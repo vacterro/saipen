@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.1.0a — 2026-07-15
+- README rewritten for v2.x: angrier grandpa, phases/confidence/graph/KNOWLEDGE covered
+
 ## 2.1.0 — 2026-07-15
 - verify confidence (high/med/low) on DONE tickets; graph mode: parallel agents claim [P] tickets over needs: DAG; KNOWLEDGE index.md rule; vac status quick metrics
 
