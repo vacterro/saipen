@@ -1,154 +1,93 @@
-# VACSKILLS — One Skill, Any Agent
+# VACSKILLS — One Skill. Any Agent. Zero Amnesia.
 
-**v1.0.1** · [Changelog](CHANGELOG.md) · plain markdown · zero dependencies · MIT
+**v1.2.1** · [Changelog](CHANGELOG.md) · plain markdown · zero dependencies · MIT
 
-Hit a usage limit on one AI agent → open another → say `VACSKILL SET` →
-work continues exactly where it stopped. Claude Code, OpenCode, Gemini,
-Codex, Aider — one brain, interchangeable hands.
+Your AI agent died mid-work? Limit hit? Listen up: open ANOTHER agent, say
+`VACSKILL SET`, and it continues EXACTLY where the dead one stopped. No
+re-explaining your project like it's a first date. Ever.
 
-Whole system = **2 files** (this repo, wherever you clone it):
+## How it works (like you're five)
 
-```
-vacskills/
-  VAC/SKILL.md   the system: commands, memory, work loop, quality gates
-  VAC/UI.md      mandatory UI theme (Win95 dark golden, Verdana no-AA)
-  README.md      you are here
-```
-
-Plus per-project memory that VAC creates itself inside each project you
-work on:
+Robots are hired hands — they come, they go, they run out of juice.
+The **notebook** stays. Every robot reads the notebook before work and
+writes in it while working. Notebook = team brain. Robot = replaceable.
 
 ```
-your-project/.vac/
-  STATE.md   where work stands + handoff + next action   (rewritten)
-  BOARD.md   tickets: TODO / DOING / DONE                (rewritten)
-  LOG.md     decisions, runs, verdicts — append-only     (never rewritten)
+vacskills/                    ← this repo, clone anywhere
+  VAC/SKILL.md                the rules every robot obeys
+  VAC/UI.md                   the look (Win95 dark gold, sharp pixels)
+  inject.ps1 / inject.sh      one-shot installer
+
+your-project/.vac/            ← the notebook (robots make it themselves)
+  STATE.md                    where work stands + what to do next
+  BOARD.md                    job tickets: TODO / DOING / DONE
+  LOG.md                      diary: every test, every decision, one line
 ```
 
-## The idea
+## Install (three commands, no crying)
 
-Agents are interchangeable workers; **`.vac/` is the shared brain.** Every
-agent reads STATE before working and writes STATE before stopping. So when
-Claude Code hits its limit, you open OpenCode or Gemini, say `VACSKILL SET`,
-and it announces "Resume T-004. Next: …" and keeps going. No re-explaining,
-ever.
-
-## Install
-
-Get it (anywhere you like — everything below works from any location):
 ```
 git clone https://github.com/vacterro/vacskills
 cd vacskills
+powershell -ExecutionPolicy Bypass -File .\inject.ps1     # Windows
+bash inject.sh                                            # macOS / Linux
 ```
 
-### One-shot injector (recommended)
+Injector sniffs out every agent on your machine — Claude Code, OpenCode,
+Codex, Gemini/Antigravity, Aider — and wires VAC into each as default.
+Re-run any time (after `git pull` too); it skips what's already done.
+That's it. Damn near idiot-proof.
 
-Installs VAC as the default protocol on every agentic system found on the
-machine — Claude Code, OpenCode, Codex, Gemini/Antigravity, Aider.
-Idempotent: re-run any time (e.g. after `git pull` to refresh Antigravity
-copies); already-installed systems are skipped.
+## How to use
 
-Windows:
-```powershell
-powershell -ExecutionPolicy Bypass -File .\inject.ps1
-```
-macOS / Linux:
-```bash
-bash inject.sh
-```
-Prints a per-system report, then: open any project in any agent and say
-`VACSKILL SET`. Done.
+| You say | Robot does |
+|---|---|
+| `vac build me X` | makes notebook, plans tickets, builds, verifies each |
+| `vac` / `vac set` / `VACSKILL SET` | continues whatever notebook says; nothing there → hunts bugs itself |
+| `vac fix <thing>` | detective mode: reproduce → root cause → regression test |
+| `vac status` | reads notebook aloud, touches nothing |
+| `vac stop` | writes goodbye note properly |
+| `vac ship` | final inspection → green → your GitHub, versioned + changelog |
 
-### Manual install (per system)
+**The daily dance:**
 
-**Claude Code** — link the skill once; edits to your clone apply instantly:
+1. `vac build me a parser` — robot plans tickets, grinds them one by one.
+   Every ticket gets VERIFIED — run, tested, proven. "Probably works" is
+   not in the vocabulary.
+2. Robot's battery dies mid-ticket? Relax. It wrote checkpoints the whole
+   time — dying robots don't get goodbye speeches, so nothing waits for one.
+3. Open any other agent: `VACSKILL SET` → "Resume T-004. Next: …" →
+   work continues like nothing happened.
+4. All green → `vac ship` → beautiful README, tiny version bump
+   (`3.1.0 → 3.1.0a` micro, `3.2.1` little, `3.2.0` feature), one-line
+   changelog, push to YOUR GitHub. Red never ships. Never.
 
-Windows (PowerShell, from the clone dir):
-```powershell
-$dst="$env:USERPROFILE\.claude\skills"
-New-Item -ItemType Directory -Force $dst | Out-Null
-cmd /c mklink /J "$dst\VAC" "$((Resolve-Path .\VAC).Path)"
-```
-macOS / Linux (from the clone dir):
-```bash
-mkdir -p ~/.claude/skills
-ln -s "$(pwd)/VAC" ~/.claude/skills/VAC
-```
+**Free extras, no coupon needed:**
+- **Hunt mode** — bare `vac` on a finished board: robot finds failing
+  tests, silent errors, orphan files, half-built features (save exists,
+  load missing — classic). Clean repo → says clean, no fake busywork.
+- **Self-cleaning** — scratch junk lives in `.vac/tmp/`, deleted at stop.
+  No litter in your repo, no `.env` leaked to GitHub. Guards built in.
+- **UI law** — any interface comes out Win95 dark golden: Verdana, no
+  antialiasing, sharp bevels, zero animations. [VAC/UI.md](VAC/UI.md) —
+  non-negotiable, gorgeous.
+- **Two voices** — chat answers: short, funny, no fluff. LOG diary: wise
+  angry grandpa with human dates (`15.07.26 14:32`, not ISO soup) and one
+  closing haiku per session. Facts stay exact in both — comedy never eats
+  evidence.
 
-**OpenCode** — supports the same trick into `~/.config/opencode/skills/vac`,
-or skip: it reads the project `AGENTS.md` block that VAC writes on first
-init. Zero setup either way.
+## Why it doesn't fall apart
 
-**Codex CLI** — link into `~/.codex/skills/vac` the same way, or rely on
-the `AGENTS.md` block.
+- Checkpoints after EVERY ticket — worst crash loses one ticket, `git
+  status` shows even that.
+- Every debug loop has a hard cap — 3 dead guesses = BLOCKED with facts,
+  next ticket. No robot spinning in circles burning your money.
+- Publish is opt-in — your projects never get pushed to GitHub uninvited.
+- Two agents, same project? Takeover guard asks before grabbing the wheel.
 
-**Gemini CLI / AI Pro** — reads `GEMINI.md`, which VAC creates per project
-on init. Nothing global needed.
+## House rules (for editing this system)
 
-**Aider** — add to `~/.aider.conf.yml`:
-```yaml
-read:
-  - /absolute/path/to/your/clone/VAC/SKILL.md
-```
+One skill — add a section, not a file. If the model already knows it,
+don't write it. Every rule must be checkable. Short beats clever.
 
-**Anything else** (Cline, OpenRouter wrappers, custom agents) — universal
-fallback, works on any agent that can read files. Paste one line:
-```
-Read <path-to-your-clone>/VAC/SKILL.md and follow it.
-```
-
-## How to use — scenarios
-
-**Start anything new**
-> `vac build a Premiere automation panel`
-VAC creates `.vac/`, writes pointer files, plans tickets to BOARD, starts
-working them: BUILD → CHECK per ticket, SHIP gate at the end.
-
-**Leaving / limit approaching**
-> `vac stop`
-Handoff written into STATE.md. Agent tells you: *Saved. On any agent say:
-VACSKILL SET.* (Good agents do this automatically when context runs low.)
-
-**Continue on another agent / another day**
-> `VACSKILL SET`
-Reads memory, re-verifies stale claims, announces resume point, works on.
-Same phrase everywhere — Claude Code, OpenCode, Gemini.
-
-**Bug**
-> `vac fix login crashes on empty email`
-Straight to CHECK/debug: reproduce → hypothesis in LOG → root-cause fix →
-regression test → proof in LOG.
-
-**Before merging / delivering**
-> `vac ship`
-Diff review: correctness → security → reliability → maintainability.
-P0/P1 fixed on the spot. 100% green → publishes to YOUR GitHub (repo's
-`origin`, or created under your logged-in `gh` account on first ship):
-README refreshed to beautiful, version bumped smallest-step
-(3.1.0 → 3.1.0a micro / 3.2.1 little / 3.2.0 minor), tiny CHANGELOG line,
-commit + push. Red never ships.
-
-**Where are we?**
-> `vac status`
-Reads memory, reports phase / board / blockers. Changes nothing.
-
-**Tiny tweak**
-Just ask normally. VAC skips ceremony for ≤2-file obvious changes — edit,
-verify, one LOG line.
-
-**Any UI work**
-Automatic: [VAC/UI.md](VAC/UI.md) theme enforced — dark golden Win95,
-Verdana forced non-antialiased, pixel bevels, zero animation,
-640×480-compact. Tokens + base CSS included, self-sufficient.
-
-**Chat style**
-Automatic caveman on every platform: compressed terse output, ~65% fewer
-tokens, technical substance intact. Code/commits/README stay normal prose.
-Off: "stop caveman".
-
-## Rules for editing this system
-
-- One skill. Resist splitting; add a section, not a file.
-- Operational text only — if the model already knows it, don't write it.
-- Every instruction imperative and checkable. Verification beats narration.
-- Memory writes are part of work, not paperwork after it.
+MIT. Take it, use it, ship your own stuff with it.

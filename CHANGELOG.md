@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.1 — 2026-07-15
+- README rewritten: ded-caveman English voice, ELI5 usage guide, half the size, twice the punch
+
 ## 1.2.0 — 2026-07-15
 - one-shot injectors inject.ps1 + inject.sh: auto-detect and wire all agentic systems (Claude Code, OpenCode, Codex, Gemini, Antigravity plugins, Aider), idempotent re-runs
 
