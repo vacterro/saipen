@@ -1,6 +1,6 @@
 # vacskill -- cross-agent project memory protocol
 
-**v5.0.1** | [Changelog](CHANGELOG.md) | plain markdown | zero deps | MIT
+**v5.1.0** | [Changelog](CHANGELOG.md) | plain markdown | zero deps | MIT
 
 A **protocol**, not a skill. The shared language that lets any model open
 `.vacskill/` and know exactly where state is, what is true, what is next --
@@ -47,7 +47,7 @@ vacskill/                   <- the distributable unit
     ship.md                   publish
     hunt.md                   autonomous bug sweep
   SKILL.md                  thin entry for skill-reading platforms
-  STYLE.md                  voice (dry chat + grumpy diary grandpa)
+  STYLE.md                  voice (взбешённый дед с района, compressed)
   UI.md                     Win95 dark golden -- loaded only for UI work
 adapters/                   per-model bridges, each ~10 lines
 templates/                  fresh .vacskill/ boilerplate

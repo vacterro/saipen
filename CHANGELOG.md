@@ -1,5 +1,8 @@
 # Changelog
 
+## 5.1.0 -- 2026-07-17
+- feat: unified "дед с района" persona. Removed haiku requirement completely. The direct, witty, tough-love "grandpa" style is now the default for both chat responses and LOG entries (while maintaining strict caveman token compression and preserving facts verbatim).
+
 ## 5.0.1 -- 2026-07-17
 - fix: extract missing `verify.md`, `review.md`, `done.md`, and `blocked.md` phases that were unintentionally merged or omitted in 5.0.0, which broke lazy loading when STATE entered these phases
 

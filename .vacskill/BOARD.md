@@ -1,10 +1,13 @@
 # Board
 ## DOING
-- [ ] T-042 IMPLEMENT 2-tier protocol (lazy load) | files: vacskill/PROTOCOL.md, vacskill/phases/*.md | verify: PROTOCOL.md < 100 lines | needs: 
+- [ ] T-045 UPDATE STYLE.md -- make "дед с района" the default chat style and remove haiku | files: vacskill/STYLE.md | verify: grep haiku clean, chat style updated | needs: 
 ## TODO
-- [ ] T-043 UPDATE README.md for phases/ dir | files: README.md | verify: no garbled chars, accurate | needs: T-042
-- [ ] T-044 SHIP v5.0.0 (Major architectural change) | files: VERSION, CHANGELOG.md | verify: push PASS | needs: T-043
+- [ ] T-046 UPDATE README.md + CHANGELOG.md -- document style change | files: README.md, CHANGELOG.md | verify: README reflects new style | needs: T-045
+- [ ] T-047 SHIP v5.1.0 | files: VERSION | verify: git push and tag | needs: T-046
 ## DONE
+- [x] T-044 SHIP v5.0.1 (verified: git push main 920ce8c, tag v5.0.1 pushed PASS, conf: high)
+- [x] T-043 UPDATE README.md for phases/ dir (verified: verify and review added, BOM=False ctrl=0 PASS, conf: high)
+- [x] T-042 IMPLEMENT missing lazy-load phases (verified: verify.md, review.md, done.md, blocked.md extracted from build.md and ship.md, conf: high)
 - [x] T-041 SHIP v4.1.0 (verified: git push main 6ad68fe, tag v4.1.0 pushed PASS, conf: high)
 - [x] T-040 README v4.1 public-grade -- clean ASCII art, no garbled chars (verified: BOM=False ctrl=0 PASS, conf: high)
 - [x] T-039 PROTOCOL.md rebuilt clean -- 240 lines, no control chars (verified: BOM=False ctrl=0 PASS, conf: high)
