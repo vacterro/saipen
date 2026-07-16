@@ -7,7 +7,7 @@
 
 ## 6.2.0 -- 2026-07-17
 - refactor: Ruthlessly purged all conversational/literary explanations from `PROTOCOL.md` to ensure the machine document remains absolutely cold and unambiguous.
-- feat: Formalized Conformance into three strict vectors: Repo Validation, Session Validation, and Phase Contract Validation. `vacskill validate` is now structurally mandated to enforce these vectors.
+- feat: Formalized Conformance into three strict vectors: Repo Validation, Session Validation, and Phase Contract Validation. `asp validate` is now structurally mandated to enforce these vectors.
 
 ## 6.1.0 -- 2026-07-17
 - doc: Reframed ASP completely around the **"Continuation Test"**. Memory is a means to an end; instant action is the goal. Tagline changed to "One command. Zero amnesia."
@@ -23,32 +23,32 @@
 - doc: Radically split documentation. `README.md` is now just a 5-minute pitch. `SPEC.md` is the human-readable RFC. `PROTOCOL.md` is strictly machine instructions. `GUIDE.md` is the human tutorial.
 
 ## 5.3.0 -- 2026-07-17
-- feat: Added dedicated `validate` phase and `vacskill validate` command.
+- feat: Added dedicated `validate` phase and `asp validate` command.
 - feat: Added `tests/validate.ps1` and `tests/validate.sh` conformance checker scripts.
-- test: Added `tests/scenarios/` with 7 mock `.vacskill` states for protocol compliance testing (crash-recovery, staleness, claim conflicts).
-- struct: Explicitly separated Core (`vacskill/`) from Adaptive Extensions (`extensions/` schemas, adapters, templates) to prevent protocol pollution.
+- test: Added `tests/scenarios/` with 7 mock `.asp` states for protocol compliance testing (crash-recovery, staleness, claim conflicts).
+- struct: Explicitly separated Core (`asp/`) from Adaptive Extensions (`extensions/` schemas, adapters, templates) to prevent protocol pollution.
 
 ## 5.2.0 -- 2026-07-17
 - BREAKING / REWRITE: Converted the core `PROTOCOL.md` from a conversational guide into a strict, RFC-style normative specification.
-- feat: Formalized the State Machine (`INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`).
+- feat: Formalized the State Machine (`INIT в†’ PLAN в†’ SCOUT в†’ BUILD в†’ VERIFY в†’ REVIEW в†’ SHIP в†’ DONE | BLOCKED`).
 - feat: Formalized Claim/Ownership logic (`owner` and `claim_time` added to `board.schema.json`) to prevent multi-agent race conditions.
 - feat: Added Capability Negotiation handshake (agents MUST check capabilities like git/shell before engaging).
 - feat: Added formal Recovery doctrine.
 - doc: Stripped all "marketing copy" and persona out of `PROTOCOL.md` into non-normative abstracts, reinforcing that voice (`STYLE.md`) never overrides logic.
 
 ## 5.1.0 -- 2026-07-17
-- feat: unified "дед с района" persona. Removed haiku requirement completely. The direct, witty, tough-love "grandpa" style is now the default for both chat responses and LOG entries (while maintaining strict caveman token compression and preserving facts verbatim).
+- feat: unified "РґРµРґ СЃ СЂР°Р№РѕРЅР°" persona. Removed haiku requirement completely. The direct, witty, tough-love "grandpa" style is now the default for both chat responses and LOG entries (while maintaining strict caveman token compression and preserving facts verbatim).
 
 ## 5.0.1 -- 2026-07-17
 - fix: extract missing `verify.md`, `review.md`, `done.md`, and `blocked.md` phases that were unintentionally merged or omitted in 5.0.0, which broke lazy loading when STATE entered these phases
 
 ## 5.0.0 -- 2026-07-17
-- BREAKING: 2-tier protocol architecture. PROTOCOL.md is now a dense boot loader (~110 lines, ~1,200 tokens cold start). Phase-specific rules moved to lazy-loaded vacskill/phases/ modules (init, plan, scout, build, ship, hunt). Agent loads only the phase it needs -- 60% fewer tokens per session vs monolithic v4. All rules preserved, zero lost. README rewritten for ASP (Agent Session Protocol) positioning
+- BREAKING: 2-tier protocol architecture. PROTOCOL.md is now a dense boot loader (~110 lines, ~1,200 tokens cold start). Phase-specific rules moved to lazy-loaded asp/phases/ modules (init, plan, scout, build, ship, hunt). Agent loads only the phase it needs -- 60% fewer tokens per session vs monolithic v4. All rules preserved, zero lost. README rewritten for ASP (Agent Session Protocol) positioning
 ## 4.1.0 -- 2026-07-17
 - Public launch edition: fix encoding corruption throughout (control chars -> clean ASCII, no BOM anywhere); README rewritten for public consumption with clean ASCII art; PROTOCOL.md audited and rebuilt clean
 
 ## 4.0.0 -- 2026-07-17
-- BREAKING: skill -> protocol. vacskill/PROTOCOL.md is the single vendor-neutral canon (240 lines, capability degradation table included); SKILL.md shrunk to a thin skill-reader adapter. New: adapters/ (9 platforms), templates/ (init boilerplate), style/ (opt-in voices), schemas/ frozen for a future orchestrator. Injectors point everything at PROTOCOL.md, upgrade stale 3.x blocks, and write UTF-8 without BOM. Positioning: vendor-neutral project execution protocol for LLM agents
+- BREAKING: skill -> protocol. asp/PROTOCOL.md is the single vendor-neutral canon (240 lines, capability degradation table included); SKILL.md shrunk to a thin skill-reader adapter. New: adapters/ (9 platforms), templates/ (init boilerplate), style/ (opt-in voices), schemas/ frozen for a future orchestrator. Injectors point everything at PROTOCOL.md, upgrade stale 3.x blocks, and write UTF-8 without BOM. Positioning: vendor-neutral project execution protocol for LLM agents
 
 ## 3.1.2 -- 2026-07-16
 - hotfix: ensure FreeBuff and Antigravity plugins receive copy, not junction, as their scanners ignore symlinks
@@ -63,7 +63,7 @@
 - anti-drift: STYLE.md Persistence section (voice holds every response, no revert after many turns) + protocol loads it upfront; git tags as release archive (all 17 past versions tagged retroactively); memory backup rule for non-git projects; self-imposed ~250-line cap -- SKILL.md compressed 281 -> 249 with zero rules lost
 
 ## 3.0.0 -- 2026-07-15
-- BREAKING: renamed VAC -> vacskill everywhere -- skill name, folder, memory dir (.vac/ -> .vacskill/), pointer blocks (VACSKILL:BEGIN), repo (github.com/vacterro/vacskill). Short alias `vac` still works for every command. Injector migrates pre-3.0 installs automatically; in projects run `git mv .vac .vacskill`
+- BREAKING: renamed VAC -> asp everywhere -- skill name, folder, memory dir (.vac/ -> .asp/), pointer blocks (VACSKILL:BEGIN), repo (github.com/vacterro/vacskill). Short alias `vac` still works for every command. Injector migrates pre-3.0 installs automatically; in projects run `git mv .vac .asp`
 
 ## 2.1.0a -- 2026-07-15
 - README rewritten for v2.x: angrier grandpa, phases/confidence/graph/KNOWLEDGE covered

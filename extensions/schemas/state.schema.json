@@ -19,6 +19,12 @@
     "agent": {
       "type": "string"
     },
+    "asp_version": {
+      "type": "integer"
+    },
+    "schema_version": {
+      "type": "integer"
+    },
     "requires": {
       "type": "array",
       "items": { "type": "string" }
@@ -32,5 +38,14 @@
       "format": "date-time"
     }
   },
-  "required": ["phase", "task", "next_action", "blocker", "agent", "updated"]
+  "required": [
+    "phase",
+    "task",
+    "next_action",
+    "blocker",
+    "agent",
+    "asp_version",
+    "schema_version",
+    "updated"
+  ]
 }

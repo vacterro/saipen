@@ -1,7 +1,7 @@
 # Codex CLI adapter
 
-- Skill route: `~/.codex/skills/vacskill/` junction; global
-  `~/.codex/AGENTS.md` carries the VACSKILL block (injector writes both).
-- Sandbox limits → declare capabilities honestly; degrade per protocol table.
+- Skill route: `~/.codex/skills/asp/` junction; global
+  `~/.codex/AGENTS.md` carries the asp block (injector writes both).
+- Sandbox limits в†’ declare capabilities honestly; degrade per protocol table.
 
-Everything else: follow `vacskill/PROTOCOL.md`.
+Everything else: follow `asp/PROTOCOL.md`.

@@ -1,8 +1,8 @@
-# vacskill UI — Dark Golden Win95 (mandatory for all UI work)
+# asp UI вЂ” Dark Golden Win95 (mandatory for all UI work)
 
 Applies to every interface: web, app, panel, dialog, HTML report, TUI.
 This file is self-sufficient. (Author's machine keeps an extended spec at
-`_ref\vintage\SKILL.md` — read it only if it exists; never required.)
+`_ref\vintage\SKILL.md` вЂ” read it only if it exists; never required.)
 
 ## Iron laws
 
@@ -12,11 +12,11 @@ This file is self-sufficient. (Author's machine keeps an extended spec at
    effects, animations, transitions. All state changes instant.
 3. **Depth = 2px bevels only.** Raised: light top-left, dark bottom-right.
    Sunken (pressed, inputs): inverted.
-4. **Ultra-compact:** fits 640×480. Padding 1-2px tight, 4px groups, 8px
+4. **Ultra-compact:** fits 640Г—480. Padding 1-2px tight, 4px groups, 8px
    sections, 12-16px window margins only. Elements share borders.
 5. **Colors from tokens only.** No rogue hex.
 
-## Tokens + base CSS (paste into every vacskill UI)
+## Tokens + base CSS (paste into every asp UI)
 
 ```css
 :root {
@@ -61,7 +61,7 @@ input, select, textarea { height: 20px; padding: 1px 3px;
   background: var(--compareBack); color: var(--textPrimary); }
 ```
 
-Non-web UI (Qt, WinForms, TUI, C4D, AHK): map same tokens — Verdana 9-12pt,
+Non-web UI (Qt, WinForms, TUI, C4D, AHK): map same tokens вЂ” Verdana 9-12pt,
 ClearType/antialiasing OFF where the API allows, flat colors + light/dark 2px
 edge pairs, no animation timers.
 
@@ -70,9 +70,9 @@ edge pairs, no animation timers.
 - Buttons pressed = sunken + 1px label shift. Loading = static `...`, never
   a spinner.
 - Inputs always sunken; focus swaps highlight to `--textPrimary`; visible
-  label mandatory — placeholder is never the label.
+  label mandatory вЂ” placeholder is never the label.
 - Tabs: active sunken, inactive raised, 0 gap between.
-- Title bars 20px `--surface`; dialog bodies `--surfaceRaised`, ≤2px padding.
+- Title bars 20px `--surface`; dialog bodies `--surfaceRaised`, в‰¤2px padding.
 - Tables: rows 16-18px, headers raised, selected row `--selection` sunken.
 - Logs/data values on `--compareBack`.
 - Errors stay loud `--danger`, specific message + fix instruction, never
@@ -81,10 +81,10 @@ edge pairs, no animation timers.
 ## Accessibility floor (compactness never excuses)
 
 WCAG AA contrast; visible focus (1px dotted) on every control; full keyboard
-reach; targets ≥24px primary / 16px secondary.
+reach; targets в‰Ґ24px primary / 16px secondary.
 
 ## QA before DONE
 
 No rounded corner, no animation frame, Verdana renders non-aliased, fits
-640×480 without horizontal scroll, every hex traces to a token. LOG line:
+640Г—480 without horizontal scroll, every hex traces to a token. LOG line:
 `RUN: UI check <component> -> PASS/FAIL <detail>`.

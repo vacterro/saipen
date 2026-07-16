@@ -1,13 +1,13 @@
 ---
 name: vacskill
 description: >
-  Cross-agent work protocol (v5). Trigger on "VACSKILL SET", "vacskill",
+  Cross-agent work protocol (v5). Trigger on "asp SET", "vacskill",
   "vac" (alias) and subcommands. 2-tier architecture: boot PROTOCOL.md
   (~110 lines) loads always; phases/ modules load on demand per STATE.
-  Persistent .vacskill/ memory lets any agent continue another's work.
+  Persistent .asp/ memory lets any agent continue another's work.
 ---
 
-# vacskill -- skill adapter
+# asp -- skill adapter
 
 Thin entry for skill-reading platforms. The system lives elsewhere:
 
@@ -17,6 +17,6 @@ Thin entry for skill-reading platforms. The system lives elsewhere:
 4. UI work: also read `UI.md` (Win95 dark golden, Verdana, no AA).
 
 Platform notes:
-- Native task lists mirror `.vacskill/BOARD.md`, never replace it.
+- Native task lists mirror `.asp/BOARD.md`, never replace it.
 - Prefer file tools over shell redirects -- UTF-8 no BOM.
 - PROTOCOL.md decides. No rule here overrides it.

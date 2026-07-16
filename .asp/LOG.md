@@ -94,3 +94,13 @@
 - [E-077] [parent: E-076] [T-049] RUN: ship v5.2.0 -> pushed 85a87d0, tag v5.2.0 PASS
 - [E-078] [parent: E-077] [T-050] DEC: Implemented conformance validator, test scenarios, and extensions structural split.
 - [E-079] [parent: E-078] [T-050] RUN: ship v5.3.0 -> pushed cf65934, tag v5.3.0 PASS
+- [E-096] [parent: E-095] [T-051] DEC: Rebranded to Agent Session Protocol (ASP). Implemented Two-Way Capability Negotiation, Graph Logs, and ADRs.
+- [E-097] [parent: E-096] [T-051] RUN: ship v6.0.0 -> pushed, tag v6.0.0 PASS
+- [E-098] [parent: E-097] [T-052] DEC: Reframed ASP entirely around 'One command. Zero amnesia.' and added TEST-001 Continuation Test.
+- [E-099] [parent: E-098] [T-052] RUN: ship v6.1.0 -> pushed, tag v6.1.0 PASS
+- [E-100] [parent: E-099] [none] RUN: manual validation via tests\validate.ps1 -> PASS
+- [E-101] [parent: E-100] [none] DEC: Purged arrogant 'Formerly known as' branding from README.
+- [E-102] [parent: E-101] [none] DEC: Purged literary fluff from PROTOCOL.md and formalized the 3 Conformance vectors.
+- [E-103] [parent: E-102] [none] RUN: ship v6.2.0 -> pushed, tag v6.2.0 PASS
+- [E-104] [parent: E-103] [none] DEC: Stripped PROTOCOL.md to <60 lines. Moved CLI to GUIDE.md.
+- [E-105] [parent: E-104] [none] RUN: ship v6.3.0 -> pushed, tag v6.3.0 PASS

@@ -2,6 +2,11 @@
 ## DOING
 ## TODO
 ## DONE
+- [x] T-054 CORE STRIP v6.3.0 | files: PROTOCOL.md, GUIDE.md | verify: v6.3.0 pushed | needs: T-053
+- [x] T-053 STRICT CONFORMANCE REFACTOR | files: PROTOCOL.md, validate.md | verify: v6.2.0 pushed | needs: T-052
+- [x] T-052 REFRAME ASP around Continuation Test | files: README.md, SPEC.md, PROTOCOL.md | verify: v6.1.0 pushed | needs: T-051
+- [x] T-051 ASP OVERHAUL | files: PROTOCOL.md, schemas, docs | verify: v6.0.0 pushed | needs: T-050
+- [x] T-050 IMPLEMENT conformance layer and test scenarios | files: tests/, vacskill/phases/validate.md | verify: scripts run and pass/fail properly | needs:
 - [x] T-049 UPGRADE PROTOCOL.md to strict RFC spec v5.2.0 (verified: 14 sections strictly defined, schemas updated, conf: high)
 - [x] T-048 REWRITE README.md to English "дед" style (verified: README updated and committed, conf: high)
 - [x] T-047 SHIP v5.1.0 (verified: git push main da71032, tag v5.1.0 pushed PASS, conf: high)

@@ -1,6 +1,6 @@
 # Phase: VALIDATE
 ## Goal
-Execute the conformance script to verify the structural integrity of `.vacskill/`.
+Execute the conformance script to verify the structural integrity of `.asp/`.
 This prevents "schizophrenic READMEs" and agent hallucinations.
 
 ## Steps

@@ -2,7 +2,7 @@
 
 ## SHIP -> PUBLISH
 
-Only on `vacskill ship`, or repo has `origin` AND LOG shows prior ship.
+Only on `asp ship`, or repo has `origin` AND LOG shows prior ship.
 Never auto-publish unopted project. Needs 100% green.
 
 1. README beautiful: pitch, features, install, usage, version + changelog link.

@@ -4,14 +4,14 @@
 
 **One command. Zero amnesia.**
 
-ASP is a stable, vendor-neutral continuation protocol. Its sole purpose is to guarantee that a completely cold agent with zero chat history can execute `/vacskill continue` and resume productive work within one minute, without asking the user to repeat context.
+ASP is a stable, vendor-neutral continuation protocol. Its sole purpose is to guarantee that a completely cold agent with zero chat history can execute `/asp continue` and resume productive work within one minute, without asking the user to repeat context.
 
 ```text
-User  →  /vacskill continue
-Agent →  reads STATE ("What do I do right now?")
-Agent →  reads BOARD ("What task am I picking up?")
-Agent →  reads next_action (executes command)
-Agent →  Works.
+User  в†’  /asp continue
+Agent в†’  reads STATE ("What do I do right now?")
+Agent в†’  reads BOARD ("What task am I picking up?")
+Agent в†’  reads next_action (executes command)
+Agent в†’  Works.
 ```
 
 Instead of writing a README instructing models "how to behave", you drop ASP into your project. Whether you use Claude today and Gemini tomorrow, both agents will instantly negotiate capabilities, follow the state machine, and execute the next action.
@@ -27,9 +27,9 @@ bash inject.sh                                             # macOS / Linux
 ```
 
 No install? Paste one line to your agent:
-> Read <clone>/vacskill/PROTOCOL.md + <clone>/STYLE.md and follow them.
+> Read <clone>/asp/PROTOCOL.md + <clone>/STYLE.md and follow them.
 
 ## Documentation
 - **[SPEC.md](SPEC.md)**: The formal RFC specification. Read this if you are building extensions or agent frameworks.
-- **[PROTOCOL.md](vacskill/PROTOCOL.md)**: The brutal, machine-readable ruleset that agents execute.
+- **[PROTOCOL.md](asp/PROTOCOL.md)**: The brutal, machine-readable ruleset that agents execute.
 - **[GUIDE.md](GUIDE.md)**: The human tutorial with examples.

@@ -1,7 +1,7 @@
 # Agent Session Protocol (ASP) Specification
 
 ## Abstract
-**Design Goal #1: A cold agent with zero chat history must be able to execute `/vacskill continue` and resume productive work within one minute, without asking the user to repeat context.**
+**Design Goal #1: A cold agent with zero chat history must be able to execute `/asp continue` and resume productive work within one minute, without asking the user to repeat context.**
 
 ASP is a portable, file-backed continuation protocol for LLM agents. Implementations MAY vary. The on-disk contract MUST remain stable. Everything in this protocol exists to serve the Continuation Test.
 
@@ -16,7 +16,7 @@ ASP is a portable, file-backed continuation protocol for LLM agents. Implementat
 The protocol is strictly normative. We explicitly separate the **Core Protocol** from **Adaptive Extensions**.
 
 ```text
-vacskill/                   <- THE CORE (distributable unit)
+asp/                   <- THE CORE (distributable unit)
   PROTOCOL.md               normative core specification (MUST/SHOULD/MAY)
   phases/                   strict state machine logic
     validate.md             conformance testing
@@ -26,7 +26,7 @@ vacskill/                   <- THE CORE (distributable unit)
 extensions/                 <- THE ADAPTIVE LAYER
   adapters/                 per-model instruction bridges
   schemas/                  canonical file schemas
-  templates/                fresh .vacskill/ boilerplate
+  templates/                fresh .asp/ boilerplate
   security/                 security scanning hooks
   performance/              performance benchmark hooks
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# vacskill conformance validator
+# asp conformance validator
 
 $ErrorActionPreference = "Stop"
 
@@ -10,10 +10,10 @@ function Assert-Format($Condition, $Message) {
     }
 }
 
-Write-Host "vacskill conformance validation starting..." -ForegroundColor Cyan
+Write-Host "asp conformance validation starting..." -ForegroundColor Cyan
 
 # 1. Check STATE.md
-$stateContent = Get-Content ".vacskill\STATE.md" -Raw
+$stateContent = Get-Content ".asp\STATE.md" -Raw
 Assert-Format ($stateContent -match "phase:\s+(INIT|PLAN|SCOUT|BUILD|VERIFY|REVIEW|SHIP|DONE|BLOCKED|VALIDATE)") "STATE.md missing valid phase"
 Assert-Format ($stateContent -match "task:") "STATE.md missing task"
 Assert-Format ($stateContent -match "next_action:") "STATE.md missing next_action"
@@ -23,7 +23,7 @@ Assert-Format ($stateContent -match "updated:") "STATE.md missing updated"
 Write-Host "PASS: STATE.md schema valid" -ForegroundColor Green
 
 # 2. Check BOARD.md (cycles)
-$boardLines = Get-Content ".vacskill\BOARD.md"
+$boardLines = Get-Content ".asp\BOARD.md"
 $deps = @{}
 foreach ($line in $boardLines) {
     if ($line -match "- \[( |x|/)\] (T-\d+).*needs: (.*)") {
@@ -66,7 +66,7 @@ Assert-Format (-not $hasCycle) "BOARD.md contains cyclic dependencies"
 Write-Host "PASS: BOARD.md acyclic" -ForegroundColor Green
 
 # 3. Check LOG.md
-$logLines = Get-Content ".vacskill\LOG.md"
+$logLines = Get-Content ".asp\LOG.md"
 foreach ($line in $logLines) {
     if ($line.Trim() -ne "" -and $line -notmatch "^#") {
         Assert-Format ($line -match "^-\s+\[E-\d+\](\s+\[parent:\s+E-\d+\])?") "LOG.md entry violates Graph Event format: $line"
@@ -75,8 +75,8 @@ foreach ($line in $logLines) {
 Write-Host "PASS: LOG.md format valid" -ForegroundColor Green
 
 # 4. Check KNOWLEDGE/
-if (Test-Path ".vacskill\KNOWLEDGE") {
-    $knowledgeFiles = Get-ChildItem ".vacskill\KNOWLEDGE\*" -Include *.md
+if (Test-Path ".asp\KNOWLEDGE") {
+    $knowledgeFiles = Get-ChildItem ".asp\KNOWLEDGE\*" -Include *.md
     foreach ($file in $knowledgeFiles) {
         $content = Get-Content $file.FullName
         foreach ($line in $content) {

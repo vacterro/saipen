@@ -1,1 +1,1 @@
-Test: Agent should bootstrap .vacskill/ using templates/ and proceed to PLAN.
+Test: Agent should bootstrap .asp/ using templates/ and proceed to PLAN.

@@ -1,4 +1,4 @@
-# vacskill injector — installs vacskill as default protocol on every agentic system found.
+# asp injector вЂ” installs asp as default protocol on every agentic system found.
 # Run from the clone dir:  powershell -ExecutionPolicy Bypass -File .\inject.ps1
 # Idempotent: safe to re-run any time (skips what's already installed).
 # Also migrates pre-3.0 installs named "VAC".
@@ -11,7 +11,7 @@ function Write-NoBom([string]$file, [string]$text) {
   [System.IO.File]::WriteAllText($file, $text, $Utf8NoBom)
 }
 try { $SkillHome = (Resolve-Path $SkillHome).Path } catch {
-  Write-Host "FATAL: vacskill folder not found at $SkillHome" -ForegroundColor Red; exit 1
+  Write-Host "FATAL: asp folder not found at $SkillHome" -ForegroundColor Red; exit 1
 }
 if (-not (Test-Path (Join-Path $SkillHome "PROTOCOL.md"))) {
   Write-Host "FATAL: PROTOCOL.md missing in $SkillHome" -ForegroundColor Red; exit 1
@@ -20,11 +20,11 @@ if (-not (Test-Path (Join-Path $SkillHome "PROTOCOL.md"))) {
 $block = @"
 
 <!-- VACSKILL:BEGIN -->
-## vacskill protocol (global)
-On "VACSKILL SET" / "vacskill ..." (short alias "vac ...") commands, or when
-project root contains .vacskill/: read $SkillHome\PROTOCOL.md + $SkillHome\STYLE.md
+## asp protocol (global)
+On "asp SET" / "asp ..." (short alias "vac ...") commands, or when
+project root contains .asp/: read $SkillHome\PROTOCOL.md + $SkillHome\STYLE.md
 and follow them.
-Memory: .vacskill/ at project root - read .vacskill/STATE.md before work;
+Memory: .asp/ at project root - read .asp/STATE.md before work;
 checkpoint BOARD + STATE after every ticket, LOG line after every run.
 Path missing (new machine)? clone github.com/vacterro/vacskill.
 UI work: also obey $SkillHome\UI.md (Win95 dark golden, Verdana, no AA).
@@ -47,7 +47,7 @@ function Add-Block([string]$file) {
   if (Test-Path $file) {
     if (Select-String -Path $file -Pattern "VACSKILL:BEGIN" -Quiet) {
       if (Select-String -Path $file -Pattern "PROTOCOL\.md" -Quiet) { return "already" }
-      # 3.x block points at SKILL.md — replace with PROTOCOL.md block
+      # 3.x block points at SKILL.md вЂ” replace with PROTOCOL.md block
       $text = Get-Content $file -Raw -Encoding utf8
       $clean = [regex]::Replace($text, '(?s)\s*<!-- VACSKILL:BEGIN -->.*?<!-- VACSKILL:END -->\s*', "`n")
       Write-NoBom $file ($clean.TrimEnd() + $block + "`n")
@@ -64,7 +64,7 @@ function Add-Block([string]$file) {
 }
 
 # Drop a pre-3.0 skill dir. Junctions are unlinked; real dirs deleted only when
-# they are ours (SKILL.md with vacskill/VAC frontmatter inside).
+# they are ours (SKILL.md with asp/VAC frontmatter inside).
 function Remove-LegacySkill([string]$path) {
   if (-not (Test-Path $path)) { return $false }
   $item = Get-Item $path -Force
@@ -85,7 +85,7 @@ function Add-Junction([string]$target, [string]$legacy) {
     if ($item.LinkType) { return "already" }
     Remove-LegacySkill $target | Out-Null   # stale copy -> replace with junction
   }
-  if (Test-Path $target) { return "exists but not vacskill - check manually" }
+  if (Test-Path $target) { return "exists but not asp - check manually" }
   $parent = Split-Path $target
   if (-not (Test-Path $parent)) { New-Item -ItemType Directory -Force $parent | Out-Null }
   cmd /c mklink /J "$target" "$SkillHome" | Out-Null
@@ -157,20 +157,20 @@ if (Get-Command aider -ErrorAction SilentlyContinue) {
     } elseif ($conf -match [regex]::Escape($skillPath)) {
       [void]$report.Add(@("Aider conf", "already"))
     } elseif ($conf -notmatch '(?m)^read:') {
-      Write-NoBom $aider ($conf.TrimEnd() + "`n`n# vacskill protocol auto-loaded`nread:`n  - $skillPath`n")
+      Write-NoBom $aider ($conf.TrimEnd() + "`n`n# asp protocol auto-loaded`nread:`n  - $skillPath`n")
       [void]$report.Add(@("Aider conf", "read: appended"))
     } else {
       [void]$report.Add(@("Aider conf", "has own read: - add manually: $skillPath"))
     }
   } else {
-    Write-NoBom $aider "# vacskill protocol auto-loaded`nread:`n  - $skillPath`n"
+    Write-NoBom $aider "# asp protocol auto-loaded`nread:`n  - $skillPath`n"
     [void]$report.Add(@("Aider conf", "created"))
   }
 } else { [void]$report.Add(@("Aider", "not installed - skip")) }
 
 # --- Report ---
 Write-Host ""
-Write-Host "vacskill injector report (source: $SkillHome)" -ForegroundColor Yellow
+Write-Host "asp injector report (source: $SkillHome)" -ForegroundColor Yellow
 Write-Host ("-" * 60)
 foreach ($r in $report) {
   $color = if ($r[1] -match "FAILED|manually") { "Red" }
@@ -178,4 +178,4 @@ foreach ($r in $report) {
   Write-Host ("{0,-28} {1}" -f $r[0], $r[1]) -ForegroundColor $color
 }
 Write-Host ("-" * 60)
-Write-Host "Done. Test: open any project in any agent, say: VACSKILL SET" -ForegroundColor Yellow
+Write-Host "Done. Test: open any project in any agent, say: asp SET" -ForegroundColor Yellow
