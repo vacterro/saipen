@@ -8,6 +8,14 @@
       "timestamp": {
         "type": "string"
       },
+      "event_id": {
+        "type": "string",
+        "pattern": "^E-\\d{3,4}$"
+      },
+      "parent_id": {
+        "type": "string",
+        "pattern": "^E-\\d{3,4}$"
+      },
       "task_id": {
         "type": "string"
       },

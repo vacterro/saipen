@@ -19,6 +19,14 @@
     "agent": {
       "type": "string"
     },
+    "requires": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["full", "read-only", "no-publish", "manual-verify"]
+    },
     "updated": {
       "type": "string",
       "format": "date-time"

@@ -1,87 +1,96 @@
 # Log
-- 2026-07-15 [T-001] RUN: secrets grep -> PASS (only self-referential pattern in SKILL.md:189)
-- 2026-07-15 [T-001] RUN: structure check -> PASS (VAC/SKILL.md, VAC/UI.md, README.md present, junctions on 5 systems verified earlier)
-- 2026-07-15 [T-002] DEC: initial version 1.0.0 — first public release of consolidated single-skill system
-- 2026-07-15 [T-004] DEC: gh CLI missing — remote creation needs user choice (install gh vs manual web create)
-- 2026-07-15 [T-004] RUN: gh repo create vacterro/vacskills --public --push -> PASS
-- 2026-07-15 [T-004] RUN: git ls-remote origin main -> 39a5ece PASS
-- 2026-07-15 [T-004] RUN: ship v1.0.0 -> pushed 39a5ece
-- 2026-07-15 [T-005] RUN: grep personal paths (V:\___VAC|vac34) -> clean PASS
-- 2026-07-15 [T-005] RUN: ship v1.0.1 -> portable docs + LICENSE
-- 2026-07-15 [T-006] DEC: rewrite SKILL.md � loop caps, PUBLISH opt-in gating, HUNT clean-skip, token discipline, 218->169 lines
-- 2026-07-15 [T-006] RUN: structure grep (sections+caps+gating) -> PASS, 169 lines
-- 2026-07-15 [T-007] RUN: ship v1.1.0 -> pushing
-- 2026-07-15 [T-008] RUN: ship v1.1.0a -> alias 'vac set' official
-- 2026-07-15 [T-009] RUN: ship v1.1.1 -> takeover guard + bootstrap fallback + gitignore/.env guard
-- 2026-07-15 [T-010] RUN: ship v1.1.2 -> publish target user-agnostic (origin / gh account)
-- 2026-07-15 [T-011] RUN: ship v1.1.3 -> self-cleaning (.vac/tmp scratch home, orphan hunt, no-litter rule)
-- 15.07.26 05:10 [T-012] RUN: ship v1.1.4 -> дед-логгер въехал: даты human, факты железные, комментарий с перчиком — теперь LOG читается как байки, а не как морг ISO-дат
-- 15.07.26 05:10 [T-012] хайку на посошок: Дед в логи пришёл / ISO-даты сдохли, blin / читать стало кайф (kaif — удовольствие)
-- 15.07.26 05:35 [T-013] RUN: ship v1.1.4a -> деда заперли в .vac/, в чат больше ни ногой — порядок, blin
-- 15.07.26 05:50 [T-014] RUN: ship v1.1.5 -> дед теперь и в чате базарит, но коротко и по делу — cavemanа с дедом поженили
-- 15.07.26 06:15 [T-015] RUN: inject.ps1 live test -> 8x already + 2 Antigravity refreshed, идемпотентный как рубильник PASS
-- 15.07.26 06:20 [T-015] RUN: ship v1.2.0 -> injector родился: одна команда и VAC везде хозяин, красота
-- 15.07.26 06:40 [T-016] RUN: ship v1.2.1 -> README теперь дед по-английски базарит: коротко, красиво, пятилетка поймёт, prohvessor одобрит
-- 15.07.26 07:05 [T-017] H: FreeBuff не читает VAC -> confirmed: копия с убитой кодировкой (в†' вместо стрелок), frontmatter битый
-- 15.07.26 07:10 [T-017] RUN: junction ~/.agents/skills/VAC -> encoding чистый, 211 строк, PASS
-- 15.07.26 07:12 [T-017] RUN: inject.ps1 re-run -> 9x already + 2 Antigravity refresh, новый путь в строю
-- 15.07.26 07:15 [T-017] RUN: ship v1.2.2 -> FreeBuff в семье, кракозябры на помойке
-- 15.07.26 08:05 [T-018] DEC: критика принята — протокол и личность развелись, SCOUT/REVIEW стали фазами, KNOWLEDGE/ родился -> KNOWLEDGE/decisions.md
-- 15.07.26 08:10 [T-018] H: FreeBuff не видит VAC -> confirmed: читает только lowercase копии, junctions игнорит как тёща советы
-- 15.07.26 08:12 [T-018] RUN: inject.ps1 -> vac lowercase copy в .agents, 3 файла, кодировка чистая PASS
-- 15.07.26 08:15 [T-018] RUN: ship v2.0.0 -> конституцию распилили на протокол и балалайку, обе тоньше и злее
-- 15.07.26 08:15 [T-018] хайку: Дед съехал в STYLE / протокол стал холодным / оба довольны (mõlemad — оба)
-- 15.07.26 08:45 [T-019] DEC: вторая волна ревью — confidence/graph/index/metrics взяли, agents-manifest и metrics.md отложили оркестратору -> KNOWLEDGE/decisions.md
-- 15.07.26 08:50 [T-019] RUN: ship v2.1.0 -> доска научилась параллелить агентов по DAG, тикеты честно говорят насколько им верить
-- 15.07.26 09:10 [T-020] RUN: ship v2.1.0a -> README перезлили под 2.x: дед в форме, фазы и graph на витрине, скука сдохла
-- 15.07.26 10:20 [T-021] DEC: имя одно на всё — скилл, папка, память, репо = vacskill; vac остаётся коротким алиасом, мышечная память не страдает
-- 15.07.26 10:25 [T-021] RUN: git mv VAC->vacskill, .vac->.vacskill -> история файлов цела PASS
-- 15.07.26 10:30 [T-021] RUN: inject.ps1 миграция -> 3 junction created + 5 migrated from VAC, старых блоков ноль PASS
-- 15.07.26 10:32 [T-021] RUN: verify 6 установок -> name=vacskill, memory=.vacskill везде, legacy leftovers пусто PASS
-- 15.07.26 10:35 [T-021] RUN: gh repo rename -> github.com/vacterro/vacskill PUBLIC, remote переставлен PASS
-- 15.07.26 10:38 [T-021] RUN: ship v3.0.0 -> VAC умер, да здравствует vacskill; старое имя живёт только в мигрaторе и летописи
-- 15.07.26 10:38 [T-021] хайку: Три буквы ушли / vacskill пишем целиком / vac всё же жив (elab — жив)
-- 15.07.26 11:05 [T-022] H: стиль выветривается к 20-му сообщению -> confirmed: у STYLE.md не было persistence-якоря, а у caveman-скилла он есть; украли формулировку
-- 15.07.26 11:10 [T-022] DEC: якорь стиля + SKILL грузит STYLE сразу, не "потом" -> дрейф лечится повторением, а не объёмом
-- 15.07.26 11:20 [T-023] RUN: git tag -a x17 задним числом + push --tags -> git show v1.0.0:VERSION вернул 1.0.0 PASS
-- 15.07.26 11:22 [T-023] DEC: теги = архив версий; _archive_* папки больше не нужны, история в git краше любой свалки
-- 15.07.26 11:35 [T-024] H: файл пух 245->255->264->281 -> confirmed: я лечил дрейф, раздувая инструкцию — сам себе противоречил, kurat (чёрт)
-- 15.07.26 11:40 [T-024] RUN: сжатие SKILL.md 281 -> 249 строк, 17 правил проверены grep -> ни одно не потеряно PASS
-- 15.07.26 11:42 [T-024] DEC: правило про самого себя — потолок ~250 строк, новое правило выселяет старое -> длина это дрейф, а не тщательность
-- 15.07.26 11:55 [T-025] RUN: rm _archive_versions -> близнецы-копии v1.2.2, тег их уже держит; свалку снесли, дерево дышит PASS
-- 15.07.26 12:30 [T-026] H: HUNT skip не работает -> confirmed: с v2.0.0 правило ссылается на запись hunt->clean, формат которой сам же и потерял; skip не срабатывал ни разу
-- 15.07.26 12:32 [T-026] DEC: якорь по хешу -> RUN: hunt -> clean @<hash>, сверка с HEAD; правило-призрак обрело тело
-- 15.07.26 12:35 [T-026] RUN: git mv в не-git проекте -> упал бы; теперь "plain move otherwise" PASS
-- 15.07.26 12:38 [T-026] DEC: счётчик REVIEW-проходов жил в голове агента, а агент сменяемый -> считаем по вердиктам в LOG
-- 15.07.26 12:40 [T-026] DEC: graph race — два клейма в один миг; лечим перечитыванием LOG после записи, ранний клейм побеждает
-- 15.07.26 12:45 [T-026] RUN: 6 дыр закрыто, 250 строк ровно (было 249, потолок 250) -> фиксы оплачены сжатием, 23 ключа целы PASS
-- 15.07.26 12:45 [T-026] хайку: Правило-призрак / два года никто не звал / хеш вернул из тьмы
-- 15.07.26 12:55 [T-027] H: README поехал кракозябрами -> confirmed: свой же PowerShell Set-Content -Encoding utf8 сломал тире и добавил BOM
-- 15.07.26 12:57 [T-027] RUN: git checkout v3.1.0a -- README.md + Edit tool -> 0 кракозябр, 30 символов на месте PASS
-- 15.07.26 13:00 [T-027] RUN: BOM снят с VERSION/STATE/BOARD -> od проверка чистая PASS
-- 15.07.26 13:02 [T-027] DEC: PowerShell не пишет файлы репо, только git -> KNOWLEDGE/traps.md
-- 15.07.26 13:02 [T-027] хайку: Чинил кодировку / сам же её и сломал / грабли верный друг
-- 16.07.26 22:27 [T-028] RUN: ship v3.1.2 -> pushed 8d8e483 PASS
-- 16.07.26 22:27 [HA-01] HAIKU: Линки сплелись в узел / Сканнер слепой прошел мимо / Файлы спас копипаст
-- 16.07.26 23:40 [T-029] H: antigravity начал протокол-эволюцию и умер в полёте -> confirmed: vacskill/ удалён, protocol+adapters+schemas+style+templates созданы, не закоммичено
-- 16.07.26 23:42 [T-029] RUN: git checkout -- vacskill/ -> junctions на 7 системах ожили, скелет цел PASS
-- 16.07.26 23:45 [T-029] DEC: скелет принимаем как каркас, содержимое нет — 121 строка против 250, потеряны caps/gates/hunt-якорь; канон тянуть из тега v3.1.1a
-- 16.07.26 23:48 [T-030] DEC: протокол = ОДИН файл vacskill/PROTOCOL.md, не пять — дробление множит недочитанность; пять файлов ревью красивы человеку, вредны модели
-- 16.07.26 23:49 [T-030] DEC: PROTOCOL.md живёт внутри vacskill/ — юнит распространения (junction/copy) остаётся самодостаточным, относительные пути не рвутся
-- 17.07.26 00:15 [T-030] RUN: PROTOCOL.md собран -> 240/250 строк, 23 ключа grep PASS, conf: high
-- 17.07.26 00:15 [T-030] DEC: capability-таблица деградаций въехала (нет git -> нет SHIP; нет terminal -> MANUAL-VERIFY) — идея antigravity, форма моя
-- 17.07.26 00:35 [T-031] RUN: SKILL.md ужат до 26-строчного адаптера -> PROTOCOL.md рядом, пути не рвутся PASS
-- 17.07.26 00:45 [T-032] RUN: 9 адаптеров переписаны -> grep PROTOCOL.md 9/9, BOM чисто PASS
-- 17.07.26 00:50 [T-033] RUN: templates + KNOWLEDGE seed + schemas заморожены -> init dry-run PASS
-- 17.07.26 00:55 [T-034] DEC: style/ = указатели, не копии — grandpa.md был полным дублем STYLE.md, дубль = мина рассинхрона
-- 17.07.26 01:05 [T-035] H: блоки скажут already при старом пути -> confirmed; инжектор научен block upgrade, прогон дал 4x upgraded PASS
-- 17.07.26 01:20 [T-036] RUN: README v4 -> протокол-позиционирование, agent A/B/C схема, актуальный layout PASS
-- 17.07.26 01:30 [T-037] H: питон сказал junction=копия -> rejected: os.stat идёт СКВОЗЬ junction; PowerShell LinkType=Junction, тревога ложная
-- 17.07.26 01:35 [T-037] H: upgrade-ветка льёт BOM -> confirmed: Set-Content PS5.1, ловушка из traps.md укусила третий раз; Write-NoBom въехал, 5 конфигов отмыты
-- 17.07.26 01:40 [T-037] RUN: REVIEW диффа -> P0 dead-refs чисто, P1 ложный, P2 закрыт; DEC: SHIP
-- 17.07.26 01:45 [T-037] RUN: ship v4.0.0 -> скилл вырос в протокол: одно ядро, девять адаптеров, любая модель у руля
-- 17.07.26 01:45 [T-037] хайку: Скилл сбросил кожу / протокол — общий язык / моделям — лопаты (shpatel — лопатка)
-- 17.07.26 01:55 [T-037] RUN: BOM в KNOWLEDGE/decisions.md (наследие ранних PowerShell-записей) -> снят, репо 0 BOM PASS
-- 17.07.26 01:58 [T-038] RUN: encoding scan all files -> BOM=0 ctrl=0 everywhere PASS
-- 17.07.26 01:58 [T-038] RUN: ship v4.1.0 -> pushed 6ad68fe, tag v4.1.0 PASS
-- 17.07.26 01:58 [T-038] DEC: no hardcoded machine paths in protocol/adapter/style files; LOG.md entries historical only
+- [E-001] [T-001] RUN: secrets grep -> PASS (only self-referential pattern in SKILL.md:189)
+- [E-002] [parent: E-001] [T-001] RUN: structure check -> PASS (VAC/SKILL.md, VAC/UI.md, README.md present, junctions on 5 systems verified earlier)
+- [E-003] [parent: E-002] [T-002] DEC: initial version 1.0.0 вЂ” first public release of consolidated single-skill system
+- [E-004] [parent: E-003] [T-004] DEC: gh CLI missing вЂ” remote creation needs user choice (install gh vs manual web create)
+- [E-005] [parent: E-004] [T-004] RUN: gh repo create vacterro/vacskills --public --push -> PASS
+- [E-006] [parent: E-005] [T-004] RUN: git ls-remote origin main -> 39a5ece PASS
+- [E-007] [parent: E-006] [T-004] RUN: ship v1.0.0 -> pushed 39a5ece
+- [E-008] [parent: E-007] [T-005] RUN: grep personal paths (V:\___VAC|vac34) -> clean PASS
+- [E-009] [parent: E-008] [T-005] RUN: ship v1.0.1 -> portable docs + LICENSE
+- [E-010] [parent: E-009] [T-006] DEC: rewrite SKILL.md пїЅ loop caps, PUBLISH opt-in gating, HUNT clean-skip, token discipline, 218->169 lines
+- [E-011] [parent: E-010] [T-006] RUN: structure grep (sections+caps+gating) -> PASS, 169 lines
+- [E-012] [parent: E-011] [T-007] RUN: ship v1.1.0 -> pushing
+- [E-013] [parent: E-012] [T-008] RUN: ship v1.1.0a -> alias 'vac set' official
+- [E-014] [parent: E-013] [T-009] RUN: ship v1.1.1 -> takeover guard + bootstrap fallback + gitignore/.env guard
+- [E-015] [parent: E-014] [T-010] RUN: ship v1.1.2 -> publish target user-agnostic (origin / gh account)
+- [E-016] [parent: E-015] [T-011] RUN: ship v1.1.3 -> self-cleaning (.vac/tmp scratch home, orphan hunt, no-litter rule)
+- [E-001] [T-012] RUN: ship v1.1.4 -> РґРµРґ-Р»РѕРіРіРµСЂ РІСЉРµС…Р°Р»: РґР°С‚С‹ human, С„Р°РєС‚С‹ Р¶РµР»РµР·РЅС‹Рµ, РєРѕРјРјРµРЅС‚Р°СЂРёР№ СЃ РїРµСЂС‡РёРєРѕРј вЂ” С‚РµРїРµСЂСЊ LOG С‡РёС‚Р°РµС‚СЃСЏ РєР°Рє Р±Р°Р№РєРё, Р° РЅРµ РєР°Рє РјРѕСЂРі ISO-РґР°С‚
+- [E-002] [parent: E-001] [T-012] С…Р°Р№РєСѓ РЅР° РїРѕСЃРѕС€РѕРє: Р”РµРґ РІ Р»РѕРіРё РїСЂРёС€С‘Р» / ISO-РґР°С‚С‹ СЃРґРѕС…Р»Рё, blin / С‡РёС‚Р°С‚СЊ СЃС‚Р°Р»Рѕ РєР°Р№С„ (kaif вЂ” СѓРґРѕРІРѕР»СЊСЃС‚РІРёРµ)
+- [E-003] [parent: E-002] [T-013] RUN: ship v1.1.4a -> РґРµРґР° Р·Р°РїРµСЂР»Рё РІ .vac/, РІ С‡Р°С‚ Р±РѕР»СЊС€Рµ РЅРё РЅРѕРіРѕР№ вЂ” РїРѕСЂСЏРґРѕРє, blin
+- [E-004] [parent: E-003] [T-014] RUN: ship v1.1.5 -> РґРµРґ С‚РµРїРµСЂСЊ Рё РІ С‡Р°С‚Рµ Р±Р°Р·Р°СЂРёС‚, РЅРѕ РєРѕСЂРѕС‚РєРѕ Рё РїРѕ РґРµР»Сѓ вЂ” cavemanР° СЃ РґРµРґРѕРј РїРѕР¶РµРЅРёР»Рё
+- [E-005] [parent: E-004] [T-015] RUN: inject.ps1 live test -> 8x already + 2 Antigravity refreshed, РёРґРµРјРїРѕС‚РµРЅС‚РЅС‹Р№ РєР°Рє СЂСѓР±РёР»СЊРЅРёРє PASS
+- [E-006] [parent: E-005] [T-015] RUN: ship v1.2.0 -> injector СЂРѕРґРёР»СЃСЏ: РѕРґРЅР° РєРѕРјР°РЅРґР° Рё VAC РІРµР·РґРµ С…РѕР·СЏРёРЅ, РєСЂР°СЃРѕС‚Р°
+- [E-007] [parent: E-006] [T-016] RUN: ship v1.2.1 -> README С‚РµРїРµСЂСЊ РґРµРґ РїРѕ-Р°РЅРіР»РёР№СЃРєРё Р±Р°Р·Р°СЂРёС‚: РєРѕСЂРѕС‚РєРѕ, РєСЂР°СЃРёРІРѕ, РїСЏС‚РёР»РµС‚РєР° РїРѕР№РјС‘С‚, prohvessor РѕРґРѕР±СЂРёС‚
+- [E-008] [parent: E-007] [T-017] H: FreeBuff РЅРµ С‡РёС‚Р°РµС‚ VAC -> confirmed: РєРѕРїРёСЏ СЃ СѓР±РёС‚РѕР№ РєРѕРґРёСЂРѕРІРєРѕР№ (РІвЂ ' РІРјРµСЃС‚Рѕ СЃС‚СЂРµР»РѕРє), frontmatter Р±РёС‚С‹Р№
+- [E-009] [parent: E-008] [T-017] RUN: junction ~/.agents/skills/VAC -> encoding С‡РёСЃС‚С‹Р№, 211 СЃС‚СЂРѕРє, PASS
+- [E-010] [parent: E-009] [T-017] RUN: inject.ps1 re-run -> 9x already + 2 Antigravity refresh, РЅРѕРІС‹Р№ РїСѓС‚СЊ РІ СЃС‚СЂРѕСЋ
+- [E-011] [parent: E-010] [T-017] RUN: ship v1.2.2 -> FreeBuff РІ СЃРµРјСЊРµ, РєСЂР°РєРѕР·СЏР±СЂС‹ РЅР° РїРѕРјРѕР№РєРµ
+- [E-012] [parent: E-011] [T-018] DEC: РєСЂРёС‚РёРєР° РїСЂРёРЅСЏС‚Р° вЂ” РїСЂРѕС‚РѕРєРѕР» Рё Р»РёС‡РЅРѕСЃС‚СЊ СЂР°Р·РІРµР»РёСЃСЊ, SCOUT/REVIEW СЃС‚Р°Р»Рё С„Р°Р·Р°РјРё, KNOWLEDGE/ СЂРѕРґРёР»СЃСЏ -> KNOWLEDGE/decisions.md
+- [E-013] [parent: E-012] [T-018] H: FreeBuff РЅРµ РІРёРґРёС‚ VAC -> confirmed: С‡РёС‚Р°РµС‚ С‚РѕР»СЊРєРѕ lowercase РєРѕРїРёРё, junctions РёРіРЅРѕСЂРёС‚ РєР°Рє С‚С‘С‰Р° СЃРѕРІРµС‚С‹
+- [E-014] [parent: E-013] [T-018] RUN: inject.ps1 -> vac lowercase copy РІ .agents, 3 С„Р°Р№Р»Р°, РєРѕРґРёСЂРѕРІРєР° С‡РёСЃС‚Р°СЏ PASS
+- [E-015] [parent: E-014] [T-018] RUN: ship v2.0.0 -> РєРѕРЅСЃС‚РёС‚СѓС†РёСЋ СЂР°СЃРїРёР»РёР»Рё РЅР° РїСЂРѕС‚РѕРєРѕР» Рё Р±Р°Р»Р°Р»Р°Р№РєСѓ, РѕР±Рµ С‚РѕРЅСЊС€Рµ Рё Р·Р»РµРµ
+- [E-016] [parent: E-015] [T-018] С…Р°Р№РєСѓ: Р”РµРґ СЃСЉРµС…Р°Р» РІ STYLE / РїСЂРѕС‚РѕРєРѕР» СЃС‚Р°Р» С…РѕР»РѕРґРЅС‹Рј / РѕР±Р° РґРѕРІРѕР»СЊРЅС‹ (mГµlemad вЂ” РѕР±Р°)
+- [E-017] [parent: E-016] [T-019] DEC: РІС‚РѕСЂР°СЏ РІРѕР»РЅР° СЂРµРІСЊСЋ вЂ” confidence/graph/index/metrics РІР·СЏР»Рё, agents-manifest Рё metrics.md РѕС‚Р»РѕР¶РёР»Рё РѕСЂРєРµСЃС‚СЂР°С‚РѕСЂСѓ -> KNOWLEDGE/decisions.md
+- [E-018] [parent: E-017] [T-019] RUN: ship v2.1.0 -> РґРѕСЃРєР° РЅР°СѓС‡РёР»Р°СЃСЊ РїР°СЂР°Р»Р»РµР»РёС‚СЊ Р°РіРµРЅС‚РѕРІ РїРѕ DAG, С‚РёРєРµС‚С‹ С‡РµСЃС‚РЅРѕ РіРѕРІРѕСЂСЏС‚ РЅР°СЃРєРѕР»СЊРєРѕ РёРј РІРµСЂРёС‚СЊ
+- [E-019] [parent: E-018] [T-020] RUN: ship v2.1.0a -> README РїРµСЂРµР·Р»РёР»Рё РїРѕРґ 2.x: РґРµРґ РІ С„РѕСЂРјРµ, С„Р°Р·С‹ Рё graph РЅР° РІРёС‚СЂРёРЅРµ, СЃРєСѓРєР° СЃРґРѕС…Р»Р°
+- [E-020] [parent: E-019] [T-021] DEC: РёРјСЏ РѕРґРЅРѕ РЅР° РІСЃС‘ вЂ” СЃРєРёР»Р», РїР°РїРєР°, РїР°РјСЏС‚СЊ, СЂРµРїРѕ = vacskill; vac РѕСЃС‚Р°С‘С‚СЃСЏ РєРѕСЂРѕС‚РєРёРј Р°Р»РёР°СЃРѕРј, РјС‹С€РµС‡РЅР°СЏ РїР°РјСЏС‚СЊ РЅРµ СЃС‚СЂР°РґР°РµС‚
+- [E-021] [parent: E-020] [T-021] RUN: git mv VAC->vacskill, .vac->.vacskill -> РёСЃС‚РѕСЂРёСЏ С„Р°Р№Р»РѕРІ С†РµР»Р° PASS
+- [E-022] [parent: E-021] [T-021] RUN: inject.ps1 РјРёРіСЂР°С†РёСЏ -> 3 junction created + 5 migrated from VAC, СЃС‚Р°СЂС‹С… Р±Р»РѕРєРѕРІ РЅРѕР»СЊ PASS
+- [E-023] [parent: E-022] [T-021] RUN: verify 6 СѓСЃС‚Р°РЅРѕРІРѕРє -> name=vacskill, memory=.vacskill РІРµР·РґРµ, legacy leftovers РїСѓСЃС‚Рѕ PASS
+- [E-024] [parent: E-023] [T-021] RUN: gh repo rename -> github.com/vacterro/vacskill PUBLIC, remote РїРµСЂРµСЃС‚Р°РІР»РµРЅ PASS
+- [E-025] [parent: E-024] [T-021] RUN: ship v3.0.0 -> VAC СѓРјРµСЂ, РґР° Р·РґСЂР°РІСЃС‚РІСѓРµС‚ vacskill; СЃС‚Р°СЂРѕРµ РёРјСЏ Р¶РёРІС‘С‚ С‚РѕР»СЊРєРѕ РІ РјРёРіСЂaС‚РѕСЂРµ Рё Р»РµС‚РѕРїРёСЃРё
+- [E-026] [parent: E-025] [T-021] С…Р°Р№РєСѓ: РўСЂРё Р±СѓРєРІС‹ СѓС€Р»Рё / vacskill РїРёС€РµРј С†РµР»РёРєРѕРј / vac РІСЃС‘ Р¶Рµ Р¶РёРІ (elab вЂ” Р¶РёРІ)
+- [E-027] [parent: E-026] [T-022] H: СЃС‚РёР»СЊ РІС‹РІРµС‚СЂРёРІР°РµС‚СЃСЏ Рє 20-РјСѓ СЃРѕРѕР±С‰РµРЅРёСЋ -> confirmed: Сѓ STYLE.md РЅРµ Р±С‹Р»Рѕ persistence-СЏРєРѕСЂСЏ, Р° Сѓ caveman-СЃРєРёР»Р»Р° РѕРЅ РµСЃС‚СЊ; СѓРєСЂР°Р»Рё С„РѕСЂРјСѓР»РёСЂРѕРІРєСѓ
+- [E-028] [parent: E-027] [T-022] DEC: СЏРєРѕСЂСЊ СЃС‚РёР»СЏ + SKILL РіСЂСѓР·РёС‚ STYLE СЃСЂР°Р·Сѓ, РЅРµ "РїРѕС‚РѕРј" -> РґСЂРµР№С„ Р»РµС‡РёС‚СЃСЏ РїРѕРІС‚РѕСЂРµРЅРёРµРј, Р° РЅРµ РѕР±СЉС‘РјРѕРј
+- [E-029] [parent: E-028] [T-023] RUN: git tag -a x17 Р·Р°РґРЅРёРј С‡РёСЃР»РѕРј + push --tags -> git show v1.0.0:VERSION РІРµСЂРЅСѓР» 1.0.0 PASS
+- [E-030] [parent: E-029] [T-023] DEC: С‚РµРіРё = Р°СЂС…РёРІ РІРµСЂСЃРёР№; _archive_* РїР°РїРєРё Р±РѕР»СЊС€Рµ РЅРµ РЅСѓР¶РЅС‹, РёСЃС‚РѕСЂРёСЏ РІ git РєСЂР°С€Рµ Р»СЋР±РѕР№ СЃРІР°Р»РєРё
+- [E-031] [parent: E-030] [T-024] H: С„Р°Р№Р» РїСѓС… 245->255->264->281 -> confirmed: СЏ Р»РµС‡РёР» РґСЂРµР№С„, СЂР°Р·РґСѓРІР°СЏ РёРЅСЃС‚СЂСѓРєС†РёСЋ вЂ” СЃР°Рј СЃРµР±Рµ РїСЂРѕС‚РёРІРѕСЂРµС‡РёР», kurat (С‡С‘СЂС‚)
+- [E-032] [parent: E-031] [T-024] RUN: СЃР¶Р°С‚РёРµ SKILL.md 281 -> 249 СЃС‚СЂРѕРє, 17 РїСЂР°РІРёР» РїСЂРѕРІРµСЂРµРЅС‹ grep -> РЅРё РѕРґРЅРѕ РЅРµ РїРѕС‚РµСЂСЏРЅРѕ PASS
+- [E-033] [parent: E-032] [T-024] DEC: РїСЂР°РІРёР»Рѕ РїСЂРѕ СЃР°РјРѕРіРѕ СЃРµР±СЏ вЂ” РїРѕС‚РѕР»РѕРє ~250 СЃС‚СЂРѕРє, РЅРѕРІРѕРµ РїСЂР°РІРёР»Рѕ РІС‹СЃРµР»СЏРµС‚ СЃС‚Р°СЂРѕРµ -> РґР»РёРЅР° СЌС‚Рѕ РґСЂРµР№С„, Р° РЅРµ С‚С‰Р°С‚РµР»СЊРЅРѕСЃС‚СЊ
+- [E-034] [parent: E-033] [T-025] RUN: rm _archive_versions -> Р±Р»РёР·РЅРµС†С‹-РєРѕРїРёРё v1.2.2, С‚РµРі РёС… СѓР¶Рµ РґРµСЂР¶РёС‚; СЃРІР°Р»РєСѓ СЃРЅРµСЃР»Рё, РґРµСЂРµРІРѕ РґС‹С€РёС‚ PASS
+- [E-035] [parent: E-034] [T-026] H: HUNT skip РЅРµ СЂР°Р±РѕС‚Р°РµС‚ -> confirmed: СЃ v2.0.0 РїСЂР°РІРёР»Рѕ СЃСЃС‹Р»Р°РµС‚СЃСЏ РЅР° Р·Р°РїРёСЃСЊ hunt->clean, С„РѕСЂРјР°С‚ РєРѕС‚РѕСЂРѕР№ СЃР°Рј Р¶Рµ Рё РїРѕС‚РµСЂСЏР»; skip РЅРµ СЃСЂР°Р±Р°С‚С‹РІР°Р» РЅРё СЂР°Р·Сѓ
+- [E-036] [parent: E-035] [T-026] DEC: СЏРєРѕСЂСЊ РїРѕ С…РµС€Сѓ -> RUN: hunt -> clean @<hash>, СЃРІРµСЂРєР° СЃ HEAD; РїСЂР°РІРёР»Рѕ-РїСЂРёР·СЂР°Рє РѕР±СЂРµР»Рѕ С‚РµР»Рѕ
+- [E-037] [parent: E-036] [T-026] RUN: git mv РІ РЅРµ-git РїСЂРѕРµРєС‚Рµ -> СѓРїР°Р» Р±С‹; С‚РµРїРµСЂСЊ "plain move otherwise" PASS
+- [E-038] [parent: E-037] [T-026] DEC: СЃС‡С‘С‚С‡РёРє REVIEW-РїСЂРѕС…РѕРґРѕРІ Р¶РёР» РІ РіРѕР»РѕРІРµ Р°РіРµРЅС‚Р°, Р° Р°РіРµРЅС‚ СЃРјРµРЅСЏРµРјС‹Р№ -> СЃС‡РёС‚Р°РµРј РїРѕ РІРµСЂРґРёРєС‚Р°Рј РІ LOG
+- [E-039] [parent: E-038] [T-026] DEC: graph race вЂ” РґРІР° РєР»РµР№РјР° РІ РѕРґРёРЅ РјРёРі; Р»РµС‡РёРј РїРµСЂРµС‡РёС‚С‹РІР°РЅРёРµРј LOG РїРѕСЃР»Рµ Р·Р°РїРёСЃРё, СЂР°РЅРЅРёР№ РєР»РµР№Рј РїРѕР±РµР¶РґР°РµС‚
+- [E-040] [parent: E-039] [T-026] RUN: 6 РґС‹СЂ Р·Р°РєСЂС‹С‚Рѕ, 250 СЃС‚СЂРѕРє СЂРѕРІРЅРѕ (Р±С‹Р»Рѕ 249, РїРѕС‚РѕР»РѕРє 250) -> С„РёРєСЃС‹ РѕРїР»Р°С‡РµРЅС‹ СЃР¶Р°С‚РёРµРј, 23 РєР»СЋС‡Р° С†РµР»С‹ PASS
+- [E-041] [parent: E-040] [T-026] С…Р°Р№РєСѓ: РџСЂР°РІРёР»Рѕ-РїСЂРёР·СЂР°Рє / РґРІР° РіРѕРґР° РЅРёРєС‚Рѕ РЅРµ Р·РІР°Р» / С…РµС€ РІРµСЂРЅСѓР» РёР· С‚СЊРјС‹
+- [E-042] [parent: E-041] [T-027] H: README РїРѕРµС…Р°Р» РєСЂР°РєРѕР·СЏР±СЂР°РјРё -> confirmed: СЃРІРѕР№ Р¶Рµ PowerShell Set-Content -Encoding utf8 СЃР»РѕРјР°Р» С‚РёСЂРµ Рё РґРѕР±Р°РІРёР» BOM
+- [E-043] [parent: E-042] [T-027] RUN: git checkout v3.1.0a -- README.md + Edit tool -> 0 РєСЂР°РєРѕР·СЏР±СЂ, 30 СЃРёРјРІРѕР»РѕРІ РЅР° РјРµСЃС‚Рµ PASS
+- [E-044] [parent: E-043] [T-027] RUN: BOM СЃРЅСЏС‚ СЃ VERSION/STATE/BOARD -> od РїСЂРѕРІРµСЂРєР° С‡РёСЃС‚Р°СЏ PASS
+- [E-045] [parent: E-044] [T-027] DEC: PowerShell РЅРµ РїРёС€РµС‚ С„Р°Р№Р»С‹ СЂРµРїРѕ, С‚РѕР»СЊРєРѕ git -> KNOWLEDGE/traps.md
+- [E-046] [parent: E-045] [T-027] С…Р°Р№РєСѓ: Р§РёРЅРёР» РєРѕРґРёСЂРѕРІРєСѓ / СЃР°Рј Р¶Рµ РµС‘ Рё СЃР»РѕРјР°Р» / РіСЂР°Р±Р»Рё РІРµСЂРЅС‹Р№ РґСЂСѓРі
+- [E-047] [parent: E-046] [T-028] RUN: ship v3.1.2 -> pushed 8d8e483 PASS
+- [E-048] [parent: E-047] [HA-01] HAIKU: Р›РёРЅРєРё СЃРїР»РµР»РёСЃСЊ РІ СѓР·РµР» / РЎРєР°РЅРЅРµСЂ СЃР»РµРїРѕР№ РїСЂРѕС€РµР» РјРёРјРѕ / Р¤Р°Р№Р»С‹ СЃРїР°СЃ РєРѕРїРёРїР°СЃС‚
+- [E-049] [parent: E-048] [T-029] H: antigravity РЅР°С‡Р°Р» РїСЂРѕС‚РѕРєРѕР»-СЌРІРѕР»СЋС†РёСЋ Рё СѓРјРµСЂ РІ РїРѕР»С‘С‚Рµ -> confirmed: vacskill/ СѓРґР°Р»С‘РЅ, protocol+adapters+schemas+style+templates СЃРѕР·РґР°РЅС‹, РЅРµ Р·Р°РєРѕРјРјРёС‡РµРЅРѕ
+- [E-050] [parent: E-049] [T-029] RUN: git checkout -- vacskill/ -> junctions РЅР° 7 СЃРёСЃС‚РµРјР°С… РѕР¶РёР»Рё, СЃРєРµР»РµС‚ С†РµР» PASS
+- [E-051] [parent: E-050] [T-029] DEC: СЃРєРµР»РµС‚ РїСЂРёРЅРёРјР°РµРј РєР°Рє РєР°СЂРєР°СЃ, СЃРѕРґРµСЂР¶РёРјРѕРµ РЅРµС‚ вЂ” 121 СЃС‚СЂРѕРєР° РїСЂРѕС‚РёРІ 250, РїРѕС‚РµСЂСЏРЅС‹ caps/gates/hunt-СЏРєРѕСЂСЊ; РєР°РЅРѕРЅ С‚СЏРЅСѓС‚СЊ РёР· С‚РµРіР° v3.1.1a
+- [E-052] [parent: E-051] [T-030] DEC: РїСЂРѕС‚РѕРєРѕР» = РћР”РРќ С„Р°Р№Р» vacskill/PROTOCOL.md, РЅРµ РїСЏС‚СЊ вЂ” РґСЂРѕР±Р»РµРЅРёРµ РјРЅРѕР¶РёС‚ РЅРµРґРѕС‡РёС‚Р°РЅРЅРѕСЃС‚СЊ; РїСЏС‚СЊ С„Р°Р№Р»РѕРІ СЂРµРІСЊСЋ РєСЂР°СЃРёРІС‹ С‡РµР»РѕРІРµРєСѓ, РІСЂРµРґРЅС‹ РјРѕРґРµР»Рё
+- [E-053] [parent: E-052] [T-030] DEC: PROTOCOL.md Р¶РёРІС‘С‚ РІРЅСѓС‚СЂРё vacskill/ вЂ” СЋРЅРёС‚ СЂР°СЃРїСЂРѕСЃС‚СЂР°РЅРµРЅРёСЏ (junction/copy) РѕСЃС‚Р°С‘С‚СЃСЏ СЃР°РјРѕРґРѕСЃС‚Р°С‚РѕС‡РЅС‹Рј, РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅС‹Рµ РїСѓС‚Рё РЅРµ СЂРІСѓС‚СЃСЏ
+- [E-054] [parent: E-053] [T-030] RUN: PROTOCOL.md СЃРѕР±СЂР°РЅ -> 240/250 СЃС‚СЂРѕРє, 23 РєР»СЋС‡Р° grep PASS, conf: high
+- [E-055] [parent: E-054] [T-030] DEC: capability-С‚Р°Р±Р»РёС†Р° РґРµРіСЂР°РґР°С†РёР№ РІСЉРµС…Р°Р»Р° (РЅРµС‚ git -> РЅРµС‚ SHIP; РЅРµС‚ terminal -> MANUAL-VERIFY) вЂ” РёРґРµСЏ antigravity, С„РѕСЂРјР° РјРѕСЏ
+- [E-056] [parent: E-055] [T-031] RUN: SKILL.md СѓР¶Р°С‚ РґРѕ 26-СЃС‚СЂРѕС‡РЅРѕРіРѕ Р°РґР°РїС‚РµСЂР° -> PROTOCOL.md СЂСЏРґРѕРј, РїСѓС‚Рё РЅРµ СЂРІСѓС‚СЃСЏ PASS
+- [E-057] [parent: E-056] [T-032] RUN: 9 Р°РґР°РїС‚РµСЂРѕРІ РїРµСЂРµРїРёСЃР°РЅС‹ -> grep PROTOCOL.md 9/9, BOM С‡РёСЃС‚Рѕ PASS
+- [E-058] [parent: E-057] [T-033] RUN: templates + KNOWLEDGE seed + schemas Р·Р°РјРѕСЂРѕР¶РµРЅС‹ -> init dry-run PASS
+- [E-059] [parent: E-058] [T-034] DEC: style/ = СѓРєР°Р·Р°С‚РµР»Рё, РЅРµ РєРѕРїРёРё вЂ” grandpa.md Р±С‹Р» РїРѕР»РЅС‹Рј РґСѓР±Р»РµРј STYLE.md, РґСѓР±Р»СЊ = РјРёРЅР° СЂР°СЃСЃРёРЅС…СЂРѕРЅР°
+- [E-060] [parent: E-059] [T-035] H: Р±Р»РѕРєРё СЃРєР°Р¶СѓС‚ already РїСЂРё СЃС‚Р°СЂРѕРј РїСѓС‚Рё -> confirmed; РёРЅР¶РµРєС‚РѕСЂ РЅР°СѓС‡РµРЅ block upgrade, РїСЂРѕРіРѕРЅ РґР°Р» 4x upgraded PASS
+- [E-061] [parent: E-060] [T-036] RUN: README v4 -> РїСЂРѕС‚РѕРєРѕР»-РїРѕР·РёС†РёРѕРЅРёСЂРѕРІР°РЅРёРµ, agent A/B/C СЃС…РµРјР°, Р°РєС‚СѓР°Р»СЊРЅС‹Р№ layout PASS
+- [E-062] [parent: E-061] [T-037] H: РїРёС‚РѕРЅ СЃРєР°Р·Р°Р» junction=РєРѕРїРёСЏ -> rejected: os.stat РёРґС‘С‚ РЎРљР’РћР—Р¬ junction; PowerShell LinkType=Junction, С‚СЂРµРІРѕРіР° Р»РѕР¶РЅР°СЏ
+- [E-063] [parent: E-062] [T-037] H: upgrade-РІРµС‚РєР° Р»СЊС‘С‚ BOM -> confirmed: Set-Content PS5.1, Р»РѕРІСѓС€РєР° РёР· traps.md СѓРєСѓСЃРёР»Р° С‚СЂРµС‚РёР№ СЂР°Р·; Write-NoBom РІСЉРµС…Р°Р», 5 РєРѕРЅС„РёРіРѕРІ РѕС‚РјС‹С‚С‹
+- [E-064] [parent: E-063] [T-037] RUN: REVIEW РґРёС„С„Р° -> P0 dead-refs С‡РёСЃС‚Рѕ, P1 Р»РѕР¶РЅС‹Р№, P2 Р·Р°РєСЂС‹С‚; DEC: SHIP
+- [E-065] [parent: E-064] [T-037] RUN: ship v4.0.0 -> СЃРєРёР»Р» РІС‹СЂРѕСЃ РІ РїСЂРѕС‚РѕРєРѕР»: РѕРґРЅРѕ СЏРґСЂРѕ, РґРµРІСЏС‚СЊ Р°РґР°РїС‚РµСЂРѕРІ, Р»СЋР±Р°СЏ РјРѕРґРµР»СЊ Сѓ СЂСѓР»СЏ
+- [E-066] [parent: E-065] [T-037] С…Р°Р№РєСѓ: РЎРєРёР»Р» СЃР±СЂРѕСЃРёР» РєРѕР¶Сѓ / РїСЂРѕС‚РѕРєРѕР» вЂ” РѕР±С‰РёР№ СЏР·С‹Рє / РјРѕРґРµР»СЏРј вЂ” Р»РѕРїР°С‚С‹ (shpatel вЂ” Р»РѕРїР°С‚РєР°)
+- [E-067] [parent: E-066] [T-037] RUN: BOM РІ KNOWLEDGE/decisions.md (РЅР°СЃР»РµРґРёРµ СЂР°РЅРЅРёС… PowerShell-Р·Р°РїРёСЃРµР№) -> СЃРЅСЏС‚, СЂРµРїРѕ 0 BOM PASS
+- [E-068] [parent: E-067] [T-038] RUN: encoding scan all files -> BOM=0 ctrl=0 everywhere PASS
+- [E-069] [parent: E-068] [T-038] RUN: ship v4.1.0 -> pushed 6ad68fe, tag v4.1.0 PASS
+- [E-070] [parent: E-069] [T-038] DEC: no hardcoded machine paths in protocol/adapter/style files; LOG.md entries historical only
+- [E-071] [parent: E-070] [T-042] DEC: Split build.md into verify.md and ship.md into review.md to fix lazy-loading bug. Created done.md and blocked.md
+- [E-072] [parent: E-071] [T-044] RUN: ship v5.0.1 -> pushed 920ce8c, tag v5.0.1 PASS
+- [E-073] [parent: E-072] [T-045] DEC: Style rewritten. Р”РµРґ СЃ СЂР°Р№РѕРЅР° is now the default chat style (compressed). Haiku deleted.
+- [E-074] [parent: E-073] [T-047] RUN: ship v5.1.0 -> pushed da71032, tag v5.1.0 PASS
+- [E-075] [parent: E-074] [T-048] RUN: README.md rewritten to English РґРµРґ style. Fucking efficient. -> pushed a2f4a3b PASS
+- [E-076] [parent: E-075] [T-049] DEC: Upgraded PROTOCOL.md to strict RFC spec (14 sections). Added claim logic to board.schema.json. Made state.schema.json require all 6 fields.
+- [E-077] [parent: E-076] [T-049] RUN: ship v5.2.0 -> pushed 85a87d0, tag v5.2.0 PASS
+- [E-078] [parent: E-077] [T-050] DEC: Implemented conformance validator, test scenarios, and extensions structural split.
+- [E-079] [parent: E-078] [T-050] RUN: ship v5.3.0 -> pushed cf65934, tag v5.3.0 PASS

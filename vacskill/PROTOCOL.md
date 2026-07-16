@@ -1,4 +1,4 @@
-# vacskill Protocol Specification (v5.2.0)
+# Agent Session Protocol (ASP) Specification (v6.0.0)
 
 ## 1. Abstract
 VACSKILL defines a portable, file-backed project session protocol for LLM agents. Implementations MAY vary. The on-disk contract MUST remain stable. This protocol allows disparate agents to collaborate, hand off state, and recover from crashes with zero amnesia by treating the `.vacskill/` directory as the single source of truth.
@@ -17,8 +17,8 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 The protocol relies on four canonical files inside `.vacskill/`:
 - **STATE.md**: The exact current execution state. MUST contain frontmatter: `phase`, `task`, `next_action`, `blocker`, `agent`, `updated`.
 - **BOARD.md**: The dependency graph of tasks. MUST track `status` (TODO/DOING/DONE), `needs:` (dependencies), and `owner` (claims).
-- **LOG.md**: Append-only event stream. MUST be one event per line (DEC, RUN, H).
-- **KNOWLEDGE/**: Directory for durable truths (e.g., `architecture.md`). MUST NOT contain event histories.
+- **LOG.md**: Append-only event graph. MUST be one event per line (DEC, RUN, H). MUST use Event IDs (`[E-001]`) and MAY use `parent_id` (`[parent: E-001]`) to form a decision graph instead of a linear list.
+- **KNOWLEDGE/**: Directory for durable truths. MUST NOT contain event histories. Major architectural decisions MUST be recorded here using the Architecture Decision Record (ADR) pattern (e.g. `ADR-001.md`).
 
 *Formal schemas for these files are defined in `schemas/`.*
 
@@ -58,11 +58,14 @@ Crash recovery is a first-class state:
 - If `STATE.md` is stale but `LOG.md` or `BOARD.md` is newer, the agent MUST read `git status` as the ground truth for in-flight edits.
 - The agent SHALL rebuild `STATE.md` based on the latest `LOG.md` entry and the current open DOING ticket on the BOARD.
 
-## 10. Capability Negotiation (Handshake)
-Before engaging, an agent MUST evaluate its host environment:
-- **Git access**: If no, agent MUST NOT transition to `SHIP`.
-- **Shell access**: If no, `VERIFY` MUST degrade to manual user verification.
-- **Filesystem Write**: If no, agent operates in read-only advisory mode.
+## 10. Capability Negotiation (Two-Way Handshake)
+Capability negotiation is two-way. The protocol specifies demands; the agent matches them.
+1. **Protocol Demands**: `.vacskill/STATE.md` MAY define `requires: [filesystem, git, shell, python]`.
+2. **Agent Capabilities**: Before engaging, the agent MUST evaluate its host environment against these requirements.
+3. **Mode Lock**: The agent MUST write its operating mode back to `STATE.md` (`mode: full | read-only | no-publish | manual-verify`).
+- **Missing Git**: `mode: no-publish`. Agent MUST NOT transition to `SHIP`.
+- **Missing Shell**: `mode: manual-verify`. `VERIFY` MUST degrade to manual user verification.
+- **Missing Filesystem Write**: `mode: read-only`. Agent operates in advisory mode.
 The agent adapts; it MUST NOT hallucinate competence.
 
 ## 11. Adapter Contract

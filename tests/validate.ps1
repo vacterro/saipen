@@ -69,7 +69,7 @@ Write-Host "PASS: BOARD.md acyclic" -ForegroundColor Green
 $logLines = Get-Content ".vacskill\LOG.md"
 foreach ($line in $logLines) {
     if ($line.Trim() -ne "" -and $line -notmatch "^#") {
-        Assert-Format ($line -match "^-\s+\d{2,4}[-\.]\d{2}[-\.]\d{2}") "LOG.md entry violates append-only event format: $line"
+        Assert-Format ($line -match "^-\s+\[E-\d+\](\s+\[parent:\s+E-\d+\])?") "LOG.md entry violates Graph Event format: $line"
     }
 }
 Write-Host "PASS: LOG.md format valid" -ForegroundColor Green

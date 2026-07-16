@@ -1,43 +1,20 @@
-# vacskill -- cross-agent project memory protocol
+# Agent Session Protocol (ASP)
 
-**v5.2.0** | [Changelog](CHANGELOG.md) | plain markdown | zero deps | MIT
+**v6.0.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | plain markdown | zero deps | MIT
 
-VACSKILL defines a portable, file-backed project session protocol for LLM agents. Implementations MAY vary. The on-disk contract MUST remain stable.
+*Formerly known as the Cross-Agent Project Memory Protocol (vacskill).*
 
-This protocol acts as a strict state machine, allowing disparate agents to collaborate, hand off state, and recover from crashes with zero amnesia by treating the `.vacskill/` directory as the single source of truth.
+**ASP** is a stable, vendor-neutral contract between your project and whatever AI agent is currently at the keyboard. It acts like `.git` for agent sessions.
 
-Think `.git`, but for agent sessions.
+Instead of writing a README instructing models "how to behave", you drop ASP into your project. The protocol ensures that whether you use Claude today and Gemini tomorrow, both agents will:
+1. Negotiate capabilities (git, shell, files).
+2. Follow a strict state machine (PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP).
+3. Safely hand off state using atomic memory (`.vacskill/`).
+4. Prove conformance via `vacskill validate`.
 
-## Architecture
+## Quick Start (5 minutes)
 
-The protocol is strictly normative. The core rules are defined in `vacskill/PROTOCOL.md`, formatted as a formal RFC specification. 
-
-We explicitly separate the **Core Protocol** from **Adaptive Extensions**.
-
-```
-vacskill/                   <- THE CORE (distributable unit)
-  PROTOCOL.md               normative core specification (MUST/SHOULD/MAY)
-  phases/                   strict state machine logic
-    validate.md             conformance testing
-    init.md / plan.md / scout.md / build.md / verify.md / review.md / ship.md
-    hunt.md / done.md / blocked.md
-
-extensions/                 <- THE ADAPTIVE LAYER
-  adapters/                 per-model instruction bridges
-  schemas/                  canonical file schemas
-  templates/                fresh .vacskill/ boilerplate
-
-tests/                      <- CONFORMANCE LAYER
-  validate.ps1 / .sh        protocol self-check validator
-  scenarios/                mock states (crash-recovery, claim-conflicts, etc.)
-
-STYLE.md / UI.md            <- NON-NORMATIVE VOICE / THEME
-inject.ps1 / inject.sh      <- INSTALLERS
-```
-
-## Install
-
-Run three commands to inject the protocol into any agent on your machine:
+Run these three commands to inject the protocol into any project:
 ```bash
 git clone https://github.com/vacterro/vacskill
 cd vacskill
@@ -46,8 +23,9 @@ bash inject.sh                                             # macOS / Linux
 ```
 
 No install? Paste one line to your agent:
-    Read <clone>/vacskill/PROTOCOL.md + <clone>/vacskill/STYLE.md and follow them.
+> Read <clone>/vacskill/PROTOCOL.md + <clone>/STYLE.md and follow them.
 
-## Editing the protocol
-
-If you intend to modify this protocol, read `vacskill/PROTOCOL.md` first. The core is governed by strict RFC semantics. Do not add marketing foam to the core spec. Changes MUST be reflected in `schemas/`.
+## Documentation
+- **[SPEC.md](SPEC.md)**: The formal RFC specification. Read this if you are building extensions or agent frameworks.
+- **[PROTOCOL.md](vacskill/PROTOCOL.md)**: The brutal, machine-readable ruleset that agents execute.
+- **[GUIDE.md](GUIDE.md)**: The human tutorial with examples.

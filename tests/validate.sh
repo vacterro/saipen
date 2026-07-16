@@ -32,12 +32,10 @@ echo -e "${GREEN}PASS: BOARD.md exists (acyclic check requires powershell/python
 
 # 3. Check LOG.md
 if [ -f ".vacskill/LOG.md" ]; then
-    grep -vE "^#" .vacskill/LOG.md | grep -vE "^$" | grep -qE "^-[[:space:]]+[0-9]{2,4}[-/.][0-9]{2}[-/.][0-9]{2}" || {
-        # If grep succeeds in finding lines that DO NOT match, it's a failure (inverted logic is tricky, so we check if all lines match)
-        # Actually a simpler check: look for bad lines
-        BAD_LINES=$(grep -vE "^#" .vacskill/LOG.md | grep -vE "^$" | grep -vE "^-[[:space:]]+[0-9]{2,4}[-/.][0-9]{2}[-/.][0-9]{2}")
+    grep -vE "^#" .vacskill/LOG.md | grep -vE "^$" | grep -qE "^-[[:space:]]+\[E-[0-9]+\]([[:space:]]+\[parent:[[:space:]]+E-[0-9]+\])?" || {
+        BAD_LINES=$(grep -vE "^#" .vacskill/LOG.md | grep -vE "^$" | grep -vE "^-[[:space:]]+\[E-[0-9]+\]([[:space:]]+\[parent:[[:space:]]+E-[0-9]+\])?")
         if [ -n "$BAD_LINES" ]; then
-            echo -e "${RED}FAIL: LOG.md entry violates append-only format${NC}"
+            echo -e "${RED}FAIL: LOG.md entry violates Graph Event format${NC}"
             exit 1
         fi
     }

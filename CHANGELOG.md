@@ -1,5 +1,13 @@
 # Changelog
 
+## 6.0.0 -- 2026-07-17
+- BREAKING / REBRAND: Renamed "Cross-Agent Project Memory Protocol" to **Agent Session Protocol (ASP)**.
+- BREAKING: `LOG.md` events are no longer linear lists. They are now graph nodes identified by `[E-XXX]` and `[parent: E-XXX]`, enabling safe multi-agent branching and merges.
+- feat: Implemented Two-Way Capability Negotiation. The protocol now dictates `requires:` in `STATE.md`, and the agent locks its `mode:` based on local capabilities.
+- feat: Formalized Architecture Decision Records (ADR). Long-term truths live in `KNOWLEDGE/ADR-XXX.md` to prevent log bloat.
+- feat: Expanded `extensions/` architecture with `security/` and `performance/` hook documentation.
+- doc: Radically split documentation. `README.md` is now just a 5-minute pitch. `SPEC.md` is the human-readable RFC. `PROTOCOL.md` is strictly machine instructions. `GUIDE.md` is the human tutorial.
+
 ## 5.3.0 -- 2026-07-17
 - feat: Added dedicated `validate` phase and `vacskill validate` command.
 - feat: Added `tests/validate.ps1` and `tests/validate.sh` conformance checker scripts.
