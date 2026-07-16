@@ -24,8 +24,8 @@ No `.vacskill/`? Init from `templates/`. Ensure `AGENTS.md` has the
 | `vacskill` / `VACSKILL SET` | Resume current phase. Board done: hunt.md |
 | `vacskill stop` | Checkpoint + handoff |
 | `vacskill status` | Report only, change nothing |
-| `vacskill ship` | ship.md |
-| `vacskill fix SYMPTOM` | build.md (VERIFY/debug path) |
+| `vacskill ship` | review.md -> ship.md |
+| `vacskill fix SYMPTOM` | verify.md (Debug path) |
 
 ## Capabilities -- protocol degrades, agent never fakes
 

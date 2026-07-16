@@ -1,6 +1,6 @@
 # vacskill -- cross-agent project memory protocol
 
-**v5.0.0** | [Changelog](CHANGELOG.md) | plain markdown | zero deps | MIT
+**v5.0.1** | [Changelog](CHANGELOG.md) | plain markdown | zero deps | MIT
 
 A **protocol**, not a skill. The shared language that lets any model open
 `.vacskill/` and know exactly where state is, what is true, what is next --
@@ -41,8 +41,10 @@ vacskill/                   <- the distributable unit
     init.md                   first-time setup
     plan.md                   ticket planning
     scout.md                  codebase reconnaissance
-    build.md                  implementation + verify + debug
-    ship.md                   review gates + publish
+    build.md                  implementation
+    verify.md                 verify + debug
+    review.md                 review gates
+    ship.md                   publish
     hunt.md                   autonomous bug sweep
   SKILL.md                  thin entry for skill-reading platforms
   STYLE.md                  voice (dry chat + grumpy diary grandpa)

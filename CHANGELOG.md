@@ -1,5 +1,8 @@
 # Changelog
 
+## 5.0.1 -- 2026-07-17
+- fix: extract missing `verify.md`, `review.md`, `done.md`, and `blocked.md` phases that were unintentionally merged or omitted in 5.0.0, which broke lazy loading when STATE entered these phases
+
 ## 5.0.0 -- 2026-07-17
 - BREAKING: 2-tier protocol architecture. PROTOCOL.md is now a dense boot loader (~110 lines, ~1,200 tokens cold start). Phase-specific rules moved to lazy-loaded vacskill/phases/ modules (init, plan, scout, build, ship, hunt). Agent loads only the phase it needs -- 60% fewer tokens per session vs monolithic v4. All rules preserved, zero lost. README rewritten for ASP (Agent Session Protocol) positioning
 ## 4.1.0 -- 2026-07-17
