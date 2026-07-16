@@ -1,16 +1,22 @@
 # Agent Session Protocol (ASP)
 
-**v6.0.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | plain markdown | zero deps | MIT
+**v6.1.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | plain markdown | zero deps | MIT
 
 *Formerly known as the Cross-Agent Project Memory Protocol (vacskill).*
 
-**ASP** is a stable, vendor-neutral contract between your project and whatever AI agent is currently at the keyboard. It acts like `.git` for agent sessions.
+**One command. Zero amnesia.**
 
-Instead of writing a README instructing models "how to behave", you drop ASP into your project. The protocol ensures that whether you use Claude today and Gemini tomorrow, both agents will:
-1. Negotiate capabilities (git, shell, files).
-2. Follow a strict state machine (PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP).
-3. Safely hand off state using atomic memory (`.vacskill/`).
-4. Prove conformance via `vacskill validate`.
+ASP is a stable, vendor-neutral continuation protocol. Its sole purpose is to guarantee that a completely cold agent with zero chat history can execute `/vacskill continue` and resume productive work within one minute, without asking the user to repeat context.
+
+```text
+User  →  /vacskill continue
+Agent →  reads STATE ("What do I do right now?")
+Agent →  reads BOARD ("What task am I picking up?")
+Agent →  reads next_action (executes command)
+Agent →  Works.
+```
+
+Instead of writing a README instructing models "how to behave", you drop ASP into your project. Whether you use Claude today and Gemini tomorrow, both agents will instantly negotiate capabilities, follow the state machine, and execute the next action.
 
 ## Quick Start (5 minutes)
 

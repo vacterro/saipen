@@ -1,7 +1,15 @@
 # Agent Session Protocol (ASP) Specification
 
 ## Abstract
-ASP defines a portable, file-backed execution protocol for LLM agents. Implementations MAY vary. The on-disk contract MUST remain stable. 
+**Design Goal #1: A cold agent with zero chat history must be able to execute `/vacskill continue` and resume productive work within one minute, without asking the user to repeat context.**
+
+ASP is a portable, file-backed continuation protocol for LLM agents. Implementations MAY vary. The on-disk contract MUST remain stable. Everything in this protocol exists to serve the Continuation Test.
+
+- **`STATE`**: Exists to answer *"What do I do right now?"*
+- **`BOARD`**: Exists to answer *"What task am I picking up?"*
+- **`LOG`**: Exists to answer *"Why did we come to this point?"*
+- **`KNOWLEDGE`**: Exists to answer *"What is the durable truth of this project?"*
+- **`next_action`**: The heart of ASP. It answers *"What exact command do I execute right this second to resume work?"*
 
 ## Architecture
 

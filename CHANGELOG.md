@@ -1,5 +1,10 @@
 # Changelog
 
+## 6.1.0 -- 2026-07-17
+- doc: Reframed ASP completely around the **"Continuation Test"**. Memory is a means to an end; instant action is the goal. Tagline changed to "One command. Zero amnesia."
+- feat: Added `TEST-001: The Continuation Test` to the Conformance section as the gold standard for release validation.
+- feat: `next_action` in `STATE.md` MUST now be an explicitly executable command (e.g. `pytest tests/`), not a vague intent, to ensure zero-context resumption.
+
 ## 6.0.0 -- 2026-07-17
 - BREAKING / REBRAND: Renamed "Cross-Agent Project Memory Protocol" to **Agent Session Protocol (ASP)**.
 - BREAKING: `LOG.md` events are no longer linear lists. They are now graph nodes identified by `[E-XXX]` and `[parent: E-XXX]`, enabling safe multi-agent branching and merges.

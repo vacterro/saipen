@@ -15,12 +15,13 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ## 4. File Model
 The protocol relies on four canonical files inside `.vacskill/`:
-- **STATE.md**: The exact current execution state. MUST contain frontmatter: `phase`, `task`, `next_action`, `blocker`, `agent`, `updated`.
-- **BOARD.md**: The dependency graph of tasks. MUST track `status` (TODO/DOING/DONE), `needs:` (dependencies), and `owner` (claims).
-- **LOG.md**: Append-only event graph. MUST be one event per line (DEC, RUN, H). MUST use Event IDs (`[E-001]`) and MAY use `parent_id` (`[parent: E-001]`) to form a decision graph instead of a linear list.
-- **KNOWLEDGE/**: Directory for durable truths. MUST NOT contain event histories. Major architectural decisions MUST be recorded here using the Architecture Decision Record (ADR) pattern (e.g. `ADR-001.md`).
+- **STATE.md**: Answers "What do I do right now?". MUST contain frontmatter: `phase`, `task`, `next_action`, `blocker`, `agent`, `updated`. The `next_action` MUST be an immediately executable command (e.g., `pytest tests/`), NOT a vague intent.
+- **BOARD.md**: Answers "What task am I picking up?". MUST track `status` (TODO/DOING/DONE), `needs:` (dependencies), and `owner` (claims).
+- **LOG.md**: Answers "Why did we come to this point?". Append-only event graph. MUST be one event per line (DEC, RUN, H). MUST use Event IDs (`[E-001]`) and MAY use `parent_id` (`[parent: E-001]`) to form a decision graph instead of a linear list.
+- **KNOWLEDGE/**: Answers "What is the durable truth of this project?". Directory for durable truths. MUST NOT contain event histories. Major architectural decisions MUST be recorded here using the Architecture Decision Record (ADR) pattern (e.g. `ADR-001.md`).
 
-*Formal schemas for these files are defined in `schemas/`.*
+*Formal schemas for these files are defined in `extensions/schemas/`.*
+
 
 ## 5. State Machine
 Agents MUST follow the strict phase transition model:
@@ -78,7 +79,14 @@ Implementations MUST be able to pass a self-check:
 - Log is strictly append-only.
 - Knowledge contains no event data.
 - Agent successfully resumes from stale state.
-If requested by the user via `vacskill status`, the agent MUST run this conformance check.
+If requested by the user via `vacskill validate`, the agent MUST run this conformance check.
+
+**TEST-001: The Continuation Test**
+Any release of this protocol MUST pass the gold standard test:
+1. Cold agent (zero chat history).
+2. Execute `/vacskill continue`.
+3. Agent MUST: understand phase, pick ticket, read `next_action`, and execute it instantly WITHOUT asking the user for context.
+If the agent asks "What should I do?", the protocol has failed.
 
 ## 13. Commands
 The following commands route to specific phases or actions:
