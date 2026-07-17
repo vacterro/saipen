@@ -29,8 +29,8 @@ It will grumble, create an `.asp/` folder, and start writing a list of tasks (ti
 
 And if you need it to permanently remember that you only use Tabs and not Spaces — toss a text file into `.asp/KNOWLEDGE/`. It will read it like the Ten Commandments before every single task.
 
-**Step 4. Infinite Evolution (For the lazy)**
-What do you do when all tasks are done and you just want your app to be better? You type `/asp` again.
-The agent won't ask "How can I help you today?". It will go hunt for bugs itself (the **HUNT** phase). If there are no bugs, it transitions to the **ADD** phase, invents a useful feature following strict UX rules (persistence, maximum user control, zero hardcoding), and immediately starts coding it. You just sit back and watch your app grow muscles step-by-step.
+**Step 4. Evolution (for lazy asses)**
+Board empty? Bored? Type `/asp`.
+Agent won't whine 'how can I help?'. It jumps to **HUNT**, seeks bugs. No bugs? Hits **ADD** and builds a new feature by strict rules: zero hardcoding, bulletproof persistence, user controls everything. You just sit, smoke, watch the app grow muscles itself.
 
 Any questions? No? Then get back to work.
