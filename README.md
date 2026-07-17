@@ -38,3 +38,4 @@ No install? Paste one line to your agent:
 - **[SPEC.md](SPEC.md)**: The formal RFC specification. Read this if you are building extensions or agent frameworks.
 - **[RFC.md](asp/RFC.md)**: The brutal, machine-readable ruleset that agents execute.
 - **[GUIDE.md](GUIDE.md)**: The human tutorial with examples.
+- **ELI5 Guides (Grandpa Style)**: [GUIDE_RU.md](GUIDE_RU.md) | [GUIDE_EN.md](GUIDE_EN.md)
