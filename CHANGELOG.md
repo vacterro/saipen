@@ -1,5 +1,8 @@
 # Changelog
 
+## 7.1.1 -- 2026-07-17
+- doc: Formally defined the boundary of ASP regarding distributed consensus. ASP explicitly states it is a local state protocol relying on atomic filesystem commits; true multi-machine network distribution requires an external "Coordinator" built on top of ASP.
+
 ## 7.1.0 -- 2026-07-17
 - refactor: Total Bootstrap Decoupling. Stripped all remaining platform-specific instructions (`CLAUDE.md`, `GEMINI.md`, `VACSKILL:BEGIN`) from the `init.md` core phase. The core is now perfectly sterile and only initializes the `.asp/` directory.
 - chore: Replaced all legacy `VACSKILL:BEGIN` hooks with `ASP:BEGIN` inside the bootstrap scripts.

@@ -44,3 +44,8 @@ Logs in ASP are not linear strings. They form an acyclic graph of decisions usin
 
 ## Architecture Decision Records (ADR)
 Transient event logs do not house permanent knowledge. ASP mandates that structural architectural decisions are persisted as ADRs (e.g., `KNOWLEDGE/ADR-001-use-sqlite.md`).
+
+## Concurrency & Distribution Boundaries
+ASP ensures state integrity via file-based claims (`owner`, `claim_time`) and sequential graphs (`LOG.md`). However, **ASP is a state protocol, not a distributed consensus algorithm.**
+- **Local/Shared Filesystem**: Conflict resolution relies on atomic filesystem writes ("first commit wins").
+- **Networked/Distributed Environments**: If agents operate across disconnected machines without real-time file syncing, race conditions on `BOARD.md` claims will occur. In highly distributed setups, ASP MUST remain immutable, but a thin **Coordinator/Server Layer** SHOULD be built *on top* of ASP to broker atomic locks before pushing state to the agents.
