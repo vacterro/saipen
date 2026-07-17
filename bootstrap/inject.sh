@@ -4,7 +4,7 @@
 # Idempotent: re-run safe. Also migrates pre-3.0 installs named "VAC".
 
 set -u
-SKILL_HOME="$(cd "$(dirname "$0")/vacskill" 2>/dev/null && pwd)"
+SKILL_HOME="$(cd "$(dirname "$0")/../asp" 2>/dev/null && pwd)"
 [ -f "$SKILL_HOME/RFC.md" ] || { echo "FATAL: asp/RFC.md not found"; exit 1; }
 
 BLOCK="
