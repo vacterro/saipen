@@ -17,7 +17,7 @@ The protocol is strictly normative. We explicitly separate the **Core Protocol**
 
 ```text
 asp/                   <- THE CORE (distributable unit)
-  PROTOCOL.md               normative core specification (MUST/SHOULD/MAY)
+  RFC.md                    normative core specification (MUST/SHOULD/MAY)
   phases/                   strict state machine logic
     validate.md             conformance testing
     init.md / plan.md / scout.md / build.md / verify.md / review.md / ship.md
