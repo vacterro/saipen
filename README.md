@@ -28,7 +28,7 @@ Instead of writing a README instructing models "how to behave", you drop SAIPEN 
 ### Automated Continuous Evolution
 When your project has no active tasks, just type `/saipen`. The protocol automatically triggers:
 1. **HUNT**: A deep audit for bugs, failing tests, and dead code.
-2. **ADD**: If no bugs remain, SAIPEN enters ADD and searches for the next obvious missing capability that naturally completes the product. The agent MUST prefer industry-standard functionality, UX completeness, and feature symmetry over novelty. Every addition MUST pass full verification before another HUNT begins.
+2. **ADD**: If no bugs remain, SAIPEN enters ADD and searches for the next obvious missing capability that naturally completes the product. The agent MUST prefer industry-standard functionality, UX completeness, and feature symmetry over novelty. Every addition MUST pass full verification before another HUNT begins. If the software is already mature, the agent gracefully stops.
 
 It never spins its wheels. It just safely evolves your app step-by-step without you lifting a finger.
 
