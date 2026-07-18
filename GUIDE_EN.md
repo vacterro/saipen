@@ -28,14 +28,14 @@ Open your terminal or editor in your project folder, call the agent, and tell it
 It will grumble, create an `.saipen/` folder, and start writing a list of tasks (tickets). Bam, the patient is on the hook.
 
 **Step 3. Make it work**
-- You type `/saipen continue` — the agent shuts up, reads what it planned, picks the top task, and does it.
-- The next day, you open a completely blank chat, type `/saipen continue` again — it picks up the old notes from the folder and resumes exactly where it stopped.
+- You just type `saipen` — the agent shuts up, reads what it planned, picks the top task, and does it.
+- The next day, you open a completely blank chat, type `saipen` again — it picks up the old notes from the folder and resumes exactly where it stopped.
 
 And if you need it to permanently remember that you only use Tabs and not Spaces — toss a text file into `.saipen/KNOWLEDGE/`. It will read it like the Ten Commandments before every single task.
 
 **Step 4. Evolution (for lazy asses)**
-Board empty? Bored? Type `/saipen`.
-Agent won't whine 'how can I help?'. It jumps to **HUNT**, seeks bugs. No bugs? Hits **ADD** and builds a new feature by strict rules: zero hardcoding, bulletproof persistence, user controls everything. You just sit, smoke, watch the app grow muscles itself.
+Board empty? Bored? Just type `saipen` again.
+Since there's no active work, the agent won't whine 'how can I help?'. It automatically jumps to **HUNT**, seeks bugs. No bugs? Hits **ADD** and builds a new feature by strict rules: zero hardcoding, bulletproof persistence, user controls everything. You just sit, smoke, watch the app grow muscles itself.
 
 **Step 5. Spring Cleaning**
 Type `saipen clean`. The agent will roll up its sleeves, prune your old finished tickets, delete orphaned files, fix broken paths, and make sure the repo is crisp and fresh.
