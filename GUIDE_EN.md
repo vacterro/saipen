@@ -37,6 +37,9 @@ And if you need it to permanently remember that you only use Tabs and not Spaces
 Board empty? Bored? Type `/saipen`.
 Agent won't whine 'how can I help?'. It jumps to **HUNT**, seeks bugs. No bugs? Hits **ADD** and builds a new feature by strict rules: zero hardcoding, bulletproof persistence, user controls everything. You just sit, smoke, watch the app grow muscles itself.
 
+**Step 5. Spring Cleaning**
+Type `saipen clean`. The agent will roll up its sleeves, prune your old finished tickets, delete orphaned files, fix broken paths, and make sure the repo is crisp and fresh.
+
 Any questions? No? Then get back to work.
 
 

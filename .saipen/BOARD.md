@@ -4,7 +4,9 @@
 ## TODO
 ## TODO
 ## TODO
+## TODO
 ## DONE
+- [x] T-062 ADD: CLEAN phase and saipen clean trigger | files: saipen/phases/clean.md, saipen/RFC.md, GUIDE*.md | verify: saipen clean commands documented and protocol updated | needs: none
 - [x] T-061 ADD: Session State Export tool for backups | files: bootstrap/export.ps1, bootstrap/export.sh | verify: archives .saipen memory into a timestamped zip/tar file | needs: none
 - [x] T-060 ADD: Uninstaller scripts for max user control | files: bootstrap/uninstall.ps1, bootstrap/uninstall.sh | verify: cleanly strips SAIPEN from host configs without deleting the repo | needs: none
 - [x] T-059 ADD: Backup host config before injection | files: bootstrap/inject.ps1, bootstrap/inject.sh | verify: .bak files created before modification | needs: none

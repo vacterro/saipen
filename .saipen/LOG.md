@@ -118,3 +118,4 @@
 - [E-030] [parent: E-029] [T-060] RUN: implement uninstall.ps1/sh -> ADD phase complete: Uninstaller provides max user control for removal.
 - [E-031] [parent: E-030] [T-none] RUN: hunt -> clean @0932f65. Transitioning to ADD phase.
 - [E-032] [parent: E-031] [T-061] RUN: implement export.ps1/sh -> ADD phase complete: Export satisfies memory backup rule.
+- [E-033] [parent: E-032] [T-062] RUN: implement saipen clean -> ADD phase complete: CLEAN phase provides deep workspace pruning.

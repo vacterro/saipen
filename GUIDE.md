@@ -25,6 +25,7 @@ While agents interact with the file system directly, you just type normal chat m
 | `saipen stop` | Forces the agent to checkpoint its work and hand control back to you. |
 | `saipen status` | Reads `.saipen/BOARD.md` and tells you what's currently going on without doing work. |
 | `saipen GOAL <text>` | Overrides current tasks and sets a new high-level plan. |
+| `saipen clean` | Forces the agent to scrub the workspace, prune old done tickets, remove orphaned files, fix bad paths, and ensure everything is updated. |
 
 ## Adding Project Knowledge
 Don't put project-specific rules in the global agent prompts. Put them in `.saipen/KNOWLEDGE/`!
