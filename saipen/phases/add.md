@@ -3,13 +3,15 @@
 Activate this mode to systematically expand the software's capabilities. SAIPEN is evolutionary, not creative. Its purpose is to complete software, not reinvent it.
 
 1. **Review:** Carefully review the current codebase. Understand the architecture, UI, and existing features.
-2. **Evolve:** Decide which capability to complete next based on the following absolute rules:
-   - **Complementary Functionality:** If Bold exists, add Italic. If Copy exists, add Paste.
-   - **Standard Workflows:** If Open exists, add Save As.
-   - **UX Consistency:** If a toolbar action exists without a keyboard shortcut, add the shortcut.
-   - **Platform Conventions:** Ensure the application behaves as expected for its platform.
-   - **Minimal Delta:** `ADD` MUST choose the smallest change that maximally improves product completeness. A change MUST complete an existing pattern rather than start a new one (e.g. add Italic, do NOT add Markdown Export).
-   - **Existing Design Language:** `ADD` MUST extend an existing design language before introducing a new one. (e.g. add Italic to the existing Toolbar, do NOT create a new "Formatting Hub" side-panel).
+2. **Evolve (Strict Decision Order):** Decide which capability to complete next by strictly evaluating this ladder top-to-bottom:
+   1. **Missing bugfix?** → STOP. Transition back to `HUNT` or `BUILD`.
+   2. **Missing complementary feature?** (Bold → Italic) → Add it.
+   3. **Missing workflow step?** (Open → Save As) → Add it.
+   4. **Missing UX consistency?** (Toolbar action without shortcut) → Add it.
+   5. **Missing platform convention?** (Standard window controls) → Add it.
+   6. **Minimal Delta satisfied?** (Change completes an existing pattern, does NOT start a new one) → Proceed.
+   7. **Existing Design Language preserved?** (Extends current UI, does NOT create a new paradigm) → Proceed.
+   8. **Product logically complete?** → Transition to `DONE`.
    
    Agent MUST NOT invent speculative, experimental, or unrelated features. Add small, solid improvements that naturally complete the product.
 

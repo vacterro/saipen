@@ -13,7 +13,7 @@
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](GUIDE_EN.md)
 
-SAIPEN is a stable, vendor-neutral continuation protocol. Its sole purpose is to guarantee that a completely cold agent with zero chat history can execute `/saipen continue` and resume productive work within one minute, without asking the user to repeat context.
+SAIPEN is an engineering operating model for autonomous software maintenance. Its core mechanism is a stable, vendor-neutral continuation protocol that guarantees a completely cold agent with zero chat history can execute `/saipen continue` and resume productive work within one minute, without asking the user to repeat context.
 
 ```text
 User  ->  /saipen continue
