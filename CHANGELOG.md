@@ -52,14 +52,14 @@
 
 ## 5.2.0 -- 2026-07-17
 - BREAKING / REWRITE: Converted the core `PROTOCOL.md` from a conversational guide into a strict, RFC-style normative specification.
-- feat: Formalized the State Machine (`INIT Р В Р вЂ Р Р†Р вЂљР’В Р Р†Р вЂљРІвЂћСћ PLAN Р В Р вЂ Р Р†Р вЂљР’В Р Р†Р вЂљРІвЂћСћ SCOUT Р В Р вЂ Р Р†Р вЂљР’В Р Р†Р вЂљРІвЂћСћ BUILD Р В Р вЂ Р Р†Р вЂљР’В Р Р†Р вЂљРІвЂћСћ VERIFY Р В Р вЂ Р Р†Р вЂљР’В Р Р†Р вЂљРІвЂћСћ REVIEW Р В Р вЂ Р Р†Р вЂљР’В Р Р†Р вЂљРІвЂћСћ SHIP Р В Р вЂ Р Р†Р вЂљР’В Р Р†Р вЂљРІвЂћСћ DONE | BLOCKED`).
+- feat: Formalized the State Machine (`INIT РІвЂ вЂ™ PLAN РІвЂ вЂ™ SCOUT РІвЂ вЂ™ BUILD РІвЂ вЂ™ VERIFY РІвЂ вЂ™ REVIEW РІвЂ вЂ™ SHIP РІвЂ вЂ™ DONE | BLOCKED`).
 - feat: Formalized Claim/Ownership logic (`owner` and `claim_time` added to `board.schema.json`) to prevent multi-agent race conditions.
 - feat: Added Capability Negotiation handshake (agents MUST check capabilities like git/shell before engaging).
 - feat: Added formal Recovery doctrine.
 - doc: Stripped all "marketing copy" and persona out of `PROTOCOL.md` into non-normative abstracts, reinforcing that voice (`STYLE.md`) never overrides logic.
 
 ## 5.1.0 -- 2026-07-17
-- feat: unified "Р В Р’В Р СћРІР‚ВР В Р’В Р вЂ™Р’ВµР В Р’В Р СћРІР‚В Р В Р Р‹Р В РЎвЂњ Р В Р Р‹Р В РІР‚С™Р В Р’В Р вЂ™Р’В°Р В Р’В Р Р†РІР‚С›РІР‚вЂњР В Р’В Р РЋРІР‚СћР В Р’В Р В РІР‚В¦Р В Р’В Р вЂ™Р’В°" persona. Removed haiku requirement completely. The direct, witty, tough-love "grandpa" style is now the default for both chat responses and LOG entries (while maintaining strict caveman token compression and preserving facts verbatim).
+- feat: unified "Р Т‘Р ВµР Т‘ РЎРѓ РЎР‚Р В°Р в„–Р С•Р Р…Р В°" persona. Removed haiku requirement completely. The direct, witty, tough-love "grandpa" style is now the default for both chat responses and LOG entries (while maintaining strict caveman token compression and preserving facts verbatim).
 
 ## 5.0.1 -- 2026-07-17
 - fix: extract missing `verify.md`, `review.md`, `done.md`, and `blocked.md` phases that were unintentionally merged or omitted in 5.0.0, which broke lazy loading when STATE entered these phases

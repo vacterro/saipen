@@ -4,8 +4,8 @@
 
 **One command. Zero amnesia.**
 
-[![Russian Guide](https://img.shields.io/badge/СЂСџвЂњвЂ“_ELI5_Guide-Р СњР С’_Р В Р Р€Р РЋР РЋР С™Р С›Р Сљ-red?style=for-the-badge)](GUIDE_RU.md)
-[![English Guide](https://img.shields.io/badge/СЂСџвЂњвЂ“_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](GUIDE_EN.md)
+[![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](GUIDE_RU.md)
+[![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](GUIDE_EN.md)
 
 SAIPEN is a stable, vendor-neutral continuation protocol. Its sole purpose is to guarantee that a completely cold agent with zero chat history can execute `/saipen continue` and resume productive work within one minute, without asking the user to repeat context.
 

@@ -12,7 +12,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 - **KNOWLEDGE/**: Directory for durable truths. MUST NOT contain event histories. Uses ADR pattern (`ADR-001.md`).
 
 ## 3. State Machine Transitions
-`INIT в†’ PLAN в†’ SCOUT в†’ BUILD в†’ VERIFY в†’ REVIEW в†’ SHIP в†’ DONE | BLOCKED | HUNT | ADD`
+`INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED | HUNT | ADD`
 
 **Strict Transition Constraints:**
 - **VERIFY**: MUST be executed. Failure loops back to `BUILD` (max 2 loops) or `SCOUT`. Success transitions to `REVIEW`.
@@ -29,7 +29,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 ## 5. Claim / Ownership
 - Agent sets `owner: <AgentID>` and `claim_time: <ISO8601>` on BOARD.
 - Active owner: `claim_time` < 15 minutes old, or actively writing to `LOG.md`.
-- Stale claims: `claim_time` > 15 minutes + no LOG activity в†’ claim is forfeit.
+- Stale claims: `claim_time` > 15 minutes + no LOG activity → claim is forfeit.
 - Conflicting writes: First successful filesystem commit wins.
 
 ## 6. Checkpointing
@@ -51,6 +51,6 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 ## 9. Workspace Hygiene
 The protocol lives in the SAIPEN home; the project holds work, not protocol copies.
 - Protocol files (`RFC.md`, `STYLE.md`, `UI.md`, `SKILL.md`, `phases/`) MUST NOT be copied into the project. Agents read them from the SAIPEN home; the pointer block in `AGENTS.md` gives the path.
-- Project memory MUST live in `.saipen/` under canonical names only: `STATE.md`, `BOARD.md`, `LOG.md`, `KNOWLEDGE/`. Ad-hoc names (`CONTEXT.md`, `MEMORY.md`, `NOTES.md`) are non-conformant вЂ” fold their content into the canonical file (`CONTEXT` в†’ `KNOWLEDGE/`, `MEMORY` в†’ `LOG.md`) and delete the stray.
+- Project memory MUST live in `.saipen/` under canonical names only: `STATE.md`, `BOARD.md`, `LOG.md`, `KNOWLEDGE/`. Ad-hoc names (`CONTEXT.md`, `MEMORY.md`, `NOTES.md`) are non-conformant — fold their content into the canonical file (`CONTEXT` → `KNOWLEDGE/`, `MEMORY` → `LOG.md`) and delete the stray.
 - Every `.md` MUST earn its place: one purpose, no duplication, no filler. On checkpoint, agent MUST prune generated litter (`__pycache__`, editor swaps, empty scaffold files) and MUST NOT create a file it will not maintain.
 - Deliverables (client-facing outputs) live at project root and are exempt; they are work, not protocol.

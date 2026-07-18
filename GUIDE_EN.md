@@ -24,10 +24,10 @@ Open your terminal or editor in your project folder, call the agent, and tell it
 It will grumble, create an `.saipen/` folder, and start writing a list of tasks (tickets). Bam, the patient is on the hook.
 
 **Step 3. Make it work**
-- You type `/saipen continue` РІР‚вЂќ the agent shuts up, reads what it planned, picks the top task, and does it.
-- The next day, you open a completely blank chat, type `/saipen continue` again РІР‚вЂќ it picks up the old notes from the folder and resumes exactly where it stopped.
+- You type `/saipen continue` — the agent shuts up, reads what it planned, picks the top task, and does it.
+- The next day, you open a completely blank chat, type `/saipen continue` again — it picks up the old notes from the folder and resumes exactly where it stopped.
 
-And if you need it to permanently remember that you only use Tabs and not Spaces РІР‚вЂќ toss a text file into `.saipen/KNOWLEDGE/`. It will read it like the Ten Commandments before every single task.
+And if you need it to permanently remember that you only use Tabs and not Spaces — toss a text file into `.saipen/KNOWLEDGE/`. It will read it like the Ten Commandments before every single task.
 
 **Step 4. Evolution (for lazy asses)**
 Board empty? Bored? Type `/saipen`.
