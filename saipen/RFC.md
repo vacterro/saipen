@@ -63,6 +63,7 @@ When the Core state machine reaches a halt (no pending tickets), the Maintenance
 - **DEFAULT BEHAVIOR**: The bare command `saipen` is an alias for `saipen continue`. If there are pending tickets on `BOARD.md`, the agent MUST resume work. If the user runs the protocol (e.g., `saipen` or `saipen continue`) and `BOARD.md` is empty (no open tickets), the agent MUST immediately transition to the `HUNT` phase to search for bugs. If `HUNT` finds nothing (clean), the agent MUST immediately transition to `ADD` to evolve the software.
 - **HUNT**: Transition to `HUNT` MUST occur strictly when `BOARD.md` has no open `TODO` tickets without blockers, or when explicitly signaled by a failed verification loop. Agent MUST NOT hallucinate tasks during `HUNT`.
 - **CLEAN**: Transition to `CLEAN` occurs when explicitly triggered by user via `saipen clean`. Agent MUST audit and prune stale tickets, orphaned files, and broken paths before returning to `DONE`.
+- **TRANSLATE**: Transition to `TRANSLATE` occurs when explicitly triggered by user via `saipen translate`. Agent MUST operate exclusively within `.saipen/kitchen/translation/` to build, maintain, and update the 22-language core translation system + bonus voice, without modifying the main software.
 
 ### 2.2 Evolutionary ADD
 - **ADD**: Agent MUST NOT invent speculative, experimental, or unrelated features. Agent MUST evaluate additions strictly using the following logic:

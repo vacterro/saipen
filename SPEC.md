@@ -51,7 +51,7 @@ saipen/
     [Core Phases]
     init.md / plan.md / scout.md / build.md / review.md / ship.md / done.md / blocked.md
     [Maintenance Phases]
-    verify.md / hunt.md / add.md / clean.md
+    verify.md / hunt.md / add.md / clean.md / translate.md
     
     validate.md             conformance testing
 
