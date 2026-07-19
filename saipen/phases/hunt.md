@@ -2,6 +2,14 @@
 
 Clean sweep. Skip only if LOG has `hunt -> clean @HASH` matching current HEAD.
 
+**Subagents available (RFC § 1.3)?** Dispatch the 6 signal categories below
+as one batch of parallel subagent tasks instead of scanning them in turn.
+Each subagent is read-only: it investigates and returns findings, it MUST
+NOT touch `.saipen/` itself -- only the orchestrating agent writes BOARD/LOG,
+once, after merging every subagent's results. This avoids write races by
+construction. No subagent support -> run the same 6 categories sequentially,
+exactly as below. Either path, the cap and output are identical.
+
 Signal order, cap 5 tickets:
 1. Failing tests
 2. Commits unverified in LOG

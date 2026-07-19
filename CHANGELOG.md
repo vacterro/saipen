@@ -1,5 +1,8 @@
 # Changelog
 
+## 7.4.0 -- 2026-07-19
+- feat: `HUNT` fans its 6 independent signal categories out to parallel subagents when the platform supports spawning them (RFC.md §1.3, new optional `subagents` capability -- never required, never gates a phase). Subagents are read-only investigators; only the orchestrating agent writes BOARD/LOG, once, after merging results, avoiding write races by construction. No subagent support falls back silently to the existing sequential sweep -- identical cap, identical output, just slower.
+
 ## 7.3.3 -- 2026-07-19
 - fix (root cause, found via a second WildRiftAssistant trace on the SAME bug after 7.3.2): `phases/done.md` item 3's HUNT-trigger condition was "the user simply typed `/saipen`" -- literally false when an agent arrives at DONE autonomously mid-`goal_mode` run, since the user typed nothing. A model reading `done.md` correctly would NOT transition to HUNT under that wording, no matter how clearly RFC.md §2.4 said to elsewhere. `done.md` now checks `goal_mode` FIRST, before any other branch, and forbids writing `next_action: wait for user command` while it's true.
 - fix: `phases/review.md` had no "STATE -> DONE" branch at all, yet the observed trace jumped straight to DONE past the mandatory SHIP step. Added an explicit line: SHIP is mandatory before DONE, no exceptions, even under `goal_mode`.

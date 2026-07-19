@@ -23,6 +23,11 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
    - Missing Git: `mode: no-publish`. Agent MUST NOT transition to `SHIP`.
    - Missing Shell: `mode: manual-verify`.
    - Missing Filesystem Write: `mode: read-only`.
+4. **Optional acceleration**: `subagents` (parallel task/agent spawning) is
+   never required and never gates a phase or sets `mode`. Where available,
+   `HUNT` (`phases/hunt.md`) MAY fan its independent signal categories out
+   in parallel. Absence MUST fall back silently to sequential execution --
+   same result, just slower.
 
 ### 1.4 Claim & Ownership
 - Agent sets `owner: <AgentID>` and `claim_time: <ISO8601>` on BOARD.
