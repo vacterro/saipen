@@ -5,6 +5,10 @@ Deep repository scrub. Execute strictly in order.
 1. **Board Scrub:** 
    - Remove `[x]` DONE tasks from `BOARD.md` that are older than the current active work.
    - Prune stale or abandoned `TODO` tickets.
+   - Re-check every `## BLOCKED` ticket: blocker resolved elsewhere since it
+     landed there? Move it back to `## TODO`. Still stuck and genuinely
+     abandoned? Prune it the same as a stale `TODO`. `## BLOCKED` is not a
+     graveyard -- CLEAN is the phase that keeps it honest.
 
 2. **Orphan Hunt:**
    - Identify and delete clearly unconnected files (orphaned assets, unused scripts).

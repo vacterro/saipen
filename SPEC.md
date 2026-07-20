@@ -49,18 +49,18 @@ saipen/
   RFC.md                    normative specification (divided into Core and Maintenance)
   phases/                   strict state machine logic
     [Core Phases]
-    init.md / plan.md / scout.md / build.md / review.md / ship.md / done.md / blocked.md
+    init.md / plan.md / scout.md / build.md / verify.md / review.md / ship.md / done.md / blocked.md
     [Maintenance Phases]
-    verify.md / hunt.md / add.md / clean.md / translate.md
+    hunt.md / add.md / clean.md / translate.md
     
     validate.md             conformance testing
 
 extensions/                 <- THE ADAPTIVE LAYER
   adapters/                 per-model instruction bridges
-  schemas/                  canonical file schemas
+  schemas/                  reference file schemas (not machine-enforced, see schemas/README.md)
   templates/                fresh .saipen/ boilerplate
-  security/                 security scanning hooks
-  performance/              performance benchmark hooks
+  security/                 security scanning hooks (RFC § 1.9, attaches to VERIFY)
+  performance/              performance benchmark hooks (RFC § 1.9, attaches to REVIEW)
 
 tests/                      <- CONFORMANCE LAYER
   validate.ps1 / .sh        protocol self-check validator

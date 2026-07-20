@@ -211,3 +211,16 @@
 - 20.07.26 08:22 [E-154] [parent: E-153] [T-none] RUN: non-ascii sweep всех тронутых файлов -> только § (c2 a7) и правильные em-dash/arrow, mojibake ноль
 - 20.07.26 08:25 [E-155] [parent: E-154] [T-none] RUN: bash + powershell validate -> оба PASS после каждой правки
 - 20.07.26 08:28 [E-156] [parent: E-155] [T-none] RUN: ship v7.6.0 -> Extension Discovery (§1.9) + BOARD BLOCKED mechanism + CONFORMANCE/schemas sync, pushed
+- 20.07.26 08:35 [E-157] [parent: E-156] [T-none] H: user 'го дальше' -> прочитал scout/plan/build/ship/done/validate.md свежим глазом
+- 20.07.26 08:38 [E-158] [parent: E-157] [T-none] H: done.md строка 3 'saipen fix SYMPTOM' -> grep по всему репо, команды нигде больше нет, ни в GUIDE, ни в RFC -- призрак
+- 20.07.26 08:40 [E-159] [parent: E-158] [T-none] RUN: done.md -> bare 'saipen SYMPTOM' вместо фантомной fix-команды PASS
+- 20.07.26 08:43 [E-160] [parent: E-159] [T-none] H: validate.md свои 3 вектора описывает не так как CONFORMANCE.md (который сам только что чинил) -- 'schema' снова расплывчато, KNOWLEDGE/ вообще не упомянут ни там ни там, а скрипты его реально чекают
+- 20.07.26 08:46 [E-161] [parent: E-160] [T-none] RUN: CONFORMANCE.md + validate.md синхронизированы, KNOWLEDGE/ добавлен в vector 1 PASS
+- 20.07.26 08:50 [E-162] [parent: E-161] [T-none] H: hunt/add/translate.md перечитаны -- чисто; clean.md Board Scrub ни словом не знает про свежий ## BLOCKED, который я сам сегодня добавил -- сам себе яму выкопал
+- 20.07.26 08:52 [E-163] [parent: E-162] [T-none] RUN: clean.md -> ## BLOCKED ре-чек добавлен (резолвнуто -> в TODO, брошено -> prune) PASS
+- 20.07.26 08:55 [E-164] [parent: E-163] [T-none] H: SKILL.md чисто; README.md бейдж v7.4.2 при реальной v7.6.0 -- протухал молча несколько шипов подряд
+- 20.07.26 08:58 [E-165] [parent: E-164] [T-none] H: SPEC.md дерево кладёт verify.md в Maintenance Phases -- неверно, VERIFY в самом ядре Ticket DAG (§1.6 BUILD->VERIFY->REVIEW), к HUNT/ADD/CLEAN отношения не имеет
+- 20.07.26 09:00 [E-166] [parent: E-165] [T-none] RUN: SPEC.md verify.md -> Core Phases, schemas/ 'canonical' -> 'reference, not enforced' (не противоречит CONFORMANCE фиксу), README бейдж -> v7.6.0 PASS
+- 20.07.26 09:03 [E-167] [parent: E-166] [T-none] RUN: repo-wide grep стухших v7.x бейджей и 'canonical schema' -> чисто, только свежий фикс остался
+- 20.07.26 09:06 [E-168] [parent: E-167] [T-none] RUN: bash + powershell validate -> оба PASS
+- 20.07.26 09:10 [E-169] [parent: E-168] [T-none] RUN: ship v7.6.1 -> phantom command fix + doc drift sweep (validate.md/clean.md/SPEC.md/README.md), pushed
