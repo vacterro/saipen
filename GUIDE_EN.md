@@ -13,7 +13,7 @@ The agent wakes up, opens this notebook (`STATE.md` and `BOARD.md`), sees exactl
 ## How to fire it up (for the specially gifted)
 
 **Step 1. Beat the rules into the agent's skull (Once per machine)**
-You have agents living on your machine (Claude, Gemini, Cursor, whatever). Download SAIPEN and run the script. It writes a global rule into their brains telling them to always read the notebook.
+You have agents living on your machine (Claude, Gemini, Aider, whatever). Download SAIPEN and run the script. It writes a global rule into their brains telling them to always read the notebook.
 ```bash
 git clone https://github.com/vacterro/saipen
 cd saipen

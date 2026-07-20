@@ -1,7 +1,7 @@
 ---
 phase: DONE
 task: none
-next_action: "v7.19.0 shipped -- inject.sh gained Antigravity plugin support (inject.ps1 has had it since v1.2.0, bash users never did), both uninstall.ps1 and uninstall.sh now reverse it too (neither did before), export.ps1/.sh no longer claim success unconditionally (real error handling, tested against genuine induced failures on both platforms), build.md/hunt.md's undefined 'flag' language reworded to plain triggers, SPEC.md's architecture tree completed, extensions/adapters/ (real, accurate, previously unreachable content) now pointed to from README. No open tickets. Board is empty -- bare `saipen` auto-transitions to HUNT per RFC § 2.1."
+next_action: "v7.19.1 shipped -- GUIDE_EN.md/GUIDE_RU.md wrongly named Cursor as a configured agent (it isn't a real injector target), swapped to Aider; .saipen/KNOWLEDGE/decisions.md gained the goal_exit rejection as a durable entry (was only findable in CHANGELOG/LOG history before). Audit findings are now genuinely thin -- 6 rounds deep this session, this round found only 2 real items across 5 checked areas. No open tickets. Board is empty -- bare `saipen` auto-transitions to HUNT per RFC § 2.1. Next natural milestone per earlier session context: the extended live test, not another audit pass."
 blocker: none
 saipen_version: 7
 schema_version: 1
@@ -11,5 +11,5 @@ requires:
   - git
 mode: full
 goal_mode: false
-updated: 2026-07-20T22:00:00Z
+updated: 2026-07-20T22:18:00Z
 ---

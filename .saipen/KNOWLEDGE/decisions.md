@@ -24,3 +24,11 @@
   tokens) every cold start even when 80% was irrelevant. Now BUILD session
   never parses SHIP rules. Inspired by caveman skill's single-sentence
   calibration: lead with state machine, not positioning text.
+- `goal_exit: objective | mature` REJECTED, asked three separate times
+  (initial decision, re-raised in T-003/v7.13.0, second confirmation in
+  v7.13.1): `goal_mode` never exits on a momentarily empty `BOARD.md` --
+  that's a waypoint, not a stopping point (RFC § 2.4). Grounded in a real
+  stall trace where early-exit-on-empty caused a premature stop. Do not
+  re-propose without new evidence (a real trace showing current behavior
+  actually causing a problem) -- the bar the original fix cleared. Full
+  history: CHANGELOG.md 7.10.0/7.11.2/7.13.0/7.13.1.
