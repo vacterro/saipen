@@ -256,3 +256,16 @@
 - 20.07.26 11:08 [E-199] [parent: E-198] [T-none] RUN: остальные числа (VERIFY 3/2, safety valve 3 waves/20 tickets, 15 минут claim) сверены -> все совпадают, это была единственная дыра
 - 20.07.26 11:10 [E-200] [parent: E-199] [T-none] RUN: review.md -> явный 2-pass кап, идентификация finding по file:line, verdict MUST -> NO после 2-го провала PASS
 - 20.07.26 11:12 [E-201] [parent: E-200] [T-none] RUN: bash + powershell validate -> оба PASS; ship v7.7.2 -> REVIEW 2-pass cap закрыт, pushed
+- 20.07.26 11:20 [E-202] [parent: E-201] [T-none] H: user 'го дальше' -> вернулся к 3 живым проектам (FastPrompter, Wintage, WildRift) вместо очередного grep по RFC
+- 20.07.26 11:25 [E-203] [parent: E-202] [T-none] H: FastPrompter BOARD.md -- все 6 тикетов продублированы дословно; LOG формат [E-###] ДО даты, ISO дата, em-dash, таксономия 'INIT' -- не RUN/DEC/H
+- 20.07.26 11:30 [E-204] [parent: E-203] [T-none] H: Wintage BOARD.md вообще не heading-секции -- markdown-таблица, третья своя схема; LOG [T-###] ДО [parent:], таксономия = имена фаз (SCOUT/BUILD/SHIP/VERIFY) -- ровно та ошибка, что RFC явно запрещает по имени
+- 20.07.26 11:35 [E-205] [parent: E-204] [T-none] H: WildRift BOARD.md -- ДВЕ секции ## DONE, ДВЕ ## BLOCKED, T-029..T-032 одновременно [x] done И [ ] blocked -- самопротиворечие, kurat
+- 20.07.26 11:38 [E-206] [parent: E-205] [T-none] H: WildRift придумал свой ## BLOCKED ДО того как я его сегодня же зашипал (таймстампы раньше) -- независимое совпадение, подтверждает что дыра была реальной
+- 20.07.26 11:40 [E-207] [parent: E-206] [T-none] H: но! WildRift LOG с E-028 сегодня корректно RUN/DEC/H вместо старых [HUNT]/[FIX]/[GOAL] -- вчерашний фикс §1.2 реально работает, не только на бумаге, agent сам подхватил
+- 20.07.26 11:42 [E-208] [parent: E-207] [T-none] DEC: BOARD.md страдает той же болезнью что LOG.md страдал до v7.5.0 -- секции названы, но точного скелета строки тикета нигде нет; validate.ps1 уже неявно ждёт `- [ ] T-### needs:`, просто RFC никогда явно не требовал
+- 20.07.26 11:45 [E-209] [parent: E-208] [T-none] RUN: RFC § 1.2 -> точный скелет строки тикета + explicit 'move не copy' правило PASS
+- 20.07.26 11:48 [E-210] [parent: E-209] [T-none] RUN: clean.md Board Scrub -> structural repair шаг на дубликаты тикетов/секций, сверка с LOG.md за правдой PASS
+- 20.07.26 11:52 [E-211] [parent: E-210] [T-none] DEC: validate.sh/ps1 молчали на ровно ту порчу что нашёл у WildRift -- добавляю detect дубликатов в оба
+- 20.07.26 11:58 [E-212] [parent: E-211] [T-none] RUN: собрал специально битый BOARD.md (копия WildRift паттерна) -> оба валидатора честно упали FAIL PASS
+- 20.07.26 12:00 [E-213] [parent: E-212] [T-none] RUN: оба валидатора против собственного чистого BOARD.md -> PASS без ложных срабатываний
+- 20.07.26 12:05 [E-214] [parent: E-213] [T-none] RUN: ship v7.8.0 -> BOARD.md ticket-line skeleton, clean.md structural repair, validators catch duplicate tickets, pushed

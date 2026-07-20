@@ -9,6 +9,14 @@ Deep repository scrub. Execute strictly in order.
      landed there? Move it back to `## TODO`. Still stuck and genuinely
      abandoned? Prune it the same as a stale `TODO`. `## BLOCKED` is not a
      graveyard -- CLEAN is the phase that keeps it honest.
+   - **Structural repair (RFC § 1.2)**: any ticket ID appearing more than
+     once -- duplicated verbatim within one section, or listed under two
+     different headings at once (e.g. both `[x]` under `## DONE` and `[ ]`
+     under `## BLOCKED`) -- is corruption from a status change that copied
+     instead of moved. Cross-check `LOG.md` for that ticket's true final
+     state and keep exactly one line, under the one correct heading;
+     delete the rest. Also merge duplicate section headings (e.g. two
+     `## DONE` blocks) into one.
 
 2. **Orphan Hunt:**
    - Identify and delete clearly unconnected files (orphaned assets, unused scripts).

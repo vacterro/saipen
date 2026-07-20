@@ -65,6 +65,20 @@ foreach ($node in $deps.Keys) {
 Assert-Format (-not $hasCycle) "BOARD.md contains cyclic dependencies"
 Write-Host "PASS: BOARD.md acyclic" -ForegroundColor Green
 
+# 2b. Check BOARD.md for duplicate ticket IDs -- a status change that
+# copied a ticket line instead of moving it (RFC § 1.2) leaves the same
+# T-### appearing twice, either within one section or across two.
+$idCounts = @{}
+foreach ($line in $boardLines) {
+    if ($line -match "- \[( |x|/)\] (T-\d+)") {
+        $id = $matches[2]
+        if ($idCounts.ContainsKey($id)) { $idCounts[$id]++ } else { $idCounts[$id] = 1 }
+    }
+}
+$dupeIds = @($idCounts.GetEnumerator() | Where-Object { $_.Value -gt 1 } | ForEach-Object { $_.Key })
+Assert-Format ($dupeIds.Count -eq 0) "BOARD.md has duplicate ticket ID(s): $($dupeIds -join ', ') -- a status change must move the line (cut+paste), never copy it"
+Write-Host "PASS: BOARD.md no duplicate tickets" -ForegroundColor Green
+
 # 3. Check LOG.md -- date prefix is optional (pre-STYLE.md history has none,
 # current entries carry one), everything else is mandatory.
 $logLines = Get-Content ".saipen\LOG.md"

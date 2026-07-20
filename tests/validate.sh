@@ -30,6 +30,16 @@ if [ ! -f ".saipen/BOARD.md" ]; then
 fi
 echo -e "${GREEN}PASS: BOARD.md exists (acyclic check requires powershell/python wrapper currently)${NC}"
 
+# 2b. Check BOARD.md for duplicate ticket IDs -- a status change that
+# copied a ticket line instead of moving it (RFC § 1.2) leaves the same
+# T-### appearing twice, either within one section or across two.
+DUPE_IDS=$(grep -oE '\- \[[ x/]\] T-[0-9]+' .saipen/BOARD.md | grep -oE 'T-[0-9]+' | sort | uniq -d || true)
+if [ -n "$DUPE_IDS" ]; then
+    echo -e "${RED}FAIL: BOARD.md has duplicate ticket ID(s): $(echo "$DUPE_IDS" | tr '\n' ' ') -- a status change must move the line (cut+paste), never copy it${NC}"
+    exit 1
+fi
+echo -e "${GREEN}PASS: BOARD.md no duplicate tickets${NC}"
+
 # 3. Check LOG.md -- every non-empty, non-comment line MUST match (date
 # prefix is optional to allow pre-STYLE.md history; new entries carry one).
 if [ -f ".saipen/LOG.md" ]; then
