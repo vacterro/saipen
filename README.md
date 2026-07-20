@@ -6,7 +6,7 @@
 
 # SAIPEN
 
-**v7.18.1** | [Spec](SPEC.md) | [Guide](GUIDE.md) | plain markdown | zero deps | MIT
+**v7.19.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | plain markdown | zero deps | MIT
 
 **One command. Zero amnesia.**
 
@@ -54,6 +54,9 @@ bash bootstrap/inject.sh                                            # macOS / Li
 
 No install? Paste one line to any agent:
 > Read <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
+
+Platform not in the list above (DeepSeek, Qwen, standalone OpenAI, etc.)?
+Per-platform notes live in `extensions/adapters/`.
 
 ## Docs
 - **[SPEC.md](SPEC.md)** -- formal architecture, for framework builders.

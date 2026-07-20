@@ -65,6 +65,19 @@ if [ -d "$HOME/.agents/skills" ]; then # copy, lowercase: these readers skip lin
   printf '%-28s %s\n' "~/.agents skills" "$(copy_skill "$HOME/.agents/skills/saipen")"
 else printf '%-28s %s\n' "~/.agents" "not installed - skip"; fi
 
+# --- Antigravity plugins (copy: IDE locks dirs, junction impossible while open) ---
+PLUG_ROOT="$HOME/.gemini/config/plugins"
+if [ -d "$PLUG_ROOT" ]; then
+  for plugin_dir in "$PLUG_ROOT"/*/; do
+    [ -d "$plugin_dir" ] || continue
+    plugin_name="$(basename "$plugin_dir")"
+    skills_dir="${plugin_dir}skills"
+    if [ -d "$skills_dir" ]; then
+      printf '%-28s %s\n' "Antigravity [$plugin_name]" "$(copy_skill "$skills_dir/saipen")"
+    fi
+  done
+fi
+
 if command -v aider >/dev/null 2>&1; then
   A="$HOME/.aider.conf.yml"
   P="$SKILL_HOME/RFC.md"

@@ -47,6 +47,10 @@ downstream feature existing.
 ```text
 saipen/
   RFC.md                    normative specification (divided into Core and Maintenance)
+  CONFORMANCE.md             self-check vectors + scenario coverage table
+  SKILL.md                  thin entry point for skill-reading platforms
+  STYLE.md                  voices: chat, LOG.md, artifacts
+  UI.md                     Dark Golden Win95 UI spec (mandatory for UI work)
   phases/                   strict state machine logic
     [Core Phases]
     init.md / plan.md / scout.md / build.md / verify.md / review.md / ship.md / done.md / blocked.md
@@ -56,11 +60,17 @@ saipen/
     validate.md             conformance testing
 
 extensions/                 <- THE ADAPTIVE LAYER
-  adapters/                 per-model instruction bridges
+  adapters/                 per-model instruction bridges, for platforms the
+                             injector doesn't auto-detect (README.md points here)
   schemas/                  reference file schemas (not machine-enforced, see schemas/README.md)
   templates/                fresh .saipen/ boilerplate
   security/                 EXAMPLE hook to copy into a project (RFC § 1.9, attaches to VERIFY)
   performance/              EXAMPLE hook to copy into a project (RFC § 1.9, attaches to REVIEW)
+
+bootstrap/                  <- INSTALL/EXPORT/UNINSTALL, one machine at a time
+  inject.ps1 / .sh          installs the SAIPEN block + skill copies (README Quick Start)
+  uninstall.ps1 / .sh       reverses inject -- removes blocks + skill copies
+  export.ps1 / .sh          archives a project's .saipen/ for backup
 
 tests/                      <- CONFORMANCE LAYER
   validate.ps1 / .sh        protocol self-check validator

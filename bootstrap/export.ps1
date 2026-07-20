@@ -15,6 +15,15 @@ $zipPath = Join-Path -Path $projectRoot -ChildPath $zipName
 Write-Host "saipen state exporter"
 Write-Host "------------------------------------------------------------"
 Write-Host "Archiving: $saipenDir"
-Compress-Archive -Path $saipenDir -DestinationPath $zipPath -Force
+try {
+    Compress-Archive -Path $saipenDir -DestinationPath $zipPath -Force -ErrorAction Stop
+} catch {
+    Write-Host "FAILED: $_" -ForegroundColor Red
+    exit 1
+}
+if (-not (Test-Path $zipPath)) {
+    Write-Host "FAILED: archive not found at $zipPath after Compress-Archive reported success" -ForegroundColor Red
+    exit 1
+}
 Write-Host "Done. Export saved to: $zipPath"
 Write-Host "------------------------------------------------------------"

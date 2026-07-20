@@ -28,7 +28,7 @@ format, not a free-text summary), then immediately transition to `ADD`.
 This transition is unconditional -- a clean hunt is never itself a reason
 to stop, under `goal_mode` or otherwise (RFC § 2.4). Never invent busywork.
 
-## Perf (perf flag)
+## Perf (user asks specifically, or a ticket calls for it)
 
 Baseline number first (profiler/timer/EXPLAIN -> LOG).
 Fix top proven bottleneck -> re-measure same way.

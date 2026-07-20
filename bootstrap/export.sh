@@ -16,6 +16,13 @@ TAR_NAME="saipen_export_${TIMESTAMP}.tar.gz"
 echo "saipen state exporter"
 echo "------------------------------------------------------------"
 echo "Archiving: $SAIPEN_DIR"
-tar -czf "$TAR_NAME" -C "$PROJECT_ROOT" .saipen
+if ! tar -czf "$TAR_NAME" -C "$PROJECT_ROOT" .saipen; then
+    echo "FAILED: tar exited non-zero"
+    exit 1
+fi
+if [ ! -s "$TAR_NAME" ]; then
+    echo "FAILED: archive missing or empty at $PROJECT_ROOT/$TAR_NAME after tar reported success"
+    exit 1
+fi
 echo "Done. Export saved to: $PROJECT_ROOT/$TAR_NAME"
 echo "------------------------------------------------------------"

@@ -49,6 +49,13 @@ Write-Host "------------------------------------------------------------"
 "{0,-28} {1}" -f "Codex AGENTS.md", (Remove-Block "$h\.codex\AGENTS.md")
 "{0,-28} {1}" -f "Gemini GEMINI.md", (Remove-Block "$h\.gemini\GEMINI.md")
 "{0,-28} {1}" -f "~/.agents skills", (Remove-Skill "$h\.agents\skills\saipen")
+$plugRoot = "$h\.gemini\config\plugins"
+if (Test-Path $plugRoot) {
+  Get-ChildItem $plugRoot -Directory | ForEach-Object {
+    $skillsPath = Join-Path $_.FullName "skills\saipen"
+    "{0,-28} {1}" -f "Antigravity [$($_.Name)]", (Remove-Skill $skillsPath)
+  }
+}
 "{0,-28} {1}" -f "Aider conf", (Remove-Aider "$h\.aider.conf.yml")
 Write-Host "------------------------------------------------------------"
 Write-Host "Done. SAIPEN global hooks removed."

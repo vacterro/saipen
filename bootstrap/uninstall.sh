@@ -51,6 +51,14 @@ printf '%-28s %s\n' "Codex skill"           "$(rm_skill "$HOME/.codex/skills/sai
 printf '%-28s %s\n' "Codex AGENTS.md"       "$(strip_block "$HOME/.codex/AGENTS.md")"
 printf '%-28s %s\n' "Gemini GEMINI.md"        "$(strip_block "$HOME/.gemini/GEMINI.md")"
 printf '%-28s %s\n' "~/.agents skills" "$(rm_skill "$HOME/.agents/skills/saipen")"
+PLUG_ROOT="$HOME/.gemini/config/plugins"
+if [ -d "$PLUG_ROOT" ]; then
+  for plugin_dir in "$PLUG_ROOT"/*/; do
+    [ -d "$plugin_dir" ] || continue
+    plugin_name="$(basename "$plugin_dir")"
+    printf '%-28s %s\n' "Antigravity [$plugin_name]" "$(rm_skill "${plugin_dir}skills/saipen")"
+  done
+fi
 printf '%-28s %s\n' "Aider conf" "$(rm_aider "$HOME/.aider.conf.yml")"
 echo "------------------------------------------------------------"
 echo "Done. SAIPEN global hooks removed."
