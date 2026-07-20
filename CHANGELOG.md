@@ -1,5 +1,8 @@
 # Changelog
 
+## 7.13.1 -- 2026-07-20 -- goal_exit closed, second confirmation
+- fix (housekeeping, no behavior change): asked the operator directly a second time whether `goal_mode` should gain a `goal_exit: objective` option that stops once the user's literal ask is done -- same question as after T-000/T-001, now specifically re-raised inside T-003. Answer both times: keep current behavior. `.saipen/kitchen/SAIPEN_GAP_MATRIX.md` now marks this CLOSED/REJECTED rather than open -- don't re-propose without new evidence (a real trace showing current behavior actually causing a problem, the bar the original fix cleared). This repo's own `STATE.md next_action` updated accordingly -- the `WAIT:` is now about which `SAIPEN_SPEC_DIRECTIVE.md` ticket comes next, not this settled question.
+
 ## 7.13.0 -- 2026-07-20 -- T-003 partial (STATE hardening, goal_exit split out)
 - feat: `next_action` now formally supports `WAIT: <specific question>` as a legal executable form -- scoped explicitly to manual-verify gates, destructive-op confirmation, first-publish confirmation, or the user's own explicit brake. Never a stand-in for "figure out project context", which the agent already gets from STATE/BOARD/LOG. `CONFORMANCE.md` TEST-001 clarified so this doesn't read as contradicting "never ask 'what should I do?'" -- asking one exact, pre-determined question instantly is the executable action; the failure mode is vague context-seeking, not a specific authorization gate.
 - feat: `blocker` MUST be non-empty when `phase: BLOCKED` -- a blocked state with no stated reason was never actually forbidden before this.

@@ -354,3 +354,5 @@
 - 20.07.26 17:38 [E-297] [parent: E-296] [T-none] RUN: проверил свой же .saipen/STATE.md updated: -- уже Z-suffix, уже конформно PASS
 - 20.07.26 17:40 [E-298] [parent: E-297] [T-none] RUN: GAP_MATRIX -> T-003 PARTIAL, goal_anchor/schema: отклонены повторно без нового аргумента, goal_exit явно вынесен наружу
 - 20.07.26 17:42 [E-299] [parent: E-298] [T-none] RUN: bash + powershell validate -> оба PASS; ship v7.13.0 -> T-003 частично (WAIT:/blocker/UTC/migration), goal_exit не тронут, pushed
+- 20.07.26 17:45 [E-300] [parent: E-299] [T-none] DEC: спросил goal_exit ВТОРОЙ раз явно через AskUserQuestion -- юзер снова 'Keep current behavior (Recommended)'
+- 20.07.26 17:48 [E-301] [parent: E-300] [T-none] DEC: решение теперь закрыто дважды подтверждённое -- GAP_MATRIX помечен CLOSED/REJECTED, не reopen без новых доказательств; STATE.md next_action обновлён, WAIT: теперь про следующий тикет, не про goal_exit

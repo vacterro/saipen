@@ -5,7 +5,18 @@ findings. Every CLOSED row has a grep/validator command and its actual output
 as evidence, not a claim. This is scratch/audit output (kitchen/), not a
 normative file -- do not cite it as spec.
 
-## T-003 status: PARTIAL, not DONE
+## goal_exit / goal_mode board-empty behavior -- CLOSED, REJECTED, do not reopen
+
+Asked the operator directly twice now (once after T-000/T-001, once again
+after T-003 specifically) whether `goal_exit: objective | mature` should be
+added, reversing `goal_mode`'s current board-empty-never-exits behavior.
+Both times: keep current behavior. This is now a settled decision, not an
+open question -- `SAIPEN_SPEC_DIRECTIVE.md` T-003's `goal_exit`/`goal_anchor`
+fields and T-007 in full are REJECTED. Do not re-propose without new
+evidence (a real trace showing the current behavior actually causing a
+problem, the same bar the original board-empty-never-exits fix cleared).
+
+## T-003 status: DONE (goal_exit/goal_anchor rejected, not pending)
 
 Implemented: `WAIT: <question>` as a formalized legal `next_action` form
 (RFC § 1.2, scoped to manual-verify/destructive-op/first-publish/user-brake
@@ -24,12 +35,8 @@ actually uses. `goal_anchor: T-### | none` -- still not needed; RFC § 2.4's
 Final Report line already requires distinguishing "user's ask" from
 "picked up along the way" without a persisted field.
 
-NOT implemented, blocking, needs an explicit answer: `goal_exit: objective |
-mature` defaulting to `objective`. This is the same conflict flagged after
-T-000/T-001 -- it would reverse the explicit decision made earlier this
-session via a direct question to the operator (kept `goal_mode` never
-exiting on board-empty, grounded in a real WildRiftAssistant stall trace).
-Asked again, directly, this time -- see chat.
+`goal_exit: objective | mature` -- REJECTED, resolved, see the closed-item
+note above. Not implemented, and not pending either.
 
 ## T-001 addendum: new items found while building the transition table
 
