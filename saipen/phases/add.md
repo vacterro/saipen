@@ -19,20 +19,46 @@ Activate this mode to systematically expand the software's capabilities. SAIPEN 
        IF satisfies(minimal_delta) AND satisfies(existing_design_language):
          IMPLEMENT(priority)
          RETURN VERIFY
+       ELSE:
+         TICKET(priority)
+         RETURN PLAN_or_SCOUT
    
    RETURN DONE
    ```
 
+   Two implementation paths come out of this -- never a third:
+   1. **Direct minimal implementation**: satisfies both `minimal_delta`
+      and `existing_design_language` -> implement now, `RETURN VERIFY`.
+   2. **Planned implementation**: a real gap exists but isn't obviously
+      minimal or isn't obviously in the existing design language ->
+      ticket it, `RETURN PLAN` or `SCOUT` (step 3 below), never implement
+      it directly just because a priority slot matched. Without this
+      `ELSE`, a genuine but non-minimal opportunity silently fell through
+      to `RETURN DONE` -- declaring the product mature when it wasn't.
+
+   `bugfix -> RETURN HUNT` means ADD does not improvise the fix itself --
+   HUNT surfaces and tickets the bug through its own normal signal
+   process (`phases/hunt.md`), ADD never reaches into BUILD/VERIFY to
+   patch it inline.
+
 3. **Act:**
    - Pick exactly ONE obvious missing capability.
-   - If the product is already mature and logically complete, **STOP**. Transition to `DONE` without hallucinating unnecessary features. Graceful completion is a successful outcome.
-   - Otherwise, create a `TODO` ticket in `BOARD.md` describing the feature.
-   - Transition to `PLAN` or `SCOUT` phase to begin immediate implementation.
-   - `goal_mode: true`? Either branch above completes this HUNT->ADD cycle --
-     increment `goal_waves` by 1 and checkpoint STATE (RFC § 2.4). Hits the
-     3-`goal_waves`/20-`goal_tickets` cap? STOP here instead of continuing --
-     full BOARD/STATE checkpoint, report progress, wait for the user to
-     re-invoke `saipen goal`.
+   - If the product is already mature and logically complete, **STOP**.
+     Transition to `DONE` without hallucinating unnecessary features --
+     graceful completion is a successful outcome. `goal_mode: true`? This
+     IS the mature-exit condition RFC § 2.4 defines: set `goal_mode:
+     false`, clear `goal_waves`/`goal_tickets`, write the final report
+     (tickets done/verified/shipped vs blocked, pre-existing backlog vs
+     found along the way), then STATE -> `DONE`.
+   - Otherwise, create a `TODO` ticket in `BOARD.md` describing the
+     feature. Transition to `PLAN` or `SCOUT` phase to begin immediate
+     implementation.
+   - `goal_mode: true` and this wasn't the mature-exit case above? Either
+     branch still completes this HUNT->ADD cycle -- increment
+     `goal_waves` by 1 and checkpoint STATE (RFC § 2.4). Hits the
+     3-`goal_waves`/20-`goal_tickets` cap? STOP here instead of
+     continuing -- full BOARD/STATE checkpoint, report progress, wait for
+     the user to re-invoke `saipen goal`.
 
 4. **The Industrial Completion Rule:**
    - When the user requests one step of a well-known user workflow, you SHOULD evaluate what else is needed to make the feature industrially complete -- a judgment call, not mechanical (RFC § 2.3).
