@@ -8,15 +8,24 @@ unopted project. Needs 100% green.
 
 1. README beautiful: pitch, features, install, usage, version + changelog link.
 2. Version bump (micro -> 3.2.1, feature -> 3.2.0, breaking -> major).
-3. .gitignore covers junk + secrets. Empty tmp/, strip debug prints.
-4. CHANGELOG.md newest-top. Push.
-5. `git tag -a vVERSION -m "line"` + push tags.
-6. First publish (no `origin` yet): confirm name + public/private with user
+3. Before push, version consistency across all three MUST hold:
+   - README's version badge matches the bumped version.
+   - `CHANGELOG.md`'s head entry matches the bumped version.
+   - The git tag about to be created matches the bumped version.
+   If this repo has a `VERSION` file, the README half of this is already
+   automated (`tests/validate.sh`/`.ps1`'s self-check, gated to this
+   repo's own clone root); manual equivalent: `grep -q "v$(cat VERSION)"
+   README.md`. The CHANGELOG/tag halves have no automated check -- eyeball
+   them here, before tagging, not after.
+4. .gitignore covers junk + secrets. Empty tmp/, strip debug prints.
+5. CHANGELOG.md newest-top. Push.
+6. `git tag -a vVERSION -m "line"` + push tags.
+7. First publish (no `origin` yet): confirm name + public/private with user
    -- ALWAYS, even under `goal_mode`. New public artifact is a one-way door.
    `next_action: WAIT: confirm repo name '<name>' and public/private before
    I push` (RFC § 1.2).
-7. LOG: `RUN: ship vX.Y.Z -> pushed HASH`.
-8. Push rejected or fails (auth, network, non-fast-forward, hook failure):
+8. LOG: `RUN: ship vX.Y.Z -> pushed HASH`.
+9. Push rejected or fails (auth, network, non-fast-forward, hook failure):
    LOG `RUN: ship vX.Y.Z -> push FAILED <reason>` -- never claim success on
    a failed push. Commit/tag stay local. Transient (network/auth)? Retry
    once. Still failing, or non-transient (diverged history, rejected)?
