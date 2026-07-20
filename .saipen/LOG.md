@@ -356,3 +356,10 @@
 - 20.07.26 17:42 [E-299] [parent: E-298] [T-none] RUN: bash + powershell validate -> оба PASS; ship v7.13.0 -> T-003 частично (WAIT:/blocker/UTC/migration), goal_exit не тронут, pushed
 - 20.07.26 17:45 [E-300] [parent: E-299] [T-none] DEC: спросил goal_exit ВТОРОЙ раз явно через AskUserQuestion -- юзер снова 'Keep current behavior (Recommended)'
 - 20.07.26 17:48 [E-301] [parent: E-300] [T-none] DEC: решение теперь закрыто дважды подтверждённое -- GAP_MATRIX помечен CLOSED/REJECTED, не reopen без новых доказательств; STATE.md next_action обновлён, WAIT: теперь про следующий тикет, не про goal_exit
+- 20.07.26 17:52 [E-302] [parent: E-301] [T-none] H: user 'проигнорируй отклонённые, выведи оставшиеся, начинай со следующего верного' -- прошёлся по T-002..T-014 целиком, классифицировал каждый по уже принятым решениям
+- 20.07.26 17:55 [E-303] [parent: E-302] [T-none] DEC: T-002/004/005/006/007/008/009/010/012 CLOSED или REJECTED -- ничего нового делать не нужно; T-011/013/014 реально OPEN -- следующий по порядку T-011
+- 20.07.26 18:00 [E-304] [parent: E-303] [T-none] RUN: T-011 -- 3 новые структурные фикстуры (dangling-needs-reference, read-only-restriction, invalid-mode-phase-combination), каждая проверена руками на честный FAIL на обеих платформах
+- 20.07.26 18:05 [E-305] [parent: E-304] [T-none] RUN: 2 поведенческие фикстуры без структурной проверки (board-empty-maintenance-transition, invalid-phase-transition) -- честно объяснено почему нет .saipen/ фикстуры для второй (STATE.md не хранит историю фаз)
+- 20.07.26 18:08 [E-306] [parent: E-305] [T-none] RUN: CONFORMANCE.md -> Scenario Coverage таблица, все 15 концептов из директивы явно закрыты (фикстура / уже покрыто / explicitly N/A с причиной)
+- 20.07.26 18:10 [E-307] [parent: E-306] [T-none] RUN: полный regression sweep 13 директорий tests/scenarios/ -- ноль неожиданных поломок, новые invalid фикстуры честно падают
+- 20.07.26 18:12 [E-308] [parent: E-307] [T-none] RUN: bash + powershell validate -> оба PASS; GAP_MATRIX T-011 -> CLOSED; ship v7.14.0 -> T-011 закрыт полностью, pushed

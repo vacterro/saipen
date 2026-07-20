@@ -1,0 +1,1 @@
+Test: Agent without filesystem write capability sets `mode: read-only` (RFC § 1.3) and MUST NOT enter `BUILD`, `SHIP`, `CLEAN`, or `TRANSLATE` -- it may only read, analyze, and report a recommended `next_action`. This fixture's `phase: BUILD` + `mode: read-only` combination is itself the violation the validator MUST catch.
