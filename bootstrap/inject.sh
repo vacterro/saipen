@@ -47,10 +47,14 @@ copy_skill() { # $1=dst
   cp -r "$SKILL_HOME/phases" "$1/"
   # validate.py resolves the schema relative to itself (../extensions/schemas),
   # so both must travel together for the skill copy to validate standalone.
+  # templates/ makes init.md's "copy, do NOT freehand" reachable; tests/ makes
+  # validate.md's no-Python shell fallback reachable.
   local root; root="$(dirname "$SKILL_HOME")"
   cp -r "$root/tools" "$1/"
-  mkdir -p "$1/extensions"
+  mkdir -p "$1/extensions" "$1/tests"
   cp -r "$root/extensions/schemas" "$1/extensions/"
+  cp -r "$root/extensions/templates" "$1/extensions/"
+  cp "$root/tests/validate.sh" "$root/tests/validate.ps1" "$1/tests/"
   echo "copied (re-run after updates)"
 }
 
@@ -85,15 +89,17 @@ if [ -d "$PLUG_ROOT" ]; then
   done
 fi
 
+# Aider boot set is RFC.md + STYLE.md, same promise as every platform.
 if command -v aider >/dev/null 2>&1; then
   A="$HOME/.aider.conf.yml"
   P="$SKILL_HOME/RFC.md"
-  if [ ! -f "$A" ]; then printf '# saipen protocol auto-loaded\nread:\n  - %s\n' "$P" > "$A"; printf '%-28s %s\n' "Aider conf" "created"
-  elif grep -qF "$P" "$A"; then printf '%-28s %s\n' "Aider conf" "already"
+  S="$SKILL_HOME/STYLE.md"
+  if [ ! -f "$A" ]; then printf '# saipen protocol auto-loaded\nread:\n  - %s\n  - %s\n' "$P" "$S" > "$A"; printf '%-28s %s\n' "Aider conf" "created"
+  elif grep -qF "$P" "$A" && grep -qF "$S" "$A"; then printf '%-28s %s\n' "Aider conf" "already"
   elif ! grep -q "^read:" "$A"; then
     backup_file "$A"
-    printf '\n# saipen protocol auto-loaded\nread:\n  - %s\n' "$P" >> "$A"; printf '%-28s %s\n' "Aider conf" "read: appended"
-  else printf '%-28s %s\n' "Aider conf" "has own read: - add manually: $P"; fi
+    printf '\n# saipen protocol auto-loaded\nread:\n  - %s\n  - %s\n' "$P" "$S" >> "$A"; printf '%-28s %s\n' "Aider conf" "read: appended"
+  else printf '%-28s %s\n' "Aider conf" "has own read: - add manually: $P + $S"; fi
 else printf '%-28s %s\n' "Aider" "not installed - skip"; fi
 
 echo "------------------------------------------------------------"

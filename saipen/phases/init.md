@@ -8,9 +8,11 @@ matching exactly:
   "WAIT: provide the first project goal or raw backlog"` (RFC § 1.2's
   narrow INIT-bootstrap `WAIT:` exception -- ask for the goal/backlog
   only, nothing else), `blocker: none`, `agent: none`, `saipen_version: 7`,
-  `mode:` (per § 1.3 capability negotiation, `full`
-  unless something's actually missing), `goal_mode: false`, `updated:`
-  (ISO-8601 UTC now).
+  `saipen_home:` (absolute path of the SAIPEN home this bootstrap read the
+  protocol from -- § 1.7's bootloader pointer; TEMPLATE COPIES TOO: the
+  template ships it empty, fill it in), `mode:` (per § 1.3 capability
+  negotiation, `full` unless something's actually missing),
+  `goal_mode: false`, `updated:` (ISO-8601 UTC now).
 - `BOARD.md`: `## DOING` / `## TODO` / `## DONE` / `## BLOCKED`, no tickets yet.
 - `LOG.md`: starts empty. The first REAL entry (once work begins) MUST
   already follow the § 1.2 LOG skeleton -- no placeholder/example line

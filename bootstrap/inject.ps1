@@ -57,10 +57,15 @@ function Copy-Skill([string]$dst) {
   Copy-Item (Join-Path $SkillHome "phases") $dst -Recurse -Force
   # validate.py resolves the schema relative to itself (../extensions/schemas),
   # so both must travel together for the skill copy to validate standalone.
+  # templates/ makes init.md's "copy, do NOT freehand" reachable; tests/ makes
+  # validate.md's no-Python shell fallback reachable.
   $root = Split-Path $SkillHome
   Copy-Item (Join-Path $root "tools") $dst -Recurse -Force
   New-Item -ItemType Directory -Force (Join-Path $dst "extensions") | Out-Null
   Copy-Item (Join-Path $root "extensions\schemas") (Join-Path $dst "extensions") -Recurse -Force
+  Copy-Item (Join-Path $root "extensions\templates") (Join-Path $dst "extensions") -Recurse -Force
+  New-Item -ItemType Directory -Force (Join-Path $dst "tests") | Out-Null
+  Copy-Item (Join-Path $root "tests\validate.sh"),(Join-Path $root "tests\validate.ps1") (Join-Path $dst "tests") -Force
   return "copied (re-run after updates)"
 }
 
@@ -107,22 +112,23 @@ if (Test-Path $plugRoot) {
   }
 }
 
-# --- Aider ---
+# --- Aider (boot set is RFC.md + STYLE.md, same promise as every platform) ---
 $aider = "$h\.aider.conf.yml"
 $skillPath = Join-Path $SkillHome "RFC.md"
+$stylePath = Join-Path $SkillHome "STYLE.md"
 if (Get-Command aider -ErrorAction SilentlyContinue) {
   if (Test-Path $aider) {
     $conf = Get-Content $aider -Raw -Encoding utf8
-    if ($conf -match [regex]::Escape($skillPath)) {
+    if (($conf -match [regex]::Escape($skillPath)) -and ($conf -match [regex]::Escape($stylePath))) {
       [void]$report.Add(@("Aider conf", "already"))
     } elseif ($conf -notmatch '(?m)^read:') {
-      Write-NoBom $aider ($conf.TrimEnd() + "`n`n# saipen protocol auto-loaded`nread:`n  - $skillPath`n")
+      Write-NoBom $aider ($conf.TrimEnd() + "`n`n# saipen protocol auto-loaded`nread:`n  - $skillPath`n  - $stylePath`n")
       [void]$report.Add(@("Aider conf", "read: appended"))
     } else {
-      [void]$report.Add(@("Aider conf", "has own read: - add manually: $skillPath"))
+      [void]$report.Add(@("Aider conf", "has own read: - add manually: $skillPath + $stylePath"))
     }
   } else {
-    Write-NoBom $aider "# saipen protocol auto-loaded`nread:`n  - $skillPath`n"
+    Write-NoBom $aider "# saipen protocol auto-loaded`nread:`n  - $skillPath`n  - $stylePath`n"
     [void]$report.Add(@("Aider conf", "created"))
   }
 } else { [void]$report.Add(@("Aider", "not installed - skip")) }

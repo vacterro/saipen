@@ -23,6 +23,10 @@
       "type": "integer",
       "description": "Records which protocol version wrote this state, and doubles as the version guard (RFC § 1.2) -- one field, not split into a separate schema_version (collapsed in v7.23.0)."
     },
+    "saipen_home": {
+      "type": "string",
+      "description": "RFC § 1.7's bootloader pointer: absolute path to the SAIPEN home on the machine that last checkpointed. Dead path on this machine? Clone github.com/vacterro/saipen and update at the next checkpoint. MAY be absent on states written before v7.25.0 -- not in the required list for that reason."
+    },
     "requires": {
       "type": "array",
       "items": { "type": "string" }
