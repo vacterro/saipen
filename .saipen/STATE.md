@@ -5,11 +5,11 @@ next_action: "No open tickets. Board empty -- bare `saipen` auto-transitions to 
 blocker: none
 saipen_version: 7
 saipen_home: "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN"
-agent: opencode
+agent: antigravity
 requires:
   - filesystem
   - git
 mode: full
 goal_mode: false
-updated: 2026-07-21T11:00:00Z
+updated: 2026-07-22T02:14:30Z
 ---
