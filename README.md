@@ -20,8 +20,6 @@ and resumes work in under a minute -- no rebriefing, any vendor, any day.
 [![Japanese Guide](https://img.shields.io/badge/📖_ELI5_Guide-日本語-red?style=for-the-badge)](GUIDE_JA.md)
 [![Ded Voice](https://img.shields.io/badge/👴_Guide-ВЕРСИЯ_ДЕДА-brown?style=for-the-badge)](GUIDE_DED.md)
 
-**Не объясняй ничего. Просто напиши saipen и продолжи работу над проектом как ни в чём не бывало, любым агентом.**
-
 ```text
 User  ->  /saipen continue
 Agent ->  reads STATE ("What do I do right now?")
