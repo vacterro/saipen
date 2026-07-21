@@ -1,7 +1,7 @@
 ---
 phase: DONE
 task: none
-next_action: "v7.28.1 shipped -- perfection sweep: LOG's last nonconformant line repaired (first zero-warning validation run in repo history), three dead references to the deleted GAP_MATRIX fixed (one was actively lying about what the validator enforces), SPEC.md caught up to v7.24.0+ reality (tools/ layer now exists in the architecture tree, schemas described as live), scenario coverage rows 19-20 + behavioral fixtures added for unclaimed-DOING adoption and clean-tree-after-BLOCKED. No open tickets. Board is empty -- bare `saipen` auto-transitions to HUNT per RFC § 2.1."
+next_action: "v7.29.0 shipped -- dirty-tree-on-continuation rule added to RFC § 1.5 off a real cross-agent incident (fresh session grumbling about a predecessor's normal in-flight work): uncommitted changes are normal protocol state, attribution is mandatory before touching (DOING scope + LOG tail + kitchen), someone else's unattributed work is never committed/reverted/stashed, asking is reserved for direct file collisions via § 1.1's destructive gate. Row 21 + dirty-tree-continuation fixture. No open tickets. Board is empty -- bare `saipen` auto-transitions to HUNT per RFC § 2.1."
 blocker: none
 saipen_version: 7
 saipen_home: "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN"
@@ -11,5 +11,5 @@ requires:
   - git
 mode: full
 goal_mode: false
-updated: 2026-07-21T07:55:00Z
+updated: 2026-07-21T08:20:00Z
 ---
