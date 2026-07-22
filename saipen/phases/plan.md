@@ -7,7 +7,8 @@ callers, migrations, UI states. Safe defaults over interrogation.
 If `PLAN` is triggered without a specific user prompt (bare `saipen plan`), the agent MUST evaluate the codebase, existing `KNOWLEDGE/`, and git log to generate an autonomous proposal plan:
 1. Identify logical next workflow steps (§ 2.3 Industrial Completion Rule).
 2. Identify missing capabilities, refactoring, or architectural strengthening (§ 2.2 Evolutionary ADD).
-3. Populate `BOARD.md` with structured proposal tickets for user review or execution.
+3. Populate `BOARD.md` with structured proposal tickets.
+4. Transition `STATE.phase` to `DONE` and halt to await user selection. MUST NOT proceed to `SCOUT`.
 
 Ticket shape: one goal, independently verifiable, `needs:` for deps.
 Every ticket SHOULD carry `| verify: <command or criterion>` (RFC § 1.2)
@@ -21,7 +22,7 @@ as normal, no correctness gate skipped for being small. LOG the size-gate
 decision. STATE -> SCOUT or BUILD per the normal phase docs, never
 straight to DONE.
 
-After PLAN: STATE -> SCOUT for first ticket.
+**After PLAN (if not in Proposal Mode):** STATE -> SCOUT for first ticket.
 If `goal_mode: true` (RFC § 2.4): do not pause here -- proceed straight into
 SCOUT. Also increment `goal_waves` by 1 (this PLAN run = a new wave) and
 checkpoint STATE. Hits the 3-`goal_waves`/20-`goal_tickets` cap? STOP here
