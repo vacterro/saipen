@@ -41,5 +41,5 @@ bash bootstrap/inject.sh                                            # macOS / Li
 - Kui tuled projekti juurde tagasi ja leiad salvestamata muudatusi, on see normaalne -- SAIPEN teeb commiti alles `ship` käigus, mitte iga sammu järel. Agent kontrollib enne millegi puudutamist, kelle muudatused need on.
 - Kui tahad, et agent mäletaks päris arhitektuuriotsust, pane see kausta `.saipen/KNOWLEDGE/` kas ühe faili `decisions.md` või nummerdatud failidena `ADR-001.md`.
 - Kui masinas pole gitti ega shelli, ütleb agent seda otse (`mode`, `WAIT: <küsimus>`), selle asemel et arvata.
-- Turvavõrku tahad? `python <saipen-kloon>/tools/install_hook.py` paigaldab commit-eelse kontrolli.
+- Turvavõrku tahad? `python <saipen-kloon>/tools/install_hook.py` paigaldab commit-eelse kontrolli. Tüdinud? `python <saipen-kloon>/tools/uninstall_hook.py` võtab selle maha (ja toob vajadusel vana konksu tagasi).
 - **Katseline:** `saipen sub spawn saihunt` -- üks käsk, toob `.saipen/extensions/subs/` ise SAIPEN kodust, kui projektis pole seda veel. Saad isoleeritud read-only agendi, kes uurib projekti ja annab leiud oma `OUTBOX.md` kaudu -- koodi ennast ei puuduta. Valmis kaks: `saiwiki` (dokumendid) ja `saihunt` (vearaha). Täiesti uus, lahinguarme veel pole.

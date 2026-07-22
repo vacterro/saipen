@@ -74,7 +74,7 @@ On a git project and want a safety net? Run this once from the project root:
 ```bash
 python <path-to-your-saipen-clone>/tools/install_hook.py
 ```
-It installs a pre-commit hook that checks `.saipen/`'s structural integrity before every commit -- a broken board or a malformed log line gets caught right there, not three sessions later when you're trying to figure out who broke what.
+It installs a pre-commit hook that checks `.saipen/`'s structural integrity before every commit -- a broken board or a malformed log line gets caught right there, not three sessions later when you're trying to figure out who broke what. Want it gone later? `python <path-to-your-saipen-clone>/tools/uninstall_hook.py` removes exactly that hook and restores whatever was there before it, if anything.
 
 <p align="center">
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>

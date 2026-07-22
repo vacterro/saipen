@@ -55,7 +55,7 @@ No git on this machine? It won't fake a push and lie to you. No shell? It'll han
 ```bash
 python <saipen-clone>/tools/install_hook.py
 ```
-Installs a pre-commit hook. Broken board, malformed log line -- caught before the commit, not three sessions later when you're trying to figure out who broke what.
+Installs a pre-commit hook. Broken board, malformed log line -- caught before the commit, not three sessions later when you're trying to figure out who broke what. Done with it? `python <saipen-clone>/tools/uninstall_hook.py` takes it back off (and restores any hook it replaced).
 
 **Experimental: spawn yourself some read-only researchers**
 `saipen sub spawn saihunt` -- one command, bootstraps `.saipen/extensions/subs/` itself from the SAIPEN home if this project's never seen it, no manual copying. Gets you an isolated, read-only agent that pokes through your project and hands findings back through its own `OUTBOX.md` -- never touches your actual code. Two come built in: `saiwiki` (drafts your docs) and `saihunt` (hunts bugs). Brand new, zero battle scars yet -- kick the tires, don't bet the farm on it.

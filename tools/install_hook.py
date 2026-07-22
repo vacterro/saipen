@@ -12,6 +12,8 @@ between ships. Bypass a false positive with `git commit --no-verify`.
 The validator is found in this order: the SAIPEN home baked in at install
 time, then STATE.md's saipen_home field (survives the home moving), then
 the frozen shell floor for hosts without Python.
+
+To remove: python <saipen-home>/tools/uninstall_hook.py
 """
 
 import sys

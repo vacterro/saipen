@@ -406,7 +406,7 @@ if Path("saipen/RFC.md").is_file() and Path("VERSION").is_file() and Path("READM
     # B. Every runtime file the protocol references must exist in the home.
     manifest = [
         "saipen/SKILL.md", "saipen/UI.md", "saipen/STYLE.md",
-        "tools/validate.py", "tools/install_hook.py",
+        "tools/validate.py", "tools/install_hook.py", "tools/uninstall_hook.py",
         "tests/validate.sh", "tests/validate.ps1",
         "extensions/schemas/state.schema.json",
         "extensions/templates/STATE.md", "extensions/templates/BOARD.md",

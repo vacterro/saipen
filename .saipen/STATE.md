@@ -1,7 +1,7 @@
 ---
 phase: DONE
 task: none
-next_action: "v7.37.0 shipped -- a real cross-project test (another agent migrating a different project's .saitranslate/) exposed that TRANSLATE's legacy-path handling was thinner than extensions' equivalent. RFC § 2.1 TRANSLATE bullet now mirrors § 1.9 exactly: never-both, dual-location-conflict resolution, git mv command + one LOG line. phases/translate.md now states the legacy path and the .saipen/-existence precondition directly instead of relying on the full RFC. Scenario rows 24 (translate-dual-location-conflict) and 25 (spawn-requires-init, backfilling v7.36.0's own uncovered precondition) + fixtures. No open tickets. Board empty -- bare `saipen` auto-transitions to HUNT per RFC § 2.1."
+next_action: "v7.38.0 shipped -- bare `saipen` auto-transitioned to HUNT (board empty, zero-prompt per RFC § 2.1). Ran the six signal categories directly. Checked and ruled OUT one hypothesis (inject.ps1/uninstall.ps1 global skill-copy symmetry -- verified clean, all 7 targets mirrored). Found one real gap: tools/install_hook.py (per-project pre-commit hook) had no uninstall counterpart, unlike the global injector. Added tools/uninstall_hook.py (marker-detect, restores backed-up prior hook or removes cleanly, never touches a non-saipen hook), tested all 3 paths against a throwaway repo, documented next to every install_hook.py mention (manifest, SPEC.md, phases/validate.md, GUIDE.md, 4 flagship guides). No open tickets. Board empty -- bare `saipen` auto-transitions to HUNT per RFC § 2.1."
 blocker: none
 saipen_version: 7
 saipen_home: "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN"
@@ -11,7 +11,7 @@ requires:
   - git
 mode: full
 goal_mode: false
-updated: 2026-07-23T04:00:00Z
+updated: 2026-07-23T04:50:00Z
 ---
 
 

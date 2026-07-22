@@ -82,6 +82,7 @@ tools/                      <- CANONICAL VALIDATOR & REPO UTILITIES
                              installs; validates STATE against state.schema.json
                              directly, plus graph checks the shell pair can't do)
   install_hook.py           installs a pre-commit hook running validate.py
+  uninstall_hook.py         removes exactly that hook (restores any prior one)
 
 tests/                      <- CONFORMANCE LAYER
   validate.ps1 / .sh        frozen portable floor for hosts without Python --

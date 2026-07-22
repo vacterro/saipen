@@ -1,5 +1,15 @@
 # Changelog
 
+## 7.38.0 -- 2026-07-23 -- autonomous HUNT: install_hook.py had no uninstall
+Bare `saipen` with an empty board -- zero-prompt auto-transition to HUNT per RFC § 2.1. Ran the six signal categories directly (sequential, no subagent dispatch). One real, verified finding; one hypothesis that didn't survive checking:
+
+- Checked first whether `bootstrap/inject.ps1`'s global per-agent skill copies had an uninstall counterpart -- they do (`bootstrap/uninstall.ps1`/`.sh`), and a side-by-side read confirmed all 7 install targets (Claude Code, OpenCode, Codex, Gemini, ~/.agents, Antigravity plugins, Aider) are mirrored exactly. Not a finding -- verified clean, no fix needed.
+- The real gap: `tools/install_hook.py` (per-project pre-commit hook installer, a completely different mechanism -- project-local, not global) had no uninstall counterpart at all. A user who installed it had no scripted way to remove it; a backed-up pre-existing foreign hook (`pre-commit.pre-saipen.bak`) had no scripted restore path either.
+- Added `tools/uninstall_hook.py`: detects the marker `install_hook.py` writes, restores any backed-up prior hook if one exists, removes cleanly if not, and leaves a non-saipen hook completely untouched if the marker isn't present. Tested all three paths directly (fresh install/uninstall, foreign-hook backup+restore, marker-absent no-touch) against a throwaway repo before shipping.
+- Documented next to every existing `install_hook.py` mention: its own docstring, `tools/validate.py`'s runtime manifest (11 -> 12 files), `SPEC.md`, `phases/validate.md`, `GUIDE.md`, and the 4 flagship guides (EN/RU/EE/DED) -- the other 29 translated guides are left for a future `saipen translate` drift pass, same precedent as prior small doc additions this segment.
+
+Both validators green.
+
 ## 7.37.0 -- 2026-07-23 -- TRANSLATE's legacy-path handling brought up to the same bar as extensions'
 Prompted by watching a real migration in the wild: a separate agent (Antigravity, on an unrelated project) was told to move root-level `.saitranslate/` to `.saipen/saitranslate/` and got the mechanics right on its own -- but the protocol itself had nothing telling it to. TRANSLATE's legacy clause was thinner than extensions' equivalent (§ 1.9), and `phases/translate.md` didn't mention the legacy path at all.
 
