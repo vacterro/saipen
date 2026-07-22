@@ -11,4 +11,4 @@ confirming no other ticket on `BOARD.md` is workable (`phases/verify.md` or `pha
 3. Ask the user for clarification, credentials, or manual intervention:
    `next_action: WAIT: <the specific question or what's needed>` (RFC § 1.2).
 4. Do not spin or guess blindly. Wait for facts.
-5. If the blocker is resolved by the user, tick BOARD if applicable, update STATE -> PLAN or SCOUT.
+5. If the blocker is resolved by the user, tick BOARD if applicable, update STATE -> PLAN, SCOUT, or DONE (if the board is now empty).

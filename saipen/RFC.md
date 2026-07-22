@@ -92,16 +92,16 @@ INIT      -> PLAN | BLOCKED
 PLAN      -> SCOUT | BUILD | DONE | BLOCKED
 SCOUT     -> BUILD | BLOCKED
 BUILD     -> VERIFY | BLOCKED
-VERIFY    -> REVIEW | BLOCKED
-REVIEW    -> SHIP | BUILD | BLOCKED
+VERIFY    -> REVIEW | SCOUT | BUILD | BLOCKED
+REVIEW    -> SHIP | BUILD | SCOUT | BLOCKED
 SHIP      -> DONE | BLOCKED
 DONE      -> SCOUT | PLAN | HUNT | ADD | BLOCKED
 VALIDATE  -> SCOUT | PLAN | DONE | BLOCKED
 HUNT      -> ADD | PLAN | SCOUT | BLOCKED
-ADD       -> VERIFY | PLAN | SCOUT | HUNT | DONE | BLOCKED
+ADD       -> BUILD | PLAN | SCOUT | HUNT | DONE | BLOCKED
 CLEAN     -> DONE | BLOCKED
 TRANSLATE -> DONE | BLOCKED
-BLOCKED   -> PLAN | SCOUT
+BLOCKED   -> PLAN | SCOUT | DONE
 ```
 
 - `CLEAN`, `TRANSLATE`, and `VALIDATE` are entered by explicit user command (`saipen clean` / `saipen translate` / `saipen validate`, § 1.10) from ANY phase -- they are not chain-specific like the rows above, the same way `saipen stop` isn't. Once entered, their own row above governs what they can transition to next.

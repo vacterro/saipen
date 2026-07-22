@@ -19,8 +19,8 @@ P0/P1: fix now (STATE -> BUILD). P2/P3: new tickets.
 Verdict -> LOG: `DEC: SHIP` / `SHIP after FIXES` / `NO -- BLOCKER`.
 **Cap: 2 review passes per finding (RFC § 2.4), identified by its `file:line`
 -- pass 1 finds it, BUILD fixes it, pass 2 re-checks. Still broken on pass 2
--> verdict MUST become `NO -- BLOCKER`, ticket it, stop cycling on THIS
-finding. A NEW finding uncovered by the fix itself starts its own fresh
+-> verdict MUST become `NO -- BLOCKER`, ticket it under `## BLOCKED`, stop cycling on THIS
+finding, and transition to the next workable ticket (STATE -> `SCOUT` or `BUILD`). A NEW finding uncovered by the fix itself starts its own fresh
 2-pass count -- this caps re-litigating the same finding, not REVIEW as a
 whole.**
 

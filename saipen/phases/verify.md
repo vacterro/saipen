@@ -27,7 +27,7 @@ Hypothesis -> LOG -> test -> fix root cause, not symptom.
 Rejected hypotheses stay logged; never re-test without new evidence.
 **Cap: 3 dead hypotheses OR 2 failed fix cycles -> move THIS ticket to the
 `## BLOCKED` section on `BOARD.md` with the facts + dead ends noted on it,
-then check for another unblocked `TODO` ticket and work that instead.**
+then check for another unblocked `TODO` ticket and work that instead (STATE -> `SCOUT` or `BUILD`).**
 `STATE.phase: BLOCKED` (which loads
 `phases/blocked.md` and stops for the user) is reserved for when no other
 ticket on the board is workable -- one stuck ticket MUST NOT halt a session

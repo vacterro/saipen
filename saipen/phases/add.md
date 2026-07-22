@@ -17,8 +17,8 @@ Activate this mode to systematically expand the software's capabilities. SAIPEN 
        IF priority == "bugfix":
          RETURN HUNT
        IF satisfies(minimal_delta) AND satisfies(existing_design_language):
-         IMPLEMENT(priority)
-         RETURN VERIFY
+         TICKET(priority)
+         RETURN BUILD
        ELSE:
          TICKET(priority)
          RETURN PLAN_or_SCOUT
@@ -28,10 +28,10 @@ Activate this mode to systematically expand the software's capabilities. SAIPEN 
 
    Two implementation paths come out of this -- never a third:
    1. **Direct minimal implementation**: satisfies both `minimal_delta`
-      and `existing_design_language` -> implement now, `RETURN VERIFY`.
+      and `existing_design_language` -> ticket it, place in `TODO`, and `RETURN BUILD` (skip planning and scouting, just build it now).
    2. **Planned implementation**: a real gap exists but isn't obviously
       minimal or isn't obviously in the existing design language ->
-      ticket it, `RETURN PLAN` or `SCOUT` (step 3 below), never implement
+      ticket it, `RETURN PLAN` or `SCOUT` (step 3 below), never build
       it directly just because a priority slot matched. Without this
       `ELSE`, a genuine but non-minimal opportunity silently fell through
       to `RETURN DONE` -- declaring the product mature when it wasn't.
