@@ -15,7 +15,8 @@ Activate this mode to systematically expand the software's capabilities. SAIPEN 
    ]:
      IF exists(priority):
        IF priority == "bugfix":
-         RETURN HUNT
+         TICKET(priority)
+         RETURN SCOUT
        IF satisfies(minimal_delta) AND satisfies(existing_design_language):
          TICKET(priority)
          RETURN BUILD
@@ -36,10 +37,7 @@ Activate this mode to systematically expand the software's capabilities. SAIPEN 
       `ELSE`, a genuine but non-minimal opportunity silently fell through
       to `RETURN DONE` -- declaring the product mature when it wasn't.
 
-   `bugfix -> RETURN HUNT` means ADD does not improvise the fix itself --
-   HUNT surfaces and tickets the bug through its own normal signal
-   process (`phases/hunt.md`), ADD never reaches into BUILD/VERIFY to
-   patch it inline.
+   `bugfix -> TICKET(priority); RETURN SCOUT` means ADD does not improvise the fix inline. It formally tickets the bug and enters the standard execution pipeline. Bouncing back to `HUNT` is illegal here because `HUNT` only scans 6 mechanical signals -- if `HUNT` didn't catch the bug on its own pass, sending `ADD` back to `HUNT` creates an infinite loop.
 
 3. **Act:**
    - Pick exactly ONE obvious missing capability.
