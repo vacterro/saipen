@@ -1,5 +1,16 @@
 # Changelog
 
+## 7.34.1 -- 2026-07-22 -- TRANSLATE was fabricating content; scope fixed to the real surface
+User's clarifying question ("so it translates the software AND README AND guides AND wiki, everything translatable in the repo?") led to checking what the phase actually produces -- and it isn't that. Read this repo's own `.saitranslate/` bundle (built by an earlier session, "23/23 locales" logged as a success): every locale file contains `app.title`, `action.continue`, `settings.language`, `status.hunting` -- fabricated UI strings for a settings screen and buttons that don't exist anywhere in SAIPEN. The phase doc's "translate the software strings" instruction assumed every project has real in-app UI copy to translate; for a protocol/CLI/docs-first project it does not, and the agent invented plausible-sounding placeholder keys instead of recognizing there was nothing real to translate.
+
+Two real bugs, both fixed:
+- **Fabrication risk**: `phases/translate.md` § 2 now requires determining the actual translatable surface before building anything -- grep the real source for genuine UI-string patterns first; if none exist (most SAIPEN-managed projects), the real surface is the project's own documentation (README, top-level docs), never invented UI copy. Docs-first mode explicitly skips anything already hand-maintained per language (this repo's own `guides/`) -- never duplicates or clobbers curated work.
+- **Structural non-compliance**: the existing bundle sat directly in `.saitranslate/locales/` + `.saitranslate/manifest.json`, not inside `.saitranslate/kitchen/` as § 4's own completion rule already required. Moved via `git mv`, history preserved.
+
+The existing bundle's *content* stays as-is for now -- moved to the correct location, not regenerated; it's fabricated and not integrated into anything (TRANSLATE's own completion rule never auto-integrates), so no real harm from it sitting there, but a real docs-scoped translate run is the honest next step whenever wanted.
+
+Both validators green.
+
 ## 7.34.0 -- 2026-07-22 -- TRANSLATE gains an explicit parallel-agent mode
 User's real ask, clarified after an initial wrong framing: not "make .saitranslate a subSaipen" (declined -- TRANSLATE writes extensively inside its own sandbox, subSaipen is permanently read-only toward everything; TRANSLATE is also Core, in RFC's closed 14-phase enum and command surface, not something that can move to an extension without a breaking change) -- the actual goal was parallelism: send a separate, dedicated full agent to build the whole translation bundle without getting in the main agent's way.
 
