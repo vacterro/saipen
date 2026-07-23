@@ -1,5 +1,15 @@
 # Changelog
 
+## 7.45.0 -- 2026-07-23 -- MARKHUNT's own self-contradiction fixed at the root
+Continued the MARKHUNT backlog triage: the remaining two P0 findings, plus one that turned out to hit this session's own recent work directly.
+
+- **A genuine self-contradiction in `markhunt.md` itself.** It claimed completion "always halts one turn for the user, even mid-`goal_mode`" -- but transitioning to `DONE` with `goal_mode: true` would let `done.md`'s existing Goal-Mode-Empty-Board step auto-proceed straight to `HUNT` regardless, exactly the silent continuation MARKHUNT was supposed to prevent. Fixed at the root, not by patching the assertion: `done.md`'s own step now has an explicit exception -- any `[MARKHUNT]`-tagged ticket sitting in `## BLOCKED` blocks the auto-`HUNT` cascade until triaged out. `markhunt.md`'s text now points at this real mechanism instead of just asserting the halt happens.
+- **`BLOCKED`'s dual meaning** (`## BLOCKED` on `BOARD.md` vs session-level `STATE.phase: BLOCKED`) is real, but the audit's own suggested fix -- rename one of the two -- was disproportionate: a full rename ripples through the phase enum, both validators, the schema, every phase doc, templates, fixtures, and any project's own already-existing `STATE.md` files. Applied a lighter fix: the transition table's own intro now states explicitly, right where the ambiguous bare word first appears, that `BLOCKED` there is always the session-level state.
+- **MARKHUNT's own thoroughness self-test (lacking a hash-match-style hard verification the way HUNT has one) was deliberately deferred**, not rushed -- it needs real design (what a completeness manifest would actually record, what `VALIDATE` would cross-check it against) rather than a quick doc-sync patch. Left in `## BLOCKED` with an explicit "needs real design" note.
+- Cleaned up a duplicate ticket ID a concurrent edit introduced (the ongoing translate session finishing its final waves happened to resurrect an already-superseded, already-buggy copy of `T-115` back into `## TODO`) -- removed only the stale duplicate, left the legitimate concurrent work untouched.
+
+Both validators green.
+
 ## 7.44.0 -- 2026-07-23 -- "BOARD.md is empty" unified to "no open TODO tickets" everywhere
 Continued triaging the MARKHUNT backlog (`BOARD.md`'s `## BLOCKED`), picking up the remaining P0 and its closest relatives.
 

@@ -62,11 +62,17 @@ readable, not a wall of noise. Append only -- never reorder or edit
 existing tickets.
 
 **Goal Mode brake.** MARKHUNT never increments `goal_waves` or
-`goal_tickets` (RFC § 2.4) and never falls into HUNT/ADD on completion,
-`goal_mode` or not -- its findings are unvetted, so nothing may treat
-finishing a MARKHUNT pass as a waypoint to keep running through.
-Completion always halts one turn for the user, even mid-`goal_mode`;
-`goal_mode` itself stays whatever it already was, untouched.
+`goal_tickets` (RFC § 2.4) -- its findings are unvetted, so nothing may
+treat finishing a MARKHUNT pass as a waypoint to keep running through.
+The brake itself lives in `phases/done.md`, not here: as long as any
+`[MARKHUNT]`-tagged ticket sits in `## BLOCKED`, `done.md`'s own
+Goal-Mode-Empty-Board step refuses to auto-proceed to `HUNT` even under
+`goal_mode: true`, and halts for the user instead. MARKHUNT itself just
+transitions to `DONE` like any other phase (§ 2.1) -- it never needs to
+know or check `goal_mode` directly; leaving `[MARKHUNT]` tickets behind
+in `## BLOCKED` is what holds the brake. `goal_mode` itself stays
+whatever it already was, untouched, until every such ticket is triaged
+out.
 
 **Long-running, so checkpoint like one.** An exhaustive, uncapped pass
 can outlast a single context window. Before that happens (a context

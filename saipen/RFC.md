@@ -85,7 +85,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 **Phase enum**: `INIT`, `PLAN`, `SCOUT`, `BUILD`, `VERIFY`, `REVIEW`, `SHIP`, `DONE`, `VALIDATE`, `HUNT`, `MARKHUNT`, `ADD`, `CLEAN`, `TRANSLATE`, `PREPARE`, `BLOCKED`.
 
-**Transition table** -- a quick-reference index, not a second source of truth. Each phase's own `phases/*.md` is authoritative; if this table and a phase doc ever disagree, the phase doc wins and this table is the one that's wrong:
+**Transition table** -- a quick-reference index, not a second source of truth. Each phase's own `phases/*.md` is authoritative; if this table and a phase doc ever disagree, the phase doc wins and this table is the one that's wrong. **`BLOCKED` here is always the session-level `STATE.phase: BLOCKED`** (`phases/blocked.md`) -- the DFA this table describes has no other kind of state. `## BLOCKED` on `BOARD.md` (§ 1.2) is a completely different, ticket-level concept that shares the name but never appears as a `phase:` value anywhere; do not conflate the two just because this table's bare word "BLOCKED" doesn't repeat the distinction every time it's used:
 
 ```text
 INIT      -> PLAN | BLOCKED
