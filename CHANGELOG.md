@@ -2,6 +2,16 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.54.0 -- 2026-07-23 -- phase-collapse audits reviewed and rejected (recorded, made findable)
+
+Three phase-audits (`tofix/saipen_phaseAudit1/2/3`) all argued the same thing -- 16 phases is too many, collapse them (to 5, 8, and 4 respectively; they didn't even agree with each other). Reviewed and rejected, and the rejection is now recorded where it will actually stop the next identical audit instead of costing a fresh analysis each time.
+
+- The token premise is already solved by the 2-tier lazy-load (v5.0.0): a phase doc costs nothing until its phase is active, so 16 small focused docs beat 8 fat merged ones -- phaseAudit2 admits merging makes every `hunt` call also load `add`+`markhunt`. Collapsing *raises* per-call tokens.
+- The specific merges (scout+build, verify+review) undo deliberate v2.0.0 splits already recorded in `KNOWLEDGE/decisions.md` with reasons (scout separate so agents read before coding; VERIFY "works?" separate from REVIEW "well made?").
+- The rewrite surface (RFC §1.6, CONFORMANCE enum + 33 scenarios, `validate.py`, `state.schema.json`, the subs PROTOCOL's enum reuse, 33 guides) re-opens 100+ versions of phase-specific hardening (VERIFY hysteresis, the ADD->HUNT / DONE->ADD phantom removals) for an illusory-to-negative gain.
+
+Recorded the full rejection in `KNOWLEDGE/decisions.md` (same treatment `goal_exit` got), added a findable pointer at RFC §1.6's phase enum, and deleted the three consumed audits. Do not re-propose without a real trace showing the phase count actually costs tokens or causes a stall.
+
 ## 7.53.0 -- 2026-07-23 -- anti-bloat + cold-start: log segmentation, changelog archival, MARKHUNT triage, audit7 polish
 
 Consolidation pass aimed at one thing: keep the files a cold agent actually reads small, so continuation stays cheap on weak hardware and never overflows a context window.
