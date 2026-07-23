@@ -31,11 +31,10 @@ bash bootstrap/inject.sh                                            # macOS / Li
 | `saipen set` | Initsialiseeri mälukaust `.saipen/` |
 | `saipen continue` | Jätka tööd märkmete põhjal |
 | `saipen stop` | Salvesta progress ja peatu |
-| `saipen status` | Loe tahvlit ja olekut |
-| `saipen goal <text>` | Liigu uue eesmärgi juurde |
-| `saipen clean` | Puhasta repositoorium sügavalt |
-| `saipen translate` | Eraldatud 32-keelne tõlkeehitus |
-| `saipen ship` | Käivita väljalase |
+| `saipen clean` | Sunnib agenti tööruumi puhastama, vanu lõpetatud pileteid eemaldama, orbfaile kustutama, katkisi teid parandama ja kõike uuendama. |
+| `saipen translate` | Loob/uuendab 32-keelset tõlkepaketti isoleeritud kaustas `.saipen/saitranslate/`, puutumata teie lähtekoodi. |
+| `saipen markhunt` | Teostab projekti sügava auditi ja salvestab leiud BOARD.md faili ilma midagi parandamata. |
+| `saipen ship` | Käivitab otseselt väljalaske (versiooni uuendamine, muudatuste logi, silt, üleslaadimine) isegi väljaspool tavalist piletivoogu. |
 
 ## Kasulik teada
 - Kui tuled projekti juurde tagasi ja leiad salvestamata muudatusi, on see normaalne -- SAIPEN teeb commiti alles `ship` käigus, mitte iga sammu järel. Agent kontrollib enne millegi puudutamist, kelle muudatused need on.

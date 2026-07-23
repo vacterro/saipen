@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.42.0 -- 2026-07-23 -- MARKHUNT and PREPARE phases introduced
+- **MARKHUNT Phase**: Dry, exhaustive, uncapped audit phase. Records findings as blocked tickets on `BOARD.md` without autonomously fixing anything. Triggered via `saipen markhunt`.
+- **PREPARE Phase**: Explicit subSaipen handoff packaging phase. SubSaipens now rigorously verify freshness, write injection instructions, and format findings in `OUTBOX.md`.
+
 ## 7.41.0 -- 2026-07-23 -- HUNT skip hardened against a real field-observed fake-clean heuristic
 User flagged a real transcript: a weaker model (a small OpenCode-hosted model), finding the prior `hunt -> clean @HASH` line stale, invented its own substitute -- "no source files changed since the last hunt's timestamp, call it clean" -- skipping the sweep entirely. Corrected once (told to re-read `hunt.md`), it caught the hash mismatch, then made the identical substitution a second time: diffed file mtimes again and declared "0 changes, all 6 categories the same, HUNT clean" without literally re-running a single one of the six checks. The prior hunt in that same transcript had found 2 open tickets -- if nothing changed since, those were still sitting there unaccounted for, so "clean" wasn't just unproven, it was wrong on the model's own logic.
 

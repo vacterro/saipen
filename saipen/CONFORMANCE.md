@@ -48,3 +48,4 @@ fixture state why, not silently.
 | 24 | Dual-location TRANSLATE conflict resolved, never merged/guessed (RFC § 2.1, v7.37.0) | `translate-dual-location-conflict` -- behavioral, README-only |
 | 25 | `saipen sub spawn` / parallel TRANSLATE both refuse on a project with no `.saipen/` yet, instead of silently triggering INIT (RFC § 1.9 v7.36.0, § 2.1 v7.37.0) | `spawn-requires-init` -- behavioral, README-only |
 | 26 | HUNT skip requires an exact HEAD-hash match; mtime/diff-timing is never a substitute for actually running the six categories (`phases/hunt.md`, v7.41.0) | `hunt-skip-requires-exact-hash-match` -- behavioral, README-only |
+| 27 | MARKHUNT records findings without fixing/capping, unlike HUNT (`phases/markhunt.md`) | `markhunt-dry-record-only` -- behavioral, README-only |

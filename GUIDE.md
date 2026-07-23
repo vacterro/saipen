@@ -28,6 +28,7 @@ While agents interact with the file system directly, you just type normal chat m
 | `saipen plan [text]` | Plans a task list or, if run bare without text, generates an autonomous proposal plan for next features/improvements. |
 | `saipen clean` | Forces the agent to scrub the workspace, prune old done tickets, remove orphaned files, fix bad paths, and ensure everything is updated. |
 | `saipen translate` | Builds/updates a 32-language translation bundle in an isolated `.saipen/saitranslate/` folder, never touching your actual source. |
+| `saipen markhunt` | Performs a dry, uncapped exhaustive audit of the project, recording findings to BOARD.md without fixing anything. |
 | `saipen ship` | Explicitly triggers a release (version bump, changelog, tag, push) even outside the normal ticket flow. |
 | `saipen validate` | Runs the conformance check on `.saipen/` and fixes any structural corruption it finds. |
 

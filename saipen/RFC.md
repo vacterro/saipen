@@ -83,7 +83,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 - **MANUAL-VERIFY**: If `mode: manual-verify`, `VERIFY` MUST block and await human confirmation. Agent MUST NOT auto-transition to `REVIEW`.
 - **DONE**: A ticket MUST NOT be marked `DONE` without a successful `VERIFY` (or human `MANUAL-VERIFY`).
 
-**Phase enum**: `INIT`, `PLAN`, `SCOUT`, `BUILD`, `VERIFY`, `REVIEW`, `SHIP`, `DONE`, `VALIDATE`, `HUNT`, `ADD`, `CLEAN`, `TRANSLATE`, `PREPARE`, `BLOCKED`.
+**Phase enum**: `INIT`, `PLAN`, `SCOUT`, `BUILD`, `VERIFY`, `REVIEW`, `SHIP`, `DONE`, `VALIDATE`, `HUNT`, `MARKHUNT`, `ADD`, `CLEAN`, `TRANSLATE`, `PREPARE`, `BLOCKED`.
 
 **Transition table** -- a quick-reference index, not a second source of truth. Each phase's own `phases/*.md` is authoritative; if this table and a phase doc ever disagree, the phase doc wins and this table is the one that's wrong:
 
@@ -98,6 +98,7 @@ SHIP      -> DONE | BLOCKED
 DONE      -> SCOUT | PLAN | HUNT | ADD | BLOCKED
 VALIDATE  -> SCOUT | PLAN | DONE | BLOCKED
 HUNT      -> ADD | PLAN | SCOUT | BLOCKED
+MARKHUNT  -> DONE | BLOCKED
 ADD       -> BUILD | PLAN | SCOUT | HUNT | DONE | BLOCKED
 CLEAN     -> DONE | BLOCKED
 TRANSLATE -> DONE | BLOCKED
@@ -105,7 +106,7 @@ PREPARE   -> DONE | BLOCKED
 BLOCKED   -> PLAN | SCOUT | DONE
 ```
 
-- `CLEAN`, `TRANSLATE`, `PREPARE`, and `VALIDATE` are entered by explicit user command (`saipen clean` / `saipen translate` / `saipen prepare` / `saipen validate`, § 1.10) from ANY phase -- they are not chain-specific like the rows above, the same way `saipen stop` isn't. Once entered, their own row above governs what they can transition to next.
+- `CLEAN`, `TRANSLATE`, `PREPARE`, `VALIDATE`, and `MARKHUNT` are entered by explicit user command (`saipen clean` / `saipen translate` / `saipen prepare` / `saipen validate` / `saipen markhunt`, § 1.10) from ANY phase -- they are not chain-specific like the rows above, the same way `saipen stop` isn't. Once entered, their own row above governs what they can transition to next.
 - `HUNT -> PLAN | SCOUT` (the findings case, distinct from the clean-board case which always goes to `ADD`) is stated explicitly in `phases/hunt.md` itself: findings that get ticketed go to `PLAN`, or straight to `SCOUT` for a small/obvious one.
 - `saipen status` MUST NOT change `phase` -- it is read-only (§ 1.10).
 - `saipen stop` checkpoints and halts; it is not itself a phase transition (§ 1.10).
@@ -135,8 +136,9 @@ The complete set of recognized user-facing commands. Phase-affecting ones are de
 - `saipen continue` / bare `saipen` -- read `STATE.md`/`BOARD.md`/tail of `LOG.md`, execute `next_action` immediately, no rebriefing (§ 1.1, § 2.1 DEFAULT BEHAVIOR, `CONFORMANCE.md` TEST-001).
 - `saipen goal <text>` -- pivot to a new objective, run to completion (§ 2.4). Bare `saipen goal` (no text) is also recognized, but ONLY to resume an already-paused `goal_mode: true` run (§ 2.4 Entry) -- it is never a way to start a new objective without stating one.
 - `saipen plan [text]` -- explicit trigger for PLAN phase (`phases/plan.md`). If run bare without text, agent MUST generate an autonomous proposal plan (next steps, missing features, refactoring) and populate `BOARD.md` with tickets.
-- `saipen clean` -- deep repository scrub (`phases/clean.md`).
+- `saipen clean` -- explicit CLEAN trigger (`phases/clean.md`).
 - `saipen translate` -- isolated translation build (`phases/translate.md`).
+- `saipen markhunt` -- dry exhaustive audit, records findings to BOARD.md, never fixes anything (`phases/markhunt.md`).
 - `saipen ship` -- explicit SHIP trigger (`phases/ship.md`); SHIP also fires implicitly per that phase's other stated conditions.
 - `saipen validate` -- explicit VALIDATE trigger (`phases/validate.md`): run the conformance script, fix structural corruption if found (shape only -- a malformed line, missing frontmatter field, wrong heading; never a rewrite of `LOG.md`'s historical event content or any other file's real content), transition to `PLAN` or `SCOUT` per that phase's own rules.
 - `saipen status` -- MUST read `BOARD.md` and `STATE.md` and report current phase, the in-flight ticket, and what's queued next. MUST NOT write to any file or perform any work -- read-only, no exceptions, regardless of `goal_mode`.
@@ -155,6 +157,7 @@ When the Core state machine reaches a halt (no pending tickets), the Maintenance
 - **ZERO-PROMPT AUTO-TRANSITION**: If the user runs the protocol and `BOARD.md` is empty, the agent MUST NOT ask the user for instructions or permission (e.g., "Should I hunt or add?"). It MUST silently and autonomously transition to the `HUNT` phase. If `HUNT` finds nothing (clean), the agent MUST immediately transition to `ADD`.
 - **HUNT**: Transition to `HUNT` MUST occur strictly when `BOARD.md` has no open `TODO` tickets without blockers, or when explicitly signaled by a failed verification loop. Agent MUST NOT hallucinate tasks during `HUNT`.
 - **CLEAN**: Transition to `CLEAN` occurs when explicitly triggered by the user via `saipen clean` (or just `clean`). The agent MUST instantly set `phase: CLEAN` in `STATE.md`, load `saipen/phases/clean.md`, and execute it. Agent MUST audit and prune stale tickets, orphaned files, and broken paths before returning to `DONE`.
+- **MARKHUNT**: Transition to `MARKHUNT` occurs when explicitly triggered by the user via `saipen markhunt` (or just `markhunt`). The agent MUST instantly set `phase: MARKHUNT` in `STATE.md`, load `saipen/phases/markhunt.md`, and execute it.
 - **TRANSLATE**: Transition to `TRANSLATE` occurs when explicitly triggered by the user via `saipen translate` (or just `translate`). The agent MUST instantly set `phase: TRANSLATE` in `STATE.md`, load `saipen/phases/translate.md`, and execute it. Agent MUST operate exclusively within a `.saipen/saitranslate/` folder to build, maintain, and update the 32-language core translation system + bonus voice (v7.35.0; before then this lived at root-level `.saitranslate/` -- legacy projects MAY still carry it there, agents MUST recognize it as equivalent, and MAY migrate it (`git mv .saitranslate .saipen/saitranslate`, one LOG line) at a convenient checkpoint; never maintain both locations at once). **Both exist at once** (a partial/failed migration, or two agents disagreeing) is a conflict, not a merge job: treat `.saipen/saitranslate/` as authoritative, the root-level copy as stale, ticket its removal, and do not silently combine or guess which copy is newer -- the same resolution § 1.9 gives extensions for the identical situation. It MUST treat the main software strictly as a read-only reference. **Exception**: a separate, dedicated agent instance sent to run TRANSLATE in true parallel with the main agent (which keeps building elsewhere) MUST NOT set the shared `phase: TRANSLATE` -- that would stomp on the main agent's own active phase. It keeps its own progress in `.saipen/saitranslate/STATE.md` instead, per `phases/translate.md`'s parallel-instance rule. This parallel mode requires the project's `.saipen/` to already exist (`saipen set` already ran) -- the same precondition `saipen sub spawn` requires (`extensions/subs/PROTOCOL.md`); TRANSLATE, parallel or not, is never a substitute for INIT.
 
 ### 2.2 Evolutionary ADD
