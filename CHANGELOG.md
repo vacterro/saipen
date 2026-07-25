@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.67.0 -- 2026-07-24 -- T-173 closed: TRANSLATE carries subSaipen's old boundary-violation gap too
+
+User asked for a fresh Core self-review of the whole project -- not another outside audit-on-phases (that ban is specifically about phase-count-collapse proposals), a direct look for logical holes. Read every phase doc not yet covered this session, RFC's command surface and Part 2 in full, `KNOWLEDGE/decisions.md`, and both reference extensions.
+
+Found one real, personally-witnessed gap: `TRANSLATE`'s parallel-instance mode is explicitly told not to write the shared `phase: TRANSLATE` into `.saipen/STATE.md` (stated twice -- RFC § 2.1 and `phases/translate.md` § 1) -- but neither location said what to do if that rule already got broken. It had: this exact session's own `deepseek-v4-flash-free` parallel run did precisely that (see 7.65.0's note), and there was no documented recovery path, only an improvised one. Generalized RFC § 1.4's stale-claim recovery (already covers `## DOING` BOARD tickets) to whole-`STATE.md` phase claims: finding a phase you never entered, under an `agent:` you don't recognize, with no matching `LOG.md` activity since, now has an explicit procedure -- LOG the takeover, inspect what was actually produced, then rebuild `STATE.md`, never silently overwrite or silently keep working under it.
+
+Everything else read this pass (`scout`/`build`/`hunt`/`init`/`plan`/`prepare`/`clean.md`, `decisions.md`, `extensions/security`+`performance`) was internally consistent -- nothing else ticketed.
+
+Also: at the user's explicit request, stopped mid-way through personally translating `saitranslate`'s remaining 22 languages -- bulk mechanical translation is better delegated to a small/cheap model, not this session's tokens. `T-168` stays open, noted accordingly.
+
+`tools/validate.py` green.
+
 ## 7.66.0 -- 2026-07-24 -- T-172 closed: outside-audit review, 4 real gaps found and fixed, 16 stale
 
 User dropped two more outside-audit files into `thoughts/` and asked for a fresh read. Same discipline as `audit5`/`6`/`7` earlier this session: verify every claim against the live repo before touching anything, fix only what survives.
