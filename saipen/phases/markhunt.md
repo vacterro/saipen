@@ -85,7 +85,12 @@ the scope categories 1-5 above are actually done), `surface:` (the
 dirs/globs swept, so "what was in scope" is a recorded fact, not a feeling),
 `findings:` (running count), `cursor: partial | done`, and
 `head_start:`/`head_end:` (the `git rev-parse --short HEAD` at the pass's
-start and its end). Overwrite, never append -- it's a cursor, not a history
+start and its end -- no git available (`mode: no-publish` or no repo at
+all)? Write the literal string `no-git` in both fields instead, and the
+closure self-test below skips the `head_end` equality check entirely for
+this pass -- a no-git project can't produce a hash to compare against, and
+that MUST resolve to "check doesn't apply," never "MARKHUNT can't run
+here"). Overwrite, never append -- it's a cursor, not a history
 (history is `LOG.md`, as always). Hitting a
 budget risk mid-pass: LOG a partial-completion line, leave
 `STATE.phase: MARKHUNT` (not `DONE`), `next_action: "saipen markhunt"`
@@ -97,8 +102,10 @@ Before transitioning to `DONE`, verify the manifest actually closes:
 `cursor: done`; every scope category 1-5 present in `vectors:` (a missing
 vector means the surface is NOT exhausted -- keep going, don't round up);
 `head_end` equals the current `git rev-parse --short HEAD` (HEAD moved
-mid-pass -> the coverage is against a stale tree, re-run the moved part);
-and `findings:` equals the number of `[MARKHUNT]` tickets this pass actually
+mid-pass -> the coverage is against a stale tree, re-run the moved part) --
+both `head_start`/`head_end` are the literal string `no-git` (no repo, or
+`mode: no-publish`)? This check is satisfied automatically, nothing to
+compare; and `findings:` equals the number of `[MARKHUNT]` tickets this pass actually
 wrote to `## BLOCKED`. Any mismatch means the pass isn't done -- resolve it,
 never paper over it. This is the manifest-driven closure HUNT gets for free
 from its hash line; MARKHUNT earns it by checking its own manifest. Only

@@ -16,7 +16,7 @@ when it actually finished safely, not by default.
 
 1. **Board Scrub:** 
    - Remove `[x]` DONE tasks from `BOARD.md` that are older than the current active work. This prunes `BOARD.md`, not history -- every one of those tickets' real events (created, built, verified, shipped) already lives permanently in `LOG.md`'s append-only graph; nothing is lost, just no longer cluttering the active board.
-   - Prune stale or abandoned `TODO` tickets.
+   - Prune stale or abandoned `TODO` tickets -- **stale, concretely, same evidence-based standard as `kitchen/`'s own definition below, not a clock**: `BOARD.md` tickets carry no creation timestamp, so age alone is never checkable and MUST NOT be the criterion. A `TODO` is stale when it is verifiably superseded (a later ticket or `KNOWLEDGE/decisions.md` entry already covers the same ground), or its cited files/behavior no longer exist or no longer apply, or `LOG.md` shows the underlying issue was already resolved by unrelated work since it was filed. Cite the evidence for the prune in the same `LOG.md` line, same as any other CLEAN action -- a ticket that's merely old but still accurate is not stale, it's just waiting.
    - Re-check every `## BLOCKED` ticket: blocker resolved elsewhere since it
      landed there? Move it back to `## TODO`. Still stuck and genuinely
      abandoned? Prune it the same as a stale `TODO`. `## BLOCKED` is not a

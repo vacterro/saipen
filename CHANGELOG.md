@@ -2,6 +2,25 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.68.0 -- 2026-07-24 -- T-174 closed: second outside-audit batch, 13 real gaps found+fixed
+
+A second batch of 10 outside-audit files landed in `thoughts/`. Same discipline: verify every claim live before touching anything. Most repeated already-fixed or already-rejected ground from a stale snapshot (`add.md`, README/GUIDE version, `init.md`, `ship.md` no-publish, `hunt.md` delete-free safety, CONFORMANCE row 38, T-136 -- all re-checked, all still correct) or re-proposed the ratified-rejected `goal_exit` command (`KNOWLEDGE/decisions.md`, three prior rejections on file). 13 real gaps survived contact with the live repo:
+
+- **`validate.md` repaired structure even under `mode: read-only`** -- a direct RFC § 1.3 violation (read-only VALIDATE must report only). Added the guard the phase doc was missing.
+- **T-171's boundary check only compared `.saipen/` metadata files**, not the whole working tree -- a confused subSaipen could corrupt real source code past it, undetected. Widened to the full tree, and connected the violation response to a formal `STATE.phase: BLOCKED`/`WAIT:` instead of leaving it as "mention it in chat and hope."
+- **`markhunt.md`'s closure self-test hard-required a git hash**, permanently unsatisfiable on a no-git project. Added an explicit `no-git` literal for `head_start`/`head_end` that satisfies the check by construction.
+- **`BOOT.md` had no fallback when `saipen_home` is empty or dead** -- the one step that can otherwise dead-end a cold agent with nowhere left to look for its own phase docs. Added the clone-and-update path directly in BOOT, not only in lazily-loaded RFC § 1.7.
+- **`verify.md`'s clean-tree step used `git restore`**, which never touches new untracked files a failed attempt created. Added scoped cleanup targeting only those files -- never a blanket `git clean`, which would just as happily eat unrelated scratch RFC § 1.5 already protects.
+- **`clean.md`'s "stale TODO" criterion was undefined.** Now evidence-based (superseded by a later ticket/decision, or its cited files/behavior no longer apply) -- explicitly never a clock, since `BOARD.md` tickets carry no creation timestamp to age against.
+- **RFC § 1.5's dirty-tree attribution required git with no fallback.** Now reuses Recovery's own no-git mtime heuristic for the identical question ("did I leave this, or did someone else").
+- **A parallel `TRANSLATE` instance had no cold-start path back to its own state.** `BOOT.md`'s generic path would hand it the *shared* `STATE.md`'s phase instead of its own `.saipen/saitranslate/STATE.md` -- fixed as the direct mirror of T-173's fix (that one covered the main agent finding a foreign claim; this covers the parallel instance itself never knowing to look at its own file).
+
+Five cheaper fixes alongside: `ship.md`'s tag delete-recreate scoped explicitly to a never-yet-pushed local tag, and its first-publish trigger widened to cover "`origin` exists but is still empty"; `sk-***` secret redaction marked illustrative rather than the only shape (`ghp_`, `AKIA`, `Bearer`, connection-string passwords all count); `human_note` clearing now requires a `LOG.md` line so it leaves a trace; extension-vs-extension bare-command collisions get an explicit decline-and-ask instead of silently picking one; `verify:` field execution is now gated against obviously destructive patterns, same footing as RFC § 1.1's existing destructive-op list.
+
+Also corrected `BOOT.md`'s stale "~30-line" self-description (real length moved past that a while ago, purely from real fixes) to "compact" everywhere it was quoted (`BOOT.md`, `SKILL.md`, `CONFORMANCE.md`, the `boot-cold-start-kernel` scenario).
+
+`tools/validate.py` green throughout.
+
 ## 7.67.0 -- 2026-07-24 -- T-173 closed: TRANSLATE carries subSaipen's old boundary-violation gap too
 
 User asked for a fresh Core self-review of the whole project -- not another outside audit-on-phases (that ban is specifically about phase-count-collapse proposals), a direct look for logical holes. Read every phase doc not yet covered this session, RFC's command surface and Part 2 in full, `KNOWLEDGE/decisions.md`, and both reference extensions.

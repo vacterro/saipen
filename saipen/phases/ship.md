@@ -40,8 +40,11 @@ project. Then STATE -> `DONE` directly, same as a normal successful ship.
 4. .gitignore covers junk + secrets. Empty tmp/, strip debug prints.
 5. CHANGELOG.md newest-top. Push.
 6. `git tag -a vVERSION -m "line"` + push tags.
-7. First publish (no `origin` yet): confirm name + public/private with user
-   -- ALWAYS, even under `goal_mode`. New public artifact is a one-way door.
+7. First publish -- no `origin` yet, **or `origin` exists but the remote has
+   zero commits/tags on it** (added early, never actually published to --
+   the same one-way door, just reached by `git remote add` instead of never
+   configuring one): confirm name + public/private with user -- ALWAYS,
+   even under `goal_mode`. New public artifact is a one-way door.
    `next_action: WAIT: confirm repo name '<name>' and public/private before
    I push` (RFC § 1.2).
 8. LOG one normal Event Graph line per RFC § 1.2 -- `- DATE [E-###]
@@ -61,7 +64,16 @@ project. Then STATE -> `DONE` directly, same as a normal successful ship.
      the new remote tip, re-run the validator, delete and recreate the
      tag on the rebased HEAD (verify `git rev-parse HEAD` ==
      `git rev-parse vX.Y.Z^{commit}` -- a tag left on the pre-rebase
-     commit is a stale pointer), push again. Rebase conflicts -> stop,
+     commit is a stale pointer), push again. **This delete-and-recreate is
+     always a purely local correction, never a remote one** -- it only
+     applies to a tag from *this same*, still-failed ship attempt, which by
+     definition was never successfully pushed (the code push that would
+     have carried it already got rejected). Discovering instead that a tag
+     with this name was already pushed in an *earlier*, separate, since-
+     completed ship -- a genuinely different and much rarer situation, not
+     what this recovery path is for -- is a remote history rewrite and
+     falls under the same force-push confirmation gate as the line below,
+     never silently redone the same way. Rebase conflicts -> stop,
      `BLOCKED` with the conflicting files as facts. NEVER resolve a
      rejected push with force-push (RFC § 1.1 destructive list).
    - Anything else non-transient? `STATE.phase: BLOCKED` -- pushing is

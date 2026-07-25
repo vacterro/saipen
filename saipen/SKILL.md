@@ -11,7 +11,7 @@ description: >
 
 Thin entry for skill-reading platforms. The system lives elsewhere:
 
-1. **Continuing? Read `BOOT.md` first -- the ~30-line cold-start kernel
+1. **Continuing? Read `BOOT.md` first -- the compact cold-start kernel
    (STATE -> BOARD -> LOG tail -> execute `next_action`). It's all a bare
    `saipen continue` needs; it points into RFC only when a rule question comes up.**
 2. **Read `RFC.md` -- the full boot protocol / constitution. Follow it.**

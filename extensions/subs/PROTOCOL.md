@@ -137,16 +137,22 @@ Whenever the main agent chooses to check (during `HUNT`, at the top of `saipen c
    tickets and draft files directly into the *main project's own*
    `BOARD.md`/`kitchen/` -- not through OUTBOX at all -- while its own
    OUTBOX and kitchen sat untouched and stale. Before folding anything in,
-   check whether the main project's own `.saipen/BOARD.md`, `kitchen/`,
-   `LOG.md`, or `STATE.md` show changes you did not make yourself (`git
-   status`/mtimes, cross-checked against your own last checkpoint). Found
-   any -> that is a boundary violation, not a finding: do NOT silently
-   merge it (it may be fabricated) and do NOT silently revert it either
-   (it may be someone's real work) -- surface it to the user plainly,
-   named as what it is, same as any other destructive-adjacent surprise
-   (RFC § 1.1). Only once the main tree's own files are confirmed
-   untouched by anyone but you does the normal OUTBOX-based collect below
-   apply.
+   run `git status` (or, no git, compare mtimes against your own last
+   checkpoint) against the **whole working tree, not just `.saipen/`** --
+   the rule in § 1 is "any file outside its own folder," and a confused
+   sub can just as easily edit real source (`src/`, config, anything) as
+   it can the main project's own `BOARD.md`/`kitchen/`/`LOG.md`/`STATE.md`;
+   checking only the `.saipen/` metadata files would miss exactly that
+   wider case. Anything changed you did not make yourself -> that is a
+   boundary violation, not a finding: do NOT silently merge it (it may be
+   fabricated) and do NOT silently revert it either (it may be someone's
+   real work) -- set `STATE.phase: BLOCKED` with `next_action: WAIT:` naming
+   the exact files and asking the user how to proceed, same as any other
+   destructive-adjacent surprise (RFC § 1.1) -- surfacing it in chat alone
+   is not enough, the session MUST actually halt on it, not quietly move on
+   to other work while a corrupted tree sits unresolved. Only once the main
+   tree's own files are confirmed untouched by anyone but you does the
+   normal OUTBOX-based collect below apply.
 1. Read every active subSaipen's `OUTBOX.md`. An entry that's sat unreviewed
    a while may have gone stale (file renamed, bug already fixed by another
    route) -- spot-check `main_project_refs` still make sense against current

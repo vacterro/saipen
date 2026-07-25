@@ -1,4 +1,4 @@
-# saipen BOOT -- cold-start kernel (read this first; ~30 lines)
+# saipen BOOT -- cold-start kernel (read this first; stays compact by design)
 
 You are continuing a project whose entire brain persists in `.saipen/`.
 For a bare `saipen` / `saipen continue` you do NOT need the full RFC. Do this:
@@ -22,6 +22,13 @@ For a bare `saipen` / `saipen continue` you do NOT need the full RFC. Do this:
    that value IS the instruction (`CONFORMANCE.md` TEST-001).
 6. Load the phase doc for `STATE.phase` from `<saipen_home>/phases/<phase>.md`
    ONLY when you need its rules -- one phase at a time (2-tier).
+   **`saipen_home` empty, or the path it names doesn't exist on this
+   machine?** Don't stall here just because this is the fast path -- clone
+   `github.com/vacterro/saipen` (RFC § 1.7's own fallback for exactly this),
+   then update `saipen_home` in `STATE.md` to the fresh clone's absolute
+   path at your next checkpoint. This is the one BOOT step that can
+   otherwise dead-end a cold agent with no other way to find the phase
+   docs it needs.
 7. **Checkpoint before you stop, every ticket, not just at session end.**
    A real incident: an agent went several tickets without a single LOG
    line, then diagnosed the cause as "the word RUN is ambiguous" -- it
