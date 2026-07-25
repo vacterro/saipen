@@ -11,9 +11,20 @@ Only on `saipen ship`, or repo has `origin` AND LOG shows prior ship, or
 `goal_mode: true` (RFC § 2.4) with an existing `origin`. Never auto-publish
 unopted project. Needs 100% green.
 
-`mode: no-publish`? This phase is never entered at all -- RFC § 1.3
-blocks the `SHIP` transition itself, not just the push step below, since
-no-publish means git is missing and nearly every step here needs it.
+`mode: no-publish`? This phase is still entered -- RFC § 1.3 blocks
+git-dependent steps only (commit, tag, push), not `SHIP` itself; a blanket
+ban here would mean a git-less project can never close a ticket at all
+(`phases/review.md` makes `SHIP` mandatory before `DONE`, no exception).
+Do steps 1, 2, 4, 5 below (README, version bump, .gitignore/tmp cleanup,
+CHANGELOG) -- all local, none need git. Skip step 3's tag-matching clause,
+step 6 (tag), step 7 (first-publish confirmation -- no remote exists to
+publish to), and the "push" half of step 5. Replace steps 8/9's LOG line
+with: `- DATE [E-###] [parent: E-###] RUN: ship vX.Y.Z -> skipped publish
+(no-publish: no git)` (this exact text after the taxonomy) -- never phrase
+it as a failure, since nothing failed; publish was never attempted because
+it isn't possible, not because it broke. Write the human digest same as
+always, `awaiting:` noting `git needed to publish` if that matters for this
+project. Then STATE -> `DONE` directly, same as a normal successful ship.
 
 1. README beautiful: pitch, features, install, usage, version + changelog link.
 2. Version bump (micro -> 3.2.1, feature -> 3.2.0, breaking -> major).

@@ -2,6 +2,20 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.66.0 -- 2026-07-24 -- T-172 closed: outside-audit review, 4 real gaps found and fixed, 16 stale
+
+User dropped two more outside-audit files into `thoughts/` and asked for a fresh read. Same discipline as `audit5`/`6`/`7` earlier this session: verify every claim against the live repo before touching anything, fix only what survives.
+
+- **20 claims checked, 16 didn't survive**: 10 were already fixed by past sessions (the author admitted up front they didn't have `BOOT.md`, current `STYLE.md`, `GUIDE.md`, or most `phases/*.md` -- and indeed `markhunt.md`'s closure self-test, `ship.md`'s digest, `blocked.md`/`validate.md`'s `DONE` paths, `add.md`'s § 2.2 sync, and `STYLE.md`'s haiku line were all already there). One claimed "RFC says 14 legal phases but the schema still allows 16" -- RFC § 1.6 plainly enumerates sixteen and `tools/validate.py` confirms it live; stale snapshot from before `MARKHUNT`/`PREPARE` were folded into the enum. Three more (`BOOT`/`SKILL`/`RFC` cold-start sync, `next_action` rigidity, `read-only` phase-write "contradiction") turned out to already be resolved once the current text was read in full -- the live `saiwiki` instance this session personally ran `sub collect` against is direct proof the read-only path already works as designed.
+- **4 were real:**
+  1. **`mode: no-publish` had no path to `DONE`.** `phases/review.md` makes `SHIP` mandatory before `DONE` with zero exception ("even under `goal_mode`"), and `phases/ship.md` refused to enter the phase at all under `no-publish` -- meaning a git-less project could VERIFY and REVIEW cleanly and then never legally close the ticket. Fixed the same way `read-only`/`manual-verify` degrade instead of dead-ending: RFC § 1.3 now blocks only the git-dependent steps (commit/tag/push), and `ship.md` gained an explicit no-publish branch that still does everything local (README, version bump, CHANGELOG, digest), skips what needs git, LOGs `skipped publish` instead of a failure, and goes straight to `DONE`.
+  2. `CONFORMANCE.md` had zero mention of LOG segmentation despite `tools/validate.py` enforcing it live on every run (this repo's own `LOG.md` + `logs/LOG-001.md` are two segments right now) -- added row 38.
+  3. LOG sealing never specified a crash-safe write order -- RFC § 1.2 now requires the same temp-file-plus-rename discipline § 1.5 already mandates for `STATE.md`/`BOARD.md`: write the sealed segment first, only then replace the active file, never delete the original before the copy is confirmed.
+  4. Recovery's goal-counter rebuild didn't say to look inside sealed LOG segments if the `goal_mode` pivot line itself got sealed away -- RFC § 1.5 now says so explicitly.
+- **Bonus, user-requested**: `STYLE.md`'s no-haiku rule lost its "opt-in when explicitly asked" carve-out entirely -- not because it was misused, just to close the one seam a future session could quietly widen back into a habit. A direct request for a poem is unrelated and still fine to fulfill; this is specifically about unsolicited closing-verse decoration.
+
+`tools/validate.py` green throughout.
+
 ## 7.65.0 -- 2026-07-24 -- T-171 closed (subSaipen boundary violation, found live) + T-168 partial + T-170 round 3
 
 A real subSaipen boundary violation, caught live on FastPrompter: `saiwiki`'s wave 5 wrote fabricated-looking tickets and draft files directly into the *main project's own* `BOARD.md`/`kitchen/`/`LOG.md`, bypassing `kitchen/OUTBOX.md` entirely -- its own OUTBOX sat stale at wave 4 the whole time. `PROTOCOL.md` § 1 already said this was forbidden, but admits enforcement is procedural with no technical lock, so a weak or confused model can and did break it anyway.
