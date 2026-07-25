@@ -2,6 +2,22 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.70.0 -- 2026-07-25 -- T-176 closed: full-repo hunt, and the last two releases had shipped two commit-blocking regressions
+
+User asked for a full sweep for logical gaps, quality over token cost. Swept the executable surface first, where defects are real rather than documentary -- and the two worst finds were this session's own, both breaking *other people's* projects rather than this one.
+
+- **v7.65.0's rewritten home-repo fingerprint hard-FAILED ordinary projects.** Loosening it from "`saipen/RFC.md` exists" to "a `saipen/` directory + `VERSION` + `README.md`" made it match any project that merely keeps a folder called `saipen/` next to a version file and a readme -- extremely ordinary. Those projects got a hard FAIL accusing them of a stray clone that never happened, and because `tools/install_hook.py` wires the validator into pre-commit, **it blocked their commits**. Reproduced live, then fixed by adding `bootstrap/` as the discriminator: home-only, and untouched by the very nested-clone corruption the check exists to catch (that incident replaced `saipen/` alone). Verified three ways -- consuming project passes, real corruption still caught, home unaffected.
+- **v7.66.0 legalized `no-publish` + `SHIP` but left all three validators banning it.** `tools/validate.py`, `tests/validate.sh` and `tests/validate.ps1` each still asserted the old rule, so a git-less project sitting in a now-legal state failed conformance and -- again through the pre-commit hook -- couldn't commit. Fixed in all three, plus `tests/scenarios/no-git-ship-denial/README.md`, which asserted the literal opposite of current behavior, and CONFORMANCE row 8. Verified that `no-publish`+SHIP now passes both validators while `read-only`+SHIP still fails, so no regression was traded in.
+
+Also found, all real:
+
+- **`CONFORMANCE.md` was never distributed to skill copies**, though `BOOT.md` -- loaded on every single cold start -- cites it by name, as does `phases/validate.md`. Every injected platform therefore carried a dangling pointer. This is precisely the v7.22.3/v7.25.0 "promised here, never wired there" class the distribution check exists to catch, and the check didn't cover it. Added to both injectors and the runtime manifest, and `dist_tokens` extended from directory to per-file granularity so the whole always-loaded root set is now guarded. Regression-verified by removing the reference and confirming the FAIL.
+- **`SPEC.md` listed 14 of the 16 phases** -- no `markhunt.md`, no `prepare.md` -- and knew nothing of `BOOT.md` or the crew launchers. (A LOG entry from an earlier session claims SPEC.md was checked and clean; that check was clearly superficial.)
+- **The Core `extensions/templates/BOARD.md` shipped with no shape example**, while the subSaipen template gained one back in v7.58.0 after a real incident where a worker invented its own ticket shape. The lesson had been applied to one template and not the other.
+- **Neither validator skips HTML comments** -- found by testing the previous fix rather than assuming it worked. A commented-out example ticket in a template parses as a live ticket on a brand-new board, and `tests/validate.sh` scans for the dependency field across the whole file rather than only ticket lines, so the two validators disagree about what's legal. Both templates now carry de-fanged examples (no leading dash, no field name adjacent to an id) with the trap documented inline so it isn't reintroduced. All four combinations -- both templates against both validators -- verified clean.
+
+Note: deployed skill copies are stale until `bootstrap/inject.*` is re-run (they lack `CONFORMANCE.md`). That writes into the user's home config, so it waits on their say-so.
+
 ## 7.69.0 -- 2026-07-25 -- T-175 closed: 19 real gaps, including two the last two releases introduced
 
 Third batch of outside-audit files in `thoughts/`. Six claims died on contact with the live repo -- notably "goal_mode + mature product = infinite loop" (`phases/add.md` already sets `goal_mode: false` *before* transitioning to DONE, so `done.md` never sees a live goal run) and the ship.md tag-recreate concern (already fixed in v7.68.0; that reviewer had a stale snapshot). Nineteen survived, and two of them were mine:

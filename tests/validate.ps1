@@ -30,10 +30,12 @@ Assert-Format ($stateContent -match "mode:\s+(full|read-only|no-publish|manual-v
 Write-Host "PASS: STATE.md schema valid" -ForegroundColor Green
 
 # 1b2. mode/phase basic compatibility (RFC § 1.3) -- not the full matrix,
-# just the two restrictions already stated normatively in prose.
-if ($stateContent -match "mode:\s+no-publish" -and $stateContent -match "phase:\s+SHIP") {
-    Assert-Format $false "mode: no-publish MUST NOT transition to SHIP (RFC § 1.3)"
-}
+# just the restriction stated normatively in prose. The old no-publish/SHIP
+# ban was REMOVED here, not merely left out: v7.66.0 made SHIP reachable
+# under no-publish (git steps skipped, local ones still run) because banning
+# the phase left a git-less project unable to close any ticket. This file is
+# frozen against NEW checks; correcting one that now contradicts the RFC is
+# a bug fix, not an extension.
 if ($stateContent -match "mode:\s+read-only" -and $stateContent -match "phase:\s+(BUILD|SHIP|CLEAN|TRANSLATE)") {
     Assert-Format $false "mode: read-only MUST NOT enter BUILD/SHIP/CLEAN/TRANSLATE (RFC § 1.3)"
 }

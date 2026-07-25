@@ -29,7 +29,7 @@ fixture state why, not silently.
 | 5 | Stale claim forfeiture | `multi-agent-claim-conflict` |
 | 6 | Goal counter crash recovery | `goal-counter-recovery` |
 | 7 | Manual-verify gate | `manual-verify-fallback` |
-| 8 | No-publish restriction | `no-git-ship-denial` |
+| 8 | No-publish restriction -- git-dependent *steps* are skipped (no commit/tag/push, never a false "pushed"), but `SHIP` itself stays reachable and still closes the ticket to `DONE` (RFC § 1.3, `phases/ship.md`'s no-publish branch, v7.66.0) | `no-git-ship-denial` -- behavioral, README-only (folder name predates v7.66.0, when this asserted the opposite) |
 | 9 | Read-only restriction | `read-only-restriction` |
 | 10 | Board-empty maintenance transition | `board-empty-maintenance-transition` -- behavioral, no fixture |
 | 11 | Goal objective exit | N/A -- `goal_exit` was evaluated and rejected three times (recorded in `.saipen/KNOWLEDGE/decisions.md` and CHANGELOG v7.13.1/v7.19.1); `goal_mode` never exits on board-empty, so there is no "objective exit" behavior to test |

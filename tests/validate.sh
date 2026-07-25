@@ -27,11 +27,12 @@ grep -qE "mode:[[:space:]]+(full|read-only|no-publish|manual-verify)" .saipen/ST
 echo -e "${GREEN}PASS: STATE.md schema valid${NC}"
 
 # 1b2. mode/phase basic compatibility (RFC § 1.3) -- not the full matrix,
-# just the two restrictions already stated normatively in prose.
-if grep -qE "mode:[[:space:]]+no-publish" .saipen/STATE.md && grep -qE "phase:[[:space:]]+SHIP" .saipen/STATE.md; then
-    echo -e "${RED}FAIL: mode: no-publish MUST NOT transition to SHIP (RFC § 1.3)${NC}"
-    exit 1
-fi
+# just the restriction stated normatively in prose. The old no-publish/SHIP
+# ban was REMOVED here, not merely left out: v7.66.0 made SHIP reachable
+# under no-publish (git steps skipped, local ones still run) because banning
+# the phase left a git-less project unable to close any ticket. This file is
+# frozen against NEW checks; correcting one that now contradicts the RFC is
+# a bug fix, not an extension.
 if grep -qE "mode:[[:space:]]+read-only" .saipen/STATE.md && grep -qE "phase:[[:space:]]+(BUILD|SHIP|CLEAN|TRANSLATE)" .saipen/STATE.md; then
     echo -e "${RED}FAIL: mode: read-only MUST NOT enter BUILD/SHIP/CLEAN/TRANSLATE (RFC § 1.3)${NC}"
     exit 1

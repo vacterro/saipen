@@ -62,7 +62,7 @@ function Copy-Skill([string]$dst) {
   # half-copy is exactly the silent-failure class hunt.md exists to catch.
   try {
     if (-not (Test-Path $dst)) { New-Item -ItemType Directory -Force $dst -ErrorAction Stop | Out-Null }
-    Copy-Item (Join-Path $SkillHome "BOOT.md"),(Join-Path $SkillHome "SKILL.md"),(Join-Path $SkillHome "RFC.md"),(Join-Path $SkillHome "UI.md"),(Join-Path $SkillHome "STYLE.md") $dst -Force -ErrorAction Stop
+    Copy-Item (Join-Path $SkillHome "BOOT.md"),(Join-Path $SkillHome "SKILL.md"),(Join-Path $SkillHome "RFC.md"),(Join-Path $SkillHome "UI.md"),(Join-Path $SkillHome "STYLE.md"),(Join-Path $SkillHome "CONFORMANCE.md") $dst -Force -ErrorAction Stop
     Copy-Item (Join-Path $SkillHome "phases") $dst -Recurse -Force -ErrorAction Stop
     $root = Split-Path $SkillHome
     Copy-Item (Join-Path $root "tools") $dst -Recurse -Force -ErrorAction Stop

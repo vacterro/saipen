@@ -168,9 +168,16 @@ if len(failures) == before:
     ok("STATE.md schema valid (checked against state.schema.json)")
 
 # RFC § 1.3 mode/phase restrictions.
+# NOTE: `no-publish` + `SHIP` is NOT checked here, deliberately. It used to
+# be, and that check outlived the rule: v7.66.0 made SHIP reachable under
+# `no-publish` (git-dependent steps are skipped, the local ones still run,
+# STATE -> DONE) precisely because banning the phase outright left a git-less
+# project unable to close any ticket at all -- `phases/review.md` makes SHIP
+# mandatory before DONE. What `no-publish` actually forbids is the push/tag
+# *steps*, which no `STATE.md` field can witness, so there is nothing here to
+# assert. Re-adding a phase-level ban would hard-FAIL a legal state and, via
+# tools/install_hook.py's pre-commit wiring, block that project's commits.
 mode, phase = state.get("mode"), state.get("phase")
-if mode == "no-publish" and phase == "SHIP":
-    fail("mode: no-publish MUST NOT transition to SHIP (RFC § 1.3)")
 if mode == "read-only" and phase in ("BUILD", "SHIP", "CLEAN", "TRANSLATE"):
     fail(f"mode: read-only MUST NOT enter {phase} (RFC § 1.3)")
 
@@ -421,13 +428,20 @@ if knowledge.is_dir():
 
 # ------------------------------------------------- home-repo-only self-check
 
-# Only applies in the saipen repo's own clone root (fingerprint: a saipen/
-# dir next to VERSION + README.md) -- a consuming project's .saipen/ never
-# has that. Fingerprint deliberately does NOT require saipen/RFC.md itself
-# to exist (see the loud FAIL just below for exactly why) -- a directory
-# fingerprint plus an explicit missing-file check catches corruption instead
-# of silently skipping every distribution-integrity check underneath it.
-if Path("saipen").is_dir() and Path("VERSION").is_file() and Path("README.md").is_file():
+# Only applies in the saipen repo's own clone root. Fingerprint deliberately
+# does NOT require saipen/RFC.md itself to exist (see the loud FAIL just
+# below for why) -- but it MUST stay specific enough that an ordinary
+# consuming project never trips it. `saipen/` + VERSION + README.md alone was
+# not: a real false positive, caught by testing this exact case, is any
+# project that happens to keep a `saipen/` folder next to a VERSION file and
+# a README -- extremely ordinary, and (via tools/install_hook.py's pre-commit
+# wiring) it would have hard-FAILED and blocked that project's commits with a
+# message about a stray clone that never happened. `bootstrap/` is the
+# discriminator: home-only, at the root, and untouched by the nested-clone
+# corruption this check exists to catch (that incident replaced `saipen/`
+# alone).
+if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
+        and Path("VERSION").is_file() and Path("README.md").is_file()):
     if not Path("saipen/RFC.md").is_file():
         fail("saipen/RFC.md missing even though this looks like the SAIPEN "
              "home repo (saipen/ + VERSION + README.md all present) -- a "
@@ -479,6 +493,7 @@ if Path("saipen").is_dir() and Path("VERSION").is_file() and Path("README.md").i
         # B. Every runtime file the protocol references must exist in the home.
         manifest = [
             "saipen/BOOT.md", "saipen/SKILL.md", "saipen/UI.md", "saipen/STYLE.md",
+            "saipen/CONFORMANCE.md",
             "tools/validate.py", "tools/install_hook.py", "tools/uninstall_hook.py",
             "tests/validate.sh", "tests/validate.ps1",
             "extensions/schemas/state.schema.json",
@@ -491,9 +506,17 @@ if Path("saipen").is_dir() and Path("VERSION").is_file() and Path("README.md").i
         if not manifest_missing:
             ok(f"runtime manifest complete ({len(manifest)} files)")
 
-        # C. Both injector scripts must actually distribute every runtime dir.
+        # C. Both injector scripts must actually distribute every runtime dir
+        # AND every always-loaded root doc. The per-file names matter as much
+        # as the dirs: CONFORMANCE.md was referenced by BOOT.md (loaded on
+        # every cold start) and phases/validate.md while no injector copied
+        # it, so every injected platform had a dangling pointer -- the same
+        # v7.22.3/v7.25.0 class this check exists to catch, just at file
+        # rather than directory granularity.
         dist_tokens = ["phases", "tools", "extensions/schemas",
-                       "extensions/templates", "extensions/subs", "tests"]
+                       "extensions/templates", "extensions/subs", "tests",
+                       "BOOT.md", "SKILL.md", "RFC.md", "STYLE.md", "UI.md",
+                       "CONFORMANCE.md"]
         wiring_ok = True
         for script in ("bootstrap/inject.ps1", "bootstrap/inject.sh"):
             if not Path(script).is_file():
@@ -508,8 +531,9 @@ if Path("saipen").is_dir() and Path("VERSION").is_file() and Path("README.md").i
                          f"(the exact v7.22.3/v7.25.0 bug class)")
                     wiring_ok = False
         if wiring_ok:
-            ok("injector distributes every runtime dir "
-               "(phases/tools/tests/schemas/templates, both scripts)")
+            ok("injector distributes every runtime dir + root doc "
+               "(phases/tools/tests/schemas/templates/subs, BOOT/SKILL/RFC/"
+               "STYLE/UI/CONFORMANCE, both scripts)")
 
 # ------------------------------------------------------------------- summary
 
