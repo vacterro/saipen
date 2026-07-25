@@ -387,6 +387,21 @@ if log_files:
         ok(f"LOG.md format valid (skeleton, E-### unique + monotonic, parents "
            f"resolve; {len(log_files)} segment(s))")
 
+    # RFC § 1.2 segmentation soft cap (~300 lines / ~64 KB). Without a signal
+    # here the rule is purely aspirational -- nothing ever tells an agent the
+    # active tail has outgrown what § 1.1's "read the tail" can cheaply load.
+    # WARN, never FAIL: an oversized log is a hygiene debt, not corruption,
+    # and sealing is a CLEAN-time action, not something to force mid-ticket.
+    if active_log.is_file():
+        active_lines = len(active_log.read_text(encoding="utf-8-sig").splitlines())
+        active_kb = active_log.stat().st_size / 1024
+        if active_lines > 300 or active_kb > 64:
+            warn("log-soft-cap",
+                 f"{active_log.as_posix()} is {active_lines} lines / "
+                 f"{active_kb:.0f} KB, past the ~300 line / ~64 KB soft cap -- "
+                 f"seal it into .saipen/logs/LOG-<NNN>.md at the next "
+                 f"checkpoint (RFC § 1.2, phases/clean.md)")
+
 # ----------------------------------------------------------------- KNOWLEDGE
 
 knowledge = Path(".saipen/KNOWLEDGE")

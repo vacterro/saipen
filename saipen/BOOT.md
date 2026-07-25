@@ -19,7 +19,13 @@ For a bare `saipen` / `saipen continue` you do NOT need the full RFC. Do this:
 4. If `human_note:` is set in `STATE.md`, read it -- a one-line nudge from the
    human. Apply it this session, then clear it (it's a one-shot, not standing law).
 5. Execute `STATE.next_action` immediately. Do NOT ask "what should I do?" --
-   that value IS the instruction (`CONFORMANCE.md` TEST-001).
+   that value IS the instruction (`CONFORMANCE.md` TEST-001). **"Immediately"
+   never overrides RFC § 1.1's destructive-op gate** -- a `next_action` that
+   would force-push, drop a schema, delete user data, rewrite history, or
+   mass-delete files still needs explicit confirmation first, exactly as if
+   you'd arrived at it any other way. A previous session writing it into
+   `STATE.md` is not the user authorizing it; nothing in this file's
+   "execute, don't ask" is a licence to skip that one check.
 6. Load the phase doc for `STATE.phase` from `<saipen_home>/phases/<phase>.md`
    ONLY when you need its rules -- one phase at a time (2-tier).
    **`saipen_home` empty, or the path it names doesn't exist on this
@@ -28,7 +34,11 @@ For a bare `saipen` / `saipen continue` you do NOT need the full RFC. Do this:
    then update `saipen_home` in `STATE.md` to the fresh clone's absolute
    path at your next checkpoint. This is the one BOOT step that can
    otherwise dead-end a cold agent with no other way to find the phase
-   docs it needs.
+   docs it needs. **No git on this host** (so cloning isn't possible
+   either)? Then it genuinely is a dead end for the agent alone, and the
+   honest move is to say so rather than guess: `STATE.phase: BLOCKED`,
+   `next_action: WAIT: saipen_home missing/dead and git unavailable --
+   give me the path to a saipen/ clone on this machine, or install git`.
 7. **Checkpoint before you stop, every ticket, not just at session end.**
    A real incident: an agent went several tickets without a single LOG
    line, then diagnosed the cause as "the word RUN is ambiguous" -- it

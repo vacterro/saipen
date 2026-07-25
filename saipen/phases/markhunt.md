@@ -105,16 +105,25 @@ vector means the surface is NOT exhausted -- keep going, don't round up);
 mid-pass -> the coverage is against a stale tree, re-run the moved part) --
 both `head_start`/`head_end` are the literal string `no-git` (no repo, or
 `mode: no-publish`)? This check is satisfied automatically, nothing to
-compare; and `findings:` equals the number of `[MARKHUNT]` tickets this pass actually
-wrote to `## BLOCKED`. Any mismatch means the pass isn't done -- resolve it,
+compare; and `findings:` is fully accounted for by the `[MARKHUNT]` tickets
+this pass wrote to `## BLOCKED` -- **accounted for, not numerically equal**:
+this same doc tells you to group related findings under one ticket rather
+than filing one per trivial nit, so 10 findings landing as 3 grouped tickets
+is the intended outcome, not a failure. What the check actually forbids is an
+*unaccounted* finding: something counted in `findings:` that reached no ticket
+at all. Grouping is legal, dropping is not -- so a grouped ticket MUST name
+how many findings it carries (e.g. `[MARKHUNT] doc-drift cluster x6`), which
+is what makes the sum checkable at all. Any finding that can't be traced to a
+ticket means the pass isn't done -- resolve it,
 never paper over it. This is the manifest-driven closure HUNT gets for free
 from its hash line; MARKHUNT earns it by checking its own manifest. Only
 then LOG the completion, carrying the manifest summary into that permanent
 line so coverage stays auditable after `kitchen/` is swept: `- DATE [E-###]
 [parent: E-###] RUN: markhunt -> N findings, V/5 vectors, @head_end` (this
 enriched form, not a bare count). A later `VALIDATE` or a human cross-checks
-it trivially -- the line's `N` must match the `[MARKHUNT]` tickets on the
-board and `V` must be `5`. Then transition to `DONE`. `DONE`'s own existing priority logic
+it trivially -- the line's `N` must equal the findings accounted for across
+this pass's `[MARKHUNT]` tickets on the board (their per-ticket counts summed,
+not the ticket count itself, per the grouping rule above) and `V` must be `5`. Then transition to `DONE`. `DONE`'s own existing priority logic
 (`phases/done.md`) takes over from there for whatever's actually in
 `## TODO` -- MARKHUNT's own `## BLOCKED` findings sit untouched until a
 human triages them. MARKHUNT never decides what gets worked next; it

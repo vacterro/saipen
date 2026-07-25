@@ -1,6 +1,17 @@
 # Phase: INIT
 
-No `.saipen/` directory found. Copy `extensions/templates/` (`STATE.md`,
+No `.saipen/` directory found. **Confirm that's actually true before creating
+anything** (RFC § 1.1): if git is available, run `git rev-parse
+--git-common-dir` first -- output ending in `/.git` rather than a bare `.git`
+means this is a *linked worktree*, and `.saipen/` (gitignored by design) was
+never copied into it even though the main worktree has one. Strip that
+trailing `/.git` to get the real root and look there. Bootstrapping anyway
+creates a second, disconnected `.saipen/` and orphans the project's real
+continuation memory -- the one mistake this phase can make that no later
+phase can detect on its own. Only genuinely absent at the main root does the
+rest of this doc apply.
+
+Copy `extensions/templates/` (`STATE.md`,
 `BOARD.md`, `LOG.md`) from the SAIPEN home -- do NOT freehand the schema.
 Templates missing or unreachable (degraded capability only)? Write by hand,
 matching exactly:

@@ -45,14 +45,21 @@ then check for another unblocked `TODO` ticket and work that instead (STATE -> `
 an earlier round (someone moved it back to `## TODO` and this is a repeat
 trip through the same cap)? Do not silently spend another fresh 3/2 budget
 retrying the same approach -- append this round's facts to the existing
-`| blocker:` text rather than overwriting it, and go `STATE.phase: BLOCKED`
-(`phases/blocked.md`) instead of just picking up other work. Two independent
-failed attempts at the same ticket is itself the signal that mechanically
-retrying won't help; it needs a human decision, not a third identical cycle.
-`STATE.phase: BLOCKED` (which loads
-`phases/blocked.md` and stops for the user) is reserved for when no other
-ticket on the board is workable -- one stuck ticket MUST NOT halt a session
-that still has other work available, under `goal_mode` or otherwise.
+`| blocker:` text rather than overwriting it. Two independent failed attempts
+at the same ticket is itself the signal that mechanically retrying won't help;
+it needs a human decision, not a third identical cycle -- so this ticket is
+done being retried either way. **What that means for the session depends on
+the rest of the board, and `phases/blocked.md`'s own entry condition decides
+it, not this cap**: that doc opens by stating you land in session-level
+`BLOCKED` only after confirming no other ticket is workable, so check that
+first. Another unblocked `TODO` exists -> leave this ticket in `## BLOCKED`
+carrying its appended history and go work that one (`SCOUT`/`BUILD`), exactly
+as the first-trip case above does. Nothing else is workable -> `STATE.phase:
+BLOCKED` with a concrete `WAIT:` naming the decision this ticket needs. The
+hysteresis is about never spending a third budget on the same ticket, never
+about halting a session that still has real work available -- one stuck
+ticket MUST NOT halt a session that still has other work, under `goal_mode`
+or otherwise.
 
 **Clean tree before the next ticket.** A blocked ticket MUST NOT leave its
 half-broken edits sitting in the working tree -- the next ticket would

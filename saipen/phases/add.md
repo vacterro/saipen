@@ -39,7 +39,14 @@ Activate this mode to systematically expand the software's capabilities. SAIPEN 
    2. **Planned implementation**: a real gap exists but isn't obviously
       minimal or isn't obviously in the existing design language ->
       ticket it, `RETURN PLAN` or `SCOUT` (step 3 below), never build
-      it directly just because a priority slot matched. Without this
+      it directly just because a priority slot matched. **Which of the two**
+      is the same size judgment `phases/plan.md`'s own size gate makes, not
+      a coin flip: the ticket's next step is already concrete and the work
+      is small (roughly its `<=2 files + obvious change` bar) -> `SCOUT`,
+      since there is nothing left to plan; it needs design, dependency
+      ordering, or research before anyone can start -> `PLAN`. Unsure ->
+      `PLAN`, the cheaper mistake (a redundant planning pass costs one
+      short analysis; skipping a needed one costs a wrong build). Without this
       `ELSE`, a genuine but non-minimal opportunity silently fell through
       to `RETURN DONE` -- declaring the product mature when it wasn't.
 

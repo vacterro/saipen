@@ -2,6 +2,28 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.69.0 -- 2026-07-25 -- T-175 closed: 19 real gaps, including two the last two releases introduced
+
+Third batch of outside-audit files in `thoughts/`. Six claims died on contact with the live repo -- notably "goal_mode + mature product = infinite loop" (`phases/add.md` already sets `goal_mode: false` *before* transitioning to DONE, so `done.md` never sees a live goal run) and the ship.md tag-recreate concern (already fixed in v7.68.0; that reviewer had a stale snapshot). Nineteen survived, and two of them were mine:
+
+- **My own v7.66.0 sealing "crash-safety" was wrong where it mattered.** It cheerfully said a crash between writing the sealed segment and replacing the active log means "worst case the next agent re-attempts sealing on a file that's already safely duplicated." A blind re-attempt writes the same `E-###` lines into a *second* segment -- duplicate IDs across the sequence, which is the exact breakage sealing exists to prevent. Now the re-attempt must compare against the highest existing segment first and, on a match, only replace the active file.
+- **My own v7.68.0 BOOT clone-fallback assumed git exists.** It told a cold agent with a dead `saipen_home` to clone the repo -- but `mode: no-publish` means git is *missing*, so that path is unavailable exactly when it's needed. Now falls through to a concrete `BLOCKED`/`WAIT:` asking for a local clone path or git.
+
+Other real ones:
+
+- **VERIFY hysteresis violated `blocked.md`'s own entry condition** -- it sent the whole session to `BLOCKED` on a ticket's second failure, while `phases/blocked.md` opens by stating you only land there after confirming no other ticket is workable. Now it checks the board first; the hysteresis caps retries on *that ticket*, it never halts a session with real work left.
+- **MARKHUNT's closure self-test was unsatisfiable whenever its own grouping rule was followed** -- the test demanded `findings:` equal the number of `[MARKHUNT]` tickets, while the same doc says to group related findings into one ticket. Ten findings in three tickets failed the test by construction. Now it checks findings are *accounted for*, and a grouped ticket must carry its own count.
+- **Secrets were never banned from `.saipen/recovery/` or `.saipen/logs/`** -- precisely the two places that copy content *verbatim* by design (Recovery duplicates a corrupt STATE; sealing moves LOG lines unedited). A secret reaching either original was faithfully archived by machinery whose whole job is not to alter content.
+- **A `BLOCKED` session could escape into autonomous HUNT** -- a board holding only `## BLOCKED` tickets satisfies "no open TODO" on a literal reading of § 2.1, letting a session that stopped for a human decision quietly start unrelated work instead.
+- **`T-###` reuse after pruning** -- `phases/clean.md` prunes DONE tickets off the board by design, so "highest ID on the board + 1" silently reuses an already-issued ID. Next ID now derives from `LOG.md` (including sealed segments), which never loses history.
+- **The `read-only` paradox**: the mode is set because filesystem writes are unavailable, yet § 1.3 requires writing it to `STATE.md`. Resolved honestly -- report it, work under it, don't fabricate a write, and never read a stored `mode:` as proof of the *current* host's capabilities.
+- **Recovery had two unhandled shapes**: no `## DOING` at all (a crash between the LOG and BOARD writes leaves the ticket still in `## TODO`), and a last event that's session-level rather than ticket-level. Both now have explicit rules instead of an implied "figure it out."
+- **Plain LOG appends had no crash-safety rule** at all, while BOARD/STATE/sealing all did. A truncated *last* line is now defined as debris; earlier malformed lines remain history with a bad shape, a different problem with a different rule.
+
+Plus: BUILD's "risky edit: LOG rollback first" no longer reads as a substitute for § 1.1's confirmation gate; ADD's `RETURN PLAN_or_SCOUT` got a real criterion instead of a coin flip; § 1.6 now states that `-> BLOCKED` is universal and a phase doc's silence isn't a prohibition; from-any-phase commands must checkpoint an in-flight `DOING` ticket; the safety valve got a legal `WAIT:` category (§ 2.4 orders a stop-and-wait that § 1.2 had no legal way to express); goal-counter bumps must leave an identifiable `DEC` line, since Recovery is *required* to rebuild counters by counting them; a missing `python` maps to real degradation instead of being ignored; explicit `saipen ship` doesn't bypass VERIFY/REVIEW; and `phases/init.md` got the linked-worktree guard that stops it creating a second, disconnected `.saipen/`.
+
+`tools/validate.py` gained a mechanical soft-cap WARN on the active `LOG.md` -- the segmentation rule previously had no signal whatsoever, so nothing ever told an agent the tail had outgrown what a cheap read can load. Verified live: inflated the log to 363 lines, confirmed the WARN fired, restored.
+
 ## 7.68.0 -- 2026-07-24 -- T-174 closed: second outside-audit batch, 13 real gaps found+fixed
 
 A second batch of 10 outside-audit files landed in `thoughts/`. Same discipline: verify every claim live before touching anything. Most repeated already-fixed or already-rejected ground from a stale snapshot (`add.md`, README/GUIDE version, `init.md`, `ship.md` no-publish, `hunt.md` delete-free safety, CONFORMANCE row 38, T-136 -- all re-checked, all still correct) or re-proposed the ratified-rejected `goal_exit` command (`KNOWLEDGE/decisions.md`, three prior rejections on file). 13 real gaps survived contact with the live repo:
