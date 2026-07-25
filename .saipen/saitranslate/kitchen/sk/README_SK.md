@@ -10,7 +10,7 @@
 
 **Jeden príkaz. Nulová amnézia.**
 
-**v7.55.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | čistý markdown | nulové závislosti | MIT
+**v7.64.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | čistý markdown | nulové závislosti | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -51,7 +51,7 @@ Pamäť žije v projekte, nie v hlave modelu. `Projekt -> Pamäť -> LLM` sa men
 
 ## Rýchly štart
 
-**1. Inštalácia raz na zariadenie** -- naučí Claude Code, Gemini, OpenCode, Aider, Antigravity:
+**1. Inštalácia raz na zariadenie** -- naučí Claude Code, Gemini, OpenCode, Aider, Antigravity, Codex a akykolvek vseobecny citac ~/.agents/skills (FreeBuff, atd.):
 ```bash
 git clone https://github.com/vacterro/saipen
 cd saipen

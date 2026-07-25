@@ -12,7 +12,7 @@ ja jatkaa työtä alle minuutissa -- ilman uudelleenohjeistusta, millä tahansa 
 
 **Yksi komento. Nolla muistinmenetystä.**
 
-**v7.55.0** | [Määrittely](SPEC.md) | [Opas](GUIDE.md) | [RFC](saipen/RFC.md) | [Tyyli](saipen/STYLE.md) | [Käyttöliittymä](saipen/UI.md) | [Yhteensopivuus](saipen/CONFORMANCE.md) | selkeä markdown | nolla riippuvuutta | MIT
+**v7.64.0** | [Määrittely](SPEC.md) | [Opas](GUIDE.md) | [RFC](saipen/RFC.md) | [Tyyli](saipen/STYLE.md) | [Käyttöliittymä](saipen/UI.md) | [Yhteensopivuus](saipen/CONFORMANCE.md) | selkeä markdown | nolla riippuvuutta | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -53,7 +53,7 @@ Muisti sijaitsee projektissa, ei tekoälymallin päässä. `Projekti -> Muisti -
 
 ## Pika-aloitus
 
-**1. Asenna kerran koneelle** -- opettaa Claude Coden, Geminin, OpenCoden, Aiderin, Antigravityn:
+**1. Asenna kerran koneelle** -- opettaa Claude Coden, Geminin, OpenCoden, Aiderin, Codexin, Antigravityn ja mikä tahansa yleinen `~/.agents/skills`-lukija (FreeBuff, jne.):
 ```bash
 git clone https://github.com/vacterro/saipen
 cd saipen

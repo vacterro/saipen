@@ -53,7 +53,10 @@ window 3 (fixer):      saipython
 
 A bare subSaipen name (`saihunt`, `saipython`, `saiwiki`) is a **role-adopt**
 command (PROTOCOL.md § 7): the agent spawns that sub if it doesn't exist
-yet, becomes it, and starts its loop -- no second command needed. Want it
+yet, becomes it, and starts its loop -- no second command needed. A trailing
+`init`/`start` (`saiwiki init`) means exactly the same thing -- and any one
+of the three works standalone, alone, with no crew and no other window
+running. Want it
 fully autonomous between tickets? After adopting, it runs
 `saipen goal "process my board, verify each, report through OUTBOX"` and
 doesn't stop until its wave/ticket valve trips (RFC § 2.4).

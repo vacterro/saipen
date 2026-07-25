@@ -12,7 +12,7 @@ và tiếp tục công việc trong chưa đầy một phút -- không cần gi�
 
 **Một lệnh. Không hề mất trí nhớ.**
 
-**v7.55.0** | [Đặc tả](SPEC.md) | [Hướng dẫn](GUIDE.md) | [RFC](saipen/RFC.md) | [Phong cách](saipen/STYLE.md) | [Giao diện UI](saipen/UI.md) | [Độ tuân thủ](saipen/CONFORMANCE.md) | markdown thuần túy | không phụ thuộc | MIT
+**v7.64.0** | [Đặc tả](SPEC.md) | [Hướng dẫn](GUIDE.md) | [RFC](saipen/RFC.md) | [Phong cách](saipen/STYLE.md) | [Giao diện UI](saipen/UI.md) | [Độ tuân thủ](saipen/CONFORMANCE.md) | markdown thuần túy | không phụ thuộc | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -53,7 +53,7 @@ Bộ nhớ nằm trong dự án, không phải trong đầu của mô hình. `D�
 
 ## Bắt đầu Nhanh
 
-**1. Cài đặt một lần trên mỗi máy** -- hướng dẫn Claude Code, Gemini, OpenCode, Aider, Antigravity:
+**1. Cài đặt một lần trên mỗi máy** -- hướng dẫn Claude Code, Gemini, OpenCode, Aider, Antigravity, Codex va b?t k? trinh d?c ~/.agents/skills chung nao (FreeBuff, v.v.):
 ```bash
 git clone https://github.com/vacterro/saipen
 cd saipen

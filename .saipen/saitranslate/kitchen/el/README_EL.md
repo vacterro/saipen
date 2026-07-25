@@ -12,7 +12,7 @@
 
 **Μία εντολή. Μηδενική αμνησία.**
 
-**v7.55.0** | [Προδιαγραφή](SPEC.md) | [Οδηγός](GUIDE.md) | [RFC](saipen/RFC.md) | [Στυλ](saipen/STYLE.md) | [UI](saipen/UI.md) | [Συμμόρφωση](saipen/CONFORMANCE.md) | απλό markdown | μηδενικές εξαρτήσεις | MIT
+**v7.64.0** | [Προδιαγραφή](SPEC.md) | [Οδηγός](GUIDE.md) | [RFC](saipen/RFC.md) | [Στυλ](saipen/STYLE.md) | [UI](saipen/UI.md) | [Συμμόρφωση](saipen/CONFORMANCE.md) | απλό markdown | μηδενικές εξαρτήσεις | MIT
 
 [![Ρωσικός Οδηγός](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![Αγγλικός Οδηγός](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -53,7 +53,7 @@ Agent ->  Εργάζεται.
 
 ## Γρήγορη Εκκίνηση
 
-**1. Εγκατάσταση μία φορά ανά μηχάνημα** -- διδάσκει τα Claude Code, Gemini, OpenCode, Aider, Antigravity:
+**1. Εγκατάσταση μία φορά ανά μηχάνημα** -- διδάσκει τα Claude Code, Gemini, OpenCode, Aider, Antigravity, Codex ??? ???????????? ?????? ????????? ~/.agents/skills (FreeBuff, ?.??.):
 ```bash
 git clone https://github.com/vacterro/saipen
 cd saipen

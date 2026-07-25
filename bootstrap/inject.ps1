@@ -69,6 +69,7 @@ function Copy-Skill([string]$dst) {
     New-Item -ItemType Directory -Force (Join-Path $dst "extensions") -ErrorAction Stop | Out-Null
     Copy-Item (Join-Path $root "extensions\schemas") (Join-Path $dst "extensions") -Recurse -Force -ErrorAction Stop
     Copy-Item (Join-Path $root "extensions\templates") (Join-Path $dst "extensions") -Recurse -Force -ErrorAction Stop
+    Copy-Item (Join-Path $root "extensions\subs") (Join-Path $dst "extensions") -Recurse -Force -ErrorAction Stop
     New-Item -ItemType Directory -Force (Join-Path $dst "tests") -ErrorAction Stop | Out-Null
     Copy-Item (Join-Path $root "tests\validate.sh"),(Join-Path $root "tests\validate.ps1") (Join-Path $dst "tests") -Force -ErrorAction Stop
     return "copied (re-run after updates)"

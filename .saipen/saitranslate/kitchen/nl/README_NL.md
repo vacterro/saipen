@@ -12,7 +12,7 @@ en het werk in minder dan een minuut hervat -- geen herbriefing, elke leverancie
 
 **Eén commando. Nul amnesie.**
 
-**v7.55.0** | [Spec](SPEC.md) | [Gids](GUIDE.md) | [RFC](saipen/RFC.md) | [Stijl](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformiteit](saipen/CONFORMANCE.md) | plat markdown | nul afhankelijkheden | MIT
+**v7.64.0** | [Spec](SPEC.md) | [Gids](GUIDE.md) | [RFC](saipen/RFC.md) | [Stijl](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformiteit](saipen/CONFORMANCE.md) | plat markdown | nul afhankelijkheden | MIT
 
 [![Russische Gids](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![Engelse Gids](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -36,6 +36,7 @@ Geheugen leeft in het project, niet in het hoofd van een model. `Project -> Gehe
 - **Nul-Prompt Autonomie**: Geen open to-do's meer? Automatische overgang `HUNT` (scant op bugs) → `ADD` (ontwikkelt functies) → `HUNT` lus. Nul vragen gesteld.
 - **Expliciete Triggers**: `/saipen clean` (repo opschonen), `/saipen translate` (geïsoleerde `.saipen/saitranslate/` fabriek), `/saipen markhunt` (droge onbegrensde audit, legt alleen vast), `/saipen prepare` (verpak werk voor overdracht), `/saipen validate` (conformiteitscontrole), `/saipen goal` (autonome golfuitvoering). Meta/besturing: `/saipen status` (alleen-lezen rapport), `/saipen stop` (checkpoint en stop). Volledige lijst: RFC.md § 1.10.
 - **Strikte Betrouwbaarheid**: Batch-invoerparsing (chirurgische 1-voor-1 tickets), dirty-tree adoptie (wist nooit niet-gecommitteerd werk), redactie van geheimen (`sk-***`).
+- **In ontwikkeling -- saicrew**: een optionele bonuslaag (`extensions/subs/`, zonder wijzigingen aan Core) voor het draaien van een multi-agent crew -- één Core-schrijver plus read-only workers `saihunt`/`saipython`, die rapporteren via hun eigen `OUTBOX.md`. Momenteel actief live getest, nog niet end-to-end geverifieerd -- zie `extensions/subs/crew.md`.
 
 ## Projecten Aangedreven door SAIPEN
 - ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — Hoogwaardige promptbeheertool die native is geïntegreerd met het SAIPEN-geheugenprotocol.
@@ -53,7 +54,7 @@ Geheugen leeft in het project, niet in het hoofd van een model. `Project -> Gehe
 
 ## Snelle Start
 
-**1. Eenmalig installeren per machine** -- leert Claude Code, Gemini, OpenCode, Aider, Antigravity:
+**1. Eenmalig installeren per machine** -- leert Claude Code, Gemini, OpenCode, Aider, Antigravity, Codex en elke generieke ~/.agents/skills-lezer (FreeBuff, etc.):
 ```bash
 git clone https://github.com/vacterro/saipen
 cd saipen

@@ -12,7 +12,7 @@ y reanude el trabajo en menos de un minuto: sin explicaciones previas, cualquier
 
 **Un comando. Cero amnesia.**
 
-**v7.55.0** | [Espec](SPEC.md) | [Guía](GUIDE.md) | [RFC](saipen/RFC.md) | [Estilo](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformidad](saipen/CONFORMANCE.md) | markdown plano | cero dependencias | MIT
+**v7.64.0** | [Espec](SPEC.md) | [Guía](GUIDE.md) | [RFC](saipen/RFC.md) | [Estilo](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformidad](saipen/CONFORMANCE.md) | markdown plano | cero dependencias | MIT
 
 [![Guía en Ruso](https://img.shields.io/badge/📖_Guía_ELI5-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![Guía en Inglés](https://img.shields.io/badge/📖_Guía_ELI5-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -36,6 +36,7 @@ La memoria vive en el proyecto, no en la cabeza de un modelo. `Proyecto -> Memor
 - **Autonomía sin Prompts**: ¿No quedan tareas pendientes? Transición automática `HUNT` (buscar errores) → `ADD` (desarrollar funcionalidades) → bucle `HUNT`. Sin hacer preguntas.
 - **Disparadores Explícitos**: `/saipen clean` (limpieza de repo), `/saipen translate` (fábrica aislada `.saipen/saitranslate/`), `/saipen markhunt` (auditoría en seco sin límites, solo registra), `/saipen prepare` (empaquetar trabajo para transferencia), `/saipen validate` (verificación de conformidad), `/saipen goal` (ejecución autónoma por oleadas). Meta/control: `/saipen status` (informe de solo lectura), `/saipen stop` (punto de control y detención). Lista completa: RFC.md § 1.10.
 - **Fiabilidad Estricta**: Análisis sintáctico de entradas en lote (tickets quirúrgicos 1 a 1), adopción de árbol de trabajo con cambios no guardados (nunca borra trabajo sin commit), redacción de secretos (`sk-***`).
+- **En desarrollo -- saicrew**: una capa adicional opcional (`extensions/subs/`, sin cambios en el Core) para ejecutar un equipo multiagente -- un Core escritor más trabajadores de solo lectura `saihunt`/`saipython`, que informan a través de su propio `OUTBOX.md`. Actualmente en pruebas en vivo, aún no verificado de extremo a extremo -- ver `extensions/subs/crew.md`.
 
 ## Proyectos Impulsados por SAIPEN
 - ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — Herramienta de gestión de prompts de alto rendimiento integrada de forma nativa con el protocolo de memoria SAIPEN.
@@ -53,7 +54,7 @@ La memoria vive en el proyecto, no en la cabeza de un modelo. `Proyecto -> Memor
 
 ## Inicio Rápido
 
-**1. Instalar una vez por máquina** — enseña a Claude Code, Gemini, OpenCode, Aider, Antigravity:
+**1. Instalar una vez por máquina** — enseña a Claude Code, Gemini, OpenCode, Aider, Antigravity, Codex y cualquier lector generico de ~/.agents/skills (FreeBuff, etc.):
 ```bash
 git clone https://github.com/vacterro/saipen
 cd saipen

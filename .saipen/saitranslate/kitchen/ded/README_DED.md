@@ -10,7 +10,7 @@
 
 **Одна команда. Ноль склероза.**
 
-**v7.55.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
+**v7.64.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -34,6 +34,7 @@
 - **Автономия Без Лишних Вопросов**: Кончились задачи? Сам переключается: `HUNT` (выискивает баги и говнокод) → `ADD` (допиливает фичи) → цикл `HUNT`. И никаких тупых вопросов.
 - **Четкие Команды**: `/saipen clean` (Зачистка репозитория от мусора), `/saipen translate` (Изолированная фабрика перевода в `.saipen/saitranslate/`), `/saipen markhunt` (Сухой аудит без ограничений, только запись), `/saipen prepare` (Упаковка работы для передачи), `/saipen validate` (Проверка целостности), `/saipen goal` (Автономный прогон волнами). Контроль: `/saipen status` (Только чтение отчета), `/saipen stop` (Сохранить чекпоинт и оторвать руки/остановить). Полный список: RFC.md § 1.10.
 - **Надежность Без Соплей**: Парсинг задач поштучно (как хирург, по 1 тикету), подбор незакоммиченного дерьма (никогда не затирает чужой некоммит), замазывание секретов (`sk-***`).
+- **Ещё не обкатано -- saicrew**: бонусный довесок (`extensions/subs/`, Core не трогает), чтоб гонять бригаду -- один Core пашет, да два дармоеда read-only `saihunt`/`saipython` отчитываются через свой `OUTBOX.md`. Тестируем живьём прямо щас, от и до ещё не проверено -- глянь `extensions/subs/crew.md`.
 
 ## Проекты на Движке SAIPEN
 - ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — Высокопроизводительный менеджер промптов, намертво вшитый в протокол памяти SAIPEN.
@@ -51,7 +52,7 @@
 
 ## Быстрый Старт (Для Тех Кто В Танке)
 
-**1. Поставь один раз на тачку** -- вбивает мозги Claude Code, Gemini, OpenCode, Aider, Antigravity:
+**1. Поставь один раз на тачку** -- вбивает мозги Claude Code, Gemini, OpenCode, Aider, Antigravity, Codex, да любой левый читатель `~/.agents/skills` (FreeBuff и подобная шушера):
 ```bash
 git clone https://github.com/vacterro/saipen
 cd saipen

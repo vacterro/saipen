@@ -40,7 +40,7 @@ No manual copying -- one command, even in a project that has never seen
 ```bash
 saipen sub spawn myagent
 # first time in this project: bootstraps .saipen/extensions/subs/ itself from
-# saipen_home (STATE.md, RFC § 1.7) -- PROTOCOL.md, TEMPLATE/, MANIFEST.md
+# saipen_home (STATE.md, RFC § 1.7) -- PROTOCOL.md, README.md, crew.md, TEMPLATE/, MANIFEST.md
 # every time: .saipen/extensions/subs/myagent/ created from TEMPLATE/, added to MANIFEST.md
 # open its STATE.md, set next_action; open BOARD.md, write first tickets
 ```
@@ -49,6 +49,15 @@ Then open that folder in whichever agent you want running as `myagent`
 (Claude, Antigravity, Codex, OpenCode -- the protocol doesn't care which)
 and point it at `.saipen/extensions/subs/myagent/PROTOCOL.md`. It works its own
 board, writes findings to its own `kitchen/OUTBOX.md`.
+
+One of the three shipped examples, spawned alone, no crew required:
+
+```bash
+saiwiki
+# bare name, first time in this project -> spawns saiwiki from TEMPLATE/ then
+# adopts it immediately: reads its own STATE.md/BOARD.md, executes next_action.
+# "saiwiki init" or "saiwiki start" work the same way -- init/start is decoration.
+```
 
 `mode: read-only` is a contract the subSaipen is told to follow, not a
 technical wall (`PROTOCOL.md` § 1) -- if you want a real one, run it in
@@ -84,7 +93,7 @@ saipen sub collect
 | `saipen sub spawn <name>` | Create a new subSaipen from `TEMPLATE/`. |
 | `saipen sub collect` | Process every subSaipen's `OUTBOX.md`. |
 | `saipen sub clean <name>` | Remove a finished subSaipen. |
-| `<subname>` (bare, e.g. `saihunt`) | Adopt that role and start working -- one word (crew, `crew.md`). |
+| `<subname>` (bare, e.g. `saihunt`, or any `sai*`-named subSaipen) | Adopt that role and start working, spawning it first if needed -- one word (crew, `crew.md`, PROTOCOL.md § 7). |
 | `saipen crew` | Show the 3-window crew layout + the one command per window. |
 
 ## Crew -- run three at once (`crew.md`)

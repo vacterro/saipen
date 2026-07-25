@@ -57,6 +57,7 @@ copy_skill() { # $1=dst
      && cp -r "$root/tools" "$1/" \
      && cp -r "$root/extensions/schemas" "$1/extensions/" \
      && cp -r "$root/extensions/templates" "$1/extensions/" \
+     && cp -r "$root/extensions/subs" "$1/extensions/" \
      && cp "$root/tests/validate.sh" "$root/tests/validate.ps1" "$1/tests/"; then
     echo "copied (re-run after updates)"
   else

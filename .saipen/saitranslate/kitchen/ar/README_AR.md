@@ -10,7 +10,7 @@
 
 **أمر واحد. صفر فقدان للذاكرة.**
 
-**v7.55.0** | [المواصفات](SPEC.md) | [الدليل](GUIDE.md) | [RFC](saipen/RFC.md) | [الأسلوب](saipen/STYLE.md) | [واجهة المستخدم](saipen/UI.md) | [التطابق](saipen/CONFORMANCE.md) | markdown بسيط | صفر تبعيات | MIT
+**v7.64.0** | [المواصفات](SPEC.md) | [الدليل](GUIDE.md) | [RFC](saipen/RFC.md) | [الأسلوب](saipen/STYLE.md) | [واجهة المستخدم](saipen/UI.md) | [التطابق](saipen/CONFORMANCE.md) | markdown بسيط | صفر تبعيات | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -51,7 +51,7 @@
 
 ## البداية السريعة
 
-**1. التثبيت مرة واحدة لكل جهاز** -- يعلّم Claude Code و Gemini و OpenCode و Aider و Antigravity:
+**1. التثبيت مرة واحدة لكل جهاز** -- يعلّم Claude Code و Gemini و OpenCode و Aider و Antigravity? Codex ??? ???? ??? ?? ~/.agents/skills (FreeBuff? ???):
 ```bash
 git clone https://github.com/vacterro/saipen
 cd saipen

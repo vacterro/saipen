@@ -10,7 +10,7 @@
 
 **Одна команда. Нуль амнезії.**
 
-**v7.55.0** | [Специфікація](SPEC.md) | [Гайд](GUIDE.md) | [RFC](saipen/RFC.md) | [Стиль](saipen/STYLE.md) | [UI](saipen/UI.md) | [Відповідність](saipen/CONFORMANCE.md) | чистий markdown | нуль залежностей | MIT
+**v7.64.0** | [Специфікація](SPEC.md) | [Гайд](GUIDE.md) | [RFC](saipen/RFC.md) | [Стиль](saipen/STYLE.md) | [UI](saipen/UI.md) | [Відповідність](saipen/CONFORMANCE.md) | чистий markdown | нуль залежностей | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -34,6 +34,7 @@
 - **Автономність без промптів**: Не залишилося відкритих задач? Автоматичний перехід у цикл `HUNT` (сканування багів) → `ADD` (розвиток функціоналу) → `HUNT`. Нуль запитань.
 - **Явні тригери**: `/saipen clean` (очищення репозиторію), `/saipen translate` (ізольована фабрика `.saipen/saitranslate/`), `/saipen markhunt` (сухий необмежений аудит, лише записи), `/saipen prepare` (підготовка роботи для передачі), `/saipen validate` (перевірка відповідності), `/saipen goal` (автономне виконання хвилі). Мета/управління: `/saipen status` (звіт тільки для читання), `/saipen stop` (чекпоїнт і зупинка). Повний список: RFC.md § 1.10.
 - **Сувора надійність**: Пакетний парсинг вхідних даних (хірургічні тикети 1-за-1), пристосування до "брудного" дерева (ніколи не стирає незакомічені зміни), приховування секретів (`sk-***`).
+- **У розробці -- saicrew**: опціональний бонусний шар (`extensions/subs/`, без змін у Core) для запуску мультиагентної бригади -- один Core-письменник плюс read-only робітники `saihunt`/`saipython`, які звітують через свій `OUTBOX.md`. Під активним живим тестуванням, ще не перевірено end-to-end -- див. `extensions/subs/crew.md`.
 
 ## Проєкти на базі SAIPEN
 - ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — Високопродуктивний інструмент управління промптами, нативно інтегрований з протоколом пам'яті SAIPEN.
@@ -51,7 +52,7 @@
 
 ## Швидкий старт
 
-**1. Встановіть один раз на машину** — навчає Claude Code, Gemini, OpenCode, Aider, Antigravity:
+**1. Встановіть один раз на машину** — навчає Claude Code, Gemini, OpenCode, Aider, Antigravity, Codex і будь-який родовий читач `~/.agents/skills` (FreeBuff тощо):
 ```bash
 git clone https://github.com/vacterro/saipen
 cd saipen

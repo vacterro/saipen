@@ -12,7 +12,7 @@ i wznawia pracę w mniej niż minutę -- bez ponownego wprowadzania, dowolny dos
 
 **Jeden nakaz. Zero amnezji.**
 
-**v7.55.0** | [Spec](SPEC.md) | [Przewodnik](GUIDE.md) | [RFC](saipen/RFC.md) | [Styl](saipen/STYLE.md) | [UI](saipen/UI.md) | [Zgodność](saipen/CONFORMANCE.md) | zwykły markdown | zero zależności | MIT
+**v7.64.0** | [Spec](SPEC.md) | [Przewodnik](GUIDE.md) | [RFC](saipen/RFC.md) | [Styl](saipen/STYLE.md) | [UI](saipen/UI.md) | [Zgodność](saipen/CONFORMANCE.md) | zwykły markdown | zero zależności | MIT
 
 [![Przewodnik rosyjski](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![Przewodnik angielski](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -53,7 +53,7 @@ Pamięć żyje w projekcie, nie w głowie modelu. `Projekt -> Pamięć -> LLM` s
 
 ## Szybki Start
 
-**1. Zainstaluj raz na maszynie** -- uczy Claude Code, Gemini, OpenCode, Aider, Antigravity:
+**1. Zainstaluj raz na maszynie** -- uczy Claude Code, Gemini, OpenCode, Aider, Antigravity, Codex i dowolny ogolny czytnik ~/.agents/skills (FreeBuff, itp.):
 ```bash
 git clone https://github.com/vacterro/saipen
 cd saipen

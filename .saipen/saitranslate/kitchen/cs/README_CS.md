@@ -13,7 +13,7 @@ and resumes work in under a minute -- no rebriefing, any vendor, any day.
 
 **One command. Zero amnesia.**
 
-**v7.42.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
+**v7.64.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -54,7 +54,7 @@ Memory lives in the project, not in a model's head. `Project -> Memory -> LLM` b
 
 ## Quick Start
 
-**1. Install once per machine** -- teaches Claude Code, Gemini, OpenCode, Aider, Antigravity:
+**1. Install once per machine** -- teaches Claude Code, Gemini, OpenCode, Aider, Antigravity, Codex a jakykoli obecny ctecka ~/.agents/skills (FreeBuff, atd.):
 ```bash
 git clone https://github.com/vacterro/saipen
 cd saipen

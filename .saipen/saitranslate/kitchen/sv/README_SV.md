@@ -12,7 +12,7 @@ och återupptar arbetet på under en minut -- ingen re-briefing, vilken leverant
 
 **Ett kommando. Noll amnesi.**
 
-**v7.55.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | ren markdown | noll beroenden | MIT
+**v7.64.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | ren markdown | noll beroenden | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -53,7 +53,7 @@ Minnet lever i projektet, inte i en modells huvud. `Projekt -> Minne -> LLM` bli
 
 ## Snabbstart
 
-**1. Installera en gång per maskin** -- lär Claude Code, Gemini, OpenCode, Aider, Antigravity:
+**1. Installera en gång per maskin** -- lär Claude Code, Gemini, OpenCode, Aider, Antigravity, Codex och alla generiska ~/.agents/skills-lasare (FreeBuff, etc.):
 ```bash
 git clone https://github.com/vacterro/saipen
 cd saipen

@@ -10,7 +10,7 @@
 
 **Tek komut. Sıfır hafıza kaybı.**
 
-**v7.55.0** | [Spec](SPEC.md) | [Rehber](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [Kullanıcı Arayüzü](saipen/UI.md) | [Uyum](saipen/CONFORMANCE.md) | sade markdown | sıfır bağımlılık | MIT
+**v7.64.0** | [Spec](SPEC.md) | [Rehber](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [Kullanıcı Arayüzü](saipen/UI.md) | [Uyum](saipen/CONFORMANCE.md) | sade markdown | sıfır bağımlılık | MIT
 
 [![Rusça Rehber](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![İngilizce Rehber](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -51,7 +51,7 @@ Hafıza bir modelin kafasında değil, projede yaşar. `Proje -> Hafıza -> LLM`
 
 ## Hızlı Başlangıç
 
-**1. Her makine için bir kez kurun** -- Claude Code, Gemini, OpenCode, Aider, Antigravity'ye öğretir:
+**1. Her makine için bir kez kurun** -- Claude Code, Gemini, OpenCode, Aider, Codex, Antigravity ve herhangi bir genel `~/.agents/skills` okuyucuya (FreeBuff, vb.) öğretir:
 ```bash
 git clone https://github.com/vacterro/saipen
 cd saipen

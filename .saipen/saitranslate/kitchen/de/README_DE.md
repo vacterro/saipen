@@ -12,7 +12,7 @@ und die Arbeit in unter einer Minute wiederaufnimmt -- kein Erklärungsbedarf, j
 
 **Ein Befehl. Null Amnesie.**
 
-**v7.55.0** | [Spezifikation](SPEC.md) | [Handbuch](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Konformität](saipen/CONFORMANCE.md) | Plain Markdown | Zero Deps | MIT
+**v7.64.0** | [Spezifikation](SPEC.md) | [Handbuch](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Konformität](saipen/CONFORMANCE.md) | Plain Markdown | Zero Deps | MIT
 
 [![Russisches Handbuch](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![Englisches Handbuch](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -36,6 +36,7 @@ Der Speicher lebt im Projekt, nicht im Kopf des Modells. `Projekt -> Speicher ->
 - **Null-Prompt-Autonomie**: Keine offenen Aufgaben mehr? Automatischer Wechsel: `HUNT` (Bugs suchen) → `ADD` (Funktionen erweitern) → `HUNT`-Schleife. Keine Fragen nötig.
 - **Explizite Auslöser**: `/saipen clean` (Repo aufräumen), `/saipen translate` (isolierte `.saipen/saitranslate/`-Fabrik), `/saipen markhunt` (trockenes, unbegrenztes Audit, nur Aufzeichnung), `/saipen prepare` (Arbeit für Übergabe verpacken), `/saipen validate` (Konformitätsprüfung), `/saipen goal` (autonome Wellen-Ausführung). Meta/Steuerung: `/saipen status` (Nur-Lese-Bericht), `/saipen stop` (Kontrollpunkt setzen und anhalten). Vollständige Liste: RFC.md § 1.10.
 - **Strenge Zuverlässigkeit**: Batch-Eingabeparsing (chirurgische 1-für-1-Tickets), Übernahme unsauberer Repositorys (löscht nie uncommitted Arbeit), Geheimnis-Schwärzung (`sk-***`).
+- **In Entwicklung -- saicrew**: eine optionale Bonusschicht (`extensions/subs/`, ohne Core-Änderungen) für einen Multi-Agenten-Crew -- ein Core-Schreiber plus schreibgeschützte Worker `saihunt`/`saipython`, die über ihre eigene `OUTBOX.md` berichten. Derzeit im aktiven Live-Test, noch nicht Ende-zu-Ende verifiziert -- siehe `extensions/subs/crew.md`.
 
 ## Projekte mit SAIPEN
 - ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — Hochleistungs-Prompt-Verwaltungstool, nativ mit dem SAIPEN-Speicherprotokoll integriert.
@@ -53,7 +54,7 @@ Der Speicher lebt im Projekt, nicht im Kopf des Modells. `Projekt -> Speicher ->
 
 ## Schnellstart
 
-**1. Einmal pro Gerät installieren** -- lehrt Claude Code, Gemini, OpenCode, Aider, Antigravity:
+**1. Einmal pro Gerät installieren** -- lehrt Claude Code, Gemini, OpenCode, Aider, Antigravity, Codex und jedem generischen ~/.agents/skills-Leser (FreeBuff, etc.):
 ```bash
 git clone https://github.com/vacterro/saipen
 cd saipen
