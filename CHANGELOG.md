@@ -2,6 +2,25 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.77.0 -- 2026-07-26 -- UI.md v2, plus the half it was missing: behaviour
+
+Operator rewrote `saipen/UI.md` into a v2 -- tighter typography and layout rules, explicit accessibility floor, maintenance guidance, fewer places a code generator can invent noise. Reviewed against the principle behind it: *the interface has no right to surprise the user; press the button, get the result; the computer is a tool, not a creature.*
+
+The visual half was already well covered -- zero animation and transition enforced in the base CSS, instant state changes, a static `...` instead of a spinner, no transparency, no control depending on hover alone. What the spec did not say anywhere was the **behavioural** half: it stopped the UI from *looking* alive without stopping it from *acting* alive. Added a `## Predictability` section covering the nine ways a static-looking interface still ambushes people:
+
+- nothing happens unless asked -- no background refresh, silent autosave, or polling that swaps content under a reading eye
+- the layout never moves after first paint (late content must not slide a button under a cursor already heading for it -- not cosmetic when that button is `Delete`)
+- same input, same outcome: no adaptive menus, no control that changes meaning with context
+- nothing disappears on a timer -- an auto-vanishing toast is either unimportant (don't show it) or important (don't hide it)
+- state changes are visible in text, or they did not happen: silent success is indistinguishable from silent failure
+- focus belongs to the user; irreversible actions name the actual object in the confirm text, and never focus the destructive default
+- long work reports a count, not motion -- a spinner says only "not dead", a number also says how long and whether it is stuck
+- `button:active`'s 1px shift is the entire motion budget, and is not precedent
+
+Also resolved a real contradiction found while reviewing: iron law 2 bans transparency, but "disabled buttons must remain visible, just quieter" never said *how* -- `opacity` was the obvious wrong reading, and it would also fail the accessibility floor and vanish in screenshots. Disabled now means `--textMuted` on the same raised surface, border and position kept. A disabled control must additionally be explainable: a dead button with no stated reason is a surprise the user cannot resolve.
+
+QA checklist gained five behavioural checks, including "left the screen open and untouched for a minute: nothing happened."
+
 ## 7.76.0 -- 2026-07-26 -- the Windows floor kept the LOG hole one release longer
 
 v7.75.0 closed the "a `.saipen/` with no `LOG.md` passes as conformant" hole in `tools/validate.py` and `tests/validate.sh` -- and missed `tests/validate.ps1`, the floor every no-Python **Windows** host falls back to. Same asymmetric-fix pattern this session keeps catching: fix N of N+1 sites, ship, find the last one later. Break-tested it four ways after fixing: absent LOG goes red, empty LOG (what a fresh `INIT` writes) stays green, a malformed LOG line goes red, `read-only` + `BUILD` goes red.
