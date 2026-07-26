@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.78.0 -- 2026-07-26 -- uninstall did not put the file back exactly, and it compounded
+
+Ran T-184: the full `inject.sh` -> `uninstall.sh` round-trip against a sandbox `HOME`. This was the last path that writes into real user config (`~/.claude/CLAUDE.md` and friends) and had never been tested end-to-end -- the T-178 backup fix had only ever been verified through an isolated `sed` reproduction, not through the actual script.
+
+Most of it held: user content survives, `$1.bak` is byte-identical to the pristine original, the block-refresh path leaves that backup pristine (T-178 confirmed for real this time), no temp residue, `.uninstalled.bak` written, skill directories removed. The test was itself proven capable of failing first -- temporarily restoring the T-178 bug turned it red, per `phases/verify.md`.
+
+One step failed, and it was a real defect. **`uninstall.sh` did not reverse `inject.sh` exactly.** `$BLOCK` begins with a newline, so every install appended one blank line that the `BEGIN..END` range-delete never removed. It compounds: a 2-line `CLAUDE.md` grew to 7 lines across five install/uninstall cycles, one stray line each time, unbounded -- while README promises uninstall "strips exactly the marked block (leaving the rest of your file alone)."
+
+Fixed with an awk pass that drops exactly one blank line immediately before `BEGIN` -- the one we added -- and preserves any the user had of their own. `uninstall.ps1` never had the bug; its regex already consumed the surrounding whitespace. Same bash-lags-PowerShell asymmetry as T-178 and the v7.76.0 `validate.ps1` hole.
+
+Verified: byte-identical after five round-trips, and a file with the user's own trailing blank lines comes back untouched.
+
 ## 7.77.0 -- 2026-07-26 -- UI.md v2, plus the half it was missing: behaviour
 
 Operator rewrote `saipen/UI.md` into a v2 -- tighter typography and layout rules, explicit accessibility floor, maintenance guidance, fewer places a code generator can invent noise. Reviewed against the principle behind it: *the interface has no right to surprise the user; press the button, get the result; the computer is a tool, not a creature.*

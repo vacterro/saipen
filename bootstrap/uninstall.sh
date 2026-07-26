@@ -10,8 +10,22 @@ strip_block() {
   # uninstalling would silently destroy the very backup installing made.
   if [ -f "$1" ] && grep -q "SAIPEN:BEGIN" "$1"; then
     cp "$1" "$1.uninstalled.bak"
-    sed -i.saipen-strip-tmp '/<!-- SAIPEN:BEGIN -->/,/<!-- SAIPEN:END -->/d' "$1" 2>/dev/null || sed -i '' '/<!-- SAIPEN:BEGIN -->/,/<!-- SAIPEN:END -->/d' "$1"
-    rm -f "$1.saipen-strip-tmp"
+    # Deleting only BEGIN..END is not a clean reverse of what inject.sh did:
+    # its $BLOCK starts with a newline, so each install adds one blank line
+    # that a plain range-delete leaves behind. Measured: install+uninstall
+    # five times grew a 2-line CLAUDE.md to 7 lines, one stray line per
+    # cycle, forever -- while README promises we leave the rest of the file
+    # alone. So drop exactly ONE blank line immediately before BEGIN (the one
+    # we added) and keep any the user had. inject.ps1/uninstall.ps1 never had
+    # this: its regex already ate the surrounding whitespace.
+    awk '
+      /^<!-- SAIPEN:BEGIN -->/ { if (nb > 0) nb--; while (nb-- > 0) print ""; nb = 0; inblk = 1; next }
+      /^<!-- SAIPEN:END -->/   { inblk = 0; next }
+      inblk                    { next }
+      /^[[:space:]]*$/         { nb++; next }
+                               { while (nb-- > 0) print ""; nb = 0; print }
+      END                      { while (nb-- > 0) print "" }
+    ' "$1" > "$1.saipen-strip-tmp" && mv "$1.saipen-strip-tmp" "$1"
     echo "block removed"
   else
     echo "clean"
