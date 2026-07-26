@@ -33,3 +33,12 @@ jobs:
       # degrades those hosts while CI stays green on the canonical path alone.
       - name: Frozen portable floor (tests/validate.sh)
         run: bash tests/validate.sh
+
+      # The 34 fixtures in tests/scenarios/ sat unexecuted by anything until
+      # v7.79.0 -- and could not have passed if run, since most shipped only
+      # the one file their concept concerned. Each executable one now declares
+      # `expect: pass|fail` in its README and this runner holds it to that. It
+      # also fails on a fixture that declares nothing, and on collecting zero
+      # fixtures at all, so it cannot quietly become a no-op.
+      - name: Conformance fixtures (tools/run_scenarios.py)
+        run: python tools/run_scenarios.py

@@ -561,6 +561,7 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
             "saipen/BOOT.md", "saipen/SKILL.md", "saipen/UI.md", "saipen/STYLE.md",
             "saipen/CONFORMANCE.md",
             "tools/validate.py", "tools/install_hook.py", "tools/uninstall_hook.py",
+            "tools/run_scenarios.py",
             "tests/validate.sh", "tests/validate.ps1",
             "extensions/schemas/state.schema.json",
             "extensions/templates/STATE.md", "extensions/templates/BOARD.md",

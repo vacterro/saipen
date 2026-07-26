@@ -2,6 +2,20 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.79.0 -- 2026-07-26 -- the test suite runs now
+
+`tests/scenarios/` held 34 fixtures that nothing had ever executed -- no script, no CI job, no phase doc -- and that could not have passed if anything had: most shipped only the single file their concept concerned. v7.75.0 stopped CONFORMANCE.md from overstating them. This makes them real.
+
+- **Completed the four partial fixtures.** `blocked-ticket` got the LOG its own README says the agent writes; `dependency-cycle` and `multi-agent-claim-conflict` got STATE+LOG; `resume-after-crash` got a BOARD carrying the very ticket its `STATE.task` names. Nothing was invented to make anything pass -- each added file states what that fixture already claimed in prose.
+- **Every executable fixture declares its expected outcome** as `expect: pass` or `expect: fail` in its README. The 25 behavioral ones declare nothing, correctly: there is nothing to run, and a declaration there would be a promise no one keeps.
+- **`tools/run_scenarios.py`** runs each and holds it to that declaration. It is built not to rot into a no-op: a fixture with a `.saipen/` and no `expect:` is an error, a behavioral fixture that declares one is an error, and a run that collects zero fixtures exits non-zero rather than reporting success.
+- **Wired into CI** and added to the runtime manifest, so it cannot quietly stop shipping.
+- **Broken on purpose three ways** before being trusted, per `phases/verify.md`: flipped a declaration, deleted an `expect:` line, corrupted a fixture's actual state. Red each time, green again after restoring.
+
+One fixture also contradicted itself and now says so: `multi-agent-claim-conflict` describes an *active* claim (under 15 minutes, RFC § 1.4) while carrying a fixed past `claim_time` that reads as stale. That is unavoidable in a checked-in file -- any "fresh" timestamp goes stale tomorrow -- so the README states it plainly rather than leaving a reader to trust a sentence the data contradicts.
+
+Result: 9 executable fixtures, 9 matching their declarations, running on every push and pull request.
+
 ## 7.78.0 -- 2026-07-26 -- uninstall did not put the file back exactly, and it compounded
 
 Ran T-184: the full `inject.sh` -> `uninstall.sh` round-trip against a sandbox `HOME`. This was the last path that writes into real user config (`~/.claude/CLAUDE.md` and friends) and had never been tested end-to-end -- the T-178 backup fix had only ever been verified through an isolated `sed` reproduction, not through the actual script.
