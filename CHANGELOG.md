@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.72.1 -- 2026-07-26 -- the fix shipped an hour ago had a false positive; HUNT caught it
+
+Routine HUNT over this session's own diff, and it found a regression v7.72.0 introduced.
+
+That release added a check stopping a shipped subSaipen template from carrying a concrete `saipen_home` -- correct in itself, but it keyed on the path starting with `extensions/` and nothing else. A *consuming* project is allowed to keep its subs exactly there: RFC § 1.9's legacy root-level `extensions/subs/`. In that project a real `saipen_home` is not pollution, it is what `saipen sub spawn` is required to write. So those projects got a hard FAIL, and via the pre-commit hook, blocked commits.
+
+Third time this session a validator change has been too eager and reached into other people's repos (v7.70.0 caught two others). Gated behind the same home fingerprint the distribution self-check already uses -- `saipen/` + `bootstrap/` + `VERSION` + `README.md` -- and verified in all three directions: a legacy consuming project passes, the home still checks every library state, deliberate re-pollution is still caught.
+
 ## 7.72.0 -- 2026-07-26 -- MARKHUNT triage: all 6 findings closed, including a backup-destroying installer bug
 
 `saipen markhunt` ran a dry, uncapped audit across the whole repo (5/5 scope vectors, 6 findings, recorded as T-178..T-181 in `## BLOCKED` and fixed nothing, as that phase requires). The user then triaged all four in. Every finding was evidence-backed and reproduced before being written down.

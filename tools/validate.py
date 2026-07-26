@@ -211,10 +211,22 @@ if not subs_root.is_dir():
 # where its siblings had the placeholder) for several releases, because
 # nothing ever walked that path. Deduped, since in the home repo `subs_root`
 # already IS extensions/subs.
+# Only the SAIPEN home actually ships a library -- fingerprinted the same way
+# the distribution self-check below is, and for the same reason: a consuming
+# project may legitimately keep its subs at root-level `extensions/subs/`
+# (RFC § 1.9's legacy location), where a concrete `saipen_home` is not a
+# defect but exactly what `saipen sub spawn` is required to write. Treating
+# that as "a shipped template" hard-FAILED such a project and, via
+# tools/install_hook.py's pre-commit wiring, blocked its commits -- caught by
+# testing this path right after shipping the check, not by reasoning about it.
+IS_SAIPEN_HOME = (Path("saipen").is_dir() and Path("bootstrap").is_dir()
+                  and Path("VERSION").is_file() and Path("README.md").is_file())
+
 sub_state_files = sorted(
     p for p in subs_root.glob("*/STATE.md") if p.parent.name != "TEMPLATE")
 library_subs = Path("extensions/subs")
-if library_subs.is_dir() and library_subs.resolve() != subs_root.resolve():
+if (IS_SAIPEN_HOME and library_subs.is_dir()
+        and library_subs.resolve() != subs_root.resolve()):
     sub_state_files += sorted(
         p for p in library_subs.glob("*/STATE.md") if p.parent.name != "TEMPLATE")
 
@@ -237,7 +249,8 @@ if sub_state_files:
         # A shipped template must not carry one machine's absolute path: it
         # is copied verbatim to every user, where that path does not exist.
         # Only the placeholder (or the field being absent) is legal here.
-        if sp.parts[0] == "extensions" and sub_state.get("saipen_home"):
+        if IS_SAIPEN_HOME and sp.parts[0] == "extensions" \
+                and sub_state.get("saipen_home"):
             fail(f"{sp} carries a concrete saipen_home "
                  f"({sub_state['saipen_home']!r}) -- this file ships to every "
                  f"user and is copied by `saipen sub spawn`; a machine-specific "
