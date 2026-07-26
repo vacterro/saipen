@@ -2,6 +2,17 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.71.0 -- 2026-07-25 -- T-177 closed: uninstalling destroyed the backup installing made, and nothing enforced conformance on a PR
+
+Injector re-run authorized and executed -- `bootstrap/inject.ps1` across 7 targets, verified by diff against the home: `CONFORMANCE.md`, `BOOT.md`, `RFC.md` and `extensions/subs/` now identical on all four platforms (`.claude`, `opencode`, `.codex`, `.agents`). v7.70.0's distribution fix is closed on the live machine, not just in source.
+
+The sweep then moved into the executable surface nobody had reviewed yet:
+
+- **`bootstrap/uninstall.sh` destroyed the backup `bootstrap/inject.sh` had deliberately made.** `strip_block` used `sed -i.bak`, which overwrites `"$1.bak"` -- the file where `inject.sh`'s `backup_file()` had stashed the user's *original, pre-SAIPEN* `CLAUDE.md`/`AGENTS.md`/`GEMINI.md` -- replacing it with the current SAIPEN-containing content, and the cleanup `rm -f "$1.bak"` right after then deleted it outright. Uninstalling SAIPEN wiped the exact backup installing SAIPEN existed to create. The PowerShell twin never had this bug (it only ever writes `.uninstalled.bak`); shell-only. Fixed with a distinct `.saipen-strip-tmp` suffix and verified live: the original survives, the block is still stripped correctly.
+- **`bootstrap/export.*` writes its archive into the project root** by design, but `.gitignore` didn't cover the name -- so an exported state archive sat untracked and one careless `git add -A` from being committed. Added `saipen_export_*.tar.gz` / `.zip`.
+- **`CONTRIBUTING.md` pointed contributors at the wrong validator.** Step 4 told them to run `tests/validate.sh` and `validate.ps1` -- the *frozen portable floor*, which states in its own header that new checks land only in `tools/validate.py`. The canonical validator, the one that checks `STATE.md` against the schema, walks the `LOG.md` event graph across sealed segments, and verifies the runtime manifest and injector wiring, went unmentioned in the single place a contributor is told what to run before opening a PR. Rewritten: canonical first, floor as the explicit no-Python fallback.
+- **There was no CI.** The pre-commit hook is opt-in, installed per machine, and bypassable with `--no-verify`, so nothing enforced conformance on a push or a pull request -- in a repository whose own changelog records the README-badge-vs-VERSION drift shipping three separate times. Added `.github/workflows/validate.yml`, running the canonical validator and then the portable floor (a change that breaks the floor would otherwise silently degrade no-Python hosts while CI stayed green). Both steps were run locally first and exit 0; the workflow YAML parse-checked.
+
 ## 7.70.0 -- 2026-07-25 -- T-176 closed: full-repo hunt, and the last two releases had shipped two commit-blocking regressions
 
 User asked for a full sweep for logical gaps, quality over token cost. Swept the executable surface first, where defects are real rather than documentary -- and the two worst finds were this session's own, both breaking *other people's* projects rather than this one.

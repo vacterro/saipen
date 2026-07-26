@@ -3,10 +3,15 @@
 set -u
 
 strip_block() {
+  # sed's in-place suffix MUST NOT be plain .bak: inject.sh's backup_file()
+  # already owns "$1.bak" and put the user's ORIGINAL, pre-SAIPEN file there.
+  # Using -i.bak here would overwrite that original with the current
+  # SAIPEN-containing content, and the cleanup rm would then delete it --
+  # uninstalling would silently destroy the very backup installing made.
   if [ -f "$1" ] && grep -q "SAIPEN:BEGIN" "$1"; then
     cp "$1" "$1.uninstalled.bak"
-    sed -i.bak '/<!-- SAIPEN:BEGIN -->/,/<!-- SAIPEN:END -->/d' "$1" 2>/dev/null || sed -i '' '/<!-- SAIPEN:BEGIN -->/,/<!-- SAIPEN:END -->/d' "$1"
-    rm -f "$1.bak"
+    sed -i.saipen-strip-tmp '/<!-- SAIPEN:BEGIN -->/,/<!-- SAIPEN:END -->/d' "$1" 2>/dev/null || sed -i '' '/<!-- SAIPEN:BEGIN -->/,/<!-- SAIPEN:END -->/d' "$1"
+    rm -f "$1.saipen-strip-tmp"
     echo "block removed"
   else
     echo "clean"

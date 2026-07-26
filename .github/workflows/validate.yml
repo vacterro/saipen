@@ -1,0 +1,35 @@
+name: validate
+
+# The repo ships a validator and then relies on people remembering to run it.
+# The pre-commit hook (tools/install_hook.py) is opt-in, installed per-machine,
+# and bypassable with --no-verify -- so nothing actually enforced conformance
+# on a push or a PR. This does. Version-badge drift alone has shipped three
+# separate times in this repo's history.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  conformance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      # Canonical validator: schema check, LOG event-graph walk across sealed
+      # segments, runtime manifest, injector wiring, README badge vs VERSION.
+      # Stdlib only -- no install step needed, by design (CONFORMANCE.md § 1).
+      - name: Canonical validator (tools/validate.py)
+        run: python tools/validate.py
+
+      # The frozen portable floor still has to run clean too: it is what a
+      # no-Python host falls back to, so a change that breaks it silently
+      # degrades those hosts while CI stays green on the canonical path alone.
+      - name: Frozen portable floor (tests/validate.sh)
+        run: bash tests/validate.sh

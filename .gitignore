@@ -3,3 +3,6 @@
 Thumbs.db
 .freebuff/
 .saipen/recovery/
+# bootstrap/export.* drops its archive in the project root by design
+saipen_export_*.tar.gz
+saipen_export_*.zip
