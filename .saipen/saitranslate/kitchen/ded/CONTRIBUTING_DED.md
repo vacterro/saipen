@@ -1,73 +1,75 @@
-<!-- TRANSLATED TO DED -->
-# Contributing to SAIPEN
+# Как Вписать Свою Лепу В SAIPEN
 
-SAIPEN is a specification first, an implementation second. Most contributions
-are changes to `saipen/RFC.md`, a `phases/*.md` file, or the conformance
-tooling in `tests/` -- not application code.
+SAIPEN — это сперва спецификация, а код — уже потом. Большинство вкладов —
+правки в `saipen/RFC.md`, файлах `phases/*.md` или инструментах проверки
+в `tests/`, а не код приложения.
 
-## Before proposing a change
+## Прежде Чем Лепить Изменение
 
-Run the [SAIPEN Litmus Test](SPEC.md#the-saipen-litmus-test) against your
-idea:
-1. Does it make the transition between agents more reliable?
-2. Does it make the behavior of different models more uniform?
-3. Does it reduce the probability of context loss?
+Прогони [Лакмусовую Бумажку SAIPEN](SPEC.md#the-saipen-litmus-test) через свою
+идею:
+1. Переход между агентами станет надёжнее?
+2. Поведение разных моделей станет одинаковее?
+3. Шанс потерять контекст уменьшится?
 
-If the answer is "no" to at least two of these, it's out of scope for this
-protocol, however useful it might be elsewhere.
+Если ответ "нет" хотя бы на два из них — протоколу это нахуй не нужно,
+как бы полезно оно ни было где-то ещё.
 
-## Reporting a gap
+## Сообщить О Дыре В Спецификации
 
-Open an issue describing:
-- which file/section the gap is in (RFC.md, a phase doc, a schema, a test)
-- the concrete evidence (a quote, a command and its output, a scenario where
-  current behavior breaks)
-- what you'd expect instead
+Открой issue, описав:
+- где конкретно дыра (RFC.md, фаза, схема, тест)
+- конкретные доказательства (цитата, команда и её вывод, сценарий где ломается)
+- что должно быть вместо этого
 
-Vague reports ("this feels off") are harder to act on than a specific
-`grep`/reproduction. See the bug report issue template for the shape this
-should take.
+Размытое "чё-то не так" сложнее разгрести, чем конкретный `grep`/воспроизведение.
+Глянь шаблон issue для баг-репортов — там форма.
 
-## Making a change
+## Как Вносить Изменения
 
-1. Read `saipen/RFC.md` and the relevant `phases/*.md` file(s) fully before
-   editing -- most apparent gaps turn out to already be addressed elsewhere,
-   or deliberately scoped a certain way for a documented reason.
-2. Check `CHANGELOG.md` and `.saipen/KNOWLEDGE/decisions.md` for prior art.
-   Don't silently reopen a decision that was already made and rejected --
-   if you have new evidence a past rejection was wrong, say so explicitly
-   in the PR description.
-3. Every normative change (a MUST/MUST NOT/SHOULD) needs a `CHANGELOG.md`
-   entry and, where practical, coverage in `tests/validate.sh` +
-   `tests/validate.ps1` (both platforms) or a fixture under
-   `tests/scenarios/`.
-4. Run both validators before opening a PR:
+1. Прочитай `saipen/RFC.md` и соответствующие `phases/*.md` от корки до корки
+   перед тем как править — половина "пробелов" уже закрыта где-то в другом месте
+   или намеренно ограничена по документированной причине.
+2. Проверь `CHANGELOG.md` и `.saipen/KNOWLEDGE/decisions.md` — может, это уже
+   обсосали и отклонили. Не открывай заново закрытое решение молча; если у тебя
+   новые аргументы, что отказ был неверным — скажи это прямо в описании PR.
+3. Каждое нормативное изменение (MUST/MUST NOT/SHOULD) требует записи в
+   `CHANGELOG.md` и, где возможно, покрытия в `tests/validate.sh` +
+   `tests/validate.ps1` (обе платформы) или фикстуры в `tests/scenarios/`.
+4. Запусти канонический валидатор перед открытием PR:
    ```bash
-   bash tests/validate.sh
-   powershell -File tests/validate.ps1
+   python tools/validate.py
    ```
-5. Bump `VERSION` per the scheme in `phases/ship.md` (patch for docs-only
-   clarifications, minor for new normative behavior, major for breaking
-   contract changes) and keep `README.md`'s version badge in sync --
-   `tests/validate.sh`/`.ps1` check this automatically when run from a
-   clone of this repo.
+   Это тот, что реально имеет значение — он проверяет `STATE.md` против
+   `extensions/schemas/state.schema.json`, ползает по графу `LOG.md` через
+   запечатанные сегменты и сверяет манифест с инжектором. `tests/validate.sh` /
+   `validate.ps1` — это **замороженный портативный минимум** для хостов без Python
+   (они сами так говорят в начале каждого файла): проверок меньше, хранятся только
+   чтоб безпитонный хост не остался совсем с пустыми руками. Запускай и их, если
+   твоё изменение их трогает, но никогда *вместо* — прохождение минимума
+   доказывает гораздо меньше, чем кажется. CI гоняет канонический валидатор
+   на каждом пуше и PR без вариантов (`.github/workflows/validate.yml`).
+5. Подними `VERSION` по схеме из `phases/ship.md` (patch для уточнений в доке,
+   minor для нового нормативного поведения, major для сломанных контрактов)
+   и синхронизируй бейдж версии в `README.md` — `tests/validate.sh`/`.ps1`
+   проверяют это автоматом при запуске из клона репы.
 
-## Style
+## Стиль
 
-- Protocol and phase docs: terse, RFC-2119 keywords where they matter, no
-  filler. See `saipen/STYLE.md`.
-- Everything in this file, commit messages, code comments, and the
-  CHANGELOG: plain and professional. The project's own chat/LOG voices
-  (`saipen/STYLE.md`) don't apply to artifacts.
+- Документация протокола и фаз: сухо, RFC-2119 ключевые слова где надо, никакой
+   воды. См. `saipen/STYLE.md`.
+- Всё в этом файле, сообщения коммитов, комментарии в коде и CHANGELOG:
+   просто и профессионально. Голоса проекта в чате/LOG (`saipen/STYLE.md`)
+   к артефактам не относятся.
 
-## What's out of scope
+## Что Не Входит В Рамки
 
-- Turning SAIPEN into a distributed consensus system. See
-  `SPEC.md`'s Concurrency & Distribution Boundaries section.
-- Machine-parseable LOG marker grammar beyond the existing skeleton.
-  `LOG.md` stays prose around a fixed shape.
-- A `saipen doctor` command or similar redundant with `saipen validate` +
+- Превращение SAIPEN в систему распределённого консенсуса. См.
+  раздел "Concurrency & Distribution Boundaries" в `SPEC.md`.
+- Машинно-читаемая грамматика LOG-маркеров сверх существующего каркаса.
+  `LOG.md` остаётся прозой вокруг фиксированной формы.
+- Команда `saipen doctor` или что-то подобное, дублирующее `saipen validate` +
   `saipen status`.
 
-These have each been proposed and evaluated before; reopening them needs
-new evidence, not just re-asking.
+Всё это уже предлагали и оценивали; открывать заново — только с новыми
+доказательствами, а не просто "а давайте ещё разок".

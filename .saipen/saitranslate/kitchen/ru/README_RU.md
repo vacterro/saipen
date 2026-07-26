@@ -6,11 +6,11 @@
 
 # SAIPEN
 
-**Протокол непрерывности для ИИ-агентов кодинга.** Постоянная память проекта в формате plain markdown, благодаря которой «холодный» агент без истории чата запускает `/saipen continue` и возобновляет работу менее чем за минуту — без повторных инструкций, с любым провайдером, в любой день.
+**Протокол непрерывности для ИИ-агентов кодинга.** SAIPEN хранит память проекта в формате plain markdown, так что холодный агент без истории чата запускает `/saipen continue`, читает `STATE`, `BOARD` и `next_action` и возобновляет работу менее чем за минуту — без повторных инструкций, с любым провайдером, в любой день.
 
 **Одна команда. Нуль амнезии.**
 
-**v7.64.0** | [Спецификация](SPEC.md) | [Руководство](GUIDE.md) | [RFC](saipen/RFC.md) | [Стиль](saipen/STYLE.md) | [Интерфейс](saipen/UI.md) | [Соответствие](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
+**v7.80.0** | [Спецификация](SPEC.md) | [Руководство](GUIDE.md) | [RFC](saipen/RFC.md) | [Стиль](saipen/STYLE.md) | [Интерфейс](saipen/UI.md) | [Соответствие](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -32,12 +32,12 @@
 ### Ключевая логика протокола и гарантии
 - **Основной конечный автомат**: `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`
 - **Автономия без подсказок**: Не осталось открытых задач? Автоматический переход в цикл `HUNT` (сканирование багов) → `ADD` (развитие функций) → `HUNT`. Без лишних вопросов.
-- **Явные триггеры**: `/saipen clean` (очистка репозитория), `/saipen translate` (изолированная фабрика `.saipen/saitranslate/`), `/saipen markhunt` (сухой аудит без ограничений, только запись), `/saipen prepare` (упаковка работы для передачи), `/saipen validate` (проверка соответствия), `/saipen goal` (автономное исполнение волны). Мета/управление: `/saipen status` (отчет только для чтения), `/saipen stop` (сохранение чекпоинта и остановка). Полный список: RFC.md § 1.10.
+- **Явные триггеры**: `/saipen plan` (превратить запрос или список задач в тикеты), `/saipen ship` (версионирование, чейнджлог, тег, пуш), `/saipen clean` (очистка репозитория), `/saipen translate` (изолированная фабрика `.saipen/saitranslate/`), `/saipen markhunt` (сухой аудит без ограничений, только запись), `/saipen prepare` (упаковка работы для передачи), `/saipen validate` (проверка соответствия), `/saipen goal` (автономное исполнение волны). Мета/управление: `/saipen status` (отчет только для чтения), `/saipen stop` (сохранение чекпоинта и остановка). Плюс `saipen set` и `saipen continue` — всего двенадцать команд, полный список: RFC.md § 1.10.
 - **Строгая надежность**: Пакетный разбор ввода (хирургически по 1 тикету), принятие нечистого дерева (никогда не стирает незакоммиченную работу), скрытие секретов (`sk-***`).
-- **В разработке -- saicrew**: опциональный бонусный слой (`extensions/subs/`, без изменений в Core) для запуска мультиагентной бригады -- один Core-писатель плюс read-only воркеры `saihunt`/`saipython`, отчитывающиеся через свой `OUTBOX.md`. Под активным живым тестированием, ещё не проверено end-to-end -- см. `extensions/subs/crew.md`.
+- **Экспериментально -- saicrew**: опциональный бонусный слой (`extensions/subs/`, без изменений в Core) для запуска мультиагентной бригады — один Core-писатель плюс read-only воркеры `saihunt`/`saipython`, отчитывающиеся через свой `OUTBOX.md`. Под активным живым тестированием, ещё не проверено end-to-end — см. `extensions/subs/crew.md`.
 
 ## Проекты на базе SAIPEN
-- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — Высокопроизводительный инструмент управления промптами, нативно интегрированный с протоколом памяти SAIPEN.
+- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — Высокопроизводительный инструмент управления промптами, построенный вокруг протокола памяти SAIPEN.
 
 ## Два уровня
 
@@ -52,13 +52,22 @@
 
 ## Быстрый старт
 
-**1. Установите один раз на машину** — обучает Claude Code, Gemini, OpenCode, Aider, Antigravity, Codex и любой родовой ридер `~/.agents/skills` (FreeBuff и т.п.):
+**1. Установите один раз на машину** — обучает Claude Code, Codex, Gemini, OpenCode, Aider, Antigravity и любой родовой ридер `~/.agents/skills` (FreeBuff и т.п.):
 ```bash
 git clone https://github.com/vacterro/saipen
 cd saipen
 powershell -ExecutionPolicy Bypass -File .\bootstrap\inject.ps1     # Windows
 bash bootstrap/inject.sh                                            # macOS / Linux
 ```
+
+<sub>Что это трогает, чтобы не было сюрпризов: скрипт добавляет размеченный блок `<!-- SAIPEN:BEGIN -->...<!-- SAIPEN:END -->` в ваши файлы инструкций для агентов (`~/.claude/CLAUDE.md`, `~/.config/opencode/AGENTS.md`, `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`) — предварительно создав резервную копию `.bak` — и копирует протокол в соответствующие папки навыков. Ничего за пределами этих путей, никаких демонов, никаких сетевых вызовов.</sub>
+
+**Передумали?** Одна команда всё откатывает:
+```bash
+powershell -ExecutionPolicy Bypass -File .\bootstrap\uninstall.ps1  # Windows
+bash bootstrap/uninstall.sh                                         # macOS / Linux
+```
+Она удаляет ровно размеченный блок (оставляя остальной файл нетронутым), предварительно сохраняет копию `.uninstalled.bak` и удаляет папки навыков.
 
 **2. Запустите проект** — откройте агента в папке вашего проекта и введите:
 > `saipen set`

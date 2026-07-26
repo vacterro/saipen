@@ -1,0 +1,33 @@
+#!/bin/sh
+# saiwiki: translation version-badge drift check (pre-commit hook)
+# Install: ln -s ../../githooks/pre-commit .git/hooks/pre-commit
+#          (or copy it, if your platform doesn't support symlinks)
+
+set -e
+
+KITCHEN=".saipen/saitranslate/kitchen"
+VERSION_FILE="VERSION"
+if [ ! -d "$KITCHEN" ] || [ ! -f "$VERSION_FILE" ]; then
+    exit 0
+fi
+
+REPO_VER=$(cat "$VERSION_FILE" | tr -d '\r\n')
+STALE=""
+
+for LOCALE in "$KITCHEN"/*/; do
+    [ -d "$LOCALE" ] || continue
+    NAME=$(basename "$LOCALE")
+    README="${LOCALE}README_${NAME}.md"
+    [ -f "$README" ] || continue
+    if ! grep -q "**v${REPO_VER}**" "$README" 2>/dev/null; then
+        STALE="${STALE} ${NAME}"
+    fi
+done
+
+if [ -n "$STALE" ]; then
+    echo "FAIL: translation README badge drift -- stale locale(s):${STALE}"
+    echo "Run: python tools/validate.py"
+    exit 1
+fi
+
+exit 0

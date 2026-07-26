@@ -34,15 +34,7 @@ Protokoll on rangelt normatiivne. SAIPEN jaguneb kontseptuaalselt kaheks kihiks:
 - **Hoolduskiht** on tuumikule ehitatud autonoomne tarkvara arengumudel.
 
 Nende kahe kihi all eraldab SAIPEN kolm valdkonda, mis kunagi ei põimu:
-**õigsus ja jätkamine** (Tuumik -- `STATE`/`BOARD`/`LOG`/`KNOWLEDGE`, võimekuse
-läbirääkimine, kontrollpunktid), **järelevalveta areng** (Hooldus -- `HUNT`/`ADD`/`CLEAN`,
-täielikult funktsionaalne tavalise `saipen`/`saipen continue` vaikeseadistuse all) ja **läbilaskevõime**
-(Goal Režiim, Alamagendid -- mõlemad selgesõnaliselt vabatahtlikud, §1.3/§2.4). Lülita Goal Režiim välja:
-protokoll on muutumatu, üks pilet korraga. Lülita Alamagendid välja: `HUNT` käivitab samad
-kuus kategooriat järjestikku, sama tulemus. Kasuta ainult Tuumikut, ilma Hoolduskihita
-üldse: see kehtib endiselt -- külm agent jätkab endiselt õigesti. Iga kiht toetub
-allpool olevale, ilma et vastupidine oleks kunagi tõsi; miski ülesvoolu ei sõltu
-allavoolu funktsiooni olemasolust.
+**õigsus ja jätkamine** (Tuumik -- `STATE`/`BOARD`/`LOG`/`KNOWLEDGE`, võimekuse läbirääkimine, kontrollpunktid), **järelevalveta areng** (Hooldus -- `HUNT`/`ADD`/`CLEAN`, täielikult funktsionaalne tavalise `saipen`/`saipen continue` vaikeseadistuse all) ja **läbilaskevõime** (Goal Režiim, Alamagendid -- mõlemad selgesõnaliselt vabatahtlikud, §1.3/§2.4). Lülita Goal Režiim välja: protokoll on muutumatu, üks pilet korraga. Lülita Alamagendid välja: `HUNT` käivitab samad kuus kategooriat järjestikku, sama tulemus. Kasuta ainult Tuumikut, ilma Hoolduskihita üldse: see kehtib endiselt -- külm agent jätkab endiselt õigesti. Iga kiht toetub allpool olevale, ilma et vastupidine oleks kunagi tõsi; miski ülesvoolu ei sõltu allavoolu funktsiooni olemasolust.
 
 ```text
 saipen/
@@ -51,12 +43,17 @@ saipen/
   SKILL.md                  õhuke sisenemispunkt oskusi-lugevatele platvormidele
   STYLE.md                  hääled: vestlus, LOG.md, artefaktid
   UI.md                     Dark Golden Win95 UI spetsifikatsioon (kohustuslik kasutajaliidese tööks)
-  phases/                   range olekumasina loogika
+  BOOT.md                   külmkäivituse tuum: kiirtee, mida vajab paljas `continue`
+                             enne ülejäänu laadimist
+  phases/                   range olekumasina loogika -- 16 dokumenti, üks iga
+                             RFC § 1.6 loendi väärtuse kohta (masinaga kontrollitud
+                             mõlemas suunas tools/validate.py poolt)
     [Tuumikfaasid]
     init.md / plan.md / scout.md / build.md / verify.md / review.md / ship.md / done.md / blocked.md
     [Hooldusfaasid]
-    hunt.md / add.md / clean.md / translate.md
-    
+    hunt.md / markhunt.md / add.md / clean.md / translate.md
+
+    prepare.md              paki töö üleandmiseks järgmisele agendile
     validate.md             vastavuse testimine
 
 extensions/                 <- KOHANDUV KIHT
@@ -76,6 +73,7 @@ bootstrap/                  <- PAIGALDUS/EKSPORT/EEMALDAMINE, üks masin korraga
   inject.ps1 / .sh          paigaldab SAIPEN ploki + oskuste koopiad (README Kiirjuhend)
   uninstall.ps1 / .sh       tühistab paigalduse -- eemaldab plokid + oskuste koopiad
   export.ps1 / .sh          arhiveerib projekti .saipen/ varukoopiaks
+  saipen_crew.bat / .sh     avab 3-aknalise meeskonna paigutuse (boonus, extensions/subs/crew.md)
 
 tools/                      <- KANOONILINE VALIDAATOR & REPO UTILIIDID
   validate.py               kanooniline vastavuse validaator (stdlib Python, null

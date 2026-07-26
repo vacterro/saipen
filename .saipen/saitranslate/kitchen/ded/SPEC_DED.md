@@ -1,110 +1,106 @@
-<!-- TRANSLATED TO DED -->
-# SAIPEN Specification
+# Спецификация SAIPEN (Для Тех Кому Надо Понять)
 
-## Abstract
-**Design Goal #1: A cold agent with zero chat history must be able to execute `/saipen continue` and resume productive work within one minute, without asking the user to repeat context.**
+## Суть
+**Цель Дизайна #1: Холодный бот без истории чата должен смочь вбить `/saipen continue` и ввалить продуктивную работу за минуту, не дёргая юзера чтобы тот повторил контекст.**
 
-SAIPEN guarantees that any compatible AI agent can safely continue any project without being rebriefed. It is an ABI (Application Binary Interface) for engineering AI agents—a compatibility layer that solves the amnesia problem. Whether you use Claude today, Gemini tomorrow, and GPT the day after, they will all operate against the same project state without requiring you to restate context.
+SAIPEN гарантирует, что любой совместимый ИИ-агент может безопасно продолжить любой проект без перебрифинга. Это ABI (Application Binary Interface) для инженерных ИИ-агентов — прослойка совместимости, решающая проблему склероза. Юзаешь ты сегодня Claude, завтра Gemini, а послезавтра GPT — они все будут долбиться в одно и то же состояние проекта, без необходимости пересказывать контекст.
 
-### Core Philosophy: Project State > Model Memory
-Memory should live next to the code, not inside the head of another model. SAIPEN shifts the paradigm from `Project -> Memory -> LLM` to `Project -> SAIPEN State -> LLM`. The memory belongs to the project.
+### Основная Философия: Состояние Проекта > Мозги Модели
+Память должна лежать рядом с кодом, а не в дырявой башке очередной модели. SAIPEN сдвигает парадигму с `Проект -> Память -> LLM` на `Проект -> Состояние SAIPEN -> LLM`. Память принадлежит проекту, а не нейронке.
 
-At its core, SAIPEN uses a portable, file-backed continuation protocol for LLM agents. Implementations MAY vary. The on-disk contract MUST remain stable. Everything in this protocol exists to serve the Continuation Test.
+По своей сути SAIPEN использует переносимый, файловый протокол продолжения для LLM-агентов. Реализации МОГУТ различаться. Контракт на диске ДОЛЖЕН оставаться стабильным. Всё в этом протоколе существует для одного — служить Тесту Продолжения (Continuation Test).
 
-SAIPEN is evolutionary, not creative. Its purpose is to complete software, not reinvent it. ADD extends existing design patterns, industry conventions, and obvious feature symmetry.
+SAIPEN эволюционен, а не креативен. Его цель — доделывать софт, а не переизобретать его заново. ADD расширяет существующие паттерны проектирования, индустриальные конвенции и очевидную симметрию фич.
 
-- **`STATE`**: Exists to answer *"What do I do right now?"*
-- **`BOARD`**: Exists to answer *"What task am I picking up?"*
-- **`LOG`**: Exists to answer *"Why did we come to this point?"*
-- **`KNOWLEDGE`**: Exists to answer *"What is the durable truth of this project?"*
-- **`next_action`**: The heart of SAIPEN. It answers *"What exact command do I execute right this second to resume work?"*
+- **`STATE`**: Существует чтобы ответить *"Чё мне делать прямо сейчас?"*
+- **`BOARD`**: Существует чтобы ответить *"Какую задачу мне взять?"*
+- **`LOG`**: Существует чтобы ответить *"Как мы дошли до жизни такой?"*
+- **`KNOWLEDGE`**: Существует чтобы ответить *"Что есть непреложная истина этого проекта?"*
+- **`next_action`**: Сердце SAIPEN. Отвечает *"Какую именно команду мне выполнить прямо сейчас, чтобы продолжить работу?"*
 
-## The SAIPEN Litmus Test
+## Лакмусовая Бумажка SAIPEN
 
-Any proposed change or new idea for the protocol MUST pass the following three questions:
-1. Does it make the transition between agents more reliable?
-2. Does it make the behavior of different models more uniform?
-3. Does it reduce the probability of context loss?
+Любое предлагаемое изменение или новая идея для протокола ДОЛЖНЫ пройти три вопроса:
+1. Переход между агентами станет надёжнее?
+2. Поведение разных моделей станет одинаковее?
+3. Шанс потерять контекст уменьшится?
 
-If the answer is "no" to at least two of these questions, the idea is rejected. SAIPEN prioritizes discipline, reproducibility, and reliability over novelty.
+Если ответ "нет" хотя бы на два — идею нахуй. SAIPEN ставит дисциплину, воспроизводимость и надёжность выше новизны.
 
-## Architecture
+## Архитектура
 
-The protocol is strictly normative. SAIPEN conceptually divides into two layers: **Core** and **Maintenance**. 
-- **The Core layer** guarantees safe, vendor-neutral task continuation. 
-- **The Maintenance layer** is an autonomous software evolution model built on top of Core.
+Протокол строго нормативный. SAIPEN концептуально делится на два слоя: **Core (Ядро)** и **Maintenance (Обслуживание)**.
+- **Слой Core** гарантирует безопасное, не зависящее от вендора продолжение задач.
+- **Слой Maintenance** — автономная эволюция софта, построенная поверх Core.
 
-Underneath the two layers, SAIPEN separates three concerns that never entangle:
-**correctness and continuation** (Core -- `STATE`/`BOARD`/`LOG`/`KNOWLEDGE`, capability
-negotiation, checkpointing), **unattended evolution** (Maintenance -- `HUNT`/`ADD`/`CLEAN`,
-fully functional under the plain `saipen`/`saipen continue` default), and **throughput**
-(Goal Mode, Subagents -- both explicitly opt-in, §1.3/§2.4). Disable Goal Mode: the
-protocol is unchanged, one ticket at a time. Disable Subagents: `HUNT` runs the same
-six categories sequentially, same result. Use Core alone, with no Maintenance layer at
-all: it still holds -- a cold agent still resumes correctly. Each layer builds on the
-one beneath without the reverse ever being true; nothing upstream depends on a
-downstream feature existing.
+Под этими двумя слоями SAIPEN разделяет три задачи, которые никогда не пересекаются:
+**корректность и продолжение** (Core -- `STATE`/`BOARD`/`LOG`/`KNOWLEDGE`, согласование возможностей, чекпоинты), **эволюция без присмотра** (Maintenance -- `HUNT`/`ADD`/`CLEAN`, полностью работает при обычном `saipen`/`saipen continue`), и **пропускная способность** (Goal Mode, Субагенты -- оба опционально включаются, §1.3/§2.4). Выключи Goal Mode: протокол не меняется, по одному тикету. Выключи Субагентов: `HUNT` гоняет те же шесть категорий последовательно, результат тот же. Используй только Core, вообще без Maintenance слоя: всё равно работает — холодный агент корректно продолжает. Каждый слой строится на базе предыдущего, обратное никогда не верно; ничего выше по течению не зависит от фичи ниже.
 
 ```text
 saipen/
-  RFC.md                    normative specification (divided into Core and Maintenance)
-  CONFORMANCE.md             self-check vectors + scenario coverage table
-  SKILL.md                  thin entry point for skill-reading platforms
-  STYLE.md                  voices: chat, LOG.md, artifacts
-  UI.md                     Dark Golden Win95 UI spec (mandatory for UI work)
-  phases/                   strict state machine logic
+  RFC.md                    нормативная спецификация (Core + Maintenance)
+  CONFORMANCE.md             самопроверка + таблица покрытия сценариев
+  SKILL.md                  тонкая точка входа для платформ, читающих скиллы
+  STYLE.md                  голоса: чат, LOG, артефакты
+  UI.md                     Спека Dark Golden Win95 UI (обязательна для UI-работы)
+  BOOT.md                   ядро холодного старта: быстрый путь для голого
+                             `continue`, до загрузки всего остального
+  phases/                   строгая логика автомата состояний -- 16 доков, по одному на
+                             каждое значение перечисления из RFC § 1.6 (проверяется
+                             машинно в обе стороны через tools/validate.py)
     [Core Phases]
     init.md / plan.md / scout.md / build.md / verify.md / review.md / ship.md / done.md / blocked.md
     [Maintenance Phases]
-    hunt.md / add.md / clean.md / translate.md
-    
-    validate.md             conformance testing
+    hunt.md / markhunt.md / add.md / clean.md / translate.md
 
-extensions/                 <- THE ADAPTIVE LAYER
-  adapters/                 per-model instruction bridges, for platforms the
-                             injector doesn't auto-detect (README.md points here)
-  schemas/                  state.schema.json is machine-read by tools/validate.py
-                             (single source of truth for STATE's shape); board/log
-                             schemas stay reference-only (see schemas/README.md)
-  templates/                fresh .saipen/ boilerplate
-  security/                 EXAMPLE hook to copy into a project (RFC § 1.9, attaches to VERIFY)
-  performance/              EXAMPLE hook to copy into a project (RFC § 1.9, attaches to REVIEW)
-  subs/                     EXAMPLE read-only research subagents (RFC § 1.9) -- own
-                             STATE/BOARD/LOG per subagent, findings only via OUTBOX,
-                             never a second write-path into the project
+    prepare.md              упаковка работы для передачи следующему агенту
+    validate.md             проверка соответствия
 
-bootstrap/                  <- INSTALL/EXPORT/UNINSTALL, one machine at a time
-  inject.ps1 / .sh          installs the SAIPEN block + skill copies (README Quick Start)
-  uninstall.ps1 / .sh       reverses inject -- removes blocks + skill copies
-  export.ps1 / .sh          archives a project's .saipen/ for backup
+extensions/                 <- АДАПТИВНЫЙ СЛОЙ
+  adapters/                 мосты для конкретных моделей, которые инжектор
+                             не детектит автоматом (README.md показывает сюда)
+  schemas/                  state.schema.json читается tools/validate.py
+                             (единственный источник истины для формы STATE)
+  templates/                свежие шаблоны .saipen/
+  security/                 ПРИМЕР хука для проекта (RFC § 1.9, цепляется к VERIFY)
+  performance/              ПРИМЕР хука для проекта (RFC § 1.9, цепляется к REVIEW)
+  subs/                     ПРИМЕР read-only субагентов-исследователей (RFC § 1.9) --
+                             свои STATE/BOARD/LOG на субагента, находки только через OUTBOX,
+                             второго пути записи в проект нет
 
-tools/                      <- CANONICAL VALIDATOR & REPO UTILITIES
-  validate.py               canonical conformance validator (stdlib Python, zero
-                             installs; validates STATE against state.schema.json
-                             directly, plus graph checks the shell pair can't do)
-  install_hook.py           installs a pre-commit hook running validate.py
-  uninstall_hook.py         removes exactly that hook (restores any prior one)
+bootstrap/                  <- УСТАНОВКА/ЭКСПОРТ/УДАЛЕНИЕ, по одной машине
+  inject.ps1 / .sh          ставит блок SAIPEN + копии скиллов (Быстрый старт из README)
+  uninstall.ps1 / .sh       откатывает inject -- сносит блоки + копии скиллов
+  export.ps1 / .sh          архивирует .saipen/ проекта для бекапа
+  saipen_crew.bat / .sh     открывает 3-оконный расклад для бригады (бонус, extensions/subs/crew.md)
 
-tests/                      <- CONFORMANCE LAYER
-  validate.ps1 / .sh        frozen portable floor for hosts without Python --
-                             new checks land only in tools/validate.py
-  scenarios/                mock states (crash-recovery, claim-conflicts, etc.)
+tools/                      <- КАНОНИЧЕСКИЙ ВАЛИДАТОР И УТИЛИТЫ
+  validate.py               канонический валидатор (stdlib Python, нихера ставить
+                             не надо; проверяет STATE напрямую через state.schema.json,
+                             плюс проверки графа, которые shell'ы не умеют)
+  install_hook.py           ставит pre-commit hook, запускающий validate.py
+  uninstall_hook.py         сносит именно этот hook (восстанавливает предыдущий)
+
+tests/                      <- СЛОЙ СООТВЕТСТВИЯ
+  validate.ps1 / .sh        замороженный портативный минимум для хостов без Python --
+                             новые проверки только в tools/validate.py
+  scenarios/                моковые состояния (восстановление после краша, конфликты и т.д.)
 ```
 
-## Two-Way Capability Negotiation
-Agents do not simply declare what they can do; the protocol demands what is required.
-The project defines `requires: [filesystem, git, shell, python]` in its state. The agent cross-references its host capabilities and locks into a `mode` (e.g., `full`, `read-only`).
+## Двустороннее Согласование Возможностей
+Агенты не просто заявляют что умеют; протокол требует что нужно.
+Проект пишет `requires: [filesystem, git, shell, python]` в своём состоянии. Агент сверяет возможности хоста с требованиями и фиксирует `mode` (например, `full`, `read-only`).
 
-## Graph-Based Event Logging
-Logs in SAIPEN are not linear strings. They form an acyclic graph of decisions using Event IDs (`E-001`). This permits complex branching, agent merging, and precise audit trails.
+## Графовое Журналирование Событий
+Логи в SAIPEN — не линейные строки. Они образуют ациклический граф решений через ID событий (`E-001`). Это позволяет сложное ветвление, слияние агентов и точный аудит.
 
-## Architecture Decision Records (ADR)
-Transient event logs do not house permanent knowledge. SAIPEN mandates that structural architectural decisions are persisted as ADRs (e.g., `KNOWLEDGE/ADR-001-use-sqlite.md`).
+## Записи Архитектурных Решений (ADR)
+Временные логи не хранят постоянные знания. SAIPEN требует, чтобы структурные архитектурные решения сохранялись как ADR (например, `KNOWLEDGE/ADR-001-use-sqlite.md`).
 
-## Concurrency & Distribution Boundaries
-SAIPEN ensures state integrity via file-based claims (`owner`, `claim_time`) and sequential graphs (`LOG.md`). However, **SAIPEN is a state protocol, not a distributed consensus algorithm.**
-- **Local/Shared Filesystem**: Conflict resolution relies on atomic filesystem writes ("first commit wins").
-- **Networked/Distributed Environments**: If agents operate across disconnected machines without real-time file syncing, race conditions on `BOARD.md` claims will occur. In highly distributed setups, the SAIPEN on-disk protocol contract MUST remain stable -- project state itself still mutates constantly, through SAIPEN's own rules (§ 1.5 checkpointing), never the protocol shape those rules follow.
+## Границы Конкурентности и Распределения
+SAIPEN обеспечивает целостность состояния через файловые блокировки (`owner`, `claim_time`) и последовательные графы (`LOG.md`). Но **SAIPEN — это протокол состояния, а не алгоритм распределённого консенсуса.**
+- **Локальная/Общая файловая система**: Конфликты решаются атомарными записями ("первый коммит побеждает").
+- **Сеть/Распределённые среды**: Если агенты работают на отключенных машинах без синхронизации в реальном времени, будут гонки при блокировках в `BOARD.md`. В сильно распределённых конфигурациях контракт SAIPEN на диске ДОЛЖЕН оставаться стабильным — состояние проекта само по себе постоянно мутирует по правилам SAIPEN (§ 1.5 чекпоинты), но форма протокола, которой следуют эти правила, никогда не меняется.
 
 
 <p align="center">

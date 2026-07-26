@@ -602,6 +602,31 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                "(phases/tools/tests/schemas/templates/subs, BOOT/SKILL/RFC/"
                "STYLE/UI/CONFORMANCE, both scripts)")
 
+# -------------------------------------------------------- translation drift
+
+# Check version-badge consistency across all locale README_*.md files.
+# Only runs when `.saipen/saitranslate/kitchen/` exists.
+kitchen = Path(".saipen/saitranslate/kitchen")
+if kitchen.is_dir():
+    repo_version = Path("VERSION").read_text(encoding="utf-8-sig").strip()
+    stale = []
+    for locale_dir in sorted(kitchen.iterdir()):
+        if not locale_dir.is_dir():
+            continue
+        readme = locale_dir / f"README_{locale_dir.name.upper()}.md"
+        if not readme.is_file():
+            # not every locale has a README -- skip silently
+            continue
+        content = readme.read_text(encoding="utf-8-sig")
+        if f"**v{repo_version}**" not in content:
+            stale.append(readme.name)
+    if stale:
+        fail(f"translation README badge drift: {len(stale)} locale(s) still"
+             f" show an old version -- {', '.join(sorted(stale))}")
+    else:
+        ok(f"all {len([d for d in kitchen.iterdir() if d.is_dir()])} locale"
+           f" README badges match VERSION ({repo_version})")
+
 # ------------------------------------------------------------------- summary
 
 warn_total = sum(len(msgs) for msgs in warnings.values())

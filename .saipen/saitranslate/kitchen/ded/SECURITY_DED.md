@@ -1,37 +1,51 @@
-<!-- TRANSLATED TO DED -->
-# Security Policy
+# Политика Безопасности (Для Тех Кто Не Вкурсе)
 
-## Scope
+## Что Под Колпаком
 
-SAIPEN is a specification plus a small set of local install/export
-scripts (`bootstrap/inject.ps1`/`.sh`, `uninstall.ps1`/`.sh`,
-`export.ps1`/`.sh`). It does not run a server, does not collect
-telemetry, and does not transmit any data anywhere. Everything the
-scripts do is local filesystem writes to files you already control
-(your own `~/.claude`, `~/.gemini`, project `.saipen/`, etc.), each
-guarded by an automatic `.bak` backup before the first modification.
+SAIPEN — это спецификация и парочка мелких скриптов для установки/экспорта
+(`bootstrap/inject.ps1`/`.sh`, `uninstall.ps1`/`.sh`,
+`export.ps1`/`.sh`). Никаких серверов, никакой телеметрии, никуда нихера не передаётся.
+Всё, что эти скрипты делают — пишут локально в файлы, которые и так твои
+(`~/.claude`, `~/.gemini`, `.saipen/` проекта и т.д.).
 
-The two things actually worth a security report:
-1. A bootstrap script doing something to your filesystem or git history
-   beyond what its own comments/README describe.
-2. The protocol's own secrets-hygiene rule (RFC.md § 1.1 -- never write
-   API keys, tokens, passwords into `STATE.md`/`BOARD.md`/`LOG.md`/
-   `KNOWLEDGE/`/`kitchen/`) having a real gap that would cause an
-   agent following SAIPEN to leak a secret into a committed file.
+Тут два уровня аккуратности, и лучше быть точным, чем разводить демагогию:
 
-## Supported Versions
+- **Твои конфиги** (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.aider.conf.yml`)
+  редактируются только через вставку/удаление размеченного блока `SAIPEN:BEGIN`/`END`,
+  перед первой правкой оригинал сохраняется как `<file>.bak`.
+  Uninstall дополнительно пишет `<file>.uninstalled.bak` перед тем как выкусить блок.
+- **Папки скиллов**, которые насрал injector (`~/.claude/skills/saipen` и прочие), — это
+  копии, принадлежащие SAIPEN, и они **НЕ** бекапятся: установка перетирает их целиком,
+  а uninstall сносит нахуй рекурсивно. Это сознательное решение — там только копии
+  файлов этого репозитория — но если ты ручками правил локальную копию скилла,
+  твои правки сгорят при следующем `inject`/`uninstall`. Пиши кастомизации в своём
+  конфиг-блоке или форке, а не внутри скопированной папки скилла.
 
-Only the latest tagged release on `main` is supported. This is a
-protocol specification, not a long-lived service -- there is no LTS
-branch.
+Две вещи, ради которых реально стоит открыть security-репорт:
+1. Скрипт установки делает с твоей файловой системой или git-историей
+   что-то сверх того, что написано в его же комментариях/README.
+2. В правиле гигиены секретов протокола (RFC.md § 1.1 — ни хуя не пиши
+   API-ключи, токены, пароли в `STATE.md`/`BOARD.md`/`LOG.md`/
+   `KNOWLEDGE/`/`kitchen/`/`extensions/`/`saitranslate/kitchen/`/
+   `recovery/`/`logs/`) есть реальная дыра, из-за которой агент,
+   следующий SAIPEN, сольёт секрет в закоммиченный файл. Последние два —
+   самые хитрые: Recovery копирует корявый `STATE.md` дословно в
+   `.saipen/recovery/`, а LOG sealing переносит строки дословно в
+   `.saipen/logs/`, так что всё, что доползло до оригинала,
+   архивируется механизмом, чья работа — не менять содержимое.
 
-## Reporting a Vulnerability
+## Поддерживаемые Версии
 
-Open a GitHub issue. If the report involves a real, currently-exploitable
-problem (not a hypothetical), mark it as a private/security advisory via
-this repository's **Security** tab ("Report a vulnerability") instead of
-a public issue, so it isn't publicly visible before a fix ships.
+Только последний релиз с тегом в ветке `main`. Это спецификация протокола,
+а не долбаный сервис с LTS — нет тут никаких LTS-веток.
 
-Include: which script or RFC rule, the concrete scenario, and what
-actually happens vs. what should happen. Same evidence standard as any
-other bug report (see `CONTRIBUTING.md`).
+## Сообщить О Дыре
+
+Открывай GitHub issue. Если речь о реальной, прямо сейчас эксплуатируемой
+проблеме (а не гипотетической "а вдруг"), пиши через вкладку **Security**
+этого репозитория ("Report a vulnerability") как приватный advisory,
+а не публичный issue, чтоб не светить дыру до выхода патча.
+
+Приложи: какой скрипт или правило, конкретный сценарий и что реально
+происходит против того что должно. Стандарт доказательств тот же,
+что и для любого баг-репорта (см. `CONTRIBUTING.md`).
