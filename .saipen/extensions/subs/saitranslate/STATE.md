@@ -1,9 +1,9 @@
 ---
 phase: DONE
-task: WIKI-003 wiki inject — wiki live at github.com/vacterro/saipen/wiki
-next_action: "Wait for user command"
+task: validate -> done @e2ded74 — structure OK, 29 stale badges per T-186
+next_action: "OUTBOX written. Collect when convenient."
 blocker: none
-agent: saiwiki
+agent: saitranslate
 saipen_version: 7
 saipen_home: "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN"
 mode: read-only

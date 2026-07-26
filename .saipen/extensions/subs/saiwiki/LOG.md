@@ -4,3 +4,4 @@
 - 24.07.26 17:54 [W-003] [parent: W-002] RUN: WIKI-001 done. OUTBOX written with full findings. Board: WIKI-002 planned (maintenance mechanism).
 - 24.07.26 20:50 [W-004] [parent: W-003] RUN: collected by main agent -- WIKI-001 marked reviewed (main-tree T-168 work found deeper corruption than "minimal," already fixing it), WIKI-002 forwarded to _shared/inbox.md for next PLAN.
 - 27.07.26 01:56 [W-005] [parent: W-004] RUN: adopted WIKI-002 (direct user request "saiwiki maintain"). Re-scanned drift v7.64..v7.80: 4 root docs changed (README/SECURITY/CONTRIBUTING/SPEC), not 1. Delivered maintenance mechanism: translation badge drift check in tools/validate.py (canonical) + githooks/pre-commit (bash + ps1). 32/32 locales confirmed stale -- badge reads v7.55.0, VERSION is 7.80.0. OUTBOX written with full findings.
+- 27.07.26 02:55 [W-006] [parent: W-005] RUN: wiki inject — pushed Home + Getting Started + _Sidebar + _Footer to github.com/vacterro/saipen.wiki.
