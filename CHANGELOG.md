@@ -2,6 +2,23 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.80.0 -- 2026-07-26 -- status answers the question people actually ask
+
+Almost nobody runs `saipen status` to find out which phase they are in. They run some form of *"is this in good shape, and does anything need me?"* -- twice in this session's own transcript. The command answered only the first kind of question, so an agent that had been in the conversation answered the second from chat scrollback, and a cold agent -- the whole point of this protocol -- could not answer it at all.
+
+Anything reconstructed from scrollback is not state. `status` now reports, alongside phase / in-flight ticket / queue, each line omitted when empty rather than padded with "none":
+
+- **Waiting on you** -- every open `WAIT:` and every `## BLOCKED` ticket whose blocker names a human decision, quoted as the concrete question. The human's to-do list, and the most useful line in the report.
+- **Claimed but unproven** -- work finished but whose `| verify:` never ran, or ran only `conf: low`/`med`. "Done" and "verified" are different states, and conflating them is how a project feels healthier than it is.
+- **Conformance** -- the last recorded `tools/validate.py` result and when, or plainly that none is recorded, which is itself the answer. Never re-run it: `status` is read-only and a validator run is work.
+- **Staleness** -- how old `STATE.updated` is, when the gap is large enough to matter. A tidy board nobody has touched in three weeks is not a tidy board from an hour ago.
+
+It reports; it does not pronounce. No "healthy", no "ready", no "good to ship" -- an agent grading its own work is the least valuable opinion in the room, and `phases/verify.md`'s manufactured-confidence warning applies to prose exactly as it does to a green check. Where `kitchen/digest.md` is a snapshot *left behind* at ship/stop, this is the same picture *asked for* live; on disagreement, say so and trust the live files.
+
+Dogfooded against this repo before shipping: every field the spec demands is derivable from `STATE`/`BOARD`/`LOG` alone, nothing requires memory. On this repo it immediately surfaces the honest caveat -- `T-170`'s `verify:` explicitly needs a live re-test that has never happened.
+
+CONFORMANCE row 41 + `status-answers-the-real-question` fixture (behavioral, README-only, correctly declaring no expected outcome so the new runner skips it).
+
 ## 7.79.0 -- 2026-07-26 -- the test suite runs now
 
 `tests/scenarios/` held 34 fixtures that nothing had ever executed -- no script, no CI job, no phase doc -- and that could not have passed if anything had: most shipped only the single file their concept concerned. v7.75.0 stopped CONFORMANCE.md from overstating them. This makes them real.
