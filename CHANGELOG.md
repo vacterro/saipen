@@ -2,6 +2,17 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.73.0 -- 2026-07-26 -- who translates what is now a rule, not a budget decision
+
+Operator ruling, written into the protocol so it binds every agent and survives the session: the Core agent handles **English, Russian, Estonian and the `Дед` voice, and nothing else**. All 29 remaining languages are subSaipen work -- a dedicated `saitranslate`/`saiwiki`-class instance on a small, cheap model.
+
+This replaces a softer version of the same idea. Two days earlier the same call had been made as a one-off ("leave the remaining 22 to a cheap model, not worth your tokens"), which left it re-decidable every session by whoever felt they had room. It is now a scope rule in `phases/translate.md` § 2: bulk translation is high-volume and low-complexity-per-unit -- real work, but not work that needs the expensive seat, and "I have budget right now" is not a reason to take one.
+
+- `Дед` stays Core's precisely because it is a *voice*, not a language: getting it right is a STYLE.md judgement (blunt, compressed, mocking, still factually exact) that a cheap model flattens into neutral Russian.
+- Japanese moved out of the old "prioritize EN/RU/ET/JA" line -- that list predated the split and now contradicted it.
+- What Core still does at any language: verify (byte-valid UTF-8, structure, spot-checks against the real source) and repair genuine corruption. That is a correctness fix, not a translation pass -- exactly what happened when four languages turned up with invalid UTF-8 in v7.65.0.
+- `T-168` restated: of its 22 outstanding languages, zero are Core's.
+
 ## 7.72.1 -- 2026-07-26 -- the fix shipped an hour ago had a false positive; HUNT caught it
 
 Routine HUNT over this session's own diff, and it found a regression v7.72.0 introduced.
