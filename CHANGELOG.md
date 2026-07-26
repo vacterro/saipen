@@ -2,6 +2,15 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.71.1 -- 2026-07-25 -- SECURITY.md said more than it could deliver
+
+Two accuracy fixes in the security policy, both found by finishing the sweep rather than assuming the remaining docs were fine.
+
+- It claimed local writes were "each guarded by an automatic `.bak` backup before the first modification." True for your own config files (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.aider.conf.yml`), which are only ever edited via the delimited SAIPEN block and copied to `.bak` first. **Not** true for the skill directories the injector creates: those are overwritten wholesale on install and removed recursively on uninstall, with no backup at all. That's intentional -- they hold nothing but copies of this repo's files -- but a blanket safety claim in a security policy is exactly the wrong place to round up. Both levels now stated exactly, with a warning not to keep hand customizations inside a copied skill folder.
+- Its secrets list still named only the pre-v7.69.0 paths, missing `.saipen/recovery/` and `.saipen/logs/` -- drift introduced by this session's own RFC § 1.1 change. Added, with the reason they're the subtle ones: Recovery copies a corrupt `STATE.md` verbatim and sealing moves LOG lines verbatim, so anything that reached the original gets archived by machinery designed not to alter content.
+
+Also checked and deliberately **not** changed: all 33 `guides/GUIDE_*.md` omit `saipen plan`/`saipen validate` from their friendly command tables, but every one carries the RFC § 1.10 pointer to the authoritative full list -- which is precisely the T-153 resolution from v7.55.0, not drift. `extensions/adapters/` verified clean.
+
 ## 7.71.0 -- 2026-07-25 -- T-177 closed: uninstalling destroyed the backup installing made, and nothing enforced conformance on a PR
 
 Injector re-run authorized and executed -- `bootstrap/inject.ps1` across 7 targets, verified by diff against the home: `CONFORMANCE.md`, `BOOT.md`, `RFC.md` and `extensions/subs/` now identical on all four platforms (`.claude`, `opencode`, `.codex`, `.agents`). v7.70.0's distribution fix is closed on the live machine, not just in source.
