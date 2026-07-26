@@ -2,6 +2,17 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.72.0 -- 2026-07-26 -- MARKHUNT triage: all 6 findings closed, including a backup-destroying installer bug
+
+`saipen markhunt` ran a dry, uncapped audit across the whole repo (5/5 scope vectors, 6 findings, recorded as T-178..T-181 in `## BLOCKED` and fixed nothing, as that phase requires). The user then triaged all four in. Every finding was evidence-backed and reproduced before being written down.
+
+- **`bootstrap/inject.sh` silently destroyed the user's pristine pre-SAIPEN backup on every re-run.** `add_block()` correctly refuses to overwrite an existing `$1.bak`, then immediately ran `sed -i.bak ...` -- and sed's own suffix overwrote that same `.bak` with the current, already-SAIPEN-containing file. The only copy of what the user had before installing was gone, unrecoverably. Reproduced live before fixing and re-run after. What makes it notable: `bootstrap/uninstall.sh` carries a comment describing this exact hazard and avoids it, and `inject.ps1`'s writer is guarded too -- v7.71.0 had fixed three of the four sites and left the installer's bash path.
+- **A shipped library template carried one machine's absolute path.** `extensions/subs/saipython/STATE.md` had a concrete `saipen_home` pointing at the author's local clone (plus a live timestamp where both siblings had the placeholder) -- in a public repo, in a file `saipen sub spawn` copies and the injector distributes to every platform. Reset to template state, and the root cause closed: `tools/validate.py` only ever walked `.saipen/extensions/subs/` (this project's live instances), never `extensions/subs/` (the library that actually ships), so nothing could have caught it. It now walks both, and a concrete `saipen_home` in a shipped template is an explicit FAIL.
+- **README told users to run the injector into their home config and never mentioned the uninstaller.** `bootstrap/uninstall.*` existed and worked but appeared only in SPEC.md and SECURITY.md. Added an undo block plus a plain statement of exactly which files the installer touches. Also restored `saipen plan` and `saipen ship` to the trigger list -- both were absent from README entirely while GUIDE.md covered all twelve commands.
+- **`BOARD.md` had no size discipline while `LOG.md` had three**, despite `BOOT.md` reading both on every cold start. Resolved by taking the cheap half only: no sealing machinery (the board is prunable rather than append-only, and `phases/clean.md`'s scrub is already the mechanism), but a validator WARN past ~16 KB so growth surfaces on its own. This repo's own board tripped it immediately -- 28 KB, of which 16 KB was closed-ticket prose already duplicated into `LOG.md` and `CHANGELOG.md` -- and was scrubbed to 9.4 KB in the same pass.
+
+CONFORMANCE rows 39-40 added for the two new mechanical checks.
+
 ## 7.71.1 -- 2026-07-25 -- SECURITY.md said more than it could deliver
 
 Two accuracy fixes in the security policy, both found by finishing the sweep rather than assuming the remaining docs were fine.

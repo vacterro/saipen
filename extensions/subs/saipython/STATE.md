@@ -5,7 +5,7 @@ next_action: "crew adopt (crew.md): take the top ## TODO PY-### -> clone target 
 blocker: none
 agent: saipython
 saipen_version: 7
-saipen_home: "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN"
+saipen_home: ""
 mode: read-only
-updated: 2026-07-23T21:42:19Z
+updated: 2026-01-01T00:00:00Z
 ---

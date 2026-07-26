@@ -35,7 +35,15 @@ add_block() { # $1=file
     canonical=$(printf '%s\n' "$BLOCK" | sed -n '/<!-- SAIPEN:BEGIN -->/,/<!-- SAIPEN:END -->/p')
     if [ "$existing" = "$canonical" ]; then echo "already"; return; fi
     backup_file "$1"
-    sed -i.bak '/<!-- SAIPEN:BEGIN -->/,/<!-- SAIPEN:END -->/d' "$1" 2>/dev/null || sed -i '' '/<!-- SAIPEN:BEGIN -->/,/<!-- SAIPEN:END -->/d' "$1"
+    # sed's in-place suffix MUST NOT be plain .bak: backup_file() above owns
+    # "$1.bak" and put the user's ORIGINAL, pre-SAIPEN file there on the FIRST
+    # install. Using -i.bak here would overwrite that original with the
+    # current, already-SAIPEN-containing content on every later refresh --
+    # silently destroying the only copy of what the user had before us.
+    # (Reproduced live 2026-07-26. uninstall.sh:6-10 carries the same warning
+    # and inject.ps1's Write-NoBom is guarded; this was the last of the four.)
+    sed -i.saipen-strip-tmp '/<!-- SAIPEN:BEGIN -->/,/<!-- SAIPEN:END -->/d' "$1" 2>/dev/null || sed -i '' '/<!-- SAIPEN:BEGIN -->/,/<!-- SAIPEN:END -->/d' "$1"
+    rm -f "$1.saipen-strip-tmp"
     printf '%s\n' "$BLOCK" >> "$1"; echo "block refreshed"; return
   fi
   backup_file "$1"

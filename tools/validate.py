@@ -202,9 +202,23 @@ subs_root = Path(".saipen/extensions/subs")
 if not subs_root.is_dir():
     subs_root = Path("extensions/subs")  # legacy root-level location (RFC § 1.9)
 
-if subs_root.is_dir():
-    sub_state_files = sorted(
-        p for p in subs_root.glob("*/STATE.md") if p.parent.name != "TEMPLATE")
+# The SHIPPED library copies get checked too, not just this project's live
+# instances. They are what `saipen sub spawn` copies from and what the
+# injector distributes into every platform's skill folder, so a defect there
+# propagates to every user -- strictly higher blast radius than one project's
+# own working state. This was a real blind spot: extensions/subs/saipython/
+# shipped carrying one machine's absolute `saipen_home` (and a live timestamp
+# where its siblings had the placeholder) for several releases, because
+# nothing ever walked that path. Deduped, since in the home repo `subs_root`
+# already IS extensions/subs.
+sub_state_files = sorted(
+    p for p in subs_root.glob("*/STATE.md") if p.parent.name != "TEMPLATE")
+library_subs = Path("extensions/subs")
+if library_subs.is_dir() and library_subs.resolve() != subs_root.resolve():
+    sub_state_files += sorted(
+        p for p in library_subs.glob("*/STATE.md") if p.parent.name != "TEMPLATE")
+
+if sub_state_files:
     subs_ok = True
     for sp in sub_state_files:
         sub_state, err = parse_frontmatter(sp.read_text(encoding="utf-8-sig"))
@@ -220,10 +234,20 @@ if subs_root.is_dir():
         if sub_state.get("phase") in ("BUILD", "SHIP", "CLEAN", "TRANSLATE"):
             fail(f"{sp} phase {sub_state.get('phase')} is unreachable under "
                  f"mode: read-only (RFC § 1.3) -- a subSaipen MUST NOT enter it")
+        # A shipped template must not carry one machine's absolute path: it
+        # is copied verbatim to every user, where that path does not exist.
+        # Only the placeholder (or the field being absent) is legal here.
+        if sp.parts[0] == "extensions" and sub_state.get("saipen_home"):
+            fail(f"{sp} carries a concrete saipen_home "
+                 f"({sub_state['saipen_home']!r}) -- this file ships to every "
+                 f"user and is copied by `saipen sub spawn`; a machine-specific "
+                 f"path here leaks the author's layout and hands users a dead "
+                 f"pointer. Use \"\" and let spawn fill it in (PROTOCOL.md § 7)")
         if len(failures) > before_sub:
             subs_ok = False
-    if sub_state_files and subs_ok:
-        ok(f"subSaipen STATE.md shape valid ({len(sub_state_files)} active)")
+    if subs_ok:
+        ok(f"subSaipen STATE.md shape valid ({len(sub_state_files)} checked, "
+           f"live + shipped library)")
 
 # --------------------------------------------------------------------- BOARD
 
@@ -314,6 +338,21 @@ if remaining:
          + ", ".join(sorted(remaining)))
 else:
     ok("BOARD.md acyclic")
+
+# RFC § 1.2 board soft cap. BOARD.md is read on every cold start (§ 1.1,
+# BOOT.md step 2), so its size is a real per-session cost -- same reasoning
+# as the LOG cap below, minus the sealing machinery (the board is prunable,
+# not append-only; phases/clean.md's scrub is the mechanism). WARN only:
+# an oversized board is hygiene debt, never corruption.
+board_kb = board_path.stat().st_size / 1024
+if board_kb > 16:
+    done_chars = sum(len(l) for l in board_lines
+                     if l.startswith("- [x]"))
+    warn("board-soft-cap",
+         f"BOARD.md is {board_kb:.0f} KB (soft cap ~16 KB), of which "
+         f"{done_chars / 1024:.0f} KB is closed-ticket text -- that content "
+         f"already lives in LOG.md/CHANGELOG.md, so scrub ## DONE at the next "
+         f"CLEAN (RFC § 1.2, phases/clean.md step 1)")
 
 for tid, t in tickets.items():
     if t["section"] == "## BLOCKED" and "blocker" not in t["fields"]:

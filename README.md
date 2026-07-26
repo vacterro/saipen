@@ -13,7 +13,7 @@ reads `STATE`, `BOARD`, and `next_action`, and resumes work in under a minute
 
 **One command. Zero amnesia.**
 
-**v7.71.1** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
+**v7.72.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -35,7 +35,7 @@ Memory lives in the project, not in a model's head. `Project -> Memory -> LLM` b
 ### Key Protocol Logic & Guarantees
 - **Core State Machine**: `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`
 - **Zero-Prompt Autonomy**: No open to-dos left? Auto-transitions `HUNT` (scan bugs) → `ADD` (evolve features) → `HUNT` loop. Zero questions asked.
-- **Explicit Triggers**: `/saipen clean` (repo scrub), `/saipen translate` (isolated `.saipen/saitranslate/` factory), `/saipen markhunt` (dry uncapped audit, records only), `/saipen prepare` (package work for handoff), `/saipen validate` (conformance check), `/saipen goal` (autonomous wave execution). Meta/control: `/saipen status` (read-only report), `/saipen stop` (checkpoint and halt). Full list: RFC.md § 1.10.
+- **Explicit Triggers**: `/saipen plan` (turn a request or a raw backlog into tickets), `/saipen ship` (version bump, changelog, tag, push), `/saipen clean` (repo scrub), `/saipen translate` (isolated `.saipen/saitranslate/` factory), `/saipen markhunt` (dry uncapped audit, records only), `/saipen prepare` (package work for handoff), `/saipen validate` (conformance check), `/saipen goal` (autonomous wave execution). Meta/control: `/saipen status` (read-only report), `/saipen stop` (checkpoint and halt). That plus `saipen set` and `saipen continue` is the whole surface -- twelve commands, full detail in RFC.md § 1.10.
 - **Strict Reliability**: Batch input parsing (surgical 1-by-1 tickets), dirty-tree adoption (never wipes uncommitted work), secret redaction (`sk-***`).
 - **Experimental -- saicrew**: an optional bonus layer (`extensions/subs/`, zero Core changes) for running a multi-agent crew -- one Core writer plus read-only `saihunt`/`saipython` workers reporting through their own `OUTBOX.md`. Under active live testing, not yet verified end-to-end -- see `extensions/subs/crew.md`.
 
@@ -62,6 +62,21 @@ cd saipen
 powershell -ExecutionPolicy Bypass -File .\bootstrap\inject.ps1     # Windows
 bash bootstrap/inject.sh                                            # macOS / Linux
 ```
+
+<sub>What that touches, so nothing is a surprise: it appends a marked
+`<!-- SAIPEN:BEGIN -->...<!-- SAIPEN:END -->` block to the agent instruction
+files you already have (`~/.claude/CLAUDE.md`, `~/.config/opencode/AGENTS.md`,
+`~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`) -- backing each up to `.bak`
+first -- and copies the protocol into the matching skill folders. Nothing
+outside those paths, no daemon, no network calls.</sub>
+
+**Changed your mind?** One command puts it back:
+```bash
+powershell -ExecutionPolicy Bypass -File .\bootstrap\uninstall.ps1  # Windows
+bash bootstrap/uninstall.sh                                         # macOS / Linux
+```
+It strips exactly the marked block (leaving the rest of your file alone),
+saves a `.uninstalled.bak` copy first, and removes the skill folders.
 
 **2. Start a project** -- open an agent in your folder, type:
 > `saipen set`
