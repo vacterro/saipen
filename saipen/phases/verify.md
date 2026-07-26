@@ -32,6 +32,31 @@ Fixed bug -> regression test that failed pre-fix.
 GUI/env unverifiable -> LOG `MANUAL-VERIFY STEPS + EXPECTED`, never fake.
 Close with `conf:` -- high (tests green), med (smoke only), low (manual).
 
+**A gate that cannot fail is not a gate.** "Never fake" above covers lying
+about a result; this covers the quieter version, where nobody lies but the
+instrument was never connected. Green from a check that is *incapable* of
+going red is not evidence -- it is manufactured confidence, and it is worse
+than no check because it stops anyone looking. Before trusting any gate,
+yours or inherited, treat these as UNVERIFIED until proven otherwise:
+- a CI job carrying `continue-on-error` / `allow_failure` / a trailing
+  `|| true` -- it cannot fail the build no matter what breaks;
+- a step that catches its own failure and prints a soft word (`SKIP`,
+  `warn`, `note`) instead of exiting non-zero;
+- a suite that collected 0 tests, or matched only files that no longer exist.
+
+The proof is cheap and mandatory when you rely on the gate: **break it once
+on purpose.** Feed it a known-bad input and confirm it goes red. Stays green
+-> you found a second defect, not a passing test. LOG both runs -- the real
+green one and the deliberate red one; a `conf: high` claimed on a gate never
+shown capable of failing is not `high`.
+
+**Pin what a gate depends on.** An unpinned linter/formatter/type-checker
+makes the gate nondeterministic: a new upstream release shifts the default
+rule set and the build goes red with zero code changes, which teaches
+everyone to ignore it -- the same end state as a gate that never fires. Pin
+the version AND state the rule set explicitly; a default set is whatever the
+tool shipped that week, not a decision this repo made.
+
 ## Debug (on FAIL)
 
 Reproduce exactly, quote decisive error line.

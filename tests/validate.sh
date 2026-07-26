@@ -127,6 +127,13 @@ echo -e "${GREEN}PASS: BOARD.md has all required section headings${NC}"
 
 # 3. Check LOG.md -- every non-empty, non-comment line MUST match (date
 # prefix is optional to allow pre-STYLE.md history; new entries carry one).
+# Absence is a FAIL, not a skip: RFC § 1.2 requires the file and § 1.5
+# Recovery rebuilds from it, so "no LOG.md" silently reporting conformant was
+# a gate that could not fail (phases/verify.md). Empty is legal (fresh INIT).
+if [ ! -f ".saipen/LOG.md" ]; then
+    echo -e "${RED}FAIL: LOG.md missing -- RFC § 1.2 requires it (an empty LOG.md is legal on a fresh project; an absent one is not)${NC}"
+    exit 1
+fi
 if [ -f ".saipen/LOG.md" ]; then
     LOG_PATTERN="^-[[:space:]]+([0-9]{2}[.\/][0-9]{2}[.\/][0-9]{2}[[:space:]]+[0-9]{2}:[0-9]{2}[[:space:]]+)?\[E-[0-9]+\]([[:space:]]+\[parent:[[:space:]]+E-[0-9]+\])?"
     BAD_LINES=$(grep -vE "^#" .saipen/LOG.md | grep -vE "^$" | grep -vE "$LOG_PATTERN" || true)

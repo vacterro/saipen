@@ -391,6 +391,20 @@ log_seg_dir = Path(".saipen/logs")
 log_segments = sorted(log_seg_dir.glob("LOG-*.md")) if log_seg_dir.is_dir() else []
 active_log = Path(".saipen/LOG.md")
 log_files = [p for p in (log_segments + [active_log]) if p.is_file()]
+
+# A gate that cannot fail is not a gate (phases/verify.md). Until v7.75.0 this
+# whole block hung off `if log_files:` -- so a `.saipen/` with NO `LOG.md` at
+# all skipped every LOG check and the run printed "Agent is conformant". That
+# is the "suite that collected 0 tests" case exactly: the instrument was never
+# connected. `STATE.md` and `BOARD.md` absence both FAIL above; `LOG.md` is
+# equally required by RFC § 1.2 and is what § 1.5 Recovery rebuilds from, so
+# its absence is if anything worse. An EMPTY LOG.md is fine and normal -- a
+# fresh `INIT` writes exactly that (`phases/init.md`) -- absent is not.
+if not active_log.is_file():
+    fail("LOG.md missing -- RFC § 1.2 requires it, and § 1.5 Recovery has "
+         "nothing to rebuild from without it (an empty LOG.md is legal, as "
+         "phases/init.md writes on a fresh project; an absent one is not)")
+
 if log_files:
     # Date prefix optional to allow pre-STYLE.md history; new entries carry one.
     # [agent: <id>] is a MAY field for writer identity (RFC § 1.2, v7.27.0).

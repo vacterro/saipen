@@ -13,12 +13,25 @@ Any release of this protocol MUST pass the gold standard test:
 If the agent asks "What should I do?", the protocol has failed. A `next_action: WAIT: <specific question>` (RFC.md § 1.2) does NOT fail this test -- asking one exact, pre-determined question instantly is the executable action; the failure mode is vague context-seeking, not a specific authorization gate. This includes the bootstrap `WAIT:` `INIT` produces on a brand-new project (RFC § 1.2's fifth `WAIT:` category, `phases/init.md`) -- asking for the first project goal or raw backlog is the same kind of specific question, not vague context-seeking, and doesn't fail this test either: nothing in `STATE`/`BOARD`/`LOG` could have answered it instead, since none of them have any history yet.
 
 ## Scenario Coverage
-`tests/scenarios/` holds one fixture directory per concept below. Structural
-fixtures include a `.saipen/` that `tests/validate.sh`/`validate.ps1` runs
-against directly; behavioral ones are README-only where the assertion is
-about agent decision-making, not file shape -- there is nothing to validate
-mechanically. "Covered by" names the actual fixture; entries with no
-fixture state why, not silently.
+`tests/scenarios/` holds one fixture directory per concept below. Behavioral
+ones are README-only where the assertion is about agent decision-making, not
+file shape -- there is nothing to validate mechanically. "Covered by" names
+the actual fixture; entries with no fixture state why, not silently.
+
+**Honest status of the 9 structural fixtures (corrected v7.75.0).** This
+section used to claim they "include a `.saipen/` that `tests/validate.sh` /
+`validate.ps1` runs against directly." Both halves were false, and nobody
+noticed because the second half guaranteed the first was never tested: no
+script, no CI job, and no phase doc ever executed a fixture. Run against them
+today and 6 of 9 fail -- for reasons unrelated to what they test, because each
+ships only the one file its concept concerns (`multi-agent-claim-conflict` has
+a `BOARD.md` and no `STATE.md`; `resume-after-crash` the reverse; several have
+no `LOG.md`). They are illustrative reference states, not executable tests, and
+saying otherwise was exactly the manufactured confidence `phases/verify.md`
+warns about. Making them genuinely runnable -- completing each to a valid
+`.saipen/` so only the intended defect fails, declaring a per-fixture expected
+outcome, and wiring a runner into CI -- is real work, tracked as its own
+ticket rather than papered over here.
 
 | # | Concept | Covered by |
 |---|---------|------------|
@@ -36,7 +49,7 @@ fixture state why, not silently.
 | 12 | Extension absence does not block | `extension-absence` |
 | 13 | Unresolved LOG parent | Enforced by `tools/validate.py` since v7.24.0 (parent must resolve to an earlier `E-###`; IDs unique + monotonic). The old excuse -- historical numbering resets a naive resolver would misflag -- died with v7.24.0's user-approved ledger repair; this repo's own LOG.md now passes the check it once couldn't. |
 | 14 | Invalid phase transition | `invalid-phase-transition` -- conceptual only; `STATE.md` doesn't track phase history, so this can't be automated without new scope |
-| 15 | Invalid mode-phase combination | `invalid-mode-phase-combination` |
+| 15 | Mode-phase restrictions -- `read-only` MUST NOT enter `BUILD`/`SHIP`/`CLEAN`/`TRANSLATE` (RFC § 1.3), the only such ban still live since v7.66.0 freed `no-publish` + `SHIP` | `read-only-restriction` (fails as intended); `invalid-mode-phase-combination` is now the inverse regression guard -- it asserts `no-publish` + `SHIP` stays legal, since re-adding that ban already shipped once |
 | 16 | Ticket-level BLOCKED (non-cycle failure), work continues | `blocked-ticket` |
 | 17 | Fresh INIT bootstrap from `templates/` | `fresh-init` -- behavioral, no `.saipen/` yet by definition (that's what INIT creates) |
 | 18 | Evolutionary ADD feature symmetry (§ 2.2) | `add-feature-symmetry` -- behavioral, no fixture |

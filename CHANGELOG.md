@@ -2,6 +2,34 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.75.0 -- 2026-07-26 -- applied the new gate rule to our own gates; one could not fail
+
+v7.74.0 added "a gate that cannot fail is not a gate" to `phases/verify.md`, including the instruction to prove a gate by breaking it once on purpose. Turned that on this repo's own validators.
+
+**Both gates do work** -- broke them four ways (malformed LOG line, README badge drift, duplicate ticket id, injector wiring regression) and each went red as it should. But one hole showed up immediately:
+
+- **A `.saipen/` with no `LOG.md` at all passed both validators and printed "Agent is conformant."** `STATE.md` and `BOARD.md` absence each FAIL loudly; `LOG.md` absence hit `if log_files:` / `if [ -f ... ]` and skipped every LOG check silently -- the "suite that collected 0 tests" case exactly. `LOG.md` is equally required by RFC § 1.2 and is the file § 1.5 Recovery rebuilds from, so its absence is if anything the worse of the three. Now FAILs in both validators, verified all four ways: absent goes red, empty (what a fresh `INIT` writes) stays green, home repo unaffected.
+
+That new check immediately earned itself by exposing shipped debt:
+
+- **`tests/scenarios/` has never been executed. By anything.** No script, no CI job, no phase doc. And the fixtures could not pass if it had been: 6 of 9 fail for reasons unrelated to what they test, because each ships only the one file its concept concerns. CONFORMANCE.md nevertheless claimed they "include a `.saipen/` that `tests/validate.sh`/`validate.ps1` runs against directly" -- both halves false, the second guaranteeing nobody discovered the first. That claim is now replaced with an honest status note, and the real work (complete the fixtures, declare per-fixture expected outcomes, add a runner, wire it to CI) is ticketed as **T-183** rather than papered over.
+- **`invalid-mode-phase-combination` had been asserting a deleted rule for eight releases.** It existed to prove the validator caught `no-publish` + `SHIP` -- the ban v7.66.0 removed on purpose. Nothing ran it, so nothing noticed; meanwhile all three validators went on enforcing that same dead rule until v7.70.0 caught them. Repurposed into the inverse and more useful test: it now asserts the combination stays **legal**, so re-adding that ban turns it red. CONFORMANCE row 15 repointed at `read-only-restriction`, which is the only mode x phase ban still live -- and which does fail as intended.
+
+## 7.74.0 -- 2026-07-26 -- a gate that cannot fail is not a gate
+
+Found in the field, not in theory. A repo's CI was reporting green while being structurally incapable of reporting red: the smoke job carried `continue-on-error: true`, and its import check wrapped every module in a `try/except` that printed `SKIP: <module> -> <error>` and moved on. So a genuine `ImportError` and a healthy import produced the same outcome. Separately the lint job installed an unpinned `ruff`, so a new upstream release changed the default rule set and surfaced 46 findings on a codebase nobody had touched -- the build went red with zero code changes, which is the fastest way to train a team to ignore CI entirely.
+
+`phases/verify.md` already said **never fake** a result. That covers lying. It did not cover the quieter failure where nobody lies and the instrument was simply never connected -- which is harder to catch precisely because every artifact looks correct.
+
+Added to `phases/verify.md`, after the `conf:` line:
+
+- The named tells: `continue-on-error`/`allow_failure`/`|| true`, a step that catches its own failure and prints a soft word instead of exiting non-zero, a suite that collected 0 tests or matched files that no longer exist. All treated as UNVERIFIED until proven otherwise.
+- The proof, mandatory when you rely on the gate: **break it once on purpose.** Feed known-bad input, confirm red. Still green -> that is a second defect, not a passing test. LOG both the real green run and the deliberate red one.
+- `conf: high` is not available for a gate never shown capable of failing.
+- Pin the tools a gate depends on, and state the rule set explicitly -- an unpinned linter's "defaults" are whatever shipped that week, not a decision the repo made. A gate that fires randomly and a gate that never fires end in the same place: ignored.
+
+Deliberately scoped to `verify.md` alone -- this is a VERIFY-discipline rule, and duplicating it into `hunt.md`/RFC would be the protocol bloat this project keeps rejecting.
+
 ## 7.73.0 -- 2026-07-26 -- who translates what is now a rule, not a budget decision
 
 Operator ruling, written into the protocol so it binds every agent and survives the session: the Core agent handles **English, Russian, Estonian and the `Дед` voice, and nothing else**. All 29 remaining languages are subSaipen work -- a dedicated `saitranslate`/`saiwiki`-class instance on a small, cheap model.
