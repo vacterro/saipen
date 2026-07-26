@@ -1,31 +1,67 @@
 # MARKHUNT progress cursor (overwrite-only, not history)
 
-run: 2026-07-23T20:35Z | agent: opus (this session)
-input: user-supplied 12-gap + 5-contradiction audit, cross-checked against live canonical files (saipen/RFC.md + all 16 phases + extensions/subs/PROTOCOL.md + VERSION)
+run: 2026-07-26T04:20Z | agent: claude-opus
+trigger: user `/goal` -- "избавиться от логических дыр вообще, чтобы не стыдно было показать на reddit"
 
-## Scope covered (exhausted)
-- RFC.md §1.1-§2.4: read whole
-- phases/: done, hunt, verify, review, markhunt, blocked, prepare, translate, clean, plan, validate -- read whole
-- extensions/subs/PROTOCOL.md -- OUTBOX/collect path confirmed
-- VERSION = 7.50.0 present
-- skill-copy vs canonical: diff-clean (RFC + 12 phases identical)
+head_start: c3933df
+head_end: c3933df
+cursor: done
 
-## Verdict: 4 real (recorded T-149..T-152), 8 false/already-fixed (rejected, not boarded)
+## vectors (all 5 of phases/markhunt.md's scope categories)
 
-REAL:
-- T-149 P2 goal_tickets = verify-passes not tickets (verify.md:63 vs RFC §2.4:222)
-- T-150 P3 saitranslate/STATE.md reaped by no phase
-- T-151 P3 kitchen not atomic + no crash-integrity check
-- T-152 P3 doc-explicitness cluster x6
+1. HUNT's own six, uncapped -- DONE
+   - failing tests: `tools/validate.py` PASS (13 checks), `tests/validate.sh` PASS
+   - stale TODO/FIXME/HACK: none in real code (the 3 grep hits are `## TODO`
+     heading literals inside the validators themselves)
+   - python parse check: all 3 files in `tools/` parse clean
+   - silent failures: `|| true` in validate.sh are deliberate `set -e` guards on
+     greps that legitimately match nothing, not swallowed errors
+   - symmetry gaps: install/uninstall pair present in both languages; export has no
+     import counterpart by design (plain untar). FOUND a doc-level asymmetry -> F4
+   - dead code / orphans: `extensions/adapters/` all 9 present and referenced from
+     README; `tofix/` empty (git doesn't track empty dirs, local-only); 0 broken
+     relative markdown links across the entire doc surface
+2. Cross-file consistency / doc drift -- DONE
+   - GUIDE.md covers all 12 RFC § 1.10 commands (T-153's old concern is satisfied)
+   - CONFORMANCE.md: all 34 named fixtures exist on disk
+   - RFC phase enum <-> phases/ docs: 16/16 both directions (validator-enforced)
+   - FOUND -> F4, F5
+3. Security posture -- DONE
+   - secret scan across every tracked file: 0 real hits (2 regex false positives on
+     Swedish/German prose containing the literal "sk-")
+   - `.gitignore` covers .bak / .freebuff / .saipen/recovery / export archives
+   - the generated pre-commit hook interpolates only paths derived from `__file__`
+     plus one quoted STATE.md field -- no unquoted expansion, no injection surface
+   - FOUND -> F3 (author's absolute local path shipped inside a public template)
+4. Architectural debt -- DONE
+   - FOUND -> F2 (validator is blind to the shipped library subs, which is the root
+     cause of F3), F6 (BOARD.md has no size discipline while LOG.md has three,
+     although BOOT.md reads both on every single cold start)
+5. Familiarity blindness -- DONE
+   - the repo's own `.saipen/BOARD.md` has grown to 23.6 KB of closed-ticket prose
+     and nobody registers it, because it's "just our board" -- it is the first file
+     a visitor opens and the second file every cold agent loads (F6)
+   - `bootstrap/uninstall.*` exists and works but is invisible from the front door,
+     normalized because the maintainer never needs to run it (F4)
 
-REJECTED (evidence):
-- #3 claim theft: already fixed v7.30.0, RFC §1.4 mandates 10-min standalone BOARD refresh
-- #6 BLOCKED timeout: blocked.md:9 re-scans every entry; clean.md re-checks BLOCKED; command-driven not daemon
-- #8 subSaipen OUTBOX orphan: extensions/subs/PROTOCOL.md:114 defines collect at HUNT/continue/`sub collect`
-- #11 ext command collision: RFC §1.9:137 already "MUST NOT collide with a §1.10 name"
-- #12 PREPARE orphan: external-handoff by design, user-invoked, out-of-band consumer
-- #14 bare `saipen goal` resume/pivot: §2.4/§1.10 unambiguous (bare = resume only)
-- #15 HUNT->ADD->DONE one tick: documented intended behavior
-- #16 WAIT: in plan.md: plan.md:11 scopes the ban to proposal-halt, which is NOT one of §1.2's legal WAIT: gates -- consistent, not contradictory
+## surface swept
 
-## Remaining: none -- surface exhausted for this audit's claims
+saipen/{RFC,BOOT,SKILL,STYLE,CONFORMANCE,UI}.md, saipen/phases/*.md (16),
+tools/*.py (3), tests/validate.{sh,ps1}, tests/scenarios/*/README.md,
+bootstrap/*.{sh,ps1,bat} (8), extensions/{templates,schemas,subs,adapters}/**,
+README.md, GUIDE.md, SPEC.md, SECURITY.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md,
+.gitignore, .github/**, plus a whole-tracked-tree grep for secrets and for absolute
+machine paths.
+Out of scope this pass: guides/GUIDE_XX.md (33 hand-maintained translations),
+.saipen/saitranslate/** (T-168's own surface), .saipen/logs/** (sealed, immutable),
+.saipen/recovery/** (gitignored backups).
+
+## findings
+
+findings: 6
+tickets written: 4 -- grouped per this phase's own grouping rule, each naming its count:
+  T-178 x1  F1  inject.sh destroys the pristine backup on re-run (reproduced live)
+  T-179 x2  F2+F3  library subs unvalidated -> shipped example carries a dead
+                   machine-specific saipen_home (root cause + symptom, one fix)
+  T-180 x2  F4+F5  front-door doc gaps: no uninstall path, 2 commands unlisted
+  T-181 x1  F6  BOARD.md unbounded while LOG.md is capped, both read at cold start
