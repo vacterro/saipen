@@ -133,8 +133,15 @@ foreach ($heading in @("## DOING", "## TODO", "## DONE", "## BLOCKED")) {
 Write-Host "PASS: BOARD.md has all required section headings" -ForegroundColor Green
 
 # 3. Check LOG.md -- date prefix is optional (pre-STYLE.md history has none,
-# current entries carry one), everything else is mandatory. File itself is
-# optional too (mirrors validate.sh -- a brand-new project may not have one yet).
+# current entries carry one), everything else is mandatory. The FILE is not
+# optional: RFC § 1.2 requires it and § 1.5 Recovery rebuilds from it, so
+# absence is a FAIL, not a skip -- otherwise this is a gate that cannot fail
+# (phases/verify.md). An EMPTY LOG.md is legal, that is what a fresh INIT
+# writes. v7.75.0 closed this in validate.py and validate.sh and missed this
+# file; the Windows floor kept the hole one release longer.
+if (-not (Test-Path ".saipen\LOG.md")) {
+    Assert-Format $false "LOG.md missing -- RFC 1.2 requires it (an empty LOG.md is legal on a fresh project; an absent one is not)"
+}
 if (Test-Path ".saipen\LOG.md") {
     $logLines = Get-Content ".saipen\LOG.md"
     $logPattern = "^-\s+(\d{2}[.\/]\d{2}[.\/]\d{2}\s+\d{2}:\d{2}\s+)?\[E-\d+\](\s+\[parent:\s+E-\d+\])?"

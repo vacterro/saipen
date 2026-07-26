@@ -2,6 +2,17 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.76.0 -- 2026-07-26 -- the Windows floor kept the LOG hole one release longer
+
+v7.75.0 closed the "a `.saipen/` with no `LOG.md` passes as conformant" hole in `tools/validate.py` and `tests/validate.sh` -- and missed `tests/validate.ps1`, the floor every no-Python **Windows** host falls back to. Same asymmetric-fix pattern this session keeps catching: fix N of N+1 sites, ship, find the last one later. Break-tested it four ways after fixing: absent LOG goes red, empty LOG (what a fresh `INIT` writes) stays green, a malformed LOG line goes red, `read-only` + `BUILD` goes red.
+
+Also verified end-to-end, first time for any of them:
+
+- **The pre-commit hook actually blocks a commit.** Installed into a throwaway repo, committed a valid `.saipen/` (passed), corrupted `LOG.md` and committed again (blocked, non-zero), then confirmed `--no-verify` still gets through as documented.
+- **`install_hook.py` / `uninstall_hook.py` round-trip preserves a foreign hook.** Seeded a pre-existing non-SAIPEN `pre-commit`, installed over it (original preserved in `.pre-saipen.bak`), uninstalled (original restored byte-for-byte), then ran uninstall again against the now-foreign hook (correctly refused to touch it).
+
+Still untested and now tracked as **T-184**: the `inject.sh` -> `uninstall.sh` round-trip against a sandbox `HOME`. It is the only remaining path that writes into the user's real agent config, and the T-178 backup fix has been verified only through an isolated `sed` repro, never through the real script.
+
 ## 7.75.0 -- 2026-07-26 -- applied the new gate rule to our own gates; one could not fail
 
 v7.74.0 added "a gate that cannot fail is not a gate" to `phases/verify.md`, including the instruction to prove a gate by breaking it once on purpose. Turned that on this repo's own validators.
