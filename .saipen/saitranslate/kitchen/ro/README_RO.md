@@ -12,7 +12,7 @@ markdown simplu, astfel încât un agent nou fără istoric de chat execută `/s
 
 **O comandă. Zero amnezie.**
 
-**v7.81.0** | [Spec](SPEC.md) | [Ghid](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformitate](saipen/CONFORMANCE.md) | markdown simplu | zero dependențe | MIT
+**v7.82.0** | [Spec](SPEC.md) | [Ghid](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformitate](saipen/CONFORMANCE.md) | markdown simplu | zero dependențe | MIT
 
 [![Ghid în română](https://img.shields.io/badge/📖_Ghid_ELI5-ROMÂNĂ-blue?style=for-the-badge)](guides/GUIDE_RO.md)
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
@@ -88,4 +88,5 @@ Notele specifice fiecărei platforme se află în `extensions/adapters/`.
 <p align="center">
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
+
 
