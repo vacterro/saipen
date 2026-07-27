@@ -1,8 +1,8 @@
 # Board
 ## DOING
+- [/] T-200 [P2] Wave 2 phase HUNT: REVIEW, SHIP, DONE, VALIDATE, HUNT — same 6-dimension analysis | owner: opencode | claim_time: 2026-07-27T07:50:00Z
 
 ## TODO
-- [ ] T-200 [P2] Wave 2 phase HUNT: REVIEW, SHIP, DONE, VALIDATE, HUNT — same 6-dimension analysis
 - [ ] T-201 [P2] Wave 3 phase HUNT: MARKHUNT, ADD, CLEAN, TRANSLATE, PREPARE — same 6-dimension analysis
 - [ ] T-202 [P3] Wave 4 phase HUNT: BLOCKED — single-phase analysis
 

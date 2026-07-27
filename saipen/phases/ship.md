@@ -4,7 +4,7 @@
 
 "PUBLISH" names the action this phase performs (tag + push), not a
 separate `STATE.md phase:` value -- `SHIP` is the only phase here; RFC
-§ 1.6's 14-value enum has no `PUBLISH` entry. The arrow above is
+§ 1.6's 16-value enum has no `PUBLISH` entry. The arrow above is
 descriptive, not a transition-table row.
 
 Only on `saipen ship`, or repo has `origin` AND LOG shows prior ship, or
