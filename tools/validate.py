@@ -39,6 +39,7 @@ from pathlib import Path
 STRICT = "--strict" in sys.argv[1:]
 USE_COLOR = sys.stdout.isatty()
 
+CURRENT_SCHEMA_VERSION = 1
 failures = []
 warnings = {}
 
@@ -114,17 +115,22 @@ TYPE_CHECKS = {
 
 
 def check_against_schema(fields, schema, label):
-    """Interpret the required/enum/type subset of JSON Schema. That subset
-    is everything state.schema.json actually uses -- if the schema ever
+    """Interpret the required/enum/type/additionalProperties subset of JSON Schema.
+    That subset is everything state.schema.json actually uses -- if the schema ever
     grows past it, extend this, don't silently skip."""
     props = schema.get("properties", {})
+    additional_forbidden = schema.get("additionalProperties") is False
     for req in schema.get("required", []):
         if req not in fields:
             fail(f"{label} missing required field: {req}")
     for key, value in fields.items():
         if key not in props:
-            warn("unknown-field", f"{label} has field the schema doesn't know: "
-                 f"{key} (retired or misspelled?)")
+            msg = f"{label} has field the schema doesn't know: " \
+                  f"{key} (retired or misspelled?)"
+            if additional_forbidden:
+                fail(msg)
+            else:
+                warn("unknown-field", msg)
             continue
         spec = props[key]
         expected = spec.get("type")
@@ -172,6 +178,46 @@ if state.get("phase") == "BLOCKED" and state.get("blocker") in ("", "none", None
     fail("STATE.md phase: BLOCKED but blocker is empty/none -- a blocked state "
          "with no stated reason is not conformant (RFC § 1.2)")
 
+# Hard invariant: DONE -> task MUST be "none" (or empty — "none" preferred).
+# RFC § 1.2: DONE is the terminal/no-active-ticket phase; a DONE state claiming
+# a concrete task is a logic error (someone forgot to clear it).
+if state.get("phase") == "DONE" and state.get("task") not in ("none", "", None):
+    fail(f"STATE.md phase: DONE but task is {state['task']!r} -- DONE must "
+         f"have task: none (no active ticket in terminal state)")
+
+# RFC § 1.2 + § 1.5: DONE is a terminal phase; WAIT from DONE is legal ONLY
+# for safety valve (§ 2.4) or explicit human brake. The board-empty drift
+# check below (RFC § 2.1) handles the ZERO-PROMPT case; this catches the
+# simpler "DONE with a concrete WAIT that isn't a valve" mistake directly.
+if state.get("phase") == "DONE" and isinstance(state.get("next_action"), str) \
+        and state.get("next_action", "").startswith("WAIT:") \
+        and "safety valve" not in state.get("next_action", "").lower():
+    warn("done-wait", f"STATE.md phase: DONE but next_action is WAIT -- "
+         f"DONE with WAIT is legal only for safety-valve pause; "
+         f"otherwise DONE should transition to SCOUT/PLAN/HUNT "
+         f"per RFC § 1.6 / § 2.1")
+
+# Hard invariant: goal_mode: false -> goal_waves/goal_tickets MUST be absent.
+if state.get("goal_mode") is False:
+    for counter in ("goal_waves", "goal_tickets"):
+        if counter in state and state[counter] is not None:
+            fail(f"STATE.md goal_mode: false but {counter} is present "
+                 f"({state[counter]!r}) -- counters MUST be cleared when "
+                 f"goal_mode is off (RFC § 2.4 Exit)")
+
+# schema_version invariant: must be >= CURRENT_SCHEMA_VERSION.
+# Absence is tolerated for legacy pre-v1 states (warn, not fail), but a
+# present value below current means the schema is outdated.
+sv = state.get("schema_version")
+if sv is None:
+    warn("schema-version",
+         "STATE.md has no schema_version -- legacy pre-v1 format. "
+         "Set schema_version: 1 at next checkpoint.")
+elif not isinstance(sv, int) or sv < CURRENT_SCHEMA_VERSION:
+    fail(f"STATE.md schema_version is {sv!r}, expected >= "
+         f"{CURRENT_SCHEMA_VERSION} -- state format may be incompatible "
+         f"with current validator")
+
 if len(failures) == before:
     ok("STATE.md schema valid (checked against state.schema.json)")
 
@@ -201,6 +247,18 @@ ANY_FROM = {"VALIDATE", "MARKHUNT", "CLEAN", "TRANSLATE", "PREPARE", "SHIP"}
 
 t_from = state.get("transition_from")
 t_current = state.get("phase")
+
+# Invariant: transition_from absent on non-INIT → FAIL.
+# Absence tolerated only for fresh INIT bootstrap.
+if t_from is None:
+    if t_current != "INIT":
+        fail(f"STATE.md missing transition_from -- required on all "
+             f"non-INIT states to validate phase transitions (RFC § 1.6)")
+    else:
+        warn("transition-from", "STATE.md phase: INIT but transition_from "
+             "is absent -- set transition_from: INIT at next checkpoint "
+             "to make it explicit")
+
 if t_from and t_current and t_from != t_current:
     if t_current not in ANY_FROM:
         allowed = VALID_TRANSITIONS.get(t_from, [])
@@ -222,6 +280,32 @@ if t_from and t_current and t_from != t_current:
 # assert. Re-adding a phase-level ban would hard-FAIL a legal state and, via
 # tools/install_hook.py's pre-commit wiring, block that project's commits.
 mode, phase = state.get("mode"), state.get("phase")
+next_action = state.get("next_action")
+if isinstance(next_action, str):
+    vague_next_action = re.compile(
+        r"\b(continue work|proceed|do next|review stuff|keep going|"
+        r"maybe|if needed|ask if needed)\b",
+        re.IGNORECASE)
+    executable_prefixes = ("WAIT:", "saipen ", "PHASE ", "RUN:", "RESUME:")
+    if vague_next_action.search(next_action):
+        fail(f"STATE.md next_action is vague, not executable: {next_action!r} "
+             f"(RFC В§ 1.2)")
+    if not next_action.startswith(executable_prefixes):
+        warn("next-action-shape",
+             f"STATE.md next_action does not start with WAIT:/saipen /PHASE "
+             f"/RUN:/RESUME:: {next_action!r} (RFC В§ 1.2)")
+    if "?" in next_action and not next_action.startswith("WAIT:"):
+        fail(f"STATE.md next_action asks a question outside WAIT:: "
+             f"{next_action!r} (RFC В§ 1.2)")
+
+if phase in ("SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP") \
+        and state.get("task") in ("none", "", None):
+    if not (isinstance(next_action, str)
+            and "ticket-less maintenance" in next_action.lower()):
+        warn("taskless-active-phase",
+             f"STATE.md phase {phase} has task: none -- active ticket phases "
+             f"SHOULD name a T-### unless next_action explains a ticket-less "
+             f"maintenance exception (RFC В§ 1.2)")
 if mode == "read-only" and phase in ("BUILD", "SHIP", "CLEAN", "TRANSLATE"):
     fail(f"mode: read-only MUST NOT enter {phase} (RFC § 1.3)")
 
@@ -314,7 +398,7 @@ if not board_path.is_file():
     sys.exit(1)
 
 REQUIRED_HEADINGS = ["## DOING", "## TODO", "## DONE", "## BLOCKED"]
-KNOWN_FIELDS = {"needs", "owner", "claim_time", "blocker", "verify"}
+KNOWN_FIELDS = {"needs", "owner", "claim_time", "blocker", "verify", "review_passes"}
 TICKET_RE = re.compile(r"^- \[([ x/])\] (T-\d+)\s+(.*)$")
 PIPE_SENTINEL = "\x00"
 
@@ -366,6 +450,12 @@ for heading in REQUIRED_HEADINGS:
         fail(f"BOARD.md missing required section heading: {heading}")
 if all(h in headings_seen for h in REQUIRED_HEADINGS):
     ok("BOARD.md has all required section headings")
+
+for heading in REQUIRED_HEADINGS:
+    count = headings_seen.count(heading)
+    if count > 1:
+        fail(f"BOARD.md has duplicate section heading {heading} ({count} times) "
+             f"-- duplicate status buckets split the work surface (RFC В§ 1.2)")
 
 if not any(f.startswith("BOARD.md") and "duplicate" in f for f in failures):
     ok("BOARD.md no duplicate tickets")
@@ -480,11 +570,16 @@ if log_files:
     seen_ids = {}
     prev_id = 0
     log_ok = True
+    timestamp_events = []
     for lf in log_files:
         for line_no, line in enumerate(lf.read_text(encoding="utf-8-sig").splitlines(), 1):
             if not line.strip() or line.startswith("#"):
                 continue
             loc = f"{lf.as_posix()}:{line_no}"
+            if "\ufffd" in line:
+                fail(f"{loc} contains U+FFFD replacement character -- repair "
+                     f"the corrupted text explicitly and LOG the repair")
+                log_ok = False
             m = LOG_RE.match(line)
             if not m:
                 fail(f"{loc} violates the Event Graph skeleton "
@@ -493,6 +588,18 @@ if log_files:
                 continue
             eid, parent, ticket, taxonomy, content = m.groups()
             eid = int(eid)
+            ts = re.match(r"^- (\d{2})\.(\d{2})\.(\d{2}) (\d{2}):(\d{2}) ", line)
+            if ts:
+                try:
+                    timestamp_events.append((
+                        datetime.datetime(
+                            2000 + int(ts.group(3)), int(ts.group(2)),
+                            int(ts.group(1)), int(ts.group(4)), int(ts.group(5)),
+                            tzinfo=datetime.timezone.utc),
+                        eid, loc))
+                except ValueError:
+                    fail(f"{loc} has unparseable LOG timestamp")
+                    log_ok = False
             if eid in seen_ids:
                 fail(f"{loc} E-{eid:03d} reused (first at "
                      f"{seen_ids[eid]}) -- Event IDs MUST be unique (RFC § 1.2)")
@@ -521,6 +628,28 @@ if log_files:
     if log_ok:
         ok(f"LOG.md format valid (skeleton, E-### unique + monotonic, parents "
            f"resolve; {len(log_files)} segment(s))")
+
+    documented_inversions = any(
+        "observed historical timestamp inversions" in
+        p.read_text(encoding="utf-8-sig", errors="replace")
+        for p in log_files)
+    for prev, current in zip(timestamp_events, timestamp_events[1:]):
+        prev_dt, prev_eid, _ = prev
+        cur_dt, cur_eid, cur_loc = current
+        if cur_dt < prev_dt and (prev_dt - cur_dt).total_seconds() > 300:
+            if not documented_inversions:
+                warn("log-timestamp-inversion",
+                     f"{cur_loc} timestamp moves backwards by "
+                     f"{(prev_dt - cur_dt).total_seconds() / 60:.0f}m "
+                     f"from E-{prev_eid:03d} to E-{cur_eid:03d}; historical "
+                     f"inversions must be documented with a DEC line (RFC В§ 1.2)")
+
+    now = datetime.datetime.now(datetime.timezone.utc)
+    for log_dt, eid, loc in timestamp_events:
+        if (log_dt - now).total_seconds() > 10800:
+            fail(f"{loc} timestamp for E-{eid:03d} is more than 3h in the "
+                 f"future from current UTC -- LOG timestamps MUST be real UTC "
+                 f"time (RFC В§ 1.2)")
 
     # RFC § 1.2 segmentation soft cap (~300 lines / ~64 KB). Without a signal
     # here the rule is purely aspirational -- nothing ever tells an agent the
@@ -616,6 +745,64 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                  f"this has drifted before, update the badge")
         else:
             ok("README.md badge matches VERSION")
+
+        conformance_path = Path("saipen/CONFORMANCE.md")
+        if conformance_path.is_file():
+            row_ids = []
+            for line_no, line in enumerate(
+                    conformance_path.read_text(encoding="utf-8-sig").splitlines(), 1):
+                m = re.match(r"^\|\s*(\d+)\s*\|", line)
+                if m:
+                    row_ids.append((int(m.group(1)), line_no))
+            duplicate_ids = sorted({rid for rid, _ in row_ids
+                                    if sum(1 for other, _ in row_ids
+                                           if other == rid) > 1})
+            for rid in duplicate_ids:
+                lines = [str(line_no) for other, line_no in row_ids
+                         if other == rid]
+                fail(f"CONFORMANCE.md duplicate row ID {rid} at lines "
+                     f"{', '.join(lines)} -- row references must be unique")
+            for (prev_rid, prev_line), (rid, line_no) in zip(row_ids, row_ids[1:]):
+                if rid <= prev_rid:
+                    fail(f"CONFORMANCE.md row IDs not monotonically increasing: "
+                         f"{prev_rid} at line {prev_line}, then {rid} at line "
+                         f"{line_no}")
+            if row_ids and not duplicate_ids:
+                ok(f"CONFORMANCE.md row IDs unique + monotonic ({len(row_ids)} rows)")
+
+        text_targets = [
+            Path("saipen/RFC.md"),
+            Path("saipen/BOOT.md"),
+            Path("saipen/CONFORMANCE.md"),
+            *sorted(Path("saipen/phases").glob("*.md")),
+        ]
+        split_terms = [
+            (re.compile(r"\bM\s+US\s+T\b", re.IGNORECASE), "MUST"),
+            (re.compile(r"\bSH\s+OULD\b", re.IGNORECASE), "SHOULD"),
+            (re.compile(r"\bM\s+AY\b", re.IGNORECASE), "MAY"),
+            (re.compile(r"\ba\s+uthorization\b"), "authorization"),
+            (re.compile(r"\bs\s+pa\s+wned\b"), "spawned"),
+            (re.compile(r"\bdeli\s+berately\b"), "deliberately"),
+            (re.compile(r"\bcomp\s+arison\b"), "comparison"),
+        ]
+        text_ok = True
+        for doc in text_targets:
+            if not doc.is_file():
+                continue
+            text = doc.read_text(encoding="utf-8-sig", errors="replace")
+            if "\ufffd" in text:
+                fail(f"{doc.as_posix()} contains U+FFFD replacement character")
+                text_ok = False
+            if text.count("```") % 2:
+                fail(f"{doc.as_posix()} has an odd number of fenced code markers")
+                text_ok = False
+            for pattern, expected in split_terms:
+                if pattern.search(text):
+                    fail(f"{doc.as_posix()} contains split text artifact for "
+                         f"{expected!r}")
+                    text_ok = False
+        if text_ok:
+            ok("core docs text lint clean (no U+FFFD/split keywords/fence drift)")
 
         # Distribution integrity -- the v7.22.3/v7.25.0 bug class, machine-checked.
         # Five separate times this repo promised a file in one place and never

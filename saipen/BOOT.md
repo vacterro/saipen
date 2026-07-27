@@ -53,8 +53,9 @@ Take it from the files, not from recollection (RFC § 1.1).
    doing it. LOG (append) -> `BOARD.md` -> `STATE.md`, that order, after
    finishing each ticket -- not a line per edit, not saved up for the end
    of the session. **Then re-read the `STATE.md` you just wrote** and confirm
-   it still has all eight required fields (`phase`, `task`, `next_action`,
-   `blocker`, `agent`, `saipen_version`, `mode`, `updated`). A real incident:
+    it still has all required fields (`phase`, `task`, `next_action`,
+    `blocker`, `agent`, `saipen_version`, `schema_version`, `mode`, `updated`,
+    `transition_from`). A real incident:
    an agent checkpointed one missing `next_action` and `blocker` entirely --
    nothing caught it, because the pre-commit hook only fires at commit time
    and this was never committed, so the live continuation state became a file

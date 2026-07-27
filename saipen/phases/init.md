@@ -18,7 +18,7 @@ matching exactly:
 - `STATE.md`: frontmatter `phase: PLAN`, `task: none`, `next_action:
   "WAIT: provide the first project goal or raw backlog"` (RFC § 1.2's
   narrow INIT-bootstrap `WAIT:` exception -- ask for the goal/backlog
-  only, nothing else), `blocker: none`, `agent: none`, `saipen_version: 7`,
+  only, nothing else), `blocker: none`, `agent: none`, `saipen_version: 7`, `schema_version: 1`,
   `saipen_home:` (absolute path of the SAIPEN home this bootstrap read the
   protocol from -- § 1.7's bootloader pointer; TEMPLATE COPIES TOO: the
   template ships it empty, fill it in), `mode:` (per § 1.3 capability

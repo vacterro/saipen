@@ -2,6 +2,25 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.86.0 -- 2026-07-27 -- the safety valve made its own escape hatch illegal, plus four determinism invariants
+
+**The Core deadlock.** § 2.4's safety valve stops an autonomous run at 3 waves / 20 tickets and tells the user to "re-invoke `saipen goal` to continue". § 2.4's Exit list then set `goal_mode: false` on a valve trip. But § 1.10 recognizes bare `saipen goal` ONLY while `goal_mode: true` -- so tripping the valve made the single documented continuation path illegal in exactly the state the trip produced. The objective could not be continued at all, only replaced by `saipen goal <text>`, which demotes the board and re-plans: a substitution, not a continuation.
+
+Resolved by naming what a valve trip actually is -- a budget pause awaiting re-authorization, the same shape as `saipen stop`, which was likewise never on the Exit list. The valve is off that list now; the two real exits (mature `ADD`, session `BLOCKED`) are the objective genuinely ending, which a trip is not. What stops a restart from walking straight past the valve is the counters, not the flag: `goal_mode: true` with `goal_waves >= 3` or `goal_tickets >= 20` *is* the tripped state, an agent resuming into it MUST re-state the stop rather than continue, and bare `saipen goal` resetting both to `0` is precisely the human's re-authorization. No new field -- and § 1.2's safety-valve `WAIT:` category already presumed this design, which is how the contradiction surfaced.
+
+**New § 1.11, Determinism Invariants.** Four rules closing places where the protocol said "the agent decides" and two models would decide differently. Deliberately not new machinery -- no files, no fields:
+
+- **Action priority is fixed**: RECOVER > UNBLOCK > FINISH > START > MAINTAIN, first match wins, no weighing. Previously nothing said whether a corrupt STATE or a blocked session or an in-flight ticket went first.
+- **One ticket at a time**: at most one `## DOING` per agent. Finish it, block it, or demote it with a LOG line before claiming another. Without this a weak model ticket-hops and leaves three tickets whose state nobody can determine.
+- **A session MUST leave a trace**: a LOG line, a BOARD change, a STATE change, or a project file change. If none happened the session did nothing and must say so, rather than summarising activity in chat -- a run whose entire output lived in a conversation is indistinguishable from one that never ran.
+- **Insufficient information is a stop, not a guess**: if writing the next action needs a sentence beginning "presumably" or "I'll assume", the information is insufficient by definition -- `WAIT:` naming the exact missing fact. Guessing is the one failure this protocol cannot detect afterwards, because a wrong guess produces confident, well-formed, fully-logged work that looks exactly like right work.
+
+**Recovery is now required to be idempotent** (§ 1.5). `continue -> crash -> continue -> crash -> continue` is the expected life of an autonomous run, so recovery that is only safe the first time is worse than none -- the crash it exists to survive is what invokes it repeatedly.
+
+Also repaired, both shape-only per `phases/validate.md`: a `LOG.md` entry dated `27.07.27` (a year ahead -- caught by the timestamp freshness check), and a `next_action` rewritten as lowercase prose that no longer matched any recognized form.
+
+Checked and deliberately **not** added, because they already exist: the infinite-`VERIFY` guard (`phases/verify.md`'s 3-hypothesis / 2-fix-cycle caps plus hysteresis), multi-source Recovery (§ 1.5 already reconciles `git status`, `LOG`, `BOARD` and mtimes), and evidence requirements on findings (`HUNT`/`MARKHUNT` both require a citation per finding).
+
 ## 7.85.1 -- 2026-07-27 -- two pre-commit installers were fighting over one file
 
 `githooks/` shipped a `pre-commit` hook doing the locale badge-drift check, with install instructions to symlink it into `.git/hooks/pre-commit`. `tools/install_hook.py` writes that same path, with a hook that runs the full `tools/validate.py`.

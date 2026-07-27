@@ -2,10 +2,28 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "SAIPEN STATE Schema",
   "type": "object",
+  "additionalProperties": false,
   "properties": {
     "phase": {
       "type": "string",
-      "enum": ["INIT", "PLAN", "SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP", "DONE", "BLOCKED", "VALIDATE", "HUNT", "MARKHUNT", "ADD", "CLEAN", "TRANSLATE", "PREPARE"]
+      "enum": [
+        "INIT",
+        "PLAN",
+        "SCOUT",
+        "BUILD",
+        "VERIFY",
+        "REVIEW",
+        "SHIP",
+        "DONE",
+        "BLOCKED",
+        "VALIDATE",
+        "HUNT",
+        "MARKHUNT",
+        "ADD",
+        "CLEAN",
+        "TRANSLATE",
+        "PREPARE"
+      ]
     },
     "task": {
       "type": "string"
@@ -21,19 +39,31 @@
     },
     "saipen_version": {
       "type": "integer",
-      "description": "Records which protocol version wrote this state, and doubles as the version guard (RFC § 1.2) -- one field, not split into a separate schema_version (collapsed in v7.23.0)."
+      "description": "Protocol major version that wrote this state. Read from VERSION at checkpoint time."
+    },
+    "schema_version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "STATE file-format revision, integer. tools/validate.py tolerates absence (legacy pre-v1 state -> warning, set it at the next checkpoint) but fails a value below the current revision. Deliberately NOT in `required`: listing it there made the schema hard-fail exactly the legacy states validate.py's own code says to tolerate, so the tolerant branch was unreachable (fixed v7.86.0). Distinct from `saipen_version`, which is the protocol MAJOR that wrote the state."
     },
     "saipen_home": {
       "type": "string",
-      "description": "RFC § 1.7's bootloader pointer: absolute path to the SAIPEN home on the machine that last checkpointed. Dead path on this machine? Clone github.com/vacterro/saipen and update at the next checkpoint. MAY be absent on states written before v7.25.0 -- not in the required list for that reason."
+      "description": "RFC § 1.7's bootloader pointer: absolute path to SAIPEN home on the machine that last checkpointed."
     },
     "requires": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
     },
     "mode": {
       "type": "string",
-      "enum": ["full", "read-only", "no-publish", "manual-verify"]
+      "enum": [
+        "full",
+        "read-only",
+        "no-publish",
+        "manual-verify"
+      ]
     },
     "goal_mode": {
       "type": "boolean",
@@ -42,12 +72,17 @@
     "goal_waves": {
       "type": "integer",
       "minimum": 0,
-      "description": "Persisted safety-valve counter, RFC § 2.4. Present only while goal_mode is true."
+      "description": "Safety-valve counter, RFC § 2.4. MUST be present when goal_mode: true, MUST be absent when goal_mode: false."
     },
     "goal_tickets": {
       "type": "integer",
       "minimum": 0,
-      "description": "Persisted safety-valve counter, RFC § 2.4. Present only while goal_mode is true."
+      "description": "Safety-valve counter, RFC § 2.4. MUST be present when goal_mode: true, MUST be absent when goal_mode: false."
+    },
+    "last_event": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "E-### ID of the last event written during the checkpoint that produced this STATE. RFC § 1.2 RECOMMENDED, will become REQUIRED."
     },
     "updated": {
       "type": "string",
@@ -55,12 +90,29 @@
     },
     "human_note": {
       "type": "string",
-      "description": "Optional one-line human->agent nudge, read on continue (RFC § 1.2) and cleared once applied. Not a ticket, not a goal -- a lightweight 'last time you did X, don't' channel."
+      "description": "Optional one-line human->agent nudge, read on continue (RFC § 1.2) and cleared once applied. Not a ticket, not a goal."
     },
     "transition_from": {
       "type": "string",
-      "enum": ["INIT", "PLAN", "SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP", "DONE", "BLOCKED", "VALIDATE", "HUNT", "MARKHUNT", "ADD", "CLEAN", "TRANSLATE", "PREPARE"],
-      "description": "The phase this state transitioned FROM. Set on every phase transition. Absent on fresh INIT bootstrap or legacy states written before v7.83.0. Combined with `phase` to validate transitions against RFC § 1.6."
+      "enum": [
+        "INIT",
+        "PLAN",
+        "SCOUT",
+        "BUILD",
+        "VERIFY",
+        "REVIEW",
+        "SHIP",
+        "DONE",
+        "BLOCKED",
+        "VALIDATE",
+        "HUNT",
+        "MARKHUNT",
+        "ADD",
+        "CLEAN",
+        "TRANSLATE",
+        "PREPARE"
+      ],
+      "description": "The phase this state transitioned FROM. REQUIRED on all checkpoints. Combined with `phase` to validate transitions against RFC § 1.6. A fresh INIT bootstrap may set transition_from: INIT (self-referential, logically 'came from nothing')."
     }
   },
   "required": [
@@ -72,5 +124,18 @@
     "saipen_version",
     "mode",
     "updated"
-  ]
+  ],
+  "if": {
+    "properties": {
+      "goal_mode": {
+        "const": true
+      }
+    }
+  },
+  "then": {
+    "required": [
+      "goal_waves",
+      "goal_tickets"
+    ]
+  }
 }

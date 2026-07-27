@@ -18,6 +18,9 @@ ones are README-only where the assertion is about agent decision-making, not
 file shape -- there is nothing to validate mechanically. "Covered by" names
 the actual fixture; entries with no fixture state why, not silently.
 
+Note: row IDs were renumbered after the duplicate 43 incident in v7.86.0.
+Current IDs are canonical; old changelog references remain historical.
+
 | # | Concept | Covered by |
 |---|---------|------------|
 | 1 | Cold continuation | This section (TEST-001 above) + this repo's own live `.saipen/` -- no separate fixture adds anything a dedicated one wouldn't just duplicate. |
@@ -66,5 +69,7 @@ the actual fixture; entries with no fixture state why, not silently.
 
 
 
-| 43 | Checkpoint self-confirmation -- after writing `STATE.md` (§ 1.5 step 3) the agent re-reads it and confirms all eight required fields survived, the same re-read-after-write discipline § 1.4 already mandates for claims. A checkpoint missing `next_action` fails TEST-001 outright and is not a checkpoint (RFC § 1.5, `BOOT.md` step 7, v7.84.0) | `checkpoint-self-confirmation` -- behavioral, README-only |
-| 44 | Returning agent distrusts its own memory -- before acting on anything it believes it already knows, it compares `STATE.md`'s `agent:` and `updated:` against itself; either mismatch means recollection is stale and the files win (RFC § 1.1, `BOOT.md`, v7.85.0) | `returning-agent-stale-memory` -- behavioral, README-only |
+| 44 | Checkpoint self-confirmation -- after writing `STATE.md` (§ 1.5 step 3) the agent re-reads it and confirms all eight required fields survived, the same re-read-after-write discipline § 1.4 already mandates for claims. A checkpoint missing `next_action` fails TEST-001 outright and is not a checkpoint (RFC § 1.5, `BOOT.md` step 7, v7.84.0) | `checkpoint-self-confirmation` -- behavioral, README-only |
+| 45 | Returning agent distrusts its own memory -- before acting on anything it believes it already knows, it compares `STATE.md`'s `agent:` and `updated:` against itself; either mismatch means recollection is stale and the files win (RFC § 1.1, `BOOT.md`, v7.85.0) | `returning-agent-stale-memory` -- behavioral, README-only |
+| 46 | A tripped safety valve is a pause, not an exit -- `goal_mode` stays `true`, the at/over-cap counters ARE the tripped state, a resuming agent re-states the stop instead of continuing, and bare `saipen goal` resetting them to `0` is the re-authorization (RFC § 2.4, v7.86.0) | `safety-valve-is-a-pause` -- behavioral, README-only |
+| 47 | Determinism invariants (RFC § 1.11) -- fixed action priority RECOVER > UNBLOCK > FINISH > START > MAINTAIN; at most one `## DOING` ticket per agent; every session leaves a LOG/BOARD/STATE/project-file trace or says it did nothing; insufficient information is a `WAIT:`, never a guess (v7.86.0) | `determinism-invariants` -- behavioral, README-only |

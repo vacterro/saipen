@@ -3,6 +3,7 @@ phase: PLAN
 task: none
 next_action: plan
 blocker: none
+transition_from: INIT
 saipen_version: 7
 agent: crashed-agent
 mode: full

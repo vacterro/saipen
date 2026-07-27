@@ -4,6 +4,7 @@
 ## TODO
 
 ## DONE
+- [x] T-208 [P0] Core logical-hole repair -- CONFORMANCE IDs, BOARD heading guard, LOG corruption guard, timestamp inversion guard, next_action/task lint, v7.86.0 chain. (2026-07-27)
 - [x] T-207 [P3] Clean stale recovery dirs (.saipen/recovery/saitranslate*) from completed translate runs — user confirmed, 414 files cleaned. (2026-07-27)
 - [x] T-202 [P3] Wave 4 phase HUNT: BLOCKED — 1 fix: blocked.md LOG mandate. validate.py PASS. (2026-07-27)
 - [x] T-201 [P2] Wave 3 phase HUNT: MARKHUNT, ADD, CLEAN, TRANSLATE, PREPARE — clean, 0 defects. validate.py PASS. (2026-07-27)
@@ -18,7 +19,6 @@
 - [x] T-197 [P3] Clean old recovery backups — pruned.
 - [x] T-198 [P2] Stale version refs in shipped docs — bumped.
 
-## DONE
 - [x] T-203 [P0] STATE.md transition_from + validate.py transition validation — schema, RFC doc, CONFORMANCE row 14 automated, init.md first-transition guard. (2026-07-27)
 - [x] T-204 [P0] BOOT cold-start chain sync — README.md + extensions/adapters/generic.md + claude.md paste line: BOOT.md first. SKILL.md frontmatter corrected. (2026-07-27)
 - [x] T-205 [P0] STATE snapshot WAIT fix — phase HUNT (not DONE+WAIT), RFC § 2.1 empty-board auto-transition. LOG-001.md:660 [T-none] fix. (2026-07-27)

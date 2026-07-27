@@ -3,6 +3,7 @@ phase: SCOUT
 task: none
 next_action: "pick a ticket that is not under another agent active claim"
 blocker: none
+transition_from: DONE
 saipen_version: 7
 agent: second-agent
 mode: full

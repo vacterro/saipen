@@ -136,7 +136,11 @@ if [ ! -f ".saipen/LOG.md" ]; then
 fi
 if [ -f ".saipen/LOG.md" ]; then
     LOG_PATTERN="^-[[:space:]]+([0-9]{2}[.\/][0-9]{2}[.\/][0-9]{2}[[:space:]]+[0-9]{2}:[0-9]{2}[[:space:]]+)?\[E-[0-9]+\]([[:space:]]+\[parent:[[:space:]]+E-[0-9]+\])?"
-    BAD_LINES=$(grep -vE "^#" .saipen/LOG.md | grep -vE "^$" | grep -vE "$LOG_PATTERN" || true)
+    # Strip a leading UTF-8 BOM before matching. tools/validate.py reads with
+    # utf-8-sig and never sees one; this floor did, so a BOM'd LOG.md failed
+    # here while passing there -- the two validators disagreeing about the same
+    # file. Bug fix, not a new check (this file is frozen against the latter).
+    BAD_LINES=$(sed '1s/^\xef\xbb\xbf//' .saipen/LOG.md | grep -vE "^#" | grep -vE "^$" | grep -vE "$LOG_PATTERN" || true)
     if [ -n "$BAD_LINES" ]; then
         echo -e "${RED}FAIL: LOG.md entry violates Graph Event format:${NC}"
         echo "$BAD_LINES"
