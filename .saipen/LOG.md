@@ -1,4 +1,4 @@
-# Log
+﻿# Log
 
 - 26.07.26 07:05 [E-762] [parent: E-761] [T-none] RUN: мой же soft-cap из v7.69.0 сработал по-настоящему -- active LOG.md дорос до 65 KB. Запечатал по RFC §1.2: содержимое verbatim в logs/LOG-002.md через temp+rename, idempotency-проверка против последнего сегмента сперва, активный сброшен только после подтверждения копии на диске. 3 сегмента, E-### сквозной, validate.py PASS. Правило само себя отработало -- сигнал, потом действие по нему
 - 26.07.26 07:25 [E-763] [parent: E-762] [T-none] H: юзер переписал UI.md в v2 и попросил пересмотреть под принцип "интерфейс не имеет права удивлять, нажал кнопку -- получил результат, компьютер инструмент а не живое существо"
@@ -15,3 +15,4 @@
 - 27.07.26 02:55 [E-774] [parent: E-773] [T-none] RUN: saiwiki inject — wiki repo initialized. Pushed Home + Getting Started + _Sidebar + _Footer to github.com/vacterro/saipen.wiki. wiki enabled at https://github.com/vacterro/saipen/wiki
 - 27.07.26 03:00 [E-775] [parent: E-774] [T-none] RUN: translate v7.80.0→v7.81.0 bump — VERSION, README.md, CONFORMANCE.md, all 32 locale README badges bumped. validate.py badge drift: PASS (0 stale). BOARD.md heading fix (TODO proposed→standard format).
 - 27.07.26 03:10 [E-776] [parent: E-775] [T-none] RUN: inject saitranslate shipped template → extensions/subs/saitranslate/ (BOARD/LOG/STATE/kitchen/OUTBOX), MANIFEST updated. VERSION 7.81.0→7.82.0 bump.
+- 27.07.26 06:00 [E-777] [parent: E-776] [T-191] RUN: SCOUT `> BUILD `> SHIP `> DONE � subSaipen mechanism formal PASS. Shipped library complete (10 entries, PROTOCOL ��0-9), live instances all round-trip clean, validate.py PASS. Subsumes T-170 closed.

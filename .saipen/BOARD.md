@@ -1,8 +1,10 @@
 # Board
 ## DOING
 
+## DONE
+- [x] T-191 [P1] close subSaipen mechanism — PASS. All structural checks green: shipped library (extensions/subs/) complete with PROTOCOL.md (§0-§9), README, crew.md, TEMPLATE/, MANIFEST.md, _shared/inbox, 4 subSaipen. Live instances (saihunt, saitranslate, saiwiki) all have proper STATE/BOARD/LOG/kitchen round-trip. validate.py PASS (7 subSaipen STATE shapes). BOOT.md line 60-66 has extension vocab check. PROTOCOL.md §7 has all spawn commands. Subsumes T-170.
+
 ## TODO
-- [ ] T-191 [P1] close subSaipen mechanism — T-170's closure bar ("лично выводишь PASS всему subsaipen механизму") is the top priority. Spawn saihunt via official `saipen sub spawn`, run a cold-agent discovery test (BOOT.md § extension vocab check), verify STATE/BOARD/LOG/kitchen round-trip. Output formal PASS or document remaining gaps. Subsumes T-170 (old ticket carries the same bar).
 - [ ] T-192 [P2] 29 stale locale batch refresh — refresh remaining stale locales to v7.81.0. Validate.py badge drift check now catches them. Run mechanical version bump + content sync for all 29 | verify: `python tools/validate.py` shows 0 stale badges. Subsumes T-186.
 - [ ] T-193 [P3] board scrub — Prune verbose DONE narratives to summary lines. Full detail lives in LOG.md + CHANGELOG.md | verify: BOARD.md under reasonable size, no structural info lost
 - [ ] T-194 [P0] Self-critique output enforcement — before any response: strip emoji, strip apology words, compress to <=4 lines unless detail asked. Verify: grep output for emoji/apology — zero matches.
