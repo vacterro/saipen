@@ -4,40 +4,49 @@
 
 # SAIPEN Guide
 
-Welcome to SAIPEN! If you're a human developer looking to tame your AI agents, you're in the right place. 
+**AI agents forget everything.** Switch agents? Gone. Next day? Gone. Re-explain project every time. Waste hours.
 
-## What is SAIPEN?
-When you switch agents (or use the same agent on different days) working on a codebase, they tend to forget decisions, step on each other's toes, or hallucinate capabilities. SAIPEN acts like a tiny `.git` folder specifically for the AI agent's working memory.
+**SAIPEN fixes that.** Tiny `.saipen/` folder in project. Agent reads STATE, BOARD, next_action. Resumes where other stopped. Zero briefing.
 
-## How it works
-1. **Global Install:** You run `bootstrap/inject.ps1` (or `.sh`) once on your machine. This teaches Claude Code, Codex, Gemini, OpenCode, Aider, Antigravity, and any generic `~/.agents/skills` reader (FreeBuff, etc.) what SAIPEN is.
-2. **Project Init:** You open an agent in your project folder and type `saipen set` (or `saipen init`). The agent reads its global rules and creates a `.saipen/` directory in your current project.
-3. **Working Memory:** From now on, the agent stores its current task, progress board, and logs in `.saipen/STATE.md` and `.saipen/BOARD.md`.
-4. **Resuming:** You close your laptop, wait a week, open a completely different agent, and type `/saipen continue`. The new agent reads the `.saipen/` folder and resumes exactly where the old one left off.
+## How
 
-## Commands you can type to the Agent
-While agents interact with the file system directly, you just type normal chat messages to control them:
+1. **Install once** -- teaches Claude, Gemini, Codex, OpenCode, Aider, Antigravity, any skill reader:
+```bash
+git clone https://github.com/vacterro/saipen
+cd saipen
+powershell -ExecutionPolicy Bypass -File .\bootstrap\inject.ps1     # Windows
+bash bootstrap/inject.sh                                            # macOS / Linux
+```
 
-| What you type | What the agent does |
+2. **Init project** -- open agent in project folder, type:
+> `saipen set`
+
+Agent creates `.saipen/`. Start planning.
+
+3. **Work** -- type `saipen continue`. Agent reads notes, picks top task, does work.
+
+4. **Next day? Different agent?** Same command: `saipen continue`. Reads `.saipen/`. Continues. No re-explain.
+
+## Commands
+
+| You type | What happens |
 |---|---|
-| `saipen set` | Bootstraps the project with `.saipen/` memory and starts planning. |
-| `saipen continue` | Wakes up, reads the state, and executes the very next action. |
-| `saipen stop` | Forces the agent to checkpoint its work and hand control back to you. |
-| `saipen status` | Reads `.saipen/BOARD.md` and tells you what's currently going on without doing work. |
-| `saipen goal <text>` | Demotes (never deletes) current tasks, plans the new objective, and drives it forward autonomously -- including auto-push on ship. Shipping the objective isn't the stopping point either: it falls straight into autonomous HUNT/ADD maintenance until the product is mature, blocked, or the run hits its cap (3 waves / 20 tickets). |
-| `saipen plan [text]` | Plans a task list or, if run bare without text, generates an autonomous proposal plan for next features/improvements. |
-| `saipen clean` | Forces the agent to scrub the workspace, prune old done tickets, remove orphaned files, fix bad paths, and ensure everything is updated. |
-| `saipen translate` | Builds/updates a 32-language translation bundle in an isolated `.saipen/saitranslate/` folder, never touching your actual source. |
-| `saipen markhunt` | Performs a dry, uncapped exhaustive audit of the project, recording findings to BOARD.md without fixing anything. |
-| `saipen prepare` | Packages the current work (or a subSaipen's) for handoff -- freshness-checks it against HEAD, formats the result, writes injection instructions for the next agent. |
-| `saipen ship` | Explicitly triggers a release (version bump, changelog, tag, push) even outside the normal ticket flow. |
-| `saipen validate` | Runs the conformance check on `.saipen/` and fixes any structural corruption it finds. |
+| `saipen set` | Bootstrap `.saipen/` memory, start planning |
+| `saipen continue` | Wake up, read state, execute next action |
+| `saipen stop` | Checkpoint work, hand back control |
+| `saipen status` | Report current board state, no code touch |
+| `saipen goal <text>` | New objective. Agent plans, builds, tests, ships autonomously. Then HUNT→ADD loop until mature or capped (3 waves / 20 tickets) |
+| `saipen plan [text]` | Generate task list. Bare = autonomous proposal |
+| `saipen clean` | Scrub repo: prune done tickets, delete orphans, fix paths |
+| `saipen translate` | Build 32-language bundle in isolated `.saipen/saitranslate/`. Safe. |
+| `saipen markhunt` | Dry exhaustive audit. Records findings, fixes nothing |
+| `saipen prepare` | Package work for handoff. Freshness check, injection instructions |
+| `saipen ship` | Release: version bump, changelog, tag, push |
+| `saipen validate` | Conformance check + fix structural corruption |
 
-**In development -- running a multi-agent crew.** `extensions/subs/` lets you spawn read-only helper agents (`saihunt` finds bugs, `saipython` fixes small ones) alongside your main agent, each in its own window, reporting back through an `OUTBOX.md`. Under active live testing right now, not yet verified end-to-end -- see `extensions/subs/crew.md` if you want to try it early.
+**Experimental crew:** `extensions/subs/` spawns read-only helpers (`saihunt` finds bugs, `saipython` fixes small ones). Each in own window. Reports via OUTBOX.md. Active testing, not battle-hardened yet.
 
-## Multilingual Guides / Руководства на разных языках
-
-Read SAIPEN guides in your native language:
+## Multilingual Guides
 
 | | | |
 |---|---|---|
@@ -53,33 +62,33 @@ Read SAIPEN guides in your native language:
 | 🇨🇿 [Čeština](guides/GUIDE_CS.md) | 🇷🇴 [Română](guides/GUIDE_RO.md) | 🇭🇺 [Magyar](guides/GUIDE_HU.md) |
 | 🇧🇬 [Български](guides/GUIDE_BG.md) | 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) | 🇭🇷 [Hrvatski](guides/GUIDE_HR.md) |
 
-## Project Knowledge & Kitchen
-Don't put project-specific rules in the global agent prompts. Put them in `.saipen/KNOWLEDGE/`!
-- Create ADRs (Architecture Decision Records) or simple text files.
-- The agent reads everything here before it starts planning.
+## Memory, not just rules
 
-The agent also has a `.saipen/kitchen/` directory. It uses this to store intermediate, half-finished files and scratchpads. If an agent dies mid-process, the next agent can just look into the `kitchen/` and immediately pick up where it left off.
+`.saipen/KNOWLEDGE/` holds durable truth: architecture decisions, conventions. Survives agent death. Two formats: running `decisions.md` or numbered `ADR-001.md`. Agent reads before planning.
 
-## Coming back to a messy folder
-If you (or a previous agent session) left uncommitted changes sitting in the project, that's not a red flag -- it's normal. SAIPEN treats work as committed at `saipen ship`, not after every small step, so mid-ticket edits sitting uncommitted are expected, not an accident. Before touching anything, the agent checks whose changes those are: its own unfinished ticket -- it continues; anyone else's edits (yours, another tool's) -- it leaves them exactly alone. No surprise auto-commits, no surprise reverts.
+Kitchen (`.saipen/kitchen/`) = scratchpad. Half-finished files. Agent dies? Next one picks up from kitchen.
 
-## Recording decisions, not just rules
-`.saipen/KNOWLEDGE/` isn't only for "always use tabs" -- it's also the right place for actual architecture decisions, so they outlive any single agent's memory. Two accepted shapes: one running `decisions.md` you keep appending to, or numbered `ADR-001.md`, `ADR-002.md`... files, one immutable record per decision. Use whichever already fits how your team documents things.
+## Messy folder? Normal
 
-## Already keep an Obsidian vault or your own notes?
-SAIPEN doesn't compete with your existing system -- `.saipen/` is plain markdown by construction, so it's already Obsidian-compatible with zero setup. Open your project root as a vault and `.saipen/KNOWLEDGE/` shows up as a normal part of your graph: `[[wikilinks]]`, backlinks, your own frontmatter properties -- none of that is something the protocol polices, KNOWLEDGE/'s only real rule is "durable truth, not an event log." Don't want `.saipen/kitchen/` or `LOG.md`'s event stream cluttering search/graph view? Exclude them in Obsidian's settings -- KNOWLEDGE/ is the one folder actually meant to live in your notes.
+Uncommitted changes expected. Agent commits at `ship`, not every step. Before touching, checks ownership: own ticket → continue. Your edits → leave alone. No surprise commits. No surprise reverts.
 
-If your real project tracking already lives in your head and your own vault, that's fine -- SAIPEN's board/ticket machinery exists for what the *agent* needs to stay oriented session to session. It doesn't ask you to replace whatever discipline already works for you; it just means the agent stops being the one part of the system with no memory of its own.
+## Obsidian compatible
 
-## When the agent genuinely can't do something
-Before doing any work, the agent checks what the host actually supports -- is git installed, is there a shell, can it write files at all -- and records that as `mode` in `STATE.md`. No git: it won't attempt a push, it'll say so. No shell: it'll hand you the exact command to run yourself and wait for your report. That's also why you'll sometimes see `next_action: WAIT: <a specific question>` -- it's not stalling, it's asking the one thing only you can answer. Answer it in chat and it proceeds immediately.
+`.saipen/` = plain markdown. Open project root as vault. KNOWLEDGE/ shows in graph. `[[wikilinks]]` work. Kitchen + LOG can be excluded. Only KNOWLEDGE/ is for your notes.
 
-## Locking it down before every commit (optional)
-On a git project and want a safety net? Run this once from the project root:
+## When agent can't do something
+
+Checks host capabilities first. No git? Says so. No shell? Hands you exact command. `WAIT: <question>` = needs you. Answer, it continues.
+
+## Lock it down
+
 ```bash
-python <path-to-your-saipen-clone>/tools/install_hook.py
+python <saipen-clone>/tools/install_hook.py
 ```
-It installs a pre-commit hook that checks `.saipen/`'s structural integrity before every commit -- a broken board or a malformed log line gets caught right there, not three sessions later when you're trying to figure out who broke what. Want it gone later? `python <path-to-your-saipen-clone>/tools/uninstall_hook.py` removes exactly that hook and restores whatever was there before it, if anything.
+Pre-commit hook. Broken board, bad log line caught before commit. Remove:
+```bash
+python <saipen-clone>/tools/uninstall_hook.py
+```
 
 <p align="center">
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
