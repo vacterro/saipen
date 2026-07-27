@@ -462,7 +462,8 @@ for line_no, line in enumerate(board_lines, 1):
             if fm.group(1) == "needs":
                 needs = re.findall(r"T-\d+", fm.group(2))
         tickets[tid] = {"section": section, "line_no": line_no,
-                        "checkbox": checkbox, "needs": needs, "fields": fields}
+                        "checkbox": checkbox, "needs": needs, "fields": fields,
+                        "raw": line}
 
 for heading in REQUIRED_HEADINGS:
     if heading not in headings_seen:
@@ -557,6 +558,21 @@ for tid, t in tickets.items():
 # ticket-hopping this invariant exists to stop (claim T-12, drift, claim
 # T-27, drift), and the resulting half-owned tickets are unreadable after the
 # fact. Cheap to check, so it is checked.
+# phases/markhunt.md: every finding is recorded with its evidence cited
+# inline -- `| blocker: unvetted audit -- <file:line or command output>`.
+# "No cite, no ticket" is the rule that stops MARKHUNT from becoming a
+# generator of confident-sounding vibes; unenforced until v7.91.0.
+for tid, t in tickets.items():
+    if "[MARKHUNT]" not in t.get("raw", ""):
+        continue
+    blocker = t["fields"].get("blocker", "")
+    tail = blocker.split("unvetted audit", 1)[-1].lstrip(" -–—")
+    if len(tail.strip()) < 10:
+        fail(f"BOARD.md:{t['line_no']} {tid} is a [MARKHUNT] finding whose "
+             f"| blocker: cites no evidence -- phases/markhunt.md requires a "
+             f"real file:line or command output per finding ('no cite, no "
+             f"ticket'), not a bare 'unvetted audit'")
+
 doing = [tid for tid, t in tickets.items() if t["section"] == "## DOING"]
 if len(doing) > 1:
     fail(f"BOARD.md has {len(doing)} tickets in ## DOING ({', '.join(sorted(doing))}) "
@@ -748,6 +764,53 @@ if log_files:
                      f"drift.")
         except ValueError:
             pass  # unparseable date (old history, skip)
+
+# ------------------------------------------------------------ SUBSAIPEN OUTBOX
+
+# `kitchen/OUTBOX.md` is the ONLY channel out of a subSaipen
+# (extensions/subs/PROTOCOL.md § 1), and until v7.91.0 nothing validated it --
+# a malformed entry became a bad collect in silence. Two contracts are
+# mechanically checkable, so they are checked; the third (is the finding TRUE)
+# is not, and no amount of tooling will make it so.
+outbox_ok = True
+outbox_seen = 0
+for ob in sorted(Path(".").glob(".saipen/extensions/subs/*/kitchen/OUTBOX.md")):
+    text = ob.read_text(encoding="utf-8-sig")
+    # Entries are `## <ID>: description` followed by bold-field lines (§ 2).
+    entries = re.split(r"^## (?=[A-Z]+-\d+)", text, flags=re.M)[1:]
+    for e in entries:
+        outbox_seen += 1
+        eid = e.split(":", 1)[0].strip()
+        loc = f"{ob.as_posix()} [{eid}]"
+        status = re.search(r"\*\*status:\*\*\s*([a-z]+)", e)
+        status = status.group(1) if status else None
+        if status is None:
+            fail(f"{loc} has no **status:** -- the main agent cannot tell "
+                 f"whether this is collectable (PROTOCOL.md § 2)")
+            outbox_ok = False
+            continue
+        if status not in ("ready", "draft", "blocked", "reviewed", "stale"):
+            fail(f"{loc} status {status!r} is not one of "
+                 f"ready/draft/blocked/reviewed/stale (PROTOCOL.md § 2)")
+            outbox_ok = False
+        if status == "ready":
+            for field in ("summary", "critical"):
+                if not re.search(rf"\*\*{field}:\*\*", e):
+                    fail(f"{loc} is status: ready but has no **{field}:** -- "
+                         f"collect reads that field to decide what to do with "
+                         f"it (PROTOCOL.md § 2)")
+                    outbox_ok = False
+            # Fixer-type entry: carries a patch, so § 9 requires provenance.
+            if re.search(r"\*\*patch:\*\*", e):
+                for field in ("base_head", "verified"):
+                    if not re.search(rf"\*\*{field}:\*\*", e):
+                        fail(f"{loc} hands over a patch as ready but has no "
+                             f"**{field}:** -- a patch with no {field} is a "
+                             f"diff nobody can re-check before applying "
+                             f"(PROTOCOL.md § 9)")
+                        outbox_ok = False
+if outbox_seen and outbox_ok:
+    ok(f"subSaipen OUTBOX entries well-formed ({outbox_seen} checked)")
 
 # ----------------------------------------------------------------- KNOWLEDGE
 

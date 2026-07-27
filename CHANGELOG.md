@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.91.0 -- 2026-07-27 -- the only channel out of a subSaipen had never been validated
+
+Continuing the push to move rules from prose into enforcement.
+
+**`kitchen/OUTBOX.md` was completely unchecked.** `tools/validate.py` had zero mentions of it. That file is the single door out of a subSaipen (`extensions/subs/PROTOCOL.md` § 1) -- everything a read-only worker ever hands back passes through it -- and a malformed entry became a bad `collect` in silence. Now checked: a recognized `status:`, and on `ready` a `summary:` and `critical:` (the two fields `collect` actually reads to decide what to do with it). An entry carrying a `patch:` additionally needs `base_head:` and `verified:` per § 9, because a diff with no provenance is one nobody can re-check before applying it.
+
+**MARKHUNT findings now have to carry their evidence.** `phases/markhunt.md` has always said "no cite, no ticket" -- every finding recorded with a real `file:line` or command output in its `| blocker:` -- and nothing enforced it. A `[MARKHUNT]` ticket whose blocker reads only "unvetted audit" now FAILs. That rule is the whole thing separating a dry audit from a generator of confident-sounding vibes, and it was running on trust.
+
+Six deliberate breaks before trusting any of it: a patch marked ready without `base_head`/`verified` (both flagged), `ready` without `summary`, a status of `probably-fine`, a MARKHUNT ticket with a bare blocker, and the same ticket with a real citation passing clean. This repo's own three live OUTBOX entries pass.
+
+Enforcement ratio moved from 9 mechanically-checked rows of 49 to 13 of 53. The remaining 28 behavioral rows are still the honest majority, and the reason has not changed: a guessed finding and a known one are byte-identical, so no check can separate them. What changed is that four things which *did* leave a checkable trace stopped relying on good behaviour.
+
 ## 7.90.0 -- 2026-07-27 -- two invariants shipped as prose, now actually enforced
 
 Measured the enforcement ratio for the first time: of CONFORMANCE's 49 rows, 9 were mechanically enforced and 28 were behavioral-only. Roughly a fifth held by tooling, the rest by agents behaving.
