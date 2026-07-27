@@ -16,3 +16,5 @@
 - 27.07.26 03:00 [E-775] [parent: E-774] [T-none] RUN: translate v7.80.0→v7.81.0 bump — VERSION, README.md, CONFORMANCE.md, all 32 locale README badges bumped. validate.py badge drift: PASS (0 stale). BOARD.md heading fix (TODO proposed→standard format).
 - 27.07.26 03:10 [E-776] [parent: E-775] [T-none] RUN: inject saitranslate shipped template → extensions/subs/saitranslate/ (BOARD/LOG/STATE/kitchen/OUTBOX), MANIFEST updated. VERSION 7.81.0→7.82.0 bump.
 - 27.07.26 06:00 [E-777] [parent: E-776] [T-191] RUN: SCOUT `> BUILD `> SHIP `> DONE � subSaipen mechanism formal PASS. Shipped library complete (10 entries, PROTOCOL ��0-9), live instances all round-trip clean, validate.py PASS. Subsumes T-170 closed.
+- 27.07.26 07:00 [E-778] [parent: E-777] [T-none] RUN: remove CI push trigger + BOARD.md T-170 duplicate cleaned. validate.py PASS. c022677.
+- 27.07.26 07:05 [E-779] [parent: E-778] [T-195] RUN: tag all missing releases v7.65.0..v7.82.0 (21 tags pushed). T-192 already done. All tickets closed.

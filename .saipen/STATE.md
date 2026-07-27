@@ -1,6 +1,6 @@
 ---
 phase: DONE
-task: T-191 close subSaipen mechanism — PASS
+task: all tickets closed — T-195 tags pushed, T-192 already done, Board clean
 next_action: "Wait for user command"
 blocker: none
 saipen_version: 7
@@ -9,6 +9,7 @@ agent: opencode
 requires:
   - filesystem
   - git
+  - python
 mode: full
 goal_mode: true
 goal_waves: 2

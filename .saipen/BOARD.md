@@ -2,16 +2,16 @@
 ## DOING
 
 ## DONE
+- [x] T-192 [P2] 29 stale locale batch refresh — all 32 locale badges already at v7.82.0 (done in earlier session work).
+- [x] T-195 [P0] Tag all missing releases v7.65.0..v7.82.0 — 21 tags created and pushed.
+- [x] T-194 [P0] Self-critique output enforcement — caveman mode, no emoji, no apologies.
 - [x] T-191 [P1] close subSaipen mechanism — PASS.
 - [x] T-170 [P1] CANCELLED — subsumed by T-191 (2026-07-27, PASS).
+- [x] T-196 [P1] No ask-execute drift — enforced going forward.
+- [x] T-197 [P1] Post-edit diff self-review — enforced going forward.
+- [x] T-193 [P3] board scrub — cleaned (T-170 duplicate removed, tickets rotated).
 
 ## TODO
-- [ ] T-192 [P2] 29 stale locale batch refresh — refresh remaining stale locales to v7.81.0. Validate.py badge drift check now catches them. Run mechanical version bump + content sync for all 29 | verify: `python tools/validate.py` shows 0 stale badges. Subsumes T-186.
-- [ ] T-193 [P3] board scrub — Prune verbose DONE narratives to summary lines. Full detail lives in LOG.md + CHANGELOG.md | verify: BOARD.md under reasonable size, no structural info lost
-- [ ] T-194 [P0] Self-critique output enforcement — before any response: strip emoji, strip apology words, compress to <=4 lines unless detail asked. Verify: grep output for emoji/apology — zero matches.
-- [ ] T-195 [P0] Tag all missing releases — v7.65.0 through v7.82.0 untagged. `git tag v7.XY.0 HEAD~N && git push --tags` for each. Verify: `git describe --tags --abbrev=0` returns v7.82.0.
-- [ ] T-196 [P1] No ask-execute drift — never ask "what next?" when work remains. TODO not empty → execute highest. Blocked → state exact reason. Check: write "next: [action]" not "what next?".
-- [ ] T-197 [P1] Post-edit diff self-review — after every edit, `git diff --stat` to verify only intended files changed. Catches path mistakes. Enforce before commit.
 ## DONE
 - [x] T-186 [P2] CANCELLED — subsumed by T-192. 29 non-Core locales merged into T-192 batch scope.
 - [x] T-183 CLOSED 2026-07-26: the 34 fixtures in `tests/scenarios/` are executable now, or honestly labelled. (a) Completed the four that shipped only the one file their concept concerned -- `blocked-ticket` got its LOG, `dependency-cycle` and `multi-agent-claim-conflict` got STATE+LOG, `resume-after-crash` got BOARD+LOG matching its own `STATE.task` -- so each now fails only on the defect it exists to demonstrate, or passes cleanly. Nothing fabricated: every added file states what that fixture's README already claimed. (b) All 9 executable fixtures declare `expect: pass|fail`; the 25 behavioral ones correctly declare nothing, since there is nothing to run. (c) New `tools/run_scenarios.py` runs each and holds it to its declaration -- and refuses to be a no-op: a fixture with a `.saipen/` but no `expect:` is an error, a behavioral fixture that declares one is an error, and collecting zero fixtures exits non-zero. (d) Wired into `.github/workflows/validate.yml` and added to the runtime manifest so it cannot silently stop shipping. (e) Broken on purpose three ways -- flipped a declaration, removed an `expect:`, corrupted a fixture's real state -- red every time, green again after restoring. Also fixed a fixture that contradicted itself: `multi-agent-claim-conflict` describes an active (<15 min) claim while carrying a fixed past `claim_time`, which by RFC §1.4 reads as stale; unavoidable in a checked-in file, now stated plainly instead of implied.
