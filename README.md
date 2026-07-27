@@ -11,9 +11,9 @@ plain markdown, so a cold agent with no chat history runs `/saipen continue`,
 reads `STATE`, `BOARD`, and `next_action`, and resumes work in under a minute
 -- no rebriefing, any vendor, any day.
 
-**One command. Zero amnesia.**
+**One command. Zero dependencies. Zero amnesia.**
 
-**v7.82.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
+**v7.82.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | One command. Zero dependencies. Zero amnesia. | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
