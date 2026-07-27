@@ -7,8 +7,6 @@ name: validate
 # separate times in this repo's history.
 
 on:
-  push:
-    branches: [main]
   pull_request:
   workflow_dispatch:
 
