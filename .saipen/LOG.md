@@ -30,3 +30,4 @@
 - 27.07.26 01:15 [E-789] [parent: E-788] [T-202] RUN: VERIFY -> done -- validate.py PASS. Pushed 4414960. Board empty, entering HUNT for next cycle.
 - 27.07.26 01:20 [E-790] [parent: E-789] RUN: HUNT -> clean -- 0/6 categories actionable. Board empty. RFC § 2.1: auto-transition to ADD next.
 - 27.07.26 01:30 [E-791] [parent: E-790] [T-none] DEC: self-critique -- 6 drifts found: (1) WAIT at DONE instead of auto-transition to ADD (RFC § 2.1), (2) skipped REVIEW STATE update on T-200/T-202, (3) vague WAIT format, (4) narrative next_action instead of executable commands, (5) T-201 checkbox/section mismatch (fixed), (6) LOG timestamps off-by-hours (fixed earlier). Fixed STATE->ADD + KNOWLEDGE entries.
+- 27.07.26 01:30 [E-792] [parent: E-791] [T-none] DEC: added DONE+WAIT guard to validate.py -- automated check WARNs when phase:DONE + empty TODO + WAIT (non-safety-valve). CONFORMANCE #43.

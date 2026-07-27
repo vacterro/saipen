@@ -360,6 +360,24 @@ if remaining:
 else:
     ok("BOARD.md acyclic")
 
+# RFC § 2.1 ZERO-PROMPT AUTO-TRANSITION: DONE + empty TODO + no MARKHUNT
+# blockers = MUST auto-transition HUNT->ADD, never WAIT at DONE.
+if state.get("phase") == "DONE" and state.get("goal_mode") is not True:
+    open_todos = sum(1 for t in tickets.values()
+                     if t["section"] == "## TODO" and t["checkbox"] in (" ", ""))
+    markhunt_blocked = bool(re.search(
+        r"## BLOCKED.*?\[MARKHUNT\]", board_path.read_text("utf-8-sig"),
+        re.DOTALL))
+    next_action = state.get("next_action", "")
+    if open_todos == 0 and not markhunt_blocked and next_action.startswith("WAIT:"):
+        # Safety valve (§ 2.4) is the one legal WAIT from DONE.
+        if "safety valve" not in next_action.lower():
+            warn("done-wait-drift",
+                 f"phase: DONE, empty ## TODO, no [MARKHUNT] blockers, "
+                 f"but next_action={next_action!r} -- RFC § 2.1 says bare "
+                 f"command + empty board MUST auto-transition HUNT->ADD, "
+                 f"never WAIT at DONE")
+
 # RFC § 1.2 board soft cap. BOARD.md is read on every cold start (§ 1.1,
 # BOOT.md step 2), so its size is a real per-session cost -- same reasoning
 # as the LOG cap below, minus the sealing machinery (the board is prunable,

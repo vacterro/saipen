@@ -77,6 +77,7 @@ ticket rather than papered over here.
 | 40 | Board soft cap -- `BOARD.md` is read on every cold start (RFC § 1.1, `BOOT.md` step 2), so growth past ~16 KB WARNs and points at `phases/clean.md`'s board scrub. No sealing machinery, unlike `LOG.md`: the board is prunable rather than append-only, and closed tickets already live permanently in `LOG.md`/`CHANGELOG.md` (RFC § 1.2, v7.72.0) | Enforced directly by `tools/validate.py` -- caught this repo's own 28 KB board on the run that introduced it |
 | 41 | `saipen status` answers the question actually being asked -- alongside phase/ticket/queue it reports what is waiting on a human, what is claimed but unproven, the last recorded conformance result, and staleness; and it states facts without pronouncing the project healthy or ready (RFC § 1.10, v7.82.0) | `status-answers-the-real-question` -- behavioral, README-only |
 | 42 | LOG timestamp UTC freshness -- `tools/validate.py` WARNs if the last LOG entry's timestamp is >3h from current UTC time. Prevents local-clock drift from corrupting the audit trail Recovery depends on (RFC § 1.2 mandates UTC, v7.82.0) | Enforced directly by `tools/validate.py` |
+| 43 | DONE+WAIT auto-transition guard -- `tools/validate.py` WARNs if `phase: DONE` with empty `## TODO`, no `[MARKHUNT]` blockers, and `next_action` starts with `WAIT:` (not safety-valve § 2.4). Catches the ZERO-PROMPT AUTO-TRANSITION violation where agent stops to ask instead of proceeding to HUNT/ADD (RFC § 2.1, v7.82.0) | Enforced directly by `tools/validate.py` |
 
 
 
