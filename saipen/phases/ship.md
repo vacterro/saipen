@@ -26,6 +26,7 @@ it isn't possible, not because it broke. Write the human digest same as
 always, `awaiting:` noting `git needed to publish` if that matters for this
 project. Then STATE -> `DONE` directly, same as a normal successful ship.
 
+0. **Board pre-flight: every work unit done this session MUST have a ticket in `## DONE`.** Inline fixes and sweeps without a ticket must get one before proceeding. Stale `## DONE` blocks SHIP (RFC § 1.2).
 1. README beautiful: pitch, features, install, usage, version + changelog link.
 2. Version bump (micro -> 3.2.1, feature -> 3.2.0, breaking -> major).
 3. Before push, version consistency across all three MUST hold:
