@@ -7,7 +7,7 @@ the project themselves. Same role as `extensions/security/`,
 something the SAIPEN home reads on its own behalf.
 
 **Not yet field-tested.** Design is sound, nothing has run for real. Same
-policy as `extensions/multi-agent/` was under until proven live: usable,
+policy as `extensions/performance/` was under until proven live: usable,
 not advertised.
 
 ## The one rule that matters

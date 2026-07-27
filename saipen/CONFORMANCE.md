@@ -18,21 +18,6 @@ ones are README-only where the assertion is about agent decision-making, not
 file shape -- there is nothing to validate mechanically. "Covered by" names
 the actual fixture; entries with no fixture state why, not silently.
 
-**Honest status of the 9 structural fixtures (corrected v7.75.0).** This
-section used to claim they "include a `.saipen/` that `tests/validate.sh` /
-`validate.ps1` runs against directly." Both halves were false, and nobody
-noticed because the second half guaranteed the first was never tested: no
-script, no CI job, and no phase doc ever executed a fixture. Run against them
-today and 6 of 9 fail -- for reasons unrelated to what they test, because each
-ships only the one file its concept concerns (`multi-agent-claim-conflict` has
-a `BOARD.md` and no `STATE.md`; `resume-after-crash` the reverse; several have
-no `LOG.md`). They are illustrative reference states, not executable tests, and
-saying otherwise was exactly the manufactured confidence `phases/verify.md`
-warns about. Making them genuinely runnable -- completing each to a valid
-`.saipen/` so only the intended defect fails, declaring a per-fixture expected
-outcome, and wiring a runner into CI -- is real work, tracked as its own
-ticket rather than papered over here.
-
 | # | Concept | Covered by |
 |---|---------|------------|
 | 1 | Cold continuation | This section (TEST-001 above) + this repo's own live `.saipen/` -- no separate fixture adds anything a dedicated one wouldn't just duplicate. |
@@ -63,7 +48,7 @@ ticket rather than papered over here.
 | 26 | HUNT skip requires an exact HEAD-hash match; mtime/diff-timing is never a substitute for actually running the six categories (`phases/hunt.md`, v7.41.0) | `hunt-skip-requires-exact-hash-match` -- behavioral, README-only |
 | 27 | MARKHUNT records findings without fixing/capping, unlike HUNT (`phases/markhunt.md`) | `markhunt-dry-record-only` -- behavioral, README-only |
 | 28 | VERIFY hysteresis: a ticket blocked a second time escalates to session-level `BLOCKED` instead of spending a fresh retry budget (`phases/verify.md`) | `verify-hysteresis-second-block` -- behavioral, README-only |
-| 29 | SubSaipen `STATE.md` shape + policy (schema-valid, `mode: read-only`, no write-requiring `phase`) checked by `tools/validate.py`, not just the main project's own `STATE.md` (`extensions/subs/PROTOCOL.md` § 1/§ 8, v7.49.0) | Enforced directly by `tools/validate.py` -- no separate fixture, the repo's own live `extensions/subs/saiwiki/` and `saihunt/` already exercise the pass case every run |
+| 29 | SubSaipen `STATE.md` shape + policy (schema-valid, `mode: read-only`, no write-requiring `phase`) checked by `tools/validate.py`, not just the main project's own `STATE.md` (`extensions/subs/PROTOCOL.md` § 1/§ 8, v7.49.0) | Enforced directly by `tools/validate.py` -- no separate fixture; the repo's own four live instances under `.saipen/extensions/subs/` exercise the pass case every run. The walk also covers the shipped library at `extensions/subs/`, which since v7.84.0 holds only `TEMPLATE/` and shared reference files -- instance state moved out to `.saipen/`, so that half of the walk now guards against instance state reappearing there rather than checking anything, which is the intended end state, not a dead check |
 | 30 | `read-only` reaches `MARKHUNT`/`PREPARE`/`VALIDATE` only in report-only form -- findings/handoff/corruption are reported in chat, never written (no `## BLOCKED` tickets, no `kitchen/`, no structural repair) (RFC § 1.3) | `read-only-audit-phases` -- behavioral, README-only |
 | 31 | `stop` preserves the goal counters; `saipen continue`/bare `saipen` resume them unchanged, but bare `saipen goal` deliberately resets `goal_waves`/`goal_tickets` to `0` for a fresh valve budget (RFC § 1.10 / § 2.4) | `stop-goal-counter-semantics` -- behavioral, README-only |
 | 32 | `goal_waves` is not double-counted when `ADD` RETURNs to `PLAN` -- the cycle's wave is counted once at ADD's RETURN, and the follow-on `PLAN` skips its own increment for that same cycle (RFC § 2.4, `phases/plan.md`/`add.md`) | `goal-waves-no-double-count` -- behavioral, README-only |
@@ -81,3 +66,4 @@ ticket rather than papered over here.
 
 
 
+| 43 | Checkpoint self-confirmation -- after writing `STATE.md` (§ 1.5 step 3) the agent re-reads it and confirms all eight required fields survived, the same re-read-after-write discipline § 1.4 already mandates for claims. A checkpoint missing `next_action` fails TEST-001 outright and is not a checkpoint (RFC § 1.5, `BOOT.md` step 7, v7.84.0) | `checkpoint-self-confirmation` -- behavioral, README-only |

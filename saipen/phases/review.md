@@ -2,6 +2,8 @@
 
 ## REVIEW -- is it well made?
 
+`mode: manual-verify` (RFC § 1.3, no shell on this host)? MUST NOT auto-transition to SHIP. Ask the user for a manual review verdict before proceeding.
+
 `.saipen/extensions/performance/` (or legacy root `extensions/performance/`) present? Read it first -- its README states the
 benchmarks/thresholds this repo requires before SHIP (RFC § 1.9). Absent:
 skip, no overhead.

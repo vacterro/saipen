@@ -2,6 +2,22 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.84.0 -- 2026-07-27 -- a checkpoint you cannot resume from is not a checkpoint
+
+Two things land together: a subSaipen layout refactor that had been sitting complete-but-uncommitted in the working tree, and a protocol fix found while reviewing it.
+
+**The protocol fix.** A checkpoint written earlier in the day produced a `STATE.md` with `next_action` and `blocker` simply absent -- both REQUIRED by § 1.2. Nothing stopped it. `tools/validate.py` catches it, but the pre-commit hook only fires at commit time and that checkpoint was never committed, so the project's *live continuation state* was a file no cold agent could boot from. `next_action` missing means `CONFORMANCE.md`'s TEST-001 fails outright -- the single guarantee this protocol exists to make -- on a project that otherwise looked completely healthy.
+
+§ 1.5 already ordered the three writes LOG -> BOARD -> STATE so a crash always leaves `STATE.md` behind the others rather than ahead. That guards the gap *between* steps. It said nothing about a step producing a malformed file. Meanwhile § 1.4 has had the guard for the analogous case since v7.28.0: after writing a claim, re-read `BOARD.md` and confirm the claim survived. Identical failure mode; only one of the two paths was protected.
+
+Now symmetric. RFC § 1.5 and `BOOT.md` step 7 both require re-reading the `STATE.md` you just wrote and confirming all eight required fields survived -- and where a validator is reachable, running it, since that is cheaper and more reliable than eyeballing. CONFORMANCE row 43 + the `checkpoint-self-confirmation` fixture.
+
+The broken state itself was repaired under `phases/validate.md`'s shape-only rule: the two missing fields restored from facts already on the board and in the log, no history rewritten.
+
+**The refactor** (by the preceding agent, reviewed before shipping rather than taken on trust): the shipped library at `extensions/subs/` no longer carries live per-instance state. `saihunt`/`saipython`/`saitranslate`/`saiwiki` each kept a `STATE.md`/`BOARD.md`/`LOG.md`/`OUTBOX.md` inside the distributed library -- meaning every consumer received one machine's working state as if it were a template, the same class of defect as the absolute path removed in v7.72.0. Instance state now lives in `.saipen/extensions/subs/`, the library holds only `TEMPLATE/` plus the shared reference files, and `MANIFEST.md` points at the live paths. Verified before committing: no dangling references to the deleted paths, all four live instances schema-valid and `read-only`, `saipen sub spawn`'s prerequisites intact, injector wiring green. CONFORMANCE row 29 updated -- it still named the now-deleted library dirs as the pass case.
+
+Version badges bumped across `README.md`, `CONFORMANCE.md` and all 32 locale READMEs. A version string is a mechanical substitution, not a translation, so `phases/translate.md` § 2's Core/subSaipen split does not apply to it.
+
 ## 7.83.0 -- 2026-07-27 -- transition_from + BOOT cold-start sync finished
 
 `STATE.md` gained an explicit `transition_from` field tracking the last phase transition, and `tools/validate.py` validates every non-self transition against RFC § 1.6's table (including from-any-phase user commands). Five phases were already covered by a conceptual-only CONFORMANCE row; that row is now mechanical.

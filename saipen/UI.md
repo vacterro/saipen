@@ -1,5 +1,4 @@
 # saipen UI -- Dark Golden Win95 v2
-A cleaner revision of the original UI spec. Same visual identity, less ambiguity, tighter maintenance rules, and fewer chances for future humans to do something adorable and wrong.
 
 Applies to every interface: web, app, panel, dialog, HTML report, TUI, desktop tool, or embedded utility.
 

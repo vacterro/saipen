@@ -4,6 +4,7 @@
 ## TODO
 
 ## DONE
+- [x] T-207 [P3] Clean stale recovery dirs (.saipen/recovery/saitranslate*) from completed translate runs — user confirmed, 414 files cleaned. (2026-07-27)
 - [x] T-202 [P3] Wave 4 phase HUNT: BLOCKED — 1 fix: blocked.md LOG mandate. validate.py PASS. (2026-07-27)
 - [x] T-201 [P2] Wave 3 phase HUNT: MARKHUNT, ADD, CLEAN, TRANSLATE, PREPARE — clean, 0 defects. validate.py PASS. (2026-07-27)
 - [x] T-200 [P2] Wave 2 phase HUNT: REVIEW, SHIP, DONE, VALIDATE, HUNT — 2 fixes: ship.md 14→16, done.md LOG. validate.py PASS. (2026-07-27)

@@ -45,7 +45,14 @@ For a bare `saipen` / `saipen continue` you do NOT need the full RFC. Do this:
    isn't; RFC § 1.5 says once per ticket, and the actual gap was just not
    doing it. LOG (append) -> `BOARD.md` -> `STATE.md`, that order, after
    finishing each ticket -- not a line per edit, not saved up for the end
-   of the session.
+   of the session. **Then re-read the `STATE.md` you just wrote** and confirm
+   it still has all eight required fields (`phase`, `task`, `next_action`,
+   `blocker`, `agent`, `saipen_version`, `mode`, `updated`). A real incident:
+   an agent checkpointed one missing `next_action` and `blocker` entirely --
+   nothing caught it, because the pre-commit hook only fires at commit time
+   and this was never committed, so the live continuation state became a file
+   no cold agent could boot from. A checkpoint you cannot resume from is not
+   a checkpoint (RFC § 1.5).
 
 That's the fast path. Reach for the full protocol only when a rule question
 comes up that STATE/BOARD/LOG + the active phase doc don't answer:

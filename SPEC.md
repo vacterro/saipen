@@ -61,6 +61,7 @@ saipen/
     [Maintenance Phases]
     hunt.md / markhunt.md / add.md / clean.md / translate.md
 
+    [Infrastructure]
     prepare.md              package work for handoff to the next agent
     validate.md             conformance testing
 
