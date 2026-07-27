@@ -18,3 +18,8 @@
 - 27.07.26 06:00 [E-777] [parent: E-776] [T-191] RUN: SCOUT `> BUILD `> SHIP `> DONE � subSaipen mechanism formal PASS. Shipped library complete (10 entries, PROTOCOL ��0-9), live instances all round-trip clean, validate.py PASS. Subsumes T-170 closed.
 - 27.07.26 07:00 [E-778] [parent: E-777] [T-none] RUN: remove CI push trigger + BOARD.md T-170 duplicate cleaned. validate.py PASS. c022677.
 - 27.07.26 07:05 [E-779] [parent: E-778] [T-195] RUN: tag all missing releases v7.65.0..v7.82.0 (21 tags pushed). T-192 already done. All tickets closed.
+- 27.07.26 07:10 [E-780] [parent: E-779] [T-none] RUN: saipen plan proposal — 3 tickets (T-196..T-198). goal_mode reset, recovery prune, stale doc refs.
+- 27.07.26 07:15 [E-781] [parent: E-780] [T-none] RUN: saipen plan phase HUNT — 4 waves (T-196, T-200..T-202).
+- 27.07.26 07:30 [E-782] [parent: E-781] [T-none] RUN: wiki ded rewrite — all 7 pages + footer. caveman-ded intro, ded per scenario/tutorial/usecase, merged cmd tables. Pushed 6 files (+907/-65). Sidebar/Home/GettingStarted/Phases/SubSaipen left with existing ded.
+- 27.07.26 07:40 [E-783] [parent: E-782] [T-196] RUN: SCOUT — read INIT, PLAN, SCOUT, BUILD, VERIFY phase docs. 6-dimension analysis complete. Findings: 3 symmetry gaps (scout no LOG/checkpoint, BUILD no clean-tree ref, PLAN no LOG), 3 weak-agent traps (subjective metrics, grep scope, verify LOG verbosity), 1 edge case (scout KNOWLEDGE/ absence). No dead refs.
+- 27.07.26 07:45 [E-784] [parent: E-783] [T-196] RUN: BUILD -- scout.md: added LOG+checkpoint mandate (lines 6-7), KNOWLEDGE/ existence guard (line 1), grep scope clarification (line 5). build.md: added clean-tree cross-ref to verify.md for BLOCKED exit (line 27).

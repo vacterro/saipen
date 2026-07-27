@@ -24,4 +24,5 @@ ticket's change is correct, a line per file touched is not. Can't complete
 safely (unrecoverable error, no write access, the change needs a decision
 only the user can make)? STATE -> BLOCKED with the facts -- never force a
 broken edit through to VERIFY, and never skip the LOG line even for a
-BLOCKED exit.
+BLOCKED exit. Clean tree before BLOCKED: follow procedure in phases/verify.md
+(clean tree section).
