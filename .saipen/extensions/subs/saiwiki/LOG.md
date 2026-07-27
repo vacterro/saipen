@@ -8,3 +8,4 @@
 - 27.07.26 03:30 [W-007] [parent: W-006] RUN: wiki content expansion — added Phases (16 phases), Scenarios (8 walkthroughs), Tutorials (7 guides), Use-Cases (10 patterns), SubSaipen (4 sub-agent descriptions). 880 new lines, 7 files.
 - 27.07.26 04:00 [W-008] [parent: W-007] RUN: enriched all pages — added concrete STATE snapshots, error paths, troubleshooting, expected outputs. Tagline updated to "One command. Zero dependencies. Zero amnesia." across Home, Footer, Sidebar. +1400 lines net.
 - 27.07.26 05:00 [W-009] [parent: W-008] RUN: caveman ultra rewrite — all 8 pages compressed. -1071 lines (31% reduction). Articles, filler, pleasantries stripped. Technical substance preserved. Code blocks exact.
+- 27.07.26 05:30 [W-010] [parent: W-009] RUN: dedicated ded-style examples — Home (5 real-life rants), Getting-Started (10 commands with grandpa), Phases (16 phase rants), SubSaipen (4 sub rants). +67 lines. Angry grandpa voice: without-SAIPEN tears vs with-SAIPEN calm.
