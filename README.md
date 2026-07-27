@@ -110,11 +110,7 @@ Per-platform notes live in `extensions/adapters/`.
 <details>
 <summary>Click to expand</summary>
 
-### Agent instructions injected by bootstrap
-
 <img src="assets/screenshot-freebuff.png" alt="FreeBuff agent instructions" width="600"/>
-
-### <code>saipen set</code> creating project memory
 
 <img src="assets/screenshot-nomadcode1.png" alt="saipen set in nomadcode" width="600"/>
 
