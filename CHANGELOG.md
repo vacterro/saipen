@@ -2,6 +2,20 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.89.0 -- 2026-07-27 -- `next_action` was checked for shape but never for vocabulary
+
+Full protocol re-sweep. Cross-references came back clean -- every `§ N.M` cited across RFC, BOOT, CONFORMANCE, SKILL, PROTOCOL, crew.md and all 16 phase docs resolves to a section that exists, and every fixture named in CONFORMANCE exists on disk. So the sweep went at the one thing never tested directly: whether this repo's own state actually passes TEST-001.
+
+It did not. `STATE.md` read `next_action: "saipen hunt ..."` -- and **`saipen hunt` is not a command.** RFC § 1.10's list is closed and does not contain it; `HUNT` is a phase reached autonomously via § 2.1, never invoked by name. § 1.10 requires a cold agent facing an unrecognized `saipen <word>` to decline and stop, which means the gold-standard continuation test failed on a state that looked entirely healthy -- and which the validator had passed, twice, because the `next_action` check verified the *prefix* (`WAIT:`/`saipen `/`PHASE `/`RUN:`/`RESUME:`) and never the word after it. An entire class of "looks executable, isn't" walked straight through.
+
+Both halves fixed. The check now resolves the verb against § 1.10's actual list, and the live state was corrected to `saipen continue` -- which is right anyway: the board is empty and `goal_mode` is false, so § 2.1 auto-transitions to `HUNT` without anyone naming it.
+
+Verified in both directions, per `phases/verify.md`: the new check fired on this repo's own `STATE.md` before the repair, went quiet after it, accepted `saipen continue` / `saipen sub collect` / `saipen goal <text>` / `saipen markhunt`, and rejected `saipen hunt` and `saipen frobnicate`.
+
+Worth noting who wrote the bad value: I did, twice this session, while shipping rules about exactly this kind of drift. The shape check gave it a green light each time. That is what a gate checking the wrong property looks like from the inside -- not obviously broken, just quietly permissive.
+
+CONFORMANCE row 49.
+
 ## 7.88.0 -- 2026-07-27 -- a subSaipen had no way to say "I don't know"
 
 subSaipen pass, closing the priority Core > phases > subSaipens.

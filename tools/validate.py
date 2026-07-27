@@ -297,6 +297,25 @@ if isinstance(next_action, str):
     if "?" in next_action and not next_action.startswith("WAIT:"):
         fail(f"STATE.md next_action asks a question outside WAIT:: "
              f"{next_action!r} (RFC В§ 1.2)")
+    # The prefix check above proves the shape, not the vocabulary: "saipen
+    # hunt" passes it while naming a command RFC 1.10 does not define, and a
+    # cold agent is then required to decline it and stop -- TEST-001 failing
+    # on a state that looked perfectly valid. HUNT/ADD/BUILD etc. are phases
+    # reached autonomously (1.6, 2.1), never words a user or a next_action
+    # may invoke. Caught live in v7.89.0 on this repo's own STATE.md.
+    if next_action.startswith("saipen "):
+        verb = next_action[len("saipen "):].split()[0].strip('."\'') if \
+            len(next_action.split()) > 1 else ""
+        # 1.10's closed list. `saipen` bare (== continue) has no verb.
+        known = {"set", "init", "continue", "goal", "plan", "clean",
+                 "translate", "markhunt", "prepare", "ship", "validate",
+                 "status", "stop", "sub"}
+        if verb and verb not in known:
+            fail(f"STATE.md next_action invokes 'saipen {verb}', which RFC "
+                 f"В§ 1.10 does not define -- a cold agent MUST decline an "
+                 f"unrecognized command and stop, so this state fails "
+                 f"TEST-001. Phases like HUNT/ADD are reached autonomously "
+                 f"(В§ 2.1), never invoked by name")
 
 if phase in ("SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP") \
         and state.get("task") in ("none", "", None):

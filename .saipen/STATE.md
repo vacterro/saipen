@@ -1,7 +1,7 @@
 ---
 phase: DONE
 task: none
-next_action: "saipen hunt [board empty, tree clean -- unexamined: guides/ 33 files, extensions/adapters/ 9 files, pushed wiki]"
+next_action: "saipen continue [board empty, tree clean -- 2.1 auto-transitions to HUNT; unexamined surface: guides/ 33 files, extensions/adapters/ 9 files, pushed wiki]"
 blocker: none
 transition_from: MARKHUNT
 saipen_version: 7
@@ -14,5 +14,5 @@ requires:
   - python
 mode: full
 goal_mode: false
-updated: 2026-07-27T19:40:00Z
+updated: 2026-07-27T21:30:00Z
 ---
