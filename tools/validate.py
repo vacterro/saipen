@@ -23,9 +23,16 @@ ticket-ref written months ago cannot be fixed without rewriting history,
 which RFC forbids) warns instead. --strict promotes warnings to failures.
 """
 
+import io
 import json
 import re
 import sys
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+else:
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+
 from pathlib import Path
 
 STRICT = "--strict" in sys.argv[1:]
