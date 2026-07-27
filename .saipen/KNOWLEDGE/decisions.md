@@ -66,6 +66,17 @@
   Default-reject is discipline; a no-evidence-ever ban would be the same
   rigidity the protocol rejects everywhere else. Treat everything else in
   such an audit as noise.
+- ZERO-PROMPT AUTO-TRANSITION discipline (v7.82.0, incident: this session):
+  RFC § 2.1: bare command + empty board MUST auto-transition HUNT->ADD, never
+  stop at DONE asking "continue?". The agent did exactly that — stopped at DONE
+  with a vague WAIT instead of running ADD. This is the exact failure the rule
+  exists to prevent: an agent that asks for permission when the protocol says
+  proceed loses the autonomy the whole state machine is built on. Fix: when no
+  `## TODO` remain and user action is a bare continue (not a specific command),
+  jump to HUNT immediately, and from clean HUNT to ADD immediately. The only
+  exception is `STATE.phase: BLOCKED` (§ 2.1). A WAIT at DONE is never legal
+  unless a `[MARKHUNT]` ticket sits in `## BLOCKED` (`phases/done.md` step 2
+  exception).
 - Command-surface compression (`saipen x <sub>` / `--flags`) REJECTED (T-161,
   v7.55.0). The surface is already tiered: `saipen`/`continue`/`goal` cover the
   90% case (the proposal itself admits this), and the long tail (`clean`,

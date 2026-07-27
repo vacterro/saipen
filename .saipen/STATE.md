@@ -1,7 +1,7 @@
 ---
-phase: DONE
-task: T-none — all 4 HUNT waves shipped + HUNT clean
-next_action: "WAIT: continue? HUNT clean, board empty. Next: HUNT -> ADD per RFC § 2.1 auto-transition, or stop here."
+phase: ADD
+task: T-none
+next_action: "ADD: scan for missing evolutionary features — bugfix, complementary, workflow, UX, convention"
 blocker: none
 saipen_version: 7
 saipen_home: "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN"
