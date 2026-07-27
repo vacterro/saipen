@@ -7,3 +7,4 @@
 - 27.07.26 02:55 [W-006] [parent: W-005] RUN: wiki inject — pushed Home + Getting Started + _Sidebar + _Footer to github.com/vacterro/saipen.wiki.
 - 27.07.26 03:30 [W-007] [parent: W-006] RUN: wiki content expansion — added Phases (16 phases), Scenarios (8 walkthroughs), Tutorials (7 guides), Use-Cases (10 patterns), SubSaipen (4 sub-agent descriptions). 880 new lines, 7 files.
 - 27.07.26 04:00 [W-008] [parent: W-007] RUN: enriched all pages — added concrete STATE snapshots, error paths, troubleshooting, expected outputs. Tagline updated to "One command. Zero dependencies. Zero amnesia." across Home, Footer, Sidebar. +1400 lines net.
+- 27.07.26 05:00 [W-009] [parent: W-008] RUN: caveman ultra rewrite — all 8 pages compressed. -1071 lines (31% reduction). Articles, filler, pleasantries stripped. Technical substance preserved. Code blocks exact.
