@@ -2,6 +2,16 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.85.1 -- 2026-07-27 -- two pre-commit installers were fighting over one file
+
+`githooks/` shipped a `pre-commit` hook doing the locale badge-drift check, with install instructions to symlink it into `.git/hooks/pre-commit`. `tools/install_hook.py` writes that same path, with a hook that runs the full `tools/validate.py`.
+
+So the repo shipped two competing installers for one file. Whoever ran second won, silently, and a user following either doc lost the other's protection without being told. Worse, the contest was pointless: `validate.py` has done the locale badge check since v7.81.0, so the specialised hook duplicated logic the general one already ran, while displacing every other check it carries -- schema, LOG graph, manifest, injector wiring.
+
+Retired `githooks/`. Nothing is lost: the check it performed runs on every `validate.py` invocation, which is what `tools/install_hook.py` installs, and what CI runs. It was also undocumented outside subSaipen internals -- absent from README, GUIDE, CONTRIBUTING and SPEC -- so no user-facing instruction pointed at it.
+
+Also repaired a stale checkpoint, caught by the rule shipped one version earlier: `STATE.md` still read `agent: opencode` / `updated: 02:22:30Z` twelve hours later, after five LOG entries and two ships by a different agent, with a `next_action` naming work already committed. v7.85.0's own staleness signal -- `agent:` is not you, `updated:` older than your last write -- flagged its own author. Fixed.
+
 ## 7.85.0 -- 2026-07-27 -- the returning agent is the dangerous one, not the cold one
 
 § 1.1 has said "MUST NOT rely on chat context for project state" since the beginning, and it reads as advice for a cold agent -- which is the harmless case. A cold agent has no memory to mislead it; `BOOT.md` is written for exactly that reader.

@@ -1,12 +1,12 @@
 ---
 phase: DONE
 task: none
-next_action: "saipen ship [E-804's subSaipen migration is complete in the working tree but uncommitted]"
+next_action: "saipen hunt [board empty, tree clean, v7.85.0 pushed -- unexamined surface: guides/ 33 files, extensions/adapters/ 9 files, the pushed wiki]"
 blocker: none
 transition_from: ADD
 saipen_version: 7
 saipen_home: "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN"
-agent: opencode
+agent: claude-opus
 requires:
   - filesystem
   - git
@@ -15,5 +15,5 @@ mode: full
 goal_mode: false
 goal_waves: 0
 goal_tickets: 0
-updated: 2026-07-27T02:22:30Z
+updated: 2026-07-27T14:50:00Z
 ---
