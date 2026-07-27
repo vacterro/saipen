@@ -114,7 +114,11 @@ Before picking the next ticket:
   tree is clean when it isn't.
 
 After VERIFY pass: STATE -> REVIEW. There is no 'next ticket' branch here -- `REVIEW` and `SHIP` are mandatory for the current ticket before picking up another.
-`goal_mode: true`? Increment `goal_tickets` by 1 and checkpoint STATE
-(RFC § 2.4). That hits the 3-`goal_waves`/20-`goal_tickets` cap? STOP here
+`goal_mode: true`? Increment `goal_tickets` by 1, write the LOG line RFC
+§ 2.4 requires for it -- `DEC: goal_tickets N->M`, that exact text after
+the taxonomy -- and checkpoint STATE (RFC § 2.4). The line is what makes
+§ 1.5's Recovery able to rebuild the counter after a crash; a bump
+recorded only in `STATE.md` is invisible to it if `STATE.md` is what was
+lost. That hits the 3-`goal_waves`/20-`goal_tickets` cap? STOP here
 instead of continuing -- full BOARD/STATE checkpoint, report progress, wait
 for the user to re-invoke `saipen goal`.

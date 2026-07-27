@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.87.0 -- 2026-07-27 -- Recovery's counter rebuild was unexecutable: nothing ever wrote the events it counts
+
+Phase-doc pass, per the priority Core > phases > subSaipens.
+
+§ 2.4 requires every `goal_waves`/`goal_tickets` bump to leave an identifiable LOG line (`DEC: goal_waves N->M`), and § 1.5's Recovery rebuilds the counters after a crash by *counting those lines*. Three phase docs actually bump a counter -- `add.md`, `plan.md`, `verify.md` -- and **none of them mentioned the line**. So the events Recovery is instructed to count were never written by anybody: the rebuild path was dead code, and a crash that lost `STATE.md` lost the safety valve's count with it, on exactly the long unattended runs the valve exists to protect.
+
+All three now name the exact line at the point of the bump, with the reason attached, since a rule whose purpose is invisible is the kind that gets dropped in the next rewrite.
+
+Found alongside it: **`add.md` had no closing LOG instruction at all** -- the only phase doc missing one, which is how the `goal_waves` line went unwritten there longest. It is also the phase that creates and claims tickets and performs the mature-exit that clears `goal_mode`, so its silence covered the three events most worth recording. It now ends like every other phase: one Event Graph line for whichever branch it took, including the case where it found nothing -- RFC § 1.11 requires a session to leave a trace, and "ADD ran and found nothing" is a real finding, not a reason for silence.
+
+Swept the other 13 phase docs against the new § 1.11 invariants at the same time. The `assume`/`probably` hits were all false positives -- `markhunt.md`, `prepare.md` and `translate.md` mention those words only to forbid them ("'probably', 'seems like' are vibes, not evidence"; "verify coverage is real, not assumed"). Nothing else contradicted the invariants.
+
 ## 7.86.0 -- 2026-07-27 -- the safety valve made its own escape hatch illegal, plus four determinism invariants
 
 **The Core deadlock.** § 2.4's safety valve stops an autonomous run at 3 waves / 20 tickets and tells the user to "re-invoke `saipen goal` to continue". § 2.4's Exit list then set `goal_mode: false` on a valve trip. But § 1.10 recognizes bare `saipen goal` ONLY while `goal_mode: true` -- so tripping the valve made the single documented continuation path illegal in exactly the state the trip produced. The objective could not be continued at all, only replaced by `saipen goal <text>`, which demotes the board and re-plans: a substitution, not a continuation.

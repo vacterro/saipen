@@ -69,7 +69,15 @@ Activate this mode to systematically expand the software's capabilities. SAIPEN 
      `STATE.phase` has already moved to `BUILD`.
    - `goal_mode: true` and this wasn't the mature-exit case above? Either
      branch still completes this HUNT->ADD cycle -- increment
-     `goal_waves` by 1 and checkpoint STATE (RFC § 2.4). This is the ONE
+     `goal_waves` by 1, **write the identifiable LOG line RFC § 2.4 requires
+     for it -- `DEC: goal_waves N->M`, that exact text after the taxonomy** --
+     and checkpoint STATE. The LOG line is not decoration: § 1.5's Recovery
+     rebuilds the counters after a crash by *counting these lines*, so a bump
+     recorded only in `STATE.md` is a bump Recovery cannot find if `STATE.md`
+     is the file that got lost. Until v7.87.0 this doc named the increment and
+     never the line, in the one place a wave is ever counted -- meaning the
+     safety valve silently lost its count on exactly the long unattended runs
+     it exists to protect. This is the ONE
      place this cycle's wave gets counted: if this branch was `RETURN PLAN`,
      the `PLAN` run that follows MUST NOT increment `goal_waves` again for
      the same cycle (`phases/plan.md`'s own carve-out) -- otherwise one
@@ -92,3 +100,18 @@ Activate this mode to systematically expand the software's capabilities. SAIPEN 
      controls, templates) over values baked into code.
 
 6. Tickets ADD creates follow the normal Core flow from here -- `BUILD -> VERIFY -> REVIEW -> SHIP -> DONE` (RFC § 1.6) -- ADD itself never implements anything directly or short-circuits past `BUILD`. `ADD` does not run on a fixed per-ticket cadence: it begins again only after a clean `HUNT` (RFC § 2.1), whenever that next occurs.
+
+7. **Before leaving ADD, LOG what it decided.** Every other phase doc ends
+   with this; `add.md` did not until v7.87.0, which is how the `goal_waves`
+   line above went unwritten for so long. One Event Graph line per RFC § 1.2,
+   whichever applies:
+   - ticketed and claimed a minimal-delta change -> `RUN: add -> T-### <what>`
+   - ticketed for planning instead -> `RUN: add -> T-### <what>, RETURN PLAN`
+   - concluded mature -> `DEC: add -> mature, goal_mode false` plus the final
+     report § 2.4 requires
+   - found nothing and the board was already empty -> say exactly that;
+     RFC § 1.11 requires a session to leave a trace, and "ADD ran and found
+     nothing" is a real finding worth recording, not silence.
+   Then checkpoint per § 1.5 (LOG -> `BOARD.md` -> `STATE.md`) and re-read the
+   `STATE.md` you wrote. ADD creates and claims tickets; an unlogged claim is
+   how a ticket ends up owned by nobody.
