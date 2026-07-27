@@ -23,6 +23,7 @@ ticket-ref written months ago cannot be fixed without rewriting history,
 which RFC forbids) warns instead. --strict promotes warnings to failures.
 """
 
+import datetime
 import io
 import json
 import re
@@ -481,6 +482,36 @@ if log_files:
                  f"{active_kb:.0f} KB, past the ~300 line / ~64 KB soft cap -- "
                  f"seal it into .saipen/logs/LOG-<NNN>.md at the next "
                  f"checkpoint (RFC § 1.2, phases/clean.md)")
+
+    # Timestamp sanity check: last LOG entry's timestamp should be close to
+    # current UTC time. Large drift = agent wrote local clock instead of UTC,
+    # which corrupts audit trail Recovery relies on (RFC § 1.2 mandates UTC).
+    LOG_TS_RE = re.compile(r"^(\d{2})\.(\d{2})\.(\d{2}) (\d{2}):(\d{2}) ")
+    last_ts = None
+    for line in reversed(active_log.read_text(encoding="utf-8-sig").splitlines()):
+        if not line.strip() or line.startswith("#"):
+            continue
+        m = LOG_TS_RE.search(line)
+        if m:
+            last_ts = m.groups()
+            break
+    if last_ts:
+        try:
+            log_dt = datetime.datetime(
+                2000 + int(last_ts[2]), int(last_ts[1]), int(last_ts[0]),
+                int(last_ts[3]), int(last_ts[4]),
+                tzinfo=datetime.timezone.utc)
+            now = datetime.datetime.now(datetime.timezone.utc)
+            diff_sec = abs((now - log_dt).total_seconds())
+            if diff_sec > 10800:  # 3 hours -- catches timezone-off errors
+                warn("log-timestamp-drift",
+                     f"latest LOG entry ({last_ts[0]}.{last_ts[1]}.{last_ts[2]} "
+                     f"{last_ts[3]}:{last_ts[4]}) is {diff_sec/3600:.1f}h from "
+                     f"current UTC ({now.strftime('%H:%M')}) -- LOG timestamps "
+                     f"MUST be UTC (RFC § 1.2). Off-by-hours suggests local-clock "
+                     f"drift.")
+        except ValueError:
+            pass  # unparseable date (old history, skip)
 
 # ----------------------------------------------------------------- KNOWLEDGE
 
