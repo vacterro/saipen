@@ -24,3 +24,6 @@
 - 27.07.26 07:40 [E-783] [parent: E-782] [T-196] RUN: SCOUT — read INIT, PLAN, SCOUT, BUILD, VERIFY phase docs. 6-dimension analysis complete. Findings: 3 symmetry gaps (scout no LOG/checkpoint, BUILD no clean-tree ref, PLAN no LOG), 3 weak-agent traps (subjective metrics, grep scope, verify LOG verbosity), 1 edge case (scout KNOWLEDGE/ absence). No dead refs.
 - 27.07.26 07:45 [E-784] [parent: E-783] [T-196] RUN: BUILD -- scout.md: added LOG+checkpoint mandate (lines 6-7), KNOWLEDGE/ existence guard (line 1), grep scope clarification (line 5). build.md: added clean-tree cross-ref to verify.md for BLOCKED exit (line 27).
 - 27.07.26 07:55 [E-785] [parent: E-784] [T-200] RUN: SCOUT -> BUILD -- read REVIEW, SHIP, DONE, VALIDATE, HUNT phase docs. 6-dimension analysis: 1 dead ref (ship.md '14-value' -> 16), 1 symmetry gap (done.md missing LOG). Fixed both.
+- 27.07.26 08:00 [E-786] [parent: E-785] [T-200] RUN: VERIFY -> DONE -- validate.py PASS (1 pre-existing WARN). Pushed a01efb3. T-201 claimed.
+- 27.07.26 08:10 [E-787] [parent: E-786] [T-201] RUN: SCOUT -> DONE -- all 5 docs clean. No dead refs, no RFC contradictions, no symmetry gaps. T-202 claimed.
+- 27.07.26 08:15 [E-788] [parent: E-787] [T-202] RUN: SCOUT -> BUILD -- read blocked.md. 1 symmetry gap (no LOG mandate). Fixed.

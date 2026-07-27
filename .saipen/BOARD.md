@@ -1,12 +1,12 @@
 # Board
 ## DOING
-- [/] T-200 [P2] Wave 2 phase HUNT: REVIEW, SHIP, DONE, VALIDATE, HUNT — same 6-dimension analysis | owner: opencode | claim_time: 2026-07-27T07:50:00Z
+- [/] T-202 [P3] Wave 4 phase HUNT: BLOCKED — single-phase analysis | owner: opencode | claim_time: 2026-07-27T08:10:00Z
 
 ## TODO
-- [ ] T-201 [P2] Wave 3 phase HUNT: MARKHUNT, ADD, CLEAN, TRANSLATE, PREPARE — same 6-dimension analysis
-- [ ] T-202 [P3] Wave 4 phase HUNT: BLOCKED — single-phase analysis
 
 ## DONE
+- [x] T-201 [P2] Wave 3 phase HUNT: MARKHUNT, ADD, CLEAN, TRANSLATE, PREPARE — clean, 0 defects. validate.py PASS. (2026-07-27)
+- [x] T-200 [P2] Wave 2 phase HUNT: REVIEW, SHIP, DONE, VALIDATE, HUNT — 2 fixes: ship.md 14→16, done.md LOG. validate.py PASS. (2026-07-27)
 - [x] T-196 [P2] Wave 1 phase HUNT: INIT, PLAN, SCOUT, BUILD, VERIFY — 5 edits: scout.md LOG/checkpoint + KNOWLEDGE/ guard + grep scope, build.md clean-tree cross-ref. validate.py PASS. (2026-07-27)
 - [x] T-192 [P2] 29 stale locale batch refresh — all 32 locale badges already at v7.82.0 (done in earlier session work).
 - [x] T-195 [P0] Tag all missing releases v7.65.0..v7.82.0 — 21 tags created and pushed.

@@ -3,6 +3,7 @@
 The whole session is stuck, not just one ticket -- you only land here after
 confirming no other ticket on `BOARD.md` is workable (`phases/verify.md` or `phases/done.md`).
 
+0. **LOG the block**: one Event Graph line `- DATE [E-###] [parent: E-###] [T-###] RUN: BLOCKED -> <blocker description>` before anything else — makes the blocking event auditable even if it gets unblocked later.
 1. Check `blocker:` in STATE.md or recent LOG.md entries. Empty `blocker:`
    here is itself non-conformant (RFC § 1.2) -- determine the real reason
    you're stuck and write it before proceeding.
