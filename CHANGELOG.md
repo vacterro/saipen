@@ -2,6 +2,19 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.90.0 -- 2026-07-27 -- two invariants shipped as prose, now actually enforced
+
+Measured the enforcement ratio for the first time: of CONFORMANCE's 49 rows, 9 were mechanically enforced and 28 were behavioral-only. Roughly a fifth held by tooling, the rest by agents behaving.
+
+Some of that gap is permanent -- "did you guess or did you know" leaves no artifact, and no validator will ever rule on it. But some of it was just unbuilt, and two of the unbuilt ones were invariants shipped days earlier in this same session:
+
+- **One ticket at a time** (§ 1.11, v7.86.0) -- nothing counted `## DOING` entries. The rule existed to stop ticket-hopping (claim T-12, drift, claim T-27, drift) and had no way to notice it happening. `tools/validate.py` now FAILs a board carrying more than one.
+- **Goal counters leave a countable trace** (§ 2.4; the three phase docs were fixed in v7.87.0) -- nothing verified the result. A non-zero counter with no matching `DEC: goal_waves N->M` in any LOG segment now WARNs: § 1.5's Recovery rebuilds those counters by counting exactly those lines, so their absence means a crash losing `STATE.md` loses the safety-valve budget with it. WARN rather than FAIL, since states written before v7.87.0 legitimately lack the lines and a sealed segment may hold an old run's.
+
+Both break-tested: two `## DOING` tickets goes red, non-zero counters with no `DEC:` line warns, this repo passes clean.
+
+Worth stating the ceiling honestly, since the question came up: `ruff`/`mypy`/`pytest` can be merciless about Python because they read the artifact and rule on it. SAIPEN's artifacts -- `STATE`/`BOARD`/`LOG` -- are judged just as hard, and there are 17 checks doing it. What cannot be mechanized is the part where the artifact looks correct either way: a guessed finding and a known one are byte-identical. That is not a tooling gap to close, it is why § 1.11 states the rule and `phases/verify.md` insists on breaking a gate before trusting it. The honest split is: shape and consistency get enforced, judgement gets stated and audited.
+
 ## 7.89.0 -- 2026-07-27 -- `next_action` was checked for shape but never for vocabulary
 
 Full protocol re-sweep. Cross-references came back clean -- every `§ N.M` cited across RFC, BOOT, CONFORMANCE, SKILL, PROTOCOL, crew.md and all 16 phase docs resolves to a section that exists, and every fixture named in CONFORMANCE exists on disk. So the sweep went at the one thing never tested directly: whether this repo's own state actually passes TEST-001.

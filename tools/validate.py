@@ -552,6 +552,19 @@ for tid, t in tickets.items():
              f"in-progress but sits under {t['section']} -- in-progress work "
              f"belongs under ## DOING")
 
+# RFC § 1.11: at most one ticket in ## DOING per agent. Shipped as prose in
+# v7.86.0 with nothing enforcing it until v7.90.0 -- which is exactly the
+# ticket-hopping this invariant exists to stop (claim T-12, drift, claim
+# T-27, drift), and the resulting half-owned tickets are unreadable after the
+# fact. Cheap to check, so it is checked.
+doing = [tid for tid, t in tickets.items() if t["section"] == "## DOING"]
+if len(doing) > 1:
+    fail(f"BOARD.md has {len(doing)} tickets in ## DOING ({', '.join(sorted(doing))}) "
+         f"-- RFC § 1.11 allows at most one per agent. Finish, block, or demote "
+         f"one to ## TODO with a LOG line before claiming another")
+else:
+    ok(f"BOARD.md at most one ## DOING ticket ({len(doing)} claimed)")
+
 # ----------------------------------------------------------------------- LOG
 
 # Segmented, append-only (RFC § 1.2): sealed older segments live in
@@ -647,6 +660,27 @@ if log_files:
     if log_ok:
         ok(f"LOG.md format valid (skeleton, E-### unique + monotonic, parents "
            f"resolve; {len(log_files)} segment(s))")
+
+    # RFC § 2.4 requires every goal counter bump to leave `DEC: goal_waves N->M`
+    # (or goal_tickets), because § 1.5 Recovery rebuilds the counters by
+    # COUNTING those lines. v7.87.0 fixed the three phase docs that bump a
+    # counter without naming the line; nothing verified the result until
+    # v7.90.0. A non-zero counter with no matching line anywhere means the
+    # crash-recovery path has nothing to count -- the valve silently loses its
+    # budget on exactly the long unattended runs it protects. WARN, not FAIL:
+    # states predating v7.87.0 legitimately carry counters with no lines, and
+    # a sealed segment may hold the lines for a very old run.
+    if state.get("goal_mode") is True:
+        all_log = "\n".join(p.read_text(encoding="utf-8-sig") for p in log_files)
+        for counter in ("goal_waves", "goal_tickets"):
+            if isinstance(state.get(counter), int) and state[counter] > 0 \
+                    and f"DEC: {counter}" not in all_log:
+                warn("goal-counter-untraced",
+                     f"STATE.md {counter} is {state[counter]} but no "
+                     f"'DEC: {counter} N->M' line exists in any LOG segment -- "
+                     f"§ 1.5 Recovery rebuilds this counter by counting those "
+                     f"lines, so a crash losing STATE.md loses the safety-valve "
+                     f"budget with it (RFC § 2.4)")
 
     documented_inversions = any(
         "observed historical timestamp inversions" in
