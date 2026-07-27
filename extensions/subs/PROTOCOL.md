@@ -88,11 +88,30 @@ File: `<name>/kitchen/OUTBOX.md`. The only channel back to the main agent.
 |---|---|
 | `ready` | Done, main agent may act on it |
 | `draft` | Still in progress, main agent ignores |
-| `blocked` | Waiting on something external, reason in `details` |
+| `blocked` | Waiting on something external, reason in `details` -- **and this is also how a subSaipen says "I do not have enough information", which is the one case it will otherwise get wrong** (see below) |
 | `reviewed` | Collected already (§ 4) -- kept as history, not deleted; safe to leave, gets swept whenever `saipen sub clean` or a `HUNT` pass (`phases/hunt.md`) touches this subSaipen's `kitchen/` like any other stale content |
 
 `critical: true` = bug, broken behavior, data loss, security issue.
 `critical: false` = improvement, docs, refactor, cosmetic.
+
+**Not enough information is a `blocked` entry, never a guess.** RFC § 1.11
+requires a Core agent short of a fact to stop and write a `WAIT:` naming it.
+A subSaipen cannot do that -- it has no `WAIT:` any human reads; its own
+`STATE.md` is nobody's dashboard, and its single door out is this OUTBOX. So
+the same rule lands here: when the finding depends on something you cannot
+determine from the project's own files, write the entry with `status:
+blocked` and put the exact missing fact in `details`. Do not infer the
+project's intent, do not pick a plausible default, do not write `ready` on
+a finding you had to assume your way into.
+
+This is the failure mode a read-only worker is *most* prone to and the main
+agent is *least* able to catch. Everything else a sub gets wrong shows up as
+a boundary violation, a stale ref, or a patch that will not apply -- all
+mechanically detectable at collect (§ 4). A guess arrives looking exactly
+like knowledge: correctly formatted, confidently worded, `status: ready`,
+and wrong. The main agent then tickets it as fact. `blocked` costs one round
+trip; a swallowed guess costs however long it takes someone to notice the
+project was built on it.
 
 **Backpressure**: this is manually invoked, not a daemon (§ 4) -- but a subSaipen that self-planned its own backlog (bare PLAN, TEMPLATE's default `next_action`) can still grind through many tickets unsupervised before anyone runs `collect`. If more than 10 `ready` entries would accumulate unreviewed, the subSaipen SHOULD pause further ticket completion and set its own `phase: BLOCKED` with `blocker: OUTBOX awaiting main agent collect` rather than continuing to pile up findings nobody's seen yet -- the same `BLOCKED` phase every subSaipen already has legally available (§ 8), no new lifecycle state.
 
@@ -254,9 +273,24 @@ A `BLOCKED` subSaipen sitting unreviewed indefinitely is a silent rot risk -- th
 ## 8. File shape for a subSaipen
 
 Identical to Core's own `.saipen/` shape (RFC § 1.2) -- `phase`, `task`,
-`next_action`, `blocker`, `agent`, `saipen_version`, `mode` (always
-`read-only`), `updated`. No extra required fields. If this file and
-RFC.md ever disagree on the shared shape, RFC.md wins (RFC § 1.9).
+`next_action`, `blocker`, `agent`, `saipen_version`, `schema_version`,
+`mode` (always `read-only`), `updated`, plus `transition_from` on every
+state except a fresh `INIT` (RFC § 1.2, required since v7.86.0 -- it is what
+makes transition checking possible). "Identical" is the whole rule: this list
+is a convenience copy and goes stale, as it did between v7.82.0 and v7.88.0
+when it still said "no extra required fields" while the validator had been
+requiring two more for six releases. `TEMPLATE/STATE.md` is the copy that
+cannot drift, because `saipen sub spawn` copies it verbatim and
+`tools/validate.py` checks it -- read that file, not this sentence, when the
+two disagree. If this file and RFC.md ever disagree on the shared shape,
+RFC.md wins (RFC § 1.9).
+
+**Core's determinism invariants (RFC § 1.11) bind a subSaipen too** -- it is
+a SAIPEN instance, not a lesser thing. One ticket in its own `## DOING` at a
+time; every run leaves a trace in its own `LOG.md`, including "found nothing";
+the same fixed action priority. The one that needs translating is the last --
+see § 2's `blocked` status for how a sub stops instead of guessing, since it
+has no `WAIT:` a human ever reads.
 
 ## 9. Fixer-type subSaipen (the OUTBOX carries a tested patch, not just a finding)
 

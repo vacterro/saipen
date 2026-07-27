@@ -2,6 +2,20 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.88.0 -- 2026-07-27 -- a subSaipen had no way to say "I don't know"
+
+subSaipen pass, closing the priority Core > phases > subSaipens.
+
+**The real gap.** RFC § 1.11 requires an agent short of a fact to stop and write a `WAIT:` naming it. A subSaipen cannot do that -- it has no `WAIT:` any human reads, its own `STATE.md` is nobody's dashboard, and its single door out is `kitchen/OUTBOX.md`. So the invariant existed in Core with no expression where a sub could obey it. `status: blocked` already existed for "waiting on something external"; it is now also the documented home for "I do not have enough information", with the missing fact quoted in `details`.
+
+This is the sub failure mode that matters most, because it is the only one the main agent cannot catch. Everything else is mechanically detectable at collect: a boundary violation shows in `git status`, a stale `main_project_refs` fails its freshness check, a patch cut against an old `base_head` will not apply. A guess arrives looking exactly like knowledge -- correctly formatted, confidently worded, `status: ready`, and wrong -- and the main agent then tickets it as fact, laundering the error onto the project's own board. `blocked` costs one round trip; a swallowed guess costs however long it takes someone to notice what got built on it.
+
+**§ 8's field list had gone stale**, which is the same drift class this session keeps finding. It enumerated the required fields and stated "No extra required fields" -- while `transition_from` had been required since v7.86.0 and `schema_version` was validator-checked. The live instances and `TEMPLATE/STATE.md` both carry them (a fresh spawn validates clean, verified), so nothing was broken in practice; the authoritative prose was simply wrong, and anyone writing a state from that list by hand would have produced a non-conformant one. Fixed, and the list now says outright that it is a convenience copy which goes stale -- `TEMPLATE/STATE.md` is the copy that cannot, since `spawn` copies it verbatim and the validator checks it.
+
+Also stated plainly: **Core's § 1.11 invariants bind a subSaipen too** -- one ticket in its own `## DOING` at a time, every run leaves a trace in its own `LOG.md` including "found nothing", same fixed action priority. A subSaipen is a SAIPEN instance, not a lesser thing.
+
+CONFORMANCE row 48 + the `subsaipen-blocked-not-guessed` fixture.
+
 ## 7.87.0 -- 2026-07-27 -- Recovery's counter rebuild was unexecutable: nothing ever wrote the events it counts
 
 Phase-doc pass, per the priority Core > phases > subSaipens.
