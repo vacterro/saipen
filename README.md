@@ -105,4 +105,19 @@ Per-platform notes live in `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
+## Screenshots
+
+<details>
+<summary>Click to expand</summary>
+
+### Agent instructions injected by bootstrap
+
+<img src="assets/screenshot-freebuff.png" alt="FreeBuff agent instructions" width="600"/>
+
+### <code>saipen set</code> creating project memory
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set in nomadcode" width="600"/>
+
+</details>
+
 
