@@ -67,3 +67,4 @@ the actual fixture; entries with no fixture state why, not silently.
 
 
 | 43 | Checkpoint self-confirmation -- after writing `STATE.md` (§ 1.5 step 3) the agent re-reads it and confirms all eight required fields survived, the same re-read-after-write discipline § 1.4 already mandates for claims. A checkpoint missing `next_action` fails TEST-001 outright and is not a checkpoint (RFC § 1.5, `BOOT.md` step 7, v7.84.0) | `checkpoint-self-confirmation` -- behavioral, README-only |
+| 44 | Returning agent distrusts its own memory -- before acting on anything it believes it already knows, it compares `STATE.md`'s `agent:` and `updated:` against itself; either mismatch means recollection is stale and the files win (RFC § 1.1, `BOOT.md`, v7.85.0) | `returning-agent-stale-memory` -- behavioral, README-only |

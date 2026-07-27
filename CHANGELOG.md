@@ -2,6 +2,23 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.85.0 -- 2026-07-27 -- the returning agent is the dangerous one, not the cold one
+
+§ 1.1 has said "MUST NOT rely on chat context for project state" since the beginning, and it reads as advice for a cold agent -- which is the harmless case. A cold agent has no memory to mislead it; `BOOT.md` is written for exactly that reader.
+
+The warm agent is the problem. It worked here before, it remembers real specifics, and it is wrong because somebody else moved the project in between. Recollection feels like knowledge, so nothing prompts a re-read, and the resulting mistakes come out stated with full confidence.
+
+This was found the honest way -- by doing it. An agent resumed this repo believing it had last shipped `v7.80.0`. Another agent had taken it to `v7.83.0` in the meantime: 36 logged events and an entire subSaipen refactor. It was one step from reviewing "the protocol" against a three-version-old mental model and reporting those findings as fact. It noticed only by chance, spotting a field in `tools/validate.py` it knew it had never written.
+
+The fix costs one comparison and needs no new field, since both already exist:
+
+- `STATE.md`'s `agent:` is not you -> someone else wrote the last checkpoint.
+- `STATE.md`'s `updated:` is newer than your own last write -> the project moved without you.
+
+Either one means memory is stale by definition: re-read `STATE`, `BOARD` and the active `LOG` tail, and treat every prior belief -- versions, ticket states, what you think you shipped -- as unverified until a file says otherwise. RFC § 1.1 states it; `BOOT.md` opens with it, since that is the file a resuming agent actually reads.
+
+Confident staleness is worse than ignorance, because ignorance asks. CONFORMANCE row 44 + the `returning-agent-stale-memory` fixture.
+
 ## 7.84.0 -- 2026-07-27 -- a checkpoint you cannot resume from is not a checkpoint
 
 Two things land together: a subSaipen layout refactor that had been sitting complete-but-uncommitted in the working tree, and a protocol fix found while reviewing it.

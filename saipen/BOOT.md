@@ -3,6 +3,13 @@
 You are continuing a project whose entire brain persists in `.saipen/`.
 For a bare `saipen` / `saipen continue` you do NOT need the full RFC. Do this:
 
+**Been here before? Then read step 1 twice.** These steps assume you know
+nothing, which is the safe case. If you *do* remember this project, your
+memory is a claim, not a fact -- somebody else may have moved it since. The
+check is one comparison: `STATE.md`'s `agent:` isn't you, or its `updated:` is
+newer than your own last write, means everything you think you know is stale.
+Take it from the files, not from recollection (RFC § 1.1).
+
 1. Read `.saipen/STATE.md` -- `phase`, `task`, `next_action`, `mode`, `goal_mode`.
    **Not there?** If git is available, run `git rev-parse --git-common-dir`
    first before concluding "not initialized" -- a path ending in `/.git`
