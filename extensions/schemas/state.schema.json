@@ -56,6 +56,11 @@
     "human_note": {
       "type": "string",
       "description": "Optional one-line human->agent nudge, read on continue (RFC § 1.2) and cleared once applied. Not a ticket, not a goal -- a lightweight 'last time you did X, don't' channel."
+    },
+    "transition_from": {
+      "type": "string",
+      "enum": ["INIT", "PLAN", "SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP", "DONE", "BLOCKED", "VALIDATE", "HUNT", "MARKHUNT", "ADD", "CLEAN", "TRANSLATE", "PREPARE"],
+      "description": "The phase this state transitioned FROM. Set on every phase transition. Absent on fresh INIT bootstrap or legacy states written before v7.83.0. Combined with `phase` to validate transitions against RFC § 1.6."
     }
   },
   "required": [

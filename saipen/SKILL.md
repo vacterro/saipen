@@ -2,8 +2,10 @@
 name: saipen
 description: >
   SAIPEN (v7). Trigger on "saipen set", "saipen",
-  and subcommands. 2-tier architecture: boot RFC.md
-  loads always; phases/ modules load on demand per STATE.
+  and subcommands. 2-tier architecture: boot BOOT.md
+  cold-start kernel loads first; phases/ modules load
+  on demand per STATE. RFC.md is the constitution,
+  reached only when a rule question arises.
   Persistent .saipen/ memory lets any agent continue another's work.
 ---
 

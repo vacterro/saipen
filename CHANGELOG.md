@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.83.0 -- 2026-07-27 -- transition_from + BOOT cold-start sync finished
+
+`STATE.md` gained an explicit `transition_from` field tracking the last phase transition, and `tools/validate.py` validates every non-self transition against RFC § 1.6's table (including from-any-phase user commands). Five phases were already covered by a conceptual-only CONFORMANCE row; that row is now mechanical.
+
+The BOOT cold-start chain is now authoritative for all cold-start paths -- bare agents paste BOOT.md first, then RFC + STYLE. All three adapter files (README.md, generic.md, claude.md) updated to match. SKILL.md frontmatter corrected from "boot RFC.md loads always" to "boot BOOT.md first." The README cold-start paragraph synced to the same chain (STATE -> BOARD -> LOG -> human_note -> next_action) that BOOT.md already defined.
+
+STATE snapshot no longer parks on DONE+WAIT with an empty board (RFC § 2.1 auto-transition). LOG-001.md:660's illegal `[T-119..T-121]` ticket-range reference replaced with `[T-none]`.
+
+CONFORMANCE row 14 (invalid phase transition): automated via transition_from.
+CONFORMANCE row 43 (DONE+WAIT auto-transition guard): enforced by validate.py.
+validate.py: SHIP added to ANY_FROM (enterable from any phase per RFC § 1.10, was missing).
+
 ## 7.80.0 -- 2026-07-26 -- status answers the question people actually ask
 
 Almost nobody runs `saipen status` to find out which phase they are in. They run some form of *"is this in good shape, and does anything need me?"* -- twice in this session's own transcript. The command answered only the first kind of question, so an agent that had been in the conversation answered the second from chat scrollback, and a cold agent -- the whole point of this protocol -- could not answer it at all.

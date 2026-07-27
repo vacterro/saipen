@@ -34,4 +34,4 @@ matching exactly:
 - `KNOWLEDGE/` directory (created on first need, not upfront).
 
 After bootstrap is physically written to disk, transition:
-STATE -> `PLAN`
+STATE -> `PLAN`, setting `transition_from: INIT`.

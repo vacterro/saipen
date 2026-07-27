@@ -8,12 +8,13 @@
 
 **Continuation protocol for AI coding agents.** SAIPEN keeps project memory in
 plain markdown, so a cold agent with no chat history runs `/saipen continue`,
-reads `STATE`, `BOARD`, and `next_action`, and resumes work in under a minute
--- no rebriefing, any vendor, any day.
+reads `STATE.md` -> `BOARD.md` -> active `LOG.md` tail -> `human_note` (if
+set), executes `next_action`, and resumes work in under a minute -- no
+rebriefing, any vendor, any day.
 
 **One command. Zero dependencies. Zero amnesia.**
 
-**v7.82.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | MIT
+**v7.83.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -23,9 +24,12 @@ reads `STATE`, `BOARD`, and `next_action`, and resumes work in under a minute
 
 ```text
 User  ->  /saipen continue
-Agent ->  reads STATE ("What do I do right now?")
-Agent ->  reads BOARD ("What task am I picking up?")
-Agent ->  reads next_action (executes command)
+Agent ->  reads STATE.md (phase, task, next_action, mode, human_note)
+Agent ->  reads BOARD.md (DOING / TODO / DONE / BLOCKED tickets)
+Agent ->  reads active LOG.md tail (recent events)
+Agent ->  reads human_note (if set, one-time nudge)
+Agent ->  executes next_action (command) immediately
+Agent ->  loads phase doc only when rules are needed
 Agent ->  Works.
 ```
 
@@ -82,7 +86,7 @@ saves a `.uninstalled.bak` copy first, and removes the skill folders.
 > `saipen set`
 
 No install? Paste one line to any agent:
-> Read <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
+> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
 
 Platform not in the list above (DeepSeek, Qwen, standalone OpenAI, etc.)?
 Per-platform notes live in `extensions/adapters/`.

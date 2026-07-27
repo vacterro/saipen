@@ -175,6 +175,42 @@ if state.get("phase") == "BLOCKED" and state.get("blocker") in ("", "none", None
 if len(failures) == before:
     ok("STATE.md schema valid (checked against state.schema.json)")
 
+# RFC § 1.6 phase transition validation. transition_from tracks the
+# previous phase; check every non-self transition against the table.
+VALID_TRANSITIONS = {
+    "INIT": ["PLAN", "BLOCKED"],
+    "PLAN": ["SCOUT", "BUILD", "DONE", "BLOCKED"],
+    "SCOUT": ["BUILD", "BLOCKED"],
+    "BUILD": ["VERIFY", "BLOCKED"],
+    "VERIFY": ["REVIEW", "SCOUT", "BUILD", "BLOCKED"],
+    "REVIEW": ["SHIP", "BUILD", "SCOUT", "BLOCKED"],
+    "SHIP": ["DONE", "BLOCKED"],
+    "DONE": ["SCOUT", "PLAN", "HUNT", "BLOCKED"],
+    "VALIDATE": ["SCOUT", "PLAN", "DONE", "BLOCKED"],
+    "HUNT": ["ADD", "PLAN", "SCOUT", "BLOCKED"],
+    "MARKHUNT": ["DONE", "BLOCKED"],
+    "ADD": ["BUILD", "PLAN", "SCOUT", "DONE", "BLOCKED"],
+    "CLEAN": ["DONE", "BLOCKED"],
+    "TRANSLATE": ["DONE", "BLOCKED"],
+    "PREPARE": ["DONE", "BLOCKED"],
+    "BLOCKED": ["PLAN", "SCOUT", "DONE"],
+}
+# These five phases are entered by explicit user command from ANY phase
+# (RFC § 1.10) -- the transition table's FROM row doesn't restrict them.
+ANY_FROM = {"VALIDATE", "MARKHUNT", "CLEAN", "TRANSLATE", "PREPARE", "SHIP"}
+
+t_from = state.get("transition_from")
+t_current = state.get("phase")
+if t_from and t_current and t_from != t_current:
+    if t_current not in ANY_FROM:
+        allowed = VALID_TRANSITIONS.get(t_from, [])
+        if t_current not in allowed:
+            fail(f"STATE.md invalid phase transition: {t_from} -> {t_current} "
+                 f"(RFC § 1.6). Allowed from {t_from}: {', '.join(allowed)}")
+    if t_from not in VALID_TRANSITIONS and t_from not in ANY_FROM:
+        fail(f"STATE.md transition_from has unknown phase: {t_from!r} "
+             f"-- must be one of the 16 enum values (RFC § 1.6)")
+
 # RFC § 1.3 mode/phase restrictions.
 # NOTE: `no-publish` + `SHIP` is NOT checked here, deliberately. It used to
 # be, and that check outlived the rule: v7.66.0 made SHIP reachable under

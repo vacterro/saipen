@@ -48,7 +48,7 @@ ticket rather than papered over here.
 | 11 | Goal objective exit | N/A -- `goal_exit` was evaluated and rejected three times (recorded in `.saipen/KNOWLEDGE/decisions.md` and CHANGELOG v7.13.1/v7.19.1); `goal_mode` never exits on board-empty, so there is no "objective exit" behavior to test |
 | 12 | Extension absence does not block | `extension-absence` |
 | 13 | Unresolved LOG parent | Enforced by `tools/validate.py` since v7.24.0 (parent must resolve to an earlier `E-###`; IDs unique + monotonic). The old excuse -- historical numbering resets a naive resolver would misflag -- died with v7.24.0's user-approved ledger repair; this repo's own LOG.md now passes the check it once couldn't. |
-| 14 | Invalid phase transition | `invalid-phase-transition` -- conceptual only; `STATE.md` doesn't track phase history, so this can't be automated without new scope |
+| 14 | Invalid phase transition | `invalid-phase-transition` -- automated via `transition_from` in STATE.md; `tools/validate.py` checks every non-self transition against RFC § 1.6's table (v7.82.0) |
 | 15 | Mode-phase restrictions -- `read-only` MUST NOT enter `BUILD`/`SHIP`/`CLEAN`/`TRANSLATE` (RFC § 1.3), the only such ban still live since v7.66.0 freed `no-publish` + `SHIP` | `read-only-restriction` (fails as intended); `invalid-mode-phase-combination` is now the inverse regression guard -- it asserts `no-publish` + `SHIP` stays legal, since re-adding that ban already shipped once |
 | 16 | Ticket-level BLOCKED (non-cycle failure), work continues | `blocked-ticket` |
 | 17 | Fresh INIT bootstrap from `templates/` | `fresh-init` -- behavioral, no `.saipen/` yet by definition (that's what INIT creates) |

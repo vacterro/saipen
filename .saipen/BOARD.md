@@ -17,4 +17,10 @@
 - [x] T-197 [P3] Clean old recovery backups — pruned.
 - [x] T-198 [P2] Stale version refs in shipped docs — bumped.
 
+## DONE
+- [x] T-203 [P0] STATE.md transition_from + validate.py transition validation — schema, RFC doc, CONFORMANCE row 14 automated, init.md first-transition guard. (2026-07-27)
+- [x] T-204 [P0] BOOT cold-start chain sync — README.md + extensions/adapters/generic.md + claude.md paste line: BOOT.md first. SKILL.md frontmatter corrected. (2026-07-27)
+- [x] T-205 [P0] STATE snapshot WAIT fix — phase HUNT (not DONE+WAIT), RFC § 2.1 empty-board auto-transition. LOG-001.md:660 [T-none] fix. (2026-07-27)
+- [x] T-206 [P1] SHIP added to ANY_FROM in validate.py (RFC § 1.10). 32 locale badge bump 7.82.0→7.83.0. (2026-07-27)
+
 ## BLOCKED

@@ -31,3 +31,9 @@
 - 27.07.26 01:20 [E-790] [parent: E-789] RUN: HUNT -> clean -- 0/6 categories actionable. Board empty. RFC § 2.1: auto-transition to ADD next.
 - 27.07.26 01:30 [E-791] [parent: E-790] [T-none] DEC: self-critique -- 6 drifts found: (1) WAIT at DONE instead of auto-transition to ADD (RFC § 2.1), (2) skipped REVIEW STATE update on T-200/T-202, (3) vague WAIT format, (4) narrative next_action instead of executable commands, (5) T-201 checkbox/section mismatch (fixed), (6) LOG timestamps off-by-hours (fixed earlier). Fixed STATE->ADD + KNOWLEDGE entries.
 - 27.07.26 01:30 [E-792] [parent: E-791] [T-none] DEC: added DONE+WAIT guard to validate.py -- automated check WARNs when phase:DONE + empty TODO + WAIT (non-safety-valve). CONFORMANCE #43.
+- 27.07.26 01:35 [E-793] [parent: E-792] [T-none] RUN: add -> done @29f3a9e. Project mature.
+- 27.07.26 01:40 [E-794] [parent: E-793] [T-none] RUN: hunt -> clean @29f3a9e. 6/6 clean, kitchen clear, sub-kitchens clear.
+- 27.07.26 01:41 [E-795] [parent: E-794] [T-none] RUN: add -> done @29f3a9e. Project mature, complete cycle done.
+- 27.07.26 01:45 [E-796] [parent: E-795] [T-none] RUN: P0 fix — transition_from in STATE + validate.py check against RFC §1.6 table. Files: state.schema.json, validate.py, RFC.md §1.2, CONFORMANCE row 14, tests/scenarios/invalid-phase-transition/README, init.md, STATE.md.
+- 27.07.26 01:46 [E-797] [parent: E-796] [T-none] RUN: P1 fix — README.md cold-start chain synced to BOOT (STATE->BOARD->LOG tail->human_note->next_action).
+- 27.07.26 01:47 [E-798] [parent: E-797] [T-none] RUN: P2 fix — SKILL.md frontmatter desc updated (boot BOOT.md first, not RFC.md).
