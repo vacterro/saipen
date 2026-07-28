@@ -1,7 +1,7 @@
 ---
 phase: DONE
 task: none
-next_action: "WAIT: user brake -- v7.96.0 shipped; T-251 (29 locale guides) remains subSaipen work. Resume with bare `saipen` or `saipen goal <text>`"
+next_action: "WAIT: user brake -- v7.97.0 shipped. Open question for the owner: re-add `push:` to validate.yml (real gate, one notification per push) or keep PR-only. T-251 remains subSaipen work"
 blocker: none
 transition_from: SHIP
 saipen_version: 7
@@ -14,7 +14,7 @@ requires:
   - python
 mode: full
 goal_mode: true
-goal_waves: 1
-goal_tickets: 4
-updated: 2026-07-28T06:41:26Z
+goal_waves: 2
+goal_tickets: 8
+updated: 2026-07-28T06:46:51Z
 ---

@@ -4,6 +4,10 @@
 ## TODO
 
 ## DONE
+- [x] T-256 [P0] CONFORMANCE 65 claimed `validate.yml` runs both portable scripts -- written in v7.96.0 without opening the workflow. Corrected to what actually runs them. | verify: row matches the workflow (2026-07-28)
+- [x] T-257 [P0] `validate.ps1` was executed by nothing -- not CI, not the hook. Added as a pwsh step; this was the root cause of the v7.96.0 `needs:` defect. | verify: workflow has 4 steps, ps1 PASSes locally (2026-07-28)
+- [x] T-258 [P1] `validate.yml` header claimed to enforce what its trigger cannot: PR-only on a repo with zero PRs ever, so today's five releases ran no CI. Header now states the real trigger and names the pre-commit hook as the real gate; `push:` left to the owner. | verify: header matches `gh run list` reality (2026-07-28)
+- [x] T-259 [P2] Ship v7.97.0. | verify: validate.py + validate.sh + validate.ps1 + run_scenarios.py all PASS (2026-07-28)
 - [x] T-252 [P0] Portable floor now probes all nine RFC § 1.2 fields (transition_from with the fresh-INIT exception). It required seven, so a Python-less host PASSed states the canonical validator FAILs. | verify: both scripts PASS this repo, desync fixtures red (2026-07-28)
 - [x] T-253 [P0] Portable read-only ban brought to § 1.3: INIT/PLAN/ADD/BUILD/SHIP/CLEAN/TRANSLATE. | verify: both scripts PASS, ban-truncation fixtures red (2026-07-28)
 - [x] T-254 [P0] Drift detector covers the portable floor -- fifth surface in four releases. First draft could never go red (searched for INIT anywhere, phase enum lists it); tightened to parse each script's own ban message. | verify: 4 desync fixtures red, restore green (2026-07-28)

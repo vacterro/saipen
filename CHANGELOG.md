@@ -2,6 +2,22 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.97.0 -- 2026-07-28 -- the CI that has not run all day, and a claim I made about it without looking
+
+This one started by checking a sentence I wrote myself hours earlier. v7.96.0 shipped CONFORMANCE row 65 asserting that `validate.yml` runs both halves of the portable floor. I had not opened the workflow. It runs `validate.sh` and has never run `validate.ps1` -- which is precisely why that script's `needs:` regex drifted apart from its sibling and FAILed conformant boards until yesterday. The root cause of the v7.96.0 defect was still sitting there, under a row claiming it was covered.
+
+**Then the worse half.** `gh run list` shows no runs at all for 2026-07-28. `c022677` removed the `push` trigger on purpose -- "no notification spam" -- leaving `pull_request` and `workflow_dispatch`. This repo has never opened a pull request; zero merge commits in its entire history. So the workflow hangs on an event that does not occur here, and the five releases shipped today (v7.92.0 through v7.96.0) went out without a single CI run. Its header meanwhile read: *"nothing actually enforced conformance on a push or a PR. This does."*
+
+What actually gated those five releases is the pre-commit hook, installed on this machine on 2026-07-27, which runs `tools/validate.py` before every commit. That is a real gate and it did its job -- it is simply not the one the documentation credits, and it is opt-in, per-machine, and bypassable with `--no-verify`.
+
+Fixed: `validate.ps1` added to the workflow as a `pwsh` step (it ships on `ubuntu-latest`, so this is a step and not a job); the header now states the real trigger and names the pre-commit hook as the real gate; row 65 corrected to say the scripts were verified by hand.
+
+**Not fixed, deliberately.** Re-adding `push:` would turn this into a gate that actually fires, at the cost of a notification per push. Removing it was a considered decision by the repo owner, so reversing it is theirs to make, not something to flip back quietly while they are not looking. The workflow now says exactly that, so the next reader sees the trade rather than inheriting a false sense of coverage.
+
+Also verified this pass, and clean: `tools/run_scenarios.py` -- 9 executable fixtures all matching their declared outcome, 33 behavioral skipped by design, including the two scenario directories added in v7.93.0.
+
+CONFORMANCE 66 added.
+
 ## 7.96.0 -- 2026-07-28 -- the fallback validator was more permissive than the thing it stands in for
 
 HUNT over `tests/validate.sh` and `tests/validate.ps1` -- the frozen portable floor a host without Python runs *instead of* `tools/validate.py`. Nothing had opened either file all session. Three defects, and the worst kind: a checker that says PASS when the real answer is FAIL.

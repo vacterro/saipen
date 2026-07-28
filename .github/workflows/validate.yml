@@ -1,10 +1,21 @@
 name: validate
 
-# The repo ships a validator and then relies on people remembering to run it.
-# The pre-commit hook (tools/install_hook.py) is opt-in, installed per-machine,
-# and bypassable with --no-verify -- so nothing actually enforced conformance
-# on a push or a PR. This does. Version-badge drift alone has shipped three
-# separate times in this repo's history.
+# Runs the full conformance suite: canonical validator, both halves of the
+# frozen portable floor, and the scenario fixtures.
+#
+# READ THE TRIGGER BEFORE TRUSTING THIS FILE. It fires on `pull_request` and
+# `workflow_dispatch` only -- c022677 removed the `push` trigger deliberately
+# (notification spam). This repo has never opened a pull request, so in
+# practice this workflow does not run on the way anything actually ships here,
+# which is a direct push to main. Five releases went out on 2026-07-28 with
+# zero runs of it.
+#
+# So the real gate on this repo is the pre-commit hook (tools/install_hook.py),
+# which runs tools/validate.py before every commit. That hook is opt-in,
+# per-machine, and bypassable with --no-verify -- know that, rather than
+# assuming this file is covering you. Re-adding `push:` would make it a real
+# gate at the cost of a notification per push; that is a preference, so it is
+# left to the repo owner rather than flipped back silently.
 
 on:
   pull_request:
@@ -31,6 +42,16 @@ jobs:
       # degrades those hosts while CI stays green on the canonical path alone.
       - name: Frozen portable floor (tests/validate.sh)
         run: bash tests/validate.sh
+
+      # The PowerShell half of that floor was executed by NOTHING until
+      # v7.97.0 -- not this workflow, not the pre-commit hook (which falls
+      # back to validate.sh only). That is exactly how it drifted apart from
+      # its sibling: it matched `needs: (.*)` to end of line where the shell
+      # script used `[^|]*`, so it FAILed a conformant board, and no run ever
+      # noticed. pwsh ships on ubuntu-latest, so this costs a step, not a job.
+      - name: Frozen portable floor (tests/validate.ps1)
+        shell: pwsh
+        run: ./tests/validate.ps1
 
       # The 34 fixtures in tests/scenarios/ sat unexecuted by anything until
       # v7.79.0 -- and could not have passed if run, since most shipped only
