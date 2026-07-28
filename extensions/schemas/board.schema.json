@@ -7,7 +7,12 @@
     "properties": {
       "status": {
         "type": "string",
-        "enum": ["TODO", "DOING", "DONE", "BLOCKED"],
+        "enum": [
+          "TODO",
+          "DOING",
+          "DONE",
+          "BLOCKED"
+        ],
         "description": "BLOCKED = ticket-level block (RFC § 1.2/VERIFY debug cap), distinct from session-level STATE.phase: BLOCKED"
       },
       "id": {
@@ -25,7 +30,9 @@
       },
       "needs": {
         "type": "array",
-        "items": { "type": "string" }
+        "items": {
+          "type": "string"
+        }
       },
       "owner": {
         "type": "string",
@@ -34,8 +41,16 @@
       "claim_time": {
         "type": "string",
         "format": "date-time"
+      },
+      "review_passes": {
+        "type": "integer",
+        "description": "RFC 1.2 recognized optional ticket field; phases/review.md uses it to enforce its two-pass cap mechanically rather than from memory. Absent from this schema until v7.100.0."
       }
     },
-    "required": ["status", "id", "description"]
+    "required": [
+      "status",
+      "id",
+      "description"
+    ]
   }
 }

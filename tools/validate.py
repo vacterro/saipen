@@ -1445,6 +1445,37 @@ else:
                  f"{', '.join(stale_guides[:6])}"
                  f"{' ...' if len(stale_guides) > 6 else ''}")
 
+    # 9b. board.schema.json / log.schema.json are described as "descriptive
+    #     reference, unread by any agent" -- which is exactly why nothing ever
+    #     compared them to the RFC. Both had drifted: log's schema left
+    #     `event_id` out of `required` though RFC § 1.2 calls [E-###] a MUST on
+    #     every line, and capped `content` at 120 characters, which declared 54
+    #     of this repo's own 72 live LOG lines invalid. A schema nobody reads
+    #     is not harmless; it is a lie waiting for the first tool built on it.
+    _schema_dir = rfc_path.parent.parent / "extensions" / "schemas"
+    _log_schema = _schema_dir / "log.schema.json"
+    if _log_schema.is_file():
+        _ls = json.loads(_log_schema.read_text(encoding="utf-8"))["items"]
+        if "event_id" not in _ls.get("required", []):
+            fail("cross-doc drift [schemas] -- log.schema.json does not require "
+                 "`event_id`, but RFC § 1.2 makes [E-###] a MUST on every line")
+            drift_ok = False
+        _cap = _ls.get("properties", {}).get("content", {}).get("maxLength")
+        if _cap is not None:
+            fail(f"cross-doc drift [schemas] -- log.schema.json caps `content` "
+                 f"at {_cap} characters; RFC § 1.2 sets no length limit and "
+                 f"STYLE.md's commentary voice routinely exceeds it")
+            drift_ok = False
+    _board_schema = _schema_dir / "board.schema.json"
+    if _board_schema.is_file():
+        _bs = json.loads(_board_schema.read_text(encoding="utf-8"))["items"]
+        _missing = sorted(KNOWN_FIELDS - set(_bs.get("properties", {})))
+        if _missing:
+            fail(f"cross-doc drift [schemas] -- board.schema.json does not "
+                 f"describe {_missing}, which RFC § 1.2 recognises as ticket "
+                 f"fields and this validator already parses")
+            drift_ok = False
+
     # 10. The portable floor (tests/validate.sh, tests/validate.ps1) is what a
     #     host without Python runs INSTEAD of this file. It is frozen against
     #     new checks -- never against corrections -- so its data must still
