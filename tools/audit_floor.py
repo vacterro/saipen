@@ -16,10 +16,11 @@ Stdlib only, same rule as the validator. Run from the SAIPEN home:
 
     python tools/audit_floor.py
 
-The PowerShell half is deliberately out of scope here. CI executes
-tests/validate.ps1 against this repo every run, which proves it runs clean on
-a conformant project; it does not prove its individual checks still fire. That
-gap is stated rather than papered over.
+Both halves of the floor are audited. Running validate.ps1 against a conformant
+repo only proves it runs; it says nothing about whether its individual checks
+still fire, and the two halves have diverged before -- ps1 matched `needs: (.*)`
+to end of line where the shell script used `[^|]*`, so it FAILed a perfectly
+legal board and no run ever noticed.
 """
 
 import io
@@ -33,6 +34,7 @@ from pathlib import Path
 
 HOME = Path(__file__).resolve().parent.parent
 FLOOR = HOME / "tests" / "validate.sh"
+FLOOR_PS1 = HOME / "tests" / "validate.ps1"
 
 GOOD_STATE = """---
 phase: PLAN
@@ -65,6 +67,15 @@ def find_bash():
     if found and "System32" not in found:
         return found
     return found
+
+
+def find_pwsh():
+    """pwsh on CI (ubuntu-latest ships it), powershell.exe on Windows."""
+    for name in ("pwsh", "powershell"):
+        found = shutil.which(name)
+        if found:
+            return found
+    return None
 
 
 # (label, mutate(state, board, log) -> (state, board, log), expected substring)
@@ -127,16 +138,8 @@ CASES = [
 ]
 
 
-def main():
-    if not FLOOR.is_file():
-        print(f"FAIL: {FLOOR.as_posix()} not found")
-        return 1
-    bash = find_bash()
-    if not bash:
-        print("SKIP: no usable bash on this host -- the portable floor cannot "
-              "be audited here (this is not a pass)")
-        return 0
-
+def audit(runner, script, half):
+    """Run every case against one half of the floor. Returns a failure list."""
     failures = []
     for label, mutate, expect in CASES:
         work = Path(tempfile.mkdtemp(prefix="saipen-floor-"))
@@ -149,27 +152,60 @@ def main():
                     with io.open(work / ".saipen" / name, "w",
                                  encoding="utf-8", newline="\n") as fh:
                         fh.write(content)
-            r = subprocess.run([bash, FLOOR.as_posix()], cwd=str(work),
+            r = subprocess.run([*runner, script], cwd=str(work),
                                capture_output=True, text=True)
-            blob = r.stdout + r.stderr
+            blob = (r.stdout or "") + (r.stderr or "")
             if expect not in blob:
                 first = next((ln for ln in blob.splitlines() if "FAIL" in ln),
                              "<no FAIL line at all>")
-                failures.append(f"{label}: expected {expect!r}, got {first[:100]!r}")
+                failures.append(f"[{half}] {label}: expected {expect!r}, "
+                                f"got {first[:90]!r}")
             elif r.returncode == 0:
-                failures.append(f"{label}: named the failure but exited 0")
+                failures.append(f"[{half}] {label}: named the failure but exited 0")
             else:
-                print(f"PASS: {label} -- floor reports {expect!r}")
+                print(f"PASS: [{half}] {label} -- floor reports {expect!r}")
         finally:
             shutil.rmtree(work, ignore_errors=True)
+    return failures
 
-    print(f"\n{len(CASES)} portable-floor checks exercised")
+
+def main():
+    failures, audited = [], []
+
+    if not FLOOR.is_file():
+        print(f"FAIL: {FLOOR.as_posix()} not found")
+        return 1
+    bash = find_bash()
+    if bash:
+        failures += audit([bash], FLOOR.as_posix(), "sh")
+        audited.append("sh")
+    else:
+        print("SKIP: no usable bash here -- the sh floor cannot be audited "
+              "(absence of a check is not a passing check)")
+
+    if FLOOR_PS1.is_file():
+        pwsh = find_pwsh()
+        if pwsh:
+            failures += audit([pwsh, "-NoProfile", "-ExecutionPolicy", "Bypass",
+                               "-File"], str(FLOOR_PS1), "ps1")
+            audited.append("ps1")
+        else:
+            print("SKIP: no pwsh/powershell here -- the ps1 floor cannot be "
+                  "audited (absence of a check is not a passing check)")
+
+    if not audited:
+        print("SKIP: neither half of the floor could be audited on this host")
+        return 0
+
+    print(f"\n{len(CASES)} checks x {len(audited)} half/halves audited "
+          f"({', '.join(audited)})")
     if failures:
         print(f"\nFAILED: {len(failures)} check(s) did not fire as expected")
         for f in failures:
             print(f"  - {f}")
         return 1
-    print("Every portable-floor check still goes red on its own condition.")
+    print("Every audited portable-floor check still goes red on its own "
+          "condition.")
     return 0
 
 
