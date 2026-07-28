@@ -52,9 +52,12 @@ to `.saipen/extensions/subs/<name>/`), use it. Don't claim automated enforcement
 that isn't there.
 
 **Your own `BOARD.md` uses the checkbox ticket shape, never the OUTBOX
-shape.** "Same STATE.md/BOARD.md/LOG.md shape" above means RFC § 1.2's
-`- [ ] <ID> description | field: value` line under `## DOING`/`## TODO`/
-`## DONE`/`## BLOCKED`, using your own ID prefix (§ 3) in place of `T-###`:
+shape.** "Same STATE.md/BOARD.md/LOG.md shape" above means exactly RFC
+§ 1.2's board shape -- read it there; this file states only the one
+sub-specific delta, which is that your own ID prefix (§ 3) stands in place
+of `T-###`. Everything else about the line (checkbox states, the
+`| field: value` tail, the four section headings, escaping) is Core's rule
+unchanged, and is deliberately not re-described here:
 ```markdown
 ## TODO
 - [ ] HUNT-001 short description of what to check
@@ -187,12 +190,16 @@ Whenever the main agent chooses to check (during `HUNT`, at the top of `saipen c
    worst case of one duplicate ticket on retry (annoying, safe, easy to
    spot and merge) rather than a silently lost finding, which is the
    failure mode the reverse order would risk.
-   `RUN:` line format: `- DATE [E-###] [parent: E-###] [T-###] [agent:
-   <subSaipen_name>] RUN: collect <name>-### -> T-###` -- naming the
-   subSaipen's own ID in the free text is the traceability link between
-   the two event graphs; RFC § 1.2's `[parent: E-###]` can't reach across
-   files into the subSaipen's own separate `LOG.md`, so this text
-   reference does the job instead, no RFC change needed.
+   That main-`LOG.md` line is an ordinary RFC § 1.2 log line -- its shape
+   is defined there and is not restated here (an earlier copy of the
+   skeleton lived in this spot and showed every optional bracket as if it
+   were mandatory). The only sub-specific parts: set `[agent: <subSaipen
+   name>]`, and write the taxonomy text as `RUN: collect <name>-### ->
+   T-###`. Naming the subSaipen's own ID in that free text IS the
+   traceability link between the two event graphs, because § 1.2's
+   `[parent: E-###]` cannot reach across files into the subSaipen's
+   separate `LOG.md` -- the text reference does that job instead, no RFC
+   change needed.
    The subSaipen's own `LOG.md` MAY also get a mirrored one-line note when
    collected (`RUN: collected by main agent -> T-###`) for a complete
    trail on both sides -- optional, since the subSaipen's ticket already
@@ -272,18 +279,23 @@ A `BLOCKED` subSaipen sitting unreviewed indefinitely is a silent rot risk -- th
 
 ## 8. File shape for a subSaipen
 
-Identical to Core's own `.saipen/` shape (RFC § 1.2) -- `phase`, `task`,
-`next_action`, `blocker`, `agent`, `saipen_version`, `schema_version`,
-`mode` (always `read-only`), `updated`, plus `transition_from` on every
-state except a fresh `INIT` (RFC § 1.2, required since v7.86.0 -- it is what
-makes transition checking possible). "Identical" is the whole rule: this list
-is a convenience copy and goes stale, as it did between v7.82.0 and v7.88.0
-when it still said "no extra required fields" while the validator had been
-requiring two more for six releases. `TEMPLATE/STATE.md` is the copy that
-cannot drift, because `saipen sub spawn` copies it verbatim and
-`tools/validate.py` checks it -- read that file, not this sentence, when the
-two disagree. If this file and RFC.md ever disagree on the shared shape,
-RFC.md wins (RFC § 1.9).
+Identical to Core's own `.saipen/` shape -- **RFC § 1.2's required set,
+whatever it currently says, plus exactly one sub-specific constraint:
+`mode` is always `read-only`** (§ 1). "Identical" is the whole rule, so the
+field list is deliberately NOT reproduced here. It used to be, as a
+convenience, and it did what every convenience copy does: between v7.82.0
+and v7.88.0 it claimed "no extra required fields" while `tools/validate.py`
+had been requiring two more for six releases, so a subSaipen built to this
+file was born non-conformant. v7.92.0 removed the copy rather than fixing
+it again, for the same reason Core collapsed its own five copies of that
+list into one.
+
+Two places carry the truth, both of which are checked and therefore cannot
+drift silently: RFC § 1.2 (normative), and `TEMPLATE/STATE.md` (executable
+-- `saipen sub spawn` copies it verbatim and `tools/validate.py` validates
+it every run). Read either. If this file ever appears to disagree with
+RFC.md on the shared shape, RFC.md wins (RFC § 1.9) and this file has a
+bug worth reporting.
 
 **Core's determinism invariants (RFC § 1.11) bind a subSaipen too** -- it is
 a SAIPEN instance, not a lesser thing. One ticket in its own `## DOING` at a

@@ -112,7 +112,7 @@
         "TRANSLATE",
         "PREPARE"
       ],
-      "description": "The phase this state transitioned FROM. REQUIRED on all checkpoints. Combined with `phase` to validate transitions against RFC § 1.6. A fresh INIT bootstrap may set transition_from: INIT (self-referential, logically 'came from nothing')."
+      "description": "The phase this state transitioned FROM. REQUIRED on every state except a fresh INIT -- part of RFC § 1.2's required set, which is the normative list; this file is its machine-readable mirror, never a second opinion about it. Deliberately NOT in `required`: that array cannot express 'except fresh INIT', and listing it there would hard-fail exactly the bootstrap state RFC § 1.2 exempts -- the same reason schema_version is kept out. The conditional is enforced in tools/validate.py instead (FAIL when phase is not INIT, WARN when it is), so absence from `required` here means 'checked elsewhere', never 'optional'. Combined with `phase` to validate transitions against RFC § 1.6. A fresh INIT bootstrap may set transition_from: INIT (self-referential, logically 'came from nothing')."
     }
   },
   "required": [

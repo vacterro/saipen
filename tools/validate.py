@@ -13,9 +13,13 @@ E-### monotonicity/uniqueness, parent-reference resolution, ticket-line
 grammar, unknown BOARD fields, UTC enforcement on `updated`.
 
 STATE.md's shape is validated against extensions/schemas/state.schema.json
-directly (required/enum/type subset of JSON Schema, interpreted natively) --
-the schema file is the single source of truth for STATE's field list, not
-a copy of it.
+directly (required/enum/type subset of JSON Schema, interpreted natively).
+The schema is the machine-readable mirror of the field list, never a second
+opinion about it: RFC § 1.2's required set is normative, and the schema's
+`required` array is deliberately narrower because it cannot express the two
+conditional members (`transition_from` except on fresh INIT; the goal
+counters only under `goal_mode: true`). Those two are checked below in code,
+so "absent from `required`" here means "checked elsewhere", not "optional".
 
 Severity model: violations of RFC.md MUSTs fail (exit 1). Drift that lives
 in immutable history (LOG.md is append-only -- a nonstandard taxonomy or
@@ -189,13 +193,15 @@ if state.get("phase") == "DONE" and state.get("task") not in ("none", "", None):
 # for safety valve (§ 2.4) or explicit human brake. The board-empty drift
 # check below (RFC § 2.1) handles the ZERO-PROMPT case; this catches the
 # simpler "DONE with a concrete WAIT that isn't a valve" mistake directly.
-if state.get("phase") == "DONE" and isinstance(state.get("next_action"), str) \
-        and state.get("next_action", "").startswith("WAIT:") \
-        and "safety valve" not in state.get("next_action", "").lower():
+_na_done = state.get("next_action", "") if isinstance(
+    state.get("next_action"), str) else ""
+if state.get("phase") == "DONE" and _na_done.startswith("WAIT:") \
+        and "safety valve" not in _na_done.lower() \
+        and not _na_done.lower().startswith("wait: user brake"):
     warn("done-wait", f"STATE.md phase: DONE but next_action is WAIT -- "
-         f"DONE with WAIT is legal only for safety-valve pause; "
-         f"otherwise DONE should transition to SCOUT/PLAN/HUNT "
-         f"per RFC § 1.6 / § 2.1")
+         f"DONE with WAIT is legal only for the § 2.4 safety valve or "
+         f"'WAIT: user brake -- <reason>' (RFC § 1.2); otherwise DONE "
+         f"should transition to SCOUT/PLAN/HUNT per RFC § 1.6 / § 2.1")
 
 # Hard invariant: goal_mode: false -> goal_waves/goal_tickets MUST be absent.
 if state.get("goal_mode") is False:
@@ -241,9 +247,14 @@ VALID_TRANSITIONS = {
     "PREPARE": ["DONE", "BLOCKED"],
     "BLOCKED": ["PLAN", "SCOUT", "DONE"],
 }
-# These five phases are entered by explicit user command from ANY phase
-# (RFC § 1.10) -- the transition table's FROM row doesn't restrict them.
-ANY_FROM = {"VALIDATE", "MARKHUNT", "CLEAN", "TRANSLATE", "PREPARE", "SHIP"}
+# These seven phases are entered by explicit user command from ANY phase
+# (RFC § 1.6/§ 1.10) -- the transition table's FROM row doesn't restrict them.
+# PLAN joined in v7.92.0: § 2.4's goal-mode Entry mandates a PLAN for the new
+# objective from wherever the pivot happens, so `saipen goal` out of REVIEW
+# (whose row allows only SHIP/BUILD/SCOUT/BLOCKED) was an invalid state
+# produced by following the protocol exactly. Caught on a live pivot.
+ANY_FROM = {"VALIDATE", "MARKHUNT", "CLEAN", "TRANSLATE", "PREPARE", "SHIP",
+            "PLAN"}
 
 t_from = state.get("transition_from")
 t_current = state.get("phase")
@@ -328,6 +339,11 @@ if phase in ("SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP") \
 if mode == "read-only" and phase in ("BUILD", "SHIP", "CLEAN", "TRANSLATE"):
     fail(f"mode: read-only MUST NOT enter {phase} (RFC § 1.3)")
 
+# RFC § 2.4 safety-valve ceilings. Named rather than inlined so the trip check
+# below and any future reader see the same two numbers the RFC states.
+GOAL_WAVE_CAP = 3
+GOAL_TICKET_CAP = 20
+
 # RFC § 2.4: goal_mode: true requires both persisted counters.
 if state.get("goal_mode") is True:
     missing_counters = [c for c in ("goal_waves", "goal_tickets")
@@ -337,6 +353,33 @@ if state.get("goal_mode") is True:
              f"can't survive a restart without it (RFC § 2.4)")
     if not missing_counters:
         ok("goal_mode counters present")
+
+        # RFC § 2.4: goal_mode: true with a counter at or over its cap IS the
+        # tripped-valve state -- there is no separate flag. A resuming agent
+        # MUST re-state the stop rather than continue, so the tripped state has
+        # to be visible in STATE.md itself, not just in whatever the last agent
+        # happened to remember. Shipped as prose in v7.86.0 with nothing
+        # checking it, which is precisely the "restart walks past the valve"
+        # failure the persisted counters exist to prevent (v7.92.0).
+        waves, ticks = state.get("goal_waves"), state.get("goal_tickets")
+        if waves >= GOAL_WAVE_CAP or ticks >= GOAL_TICKET_CAP:
+            na = state.get("next_action", "") or ""
+            if not na.startswith("WAIT:") or "safety valve" not in na.lower():
+                fail(f"goal_mode: true with goal_waves={waves}/"
+                     f"goal_tickets={ticks} is the tripped safety valve "
+                     f"(caps {GOAL_WAVE_CAP}/{GOAL_TICKET_CAP}), but "
+                     f"next_action={na!r} -- RFC § 2.4 requires "
+                     f"next_action: WAIT: safety valve reached (N waves / "
+                     f"M tickets) -- run 'saipen goal' to continue")
+            # phase: BLOCKED here would satisfy § 2.4's Exit list and flip
+            # goal_mode to false, making the bare `saipen goal` that the WAIT
+            # line tells the user to run illegal under § 1.10 -- the valve
+            # destroying its own continuation path.
+            if state.get("phase") == "BLOCKED":
+                fail("tripped safety valve MUST NOT set phase: BLOCKED -- "
+                     "that is a § 2.4 Exit condition, so it clears goal_mode "
+                     "and makes bare `saipen goal` (the documented way to "
+                     "continue) illegal under § 1.10. Leave phase as-is")
 
 # ------------------------------------------------------------------ SUBSAIPEN
 
@@ -516,16 +559,27 @@ if state.get("phase") == "DONE" and state.get("goal_mode") is not True:
         re.DOTALL))
     next_action = state.get("next_action", "")
     if open_todos == 0 and not markhunt_blocked and next_action.startswith("WAIT:"):
-        # Safety valve (§ 2.4) is the one legal WAIT from DONE.
-        if "safety valve" not in next_action.lower():
-            warn("done-wait-drift",
-                 f"phase: DONE, empty ## TODO, no [MARKHUNT] blockers, "
+        # RFC § 1.2 allows exactly two WAITs in this exact state, both in a
+        # fixed wording so they are machine-separable from drift: the § 2.4
+        # safety valve, and the user's own explicit brake. Free-prose "waiting
+        # for something" is indistinguishable from a previous agent asking the
+        # user what to do next -- which § 2.1 forbids outright -- so it is
+        # treated as drift. WARN until v7.92.0; promoted to FAIL once § 1.11
+        # gained the UNBLOCK exception that tells an agent what to do instead
+        # (auto-transition DONE -> HUNT), because a warning still leaves a weak
+        # model sitting on a deadlocked board waiting for a human who was never
+        # asked a real question.
+        low = next_action.lower()
+        if "safety valve" not in low and not low.startswith("wait: user brake"):
+            fail(f"phase: DONE, empty ## TODO, no [MARKHUNT] blockers, "
                  f"but next_action={next_action!r} -- RFC § 2.1 says bare "
-                 f"command + empty board MUST auto-transition HUNT->ADD, "
-                 f"never WAIT at DONE")
+                 f"command + empty board MUST auto-transition HUNT->ADD. "
+                 f"The only legal WAITs here are the § 2.4 safety valve and "
+                 f"'WAIT: user brake -- <reason>' (RFC § 1.2); anything else "
+                 f"deadlocks the board (§ 1.11 UNBLOCK exception)")
 
 # RFC § 1.2 board soft cap. BOARD.md is read on every cold start (§ 1.1,
-# BOOT.md step 2), so its size is a real per-session cost -- same reasoning
+# BOOT.md's fast path), so its size is a real per-session cost -- same reasoning
 # as the LOG cap below, minus the sealing machinery (the board is prunable,
 # not append-only; phases/clean.md's scrub is the mechanism). WARN only:
 # an oversized board is hygiene debt, never corruption.
