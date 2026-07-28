@@ -9,6 +9,33 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+      # A tag whose VERSION file disagrees with it must not become a release.
+      # v7.99.0 was published from a commit that still said 7.98.0, carrying
+      # v7.98.0's notes and a VERSION asset reading 7.98.0 -- the tag had been
+      # pushed from a shell line that ran `git tag` even though the commit
+      # before it had failed. The workflow published it without hesitating,
+      # because nothing compared the two. Now it does, and refuses.
+      - name: Tag must match VERSION
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          file="$(tr -d '[:space:]' < VERSION)"
+          if [ "$tag" != "$file" ]; then
+            echo "::error::tag $GITHUB_REF_NAME points at a commit whose VERSION is $file"
+            exit 1
+          fi
+          echo "tag $GITHUB_REF_NAME matches VERSION $file"
+
+      # The changelog entry must actually be this version's. Same incident:
+      # awk happily took the top block, which belonged to the previous release.
+      - name: Changelog head must be this version
+        run: |
+          head_ver="$(grep -m1 '^## ' CHANGELOG.md | sed 's/^## \([0-9.]*\).*/\1/')"
+          if [ "$head_ver" != "${GITHUB_REF_NAME#v}" ]; then
+            echo "::error::CHANGELOG.md top entry is $head_ver, tag is $GITHUB_REF_NAME"
+            exit 1
+          fi
+          echo "changelog head $head_ver matches tag"
+
       - name: Extract changelog entry
         run: |
           awk '/^## / { if (found) exit; found=1; next } /^## / && found { exit } { if (found) print }' CHANGELOG.md > _relnotes.md
