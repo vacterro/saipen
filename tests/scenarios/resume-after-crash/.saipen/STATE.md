@@ -1,7 +1,7 @@
 ---
 phase: BUILD
 task: T-010
-next_action: implement feature
+next_action: "PHASE BUILD T-010"
 blocker: none
 transition_from: SCOUT
 saipen_version: 7

@@ -34,6 +34,19 @@ SCENARIOS = HOME / "tests" / "scenarios"
 
 EXPECT_RE = re.compile(r"^expect:\s*(pass|fail)\s*$", re.MULTILINE)
 
+# A fixture that declares `expect: fail` and then fails for some OTHER reason
+# asserts nothing at all, and says PASS while doing it. Three did exactly that:
+# dependency-cycle, dangling-needs-reference and read-only-restriction each
+# carried a control character where `saipen_version: 7` belonged, so every run
+# died on unparseable frontmatter long before reaching the cycle, the dangling
+# reference or the mode ban they exist to prove. The suite was green throughout.
+#
+# So a fail-fixture MAY pin the reason with a second line:
+#     expect_fail_contains: <substring of the FAIL message>
+# Unpinned fail-fixtures still run, but WARN -- they are asserting only that
+# something, somewhere, went wrong.
+REASON_RE = re.compile(r"^expect_fail_contains:\s*(.+?)\s*$", re.MULTILINE)
+
 if not SCENARIOS.is_dir():
     print(f"FAIL: no {SCENARIOS} -- run this from the SAIPEN home")
     sys.exit(1)
@@ -46,8 +59,11 @@ for d in sorted(p for p in SCENARIOS.iterdir() if p.is_dir()):
     has_state = (d / ".saipen").is_dir()
     declared = None
     if readme.is_file():
-        m = EXPECT_RE.search(readme.read_text(encoding="utf-8-sig"))
+        _rtext = readme.read_text(encoding="utf-8-sig")
+        m = EXPECT_RE.search(_rtext)
         declared = m.group(1) if m else None
+        _rm = REASON_RE.search(_rtext)
+        reason = _rm.group(1) if _rm else None
 
     if not has_state:
         # Behavioral fixture. It must NOT declare an expectation -- there is
@@ -76,7 +92,21 @@ for d in sorted(p for p in SCENARIOS.iterdir() if p.is_dir()):
                 break
         failures.append(f"{d.name}: declared '{declared}', got '{actual}' "
                         f"(validator exit {r.returncode}){detail}")
+    elif declared == "fail" and reason:
+        blob = r.stdout + r.stderr
+        if reason not in blob:
+            first = next((ln for ln in blob.splitlines()
+                          if ln.startswith("FAIL")), "<no FAIL line>")
+            failures.append(f"{d.name}: failed as declared, but for the wrong "
+                            f"reason -- expected {reason!r}, first FAIL was "
+                            f"{first[:110]!r}")
+        else:
+            print(f"PASS: {d.name} -- failed on {reason!r}, as declared")
     else:
+        if declared == "fail":
+            print(f"WARN: {d.name} -- fails as declared, but pins no reason; "
+                  f"add `expect_fail_contains:` so it cannot pass by failing "
+                  f"at something unrelated")
         print(f"PASS: {d.name} -- expected {declared}, got {actual}")
 
 print(f"\n{checked} executable fixture(s) checked, "

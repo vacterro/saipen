@@ -1,7 +1,7 @@
 ---
 phase: VERIFY
 task: T-001
-next_action: check verify
+next_action: "PHASE VERIFY T-001"
 blocker: none
 transition_from: BUILD
 saipen_version: 7

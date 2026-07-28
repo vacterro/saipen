@@ -1,7 +1,7 @@
 ---
 phase: PLAN
 task: none
-next_action: plan
+next_action: "saipen plan"
 blocker: none
 transition_from: INIT
 saipen_version: 7

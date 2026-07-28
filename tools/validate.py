@@ -314,10 +314,18 @@ if isinstance(next_action, str):
     if vague_next_action.search(next_action):
         fail(f"STATE.md next_action is vague, not executable: {next_action!r} "
              f"(RFC § 1.2)")
+    # FAIL, not WARN. RFC § 1.2 says next_action MUST begin with one of these
+    # five, and the identical check on a subSaipen's STATE (below) has always
+    # FAILed -- so the protocol was stricter about a read-only worker's state
+    # than about the one a cold agent actually boots from. The vague-phrase
+    # regex above is a blacklist and evadable by construction: `fix the thing`,
+    # `ship it` and `look at the board` all passed clean at exit 0 until
+    # v7.100.0, each of them a state TEST-001 cannot execute. The prefix rule
+    # is the whitelist; it has to carry the weight.
     if not next_action.startswith(executable_prefixes):
-        warn("next-action-shape",
-             f"STATE.md next_action does not start with WAIT:/saipen /PHASE "
-             f"/RUN:/RESUME:: {next_action!r} (RFC § 1.2)")
+        fail(f"STATE.md next_action does not start with WAIT:/saipen /PHASE "
+             f"/RUN:/RESUME:: {next_action!r} -- not executable, so a cold "
+             f"agent cannot boot from it (RFC § 1.2, CONFORMANCE TEST-001)")
     # RFC § 1.2 (v7.93.0): WAIT carries a category token from a closed set of
     # seven. The stopping agent is the twin of § 1.11's guessing agent -- a
     # vague "WAIT: need more context" is shape-identical to a real gate, passes
