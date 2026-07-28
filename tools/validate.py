@@ -743,10 +743,14 @@ if log_files:
         r"(?: \[agent: [^\]]+\])?"
         r" ([A-Z]+): (.*)$")
     seen_ids = {}
+    sealed_dateless = []
     prev_id = 0
     log_ok = True
     timestamp_events = []
     for lf in log_files:
+        # Sealed segments are immutable (append-only, RFC § 1.2); the active
+        # log is still the writer's to get right. Severity below splits on it.
+        is_active_log = (lf == active_log)
         for line_no, line in enumerate(lf.read_text(encoding="utf-8-sig").splitlines(), 1):
             if not line.strip() or line.startswith("#"):
                 continue
@@ -764,6 +768,20 @@ if log_files:
             eid, parent, ticket, taxonomy, content = m.groups()
             eid = int(eid)
             ts = re.match(r"^- (\d{2})\.(\d{2})\.(\d{2}) (\d{2}):(\d{2}) ", line)
+            # RFC § 1.2 makes DATE mandatory, but LOG_RE has always accepted a
+            # dateless line and 125 of them sit in the sealed LOG-001, where
+            # append-only forbids a rewrite. So: FAIL in the active log, where
+            # the line is still the writer's to get right, and WARN in sealed
+            # history, which is immutable by design. Same severity split this
+            # file already applies to nonstandard taxonomies.
+            if ts is None:
+                if is_active_log:
+                    fail(f"{loc} has no DATE -- RFC § 1.2 makes it mandatory, "
+                         f"and without it this line contributes nothing to the "
+                         f"timestamp checks below")
+                    log_ok = False
+                else:
+                    sealed_dateless.append(loc)
             if ts:
                 try:
                     timestamp_events.append((
@@ -829,6 +847,26 @@ if log_files:
         "observed historical timestamp inversions" in
         p.read_text(encoding="utf-8-sig", errors="replace")
         for p in log_files)
+    # A zero harvest means both timestamp checks below iterate over nothing and
+    # pass in silence -- the exact shape of the check that lay dead from
+    # feae149 until v7.99.0. If there are entries but no parsed timestamps at
+    # all, the parser and the log have diverged and the checks are decoration.
+    # One finding for the whole sealed population, not one per line: warn()'s
+    # own rule is that a pattern repeated hundreds of times in immutable
+    # history is a single finding, and 125 lines of it every run is how people
+    # learn to scroll past warnings.
+    if sealed_dateless:
+        warn("log-missing-date",
+             f"{len(sealed_dateless)} sealed LOG entr(y/ies) predate the "
+             f"mandatory DATE (earliest {sealed_dateless[0]}). Immutable by "
+             f"append-only; new entries are FAILed instead")
+
+    if seen_ids and not timestamp_events:
+        fail("LOG has entries but not one parseable timestamp -- the "
+             "inversion and future-timestamp checks below would both pass by "
+             "iterating over nothing")
+        log_ok = False
+
     for prev, current in zip(timestamp_events, timestamp_events[1:]):
         prev_dt, prev_eid, _ = prev
         cur_dt, cur_eid, cur_loc = current
