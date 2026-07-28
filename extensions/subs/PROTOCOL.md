@@ -78,7 +78,7 @@ File: `<name>/kitchen/OUTBOX.md`. The only channel back to the main agent.
 # OUTBOX
 
 ## WIKI-001: short description
-- **status:** ready | draft | blocked | reviewed
+- **status:** ready | draft | blocked | reviewed | stale
 - **summary:** one line, what was found or produced
 - **main_project_refs:** [src/foo.py, ...]
 - **critical:** true | false
@@ -93,6 +93,7 @@ File: `<name>/kitchen/OUTBOX.md`. The only channel back to the main agent.
 | `draft` | Still in progress, main agent ignores |
 | `blocked` | Waiting on something external, reason in `details` -- **and this is also how a subSaipen says "I do not have enough information", which is the one case it will otherwise get wrong** (see below) |
 | `reviewed` | Collected already (§ 4) -- kept as history, not deleted; safe to leave, gets swept whenever `saipen sub clean` or a `HUNT` pass (`phases/hunt.md`) touches this subSaipen's `kitchen/` like any other stale content |
+| `stale` | The finding no longer matches HEAD -- a renamed file, a bug already fixed by another route (§ 4). Collect skips it rather than ticketing a ghost. This row was missing from this table until v7.100.0 while § 4 and § 9 both instructed agents to write it, and both `outbox.schema.json` and `tools/validate.py` already accepted it |
 
 `critical: true` = bug, broken behavior, data loss, security issue.
 `critical: false` = improvement, docs, refactor, cosmetic.

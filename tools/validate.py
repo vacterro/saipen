@@ -45,6 +45,11 @@ STRICT = "--strict" in sys.argv[1:]
 USE_COLOR = sys.stdout.isatty()
 
 CURRENT_SCHEMA_VERSION = 1
+
+# extensions/subs/PROTOCOL.md § 2 status table -- the normative list for
+# the extension (RFC § 1.9). Named rather than inlined so the cross-doc
+# check can compare it against the table and the schema enum.
+OUTBOX_STATUSES = ("ready", "draft", "blocked", "reviewed", "stale")
 failures = []
 warnings = {}
 
@@ -893,7 +898,7 @@ for ob in sorted(Path(".").glob(".saipen/extensions/subs/*/kitchen/OUTBOX.md")):
                  f"whether this is collectable (PROTOCOL.md § 2)")
             outbox_ok = False
             continue
-        if status not in ("ready", "draft", "blocked", "reviewed", "stale"):
+        if status not in OUTBOX_STATUSES:
             fail(f"{loc} status {status!r} is not one of "
                  f"ready/draft/blocked/reviewed/stale (PROTOCOL.md § 2)")
             outbox_ok = False
@@ -1474,6 +1479,29 @@ else:
             fail(f"cross-doc drift [schemas] -- board.schema.json does not "
                  f"describe {_missing}, which RFC § 1.2 recognises as ticket "
                  f"fields and this validator already parses")
+            drift_ok = False
+
+    # 9c. OUTBOX status vocabulary, three ways: PROTOCOL.md's own table,
+    #     outbox.schema.json's enum, and the tuple this file checks against.
+    #     All three disagreed until v7.100.0 -- the table listed four while the
+    #     document's own prose (§ 4, § 9) told agents to write a fifth, and both
+    #     implementations already accepted it. The validator even cited
+    #     "PROTOCOL.md § 2" in its error message while enforcing a superset of
+    #     what § 2 said.
+    _proto = rfc_path.parent.parent / "extensions" / "subs" / "PROTOCOL.md"
+    _outbox_schema = _schema_dir / "outbox.schema.json"
+    if _proto.is_file() and _outbox_schema.is_file():
+        _ptext = _proto.read_text(encoding="utf-8-sig")
+        _table = set(re.findall(r"^\| `([a-z]+)` \|", _ptext, re.MULTILINE))
+        _os = json.loads(_outbox_schema.read_text(encoding="utf-8"))
+        _enum = set(_os.get("items", _os).get("properties", {})
+                    .get("status", {}).get("enum", []))
+        _code = set(OUTBOX_STATUSES)
+        if not (_table == _enum == _code):
+            fail(f"cross-doc drift [outbox-status] -- PROTOCOL.md table "
+                 f"{sorted(_table)}, outbox.schema.json enum {sorted(_enum)}, "
+                 f"validate.py {sorted(_code)}. The table is normative for the "
+                 f"extension (RFC § 1.9); the other two must match it")
             drift_ok = False
 
     # 10. The portable floor (tests/validate.sh, tests/validate.ps1) is what a
