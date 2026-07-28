@@ -1292,6 +1292,50 @@ else:
                  f"{', '.join(stale_guides[:6])}"
                  f"{' ...' if len(stale_guides) > 6 else ''}")
 
+    # 10. The portable floor (tests/validate.sh, tests/validate.ps1) is what a
+    #     host without Python runs INSTEAD of this file. It is frozen against
+    #     new checks -- never against corrections -- so its data must still
+    #     match RFC. Until v7.96.0 it required 7 of § 1.2's 9 fields and knew
+    #     none of the read-only bans added in v7.93.0/v7.94.0, so it handed out
+    #     PASS on states this file FAILs. A floor more permissive than the
+    #     thing it substitutes for is worse than no floor.
+    #
+    #     Both halves below are matched precisely, not by bare word presence:
+    #     the first version of this check looked for "INIT" anywhere in the
+    #     file and could therefore never fail, because the phase enum lists it
+    #     a few lines above. A check that cannot go red is decoration.
+    floor = [rfc_path.parent.parent / "tests" / "validate.sh",
+             rfc_path.parent.parent / "tests" / "validate.ps1"]
+    for script in floor:
+        if not script.is_file():
+            fail(f"portable floor missing: {script.as_posix()} (CONFORMANCE § 1)")
+            drift_ok = False
+            continue
+        body = script.read_text(encoding="utf-8-sig")
+
+        # required fields: each must appear as an actual `field:` probe
+        missing_fields = sorted(f for f in rfc_required if (f + ":") not in body)
+        if missing_fields:
+            fail(f"cross-doc drift [portable-floor] -- {script.name} never "
+                 f"probes {missing_fields}, which RFC § 1.2 requires; a host "
+                 f"without Python would PASS a state this validator FAILs")
+            drift_ok = False
+
+        # read-only bans: parse the phases out of the script's own message
+        m = re.search(r"read-only MUST NOT enter ([A-Z/]+)", body)
+        if not m:
+            fail(f"cross-doc drift [portable-floor] -- {script.name} has no "
+                 f"recognizable read-only ban message; RFC § 1.3's ban cannot "
+                 f"be compared against it")
+            drift_ok = False
+        else:
+            floor_bans = set(m.group(1).split("/"))
+            missing_bans = sorted(set(READ_ONLY_BANNED_PHASES) - floor_bans)
+            if missing_bans:
+                fail(f"cross-doc drift [portable-floor] -- {script.name} does "
+                     f"not ban read-only from {missing_bans} (RFC § 1.3)")
+                drift_ok = False
+
     if drift_ok and not failures:
         ok("cross-doc sets agree (required fields, phase enum, from-any-phase, "
            "read-only bans, next_action prefixes, WAIT categories; no re-listing "

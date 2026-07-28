@@ -27,6 +27,14 @@ Assert-Format ($stateContent -match "blocker:") "STATE.md missing blocker"
 Assert-Format ($stateContent -match "agent:") "STATE.md missing agent"
 Assert-Format ($stateContent -match "updated:") "STATE.md missing updated"
 Assert-Format ($stateContent -match "mode:\s+(full|read-only|no-publish|manual-verify)") "STATE.md missing mode, or mode isn't one of full|read-only|no-publish|manual-verify"
+# saipen_version + transition_from complete RFC § 1.2's nine-field required
+# set. Absent here until v7.96.0, so a host without Python got a PASS on a
+# state tools/validate.py FAILs. transition_from carries the fresh-INIT
+# exception: no previous phase exists to name there.
+Assert-Format ($stateContent -match "saipen_version:\s+\d+") "STATE.md missing saipen_version (RFC § 1.2)"
+if ($stateContent -notmatch "phase:\s+INIT") {
+    Assert-Format ($stateContent -match "transition_from:") "STATE.md missing transition_from -- required on all non-INIT states (RFC § 1.2)"
+}
 Write-Host "PASS: STATE.md schema valid" -ForegroundColor Green
 
 # 1b2. mode/phase basic compatibility (RFC § 1.3) -- not the full matrix,
@@ -36,8 +44,8 @@ Write-Host "PASS: STATE.md schema valid" -ForegroundColor Green
 # the phase left a git-less project unable to close any ticket. This file is
 # frozen against NEW checks; correcting one that now contradicts the RFC is
 # a bug fix, not an extension.
-if ($stateContent -match "mode:\s+read-only" -and $stateContent -match "phase:\s+(BUILD|SHIP|CLEAN|TRANSLATE)") {
-    Assert-Format $false "mode: read-only MUST NOT enter BUILD/SHIP/CLEAN/TRANSLATE (RFC § 1.3)"
+if ($stateContent -match "mode:\s+read-only" -and $stateContent -match "phase:\s+(INIT|PLAN|ADD|BUILD|SHIP|CLEAN|TRANSLATE)") {
+    Assert-Format $false "mode: read-only MUST NOT enter INIT/PLAN/ADD/BUILD/SHIP/CLEAN/TRANSLATE (RFC § 1.3)"
 }
 
 # 1b. goal_mode: true requires the persisted safety-valve counters (RFC § 2.4)
@@ -55,7 +63,13 @@ if (-not (Test-Path ".saipen\BOARD.md")) {
 $boardLines = Get-Content ".saipen\BOARD.md"
 $deps = @{}
 foreach ($line in $boardLines) {
-    if ($line -match "- \[( |x|/)\] (T-\d+).*needs: (.*)") {
+    # `needs:` runs to the next " | " field separator, not to end of line.
+    # This read `(.*)` until v7.96.0, so a conformant `| needs: T-1 | verify: x`
+    # line parsed its needs as "T-1 | verify: x" and the dangling-reference
+    # check below FAILed a legal board. validate.sh always used [^|]* here;
+    # the two halves of the portable floor disagreed, and nobody noticed
+    # because this repo runs the Python validator.
+    if ($line -match "- \[( |x|/)\] (T-\d+).*needs: ([^|]*)") {
         $taskId = $matches[2]
         $needsRaw = $matches[3]
         $needsList = $needsRaw -split "," | ForEach-Object { $_.Trim() }

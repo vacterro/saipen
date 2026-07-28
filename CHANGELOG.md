@@ -2,6 +2,20 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.96.0 -- 2026-07-28 -- the fallback validator was more permissive than the thing it stands in for
+
+HUNT over `tests/validate.sh` and `tests/validate.ps1` -- the frozen portable floor a host without Python runs *instead of* `tools/validate.py`. Nothing had opened either file all session. Three defects, and the worst kind: a checker that says PASS when the real answer is FAIL.
+
+**It required 7 of RFC § 1.2's 9 fields.** No `saipen_version`, no `transition_from`. So a Python-less host validated a `STATE.md` the canonical validator rejects, and got a green light. It also banned `read-only` from only `BUILD`/`SHIP`/`CLEAN`/`TRANSLATE` -- `INIT` and `PLAN` (v7.93.0) and `ADD` (v7.94.0) never reached it. Both corrected, which the file's own comment already authorises in as many words: frozen against *new* checks, never against fixing one that now contradicts the RFC.
+
+**The two halves disagreed with each other.** `validate.ps1` matched `needs: (.*)` to end of line where `validate.sh` used `[^|]*`. So a perfectly conformant `| needs: T-252,T-253,T-254 | verify: ...` line parsed its dependencies as `T-254 | verify: ...`, and the PowerShell floor reported a dangling reference on a legal board. This one was found by running it -- this repo's own board tripped it on the first invocation. Nobody had, because the repo runs the Python validator.
+
+**And now something checks all of it.** The drift detector parses § 1.2's required set and § 1.3's ban list and asserts both portable scripts still probe every member. That is the fifth surface added to it in four releases -- schema and validator constants (v7.93.0), phase docs and extensions (v7.94.0), guides (v7.95.0), the portable floor (now).
+
+Worth recording how the check itself failed first: the ban half originally searched for `INIT` anywhere in the script, which can never go red, because the phase enum lists `INIT` a few lines above. It passed its own red test by accident. The fix parses the phases out of each script's own error message. **A check that cannot go red is decoration**, and the only way to find out which kind you wrote is to break the thing on purpose and watch.
+
+CONFORMANCE 64-65 added.
+
 ## 7.95.0 -- 2026-07-28 -- the same rule failed to reach a third place, so now something looks there
 
 A HUNT over the two surfaces this session had never examined -- `guides/` (33 files) and `extensions/adapters/` (9). The adapters came back clean: no copied field lists, no stale `WAIT:` forms, nothing to fix. The guides did not.

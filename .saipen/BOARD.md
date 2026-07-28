@@ -4,6 +4,10 @@
 ## TODO
 
 ## DONE
+- [x] T-252 [P0] Portable floor now probes all nine RFC § 1.2 fields (transition_from with the fresh-INIT exception). It required seven, so a Python-less host PASSed states the canonical validator FAILs. | verify: both scripts PASS this repo, desync fixtures red (2026-07-28)
+- [x] T-253 [P0] Portable read-only ban brought to § 1.3: INIT/PLAN/ADD/BUILD/SHIP/CLEAN/TRANSLATE. | verify: both scripts PASS, ban-truncation fixtures red (2026-07-28)
+- [x] T-254 [P0] Drift detector covers the portable floor -- fifth surface in four releases. First draft could never go red (searched for INIT anywhere, phase enum lists it); tightened to parse each script's own ban message. | verify: 4 desync fixtures red, restore green (2026-07-28)
+- [x] T-255 [P2] Ship v7.96.0. | verify: tools/validate.py PASS, validate.sh PASS, validate.ps1 PASS, 33 badges (2026-07-28)
 - [x] T-249 [P1] Core guides (EN/RU/EE/DED) now teach `WAIT: <category> -- <question>` with the seven categories named. | verify: four Core locales carry the category form, tools/validate.py PASS (2026-07-28)
 - [x] T-250 [P1] Drift detector walks guides/ at WARN severity -- guides mislead a human, they do not break a continuation, and a FAIL would block every release on 29 translations Core may not write. | verify: sees exactly 29 stale, four Core clean (2026-07-28)
 - [x] T-240 [P0] `saipen ship` is a command from any phase; `phase: SHIP` is enterable only from REVIEW. SHIP out of the from-any-phase transition set (RFC + validator); § 1.10 now names the exact next_action it writes. | verify: INIT->SHIP FAIL, REVIEW->SHIP PASS, `saipen ship` legal (2026-07-28)

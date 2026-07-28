@@ -24,6 +24,15 @@ grep -q "blocker:" .saipen/STATE.md || { echo -e "${RED}FAIL: STATE.md missing b
 grep -q "agent:" .saipen/STATE.md || { echo -e "${RED}FAIL: STATE.md missing agent${NC}"; exit 1; }
 grep -q "updated:" .saipen/STATE.md || { echo -e "${RED}FAIL: STATE.md missing updated${NC}"; exit 1; }
 grep -qE "mode:[[:space:]]+(full|read-only|no-publish|manual-verify)" .saipen/STATE.md || { echo -e "${RED}FAIL: STATE.md missing mode, or mode isn't one of full|read-only|no-publish|manual-verify${NC}"; exit 1; }
+# saipen_version + transition_from complete RFC § 1.2's nine-field required set.
+# They were absent here until v7.96.0, so a host without Python got a PASS on a
+# state tools/validate.py FAILs -- a floor that is more permissive than the
+# thing it stands in for is worse than no floor. transition_from carries § 1.2's
+# fresh-INIT exception: no previous phase exists to name there.
+grep -qE "saipen_version:[[:space:]]+[0-9]+" .saipen/STATE.md || { echo -e "${RED}FAIL: STATE.md missing saipen_version (RFC § 1.2)${NC}"; exit 1; }
+if ! grep -qE "phase:[[:space:]]+INIT" .saipen/STATE.md; then
+    grep -q "transition_from:" .saipen/STATE.md || { echo -e "${RED}FAIL: STATE.md missing transition_from -- required on all non-INIT states (RFC § 1.2)${NC}"; exit 1; }
+fi
 echo -e "${GREEN}PASS: STATE.md schema valid${NC}"
 
 # 1b2. mode/phase basic compatibility (RFC § 1.3) -- not the full matrix,
@@ -33,8 +42,8 @@ echo -e "${GREEN}PASS: STATE.md schema valid${NC}"
 # the phase left a git-less project unable to close any ticket. This file is
 # frozen against NEW checks; correcting one that now contradicts the RFC is
 # a bug fix, not an extension.
-if grep -qE "mode:[[:space:]]+read-only" .saipen/STATE.md && grep -qE "phase:[[:space:]]+(BUILD|SHIP|CLEAN|TRANSLATE)" .saipen/STATE.md; then
-    echo -e "${RED}FAIL: mode: read-only MUST NOT enter BUILD/SHIP/CLEAN/TRANSLATE (RFC § 1.3)${NC}"
+if grep -qE "mode:[[:space:]]+read-only" .saipen/STATE.md && grep -qE "phase:[[:space:]]+(INIT|PLAN|ADD|BUILD|SHIP|CLEAN|TRANSLATE)" .saipen/STATE.md; then
+    echo -e "${RED}FAIL: mode: read-only MUST NOT enter INIT/PLAN/ADD/BUILD/SHIP/CLEAN/TRANSLATE (RFC § 1.3)${NC}"
     exit 1
 fi
 
