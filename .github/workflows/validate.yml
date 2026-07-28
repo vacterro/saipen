@@ -75,6 +75,13 @@ jobs:
       # project that had run `saipen translate`, and every cross-document check
       # FAILed with "SAIPEN home clone incomplete". Install into a sandbox HOME
       # and run the copy, so the shipped configuration is a tested one.
+      # The floor's own checks were verified by hand when they shipped and
+      # nothing kept them verified -- the same shape as the LOG timestamp check
+      # that lay dead in validate.py for months. This breaks a scratch project
+      # one way per check and asserts the floor names that specific failure.
+      - name: Portable floor still goes red (tools/audit_floor.py)
+        run: python tools/audit_floor.py
+
       - name: Installed layout (inject into a sandbox HOME, run the copy)
         run: |
           sandbox="$(mktemp -d)"
