@@ -7,6 +7,22 @@ set -u
 SKILL_HOME="$(cd "$(dirname "$0")/../saipen" 2>/dev/null && pwd)"
 [ -f "$SKILL_HOME/RFC.md" ] || { echo "FATAL: saipen/RFC.md not found"; exit 1; }
 
+# Under git bash / MSYS / Cygwin on Windows, `pwd` yields an MSYS path such as
+# /v/proj/saipen. The agents that later READ these instructions are Windows
+# programs, and they cannot open that form -- only the shell that produced it
+# can. Writing it into CLAUDE.md hands every Windows user who ran the .sh
+# injector a config pointing at files their agent will never find, and nothing
+# reports an error: the block is present, the paths are simply dead.
+# cygpath ships with git bash, so the conversion is free where it is needed
+# and skipped entirely everywhere else.
+case "$(uname -s 2>/dev/null)" in
+  MINGW*|MSYS*|CYGWIN*)
+    if command -v cygpath >/dev/null 2>&1; then
+      SKILL_HOME="$(cygpath -w "$SKILL_HOME")"
+    fi
+    ;;
+esac
+
 backup_file() {
   [ -f "$1" ] && [ ! -f "$1.bak" ] && cp "$1" "$1.bak"
 }
