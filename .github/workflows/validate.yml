@@ -51,7 +51,7 @@ jobs:
         shell: pwsh
         run: ./tests/validate.ps1
 
-      # The 42 fixtures in tests/scenarios/ sat unexecuted by anything until
+      # The 43 fixtures in tests/scenarios/ sat unexecuted by anything until
       # v7.79.0 -- and could not have passed if run, since most shipped only
       # the one file their concept concerned. Each executable one now declares
       # `expect: pass|fail` in its README and this runner holds it to that. It
