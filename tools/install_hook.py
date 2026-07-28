@@ -16,6 +16,7 @@ the frozen shell floor for hosts without Python.
 To remove: python <saipen-home>/tools/uninstall_hook.py
 """
 
+import contextlib
 import sys
 from pathlib import Path
 
@@ -85,8 +86,8 @@ if target.exists():
         print(f"note: existing non-saipen pre-commit hook backed up to {backup}")
 
 target.write_text(hook, encoding="utf-8", newline="\n")
-try:
+# Windows: git runs hooks through sh regardless of mode bits, so a failed
+# chmod is not a failed install.
+with contextlib.suppress(OSError):
     target.chmod(0o755)
-except OSError:
-    pass  # Windows: git runs hooks through sh regardless of mode bits
 print(f"Installed: {target} (validator home: {home_sh})")

@@ -32,7 +32,7 @@ HOME = Path(__file__).resolve().parent.parent
 VALIDATOR = HOME / "tools" / "validate.py"
 SCENARIOS = HOME / "tests" / "scenarios"
 
-EXPECT_RE = re.compile(r"^expect:\s*(pass|fail)\s*$", re.M)
+EXPECT_RE = re.compile(r"^expect:\s*(pass|fail)\s*$", re.MULTILINE)
 
 if not SCENARIOS.is_dir():
     print(f"FAIL: no {SCENARIOS} -- run this from the SAIPEN home")

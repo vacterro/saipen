@@ -31,6 +31,7 @@ import datetime
 import io
 import json
 import re
+import subprocess
 import sys
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -198,10 +199,10 @@ _na_done = state.get("next_action", "") if isinstance(
 if state.get("phase") == "DONE" and _na_done.startswith("WAIT:") \
         and "safety valve" not in _na_done.lower() \
         and not _na_done.lower().startswith("wait: user brake"):
-    warn("done-wait", f"STATE.md phase: DONE but next_action is WAIT -- "
-         f"DONE with WAIT is legal only for the § 2.4 safety valve or "
-         f"'WAIT: user brake -- <reason>' (RFC § 1.2); otherwise DONE "
-         f"should transition to SCOUT/PLAN/HUNT per RFC § 1.6 / § 2.1")
+    warn("done-wait", "STATE.md phase: DONE but next_action is WAIT -- "
+         "DONE with WAIT is legal only for the § 2.4 safety valve or "
+         "'WAIT: user brake -- <reason>' (RFC § 1.2); otherwise DONE "
+         "should transition to SCOUT/PLAN/HUNT per RFC § 1.6 / § 2.1")
 
 # Hard invariant: goal_mode: false -> goal_waves/goal_tickets MUST be absent.
 if state.get("goal_mode") is False:
@@ -266,8 +267,8 @@ t_current = state.get("phase")
 # Absence tolerated only for fresh INIT bootstrap.
 if t_from is None:
     if t_current != "INIT":
-        fail(f"STATE.md missing transition_from -- required on all "
-             f"non-INIT states to validate phase transitions (RFC § 1.6)")
+        fail("STATE.md missing transition_from -- required on all "
+             "non-INIT states to validate phase transitions (RFC § 1.6)")
     else:
         warn("transition-from", "STATE.md phase: INIT but transition_from "
              "is absent -- set transition_from: INIT at next checkpoint "
@@ -307,11 +308,11 @@ if isinstance(next_action, str):
     executable_prefixes = ("WAIT:", "saipen ", "PHASE ", "RUN:", "RESUME:")
     if vague_next_action.search(next_action):
         fail(f"STATE.md next_action is vague, not executable: {next_action!r} "
-             f"(RFC В§ 1.2)")
+             f"(RFC § 1.2)")
     if not next_action.startswith(executable_prefixes):
         warn("next-action-shape",
              f"STATE.md next_action does not start with WAIT:/saipen /PHASE "
-             f"/RUN:/RESUME:: {next_action!r} (RFC В§ 1.2)")
+             f"/RUN:/RESUME:: {next_action!r} (RFC § 1.2)")
     # RFC § 1.2 (v7.93.0): WAIT carries a category token from a closed set of
     # seven. The stopping agent is the twin of § 1.11's guessing agent -- a
     # vague "WAIT: need more context" is shape-identical to a real gate, passes
@@ -330,7 +331,7 @@ if isinstance(next_action, str):
 
     if "?" in next_action and not next_action.startswith("WAIT:"):
         fail(f"STATE.md next_action asks a question outside WAIT:: "
-             f"{next_action!r} (RFC В§ 1.2)")
+             f"{next_action!r} (RFC § 1.2)")
     # The prefix check above proves the shape, not the vocabulary: "saipen
     # hunt" passes it while naming a command RFC 1.10 does not define, and a
     # cold agent is then required to decline it and stop -- TEST-001 failing
@@ -346,10 +347,10 @@ if isinstance(next_action, str):
                  "status", "stop", "sub"}
         if verb and verb not in known:
             fail(f"STATE.md next_action invokes 'saipen {verb}', which RFC "
-                 f"В§ 1.10 does not define -- a cold agent MUST decline an "
+                 f"§ 1.10 does not define -- a cold agent MUST decline an "
                  f"unrecognized command and stop, so this state fails "
                  f"TEST-001. Phases like HUNT/ADD are reached autonomously "
-                 f"(В§ 2.1), never invoked by name")
+                 f"(§ 2.1), never invoked by name")
 
 if phase in ("SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP") \
         and state.get("task") in ("none", "", None):
@@ -358,7 +359,7 @@ if phase in ("SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP") \
         warn("taskless-active-phase",
              f"STATE.md phase {phase} has task: none -- active ticket phases "
              f"SHOULD name a T-### unless next_action explains a ticket-less "
-             f"maintenance exception (RFC В§ 1.2)")
+             f"maintenance exception (RFC § 1.2)")
 # RFC § 1.3: read-only cannot write, so every phase whose work product is a
 # file write is unreachable. INIT (creates .saipen/) and PLAN (writes tickets
 # onto BOARD.md) joined in v7.93.0 -- they were always unreachable in
@@ -569,7 +570,7 @@ for heading in REQUIRED_HEADINGS:
     count = headings_seen.count(heading)
     if count > 1:
         fail(f"BOARD.md has duplicate section heading {heading} ({count} times) "
-             f"-- duplicate status buckets split the work surface (RFC В§ 1.2)")
+             f"-- duplicate status buckets split the work surface (RFC § 1.2)")
 
 if not any(f.startswith("BOARD.md") and "duplicate" in f for f in failures):
     ok("BOARD.md no duplicate tickets")
@@ -636,8 +637,8 @@ if state.get("phase") == "DONE" and state.get("goal_mode") is not True:
 # an oversized board is hygiene debt, never corruption.
 board_kb = board_path.stat().st_size / 1024
 if board_kb > 16:
-    done_chars = sum(len(l) for l in board_lines
-                     if l.startswith("- [x]"))
+    done_chars = sum(len(bl) for bl in board_lines
+                     if bl.startswith("- [x]"))
     warn("board-soft-cap",
          f"BOARD.md is {board_kb:.0f} KB (soft cap ~16 KB), of which "
          f"{done_chars / 1024:.0f} KB is closed-ticket text -- that content "
@@ -679,7 +680,7 @@ for tid, t in tickets.items():
     if "[MARKHUNT]" not in t.get("raw", ""):
         continue
     blocker = t["fields"].get("blocker", "")
-    tail = blocker.split("unvetted audit", 1)[-1].lstrip(" -–—")
+    tail = blocker.split("unvetted audit", 1)[-1].lstrip(" -–—")  # noqa: RUF001 -- en dash deliberate; markdown uses both
     if len(tail.strip()) < 10:
         fail(f"BOARD.md:{t['line_no']} {tid} is a [MARKHUNT] finding whose "
              f"| blocker: cites no evidence -- phases/markhunt.md requires a "
@@ -703,7 +704,7 @@ else:
 log_seg_dir = Path(".saipen/logs")
 log_segments = sorted(log_seg_dir.glob("LOG-*.md")) if log_seg_dir.is_dir() else []
 active_log = Path(".saipen/LOG.md")
-log_files = [p for p in (log_segments + [active_log]) if p.is_file()]
+log_files = [p for p in ([*log_segments, active_log]) if p.is_file()]
 
 # A gate that cannot fail is not a gate (phases/verify.md). Until v7.75.0 this
 # whole block hung off `if log_files:` -- so a `.saipen/` with NO `LOG.md` at
@@ -824,14 +825,14 @@ if log_files:
                      f"{cur_loc} timestamp moves backwards by "
                      f"{(prev_dt - cur_dt).total_seconds() / 60:.0f}m "
                      f"from E-{prev_eid:03d} to E-{cur_eid:03d}; historical "
-                     f"inversions must be documented with a DEC line (RFC В§ 1.2)")
+                     f"inversions must be documented with a DEC line (RFC § 1.2)")
 
     now = datetime.datetime.now(datetime.timezone.utc)
     for log_dt, eid, loc in timestamp_events:
         if (log_dt - now).total_seconds() > 10800:
             fail(f"{loc} timestamp for E-{eid:03d} is more than 3h in the "
                  f"future from current UTC -- LOG timestamps MUST be real UTC "
-                 f"time (RFC В§ 1.2)")
+                 f"time (RFC § 1.2)")
 
     # RFC § 1.2 segmentation soft cap (~300 lines / ~64 KB). Without a signal
     # here the rule is purely aspirational -- nothing ever tells an agent the
@@ -880,7 +881,7 @@ outbox_seen = 0
 for ob in sorted(Path(".").glob(".saipen/extensions/subs/*/kitchen/OUTBOX.md")):
     text = ob.read_text(encoding="utf-8-sig")
     # Entries are `## <ID>: description` followed by bold-field lines (§ 2).
-    entries = re.split(r"^## (?=[A-Z]+-\d+)", text, flags=re.M)[1:]
+    entries = re.split(r"^## (?=[A-Z]+-\d+)", text, flags=re.MULTILINE)[1:]
     for e in entries:
         outbox_seen += 1
         eid = e.split(":", 1)[0].strip()
@@ -1012,6 +1013,16 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
             if "\ufffd" in text:
                 fail(f"{doc.as_posix()} contains U+FFFD replacement character")
                 text_ok = False
+            # Mojibake that is NOT U+FFFD. A section sign decoded as
+            # cp1251 and re-encoded round-trips as perfectly valid UTF-8,
+            # so the replacement-character check above can never see it.
+            # Nine sat in this file's own FAIL messages until v7.99.0 --
+            # found by a linter, not by this check.
+            if "\u0412\u00a7" in text:
+                fail(f"{doc.as_posix()} carries a cp1251-mangled section "
+                     f"sign -- valid UTF-8, so the U+FFFD check above "
+                     f"cannot catch it")
+                text_ok = False
             if text.count("```") % 2:
                 fail(f"{doc.as_posix()} has an odd number of fenced code markers")
                 text_ok = False
@@ -1030,8 +1041,8 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
 
         # A. RFC's phase enum <-> phases/ docs, both directions.
         rfc_text = Path("saipen/RFC.md").read_text(encoding="utf-8-sig")
-        enum_line = next((l for l in rfc_text.splitlines()
-                          if l.startswith("**Phase enum**")), None)
+        enum_line = next((rl for rl in rfc_text.splitlines()
+                          if rl.startswith("**Phase enum**")), None)
         if enum_line is None:
             fail("RFC.md: '**Phase enum**' line not found -- the phase-docs "
                  "integrity check anchors on it")
@@ -1153,6 +1164,47 @@ if kitchen.is_dir():
     else:
         ok(f"all {len([d for d in kitchen.iterdir() if d.is_dir()])} locale"
            f" README badges match VERSION ({repo_version})")
+
+# --------------------------------------------- claims that git can adjudicate
+
+# A STATE that says "pushed" while commits sit local-only is exactly what
+# v7.98.0 shipped: next_action read "shipped, committed, pushed. CI green"
+# while three commits -- two of them changes to CI itself -- had never left the
+# machine. Nothing could contradict it, because nothing looked. git can.
+#
+# Only claims about PUSHING are checked. "committed" is already visible in the
+# log, and "CI green" belongs to a service this validator does not call.
+
+def _unpushed_count():
+    """Commits on HEAD absent from the tracking remote, or None if unknowable."""
+    try:
+        r = subprocess.run(["git", "rev-list", "--count", "@{u}..HEAD"],
+                           capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return None          # no git on this host (RFC § 1.3 no-publish)
+    if r.returncode != 0:
+        return None          # no upstream configured, or not a repo
+    try:
+        return int(r.stdout.strip())
+    except ValueError:
+        return None
+
+
+_claim = (state.get("next_action") or "")
+if "push" in _claim.lower():
+    _ahead = _unpushed_count()
+    if _ahead is None:
+        warn("push-claim-unverifiable",
+             "STATE.md next_action claims something about pushing, but git "
+             "cannot confirm it here (no repo, no upstream, or no git). The "
+             "claim stands unverified rather than verified")
+    elif _ahead > 0:
+        fail(f"STATE.md next_action claims a push ({_claim[:70]!r}) but "
+             f"{_ahead} commit(s) are not on the upstream branch. A claim the "
+             f"repository itself contradicts is worse than no claim: the next "
+             f"agent reads it as done and never looks (RFC § 1.11)")
+    else:
+        ok("STATE.md push claim matches the repository")
 
 # ------------------------------------------------- cross-document drift (§ 1.1)
 

@@ -1,0 +1,49 @@
+# Lint config for the project's own Python -- tools/validate.py and
+# tools/run_scenarios.py. Nothing here touches what those scripts DO; the
+# validator's output was byte-identical before and after the first pass that
+# introduced this file (v7.99.0), which is the only reason a cleanup of the
+# most load-bearing file in the repo was safe to make at all.
+#
+# This is a dev-time gate. It does NOT relax CONFORMANCE § 1's "stdlib only,
+# no pip installs, ever" rule for the validator itself: that rule is about
+# what a host needs to RUN validate.py, not about what CI needs to lint it.
+
+target-version = "py38"
+line-length = 100
+
+[lint]
+# Default rules plus the four families that actually caught something on the
+# first run: pyflakes(F), pycodestyle(E), bugbear-ish simplifications(SIM),
+# ruff-native(RUF), and refurb(FURB).
+select = ["E", "F", "SIM", "RUF", "FURB", "PLW"]
+
+ignore = [
+    # itertools.pairwise() is 3.10+. The validator is expected to run on
+    # whatever Python a contributor's machine has, and target-version above
+    # says 3.8 for exactly that reason -- zip(x, x[1:]) works everywhere.
+    "RUF007",
+
+    # Nested `if`s are kept where each level carries its own comment
+    # explaining a distinct condition. Collapsing them with `and` merges two
+    # documented reasons into one undocumented one, which in this file is a
+    # loss: the comments are why the checks survive review.
+    "SIM102",
+
+    # `subprocess.run` without check=. run_scenarios.py inspects returncode
+    # itself and compares it against each fixture's declared `expect:`, so a
+    # non-zero exit is the expected outcome for half the fixtures. check=True
+    # would abort on precisely the cases the runner exists to assert.
+    "PLW1510",
+]
+
+[lint.per-file-ignores]
+# validate.py is one long top-level script by design -- it runs checks in
+# order and prints as it goes, so a cold reader follows it top to bottom.
+# E402 (import not at top) does not apply, but line length does creep in the
+# long fail() messages, which are deliberately verbatim quotes of RFC text.
+"tools/validate.py" = ["E501"]
+
+# The hook template embeds a shell one-liner (a sed expression that reads
+# saipen_home out of STATE.md). Wrapping it would change the shell code, so the
+# length limit does not apply to that file.
+"tools/install_hook.py" = ["E501"]

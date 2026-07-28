@@ -57,5 +57,15 @@ jobs:
       # `expect: pass|fail` in its README and this runner holds it to that. It
       # also fails on a fixture that declares nothing, and on collecting zero
       # fixtures at all, so it cannot quietly become a no-op.
+      # tools/validate.py is the most load-bearing file in the repo and had
+      # never been linted until v7.99.0. The first run found nine cp1251-mangled
+      # section signs sitting in its own FAIL messages -- valid UTF-8, so the
+      # validator's own U+FFFD check could not see them. ruff.toml documents a
+      # reason for every rule that is switched off.
+      - name: Lint (ruff)
+        run: |
+          python -m pip install --quiet ruff
+          python -m ruff check tools/ tests/
+
       - name: Conformance fixtures (tools/run_scenarios.py)
         run: python tools/run_scenarios.py
