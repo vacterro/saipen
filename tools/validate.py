@@ -1165,6 +1165,53 @@ if kitchen.is_dir():
         ok(f"all {len([d for d in kitchen.iterdir() if d.is_dir()])} locale"
            f" README badges match VERSION ({repo_version})")
 
+# ------------------------------------------------ subSaipen liveness signals
+
+# Two things about a subSaipen that were invisible until v7.99.0, both found by
+# reading the four live instances by hand rather than by any check:
+#
+#   1. A sub that was spawned and never ran looks identical to a healthy one in
+#      MANIFEST.md. saipython sat with 5 open tickets, 0 done and an empty
+#      OUTBOX for a full day; nothing said so.
+#   2. `ready` OUTBOX entries are the sub's whole output, and they are only
+#      seen when somebody remembers to run collect. saitranslate's SAIT-002 sat
+#      `ready` after its work had already been collected and its main-board
+#      ticket closed -- harmless here (PROTOCOL § 4 orders the writes so the
+#      worst case is a duplicate ticket, never a lost finding), but nothing
+#      surfaced it either way.
+#
+# Both are WARN. Neither is a broken file; both are work or rot a human should
+# see, which is what a warning is for.
+_subs_root = Path(".saipen/extensions/subs")
+if _subs_root.is_dir():
+    _idle, _ready_total = [], 0
+    for _sub in sorted(_subs_root.iterdir()):
+        if not _sub.is_dir() or _sub.name == "TEMPLATE":
+            continue
+        _board = _sub / "BOARD.md"
+        _outbox = _sub / "kitchen" / "OUTBOX.md"
+        _obtext = _outbox.read_text(encoding="utf-8-sig") if _outbox.is_file() else ""
+        _ready = _obtext.count("**status:** ready")
+        _ready_total += _ready
+        if _board.is_file():
+            _btext = _board.read_text(encoding="utf-8-sig")
+            _open = len(re.findall(r"^- \[ \]", _btext, re.MULTILINE))
+            _done = len(re.findall(r"^- \[x\]", _btext, re.MULTILINE))
+            if _open and not _done and not _obtext.strip().count("## "):
+                _idle.append(f"{_sub.name} ({_open} open, 0 done, empty OUTBOX)")
+    if _idle:
+        warn("subsaipen-never-ran",
+             "subSaipen spawned but never run: " + "; ".join(_idle) +
+             " -- indistinguishable from a working one in MANIFEST.md until "
+             "someone opens its board")
+    if _ready_total:
+        warn("subsaipen-uncollected",
+             f"{_ready_total} subSaipen OUTBOX entr(y/ies) sit at `status: "
+             f"ready` -- that is a finding waiting on `saipen sub collect`, "
+             f"visible only when someone runs it (extensions/subs/PROTOCOL.md § 4)")
+    if not _idle and not _ready_total:
+        ok("subSaipen liveness clean (none idle, no uncollected findings)")
+
 # --------------------------------------------- claims that git can adjudicate
 
 # A STATE that says "pushed" while commits sit local-only is exactly what
