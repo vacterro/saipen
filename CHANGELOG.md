@@ -2,6 +2,25 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.99.0 -- 2026-07-28 -- the validator had never been linted, and nine of its own error messages were corrupt
+
+Two threads: a review of how the four subSaipens actually did, and the first linter ever pointed at this project's own Python.
+
+**`tools/validate.py` is 1418 lines, is the most load-bearing file here, and nothing had ever linted it.** ruff found 14 items. None were correctness bugs -- but `RUF001` found nine cp1251-mangled section signs sitting inside the validator's own `FAIL` and `WARN` messages. A section sign decoded as cp1251 and re-encoded round-trips as perfectly valid UTF-8, which is exactly why the validator's own U+FFFD corruption check could never see them. Repaired, and the doc text lint now catches that byte sequence too, since U+FFFD detection structurally cannot. CI gained a `ruff` step so it cannot rot back; `ruff.toml` carries a written reason for every rule switched off, because a lint config without reasons becomes a place to hide findings.
+
+The cleanup itself was verified the boring way: `tools/validate.py`'s full output was captured before and after and diffed byte-for-byte. Identical. A cleanup of the file every other check depends on is worth exactly that much paranoia.
+
+**A push claim is now adjudicated by git.** v7.98.0 shipped with `next_action` reading "shipped, committed, pushed. CI green" while three commits -- two of them changes to CI itself -- had never left the machine. Nothing could contradict the claim because nothing looked. `STATE.next_action` mentioning a push while commits sit local-only now FAILs, degrading to a WARN where there is no git or no upstream. This is the same shape as v7.93.0's read-back rule: a claim nobody verified is not a fact, and here the repository itself holds the answer.
+
+**SubSaipen review.** Three of four did their work, and `saitranslate`'s was confirmed independently rather than taken on its word -- the `guide-wait-shape` WARN it was supposed to clear is gone. No isolation boundary was crossed, `mode: read-only` held on all four, and all six OUTBOX entries are well-formed. Both slips were bookkeeping and both were invisible until someone opened the files:
+
+- `saipython` was spawned and never run -- 5 open tickets, 0 done, empty OUTBOX -- and looked identical to a healthy sub in `MANIFEST.md`. That now WARNs.
+- `saitranslate` left `SAIT-002` at `status: ready` after its finding was collected and its main-board ticket closed. Harmless by design (PROTOCOL § 4 orders the writes so the worst case is a duplicate ticket, never a lost finding), but nothing surfaced it. `ready` entries now WARN as findings waiting on `collect`.
+
+CONFORMANCE 69-71. Both new warnings and the push check were red-tested.
+
+**One incident, recorded because it cost an hour.** A red test destroyed the work it was testing: an empty commit followed by `git reset --hard HEAD~1`, which also wipes the uncommitted tree -- and every `validate.py` edit was uncommitted. RFC § 1.1 calls that a destructive operation requiring confirmation, and it was applied self-inflicted, inside a test, without thought. Mutate-and-restore is safe while the blast radius is one backed-up file; a git command inside a test has the whole tree as its radius. Restored from the scratchpad scripts, which is the only reason this is a paragraph and not a lost afternoon.
+
 ## 7.98.0 -- 2026-07-28 -- drift hunt: subs README, sub states, self-transitions, adapters
 
 Systematic drift hunt across surfaces outside validate.py coverage. Sub-sections:

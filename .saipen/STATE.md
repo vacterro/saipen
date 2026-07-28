@@ -1,7 +1,7 @@
 ---
 phase: DONE
 task: none
-next_action: "WAIT: user brake -- validator linted (9 mojibake repaired), push-claim + subSaipen liveness checks added, CI has a ruff gate. saipython still never run"
+next_action: "WAIT: user brake -- v7.99.0 shipped. Open question for the human: saipython has 5 tickets and has never been driven; drive it or retire it"
 blocker: none
 transition_from: PLAN
 saipen_version: 7
@@ -16,5 +16,5 @@ mode: full
 goal_mode: true
 goal_waves: 2
 goal_tickets: 8
-updated: 2026-07-28T10:47:18Z
+updated: 2026-07-28T10:49:05Z
 ---
