@@ -1,0 +1,19 @@
+name: release
+on:
+  push:
+    tags: ["v*"]
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract changelog entry
+        run: |
+          awk '/^## / { if (found) exit; found=1; next } /^## / && found { exit } { if (found) print }' CHANGELOG.md > _relnotes.md
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: _relnotes.md
+          files: VERSION

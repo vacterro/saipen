@@ -57,3 +57,4 @@
 - 28.07.26 10:30 [E-935] [parent: E-934] [T-none] H: systematic drift scan across untracked surfaces — 11 drifts found. Fixed: subs README (field-tested claim), sub next_action prefixes (saipython/saihunt/saiwiki), saihunt STATE (HUNT→DONE), saitranslate backslashes, self-transition validation gap, adapter cross-ref check. Shipped v7.98.0. CONFORMANCE row 67.
 - 28.07.26 10:40 [E-936] [parent: E-935] [T-258] DEC: owner approved push: trigger for validate.yml with concurrency group to cancel duplicates. Header rewritten, 34→42 fixture count fixed.
 - 28.07.26 10:45 [E-937] [parent: E-936] [T-none] DEC: HUNT complete -- no new tickets. 174 uncommitted files from SAIT-002/SAIT-003/drift fixes. STATE back to DONE + WAIT.
+- 28.07.26 10:50 [E-938] [parent: E-937] [T-none] RUN: watch saiwiki. Wiki CI trigger section stale after push:+ addition. Fixed Home.md, pushed (4dd270f). saiwiki W-018.

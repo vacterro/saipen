@@ -22,3 +22,4 @@
 - 28.07.26 10:35 [W-016] [parent: none] RUN: v7.98.0 drift scan — project working tree at v7.98.0 (uncommitted: VERSION bump, CONFORMANCE row 67, validate.py guards, subs README status, saihunt STATE fix, saipython prefix). Wiki at committed v7.97.0. 5 wiki pages need light refresh: Home (version), Scenarios (row 67), SubSaipen (guards), Footer (version). OUTBOX WIKI-007 written. validate.py PASS (19/19).
 
 - 28.07.26 10:40 [W-017] [parent: W-016] RUN: wiki light refresh applied — Home (v7.97.0→v7.98.0 badge, key features date, 2 new bullets), _Footer (version), Scenarios (66→67, row 67 added), SubSaipen (validation guards section). Pushed to github.com/vacterro/saipen.wiki (340d4be).
+- 28.07.26 10:50 [W-018] [parent: W-017] RUN: CI trigger drift detected — Home.md still said PR-only after push:+concurrency change. Updated to reflect new trigger. Pushed (4dd270f).
