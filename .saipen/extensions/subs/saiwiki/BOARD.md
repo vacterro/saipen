@@ -20,4 +20,6 @@
 
 - [x] W-016 v7.98.0 drift scan — project working tree at v7.98.0 (uncommitted), wiki at v7.97.0. 5 wiki pages need light refresh: Home (version badge), Scenarios (row 67), SubSaipen (guards), Footer (version). OUTBOX WIKI-007 written | verify: validate.py PASS, OUTBOX well-formed
 
+- [x] W-017 wiki light refresh — Home/Footer version v7.97.0→v7.98.0, Scenarios 66→67 (row 67), SubSaipen validation guards section added. Pushed to github.com/vacterro/saipen.wiki (340d4be) | verify: wiki live at github.com/vacterro/saipen/wiki, all 4 pages render
+
 ## BLOCKED

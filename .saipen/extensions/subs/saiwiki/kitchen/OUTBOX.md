@@ -1,7 +1,7 @@
 # OUTBOX
 
 ## WIKI-007: v7.98.0 drift scan — wiki 5 pages stale after drift hunt
-- **status:** ready
+- **status:** reviewed
 - **summary:** Project evolved from v7.97.0 to v7.98.0 (drift hunt release). 5 wiki pages need minor refresh: Home (v7.98.0 badge, CONFORMANCE 67), Scenarios (row 67), SubSaipen (subs README no longer "Not yet field-tested", new validate.py guards), _Footer (version bump). Light refresh — not a full regeneration.
 - **main_project_refs:** [VERSION (7.97.0→7.98.0), CHANGELOG.md (v7.98.0 block), saipen/CONFORMANCE.md (row 66→67), tools/validate.py (self-transition guard, sub next_action checks, adapter cross-ref check), extensions/subs/README.md ("Not yet field-tested"→"Running in production"), .saipen/extensions/subs/saihunt/STATE.md (HUNT→DONE), .saipen/extensions/subs/saipython/STATE.md (next_action: RESUME: prefix)]
 - **critical:** false
