@@ -42,7 +42,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 ## Bueno saber
 - ¿Cambios sin confirmar al volver al proyecto? Normal -- SAIPEN confirma (commit) solo en `ship`, no en cada paso. El agente verifica primero de quién son esos cambios antes de tocar nada.
 - ¿Quieres que recuerde una decisión de arquitectura real? Ponla en `.saipen/KNOWLEDGE/`, como un archivo `decisions.md` o archivos numerados `ADR-001.md`.
-- ¿No hay git ni shell en esta máquina? El agente lo dice claramente (`mode`, `WAIT: <pregunta>`) en vez de adivinar.
+- ¿No hay git ni shell en esta máquina? El agente lo dice claramente (`mode`, `WAIT: <category> -- <pregunta>`) en vez de adivinar.
 - ¿Quieres una red de seguridad? `python <clon-saipen>/tools/install_hook.py` instala una verificación antes de cada commit.
 
 ---

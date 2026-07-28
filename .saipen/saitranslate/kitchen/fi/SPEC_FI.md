@@ -43,13 +43,16 @@ saipen/
   SKILL.md                  ohut aloitustiedosto taitoja lukeville alustoille
   STYLE.md                  äänet: chat, LOG.md, artefaktit
   UI.md                     Dark Golden Win95 UI spesifikaatio (pakollinen UI-työlle)
-  phases/                   tiukka tilakonelogiikka
+  BOOT.md                   käynnistyssekvenssi / kylmäkäynnistyksen orkestrointi
+  phases/                   16 docs, one per RFC § 1.6 enum value (machine-checked both ways by tools/validate.py)
     [Ydinvaiheet (Core Phases)]
     init.md / plan.md / scout.md / build.md / verify.md / review.md / ship.md / done.md / blocked.md
     [Ylläpitovaiheet (Maintenance Phases)]
-    hunt.md / add.md / clean.md / translate.md
-    
-    validate.md             vaatimustenmukaisuuden testaus
+    hunt.md / add.md / clean.md / translate.md / markhunt.md
+
+  [Infrastructure]
+  prepare.md                työtilan valmistelu
+  validate.md               vaiheiden välinen vaatimustenmukaisuus
 
 extensions/                 <- ADAPTIIVINEN KERROS
   adapters/                 mallikohtaiset ohjesillat, alustoille, joita 
@@ -68,6 +71,7 @@ bootstrap/                  <- ASENNUS/VIENTI/POISTO, yksi kone kerrallaan
   inject.ps1 / .sh          asentaa SAIPEN-lohkon + taitokopiot (README Pika-aloitus)
   uninstall.ps1 / .sh       kumoaa injectin -- poistaa lohkot + taitokopiot
   export.ps1 / .sh          arkistoi projektin .saipen/-kansion varmuuskopiointia varten
+  saipen_crew.bat / .sh     käynnistää SAIPEN-työryhmätyökalun
 
 tools/                      <- KANONINEN VALIDAATTORI & REPO-TYÖKALUT
   validate.py               kanoninen vaatimustenmukaisuuden validaattori (stdlib Python, nolla

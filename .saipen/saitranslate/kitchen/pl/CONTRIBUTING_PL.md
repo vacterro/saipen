@@ -40,11 +40,11 @@ to przybrać.
    i, tam gdzie to praktyczne, pokrycia w `tests/validate.sh` +
    `tests/validate.ps1` (obie platformy) lub testu (fixture) w
    `tests/scenarios/`.
-4. Uruchom oba walidatory przed otwarciem PR:
+4. Uruchom kanoniczny walidator przed otwarciem PR:
    ```bash
-   bash tests/validate.sh
-   powershell -File tests/validate.ps1
+   python tools/validate.py
    ```
+   To jest ten, który ma znaczenie -- sprawdza `STATE.md` względem `extensions/schemas/state.schema.json`, przechodzi przez graf zdarzeń `LOG.md` w poprzek zapieczętowanych segmentów oraz weryfikuje manifest wykonawczy i okablowanie wstrzykiwacza. `tests/validate.sh` / `validate.ps1` to **zamrożone przenośne minimum** dla hostów bez Pythona (jest to napisane na górze każdego pliku): mniej kontroli, utrzymywane tylko po to, aby host bez Pythona nie został z niczym. Uruchom je również, jeśli twoja zmiana dotyczy któregokolwiek z nich, ale nigdy *zamiast* -- samo przejście minimum dowodzi znacznie mniej, niż się wydaje. CI uruchamia kanoniczny walidator przy każdym pushu i PR, niezależnie od tego (`.github/workflows/validate.yml`).
 5. Podnieś `VERSION` zgodnie ze schematem w `phases/ship.md` (patch dla
    wyjaśnień tylko w dokumentacji, minor dla nowych zachowań normatywnych, major dla łamiących
    zmian kontraktu) i utrzymuj odznakę wersji w `README.md` zsynchronizowaną --

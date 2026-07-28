@@ -51,14 +51,21 @@ saipen/
   CONFORMANCE.md             self-check vectors + scenario coverage table
   SKILL.md                  thin entry point for skill-reading platforms
   STYLE.md                  voices: chat, LOG.md, artifacts
-  UI.md                     Dark Golden Win95 UI spec (mandatory for UI work)
-  phases/                   strict state machine logic
+  UI.md                     Specificație UI Dark Golden Win95 (obligatoriu pentru lucrul UI)
+  BOOT.md                   ~kernel de pornire la rece: calea rapidă de care
+                             are nevoie un `continue` gol, înainte ca oricare
+                             dintre cele de mai sus să fie încărcat
+  phases/                   logică strictă de mașină de stare -- 16 doc-uri,
+                             câte unul per valoare de enumerare RFC § 1.6
+                             (verificat mașinal în ambele sensuri de tools/validate.py)
     [Core Phases]
     init.md / plan.md / scout.md / build.md / verify.md / review.md / ship.md / done.md / blocked.md
     [Maintenance Phases]
-    hunt.md / add.md / clean.md / translate.md
-    
-    validate.md             conformance testing
+    hunt.md / markhunt.md / add.md / clean.md / translate.md
+
+    [Infrastructure]
+    prepare.md              împachetează munca pentru predarea către următorul agent
+    validate.md             testare de conformitate
 
 extensions/                 <- THE ADAPTIVE LAYER
   adapters/                 per-model instruction bridges, for platforms the
@@ -76,7 +83,8 @@ extensions/                 <- THE ADAPTIVE LAYER
 bootstrap/                  <- INSTALL/EXPORT/UNINSTALL, one machine at a time
   inject.ps1 / .sh          installs the SAIPEN block + skill copies (README Quick Start)
   uninstall.ps1 / .sh       reverses inject -- removes blocks + skill copies
-  export.ps1 / .sh          archives a project's .saipen/ for backup
+  export.ps1 / .sh          arhivează .saipen/ al unui proiect pentru backup
+  saipen_crew.bat / .sh     deschide aspectul crew cu 3 ferestre (bonus, extensions/subs/crew.md)
 
 tools/                      <- CANONICAL VALIDATOR & REPO UTILITIES
   validate.py               canonical conformance validator (stdlib Python, zero

@@ -25,11 +25,20 @@ Rapporti vaghi ("questo sembra sbagliato") sono più difficili da gestire rispet
 1. Leggi interamente `saipen/RFC.md` e i file `phases/*.md` rilevanti prima di modificare -- la maggior parte delle lacune apparenti si rivelano essere già affrontate altrove, o deliberatamente limitate in un certo modo per un motivo documentato.
 2. Controlla `CHANGELOG.md` e `.saipen/KNOWLEDGE/decisions.md` per i precedenti. Non riaprire silenziosamente una decisione che è già stata presa e respinta -- se hai nuove prove che un rifiuto passato era sbagliato, dillo esplicitamente nella descrizione della PR.
 3. Ogni modifica normativa (un MUST/MUST NOT/SHOULD) necessita di una voce nel `CHANGELOG.md` e, ove pratico, di copertura in `tests/validate.sh` + `tests/validate.ps1` (entrambe le piattaforme) o di una fixture in `tests/scenarios/`.
-4. Esegui sia bash che powershell validatori prima di aprire una PR:
+4. Esegui il validatore canonico prima di aprire una PR:
    ```bash
-   bash tests/validate.sh
-   powershell -File tests/validate.ps1
+   python tools/validate.py
    ```
+   Questo è quello che conta -- controlla `STATE.md` rispetto a
+   `extensions/schemas/state.schema.json`, percorre il grafo degli eventi `LOG.md`
+   attraverso i segmenti sigillati e verifica il manifest di runtime e il cablaggio
+   dell'iniettore. `tests/validate.sh` / `validate.ps1` sono il **pavimento portabile
+   congelato** per host senza Python (lo dicono all'inizio di ogni file):
+   meno controlli, mantenuti solo così un host senza Python non rimane con nulla.
+   Eseguili anche se la tua modifica tocca uno di essi, ma mai *invece* --
+   superare il pavimento da solo dimostra molto meno di quanto sembri.
+   CI esegue il validatore canonico su ogni push e PR indipendentemente
+   (`.github/workflows/validate.yml`).
 5. Incrementa `VERSION` secondo lo schema in `phases/ship.md` (patch per chiarimenti solo documentali, minor per nuovi comportamenti normativi, major per modifiche al contratto che rompono la compatibilità) e mantieni sincronizzato il badge della versione in `README.md` -- `tests/validate.sh`/`.ps1` controllano questo automaticamente quando eseguiti da un clone di questo repository.
 
 ## Stile

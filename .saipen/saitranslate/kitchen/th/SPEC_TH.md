@@ -43,12 +43,18 @@ saipen/
   SKILL.md                  จุดเข้าใช้งานแบบบาง สำหรับแพลตฟอร์มที่ใช้อ่าน skill
   STYLE.md                  เสียง: แชท, LOG.md, วัตถุที่ส่งมอบ (artifacts)
   UI.md                     ข้อกำหนด UI Dark Golden Win95 (จำเป็นสำหรับงาน UI)
-  phases/                   ตรรกะระบบสถานะ (state machine) ที่เข้มงวด
+  BOOT.md                   ~เคอร์เนลเริ่มต้นแบบเย็น: เส้นทางด่วนที่ bare `continue`
+                             ต้องการ ก่อนที่สิ่งใดข้างต้นจะถูกโหลด
+  phases/                   ตรรกะระบบสถานะที่เข้มงวด -- 16 เอกสาร หนึ่งฉบับต่อ
+                             ค่า enum RFC § 1.6 (ตรวจสอบด้วยเครื่องทั้งสองทาง
+                             โดย tools/validate.py)
     [Core Phases]
     init.md / plan.md / scout.md / build.md / verify.md / review.md / ship.md / done.md / blocked.md
     [Maintenance Phases]
-    hunt.md / add.md / clean.md / translate.md
-    
+    hunt.md / markhunt.md / add.md / clean.md / translate.md
+
+    [Infrastructure]
+    prepare.md              เตรียมงานสำหรับส่งต่อให้ agent ถัดไป
     validate.md             การทดสอบความสอดคล้อง
 
 extensions/                 <- THE ADAPTIVE LAYER
@@ -68,6 +74,7 @@ bootstrap/                  <- INSTALL/EXPORT/UNINSTALL, ทำงานที�
   inject.ps1 / .sh          ติดตั้งบล็อก SAIPEN + สำเนา skill (เริ่มต้นอย่างรวดเร็วใน README)
   uninstall.ps1 / .sh       ย้อนกลับการติดตั้ง -- ลบบล็อก + สำเนา skill
   export.ps1 / .sh          เก็บถาวร .saipen/ ของโปรเจกต์เพื่อแบ็คอัพ
+  saipen_crew.bat / .sh     เปิดเค้าโครง crew 3 หน้าต่าง (โบนัส, extensions/subs/crew.md)
 
 tools/                      <- CANONICAL VALIDATOR & REPO UTILITIES
   validate.py               เครื่องมือทดสอบความสอดคล้องที่เป็นมาตรฐาน (ใช้ Python stdlib,

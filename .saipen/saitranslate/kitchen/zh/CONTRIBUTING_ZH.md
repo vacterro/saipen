@@ -25,11 +25,18 @@ SAIPEN 首先是一个规范，其次才是一个实现。大多数的贡献是�
 1. 在编辑之前完整阅读 `saipen/RFC.md` 以及相关的 `phases/*.md` 文件——大多数明显的差距通常已在其他地方解决，或因为文档化的原因而被刻意地限定了范围。
 2. 检查 `CHANGELOG.md` 和 `.saipen/KNOWLEDGE/decisions.md` 以获取现有的先例。不要默默地重新讨论一项已经被做出并拒绝的决策——如果你有新的证据证明过去的拒绝是错误的，请在 PR 描述中明确说明。
 3. 每一个规范性变更 (MUST/MUST NOT/SHOULD) 都需要一条 `CHANGELOG.md` 记录，并在可行的情况下，提供 `tests/validate.sh` + `tests/validate.ps1` (两个平台) 的覆盖，或在 `tests/scenarios/` 下提供一个 fixture。
-4. 在开启 PR 之前运行两个验证器：
+4. 在开启 PR 之前运行标准验证器：
    ```bash
-   bash tests/validate.sh
-   powershell -File tests/validate.ps1
+   python tools/validate.py
    ```
+   这才是最重要的验证工具——它会对照 `extensions/schemas/state.schema.json`
+   检查 `STATE.md`，遍历 `LOG.md` 中已密封段的事件图，并验证运行时清单和
+   注入器连接。`tests/validate.sh` / `validate.ps1` 是面向没有 Python 的
+   主机的**冻结便携底线**（每个文件顶部都说明了这一点）：检查较少，保留它们
+   只是为了没有 Python 的主机不至于无检验可用。如果你的更改涉及其中任何一个，
+   也请运行它们，但绝不能 *代替* -- 仅通过底线测试能证明的东西远比看起来的要少。
+   CI 会在每次推送和 PR 时运行标准验证器，无论其他情况如何
+   (`.github/workflows/validate.yml`)。
 5. 根据 `phases/ship.md` 中的方案提升 `VERSION` 版本号 (针对仅涉及文档的说明使用 patch，针对新的规范性行为使用 minor，针对破坏契约的变更使用 major)，并保持 `README.md` 中的版本徽章同步——`tests/validate.sh`/`.ps1` 会在从该仓库克隆运行时自动检查这点。
 
 ## 风格

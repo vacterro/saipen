@@ -25,11 +25,11 @@ SAIPEN은 사양(specification)이 우선이고, 구현(implementation)은 그 �
 1. 편집하기 전에 `saipen/RFC.md` 및 관련 `phases/*.md` 파일 전체를 읽어보세요 — 표면적으로 보이는 문제(gap)의 대부분은 이미 다른 곳에서 다루어지고 있거나, 문서화된 이유로 인해 의도적으로 특정 범위로 제한되어 있습니다.
 2. 이전 기록에 대해서는 `CHANGELOG.md`와 `.saipen/KNOWLEDGE/decisions.md`를 확인하세요. 이미 논의되어 거부된 결정을 아무 말 없이 다시 열지 마세요 — 만약 과거의 거절이 틀렸다는 새로운 증거가 있다면, PR 설명에 명시적으로 밝혀주세요.
 3. 모든 규범적(normative) 변경(MUST/MUST NOT/SHOULD)에는 `CHANGELOG.md` 항목이 필요하며, 실용적인 경우 `tests/validate.sh` + `tests/validate.ps1` (두 플랫폼 모두)의 적용 범위(coverage)나 `tests/scenarios/` 아래의 픽스처(fixture)가 필요합니다.
-4. PR을 열기 전에 두 가지 검사기(validator)를 모두 실행하세요:
+4. PR을 열기 전에 정식(canonical) 검사기를 실행하세요:
    ```bash
-   bash tests/validate.sh
-   powershell -File tests/validate.ps1
+   python tools/validate.py
    ```
+   이것이 진짜 중요한 것입니다 -- `STATE.md`를 `extensions/schemas/state.schema.json`에 대해 검사하고, 밀봉된(sealed) 세그먼트를 넘나드는 `LOG.md` 이벤트 그래프를 탐색하며, 런타임 매니페스트와 인젝터 배선을 검증합니다. `tests/validate.sh` / `validate.ps1`은 Python이 없는 호스트를 위한 **동결된 이식 가능한 기본(frozen portable floor)**입니다 (각 파일 상단에 명시되어 있습니다): 검사 항목이 더 적으며, Python이 없는 호스트가 아무것도 없이 방치되지 않도록 유지됩니다. 변경 사항이 이 파일들에 영향을 준다면 함께 실행하세요. 그러나 절대 *대신* 실행하지 마세요 -- 기본(floor)만 통과한다고 해서 겉보기만큼 충분히 증명되지는 않습니다. CI는 모든 푸시와 PR에서 항상 정식 검사기를 실행합니다 (`.github/workflows/validate.yml`).
 5. `phases/ship.md`의 규칙에 따라 `VERSION`을 올리세요 (문서 명확화는 patch, 새로운 규범적 동작은 minor, 호환성을 깨는 계약 변경은 major) 그리고 `README.md`의 버전 뱃지도 동기화하세요 — 이 저장소를 클론한 곳에서 `tests/validate.sh`/`.ps1`를 실행하면 이를 자동으로 확인합니다.
 
 ## 스타일 (Style)

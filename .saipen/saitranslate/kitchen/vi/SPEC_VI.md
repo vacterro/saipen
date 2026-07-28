@@ -51,12 +51,18 @@ saipen/
   SKILL.md                  điểm truy cập mỏng cho các nền tảng đọc skill
   STYLE.md                  giọng điệu: trò chuyện, LOG.md, artifacts
   UI.md                     đặc tả UI Dark Golden Win95 (bắt buộc cho công việc UI)
-  phases/                   logic máy trạng thái nghiêm ngặt
+  BOOT.md                   ~nhân khởi động nguội: đường dẫn nhanh mà bare `continue`
+                             cần, trước khi bất kỳ thứ nào ở trên được tải
+  phases/                   logic máy trạng thái nghiêm ngặt -- 16 tài liệu, một tài
+                             liệu cho mỗi giá trị enum RFC § 1.6 (được máy kiểm tra
+                             cả hai chiều bởi tools/validate.py)
     [Core Phases]
     init.md / plan.md / scout.md / build.md / verify.md / review.md / ship.md / done.md / blocked.md
     [Maintenance Phases]
-    hunt.md / add.md / clean.md / translate.md
-    
+    hunt.md / markhunt.md / add.md / clean.md / translate.md
+
+    [Infrastructure]
+    prepare.md              đóng gói công việc để bàn giao cho agent tiếp theo
     validate.md             kiểm thử tuân thủ
 
 extensions/                 <- LỚP THÍCH ỨNG
@@ -76,6 +82,7 @@ bootstrap/                  <- CÀI ĐẶT/XUẤT/GỠ CÀI ĐẶT, mỗi lần 
   inject.ps1 / .sh          cài đặt khối SAIPEN + bản sao skill (README Bắt đầu nhanh)
   uninstall.ps1 / .sh       đảo ngược quá trình tiêm -- xóa khối + bản sao skill
   export.ps1 / .sh          lưu trữ thư mục .saipen/ của một dự án để sao lưu
+  saipen_crew.bat / .sh     mở bố cục crew 3 cửa sổ (phần thưởng, extensions/subs/crew.md)
 
 tools/                      <- TRÌNH XÁC THỰC CHÍNH THỨC & TIỆN ÍCH REPO
   validate.py               trình xác thực tuân thủ chính thức (stdlib Python, không

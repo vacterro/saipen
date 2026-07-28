@@ -43,13 +43,16 @@ saipen/
   SKILL.md                  نقطة دخول رفيعة لمنصات قراءة المهارات
   STYLE.md                  الأصوات: الدردشة، LOG.md، القطع الأثرية
   UI.md                     مواصفات واجهة المستخدم Dark Golden Win95 (إلزامية لعمل واجهة المستخدم)
-  phases/                   منطق آلة الحالة الصارم
+  BOOT.md                   تسلسل التمهيد / التنسيق عند بدء التشغيل البارد
+  phases/                   16 docs, one per RFC § 1.6 enum value (machine-checked both ways by tools/validate.py)
     [Core Phases]
     init.md / plan.md / scout.md / build.md / verify.md / review.md / ship.md / done.md / blocked.md
     [Maintenance Phases]
-    hunt.md / add.md / clean.md / translate.md
-    
-    validate.md             اختبار التوافق
+    hunt.md / add.md / clean.md / translate.md / markhunt.md
+
+  [Infrastructure]
+  prepare.md                إعداد بيئة العمل
+  validate.md               اختبار التوافق عبر المراحل
 
 extensions/                 <- الطبقة التكيفية
   adapters/                 جسور تعليمات لكل نموذج، للمنصات التي
@@ -68,6 +71,7 @@ bootstrap/                  <- التثبيت/التصدير/إلغاء التث
   inject.ps1 / .sh          يثبت كتلة SAIPEN + نسخ المهارات (بداية سريعة في README)
   uninstall.ps1 / .sh       يعكس inject -- يزيل الكتل + نسخ المهارات
   export.ps1 / .sh          يؤرشف .saipen/ لمشروع كنسخة احتياطية
+  saipen_crew.bat / .sh     يقوم بتشغيل أداة الفريق SAIPEN
 
 tools/                      <- مدقق قانوني وأدوات المستودع
   validate.py               مدقق توافق قانوني (stdlib Python، صفر

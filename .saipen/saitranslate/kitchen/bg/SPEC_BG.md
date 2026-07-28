@@ -52,13 +52,16 @@ saipen/
   SKILL.md                  thin entry point for skill-reading platforms
   STYLE.md                  voices: chat, LOG.md, artifacts
   UI.md                     Dark Golden Win95 UI spec (mandatory for UI work)
-  phases/                   strict state machine logic
+  BOOT.md                   boot sequence / cold-start orchestration
+  phases/                   16 docs, one per RFC § 1.6 enum value (machine-checked both ways by tools/validate.py)
     [Core Phases]
     init.md / plan.md / scout.md / build.md / verify.md / review.md / ship.md / done.md / blocked.md
     [Maintenance Phases]
-    hunt.md / add.md / clean.md / translate.md
-    
-    validate.md             conformance testing
+    hunt.md / add.md / clean.md / translate.md / markhunt.md
+
+  [Infrastructure]
+  prepare.md                workspace preparation
+  validate.md               cross-phase conformance testing
 
 extensions/                 <- THE ADAPTIVE LAYER
   adapters/                 per-model instruction bridges, for platforms the
@@ -77,6 +80,7 @@ bootstrap/                  <- INSTALL/EXPORT/UNINSTALL, one machine at a time
   inject.ps1 / .sh          installs the SAIPEN block + skill copies (README Quick Start)
   uninstall.ps1 / .sh       reverses inject -- removes blocks + skill copies
   export.ps1 / .sh          archives a project's .saipen/ for backup
+  saipen_crew.bat / .sh     launches the SAIPEN crew tool
 
 tools/                      <- CANONICAL VALIDATOR & REPO UTILITIES
   validate.py               canonical conformance validator (stdlib Python, zero

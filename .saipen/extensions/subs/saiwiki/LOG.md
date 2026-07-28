@@ -10,3 +10,13 @@
 - 27.07.26 05:00 [W-009] [parent: W-008] RUN: caveman ultra rewrite — all 8 pages compressed. -1071 lines (31% reduction). Articles, filler, pleasantries stripped. Technical substance preserved. Code blocks exact.
 - 27.07.26 05:30 [W-010] [parent: W-009] RUN: dedicated ded-style examples — Home (5 real-life rants), Getting-Started (10 commands with grandpa), Phases (16 phase rants), SubSaipen (4 sub rants). +67 lines. Angry grandpa voice: without-SAIPEN tears vs with-SAIPEN calm.
 - 27.07.26 06:30 [W-011] [parent: W-010] RUN: flag emoji icons to all locale listings in Phases.md (Core + SubSaipen split tables) + SubSaipen.md (saitranslate coverage). Also pushed to main repo translate.md. 🇬🇧🇷🇺🇪🇪🇯🇵🇺🇦🇩🇪🇫🇷🇪🇸🇮🇹🇵🇹🇳🇱🇵🇱🇸🇪🇩🇰🇫🇮🇳🇴🇨🇳🇰🇷🇹🇭🇻🇳🌍🇮🇱🇹🇷🇮🇳🇮🇩🇬🇷🇨🇿🇷🇴🇭🇺🇧🇬🇸🇰🇭🇷 + 🫡 ДED.
+
+- 28.07.26 09:50 [W-012] [parent: none] RUN: wiki drift audit v7.64-era vs current v7.97.0. Found 6 drift categories across 8 wiki pages. OUTBOX written with WIKI-005 findings. Recommended: wiki refresh at P2 priority.
+
+- 28.07.26 07:05 [W-013] [parent: none] RUN: maintenance scan + verify — deep audit of project vs wiki at v7.97.0. Found: 1 validate FAIL (saitranslate read-only/TRANSLATE conflict), 6 drift categories across 8 wiki pages, 4 positive findings. OUTBOX WIKI-006 written with per-page drift details.
+
+- 28.07.26 07:08 [W-014] [parent: none] RUN: OUTBOX collection + fixes — collected WIKI-005/WIKI-006 into main BOARD (T-260 wiki refresh, T-261 validate fix); fixed saitranslate STATE phase TRANSLATE→DONE (RFC § 1.3 violation); added SAIT-003 to saitranslate TODO. tools/validate.py verified PASS after fix.
+
+- 28.07.26 07:16 [W-015] [parent: none] RUN: wiki refresh + validate fixes — regenerated 8 wiki pages from v7.97.0 sources, pushed to github.com/vacterro/saipen.wiki (0e99a90). Closed T-260 (wiki refresh) and T-261 (saitranslate validate fix). saitranslate STATE phase TRANSLATE→DONE. tools/validate.py PASS (19/19). Fixed Scenarios.md headline 17→66, added CI truth to Home.md.
+
+- 28.07.26 10:35 [W-016] [parent: none] RUN: v7.98.0 drift scan — project working tree at v7.98.0 (uncommitted: VERSION bump, CONFORMANCE row 67, validate.py guards, subs README status, saihunt STATE fix, saipython prefix). Wiki at committed v7.97.0. 5 wiki pages need light refresh: Home (version), Scenarios (row 67), SubSaipen (guards), Footer (version). OUTBOX WIKI-007 written. validate.py PASS (19/19).

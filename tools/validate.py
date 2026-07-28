@@ -273,15 +273,19 @@ if t_from is None:
              "is absent -- set transition_from: INIT at next checkpoint "
              "to make it explicit")
 
-if t_from and t_current and t_from != t_current:
-    if t_current not in ANY_FROM:
+if t_from and t_current:
+    if t_from == t_current:
+        if t_from not in VALID_TRANSITIONS and t_from not in ANY_FROM:
+            fail(f"STATE.md self-transition at {t_from} but {t_from!r} is not "
+                 f"a known phase -- must be one of the 16 enum values (RFC § 1.6)")
+    elif t_current not in ANY_FROM:
         allowed = VALID_TRANSITIONS.get(t_from, [])
         if t_current not in allowed:
             fail(f"STATE.md invalid phase transition: {t_from} -> {t_current} "
                  f"(RFC § 1.6). Allowed from {t_from}: {', '.join(allowed)}")
-    if t_from not in VALID_TRANSITIONS and t_from not in ANY_FROM:
-        fail(f"STATE.md transition_from has unknown phase: {t_from!r} "
-             f"-- must be one of the 16 enum values (RFC § 1.6)")
+        if t_from not in VALID_TRANSITIONS and t_from not in ANY_FROM:
+            fail(f"STATE.md transition_from has unknown phase: {t_from!r} "
+                 f"-- must be one of the 16 enum values (RFC § 1.6)")
 
 # RFC § 1.3 mode/phase restrictions.
 # NOTE: `no-publish` + `SHIP` is NOT checked here, deliberately. It used to
@@ -472,6 +476,27 @@ if sub_state_files:
                  f"user and is copied by `saipen sub spawn`; a machine-specific "
                  f"path here leaks the author's layout and hands users a dead "
                  f"pointer. Use \"\" and let spawn fill it in (PROTOCOL.md § 7)")
+        # RFC § 1.2: subSaipen next_action MUST follow same prefix rules as Core.
+        sub_na = sub_state.get("next_action")
+        if isinstance(sub_na, str):
+            sub_vague = re.compile(
+                r"\b(continue work|proceed|do next|review stuff|keep going|"
+                r"maybe|if needed|ask if needed)\b", re.IGNORECASE)
+            if sub_vague.search(sub_na):
+                fail(f"{sp} next_action is vague, not executable: {sub_na!r} "
+                     f"(RFC § 1.2)")
+            if not sub_na.startswith(executable_prefixes):
+                fail(f"{sp} next_action does not start with WAIT:/saipen /PHASE "
+                     f"/RUN:/RESUME:: {sub_na!r} (RFC § 1.2)")
+            if sub_na.startswith("WAIT:"):
+                body = sub_na[len("WAIT:"):].strip().lower()
+                if not any(body.startswith(c) for c in WAIT_CATEGORIES):
+                    fail(f"{sp} next_action is WAIT with no category token -- "
+                         f"must be one of {'/'.join(WAIT_CATEGORIES)}; got "
+                         f"{sub_na!r}")
+            if "?" in sub_na and not sub_na.startswith("WAIT:"):
+                fail(f"{sp} next_action asks a question outside WAIT:: "
+                     f"{sub_na!r} (RFC § 1.2)")
         if len(failures) > before_sub:
             subs_ok = False
     if subs_ok:
@@ -1074,6 +1099,35 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
             ok("injector distributes every runtime dir + root doc "
                "(phases/tools/tests/schemas/templates/subs, BOOT/SKILL/RFC/"
                "STYLE/UI/CONFORMANCE, both scripts)")
+
+# --------------------------------------------------- adapters cross-reference
+
+# Every adapter file references `saipen/` paths that must exist. A stale
+# reference misleads users on that platform about how to install or use SAIPEN.
+# Unlike the injector-distribution check above (which ensures every file IS
+# shipped), this ensures every claimed path actually EXISTS in the home repo.
+adapter_dir = Path("extensions/adapters")
+if adapter_dir.is_dir():
+    adapter_ok = True
+    for doc in sorted(adapter_dir.glob("*.md")):
+        text = doc.read_text(encoding="utf-8-sig")
+        for m in re.finditer(r"`([^`]+)`", text):
+            ref = m.group(1)
+            if "saipen/" not in ref or ".saipen/" in ref:
+                continue
+            # Strip path prefixes like `<clone>/` or `~/.claude/skills/saipen/`
+            clean = ref.split("saipen/", 1)[1] if "saipen/" in ref else ref
+            # If it's a file reference (has extension), check it exists
+            if "." in clean and clean.endswith(".md"):
+                target = Path("saipen") / clean
+                if not target.is_file() and not target.with_suffix("").is_dir():
+                    fail(f"extensions/adapters/{doc.name} references "
+                         f"{ref!r} ({target.as_posix()}) which does not exist "
+                         f"-- stale cross-reference (v7.22.3 bug class)")
+                    adapter_ok = False
+    if adapter_ok:
+        ok("adapter cross-references valid (checking saipen/ paths in all "
+           f"{len(list(adapter_dir.glob('*.md')))} adapters)")
 
 # -------------------------------------------------------- translation drift
 

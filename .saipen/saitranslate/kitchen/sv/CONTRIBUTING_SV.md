@@ -25,11 +25,20 @@ Vaga rapporter ("detta känns fel") är svårare att agera på än en specifik `
 1. Läs `saipen/RFC.md` och relevanta `phases/*.md`-filer helt innan du redigerar -- de flesta uppenbara luckor visar sig redan vara hanterade någon annanstans, eller medvetet avgränsade på ett visst sätt av en dokumenterad anledning.
 2. Kontrollera `CHANGELOG.md` och `.saipen/KNOWLEDGE/decisions.md` för tidigare arbete. Återuppta inte tyst ett beslut som redan fattats och avslagits -- om du har nya bevis för att ett tidigare avslag var fel, säg det uttryckligen i PR-beskrivningen.
 3. Varje normativ ändring (ett MÅSTE/FÅR INTE/BÖR) behöver en post i `CHANGELOG.md` och, där det är praktiskt, täckning i `tests/validate.sh` + `tests/validate.ps1` (båda plattformarna) eller en fixtur under `tests/scenarios/`.
-4. Kör båda validerarna innan du öppnar en PR:
+4. Kör den kanoniska valideraren innan du öppnar en PR:
    ```bash
-   bash tests/validate.sh
-   powershell -File tests/validate.ps1
+   python tools/validate.py
    ```
+   Detta är den som räknas – den kontrollerar `STATE.md` mot
+   `extensions/schemas/state.schema.json`, går igenom `LOG.md` händelsegrafen
+   över förseglade segment och verifierar runtime-manifestet samt
+   injectorkopplingar. `tests/validate.sh` / `validate.ps1` är **frusna
+   portabla golv** för värdar utan Python (det står överst i varje fil):
+   färre kontroller, behålls bara så att en värd utan Python inte lämnas
+   utan något. Kör dem också om din ändring påverkar någon av dem, men aldrig
+   *istället* – att klara enbart golvet bevisar mycket mindre än det ser ut
+   att göra. CI kör den kanoniska valideraren vid varje push och PR oavsett
+   (`.github/workflows/validate.yml`).
 5. Uppdatera `VERSION` enligt schemat i `phases/ship.md` (patch för förtydliganden av enbart dokumentation, minor för nytt normativt beteende, major för brytande kontraktsändringar) och håll `README.md`:s versionsbricka synkroniserad -- `tests/validate.sh`/`.ps1` kontrollerar detta automatiskt när de körs från en klon av detta repo.
 
 ## Stil

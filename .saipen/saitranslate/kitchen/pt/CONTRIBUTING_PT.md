@@ -39,11 +39,11 @@ isso deve tomar.
    e, onde prático, cobertura em `tests/validate.sh` +
    `tests/validate.ps1` (ambas as plataformas) ou uma fixture sob
    `tests/scenarios/`.
-4. Execute ambos os validadores antes de abrir um PR:
+4. Execute o validador canônico antes de abrir um PR:
    ```bash
-   bash tests/validate.sh
-   powershell -File tests/validate.ps1
+   python tools/validate.py
    ```
+   Este é o que importa -- ele verifica `STATE.md` contra `extensions/schemas/state.schema.json`, percorre o grafo de eventos do `LOG.md` através de segmentos selados, e verifica o manifesto de tempo de execução e a fiação do injetor. `tests/validate.sh` / `validate.ps1` são o **piso portátil congelado** para hosts sem Python (eles dizem isso no topo de cada arquivo): menos verificações, mantidos apenas para que um host sem Python não fique sem nada. Execute-os também se sua alteração tocar em algum deles, mas nunca *em vez de* -- passar apenas no piso prova muito menos do que parece. O CI executa o validador canônico em todo push e PR, independentemente (`.github/workflows/validate.yml`).
 5. Aumente o `VERSION` conforme o esquema em `phases/ship.md` (patch para esclarecimentos
    apenas de documentação, minor para novo comportamento normativo, major para quebras
    no contrato) e mantenha o badge de versão do `README.md` sincronizado --

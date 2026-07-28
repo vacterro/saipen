@@ -43,12 +43,18 @@ saipen/
   SKILL.md                  punto di ingresso sottile per piattaforme skill-reading
   STYLE.md                  voci: chat, LOG.md, artefatti
   UI.md                     specifica UI Dark Golden Win95 (obbligatoria per lavoro UI)
-  phases/                   rigorosa logica a macchina a stati
+  BOOT.md                   ~kernel di avvio a freddo: il percorso rapido di cui un
+                             `continue` nudo ha bisogno, prima che uno dei suddetti sia caricato
+  phases/                   rigorosa logica a macchina a stati -- 16 documenti, uno per
+                             valore enum RFC § 1.6 (controllato a macchina in entrambi i sensi
+                             da tools/validate.py)
     [Fasi Core]
     init.md / plan.md / scout.md / build.md / verify.md / review.md / ship.md / done.md / blocked.md
     [Fasi di Manutenzione]
-    hunt.md / add.md / clean.md / translate.md
-    
+    hunt.md / markhunt.md / add.md / clean.md / translate.md
+
+    [Infrastruttura]
+    prepare.md              prepara il lavoro per la consegna al prossimo agente
     validate.md             test di conformità
 
 extensions/                 <- IL LIVELLO ADATTIVO
@@ -63,6 +69,7 @@ bootstrap/                  <- INSTALLA/ESPORTA/DISINSTALLA, una macchina alla v
   inject.ps1 / .sh          installa il blocco SAIPEN + copie skill (Avvio Rapido nel README)
   uninstall.ps1 / .sh       inverte inject -- rimuove i blocchi + le copie skill
   export.ps1 / .sh          archivia la .saipen/ di un progetto per backup
+  saipen_crew.bat / .sh     apre il layout crew a 3 finestre (bonus, extensions/subs/crew.md)
 
 tools/                      <- VALIDATORE CANONICO E UTILITY DI REPO
   validate.py               validatore di conformità canonico (stdlib Python, zero installazioni; valida STATE contro state.schema.json direttamente, più controlli del grafo che la coppia di shell non può fare)

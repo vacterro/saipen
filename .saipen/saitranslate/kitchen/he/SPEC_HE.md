@@ -43,12 +43,18 @@ saipen/
   SKILL.md                  נקודת כניסה דקה לפלטפורמות הקוראות מיומנויות
   STYLE.md                  קולות: צ'אט, LOG.md, ארטיפקטים
   UI.md                     מפרט ממשק משתמש של Dark Golden Win95 (חובה לעבודת ממשק משתמש)
-  phases/                   לוגיקת מכונת מצבים קפדנית
-    [Core Phases]
+  BOOT.md                   ~גרעין התנעה קרה: הנתיב המהיר ש-`continue` חשוף זקוק לו,
+                             לפני שכל אחד מהנ"ל נטען
+  phases/                   לוגיקת מכונת מצבים קפדנית -- 16 מסמכים, אחד לכל
+                             ערך enum RFC § 1.6 (נבדק מכונה בשני הכיוונים
+                             על ידי tools/validate.py)
+    [Phases Core - שלבי ליבה]
     init.md / plan.md / scout.md / build.md / verify.md / review.md / ship.md / done.md / blocked.md
-    [Maintenance Phases]
-    hunt.md / add.md / clean.md / translate.md
-    
+    [Phases Maintenance - שלבי תחזוקה]
+    hunt.md / markhunt.md / add.md / clean.md / translate.md
+
+    [תשתית]
+    prepare.md              אורז עבודה להעברה לסוכן הבא
     validate.md             בדיקת תאימות
 
 extensions/                 <- השכבה המסתגלת
@@ -63,6 +69,7 @@ bootstrap/                  <- התקנה/ייצוא/הסרה, מכונה אחת
   inject.ps1 / .sh          מתקין את בלוק SAIPEN + עותקי מיומנויות (התחלה מהירה ב-README)
   uninstall.ps1 / .sh       הופך את תהליך ההזרקה -- מסיר בלוקים + עותקי מיומנויות
   export.ps1 / .sh          מארכב את ה-.saipen/ של פרויקט לגיבוי
+  saipen_crew.bat / .sh     פותח את פריסת ה-3-חלונות של הצוות (בונוס, extensions/subs/crew.md)
 
 tools/                      <- מאמת קנוני ושירותי מאגר
   validate.py               מאמת תאימות קנוני (ספריית Python סטנדרטית, אפס התקנות; מאמת את STATE מול state.schema.json ישירות, פלוס בדיקות גרף שצמד המעטפת לא יכול לעשות)

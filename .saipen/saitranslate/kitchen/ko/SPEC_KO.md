@@ -43,12 +43,18 @@ saipen/
   SKILL.md                  기술 읽기 지원 플랫폼을 위한 얇은 진입점
   STYLE.md                  음성: chat, LOG.md, artifacts
   UI.md                     Dark Golden Win95 UI 사양 (UI 작업 시 필수)
-  phases/                   엄격한 상태 머신 로직
+  BOOT.md                   ~콜드스타트 커널: 베어 `continue`가 필요로 하는
+                             고속 경로, 위의 어떤 것도 로드되기 전
+  phases/                   엄격한 상태 머신 로직 -- RFC § 1.6 열거 값당
+                             16개 문서 (tools/validate.py에 의한 양방향
+                             기계 검증 포함)
     [Core Phases]
     init.md / plan.md / scout.md / build.md / verify.md / review.md / ship.md / done.md / blocked.md
     [Maintenance Phases]
-    hunt.md / add.md / clean.md / translate.md
-    
+    hunt.md / markhunt.md / add.md / clean.md / translate.md
+
+    [Infrastructure]
+    prepare.md              다음 에이전트로 인계할 패키지 작업
     validate.md             적합성 테스트
 
 extensions/                 <- 적응 계층 (THE ADAPTIVE LAYER)
@@ -63,6 +69,7 @@ bootstrap/                  <- 설치/내보내기/제거 (한 번에 한 머신
   inject.ps1 / .sh          SAIPEN 블록 + 스킬 복사본 설치 (README 빠른 시작)
   uninstall.ps1 / .sh       inject의 반대 -- 블록 + 스킬 복사본 제거
   export.ps1 / .sh          백업을 위해 프로젝트의 .saipen/ 아카이브
+  saipen_crew.bat / .sh     3창 크루 레이아웃 열기 (보너스, extensions/subs/crew.md)
 
 tools/                      <- 표준 검사기 및 저장소 유틸리티
   validate.py               표준 적합성 검사기 (표준 Python, 설치 불필요; state.schema.json에 대해 STATE 직접 검증, 쉘 스크립트가 할 수 없는 그래프 검사 추가 수행)

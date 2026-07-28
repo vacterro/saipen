@@ -40,11 +40,11 @@ zou moeten aannemen.
    en, waar praktisch mogelijk, dekking in `tests/validate.sh` +
    `tests/validate.ps1` (beide platformen) of een testscenario onder
    `tests/scenarios/`.
-4. Voer beide validators uit voordat u een PR opent:
+4. Voer de canonieke validator uit voordat u een PR opent:
    ```bash
-   bash tests/validate.sh
-   powershell -File tests/validate.ps1
+   python tools/validate.py
    ```
+   Dit is degene die ertoe doet -- het controleert `STATE.md` tegen `extensions/schemas/state.schema.json`, doorloopt de `LOG.md` gebeurtenisgrafiek over verzegelde segmenten heen, en verifieert het runtime-manifest en de injector-bedrading. `tests/validate.sh` / `validate.ps1` zijn de **bevroren draagbare vloer** voor hosts zonder Python (dat staat bovenaan elk bestand): minder controles, alleen bewaard zodat een host zonder Python niet met lege handen staat. Voer ze ook uit als uw wijziging een van hen raakt, maar nooit *in plaats van* -- alleen de vloer doorstaan bewijst veel minder dan het lijkt. CI voert de canonieke validator uit bij elke push en PR, ongeacht (`.github/workflows/validate.yml`).
 5. Verhoog `VERSION` volgens het schema in `phases/ship.md` (patch voor alleen-documentatie
    verduidelijkingen, minor voor nieuw normatief gedrag, major voor wijzigingen in het contract
    die compatibiliteit verbreken) en houd de versiebadge in `README.md` synchroon --

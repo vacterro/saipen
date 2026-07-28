@@ -3,23 +3,21 @@ name: validate
 # Runs the full conformance suite: canonical validator, both halves of the
 # frozen portable floor, and the scenario fixtures.
 #
-# READ THE TRIGGER BEFORE TRUSTING THIS FILE. It fires on `pull_request` and
-# `workflow_dispatch` only -- c022677 removed the `push` trigger deliberately
-# (notification spam). This repo has never opened a pull request, so in
-# practice this workflow does not run on the way anything actually ships here,
-# which is a direct push to main. Five releases went out on 2026-07-28 with
-# zero runs of it.
-#
-# So the real gate on this repo is the pre-commit hook (tools/install_hook.py),
-# which runs tools/validate.py before every commit. That hook is opt-in,
-# per-machine, and bypassable with --no-verify -- know that, rather than
-# assuming this file is covering you. Re-adding `push:` would make it a real
-# gate at the cost of a notification per push; that is a preference, so it is
-# left to the repo owner rather than flipped back silently.
+# Triggers on push to main (the actual ship path) AND pull_request (someone
+# else's branch). Concurrency group cancels redundant in-progress runs so the
+# last push in a burst is the only one that finishes -- notifications for the
+# cancelled ones never fire.
 
 on:
+  push:
+    branches: [main, master]
   pull_request:
+    branches: [main, master]
   workflow_dispatch:
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   conformance:
@@ -53,7 +51,7 @@ jobs:
         shell: pwsh
         run: ./tests/validate.ps1
 
-      # The 34 fixtures in tests/scenarios/ sat unexecuted by anything until
+      # The 42 fixtures in tests/scenarios/ sat unexecuted by anything until
       # v7.79.0 -- and could not have passed if run, since most shipped only
       # the one file their concept concerned. Each executable one now declares
       # `expect: pass|fail` in its README and this runner holds it to that. It

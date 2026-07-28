@@ -40,7 +40,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 ## Điều nên biết
 - Có thay đổi chưa commit khi quay lại dự án? Bình thường thôi -- SAIPEN chỉ commit ở bước `ship`, không phải mỗi bước. Agent sẽ kiểm tra xem đó là thay đổi của ai trước khi động vào bất cứ thứ gì.
 - Muốn nó nhớ một quyết định kiến trúc thực sự? Đặt vào `.saipen/KNOWLEDGE/`, dưới dạng một file `decisions.md` hoặc các file đánh số `ADR-001.md`.
-- Máy này không có git hay shell? Agent sẽ nói thẳng (`mode`, `WAIT: <câu hỏi>`) thay vì đoán mò.
+- Máy này không có git hay shell? Agent sẽ nói thẳng (`mode`, `WAIT: <category> -- <câu hỏi>`) thay vì đoán mò.
 - Muốn có lưới an toàn? `python <saipen-clone>/tools/install_hook.py` sẽ cài đặt kiểm tra trước khi commit.
 
 ---

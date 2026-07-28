@@ -1,23 +1,43 @@
 <!-- TRANSLATED TO SK -->
 # Security Policy
 
-## Scope
+## Rozsah
 
-SAIPEN is a specification plus a small set of local install/export
-scripts (`bootstrap/inject.ps1`/`.sh`, `uninstall.ps1`/`.sh`,
-`export.ps1`/`.sh`). It does not run a server, does not collect
-telemetry, and does not transmit any data anywhere. Everything the
-scripts do is local filesystem writes to files you already control
-(your own `~/.claude`, `~/.gemini`, project `.saipen/`, etc.), each
-guarded by an automatic `.bak` backup before the first modification.
+SAIPEN je špecifikácia plus malá sada lokálnych inštalačných/exportných
+skriptov (`bootstrap/inject.ps1`/`.sh`, `uninstall.ps1`/`.sh`,
+`export.ps1`/`.sh`). Nespúšťa server, nezbiera telemetriu
+a nikde neprenáša žiadne dáta. Všetko, čo skripty robia, sú lokálne
+zápisy do súborového systému na súbory, ktoré už ovládate
+(vlastné `~/.claude`, `~/.gemini`, projektový `.saipen/` atď.).
 
-The two things actually worth a security report:
-1. A bootstrap script doing something to your filesystem or git history
-   beyond what its own comments/README describe.
-2. The protocol's own secrets-hygiene rule (RFC.md § 1.1 -- never write
-   API keys, tokens, passwords into `STATE.md`/`BOARD.md`/`LOG.md`/
-   `KNOWLEDGE/`/`kitchen/`) having a real gap that would cause an
-   agent following SAIPEN to leak a secret into a committed file.
+Platia tu dve rôzne úrovne starostlivosti a stojí za to byť presný
+namiesto tvrdenia o všeobecnej bezpečnosti:
+
+- **Vaše vlastné konfiguračné súbory** (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`,
+  `.aider.conf.yml`) sú upravované iba pridaním alebo odstránením
+  ohraničeného bloku `SAIPEN:BEGIN`/`END` a originál je skopírovaný do
+  `<file>.bak` pred prvou úpravou. Odinštalovanie navyše zapíše
+  `<file>.uninstalled.bak` pred odstránením.
+- **Adresáre zručností**, ktoré injector vytvára (`~/.claude/skills/saipen`
+  a podobne) sú kópie vlastnené SAIPENom a **nie sú** zálohované: inštalácia
+  ich hromadne prepisuje a odinštalovanie ich rekurzívne odstraňuje. To je
+  zámerné -- neobsahujú nič iné ako kópie súborov tohto repozitára --
+  ale ak ručne upravíte lokálnu kópiu zručnosti, tieto úpravy sa stratia pri
+  najbližšom `inject`/`uninstall`. Vlastné úpravy uchovávajte vo vlastnom
+  konfiguračnom bloku alebo forku, nie v skopírovanom priečinku zručnosti.
+
+Dve veci, ktoré skutočne stoja za bezpečnostnú správu:
+1. Bootstrap skript robiaci niečo s vaším súborovým systémom alebo git históriou
+   nad rámec toho, čo popisujú jeho vlastné komentáre/README.
+2. Vlastné pravidlo hygieny tajomstiev protokolu (RFC.md § 1.1 -- nikdy nezapisovať
+   API kľúče, tokeny, heslá do `STATE.md`/`BOARD.md`/`LOG.md`/
+   `KNOWLEDGE/`/`kitchen/`/`extensions/`/`saitranslate/kitchen/`/
+   `recovery/`/`logs/`) s reálnou medzerou, ktorá by spôsobila, že agent
+   dodržiavajúci SAIPEN unikne tajomstvo do skommitovaného súboru. Posledné dve
+   sú tie záludné: Recovery skopíruje poškodený `STATE.md` doslovne do
+   `.saipen/recovery/` a LOG sealing presúva riadky doslovne do
+   `.saipen/logs/`, takže čokoľvek, čo sa dostalo do originálu, je archivované
+   mechanizmom, ktorého celou úlohou je nemeniť obsah.
 
 ## Supported Versions
 

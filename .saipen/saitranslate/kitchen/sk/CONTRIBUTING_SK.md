@@ -41,11 +41,20 @@ should take.
    entry and, where practical, coverage in `tests/validate.sh` +
    `tests/validate.ps1` (both platforms) or a fixture under
    `tests/scenarios/`.
-4. Run both validators before opening a PR:
+4. Pred otvorením PR spustite kanonický validátor:
    ```bash
-   bash tests/validate.sh
-   powershell -File tests/validate.ps1
+   python tools/validate.py
    ```
+   Toto je ten, na ktorom záleží – kontroluje `STATE.md` proti
+   `extensions/schemas/state.schema.json`, prechádza graf udalostí `LOG.md`
+   cez uzavreté segmenty a overuje runtime manifest a injector prepojenie.
+   `tests/validate.sh` / `validate.ps1` sú **zmrazená prenosná podlaha**
+   pre hostiteľov bez Pythonu (uvádzajú to na začiatku každého súboru):
+   menej kontrol, ponechané len aby hostiteľ bez Pythonu nebol bez ničoho.
+   Spustite ich tiež, ak sa vaša zmena dotýka niektorého z nich, ale nikdy
+   *namiesto* – prejdenie len podlahy dokazuje oveľa menej, než sa zdá.
+   CI spúšťa kanonický validátor pri každom pushi a PR bez ohľadu na to
+   (`.github/workflows/validate.yml`).
 5. Bump `VERSION` per the scheme in `phases/ship.md` (patch for docs-only
    clarifications, minor for new normative behavior, major for breaking
    contract changes) and keep `README.md`'s version badge in sync --

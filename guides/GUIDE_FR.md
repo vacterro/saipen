@@ -42,7 +42,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 ## Bon à savoir
 - Des changements non commités en revenant sur le projet ? Normal -- SAIPEN committe seulement au `ship`, pas à chaque étape. L'agent vérifie d'abord à qui appartiennent ces changements avant d'y toucher.
 - Tu veux qu'il retienne une vraie décision d'architecture ? Mets-la dans `.saipen/KNOWLEDGE/`, soit en un fichier `decisions.md`, soit en fichiers numérotés `ADR-001.md`.
-- Pas de git ni de shell sur cette machine ? L'agent le dit clairement (`mode`, `WAIT: <question>`) plutôt que de deviner.
+- Pas de git ni de shell sur cette machine ? L'agent le dit clairement (`mode`, `WAIT: <category> -- <question>`) plutôt que de deviner.
 - Tu veux un filet de sécurité ? `python <clone-saipen>/tools/install_hook.py` installe une vérification avant chaque commit.
 
 ---

@@ -1,14 +1,13 @@
-# SubSaipen -- EXAMPLE, copy into your project
+# SubSaipen -- production sub-agents
 
 Isolated, read-only research agents that run alongside the main agent on
 the same project -- they find things and propose things, they never edit
-the project themselves. Same role as `extensions/security/`,
-`extensions/performance/`: a reference example under RFC § 1.9, not
-something the SAIPEN home reads on its own behalf.
+the project themselves. Defined in RFC § 1.9, detailed in PROTOCOL.md.
 
-**Not yet field-tested.** Design is sound, nothing has run for real. Same
-policy as `extensions/performance/` was under until proven live: usable,
-not advertised.
+**Running in production on this repo since v7.84.0.** Four live instances
+(saihunt, saipython, saiwiki, saitranslate) with real STATE/BOARD/LOG/OUTBOX,
+checked by tools/validate.py every invocation. The same design applies to any
+project that boots SAIPEN -- sub spawn, work, report through OUTBOX, collect.
 
 ## The one rule that matters
 

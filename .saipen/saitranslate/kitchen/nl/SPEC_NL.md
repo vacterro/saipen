@@ -43,12 +43,18 @@ saipen/
   SKILL.md                  dunne ingang voor vaardigheid-lezende platformen
   STYLE.md                  stemmen: chat, LOG.md, artefacten
   UI.md                     Dark Golden Win95 UI specificatie (verplicht voor UI werk)
-  phases/                   strikte statusmachinelogica
+  BOOT.md                   ~cold-start kernel: het snelle pad dat een kale
+                             `continue` nodig heeft, voordat bovenstaande wordt geladen
+  phases/                   strikte statusmachinelogica -- 16 docs, één per
+                             RFC § 1.6 enumwaarde (machine-gecontroleerd beide
+                             richtingen door tools/validate.py)
     [Kern Fasen]
     init.md / plan.md / scout.md / build.md / verify.md / review.md / ship.md / done.md / blocked.md
     [Onderhouds Fasen]
-    hunt.md / add.md / clean.md / translate.md
-    
+    hunt.md / markhunt.md / add.md / clean.md / translate.md
+
+    [Infrastructuur]
+    prepare.md              werk verpakken voor overdracht aan de volgende agent
     validate.md             conformiteitstesten
 
 extensions/                 <- DE ADAPTIEVE LAAG
@@ -63,6 +69,7 @@ bootstrap/                  <- INSTALLATIE/EXPORT/DE-INSTALLATIE, één machine 
   inject.ps1 / .sh          installeert het SAIPEN blok + vaardigheidskopieën (README Snelstart)
   uninstall.ps1 / .sh       draait inject om -- verwijdert blokken + vaardigheidskopieën
   export.ps1 / .sh          archiveert een project's .saipen/ voor back-up
+  saipen_crew.bat / .sh     opent de 3-venster crew lay-out (bonus, extensions/subs/crew.md)
 
 tools/                      <- CANONIEKE VALIDATOR & REPO UTILITIES
   validate.py               canonieke conformiteitsvalidator (stdlib Python, nul installaties; valideert STATE direct tegen state.schema.json, plus grafiekcontroles die het shell-paar niet kan doen)

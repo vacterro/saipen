@@ -2,6 +2,17 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.98.0 -- 2026-07-28 -- drift hunt: subs README, sub states, self-transitions, adapters
+
+Systematic drift hunt across surfaces outside validate.py coverage. Sub-sections:
+
+- **subs README** said "Not yet field-tested" with four live instances running on this repo. Now states honest production status.
+- **Sub next_action format fixed**: saipython (no prefix → `RESUME:`), saihunt (bare prose → `WAIT: user brake`), saiwiki ("Wait for user command..." → `WAIT: user brake`). All three validate.py now catches.
+- **saihunt STATE** was `phase: HUNT` with board showing HUNT-001 DONE and no TODO. Transitioned to DONE.
+- **Self-transition guard** in validate.py skipped *all* validation for `transition_from == phase`. Now checks the source phase is a known enum value; self-transitions are legal, but an unknown phase is always a FAIL.
+- **Adapter cross-ref check** added: every `saipen/` path referenced in `extensions/adapters/*.md` must exist in the home. 9 adapters, all pass.
+- **saitranslate saipen_home** used single backslashes (YAML ambiguity). Fixed to double backslashes matching siblings.
+
 ## 7.97.0 -- 2026-07-28 -- the CI that has not run all day, and a claim I made about it without looking
 
 This one started by checking a sentence I wrote myself hours earlier. v7.96.0 shipped CONFORMANCE row 65 asserting that `validate.yml` runs both halves of the portable floor. I had not opened the workflow. It runs `validate.sh` and has never run `validate.ps1` -- which is precisely why that script's `needs:` regex drifted apart from its sibling and FAILed conformant boards until yesterday. The root cause of the v7.96.0 defect was still sitting there, under a row claiming it was covered.

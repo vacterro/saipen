@@ -41,11 +41,20 @@ should take.
    entry and, where practical, coverage in `tests/validate.sh` +
    `tests/validate.ps1` (both platforms) or a fixture under
    `tests/scenarios/`.
-4. Run both validators before opening a PR:
+4. PR açmadan önce canonical doğrulayıcıyı çalıştırın:
    ```bash
-   bash tests/validate.sh
-   powershell -File tests/validate.ps1
+   python tools/validate.py
    ```
+   Önemli olan budur -- `STATE.md` dosyasını `extensions/schemas/state.schema.json`
+   ile kontrol eder, `LOG.md` olay grafiğinde mühürlenmiş segmentler boyunca
+   ilerler ve çalışma zamanı manifestosunu ve enjektör bağlantılarını doğrular.
+   `tests/validate.sh` / `validate.ps1` Python'u olmayan konaklar için
+   **dondurulmuş taşınabilir taban**dır (her dosyanın başında belirtilir):
+   daha az kontrol, yalnızca Python'suz bir konağın hiçbir şeysiz kalmaması
+   için tutulur. Değişikliğiniz bunlardan birine dokunuyorsa onları da
+   çalıştırın, ancak asla *onun yerine* -- sadece tabanı geçmek göründüğünden
+   çok daha azını kanıtlar. CI her push ve PR'da canonical doğrulayıcıyı
+   çalıştırır (`.github/workflows/validate.yml`).
 5. Bump `VERSION` per the scheme in `phases/ship.md` (patch for docs-only
    clarifications, minor for new normative behavior, major for breaking
    contract changes) and keep `README.md`'s version badge in sync --

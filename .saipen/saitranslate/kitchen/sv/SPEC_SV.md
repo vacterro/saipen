@@ -43,12 +43,18 @@ saipen/
   SKILL.md                  tunn ingångspunkt för kompetensläsande (skill-reading) plattformar
   STYLE.md                  röster: chatt, LOG.md, artefakter
   UI.md                     Mörkt Gyllene Win95 UI-spec (obligatorisk för UI-arbete)
-  phases/                   strikt tillståndsmaskinlogik
+  BOOT.md                   ~cold-startkärna: snabbvägen en bar `continue`
+                             behöver, innan något av ovanstående laddats
+  phases/                   strikt tillståndsmaskinlogik -- 16 dokument, ett per
+                             RFC § 1.6 enum-värde (maskinkontrollerad båda vägar
+                             av tools/validate.py)
     [Core Phases]
     init.md / plan.md / scout.md / build.md / verify.md / review.md / ship.md / done.md / blocked.md
     [Maintenance Phases]
-    hunt.md / add.md / clean.md / translate.md
-    
+    hunt.md / markhunt.md / add.md / clean.md / translate.md
+
+    [Infrastructure]
+    prepare.md              paketerar arbete för överlämning till nästa agent
     validate.md             konformitetstestning
 
 extensions/                 <- DET ADAPTIVA LAGRET
@@ -63,6 +69,7 @@ bootstrap/                  <- INSTALLERA/EXPORTERA/AVINSTALLERA, en maskin i ta
   inject.ps1 / .sh          installerar SAIPEN-blocket + skill-kopior (README Snabbstart)
   uninstall.ps1 / .sh       återställer injektion -- tar bort block + skill-kopior
   export.ps1 / .sh          arkiverar ett projekts .saipen/ för säkerhetskopiering
+  saipen_crew.bat / .sh     öppnar 3-fönsters crew-layouten (bonus, extensions/subs/crew.md)
 
 tools/                      <- KANONISK VALIDATOR & REPO-VERKTYG
   validate.py               kanonisk konformitetsvalidator (stdlib Python, noll installationer; validerar STATE mot state.schema.json direkt, plus grafkontroller som skal-paret inte kan göra)

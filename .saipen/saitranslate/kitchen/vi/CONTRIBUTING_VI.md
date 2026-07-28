@@ -40,11 +40,20 @@ nên có.
    `CHANGELOG.md` và, nếu có thể thực hiện, phạm vi phủ sóng trong `tests/validate.sh` +
    `tests/validate.ps1` (cả hai nền tảng) hoặc một vật cố định (fixture) dưới
    `tests/scenarios/`.
-4. Chạy cả hai trình xác thực trước khi mở một PR:
+4. Chạy trình xác thực chuẩn (canonical validator) trước khi mở một PR:
    ```bash
-   bash tests/validate.sh
-   powershell -File tests/validate.ps1
+   python tools/validate.py
    ```
+   Đây mới là thứ quan trọng – nó kiểm tra `STATE.md` so với
+   `extensions/schemas/state.schema.json`, duyệt đồ thị sự kiện `LOG.md`
+   qua các phân đoạn đã niêm phong và xác minh runtime manifest và injector
+   wiring. `tests/validate.sh` / `validate.ps1` là **mức sàn di động đông
+   lạnh** cho các máy chủ không có Python (chúng nói như vậy ở đầu mỗi tệp):
+   ít kiểm tra hơn, chỉ giữ lại để máy chủ không có Python không bị bỏ lại
+   tay không. Chạy chúng nữa nếu thay đổi của bạn chạm vào một trong hai
+   tệp đó, nhưng đừng bao giờ *thay thế* -- chỉ vượt qua mức sàn chứng minh
+   được ít hơn nhiều so với vẻ ngoài của nó. CI chạy trình xác thực chuẩn
+   trên mọi push và PR bất kể thế nào (`.github/workflows/validate.yml`).
 5. Tăng phiên bản `VERSION` theo sơ đồ trong `phases/ship.md` (patch cho các 
    làm rõ chỉ thuộc về tài liệu, minor cho hành vi quy chuẩn mới, major cho các thay đổi
    phá vỡ hợp đồng (breaking changes)) và giữ huy hiệu phiên bản của `README.md` đồng bộ --

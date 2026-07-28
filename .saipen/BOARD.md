@@ -8,6 +8,8 @@
 - [x] T-257 [P0] `validate.ps1` was executed by nothing -- not CI, not the hook. Added as a pwsh step; this was the root cause of the v7.96.0 `needs:` defect. | verify: workflow has 4 steps, ps1 PASSes locally (2026-07-28)
 - [x] T-258 [P1] `validate.yml` header claimed to enforce what its trigger cannot: PR-only on a repo with zero PRs ever, so today's five releases ran no CI. Header now states the real trigger and names the pre-commit hook as the real gate; `push:` left to the owner. | verify: header matches `gh run list` reality (2026-07-28)
 - [x] T-259 [P2] Ship v7.97.0. | verify: validate.py + validate.sh + validate.ps1 + run_scenarios.py all PASS (2026-07-28)
+- [x] T-260 [P2] Wiki refresh — 8 GitHub wiki pages regenerated from v7.97.0 sources. Pushed to github.com/vacterro/saipen.wiki. | verify: git push succeeded, 9 files to master (0e99a90), wiki live at github.com/vacterro/saipen/wiki (2026-07-28)
+- [x] T-261 [P0] Fix saipen validate FAIL — saitranslate STATE had phase=TRANSLATE with mode=read-only (RFC § 1.3). Fixed by setting phase to DONE and moving SAIT-003 to TODO. | verify: tools/validate.py PASS (2026-07-28)
 - [x] T-252 [P0] Portable floor now probes all nine RFC § 1.2 fields (transition_from with the fresh-INIT exception). It required seven, so a Python-less host PASSed states the canonical validator FAILs. | verify: both scripts PASS this repo, desync fixtures red (2026-07-28)
 - [x] T-253 [P0] Portable read-only ban brought to § 1.3: INIT/PLAN/ADD/BUILD/SHIP/CLEAN/TRANSLATE. | verify: both scripts PASS, ban-truncation fixtures red (2026-07-28)
 - [x] T-254 [P0] Drift detector covers the portable floor -- fifth surface in four releases. First draft could never go red (searched for INIT anywhere, phase enum lists it); tightened to parse each script's own ban message. | verify: 4 desync fixtures red, restore green (2026-07-28)
@@ -73,6 +75,7 @@
 - [x] T-204 [P0] BOOT cold-start chain sync — README.md + extensions/adapters/generic.md + claude.md paste line: BOOT.md first. SKILL.md frontmatter corrected. (2026-07-27)
 - [x] T-205 [P0] STATE snapshot WAIT fix — phase HUNT (not DONE+WAIT), RFC § 2.1 empty-board auto-transition. LOG-001.md:660 [T-none] fix. (2026-07-27)
 - [x] T-206 [P1] SHIP added to ANY_FROM in validate.py (RFC § 1.10). 32 locale badge bump 7.82.0→7.83.0. (2026-07-27)
+- [x] T-251 [P2] 29 non-Core locale guides updated from `WAIT: <question>` to `WAIT: <category> -- <word>` — saitranslate SAIT-002 | verify: drift detector 0 stale, tools/validate.py PASS (2026-07-28)
 
 ## BLOCKED
-- [ ] T-251 [P2] 29 non-Core locale guides still teach the pre-v7.93.0 `WAIT: <question>` shape | blocker: subSaipen translation work by standing rule -- Core owns en/ru/et/ded only; live list is validate.py's `guide-wait-shape` WARN
+

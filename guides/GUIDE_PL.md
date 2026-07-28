@@ -40,7 +40,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 ## Warto wiedzieć
 - Niezacommitowane zmiany po powrocie do projektu? Normalka -- SAIPEN commituje dopiero przy `ship`, nie na każdym kroku. Agent najpierw sprawdza, czyje to zmiany, zanim czegokolwiek dotknie.
 - Chcesz, żeby pamiętał prawdziwą decyzję architektoniczną? Wrzuć ją do `.saipen/KNOWLEDGE/`, jako plik `decisions.md` albo ponumerowane pliki `ADR-001.md`.
-- Brak gita albo shella na tej maszynie? Agent mówi to wprost (`mode`, `WAIT: <pytanie>`), zamiast zgadywać.
+- Brak gita albo shella na tej maszynie? Agent mówi to wprost (`mode`, `WAIT: <category> -- <pytanie>`), zamiast zgadywać.
 - Chcesz siatkę bezpieczeństwa? `python <klon-saipen>/tools/install_hook.py` instaluje sprawdzenie przed commitem.
 
 ---

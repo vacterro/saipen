@@ -43,13 +43,16 @@ saipen/
   SKILL.md                  tyndt indgangspunkt for platforme der læser skills
   STYLE.md                  stemmer: chat, LOG.md, artefakter
   UI.md                     Mørk Gylden Win95 UI specifikation (obligatorisk for UI-arbejde)
-  phases/                   streng tilstandsmaskinelogik
+  BOOT.md                   boot-sekvens / koldstartsorkestrering
+  phases/                   16 docs, one per RFC § 1.6 enum value (machine-checked both ways by tools/validate.py)
     [Core Phases]
     init.md / plan.md / scout.md / build.md / verify.md / review.md / ship.md / done.md / blocked.md
     [Maintenance Phases]
-    hunt.md / add.md / clean.md / translate.md
-    
-    validate.md             overensstemmelsestest
+    hunt.md / add.md / clean.md / translate.md / markhunt.md
+
+  [Infrastructure]
+  prepare.md                workspace-forberedelse
+  validate.md               overordnet overensstemmelsestest
 
 extensions/                 <- DET ADAPTIVE LAG
   adapters/                 model-specifikke instruktionsbroer, for platforme injektoren
@@ -68,6 +71,7 @@ bootstrap/                  <- INSTALLER/EKSPORTER/AFINSTALLER, én maskine ad g
   inject.ps1 / .sh          installerer SAIPEN-blokken + skill kopier (README Hurtig Start)
   uninstall.ps1 / .sh       omvender inject -- fjerner blokke + skill kopier
   export.ps1 / .sh          arkiverer et projekts .saipen/ for backup
+  saipen_crew.bat / .sh     starter SAIPEN crew-værktøjet
 
 tools/                      <- KANONISK VALIDATOR & REPO VÆRKTØJER
   validate.py               kanonisk overensstemmelsesvalidator (stdlib Python, nul

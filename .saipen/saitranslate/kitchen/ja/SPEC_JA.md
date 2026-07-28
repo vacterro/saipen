@@ -43,12 +43,18 @@ saipen/
   SKILL.md                  スキル読み取りプラットフォーム用の薄いエントリポイント
   STYLE.md                  ボイス: チャット、LOG.md、アーティファクト
   UI.md                     Dark Golden Win95 UI仕様（UI作業に必須）
-  phases/                   厳格なステートマシンロジック
+  BOOT.md                   ~コールドスタートカーネル：ベア`continue`が必要とする
+                             高速パス、上記のいずれかがロードされる前
+  phases/                   厳格なステートマシンロジック -- RFC § 1.6の
+                             列挙値ごとに16のドキュメント（tools/validate.py
+                             による双方向の機械チェック付き）
     [Core Phases]
     init.md / plan.md / scout.md / build.md / verify.md / review.md / ship.md / done.md / blocked.md
     [Maintenance Phases]
-    hunt.md / add.md / clean.md / translate.md
-    
+    hunt.md / markhunt.md / add.md / clean.md / translate.md
+
+    [Infrastructure]
+    prepare.md              パッケージ作業を次のエージェントへ引き渡す
     validate.md             適合性テスト
 
 extensions/                 <- 適応レイヤー
@@ -63,6 +69,7 @@ bootstrap/                  <- インストール/エクスポート/アンイ�
   inject.ps1 / .sh          SAIPENブロック + スキルコピーをインストール（README クイックスタート）
   uninstall.ps1 / .sh       インジェクトを元に戻す -- ブロック + スキルコピーを削除
   export.ps1 / .sh          バックアップのためにプロジェクトの .saipen/ をアーカイブ
+  saipen_crew.bat / .sh     3ウィンドウのクルーレイアウトを開く（特典、extensions/subs/crew.md）
 
 tools/                      <- 標準バリデーター & リポジトリユーティリティ
   validate.py               標準の適合性バリデーター（標準ライブラリのPython、インストール不要。STATEを直接state.schema.jsonに対して検証し、シェルペアでは実行できないグラフチェックを追加）

@@ -40,11 +40,20 @@ devrait prendre.
    dans `CHANGELOG.md` et, lorsque c'est pratique, une couverture dans `tests/validate.sh` +
    `tests/validate.ps1` (les deux plateformes) ou une fixture sous
    `tests/scenarios/`.
-4. Exécutez les deux validateurs avant d'ouvrir une PR :
+4. Exécutez le validateur canonique avant d'ouvrir une PR :
    ```bash
-   bash tests/validate.sh
-   powershell -File tests/validate.ps1
+   python tools/validate.py
    ```
+   C'est celui qui compte -- il vérifie `STATE.md` par rapport à
+   `extensions/schemas/state.schema.json`, parcourt le graphe d'événements `LOG.md`
+   à travers les segments scellés, et vérifie le manifeste d'exécution et le câblage
+   de l'injecteur. `tests/validate.sh` / `validate.ps1` sont le **plancher portable
+   gelé** pour les hôtes sans Python (ils le disent en haut de chaque fichier) :
+   moins de vérifications, conservés uniquement pour qu'un hôte sans Python ne soit
+   pas laissé sans rien. Exécutez-les aussi si votre modification touche à l'un d'eux,
+   mais jamais *à la place* -- réussir le plancher seul prouve beaucoup moins qu'il n'y paraît.
+   CI exécute le validateur canonique sur chaque push et PR indépendamment
+   (`.github/workflows/validate.yml`).
 5. Augmentez `VERSION` selon le schéma dans `phases/ship.md` (patch pour des clarifications
    uniquement dans la doc, mineur pour un nouveau comportement normatif, majeur pour des changements
    de contrat cassants) et gardez le badge de version du `README.md` synchronisé --

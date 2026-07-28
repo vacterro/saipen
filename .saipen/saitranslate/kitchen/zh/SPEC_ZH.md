@@ -43,12 +43,18 @@ saipen/
   SKILL.md                  供读取技能的平台使用的轻量级入口点
   STYLE.md                  语音风格：聊天、LOG.md、工件
   UI.md                     深金色 Win95 UI 规范 (在处理 UI 工作时强制执行)
-  phases/                   严格的状态机逻辑
+  BOOT.md                   ~冷启动内核：裸 `continue` 所需的快速路径，
+                             在上述任何内容加载之前
+  phases/                   严格的状态机逻辑 -- 16 个文档，每个对应
+                             RFC § 1.6 枚举值之一（由 tools/validate.py
+                             双向机器检查）
     [Core Phases 核心阶段]
     init.md / plan.md / scout.md / build.md / verify.md / review.md / ship.md / done.md / blocked.md
     [Maintenance Phases 维护阶段]
-    hunt.md / add.md / clean.md / translate.md
-    
+    hunt.md / markhunt.md / add.md / clean.md / translate.md
+
+    [Infrastructure 基础设施]
+    prepare.md              打包工作以移交给下一个智能体
     validate.md             一致性测试
 
 extensions/                 <- 自适应层 (THE ADAPTIVE LAYER)
@@ -66,6 +72,7 @@ bootstrap/                  <- 安装/导出/卸载，每次一台机器
   inject.ps1 / .sh          安装 SAIPEN 块 + 技能副本 (README 快速入门)
   uninstall.ps1 / .sh       回滚注入 -- 移除块 + 技能副本
   export.ps1 / .sh          归档一个项目的 .saipen/ 用于备份
+  saipen_crew.bat / .sh     打开三窗口协作布局（额外功能，extensions/subs/crew.md）
 
 tools/                      <- 规范验证器及仓库实用工具
   validate.py               规范的一致性验证器 (stdlib Python，零安装；直接

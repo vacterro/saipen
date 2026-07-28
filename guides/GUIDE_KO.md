@@ -40,7 +40,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 ## 알아두면 좋은 것
 - 프로젝트로 돌아왔을 때 커밋되지 않은 변경사항이 있다면? 정상입니다 -- SAIPEN은 매 단계가 아니라 `ship` 시점에만 커밋합니다. 에이전트는 무언가를 건드리기 전에 먼저 그 변경사항이 누구의 것인지 확인합니다.
 - 실제 아키텍처 결정을 기억하게 하고 싶다면? `.saipen/KNOWLEDGE/`에 `decisions.md` 파일 하나로, 또는 번호가 매겨진 `ADR-001.md` 파일들로 넣으세요.
-- 이 머신에 git이나 shell이 없다면? 에이전트는 추측하는 대신 명확하게 말합니다 (`mode`, `WAIT: <질문>`).
+- 이 머신에 git이나 shell이 없다면? 에이전트는 추측하는 대신 명확하게 말합니다 (`mode`, `WAIT: <category> -- <질문>`).
 - 안전망을 원하세요? `python <saipen-클론>/tools/install_hook.py`로 커밋 전 검사를 설치할 수 있습니다.
 
 ---

@@ -36,11 +36,11 @@ Vage rapporter ("dette føles feil") er vanskeligere å agere på enn en spesifi
    og, der det er praktisk mulig, dekning i `tests/validate.sh` +
    `tests/validate.ps1` (begge plattformer) eller en fixture under
    `tests/scenarios/`.
-4. Kjør begge validatorene før du åpner en PR:
+4. Kjør den kanoniske validatoren før du åpner en PR:
    ```bash
-   bash tests/validate.sh
-   powershell -File tests/validate.ps1
+   python tools/validate.py
    ```
+   Dette er den som teller -- den sjekker `STATE.md` mot `extensions/schemas/state.schema.json`, går gjennom `LOG.md` hendelsesgrafen over forseglede segmenter, og verifiserer kjøretidsmanifestet og injektortilkoblingene. `tests/validate.sh` / `validate.ps1` er den **frosne portable bunnlinjen** for verter uten Python (det står øverst i hver fil): færre sjekker, beholdt kun så en vert uten Python ikke står igjen med ingenting. Kjør dem også hvis endringen din påvirker en av dem, men aldri *istedenfor* -- å bestå bunnlinjen alene beviser mye mindre enn det ser ut til. CI kjører den kanoniske validatoren på hver push og PR uansett (`.github/workflows/validate.yml`).
 5. Oppdater `VERSION` i henhold til skjemaet i `phases/ship.md` (patch for kun dokumentasjonsklargjøringer, minor for ny normativ atferd, major for kontraktbrytende endringer) og hold `README.md`s versjonsmerke synkronisert --
    `tests/validate.sh`/`.ps1` sjekker dette automatisk når det kjøres fra en
    klon av dette repoet.

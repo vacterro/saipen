@@ -41,11 +41,20 @@ should take.
    entry and, where practical, coverage in `tests/validate.sh` +
    `tests/validate.ps1` (both platforms) or a fixture under
    `tests/scenarios/`.
-4. Run both validators before opening a PR:
+4. Run the canonical validator before opening a PR:
    ```bash
-   bash tests/validate.sh
-   powershell -File tests/validate.ps1
+   python tools/validate.py
    ```
+   This is the one that matters -- it checks `STATE.md` against
+   `extensions/schemas/state.schema.json`, walks the `LOG.md` event graph
+   across sealed segments, and verifies the runtime manifest and injector
+   wiring. `tests/validate.sh` / `validate.ps1` are the **frozen portable
+   floor** for hosts without Python (they say so at the top of each file):
+   fewer checks, kept only so a no-Python host isn't left with nothing. Run
+   them too if your change touches either of them, but never *instead* --
+   passing the floor alone proves much less than it looks like it does.
+   CI runs the canonical validator on every push and PR regardless
+   (`.github/workflows/validate.yml`).
 5. Bump `VERSION` per the scheme in `phases/ship.md` (patch for docs-only
    clarifications, minor for new normative behavior, major for breaking
    contract changes) and keep `README.md`'s version badge in sync --

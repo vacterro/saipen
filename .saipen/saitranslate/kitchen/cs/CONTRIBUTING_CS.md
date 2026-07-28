@@ -1,4 +1,4 @@
-<!-- TRANSLATED TO CS -->
+﻿<!-- TRANSLATED TO CS -->
 # Contributing to SAIPEN
 
 SAIPEN is a specification first, an implementation second. Most contributions
@@ -41,11 +41,11 @@ should take.
    entry and, where practical, coverage in `tests/validate.sh` +
    `tests/validate.ps1` (both platforms) or a fixture under
    `tests/scenarios/`.
-4. Run both validators before opening a PR:
+4. Spusťte kanonický validátor před otevřením PR:
    ```bash
-   bash tests/validate.sh
-   powershell -File tests/validate.ps1
+   python tools/validate.py
    ```
+   Toto je ten, na kterém záleží -- kontroluje STATE.md proti extensions/schemas/state.schema.json, prochází graf událostí LOG.md přes uzavřené segmenty a ověřuje runtime manifest a zapojení injectoru. tests/validate.sh / validate.ps1 jsou zmrazený přenosný základ pro hostitele bez Pythonu (říkají to na začátku každého souboru): méně kontrol, ponechané pouze proto, aby hostitel bez Pythonu nezůstal s prázdnou. Spusťte je také, pokud se vaše změna týká kteréhokoli z nich, ale nikdy místo něj -- samotné projití základu prokazuje mnohem méně, než se zdá. CI spouští kanonický validátor při každém push a PR bez ohledu na to (.github/workflows/validate.yml).
 5. Bump `VERSION` per the scheme in `phases/ship.md` (patch for docs-only
    clarifications, minor for new normative behavior, major for breaking
    contract changes) and keep `README.md`'s version badge in sync --
@@ -71,3 +71,4 @@ should take.
 
 These have each been proposed and evaluated before; reopening them needs
 new evidence, not just re-asking.
+

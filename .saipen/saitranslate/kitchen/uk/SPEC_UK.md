@@ -51,12 +51,18 @@ saipen/
   SKILL.md                  тонка точка входу для платформ, що читають навички (skills)
   STYLE.md                  голоси: чат, LOG.md, артефакти
   UI.md                     Специфікація UI Dark Golden Win95 (обов'язкова для робіт з UI)
-  phases/                   сувора логіка автомата станів
+  BOOT.md                   ~ядро холодного старту: швидкий шлях, який bare `continue`
+                             потребує, перед завантаженням будь-чого з вищезазначеного
+  phases/                   сувора логіка автомата станів -- 16 документів, один на
+                             кожне значення enum з RFC § 1.6 (машинна перевірка обома
+                             шляхами через tools/validate.py)
     [Фази Ядра]
     init.md / plan.md / scout.md / build.md / verify.md / review.md / ship.md / done.md / blocked.md
     [Фази Обслуговування]
-    hunt.md / add.md / clean.md / translate.md
-    
+    hunt.md / markhunt.md / add.md / clean.md / translate.md
+
+    [Інфраструктура]
+    prepare.md              пакує роботу для передачі наступному агенту
     validate.md             перевірка відповідності
 
 extensions/                 <- АДАПТИВНИЙ ШАР
@@ -76,6 +82,7 @@ bootstrap/                  <- ВСТАНОВЛЕННЯ/ЕКСПОРТ/ВИДА�
   inject.ps1 / .sh          встановлює блок SAIPEN + копії навичок (README Швидкий старт)
   uninstall.ps1 / .sh       скасовує встановлення -- видаляє блоки + копії навичок
   export.ps1 / .sh          архівує .saipen/ проєкту для резервного копіювання
+  saipen_crew.bat / .sh     відкриває 3-віконне компонування crew (бонус, extensions/subs/crew.md)
 
 tools/                      <- КАНОНІЧНИЙ ВАЛІДАТОР & УТИЛІТИ РЕПОЗИТОРІЮ
   validate.py               канонічний валідатор відповідності (стандартна бібліотека Python, нуль
