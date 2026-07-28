@@ -2,8 +2,8 @@
 ## DOING
 
 ## TODO
-- [ ] T-219 [P1] Ship v7.92.0 -- VERSION, CHANGELOG, README badge, 32 locale badges, commit, tag, push | needs: T-218 | verify: tools/validate.py PASS + badges match VERSION
 ## DONE
+- [x] T-219 [P1] Ship v7.92.0 -- commit 8fd7d1a, tag v7.92.0, pushed to main. | verify: tools/validate.py PASS + all 33 badges match VERSION (2026-07-28)
 - [x] T-220 [P0] PLAN was a from-any-phase command in § 1.10 but not in § 1.6's list or the validator's ANY_FROM -- § 2.4's mandatory pivot PLAN produced a state the validator rejected. Both fixed; SHIP added to § 1.6's text too. | verify: tools/validate.py PASS on REVIEW -> PLAN (2026-07-28)
 - [x] T-218 [P0] subs/PROTOCOL.md: three Core-shape copies removed (board line, LOG skeleton, STATE field list) -- pointers + sub-specific delta only. | verify: tools/validate.py PASS + grep clean (2026-07-28)
 - [x] T-209 [P0] One required-field set -- RFC § 1.2 is now the only place it is written; § 1.5, BOOT, CONFORMANCE 44, state.schema.json all point there. Five copies had drifted into five answers. | verify: tools/validate.py PASS + red test (transition_from removed -> FAIL) (2026-07-28)
