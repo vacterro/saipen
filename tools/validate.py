@@ -1268,6 +1268,30 @@ else:
     if bad_waits:
         drift_ok = False
 
+    # 9. guides/ teach the same shape to a human. They are not in the injector
+    #    manifest and no agent boots from them, so this is a WARN rather than a
+    #    FAIL -- but it is the same drift: 33 guides went on teaching the
+    #    pre-v7.93.0 `WAIT: <question>` form through two releases that changed
+    #    it, because nothing looked there. Core owns en/ru/et/ded; the other
+    #    locales are subSaipen translation work by standing rule, so this
+    #    warns for all and blocks none.
+    guides = rfc_path.parent.parent / "guides"
+    if guides.is_dir():
+        stale_guides = []
+        for doc in sorted(guides.glob("GUIDE_*.md")):
+            body = doc.read_text(encoding="utf-8-sig")
+            for m in re.finditer(r"`WAIT:\s*([^`]{0,40})`", body):
+                arg = m.group(1).strip().lower()
+                if arg.startswith("<") and "--" not in arg:
+                    stale_guides.append(doc.name)
+                    break
+        if stale_guides:
+            warn("guide-wait-shape",
+                 f"{len(stale_guides)} guide(s) still teach `WAIT: <question>` "
+                 f"without \u00a7 1.2's category token: "
+                 f"{', '.join(stale_guides[:6])}"
+                 f"{' ...' if len(stale_guides) > 6 else ''}")
+
     if drift_ok and not failures:
         ok("cross-doc sets agree (required fields, phase enum, from-any-phase, "
            "read-only bans, next_action prefixes, WAIT categories; no re-listing "

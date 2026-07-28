@@ -4,6 +4,8 @@
 ## TODO
 
 ## DONE
+- [x] T-249 [P1] Core guides (EN/RU/EE/DED) now teach `WAIT: <category> -- <question>` with the seven categories named. | verify: four Core locales carry the category form, tools/validate.py PASS (2026-07-28)
+- [x] T-250 [P1] Drift detector walks guides/ at WARN severity -- guides mislead a human, they do not break a continuation, and a FAIL would block every release on 29 translations Core may not write. | verify: sees exactly 29 stale, four Core clean (2026-07-28)
 - [x] T-240 [P0] `saipen ship` is a command from any phase; `phase: SHIP` is enterable only from REVIEW. SHIP out of the from-any-phase transition set (RFC + validator); § 1.10 now names the exact next_action it writes. | verify: INIT->SHIP FAIL, REVIEW->SHIP PASS, `saipen ship` legal (2026-07-28)
 - [x] T-241 [P0] Four shipped docs prescribed category-less `WAIT:` after v7.93.0 made the category mandatory. All fixed; drift detector now walks phases/ and extensions/ and found the fourth itself. | verify: red fixture FAILs, restore green (2026-07-28)
 - [x] T-242 [P0] BOOT re-read all three checkpoint files (was STATE only, drift from § 1.5) + § 1.11 priority pointer for a cold agent. | verify: row 58 green, tools/validate.py PASS (2026-07-28)
@@ -65,3 +67,4 @@
 - [x] T-206 [P1] SHIP added to ANY_FROM in validate.py (RFC § 1.10). 32 locale badge bump 7.82.0→7.83.0. (2026-07-27)
 
 ## BLOCKED
+- [ ] T-251 [P2] 29 non-Core locale guides still teach the pre-v7.93.0 `WAIT: <question>` shape | blocker: subSaipen translation work by standing rule -- Core owns en/ru/et/ded only; live list is validate.py's `guide-wait-shape` WARN

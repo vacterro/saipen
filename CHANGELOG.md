@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.95.0 -- 2026-07-28 -- the same rule failed to reach a third place, so now something looks there
+
+A HUNT over the two surfaces this session had never examined -- `guides/` (33 files) and `extensions/adapters/` (9). The adapters came back clean: no copied field lists, no stale `WAIT:` forms, nothing to fix. The guides did not.
+
+**All 33 guides still taught `WAIT: <question>`**, the shape from before v7.93.0 introduced the mandatory category token. Two releases changed the format underneath them and nothing looked. This is the third instance of one pattern in three releases: v7.93.0 enforced the category against `STATE.md` but not the phase docs that prescribe it; v7.94.0 fixed the phase docs and extensions; v7.95.0 finds the guides. Each time the rule was right and its propagation was manual.
+
+So `tools/validate.py` now walks `guides/` too, at WARN rather than FAIL. The severity is the honest one: guides are not in the injector manifest and no agent boots from them, so a stale guide misleads a human reading the docs, which is real but is not a broken continuation. Making it a FAIL would also block every release until 29 translations land, and those are not Core's to write.
+
+Core owns `en`/`ru`/`et`/`ded` by standing rule -- those four now carry `WAIT: <category> -- <question>` with the seven categories spelled out. The remaining 29 are subSaipen translation work and sit in `## BLOCKED` naming exactly that, with the validator's own WARN as the live list. The warning is expected to stay lit until they are done, which is what an honest signal looks like when the work is real and simply belongs to someone else.
+
+CONFORMANCE 63 added.
+
 ## 7.94.0 -- 2026-07-28 -- three of six defects were mine, from the last two releases
 
 The question this release had to answer was whether the last three were going in circles. They were not, but the pattern changed and that is worth naming: v7.92.0 and v7.93.0 found defects older than themselves -- one dead check had been dead since `feae149`. This round, three of six findings were introduced by those same two releases. New rules were outrunning their own propagation. The fix is not more rules; it is making propagation mechanical, which is what most of this release does.

@@ -45,7 +45,9 @@ Uncommitted changes = Tuesday. Agent commits only at `ship`. Checks ownership be
 Drop architecture decisions in `.saipen/KNOWLEDGE/`. `decisions.md` or `ADR-001.md`. Read like scripture before planning.
 
 **When stuck**
-No git? Says so. No shell? Hands you command. `WAIT: <question>` = needs you. Answer, it moves.
+No git? Says so. No shell? Hands you command. `WAIT: <category> -- <question>` = needs you. The category is one of seven
+(`manual-verify`, `destructive-op`, `first-publish`, `user brake`, `blocked`,
+`safety valve`, `init`) and tells you what kind of answer unblocks it.
 
 **Paranoid?**
 ```bash
