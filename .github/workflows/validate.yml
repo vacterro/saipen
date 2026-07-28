@@ -67,5 +67,23 @@ jobs:
           python -m pip install --quiet ruff
           python -m ruff check tools/ tests/
 
+      # Everything above runs the validator from the development layout, where
+      # RFC.md sits in saipen/ next to tools/. Every actual USER runs the
+      # injected layout, where the injector flattens RFC.md to tools/'s sibling
+      # -- and nothing had ever executed that. It was broken twice over: an
+      # unguarded VERSION read crashed with a traceback in any consuming
+      # project that had run `saipen translate`, and every cross-document check
+      # FAILed with "SAIPEN home clone incomplete". Install into a sandbox HOME
+      # and run the copy, so the shipped configuration is a tested one.
+      - name: Installed layout (inject into a sandbox HOME, run the copy)
+        run: |
+          sandbox="$(mktemp -d)"
+          mkdir -p "$sandbox/.claude" "$sandbox/proj"
+          cp -r .saipen "$sandbox/proj/"
+          HOME="$sandbox" bash bootstrap/inject.sh
+          test -f "$sandbox/.claude/skills/saipen/tools/validate.py"             || { echo "::error::injector did not copy the skill"; exit 1; }
+          cd "$sandbox/proj"
+          python "$sandbox/.claude/skills/saipen/tools/validate.py"
+
       - name: Conformance fixtures (tools/run_scenarios.py)
         run: python tools/run_scenarios.py

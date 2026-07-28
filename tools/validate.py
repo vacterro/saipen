@@ -1149,8 +1149,14 @@ if adapter_dir.is_dir():
 
 # Check version-badge consistency across all locale README_*.md files.
 # Only runs when `.saipen/saitranslate/kitchen/` exists.
+# IS_SAIPEN_HOME, not just kitchen.is_dir(): VERSION lives in the SAIPEN home
+# and never in a consuming project. Gated on the directory alone, this read
+# raised an unhandled FileNotFoundError in any project that had ever run
+# `saipen translate` -- a crash with a traceback instead of a verdict, in the
+# one layout every actual user of SAIPEN runs. Found by installing into a
+# sandbox HOME and running the copy, which nothing had ever done.
 kitchen = Path(".saipen/saitranslate/kitchen")
-if kitchen.is_dir():
+if IS_SAIPEN_HOME and kitchen.is_dir():
     repo_version = Path("VERSION").read_text(encoding="utf-8-sig").strip()
     stale = []
     for locale_dir in sorted(kitchen.iterdir()):
@@ -1306,7 +1312,15 @@ def _compare(label, rfc_set, other_set, other_name):
         return False
     return True
 
-rfc_path = Path(__file__).resolve().parent.parent / "saipen" / "RFC.md"
+# Two layouts, both legitimate. In the SAIPEN home the protocol lives in
+# saipen/ next to tools/; the injector flattens it, so an installed copy has
+# RFC.md as tools/'s sibling. Assuming only the first made every cross-doc
+# check FAIL with "SAIPEN home clone incomplete" on every installed copy --
+# a validator that only works in its own development repo.
+_tools_parent = Path(__file__).resolve().parent.parent
+rfc_path = _tools_parent / "saipen" / "RFC.md"
+if not rfc_path.is_file():
+    rfc_path = _tools_parent / "RFC.md"
 boot_path = rfc_path.parent / "BOOT.md"
 conf_path = rfc_path.parent / "CONFORMANCE.md"
 if not rfc_path.is_file():
@@ -1409,7 +1423,7 @@ else:
     #    following its own phase doc verbatim produced a state this validator
     #    then FAILed. Rules propagate to the docs that emit them, or they are
     #    only enforced against agents that never read the docs.
-    doc_roots = [rfc_path.parent / "phases", rfc_path.parent.parent / "extensions"]
+    doc_roots = [rfc_path.parent / "phases", _tools_parent / "extensions"]
     prescribed = re.compile('next_action:\\s*`?WAIT:\\s*([^`\\n<]{0,40})')
     bad_waits = []
     for root in doc_roots:
@@ -1433,7 +1447,7 @@ else:
     #    it, because nothing looked there. Core owns en/ru/et/ded; the other
     #    locales are subSaipen translation work by standing rule, so this
     #    warns for all and blocks none.
-    guides = rfc_path.parent.parent / "guides"
+    guides = _tools_parent / "guides"
     if guides.is_dir():
         stale_guides = []
         for doc in sorted(guides.glob("GUIDE_*.md")):
@@ -1457,7 +1471,7 @@ else:
     #     every line, and capped `content` at 120 characters, which declared 54
     #     of this repo's own 72 live LOG lines invalid. A schema nobody reads
     #     is not harmless; it is a lie waiting for the first tool built on it.
-    _schema_dir = rfc_path.parent.parent / "extensions" / "schemas"
+    _schema_dir = _tools_parent / "extensions" / "schemas"
     _log_schema = _schema_dir / "log.schema.json"
     if _log_schema.is_file():
         _ls = json.loads(_log_schema.read_text(encoding="utf-8"))["items"]
@@ -1488,7 +1502,7 @@ else:
     #     implementations already accepted it. The validator even cited
     #     "PROTOCOL.md § 2" in its error message while enforcing a superset of
     #     what § 2 said.
-    _proto = rfc_path.parent.parent / "extensions" / "subs" / "PROTOCOL.md"
+    _proto = _tools_parent / "extensions" / "subs" / "PROTOCOL.md"
     _outbox_schema = _schema_dir / "outbox.schema.json"
     if _proto.is_file() and _outbox_schema.is_file():
         _ptext = _proto.read_text(encoding="utf-8-sig")
@@ -1516,8 +1530,8 @@ else:
     #     the first version of this check looked for "INIT" anywhere in the
     #     file and could therefore never fail, because the phase enum lists it
     #     a few lines above. A check that cannot go red is decoration.
-    floor = [rfc_path.parent.parent / "tests" / "validate.sh",
-             rfc_path.parent.parent / "tests" / "validate.ps1"]
+    floor = [_tools_parent / "tests" / "validate.sh",
+             _tools_parent / "tests" / "validate.ps1"]
     for script in floor:
         if not script.is_file():
             fail(f"portable floor missing: {script.as_posix()} (CONFORMANCE § 1)")
