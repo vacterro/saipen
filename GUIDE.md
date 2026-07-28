@@ -78,7 +78,10 @@ Uncommitted changes expected. Agent commits at `ship`, not every step. Before to
 
 ## When agent can't do something
 
-Checks host capabilities first. No git? Says so. No shell? Hands you exact command. `WAIT: <question>` = needs you. Answer, it continues.
+Checks host capabilities first. No git? Says so. No shell? Hands you exact command. `WAIT: <category> -- <question>` = needs you. The category is one of seven
+(`manual-verify`, `destructive-op`, `first-publish`, `user brake`, `blocked`,
+`safety valve`, `init`) and tells you what kind of answer unblocks it.
+Answer, it continues.
 
 ## Lock it down
 

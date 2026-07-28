@@ -1080,6 +1080,12 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
 
         # B. Every runtime file the protocol references must exist in the home.
         manifest = [
+            # RFC.md was absent from this list until v7.100.0 -- the manifest of
+            # "every runtime file the protocol references" omitted the
+            # constitution itself. Other checks would have noticed its absence,
+            # but a completeness list that skips the most important item is not
+            # a completeness list.
+            "saipen/RFC.md",
             "saipen/BOOT.md", "saipen/SKILL.md", "saipen/UI.md", "saipen/STYLE.md",
             "saipen/CONFORMANCE.md",
             "tools/validate.py", "tools/install_hook.py", "tools/uninstall_hook.py",
@@ -1481,7 +1487,15 @@ else:
     guides = _tools_parent / "guides"
     if guides.is_dir():
         stale_guides = []
-        for doc in sorted(guides.glob("GUIDE_*.md")):
+        # The root GUIDE.md is a separate document from guides/GUIDE_EN.md and
+        # sat outside this walk entirely, so it went on teaching the
+        # pre-v7.93.0 `WAIT: <question>` shape through v7.95.0's sweep of all
+        # 33 locale guides. A directory glob is not a document inventory.
+        _guide_docs = sorted(guides.glob("GUIDE_*.md"))
+        _root_guide = _tools_parent / "GUIDE.md"
+        if _root_guide.is_file():
+            _guide_docs.append(_root_guide)
+        for doc in _guide_docs:
             body = doc.read_text(encoding="utf-8-sig")
             for m in re.finditer(r"`WAIT:\s*([^`]{0,40})`", body):
                 arg = m.group(1).strip().lower()
