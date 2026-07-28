@@ -1607,6 +1607,64 @@ else:
                      f"not ban read-only from {missing_bans} (RFC § 1.3)")
                 drift_ok = False
 
+    # 11. Coverage accounting. Every check above answers "do these two agree?".
+    #     None answered "is everything even being looked at?" -- and twice in a
+    #     row that was the actual defect: the scenario READMEs escaped the
+    #     re-enumeration guard, and the root GUIDE.md escaped the guides/ sweep,
+    #     both because a directory glob only ever sees what lives inside it.
+    #
+    #     So the protocol's document surface is declared here, and any shipped
+    #     markdown that matches no entry FAILs. Adding a doc then forces a
+    #     deliberate choice: put it under a check, or exempt it and say why.
+    #     `.saipen/` is excluded wholesale -- that is this project's own working
+    #     memory, data rather than protocol text.
+    COVERED = [
+        ("saipen/RFC.md",            "source of truth for six cross-doc sets"),
+        ("saipen/BOOT.md",           "re-enumeration + required-field-count checks"),
+        ("saipen/CONFORMANCE.md",    "re-enumeration + count + row-ID checks"),
+        ("saipen/phases/*.md",       "phase-enum sync + prescribed-WAIT category check"),
+        ("extensions/**/*.md",       "prescribed-WAIT category check"),
+        ("guides/GUIDE_*.md",        "guide WAIT-shape check"),
+        ("GUIDE.md",                 "guide WAIT-shape check"),
+        ("tests/scenarios/*/README.md", "required-field-count check + expect/reason parsing"),
+        ("tests/scenarios/*/.saipen/*.md", "run_scenarios.py runs this validator against each fixture"),
+        ("README.md",                "version-badge check"),
+    ]
+    EXEMPT = [
+        ("saipen/SKILL.md",   "front-matter manifest for skill loaders, no protocol rules"),
+        ("saipen/STYLE.md",   "chat voice; asserts nothing a machine can hold to RFC"),
+        ("saipen/UI.md",      "visual spec for UI work, disjoint from the state protocol"),
+        ("SPEC.md",           "design intent and rationale, deliberately not normative"),
+        ("CHANGELOG.md",      "history; never read by an agent, never a rule source"),
+        ("CHANGELOG_ARCHIVE.md", "sealed history, same as above"),
+        ("CONTRIBUTING.md",   "human process, not agent-facing"),
+        ("SECURITY.md",       "disclosure policy, not agent-facing"),
+        ("CODE_OF_CONDUCT.md", "human conduct, not agent-facing"),
+        (".github/**/*.md",   "issue/PR templates, not agent-facing"),
+        (".github/*.md",      "issue/PR templates, not agent-facing"),
+    ]
+    if IS_SAIPEN_HOME:
+        import fnmatch
+        home = Path(".")
+        surface = sorted(
+            q.as_posix() for q in home.rglob("*.md")
+            if not q.as_posix().startswith(".saipen/")
+            and ".git/" not in q.as_posix())
+        patterns = [g for g, _ in COVERED] + [g for g, _ in EXEMPT]
+        unclassified = [
+            d for d in surface
+            if not any(fnmatch.fnmatch(d, g) for g in patterns)]
+        if unclassified:
+            fail(f"coverage gap -- {len(unclassified)} shipped document(s) are "
+                 f"read by no check and declared exempt by none: "
+                 f"{', '.join(unclassified[:6])}"
+                 f"{' ...' if len(unclassified) > 6 else ''}. Put each under a "
+                 f"check or add it to EXEMPT with a reason")
+            drift_ok = False
+        else:
+            ok(f"doc coverage accounted for ({len(surface)} shipped documents, "
+               f"{len(COVERED)} checked patterns, {len(EXEMPT)} exempt)")
+
     if drift_ok and not failures:
         ok("cross-doc sets agree (required fields, phase enum, from-any-phase, "
            "read-only bans, next_action prefixes, WAIT categories; no re-listing "
