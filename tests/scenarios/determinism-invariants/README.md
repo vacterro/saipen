@@ -11,7 +11,7 @@ new one is claimed. Previously nothing said which of these went first, so two
 models facing a blocked session with a workable ticket could legitimately do
 opposite things.
 
-**One ticket at a time.** At most one `## DOING` per agent. Finish it, block
+**One ticket at a time.** At most one `## DOING` in total, not per agent (RFC § 1.11; this README said "per agent" until v7.100.0, six releases after the rule changed and while `tools/validate.py` already FAILed any board with two). Core's model is one agent writing `.saipen/` at a time, so "per agent" invited the reading "that ticket is not mine, so I may claim a second". Finish it, block
 it, or demote it -- with a LOG line, since walking away silently is what
 produces tickets whose state nobody can determine. The failure mode is
 specific: claim T-12, drift, claim T-27, drift, claim T-53, and now the log is

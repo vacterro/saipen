@@ -1409,6 +1409,29 @@ else:
     # 7. BOOT.md and CONFORMANCE.md MUST NOT re-list the required field set --
     #    that is exactly how v7.92.0's five disagreeing copies happened. They
     #    are allowed to name it and point at § 1.2, never to enumerate it.
+    # A count is a copy too. `checkpoint-self-confirmation/README.md` said "all
+    # eight required fields" for eight releases after the set became nine --
+    # the enumeration check below could not see it, because it enumerates
+    # nothing. Any shipped doc that states how many required fields there are
+    # is asserting a number that moves without it.
+    _count_re = re.compile(
+        r"\b(all\s+)?(five|six|seven|eight|nine|ten|\d+)\s+required\s+fields?\b",
+        re.IGNORECASE)
+    _count_docs = [boot_path, conf_path]
+    _scen = _tools_parent / "tests" / "scenarios"
+    if _scen.is_dir():
+        _count_docs += sorted(_scen.glob("*/README.md"))
+    for _doc in _count_docs:
+        if not _doc.is_file():
+            continue
+        _m = _count_re.search(_doc.read_text(encoding="utf-8-sig"))
+        if _m:
+            fail(f"cross-doc drift [required-set] -- {_doc.name} states a COUNT "
+                 f"of required fields ({_m.group(0)!r}). RFC § 1.2 is the only "
+                 f"place the set is written down, and a count drifts the same "
+                 f"way an enumeration does")
+            drift_ok = False
+
     for doc_path, doc_name in ((boot_path, "BOOT.md"), (conf_path, "CONFORMANCE.md")):
         if not doc_path.is_file():
             continue
