@@ -8,8 +8,8 @@ skip, no overhead.
 
 `mode: manual-verify` (RFC § 1.3, no shell on this host)? MUST NOT
 auto-transition to REVIEW. Ask the user to run the `verify:` command
-themselves and report the result: `next_action: WAIT: run '<verify:
-command>' and report pass or fail`. Proceed only once they confirm.
+themselves and report the result: `next_action: WAIT: manual-verify -- run
+'<verify: command>' and report pass or fail`. Proceed only once they confirm.
 
 Repo's own harness only (never invent one). Strongest available:
 parse -> import -> unit -> repro -> smoke.

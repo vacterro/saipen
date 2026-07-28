@@ -1,7 +1,7 @@
 ---
 phase: DONE
 task: none
-next_action: "WAIT: user brake -- v7.92.0 shipped, user asked to pause before the next objective; resume with bare `saipen` (keeps goal budget 1 wave / 3 tickets) or `saipen goal <text>` for a new one"
+next_action: "WAIT: user brake -- v7.93.0 shipped, user asked to pause; resume with bare `saipen` (keeps goal budget 2 waves / 19 tickets) or `saipen goal <text>` for a new objective"
 blocker: none
 transition_from: SHIP
 saipen_version: 7
@@ -14,7 +14,7 @@ requires:
   - python
 mode: full
 goal_mode: true
-goal_waves: 1
-goal_tickets: 3
-updated: 2026-07-28T00:58:08Z
+goal_waves: 2
+goal_tickets: 19
+updated: 2026-07-28T01:35:47Z
 ---

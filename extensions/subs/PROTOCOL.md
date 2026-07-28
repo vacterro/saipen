@@ -273,7 +273,7 @@ Legal only while `.saipen/extensions/subs/` (or legacy root `extensions/subs/`) 
 
 `saipen sub spawn` requires a project that already has `.saipen/` (i.e. `saipen set` already ran) -- a subSaipen attaches to a main project's continuation state, it isn't one on its own. No `.saipen/` at all yet? Tell the user to run `saipen set` first; don't silently trigger `INIT` as a side effect of an unrelated command.
 
-First `saipen sub spawn` in a project no `saipen_home` was ever recorded for (state written before v7.25.0, or a manual/degraded bootstrap)? Ask once -- `WAIT: path to the saipen clone to bootstrap subs from` -- never guess a path.
+First `saipen sub spawn` in a project no `saipen_home` was ever recorded for (state written before v7.25.0, or a manual/degraded bootstrap)? Ask once -- `WAIT: blocked -- path to the saipen clone to bootstrap subs from` -- never guess a path.
 
 A `BLOCKED` subSaipen sitting unreviewed indefinitely is a silent rot risk -- the main agent MUST check `saipen sub list`'s output for `BLOCKED` warnings at least once per autonomous `HUNT` pass (RFC § 2.1), piggybacking on a cadence that already runs on its own rather than inventing a new dedicated timer.
 

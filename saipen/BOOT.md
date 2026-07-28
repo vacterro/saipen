@@ -17,7 +17,10 @@ does not answer.
 
 2. **Validate STATE before executing anything in it.**
    Every field RFC § 1.2's required set names must be present and non-empty
-   (read the set there -- this file deliberately does not copy it). Any
+   (read the set there -- this file deliberately does not copy it), including
+   its fresh-INIT exception for `transition_from`: a brand-new INIT state
+   legitimately has no previous phase to name, so its absence there is not
+   damage to repair. Any
    missing, or STATE contradicted by `LOG.md`/`BOARD.md` -> RECOVER per
    RFC § 1.5 first. Do NOT execute `next_action` from an unrepaired state
    (RFC § 1.11, priority 1).
@@ -49,8 +52,9 @@ does not answer.
    `saipen_home` empty or dead on this machine? Clone
    `github.com/vacterro/saipen` and update the field at your next checkpoint
    (RFC § 1.7). No git either -> set `phase: BLOCKED` and
-   `next_action: WAIT: saipen_home missing/dead and git unavailable -- give me
-   the path to a saipen/ clone on this machine, or install git`.
+   `next_action: WAIT: blocked -- saipen_home missing/dead and git
+   unavailable; give me the path to a saipen/ clone on this machine, or
+   install git`.
 
 8. **Checkpoint after every ticket and before you stop** -- not per edit, not
    saved up for session end: LOG (append) -> `BOARD.md` -> `STATE.md`, that

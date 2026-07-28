@@ -38,3 +38,10 @@ Behavioral, README-only: the assertion is about an agent choosing to verify
 its own recollection, which no static fixture can express -- a fixture could
 only show the end state, and the end state looks perfectly valid. Correctly
 declares no expected outcome, so `tools/run_scenarios.py` skips it.
+
+## Incident (moved out of RFC.md in v7.93.0)
+
+A real incident: an agent resumed believing it had last shipped `v7.80.0`, while another agent had taken the project to `v7.83.0` in between (36 events, a whole refactor). It was about to review "the protocol" against a three-version-old mental model and report the findings confidently; it noticed only by chance, spotting a field in `tools/validate.py` it knew it had never written.
+
+RFC.md keeps the rule and one clause of why; the narrative lives here so the
+constitution stays readable for a weak model on a cold start.

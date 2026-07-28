@@ -305,6 +305,22 @@ if isinstance(next_action, str):
         warn("next-action-shape",
              f"STATE.md next_action does not start with WAIT:/saipen /PHASE "
              f"/RUN:/RESUME:: {next_action!r} (RFC В§ 1.2)")
+    # RFC § 1.2 (v7.93.0): WAIT carries a category token from a closed set of
+    # seven. The stopping agent is the twin of § 1.11's guessing agent -- a
+    # vague "WAIT: need more context" is shape-identical to a real gate, passes
+    # every other check here, and parks the project on a question nobody can
+    # answer. The token is what separates them mechanically, and it also tells
+    # the human what kind of answer unblocks it.
+    WAIT_CATEGORIES = ("manual-verify", "destructive-op", "first-publish",
+                       "user brake", "blocked", "safety valve", "init")
+    if next_action.startswith("WAIT:"):
+        body = next_action[len("WAIT:"):].strip().lower()
+        if not any(body.startswith(c) for c in WAIT_CATEGORIES):
+            fail(f"STATE.md next_action is a WAIT with no category token -- "
+                 f"RFC § 1.2 requires 'WAIT: <category> -- <question>' where "
+                 f"category is one of {'/'.join(WAIT_CATEGORIES)}; got "
+                 f"{next_action!r}")
+
     if "?" in next_action and not next_action.startswith("WAIT:"):
         fail(f"STATE.md next_action asks a question outside WAIT:: "
              f"{next_action!r} (RFC В§ 1.2)")
@@ -336,8 +352,14 @@ if phase in ("SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP") \
              f"STATE.md phase {phase} has task: none -- active ticket phases "
              f"SHOULD name a T-### unless next_action explains a ticket-less "
              f"maintenance exception (RFC В§ 1.2)")
-if mode == "read-only" and phase in ("BUILD", "SHIP", "CLEAN", "TRANSLATE"):
-    fail(f"mode: read-only MUST NOT enter {phase} (RFC § 1.3)")
+# RFC § 1.3: read-only cannot write, so every phase whose work product is a
+# file write is unreachable. INIT (creates .saipen/) and PLAN (writes tickets
+# onto BOARD.md) joined in v7.93.0 -- they were always unreachable in
+# principle, but the enumeration named only four and read as exhaustive.
+READ_ONLY_BANNED_PHASES = ("INIT", "PLAN", "BUILD", "SHIP", "CLEAN", "TRANSLATE")
+if mode == "read-only" and phase in READ_ONLY_BANNED_PHASES:
+    fail(f"mode: read-only MUST NOT enter {phase} -- that phase's work "
+         f"product is a file write (RFC § 1.3)")
 
 # RFC § 2.4 safety-valve ceilings. Named rather than inlined so the trip check
 # below and any future reader see the same two numbers the RFC states.
@@ -598,14 +620,22 @@ for tid, t in tickets.items():
         warn("blocked-no-blocker", f"BOARD.md:{t['line_no']} ticket {tid} is in "
              f"## BLOCKED with no | blocker: field -- facts + dead ends belong "
              f"on the ticket (RFC § 1.2)")
+    # RFC § 1.2 (rule stated v7.93.0): the section IS the status, the checkbox
+    # is how a human skims it. A board where they disagree answers "is this
+    # done" differently depending on which one the reader trusts. FAIL, not
+    # WARN -- there is no legacy shape here to tolerate, only a mistake.
     if t["checkbox"] == "x" and t["section"] != "## DONE":
-        warn("checkbox-section", f"BOARD.md:{t['line_no']} ticket {tid} is "
-             f"checked [x] but sits under {t['section']} -- checkbox and "
-             f"section disagree")
-    if t["checkbox"] == "/" and t["section"] not in ("## DOING",):
-        warn("checkbox-section", f"BOARD.md:{t['line_no']} ticket {tid} is [/] "
-             f"in-progress but sits under {t['section']} -- in-progress work "
-             f"belongs under ## DOING")
+        fail(f"BOARD.md:{t['line_no']} ticket {tid} is checked [x] but sits "
+             f"under {t['section']} -- checkbox and section disagree; [x] "
+             f"belongs only under ## DONE (RFC § 1.2)")
+    if t["checkbox"] == "/" and t["section"] != "## DOING":
+        fail(f"BOARD.md:{t['line_no']} ticket {tid} is [/] in-progress but "
+             f"sits under {t['section']} -- in-progress work belongs only "
+             f"under ## DOING (RFC § 1.2)")
+    if t["checkbox"] in (" ", "") and t["section"] in ("## DONE", "## DOING"):
+        fail(f"BOARD.md:{t['line_no']} ticket {tid} has an open [ ] checkbox "
+             f"under {t['section']} -- open boxes belong under ## TODO or "
+             f"## BLOCKED (RFC § 1.2)")
 
 # RFC § 1.11: at most one ticket in ## DOING per agent. Shipped as prose in
 # v7.86.0 with nothing enforcing it until v7.90.0 -- which is exactly the
@@ -789,35 +819,25 @@ if log_files:
                  f"seal it into .saipen/logs/LOG-<NNN>.md at the next "
                  f"checkpoint (RFC § 1.2, phases/clean.md)")
 
-    # Timestamp sanity check: last LOG entry's timestamp should be close to
-    # current UTC time. Large drift = agent wrote local clock instead of UTC,
-    # which corrupts audit trail Recovery relies on (RFC § 1.2 mandates UTC).
-    LOG_TS_RE = re.compile(r"^(\d{2})\.(\d{2})\.(\d{2}) (\d{2}):(\d{2}) ")
-    last_ts = None
-    for line in reversed(active_log.read_text(encoding="utf-8-sig").splitlines()):
-        if not line.strip() or line.startswith("#"):
-            continue
-        m = LOG_TS_RE.search(line)
-        if m:
-            last_ts = m.groups()
-            break
-    if last_ts:
-        try:
-            log_dt = datetime.datetime(
-                2000 + int(last_ts[2]), int(last_ts[1]), int(last_ts[0]),
-                int(last_ts[3]), int(last_ts[4]),
-                tzinfo=datetime.timezone.utc)
-            now = datetime.datetime.now(datetime.timezone.utc)
-            diff_sec = abs((now - log_dt).total_seconds())
-            if diff_sec > 10800:  # 3 hours -- catches timezone-off errors
-                warn("log-timestamp-drift",
-                     f"latest LOG entry ({last_ts[0]}.{last_ts[1]}.{last_ts[2]} "
-                     f"{last_ts[3]}:{last_ts[4]}) is {diff_sec/3600:.1f}h from "
-                     f"current UTC ({now.strftime('%H:%M')}) -- LOG timestamps "
-                     f"MUST be UTC (RFC § 1.2). Off-by-hours suggests local-clock "
-                     f"drift.")
-        except ValueError:
-            pass  # unparseable date (old history, skip)
+    # A third timestamp check lived here (feae149, CONFORMANCE 42) and was
+    # removed in v7.93.0 as dead and wrong on both counts.
+    #
+    # Dead: its regex was `^(\d{2})\.` against lines that begin `- DD.MM.YY`,
+    # so `^` never matched and `last_ts` was always None. It had never fired
+    # once. That is also why nothing noticed the second problem:
+    #
+    # Wrong: it compared abs(now - last_entry) and WARNed past 3h, which
+    # collapses two opposite faults into one verdict. A timestamp in the
+    # FUTURE is corruption -- every later event inherits a broken clock -- and
+    # RFC § 1.2 rates it FAIL; that case is already handled correctly above,
+    # per-event, signed, at FAIL severity. A timestamp in the PAST is just a
+    # project nobody touched today, which RFC § 1.2 says nothing against and
+    # `saipen status` reports as staleness rather than corruption. Had the
+    # regex worked, every repo idle for an afternoon would have warned.
+    #
+    # What RFC § 1.2 actually asks for is exactly the two checks that remain:
+    # signed >3h future = FAIL (above), and >5min backwards between
+    # consecutive events = WARN unless a DEC documents it (above).
 
 # ------------------------------------------------------------ SUBSAIPEN OUTBOX
 
@@ -1075,6 +1095,156 @@ if kitchen.is_dir():
     else:
         ok(f"all {len([d for d in kitchen.iterdir() if d.is_dir()])} locale"
            f" README badges match VERSION ({repo_version})")
+
+# ------------------------------------------------- cross-document drift (§ 1.1)
+
+# The five-copies bug class, mechanized. RFC § 1.2's required field set lived
+# in five documents at once and all five disagreed (v7.92.0); the from-any-phase
+# set lived in three and all three disagreed (v7.93.0). Each was found by a
+# human reading two files side by side, which is not a strategy -- it is luck
+# with extra steps. RFC.md is normative (§ 1.1), so every set below is PARSED
+# OUT OF RFC.md and compared against every other copy of it in the tree.
+#
+# A missing anchor is a FAIL, never a skip. If someone rewords RFC past these
+# patterns, this checker must be updated deliberately -- a drift detector that
+# silently stops detecting is worse than none, because it still reports PASS.
+
+def _ticks(text):
+    """Backticked tokens, in order, deduped."""
+    seen, out = set(), []
+    for tok in re.findall(r"`([^`]+)`", text):
+        if tok not in seen:
+            seen.add(tok)
+            out.append(tok)
+    return out
+
+
+def _rfc_sentence(label, pattern, text):
+    m = re.search(pattern, text)
+    if not m:
+        fail(f"cross-doc check '{label}' cannot find its anchor in RFC.md -- "
+             f"the wording moved. Update tools/validate.py deliberately; a "
+             f"drift check that silently stops checking still prints PASS")
+        return None
+    return m.group(1)
+
+
+def _compare(label, rfc_set, other_set, other_name):
+    missing = rfc_set - other_set
+    extra = other_set - rfc_set
+    if missing or extra:
+        bits = []
+        if missing:
+            bits.append(f"in RFC.md but not {other_name}: {sorted(missing)}")
+        if extra:
+            bits.append(f"in {other_name} but not RFC.md: {sorted(extra)}")
+        fail(f"cross-doc drift [{label}] -- {'; '.join(bits)}. RFC.md is "
+             f"normative (§ 1.1); bring {other_name} to it, or change RFC "
+             f"deliberately and update both")
+        return False
+    return True
+
+rfc_path = Path(__file__).resolve().parent.parent / "saipen" / "RFC.md"
+boot_path = rfc_path.parent / "BOOT.md"
+conf_path = rfc_path.parent / "CONFORMANCE.md"
+if not rfc_path.is_file():
+    fail(f"RFC.md not found at {rfc_path} -- SAIPEN home clone incomplete")
+else:
+    rfc = rfc_path.read_text(encoding="utf-8-sig")
+    drift_ok = True
+
+    # 1. Required STATE field set: RFC § 1.2 vs schema properties.
+    s = _rfc_sentence("required-set",
+                      r"\*\*STATE\.md\*\*: MUST contain frontmatter: (.+?)\.\s",
+                      rfc)
+    if s is None:
+        drift_ok = False
+    else:
+        rfc_required = set(_ticks(s))
+        # The schema legitimately defines MORE properties than RFC requires
+        # (optional fields), so this is a subset test, not equality: every
+        # field RFC calls required must at least exist in the schema.
+        unknown = rfc_required - set(schema.get("properties", {}))
+        if unknown:
+            fail(f"cross-doc drift [required-set] -- RFC § 1.2 requires "
+                 f"{sorted(unknown)}, which state.schema.json does not define "
+                 f"as properties at all, so nothing validates them")
+            drift_ok = False
+
+    # 2. Phase enum: RFC § 1.6 vs schema enum vs the transition table here.
+    s = _rfc_sentence("phase-enum", r"\*\*Phase enum\*\*: (.+?)\. These", rfc)
+    if s is None:
+        drift_ok = False
+    else:
+        rfc_phases = set(_ticks(s))
+        schema_phases = set(schema["properties"]["phase"]["enum"])
+        drift_ok &= _compare("phase-enum", rfc_phases, schema_phases,
+                             "state.schema.json phase enum")
+        drift_ok &= _compare("phase-enum", rfc_phases,
+                             set(VALID_TRANSITIONS) | {"INIT"},
+                             "validate.py VALID_TRANSITIONS")
+
+    # 3. From-any-phase set: RFC § 1.6 vs ANY_FROM here.
+    s = _rfc_sentence("any-from", r"\*\*From-any-phase set\*\*: (.+?)\.\n", rfc)
+    if s is None:
+        drift_ok = False
+    else:
+        drift_ok &= _compare("any-from", set(_ticks(s)), ANY_FROM,
+                             "validate.py ANY_FROM")
+
+    # 4. read-only banned phases: RFC § 1.3 vs the tuple here.
+    s = _rfc_sentence("read-only-bans",
+                      r"\*\*Read-only banned phases\*\*: (.+?)\. The agent", rfc)
+    if s is None:
+        drift_ok = False
+    else:
+        drift_ok &= _compare("read-only-bans", set(_ticks(s)),
+                             set(READ_ONLY_BANNED_PHASES),
+                             "validate.py READ_ONLY_BANNED_PHASES")
+
+    # 5. next_action prefixes: RFC § 1.2 vs the tuple here.
+    s = _rfc_sentence("next-action-prefixes",
+                      r"`next_action` MUST begin with one of (.+?)\.\s\*\*", rfc)
+    if s is None:
+        drift_ok = False
+    else:
+        rfc_prefixes = {p.strip() for p in _ticks(s)}
+        drift_ok &= _compare("next-action-prefixes", rfc_prefixes,
+                             {p.strip() for p in executable_prefixes},
+                             "validate.py executable_prefixes")
+
+    # 6. WAIT categories: RFC § 1.2 vs the tuple here.
+    s = _rfc_sentence("wait-categories",
+                      r"is one of exactly seven words: (.+?)\.\s", rfc)
+    if s is None:
+        drift_ok = False
+    else:
+        drift_ok &= _compare("wait-categories", set(_ticks(s)),
+                             set(WAIT_CATEGORIES), "validate.py WAIT_CATEGORIES")
+
+    # 7. BOOT.md and CONFORMANCE.md MUST NOT re-list the required field set --
+    #    that is exactly how v7.92.0's five disagreeing copies happened. They
+    #    are allowed to name it and point at § 1.2, never to enumerate it.
+    for doc_path, doc_name in ((boot_path, "BOOT.md"), (conf_path, "CONFORMANCE.md")):
+        if not doc_path.is_file():
+            continue
+        doc = doc_path.read_text(encoding="utf-8-sig")
+        for m in re.finditer(r"[^.\n]*`saipen_version`[^.\n]*", doc):
+            frag = m.group()
+            named = {t for t in _ticks(frag)}
+            if len({"phase", "task", "next_action", "blocker", "agent",
+                    "saipen_version", "mode", "updated"} & named) >= 4:
+                fail(f"cross-doc drift [required-set] -- {doc_name} enumerates "
+                     f"the STATE required fields again ({sorted(named)[:5]}...). "
+                     f"RFC § 1.2 is the only place that list may exist; refer "
+                     f"to it instead (this is the v7.92.0 five-copies defect)")
+                drift_ok = False
+
+    if drift_ok and not failures:
+        ok("cross-doc sets agree (required fields, phase enum, from-any-phase, "
+           "read-only bans, next_action prefixes, WAIT categories; no re-listing "
+           "in BOOT/CONFORMANCE)")
+
 
 # ------------------------------------------------------------------- summary
 

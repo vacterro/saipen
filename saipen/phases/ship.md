@@ -46,8 +46,8 @@ project. Then STATE -> `DONE` directly, same as a normal successful ship.
    the same one-way door, just reached by `git remote add` instead of never
    configuring one): confirm name + public/private with user -- ALWAYS,
    even under `goal_mode`. New public artifact is a one-way door.
-   `next_action: WAIT: confirm repo name '<name>' and public/private before
-   I push` (RFC § 1.2).
+   `next_action: WAIT: first-publish -- confirm repo name '<name>' and
+   public/private before I push` (RFC § 1.2).
 8. LOG one normal Event Graph line per RFC § 1.2 -- `- DATE [E-###]
    [parent: E-###] RUN: ship vX.Y.Z -> pushed HASH` (this exact text after
    the taxonomy).

@@ -1,7 +1,7 @@
 ---
 phase: PLAN
 task: none
-next_action: "WAIT: provide the first project goal or raw backlog"
+next_action: "WAIT: init -- provide the first project goal or raw backlog"
 blocker: none
 agent: none
 saipen_version: 7

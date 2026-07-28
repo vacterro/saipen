@@ -16,7 +16,7 @@ Copy `extensions/templates/` (`STATE.md`,
 Templates missing or unreachable (degraded capability only)? Write by hand,
 matching exactly:
 - `STATE.md`: frontmatter `phase: PLAN`, `task: none`, `next_action:
-  "WAIT: provide the first project goal or raw backlog"` (RFC § 1.2's
+  "WAIT: init -- provide the first project goal or raw backlog"` (RFC § 1.2's
   narrow INIT-bootstrap `WAIT:` exception -- ask for the goal/backlog
   only, nothing else), `blocker: none`, `agent: none`, `saipen_version: 7`, `schema_version: 1`,
   `saipen_home:` (absolute path of the SAIPEN home this bootstrap read the
