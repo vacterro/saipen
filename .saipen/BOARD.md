@@ -4,6 +4,15 @@
 ## TODO
 
 ## DONE
+- [x] T-240 [P0] `saipen ship` is a command from any phase; `phase: SHIP` is enterable only from REVIEW. SHIP out of the from-any-phase transition set (RFC + validator); § 1.10 now names the exact next_action it writes. | verify: INIT->SHIP FAIL, REVIEW->SHIP PASS, `saipen ship` legal (2026-07-28)
+- [x] T-241 [P0] Four shipped docs prescribed category-less `WAIT:` after v7.93.0 made the category mandatory. All fixed; drift detector now walks phases/ and extensions/ and found the fourth itself. | verify: red fixture FAILs, restore green (2026-07-28)
+- [x] T-242 [P0] BOOT re-read all three checkpoint files (was STATE only, drift from § 1.5) + § 1.11 priority pointer for a cold agent. | verify: row 58 green, tools/validate.py PASS (2026-07-28)
+- [x] T-243 [P0] § 1.11 RECOVER now triggers on a `next_action` failing § 1.2's prefix/category checks; DONE+empty invalid-WAIT still routes to UNBLOCK. | verify: rule stated, tools/validate.py PASS (2026-07-28)
+- [x] T-244 [P1] Pick Rule is topmost-workable, not just eligibility -- determinism restored inside Determinism Invariants. | verify: tools/validate.py PASS (2026-07-28)
+- [x] T-245 [P1] read-only bans ADD; § 1.3 + validator + CONFORMANCE 15 synced. | verify: read-only+ADD FAIL, read-only+HUNT PASS (2026-07-28)
+- [x] T-246 [P1] README zero-prompt claim now carries § 2.1's BLOCKED exception. | verify: README matches § 2.1, tools/validate.py PASS (2026-07-28)
+- [x] T-247 [P1] § 1.5 checkpoints after every phase transition, not only after a ticket. | verify: § 1.5 + BOOT agree (2026-07-28)
+- [x] T-248 [P2] Ship v7.94.0. | verify: tools/validate.py PASS, 33 badges match VERSION (2026-07-28)
 - [x] T-236 [P0] Sealed LOG.md -> logs/LOG-003.md (119 events, E-762..E-880). Cold-start read 66.9 -> 14.5 KB (-78%). § 1.2 gained the outer cap guard the idempotency check cannot substitute for. | verify: sealed copy byte-identical, E-### unique+monotonic across 4 segments (2026-07-28)
 - [x] T-237 [P0] RFC compressed 102682 -> 100359 bytes (~4.9 KB total across both waves); MUST/SHOULD/MAY 163/9/28 unchanged. | verify: counts unchanged, tools/validate.py PASS incl. cross-doc anchors (2026-07-28)
 - [x] T-238 [P1] CONFORMANCE 20589 -> 19746 bytes, 60 rows and every ID unchanged. | verify: row IDs identical, tools/validate.py PASS (2026-07-28)

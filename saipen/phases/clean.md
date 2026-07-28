@@ -26,8 +26,9 @@ when it actually finished safely, not by default.
      nobody triaged) MUST NOT just keep rotting silently: surface it once by
      setting `STATE.next_action` to a concrete `WAIT:` that names the actual
      yes/no or decision it needs -- never "sort out the blocked tickets", but
-     the real question (e.g. `WAIT: T-149 -- goal_tickets counts verify-passes;
-     accept as-is or change to count only on DONE?`). It stays blocked until
+     the real question (e.g. `WAIT: blocked -- T-149: goal_tickets counts
+     verify-passes; accept as-is, or count only on DONE?`; the category
+     prefix is RFC § 1.2's, not optional). It stays blocked until
      the human answers; the point is they get asked with a two-word-answerable
      question, not that it auto-unblocks.
    - **Structural repair (RFC § 1.2)**: any ticket ID appearing more than

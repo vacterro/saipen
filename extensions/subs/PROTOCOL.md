@@ -168,8 +168,9 @@ Whenever the main agent chooses to check (during `HUNT`, at the top of `saipen c
    wider case. Anything changed you did not make yourself -> that is a
    boundary violation, not a finding: do NOT silently merge it (it may be
    fabricated) and do NOT silently revert it either (it may be someone's
-   real work) -- set `STATE.phase: BLOCKED` with `next_action: WAIT:` naming
-   the exact files and asking the user how to proceed, same as any other
+   real work) -- set `STATE.phase: BLOCKED` with `next_action: WAIT: blocked -- ...`
+   (RFC § 1.2's category vocabulary) naming the exact files and asking the
+   user how to proceed, same as any other
    destructive-adjacent surprise (RFC § 1.1) -- surfacing it in chat alone
    is not enough, the session MUST actually halt on it, not quietly move on
    to other work while a corrupted tree sits unresolved. Only once the main

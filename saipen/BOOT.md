@@ -38,7 +38,12 @@ does not answer.
    `DEC: human_note -> T-###` if it became a ticket. One-shot, not standing law.
 
 6. **Execute `STATE.next_action` immediately.** That value IS the instruction;
-   do not ask "what should I do?" (`CONFORMANCE.md` TEST-001). Its five legal
+   do not ask "what should I do?" (`CONFORMANCE.md` TEST-001). A `WAIT:` means
+   output that question verbatim and stop. If `next_action` is absent, vague,
+   or fails § 1.2's prefix/category checks, it is corrupt -- RECOVER (step 2),
+   do not improvise a replacement. When you must choose what to do at all,
+   RFC § 1.11's priority decides and is not a judgement call:
+   RECOVER > UNBLOCK > FINISH > START > MAINTAIN. Its five legal
    forms and their arguments are defined in RFC § 1.2:
    `WAIT:` / `saipen <command>` / `PHASE <phase> [T-###]` / `RUN:` /
    `RESUME: T-### <phase>`.
@@ -56,11 +61,14 @@ does not answer.
    unavailable; give me the path to a saipen/ clone on this machine, or
    install git`.
 
-8. **Checkpoint after every ticket and before you stop** -- not per edit, not
-   saved up for session end: LOG (append) -> `BOARD.md` -> `STATE.md`, that
-   order (RFC § 1.5). Then re-read the `STATE.md` you just wrote and confirm
-   the required fields survived. Where `tools/validate.py` runs, it IS that
-   check. A checkpoint you cannot resume from is not a checkpoint.
+8. **Checkpoint after every ticket, after every phase transition, and before
+   you stop** -- not per edit, not saved up for session end: LOG (append) ->
+   `BOARD.md` -> `STATE.md`, that order (RFC § 1.5). Then **read back all
+   three**: your LOG line is the file's last line, your BOARD changes are on
+   the board, and `STATE.md` still carries § 1.2's required set. Where
+   `tools/validate.py` runs it is the cheapest shape check, but it is not a
+   substitute for the read-back -- an empty board passes every shape check
+   ever written. A checkpoint you cannot resume from is not a checkpoint.
 
 ## Anything else
 

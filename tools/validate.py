@@ -253,8 +253,11 @@ VALID_TRANSITIONS = {
 # objective from wherever the pivot happens, so `saipen goal` out of REVIEW
 # (whose row allows only SHIP/BUILD/SCOUT/BLOCKED) was an invalid state
 # produced by following the protocol exactly. Caught on a live pivot.
-ANY_FROM = {"VALIDATE", "MARKHUNT", "CLEAN", "TRANSLATE", "PREPARE", "SHIP",
-            "PLAN"}
+# NOTE: SHIP is deliberately absent. `saipen ship` is recognized from any
+# phase as a COMMAND (RFC § 1.10), but `phase: SHIP` is reachable only from
+# REVIEW -- § 1.10 says so in as many words while this set said otherwise
+# from v7.83.0 to v7.94.0. A command is not a transition.
+ANY_FROM = {"VALIDATE", "MARKHUNT", "CLEAN", "TRANSLATE", "PREPARE", "PLAN"}
 
 t_from = state.get("transition_from")
 t_current = state.get("phase")
@@ -356,7 +359,8 @@ if phase in ("SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP") \
 # file write is unreachable. INIT (creates .saipen/) and PLAN (writes tickets
 # onto BOARD.md) joined in v7.93.0 -- they were always unreachable in
 # principle, but the enumeration named only four and read as exhaustive.
-READ_ONLY_BANNED_PHASES = ("INIT", "PLAN", "BUILD", "SHIP", "CLEAN", "TRANSLATE")
+READ_ONLY_BANNED_PHASES = ("INIT", "PLAN", "ADD", "BUILD", "SHIP", "CLEAN",
+                           "TRANSLATE")
 if mode == "read-only" and phase in READ_ONLY_BANNED_PHASES:
     fail(f"mode: read-only MUST NOT enter {phase} -- that phase's work "
          f"product is a file write (RFC § 1.3)")
@@ -1239,6 +1243,30 @@ else:
                      f"RFC § 1.2 is the only place that list may exist; refer "
                      f"to it instead (this is the v7.92.0 five-copies defect)")
                 drift_ok = False
+
+    # 8. Every `WAIT:` a shipped doc tells an agent to WRITE must carry a
+    #    category from § 1.2's closed set. v7.93.0 made the category mandatory
+    #    and enforced it on STATE.md, but left three phase docs (blocked.md,
+    #    build.md, clean.md) prescribing category-less WAITs -- so an agent
+    #    following its own phase doc verbatim produced a state this validator
+    #    then FAILed. Rules propagate to the docs that emit them, or they are
+    #    only enforced against agents that never read the docs.
+    doc_roots = [rfc_path.parent / "phases", rfc_path.parent.parent / "extensions"]
+    prescribed = re.compile('next_action:\\s*`?WAIT:\\s*([^`\\n<]{0,40})')
+    bad_waits = []
+    for root in doc_roots:
+        if not root.is_dir():
+            continue
+        for doc in sorted(root.rglob("*.md")):
+            for m in prescribed.finditer(doc.read_text(encoding="utf-8-sig")):
+                body = m.group(1).strip().lower()
+                if not any(body.startswith(c) for c in WAIT_CATEGORIES):
+                    bad_waits.append(f"{doc.as_posix()}: WAIT: {m.group(1).strip()[:40]!r}")
+    for b in bad_waits:
+        fail(f"cross-doc drift [wait-categories] -- shipped doc prescribes a "
+             f"`WAIT:` with no § 1.2 category token: {b}")
+    if bad_waits:
+        drift_ok = False
 
     if drift_ok and not failures:
         ok("cross-doc sets agree (required fields, phase enum, from-any-phase, "

@@ -10,6 +10,8 @@ confirming no other ticket on `BOARD.md` is workable (`phases/verify.md` or `pha
 2. Re-scan `BOARD.md` for any unblocked `TODO` once more -- if one exists,
    go work it instead of proceeding to step 3. This phase is the last resort.
 3. Ask the user for clarification, credentials, or manual intervention:
-   `next_action: WAIT: <the specific question or what's needed>` (RFC § 1.2).
+   `next_action: WAIT: blocked -- <the specific question or what's needed>`
+   (RFC § 1.2's category vocabulary; `blocked` is the category for a
+   session-level unblock request).
 4. Do not spin or guess blindly. Wait for facts.
 5. If the blocker is resolved by the user, tick BOARD if applicable, update STATE -> PLAN, SCOUT, or DONE (if the board is now empty).

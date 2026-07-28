@@ -8,7 +8,8 @@ sense (schema/database drop, mass file deletion, history rewrite, irreversible
 migration, deleting user data), that section's confirmation gate governs and a
 logged rollback command doesn't satisfy it. Either the active ticket itself
 pre-authorizes the operation AND it's reversible, or you stop and ask
-(`next_action: WAIT: <the exact operation, spelled out>`). "Risky" here covers
+(`next_action: WAIT: destructive-op -- <the exact operation, spelled out>`,
+RFC § 1.2's category vocabulary). "Risky" here covers
 the ordinary large-but-recoverable edit; anything on § 1.1's list is a
 different category with a different gate.
 Scope grows / neighbor broken: new TODO ticket, keep moving.

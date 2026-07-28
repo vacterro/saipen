@@ -2,6 +2,26 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.94.0 -- 2026-07-28 -- three of six defects were mine, from the last two releases
+
+The question this release had to answer was whether the last three were going in circles. They were not, but the pattern changed and that is worth naming: v7.92.0 and v7.93.0 found defects older than themselves -- one dead check had been dead since `feae149`. This round, three of six findings were introduced by those same two releases. New rules were outrunning their own propagation. The fix is not more rules; it is making propagation mechanical, which is what most of this release does.
+
+**A recognized command is not a legal transition.** § 1.10 has always said "the transition table's only route into `SHIP` is from `REVIEW`". The validator has had `SHIP` in its from-any-phase set since v7.83.0, and in v7.92.0 I copied that into § 1.6's text -- so one half of the protocol told an agent to run the gates while the other half made jumping straight to `phase: SHIP` a legal transition. Worse, v7.93.0's cross-document drift detector then certified the agreement, because both sides now said the same wrong thing. `SHIP` is out of the transition set; `saipen ship` stays recognized from anywhere and now says concretely what it writes: the next unmet gate on that ticket's chain, `PHASE SHIP` only after `REVIEW` passes, and `WAIT: blocked -- saipen ship has no verified work to ship` when there is nothing to ship at all.
+
+**A rule has to reach the docs that emit it.** v7.93.0 made the `WAIT:` category mandatory and enforced it against `STATE.md` -- while `blocked.md`, `build.md`, `clean.md` and `extensions/subs/PROTOCOL.md` went on prescribing category-less WAITs. An agent following its own phase doc verbatim produced a state this validator then failed. All four fixed, and the drift detector now walks `phases/` and `extensions/` for any prescribed `next_action: WAIT:` and FAILs a missing category. It found the fourth one itself, seconds after being written.
+
+**`BOOT.md` still told agents to re-read only `STATE.md`** after a checkpoint, three days after § 1.5 started requiring all three. Same self-inflicted class, same fix: BOOT points at the rule instead of paraphrasing half of it, and now also carries § 1.11's priority order for a cold agent that must decide what to do at all.
+
+**RECOVER had a hole exactly where it hurts.** Its triggers were unreadable, missing-field, or contradicted-by-LOG/BOARD. A `next_action: continue work` is none of those -- present, non-empty, contradicted by nothing -- so a conformant agent fell through to FINISH or START and *executed* a value § 1.2 calls non-conformant. RECOVER now covers a `next_action` that fails § 1.2's prefix or category checks, with the `DONE` + empty-board invalid-`WAIT:` case still routed to UNBLOCK's auto-transition instead.
+
+**The Pick Rule never said which ticket to pick.** It defined eligibility and stopped, inside the section named Determinism Invariants -- two conformant agents handed one board could choose differently and both be right. It is now the topmost workable line, which is what § 2.4's Entry already assumed when it inserts a new objective's tickets at the top.
+
+Smaller: `read-only` now bans `ADD`, whose entire work product is tickets -- the principle in § 1.3 covered it, the enumeration did not. `§ 1.5` checkpoints after a phase transition too, since one ticket walks four phases and a crash mid-walk left `STATE.phase` naming a phase the work had left. And `README.md` promised auto-`HUNT` on an empty board with no mention of § 2.1's `BLOCKED` exception -- the single place a weak agent walks straight past a real blocker to go find busywork.
+
+Rejected from the patch, with reasons: adding a `-> BLOCKED` line to every phase doc (§ 1.6 states outright that `-> BLOCKED` is universal, not per-phase vocabulary, and that a doc's silence never removes it -- adding nine copies is the second constitution the same patch objects to); deleting CONFORMANCE row 43 (it is a tombstone from the v7.86.0 duplicate-43 incident, and removing it invites reuse); and rewording the LOG skeleton again, which already says exactly what the patch asked for and has now been misread by three separate audits.
+
+CONFORMANCE 61-62 added. Enforcement: 23 mechanically-checked rows of 62.
+
 ## 7.93.0 -- 2026-07-28 -- a dead check, a deadlock I shipped myself, and the diet that actually mattered
 
 Three more audit patches arrived. Verifying them first turned out to matter more than applying them: a good half described a tree that no longer existed, one would have re-introduced a deadlock, and the same false claim about LOG lines arrived for the third time. What survived verification was real, and shipping it surfaced four defects nobody had reported.
