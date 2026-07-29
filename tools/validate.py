@@ -1703,6 +1703,44 @@ else:
             ok(f"doc coverage accounted for ({len(surface)} shipped documents, "
                f"{len(COVERED)} checked patterns, {len(EXEMPT)} exempt)")
 
+    # 12. Citations resolve. Nearly every shipped document points into RFC by
+    #     section number or at a phase doc by filename, and both move: sections
+    #     get renumbered, phase docs get renamed. Neither leaves a mark on the
+    #     citing document, so a pointer can rot into a reference to a rule that
+    #     no longer exists while the sentence around it still reads fine.
+    #     This is the same class as the adapter cross-reference check, applied
+    #     to the two things every doc actually cites.
+    _rfc_text = rfc_path.read_text(encoding="utf-8-sig")
+    _sections = set(re.findall(r"^###\s+(\d+\.\d+)(?![\d.])", _rfc_text, re.MULTILINE))
+    _phase_dir = rfc_path.parent / "phases"
+    _phase_docs = {q.name for q in _phase_dir.glob("*.md")} if _phase_dir.is_dir() else set()
+    if not _sections or not _phase_docs:
+        fail("cross-doc drift [citations] -- could not read RFC's section "
+             "headings or the phases/ directory, so citation checking would "
+             "silently pass over everything")
+        drift_ok = False
+    else:
+        _cite_docs = []
+        for _pat in ("saipen/*.md", "saipen/phases/*.md", "extensions/**/*.md",
+                     "tests/scenarios/*/README.md", "*.md"):
+            _cite_docs += list(_tools_parent.glob(_pat))
+        _dangling = []
+        for _doc in sorted(set(_cite_docs)):
+            if not _doc.is_file() or "CHANGELOG" in _doc.name:
+                continue
+            _body = _doc.read_text(encoding="utf-8-sig", errors="replace")
+            for _s in sorted(set(re.findall(r"\u00a7\s*(\d+\.\d+)", _body))):
+                if _s not in _sections:
+                    _dangling.append(f"{_doc.name} cites RFC \u00a7 {_s}")
+            for _d in sorted(set(re.findall(r"phases/([a-z_]+\.md)", _body))):
+                if _d not in _phase_docs:
+                    _dangling.append(f"{_doc.name} cites phases/{_d}")
+        if _dangling:
+            fail(f"cross-doc drift [citations] -- {len(_dangling)} dangling "
+                 f"reference(s): {'; '.join(_dangling[:5])}"
+                 f"{' ...' if len(_dangling) > 5 else ''}")
+            drift_ok = False
+
     if drift_ok and not failures:
         ok("cross-doc sets agree (required fields, phase enum, from-any-phase, "
            "read-only bans, next_action prefixes, WAIT categories; no re-listing "
