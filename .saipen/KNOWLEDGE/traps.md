@@ -73,6 +73,33 @@ always is. Before believing any negative, run a control whose result is
 already known and confirm it comes back right. Control silent -> report
 nothing and fix the instrument. Codified in `phases/verify.md`.
 
+## Never chain `git tag` after a commit with `;`
+
+Twice in one session a tag reached origin pointing at the wrong commit, both
+times from the same shape:
+
+```sh
+git commit -F- <<'MSG' ... MSG
+git tag -a vX.Y.Z -m "..." && git push origin main && git push origin vX.Y.Z
+```
+
+The commit failed -- once on a hook rejection, once on shell quoting -- and the
+tag command, being a separate statement, ran anyway and tagged the PREVIOUS
+commit. Both then pushed cleanly, because pushing a tag has no opinion about
+what it points at.
+
+Use `&&` so the tag cannot outlive a failed commit:
+`git commit ... && git tag -a ... && git push origin main && git push origin vX.Y.Z`
+
+The first occurrence published a GitHub Release built from the wrong commit,
+carrying the previous version's notes and a VERSION asset that disagreed with
+its own tag name. The second was caught by `release.yml`'s tag-vs-VERSION
+guard, added because of the first -- the release job failed in 16 seconds and
+nothing was published. The guard works; the habit that needs it is the defect.
+
+Moving a published tag is a force-push on a ref: RFC § 1.1 destructive, ask
+first.
+
 ## Python string escapes keep eating shell and path text
 
 Four separate times in one session: `\1` in a sed replacement became `chr(1)`
