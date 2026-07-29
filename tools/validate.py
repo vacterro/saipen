@@ -1674,9 +1674,17 @@ else:
         # teaching a WAIT-at-DONE rule that had been superseded.
         (".saipen/KNOWLEDGE/*.md", "citation + required-field-count checks"),
     ]
+    # EXEMPT means "no rule-CONTENT check applies", never "nothing looks at it".
+    # Citations are verified across every shipped document below, exempt or
+    # not: a pointer at a section or file that no longer exists is wrong
+    # wherever it sits. The v7.100.0 wording implied the weaker thing, and five
+    # of the seven entries here in fact name protocol files -- three of them
+    # (SKILL.md, STYLE.md, UI.md) are shipped into every install by the
+    # injector, and SKILL.md is the entry point that tells a skill-reading
+    # platform which file to read first.
     EXEMPT = [
-        ("saipen/SKILL.md",   "front-matter manifest for skill loaders, no protocol rules"),
-        ("saipen/STYLE.md",   "chat voice; asserts nothing a machine can hold to RFC"),
+        ("saipen/SKILL.md",   "reading-order entry point for skill platforms; its file references are citation-checked, it states no rule of its own"),
+        ("saipen/STYLE.md",   "chat voice; shipped, and its RFC reference is citation-checked, but the voice itself is not machine-checkable"),
         ("saipen/UI.md",      "visual spec for UI work, disjoint from the state protocol"),
         ("SPEC.md",           "design intent and rationale, deliberately not normative"),
         ("CHANGELOG.md",      "history; never read by an agent, never a rule source"),
@@ -1728,9 +1736,10 @@ else:
         drift_ok = False
     else:
         _cite_docs = []
+        # Every shipped document, exempt or not -- see the EXEMPT note above.
         for _pat in ("saipen/*.md", "saipen/phases/*.md", "extensions/**/*.md",
                      "tests/scenarios/*/README.md", "*.md",
-                     ".saipen/KNOWLEDGE/*.md"):
+                     ".saipen/KNOWLEDGE/*.md", ".github/**/*.md"):
             _cite_docs += list(_tools_parent.glob(_pat))
         _dangling = []
         for _doc in sorted(set(_cite_docs)):
@@ -1743,6 +1752,19 @@ else:
             for _d in sorted(set(re.findall(r"phases/([a-z_]+\.md)", _body))):
                 if _d not in _phase_docs:
                     _dangling.append(f"{_doc.name} cites phases/{_d}")
+            # Named protocol files rot the same way. SKILL.md alone points a
+            # cold platform at five of them; if one is renamed, every such
+            # pointer becomes a dead end with no other symptom. Scope is
+            # exactly these six plus extensions/subs/PROTOCOL.md -- the files
+            # the protocol itself names. An arbitrary `Foo.md` reference is
+            # somebody else's filename and deliberately not adjudicated here.
+            for _f in sorted(set(re.findall(
+                    r"\b(RFC|BOOT|STYLE|UI|CONFORMANCE|SKILL)\.md\b", _body))):
+                if not (rfc_path.parent / f"{_f}.md").is_file():
+                    _dangling.append(f"{_doc.name} cites {_f}.md")
+            if "extensions/subs/PROTOCOL.md" in _body and not (
+                    _tools_parent / "extensions" / "subs" / "PROTOCOL.md").is_file():
+                _dangling.append(f"{_doc.name} cites extensions/subs/PROTOCOL.md")
         if _dangling:
             fail(f"cross-doc drift [citations] -- {len(_dangling)} dangling "
                  f"reference(s): {'; '.join(_dangling[:5])}"
