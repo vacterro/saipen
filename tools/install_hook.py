@@ -21,6 +21,14 @@ import sys
 from pathlib import Path
 
 MARKER = "# saipen pre-commit hook"
+# Bumped whenever the hook BODY changes. The hook text is baked into
+# .git/hooks/pre-commit at install time and never updates itself, so without a
+# stamp an installed hook silently stays whatever generation it was born in --
+# the same failure KNOWLEDGE/traps.md already records for the injector's skill
+# copies ("re-run inject after every git pull"), and nothing guarded this one.
+# tools/validate.py reads this number out of THIS file and compares it against
+# the number in the installed hook.
+HOOK_VERSION = 2
 
 home = Path(__file__).resolve().parent.parent
 hooks_dir = Path(".git/hooks")
@@ -46,6 +54,7 @@ home_sh = str(home).replace("\\", "/")
 
 hook = f"""#!/bin/sh
 {MARKER}
+# saipen-hook-version: {HOOK_VERSION}
 # Validates .saipen/ before every commit; installed by tools/install_hook.py.
 # Bypass a false positive with: git commit --no-verify
 [ -d .saipen ] || exit 0
@@ -72,7 +81,11 @@ if [ -f "$SAIPEN_HOME/tests/validate.sh" ]; then
   echo "saipen: validation failed -- fix .saipen/ or commit with --no-verify" >&2
   exit 1
 fi
-# No validator reachable -- never block commits on a broken install.
+# No validator reachable -- never block commits on a broken install, but never
+# stay quiet about it either. Usually a moved saipen_home; if STATE.md is UTF-16
+# the sed above recovers nothing either. An unvalidated commit that LOOKS
+# validated is the silent PASS this protocol keeps digging out.
+echo "saipen: NOT VALIDATED -- no validator found at $SAIPEN_HOME. Check saipen_home in .saipen/STATE.md, then re-run tools/install_hook.py" >&2
 exit 0
 """
 

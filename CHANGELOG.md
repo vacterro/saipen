@@ -2,6 +2,16 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.113.0 -- 2026-07-30 -- the only gate a consuming project has, and nothing checked its age
+
+In a project that merely uses SAIPEN, `.git/hooks/pre-commit` is the whole enforcement surface: no CI, no release workflow, just that one file deciding whether a corrupt `.saipen/` reaches a commit. Its text is baked in at install time and never updates itself, so a hook installed twenty releases ago goes on running exactly the logic it was born with -- and nothing anywhere said so.
+
+That is the failure `KNOWLEDGE/traps.md` already records for the injector's skill copies, which have to be re-injected after every pull. The hook had no equivalent signal at all. It carries a generation stamp now, and `tools/validate.py` compares it against the number the installer ships -- parsed out of `install_hook.py` rather than imported, because that module does its work at import time.
+
+The check introduced itself: this repository's own hook had no stamp, having been installed before one existed.
+
+The second half is the hook's final `exit 0`. Reaching it means neither `validate.py` nor the portable floor could be found -- usually a moved `saipen_home`, and if `STATE.md` happens to be UTF-16 then the `sed` fallback recovers nothing either. The commit was allowed through, which is right, and in complete silence, which is not: an unvalidated commit that LOOKS validated is the same silent PASS this protocol has spent ten releases digging out of its own checks. It stays fail-open -- blocking every commit on a broken install is worse than letting one through -- and now prints what it could not find and the command that repairs it.
+
 ## 7.112.0 -- 2026-07-30 -- three NameErrors in one day, none of them visible locally
 
 `tools/validate.py` is a 2300-line straight-line script: its checks run in file order, so a constant placed below its first use is a `NameError` waiting for the one input that reaches that branch. Three landed in a single day. `SAIPEN_COMMANDS` was declared beside its second consumer, and the branch that reads it first only runs when `next_action` starts with `saipen ` -- this repository's own says `WAIT:`, so every local run passed and a fixture caught it. `IS_SAIPEN_HOME` was read by a check spliced above the line that computes it. And `saipen_dir` was a name that never existed at all.

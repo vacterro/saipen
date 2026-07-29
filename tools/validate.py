@@ -2332,6 +2332,36 @@ else:
                  "read as an unexplained contradiction again")
             drift_ok = False
 
+    # 13f. The installed pre-commit hook is not from an older generation.
+    #      In a consuming project the hook is the ONLY thing that gates a
+    #      commit, and its text is baked into `.git/hooks/pre-commit` at install
+    #      time -- it never updates itself. So a hook installed twenty releases
+    #      ago goes on running whatever logic it was born with, and nothing said
+    #      so. Exactly the failure `KNOWLEDGE/traps.md` records for the
+    #      injector's skill copies, which need a re-inject after every pull; the
+    #      hook had no equivalent signal at all. Parsed out of install_hook.py
+    #      rather than imported, because that module does its work at import.
+    _hook = Path(".git/hooks/pre-commit")
+    _installer = _tools_parent / "tools" / "install_hook.py"
+    if _hook.is_file() and _installer.is_file():
+        _cur = re.search(r"^HOOK_VERSION\s*=\s*(\d+)",
+                         _installer.read_text(encoding="utf-8-sig"), re.MULTILINE)
+        _got = re.search(r"saipen-hook-version:\s*(\d+)",
+                         read_doc(_hook))
+        if _cur:
+            if _got is None:
+                warn("hook-generation",
+                     f"the installed pre-commit hook carries no version stamp "
+                     f"-- it predates v7.113.0 and cannot be compared. Re-run "
+                     f"tools/install_hook.py to pick up the current one "
+                     f"(generation {_cur.group(1)})")
+            elif int(_got.group(1)) != int(_cur.group(1)):
+                warn("hook-generation",
+                     f"the installed pre-commit hook is generation "
+                     f"{_got.group(1)}; the installer ships generation "
+                     f"{_cur.group(1)}. The hook never updates itself -- "
+                     f"re-run tools/install_hook.py")
+
     # 13d. RFC § 1.7 Workspace Hygiene, mechanically. `saipen set` writes a
     #      bootloader that POINTS at the canonical home; it must never copy the
     #      protocol into the project, and phase transitions must load from

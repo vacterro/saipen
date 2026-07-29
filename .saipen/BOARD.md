@@ -4,6 +4,9 @@
 ## TODO
 
 ## DONE
+- [x] T-302 [P0] The pre-commit hook now carries a generation stamp and the validator compares it. In a consuming project the hook is the only gate, and it never updated itself -- a hook from twenty releases ago ran silently. This repo's own hook was stamp-less. | verify: tools/validate.py PASS (2026-07-30)
+- [x] T-303 [P0] The hook's fail-open path was silent: no validator found meant an unvalidated commit that looked validated. Still fail-open, now says why and names the fix. | verify: tools/validate.py PASS (2026-07-30)
+- [x] T-304 [P2] Ship v7.113.0. | verify: tools/validate.py PASS (2026-07-30)
 - [x] T-297 [P0] tools/audit_order.py: no module-level name may be read before its assignment. Three such NameErrors landed in one day, all invisible to a local run and to ruff. | verify: tools/audit_order.py PASS (2026-07-30)
 - [x] T-298 [P1] requires: values checked against RFC 1.3's capability vocabulary -- a typo silently removed a requirement rather than tightening it. | verify: tools/audit_order.py PASS (2026-07-30)
 - [x] T-299 [P1] saipen_version compared against the home's major. It had been type-checked and compared to nothing. | verify: tools/audit_order.py PASS (2026-07-30)
