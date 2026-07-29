@@ -10,7 +10,7 @@
 
 **Една команда. Нула амнезия.**
 
-**v7.104.0** | [Спецификация](SPEC.md) | [Ръководство](GUIDE.md) | [RFC](saipen/RFC.md) | [Стил](saipen/STYLE.md) | [UI](saipen/UI.md) | [Съответствие](saipen/CONFORMANCE.md) | чист markdown | нула зависимости | MIT
+**v7.105.0** | [Спецификация](SPEC.md) | [Ръководство](GUIDE.md) | [RFC](saipen/RFC.md) | [Стил](saipen/STYLE.md) | [UI](saipen/UI.md) | [Съответствие](saipen/CONFORMANCE.md) | чист markdown | нула зависимости | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)

@@ -8,7 +8,15 @@ jobs:
     permissions:
       contents: write
     steps:
+      # fetch-depth: 0 fetches tags. The default shallow checkout has none,
+      # and both jobs read the tag list: the validator treats tags as half
+      # of the release ledger, and the release job decides "is this the
+      # highest version" from it. Without tags the validator saw a partial
+      # ledger and FAILed a legitimate citation, and `git fetch --tags`
+      # against a shallow clone exited non-zero and killed the release job.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       # A tag whose VERSION file disagrees with it must not become a release.
       # v7.99.0 was published from a commit that still said 7.98.0, carrying
       # v7.98.0's notes and a VERSION asset reading 7.98.0 -- the tag had been
@@ -49,7 +57,6 @@ jobs:
       - name: Is this the highest tag?
         id: highest
         run: |
-          git fetch --tags --quiet
           top="$(git tag -l 'v*' | sed 's/^v//' | sort -V | tail -1)"
           if [ "$top" = "${GITHUB_REF_NAME#v}" ]; then
             echo "latest=true" >> "$GITHUB_OUTPUT"

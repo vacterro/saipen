@@ -23,7 +23,15 @@ jobs:
   conformance:
     runs-on: ubuntu-latest
     steps:
+      # fetch-depth: 0 fetches tags. The default shallow checkout has none,
+      # and both jobs read the tag list: the validator treats tags as half
+      # of the release ledger, and the release job decides "is this the
+      # highest version" from it. Without tags the validator saw a partial
+      # ledger and FAILed a legitimate citation, and `git fetch --tags`
+      # against a shallow clone exited non-zero and killed the release job.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:

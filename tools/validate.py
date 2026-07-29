@@ -1884,14 +1884,16 @@ else:
             _ledger |= set(re.findall(
                 r"^## (\d+\.\d+\.\d+)",
                 _chg.read_text(encoding="utf-8-sig"), re.MULTILINE))
+        _tag_list = set()
         try:
             _r = subprocess.run(["git", "tag", "-l", "v*"],
                                 capture_output=True, text=True, check=False)
             if _r.returncode == 0:
-                _ledger |= {ln.strip()[1:] for ln in _r.stdout.splitlines()
-                            if ln.strip().startswith("v")}
+                _tag_list = {ln.strip()[1:] for ln in _r.stdout.splitlines()
+                             if ln.strip().startswith("v")}
         except (OSError, subprocess.SubprocessError):
             pass
+        _ledger |= _tag_list
 
         def _rel(p):
             try:
@@ -1906,7 +1908,21 @@ else:
                 return None
 
         _known = {t for t in (_tup(v) for v in _ledger) if t}
-        if _known:
+        # A PARTIAL ledger is worse than no ledger: it turns every release
+        # recorded only in the missing half into a phantom. That is not
+        # hypothetical -- this check shipped without the guard and CI reddened
+        # on the first run, because `actions/checkout` clones shallow and
+        # fetches no tags, so two legitimately-tagged releases with no
+        # CHANGELOG entry read as never having happened. The instrument was
+        # broken, not the subject, and it took a whole release to say so.
+        # Both halves present, or the check does not run.
+        _tags_seen = bool(_tag_list)
+        if not _tags_seen:
+            warn("release-ledger",
+                 "git tag list unavailable or empty -- the release ledger has "
+                 "only its CHANGELOG half, so the phantom-version check is "
+                 "skipped rather than run against incomplete data")
+        if _known and _tags_seen:
             # Below the oldest entry the ledger simply has no memory -- those
             # citations predate both files and cannot be decided here. Silence
             # there is honest; silence above it was the defect.

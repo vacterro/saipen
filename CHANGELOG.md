@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.105.0 -- 2026-07-29 -- the ledger check ran on half a ledger and failed a correct repo
+
+Yesterday's release added a check that a cited version must exist in the release ledger -- git tags plus CHANGELOG entries. It reddened CI on its first run, on a repository that was correct.
+
+`actions/checkout` clones shallow and fetches no tags. So in CI the ledger arrived with only its CHANGELOG half, and the two releases recorded solely by a tag (`v7.81.0`, `v7.82.0`) read as versions that never happened. Every citation to them became a phantom. The check had been red-tested locally, in a full clone, where the failure is invisible by construction -- which is the same shape as every dead check this repo has found: verified once, in one environment, and never asked what it depends on.
+
+A partial view of external state is worse than none: it does not weaken the check, it inverts it. Both halves present, or the check is skipped and says so with a WARN naming the missing half. Red-tested against a working-tree copy with no git at all, and confirmed still able to go red with tags present -- the first attempt at that test proved nothing, because it cloned the committed tree and ran the version of the validator that predated the fix.
+
+The release job died the same way, on `git fetch --tags` against a shallow clone, so `v7.104.0` was tagged with no GitHub Release published. Both workflows now check out with `fetch-depth: 0`.
+
+One thing worth stating because it shapes every future fix of this kind: repairing a workflow on `main` does nothing for a tag already pushed. GitHub runs the workflow file from the ref that triggered it, so a broken release job must be fixed forward with a new release, never by re-pushing the old tag.
+
 ## 7.104.0 -- 2026-07-29 -- below VERSION is not the same as shipped
 
 Forty-two lines across `CONFORMANCE.md`, `extensions/subs/PROTOCOL.md`, both JSON schemas, `tools/validate.py`, the PowerShell floor and sixteen scenario READMEs named `v7.100.0` as the release they shipped in. There is no such release: no tag, no CHANGELOG entry, and no commit whose `VERSION` file ever said it. The number was skipped and the citations were written anyway.

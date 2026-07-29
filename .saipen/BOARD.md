@@ -4,6 +4,9 @@
 ## TODO
 
 ## DONE
+- [x] T-269 [P0] The release-ledger check FAILed a correct repo on its first CI run: checkout is shallow and carries no tags, so the ledger arrived half-empty and two tagged-but-unchangelogged releases read as phantoms. Skips with a WARN unless both halves are present. | verify: tools/validate.py PASS (2026-07-29)
+- [x] T-270 [P0] Both workflows check out with fetch-depth: 0. The release job also died on `git fetch --tags` against a shallow clone, so v7.104.0 was tagged with no GitHub Release published. | verify: tools/validate.py PASS (2026-07-29)
+- [x] T-271 [P2] Ship v7.105.0 and publish the missing v7.104.0 release. | verify: tools/validate.py PASS (2026-07-29)
 - [x] T-263 [P0] 42 lines named v7.100.0 as the release they shipped in. No tag, no CHANGELOG entry, no commit whose VERSION said it. All below VERSION, so the future-version bound certified every one. Corrected to v7.101.0, where the work actually shipped. | verify: 0 phantom citations, red test reinstating one FAILs (2026-07-29)
 - [x] T-264 [P0] New [phantom-version] check: a cited version must exist in the release ledger (git tags + CHANGELOG), not merely sit below VERSION. Scan widened past markdown -- the JSON schemas and the validator itself carried the number. | verify: red-tested, found 25 citations my own manual sweep had missed (2026-07-29)
 - [x] T-265 [P1] Release ledger halves compared: 2 tags without a CHANGELOG entry, 9 entries without a tag. WARN -- closing it means rewriting history or publishing backdated releases. | verify: both directions reported (2026-07-29)
