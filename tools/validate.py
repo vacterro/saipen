@@ -460,7 +460,9 @@ IS_SAIPEN_HOME = (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                   and Path("VERSION").is_file() and Path("README.md").is_file())
 
 sub_state_files = sorted(
-    p for p in subs_root.glob("*/STATE.md") if p.parent.name != "TEMPLATE")
+    # TEMPLATE included here too -- the shipped-library walk below stopped
+    # skipping it in v7.101.0 and this half had the same hole.
+    p for p in subs_root.glob("*/STATE.md"))
 library_subs = Path("extensions/subs")
 if (IS_SAIPEN_HOME and library_subs.is_dir()
         and library_subs.resolve() != subs_root.resolve()):
@@ -1218,23 +1220,32 @@ if adapter_dir.is_dir():
 kitchen = Path(".saipen/saitranslate/kitchen")
 if IS_SAIPEN_HOME and kitchen.is_dir():
     repo_version = Path("VERSION").read_text(encoding="utf-8-sig").strip()
-    stale = []
+    stale, absent, checked = [], [], 0
     for locale_dir in sorted(kitchen.iterdir()):
         if not locale_dir.is_dir():
             continue
         readme = locale_dir / f"README_{locale_dir.name.upper()}.md"
         if not readme.is_file():
-            # not every locale has a README -- skip silently
+            # A missing README used to be skipped in silence while the success
+            # line still counted DIRECTORIES -- so deleting one left the run
+            # reporting "all 32 badges match" having checked 31. Absence of a
+            # check is not a passing check (v7.101.0).
+            absent.append(locale_dir.name)
             continue
+        checked += 1
         content = readme.read_text(encoding="utf-8-sig")
         if f"**v{repo_version}**" not in content:
             stale.append(readme.name)
+    if absent:
+        warn("locale-readme-absent",
+             f"{len(absent)} locale director(y/ies) carry no README to check: "
+             f"{', '.join(sorted(absent)[:8])} -- the badge check silently "
+             f"skips them, so their version is unverified, not verified")
     if stale:
         fail(f"translation README badge drift: {len(stale)} locale(s) still"
              f" show an old version -- {', '.join(sorted(stale))}")
     else:
-        ok(f"all {len([d for d in kitchen.iterdir() if d.is_dir()])} locale"
-           f" README badges match VERSION ({repo_version})")
+        ok(f"{checked} locale README badge(s) match VERSION ({repo_version})")
 
 # ------------------------------------------------ subSaipen liveness signals
 
@@ -1778,6 +1789,44 @@ else:
                  f"reference(s): {'; '.join(_dangling[:5])}"
                  f"{' ...' if len(_dangling) > 5 else ''}")
             drift_ok = False
+
+    # 13. No document may cite a version that has not shipped. Writing
+    #     a not-yet-shipped version into a rationale is easy and reads as fact; if
+    #     the release never happens, or the number slips, every such line is a
+    #     promise the repository cannot keep. The bound is VERSION itself.
+    if IS_SAIPEN_HOME:
+        _cur = Path("VERSION").read_text(encoding="utf-8-sig").strip()
+        try:
+            _cur_t = tuple(int(x) for x in _cur.split("."))
+        except ValueError:
+            _cur_t = None
+        if _cur_t:
+            _future = {}
+            for _doc in sorted(set(_cite_docs)):
+                if not _doc.is_file() or "CHANGELOG" in _doc.name:
+                    continue
+                _body = _doc.read_text(encoding="utf-8-sig", errors="replace")
+                # Explicit character class, not a word boundary: the first
+                # version of this line reached the file as a literal BACKSPACE
+                # on both ends -- the escape was consumed before the raw prefix
+                # applied. It matched nothing and said nothing. Sixth escape
+                # trap of the session, in the tool written right after that
+                # trap was recorded in KNOWLEDGE.
+                for _v in set(re.findall(r"(?:^|[\s(\[])v(\d+\.\d+\.\d+)",
+                                         _body, re.MULTILINE)):
+                    try:
+                        if tuple(int(x) for x in _v.split(".")) > _cur_t:
+                            _future.setdefault(_v, set()).add(_doc.name)
+                    except ValueError:
+                        continue
+            if _future:
+                _bits = [f"v{v} in {', '.join(sorted(d)[:3])}"
+                         for v, d in sorted(_future.items())]
+                fail(f"cross-doc drift [future-version] -- {len(_future)} "
+                     f"version(s) cited above VERSION ({_cur}): "
+                     f"{'; '.join(_bits[:4])}. A citation to a release that "
+                     f"has not happened is a promise the repo cannot keep")
+                drift_ok = False
 
     if drift_ok and not failures:
         ok("cross-doc sets agree (required fields, phase enum, from-any-phase, "

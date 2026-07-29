@@ -2,6 +2,26 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.101.0 -- 2026-07-28 -- every exemption turned out to be an un-audited boundary
+
+Twenty commits of hardening, and one pattern underneath all of them: the places this repo had declared out of scope were exactly the places defects were living. Not once by coincidence -- five times in a row.
+
+**The subSaipen TEMPLATE was skipped by name, and that is where the defect was.** `extensions/subs/TEMPLATE/STATE.md` shipped a `next_action` with no legal prefix, so every subSaipen `saipen sub spawn` ever produced was born failing RFC § 1.2. It survived because the validation walk carried `if p.parent.name != "TEMPLATE"` -- the single file exempted from the check was the source every instance inherits. `phases/done.md` had the twin defect, endorsing `next_action: wait for user command`; a phase doc prescribing a state the validator rejects is worse than one that says nothing, because the agent obeys it.
+
+**`.saipen/KNOWLEDGE/` was blanketed as "project data, not protocol text".** RFC § 1.2 makes it durable truth an agent reads before planning. Reading it -- rather than grepping it, which had reported clean -- found `traps.md` and `decisions.md` both teaching a WAIT-at-DONE rule superseded nine releases earlier, and `traps.md` describing the LOG drift check as a WARN when it is a FAIL and its WARN half had already been deleted as dead code.
+
+**"Exempt" was doing more work than it should.** Five of seven exemptions name protocol files and three ship into every install; `SKILL.md` is the entry point telling a platform which file to read first. Exempt now means no rule-CONTENT check applies. Citations are verified everywhere, because a pointer at a section or file that no longer exists is wrong wherever it sits -- and they now resolve named protocol files too, not just `§ N.N` and `phases/*.md`.
+
+**Checks that could not fire.** One warn category, `unknown-field`, sat behind a branch on `additionalProperties` that both call sites set to false: it had never appeared in any run ever produced. `LOG_RE` accepted a dateless line while § 1.2 calls DATE mandatory, which quietly disarmed both timestamp checks by giving them an empty harvest -- the same death as the check removed in v7.99.0, reached by another road. 125 sealed entries predate the rule, so severity splits: FAIL in the active log, one collapsed WARN for immutable history.
+
+**And the instruments themselves lied, three times.** A harness said 20 of 20 portable-floor checks were dead (it was invoking the WSL `bash` stub). Another said 8 of 8 warn categories were unreachable and the repo was dirty (it matched an internal key that is never printed, and tested `"FAIL" in output` while the validator's own prose says FAILs). Each would have shipped a confident, false finding about a healthy subsystem. `phases/verify.md` guarded only the pole where a gate is stuck green; it now guards the other: **a run claiming total failure is a claim about your instrument first**, because a real defect is almost never total while a misconfigured harness almost always is. Run a control whose result is already known before reporting any negative.
+
+New standing coverage rather than one-off proof: `tools/audit_floor.py` breaks a scratch project one way per check and asserts both halves of the portable floor still go red (20 checks x 2, and it found the two halves wording the same defect differently). Five fixtures now stand behind the checks guarding TEST-001, the checkpoint contract, the DONE deadlock, the tripped valve and the one-DOING rule -- failure modes with a fixture went from 3 to 8 of 93. Fail-fixtures can pin their reason with `expect_fail_contains:`, which immediately caught three that had been failing for the wrong reason for months while the suite reported green.
+
+Also: doc coverage is accounted for -- 184 shipped documents, every one either under a check or exempt with a stated reason, which found an orphan fixture README at a phantom path tracked since `00c7557`. The locale badge line counted directories rather than checked files, so deleting a README left it reporting "all 32 match" having checked 31. And no document may now cite a version that has not shipped, a rule this release had to obey before it could be written.
+
+CONFORMANCE 89 rows to 96.
+
 ## 7.99.0 -- 2026-07-28 -- the validator had never been linted, and nine of its own error messages were corrupt
 
 Two threads: a review of how the four subSaipens actually did, and the first linter ever pointed at this project's own Python.
