@@ -1,7 +1,7 @@
 ---
 phase: PLAN
 task: none
-next_action: "read the main project, plan the first tickets on BOARD.md"
+next_action: "saipen plan"
 blocker: none
 agent: <name>
 saipen_version: 7

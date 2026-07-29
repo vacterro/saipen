@@ -464,8 +464,13 @@ sub_state_files = sorted(
 library_subs = Path("extensions/subs")
 if (IS_SAIPEN_HOME and library_subs.is_dir()
         and library_subs.resolve() != subs_root.resolve()):
-    sub_state_files += sorted(
-        p for p in library_subs.glob("*/STATE.md") if p.parent.name != "TEMPLATE")
+    # TEMPLATE included, not skipped. `saipen sub spawn` copies it verbatim,
+    # so it is the source every instance inherits -- and excluding it is
+    # exactly why it shipped a `next_action` with no legal prefix, meaning
+    # every spawned subSaipen was born failing RFC § 1.2 until v7.101.0.
+    # The one file exempted from the check was the one the check existed
+    # to protect.
+    sub_state_files += sorted(library_subs.glob("*/STATE.md"))
 
 if sub_state_files:
     subs_ok = True
