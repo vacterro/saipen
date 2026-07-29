@@ -4,6 +4,11 @@
 ## TODO
 
 ## DONE
+- [x] T-279 [P0] Rule coverage: every RFC section stating a MUST must be cited by a CONFORMANCE row. Three sections stated nine MUSTs with no row at all -- 1.7, 1.8, 2.3. | verify: tools/validate.py PASS (2026-07-29)
+- [x] T-280 [P0] RFC 1.7 workspace hygiene enforced mechanically: .saipen/ carrying phases/tools/tests/schemas/adapters/templates or a core doc now FAILs. extensions/subs/ deliberately excluded -- those are the project's own instances, not a copy. | verify: tools/validate.py PASS (2026-07-29)
+- [x] T-281 [P1] 1.8 and 2.3 given rows that state they are behavioral and unenforceable by any tool here. A MUST with no row is indistinguishable from a MUST nobody remembered. | verify: tools/validate.py PASS (2026-07-29)
+- [x] T-282 [P1] Active LOG sealed into logs/LOG-004.md: 147 events, E-881..E-1027. 169 -> 22 lines. Second run refused -- the outer threshold guard held. | verify: tools/validate.py PASS (2026-07-29)
+- [x] T-283 [P2] Ship v7.108.0. | verify: tools/validate.py PASS (2026-07-29)
 - [x] T-276 [P1] Palette name corrected to Vintage Golden across 49 files. CHANGELOG.md and the append-only logs deliberately keep the old name -- they are history. | verify: tools/validate.py PASS (2026-07-29)
 - [x] T-277 [P0] The palette guard now holds a list of superseded names and exempts CHANGELOG. Enforcing exactly one name meant the guard could not survive its own name being corrected. | verify: tools/validate.py PASS (2026-07-29)
 - [x] T-278 [P2] Ship v7.107.0. | verify: tools/validate.py PASS (2026-07-29)

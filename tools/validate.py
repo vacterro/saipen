@@ -2051,6 +2051,64 @@ else:
                  f"{' ...' if len(_stale_name) > 5 else ''}")
             drift_ok = False
 
+    # 13d. RFC § 1.7 Workspace Hygiene, mechanically. `saipen set` writes a
+    #      bootloader that POINTS at the canonical home; it must never copy the
+    #      protocol into the project, and phase transitions must load from
+    #      `saipen_home` by absolute path. A copied `phases/` or `tools/` under
+    #      `.saipen/` is the failure this forbids: it goes stale the moment the
+    #      home moves, and nothing in the project would ever say so.
+    #      `extensions/subs/` is NOT a copy -- those are the project's own
+    #      subSaipen instances, which is why the ban names directories rather
+    #      than blanketing `.saipen/`.
+    _sd = Path(".saipen")
+    if _sd.is_dir():
+        _copied = [n for n in ("phases", "tools", "tests", "schemas",
+                               "adapters", "templates")
+                   if (_sd / n).is_dir()]
+        _copied += [n for n in ("RFC.md", "BOOT.md", "SKILL.md", "STYLE.md",
+                                "UI.md", "CONFORMANCE.md")
+                    if (_sd / n).is_file()]
+        if _copied:
+            fail(f"RFC § 1.7 -- .saipen/ carries {', '.join(sorted(_copied))}, "
+                 f"which belong to saipen_home. `saipen set` writes a "
+                 f"bootloader that POINTS at the home; a copy goes stale the "
+                 f"moment the home moves and nothing here would say so")
+            drift_ok = False
+
+    # 13e. Every RFC section that states a MUST is claimed by CONFORMANCE.
+    #      The doc-coverage check answers "is any check looking at this file?".
+    #      Nothing answered the same question one level up, about RULES, and
+    #      three sections turned out to state nine MUSTs between them with no
+    #      row claiming any of them -- not disputed, not exempted, simply
+    #      unaccounted for. A behavioral rule no validator can test still gets
+    #      a row saying so; the row is how the protocol admits the limit
+    #      instead of leaving a silent hole.
+    _rfc_p = _tools_parent / "saipen" / "RFC.md"
+    _conf_p = _tools_parent / "saipen" / "CONFORMANCE.md"
+    if _rfc_p.is_file() and _conf_p.is_file():
+        _rfc_b = _rfc_p.read_text(encoding="utf-8-sig")
+        _must_by_sec, _cur_sec = {}, None
+        for _ln in _rfc_b.splitlines():
+            _h = re.match(r"^#{2,4}\s*§?\s*(\d+\.\d+)\s", _ln)
+            if _h:
+                _cur_sec = _h.group(1)
+                _must_by_sec.setdefault(_cur_sec, 0)
+                continue
+            if _cur_sec:
+                _must_by_sec[_cur_sec] += len(re.findall(r"\bMUST\b", _ln))
+        _claimed = set(re.findall(r"§\s*(\d+\.\d+)",
+                                  _conf_p.read_text(encoding="utf-8-sig")))
+        _unclaimed = sorted((s for s, c in _must_by_sec.items()
+                             if c and s not in _claimed),
+                            key=lambda s: [int(x) for x in s.split(".")])
+        if _unclaimed:
+            _bits = [f"§ {s} ({_must_by_sec[s]} MUST)" for s in _unclaimed]
+            fail(f"rule coverage -- {len(_unclaimed)} RFC section(s) state a "
+                 f"MUST that no CONFORMANCE row cites: {', '.join(_bits)}. "
+                 f"Every MUST is either enforced or has a row saying why it "
+                 f"cannot be")
+            drift_ok = False
+
     # 14. Every adapter names the cold-start kernel. An adapter that sends a
     #     cold agent straight at RFC.md inverts the 2-tier design: the
     #     constitution is ~100 KB and BOOT.md is under 4, and BOOT is all a

@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.108.0 -- 2026-07-29 -- nine MUSTs nobody had claimed
+
+Since v7.101.0 this repository checks that every shipped document is accounted for -- each one either matches a pattern some check reads, or is listed exempt with a stated reason. That check exists because twice running the real defect was not two documents disagreeing but nobody looking at a document at all.
+
+The same question was never asked one level up, about rules. Ask it and three RFC sections come back stating nine MUSTs between them with no CONFORMANCE row citing any of them: § 1.7 workspace hygiene, § 1.8 batch input parsing, § 2.3 the completion rule. Not disputed, not exempted, not deferred -- unaccounted for. And structurally invisible to every existing check, because they all compare things that ARE written to each other, and this is an absence.
+
+One of the three was mechanically checkable all along. § 1.7 forbids `saipen set` from copying phases or scripts into a project: the bootloader POINTS at `saipen_home`, and a copy goes stale the moment the home moves with nothing in the project to say so -- which is precisely the failure `KNOWLEDGE/traps.md` already records for the skill-directory copies. `.saipen/` carrying `phases/`, `tools/`, `tests/`, `schemas/`, `adapters/`, `templates/` or a core doc now FAILs. `extensions/subs/` is deliberately not in that list; those are the project's own subSaipen instances, not a copy of the home.
+
+The other two are judgement about scope and intent, and no artifact in `.saipen/` witnesses them. A board with twenty tickets from one prompt is shape-identical to a board with twenty tickets from twenty prompts; an invented "etc." item reads exactly like a real one. They get rows saying exactly that. A MUST with a row admitting no tool stands behind it is a known limit; a MUST with no row is indistinguishable from one nobody remembered.
+
+Housekeeping in the same pass: the active log crossed its cap and was sealed into `logs/LOG-004.md` -- 147 events, E-881..E-1027, 169 lines down to 22. Running the seal a second time refused, which is the outer threshold guard added in v7.93.0 doing its job at the exact spot where an earlier run had sealed a four-hundred-byte fresh log.
+
 ## 7.107.0 -- 2026-07-29 -- the guard could not survive its own name being wrong
 
 The palette named one release ago carried a one-letter slip. Correcting it meant travelling the same 49 files the rename had, and it exposed a flaw in the guard shipped alongside it: that guard enforced exactly ONE superseded name, so the moment its own canonical name changed, the name it had been created to enforce became the thing it needed to reject.
