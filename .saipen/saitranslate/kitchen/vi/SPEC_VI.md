@@ -50,7 +50,7 @@ saipen/
   CONFORMANCE.md             vector tự kiểm tra + bảng phạm vi kịch bản
   SKILL.md                  điểm truy cập mỏng cho các nền tảng đọc skill
   STYLE.md                  giọng điệu: trò chuyện, LOG.md, artifacts
-  UI.md                     đặc tả UI Dark Golden Win95 (bắt buộc cho công việc UI)
+  UI.md                     đặc tả UI Wintage Golden (bắt buộc cho công việc UI)
   BOOT.md                   ~nhân khởi động nguội: đường dẫn nhanh mà bare `continue`
                              cần, trước khi bất kỳ thứ nào ở trên được tải
   phases/                   logic máy trạng thái nghiêm ngặt -- 16 tài liệu, một tài

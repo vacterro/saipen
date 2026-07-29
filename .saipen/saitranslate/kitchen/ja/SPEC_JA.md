@@ -42,7 +42,7 @@ saipen/
   CONFORMANCE.md             自己チェックベクター + シナリオカバレッジ表
   SKILL.md                  スキル読み取りプラットフォーム用の薄いエントリポイント
   STYLE.md                  ボイス: チャット、LOG.md、アーティファクト
-  UI.md                     Dark Golden Win95 UI仕様（UI作業に必須）
+  UI.md                     Wintage Golden UI仕様（UI作業に必須）
   BOOT.md                   ~コールドスタートカーネル：ベア`continue`が必要とする
                              高速パス、上記のいずれかがロードされる前
   phases/                   厳格なステートマシンロジック -- RFC § 1.6の

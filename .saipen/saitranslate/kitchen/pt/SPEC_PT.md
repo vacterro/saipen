@@ -42,7 +42,7 @@ saipen/
   CONFORMANCE.md             vetores de autoverificação + tabela de cobertura de cenário
   SKILL.md                  ponto de entrada fino para plataformas de leitura de habilidades
   STYLE.md                  vozes: chat, LOG.md, artefatos
-  UI.md                     especificação de UI Dark Golden Win95 (obrigatório para trabalhos de UI)
+  UI.md                     especificação de UI Wintage Golden (obrigatório para trabalhos de UI)
   BOOT.md                   ~kernel de inicialização a frio: o caminho rápido
                              que um `continue` básico precisa, antes de qualquer
                              um dos acima ser carregado

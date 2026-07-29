@@ -42,7 +42,7 @@ saipen/
   CONFORMANCE.md             enese-kontrolli vektorid + stsenaariumide katvustabel
   SKILL.md                  õhuke sisenemispunkt oskusi-lugevatele platvormidele
   STYLE.md                  hääled: vestlus, LOG.md, artefaktid
-  UI.md                     Dark Golden Win95 UI spetsifikatsioon (kohustuslik kasutajaliidese tööks)
+  UI.md                     Wintage Golden UI spetsifikatsioon (kohustuslik kasutajaliidese tööks)
   BOOT.md                   külmkäivituse tuum: kiirtee, mida vajab paljas `continue`
                              enne ülejäänu laadimist
   phases/                   range olekumasina loogika -- 16 dokumenti, üks iga

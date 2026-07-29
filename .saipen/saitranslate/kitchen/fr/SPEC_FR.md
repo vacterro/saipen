@@ -50,7 +50,7 @@ saipen/
   CONFORMANCE.md             vecteurs d'auto-contrôle + tableau de couverture de scénarios
   SKILL.md                  point d'entrée mince pour les plateformes lisant les skills
   STYLE.md                  voix : chat, LOG.md, artefacts
-  UI.md                     spécification UI Dark Golden Win95 (obligatoire pour le travail UI)
+  UI.md                     spécification UI Wintage Golden (obligatoire pour le travail UI)
   BOOT.md                   ~noyau de démarrage à froid : le chemin rapide dont un `continue`
                              nu a besoin, avant que l'une des ci-dessus soit chargée
   phases/                   logique stricte de machine à état -- 16 docs, un par

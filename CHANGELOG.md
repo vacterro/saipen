@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.106.0 -- 2026-07-29 -- the palette has a name now, and every document uses it
+
+`UI.md` declares **Wintage Golden** the default palette. Not a theme, not a preset, not one option among several -- it is what a saipen interface looks like unless the user asks otherwise in so many words, and there is deliberately no second palette in the document to choose from. A document with two defaults has none.
+
+The eighteen tokens under that heading are the reference: an interface that has drifted from them is wrong rather than merely different. The values themselves are the lighter set that had been sitting uncommitted since before this session -- the original numbers proved hard to read on a glossy panel in daylight -- and they are already exactly what SAIPENVIEW ships, verified token by token, eighteen of eighteen. The old numbers are not preserved as an alternative; superseded is superseded, and `git log` remembers them.
+
+`UI.md` also now says how to extend the palette, because iron law 5 forbids inline hex and an implementation with a domain-specific colour needs somewhere to put it: declare it in the same `:root`, name it by role, never by colour.
+
+The name it replaced lived in 46 files -- two shipped root documents and 44 locale copies, every one of which would have gone on naming a palette the defining document no longer knows. That is the shape this repository keeps re-finding: the 33 guides teaching a superseded `WAIT:` form, the root `GUIDE.md` sitting outside the glob, seven adapters pointing a cold agent at the constitution. A change that lands where it was written and nowhere else.
+
+So the rename is guarded, not swept: `UI.md` must name its palette, and no shipped document may name the superseded one. Red-tested in both directions. The superseded literal is assembled in code rather than written into `CONFORMANCE.md`, because that file is itself scanned -- the fourth rule this session that had to stop quoting its own illustration.
+
 ## 7.105.0 -- 2026-07-29 -- the ledger check ran on half a ledger and failed a correct repo
 
 Yesterday's release added a check that a cited version must exist in the release ledger -- git tags plus CHANGELOG entries. It reddened CI on its first run, on a repository that was correct.

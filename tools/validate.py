@@ -2001,6 +2001,46 @@ else:
                          f"{len(_no_tag)} release(s) have a CHANGELOG entry "
                          f"but no git tag: {_vs(_no_tag)}")
 
+    # 13c. The palette has one name, and every document uses it. UI.md's
+    #      palette was renamed to Wintage Golden and declared the default; the
+    #      old name lived in 46 files, two of them shipped root docs and the
+    #      rest locale copies. A rename that lands in the defining document and
+    #      nowhere else is the shape this repo keeps re-finding -- the 33
+    #      guides teaching a superseded WAIT form, the root GUIDE.md outside
+    #      the glob, seven adapters pointing at the constitution. The old
+    #      literal is assembled here rather than written out, because
+    #      CONFORMANCE.md is itself scanned and a rule that trips on its own
+    #      illustration is one nobody can keep.
+    def _rel_doc(_p):
+        try:
+            return _p.relative_to(_tools_parent).as_posix()
+        except ValueError:
+            return _p.name
+
+    _ui = _tools_parent / "saipen" / "UI.md"
+    if _ui.is_file():
+        _ui_body = _ui.read_text(encoding="utf-8-sig")
+        _palette = "Wintage Golden"
+        _superseded = "Dark" + " Golden"
+        if _palette not in _ui_body:
+            fail(f"UI.md no longer names its palette {_palette!r} -- the "
+                 f"palette name is normative and every other document "
+                 f"references it")
+            drift_ok = False
+        _stale_name = []
+        for _doc in sorted(set(_cite_docs)):
+            if not _doc.is_file():
+                continue
+            if _superseded in _doc.read_text(encoding="utf-8-sig",
+                                             errors="replace"):
+                _stale_name.append(_rel_doc(_doc))
+        if _stale_name:
+            fail(f"cross-doc drift [palette-name] -- {len(_stale_name)} "
+                 f"document(s) still name the superseded palette instead of "
+                 f"{_palette!r}: {', '.join(_stale_name[:5])}"
+                 f"{' ...' if len(_stale_name) > 5 else ''}")
+            drift_ok = False
+
     # 14. Every adapter names the cold-start kernel. An adapter that sends a
     #     cold agent straight at RFC.md inverts the 2-tier design: the
     #     constitution is ~100 KB and BOOT.md is under 4, and BOOT is all a

@@ -42,7 +42,7 @@ saipen/
   CONFORMANCE.md             vettori di auto-verifica + tabella copertura scenari
   SKILL.md                  punto di ingresso sottile per piattaforme skill-reading
   STYLE.md                  voci: chat, LOG.md, artefatti
-  UI.md                     specifica UI Dark Golden Win95 (obbligatoria per lavoro UI)
+  UI.md                     specifica UI Wintage Golden (obbligatoria per lavoro UI)
   BOOT.md                   ~kernel di avvio a freddo: il percorso rapido di cui un
                              `continue` nudo ha bisogno, prima che uno dei suddetti sia caricato
   phases/                   rigorosa logica a macchina a stati -- 16 documenti, uno per

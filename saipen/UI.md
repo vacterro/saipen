@@ -1,6 +1,12 @@
-# saipen UI -- Dark Golden Win95 v2
+# saipen UI -- Wintage Golden
 
 Applies to every interface: web, app, panel, dialog, HTML report, TUI, desktop tool, or embedded utility.
+
+**Wintage Golden is the default palette.** Not a theme, not a preset, not one
+option among several -- it is what a saipen interface looks like unless the
+user asks for something else in so many words. There is no second palette in
+this document to choose from, and that is deliberate: a document with two
+defaults has none.
 
 ## Intent
 
@@ -82,35 +88,47 @@ built on that distrust.
    instant, it is physical feedback for a press the user themselves caused,
    and it is the entire motion budget. It is not precedent for anything else.
 
-## Tokens + base CSS
+## Tokens + base CSS -- Wintage Golden
 
-Paste this into every saipen UI implementation.
+Paste this into every saipen UI implementation. These eighteen values ARE the
+palette: naming it means the numbers below are the reference, and an interface
+that has drifted from them is wrong rather than merely different.
+
+The set was lightened once, after the original darker values proved hard to
+read on a glossy panel in daylight. The old numbers are not kept here as an
+alternative -- superseded is superseded, and `git log` remembers them.
+
+**Extending it.** An implementation MAY add tokens its own domain needs -- a
+softer surface, an accent for one recurring mark. Two conditions: declare them
+in this same `:root` block alongside the eighteen, and name them by role, never
+by colour. What is never allowed is a hex value inline in a rule; that is iron
+law 5, and an added token is how you obey it, not how you get around it.
 
 ```css
 :root {
-  --background:#1A0F05;
-  --backgroundSoft:#1E1408;
-  --surface:#2A1C0A;
-  --surfaceRaised:#362812;
-  --surfaceAlt:#3A2A15;
+  --background:#342012;
+  --backgroundSoft:#3A2616;
+  --surface:#4A341B;
+  --surfaceRaised:#5A4324;
+  --surfaceAlt:#634B2B;
 
-  --borderDark:#0E0803;
-  --borderHighlight:#C0A060;
-  --borderMuted:#4A3820;
+  --borderDark:#1C1208;
+  --borderHighlight:#D3B57A;
+  --borderMuted:#665033;
 
-  --textPrimary:#D4B87A;
-  --textSecondary:#B09558;
-  --textMuted:#7A6838;
+  --textPrimary:#E2CA95;
+  --textSecondary:#C5AB6E;
+  --textMuted:#95804C;
 
   --accentTeal:#008080;
-  --accentTealDeep:#004C4C;
+  --accentTealDeep:#006060;
 
-  --success:#4A7A20;
-  --warning:#7A7A20;
-  --danger:#7A2020;
+  --success:#5B9630;
+  --warning:#969630;
+  --danger:#963030;
 
-  --selection:#362812;
-  --compareBack:#0F0A04;
+  --selection:#5A4324;
+  --compareBack:#24170C;
 }
 
 * {
