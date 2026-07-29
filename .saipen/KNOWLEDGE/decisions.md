@@ -74,8 +74,10 @@
   proceed loses the autonomy the whole state machine is built on. Fix: when no
   `## TODO` remain and user action is a bare continue (not a specific command),
   jump to HUNT immediately, and from clean HUNT to ADD immediately. The only
-  exception is `STATE.phase: BLOCKED` (§ 2.1). A WAIT at DONE is never legal
-  unless a `[MARKHUNT]` ticket sits in `## BLOCKED` (`phases/done.md` step 2
+  exception is `STATE.phase: BLOCKED` (§ 2.1). A WAIT at DONE with an empty `## TODO`
+  is legal only as the § 2.4 safety valve or `WAIT: user brake -- <reason>`
+  (RFC § 1.2 since v7.92.0; this said the `[MARKHUNT]` case was the only one
+  until v7.101.0, and that case is really "the board has not halted") (`phases/done.md` step 2
   exception).
 - Command-surface compression (`saipen x <sub>` / `--flags`) REJECTED (T-161,
   v7.55.0). The surface is already tiered: `saipen`/`continue`/`goal` cover the

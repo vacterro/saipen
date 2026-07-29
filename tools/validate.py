@@ -1462,6 +1462,7 @@ else:
         r"\b(all\s+)?(five|six|seven|eight|nine|ten|\d+)\s+required\s+fields?\b",
         re.IGNORECASE)
     _count_docs = [boot_path, conf_path]
+    _count_docs += sorted((_tools_parent / ".saipen" / "KNOWLEDGE").glob("*.md"))
     _scen = _tools_parent / "tests" / "scenarios"
     if _scen.is_dir():
         _count_docs += sorted(_scen.glob("*/README.md"))
@@ -1667,6 +1668,11 @@ else:
         ("tests/scenarios/*/README.md", "required-field-count check + expect/reason parsing"),
         ("tests/scenarios/*/.saipen/*.md", "run_scenarios.py runs this validator against each fixture"),
         ("README.md",                "version-badge check"),
+        # KNOWLEDGE/ is excluded from the .saipen/ blanket on purpose: RFC
+        # § 1.2 makes it durable truth an agent reads before planning, not
+        # inert project data. Blanketing it cost nine releases of traps.md
+        # teaching a WAIT-at-DONE rule that had been superseded.
+        (".saipen/KNOWLEDGE/*.md", "citation + required-field-count checks"),
     ]
     EXEMPT = [
         ("saipen/SKILL.md",   "front-matter manifest for skill loaders, no protocol rules"),
@@ -1686,7 +1692,8 @@ else:
         home = Path(".")
         surface = sorted(
             q.as_posix() for q in home.rglob("*.md")
-            if not q.as_posix().startswith(".saipen/")
+            if (not q.as_posix().startswith(".saipen/")
+                or q.as_posix().startswith(".saipen/KNOWLEDGE/"))
             and ".git/" not in q.as_posix())
         patterns = [g for g, _ in COVERED] + [g for g, _ in EXEMPT]
         unclassified = [
@@ -1722,7 +1729,8 @@ else:
     else:
         _cite_docs = []
         for _pat in ("saipen/*.md", "saipen/phases/*.md", "extensions/**/*.md",
-                     "tests/scenarios/*/README.md", "*.md"):
+                     "tests/scenarios/*/README.md", "*.md",
+                     ".saipen/KNOWLEDGE/*.md"):
             _cite_docs += list(_tools_parent.glob(_pat))
         _dangling = []
         for _doc in sorted(set(_cite_docs)):
