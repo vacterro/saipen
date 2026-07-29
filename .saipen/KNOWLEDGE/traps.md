@@ -3,7 +3,11 @@
 ## Never write repo files with PowerShell Set-Content / Add-Content
 
 Windows PowerShell 5.1 `-Encoding utf8` writes a **BOM** and mangles
-non-ASCII (em-dash `—` becomes `вЂ"`, arrows `→` become `в†'`). Bit us twice:
+non-ASCII: an em-dash, an arrow or a section sign each come back as a
+two- or three-character Cyrillic sequence -- the UTF-8 bytes read as
+cp1251 and re-encoded. The sequences are deliberately not reproduced
+here: `tools/validate.py` FAILs any shipped doc that contains one, and a
+warning that trips over its own example is one nobody can keep. Bit us twice:
 the FreeBuff skill copy was unreadable for this exact reason (v1.2.2), then
 the same command corrupted README.md at v3.1.1 seconds after we fixed it.
 

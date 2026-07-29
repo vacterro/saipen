@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.103.0 -- 2026-07-29 -- the lint knew one mojibake shape and walked four files
+
+`KNOWLEDGE/traps.md` documents three shapes of the cp1251 corruption PowerShell inflicts on non-ASCII text -- a mangled em-dash, a mangled arrow, a mangled section sign. The text lint in `tools/validate.py` recognised exactly one of them. It also walked a curated list of four core docs rather than the shipped surface, so `KNOWLEDGE/`, `extensions/` and the fixture READMEs were never scanned at all. Two gaps at once, content and coverage, and the second is the one that hid the first.
+
+Widening the walk made it FAIL on the first run, on `traps.md` itself: a mangled arrow had been sitting in the very file that documents this corruption, invisible to the check whose subject it describes. Five sequences are recognised now, across every shipped doc.
+
+`traps.md` now describes the shapes instead of reproducing them. That is the third rule this session to trip over its own illustration, after the required-field count and the future-version bound -- and the answer was the same all three times: a rule that cannot survive its own example is one nobody can keep.
+
 ## 7.102.0 -- 2026-07-29 -- seven of nine adapters sent a cold agent at the constitution
 
 `extensions/adapters/*.md` tell each platform how to load SAIPEN. Seven of the nine never mentioned `BOOT.md` at all -- they said only "follow `saipen/RFC.md`", which inverts the entire 2-tier design. The constitution is around 100 KB; the cold-start kernel is under 4, and BOOT is all a bare `saipen continue` needs. Every cold start on those seven platforms was paying twenty-five times the necessary read.

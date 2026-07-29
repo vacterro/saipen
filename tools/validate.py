@@ -1051,11 +1051,21 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
             if row_ids and not duplicate_ids:
                 ok(f"CONFORMANCE.md row IDs unique + monotonic ({len(row_ids)} rows)")
 
+        # The mojibake half of this lint applies to any shipped text, not just
+        # the four core docs -- corruption does not respect a curated list.
+        # KNOWLEDGE/, extensions/ and the fixture READMEs were outside it until
+        # v7.103.0, so an arrow mangled in traps.md sat unseen by the very
+        # check whose subject traps.md documents.
         text_targets = [
             Path("saipen/RFC.md"),
             Path("saipen/BOOT.md"),
             Path("saipen/CONFORMANCE.md"),
+            Path("saipen/SKILL.md"),
+            Path("saipen/STYLE.md"),
             *sorted(Path("saipen/phases").glob("*.md")),
+            *sorted(Path(".saipen/KNOWLEDGE").glob("*.md")),
+            *sorted(Path("extensions").rglob("*.md")),
+            *sorted(Path("tests/scenarios").glob("*/README.md")),
         ]
         split_terms = [
             (re.compile(r"\bM\s+US\s+T\b", re.IGNORECASE), "MUST"),
@@ -1079,11 +1089,21 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
             # so the replacement-character check above can never see it.
             # Nine sat in this file's own FAIL messages until v7.99.0 --
             # found by a linter, not by this check.
-            if "\u0412\u00a7" in text:
-                fail(f"{doc.as_posix()} carries a cp1251-mangled section "
-                     f"sign -- valid UTF-8, so the U+FFFD check above "
-                     f"cannot catch it")
-                text_ok = False
+            # KNOWLEDGE/traps.md documents three shapes of this corruption and
+            # this check knew only one until v7.103.0 -- the em-dash and arrow
+            # forms were exactly as invisible as the section sign had been.
+            # Same "fixed where it was noticed, not everywhere it applies"
+            # shape as the seven adapters.
+            for _seq, _what in (("\u0412\u00a7", "section sign"),
+                                ("\u0432\u0403\u201c", "em dash"),
+                                ("\u0432\u0402\u201d", "em dash"),
+                                ("\u0432\u2020'", "arrow"),
+                                ("\u0421\u040f", "non-breaking space")):
+                if _seq in text:
+                    fail(f"{doc.as_posix()} carries a cp1251-mangled {_what} "
+                         f"-- valid UTF-8, so the U+FFFD check above cannot "
+                         f"catch it")
+                    text_ok = False
             if text.count("```") % 2:
                 fail(f"{doc.as_posix()} has an odd number of fenced code markers")
                 text_ok = False
