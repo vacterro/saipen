@@ -1828,6 +1828,22 @@ else:
                      f"has not happened is a promise the repo cannot keep")
                 drift_ok = False
 
+    # 14. Every adapter names the cold-start kernel. An adapter that sends a
+    #     cold agent straight at RFC.md inverts the 2-tier design: the
+    #     constitution is ~100 KB and BOOT.md is under 4, and BOOT is all a
+    #     bare `saipen continue` needs. T-204 fixed two adapters and nobody
+    #     checked the other seven, which went on pointing at RFC alone until
+    #     v7.102.0.
+    _adapters = sorted((_tools_parent / "extensions" / "adapters").glob("*.md"))
+    if _adapters:
+        _no_kernel = [a.name for a in _adapters
+                      if "BOOT.md" not in a.read_text(encoding="utf-8-sig")]
+        if _no_kernel:
+            fail(f"cross-doc drift [adapters] -- {len(_no_kernel)} adapter(s) "
+                 f"never name BOOT.md and point a cold agent straight at the "
+                 f"constitution: {', '.join(_no_kernel)}")
+            drift_ok = False
+
     if drift_ok and not failures:
         ok("cross-doc sets agree (required fields, phase enum, from-any-phase, "
            "read-only bans, next_action prefixes, WAIT categories; no re-listing "

@@ -2,6 +2,16 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.102.0 -- 2026-07-29 -- seven of nine adapters sent a cold agent at the constitution
+
+`extensions/adapters/*.md` tell each platform how to load SAIPEN. Seven of the nine never mentioned `BOOT.md` at all -- they said only "follow `saipen/RFC.md`", which inverts the entire 2-tier design. The constitution is around 100 KB; the cold-start kernel is under 4, and BOOT is all a bare `saipen continue` needs. Every cold start on those seven platforms was paying twenty-five times the necessary read.
+
+T-204 corrected two of them and nobody looked at the other seven. That is the third instance of one shape this week: the 33 guides teaching a superseded `WAIT:` form, the root `GUIDE.md` sitting outside the `guides/` glob, and now this. A fix applied where it was noticed rather than everywhere it applies. All nine adapters now carry the boot order, and an adapter that never names `BOOT.md` FAILs.
+
+Two things confirmed rather than assumed, which is the other half of the work: CI's seven steps carry no `continue-on-error`, no `allow_failure`, no trailing `|| true` -- every one of them actually gates. And the release guard added in v7.99.0 earned itself in production this week: a tag reached origin pointing at the wrong commit for the second time, and the release job failed in 16 seconds on the tag-vs-VERSION check instead of publishing a false release the way the first occurrence did.
+
+The habit behind that tag is now recorded in `KNOWLEDGE/traps.md`: `git commit ...` followed by `git tag ...` as separate statements lets the tag outlive a failed commit and label the previous one. Chain them with `&&`. The guard works; the habit that needs it is the defect.
+
 ## 7.101.0 -- 2026-07-28 -- every exemption turned out to be an un-audited boundary
 
 Twenty commits of hardening, and one pattern underneath all of them: the places this repo had declared out of scope were exactly the places defects were living. Not once by coincidence -- five times in a row.

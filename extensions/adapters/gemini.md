@@ -5,4 +5,7 @@
 - Prefer native file-edit tools over bash for modifications.
 - Long background loops: checkpoint doctrine matters double — write as you go.
 
+Boot order: read `saipen/BOOT.md` first -- the cold-start kernel is all a
+bare `saipen continue` needs. `saipen/RFC.md` is the constitution, reached
+only when a rule question comes up; `saipen/STYLE.md` loads alongside it.
 Everything else: follow `saipen/RFC.md`.

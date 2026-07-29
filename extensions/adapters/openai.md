@@ -5,4 +5,7 @@
 - Keep `.saipen/` files raw Markdown — no JSON re-encoding.
 - No greetings, no apologies; report shape comes from STYLE.md.
 
+Boot order: read `saipen/BOOT.md` first -- the cold-start kernel is all a
+bare `saipen continue` needs. `saipen/RFC.md` is the constitution, reached
+only when a rule question comes up; `saipen/STYLE.md` loads alongside it.
 Everything else: follow `saipen/RFC.md`.
