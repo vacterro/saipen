@@ -129,18 +129,21 @@ def check_against_schema(fields, schema, label):
     That subset is everything state.schema.json actually uses -- if the schema ever
     grows past it, extend this, don't silently skip."""
     props = schema.get("properties", {})
-    additional_forbidden = schema.get("additionalProperties") is False
     for req in schema.get("required", []):
         if req not in fields:
             fail(f"{label} missing required field: {req}")
     for key, value in fields.items():
         if key not in props:
-            msg = f"{label} has field the schema doesn't know: " \
-                  f"{key} (retired or misspelled?)"
-            if additional_forbidden:
-                fail(msg)
-            else:
-                warn("unknown-field", msg)
+            # Always a FAIL. This branched on additionalProperties until
+            # v7.101.0 and warned when it was not False -- an arm that could
+            # never execute: both call sites pass state.schema.json, which
+            # sets additionalProperties: false, so the `unknown-field` warn
+            # category could not appear in any output ever produced. Found by
+            # auditing which warn categories can actually fire. A branch
+            # nobody can reach is decoration, and a warning nobody can see is
+            # indistinguishable from a check that is not there.
+            fail(f"{label} has field the schema doesn't know: "
+                 f"{key} (retired or misspelled?)")
             continue
         spec = props[key]
         expected = spec.get("type")
