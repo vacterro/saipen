@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.109.0 -- 2026-07-29 -- the tag guard had never looked behind itself
+
+`release.yml` refuses to publish a tag whose `VERSION` file disagrees with it. That guard is forward-only by construction: it was added in v7.99.0 *because* a tag had already reached origin pointing two releases behind, and it can say nothing about the tags that were already there. Nothing ever swept them.
+
+The sweep found four mismatches nobody knew about, on top of the one that caused the guard: `v7.61.0` landed one release behind, `v7.74.0` one ahead, and `v7.81.0` and `v3.1.1a` sit on the right commit with a `VERSION` that was never bumped. All four confirmed by hand.
+
+The audit lied twice before it told the truth, and both lies are worth recording because they are the same failure this repository keeps meeting. First, the `git cat-file --batch` parser advanced two lines per record where a record is `header + contents + newline`, so every reading after the first was matched against the wrong tag: 82 of 174 tags "broken", including ones created minutes earlier. That is the total-failure signature -- a misconfigured harness is almost always total, a real defect almost never is. Second, a dozen historical `VERSION` blobs turned out to be UTF-16 written by PowerShell; read as UTF-8 they come back as spaced-out digits, and every one was reported as a mismatch. Decode by what the bytes are, not by what they ought to be.
+
+The pre-existing mismatches are recorded with a per-entry reason rather than rewritten. Moving a published tag re-runs `release.yml` from the TAG's commit -- for these, a workflow with no guard at all -- and could republish or reorder releases years old. The repository already decided this way about `CHANGELOG.md`: history records what happened, mistakes included.
+
+And the exemption list is itself rechecked. A tag listed as a known mismatch that has since come to agree with its `VERSION` FAILs, because an entry that no longer describes a real defect is exactly how a check quietly stops covering what it claims to -- which this session has already found to be where coverage rots.
+
 ## 7.108.0 -- 2026-07-29 -- nine MUSTs nobody had claimed
 
 Since v7.101.0 this repository checks that every shipped document is accounted for -- each one either matches a pattern some check reads, or is listed exempt with a stated reason. That check exists because twice running the real defect was not two documents disagreeing but nobody looking at a document at all.

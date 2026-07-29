@@ -90,6 +90,14 @@ jobs:
       - name: Portable floor still goes red (tools/audit_floor.py)
         run: python tools/audit_floor.py
 
+      # release.yml's tag-vs-VERSION guard is forward-only: it was added
+      # BECAUSE a tag had already reached origin pointing two releases behind,
+      # and it can say nothing about the tags that were already there. This is
+      # the sweep, in CI so it keeps happening -- a one-off sweep is not a
+      # guard. Needs the full tag list, hence fetch-depth: 0 above.
+      - name: Every tag agrees with its VERSION (tools/audit_tags.py)
+        run: python tools/audit_tags.py
+
       - name: Installed layout (inject into a sandbox HOME, run the copy)
         run: |
           sandbox="$(mktemp -d)"

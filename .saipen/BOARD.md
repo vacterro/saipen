@@ -4,6 +4,10 @@
 ## TODO
 
 ## DONE
+- [x] T-284 [P0] tools/audit_tags.py sweeps every tag against its VERSION. release.yml's guard is forward-only and had never looked behind itself; found 4 mismatches nobody knew about plus the known v7.99.0. | verify: tools/audit_tags.py PASS (2026-07-29)
+- [x] T-285 [P0] The audit lied twice before it told the truth: a --batch parser that advanced 2 lines per record instead of 3 (82 of 174 'broken'), then UTF-16 VERSION blobs read as UTF-8. Both produced findings that were not there. | verify: tools/audit_tags.py PASS (2026-07-29)
+- [x] T-286 [P1] Historical mismatches recorded with per-entry reasons instead of rewritten; a stale entry FAILs too, because an exemption nobody rechecks is how coverage rots. | verify: tools/audit_tags.py PASS (2026-07-29)
+- [x] T-287 [P2] Ship v7.109.0. | verify: tools/audit_tags.py PASS (2026-07-29)
 - [x] T-279 [P0] Rule coverage: every RFC section stating a MUST must be cited by a CONFORMANCE row. Three sections stated nine MUSTs with no row at all -- 1.7, 1.8, 2.3. | verify: tools/validate.py PASS (2026-07-29)
 - [x] T-280 [P0] RFC 1.7 workspace hygiene enforced mechanically: .saipen/ carrying phases/tools/tests/schemas/adapters/templates or a core doc now FAILs. extensions/subs/ deliberately excluded -- those are the project's own instances, not a copy. | verify: tools/validate.py PASS (2026-07-29)
 - [x] T-281 [P1] 1.8 and 2.3 given rows that state they are behavioral and unenforceable by any tool here. A MUST with no row is indistinguishable from a MUST nobody remembered. | verify: tools/validate.py PASS (2026-07-29)
