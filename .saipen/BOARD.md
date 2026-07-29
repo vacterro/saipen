@@ -4,7 +4,10 @@
 ## TODO
 
 ## DONE
-- [x] T-272 [P1] UI.md declares Wintage Golden the default palette, states the eighteen tokens are the reference, and says how an implementation may extend it without inline hex. The lighter values had been sitting uncommitted since before this session; they are already what SAIPENVIEW ships. | verify: tools/validate.py PASS (2026-07-29)
+- [x] T-276 [P1] Palette name corrected to Vintage Golden across 49 files. CHANGELOG.md and the append-only logs deliberately keep the old name -- they are history. | verify: tools/validate.py PASS (2026-07-29)
+- [x] T-277 [P0] The palette guard now holds a list of superseded names and exempts CHANGELOG. Enforcing exactly one name meant the guard could not survive its own name being corrected. | verify: tools/validate.py PASS (2026-07-29)
+- [x] T-278 [P2] Ship v7.107.0. | verify: tools/validate.py PASS (2026-07-29)
+- [x] T-272 [P1] UI.md declares Vintage Golden the default palette, states the eighteen tokens are the reference, and says how an implementation may extend it without inline hex. The lighter values had been sitting uncommitted since before this session; they are already what SAIPENVIEW ships. | verify: tools/validate.py PASS (2026-07-29)
 - [x] T-273 [P1] Palette renamed across 46 files -- 2 shipped root docs, 44 locale copies. A proper-noun swap, identical in every language, so not delegated as translation work. | verify: tools/validate.py PASS (2026-07-29)
 - [x] T-274 [P0] New [palette-name] check: UI.md must name its palette, and no shipped doc may name the superseded one. Red-tested both directions. | verify: tools/validate.py PASS (2026-07-29)
 - [x] T-275 [P2] Ship v7.106.0. | verify: tools/validate.py PASS (2026-07-29)

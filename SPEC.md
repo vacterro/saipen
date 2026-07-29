@@ -50,7 +50,7 @@ saipen/
   CONFORMANCE.md             self-check vectors + scenario coverage table
   SKILL.md                  thin entry point for skill-reading platforms
   STYLE.md                  voices: chat, LOG.md, artifacts
-  UI.md                     Wintage Golden UI spec (mandatory for UI work)
+  UI.md                     Vintage Golden UI spec (mandatory for UI work)
   BOOT.md                   ~cold-start kernel: the fast path a bare `continue`
                              needs, before any of the above is loaded
   phases/                   strict state machine logic -- 16 docs, one per

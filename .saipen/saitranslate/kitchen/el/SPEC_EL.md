@@ -51,7 +51,7 @@ saipen/
   CONFORMANCE.md             self-check vectors + scenario coverage table
   SKILL.md                  thin entry point for skill-reading platforms
   STYLE.md                  voices: chat, LOG.md, artifacts
-  UI.md                     Wintage Golden UI spec (mandatory for UI work)
+  UI.md                     Vintage Golden UI spec (mandatory for UI work)
   BOOT.md                   boot sequence / cold-start orchestration
   phases/                   16 docs, one per RFC § 1.6 enum value (machine-checked both ways by tools/validate.py)
     [Core Phases]

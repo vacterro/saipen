@@ -42,7 +42,7 @@ saipen/
   CONFORMANCE.md             자체 검사 벡터 + 시나리오 커버리지 테이블
   SKILL.md                  기술 읽기 지원 플랫폼을 위한 얇은 진입점
   STYLE.md                  음성: chat, LOG.md, artifacts
-  UI.md                     Wintage Golden UI 사양 (UI 작업 시 필수)
+  UI.md                     Vintage Golden UI 사양 (UI 작업 시 필수)
   BOOT.md                   ~콜드스타트 커널: 베어 `continue`가 필요로 하는
                              고속 경로, 위의 어떤 것도 로드되기 전
   phases/                   엄격한 상태 머신 로직 -- RFC § 1.6 열거 값당

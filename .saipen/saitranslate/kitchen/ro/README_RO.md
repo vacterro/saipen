@@ -12,7 +12,7 @@ markdown simplu, astfel încât un agent nou fără istoric de chat execută `/s
 
 **O comandă. Zero amnezie.**
 
-**v7.106.0** | [Spec](SPEC.md) | [Ghid](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformitate](saipen/CONFORMANCE.md) | markdown simplu | zero dependențe | MIT
+**v7.107.0** | [Spec](SPEC.md) | [Ghid](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformitate](saipen/CONFORMANCE.md) | markdown simplu | zero dependențe | MIT
 
 [![Ghid în română](https://img.shields.io/badge/📖_Ghid_ELI5-ROMÂNĂ-blue?style=for-the-badge)](guides/GUIDE_RO.md)
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
@@ -82,7 +82,7 @@ Notele specifice fiecărei platforme se află în `extensions/adapters/`.
   - 🇹🇷 [Türkçe](guides/GUIDE_TR.md) | 🇮🇳 [हिन्दी](guides/GUIDE_HI.md) | 🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) | 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) | 🇨🇿 [Čeština](guides/GUIDE_CS.md) | 🇷🇴 [Română](guides/GUIDE_RO.md)
   - 🇭🇺 [Magyar](guides/GUIDE_HU.md) | 🇧🇬 [Български](guides/GUIDE_BG.md) | 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) | 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
 - **[STYLE.md](saipen/STYLE.md)** -- stilul de comunicare al agentului și definirea vocii.
-- **[UI.md](saipen/UI.md)** -- ghid de design UI Win95 Wintage Golden.
+- **[UI.md](saipen/UI.md)** -- ghid de design UI Win95 Vintage Golden.
 - **[CONFORMANCE.md](saipen/CONFORMANCE.md)** -- scenarii de testare comportamentale și reguli de validare.
 
 <p align="center">

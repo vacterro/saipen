@@ -50,7 +50,7 @@ saipen/
   CONFORMANCE.md             vectores de autocomprobación + tabla de cobertura de escenarios
   SKILL.md                  punto de entrada delgado para plataformas que leen habilidades
   STYLE.md                  voces: chat, LOG.md, artefactos
-  UI.md                     Especificación de interfaz Wintage Golden (obligatorio para trabajo de UI)
+  UI.md                     Especificación de interfaz Vintage Golden (obligatorio para trabajo de UI)
   BOOT.md                   secuencia de arranque / orquestación de inicio en frío
   phases/                   16 docs, one per RFC § 1.6 enum value (machine-checked both ways by tools/validate.py)
     [Fases Centrales]

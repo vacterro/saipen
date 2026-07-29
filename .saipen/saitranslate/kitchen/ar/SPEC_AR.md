@@ -42,7 +42,7 @@ saipen/
   CONFORMANCE.md             متجهات الفحص الذاتي + جدول تغطية السيناريو
   SKILL.md                  نقطة دخول رفيعة لمنصات قراءة المهارات
   STYLE.md                  الأصوات: الدردشة، LOG.md، القطع الأثرية
-  UI.md                     مواصفات واجهة المستخدم Wintage Golden (إلزامية لعمل واجهة المستخدم)
+  UI.md                     مواصفات واجهة المستخدم Vintage Golden (إلزامية لعمل واجهة المستخدم)
   BOOT.md                   تسلسل التمهيد / التنسيق عند بدء التشغيل البارد
   phases/                   16 docs, one per RFC § 1.6 enum value (machine-checked both ways by tools/validate.py)
     [Core Phases]

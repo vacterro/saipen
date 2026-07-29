@@ -1,8 +1,8 @@
-# saipen UI -- Wintage Golden
+# saipen UI -- Vintage Golden
 
 Applies to every interface: web, app, panel, dialog, HTML report, TUI, desktop tool, or embedded utility.
 
-**Wintage Golden is the default palette.** Not a theme, not a preset, not one
+**Vintage Golden is the default palette.** Not a theme, not a preset, not one
 option among several -- it is what a saipen interface looks like unless the
 user asks for something else in so many words. There is no second palette in
 this document to choose from, and that is deliberate: a document with two
@@ -88,7 +88,7 @@ built on that distrust.
    instant, it is physical feedback for a press the user themselves caused,
    and it is the entire motion budget. It is not precedent for anything else.
 
-## Tokens + base CSS -- Wintage Golden
+## Tokens + base CSS -- Vintage Golden
 
 Paste this into every saipen UI implementation. These eighteen values ARE the
 palette: naming it means the numbers below are the reference, and an interface

@@ -50,7 +50,7 @@ saipen/
   CONFORMANCE.md             wektory samokontroli + tabela pokrycia scenariuszy
   SKILL.md                  cienki punkt wejścia dla platform czytających umiejętności
   STYLE.md                  głosy: czat, LOG.md, artefakty
-  UI.md                     specyfikacja UI Wintage Golden (obowiązkowa dla prac nad UI)
+  UI.md                     specyfikacja UI Vintage Golden (obowiązkowa dla prac nad UI)
   BOOT.md                   ~jądro cold-start: szybka ścieżka, której potrzebuje
                              goły `continue`, zanim którekolwiek z powyższych zostanie załadowane
   phases/                   ściśle maszyna stanów -- 16 dokumentów, jeden na

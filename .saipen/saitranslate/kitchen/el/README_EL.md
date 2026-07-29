@@ -12,7 +12,7 @@
 
 **Μία εντολή. Μηδενική αμνησία.**
 
-**v7.106.0** | [Προδιαγραφή](SPEC.md) | [Οδηγός](GUIDE.md) | [RFC](saipen/RFC.md) | [Στυλ](saipen/STYLE.md) | [UI](saipen/UI.md) | [Συμμόρφωση](saipen/CONFORMANCE.md) | απλό markdown | μηδενικές εξαρτήσεις | MIT
+**v7.107.0** | [Προδιαγραφή](SPEC.md) | [Οδηγός](GUIDE.md) | [RFC](saipen/RFC.md) | [Στυλ](saipen/STYLE.md) | [UI](saipen/UI.md) | [Συμμόρφωση](saipen/CONFORMANCE.md) | απλό markdown | μηδενικές εξαρτήσεις | MIT
 
 [![Ρωσικός Οδηγός](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![Αγγλικός Οδηγός](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -81,7 +81,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
   - 🇹🇷 [Türkçe](guides/GUIDE_TR.md) | 🇮🇳 [हिन्दी](guides/GUIDE_HI.md) | 🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) | 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) | 🇨🇿 [Čeština](guides/GUIDE_CS.md) | 🇷🇴 [Română](guides/GUIDE_RO.md)
   - 🇭🇺 [Magyar](guides/GUIDE_HU.md) | 🇧🇬 [Български](guides/GUIDE_BG.md) | 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) | 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
 - **[STYLE.md](saipen/STYLE.md)** -- στυλ επικοινωνίας πράκτορα & ορισμός φωνής.
-- **[UI.md](saipen/UI.md)** -- οδηγίες σχεδίασης Wintage Golden UI.
+- **[UI.md](saipen/UI.md)** -- οδηγίες σχεδίασης Vintage Golden UI.
 - **[CONFORMANCE.md](saipen/CONFORMANCE.md)** -- σενάρια δοκιμών συμπεριφοράς & κανόνες επικύρωσης.
 
 <p align="center">

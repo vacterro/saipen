@@ -42,7 +42,7 @@ saipen/
   CONFORMANCE.md             zelftestvectoren + scenariodekkingstabel
   SKILL.md                  dunne ingang voor vaardigheid-lezende platformen
   STYLE.md                  stemmen: chat, LOG.md, artefacten
-  UI.md                     Wintage Golden UI specificatie (verplicht voor UI werk)
+  UI.md                     Vintage Golden UI specificatie (verplicht voor UI werk)
   BOOT.md                   ~cold-start kernel: het snelle pad dat een kale
                              `continue` nodig heeft, voordat bovenstaande wordt geladen
   phases/                   strikte statusmachinelogica -- 16 docs, één per

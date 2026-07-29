@@ -42,7 +42,7 @@ saipen/
   CONFORMANCE.md             selvsjekk vektorer + scenariedekningstabell
   SKILL.md                  tynt inngangspunkt for ferdighetslesende plattformer
   STYLE.md                  stemmer: chat, LOG.md, gjenstander
-  UI.md                     Wintage Golden UI spesifikasjon (obligatorisk for UI-arbeid)
+  UI.md                     Vintage Golden UI spesifikasjon (obligatorisk for UI-arbeid)
   BOOT.md                   ~cold-start kjerne: den raske stien en bar
                              `continue` trenger, før noen av ovenstående er lastet
   phases/                   streng tilstandsmaskinlogikk -- 16 docs, én per

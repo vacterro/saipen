@@ -12,7 +12,7 @@ en het werk in minder dan een minuut hervat -- geen herbriefing, elke leverancie
 
 **Eén commando. Nul amnesie.**
 
-**v7.106.0** | [Spec](SPEC.md) | [Gids](GUIDE.md) | [RFC](saipen/RFC.md) | [Stijl](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformiteit](saipen/CONFORMANCE.md) | plat markdown | nul afhankelijkheden | MIT
+**v7.107.0** | [Spec](SPEC.md) | [Gids](GUIDE.md) | [RFC](saipen/RFC.md) | [Stijl](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformiteit](saipen/CONFORMANCE.md) | plat markdown | nul afhankelijkheden | MIT
 
 [![Russische Gids](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![Engelse Gids](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -82,7 +82,7 @@ Notities per platform zijn te vinden in `extensions/adapters/`.
   - 🇹🇷 [Türkçe](guides/GUIDE_TR.md) | 🇮🇳 [हिन्दी](guides/GUIDE_HI.md) | 🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) | 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) | 🇨🇿 [Čeština](guides/GUIDE_CS.md) | 🇷🇴 [Română](guides/GUIDE_RO.md)
   - 🇭🇺 [Magyar](guides/GUIDE_HU.md) | 🇧🇬 [Български](guides/GUIDE_BG.md) | 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) | 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
 - **[STYLE.md](saipen/STYLE.md)** -- communicatiestijl & stemdefinitie van agent.
-- **[UI.md](saipen/UI.md)** -- Wintage Golden UI-ontwerprichtlijnen.
+- **[UI.md](saipen/UI.md)** -- Vintage Golden UI-ontwerprichtlijnen.
 - **[CONFORMANCE.md](saipen/CONFORMANCE.md)** -- gedragstestscenario's & validatorregels.
 
 <p align="center">

@@ -2,6 +2,16 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.107.0 -- 2026-07-29 -- the guard could not survive its own name being wrong
+
+The palette named one release ago carried a one-letter slip. Correcting it meant travelling the same 49 files the rename had, and it exposed a flaw in the guard shipped alongside it: that guard enforced exactly ONE superseded name, so the moment its own canonical name changed, the name it had been created to enforce became the thing it needed to reject.
+
+A constant would have made every future rename a code change. A list makes it a one-line append -- which is the difference between a rule that survives being wrong and a rule that gets deleted the first time it is inconvenient. Two entries now; it grows by one per rename.
+
+`CHANGELOG.md` is exempt, deliberately. It records what the name WAS, and so do the append-only logs. A rule that forces a rewrite of the past is a rule nobody keeps.
+
+Red-tested with both superseded names, and confirmed silent on the CHANGELOG entry that legitimately carries one.
+
 ## 7.106.0 -- 2026-07-29 -- the palette has a name now, and every document uses it
 
 `UI.md` declares **Wintage Golden** the default palette. Not a theme, not a preset, not one option among several -- it is what a saipen interface looks like unless the user asks otherwise in so many words, and there is deliberately no second palette in the document to choose from. A document with two defaults has none.

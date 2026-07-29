@@ -12,7 +12,7 @@ i nastavlja rad za manje od minute -- bez ponovnog brifiranja, bilo koji pružat
 
 **Jedna naredba. Nula amnezije.**
 
-**v7.106.0** | [Spec](SPEC.md) | [Vodič](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [Korisničko sučelje](saipen/UI.md) | [Sukladnost](saipen/CONFORMANCE.md) | čist markdown | nula ovisnosti | MIT
+**v7.107.0** | [Spec](SPEC.md) | [Vodič](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [Korisničko sučelje](saipen/UI.md) | [Sukladnost](saipen/CONFORMANCE.md) | čist markdown | nula ovisnosti | MIT
 
 [![Vodič na ruskom](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![Vodič na engleskom](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -81,7 +81,7 @@ Bilješke po platformi nalaze se u `extensions/adapters/`.
   - 🇹🇷 [Türkçe](guides/GUIDE_TR.md) | 🇮🇳 [हिन्दी](guides/GUIDE_HI.md) | 🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) | 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) | 🇨🇿 [Čeština](guides/GUIDE_CS.md) | 🇷🇴 [Română](guides/GUIDE_RO.md)
   - 🇭🇺 [Magyar](guides/GUIDE_HU.md) | 🇧🇬 [Български](guides/GUIDE_BG.md) | 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) | 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
 - **[STYLE.md](saipen/STYLE.md)** -- stil komunikacije agenta i definicija glasa.
-- **[UI.md](saipen/UI.md)** -- smjernice za dizajn Wintage Golden korisničkog sučelja.
+- **[UI.md](saipen/UI.md)** -- smjernice za dizajn Vintage Golden korisničkog sučelja.
 - **[CONFORMANCE.md](saipen/CONFORMANCE.md)** -- scenariji ispitivanja ponašanja i pravila validatora.
 
 <p align="center">

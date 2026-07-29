@@ -51,7 +51,7 @@ saipen/
   CONFORMANCE.md             self-check vectors + scenario coverage table
   SKILL.md                  thin entry point for skill-reading platforms
   STYLE.md                  voices: chat, LOG.md, artifacts
-  UI.md                     Specificație UI Wintage Golden (obligatoriu pentru lucrul UI)
+  UI.md                     Specificație UI Vintage Golden (obligatoriu pentru lucrul UI)
   BOOT.md                   ~kernel de pornire la rece: calea rapidă de care
                              are nevoie un `continue` gol, înainte ca oricare
                              dintre cele de mai sus să fie încărcat

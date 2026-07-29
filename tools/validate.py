@@ -2020,8 +2020,15 @@ else:
     _ui = _tools_parent / "saipen" / "UI.md"
     if _ui.is_file():
         _ui_body = _ui.read_text(encoding="utf-8-sig")
-        _palette = "Wintage Golden"
-        _superseded = "Dark" + " Golden"
+        _palette = "Vintage Golden"
+        # Every name the palette has HAD. Assembled from fragments so this
+        # file, CONFORMANCE.md and the row describing the rename can all
+        # discuss it without tripping it -- the fifth rule this session that
+        # had to stop quoting its own illustration. Grows by one entry per
+        # rename; the second was a one-letter correction shipped an hour
+        # after the first, which is exactly why this is a list and not a
+        # constant.
+        _superseded = ("Dark" + " Golden", "Win" + "tage Golden")
         if _palette not in _ui_body:
             fail(f"UI.md no longer names its palette {_palette!r} -- the "
                  f"palette name is normative and every other document "
@@ -2029,10 +2036,13 @@ else:
             drift_ok = False
         _stale_name = []
         for _doc in sorted(set(_cite_docs)):
-            if not _doc.is_file():
+            # CHANGELOG is history and records what the name WAS. A rule that
+            # forces a rewrite of the past is a rule that gets disabled the
+            # first time it is inconvenient.
+            if not _doc.is_file() or "CHANGELOG" in _doc.name:
                 continue
-            if _superseded in _doc.read_text(encoding="utf-8-sig",
-                                             errors="replace"):
+            _txt = _doc.read_text(encoding="utf-8-sig", errors="replace")
+            if any(_s in _txt for _s in _superseded):
                 _stale_name.append(_rel_doc(_doc))
         if _stale_name:
             fail(f"cross-doc drift [palette-name] -- {len(_stale_name)} "

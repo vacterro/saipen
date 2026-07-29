@@ -42,7 +42,7 @@ saipen/
   CONFORMANCE.md             itsetarkistusvektorit + skenaarioiden kattavuustaulukko
   SKILL.md                  ohut aloitustiedosto taitoja lukeville alustoille
   STYLE.md                  äänet: chat, LOG.md, artefaktit
-  UI.md                     Wintage Golden UI spesifikaatio (pakollinen UI-työlle)
+  UI.md                     Vintage Golden UI spesifikaatio (pakollinen UI-työlle)
   BOOT.md                   käynnistyssekvenssi / kylmäkäynnistyksen orkestrointi
   phases/                   16 docs, one per RFC § 1.6 enum value (machine-checked both ways by tools/validate.py)
     [Ydinvaiheet (Core Phases)]

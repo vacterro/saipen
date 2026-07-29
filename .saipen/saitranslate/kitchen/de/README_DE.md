@@ -12,7 +12,7 @@ und die Arbeit in unter einer Minute wiederaufnimmt -- kein Erklärungsbedarf, j
 
 **Ein Befehl. Null Amnesie.**
 
-**v7.106.0** | [Spezifikation](SPEC.md) | [Handbuch](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Konformität](saipen/CONFORMANCE.md) | Plain Markdown | Zero Deps | MIT
+**v7.107.0** | [Spezifikation](SPEC.md) | [Handbuch](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Konformität](saipen/CONFORMANCE.md) | Plain Markdown | Zero Deps | MIT
 
 [![Russisches Handbuch](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![Englisches Handbuch](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -82,7 +82,7 @@ Plattformspezifische Hinweise befinden sich in `extensions/adapters/`.
   - 🇹🇷 [Türkçe](guides/GUIDE_TR.md) | 🇮🇳 [हिन्दी](guides/GUIDE_HI.md) | 🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) | 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) | 🇨🇿 [Čeština](guides/GUIDE_CS.md) | 🇷🇴 [Română](guides/GUIDE_RO.md)
   - 🇭🇺 [Magyar](guides/GUIDE_HU.md) | 🇧🇬 [Български](guides/GUIDE_BG.md) | 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) | 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
 - **[STYLE.md](saipen/STYLE.md)** -- Agenten-Kommunikationsstil & Sprachdefinition.
-- **[UI.md](saipen/UI.md)** -- Wintage Golden UI-Design-Richtlinien.
+- **[UI.md](saipen/UI.md)** -- Vintage Golden UI-Design-Richtlinien.
 - **[CONFORMANCE.md](saipen/CONFORMANCE.md)** -- Verhaltenstest-Szenarien & Validierungsregeln.
 
 <p align="center">
