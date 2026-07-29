@@ -4,6 +4,11 @@
 ## TODO
 
 ## DONE
+- [x] T-297 [P0] tools/audit_order.py: no module-level name may be read before its assignment. Three such NameErrors landed in one day, all invisible to a local run and to ruff. | verify: tools/audit_order.py PASS (2026-07-30)
+- [x] T-298 [P1] requires: values checked against RFC 1.3's capability vocabulary -- a typo silently removed a requirement rather than tightening it. | verify: tools/audit_order.py PASS (2026-07-30)
+- [x] T-299 [P1] saipen_version compared against the home's major. It had been type-checked and compared to nothing. | verify: tools/audit_order.py PASS (2026-07-30)
+- [x] T-300 [P2] The release-ledger warning no longer states a count and lists fewer. | verify: tools/audit_order.py PASS (2026-07-30)
+- [x] T-301 [P2] Ship v7.112.0. | verify: tools/audit_order.py PASS (2026-07-30)
 - [x] T-292 [P0] mode: read-only meant two different things -- a capability lock for Core (7 banned phases) and a scope lock for a subSaipen (4). PROTOCOL.md called them identical, so the document forbade PLAN while every real subSaipen planned its own board. Both documents state the distinction; both lists are named constants; drift detector compares them. | verify: tools/validate.py + run_scenarios.py PASS (2026-07-30)
 - [x] T-293 [P0] subSaipen STATE.md now held to Core's rules: ninth required field, transition legality, updated format, command vocabulary, goal counters. The PASS line said 'shape valid' while checking a fraction. | verify: tools/validate.py + run_scenarios.py PASS (2026-07-30)
 - [x] T-294 [P1] HUNT -> DONE made legal for a subSaipen only -- a reporting sub's add step happens in the main project during collect. saihunt had been in that state truthfully since its first sweep. | verify: tools/validate.py + run_scenarios.py PASS (2026-07-30)

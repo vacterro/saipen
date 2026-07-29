@@ -525,6 +525,29 @@ if mode == "read-only" and phase in READ_ONLY_BANNED_PHASES:
     fail(f"mode: read-only MUST NOT enter {phase} -- that phase's work "
          f"product is a file write (RFC § 1.3)")
 
+# RFC § 1.3's handshake names the capability vocabulary: filesystem, git,
+# shell, python. Nothing had ever checked the values, so a typo
+# (`requires: [pyhton]`) reads as an unknown capability -- and § 1.3 says an
+# unmapped entry "is not a licence to ignore it", meaning the agent must
+# degrade to the nearest mode describing what is lost. It cannot do that for a
+# capability that does not exist, so the typo silently removes the requirement
+# instead of tightening it. WARN, not FAIL: the vocabulary is explicitly open
+# to entries with no mapping, and a project MAY legitimately require something
+# this list has not learned yet -- but it gets said out loud.
+KNOWN_CAPABILITIES = ("filesystem", "git", "shell", "python")
+_req = state.get("requires")
+if isinstance(_req, list):
+    _unknown = [c for c in _req
+                if isinstance(c, str) and c.strip()
+                and c.strip() not in KNOWN_CAPABILITIES]
+    if _unknown:
+        warn("requires-vocabulary",
+             f"STATE.md requires: names {_unknown} -- not in RFC § 1.3's "
+             f"handshake vocabulary ({'/'.join(KNOWN_CAPABILITIES)}). An "
+             f"unmapped entry is not ignorable: the agent MUST degrade to the "
+             f"mode describing what is lost, which it cannot do for a "
+             f"capability nobody defines. Check for a typo")
+
 # RFC § 2.4 safety-valve ceilings. Named rather than inlined so the trip check
 # below and any future reader see the same two numbers the RFC states.
 GOAL_WAVE_CAP = 3
@@ -597,6 +620,24 @@ if not subs_root.is_dir():
 # testing this path right after shipping the check, not by reasoning about it.
 IS_SAIPEN_HOME = (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                   and Path("VERSION").is_file() and Path("README.md").is_file())
+
+# `saipen_version` is the protocol MAJOR this state was written against. It was
+# type-checked as an integer and compared to nothing, so a project declaring 6
+# while running against a v7 home was executing v7 rules over a v6 state with
+# no signal anywhere.
+if IS_SAIPEN_HOME and Path("VERSION").is_file():
+    _sv_major = state.get("saipen_version")
+    try:
+        _home_major = int(Path("VERSION").read_text(
+            encoding="utf-8-sig").strip().split(".")[0])
+    except (ValueError, OSError):
+        _home_major = None
+    if isinstance(_sv_major, int) and _home_major is not None             and _sv_major != _home_major:
+        warn("saipen-version-major",
+             f"STATE.md saipen_version is {_sv_major} but saipen_home is at "
+             f"major {_home_major} -- this state was written against a "
+             f"different protocol generation, and every rule below is being "
+             f"applied to it regardless")
 
 sub_state_files = sorted(
     # TEMPLATE included here too -- the shipped-library walk below stopped
@@ -2184,8 +2225,14 @@ else:
                 pass
 
             def _vs(versions):
-                return ", ".join("v" + ".".join(map(str, v))
-                                 for v in sorted(versions)[:8])
+                # The count above and this list have to agree, or the message
+                # states ten and shows eight with nothing saying so -- a small
+                # lie in a warning is still a warning nobody can act on.
+                _s = sorted(versions)
+                _out = ", ".join("v" + ".".join(map(str, v)) for v in _s[:8])
+                if len(_s) > 8:
+                    _out += f", and {len(_s) - 8} more"
+                return _out
 
             if _chg_v and _tag_v:
                 # Compare only where both halves have memory. Below either

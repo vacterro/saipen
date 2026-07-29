@@ -98,6 +98,14 @@ jobs:
       - name: Every tag agrees with its VERSION (tools/audit_tags.py)
         run: python tools/audit_tags.py
 
+      # Three module-level use-before-define NameErrors landed in one day, all
+      # in validate.py, all invisible locally: the branch reading the constant
+      # only runs on an input this repo's own STATE.md does not produce. Ruff
+      # cannot see them (the name IS bound, just later) and nothing else was
+      # looking.
+      - name: No tool reads a name before assigning it (tools/audit_order.py)
+        run: python tools/audit_order.py
+
       - name: Installed layout (inject into a sandbox HOME, run the copy)
         run: |
           sandbox="$(mktemp -d)"

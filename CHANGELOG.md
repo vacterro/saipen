@@ -2,6 +2,22 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.112.0 -- 2026-07-30 -- three NameErrors in one day, none of them visible locally
+
+`tools/validate.py` is a 2300-line straight-line script: its checks run in file order, so a constant placed below its first use is a `NameError` waiting for the one input that reaches that branch. Three landed in a single day. `SAIPEN_COMMANDS` was declared beside its second consumer, and the branch that reads it first only runs when `next_action` starts with `saipen ` -- this repository's own says `WAIT:`, so every local run passed and a fixture caught it. `IS_SAIPEN_HOME` was read by a check spliced above the line that computes it. And `saipen_dir` was a name that never existed at all.
+
+Ruff cannot see any of them: the name IS bound in the module, just later, and `F821` reports only names never bound anywhere. Nothing else was looking, so `tools/audit_order.py` now does -- walking each tool's top-level statements in order and reporting any read of a name nothing binds until later.
+
+The instrument lied twice before it worked, and both lies are the signature this repository keeps meeting. The first version reported several hundred findings: reads inside a top-level `for` body were checked against the set of names bound *before* the loop, so the loop variable itself came back as used-before-assigned. The second reported five: function and lambda parameters, which are bindings resolved at call time, not reads happening where they sit. A misconfigured harness is almost always total; a real defect almost never is, and that is now four instruments in one session caught by that test rather than by inspection.
+
+Three smaller holes in the same pass, all of the same shape -- a field with a type and no meaning:
+
+`requires:` was checked as an array of strings and its values compared to nothing. RFC § 1.3 says an entry with no mapping "is not a licence to ignore it": the agent MUST degrade to the mode describing what is lost. It cannot do that for a capability nobody defines, so `requires: [pyhton]` silently REMOVED a requirement instead of tightening it.
+
+`saipen_version` was checked as an integer and compared to nothing at all -- a project declaring 6 while running against a v7 home had every v7 rule applied to a v6 state, with no signal anywhere.
+
+And the release-ledger warning printed "10 release(s)" and then listed eight, silently truncated. Small, and exactly how a reader learns to stop trusting the numbers in a message.
+
 ## 7.111.0 -- 2026-07-30 -- read-only meant two different things and one document said they were identical
 
 Looking for asymmetry -- which checks Core's `STATE.md` gets and a subSaipen's does not -- turned up four: RFC § 1.2's ninth required field, transition legality, the ISO-8601 UTC form of `updated`, and § 1.10's command vocabulary were all Core-only. Meanwhile the validator printed `subSaipen STATE.md shape valid`, a message claiming a shape it had not checked. That is the mirror of the inversion fixed in v7.101.0, where the prefix rule was stricter for a read-only worker than for the state a cold agent actually boots from.
