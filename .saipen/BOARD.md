@@ -4,6 +4,11 @@
 ## TODO
 
 ## DONE
+- [x] T-292 [P0] mode: read-only meant two different things -- a capability lock for Core (7 banned phases) and a scope lock for a subSaipen (4). PROTOCOL.md called them identical, so the document forbade PLAN while every real subSaipen planned its own board. Both documents state the distinction; both lists are named constants; drift detector compares them. | verify: tools/validate.py + run_scenarios.py PASS (2026-07-30)
+- [x] T-293 [P0] subSaipen STATE.md now held to Core's rules: ninth required field, transition legality, updated format, command vocabulary, goal counters. The PASS line said 'shape valid' while checking a fraction. | verify: tools/validate.py + run_scenarios.py PASS (2026-07-30)
+- [x] T-294 [P1] HUNT -> DONE made legal for a subSaipen only -- a reporting sub's add step happens in the main project during collect. saihunt had been in that state truthfully since its first sweep. | verify: tools/validate.py + run_scenarios.py PASS (2026-07-30)
+- [x] T-295 [P1] SAIPEN_COMMANDS was declared after its first use; the branch never runs in this repo, so only a fixture could catch the NameError. run_scenarios.py now names a crash a crash instead of 'failed for the wrong reason'. | verify: tools/validate.py + run_scenarios.py PASS (2026-07-30)
+- [x] T-296 [P2] Ship v7.111.0. | verify: tools/validate.py + run_scenarios.py PASS (2026-07-30)
 - [x] T-288 [P0] A UTF-16 STATE.md killed the whole validator run on a traceback with zero checks performed, from a pre-commit hook. All three checkpoint files are encoding-checked up front now; one named FAIL, every other check still runs. | verify: tools/validate.py PASS (2026-07-30)
 - [x] T-289 [P0] read_doc() added: BOM sniffing, BOM-less UTF-16 by NUL parity, cp1251 fallback. Six project-owned read sites moved onto it. | verify: tools/validate.py PASS (2026-07-30)
 - [x] T-290 [P1] schema_version greater than the validator understands was a silent PASS. Now a WARN naming what a clean run does and does not cover. | verify: tools/validate.py PASS (2026-07-30)

@@ -50,6 +50,14 @@ CURRENT_SCHEMA_VERSION = 1
 # the extension (RFC § 1.9). Named rather than inlined so the cross-doc
 # check can compare it against the table and the schema enum.
 OUTBOX_STATUSES = ("ready", "draft", "blocked", "reviewed", "stale")
+# RFC § 1.10's closed command list. Was a local inside Core's own next_action
+# branch, so it existed only when Core's next_action happened to start with
+# "saipen " -- the moment the subSaipen check reused it against a Core state
+# that said WAIT, it was simply not defined. A vocabulary two checks share is
+# a module constant, not a variable one of them happens to have built.
+SAIPEN_COMMANDS = frozenset({
+    "set", "init", "continue", "goal", "plan", "clean", "translate",
+    "markhunt", "prepare", "ship", "validate", "status", "stop", "sub"})
 failures = []
 warnings = {}
 
@@ -480,10 +488,7 @@ if isinstance(next_action, str):
         verb = next_action[len("saipen "):].split()[0].strip('."\'') if \
             len(next_action.split()) > 1 else ""
         # 1.10's closed list. `saipen` bare (== continue) has no verb.
-        known = {"set", "init", "continue", "goal", "plan", "clean",
-                 "translate", "markhunt", "prepare", "ship", "validate",
-                 "status", "stop", "sub"}
-        if verb and verb not in known:
+        if verb and verb not in SAIPEN_COMMANDS:
             fail(f"STATE.md next_action invokes 'saipen {verb}', which RFC "
                  f"§ 1.10 does not define -- a cold agent MUST decline an "
                  f"unrecognized command and stop, so this state fails "
@@ -504,6 +509,18 @@ if phase in ("SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP") \
 # principle, but the enumeration named only four and read as exhaustive.
 READ_ONLY_BANNED_PHASES = ("INIT", "PLAN", "ADD", "BUILD", "SHIP", "CLEAN",
                            "TRANSLATE")
+# A subSaipen's `read-only` is a SCOPE lock, not Core's capability lock: it
+# writes its own STATE/BOARD/LOG/kitchen freely and is barred only from the
+# shared tree, so the ban is the phases whose work product lands OUTSIDE its
+# folder. Four, not seven. PLAN and ADD are reachable and expected --
+# PROTOCOL.md § 5's backpressure note and TEMPLATE/STATE.md's default
+# next_action both have a subSaipen planning its own backlog, which the
+# capability reading forbids outright. These two lists had always differed
+# here while PROTOCOL.md § 1 claimed the contracts were "identical", so a
+# conformant reader and a conformant run disagreed about PLAN. Both are named
+# now and the drift detector compares them against that paragraph.
+SUB_READ_ONLY_BANNED_PHASES = ("BUILD", "SHIP", "CLEAN", "TRANSLATE")
+
 if mode == "read-only" and phase in READ_ONLY_BANNED_PHASES:
     fail(f"mode: read-only MUST NOT enter {phase} -- that phase's work "
          f"product is a file write (RFC § 1.3)")
@@ -609,9 +626,10 @@ if sub_state_files:
         if sub_state.get("mode") != "read-only":
             fail(f"{sp} mode is {sub_state.get('mode')!r}, MUST be read-only "
                  f"(extensions/subs/PROTOCOL.md § 1)")
-        if sub_state.get("phase") in ("BUILD", "SHIP", "CLEAN", "TRANSLATE"):
-            fail(f"{sp} phase {sub_state.get('phase')} is unreachable under "
-                 f"mode: read-only (RFC § 1.3) -- a subSaipen MUST NOT enter it")
+        if sub_state.get("phase") in SUB_READ_ONLY_BANNED_PHASES:
+            fail(f"{sp} phase {sub_state.get('phase')} is unreachable for a "
+                 f"subSaipen -- its work product lands outside the subSaipen's "
+                 f"own folder (extensions/subs/PROTOCOL.md § 1)")
         # A shipped template must not carry one machine's absolute path: it
         # is copied verbatim to every user, where that path does not exist.
         # Only the placeholder (or the field being absent) is legal here.
@@ -643,6 +661,68 @@ if sub_state_files:
             if "?" in sub_na and not sub_na.startswith("WAIT:"):
                 fail(f"{sp} next_action asks a question outside WAIT:: "
                      f"{sub_na!r} (RFC § 1.2)")
+            # The prefix proves the shape, not the vocabulary. Core has had
+            # this since v7.89.0; a sub's STATE went without it, so
+            # `saipen hunt` in a sub validated clean while naming a command
+            # § 1.10 does not define -- a state its own cold agent is required
+            # to decline.
+            if sub_na.startswith("saipen "):
+                _rest = sub_na[len("saipen "):].split()
+                _verb = _rest[0].strip('."\'') if _rest else ""
+                if _verb and _verb not in SAIPEN_COMMANDS:
+                    fail(f"{sp} next_action invokes 'saipen {_verb}', which RFC "
+                         f"§ 1.10 does not define -- its cold agent MUST "
+                         f"decline an unrecognized command and stop")
+
+        # PROTOCOL.md § 1 says a subSaipen is a normal SAIPEN instance: "same
+        # STATE.md/BOARD.md/LOG.md shape, same phase enum (RFC § 1.6), same LOG
+        # skeleton (RFC § 1.2)". The schema call above covers eight required
+        # fields and the phase enum. These four were Core-only, so the PASS
+        # line below claimed a shape it had not checked -- the same inversion
+        # v7.101.0 fixed in the other direction, when the prefix rule was
+        # stricter for a read-only worker than for the state a cold agent boots
+        # from. Parity in both directions or the message is a lie.
+        _sub_tf = sub_state.get("transition_from")
+        _sub_ph = sub_state.get("phase")
+        if _sub_tf is None:
+            if _sub_ph != "INIT":
+                fail(f"{sp} missing transition_from -- RFC § 1.2's ninth "
+                     f"required field, absent only for a fresh INIT")
+        elif _sub_tf not in VALID_TRANSITIONS and _sub_tf not in ANY_FROM:
+            fail(f"{sp} transition_from {_sub_tf!r} is not one of the 16 phase "
+                 f"enum values (RFC § 1.6)")
+        elif _sub_ph and _sub_tf != _sub_ph and _sub_ph not in ANY_FROM:
+            _allowed = list(VALID_TRANSITIONS.get(_sub_tf, []))
+            # RFC § 1.6 routes HUNT to ADD/PLAN/SCOUT/BLOCKED because for Core
+            # a clean sweep still has to decide what work it creates. A
+            # reporting subSaipen's deliverable is its OUTBOX, and the "add"
+            # step happens in the MAIN project during collect (PROTOCOL.md § 4),
+            # so HUNT -> DONE is its real, honest terminus. saihunt had been
+            # sitting in exactly that state since its first sweep, truthfully,
+            # and no check had ever looked at a sub's transitions to notice.
+            if _sub_tf == "HUNT":
+                _allowed.append("DONE")
+            if _sub_ph not in _allowed:
+                fail(f"{sp} {_sub_tf} -> {_sub_ph} is not in the transition "
+                     f"table ({_sub_tf} allows "
+                     f"{'/'.join(_allowed) or 'nothing'}) (RFC § 1.6)")
+
+        _sub_up = sub_state.get("updated")
+        if isinstance(_sub_up, str) and not re.fullmatch(
+                r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|\+00:00)",
+                _sub_up):
+            fail(f"{sp} updated must be ISO-8601 UTC (Z or +00:00), got "
+                 f"{_sub_up!r} -- Recovery miscompares staleness across "
+                 f"timezones otherwise (RFC § 1.2)")
+
+        if sub_state.get("goal_mode") is True:
+            for _c in ("goal_waves", "goal_tickets"):
+                if not TYPE_CHECKS["integer"](sub_state.get(_c)):
+                    fail(f"{sp} goal_mode: true but {_c} is missing -- "
+                         f"PROTOCOL.md documents `saipen goal` for an "
+                         f"unattended sub run, so § 2.4's valve applies here "
+                         f"too and cannot survive a restart without it")
+
         if len(failures) > before_sub:
             subs_ok = False
     if subs_ok:
@@ -2171,6 +2251,38 @@ else:
                  f"document(s) still name the superseded palette instead of "
                  f"{_palette!r}: {', '.join(_stale_name[:5])}"
                  f"{' ...' if len(_stale_name) > 5 else ''}")
+            drift_ok = False
+
+    # 13c2. PROTOCOL.md § 1's four-phase subSaipen ban agrees with the tool.
+    #       This pair spent its whole life disagreeing: the document said the
+    #       contract was "identical" to RFC § 1.3's seven-phase capability ban
+    #       while the tool enforced four, so a reader who obeyed the document
+    #       would never PLAN and every real subSaipen did. The seventh set the
+    #       drift detector carries, and the first one added because a document
+    #       was STRICTER than the tool rather than looser.
+    _pp = _tools_parent / "extensions" / "subs" / "PROTOCOL.md"
+    if _pp.is_file():
+        _pt = _pp.read_text(encoding="utf-8-sig")
+        _m = re.search(
+            r"A subSaipen MUST NOT transition to ([^.]+?)\.", _pt, re.DOTALL)
+        if not _m:
+            fail("cross-doc drift [sub-ban] -- PROTOCOL.md no longer states "
+                 "the subSaipen phase ban in the form the drift check parses "
+                 "('A subSaipen MUST NOT transition to ...'). A missing anchor "
+                 "is a failure, not a skip")
+            drift_ok = False
+        else:
+            _doc_ban = set(re.findall(r"`([A-Z]+)`", _m.group(1)))
+            if _doc_ban != set(SUB_READ_ONLY_BANNED_PHASES):
+                fail(f"cross-doc drift [sub-ban] -- PROTOCOL.md § 1 bans "
+                     f"{sorted(_doc_ban)} but validate.py enforces "
+                     f"{sorted(SUB_READ_ONLY_BANNED_PHASES)}")
+                drift_ok = False
+        if "scope" not in _pt.lower():
+            fail("cross-doc drift [sub-ban] -- PROTOCOL.md § 1 no longer "
+                 "distinguishes a subSaipen's SCOPE lock from Core's "
+                 "capability lock; without that sentence the two phase bans "
+                 "read as an unexplained contradiction again")
             drift_ok = False
 
     # 13d. RFC § 1.7 Workspace Hygiene, mechanically. `saipen set` writes a

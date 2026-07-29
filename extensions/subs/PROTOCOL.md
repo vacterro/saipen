@@ -36,13 +36,39 @@ A subSaipen is a normal SAIPEN instance -- same `STATE.md`/`BOARD.md`/`LOG.md`
 shape, same `phase` enum (RFC § 1.6), same LOG skeleton (RFC § 1.2) -- living
 in its own folder instead of the project's `.saipen/`, permanently locked to
 `mode: read-only`. No separate state machine, no lifecycle field: RFC § 1.3
-already defines exactly the behavior wanted here -- "the agent MAY still
-read, analyze, and report; it advises, it does not act" -- MUST NOT
-transition to `BUILD`/`SHIP`/`CLEAN`/`TRANSLATE`, MUST NOT touch any file
-outside its own `.saipen/extensions/subs/<name>/`. This is a *policy* use of the
-same `mode: read-only` value Core defines for a *capability* gap (missing
-filesystem write) -- the behavioral contract is identical either way, so
-the value is reused deliberately, not coincidentally.
+already defines the behavior wanted here -- "the agent MAY still read,
+analyze, and report; it advises, it does not act" -- MUST NOT touch any file
+outside its own `.saipen/extensions/subs/<name>/`.
+
+**The value is reused; the contract is NOT identical, and saying it was cost
+this protocol two contradicting phase bans.** Core's `read-only` is a
+*capability* lock: filesystem write is unavailable, so RFC § 1.3 bans all
+seven phases whose work product is a file write -- including `PLAN` (it writes
+tickets) and `ADD`. A subSaipen's `read-only` is a *scope* lock: it writes its
+own `STATE.md`, `BOARD.md`, `LOG.md` and `kitchen/` freely -- § 8's fixer even
+edits copies in `kitchen/pen/` -- and is forbidden only from the shared tree.
+So the ban here is the phases whose work product lands OUTSIDE its own folder:
+
+> **A subSaipen MUST NOT transition to `BUILD`, `SHIP`, `CLEAN` or
+> `TRANSLATE`.** Four, not RFC § 1.3's seven. `PLAN` and `ADD` are reachable
+> and expected -- § 5's backpressure note and `TEMPLATE/STATE.md`'s default
+> `next_action` both have a subSaipen planning its own backlog, which is
+> unreachable under the capability reading. `INIT` is moot: `saipen sub spawn`
+> creates the folder, the subSaipen never bootstraps itself.
+
+The two lists were always different in `tools/validate.py` and identical in
+this sentence, which is drift in the worst direction -- the document said the
+stricter thing and the tool did the workable thing, so a conformant reader and
+a conformant run disagreed about `PLAN`. Both lists are now named constants and
+the drift detector compares them against this paragraph.
+
+**One transition-table addition, for the same reason.** RFC § 1.6 routes
+`HUNT` to `ADD`/`PLAN`/`SCOUT`/`BLOCKED`, because for Core a clean sweep still
+has to decide what work it creates. A reporting subSaipen's deliverable is its
+OUTBOX, not tickets: the "add" step happens in the MAIN project, during
+`collect` (§ 4). **`HUNT -> DONE` is therefore legal for a subSaipen** whose
+findings went to `kitchen/OUTBOX.md`, and only for a subSaipen. `saihunt` had
+been sitting in exactly that state, truthfully, since its first sweep.
 
 **Enforcement is procedural, same footing as RFC § 1.1's destructive-op
 rule** -- there is no universal technical lock. The subSaipen's own

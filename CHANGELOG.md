@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.111.0 -- 2026-07-30 -- read-only meant two different things and one document said they were identical
+
+Looking for asymmetry -- which checks Core's `STATE.md` gets and a subSaipen's does not -- turned up four: RFC § 1.2's ninth required field, transition legality, the ISO-8601 UTC form of `updated`, and § 1.10's command vocabulary were all Core-only. Meanwhile the validator printed `subSaipen STATE.md shape valid`, a message claiming a shape it had not checked. That is the mirror of the inversion fixed in v7.101.0, where the prefix rule was stricter for a read-only worker than for the state a cold agent actually boots from.
+
+Closing the parity opened something bigger. `mode: read-only` means two different things in this protocol. Core's is a **capability** lock: filesystem write is unavailable, so RFC § 1.3 bans all seven phases whose work product is a file write -- `PLAN` writes tickets and `ADD` writes a board, so both are out of reach. A subSaipen's is a **scope** lock: it writes its own `STATE.md`, `BOARD.md`, `LOG.md` and `kitchen/` freely -- § 8's fixer edits copies in `kitchen/pen/` -- and is forbidden only from the shared tree. Its ban is the four phases whose product lands outside its own folder.
+
+`extensions/subs/PROTOCOL.md` § 1 asserted that "the behavioral contract is identical either way". `tools/validate.py` has always enforced four. So the document was **stricter than the tool** -- drift in the rarer and more confusing direction: a reader obeying the document would never enter `PLAN`, while every real subSaipen plans its own backlog, including the shipped `TEMPLATE`, `saipython` right now, and § 5's own backpressure note. Both documents now state the distinction, both lists are named constants, and the drift detector parses PROTOCOL.md's own sentence -- failing on a missing anchor as loudly as on a changed list.
+
+One transition follows from the same reasoning. RFC § 1.6 routes `HUNT` to `ADD`/`PLAN`/`SCOUT`/`BLOCKED` because for Core a clean sweep still has to decide what work it creates. A reporting subSaipen's deliverable is its OUTBOX, and the add step happens in the main project during `collect` (§ 4). `HUNT -> DONE` is therefore legal for a subSaipen and only for one. `saihunt` had been sitting in exactly that state, truthfully, since its first sweep -- nothing had ever looked at a subSaipen's transitions.
+
+Two tooling defects surfaced on the way. `SAIPEN_COMMANDS` was declared after its first use, and the branch that reads it never executes in this repository, because this `STATE.md`'s `next_action` is a `WAIT` -- so only a fixture could reach the `NameError`, and one did. And `tools/run_scenarios.py` reported that crash as "failed as declared, but for the wrong reason": both a crash and a wrong-reason failure exit non-zero, and the softer wording sent the reader at the fixture when the defect was in the tool. A crash is now named a crash.
+
 ## 7.110.0 -- 2026-07-30 -- the validator died on the first file it read
 
 `.saipen/STATE.md` is the first thing `tools/validate.py` opens, and it opened it as `utf-8-sig`. A UTF-16 file -- which is what PowerShell 5.1's `Set-Content` and `Out-File` produce by default, a trap `KNOWLEDGE/traps.md` has recorded since v3.1.1 -- raised `UnicodeDecodeError` and killed the whole run. A Python traceback, zero FAILs, not one other check performed, and all of it out of a pre-commit hook. A project could carry ten defects and the only thing reported was a decode error nobody can act on.

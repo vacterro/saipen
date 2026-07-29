@@ -94,7 +94,20 @@ for d in sorted(p for p in SCENARIOS.iterdir() if p.is_dir()):
                         f"(validator exit {r.returncode}){detail}")
     elif declared == "fail" and reason:
         blob = r.stdout + r.stderr
-        if reason not in blob:
+        if "Traceback (most recent call last)" in blob:
+            # A CRASH is not "failed for the wrong reason". Both exit non-zero,
+            # and the softer wording pointed at the fixture when the defect was
+            # in the validator: a NameError on a constant declared after its
+            # first use, in a branch this repo's own STATE never enters. Name
+            # the crash so the next reader looks at the tool, not the data.
+            last = next((ln for ln in reversed(blob.splitlines())
+                         if ln.strip() and not ln.startswith(" ")),
+                        "<no exception line>")
+            failures.append(f"{d.name}: the validator CRASHED instead of "
+                            f"reporting -- {last.strip()[:110]!r}. A traceback "
+                            f"exits non-zero and can be mistaken for the "
+                            f"declared failure; it is a defect in the tool")
+        elif reason not in blob:
             first = next((ln for ln in blob.splitlines()
                           if ln.startswith("FAIL")), "<no FAIL line>")
             failures.append(f"{d.name}: failed as declared, but for the wrong "
