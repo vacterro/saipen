@@ -51,3 +51,36 @@ real directories with lowercase names — junctions/symlinks are ignored, and
 the IDE holds a lock so junctions can't even be created while it runs. The
 injector copies files there instead, which means those copies go stale:
 re-run `inject.ps1` after every `git pull`.
+
+## A harness reporting total failure is broken, not the subject
+
+Three times in one session a scratch harness claimed everything was dead.
+`audit_floor` said 20 of 20 portable-floor checks never fire; the warn audit
+said 8 of 8 categories are unreachable *and* the repo was dirty. All false.
+Causes, in order found:
+
+- `subprocess.run(["bash", ...])` from Python on Windows resolves to the WSL
+  stub in System32, not git-bash. With no distro installed it emits a UTF-16
+  error and runs nothing, so the harness saw empty output and scored every
+  case as never-fired. Invoke git-bash by full path instead.
+- Matching on `warn()`'s internal category key, which is never printed. The
+  output carries the message text, not the key.
+- Testing `"FAIL" in output` while several validator messages contain the
+  word "FAILs" in ordinary prose.
+
+Rule: a real defect is almost never total; a misconfigured harness almost
+always is. Before believing any negative, run a control whose result is
+already known and confirm it comes back right. Control silent -> report
+nothing and fix the instrument. Codified in `phases/verify.md`.
+
+## Python string escapes keep eating shell and path text
+
+Four separate times in one session: `\1` in a sed replacement became `chr(1)`
+(octal escape) and silently corrupted a fixture's `saipen_version` line and,
+later, a YAML workflow; a Windows path written `C:\Program Files\Git\usr\...`
+inside a normal triple-quoted string tripped `truncated \uXXXX escape`.
+
+Use raw strings for anything containing a backslash, or write the file with
+the editor tools rather than through a Python heredoc. The failure is quiet
+when it lands inside data (`chr(1)` in a Markdown file passed review for
+weeks) and loud only when it happens to break a parser.

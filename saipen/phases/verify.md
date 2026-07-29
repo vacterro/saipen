@@ -50,6 +50,20 @@ on purpose.** Feed it a known-bad input and confirm it goes red. Stays green
 green one and the deliberate red one; a `conf: high` claimed on a gate never
 shown capable of failing is not `high`.
 
+**A gate stuck red lies as loudly as one stuck green.** The rule above guards
+one pole; this guards the other. When a run says *everything* failed --
+20 of 20 checks dead, every fixture broken, the whole floor gone -- that is a
+claim about your instrument before it is a claim about the subject. A real
+defect is almost never total; a misconfigured harness almost always is.
+So before reporting any negative, make the instrument prove it can see a
+positive: run one input whose expected result is already known and confirm
+it comes back as expected. Control silent -> report nothing, fix the
+instrument. Three harnesses in one v7.101.0 session claimed total failure and
+were each wrong: one invoked the WSL `bash` stub instead of the real shell,
+one matched on an internal key never present in the output, one asserted a
+check catch something it had never claimed to. All three would have shipped a
+confident, false finding.
+
 **Pin what a gate depends on.** An unpinned linter/formatter/type-checker
 makes the gate nondeterministic: a new upstream release shifts the default
 rule set and the build goes red with zero code changes, which teaches
