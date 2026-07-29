@@ -110,7 +110,7 @@ foreach ($node in $deps.Keys) {
 # Wording matches validate.sh deliberately: the two halves are one floor in
 # two languages, and a human comparing platforms (or anything grepping the
 # output) should not have to know which half produced it. They said
-# different things for the same defect until v7.100.0, found the moment
+# different things for the same defect until v7.101.0, found the moment
 # tools/audit_floor.py started auditing this half too.
 Assert-Format (-not $hasCycle) "BOARD.md contains cyclic needs: dependencies involving: $cycleNode"
 Write-Host "PASS: BOARD.md acyclic" -ForegroundColor Green

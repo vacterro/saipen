@@ -323,7 +323,7 @@ if isinstance(next_action, str):
     # than about the one a cold agent actually boots from. The vague-phrase
     # regex above is a blacklist and evadable by construction: `fix the thing`,
     # `ship it` and `look at the board` all passed clean at exit 0 until
-    # v7.100.0, each of them a state TEST-001 cannot execute. The prefix rule
+    # v7.101.0, each of them a state TEST-001 cannot execute. The prefix rule
     # is the whitelist; it has to carry the weight.
     if not next_action.startswith(executable_prefixes):
         fail(f"STATE.md next_action does not start with WAIT:/saipen /PHASE "
@@ -1148,7 +1148,7 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
 
         # B. Every runtime file the protocol references must exist in the home.
         manifest = [
-            # RFC.md was absent from this list until v7.100.0 -- the manifest of
+            # RFC.md was absent from this list until v7.101.0 -- the manifest of
             # "every runtime file the protocol references" omitted the
             # constitution itself. Other checks would have noticed its absence,
             # but a completeness list that skips the most important item is not
@@ -1641,7 +1641,7 @@ else:
 
     # 9c. OUTBOX status vocabulary, three ways: PROTOCOL.md's own table,
     #     outbox.schema.json's enum, and the tuple this file checks against.
-    #     All three disagreed until v7.100.0 -- the table listed four while the
+    #     All three disagreed until v7.101.0 -- the table listed four while the
     #     document's own prose (§ 4, § 9) told agents to write a fifth, and both
     #     implementations already accepted it. The validator even cited
     #     "PROTOCOL.md § 2" in its error message while enforcing a superset of
@@ -1737,7 +1737,7 @@ else:
     # EXEMPT means "no rule-CONTENT check applies", never "nothing looks at it".
     # Citations are verified across every shipped document below, exempt or
     # not: a pointer at a section or file that no longer exists is wrong
-    # wherever it sits. The v7.100.0 wording implied the weaker thing, and five
+    # wherever it sits. The v7.101.0 wording implied the weaker thing, and five
     # of the seven entries here in fact name protocol files -- three of them
     # (SKILL.md, STYLE.md, UI.md) are shipped into every install by the
     # injector, and SKILL.md is the entry point that tells a skill-reading
@@ -1868,6 +1868,122 @@ else:
                      f"{'; '.join(_bits[:4])}. A citation to a release that "
                      f"has not happened is a promise the repo cannot keep")
                 drift_ok = False
+
+    # 13b. A version BELOW VERSION is not the same as a version that happened.
+    #      The bound above assumes the sequence is dense, and it is not: one
+    #      number was skipped entirely -- no tag, no CHANGELOG entry, no commit
+    #      whose VERSION ever said it -- while twenty-four lines across
+    #      CONFORMANCE, PROTOCOL.md, this file and the PowerShell floor named it
+    #      as the release they shipped in. Every one of them was below VERSION,
+    #      so the check above certified them all. The ledger, not the ordering,
+    #      is what says a release exists.
+    if IS_SAIPEN_HOME:
+        _ledger = set()
+        _chg = _tools_parent / "CHANGELOG.md"
+        if _chg.is_file():
+            _ledger |= set(re.findall(
+                r"^## (\d+\.\d+\.\d+)",
+                _chg.read_text(encoding="utf-8-sig"), re.MULTILINE))
+        try:
+            _r = subprocess.run(["git", "tag", "-l", "v*"],
+                                capture_output=True, text=True, check=False)
+            if _r.returncode == 0:
+                _ledger |= {ln.strip()[1:] for ln in _r.stdout.splitlines()
+                            if ln.strip().startswith("v")}
+        except (OSError, subprocess.SubprocessError):
+            pass
+
+        def _rel(p):
+            try:
+                return p.relative_to(_tools_parent).as_posix()
+            except ValueError:
+                return p.name
+
+        def _tup(v):
+            try:
+                return tuple(int(x) for x in v.split("."))
+            except ValueError:
+                return None
+
+        _known = {t for t in (_tup(v) for v in _ledger) if t}
+        if _known:
+            # Below the oldest entry the ledger simply has no memory -- those
+            # citations predate both files and cannot be decided here. Silence
+            # there is honest; silence above it was the defect.
+            _floor = min(_known)
+            # Wider than _cite_docs, which is markdown only. A version
+            # citation rots the same way inside a JSON schema, the validator
+            # itself or the portable floor -- and all three carried the
+            # phantom number. Third time in one day that a check was right
+            # about content and wrong about coverage.
+            _ver_docs = list(_cite_docs)
+            for _pat in ("extensions/schemas/*.json", "tools/*.py",
+                         "tests/*.sh", "tests/*.ps1",
+                         "tests/scenarios/*/*.md"):
+                _ver_docs += list(_tools_parent.glob(_pat))
+            _phantom = {}
+            for _doc in sorted(set(_ver_docs)):
+                if not _doc.is_file() or "CHANGELOG" in _doc.name:
+                    continue
+                _body = _doc.read_text(encoding="utf-8-sig", errors="replace")
+                for _v in set(re.findall(r"(?:^|[\s(\[])v(\d+\.\d+\.\d+)",
+                                         _body, re.MULTILINE)):
+                    _t = _tup(_v)
+                    if _t and _t >= _floor and _t not in _known:
+                        # Path, not name: this repo has ten README.md, and the
+                        # first run of this check reported "README.md" for a
+                        # cluster of nine scenario fixtures.
+                        _phantom.setdefault(_v, set()).add(_rel(_doc))
+            if _phantom:
+                _bits = [f"v{v} in {', '.join(sorted(d)[:3])}"
+                         for v, d in sorted(_phantom.items())]
+                fail(f"cross-doc drift [phantom-version] -- "
+                     f"{len(_phantom)} version(s) cited that are inside the "
+                     f"release ledger's range but absent from it (no tag, no "
+                     f"CHANGELOG entry): {'; '.join(_bits[:4])}. Below VERSION "
+                     f"is not the same as shipped")
+                drift_ok = False
+
+            # The ledger's two halves are themselves a cross-document pair and
+            # nothing had ever compared them. WARN, not FAIL: closing a
+            # historical divergence means either rewriting CHANGELOG or pushing
+            # a backdated tag, and a backdated tag push publishes a release.
+            # The divergence is a fact the repo should carry, not a gate.
+            _chg_v = set()
+            if _chg.is_file():
+                _chg_v = {t for t in (_tup(v) for v in re.findall(
+                    r"^## (\d+\.\d+\.\d+)",
+                    _chg.read_text(encoding="utf-8-sig"), re.MULTILINE)) if t}
+            _tag_v = set()
+            try:
+                _r = subprocess.run(["git", "tag", "-l", "v*"],
+                                    capture_output=True, text=True, check=False)
+                if _r.returncode == 0:
+                    _tag_v = {t for t in (_tup(ln.strip()[1:])
+                                          for ln in _r.stdout.splitlines()
+                                          if ln.strip().startswith("v")) if t}
+            except (OSError, subprocess.SubprocessError):
+                pass
+
+            def _vs(versions):
+                return ", ".join("v" + ".".join(map(str, v))
+                                 for v in sorted(versions)[:8])
+
+            if _chg_v and _tag_v:
+                # Compare only where both halves have memory. Below either
+                # floor one of them simply wasn't being kept yet, and calling
+                # that a divergence would be noise, not a finding.
+                _overlap = max(min(_chg_v), min(_tag_v))
+                _no_entry = {v for v in _tag_v if v >= _overlap} - _chg_v
+                _no_tag = {v for v in _chg_v if v >= _overlap} - _tag_v
+                if _no_entry:
+                    warn("release-ledger",
+                         f"{len(_no_entry)} release(s) carry a git tag but no "
+                         f"CHANGELOG entry: {_vs(_no_entry)}")
+                if _no_tag:
+                    warn("release-ledger",
+                         f"{len(_no_tag)} release(s) have a CHANGELOG entry "
+                         f"but no git tag: {_vs(_no_tag)}")
 
     # 14. Every adapter names the cold-start kernel. An adapter that sends a
     #     cold agent straight at RFC.md inverts the 2-tier design: the

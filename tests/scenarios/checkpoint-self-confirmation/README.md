@@ -17,7 +17,7 @@ fails outright, on a project that otherwise looked perfectly healthy.
 agent MUST re-read `BOARD.md` and confirm the claim survived. Identical
 failure mode, and until v7.84.0 only one of the two paths was protected.
 
-So: after step (3), re-read `STATE.md` and confirm every field RFC § 1.2's required set names -- read it there, never from a count repeated here (this line said "eight" until v7.100.0; the set has been nine since v7.92.0, which is exactly the drift § 1.2 now forbids other documents from reproducing)
+So: after step (3), re-read `STATE.md` and confirm every field RFC § 1.2's required set names -- read it there, never from a count repeated here (this line said "eight" until v7.101.0; the set has been nine since v7.92.0, which is exactly the drift § 1.2 now forbids other documents from reproducing)
 are present and non-empty (`phase`, `task`, `next_action`, `blocker`, `agent`,
 `saipen_version`, `mode`, `updated`). Missing one, fix it before doing
 anything else. Where a validator is reachable, run it -- cheaper and more

@@ -42,7 +42,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 ## Baik untuk diketahui
 - Ada perubahan yang belum di-commit saat kembali ke proyek? Normal -- SAIPEN hanya commit saat `ship`, bukan setiap langkah. Agen memeriksa dulu perubahan itu milik siapa sebelum menyentuh apa pun.
 - Ingin agar ia mengingat keputusan arsitektur yang sebenarnya? Taruh di `.saipen/KNOWLEDGE/`, sebagai satu file `decisions.md` atau file bernomor `ADR-001.md`.
-- Tidak ada git atau shell di mesin ini? Agen akan mengatakannya dengan jelas (`mode`, `WAIT: <category> -- <pertanyaan>`) alih-alih menebak.
+- Tidak ada git atau shell di mesin ini? Agen akan mengatakannya dengan jelas (`mode`, `WAIT: <category> -- <pertanyaan>`) alih-alih menebak (kategori adalah salah satu dari tujuh: `manual-verify, destructive-op, first-publish, user brake, blocked, safety valve, init`; ini memberi tahu jenis jawaban apa yang membuka blokir)
 - Ingin jaring pengaman? `python <klon-saipen>/tools/install_hook.py` memasang pemeriksaan pra-commit.
 
 ---

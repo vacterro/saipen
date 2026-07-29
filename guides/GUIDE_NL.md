@@ -40,7 +40,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 ## Goed om te weten
 - Niet-gecommitte wijzigingen als je terugkomt? Normaal -- SAIPEN commit alleen bij `ship`, niet bij elke stap. De agent controleert eerst van wie die wijzigingen zijn voordat hij iets aanraakt.
 - Wil je dat hij een echte architectuurbeslissing onthoudt? Zet het in `.saipen/KNOWLEDGE/`, als één bestand `decisions.md` of genummerde `ADR-001.md`-bestanden.
-- Geen git of shell op deze machine? De agent zegt het gewoon eerlijk (`mode`, `WAIT: <category> -- <vraag>`) in plaats van te gokken.
+- Geen git of shell op deze machine? De agent zegt het gewoon eerlijk (`mode`, `WAIT: <category> -- <vraag>`) in plaats van te gokken (de categorie is een van de zeven: `manual-verify, destructive-op, first-publish, user brake, blocked, safety valve, init`; het vertelt welk antwoord de blokkade opheft)
 - Wil je een vangnet? `python <saipen-kloon>/tools/install_hook.py` installeert een pre-commit check.
 
 ---

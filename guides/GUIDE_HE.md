@@ -40,7 +40,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 ## טוב לדעת
 - שינויים לא מחויבים כשחוזרים לפרויקט? נורמלי -- SAIPEN מבצע commit רק ב-`ship`, לא בכל שלב. הסוכן בודק קודם למי שייכים השינויים לפני שהוא נוגע במשהו.
 - רוצה שהוא יזכור החלטת ארכיטקטורה אמיתית? שים אותה ב-`.saipen/KNOWLEDGE/`, כקובץ `decisions.md` אחד או כקבצים ממוספרים `ADR-001.md`.
-- אין git או shell במחשב הזה? הסוכן אומר את זה בפירוש (`mode`, `WAIT: <category> -- <שאלה>`) במקום לנחש.
+- אין git או shell במחשב הזה? הסוכן אומר את זה בפירוש (`mode`, `WAIT: <category> -- <שאלה>`) במקום לנחש (הקטגוריה היא אחת משבע: `manual-verify, destructive-op, first-publish, user brake, blocked, safety valve, init`; היא אומרת איזו תשובה פותרת את החסימה)
 - רוצה רשת ביטחון? `python <שכפול-saipen>/tools/install_hook.py` מתקין בדיקה לפני כל commit.
 
 ---

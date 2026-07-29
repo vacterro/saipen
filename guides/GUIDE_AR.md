@@ -40,7 +40,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 ## من الجيد معرفته
 - تغييرات غير مُلتزم بها عند العودة إلى المشروع؟ هذا طبيعي -- SAIPEN يلتزم فقط عند `ship`، وليس في كل خطوة. يتحقق الوكيل أولاً من صاحب هذه التغييرات قبل لمس أي شيء.
 - تريده أن يتذكر قرارًا معماريًا حقيقيًا؟ ضعه في `.saipen/KNOWLEDGE/`، إما كملف `decisions.md` أو كملفات مرقمة `ADR-001.md`.
-- لا يوجد git أو shell على هذا الجهاز؟ يقول الوكيل ذلك بوضوح (`mode`، `WAIT: <category> -- <سؤال>`) بدلاً من التخمين.
+- لا يوجد git أو shell على هذا الجهاز؟ يقول الوكيل ذلك بوضوح (`mode`، `WAIT: <category> -- <سؤال>`) بدلاً من التخمين (الفئة هي واحدة من سبع: `manual-verify, destructive-op, first-publish, user brake, blocked, safety valve, init`؛ وتوضح نوع الإجابة المطلوبة لإزالة التعليق)
 - تريد شبكة أمان؟ `python <نسخة-saipen>/tools/install_hook.py` يثبّت فحصًا قبل كل التزام.
 
 ---

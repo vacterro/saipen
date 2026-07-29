@@ -23,3 +23,7 @@
 
 - 28.07.26 10:40 [W-017] [parent: W-016] RUN: wiki light refresh applied — Home (v7.97.0→v7.98.0 badge, key features date, 2 new bullets), _Footer (version), Scenarios (66→67, row 67 added), SubSaipen (validation guards section). Pushed to github.com/vacterro/saipen.wiki (340d4be).
 - 28.07.26 10:50 [W-018] [parent: W-017] RUN: CI trigger drift detected — Home.md still said PR-only after push:+concurrency change. Updated to reflect new trigger. Pushed (4dd270f).
+- 29.07.26 12:00 [W-019] [parent: none] RUN: v7.103.0 full wiki refresh — drift scan (WIKI-008) -> direct apply: Home (badge, CI, features v7.103.0), Scenarios (68→99 rows, 31 new), SubSaipen (liveness, TEMPLATE, boundary), Getting-Started (cygpath-w, audit_floor), Phases (gate-stuck-red, release guard, done.md fix), Tutorials (validator lint, push-claim, fixture), Use-Cases (citation, push-claim, boundary), _Footer (v7.98.0→v7.103.0). Pushed ed51225. tools/validate.py PASS.
+- 29.07.26 12:20 [HUNT-002] [parent: W-019] RUN: hunt -> clean @3efc567 — 6-category HUNT sweep after v7.103.0 wiki refresh. validate.py PASS, wiki remote in sync (ed51225), no stale refs, no orphan kitchen files. Wiki fully compliant at v7.103.0.
+
+## BLOCKED

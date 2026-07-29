@@ -42,7 +42,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 ## Bine de știut
 - Modificări necomise când revii la proiect? Normal -- SAIPEN face commit doar la `ship`, nu la fiecare pas. Agentul verifică mai întâi ale cui sunt acele modificări înainte de a atinge ceva.
 - Vrei să rețină o decizie arhitecturală reală? Pune-o în `.saipen/KNOWLEDGE/`, fie ca un singur fișier `decisions.md`, fie ca fișiere numerotate `ADR-001.md`.
-- Nu ai git sau shell pe această mașină? Agentul spune asta clar (`mode`, `WAIT: <category> -- <întrebare>`) în loc să ghicească.
+- Nu ai git sau shell pe această mașină? Agentul spune asta clar (`mode`, `WAIT: <category> -- <întrebare>`) în loc să ghicească (categoria este una din șapte: `manual-verify, destructive-op, first-publish, user brake, blocked, safety valve, init`; spune ce fel de răspuns deblochează situația)
 - Vrei o plasă de siguranță? `python <clonă-saipen>/tools/install_hook.py` instalează o verificare pre-commit.
 
 ---

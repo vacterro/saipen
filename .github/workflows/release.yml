@@ -39,8 +39,28 @@ jobs:
       - name: Extract changelog entry
         run: |
           awk '/^## / { if (found) exit; found=1; next } /^## / && found { exit } { if (found) print }' CHANGELOG.md > _relnotes.md
+
+      # "Latest" must mean highest version, not most recently pushed. This
+      # workflow left make_latest at its default, so re-pushing an OLD tag --
+      # which is exactly what fixing a mistagged release requires -- marked
+      # that old release Latest and buried the current one. Happened while
+      # correcting v7.101.0, whose tag had been pushed at the wrong commit.
+      # Decide it from the tag list, not from the clock.
+      - name: Is this the highest tag?
+        id: highest
+        run: |
+          git fetch --tags --quiet
+          top="$(git tag -l 'v*' | sed 's/^v//' | sort -V | tail -1)"
+          if [ "$top" = "${GITHUB_REF_NAME#v}" ]; then
+            echo "latest=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "latest=false" >> "$GITHUB_OUTPUT"
+            echo "not marking latest: highest tag is v$top"
+          fi
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           body_path: _relnotes.md
           files: VERSION
+          make_latest: ${{ steps.highest.outputs.latest }}

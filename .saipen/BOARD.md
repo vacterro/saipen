@@ -4,6 +4,13 @@
 ## TODO
 
 ## DONE
+- [x] T-263 [P0] 42 lines named v7.100.0 as the release they shipped in. No tag, no CHANGELOG entry, no commit whose VERSION said it. All below VERSION, so the future-version bound certified every one. Corrected to v7.101.0, where the work actually shipped. | verify: 0 phantom citations, red test reinstating one FAILs (2026-07-29)
+- [x] T-264 [P0] New [phantom-version] check: a cited version must exist in the release ledger (git tags + CHANGELOG), not merely sit below VERSION. Scan widened past markdown -- the JSON schemas and the validator itself carried the number. | verify: red-tested, found 25 citations my own manual sweep had missed (2026-07-29)
+- [x] T-265 [P1] Release ledger halves compared: 2 tags without a CHANGELOG entry, 9 entries without a tag. WARN -- closing it means rewriting history or publishing backdated releases. | verify: both directions reported (2026-07-29)
+- [x] T-266 [P0] release.yml pinned make_latest to whether this is the highest tag. Re-pushing an old tag marked it Latest and buried v7.103.0; observed live. | verify: yaml parses, Latest repointed to v7.103.0 (2026-07-29)
+- [x] T-267 [P1] saipen/phases/hunt.md carried a UTF-8 BOM and five cp1251-mangled section signs from an uncommitted PowerShell edit. Repaired, content change kept. | verify: text lint PASS (2026-07-29)
+- [x] T-268 [P2] Ship v7.104.0. | verify: tools/validate.py PASS (2026-07-29)
+- [x] T-262 [P2] SAIT-004 collection — 100% translation coverage achieved: WAIT 7-category list localized across all 32 locale guides; EN/RU 'Experimental' → 'Production' wording for subSaipen. ref: saitranslate SAIT-004. All guides at v7.103.0 standard. | verify: tools/validate.py PASS, drift detector 0 stale guides
 - [x] T-256 [P0] CONFORMANCE 65 claimed `validate.yml` runs both portable scripts -- written in v7.96.0 without opening the workflow. Corrected to what actually runs them. | verify: row matches the workflow (2026-07-28)
 - [x] T-257 [P0] `validate.ps1` was executed by nothing -- not CI, not the hook. Added as a pwsh step; this was the root cause of the v7.96.0 `needs:` defect. | verify: workflow has 4 steps, ps1 PASSes locally (2026-07-28)
 - [x] T-258 [P1] `validate.yml` header claimed to enforce what its trigger cannot: PR-only on a repo with zero PRs ever, so today's five releases ran no CI. Header now states the real trigger and names the pre-commit hook as the real gate; `push:` left to the owner. | verify: header matches `gh run list` reality (2026-07-28)

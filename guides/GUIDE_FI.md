@@ -40,7 +40,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 ## Hyvä tietää
 - Tallentamattomia muutoksia, kun palaat projektiin? Normaalia -- SAIPEN committaa vasta `ship`-vaiheessa, ei joka askeleella. Agentti tarkistaa ensin, kenen muutoksia ne ovat, ennen kuin koskee mihinkään.
 - Haluatko sen muistavan oikean arkkitehtuuripäätöksen? Laita se kansioon `.saipen/KNOWLEDGE/` joko tiedostona `decisions.md` tai numeroituina `ADR-001.md`-tiedostoina.
-- Ei gitiä eikä shelliä tällä koneella? Agentti sanoo sen suoraan (`mode`, `WAIT: <category> -- <kysymys>`) sen sijaan että arvaisi.
+- Ei gitiä eikä shelliä tällä koneella? Agentti sanoo sen suoraan (`mode`, `WAIT: <category> -- <kysymys>`) sen sijaan että arvaisi (kategoria on yksi seitsemästä: `manual-verify, destructive-op, first-publish, user brake, blocked, safety valve, init`; se kertoo, millainen vastaus avaa tilanteen)
 - Haluatko turvaverkon? `python <saipen-klooni>/tools/install_hook.py` asentaa pre-commit-tarkistuksen.
 
 ---

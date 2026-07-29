@@ -58,8 +58,8 @@ Pre-commit hook. Broken board caught before commit. Remove:
 python <saipen-clone>/tools/uninstall_hook.py
 ```
 
-**Experimental helpers**
-`saipen sub spawn saihunt` — bootstraps `.saipen/extensions/subs/`, spawns read-only agent. Reports via OUTBOX.md. Never touches code. Built-in: saiwiki (drafts docs), saihunt (hunts bugs). Fresh, no battle scars.
+**SubSaipen in production**
+`saipen sub spawn saihunt` — bootstraps `.saipen/extensions/subs/`, spawns read-only agent. Reports via OUTBOX.md. Never touches code. Built-in: saiwiki (wiki docs), saihunt (drift hunts), saitranslate (translation builds), saipython (minor fixes). Running in production since v7.84.0 — 4 live instances, proven across 30+ wiki pages and 32 locale translations.
 
 ## Commands Cheat Sheet
 

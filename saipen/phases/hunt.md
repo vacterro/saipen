@@ -41,7 +41,7 @@ Signal order, cap 5 tickets:
 2. Commits unverified in LOG
 3. Stale TODO/FIXME/HACK
 4. Silent failures (empty catch, ignored returns, missing IO error paths)
-5. Symmetry gaps (save/load, undo/redo, import/export, start/stop)
+5. Symmetry gaps (save/load, undo/redo, import/export, start/stop, CLI params vs internal lists/GUI)
 6. Dead code, orphan files (zero grep refs, not entry/doc/config)
 
 Obvious junk -> delete free, capped at 5 files per sweep (same cap as the

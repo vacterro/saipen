@@ -40,7 +40,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 ## Bra att veta
 - Ocommittade ändringar när du kommer tillbaka? Normalt -- SAIPEN committar först vid `ship`, inte vid varje steg. Agenten kollar först vems ändringar det är innan den rör något.
 - Vill du att den ska minnas ett riktigt arkitekturbeslut? Lägg det i `.saipen/KNOWLEDGE/`, som en fil `decisions.md` eller numrerade `ADR-001.md`-filer.
-- Ingen git eller shell på maskinen? Agenten säger det rakt ut (`mode`, `WAIT: <category> -- <fråga>`) istället för att gissa.
+- Ingen git eller shell på maskinen? Agenten säger det rakt ut (`mode`, `WAIT: <category> -- <fråga>`) istället för att gissa (kategorin är en av sju: `manual-verify, destructive-op, first-publish, user brake, blocked, safety valve, init`; den säger vilken typ av svar som låser upp).
 - Vill du ha ett skyddsnät? `python <saipen-klon>/tools/install_hook.py` installerar en pre-commit-kontroll.
 
 ---

@@ -42,7 +42,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 ## Jó tudni
 - Nem commitolt változtatások, amikor visszatérsz a projekthez? Normális -- a SAIPEN csak `ship`-nél commitol, nem minden lépésnél. Az ágens előbb ellenőrzi, kié ezek a változtatások, mielőtt bármihez hozzáérne.
 - Szeretnéd, hogy emlékezzen egy valódi architektúra döntésre? Tedd a `.saipen/KNOWLEDGE/` mappába, egyetlen `decisions.md` fájlként vagy számozott `ADR-001.md` fájlokként.
-- Nincs git vagy shell ezen a gépen? Az ágens ezt nyíltan megmondja (`mode`, `WAIT: <category> -- <kérdés>`), ahelyett hogy találgatna.
+- Nincs git vagy shell ezen a gépen? Az ágens ezt nyíltan megmondja (`mode`, `WAIT: <category> -- <kérdés>`), ahelyett hogy találgatna (a kategória a hét egyike: `manual-verify, destructive-op, first-publish, user brake, blocked, safety valve, init`; megmondja, milyen válasz oldja fel a blokkot)
 - Szeretnél biztonsági hálót? A `python <saipen-klón>/tools/install_hook.py` telepít egy commit előtti ellenőrzést.
 
 ---

@@ -42,7 +42,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 ## Dobro je znati
 - Necommitane promjene kad se vratiš na projekt? Normalno -- SAIPEN commita samo kod `ship`, ne kod svakog koraka. Agent prvo provjerava čije su te promjene prije nego što išta dotakne.
 - Želiš da pamti pravu arhitektonsku odluku? Stavi je u `.saipen/KNOWLEDGE/`, kao jednu datoteku `decisions.md` ili numerirane datoteke `ADR-001.md`.
-- Nema gita ni shella na ovom stroju? Agent to jasno kaže (`mode`, `WAIT: <category> -- <pitanje>`) umjesto da nagađa.
+- Nema gita ni shella na ovom stroju? Agent to jasno kaže (`mode`, `WAIT: <category> -- <pitanje>`) umjesto da nagađa (kategorija je jedna od sedam: `manual-verify, destructive-op, first-publish, user brake, blocked, safety valve, init`; govori kakav odgovor otključava situaciju)
 - Želiš sigurnosnu mrežu? `python <saipen-klon>/tools/install_hook.py` instalira provjeru prije svakog commita.
 
 ---

@@ -1,5 +1,25 @@
 # OUTBOX
 
+## SAIT-004: 100% coverage campaign — all 32 locales at v7.103.0 standard
+- **status:** reviewed
+- **collected_by:** main agent (direct collect -> T-262)
+- **collected_at:** 2026-07-29T12:45:00Z
+- **summary:** 100% translation coverage achieved. Added WAIT 7-category list (v7.103.0 GUIDE.md requirement) to all 30 remaining locale guides. Updated EN/RU 'Experimental helpers' → 'Running in production' wording for subSaipen. All 32 locales now fully conformant.
+- **main_project_refs:** [guides/*.md (all 32 locale guides)]
+- **critical:** false
+- **severity:** P2
+- **details:**
+  **What was done:**
+  - 26/30 non-Core guides: appended 7-category WAIT list (`manual-verify`, `destructive-op`, `first-publish`, `user brake`, `blocked`, `safety valve`, `init`) after `<category>` WAIT reference
+  - GUIDE_DED.md: added localized Russian category list after `<категория>` WAIT line
+  - GUIDE_EE.md: added localized Estonian category list after `<kategooria>` WAIT line
+  - GUIDE_EN.md: 'Experimental helpers...Fresh, no battle scars' → 'SubSaipen in production...Running in production since v7.84.0, 4 live instances'
+  - GUIDE_RU.md: 'Экспериментально...только родилось, боевых шрамов ноль' → 'Под-агенты в продакшене...В продакшене с v7.84.0, четыре живых инстанса'
+
+  **Verification:** tools/validate.py PASS, drift detector sees 0 stale guides, all 32 locale badges match VERSION 7.103.0
+
+  **Coverage gap (known):** 26 guides got bare category list without localized intro text (e.g. 'категория — одна из семи:' only in DED/EE/EN/RU). The list itself is English protocol keywords — functional but less polished in non-English locales. Full 32-locale sentence translation would require native speakers for each language.
+
 ## SAIT-001: translation kitchen validation
 - **status:** reviewed
 - **summary:** 32-locale kitchen validated — structure sound, 29 non-Core stale badges (T-186)

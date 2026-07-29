@@ -42,7 +42,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 ## 知っておくと良いこと
 - プロジェクトに戻ったときに未コミットの変更があっても普通のことだ。SAIPENは`ship`の時にコミットする、毎ステップではない。エージェントは何かに触れる前に、それが誰の変更か確認する。
 - 本物のアーキテクチャ決定を覚えさせたいなら、`.saipen/KNOWLEDGE/`に`decisions.md`か番号付き`ADR-001.md`ファイルとして置け。
-- このマシンにgitやshellがないなら、エージェントは推測せず正直に言う(`mode`、`WAIT: <category> -- <質問>`)。
+- このマシンにgitやshellがないなら、エージェントは推測せず正直に言う(`mode`、`WAIT: <category> -- <質問>`) (カテゴリは7つのうちの1つ: `manual-verify, destructive-op, first-publish, user brake, blocked, safety valve, init`; どのような回答が状況を解除するかを示します)。
 - 保険が欲しいか？`python <saipen-clone>/tools/install_hook.py`でコミット前チェックを導入できる。
 
 ---

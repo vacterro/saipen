@@ -18,7 +18,7 @@ asking anyone, so the WAIT is a previous agent's drift. Obeying it deadlocks
 the project permanently: UNBLOCK says stop, nobody is coming, and the WAIT
 names no answerable question.
 
-Added in v7.100.0. The check was hand-verified when it shipped and
+Added in v7.101.0. The check was hand-verified when it shipped and
 then had nothing standing behind it -- 93 failure paths in
 `tools/validate.py`, three with a fixture. A hand test proves a
 check works once; a fixture proves it still works.

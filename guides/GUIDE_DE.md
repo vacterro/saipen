@@ -42,7 +42,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 ## Gut zu wissen
 - Nicht committete Änderungen, wenn du zurückkommst? Normal -- SAIPEN committet erst bei `ship`, nicht bei jedem Schritt. Der Agent prüft erst, wessen Änderungen das sind, bevor er etwas anfasst.
 - Soll er sich eine echte Architekturentscheidung merken? Leg sie in `.saipen/KNOWLEDGE/` ab, entweder als `decisions.md` oder als nummerierte `ADR-001.md`-Dateien.
-- Kein Git oder keine Shell auf dieser Maschine? Der Agent sagt es offen (`mode`, `WAIT: <category> -- <Frage>`), statt zu raten.
+- Kein Git oder keine Shell auf dieser Maschine? Der Agent sagt es offen (`mode`, `WAIT: <category> -- <Frage>`), statt zu raten (die Kategorie ist eine von sieben: `manual-verify, destructive-op, first-publish, user brake, blocked, safety valve, init`; sie sagt dir, welche Art von Antwort dich entblockt)
 - Willst du ein Sicherheitsnetz? `python <saipen-Klon>/tools/install_hook.py` installiert eine Pre-Commit-Prüfung.
 
 ---

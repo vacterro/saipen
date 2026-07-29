@@ -44,7 +44,7 @@
       },
       "review_passes": {
         "type": "integer",
-        "description": "RFC 1.2 recognized optional ticket field; phases/review.md uses it to enforce its two-pass cap mechanically rather than from memory. Absent from this schema until v7.100.0."
+        "description": "RFC 1.2 recognized optional ticket field; phases/review.md uses it to enforce its two-pass cap mechanically rather than from memory. Absent from this schema until v7.101.0."
       }
     },
     "required": [

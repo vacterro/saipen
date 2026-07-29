@@ -2,6 +2,22 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.104.0 -- 2026-07-29 -- below VERSION is not the same as shipped
+
+Forty-two lines across `CONFORMANCE.md`, `extensions/subs/PROTOCOL.md`, both JSON schemas, `tools/validate.py`, the PowerShell floor and sixteen scenario READMEs named `v7.100.0` as the release they shipped in. There is no such release: no tag, no CHANGELOG entry, and no commit whose `VERSION` file ever said it. The number was skipped and the citations were written anyway.
+
+The check that exists to catch exactly this certified every one of them. It bounds citations by `VERSION` -- a version above the current one is a promise the repo cannot keep -- and that bound silently assumes the sequence is dense. It is not. A cited version now has to exist in the release ledger, which is git tags plus CHANGELOG entries; below the older of those two floors the repo genuinely has no memory and the check stays quiet, which is honest. Silence above it was the defect.
+
+The scan also had to widen past markdown. `_cite_docs` is `.md` only, and a version citation rots identically inside a JSON schema, inside the validator itself, and inside the frozen portable floor -- all three carried the phantom number. That is the third time in one day a rule was right about content and wrong about coverage. The check earned it immediately: it found twenty-five citations that a manual sweep run minutes earlier had missed, including every scenario README and both schemas.
+
+Two more findings came out of the same audit, both about records nobody had ever compared.
+
+The release ledger's halves disagree: two releases carry a git tag with no CHANGELOG entry, nine carry a CHANGELOG entry with no tag. That is now a WARN rather than a FAIL, deliberately -- closing it means either rewriting CHANGELOG or pushing nine backdated tags, and pushing a tag publishes a release. It is a fact the repo should carry, not a gate it should trip on.
+
+And `release.yml` left `make_latest` at its default, so re-pushing an old tag marks that old release "Latest". Re-pushing an old tag is precisely what correcting a mistagged release requires, so the fix for one mistake caused another: correcting `v7.101.0`, whose tag had been pushed at a commit two releases behind, buried `v7.103.0`. The workflow now decides from `git tag -l | sort -V` instead of from the clock.
+
+Also repaired: `saipen/phases/hunt.md` carried a UTF-8 BOM and five cp1251-mangled section signs from an uncommitted PowerShell edit, caught by the text lint widened one release earlier. The author's content change was kept.
+
 ## 7.103.0 -- 2026-07-29 -- the lint knew one mojibake shape and walked four files
 
 `KNOWLEDGE/traps.md` documents three shapes of the cp1251 corruption PowerShell inflicts on non-ASCII text -- a mangled em-dash, a mangled arrow, a mangled section sign. The text lint in `tools/validate.py` recognised exactly one of them. It also walked a curated list of four core docs rather than the shipped surface, so `KNOWLEDGE/`, `extensions/` and the fixture READMEs were never scanned at all. Two gaps at once, content and coverage, and the second is the one that hid the first.
