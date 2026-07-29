@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.110.0 -- 2026-07-30 -- the validator died on the first file it read
+
+`.saipen/STATE.md` is the first thing `tools/validate.py` opens, and it opened it as `utf-8-sig`. A UTF-16 file -- which is what PowerShell 5.1's `Set-Content` and `Out-File` produce by default, a trap `KNOWLEDGE/traps.md` has recorded since v3.1.1 -- raised `UnicodeDecodeError` and killed the whole run. A Python traceback, zero FAILs, not one other check performed, and all of it out of a pre-commit hook. A project could carry ten defects and the only thing reported was a decode error nobody can act on.
+
+Found by transferring a defect out of SAIPENVIEW, where the same `read_text(encoding="utf-8")` habit meant the viewer could not display the project it lives in.
+
+What makes this shape expensive is that the three corruption forms break every tool differently, which hides the cause rather than exposing it. This validator died on a traceback. The `grep`-based portable floor matches nothing and reports missing fields. And a BOM alone raises nothing at all: it survives as a leading character, `^---` stops matching, and the frontmatter parses as silently empty -- a project rendering with no fields and no error anywhere.
+
+So all three checkpoint files are encoding-checked up front, by name, before anything is parsed, and the run continues: one FAIL that says which file, which encoding, and what the other tools will do about it, plus every remaining check still performed. Red-tested with UTF-16 with and without a BOM, and with BOM-carrying UTF-8; each gives one named FAIL and seven surviving PASSes where the traceback gave none.
+
+Separately, `schema_version` was checked as `>= CURRENT`, which is written from the wrong end. A state NEWER than this validator is not reassuring: it may carry required fields this file has never heard of, or the same field names with changed meaning, and every PASS underneath is a claim with nothing behind it. `schema_version: 99` validated clean at exit 0. That is the same defect class as the release-ledger check running on half a ledger one release ago -- a check reporting on data it cannot evaluate. It is a WARN rather than a FAIL on purpose: a FAIL would block every commit in a project the moment the protocol bumps its schema, including during the bump itself, and the point is to kill the silent PASS, not the work.
+
 ## 7.109.0 -- 2026-07-29 -- the tag guard had never looked behind itself
 
 `release.yml` refuses to publish a tag whose `VERSION` file disagrees with it. That guard is forward-only by construction: it was added in v7.99.0 *because* a tag had already reached origin pointing two releases behind, and it can say nothing about the tags that were already there. Nothing ever swept them.

@@ -4,6 +4,10 @@
 ## TODO
 
 ## DONE
+- [x] T-288 [P0] A UTF-16 STATE.md killed the whole validator run on a traceback with zero checks performed, from a pre-commit hook. All three checkpoint files are encoding-checked up front now; one named FAIL, every other check still runs. | verify: tools/validate.py PASS (2026-07-30)
+- [x] T-289 [P0] read_doc() added: BOM sniffing, BOM-less UTF-16 by NUL parity, cp1251 fallback. Six project-owned read sites moved onto it. | verify: tools/validate.py PASS (2026-07-30)
+- [x] T-290 [P1] schema_version greater than the validator understands was a silent PASS. Now a WARN naming what a clean run does and does not cover. | verify: tools/validate.py PASS (2026-07-30)
+- [x] T-291 [P2] Ship v7.110.0. | verify: tools/validate.py PASS (2026-07-30)
 - [x] T-284 [P0] tools/audit_tags.py sweeps every tag against its VERSION. release.yml's guard is forward-only and had never looked behind itself; found 4 mismatches nobody knew about plus the known v7.99.0. | verify: tools/audit_tags.py PASS (2026-07-29)
 - [x] T-285 [P0] The audit lied twice before it told the truth: a --batch parser that advanced 2 lines per record instead of 3 (82 of 174 'broken'), then UTF-16 VERSION blobs read as UTF-8. Both produced findings that were not there. | verify: tools/audit_tags.py PASS (2026-07-29)
 - [x] T-286 [P1] Historical mismatches recorded with per-entry reasons instead of rewritten; a stale entry FAILs too, because an exemption nobody rechecks is how coverage rots. | verify: tools/audit_tags.py PASS (2026-07-29)

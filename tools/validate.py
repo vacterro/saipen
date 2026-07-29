@@ -53,6 +53,92 @@ OUTBOX_STATUSES = ("ready", "draft", "blocked", "reviewed", "stale")
 failures = []
 warnings = {}
 
+# Longest BOM first: UTF-32LE opens with the same two bytes as UTF-16LE.
+_BOMS = (
+    (b"\xff\xfe\x00\x00", "utf-32-le"),
+    (b"\x00\x00\xfe\xff", "utf-32-be"),
+    (b"\xef\xbb\xbf", "utf-8-sig"),
+    (b"\xff\xfe", "utf-16-le"),
+    (b"\xfe\xff", "utf-16-be"),
+)
+
+
+def _bomless_utf16(raw):
+    """Name the UTF-16 flavour of a BOM-less file, or None.
+
+    The obvious test does not work: UTF-16LE ASCII is every other byte NUL and
+    NUL is valid UTF-8, so `.decode("utf-8")` SUCCEEDS and hands back a string
+    full of NULs that matches no pattern. Test the byte shape instead.
+    """
+    if len(raw) < 4 or b"\x00" not in raw:
+        return None
+    head = raw[:4096]
+    head = head[:len(head) - len(head) % 2]
+    half = len(head) // 2
+    if not half:
+        return None
+    even, odd = head[0::2].count(0), head[1::2].count(0)
+    if odd > half * 0.3 and even < half * 0.1:
+        return "utf-16-le"
+    if even > half * 0.3 and odd < half * 0.1:
+        return "utf-16-be"
+    return None
+
+
+def encoding_of(path):
+    """Name the encoding of a `.saipen/` file, without decoding it."""
+    try:
+        raw = Path(path).read_bytes()
+    except OSError:
+        return "unreadable"
+    for bom, enc in _BOMS:
+        if raw.startswith(bom):
+            return enc
+    bomless = _bomless_utf16(raw)
+    if bomless:
+        return bomless + " (no BOM)"
+    try:
+        raw.decode("utf-8")
+    except UnicodeDecodeError:
+        return "not-utf-8"
+    return "utf-8"
+
+
+def read_doc(path):
+    """Read a `.saipen/` file without dying on its encoding.
+
+    `read_text(encoding="utf-8-sig")` raises on a UTF-16 file, and because the
+    very first thing this validator reads is `.saipen/STATE.md`, that raise
+    killed the whole run: a Python traceback, zero FAILs, and not one other
+    check performed. The project could have ten defects and the only thing
+    reported was a decode error nobody can act on -- from a pre-commit hook, at
+    that. Diagnose the encoding (below) and keep checking everything else.
+    """
+    try:
+        raw = Path(path).read_bytes()
+    except OSError:
+        return ""
+    for bom, enc in _BOMS:
+        if raw.startswith(bom):
+            text = raw[len(bom):].decode(enc, errors="replace")
+            break
+    else:
+        bomless = _bomless_utf16(raw)
+        if bomless:
+            text = raw.decode(bomless, errors="replace")
+        else:
+            try:
+                text = raw.decode("utf-8")
+            except UnicodeDecodeError:
+                # cp1251 before a never-failing fallback: these files are
+                # frequently Russian, and latin-1 first would mean cp1251 is
+                # never reached and Cyrillic always arrives as mojibake.
+                try:
+                    text = raw.decode("cp1251")
+                except UnicodeDecodeError:
+                    text = raw.decode("utf-8", errors="replace")
+    return text.replace("\r\n", "\n").replace("\r", "\n")
+
 
 def color(code, text):
     return f"\033[{code}m{text}\033[0m" if USE_COLOR else text
@@ -171,7 +257,26 @@ if not schema_path.is_file():
     sys.exit(1)
 schema = json.loads(schema_path.read_text(encoding="utf-8"))
 
-state, err = parse_frontmatter(state_path.read_text(encoding="utf-8-sig"))
+# Encoding is diagnosed before anything is parsed, on all three checkpoint
+# files. A UTF-16 or BOM-carrying `.saipen/` file is what PowerShell 5.1's
+# `Set-Content`/`Out-File` produce by default (KNOWLEDGE/traps.md), and the
+# consequences differ by tool in a way that hides the cause: this validator
+# used to die on a traceback at the first read, the portable `grep` floor
+# matches nothing and reports missing fields, and a BOM alone breaks `^---`
+# so the frontmatter silently parses as empty. One named FAIL beats three
+# unrelated symptoms.
+for _cf in (state_path, Path(".saipen/BOARD.md"), Path(".saipen/LOG.md")):
+    if not _cf.is_file():
+        continue
+    _enc = encoding_of(_cf)
+    if _enc != "utf-8":
+        fail(f"{_cf.as_posix()} is {_enc}, not plain UTF-8. Every other SAIPEN "
+             f"tool reads it byte-wise and will fail differently: the portable "
+             f"floor greps and finds no fields, a BOM alone breaks the "
+             f"frontmatter match. Rewrite it as UTF-8 without a BOM -- never "
+             f"with PowerShell Set-Content (KNOWLEDGE/traps.md)")
+
+state, err = parse_frontmatter(read_doc(state_path))
 if state is None:
     fail(f"STATE.md frontmatter: {err}")
     sys.exit(1)
@@ -232,6 +337,23 @@ elif not isinstance(sv, int) or sv < CURRENT_SCHEMA_VERSION:
     fail(f"STATE.md schema_version is {sv!r}, expected >= "
          f"{CURRENT_SCHEMA_VERSION} -- state format may be incompatible "
          f"with current validator")
+elif sv > CURRENT_SCHEMA_VERSION:
+    # ">= current" was written from the wrong end. A state NEWER than this
+    # validator is not reassuring: it may carry required fields this file has
+    # never heard of, or the same field names with changed meaning, and every
+    # PASS below is then a claim with nothing behind it. `schema_version: 99`
+    # validated clean at exit 0 until now, which is the same defect class as
+    # the release-ledger check running on half a ledger -- a check reporting
+    # on data it cannot evaluate. WARN rather than FAIL: FAIL would block
+    # every commit in a project the moment the protocol bumps its schema,
+    # including during the bump itself, and the point is to stop the silent
+    # PASS, not to stop the work.
+    warn("schema-version",
+         f"STATE.md schema_version is {sv}, but this validator only "
+         f"understands {CURRENT_SCHEMA_VERSION} -- it was written by a newer "
+         f"SAIPEN than the one installed here. Every PASS below covers only "
+         f"the rules this version knows; update saipen_home before trusting "
+         f"a clean run")
 
 if len(failures) == before:
     ok("STATE.md schema valid (checked against state.schema.json)")
@@ -477,7 +599,7 @@ if (IS_SAIPEN_HOME and library_subs.is_dir()
 if sub_state_files:
     subs_ok = True
     for sp in sub_state_files:
-        sub_state, err = parse_frontmatter(sp.read_text(encoding="utf-8-sig"))
+        sub_state, err = parse_frontmatter(read_doc(sp))
         if sub_state is None:
             fail(f"{sp} frontmatter: {err}")
             subs_ok = False
@@ -539,7 +661,7 @@ KNOWN_FIELDS = {"needs", "owner", "claim_time", "blocker", "verify", "review_pas
 TICKET_RE = re.compile(r"^- \[([ x/])\] (T-\d+)\s+(.*)$")
 PIPE_SENTINEL = "\x00"
 
-board_lines = board_path.read_text(encoding="utf-8-sig").splitlines()
+board_lines = read_doc(board_path).splitlines()
 headings_seen = []
 tickets = {}          # id -> {"section", "line_no", "checkbox", "needs", "fields"}
 section = None
@@ -630,7 +752,7 @@ if state.get("phase") == "DONE" and state.get("goal_mode") is not True:
     open_todos = sum(1 for t in tickets.values()
                      if t["section"] == "## TODO" and t["checkbox"] in (" ", ""))
     markhunt_blocked = bool(re.search(
-        r"## BLOCKED.*?\[MARKHUNT\]", board_path.read_text("utf-8-sig"),
+        r"## BLOCKED.*?\[MARKHUNT\]", read_doc(board_path),
         re.DOTALL))
     next_action = state.get("next_action", "")
     if open_todos == 0 and not markhunt_blocked and next_action.startswith("WAIT:"):
@@ -761,7 +883,7 @@ if log_files:
         # Sealed segments are immutable (append-only, RFC § 1.2); the active
         # log is still the writer's to get right. Severity below splits on it.
         is_active_log = (lf == active_log)
-        for line_no, line in enumerate(lf.read_text(encoding="utf-8-sig").splitlines(), 1):
+        for line_no, line in enumerate(read_doc(lf).splitlines(), 1):
             if not line.strip() or line.startswith("#"):
                 continue
             loc = f"{lf.as_posix()}:{line_no}"
@@ -842,7 +964,7 @@ if log_files:
     # states predating v7.87.0 legitimately carry counters with no lines, and
     # a sealed segment may hold the lines for a very old run.
     if state.get("goal_mode") is True:
-        all_log = "\n".join(p.read_text(encoding="utf-8-sig") for p in log_files)
+        all_log = "\n".join(read_doc(p) for p in log_files)
         for counter in ("goal_waves", "goal_tickets"):
             if isinstance(state.get(counter), int) and state[counter] > 0 \
                     and f"DEC: {counter}" not in all_log:
@@ -901,7 +1023,7 @@ if log_files:
     # WARN, never FAIL: an oversized log is a hygiene debt, not corruption,
     # and sealing is a CLEAN-time action, not something to force mid-ticket.
     if active_log.is_file():
-        active_lines = len(active_log.read_text(encoding="utf-8-sig").splitlines())
+        active_lines = len(read_doc(active_log).splitlines())
         active_kb = active_log.stat().st_size / 1024
         if active_lines > 300 or active_kb > 64:
             warn("log-soft-cap",
@@ -940,7 +1062,7 @@ if log_files:
 outbox_ok = True
 outbox_seen = 0
 for ob in sorted(Path(".").glob(".saipen/extensions/subs/*/kitchen/OUTBOX.md")):
-    text = ob.read_text(encoding="utf-8-sig")
+    text = read_doc(ob)
     # Entries are `## <ID>: description` followed by bold-field lines (§ 2).
     entries = re.split(r"^## (?=[A-Z]+-\d+)", text, flags=re.MULTILINE)[1:]
     for e in entries:
