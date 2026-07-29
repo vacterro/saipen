@@ -1518,21 +1518,42 @@ else:
     #    following its own phase doc verbatim produced a state this validator
     #    then FAILed. Rules propagate to the docs that emit them, or they are
     #    only enforced against agents that never read the docs.
-    doc_roots = [rfc_path.parent / "phases", _tools_parent / "extensions"]
-    prescribed = re.compile('next_action:\\s*`?WAIT:\\s*([^`\\n<]{0,40})')
-    bad_waits = []
+    #    Every prescribed `next_action:` is checked, not only the WAIT ones.
+    #    Restricting it to WAITs is how `phases/done.md` came to endorse
+    #    `next_action: wait for user command` and how the shipped subSaipen
+    #    TEMPLATE shipped `read the main project, ...` -- both with no legal
+    #    prefix at all, so every doc-following agent produced a state this
+    #    validator rejects. Found by a one-off sweep in v7.101.0 and fixed by
+    #    hand; a one-off sweep is not a guard, which is the same "fixed where
+    #    noticed, not everywhere it applies" shape as the seven adapters.
+    doc_roots = [rfc_path.parent / "phases", _tools_parent / "extensions",
+                 _tools_parent / ".saipen" / "KNOWLEDGE"]
+    prescribed = re.compile('next_action:\\s*`?"?([^`"\\n]{3,60})')
+    bad_actions, bad_waits = [], []
     for root in doc_roots:
         if not root.is_dir():
             continue
         for doc in sorted(root.rglob("*.md")):
             for m in prescribed.finditer(doc.read_text(encoding="utf-8-sig")):
-                body = m.group(1).strip().lower()
-                if not any(body.startswith(c) for c in WAIT_CATEGORIES):
-                    bad_waits.append(f"{doc.as_posix()}: WAIT: {m.group(1).strip()[:40]!r}")
+                val = m.group(1).strip()
+                if val.startswith("<") or val.startswith("..."):
+                    continue          # a placeholder, not a prescription
+                if not val.startswith(executable_prefixes):
+                    bad_actions.append(f"{doc.as_posix()}: {val[:45]!r}")
+                elif val.startswith("WAIT:"):
+                    body = val[len("WAIT:"):].strip().lower()
+                    if not (body.startswith("<") or
+                            any(body.startswith(c) for c in WAIT_CATEGORIES)):
+                        bad_waits.append(f"{doc.as_posix()}: {val[:45]!r}")
+    for b in bad_actions:
+        fail(f"cross-doc drift [prescribed-next-action] -- shipped doc "
+             f"prescribes a `next_action` with none of § 1.2's five legal "
+             f"prefixes, so an agent obeying it writes a state this validator "
+             f"FAILs: {b}")
     for b in bad_waits:
         fail(f"cross-doc drift [wait-categories] -- shipped doc prescribes a "
              f"`WAIT:` with no § 1.2 category token: {b}")
-    if bad_waits:
+    if bad_actions or bad_waits:
         drift_ok = False
 
     # 9. guides/ teach the same shape to a human. They are not in the injector
