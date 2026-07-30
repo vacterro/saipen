@@ -4,6 +4,10 @@
 ## TODO
 
 ## DONE
+- [x] T-305 [P0] BOOT.md carries the reply-language rule directly. It lived only in STYLE.md, which BOOT reached for only on a rule question -- so an agent that booted and worked never saw the rule governing its first token. | verify: tools/validate.py PASS (2026-07-30)
+- [x] T-306 [P0] STYLE.md's ambient-signal ban now names repository contents. It listed OS locale, platform UI and prior context, and missed the 33 translated guides the agent is standing in. | verify: tools/validate.py PASS (2026-07-30)
+- [x] T-307 [P1] Locale coverage checked both ways; the et/EE alias between kitchen and guides is written down instead of implied. | verify: tools/validate.py PASS (2026-07-30)
+- [x] T-308 [P2] Ship v7.114.0. | verify: tools/validate.py PASS (2026-07-30)
 - [x] T-302 [P0] The pre-commit hook now carries a generation stamp and the validator compares it. In a consuming project the hook is the only gate, and it never updated itself -- a hook from twenty releases ago ran silently. This repo's own hook was stamp-less. | verify: tools/validate.py PASS (2026-07-30)
 - [x] T-303 [P0] The hook's fail-open path was silent: no validator found meant an unvalidated commit that looked validated. Still fail-open, now says why and names the fix. | verify: tools/validate.py PASS (2026-07-30)
 - [x] T-304 [P2] Ship v7.113.0. | verify: tools/validate.py PASS (2026-07-30)

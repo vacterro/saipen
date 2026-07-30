@@ -2362,6 +2362,74 @@ else:
                      f"{_cur.group(1)}. The hook never updates itself -- "
                      f"re-run tools/install_hook.py")
 
+    # 13g. Every translated locale has a guide, and every guide has a locale.
+    #      The two sides name Estonian differently -- `et` in
+    #      `.saipen/saitranslate/kitchen/` (ISO 639-1, a language) and `EE` in
+    #      `guides/` (ISO 3166, a country, chosen to sit beside the flag in a
+    #      human-facing badge). Both conventions are defensible in their own
+    #      role; what was missing is any statement of which governs where, so
+    #      the sets diverged in silence and the first tool to join them would
+    #      have dropped Estonian without a word. The alias is written down
+    #      here, and the join is checked in both directions.
+    LOCALE_GUIDE_ALIASES = {"et": "EE"}
+    _kitchen = _tools_parent / ".saipen" / "saitranslate" / "kitchen"
+    _guides = _tools_parent / "guides"
+    if IS_SAIPEN_HOME and _kitchen.is_dir() and _guides.is_dir():
+        _locales = {d.name for d in _kitchen.iterdir() if d.is_dir()}
+        _guide_codes = {g.stem[len("GUIDE_"):].lower()
+                        for g in _guides.glob("GUIDE_*.md")}
+        _missing_guide = sorted(
+            loc for loc in _locales
+            if LOCALE_GUIDE_ALIASES.get(loc, loc).lower() not in _guide_codes)
+        # English is the source language: it has a guide and no kitchen dir by
+        # design, so it is the one legal asymmetry.
+        _rev = {v.lower(): k for k, v in LOCALE_GUIDE_ALIASES.items()}
+        _missing_locale = sorted(
+            g for g in _guide_codes
+            if g != "en" and _rev.get(g, g) not in _locales)
+        if _missing_guide:
+            fail(f"locale coverage -- {len(_missing_guide)} translated "
+                 f"locale(s) have no guide: {', '.join(_missing_guide)}")
+            drift_ok = False
+        if _missing_locale:
+            fail(f"locale coverage -- {len(_missing_locale)} guide(s) have no "
+                 f"translated locale: {', '.join(_missing_locale)}. English is "
+                 f"the source and is exempt by name")
+            drift_ok = False
+
+    # 13h. The reply-language rule is in the kernel and agrees with STYLE.md.
+    #      STYLE.md has carried it since v7.23.0, but BOOT.md -- the only file a
+    #      bare `saipen continue` reads -- listed STYLE.md solely under "rule
+    #      questions the phase doc doesn't answer". So an agent that boots and
+    #      simply works never opened it, and the rule governing every response
+    #      from the first token sat behind an escalation nobody escalates to.
+    #      Twice observed: a session that went fully German off a bare command,
+    #      and one that answered a Russian speaker in Ukrainian out of a
+    #      repository that merely CONTAINS 33 translated guides. This is the one
+    #      thing BOOT deliberately repeats rather than points at, so the two
+    #      copies are checked against each other.
+    _boot = _tools_parent / "saipen" / "BOOT.md"
+    _style = _tools_parent / "saipen" / "STYLE.md"
+    if _boot.is_file() and _style.is_file():
+        _bt = _boot.read_text(encoding="utf-8-sig")
+        _st = _style.read_text(encoding="utf-8-sig")
+        if "Reply language" not in _bt:
+            fail("cross-doc drift [reply-language] -- BOOT.md no longer states "
+                 "the reply-language rule. It governs the first token, so a "
+                 "pointer into STYLE.md is too late by construction")
+            drift_ok = False
+        elif "English" not in _bt.split("Reply language", 1)[1][:600]:
+            fail("cross-doc drift [reply-language] -- BOOT.md states the rule "
+                 "without naming English as the no-signal default, which is "
+                 "the half that decides a first message carrying no prose")
+            drift_ok = False
+        if "repository" not in _st.lower().split("ambient signals", 1)[-1][:400]:
+            fail("cross-doc drift [reply-language] -- STYLE.md's ban on ambient "
+                 "language signals no longer names repository contents. That "
+                 "omission is what let a session answer in a language found "
+                 "only in the files it was working on")
+            drift_ok = False
+
     # 13d. RFC § 1.7 Workspace Hygiene, mechanically. `saipen set` writes a
     #      bootloader that POINTS at the canonical home; it must never copy the
     #      protocol into the project, and phase transitions must load from

@@ -2,6 +2,20 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.114.0 -- 2026-07-30 -- the rule that governs the first token sat behind an escalation
+
+A session answered a Russian-speaking user in Ukrainian. The user has never written a word of Ukrainian to it.
+
+The rule against exactly this has been in `STYLE.md` since v7.23.0: reply in the language the user themselves typed, and where a first message carries no prose at all -- a bare command -- default to English. It even records the incident that produced it, a session that went fully German off a bare `saipen hunt`. The rule was not missing. It was unreachable.
+
+`BOOT.md` is the cold-start kernel, and it is all a bare `saipen continue` reads. It mentioned `STYLE.md` in exactly one place: the line listing what to open when `STATE`/`BOARD`/`LOG` and the active phase doc *don't answer a rule question*. An agent that boots and simply works never has a rule question, so it never opens `STYLE.md`, so it never sees the one rule that applies before its first token. `BOOT.md` now states the rule itself -- the single thing it repeats rather than points at, because a pointer to a rule that governs the first token is too late by construction.
+
+The second half is worse, because the rule was incomplete where it lives. `STYLE.md` banned inferring the user's language from "IDE/OS locale, platform UI language, unrelated prior context" -- three ambient sources, and it missed the one this project is made of. SAIPEN ships 33 translated guides and 32 locale directories. An agent working inside it is surrounded by Ukrainian, Japanese and Estonian prose that neither it nor the user wrote, and nothing said that was not a signal. It says so now: files are content to produce, never a cue for which language to speak.
+
+Both copies are checked against each other, because a rule deliberately duplicated into the kernel is a drift surface by definition.
+
+While counting locales for the above, the two sides turned out to name Estonian differently: `et` in the kitchen (ISO 639-1, a language) and `EE` in `guides/` (ISO 3166, a country, picked to sit beside the flag in a human-facing badge). Both are defensible in their own role, and nothing stated which governs where -- so the sets could drift apart in silence, and the first tool to join them would have dropped Estonian without a word. The alias is written down now and the join is checked in both directions, with English exempt by name as the source language.
+
 ## 7.113.0 -- 2026-07-30 -- the only gate a consuming project has, and nothing checked its age
 
 In a project that merely uses SAIPEN, `.git/hooks/pre-commit` is the whole enforcement surface: no CI, no release workflow, just that one file deciding whether a corrupt `.saipen/` reaches a commit. Its text is baked in at install time and never updates itself, so a hook installed twenty releases ago goes on running exactly the logic it was born with -- and nothing anywhere said so.
