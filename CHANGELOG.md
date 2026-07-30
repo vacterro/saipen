@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.117.0 -- 2026-07-30 -- two more fields with a spec and no reader
+
+RFC § 1.2 states why `review_passes` exists, in as many words: so `phases/review.md` can "enforce its two-pass cap mechanically instead of from memory". The board grammar recognised the field name and nothing ever read the number, which left the cap in precisely the place the RFC says it must not be.
+
+`.saipen/kitchen/digest.md` is the three-line snapshot `phases/ship.md` promises: `done:`/`remaining:`/`awaiting:`, "(over)write ... exactly three short lines", "overwrite every time", and `saipen stop` writes the same file. Neither the shape nor the freshness was checked, and the live digest turned out to name a release **33 versions old** -- every ship since had skipped the write silently, fourteen of them in this very session. A snapshot nobody refreshes is worse than no snapshot: it reads as current.
+
+Freshness is checked without comparing file times, which are meaningless in a fresh clone. The digest usually names the version it describes, so a version in that text that is not `VERSION` is the signal -- narrow, but it is exactly the shape this failure takes, and it introduced itself on the live file within a second of existing.
+
 ## 7.116.0 -- 2026-07-30 -- a field name everyone spelled right and nobody read
 
 `claim_time` sat in the validator's list of recognised ticket fields and its value was never once looked at. RFC § 1.4 decides from that value whether a ticket is live or forfeitable, by comparing it against a 15-minute window -- and a stamp carrying no zone marker is not comparable across agents at all. That is the identical argument § 1.2 already makes for `updated`, which is checked. The field was recognised, not read.

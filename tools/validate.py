@@ -867,6 +867,22 @@ for line_no, line in enumerate(board_lines, 1):
                  f"ISO-8601 UTC (Z or +00:00) -- § 1.4 decides a live claim "
                  f"from a 15-minute window, and a stamp with no zone is not "
                  f"comparable across agents (RFC § 1.4)")
+        # RFC § 1.2 says review_passes exists so phases/review.md enforces its
+        # two-pass cap "mechanically instead of from memory". The field name
+        # was recognised and the number never read, which leaves the cap
+        # exactly where the RFC says it should not be: in memory.
+        _rp = fields.get("review_passes")
+        if _rp is not None:
+            _rps = _rp.strip()
+            if not _rps.isdigit():
+                fail(f"BOARD.md:{line_no} ticket {tid} review_passes "
+                     f"{_rp!r} is not a number (RFC § 1.2)")
+            elif int(_rps) > 2:
+                fail(f"BOARD.md:{line_no} ticket {tid} has review_passes "
+                     f"{_rps} -- phases/review.md caps re-litigating one "
+                     f"finding at two passes, and this field exists so that "
+                     f"cap is mechanical rather than remembered")
+
         # An owner with no claim_time, or the reverse, is half a claim:
         # § 1.4 reads liveness from BOTH, so either alone is undecidable.
         if bool(fields.get("owner")) != bool(_ct):
@@ -2509,6 +2525,33 @@ else:
                  "omission is what let a session answer in a language found "
                  "only in the files it was working on")
             drift_ok = False
+
+    # 13i. The human digest is the shape ship.md promises, and is not from
+    #      another era. `phases/ship.md` says "(over)write ... exactly three
+    #      short lines" -- `done:`/`remaining:`/`awaiting:` -- "overwrite every
+    #      time", and `saipen stop` writes the same file. Nothing checked
+    #      either half, and the live one was found naming a release 33 versions
+    #      old: every ship since had skipped the write, in silence, including
+    #      fourteen in the session that added this check. A snapshot nobody
+    #      refreshes is worse than no snapshot, because it reads as current.
+    _digest = Path(".saipen/kitchen/digest.md")
+    if _digest.is_file():
+        _dl = [ln for ln in read_doc(_digest).splitlines() if ln.strip()]
+        _want = ("done:", "remaining:", "awaiting:")
+        if len(_dl) != 3 or not all(
+                _dl[i].strip().lower().startswith(_want[i]) for i in range(3)):
+            fail(f"{_digest.as_posix()} must be exactly three lines -- "
+                 f"done:/remaining:/awaiting: in that order (phases/ship.md, "
+                 f"RFC § 1.10); got {len(_dl)} line(s)")
+        elif IS_SAIPEN_HOME and Path("VERSION").is_file():
+            _cur_v = Path("VERSION").read_text(encoding="utf-8-sig").strip()
+            _cited = re.findall(r"v(\d+\.\d+\.\d+)", " ".join(_dl))
+            if _cited and _cur_v not in _cited:
+                warn("digest-stale",
+                     f"{_digest.as_posix()} names v{_cited[0]} while VERSION "
+                     f"is {_cur_v} -- ship.md says overwrite it after every "
+                     f"push, so this snapshot has been carried past at least "
+                     f"one release that did not refresh it")
 
     # 13d. RFC § 1.7 Workspace Hygiene, mechanically. `saipen set` writes a
     #      bootloader that POINTS at the canonical home; it must never copy the

@@ -4,6 +4,9 @@
 ## TODO
 
 ## DONE
+- [x] T-318 [P0] review_passes cap enforced. RFC says the field exists so the two-pass cap is mechanical instead of remembered; the name was recognised and the number never read. | verify: tools/validate.py PASS (2026-07-30)
+- [x] T-319 [P0] digest.md shape and freshness checked. ship.md says overwrite after every push; the live one named v7.83.0, so 33 releases had skipped it in silence -- fourteen of them mine. | verify: tools/validate.py PASS (2026-07-30)
+- [x] T-320 [P2] Ship v7.117.0. | verify: tools/validate.py PASS (2026-07-30)
 - [x] T-314 [P0] claim_time is validated as ISO-8601 UTC. It was a known field name whose value nothing read, while 1.4 judges liveness from it against a 15-minute window. A shipped fixture had carried a zone-less stamp for releases; fixed. | verify: tools/validate.py + run_scenarios.py PASS (2026-07-30)
 - [x] T-315 [P1] owner without claim_time (or the reverse) now warns -- half a claim cannot be judged live or stale. | verify: tools/validate.py + run_scenarios.py PASS (2026-07-30)
 - [x] T-316 [P0] warn() prints its category. The key existed only in the roll-up line, so grepping for it found nothing -- a documented trap walked into five more times after being documented. | verify: tools/validate.py + run_scenarios.py PASS (2026-07-30)
