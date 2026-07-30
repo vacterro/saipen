@@ -2,6 +2,16 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.115.0 -- 2026-07-30 -- a fully specified MUST with nothing behind it
+
+`last_event` is the one `STATE.md` field whose entire job is catching a state that has drifted from its own log. RFC § 1.2 specifies it exactly -- "lower than the LOG tail means stale, higher than the LOG tail means corrupt or from an incompatible branch" -- and `tools/validate.py` contained zero references to it. Nothing is broken today, because the field is RECOMMENDED and nobody writes it. The RFC says it will become REQUIRED, and that is precisely when an unchecked value starts doing damage: Recovery rebuilds from the LOG tail, and a `last_event` above it points at an event nobody ever wrote.
+
+How it survived is worth as much as the fix. v7.108.0 added a rule-coverage check requiring every RFC section that states a MUST to be cited by a CONFORMANCE row -- and § 1.2 is cited by dozens. A single unenforced MUST inside a heavily-cited section is invisible at section granularity. That blind spot is now stated in the table rather than quietly narrowed: the check is worth keeping, and knowing what it cannot see is worth more than pretending it sees everything. Per-MUST granularity would need every clause to carry an id, which the RFC does not have.
+
+Second hole, the mirror of one already closed. `TEMPLATE/STATE.md` ships placeholders that `saipen sub spawn` replaces: `agent: <name>`, an empty `saipen_home`, a fixed `updated:`. A check already stopped a concrete machine path leaking INTO the shipped template. Nothing stopped a placeholder surviving OUT of it into a live subSaipen -- and that is not cosmetic, because RFC § 1.4 decides concurrency by comparing `agent:` against itself. A spawned worker still called `<name>` makes every liveness comparison meaningless.
+
+And a note on the tooling, because it is the first time it paid for itself unprompted: writing the placeholder check produced the fourth use-before-define `NameError` of this session, and `tools/audit_order.py` -- added one release ago for exactly that -- caught it with no fixture and no human looking.
+
 ## 7.114.0 -- 2026-07-30 -- the rule that governs the first token sat behind an escalation
 
 A session answered a Russian-speaking user in Ukrainian. The user has never written a word of Ukrainian to it.

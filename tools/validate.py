@@ -50,6 +50,14 @@ CURRENT_SCHEMA_VERSION = 1
 # the extension (RFC § 1.9). Named rather than inlined so the cross-doc
 # check can compare it against the table and the schema enum.
 OUTBOX_STATUSES = ("ready", "draft", "blocked", "reviewed", "stale")
+
+# The SAIPEN home this file ships from, derived from its own location rather
+# than from cwd -- the validator runs inside a consuming project, where cwd is
+# that project and the protocol lives elsewhere. Declared up here with the
+# other constants because it was computed 1700 lines down, beside its first
+# consumer, and the fourth use-before-define NameError of this session was a
+# check spliced above that line. tools/audit_order.py caught this one.
+_tools_parent = Path(__file__).resolve().parent.parent
 # RFC § 1.10's closed command list. Was a local inside Core's own next_action
 # branch, so it existed only when Core's next_action happened to start with
 # "saipen " -- the moment the subSaipen check reused it against a Core state
@@ -681,6 +689,28 @@ if sub_state_files:
                  f"user and is copied by `saipen sub spawn`; a machine-specific "
                  f"path here leaks the author's layout and hands users a dead "
                  f"pointer. Use \"\" and let spawn fill it in (PROTOCOL.md § 7)")
+        # TEMPLATE ships placeholders that `saipen sub spawn` is documented to
+        # replace: `agent: <name>`, an empty `saipen_home`, and a fixed
+        # `updated:` PROTOCOL.md § 6 calls "a placeholder like the other two,
+        # not a value to partially edit". The reverse of the check above,
+        # which stops a concrete path leaking INTO the shipped template --
+        # nothing stopped a placeholder surviving OUT of it into a live
+        # subSaipen. It matters concretely: RFC § 1.4 decides concurrency by
+        # comparing `agent:` against itself, and a spawned worker still called
+        # `<name>` makes every liveness comparison meaningless.
+        if sp.parts[0] != "extensions":
+            _tmpl = _tools_parent / "extensions" / "subs" / "TEMPLATE" / "STATE.md"
+            if _tmpl.is_file():
+                _tf, _ = parse_frontmatter(read_doc(_tmpl))
+                for _k in ("agent", "updated"):
+                    _pv = (_tf or {}).get(_k)
+                    if _pv and sub_state.get(_k) == _pv:
+                        fail(f"{sp} still carries TEMPLATE's placeholder "
+                             f"{_k}: {_pv!r} -- `saipen sub spawn` replaces it "
+                             f"at spawn (PROTOCOL.md § 6). A live subSaipen "
+                             f"named {_pv!r} defeats RFC § 1.4's concurrency "
+                             f"comparison, which is agent-against-agent")
+
         # RFC § 1.2: subSaipen next_action MUST follow same prefix rules as Core.
         sub_na = sub_state.get("next_action")
         if isinstance(sub_na, str):
@@ -1071,6 +1101,33 @@ if log_files:
                     and not re.fullmatch(r"T-\d+", ticket):
                 warn("log-ticket-ref", f"{loc} ticket ref [{ticket}] "
                      f"isn't numeric T-### or the literal T-none (RFC § 1.2)")
+    # RFC § 1.2's STATE freshness marker. The clause is fully specified --
+    # "lower than the LOG tail means stale, higher means corrupt or from an
+    # incompatible branch" -- and had zero references in this file, so the one
+    # field whose entire purpose is catching a STATE that drifted from its own
+    # LOG was checked by nothing. It is RECOMMENDED today and the RFC says it
+    # will become REQUIRED, which is exactly when an unchecked value starts
+    # doing damage: Recovery rebuilds from the LOG tail, and a `last_event`
+    # above it points at an event that does not exist.
+    #
+    # Note on how this survived: v7.108.0's rule-coverage check requires every
+    # RFC section stating a MUST to be CITED by a CONFORMANCE row, and § 1.2 is
+    # cited by dozens. Section granularity cannot see one unenforced MUST
+    # inside a heavily-cited section. That limit is real and now demonstrated.
+    _le = state.get("last_event")
+    if isinstance(_le, int) and log_files:
+        if _le > prev_id:
+            fail(f"STATE.md last_event is E-{_le} but the LOG tail is "
+                 f"E-{prev_id} -- higher than the log means corrupt, or a "
+                 f"STATE carried over from an incompatible branch. Recovery "
+                 f"rebuilds from the log and would chase an event that was "
+                 f"never written (RFC § 1.2)")
+        elif _le < prev_id:
+            fail(f"STATE.md last_event is E-{_le} but the LOG tail is "
+                 f"E-{prev_id} -- lower than the log means this STATE predates "
+                 f"its own history: a checkpoint wrote LOG lines and did not "
+                 f"finish updating STATE (RFC § 1.2, § 1.5)")
+
     if log_ok:
         ok(f"LOG.md format valid (skeleton, E-### unique + monotonic, parents "
            f"resolve; {len(log_files)} segment(s))")
@@ -1651,7 +1708,6 @@ def _compare(label, rfc_set, other_set, other_name):
 # RFC.md as tools/'s sibling. Assuming only the first made every cross-doc
 # check FAIL with "SAIPEN home clone incomplete" on every installed copy --
 # a validator that only works in its own development repo.
-_tools_parent = Path(__file__).resolve().parent.parent
 rfc_path = _tools_parent / "saipen" / "RFC.md"
 if not rfc_path.is_file():
     rfc_path = _tools_parent / "RFC.md"

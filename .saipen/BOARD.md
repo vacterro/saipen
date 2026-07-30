@@ -4,6 +4,11 @@
 ## TODO
 
 ## DONE
+- [x] T-309 [P0] last_event enforced. A fully-specified MUST with zero references in the validator -- the one field whose entire job is catching a STATE that drifted from its own LOG. | verify: tools/validate.py PASS (2026-07-30)
+- [x] T-310 [P1] Recorded the rule-coverage check's blind spot: section granularity cannot see one unenforced MUST inside a heavily-cited section, which is how last_event survived it. | verify: tools/validate.py PASS (2026-07-30)
+- [x] T-311 [P0] TEMPLATE placeholders can no longer escape into a live subSaipen. RFC 1.4 compares agent-against-agent, so a worker still called <name> makes liveness meaningless. | verify: tools/validate.py PASS (2026-07-30)
+- [x] T-312 [P1] _tools_parent hoisted to the top: fourth use-before-define NameError of the session, and the first one audit_order.py caught by itself. | verify: tools/validate.py PASS (2026-07-30)
+- [x] T-313 [P2] Ship v7.115.0. | verify: tools/validate.py PASS (2026-07-30)
 - [x] T-305 [P0] BOOT.md carries the reply-language rule directly. It lived only in STYLE.md, which BOOT reached for only on a rule question -- so an agent that booted and worked never saw the rule governing its first token. | verify: tools/validate.py PASS (2026-07-30)
 - [x] T-306 [P0] STYLE.md's ambient-signal ban now names repository contents. It listed OS locale, platform UI and prior context, and missed the 33 translated guides the agent is standing in. | verify: tools/validate.py PASS (2026-07-30)
 - [x] T-307 [P1] Locale coverage checked both ways; the et/EE alias between kitchen and guides is written down instead of implied. | verify: tools/validate.py PASS (2026-07-30)
