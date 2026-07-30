@@ -2,6 +2,16 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.123.0 -- 2026-07-30 -- the commit that added two checks also shipped a gitlink
+
+`saiwiki` keeps a clone of the GitHub wiki inside its own kitchen, which is exactly what a subSaipen's kitchen is for. `git add -A` turns a nested repository into a mode-160000 entry -- a pointer to a commit no clone of this repository can fetch, carrying none of the content. That is what v7.122.0 shipped, in the same commit that added two new cross-document drift checks.
+
+Git does warn about this. The hint arrived in the middle of roughly fifty lines of `LF will be replaced by CRLF`, which is to say in the one place nobody reads.
+
+The path is ignored now and the entry is out of the index. More usefully, `tools/validate.py` FAILs any gitlink under `.saipen/`, and it introduced itself the way these checks keep doing: a fresh clone of the pushed v7.122.0 tree came back red.
+
+A clone inside a kitchen is legitimate. Recording it in history as a pointer nobody can resolve is not.
+
 ## 7.122.0 -- 2026-07-30 -- a field the tool enforced and no document defined
 
 `tools/validate.py` has rejected any ticket field outside `needs / owner / claim_time / blocker / verify / review_passes` since the beginning, with a message citing "RFC § 1.2's field list is closed". `phases/plan.md` tells every ticket to carry `| verify: <command or criterion>` and cites § 1.2 for it too. Seventy-two of this repository's own tickets carry the field.

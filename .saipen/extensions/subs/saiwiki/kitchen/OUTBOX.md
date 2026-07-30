@@ -1,7 +1,8 @@
 # OUTBOX
 
 ## WIKI-009: verify drift v7.103.0..v7.121.0 — 18 releases, 8 wiki pages
-- **status:** ready
+- **status:** stale
+- **stale_reason:** the finding was actioned by this subSaipen's own W-022 (wiki pushed at b466666, badge now v7.121.0), so collecting it would ticket a ghost -- PROTOCOL.md § 2's `stale` is exactly this case. The project has moved on again since; that is a NEW sweep's finding, not this one's
 - **summary:** Project v7.121.0 (ac37c91), wiki still at v7.103.0 (ed51225). 18-release gap: v7.104.0–v7.121.0. CONFORMANCE 99→140 rows. 8 new tools: audit_checks, audit_order, audit_parity, audit_tags, audit_floor, parity CI, hook stamp, encoding guard. All 8 wiki pages inspected live — every one stale. Light refresh recommended (P2).
 - **main_project_refs:** [VERSION (7.103.0→7.121.0), CHANGELOG.md (v7.104.0–v7.121.0), saipen/CONFORMANCE.md (rows 100→140), tools/validate.py (+850 lines), tools/audit_checks.py (new, 334), tools/audit_order.py (new, 185), tools/audit_parity.py (new, 168), tools/audit_tags.py (new, 186), tests/validate.sh (+9), tests/validate.ps1 (+8), .github/workflows/release.yml (+27), .github/workflows/validate.yml (+51), extensions/schemas/board.schema.json (+2), extensions/schemas/log.schema.json (+4), tools/install_hook.py (+15)]
 - **critical:** false

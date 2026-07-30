@@ -8,3 +8,9 @@ saipen_export_*.tar.gz
 saipen_export_*.zip
 
 thoughts/
+
+# A subSaipen's kitchen is a sandbox, and saiwiki's holds a CLONE of the
+# GitHub wiki -- a nested git repository. `git add -A` turns that into a
+# gitlink: a 160000 entry pointing at a commit no clone of this repo can
+# fetch, with none of the content. It landed in v7.122.0 exactly that way.
+.saipen/extensions/subs/*/kitchen/wiki/

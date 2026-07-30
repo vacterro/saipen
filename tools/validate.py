@@ -58,6 +58,17 @@ OUTBOX_STATUSES = ("ready", "draft", "blocked", "reviewed", "stale")
 # consumer, and the fourth use-before-define NameError of this session was a
 # check spliced above that line. tools/audit_order.py caught this one.
 _tools_parent = Path(__file__).resolve().parent.parent
+
+
+def _git(*args):
+    """Run git, returning (returncode, stdout). Never raises: this file runs
+    from a pre-commit hook and in projects that are not repositories at all."""
+    try:
+        r = subprocess.run(["git", *args], capture_output=True, text=True,
+                           check=False)
+    except (OSError, subprocess.SubprocessError):
+        return 1, ""
+    return r.returncode, r.stdout
 # RFC § 1.10's closed command list. Was a local inside Core's own next_action
 # branch, so it existed only when Core's next_action happened to start with
 # "saipen " -- the moment the subSaipen check reused it against a Core state
@@ -2650,6 +2661,24 @@ else:
                      f"{sorted(_doc_fields)} but validate.py accepts "
                      f"{sorted(KNOWN_FIELDS)}")
                 drift_ok = False
+
+    # 13l. No gitlink inside `.saipen/`. A subSaipen's kitchen is a sandbox
+    #      and it may legitimately hold a CLONE of something -- saiwiki keeps
+    #      the GitHub wiki there. `git add -A` turns a nested repository into a
+    #      mode-160000 entry: a pointer to a commit no clone of this repository
+    #      can fetch, carrying none of the content, and git says so in a hint
+    #      that scrolls past in a wall of CRLF warnings. It landed in v7.122.0
+    #      exactly that way, in the commit that shipped this file's previous
+    #      check. Ignoring the path is the fix; noticing is what this is for.
+    _rc, _out = _git("ls-files", "-s", ".saipen")
+    if _rc == 0:
+        _links = [ln.split("	", 1)[1] for ln in _out.splitlines()
+                  if ln.startswith("160000")]
+        if _links:
+            fail(f"gitlink(s) committed inside .saipen/: {', '.join(_links)} "
+                 f"-- a nested repository recorded as a bare commit pointer "
+                 f"nobody can fetch, with none of its content. Add the path "
+                 f"to .gitignore and `git rm --cached` it")
 
     # 13d. RFC § 1.7 Workspace Hygiene, mechanically. `saipen set` writes a
     #      bootloader that POINTS at the canonical home; it must never copy the
