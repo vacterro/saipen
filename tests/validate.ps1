@@ -200,4 +200,8 @@ if ((Test-Path "saipen\RFC.md") -and (Test-Path "VERSION") -and (Test-Path "READ
     Write-Host "PASS: README.md badge matches VERSION" -ForegroundColor Green
 }
 
-Write-Host "Validation complete. Agent is conformant." -ForegroundColor Green
+# Same correction as the sh half, same wording -- the two halves already
+# diverged on their own words once (v7.96.0) and that cost a reader the
+# ability to compare platforms.
+Write-Host "Portable floor complete: no structural break found." -ForegroundColor Green
+Write-Host "This is a SUBSET of tools/validate.py -- run that wherever Python exists." -ForegroundColor Green

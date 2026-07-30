@@ -182,4 +182,11 @@ if [ -f "saipen/RFC.md" ] && [ -f "VERSION" ] && [ -f "README.md" ]; then
     echo -e "${GREEN}PASS: README.md badge matches VERSION${NC}"
 fi
 
-echo -e "${GREEN}Validation complete. Agent is conformant.${NC}"
+# NOT the canonical validator's wording, deliberately. This floor caught
+# 11 of 41 defects that tools/validate.py catches, measured, and it said
+# "Agent is conformant" for the other 28 in exactly the words the real
+# validator uses. A host without Python was reading a stronger claim than
+# this file can make. Correcting a claim is not a new check, so the freeze
+# permits it -- same footing as v7.96.0's corrections.
+echo -e "${GREEN}Portable floor complete: no structural break found.${NC}"
+echo -e "${GREEN}This is a SUBSET of tools/validate.py -- run that wherever Python exists.${NC}"

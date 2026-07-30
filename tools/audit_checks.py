@@ -277,19 +277,37 @@ def main() -> int:
         shutil.rmtree(tmp, ignore_errors=True)
         return 1
 
+    # One copy, not one per case. Every case touches exactly one file, so
+    # saving that file's bytes and putting them back is equivalent to a fresh
+    # tree and turns 41 copytrees of a repo carrying 32 locale directories into
+    # one. The difference is four minutes against twenty seconds, which is the
+    # difference between a gate CI runs and a gate someone deletes.
     dead, skipped, always = [], [], []
     for label, rel, mutation, expected in CASES:
         if expected in control:
             always.append((label, expected))
             continue
-        work = tmp / "work"
-        shutil.rmtree(work, ignore_errors=True)
-        shutil.copytree(pristine, work)
-        if not apply_case(work, rel, mutation):
-            skipped.append(label)
-            continue
-        if expected not in validator_output(work):
-            dead.append((label, expected))
+        target = pristine / rel
+        saved = target.read_bytes() if target.exists() else None
+        try:
+            if not apply_case(pristine, rel, mutation):
+                skipped.append(label)
+                continue
+            if expected not in validator_output(pristine):
+                dead.append((label, expected))
+        finally:
+            if saved is None:
+                if target.exists():
+                    target.unlink()
+            else:
+                target.write_bytes(saved)
+    # The copy must be back to its starting state, or every case after the
+    # first was run against a tree carrying the previous mutation.
+    if validator_output(pristine) != control:
+        print("FAIL: restoring between cases did not put the copy back -- the "
+              "results above were measured against a drifting tree")
+        shutil.rmtree(tmp, ignore_errors=True)
+        return 1
     shutil.rmtree(tmp, ignore_errors=True)
 
     for label, expected in always:

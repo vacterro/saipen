@@ -114,6 +114,25 @@ jobs:
       - name: Validator checks still go red (tools/audit_checks.py)
         run: python tools/audit_checks.py
 
+      # Parity runs every mutation against BOTH tools, so it costs minutes
+      # rather than seconds. The number it measures only moves when the floor
+      # or the mutation table moves, so it runs when those files do -- a gate
+      # nobody waits seven minutes for is a gate someone deletes.
+      - name: Did the floor or the mutation table change?
+        id: floor_touched
+        run: |
+          changed="$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" 2>/dev/null || git diff --name-only HEAD~1 HEAD)"
+          if echo "$changed" | grep -qE '^(tests/validate\.(sh|ps1)|tools/audit_checks\.py|tools/audit_parity\.py)$'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "floor untouched in this push -- parity not re-measured"
+          fi
+
+      - name: Floor parity (tools/audit_parity.py)
+        if: steps.floor_touched.outputs.run == 'true'
+        run: python tools/audit_parity.py
+
       - name: Installed layout (inject into a sandbox HOME, run the copy)
         run: |
           sandbox="$(mktemp -d)"

@@ -2,6 +2,20 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.120.0 -- 2026-07-30 -- the floor was claiming conformance in the validator's own words
+
+Yesterday's 41 mutations were built to prove `tools/validate.py`'s checks still go red. Pointing the same table at the portable floor answers a different question, and the answer is uncomfortable: **the floor catches 11 of 41.**
+
+The gap itself is not the defect. `tests/validate.sh` / `.ps1` exist for hosts without Python, they are frozen against new checks on purpose, and a `grep` pipeline cannot parse a phase transition table or walk an event graph. Twenty-eight of those defects genuinely need Python.
+
+The defect is what the floor said about itself. Both halves ended with `Validation complete. Agent is conformant.` -- the exact sentence the canonical validator prints on a clean run. A host without Python was reading a claim four times larger than the file can support, in wording chosen to be indistinguishable from the real thing. They now print `Portable floor complete: no structural break found` and name themselves a subset that `tools/validate.py` should be run against wherever Python exists. Correcting a claim is not adding a check, so the freeze permits it -- the same footing as v7.96.0's corrections.
+
+CONFORMANCE row 78 has been rewritten for the same reason. It stated ONE known floor gap, `next_action` presence without executability. Stating one where there are twenty-eight is not a cautious understatement, it is the wrong shape of reassurance.
+
+`tools/audit_parity.py` keeps the number from rotting, and guards the direction that actually matters: it fails when the floor drops BELOW its recorded baseline. A permanent gap that everyone knows about is a design decision; a floor getting quietly weaker is the failure.
+
+Two cases are caught by neither tool -- a `schema_version` from the future and a `requires:` capability nobody defines. Both are deliberate WARNs, so both exit 0. The tool prints them by name instead of folding them into a count, because "caught by neither" and "warned by one" are different facts.
+
 ## 7.119.0 -- 2026-07-30 -- sixteen releases of red tests, all thrown away
 
 Row 84 said it in general terms; this release measured it. `tools/validate.py` carries about 160 failure paths. The inputs this repository ships -- its own `.saipen/` plus the 14 executable fixtures -- produce **17 distinct FAIL/WARN lines** between them. Every other check rests on a hand test from the day it was written, which is precisely how one check in that file lay dead from `feae149` to v7.99.0 and how the first draft of the portable-floor check could not go red at all.

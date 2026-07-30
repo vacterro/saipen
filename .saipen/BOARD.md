@@ -4,6 +4,10 @@
 ## TODO
 
 ## DONE
+- [x] T-329 [P0] The portable floor said 'Agent is conformant' in the canonical validator's exact words while catching 11 of 41 defects it catches. Both halves now name themselves a subset. | verify: tools/audit_parity.py PASS 11/41 (2026-07-30)
+- [x] T-330 [P0] Row 78 stated ONE known floor gap. Measured: 28. Corrected with the number and a tool that keeps it honest. | verify: tools/audit_parity.py PASS 11/41 (2026-07-30)
+- [x] T-331 [P1] tools/audit_parity.py: applies audit_checks' mutations to both tools and FAILs if the floor drops below its baseline -- a floor getting quietly weaker, not the gap itself. | verify: tools/audit_parity.py PASS 11/41 (2026-07-30)
+- [x] T-332 [P2] Ship v7.120.0. | verify: tools/audit_parity.py PASS 11/41 (2026-07-30)
 - [x] T-325 [P0] tools/audit_checks.py: 41 mutations proving the canonical validator's checks still go red. The floor had this since v7.101.0; the validator's ~160 failure paths had nothing, and shipped inputs reach about ten of them. | verify: tools/audit_checks.py PASS 41/41 (2026-07-30)
 - [x] T-326 [P0] The harness lied three ways before it worked -- matching PASS prose, a sentinel that deleted the file it meant to re-encode, and a mutation that was a no-op on this repo's own state. Each fixed, each recorded. | verify: tools/audit_checks.py PASS 41/41 (2026-07-30)
 - [x] T-327 [P1] A case whose expectation already appears unmutated now FAILs: five did, all matching the PASS line of the check they meant to break. | verify: tools/audit_checks.py PASS 41/41 (2026-07-30)
