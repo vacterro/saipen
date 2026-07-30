@@ -4,6 +4,9 @@
 ## TODO
 
 ## DONE
+- [x] T-333 [P0] audit_parity picked `sh` as its fallback shell; on Ubuntu that is dash, and tests/validate.sh is #!/bin/bash. Died in CI in 0.4s. Prefers a real bash now, never sh. | verify: dash tests/validate.sh exit 2, reproduced (2026-07-30)
+- [x] T-334 [P0] Its control-failure message said 'one of the two tools' without naming which, its exit code, or what it printed -- a whole CI round trip to learn nothing. | verify: dash tests/validate.sh exit 2, reproduced (2026-07-30)
+- [x] T-335 [P2] Ship v7.121.0. | verify: dash tests/validate.sh exit 2, reproduced (2026-07-30)
 - [x] T-329 [P0] The portable floor said 'Agent is conformant' in the canonical validator's exact words while catching 11 of 41 defects it catches. Both halves now name themselves a subset. | verify: tools/audit_parity.py PASS 11/41 (2026-07-30)
 - [x] T-330 [P0] Row 78 stated ONE known floor gap. Measured: 28. Corrected with the number and a tool that keeps it honest. | verify: tools/audit_parity.py PASS 11/41 (2026-07-30)
 - [x] T-331 [P1] tools/audit_parity.py: applies audit_checks' mutations to both tools and FAILs if the floor drops below its baseline -- a floor getting quietly weaker, not the gap itself. | verify: tools/audit_parity.py PASS 11/41 (2026-07-30)

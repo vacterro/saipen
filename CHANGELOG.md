@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.121.0 -- 2026-07-30 -- 0.4 seconds was the diagnosis
+
+The `Floor parity` step added one release ago failed on its first CI run, in **0.4 seconds**. That number is the whole finding: neither of the two tools it compares could have executed in that time, so what failed was the harness, not the subject.
+
+`find_bash()` tried the Git-for-Windows paths first -- because a bare `bash` on Windows resolves from Python to the WSL stub, which without an installed distro prints a UTF-16 error and runs nothing, a trap `KNOWLEDGE/traps.md` has carried since an audit scored all twenty floor checks dead. Its fallback was `sh`. On Ubuntu `sh` is **dash**, and `tests/validate.sh` is shebanged `#!/bin/bash`. Reproduced locally: `dash tests/validate.sh` exits 2 immediately.
+
+Both halves of the same trap, in one file, in one release: the wrong shell on Windows and the wrong shell on Linux. It takes a real `bash` now, and `sh` is never acceptable.
+
+The second half matters more. The precondition that caught it printed `one of the two tools rejects an UNMODIFIED copy` and stopped. True, useless, and it cost a full CI round trip to learn nothing -- which tool, what exit code, what it actually said, all absent. It names all three now.
+
+Twenty releases of this work have been spent finding checks that report without diagnosing. Writing a fresh one is the same defect wearing a new hat.
+
 ## 7.120.0 -- 2026-07-30 -- the floor was claiming conformance in the validator's own words
 
 Yesterday's 41 mutations were built to prove `tools/validate.py`'s checks still go red. Pointing the same table at the portable floor answers a different question, and the answer is uncomfortable: **the floor catches 11 of 41.**

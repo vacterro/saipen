@@ -42,13 +42,22 @@ BASELINE = 11
 
 
 def find_bash() -> str | None:
-    """A bare `bash` is the wrong binary on Windows: from Python it resolves to
-    the WSL stub in System32, which without an installed distro prints a UTF-16
-    error and runs nothing. An audit that scored every check dead once already
-    did so for exactly this reason."""
+    """Pick a real bash, and never `sh`.
+
+    Two ways to get this wrong, and this tool managed both. On Windows a bare
+    `bash` resolves from Python to the WSL stub in System32, which without an
+    installed distro prints a UTF-16 error and runs nothing -- the trap that
+    once scored every floor check dead. And on Ubuntu `sh` is **dash**, which
+    the floor script is not written for: it died in 0.4 seconds on its first CI
+    run, fast enough that the failure was obviously the shell rather than the
+    subject, if anyone had looked at the clock.
+
+    Explicit Git-for-Windows paths first, then `bash` from PATH. `sh` is never
+    acceptable.
+    """
     for candidate in (r"C:\Program Files\Git\bin\bash.exe",
                       r"C:\Program Files (x86)\Git\bin\bash.exe",
-                      shutil.which("sh")):
+                      shutil.which("bash")):
         if candidate and os.path.exists(candidate):
             return candidate
     return None
@@ -70,19 +79,37 @@ def main() -> int:
     pristine = tmp / "pristine"
     shutil.copytree(HOME, pristine, ignore=ac.IGNORE)
 
-    def validate(root):
+    def run_validate(root):
         return subprocess.run(
             [sys.executable, str(root / "tools" / "validate.py")], cwd=root,
-            capture_output=True, text=True, errors="replace").returncode
+            capture_output=True, text=True, errors="replace")
 
-    def floor(root):
+    def run_floor(root):
         return subprocess.run(
             [bash, "tests/validate.sh"], cwd=root,
-            capture_output=True, text=True, errors="replace").returncode
+            capture_output=True, text=True, errors="replace")
 
-    if validate(pristine) != 0 or floor(pristine) != 0:
-        print("FAIL: one of the two tools rejects an UNMODIFIED copy -- every "
-              "number below would be measuring that instead")
+    def validate(root):
+        return run_validate(root).returncode
+
+    def floor(root):
+        return run_floor(root).returncode
+
+    # Name which tool objected and show what it said. The first version printed
+    # "one of the two tools rejects an unmodified copy" and stopped -- true,
+    # useless, and it cost a CI round-trip to learn nothing. A precondition
+    # that fails without naming what it saw is the same defect this repository
+    # keeps finding in its own checks.
+    ctl_v, ctl_f = run_validate(pristine), run_floor(pristine)
+    if ctl_v.returncode != 0 or ctl_f.returncode != 0:
+        who = "tools/validate.py" if ctl_v.returncode != 0 else "tests/validate.sh"
+        bad = ctl_v if ctl_v.returncode != 0 else ctl_f
+        print(f"FAIL: {who} rejects an UNMODIFIED copy (exit "
+              f"{bad.returncode}) -- every number below would be measuring "
+              f"that instead of the floor's coverage. What it said:")
+        for ln in (bad.stdout + bad.stderr).splitlines():
+            if ln.startswith(("FAIL", "Traceback")) or "Error" in ln:
+                print("    " + ln.strip()[:160])
         shutil.rmtree(tmp, ignore_errors=True)
         return 1
 

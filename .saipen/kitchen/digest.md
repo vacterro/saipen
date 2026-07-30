@@ -1,3 +1,3 @@
-done: v7.120.0 shipped — the portable floor stopped claiming conformance in the canonical validator's words, and its real coverage (11 of 41) is measured and guarded
+done: v7.121.0 shipped — the parity audit picked dash as its shell and died in 0.4s; it takes a real bash now, and its precondition names what it saw
 remaining: nothing
 awaiting: nothing
