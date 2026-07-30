@@ -1,6 +1,6 @@
 # Board
 ## DOING
-- [/] T-002 hot task | owner: other-agent | claim_time: 2026-07-17T02:26:09
+- [/] T-002 hot task | owner: other-agent | claim_time: 2026-07-17T02:26:09Z
 ## TODO
 ## DONE
 ## BLOCKED

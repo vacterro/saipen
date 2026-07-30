@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.116.0 -- 2026-07-30 -- a field name everyone spelled right and nobody read
+
+`claim_time` sat in the validator's list of recognised ticket fields and its value was never once looked at. RFC § 1.4 decides from that value whether a ticket is live or forfeitable, by comparing it against a 15-minute window -- and a stamp carrying no zone marker is not comparable across agents at all. That is the identical argument § 1.2 already makes for `updated`, which is checked. The field was recognised, not read.
+
+It found a shipped fixture immediately: `multi-agent-claim-conflict` had carried a zone-less `claim_time` for releases. The fixture was fixed rather than the check, because its own README says it exists to demonstrate the *shape* of a claimed ticket -- and the shape includes the zone.
+
+An `owner` with no `claim_time`, or the reverse, is half a claim and now warns. Liveness is read from the pair; one alone cannot be judged live or stale.
+
+The last finding is about the tooling and matters more than either. The red test for that half-claim warning came back empty -- and the test was wrong, not the check: it grepped for `warn()`'s category key, which was never printed. Individual warnings were anonymous; the key appeared only in the "... and N more" roll-up. That trap is recorded in `KNOWLEDGE/traps.md`, has been since a warn-coverage audit scored 8 of 8 categories unreachable, and it has been walked into five more times since being written down -- twice while writing checks in this session.
+
+A trap that keeps catching people after it is documented is a missing affordance, not a discipline problem. Every `WARN` line now carries its `[category]`. There is nothing left to catch.
+
 ## 7.115.0 -- 2026-07-30 -- a fully specified MUST with nothing behind it
 
 `last_event` is the one `STATE.md` field whose entire job is catching a state that has drifted from its own log. RFC § 1.2 specifies it exactly -- "lower than the LOG tail means stale, higher than the LOG tail means corrupt or from an incompatible branch" -- and `tools/validate.py` contained zero references to it. Nothing is broken today, because the field is RECOMMENDED and nobody writes it. The RFC says it will become REQUIRED, and that is precisely when an unchecked value starts doing damage: Recovery rebuilds from the LOG tail, and a `last_event` above it points at an event nobody ever wrote.

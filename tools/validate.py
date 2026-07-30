@@ -852,6 +852,30 @@ for line_no, line in enumerate(board_lines, 1):
             fields[fm.group(1)] = fm.group(2)
             if fm.group(1) == "needs":
                 needs = re.findall(r"T-\d+", fm.group(2))
+        # RFC § 1.4 claim fields. `claim_time` is compared against a 15-minute
+        # window to decide whether a ticket is live or forfeitable, and it was
+        # recognised as a known field NAME and never once looked at. Without a
+        # zone marker that comparison miscompares across agents in different
+        # timezones -- the identical argument § 1.2 already makes for
+        # `updated`, which is checked. A fixture shipped a zone-less
+        # `claim_time` for releases and nothing noticed.
+        _ct = fields.get("claim_time")
+        if _ct and not re.fullmatch(
+                r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|\+00:00)",
+                _ct.strip()):
+            fail(f"BOARD.md:{line_no} ticket {tid} claim_time {_ct!r} is not "
+                 f"ISO-8601 UTC (Z or +00:00) -- § 1.4 decides a live claim "
+                 f"from a 15-minute window, and a stamp with no zone is not "
+                 f"comparable across agents (RFC § 1.4)")
+        # An owner with no claim_time, or the reverse, is half a claim:
+        # § 1.4 reads liveness from BOTH, so either alone is undecidable.
+        if bool(fields.get("owner")) != bool(_ct):
+            warn("half-claim",
+                 f"BOARD.md:{line_no} ticket {tid} carries "
+                 f"{'owner but no claim_time' if fields.get('owner') else 'claim_time but no owner'}"
+                 f" -- § 1.4 decides liveness from the pair, so one "
+                 f"alone cannot be judged live or stale")
+
         tickets[tid] = {"section": section, "line_no": line_no,
                         "checkbox": checkbox, "needs": needs, "fields": fields,
                         "raw": line}
@@ -2571,10 +2595,19 @@ else:
 warn_total = sum(len(msgs) for msgs in warnings.values())
 for category, msgs in warnings.items():
     for msg in msgs[:2]:
-        print(color("33", f"WARN: {msg}"))
+        # The category is printed, not just carried. It used to appear only in
+        # the "... and N more" roll-up, so every individual warning was
+        # anonymous -- and matching on the invisible key is a trap
+        # KNOWLEDGE/traps.md has recorded since the warn-coverage audit scored
+        # 8 of 8 categories unreachable. It was recorded and then walked into
+        # five more times, including twice while writing checks in this
+        # session. A trap that keeps being hit after being written down is not
+        # a discipline problem; it is a missing affordance. Now the key is on
+        # screen, so grepping for it works and the trap has nothing to catch.
+        print(color("33", f"WARN [{category}]: {msg}"))
     if len(msgs) > 2:
-        print(color("33", f"WARN: ... and {len(msgs) - 2} more [{category}] "
-                    f"warnings like the above"))
+        print(color("33", f"WARN [{category}]: ... and {len(msgs) - 2} more "
+                    f"like the above"))
 
 if STRICT:
     for msgs in warnings.values():

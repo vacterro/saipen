@@ -4,6 +4,10 @@
 ## TODO
 
 ## DONE
+- [x] T-314 [P0] claim_time is validated as ISO-8601 UTC. It was a known field name whose value nothing read, while 1.4 judges liveness from it against a 15-minute window. A shipped fixture had carried a zone-less stamp for releases; fixed. | verify: tools/validate.py + run_scenarios.py PASS (2026-07-30)
+- [x] T-315 [P1] owner without claim_time (or the reverse) now warns -- half a claim cannot be judged live or stale. | verify: tools/validate.py + run_scenarios.py PASS (2026-07-30)
+- [x] T-316 [P0] warn() prints its category. The key existed only in the roll-up line, so grepping for it found nothing -- a documented trap walked into five more times after being documented. | verify: tools/validate.py + run_scenarios.py PASS (2026-07-30)
+- [x] T-317 [P2] Ship v7.116.0. | verify: tools/validate.py + run_scenarios.py PASS (2026-07-30)
 - [x] T-309 [P0] last_event enforced. A fully-specified MUST with zero references in the validator -- the one field whose entire job is catching a STATE that drifted from its own LOG. | verify: tools/validate.py PASS (2026-07-30)
 - [x] T-310 [P1] Recorded the rule-coverage check's blind spot: section granularity cannot see one unenforced MUST inside a heavily-cited section, which is how last_event survived it. | verify: tools/validate.py PASS (2026-07-30)
 - [x] T-311 [P0] TEMPLATE placeholders can no longer escape into a live subSaipen. RFC 1.4 compares agent-against-agent, so a worker still called <name> makes liveness meaningless. | verify: tools/validate.py PASS (2026-07-30)
