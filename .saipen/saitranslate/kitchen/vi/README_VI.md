@@ -12,7 +12,7 @@ và tiếp tục công việc trong chưa đầy một phút -- không cần gi�
 
 **Một lệnh. Không hề mất trí nhớ.**
 
-**v7.121.0** | [Đặc tả](SPEC.md) | [Hướng dẫn](GUIDE.md) | [RFC](saipen/RFC.md) | [Phong cách](saipen/STYLE.md) | [Giao diện UI](saipen/UI.md) | [Độ tuân thủ](saipen/CONFORMANCE.md) | markdown thuần túy | không phụ thuộc | MIT
+**v7.122.0** | [Đặc tả](SPEC.md) | [Hướng dẫn](GUIDE.md) | [RFC](saipen/RFC.md) | [Phong cách](saipen/STYLE.md) | [Giao diện UI](saipen/UI.md) | [Độ tuân thủ](saipen/CONFORMANCE.md) | markdown thuần túy | không phụ thuộc | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)

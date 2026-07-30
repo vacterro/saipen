@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.122.0 -- 2026-07-30 -- a field the tool enforced and no document defined
+
+`tools/validate.py` has rejected any ticket field outside `needs / owner / claim_time / blocker / verify / review_passes` since the beginning, with a message citing "RFC § 1.2's field list is closed". `phases/plan.md` tells every ticket to carry `| verify: <command or criterion>` and cites § 1.2 for it too. Seventy-two of this repository's own tickets carry the field.
+
+§ 1.2 named neither the list nor `verify:`. All fourteen occurrences of the word in the constitution are the `manual-verify` mode or the VERIFY phase. Three places pointed at a clause that did not exist.
+
+The citation checker could not see this, and the reason is worth stating rather than patching around: it proves a cited section EXISTS, never that the section says the thing being cited. § 1.2 is real, so all three citations resolved. Closing that in general would need every clause to carry an id, which the RFC does not have -- so the closed vocabularies get compared one at a time instead, and this release brings that to eight: § 1.10's command surface and § 1.2's ticket fields join required fields, the phase enum, from-any-phase, the read-only bans, the `next_action` prefixes and the WAIT categories.
+
+The command surface agreed on the day it was checked, which is exactly the point. A vocabulary copied into a tool with no comparison is a bet that nobody ever edits either side.
+
+Separately, a live catch by a rule shipped eleven releases ago: `saiwiki` was sitting at `transition_from: BUILD` with `phase: DONE` -- illegal twice, since the table does not allow it and `BUILD` is a phase no subSaipen may enter at all. Its own log explains why it looked that way: it cloned the GitHub wiki into its kitchen and pushed, which lands work outside its own folder. Its last entry was five hours old, twenty times past § 1.4's claim window, so the takeover was recorded in its LOG and the state rebuilt as a self-transition rather than a path the log does not support. The work itself was left alone.
+
 ## 7.121.0 -- 2026-07-30 -- 0.4 seconds was the diagnosis
 
 The `Floor parity` step added one release ago failed on its first CI run, in **0.4 seconds**. That number is the whole finding: neither of the two tools it compares could have executed in that time, so what failed was the harness, not the subject.

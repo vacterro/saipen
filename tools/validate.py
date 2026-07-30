@@ -2606,6 +2606,51 @@ else:
                  f"leaves phase: MARKHUNT with next_action: `saipen markhunt`. "
                  f"Moving on closed a pass the manifest says never finished")
 
+    # 13k. Two more copied vocabularies compared against the document that
+    #      owns them -- the seventh and eighth sets to get this treatment.
+    #      `SAIPEN_COMMANDS` is § 1.10's command surface and `KNOWN_FIELDS` is
+    #      § 1.2's closed ticket-field list. Both were copied into the tool
+    #      and never checked against their source, and the second one hid a
+    #      real hole: the tool has FAILed unknown ticket fields since the
+    #      beginning with a message citing "§ 1.2's field list", `verify:`
+    #      included, while § 1.2 named neither the list nor that field.
+    #      `phases/plan.md` cited § 1.2 for it too, and 72 of this repo's own
+    #      tickets carry it. The citation checker could not see this: it proves
+    #      a cited section EXISTS, never that it says the thing being cited.
+    _rfc_p2 = _tools_parent / "saipen" / "RFC.md"
+    if _rfc_p2.is_file():
+        _rfc_t = _rfc_p2.read_text(encoding="utf-8-sig")
+        _i = _rfc_t.find("### 1.10")
+        _j = _rfc_t.find("### 1.11", _i)
+        if _i < 0 or _j < 0:
+            fail("cross-doc drift [commands] -- RFC § 1.10 not found; the "
+                 "command surface cannot be compared, and a missing anchor is "
+                 "a failure rather than a skip")
+            drift_ok = False
+        else:
+            _doc_cmds = set(re.findall(r"`saipen ([a-z]+)", _rfc_t[_i:_j]))
+            if _doc_cmds != set(SAIPEN_COMMANDS):
+                fail(f"cross-doc drift [commands] -- RFC § 1.10 names "
+                     f"{sorted(_doc_cmds)} but validate.py accepts "
+                     f"{sorted(SAIPEN_COMMANDS)}")
+                drift_ok = False
+
+        _m = re.search(r"ticket-field list is closed.*?(?=\n- |\n#)",
+                       _rfc_t, re.DOTALL)
+        if not _m:
+            fail("cross-doc drift [ticket-fields] -- RFC § 1.2 no longer "
+                 "states the closed ticket-field list. It went unstated until "
+                 "v7.122.0 while the tool rejected everything outside it and "
+                 "cited § 1.2 for the rule")
+            drift_ok = False
+        else:
+            _doc_fields = set(re.findall(r"`([a-z_]+):`", _m.group(0)))
+            if _doc_fields != set(KNOWN_FIELDS):
+                fail(f"cross-doc drift [ticket-fields] -- RFC § 1.2 lists "
+                     f"{sorted(_doc_fields)} but validate.py accepts "
+                     f"{sorted(KNOWN_FIELDS)}")
+                drift_ok = False
+
     # 13d. RFC § 1.7 Workspace Hygiene, mechanically. `saipen set` writes a
     #      bootloader that POINTS at the canonical home; it must never copy the
     #      protocol into the project, and phase transitions must load from

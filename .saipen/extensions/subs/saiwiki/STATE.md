@@ -1,13 +1,13 @@
 ---
 phase: DONE
-task: W-019 v7.103.0 full wiki refresh
-next_action: "WAIT: user brake -- wiki synced to v7.103.0 (ed51225). All 8 pages refreshed. Conformance 99 rows, features through v7.103.0."
+task: W-022 wiki refresh v7.103.0→v7.121.0 — 6 pages update + push
+next_action: "WAIT: user brake -- v7.121.0 wiki live (b466666). 6 pages updated: Home (19 new bullets), Scenarios (99→140), Footer, Phases, Getting-Started, SubSaipen. 2 pages stable: Tutorials, Use-Cases, _Sidebar."
 blocker: none
 agent: saiwiki
 saipen_version: 7
 schema_version: 1
-saipen_home: "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN"
+saipen_home: "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN"
 mode: read-only
 transition_from: DONE
-updated: 2026-07-29T12:00:00Z
+updated: 2026-07-30T09:30:00Z
 ---

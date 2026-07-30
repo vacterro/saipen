@@ -1,3 +1,4 @@
 # Log
 - 27.07.26 02:15 [H-001] H: saihunt auto-spawned. Running 6-category sweep against HEAD 40242f3.
 - 27.07.26 02:16 [H-002] [parent: H-001] RUN: 1=failing test (PASS), 2=commits (clean), 3=TODO/FIXME (only kitchens), 4=silent-fail (none), 5=symmetry (ok), 6=dead-code (none). Finding: 2 stale kitchen files (markhunt_integration_plan.md, markhunt_progress.md) — owning tickets T-178..T-181 all DONE, files never cleaned. Obvious junk per hunt.md, free-delete. OUTBOX written.
+- 30.07.26 10:00 [H-003] [parent: H-002] RUN: markhunt -> 5 findings, 5/5 vectors, @ac37c91. Examined RFC § 1.2/§ 1.5/§ 1.6, phases/*.md, PROTOCOL.md, MANIFEST.md. 5 logical flaws: (1) last_event chicken-and-egg, (2) goal-wave double-count, (3) HUNT->DONE hierarchy tension, (4) MANIFEST last_collect never enforced, (5) read-only list runtime gap. Recorded as HUNT-002..HUNT-006 on BOARD.md ## BLOCKED.
