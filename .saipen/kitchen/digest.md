@@ -1,3 +1,3 @@
-done: v7.117.0 shipped — review_passes cap made mechanical, digest shape + staleness now checked, claim_time validated as ISO-8601 UTC, every WARN line carries its category
+done: v7.118.0 shipped — MARKHUNT's closure manifest is read at last, and a `no-git` head pair must be a pair
 remaining: nothing
 awaiting: nothing

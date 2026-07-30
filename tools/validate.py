@@ -2553,6 +2553,59 @@ else:
                      f"push, so this snapshot has been carried past at least "
                      f"one release that did not refresh it")
 
+    # 13j. MARKHUNT's own closure manifest. `phases/markhunt.md` specifies it
+    #      in full -- `vectors:` (which of scope categories 1-5 are done),
+    #      `surface:`, `findings:`, `cursor: partial | done`, and
+    #      `head_start:`/`head_end:` -- and states the self-test it exists for:
+    #      the file IS MARKHUNT's closure check, "the thing HUNT gets from its
+    #      exact hash-match skip and MARKHUNT historically lacked, leaving
+    #      completeness pure self-report". No tool had ever opened it, so
+    #      completeness was back to pure self-report by a different route.
+    _mh = Path(".saipen/kitchen/markhunt_progress.md")
+    if _mh.is_file():
+        _mf = {}
+        for _ln in read_doc(_mh).splitlines():
+            _m = re.match(r"^([a-z_]+):\s*(.*)$", _ln.strip())
+            if _m:
+                _mf[_m.group(1)] = _m.group(2).strip()
+        _need = ("vectors", "surface", "findings", "cursor",
+                 "head_start", "head_end")
+        _absent = [f for f in _need if f not in _mf]
+        if _absent:
+            fail(f"{_mh.as_posix()} is missing {', '.join(_absent)} -- "
+                 f"phases/markhunt.md requires a manifest, not a note: this "
+                 f"file IS the closure check, and a partial one cannot close "
+                 f"anything")
+        _cur = _mf.get("cursor")
+        if _cur and _cur not in ("partial", "done"):
+            fail(f"{_mh.as_posix()} cursor is {_cur!r} -- markhunt.md defines "
+                 f"exactly `partial` and `done`")
+        _hs, _he = _mf.get("head_start"), _mf.get("head_end")
+        if _hs and _he:
+            # markhunt.md allows the literal `no-git` in BOTH fields, and the
+            # closure test then "is satisfied automatically". A mixed pair is
+            # undefined by that wording: one real hash and one `no-git` would
+            # skip the equality test on the strength of half a reason.
+            if (_hs == "no-git") != (_he == "no-git"):
+                fail(f"{_mh.as_posix()} has head_start={_hs!r} and "
+                     f"head_end={_he!r} -- markhunt.md permits `no-git` in "
+                     f"BOTH fields, never one. A mixed pair skips the "
+                     f"head-equality closure test on half a reason")
+        if _cur == "done":
+            _vec = set(re.findall(r"\d+", _mf.get("vectors", "")))
+            _missing_vec = sorted({"1", "2", "3", "4", "5"} - _vec)
+            if _missing_vec:
+                fail(f"{_mh.as_posix()} says cursor: done but vectors lists "
+                     f"only {sorted(_vec)} -- markhunt.md: a missing vector "
+                     f"means the surface is NOT exhausted, keep going rather "
+                     f"than round up (categories {', '.join(_missing_vec)})")
+        elif _cur == "partial" and state.get("phase") not in ("MARKHUNT",
+                                                              "BLOCKED"):
+            fail(f"{_mh.as_posix()} says cursor: partial while STATE.phase is "
+                 f"{state.get('phase')} -- markhunt.md says an unfinished pass "
+                 f"leaves phase: MARKHUNT with next_action: `saipen markhunt`. "
+                 f"Moving on closed a pass the manifest says never finished")
+
     # 13d. RFC § 1.7 Workspace Hygiene, mechanically. `saipen set` writes a
     #      bootloader that POINTS at the canonical home; it must never copy the
     #      protocol into the project, and phase transitions must load from

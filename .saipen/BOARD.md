@@ -4,6 +4,10 @@
 ## TODO
 
 ## DONE
+- [x] T-321 [P0] MARKHUNT's closure manifest is validated: shape, cursor vocabulary, vector completeness on done, and a partial manifest under a phase that moved on. The file exists to end pure self-report and no tool had ever opened it. | verify: tools/validate.py PASS (2026-07-30)
+- [x] T-322 [P1] A no-git head pair must be a pair -- one real hash plus one no-git skipped the equality test on half a reason. | verify: tools/validate.py PASS (2026-07-30)
+- [x] T-323 [P1] Stopped hunting by luck: swept every MUST sentence across 18 normative docs for named artifacts no tool mentions. 192 MUSTs, 77 artifacts, 14 candidates, 1 real -- this one. | verify: tools/validate.py PASS (2026-07-30)
+- [x] T-324 [P2] Ship v7.118.0. | verify: tools/validate.py PASS (2026-07-30)
 - [x] T-318 [P0] review_passes cap enforced. RFC says the field exists so the two-pass cap is mechanical instead of remembered; the name was recognised and the number never read. | verify: tools/validate.py PASS (2026-07-30)
 - [x] T-319 [P0] digest.md shape and freshness checked. ship.md says overwrite after every push; the live one named v7.83.0, so 33 releases had skipped it in silence -- fourteen of them mine. | verify: tools/validate.py PASS (2026-07-30)
 - [x] T-320 [P2] Ship v7.117.0. | verify: tools/validate.py PASS (2026-07-30)

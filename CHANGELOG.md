@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.118.0 -- 2026-07-30 -- the file that exists to end self-report, read by nobody
+
+Three releases running found the same shape -- a field with a full specification and no reader -- and all three found it by luck. So this one stopped hunting by luck: every `MUST` sentence across the 18 normative documents, pulled out and cross-checked against the artifacts any tool actually mentions. 192 MUSTs, 77 named artifacts, 14 candidates, one real.
+
+That one is `.saipen/kitchen/markhunt_progress.md`. `phases/markhunt.md` specifies it completely -- `vectors:` (which of scope categories 1-5 are done), `surface:`, `findings:`, `cursor: partial | done`, `head_start:`/`head_end:` -- and states plainly why it exists: the file IS MARKHUNT's closure check, "the thing HUNT gets from its exact hash-match skip and MARKHUNT historically lacked, leaving completeness pure self-report". No tool had ever opened it. Completeness was back to pure self-report by a different route.
+
+Checked now: the shape, the `cursor` vocabulary, the rule that `cursor: done` requires every scope category present in `vectors:` (markhunt.md: a missing vector means the surface is NOT exhausted, keep going rather than round up), and the contradiction of a `partial` manifest sitting under a phase that has already moved on -- a pass the manifest says never finished, closed anyway.
+
+Reading the spec closely enough to enforce it also turned up a gap in the spec itself. `no-git` is permitted in both `head_start` and `head_end`, and the head-equality closure test is then "satisfied automatically". A mixed pair -- one real hash, one `no-git` -- is undefined by that wording, and would skip the equality test on the strength of half a reason. It fails now.
+
+The 1-in-14 signal ratio is why the sweep is recorded as a technique rather than shipped as a gate: a check that cries wolf thirteen times out of fourteen teaches people to ignore it, which is the opposite of what this repository has spent fifteen releases building.
+
 ## 7.117.0 -- 2026-07-30 -- two more fields with a spec and no reader
 
 RFC § 1.2 states why `review_passes` exists, in as many words: so `phases/review.md` can "enforce its two-pass cap mechanically instead of from memory". The board grammar recognised the field name and nothing ever read the number, which left the cap in precisely the place the RFC says it must not be.
