@@ -4,6 +4,10 @@
 ## TODO
 
 ## DONE
+- [x] T-325 [P0] tools/audit_checks.py: 41 mutations proving the canonical validator's checks still go red. The floor had this since v7.101.0; the validator's ~160 failure paths had nothing, and shipped inputs reach about ten of them. | verify: tools/audit_checks.py PASS 41/41 (2026-07-30)
+- [x] T-326 [P0] The harness lied three ways before it worked -- matching PASS prose, a sentinel that deleted the file it meant to re-encode, and a mutation that was a no-op on this repo's own state. Each fixed, each recorded. | verify: tools/audit_checks.py PASS 41/41 (2026-07-30)
+- [x] T-327 [P1] A case whose expectation already appears unmutated now FAILs: five did, all matching the PASS line of the check they meant to break. | verify: tools/audit_checks.py PASS 41/41 (2026-07-30)
+- [x] T-328 [P2] Ship v7.119.0. | verify: tools/audit_checks.py PASS 41/41 (2026-07-30)
 - [x] T-321 [P0] MARKHUNT's closure manifest is validated: shape, cursor vocabulary, vector completeness on done, and a partial manifest under a phase that moved on. The file exists to end pure self-report and no tool had ever opened it. | verify: tools/validate.py PASS (2026-07-30)
 - [x] T-322 [P1] A no-git head pair must be a pair -- one real hash plus one no-git skipped the equality test on half a reason. | verify: tools/validate.py PASS (2026-07-30)
 - [x] T-323 [P1] Stopped hunting by luck: swept every MUST sentence across 18 normative docs for named artifacts no tool mentions. 192 MUSTs, 77 artifacts, 14 candidates, 1 real -- this one. | verify: tools/validate.py PASS (2026-07-30)

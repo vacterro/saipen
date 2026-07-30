@@ -106,6 +106,14 @@ jobs:
       - name: No tool reads a name before assigning it (tools/audit_order.py)
         run: python tools/audit_order.py
 
+      # audit_floor.py proves the 20 portable-floor checks still go red.
+      # Nothing did that for the canonical validator's ~160 failure paths, of
+      # which the inputs this repo ships exercise about ten. Every other check
+      # rested on a hand test from the day it was written -- and one in this
+      # file lay dead from feae149 to v7.99.0 for exactly that reason.
+      - name: Validator checks still go red (tools/audit_checks.py)
+        run: python tools/audit_checks.py
+
       - name: Installed layout (inject into a sandbox HOME, run the copy)
         run: |
           sandbox="$(mktemp -d)"

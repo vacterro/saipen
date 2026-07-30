@@ -12,7 +12,7 @@ y reanude el trabajo en menos de un minuto: sin explicaciones previas, cualquier
 
 **Un comando. Cero amnesia.**
 
-**v7.118.0** | [Espec](SPEC.md) | [Guía](GUIDE.md) | [RFC](saipen/RFC.md) | [Estilo](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformidad](saipen/CONFORMANCE.md) | markdown plano | cero dependencias | MIT
+**v7.119.0** | [Espec](SPEC.md) | [Guía](GUIDE.md) | [RFC](saipen/RFC.md) | [Estilo](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformidad](saipen/CONFORMANCE.md) | markdown plano | cero dependencias | MIT
 
 [![Guía en Ruso](https://img.shields.io/badge/📖_Guía_ELI5-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![Guía en Inglés](https://img.shields.io/badge/📖_Guía_ELI5-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)

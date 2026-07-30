@@ -2,6 +2,22 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.119.0 -- 2026-07-30 -- sixteen releases of red tests, all thrown away
+
+Row 84 said it in general terms; this release measured it. `tools/validate.py` carries about 160 failure paths. The inputs this repository ships -- its own `.saipen/` plus the 14 executable fixtures -- produce **17 distinct FAIL/WARN lines** between them. Every other check rests on a hand test from the day it was written, which is precisely how one check in that file lay dead from `feae149` to v7.99.0 and how the first draft of the portable-floor check could not go red at all.
+
+The uncomfortable part is not the number. It is that the previous sixteen releases red-tested roughly twenty-five checks, each in a scratch directory, each deleted seconds later. This repository's own rule is that a hand test proves a check worked once and a fixture proves it still works -- and every one of those tests was a hand test.
+
+`tools/audit_checks.py` is those tests, kept: 41 mutations of a known-good copy, each asserting the validator names that specific failure. `tools/audit_floor.py` has done this for the floor's 20 checks since v7.101.0; the canonical validator had nothing.
+
+The harness lied three ways before it worked, and all three are the shapes this repository keeps meeting. It searched the whole output, so "at most one", "cyclic" and "dangling needs" matched the PASS lines announcing those very checks had succeeded -- five cases scoring as proving nothing when the harness was at fault. Its UTF-16 sentinel evaluated to `None`, so that case deleted the file it meant to re-encode. And the `goal_mode` mutation was a no-op, because this repository already runs with `goal_mode: true`.
+
+So the control run is now a precondition rather than a formality: a case whose expected text is already present before the mutation fails loudly, because a message that is always there is not evidence. Comparison is against FAIL/WARN lines only.
+
+Red-tested twice, in both directions that matter: raising one cap out of reach kills exactly one case, and silencing `fail()` entirely kills 39 of 41 -- the two survivors being the WARN-based cases, which is correct rather than a gap.
+
+One case was deliberately retired instead of kept. The phantom-version check needs the tag half of the release ledger, and this harness copies the tree without `.git` on purpose; without tags the check correctly declines to run, so a case for it could only ever match the WARN saying it was skipped. That is on the record in the file, rather than a case that quietly proves nothing.
+
 ## 7.118.0 -- 2026-07-30 -- the file that exists to end self-report, read by nobody
 
 Three releases running found the same shape -- a field with a full specification and no reader -- and all three found it by luck. So this one stopped hunting by luck: every `MUST` sentence across the 18 normative documents, pulled out and cross-checked against the artifacts any tool actually mentions. 192 MUSTs, 77 named artifacts, 14 candidates, one real.
