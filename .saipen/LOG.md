@@ -171,3 +171,27 @@
 - 31.07.26 15:43 [E-1196] [parent: E-1195] [T-360] RUN: VERIFY -> post-repair validator/scenarios/ruff/order/audit_checks PASS; isolated parity 42/base 11 PASS; conf: high.
 - 31.07.26 15:43 [E-1197] [parent: E-1196] [T-360] DEC: goal_tickets 16->17
 - 31.07.26 15:44 [E-1198] [parent: E-1197] [T-360] DEC: SHIP after FIXES -- second review confirms one tag query, visible failure, green isolated parity, and clean diff.
+- 31.07.26 15:45 [E-1199] [parent: E-1198] [T-360] RUN: ship v7.129.0 -> pushed 193b6e4
+- 31.07.26 15:46 [E-1200] [parent: E-1199] [T-360] RUN: DONE -> ticket complete
+- 31.07.26 15:47 [E-1201] [parent: E-1200] RUN: hunt -> clean @193b6e4
+- 31.07.26 15:48 [E-1202] [parent: E-1201] [T-361] RUN: add -> T-361 make last_event a real recoverable freshness marker, RETURN SCOUT
+- 31.07.26 15:48 [E-1203] [parent: E-1202] [T-361] DEC: goal_waves 2->3
+- 31.07.26 15:53 [E-1204] [parent: E-1203] DEC: agent seat claude-opus -> codex-root; different actor, seat is not shared.
+- 31.07.26 15:53 [E-1205] [parent: E-1204] DEC: goal pivot -> Wave 4 prove guards by execution; reset goal_waves 3->0 and goal_tickets 17->0.
+- 31.07.26 15:54 [E-1206] [parent: E-1205] RUN: PLAN -> T-363 executable guards, T-364 root ownership, T-365 release-ledger retirement; T-361 demoted below Wave 4.
+- 31.07.26 15:54 [E-1207] [parent: E-1206] DEC: goal_waves 0->1
+- 31.07.26 15:54 [E-1208] [parent: E-1207] [T-363] DEC: claimed executable injector probes and script-text guard sweep.
+- 31.07.26 15:56 [E-1209] [parent: E-1208] [T-363] DEC: goal pivot -> T-359 approved; returned untouched T-363 to TODO; reset goal_waves 1->0 and goal_tickets 0->0.
+- 31.07.26 15:56 [E-1210] [parent: E-1209] [T-359] H: corrected false board fact after measurement: remote-v7101 0f6328e->1e42a89, distinct from v7.101.0 8ea775a->89bda01; commit is ancestor of main and contained by later tags.
+- 31.07.26 15:57 [E-1211] [parent: E-1210] [T-359] RUN: PLAN -> delete approved refs, verify commit retention, then trace and close creator path.
+- 31.07.26 15:57 [E-1212] [parent: E-1211] DEC: goal_waves 0->1
+- 31.07.26 15:57 [E-1213] [parent: E-1212] [T-359] DEC: claimed corrected and explicitly approved stray-tag deletion.
+- 31.07.26 15:58 [E-1214] [parent: E-1213] [T-359] RUN: SCOUT -- delete remote then local; verify absence/ancestry; trace creator through repo, Event Graph, reflogs, and shell histories.
+- 31.07.26 16:01 [E-1215] [parent: E-1214] [T-359] RUN: deleted explicitly approved origin/local remote-v7101 refs; remote/local absent, 1e42a89 remains a commit and ancestor of main.
+- 31.07.26 16:03 [E-1216] [parent: E-1215] [T-359] H: creator traced to Claude session bbdc9581-76e8-41f0-9ef6-f422e9c9acb8 -- one-off `git fetch origin refs/tags/v7.101.0:refs/tags/remote-v7101 --force`; 0f6328e is a prior annotated v7.101.0 object, distinct from the current v7.101.0 object; later `--follow-tags` was the live publication path.
+- 31.07.26 16:08 [E-1217] [parent: E-1216] [T-359] RUN: build -> SHIP now pushes one exact release-tag ref and explicitly forbids --tags/--follow-tags; creator command is not present in any live repo script.
+- 31.07.26 16:12 [E-1218] [parent: E-1217] [T-359] RUN: VERIFY -> remote/local refs absent; 1e42a89 commit retained and ancestor of main; temp bare origin with intended+stray tags received only intended exact ref; validator and 15 executable scenarios PASS; conf: high.
+- 31.07.26 16:12 [E-1219] [parent: E-1218] [T-359] DEC: goal_tickets 0->1
+- 31.07.26 16:15 [E-1220] [parent: E-1219] [T-359] DEC: SHIP -- review pass 1 confirms exact object provenance, retained commit, absent refs, no live creator script, and exact-tag publication contract; no P0-P2 findings.
+- 31.07.26 16:18 [E-1221] [parent: E-1220] [T-359] RUN: SHIP preflight -> ticket work complete; prepare v7.130.0 metadata and rerun gates before commit/tag/push.
+- 31.07.26 16:25 [E-1222] [parent: E-1221] [T-359] RUN: SHIP preflight v7.130.0 -> validator/scenarios/ruff/order PASS; audit_checks 42/42; parity 11/42 baseline PASS; tag audit 195 with no new mismatch; generated tracked pyc restored; no commit/tag/push begun.

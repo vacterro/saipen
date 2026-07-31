@@ -2,6 +2,12 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.130.0 -- 2026-07-31 -- publish the release you named
+
+`remote-v7101` was not an alias of the current `v7.101.0` object. It was a distinct, earlier annotated object whose embedded tag name was also `v7.101.0`, preserved under a temporary local ref while a mistag was investigated. That ref was created by a one-off Claude session command, not by a live repository script. It later escaped because SHIP said only "push tags", and `git push --follow-tags` selected the unrelated annotated tag from ambient local state.
+
+The explicitly approved local and remote refs are gone. Their peeled commit, `1e42a89`, remains an ancestor of `main` and is contained by `v7.101.0` and every later release, so deleting the names discarded no commit. SHIP now pushes the branch and one exact `refs/tags/vVERSION` ref in separate commands; `--tags` and `--follow-tags` are forbidden for releases. A temporary bare-origin probe with both an intended and a stray annotated tag proved that the prescribed refspec publishes only the intended one.
+
 ## 7.129.0 -- 2026-07-31 -- one observation, two checks
 
 The release ledger asked Git for its tag list twice. The first query fed the phantom-version check and warned when tags were unavailable; the second independently fed the tag-vs-CHANGELOG comparison and swallowed its own error with `except: pass`. A transient failure between those calls could therefore make one validation run say tags were available and silently skip the comparison that needed them.

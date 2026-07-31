@@ -55,7 +55,13 @@ project. Then STATE -> `DONE` directly, same as a normal successful ship.
    metadata edit; a gate run before VERSION/README/CHANGELOG changed proves the
    old release, not the one about to ship. Once green, commit the reviewed
    changes, then push the branch.
-6. `git tag -a vVERSION -m "line"` + push tags.
+6. Create the release tag, then push that exact ref only:
+   `git tag -a vVERSION -m "line"` followed by
+   `git push origin refs/tags/vVERSION:refs/tags/vVERSION`.
+   `git push --tags` and `git push --follow-tags` are forbidden here: both
+   select from unrelated local tag state, so a temporary inspection tag can
+   become a published artifact without appearing in the release plan. The
+   branch push in step 5 and this one named tag push are separate commands.
 7. First publish -- no `origin` yet, **or `origin` exists but the remote has
    zero commits/tags on it** (added early, never actually published to --
    the same one-way door, just reached by `git remote add` instead of never

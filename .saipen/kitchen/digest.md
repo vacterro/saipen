@@ -1,3 +1,3 @@
-done: v7.128.0 shipped; SHIP preflight repair loop verified and published
-remaining: maintenance HUNT under active goal mode
-awaiting: approval or refusal to delete accidentally published remote tag remote-v7101 (T-359)
+done: T-359 verified; v7.130.0 exact-tag release prepared
+remaining: Wave 4 T-363/T-364/T-365, then T-361
+awaiting: nothing
