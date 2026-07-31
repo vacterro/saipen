@@ -1,3 +1,3 @@
-done: T-369 verified and v7.138.0 prepared -- exports bind to the project owner
-remaining: publish v7.138.0, then T-370 launcher truthfulness
+done: T-370 verified and v7.139.0 prepared -- crew success means three accepted launches
+remaining: publish v7.139.0, then T-371 remove distributed bytecode
 awaiting: nothing

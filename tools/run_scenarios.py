@@ -608,6 +608,77 @@ def run_export_probes() -> tuple[list[str], int, int]:
     return problems, checked, skipped
 
 
+def run_crew_probes() -> tuple[list[str], int, int]:
+    """Execute the Unix crew launcher against controlled terminal processes."""
+    bash = find_bash()
+    if not bash:
+        print("SKIP: bootstrap/saipen_crew.sh probes -- no usable bash")
+        return [], 0, 2
+
+    problems = []
+    checked = 0
+    with tempfile.TemporaryDirectory(prefix="saipen-crew-") as raw:
+        sandbox = Path(raw)
+        shim_dir = sandbox / "bin"
+        shim_dir.mkdir()
+        probe_log = sandbox / "launcher.log"
+        converted = subprocess.run(
+            [bash, "-lc", 'cygpath -u "$1" 2>/dev/null || printf "%s" "$1"',
+             "saipen-crew", str(probe_log)],
+            capture_output=True, text=True, errors="replace")
+        log_path = converted.stdout.strip() if converted.returncode == 0 else str(probe_log)
+        launcher_source = (
+            "#!/usr/bin/env sh\n"
+            'printf "%s\\n" "$*" >> "$SAIPEN_CREW_PROBE_LOG"\n'
+            'exit "$SAIPEN_CREW_PROBE_EXIT"\n')
+        for name in ("gnome-terminal", "konsole", "xterm"):
+            launcher = shim_dir / name
+            launcher.write_text(launcher_source, encoding="utf-8", newline="\n")
+            launcher.chmod(0o755)
+
+        env = bash_env(bash, sandbox)
+        env["PATH"] = str(shim_dir) + os.pathsep + env.get("PATH", "")
+        env["SAIPEN_CREW_LAUNCH_GRACE"] = "0.05"
+        env["SAIPEN_CREW_PROBE_LOG"] = log_path
+        command = [bash, str(HOME / "bootstrap" / "saipen_crew.sh")]
+
+        env["SAIPEN_CREW_PROBE_EXIT"] = "9"
+        failed = subprocess.run(
+            command, cwd=HOME, env=env, capture_output=True, text=True,
+            errors="replace")
+        checked += 1
+        failed_output = failed.stdout + failed.stderr
+        failed_calls = (probe_log.read_text(encoding="utf-8").splitlines()
+                        if probe_log.is_file() else [])
+        if (failed.returncode == 0 or "Done." in failed_output
+                or "FAILED:" not in failed_output or len(failed_calls) != 9):
+            problems.append(
+                "bootstrap/saipen_crew.sh broken launcher: expected nine "
+                f"failed fallback calls, focused nonzero, and no Done; got {len(failed_calls)}")
+        else:
+            print("PASS: bootstrap/saipen_crew.sh broken launcher -- exits nonzero without Done")
+
+        probe_log.unlink(missing_ok=True)
+        env["SAIPEN_CREW_PROBE_EXIT"] = "0"
+        succeeded = subprocess.run(
+            command, cwd=HOME, env=env, capture_output=True, text=True,
+            errors="replace")
+        checked += 1
+        succeeded_output = succeeded.stdout + succeeded.stderr
+        calls = (probe_log.read_text(encoding="utf-8").splitlines()
+                 if probe_log.is_file() else [])
+        if (succeeded.returncode != 0 or "Done. Launched 3 crew windows." not in succeeded_output
+                or len(calls) != 3):
+            problems.append(
+                "bootstrap/saipen_crew.sh working launcher: expected three "
+                "accepted calls and truthful Done, got "
+                f"rc={succeeded.returncode} calls={len(calls)}")
+        else:
+            print("PASS: bootstrap/saipen_crew.sh working launcher -- three accepted calls")
+
+    return problems, checked, 0
+
+
 def run_last_event_probes() -> tuple[list[str], int]:
     """Execute the schema-v1 to schema-v2 checkpoint migration boundary."""
     problems = []
@@ -766,6 +837,8 @@ root_failures, root_checked = run_project_root_probes()
 failures.extend(root_failures)
 export_failures, export_checked, export_skipped = run_export_probes()
 failures.extend(export_failures)
+crew_failures, crew_checked, crew_skipped = run_crew_probes()
+failures.extend(crew_failures)
 last_event_failures, last_event_checked = run_last_event_probes()
 failures.extend(last_event_failures)
 
@@ -776,6 +849,8 @@ print(f"{injector_checked} injector(s) executed, "
 print(f"{root_checked} project-root behavior(s) executed")
 print(f"{export_checked} export ownership behavior(s) executed, "
       f"{export_skipped} skipped for missing interpreters")
+print(f"{crew_checked} crew-launch behavior(s) executed, "
+      f"{crew_skipped} skipped for missing interpreters")
 print(f"{last_event_checked} last_event migration behavior(s) executed")
 
 if failures:

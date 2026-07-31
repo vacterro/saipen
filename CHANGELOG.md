@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.139.0 -- 2026-07-31 -- crew launch success means three terminals accepted
+
+The Unix crew launcher selected a terminal executable by name, backgrounded some variants, ignored every launch status, and always printed that three windows were launched. A missing display, rejected option, or immediately failing launcher therefore produced the same completion claim as three accepted terminals.
+
+Each detached launcher is now observed through a bounded startup window. A nonzero exit advances to the next available launcher; an accepted process stops fallback for that crew seat. Exhausting installed launchers exits nonzero without `Done.`, while the no-emulator command-printing fallback explicitly reports zero launched windows. The completion line is reachable only after all three seats are accepted.
+
+The executable scenario harness supplies controlled terminal shims. Its all-fail run records nine attempted processes across three launchers and three seats, exits nonzero, and cannot print `Done.`; its first-success run records exactly three calls and reports exactly three launched windows.
+
 ## 7.138.0 -- 2026-07-31 -- exports belong to the project, not the shell
 
 Both export scripts treated ambient cwd as the project root. Invocation from a nested directory failed, a foreign repository could export the wrong state, and a linked worktree could not reach the main worktree's shared `.saipen/`. The scripts now use the same explicit/Git-common/non-Git ownership contract as the Core bootstrap and write the archive beside the resolved owner.

@@ -89,3 +89,16 @@
 - 31.07.26 19:38 [E-1329] [parent: E-1328] [T-369] DEC: SHIP after FIXES -- explicit, Git-common, worktree, ancestor, empty-root, and external-git-dir boundaries are behaviorally proved; no P0-P1 findings.
 - 31.07.26 19:38 [E-1330] [parent: E-1329] [T-369] RUN: SHIP preflight -> origin/main 6a8b9fc; v7.138.0 and remote-v7101 absent local/remote; unrelated subSaipen checkpoints excluded.
 - 31.07.26 19:39 [E-1331] [parent: E-1330] [T-369] RUN: SHIP gate -> ownership 12/12, canonical 44/44, scenarios/tags/validator/ruff/order PASS; v7.138.0 prepared.
+- 31.07.26 19:40 [E-1332] [parent: E-1331] [T-369] RUN: ship v7.138.0 -> pushed 97f1df0
+- 31.07.26 19:40 [E-1333] [parent: E-1332] [T-369] RUN: DONE -> ticket complete
+- 31.07.26 19:40 [E-1334] [parent: E-1333] [T-370] DEC: claimed terminal-launch truthfulness with executable failed and successful launcher controls.
+- 31.07.26 19:42 [E-1335] [parent: E-1334] [T-370] RUN: SCOUT -- launcher selection observes detached process failure before falling through; distinguish three accepted launches, no-emulator printed hints, and exhausted launcher failure.
+- 31.07.26 19:45 [E-1336] [parent: E-1335] [T-370] RUN: BUILD -> detached launcher status is observed before fallback; exhausted failures cannot reach Done; broken and three-call success controls PASS.
+- 31.07.26 19:47 [E-1337] [parent: E-1336] [T-370] RUN: VERIFY -> crew launch controls 2/2; canonical 44/44; validator/scenarios/ruff/order/tags PASS; conf: high.
+- 31.07.26 19:47 [E-1338] [parent: E-1337] [T-370] DEC: goal_tickets 14->15
+- 31.07.26 19:48 [E-1339] [parent: E-1338] [T-370] DEC: REVIEW -> BUILD -- broken control proves failure but not fallback traversal; require nine attempted calls versus three after first-launcher success.
+- 31.07.26 19:49 [E-1340] [parent: E-1339] [T-370] RUN: build proof -> all-fail control observes nine fallback calls; first-success control observes three and no surplus fallback.
+- 31.07.26 19:51 [E-1341] [parent: E-1340] [T-370] RUN: VERIFY after proof fix -> crew controls 2/2 with 9/3 call counts; canonical 44/44 and all release gates PASS; conf: high.
+- 31.07.26 19:52 [E-1342] [parent: E-1341] [T-370] DEC: SHIP after FIXES -- observed failures traverse fallback, accepted launches stop it, and completion requires three successes; no P0-P1 findings.
+- 31.07.26 19:53 [E-1343] [parent: E-1342] [T-370] RUN: SHIP preflight -> origin/main 97f1df0; v7.139.0 and remote-v7101 absent local/remote; unrelated subSaipen checkpoints excluded.
+- 31.07.26 19:55 [E-1344] [parent: E-1343] [T-370] RUN: SHIP gate -> crew 2/2 with 9/3 calls, canonical 44/44, scenarios/tags/validator/ruff/order PASS; v7.139.0 prepared.
