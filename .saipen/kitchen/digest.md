@@ -1,3 +1,3 @@
-done: v7.127.0 shipped; T-355 local skill frontmatter repaired and verified
-remaining: T-358 repair SHIP preflight route
+done: v7.128.0 shipped; SHIP preflight repair loop verified and published
+remaining: maintenance HUNT under active goal mode
 awaiting: approval or refusal to delete accidentally published remote tag remote-v7101 (T-359)

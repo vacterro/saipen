@@ -2306,14 +2306,17 @@ else:
                 r"^## (\d+\.\d+\.\d+)",
                 _chg.read_text(encoding="utf-8-sig"), re.MULTILINE))
         _tag_list = set()
+        _tag_problem = None
         try:
             _r = subprocess.run(["git", "tag", "-l", "v*"],
                                 capture_output=True, text=True, check=False)
             if _r.returncode == 0:
                 _tag_list = {ln.strip()[1:] for ln in _r.stdout.splitlines()
                              if ln.strip().startswith("v")}
-        except (OSError, subprocess.SubprocessError):
-            pass
+            else:
+                _tag_problem = f"git tag -l exited {_r.returncode}"
+        except (OSError, subprocess.SubprocessError) as _e:
+            _tag_problem = f"git tag -l failed: {_e}"
         _ledger |= _tag_list
 
         def _rel(p):
@@ -2339,10 +2342,12 @@ else:
         # Both halves present, or the check does not run.
         _tags_seen = bool(_tag_list)
         if not _tags_seen:
+            _tag_detail = f" ({_tag_problem})" if _tag_problem else ""
             warn("release-ledger",
                  "git tag list unavailable or empty -- the release ledger has "
                  "only its CHANGELOG half, so the phantom-version check is "
-                 "skipped rather than run against incomplete data")
+                 "skipped rather than run against incomplete data"
+                 f"{_tag_detail}")
         if _known and _tags_seen:
             # Below the oldest entry the ledger simply has no memory -- those
             # citations predate both files and cannot be decided here. Silence
@@ -2391,16 +2396,7 @@ else:
                 _chg_v = {t for t in (_tup(v) for v in re.findall(
                     r"^## (\d+\.\d+\.\d+)",
                     _chg.read_text(encoding="utf-8-sig"), re.MULTILINE)) if t}
-            _tag_v = set()
-            try:
-                _r = subprocess.run(["git", "tag", "-l", "v*"],
-                                    capture_output=True, text=True, check=False)
-                if _r.returncode == 0:
-                    _tag_v = {t for t in (_tup(ln.strip()[1:])
-                                          for ln in _r.stdout.splitlines()
-                                          if ln.strip().startswith("v")) if t}
-            except (OSError, subprocess.SubprocessError):
-                pass
+            _tag_v = {t for t in (_tup(v) for v in _tag_list) if t}
 
             def _vs(versions):
                 # The count above and this list have to agree, or the message

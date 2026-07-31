@@ -4,7 +4,8 @@
 ## TODO
 
 ## DONE
-- [x] T-358 [P0] Added a pre-commit SHIP -> BUILD repair loop, explicit validator rerun/commit/push order, stable red-test, and executable scenario. | verify: validator PASS; scenarios 15/15; audit_checks 42/42
+- [x] T-360 [P1] Release-ledger now observes `git tag -l` once, reuses the snapshot for both checks, and reports the actual failure cause instead of silently skipping the second comparison. | review_passes: 2 | verify: validator/scenarios/ruff/order PASS; audit_checks 42/42 + duplicate-query red-control PASS; no-Git cause visible; parity 42/base 11 PASS
+- [x] T-358 [P0] Added a pre-commit SHIP -> BUILD repair loop, explicit validator rerun/commit/push order, stable red-test, and executable scenario. | verify: validator PASS; scenarios 15/15; audit_checks 42/42; audit_parity baseline 11/42 PASS; v7.128.0 pushed
 - [x] T-357 [P0] Both floor harnesses now reject System32 WSL stubs and add Git usr/bin only to child PATH. | verify: audit_floor 20x2 PASS; audit_parity 42 cases/base 11 PASS; lowercase stub red-control PASS
 - [x] T-355 Removed BOM from audit-domains/templates and quoted audit-domains' colon-bearing YAML description. | verify: 2/2 ASCII delimiters, no BOM, PyYAML PASS, Codex startup clean
 - [x] T-356 [P0] Fixed shell injector delete-after-create order, added PowerShell unsafe-destination parity, and made the validator enforce recreation order. | verify: functional shell install PASS; ordering red-test PASS; audit_checks 42/42

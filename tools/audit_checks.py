@@ -48,6 +48,15 @@ LOG = ".saipen/LOG.md"
 DIGEST = ".saipen/kitchen/digest.md"
 MANIFEST = ".saipen/kitchen/markhunt_progress.md"
 SUB = ".saipen/extensions/subs/saiwiki/STATE.md"
+TAG_QUERY = '["git", "tag", "-l", "v*"]'
+
+
+def tag_query_problem(source: str) -> str | None:
+    """The release ledger must observe tags once, then reuse that snapshot."""
+    count = source.count(TAG_QUERY)
+    if count != 1:
+        return f"release ledger has {count} git tag queries; expected exactly 1"
+    return None
 
 
 def sub_line(field: str, value: str):
@@ -281,6 +290,14 @@ def validator_output(root: Path) -> str:
 
 
 def main() -> int:
+    validator_source = (HOME / "tools" / "validate.py").read_text(
+        encoding="utf-8-sig")
+    query_problem = tag_query_problem(validator_source)
+    red_control = tag_query_problem(validator_source + "\n" + TAG_QUERY)
+    if query_problem or red_control is None:
+        print(f"FAIL: {query_problem or 'duplicate tag-query red-control stayed green'}")
+        return 1
+
     tmp = Path(tempfile.mkdtemp(prefix="audit_checks_"))
     pristine = tmp / "pristine"
     shutil.copytree(HOME, pristine, ignore=IGNORE)
@@ -342,6 +359,8 @@ def main() -> int:
         print(f"\n{len(dead) + len(always)} of {len(CASES)} case(s) are not "
               f"evidence any more.")
         return 1
+    print("PASS: release-ledger tag query is observed once and its duplicate "
+          "red-control fails")
     print(f"PASS: {live} of {len(CASES)} validator check(s) still go red on "
           f"their own condition"
           + (f" ({len(skipped)} skipped)" if skipped else ""))

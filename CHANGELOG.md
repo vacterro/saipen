@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.129.0 -- 2026-07-31 -- one observation, two checks
+
+The release ledger asked Git for its tag list twice. The first query fed the phantom-version check and warned when tags were unavailable; the second independently fed the tag-vs-CHANGELOG comparison and swallowed its own error with `except: pass`. A transient failure between those calls could therefore make one validation run say tags were available and silently skip the comparison that needed them.
+
+The validator now observes tags once and reuses that immutable snapshot for both checks. A failed or non-zero query produces one warning with the actual cause. `audit_checks.py` pins the single-query invariant and proves its duplicate-query red-control fails.
+
+The maintenance sweep also removed one completed MARKHUNT manifest and cleared three subSaipen OUTBOX files whose entries were already `reviewed` or explicitly `stale`. Their durable results remain in the main LOG, BOARD, and CHANGELOG; the kitchen no longer keeps second copies indefinitely.
+
 ## 7.128.0 -- 2026-07-31 -- SHIP could fail only by giving up
 
 SHIP requires 100% green, but its DFA row allowed only `DONE` or `BLOCKED`. A fixable failure found during release preparation therefore had no legal route back to BUILD. This happened immediately in v7.126.0: preflight found the shell injector deleting `tests/` after creating it. The fix was known and local, but returning to BUILD was non-conformant; entering BLOCKED would have lied about needing human input and ended goal mode.

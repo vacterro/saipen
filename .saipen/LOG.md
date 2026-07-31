@@ -157,3 +157,17 @@
 - 31.07.26 15:32 [E-1182] [parent: E-1181] [T-358] RUN: VERIFY -> validator and 15 executable scenarios PASS after boundary fix; conf: high.
 - 31.07.26 15:32 [E-1183] [parent: E-1182] [T-358] DEC: goal_tickets 14->15
 - 31.07.26 15:33 [E-1184] [parent: E-1183] [T-358] DEC: SHIP -- preflight BUILD edge ends at commit; publish recovery remains step 9.
+- 31.07.26 15:34 [E-1185] [parent: E-1184] [T-358] RUN: ship v7.128.0 -> pushed 5879fc5
+- 31.07.26 15:35 [E-1186] [parent: E-1185] [T-358] RUN: DONE -> ticket complete
+- 31.07.26 15:36 [E-1187] [parent: E-1186] [T-360] RUN: HUNT -> six signals swept @5879fc5; tests/commits/markers/symmetry/dead-code clean; pruned four stale sub kitchen artifacts; release-ledger transient tag-list failure found.
+- 31.07.26 15:36 [E-1188] [parent: E-1187] [T-360] DEC: claimed duplicate git-tag query whose second failure is silently swallowed.
+- 31.07.26 15:37 [E-1189] [parent: E-1188] [T-360] RUN: SCOUT -- reuse one tag observation for both ledger checks; expose its failure once; pin one-query invariant in audit_checks.
+- 31.07.26 15:38 [E-1190] [parent: E-1189] [T-360] RUN: build -> one tag snapshot feeds both ledger checks; tag failure is named once; duplicate-query red-control added.
+- 31.07.26 15:39 [E-1191] [parent: E-1190] [T-360] RUN: VERIFY -> validator, ruff, audit_order, audit_checks 42/42 PASS; no-Git run names tag query failure; conf: high.
+- 31.07.26 15:39 [E-1192] [parent: E-1191] [T-360] DEC: goal_tickets 15->16
+- 31.07.26 15:40 [E-1193] [parent: E-1192] [T-360] DEC: SHIP -- one reusable tag snapshot; failure remains visible; cleanup bounded to stale reviewed sub kitchen content.
+- 31.07.26 15:41 [E-1194] [parent: E-1193] [T-360] H: SHIP preflight -> audit_parity exits 1 without a summary after validator/scenarios/ruff/order/audit_checks all pass; no commit/tag/push begun.
+- 31.07.26 15:42 [E-1195] [parent: E-1194] [T-360] RUN: build -> isolated parity from composite gate and raised orchestration timeout 120s->360s; PASS 42/base 11 in 207.6s, no code defect.
+- 31.07.26 15:43 [E-1196] [parent: E-1195] [T-360] RUN: VERIFY -> post-repair validator/scenarios/ruff/order/audit_checks PASS; isolated parity 42/base 11 PASS; conf: high.
+- 31.07.26 15:43 [E-1197] [parent: E-1196] [T-360] DEC: goal_tickets 16->17
+- 31.07.26 15:44 [E-1198] [parent: E-1197] [T-360] DEC: SHIP after FIXES -- second review confirms one tag query, visible failure, green isolated parity, and clean diff.
