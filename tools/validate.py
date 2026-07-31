@@ -1339,6 +1339,41 @@ if log_files:
                      f"lines, so a crash losing STATE.md loses the safety-valve "
                      f"budget with it (RFC § 2.4)")
 
+        # RFC § 1.5 rebuilds the counters by counting bumps since the newest
+        # goal marker -- a `DEC: goal pivot` or a `DEC: goal reauthorized`.
+        # The re-authorization marker exists because bare `saipen goal` resets
+        # both counters to 0: without a line marking that drop, Recovery counts
+        # from the older pivot, rebuilds the pre-reset totals, and re-trips a
+        # valve the human just cleared -- while § 2.4 forbids "tidying" the
+        # counters back down. So the reset is only safe if it is countable.
+        # This compares the rebuild against STATE instead of grepping for the
+        # line's presence: a marker that exists but does not explain the
+        # counters is exactly the failure, and only replaying the count sees it.
+        # Only increments count -- a reset line's own `N->0` is a drop, not a
+        # completed wave or ticket.
+        _marker = re.compile(r"DEC: goal (?:pivot|reauthorized)\b")
+        _log_lines = [ln for p in log_files for ln in read_doc(p).splitlines()]
+        _last_marker = max(
+            (i for i, ln in enumerate(_log_lines) if _marker.search(ln)),
+            default=None)
+        if _last_marker is not None:
+            for counter in ("goal_waves", "goal_tickets"):
+                if not isinstance(state.get(counter), int):
+                    continue
+                rebuilt = sum(
+                    1 for ln in _log_lines[_last_marker + 1:]
+                    for m in [re.search(rf"DEC: {counter} (\d+)->(\d+)", ln)]
+                    if m and int(m.group(2)) > int(m.group(1)))
+                if rebuilt != state[counter]:
+                    fail(f"STATE.md {counter} is {state[counter]} but replaying "
+                         f"§ 1.5 Recovery from the newest goal marker rebuilds "
+                         f"{rebuilt} -- a crash here would resume this run on the "
+                         f"rebuilt number, not the one in STATE. Either a bump "
+                         f"reached STATE without its `DEC: {counter} N->M` line, "
+                         f"or a reset dropped the counter without the "
+                         f"`DEC: goal reauthorized` line that makes the drop "
+                         f"countable (RFC § 1.5, § 2.4)")
+
     documented_inversions = any(
         "observed historical timestamp inversions" in
         p.read_text(encoding="utf-8-sig", errors="replace")

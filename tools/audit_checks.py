@@ -393,6 +393,13 @@ CASES: list[tuple[str, str, object, str]] = [
     ("last_event above the log tail", STATE,
      sub_line("last_event", "999999"),
      "higher than the log"),
+    # The counter STATE carries must survive being rebuilt from the LOG the
+    # way § 1.5 Recovery rebuilds it. Mutating STATE alone leaves the log
+    # untouched, so the two disagree exactly as they would after an untraced
+    # bare-`saipen goal` reset.
+    ("goal counter STATE cannot survive its own rebuild", STATE,
+     sub_line("goal_tickets", "7"),
+     "newest goal marker rebuilds"),
     ("requires: a capability nobody defines", STATE,
      replace("  - python", "  - pyhton"), "handshake vocabulary"),
 
