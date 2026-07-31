@@ -1,14 +1,14 @@
 ---
 phase: SHIP
-task: T-375
-next_action: "PHASE SHIP T-375"
+task: T-376
+next_action: "PHASE SHIP T-376"
 blocker: none
 transition_from: REVIEW
 saipen_version: 7
 schema_version: 2
-last_event: 1404
+last_event: 1417
 saipen_home: "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN"
-agent: codex-root
+agent: claude-opus
 requires:
   - filesystem
   - git
@@ -16,6 +16,6 @@ requires:
 mode: full
 goal_mode: true
 goal_waves: 0
-goal_tickets: 0
-updated: 2026-07-31T20:47:00Z
+goal_tickets: 1
+updated: 2026-07-31T21:22:00Z
 ---

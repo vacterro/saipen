@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.145.0 -- 2026-07-31 -- the Windows crew launcher reports what happened
+
+`bootstrap/saipen_crew.bat` fired three `start` calls and then printed "Three crew windows opened." unconditionally. None of the three statuses was read, so a launcher that refused every window still reported full success -- the same defect the Unix twin lost in T-370.
+
+Each launch now goes through one status-observing subroutine. A refused window stops the run, names which of the three failed, and exits nonzero without the success line. The accepted count in that message comes from the counter the script actually maintains rather than a literal typed into each branch, so the numbers cannot drift from the launches.
+
+Four executable controls run the real BAT under real `cmd.exe` with a shim launcher that refuses call 1, 2, or 3, plus a run where all three are accepted. A behavioral red-test -- making the subroutine swallow the shim's status instead of returning it -- turns all three failure controls red with `got rc=0 calls=3`, and restoring it returns them to green. Coverage stops at status propagation: `start` itself is not exercised, because exercising it means opening three real windows.
+
 ## 7.144.0 -- 2026-07-31 -- hooks resolve Bash for the Bash floor
 
 The generated POSIX pre-commit hook runs under `/bin/sh`, but its no-Python fallback invoked the Bash-only portable floor through that same `sh`. On systems where `/bin/sh` is dash, a healthy project was rejected on the floor's Bash syntax before validation began.

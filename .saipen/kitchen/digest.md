@@ -1,3 +1,3 @@
-done: T-375 BUILD and VERIFY pass; review and ship remain
-remaining: T-375 review/ship, then T-376 Windows crew and T-377 digest warning
-awaiting: safety valve at 1 wave / 20 tickets; run saipen goal to continue
+done: T-376 Windows crew launcher now reports observed start statuses; shipping as v7.145.0
+remaining: T-378 (P0 goal re-auth trace), T-379 (behavioral red-test rule), T-380 (gg alias), T-377 (pre-tag digest warning)
+awaiting: nothing -- codex-root limit-locked until 2026-08-07, seat held by claude-opus

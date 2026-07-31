@@ -798,74 +798,140 @@ def run_export_probes() -> tuple[list[str], int, int]:
 
 
 def run_crew_probes() -> tuple[list[str], int, int]:
-    """Execute the Unix crew launcher against controlled terminal processes."""
+    """Execute both crew launchers against controlled start processes."""
     bash = find_bash()
-    if not bash:
-        print("SKIP: bootstrap/saipen_crew.sh probes -- no usable bash")
-        return [], 0, 2
-
     problems = []
     checked = 0
-    with tempfile.TemporaryDirectory(prefix="saipen-crew-") as raw:
-        sandbox = Path(raw)
-        shim_dir = sandbox / "bin"
-        shim_dir.mkdir()
-        probe_log = sandbox / "launcher.log"
-        converted = subprocess.run(
-            [bash, "-lc", 'cygpath -u "$1" 2>/dev/null || printf "%s" "$1"',
-             "saipen-crew", str(probe_log)],
-            capture_output=True, text=True, errors="replace")
-        log_path = converted.stdout.strip() if converted.returncode == 0 else str(probe_log)
-        launcher_source = (
-            "#!/usr/bin/env sh\n"
-            'printf "%s\\n" "$*" >> "$SAIPEN_CREW_PROBE_LOG"\n'
-            'exit "$SAIPEN_CREW_PROBE_EXIT"\n')
-        for name in ("gnome-terminal", "konsole", "xterm"):
-            launcher = shim_dir / name
-            launcher.write_text(launcher_source, encoding="utf-8", newline="\n")
-            launcher.chmod(0o755)
+    skipped = 0
+    if not bash:
+        print("SKIP: bootstrap/saipen_crew.sh probes -- no usable bash")
+        skipped += 2
+    else:
+        with tempfile.TemporaryDirectory(prefix="saipen-crew-") as raw:
+            sandbox = Path(raw)
+            shim_dir = sandbox / "bin"
+            shim_dir.mkdir()
+            probe_log = sandbox / "launcher.log"
+            converted = subprocess.run(
+                [bash, "-lc", 'cygpath -u "$1" 2>/dev/null || printf "%s" "$1"',
+                 "saipen-crew", str(probe_log)],
+                capture_output=True, text=True, errors="replace")
+            log_path = (converted.stdout.strip() if converted.returncode == 0
+                        else str(probe_log))
+            launcher_source = (
+                "#!/usr/bin/env sh\n"
+                'printf "%s\\n" "$*" >> "$SAIPEN_CREW_PROBE_LOG"\n'
+                'exit "$SAIPEN_CREW_PROBE_EXIT"\n')
+            for name in ("gnome-terminal", "konsole", "xterm"):
+                launcher = shim_dir / name
+                launcher.write_text(launcher_source, encoding="utf-8", newline="\n")
+                launcher.chmod(0o755)
 
-        env = bash_env(bash, sandbox)
-        env["PATH"] = str(shim_dir) + os.pathsep + env.get("PATH", "")
-        env["SAIPEN_CREW_LAUNCH_GRACE"] = "0.05"
-        env["SAIPEN_CREW_PROBE_LOG"] = log_path
-        command = [bash, str(HOME / "bootstrap" / "saipen_crew.sh")]
+            env = bash_env(bash, sandbox)
+            env["PATH"] = str(shim_dir) + os.pathsep + env.get("PATH", "")
+            env["SAIPEN_CREW_LAUNCH_GRACE"] = "0.05"
+            env["SAIPEN_CREW_PROBE_LOG"] = log_path
+            command = [bash, str(HOME / "bootstrap" / "saipen_crew.sh")]
 
-        env["SAIPEN_CREW_PROBE_EXIT"] = "9"
-        failed = subprocess.run(
-            command, cwd=HOME, env=env, capture_output=True, text=True,
-            errors="replace")
-        checked += 1
-        failed_output = failed.stdout + failed.stderr
-        failed_calls = (probe_log.read_text(encoding="utf-8").splitlines()
-                        if probe_log.is_file() else [])
-        if (failed.returncode == 0 or "Done." in failed_output
-                or "FAILED:" not in failed_output or len(failed_calls) != 9):
-            problems.append(
-                "bootstrap/saipen_crew.sh broken launcher: expected nine "
-                f"failed fallback calls, focused nonzero, and no Done; got {len(failed_calls)}")
-        else:
-            print("PASS: bootstrap/saipen_crew.sh broken launcher -- exits nonzero without Done")
+            env["SAIPEN_CREW_PROBE_EXIT"] = "9"
+            failed = subprocess.run(
+                command, cwd=HOME, env=env, capture_output=True, text=True,
+                errors="replace")
+            checked += 1
+            failed_output = failed.stdout + failed.stderr
+            failed_calls = (probe_log.read_text(encoding="utf-8").splitlines()
+                            if probe_log.is_file() else [])
+            if (failed.returncode == 0 or "Done." in failed_output
+                    or "FAILED:" not in failed_output or len(failed_calls) != 9):
+                problems.append(
+                    "bootstrap/saipen_crew.sh broken launcher: expected nine "
+                    "failed fallback calls, focused nonzero, and no Done; got "
+                    f"{len(failed_calls)}")
+            else:
+                print("PASS: bootstrap/saipen_crew.sh broken launcher -- "
+                      "exits nonzero without Done")
 
-        probe_log.unlink(missing_ok=True)
-        env["SAIPEN_CREW_PROBE_EXIT"] = "0"
-        succeeded = subprocess.run(
-            command, cwd=HOME, env=env, capture_output=True, text=True,
-            errors="replace")
-        checked += 1
-        succeeded_output = succeeded.stdout + succeeded.stderr
-        calls = (probe_log.read_text(encoding="utf-8").splitlines()
-                 if probe_log.is_file() else [])
-        if (succeeded.returncode != 0 or "Done. Launched 3 crew windows." not in succeeded_output
-                or len(calls) != 3):
-            problems.append(
-                "bootstrap/saipen_crew.sh working launcher: expected three "
-                "accepted calls and truthful Done, got "
-                f"rc={succeeded.returncode} calls={len(calls)}")
-        else:
-            print("PASS: bootstrap/saipen_crew.sh working launcher -- three accepted calls")
+            probe_log.unlink(missing_ok=True)
+            env["SAIPEN_CREW_PROBE_EXIT"] = "0"
+            succeeded = subprocess.run(
+                command, cwd=HOME, env=env, capture_output=True, text=True,
+                errors="replace")
+            checked += 1
+            succeeded_output = succeeded.stdout + succeeded.stderr
+            calls = (probe_log.read_text(encoding="utf-8").splitlines()
+                     if probe_log.is_file() else [])
+            if (succeeded.returncode != 0
+                    or "Done. Launched 3 crew windows." not in succeeded_output
+                    or len(calls) != 3):
+                problems.append(
+                    "bootstrap/saipen_crew.sh working launcher: expected three "
+                    "accepted calls and truthful Done, got "
+                    f"rc={succeeded.returncode} calls={len(calls)}")
+            else:
+                print("PASS: bootstrap/saipen_crew.sh working launcher -- "
+                      "three accepted calls")
 
-    return problems, checked, 0
+    cmd = os.environ.get("COMSPEC") or shutil.which("cmd")
+    if not cmd:
+        print("SKIP: bootstrap/saipen_crew.bat probes -- no cmd.exe")
+        skipped += 4
+    else:
+        with tempfile.TemporaryDirectory(prefix="saipen-crew-bat-") as raw:
+            sandbox = Path(raw)
+            probe_log = sandbox / "launcher.log"
+            launcher = sandbox / "start-probe.cmd"
+            launcher.write_text(
+                "@echo off\n"
+                '>>"%SAIPEN_CREW_PROBE_LOG%" echo call\n'
+                'if "%SAIPEN_CREW_LAUNCH_INDEX%"=="%SAIPEN_CREW_FAIL_AT%" exit /b 9\n'
+                "exit /b 0\n",
+                encoding="utf-8", newline="\r\n")
+            env = os.environ.copy()
+            env["SAIPEN_CREW_START_COMMAND"] = str(launcher)
+            env["SAIPEN_CREW_PROBE_LOG"] = str(probe_log)
+            command = [cmd, "/d", "/c", str(HOME / "bootstrap" / "saipen_crew.bat")]
+
+            for fail_at in (1, 2, 3):
+                probe_log.unlink(missing_ok=True)
+                env["SAIPEN_CREW_FAIL_AT"] = str(fail_at)
+                failed = subprocess.run(
+                    command, cwd=HOME, env=env, capture_output=True, text=True,
+                    errors="replace")
+                checked += 1
+                output = failed.stdout + failed.stderr
+                calls = (probe_log.read_text(encoding="utf-8").splitlines()
+                         if probe_log.is_file() else [])
+                if (failed.returncode == 0 or "Three crew windows opened." in output
+                        or "FAILED:" not in output or len(calls) != fail_at):
+                    problems.append(
+                        f"bootstrap/saipen_crew.bat failed start {fail_at}: "
+                        "expected focused nonzero and no success after "
+                        f"{fail_at} calls; got rc={failed.returncode} calls={len(calls)}")
+                else:
+                    print(f"PASS: bootstrap/saipen_crew.bat failed start {fail_at} "
+                          "-- exits nonzero without success")
+
+            probe_log.unlink(missing_ok=True)
+            env["SAIPEN_CREW_FAIL_AT"] = "0"
+            succeeded = subprocess.run(
+                command, cwd=HOME, env=env, capture_output=True, text=True,
+                errors="replace")
+            checked += 1
+            output = succeeded.stdout + succeeded.stderr
+            calls = (probe_log.read_text(encoding="utf-8").splitlines()
+                     if probe_log.is_file() else [])
+            if (succeeded.returncode != 0
+                    or output.count("Three crew windows opened.") != 1
+                    or len(calls) != 3):
+                problems.append(
+                    "bootstrap/saipen_crew.bat working start: expected three "
+                    "accepted calls and one truthful success, got "
+                    f"rc={succeeded.returncode} calls={len(calls)}")
+            else:
+                print("PASS: bootstrap/saipen_crew.bat working start -- "
+                      "three accepted calls")
+
+    return problems, checked, skipped
 
 
 def run_last_event_probes() -> tuple[list[str], int]:
