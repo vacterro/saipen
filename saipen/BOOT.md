@@ -79,6 +79,11 @@ does not answer.
 - Rule questions `STATE`/`BOARD`/`LOG` + the active phase doc don't answer:
   `saipen/RFC.md` (constitution, authoritative on everything),
   `saipen/STYLE.md` (chat voice), `saipen/UI.md` (UI work only).
+- **`agent:` is inherited, not invented**: keep the value `STATE.md` already
+  carries. It names the seat, not your model build -- § 1.4's concurrency
+  test compares it against itself, and six invented names in one project is
+  what happens otherwise. Genuinely a different actor? Change it and LOG a
+  `DEC` naming both.
 - **Reply language, before any output**: the language the user themselves
   typed. No prose from them yet (a bare command)? **English.** Never inferred
   from the OS/IDE locale, the platform UI, or the files in the repository --

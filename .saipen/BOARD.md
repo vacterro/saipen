@@ -4,6 +4,10 @@
 ## TODO
 
 ## DONE
+- [x] T-349 [P0] 1.4 compares agent: against 'itself' and never said what 'itself' is. Six invented names in this project's own history for two or three actors, plus a LOG line reading [agent: id]. | verify: tools/validate.py PASS (2026-07-31)
+- [x] T-350 [P0] agent: now names the seat and is inherited from STATE; a model upgrade is not a different actor. BOOT carries it, since a cold agent writes the field on its first checkpoint. | verify: tools/validate.py PASS (2026-07-31)
+- [x] T-351 [P1] Placeholder agent values FAIL. The stability rule itself is behavioral and recorded as such. | verify: tools/validate.py PASS (2026-07-31)
+- [x] T-352 [P2] Ship v7.125.0. | verify: tools/validate.py PASS (2026-07-31)
 - [x] T-344 [P0] CONFORMANCE rows can no longer claim an enforcement that was deleted. 144 rows, zero retirements, and nothing made a dead rule loud. | verify: tools/validate.py PASS (2026-07-30)
 - [x] T-345 [P0] RFC 1.6: a repeated attempt must name what changed; nothing changed means the retry is forbidden. verify.md said this for debugging hypotheses only. | verify: tools/validate.py PASS (2026-07-30)
 - [x] T-346 [P1] ship.md's retry-once and verify.md's hypothesis line now inherit the general rule by name instead of restating a fragment of it. | verify: tools/validate.py PASS (2026-07-30)

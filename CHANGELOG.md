@@ -2,6 +2,20 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.125.0 -- 2026-07-31 -- a comparison with one side undefined
+
+Asked whether a second Core could be added to this project, the useful answer turned out to be a defect rather than a yes. RFC § 1.4 decides whether another agent is live by comparing `STATE.md`'s `agent:` against "itself" -- and nothing in the protocol said where an agent gets its own value. One side of that comparison was never defined.
+
+The consequence is measurable in this repository's own history: **six** distinct `agent:` values for what were two or three actual actors -- `claude-opus`, `claude-sonnet-5`, `opencode`, `antigravity`, `antigravity-gemini`, `gemini-pro` -- because every session invented one. A LOG line also reached disk reading `[agent: id]`: the placeholder itself, not a name.
+
+An undefined side makes the test fail in both directions. A model upgrade renames the seat, so the next session sees a stranger and must assume a live concurrent agent that does not exist. And two genuinely different actors both writing a generic value are indistinguishable, which is the case the section exists for.
+
+So the field is defined: `agent:` names the **seat**, not the model build, and a returning agent **inherits** whatever `STATE.md` already carries -- continuing another session's work under the same seat is what this protocol is for. Change it only when genuinely a different actor, and LOG a `DEC` naming both values so the graph shows a handover rather than an unexplained stranger. A model version change is not a different actor.
+
+`BOOT.md` carries it too, because a cold agent writes this field at its first checkpoint, long before it would ever open § 1.4.
+
+The stability half is behavioural and recorded as such: nothing can distinguish an honest handover from a renamed seat. Placeholders are mechanical, and they are the shape that actually escapes -- `id`, `<name>`, `AgentID`, `unknown` all FAIL now.
+
 ## 7.124.0 -- 2026-07-30 -- how a rule dies, and why a retry owes an answer
 
 Two findings, both from checking a list of proposals against the repository instead of against intuition. Most of the list was already here in a finer form -- "acceptance is not completion" is `VERIFY -> REVIEW -> SHIP -> DONE` plus a per-ticket `verify:`, and the suggested five-state outcome taxonomy is coarser than the seven `WAIT:` categories § 1.2 already closes over. Two things were genuinely missing.

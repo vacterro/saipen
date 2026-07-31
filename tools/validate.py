@@ -567,6 +567,21 @@ if isinstance(_req, list):
              f"mode describing what is lost, which it cannot do for a "
              f"capability nobody defines. Check for a typo")
 
+# RFC § 1.4: `agent:` names the seat and is inherited, never invented. Every
+# concurrency rule in that section compares it against "itself", and a
+# placeholder makes both sides meaningless -- one reached this repository's own
+# LOG reading `[agent: id]`. The stability rule itself is behavioural (nothing
+# here can tell a genuine handover from a renamed seat), but a placeholder is
+# mechanical and is the shape that actually escapes.
+AGENT_PLACEHOLDERS = ("id", "<name>", "agentid", "unknown", "agent", "name",
+                      "todo", "tbd", "your-agent-id", "<agent>")
+_ag = state.get("agent")
+if isinstance(_ag, str) and _ag.strip().lower() in AGENT_PLACEHOLDERS:
+    fail(f"STATE.md agent is {_ag!r} -- a placeholder, not a seat name. RFC "
+         f"§ 1.4 compares this field against itself to decide whether another "
+         f"agent is live, and a placeholder makes that comparison meaningless "
+         f"in both directions")
+
 # RFC § 2.4 safety-valve ceilings. Named rather than inlined so the trip check
 # below and any future reader see the same two numbers the RFC states.
 GOAL_WAVE_CAP = 3

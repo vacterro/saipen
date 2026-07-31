@@ -1,3 +1,3 @@
-done: v7.124.0 shipped — a CONFORMANCE row can no longer claim an enforcement that was deleted, and a repeated attempt must name what changed
+done: v7.125.0 shipped — `agent:` names the seat and is inherited, so § 1.4's concurrency comparison finally has two defined sides
 remaining: nothing
 awaiting: nothing
