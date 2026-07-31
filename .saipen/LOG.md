@@ -139,3 +139,14 @@
 - 31.07.26 20:20 [E-1379] [parent: E-1378] [T-373] RUN: SHIP preflight -> origin/main 4cf7a38; v7.142.0 and remote-v7101 absent local/remote; release metadata prepared; unrelated subSaipen checkpoints excluded.
 - 31.07.26 20:21 [E-1380] [parent: E-1379] [T-377] DEC: scope -> TODO -- pre-tag VERSION bump falsely triggers digest-stale before ship.md permits the post-push digest refresh.
 - 31.07.26 20:21 [E-1381] [parent: E-1380] [T-373] RUN: SHIP gate -> missing-Git/rc9 controls, canonical 44/44, floor 27x2, scenarios/tags/validator/ruff/order PASS; expected pre-tag ledger warning and T-377 digest warning; v7.142.0 prepared.
+- 31.07.26 20:22 [E-1382] [parent: E-1381] [T-373] RUN: ship v7.142.0 -> pushed afa27b0
+- 31.07.26 20:22 [E-1383] [parent: E-1382] [T-373] RUN: DONE -> ticket complete
+- 31.07.26 20:22 [E-1384] [parent: E-1383] [T-374] DEC: claimed portable LOG pipeline failure propagation with an executable sed-rc7 control.
+- 31.07.26 20:23 [E-1385] [parent: E-1384] [T-374] RUN: SCOUT -- final grep no-match is legitimate but masks upstream sed failure; normalize filtering through awk under local pipefail and add a targeted sed shim to audit_floor.
+- 31.07.26 20:25 [E-1386] [parent: E-1385] [T-374] RUN: BUILD -> LOG filters normalize grep no-match under local pipefail; targeted sed rc7 exits focused before LOG PASS/completion; floor 27x2 PASS.
+- 31.07.26 20:25 [E-1387] [parent: E-1386] [T-374] DEC: correction -- E-1385's awk plan was superseded; implementation keeps grep semantics and normalizes only rc1 under local pipefail.
+- 31.07.26 20:26 [E-1388] [parent: E-1387] [T-374] RUN: VERIFY -> sed-rc7 fails before LOG PASS/completion; normal floor 27x2, canonical 44/44, and all release gates PASS; conf: high.
+- 31.07.26 20:26 [E-1389] [parent: E-1388] [T-374] DEC: goal_tickets 18->19
+- 31.07.26 20:26 [E-1390] [parent: E-1389] [T-374] DEC: SHIP -- legitimate empty filters remain success, process failures survive local pipefail, and no later success claim is reachable; no P0-P1 findings.
+- 31.07.26 20:27 [E-1391] [parent: E-1390] [T-374] RUN: SHIP preflight -> origin/main afa27b0; v7.143.0 and remote-v7101 absent local/remote; release metadata prepared; unrelated subSaipen checkpoints excluded.
+- 31.07.26 20:28 [E-1392] [parent: E-1391] [T-374] RUN: SHIP gate -> sed-rc7/no-success control, floor 27x2, canonical 44/44, scenarios/tags/validator/ruff/order/syntax PASS; expected pre-tag warnings ticketed; v7.143.0 prepared.

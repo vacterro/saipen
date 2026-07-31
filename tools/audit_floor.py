@@ -221,6 +221,49 @@ def audit(runner, script, half):
     return failures
 
 
+def audit_sh_log_filter_failure(bash: str) -> str | None:
+    """Make only the LOG-filter sed invocation fail after earlier sed uses."""
+    work = Path(tempfile.mkdtemp(prefix="saipen-floor-sed-failure-"))
+    try:
+        (work / ".saipen").mkdir()
+        for name, content in (("STATE.md", GOOD_STATE), ("BOARD.md", GOOD_BOARD),
+                              ("LOG.md", GOOD_LOG)):
+            with io.open(work / ".saipen" / name, "w", encoding="utf-8",
+                         newline="\n") as fh:
+                fh.write(content)
+
+        shim_dir = work / "bin"
+        shim_dir.mkdir()
+        sed = shim_dir / "sed"
+        sed.write_text(
+            "#!/bin/sh\n"
+            "case \"$1\" in\n"
+            "  1s/*) echo 'synthetic LOG sed failure' >&2; exit 7 ;;\n"
+            "esac\n"
+            "command -p sed \"$@\"\n",
+            encoding="utf-8", newline="\n")
+        sed.chmod(0o755)
+        env = bash_env(bash)
+        env["PATH"] = str(shim_dir) + os.pathsep + env.get("PATH", "")
+        result = subprocess.run(
+            [bash, FLOOR.as_posix()], cwd=work, env=env,
+            capture_output=True, text=True, errors="replace")
+        output = result.stdout + result.stderr
+        if result.returncode == 0:
+            return "[sh] LOG sed-rc7 control exited 0"
+        if "FAIL: LOG.md read/filter failed" not in output:
+            return ("[sh] LOG sed-rc7 control missed focused failure: "
+                    f"{output.strip()[-200:]}")
+        forbidden = ("PASS: LOG.md format valid", "Portable floor complete")
+        if any(text in output for text in forbidden):
+            return "[sh] LOG sed-rc7 control printed success after process failure"
+        print("PASS: [sh] LOG sed-rc7 process failure -- exits nonzero before "
+              "LOG PASS or floor completion")
+        return None
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
 def main():
     failures, audited = [], []
 
@@ -230,6 +273,9 @@ def main():
     bash = find_bash()
     if bash:
         failures += audit([bash], FLOOR.as_posix(), "sh")
+        process_failure = audit_sh_log_filter_failure(bash)
+        if process_failure:
+            failures.append(process_failure)
         audited.append("sh")
     else:
         print("SKIP: no usable bash here -- the sh floor cannot be audited "

@@ -10,6 +10,16 @@ GREEN='\033[0;32m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
+grep_without_matches() {
+    if grep -vE "$1"; then
+        return 0
+    else
+        local status=$?
+        [ "$status" -eq 1 ] && return 0
+        return "$status"
+    fi
+}
+
 echo -e "${CYAN}saipen conformance validation starting...${NC}"
 
 # 1. Check STATE.md
@@ -149,7 +159,16 @@ if [ -f ".saipen/LOG.md" ]; then
     # utf-8-sig and never sees one; this floor did, so a BOM'd LOG.md failed
     # here while passing there -- the two validators disagreeing about the same
     # file. Bug fix, not a new check (this file is frozen against the latter).
-    BAD_LINES=$(sed '1s/^\xef\xbb\xbf//' .saipen/LOG.md | grep -vE "^#" | grep -vE "^$" | grep -vE "$LOG_PATTERN" || true)
+    if ! BAD_LINES=$(
+        set -o pipefail
+        sed '1s/^\xef\xbb\xbf//' .saipen/LOG.md \
+            | grep_without_matches "^#" \
+            | grep_without_matches "^$" \
+            | grep_without_matches "$LOG_PATTERN"
+    ); then
+        echo -e "${RED}FAIL: LOG.md read/filter failed${NC}"
+        exit 1
+    fi
     if [ -n "$BAD_LINES" ]; then
         echo -e "${RED}FAIL: LOG.md entry violates Graph Event format:${NC}"
         echo "$BAD_LINES"

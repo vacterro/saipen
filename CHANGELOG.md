@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.143.0 -- 2026-07-31 -- portable LOG filtering propagates failure
+
+The shell portable floor ended its LOG-validation pipeline with `|| true`. That made an empty malformed-line set convenient, but also converted a failed `sed`, `grep`, or file read into success before printing both the LOG-format PASS and final floor completion.
+
+The filter stages now normalize only `grep` status 1, the legitimate no-match result. A locally scoped `pipefail` preserves any process error without changing the rest of the frozen shell floor, and a focused failure exits before either success claim.
+
+The floor audit supplies a targeted executable `sed` shim: earlier invocations delegate to the real tool, while the LOG BOM-strip invocation returns 7. The real validator must fail with `FAIL: LOG.md read/filter failed`, without LOG PASS or completion. All normal 27-by-2 floor mutations, the canonical validator, 44 mutation checks, scenarios, tag audit, order audit, Ruff, and shell syntax pass.
+
 ## 7.142.0 -- 2026-07-31 -- tag enumeration failures are not skips
 
 The historical tag audit mapped every failure of its initial `git tag -l v*` command to `SKIP: git unavailable` and exited zero. A launched Git process could return an IO, repository, or protocol error before producing any tag list, yet CI reported the dedicated audit as green after losing its entire subject set.

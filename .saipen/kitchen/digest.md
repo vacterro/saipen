@@ -1,3 +1,3 @@
-done: T-372 shell predicate truthfulness shipped as v7.141.0 at 4cf7a38
-remaining: T-373 initial tag enumeration, then three HUNT tickets
+done: T-373 tag enumeration truthfulness shipped as v7.142.0 at afa27b0
+remaining: T-374 portable LOG pipeline, then T-375 and two P2 findings
 awaiting: nothing
