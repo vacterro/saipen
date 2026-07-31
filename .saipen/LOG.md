@@ -115,3 +115,16 @@
 - 31.07.26 20:08 [E-1355] [parent: E-1354] [T-371] DEC: SHIP after FIXES -- cleanup is destination-scoped, fail-closed, and proved for cache directories plus loose bytecode; no P0-P1 findings.
 - 31.07.26 20:09 [E-1356] [parent: E-1355] [T-371] RUN: SHIP preflight -> origin/main aac22df; v7.140.0 and remote-v7101 absent local/remote; exactly six tracked cache deletions staged; unrelated subSaipen checkpoints excluded.
 - 31.07.26 20:11 [E-1357] [parent: E-1356] [T-371] RUN: SHIP gate -> tracked pyc 0, injector cache/loose-bytecode 2/2, canonical 44/44, floor 27x2, all gates PASS; v7.140.0 prepared.
+- 31.07.26 20:12 [E-1358] [parent: E-1357] [T-371] RUN: ship v7.140.0 -> pushed 6aaba6d
+- 31.07.26 20:12 [E-1359] [parent: E-1358] [T-371] RUN: DONE -> ticket complete
+- 31.07.26 20:12 [E-1360] [parent: E-1359] [T-none] DEC: DONE -> HUNT -- board empty; exact clean marker for 6aaba6d absent, full six-category sweep required.
+- 31.07.26 20:22 [E-1361] [parent: E-1360] [T-none] RUN: HUNT -> T-372..T-376; tests, commit evidence, stale markers, dead code, and kitchens clean; six silent/symmetry findings merged into five bounded tickets at cap.
+- 31.07.26 20:22 [E-1362] [parent: E-1361] [T-372] DEC: claimed shell bootstrap predicate/error and managed-path type truthfulness.
+- 31.07.26 20:24 [E-1363] [parent: E-1362] [T-372] RUN: SCOUT -- make grep predicates explicit 0/1/error branches in block and Aider paths; treat any existing or linked managed skill path as removable; add three process controls.
+- 31.07.26 20:08 [E-1364] [parent: E-1363] [T-372] DEC: corrected prior +16m checkpoint clock skew; event IDs remain the ordering authority.
+- 31.07.26 20:08 [E-1365] [parent: E-1364] [T-372] RUN: BUILD -> shell predicates fail on grep rc>1, preserve configs, and remove regular-file managed skills; three executable controls PASS.
+- 31.07.26 20:09 [E-1366] [parent: E-1365] [T-372] RUN: VERIFY -> grep-failure install/uninstall controls and regular-file removal PASS; canonical 44/44 and all release gates green; conf: high.
+- 31.07.26 20:09 [E-1367] [parent: E-1366] [T-372] DEC: goal_tickets 16->17
+- 31.07.26 20:10 [E-1368] [parent: E-1367] [T-372] DEC: SHIP -- process errors fail closed, absence stays valid, and managed regular files uninstall; no P0-P1 findings.
+- 31.07.26 20:11 [E-1369] [parent: E-1368] [T-372] RUN: SHIP preflight -> origin/main 6aaba6d; v7.141.0 and remote-v7101 absent local/remote; release metadata prepared; unrelated subSaipen checkpoints excluded.
+- 31.07.26 20:13 [E-1370] [parent: E-1369] [T-372] RUN: SHIP gate -> grep-error controls, regular-file uninstall, canonical 44/44, floor 27x2, scenarios/tags/validator/ruff/order/syntax PASS; v7.141.0 prepared.

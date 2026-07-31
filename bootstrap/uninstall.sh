@@ -10,7 +10,14 @@ strip_block() {
   # Using -i.bak here would overwrite that original with the current
   # SAIPEN-containing content, and the cleanup rm would then delete it --
   # uninstalling would silently destroy the very backup installing made.
-  if [ -f "$1" ] && grep -q "SAIPEN:BEGIN" "$1"; then
+  local marker_status=1
+  if [ -f "$1" ]; then
+    grep -q "SAIPEN:BEGIN" "$1"
+    marker_status=$?
+    [ "$marker_status" -le 1 ] \
+      || { echo "block marker read FAILED ($1)"; return 1; }
+  fi
+  if [ "$marker_status" -eq 0 ]; then
     # Deleting only BEGIN..END is not a clean reverse of what inject.sh did:
     # its $BLOCK starts with a newline, so each install adds one blank line
     # that a plain range-delete leaves behind. Measured: install+uninstall
@@ -44,7 +51,7 @@ strip_block() {
 }
 
 rm_skill() {
-  if [ -d "$1" ] || [ -L "$1" ]; then
+  if [ -e "$1" ] || [ -L "$1" ]; then
     if rm -rf "$1"; then
       echo "skill removed"
     else
@@ -61,7 +68,11 @@ rm_aider() {
   # read: key that immediately follows it, and the consecutive saipen
   # RFC/STYLE items -- never any other read: line the user owns.
   if [ -f "$1" ]; then
-    if grep -q "# saipen protocol auto-loaded" "$1"; then
+    local managed_status manual_status
+    grep -q "# saipen protocol auto-loaded" "$1"; managed_status=$?
+    [ "$managed_status" -le 1 ] \
+      || { echo "aider marker read FAILED ($1)"; return 1; }
+    if [ "$managed_status" -eq 0 ]; then
       cp "$1" "$1.uninstalled.bak" \
         || { echo "backup FAILED ($1)"; return 1; }
       awk '
@@ -72,10 +83,15 @@ rm_aider() {
       ' "$1" > "$1.tmp" && mv "$1.tmp" "$1" \
         || { rm -f "$1.tmp" 2>/dev/null || true; echo "aider clean FAILED ($1)"; return 1; }
       echo "aider conf cleaned"
-    elif grep -q "saipen/RFC.md" "$1"; then
-      echo "manual aider conf (please remove manually)"
     else
-      echo "clean"
+      grep -q "saipen/RFC.md" "$1"; manual_status=$?
+      [ "$manual_status" -le 1 ] \
+        || { echo "aider path read FAILED ($1)"; return 1; }
+      if [ "$manual_status" -eq 0 ]; then
+        echo "manual aider conf (please remove manually)"
+      else
+        echo "clean"
+      fi
     fi
   else
     echo "clean"

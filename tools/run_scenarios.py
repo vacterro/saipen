@@ -235,6 +235,21 @@ def run_injector_probes() -> tuple[list[str], int, int]:
     powershell = find_powershell()
 
     if bash:
+        def grep_failure_env(home: Path) -> dict[str, str]:
+            shim_dir = home / "bin"
+            shim_dir.mkdir()
+            grep = shim_dir / "grep"
+            grep.write_text("#!/usr/bin/env bash\nexit 2\n", encoding="utf-8",
+                            newline="\n")
+            grep.chmod(0o755)
+            aider = shim_dir / "aider"
+            aider.write_text("#!/usr/bin/env bash\nexit 0\n", encoding="utf-8",
+                             newline="\n")
+            aider.chmod(0o755)
+            env = bash_env(bash, home)
+            env["PATH"] = str(shim_dir) + os.pathsep + env.get("PATH", "")
+            return env
+
         with tempfile.TemporaryDirectory(prefix="saipen-inject-sh-") as raw:
             home = Path(raw)
             problem = run_injector_probe(
@@ -243,6 +258,30 @@ def run_injector_probes() -> tuple[list[str], int, int]:
                 bash_env(bash, home), home)
             if problem:
                 probe_failures.append(problem)
+
+        with tempfile.TemporaryDirectory(prefix="saipen-inject-sh-grep-fail-") as raw:
+            home = Path(raw)
+            config = home / ".claude" / "CLAUDE.md"
+            config.parent.mkdir(parents=True)
+            original = b"user config\n"
+            config.write_bytes(original)
+            aider_config = home / ".aider.conf.yml"
+            aider_original = b"read:\n  - user-owned.md\n"
+            aider_config.write_bytes(aider_original)
+            result = subprocess.run(
+                [bash, str(HOME / "bootstrap" / "inject.sh")], cwd=HOME,
+                env=grep_failure_env(home), capture_output=True, text=True,
+                errors="replace")
+            problem = failed_bootstrap_problem(
+                "bootstrap/inject.sh grep failure", result)
+            if problem:
+                probe_failures.append(problem)
+            elif (config.read_bytes() != original
+                  or aider_config.read_bytes() != aider_original):
+                probe_failures.append(
+                    "bootstrap/inject.sh grep failure: config changed after read error")
+            else:
+                print("PASS: bootstrap/inject.sh grep failure -- exits nonzero without Done")
             checked += 1
 
         with tempfile.TemporaryDirectory(prefix="saipen-inject-sh-fail-") as raw:
@@ -279,6 +318,47 @@ def run_injector_probes() -> tuple[list[str], int, int]:
                 "bootstrap/uninstall.sh transform failure", result)
             if problem:
                 probe_failures.append(problem)
+
+        with tempfile.TemporaryDirectory(prefix="saipen-uninstall-sh-grep-fail-") as raw:
+            home = Path(raw)
+            config = home / ".claude" / "CLAUDE.md"
+            config.parent.mkdir(parents=True)
+            original = b"<!-- SAIPEN:BEGIN -->\nstale\n<!-- SAIPEN:END -->\n"
+            config.write_bytes(original)
+            aider_config = home / ".aider.conf.yml"
+            aider_original = b"# saipen protocol auto-loaded\nread:\n"
+            aider_config.write_bytes(aider_original)
+            result = subprocess.run(
+                [bash, str(HOME / "bootstrap" / "uninstall.sh")], cwd=HOME,
+                env=grep_failure_env(home), capture_output=True, text=True,
+                errors="replace")
+            problem = failed_bootstrap_problem(
+                "bootstrap/uninstall.sh grep failure", result)
+            if problem:
+                probe_failures.append(problem)
+            elif (config.read_bytes() != original
+                  or aider_config.read_bytes() != aider_original):
+                probe_failures.append(
+                    "bootstrap/uninstall.sh grep failure: config changed after read error")
+            else:
+                print("PASS: bootstrap/uninstall.sh grep failure -- exits nonzero without Done")
+
+        with tempfile.TemporaryDirectory(prefix="saipen-uninstall-sh-file-") as raw:
+            home = Path(raw)
+            skill = home / ".claude" / "skills" / "saipen"
+            skill.parent.mkdir(parents=True)
+            skill.write_text("stale managed path\n", encoding="utf-8")
+            result = subprocess.run(
+                [bash, str(HOME / "bootstrap" / "uninstall.sh")], cwd=HOME,
+                env=bash_env(bash, home), capture_output=True, text=True,
+                errors="replace")
+            output = result.stdout + result.stderr
+            if result.returncode or "Done." not in output or skill.exists():
+                probe_failures.append(
+                    "bootstrap/uninstall.sh regular-file skill: expected removal "
+                    f"and truthful success, got rc={result.returncode} exists={skill.exists()}")
+            else:
+                print("PASS: bootstrap/uninstall.sh regular-file skill -- removed")
     else:
         print("SKIP: bootstrap/inject.sh executable probe -- no usable bash")
         skipped += 1

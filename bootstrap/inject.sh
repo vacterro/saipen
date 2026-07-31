@@ -48,7 +48,14 @@ UI work: also obey $SKILL_HOME/UI.md (Win95 dark golden, Verdana, no AA).
 add_block() { # $1=file
   # Compare content instead of stripping unconditionally, or every re-run
   # would rewrite an already-current block for no reason.
-  if [ -f "$1" ] && grep -q "SAIPEN:BEGIN" "$1"; then
+  local marker_status=1
+  if [ -f "$1" ]; then
+    grep -q "SAIPEN:BEGIN" "$1"
+    marker_status=$?
+    [ "$marker_status" -le 1 ] \
+      || { echo "block marker read FAILED ($1)"; return 1; }
+  fi
+  if [ "$marker_status" -eq 0 ]; then
     local existing canonical
     existing=$(sed -n '/<!-- SAIPEN:BEGIN -->/,/<!-- SAIPEN:END -->/p' "$1") \
       || { echo "block read FAILED ($1)"; return 1; }
@@ -136,15 +143,27 @@ configure_aider() { # $1=config
       && printf '# saipen protocol auto-loaded\nread:\n  - %s\n  - %s\n' "$P" "$S" > "$A" \
       || { echo "create FAILED ($A)"; return 1; }
     echo "created"
-  elif grep -qF "$P" "$A" && grep -qF "$S" "$A"; then
-    echo "already"
-  elif ! grep -q "^read:" "$A"; then
-    backup_file "$A" || return 1
-    printf '\n# saipen protocol auto-loaded\nread:\n  - %s\n  - %s\n' "$P" "$S" >> "$A" \
-      || { echo "write FAILED ($A)"; return 1; }
-    echo "read: appended"
   else
-    echo "has own read: - add manually: $P + $S"
+    local p_status s_status read_status
+    grep -qF "$P" "$A"; p_status=$?
+    grep -qF "$S" "$A"; s_status=$?
+    [ "$p_status" -le 1 ] && [ "$s_status" -le 1 ] \
+      || { echo "read check FAILED ($A)"; return 1; }
+    if [ "$p_status" -eq 0 ] && [ "$s_status" -eq 0 ]; then
+      echo "already"
+      return 0
+    fi
+    grep -q "^read:" "$A"; read_status=$?
+    [ "$read_status" -le 1 ] \
+      || { echo "read key check FAILED ($A)"; return 1; }
+    if [ "$read_status" -eq 1 ]; then
+      backup_file "$A" || return 1
+      printf '\n# saipen protocol auto-loaded\nread:\n  - %s\n  - %s\n' "$P" "$S" >> "$A" \
+        || { echo "write FAILED ($A)"; return 1; }
+      echo "read: appended"
+    else
+      echo "has own read: - add manually: $P + $S"
+    fi
   fi
 }
 
