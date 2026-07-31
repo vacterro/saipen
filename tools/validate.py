@@ -2680,6 +2680,62 @@ else:
                  f"nobody can fetch, with none of its content. Add the path "
                  f"to .gitignore and `git rm --cached` it")
 
+    # 13m. Every CONFORMANCE row's stated enforcement still exists.
+    #      This table only ever grew -- 144 rows, not one retirement -- and
+    #      nothing made a rule LOUD when the thing enforcing it went away. A
+    #      row naming a deleted tool, a renamed CI step or a fixture that no
+    #      longer exists reads exactly like a row that is enforced, which is
+    #      the difference between a guarantee and a decoration. Row 78 sat
+    #      wrong for releases and was only corrected because someone measured
+    #      it by hand.
+    #
+    #      This is the mechanical half of retiring a rule: it cannot decide
+    #      that a rule is obsolete, but it can refuse to let one keep claiming
+    #      an enforcement that is gone. Then the choice -- restore it or retire
+    #      the row -- has to be made by a person, out loud.
+    _conf_p = _tools_parent / "saipen" / "CONFORMANCE.md"
+    _wf_p = _tools_parent / ".github" / "workflows" / "validate.yml"
+    if IS_SAIPEN_HOME and _conf_p.is_file():
+        _conf_t = _conf_p.read_text(encoding="utf-8-sig")
+        _wf_t = _wf_p.read_text(encoding="utf-8-sig") if _wf_p.is_file() else ""
+        _step_names = set(re.findall(r"^\s*- name: (.+)$", _wf_t, re.MULTILINE))
+        _fixtures = {d.name for d in (_tools_parent / "tests" / "scenarios").iterdir()
+                     if d.is_dir()} if (_tools_parent / "tests" / "scenarios").is_dir() else set()
+        _gone = []
+        for _rid, _body, _how in re.findall(r"^\| (\d+) \| (.*?) \| (.*?) \|\s*$",
+                                            _conf_t, re.MULTILINE):
+            for _tool in set(re.findall(r"`(tools/[a-z_]+\.py|tests/validate\.(?:sh|ps1))`",
+                                        _how)):
+                if not (_tools_parent / _tool).is_file():
+                    _gone.append(f"row {_rid} names {_tool}, which does not exist")
+            for _step in set(re.findall(r"`([^`]+)` CI step", _how)):
+                if _step_names and not any(_step.lower() in _s.lower()
+                                           for _s in _step_names):
+                    _gone.append(f"row {_rid} names a `{_step}` CI step, which "
+                                 f"no workflow defines")
+            for _fx in set(re.findall(r"`([a-z0-9]+(?:-[a-z0-9]+){1,})`", _body + " " + _how)):
+                if _fixtures and _fx in _fixtures:
+                    continue
+                # Only names that LOOK like fixtures and match none: a
+                # hyphenated lowercase token that is also not a mode, a WAIT
+                # category or a filename. Anything else is ordinary prose.
+                if _fx in ("read-only", "no-publish", "manual-verify",
+                           "destructive-op", "first-publish", "user-brake",
+                           "safety-valve", "utf-8-sig", "unknown-field",
+                           "no-git", "fetch-depth", "pre-commit",
+                           "utf-16-le", "utf-16-be", "utf-8"):
+                    continue
+                if "/" in _fx or "." in _fx:
+                    continue
+                if _fixtures and _fx.count("-") >= 2:
+                    _gone.append(f"row {_rid} names fixture `{_fx}`, which "
+                                 f"tests/scenarios/ does not contain")
+        if _gone:
+            fail(f"CONFORMANCE enforcement gone -- {len(_gone)} row(s) claim "
+                 f"something that no longer exists: {'; '.join(sorted(set(_gone))[:4])}"
+                 f"{' ...' if len(set(_gone)) > 4 else ''}. Restore it or retire "
+                 f"the row; a rule enforced by nothing is a decoration")
+
     # 13d. RFC § 1.7 Workspace Hygiene, mechanically. `saipen set` writes a
     #      bootloader that POINTS at the canonical home; it must never copy the
     #      protocol into the project, and phase transitions must load from

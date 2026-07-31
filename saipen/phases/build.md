@@ -2,6 +2,20 @@
 
 Smallest safe change. Full code: no stubs, null/empty/error paths handled.
 Match repo style even if dated; modernizing = separate ticket.
+
+**Before writing new code, look for existing code, in this order:**
+1. this project's own code -- a helper, a module, a pattern already here;
+2. the standard library of whatever language this is;
+3. a dependency the project ALREADY has (adding one is a ticket, not a
+   build step -- a new dependency is a decision with a maintenance tail,
+   and it does not get made in passing while fixing something else);
+4. only then write it.
+
+One pass down that ladder, not a research project: the point is to stop
+the third private implementation of the same thing, not to turn every
+edit into an audit. If the search costs longer than writing it would,
+write it and say so in the LOG line -- an honest "looked, didn't find,
+wrote my own" is worth more than a silent duplicate.
 Risky edit: LOG rollback command first. **Logging a rollback is not the same
 as being allowed to proceed** -- if the edit is destructive in RFC § 1.1's own
 sense (schema/database drop, mass file deletion, history rewrite, irreversible

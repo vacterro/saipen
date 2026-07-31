@@ -55,7 +55,11 @@ project. Then STATE -> `DONE` directly, same as a normal successful ship.
    -- `- DATE [E-###] [parent: E-###] RUN: ship vX.Y.Z -> push FAILED
    <reason>` (this exact text after the taxonomy) -- never claim success
    on a failed push. Commit/tag stay local. Then by failure class:
-   - Transient (network, auth hiccup)? Retry once, then `BLOCKED`.
+   - Transient (network, auth hiccup)? Retry once, then `BLOCKED` -- and
+     the retry still owes RFC § 1.6's question: name what is different
+     in the LOG line (token refreshed, remote reachable again, a
+     different branch). "Nothing, but maybe this time" is not a delta,
+     and a counter of one does not make it into one.
     - **Non-fast-forward (someone pushed meanwhile) is ROUTINE, not a
       blocker** -- for a protocol built around multiple sessions
       touching one project, "the remote moved" is expected life,

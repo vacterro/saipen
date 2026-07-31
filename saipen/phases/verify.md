@@ -76,7 +76,9 @@ tool shipped that week, not a decision this repo made.
 Reproduce exactly, quote decisive error line.
 Cheap suspects first (git log, config, env, named file).
 Hypothesis -> LOG -> test -> fix root cause, not symptom.
-Rejected hypotheses stay logged; never re-test without new evidence.
+Rejected hypotheses stay logged; never re-test without new evidence --
+RFC § 1.6 states this for every repeated attempt, not just hypotheses;
+this line is the debugging instance of it.
 **Cap: 3 dead hypotheses OR 2 failed fix cycles -> move THIS ticket to the
 `## BLOCKED` section on `BOARD.md` with the facts + dead ends noted on it,
 then check for another unblocked `TODO` ticket and work that instead (STATE -> `SCOUT` or `BUILD`).**

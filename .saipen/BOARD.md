@@ -4,6 +4,11 @@
 ## TODO
 
 ## DONE
+- [x] T-344 [P0] CONFORMANCE rows can no longer claim an enforcement that was deleted. 144 rows, zero retirements, and nothing made a dead rule loud. | verify: tools/validate.py PASS (2026-07-30)
+- [x] T-345 [P0] RFC 1.6: a repeated attempt must name what changed; nothing changed means the retry is forbidden. verify.md said this for debugging hypotheses only. | verify: tools/validate.py PASS (2026-07-30)
+- [x] T-346 [P1] ship.md's retry-once and verify.md's hypothesis line now inherit the general rule by name instead of restating a fragment of it. | verify: tools/validate.py PASS (2026-07-30)
+- [x] T-347 [P1] BUILD gained the reuse ladder: project code, stdlib, an existing dependency, then write it. Adding a dependency is a ticket, not a build step. | verify: tools/validate.py PASS (2026-07-30)
+- [x] T-348 [P2] Ship v7.124.0. | verify: tools/validate.py PASS (2026-07-30)
 - [x] T-341 [P0] v7.122.0 shipped a gitlink: git add -A swallowed saiwiki's nested wiki clone as a 160000 entry pointing at a commit nobody can fetch. Removed from the index, path ignored. | verify: git ls-files -s .saipen \| grep 160000 -> empty (2026-07-30)
 - [x] T-342 [P0] The validator now FAILs any gitlink under .saipen/. Git warns about this, but the hint scrolls past inside 50 lines of CRLF warnings -- noticing is what a check is for. | verify: git ls-files -s .saipen \| grep 160000 -> empty (2026-07-30)
 - [x] T-343 [P2] Ship v7.123.0. | verify: git ls-files -s .saipen \| grep 160000 -> empty (2026-07-30)

@@ -1,3 +1,3 @@
-done: v7.123.0 shipped — v7.122.0 had committed a gitlink to saiwiki's nested wiki clone; removed, ignored, and the validator FAILs any gitlink under .saipen/ now
+done: v7.124.0 shipped — a CONFORMANCE row can no longer claim an enforcement that was deleted, and a repeated attempt must name what changed
 remaining: nothing
 awaiting: nothing

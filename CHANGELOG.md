@@ -2,6 +2,22 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.124.0 -- 2026-07-30 -- how a rule dies, and why a retry owes an answer
+
+Two findings, both from checking a list of proposals against the repository instead of against intuition. Most of the list was already here in a finer form -- "acceptance is not completion" is `VERIFY -> REVIEW -> SHIP -> DONE` plus a per-ticket `verify:`, and the suggested five-state outcome taxonomy is coarser than the seven `WAIT:` categories § 1.2 already closes over. Two things were genuinely missing.
+
+**A rule had no way to die.** `CONFORMANCE.md` has only ever grown: 144 rows, not one retirement, and a grep for `retire|obsolete|no longer needed` across it and the RFC returns nothing. Nothing made a rule loud when the tool, CI step or fixture behind it went away -- and a row naming something deleted reads exactly like a row that is enforced. That is the whole difference between a guarantee and a decoration. Row 78 sat wrong for several releases and was corrected only because somebody measured it by hand.
+
+Deciding that a rule is obsolete is not a thing a validator can do. Refusing to let one claim an enforcement that no longer exists is. So it does, and the choice -- restore it or retire the row -- now has to be made by a person, out loud. Red-tested by deleting a named tool, renaming a named CI step, and removing a named fixture.
+
+**A retry owed an answer nobody asked for.** RFC § 1.6 now requires a repeated attempt to name what changed since the last one -- new evidence, a changed input, a narrowed hypothesis -- and forbids the retry outright when the honest answer is "nothing". Counters never carried this: `phases/verify.md`'s 3-hypothesis/2-fix-cycle cap and `phases/ship.md`'s retry-once both bound how MANY times something repeats, and neither asks whether the second attempt could possibly go differently.
+
+`verify.md` had in fact said "never re-test without new evidence" for a long time -- of debugging hypotheses. True of every repeated attempt, written for one of them: the same fixed-where-noticed shape this protocol keeps finding in itself, and the reason both phase docs now inherit the general rule by name instead of each restating a fragment.
+
+It is behavioural and recorded as such. No artifact witnesses whether the agent really had new information. What the LOG line does is remove the excuse rather than the possibility.
+
+Also taken, from a proposal that arrived with a rule attached: BUILD looks for existing code before writing new -- this project's own, the standard library, a dependency the project ALREADY has (adding one is a ticket, not a build step), then implement. One pass, deliberately. The attached "hard limit: never revisit" was left out, being a rule no artifact could witness.
+
 ## 7.123.0 -- 2026-07-30 -- the commit that added two checks also shipped a gitlink
 
 `saiwiki` keeps a clone of the GitHub wiki inside its own kitchen, which is exactly what a subSaipen's kitchen is for. `git add -A` turns a nested repository into a mode-160000 entry -- a pointer to a commit no clone of this repository can fetch, carrying none of the content. That is what v7.122.0 shipped, in the same commit that added two new cross-document drift checks.
