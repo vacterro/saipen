@@ -1,6 +1,8 @@
 *.bak
 .DS_Store
 Thumbs.db
+__pycache__/
+*.py[cod]
 .freebuff/
 .saipen/recovery/
 # bootstrap/export.* drops its archive in the project root by design

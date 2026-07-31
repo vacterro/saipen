@@ -88,6 +88,13 @@ function Copy-Skill([string]$dst) {
     Copy-Item (Join-Path $SkillHome "BOOT.md"),(Join-Path $SkillHome "SKILL.md"),(Join-Path $SkillHome "RFC.md"),(Join-Path $SkillHome "UI.md"),(Join-Path $SkillHome "STYLE.md"),(Join-Path $SkillHome "CONFORMANCE.md"),(Join-Path $root "VERSION") $dst -Force -ErrorAction Stop
     Copy-Item (Join-Path $SkillHome "phases") $dst -Recurse -Force -ErrorAction Stop
     Copy-Item (Join-Path $root "tools") $dst -Recurse -Force -ErrorAction Stop
+    $installedTools = Join-Path $dst "tools"
+    Get-ChildItem -LiteralPath $installedTools -Directory -Recurse -Force -ErrorAction Stop |
+      Where-Object Name -eq "__pycache__" |
+      Remove-Item -Recurse -Force -ErrorAction Stop
+    Get-ChildItem -LiteralPath $installedTools -File -Recurse -Force -ErrorAction Stop |
+      Where-Object Extension -in ".pyc", ".pyo" |
+      Remove-Item -Force -ErrorAction Stop
     New-Item -ItemType Directory -Force (Join-Path $dst "extensions") -ErrorAction Stop | Out-Null
     Copy-Item (Join-Path $root "extensions\schemas") (Join-Path $dst "extensions") -Recurse -Force -ErrorAction Stop
     Copy-Item (Join-Path $root "extensions\templates") (Join-Path $dst "extensions") -Recurse -Force -ErrorAction Stop

@@ -102,3 +102,16 @@
 - 31.07.26 19:52 [E-1342] [parent: E-1341] [T-370] DEC: SHIP after FIXES -- observed failures traverse fallback, accepted launches stop it, and completion requires three successes; no P0-P1 findings.
 - 31.07.26 19:53 [E-1343] [parent: E-1342] [T-370] RUN: SHIP preflight -> origin/main 97f1df0; v7.139.0 and remote-v7101 absent local/remote; unrelated subSaipen checkpoints excluded.
 - 31.07.26 19:55 [E-1344] [parent: E-1343] [T-370] RUN: SHIP gate -> crew 2/2 with 9/3 calls, canonical 44/44, scenarios/tags/validator/ruff/order PASS; v7.139.0 prepared.
+- 31.07.26 19:56 [E-1345] [parent: E-1344] [T-370] RUN: ship v7.139.0 -> pushed aac22df
+- 31.07.26 19:56 [E-1346] [parent: E-1345] [T-370] RUN: DONE -> ticket complete
+- 31.07.26 19:56 [E-1347] [parent: E-1346] [T-371] DEC: claimed tracked Python bytecode removal and executable clean-install proof.
+- 31.07.26 19:58 [E-1348] [parent: E-1347] [T-371] RUN: SCOUT -- exactly six tracked pyc; ignore has no bytecode rule; both recursive copies include ignored source caches, so clean destination after copy and seed source cache in each executable probe.
+- 31.07.26 20:01 [E-1349] [parent: E-1348] [T-371] RUN: BUILD -> six tracked caches removed; bytecode ignored; both real injectors strip a seeded source cache; installed-bytecode red-control fails as required.
+- 31.07.26 20:03 [E-1350] [parent: E-1349] [T-371] RUN: VERIFY -> tracked pyc 0; injector seeded-cache 2/2 and bytecode red-control PASS; canonical 44/44, floor 27x2, all gates green; conf: high.
+- 31.07.26 20:03 [E-1351] [parent: E-1350] [T-371] DEC: goal_tickets 15->16
+- 31.07.26 20:04 [E-1352] [parent: E-1351] [T-371] DEC: REVIEW -> BUILD -- seeded proof covers cache-directory deletion but not loose pyc cleanup; seed and assert both artifact shapes.
+- 31.07.26 20:05 [E-1353] [parent: E-1352] [T-371] RUN: build proof -> both injector runs now seed cache-directory and loose-pyc artifacts; clean installed layouts and red-control PASS.
+- 31.07.26 20:07 [E-1354] [parent: E-1353] [T-371] RUN: VERIFY after proof fix -> both bytecode shapes absent from installs; tracked pyc 0; canonical 44/44, floor 27x2, all gates PASS; conf: high.
+- 31.07.26 20:08 [E-1355] [parent: E-1354] [T-371] DEC: SHIP after FIXES -- cleanup is destination-scoped, fail-closed, and proved for cache directories plus loose bytecode; no P0-P1 findings.
+- 31.07.26 20:09 [E-1356] [parent: E-1355] [T-371] RUN: SHIP preflight -> origin/main aac22df; v7.140.0 and remote-v7101 absent local/remote; exactly six tracked cache deletions staged; unrelated subSaipen checkpoints excluded.
+- 31.07.26 20:11 [E-1357] [parent: E-1356] [T-371] RUN: SHIP gate -> tracked pyc 0, injector cache/loose-bytecode 2/2, canonical 44/44, floor 27x2, all gates PASS; v7.140.0 prepared.
