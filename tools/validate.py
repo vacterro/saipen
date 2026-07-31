@@ -394,7 +394,7 @@ VALID_TRANSITIONS = {
     "BUILD": ["VERIFY", "BLOCKED"],
     "VERIFY": ["REVIEW", "SCOUT", "BUILD", "BLOCKED"],
     "REVIEW": ["SHIP", "BUILD", "SCOUT", "BLOCKED"],
-    "SHIP": ["DONE", "BLOCKED"],
+    "SHIP": ["DONE", "BUILD", "BLOCKED"],
     "DONE": ["SCOUT", "PLAN", "HUNT", "BLOCKED"],
     "VALIDATE": ["SCOUT", "PLAN", "DONE", "BLOCKED"],
     "HUNT": ["ADD", "PLAN", "SCOUT", "BLOCKED"],

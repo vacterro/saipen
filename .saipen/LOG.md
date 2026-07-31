@@ -146,3 +146,14 @@
 - 31.07.26 15:23 [E-1171] [parent: E-1170] [T-357] RUN: VERIFY -> lowercase System32 red-control and floor 20x2 PASS; conf: high.
 - 31.07.26 15:23 [E-1172] [parent: E-1171] [T-357] DEC: goal_tickets 12->13
 - 31.07.26 15:24 [E-1173] [parent: E-1172] [T-357] DEC: SHIP -- both harnesses reject WSL stubs and expose Git POSIX tools only to child processes.
+- 31.07.26 15:25 [E-1174] [parent: E-1173] [T-357] RUN: ship v7.127.0 -> pushed 07d1dbf
+- 31.07.26 15:26 [E-1175] [parent: E-1174] [T-358] DEC: claimed SHIP preflight dead-end exposed by the v7.126.0 injector failure.
+- 31.07.26 15:27 [E-1176] [parent: E-1175] [T-358] RUN: SCOUT -- patch RFC/ship/validator/scenario; harden phase-transition red-test pair.
+- 31.07.26 15:28 [E-1177] [parent: E-1176] [T-358] RUN: build -> added SHIP preflight BUILD edge, boundary prose, validator rule, scenario, stable red-test.
+- 31.07.26 15:29 [E-1178] [parent: E-1177] [T-358] RUN: VERIFY -> validator PASS; scenarios 15/15; audit_checks 42/42; conf: high.
+- 31.07.26 15:29 [E-1179] [parent: E-1178] [T-358] DEC: goal_tickets 13->14
+- 31.07.26 15:30 [E-1180] [parent: E-1179] [T-358] H: REVIEW found boundary contradiction: step 5 already pushes and never explicitly commits; split preflight from commit/push.
+- 31.07.26 15:31 [E-1181] [parent: E-1180] [T-358] RUN: build -> defined metadata/validator preflight, then explicit commit and branch push.
+- 31.07.26 15:32 [E-1182] [parent: E-1181] [T-358] RUN: VERIFY -> validator and 15 executable scenarios PASS after boundary fix; conf: high.
+- 31.07.26 15:32 [E-1183] [parent: E-1182] [T-358] DEC: goal_tickets 14->15
+- 31.07.26 15:33 [E-1184] [parent: E-1183] [T-358] DEC: SHIP -- preflight BUILD edge ends at commit; publish recovery remains step 9.

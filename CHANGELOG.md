@@ -2,6 +2,16 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.128.0 -- 2026-07-31 -- SHIP could fail only by giving up
+
+SHIP requires 100% green, but its DFA row allowed only `DONE` or `BLOCKED`. A fixable failure found during release preparation therefore had no legal route back to BUILD. This happened immediately in v7.126.0: preflight found the shell injector deleting `tests/` after creating it. The fix was known and local, but returning to BUILD was non-conformant; entering BLOCKED would have lied about needing human input and ended goal mode.
+
+SHIP now has a narrow pre-commit repair edge to BUILD. The current ticket must repeat VERIFY, REVIEW, and SHIP after the fix. The edge ends when commit begins; push rejection and any later failure remain under SHIP's existing publish-recovery rules, and already-pushed work never returns to BUILD.
+
+The release order is explicit now: prepare VERSION/README/CHANGELOG, rerun validators against that metadata, commit, then push the branch. Previously step 5 said only `Push`; a protocol that meticulously gates releases had omitted the command that creates the commit being released.
+
+An executable scenario proves `SHIP -> BUILD` is legal, while the transition mutation now pins a fixed illegal `INIT -> SHIP` pair instead of depending on whichever phase the repository happened to occupy during the audit.
+
 ## 7.127.0 -- 2026-07-31 -- bash existed; its tools did not
 
 The Windows floor harnesses correctly stopped choosing `sh` and the WSL `bash.exe` stub, then launched Git Bash by absolute path. That still was not enough: a directly launched Git Bash inherited the Windows process `PATH`, which did not contain Git's `usr/bin`. Bash ran, but `grep`, `sed`, and `sort` did not. Eighteen of twenty shell controls therefore failed at the first phase check and blamed `STATE.md`; the subject was healthy and the instrument had lost its tools.

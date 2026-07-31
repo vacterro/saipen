@@ -178,6 +178,11 @@ Before overwriting a corrupt or stale `STATE.md`, copy it to `.saipen/recovery/<
 ### 1.6 Core State Machine & Ticket DAG
 `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`
 
+`SHIP` has one narrow backward edge: a fixable preflight failure found before
+commit/tag/push returns the current ticket to `BUILD`, then repeats
+`VERIFY -> REVIEW -> SHIP`. It is not a retry path for a failed publish and
+never permits editing after a successful push (`phases/ship.md`).
+
 - **Ticket DAG**: Tickets MUST define dependencies using `needs: [T-XXX]`. **Pick Rule**: a `## TODO` ticket is *workable* when all its `needs:` are marked `DONE` and it is not under another agent's active claim (§ 1.4). **Agents MUST take the topmost workable ticket, reading `## TODO` from the top.** Eligibility alone left the actual choice open, which is a hole in a section named Determinism Invariants: two conformant agents handed the same board could pick different tickets and both be right. Board order is priority -- § 2.4's Entry already relies on exactly that when it inserts a new objective's tickets at the top -- so the first workable line wins, and re-prioritising means moving lines, not arguing about them.
 - **VERIFY**: MUST be executed. Failure retries within VERIFY itself, not a phase transition -- `phases/verify.md`'s own cap (3 dead hypotheses or 2 failed fix cycles) moves the ticket to `## BLOCKED` on `BOARD.md` and the agent picks up other workable tickets instead. Success transitions to `REVIEW`.
 - **MANUAL-VERIFY**: If `mode: manual-verify`, `VERIFY` MUST block and await human confirmation. Agent MUST NOT auto-transition to `REVIEW`.
@@ -194,7 +199,7 @@ SCOUT     -> BUILD | BLOCKED
 BUILD     -> VERIFY | BLOCKED
 VERIFY    -> REVIEW | SCOUT | BUILD | BLOCKED
 REVIEW    -> SHIP | BUILD | SCOUT | BLOCKED
-SHIP      -> DONE | BLOCKED
+SHIP      -> DONE | BUILD | BLOCKED
 DONE      -> SCOUT | PLAN | HUNT | BLOCKED
 VALIDATE  -> SCOUT | PLAN | DONE | BLOCKED
 HUNT      -> ADD | PLAN | SCOUT | BLOCKED

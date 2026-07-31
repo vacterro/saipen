@@ -11,6 +11,18 @@ Only on `saipen ship`, or repo has `origin` AND LOG shows prior ship, or
 `goal_mode: true` (RFC § 2.4) with an existing `origin`. Never auto-publish
 unopted project. Needs 100% green.
 
+**Fixable preflight failure -> BUILD, not BLOCKED.** Steps 0-4 plus release
+metadata preparation and the validator rerun in step 5 can expose a defect
+before anything is committed, tagged, or pushed: a broken release script, a
+stale generated file, a failing validator, or another fault with a known local
+fix. LOG the exact failure, transition the current ticket
+`SHIP -> BUILD`, fix it, and repeat `VERIFY -> REVIEW -> SHIP`. `BLOCKED` is
+reserved for a failure that genuinely needs user input or has no safe known
+fix; using it for ordinary repair would falsely end goal mode (RFC section
+2.4). This edge closes the pre-publish loop only. Once commit/tag/push begins,
+the failure-specific recovery in step 9 governs; after a successful push there
+is never a return to BUILD for that shipped ticket.
+
 `mode: no-publish`? This phase is still entered -- RFC § 1.3 blocks
 git-dependent steps only (commit, tag, push), not `SHIP` itself; a blanket
 ban here would mean a git-less project can never close a ticket at all
@@ -39,7 +51,10 @@ project. Then STATE -> `DONE` directly, same as a normal successful ship.
    README.md`. The CHANGELOG/tag halves have no automated check -- eyeball
    them here, before tagging, not after.
 4. .gitignore covers junk + secrets. Empty tmp/, strip debug prints.
-5. CHANGELOG.md newest-top. Push.
+5. CHANGELOG.md newest-top. Re-run the required validators after every release
+   metadata edit; a gate run before VERSION/README/CHANGELOG changed proves the
+   old release, not the one about to ship. Once green, commit the reviewed
+   changes, then push the branch.
 6. `git tag -a vVERSION -m "line"` + push tags.
 7. First publish -- no `origin` yet, **or `origin` exists but the remote has
    zero commits/tags on it** (added early, never actually published to --

@@ -1,7 +1,7 @@
 ---
 phase: SHIP
-task: T-357
-next_action: "PHASE SHIP T-357"
+task: T-358
+next_action: "PHASE SHIP T-358"
 blocker: none
 transition_from: REVIEW
 saipen_version: 7
@@ -15,6 +15,6 @@ requires:
 mode: full
 goal_mode: true
 goal_waves: 2
-goal_tickets: 13
-updated: 2026-07-31T15:24:00Z
+goal_tickets: 15
+updated: 2026-07-31T15:33:00Z
 ---
