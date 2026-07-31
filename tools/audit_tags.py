@@ -15,9 +15,9 @@ consuming project does not have and a shallow checkout does not fetch, and it
 would put a git round-trip into a pre-commit hook that runs on every commit.
 
 Exit 0 when every tag agrees, 1 otherwise. The initial tag discovery skips
-(exit 0, loudly) where git or the tag list is unavailable. Once tags were
-enumerated, batch-process or protocol failures fail closed: the audit has a
-subject and must not turn losing its evidence into a green result.
+(exit 0, loudly) only when the Git executable or tag list is absent. An
+observed Git process failure and every later batch-process or protocol failure
+fail closed: the audit must not turn losing its evidence into a green result.
 """
 from __future__ import annotations
 
@@ -80,13 +80,9 @@ def _decode_version(raw: bytes) -> str:
     return text.strip()
 
 
-def git(*args: str) -> tuple[int, str]:
-    try:
-        r = subprocess.run([*_git_command(), *args], capture_output=True, text=True,
-                           check=False)
-    except (OSError, subprocess.SubprocessError) as e:
-        return 1, str(e)
-    return r.returncode, r.stdout
+def git(*args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run([*_git_command(), *args], capture_output=True, text=True,
+                          check=False)
 
 
 def _git_command() -> list[str]:
@@ -132,10 +128,20 @@ def _parse_batch_versions(
 
 
 def main() -> int:
-    rc, out = git("tag", "-l", "v*")
-    if rc != 0:
+    try:
+        tag_result = git("tag", "-l", "v*")
+    except FileNotFoundError:
         print("SKIP: git unavailable -- cannot audit tags")
         return 0
+    except (OSError, subprocess.SubprocessError) as e:
+        print(f"FAIL: git tag enumeration failed to start ({e})")
+        return 1
+    if tag_result.returncode:
+        detail = tag_result.stderr.strip() or tag_result.stdout.strip()
+        suffix = f": {detail}" if detail else ""
+        print(f"FAIL: git tag enumeration exited {tag_result.returncode}{suffix}")
+        return 1
+    out = tag_result.stdout
     tags = [t.strip() for t in out.splitlines() if t.strip()]
     if not tags:
         print("SKIP: no tags in this checkout -- nothing to audit. "

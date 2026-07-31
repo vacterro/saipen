@@ -1,3 +1,3 @@
-done: HUNT at 6aaba6d completed -- five bounded silent/symmetry tickets found
-remaining: T-372 shell bootstrap truthfulness, then four HUNT tickets
+done: T-372 shell predicate truthfulness shipped as v7.141.0 at 4cf7a38
+remaining: T-373 initial tag enumeration, then three HUNT tickets
 awaiting: nothing

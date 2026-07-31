@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.142.0 -- 2026-07-31 -- tag enumeration failures are not skips
+
+The historical tag audit mapped every failure of its initial `git tag -l v*` command to `SKIP: git unavailable` and exited zero. A launched Git process could return an IO, repository, or protocol error before producing any tag list, yet CI reported the dedicated audit as green after losing its entire subject set.
+
+Only a genuinely absent Git executable now takes the loud, successful skip path. Startup errors and nonzero enumeration results exit one with a focused diagnostic, including the process status and captured stderr. Empty tag lists still skip because there is genuinely nothing in that checkout to compare.
+
+The existing executable Git shim now covers the initial query as well as batch processing. An empty-PATH control proves the allowed missing-Git branch; an rc9 enumeration control proves observed process failure cannot print PASS or SKIP. The canonical validator, all 44 mutation checks, both portable floors, scenarios, tag audit, order audit, and Ruff pass.
+
 ## 7.141.0 -- 2026-07-31 -- shell predicates fail closed
 
 The shell installer and uninstaller treated every failed `grep` as an ordinary no-match. A read or process error could therefore select an append, retain, or clean path and still let the script print `Done.`. The uninstaller also ignored a managed skill path when it existed as a regular file instead of a directory or symlink.

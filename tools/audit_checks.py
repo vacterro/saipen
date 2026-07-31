@@ -135,6 +135,21 @@ def release_ledger_probe(source: Path, destination: Path) -> str | None:
 
 def audit_tags_batch_probe(root: Path, destination: Path) -> str | None:
     """Execute process and protocol failures against the tag audit."""
+    missing_env = os.environ.copy()
+    missing_env.pop(AUDIT_TAGS_GIT_SHIM, None)
+    missing_env.pop(AUDIT_TAGS_MODE, None)
+    missing_env["PATH"] = ""
+    missing = subprocess.run(
+        [sys.executable, str(root / "tools" / "audit_tags.py")],
+        cwd=root, env=missing_env, capture_output=True, text=True,
+        errors="replace")
+    missing_output = missing.stdout + missing.stderr
+    if (missing.returncode != 0
+            or "SKIP: git unavailable -- cannot audit tags" not in missing_output
+            or "PASS:" in missing_output or "FAIL:" in missing_output):
+        return ("missing-Git control did not produce the sole allowed SKIP: "
+                f"rc={missing.returncode} {missing_output.strip()[:200]}")
+
     shim = destination / "audit-tags-git-shim.py"
     shim.write_text(
         """import os
@@ -142,6 +157,9 @@ import sys
 
 args = sys.argv[1:]
 if args == ["tag", "-l", "v*"]:
+    if os.environ["SAIPEN_AUDIT_TAGS_MODE"] == "enumeration_nonzero":
+        print("synthetic enumeration failure", file=sys.stderr)
+        raise SystemExit(9)
     print("v" + "9.9.9")
     raise SystemExit(0)
 if args == ["cat-file", "--batch"]:
@@ -165,6 +183,8 @@ raise SystemExit(8)
 
     synthetic_tag = "v" + "9.9.9"
     expected = {
+        "enumeration_nonzero": (
+            "FAIL: git tag enumeration exited 9: synthetic enumeration failure"),
         "nonzero": "FAIL: git cat-file exited 9: synthetic batch failure",
         "truncated": f"FAIL: git cat-file response for {synthetic_tag} is truncated",
         "malformed": f"FAIL: git cat-file response for {synthetic_tag} has malformed header",
@@ -182,8 +202,8 @@ raise SystemExit(8)
             return f"{mode} control exited 0"
         if message not in output:
             return f"{mode} control did not report {message!r}: {output.strip()[:200]}"
-        if "PASS:" in output:
-            return f"{mode} control printed PASS after losing batch evidence"
+        if "PASS:" in output or "SKIP:" in output:
+            return f"{mode} control printed PASS/SKIP after losing audit evidence"
     return None
 
 
@@ -532,8 +552,8 @@ def main() -> int:
         print(f"FAIL: audit-tags batch process probe -- {batch_error}")
         shutil.rmtree(tmp, ignore_errors=True)
         return 1
-    print("PASS: audit-tags nonzero, malformed, truncated, and surplus batch "
-          "controls fail closed")
+    print("PASS: audit-tags missing-Git skip plus enumeration, nonzero, "
+          "malformed, truncated, and surplus fail-closed controls behave")
 
     query_count, query_error = observed_tag_queries(pristine)
     red_tree = tmp / "duplicate-tag-query"

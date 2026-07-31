@@ -128,3 +128,14 @@
 - 31.07.26 20:10 [E-1368] [parent: E-1367] [T-372] DEC: SHIP -- process errors fail closed, absence stays valid, and managed regular files uninstall; no P0-P1 findings.
 - 31.07.26 20:11 [E-1369] [parent: E-1368] [T-372] RUN: SHIP preflight -> origin/main 6aaba6d; v7.141.0 and remote-v7101 absent local/remote; release metadata prepared; unrelated subSaipen checkpoints excluded.
 - 31.07.26 20:13 [E-1370] [parent: E-1369] [T-372] RUN: SHIP gate -> grep-error controls, regular-file uninstall, canonical 44/44, floor 27x2, scenarios/tags/validator/ruff/order/syntax PASS; v7.141.0 prepared.
+- 31.07.26 20:14 [E-1371] [parent: E-1370] [T-372] RUN: ship v7.141.0 -> pushed 4cf7a38
+- 31.07.26 20:14 [E-1372] [parent: E-1371] [T-372] RUN: DONE -> ticket complete
+- 31.07.26 20:14 [E-1373] [parent: E-1372] [T-373] DEC: claimed initial tag-enumeration fail-closed behavior with an executable rc9 Git control.
+- 31.07.26 20:15 [E-1374] [parent: E-1373] [T-373] RUN: SCOUT -- initial helper merges missing executable and observed nonzero process; preserve true no-Git SKIP, fail launched errors, extend the existing Git shim control.
+- 31.07.26 20:17 [E-1375] [parent: E-1374] [T-373] RUN: BUILD -> missing Git alone SKIPs; enumeration start/process failures exit nonzero; empty-PATH green and rc9 red controls PASS.
+- 31.07.26 20:18 [E-1376] [parent: E-1375] [T-373] RUN: VERIFY -> missing-Git SKIP and enumeration rc9 FAIL controls PASS; canonical 44/44, floor 27x2, and all release gates green; conf: high.
+- 31.07.26 20:18 [E-1377] [parent: E-1376] [T-373] DEC: goal_tickets 17->18
+- 31.07.26 20:19 [E-1378] [parent: E-1377] [T-373] DEC: SHIP -- absent executable and launched-process failure are behaviorally distinct; diagnostics survive and no green verdict follows evidence loss; no P0-P1 findings.
+- 31.07.26 20:20 [E-1379] [parent: E-1378] [T-373] RUN: SHIP preflight -> origin/main 4cf7a38; v7.142.0 and remote-v7101 absent local/remote; release metadata prepared; unrelated subSaipen checkpoints excluded.
+- 31.07.26 20:21 [E-1380] [parent: E-1379] [T-377] DEC: scope -> TODO -- pre-tag VERSION bump falsely triggers digest-stale before ship.md permits the post-push digest refresh.
+- 31.07.26 20:21 [E-1381] [parent: E-1380] [T-373] RUN: SHIP gate -> missing-Git/rc9 controls, canonical 44/44, floor 27x2, scenarios/tags/validator/ruff/order PASS; expected pre-tag ledger warning and T-377 digest warning; v7.142.0 prepared.
