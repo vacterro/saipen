@@ -155,6 +155,45 @@ def write_new(content: str):
     return ("WRITE", content)
 
 
+def case_target(root: Path, rel: str, mutation) -> Path:
+    """Return the physical file a logical mutation will edit.
+
+    LOG chronology spans sealed segments plus the active tail. Immediately
+    after a normal seal the active file has no event pair to swap, so the
+    backwards-ID mutation must walk to the newest segment that does. Both
+    runners call this before saving bytes, and apply_case calls it again,
+    keeping mutation and restoration on the same file.
+    """
+    default = root / rel
+    if mutation != SWAP:
+        return default
+    candidates = [default]
+    candidates.extend(reversed(sorted((root / ".saipen" / "logs").glob(
+        "LOG-*.md"))))
+    for candidate in candidates:
+        if not candidate.is_file():
+            continue
+        lines = candidate.read_text(
+            encoding="utf-8-sig", errors="replace").splitlines()
+        if sum(line.startswith("- ") for line in lines) >= 2:
+            return candidate
+    return default
+
+
+def case_available(root: Path, rel: str, mutation) -> bool:
+    if mutation == CREATE or (isinstance(mutation, tuple)
+                              and mutation[0] == "WRITE"):
+        return True
+    target = case_target(root, rel, mutation)
+    if not target.is_file():
+        return False
+    if mutation != SWAP:
+        return True
+    lines = target.read_text(
+        encoding="utf-8-sig", errors="replace").splitlines()
+    return sum(line.startswith("- ") for line in lines) >= 2
+
+
 # (label, file, mutation, expected substring in the validator's output)
 CASES: list[tuple[str, str, object, str]] = [
     # --- STATE shape -----------------------------------------------------
@@ -286,7 +325,7 @@ CASES: list[tuple[str, str, object, str]] = [
 
 def apply_case(root: Path, rel: str, mutation) -> bool:
     """Returns False when the case cannot be set up (skip it loudly)."""
-    p = root / rel
+    p = case_target(root, rel, mutation)
     if mutation == DELETE:
         if not p.exists():
             return False
@@ -391,6 +430,16 @@ def main() -> int:
         shutil.rmtree(tmp, ignore_errors=True)
         return 1
 
+    unavailable = [label for label, rel, mutation, _expected in CASES
+                   if not case_available(pristine, rel, mutation)]
+    if unavailable:
+        for label in unavailable:
+            print(f"FAIL: skipped canonical mutation: {label}")
+        print("FAIL: canonical mutation suite cannot start with a changing "
+              "denominator")
+        shutil.rmtree(tmp, ignore_errors=True)
+        return 1
+
     # One copy, not one per case. Every case touches exactly one file, so
     # saving that file's bytes and putting them back is equivalent to a fresh
     # tree and turns 41 copytrees of a repo carrying 32 locale directories into
@@ -401,7 +450,7 @@ def main() -> int:
         if expected in control:
             always.append((label, expected))
             continue
-        target = pristine / rel
+        target = case_target(pristine, rel, mutation)
         saved = target.read_bytes() if target.exists() else None
         try:
             if not apply_case(pristine, rel, mutation):
@@ -434,8 +483,9 @@ def main() -> int:
               f"That check no longer goes red on its own condition")
 
     live = len(CASES) - len(dead) - len(skipped) - len(always)
-    if dead or always:
-        print(f"\n{len(dead) + len(always)} of {len(CASES)} case(s) are not "
+    if dead or always or skipped:
+        print(f"\n{len(dead) + len(always) + len(skipped)} of {len(CASES)} "
+              "case(s) are not "
               f"evidence any more.")
         return 1
     print("PASS: release-ledger tag query is observed once; duplicate-query "

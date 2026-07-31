@@ -2,6 +2,12 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.133.0 -- 2026-07-31 -- a skipped guard is a failed guard
+
+Normal LOG sealing left active `LOG.md` without two events. The canonical backwards-ID mutation therefore skipped; `audit_checks.py` still exited 0 after reporting 40/41, while parity silently changed its denominator from 41 to 40. A green suite had lost a case because routine protocol maintenance changed the storage layout.
+
+Logical LOG mutations now resolve to active or the newest sealed segment carrying an event pair. Both runners save, mutate, and restore that same physical file. Availability is checked before the expensive matrix, and any preflight or runtime skip is fatal. An active-empty sealed layout still applies 41/41; removing every eligible LOG makes both tools exit nonzero and name the missing backwards-ID case.
+
 ## 7.132.0 -- 2026-07-31 -- bind memory before touching it
 
 Checkpoint paths were relative to ambient cwd. After an agent changed directories, `.saipen/STATE.md` could name a different project without any error; persisting an absolute root in STATE would only replace that with false corruption whenever a clone moved.

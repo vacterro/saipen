@@ -129,14 +129,25 @@ def main() -> int:
         shutil.rmtree(tmp, ignore_errors=True)
         return 1
 
+    unavailable = [label for label, rel, mutation, _expected in ac.CASES
+                   if not ac.case_available(pristine, rel, mutation)]
+    if unavailable:
+        for label in unavailable:
+            print(f"FAIL: skipped canonical mutation: {label}")
+        print("FAIL: parity denominator would change because a canonical "
+              "mutation cannot be set up")
+        shutil.rmtree(tmp, ignore_errors=True)
+        return 1
+
     # One copy, restored between cases -- see the same note in audit_checks.py.
     # Every case touches exactly one file, so its bytes are the whole state.
-    both, only_canonical, neither = [], [], []
+    both, only_canonical, neither, skipped = [], [], [], []
     for label, rel, mutation, _expected in ac.CASES:
-        target = pristine / rel
+        target = ac.case_target(pristine, rel, mutation)
         saved = target.read_bytes() if target.exists() else None
         try:
             if not ac.apply_case(pristine, rel, mutation):
+                skipped.append(label)
                 continue
             v, f = validate(pristine), floor(pristine)
             if v != 0 and f != 0:
@@ -161,12 +172,19 @@ def main() -> int:
     shutil.rmtree(tmp, ignore_errors=True)
 
     applied = len(both) + len(only_canonical) + len(neither)
-    print(f"cases applied: {applied}")
+    print(f"cases applied: {applied} of {len(ac.CASES)}")
     print(f"  caught by both:                 {len(both)}")
     print(f"  caught only by tools/validate:  {len(only_canonical)}")
     print(f"  caught by neither (WARN-only):  {len(neither)}")
     for label in neither:
         print(f"      {label}")
+
+    if skipped:
+        for label in skipped:
+            print(f"FAIL: skipped canonical mutation: {label}")
+        print("\nFAIL: parity denominator changed because a canonical mutation "
+              "could not be set up")
+        return 1
 
     if len(both) < BASELINE:
         print(f"\nFAIL: the floor catches {len(both)} of {applied}, below the "

@@ -1,3 +1,3 @@
-done: v7.132.0 prepared; checkpoint memory now binds to one resolved project root
-remaining: T-366 sealed-LOG mutation audit, T-365 ledger warning, then T-361
+done: v7.133.0 prepared; sealed LOG mutations stay in the 41-case denominator
+remaining: T-365 release-ledger warning, then T-361 last_event migration
 awaiting: nothing
