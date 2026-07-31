@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "SAIPEN STATE Schema",
+  "x-current-schema-version": 2,
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -44,7 +45,7 @@
     "schema_version": {
       "type": "integer",
       "minimum": 1,
-      "description": "STATE file-format revision, integer. tools/validate.py tolerates absence (legacy pre-v1 state -> warning, set it at the next checkpoint) but fails a value below the current revision. Deliberately NOT in `required`: listing it there made the schema hard-fail exactly the legacy states validate.py's own code says to tolerate, so the tolerant branch was unreachable (fixed v7.86.0). Distinct from `saipen_version`, which is the protocol MAJOR that wrote the state."
+      "description": "STATE file-format revision, integer. The current revision comes from this schema's x-current-schema-version metadata; revision 2 introduced the Core last_event checkpoint marker. Schema v1 or absence remains readable legacy and WARNs, then MUST upgrade at the next checkpoint. Deliberately NOT in `required`: listing it there would hard-fail exactly the legacy states tools/validate.py must still open. Distinct from `saipen_version`, which is the protocol MAJOR that wrote the state."
     },
     "saipen_home": {
       "type": "string",
@@ -81,8 +82,8 @@
     },
     "last_event": {
       "type": "integer",
-      "minimum": 0,
-      "description": "E-### ID of the last event written during the checkpoint that produced this STATE. RFC § 1.2 RECOMMENDED, will become REQUIRED."
+      "minimum": 1,
+      "description": "Numeric N from the highest E-N event in the Core LOG at the checkpoint that produced this STATE. REQUIRED by tools/validate.py when schema_version is 2 and LOG contains an event; omitted only for a fresh empty LOG or readable legacy v1 state. Kept out of the JSON Schema `required` array because that array cannot express either condition."
     },
     "updated": {
       "type": "string",

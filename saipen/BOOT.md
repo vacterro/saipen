@@ -32,10 +32,18 @@ does not answer.
    missing, or STATE contradicted by `LOG.md`/`BOARD.md` -> RECOVER per
    RFC § 1.5 first. Do NOT execute `next_action` from an unrepaired state
    (RFC § 1.11, priority 1).
+   `schema_version` absent or `1` is readable legacy, not a reason to recover
+   before continuing: WARN, then upgrade at the next checkpoint. Any present
+   `last_event` is still checked. At schema v2, an event-bearing LOG requires
+   the marker to equal its highest `E-###`; absence or mismatch is
+   contradiction and enters Recovery. A fresh empty LOG has no marker.
 
 3. **Read `.saipen/BOARD.md`, then the active tail of `.saipen/LOG.md`.**
    Older history is sealed in `.saipen/logs/LOG-NNN.md`; load it only when a
-   `parent:` chain or an audit walks back into it.
+   `parent:` chain or an audit walks back into it. The `last_event` freshness
+   check needs only the newest event: use the active LOG tail when it has one,
+   otherwise read the tail of the newest sealed segment. Do not scan every
+   segment merely to rediscover the maximum.
 
 4. **Distrust your own memory.** `STATE.agent` is not you, or `STATE.updated`
    is newer than your last write -> everything you remember about this project
@@ -77,6 +85,10 @@ does not answer.
    `tools/validate.py` runs it is the cheapest shape check, but it is not a
    substitute for the read-back -- an empty board passes every shape check
    ever written. A checkpoint you cannot resume from is not a checkpoint.
+   The final STATE write uses `schema_version: 2` and `last_event: N`, where
+   `E-N` is the highest event across sealed plus active LOG after step 1; omit
+   it only for a fresh bootstrap whose LOG is still empty. Recovery writes the
+   same pair from that evidence, including when upgrading legacy state.
 
 ## Anything else
 

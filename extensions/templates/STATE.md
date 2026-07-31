@@ -5,7 +5,7 @@ next_action: "WAIT: init -- provide the first project goal or raw backlog"
 blocker: none
 agent: none
 saipen_version: 7
-schema_version: 1
+schema_version: 2
 saipen_home: ""
 mode: full
 goal_mode: false

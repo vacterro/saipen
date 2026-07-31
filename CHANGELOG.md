@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.135.0 -- 2026-07-31 -- make STATE a real commit pointer
+
+`last_event` was documented as the freshness marker that would eventually become required, but normal checkpoints and Recovery did not write it and the validator checked it only when present. The stale-state guard therefore disappeared from the usual state shape: an omitted marker looked green forever.
+
+Core STATE schema v2 now requires the marker whenever the LOG has an event. Missing or v1 state remains readable legacy with a focused warning and upgrades at its next checkpoint; a genuinely fresh empty bootstrap still omits the marker because no event exists to name. Every checkpoint writes the numeric ID of the real LOG tail last, and Recovery derives the same value from sealed plus active history, so replaying Recovery is idempotent.
+
+The schema's `x-current-schema-version` metadata is the single current-revision authority used by the validator. Six executable migration controls prove legacy readability, missing-v2 rejection, exact agreement, stale detection after a LOG append, recovery to the new tail, and above-tail corruption. Canonical mutation coverage is 44/44 with all four marker and schema-metadata failure paths held red.
+
 ## 7.134.0 -- 2026-07-31 -- known history is not a permanent warning
 
 The release ledger repeated the same two tag-only and nine changelog-only releases on every validation. Tagged releases 7.81.0 and 7.82.0 now have truthful backfilled entries. The nine 7.84.0-7.91.0 commits whose tags were never published are recorded in a structured baseline with their release commits and reasons; no local or remote historical tag was created or changed.

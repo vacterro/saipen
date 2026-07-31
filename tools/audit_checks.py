@@ -51,6 +51,7 @@ LOG = ".saipen/LOG.md"
 DIGEST = ".saipen/kitchen/digest.md"
 MANIFEST = ".saipen/kitchen/markhunt_progress.md"
 SUB = ".saipen/extensions/subs/saiwiki/STATE.md"
+STATE_SCHEMA = "extensions/schemas/state.schema.json"
 TAG_QUERY = ("git", "tag", "-l", "v*")
 
 
@@ -289,6 +290,13 @@ CASES: list[tuple[str, str, object, str]] = [
      "must be ISO-8601 UTC"),
     ("schema_version from the future", STATE, sub_line("schema_version", "99"),
      "only understands"),
+    ("current schema revision metadata missing", STATE_SCHEMA,
+     replace('  "x-current-schema-version": 2,\n', ""),
+     "x-current-schema-version must be a positive integer"),
+    ("schema v2 missing last_event", STATE, drop_line("last_event"),
+     "requires last_event"),
+    ("last_event below the log tail", STATE, sub_line("last_event", "1"),
+     "lower than the log"),
     ("next_action has no prefix", STATE,
      sub_line("next_action", '"finish the thing"'),
      "does not start with"),
@@ -307,7 +315,7 @@ CASES: list[tuple[str, str, object, str]] = [
      lambda s: drop_line("goal_tickets")(drop_line("goal_waves")(s)),
      "counter missing"),
     ("last_event above the log tail", STATE,
-     add_after("schema_version: 1\n", "last_event: 999999\n"),
+     sub_line("last_event", "999999"),
      "higher than the log"),
     ("requires: a capability nobody defines", STATE,
      replace("  - python", "  - pyhton"), "handshake vocabulary"),

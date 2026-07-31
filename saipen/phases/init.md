@@ -19,7 +19,7 @@ matching exactly:
 - `STATE.md`: frontmatter `phase: PLAN`, `task: none`, `next_action:
   "WAIT: init -- provide the first project goal or raw backlog"` (RFC § 1.2's
   narrow INIT-bootstrap `WAIT:` exception -- ask for the goal/backlog
-  only, nothing else), `blocker: none`, `agent: none`, `saipen_version: 7`, `schema_version: 1`,
+  only, nothing else), `blocker: none`, `agent: none`, `saipen_version: 7`, `schema_version: 2`,
   `saipen_home:` (absolute path of the SAIPEN home this bootstrap read the
   protocol from -- § 1.7's bootloader pointer; TEMPLATE COPIES TOO: the
   template ships it empty, fill it in), `mode:` (per § 1.3 capability
@@ -32,6 +32,9 @@ matching exactly:
   user answers the bootstrap `WAIT:`: a `DEC` line recording the goal
   itself (e.g. "DEC: bootstrap SAIPEN for project -- goal: <what the user
   said>").
+  The initial STATE omits `last_event` because this LOG has no event. The
+  first checkpoint after that real entry writes its numeric `E-###` ID as
+  `last_event`, per RFC § 1.2/§ 1.5.
 - `KNOWLEDGE/` directory (created on first need, not upfront).
 
 After bootstrap is physically written to disk, transition:

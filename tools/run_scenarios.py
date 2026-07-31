@@ -27,6 +27,10 @@ Project-root probes also execute the canonical validator from a correct Git
 root, nested Git and non-Git directories, a foreign repository, an explicit
 root, and a linked worktree. They assert no fallback `.saipen/` is created.
 
+The last-event probe upgrades one legacy fixture through schema v2, advances
+its LOG, and executes the validator at every boundary. It proves migration,
+missing, exact, stale, recovered, and corrupt marker behavior.
+
 Exit code is non-zero if any fixture's real outcome differs from its
 declaration, so CI fails on it like any other gate.
 """
@@ -325,6 +329,84 @@ def run_project_root_probes() -> tuple[list[str], int]:
 
     return problems, checked
 
+
+def run_last_event_probes() -> tuple[list[str], int]:
+    """Execute the schema-v1 to schema-v2 checkpoint migration boundary."""
+    problems = []
+    checked = 0
+
+    def validate(project: Path) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [sys.executable, str(VALIDATOR), "--project-root", str(project)],
+            cwd=project, capture_output=True, text=True, errors="replace")
+
+    def expect(label: str, result: subprocess.CompletedProcess[str],
+               returncode: int, contains: str,
+               excludes: tuple[str, ...] = ()) -> None:
+        nonlocal checked
+        checked += 1
+        output = result.stdout + result.stderr
+        missing = contains not in output
+        leaked = next((value for value in excludes if value in output), None)
+        if result.returncode != returncode or missing or leaked:
+            details = []
+            if result.returncode != returncode:
+                details.append(f"exit {result.returncode}, expected {returncode}")
+            if missing:
+                details.append(f"missing {contains!r}")
+            if leaked:
+                details.append(f"unexpected {leaked!r}")
+            problems.append(f"{label}: {'; '.join(details)}")
+        else:
+            print(f"PASS: last_event -- {label}")
+
+    with tempfile.TemporaryDirectory(prefix="saipen-last-event-") as raw:
+        project = Path(raw) / "project"
+        shutil.copytree(SCENARIOS / "stale-state-reconciliation" / ".saipen",
+                        project / ".saipen")
+        state_path = project / ".saipen" / "STATE.md"
+        log_path = project / ".saipen" / "LOG.md"
+
+        expect("legacy absence warns but remains readable", validate(project), 0,
+               "WARN [schema-version]", ("requires last_event",))
+
+        state = state_path.read_text(encoding="utf-8-sig")
+        state = state.replace("saipen_version: 7\n",
+                              "saipen_version: 7\nschema_version: 2\n", 1)
+        state_path.write_text(state, encoding="utf-8", newline="\n")
+        expect("schema v2 missing marker fails", validate(project), 1,
+               "requires last_event")
+
+        state = state_path.read_text(encoding="utf-8")
+        state = state.replace("schema_version: 2\n",
+                              "schema_version: 2\nlast_event: 1\n", 1)
+        state_path.write_text(state, encoding="utf-8", newline="\n")
+        expect("exact recovered tail passes", validate(project), 0,
+               "Validation complete. Agent is conformant.",
+               ("WARN [schema-version]", "FAIL: STATE.md last_event"))
+
+        log = log_path.read_text(encoding="utf-8-sig").rstrip()
+        log += ("\n- 26.07.17 00:01 [E-002] [parent: E-001] [T-001] "
+                "RUN: checkpoint advanced\n")
+        log_path.write_text(log, encoding="utf-8", newline="\n")
+        expect("advanced LOG makes old marker stale", validate(project), 1,
+               "lower than the log")
+
+        state = state_path.read_text(encoding="utf-8")
+        state_path.write_text(state.replace("last_event: 1\n", "last_event: 2\n", 1),
+                              encoding="utf-8", newline="\n")
+        expect("recovered exact tail passes", validate(project), 0,
+               "Validation complete. Agent is conformant.",
+               ("FAIL: STATE.md last_event",))
+
+        state = state_path.read_text(encoding="utf-8")
+        state_path.write_text(state.replace("last_event: 2\n", "last_event: 3\n", 1),
+                              encoding="utf-8", newline="\n")
+        expect("marker above LOG fails as corrupt", validate(project), 1,
+               "higher than the log")
+
+    return problems, checked
+
 if not SCENARIOS.is_dir():
     print(f"FAIL: no {SCENARIOS} -- run this from the SAIPEN home")
     sys.exit(1)
@@ -404,12 +486,15 @@ injector_failures, injector_checked, injector_skipped = run_injector_probes()
 failures.extend(injector_failures)
 root_failures, root_checked = run_project_root_probes()
 failures.extend(root_failures)
+last_event_failures, last_event_checked = run_last_event_probes()
+failures.extend(last_event_failures)
 
 print(f"\n{checked} executable fixture(s) checked, "
       f"{skipped} behavioral fixture(s) skipped (README-only by design)")
 print(f"{injector_checked} injector(s) executed, "
       f"{injector_skipped} skipped for missing interpreters")
 print(f"{root_checked} project-root behavior(s) executed")
+print(f"{last_event_checked} last_event migration behavior(s) executed")
 
 if failures:
     print(f"\nFAILED: {len(failures)} executable check(s) failed")

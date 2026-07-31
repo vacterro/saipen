@@ -44,8 +44,6 @@ from pathlib import Path
 
 USE_COLOR = sys.stdout.isatty()
 
-CURRENT_SCHEMA_VERSION = 1
-
 # extensions/subs/PROTOCOL.md § 2 status table -- the normative list for
 # the extension (RFC § 1.9). Named rather than inlined so the cross-doc
 # check can compare it against the table and the schema enum.
@@ -391,6 +389,10 @@ if not schema_path.is_file():
     fail(f"state.schema.json not found at {schema_path} -- SAIPEN home clone incomplete")
     sys.exit(1)
 schema = json.loads(schema_path.read_text(encoding="utf-8"))
+CURRENT_SCHEMA_VERSION = schema.get("x-current-schema-version")
+if not isinstance(CURRENT_SCHEMA_VERSION, int) or CURRENT_SCHEMA_VERSION < 1:
+    fail("state.schema.json x-current-schema-version must be a positive integer")
+    sys.exit(1)
 
 # Encoding is diagnosed before anything is parsed, on all three checkpoint
 # files. A UTF-16 or BOM-carrying `.saipen/` file is what PowerShell 5.1's
@@ -460,18 +462,23 @@ if state.get("goal_mode") is False:
                  f"({state[counter]!r}) -- counters MUST be cleared when "
                  f"goal_mode is off (RFC § 2.4 Exit)")
 
-# schema_version invariant: must be >= CURRENT_SCHEMA_VERSION.
-# Absence is tolerated for legacy pre-v1 states (warn, not fail), but a
-# present value below current means the schema is outdated.
+# schema_version is the migration boundary for checkpoint semantics. Absence
+# and v1 remain readable so installing a newer SAIPEN cannot trap an existing
+# project. The next checkpoint upgrades them to v2, whose `last_event` marker
+# makes STATE the checkable commit pointer promised by RFC section 1.5.
 sv = state.get("schema_version")
 if sv is None:
     warn("schema-version",
          "STATE.md has no schema_version -- legacy pre-v1 format. "
-         "Set schema_version: 1 at next checkpoint.")
-elif not isinstance(sv, int) or sv < CURRENT_SCHEMA_VERSION:
-    fail(f"STATE.md schema_version is {sv!r}, expected >= "
-         f"{CURRENT_SCHEMA_VERSION} -- state format may be incompatible "
-         f"with current validator")
+         "At the next checkpoint set schema_version: 2 and last_event to "
+         "the current LOG tail (omit last_event only while LOG is empty).")
+elif not isinstance(sv, int) or sv < 1:
+    fail(f"STATE.md schema_version is {sv!r}, expected a positive integer")
+elif sv < CURRENT_SCHEMA_VERSION:
+    warn("schema-version",
+         f"STATE.md schema_version is legacy v{sv}. At the next checkpoint "
+         "set schema_version: 2 and last_event to the current LOG tail "
+         "(omit last_event only while LOG is empty).")
 elif sv > CURRENT_SCHEMA_VERSION:
     # ">= current" was written from the wrong end. A state NEWER than this
     # validator is not reassuring: it may carry required fields this file has
@@ -1275,21 +1282,26 @@ if log_files:
                     and not re.fullmatch(r"T-\d+", ticket):
                 warn("log-ticket-ref", f"{loc} ticket ref [{ticket}] "
                      f"isn't numeric T-### or the literal T-none (RFC § 1.2)")
-    # RFC § 1.2's STATE freshness marker. The clause is fully specified --
-    # "lower than the LOG tail means stale, higher means corrupt or from an
-    # incompatible branch" -- and had zero references in this file, so the one
-    # field whose entire purpose is catching a STATE that drifted from its own
-    # LOG was checked by nothing. It is RECOMMENDED today and the RFC says it
-    # will become REQUIRED, which is exactly when an unchecked value starts
-    # doing damage: Recovery rebuilds from the LOG tail, and a `last_event`
-    # above it points at an event that does not exist.
+    # RFC section 1.2's STATE freshness marker. Schema v1 and absent schema
+    # versions are readable legacy states; their warning above orders the next
+    # checkpoint to migrate. Schema v2 is proof that checkpoint code knows the
+    # marker, so an event-bearing LOG without it is corrupt. A fresh bootstrap
+    # has an empty LOG and therefore no event to name.
     #
     # Note on how this survived: v7.108.0's rule-coverage check requires every
     # RFC section stating a MUST to be CITED by a CONFORMANCE row, and § 1.2 is
     # cited by dozens. Section granularity cannot see one unenforced MUST
     # inside a heavily-cited section. That limit is real and now demonstrated.
     _le = state.get("last_event")
-    if isinstance(_le, int) and log_files:
+    if sv == CURRENT_SCHEMA_VERSION and prev_id and _le is None:
+        fail(f"STATE.md schema_version {CURRENT_SCHEMA_VERSION} requires "
+             f"last_event because the LOG tail is E-{prev_id}. Legacy v1 "
+             "may omit it only until its next checkpoint (RFC section 1.2, "
+             "section 1.5)")
+    if isinstance(_le, int) and _le < 1:
+        fail(f"STATE.md last_event is E-{_le}, but event IDs start at E-1; "
+             "omit the field only for a fresh empty LOG")
+    elif isinstance(_le, int) and log_files:
         if _le > prev_id:
             fail(f"STATE.md last_event is E-{_le} but the LOG tail is "
                  f"E-{prev_id} -- higher than the log means corrupt, or a "

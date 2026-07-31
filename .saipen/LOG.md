@@ -25,3 +25,17 @@
 - 31.07.26 17:39 [E-1265] [parent: E-1264] [T-365] DEC: SHIP -- review pass 1 finds baseline bounded by live divergence, installed with validator, and behaviorally red-tested; no P0-P1 findings.
 - 31.07.26 17:41 [E-1266] [parent: E-1265] [T-365] RUN: SHIP preflight -> origin/main equals 8f685d6, v7.134.0 absent, metadata prepared; unrelated subSaipen checkpoints will stay unstaged.
 - 31.07.26 17:42 [E-1267] [parent: E-1266] [T-365] RUN: SHIP preflight v7.134.0 -> audit_checks 41/41; validator/scenarios/ruff/order PASS; metadata aligned; only expected pre-tag ledger WARN; no commit/tag/push begun.
+- 31.07.26 17:44 [E-1268] [parent: E-1267] [T-365] RUN: ship v7.134.0 -> pushed e167371
+- 31.07.26 17:44 [E-1269] [parent: E-1268] [T-365] RUN: DONE -> ticket complete; local/remote tag peels to e167371, VERSION 7.134.0, ledger clean, remote-v7101 absent.
+- 31.07.26 17:44 [E-1270] [parent: E-1269] [T-361] DEC: claimed last_event migration; make checkpoint freshness present without trapping legacy projects.
+- 31.07.26 17:47 [E-1271] [parent: E-1270] [T-361] RUN: SCOUT -- schema v1 remains legacy; v2 requires LOG-tail marker except empty bootstrap; Recovery writes both; executable migration/stale/corrupt controls.
+- 31.07.26 17:54 [E-1272] [parent: E-1271] [T-361] RUN: build -> schema-v2 checkpoint/Recovery contract plus six executable legacy/missing/exact/stale/recovered/corrupt controls.
+- 31.07.26 18:00 [E-1273] [parent: E-1272] [T-361] RUN: VERIFY -> migration 6/6; canonical 43/43; parity 11/43; validator/scenarios/ruff/order PASS; live v2 checkpoint exact; conf: high.
+- 31.07.26 18:00 [E-1274] [parent: E-1273] [T-361] DEC: goal_tickets 6->7
+- 31.07.26 18:01 [E-1275] [parent: E-1274] [T-361] DEC: SHIP after FIXES -- review pass 1 found current schema revision duplicated in JSON prose and Python; derive it from schema metadata.
+- 31.07.26 18:08 [E-1276] [parent: E-1275] [T-361] RUN: build -> schema metadata is sole current-revision source; missing metadata is canonical red-control 44.
+- 31.07.26 18:08 [E-1277] [parent: E-1276] [T-361] RUN: VERIFY -> migration 6/6; canonical 44/44; parity 11/44; validator/scenarios/ruff/order PASS after review fix; conf: high.
+- 31.07.26 18:08 [E-1278] [parent: E-1277] [T-361] DEC: goal_tickets 7->8
+- 31.07.26 18:09 [E-1279] [parent: E-1278] [T-361] DEC: SHIP after FIXES -- review pass 2 confirms schema metadata authority and diagnostic fix; no remaining P0-P1 findings.
+- 31.07.26 18:12 [E-1280] [parent: E-1279] [T-361] RUN: SHIP preflight -> origin/main e167371; v7.135.0 absent local/remote; unrelated subSaipen checkpoints excluded.
+- 31.07.26 18:19 [E-1281] [parent: E-1280] [T-361] RUN: SHIP gate -> validator/scenarios/ruff/order PASS; migration 6/6; canonical 44/44; parity 11/44.
