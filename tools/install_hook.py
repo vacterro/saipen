@@ -28,7 +28,7 @@ MARKER = "# saipen pre-commit hook"
 # copies ("re-run inject after every git pull"), and nothing guarded this one.
 # tools/validate.py reads this number out of THIS file and compares it against
 # the number in the installed hook.
-HOOK_VERSION = 2
+HOOK_VERSION = 3
 
 home = Path(__file__).resolve().parent.parent
 hooks_dir = Path(".git/hooks")
@@ -77,7 +77,11 @@ if [ -f "$SAIPEN_HOME/tools/validate.py" ]; then
   fi
 fi
 if [ -f "$SAIPEN_HOME/tests/validate.sh" ]; then
-  sh "$SAIPEN_HOME/tests/validate.sh" && exit 0
+  if ! command -v bash >/dev/null 2>&1; then
+    echo "saipen: validation failed -- Bash is required to run $SAIPEN_HOME/tests/validate.sh" >&2
+    exit 1
+  fi
+  bash "$SAIPEN_HOME/tests/validate.sh" && exit 0
   echo "saipen: validation failed -- fix .saipen/ or commit with --no-verify" >&2
   exit 1
 fi

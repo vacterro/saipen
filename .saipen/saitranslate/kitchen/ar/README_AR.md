@@ -10,7 +10,7 @@
 
 **أمر واحد. صفر فقدان للذاكرة.**
 
-**v7.143.0** | [المواصفات](SPEC.md) | [الدليل](GUIDE.md) | [RFC](saipen/RFC.md) | [الأسلوب](saipen/STYLE.md) | [واجهة المستخدم](saipen/UI.md) | [التطابق](saipen/CONFORMANCE.md) | markdown بسيط | صفر تبعيات | MIT
+**v7.144.0** | [المواصفات](SPEC.md) | [الدليل](GUIDE.md) | [RFC](saipen/RFC.md) | [الأسلوب](saipen/STYLE.md) | [واجهة المستخدم](saipen/UI.md) | [التطابق](saipen/CONFORMANCE.md) | markdown بسيط | صفر تبعيات | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)

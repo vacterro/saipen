@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.144.0 -- 2026-07-31 -- hooks resolve Bash for the Bash floor
+
+The generated POSIX pre-commit hook runs under `/bin/sh`, but its no-Python fallback invoked the Bash-only portable floor through that same `sh`. On systems where `/bin/sh` is dash, a healthy project was rejected on the floor's Bash syntax before validation began.
+
+Hook generation 3 now resolves and invokes `bash` explicitly. When the floor exists but Bash does not, the hook fails nonzero with a focused dependency message instead of reporting a structural validation failure or silently skipping the check.
+
+Executable controls copy the real installer into an isolated SAIPEN home, generate a real hook, and run it through real dash. With only Bash reachable, a here-string floor executes and prints its marker; with Bash absent, the hook fails focused without the marker. The canonical validator, all 44 mutation checks, both portable floors, scenarios, tag audit, order audit, and Ruff pass.
+
 ## 7.143.0 -- 2026-07-31 -- portable LOG filtering propagates failure
 
 The shell portable floor ended its LOG-validation pipeline with `|| true`. That made an empty malformed-line set convenient, but also converted a failed `sed`, `grep`, or file read into success before printing both the LOG-format PASS and final floor completion.

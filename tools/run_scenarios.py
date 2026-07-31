@@ -76,6 +76,15 @@ def find_bash() -> str | None:
     return None
 
 
+def find_dash() -> str | None:
+    """Return dash for proving the generated POSIX hook is not Bash itself."""
+    for candidate in (r"C:\Program Files\Git\usr\bin\dash.exe",
+                      shutil.which("dash")):
+        if candidate and os.path.isfile(candidate):
+            return candidate
+    return None
+
+
 def bash_env(bash: str, home: Path) -> dict[str, str]:
     env = os.environ.copy()
     env["HOME"] = str(home)
@@ -96,6 +105,75 @@ def find_powershell() -> str | None:
         if found:
             return found
     return None
+
+
+def run_hook_probes() -> tuple[list[str], int, int]:
+    failures = []
+    bash, dash = find_bash(), find_dash()
+    if not bash or not dash:
+        print("SKIP: installed-hook Bash resolution -- bash or dash unavailable")
+        return failures, 0, 1
+
+    with tempfile.TemporaryDirectory(prefix="saipen-hook-") as raw:
+        root = Path(raw)
+        fake_home = root / "saipen-home"
+        (fake_home / "tools").mkdir(parents=True)
+        (fake_home / "tests").mkdir()
+        shutil.copy2(HOME / "tools" / "install_hook.py",
+                     fake_home / "tools" / "install_hook.py")
+        (fake_home / "tools" / "validate.py").write_text(
+            "# forces the hook's no-Python fallback branch\n", encoding="utf-8")
+        (fake_home / "tests" / "validate.sh").write_text(
+            "#!/bin/bash\nread -r value <<< 'bash-floor-ok'\n"
+            "[ \"$value\" = bash-floor-ok ] || exit 8\necho FLOOR_OK\n",
+            encoding="utf-8", newline="\n")
+
+        project = root / "project"
+        (project / ".git" / "hooks").mkdir(parents=True)
+        (project / ".saipen").mkdir()
+        install = subprocess.run(
+            [sys.executable, str(fake_home / "tools" / "install_hook.py")],
+            cwd=project, capture_output=True, text=True, errors="replace")
+        if install.returncode:
+            return [f"install-hook probe setup failed: {install.stderr.strip()[:160]}"], 1, 0
+        hook = project / ".git" / "hooks" / "pre-commit"
+
+        controlled = root / "bin"
+        controlled.mkdir()
+        if os.name == "nt":
+            bash_path = str(Path(bash).resolve().parent)
+        else:
+            (controlled / "bash").symlink_to(Path(bash).resolve())
+            bash_path = str(controlled)
+        env = os.environ.copy()
+        env["PATH"] = bash_path
+        working = subprocess.run(
+            [dash, str(hook)], cwd=project, env=env,
+            capture_output=True, text=True, errors="replace")
+        working_output = working.stdout + working.stderr
+        if working.returncode or "FLOOR_OK" not in working_output:
+            failures.append(
+                f"installed-hook dash control did not execute Bash floor: "
+                f"rc={working.returncode} {working_output.strip()[-160:]}")
+        else:
+            print("PASS: installed hook under dash -- Bash floor executed")
+
+        no_bash_env = os.environ.copy()
+        no_bash_env["PATH"] = ""
+        missing = subprocess.run(
+            [dash, str(hook)], cwd=project, env=no_bash_env,
+            capture_output=True, text=True, errors="replace")
+        missing_output = missing.stdout + missing.stderr
+        expected = "saipen: validation failed -- Bash is required to run"
+        if missing.returncode == 0 or expected not in missing_output:
+            failures.append(
+                f"installed-hook no-Bash control was not focused: "
+                f"rc={missing.returncode} {missing_output.strip()[-160:]}")
+        elif "FLOOR_OK" in missing_output:
+            failures.append("installed-hook no-Bash control printed floor success")
+        else:
+            print("PASS: installed hook without Bash -- focused nonzero failure")
+    return failures, 2, 0
 
 
 REQUIRED_INSTALL_FILES = (
@@ -952,6 +1030,8 @@ crew_failures, crew_checked, crew_skipped = run_crew_probes()
 failures.extend(crew_failures)
 last_event_failures, last_event_checked = run_last_event_probes()
 failures.extend(last_event_failures)
+hook_failures, hook_checked, hook_skipped = run_hook_probes()
+failures.extend(hook_failures)
 
 print(f"\n{checked} executable fixture(s) checked, "
       f"{skipped} behavioral fixture(s) skipped (README-only by design)")
@@ -963,6 +1043,8 @@ print(f"{export_checked} export ownership behavior(s) executed, "
 print(f"{crew_checked} crew-launch behavior(s) executed, "
       f"{crew_skipped} skipped for missing interpreters")
 print(f"{last_event_checked} last_event migration behavior(s) executed")
+print(f"{hook_checked} installed-hook behavior(s) executed, "
+      f"{hook_skipped} skipped for missing interpreters")
 
 if failures:
     print(f"\nFAILED: {len(failures)} executable check(s) failed")

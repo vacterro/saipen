@@ -150,3 +150,15 @@
 - 31.07.26 20:26 [E-1390] [parent: E-1389] [T-374] DEC: SHIP -- legitimate empty filters remain success, process failures survive local pipefail, and no later success claim is reachable; no P0-P1 findings.
 - 31.07.26 20:27 [E-1391] [parent: E-1390] [T-374] RUN: SHIP preflight -> origin/main afa27b0; v7.143.0 and remote-v7101 absent local/remote; release metadata prepared; unrelated subSaipen checkpoints excluded.
 - 31.07.26 20:28 [E-1392] [parent: E-1391] [T-374] RUN: SHIP gate -> sed-rc7/no-success control, floor 27x2, canonical 44/44, scenarios/tags/validator/ruff/order/syntax PASS; expected pre-tag warnings ticketed; v7.143.0 prepared.
+- 31.07.26 20:29 [E-1393] [parent: E-1392] [T-374] RUN: ship v7.143.0 -> pushed 3c0d9b9
+- 31.07.26 20:29 [E-1394] [parent: E-1393] [T-374] RUN: DONE -> ticket complete
+- 31.07.26 20:29 [E-1395] [parent: E-1394] [T-375] DEC: claimed Bash floor interpreter resolution with dash-is-sh and no-Bash controls.
+- 31.07.26 20:30 [E-1396] [parent: E-1395] [T-375] RUN: SCOUT -- generated hook hardcodes sh for a Bash-only floor; resolve bash explicitly, bump hook generation, and execute installed hooks through real dash with controlled fake homes.
+- 31.07.26 20:32 [E-1397] [parent: E-1396] [T-375] RUN: BUILD -> hook generation 3 resolves Bash for the floor and fails focused when absent; real dash working/no-Bash controls 2/2 PASS.
+- 31.07.26 20:33 [E-1398] [parent: E-1397] [T-375] RUN: VERIFY -> installed-hook dash/Bash controls 2/2, canonical 44/44, floor 27x2, and all release gates PASS; local hook upgraded to generation 3; conf: high.
+- 31.07.26 20:33 [E-1399] [parent: E-1398] [T-375] DEC: goal_tickets 19->20
+- 31.07.26 20:33 [E-1400] [parent: E-1399] [T-375] DEC: safety valve reached (1 waves / 20 tickets) -- pause before REVIEW; bare saipen goal resets counters and resumes this verified ticket.
+- 31.07.26 20:44 [E-1401] [parent: E-1400] [T-375] DEC: goal reauthorized -- reset goal_waves 1->0 and goal_tickets 20->0; resume verified ticket at REVIEW.
+- 31.07.26 20:45 [E-1402] [parent: E-1401] [T-375] DEC: SHIP -- dash-compatible hook resolves Bash explicitly, missing Bash fails focused, and executable controls prove both branches; no P0-P1 findings.
+- 31.07.26 20:46 [E-1403] [parent: E-1402] [T-375] RUN: SHIP preflight -> origin/main 3c0d9b9; v7.144.0 and remote-v7101 absent local/remote; release metadata prepared; unrelated subSaipen checkpoints excluded.
+- 31.07.26 20:47 [E-1404] [parent: E-1403] [T-375] RUN: SHIP gate -> installed-hook dash/Bash 2/2, canonical 44/44, floor 27x2, scenarios/tags/validator/ruff/order PASS; expected pre-tag ledger warning only; v7.144.0 prepared.
