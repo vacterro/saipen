@@ -2,6 +2,12 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.134.0 -- 2026-07-31 -- known history is not a permanent warning
+
+The release ledger repeated the same two tag-only and nine changelog-only releases on every validation. Tagged releases 7.81.0 and 7.82.0 now have truthful backfilled entries. The nine 7.84.0-7.91.0 commits whose tags were never published are recorded in a structured baseline with their release commits and reasons; no local or remote historical tag was created or changed.
+
+The validator reads both current and archived changelogs, suppresses only those explicit historical exceptions, and fails when an exception becomes stale. `audit_checks.py` builds a temporary Git repository and executes four controls: clean ledger, new unmatched tag, new unmatched changelog entry, and resolved exception. New divergence stays focused and loud without forcing every normal run to reread old noise.
+
 ## 7.133.0 -- 2026-07-31 -- a skipped guard is a failed guard
 
 Normal LOG sealing left active `LOG.md` without two events. The canonical backwards-ID mutation therefore skipped; `audit_checks.py` still exited 0 after reporting 40/41, while parity silently changed its denominator from 41 to 40. A green suite had lost a case because routine protocol maintenance changed the storage layout.
@@ -650,6 +656,14 @@ STATE snapshot no longer parks on DONE+WAIT with an empty board (RFC § 2.1 auto
 CONFORMANCE row 14 (invalid phase transition): automated via transition_from.
 CONFORMANCE row 43 (DONE+WAIT auto-transition guard): enforced by validate.py.
 validate.py: SHIP added to ANY_FROM (enterable from any phase per RFC § 1.10, was missing).
+
+## 7.82.0 -- 2026-07-27 -- versioned translation templates
+
+Backfilled from tagged commit `40a6304`. VERSION and every translated README moved to 7.82.0, and the shipped translation template gained the current badge and continuation metadata. This entry repairs the non-destructive half of the historical release ledger; no tag was created or changed.
+
+## 7.81.0 -- 2026-07-27 -- hunt, translation, and badge drift guard
+
+Backfilled from tagged commit `e2ded74`. The release integrated the saihunt sweep, refreshed Russian, Estonian, and Ded translation artifacts, and added a pre-commit guard against translated README badge drift. The tag's commit still carries VERSION 7.80.0; this entry records what the published tag actually names rather than rewriting it or pretending its metadata was clean.
 
 ## 7.80.0 -- 2026-07-26 -- status answers the question people actually ask
 

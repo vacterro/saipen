@@ -54,6 +54,82 @@ SUB = ".saipen/extensions/subs/saiwiki/STATE.md"
 TAG_QUERY = ("git", "tag", "-l", "v*")
 
 
+def release_ledger_probe(source: Path, destination: Path) -> str | None:
+    """Execute clean, new-divergence, and stale-baseline ledger controls."""
+    tree = destination / "release-ledger"
+    shutil.copytree(source, tree)
+
+    def git(*args: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(["git", *args], cwd=tree, capture_output=True,
+                              text=True, errors="replace")
+
+    for args in (("init", "-q"),
+                 ("config", "user.name", "SAIPEN ledger probe"),
+                 ("config", "user.email", "ledger-probe@example.invalid"),
+                 ("commit", "--allow-empty", "-m", "ledger probe")):
+        result = git(*args)
+        if result.returncode:
+            return f"git {' '.join(args)} failed: {(result.stderr or result.stdout).strip()}"
+
+    baseline = json.loads((tree / "tools" / "release_ledger_baseline.json").read_text(
+        encoding="utf-8"))
+    changelog_only = set(baseline["changelog_only"])
+    changelog_versions = set()
+    for name in ("CHANGELOG.md", "CHANGELOG_ARCHIVE.md"):
+        path = tree / name
+        if path.is_file():
+            changelog_versions |= set(re.findall(
+                r"^## (\d+\.\d+\.\d+)",
+                path.read_text(encoding="utf-8-sig"), re.MULTILINE))
+    for version in sorted(changelog_versions - changelog_only):
+        result = git("tag", f"v{version}")
+        if result.returncode:
+            return f"could not seed ledger tag v{version}: {result.stderr.strip()}"
+
+    def validate() -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [sys.executable, str(tree / "tools" / "validate.py")], cwd=tree,
+            capture_output=True, text=True, errors="replace")
+
+    control = validate()
+    control_text = control.stdout + control.stderr
+    if control.returncode or "WARN [release-ledger]" in control_text:
+        return "clean synthetic ledger is not clean"
+
+    tag_only = "7.83.9"
+    if git("tag", f"v{tag_only}").returncode:
+        return "could not create tag-only red-control"
+    tag_result = validate()
+    tag_text = tag_result.stdout + tag_result.stderr
+    if (tag_result.returncode != 0
+            or f"git tag but no CHANGELOG entry: v{tag_only}" not in tag_text):
+        return "new tag-only divergence did not produce its focused warning"
+    if git("tag", "-d", f"v{tag_only}").returncode:
+        return "could not remove temporary tag-only red-control"
+
+    changelog_version = "7.83.8"
+    changelog = tree / "CHANGELOG.md"
+    changelog.write_text(
+        changelog.read_text(encoding="utf-8-sig")
+        + f"\n## {changelog_version} -- 2026-07-31 -- ledger red-control\n",
+        encoding="utf-8", newline="\n")
+    changelog_result = validate()
+    changelog_text = changelog_result.stdout + changelog_result.stderr
+    if (changelog_result.returncode != 0
+            or f"CHANGELOG entry but no git tag: v{changelog_version}" not in changelog_text):
+        return "new changelog-only divergence did not produce its focused warning"
+
+    original = next(iter(sorted(changelog_only)))
+    if git("tag", f"v{original}").returncode:
+        return "could not create stale-baseline red-control"
+    stale_result = validate()
+    stale_text = stale_result.stdout + stale_result.stderr
+    if (stale_result.returncode == 0
+            or f"baseline is stale for: v{original}" not in stale_text):
+        return "resolved historical exception did not make stale baseline fail"
+    return None
+
+
 def observed_tag_queries(root: Path) -> tuple[int, str | None]:
     """Count real `git tag -l v*` processes through Git's Trace2 stream."""
     handle, raw_path = tempfile.mkstemp(prefix="saipen-git-trace-", suffix=".json")
@@ -378,6 +454,14 @@ def main() -> int:
     tmp = Path(tempfile.mkdtemp(prefix="audit_checks_"))
     pristine = tmp / "pristine"
     shutil.copytree(HOME, pristine, ignore=IGNORE)
+
+    ledger_error = release_ledger_probe(pristine, tmp)
+    if ledger_error:
+        print(f"FAIL: release-ledger divergence probe -- {ledger_error}")
+        shutil.rmtree(tmp, ignore_errors=True)
+        return 1
+    print("PASS: release-ledger clean/new-tag/new-changelog/stale-baseline "
+          "controls behave distinctly")
 
     query_count, query_error = observed_tag_queries(pristine)
     red_tree = tmp / "duplicate-tag-query"

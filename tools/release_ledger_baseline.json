@@ -1,0 +1,41 @@
+{
+  "changelog_only": {
+    "7.84.0": {
+      "commit": "fbf9099",
+      "reason": "release commit exists with matching VERSION; no tag was published"
+    },
+    "7.85.0": {
+      "commit": "1f685f0",
+      "reason": "release commit exists with matching VERSION; no tag was published"
+    },
+    "7.85.1": {
+      "commit": "b52a26b",
+      "reason": "release commit exists with matching VERSION; no tag was published"
+    },
+    "7.86.0": {
+      "commit": "7ae41f6",
+      "reason": "release commit exists with matching VERSION; no tag was published"
+    },
+    "7.87.0": {
+      "commit": "30b1be4",
+      "reason": "release commit exists with matching VERSION; no tag was published"
+    },
+    "7.88.0": {
+      "commit": "1b95524",
+      "reason": "release commit exists with matching VERSION; no tag was published"
+    },
+    "7.89.0": {
+      "commit": "27ea5b1",
+      "reason": "release commit exists with matching VERSION; no tag was published"
+    },
+    "7.90.0": {
+      "commit": "5439be0",
+      "reason": "release commit exists with matching VERSION; no tag was published"
+    },
+    "7.91.0": {
+      "commit": "e65309e",
+      "reason": "release commit exists with matching VERSION; no tag was published"
+    }
+  },
+  "tag_only": {}
+}

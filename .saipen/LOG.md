@@ -15,3 +15,13 @@
 - 31.07.26 17:16 [E-1255] [parent: E-1254] [T-366] DEC: SHIP -- review pass 1 confirms logical target selection, physical save/restore identity, and fatal preflight/runtime skip paths; no P0-P1 findings.
 - 31.07.26 17:17 [E-1256] [parent: E-1255] [T-366] RUN: SHIP preflight -> origin/main equals fc30654, v7.133.0 absent, ticket work complete; prepare metadata and rerun release gates before commit/tag/push.
 - 31.07.26 17:18 [E-1257] [parent: E-1256] [T-366] RUN: SHIP preflight v7.133.0 -> audit_checks 41/41; full parity 11/41 after final code; validator/scenarios/installed validators/ruff/order PASS; tag audit 198 no new mismatch; metadata aligned; no commit/tag/push begun.
+- 31.07.26 17:19 [E-1258] [parent: E-1257] [T-366] RUN: ship v7.133.0 -> pushed 8f685d6
+- 31.07.26 17:19 [E-1259] [parent: E-1258] [T-366] RUN: DONE -> local/remote tag peels to 8f685d6 and carries VERSION 7.133.0; remote-v7101 remains absent.
+- 31.07.26 17:20 [E-1260] [parent: E-1259] [T-365] DEC: claimed permanent release-ledger warning; preserve detection of new mismatches without any remote tag mutation.
+- 31.07.26 17:21 [E-1261] [parent: E-1260] [T-365] RUN: SCOUT -- backfill CHANGELOG for real tagged 7.81/7.82 releases; baseline the nine changelog-only 7.84-7.91 releases, read current+archive, and red-test both new mismatch directions without changing refs.
+- 31.07.26 17:27 [E-1262] [parent: E-1261] [T-365] RUN: build -> explicit nine-release baseline; executable clean/new/stale controls; no refs changed.
+- 31.07.26 17:37 [E-1263] [parent: E-1262] [T-365] RUN: VERIFY -> first parallel audits timed out under contention; sequential audit 41/41 and parity 11/41 PASS; validator/scenarios/ruff/order PASS; ledger controls distinguish clean/new/stale; nine commit VERSION values match; conf: high.
+- 31.07.26 17:37 [E-1264] [parent: E-1263] [T-365] DEC: goal_tickets 5->6
+- 31.07.26 17:39 [E-1265] [parent: E-1264] [T-365] DEC: SHIP -- review pass 1 finds baseline bounded by live divergence, installed with validator, and behaviorally red-tested; no P0-P1 findings.
+- 31.07.26 17:41 [E-1266] [parent: E-1265] [T-365] RUN: SHIP preflight -> origin/main equals 8f685d6, v7.134.0 absent, metadata prepared; unrelated subSaipen checkpoints will stay unstaged.
+- 31.07.26 17:42 [E-1267] [parent: E-1266] [T-365] RUN: SHIP preflight v7.134.0 -> audit_checks 41/41; validator/scenarios/ruff/order PASS; metadata aligned; only expected pre-tag ledger WARN; no commit/tag/push begun.

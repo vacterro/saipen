@@ -1634,6 +1634,7 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
             "saipen/CONFORMANCE.md",
             "tools/validate.py", "tools/install_hook.py", "tools/uninstall_hook.py",
             "tools/run_scenarios.py", "tools/audit_floor.py",
+            "tools/release_ledger_baseline.json",
             "tests/validate.sh", "tests/validate.ps1",
             "bootstrap/inject.sh", "bootstrap/inject.ps1",
             "extensions/schemas/state.schema.json",
@@ -2326,11 +2327,19 @@ else:
         # to the validator's install directory. Running an installed skill copy
         # against the SAIPEN home otherwise combines project git tags with a
         # missing installed CHANGELOG and creates false phantom releases.
-        _chg = Path("CHANGELOG.md")
-        if _chg.is_file():
-            _ledger |= set(re.findall(
-                r"^## (\d+\.\d+\.\d+)",
-                _chg.read_text(encoding="utf-8-sig"), re.MULTILINE))
+        _changelog_files = tuple(
+            path for path in (Path("CHANGELOG.md"), Path("CHANGELOG_ARCHIVE.md"))
+            if path.is_file())
+
+        def _changelog_versions():
+            versions = set()
+            for path in _changelog_files:
+                versions |= set(re.findall(
+                    r"^## (\d+\.\d+\.\d+)",
+                    path.read_text(encoding="utf-8-sig"), re.MULTILINE))
+            return versions
+
+        _ledger |= _changelog_versions()
         _tag_list = set()
         _tag_problem = None
         try:
@@ -2417,12 +2426,42 @@ else:
             # historical divergence means either rewriting CHANGELOG or pushing
             # a backdated tag, and a backdated tag push publishes a release.
             # The divergence is a fact the repo should carry, not a gate.
-            _chg_v = set()
-            if _chg.is_file():
-                _chg_v = {t for t in (_tup(v) for v in re.findall(
-                    r"^## (\d+\.\d+\.\d+)",
-                    _chg.read_text(encoding="utf-8-sig"), re.MULTILINE)) if t}
+            _chg_v = {t for t in (_tup(v) for v in _changelog_versions()) if t}
             _tag_v = {t for t in (_tup(v) for v in _tag_list) if t}
+
+            _baseline_path = _tools_parent / "tools" / "release_ledger_baseline.json"
+            _baseline = None
+            try:
+                _baseline = json.loads(_baseline_path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError) as _e:
+                fail(f"release ledger baseline unreadable at {_baseline_path}: {_e}")
+                drift_ok = False
+            _baseline_tag_only = set()
+            _baseline_changelog_only = set()
+            if isinstance(_baseline, dict):
+                if set(_baseline) != {"tag_only", "changelog_only"}:
+                    fail("release ledger baseline must contain exactly tag_only "
+                         "and changelog_only maps")
+                    drift_ok = False
+                else:
+                    for _direction, _target in (
+                            ("tag_only", _baseline_tag_only),
+                            ("changelog_only", _baseline_changelog_only)):
+                        _entries = _baseline[_direction]
+                        if not isinstance(_entries, dict):
+                            fail(f"release ledger baseline {_direction} must be a map")
+                            drift_ok = False
+                            continue
+                        for _version, _evidence in _entries.items():
+                            _version_t = _tup(_version)
+                            if (not _version_t or not isinstance(_evidence, dict)
+                                    or not _evidence.get("commit")
+                                    or not _evidence.get("reason")):
+                                fail(f"release ledger baseline {_direction} entry "
+                                     f"{_version!r} lacks semver/commit/reason evidence")
+                                drift_ok = False
+                                continue
+                            _target.add(_version_t)
 
             def _vs(versions):
                 # The count above and this list have to agree, or the message
@@ -2439,8 +2478,18 @@ else:
                 # floor one of them simply wasn't being kept yet, and calling
                 # that a divergence would be noise, not a finding.
                 _overlap = max(min(_chg_v), min(_tag_v))
-                _no_entry = {v for v in _tag_v if v >= _overlap} - _chg_v
-                _no_tag = {v for v in _chg_v if v >= _overlap} - _tag_v
+                _raw_no_entry = {v for v in _tag_v if v >= _overlap} - _chg_v
+                _raw_no_tag = {v for v in _chg_v if v >= _overlap} - _tag_v
+                _stale_baseline = ((_baseline_tag_only - _raw_no_entry)
+                                   | (_baseline_changelog_only - _raw_no_tag))
+                if _stale_baseline:
+                    fail("release ledger baseline is stale for: "
+                         f"{_vs(_stale_baseline)}. The recorded divergence no "
+                         "longer exists; remove its exception so the baseline "
+                         "cannot become a permanent blind spot")
+                    drift_ok = False
+                _no_entry = _raw_no_entry - _baseline_tag_only
+                _no_tag = _raw_no_tag - _baseline_changelog_only
                 if _no_entry:
                     warn("release-ledger",
                          f"{len(_no_entry)} release(s) carry a git tag but no "
@@ -2449,6 +2498,10 @@ else:
                     warn("release-ledger",
                          f"{len(_no_tag)} release(s) have a CHANGELOG entry "
                          f"but no git tag: {_vs(_no_tag)}")
+                if not _no_entry and not _no_tag and not _stale_baseline:
+                    ok("release ledger has no unexpected divergence "
+                       f"({len(_baseline_tag_only) + len(_baseline_changelog_only)} "
+                       "historical exception(s) verified)")
 
     # 13c. The palette has one name, and every document uses it. UI.md's
     #      palette was renamed to Wintage Golden and declared the default; the

@@ -1,3 +1,3 @@
-done: v7.133.0 prepared; sealed LOG mutations stay in the 41-case denominator
-remaining: T-365 release-ledger warning, then T-361 last_event migration
+done: T-365 v7.134.0 prepared -- known ledger history is quiet, new divergence stays loud
+remaining: T-361 last_event migration
 awaiting: nothing
