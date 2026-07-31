@@ -67,6 +67,21 @@ def replace(old: str, new: str):
     return lambda t: t.replace(old, new, 1)
 
 
+def shell_delete_after_recreate(text: str) -> str:
+    """Restore the injector bug where cleanup deletes a freshly made tests/."""
+    recreate = '     && mkdir -p "$1" "$1/extensions" "$1/tests" \\\n'
+    pos = text.find(recreate)
+    if pos < 0:
+        return text
+    text = text[:pos] + text[pos + len(recreate):]
+    return text.replace(
+        "  if rm -rf",
+        '  if mkdir -p "$1" "$1/extensions" "$1/tests" \\\n'
+        "     && rm -rf",
+        1,
+    )
+
+
 UTF16 = "<rewrite as utf-16>"      # sentinel, not a mutation function
 DELETE = "<delete the file>"
 CREATE = "<create the file>"
@@ -199,6 +214,8 @@ CASES: list[tuple[str, str, object, str]] = [
      "reply-language"),
     ("a locale loses its guide", "guides/GUIDE_UK.md", DELETE,
      "locale coverage"),
+    ("shell injector deletes tests after recreating it", "bootstrap/inject.sh",
+     shell_delete_after_recreate, "does not recreate extensions/tests after"),
     # NOT tested here: the phantom-version check needs the TAG half of the
     # release ledger, and this harness copies the tree without .git on
     # purpose. Without tags the check correctly declines to run, so a case

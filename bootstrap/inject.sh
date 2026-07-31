@@ -75,8 +75,15 @@ copy_skill() { # $1=dst
   # Any cp failure must surface in the report -- a claimed "copied" over a
   # half-copy is exactly the silent-failure class hunt.md exists to catch.
   local root; root="$(dirname "$SKILL_HOME")"
-  if mkdir -p "$1" "$1/extensions" "$1/tests" \
-     && cp "$SKILL_HOME/BOOT.md" "$SKILL_HOME/SKILL.md" "$SKILL_HOME/RFC.md" "$SKILL_HOME/UI.md" "$SKILL_HOME/STYLE.md" "$SKILL_HOME/CONFORMANCE.md" "$1/" \
+  local dst="${1%/}"
+  [ -n "$dst" ] && [ "$dst" != "/" ] && [ "$dst" != "." ] || {
+    echo "copy FAILED ($1) -- unsafe destination"; return
+  }
+  if rm -rf "$dst/phases" "$dst/tools" "$dst/tests" \
+               "$dst/extensions/schemas" "$dst/extensions/templates" \
+               "$dst/extensions/subs" \
+     && mkdir -p "$1" "$1/extensions" "$1/tests" \
+     && cp "$SKILL_HOME/BOOT.md" "$SKILL_HOME/SKILL.md" "$SKILL_HOME/RFC.md" "$SKILL_HOME/UI.md" "$SKILL_HOME/STYLE.md" "$SKILL_HOME/CONFORMANCE.md" "$root/VERSION" "$1/" \
      && cp -r "$SKILL_HOME/phases" "$1/" \
      && cp -r "$root/tools" "$1/" \
      && cp -r "$root/extensions/schemas" "$1/extensions/" \

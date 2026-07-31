@@ -22,8 +22,8 @@ state is legal. Anything that re-introduces a phase-level `no-publish` ban turns
 this fixture red -- precisely the mistake that already shipped once.
 
 The still-live mode x phase restriction -- `read-only` MUST NOT enter
-`BUILD`/`SHIP`/`CLEAN`/`TRANSLATE` -- is covered by `read-only-restriction`,
-which does fail as intended.
+`INIT`/`PLAN`/`ADD`/`BUILD`/`SHIP`/`CLEAN`/`TRANSLATE` -- is covered by
+`read-only-restriction`, which does fail as intended.
 
 expect: pass
 

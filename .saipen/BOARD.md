@@ -2,8 +2,14 @@
 ## DOING
 
 ## TODO
+- [ ] T-355 Remove UTF-8 BOM before YAML frontmatter in audit-domains and templates so Codex loads both skills. | verify: both SKILL.md files begin with ASCII --- and parse as YAML frontmatter
+- [ ] T-357 [P0] audit_floor launches Git Bash without its usr/bin on PATH, so 18 shell controls fail at missing grep and report the wrong phase defect. | verify: python tools/audit_floor.py PASS 20 checks x 2 halves on Windows
+- [ ] T-358 [P0] SHIP requires 100% green but its only exits are DONE/BLOCKED; a fixable pre-publish failure has no legal route back to BUILD, and BLOCKED would falsely end goal mode. | verify: RFC transition table, ship.md, validator transition checks, and scenario fixture agree on SHIP -> BUILD for failed preflight
 
 ## DONE
+- [x] T-356 [P0] Fixed shell injector delete-after-create order, added PowerShell unsafe-destination parity, and made the validator enforce recreation order. | verify: functional shell install PASS; ordering red-test PASS; audit_checks 42/42
+- [x] T-354 Inject updated SAIPEN into the Codex skill copy so Codex boots from the current protocol, including VERSION. | verify: Codex skill copy reports current VERSION and tools/validate.py PASS from the installed copy
+- [x] T-353 [P0] Scenario READMEs re-listed the old four-phase Core read-only ban while RFC 1.3 and validators use seven; added a scenario prose drift check and fixed both stale READMEs. | verify: tools/validate.py PASS; tools/audit_checks.py PASS 41/41; tools/audit_order.py PASS; tools/run_scenarios.py PASS; red-test old four-phase text FAILed
 - [x] T-349 [P0] 1.4 compares agent: against 'itself' and never said what 'itself' is. Six invented names in this project's own history for two or three actors, plus a LOG line reading [agent: id]. | verify: tools/validate.py PASS (2026-07-31)
 - [x] T-350 [P0] agent: now names the seat and is inherited from STATE; a model upgrade is not a different actor. BOOT carries it, since a cold agent writes the field on its first checkpoint. | verify: tools/validate.py PASS (2026-07-31)
 - [x] T-351 [P1] Placeholder agent values FAIL. The stability rule itself is behavioral and recorded as such. | verify: tools/validate.py PASS (2026-07-31)
@@ -28,4 +34,3 @@
 
 
 ## BLOCKED
-

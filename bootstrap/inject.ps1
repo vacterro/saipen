@@ -60,11 +60,18 @@ function Copy-Skill([string]$dst) {
   # validate.md's no-Python shell fallback reachable.
   # Any copy failure must surface in the report -- a claimed "copied" over a
   # half-copy is exactly the silent-failure class hunt.md exists to catch.
+  if ([string]::IsNullOrWhiteSpace($dst)) { return "copy FAILED ($dst): unsafe destination" }
   try {
     if (-not (Test-Path $dst)) { New-Item -ItemType Directory -Force $dst -ErrorAction Stop | Out-Null }
-    Copy-Item (Join-Path $SkillHome "BOOT.md"),(Join-Path $SkillHome "SKILL.md"),(Join-Path $SkillHome "RFC.md"),(Join-Path $SkillHome "UI.md"),(Join-Path $SkillHome "STYLE.md"),(Join-Path $SkillHome "CONFORMANCE.md") $dst -Force -ErrorAction Stop
-    Copy-Item (Join-Path $SkillHome "phases") $dst -Recurse -Force -ErrorAction Stop
     $root = Split-Path $SkillHome
+    foreach ($rel in @("phases", "tools", "tests", "extensions\schemas", "extensions\templates", "extensions\subs")) {
+      $target = Join-Path $dst $rel
+      if (Test-Path $target) {
+        Remove-Item -LiteralPath $target -Recurse -Force -ErrorAction Stop
+      }
+    }
+    Copy-Item (Join-Path $SkillHome "BOOT.md"),(Join-Path $SkillHome "SKILL.md"),(Join-Path $SkillHome "RFC.md"),(Join-Path $SkillHome "UI.md"),(Join-Path $SkillHome "STYLE.md"),(Join-Path $SkillHome "CONFORMANCE.md"),(Join-Path $root "VERSION") $dst -Force -ErrorAction Stop
+    Copy-Item (Join-Path $SkillHome "phases") $dst -Recurse -Force -ErrorAction Stop
     Copy-Item (Join-Path $root "tools") $dst -Recurse -Force -ErrorAction Stop
     New-Item -ItemType Directory -Force (Join-Path $dst "extensions") -ErrorAction Stop | Out-Null
     Copy-Item (Join-Path $root "extensions\schemas") (Join-Path $dst "extensions") -Recurse -Force -ErrorAction Stop

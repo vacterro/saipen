@@ -112,3 +112,16 @@
 - 31.07.26 09:48 [E-1137] [parent: E-1136] [T-349] RUN: померил по истории: шесть разных значений agent: в одном проекте -- claude-opus, claude-sonnet-5, opencode, antigravity, antigravity-gemini, gemini-pro -- на два-три реальных актора. Плюс строка лога [agent: id], то есть плейсхолдер доехал до диска
 - 31.07.26 09:48 [E-1138] [parent: E-1137] [T-350] DEC: ошибается в обе стороны: апгрейд модели переименовывает место, и следующая сессия видит чужого; два разных актора с одинаковым дженериком неразличимы. Поле называет МЕСТО, а не сборку модели, и наследуется из STATE. Смена -- только при реальной смене актора, с DEC, называющим оба значения
 - 31.07.26 09:48 [E-1139] [parent: E-1138] [T-350] DEC: устойчивость поведенческая: отличить честную передачу от переименованного места нечем. Плейсхолдер -- механический, и это ровно та форма, что реально убегает. Красный тест: id, <name>, AgentID, unknown
+- 31.07.26 17:19 [E-1140] [parent: E-1139] [T-353] H: scenario READMEs re-listed Core read-only ban as four phases after RFC 1.3 made it seven; validator checked floor scripts, not this prose.
+- 31.07.26 17:19 [E-1141] [parent: E-1140] [T-353] RUN: fixed README drift and added scenario-read-only-bans sweep; red-test old four-phase text -> FAIL; restored -> validate/audit/scenarios PASS.
+- 31.07.26 17:19 [E-1142] [parent: E-1141] [T-354] DEC: user asked to later inject updated SAIPEN into Codex skill copy; queued, not run in this fix.
+- 31.07.26 14:47 [E-1143] [parent: E-1142] [T-354] DEC: user resumed; cleared user brake and claimed queued Codex skill refresh.
+- 31.07.26 14:48 [E-1144] [parent: E-1143] [T-354] RUN: SCOUT -- Codex copy matches source hashes; run injector and installed validator.
+- 31.07.26 14:49 [E-1145] [parent: E-1144] [T-354] DEC: repaired E-1143/E-1144 local timestamps to UTC; observed historical timestamp inversions.
+- 31.07.26 14:50 [E-1146] [parent: E-1145] [T-354] RUN: build -> injector refreshed all skill copies; installed Codex validator PASS.
+- 31.07.26 14:51 [E-1147] [parent: E-1146] [T-354] RUN: VERIFY -> copy hashes/VERSION match and stale worker dirs absent; conf: high.
+- 31.07.26 14:51 [E-1148] [parent: E-1147] [T-354] DEC: goal_tickets 9->10
+- 31.07.26 14:52 [E-1149] [parent: E-1148] [T-354] DEC: SHIP -- injector replacement scope bounded; PowerShell/shell parity and installed layout verified.
+- 31.07.26 14:58 [E-1150] [parent: E-1149] [T-357] H: audit_floor selects Git Bash but omits usr/bin from PATH; grep exists yet 18 shell controls misreport phase failure.
+- 31.07.26 15:04 [E-1151] [parent: E-1150] [T-357] DEC: ticket collision repaired T-356->T-357; concurrent T-356 keeps the earlier board assignment.
+- 31.07.26 15:05 [E-1152] [parent: E-1151] [T-356] RUN: functional shell install PASS; ordering guard red-test PASS; audit_checks 42/42.

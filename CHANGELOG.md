@@ -2,6 +2,16 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.126.0 -- 2026-07-31 -- the installed protocol forgot its own version
+
+The installed Codex/Claude/OpenCode skill carried `RFC.md` but not `VERSION`, even though RFC section 1.2 names that file as the only source of truth for the version guard. A clean install therefore had enough protocol to refuse work and not enough protocol to prove which version it was running. Both injectors now ship `VERSION`, and the runtime manifest makes forgetting it again a validation failure.
+
+Refreshes were overlays, too. Deleted source directories survived indefinitely in installed copies; the Codex skill still contained three old live subSaipen worker trees after the source layout moved them elsewhere. Injectors now replace the managed runtime directories before copying, with bounded destination guards. The installed validator was run from the Codex copy against this repository and passes; source and installed hashes agree, and stale worker directories are absent.
+
+The same run caught a second kind of copied-contract drift: two scenario READMEs still listed the old four-phase Core read-only ban after RFC section 1.3 expanded it to seven. Scenario prose is now swept against the RFC-owned set, not trusted because executable floor scripts happen to agree.
+
+During verification, the shell cleanup was found using the invalid `rm -rF` spelling. After that became portable `rm -rf`, a functional install exposed the next fault: `tests/` was created and then deleted before the floor scripts were copied into it. The order is now cleanup, recreation, copy; the validator checks that order instead of merely grepping for a cleanup token. PowerShell now carries the same empty-destination guard as shell.
+
 ## 7.125.0 -- 2026-07-31 -- a comparison with one side undefined
 
 Asked whether a second Core could be added to this project, the useful answer turned out to be a defect rather than a yes. RFC § 1.4 decides whether another agent is live by comparing `STATE.md`'s `agent:` against "itself" -- and nothing in the protocol said where an agent gets its own value. One side of that comparison was never defined.
@@ -1029,4 +1039,3 @@ A fourth external audit (`tofix/saipen_audit3_aboutPhases.md`, cleaner and bette
 - Two real, both simple missing scaffolding every *other* phase doc already has: `prepare.md` never required a completion `LOG` line (every other terminal phase -- `hunt.md`, `clean.md`, `translate.md`, `markhunt.md`, `ship.md` -- does); added, plus an explicit `BLOCKED` path for a failed preparation. `build.md` never mentioned `BLOCKED` at all despite RFC's own transition table listing `BUILD -> VERIFY | BLOCKED` -- added a one-line branch for an unrecoverable build error.
 
 Both validators green.
-

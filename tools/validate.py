@@ -1519,6 +1519,7 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
             # constitution itself. Other checks would have noticed its absence,
             # but a completeness list that skips the most important item is not
             # a completeness list.
+            "VERSION",
             "saipen/RFC.md",
             "saipen/BOOT.md", "saipen/SKILL.md", "saipen/UI.md", "saipen/STYLE.md",
             "saipen/CONFORMANCE.md",
@@ -1545,7 +1546,7 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
         dist_tokens = ["phases", "tools", "extensions/schemas",
                        "extensions/templates", "extensions/subs", "tests",
                        "BOOT.md", "SKILL.md", "RFC.md", "STYLE.md", "UI.md",
-                       "CONFORMANCE.md"]
+                       "CONFORMANCE.md", "VERSION"]
         wiring_ok = True
         for script in ("bootstrap/inject.ps1", "bootstrap/inject.sh"):
             if not Path(script).is_file():
@@ -1559,10 +1560,31 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                          f"wiring broken, skill copies won't receive it "
                          f"(the exact v7.22.3/v7.25.0 bug class)")
                     wiring_ok = False
+            if script.endswith(".ps1") and "Remove-Item" not in normalized:
+                fail(f"{script} does not clear managed runtime dirs before "
+                     f"copying -- stale skill-copy files can survive forever")
+                wiring_ok = False
+            if script.endswith(".ps1") and "IsNullOrWhiteSpace" not in normalized:
+                fail(f"{script} does not reject an empty destination before "
+                     f"recursive cleanup -- an unsafe caller could delete "
+                     f"outside a skill copy")
+                wiring_ok = False
+            if script.endswith(".sh") and "rm -rf" not in normalized:
+                fail(f"{script} does not clear managed runtime dirs before "
+                     f"copying -- stale skill-copy files can survive forever")
+                wiring_ok = False
+            if script.endswith(".sh"):
+                cleanup = normalized.find("rm -rf")
+                recreate = normalized.find('mkdir -p "$1" "$1/extensions" "$1/tests"')
+                if cleanup < 0 or recreate < 0 or recreate < cleanup:
+                    fail(f"{script} does not recreate extensions/tests after "
+                         f"recursive cleanup -- copying floor files into the "
+                         f"deleted tests directory will fail")
+                    wiring_ok = False
         if wiring_ok:
             ok("injector distributes every runtime dir + root doc "
                "(phases/tools/tests/schemas/templates/subs, BOOT/SKILL/RFC/"
-               "STYLE/UI/CONFORMANCE, both scripts)")
+               "STYLE/UI/CONFORMANCE, both scripts) and clears stale managed dirs")
 
 # --------------------------------------------------- adapters cross-reference
 
@@ -1879,6 +1901,36 @@ else:
                  f"of required fields ({_m.group(0)!r}). RFC § 1.2 is the only "
                  f"place the set is written down, and a count drifts the same "
                  f"way an enumeration does")
+            drift_ok = False
+
+    # Scenario READMEs are protocol prose too. The portable-floor check above
+    # caught validate.sh/ps1 when they still banned read-only from four phases,
+    # but two behavioral fixtures kept teaching that same dead list because
+    # this block only guarded required-field counts there. A README that says
+    # what `mode: read-only` MUST NOT enter is a copy of RFC § 1.3's moving
+    # set; compare it or it rots quietly.
+    if _scen.is_dir():
+        _core_read_only_docs = []
+        for _doc in sorted(_scen.glob("*/README.md")):
+            _body = _doc.read_text(encoding="utf-8-sig")
+            if "read-only" not in _body or "MUST NOT enter" not in _body:
+                continue
+            if "subSaipen" in _body or "subsaipen" in _body.lower():
+                continue
+            _body_norm = _body.replace("\n", " ")
+            _m = re.search(r"read-only`?.{0,200}?MUST NOT enter\s+(.+?)(?:--|\.|$)",
+                           _body_norm)
+            if not _m:
+                continue
+            _doc_bans = set(re.findall(r"`([A-Z]+)`", _m.group(1)))
+            if _doc_bans and _doc_bans != set(READ_ONLY_BANNED_PHASES):
+                _core_read_only_docs.append(
+                    f"{_doc.relative_to(_tools_parent).as_posix()} "
+                    f"lists {sorted(_doc_bans)}")
+        if _core_read_only_docs:
+            fail("cross-doc drift [scenario-read-only-bans] -- scenario "
+                 "README(s) re-list RFC § 1.3's Core read-only ban "
+                 "incorrectly: " + "; ".join(_core_read_only_docs[:4]))
             drift_ok = False
 
     for doc_path, doc_name in ((boot_path, "BOOT.md"), (conf_path, "CONFORMANCE.md")):
@@ -2244,7 +2296,11 @@ else:
     #      is what says a release exists.
     if IS_SAIPEN_HOME:
         _ledger = set()
-        _chg = _tools_parent / "CHANGELOG.md"
+        # The ledger belongs to the project being validated, not necessarily
+        # to the validator's install directory. Running an installed skill copy
+        # against the SAIPEN home otherwise combines project git tags with a
+        # missing installed CHANGELOG and creates false phantom releases.
+        _chg = Path("CHANGELOG.md")
         if _chg.is_file():
             _ledger |= set(re.findall(
                 r"^## (\d+\.\d+\.\d+)",
@@ -2827,8 +2883,8 @@ else:
 
     if drift_ok and not failures:
         ok("cross-doc sets agree (required fields, phase enum, from-any-phase, "
-           "read-only bans, next_action prefixes, WAIT categories; no re-listing "
-           "in BOOT/CONFORMANCE)")
+           "read-only bans, next_action prefixes, WAIT categories, command "
+           "surface, ticket fields; no stale re-listing in shipped docs)")
 
 
 # ------------------------------------------------------------------- summary
