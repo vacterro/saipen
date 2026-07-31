@@ -19,13 +19,20 @@ un-declared fixture cannot be checked, and silently skipping it is how this
 whole directory sat unexecuted for months (CONFORMANCE.md's "honest status"
 note, v7.75.0).
 
+After the state fixtures, both bootstrap injectors run against isolated homes
+seeded with stale managed directories. The probe checks installed artifacts,
+not script tokens, and carries a broken-layout red-control.
+
 Exit code is non-zero if any fixture's real outcome differs from its
 declaration, so CI fails on it like any other gate.
 """
 
+import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 HOME = Path(__file__).resolve().parent.parent
@@ -46,6 +53,151 @@ EXPECT_RE = re.compile(r"^expect:\s*(pass|fail)\s*$", re.MULTILINE)
 # Unpinned fail-fixtures still run, but WARN -- they are asserting only that
 # something, somewhere, went wrong.
 REASON_RE = re.compile(r"^expect_fail_contains:\s*(.+?)\s*$", re.MULTILINE)
+
+
+def find_bash() -> str | None:
+    """Return a real bash, excluding Windows' WSL launcher stub."""
+    for candidate in (r"C:\Program Files\Git\usr\bin\bash.exe",
+                      r"C:\Program Files\Git\bin\bash.exe",
+                      shutil.which("bash")):
+        if (candidate and os.path.isfile(candidate)
+                and "system32" not in candidate.lower()):
+            return candidate
+    return None
+
+
+def bash_env(bash: str, home: Path) -> dict[str, str]:
+    env = os.environ.copy()
+    env["HOME"] = str(home)
+    env["USERPROFILE"] = str(home)
+    if os.name == "nt":
+        bindir = Path(bash).resolve().parent
+        for tools_dir in (bindir, bindir.parent / "usr" / "bin"):
+            if all((tools_dir / f"{name}.exe").is_file()
+                   for name in ("cp", "grep", "sed")):
+                env["PATH"] = str(tools_dir) + os.pathsep + env.get("PATH", "")
+                break
+    return env
+
+
+def find_powershell() -> str | None:
+    for name in ("pwsh", "powershell", "powershell.exe"):
+        found = shutil.which(name)
+        if found:
+            return found
+    return None
+
+
+REQUIRED_INSTALL_FILES = (
+    "VERSION",
+    "tests/validate.sh",
+    "tests/validate.ps1",
+)
+STALE_SENTINEL = "obsolete-from-prior-install.txt"
+MANAGED_DIRS = (
+    "phases",
+    "tools",
+    "tests",
+    "extensions/schemas",
+    "extensions/templates",
+    "extensions/subs",
+)
+
+
+def seed_stale_install(destination: Path) -> None:
+    for rel in MANAGED_DIRS:
+        target = destination / rel
+        target.mkdir(parents=True, exist_ok=True)
+        (target / STALE_SENTINEL).write_text("stale\n", encoding="utf-8")
+
+
+def installed_layout_problems(destination: Path) -> list[str]:
+    problems = [f"missing {rel}" for rel in REQUIRED_INSTALL_FILES
+                if not (destination / rel).is_file()]
+    expected_version = (HOME / "VERSION").read_text(
+        encoding="utf-8-sig").strip()
+    installed_version = destination / "VERSION"
+    if installed_version.is_file() and installed_version.read_text(
+            encoding="utf-8-sig").strip() != expected_version:
+        problems.append("installed VERSION differs from source")
+    stale = [rel for rel in MANAGED_DIRS
+             if (destination / rel / STALE_SENTINEL).exists()]
+    if stale:
+        problems.append(f"stale managed content survived in {stale}")
+    return problems
+
+
+def run_injector_probe(label: str, command: list[str], env: dict[str, str],
+                       home: Path) -> str | None:
+    destination = home / ".claude" / "skills" / "saipen"
+    (home / ".claude").mkdir(parents=True)
+    seed_stale_install(destination)
+    result = subprocess.run(command, cwd=HOME, env=env, capture_output=True,
+                            text=True, errors="replace")
+    problems = installed_layout_problems(destination)
+    if result.returncode:
+        problems.insert(0, f"exited {result.returncode}")
+    if problems:
+        detail = next((line for line in (result.stdout + result.stderr).splitlines()
+                       if "FAILED" in line or "FATAL" in line), "no failure line")
+        return f"{label}: {'; '.join(problems)} | {detail[:120]}"
+    print(f"PASS: {label} -- executable install replaced stale dirs and landed "
+          "VERSION + both portable validators")
+    return None
+
+
+def run_injector_probes() -> tuple[list[str], int, int]:
+    probe_failures = []
+    checked = skipped = 0
+    bash = find_bash()
+    powershell = find_powershell()
+
+    if bash:
+        with tempfile.TemporaryDirectory(prefix="saipen-inject-sh-") as raw:
+            home = Path(raw)
+            problem = run_injector_probe(
+                "bootstrap/inject.sh", [bash, str(HOME / "bootstrap" / "inject.sh")],
+                bash_env(bash, home), home)
+            if problem:
+                probe_failures.append(problem)
+            checked += 1
+    else:
+        print("SKIP: bootstrap/inject.sh executable probe -- no usable bash")
+        skipped += 1
+
+    if powershell:
+        with tempfile.TemporaryDirectory(prefix="saipen-inject-ps1-") as raw:
+            home = Path(raw)
+            env = os.environ.copy()
+            env["HOME"] = str(home)
+            env["USERPROFILE"] = str(home)
+            problem = run_injector_probe(
+                "bootstrap/inject.ps1",
+                [powershell, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
+                 str(HOME / "bootstrap" / "inject.ps1"), "-SkillHome",
+                 str(HOME / "saipen")], env, home)
+            if problem:
+                probe_failures.append(problem)
+            checked += 1
+    else:
+        print("SKIP: bootstrap/inject.ps1 executable probe -- no PowerShell")
+        skipped += 1
+
+    # Prove the artifact assertions can go red without depending on injector
+    # formatting: model the old delete-after-create result (VERSION copied,
+    # tests/ gone) and require the probe to reject it.
+    with tempfile.TemporaryDirectory(prefix="saipen-inject-red-") as raw:
+        broken = Path(raw)
+        (broken / "VERSION").write_text(
+            (HOME / "VERSION").read_text(encoding="utf-8-sig"), encoding="utf-8")
+        red = installed_layout_problems(broken)
+        if not any("tests/validate" in problem for problem in red):
+            probe_failures.append(
+                "injector red-control: layout with deleted tests/ stayed green")
+        else:
+            print("PASS: injector probe red-control -- deleted tests/ goes red")
+
+    return probe_failures, checked, skipped
 
 if not SCENARIOS.is_dir():
     print(f"FAIL: no {SCENARIOS} -- run this from the SAIPEN home")
@@ -122,11 +274,16 @@ for d in sorted(p for p in SCENARIOS.iterdir() if p.is_dir()):
                   f"at something unrelated")
         print(f"PASS: {d.name} -- expected {declared}, got {actual}")
 
+injector_failures, injector_checked, injector_skipped = run_injector_probes()
+failures.extend(injector_failures)
+
 print(f"\n{checked} executable fixture(s) checked, "
       f"{skipped} behavioral fixture(s) skipped (README-only by design)")
+print(f"{injector_checked} injector(s) executed, "
+      f"{injector_skipped} skipped for missing interpreters")
 
 if failures:
-    print(f"\nFAILED: {len(failures)} fixture(s) disagree with their declaration")
+    print(f"\nFAILED: {len(failures)} executable check(s) failed")
     for f in failures:
         print(f"  - {f}")
     sys.exit(1)
@@ -137,4 +294,4 @@ if checked == 0:
     print("FAILED: no executable fixtures found -- this suite collected 0 tests")
     sys.exit(1)
 
-print("All fixtures match their declared outcome.")
+print("All executable scenarios and injector probes passed.")

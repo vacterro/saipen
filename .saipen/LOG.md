@@ -195,3 +195,18 @@
 - 31.07.26 16:15 [E-1220] [parent: E-1219] [T-359] DEC: SHIP -- review pass 1 confirms exact object provenance, retained commit, absent refs, no live creator script, and exact-tag publication contract; no P0-P2 findings.
 - 31.07.26 16:18 [E-1221] [parent: E-1220] [T-359] RUN: SHIP preflight -> ticket work complete; prepare v7.130.0 metadata and rerun gates before commit/tag/push.
 - 31.07.26 16:25 [E-1222] [parent: E-1221] [T-359] RUN: SHIP preflight v7.130.0 -> validator/scenarios/ruff/order PASS; audit_checks 42/42; parity 11/42 baseline PASS; tag audit 195 with no new mismatch; generated tracked pyc restored; no commit/tag/push begun.
+- 31.07.26 16:26 [E-1223] [parent: E-1222] [T-359] RUN: ship v7.130.0 -> pushed e1b186e
+- 31.07.26 16:26 [E-1224] [parent: E-1223] [T-359] RUN: DONE -> remote/local remote-v7101 absent; release tag peels to e1b186e and carries VERSION 7.130.0; 1e42a89 remains ancestor of main.
+- 31.07.26 16:27 [E-1225] [parent: E-1224] [T-359] H: post-push checkpoint validator rejected DONE with task T-359; terminal state requires task none, remote and release remain correct.
+- 31.07.26 16:28 [E-1226] [parent: E-1225] [T-363] DEC: claimed executable injector probes and script-text behavioral-guard sweep after v7.130.0 completion.
+- 31.07.26 16:31 [E-1227] [parent: E-1226] [T-363] RUN: SCOUT -> both injectors execute successfully in isolated Windows homes; behavioral source reads found in injector distribution, portable-floor parity, and audit_checks tag-query count; hook-version/workflow/doc reads are declarative syntax contracts.
+- 31.07.26 16:39 [E-1228] [parent: E-1227] [T-363] RUN: build -> executable shell+PowerShell installs with stale seeds/artifact assertions/red-control; RFC-derived floor executions; Git Trace2 tag-query observation; literal injector and floor source guards removed; formatting-only shell reflow green.
+- 31.07.26 16:44 [E-1229] [parent: E-1228] [T-363] RUN: VERIFY -> injectors 2/2 + stale/artifacts/reflow/red-control PASS; floor 27x2; Trace2 1 query and duplicate 2; audit_checks 41/41; parity 11/41; validator/scenarios/ruff/order PASS; conf: high.
+- 31.07.26 16:44 [E-1230] [parent: E-1229] [T-363] DEC: goal_tickets 1->2
+- 31.07.26 16:47 [E-1231] [parent: E-1230] [T-363] H: REVIEW pass 1 -> audit_checks Trace2 accepted a nonzero validator unless it crashed, and AST query matching did not require every list element constant; fixed both, RETURN BUILD.
+- 31.07.26 16:48 [E-1232] [parent: E-1231] [T-363] RUN: build -> Trace2 probe now rejects nonzero validator controls; AST matcher requires exact query-list arity before inserting duplicate.
+- 31.07.26 16:52 [E-1233] [parent: E-1232] [T-363] RUN: VERIFY -> invalid-validator control red; Trace2 one/duplicate two; audit_checks 41/41; parity 11/41; validator/scenarios/injectors/ruff/order PASS; conf: high.
+- 31.07.26 16:52 [E-1234] [parent: E-1233] [T-363] DEC: goal_tickets 2->3
+- 31.07.26 16:54 [E-1235] [parent: E-1234] [T-363] DEC: SHIP after FIXES -- review pass 2 confirms nonzero-control rejection and exact-arity AST matching; executable injector/floor/query guards and cleanup are bounded; no new P0-P2 findings.
+- 31.07.26 16:56 [E-1236] [parent: E-1235] [T-363] RUN: SHIP preflight -> ticket work complete; prepare v7.131.0 metadata and rerun gates before commit/tag/push.
+- 31.07.26 17:00 [E-1237] [parent: E-1236] [T-363] RUN: SHIP preflight v7.131.0 -> validator/scenarios/injectors/ruff/order PASS; audit_checks 41/41; tag audit 196 no new mismatch; prior parity 11/41 twice; no commit/tag/push begun.

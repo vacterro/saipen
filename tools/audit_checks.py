@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Proves the canonical validator's checks can still go red.
 
-`tools/audit_floor.py` does this for the 20 checks in the frozen portable
+`tools/audit_floor.py` does this for the checks in the frozen portable
 floor. Nothing did it for `tools/validate.py`, which now carries around 160
 failure paths -- and measuring it is unpleasant reading: the inputs this
-repository ships (its own `.saipen/` plus 14 executable fixtures) produce 17
+repository ships (its own `.saipen/` plus 15 executable fixtures) produce 17
 distinct FAIL/WARN lines between them. Every other check rests on a hand test
 from the day it was written.
 
@@ -25,7 +25,10 @@ Exit 0 when every case still goes red, 1 otherwise.
 """
 from __future__ import annotations
 
+import ast
 import io
+import json
+import os
 import re
 import shutil
 import subprocess
@@ -48,14 +51,74 @@ LOG = ".saipen/LOG.md"
 DIGEST = ".saipen/kitchen/digest.md"
 MANIFEST = ".saipen/kitchen/markhunt_progress.md"
 SUB = ".saipen/extensions/subs/saiwiki/STATE.md"
-TAG_QUERY = '["git", "tag", "-l", "v*"]'
+TAG_QUERY = ("git", "tag", "-l", "v*")
 
 
-def tag_query_problem(source: str) -> str | None:
-    """The release ledger must observe tags once, then reuse that snapshot."""
-    count = source.count(TAG_QUERY)
-    if count != 1:
-        return f"release ledger has {count} git tag queries; expected exactly 1"
+def observed_tag_queries(root: Path) -> tuple[int, str | None]:
+    """Count real `git tag -l v*` processes through Git's Trace2 stream."""
+    handle, raw_path = tempfile.mkstemp(prefix="saipen-git-trace-", suffix=".json")
+    os.close(handle)
+    trace = Path(raw_path)
+    env = os.environ.copy()
+    env["GIT_TRACE2_EVENT"] = str(trace)
+    try:
+        result = subprocess.run(
+            [sys.executable, str(root / "tools" / "validate.py")], cwd=root,
+            env=env, capture_output=True, text=True, errors="replace")
+        output = result.stdout + result.stderr
+        count = 0
+        for line in trace.read_text(encoding="utf-8", errors="replace").splitlines():
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            argv = event.get("argv", [])
+            if event.get("event") == "start" and tuple(argv[1:]) == TAG_QUERY[1:]:
+                count += 1
+        error = None
+        if "Traceback (most recent call last)" in output:
+            error = "validator crashed while tag queries were observed"
+        elif result.returncode:
+            first = next((line for line in output.splitlines()
+                          if line.startswith("FAIL")), "no FAIL line")
+            error = (f"validator control exited {result.returncode} while tag "
+                     f"queries were observed: {first[:100]}")
+        return count, error
+    finally:
+        trace.unlink(missing_ok=True)
+
+
+def duplicate_tag_query(path: Path) -> str | None:
+    """AST-locate the query and insert a second executable call as red-control."""
+    source = path.read_text(encoding="utf-8-sig")
+    tree = ast.parse(source)
+    matches = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call) or not node.args:
+            continue
+        func = node.func
+        if not (isinstance(func, ast.Attribute) and func.attr == "run"
+                and isinstance(func.value, ast.Name)
+                and func.value.id == "subprocess"):
+            continue
+        first = node.args[0]
+        if not isinstance(first, (ast.List, ast.Tuple)):
+            continue
+        if len(first.elts) != len(TAG_QUERY):
+            continue
+        values = tuple(item.value for item in first.elts
+                       if isinstance(item, ast.Constant))
+        if values == TAG_QUERY:
+            matches.append(node)
+    if len(matches) != 1:
+        return f"red-control setup found {len(matches)} executable tag queries"
+    lines = source.splitlines(keepends=True)
+    index = matches[0].lineno - 1
+    indent = lines[index][:len(lines[index]) - len(lines[index].lstrip())]
+    duplicate = (f'{indent}subprocess.run(["git", "tag", "-l", "v*"], '
+                 'capture_output=True, text=True, check=False)\n')
+    lines.insert(index, duplicate)
+    path.write_text("".join(lines), encoding="utf-8", newline="\n")
     return None
 
 
@@ -74,21 +137,6 @@ def add_after(anchor: str, text: str):
 
 def replace(old: str, new: str):
     return lambda t: t.replace(old, new, 1)
-
-
-def shell_delete_after_recreate(text: str) -> str:
-    """Restore the injector bug where cleanup deletes a freshly made tests/."""
-    recreate = '     && mkdir -p "$1" "$1/extensions" "$1/tests" \\\n'
-    pos = text.find(recreate)
-    if pos < 0:
-        return text
-    text = text[:pos] + text[pos + len(recreate):]
-    return text.replace(
-        "  if rm -rf",
-        '  if mkdir -p "$1" "$1/extensions" "$1/tests" \\\n'
-        "     && rm -rf",
-        1,
-    )
 
 
 UTF16 = "<rewrite as utf-16>"      # sentinel, not a mutation function
@@ -224,8 +272,6 @@ CASES: list[tuple[str, str, object, str]] = [
      "reply-language"),
     ("a locale loses its guide", "guides/GUIDE_UK.md", DELETE,
      "locale coverage"),
-    ("shell injector deletes tests after recreating it", "bootstrap/inject.sh",
-     shell_delete_after_recreate, "does not recreate extensions/tests after"),
     # NOT tested here: the phantom-version check needs the TAG half of the
     # release ledger, and this harness copies the tree without .git on
     # purpose. Without tags the check correctly declines to run, so a case
@@ -290,17 +336,42 @@ def validator_output(root: Path) -> str:
 
 
 def main() -> int:
-    validator_source = (HOME / "tools" / "validate.py").read_text(
-        encoding="utf-8-sig")
-    query_problem = tag_query_problem(validator_source)
-    red_control = tag_query_problem(validator_source + "\n" + TAG_QUERY)
-    if query_problem or red_control is None:
-        print(f"FAIL: {query_problem or 'duplicate tag-query red-control stayed green'}")
-        return 1
-
     tmp = Path(tempfile.mkdtemp(prefix="audit_checks_"))
     pristine = tmp / "pristine"
     shutil.copytree(HOME, pristine, ignore=IGNORE)
+
+    query_count, query_error = observed_tag_queries(pristine)
+    red_tree = tmp / "duplicate-tag-query"
+    shutil.copytree(pristine, red_tree)
+    setup_error = duplicate_tag_query(red_tree / "tools" / "validate.py")
+    red_count, red_error = observed_tag_queries(red_tree)
+    shutil.rmtree(red_tree, ignore_errors=True)
+    if query_error or setup_error or red_error or query_count != 1 or red_count != 2:
+        problem = query_error or setup_error or red_error
+        if problem is None:
+            problem = (f"observed {query_count} tag queries; expected 1"
+                       if query_count != 1 else
+                       f"duplicate red-control observed {red_count}; expected 2")
+        print(f"FAIL: release-ledger runtime query probe -- {problem}")
+        shutil.rmtree(tmp, ignore_errors=True)
+        return 1
+
+    # The observation itself must not bless a stuck-red validator merely
+    # because Git still launched. Break the pristine STATE, require a control
+    # error, then restore it before the mutation table starts.
+    state_path = pristine / STATE
+    state_source = state_path.read_text(encoding="utf-8-sig")
+    state_path.write_text(
+        re.sub(r"^phase:.*$", "phase: NOT-A-PHASE", state_source,
+               count=1, flags=re.MULTILINE),
+        encoding="utf-8", newline="\n")
+    _, invalid_control_error = observed_tag_queries(pristine)
+    state_path.write_text(state_source, encoding="utf-8", newline="\n")
+    if invalid_control_error is None:
+        print("FAIL: release-ledger runtime query probe accepted a validator "
+              "control that was deliberately stuck red")
+        shutil.rmtree(tmp, ignore_errors=True)
+        return 1
 
     # The control. Every expectation below must be ABSENT here, or the case
     # proves nothing -- a message that is always present is not evidence.
@@ -309,6 +380,14 @@ def main() -> int:
         print("FAIL: the validator crashes on an unmodified copy -- fix that "
               "before trusting any case below")
         print(control[-800:])
+        shutil.rmtree(tmp, ignore_errors=True)
+        return 1
+    control_failure = next((line for line in control.splitlines()
+                            if line.startswith("FAIL")), None)
+    if control_failure:
+        print("FAIL: the validator rejects an unmodified copy -- fix the "
+              "known-good control before trusting mutation results")
+        print(control_failure[:800])
         shutil.rmtree(tmp, ignore_errors=True)
         return 1
 
@@ -359,8 +438,8 @@ def main() -> int:
         print(f"\n{len(dead) + len(always)} of {len(CASES)} case(s) are not "
               f"evidence any more.")
         return 1
-    print("PASS: release-ledger tag query is observed once and its duplicate "
-          "red-control fails")
+    print("PASS: release-ledger tag query is observed once; duplicate-query "
+          "and invalid-validator controls both go red")
     print(f"PASS: {live} of {len(CASES)} validator check(s) still go red on "
           f"their own condition"
           + (f" ({len(skipped)} skipped)" if skipped else ""))

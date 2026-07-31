@@ -35,6 +35,7 @@ from pathlib import Path
 HOME = Path(__file__).resolve().parent.parent
 FLOOR = HOME / "tests" / "validate.sh"
 FLOOR_PS1 = HOME / "tests" / "validate.ps1"
+RFC = HOME / "saipen" / "RFC.md"
 
 GOOD_STATE = """---
 phase: PLAN
@@ -52,6 +53,44 @@ updated: 2026-07-28T10:00:00Z
 GOOD_BOARD = ("# Board\n## DOING\n\n## TODO\n- [ ] T-001 a ticket\n\n"
               "## DONE\n\n## BLOCKED\n")
 GOOD_LOG = "# Log\n\n- 28.07.26 10:00 [E-001] [T-none] DEC: fixture\n"
+
+
+def rfc_ticks(pattern: str) -> list[str]:
+    """Read a closed vocabulary from its normative RFC sentence."""
+    body = RFC.read_text(encoding="utf-8-sig")
+    match = re.search(pattern, body, re.DOTALL)
+    if not match:
+        raise RuntimeError(f"RFC contract anchor not found: {pattern}")
+    return re.findall(r"`([^`]+)`", match.group(1))
+
+
+REQUIRED_FIELDS = rfc_ticks(
+    r"\*\*STATE\.md\*\*: MUST contain frontmatter: (.+?)\.\s")
+READ_ONLY_PHASES = rfc_ticks(
+    r"\*\*Read-only banned phases\*\*: (.+?)\. The agent")
+
+
+def without_state_field(field: str):
+    return lambda s, b, lg: (
+        re.sub(rf"^{re.escape(field)}:.*\n", "", s, count=1,
+               flags=re.MULTILINE), b, lg)
+
+
+REQUIRED_FIELD_CASES = [
+    (f"required field {field} missing", without_state_field(field),
+     "missing valid phase" if field == "phase" else f"missing {field}")
+    for field in REQUIRED_FIELDS
+]
+
+
+READ_ONLY_CASES = [
+    (f"read-only in {phase}",
+     lambda s, b, lg, phase=phase: (
+         s.replace("mode: full", "mode: read-only", 1)
+          .replace("phase: PLAN", f"phase: {phase}", 1), b, lg),
+     "read-only MUST NOT enter")
+    for phase in READ_ONLY_PHASES
+]
 
 
 def find_bash():
@@ -98,31 +137,8 @@ CASES = [
     ("missing STATE.md", lambda s, b, lg: (None, b, lg), "STATE.md missing"),
     ("missing BOARD.md", lambda s, b, lg: (s, None, lg), "BOARD.md missing"),
     ("missing LOG.md", lambda s, b, lg: (s, b, None), "LOG.md missing"),
-    ("no phase", lambda s, b, lg: (re.sub(r"phase: PLAN\n", "", s, 1), b, lg),
-     "missing valid phase"),
-    ("no task", lambda s, b, lg: (s.replace("task: none\n", "", 1), b, lg),
-     "missing task"),
-    ("no next_action",
-     lambda s, b, lg: (re.sub(r"next_action: .*\n", "", s, 1), b, lg),
-     "missing next_action"),
-    ("no blocker", lambda s, b, lg: (s.replace("blocker: none\n", "", 1), b, lg),
-     "missing blocker"),
-    ("no agent", lambda s, b, lg: (s.replace("agent: test\n", "", 1), b, lg),
-     "missing agent"),
-    ("no updated",
-     lambda s, b, lg: (re.sub(r"updated: .*\n", "", s, 1), b, lg), "missing updated"),
     ("bad mode", lambda s, b, lg: (s.replace("mode: full", "mode: banana", 1), b, lg),
      "missing mode"),
-    ("no saipen_version",
-     lambda s, b, lg: (s.replace("saipen_version: 7\n", "", 1), b, lg),
-     "missing saipen_version"),
-    ("no transition_from",
-     lambda s, b, lg: (s.replace("transition_from: INIT\n", "", 1), b, lg),
-     "missing transition_from"),
-    ("read-only in BUILD",
-     lambda s, b, lg: (s.replace("mode: full", "mode: read-only", 1)
-                      .replace("phase: PLAN", "phase: BUILD", 1), b, lg),
-     "read-only MUST NOT enter"),
     ("goal_mode without goal_waves",
      lambda s, b, lg: (s.replace("mode: full",
                                 "mode: full\ngoal_mode: true\ngoal_tickets: 0", 1), b, lg),
@@ -149,12 +165,33 @@ CASES = [
     ("malformed LOG line",
      lambda s, b, lg: (s, b, "# Log\n\n- this is not an event line at all\n"),
      "Graph Event format"),
+    *REQUIRED_FIELD_CASES,
+    *READ_ONLY_CASES,
 ]
 
 
 def audit(runner, script, half):
     """Run every case against one half of the floor. Returns a failure list."""
     failures = []
+    control = Path(tempfile.mkdtemp(prefix="saipen-floor-control-"))
+    try:
+        (control / ".saipen").mkdir()
+        for name, content in (("STATE.md", GOOD_STATE), ("BOARD.md", GOOD_BOARD),
+                              ("LOG.md", GOOD_LOG)):
+            with io.open(control / ".saipen" / name, "w", encoding="utf-8",
+                         newline="\n") as fh:
+                fh.write(content)
+        env = bash_env(runner[0]) if half == "sh" else None
+        result = subprocess.run([*runner, script], cwd=str(control), env=env,
+                                capture_output=True, text=True)
+        if result.returncode:
+            first = next((line for line in (result.stdout + result.stderr).splitlines()
+                          if "FAIL" in line), "<no FAIL line at all>")
+            return [f"[{half}] known-good control exited {result.returncode}: "
+                    f"{first[:100]}"]
+    finally:
+        shutil.rmtree(control, ignore_errors=True)
+
     for label, mutate, expect in CASES:
         work = Path(tempfile.mkdtemp(prefix="saipen-floor-"))
         try:

@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.131.0 -- 2026-07-31 -- run the guard, not its spelling
+
+The injector distribution guard read both scripts as text. Its last version pinned one exact `mkdir -p "$1" "$1/extensions" "$1/tests"` line; a harmless reflow killed the guard, while its token-only predecessor had passed an injector that created `tests/`, deleted it, and then could not copy the validators. The check observed spelling and called it behavior.
+
+`tools/run_scenarios.py` now runs both injectors in isolated homes seeded with stale managed directories. Each must remove the sentinels and install `VERSION`, `tests/validate.sh`, and `tests/validate.ps1`; a deleted-`tests/` layout is the red-control. The old shell line was deliberately reflowed and stays green because no check reads its formatting.
+
+The sweep found two more behavioral claims made from source text. Portable-floor parity now derives required fields and read-only phase bans from RFC.md, mutates a known-good project for every value, and executes both shell implementations: 27 cases across two halves. The release-ledger single-query invariant now uses Git Trace2 to observe one real process; an AST-located duplicate produces two, and a deliberately invalid validator control is rejected. Canonical mutations remain 41/41 and portable parity remains at its baseline of 11/41.
+
 ## 7.130.0 -- 2026-07-31 -- publish the release you named
 
 `remote-v7101` was not an alias of the current `v7.101.0` object. It was a distinct, earlier annotated object whose embedded tag name was also `v7.101.0`, preserved under a temporary local ref while a mistag was investigated. That ref was created by a one-off Claude session command, not by a live repository script. It later escaped because SHIP said only "push tags", and `git push --follow-tags` selected the unrelated annotated tag from ambient local state.

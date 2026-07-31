@@ -1484,7 +1484,8 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
         # Distribution integrity -- the v7.22.3/v7.25.0 bug class, machine-checked.
         # Five separate times this repo promised a file in one place and never
         # wired its delivery in another; each was found by archaeology. These
-        # three checks make the whole class a validator FAIL instead.
+        # structural checks make the remaining class a validator FAIL; actual
+        # injector delivery is executed by tools/run_scenarios.py.
 
         # A. RFC's phase enum <-> phases/ docs, both directions.
         rfc_text = Path("saipen/RFC.md").read_text(encoding="utf-8-sig")
@@ -1526,6 +1527,7 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
             "tools/validate.py", "tools/install_hook.py", "tools/uninstall_hook.py",
             "tools/run_scenarios.py", "tools/audit_floor.py",
             "tests/validate.sh", "tests/validate.ps1",
+            "bootstrap/inject.sh", "bootstrap/inject.ps1",
             "extensions/schemas/state.schema.json",
             "extensions/templates/STATE.md", "extensions/templates/BOARD.md",
             "extensions/templates/LOG.md",
@@ -1536,55 +1538,10 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
         if not manifest_missing:
             ok(f"runtime manifest complete ({len(manifest)} files)")
 
-        # C. Both injector scripts must actually distribute every runtime dir
-        # AND every always-loaded root doc. The per-file names matter as much
-        # as the dirs: CONFORMANCE.md was referenced by BOOT.md (loaded on
-        # every cold start) and phases/validate.md while no injector copied
-        # it, so every injected platform had a dangling pointer -- the same
-        # v7.22.3/v7.25.0 class this check exists to catch, just at file
-        # rather than directory granularity.
-        dist_tokens = ["phases", "tools", "extensions/schemas",
-                       "extensions/templates", "extensions/subs", "tests",
-                       "BOOT.md", "SKILL.md", "RFC.md", "STYLE.md", "UI.md",
-                       "CONFORMANCE.md", "VERSION"]
-        wiring_ok = True
-        for script in ("bootstrap/inject.ps1", "bootstrap/inject.sh"):
-            if not Path(script).is_file():
-                fail(f"{script} missing")
-                wiring_ok = False
-                continue
-            normalized = Path(script).read_text(encoding="utf-8-sig").replace("\\", "/")
-            for token in dist_tokens:
-                if token not in normalized:
-                    fail(f"{script} never references {token} -- Copy-Skill "
-                         f"wiring broken, skill copies won't receive it "
-                         f"(the exact v7.22.3/v7.25.0 bug class)")
-                    wiring_ok = False
-            if script.endswith(".ps1") and "Remove-Item" not in normalized:
-                fail(f"{script} does not clear managed runtime dirs before "
-                     f"copying -- stale skill-copy files can survive forever")
-                wiring_ok = False
-            if script.endswith(".ps1") and "IsNullOrWhiteSpace" not in normalized:
-                fail(f"{script} does not reject an empty destination before "
-                     f"recursive cleanup -- an unsafe caller could delete "
-                     f"outside a skill copy")
-                wiring_ok = False
-            if script.endswith(".sh") and "rm -rf" not in normalized:
-                fail(f"{script} does not clear managed runtime dirs before "
-                     f"copying -- stale skill-copy files can survive forever")
-                wiring_ok = False
-            if script.endswith(".sh"):
-                cleanup = normalized.find("rm -rf")
-                recreate = normalized.find('mkdir -p "$1" "$1/extensions" "$1/tests"')
-                if cleanup < 0 or recreate < 0 or recreate < cleanup:
-                    fail(f"{script} does not recreate extensions/tests after "
-                         f"recursive cleanup -- copying floor files into the "
-                         f"deleted tests directory will fail")
-                    wiring_ok = False
-        if wiring_ok:
-            ok("injector distributes every runtime dir + root doc "
-               "(phases/tools/tests/schemas/templates/subs, BOOT/SKILL/RFC/"
-               "STYLE/UI/CONFORMANCE, both scripts) and clears stale managed dirs")
+        # Injector behavior is executed by tools/run_scenarios.py for both
+        # shells. This manifest owns only the structural question: are the two
+        # entry-point scripts present? Reading their source cannot prove copy
+        # order, stale-directory replacement, or installed artifacts.
 
 # --------------------------------------------------- adapters cross-reference
 
@@ -2079,49 +2036,10 @@ else:
                  f"extension (RFC § 1.9); the other two must match it")
             drift_ok = False
 
-    # 10. The portable floor (tests/validate.sh, tests/validate.ps1) is what a
-    #     host without Python runs INSTEAD of this file. It is frozen against
-    #     new checks -- never against corrections -- so its data must still
-    #     match RFC. Until v7.96.0 it required 7 of § 1.2's 9 fields and knew
-    #     none of the read-only bans added in v7.93.0/v7.94.0, so it handed out
-    #     PASS on states this file FAILs. A floor more permissive than the
-    #     thing it substitutes for is worse than no floor.
-    #
-    #     Both halves below are matched precisely, not by bare word presence:
-    #     the first version of this check looked for "INIT" anywhere in the
-    #     file and could therefore never fail, because the phase enum lists it
-    #     a few lines above. A check that cannot go red is decoration.
-    floor = [_tools_parent / "tests" / "validate.sh",
-             _tools_parent / "tests" / "validate.ps1"]
-    for script in floor:
-        if not script.is_file():
-            fail(f"portable floor missing: {script.as_posix()} (CONFORMANCE § 1)")
-            drift_ok = False
-            continue
-        body = script.read_text(encoding="utf-8-sig")
-
-        # required fields: each must appear as an actual `field:` probe
-        missing_fields = sorted(f for f in rfc_required if (f + ":") not in body)
-        if missing_fields:
-            fail(f"cross-doc drift [portable-floor] -- {script.name} never "
-                 f"probes {missing_fields}, which RFC § 1.2 requires; a host "
-                 f"without Python would PASS a state this validator FAILs")
-            drift_ok = False
-
-        # read-only bans: parse the phases out of the script's own message
-        m = re.search(r"read-only MUST NOT enter ([A-Z/]+)", body)
-        if not m:
-            fail(f"cross-doc drift [portable-floor] -- {script.name} has no "
-                 f"recognizable read-only ban message; RFC § 1.3's ban cannot "
-                 f"be compared against it")
-            drift_ok = False
-        else:
-            floor_bans = set(m.group(1).split("/"))
-            missing_bans = sorted(set(READ_ONLY_BANNED_PHASES) - floor_bans)
-            if missing_bans:
-                fail(f"cross-doc drift [portable-floor] -- {script.name} does "
-                     f"not ban read-only from {missing_bans} (RFC § 1.3)")
-                drift_ok = False
+    # 10. Portable-floor parity is behavioral. tools/audit_floor.py derives
+    #     required fields and read-only phase bans from RFC.md, mutates a valid
+    #     project for each value, and executes both floor scripts. This
+    #     validator deliberately does not infer behavior from shell text.
 
     # 11. Coverage accounting. Every check above answers "do these two agree?".
     #     None answered "is everything even being looked at?" -- and twice in a
@@ -2513,8 +2431,11 @@ else:
     #      ago goes on running whatever logic it was born with, and nothing said
     #      so. Exactly the failure `KNOWLEDGE/traps.md` records for the
     #      injector's skill copies, which need a re-inject after every pull; the
-    #      hook had no equivalent signal at all. Parsed out of install_hook.py
-    #      rather than imported, because that module does its work at import.
+    #      hook had no equivalent signal at all. Static-contract exception:
+    #      this reads one declarative generation constant; it does not claim
+    #      the installer behaves correctly. Importing is unsafe because the
+    #      module installs the hook at import time; installer behavior belongs
+    #      in an executable sandbox probe if it is ever claimed here.
     _hook = Path(".git/hooks/pre-commit")
     _installer = _tools_parent / "tools" / "install_hook.py"
     if _hook.is_file() and _installer.is_file():
@@ -2756,6 +2677,8 @@ else:
     #      wrong for releases and was only corrected because someone measured
     #      it by hand.
     #
+    #      This is a syntax/identity contract, not a behavior claim: it proves
+    #      that a row's named tool, fixture, or workflow step still exists.
     #      This is the mechanical half of retiring a rule: it cannot decide
     #      that a rule is obsolete, but it can refuse to let one keep claiming
     #      an enforcement that is gone. Then the choice -- restore it or retire
