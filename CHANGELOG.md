@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.138.0 -- 2026-07-31 -- exports belong to the project, not the shell
+
+Both export scripts treated ambient cwd as the project root. Invocation from a nested directory failed, a foreign repository could export the wrong state, and a linked worktree could not reach the main worktree's shared `.saipen/`. The scripts now use the same explicit/Git-common/non-Git ownership contract as the Core bootstrap and write the archive beside the resolved owner.
+
+Root selection fails closed: an empty explicit path, an unowned Git worktree, or an external git-dir whose parent happens to contain another `.saipen/` cannot become an implicit export target. Shell and PowerShell retain focused failure text and cannot report completion without a real non-empty archive.
+
+`tools/run_scenarios.py` executes twelve ownership paths across both formats: nested, foreign, explicit, empty-explicit, linked-worktree, and separate-git-dir. Success cases open the real tar or zip and compare the archived owner marker; rejected and non-owner directories must remain archive-free.
+
 ## 7.137.0 -- 2026-07-31 -- bootstrap success means the writes landed
 
 The shell injector and both uninstallers could print success after failed backups, transforms, removals, or writes. Shell command substitutions discarded function status; PowerShell collected `"FAILED"` as ordinary report text and still reached `Done.`. PowerShell's block regex also consumed user-owned surrounding whitespace, so install followed by uninstall changed a config it promised to leave alone.

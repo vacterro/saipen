@@ -40,7 +40,9 @@ import re
 import shutil
 import subprocess
 import sys
+import tarfile
 import tempfile
+import zipfile
 from pathlib import Path
 
 HOME = Path(__file__).resolve().parent.parent
@@ -435,6 +437,177 @@ def run_project_root_probes() -> tuple[list[str], int]:
     return problems, checked
 
 
+def run_export_probes() -> tuple[list[str], int, int]:
+    """Execute both exporters across the Core project-root ownership paths."""
+    problems = []
+    checked = skipped = 0
+    git = shutil.which("git")
+    bash = find_bash()
+    powershell = find_powershell()
+    if not git:
+        return ["export probes require git"], checked, skipped
+
+    def git_run(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run([git, *args], cwd=cwd, capture_output=True,
+                              text=True, errors="replace")
+
+    def bash_path(path: Path) -> str:
+        if os.name != "nt" or not bash:
+            return str(path)
+        converted = subprocess.run(
+            [bash, "-lc", 'cygpath -u "$1"', "saipen-export", str(path)],
+            capture_output=True, text=True, errors="replace")
+        return converted.stdout.strip() if converted.returncode == 0 else str(path)
+
+    def archive_marker(archive: Path) -> bytes | None:
+        if archive.suffix == ".zip":
+            with zipfile.ZipFile(archive) as bundle:
+                name = next((n for n in bundle.namelist()
+                             if n.replace("\\", "/").endswith(".saipen/marker.txt")),
+                            None)
+                return bundle.read(name) if name else None
+        with tarfile.open(archive, "r:gz") as bundle:
+            member = next((m for m in bundle.getmembers()
+                           if m.name.replace("\\", "/").endswith(
+                               ".saipen/marker.txt")), None)
+            if member is None:
+                return None
+            stream = bundle.extractfile(member)
+            return stream.read() if stream else None
+
+    with tempfile.TemporaryDirectory(prefix="saipen-export-") as raw:
+        sandbox = Path(raw).resolve()
+        project = sandbox / "project"
+        project.mkdir()
+        (project / ".saipen").mkdir()
+        marker = b"owner-project\n"
+        (project / ".saipen" / "marker.txt").write_bytes(marker)
+        (project / "tracked.txt").write_text("export probe\n", encoding="utf-8")
+        for command in (
+                ("init", "-q"),
+                ("config", "user.name", "SAIPEN export probe"),
+                ("config", "user.email", "export-probe@example.invalid"),
+                ("add", "tracked.txt"),
+                ("commit", "-q", "-m", "export probe")):
+            result = git_run(project, *command)
+            if result.returncode:
+                return [f"export Git setup failed at {command}: "
+                        f"{(result.stderr or result.stdout).strip()}"], checked, skipped
+
+        nested = project / "nested" / "cwd"
+        nested.mkdir(parents=True)
+        foreign = sandbox / "foreign"
+        foreign.mkdir()
+        if git_run(foreign, "init", "-q").returncode:
+            return ["export foreign Git setup failed"], checked, skipped
+        linked = sandbox / "linked"
+        worktree = git_run(project, "worktree", "add", "--detach", str(linked))
+        if worktree.returncode:
+            return ["export linked-worktree setup failed: "
+                    + (worktree.stderr or worktree.stdout).strip()], checked, skipped
+
+        external_parent = sandbox / "git-store"
+        external_parent.mkdir()
+        (external_parent / ".saipen").mkdir()
+        (external_parent / ".saipen" / "marker.txt").write_bytes(
+            b"wrong-external-owner\n")
+        separate = sandbox / "separate"
+        separate_git = git_run(
+            sandbox, "init", "-q", "--separate-git-dir",
+            str(external_parent / "repository.git"), str(separate))
+        if separate_git.returncode:
+            return ["export separate-git-dir setup failed: "
+                    + (separate_git.stderr or separate_git.stdout).strip()], checked, skipped
+
+        shell_home = sandbox / "shell-home"
+        shell_home.mkdir()
+        shell_environment = bash_env(bash, shell_home) if bash else None
+
+        tools: list[tuple[str, list[str], str]] = []
+        if bash:
+            tools.append((
+                "export.sh", [bash, str(HOME / "bootstrap" / "export.sh")],
+                "--project-root"))
+        else:
+            print("SKIP: bootstrap/export.sh probes -- no usable bash")
+            skipped += 6
+        if powershell:
+            tools.append((
+                "export.ps1",
+                [powershell, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
+                 str(HOME / "bootstrap" / "export.ps1")], "-ProjectRoot"))
+        else:
+            print("SKIP: bootstrap/export.ps1 probes -- no PowerShell")
+            skipped += 6
+
+        cases = (
+            ("nested cwd", nested, None, True, None),
+            ("foreign cwd rejected", foreign, None, False, "owns no .saipen"),
+            ("explicit root overrides cwd", foreign, project, True, None),
+            ("empty explicit root rejected", foreign, "", False,
+             "requires a non-empty path"),
+            ("linked worktree uses main owner", linked, None, True, None),
+            ("external git-dir parent rejected", separate, None, False,
+             "owns no .saipen"),
+        )
+        nonowner_roots = (foreign, nested, linked, external_parent, separate)
+        for tool_name, base_command, explicit_flag in tools:
+            for label, cwd, explicit, succeeds, failure_text in cases:
+                for old in project.glob("saipen_export_*"):
+                    old.unlink()
+                for root in nonowner_roots:
+                    for old in root.glob("saipen_export_*"):
+                        old.unlink()
+                command = list(base_command)
+                if explicit is not None:
+                    root_arg = (bash_path(explicit)
+                                if tool_name.endswith(".sh") and explicit else str(explicit))
+                    command.extend((explicit_flag, root_arg))
+                result = subprocess.run(
+                    command, cwd=cwd, capture_output=True, text=True,
+                    errors="replace",
+                    env=shell_environment if tool_name.endswith(".sh") else None)
+                checked += 1
+                output = result.stdout + result.stderr
+                archives = list(project.glob("saipen_export_*"))
+                wrong = [archive for root in nonowner_roots
+                         for archive in root.glob("saipen_export_*")]
+                if not succeeds:
+                    if (result.returncode == 0 or "Done." in output or archives or wrong
+                            or failure_text not in output):
+                        problems.append(
+                            f"{tool_name} {label}: expected focused failure containing "
+                            f"{failure_text!r} with no archive")
+                    else:
+                        print(f"PASS: {tool_name} -- {label}")
+                    continue
+                if result.returncode or "Done. Export saved to:" not in output:
+                    detail = next((line for line in output.splitlines()
+                                   if line.startswith(("FAILED", "tar:"))),
+                                  output.strip()[:160] or "no output")
+                    problems.append(
+                        f"{tool_name} {label}: exit {result.returncode} without "
+                        f"success path: {detail}")
+                    continue
+                if len(archives) != 1 or wrong:
+                    problems.append(
+                        f"{tool_name} {label}: expected one owner archive, got "
+                        f"owner={len(archives)} wrong={len(wrong)}")
+                    continue
+                try:
+                    archived_marker = archive_marker(archives[0])
+                except (OSError, tarfile.TarError, zipfile.BadZipFile) as exc:
+                    problems.append(f"{tool_name} {label}: unreadable archive: {exc}")
+                    continue
+                if archived_marker != marker:
+                    problems.append(f"{tool_name} {label}: archive has wrong owner marker")
+                else:
+                    print(f"PASS: {tool_name} -- {label}")
+                archives[0].unlink(missing_ok=True)
+
+    return problems, checked, skipped
+
+
 def run_last_event_probes() -> tuple[list[str], int]:
     """Execute the schema-v1 to schema-v2 checkpoint migration boundary."""
     problems = []
@@ -591,6 +764,8 @@ injector_failures, injector_checked, injector_skipped = run_injector_probes()
 failures.extend(injector_failures)
 root_failures, root_checked = run_project_root_probes()
 failures.extend(root_failures)
+export_failures, export_checked, export_skipped = run_export_probes()
+failures.extend(export_failures)
 last_event_failures, last_event_checked = run_last_event_probes()
 failures.extend(last_event_failures)
 
@@ -599,6 +774,8 @@ print(f"\n{checked} executable fixture(s) checked, "
 print(f"{injector_checked} injector(s) executed, "
       f"{injector_skipped} skipped for missing interpreters")
 print(f"{root_checked} project-root behavior(s) executed")
+print(f"{export_checked} export ownership behavior(s) executed, "
+      f"{export_skipped} skipped for missing interpreters")
 print(f"{last_event_checked} last_event migration behavior(s) executed")
 
 if failures:

@@ -73,3 +73,19 @@
 - 31.07.26 18:59 [E-1313] [parent: E-1312] [T-368] DEC: SHIP after FIXES -- CRLF bytes, caught and terminating failures, reports, and completion text are behaviorally bounded; no P0-P1 findings.
 - 31.07.26 18:59 [E-1314] [parent: E-1313] [T-368] RUN: SHIP preflight -> origin/main 7744c1d; v7.137.0 absent local/remote; unrelated subSaipen checkpoints excluded.
 - 31.07.26 19:01 [E-1315] [parent: E-1314] [T-368] RUN: SHIP gate -> CRLF round trips and four failures red; scenarios/tags 202/canonical 44/44/validator/ruff/order PASS.
+- 31.07.26 19:02 [E-1316] [parent: E-1315] [T-368] RUN: ship v7.137.0 -> pushed 6a8b9fc
+- 31.07.26 19:02 [E-1317] [parent: E-1316] [T-368] RUN: DONE -> ticket complete
+- 31.07.26 19:03 [E-1318] [parent: E-1317] [T-369] DEC: claimed export project-root ownership across nested, foreign, explicit, and linked-worktree invocations.
+- 31.07.26 19:04 [E-1319] [parent: E-1318] [T-369] RUN: SCOUT -- export has no arguments or root resolver; mirror explicit/Git-common/non-Git ownership and inspect real archive contents in both formats.
+- 31.07.26 19:13 [E-1320] [parent: E-1319] [T-369] RUN: BUILD -> both exporters bind archives to explicit, Git-common, or nearest non-Git owner; 8/8 real tar/zip ownership scenarios PASS.
+- 31.07.26 19:21 [E-1321] [parent: E-1320] [T-369] RUN: VERIFY -> export ownership 8/8; canonical 44/44; parity 11/44; validator, ruff, order, scenarios, and tags PASS; conf: high.
+- 31.07.26 19:21 [E-1322] [parent: E-1321] [T-369] DEC: goal_tickets 13->14
+- 31.07.26 19:24 [E-1323] [parent: E-1322] [T-369] DEC: REVIEW -> BUILD -- arbitrary external git-dir parents could be mistaken for owners, and an explicitly empty root silently became implicit cwd.
+- 31.07.26 19:27 [E-1324] [parent: E-1323] [T-369] RUN: build fixes -> common-dir owner now requires `.git`; empty explicit roots fail focused; export scenarios 10/10 and both parsers PASS.
+- 31.07.26 19:33 [E-1325] [parent: E-1324] [T-369] RUN: VERIFY after fixes -> export ownership 10/10; canonical 44/44; parity 11/44; all release gates PASS; conf: high.
+- 31.07.26 19:35 [E-1326] [parent: E-1325] [T-369] DEC: REVIEW -> BUILD -- external git-dir ownership fix lacks its own executable red-control; add real separate-git-dir rejection for both exporters.
+- 31.07.26 19:37 [E-1327] [parent: E-1326] [T-369] RUN: build proof -> real separate-git-dir with a tempting foreign `.saipen` is rejected by both exporters; ownership scenarios 12/12 PASS.
+- 31.07.26 19:37 [E-1328] [parent: E-1327] [T-369] RUN: VERIFY final -> ownership 12/12, canonical 44/44, validator/scenarios/ruff/order/tags PASS; prior parity repeat remains 11/44; conf: high.
+- 31.07.26 19:38 [E-1329] [parent: E-1328] [T-369] DEC: SHIP after FIXES -- explicit, Git-common, worktree, ancestor, empty-root, and external-git-dir boundaries are behaviorally proved; no P0-P1 findings.
+- 31.07.26 19:38 [E-1330] [parent: E-1329] [T-369] RUN: SHIP preflight -> origin/main 6a8b9fc; v7.138.0 and remote-v7101 absent local/remote; unrelated subSaipen checkpoints excluded.
+- 31.07.26 19:39 [E-1331] [parent: E-1330] [T-369] RUN: SHIP gate -> ownership 12/12, canonical 44/44, scenarios/tags/validator/ruff/order PASS; v7.138.0 prepared.

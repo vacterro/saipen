@@ -1,3 +1,3 @@
-done: T-368 verified and v7.137.0 prepared -- bootstrap reports and user bytes are truthful
-remaining: publish v7.137.0, then T-369 export project-root binding
+done: T-369 verified and v7.138.0 prepared -- exports bind to the project owner
+remaining: publish v7.138.0, then T-370 launcher truthfulness
 awaiting: nothing
