@@ -23,6 +23,10 @@ After the state fixtures, both bootstrap injectors run against isolated homes
 seeded with stale managed directories. The probe checks installed artifacts,
 not script tokens, and carries a broken-layout red-control.
 
+Project-root probes also execute the canonical validator from a correct Git
+root, nested Git and non-Git directories, a foreign repository, an explicit
+root, and a linked worktree. They assert no fallback `.saipen/` is created.
+
 Exit code is non-zero if any fixture's real outcome differs from its
 declaration, so CI fails on it like any other gate.
 """
@@ -137,12 +141,31 @@ def run_injector_probe(label: str, command: list[str], env: dict[str, str],
     problems = installed_layout_problems(destination)
     if result.returncode:
         problems.insert(0, f"exited {result.returncode}")
+    if not problems:
+        project = home / "validator-project"
+        shutil.copytree(
+            SCENARIOS / "resume-after-crash" / ".saipen",
+            project / ".saipen")
+        installed_validator = destination / "tools" / "validate.py"
+        validation = subprocess.run(
+            [sys.executable, str(installed_validator), "--project-root",
+             str(project)], cwd=home, env=env, capture_output=True, text=True,
+            errors="replace")
+        expected_root = f"Project root: {project.resolve()} (explicit)"
+        if validation.returncode != 0 or expected_root not in validation.stdout:
+            first = next(
+                (line for line in (validation.stdout + validation.stderr).splitlines()
+                 if line.startswith(("FAIL", "Traceback"))),
+                "installed validator did not report a failure line")
+            problems.append(
+                f"installed validator explicit-root smoke exited "
+                f"{validation.returncode}: {first[:120]}")
     if problems:
         detail = next((line for line in (result.stdout + result.stderr).splitlines()
                        if "FAILED" in line or "FATAL" in line), "no failure line")
         return f"{label}: {'; '.join(problems)} | {detail[:120]}"
-    print(f"PASS: {label} -- executable install replaced stale dirs and landed "
-          "VERSION + both portable validators")
+    print(f"PASS: {label} -- executable install replaced stale dirs, landed "
+          "VERSION + both portable validators, and ran installed validate.py")
     return None
 
 
@@ -199,6 +222,109 @@ def run_injector_probes() -> tuple[list[str], int, int]:
 
     return probe_failures, checked, skipped
 
+
+def run_project_root_probes() -> tuple[list[str], int]:
+    problems = []
+    checked = 0
+    git = shutil.which("git")
+    if not git:
+        return ["project-root probes require git"], checked
+
+    def git_run(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run([git, *args], cwd=cwd, capture_output=True,
+                              text=True)
+
+    def validate(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run([sys.executable, str(VALIDATOR), *args], cwd=cwd,
+                              capture_output=True, text=True)
+
+    def expect(label: str, result: subprocess.CompletedProcess[str],
+               returncode: int, contains: str) -> None:
+        nonlocal checked
+        checked += 1
+        output = result.stdout + result.stderr
+        if result.returncode != returncode or contains not in output:
+            problems.append(
+                f"{label}: exit {result.returncode}, expected {returncode}; "
+                f"missing output {contains!r}")
+        else:
+            print(f"PASS: project root -- {label}")
+
+    with tempfile.TemporaryDirectory(prefix="saipen-root-") as raw:
+        sandbox = Path(raw).resolve()
+        project = sandbox / "project"
+        project.mkdir()
+        shutil.copytree(
+            SCENARIOS / "resume-after-crash" / ".saipen",
+            project / ".saipen")
+        (project / ".gitignore").write_text(".saipen/\n", encoding="utf-8")
+        (project / "tracked.txt").write_text("root probe\n", encoding="utf-8")
+
+        setup = [
+            ("init",),
+            ("config", "user.name", "SAIPEN root probe"),
+            ("config", "user.email", "root-probe@example.invalid"),
+            ("add", ".gitignore", "tracked.txt"),
+            ("commit", "-m", "root probe"),
+        ]
+        for command in setup:
+            result = git_run(project, *command)
+            if result.returncode != 0:
+                return [f"project-root git setup failed at {command}: "
+                        f"{(result.stderr or result.stdout).strip()}"], checked
+
+        project_text = str(project)
+        expect("correct root", validate(project), 0,
+               f"Project root: {project_text} (git-common)")
+
+        nested = project / "one" / "two"
+        nested.mkdir(parents=True)
+        expect("nested cwd", validate(nested), 0,
+               f"Project root: {project_text} (git-common)")
+        if (nested / ".saipen").exists() or (nested.parent / ".saipen").exists():
+            problems.append("nested cwd created a second .saipen/")
+
+        foreign = sandbox / "foreign"
+        foreign.mkdir()
+        init_foreign = git_run(foreign, "init")
+        if init_foreign.returncode != 0:
+            return ["foreign repository setup failed: "
+                    + (init_foreign.stderr or init_foreign.stdout).strip()], checked
+        wrong = validate(foreign)
+        expect("wrong cwd rejected", wrong, 1,
+               "refusing to guess or create a second .saipen/")
+        if (foreign / ".saipen").exists():
+            problems.append("wrong cwd created .saipen/")
+
+        expect("explicit root overrides cwd",
+               validate(foreign, "--project-root", project_text), 0,
+               f"Project root: {project_text} (explicit)")
+        if (foreign / ".saipen").exists():
+            problems.append("explicit-root invocation created .saipen/ in cwd")
+
+        plain = sandbox / "plain-project"
+        plain_nested = plain / "deep" / "cwd"
+        plain_nested.mkdir(parents=True)
+        shutil.copytree(
+            SCENARIOS / "resume-after-crash" / ".saipen",
+            plain / ".saipen")
+        expect("non-Git nested cwd", validate(plain_nested), 0,
+               f"Project root: {plain} (ancestor)")
+        if (plain_nested / ".saipen").exists() or (plain / "deep" / ".saipen").exists():
+            problems.append("non-Git nested cwd created a second .saipen/")
+
+        linked = sandbox / "linked"
+        add_worktree = git_run(project, "worktree", "add", "--detach", str(linked))
+        if add_worktree.returncode != 0:
+            return ["linked worktree setup failed: "
+                    + (add_worktree.stderr or add_worktree.stdout).strip()], checked
+        expect("linked worktree uses main owner", validate(linked), 0,
+               f"Project root: {project_text} (git-common)")
+        if (linked / ".saipen").exists():
+            problems.append("linked worktree created a second .saipen/")
+
+    return problems, checked
+
 if not SCENARIOS.is_dir():
     print(f"FAIL: no {SCENARIOS} -- run this from the SAIPEN home")
     sys.exit(1)
@@ -232,7 +358,7 @@ for d in sorted(p for p in SCENARIOS.iterdir() if p.is_dir()):
                         f"'expect: pass|fail' line -- cannot be checked")
         continue
 
-    r = subprocess.run([sys.executable, str(VALIDATOR)], cwd=d,
+    r = subprocess.run([sys.executable, str(VALIDATOR), "--project-root", str(d)], cwd=d,
                        capture_output=True, text=True)
     actual = "pass" if r.returncode == 0 else "fail"
     checked += 1
@@ -276,11 +402,14 @@ for d in sorted(p for p in SCENARIOS.iterdir() if p.is_dir()):
 
 injector_failures, injector_checked, injector_skipped = run_injector_probes()
 failures.extend(injector_failures)
+root_failures, root_checked = run_project_root_probes()
+failures.extend(root_failures)
 
 print(f"\n{checked} executable fixture(s) checked, "
       f"{skipped} behavioral fixture(s) skipped (README-only by design)")
 print(f"{injector_checked} injector(s) executed, "
       f"{injector_skipped} skipped for missing interpreters")
+print(f"{root_checked} project-root behavior(s) executed")
 
 if failures:
     print(f"\nFAILED: {len(failures)} executable check(s) failed")

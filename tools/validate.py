@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """saipen conformance validator (canonical).
 
-Stdlib only -- no pip installs, ever. Run from a project root (the
-directory containing .saipen/):
+Stdlib only -- no pip installs, ever. Run from anywhere inside the project,
+or name the owning root explicitly:
 
-    python <saipen-home>/tools/validate.py [--strict]
+    python <saipen-home>/tools/validate.py [--strict] [--project-root PATH]
 
 Covers every check tests/validate.sh / validate.ps1 perform (those two
 are the frozen portable floor for hosts without Python -- new checks land
@@ -30,6 +30,7 @@ which RFC forbids) warns instead. --strict promotes warnings to failures.
 import datetime
 import io
 import json
+import os
 import re
 import subprocess
 import sys
@@ -41,7 +42,6 @@ else:
 
 from pathlib import Path
 
-STRICT = "--strict" in sys.argv[1:]
 USE_COLOR = sys.stdout.isatty()
 
 CURRENT_SCHEMA_VERSION = 1
@@ -58,6 +58,113 @@ OUTBOX_STATUSES = ("ready", "draft", "blocked", "reviewed", "stale")
 # consumer, and the fourth use-before-define NameError of this session was a
 # check spliced above that line. tools/audit_order.py caught this one.
 _tools_parent = Path(__file__).resolve().parent.parent
+
+
+def _parse_cli(argv):
+    strict = False
+    project_root = None
+    i = 0
+    while i < len(argv):
+        arg = argv[i]
+        if arg == "--strict":
+            strict = True
+        elif arg == "--project-root":
+            i += 1
+            if i >= len(argv):
+                print("FAIL: --project-root requires a path")
+                sys.exit(2)
+            project_root = argv[i]
+        elif arg.startswith("--project-root="):
+            project_root = arg.split("=", 1)[1]
+            if not project_root:
+                print("FAIL: --project-root requires a path")
+                sys.exit(2)
+        else:
+            print(f"FAIL: unknown argument: {arg}")
+            sys.exit(2)
+        i += 1
+    return strict, project_root
+
+
+def _git_from(cwd, *args):
+    try:
+        result = subprocess.run(
+            ["git", *args], cwd=cwd, capture_output=True, text=True,
+            check=False)
+    except (OSError, subprocess.SubprocessError):
+        return 1, ""
+    return result.returncode, result.stdout.strip()
+
+
+def _nearest_checkpoint_root(start):
+    for candidate in (start, *start.parents):
+        if (candidate / ".saipen").is_dir():
+            return candidate
+    return None
+
+
+def _resolve_project_root(start, explicit):
+    """Resolve the one root whose checkpoint files this run may inspect.
+
+    Explicit selection is intentional and therefore overrides cwd. Implicit
+    Git selection follows the common directory so a linked worktree reaches
+    the main worktree's gitignored `.saipen/` instead of inventing a second
+    one. Non-Git projects use the nearest ancestor carrying `.saipen/`;
+    validation separately diagnoses a missing or corrupt STATE.md there.
+    """
+    if explicit is not None:
+        root = Path(explicit).expanduser()
+        if not root.is_absolute():
+            root = start / root
+        root = root.resolve()
+        if not root.is_dir():
+            return None, "explicit --project-root is not a directory: " + str(root)
+        if not (root / ".saipen").is_dir():
+            return None, ("explicit --project-root has no .saipen/ directory: "
+                          + str(root))
+        return root, "explicit"
+
+    rc, top_text = _git_from(start, "rev-parse", "--show-toplevel")
+    if rc == 0 and top_text:
+        worktree_root = Path(top_text).resolve()
+        common_rc, common_text = _git_from(start, "rev-parse", "--git-common-dir")
+        candidates = []
+        if common_rc == 0 and common_text:
+            common_dir = Path(common_text)
+            if not common_dir.is_absolute():
+                common_dir = start / common_dir
+            common_dir = common_dir.resolve()
+            if common_dir.name.lower() == ".git":
+                candidates.append((common_dir.parent, "git-common"))
+        candidates.append((worktree_root, "git-worktree"))
+        seen = set()
+        for root, source in candidates:
+            key = os.path.normcase(str(root))
+            if key in seen:
+                continue
+            seen.add(key)
+            if (root / ".saipen").is_dir():
+                return root, source
+        return None, ("cwd belongs to Git worktree " + str(worktree_root)
+                      + " but its owning repository has no .saipen/; "
+                      "refusing to guess or create a second .saipen/. Run from "
+                      "the intended project or pass --project-root PATH")
+
+    root = _nearest_checkpoint_root(start)
+    if root is not None:
+        return root, "ancestor"
+    return None, ("cwd has no owning .saipen/; refusing to guess or "
+                  "create one. Run from the intended project or pass "
+                  "--project-root PATH")
+
+
+STRICT, _requested_root = _parse_cli(sys.argv[1:])
+PROJECT_ROOT, PROJECT_ROOT_SOURCE = _resolve_project_root(
+    Path.cwd().resolve(), _requested_root)
+if PROJECT_ROOT is None:
+    print(f"FAIL: {PROJECT_ROOT_SOURCE}")
+    sys.exit(1)
+os.chdir(PROJECT_ROOT)
 
 
 def _git(*args):
@@ -271,6 +378,7 @@ def check_against_schema(fields, schema, label):
 # --------------------------------------------------------------------- STATE
 
 print(color("36", "saipen conformance validation starting (tools/validate.py)..."))
+print(f"Project root: {PROJECT_ROOT} ({PROJECT_ROOT_SOURCE})")
 
 state_path = Path(".saipen/STATE.md")
 if not state_path.is_file():

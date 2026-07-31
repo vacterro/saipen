@@ -1,15 +1,16 @@
 # Phase: INIT
 
 No `.saipen/` directory found. **Confirm that's actually true before creating
-anything** (RFC § 1.1): if git is available, run `git rev-parse
---git-common-dir` first -- output ending in `/.git` rather than a bare `.git`
-means this is a *linked worktree*, and `.saipen/` (gitignored by design) was
-never copied into it even though the main worktree has one. Strip that
-trailing `/.git` to get the real root and look there. Bootstrapping anyway
+anything** (RFC § 1.1): bind the project root exactly as BOOT describes. A
+linked worktree resolves through its common Git directory to the main
+worktree's existing memory; a nested non-Git cwd resolves to the nearest
+ancestor already carrying `.saipen/`. No owner found means refuse a relative
+write until the intended root is explicit. Bootstrapping in an unbound cwd
 creates a second, disconnected `.saipen/` and orphans the project's real
 continuation memory -- the one mistake this phase can make that no later
-phase can detect on its own. Only genuinely absent at the main root does the
-rest of this doc apply.
+phase can detect on its own. Only genuinely absent at the explicitly chosen
+or resolved root does the rest of this doc apply, and every path below is
+absolute under that root.
 
 Copy `extensions/templates/` (`STATE.md`,
 `BOARD.md`, `LOG.md`) from the SAIPEN home -- do NOT freehand the schema.

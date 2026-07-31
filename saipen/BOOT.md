@@ -8,12 +8,20 @@ does not answer.
 
 ## Fast path
 
-1. **Read `.saipen/STATE.md`.**
-   Missing, and git is available? Run `git rev-parse --git-common-dir` before
-   concluding "not initialized". Output ending in `/.git` means you are in a
-   linked worktree, which never receives the gitignored `.saipen/` -- strip
-   that suffix for the real project root and look there. Genuinely absent at
-   *that* root -> `saipen set` (RFC § 1.1).
+1. **Bind `project_root`, then read its `.saipen/STATE.md`.** An explicit
+   project-root target wins. Otherwise use `git rev-parse --show-toplevel`
+   plus `git rev-parse --git-common-dir`; a common directory ending in
+   `/.git` binds a linked worktree to that main worktree's root and shared
+   gitignored `.saipen/`. Outside Git, use the nearest ancestor already
+   carrying `.saipen/`. This binds location only: missing `STATE.md` there is
+   corruption for step 2 to diagnose, not evidence that the cwd is unowned.
+   Nothing owns the cwd? Refuse to guess or
+   create a relative `.saipen/`; only `saipen set` after INIT confirms genuine
+   absence. Keep the resolved absolute root for the session: every later
+   checkpoint path is `<project_root>/.saipen/...`, even after `cd`. An
+   explicit new root may deliberately retarget the session; an accidental cwd
+   change may not. `saipen_home` points to the protocol install, not this root
+   (RFC § 1.1).
 
 2. **Validate STATE before executing anything in it.**
    Every field RFC § 1.2's required set names must be present and non-empty

@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.132.0 -- 2026-07-31 -- bind memory before touching it
+
+Checkpoint paths were relative to ambient cwd. After an agent changed directories, `.saipen/STATE.md` could name a different project without any error; persisting an absolute root in STATE would only replace that with false corruption whenever a clone moved.
+
+BOOT now binds one project root for the session. Git projects resolve their worktree and common directory, linked worktrees deliberately use the main worktree's gitignored memory, non-Git projects choose the nearest ancestor already carrying `.saipen/`, and `--project-root` is the intentional override from another cwd. Every later checkpoint path stays under that bound root. An unowned cwd fails instead of guessing or creating a second memory tree.
+
+Six executable scenarios cover the correct Git root, nested Git cwd, foreign-repository rejection, explicit override, nested non-Git cwd, and linked-worktree ownership. Both injectors also run their installed validator against an explicit project root. The mutation audit caught one regression during development: root discovery initially swallowed the precise `STATE.md missing` diagnosis; location discovery now recognizes `.saipen/` and leaves file integrity to validation.
+
 ## 7.131.0 -- 2026-07-31 -- run the guard, not its spelling
 
 The injector distribution guard read both scripts as text. Its last version pinned one exact `mkdir -p "$1" "$1/extensions" "$1/tests"` line; a harmless reflow killed the guard, while its token-only predecessor had passed an injector that created `tests/`, deleted it, and then could not copy the validators. The check observed spelling and called it behavior.
