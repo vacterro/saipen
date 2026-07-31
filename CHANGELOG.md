@@ -2,6 +2,12 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.127.0 -- 2026-07-31 -- bash existed; its tools did not
+
+The Windows floor harnesses correctly stopped choosing `sh` and the WSL `bash.exe` stub, then launched Git Bash by absolute path. That still was not enough: a directly launched Git Bash inherited the Windows process `PATH`, which did not contain Git's `usr/bin`. Bash ran, but `grep`, `sed`, and `sort` did not. Eighteen of twenty shell controls therefore failed at the first phase check and blamed `STATE.md`; the subject was healthy and the instrument had lost its tools.
+
+`audit_floor.py` and `audit_parity.py` now add the detected Git `usr/bin` only to their child environment, leaving the user's global `PATH` untouched. Both reject the System32 WSL stub case-insensitively. The floor passes all 20 checks in both shell and PowerShell halves on Windows, and full parity passes 42 mutations at its frozen baseline of 11 shared detections.
+
 ## 7.126.0 -- 2026-07-31 -- the installed protocol forgot its own version
 
 The installed Codex/Claude/OpenCode skill carried `RFC.md` but not `VERSION`, even though RFC section 1.2 names that file as the only source of truth for the version guard. A clean install therefore had enough protocol to refuse work and not enough protocol to prove which version it was running. Both injectors now ship `VERSION`, and the runtime manifest makes forgetting it again a validation failure.

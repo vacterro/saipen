@@ -58,9 +58,24 @@ def find_bash() -> str | None:
     for candidate in (r"C:\Program Files\Git\bin\bash.exe",
                       r"C:\Program Files (x86)\Git\bin\bash.exe",
                       shutil.which("bash")):
-        if candidate and os.path.exists(candidate):
+        if (candidate and os.path.exists(candidate)
+                and "system32" not in candidate.lower()):
             return candidate
     return None
+
+
+def bash_env(bash: str) -> dict[str, str]:
+    """Expose Git Bash's POSIX tools without changing the user's PATH."""
+    env = os.environ.copy()
+    if os.name != "nt":
+        return env
+    bindir = Path(bash).resolve().parent
+    for tools_dir in (bindir, bindir.parent / "usr" / "bin"):
+        if all((tools_dir / f"{name}.exe").is_file()
+               for name in ("grep", "sed", "sort")):
+            env["PATH"] = str(tools_dir) + os.pathsep + env.get("PATH", "")
+            break
+    return env
 
 
 def main() -> int:
@@ -68,6 +83,7 @@ def main() -> int:
     if bash is None:
         print("SKIP: no POSIX shell found -- cannot compare against the floor")
         return 0
+    floor_env = bash_env(bash)
 
     spec = importlib.util.spec_from_file_location(
         "audit_checks", HOME / "tools" / "audit_checks.py")
@@ -87,7 +103,7 @@ def main() -> int:
     def run_floor(root):
         return subprocess.run(
             [bash, "tests/validate.sh"], cwd=root,
-            capture_output=True, text=True, errors="replace")
+            env=floor_env, capture_output=True, text=True, errors="replace")
 
     def validate(root):
         return run_validate(root).returncode

@@ -125,3 +125,24 @@
 - 31.07.26 14:58 [E-1150] [parent: E-1149] [T-357] H: audit_floor selects Git Bash but omits usr/bin from PATH; grep exists yet 18 shell controls misreport phase failure.
 - 31.07.26 15:04 [E-1151] [parent: E-1150] [T-357] DEC: ticket collision repaired T-356->T-357; concurrent T-356 keeps the earlier board assignment.
 - 31.07.26 15:05 [E-1152] [parent: E-1151] [T-356] RUN: functional shell install PASS; ordering guard red-test PASS; audit_checks 42/42.
+- 31.07.26 15:06 [E-1153] [parent: E-1152] [T-354] RUN: ship v7.126.0 -> pushed e683e90
+- 31.07.26 15:06 [E-1154] [parent: E-1153] [T-359] DEC: --follow-tags also published local remote-v7101; remote deletion needs explicit user approval.
+- 31.07.26 15:07 [E-1155] [parent: E-1154] [T-355] DEC: claimed user-reported skill frontmatter warning; both files carry BOM before the delimiter.
+- 31.07.26 15:08 [E-1156] [parent: E-1155] [T-355] RUN: SCOUT -- only leading UTF-8 BOM is wrong; YAML fields and closing delimiter are valid.
+- 31.07.26 15:09 [E-1157] [parent: E-1156] [T-355] RUN: build -> removed only the leading U+FEFF from both SKILL.md files.
+- 31.07.26 15:10 [E-1158] [parent: E-1157] [T-355] H: PyYAML FAIL audit-domains description at colon; templates parses, so quote the one scalar.
+- 31.07.26 15:11 [E-1159] [parent: E-1158] [T-355] RUN: build -> quoted audit-domains description scalar; no body changes.
+- 31.07.26 15:12 [E-1160] [parent: E-1159] [T-355] RUN: VERIFY -> 2/2 ASCII delimiters, no BOM, PyYAML parses; Codex starts clean; conf: high.
+- 31.07.26 15:12 [E-1161] [parent: E-1160] [T-355] DEC: goal_tickets 10->11
+- 31.07.26 15:13 [E-1162] [parent: E-1161] [T-355] DEC: SHIP -- frontmatter-only local skill repair; no owning git remote for user-level files.
+- 31.07.26 15:14 [E-1163] [parent: E-1162] [T-355] RUN: ship local skill repair -> installed in user profile; publish not applicable.
+- 31.07.26 15:15 [E-1164] [parent: E-1163] [T-357] DEC: claimed Git Bash PATH harness defect after T-355 completed.
+- 31.07.26 15:16 [E-1165] [parent: E-1164] [T-357] RUN: SCOUT -- audit_parity has the same Git Bash PATH defect; fix both harnesses.
+- 31.07.26 15:17 [E-1166] [parent: E-1165] [T-357] RUN: build -> reject System32 stub and inject Git usr/bin into both harness child environments.
+- 31.07.26 15:20 [E-1167] [parent: E-1166] [T-357] RUN: VERIFY -> audit_floor 20x2 PASS; audit_parity 42 cases/base 11 PASS; conf: high.
+- 31.07.26 15:20 [E-1168] [parent: E-1167] [T-357] DEC: goal_tickets 11->12
+- 31.07.26 15:21 [E-1169] [parent: E-1168] [T-357] H: REVIEW found audit_floor System32 filter case-sensitive; lowercase path can still admit WSL stub.
+- 31.07.26 15:22 [E-1170] [parent: E-1169] [T-357] RUN: build -> made audit_floor System32 rejection case-insensitive.
+- 31.07.26 15:23 [E-1171] [parent: E-1170] [T-357] RUN: VERIFY -> lowercase System32 red-control and floor 20x2 PASS; conf: high.
+- 31.07.26 15:23 [E-1172] [parent: E-1171] [T-357] DEC: goal_tickets 12->13
+- 31.07.26 15:24 [E-1173] [parent: E-1172] [T-357] DEC: SHIP -- both harnesses reject WSL stubs and expose Git POSIX tools only to child processes.

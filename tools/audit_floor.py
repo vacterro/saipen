@@ -64,9 +64,23 @@ def find_bash():
         if os.path.isfile(candidate):
             return candidate
     found = shutil.which("bash")
-    if found and "System32" not in found:
+    if found and "system32" not in found.lower():
         return found
-    return found
+    return None
+
+
+def bash_env(bash: str) -> dict[str, str]:
+    """Expose Git Bash's POSIX tools without changing the user's PATH."""
+    env = os.environ.copy()
+    if os.name != "nt":
+        return env
+    bindir = Path(bash).resolve().parent
+    for tools_dir in (bindir, bindir.parent / "usr" / "bin"):
+        if all((tools_dir / f"{name}.exe").is_file()
+               for name in ("grep", "sed", "sort")):
+            env["PATH"] = str(tools_dir) + os.pathsep + env.get("PATH", "")
+            break
+    return env
 
 
 def find_pwsh():
@@ -152,7 +166,8 @@ def audit(runner, script, half):
                     with io.open(work / ".saipen" / name, "w",
                                  encoding="utf-8", newline="\n") as fh:
                         fh.write(content)
-            r = subprocess.run([*runner, script], cwd=str(work),
+            env = bash_env(runner[0]) if half == "sh" else None
+            r = subprocess.run([*runner, script], cwd=str(work), env=env,
                                capture_output=True, text=True)
             blob = (r.stdout or "") + (r.stderr or "")
             if expect not in blob:

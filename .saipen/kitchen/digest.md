@@ -1,3 +1,3 @@
-done: v7.125.0 shipped — `agent:` names the seat and is inherited, so § 1.4's concurrency comparison finally has two defined sides
-remaining: nothing
-awaiting: nothing
+done: v7.126.0 shipped; T-355 local skill frontmatter repaired and verified
+remaining: T-357 fix Git Bash PATH; T-358 repair SHIP preflight route
+awaiting: approval or refusal to delete accidentally published remote tag remote-v7101 (T-359)

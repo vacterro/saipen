@@ -2,11 +2,11 @@
 ## DOING
 
 ## TODO
-- [ ] T-355 Remove UTF-8 BOM before YAML frontmatter in audit-domains and templates so Codex loads both skills. | verify: both SKILL.md files begin with ASCII --- and parse as YAML frontmatter
-- [ ] T-357 [P0] audit_floor launches Git Bash without its usr/bin on PATH, so 18 shell controls fail at missing grep and report the wrong phase defect. | verify: python tools/audit_floor.py PASS 20 checks x 2 halves on Windows
 - [ ] T-358 [P0] SHIP requires 100% green but its only exits are DONE/BLOCKED; a fixable pre-publish failure has no legal route back to BUILD, and BLOCKED would falsely end goal mode. | verify: RFC transition table, ship.md, validator transition checks, and scenario fixture agree on SHIP -> BUILD for failed preflight
 
 ## DONE
+- [x] T-357 [P0] Both floor harnesses now reject System32 WSL stubs and add Git usr/bin only to child PATH. | verify: audit_floor 20x2 PASS; audit_parity 42 cases/base 11 PASS; lowercase stub red-control PASS
+- [x] T-355 Removed BOM from audit-domains/templates and quoted audit-domains' colon-bearing YAML description. | verify: 2/2 ASCII delimiters, no BOM, PyYAML PASS, Codex startup clean
 - [x] T-356 [P0] Fixed shell injector delete-after-create order, added PowerShell unsafe-destination parity, and made the validator enforce recreation order. | verify: functional shell install PASS; ordering red-test PASS; audit_checks 42/42
 - [x] T-354 Inject updated SAIPEN into the Codex skill copy so Codex boots from the current protocol, including VERSION. | verify: Codex skill copy reports current VERSION and tools/validate.py PASS from the installed copy
 - [x] T-353 [P0] Scenario READMEs re-listed the old four-phase Core read-only ban while RFC 1.3 and validators use seven; added a scenario prose drift check and fixed both stale READMEs. | verify: tools/validate.py PASS; tools/audit_checks.py PASS 41/41; tools/audit_order.py PASS; tools/run_scenarios.py PASS; red-test old four-phase text FAILed
@@ -34,3 +34,4 @@
 
 
 ## BLOCKED
+- [ ] T-359 Decide whether to delete accidentally published remote tag remote-v7101; it points at the old v7.101.0 tag object. | blocker: remote tag deletion is destructive and needs explicit user approval | verify: git ls-remote --tags origin remote-v7101 returns no ref
