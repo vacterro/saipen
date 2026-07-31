@@ -135,10 +135,16 @@ def installed_layout_problems(destination: Path) -> list[str]:
     return problems
 
 
-def run_injector_probe(label: str, command: list[str], env: dict[str, str],
+ROUND_TRIP_BYTES = b"user-setting: keep  \r\n \t\r\n\r\n"
+
+
+def run_injector_probe(label: str, command: list[str],
+                       uninstall_command: list[str], env: dict[str, str],
                        home: Path) -> str | None:
     destination = home / ".claude" / "skills" / "saipen"
     (home / ".claude").mkdir(parents=True)
+    config = home / ".claude" / "CLAUDE.md"
+    config.write_bytes(ROUND_TRIP_BYTES)
     seed_stale_install(destination)
     result = subprocess.run(command, cwd=HOME, env=env, capture_output=True,
                             text=True, errors="replace")
@@ -164,12 +170,40 @@ def run_injector_probe(label: str, command: list[str], env: dict[str, str],
             problems.append(
                 f"installed validator explicit-root smoke exited "
                 f"{validation.returncode}: {first[:120]}")
+    if b"<!-- SAIPEN:BEGIN -->" not in config.read_bytes():
+        problems.append("injector did not add its managed config block")
+    if not problems:
+        uninstall = subprocess.run(
+            uninstall_command, cwd=HOME, env=env, capture_output=True,
+            text=True, errors="replace")
+        uninstall_output = uninstall.stdout + uninstall.stderr
+        if uninstall.returncode:
+            problems.append(f"uninstaller exited {uninstall.returncode}")
+        elif "Done." not in uninstall_output:
+            problems.append("uninstaller succeeded without completion text")
+        if config.read_bytes() != ROUND_TRIP_BYTES:
+            problems.append("install/uninstall changed surrounding user bytes")
+        if destination.exists():
+            problems.append("uninstaller left the installed skill directory")
     if problems:
         detail = next((line for line in (result.stdout + result.stderr).splitlines()
                        if "FAILED" in line or "FATAL" in line), "no failure line")
         return f"{label}: {'; '.join(problems)} | {detail[:120]}"
     print(f"PASS: {label} -- executable install replaced stale dirs, landed "
-          "VERSION + both portable validators, and ran installed validate.py")
+          "VERSION + validators, ran validate.py, and uninstalled byte-exact")
+    return None
+
+
+def failed_bootstrap_problem(label: str,
+                             result: subprocess.CompletedProcess[str]) -> str | None:
+    output = result.stdout + result.stderr
+    if result.returncode == 0:
+        return f"{label}: failure control exited 0"
+    if "Done." in output:
+        return f"{label}: failure control printed Done"
+    if not any(word in output for word in ("FAILED", "not a file", "Is a directory")):
+        return f"{label}: failure control had no focused diagnostic"
+    print(f"PASS: {label} -- exits nonzero without completion text")
     return None
 
 
@@ -184,10 +218,46 @@ def run_injector_probes() -> tuple[list[str], int, int]:
             home = Path(raw)
             problem = run_injector_probe(
                 "bootstrap/inject.sh", [bash, str(HOME / "bootstrap" / "inject.sh")],
+                [bash, str(HOME / "bootstrap" / "uninstall.sh")],
                 bash_env(bash, home), home)
             if problem:
                 probe_failures.append(problem)
             checked += 1
+
+        with tempfile.TemporaryDirectory(prefix="saipen-inject-sh-fail-") as raw:
+            home = Path(raw)
+            config = home / ".claude" / "CLAUDE.md"
+            config.mkdir(parents=True)
+            result = subprocess.run(
+                [bash, str(HOME / "bootstrap" / "inject.sh")], cwd=HOME,
+                env=bash_env(bash, home), capture_output=True, text=True,
+                errors="replace")
+            problem = failed_bootstrap_problem("bootstrap/inject.sh write failure", result)
+            if problem:
+                probe_failures.append(problem)
+
+        with tempfile.TemporaryDirectory(prefix="saipen-uninstall-sh-fail-") as raw:
+            home = Path(raw)
+            config = home / ".claude" / "CLAUDE.md"
+            config.parent.mkdir(parents=True)
+            config.write_text(
+                "user\n\n<!-- SAIPEN:BEGIN -->\nstale\n<!-- SAIPEN:END -->\n",
+                encoding="utf-8", newline="\n")
+            shim_dir = home / "bin"
+            shim_dir.mkdir()
+            head = shim_dir / "head"
+            head.write_text("#!/usr/bin/env bash\nexit 9\n", encoding="utf-8",
+                            newline="\n")
+            head.chmod(0o755)
+            env = bash_env(bash, home)
+            env["PATH"] = str(shim_dir) + os.pathsep + env.get("PATH", "")
+            result = subprocess.run(
+                [bash, str(HOME / "bootstrap" / "uninstall.sh")], cwd=HOME,
+                env=env, capture_output=True, text=True, errors="replace")
+            problem = failed_bootstrap_problem(
+                "bootstrap/uninstall.sh transform failure", result)
+            if problem:
+                probe_failures.append(problem)
     else:
         print("SKIP: bootstrap/inject.sh executable probe -- no usable bash")
         skipped += 1
@@ -202,10 +272,45 @@ def run_injector_probes() -> tuple[list[str], int, int]:
                 "bootstrap/inject.ps1",
                 [powershell, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
                  str(HOME / "bootstrap" / "inject.ps1"), "-SkillHome",
-                 str(HOME / "saipen")], env, home)
+                 str(HOME / "saipen")],
+                [powershell, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
+                 str(HOME / "bootstrap" / "uninstall.ps1")], env, home)
             if problem:
                 probe_failures.append(problem)
             checked += 1
+
+        with tempfile.TemporaryDirectory(prefix="saipen-inject-ps1-fail-") as raw:
+            home = Path(raw)
+            claude = home / ".claude"
+            claude.mkdir(parents=True)
+            (claude / "skills").write_text("not a directory\n", encoding="utf-8")
+            env = os.environ.copy()
+            env["HOME"] = str(home)
+            env["USERPROFILE"] = str(home)
+            result = subprocess.run(
+                [powershell, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
+                 str(HOME / "bootstrap" / "inject.ps1"), "-SkillHome",
+                 str(HOME / "saipen")], cwd=HOME, env=env,
+                capture_output=True, text=True, errors="replace")
+            problem = failed_bootstrap_problem("bootstrap/inject.ps1 copy failure", result)
+            if problem:
+                probe_failures.append(problem)
+
+        with tempfile.TemporaryDirectory(prefix="saipen-uninstall-ps1-fail-") as raw:
+            home = Path(raw)
+            config = home / ".claude" / "CLAUDE.md"
+            config.mkdir(parents=True)
+            env = os.environ.copy()
+            env["HOME"] = str(home)
+            env["USERPROFILE"] = str(home)
+            result = subprocess.run(
+                [powershell, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
+                 str(HOME / "bootstrap" / "uninstall.ps1")], cwd=HOME, env=env,
+                capture_output=True, text=True, errors="replace")
+            problem = failed_bootstrap_problem(
+                "bootstrap/uninstall.ps1 read failure", result)
+            if problem:
+                probe_failures.append(problem)
     else:
         print("SKIP: bootstrap/inject.ps1 executable probe -- no PowerShell")
         skipped += 1

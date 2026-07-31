@@ -1,12 +1,12 @@
 ---
 phase: SHIP
-task: T-367
-next_action: "PHASE SHIP T-367"
+task: T-368
+next_action: "PHASE SHIP T-368"
 blocker: none
 transition_from: REVIEW
 saipen_version: 7
 schema_version: 2
-last_event: 1297
+last_event: 1315
 saipen_home: "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN"
 agent: codex-root
 requires:
@@ -16,6 +16,6 @@ requires:
 mode: full
 goal_mode: true
 goal_waves: 1
-goal_tickets: 10
-updated: 2026-07-31T18:41:52Z
+goal_tickets: 13
+updated: 2026-07-31T19:01:33Z
 ---

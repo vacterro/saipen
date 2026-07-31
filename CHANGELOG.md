@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.137.0 -- 2026-07-31 -- bootstrap success means the writes landed
+
+The shell injector and both uninstallers could print success after failed backups, transforms, removals, or writes. Shell command substitutions discarded function status; PowerShell collected `"FAILED"` as ordinary report text and still reached `Done.`. PowerShell's block regex also consumed user-owned surrounding whitespace, so install followed by uninstall changed a config it promised to leave alone.
+
+All four bootstrap scripts now fail closed. Shell reports retain each operation's status, PowerShell uses terminating IO errors and converts caught copy/removal failures into a nonzero final result, and completion text is unreachable after any reported failure. Config block removal deletes only the managed content and separator it added.
+
+The executable injector harness now completes both full lifecycles: replace a stale skill, validate the installed layout, uninstall it, and compare the seeded CRLF config bytes exactly, including space-only and tab-only lines. Four failure controls exercise a shell write error, a broken shell transform, a caught PowerShell copy failure, and a terminating PowerShell read failure; every control must exit nonzero without `Done.`.
+
 ## 7.136.0 -- 2026-07-31 -- a lost tag audit is not a passing tag audit
 
 `tools/audit_tags.py` enumerated release tags, launched one efficient `git cat-file --batch`, and never checked whether that process succeeded. A started process that exited nonzero or returned truncated output became a list of historical missing VERSION warnings; with no comparable records left, the audit still printed PASS.

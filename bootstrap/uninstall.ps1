@@ -1,14 +1,16 @@
-$ErrorActionPreference = "Continue"
+$ErrorActionPreference = "Stop"
 $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 
 function Remove-Block([string]$file) {
   if (Test-Path $file) {
-    $text = Get-Content $file -Raw -Encoding utf8
-    if ($text -match '<!-- SAIPEN:BEGIN -->') {
-      $clean = [regex]::Replace($text, '(?s)\s*<!-- SAIPEN:BEGIN -->.*?<!-- SAIPEN:END -->\s*', "`n")
+    if (-not (Test-Path $file -PathType Leaf)) { throw "config path is not a file: $file" }
+    $text = [System.IO.File]::ReadAllText($file)
+    $match = [regex]::Match($text, '(?s)(?:\r\n|\n)?<!-- SAIPEN:BEGIN -->.*?<!-- SAIPEN:END -->(?:\r\n|\n)?')
+    if ($match.Success) {
+      $clean = $text.Substring(0, $match.Index) + $text.Substring($match.Index + $match.Length)
       # Backup the file before uninstalling just in case
-      Copy-Item $file "$file.uninstalled.bak" -Force
-      [System.IO.File]::WriteAllText($file, $clean.TrimEnd() + "`n", $Utf8NoBom)
+      Copy-Item $file "$file.uninstalled.bak" -Force -ErrorAction Stop
+      [System.IO.File]::WriteAllText($file, $clean, $Utf8NoBom)
       return "block removed"
     }
   }
@@ -32,11 +34,12 @@ function Remove-Aider([string]$file) {
   # consecutive saipen RFC/STYLE items), CRLF-tolerant -- never any other
   # read: line the user owns.
   if (Test-Path $file) {
-    $text = Get-Content $file -Raw -Encoding utf8
-    $blockRe = '(?m)^# saipen protocol auto-loaded\r?\nread:\r?\n(?:[ \t]*-[ \t].*saipen[\\/](?:RFC|STYLE)\.md\r?\n?)+'
+    if (-not (Test-Path $file -PathType Leaf)) { throw "config path is not a file: $file" }
+    $text = [System.IO.File]::ReadAllText($file)
+    $blockRe = '(?m)(?:\r?\n)?# saipen protocol auto-loaded\r?\nread:\r?\n(?:[ \t]*-[ \t].*saipen[\\/](?:RFC|STYLE)\.md\r?\n?)+'
     if ($text -match $blockRe) {
       $clean = [regex]::Replace($text, $blockRe, "")
-      Copy-Item $file "$file.uninstalled.bak" -Force
+      Copy-Item $file "$file.uninstalled.bak" -Force -ErrorAction Stop
       [System.IO.File]::WriteAllText($file, $clean, $Utf8NoBom)
       return "aider conf cleaned"
     } elseif ($text -match 'saipen[\\/]RFC\.md') {
@@ -47,23 +50,33 @@ function Remove-Aider([string]$file) {
 }
 
 $h = $env:USERPROFILE
+$script:BootstrapFailed = $false
+function Report([string]$label, [string]$result) {
+  "{0,-28} {1}" -f $label, $result
+  if ($result -match "FAILED") { $script:BootstrapFailed = $true }
+}
+
 Write-Host "saipen uninstaller"
 Write-Host "------------------------------------------------------------"
-"{0,-28} {1}" -f "Claude Code skill", (Remove-Skill "$h\.claude\skills\saipen")
-"{0,-28} {1}" -f "Claude Code CLAUDE.md", (Remove-Block "$h\.claude\CLAUDE.md")
-"{0,-28} {1}" -f "OpenCode skill", (Remove-Skill "$h\.config\opencode\skills\saipen")
-"{0,-28} {1}" -f "OpenCode AGENTS.md", (Remove-Block "$h\.config\opencode\AGENTS.md")
-"{0,-28} {1}" -f "Codex skill", (Remove-Skill "$h\.codex\skills\saipen")
-"{0,-28} {1}" -f "Codex AGENTS.md", (Remove-Block "$h\.codex\AGENTS.md")
-"{0,-28} {1}" -f "Gemini GEMINI.md", (Remove-Block "$h\.gemini\GEMINI.md")
-"{0,-28} {1}" -f "~/.agents skills", (Remove-Skill "$h\.agents\skills\saipen")
+Report "Claude Code skill" (Remove-Skill "$h\.claude\skills\saipen")
+Report "Claude Code CLAUDE.md" (Remove-Block "$h\.claude\CLAUDE.md")
+Report "OpenCode skill" (Remove-Skill "$h\.config\opencode\skills\saipen")
+Report "OpenCode AGENTS.md" (Remove-Block "$h\.config\opencode\AGENTS.md")
+Report "Codex skill" (Remove-Skill "$h\.codex\skills\saipen")
+Report "Codex AGENTS.md" (Remove-Block "$h\.codex\AGENTS.md")
+Report "Gemini GEMINI.md" (Remove-Block "$h\.gemini\GEMINI.md")
+Report "~/.agents skills" (Remove-Skill "$h\.agents\skills\saipen")
 $plugRoot = "$h\.gemini\config\plugins"
 if (Test-Path $plugRoot) {
   Get-ChildItem $plugRoot -Directory | ForEach-Object {
     $skillsPath = Join-Path $_.FullName "skills\saipen"
-    "{0,-28} {1}" -f "Antigravity [$($_.Name)]", (Remove-Skill $skillsPath)
+    Report "Antigravity [$($_.Name)]" (Remove-Skill $skillsPath)
   }
 }
-"{0,-28} {1}" -f "Aider conf", (Remove-Aider "$h\.aider.conf.yml")
+Report "Aider conf" (Remove-Aider "$h\.aider.conf.yml")
 Write-Host "------------------------------------------------------------"
+if ($script:BootstrapFailed) {
+  Write-Host "FAILED. Fix reported errors and re-run." -ForegroundColor Red
+  exit 1
+}
 Write-Host "Done. SAIPEN global hooks removed."

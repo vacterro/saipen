@@ -4,6 +4,7 @@
 # Idempotent: re-run safe.
 
 set -u
+FAILURES=0
 SKILL_HOME="$(cd "$(dirname "$0")/../saipen" 2>/dev/null && pwd)"
 [ -f "$SKILL_HOME/RFC.md" ] || { echo "FATAL: saipen/RFC.md not found"; exit 1; }
 
@@ -24,7 +25,9 @@ case "$(uname -s 2>/dev/null)" in
 esac
 
 backup_file() {
-  [ -f "$1" ] && [ ! -f "$1.bak" ] && cp "$1" "$1.bak"
+  if [ -f "$1" ] && [ ! -f "$1.bak" ]; then
+    cp "$1" "$1.bak" || { echo "backup FAILED ($1)"; return 1; }
+  fi
 }
 
 BLOCK="
@@ -47,10 +50,12 @@ add_block() { # $1=file
   # would rewrite an already-current block for no reason.
   if [ -f "$1" ] && grep -q "SAIPEN:BEGIN" "$1"; then
     local existing canonical
-    existing=$(sed -n '/<!-- SAIPEN:BEGIN -->/,/<!-- SAIPEN:END -->/p' "$1")
-    canonical=$(printf '%s\n' "$BLOCK" | sed -n '/<!-- SAIPEN:BEGIN -->/,/<!-- SAIPEN:END -->/p')
+    existing=$(sed -n '/<!-- SAIPEN:BEGIN -->/,/<!-- SAIPEN:END -->/p' "$1") \
+      || { echo "block read FAILED ($1)"; return 1; }
+    canonical=$(printf '%s\n' "$BLOCK" | sed -n '/<!-- SAIPEN:BEGIN -->/,/<!-- SAIPEN:END -->/p') \
+      || { echo "block render FAILED ($1)"; return 1; }
     if [ "$existing" = "$canonical" ]; then echo "already"; return; fi
-    backup_file "$1"
+    backup_file "$1" || return 1
     # sed's in-place suffix MUST NOT be plain .bak: backup_file() above owns
     # "$1.bak" and put the user's ORIGINAL, pre-SAIPEN file there on the FIRST
     # install. Using -i.bak here would overwrite that original with the
@@ -58,12 +63,25 @@ add_block() { # $1=file
     # silently destroying the only copy of what the user had before us.
     # (Reproduced live 2026-07-26. uninstall.sh:6-10 carries the same warning
     # and inject.ps1's Write-NoBom is guarded; this was the last of the four.)
-    sed -i.saipen-strip-tmp '/<!-- SAIPEN:BEGIN -->/,/<!-- SAIPEN:END -->/d' "$1" 2>/dev/null || sed -i '' '/<!-- SAIPEN:BEGIN -->/,/<!-- SAIPEN:END -->/d' "$1"
-    rm -f "$1.saipen-strip-tmp"
-    printf '%s\n' "$BLOCK" >> "$1"; echo "block refreshed"; return
+    if sed -i.saipen-strip-tmp '/<!-- SAIPEN:BEGIN -->/,/<!-- SAIPEN:END -->/d' "$1" 2>/dev/null \
+       || sed -i '' '/<!-- SAIPEN:BEGIN -->/,/<!-- SAIPEN:END -->/d' "$1"; then
+      rm -f "$1.saipen-strip-tmp" \
+        || { echo "block cleanup FAILED ($1)"; return 1; }
+    else
+      rm -f "$1.saipen-strip-tmp" 2>/dev/null || true
+      echo "block refresh FAILED ($1)"
+      return 1
+    fi
+    printf '%s\n' "$BLOCK" >> "$1" \
+      || { echo "block write FAILED ($1)"; return 1; }
+    echo "block refreshed"
+    return 0
   fi
-  backup_file "$1"
-  mkdir -p "$(dirname "$1")"; printf '%s\n' "$BLOCK" >> "$1"
+  backup_file "$1" || return 1
+  mkdir -p "$(dirname "$1")" \
+    || { echo "directory create FAILED ($1)"; return 1; }
+  printf '%s\n' "$BLOCK" >> "$1" \
+    || { echo "block write FAILED ($1)"; return 1; }
   echo "block added"
 }
 
@@ -96,25 +114,54 @@ copy_skill() { # $1=dst
     echo "copied (re-run after updates)"
   else
     echo "copy FAILED ($1) -- fix and re-run"
+    return 1
+  fi
+}
+
+report() { # $1=label, remaining=function + args
+  local label="$1" output status
+  shift
+  output=$("$@" 2>&1)
+  status=$?
+  printf '%-28s %s\n' "$label" "$output"
+  [ "$status" -eq 0 ] || FAILURES=1
+}
+
+configure_aider() { # $1=config
+  local A="$1" P="$SKILL_HOME/RFC.md" S="$SKILL_HOME/STYLE.md"
+  if [ ! -f "$A" ]; then
+    mkdir -p "$(dirname "$A")" \
+      && printf '# saipen protocol auto-loaded\nread:\n  - %s\n  - %s\n' "$P" "$S" > "$A" \
+      || { echo "create FAILED ($A)"; return 1; }
+    echo "created"
+  elif grep -qF "$P" "$A" && grep -qF "$S" "$A"; then
+    echo "already"
+  elif ! grep -q "^read:" "$A"; then
+    backup_file "$A" || return 1
+    printf '\n# saipen protocol auto-loaded\nread:\n  - %s\n  - %s\n' "$P" "$S" >> "$A" \
+      || { echo "write FAILED ($A)"; return 1; }
+    echo "read: appended"
+  else
+    echo "has own read: - add manually: $P + $S"
   fi
 }
 
 echo "saipen injector (source: $SKILL_HOME)"
 echo "------------------------------------------------------------"
-[ -d "$HOME/.claude" ]          && { printf '%-28s %s\n' "Claude Code skill"     "$(copy_skill "$HOME/.claude/skills/saipen")";
-                                     printf '%-28s %s\n' "Claude Code CLAUDE.md" "$(add_block "$HOME/.claude/CLAUDE.md")"; } \
+[ -d "$HOME/.claude" ]          && { report "Claude Code skill" copy_skill "$HOME/.claude/skills/saipen";
+                                     report "Claude Code CLAUDE.md" add_block "$HOME/.claude/CLAUDE.md"; } \
                                 || printf '%-28s %s\n' "Claude Code" "not installed - skip"
-[ -d "$HOME/.config/opencode" ] && { printf '%-28s %s\n' "OpenCode skill"        "$(copy_skill "$HOME/.config/opencode/skills/saipen")";
-                                     printf '%-28s %s\n' "OpenCode AGENTS.md"    "$(add_block "$HOME/.config/opencode/AGENTS.md")"; } \
+[ -d "$HOME/.config/opencode" ] && { report "OpenCode skill" copy_skill "$HOME/.config/opencode/skills/saipen";
+                                     report "OpenCode AGENTS.md" add_block "$HOME/.config/opencode/AGENTS.md"; } \
                                 || printf '%-28s %s\n' "OpenCode" "not installed - skip"
-[ -d "$HOME/.codex" ]           && { printf '%-28s %s\n' "Codex skill"           "$(copy_skill "$HOME/.codex/skills/saipen")";
-                                     printf '%-28s %s\n' "Codex AGENTS.md"       "$(add_block "$HOME/.codex/AGENTS.md")"; } \
+[ -d "$HOME/.codex" ]           && { report "Codex skill" copy_skill "$HOME/.codex/skills/saipen";
+                                     report "Codex AGENTS.md" add_block "$HOME/.codex/AGENTS.md"; } \
                                 || printf '%-28s %s\n' "Codex" "not installed - skip"
-[ -d "$HOME/.gemini" ]          && printf '%-28s %s\n' "Gemini GEMINI.md"        "$(add_block "$HOME/.gemini/GEMINI.md")" \
+[ -d "$HOME/.gemini" ]          && report "Gemini GEMINI.md" add_block "$HOME/.gemini/GEMINI.md" \
                                 || printf '%-28s %s\n' "Gemini" "not installed - skip"
 
 if [ -d "$HOME/.agents/skills" ]; then # copy, lowercase: these readers skip links/uppercase
-  printf '%-28s %s\n' "~/.agents skills" "$(copy_skill "$HOME/.agents/skills/saipen")"
+  report "~/.agents skills" copy_skill "$HOME/.agents/skills/saipen"
 else printf '%-28s %s\n' "~/.agents" "not installed - skip"; fi
 
 # --- Antigravity plugins (copy: IDE locks dirs, junction impossible while open) ---
@@ -125,23 +172,19 @@ if [ -d "$PLUG_ROOT" ]; then
     plugin_name="$(basename "$plugin_dir")"
     skills_dir="${plugin_dir}skills"
     if [ -d "$skills_dir" ]; then
-      printf '%-28s %s\n' "Antigravity [$plugin_name]" "$(copy_skill "$skills_dir/saipen")"
+      report "Antigravity [$plugin_name]" copy_skill "$skills_dir/saipen"
     fi
   done
 fi
 
 # Aider boot set is RFC.md + STYLE.md, same promise as every platform.
 if command -v aider >/dev/null 2>&1; then
-  A="$HOME/.aider.conf.yml"
-  P="$SKILL_HOME/RFC.md"
-  S="$SKILL_HOME/STYLE.md"
-  if [ ! -f "$A" ]; then printf '# saipen protocol auto-loaded\nread:\n  - %s\n  - %s\n' "$P" "$S" > "$A"; printf '%-28s %s\n' "Aider conf" "created"
-  elif grep -qF "$P" "$A" && grep -qF "$S" "$A"; then printf '%-28s %s\n' "Aider conf" "already"
-  elif ! grep -q "^read:" "$A"; then
-    backup_file "$A"
-    printf '\n# saipen protocol auto-loaded\nread:\n  - %s\n  - %s\n' "$P" "$S" >> "$A"; printf '%-28s %s\n' "Aider conf" "read: appended"
-  else printf '%-28s %s\n' "Aider conf" "has own read: - add manually: $P + $S"; fi
+  report "Aider conf" configure_aider "$HOME/.aider.conf.yml"
 else printf '%-28s %s\n' "Aider" "not installed - skip"; fi
 
 echo "------------------------------------------------------------"
+if [ "$FAILURES" -ne 0 ]; then
+  echo "FAILED. Fix reported errors and re-run."
+  exit 1
+fi
 echo "Done. Test: open any project in any agent, say: saipen set"

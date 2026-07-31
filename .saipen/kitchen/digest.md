@@ -1,3 +1,3 @@
-done: T-367 verified and v7.136.0 prepared -- tag batch evidence now fails closed
-remaining: publish v7.136.0, then T-368 bootstrap failure semantics
+done: T-368 verified and v7.137.0 prepared -- bootstrap reports and user bytes are truthful
+remaining: publish v7.137.0, then T-369 export project-root binding
 awaiting: nothing

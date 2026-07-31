@@ -4,7 +4,7 @@
 
 param([string]$SkillHome = (Join-Path (Split-Path $PSScriptRoot) "saipen"))
 
-$ErrorActionPreference = "Continue"
+$ErrorActionPreference = "Stop"
 $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 function Write-NoBom([string]$file, [string]$text) {
   if ((Test-Path $file) -and -not (Test-Path "$file.bak")) { Copy-Item $file "$file.bak" -Force }
@@ -17,8 +17,7 @@ if (-not (Test-Path (Join-Path $SkillHome "RFC.md"))) {
   Write-Host "FATAL: RFC.md missing in $SkillHome" -ForegroundColor Red; exit 1
 }
 
-$block = @"
-
+$blockCore = @"
 <!-- SAIPEN:BEGIN -->
 ## saipen protocol (global)
 On "saipen set" / "saipen ..." commands, or when project root contains
@@ -33,23 +32,39 @@ role and start working (extensions/subs/crew.md); saipen crew = 3-window layout.
 UI work: also obey $SkillHome\UI.md (Win95 dark golden, Verdana, no AA).
 <!-- SAIPEN:END -->
 "@
+$blockCore = $blockCore.Trim([char[]]"`r`n")
+
+function Get-Newline([string]$text) {
+  if ($text.Contains("`r`n")) { return "`r`n" }
+  return "`n"
+}
+
+function Get-BlockCore([string]$text) {
+  $nl = Get-Newline $text
+  return ($blockCore -replace "`r?`n", $nl)
+}
 
 function Add-Block([string]$file) {
   if (Test-Path $file) {
-    $text = Get-Content $file -Raw -Encoding utf8
-    if ($text -match '(?s)<!-- SAIPEN:BEGIN -->.*?<!-- SAIPEN:END -->') {
-      $existing = $Matches[0]
-      if ($existing.Trim() -eq $block.Trim()) { return "already" }
-      $clean = [regex]::Replace($text, '(?s)\s*<!-- SAIPEN:BEGIN -->.*?<!-- SAIPEN:END -->\s*', "`n")
-      Write-NoBom $file ($clean.TrimEnd() + $block + "`n")
+    if (-not (Test-Path $file -PathType Leaf)) { throw "config path is not a file: $file" }
+    $text = [System.IO.File]::ReadAllText($file)
+    $match = [regex]::Match($text, '(?s)<!-- SAIPEN:BEGIN -->.*?<!-- SAIPEN:END -->')
+    $core = Get-BlockCore $text
+    if ($match.Success) {
+      $existing = $match.Value -replace "`r`n", "`n"
+      $canonical = $blockCore -replace "`r`n", "`n"
+      if ($existing -eq $canonical) { return "already" }
+      $clean = $text.Substring(0, $match.Index) + $core + $text.Substring($match.Index + $match.Length)
+      Write-NoBom $file $clean
       return "block refreshed"
     }
-    Write-NoBom $file ($text.TrimEnd() + $block + "`n")
+    $nl = Get-Newline $text
+    Write-NoBom $file ($text + $nl + $core + $nl)
     return "block added"
   }
   $dir = Split-Path $file
-  if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Force $dir | Out-Null }
-  Write-NoBom $file ($block.TrimStart() + "`n")
+  if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Force $dir -ErrorAction Stop | Out-Null }
+  Write-NoBom $file ($blockCore + "`n")
   return "file created"
 }
 
@@ -138,7 +153,7 @@ if (Get-Command aider -ErrorAction SilentlyContinue) {
     if (($conf -match [regex]::Escape($skillPath)) -and ($conf -match [regex]::Escape($stylePath))) {
       [void]$report.Add(@("Aider conf", "already"))
     } elseif ($conf -notmatch '(?m)^read:') {
-      Write-NoBom $aider ($conf.TrimEnd() + "`n`n# saipen protocol auto-loaded`nread:`n  - $skillPath`n  - $stylePath`n")
+      Write-NoBom $aider ($conf + "`n# saipen protocol auto-loaded`nread:`n  - $skillPath`n  - $stylePath`n")
       [void]$report.Add(@("Aider conf", "read: appended"))
     } else {
       [void]$report.Add(@("Aider conf", "has own read: - add manually: $skillPath + $stylePath"))
@@ -159,4 +174,9 @@ foreach ($r in $report) {
   Write-Host ("{0,-28} {1}" -f $r[0], $r[1]) -ForegroundColor $color
 }
 Write-Host ("-" * 60)
+$failed = @($report | Where-Object { $_[1] -match "FAILED" })
+if ($failed.Count -gt 0) {
+  Write-Host "FAILED. Fix reported errors and re-run." -ForegroundColor Red
+  exit 1
+}
 Write-Host "Done. Test: open any project in any agent, say: saipen set" -ForegroundColor Yellow

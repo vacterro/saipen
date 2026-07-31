@@ -55,3 +55,21 @@
 - 31.07.26 18:39 [E-1295] [parent: E-1294] [T-367] DEC: SHIP after FIXES -- review pass 2 confirms strict framing, legal missing record, and all four failure controls; no P0-P1 findings.
 - 31.07.26 18:40 [E-1296] [parent: E-1295] [T-367] RUN: SHIP preflight -> origin/main 926dcaf; v7.136.0 absent local/remote; unrelated subSaipen checkpoints excluded.
 - 31.07.26 18:41 [E-1297] [parent: E-1296] [T-367] RUN: SHIP gate -> release metadata aligned; scenarios/tags/four batch controls/canonical 44/44/validator/ruff/order PASS.
+- 31.07.26 18:43 [E-1298] [parent: E-1297] [T-367] RUN: ship v7.136.0 -> pushed 7744c1d
+- 31.07.26 18:43 [E-1299] [parent: E-1298] [T-367] RUN: DONE -> ticket complete
+- 31.07.26 18:43 [E-1300] [parent: E-1299] [T-368] DEC: claimed bootstrap fail-closed and byte-preserving install/uninstall parity.
+- 31.07.26 18:46 [E-1301] [parent: E-1300] [T-368] RUN: SCOUT -- shell command substitutions and PowerShell string reports erase failure status; removal regex/awk consume user whitespace; exercise both round trips and failure paths.
+- 31.07.26 18:51 [E-1302] [parent: E-1301] [T-368] RUN: build -> fail-closed reports in four scripts; exact managed-newline removal; two round trips and four failure controls.
+- 31.07.26 18:52 [E-1303] [parent: E-1302] [T-368] RUN: VERIFY -> shell/PowerShell round trips byte-exact; four failure controls red; validator/scenarios/ruff/order/canonical 44/44 PASS; conf: high.
+- 31.07.26 18:52 [E-1304] [parent: E-1303] [T-368] DEC: goal_tickets 10->11
+- 31.07.26 18:54 [E-1305] [parent: E-1304] [T-368] DEC: REVIEW -> BUILD -- LF-only seed hid Git Bash awk converting CRLF; byte-exact claim failed on CRLF control.
+- 31.07.26 18:55 [E-1306] [parent: E-1305] [T-368] RUN: build -> byte-offset shell removal preserves CRLF prefix/suffix; broken-head transform control replaces awk-only proof.
+- 31.07.26 18:56 [E-1307] [parent: E-1306] [T-368] RUN: VERIFY -> CRLF+space/tab round trips byte-exact in Git Bash/PowerShell; four failures red; validator/scenarios/ruff/order/canonical 44/44 PASS; conf: high.
+- 31.07.26 18:56 [E-1308] [parent: E-1307] [T-368] DEC: goal_tickets 11->12
+- 31.07.26 18:57 [E-1309] [parent: E-1308] [T-368] DEC: REVIEW -> BUILD -- PowerShell failure control proves terminating errors, not Copy-Skill FAILED-report aggregation.
+- 31.07.26 18:58 [E-1310] [parent: E-1309] [T-368] RUN: build -> PowerShell copy failure now exercises caught FAILED report and final nonzero aggregation.
+- 31.07.26 18:59 [E-1311] [parent: E-1310] [T-368] RUN: VERIFY -> CRLF byte-exact round trips; shell write/transform and PowerShell caught-copy/read failures red; full gates PASS; conf: high.
+- 31.07.26 18:59 [E-1312] [parent: E-1311] [T-368] DEC: goal_tickets 12->13
+- 31.07.26 18:59 [E-1313] [parent: E-1312] [T-368] DEC: SHIP after FIXES -- CRLF bytes, caught and terminating failures, reports, and completion text are behaviorally bounded; no P0-P1 findings.
+- 31.07.26 18:59 [E-1314] [parent: E-1313] [T-368] RUN: SHIP preflight -> origin/main 7744c1d; v7.137.0 absent local/remote; unrelated subSaipen checkpoints excluded.
+- 31.07.26 19:01 [E-1315] [parent: E-1314] [T-368] RUN: SHIP gate -> CRLF round trips and four failures red; scenarios/tags 202/canonical 44/44/validator/ruff/order PASS.
