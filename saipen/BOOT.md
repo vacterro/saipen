@@ -108,7 +108,7 @@ does not answer.
   typed. No prose from them yet (a bare command)? **English.** Never inferred
   from the OS/IDE locale, the platform UI, or the files in the repository --
   this one ships 33 translated guides, and a session answered a Russian
-  speaker in Ukrainian for no other reason. Full rule in `saipen/STYLE.md`;
+  speaker in Ukrainian for no other reason. Full rule in `saipen/STYLE.md` and `RFC.md`;
   it is repeated here because it governs the first token, so deferring it to
   a "rule question" is already too late.
 - `CHANGELOG.md` is never part of a cold start.

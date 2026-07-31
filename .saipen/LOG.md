@@ -199,3 +199,6 @@
 - 01.08.26 01:00 [E-1438] [parent: E-1437] DEC: updated cc rule in RFC.md for subSaipen kitchen execution.
 - 01.08.26 01:03 [E-1439] [parent: E-1438] DEC: removed haiku from ss, fixed SKILL.md paths, added shortcuts to SKILL.md trigger list.
 - 01.08.26 01:05 [E-1440] [parent: E-1439] DEC: updated STYLE.md base language to Estonian priority, then English, then Russian (switchable).
+
+- 01.08.26 01:11 [E-1441] [parent: E-1440] DEC: added local language detection rule to RFC.md 1.1 and BOOT.md.
+- 01.08.26 01:11 [E-1442] [parent: E-1441] RUN: bootstrap/inject.ps1 -> protocol distributed to all local agent seats.
