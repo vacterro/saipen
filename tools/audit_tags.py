@@ -14,14 +14,15 @@ Not in `tools/validate.py` on purpose. It needs the full tag list, which a
 consuming project does not have and a shallow checkout does not fetch, and it
 would put a git round-trip into a pre-commit hook that runs on every commit.
 
-Exit 0 when every tag agrees, 1 otherwise. Skips (exit 0, loudly) where git
-or the tag list is unavailable, because a check that cannot see its subject
-must report that rather than pass or fail on nothing -- the failure mode this
-repo hit in CI one release ago.
+Exit 0 when every tag agrees, 1 otherwise. The initial tag discovery skips
+(exit 0, loudly) where git or the tag list is unavailable. Once tags were
+enumerated, batch-process or protocol failures fail closed: the audit has a
+subject and must not turn losing its evidence into a green result.
 """
 from __future__ import annotations
 
 import io
+import os
 import subprocess
 import sys
 
@@ -52,6 +53,8 @@ KNOWN_MISMATCHES = {
                "release carries v7.98.0's notes",
 }
 
+GIT_SHIM_ENV = "SAIPEN_AUDIT_TAGS_GIT_SHIM"
+
 
 def _decode_version(raw: bytes) -> str:
     """Decode a historical VERSION blob.
@@ -79,11 +82,53 @@ def _decode_version(raw: bytes) -> str:
 
 def git(*args: str) -> tuple[int, str]:
     try:
-        r = subprocess.run(["git", *args], capture_output=True, text=True,
+        r = subprocess.run([*_git_command(), *args], capture_output=True, text=True,
                            check=False)
     except (OSError, subprocess.SubprocessError) as e:
         return 1, str(e)
     return r.returncode, r.stdout
+
+
+def _git_command() -> list[str]:
+    """Return Git, or the Python shim used by executable failure controls."""
+    shim = os.environ.get(GIT_SHIM_ENV)
+    return [sys.executable, shim] if shim else ["git"]
+
+
+def _parse_batch_versions(
+        tags: list[str], buf: bytes) -> tuple[dict[str, str | None], str | None]:
+    """Parse one exact `cat-file --batch` record per requested VERSION."""
+    versions: dict[str, str | None] = {}
+    pos = 0
+    for tag in tags:
+        nl = buf.find(b"\n", pos)
+        if nl < 0:
+            return versions, f"response for {tag} has no complete header"
+        header = buf[pos:nl].decode("utf-8", "replace")
+        pos = nl + 1
+        missing_header = f"{tag}^{{commit}}:VERSION missing"
+        if header == missing_header:
+            versions[tag] = None
+            continue
+
+        parts = header.rsplit(" ", 2)
+        if (len(parts) != 3 or parts[1] != "blob"
+                or len(parts[0]) not in {40, 64}
+                or not all(c in "0123456789abcdef" for c in parts[0].lower())):
+            return versions, f"response for {tag} has malformed header {header!r}"
+        try:
+            size = int(parts[2])
+        except ValueError:
+            return versions, f"response for {tag} has invalid size {parts[2]!r}"
+        end = pos + size
+        if end >= len(buf) or buf[end:end + 1] != b"\n":
+            return versions, f"response for {tag} is truncated"
+        versions[tag] = _decode_version(buf[pos:end])
+        pos = end + 1
+
+    if pos != len(buf):
+        return versions, f"batch response has {len(buf) - pos} unexpected trailing byte(s)"
+    return versions, None
 
 
 def main() -> int:
@@ -104,11 +149,17 @@ def main() -> int:
     spec = "".join(f"{t}^{{commit}}:VERSION\n" for t in tags)
     try:
         proc = subprocess.run(
-            ["git", "cat-file", "--batch"], input=spec.encode("utf-8"),
+            [*_git_command(), "cat-file", "--batch"],
+            input=spec.encode("utf-8"),
             capture_output=True, check=False)
     except (OSError, subprocess.SubprocessError) as e:
-        print(f"SKIP: git cat-file failed ({e})")
-        return 0
+        print(f"FAIL: git cat-file failed to start ({e})")
+        return 1
+    if proc.returncode:
+        detail = proc.stderr.decode("utf-8", "replace").strip()
+        suffix = f": {detail}" if detail else ""
+        print(f"FAIL: git cat-file exited {proc.returncode}{suffix}")
+        return 1
 
     # Parse by SIZE, on bytes. The first version of this walked the output as
     # text lines and advanced two per record; a `--batch` record is
@@ -118,27 +169,10 @@ def main() -> int:
     # earlier -- the total-failure signature this repo has already been
     # burned by three times. A misconfigured harness is almost always total;
     # a real defect almost never is.
-    versions: dict[str, str | None] = {}
-    buf, pos = proc.stdout, 0
-    for tag in tags:
-        nl = buf.find(b"\n", pos)
-        if nl < 0:
-            versions[tag] = None
-            continue
-        header = buf[pos:nl].decode("utf-8", "replace")
-        pos = nl + 1
-        parts = header.rsplit(" ", 2)
-        if len(parts) != 3 or parts[1] != "blob":
-            versions[tag] = None       # "<name> missing", or a tree/commit
-            continue
-        try:
-            size = int(parts[2])
-        except ValueError:
-            versions[tag] = None
-            continue
-        raw = buf[pos:pos + size]
-        pos += size + 1                # +1 for the newline git appends
-        versions[tag] = _decode_version(raw)
+    versions, parse_error = _parse_batch_versions(tags, proc.stdout)
+    if parse_error:
+        print(f"FAIL: git cat-file {parse_error}")
+        return 1
 
     bad, missing = [], []
     for tag, ver in versions.items():

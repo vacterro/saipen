@@ -39,3 +39,19 @@
 - 31.07.26 18:09 [E-1279] [parent: E-1278] [T-361] DEC: SHIP after FIXES -- review pass 2 confirms schema metadata authority and diagnostic fix; no remaining P0-P1 findings.
 - 31.07.26 18:12 [E-1280] [parent: E-1279] [T-361] RUN: SHIP preflight -> origin/main e167371; v7.135.0 absent local/remote; unrelated subSaipen checkpoints excluded.
 - 31.07.26 18:19 [E-1281] [parent: E-1280] [T-361] RUN: SHIP gate -> validator/scenarios/ruff/order PASS; migration 6/6; canonical 44/44; parity 11/44.
+- 31.07.26 18:21 [E-1282] [parent: E-1281] [T-361] RUN: ship v7.135.0 -> pushed 926dcaf
+- 31.07.26 18:21 [E-1283] [parent: E-1282] [T-361] RUN: DONE -> ticket complete
+- 31.07.26 18:22 [E-1284] [parent: E-1283] [T-none] DEC: DONE -> HUNT -- goal board empty
+- 31.07.26 18:29 [E-1285] [parent: E-1284] [T-none] RUN: HUNT -> T-367..T-371; tests and shipped commits clean; five bounded guard/bootstrap/export/cache tickets added.
+- 31.07.26 18:30 [E-1286] [parent: E-1285] [T-367] DEC: claimed audit_tags cat-file false-green; subprocess failure and truncation must fail closed.
+- 31.07.26 18:32 [E-1287] [parent: E-1286] [T-367] RUN: SCOUT -- batch parser conflates valid missing blobs with malformed/truncated output and ignores process status; add injected executable Git controls.
+- 31.07.26 18:35 [E-1288] [parent: E-1287] [T-367] RUN: build -> strict cat-file status/protocol parser plus executable nonzero and truncated process controls.
+- 31.07.26 18:36 [E-1289] [parent: E-1288] [T-367] RUN: VERIFY -> normal tags 201/5/0; nonzero/truncated process controls red; canonical 44/44; validator/ruff/order PASS; conf: high.
+- 31.07.26 18:36 [E-1290] [parent: E-1289] [T-367] DEC: goal_tickets 8->9
+- 31.07.26 18:37 [E-1291] [parent: E-1290] [T-367] DEC: REVIEW -> BUILD -- empty OID passes all([]); malformed/surplus claims lack executable controls.
+- 31.07.26 18:38 [E-1292] [parent: E-1291] [T-367] RUN: build -> require full SHA-1/SHA-256 OID; four executable process/protocol failure controls.
+- 31.07.26 18:39 [E-1293] [parent: E-1292] [T-367] RUN: VERIFY -> normal tags 201/5/0; nonzero/malformed/truncated/surplus controls red; canonical 44/44; validator/ruff/order PASS; conf: high.
+- 31.07.26 18:39 [E-1294] [parent: E-1293] [T-367] DEC: goal_tickets 9->10
+- 31.07.26 18:39 [E-1295] [parent: E-1294] [T-367] DEC: SHIP after FIXES -- review pass 2 confirms strict framing, legal missing record, and all four failure controls; no P0-P1 findings.
+- 31.07.26 18:40 [E-1296] [parent: E-1295] [T-367] RUN: SHIP preflight -> origin/main 926dcaf; v7.136.0 absent local/remote; unrelated subSaipen checkpoints excluded.
+- 31.07.26 18:41 [E-1297] [parent: E-1296] [T-367] RUN: SHIP gate -> release metadata aligned; scenarios/tags/four batch controls/canonical 44/44/validator/ruff/order PASS.

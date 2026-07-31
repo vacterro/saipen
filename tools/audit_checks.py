@@ -53,6 +53,8 @@ MANIFEST = ".saipen/kitchen/markhunt_progress.md"
 SUB = ".saipen/extensions/subs/saiwiki/STATE.md"
 STATE_SCHEMA = "extensions/schemas/state.schema.json"
 TAG_QUERY = ("git", "tag", "-l", "v*")
+AUDIT_TAGS_GIT_SHIM = "SAIPEN_AUDIT_TAGS_GIT_SHIM"
+AUDIT_TAGS_MODE = "SAIPEN_AUDIT_TAGS_MODE"
 
 
 def release_ledger_probe(source: Path, destination: Path) -> str | None:
@@ -128,6 +130,60 @@ def release_ledger_probe(source: Path, destination: Path) -> str | None:
     if (stale_result.returncode == 0
             or f"baseline is stale for: v{original}" not in stale_text):
         return "resolved historical exception did not make stale baseline fail"
+    return None
+
+
+def audit_tags_batch_probe(root: Path, destination: Path) -> str | None:
+    """Execute process and protocol failures against the tag audit."""
+    shim = destination / "audit-tags-git-shim.py"
+    shim.write_text(
+        """import os
+import sys
+
+args = sys.argv[1:]
+if args == ["tag", "-l", "v*"]:
+    print("v" + "9.9.9")
+    raise SystemExit(0)
+if args == ["cat-file", "--batch"]:
+    sys.stdin.buffer.read()
+    mode = os.environ["SAIPEN_AUDIT_TAGS_MODE"]
+    if mode == "nonzero":
+        print("synthetic batch failure", file=sys.stderr)
+        raise SystemExit(9)
+    if mode == "truncated":
+        sys.stdout.buffer.write(b"0" * 40 + b" blob 5\\n7.")
+        raise SystemExit(0)
+    if mode == "malformed":
+        sys.stdout.buffer.write(b" blob 5\\n9.9.9\\n")
+        raise SystemExit(0)
+    if mode == "surplus":
+        sys.stdout.buffer.write(b"0" * 40 + b" blob 5\\n9.9.9\\nEXTRA")
+        raise SystemExit(0)
+raise SystemExit(8)
+""",
+        encoding="utf-8", newline="\n")
+
+    synthetic_tag = "v" + "9.9.9"
+    expected = {
+        "nonzero": "FAIL: git cat-file exited 9: synthetic batch failure",
+        "truncated": f"FAIL: git cat-file response for {synthetic_tag} is truncated",
+        "malformed": f"FAIL: git cat-file response for {synthetic_tag} has malformed header",
+        "surplus": "FAIL: git cat-file batch response has 5 unexpected trailing byte(s)",
+    }
+    for mode, message in expected.items():
+        env = os.environ.copy()
+        env[AUDIT_TAGS_GIT_SHIM] = str(shim)
+        env[AUDIT_TAGS_MODE] = mode
+        result = subprocess.run(
+            [sys.executable, str(root / "tools" / "audit_tags.py")],
+            cwd=root, env=env, capture_output=True, text=True, errors="replace")
+        output = result.stdout + result.stderr
+        if result.returncode == 0:
+            return f"{mode} control exited 0"
+        if message not in output:
+            return f"{mode} control did not report {message!r}: {output.strip()[:200]}"
+        if "PASS:" in output:
+            return f"{mode} control printed PASS after losing batch evidence"
     return None
 
 
@@ -470,6 +526,14 @@ def main() -> int:
         return 1
     print("PASS: release-ledger clean/new-tag/new-changelog/stale-baseline "
           "controls behave distinctly")
+
+    batch_error = audit_tags_batch_probe(HOME, tmp)
+    if batch_error:
+        print(f"FAIL: audit-tags batch process probe -- {batch_error}")
+        shutil.rmtree(tmp, ignore_errors=True)
+        return 1
+    print("PASS: audit-tags nonzero, malformed, truncated, and surplus batch "
+          "controls fail closed")
 
     query_count, query_error = observed_tag_queries(pristine)
     red_tree = tmp / "duplicate-tag-query"

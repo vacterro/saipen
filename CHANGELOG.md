@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.136.0 -- 2026-07-31 -- a lost tag audit is not a passing tag audit
+
+`tools/audit_tags.py` enumerated release tags, launched one efficient `git cat-file --batch`, and never checked whether that process succeeded. A started process that exited nonzero or returned truncated output became a list of historical missing VERSION warnings; with no comparable records left, the audit still printed PASS.
+
+Once tag discovery succeeds, the batch step now fails closed on process errors and strict protocol violations. It accepts only complete SHA-1 or SHA-256 blob records and the exact legal `<spec> missing` response, checks declared sizes and record delimiters, and rejects malformed headers, truncation, and surplus bytes.
+
+`audit_checks.py` executes the guard through a Python Git shim. Four controls make the batch process exit 9, return an empty-OID header, truncate a blob, and append surplus bytes. Every one must exit nonzero with focused FAIL text and no PASS; the normal audit still compares 201 tags with only the five recorded historical mismatches.
+
 ## 7.135.0 -- 2026-07-31 -- make STATE a real commit pointer
 
 `last_event` was documented as the freshness marker that would eventually become required, but normal checkpoints and Recovery did not write it and the validator checked it only when present. The stale-state guard therefore disappeared from the usual state shape: an omitted marker looked green forever.
