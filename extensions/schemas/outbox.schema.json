@@ -29,6 +29,26 @@
         "enum": ["P0", "P1", "P2"],
         "description": "Optional, matches phases/review.md's own taxonomy"
       },
+      "producer": {
+        "type": "string",
+        "description": "Required for a complete package consumed by Core saipen collect <producer>"
+      },
+      "source_head": {
+        "type": "string",
+        "description": "Full source Git HEAD or no-git; required for a complete package"
+      },
+      "coverage": {
+        "description": "Exact source surfaces and locale/page scope completed; required for a complete package"
+      },
+      "payload": {
+        "description": "Exact files or artifacts to integrate; required for a complete package"
+      },
+      "verified": {
+        "description": "Producer-side checks and results; required for a complete package"
+      },
+      "instructions": {
+        "description": "Ordered integration instructions; required for a complete package"
+      },
       "details": {
         "type": "string"
       }

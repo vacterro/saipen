@@ -8,7 +8,7 @@ Escucha, novato. El problema es simple: tus agentes de IA tienen la memoria de u
 
 **SAIPEN** es un cuaderno resistente dentro de la carpeta `.saipen/` de tu proyecto.
 
-**Atajos rápidos:** `cc` continúa una ejecución activa de Goal Mode, `sss` informa del estado sin tocar código y `ss` guarda un punto de control y se detiene. [Ver el mapa completo de 11 teclas](../saipen/RFC.md#110-command-surface). Los gemelos cirílicos también funcionan: `сс`, `ссс`, `аа`, `ее`, `рр`.
+**Atajos rápidos:** `cc` continúa una ejecución activa de Goal Mode, `sss` informa del estado sin tocar código y `ss` guarda un punto de control y se detiene. [Ver el mapa completo de 13 teclas](../saipen/RFC.md#110-command-surface). Los gemelos cirílicos también funcionan: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 ## Inicio Rápido
 

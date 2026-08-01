@@ -10,9 +10,11 @@
 
 **Одна команда. Нуль амнезии.**
 
-**Быстрые клавиши:** `cc` продолжает активный Goal Mode, `sss` показывает статус без правок кода, а `ss` сохраняет чекпоинт и останавливается. [Полная карта из 11 клавиш](saipen/RFC.md#110-command-surface). Кириллические близнецы тоже работают: `сс`, `ссс`, `аа`, `ее`, `рр`.
+**Быстрые клавиши:** `cc` продолжает активный Goal Mode, `sss` показывает статус без правок кода, а `ss` сохраняет чекпоинт и останавливается. [Полная карта из 13 клавиш](saipen/RFC.md#110-command-surface). Кириллические близнецы тоже работают: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.157.0** | [Спецификация](SPEC.md) | [Руководство](GUIDE.md) | [RFC](saipen/RFC.md) | [Стиль](saipen/STYLE.md) | [Интерфейс](saipen/UI.md) | [Соответствие](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
+**Пакетные шорткаты:** `ee`/`qq` готовят полный пакет переводов/вики без внедрения; `eee`/`qqq` принимают только готовый пакет, затем внедряют, проверяют и пушат.
+
+**v7.158.0** | [Спецификация](SPEC.md) | [Руководство](GUIDE.md) | [RFC](saipen/RFC.md) | [Стиль](saipen/STYLE.md) | [Интерфейс](saipen/UI.md) | [Соответствие](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -97,5 +99,4 @@ bash bootstrap/uninstall.sh                                         # macOS / Li
 <p align="center">
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
-
 

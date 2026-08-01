@@ -6,7 +6,7 @@
 
 SAIPEN è un taccuino di memoria persistente nella cartella `.saipen/` per agenti AI.
 
-**Tasti rapidi:** `cc` prosegue un Goal Mode attivo, `sss` segnala lo stato senza toccare il codice e `ss` salva un checkpoint e si ferma. [Guarda la mappa completa degli 11 tasti](../saipen/RFC.md#110-command-surface). Funzionano anche i gemelli cirillici: `сс`, `ссс`, `аа`, `ее`, `рр`.
+**Tasti rapidi:** `cc` prosegue un Goal Mode attivo, `sss` segnala lo stato senza toccare il codice e `ss` salva un checkpoint e si ferma. [Guarda la mappa completa degli 13 tasti](../saipen/RFC.md#110-command-surface). Funzionano anche i gemelli cirillici: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 ## Avvio Rapido
 

@@ -2,6 +2,12 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.158.0 -- 2026-08-01 -- ready packages, exact keys, cleaner front door
+
+Repeated keys are assignments now, not weak-model vibes. `ee` and `qq` prepare complete translation/wiki packages into explicit seven-field `status: ready` handoffs without touching the target or a remote. `eee` and `qqq` consume only a fresh ready package, integrate its declared payload through VERIFY/REVIEW/SHIP, and push; incomplete input is an exact no-op naming the doubled prerequisite. `cc` stays mapped to Goal Mode. The validator pins all 13 routes, rejects valid-but-wrong destinations, rejects stale global claims about doubled/tripled cost, and keeps six Cyrillic twins aligned across skill activation, 32 locale sources, mirrors, and guides. All 59 canonical mutations fire; portable-floor parity remains 11.
+
+The README front door is now seven real sections instead of loose headings and walls of links. The full 16-command surface is a one-command-per-row table, all 33 translated guides sit in a compact details block, and the package shortcuts remain visible near the opening. CLEAN finally pruned 65 shipped tickets and sealed the 389-line active LOG as `LOG-006.md`; the board/log soft-cap warnings disappeared. The stale untracked root `saipen.wiki/` duplicate is gone; the live saiwiki kitchen clone remains the sole wiki source.
+
 ## 7.157.0 -- 2026-08-01 -- one language contract, one stubborn дед
 
 Chat-language selection had two constitutions: STYLE defaulted a prose-free command to Estonian, while RFC and the cold-start BOOT kernel defaulted it to English. The skill discovery metadata carried neither that choice nor the rule that caveman-дед survives every response. Weak models could therefore pick whichever fragment they loaded first, drift into corporate prose later, or mistake a translated repository file for the user's language.

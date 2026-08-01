@@ -6,7 +6,7 @@
 
 SAIPEN är en minnesanteckningsbok i mappen `.saipen/` för AI-agenter.
 
-**Snabbkommandon:** `cc` fortsätter en aktiv Goal Mode-körning, `sss` visar status utan att röra koden och `ss` sparar en kontrollpunkt och stannar. [Se hela 11-tangentkartan](../saipen/RFC.md#110-command-surface). Kyrilliska tvillingar fungerar också: `сс`, `ссс`, `аа`, `ее`, `рр`.
+**Snabbkommandon:** `cc` fortsätter en aktiv Goal Mode-körning, `sss` visar status utan att röra koden och `ss` sparar en kontrollpunkt och stannar. [Se hela 13-tangentkartan](../saipen/RFC.md#110-command-surface). Kyrilliska tvillingar fungerar också: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 ## Snabbstart
 

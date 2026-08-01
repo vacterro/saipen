@@ -186,8 +186,27 @@ def _git(*args):
 # a module constant, not a variable one of them happens to have built.
 SAIPEN_COMMANDS = frozenset({
     "set", "init", "continue", "goal", "plan", "clean", "translate",
-    "markhunt", "prepare", "ship", "validate", "status", "stop", "sub",
-    "hunt"})
+    "markhunt", "prepare", "collect", "ship", "validate", "status", "stop",
+    "sub", "hunt"})
+EXPECTED_SHORTCUT_ROUTES = {
+    "gg": "`saipen goal`",
+    "hh": "`saipen hunt`",
+    "cc": "`saipen goal`",
+    "ccc": "`saipen continue` then `saipen ship`",
+    "ss": "`saipen stop`",
+    "sss": "`saipen status`",
+    "dd": "`saipen plan`",
+    "aa": "`saipen markhunt`",
+    "qq": "`saipen prepare saiwiki`",
+    "qqq": "`saipen collect saiwiki` then `saipen ship`",
+    "ee": "`saipen prepare saitranslate`",
+    "eee": "`saipen collect saitranslate` then `saipen ship`",
+    "pp": "`saipen sub spawn saipython`",
+}
+PACKAGE_HANDOFF_FIELDS = {
+    "status", "producer", "source_head", "coverage", "payload", "verified",
+    "instructions",
+}
 failures = []
 warnings = {}
 
@@ -1797,7 +1816,8 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
     # a stale mirror, or a second weak-model rewrite loud.
     _shortcut_tokens = ("`cc`", "`sss`", "`ss`",
                         "`\u0441\u0441`", "`\u0441\u0441\u0441`",
-                        "`\u0430\u0430`", "`\u0435\u0435`", "`\u0440\u0440`")
+                        "`\u0430\u0430`", "`\u0435\u0435`",
+                        "`\u0435\u0435\u0435`", "`\u0440\u0440`")
 
     def _shortcut_callout(path, expected_link):
         if not path.is_file():
@@ -1811,6 +1831,9 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
                  f"{len(_matches)} shortcut callouts; expected exactly one")
             return None
         _index, _line = _matches[0]
+        if "13" not in _line:
+            fail(f"cross-doc drift [shortcut-callouts] -- {path} does not "
+                 "name the complete 13-key map")
         _missing = [token for token in _shortcut_tokens
                     if _line.count(token) != 1]
         if _missing:
@@ -3068,6 +3091,96 @@ else:
                      "not resolve to a command the same section defines: "
                      + "; ".join(_bad_routes))
                 drift_ok = False
+
+            _actual_routes = {shortcut: route.strip()
+                              for shortcut, route in _shortcut_rows}
+            if (len(_actual_routes) != len(_shortcut_rows)
+                    or _actual_routes != EXPECTED_SHORTCUT_ROUTES):
+                _route_diffs = []
+                for _shortcut in sorted(set(_actual_routes)
+                                        | set(EXPECTED_SHORTCUT_ROUTES)):
+                    _actual = _actual_routes.get(_shortcut, "<missing>")
+                    _expected = EXPECTED_SHORTCUT_ROUTES.get(
+                        _shortcut, "<undeclared>")
+                    if _actual != _expected:
+                        _route_diffs.append(
+                            f"`{_shortcut}` is {_actual!r}, expected "
+                            f"{_expected!r}")
+                fail("cross-doc drift [shortcut-routes] -- assigned "
+                     "destination changed: " + "; ".join(_route_diffs))
+                drift_ok = False
+
+            _shortcut_section = _rfc_t[_i:_j]
+            if ("**Length has no global meaning.**" not in _shortcut_section
+                    or "do not invent an undeclared repeated form"
+                    not in _shortcut_section
+                    or "Doubled is safe, tripled reaches a remote"
+                    in _shortcut_section):
+                fail("cross-doc drift [shortcut-rationale] -- length must "
+                     "have no global cost meaning and undeclared repeated "
+                     "forms must not be invented")
+                drift_ok = False
+
+            _package_docs = {
+                "RFC.md": _rfc_t,
+                "phases/prepare.md": (_tools_parent / "saipen" / "phases"
+                                      / "prepare.md").read_text(
+                                          encoding="utf-8-sig"),
+                "phases/translate.md": (_tools_parent / "saipen" / "phases"
+                                        / "translate.md").read_text(
+                                            encoding="utf-8-sig"),
+                "extensions/subs/PROTOCOL.md": (
+                    _tools_parent / "extensions" / "subs" / "PROTOCOL.md"
+                ).read_text(encoding="utf-8-sig"),
+            }
+            _prepare_contract = re.search(
+                r"Every collectable handoff MUST include these fields: "
+                r"([^\n]+)", _package_docs["phases/prepare.md"])
+            _prepare_fields = (set(re.findall(r"`([a-z_]+)`",
+                                              _prepare_contract.group(1)))
+                               if _prepare_contract else set())
+            if _prepare_fields != PACKAGE_HANDOFF_FIELDS:
+                fail("cross-doc drift [package-handoffs] -- PREPARE fields "
+                     f"are {sorted(_prepare_fields)}, expected "
+                     f"{sorted(PACKAGE_HANDOFF_FIELDS)}")
+                drift_ok = False
+            _outbox_schema = json.loads((
+                _tools_parent / "extensions" / "schemas"
+                / "outbox.schema.json").read_text(encoding="utf-8-sig"))
+            _schema_package_fields = set(
+                _outbox_schema.get("items", {}).get("properties", {}))
+            _schema_missing = PACKAGE_HANDOFF_FIELDS - _schema_package_fields
+            if _schema_missing:
+                fail("cross-doc drift [package-handoffs] -- OUTBOX schema "
+                     "misses complete-package field(s): "
+                     + ", ".join(sorted(_schema_missing)))
+                drift_ok = False
+            _package_markers = {
+                "RFC.md": ("Not ready: run ee first.",
+                           "Not ready: run qq first.",
+                           "No main-project file, checkpoint, Git ref, or "
+                           "remote may change on that refusal."),
+                "phases/prepare.md": ("saipen prepare saitranslate",
+                                      "saipen prepare saiwiki",
+                                      "MUST NOT integrate the payload"),
+                "phases/translate.md": ("producer: saitranslate",
+                                        "status: ready",
+                                        "No ready handoff means no main "
+                                        "write."),
+                "extensions/subs/PROTOCOL.md": (
+                    "Targeted complete-package path.",
+                    "Not ready: run qq first.",
+                    "The doubled `qq` never integrates, commits, tags, or "
+                    "pushes."),
+            }
+            for _doc_name, _markers in _package_markers.items():
+                _missing_markers = [marker for marker in _markers
+                                    if marker not in _package_docs[_doc_name]]
+                if _missing_markers:
+                    fail("cross-doc drift [package-handoffs] -- "
+                         f"{_doc_name} misses "
+                         + ", ".join(repr(m) for m in _missing_markers))
+                    drift_ok = False
 
             # Skill platforms decide whether to load SAIPEN from SKILL.md's
             # frontmatter before the RFC is available. A shortcut present

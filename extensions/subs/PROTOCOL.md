@@ -109,6 +109,12 @@ File: `<name>/kitchen/OUTBOX.md`. The only channel back to the main agent.
 - **main_project_refs:** [src/foo.py, ...]
 - **critical:** true | false
 - **severity:** P0 | P1 | P2 (optional -- matches `phases/review.md`'s own taxonomy; helps the main agent pick what to collect first when several are `critical: true`)
+- **producer:** saiwiki (required for a complete package consumed by Core `saipen collect <producer>`)
+- **source_head:** full Git HEAD or `no-git` (required for a complete package)
+- **coverage:** exact surfaces completed (required for a complete package)
+- **payload:** exact files/artifacts to integrate (required for a complete package)
+- **verified:** checks already run and their results (required for a complete package)
+- **instructions:** ordered integration steps (required for a complete package)
 - **details:**
   What was found, what's proposed, why it matters.
 ```
@@ -176,6 +182,8 @@ Pick Rule as Core (RFC § 1.6).
 1. Re-verify the findings against current HEAD (freshness).
 2. Write comprehensive injection instructions for the main agent.
 3. Write the combined result into `kitchen/OUTBOX.md` as `status: ready`, and move the ticket to its own `## DONE`.
+
+**Targeted complete-package path.** Core `saipen collect <producer>` is stricter than the backlog-oriented `saipen sub collect`: it consumes exactly one producer and requires one complete `status: ready` package carrying `producer`, `source_head`, `coverage`, `payload`, `verified`, and `instructions`. `saipen prepare saiwiki` must cover the whole maintained wiki, not one sampled page or a quick scan. If the package is missing, incomplete, non-ready, stale, or already reviewed, Core performs no main-project write and replies exactly `Not ready: run qq first.` Targeted collection then applies only the declared payload, creates/claims a normal Core ticket, and enters Core `VERIFY -> REVIEW -> SHIP`; it inherits the boundary check and crash-safe ordering below. The tripled `qqq` macro adds SHIP after collection. The doubled `qq` never integrates, commits, tags, or pushes.
 
 Whenever the main agent chooses to check (during `HUNT`, at the top of `saipen continue`, or via `saipen sub collect`):
 0. **Boundary check first, before trusting anything an OUTBOX claims.** § 1

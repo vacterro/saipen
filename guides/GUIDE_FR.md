@@ -8,7 +8,7 @@
 
 **SAIPEN** est un cahier résistant dans le dossier `.saipen/` de votre projet.
 
-**Raccourcis clavier :** `cc` poursuit un Goal Mode actif, `sss` signale l’état sans toucher au code et `ss` enregistre un point de contrôle puis s’arrête. [Voir la carte complète des 11 touches](../saipen/RFC.md#110-command-surface). Les jumeaux cyrilliques fonctionnent aussi : `сс`, `ссс`, `аа`, `ее`, `рр`.
+**Raccourcis clavier :** `cc` poursuit un Goal Mode actif, `sss` signale l’état sans toucher au code et `ss` enregistre un point de contrôle puis s’arrête. [Voir la carte complète des 13 touches](../saipen/RFC.md#110-command-surface). Les jumeaux cyrilliques fonctionnent aussi : `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 ## Démarrage Rapide
 

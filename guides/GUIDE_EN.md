@@ -8,7 +8,9 @@ Problem: AI agents have goldfish memory. Yesterday half day explaining architect
 
 **SAIPEN** = fireproof notebook in `.saipen/` folder. Agent wakes, reads STATE, BOARD. Sees where it left off. Gets back to work.
 
-**Fast keys:** `cc` keeps active Goal Mode moving, `sss` checks status without touching code, and `ss` hits the brake after checkpointing. [Full 11-key map](../saipen/RFC.md#110-command-surface); Cyrillic twins `сс`, `ссс`, `аа`, `ее`, `рр` work too.
+**Fast keys:** `cc` keeps active Goal Mode moving, `sss` checks status without touching code, and `ss` hits the brake after checkpointing. [Full 13-key map](../saipen/RFC.md#110-command-surface); Cyrillic twins `сс`, `ссс`, `аа`, `ее`, `еее`, `рр` work too.
+
+**Package keys:** `ee`/`qq` prepare complete translation/wiki packages without integrating; `eee`/`qqq` accept only ready packages, then integrate, verify, review, and push.
 
 ## Fire it up
 

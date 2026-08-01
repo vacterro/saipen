@@ -31,6 +31,12 @@ Deep, isolated translation preparation system. This phase runs in a strictly qua
    - Before calling it done, verify coverage is real, not assumed: spot-check that everything identified in § 2 actually has a matching entry in every locale. A partial pass reported as 100% is a worse outcome than an honest partial report -- if something's missing, say so in the completion LOG line, don't round up.
 
 4. **Completion:**
+   - A translation run intended for later collection is not complete until
+     `.saipen/saitranslate/kitchen/OUTBOX.md` carries the PREPARE contract's
+     exact fields: `status`, `producer`, `source_head`, `coverage`, `payload`,
+     `verified`, and `instructions`. Use `producer: saitranslate`. Only the
+     full 32-language plus bonus-voice bundle over every real surface may say
+     `status: ready`; partial work says `draft` or `blocked` and names the gap.
    - Once the translation bundle is fully built, validated, and up-to-date,
      LOG one normal Event Graph line per RFC § 1.2 -- `- DATE [E-###]
      [parent: E-###] RUN: translate -> done @SHORT-HASH` (this exact text
@@ -45,7 +51,7 @@ Deep, isolated translation preparation system. This phase runs in a strictly qua
      wrote a separate one (it uses the main `.saipen/STATE.md`), so this step
      is a no-op there.
    - TRANSLATE completion does NOT integrate the bundle into the main
-     software -- the bundle sits safely in `.saipen/saitranslate/kitchen/` until
-     a future `ADD`/`PLAN` ticket formally integrates it, through the
-     normal `VERIFY`/`REVIEW`/`SHIP` gates like any other change, never as
-     a side effect of TRANSLATE itself.
+     software. The bundle sits safely in `.saipen/saitranslate/kitchen/`
+     until targeted `saipen collect saitranslate` consumes a `status: ready`
+     handoff, creates/claims the Core ticket, and routes it through the normal
+     `VERIFY`/`REVIEW`/`SHIP` gates. No ready handoff means no main write.

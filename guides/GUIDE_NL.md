@@ -6,7 +6,7 @@
 
 SAIPEN is een geheugennotitieblok in de map `.saipen/` voor AI-agente.
 
-**Sneltoetsen:** `cc` zet een actieve Goal Mode voort, `sss` meldt status zonder code aan te raken en `ss` slaat een checkpoint op en stopt. [Bekijk de volledige 11-toetsenkaart](../saipen/RFC.md#110-command-surface). Cyrillische tweelingen werken ook: `сс`, `ссс`, `аа`, `ее`, `рр`.
+**Sneltoetsen:** `cc` zet een actieve Goal Mode voort, `sss` meldt status zonder code aan te raken en `ss` slaat een checkpoint op en stopt. [Bekijk de volledige 13-toetsenkaart](../saipen/RFC.md#110-command-surface). Cyrillische tweelingen werken ook: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 ## Snelstart
 
