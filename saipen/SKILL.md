@@ -2,7 +2,8 @@
 name: saipen
 description: >
   SAIPEN (v7). Trigger on "saipen set", "saipen",
-  subcommands, and shortcuts (ss, cc, hh, gg, dd, aa, qq, ee, pp).
+  subcommands, and shortcuts (gg, hh, cc, ccc, ss, sss, dd, aa, qq, ee, pp;
+  Cyrillic twins: сс, ссс, аа, ее, рр).
   cold-start kernel loads first; phases/ modules load
   on demand per STATE. RFC.md is the constitution,
   reached only when a rule question arises.

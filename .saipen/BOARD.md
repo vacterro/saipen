@@ -1,10 +1,15 @@
 # Board
 ## DOING
-- [/] T-389 [P0] Add Path Resolution hint to SKILL.md to prevent expensive global searches for the SAIPEN protocol files when the skill is loaded from outside the project directory. | verify: SKILL.md updated, validator PASS
 
 ## TODO
+- [ ] T-394 [P1] Surface SAIPEN shortcuts near the start of README in concise, harmonious prose and update every guide that references shortcut usage so the entry path stays consistent. | needs: T-390 | verify: README opens with a clear shortcut path; every shortcut-reference guide matches the canonical RFC table; validator and docs checks PASS
+- [ ] T-393 [P0] Make the goal-counter mutation control change the live value instead of hard-coding `7`, which became a no-op and let one dead validator check masquerade as evidence. | verify: audit_checks goal-counter case mutates dynamically and all mutation cases PASS
+- [ ] T-391 [P0] Keep weak models in STYLE.md chat voice for every response: put the anti-drift duty in skill entry metadata and mechanically fail if it disappears. | verify: SKILL.md entry explicitly requires STYLE.md before first output and a pre-send re-check every response; behavioral guard and full gates PASS
+- [ ] T-392 [P1] Produce a large implementation-ready reorganization plan that preserves SAIPEN semantics while reducing load, duplication, and model-strength sensitivity across all supported agents. | needs: T-390,T-391 | verify: plan maps invariants, failure modes, target architecture, staged migration, compatibility gates, rollback, and measurable acceptance criteria into ordered tickets
 
 ## DONE
+- [x] T-390 [P0] Make every RFC shortcut trigger the SAIPEN skill from any project, including `ccc`, `sss`, and Cyrillic-confusable forms; guard skill metadata against shortcut-table drift. | review_passes: 2 | verify: PASS -- exact trigger-set equality; missing/stale red-controls; validator; audit_checks 50/50; scenarios; ruff; audit_order
+- [x] T-389 [P0] Add Path Resolution hint to SKILL.md to prevent expensive global searches for the SAIPEN protocol files when the skill is loaded from outside the project directory. | verify: SKILL.md updated, validator PASS
 - [x] T-388 [P0] Map the `cc` (and Cyrillic `сс`) shortcut to `saipen goal` (/goal) as requested by the user, replacing its current mapping to `saipen continue`. | verify: RFC.md updated, validator PASS
 - [x] T-387 [P2] A shortcut typed in Cyrillic resolves to the same shortcut; § 1.10 normalizes through the lowercase confusable set before matching. Five of eleven rows have twins. | review_passes: 1 | verify: PASS -- § 1.10 states the set and the step; shortcut-resolution check PASS; canonical 48/48
 - [x] T-386 [P0] `saipen hunt` now carries the phase switch's checkpoint duty, and that list's membership is derived from the phase docs instead of hand-kept. | review_passes: 1 | verify: PASS -- red-test removing `hunt` FAILs '[phase-switching]'; canonical 48/48; scenarios EXIT=0; ruff clean

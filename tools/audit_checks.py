@@ -415,6 +415,12 @@ CASES: list[tuple[str, str, object, str]] = [
     ("shortcut routes to a phase, not a command", "saipen/RFC.md",
      replace("| `hh` | `saipen hunt` |", "| `hh` | HUNT |"),
      "do not resolve to a command"),
+    ("SKILL metadata drops a shortcut trigger", "saipen/SKILL.md",
+     replace("cc, ccc, ss, sss, dd", "cc, ccc, ss, dd"),
+     "metadata misses RFC shortcut trigger"),
+    ("SKILL metadata keeps a stale shortcut trigger", "saipen/SKILL.md",
+     replace("qq, ee, pp;", "qq, ee, pp, zz;"),
+     "metadata has non-RFC shortcut trigger"),
     # Drop a phase-named command from the checkpoint duty. This is how
     # `saipen hunt` shipped: on the surface, absent from the list, and no
     # check compared the two for two releases.

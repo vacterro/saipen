@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.153.0 -- 2026-08-01 -- every shortcut can wake the protocol up
+
+Skill discovery happens before an agent has read the RFC. The RFC carried eleven shortcuts plus five Cyrillic-confusable twins, while `SKILL.md` advertised only part of that set; the missing forms worked inside an initialized SAIPEN project by accident and could fail to activate the skill anywhere else. Discovery metadata now carries the full set.
+
+The validator derives the expected triggers from the canonical RFC table and its confusable mapping, then requires exact equality with `SKILL.md` frontmatter. It rejects both halves of drift: a missing live shortcut and a stale shortcut left advertised after its RFC row disappears. Separate mutation controls prove both directions can still go red; the canonical mutation suite is now 50 of 50.
+
+This release also carries the user's `cc` mapping to bare `saipen goal`, so the short key resumes an active Goal Mode run without resetting an untripped valve, and a skill-entry path hint that stops external installations from hunting the filesystem for protocol files. Both changes were committed after v7.152.0 and are published here with the discovery guard that keeps their trigger surface honest.
+
 ## 7.152.0 -- 2026-08-01 -- a shortcut typed in Cyrillic is the same shortcut
 
 The user works on a Russian layout, where the visually identical letters carry different codepoints. Five of the eleven shortcuts have lowercase homoglyph twins and six have none, so the recognizer normalizes through the confusable set before matching rather than carrying a second column of aliases.

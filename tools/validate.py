@@ -2949,9 +2949,11 @@ else:
                          f"checkpoint")
                     drift_ok = False
 
+            _shortcut_rows = re.findall(
+                r"^\| `([a-z]{2,3})` \| ([^|]+) \|",
+                _rfc_t[_i:_j], re.MULTILINE)
             _bad_routes = []
-            for _sc, _route in re.findall(r"^\| `([a-z]{2,3})` \| ([^|]+) \|",
-                                          _rfc_t[_i:_j], re.MULTILINE):
+            for _sc, _route in _shortcut_rows:
                 _named = set(re.findall(r"`saipen ([a-z]+)", _route))
                 if not _named:
                     _bad_routes.append(f"`{_sc}` -> {_route.strip()!r} names no "
@@ -2964,6 +2966,52 @@ else:
                      "not resolve to a command the same section defines: "
                      + "; ".join(_bad_routes))
                 drift_ok = False
+
+            # Skill platforms decide whether to load SAIPEN from SKILL.md's
+            # frontmatter before the RFC is available. A shortcut present
+            # only in the RFC works by accident when `.saipen/` forces the
+            # skill to load, then silently misses everywhere else. Derive the
+            # Latin rows and their Cyrillic-confusable twins from the table.
+            _skill_p = _tools_parent / "saipen" / "SKILL.md"
+            if not _skill_p.is_file():
+                fail("cross-doc drift [skill-triggers] -- saipen/SKILL.md is "
+                     "missing; shortcut activation metadata cannot be checked")
+                drift_ok = False
+            else:
+                _skill_t = _skill_p.read_text(encoding="utf-8-sig")
+                _front = _skill_t.split("---", 2)
+                _trigger_m = (re.search(r"shortcuts\s*\(([^)]*)\)", _front[1],
+                                        re.DOTALL)
+                              if len(_front) == 3 else None)
+                if not _trigger_m:
+                    fail("cross-doc drift [skill-triggers] -- SKILL.md "
+                         "frontmatter has no `shortcuts (...)` trigger list")
+                    drift_ok = False
+                else:
+                    _advertised = set(re.findall(
+                        r"(?<!\w)(\w{2,3})(?!\w)", _trigger_m.group(1),
+                        re.IGNORECASE))
+                    _latin = {shortcut for shortcut, _ in _shortcut_rows}
+                    _to_cyr = {"a": "\u0430", "e": "\u0435",
+                               "o": "\u043e", "p": "\u0440",
+                               "c": "\u0441", "y": "\u0443",
+                               "x": "\u0445"}
+                    _twins = {"".join(_to_cyr[ch] for ch in shortcut)
+                              for shortcut in _latin
+                              if all(ch in _to_cyr for ch in shortcut)}
+                    _expected_triggers = _latin | _twins
+                    _missing = sorted(_expected_triggers - _advertised)
+                    _unexpected = sorted(_advertised - _expected_triggers)
+                    if _missing:
+                        fail("cross-doc drift [skill-triggers] -- SKILL.md "
+                             "metadata misses RFC shortcut trigger(s): "
+                             + ", ".join(_missing))
+                        drift_ok = False
+                    if _unexpected:
+                        fail("cross-doc drift [skill-triggers] -- SKILL.md "
+                             "metadata has non-RFC shortcut trigger(s): "
+                             + ", ".join(_unexpected))
+                        drift_ok = False
 
         _m = re.search(r"ticket-field list is closed.*?(?=\n- |\n#)",
                        _rfc_t, re.DOTALL)

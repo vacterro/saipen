@@ -294,3 +294,26 @@
 - 01.08.26 09:06 [E-1530] [parent: E-1529] [T-389] DEC: SHIP -- one row added to SKILL.md. No P0-P1 findings.
 - 01.08.26 09:06 [E-1531] [parent: E-1530] [T-389] DEC: REVIEW -- verified the path resolution hint is clear and correct.
 - 01.08.26 09:06 [E-1532] [parent: E-1531] [T-389] RUN: SHIP -> pushed 810c83a
+- 01.08.26 09:07 [E-1533] [parent: E-1532] [T-389] RUN: DONE -> ticket complete
+- 01.08.26 09:07 [E-1534] [parent: E-1533] [T-none] DEC: DONE -> HUNT -- board empty
+- 01.08.26 09:09 [E-1535] [parent: E-1534] [T-390] RUN: HUNT -> RFC has 11 shortcuts, but SKILL.md advertises only 9; `ccc`, `sss`, and all Cyrillic twins may miss skill activation outside an initialized project.
+- 01.08.26 09:09 [E-1536] [parent: E-1535] [T-390] DEC: claimed; small metadata/validator symmetry gap, HUNT -> SCOUT.
+- 01.08.26 09:10 [E-1537] [parent: E-1536] [T-391] DEC: user reports weak-model STYLE.md chat drift; queued separate entry-metadata plus guard hardening behind T-390.
+- 01.08.26 09:11 [E-1538] [parent: E-1537] [T-392] DEC: greenlight -- plan semantic-preserving reorganization for lower load and stronger cross-model reliability after T-390/T-391.
+- 01.08.26 09:12 [E-1539] [parent: E-1538] [T-390] RUN: SCOUT -- RFC table is canonical; derive 11 Latin triggers plus five Cyrillic twins, require them in SKILL.md frontmatter, red-test metadata removal.
+- 01.08.26 09:16 [E-1540] [parent: E-1539] [T-390] RUN: BUILD -> SKILL metadata now advertises 11 Latin shortcuts plus five derived Cyrillic twins; validator compares metadata to RFC; mutation red-test added.
+- 01.08.26 09:16 [E-1541] [parent: E-1540] [T-393] DEC: full audit exposed pre-existing no-op control: hard-coded `goal_tickets: 7` equals live STATE; ticketed separately.
+- 01.08.26 09:31 [E-1542] [parent: E-1541] [T-390] RUN: VERIFY -> validator PASS; audit_checks 49/49; scenarios PASS; ruff clean; audit_order PASS. conf: high.
+- 01.08.26 09:31 [E-1543] [parent: E-1542] [T-390] DEC: goal_tickets 7->8
+- 01.08.26 09:32 [E-1544] [parent: E-1543] [T-390] DEC: SHIP -- review pass 1 finds derived trigger coverage and live metadata red-control correct; no P0-P1 findings.
+- 01.08.26 09:34 [E-1545] [parent: E-1544] [T-390] DEC: SHIP -> BUILD -- preflight found ungated T-393 implementation in diff; separated its dynamic-counter lines before publish.
+- 01.08.26 09:34 [E-1546] [parent: E-1545] [T-390] RUN: BUILD -> isolated T-390 metadata guard from queued T-393 mutation fix; current diff now matches claimed scope.
+- 01.08.26 09:35 [E-1547] [parent: E-1546] [T-390] RUN: VERIFY -> validator PASS; audit_checks 49/49; scenarios PASS; ruff clean; audit_order PASS. conf: high.
+- 01.08.26 09:35 [E-1548] [parent: E-1547] [T-390] DEC: goal_tickets 8->9
+- 01.08.26 09:36 [E-1549] [parent: E-1548] [T-394] DEC: user requested shortcut-first README copy plus synchronized guide references; queued directly behind T-390.
+- 01.08.26 09:38 [E-1550] [parent: E-1549] [T-390] DEC: REVIEW -> BUILD -- validator rejected missing metadata triggers but accepted stale extras; exact-set guard and reverse red-control required.
+- 01.08.26 09:38 [E-1551] [parent: E-1550] [T-390] RUN: BUILD -> trigger guard now rejects both missing and stale metadata; added stale-`zz` mutation control.
+- 01.08.26 09:39 [E-1552] [parent: E-1551] [T-390] RUN: VERIFY -> validator PASS; audit_checks 50/50; scenarios PASS; ruff clean; audit_order PASS. conf: high.
+- 01.08.26 09:39 [E-1553] [parent: E-1552] [T-390] DEC: goal_tickets 9->10
+- 01.08.26 09:40 [E-1554] [parent: E-1553] [T-390] DEC: SHIP -- review pass 2 confirms missing/stale exact-set guard and both red-controls; no P0-P1 findings.
+- 01.08.26 09:55 [E-1555] [parent: E-1554] [T-390] RUN: SHIP preflight -> validator/scenarios/ruff/order/tags/floor/checks PASS; parity 11/50 baseline PASS.
