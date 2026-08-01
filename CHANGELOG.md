@@ -2,6 +2,12 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.152.0 -- 2026-08-01 -- a shortcut typed in Cyrillic is the same shortcut
+
+The user works on a Russian layout, where the visually identical letters carry different codepoints. Five of the eleven shortcuts have lowercase homoglyph twins and six have none, so the recognizer normalizes through the confusable set before matching rather than carrying a second column of aliases.
+
+Answering "unrecognized command" to a key pressed correctly, on the layout the user actually types in, is the worst available response -- and the shortcut it hits is the most-used one. The table stays Latin: that is the canonical spelling, not the only accepted one.
+
 ## 7.151.0 -- 2026-08-01 -- a command named after a phase carries the phase switch's duty
 
 `saipen hunt` joined the command surface in v7.148.0 and was never added to section 1.10's phase-switching list -- the closed enumeration that makes those commands checkpoint a claimed `## DOING` ticket before switching phase. For two releases `hh` was the one phase switch that could leave half-finished work unwritten. Its own definition said a claimed ticket outranks it, which orders which runs first and says nothing about writing the checkpoint; ordering and checkpointing are two rules and only one was stated.

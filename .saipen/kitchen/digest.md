@@ -1,3 +1,3 @@
-done: T-386 -- saipen hunt carries the checkpoint duty; list derived from phase docs; shipping as v7.151.0
+done: T-387 -- Cyrillic shortcuts resolve to the same command; shipping as v7.152.0
 remaining: nothing open
 awaiting: nothing
