@@ -5,7 +5,7 @@
 </p>
 
 <div align="center">
-  <h3>🔥 <a href="README.ee.md">🇪🇪 LOE SEDA EESTI KEELES / ESTONIAN 🇪🇪</a> 🔥</h3>
+  <h3><a href="README.ee.md">🇪🇪 LOE SEDA EESTI KEELES / ESTONIAN 🇪🇪</a></h3>
   <a href="README.md">🇬🇧 English</a> &nbsp;|&nbsp; 
   <a href="README.ded.md">👴 Дед-Версия (Russian)</a> &nbsp;|&nbsp; 
   <a href="README.ja.md">🇯🇵 日本語 (Japanese)</a>
