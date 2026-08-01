@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.147.0 -- 2026-08-01 -- a file that stops mid-line swallows the next write
+
+Every file the protocol appends to has to end on a line boundary. Appending to a file that stops mid-line does not add a line, it extends the last one -- and nothing here had ever read a file's last byte.
+
+`.saipen/LOG.md` had reached exactly that state: a literal escape written where a newline belonged. Every LOG mutation `tools/audit_checks.py` appends then landed inside the final entry instead of after it, and two of its 45 red controls stopped being evidence while the suite still printed PASS. Three more live files were mid-line when this check was written, including a subSaipen `BOARD.md` ending on `## BLOCKED`, where one appended ticket would have cost both the heading and the ticket, and a subSaipen `STATE.md` ending on its own closing `---`.
+
+The validator now reads the last byte of all 21 append targets -- the checkpoint trio, sealed LOG segments, the subSaipen manifest, and each worker's own three files -- and FAILs when one ends mid-line. Three shipped scenario fixtures turned out to be in the same state and were repaired. The red control strips the final newline from a fixture `BOARD.md`, so the mutation is the file's bytes rather than any check's wording, and the mutation harness now stands at 46 of 46.
+
 ## 7.146.0 -- 2026-08-01 -- a re-authorization that survives the next crash
 
 Bare `saipen goal` clears a tripped safety valve by resetting `goal_waves`/`goal_tickets` to `0`, and nothing required that reset to leave a line. The bumps it cancels stay in the LOG, so Recovery -- which rebuilt the counters by counting completion events since the `saipen goal <text>` pivot -- restored the pre-reset totals and re-tripped a valve the human had just cleared, while RFC section 2.4 forbids tidying those counters back down. Not a one-time slip: every later Recovery revoked the same re-authorization again, from a count that only grows.

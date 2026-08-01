@@ -1814,6 +1814,41 @@ if _subs_root.is_dir():
     if not _idle and not _ready_total:
         ok("subSaipen liveness clean (none idle, no uncollected findings)")
 
+# ------------------------------------------- append targets end on a boundary
+
+# Every file the protocol APPENDS to has to end on a line boundary, because an
+# append to a file that stops mid-line does not add a line -- it extends the
+# last one. `.saipen/LOG.md` reached this state (a literal `\n` written where a
+# newline belonged) and every LOG mutation `tools/audit_checks.py` appends
+# landed inside the final entry instead of after it: two of its red controls
+# stopped being evidence while the suite still printed PASS. A BOARD.md ending
+# on `## BLOCKED` costs the heading AND the next ticket in one write, and no
+# structural check can see it, since the bytes never become a second line.
+# Checked by reading the last byte -- the one thing no other check here does.
+_append_targets = [Path(".saipen/STATE.md"), Path(".saipen/BOARD.md"),
+                   Path(".saipen/LOG.md")]
+_append_targets += sorted(Path(".saipen/logs").glob("LOG-*.md"))
+_subs_root = Path(".saipen/extensions/subs")
+if _subs_root.is_dir():
+    _append_targets.append(_subs_root / "MANIFEST.md")
+    for _sub in sorted(p for p in _subs_root.iterdir() if p.is_dir()):
+        _append_targets += [_sub / "STATE.md", _sub / "BOARD.md", _sub / "LOG.md"]
+
+_unterminated = []
+for _t in _append_targets:
+    if not _t.is_file():
+        continue
+    _raw = _t.read_bytes()
+    if _raw and not _raw.endswith(b"\n"):
+        _unterminated.append(f"{_t.as_posix()} ends {_raw[-40:]!r}")
+if _unterminated:
+    fail(f"{len(_unterminated)} protocol append target(s) end mid-line, so the "
+         f"next append extends the last line instead of adding one: "
+         + "; ".join(_unterminated[:3]))
+elif any(t.is_file() for t in _append_targets):
+    ok(f"append targets end on a line boundary "
+       f"({sum(1 for t in _append_targets if t.is_file())} checked)")
+
 # --------------------------------------------- claims that git can adjudicate
 
 # A STATE that says "pushed" while commits sit local-only is exactly what

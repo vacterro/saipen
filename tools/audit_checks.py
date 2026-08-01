@@ -400,6 +400,12 @@ CASES: list[tuple[str, str, object, str]] = [
     ("goal counter STATE cannot survive its own rebuild", STATE,
      sub_line("goal_tickets", "7"),
      "newest goal marker rebuilds"),
+    # Strip the final newline and the file stops mid-line. Nothing else in this
+    # list reads a last byte, which is how the real one survived: every
+    # mutation appended below landed INSIDE the last entry instead of after it,
+    # and two of these cases quietly stopped being evidence.
+    ("BOARD.md ends mid-line", BOARD, lambda t: t.rstrip("\r\n"),
+     "end mid-line"),
     ("requires: a capability nobody defines", STATE,
      replace("  - python", "  - pyhton"), "handshake vocabulary"),
 
