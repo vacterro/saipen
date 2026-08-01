@@ -1,6 +1,10 @@
 *.bak
 .DS_Store
 Thumbs.db
+# A Windows agent can leave a real NTFS device-name entry behind when a
+# redirect meant for another shell is interpreted literally. It is never
+# project content, and Git must not offer it to `git add -A`.
+/nul
 __pycache__/
 *.py[cod]
 .freebuff/

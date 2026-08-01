@@ -12,7 +12,9 @@ og gjenopptar arbeidet på under ett minutt -- ingen ny brifing, hvilken som hel
 
 **Én kommando. Null hukommelsestap.**
 
-**v7.155.0** | [Spesifikasjon](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Samsvar](saipen/CONFORMANCE.md) | ren markdown | null avhengigheter | MIT
+**Hurtigtaster:** `cc` fortsetter en aktiv Goal Mode-kjøring, `sss` viser status uten å røre koden, og `ss` lagrer et sjekkpunkt og stopper. [Se hele 11-tasters kartet](saipen/RFC.md#110-command-surface). Kyrilliske tvillinger fungerer også: `сс`, `ссс`, `аа`, `ее`, `рр`.
+
+**v7.156.0** | [Spesifikasjon](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Samsvar](saipen/CONFORMANCE.md) | ren markdown | null avhengigheter | MIT
 
 [![Russisk guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![Engelsk guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)

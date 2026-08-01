@@ -8,6 +8,8 @@ Ascultă, începătorule. Problema e simplă: agenții tăi AI au memoria unui p
 
 **SAIPEN** este un caiet în folderul `.saipen/` din proiectul tău.
 
+**Comenzi rapide:** `cc` continuă un Goal Mode activ, `sss` afișează starea fără să atingă codul, iar `ss` salvează un punct de control și se oprește. [Vezi harta completă cu 11 taste](../saipen/RFC.md#110-command-surface). Gemenii chirilici funcționează și ei: `сс`, `ссс`, `аа`, `ее`, `рр`.
+
 ## Pornire rapidă
 
 1. **Instalați o dată per mașină:**

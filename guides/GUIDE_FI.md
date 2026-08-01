@@ -6,6 +6,8 @@
 
 SAIPEN on muistilehtiö `.saipen/`-kansiossa tekoälyagenteille.
 
+**Pikanäppäimet:** `cc` jatkaa aktiivista Goal Mode -ajoa, `sss` näyttää tilan koskematta koodiin ja `ss` tallentaa tarkistuspisteen ja pysähtyy. [Katso täydellinen 11 näppäimen kartta](../saipen/RFC.md#110-command-surface). Kyrilliset kaksoset toimivat myös: `сс`, `ссс`, `аа`, `ее`, `рр`.
+
 ## Pika-aloitus
 
 1. **Asenna kerran konetta kohti:**

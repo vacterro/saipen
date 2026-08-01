@@ -8,6 +8,8 @@ Hör zu, Neuling. Das Problem ist einfach: Deine AI-Agenten haben das Gedächtni
 
 **SAIPEN** ist einfach ein Notizbuch im Ordner `.saipen/` direkt in deinem Projekt.
 
+**Schnellzugriff:** `cc` setzt einen aktiven Goal Mode fort, `sss` meldet Status ohne Code anzufassen und `ss` speichert einen Checkpoint und stoppt. [Siehe die komplette 11-Tasten-Karte](../saipen/RFC.md#110-command-surface). Kyrillische Zwillinge funktionieren auch: `сс`, `ссс`, `аа`, `ее`, `рр`.
+
 ## Schnellstart
 
 1. **Einmal pro Maschine installieren:**

@@ -2,6 +2,12 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.156.0 -- 2026-08-01 -- device names and weak translations get guards
+
+A real zero-byte NTFS entry named `nul`, left by an external agent or shell, made Git advertise junk and made both mutation audits abort inside `shutil.copytree` before they could print a useful diagnosis. Root `/nul` is now ignored by Git and canonical audit snapshots. A behavioral self-control creates the real extended-path device-name entry on Windows, copies the tree, and proves the ordinary marker survives while `nul` does not; the original workspace entry remains in place and no longer interferes.
+
+The SAIT-008 translation pass reached all 32 locale READMEs, three root mirrors, and 28 non-Core guides, but its weak read-only worker wrote shared files directly and independently translated the guide half. The keys were structurally present while several sentences had missing verbs, Korean misspellings, and broken Thai. Core reviewed the output, corrected the visible HE/JA/KO/TH/TR defects, and made each locale README the single source for its non-Core guide. The validator now guards all 32 sources, three mirrors, 33 locale guides, and both root entry docs for one early callout, canonical key order, five Cyrillic twins, exact RFC targets, and source/consumer equality. All 52 canonical mutations fire; portable-floor parity remains at its 11-case baseline.
+
 ## 7.155.0 -- 2026-08-01 -- a no-op mutation is not evidence
 
 The goal-counter recovery control wrote the literal value `7` into live `STATE.md`. Once the real counter itself reached 7, that mutation changed nothing; the canonical validator received the untouched control tree, and the audit suite still counted the case as proof that its check could go red.

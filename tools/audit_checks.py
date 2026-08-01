@@ -26,6 +26,7 @@ Exit 0 when every case still goes red, 1 otherwise.
 from __future__ import annotations
 
 import ast
+import contextlib
 import io
 import json
 import os
@@ -43,7 +44,7 @@ else:
 
 HOME = Path(__file__).resolve().parent.parent
 IGNORE = shutil.ignore_patterns(".git", ".venv", "__pycache__", ".freebuff",
-                                "node_modules")
+                                "node_modules", "nul")
 
 STATE = ".saipen/STATE.md"
 BOARD = ".saipen/BOARD.md"
@@ -55,6 +56,38 @@ STATE_SCHEMA = "extensions/schemas/state.schema.json"
 TAG_QUERY = ("git", "tag", "-l", "v*")
 AUDIT_TAGS_GIT_SHIM = "SAIPEN_AUDIT_TAGS_GIT_SHIM"
 AUDIT_TAGS_MODE = "SAIPEN_AUDIT_TAGS_MODE"
+
+
+def root_device_ignore_probe(tmp: Path) -> str | None:
+    """Prove a real `nul` entry cannot poison an audit snapshot.
+
+    On Windows, ordinary APIs resolve `nul` to the character device instead
+    of creating a directory entry. The extended path creates the same real
+    NTFS artifact an external shell/agent left in this repository. POSIX can
+    create the name normally, so CI still exercises the ignore contract.
+    """
+    source = tmp / "root-device-source"
+    destination = tmp / "root-device-copy"
+    source.mkdir()
+    (source / "kept.txt").write_text("kept\n", encoding="utf-8")
+    reserved = source / "nul"
+    native = ("\\\\?\\" + str(reserved.resolve())
+              if os.name == "nt" else str(reserved))
+    try:
+        with open(native, "wb") as stream:
+            stream.write(b"external agent artifact")
+        shutil.copytree(source, destination, ignore=IGNORE)
+        copied = {entry.name.casefold() for entry in destination.iterdir()}
+        if copied != {"kept.txt"}:
+            return "snapshot did not preserve only the ordinary control file"
+    except (OSError, shutil.Error) as exc:
+        return f"snapshot raised {type(exc).__name__}: {exc}"
+    finally:
+        with contextlib.suppress(FileNotFoundError):
+            os.unlink(native)
+        shutil.rmtree(source, ignore_errors=True)
+        shutil.rmtree(destination, ignore_errors=True)
+    return None
 
 
 def release_ledger_probe(source: Path, destination: Path) -> str | None:
@@ -516,6 +549,12 @@ CASES: list[tuple[str, str, object, str]] = [
      "reply-language"),
     ("a locale loses its guide", "guides/GUIDE_UK.md", DELETE,
      "locale coverage"),
+    ("a locale guide loses its shortcut callout", "guides/GUIDE_AR.md",
+     lambda t: re.sub(r"^\*\*[^\n]*`cc`[^\n]*#110-command-surface[^\n]*\n",
+                      "", t, count=1, flags=re.MULTILINE),
+     "shortcut-callouts"),
+    ("root device artifact is no longer Git-ignored", ".gitignore",
+     replace("/nul\n", ""), "root-device-ignore"),
     # NOT tested here: the phantom-version check needs the TAG half of the
     # release ledger, and this harness copies the tree without .git on
     # purpose. Without tags the check correctly declines to run, so a case
@@ -584,6 +623,13 @@ def validator_output(root: Path) -> str:
 
 def main() -> int:
     tmp = Path(tempfile.mkdtemp(prefix="audit_checks_"))
+    device_error = root_device_ignore_probe(tmp)
+    if device_error:
+        print(f"FAIL: root `nul` snapshot control -- {device_error}")
+        shutil.rmtree(tmp, ignore_errors=True)
+        return 1
+    print("PASS: a real root `nul` entry is excluded from audit snapshots")
+
     pristine = tmp / "pristine"
     shutil.copytree(HOME, pristine, ignore=IGNORE)
 

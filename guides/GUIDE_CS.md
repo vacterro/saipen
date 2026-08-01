@@ -8,6 +8,8 @@ Poslouchej, nováčku. Problém je jednoduchý: tvoji AI agenti mají paměť zl
 
 **SAIPEN** je zápisník ve složce `.saipen/` ve tvém projektu.
 
+**Rychlé klávesy:** `cc` pokračuje v aktivním Goal Mode, `sss` zobrazí stav bez dotyku kódu a `ss` uloží kontrolní bod a zastaví. [Podívej se na úplnou mapu 11 kláves](../saipen/RFC.md#110-command-surface). Fungují i cyrilské dvojníky: `сс`, `ссс`, `аа`, `ее`, `рр`.
+
 ## Rychlý start
 
 1. **Nainstalujte jednou na počítač:**

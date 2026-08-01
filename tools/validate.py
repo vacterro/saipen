@@ -1787,6 +1787,99 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
     else:
         ok(f"{checked} locale README badge(s) match VERSION ({repo_version})")
 
+    # A translated shortcut paragraph is small, but its consumers are not:
+    # 32 locale sources, three root mirrors, 33 locale guides, plus the two
+    # root entry docs. SAIT-008 wrote most of them directly and produced two
+    # independently translated versions per language; visible grammar errors
+    # appeared in the guide half immediately. Keep one locale source and make
+    # every non-Core guide an exact link-adjusted consumer of it. This check
+    # cannot judge prose quality, but it makes semantic loss, duplicate drift,
+    # a stale mirror, or a second weak-model rewrite loud.
+    _shortcut_tokens = ("`cc`", "`sss`", "`ss`",
+                        "`\u0441\u0441`", "`\u0441\u0441\u0441`",
+                        "`\u0430\u0430`", "`\u0435\u0435`", "`\u0440\u0440`")
+
+    def _shortcut_callout(path, expected_link):
+        if not path.is_file():
+            fail(f"cross-doc drift [shortcut-callouts] -- missing {path}")
+            return None
+        _lines = path.read_text(encoding="utf-8-sig").splitlines()
+        _matches = [(i, line) for i, line in enumerate(_lines)
+                    if "#110-command-surface" in line and "`cc`" in line]
+        if len(_matches) != 1:
+            fail(f"cross-doc drift [shortcut-callouts] -- {path} has "
+                 f"{len(_matches)} shortcut callouts; expected exactly one")
+            return None
+        _index, _line = _matches[0]
+        _missing = [token for token in _shortcut_tokens
+                    if _line.count(token) != 1]
+        if _missing:
+            fail(f"cross-doc drift [shortcut-callouts] -- {path} callout "
+                 "does not carry each canonical key exactly once: "
+                 + ", ".join(_missing))
+        if not _missing and not (_line.index("`cc`") < _line.index("`sss`")
+                                 < _line.index("`ss`")):
+            fail(f"cross-doc drift [shortcut-callouts] -- {path} no longer "
+                 "orders continue, status, then stop like the canonical entry")
+        if f"]({expected_link})" not in _line:
+            fail(f"cross-doc drift [shortcut-callouts] -- {path} does not "
+                 f"link to {expected_link}")
+        if _index >= 40:
+            fail(f"cross-doc drift [shortcut-callouts] -- {path} hides its "
+                 f"shortcut entry at line {_index + 1}, outside the opening")
+        return _line
+
+    _locale_sources = {}
+    for _locale_dir in sorted(p for p in kitchen.iterdir() if p.is_dir()):
+        _code = _locale_dir.name.upper()
+        _source = _locale_dir / f"README_{_code}.md"
+        _locale_sources[_code] = _shortcut_callout(
+            _source, "saipen/RFC.md#110-command-surface")
+    if len(_locale_sources) != 32:
+        fail("cross-doc drift [shortcut-callouts] -- expected 32 locale "
+             f"README sources, found {len(_locale_sources)}")
+
+    _mirror_map = {
+        Path("README.ded.md"): "DED",
+        Path("README.ee.md"): "ET",
+        Path("README.ja.md"): "JA",
+    }
+    for _mirror, _code in _mirror_map.items():
+        _mirror_line = _shortcut_callout(
+            _mirror, "saipen/RFC.md#110-command-surface")
+        if (_mirror_line is not None and _locale_sources.get(_code) is not None
+                and _mirror_line != _locale_sources[_code]):
+            fail(f"cross-doc drift [shortcut-callouts] -- {_mirror} differs "
+                 f"from locale source {_code}")
+
+    _shortcut_callout(Path("README.md"),
+                      "saipen/RFC.md#110-command-surface")
+    _shortcut_callout(Path("GUIDE.md"),
+                      "saipen/RFC.md#110-command-surface")
+    _guide_paths = sorted(Path("guides").glob("GUIDE_*.md"))
+    if len(_guide_paths) != 33:
+        fail("cross-doc drift [shortcut-callouts] -- expected 33 locale "
+             f"guides, found {len(_guide_paths)}")
+    _core_guides = {"EN", "EE", "DED", "JA", "RU"}
+    for _guide in _guide_paths:
+        _code = _guide.stem[len("GUIDE_"):]
+        _guide_line = _shortcut_callout(
+            _guide, "../saipen/RFC.md#110-command-surface")
+        if _code not in _core_guides:
+            _source_line = _locale_sources.get(_code)
+            _expected = (_source_line.replace(
+                "](saipen/RFC.md#110-command-surface)",
+                "](../saipen/RFC.md#110-command-surface)")
+                         if _source_line is not None else None)
+            if _guide_line is not None and _expected is not None \
+                    and _guide_line != _expected:
+                fail(f"cross-doc drift [shortcut-callouts] -- {_guide} "
+                     f"differs from locale source {_code}")
+
+    if not any("shortcut-callouts" in problem for problem in failures):
+        ok("shortcut callouts aligned across 32 locale sources, 3 mirrors, "
+           "33 locale guides, and both root entry docs")
+
 # ------------------------------------------------ subSaipen liveness signals
 
 # Two things about a subSaipen that were invisible until v7.99.0, both found by
@@ -3029,7 +3122,20 @@ else:
                      f"{sorted(KNOWN_FIELDS)}")
                 drift_ok = False
 
-    # 13l. No gitlink inside `.saipen/`. A subSaipen's kitchen is a sandbox
+    # 13l. Keep the one known Windows device-name artifact out of Git. This is
+    #      an exact config identity contract: the behavioral half lives in
+    #      audit_checks.py, which creates a real entry and copies the tree.
+    #      A Git query cannot be used here because mutation audits deliberately
+    #      copy the repository without `.git/` before running this validator.
+    _ignore_p = _tools_parent / ".gitignore"
+    _ignore_lines = (set(_ignore_p.read_text(encoding="utf-8-sig").splitlines())
+                     if _ignore_p.is_file() else set())
+    if IS_SAIPEN_HOME and "/nul" not in _ignore_lines:
+        fail("cross-doc drift [root-device-ignore] -- root `nul` is not "
+             "excluded by .gitignore; a real Windows device-name entry can "
+             "pollute status and be staged by broad add commands")
+
+    # 13m. No gitlink inside `.saipen/`. A subSaipen's kitchen is a sandbox
     #      and it may legitimately hold a CLONE of something -- saiwiki keeps
     #      the GitHub wiki there. `git add -A` turns a nested repository into a
     #      mode-160000 entry: a pointer to a commit no clone of this repository
@@ -3047,7 +3153,7 @@ else:
                  f"nobody can fetch, with none of its content. Add the path "
                  f"to .gitignore and `git rm --cached` it")
 
-    # 13m. Every CONFORMANCE row's stated enforcement still exists.
+    # 13n. Every CONFORMANCE row's stated enforcement still exists.
     #      This table only ever grew -- 144 rows, not one retirement -- and
     #      nothing made a rule LOUD when the thing enforcing it went away. A
     #      row naming a deleted tool, a renamed CI step or a fixture that no

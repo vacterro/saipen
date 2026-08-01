@@ -6,6 +6,8 @@
 
 SAIPEN là sổ ghi nhớ trong thư mục `.saipen/` cho các tác nhân AI.
 
+**Phím tắt:** `cc` tiếp tục Goal Mode đang chạy, `sss` báo trạng thái mà không đụng vào mã và `ss` lưu điểm kiểm tra rồi dừng. [Xem bản đồ đầy đủ 11 phím](../saipen/RFC.md#110-command-surface). Các cặp song sinh Cyrillic cũng hoạt động: `сс`, `ссс`, `аа`, `ее`, `рр`.
+
 ## Khởi đầu nhanh
 
 1. **Cài đặt một lần cho mỗi máy:**

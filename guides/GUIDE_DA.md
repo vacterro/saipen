@@ -6,6 +6,8 @@
 
 SAIPEN er en hukommelsesnotesbog i mappen `.saipen/` til AI-agenter.
 
+**Hurtigtaster:** `cc` fortsætter en aktiv Goal Mode-kørsel, `sss` viser status uden at røre koden, og `ss` gemmer et kontrolpunkt og stopper. [Se hele 11-tasters kortet](../saipen/RFC.md#110-command-surface). Kyrilliske tvillinger virker også: `сс`, `ссс`, `аа`, `ее`, `рр`.
+
 ## Hurtig Start
 
 1. **Installer én gang pr. maskine:**
