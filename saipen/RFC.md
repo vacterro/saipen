@@ -280,8 +280,8 @@ The complete set of recognized user-facing commands. Phase-affecting ones are de
 |----------|-----------|-------|
 | `gg` | `saipen goal` | Goal Mode pivot / re-authorization |
 | `hh` | `saipen hunt` | Autonomous defect/improvement scan (§ 2.1) |
-| `cc` | `saipen continue` | Maintain: resume, and keep going -- § 1.11's ladder, never a push |
-| `ccc` | `saipen continue` then `saipen ship` | Everything `cc` does, then the commit/tag/push chain through its own gates. **The only shortcut whose chain reaches a remote** -- stated here because the table carries the fact, not because length implies it: `sss` is tripled too and touches nothing outside the repository. It waives nothing -- `saipen ship` still routes through `VERIFY`/`REVIEW` per its own definition |
+| `cc` | `saipen goal` | Mapped by user request to trigger goal mode; originally resume/continue |
+| `ccc` | `saipen continue` then `saipen ship` | Everything `saipen continue` does, then the commit/tag/push chain through its own gates. **The only shortcut whose chain reaches a remote** -- stated here because the table carries the fact, not because length implies it: `sss` is tripled too and touches nothing outside the repository. It waives nothing -- `saipen ship` still routes through `VERIFY`/`REVIEW` per its own definition |
 | `ss` | `saipen stop` | The brake: checkpoint, write the digest, hand control back |
 | `sss` | `saipen status` | Where the run stands, caveman-дед short |
 | `dd` | `saipen plan` | ADD / PLAN — autonomous 4-best-additions proposal when bare |

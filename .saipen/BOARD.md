@@ -4,6 +4,7 @@
 ## TODO
 
 ## DONE
+- [x] T-388 [P0] Map the `cc` (and Cyrillic `сс`) shortcut to `saipen goal` (/goal) as requested by the user, replacing its current mapping to `saipen continue`. | verify: RFC.md updated, validator PASS
 - [x] T-387 [P2] A shortcut typed in Cyrillic resolves to the same shortcut; § 1.10 normalizes through the lowercase confusable set before matching. Five of eleven rows have twins. | review_passes: 1 | verify: PASS -- § 1.10 states the set and the step; shortcut-resolution check PASS; canonical 48/48
 - [x] T-386 [P0] `saipen hunt` now carries the phase switch's checkpoint duty, and that list's membership is derived from the phase docs instead of hand-kept. | review_passes: 1 | verify: PASS -- red-test removing `hunt` FAILs '[phase-switching]'; canonical 48/48; scenarios EXIT=0; ruff clean
 - [x] T-385 [P1] `sss` -> `saipen status`, and the length rule was rewritten with it: length is collision order, not cost, since status reaches no remote. `ccc` now states its remote reach as a fact on its own row. | review_passes: 1 | verify: PASS -- shortcut check PASS; red-test `sss`->'STATUS' FAILs 'do not resolve to a command'; canonical 47/47; scenarios EXIT=0

@@ -281,3 +281,10 @@
 - 01.08.26 08:56 [E-1517] [parent: E-1516] [T-387] RUN: VERIFY -> canonical 48/48, scenarios EXIT=0, ruff clean, validator PASS. The shortcut-resolution check is unaffected by design: the table stays Latin, so its right column still resolves against the command surface. conf: high.
 - 01.08.26 08:56 [E-1518] [parent: E-1517] [T-387] DEC: goal_tickets 5->6
 - 01.08.26 08:56 [E-1519] [parent: E-1518] [T-387] DEC: SHIP -- review pass 1: the rule is stated where recognition is defined, the twins were measured rather than assumed (five of eleven), and nothing mechanical changed. No P0-P1 findings.
+- 01.08.26 09:00 [E-1520] [parent: E-1519] [T-388] RUN: SCOUT -- mapped cc shortcut to saipen goal (/goal) as requested by the user.
+- 01.08.26 09:00 [E-1521] [parent: E-1520] [T-388] RUN: BUILD -- modifying RFC.md 1.10 shortcut table to map cc to saipen goal.
+- 01.08.26 09:01 [E-1522] [parent: E-1521] [T-388] RUN: VERIFY -- validate.py PASS, shortcut table updated.
+- 01.08.26 09:02 [E-1523] [parent: E-1522] [T-388] DEC: goal_tickets 6->7
+- 01.08.26 09:02 [E-1524] [parent: E-1523] [T-388] DEC: SHIP -- review pass 1 finds cc shortcut correctly updated to trigger saipen goal in RFC 1.10. No P0-P1 findings.
+- 01.08.26 09:03 [E-1525] [parent: E-1524] [T-388] RUN: DONE -> ticket complete
+- 01.08.26 09:03 [E-1526] [parent: E-1525] [T-none] DEC: DONE -> HUNT -- board empty
