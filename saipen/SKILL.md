@@ -7,6 +7,10 @@ description: >
   on demand per STATE. RFC.md is the constitution,
   reached only when a rule question arises.
   Persistent .saipen/ memory lets any agent continue another's work.
+  IMPORTANT - Path Resolution: Before executing any commands or reading files,
+  determine this skill's directory based on the absolute path where you loaded
+  this SKILL.md file (provided in your system prompt). Do not run disk searches
+  for BOOT.md. Alternatively, read `saipen_home` from `.saipen/STATE.md`.
 ---
 
 # saipen -- skill adapter

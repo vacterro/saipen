@@ -288,3 +288,9 @@
 - 01.08.26 09:02 [E-1524] [parent: E-1523] [T-388] DEC: SHIP -- review pass 1 finds cc shortcut correctly updated to trigger saipen goal in RFC 1.10. No P0-P1 findings.
 - 01.08.26 09:03 [E-1525] [parent: E-1524] [T-388] RUN: DONE -> ticket complete
 - 01.08.26 09:03 [E-1526] [parent: E-1525] [T-none] DEC: DONE -> HUNT -- board empty
+- 01.08.26 09:05 [E-1527] [parent: E-1526] [T-389] RUN: SCOUT -- findings: agents loading saipen SKILL.md from external directories fail to locate protocol files because they lack a path resolution hint. The issue causes them to execute expensive global filesystem searches.
+- 01.08.26 09:05 [E-1528] [parent: E-1527] [T-389] RUN: BUILD -- modifying saipen/SKILL.md description to add Path Resolution hint telling the agent to determine the skill directory based on the absolute path in their system prompt.
+- 01.08.26 09:05 [E-1529] [parent: E-1528] [T-389] RUN: VERIFY -- SKILL.md validated successfully without any drift or formatting errors.
+- 01.08.26 09:06 [E-1530] [parent: E-1529] [T-389] DEC: SHIP -- one row added to SKILL.md. No P0-P1 findings.
+- 01.08.26 09:06 [E-1531] [parent: E-1530] [T-389] DEC: REVIEW -- verified the path resolution hint is clear and correct.
+- 01.08.26 09:06 [E-1532] [parent: E-1531] [T-389] RUN: SHIP -> pushed 810c83a

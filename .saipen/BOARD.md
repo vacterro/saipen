@@ -1,5 +1,6 @@
 # Board
 ## DOING
+- [/] T-389 [P0] Add Path Resolution hint to SKILL.md to prevent expensive global searches for the SAIPEN protocol files when the skill is loaded from outside the project directory. | verify: SKILL.md updated, validator PASS
 
 ## TODO
 
