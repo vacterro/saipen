@@ -12,7 +12,7 @@
 
 **Tasti rapidi:** `cc` prosegue un Goal Mode attivo, `sss` segnala lo stato senza toccare il codice e `ss` salva un checkpoint e si ferma. [Guarda la mappa completa degli 11 tasti](saipen/RFC.md#110-command-surface). Funzionano anche i gemelli cirillici: `сс`, `ссс`, `аа`, `ее`, `рр`.
 
-**v7.156.0** | [Spec](SPEC.md) | [Guida](GUIDE.md) | [RFC](saipen/RFC.md) | [Stile](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformità](saipen/CONFORMANCE.md) | markdown semplice | zero dipendenze | MIT
+**v7.157.0** | [Spec](SPEC.md) | [Guida](GUIDE.md) | [RFC](saipen/RFC.md) | [Stile](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformità](saipen/CONFORMANCE.md) | markdown semplice | zero dipendenze | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)

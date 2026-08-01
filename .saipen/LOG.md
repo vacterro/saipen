@@ -359,3 +359,17 @@
 - 01.08.26 11:16 [E-1595] [parent: E-1594] [T-397] DEC: goal_tickets 13->14.
 - 01.08.26 11:17 [E-1596] [parent: E-1595] [T-397] DEC: SHIP -- review pass 1 confirms one source per non-Core language, exact mirrors, canonical key order/targets, corrected visible defects, and a behavior-red guard; no P0-P1 findings.
 - 01.08.26 11:29 [E-1597] [parent: E-1596] [T-397] RUN: SHIP preflight v7.156.0 -> audit_checks 52/52; parity 11/52 baseline; floor/tags/scenarios/order/validator/ruff/diff-check PASS with live root `nul`; stage excludes unfinished saiwiki state.
+- 01.08.26 11:31 [E-1598] [parent: E-1597] [T-397] RUN: ship v7.156.0 -> pushed e87668c; exact remote main and annotated tag peel to the commit.
+- 01.08.26 11:31 [E-1599] [parent: E-1598] [T-397] RUN: DONE -> T-396 and T-397 release complete.
+- 01.08.26 11:32 [E-1600] [parent: E-1599] [T-398] [agent: saiwiki] RUN: collect W-027 -> T-398; wiki refresh landed at v7.155.0 before v7.156.0 added rows 180-181, so its completion report is fresh evidence but not current completion.
+- 01.08.26 11:33 [E-1601] [parent: E-1600] [T-391] DEC: claimed by codex-root; DONE -> SCOUT -- audit STYLE/RFC/BOOT/SKILL language precedence and persistent caveman-ded duty.
+- 01.08.26 11:39 [E-1602] [parent: E-1601] [T-391] RUN: SCOUT -- STYLE defaults bare input to Estonian, RFC/BOOT contradict it with English, and SKILL metadata carries neither persistence nor the EE/EN/RU precedence; harden one shared contract plus red controls.
+- 01.08.26 11:46 [E-1603] [parent: E-1602] [T-391] RUN: build -> RFC/BOOT/STYLE/SKILL share one EE/EN/RU precedence and persistent caveman-дед contract; validator checks all four, with language and voice mutation controls.
+- 01.08.26 11:58 [E-1604] [parent: E-1603] [T-391] RUN: VERIFY -> validator/scenarios/floor/tags/order/ruff/diff-check PASS; audit_checks 54/54; parity 11/54 baseline PASS. conf: high.
+- 01.08.26 11:58 [E-1605] [parent: E-1604] [T-391] DEC: goal_tickets 14->15
+- 01.08.26 11:59 [E-1606] [parent: E-1605] [T-399] DEC: review finding -- clean Windows parity takes 544.6 s with no progress; queue bounded/observable harness repair as P2.
+- 01.08.26 12:01 [E-1607] [parent: E-1606] [T-391] DEC: REVIEW pass 1 -> BUILD -- stale row 124 still called English the bare default, and STYLE's lower "user's own" sentence contradicted the three-language fallback.
+- 01.08.26 12:02 [E-1608] [parent: E-1607] [T-391] RUN: build -> row 124 now delegates current precedence to row 182; STYLE promises one selected EE/EN/RU language without contradicting English fallback.
+- 01.08.26 12:04 [E-1609] [parent: E-1608] [T-391] RUN: VERIFY -> exact stale-English/user-language phrases absent; validator 54/54 mutation controls and ruff/diff-check PASS. conf: high.
+- 01.08.26 12:05 [E-1610] [parent: E-1609] [T-391] DEC: SHIP after FIXES -- review pass 2 finds one coherent three-language contract, repo tie-break bounded, persistent voice guarded, and no P0-P1 findings.
+- 01.08.26 12:18 [E-1611] [parent: E-1610] [T-391] RUN: SHIP preflight v7.157.0 -> audit_checks 54/54; parity 11/54 baseline; floor/tags/scenarios/order/validator/ruff/diff-check PASS with 36 README version lines aligned.

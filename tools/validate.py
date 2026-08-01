@@ -2381,8 +2381,8 @@ else:
     # injector, and SKILL.md is the entry point that tells a skill-reading
     # platform which file to read first.
     EXEMPT = [
-        ("saipen/SKILL.md",   "reading-order entry point for skill platforms; its file references are citation-checked, it states no rule of its own"),
-        ("saipen/STYLE.md",   "chat voice; shipped, and its RFC reference is citation-checked, but the voice itself is not machine-checkable"),
+        ("saipen/SKILL.md",   "reading-order entry point for skill platforms; its file references and boot-critical voice/language metadata are checked directly"),
+        ("saipen/STYLE.md",   "chat voice; persistence/language contracts and RFC citation are checked directly, while prose tone itself is not machine-checkable"),
         ("saipen/UI.md",      "visual spec for UI work, disjoint from the state protocol"),
         ("SPEC.md",           "design intent and rationale, deliberately not normative"),
         ("CHANGELOG.md",      "history; never read by an agent, never a rule source"),
@@ -2847,7 +2847,8 @@ else:
                  f"the source and is exempt by name")
             drift_ok = False
 
-    # 13h. The reply-language rule is in the kernel and agrees with STYLE.md.
+    # 13h. The reply-language and persistent-voice rules agree across every
+    #      surface a weak model may load first.
     #      STYLE.md has carried it since v7.23.0, but BOOT.md -- the only file a
     #      bare `saipen continue` reads -- listed STYLE.md solely under "rule
     #      questions the phase doc doesn't answer". So an agent that boots and
@@ -2856,29 +2857,37 @@ else:
     #      Twice observed: a session that went fully German off a bare command,
     #      and one that answered a Russian speaker in Ukrainian out of a
     #      repository that merely CONTAINS 33 translated guides. This is the one
-    #      thing BOOT deliberately repeats rather than points at, so the two
-    #      copies are checked against each other.
-    _boot = _tools_parent / "saipen" / "BOOT.md"
-    _style = _tools_parent / "saipen" / "STYLE.md"
-    if _boot.is_file() and _style.is_file():
-        _bt = _boot.read_text(encoding="utf-8-sig")
-        _st = _style.read_text(encoding="utf-8-sig")
-        if "Reply language" not in _bt:
-            fail("cross-doc drift [reply-language] -- BOOT.md no longer states "
-                 "the reply-language rule. It governs the first token, so a "
-                 "pointer into STYLE.md is too late by construction")
+    #      thing BOOT deliberately repeats rather than points at. SKILL.md is
+    #      an even earlier discovery surface, so all four copies stay exact.
+    _language_contract = (
+        "Reply-language precedence: explicit current user prose "
+        "(Estonian/English/Russian) > clearly Russian primary repository for "
+        "bare/ambiguous input > Estonian default; another detected language "
+        "uses English."
+    )
+    _voice_contract = (
+        'Voice persistence: caveman-дед applies to every response until explicit '
+        '"stop caveman" or "normal mode".'
+    )
+    _contract_docs = {
+        name: _tools_parent / "saipen" / name
+        for name in ("RFC.md", "BOOT.md", "STYLE.md", "SKILL.md")
+    }
+    for _name, _path in _contract_docs.items():
+        if not _path.is_file():
+            continue
+        _text = _path.read_text(encoding="utf-8-sig")
+        if _language_contract not in _text:
+            fail(f"cross-doc drift [reply-language] -- {_name} no longer carries "
+                 "the exact EE/EN/RU precedence: explicit prose first, Russian "
+                 "repository only as a bare/ambiguous tie-breaker, then Estonian")
             drift_ok = False
-        elif "English" not in _bt.split("Reply language", 1)[1][:600]:
-            fail("cross-doc drift [reply-language] -- BOOT.md states the rule "
-                 "without naming English as the no-signal default, which is "
-                 "the half that decides a first message carrying no prose")
+        if _voice_contract not in _text:
+            fail(f"cross-doc drift [chat-voice] -- {_name} no longer carries the "
+                 "persistent caveman-дед duty and its two explicit off switches")
             drift_ok = False
-        if "repository" not in _st.lower().split("ambient signals", 1)[-1][:400]:
-            fail("cross-doc drift [reply-language] -- STYLE.md's ban on ambient "
-                 "language signals no longer names repository contents. That "
-                 "omission is what let a session answer in a language found "
-                 "only in the files it was working on")
-            drift_ok = False
+    if _contract_docs["BOOT.md"].is_file():
+        _bt = _contract_docs["BOOT.md"].read_text(encoding="utf-8-sig")
         if "Chat voice & compression" not in _bt:
             fail("cross-doc drift [chat-voice] -- BOOT.md no longer mandates "
                  "STYLE.md (caveman-дед) before output. It governs every response "

@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.157.0 -- 2026-08-01 -- one language contract, one stubborn дед
+
+Chat-language selection had two constitutions: STYLE defaulted a prose-free command to Estonian, while RFC and the cold-start BOOT kernel defaulted it to English. The skill discovery metadata carried neither that choice nor the rule that caveman-дед survives every response. Weak models could therefore pick whichever fragment they loaded first, drift into corporate prose later, or mistake a translated repository file for the user's language.
+
+RFC, BOOT, STYLE, and SKILL metadata now carry one exact three-language precedence. Explicit current Estonian, English, or Russian prose wins. A clearly Russian root README plus ordinary first-party project docs may select Russian only for bare or ambiguous input; otherwise Estonian is the default, and another detected language bridges through English. Quotes, code, paths, logs, locale trees, OS/IDE locale, and platform UI are not user-language evidence. Caveman-дед remains active until explicit `stop caveman` or `normal mode`.
+
+The validator requires both contracts on all four boot surfaces. Independent mutations remove the SKILL language marker and STYLE persistence marker, proving the checks go red; all 54 canonical mutations fire, and portable-floor parity remains at its 11-case baseline. Review also retired the old English-default guarantee and a lower STYLE sentence that contradicted the three-language fallback. The clean Windows parity run exposed a separate 544.6-second observability problem, queued as T-399 rather than mixed into this release.
+
 ## 7.156.0 -- 2026-08-01 -- device names and weak translations get guards
 
 A real zero-byte NTFS entry named `nul`, left by an external agent or shell, made Git advertise junk and made both mutation audits abort inside `shutil.copytree` before they could print a useful diagnosis. Root `/nul` is now ignored by Git and canonical audit snapshots. A behavioral self-control creates the real extended-path device-name entry on Windows, copies the tree, and proves the ordinary marker survives while `nul` does not; the original workspace entry remains in place and no longer interferes.

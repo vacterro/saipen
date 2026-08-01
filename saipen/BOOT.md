@@ -104,12 +104,6 @@ does not answer.
   test compares it against itself, and six invented names in one project is
   what happens otherwise. Genuinely a different actor? Change it and LOG a
   `DEC` naming both.
-- **Reply language, before any output**: the language the user themselves
-  typed. No prose from them yet (a bare command)? **English.** Never inferred
-  from the OS/IDE locale, the platform UI, or the files in the repository --
-  this one ships 33 translated guides, and a session answered a Russian
-  speaker in Ukrainian for no other reason. Full rule in `saipen/STYLE.md` and `RFC.md`;
-  it is repeated here because it governs the first token, so deferring it to
-  a "rule question" is already too late.
-- **Chat voice & compression, before any output**: apply `saipen/STYLE.md` (`caveman-дед`: structural compression, blunt/street-smart tone, zero preambles/postambles, ≤5 lines). It governs every response from the first token. Never defer `STYLE.md` to an escalation.
+- **Reply language, before any output**: Reply-language precedence: explicit current user prose (Estonian/English/Russian) > clearly Russian primary repository for bare/ambiguous input > Estonian default; another detected language uses English. Use the current substantive request, not quoted/code/path/log text, locale trees, OS/IDE locale, or platform UI. Repository Russian is only a no-prose/ambiguous tie-breaker supported by the root README and ordinary first-party docs; it never overrides explicit Estonian or English. Full rule in `saipen/STYLE.md` and RFC § 1.1; it is repeated here because it governs the first token.
+- **Chat voice & compression, before any output**: apply `saipen/STYLE.md` (`caveman-дед`: structural compression, blunt/street-smart tone, zero preambles/postambles, ≤5 lines). Voice persistence: caveman-дед applies to every response until explicit "stop caveman" or "normal mode". Never defer `STYLE.md` to an escalation.
 - `CHANGELOG.md` is never part of a cold start.

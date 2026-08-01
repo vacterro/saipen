@@ -19,7 +19,7 @@
 
 **Короткие кнопки, чтоб пальцы не отсохли:** `cc` гонит активный Goal Mode дальше, `sss` докладывает статус и код не лапает, `ss` ставит чекпоинт и жмёт тормоз. [Вся карта из 11 шорткатов](saipen/RFC.md#110-command-surface); на русской раскладке работают `сс`, `ссс`, `аа`, `ее`, `рр`.
 
-**v7.156.0** | [Спека](SPEC.md) | [Гайд](GUIDE.md) | [RFC](saipen/RFC.md) | [Стиль](saipen/STYLE.md) | [UI](saipen/UI.md) | [Контроль](saipen/CONFORMANCE.md) | MIT | [![CI](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
+**v7.157.0** | [Спека](SPEC.md) | [Гайд](GUIDE.md) | [RFC](saipen/RFC.md) | [Стиль](saipen/STYLE.md) | [UI](saipen/UI.md) | [Контроль](saipen/CONFORMANCE.md) | MIT | [![CI](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
 
 [![Русский Гайд](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![Английский Гайд](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
