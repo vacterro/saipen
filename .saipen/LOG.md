@@ -317,3 +317,12 @@
 - 01.08.26 09:39 [E-1553] [parent: E-1552] [T-390] DEC: goal_tickets 9->10
 - 01.08.26 09:40 [E-1554] [parent: E-1553] [T-390] DEC: SHIP -- review pass 2 confirms missing/stale exact-set guard and both red-controls; no P0-P1 findings.
 - 01.08.26 09:55 [E-1555] [parent: E-1554] [T-390] RUN: SHIP preflight -> validator/scenarios/ruff/order/tags/floor/checks PASS; parity 11/50 baseline PASS.
+- 01.08.26 09:58 [E-1556] [parent: E-1555] [T-390] RUN: ship v7.153.0 -> pushed 2dbef46
+- 01.08.26 09:58 [E-1557] [parent: E-1556] [T-390] RUN: DONE -> ticket complete
+- 01.08.26 09:58 [E-1558] [parent: E-1557] [T-394] DEC: claimed; DONE -> SCOUT -- user-requested README and guide shortcut entry path is next.
+- 01.08.26 10:01 [E-1559] [parent: E-1558] [T-394] RUN: SCOUT -- README plus six linked guides lack an early shortcut path; use core trio + canonical RFC link. Adjacent stale RFC rationale -> T-395.
+- 01.08.26 10:04 [E-1560] [parent: E-1559] [T-394] RUN: BUILD -> added early shortcut callouts to README and six linked guides; core trio stays concise and full map links to RFC.
+- 01.08.26 10:06 [E-1561] [parent: E-1560] [T-394] RUN: VERIFY -> validator PASS; seven early callouts match canonical cc/sss/ss rows, five Cyrillic twins, and full-map links; diff-check clean. conf: high.
+- 01.08.26 10:06 [E-1562] [parent: E-1561] [T-394] DEC: goal_tickets 10->11
+- 01.08.26 10:07 [E-1563] [parent: E-1562] [T-394] DEC: SHIP -- review pass 1 confirms early placement, canonical meanings, valid links, and voice-fit across all seven docs; no P0-P1 findings.
+- 01.08.26 10:09 [E-1564] [parent: E-1563] [T-394] RUN: SHIP preflight -> validator/floor/tags/order/checks/scenarios/ruff/docs probe PASS; diff-check clean.

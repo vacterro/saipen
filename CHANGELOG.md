@@ -2,6 +2,12 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.154.0 -- 2026-08-01 -- shortcuts belong at the front door
+
+The shortcut table existed deep in RFC section 1.10 while every human entry point still taught the long command names first. README and its six directly linked guides now surface the safe core trio near the opening: `cc` continues an active Goal Mode run, `sss` reports status without touching code, and `ss` checkpoints and stops.
+
+The callouts stay deliberately small. They link to the canonical 11-key RFC table instead of cloning it into seven documents, and name the five Cyrillic-confusable forms (`сс`, `ссс`, `аа`, `ее`, `рр`) so a Russian keyboard does not look broken. Each guide keeps its own language and voice; the shortcut semantics stay identical.
+
 ## 7.153.0 -- 2026-08-01 -- every shortcut can wake the protocol up
 
 Skill discovery happens before an agent has read the RFC. The RFC carried eleven shortcuts plus five Cyrillic-confusable twins, while `SKILL.md` advertised only part of that set; the missing forms worked inside an initialized SAIPEN project by accident and could fail to activate the skill anywhere else. Discovery metadata now carries the full set.

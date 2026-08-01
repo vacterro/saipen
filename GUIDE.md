@@ -8,6 +8,8 @@
 
 **SAIPEN fixes that.** Tiny `.saipen/` folder in project. Agent reads STATE, BOARD, next_action. Resumes where other stopped. Zero briefing.
 
+**Fast keys:** `cc` continues an active Goal Mode run, `sss` checks status without touching code, and `ss` checkpoints and stops. [Full 11-key map](saipen/RFC.md#110-command-surface); Cyrillic twins `сс`, `ссс`, `аа`, `ее`, `рр` work too.
+
 ## How
 
 1. **Install once** -- teaches Claude, Gemini, Codex, OpenCode, Aider, Antigravity, any skill reader:
