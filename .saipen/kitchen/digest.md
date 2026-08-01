@@ -1,3 +1,3 @@
-done: T-385 -- sss is status; length means collision order; shipping as v7.150.0
+done: T-386 -- saipen hunt carries the checkpoint duty; list derived from phase docs; shipping as v7.151.0
 remaining: nothing open
 awaiting: nothing

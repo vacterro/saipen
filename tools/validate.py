@@ -2913,6 +2913,42 @@ else:
             # quietly added commit+push to the most-typed key. The check reads
             # the table itself rather than any prose about it, so the rule and
             # the thing it governs cannot drift apart.
+            # A command named after a phase switches into it, and § 1.10 makes
+            # every such command checkpoint a claimed `## DOING` ticket first.
+            # That list was hand-kept: `saipen hunt` joined the surface in
+            # v7.148.0 and nobody added it, so for two releases `hh` was the
+            # one phase switch that could leave half-finished work unwritten.
+            # Derive the membership from the phase enum instead of trusting a
+            # second copy -- a command whose name IS a phase belongs there.
+            # `init` is the one exclusion and it is structural, not a taste
+            # call: it creates `.saipen/` and there is no board to hold a
+            # claimed ticket at the moment it runs.
+            _switch_m = re.search(
+                r"Any recognized phase-switching command \(([^)]*)\)",
+                _rfc_t[_i:_j])
+            if not _switch_m:
+                fail("cross-doc drift [phase-switching] -- RFC § 1.10's "
+                     "phase-switching sentence not found; the list that makes "
+                     "these commands checkpoint cannot be compared")
+                drift_ok = False
+            else:
+                _listed = set(re.findall(r"`([a-z]+)`", _switch_m.group(1)))
+                # Resolved against the validator's own tree, not the cwd: a
+                # fixture sandbox is a project root with a `.saipen/` and no
+                # protocol docs, and a cwd-relative lookup made `_expected`
+                # empty there and failed four conformant fixtures.
+                _phases_dir = _tools_parent / "saipen" / "phases"
+                _expected = {c for c in SAIPEN_COMMANDS
+                             if (_phases_dir / f"{c}.md").is_file()} - {"init"}
+                if _listed != _expected:
+                    fail(f"cross-doc drift [phase-switching] -- RFC § 1.10 "
+                         f"lists {sorted(_listed)} as phase-switching but the "
+                         f"commands named after a phase are "
+                         f"{sorted(_expected)}; a command that switches phase "
+                         f"without this duty can drop a claimed ticket's "
+                         f"checkpoint")
+                    drift_ok = False
+
             _bad_routes = []
             for _sc, _route in re.findall(r"^\| `([a-z]{2,3})` \| ([^|]+) \|",
                                           _rfc_t[_i:_j], re.MULTILINE):

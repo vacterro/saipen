@@ -264,3 +264,12 @@
 - 01.08.26 08:29 [E-1500] [parent: E-1499] [T-385] RUN: VERIFY -> canonical 47/47, scenarios EXIT=0, ruff clean, validator PASS. Red-test: `sss` -> bare 'STATUS' gives FAIL 'do not resolve to a command', restored clean. conf: high.
 - 01.08.26 08:29 [E-1501] [parent: E-1500] [T-385] DEC: goal_tickets 3->4
 - 01.08.26 08:29 [E-1502] [parent: E-1501] [T-385] DEC: SHIP -- one row added, one rule rewritten with it, and the row that depended on the old rule corrected in the same pass. No P0-P1 findings.
+- 01.08.26 08:30 [E-1503] [parent: E-1502] [T-385] RUN: ship v7.150.0 -> pushed 1715ef7
+- 01.08.26 08:30 [E-1504] [parent: E-1503] [T-385] RUN: DONE -> ticket complete
+- 01.08.26 08:37 [E-1505] [parent: E-1504] RUN: bootstrap/inject.ps1 -> protocol distributed to all local agent seats; Claude/OpenCode/Codex/~/.agents/Antigravity x2 copied, all three checked copies report VERSION 7.150.0 and carry the `sss` row. Aider keeps its own read: list and is reported as manual, as designed.
+- 01.08.26 08:37 [E-1506] [parent: E-1505] RUN: HUNT -> T-386; `saipen hunt` was added to 1.10 in v7.148.0 but never added to the same section's closed phase-switching list, so it alone carries no duty to checkpoint a claimed ticket before switching phase. My own defect, two releases old.
+- 01.08.26 08:37 [E-1507] [parent: E-1506] [T-386] DEC: claimed.
+- 01.08.26 08:41 [E-1508] [parent: E-1507] [T-386] RUN: BUILD -> `hunt` added to 1.10's phase-switching list, its own definition now names the checkpoint duty as well as the ordering rule, hunt.md's title covers explicit invocation, and the list membership is derived from the phase docs with `init` excluded structurally.
+- 01.08.26 08:41 [E-1509] [parent: E-1508] [T-386] DEC: REVIEW -> BUILD -- the new check resolved `saipen/phases/` against the cwd, so in a fixture sandbox (a project root with `.saipen/` and no protocol docs) the expected set came out empty and four conformant fixtures FAILed. Caught by run_scenarios, not by the validator on this repo, where cwd and validator tree are the same directory -- the check was right and blind in exactly the place the fixtures exist to cover. Resolved against `_tools_parent` like the RFC lookup beside it.
+- 01.08.26 08:41 [E-1510] [parent: E-1509] [T-386] RUN: VERIFY -> canonical 48/48, scenarios EXIT=0, ruff clean, audit_order PASS, validator PASS. Red-test: removing `hunt` from the sentence FAILs '[phase-switching]', restored clean. conf: high.
+- 01.08.26 08:41 [E-1511] [parent: E-1510] [T-386] DEC: goal_tickets 4->5

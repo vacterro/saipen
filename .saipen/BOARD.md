@@ -4,6 +4,7 @@
 ## TODO
 
 ## DONE
+- [x] T-386 [P0] `saipen hunt` now carries the phase switch's checkpoint duty, and that list's membership is derived from the phase docs instead of hand-kept. | review_passes: 1 | verify: PASS -- red-test removing `hunt` FAILs '[phase-switching]'; canonical 48/48; scenarios EXIT=0; ruff clean
 - [x] T-385 [P1] `sss` -> `saipen status`, and the length rule was rewritten with it: length is collision order, not cost, since status reaches no remote. `ccc` now states its remote reach as a fact on its own row. | review_passes: 1 | verify: PASS -- shortcut check PASS; red-test `sss`->'STATUS' FAILs 'do not resolve to a command'; canonical 47/47; scenarios EXIT=0
 - [x] T-384 [P1] `ss` is the brake (`saipen stop`); `saipen status` carries no shortcut, since the tripled form is reserved for the chain that reaches a remote. | review_passes: 1 | verify: PASS -- table routes `ss` to `saipen stop`, no status row; shortcut check PASS; red-test `ss`->'STOP' FAILs 'do not resolve to a command'
 - [x] T-383 [P0] `cc` is the maintenance button again: an empty board always goes to HUNT (1.11 wins, done.md defers), `gg` resets counters only against a tripped valve, a resume names what is stuck, and every shortcut resolves to a real command -- `saipen hunt` defined, `cc`=continue, `ccc`=continue+ship. | review_passes: 1 | verify: PASS -- canonical 47/47; scenarios EXIT=0; `hh`->HUNT red-test FAILs 'do not resolve to a command'; reauth guard fires on E-1468; ruff clean

@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.151.0 -- 2026-08-01 -- a command named after a phase carries the phase switch's duty
+
+`saipen hunt` joined the command surface in v7.148.0 and was never added to section 1.10's phase-switching list -- the closed enumeration that makes those commands checkpoint a claimed `## DOING` ticket before switching phase. For two releases `hh` was the one phase switch that could leave half-finished work unwritten. Its own definition said a claimed ticket outranks it, which orders which runs first and says nothing about writing the checkpoint; ordering and checkpointing are two rules and only one was stated.
+
+The list is no longer hand-kept. Membership is derived from the phase docs: a command whose name is a phase switches into it and belongs there. `init` is the single exclusion and it is structural rather than a taste call -- it creates `.saipen/`, so there is no board to hold a claimed ticket at the moment it runs. Red-tested by removing `hunt` again, which now FAILs instead of passing quietly.
+
+`phases/hunt.md` was titled "no TODO tickets remaining", true of the auto-transition and stale for an explicit invocation since the same release.
+
 ## 7.150.0 -- 2026-08-01 -- length is collision order, not cost
 
 `sss` routes to `saipen status`, restoring the shortcut it lost a release earlier.

@@ -415,6 +415,12 @@ CASES: list[tuple[str, str, object, str]] = [
     ("shortcut routes to a phase, not a command", "saipen/RFC.md",
      replace("| `hh` | `saipen hunt` |", "| `hh` | HUNT |"),
      "do not resolve to a command"),
+    # Drop a phase-named command from the checkpoint duty. This is how
+    # `saipen hunt` shipped: on the surface, absent from the list, and no
+    # check compared the two for two releases.
+    ("phase-switching command loses its checkpoint duty", "saipen/RFC.md",
+     replace("`ship`, `hunt`) invoked while", "`ship`) invoked while"),
+     "as phase-switching but the commands named after a phase"),
     ("requires: a capability nobody defines", STATE,
      replace("  - python", "  - pyhton"), "handshake vocabulary"),
 

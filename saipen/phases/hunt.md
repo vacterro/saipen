@@ -1,4 +1,4 @@
-# Phase: HUNT (no TODO tickets remaining)
+# Phase: HUNT (no TODO tickets remaining, or `saipen hunt` invoked)
 
 Clean sweep. Skip ONLY if `.saipen/LOG.md`'s tail literally contains
 `hunt -> clean @<HASH>` where `<HASH>` is the exact output of
