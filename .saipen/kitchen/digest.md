@@ -1,3 +1,3 @@
-done: T-390 -- all shortcut forms activate SAIPEN; shipped as v7.153.0
-remaining: T-394 -- surface shortcuts near README start and sync guides
+done: T-394 -- shortcut entry path added to README and six guides; shipped as v7.154.0
+remaining: T-393 -- make goal-counter mutation control dynamic
 awaiting: nothing

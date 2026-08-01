@@ -280,6 +280,17 @@ def sub_line(field: str, value: str):
     return lambda t: re.sub(rf"^{field}:.*$", f"{field}: {value}", t, flags=re.MULTILINE)
 
 
+def bump_int_line(field: str):
+    """Increment a frontmatter integer instead of guessing its live value."""
+    return lambda t: re.sub(
+        rf"^{field}:\s*(\d+)$",
+        lambda match: f"{field}: {int(match.group(1)) + 1}",
+        t,
+        count=1,
+        flags=re.MULTILINE,
+    )
+
+
 def drop_line(field: str):
     return lambda t: re.sub(rf"^{field}:.*\n", "", t, flags=re.MULTILINE)
 
@@ -401,7 +412,7 @@ CASES: list[tuple[str, str, object, str]] = [
     # untouched, so the two disagree exactly as they would after an untraced
     # bare-`saipen goal` reset.
     ("goal counter STATE cannot survive its own rebuild", STATE,
-     sub_line("goal_tickets", "7"),
+     bump_int_line("goal_tickets"),
      "newest goal marker rebuilds"),
     # Strip the final newline and the file stops mid-line. Nothing else in this
     # list reads a last byte, which is how the real one survived: every
@@ -551,7 +562,10 @@ def apply_case(root: Path, rel: str, mutation) -> bool:
     if not p.exists():
         return False
     text = p.read_text(encoding="utf-8-sig")
-    p.write_text(mutation(text), encoding="utf-8", newline="\n")
+    mutated = mutation(text)
+    if mutated == text:
+        return False
+    p.write_text(mutated, encoding="utf-8", newline="\n")
     return True
 
 
@@ -639,6 +653,17 @@ def main() -> int:
         print(control_failure[:800])
         shutil.rmtree(tmp, ignore_errors=True)
         return 1
+
+    # A callable that changes nothing is not an applied mutation. The
+    # goal-counter case once hard-coded the exact integer live STATE already
+    # carried, so the validator saw an untouched tree and the suite still
+    # counted the case as evidence. Keep this harness guard red-test inside
+    # the harness: removing the equality check above makes this control fail.
+    if apply_case(pristine, STATE, lambda text: text):
+        print("FAIL: callable no-op mutation was accepted as applied")
+        shutil.rmtree(tmp, ignore_errors=True)
+        return 1
+    print("PASS: callable no-op mutations are rejected before validation")
 
     unavailable = [label for label, rel, mutation, _expected in CASES
                    if not case_available(pristine, rel, mutation)]

@@ -326,3 +326,15 @@
 - 01.08.26 10:06 [E-1562] [parent: E-1561] [T-394] DEC: goal_tickets 10->11
 - 01.08.26 10:07 [E-1563] [parent: E-1562] [T-394] DEC: SHIP -- review pass 1 confirms early placement, canonical meanings, valid links, and voice-fit across all seven docs; no P0-P1 findings.
 - 01.08.26 10:09 [E-1564] [parent: E-1563] [T-394] RUN: SHIP preflight -> validator/floor/tags/order/checks/scenarios/ruff/docs probe PASS; diff-check clean.
+- 01.08.26 10:10 [E-1565] [parent: E-1564] [T-394] RUN: ship v7.154.0 -> pushed a796829
+- 01.08.26 10:10 [E-1566] [parent: E-1565] [T-394] RUN: DONE -> ticket complete
+- 01.08.26 10:10 [E-1567] [parent: E-1566] [T-393] DEC: claimed; DONE -> SCOUT -- `ccc` continues through mandatory SHIP.
+- 01.08.26 10:10 [E-1568] [parent: E-1567] [T-393] RUN: SCOUT -- hard-coded `7` can equal live STATE, and apply_case treats unchanged callable output as applied; fix dynamic value plus global no-op rejection.
+- 01.08.26 10:10 [E-1569] [parent: E-1568] [T-393] RUN: BUILD -> goal counter bumps observed integer; callable mutations returning identical text are rejected; identity self-control added.
+- 01.08.26 10:18 [E-1570] [parent: E-1569] [T-393] RUN: VERIFY -> no-op self-control PASS; audit_checks 50/50; parity 11/50 baseline; validator/floor/scenarios/ruff/order PASS. conf: high.
+- 01.08.26 10:18 [E-1571] [parent: E-1570] [T-393] DEC: goal_tickets 11->12
+- 01.08.26 10:19 [E-1572] [parent: E-1571] [T-393] DEC: SHIP -- review pass 1 confirms dynamic counter mutation, global identity rejection, and self-control; no P0-P1 findings.
+- 01.08.26 10:20 [E-1573] [parent: E-1572] [T-391] DEC: user broadened STYLE audit -- persistent caveman-ded voice plus smart EE/EN/RU selection; explicit user language wins, repo language only breaks bare/ambiguous input ties.
+- 01.08.26 10:33 [E-1574] [parent: E-1573] [T-none] DEC: agent claude-opus -> codex-root; active primary seat is Codex `/root`, so checkpoint identity repaired before ship.
+- 01.08.26 10:33 [E-1575] [parent: E-1574] [T-393] RUN: SHIP preflight -> validator/floor/tags/order/checks/scenarios/ruff/diff-check PASS; isolated parity 50/50, baseline 11 PASS. The earlier fast blank rc1 was a root NTFS `nul` entry breaking copytree, not a product failure.
+- 01.08.26 10:33 [E-1576] [parent: E-1575] [T-396] DEC: user requested permanent `nul` hardening; repository search found no creator, so queue a focused root-ignore plus behavioral snapshot control instead of guessing provenance.

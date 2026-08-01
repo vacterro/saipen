@@ -2,6 +2,12 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.155.0 -- 2026-08-01 -- a no-op mutation is not evidence
+
+The goal-counter recovery control wrote the literal value `7` into live `STATE.md`. Once the real counter itself reached 7, that mutation changed nothing; the canonical validator received the untouched control tree, and the audit suite still counted the case as proof that its check could go red.
+
+The case now increments the integer it observes instead of guessing a value. More importantly, the mutation harness rejects every callable whose output equals its input before running the validator, so the same defect cannot move to another hard-coded replacement. An identity-mutation self-control keeps that harness guard capable of failing. All 50 canonical mutations still fire, and portable-floor parity remains at its 11-case baseline.
+
 ## 7.154.0 -- 2026-08-01 -- shortcuts belong at the front door
 
 The shortcut table existed deep in RFC section 1.10 while every human entry point still taught the long command names first. README and its six directly linked guides now surface the safe core trio near the opening: `cc` continues an active Goal Mode run, `sss` reports status without touching code, and `ss` checkpoints and stops.
