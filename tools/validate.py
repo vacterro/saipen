@@ -25,6 +25,11 @@ Severity model: violations of RFC.md MUSTs fail (exit 1). Drift that lives
 in immutable history (LOG.md is append-only -- a nonstandard taxonomy or
 ticket-ref written months ago cannot be fixed without rewriting history,
 which RFC forbids) warns instead. --strict promotes warnings to failures.
+
+Guards rule: a check's red-test MUST break the BEHAVIOR, not the wording.
+If the only way to make a check FAIL is to edit the text it greps, the check
+tests the text and the thing it claims to protect is unprotected. Do not use
+source-text assertions (e.g. naive string inclusion) to verify runtime logic.
 """
 
 import datetime
@@ -1328,42 +1333,28 @@ if log_files:
     # states predating v7.87.0 legitimately carry counters with no lines, and
     # a sealed segment may hold the lines for a very old run.
     if state.get("goal_mode") is True:
-        all_log = "\n".join(read_doc(p) for p in log_files)
-        for counter in ("goal_waves", "goal_tickets"):
-            if isinstance(state.get(counter), int) and state[counter] > 0 \
-                    and f"DEC: {counter}" not in all_log:
-                warn("goal-counter-untraced",
-                     f"STATE.md {counter} is {state[counter]} but no "
-                     f"'DEC: {counter} N->M' line exists in any LOG segment -- "
-                     f"§ 1.5 Recovery rebuilds this counter by counting those "
-                     f"lines, so a crash losing STATE.md loses the safety-valve "
-                     f"budget with it (RFC § 2.4)")
-
-        # RFC § 1.5 rebuilds the counters by counting bumps since the newest
-        # goal marker -- a `DEC: goal pivot` or a `DEC: goal reauthorized`.
-        # The re-authorization marker exists because bare `saipen goal` resets
-        # both counters to 0: without a line marking that drop, Recovery counts
-        # from the older pivot, rebuilds the pre-reset totals, and re-trips a
-        # valve the human just cleared -- while § 2.4 forbids "tidying" the
-        # counters back down. So the reset is only safe if it is countable.
-        # This compares the rebuild against STATE instead of grepping for the
-        # line's presence: a marker that exists but does not explain the
-        # counters is exactly the failure, and only replaying the count sees it.
-        # Only increments count -- a reset line's own `N->0` is a drop, not a
-        # completed wave or ticket.
-        _marker = re.compile(r"DEC: goal (?:pivot|reauthorized)\b")
+        # Anchored to the taxonomy slot -- the token immediately after the
+        # bracket group -- so a line that merely QUOTES the marker is not one.
+        # Found in review: two `RUN:` lines describing this very rule matched
+        # an unanchored pattern and became the newest marker themselves, which
+        # would have dated the rebuild window from a sentence about the rule.
+        _marker = re.compile(r"\]\s+DEC: goal (?:pivot|reauthorized)\b")
         _log_lines = [ln for p in log_files for ln in read_doc(p).splitlines()]
         _last_marker = max(
             (i for i, ln in enumerate(_log_lines) if _marker.search(ln)),
             default=None)
-        if _last_marker is not None:
-            for counter in ("goal_waves", "goal_tickets"):
-                if not isinstance(state.get(counter), int):
-                    continue
-                rebuilt = sum(
-                    1 for ln in _log_lines[_last_marker + 1:]
-                    for m in [re.search(rf"DEC: {counter} (\d+)->(\d+)", ln)]
-                    if m and int(m.group(2)) > int(m.group(1)))
+
+        for counter in ("goal_waves", "goal_tickets"):
+            if not isinstance(state.get(counter), int):
+                continue
+            
+            _start_idx = _last_marker + 1 if _last_marker is not None else 0
+            rebuilt = sum(
+                1 for ln in _log_lines[_start_idx:]
+                for m in [re.search(rf"DEC: {counter} (\d+)->(\d+)", ln)]
+                if m and int(m.group(2)) > int(m.group(1)))
+
+            if _last_marker is not None:
                 if rebuilt != state[counter]:
                     fail(f"STATE.md {counter} is {state[counter]} but replaying "
                          f"§ 1.5 Recovery from the newest goal marker rebuilds "
@@ -1373,6 +1364,14 @@ if log_files:
                          f"or a reset dropped the counter without the "
                          f"`DEC: goal reauthorized` line that makes the drop "
                          f"countable (RFC § 1.5, § 2.4)")
+            else:
+                if rebuilt == 0 and state[counter] > 0:
+                    warn("goal-counter-untraced",
+                         f"STATE.md {counter} is {state[counter]} but no "
+                         f"'DEC: {counter} N->M' line exists in the accountable LOG -- "
+                         f"§ 1.5 Recovery rebuilds this counter by counting those "
+                         f"lines, so a crash losing STATE.md loses the safety-valve "
+                         f"budget with it (RFC § 2.4)")
 
     documented_inversions = any(
         "observed historical timestamp inversions" in
@@ -2218,7 +2217,7 @@ else:
         ("GUIDE.md",                 "guide WAIT-shape check"),
         ("tests/scenarios/*/README.md", "required-field-count check + expect/reason parsing"),
         ("tests/scenarios/*/.saipen/*.md", "run_scenarios.py runs this validator against each fixture"),
-        ("README.md",                "version-badge check"),
+        ("README*.md",                "version-badge check"),
         # KNOWLEDGE/ is excluded from the .saipen/ blanket on purpose: RFC
         # § 1.2 makes it durable truth an agent reads before planning, not
         # inert project data. Blanketing it cost nine releases of traps.md
@@ -2732,6 +2731,11 @@ else:
                  "omission is what let a session answer in a language found "
                  "only in the files it was working on")
             drift_ok = False
+        if "Chat voice & compression" not in _bt:
+            fail("cross-doc drift [chat-voice] -- BOOT.md no longer mandates "
+                 "STYLE.md (caveman-дед) before output. It governs every response "
+                 "from the first token, so deferring it to an escalation is too late")
+            drift_ok = False
 
     # 13i. The human digest is the shape ship.md promises, and is not from
     #      another era. `phases/ship.md` says "(over)write ... exactly three
@@ -2754,11 +2758,15 @@ else:
             _cur_v = Path("VERSION").read_text(encoding="utf-8-sig").strip()
             _cited = re.findall(r"v(\d+\.\d+\.\d+)", " ".join(_dl))
             if _cited and _cur_v not in _cited:
-                warn("digest-stale",
-                     f"{_digest.as_posix()} names v{_cited[0]} while VERSION "
-                     f"is {_cur_v} -- ship.md says overwrite it after every "
-                     f"push, so this snapshot has been carried past at least "
-                     f"one release that did not refresh it")
+                _rc, _stdout = _git_from(os.getcwd(), "tag", "-l", f"v{_cur_v}")
+                if _rc == 0 and not _stdout.strip():
+                    pass
+                else:
+                    warn("digest-stale",
+                         f"{_digest.as_posix()} names v{_cited[0]} while VERSION "
+                         f"is {_cur_v} -- ship.md says overwrite it after every "
+                         f"push, so this snapshot has been carried past at least "
+                         f"one release that did not refresh it")
 
     # 13j. MARKHUNT's own closure manifest. `phases/markhunt.md` specifies it
     #      in full -- `vectors:` (which of scope categories 1-5 are done),

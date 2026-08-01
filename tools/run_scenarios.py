@@ -63,6 +63,7 @@ EXPECT_RE = re.compile(r"^expect:\s*(pass|fail)\s*$", re.MULTILINE)
 # Unpinned fail-fixtures still run, but WARN -- they are asserting only that
 # something, somewhere, went wrong.
 REASON_RE = re.compile(r"^expect_fail_contains:\s*(.+?)\s*$", re.MULTILINE)
+WARN_RE = re.compile(r"^expect_warn_contains:\s*(.+?)\s*$", re.MULTILINE)
 
 
 def find_bash() -> str | None:
@@ -1022,12 +1023,16 @@ for d in sorted(p for p in SCENARIOS.iterdir() if p.is_dir()):
     readme = d / "README.md"
     has_state = (d / ".saipen").is_dir()
     declared = None
+    reason = None
+    warn_reason = None
     if readme.is_file():
         _rtext = readme.read_text(encoding="utf-8-sig")
         m = EXPECT_RE.search(_rtext)
         declared = m.group(1) if m else None
         _rm = REASON_RE.search(_rtext)
         reason = _rm.group(1) if _rm else None
+        _wm = WARN_RE.search(_rtext)
+        warn_reason = _wm.group(1) if _wm else None
 
     if not has_state:
         # Behavioral fixture. It must NOT declare an expectation -- there is
@@ -1079,6 +1084,13 @@ for d in sorted(p for p in SCENARIOS.iterdir() if p.is_dir()):
                             f"{first[:110]!r}")
         else:
             print(f"PASS: {d.name} -- failed on {reason!r}, as declared")
+    elif declared == "pass" and warn_reason:
+        blob = r.stdout + r.stderr
+        if warn_reason not in blob:
+            failures.append(f"{d.name}: passed as declared, but missing expected warning -- "
+                            f"expected {warn_reason!r}")
+        else:
+            print(f"PASS: {d.name} -- passed and warned on {warn_reason!r}, as declared")
     else:
         if declared == "fail":
             print(f"WARN: {d.name} -- fails as declared, but pins no reason; "
@@ -1086,6 +1098,69 @@ for d in sorted(p for p in SCENARIOS.iterdir() if p.is_dir()):
                   f"at something unrelated")
         print(f"PASS: {d.name} -- expected {declared}, got {actual}")
 
+
+
+
+def run_digest_stale_probes() -> tuple[list[str], int]:
+    problems = []
+    checked = 0
+    git = shutil.which("git")
+    if not git:
+        return ["digest-stale probes require git"], checked
+
+    def git_run(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run([git, *args], cwd=cwd, capture_output=True,
+                              text=True, errors="replace")
+
+    with tempfile.TemporaryDirectory(prefix="saipen-digest-") as raw:
+        sandbox = Path(raw).resolve()
+        project = sandbox / "project"
+        project.mkdir()
+
+        shutil.copytree(SCENARIOS / "resume-after-crash" / ".saipen", project / ".saipen")
+
+        # Setup basic IS_SAIPEN_HOME
+        (project / "VERSION").write_text("1.0.0\n", encoding="utf-8-sig")
+        (project / "README.md").write_text("# SAIPEN\n", encoding="utf-8-sig")
+        (project / ".saipen" / "kitchen").mkdir(exist_ok=True, parents=True)
+        (project / ".saipen" / "kitchen" / "digest.md").write_text(
+            "done: v0.9.0\nremaining: 0\nawaiting: none\n", encoding="utf-8-sig")
+        (project / "saipen").mkdir(exist_ok=True)
+        (project / "saipen" / "RFC.md").write_text("", encoding="utf-8-sig")
+        (project / "bootstrap").mkdir(exist_ok=True)
+        (project / "CHANGELOG.md").write_text("## [1.0.0]\n", encoding="utf-8-sig")
+
+        git_run(project, "init", "-q")
+        git_run(project, "config", "user.name", "SAIPEN")
+        git_run(project, "config", "user.email", "test@test")
+        git_run(project, "add", ".")
+        git_run(project, "commit", "-q", "-m", "Initial")
+        git_run(project, "tag", "v0.9.0")
+
+        # Test 1: pre-tag (tag for 1.0.0 does not exist yet)
+        checked += 1
+        res1 = subprocess.run(
+            [sys.executable, str(VALIDATOR), "--project-root", str(project)],
+            cwd=project, capture_output=True, text=True)
+        if "[digest-stale]" in res1.stdout or "[digest-stale]" in res1.stderr:
+            problems.append("digest-stale warned incorrectly on pre-tag "
+                            "state: " + res1.stdout + res1.stderr)
+        else:
+            print("PASS: digest-stale -- no warning before tag is created")
+
+        # Test 2: post-tag (tag for 1.0.0 exists, but digest names 0.9.0)
+        git_run(project, "tag", "v1.0.0")
+        checked += 1
+        res2 = subprocess.run(
+            [sys.executable, str(VALIDATOR), "--project-root", str(project)],
+            cwd=project, capture_output=True, text=True)
+        if "[digest-stale]" not in res2.stdout and "[digest-stale]" not in res2.stderr:
+            problems.append("digest-stale failed to warn after tag was "
+                            "created: " + res2.stdout + res2.stderr)
+        else:
+            print("PASS: digest-stale -- warned correctly after tag exists")
+
+    return problems, checked
 injector_failures, injector_checked, injector_skipped = run_injector_probes()
 failures.extend(injector_failures)
 root_failures, root_checked = run_project_root_probes()
@@ -1099,6 +1174,9 @@ failures.extend(last_event_failures)
 hook_failures, hook_checked, hook_skipped = run_hook_probes()
 failures.extend(hook_failures)
 
+
+digest_failures, digest_checked = run_digest_stale_probes()
+failures.extend(digest_failures)
 print(f"\n{checked} executable fixture(s) checked, "
       f"{skipped} behavioral fixture(s) skipped (README-only by design)")
 print(f"{injector_checked} injector(s) executed, "
@@ -1108,6 +1186,7 @@ print(f"{export_checked} export ownership behavior(s) executed, "
       f"{export_skipped} skipped for missing interpreters")
 print(f"{crew_checked} crew-launch behavior(s) executed, "
       f"{crew_skipped} skipped for missing interpreters")
+print(f"{digest_checked} digest-stale behavior(s) executed")
 print(f"{last_event_checked} last_event migration behavior(s) executed")
 print(f"{hook_checked} installed-hook behavior(s) executed, "
       f"{hook_skipped} skipped for missing interpreters")

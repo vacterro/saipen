@@ -2,13 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
-## 7.146.0 -- 2026-07-31 -- a re-authorization that survives the next crash
+## 7.146.0 -- 2026-08-01 -- a re-authorization that survives the next crash
 
 Bare `saipen goal` clears a tripped safety valve by resetting `goal_waves`/`goal_tickets` to `0`, and nothing required that reset to leave a line. The bumps it cancels stay in the LOG, so Recovery -- which rebuilt the counters by counting completion events since the `saipen goal <text>` pivot -- restored the pre-reset totals and re-tripped a valve the human had just cleared, while RFC section 2.4 forbids tidying those counters back down. Not a one-time slip: every later Recovery revoked the same re-authorization again, from a count that only grows.
 
 The bare path now writes `DEC: goal reauthorized -- goal_waves N->0, goal_tickets M->0`, section 1.5 counts from the NEWEST goal marker rather than the first, and only increments count as completion events so a reset line's own drop cannot be miscounted as work.
 
 The validator replays that rebuild and compares the result against `STATE.md` instead of grepping for the line, because a marker that exists but does not explain the counters is the same defect. Its red control is a fixture pair -- `goal-reauthorization-trace` and `goal-reauthorization-untraced` -- identical except for whether the reset left evidence, so the control breaks the behavior rather than the wording of a check.
+
+Shipped alongside it, from the same run: the `digest-stale` warning now distinguishes an in-progress pre-tag release from a digest actually carried past a published one, with executable pre-tag and post-tag probes; the guard sweep from the behavioral-red-test rule; the doubled-first-letter command shortcuts (`gg`/`cc`/`ss`); and the STYLE/RFC language-detection rules.
+
+Two repairs to that work were needed before the gates went green. `.saipen/LOG.md` had been written with a literal `
+` in place of its final newline, so the file ended mid-line: every LOG mutation the audit harness appends or swaps landed inside the last entry instead of after it, and two of the 45 red controls silently stopped being evidence. One byte restored both. The new digest probes also shipped five lines over the length limit, which took Ruff red.
 
 ## 7.145.0 -- 2026-07-31 -- the Windows crew launcher reports what happened
 

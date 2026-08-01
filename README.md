@@ -4,6 +4,13 @@
   <img src="assets/__SAIPEN_Alpha.png" alt="SAIPEN Sticker" width="200"/>
 </p>
 
+<div align="center">
+  <h3>🔥 <a href="README.ee.md">🇪🇪 LOE SEDA EESTI KEELES / ESTONIAN 🇪🇪</a> 🔥</h3>
+  <a href="README.md">🇬🇧 English</a> &nbsp;|&nbsp; 
+  <a href="README.ded.md">👴 Дед-Версия (Russian)</a> &nbsp;|&nbsp; 
+  <a href="README.ja.md">🇯🇵 日本語 (Japanese)</a>
+</div>
+
 # SAIPEN
 
 **Continuation protocol for AI coding agents.** SAIPEN keeps project memory in

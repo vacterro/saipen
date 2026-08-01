@@ -202,3 +202,29 @@
 
 - 01.08.26 01:11 [E-1441] [parent: E-1440] DEC: added local language detection rule to RFC.md 1.1 and BOOT.md.
 - 01.08.26 01:11 [E-1442] [parent: E-1441] RUN: bootstrap/inject.ps1 -> protocol distributed to all local agent seats.
+
+- 01.08.26 01:14 [E-1443] [parent: E-1442] RUN: hunt -> clean @8230f72
+- 01.08.26 01:16 [E-1444] [parent: E-1443] [T-379] DEC: picked T-379 from TODO, transitioned to SCOUT.
+- 01.08.26 01:21 [E-1445] [parent: E-1444] DEC: strengthened STYLE.md with explicit Anti-Drift Sentinels (preamble/postamble/apology/narration bans).
+- 01.08.26 01:21 [E-1446] [parent: E-1445] RUN: bootstrap/inject.ps1 -> injected updated STYLE.md across all skill targets.
+- 01.08.26 01:23 [E-1447] [parent: E-1446] [T-381] DEC: goal reauthorized; claimed T-381 (fix STYLE.md cold-boot loading gap in BOOT.md, RFC § 1.1, and validate.py).
+- 01.08.26 01:24 [E-1448] [parent: E-1447] [T-381] RUN: VERIFY -> validate.py PASS (169 rows, cross-doc check 13j PASS).
+- 01.08.26 01:24 [E-1449] [parent: E-1448] [T-381] DEC: goal_tickets 0->1
+- 01.08.26 01:24 [E-1450] [parent: E-1449] [T-381] DEC: SHIP -- review pass 1 confirms BOOT.md, RFC § 1.1, CONFORMANCE row 169, and validate.py check 13j in sync; no P0-P1 findings.
+- 01.08.26 01:24 [E-1451] [parent: E-1450] [T-381] RUN: DONE -> T-381 complete.
+
+- 31.07.26 22:30 [E-1452] [parent: E-1451] [T-379] RUN: SCOUT -- findings: all source-text assertions named in ticket were already migrated to run_scenarios.py by T-363 and recent commits; no further source-text assertions for runtime logic exist.
+- 31.07.26 22:30 [E-1453] [parent: E-1452] [T-379] RUN: VERIFY -> validator PASS; scenarios PASS.
+- 31.07.26 22:30 [E-1454] [parent: E-1453] [T-379] DEC: goal_tickets 1->2
+- 31.07.26 22:30 [E-1455] [parent: E-1454] [T-379] DEC: SHIP -- review pass 1 finds ticket instructions fully implemented by prior commits; scenarios cover the refactored guards; no P0-P1 findings.
+- 31.07.26 22:30 [E-1456] [parent: E-1455] [T-379] RUN: DONE -> T-379 complete.
+- 31.07.26 22:37 [E-1457] [parent: E-1456] [T-377] RUN: SCOUT -- findings: digest-stale false positive occurred because validate.py checks VERSION against digest.md without verifying if the new tag actually exists yet. Pre-tag states are legitimate during SHIP.
+- 31.07.26 22:37 [E-1458] [parent: E-1457] [T-377] RUN: BUILD -- modified validate.py check 13i to run git tag -l; if rc is 0 and output is empty (tag missing), bypass warning. Added run_digest_stale_probes to tools/run_scenarios.py to verify behavior pre/post tag creation.
+- 31.07.26 22:37 [E-1459] [parent: E-1458] [T-377] RUN: VERIFY -- validator PASS; scenarios PASS (both digest-stale behavior checks passed).
+- 31.07.26 22:37 [E-1460] [parent: E-1459] [T-377] DEC: goal_tickets 2->3
+- 31.07.26 22:37 [E-1461] [parent: E-1460] [T-377] DEC: SHIP -- review pass 1 finds validator logic correct and tests exhaustive; no P0-P1 findings.
+- 31.07.26 22:37 [E-1462] [parent: E-1461] [T-377] RUN: DONE -- T-377 complete.
+- 31.07.26 22:37 [E-1463] [parent: E-1462] RUN: bootstrap/inject.ps1 -> protocol distributed to all local agent seats.
+- 01.08.26 01:41 [E-1464] [parent: E-1463] DEC: STATE repair -- it read `phase: SCOUT, task: T-377` while E-1462 closed T-377 and the board holds nothing open. The checkpoint never left SCOUT after that ticket shipped, so SCOUT->DONE was also an illegal transition. Rebuilt to `phase: DONE, task: none, transition_from: SHIP`, which is what E-1461/E-1462 actually record. No LOG content altered.
+- 01.08.26 01:41 [E-1465] [parent: E-1464] DEC: repaired .saipen/LOG.md's terminator -- the file ended with a literal backslash-n instead of a newline, so it stopped mid-line. Every LOG mutation tools/audit_checks.py appends or swaps landed inside E-1463 rather than after it, and 'LOG event ids go backwards' plus 'LOG entry with no date' quietly stopped going red: 43 of 45. One byte restored both to 45 of 45. Content untouched, append-only intact.
+- 01.08.26 01:41 [E-1466] [parent: E-1465] DEC: wrapped five over-length lines in tools/run_scenarios.py's new digest-stale probes, which had left ruff red on 5 E501s; behavior unchanged, both probes still report PASS.

@@ -111,4 +111,5 @@ does not answer.
   speaker in Ukrainian for no other reason. Full rule in `saipen/STYLE.md` and `RFC.md`;
   it is repeated here because it governs the first token, so deferring it to
   a "rule question" is already too late.
+- **Chat voice & compression, before any output**: apply `saipen/STYLE.md` (`caveman-дед`: structural compression, blunt/street-smart tone, zero preambles/postambles, ≤5 lines). It governs every response from the first token. Never defer `STYLE.md` to an escalation.
 - `CHANGELOG.md` is never part of a cold start.
