@@ -2,6 +2,12 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.149.0 -- 2026-08-01 -- the brake gets the short key
+
+`ss` routed to `saipen status`. The user assigns it to `saipen stop` instead: `s` alone collides across stop, set, ship, status and scout, which is why the table resolves those by fiat, and the brake is the one worth two keystrokes.
+
+`saipen status` loses its shortcut rather than taking a tripled one. Section 1.10's own prose, shipped a release earlier, reserves the three-letter form for the chain that reaches a remote, so `sss` on a read-only report would have contradicted a rule one day old. Status is also no longer the only way to see parked work: a resume must name blocked tickets, untriaged findings and live gates in its reply.
+
 ## 7.148.0 -- 2026-08-01 -- one key to maintain, one to reach a remote
 
 `cc` is the button you press to keep the project moving, so three things that made it unreliable are fixed together.
