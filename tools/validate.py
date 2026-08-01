@@ -186,7 +186,8 @@ def _git(*args):
 # a module constant, not a variable one of them happens to have built.
 SAIPEN_COMMANDS = frozenset({
     "set", "init", "continue", "goal", "plan", "clean", "translate",
-    "markhunt", "prepare", "ship", "validate", "status", "stop", "sub"})
+    "markhunt", "prepare", "ship", "validate", "status", "stop", "sub",
+    "hunt"})
 failures = []
 warnings = {}
 
@@ -618,8 +619,8 @@ if isinstance(next_action, str):
         fail(f"STATE.md next_action asks a question outside WAIT:: "
              f"{next_action!r} (RFC § 1.2)")
     # The prefix check above proves the shape, not the vocabulary: "saipen
-    # hunt" passes it while naming a command RFC 1.10 does not define, and a
-    # cold agent is then required to decline it and stop -- TEST-001 failing
+    # refactor" passes it while naming a command RFC 1.10 does not define,
+    # and a cold agent is then required to decline it and stop -- TEST-001 failing
     # on a state that looked perfectly valid. HUNT/ADD/BUILD etc. are phases
     # reached autonomously (1.6, 2.1), never words a user or a next_action
     # may invoke. Caught live in v7.89.0 on this repo's own STATE.md.
@@ -1338,6 +1339,25 @@ if log_files:
         # Found in review: two `RUN:` lines describing this very rule matched
         # an unanchored pattern and became the newest marker themselves, which
         # would have dated the rebuild window from a sentence about the rule.
+        # A re-authorization only means something against a tripped valve. The
+        # line names the counters it cleared, so the claim checks itself: below
+        # both caps, nothing was re-authorized and the reset just handed out a
+        # fresh budget nobody asked for -- the failure that made the most
+        # convenient shortcut unsafe to type (RFC § 2.4 Entry, v7.148.0).
+        for _n, _m in enumerate(re.finditer(
+                r"\]\s+DEC: goal reauthorized -- goal_waves (\d+)->0, "
+                r"goal_tickets (\d+)->0", "\n".join(
+                    ln for p in log_files for ln in read_doc(p).splitlines()))):
+            _w, _t = int(_m.group(1)), int(_m.group(2))
+            if _w < 3 and _t < 20:
+                warn("goal-reauth-untripped",
+                     f"a `DEC: goal reauthorized` line clears goal_waves {_w} "
+                     f"and goal_tickets {_t}, both under § 2.4's 3/20 caps -- "
+                     f"the valve had not tripped, so nothing needed "
+                     f"re-authorizing and the reset granted a fresh budget "
+                     f"instead (RFC § 2.4 Entry)")
+                break
+
         _marker = re.compile(r"\]\s+DEC: goal (?:pivot|reauthorized)\b")
         _log_lines = [ln for p in log_files for ln in read_doc(p).splitlines()]
         _last_marker = max(
@@ -2883,6 +2903,30 @@ else:
                 fail(f"cross-doc drift [commands] -- RFC § 1.10 names "
                      f"{sorted(_doc_cmds)} but validate.py accepts "
                      f"{sorted(SAIPEN_COMMANDS)}")
+                drift_ok = False
+
+            # The shortcut table's right-hand column is a promise that each
+            # shortcut lands on a command this surface defines. Nothing read
+            # that column until v7.148.0, and two rows had stopped being true:
+            # `hh` pointed at HUNT, a PHASE with no command behind it, and `cc`
+            # pointed at a "Full pipeline" that was not a command either -- and
+            # quietly added commit+push to the most-typed key. The check reads
+            # the table itself rather than any prose about it, so the rule and
+            # the thing it governs cannot drift apart.
+            _bad_routes = []
+            for _sc, _route in re.findall(r"^\| `([a-z]{2,3})` \| ([^|]+) \|",
+                                          _rfc_t[_i:_j], re.MULTILINE):
+                _named = set(re.findall(r"`saipen ([a-z]+)", _route))
+                if not _named:
+                    _bad_routes.append(f"`{_sc}` -> {_route.strip()!r} names no "
+                                       f"`saipen <command>` at all")
+                elif not _named <= set(SAIPEN_COMMANDS):
+                    _bad_routes.append(
+                        f"`{_sc}` -> {sorted(_named - set(SAIPEN_COMMANDS))}")
+            if _bad_routes:
+                fail("cross-doc drift [shortcuts] -- RFC § 1.10 shortcut(s) do "
+                     "not resolve to a command the same section defines: "
+                     + "; ".join(_bad_routes))
                 drift_ok = False
 
         _m = re.search(r"ticket-field list is closed.*?(?=\n- |\n#)",

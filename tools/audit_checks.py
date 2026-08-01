@@ -379,7 +379,10 @@ CASES: list[tuple[str, str, object, str]] = [
     ("WAIT with no category", STATE,
      sub_line("next_action", '"WAIT: need more context"'),
      "WAIT with no category token"),
-    ("undefined saipen command", STATE, sub_line("next_action", '"saipen hunt"'),
+    # `saipen hunt` was this case's undefined command until v7.148.0 defined
+    # it. A red control whose example became legal stops being evidence, so it
+    # names a verb the surface has no plans for instead of a near-miss.
+    ("undefined saipen command", STATE, sub_line("next_action", '"saipen refactor"'),
      "does not define"),
     ("question outside a WAIT", STATE, sub_line("next_action", '"RUN: ship it?"'),
      "asks a question outside"),
@@ -406,6 +409,12 @@ CASES: list[tuple[str, str, object, str]] = [
     # and two of these cases quietly stopped being evidence.
     ("BOARD.md ends mid-line", BOARD, lambda t: t.rstrip("\r\n"),
      "end mid-line"),
+    # Point a shortcut back at a phase name. The table promises each one lands
+    # on a command § 1.10 defines; nothing read that column until v7.148.0,
+    # and two rows had already stopped being true.
+    ("shortcut routes to a phase, not a command", "saipen/RFC.md",
+     replace("| `hh` | `saipen hunt` |", "| `hh` | HUNT |"),
+     "do not resolve to a command"),
     ("requires: a capability nobody defines", STATE,
      replace("  - python", "  - pyhton"), "handshake vocabulary"),
 

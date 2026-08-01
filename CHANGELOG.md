@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.148.0 -- 2026-08-01 -- one key to maintain, one to reach a remote
+
+`cc` is the button you press to keep the project moving, so three things that made it unreliable are fixed together.
+
+RFC section 1.11 step 5 and section 2.1 both say an empty board at `DONE` auto-transitions into `HUNT` with no human asked. `phases/done.md` step 2 said the opposite under `goal_mode: false`: park with a manufactured `WAIT: user brake`. Same state, two mandates -- whether a plain continue kept maintaining or stopped depended on which document the agent had read. Section 1.11 wins and `done.md` now defers to it. A brake the user actually asked for is still legal to sit at; what is gone is a phase doc inventing one from an empty board.
+
+Bare `saipen goal` reset the safety-valve counters unconditionally, so typing it out of habit mid-run silently granted a fresh 3-wave/20-ticket budget nobody authorized. It now resets only when the valve has actually tripped, and carries the counters over otherwise. That is what makes the shortcut safe to type at any time.
+
+A resume must now name what is stuck -- blocked tickets, untriaged findings, a live gate -- in its reply. That view came only from `digest.md`, which is written at stop and ship, so a blocked ticket could sit unmentioned across any number of otherwise truthful sessions.
+
+The shortcut table itself did not hold: `hh` routed to `HUNT`, a phase with no command behind it, and `cc` routed to a "Full pipeline" that was not a command either and quietly added commit and push to the most-typed key. `saipen hunt` now exists as an explicit trigger, `cc` is plain `saipen continue`, and the pushing chain moved to `ccc` -- doubled is safe, tripled reaches a remote, so the length of the shortcut says what it costs before you finish typing it. The validator now reads the table's right-hand column and FAILs any shortcut that does not resolve to a command the same section defines.
+
 ## 7.147.0 -- 2026-08-01 -- a file that stops mid-line swallows the next write
 
 Every file the protocol appends to has to end on a line boundary. Appending to a file that stops mid-line does not add a line, it extends the last one -- and nothing here had ever read a file's last byte.

@@ -1,3 +1,3 @@
-done: T-382 -- append targets must end on a line boundary; 6 files repaired; shipping as v7.147.0
-remaining: nothing open; board empty after this
-awaiting: your call on ss -- T-380 shipped ss=HUNT, you specified ss=saipen stop
+done: T-383 -- cc always maintains, gg is safe to type, shortcuts resolve; shipping as v7.148.0
+remaining: nothing open
+awaiting: nothing
