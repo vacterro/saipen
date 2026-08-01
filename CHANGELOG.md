@@ -2,6 +2,16 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.150.0 -- 2026-08-01 -- length is collision order, not cost
+
+`sss` routes to `saipen status`, restoring the shortcut it lost a release earlier.
+
+That row killed a rule one release old. v7.148.0 said the tripled form was the one that reaches a remote, and `ccc` was the only three-letter shortcut, so length told the reader what a key cost before they finished typing it. `sss` touches nothing outside the repository, and the claim stopped being true the moment it was added.
+
+Length now means what stayed true: where two commands want the same first letter, the doubled form goes to one and the tripled form to the next -- `cc`/`ccc` for continue and its shipping chain, `ss`/`sss` for stop and status. That `ccc` is the only shortcut whose chain pushes is now stated on its own row, as a fact the table carries rather than an inference drawn from counting keys.
+
+The row and the rule changed together, on purpose. The same defect shipped twice in the previous two days -- a citation that outlived its claim, and a `cc` row that had stopped matching the rule above it -- and both times the prose was left vouching for a table it no longer described.
+
 ## 7.149.0 -- 2026-08-01 -- the brake gets the short key
 
 `ss` routed to `saipen status`. The user assigns it to `saipen stop` instead: `s` alone collides across stop, set, ship, status and scout, which is why the table resolves those by fiat, and the brake is the one worth two keystrokes.

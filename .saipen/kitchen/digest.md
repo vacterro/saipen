@@ -1,3 +1,3 @@
-done: T-384 -- ss is saipen stop; shipping as v7.149.0
+done: T-385 -- sss is status; length means collision order; shipping as v7.150.0
 remaining: nothing open
 awaiting: nothing
