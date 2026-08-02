@@ -2091,6 +2091,10 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
             "saipen/CONFORMANCE.md",
             "tools/validate.py", "tools/install_hook.py", "tools/uninstall_hook.py",
             "tools/run_scenarios.py", "tools/audit_floor.py",
+            # The generation-4 hook calls this before every commit; a home
+            # without it ships a hook whose dependency exists in no clone,
+            # which is the v7.166.1 defect one layer up (T-428).
+            "tools/ci_status.py",
             "tools/release_ledger_baseline.json",
             "tests/validate.sh", "tests/validate.ps1",
             "bootstrap/inject.sh", "bootstrap/inject.ps1",

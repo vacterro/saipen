@@ -2,6 +2,16 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.172.0 -- 2026-08-02 -- the CI-status hook ships with the tool it calls
+
+Generation 4 of the pre-commit hook asks GitHub what the last workflow run for the branch was, and says so when it is red -- the active counterpart to a badge nobody is forced to look at, written after this repository's own CI sat red for 30+ commits while every local gate stayed green. It was wired to an UNTRACKED `tools/ci_status.py`: present on the machine that wrote it, absent from every clone. That is the v7.166.1 manifest defect one layer up, and it is why the tool sat undecided rather than shipped.
+
+Shipped now, with four quiet failures closed. A missing `ci_status.py` is skipped by the hook's `-f` guard instead of leaking an error into every commit. The branch query asks for COMPLETED runs -- without that the newest run wins even while it is still queued, and the RED run underneath is never looked at, which is exactly the moment someone is committing on a red base. The cache path is resolved through git, because a linked worktree's `.git` is a FILE and the literal path can only fail to write, silently spending one of the 60 unauthenticated requests per hour on every commit made there. An unreachable API exits 0 in silence.
+
+Warn-only in both directions, and now the docstring, the hook comment and the behaviour all say it: a red CI must never block the commit that fixes it, and a network hiccup must never block any commit at all.
+
+Seven probes, all offline. Three drive the tool in-process with a stubbed network; four run the real installed hook under dash, including one where `ci_status.py` exits 1 loudly and the hook must still leave the commit at exit 0. The tool is in the runtime manifest, which FAILs on an untracked entry, so the dependency cannot go local-only again.
+
 ## 7.171.0 -- 2026-08-02 -- a completion claim carries its evidence, and a LOG line stays in the past tense
 
 Three gaps, all of them ways a claim could outrun what actually happened.

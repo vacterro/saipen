@@ -28,7 +28,12 @@ MARKER = "# saipen pre-commit hook"
 # copies ("re-run inject after every git pull"), and nothing guarded this one.
 # tools/validate.py reads this number out of THIS file and compares it against
 # the number in the installed hook.
-HOOK_VERSION = 3
+# Generation 4 added the CI-status line: before every commit the hook asks
+# GitHub what the last completed workflow run for the branch was, and says so
+# out loud when it is red -- the failure mode where this repo's own CI sat red
+# for 30+ commits while every local gate stayed green (the badge is passive;
+# nothing in the commit loop ever looked at it). Warn-only, never blocks.
+HOOK_VERSION = 4
 
 home = Path(__file__).resolve().parent.parent
 hooks_dir = Path(".git/hooks")
@@ -63,6 +68,15 @@ SAIPEN_HOME="{home_sh}"
 if [ ! -f "$SAIPEN_HOME/tools/validate.py" ]; then
   # Home moved since install -- fall back to STATE.md's saipen_home field.
   SAIPEN_HOME=$(sed -n 's/^saipen_home:[ \\t]*"\\{{0,1\\}}\\([^"]*\\)"\\{{0,1\\}}[ \\t]*$/\\1/p' .saipen/STATE.md | head -1 | tr '\\\\' '/')
+fi
+
+# CI status: if the last completed workflow run for this branch is red, say
+# so out loud BEFORE this commit buries it further. Warn-only and fail-open:
+# a red CI must never block the very commit that fixes it, and a network
+# hiccup must never block any commit. tools/ci_status.py handles both -- exit
+# 0 on green/in-progress/no-remote/offline, a loud line on red. (Generation 4.)
+if [ -f "$SAIPEN_HOME/tools/ci_status.py" ] && command -v python >/dev/null 2>&1; then
+  python "$SAIPEN_HOME/tools/ci_status.py" --hook || true
 fi
 
 if [ -f "$SAIPEN_HOME/tools/validate.py" ]; then

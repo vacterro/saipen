@@ -35,6 +35,9 @@ Exit code is non-zero if any fixture's real outcome differs from its
 declaration, so CI fails on it like any other gate.
 """
 
+import contextlib
+import importlib.util
+import io
 import os
 import re
 import shutil
@@ -42,6 +45,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import urllib.error
 import zipfile
 from pathlib import Path
 
@@ -106,6 +110,95 @@ def find_powershell() -> str | None:
         if found:
             return found
     return None
+
+
+def run_ci_status_probes() -> tuple[list[str], int]:
+    """T-428: the four ways the CI-status tool could fail quietly.
+
+    All four run OFFLINE. A probe that needs GitHub is a probe that skips on
+    every machine without a network and reports "0 failures" while checking
+    nothing -- the vacuous-gate shape this repository keeps finding in itself.
+    The API is reached exactly once here, through a stub that raises.
+    """
+    failures = []
+    spec = importlib.util.spec_from_file_location(
+        "saipen_ci_status", HOME / "tools" / "ci_status.py")
+    ci = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(ci)
+
+    # 1. An in-progress run must not hide a red base. The URL is the whole
+    #    mechanism: without status=completed the newest run wins even when it
+    #    is still queued, classify() says "in progress" and exits 0, and the
+    #    RED run underneath is never looked at -- which is exactly the moment
+    #    the tool exists for, a red base being re-run while someone commits.
+    url = ci.runs_url("owner/repo", "main", "validate.yml")
+    if "status=completed" not in url:
+        failures.append(f"ci_status branch query does not ask for completed "
+                        f"runs: {url}")
+    elif ci.classify({"status": "in_progress", "run_number": 1})[0] != 0 \
+            or ci.classify({"status": "completed", "conclusion": "failure",
+                            "run_number": 1})[0] != 1:
+        failures.append("ci_status classify() does not separate an "
+                        "in-progress run from a completed failure")
+    else:
+        print("PASS: ci_status queries completed runs only; in-progress is "
+              "not a verdict and a completed failure is")
+
+    # 2. An unreachable API must never block a commit, and must say nothing
+    #    in hook mode -- a per-commit "cannot reach GitHub" line is noise the
+    #    user learns to scroll past, which is how a real red line gets missed.
+    def _boom(_url):
+        raise urllib.error.URLError("probe: network down")
+
+    ci.fetch_json = _boom
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        rc = ci.main_argv(["--hook", "--repo", "owner/repo", "--branch", "main"])
+    if rc != 0 or buf.getvalue().strip():
+        failures.append(f"ci_status --hook did not fail open on an "
+                        f"unreachable API: rc={rc} out={buf.getvalue()[:120]!r}")
+    else:
+        print("PASS: ci_status --hook fails open and stays silent when the "
+              "API is unreachable")
+
+    # 3. The cache path must come from git, not the literal `.git/`. In a
+    #    linked worktree `.git` is a FILE, so the literal path cannot be
+    #    written: the hook would silently stop caching and spend one of the
+    #    60 unauthenticated requests per hour on every commit made there.
+    with tempfile.TemporaryDirectory(prefix="saipen-ci-") as raw:
+        root = Path(raw)
+        main_repo = root / "main"
+        main_repo.mkdir()
+        for args in (["init", "-q"], ["config", "user.email", "p@probe"],
+                     ["config", "user.name", "probe"],
+                     ["commit", "-q", "--allow-empty", "-m", "base"],
+                     ["worktree", "add", "-q", "-b", "probe",
+                      str(root / "linked")]):
+            subprocess.run(["git", *args], cwd=main_repo, check=False,
+                           capture_output=True, text=True)
+        linked = root / "linked"
+        if not linked.is_dir():
+            print("SKIP: ci_status worktree cache -- git worktree unavailable")
+        else:
+            cwd = os.getcwd()
+            try:
+                os.chdir(linked)
+                path = ci.cache_path()
+            finally:
+                os.chdir(cwd)
+            if path is None or not path.parent.is_dir():
+                failures.append(f"ci_status cache_path() does not resolve to "
+                                f"a real directory in a linked worktree: "
+                                f"{path}")
+            elif path.parent == linked / ".git":
+                failures.append("ci_status cache_path() returned the literal "
+                                ".git/ of a linked worktree, where .git is a "
+                                "file -- the write can only fail")
+            else:
+                print("PASS: ci_status cache path resolves through git and is "
+                      "writable inside a linked worktree")
+
+    return failures, 3
 
 
 def run_hook_probes() -> tuple[list[str], int, int]:
@@ -174,7 +267,66 @@ def run_hook_probes() -> tuple[list[str], int, int]:
             failures.append("installed-hook no-Bash control printed floor success")
         else:
             print("PASS: installed hook without Bash -- focused nonzero failure")
-    return failures, 2, 0
+
+        # T-428, the two halves of the CI-status line the hook grew in
+        # generation 4. The fake home above deliberately has no ci_status.py,
+        # which is every clone that predates it and every consuming project
+        # that never installed it: the `-f` guard must skip the call silently
+        # rather than let a missing tool leak an error into every commit.
+        # The two controls above run on a PATH holding only bash, which also
+        # hides `python` -- and the hook guards its CI line on `command -v
+        # python`. Probing the CI line on that PATH would assert nothing
+        # while printing PASS, the vacuous-control shape this file exists to
+        # prevent, so both CI probes get python back on the PATH.
+        python_exe = shutil.which("python")
+        ci_env = os.environ.copy()
+        ci_env["PATH"] = (bash_path + os.pathsep
+                          + str(Path(python_exe).resolve().parent)
+                          if python_exe else bash_path)
+        no_tool = subprocess.run(
+            [dash, str(hook)], cwd=project, env=ci_env,
+            capture_output=True, text=True, errors="replace")
+        no_tool_output = no_tool.stdout + no_tool.stderr
+        if not python_exe:
+            print("SKIP: installed-hook CI line -- no python on PATH")
+            return failures, 2, 1
+        # No FLOOR_OK expected here: with python back on the PATH the hook
+        # takes its normal validate.py branch and never reaches the Bash
+        # fallback the two controls above were built to exercise.
+        if no_tool.returncode:
+            failures.append(
+                f"installed hook broke with no ci_status.py present: "
+                f"rc={no_tool.returncode} {no_tool_output.strip()[-160:]}")
+        elif "RED" in no_tool_output or "ci_status" in no_tool_output:
+            failures.append("installed hook without ci_status.py leaked CI "
+                            "output -- the -f guard did not hold")
+        else:
+            print("PASS: installed hook with no ci_status.py present -- "
+                  "skipped silently, commit path unaffected")
+
+        # And the other half: with the tool present and RED, the hook must
+        # still exit 0. Warn-only is not a preference here -- a red CI that
+        # blocks commits blocks the commit that fixes it. Docstring, hook
+        # comment and behaviour now say the same thing.
+        (fake_home / "tools" / "ci_status.py").write_text(
+            "import sys\n"
+            "print('run #1 failure (deadbee..) -- RED -- probe')\n"
+            "sys.exit(1)\n", encoding="utf-8", newline="\n")
+        red = subprocess.run(
+            [dash, str(hook)], cwd=project, env=ci_env,
+            capture_output=True, text=True, errors="replace")
+        red_output = red.stdout + red.stderr
+        if red.returncode != 0:
+            failures.append(
+                f"installed hook blocked a commit on a RED CI status: "
+                f"rc={red.returncode} {red_output.strip()[-160:]}")
+        elif "RED" not in red_output:
+            failures.append("installed hook swallowed the RED CI line -- a "
+                            "warning nobody sees is not a warning")
+        else:
+            print("PASS: installed hook reports a RED CI status and still "
+                  "exits 0 -- warn-only, as the docs now say")
+    return failures, 4, 0
 
 
 REQUIRED_INSTALL_FILES = (
@@ -1360,6 +1512,8 @@ failures.extend(hunt_mark_failures)
 manifest_failures, manifest_checked = run_manifest_tracking_probes()
 failures.extend(manifest_failures)
 hook_failures, hook_checked, hook_skipped = run_hook_probes()
+ci_failures, ci_checked = run_ci_status_probes()
+failures.extend(ci_failures)
 failures.extend(hook_failures)
 
 
@@ -1380,6 +1534,7 @@ print(f"{hunt_mark_checked} hunt-mark behavior(s) executed")
 print(f"{manifest_checked} manifest-tracking behavior(s) executed")
 print(f"{hook_checked} installed-hook behavior(s) executed, "
       f"{hook_skipped} skipped for missing interpreters")
+print(f"{ci_checked} ci-status behavior(s) executed")
 
 if failures:
     print(f"\nFAILED: {len(failures)} executable check(s) failed")
