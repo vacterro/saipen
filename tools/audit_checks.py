@@ -102,6 +102,13 @@ def release_ledger_probe(source: Path, destination: Path) -> str | None:
     for args in (("init", "-q"),
                  ("config", "user.name", "SAIPEN ledger probe"),
                  ("config", "user.email", "ledger-probe@example.invalid"),
+                 # The tree has to be COMMITTED, not just present: the runtime
+                 # manifest now requires its files to be tracked, and a probe
+                 # whose repository contains one empty commit has every file
+                 # untracked. That made this fixture fail for a reason it does
+                 # not test -- a synthetic repository has to resemble a real
+                 # clone in every way the validator can see.
+                 ("add", "-A"),
                  ("commit", "--allow-empty", "-m", "ledger probe")):
         result = git(*args)
         if result.returncode:

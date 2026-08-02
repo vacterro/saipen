@@ -2,6 +2,12 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.166.2 -- 2026-08-02 -- the ledger probe's repository was not a repository
+
+v7.166.1 required every runtime-manifest file to be tracked by git. The release-ledger probe in `tools/audit_checks.py` builds its synthetic repository with `git init` and a single EMPTY commit -- so nothing in it was tracked, and the fixture failed for a reason it does not test. Caught by CI on the very commit that added the requirement, which is the first useful thing the red CI has done all day.
+
+The probe now commits the tree it copied. A synthetic repository has to resemble a real clone in every way the validator can see, or it is testing the harness rather than the rule.
+
 ## 7.166.1 -- 2026-08-02 -- the manifest listed a file no clone had
 
 CI had been red since v7.164.0 while every local gate stayed green, and the reason is embarrassing in the useful way. `tools/validate.py` carried an uncommitted working-tree edit when v7.164.0 was prepared -- one runtime-manifest entry naming `tools/ci_status.py` -- and the release committed the whole file. The tool it names was never committed. Locally the manifest check found the file on disk and passed on every commit; every clone, CI included, got a home missing a runtime file and failed on every run.
