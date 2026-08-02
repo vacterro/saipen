@@ -575,6 +575,26 @@ CASES: list[tuple[str, str, object, str]] = [
      "reply-language"),
     ("STYLE drops persistent caveman voice", "saipen/STYLE.md",
      replace("Voice persistence:", "Voice remains:"), "chat-voice"),
+    # T-404: BOOT.md's on-demand rule-question list and its before-output
+    # mandate must stay disjoint. Line 101 once filed STYLE.md under lazy
+    # 'rule questions' while line 108 ordered it before any output -- a live
+    # session took the cheap reading and never opened the file.
+    ("BOOT re-lists STYLE.md as an on-demand rule question",
+     "saipen/BOOT.md",
+     replace("`saipen/UI.md` (UI work only). **`STYLE.md` is deliberately NOT on",
+             "`saipen/STYLE.md` (chat voice), `saipen/UI.md` (UI work only)."
+             " **`STYLE.md` is deliberately NOT on"),
+     "under on-demand 'rule questions' while ordering it"),
+    ("BOOT loses a T-404 disjointness anchor bullet",
+     "saipen/BOOT.md",
+     replace("- Rule questions `STATE`/`BOARD`/`LOG` + the active phase doc don't answer:",
+             "- Questions `STATE`/`BOARD`/`LOG` + the active phase doc don't answer:"),
+     "lost one of the two T-404 anchor bullets"),
+    ("an adapter lazily defers STYLE.md to a rule question",
+     "extensions/adapters/deepseek.md",
+     replace("`saipen/STYLE.md` is a boot-read: apply it before any output.",
+             "`saipen/STYLE.md` loads alongside it."),
+     "as a rule-question escalation"),
     ("a locale loses its guide", "guides/GUIDE_UK.md", DELETE,
      "locale coverage"),
     ("a locale guide loses its shortcut callout", "guides/GUIDE_AR.md",

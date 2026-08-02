@@ -2,6 +2,12 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.159.0 -- 2026-08-02 -- one file, two mandates, the cheap one won
+
+`BOOT.md` told STYLE.md two things eight lines apart: line 101 filed it under lazy "rule questions" -- open only when the phase doc fails to answer -- while line 108 ordered applying it before any output. Measured, not theorised: a live DeepSeek v4 flash session read BOOT, RFC, the phase docs and PROTOCOL.md, never opened STYLE.md, and said so when asked. It obeyed the cheaper line; T-381's red-test had proven the mandate EXISTS, never that nothing contradicts it.
+
+The fix is structural, not louder wording. The operative caveman-дед contract now lives inline in the cold-start kernel as text, and STYLE.md stays the reference for nuance. The validator FAILs when a before-output file reappears on BOOT's on-demand rule-question list, fails loud when either anchor bullet is lost so the check cannot pass vacuously, and rejects an adapter filing STYLE.md as a rule-question escalation -- all seven adapters carried the same lazy classification. Three new red controls prove all three regressions; all 62 canonical mutations fire and portable-floor parity stays 11.
+
 ## 7.158.0 -- 2026-08-01 -- ready packages, exact keys, cleaner front door
 
 Repeated keys are assignments now, not weak-model vibes. `ee` and `qq` prepare complete translation/wiki packages into explicit seven-field `status: ready` handoffs without touching the target or a remote. `eee` and `qqq` consume only a fresh ready package, integrate its declared payload through VERIFY/REVIEW/SHIP, and push; incomplete input is an exact no-op naming the doubled prerequisite. `cc` stays mapped to Goal Mode. The validator pins all 13 routes, rejects valid-but-wrong destinations, rejects stale global claims about doubled/tripled cost, and keeps six Cyrillic twins aligned across skill activation, 32 locale sources, mirrors, and guides. All 59 canonical mutations fire; portable-floor parity remains 11.

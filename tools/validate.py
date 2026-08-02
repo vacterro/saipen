@@ -2916,6 +2916,39 @@ else:
                  "STYLE.md (caveman-дед) before output. It governs every response "
                  "from the first token, so deferring it to an escalation is too late")
             drift_ok = False
+        # T-404: the before-output mandate and the on-demand rule-question list
+        # must stay disjoint. Line 101 once filed STYLE.md under lazy "rule
+        # questions the phase doc doesn't answer" while line 108 ordered it
+        # before any output; a live session took the cheap reading and never
+        # opened the file. A file BOOT names as required-before-output that also
+        # appears on its on-demand list is that contradiction back.
+        # The on-demand regex REQUIRES the `saipen/` prefix on purpose: the
+        # bullet's own prose says "**`STYLE.md` is deliberately NOT on this
+        # list**", so matching bare backticks would false-positive the green
+        # control. Only prefixed refs count as list entries; the bare mention
+        # is the deliberate-absence note.
+        _btn = _bt.replace("\r\n", "\n")
+        _on_bullet = next((b for b in _btn.split("\n- ")
+                           if b.startswith("Rule questions")), "")
+        _vo_bullet = next((b for b in _btn.split("\n- ")
+                           if b.startswith("**Chat voice")), "")
+        if not _on_bullet or not _vo_bullet:
+            fail("cross-doc drift [chat-voice] -- BOOT.md lost one of the two "
+                 "T-404 anchor bullets: the on-demand 'Rule questions' list or "
+                 "the before-output 'Chat voice' mandate. The disjointness "
+                 "check cannot see a contradiction it cannot parse, so it fails "
+                 "loud instead of passing vacuously")
+            drift_ok = False
+        _refs = r"`(?:saipen/|<saipen_home>/)([A-Za-z0-9_]+\.md)`"
+        _ondemand = set(re.findall(_refs, _on_bullet))
+        _bootread = set(re.findall(_refs, _vo_bullet))
+        _straddlers = sorted(_ondemand & _bootread)
+        if _straddlers:
+            fail("cross-doc drift [chat-voice] -- BOOT.md files "
+                 + ", ".join(f"`{f}`" for f in _straddlers)
+                 + " under on-demand 'rule questions' while ordering it "
+                 "before any output; the lazy reading wins (T-404)")
+            drift_ok = False
 
     # 13i. The human digest is the shape ship.md promises, and is not from
     #      another era. `phases/ship.md` says "(over)write ... exactly three
@@ -3405,6 +3438,18 @@ else:
             fail(f"cross-doc drift [adapters] -- {len(_no_kernel)} adapter(s) "
                  f"never name BOOT.md and point a cold agent straight at the "
                  f"constitution: {', '.join(_no_kernel)}")
+            drift_ok = False
+        # T-404: an adapter that files STYLE.md as a rule-question escalation
+        # ("loads alongside it") is the same lazy hole BOOT.md line 101 opened
+        # -- a DeepSeek agent booting on its own adapter is told STYLE.md only
+        # loads when a rule question comes up, and never opens it.
+        _lazy_style = [a.name for a in _adapters
+                       if "loads alongside" in a.read_text(encoding="utf-8-sig")]
+        if _lazy_style:
+            fail(f"cross-doc drift [adapters] -- {', '.join(_lazy_style)} "
+                 f"file(s) STYLE.md as a rule-question escalation "
+                 f"('loads alongside it'); STYLE.md is a boot-read, applied "
+                 f"before any output")
             drift_ok = False
 
     if drift_ok and not failures:
