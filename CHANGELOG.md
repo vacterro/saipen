@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.167.0 -- 2026-08-02 -- the default says its own name now
+
+`reply_language:` ships as `et`, so someone who clones this and writes English gets Estonian back. That is the setting working. It also reads exactly like a broken tool, because nothing on the way in mentioned it and no reader has a reason to suspect one line in `STYLE.md` is the fix.
+
+`README.md`, `README.ee.md` and `README.ded.md` now say it in their first screen: the default, the four values, the file, and the fact that nothing else about SAIPEN is Estonian -- protocol, code, commits and every document stay English at every value. The validator requires all three to name the setting, and the red control strips that name out of one of them, removing the reader's only pointer rather than reweighting prose.
+
+`README.ja.md` and the 32 locale copies are saitranslate's, ticketed as T-419 rather than machine-translated here.
+
 ## 7.166.2 -- 2026-08-02 -- the ledger probe's repository was not a repository
 
 v7.166.1 required every runtime-manifest file to be tracked by git. The release-ledger probe in `tools/audit_checks.py` builds its synthetic repository with `git init` and a single EMPTY commit -- so nothing in it was tracked, and the fixture failed for a reason it does not test. Caught by CI on the very commit that added the requirement, which is the first useful thing the red CI has done all day.

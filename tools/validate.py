@@ -3233,6 +3233,27 @@ else:
                  f"meant answers in a language nobody chose")
             drift_ok = False
 
+    # A default nobody is told about is not a setting, it is a surprise. The
+    # agent answering in Estonian to someone who never asked for Estonian
+    # reads as a broken tool, and the reader has no reason to suspect one line
+    # in STYLE.md would fix it. Core owns these three entry documents
+    # (en/ru/et + Дед); the Japanese README and the locale copies are
+    # subSaipen work and are not checked here.
+    _entry_readmes = [_n for _n in ("README.md", "README.ee.md", "README.ded.md")
+                      if (_tools_parent / _n).is_file()]
+    _silent_readmes = [
+        _n for _n in _entry_readmes
+        if "reply_language" not in (_tools_parent / _n).read_text(
+            encoding="utf-8-sig")
+    ]
+    if _silent_readmes:
+        fail("cross-doc drift [reply-language] -- "
+             + ", ".join(_silent_readmes)
+             + " never mentions `reply_language:`, so a reader meets an "
+               "Estonian answer with no way to know it is a setting or where "
+               "to change it")
+        drift_ok = False
+
     if _contract_docs["BOOT.md"].is_file():
         _bt = _contract_docs["BOOT.md"].read_text(encoding="utf-8-sig")
         if "Chat voice & compression" not in _bt:

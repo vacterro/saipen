@@ -21,7 +21,9 @@
 
 **Paketiklahvid:** `ee`/`qq` valmistavad täieliku tõlke- või vikipaketi ette ilma seda lõimimata; `eee`/`qqq` võtavad vastu ainult valmis paketi, seejärel lõimivad, kontrollivad, vaatavad üle ja lükkavad üles.
 
-**v7.166.2** | [Spetsifikatsioon](SPEC.md) | [Juhend](GUIDE.md) | [RFC](saipen/RFC.md) | [Stiil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Vastavus](saipen/CONFORMANCE.md) | MIT | [![CI](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
+**Vastuste keel.** Agent vastab vaikimisi **eesti keeles** — see on säte, mitte veidrus, ja miski muu SAIPEN-is ei ole eestikeelne. Muuda seda ühes kohas: rida `reply_language:` [`saipen/STYLE.md`](saipen/STYLE.md) alguses. `et` eesti, `en` inglise, `ru` vene, `auto` valib selle järgi, mis keeles sa kirjutasid. Protokoll, kood, commitid ja kõik dokumendid jäävad igal väärtusel inglise keelde.
+
+**v7.167.0** | [Spetsifikatsioon](SPEC.md) | [Juhend](GUIDE.md) | [RFC](saipen/RFC.md) | [Stiil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Vastavus](saipen/CONFORMANCE.md) | MIT | [![CI](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
 
 [![Vene Juhend](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![Inglise Juhend](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)

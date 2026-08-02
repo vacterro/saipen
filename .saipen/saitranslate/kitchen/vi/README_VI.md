@@ -14,7 +14,7 @@ và tiếp tục công việc trong chưa đầy một phút -- không cần gi�
 
 **Phím tắt:** `cc` tiếp tục Goal Mode đang chạy, `sss` báo trạng thái mà không đụng vào mã và `ss` lưu điểm kiểm tra rồi dừng. [Xem bản đồ đầy đủ 13 phím](saipen/RFC.md#110-command-surface). Các cặp song sinh Cyrillic cũng hoạt động: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.166.2** | [Đặc tả](SPEC.md) | [Hướng dẫn](GUIDE.md) | [RFC](saipen/RFC.md) | [Phong cách](saipen/STYLE.md) | [Giao diện UI](saipen/UI.md) | [Độ tuân thủ](saipen/CONFORMANCE.md) | markdown thuần túy | không phụ thuộc | MIT
+**v7.167.0** | [Đặc tả](SPEC.md) | [Hướng dẫn](GUIDE.md) | [RFC](saipen/RFC.md) | [Phong cách](saipen/STYLE.md) | [Giao diện UI](saipen/UI.md) | [Độ tuân thủ](saipen/CONFORMANCE.md) | markdown thuần túy | không phụ thuộc | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
