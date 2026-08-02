@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.162.0 -- 2026-08-02 -- the validator was more permissive than the format it validates
+
+`saipen_home` lost its backslash doubling in commit 4012bae, so RFC section 1.7's bootloader pointer stopped being a path. A YAML reader consumes each single backslash as an escape -- and `\_` is a perfectly legal one, yielding U+00A0 -- so the pointer parsed to a value with five non-breaking spaces where five separators belong. Any agent resolving the SAIPEN home from STATE got a path that cannot exist.
+
+It survived three releases for two reasons, and the second one matters more. `state.schema.json` types the field `string`, and corruption is a string. And `tools/validate.py` does not use a YAML parser at all: it reads the subset STATE.md actually uses, strips quotes, and never processes escapes -- so the corrupted pointer looked perfect to every check in the file while a real reader saw something else. Fourteen mentions of `saipen_home` in the validator, zero parses.
+
+The check is therefore the escaping rule itself, with no parser and no dependency: inside a double-quoted scalar the only defensible backslash is a doubled one. The first draft of this check accepted `\_`, because YAML does -- legal, and wrong, which is exactly how the bug got in. Red control un-doubles the backslashes the way the original commit did, so the mutation is the state file rather than any wording.
+
 ## 7.161.0 -- 2026-08-02 -- warning ownership from release history
 
 A WARN category that survives release after release is standing debt, and nothing said so. `tools/release_ledger_baseline.json` now records each tracked slug's first/last seen release and an explicit rationale; a slug still emitted this run that has outlived `WARN_OWNER_SPAN=3` consecutive releases FAILs `tools/validate.py` unless a live BOARD ticket names that exact slug. Calibrated against board-soft-cap, log-soft-cap, subsaipen-never-ran and goal-reauth-untripped; resolved slugs stay as history and re-own only if they return. A new behavioral probe ages an unowned slug in baseline DATA to prove the FAIL, then proves the identical aged slug with a live naming ticket passes; three canonical mutations red-test the baseline shape (68/68). Standing owner tickets T-406/T-407 keep the emitted warnings owned after T-401 closes.

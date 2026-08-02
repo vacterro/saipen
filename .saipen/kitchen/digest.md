@@ -1,3 +1,3 @@
-done: T-401 -- warn-slug ownership from release history
-remaining: T-400, T-392, T-399, T-406/T-407 (standing owners, live while warnings emit)
+done: T-412 -- bootloader pointer parses again; escaping checked; shipping as v7.162.0
+remaining: T-408 UI Golden default, T-409 dd semantics, T-410 STYLE proof, T-411 behavioral sweep
 awaiting: nothing

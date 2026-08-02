@@ -487,6 +487,43 @@ if state.get("goal_mode") is False:
                  f"({state[counter]!r}) -- counters MUST be cleared when "
                  f"goal_mode is off (RFC § 2.4 Exit)")
 
+# RFC § 1.7's bootloader pointer has to survive being parsed, and this file
+# is the wrong judge of that: `parse_frontmatter` above reads the YAML SUBSET
+# STATE.md uses, strips quotes, and never processes escape sequences -- so a
+# corrupted pointer looks perfect to every check here while a real YAML reader
+# sees something else entirely. `"V:\___VAC\__K"` written with single
+# backslashes parses, in PyYAML, to a value where each separator became
+# U+00A0 -- five path separators eaten as escapes. It shipped that way
+# through three releases because the schema types the field `string` and
+# corruption is a string, and because the validator is more permissive than
+# the format it claims to validate. So check the escaping rule itself, with no
+# parser and no dependency: inside a double-quoted scalar, a backslash only
+# ever legally introduces another backslash or one of YAML's escape letters.
+# In a PATH the only defensible escape is a doubled backslash. `\_` is a
+# perfectly legal YAML escape -- it yields U+00A0 -- which is precisely how
+# this corruption passed for three releases: legal, and wrong.
+for _key in ("saipen_home",):
+    _raw = next((ln for ln in read_doc(state_path).splitlines()
+                 if ln.startswith(f"{_key}:")), None)
+    if _raw is None or '"' not in _raw:
+        continue
+    _body = _raw[_raw.index('"') + 1:_raw.rindex('"')]
+    _bad, _i = [], 0
+    while _i < len(_body):
+        if _body[_i] == "\\":
+            _nxt = _body[_i + 1] if _i + 1 < len(_body) else ""
+            if _nxt != "\\":
+                _bad.append("\\" + _nxt)
+            _i += 2
+        else:
+            _i += 1
+    if _bad:
+        fail(f"STATE.md {_key} is a double-quoted scalar whose backslashes are "
+             f"not escaped ({', '.join(_bad[:4])}) -- a YAML reader consumes "
+             f"each as an escape sequence, so RFC § 1.7's bootloader pointer "
+             f"resolves to a path that cannot exist. This file's own subset "
+             f"parser cannot see it: double every backslash inside the quotes")
+
 # schema_version is the migration boundary for checkpoint semantics. Absence
 # and v1 remain readable so installing a newer SAIPEN cannot trap an existing
 # project. The next checkpoint upgrades them to v2, whose `last_event` marker
