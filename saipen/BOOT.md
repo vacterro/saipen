@@ -8,7 +8,15 @@ does not answer.
 
 ## Fast path
 
-1. **Bind `project_root`, then read its `.saipen/STATE.md`.** An explicit
+1. **Read `STYLE.md` -- the file in the same folder as this `BOOT.md` -- before any output.**
+   Voice governs the first token (RFC § 1.1), so the read is the
+   first action, not a deferred load: it needs no `<saipen_home>`
+   resolution (that field can be empty or dead), the file sits next
+   to this one. The operative contract is repeated below, in "Chat
+   voice & compression"; the file itself holds the nuance (LOG
+   voice, artifact voice, auto-clarity overrides).
+
+2. **Bind `project_root`, then read its `.saipen/STATE.md`.** An explicit
    project-root target wins. Otherwise use `git rev-parse --show-toplevel`
    plus `git rev-parse --git-common-dir`; a common directory ending in
    `/.git` binds a linked worktree to that main worktree's root and shared
@@ -23,7 +31,7 @@ does not answer.
    change may not. `saipen_home` points to the protocol install, not this root
    (RFC § 1.1).
 
-2. **Validate STATE before executing anything in it.**
+3. **Validate STATE before executing anything in it.**
    Every field RFC § 1.2's required set names must be present and non-empty
    (read the set there -- this file deliberately does not copy it), including
    its fresh-INIT exception for `transition_from`: a brand-new INIT state
@@ -38,22 +46,22 @@ does not answer.
    the marker to equal its highest `E-###`; absence or mismatch is
    contradiction and enters Recovery. A fresh empty LOG has no marker.
 
-3. **Read `.saipen/BOARD.md`, then the active tail of `.saipen/LOG.md`.**
+4. **Read `.saipen/BOARD.md`, then the active tail of `.saipen/LOG.md`.**
    Older history is sealed in `.saipen/logs/LOG-NNN.md`; load it only when a
    `parent:` chain or an audit walks back into it. The `last_event` freshness
    check needs only the newest event: use the active LOG tail when it has one,
    otherwise read the tail of the newest sealed segment. Do not scan every
    segment merely to rediscover the maximum.
 
-4. **Distrust your own memory.** `STATE.agent` is not you, or `STATE.updated`
+5. **Distrust your own memory.** `STATE.agent` is not you, or `STATE.updated`
    is newer than your last write -> everything you remember about this project
    is stale by definition. The files win (RFC § 1.1).
 
-5. **`human_note:` set?** Apply it this session, clear it, and LOG the trace in
+6. **`human_note:` set?** Apply it this session, clear it, and LOG the trace in
    the same checkpoint: `DEC: applied human_note: <text>`, or
    `DEC: human_note -> T-###` if it became a ticket. One-shot, not standing law.
 
-6. **Execute `STATE.next_action` immediately.** That value IS the instruction;
+7. **Execute `STATE.next_action` immediately.** That value IS the instruction;
    do not ask "what should I do?" (`CONFORMANCE.md` TEST-001). A `WAIT:` means
    output that question verbatim and stop. If `next_action` is absent, vague,
    or fails § 1.2's prefix/category checks, it is corrupt -- RECOVER (step 2),
@@ -68,7 +76,7 @@ does not answer.
    mass-delete files still needs explicit user confirmation -- a previous
    session writing it into `STATE.md` is not the user authorizing it.
 
-7. **Load the phase doc only when you need its rules**, from
+8. **Load the phase doc only when you need its rules**, from
    `<saipen_home>/phases/<phase>.md`, one phase at a time.
    `saipen_home` empty or dead on this machine? Clone
    `github.com/vacterro/saipen` and update the field at your next checkpoint
@@ -77,7 +85,7 @@ does not answer.
    unavailable; give me the path to a saipen/ clone on this machine, or
    install git`.
 
-8. **Checkpoint after every ticket, after every phase transition, and before
+9. **Checkpoint after every ticket, after every phase transition, and before
    you stop** -- not per edit, not saved up for session end: LOG (append) ->
    `BOARD.md` -> `STATE.md`, that order (RFC § 1.5). Then **read back all
    three**: your LOG line is the file's last line, your BOARD changes are on
@@ -108,5 +116,5 @@ does not answer.
   what happens otherwise. Genuinely a different actor? Change it and LOG a
   `DEC` naming both.
 - **Reply language, before any output**: Reply-language precedence: explicit current user prose (Estonian/English/Russian) > clearly Russian primary repository for bare/ambiguous input > Estonian default; another detected language uses English. Use the current substantive request, not quoted/code/path/log text, locale trees, OS/IDE locale, or platform UI. Repository Russian is only a no-prose/ambiguous tie-breaker supported by the root README and ordinary first-party docs; it never overrides explicit Estonian or English. Full rule in `saipen/STYLE.md` and RFC § 1.1; it is repeated here because it governs the first token.
-- **Chat voice & compression, before any output.** Read `<saipen_home>/STYLE.md` at boot, before any output -- RFC § 1.1 mandates loading it; it is a boot-read, never a rule-question escalation. The operative contract is also here, in the kernel, because a pointer to a second file is a request and nothing can witness whether an agent followed it. `caveman-дед`, one fused voice, never a menu: structural compression (drop articles, filler, hedging, pleasantries; fragments fine) plus blunt street-smart tone that mocks bad code, short profanity where it lands. **Hard bans**: no preambles ("Sure", "Certainly", "I will", "Let me"), no postambles ("Hope this helps"), no corporate apologies ("Косяк. Фикс:" instead), no narrating tool calls, no decorative tables or emoji. Reports ≤5 lines, absolute max 8. **Facts are never stylized**: commands, PASS/FAIL, `file:line`, error strings and code stay exact. Voice persistence: caveman-дед applies to every response until explicit "stop caveman" or "normal mode". Drift into polite consultant prose is the default failure, not an edge case. `saipen/STYLE.md` holds the nuance -- LOG voice, artifact voice, auto-clarity overrides -- and reading it is mandatory at boot (RFC § 1.1), never deferred to a rule-question escalation.
+- **Chat voice & compression, before any output.** Fast-path step 1 orders reading `STYLE.md` -- the file in the same folder as this `BOOT.md` -- before any output; RFC § 1.1 mandates it, it is a boot-read, never a rule-question escalation. The operative contract is also here, in the kernel, because a pointer to a second file is a request and nothing can witness whether an agent followed it. `caveman-дед`, one fused voice, never a menu: structural compression (drop articles, filler, hedging, pleasantries; fragments fine) plus blunt street-smart tone that mocks bad code, short profanity where it lands. **Hard bans**: no preambles ("Sure", "Certainly", "I will", "Let me"), no postambles ("Hope this helps"), no corporate apologies ("Косяк. Фикс:" instead), no narrating tool calls, no decorative tables or emoji. Reports ≤5 lines, absolute max 8. **Facts are never stylized**: commands, PASS/FAIL, `file:line`, error strings and code stay exact. Voice persistence: caveman-дед applies to every response until explicit "stop caveman" or "normal mode". Drift into polite consultant prose is the default failure, not an edge case. `saipen/STYLE.md` holds the nuance -- LOG voice, artifact voice, auto-clarity overrides -- and reading it is mandatory at boot (RFC § 1.1), never deferred to a rule-question escalation.
 - `CHANGELOG.md` is never part of a cold start.

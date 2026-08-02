@@ -2,6 +2,12 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.160.0 -- 2026-08-02 -- the read is now a step, not a wish
+
+T-404 (v7.159.0) proved the mandate EXISTS but the read itself still lived as a trailing "Anything else" bullet below the numbered fast path -- the execution order a cold agent actually walks. A weak model reads steps 1-8, executes next_action, stops; the bottom bullet is never reached. Worse, the path `<saipen_home>/STYLE.md` requires saipen_home to resolve, and an empty or dead value silently skips the read.
+
+The read is now BOOT.md fast-path step 1: read `STYLE.md` -- the file in the same folder as this `BOOT.md` -- before any output. Self-locating, no home resolution. RFC § 1.1 pins the placement; SKILL.md reads STYLE right after BOOT, before RFC; the validator checks the fast-path region and fails loud if the section headings vanish so the check cannot pass vacuously. Three new red controls prove all three regressions (read out of the fast path, self-locating reference lost, heading renamed); all 65 canonical mutations fire and portable-floor parity stays 11.
+
 ## 7.159.0 -- 2026-08-02 -- one file, two mandates, the cheap one won
 
 `BOOT.md` told STYLE.md two things eight lines apart: line 101 filed it under lazy "rule questions" -- open only when the phase doc fails to answer -- while line 108 ordered applying it before any output. Measured, not theorised: a live DeepSeek v4 flash session read BOOT, RFC, the phase docs and PROTOCOL.md, never opened STYLE.md, and said so when asked. It obeyed the cheaper line; T-381's red-test had proven the mandate EXISTS, never that nothing contradicts it.

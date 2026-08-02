@@ -23,8 +23,8 @@ Thin entry for skill-reading platforms. The system lives elsewhere:
 1. **Continuing? Read `BOOT.md` (located in the same folder as this SKILL.md) first -- the compact cold-start kernel
    (STATE -> BOARD -> LOG tail -> execute `next_action`). It's all a bare
    `saipen continue` needs; it points into RFC only when a rule question comes up.**
-2. **Read `RFC.md` (in the same folder) -- the full boot protocol / constitution. Follow it.**
-3. **Read `STYLE.md` (in the same folder) -- voices. Load with RFC.**
+2. **Read `STYLE.md` (in the same folder) -- voices; it governs the first token, so read it right after BOOT.md, before RFC.**
+3. **Read `RFC.md` (in the same folder) -- the full boot protocol / constitution. Follow it.**
 4. **Phase modules in `phases/` (in the same folder) -- loaded by boot per STATE.md phase.**
 5. UI work: also read `UI.md` (Win95 dark golden, Verdana, no AA).
 

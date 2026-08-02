@@ -2949,6 +2949,36 @@ else:
                  + " under on-demand 'rule questions' while ordering it "
                  "before any output; the lazy reading wins (T-404)")
             drift_ok = False
+        # T-405: the read must live in the NUMBERED fast path -- the
+        # execution order a cold agent actually walks -- not only in a
+        # trailing "Anything else" bullet below it. T-404 proved the mandate
+        # EXISTS, but the read was still a bullet a weak model could walk
+        # past: steps 1-8 then next_action, never reaching the bottom of the
+        # file. And the path must be self-locating: "<saipen_home>/STYLE.md"
+        # needs saipen_home to resolve, which can be empty or dead, while
+        # "the file in the same folder as this BOOT.md" needs nothing.
+        _fp_start = _btn.find("## Fast path")
+        _fp_end = _btn.find("## Anything else")
+        if _fp_start == -1 or _fp_end == -1 or _fp_end <= _fp_start:
+            fail("cross-doc drift [chat-voice] -- BOOT.md lost its "
+                 "'## Fast path' or '## Anything else' heading; the fast-path "
+                 "STYLE.md read cannot be located, so the check fails loud "
+                 "instead of passing vacuously (T-405)")
+            drift_ok = False
+        else:
+            _fp_region = _btn[_fp_start:_fp_end]
+            if "STYLE.md" not in _fp_region or "before any output" not in _fp_region:
+                fail("cross-doc drift [chat-voice] -- BOOT.md's numbered fast "
+                     "path no longer orders reading STYLE.md before any "
+                     "output; a cold agent that walks the numbered steps and "
+                     "stops never opens the file (T-405)")
+                drift_ok = False
+            elif "same folder as this" not in _fp_region:
+                fail("cross-doc drift [chat-voice] -- the fast-path STYLE.md "
+                     "read lost its self-locating reference ('the file in the "
+                     "same folder as this BOOT.md'); a bare <saipen_home>/ "
+                     "path needs resolution that can be empty or dead (T-405)")
+                drift_ok = False
 
     # 13i. The human digest is the shape ship.md promises, and is not from
     #      another era. `phases/ship.md` says "(over)write ... exactly three
