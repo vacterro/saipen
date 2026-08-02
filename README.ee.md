@@ -4,13 +4,6 @@
   <img src="assets/__SAIPEN_Alpha.png" alt="SAIPEN Sticker" width="200"/>
 </p>
 
-<div align="center">
-  <h3>🔥 <a href="README.ee.md">🇪🇪 LOE SEDA EESTI KEELES / ESTONIAN 🇪🇪</a> 🔥</h3>
-  <a href="README.md">🇬🇧 English</a> &nbsp;|&nbsp; 
-  <a href="README.ded.md">👴 Дед-Версия (Russian)</a> &nbsp;|&nbsp; 
-  <a href="README.ja.md">🇯🇵 日本語 (Japanese)</a>
-</div>
-
 # SAIPEN
 
 **Jätkamisprotokoll tehisintellektist programmeerimisagentidele.** SAIPEN hoiab projekti mälu lihtsas markdown-vormingus, nii et "külm" agent (ilma vestlusajaloota) saab käivitada `/saipen continue`, lugeda `STATE.md` -> `BOARD.md` -> aktiivse `LOG.md` lõppu -> `human_note` (kui on määratud), käivitada `next_action` ja jätkata tööd vähem kui minutiga -- ilma uuesti briifimata, suvalise teenusepakkujaga, mis tahes päeval.
