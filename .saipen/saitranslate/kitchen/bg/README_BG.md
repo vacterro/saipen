@@ -12,7 +12,7 @@
 
 **Бързи клавиши:** `cc` продължава активен Goal Mode, `sss` показва статус без допиране до кода, а `ss` запазва контролна точка и спира. [Виж пълната карта с 13 клавиша](saipen/RFC.md#110-command-surface). Кирилските близнаци също работят: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.167.0** | [Спецификация](SPEC.md) | [Ръководство](GUIDE.md) | [RFC](saipen/RFC.md) | [Стил](saipen/STYLE.md) | [UI](saipen/UI.md) | [Съответствие](saipen/CONFORMANCE.md) | чист markdown | нула зависимости | MIT
+**v7.168.0** | [Спецификация](SPEC.md) | [Ръководство](GUIDE.md) | [RFC](saipen/RFC.md) | [Стил](saipen/STYLE.md) | [UI](saipen/UI.md) | [Съответствие](saipen/CONFORMANCE.md) | чист markdown | нула зависимости | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)

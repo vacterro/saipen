@@ -4,7 +4,9 @@
 
 # SAIPEN Guide
 
-**AI agents forget everything.** Switch agents? Gone. Next day? Gone. Re-explain project every time. Waste hours.
+It is 2026 and the AI woke up. The assistants stopped being chat toys — they open your project, write the code, run the tests, and finish a job while you go make coffee. There is one thing they cannot do. They cannot remember. Close the window and everything they learned about your work is gone: what you were building, what you already tried, which idea died on Tuesday. Every morning you brief a brilliant stranger from scratch.
+
+This is the fix for that one thing.
 
 **SAIPEN fixes that.** Tiny `.saipen/` folder in project. Agent reads STATE, BOARD, next_action. Resumes where other stopped. Zero briefing.
 

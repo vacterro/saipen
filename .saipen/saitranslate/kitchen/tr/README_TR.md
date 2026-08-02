@@ -12,7 +12,7 @@
 
 **Kısayol tuşları:** `cc` aktif Goal Mode’u sürdürür, `sss` koda dokunmadan durumu bildirir ve `ss` kontrol noktası kaydedip durur. [13 tuşluk tam haritaya bakın](saipen/RFC.md#110-command-surface). Kiril ikizleri de çalışır: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.167.0** | [Spec](SPEC.md) | [Rehber](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [Kullanıcı Arayüzü](saipen/UI.md) | [Uyum](saipen/CONFORMANCE.md) | sade markdown | sıfır bağımlılık | MIT
+**v7.168.0** | [Spec](SPEC.md) | [Rehber](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [Kullanıcı Arayüzü](saipen/UI.md) | [Uyum](saipen/CONFORMANCE.md) | sade markdown | sıfır bağımlılık | MIT
 
 [![Rusça Rehber](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![İngilizce Rehber](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)

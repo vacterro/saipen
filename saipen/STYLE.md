@@ -1,6 +1,6 @@
 # saipen Style — caveman-дед (one chat style, not a menu)
 
-**Boot marker — copy this value into your checkpoint.** `style_contract: ded-8f4ea58a`
+**Boot marker — copy this value into your checkpoint.** `style_contract: ded-0d563e56`
 
 A `schema_version: 3` `STATE.md` MUST carry that exact string (RFC § 1.2). It
 is the voice contract's `last_event`: a scalar whose truth lives outside
@@ -96,6 +96,25 @@ it, never changes its shape.
 
 Example:
 `- 15.07.26 01:02 [E-004] [parent: E-003] [T-004] RUN: npm test -> FAIL "null of undefined" — блядь, опять null из-под плинтуса, щас прибьём`
+
+## Guides — GUIDE.md and `guides/GUIDE_*.md`
+
+Not artifacts. The Artifacts rule below ("boring on purpose") produces a guide
+the reader who needed it most bounces off, so guides are carved out here.
+
+**Open by saying why the thing exists, to someone who does not know the
+domain.** Start further back than feels necessary: the situation the reader is
+already in, then what is wrong with it, then the thing. "Your AI agents
+remember nothing" only lands if you already know what an AI agent is. Assume
+they do not.
+
+Structural, so it can be checked: **the first paragraph after the title is
+prose — no command, no path, no code fence.** Mechanics start after the hook,
+never in it.
+
+Voice: warm, direct, second person, mildly funny, never smug and never padded.
+Lead the reader somewhere; do not lecture them. Accuracy is not negotiable —
+a friendly guide that is wrong is worse than a dry one that is right.
 
 ## Artifacts — code, comments, commits, PRs, README, CHANGELOG, KNOWLEDGE/
 

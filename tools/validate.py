@@ -3254,6 +3254,34 @@ else:
                "to change it")
         drift_ok = False
 
+    # STYLE.md's guide contract, the half that is structure rather than tone.
+    # Guides used to fall under Artifacts ("boring on purpose") and opened in
+    # the reader's assumed jargon, which only lands for a reader who already
+    # knows the domain -- everyone else stops at line one. Tone is not
+    # checkable; "the hook comes before the mechanics" is.
+    _core_guides = [_n for _n in ("GUIDE.md", "guides/GUIDE_EN.md",
+                                  "guides/GUIDE_EE.md", "guides/GUIDE_RU.md",
+                                  "guides/GUIDE_DED.md")
+                    if (_tools_parent / _n).is_file()]
+    _cold_openings = []
+    for _n in _core_guides:
+        _gt = (_tools_parent / _n).read_text(encoding="utf-8-sig").replace("\r\n", "\n")
+        _h1 = _gt.find("\n# ")
+        if _h1 == -1:
+            _cold_openings.append(f"{_n} (no title to open after)")
+            continue
+        _after = _gt[_gt.index("\n", _h1 + 1):].lstrip("\n")
+        _first = _after.split("\n\n", 1)[0]
+        if "`" in _first or _first.startswith("```"):
+            _cold_openings.append(_n)
+    if _cold_openings:
+        fail("guide opening drift -- " + ", ".join(_cold_openings)
+             + " starts with mechanics instead of prose. STYLE.md's guide "
+               "contract puts the why-this-exists hook first, before any "
+               "command, path or fence, for a reader who does not know the "
+               "domain yet")
+        drift_ok = False
+
     if _contract_docs["BOOT.md"].is_file():
         _bt = _contract_docs["BOOT.md"].read_text(encoding="utf-8-sig")
         if "Chat voice & compression" not in _bt:

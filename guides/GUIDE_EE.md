@@ -4,7 +4,9 @@
 
 # SAIPEN Juhis (Eesti)
 
-Kuula siia, algaja. Probleem on lihtne: sinu AI agentidel on kuldkala mälu. Eile veetsid pool päeva oma arhitektuuri selgitades ja täna avad uue vestluse ning see hakkab kõike nullist ehitama ja lollakaid küsimusi küsima.
+On 2026 ja tehisintellekt ärkas üles. Abilised ei ole enam vestlusmänguasjad — nad avavad sinu projekti, kirjutavad koodi, käivitavad testid ja teevad töö ära, kuni sina kohvi keedad. Üht asja nad ei oska. Nad ei mäleta. Sulged akna ja kõik, mida nad sinu tööst teadsid, on läinud: mida sa ehitasid, mida sa juba proovisid, milline mõte teisipäeval suri. Iga hommik seletad geniaalsele võõrale kõik uuesti algusest.
+
+See on lahendus täpselt sellele ühele asjale.
 
 **SAIPEN** on lihtsalt üks kuradi märkmik kaustas `.saipen/`.
 

@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.168.0 -- 2026-08-02 -- guides open with why, not with what
+
+Guides were filed under Artifacts, whose rule is "professional, plain, boring on purpose". So they opened by naming the problem in the reader's own jargon -- "your AI agents remember nothing" -- which lands only if you already know what an AI agent is. The reader who does not is exactly the reader a guide exists for, and they stopped at line one.
+
+`STYLE.md` gives guides their own surface now: open by saying why the thing exists, starting further back than feels necessary, for someone who does not know the domain. Tone is not machine-checkable. Structure is, and it is the half that matters: the first paragraph after the title carries no command, no path, no fence. Mechanics come after the hook.
+
+The five Core-owned guides (en/et/ru/Дед) were rewritten to it. The other 28 are saitranslate's, ticketed as T-422 -- the point there is the same reader, not a literal translation of the English hook.
+
 ## 7.167.0 -- 2026-08-02 -- the default says its own name now
 
 `reply_language:` ships as `et`, so someone who clones this and writes English gets Estonian back. That is the setting working. It also reads exactly like a broken tool, because nothing on the way in mentioned it and no reader has a reason to suspect one line in `STYLE.md` is the fix.
