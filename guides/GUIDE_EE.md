@@ -2,7 +2,7 @@
   <img src="assets/SAIPEN_design1.png" alt="SAIPEN Guide Title" width="800"/>
 </p>
 
-# SAIPEN Juhis (Eesti)
+# SAIPEN Juhis
 
 On 2026 ja tehisintellekt ärkas üles. Abilised ei ole enam vestlusmänguasjad — nad avavad sinu projekti, kirjutavad koodi, käivitavad testid ja teevad töö ära, kuni sina kohvi keedad. Üht asja nad ei oska. Nad ei mäleta. Sulged akna ja kõik, mida nad sinu tööst teadsid, on läinud: mida sa ehitasid, mida sa juba proovisid, milline mõte teisipäeval suri. Iga hommik seletad geniaalsele võõrale kõik uuesti algusest.
 
