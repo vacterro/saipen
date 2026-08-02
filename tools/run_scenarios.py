@@ -935,8 +935,20 @@ def run_crew_probes() -> tuple[list[str], int, int]:
     return problems, checked, skipped
 
 
+def live_style_marker() -> str:
+    """STYLE.md's declared boot marker, read the way an agent reads it.
+
+    Never hardcoded: a pinned token silently turns the marker fixtures into a
+    pair of always-failing states the moment STYLE.md is edited, which is the
+    opposite of what they check.
+    """
+    text = (HOME / "saipen" / "STYLE.md").read_text(encoding="utf-8-sig")
+    found = re.search(r"`style_contract:\s*(ded-[0-9a-f]{8})`", text)
+    return found.group(1) if found else "ded-00000000"
+
+
 def run_last_event_probes() -> tuple[list[str], int]:
-    """Execute the schema-v1 to schema-v2 checkpoint migration boundary."""
+    """Execute the legacy-schema to current-schema checkpoint migration."""
     problems = []
     checked = 0
 
@@ -977,14 +989,26 @@ def run_last_event_probes() -> tuple[list[str], int]:
 
         state = state_path.read_text(encoding="utf-8-sig")
         state = state.replace("saipen_version: 7\n",
-                              "saipen_version: 7\nschema_version: 2\n", 1)
+                              "saipen_version: 7\nschema_version: 3\n", 1)
         state_path.write_text(state, encoding="utf-8", newline="\n")
-        expect("schema v2 missing marker fails", validate(project), 1,
+        expect("current schema missing marker fails", validate(project), 1,
                "requires last_event")
 
         state = state_path.read_text(encoding="utf-8")
-        state = state.replace("schema_version: 2\n",
-                              "schema_version: 2\nlast_event: 1\n", 1)
+        state = state.replace("schema_version: 3\n",
+                              "schema_version: 3\nlast_event: 1\n", 1)
+        state_path.write_text(state, encoding="utf-8", newline="\n")
+        # The voice marker is the half a cold session can skip in silence:
+        # every other required field is derivable from `.saipen/` itself, so
+        # an agent that never opened STYLE.md fills the state in completely
+        # and looks conformant. Checked on its own, between two states that
+        # differ by that one line.
+        expect("current schema missing style marker fails", validate(project), 1,
+               "requires style_contract")
+
+        state = state_path.read_text(encoding="utf-8")
+        state = state.replace("last_event: 1\n",
+                              f"last_event: 1\nstyle_contract: {live_style_marker()}\n", 1)
         state_path.write_text(state, encoding="utf-8", newline="\n")
         expect("exact recovered tail passes", validate(project), 0,
                "Validation complete. Agent is conformant.",

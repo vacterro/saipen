@@ -33,6 +33,7 @@ source-text assertions (e.g. naive string inclusion) to verify runtime logic.
 """
 
 import datetime
+import hashlib
 import io
 import json
 import os
@@ -61,6 +62,47 @@ OUTBOX_STATUSES = ("ready", "draft", "blocked", "reviewed", "stale")
 # consumer, and the fourth use-before-define NameError of this session was a
 # check spliced above that line. tools/audit_order.py caught this one.
 _tools_parent = Path(__file__).resolve().parent.parent
+
+# RFC § 1.2's voice marker. `last_event` is checkable because its value comes
+# from evidence living OUTSIDE STATE.md; the caveman-дед contract had no such
+# value, which made "read STYLE.md before any output" the one boot MUST no
+# artifact could witness -- a live DeepSeek session read BOOT.md, RFC.md and
+# the phase docs and never opened STYLE.md at all. T-404 and T-405 removed the
+# contradiction that permitted it; neither could prove the read afterwards,
+# because a read leaves no trace. This does not prove it either -- nothing
+# can -- it removes the silence: the duty now has a value attached, and a
+# value can be wrong out loud. Derived from STYLE.md's own text so it cannot
+# be memorized once and reused after the contract changes, and declared in
+# STYLE.md alone so that copying it IS opening the file.
+_STYLE_TOKEN_RE = re.compile(r"`style_contract:\s*(ded-[0-9a-f]{8})`")
+_STYLE_LEAK_DOCS = ("RFC.md", "BOOT.md", "SKILL.md", "UI.md", "CONFORMANCE.md")
+
+
+def home_doc(name):
+    """A shipped protocol doc, in either layout SAIPEN is ever installed as.
+
+    The repository keeps them under `saipen/`; `bootstrap/inject.*` flattens
+    that folder into the skill root, so an installed validator resolving only
+    the repository shape finds nothing. The 13h contract checks quietly SKIP
+    a missing file and were therefore vacuous in every install; this one
+    FAILs, and would have turned every injected install red.
+    """
+    for candidate in (_tools_parent / "saipen" / name, _tools_parent / name):
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def style_contract_token(text):
+    """STYLE.md's marker token, computed from the file minus its own claim.
+
+    The declaration line is excluded so the token is a function of the
+    contract, not of itself -- including it would make every value
+    self-invalidating and no value ever reachable.
+    """
+    body = "\n".join(ln for ln in text.replace("\r\n", "\n").split("\n")
+                     if "style_contract:" not in ln).strip()
+    return "ded-" + hashlib.sha256(body.encode("utf-8")).hexdigest()[:8]
 
 
 def _parse_cli(argv):
@@ -532,15 +574,17 @@ sv = state.get("schema_version")
 if sv is None:
     warn("schema-version",
          "STATE.md has no schema_version -- legacy pre-v1 format. "
-         "At the next checkpoint set schema_version: 2 and last_event to "
-         "the current LOG tail (omit last_event only while LOG is empty).")
+         f"At the next checkpoint set schema_version: {CURRENT_SCHEMA_VERSION}, "
+         "last_event to the current LOG tail (omit last_event only while LOG "
+         "is empty), and style_contract to saipen/STYLE.md's boot marker.")
 elif not isinstance(sv, int) or sv < 1:
     fail(f"STATE.md schema_version is {sv!r}, expected a positive integer")
 elif sv < CURRENT_SCHEMA_VERSION:
     warn("schema-version",
          f"STATE.md schema_version is legacy v{sv}. At the next checkpoint "
-         "set schema_version: 2 and last_event to the current LOG tail "
-         "(omit last_event only while LOG is empty).")
+         f"set schema_version: {CURRENT_SCHEMA_VERSION}, last_event to the "
+         "current LOG tail (omit last_event only while LOG is empty), and "
+         "style_contract to saipen/STYLE.md's boot marker.")
 elif sv > CURRENT_SCHEMA_VERSION:
     # ">= current" was written from the wrong end. A state NEWER than this
     # validator is not reassuring: it may carry required fields this file has
@@ -561,6 +605,60 @@ elif sv > CURRENT_SCHEMA_VERSION:
 
 if len(failures) == before:
     ok("STATE.md schema valid (checked against state.schema.json)")
+
+# The voice marker, gated exactly the way `last_event` is: REQUIRED once the
+# state is at the current revision, exempt while it is readable legacy, and
+# always enforced when present. A missing STYLE.md fails loud instead of
+# passing vacuously -- a marker check that cannot reach its own source of
+# truth is the same "check reporting on data it cannot evaluate" defect the
+# schema-version block above names.
+_STYLE_PATH = home_doc("STYLE.md")
+if _STYLE_PATH is None:
+    fail(f"STYLE.md not found under {_tools_parent} -- the chat-voice "
+         f"contract has no source of truth on this install, so STATE.md's "
+         f"style_contract marker cannot be checked at all (RFC § 1.2)")
+else:
+    _style_text = _STYLE_PATH.read_text(encoding="utf-8-sig")
+    _style_expected = style_contract_token(_style_text)
+    _style_declared = _STYLE_TOKEN_RE.findall(_style_text)
+    if len(_style_declared) != 1:
+        fail(f"{_STYLE_PATH.name} declares {len(_style_declared)} boot markers, "
+             f"expected exactly one line reading `style_contract: "
+             f"{_style_expected}` -- zero leaves every checkpoint with nothing "
+             f"to copy, two leaves it a choice (RFC § 1.2)")
+    elif _style_declared[0] != _style_expected:
+        fail(f"{_STYLE_PATH.name} declares style_contract "
+             f"{_style_declared[0]} but its text hashes to {_style_expected} "
+             f"-- the contract changed and its marker did not, so every state "
+             f"carrying the old value would validate against a voice nobody "
+             f"is bound by. Set the declaration to {_style_expected}")
+    # The token is worth something only while STYLE.md is the sole place to
+    # find it: a value reachable from BOOT.md is copyable by an agent that
+    # never opened the contract, which is precisely the session this ticket
+    # exists to catch.
+    _style_leaks = [
+        _n for _n in _STYLE_LEAK_DOCS
+        if home_doc(_n) is not None
+        and _style_expected in home_doc(_n).read_text(encoding="utf-8-sig")
+    ]
+    if _style_leaks:
+        fail(", ".join(_style_leaks) + " carries STYLE.md's "
+             f"marker value {_style_expected}; it MUST appear in STYLE.md "
+             f"alone, or the checkpoint can copy it without ever reading the "
+             f"contract it stands for (RFC § 1.2)")
+    _sc = state.get("style_contract")
+    if sv == CURRENT_SCHEMA_VERSION and _sc is None:
+        fail(f"STATE.md schema_version {CURRENT_SCHEMA_VERSION} requires "
+             f"style_contract: {_style_expected} -- RFC § 1.2's voice marker, "
+             f"declared at the top of saipen/STYLE.md. Legacy states below "
+             f"v{CURRENT_SCHEMA_VERSION} may omit it only until their next "
+             f"checkpoint (RFC § 1.2, § 1.5)")
+    elif _sc is not None and _sc != _style_expected:
+        fail(f"STATE.md style_contract is {_sc!r} but the installed STYLE.md's "
+             f"marker is {_style_expected} -- this checkpoint was written "
+             f"against a different voice contract than the one installed, so "
+             f"the agent that wrote it did not read the current STYLE.md "
+             f"(RFC § 1.2)")
 
 # RFC § 1.6 phase transition validation. transition_from tracks the
 # previous phase; check every non-self transition against the table.
@@ -3067,8 +3165,23 @@ else:
                  "instead of passing vacuously (T-405)")
             drift_ok = False
         else:
+            # Narrowed to fast-path step 1 itself, not the whole region: the
+            # numbered steps below it now legitimately mention STYLE.md (§ 1.2's
+            # voice marker is validated at step 3 and written at step 9), and a
+            # region-wide substring test counts those as the mandate. It then
+            # passes while step 1 says something else entirely -- a check
+            # satisfied by a neighbour is not a check on the thing it names.
             _fp_region = _btn[_fp_start:_fp_end]
-            if "STYLE.md" not in _fp_region or "before any output" not in _fp_region:
+            _s1 = _fp_region.find("\n1. ")
+            _s2 = _fp_region.find("\n2. ")
+            _fp_region = (_fp_region[_s1:_s2] if -1 < _s1 < _s2 else "")
+            if not _fp_region:
+                fail("cross-doc drift [chat-voice] -- BOOT.md's fast path has "
+                     "no parseable step 1/step 2 boundary, so the STYLE.md "
+                     "mandate cannot be located inside it; failing loud "
+                     "instead of passing vacuously (T-405)")
+                drift_ok = False
+            elif "STYLE.md" not in _fp_region or "before any output" not in _fp_region:
                 fail("cross-doc drift [chat-voice] -- BOOT.md's numbered fast "
                      "path no longer orders reading STYLE.md before any "
                      "output; a cold agent that walks the numbered steps and "

@@ -19,7 +19,10 @@ matching exactly:
 - `STATE.md`: frontmatter `phase: PLAN`, `task: none`, `next_action:
   "WAIT: init -- provide the first project goal or raw backlog"` (RFC § 1.2's
   narrow INIT-bootstrap `WAIT:` exception -- ask for the goal/backlog
-  only, nothing else), `blocker: none`, `agent: none`, `saipen_version: 7`, `schema_version: 2`,
+  only, nothing else), `blocker: none`, `agent: none`, `saipen_version: 7`, `schema_version: 3`,
+  `style_contract:` (the boot marker declared at the top of `STYLE.md` --
+  § 1.2's voice marker, required from the very first checkpoint; it is the
+  only field here whose value lives outside `.saipen/`),
   `saipen_home:` (absolute path of the SAIPEN home this bootstrap read the
   protocol from -- § 1.7's bootloader pointer; TEMPLATE COPIES TOO: the
   template ships it empty, fill it in), `mode:` (per § 1.3 capability

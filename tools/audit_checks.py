@@ -393,6 +393,19 @@ def replace(old: str, new: str):
     return lambda t: t.replace(old, new, 1)
 
 
+def leak_style_marker(text: str) -> str:
+    """Copy STYLE.md's live marker into whichever doc is being mutated.
+
+    Read from the pristine tree at mutation time rather than hardcoded: a
+    control that pins the token would have to be re-typed on every STYLE.md
+    edit, and a stale pin makes the mutation a no-op -- the one failure the
+    no-op guard exists to catch.
+    """
+    style = (HOME / "saipen" / "STYLE.md").read_text(encoding="utf-8-sig")
+    found = re.search(r"`style_contract:\s*(ded-[0-9a-f]{8})`", style)
+    return text if not found else f"{text}\n<!-- {found.group(1)} -->\n"
+
+
 UTF16 = "<rewrite as utf-16>"      # sentinel, not a mutation function
 DELETE = "<delete the file>"
 CREATE = "<create the file>"
@@ -468,10 +481,15 @@ CASES: list[tuple[str, str, object, str]] = [
     ("schema_version from the future", STATE, sub_line("schema_version", "99"),
      "only understands"),
     ("current schema revision metadata missing", STATE_SCHEMA,
-     replace('  "x-current-schema-version": 2,\n', ""),
+     replace('  "x-current-schema-version": 3,\n', ""),
      "x-current-schema-version must be a positive integer"),
-    ("schema v2 missing last_event", STATE, drop_line("last_event"),
+    ("current-schema state missing last_event", STATE, drop_line("last_event"),
      "requires last_event"),
+    ("current-schema state missing style_contract", STATE,
+     drop_line("style_contract"), "requires style_contract"),
+    ("style_contract names a different voice contract", STATE,
+     sub_line("style_contract", "ded-deadbeef"),
+     "did not read the current STYLE.md"),
     ("last_event below the log tail", STATE, sub_line("last_event", "1"),
      "lower than the log"),
     ("next_action has no prefix", STATE,
@@ -665,6 +683,17 @@ CASES: list[tuple[str, str, object, str]] = [
      replace("1. **Read `STYLE.md` -- the file in the same folder as this `BOOT.md` --",
              "1. **Read the voice notes -- the file in the same folder as this `BOOT.md` --"),
      "no longer orders reading STYLE.md before any output"),
+    ("STYLE.md contract edited without reprinting its marker",
+     "saipen/STYLE.md",
+     replace("Formatting only.", "Formatting mostly."),
+     "the contract changed and its marker did not"),
+    ("STYLE.md stops declaring a boot marker at all",
+     "saipen/STYLE.md",
+     replace("`style_contract:", "`style_contrakt:"),
+     "boot markers, expected exactly one"),
+    ("BOOT.md leaks STYLE.md's marker value",
+     "saipen/BOOT.md", leak_style_marker,
+     "carries STYLE.md's marker value"),
     ("BOOT fast-path STYLE.md read loses its self-locating reference",
      "saipen/BOOT.md",
      replace("the file in the same folder as this `BOOT.md`",

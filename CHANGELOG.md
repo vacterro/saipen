@@ -2,6 +2,16 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.164.0 -- 2026-08-02 -- the voice contract now carries a value, so skipping it stops being silent
+
+Three releases went into making `STYLE.md` unskippable: v7.159.0 removed the contradiction that let a live session file it under lazy rule-questions, v7.160.0 moved the read into the numbered fast path. Both fixed what the documents SAY. Neither could tell a session that obeyed from one that did not, because a read leaves no trace -- and every other required STATE field is derivable from `.saipen/` itself, so an agent that never opened the file fills its checkpoint in completely and looks perfectly conformant.
+
+`STYLE.md` now declares a boot marker derived from its own text, and `schema_version: 3` STATE MUST carry it -- the same shape `last_event` has: a scalar whose truth lives outside `STATE.md`, so a checkpoint claiming it can be checked against evidence instead of believed. Absent at current schema FAILs, present-and-wrong FAILs, any lower revision stays readable legacy that WARNs and migrates at its next checkpoint. The token appears in no other shipped document on purpose: a value reachable from `BOOT.md` is copyable by an agent that never read the contract it stands for. Edit the contract and the token changes, which invalidates every state that has not re-read it; the validator prints the current value whenever it disagrees.
+
+This does not prove the read. Nothing can. It removes the silence -- the duty now has a value attached, and a value can be wrong out loud.
+
+Two existing checks turned out to be wrong, both found by their own red controls going green. The fast-path test scanned the whole numbered region, so a mention of `STYLE.md` in any later step satisfied a check about step 1; it now reads step 1 alone. And shipped docs were resolved only at `saipen/<name>`, the repository layout -- `bootstrap/inject.*` flattens that folder, so the entire cross-document contract check had been SKIPping itself in every injected install. Canonical mutations 75/75, portable-floor parity 11.
+
 ## 7.163.0 -- 2026-08-02 -- `dd <text>` is the user's request, not a prompt for four inventions
 
 `saipen plan` is two commands wearing one name and only the bare one was written down. Section 1.10 said "explicit trigger for PLAN phase" plus a sentence about the bare form; `phases/plan.md` led with its Proposal Mode paragraph. A weak model reading either one answers a specific instruction with four autonomous proposals of its own -- a request replaced by a menu, politely.

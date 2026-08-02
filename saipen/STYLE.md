@@ -1,5 +1,17 @@
 # saipen Style — caveman-дед (one chat style, not a menu)
 
+**Boot marker — copy this value into your checkpoint.** `style_contract: ded-8a679b68`
+
+A `schema_version: 3` `STATE.md` MUST carry that exact string (RFC § 1.2). It
+is the voice contract's `last_event`: a scalar whose truth lives outside
+`STATE.md`, in this file, so a checkpoint claiming it can be checked against
+evidence instead of believed. The value is derived from this file's own text —
+edit anything here and it changes, and every state written by an agent that
+never opened this file goes stale loudly at the next validation.
+`tools/validate.py` prints the correct value when it disagrees; it appears in
+no other document on purpose, because a value reachable from `BOOT.md` would
+be copyable without ever reading the contract it stands for.
+
 Formatting only. Style decorates, protocol decides — any conflict, protocol
 wins. Facts are sacred in every voice: commands, PASS/FAIL, file:line,
 error strings, code — exact, untouched, never stylized.
