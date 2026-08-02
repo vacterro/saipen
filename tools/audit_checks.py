@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import ast
 import contextlib
+import datetime
 import io
 import json
 import os
@@ -497,6 +498,27 @@ def cite_open_ticket(text: str) -> str:
     return re.sub(r"\(T-\d+\)", f"({open_ticket.group(1)})", text, count=1)
 
 
+def stamp_log_ahead(text: str) -> str:
+    """T-432: restamp the newest LOG entry 6 minutes ahead of the real clock.
+
+    Computed at mutation time, never hardcoded: a pinned date drifts into the
+    past and the control silently stops proving anything -- the same no-op
+    trap leak_style_marker was written to avoid. 6 minutes is one past the
+    validator's 5-minute slack, so the control tests the BOUND rather than
+    some obviously-absurd year.
+    """
+    ahead = (datetime.datetime.now(datetime.timezone.utc)
+             + datetime.timedelta(minutes=6))
+    lines = text.splitlines()
+    for i in range(len(lines) - 1, -1, -1):
+        if re.match(r"^- \d{2}\.\d{2}\.\d{2} \d{2}:\d{2} \[E-\d+\]", lines[i]):
+            lines[i] = re.sub(r"^- \d{2}\.\d{2}\.\d{2} \d{2}:\d{2} ",
+                              "- " + ahead.strftime("%d.%m.%y %H:%M") + " ",
+                              lines[i])
+            break
+    return "\n".join(lines) + "\n"
+
+
 CREATE = "<create the file>"
 SWAP = "<swap the last two log entries>"
 
@@ -888,6 +910,13 @@ CASES: list[tuple[str, str, object, str]] = [
     ("a LOG entry states its event in the future tense", ".saipen/LOG.md",
      replace("RUN: prepare saiwiki (qq)", "RUN: will prepare saiwiki (qq)"),
      "future tense"),
+
+    # T-432: the newest LOG entry restamped just past the clock slack. The
+    # old 3h bound made this control impossible to write honestly -- a stamp
+    # 3h out is absurd on sight, while 6 minutes out is exactly what an agent
+    # that estimated instead of reading produces.
+    ("a LOG entry is stamped ahead of the real clock", ".saipen/LOG.md",
+     stamp_log_ahead, "ahead of real UTC"),
 
     # T-431: two ways a completion claim outran its evidence, one control
     # each. Both mutations leave the CLAIM intact and remove only what backs

@@ -1784,12 +1784,28 @@ if log_files:
                      f"from E-{prev_eid:03d} to E-{cur_eid:03d}; historical "
                      f"inversions must be documented with a DEC line (RFC § 1.2)")
 
+    # The forward bound was 3h and that is why nothing ever caught the real
+    # behaviour: an agent does not miss the clock by hours, it misses it by
+    # twenty minutes, because reading the clock costs a tool call and writing
+    # a plausible number costs nothing. Reproduced by this validator's own
+    # author at E-1788..E-1793 -- stamps up to 37 minutes ahead of real UTC,
+    # every line green (T-432). 5 minutes is the same slack the inversion
+    # check above already allows for clock skew between machines, so there is
+    # one number here with one meaning: clocks may disagree this much, and
+    # past it the stamp was invented rather than read.
+    LOG_CLOCK_SLACK = 300
     now = datetime.datetime.now(datetime.timezone.utc)
     for log_dt, eid, loc in timestamp_events:
-        if (log_dt - now).total_seconds() > 10800:
-            fail(f"{loc} timestamp for E-{eid:03d} is more than 3h in the "
-                 f"future from current UTC -- LOG timestamps MUST be real UTC "
-                 f"time (RFC § 1.2)")
+        ahead = (log_dt - now).total_seconds()
+        if ahead > LOG_CLOCK_SLACK:
+            fail(f"{loc} timestamp for E-{eid:03d} is {ahead / 60:.0f}m ahead "
+                 f"of real UTC (slack is {LOG_CLOCK_SLACK // 60}m) -- LOG "
+                 f"timestamps MUST be real UTC time, and an event stamped at "
+                 f"a minute that has not happened yet reorders everything a "
+                 f"§ 1.5 rebuild reads off these stamps. Read the clock, do "
+                 f"not estimate it: python -c \"import datetime;print("
+                 f"datetime.datetime.now(datetime.timezone.utc).strftime("
+                 f"'%d.%m.%y %H:%M'))\" (RFC § 1.2)")
 
     # RFC § 1.2 segmentation soft cap (~300 lines / ~64 KB). Without a signal
     # here the rule is purely aspirational -- nothing ever tells an agent the

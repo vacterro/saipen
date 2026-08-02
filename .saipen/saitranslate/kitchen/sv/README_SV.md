@@ -16,7 +16,7 @@ och återupptar arbetet på under en minut -- ingen re-briefing, vilken leverant
 
 **Svarspråk.** Agenten svarar som standard **på estniska** — det är en inställning, inte en egenhet, och inget annat i SAIPEN är estniskt. Ändras på ett ställe: raden `reply_language:` överst i [`saipen/STYLE.md`](saipen/STYLE.md). `et` estniska, `en` engelska, `ru` ryska, `auto` väljer utifrån språket i ditt meddelande. Protokollet, koden, commits och alla dokument förblir engelska vid varje värde.
 
-**v7.172.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | ren markdown | noll beroenden | MIT
+**v7.173.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | ren markdown | noll beroenden | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)

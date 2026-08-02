@@ -2,6 +2,16 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.173.0 -- 2026-08-02 -- the LOG clock is read, not estimated
+
+The forward bound on a LOG timestamp was 3 hours, and in the whole life of this protocol it caught nothing. That is not because agents keep good time -- it is because nobody misses the clock by hours. They miss it by twenty minutes, because reading the clock costs a tool call and writing a plausible minute costs nothing, and a plausible minute is what a language model produces when it is not stopped.
+
+Caught here on the author of the two releases before it: E-1788..E-1793 were stamped up to 37 minutes ahead of real UTC and every line was green. Those stamps are still in the LOG, because append-only means they stay as the evidence.
+
+The bound is 5 minutes now -- the same slack the backwards-drift check already allows, standing for the same thing, clock skew between machines. Past that, the stamp was invented rather than read, and the ordering a § 1.5 Recovery rebuild reads off these stamps is fiction. The FAIL message carries the exact command that answers the question, because the failure being corrected is estimation, not ignorance.
+
+This is the same class the future-tense LOG gate closed one release ago, one field over: a line claiming a moment that had not arrived yet.
+
 ## 7.172.0 -- 2026-08-02 -- the CI-status hook ships with the tool it calls
 
 Generation 4 of the pre-commit hook asks GitHub what the last workflow run for the branch was, and says so when it is red -- the active counterpart to a badge nobody is forced to look at, written after this repository's own CI sat red for 30+ commits while every local gate stayed green. It was wired to an UNTRACKED `tools/ci_status.py`: present on the machine that wrote it, absent from every clone. That is the v7.166.1 manifest defect one layer up, and it is why the tool sat undecided rather than shipped.

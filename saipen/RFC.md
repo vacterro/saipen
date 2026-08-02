@@ -52,12 +52,22 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
     ISO-8601 -- ISO-8601 UTC lives only in `STATE.md updated`; `DD.MM.YY
     HH:mm` here is also UTC). Agent MUST use the real current UTC time,
     never a placeholder (`XX`, `TODO`, etc. are non-conformant).
-    CONFORMANCE #42 enforces this via validate.py's 3-hour drift check.
-    LOG timestamps SHOULD be monotonically non-decreasing within the active
-    LOG and across sealed segments. A timestamp earlier than the previous
-    event by more than 5 minutes is a WARN-level anomaly unless a later DEC
-    line explicitly documents it as historical clock drift. A timestamp more
-    than 3 hours in the future from current UTC is a FAIL-level anomaly.
+    **The agent MUST read the clock rather than estimate it.** The number is
+    not derivable from anything already in context -- not from the previous
+    line, not from how long the work felt -- and an agent that reasons its
+    way to a plausible minute has fabricated evidence in the one file
+    Recovery reconstructs order from. Read it: `python -c "import
+    datetime;print(datetime.datetime.now(datetime.timezone.utc).strftime('%d.%m.%y
+    %H:%M'))"`. LOG timestamps SHOULD be monotonically non-decreasing within
+    the active LOG and across sealed segments. A timestamp earlier than the
+    previous event by more than 5 minutes is a WARN-level anomaly unless a
+    later DEC line explicitly documents it as historical clock drift. A
+    timestamp more than **5 minutes** ahead of current UTC is a FAIL-level
+    anomaly -- the same slack the backwards check allows, because it stands
+    for the same thing, clock skew between machines. The bound was 3 hours for most of
+    this protocol's life and caught nothing real: agents do not miss the clock by
+    hours, they miss it by twenty minutes, which is exactly what happened at
+    E-1788..E-1793 with every line green.
     U+FFFD replacement characters in LOG are a FAIL-level corruption signal:
     repair the shape/readability explicitly and add a new DEC line naming the
     repaired event; never hide the repair by silently rewriting history.

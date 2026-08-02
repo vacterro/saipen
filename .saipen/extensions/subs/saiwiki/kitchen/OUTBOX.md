@@ -11,7 +11,7 @@
 - **source_head:** 2c76b621fdf2fa60ce5f2904e21884d1fa5298ac
 - **coverage:**
   - Scenarios.md: 182→195 rows (13 new: 183-195), IDs mirror CONFORMANCE 1-195 exactly; headline + closing quote updated. T-400 (semantic drift of ID rows 117-168) closed: all rows regenerated from canon by ID, not by copy.
-  - Home.md: badge **v7.172.0**, "Key features v7.170.0" header, feature bullets for v7.159-v7.170 (incl. pick-rule check v7.169.0, active-worktree-is-root v7.170.0), command table, scenario count.
+  - Home.md: badge **v7.173.0**, "Key features v7.170.0" header, feature bullets for v7.159-v7.170 (incl. pick-rule check v7.169.0, active-worktree-is-root v7.170.0), command table, scenario count.
   - _Footer.md: version v7.157.0-era → v7.170.0.
   - Phases.md: 13 new phase-level checks (v7.158-v7.170 range), project-root binding line updated for v7.170.0 active-worktree-first root order.
   - Getting-Started.md: project-root resolution paragraph updated to active-worktree-first; installs/hook/audit sections current.

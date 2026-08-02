@@ -14,7 +14,7 @@
 
 **Jazyk odpovedí.** Agent štandardne odpovedá **po estónsky** — to je nastavenie, nie výstrelok, a nič iné v SAIPEN nie je estónske. Zmení sa to na jednom mieste: riadok `reply_language:` na začiatku [`saipen/STYLE.md`](saipen/STYLE.md). `et` estónčina, `en` angličtina, `ru` ruština, `auto` vyberie podľa jazyka tvojej správy. Protokol, kód, commity a všetky dokumenty zostávajú anglicky pri akejkoľvek hodnote.
 
-**v7.172.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | čistý markdown | nulové závislosti | MIT
+**v7.173.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | čistý markdown | nulové závislosti | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
