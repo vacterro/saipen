@@ -18,9 +18,12 @@ does not answer.
 
 2. **Bind `project_root`, then read its `.saipen/STATE.md`.** An explicit
    project-root target wins. Otherwise use `git rev-parse --show-toplevel`
-   plus `git rev-parse --git-common-dir`; a common directory ending in
-   `/.git` binds a linked worktree to that main worktree's root and shared
-   gitignored `.saipen/`. Outside Git, use the nearest ancestor already
+   plus `git rev-parse --git-common-dir`. The ACTIVE worktree is asked first:
+   a linked worktree carrying its own `.saipen/` is its own project root.
+   Only when it has none -- the normal case, since `.saipen/` is gitignored
+   and a fresh worktree starts without one -- does a common directory ending
+   in `/.git` bind it to that main worktree's root and shared `.saipen/`.
+   Never create a local second copy to force this. Outside Git, use the nearest ancestor already
    carrying `.saipen/`. This binds location only: missing `STATE.md` there is
    corruption for step 2 to diagnose, not evidence that the cwd is unowned.
    Nothing owns the cwd? Refuse to guess or

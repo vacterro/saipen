@@ -2,6 +2,16 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.170.0 -- 2026-08-02 -- the validator stops reporting on a tree nobody edited
+
+Root resolution asked the git-common main worktree before the active one. A linked worktree carrying its own `.saipen/` was therefore never consulted: a local `STATE.md` reading `phase: NOT-A-PHASE` validated EXIT=0 and named the main repository. Honest output, invisible consequence -- green about a tree the agent was not editing.
+
+The active worktree is asked first now. A linked worktree with no `.saipen/` of its own -- the normal case, since the folder is gitignored and a fresh worktree starts without one -- still falls back to the shared state, so the design that made worktrees usable is intact. Only a deliberately created local `.saipen/` changes the answer, and then it is the right answer.
+
+Both controls run against real worktrees in `tools/run_scenarios.py`: an invalid local state must FAIL and name the linked root, and a worktree without `.saipen/` must keep using the main owner.
+
+One control caught its author. The first version of the new probe mutated `phase: PLAN` in a fixture that says `phase: BUILD` -- a silent no-op that passed a mutation it never applied. That is the exact defect class `tools/audit_checks.py` exists to catch, committed by hand inside the harness.
+
 ## 7.169.0 -- 2026-08-02 -- the pre-computed pick is checked against the rule that computed it
 
 `next_action` IS the Pick Rule's answer, written down in advance, and nothing ever checked it. This repository's own board carried `PHASE SCOUT T-417` under four newer tickets and validated clean: filing a ticket at the front of `## TODO`, which RFC section 1.10's `dd <text>` contract requires, silently invalidates a pick written earlier. A cold agent executes the stale one and believes it followed the rule.

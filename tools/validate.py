@@ -183,9 +183,20 @@ def _resolve_project_root(start, explicit):
             if not common_dir.is_absolute():
                 common_dir = start / common_dir
             common_dir = common_dir.resolve()
+        # The ACTIVE worktree is asked first, the main worktree second. A
+        # linked worktree normally has no `.saipen/` of its own -- the folder
+        # is gitignored, so a fresh one starts without it -- and that common
+        # case still falls through to the shared state below. But when a
+        # linked worktree DOES carry one, somebody put it there deliberately,
+        # and asking git-common first meant the validator read a different
+        # tree than the agent was editing: a linked worktree whose local
+        # STATE.md said `phase: NOT-A-PHASE` validated EXIT=0, reporting the
+        # main repository. Green for the wrong tree is the one answer this
+        # resolver must never give.
+        candidates.append((worktree_root, "git-worktree"))
+        if common_rc == 0 and common_text:
             if common_dir.name.lower() == ".git":
                 candidates.append((common_dir.parent, "git-common"))
-        candidates.append((worktree_root, "git-worktree"))
         seen = set()
         for root, source in candidates:
             key = os.path.normcase(str(root))

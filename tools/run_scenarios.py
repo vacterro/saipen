@@ -576,12 +576,12 @@ def run_project_root_probes() -> tuple[list[str], int]:
 
         project_text = str(project)
         expect("correct root", validate(project), 0,
-               f"Project root: {project_text} (git-common)")
+               f"Project root: {project_text} (git-worktree)")
 
         nested = project / "one" / "two"
         nested.mkdir(parents=True)
         expect("nested cwd", validate(nested), 0,
-               f"Project root: {project_text} (git-common)")
+               f"Project root: {project_text} (git-worktree)")
         if (nested / ".saipen").exists() or (nested.parent / ".saipen").exists():
             problems.append("nested cwd created a second .saipen/")
 
@@ -623,6 +623,34 @@ def run_project_root_probes() -> tuple[list[str], int]:
                f"Project root: {project_text} (git-common)")
         if (linked / ".saipen").exists():
             problems.append("linked worktree created a second .saipen/")
+
+        # The other half: a linked worktree that DOES carry its own `.saipen/`
+        # must be validated as itself. Asking the main worktree first meant a
+        # local `phase: NOT-A-PHASE` validated EXIT=0 against a different
+        # tree -- green for a tree nobody edited.
+        own = linked / ".saipen"
+        own.mkdir()
+        for name in ("STATE.md", "BOARD.md", "LOG.md"):
+            shutil.copy2(project / ".saipen" / name, own / name)
+        state_path = own / "STATE.md"
+        state_path.write_text(
+            re.sub(r"^phase:.*$", "phase: NOT-A-PHASE",
+                   state_path.read_text(encoding="utf-8-sig"),
+                   count=1, flags=re.MULTILINE),
+            encoding="utf-8", newline="\n")
+        local = validate(linked)
+        checked += 1
+        local_text = local.stdout + local.stderr
+        if local.returncode == 0 or "NOT-A-PHASE" not in local_text:
+            problems.append(
+                "linked worktree with its own .saipen/ did not validate itself: "
+                f"exit {local.returncode} :: {local_text.strip()[:300]}")
+        elif f"Project root: {linked}" not in local_text:
+            problems.append(
+                "linked worktree failure did not name the linked root")
+        else:
+            print("PASS: project root -- linked worktree with its own "
+                  ".saipen/ is validated as itself")
 
     return problems, checked
 
