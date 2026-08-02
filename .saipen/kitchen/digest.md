@@ -1,3 +1,3 @@
-done: T-412 -- bootloader pointer parses again; escaping checked; shipping as v7.162.0
-remaining: T-408 UI Golden default, T-409 dd semantics, T-410 STYLE proof, T-411 behavioral sweep
+done: T-409 -- dd <text> files the user's own items at the front; shipping as v7.163.0
+remaining: T-410 STYLE read proof, T-411 behavioral sweep, then T-400/T-392/T-399
 awaiting: nothing

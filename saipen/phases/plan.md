@@ -3,6 +3,8 @@
 Amplify user intent into tickets. <=8 lines of analysis: edge cases,
 callers, migrations, UI states. Safe defaults over interrogation.
 
+**With text (`saipen plan <text>`, `dd <text>`):** the text IS the work. Every item the user named becomes a ticket, inserted at the FRONT of `## TODO` -- board order is priority (RFC § 1.6), so putting the request behind existing work answers it politely and never. Reword each item into something a cold agent can execute while the human still recognises what they asked for: state the defect or the goal, and where a one-line ask hides a failure mode, spell that out -- the user's phrasing carries intent, not ticket text. MUST NOT substitute the Proposal Mode below: four inventions in place of one instruction is the failure this paragraph exists to prevent. Spotted something the user missed? Ticket it BELOW theirs.
+
 **Bare / Proposal Mode (`saipen plan` with no prompt):**
 If `PLAN` is triggered without a specific user prompt (bare `saipen plan`), the agent MUST evaluate the codebase, existing `KNOWLEDGE/`, and git log to generate an autonomous proposal plan:
 1. Identify logical next workflow steps (§ 2.3 Industrial Completion Rule).

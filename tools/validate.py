@@ -3241,6 +3241,28 @@ else:
             _shortcut_rows = re.findall(
                 r"^\| `([a-z]{2,3})` \| ([^|]+) \|",
                 _rfc_t[_i:_j], re.MULTILINE)
+            # `saipen plan` is two commands wearing one name, and only the
+            # bare one was ever written down. A weak model reading the
+            # Proposal-Mode paragraph answers `dd <text>` with four
+            # inventions of its own -- a specific instruction silently
+            # replaced by a menu. Both documents that describe the command
+            # must carry the with-text half, and it must say where those
+            # tickets land, because "priority" here means board position.
+            _plan_doc = _tools_parent / "saipen" / "phases" / "plan.md"
+            for _doc, _body in (("RFC.md § 1.10", _rfc_t[_i:_j]),
+                                ("phases/plan.md",
+                                 _plan_doc.read_text(encoding="utf-8-sig")
+                                 if _plan_doc.is_file() else "")):
+                if not _body:
+                    continue
+                if "FRONT of `## TODO`" not in _body:
+                    fail(f"cross-doc drift [plan-forms] -- {_doc} does not say "
+                         f"that `saipen plan <text>` puts the user's own items "
+                         f"at the front of `## TODO`. Board order is priority "
+                         f"(§ 1.6), so a request filed behind existing work is "
+                         f"a request denied politely")
+                    drift_ok = False
+
             _bad_routes = []
             for _sc, _route in _shortcut_rows:
                 _named = set(re.findall(r"`saipen ([a-z]+)", _route))

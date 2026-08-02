@@ -501,6 +501,12 @@ CASES: list[tuple[str, str, object, str]] = [
     ("saipen_home backslashes stop being escaped", STATE,
      lambda t: t.replace(chr(92) * 2, chr(92)),
      "backslashes are not escaped"),
+    # `saipen plan <text>` and bare `saipen plan` are different commands; only
+    # the bare one was ever written down, so a weak model answered a specific
+    # instruction with four inventions of its own.
+    ("plan with text loses its front-of-board rule", "saipen/phases/plan.md",
+     replace("FRONT of `## TODO`", "front of the board"),
+     "at the front of `## TODO`"),
     ("last_event above the log tail", STATE,
      sub_line("last_event", "999999"),
      "higher than the log"),

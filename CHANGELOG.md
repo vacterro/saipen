@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.163.0 -- 2026-08-02 -- `dd <text>` is the user's request, not a prompt for four inventions
+
+`saipen plan` is two commands wearing one name and only the bare one was written down. Section 1.10 said "explicit trigger for PLAN phase" plus a sentence about the bare form; `phases/plan.md` led with its Proposal Mode paragraph. A weak model reading either one answers a specific instruction with four autonomous proposals of its own -- a request replaced by a menu, politely.
+
+Both documents now carry the with-text half. The text IS the work: the user's own items become tickets, reworded so a cold agent can execute them while the human still recognises what they asked for, and inserted at the FRONT of `## TODO`. Board order is priority (section 1.6), so filing a request behind existing work answers it politely and never. Anything the agent spots that the user missed goes BELOW their items, never in place of them.
+
+The validator checks the placement rule in both documents, because that is the half a paraphrase drops first. Red control softens `FRONT of \`## TODO\`` to "front of the board" in the phase doc, so the mutation is the rule's operative words rather than a checker's wording.
+
 ## 7.162.0 -- 2026-08-02 -- the validator was more permissive than the format it validates
 
 `saipen_home` lost its backslash doubling in commit 4012bae, so RFC section 1.7's bootloader pointer stopped being a path. A YAML reader consumes each single backslash as an escape -- and `\_` is a perfectly legal one, yielding U+00A0 -- so the pointer parsed to a value with five non-breaking spaces where five separators belong. Any agent resolving the SAIPEN home from STATE got a path that cannot exist.
