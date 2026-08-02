@@ -109,3 +109,4 @@
 - 02.08.26 13:59 [E-1734] [parent: E-1733] [T-418] RUN: VERIFY -> validator PASS; audit_checks 80/80; scenarios pass; ruff clean; audit_order 10 tools; audit_tags 234 tags; sh floor PASS. Parity not re-run: measured 11/79 this session and this ticket adds a documentation-surface check that the shell floor cannot express either way.
 - 02.08.26 14:00 [E-1735] [parent: E-1734] [T-418] DEC: CI run on 3336f36 -> success. The red streak that began at v7.164.0 is closed, confirmed on the remote rather than assumed from a local green.
 - 02.08.26 14:01 [E-1736] [parent: E-1735] [T-418] DEC: goal_tickets 10->11
+- 02.08.26 14:05 [E-1737] [parent: E-1736] [T-418] RUN: ship v7.167.0 -> pushed edb8c34
