@@ -14,7 +14,7 @@ markdown simplu, astfel încât un agent nou fără istoric de chat execută `/s
 
 **Comenzi rapide:** `cc` continuă un Goal Mode activ, `sss` afișează starea fără să atingă codul, iar `ss` salvează un punct de control și se oprește. [Vezi harta completă cu 13 taste](saipen/RFC.md#110-command-surface). Gemenii chirilici funcționează și ei: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.168.0** | [Spec](SPEC.md) | [Ghid](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformitate](saipen/CONFORMANCE.md) | markdown simplu | zero dependențe | MIT
+**v7.169.0** | [Spec](SPEC.md) | [Ghid](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformitate](saipen/CONFORMANCE.md) | markdown simplu | zero dependențe | MIT
 
 [![Ghid în română](https://img.shields.io/badge/📖_Ghid_ELI5-ROMÂNĂ-blue?style=for-the-badge)](guides/GUIDE_RO.md)
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)

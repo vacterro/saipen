@@ -2,6 +2,16 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.169.0 -- 2026-08-02 -- the pre-computed pick is checked against the rule that computed it
+
+`next_action` IS the Pick Rule's answer, written down in advance, and nothing ever checked it. This repository's own board carried `PHASE SCOUT T-417` under four newer tickets and validated clean: filing a ticket at the front of `## TODO`, which RFC section 1.10's `dd <text>` contract requires, silently invalidates a pick written earlier. A cold agent executes the stale one and believes it followed the rule.
+
+The named ticket must now exist, sit in an executable section, have every dependency DONE, not be another agent's claim, and be the topmost workable one -- five conditions, one diagnostic each, no silent repair.
+
+The new check immediately broke the warn-ownership probe, which filed its synthetic ticket at the front of `## TODO` and so invalidated the state's own pick. It appends at the end now: it tests warning ownership, not board order, and a fixture that fails for a reason it does not test is exactly what this repository keeps catching in itself.
+
+Two smaller things. The default language set is fixed at six -- English, Russian, Estonian, Ukrainian, Japanese and Дед -- and the guide-opening contract covers all six rather than the four Core writes by hand; Дед is not a bonus voice, caveman+Дед is SAIPEN's own style. And `.claude/settings.local.json` is gitignored: an untracked per-machine allowlist carrying `Bash(rm -f *)`, in a repository where `git add -A` is routine.
+
 ## 7.168.0 -- 2026-08-02 -- guides open with why, not with what
 
 Guides were filed under Artifacts, whose rule is "professional, plain, boring on purpose". So they opened by naming the problem in the reader's own jargon -- "your AI agents remember nothing" -- which lands only if you already know what an AI agent is. The reader who does not is exactly the reader a guide exists for, and they stopped at line one.

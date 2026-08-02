@@ -20,3 +20,8 @@ thoughts/
 # gitlink: a 160000 entry pointing at a commit no clone of this repo can
 # fetch, with none of the content. It landed in v7.122.0 exactly that way.
 .saipen/extensions/subs/*/kitchen/wiki/
+
+# Per-machine agent permissions. Untracked and unshared on purpose: it is
+# local trust, not project content, and `git add -A` would otherwise publish
+# one machine's allowlist as everyone's.
+.claude/settings.local.json

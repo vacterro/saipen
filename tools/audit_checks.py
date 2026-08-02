@@ -221,7 +221,14 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
               "125 sealed pre-DATE entries are immutable by append-only, so it "
               "warns forever; keep this ticket live while it emits. | "
               "verify: warn ownership probe passes with this ticket live\n")
-    board_text = board_text.replace("## TODO\n", "## TODO\n" + ticket, 1)
+    # Appended at the END of ## TODO, not the front: board order is priority
+    # (RFC section 1.11) and STATE's next_action names the topmost workable
+    # ticket, so a probe that files its own ticket first invalidates that pick
+    # and then fails for a reason it does not test.
+    todo_at = board_text.index("## TODO\n") + len("## TODO\n")
+    next_heading = board_text.find("\n## ", todo_at)
+    cut = len(board_text) if next_heading == -1 else next_heading + 1
+    board_text = board_text[:cut] + ticket + board_text[cut:]
     board.write_text(board_text, encoding="utf-8", newline="\n")
     green = validate()
     if green.returncode:
@@ -499,6 +506,9 @@ CASES: list[tuple[str, str, object, str]] = [
      "did not read the current STYLE.md"),
     ("last_event below the log tail", STATE, sub_line("last_event", "1"),
      "lower than the log"),
+    ("next_action picks a ticket that is not the topmost workable", STATE,
+     sub_line("next_action", '"PHASE SCOUT T-419"'),
+     "but the topmost workable ## TODO ticket is"),
     ("next_action has no prefix", STATE,
      sub_line("next_action", '"finish the thing"'),
      "does not start with"),

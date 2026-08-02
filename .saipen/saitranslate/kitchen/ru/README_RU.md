@@ -14,7 +14,7 @@
 
 **Пакетные шорткаты:** `ee`/`qq` готовят полный пакет переводов/вики без внедрения; `eee`/`qqq` принимают только готовый пакет, затем внедряют, проверяют и пушат.
 
-**v7.168.0** | [Спецификация](SPEC.md) | [Руководство](GUIDE.md) | [RFC](saipen/RFC.md) | [Стиль](saipen/STYLE.md) | [Интерфейс](saipen/UI.md) | [Соответствие](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
+**v7.169.0** | [Спецификация](SPEC.md) | [Руководство](GUIDE.md) | [RFC](saipen/RFC.md) | [Стиль](saipen/STYLE.md) | [Интерфейс](saipen/UI.md) | [Соответствие](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)

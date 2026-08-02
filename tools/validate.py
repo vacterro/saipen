@@ -1274,6 +1274,58 @@ if _unsatisfied:
 else:
     ok("BOARD.md claimed tickets have their needs: satisfied")
 
+# The other half of § 1.11's Pick Rule: `next_action` is the pre-computed pick,
+# so it has to name the ticket the rule would choose. Filing a new ticket at
+# the front of `## TODO` (§ 1.10's `dd <text>` contract) silently invalidates
+# a `PHASE ... T-###` written earlier, and nothing said so -- this repository's
+# own board carried `PHASE SCOUT T-417` under four newer tickets and validated
+# clean. A cold agent then executes the stale pick and works the wrong ticket
+# while believing it followed the rule. Only checked when nothing is claimed:
+# a `## DOING` ticket is the pick, and § 1.11 puts finishing it first.
+_na_pick = re.match(r"PHASE\s+\w+\s+(T-\d+)", str(state.get("next_action", "")))
+if _na_pick:
+    _named = _na_pick.group(1)
+    _t = tickets.get(_named)
+    if _t is None:
+        fail(f"STATE.md next_action names {_named}, which is on no board "
+             f"section -- the pre-computed pick points at nothing, so the "
+             f"cold agent BOOT.md sends here has no ticket to execute "
+             f"(RFC § 1.2, § 1.11)")
+    elif _t["section"] in ("## DONE", "## BLOCKED"):
+        fail(f"STATE.md next_action names {_named}, which sits under "
+             f"{_t['section']} -- finished and blocked tickets are not "
+             f"executable, and § 1.11's Pick Rule selects from ## TODO "
+             f"(## BLOCKED is excluded on purpose)")
+    else:
+        _unmet = [r for r in _t["needs"]
+                  if tickets.get(r, {}).get("section") != "## DONE"]
+        if _unmet:
+            fail(f"STATE.md next_action names {_named}, whose needs: "
+                 + ", ".join(_unmet) + " are not DONE -- § 1.11 makes a "
+                 "ticket workable only when every dependency is finished, so "
+                 "this pick was never the rule's to make")
+        _owner = _t["fields"].get("owner")
+        if _owner and state.get("agent") and _owner != state.get("agent"):
+            fail(f"STATE.md next_action names {_named}, claimed by "
+                 f"{_owner!r} while this state's agent is "
+                 f"{state.get('agent')!r} -- executing another agent's claim "
+                 f"is the concurrency collision § 1.4 exists to prevent")
+if _na_pick and not any(t["section"] == "## DOING" for t in tickets.values()):
+    _named = _na_pick.group(1)
+    _workable = [
+        (t["line_no"], tid) for tid, t in tickets.items()
+        if t["section"] == "## TODO"
+        and all(tickets.get(r, {}).get("section") == "## DONE" for r in t["needs"])
+    ]
+    _top = min(_workable)[1] if _workable else None
+    if _top is not None and _named != _top:
+        fail(f"STATE.md next_action picks {_named}, but the topmost workable "
+             f"## TODO ticket is {_top} -- board order is priority (RFC "
+             f"§ 1.11), so a ticket filed above the named one makes this pick "
+             f"stale. Repoint next_action or move the line")
+    elif _top is not None:
+        ok(f"next_action picks the topmost workable ticket ({_top})")
+
 # RFC § 2.1 ZERO-PROMPT AUTO-TRANSITION: DONE + empty TODO + no MARKHUNT
 # blockers = MUST auto-transition HUNT->ADD, never WAIT at DONE.
 if state.get("phase") == "DONE" and state.get("goal_mode") is not True:
@@ -3259,9 +3311,20 @@ else:
     # the reader's assumed jargon, which only lands for a reader who already
     # knows the domain -- everyone else stops at line one. Tone is not
     # checkable; "the hook comes before the mechanics" is.
-    _core_guides = [_n for _n in ("GUIDE.md", "guides/GUIDE_EN.md",
-                                  "guides/GUIDE_EE.md", "guides/GUIDE_RU.md",
-                                  "guides/GUIDE_DED.md")
+    # `phases/translate.md` § 2's default set: six that must always exist,
+    # everywhere. Without a named default, "all 32 languages" degrades to
+    # whichever ones a run reached, and no absence is a defect. Дед is in it
+    # for the same reason English is -- caveman+Дед is SAIPEN's own voice,
+    # not a garnish on someone else's.
+    _default_guides = ("GUIDE.md", "guides/GUIDE_EN.md", "guides/GUIDE_RU.md",
+                       "guides/GUIDE_EE.md", "guides/GUIDE_UK.md",
+                       "guides/GUIDE_JA.md", "guides/GUIDE_DED.md")
+    # Their existence is NOT re-checked here: the locale-coverage check
+    # already FAILs when any guide disappears, so a second existence test
+    # would kill no error class the first one leaves alive. What is new is
+    # that the opening contract now covers all six, not just the four Core
+    # writes by hand.
+    _core_guides = [_n for _n in _default_guides
                     if (_tools_parent / _n).is_file()]
     _cold_openings = []
     for _n in _core_guides:
