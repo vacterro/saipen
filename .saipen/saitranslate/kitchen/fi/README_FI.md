@@ -14,7 +14,7 @@ ja jatkaa työtä alle minuutissa -- ilman uudelleenohjeistusta, millä tahansa 
 
 **Pikanäppäimet:** `cc` jatkaa aktiivista Goal Mode -ajoa, `sss` näyttää tilan koskematta koodiin ja `ss` tallentaa tarkistuspisteen ja pysähtyy. [Katso täydellinen 13 näppäimen kartta](saipen/RFC.md#110-command-surface). Kyrilliset kaksoset toimivat myös: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.160.0** | [Määrittely](SPEC.md) | [Opas](GUIDE.md) | [RFC](saipen/RFC.md) | [Tyyli](saipen/STYLE.md) | [Käyttöliittymä](saipen/UI.md) | [Yhteensopivuus](saipen/CONFORMANCE.md) | selkeä markdown | nolla riippuvuutta | MIT
+**v7.161.0** | [Määrittely](SPEC.md) | [Opas](GUIDE.md) | [RFC](saipen/RFC.md) | [Tyyli](saipen/STYLE.md) | [Käyttöliittymä](saipen/UI.md) | [Yhteensopivuus](saipen/CONFORMANCE.md) | selkeä markdown | nolla riippuvuutta | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)

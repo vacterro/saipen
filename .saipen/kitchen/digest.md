@@ -1,3 +1,3 @@
-done: T-405 -- STYLE.md read is now BOOT.md fast-path step 1, self-locating, before any output; RFC/SKILL/validator pinned; 3 red controls
-remaining: T-401 parked by user brake; then T-400/T-392/T-399
-awaiting: ship v7.160.0 + inject
+done: T-401 -- warn-slug ownership from release history
+remaining: T-400, T-392, T-399, T-406/T-407 (standing owners, live while warnings emit)
+awaiting: nothing

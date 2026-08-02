@@ -37,5 +37,27 @@
       "reason": "release commit exists with matching VERSION; no tag was published"
     }
   },
-  "tag_only": {}
+  "tag_only": {},
+  "warn_slugs": {
+    "board-soft-cap": {
+      "first_seen": "7.72.0",
+      "last_seen": "7.156.0",
+      "rationale": "BOARD.md outgrew the ~16 KB soft cap; CLEAN pruned it at v7.157.0 so the warning stopped emitting -- kept as history, re-owns only if it returns"
+    },
+    "log-soft-cap": {
+      "first_seen": "7.69.0",
+      "last_seen": "7.156.0",
+      "rationale": "active LOG.md outgrew a cheap read; CLEAN sealed it at v7.157.0 so the warning stopped emitting -- kept as history, re-owns only if it returns"
+    },
+    "subsaipen-never-ran": {
+      "first_seen": "7.99.0",
+      "last_seen": "7.160.0",
+      "rationale": "saipython sub spawned on migration but never run; MANIFEST advertises it live until its board opens -- owned by T-406"
+    },
+    "goal-reauth-untripped": {
+      "first_seen": "7.146.0",
+      "last_seen": "7.160.0",
+      "rationale": "E-1659 wrote a DEC: goal reauthorized while the valve had not tripped; LOG is immutable so it warns forever -- owned by T-407"
+    }
+  }
 }

@@ -2,6 +2,10 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.161.0 -- 2026-08-02 -- warning ownership from release history
+
+A WARN category that survives release after release is standing debt, and nothing said so. `tools/release_ledger_baseline.json` now records each tracked slug's first/last seen release and an explicit rationale; a slug still emitted this run that has outlived `WARN_OWNER_SPAN=3` consecutive releases FAILs `tools/validate.py` unless a live BOARD ticket names that exact slug. Calibrated against board-soft-cap, log-soft-cap, subsaipen-never-ran and goal-reauth-untripped; resolved slugs stay as history and re-own only if they return. A new behavioral probe ages an unowned slug in baseline DATA to prove the FAIL, then proves the identical aged slug with a live naming ticket passes; three canonical mutations red-test the baseline shape (68/68). Standing owner tickets T-406/T-407 keep the emitted warnings owned after T-401 closes.
+
 ## 7.160.0 -- 2026-08-02 -- the read is now a step, not a wish
 
 T-404 (v7.159.0) proved the mandate EXISTS but the read itself still lived as a trailing "Anything else" bullet below the numbered fast path -- the execution order a cold agent actually walks. A weak model reads steps 1-8, executes next_action, stops; the bottom bullet is never reached. Worse, the path `<saipen_home>/STYLE.md` requires saipen_home to resolve, and an empty or dead value silently skips the read.

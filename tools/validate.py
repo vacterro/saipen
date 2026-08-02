@@ -726,6 +726,10 @@ if isinstance(_ag, str) and _ag.strip().lower() in AGENT_PLACEHOLDERS:
 # below and any future reader see the same two numbers the RFC states.
 GOAL_WAVE_CAP = 3
 GOAL_TICKET_CAP = 20
+# T-401: releases a WARN slug must survive before it needs a live owner ticket.
+# The baseline's first/last seen fields are the age data; a slug still emitted
+# after this many consecutive releases MUST be named by a live BOARD ticket.
+WARN_OWNER_SPAN = 3
 
 # RFC § 2.4: goal_mode: true requires both persisted counters.
 if state.get("goal_mode") is True:
@@ -2584,6 +2588,45 @@ else:
                 return None
 
         _known = {t for t in (_tup(v) for v in _ledger) if t}
+        # The baseline belongs to the release ledger but must be loadable
+        # WITHOUT git: the ownership check below (T-401) is a changelog-age
+        # fact, not a tag fact, and the audit harness copies the tree with no
+        # .git. Loading it inside the `_tags_seen` gate below would make every
+        # no-git run crash on NameError instead of skipping only the
+        # tag-dependent halves.
+        _baseline_path = _tools_parent / "tools" / "release_ledger_baseline.json"
+        _baseline = None
+        try:
+            _baseline = json.loads(_baseline_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as _e:
+            fail(f"release ledger baseline unreadable at {_baseline_path}: {_e}")
+            drift_ok = False
+        _baseline_tag_only = set()
+        _baseline_changelog_only = set()
+        if isinstance(_baseline, dict):
+            if set(_baseline) != {"tag_only", "changelog_only", "warn_slugs"}:
+                fail("release ledger baseline must contain exactly tag_only, "
+                     "changelog_only and warn_slugs maps")
+                drift_ok = False
+            else:
+                for _direction, _target in (
+                        ("tag_only", _baseline_tag_only),
+                        ("changelog_only", _baseline_changelog_only)):
+                    _entries = _baseline[_direction]
+                    if not isinstance(_entries, dict):
+                        fail(f"release ledger baseline {_direction} must be a map")
+                        drift_ok = False
+                        continue
+                    for _version, _evidence in _entries.items():
+                        _version_t = _tup(_version)
+                        if (not _version_t or not isinstance(_evidence, dict)
+                                or not _evidence.get("commit")
+                                or not _evidence.get("reason")):
+                            fail(f"release ledger baseline {_direction} entry "
+                                 f"{_version!r} lacks semver/commit/reason evidence")
+                            drift_ok = False
+                            continue
+                        _target.add(_version_t)
         # A PARTIAL ledger is worse than no ledger: it turns every release
         # recorded only in the missing half into a phantom. That is not
         # hypothetical -- this check shipped without the guard and CI reddened
@@ -2646,40 +2689,6 @@ else:
             _chg_v = {t for t in (_tup(v) for v in _changelog_versions()) if t}
             _tag_v = {t for t in (_tup(v) for v in _tag_list) if t}
 
-            _baseline_path = _tools_parent / "tools" / "release_ledger_baseline.json"
-            _baseline = None
-            try:
-                _baseline = json.loads(_baseline_path.read_text(encoding="utf-8"))
-            except (OSError, json.JSONDecodeError) as _e:
-                fail(f"release ledger baseline unreadable at {_baseline_path}: {_e}")
-                drift_ok = False
-            _baseline_tag_only = set()
-            _baseline_changelog_only = set()
-            if isinstance(_baseline, dict):
-                if set(_baseline) != {"tag_only", "changelog_only"}:
-                    fail("release ledger baseline must contain exactly tag_only "
-                         "and changelog_only maps")
-                    drift_ok = False
-                else:
-                    for _direction, _target in (
-                            ("tag_only", _baseline_tag_only),
-                            ("changelog_only", _baseline_changelog_only)):
-                        _entries = _baseline[_direction]
-                        if not isinstance(_entries, dict):
-                            fail(f"release ledger baseline {_direction} must be a map")
-                            drift_ok = False
-                            continue
-                        for _version, _evidence in _entries.items():
-                            _version_t = _tup(_version)
-                            if (not _version_t or not isinstance(_evidence, dict)
-                                    or not _evidence.get("commit")
-                                    or not _evidence.get("reason")):
-                                fail(f"release ledger baseline {_direction} entry "
-                                     f"{_version!r} lacks semver/commit/reason evidence")
-                                drift_ok = False
-                                continue
-                            _target.add(_version_t)
-
             def _vs(versions):
                 # The count above and this list have to agree, or the message
                 # states ten and shows eight with nothing saying so -- a small
@@ -2719,6 +2728,61 @@ else:
                     ok("release ledger has no unexpected divergence "
                        f"({len(_baseline_tag_only) + len(_baseline_changelog_only)} "
                        "historical exception(s) verified)")
+
+        # T-401: WARN slug ownership from release history. The baseline
+        #      records each tracked slug's first/last seen release and its
+        #      rationale; a slug STILL EMITTED this run that has survived
+        #      WARN_OWNER_SPAN consecutive releases is standing debt and MUST
+        #      be named by a live BOARD ticket (## DOING or ## TODO). Aging an
+        #      unowned slug in the baseline DATA fails; the identical aged
+        #      slug with a live naming ticket passes. The red control mutates
+        #      baseline data, never validator wording.
+        _warn_slugs = (_baseline.get("warn_slugs")
+                       if isinstance(_baseline, dict) else None)
+        if _warn_slugs is not None and not isinstance(_warn_slugs, dict):
+            fail("release ledger baseline warn_slugs must be a map of "
+                 "slug -> first/last seen + rationale")
+            drift_ok = False
+        elif isinstance(_warn_slugs, dict):
+            _slugs_ok = True
+            for _slug, _meta in _warn_slugs.items():
+                if (not isinstance(_meta, dict)
+                        or not _meta.get("first_seen")
+                        or not _meta.get("last_seen")
+                        or not _meta.get("rationale")):
+                    fail(f"release ledger baseline warn_slugs entry {_slug!r} "
+                         "needs first_seen, last_seen and rationale")
+                    drift_ok = False
+                    _slugs_ok = False
+                    continue
+                _ft = _tup(_meta["first_seen"])
+                _lt = _tup(_meta["last_seen"])
+                if not _ft or not _lt:
+                    fail(f"release ledger baseline warn_slugs entry {_slug!r} "
+                         "has non-semver first_seen/last_seen")
+                    drift_ok = False
+                    _slugs_ok = False
+                    continue
+                # Resolved slugs (not emitted this run) are history, not debt.
+                if _slug not in warnings:
+                    continue
+                _age = sum(1 for v in _known if _ft <= v <= _lt)
+                if _age < WARN_OWNER_SPAN:
+                    continue
+                _live_lines = [
+                    board_lines[t["line_no"] - 1] for t in tickets.values()
+                    if t["section"] in ("## DOING", "## TODO")]
+                if not any(_slug in ln for ln in _live_lines):
+                    fail(f"warn ownership [release history] -- WARN slug "
+                         f"`{_slug}` has survived {_age} consecutive releases "
+                         f"but no live BOARD ticket names it; create an "
+                         f"owning ticket or fix the warning (T-401)")
+                    drift_ok = False
+                    _slugs_ok = False
+            if _slugs_ok:
+                ok(f"warn slug ownership verified for {len(_warn_slugs)} "
+                   "tracked slug(s)")
+
 
     # 13c. The palette has one name, and every document uses it. UI.md's
     #      palette was renamed to Wintage Golden and declared the default; the

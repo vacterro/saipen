@@ -166,6 +166,63 @@ def release_ledger_probe(source: Path, destination: Path) -> str | None:
     return None
 
 
+def warn_ownership_probe(source: Path, destination: Path) -> str | None:
+    """T-401: a WARN slug aged past the owner span FAILs unless a live
+    BOARD ticket names it; the identical aged slug with a live naming
+    ticket passes. The red control mutates baseline DATA, never validator
+    wording."""
+    tree = destination / "warn-ownership"
+    shutil.copytree(source, tree)
+
+    baseline_path = tree / "tools" / "release_ledger_baseline.json"
+    baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
+
+    def validate() -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [sys.executable, str(tree / "tools" / "validate.py")], cwd=tree,
+            capture_output=True, text=True, errors="replace")
+
+    control = validate()
+    if control.returncode:
+        return ("control copy with calibrated warn_slugs is not clean: "
+                + (control.stdout + control.stderr).strip()[-300:])
+
+    # Age an unowned slug: log-missing-date emits in every clean copy (125
+    # sealed pre-DATE entries are immutable), and no ticket names it.
+    baseline["warn_slugs"]["log-missing-date"] = {
+        "first_seen": "7.1.0",
+        "last_seen": "7.160.0",
+        "rationale": "ownership probe: aged, unowned",
+    }
+    baseline_path.write_text(
+        json.dumps(baseline, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8", newline="\n")
+    red = validate()
+    red_text = red.stdout + red.stderr
+    if (red.returncode == 0
+            or "no live BOARD ticket names it" not in red_text
+            or "log-missing-date" not in red_text):
+        return ("aged unowned slug did not fail the validator: "
+                + red_text.strip()[-300:])
+
+    # The identical aged slug with a live naming ticket must pass.
+    board = tree / ".saipen" / "BOARD.md"
+    board_text = board.read_text(encoding="utf-8-sig")
+    if "## TODO" not in board_text:
+        return "BOARD copy has no ## TODO section to host the owning ticket"
+    ticket = ("- [ ] T-990 [P2] Own the persistent `log-missing-date` warning: "
+              "125 sealed pre-DATE entries are immutable by append-only, so it "
+              "warns forever; keep this ticket live while it emits. | "
+              "verify: warn ownership probe passes with this ticket live\n")
+    board_text = board_text.replace("## TODO\n", "## TODO\n" + ticket, 1)
+    board.write_text(board_text, encoding="utf-8", newline="\n")
+    green = validate()
+    if green.returncode:
+        return ("aged slug with live owning ticket still fails: "
+                + (green.stdout + green.stderr).strip()[-300:])
+    return None
+
+
 def audit_tags_batch_probe(root: Path, destination: Path) -> str | None:
     """Execute process and protocol failures against the tag audit."""
     missing_env = os.environ.copy()
@@ -609,6 +666,23 @@ CASES: list[tuple[str, str, object, str]] = [
      replace("`saipen/STYLE.md` is a boot-read: apply it before any output.",
              "`saipen/STYLE.md` loads alongside it."),
      "as a rule-question escalation"),
+    # T-401: the WARN ownership ledger is data, not decoration. Each tracked
+    # slug must carry semver first/last seen and a rationale; a slug that
+    # survives WARN_OWNER_SPAN consecutive releases must be named by a live
+    # BOARD ticket. These mutate the baseline DATA -- a broken map key, a
+    # missing rationale, a non-semver bound -- never validator wording.
+    ("baseline warn_slugs map key drifts",
+     "tools/release_ledger_baseline.json",
+     replace('"warn_slugs": {', '"warn_slugs_x": {'),
+     "must contain exactly tag_only, changelog_only and warn_slugs maps"),
+    ("baseline warn_slugs entry loses its rationale",
+     "tools/release_ledger_baseline.json",
+     replace('"rationale": "BOARD.md outgrew', '"rationale_x": "BOARD.md outgrew'),
+     "needs first_seen, last_seen and rationale"),
+    ("baseline warn_slugs entry gains non-semver bounds",
+     "tools/release_ledger_baseline.json",
+     replace('"first_seen": "7.72.0"', '"first_seen": "banana"'),
+     "has non-semver first_seen/last_seen"),
     ("a locale loses its guide", "guides/GUIDE_UK.md", DELETE,
      "locale coverage"),
     ("a locale guide loses its shortcut callout", "guides/GUIDE_AR.md",
@@ -702,6 +776,14 @@ def main() -> int:
         return 1
     print("PASS: release-ledger clean/new-tag/new-changelog/stale-baseline "
           "controls behave distinctly")
+
+    owner_error = warn_ownership_probe(pristine, tmp)
+    if owner_error:
+        print(f"FAIL: warn-slug ownership probe -- {owner_error}")
+        shutil.rmtree(tmp, ignore_errors=True)
+        return 1
+    print("PASS: aged unowned WARN slug fails; identical aged slug with a "
+          "live naming ticket passes; baseline data, never validator wording")
 
     batch_error = audit_tags_batch_probe(HOME, tmp)
     if batch_error:
