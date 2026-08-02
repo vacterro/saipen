@@ -1,16 +1,24 @@
 $ErrorActionPreference = "Stop"
 $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+# Raw .NET File APIs take the path as a plain string, and on Unix a
+# backslash is a legal filename character, not a directory separator --
+# PowerShell cmdlets normalize the Windows-style paths below, but
+# [System.IO.File] does not, so every raw .NET call gets the
+# platform-native spelling.
+function Get-NativePath([string]$path) {
+  return $path.Replace('\', [System.IO.Path]::DirectorySeparatorChar)
+}
 
 function Remove-Block([string]$file) {
   if (Test-Path $file) {
     if (-not (Test-Path $file -PathType Leaf)) { throw "config path is not a file: $file" }
-    $text = [System.IO.File]::ReadAllText($file)
+    $text = [System.IO.File]::ReadAllText((Get-NativePath $file))
     $match = [regex]::Match($text, '(?s)(?:\r\n|\n)?<!-- SAIPEN:BEGIN -->.*?<!-- SAIPEN:END -->(?:\r\n|\n)?')
     if ($match.Success) {
       $clean = $text.Substring(0, $match.Index) + $text.Substring($match.Index + $match.Length)
       # Backup the file before uninstalling just in case
       Copy-Item $file "$file.uninstalled.bak" -Force -ErrorAction Stop
-      [System.IO.File]::WriteAllText($file, $clean, $Utf8NoBom)
+      [System.IO.File]::WriteAllText((Get-NativePath $file), $clean, $Utf8NoBom)
       return "block removed"
     }
   }
@@ -35,12 +43,12 @@ function Remove-Aider([string]$file) {
   # read: line the user owns.
   if (Test-Path $file) {
     if (-not (Test-Path $file -PathType Leaf)) { throw "config path is not a file: $file" }
-    $text = [System.IO.File]::ReadAllText($file)
+    $text = [System.IO.File]::ReadAllText((Get-NativePath $file))
     $blockRe = '(?m)(?:\r?\n)?# saipen protocol auto-loaded\r?\nread:\r?\n(?:[ \t]*-[ \t].*saipen[\\/](?:RFC|STYLE)\.md\r?\n?)+'
     if ($text -match $blockRe) {
       $clean = [regex]::Replace($text, $blockRe, "")
       Copy-Item $file "$file.uninstalled.bak" -Force -ErrorAction Stop
-      [System.IO.File]::WriteAllText($file, $clean, $Utf8NoBom)
+      [System.IO.File]::WriteAllText((Get-NativePath $file), $clean, $Utf8NoBom)
       return "aider conf cleaned"
     } elseif ($text -match 'saipen[\\/]RFC\.md') {
       return "manual aider conf (please remove manually)"

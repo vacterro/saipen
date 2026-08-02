@@ -6,9 +6,17 @@ param([string]$SkillHome = (Join-Path (Split-Path $PSScriptRoot) "saipen"))
 
 $ErrorActionPreference = "Stop"
 $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+# Raw .NET File APIs take the path as a plain string, and on Unix a
+# backslash is a legal filename character, not a directory separator --
+# PowerShell cmdlets (Test-Path, Copy-Item) normalize the Windows-style
+# paths below, but [System.IO.File] does not, so every raw .NET call gets
+# the platform-native spelling.
+function Get-NativePath([string]$path) {
+  return $path.Replace('\', [System.IO.Path]::DirectorySeparatorChar)
+}
 function Write-NoBom([string]$file, [string]$text) {
   if ((Test-Path $file) -and -not (Test-Path "$file.bak")) { Copy-Item $file "$file.bak" -Force }
-  [System.IO.File]::WriteAllText($file, $text, $Utf8NoBom)
+  [System.IO.File]::WriteAllText((Get-NativePath $file), $text, $Utf8NoBom)
 }
 try { $SkillHome = (Resolve-Path $SkillHome).Path } catch {
   Write-Host "FATAL: saipen folder not found at $SkillHome" -ForegroundColor Red; exit 1
@@ -47,7 +55,7 @@ function Get-BlockCore([string]$text) {
 function Add-Block([string]$file) {
   if (Test-Path $file) {
     if (-not (Test-Path $file -PathType Leaf)) { throw "config path is not a file: $file" }
-    $text = [System.IO.File]::ReadAllText($file)
+    $text = [System.IO.File]::ReadAllText((Get-NativePath $file))
     $match = [regex]::Match($text, '(?s)<!-- SAIPEN:BEGIN -->.*?<!-- SAIPEN:END -->')
     $core = Get-BlockCore $text
     if ($match.Success) {
