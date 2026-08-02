@@ -110,3 +110,4 @@
 - 02.08.26 14:00 [E-1735] [parent: E-1734] [T-418] DEC: CI run on 3336f36 -> success. The red streak that began at v7.164.0 is closed, confirmed on the remote rather than assumed from a local green.
 - 02.08.26 14:01 [E-1736] [parent: E-1735] [T-418] DEC: goal_tickets 10->11
 - 02.08.26 14:05 [E-1737] [parent: E-1736] [T-418] RUN: ship v7.167.0 -> pushed edb8c34
+- 02.08.26 14:15 [E-1738] [parent: E-1737] RUN: PLAN -- user handed one item as `dd <text>`: a new section must kill a real error class or not be written. Ticketed T-420 at the front of ## TODO, not claimed. Applies to me retroactively: this session's CHANGELOG entries and CONFORMANCE rows are longer than the defects they name require.
