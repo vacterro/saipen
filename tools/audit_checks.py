@@ -603,6 +603,13 @@ CASES: list[tuple[str, str, object, str]] = [
      add_after("## TODO\n",
                "- [ ] T-805 a | needs: T-806\n- [ ] T-806 b | needs: T-805\n"),
      "cyclic needs: dependencies"),
+    # Both lines in one mutation on purpose: with only the claim, the
+    # dependency is dangling and the older check owns the failure, so the
+    # Pick Rule branch is never reached.
+    ("claimed ticket whose dependency is not done", BOARD,
+     lambda t: t.replace("## DOING\n", "## DOING\n- [/] T-809 a | needs: T-810\n", 1)
+                .replace("## TODO\n", "## TODO\n- [ ] T-810 b\n", 1),
+     "dependencies are not done"),
     ("claim_time with no zone", BOARD,
      add_after("## DOING\n",
                "- [/] T-807 a | owner: x | claim_time: 2026-07-30T01:00:00\n"),

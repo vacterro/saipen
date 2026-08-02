@@ -1242,6 +1242,34 @@ if remaining:
 else:
     ok("BOARD.md acyclic")
 
+# RFC § 1.11's Pick Rule, the satisfaction half. Dangling and cyclic references
+# were both checked from the start; whether a claimed ticket's dependencies are
+# actually DONE was not, so the DAG decided nothing. § 1.11 records that two
+# phrasings of "workable" once coexisted and a ticket with unsatisfied `needs:`
+# passed one and failed the other -- an ambiguity resolved in prose while the
+# board stayed unable to show it had been resolved at all. A claim is the only
+# moment this is decidable from the board alone: `## TODO` order is advisory
+# until someone picks, and a ticket already in `## DOING` names its own
+# violation. `## BLOCKED` is deliberately exempt -- a blocked ticket is not a
+# claim, and § 1.2 sends dependency problems there on purpose.
+_unsatisfied = []
+for tid, t in tickets.items():
+    if t["section"] != "## DOING":
+        continue
+    for ref in t["needs"]:
+        _dep = tickets.get(ref)
+        if _dep is not None and _dep["section"] != "## DONE":
+            _unsatisfied.append(f"{tid} needs {ref}, which is under "
+                                f"{_dep['section']} (line {t['line_no']})")
+if _unsatisfied:
+    fail("BOARD.md claims work whose dependencies are not done: "
+         + "; ".join(_unsatisfied)
+         + " -- RFC § 1.11's Pick Rule makes a ticket workable only when all "
+           "its needs: are DONE, so this claim was not the agent's to make and "
+           "the DAG decided nothing")
+else:
+    ok("BOARD.md claimed tickets have their needs: satisfied")
+
 # RFC § 2.1 ZERO-PROMPT AUTO-TRANSITION: DONE + empty TODO + no MARKHUNT
 # blockers = MUST auto-transition HUNT->ADD, never WAIT at DONE.
 if state.get("phase") == "DONE" and state.get("goal_mode") is not True:
@@ -1481,6 +1509,46 @@ if log_files:
     if log_ok:
         ok(f"LOG.md format valid (skeleton, E-### unique + monotonic, parents "
            f"resolve; {len(log_files)} segment(s))")
+
+    # `phases/hunt.md`'s skip condition: a sweep may be skipped only when the
+    # newest `hunt -> clean @<HASH>` names the exact current HEAD. The hash is
+    # the whole mechanism -- no hash, no skip, by construction -- and until now
+    # nothing read it. The recorded incident is an agent that invented its own
+    # substitute signal ("no source files changed"), was corrected, then
+    # produced the identical substitution a second time dressed as compliance;
+    # a fabricated skip has no resolvable commit behind it, and that is exactly
+    # what this reads. Sealed segments WARN because append-only history cannot
+    # be corrected; the active tail FAILs. Skipped whole where git is absent --
+    # hunt.md already says a repo-less project can never satisfy the skip.
+    _hunt_marks = []
+    for _lf in log_files:
+        for _ln, _line in enumerate(_lf.read_text(encoding="utf-8-sig")
+                                    .splitlines(), 1):
+            for _h in re.findall(r"hunt -> clean @([0-9a-f]{7,40})\b", _line):
+                _hunt_marks.append((_lf, _ln, _h))
+    if _hunt_marks and _git("rev-parse", "--git-dir")[0] == 0:
+        _bad_active, _bad_sealed, _seen = [], [], {}
+        for _lf, _ln, _h in _hunt_marks:
+            if _h not in _seen:
+                _seen[_h] = _git("cat-file", "-e", f"{_h}^{{commit}}")[0] == 0
+            if _seen[_h]:
+                continue
+            (_bad_active if _lf == active_log else _bad_sealed).append(
+                f"{_lf.as_posix()}:{_ln} @{_h}")
+        if _bad_active:
+            fail("LOG.md records a clean hunt against commit(s) this "
+                 "repository does not have: " + "; ".join(_bad_active)
+                 + " -- `phases/hunt.md` skips a sweep only on an exact match "
+                   "with HEAD, so a mark no commit backs is a skip nothing "
+                   "earned")
+        if _bad_sealed:
+            warn("hunt-mark-unresolvable",
+                 f"{len(_bad_sealed)} sealed hunt mark(s) name commits this "
+                 f"repository does not have (earliest {_bad_sealed[0]}). "
+                 f"Immutable by append-only; new marks are FAILed instead")
+        if not _bad_active and not _bad_sealed:
+            ok(f"hunt skip marks resolve to real commits "
+               f"({len(_hunt_marks)} checked)")
 
     # RFC § 2.4 requires every goal counter bump to leave `DEC: goal_waves N->M`
     # (or goal_tickets), because § 1.5 Recovery rebuilds the counters by
@@ -1857,7 +1925,7 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
             "saipen/BOOT.md", "saipen/SKILL.md", "saipen/UI.md", "saipen/STYLE.md",
             "saipen/CONFORMANCE.md",
             "tools/validate.py", "tools/install_hook.py", "tools/uninstall_hook.py",
-            "tools/run_scenarios.py", "tools/audit_floor.py",
+            "tools/run_scenarios.py", "tools/ci_status.py", "tools/audit_floor.py",
             "tools/release_ledger_baseline.json",
             "tests/validate.sh", "tests/validate.ps1",
             "bootstrap/inject.sh", "bootstrap/inject.ps1",

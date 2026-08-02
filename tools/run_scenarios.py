@@ -947,6 +947,79 @@ def live_style_marker() -> str:
     return found.group(1) if found else "ded-00000000"
 
 
+def run_hunt_mark_probes() -> tuple[list[str], int]:
+    """Execute `phases/hunt.md`'s skip condition against a real repository.
+
+    Lives here rather than in `tools/audit_checks.py` because that harness
+    copies the tree WITHOUT `.git`, so a hash-resolution check is skipped
+    there and its red control would report a green mutation -- an instrument
+    measuring nothing while reporting a result.
+    """
+    problems: list[str] = []
+    checked = 0
+
+    def validate(project: Path) -> str:
+        r = subprocess.run(
+            [sys.executable, str(VALIDATOR), "--project-root", str(project)],
+            cwd=project, capture_output=True, text=True, errors="replace")
+        return r.stdout + r.stderr
+
+    def expect(label: str, output: str, contains: str, absent: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        details = []
+        if contains not in output:
+            details.append(f"missing {contains!r}")
+        if absent and absent in output:
+            details.append(f"unexpected {absent!r}")
+        if details:
+            problems.append(f"{label}: {'; '.join(details)}")
+        else:
+            print(f"PASS: hunt mark -- {label}")
+
+    marker = "LOG.md records a clean hunt against commit(s)"
+    with tempfile.TemporaryDirectory(prefix="saipen-hunt-mark-") as raw:
+        project = Path(raw) / "project"
+        shutil.copytree(SCENARIOS / "stale-state-reconciliation" / ".saipen",
+                        project / ".saipen")
+        env = {**os.environ, "GIT_AUTHOR_NAME": "probe",
+               "GIT_AUTHOR_EMAIL": "probe@example.invalid",
+               "GIT_COMMITTER_NAME": "probe",
+               "GIT_COMMITTER_EMAIL": "probe@example.invalid"}
+
+        def git(*args: str) -> subprocess.CompletedProcess[str]:
+            return subprocess.run(["git", *args], cwd=project, env=env,
+                                  capture_output=True, text=True, check=False)
+
+        if git("init", "-q").returncode != 0:
+            print("SKIP: hunt mark probes -- git unavailable")
+            return problems, checked
+        git("add", "-A")
+        git("commit", "-q", "-m", "probe")
+        head = git("rev-parse", "--short", "HEAD").stdout.strip()
+        if not head:
+            print("SKIP: hunt mark probes -- no commit to resolve against")
+            return problems, checked
+
+        log_path = project / ".saipen" / "LOG.md"
+        base = log_path.read_text(encoding="utf-8-sig").rstrip("\n")
+
+        def write_mark(short_hash: str) -> None:
+            log_path.write_text(
+                f"{base}\n- 26.07.17 00:01 [E-002] [parent: E-001] [T-001] "
+                f"RUN: hunt -> clean @{short_hash}\n",
+                encoding="utf-8", newline="\n")
+
+        write_mark("dead0be")
+        expect("a mark no commit backs fails", validate(project), marker)
+
+        write_mark(head)
+        expect("the exact HEAD mark passes", validate(project),
+               "hunt skip marks resolve to real commits", absent=marker)
+
+    return problems, checked
+
+
 def run_last_event_probes() -> tuple[list[str], int]:
     """Execute the legacy-schema to current-schema checkpoint migration."""
     problems = []
@@ -1195,6 +1268,8 @@ crew_failures, crew_checked, crew_skipped = run_crew_probes()
 failures.extend(crew_failures)
 last_event_failures, last_event_checked = run_last_event_probes()
 failures.extend(last_event_failures)
+hunt_mark_failures, hunt_mark_checked = run_hunt_mark_probes()
+failures.extend(hunt_mark_failures)
 hook_failures, hook_checked, hook_skipped = run_hook_probes()
 failures.extend(hook_failures)
 
@@ -1212,6 +1287,7 @@ print(f"{crew_checked} crew-launch behavior(s) executed, "
       f"{crew_skipped} skipped for missing interpreters")
 print(f"{digest_checked} digest-stale behavior(s) executed")
 print(f"{last_event_checked} last_event migration behavior(s) executed")
+print(f"{hunt_mark_checked} hunt-mark behavior(s) executed")
 print(f"{hook_checked} installed-hook behavior(s) executed, "
       f"{hook_skipped} skipped for missing interpreters")
 

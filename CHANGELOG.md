@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.165.0 -- 2026-08-02 -- two rules that decided nothing now decide something
+
+A sweep of CONFORMANCE's own enforcement column: 70 of 188 rows name no tool. Most are honest -- the assertion is an agent decision and no artifact records it. Two were not.
+
+`needs:` had two guards from the start, neither of which asked the question the DAG exists to answer. Dangling references FAIL, cycles FAIL, and a `## DOING` ticket whose dependencies are still sitting in `## TODO` passed every check ever written. RFC § 1.11 itself records that two phrasings of "workable" once coexisted and a ticket with unsatisfied `needs:` passed one and failed the other -- settled in prose, while the board stayed unable to show it. Claimed tickets now have their dependencies verified against `## DONE`; `## BLOCKED` is exempt, because a blocked ticket is not a claim. The check caught this repository's own board on the way in: an agent finding filed at the front of `## TODO` had made a P2 the topmost workable ticket above two P1s.
+
+`phases/hunt.md` allows skipping the six-category sweep only when the newest `hunt -> clean @<HASH>` matches HEAD exactly. The hash IS the mechanism -- no hash, no skip, by construction -- and nothing ever read it. The recorded incident is an agent that invented a substitute signal, was corrected, then produced the identical substitution a second time dressed as compliance. A fabricated skip has no commit behind it: unresolvable marks now FAIL in the active LOG, WARN in sealed segments that append-only history cannot correct, and the check stands down entirely where git is absent.
+
+Its red control lives in `tools/run_scenarios.py` rather than `tools/audit_checks.py`, because that harness snapshots the tree without `.git` -- a hash check is skipped there, and the control would have reported a green mutation. An instrument measuring nothing while printing a result is the same defect class this whole sweep is about.
+
+The 26 rows that genuinely cannot be checked now say why, one line each, and four of them dropped to partly-mechanical. Canonical mutations 76/76.
+
 ## 7.164.0 -- 2026-08-02 -- the voice contract now carries a value, so skipping it stops being silent
 
 Three releases went into making `STYLE.md` unskippable: v7.159.0 removed the contradiction that let a live session file it under lazy rule-questions, v7.160.0 moved the read into the numbered fast path. Both fixed what the documents SAY. Neither could tell a session that obeyed from one that did not, because a read leaves no trace -- and every other required STATE field is derivable from `.saipen/` itself, so an agent that never opened the file fills its checkpoint in completely and looks perfectly conformant.
