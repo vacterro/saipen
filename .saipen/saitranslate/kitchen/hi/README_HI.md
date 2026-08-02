@@ -12,7 +12,9 @@
 
 **त्वरित कुंजियाँ:** `cc` सक्रिय Goal Mode जारी रखता है, `sss` कोड छुए बिना स्थिति दिखाता है और `ss` चेकपॉइंट सहेज कर रुक जाता है. [पूरा 13-कुंजी नक्शा देखें](saipen/RFC.md#110-command-surface). सिरिलिक जुड़वाँ भी काम करती हैं: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.170.0** | [विशिष्टता (Spec)](SPEC_HI.md) | [गाइड (Guide)](GUIDE.md) | [RFC](RFC_HI.md) | [शैली (Style)](STYLE_HI.md) | [UI](saipen/UI.md) | [अनुरूपता (Conformance)](saipen/CONFORMANCE.md) | सादा मार्कडाउन | शून्य निर्भरता | MIT
+**उत्तर की भाषा।** एजेंट डिफ़ॉल्ट रूप से **एस्टोनियाई** में उत्तर देता है — यह एक सेटिंग है, सनक नहीं, और SAIPEN में और कुछ भी एस्टोनियाई नहीं है। इसे एक ही जगह बदलें: [`saipen/STYLE.md`](saipen/STYLE.md) के शीर्ष पर `reply_language:` पंक्ति। `et` एस्टोनियाई, `en` अंग्रेज़ी, `ru` रूसी, `auto` आपके संदेश की भाषा से चुनता है। प्रोटोकॉल, कोड, कमिट और सभी दस्तावेज़ हर मान पर अंग्रेज़ी में रहते हैं।
+
+**v7.171.0** | [विशिष्टता (Spec)](SPEC_HI.md) | [गाइड (Guide)](GUIDE.md) | [RFC](RFC_HI.md) | [शैली (Style)](STYLE_HI.md) | [UI](saipen/UI.md) | [अनुरूपता (Conformance)](saipen/CONFORMANCE.md) | सादा मार्कडाउन | शून्य निर्भरता | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -52,4 +54,15 @@ bash bootstrap/inject.sh                                            # macOS / Li
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
+## ## स्क्रीनशॉट
 
+<details>
+<summary>विस्तार करने के लिए क्लिक करें</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="FreeBuff एजेंट निर्देश" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="nomadcode में saipen set" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="saipen स्क्रीनशॉट 2026-08-01" width="600"/>
+
+</details>

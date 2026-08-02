@@ -14,7 +14,9 @@ ja jatkaa työtä alle minuutissa -- ilman uudelleenohjeistusta, millä tahansa 
 
 **Pikanäppäimet:** `cc` jatkaa aktiivista Goal Mode -ajoa, `sss` näyttää tilan koskematta koodiin ja `ss` tallentaa tarkistuspisteen ja pysähtyy. [Katso täydellinen 13 näppäimen kartta](saipen/RFC.md#110-command-surface). Kyrilliset kaksoset toimivat myös: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.170.0** | [Määrittely](SPEC.md) | [Opas](GUIDE.md) | [RFC](saipen/RFC.md) | [Tyyli](saipen/STYLE.md) | [Käyttöliittymä](saipen/UI.md) | [Yhteensopivuus](saipen/CONFORMANCE.md) | selkeä markdown | nolla riippuvuutta | MIT
+**Vastauskieli.** Agentti vastaa oletuksena **viroksi** — se on asetus, ei oikku, eikä mikään muu SAIPENissa ole vironkielistä. Muuta se yhdestä paikasta: `reply_language:`-rivi [`saipen/STYLE.md`](saipen/STYLE.md)-tiedoston alussa. `et` viro, `en` englanti, `ru` venäjä, `auto` valitsee viestisi kielen mukaan. Protokolla, koodi, commitit ja kaikki dokumentit pysyvät englanninkielisinä joka arvolla.
+
+**v7.171.0** | [Määrittely](SPEC.md) | [Opas](GUIDE.md) | [RFC](saipen/RFC.md) | [Tyyli](saipen/STYLE.md) | [Käyttöliittymä](saipen/UI.md) | [Yhteensopivuus](saipen/CONFORMANCE.md) | selkeä markdown | nolla riippuvuutta | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -90,4 +92,15 @@ Alustakohtaiset muistiinpanot löytyvät kansiosta `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
+## ## Kuvakaappaukset
 
+<details>
+<summary>Laajenna napsauttamalla</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="FreeBuff-agentin ohjeet" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set nomadcodessa" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="saipen-kuvakaappaus 2026-08-01" width="600"/>
+
+</details>

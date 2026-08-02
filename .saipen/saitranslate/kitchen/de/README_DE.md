@@ -14,7 +14,9 @@ und die Arbeit in unter einer Minute wiederaufnimmt -- kein Erklärungsbedarf, j
 
 **Schnellzugriff:** `cc` setzt einen aktiven Goal Mode fort, `sss` meldet Status ohne Code anzufassen und `ss` speichert einen Checkpoint und stoppt. [Siehe die komplette 13-Tasten-Karte](saipen/RFC.md#110-command-surface). Kyrillische Zwillinge funktionieren auch: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.170.0** | [Spezifikation](SPEC.md) | [Handbuch](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Konformität](saipen/CONFORMANCE.md) | Plain Markdown | Zero Deps | MIT
+**Antwortsprache.** Der Agent antwortet standardmäßig **auf Estnisch** — das ist eine Einstellung, keine Marotte, und nichts anderes an SAIPEN ist estnisch. Geändert wird das an einer Stelle: die Zeile `reply_language:` am Anfang von [`saipen/STYLE.md`](saipen/STYLE.md). `et` Estnisch, `en` Englisch, `ru` Russisch, `auto` wählt anhand der Sprache deiner Nachricht. Das Protokoll, der Code, die Commits und alle Dokumente bleiben bei jedem Wert englisch.
+
+**v7.171.0** | [Spezifikation](SPEC.md) | [Handbuch](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Konformität](saipen/CONFORMANCE.md) | Plain Markdown | Zero Deps | MIT
 
 [![Russisches Handbuch](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![Englisches Handbuch](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -91,4 +93,15 @@ Plattformspezifische Hinweise befinden sich in `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
+## ## Screenshots
 
+<details>
+<summary>Zum Aufklappen klicken</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="FreeBuff-Agent-Anweisungen" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set in nomadcode" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="saipen-Screenshot 2026-08-01" width="600"/>
+
+</details>

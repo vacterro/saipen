@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.171.0 -- 2026-08-02 -- a completion claim carries its evidence, and a LOG line stays in the past tense
+
+Three gaps, all of them ways a claim could outrun what actually happened.
+
+A LOG entry could be written in the future tense and nothing stopped it. `RUN: will ship the release` and `RUN: ship the release -> pushed abc1234` read identically to everything downstream -- RFC § 1.5's Recovery rebuild, an audit, the next agent's cold start -- so a line written ahead of its own work manufactures completion at the moment it is appended, and append-only means it can never be withdrawn. The gated span is the text's FIRST CLAUSE, up to its first ` -- `, ` -> `, `; ` or `. `: that is where a line states what its event WAS. Later clauses may still name a future that is not the writer's own claim, such as a ticket's pending content. Measured across all 7 sealed segments, the active log and 4 subSaipen logs before shipping: zero first-clause hits, so the gate starts clean rather than inheriting debt. FAIL in the active log, WARN in sealed history -- the same severity split the DATE check already uses.
+
+`## DONE` required no `verify:` field. Moving a line into that section was by itself enough to make the board assert a proven result, and this repository did exactly that at E-1767: a ticket went DOING -> DONE with "no verify -- not built work" and every gate stayed green. Closing a ticket without building it is still legal -- superseded, withdrawn, decided away by the user -- but it has to say so in the field now. Presence only: the field's content is evidence for a human to weigh, and a checker pretending to grade it would add a claim rather than remove one.
+
+A CONFORMANCE row could ship citing a ticket that had not been done. The row asserts an invariant is enforced NOW and names the ticket that landed it; nothing compared that against `BOARD.md`. Reproduced verbatim while writing this release: rows 193 and 196 cited T-419 and T-426 with both still in `## TODO`, their code already sitting in the working tree, and no LOG event for either. That makes this check the only mechanical witness the protocol has for the wider failure behind it -- work landing with BOARD and LOG untouched, which nothing can detect in general, but which surfaces here as two shipped documents contradicting each other.
+
+Also: the reply-language guard now covers every document a new reader lands on -- the four root entry READMEs and all 32 locale copies, 36 in total -- instead of the three Core writes by hand, and FAILs if fewer than the four always-present root documents resolve, so an empty candidate list cannot pass by reading nothing.
+
 ## 7.170.0 -- 2026-08-02 -- the validator stops reporting on a tree nobody edited
 
 Root resolution asked the git-common main worktree before the active one. A linked worktree carrying its own `.saipen/` was therefore never consulted: a local `STATE.md` reading `phase: NOT-A-PHASE` validated EXIT=0 and named the main repository. Honest output, invisible consequence -- green about a tree the agent was not editing.

@@ -1402,6 +1402,24 @@ for tid, t in tickets.items():
         fail(f"BOARD.md:{t['line_no']} ticket {tid} has an open [ ] checkbox "
              f"under {t['section']} -- open boxes belong under ## TODO or "
              f"## BLOCKED (RFC § 1.2)")
+    # A ticket in ## DONE is a completion claim, and until now it could be
+    # made with no evidence at all: `verify:` was a recognised field nothing
+    # required, so moving a line into ## DONE was enough to make the board
+    # say the work was proven. Reproduced on this repository (E-1767): a
+    # ticket went DOING -> DONE with "no verify -- not built work" and every
+    # gate stayed green. DONE must mean the same thing on every board, and
+    # what it means is "the verify: condition this ticket set for itself was
+    # met" -- so the ticket has to say what met it. The field's CONTENT is
+    # not judged here and cannot be: it is evidence for a human or a reviewer
+    # to weigh, and the check that pretends to grade it would be the third
+    # lie in the chain. Absence is what nothing could see before.
+    if t["section"] == "## DONE" and not t["fields"].get("verify", "").strip():
+        fail(f"BOARD.md:{t['line_no']} ticket {tid} sits under ## DONE with "
+             f"no | verify: evidence -- ## DONE is a claim that the ticket's "
+             f"own verify condition was met, and a claim with no evidence "
+             f"attached is indistinguishable from one that was never tested "
+             f"(RFC § 1.2). Closing without building it? Say so in verify: "
+             f"and the board stops overstating what happened")
 
 # RFC § 1.11: at most one ticket in ## DOING per agent. Shipped as prose in
 # v7.86.0 with nothing enforcing it until v7.90.0 -- which is exactly the
@@ -1465,8 +1483,29 @@ if log_files:
         r"(?: \[(T-[^\]]*)\])?"
         r"(?: \[agent: [^\]]+\])?"
         r" ([A-Z]+): (.*)$")
+    # A LOG line records what HAPPENED. An entry written in the future tense
+    # records an intention instead, and every later reader -- § 1.5's Recovery
+    # rebuild, an audit, the next agent's cold start -- counts it as evidence
+    # that the act occurred. "RUN: will ship the release" and "RUN: ship the
+    # release -> pushed abc1234" are indistinguishable to a rebuild that only
+    # knows the line exists. Nothing gated this, and an agent's default is to narrate
+    # its plan (T-430).
+    #
+    # Scope is the FIRST CLAUSE, up to the first ` -- `, ` -> `, `; ` or `. `:
+    # that span is where a line states what its event WAS. Later clauses are
+    # commentary and may legitimately name someone else's future -- E-1679's
+    # "the very rule T-409 is about to write down" describes a ticket's
+    # content, not a claim that the writer did something. Measured against
+    # every LOG this repository has (7 sealed segments, the active log and 4
+    # subSaipen logs): zero first-clause hits, so the gate starts clean and
+    # any hit is new drift rather than inherited history.
+    FUTURE_TENSE_RE = re.compile(
+        r"\b(will|won't|shall|going to|about to|plans? to|planning to|"
+        r"intends? to|i'll|we'll|next step|next up)\b", re.IGNORECASE)
+    FIRST_CLAUSE_RE = re.compile(r" -- | -> |; |\. ")
     seen_ids = {}
     sealed_dateless = []
+    sealed_future = []
     prev_id = 0
     log_ok = True
     timestamp_events = []
@@ -1531,6 +1570,24 @@ if log_files:
                      f"earlier in the sequence -- dangling parent breaks the graph "
                      f"Recovery depends on (RFC § 1.2)")
                 log_ok = False
+            # Future tense in the first clause: the line records a plan, not
+            # an event. Same severity split the DATE check uses -- the active
+            # log is still the writer's to get right, sealed history is
+            # immutable by append-only and can only be reported.
+            _future = FUTURE_TENSE_RE.search(
+                FIRST_CLAUSE_RE.split(content)[0])
+            if _future:
+                if is_active_log:
+                    fail(f"{loc} states its event in the future tense "
+                         f"({_future.group(0)!r}) -- a LOG line records what "
+                         f"happened, and an intention written as an event is "
+                         f"counted as evidence the act occurred by every "
+                         f"reader after you, including § 1.5 Recovery. Log it "
+                         f"after doing it, or log the decision as a DEC about "
+                         f"a ticket (RFC § 1.2)")
+                    log_ok = False
+                else:
+                    sealed_future.append(f"{loc} ({_future.group(0)!r})")
             # History is append-only and immutable -- style drift in old lines
             # can't be fixed without rewriting history, so it warns, not fails.
             if taxonomy not in ("RUN", "DEC", "H"):
@@ -1703,6 +1760,12 @@ if log_files:
              f"{len(sealed_dateless)} sealed LOG entr(y/ies) predate the "
              f"mandatory DATE (earliest {sealed_dateless[0]}). Immutable by "
              f"append-only; new entries are FAILed instead")
+
+    if sealed_future:
+        warn("log-future-tense",
+             f"{len(sealed_future)} sealed LOG entr(y/ies) state their event "
+             f"in the future tense (earliest {sealed_future[0]}). Immutable "
+             f"by append-only; new entries are FAILed instead")
 
     if seen_ids and not timestamp_events:
         fail("LOG has entries but not one parseable timestamp -- the "
@@ -1883,6 +1946,41 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                          f"{line_no}")
             if row_ids and not duplicate_ids:
                 ok(f"CONFORMANCE.md row IDs unique + monotonic ({len(row_ids)} rows)")
+
+            # A CONFORMANCE row is shipped evidence: it says an invariant is
+            # enforced NOW, and cites the ticket that landed it. A row citing
+            # a ticket still sitting in ## TODO / ## DOING / ## BLOCKED is
+            # therefore two documents contradicting each other -- one says
+            # shipped, the other says not started -- and whichever the reader
+            # trusts, the other is a lie. This is also the only mechanical
+            # witness this repository has for the wider failure it keeps
+            # committing: work landing in the tree with the board and LOG
+            # untouched. Reproduced verbatim -- rows 193 and 196 shipped
+            # citing T-419 and T-426 while both sat in ## TODO, their code
+            # already in the tree, no LOG event for either. A ticket that is
+            # absent from the board entirely is history, not a contradiction:
+            # ## DONE is pruned deliberately (§ 1.2) and the rows outlive it.
+            _row_cites = []
+            for _ln, _line in enumerate(
+                    conformance_path.read_text(
+                        encoding="utf-8-sig").splitlines(), 1):
+                _rm = re.match(r"^\|\s*(\d+)\s*\|", _line)
+                if not _rm:
+                    continue
+                for _cited in sorted(set(re.findall(r"\(T-\d+\)", _line))):
+                    _tk = tickets.get(_cited.strip("()"))
+                    if _tk and _tk["section"] != "## DONE":
+                        _row_cites.append(
+                            f"row {_rm.group(1)} cites {_cited.strip('()')}, "
+                            f"which is in {_tk['section']}")
+            if _row_cites:
+                fail("CONFORMANCE row cites unfinished work -- "
+                     + "; ".join(_row_cites)
+                     + ". The row says the invariant is enforced and the "
+                       "board says the ticket has not been done: one of the "
+                       "two is wrong, and a reader has no way to tell which. "
+                       "Either the row shipped early, or work landed and the "
+                       "board was never checkpointed (RFC § 1.5)")
 
         # The mojibake half of this lint applies to any shipped text, not just
         # the four core docs -- corruption does not respect a curated list.
@@ -2419,6 +2517,74 @@ else:
     else:
         drift_ok &= _compare("any-from", set(_ticks(s)), ANY_FROM,
                              "validate.py ANY_FROM")
+
+    # 3b. Transition-table EDGES: RFC § 1.6's quick-reference table vs the
+    #     DFA here. The phase-enum check above compares NAMES; nothing ever
+    #     compared EDGES, so a phase doc could prescribe an exit the DFA
+    #     rejects while both carried an official stamp (T-426). The table is
+    #     a ```text fence, parsed row-by-row; the DFA is the enforced copy.
+    _table_fence = re.search(r"```text\n((?:[A-Z]+ +-> .*\n)+)```", rfc)
+    if _table_fence is None:
+        fail("cross-doc drift [transition-table] -- RFC § 1.6's ```text "
+             "transition table not found, so its edges cannot be compared "
+             "to the DFA")
+        drift_ok = False
+    else:
+        _rfc_edges = {}
+        for _row in _table_fence.group(1).splitlines():
+            _tm = re.match(r"^([A-Z]+) +-> (.+)$", _row)
+            if not _tm:
+                fail(f"cross-doc drift [transition-table] -- unparseable row "
+                     f"in RFC § 1.6's table: {_row!r}")
+                drift_ok = False
+                continue
+            _rfc_edges[_tm.group(1)] = {
+                t.strip() for t in _tm.group(2).split("|")}
+        _dfa_edges = {p: set(v) for p, v in VALID_TRANSITIONS.items()}
+        if _rfc_edges != _dfa_edges:
+            _diffs = []
+            for _p in sorted(set(_rfc_edges) | set(_dfa_edges)):
+                _a, _b = _rfc_edges.get(_p, set()), _dfa_edges.get(_p, set())
+                if _a != _b:
+                    _diffs.append(f"{_p}: RFC {sorted(_a)} vs DFA {sorted(_b)}")
+            fail("cross-doc drift [transition-table] -- RFC § 1.6's table "
+                 "disagrees with validate.py's DFA on edges: "
+                 + "; ".join(_diffs)
+                 + ". The DFA is the enforced copy; bring the table to it, "
+                 "or change both deliberately")
+            drift_ok = False
+
+    # 3c. Phase-doc exit EDGES: each phases/*.md exit line (`STATE -> X` /
+    #     `STATE.phase -> X`) may only name edges the DFA allows from that
+    #     phase. A doc that prescribes an exit the DFA rejects is the third
+    #     official copy of the transition table (T-426). Double-quoted spans
+    #     are masked first: review.md's "There is no \"STATE -> DONE\" branch
+    #     here" is a NEGATION, not a claim -- a parser that read it would flag
+    #     the very edge the sentence denies. Targets are backticked-or-bare
+    #     phase names in a comma/"or"/pipe list, optionally wrapped onto the
+    #     next line (prepare.md writes `STATE.phase ->` then the target).
+    _exit_re = re.compile(
+        r"STATE(?:\.phase)?\s*->\s*"
+        r"((?:`?[A-Z][A-Z0-9]*`?(?:\s*,\s+or\s+|\s*,\s*|"
+        r"\s+or\s+|\s*\|\s*|\s+)?)+)")
+    _exit_problems = []
+    for _pd in sorted((rfc_path.parent / "phases").glob("*.md")):
+        _ph = _pd.stem.upper()
+        _allowed = set(VALID_TRANSITIONS.get(_ph, []))
+        _body = _pd.read_text(encoding="utf-8-sig")
+        _masked = re.sub(r'"[^"]*"', lambda m: " " * len(m.group(0)),
+                         _body)
+        for _em in _exit_re.finditer(_masked):
+            for _t in re.findall(r"[A-Z][A-Z0-9]*", _em.group(1)):
+                if _t not in _allowed:
+                    _exit_problems.append(
+                        f"{_pd.name} prescribes STATE -> {_t}, which the DFA "
+                        f"does not allow from {_ph}")
+    if _exit_problems:
+        fail("cross-doc drift [phase-exit] -- " + "; ".join(_exit_problems)
+             + ". A phase doc may only name edges that phase's DFA row "
+             "allows; the phase doc is a copy, the DFA is enforced")
+        drift_ok = False
 
     # 4. read-only banned phases: RFC § 1.3 vs the tuple here.
     s = _rfc_sentence("read-only-bans",
@@ -3299,15 +3465,23 @@ else:
     # A default nobody is told about is not a setting, it is a surprise. The
     # agent answering in Estonian to someone who never asked for Estonian
     # reads as a broken tool, and the reader has no reason to suspect one line
-    # in STYLE.md would fix it. Core owns these three entry documents
-    # (en/ru/et + Дед); the Japanese README and the locale copies are
-    # subSaipen work and are not checked here.
-    _entry_readmes = [_n for _n in ("README.md", "README.ee.md", "README.ded.md")
-                      if (_tools_parent / _n).is_file()]
+    # in STYLE.md would fix it. Core writes en/ru/et + Дед by hand and the
+    # Japanese root mirror plus the 32 locale copies are saitranslate's; the
+    # check does not care who wrote a document, only that a reader who lands
+    # on it is told (T-419). A locale reader is the one MOST likely to read
+    # the Estonian answer as a bug, having arrived in a third language.
+    _entry_readmes = [
+        (_tools_parent / _n) for _n in
+        ("README.md", "README.ee.md", "README.ded.md", "README.ja.md")
+        if (_tools_parent / _n).is_file()]
+    _kitchen_dir = _tools_parent / ".saipen" / "saitranslate" / "kitchen"
+    if IS_SAIPEN_HOME and _kitchen_dir.is_dir():
+        _entry_readmes += [
+            _r for _d in sorted(_kitchen_dir.iterdir()) if _d.is_dir()
+            for _r in [_d / f"README_{_d.name.upper()}.md"] if _r.is_file()]
     _silent_readmes = [
-        _n for _n in _entry_readmes
-        if "reply_language" not in (_tools_parent / _n).read_text(
-            encoding="utf-8-sig")
+        _p.name for _p in _entry_readmes
+        if "reply_language" not in _p.read_text(encoding="utf-8-sig")
     ]
     if _silent_readmes:
         fail("cross-doc drift [reply-language] -- "
@@ -3315,6 +3489,17 @@ else:
              + " never mentions `reply_language:`, so a reader meets an "
                "Estonian answer with no way to know it is a setting or where "
                "to change it")
+        drift_ok = False
+    # An empty candidate list passes this check without reading anything --
+    # the exact "suite that collected 0 tests" shape the locale badge check
+    # was already bitten by. In the repository the four root entry documents
+    # are always present, so a count below four means resolution broke, not
+    # that the documents stopped needing the note.
+    if IS_SAIPEN_HOME and len(_entry_readmes) < 4:
+        fail(f"cross-doc drift [reply-language] -- only "
+             f"{len(_entry_readmes)} entry README(s) resolved for the "
+             f"reply-language note; the four root entry documents are always "
+             f"present here, so this check just passed on nothing")
         drift_ok = False
 
     # STYLE.md's guide contract, the half that is structure rather than tone.

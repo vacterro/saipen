@@ -14,7 +14,9 @@ e retome o trabalho em menos de um minuto -- sem re-instruções, qualquer forne
 
 **Atalhos rápidos:** `cc` continua uma execução ativa de Goal Mode, `sss` informa o estado sem tocar no código e `ss` salva um ponto de verificação e para. [Veja o mapa completo de 13 teclas](saipen/RFC.md#110-command-surface). Os gêmeos cirílicos também funcionam: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.170.0** | [Espec](SPEC.md) | [Guia](GUIDE.md) | [RFC](saipen/RFC.md) | [Estilo](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformidade](saipen/CONFORMANCE.md) | markdown simples | zero deps | MIT
+**Idioma de resposta.** O agente responde por padrão **em estoniano** — é uma configuração, não uma excentricidade, e nada mais no SAIPEN está em estoniano. Muda-se em um único lugar: a linha `reply_language:` no topo de [`saipen/STYLE.md`](saipen/STYLE.md). `et` estoniano, `en` inglês, `ru` russo, `auto` escolhe pelo idioma da sua mensagem. O protocolo, o código, os commits e todos os documentos permanecem em inglês em qualquer valor.
+
+**v7.171.0** | [Espec](SPEC.md) | [Guia](GUIDE.md) | [RFC](saipen/RFC.md) | [Estilo](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformidade](saipen/CONFORMANCE.md) | markdown simples | zero deps | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -91,4 +93,15 @@ Notas específicas por plataforma estão em `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
+## ## Capturas de tela
 
+<details>
+<summary>Clique para expandir</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="Instruções do agente FreeBuff" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set no nomadcode" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="Captura de tela saipen 2026-08-01" width="600"/>
+
+</details>

@@ -12,7 +12,9 @@
 
 **Бързи клавиши:** `cc` продължава активен Goal Mode, `sss` показва статус без допиране до кода, а `ss` запазва контролна точка и спира. [Виж пълната карта с 13 клавиша](saipen/RFC.md#110-command-surface). Кирилските близнаци също работят: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.170.0** | [Спецификация](SPEC.md) | [Ръководство](GUIDE.md) | [RFC](saipen/RFC.md) | [Стил](saipen/STYLE.md) | [UI](saipen/UI.md) | [Съответствие](saipen/CONFORMANCE.md) | чист markdown | нула зависимости | MIT
+**Език на отговорите.** Агентът по подразбиране отговаря **на естонски** — това е настройка, а не приумица, и нищо друго в SAIPEN не е на естонски. Променя се на едно място: редът `reply_language:` в началото на [`saipen/STYLE.md`](saipen/STYLE.md). `et` естонски, `en` английски, `ru` руски, `auto` избира според езика на твоето съобщение. Протоколът, кодът, комитите и всички документи остават на английски при всяка стойност.
+
+**v7.171.0** | [Спецификация](SPEC.md) | [Ръководство](GUIDE.md) | [RFC](saipen/RFC.md) | [Стил](saipen/STYLE.md) | [UI](saipen/UI.md) | [Съответствие](saipen/CONFORMANCE.md) | чист markdown | нула зависимости | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -89,4 +91,15 @@ bash bootstrap/inject.sh                                            # macOS / Li
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
+## ## Екранни снимки
 
+<details>
+<summary>Кликни, за да разшириш</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="Инструкции за агента FreeBuff" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set в nomadcode" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="Екранна снимка saipen 2026-08-01" width="600"/>
+
+</details>

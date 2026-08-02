@@ -14,7 +14,9 @@
 
 **パッケージ用キー:** `ee`/`qq` は翻訳/Wikiの完全なパッケージを準備するだけで、統合しない。`eee`/`qqq` は ready のパッケージだけを受け取り、統合・検証・レビュー後に push する。
 
-**v7.170.0** | [仕様](SPEC.md) | [ガイド](GUIDE.md) | [RFC](saipen/RFC.md) | [スタイル](saipen/STYLE.md) | [UI](saipen/UI.md) | [適合性](saipen/CONFORMANCE.md) | プレーンMarkdown | 依存関係ゼロ | MIT
+**返信言語。** エージェントはデフォルトで**エストニア語**で応答します — これは設定であり、気まぐれではなく、SAIPEN の中でエストニア語なのはこれだけです。変更は1か所: [`saipen/STYLE.md`](saipen/STYLE.md) 冒頭の `reply_language:` 行。`et` エストニア語、`en` 英語、`ru` ロシア語、`auto` は送ったメッセージの言語から選びます。プロトコル、コード、コミット、すべてのドキュメントはどの値でも英語のままです。
+
+**v7.171.0** | [仕様](SPEC.md) | [ガイド](GUIDE.md) | [RFC](saipen/RFC.md) | [スタイル](saipen/STYLE.md) | [UI](saipen/UI.md) | [適合性](saipen/CONFORMANCE.md) | プレーンMarkdown | 依存関係ゼロ | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -89,3 +91,16 @@ bash bootstrap/inject.sh                                            # macOS / Li
 <p align="center">
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
+
+## ## スクリーンショット
+
+<details>
+<summary>クリックして展開</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="FreeBuff エージェントの指示" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="nomadcode での saipen set" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="saipen スクリーンショット 2026-08-01" width="600"/>
+
+</details>

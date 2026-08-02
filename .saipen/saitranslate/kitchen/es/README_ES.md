@@ -14,7 +14,9 @@ y reanude el trabajo en menos de un minuto: sin explicaciones previas, cualquier
 
 **Atajos rápidos:** `cc` continúa una ejecución activa de Goal Mode, `sss` informa del estado sin tocar código y `ss` guarda un punto de control y se detiene. [Ver el mapa completo de 13 teclas](saipen/RFC.md#110-command-surface). Los gemelos cirílicos también funcionan: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.170.0** | [Espec](SPEC.md) | [Guía](GUIDE.md) | [RFC](saipen/RFC.md) | [Estilo](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformidad](saipen/CONFORMANCE.md) | markdown plano | cero dependencias | MIT
+**Idioma de respuesta.** El agente responde por defecto **en estonio** — es un ajuste, no una manía, y nada más en SAIPEN está en estonio. Se cambia en un solo lugar: la línea `reply_language:` al principio de [`saipen/STYLE.md`](saipen/STYLE.md). `et` estonio, `en` inglés, `ru` ruso, `auto` elige según el idioma de tu mensaje. El protocolo, el código, los commits y todos los documentos siguen en inglés con cualquier valor.
+
+**v7.171.0** | [Espec](SPEC.md) | [Guía](GUIDE.md) | [RFC](saipen/RFC.md) | [Estilo](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformidad](saipen/CONFORMANCE.md) | markdown plano | cero dependencias | MIT
 
 [![Guía en Ruso](https://img.shields.io/badge/📖_Guía_ELI5-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![Guía en Inglés](https://img.shields.io/badge/📖_Guía_ELI5-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -91,4 +93,15 @@ Las notas específicas para cada plataforma se encuentran en `extensions/adapter
   <img src="assets/SAIPEN_design2_alpha.png" alt="Sello de SAIPEN" width="120"/>
 </p>
 
+## ## Capturas de pantalla
 
+<details>
+<summary>Haz clic para expandir</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="Instrucciones del agente FreeBuff" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set en nomadcode" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="Captura de saipen 2026-08-01" width="600"/>
+
+</details>

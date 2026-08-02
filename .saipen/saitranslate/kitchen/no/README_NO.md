@@ -14,7 +14,9 @@ og gjenopptar arbeidet på under ett minutt -- ingen ny brifing, hvilken som hel
 
 **Hurtigtaster:** `cc` fortsetter en aktiv Goal Mode-kjøring, `sss` viser status uten å røre koden, og `ss` lagrer et sjekkpunkt og stopper. [Se hele 13-tasters kartet](saipen/RFC.md#110-command-surface). Kyrilliske tvillinger fungerer også: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.170.0** | [Spesifikasjon](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Samsvar](saipen/CONFORMANCE.md) | ren markdown | null avhengigheter | MIT
+**Svarspråk.** Agenten svarer som standard **på estisk** — det er en innstilling, ikke en særhet, og ingenting annet i SAIPEN er estisk. Endres på ett sted: linjen `reply_language:` øverst i [`saipen/STYLE.md`](saipen/STYLE.md). `et` estisk, `en` engelsk, `ru` russisk, `auto` velger ut fra språket i meldingen din. Protokollen, koden, commits og alle dokumenter forblir engelske ved enhver verdi.
+
+**v7.171.0** | [Spesifikasjon](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Samsvar](saipen/CONFORMANCE.md) | ren markdown | null avhengigheter | MIT
 
 [![Russisk guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![Engelsk guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -90,3 +92,15 @@ Plattformspesifikke notater finnes i `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
+## ## Skjermbilder
+
+<details>
+<summary>Klikk for å utvide</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="FreeBuff-agentinstruksjoner" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set i nomadcode" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="saipen-skjermbilde 2026-08-01" width="600"/>
+
+</details>

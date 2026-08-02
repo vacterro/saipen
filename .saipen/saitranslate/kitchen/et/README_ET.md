@@ -14,7 +14,9 @@
 
 **Paketiklahvid:** `ee`/`qq` valmistavad täieliku tõlke- või vikipaketi ette ilma seda lõimimata; `eee`/`qqq` võtavad vastu ainult valmis paketi, seejärel lõimivad, kontrollivad, vaatavad üle ja lükkavad üles.
 
-**v7.170.0** | [Spetsifikatsioon](SPEC.md) | [Juhend](GUIDE.md) | [RFC](saipen/RFC.md) | [Stiil](saipen/STYLE.md) | [Kasutajaliides](saipen/UI.md) | [Vastavus](saipen/CONFORMANCE.md) | tavaline markdown | null sõltuvust | MIT
+**Vastuste keel.** Agent vastab vaikimisi **eesti keeles** — see on säte, mitte veidrus, ja miski muu SAIPEN-is ei ole eestikeelne. Muuda seda ühes kohas: rida `reply_language:` [`saipen/STYLE.md`](saipen/STYLE.md) alguses. `et` eesti, `en` inglise, `ru` vene, `auto` valib selle järgi, mis keeles sa kirjutasid. Protokoll, kood, commitid ja kõik dokumendid jäävad igal väärtusel inglise keelde.
+
+**v7.171.0** | [Spetsifikatsioon](SPEC.md) | [Juhend](GUIDE.md) | [RFC](saipen/RFC.md) | [Stiil](saipen/STYLE.md) | [Kasutajaliides](saipen/UI.md) | [Vastavus](saipen/CONFORMANCE.md) | tavaline markdown | null sõltuvust | MIT
 
 [![Venekeelne juhend](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![Ingliskeelne juhend](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -100,3 +102,15 @@ Platvormipõhised märkused asuvad kaustas `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
+## ## Ekraanitõmmised
+
+<details>
+<summary>Vajuta avamiseks</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="FreeBuff agent instructions" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set in nomadcode" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="saipen screenshot 2026-08-01" width="600"/>
+
+</details>

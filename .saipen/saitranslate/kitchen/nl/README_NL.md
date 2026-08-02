@@ -14,7 +14,9 @@ en het werk in minder dan een minuut hervat -- geen herbriefing, elke leverancie
 
 **Sneltoetsen:** `cc` zet een actieve Goal Mode voort, `sss` meldt status zonder code aan te raken en `ss` slaat een checkpoint op en stopt. [Bekijk de volledige 13-toetsenkaart](saipen/RFC.md#110-command-surface). Cyrillische tweelingen werken ook: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.170.0** | [Spec](SPEC.md) | [Gids](GUIDE.md) | [RFC](saipen/RFC.md) | [Stijl](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformiteit](saipen/CONFORMANCE.md) | plat markdown | nul afhankelijkheden | MIT
+**Antwoordtaal.** De agent antwoordt standaard **in het Estisch** — dat is een instelling, geen eigenaardigheid, en niets anders aan SAIPEN is Estisch. Het wordt op één plek gewijzigd: de regel `reply_language:` bovenaan [`saipen/STYLE.md`](saipen/STYLE.md). `et` Estisch, `en` Engels, `ru` Russisch, `auto` kiest op basis van de taal van je bericht. Het protocol, de code, de commits en alle documenten blijven bij elke waarde Engels.
+
+**v7.171.0** | [Spec](SPEC.md) | [Gids](GUIDE.md) | [RFC](saipen/RFC.md) | [Stijl](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformiteit](saipen/CONFORMANCE.md) | plat markdown | nul afhankelijkheden | MIT
 
 [![Russische Gids](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![Engelse Gids](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -91,3 +93,15 @@ Notities per platform zijn te vinden in `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
+## ## Schermafbeeldingen
+
+<details>
+<summary>Klik om uit te vouwen</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="FreeBuff-agentinstructies" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set in nomadcode" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="saipen-schermafbeelding 2026-08-01" width="600"/>
+
+</details>

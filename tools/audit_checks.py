@@ -237,6 +237,43 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
     return None
 
 
+def phase_rename_probe(source: Path, destination: Path) -> str | None:
+    """T-426 verify: renaming a phase consistently across every copy the
+    validator reads stays green. The new edge gates exist to catch drift,
+    not to forbid a deliberate rename: SCOUT -> SCOUTX (and scout -> scoutx,
+    word-boundary, so the phase doc file and its citations move too) across
+    the whole tree -- DFA, RFC table and enum sentence, schema enum, the
+    phase doc and its exit line, STATE references -- must validate clean.
+    """
+    tree = destination / "phase-rename"
+    shutil.copytree(source, tree)
+    changed = 0
+    for path in tree.rglob("*"):
+        if not path.is_file():
+            continue
+        try:
+            text = path.read_text(encoding="utf-8-sig")
+        except (UnicodeDecodeError, OSError):
+            continue
+        new = re.sub(r"\bSCOUT\b", "SCOUTX", text)
+        new = re.sub(r"\bscout\b", "scoutx", new)
+        if new != text:
+            path.write_text(new, encoding="utf-8", newline="\n")
+            changed += 1
+    old_doc = tree / "saipen" / "phases" / "scout.md"
+    if old_doc.is_file():
+        old_doc.rename(tree / "saipen" / "phases" / "scoutx.md")
+    if changed == 0:
+        return "rename probe changed nothing -- a bug in the probe itself"
+    proc = subprocess.run(
+        [sys.executable, str(tree / "tools" / "validate.py")], cwd=tree,
+        capture_output=True, text=True, errors="replace")
+    if proc.returncode:
+        return ("consistent SCOUT->SCOUTX rename was rejected: "
+                + (proc.stdout + proc.stderr).strip()[-400:])
+    return None
+
+
 def audit_tags_batch_probe(root: Path, destination: Path) -> str | None:
     """Execute process and protocol failures against the tag audit."""
     missing_env = os.environ.copy()
@@ -422,6 +459,44 @@ def leak_style_marker(text: str) -> str:
 
 UTF16 = "<rewrite as utf-16>"      # sentinel, not a mutation function
 DELETE = "<delete the file>"
+def strip_done_verify(text: str) -> str:
+    """T-431: take the evidence off the first ## DONE ticket, keep the ticket.
+
+    The ticket still claims completion, exactly as it did before -- only the
+    proof is gone, which was legal until this check existed. Written against
+    the board's structure rather than one ticket's wording so the control
+    survives every ## DONE prune.
+    """
+    out, section, done_once = [], "", False
+    for line in text.splitlines():
+        stripped = line
+        if line.startswith("## "):
+            section = line.strip()
+        elif (section == "## DONE" and not done_once
+                and line.startswith("- [x] T-") and " | verify:" in line):
+            stripped = re.sub(r" \| verify:.*$", "", line)
+            done_once = True
+        out.append(stripped)
+    return "\n".join(out) + "\n"
+
+
+def cite_open_ticket(text: str) -> str:
+    """T-431: repoint a shipped CONFORMANCE row at a ticket still in ## TODO.
+
+    The open ticket is read out of the pristine board at mutation time, the
+    same way leak_style_marker reads STYLE.md's live marker: a hardcoded ID
+    would go stale into a silent no-op the moment the board moved on.
+    """
+    board = (HOME / ".saipen" / "BOARD.md").read_text(encoding="utf-8-sig")
+    todo = re.search(r"^## TODO$(.*?)^## ", board,
+                     re.MULTILINE | re.DOTALL)
+    open_ticket = re.search(r"^- \[ \] (T-\d+)", todo.group(1),
+                            re.MULTILINE) if todo else None
+    if not open_ticket:
+        return text
+    return re.sub(r"\(T-\d+\)", f"({open_ticket.group(1)})", text, count=1)
+
+
 CREATE = "<create the file>"
 SWAP = "<swap the last two log entries>"
 
@@ -731,6 +806,15 @@ CASES: list[tuple[str, str, object, str]] = [
      "README.ee.md",
      replace("rida `reply_language:`", "rida stiilifailis"),
      "never mentions `reply_language:`"),
+    # T-419: the guard used to stop at the three Core-owned entry documents,
+    # so the Japanese root mirror and the 32 locale copies could carry the
+    # note today and lose it in the next translation pass with nothing
+    # noticing. A locale reader is the one most likely to read an Estonian
+    # answer as a broken tool, having arrived in a third language.
+    ("a locale README stops naming the reply-language setting",
+     ".saipen/saitranslate/kitchen/ru/README_RU.md",
+     replace("`reply_language:`", "строку языка"),
+     "never mentions `reply_language:`"),
     ("BOOT.md presents the precedence rule without the setting",
      "saipen/BOOT.md",
      replace("`STYLE.md`'s `reply_language:` (step 1",
@@ -784,6 +868,34 @@ CASES: list[tuple[str, str, object, str]] = [
     # for it could only ever match the WARN saying it was skipped -- which
     # is exactly how it scored as "always present". CI covers it, where the
     # checkout carries tags (fetch-depth: 0).
+
+    # T-426: transition-table EDGES must agree in every copy, not just the
+    # phase NAMES. The DFA is the enforced representation; both remaining
+    # copies (RFC § 1.6's fence table, and each phases/*.md exit line) are
+    # gated against it. Each mutation is a byte in a DIFFERENT copy, so a
+    # drift in one is caught no matter which one drifts first.
+    ("RFC transition table loses an edge", "saipen/RFC.md",
+     replace("SCOUT     -> BUILD | BLOCKED", "SCOUT     -> BLOCKED"),
+     "transition-table"),
+    ("phase doc exit names an edge the DFA rejects", "saipen/phases/scout.md",
+     replace("After SCOUT: STATE -> BUILD.", "After SCOUT: STATE -> SHIP."),
+     "phase-exit"),
+
+    # T-430: a LOG line records what happened. One word turns E-1769 from an
+    # event into an intention, and every reader after it -- § 1.5's Recovery
+    # rebuild included -- would still count it as evidence the act occurred.
+    # The anchor is safe to name: append-only makes that line immutable.
+    ("a LOG entry states its event in the future tense", ".saipen/LOG.md",
+     replace("RUN: prepare saiwiki (qq)", "RUN: will prepare saiwiki (qq)"),
+     "future tense"),
+
+    # T-431: two ways a completion claim outran its evidence, one control
+    # each. Both mutations leave the CLAIM intact and remove only what backs
+    # it -- which is the state both files were shipped in.
+    ("a ## DONE ticket carries no verify evidence", ".saipen/BOARD.md",
+     strip_done_verify, "no | verify: evidence"),
+    ("a CONFORMANCE row cites a ticket still open on the board",
+     "saipen/CONFORMANCE.md", cite_open_ticket, "cites unfinished work"),
 
     (".saipen/ carries a copy of the protocol", ".saipen/RFC.md",
      CREATE, "§ 1.7"),
@@ -871,6 +983,15 @@ def main() -> int:
         return 1
     print("PASS: aged unowned WARN slug fails; identical aged slug with a "
           "live naming ticket passes; baseline data, never validator wording")
+
+    rename_error = phase_rename_probe(pristine, tmp)
+    if rename_error:
+        print(f"FAIL: phase-rename probe -- {rename_error}")
+        shutil.rmtree(tmp, ignore_errors=True)
+        return 1
+    print("PASS: consistent SCOUT->SCOUTX rename stays green across the DFA, "
+          "RFC table, schema enum and phase doc -- edge gates catch drift, "
+          "not deliberate renames")
 
     batch_error = audit_tags_batch_probe(HOME, tmp)
     if batch_error:

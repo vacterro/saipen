@@ -12,7 +12,9 @@
 
 **빠른 키:** `cc`는 활성 Goal Mode 실행을 계속하고, `sss`는 코드를 건드리지 않고 상태를 보여주며, `ss`는 체크포인트를 저장하고 멈춥니다. [전체 13 키 맵 보기](saipen/RFC.md#110-command-surface). 키릴 문자 쌍둥이도 작동합니다: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.170.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
+**응답 언어.** 에이전트는 기본적으로 **에스토니아어**로 응답합니다 — 이것은 설정이지 기벽이 아니며, SAIPEN에서 에스토니아어인 것은 이것뿐입니다. 한 곳에서 변경합니다: [`saipen/STYLE.md`](saipen/STYLE.md) 맨 위의 `reply_language:` 줄. `et` 에스토니아어, `en` 영어, `ru` 러시아어, `auto`는 보낸 메시지의 언어로 선택합니다. 프로토콜, 코드, 커밋과 모든 문서는 어떤 값에서도 영어로 유지됩니다.
+
+**v7.171.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -88,3 +90,15 @@ bash bootstrap/inject.sh                                            # macOS / Li
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
+## ## 스크린샷
+
+<details>
+<summary>클릭하여 펼치기</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="FreeBuff 에이전트 지침" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="nomadcode에서 saipen set" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="saipen 스크린샷 2026-08-01" width="600"/>
+
+</details>

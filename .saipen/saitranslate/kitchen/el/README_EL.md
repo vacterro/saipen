@@ -14,7 +14,9 @@
 
 **Συντομεύσεις:** το `cc` συνεχίζει ενεργό Goal Mode, το `sss` εμφανίζει την κατάσταση χωρίς να αγγίζει κώδικα και το `ss` αποθηκεύει σημείο ελέγχου και σταματάει. [Δες τον πλήρη χάρτη 13 πλήκτρων](saipen/RFC.md#110-command-surface). Λειτουργούν και τα κυριλλικά δίδυμα: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.170.0** | [Προδιαγραφή](SPEC.md) | [Οδηγός](GUIDE.md) | [RFC](saipen/RFC.md) | [Στυλ](saipen/STYLE.md) | [UI](saipen/UI.md) | [Συμμόρφωση](saipen/CONFORMANCE.md) | απλό markdown | μηδενικές εξαρτήσεις | MIT
+**Γλώσσα απαντήσεων.** Ο πράκτορας απαντά από προεπιλογή **στα εσθονικά** — είναι ρύθμιση, όχι ιδιοτροπία, και τίποτα άλλο στο SAIPEN δεν είναι εσθονικό. Αλλάζει σε ένα σημείο: η γραμμή `reply_language:` στην αρχή του [`saipen/STYLE.md`](saipen/STYLE.md). `et` εσθονικά, `en` αγγλικά, `ru` ρωσικά, `auto` επιλέγει από τη γλώσσα του μηνύματός σου. Το πρωτόκολλο, ο κώδικας, τα commits και όλα τα έγγραφα παραμένουν στα αγγλικά σε κάθε τιμή.
+
+**v7.171.0** | [Προδιαγραφή](SPEC.md) | [Οδηγός](GUIDE.md) | [RFC](saipen/RFC.md) | [Στυλ](saipen/STYLE.md) | [UI](saipen/UI.md) | [Συμμόρφωση](saipen/CONFORMANCE.md) | απλό markdown | μηδενικές εξαρτήσεις | MIT
 
 [![Ρωσικός Οδηγός](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![Αγγλικός Οδηγός](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -90,4 +92,15 @@ bash bootstrap/inject.sh                                            # macOS / Li
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
+## ## Στιγμιότυπα οθόνης
 
+<details>
+<summary>Κάντε κλικ για επέκταση</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="Οδηγίες πράκτορα FreeBuff" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set στο nomadcode" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="Στιγμιότυπο saipen 2026-08-01" width="600"/>
+
+</details>

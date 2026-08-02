@@ -12,7 +12,9 @@
 
 **Kısayol tuşları:** `cc` aktif Goal Mode’u sürdürür, `sss` koda dokunmadan durumu bildirir ve `ss` kontrol noktası kaydedip durur. [13 tuşluk tam haritaya bakın](saipen/RFC.md#110-command-surface). Kiril ikizleri de çalışır: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.170.0** | [Spec](SPEC.md) | [Rehber](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [Kullanıcı Arayüzü](saipen/UI.md) | [Uyum](saipen/CONFORMANCE.md) | sade markdown | sıfır bağımlılık | MIT
+**Yanıt dili.** Aracı varsayılan olarak **Estonca** yanıtlar — bu bir ayar, tuhaflık değil, ve SAIPEN'de Estonca olan başka hiçbir şey yoktur. Tek bir yerde değişir: [`saipen/STYLE.md`](saipen/STYLE.md) dosyasının başındaki `reply_language:` satırı. `et` Estonca, `en` İngilizce, `ru` Rusça, `auto` gönderdiğin mesajın diline göre seçer. Protokol, kod, commit'ler ve tüm belgeler her değerde İngilizce kalır.
+
+**v7.171.0** | [Spec](SPEC.md) | [Rehber](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [Kullanıcı Arayüzü](saipen/UI.md) | [Uyum](saipen/CONFORMANCE.md) | sade markdown | sıfır bağımlılık | MIT
 
 [![Rusça Rehber](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![İngilizce Rehber](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -88,3 +90,15 @@ Platform bazlı notlar `extensions/adapters/` içinde yer alır.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
+## ## Ekran Görüntüleri
+
+<details>
+<summary>Genişletmek için tıklayın</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="FreeBuff aracı talimatları" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="nomadcode'da saipen set" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="saipen ekran görüntüsü 2026-08-01" width="600"/>
+
+</details>

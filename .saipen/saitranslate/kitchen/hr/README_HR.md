@@ -14,7 +14,9 @@ i nastavlja rad za manje od minute -- bez ponovnog brifiranja, bilo koji pružat
 
 **Brzi prečaci:** `cc` nastavlja aktivni Goal Mode, `sss` prikazuje status bez diranja koda, a `ss` sprema kontrolnu točku i zaustavlja se. [Pogledaj punu kartu od 13 tipki](saipen/RFC.md#110-command-surface). Ćirilični blizanci također rade: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.170.0** | [Spec](SPEC.md) | [Vodič](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [Korisničko sučelje](saipen/UI.md) | [Sukladnost](saipen/CONFORMANCE.md) | čist markdown | nula ovisnosti | MIT
+**Jezik odgovora.** Agent prema zadanim postavkama odgovara **na estonskom** — to je postavka, a ne hir, i ništa drugo u SAIPEN-u nije estonsko. Mijenja se na jednom mjestu: redak `reply_language:` na vrhu [`saipen/STYLE.md`](saipen/STYLE.md). `et` estonski, `en` engleski, `ru` ruski, `auto` bira prema jeziku tvoje poruke. Protokol, kod, commitovi i svi dokumenti ostaju na engleskom pri svakoj vrijednosti.
+
+**v7.171.0** | [Spec](SPEC.md) | [Vodič](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [Korisničko sučelje](saipen/UI.md) | [Sukladnost](saipen/CONFORMANCE.md) | čist markdown | nula ovisnosti | MIT
 
 [![Vodič na ruskom](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![Vodič na engleskom](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -90,4 +92,15 @@ Bilješke po platformi nalaze se u `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
+## ## Snimke zaslona
 
+<details>
+<summary>Klikni za proširivanje</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="Upute za FreeBuff agenta" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set u nomadcodeu" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="Snimka zaslona saipen 2026-08-01" width="600"/>
+
+</details>

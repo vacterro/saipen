@@ -12,7 +12,9 @@
 
 **คีย์ลัด:** `cc` ให้ Goal Mode ที่กำลังทำงานอยู่ดำเนินต่อ, `sss` แสดงสถานะโดยไม่แตะโค้ด และ `ss` บันทึกจุดตรวจสอบแล้วหยุด [ดูแผนที่ปุ่มลัดทั้ง 13 รายการ](saipen/RFC.md#110-command-surface) ปุ่มอักษรซีริลลิกที่มีรูปเหมือนกันก็ใช้ได้: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`
 
-**v7.170.0** | [ข้อกำหนด](SPEC.md) | [คู่มือ](GUIDE.md) | [RFC](saipen/RFC.md) | [สไตล์](saipen/STYLE.md) | [UI](saipen/UI.md) | [การปฏิบัติตามมาตรฐาน](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
+**ภาษาที่ตอบ** เอเจนต์ตอบเป็น**ภาษาเอสโตเนีย** โดยค่าเริ่มต้น — นี่คือการตั้งค่า ไม่ใช่ความแปลก และไม่มีสิ่งอื่นใดใน SAIPEN เป็นภาษาเอสโตเนีย เปลี่ยนได้ที่จุดเดียว: บรรทัด `reply_language:` ที่ด้านบนของ [`saipen/STYLE.md`](saipen/STYLE.md) `et` เอสโตเนีย `en` อังกฤษ `ru` รัสเซีย `auto` เลือกตามภาษาของข้อความที่คุณส่ง โปรโตคอล โค้ด คอมมิต และเอกสารทั้งหมดยังคงเป็นภาษาอังกฤษไม่ว่าค่าใด
+
+**v7.171.0** | [ข้อกำหนด](SPEC.md) | [คู่มือ](GUIDE.md) | [RFC](saipen/RFC.md) | [สไตล์](saipen/STYLE.md) | [UI](saipen/UI.md) | [การปฏิบัติตามมาตรฐาน](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -88,3 +90,15 @@ bash bootstrap/inject.sh                                            # macOS / Li
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
+## ## ภาพหน้าจอ
+
+<details>
+<summary>คลิกเพื่อขยาย</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="คำแนะนำเอเจนต์ FreeBuff" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set ใน nomadcode" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="ภาพหน้าจอ saipen 2026-08-01" width="600"/>
+
+</details>

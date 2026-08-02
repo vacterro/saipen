@@ -14,7 +14,9 @@ và tiếp tục công việc trong chưa đầy một phút -- không cần gi�
 
 **Phím tắt:** `cc` tiếp tục Goal Mode đang chạy, `sss` báo trạng thái mà không đụng vào mã và `ss` lưu điểm kiểm tra rồi dừng. [Xem bản đồ đầy đủ 13 phím](saipen/RFC.md#110-command-surface). Các cặp song sinh Cyrillic cũng hoạt động: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.170.0** | [Đặc tả](SPEC.md) | [Hướng dẫn](GUIDE.md) | [RFC](saipen/RFC.md) | [Phong cách](saipen/STYLE.md) | [Giao diện UI](saipen/UI.md) | [Độ tuân thủ](saipen/CONFORMANCE.md) | markdown thuần túy | không phụ thuộc | MIT
+**Ngôn ngữ trả lời.** Tác nhân trả lời mặc định **bằng tiếng Estonia** — đó là cài đặt, không phải sự kỳ quặc, và không có gì khác trong SAIPEN là tiếng Estonia. Thay đổi ở một nơi: dòng `reply_language:` ở đầu [`saipen/STYLE.md`](saipen/STYLE.md). `et` tiếng Estonia, `en` tiếng Anh, `ru` tiếng Nga, `auto` chọn theo ngôn ngữ tin nhắn bạn gửi. Giao thức, mã nguồn, commit và mọi tài liệu vẫn bằng tiếng Anh ở mọi giá trị.
+
+**v7.171.0** | [Đặc tả](SPEC.md) | [Hướng dẫn](GUIDE.md) | [RFC](saipen/RFC.md) | [Phong cách](saipen/STYLE.md) | [Giao diện UI](saipen/UI.md) | [Độ tuân thủ](saipen/CONFORMANCE.md) | markdown thuần túy | không phụ thuộc | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -90,4 +92,15 @@ Ghi chú cho từng nền tảng nằm tại `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
+## ## Ảnh chụp màn hình
 
+<details>
+<summary>Nhấp để mở rộng</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="Hướng dẫn tác nhân FreeBuff" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set trong nomadcode" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="Ảnh chụp màn hình saipen 2026-08-01" width="600"/>
+
+</details>

@@ -12,7 +12,9 @@
 
 **快捷键:** `cc` 继续正在运行的 Goal Mode，`sss` 在不触碰代码的情况下报告状态，`ss` 保存检查点并停止。[查看完整的 13 键快捷键地图](saipen/RFC.md#110-command-surface)。西里尔字母的同型键也可用：`сс`、`ссс`、`аа`、`ее`、`еее`、`рр`。
 
-**v7.170.0** | [规范](SPEC.md) | [指南](GUIDE.md) | [RFC](saipen/RFC.md) | [风格](saipen/STYLE.md) | [UI 指南](saipen/UI.md) | [一致性](saipen/CONFORMANCE.md) | 纯 Markdown | 零依赖 | MIT 协议
+**回复语言。** 代理默认用**爱沙尼亚语**回答 —— 这是设置，不是怪癖，SAIPEN 中其他任何内容都不是爱沙尼亚语。只需在一处更改：[`saipen/STYLE.md`](saipen/STYLE.md) 顶部的 `reply_language:` 行。`et` 爱沙尼亚语，`en` 英语，`ru` 俄语，`auto` 根据你发送消息的语言选择。协议、代码、提交和所有文档在任何值下都保持英文。
+
+**v7.171.0** | [规范](SPEC.md) | [指南](GUIDE.md) | [RFC](saipen/RFC.md) | [风格](saipen/STYLE.md) | [UI 指南](saipen/UI.md) | [一致性](saipen/CONFORMANCE.md) | 纯 Markdown | 零依赖 | MIT 协议
 
 [![俄语指南](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![英语指南](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -88,3 +90,15 @@ bash bootstrap/inject.sh                                            # macOS / Li
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
+## ## 截图
+
+<details>
+<summary>点击展开</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="FreeBuff 代理说明" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="在 nomadcode 中运行 saipen set" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="saipen 截图 2026-08-01" width="600"/>
+
+</details>

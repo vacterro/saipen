@@ -12,7 +12,9 @@
 
 **مفاتيح سريعة:** `cc` يواصل تشغيل وضع الأهداف النشط، `sss` يعرض الحالة دون لمس الكود، و`ss` يحفظ نقطة تحقق ويتوقف. [انظر خريطة المفاتيح الكاملة 13](saipen/RFC.md#110-command-surface). التوائم السيريلية تعمل أيضًا: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.170.0** | [المواصفات](SPEC.md) | [الدليل](GUIDE.md) | [RFC](saipen/RFC.md) | [الأسلوب](saipen/STYLE.md) | [واجهة المستخدم](saipen/UI.md) | [التطابق](saipen/CONFORMANCE.md) | markdown بسيط | صفر تبعيات | MIT
+**لغة الرد.** يرد الوكيل افتراضيًا **باللغة الإستونية** — هذه إعدادات، وليست نزوة، ولا شيء آخر في SAIPEN باللغة الإستونية. غيّرها في مكان واحد: سطر `reply_language:` في أعلى [`saipen/STYLE.md`](saipen/STYLE.md). `et` الإستونية، `en` الإنجليزية، `ru` الروسية، `auto` تختار حسب لغة رسالتك. يبقى البروتوكول والكود والالتزامات وكل الوثائق بالإنجليزية مهما كانت القيمة.
+
+**v7.171.0** | [المواصفات](SPEC.md) | [الدليل](GUIDE.md) | [RFC](saipen/RFC.md) | [الأسلوب](saipen/STYLE.md) | [واجهة المستخدم](saipen/UI.md) | [التطابق](saipen/CONFORMANCE.md) | markdown بسيط | صفر تبعيات | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -88,4 +90,15 @@ bash bootstrap/inject.sh                                            # macOS / Li
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
+## ## لقطات الشاشة
 
+<details>
+<summary>انقر للتوسيع</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="إرشادات وكيل FreeBuff" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set في nomadcode" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="لقطة شاشة saipen 2026-08-01" width="600"/>
+
+</details>

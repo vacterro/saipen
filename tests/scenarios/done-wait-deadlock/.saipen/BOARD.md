@@ -4,6 +4,6 @@
 ## TODO
 
 ## DONE
-- [x] T-001 the last ticket, already closed
+- [x] T-001 the last ticket, already closed | verify: PASS -- fixture
 
 ## BLOCKED

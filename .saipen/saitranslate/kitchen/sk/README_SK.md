@@ -12,7 +12,9 @@
 
 **Rýchle klávesy:** `cc` pokračuje v aktívnom Goal Mode, `sss` zobrazí stav bez dotyku kódu a `ss` uloží kontrolný bod a zastaví. [Pozri si úplnú mapu 13 kláves](saipen/RFC.md#110-command-surface). Fungujú aj cyrilské dvojníky: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.170.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | čistý markdown | nulové závislosti | MIT
+**Jazyk odpovedí.** Agent štandardne odpovedá **po estónsky** — to je nastavenie, nie výstrelok, a nič iné v SAIPEN nie je estónske. Zmení sa to na jednom mieste: riadok `reply_language:` na začiatku [`saipen/STYLE.md`](saipen/STYLE.md). `et` estónčina, `en` angličtina, `ru` ruština, `auto` vyberie podľa jazyka tvojej správy. Protokol, kód, commity a všetky dokumenty zostávajú anglicky pri akejkoľvek hodnote.
+
+**v7.171.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | čistý markdown | nulové závislosti | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -88,4 +90,15 @@ Poznámky pre jednotlivé platformy sa nachádzajú v `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
+## ## Snímky obrazovky
 
+<details>
+<summary>Kliknutím rozbalíte</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="Inštrukcie pre agenta FreeBuff" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set v nomadcode" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="Snímka obrazovky saipen 2026-08-01" width="600"/>
+
+</details>

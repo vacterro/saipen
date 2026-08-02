@@ -12,7 +12,9 @@
 
 **מקשים מהירים:** `cc` ממשיך Goal Mode פעיל, `sss` מציג סטטוס ללא נגיעה בקוד ו-`ss` שומר נקודת ביקורת ועוצר. [ראה את מפת 13 המקשים המלאה](saipen/RFC.md#110-command-surface). גם התאומים הקיריליים עובדים: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.170.0** | [מפרט](SPEC.md) | [מדריך](GUIDE.md) | [RFC](saipen/RFC.md) | [סגנון](saipen/STYLE.md) | [ממשק משתמש](saipen/UI.md) | [תאימות](saipen/CONFORMANCE.md) | markdown פשוט | אפס תלויות | MIT
+**שפת התשובה.** הסוכן עונה כברירת מחדל **באסטונית** — זו הגדרה, לא גחמה, ושום דבר אחר ב-SAIPEN אינו אסטוני. משנים זאת במקום אחד: השורה `reply_language:` בראש [`saipen/STYLE.md`](saipen/STYLE.md). `et` אסטונית, `en` אנגלית, `ru` רוסית, `auto` בוחר לפי שפת ההודעה שלך. הפרוטוקול, הקוד, הקומיטים וכל המסמכים נשארים באנגלית בכל ערך.
+
+**v7.171.0** | [מפרט](SPEC.md) | [מדריך](GUIDE.md) | [RFC](saipen/RFC.md) | [סגנון](saipen/STYLE.md) | [ממשק משתמש](saipen/UI.md) | [תאימות](saipen/CONFORMANCE.md) | markdown פשוט | אפס תלויות | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -88,3 +90,15 @@ bash bootstrap/inject.sh                                            # macOS / Li
   <img src="assets/SAIPEN_design2_alpha.png" alt="חותמת SAIPEN" width="120"/>
 </p>
 
+## ## צילומי מסך
+
+<details>
+<summary>לחצו להרחבה</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="הוראות לסוכן FreeBuff" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set ב-nomadcode" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="צילום מסך saipen 2026-08-01" width="600"/>
+
+</details>

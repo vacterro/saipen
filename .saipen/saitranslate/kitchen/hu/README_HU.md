@@ -14,7 +14,9 @@ paranccsal egy percen belül folytatja a munkát -- újratájékoztatás nélkü
 
 **Gyorsbillentyűk:** a `cc` folytat egy aktív Goal Mode-ot, az `sss` kód érintése nélkül jelzi az állapotot, az `ss` pedig menti az ellenőrzőpontot és megáll. [Lásd a teljes 13 billentyűs térképet](saipen/RFC.md#110-command-surface). A cirill ikrek is működnek: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.170.0** | [Spec](SPEC.md) | [Útmutató](GUIDE.md) | [RFC](saipen/RFC.md) | [Stílus](saipen/STYLE.md) | [UI](saipen/UI.md) | [Megfelelőség](saipen/CONFORMANCE.md) | egyszerű markdown | zéró függőség | MIT
+**A válasz nyelve.** Az ügynök alapértelmezés szerint **észtül** válaszol — ez beállítás, nem hóbort, és semmi más nem észt a SAIPEN-ben. Egy helyen módosítható: a `reply_language:` sor a [`saipen/STYLE.md`](saipen/STYLE.md) elején. `et` észt, `en` angol, `ru` orosz, `auto` az üzeneted nyelve alapján választ. A protokoll, a kód, a commitok és minden dokumentum minden értéknél angol marad.
+
+**v7.171.0** | [Spec](SPEC.md) | [Útmutató](GUIDE.md) | [RFC](saipen/RFC.md) | [Stílus](saipen/STYLE.md) | [UI](saipen/UI.md) | [Megfelelőség](saipen/CONFORMANCE.md) | egyszerű markdown | zéró függőség | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -90,4 +92,15 @@ Platformspecifikus megjegyzések az `extensions/adapters/` mappában található
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
+## ## Képernyőképek
 
+<details>
+<summary>Kattints a kibontáshoz</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="FreeBuff-ügynök utasításai" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set a nomadcode-ban" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="saipen képernyőkép 2026-08-01" width="600"/>
+
+</details>

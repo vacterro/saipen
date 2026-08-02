@@ -14,7 +14,9 @@
 
 **Пакетные кнопки:** `ee`/`qq` собирают полный пакет переводов/вики, но в проект лапы не суют; `eee`/`qqq` берут только готовый пакет, внедряют, проверяют и пушат.
 
-**v7.170.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
+**Язык ответов.** Агент по умолчанию отвечает на **эстонском** — это настройка, а не причуда, и больше ничего эстонского в SAIPEN нет. Меняется в одном месте: строка `reply_language:` в начале [`saipen/STYLE.md`](saipen/STYLE.md). `et` эстонский, `en` английский, `ru` русский, `auto` выбирает по языку твоего сообщения. Протокол, код, коммиты и все документы при любом значении остаются на английском.
+
+**v7.171.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -100,3 +102,15 @@ bash bootstrap/uninstall.sh                                         # macOS / Li
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
+## ## Скриншоты (Картинки)
+
+<details>
+<summary>Жми сюда, чтоб развернуть</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="FreeBuff инструкции" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set в nomadcode" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="saipen скриншот 2026-08-01" width="600"/>
+
+</details>

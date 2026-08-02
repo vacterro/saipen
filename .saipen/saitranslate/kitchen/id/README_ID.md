@@ -15,7 +15,9 @@ and resumes work in under a minute -- no rebriefing, any vendor, any day.
 
 **Tombol cepat:** `cc` melanjutkan Goal Mode aktif, `sss` melaporkan status tanpa menyentuh kode, dan `ss` menyimpan titik periksa lalu berhenti. [Lihat peta 13 tombol lengkap](saipen/RFC.md#110-command-surface). Kembar Sirilik juga berfungsi: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.170.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
+**Bahasa balasan.** Agen menjawab secara default **dalam bahasa Estonia** — itu pengaturan, bukan keanehan, dan tidak ada hal lain tentang SAIPEN yang berbahasa Estonia. Ubah di satu tempat: baris `reply_language:` di bagian atas [`saipen/STYLE.md`](saipen/STYLE.md). `et` Estonia, `en` Inggris, `ru` Rusia, `auto` memilih dari bahasa pesan yang Anda kirim. Protokol, kode, commit, dan semua dokumen tetap dalam bahasa Inggris pada nilai apa pun.
+
+**v7.171.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
 
 [![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
@@ -91,3 +93,15 @@ Per-platform notes live in `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
+## ## Tangkapan Layar
+
+<details>
+<summary>Klik untuk memperluas</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="Instruksi agen FreeBuff" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set di nomadcode" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="Tangkapan layar saipen 2026-08-01" width="600"/>
+
+</details>
