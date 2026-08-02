@@ -14,7 +14,7 @@ et reprenne le travail en moins d'une minute -- sans réexplication, quel que so
 
 **Raccourcis clavier :** `cc` poursuit un Goal Mode actif, `sss` signale l’état sans toucher au code et `ss` enregistre un point de contrôle puis s’arrête. [Voir la carte complète des 13 touches](saipen/RFC.md#110-command-surface). Les jumeaux cyrilliques fonctionnent aussi : `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.166.0** | [Spécification](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformité](saipen/CONFORMANCE.md) | markdown brut | zéro dépendance | MIT
+**v7.166.1** | [Spécification](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformité](saipen/CONFORMANCE.md) | markdown brut | zéro dépendance | MIT
 
 [![Guide en russe](https://img.shields.io/badge/📖_Guide_ELI5-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![Guide en anglais](https://img.shields.io/badge/📖_Guide_ELI5-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)

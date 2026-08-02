@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.166.1 -- 2026-08-02 -- the manifest listed a file no clone had
+
+CI had been red since v7.164.0 while every local gate stayed green, and the reason is embarrassing in the useful way. `tools/validate.py` carried an uncommitted working-tree edit when v7.164.0 was prepared -- one runtime-manifest entry naming `tools/ci_status.py` -- and the release committed the whole file. The tool it names was never committed. Locally the manifest check found the file on disk and passed on every commit; every clone, CI included, got a home missing a runtime file and failed on every run.
+
+The entry is gone. The check that let it through is what actually mattered: completeness tested `is_file()` against the working tree, and an untracked file satisfies that permanently on the machine that created it. Manifest entries must now also be tracked by git wherever git is available -- present on this disk stopped counting as present in the repository. Homes without git keep the path check unchanged.
+
+Its red control builds a real repository and removes one manifest file from the index while leaving it on disk, which is precisely the state that shipped. It lives in `tools/run_scenarios.py` rather than `tools/audit_checks.py` for the third time this session: that harness snapshots without `.git`, where this check correctly stands down and a control would report a green mutation.
+
 ## 7.166.0 -- 2026-08-02 -- the reply language is a setting now, and Estonian is what it ships as
 
 Four documents carried one precedence rule: explicit user prose first, a Russian-repository tie-breaker for bare input, Estonian as the fallback. It worked, and it was unchangeable in practice -- a user who simply wanted every answer in Estonian had to edit all four documents plus the validator check that keeps them identical. A rule that costs five coordinated edits to express a preference is not a preference, it is a policy.

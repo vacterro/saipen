@@ -12,7 +12,7 @@
 
 **快捷键:** `cc` 继续正在运行的 Goal Mode，`sss` 在不触碰代码的情况下报告状态，`ss` 保存检查点并停止。[查看完整的 13 键快捷键地图](saipen/RFC.md#110-command-surface)。西里尔字母的同型键也可用：`сс`、`ссс`、`аа`、`ее`、`еее`、`рр`。
 
-**v7.166.0** | [规范](SPEC.md) | [指南](GUIDE.md) | [RFC](saipen/RFC.md) | [风格](saipen/STYLE.md) | [UI 指南](saipen/UI.md) | [一致性](saipen/CONFORMANCE.md) | 纯 Markdown | 零依赖 | MIT 协议
+**v7.166.1** | [规范](SPEC.md) | [指南](GUIDE.md) | [RFC](saipen/RFC.md) | [风格](saipen/STYLE.md) | [UI 指南](saipen/UI.md) | [一致性](saipen/CONFORMANCE.md) | 纯 Markdown | 零依赖 | MIT 协议
 
 [![俄语指南](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
 [![英语指南](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)

@@ -947,6 +947,65 @@ def live_style_marker() -> str:
     return found.group(1) if found else "ded-00000000"
 
 
+def run_manifest_tracking_probes() -> tuple[list[str], int]:
+    """A runtime-manifest entry must be in the repository, not just on disk.
+
+    Needs a real repository for the same reason the hunt-mark probe does, so
+    it cannot live in `tools/audit_checks.py`, whose snapshot excludes `.git`.
+    The mutation removes one manifest file from the index and leaves it on
+    disk -- exactly the state that shipped green locally and red in CI.
+    """
+    problems: list[str] = []
+    checked = 0
+    victim = "tools/audit_floor.py"
+
+    with tempfile.TemporaryDirectory(prefix="saipen-manifest-") as raw:
+        home = Path(raw) / "home"
+        shutil.copytree(HOME, home, ignore=shutil.ignore_patterns(
+            ".git", ".venv", "__pycache__", "node_modules", "nul", ".freebuff"))
+        env = {**os.environ, "GIT_AUTHOR_NAME": "probe",
+               "GIT_AUTHOR_EMAIL": "probe@example.invalid",
+               "GIT_COMMITTER_NAME": "probe",
+               "GIT_COMMITTER_EMAIL": "probe@example.invalid"}
+
+        def git(*args: str) -> subprocess.CompletedProcess[str]:
+            return subprocess.run(["git", *args], cwd=home, env=env,
+                                  capture_output=True, text=True, check=False)
+
+        if git("init", "-q").returncode != 0:
+            print("SKIP: manifest tracking probes -- git unavailable")
+            return problems, checked
+        git("add", "-A")
+        git("commit", "-q", "-m", "probe")
+
+        def validate() -> str:
+            r = subprocess.run(
+                [sys.executable, str(home / "tools" / "validate.py"),
+                 "--project-root", str(home)],
+                cwd=home, capture_output=True, text=True, errors="replace")
+            return r.stdout + r.stderr
+
+        def expect(label: str, output: str, contains: str) -> None:
+            nonlocal checked
+            checked += 1
+            if contains not in output:
+                problems.append(f"{label}: missing {contains!r}")
+            else:
+                print(f"PASS: manifest tracking -- {label}")
+
+        git("rm", "-q", "--cached", victim)
+        git("commit", "-q", "-m", "drop from index, keep on disk")
+        expect("an untracked manifest file fails", validate(),
+               f"names a file git does not track: {victim}")
+
+        git("add", victim)
+        git("commit", "-q", "-m", "restore")
+        expect("the same file tracked again passes", validate(),
+               "runtime manifest complete")
+
+    return problems, checked
+
+
 def run_hunt_mark_probes() -> tuple[list[str], int]:
     """Execute `phases/hunt.md`'s skip condition against a real repository.
 
@@ -1270,6 +1329,8 @@ last_event_failures, last_event_checked = run_last_event_probes()
 failures.extend(last_event_failures)
 hunt_mark_failures, hunt_mark_checked = run_hunt_mark_probes()
 failures.extend(hunt_mark_failures)
+manifest_failures, manifest_checked = run_manifest_tracking_probes()
+failures.extend(manifest_failures)
 hook_failures, hook_checked, hook_skipped = run_hook_probes()
 failures.extend(hook_failures)
 
@@ -1288,6 +1349,7 @@ print(f"{crew_checked} crew-launch behavior(s) executed, "
 print(f"{digest_checked} digest-stale behavior(s) executed")
 print(f"{last_event_checked} last_event migration behavior(s) executed")
 print(f"{hunt_mark_checked} hunt-mark behavior(s) executed")
+print(f"{manifest_checked} manifest-tracking behavior(s) executed")
 print(f"{hook_checked} installed-hook behavior(s) executed, "
       f"{hook_skipped} skipped for missing interpreters")
 

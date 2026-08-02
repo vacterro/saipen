@@ -1929,7 +1929,7 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
             "saipen/BOOT.md", "saipen/SKILL.md", "saipen/UI.md", "saipen/STYLE.md",
             "saipen/CONFORMANCE.md",
             "tools/validate.py", "tools/install_hook.py", "tools/uninstall_hook.py",
-            "tools/run_scenarios.py", "tools/ci_status.py", "tools/audit_floor.py",
+            "tools/run_scenarios.py", "tools/audit_floor.py",
             "tools/release_ledger_baseline.json",
             "tests/validate.sh", "tests/validate.ps1",
             "bootstrap/inject.sh", "bootstrap/inject.ps1",
@@ -1940,8 +1940,25 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
         manifest_missing = [f for f in manifest if not Path(f).is_file()]
         for f in manifest_missing:
             fail(f"runtime manifest file missing from the home: {f}")
-        if not manifest_missing:
-            ok(f"runtime manifest complete ({len(manifest)} files)")
+        # Present on THIS disk is not the same as present in the repository,
+        # and the gap is the whole failure: an untracked working-tree file
+        # satisfies `is_file()` forever on the machine that created it, while
+        # every clone -- CI included -- gets a home missing a runtime file.
+        # Shipped exactly that way for three releases here: a manifest entry
+        # for an uncommitted tool went green locally on every commit and red
+        # on every CI run, and no local gate could see the difference.
+        manifest_untracked = []
+        if not manifest_missing and _git("rev-parse", "--git-dir")[0] == 0:
+            for f in manifest:
+                if not _git("ls-files", "--", f)[1].strip():
+                    manifest_untracked.append(f)
+        for f in manifest_untracked:
+            fail(f"runtime manifest names a file git does not track: {f} -- it "
+                 f"exists here and in no clone, so this home ships complete "
+                 f"and every checkout of it does not. Commit the file or drop "
+                 f"the manifest entry")
+        if not manifest_missing and not manifest_untracked:
+            ok(f"runtime manifest complete ({len(manifest)} files, all tracked)")
 
         # Injector behavior is executed by tools/run_scenarios.py for both
         # shells. This manifest owns only the structural question: are the two
