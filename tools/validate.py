@@ -75,6 +75,10 @@ _tools_parent = Path(__file__).resolve().parent.parent
 # be memorized once and reused after the contract changes, and declared in
 # STYLE.md alone so that copying it IS opening the file.
 _STYLE_TOKEN_RE = re.compile(r"`style_contract:\s*(ded-[0-9a-f]{8})`")
+# STYLE.md's reply-language setting. Closed on purpose: the whole point of
+# replacing a precedence rule with a knob is that the knob has no room for
+# interpretation, and an open set would put the reasoning right back.
+REPLY_LANGUAGES = ("et", "en", "ru", "auto")
 _STYLE_LEAK_DOCS = ("RFC.md", "BOOT.md", "SKILL.md", "UI.md", "CONFORMANCE.md")
 
 
@@ -3176,6 +3180,42 @@ else:
             fail(f"cross-doc drift [chat-voice] -- {_name} no longer carries the "
                  "persistent caveman-дед duty and its two explicit off switches")
             drift_ok = False
+        # The precedence rule above is now ONE of four values, not the rule. A
+        # document that still presents it as the whole story sends an agent
+        # into detection logic the setting exists to switch off, and the four
+        # copies were already proven to drift apart when only one of them was
+        # updated (T-404, T-405). Naming the setting is the cheap half; the
+        # value itself is checked once, at its single source, below.
+        if "reply_language" not in _text:
+            fail(f"cross-doc drift [reply-language] -- {_name} describes the "
+                 "precedence rule without naming STYLE.md's `reply_language:` "
+                 "setting, so it reads as the whole rule instead of the "
+                 "`auto` value of a setting that ships pinned to `et`")
+            drift_ok = False
+    # The setting itself, at its one source. A user changing the reply
+    # language edits exactly this line and nothing else, which only holds
+    # while the value is validated where it is declared: a typo'd value that
+    # silently falls back to some default would put the agent in a language
+    # the user did not choose and never told them.
+    if _contract_docs["STYLE.md"].is_file():
+        _style_doc = _contract_docs["STYLE.md"].read_text(encoding="utf-8-sig")
+        _declared_lang = re.findall(r"^\*\*`reply_language:\s*([a-z]+)`\*\*\s*$",
+                                    _style_doc, re.MULTILINE)
+        if len(_declared_lang) != 1:
+            fail(f"cross-doc drift [reply-language] -- STYLE.md declares "
+                 f"{len(_declared_lang)} reply_language setting(s); it needs "
+                 f"exactly one bold line reading `reply_language: <value>`, "
+                 f"one of {'/'.join(REPLY_LANGUAGES)}. Zero leaves the agent "
+                 f"guessing, two leave it choosing")
+            drift_ok = False
+        elif _declared_lang[0] not in REPLY_LANGUAGES:
+            fail(f"cross-doc drift [reply-language] -- STYLE.md sets "
+                 f"reply_language: {_declared_lang[0]}, which is not one of "
+                 f"{'/'.join(REPLY_LANGUAGES)}. A value outside the closed set "
+                 f"is corruption, not a hint: an agent that guesses what it "
+                 f"meant answers in a language nobody chose")
+            drift_ok = False
+
     if _contract_docs["BOOT.md"].is_file():
         _bt = _contract_docs["BOOT.md"].read_text(encoding="utf-8-sig")
         if "Chat voice & compression" not in _bt:

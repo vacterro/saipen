@@ -2,6 +2,20 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.166.0 -- 2026-08-02 -- the reply language is a setting now, and Estonian is what it ships as
+
+Four documents carried one precedence rule: explicit user prose first, a Russian-repository tie-breaker for bare input, Estonian as the fallback. It worked, and it was unchangeable in practice -- a user who simply wanted every answer in Estonian had to edit all four documents plus the validator check that keeps them identical. A rule that costs five coordinated edits to express a preference is not a preference, it is a policy.
+
+`STYLE.md` now opens with one bold line: `reply_language: et`. That is the whole interface. `et` means Estonian always, whatever language the message arrived in, and it is what ships. `en` and `ru` pin those. `auto` restores the precedence rule, kept verbatim rather than deleted, because it is genuinely useful and reconstructing it from memory is how it drifted twice already.
+
+At a pinned value there is nothing left to weigh -- no detection, no tie-breaker, no repository-language reasoning -- and answering in the user's language because it seems more helpful is the violation, not the courtesy. A value outside the closed set FAILs rather than falling back: an agent guessing what `reply_language: eesti` meant answers in a language nobody chose.
+
+The setting governs chat and only chat. Protocol, code, commits, `KNOWLEDGE/` and this file stay English at every value; it selects which language дед swears in, not which language the project is written in.
+
+The value is validated where it is declared, and all four contract documents must now name the setting -- otherwise one of them keeps presenting the precedence rule as the whole rule, which is exactly the drift the four-copy check exists for. Three red controls: an out-of-set value, a deleted declaration, and `BOOT.md` stripped back to prose. Canonical mutations 79/79.
+
+Editing `STYLE.md` also moved its boot marker twice during this change, on purpose and out loud -- v7.164.0's machinery working exactly as designed.
+
 ## 7.165.0 -- 2026-08-02 -- two rules that decided nothing now decide something
 
 A sweep of CONFORMANCE's own enforcement column: 70 of 188 rows name no tool. Most are honest -- the assertion is an agent decision and no artifact records it. Two were not.
