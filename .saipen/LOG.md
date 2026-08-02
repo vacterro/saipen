@@ -102,3 +102,5 @@
 - 02.08.26 13:16 [E-1727] [parent: E-1726] [T-415] DEC: goal_tickets 8->9
 - 02.08.26 13:26 [E-1728] [parent: E-1727] [T-416] RUN: BUILD -> the release-ledger probe built its synthetic repository with one empty commit, so v7.166.1's tracked-manifest requirement failed every file in it. Probe now runs `git add -A` before committing: a synthetic repository has to resemble a real clone in every way the validator can see. CI run 30753062380 on eee3bd2 failed on exactly this line.
 - 02.08.26 13:27 [E-1729] [parent: E-1728] [T-416] DEC: goal_tickets 9->10
+- 02.08.26 13:34 [E-1730] [parent: E-1729] [T-416] RUN: ship v7.166.2 -> pushed 5a896b8
+- 02.08.26 13:38 [E-1731] [parent: E-1730] RUN: PLAN -- user handed one item as `dd <text>`: the protocol must name the statistical habits of modern LLMs and answer each. Ticketed T-417 at the front of ## TODO per RFC 1.10; not claimed, this session is closing.

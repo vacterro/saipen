@@ -1,3 +1,3 @@
-done: T-415 -- CI red since v7.164.0 traced to a manifest entry no clone had; shipping as v7.166.1
+done: T-414/T-415/T-416 -- reply_language setting shipped, CI red root-caused and fixed; v7.166.2
 remaining: T-400 wiki ID drift, T-392 reorg plan, T-413 install-layout sweep, T-399, standing T-406/T-407
 awaiting: nothing
