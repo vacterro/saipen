@@ -135,3 +135,4 @@
 - 02.08.26 16:26 [E-1760] [parent: E-1759] [T-425] DEC: my own scripted edit to the new control was a silent no-op -- a python replace with no assert left `phase: PLAN` matching a fixture that says `phase: BUILD`, so the control passed a mutation it never applied. Exactly the class audit_checks exists to catch, committed by hand in the harness. Rewrote it as a regex on the phase line.
 - 02.08.26 16:27 [E-1761] [parent: E-1760] [T-425] RUN: VERIFY -> validator PASS; audit_checks 82/82; scenarios all pass incl. both new worktree controls; sh floor PASS; ruff clean over the files I touched.
 - 02.08.26 16:28 [E-1762] [parent: E-1761] [T-425] DEC: goal_tickets 13->14
+- 02.08.26 16:32 [E-1763] [parent: E-1762] [T-425] RUN: ship v7.170.0 -> pushed f1ef487
