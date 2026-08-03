@@ -21,11 +21,13 @@ with `sed -i '1s/^\xEF\xBB\xBF//' <file>`.
 
 RFC § 2.1 ZERO-PROMPT AUTO-TRANSITION: bare command + empty `## TODO` = MUST
 go to HUNT, never WAIT at DONE. If HUNT clean, MUST go to ADD immediately.
-A `WAIT:` at DONE with an empty `## TODO` is legal in exactly two forms since
-v7.92.0 (RFC § 1.2): the § 2.4 safety valve, and `WAIT: user brake -- <reason>`.
-Anything else there is drift, and `tools/validate.py` FAILs it. A `[MARKHUNT]`
-ticket in `## BLOCKED` is a different situation entirely -- it means the board
-has not halted, so the rule above never applies. This paragraph said the
+A `WAIT:` at DONE with an empty `## TODO` is legal only in the fixed forms
+RFC § 1.2 lists; anything else there is drift, and `tools/validate.py` FAILs
+it. Read the count there, never from here. An untriaged MARKHUNT ticket in
+`## BLOCKED` is one of those forms -- NOT, as this paragraph used to claim, a
+board that has not halted: § 2.1 defines the halt as no workable `## TODO` and
+no `## DOING`, and says outright that `## DONE` and `## BLOCKED` tickets never
+count against it. The board HAS halted; the brake is a whitelisted pause. This paragraph said the
 MARKHUNT case was the *only* legal WAIT until v7.101.0, which had been wrong
 for nine releases. Violated this session: stopped at
 DONE asking vague "continue?" instead of running ADD.

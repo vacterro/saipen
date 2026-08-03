@@ -566,14 +566,26 @@ if state.get("phase") == "DONE" and state.get("task") not in ("none", "", None):
 # for safety valve (§ 2.4) or explicit human brake. The board-empty drift
 # check below (RFC § 2.1) handles the ZERO-PROMPT case; this catches the
 # simpler "DONE with a concrete WAIT that isn't a valve" mistake directly.
+# RFC § 1.2's fixed WAIT wordings for `phase: DONE`. Three of them, and
+# the count lives in § 1.2 alone -- the MARKHUNT brake was added as a third
+# after both phase docs had stated it for releases while this file carved it
+# out of one check and not the other, so a doc-following agent produced a
+# state one half of the tool called drift.
+def _done_wait_whitelisted(value):
+    low = value.lower()
+    return ("safety valve" in low
+            or low.startswith("wait: user brake")
+            or "untriaged markhunt findings" in low)
+
+
 _na_done = state.get("next_action", "") if isinstance(
     state.get("next_action"), str) else ""
 if state.get("phase") == "DONE" and _na_done.startswith("WAIT:") \
-        and "safety valve" not in _na_done.lower() \
-        and not _na_done.lower().startswith("wait: user brake"):
+        and not _done_wait_whitelisted(_na_done):
     warn("done-wait", "STATE.md phase: DONE but next_action is WAIT -- "
-         "DONE with WAIT is legal only for the § 2.4 safety valve or "
-         "'WAIT: user brake -- <reason>' (RFC § 1.2); otherwise DONE "
+         "DONE with WAIT is legal only for the § 2.4 safety valve, "
+         "'WAIT: user brake -- <reason>', or the untriaged-MARKHUNT "
+         "brake (RFC § 1.2); otherwise DONE "
          "should transition to SCOUT/PLAN/HUNT per RFC § 1.6 / § 2.1")
 
 # Hard invariant: goal_mode: false -> goal_waves/goal_tickets MUST be absent.
@@ -745,7 +757,8 @@ VALID_TRANSITIONS = {
 # phase as a COMMAND (RFC § 1.10), but `phase: SHIP` is reachable only from
 # REVIEW -- § 1.10 says so in as many words while this set said otherwise
 # from v7.83.0 to v7.94.0. A command is not a transition.
-ANY_FROM = {"VALIDATE", "MARKHUNT", "CLEAN", "TRANSLATE", "PREPARE", "PLAN"}
+ANY_FROM = {"VALIDATE", "MARKHUNT", "CLEAN", "TRANSLATE", "PREPARE", "PLAN",
+            "HUNT"}
 
 t_from = state.get("transition_from")
 t_current = state.get("phase")
@@ -1402,14 +1415,18 @@ if _na_pick and not any(t["section"] == "## DOING" for t in tickets.values()):
 
 # RFC § 2.1 ZERO-PROMPT AUTO-TRANSITION: DONE + empty TODO + no MARKHUNT
 # blockers = MUST auto-transition HUNT->ADD, never WAIT at DONE.
-if state.get("phase") == "DONE" and state.get("goal_mode") is not True:
+# The `goal_mode is not True` exemption this check carried switched it off
+# in exactly the mode where a deadlocked board costs most: an unattended
+# run parked on a WAIT nobody was asked. The tripped valve was always
+# covered by the wording test below, so the exemption protected nothing it
+# needed to. The MARKHUNT carve-out is no longer a blanket skip either --
+# those findings have a fixed § 1.2 wording now, so the brake is checked
+# like every other legal pause instead of exempted from checking.
+if state.get("phase") == "DONE":
     open_todos = sum(1 for t in tickets.values()
                      if t["section"] == "## TODO" and t["checkbox"] in (" ", ""))
-    markhunt_blocked = bool(re.search(
-        r"## BLOCKED.*?\[MARKHUNT\]", read_doc(board_path),
-        re.DOTALL))
     next_action = state.get("next_action", "")
-    if open_todos == 0 and not markhunt_blocked and next_action.startswith("WAIT:"):
+    if open_todos == 0 and next_action.startswith("WAIT:"):
         # RFC § 1.2 allows exactly two WAITs in this exact state, both in a
         # fixed wording so they are machine-separable from drift: the § 2.4
         # safety valve, and the user's own explicit brake. Free-prose "waiting
@@ -1420,13 +1437,13 @@ if state.get("phase") == "DONE" and state.get("goal_mode") is not True:
         # (auto-transition DONE -> HUNT), because a warning still leaves a weak
         # model sitting on a deadlocked board waiting for a human who was never
         # asked a real question.
-        low = next_action.lower()
-        if "safety valve" not in low and not low.startswith("wait: user brake"):
-            fail(f"phase: DONE, empty ## TODO, no [MARKHUNT] blockers, "
-                 f"but next_action={next_action!r} -- RFC § 2.1 says bare "
+        if not _done_wait_whitelisted(next_action):
+            fail(f"phase: DONE, empty ## TODO, but "
+                 f"next_action={next_action!r} -- RFC § 2.1 says bare "
                  f"command + empty board MUST auto-transition HUNT->ADD. "
-                 f"The only legal WAITs here are the § 2.4 safety valve and "
-                 f"'WAIT: user brake -- <reason>' (RFC § 1.2); anything else "
+                 f"The legal WAITs here are the § 2.4 safety valve, "
+                 f"'WAIT: user brake -- <reason>', and the "
+                 f"untriaged-MARKHUNT brake (RFC § 1.2); anything else "
                  f"deadlocks the board (§ 1.11 UNBLOCK exception)")
 
 # RFC § 1.2 board soft cap. BOARD.md is read on every cold start (§ 1.1,
@@ -2618,6 +2635,73 @@ else:
         drift_ok &= _compare("phase-enum", rfc_phases,
                              set(VALID_TRANSITIONS) | {"INIT"},
                              "validate.py VALID_TRANSITIONS")
+
+    # 1a. `saipen hunt` is a phase-switching command § 1.10 recognises from
+    #     anywhere, and HUNT was missing from § 1.6's from-any-phase set, so
+    #     the DFA's only route into it was DONE -> HUNT. Invoking the command
+    #     from BUILD or REVIEW produced a transition the validator rejects
+    #     while the agent did exactly what § 1.10 said -- the same two-halves
+    #     disagreement CONFORMANCE 61 records for SHIP, one phase over. § 2.1
+    #     compounded it by phrasing the halt as a precondition on HUNT itself
+    #     rather than on the autonomous transition, and hunt.md's hash skip
+    #     had no carve-out, making the one command for forcing a sweep a
+    #     documented no-op on any unchanged tree.
+    _s21_hunt_i = rfc.find("- **HUNT**: Transition to `HUNT`")
+    _s21_hunt = rfc[_s21_hunt_i:_s21_hunt_i + 1600] if _s21_hunt_i >= 0 else ""
+    if not _s21_hunt:
+        fail("cross-doc check 'hunt-entry' cannot find RFC § 2.1's HUNT bullet "
+             "-- update tools/validate.py deliberately; a drift check that "
+             "silently stops checking still prints PASS")
+        drift_ok = False
+    elif "governs the AUTONOMOUS transition only" not in _s21_hunt:
+        fail("cross-doc drift [hunt-entry] -- RFC § 2.1's HUNT bullet must say "
+             "the halt requirement governs the autonomous transition only, and "
+             "that `saipen hunt` enters from any phase regardless of board "
+             "state. Read as a precondition on the command, it makes the one "
+             "command for forcing a sweep refuse on nearly every board")
+        drift_ok = False
+    _hunt_doc = rfc_path.parent / "phases" / "hunt.md"
+    if _hunt_doc.is_file():
+        _hunt_t = _hunt_doc.read_text(encoding="utf-8-sig")
+        if "does not apply -- run the full sweep" not in _hunt_t:
+            fail("cross-doc drift [hunt-entry] -- phases/hunt.md must exempt an "
+                 "explicit `saipen hunt` / `hh` from the hash skip. § 1.10 says "
+                 "that command forces the sweep and skips nothing; honouring "
+                 "the skip there makes it a no-op on any unchanged tree")
+            drift_ok = False
+
+    # `phases/ship.md` carried the first-publish gate at step 7, AFTER the
+    # branch push at step 5 and the tag push at step 6 -- its own WAIT text
+    # reading "before I push" about a push two steps behind it. On the one
+    # run the gate exists for, the irreversible act preceded its
+    # authorization; with no `origin` at all the push simply failed first and
+    # dropped into generic push recovery, which never asks. RFC § 2.4's SHIP
+    # exception and § 1.1's destructive gate both make the confirmation a
+    # MUST, and ship.md is the doc that emits it.
+    _ship_doc = rfc_path.parent / "phases" / "ship.md"
+    if _ship_doc.is_file():
+        _ship_t = _ship_doc.read_text(encoding="utf-8-sig")
+        _gate = _ship_t.find("WAIT: first-publish")
+        _push = _ship_t.find("then push the branch")
+        if _gate < 0 or _push < 0:
+            fail("cross-doc drift [first-publish-order] -- phases/ship.md no "
+                 "longer names both the first-publish gate and the branch "
+                 "push; update tools/validate.py deliberately rather than "
+                 "letting the ordering check quietly stop checking")
+            drift_ok = False
+        elif _gate > _push:
+            fail("cross-doc drift [first-publish-order] -- phases/ship.md "
+                 "places the first-publish confirmation AFTER the branch "
+                 "push. A gate downstream of the act it authorizes is not a "
+                 "gate: on a true first publish the one-way door opens before "
+                 "the user is asked (RFC § 2.4 SHIP exception, § 1.1)")
+            drift_ok = False
+        if "Classify the remote BEFORE any external write" not in _ship_t:
+            fail("cross-doc drift [first-publish-order] -- phases/ship.md must "
+                 "classify the remote before any external write, so the "
+                 "first-publish gate is decided while everything is still "
+                 "local")
+            drift_ok = False
 
     # 1b. CLEAN's board scrub has to keep the dependency graph intact. § 1.2
     #     answers a `needs:` pointing at a ticket that exists nowhere on the

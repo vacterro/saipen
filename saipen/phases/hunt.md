@@ -1,7 +1,15 @@
 # Phase: HUNT (no TODO tickets remaining, or `saipen hunt` invoked)
 
-Clean sweep. Skip ONLY if `.saipen/LOG.md`'s tail literally contains
-`hunt -> clean @<HASH>` where `<HASH>` is the exact output of
+Clean sweep. **Entered by explicit `saipen hunt` / `hh`? The skip below
+does not apply -- run the full sweep.** § 1.10 says that command forces
+the sweep and skips nothing, and the skip exists for the autonomous
+§ 2.1 path, where re-running an identical sweep on an unchanged tree is
+pure waste. A user who typed the command has already decided otherwise,
+so honouring the skip there makes the one command for forcing a sweep a
+documented no-op.
+
+Reached autonomously, skip ONLY if `.saipen/LOG.md`'s tail literally
+contains `hunt -> clean @<HASH>` where `<HASH>` is the exact output of
 `git rev-parse --short HEAD` run right now -- compute the hash first,
 then grep for that exact string. Anything else -- no match, an older
 hash, no `hunt -> clean` line at all -- run the full sweep below. No

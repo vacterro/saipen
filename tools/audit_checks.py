@@ -710,6 +710,36 @@ CASES: list[tuple[str, str, object, str]] = [
      lambda t: re.sub(r"(RUN: )validate\.py -> (PASS|FAIL)",
                       r"\1validate.py \2", t),
      "no-conformance-record"),
+    # NOT here: the DONE-wait deadlock under `goal_mode: true`. It needs an
+    # empty `## TODO` *and* a bogus WAIT, and a case mutates exactly one file,
+    # so every single-file attempt proves nothing -- STATE alone leaves the
+    # board full, BOARD alone leaves next_action legal. Tried, went not-red,
+    # removed rather than left standing. T-457 owns the compound-fixture route.
+    # `saipen hunt` is recognised from anywhere while HUNT sat outside § 1.6's
+    # from-any-phase set, so the DFA's only route in was DONE -> HUNT and the
+    # command produced a transition the validator rejects. Three surfaces, one
+    # defect: the set, § 2.1's halt phrasing, and hunt.md's hash skip.
+    ("HUNT drops out of the from-any-phase set", "saipen/RFC.md",
+     replace("`PLAN`, `HUNT`.", "`PLAN`."),
+     "any-from"),
+    ("§ 2.1 reads the halt as a precondition on the command too",
+     "saipen/RFC.md",
+     replace("governs the AUTONOMOUS transition only",
+             "applies to every entry into this phase"),
+     "hunt-entry"),
+    ("hunt.md lets the hash skip swallow an explicit sweep",
+     "saipen/phases/hunt.md",
+     replace("does not apply -- run the full sweep",
+             "may still apply if the tree is unchanged"),
+     "hunt-entry"),
+    # The first-publish gate sat after the pushes it authorizes, with its own
+    # WAIT text claiming "before I push". Moving it back below the push is the
+    # exact regression this control catches.
+    ("ship.md puts the first-publish gate back after the push",
+     "saipen/phases/ship.md",
+     replace("Classify the remote BEFORE any external write",
+             "Classify the remote at some point"),
+     "first-publish-order"),
     # § 2.1's ZERO-PROMPT MUST named one exception while § 1.3 banned ADD
     # under read-only, so the rule ordered a phase the mode forbids and both
     # rules looked followed on their own.

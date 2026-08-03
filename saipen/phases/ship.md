@@ -12,7 +12,7 @@ Only on `saipen ship`, or repo has `origin` AND LOG shows prior ship, or
 unopted project. Needs 100% green.
 
 **Fixable preflight failure -> BUILD, not BLOCKED.** Steps 0-4 plus release
-metadata preparation and the validator rerun in step 5 can expose a defect
+metadata preparation and the validator rerun in step 6 can expose a defect
 before anything is committed, tagged, or pushed: a broken release script, a
 stale generated file, a failing validator, or another fault with a known local
 fix. LOG the exact failure, transition the current ticket
@@ -20,17 +20,17 @@ fix. LOG the exact failure, transition the current ticket
 reserved for a failure that genuinely needs user input or has no safe known
 fix; using it for ordinary repair would falsely end goal mode (RFC section
 2.4). This edge closes the pre-publish loop only. Once commit/tag/push begins,
-the failure-specific recovery in step 9 governs; after a successful push there
+the failure-specific recovery in step 10 governs; after a successful push there
 is never a return to BUILD for that shipped ticket.
 
 `mode: no-publish`? This phase is still entered -- RFC § 1.3 blocks
 git-dependent steps only (commit, tag, push), not `SHIP` itself; a blanket
 ban here would mean a git-less project can never close a ticket at all
 (`phases/review.md` makes `SHIP` mandatory before `DONE`, no exception).
-Do steps 1, 2, 4, 5 below (README, version bump, .gitignore/tmp cleanup,
+Do steps 1, 2, 4, 6 below (README, version bump, .gitignore/tmp cleanup,
 CHANGELOG) -- all local, none need git. Skip step 3's tag-matching clause,
-step 6 (tag), step 7 (first-publish confirmation -- no remote exists to
-publish to), and the "push" half of step 5. Replace steps 8/9's LOG line
+step 5 and step 8 (remote classification and the first-publish gate -- no
+remote exists to publish to), step 7 (tag), and the "push" half of step 6. Replace steps 9/10's LOG line
 with: `- DATE [E-###] [parent: E-###] RUN: ship vX.Y.Z -> skipped publish
 (no-publish: no git)` (this exact text after the taxonomy) -- never phrase
 it as a failure, since nothing failed; publish was never attempted because
@@ -51,28 +51,48 @@ project. Then STATE -> `DONE` directly, same as a normal successful ship.
    README.md`. The CHANGELOG/tag halves have no automated check -- eyeball
    them here, before tagging, not after.
 4. .gitignore covers junk + secrets. Empty tmp/, strip debug prints.
-5. CHANGELOG.md newest-top. Re-run the required validators after every release
+5. **Classify the remote BEFORE any external write, and clear the
+   first-publish gate here.** `git remote get-url origin` (absent -> no
+   remote), then `git ls-remote --heads --tags origin` (empty -> the remote
+   exists but has never received a commit or tag). Either answer is a first
+   publish, and a first publish stops here for confirmation --
+   `next_action: WAIT: first-publish -- confirm repo name '<name>' and
+   public/private before I push` (RFC § 1.2) -- ALWAYS, even under
+   `goal_mode` (RFC § 2.4's SHIP exception). Creating a new public artifact
+   is a one-way door.
+   **This gate used to sit at step 7, after the branch push and the tag
+   push.** Its own wording said "before I push" while the push it named had
+   already happened two steps earlier, so on the one run it exists for the
+   irreversible act preceded the authorization -- or, with no `origin` at
+   all, the push failed first and dropped into generic push recovery, which
+   never asks the question. A gate downstream of the act it authorizes is
+   not a gate.
+6. CHANGELOG.md newest-top. Re-run the required validators after every release
    metadata edit; a gate run before VERSION/README/CHANGELOG changed proves the
    old release, not the one about to ship. Once green, commit the reviewed
-   changes, then push the branch.
-6. Create the release tag, then push that exact ref only:
+   changes, then push the branch. **Re-read the remote immediately before this
+   push** and again before the tag push below: step 5's answer is a
+   measurement, and a remote someone else published to in between makes it
+   stale. Classification changed from first-publish to established -> proceed;
+   changed the other way -> stop and re-run step 5's gate.
+7. Create the release tag, then push that exact ref only:
    `git tag -a vVERSION -m "line"` followed by
    `git push origin refs/tags/vVERSION:refs/tags/vVERSION`.
    `git push --tags` and `git push --follow-tags` are forbidden here: both
    select from unrelated local tag state, so a temporary inspection tag can
    become a published artifact without appearing in the release plan. The
-   branch push in step 5 and this one named tag push are separate commands.
-7. First publish -- no `origin` yet, **or `origin` exists but the remote has
-   zero commits/tags on it** (added early, never actually published to --
-   the same one-way door, just reached by `git remote add` instead of never
-   configuring one): confirm name + public/private with user -- ALWAYS,
-   even under `goal_mode`. New public artifact is a one-way door.
-   `next_action: WAIT: first-publish -- confirm repo name '<name>' and
-   public/private before I push` (RFC § 1.2).
-8. LOG one normal Event Graph line per RFC § 1.2 -- `- DATE [E-###]
+   branch push in step 6 and this one named tag push are separate commands.
+8. First publish is settled at step 5, before anything leaves this machine,
+   and re-checked at step 6 and step 7. It is named here only because this
+   is where the list used to carry it, and a reader who learned the old
+   order needs to be sent forward rather than left looking. Both shapes
+   count as brand-new: no `origin` at all, and an `origin` that exists but
+   has never received a commit or tag (added early by `git remote add`,
+   never published to) -- the same one-way door reached two ways.
+9. LOG one normal Event Graph line per RFC § 1.2 -- `- DATE [E-###]
    [parent: E-###] RUN: ship vX.Y.Z -> pushed HASH` (this exact text after
    the taxonomy).
-9. Push rejected or fails: LOG one normal Event Graph line per RFC § 1.2
+10. Push rejected or fails: LOG one normal Event Graph line per RFC § 1.2
    -- `- DATE [E-###] [parent: E-###] RUN: ship vX.Y.Z -> push FAILED
    <reason>` (this exact text after the taxonomy) -- never claim success
    on a failed push. Commit/tag stay local. Then by failure class:
