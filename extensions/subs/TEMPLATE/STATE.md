@@ -5,7 +5,8 @@ next_action: "saipen plan"
 blocker: none
 agent: <name>
 saipen_version: 7
-schema_version: 1
+schema_version: 3
+style_contract: ded-0d563e56
 saipen_home: ""
 mode: read-only
 transition_from: INIT

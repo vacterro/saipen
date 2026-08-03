@@ -1044,6 +1044,20 @@ if sub_state_files:
             fail(f"{sp} phase {sub_state.get('phase')} is unreachable for a "
                  f"subSaipen -- its work product lands outside the subSaipen's "
                  f"own folder (extensions/subs/PROTOCOL.md § 1)")
+        # PROTOCOL.md § 1: a subSaipen is a normal SAIPEN instance, so § 1.2's
+        # schema rule reaches it too -- legacy is readable and WARNs, and the
+        # NEXT checkpoint must upgrade. Core's own state has been checked
+        # since v1 of this field and a sub's never was, which is how all four
+        # live instances came to sit at the version the shipped TEMPLATE was
+        # frozen at. WARN, not FAIL: the upgrade is that sub's own duty at its
+        # own next checkpoint, not something another agent performs on it.
+        _sub_sv = sub_state.get("schema_version")
+        if isinstance(_sub_sv, int) and _sub_sv < CURRENT_SCHEMA_VERSION:
+            warn("subsaipen-legacy-schema",
+                 f"{sp} schema_version is legacy v{_sub_sv} while current is "
+                 f"{CURRENT_SCHEMA_VERSION} -- this sub writes the current "
+                 f"schema plus style_contract at its next checkpoint "
+                 f"(RFC § 1.2)")
         # A shipped template must not carry one machine's absolute path: it
         # is copied verbatim to every user, where that path does not exist.
         # Only the placeholder (or the field being absent) is legal here.
@@ -1553,6 +1567,7 @@ if log_files:
         r"intends? to|i'll|we'll|next step|next up)\b", re.IGNORECASE)
     FIRST_CLAUSE_RE = re.compile(r" -- | -> |; |\. ")
     seen_ids = {}
+    conf_run_seen = False
     sealed_dateless = []
     sealed_future = []
     prev_id = 0
@@ -1637,6 +1652,16 @@ if log_files:
                     log_ok = False
                 else:
                     sealed_future.append(f"{loc} ({_future.group(0)!r})")
+            # § 1.2's fixed conformance-run form, the record § 1.10's
+            # `saipen status` is ordered to report. Active log only: status
+            # wants the LAST run, `BOOT.md`'s cold start reads the active tail
+            # and nothing else, and a record sealed into cold storage is by
+            # definition not the current answer. A freshly sealed log warns
+            # until the next validator run, which is exactly the state where
+            # status genuinely has nothing fresh to report.
+            if is_active_log and re.match(
+                    r"validate\.py\s*->\s*(PASS|FAIL)\b", content):
+                conf_run_seen = True
             # History is append-only and immutable -- style drift in old lines
             # can't be fixed without rewriting history, so it warns, not fails.
             if taxonomy not in ("RUN", "DEC", "H"):
@@ -1682,6 +1707,21 @@ if log_files:
     if log_ok:
         ok(f"LOG.md format valid (skeleton, E-### unique + monotonic, parents "
            f"resolve; {len(log_files)} segment(s))")
+
+    # § 1.10 orders `saipen status` to report "the result of the last
+    # tools/validate.py run if one is recorded in LOG.md" -- a duty handed out
+    # before anything gave that record a shape, so the reader either grepped
+    # prose and guessed or answered "none recorded" over a LOG that held the
+    # answer. § 1.2 now fixes the form, exactly as § 2.4 fixed
+    # `DEC: goal_waves N->M` so § 1.5's rebuild could count them. WARN, not
+    # FAIL: a project may legitimately never have run the validator, and this
+    # says so out loud instead of letting `status` invent an answer.
+    if not conf_run_seen:
+        warn("no-conformance-record",
+             "no LOG line records a conformance run in § 1.2's fixed form "
+             "(`RUN: validate.py -> PASS` or `-> FAIL`), so § 1.10's "
+             "`saipen status` has nothing to report under Conformance and a "
+             "cold agent must either guess from prose or say none exists")
 
     # `phases/hunt.md`'s skip condition: a sweep may be skipped only when the
     # newest `hunt -> clean @<HASH>` names the exact current HEAD. The hash is
@@ -2578,6 +2618,83 @@ else:
         drift_ok &= _compare("phase-enum", rfc_phases,
                              set(VALID_TRANSITIONS) | {"INIT"},
                              "validate.py VALID_TRANSITIONS")
+
+    # 1b. CLEAN's board scrub has to keep the dependency graph intact. § 1.2
+    #     answers a `needs:` pointing at a ticket that exists nowhere on the
+    #     board with `## BLOCKED`, so a scrub with no inbound-reference guard
+    #     lets the phase that keeps the board honest block a workable ticket,
+    #     and the block reads as a dependency failure rather than as damage
+    #     the scrub just did. Reproduced on this repository at E-1811.
+    _clean_doc = rfc_path.parent / "phases" / "clean.md"
+    if _clean_doc.is_file():
+        _clean_t = _clean_doc.read_text(encoding="utf-8-sig")
+        if "still names in `needs:` MUST NOT be pruned" not in _clean_t:
+            fail("cross-doc drift [clean-scrub-guard] -- phases/clean.md's "
+                 "board scrub must state that a `## DONE` ticket some live "
+                 "ticket still names in `needs:` is never pruned. Without it "
+                 "a conformant CLEAN manufactures the dangling reference "
+                 "RFC § 1.2 answers with `## BLOCKED`")
+            drift_ok = False
+
+    # 1c. § 2.1's ZERO-PROMPT rule is a MUST, and its exception list has to
+    #     carry every live carve-out or the MUST orders a violation. It named
+    #     only `phase: BLOCKED` while § 1.3 bans `ADD` outright under
+    #     `mode: read-only` -- so a read-only agent on a clean HUNT was
+    #     ordered into a phase it may not enter, with each rule looking
+    #     followed on its own. Same shape as § 1.3's own ban list (four phases
+    #     presented as exhaustive) and § 1.6's from-any-phase set (five where
+    #     § 1.10 had seven), both already fixed.
+    _s21_i = rfc.find("### 2.1")
+    _s21 = rfc[_s21_i:rfc.find("### 2.2", _s21_i)] if _s21_i >= 0 else ""
+    if not _s21:
+        fail("cross-doc check 'zero-prompt-exceptions' cannot find RFC § 2.1 "
+             "-- update tools/validate.py deliberately; a drift check that "
+             "silently stops checking still prints PASS")
+        drift_ok = False
+    elif ("MUST NOT enter `ADD` at all" not in _s21
+            or "this list is the complete one" not in _s21):
+        fail("cross-doc drift [zero-prompt-exceptions] -- RFC § 2.1's "
+             "ZERO-PROMPT rule must declare its exception list complete and "
+             "name the `mode: read-only` carve-out: read-only reaches HUNT "
+             "report-only and MUST NOT enter ADD, which § 1.3 bans outright. "
+             "Without it the MUST orders a phase the mode forbids")
+        drift_ok = False
+
+    # 2a. No shipped file instructs an agent to write a SUPERSEDED schema
+    #     version. § 1.2's own legacy-upgrade sentence said "MUST upgrade to
+    #     v2" long after the schema reached 3, so the single instruction for
+    #     escaping legacy state ordered a value the validator immediately
+    #     WARNs as legacy -- unreadable as a defect, because a version number
+    #     reads as fact. Current is fine; ABOVE current is fine too, since
+    #     that is how a doc describes a future-schema example. Only a
+    #     superseded literal is rot. CHANGELOG.md is exempt for the same
+    #     reason the palette guard exempts it: it records what the value WAS.
+    _stale_schema = []
+    _schema_roots = [rfc_path.parent / "phases",
+                     _tools_parent / "extensions",
+                     _tools_parent / ".saipen" / "KNOWLEDGE"]
+    _schema_docs = [rfc_path] + [
+        d for root in _schema_roots if root.is_dir()
+        for d in sorted(root.rglob("*.md"))] + [
+        p for p in [rfc_path.parent / "BOOT.md",
+                    rfc_path.parent / "STYLE.md",
+                    rfc_path.parent / "CONFORMANCE.md",
+                    _tools_parent / "extensions" / "subs" / "TEMPLATE"
+                    / "STATE.md",
+                    _tools_parent / "extensions" / "templates"
+                    / "STATE.md"] if p.is_file()]
+    for _doc in _schema_docs:
+        for _m in re.finditer(r"schema_version:\s*(\d+)",
+                              _doc.read_text(encoding="utf-8-sig")):
+            if 1 <= int(_m.group(1)) < CURRENT_SCHEMA_VERSION:
+                _stale_schema.append(f"{_doc.as_posix()}: {_m.group(0)!r}")
+    for _b in dict.fromkeys(_stale_schema):
+        fail(f"cross-doc drift [stale-schema-version] -- {_b} names a "
+             f"superseded schema version while the current one is "
+             f"{CURRENT_SCHEMA_VERSION}. An agent obeying it writes state "
+             f"this validator WARNs as legacy on the spot, and a shipped "
+             f"template born there is born legacy (RFC § 1.2, § 1.5)")
+        drift_ok = False
 
     # 2b. Ticket-bearing five: RFC § 1.2's `PHASE` pairing rule vs the copy
     #     this file enforces with. Same shape as the phase enum -- the list is
@@ -3960,6 +4077,21 @@ else:
                      "must say a shortcut is a command, never a greeting -- "
                      "receiving one means executing the exact row (or its "
                      "exact no-op), never answering with chat")
+                drift_ok = False
+
+            # A row's Notes column describes its destination, bare form
+            # included. `cc`'s said "trigger goal mode" while § 1.10 forbids
+            # bare `saipen goal` from setting the flag, touching a counter or
+            # planning -- it replies with the usage line. The most-used key
+            # promised an outcome the row cannot produce.
+            if ("The pivot needs text" not in _shortcut_section
+                    or "trigger goal mode" in _shortcut_section):
+                fail("cross-doc drift [shortcut-notes] -- the `cc` row must "
+                     "say the pivot needs text and that the bare form is a "
+                     "resume or the § 1.10 usage line, never a pivot. Bare "
+                     "`saipen goal` MUST NOT set goal_mode, write a counter "
+                     "or plan, so a Notes column promising a bare pivot "
+                     "describes a command that does not exist")
                 drift_ok = False
 
             # § 1.10's `saipen stop` paragraph and § 2.4 Entry both describe

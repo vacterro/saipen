@@ -677,6 +677,58 @@ CASES: list[tuple[str, str, object, str]] = [
     ("shortcut paragraph loses its never-a-greeting duty", "saipen/RFC.md",
      replace("never a greeting", "rarely ambiguous"),
      "shortcut-rationale"),
+    # CLEAN's board scrub pruned `## DONE` with no inbound-reference guard, so
+    # the phase that keeps the board honest could orphan a live `needs:` and
+    # block a workable ticket. Reproduced on this repository at E-1811.
+    ("clean.md's board scrub loses its inbound-needs guard",
+     "saipen/phases/clean.md",
+     replace("still names in `needs:` MUST NOT be pruned",
+             "still names in `needs:` should usually be kept"),
+     "clean-scrub-guard"),
+    # The `cc` row's Notes promised "trigger goal mode" while § 1.10 forbids
+    # bare `saipen goal` from setting the flag at all.
+    ("the cc row promises a pivot its bare form cannot perform",
+     "saipen/RFC.md",
+     replace("The pivot needs text", "Trigger goal mode"),
+     "shortcut-notes"),
+    # § 1.10 ordered `saipen status` to report the last validator result from
+    # LOG.md before anything gave that record a shape. Break the fixed form
+    # and the report has nothing to read -- the same silence the duty had for
+    # its whole life, now visible.
+    # Anchored at the taxonomy, not on the bare literal: `replace()` takes the
+    # FIRST occurrence, and the first one in this LOG is a line QUOTING the
+    # form while explaining it. That mutation edited prose and left the real
+    # record standing, so the case reported green while proving nothing --
+    # the exact "expectation is not evidence" trap row 137 exists for.
+    # The check reads the ACTIVE log only -- status wants the last run, not one
+    # sealed into cold storage -- so breaking every record here is what fires
+    # it. A first attempt aimed at the sealed segment and proved nothing: the
+    # active log still carried its own record, and a global check needs every
+    # copy broken. Regex-anchored on the taxonomy so a cap crossing cannot
+    # quietly carry the anchor away, which is how two cases became SKIPs.
+    ("the conformance record loses its fixed form", LOG,
+     lambda t: re.sub(r"(RUN: )validate\.py -> (PASS|FAIL)",
+                      r"\1validate.py \2", t),
+     "no-conformance-record"),
+    # § 2.1's ZERO-PROMPT MUST named one exception while § 1.3 banned ADD
+    # under read-only, so the rule ordered a phase the mode forbids and both
+    # rules looked followed on their own.
+    ("§ 2.1 drops the read-only carve-out from ZERO-PROMPT", "saipen/RFC.md",
+     replace("MUST NOT enter `ADD` at all", "SHOULD prefer to skip `ADD`"),
+     "zero-prompt-exceptions"),
+    # § 1.2's legacy-upgrade sentence named `v2` long after the schema reached
+    # 3, so the one instruction for escaping legacy state ordered a value the
+    # validator WARNs as legacy. A version number reads as fact, which is why
+    # nothing saw it; the same rot had the shipped subSaipen TEMPLATE born at
+    # schema 1, so every spawn produced a legacy state.
+    ("§ 1.2 re-hardcodes a superseded schema version", "saipen/RFC.md",
+     replace("MUST upgrade **to the current schema version**",
+             "MUST upgrade to `schema_version: 2`"),
+     "stale-schema-version"),
+    ("the shipped subSaipen TEMPLATE is born legacy",
+     "extensions/subs/TEMPLATE/STATE.md",
+     sub_line("schema_version", "1"),
+     "stale-schema-version"),
     # RFC § 1.2 pairs `PHASE` with a ticket ref for exactly five phases and
     # forbids it everywhere else. Nothing witnessed either direction, and the
     # constitution's own § 2.2 example wrote the forbidden one in prose.
@@ -940,8 +992,12 @@ CASES: list[tuple[str, str, object, str]] = [
     # event into an intention, and every reader after it -- § 1.5's Recovery
     # rebuild included -- would still count it as evidence the act occurred.
     # The anchor is safe to name: append-only makes that line immutable.
+    # Anchored on the taxonomy rather than on one line's words: the previous
+    # anchor named a specific event, and that event was sealed into a segment
+    # at the next cap crossing, which turned this case into a silent SKIP.
+    # The active log always carries at least the checkpoint that just ran.
     ("a LOG entry states its event in the future tense", ".saipen/LOG.md",
-     replace("RUN: prepare saiwiki (qq)", "RUN: will prepare saiwiki (qq)"),
+     lambda t: re.sub(r"\] RUN: (?!will )", "] RUN: will ", t, count=1),
      "future tense"),
 
     # T-432: the newest LOG entry restamped just past the clock slack. The
@@ -1172,7 +1228,13 @@ def main() -> int:
         print(f"FAIL: {label!r} expects {expected!r}, which the UNMODIFIED "
               f"repository already prints -- the case proves nothing")
     for label in skipped:
-        print(f"SKIP: {label} -- the file it mutates is absent here")
+        # The old wording blamed a missing FILE, and a skip is far more often
+        # a present file whose ANCHOR moved -- a LOG line sealed into a
+        # segment at the next cap crossing being the usual way. That message
+        # sent its own author hunting for a file that was sitting right there.
+        print(f"SKIP: {label} -- the mutation changed nothing: the file is "
+              f"missing, or its anchor text is (a LOG anchor sealed into "
+              f".saipen/logs/ is the usual cause)")
     for label, expected in dead:
         print(f"FAIL: {label} -- the validator did not report {expected!r}. "
               f"That check no longer goes red on its own condition")
