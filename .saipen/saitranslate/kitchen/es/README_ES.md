@@ -16,13 +16,7 @@ y reanude el trabajo en menos de un minuto: sin explicaciones previas, cualquier
 
 **Idioma de respuesta.** El agente responde por defecto **en estonio** — es un ajuste, no una manía, y nada más en SAIPEN está en estonio. Se cambia en un solo lugar: la línea `reply_language:` al principio de [`saipen/STYLE.md`](saipen/STYLE.md). `et` estonio, `en` inglés, `ru` ruso, `auto` elige según el idioma de tu mensaje. El protocolo, el código, los commits y todos los documentos siguen en inglés con cualquier valor.
 
-**v7.173.0** | [Espec](SPEC.md) | [Guía](GUIDE.md) | [RFC](saipen/RFC.md) | [Estilo](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformidad](saipen/CONFORMANCE.md) | markdown plano | cero dependencias | MIT
-
-[![Guía en Ruso](https://img.shields.io/badge/📖_Guía_ELI5-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
-[![Guía en Inglés](https://img.shields.io/badge/📖_Guía_ELI5-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
-[![Guía en Estonio](https://img.shields.io/badge/📖_Guía_ELI5-EESTI-black?style=for-the-badge)](guides/GUIDE_EE.md)
-[![Guía en Japonés](https://img.shields.io/badge/📖_Guía_ELI5-日本語-red?style=for-the-badge)](guides/GUIDE_JA.md)
-[![Voz del Viejo](https://img.shields.io/badge/👴_Guía-ВЕРСИЯ_ДЕДА-brown?style=for-the-badge)](guides/GUIDE_DED.md)
+**v7.174.0** | [Espec](SPEC.md) | [Guía](GUIDE.md) | [RFC](saipen/RFC.md) | [Estilo](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformidad](saipen/CONFORMANCE.md) | markdown plano | cero dependencias | MIT
 
 ```text
 Usuario ->  /saipen continue

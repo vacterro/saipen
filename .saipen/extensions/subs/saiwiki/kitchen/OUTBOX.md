@@ -3,7 +3,8 @@
 - [W-027] W-025 refresh complete: 8 wiki pages refreshed v7.133.0→v7.155.0, 180 scenarios, pushed 731101e. 0 drift items. Pending: core checkpoint + commit (refresh rides on unshipped T-393/394 tree).
 
 ## W-028: wiki refresh v7.157.0-era -> v7.170.0, 195 scenarios, T-400 closed
-- **status:** ready
+- **status:** stale
+- **superseded_by:** W-029 -- project HEAD moved 2c76b62 -> d74a26c (v7.173.0, rows 196-201 landed); collect skips this entry rather than ticketing a ghost
 - **summary:** 6 wiki pages refreshed to v7.170.0 truth (main HEAD 2c76b62): Scenarios 182→195 rows mirroring CONFORMANCE IDs 1-195 (fixes T-400 semantic ID drift), Home badge/features v7.170.0, _Footer v7.170.0, Phases +13 phase-level checks + project-root binding v7.170.0, Getting-Started worktree-root fix, SubSaipen status. 0 drift items remaining.
 - **main_project_refs:** [saipen/CONFORMANCE.md, saipen/phases/*.md, saipen/BOOT.md, tools/validate.py, tools/audit_floor.py, README.md]
 - **critical:** false
@@ -33,3 +34,35 @@
   5. No main-project files touched by this package.
 - **details:**
   Project moved v7.157.0-era → v7.170.0 during the pass (3 fresh commits landed mid-work: 8b8d58c pick-rule check, f1ef487 worktree-root fix, 2c76b62 checkpoint). Wiki was re-synced at the end to the final HEAD: row 195 added, worktree-root notes inserted into Phases/Getting-Started, Home bullet added. T-400's wiki half (rows 117-168 semantic drift) closed by regenerating Scenarios.md rows from canon by ID. Remaining T-400 half (if any) is validator-side only; nothing wiki-side drifts now.
+
+## W-029: wiki refresh v7.170.0 -> v7.173.0, 201 scenarios
+- **status:** ready
+- **summary:** 6 wiki pages refreshed to v7.173.0 truth (main HEAD d74a26c): Scenarios 195→201 rows (6 new: 196-201 mirroring CONFORMANCE IDs 196-201 -- phase-edge parity, LOG past-tense, DONE evidence, no-claim-outruns-ticket, CI-status hook, shortcut-never-a-greeting), Home badge/features v7.173.0 + 4 bullets (v7.171-v7.173), _Footer v7.173.0, Phases +4 phase-level checks + range header, Getting-Started audit_checks 79→91 + CI-status hook section, SubSaipen status row. 0 drift items remaining.
+- **main_project_refs:** [saipen/CONFORMANCE.md, saipen/RFC.md, saipen/phases/*.md, saipen/BOOT.md, tools/validate.py, tools/audit_checks.py, VERSION]
+- **critical:** false
+- **producer:** saiwiki
+- **source_head:** d74a26c414660663539954b83d59d9be8706b5d5
+- **coverage:**
+  - Scenarios.md: 195→201 rows (6 new: 196-201), IDs mirror CONFORMANCE 1-201 exactly; headline + closing quote updated to 201.
+  - Home.md: badge v7.170.0 → **v7.173.0**, "Key features" header v7.173.0, +4 feature bullets (completion-claim evidence + LOG past-tense v7.171.0, CI-status hook ships with its tool v7.172.0, LOG clock read not estimated v7.173.0).
+  - _Footer.md: version v7.170.0 → v7.173.0.
+  - Phases.md: range header v7.104.0–v7.169.0 → v7.104.0–v7.173.0; +4 phase-level checks (v7.171.0 ×2, v7.172.0, v7.173.0).
+  - Getting-Started.md: audit_checks 79→91 mutations; new CI-status line in the pre-commit hook section (v7.172.0).
+  - SubSaipen.md: saiwiki status row -- W-028 T-400 wiki half closed, W-029 prepared (v7.173.0).
+  - Tutorials.md, Use-Cases.md, _Sidebar.md: no drift (unchanged).
+- **payload:** 6 modified pages in the wiki clone `kitchen/wiki/` (local, uncommitted):
+  - `Home.md`, `Scenarios.md`, `Phases.md`, `Getting-Started.md`, `SubSaipen.md`, `_Footer.md`
+  - To integrate: `git -C .saipen/extensions/subs/saiwiki/kitchen/wiki diff` review, commit, push to github.com/vacterro/saipen.wiki.
+- **verified:**
+  - Scenarios.md row count 201 == CONFORMANCE max ID 201; rows 196-201 present, no duplicate IDs.
+  - Home/_Footer badges v7.173.0; no stale v7.170.0 badges left in page content.
+  - Version refs per page: Home 7, Phases 6, Getting-Started 2, SubSaipen 1, _Footer 1 -- all v7.171-v7.173 content refs, no stale-era badge.
+  - tools/validate.py PASS (exit 0, 5 known WARNs: sealed-log dates, saipython never-ran, uncollected W-028 now stale, digest stale).
+- **instructions:**
+  1. Review the uncommitted diff: `git -C .saipen/extensions/subs/saiwiki/kitchen/wiki diff`.
+  2. Commit with message style `saiwiki: refresh wiki to v7.173.0 -- 201 scenarios, 6 pages` and push to origin (github.com/vacterro/saipen.wiki).
+  3. Verify live: Home badge shows v7.173.0, Scenarios shows 201 rows, _Footer v7.173.0.
+  4. T-400 wiki half already closed (W-028); nothing else on the main board to close for this package.
+  5. No main-project files touched by this package.
+- **details:**
+  W-028 (v7.170.0, 195 rows) went stale: 4 fresh commits landed (d6317b3, ab9211a, 9ea2bd4, d74a26c) carrying v7.171.0 (T-431 completion-claim evidence + LOG past-tense), v7.172.0 (T-428 CI-status hook ships with its tool), v7.173.0 (T-432 LOG clock read, 5-minute forward bound). CONFORMANCE grew 195→201. T-433 (shortcut never-a-greeting, CONFORMANCE 201) sits in the working tree awaiting its v7.174.0 ship; its row is already mirrored so the wiki stays current through that release. Scenarios regenerated by ID from canon, same method W-028 used for T-400's rows 117-168.

@@ -14,13 +14,7 @@
 
 **Yanıt dili.** Aracı varsayılan olarak **Estonca** yanıtlar — bu bir ayar, tuhaflık değil, ve SAIPEN'de Estonca olan başka hiçbir şey yoktur. Tek bir yerde değişir: [`saipen/STYLE.md`](saipen/STYLE.md) dosyasının başındaki `reply_language:` satırı. `et` Estonca, `en` İngilizce, `ru` Rusça, `auto` gönderdiğin mesajın diline göre seçer. Protokol, kod, commit'ler ve tüm belgeler her değerde İngilizce kalır.
 
-**v7.173.0** | [Spec](SPEC.md) | [Rehber](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [Kullanıcı Arayüzü](saipen/UI.md) | [Uyum](saipen/CONFORMANCE.md) | sade markdown | sıfır bağımlılık | MIT
-
-[![Rusça Rehber](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
-[![İngilizce Rehber](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
-[![Estonca Rehber](https://img.shields.io/badge/📖_ELI5_Guide-EESTI-black?style=for-the-badge)](guides/GUIDE_EE.md)
-[![Japonca Rehber](https://img.shields.io/badge/📖_ELI5_Guide-日本語-red?style=for-the-badge)](guides/GUIDE_JA.md)
-[![Dede Sesi](https://img.shields.io/badge/👴_Guide-ВЕРСИЯ_ДЕДА-brown?style=for-the-badge)](guides/GUIDE_DED.md)
+**v7.174.0** | [Spec](SPEC.md) | [Rehber](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [Kullanıcı Arayüzü](saipen/UI.md) | [Uyum](saipen/CONFORMANCE.md) | sade markdown | sıfır bağımlılık | MIT
 
 ```text
 Kullanıcı -> /saipen continue

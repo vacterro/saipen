@@ -16,13 +16,7 @@ paranccsal egy percen belül folytatja a munkát -- újratájékoztatás nélkü
 
 **A válasz nyelve.** Az ügynök alapértelmezés szerint **észtül** válaszol — ez beállítás, nem hóbort, és semmi más nem észt a SAIPEN-ben. Egy helyen módosítható: a `reply_language:` sor a [`saipen/STYLE.md`](saipen/STYLE.md) elején. `et` észt, `en` angol, `ru` orosz, `auto` az üzeneted nyelve alapján választ. A protokoll, a kód, a commitok és minden dokumentum minden értéknél angol marad.
 
-**v7.173.0** | [Spec](SPEC.md) | [Útmutató](GUIDE.md) | [RFC](saipen/RFC.md) | [Stílus](saipen/STYLE.md) | [UI](saipen/UI.md) | [Megfelelőség](saipen/CONFORMANCE.md) | egyszerű markdown | zéró függőség | MIT
-
-[![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
-[![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
-[![Eesti Guide](https://img.shields.io/badge/📖_ELI5_Guide-EESTI-black?style=for-the-badge)](guides/GUIDE_EE.md)
-[![Japanese Guide](https://img.shields.io/badge/📖_ELI5_Guide-日本語-red?style=for-the-badge)](guides/GUIDE_JA.md)
-[![Ded Voice](https://img.shields.io/badge/👴_Guide-ВЕРСИЯ_ДЕДА-brown?style=for-the-badge)](guides/GUIDE_DED.md)
+**v7.174.0** | [Spec](SPEC.md) | [Útmutató](GUIDE.md) | [RFC](saipen/RFC.md) | [Stílus](saipen/STYLE.md) | [UI](saipen/UI.md) | [Megfelelőség](saipen/CONFORMANCE.md) | egyszerű markdown | zéró függőség | MIT
 
 ```text
 Felhasználó ->  /saipen continue

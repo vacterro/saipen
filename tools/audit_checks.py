@@ -669,6 +669,39 @@ CASES: list[tuple[str, str, object, str]] = [
      replace("**Length has no global meaning.**",
              "**Doubled is safe, tripled reaches a remote**"),
      "shortcut-rationale"),
+    # A bare shortcut is a command, never a greeting. The ENTIRE-message rule
+    # claimed it could not be mistaken for prose, and a bare `qq` was still
+    # answered as a greeting instead of run as `saipen prepare saiwiki` --
+    # the property was true and the failure still happened, so the paragraph
+    # now names the greeting misreading as the failure and orders execution.
+    ("shortcut paragraph loses its never-a-greeting duty", "saipen/RFC.md",
+     replace("never a greeting", "rarely ambiguous"),
+     "shortcut-rationale"),
+    # RFC § 1.2 pairs `PHASE` with a ticket ref for exactly five phases and
+    # forbids it everywhere else. Nothing witnessed either direction, and the
+    # constitution's own § 2.2 example wrote the forbidden one in prose.
+    ("next_action bolts a ticket ref onto a phase that takes none", STATE,
+     sub_line("next_action", '"PHASE PLAN T-435"'),
+     "not one of the five ticket-bearing phases"),
+    ("next_action enters a ticket-bearing phase with no ticket", STATE,
+     sub_line("next_action", '"PHASE BUILD"'),
+     "enters ticket-bearing phase"),
+    ("a shipped doc spells out the forbidden PHASE form", "saipen/RFC.md",
+     replace("Translate it: `PHASE PLAN` when",
+             "Translate it: `PHASE PLAN T-###` when"),
+     "phase-ticket-ref"),
+    ("§ 1.2 loses a phase from the ticket-bearing five", "saipen/RFC.md",
+     replace("`SCOUT`, `BUILD`, `VERIFY`, `REVIEW`, `SHIP` -- and omitted",
+             "`SCOUT`, `BUILD`, `VERIFY`, `REVIEW` -- and omitted"),
+     "TICKET_BEARING_PHASES"),
+    # § 1.10's stop paragraph cited § 2.4 Entry while stating its opposite:
+    # an unconditional counter reset on bare `saipen goal`. That is a fresh
+    # 3-wave/20-ticket budget for anyone who types the key out of habit.
+    ("stop paragraph re-asserts an unconditional goal-counter reset",
+     "saipen/RFC.md",
+     replace("only when they are at or over the caps",
+             "every time, whatever the counters read"),
+     "goal-counter-reset"),
     ("translation collect shortcut silently prepares instead",
      "saipen/RFC.md",
      replace("| `eee` | `saipen collect saitranslate` then `saipen ship` |",

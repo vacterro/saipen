@@ -2,6 +2,12 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.174.0 -- 2026-08-03 -- the phase/ref pairing is witnessed, the goal budget is conditional, and every locale README grew a Commands table
+
+Two tickets closed the loop on rules the validator never watched. `PHASE <phase> [T-###]` pairing: RFC § 1.2 requires the ticket ref on exactly SCOUT/BUILD/VERIFY/REVIEW/SHIP and omits it everywhere else, and RFC's own § 2.2 example taught the violation until T-435 corrected it and shipped the witness both directions (validate.py FAILs a ref on PLAN and a bare PHASE BUILD; audit_checks 95/95). The goal budget: § 1.10's `saipen stop` paragraph claimed bare `saipen goal` resets the counters unconditionally while § 2.4 Entry resets them only at/over the caps -- T-434 deferred the claim to the section that owns it and the [goal-counter-reset] check now FAILs if the conditional clause goes missing.
+
+Translation surface: the Core-owned README family (ru/et/ded kitchens, README.ee.md/README.ded.md mirrors) restructured to the v7.172.0-era outline -- How it works, a full 16-row Commands table, a Documentation table, Built with SAIPEN -- and README.ee.md got its language switcher back. Palette name unified to Vintage Golden. 29 locales remain on the old outline, ticketed SAIT-009 on the saitranslate sub board.
+
 ## 7.173.0 -- 2026-08-02 -- the LOG clock is read, not estimated
 
 The forward bound on a LOG timestamp was 3 hours, and in the whole life of this protocol it caught nothing. That is not because agents keep good time -- it is because nobody misses the clock by hours. They miss it by twenty minutes, because reading the clock costs a tool call and writing a plausible minute costs nothing, and a plausible minute is what a language model produces when it is not stopped.

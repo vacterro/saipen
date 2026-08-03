@@ -19,17 +19,9 @@
 
 **Короткие кнопки, чтоб пальцы не отсохли:** `cc` гонит активный Goal Mode дальше, `sss` докладывает статус и код не лапает, `ss` ставит чекпоинт и жмёт тормоз. [Вся карта из 13 шорткатов](saipen/RFC.md#110-command-surface); на русской раскладке работают `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**Пакетные кнопки:** `ee`/`qq` собирают полный пакет переводов/вики, но в проект лапы не суют; `eee`/`qqq` берут только готовый пакет, внедряют, проверяют и пушат.
-
 **Язык ответов.** Агент по умолчанию отвечает на **эстонском** — это настройка, а не причуда, и больше ничего эстонского в SAIPEN нет. Меняется в одном месте: строка `reply_language:` в начале [`saipen/STYLE.md`](saipen/STYLE.md). `et` эстонский, `en` английский, `ru` русский, `auto` выбирает по языку твоего сообщения. Протокол, код, коммиты и все документы при любом значении остаются на английском.
 
-**v7.173.0** | [Спека](SPEC.md) | [Гайд](GUIDE.md) | [RFC](saipen/RFC.md) | [Стиль](saipen/STYLE.md) | [UI](saipen/UI.md) | [Контроль](saipen/CONFORMANCE.md) | MIT | [![CI](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
-
-[![Русский Гайд](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
-[![Английский Гайд](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
-[![Эстонский Гайд](https://img.shields.io/badge/📖_ELI5_Guide-EESTI-black?style=for-the-badge)](guides/GUIDE_EE.md)
-[![Японский Гайд](https://img.shields.io/badge/📖_ELI5_Guide-日本語-red?style=for-the-badge)](guides/GUIDE_JA.md)
-[![Версия Деда](https://img.shields.io/badge/👴_Guide-ВЕРСИЯ_ДЕДА-brown?style=for-the-badge)](guides/GUIDE_DED.md)
+**v7.174.0** | [Спека](SPEC.md) | [Гайд](GUIDE.md) | [RFC](saipen/RFC.md) | [Стиль](saipen/STYLE.md) | [UI](saipen/UI.md) | [Контроль](saipen/CONFORMANCE.md) | MIT
 
 ```text
 Юзер   ->  /saipen continue
@@ -42,18 +34,40 @@
 Агент  ->  Пашет как проклятый.
 ```
 
-### Состояние Проекта > Память Модели
-Память живёт в проекте, а не в башке LLM. `Проект -> Память -> LLM` становится `Проект -> SAIPEN State -> LLM`.
+## Как Это Работает
 
-### Железная Логика и Гарантии
-- **Базовый Стейт-Машин**: `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`
-- **Автономия Без Нытья**: доска встала (нет рабочих `TODO`, пусто в `DOING`) **и нет `BLOCKED`**? Автоматом прёт в `HUNT` (ищет баги) → `ADD` (пилит фичи) → `HUNT`, вообще без лишних вопросов. Если сессия встала на `BLOCKED`, она сама не пойдёт в охоту — будет ждать, пока кожаный мешок не разберётся (RFC § 2.1).
-- **Чёткие Триггеры**: `/saipen plan` (рубит хотелку на тикеты), `/saipen ship` (бамп версии, чейнджлог, тег, пуш), `/saipen clean` (драит репо), `/saipen translate` (изолированный завод `.saipen/saitranslate/`), `/saipen markhunt` (аудит без лимитов, просто пишет), `/saipen prepare` (пакует работу для передачи), `/saipen validate` (проверка по ГОСТу), `/saipen goal` (врубает автономную волну). Контроль: `/saipen status` (отчёт только на чтение), `/saipen stop` (сохранился и вырубился). Итого, плюс `saipen set` и `saipen continue`, весь фасад — 12 команд. Все кишки в RFC.md § 1.10.
-- **Драконовская Надёжность**: Парсинг по одному тикету, берёт грязное дерево как есть (никогда не трёт несохранённый труд), глушит секреты (`sk-***`).
-- **Эксперимент -- saicrew**: опциональная приблуда (`extensions/subs/`, ядро не трогает) для бригады агентов — один писатель-Ядро плюс read-only `saihunt`/`saipython` пахари, отчитывающиеся через свои `OUTBOX.md`. Тестируется в бою, пока не зацементировано — см. `extensions/subs/crew.md`.
+**Состояние Проекта > Память Модели.** Память живёт в проекте, а не в башке LLM. `Проект -> Память -> LLM` становится `Проект -> SAIPEN State -> LLM`.
 
-## Кто Пашет на SAIPEN
-- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — Лютый инструмент управления промптами, построенный вокруг протокола памяти SAIPEN.
+- **Базовый Стейт-Машин** — `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`
+- **Автономия Без Нытья** — доска встала (нет рабочих `TODO`, пусто в `DOING`) **и нет `BLOCKED`**? Автоматом прёт в `HUNT` (ищет баги) → `ADD` (пилит фичи) → `HUNT`, вообще без лишних вопросов. Если сессия встала на `BLOCKED`, она сама не пойдёт в охоту — будет ждать, пока кожаный мешок не разберётся (RFC § 2.1).
+- **Драконовская Надёжность** — парсинг по одному тикету, берёт грязное дерево как есть (никогда не трёт несохранённый труд), глушит секреты (`sk-***`).
+
+## Команды
+
+Весь фасад — 16 команд; полные детали в [RFC § 1.10](saipen/RFC.md#110-command-surface).
+
+| Команда | Что делает |
+|---|---|
+| `/saipen set` | Принять проект |
+| `/saipen continue` | Возобновить ровно с места остановки |
+| `/saipen plan` | Рубит хотелку на тикеты |
+| `/saipen goal <text>` | Автономный прогон волны под новую цель |
+| `/saipen hunt` | Прогнать поиск дефектов/улучшений щас |
+| `/saipen ship` | Бамп версии, чейнджлог, тег, пуш |
+| `/saipen clean` | Драит репо |
+| `/saipen validate` | Проверка по ГОСТу |
+| `/saipen markhunt` | Аудит без лимитов, просто пишет |
+| `/saipen translate` | Изолированный завод `.saipen/saitranslate/` |
+| `/saipen prepare` | Пакует работу для передачи |
+| `/saipen collect` | Внедряет готовый пакет |
+| `/saipen status` | Отчёт только на чтение |
+| `/saipen stop` | Сохранился и вырубился |
+
+<sub>`saipen init` и `saipen sub` добивают до шестнадцати; обе дёргает сам протокол, а не ты каждый день.</sub>
+
+**Пакетные кнопки.** `ee`/`qq` собирают полный пакет переводов/вики, но в проект лапы не суют; `eee`/`qqq` берут только готовый пакет, внедряют, проверяют, ревьюят и пушат.
+
+**Эксперимент -- saicrew.** Опциональная приблуда (`extensions/subs/`, ядро не трогает) для бригады агентов — один писатель-Ядро плюс read-only `saihunt`/`saipython` пахари, отчитывающиеся через свои `OUTBOX.md`. Тестируется в бою, пока не зацементировано — см. `extensions/subs/crew.md`.
 
 ## Два Слоя
 
@@ -96,23 +110,39 @@ bash bootstrap/uninstall.sh                                         # Для м�
 Платформы нет в списке выше (DeepSeek, Qwen, чистый OpenAI)?
 Заметки по платформам валяются в `extensions/adapters/`.
 
-## Документация и Бумажки
-- **[SPEC.md](SPEC.md)** -- формальная архитектура, зачем всё это, лакмусовая бумажка.
-- **[RFC.md](saipen/RFC.md)** -- ГОСТ-спека для агентов. Выполнять беспрекословно.
-- **[GUIDE.md](GUIDE.md)** -- гайды для людей (ELI5):
-  - 🇷🇺 [Русский](guides/GUIDE_RU.md) | 🇺🇸 [English](guides/GUIDE_EN.md) | 🇪🇪 [Eesti](guides/GUIDE_EE.md) | 🇯🇵 [日本語](guides/GUIDE_JA.md) | 👴 [Версия Деда](guides/GUIDE_DED.md)
-  - 🇺🇦 [Українська](guides/GUIDE_UK.md) | 🇩🇪 [Deutsch](guides/GUIDE_DE.md) | 🇫🇷 [Français](guides/GUIDE_FR.md) | 🇪🇸 [Español](guides/GUIDE_ES.md) | 🇮🇹 [Italiano](guides/GUIDE_IT.md)
-  - 🇵🇹 [Português](guides/GUIDE_PT.md) | 🇳🇱 [Nederlands](guides/GUIDE_NL.md) | 🇵🇱 [Polski](guides/GUIDE_PL.md) | 🇸🇪 [Svenska](guides/GUIDE_SV.md) | 🇩🇰 [Dansk](guides/GUIDE_DA.md)
-  - 🇫🇮 [Suomi](guides/GUIDE_FI.md) | 🇳🇴 [Norsk](guides/GUIDE_NO.md) | 🇨🇳 [中文](guides/GUIDE_ZH.md) | 🇰🇷 [한국어](guides/GUIDE_KO.md) | 🇹🇭 [ไทย](guides/GUIDE_TH.md) | 🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) | 🇸🇦 [العربية](guides/GUIDE_AR.md) | 🇮🇱 [עברית](guides/GUIDE_HE.md)
-  - 🇹🇷 [Türkçe](guides/GUIDE_TR.md) | 🇮🇳 [हिन्दी](guides/GUIDE_HI.md) | 🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) | 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) | 🇨🇿 [Čeština](guides/GUIDE_CS.md) | 🇷🇴 [Română](guides/GUIDE_RO.md)
-  - 🇭🇺 [Magyar](guides/GUIDE_HU.md) | 🇧🇬 [Български](guides/GUIDE_BG.md) | 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) | 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
-- **[STYLE.md](saipen/STYLE.md)** -- стиль базара агента.
-- **[UI.md](saipen/UI.md)** -- дизайн Винтаж-Золото.
-- **[CONFORMANCE.md](saipen/CONFORMANCE.md)** -- сценарии тестов и правила валидации.
+## Документация
 
-<p align="center">
-  <img src="assets/SAIPEN_design2_alpha.png" alt="Печать Деда" width="120"/>
-</p>
+| Документ | Что это |
+|---|---|
+| [SPEC.md](SPEC.md) | Формальная архитектура, зачем всё это, лакмусовая бумажка |
+| [RFC.md](saipen/RFC.md) | ГОСТ-спека для агентов. Выполнять беспрекословно |
+| [GUIDE.md](GUIDE.md) | Гайды для людей (ELI5) |
+| [STYLE.md](saipen/STYLE.md) | Стиль базара агента |
+| [UI.md](saipen/UI.md) | Дизайн-гайдлайны Vintage Golden UI |
+| [CONFORMANCE.md](saipen/CONFORMANCE.md) | Сценарии тестов и правила валидации |
+
+<details>
+<summary><b>Все 33 переведенных гайда</b></summary>
+
+🇷🇺 [Русский](guides/GUIDE_RU.md) · 🇺🇸 [English](guides/GUIDE_EN.md) · 🇪🇪 [Eesti](guides/GUIDE_EE.md) · 🇯🇵 [日本語](guides/GUIDE_JA.md) · 👴 [Версия Деда](guides/GUIDE_DED.md)
+
+🇺🇦 [Українська](guides/GUIDE_UK.md) · 🇩🇪 [Deutsch](guides/GUIDE_DE.md) · 🇫🇷 [Français](guides/GUIDE_FR.md) · 🇪🇸 [Español](guides/GUIDE_ES.md) · 🇮🇹 [Italiano](guides/GUIDE_IT.md)
+
+🇵🇹 [Português](guides/GUIDE_PT.md) · 🇳🇱 [Nederlands](guides/GUIDE_NL.md) · 🇵🇱 [Polski](guides/GUIDE_PL.md) · 🇸🇪 [Svenska](guides/GUIDE_SV.md) · 🇩🇰 [Dansk](guides/GUIDE_DA.md)
+
+🇫🇮 [Suomi](guides/GUIDE_FI.md) · 🇳🇴 [Norsk](guides/GUIDE_NO.md) · 🇨🇳 [中文](guides/GUIDE_ZH.md) · 🇰🇷 [한국어](guides/GUIDE_KO.md) · 🇹🇭 [ไทย](guides/GUIDE_TH.md)
+
+🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) · 🇸🇦 [العربية](guides/GUIDE_AR.md) · 🇮🇱 [עברית](guides/GUIDE_HE.md) · 🇹🇷 [Türkçe](guides/GUIDE_TR.md) · 🇮🇳 [हिन्दी](guides/GUIDE_HI.md)
+
+🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) · 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) · 🇨🇿 [Čeština](guides/GUIDE_CS.md) · 🇷🇴 [Română](guides/GUIDE_RO.md) · 🇭🇺 [Magyar](guides/GUIDE_HU.md)
+
+🇧🇬 [Български](guides/GUIDE_BG.md) · 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) · 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
+
+</details>
+
+## Кто Пашет на SAIPEN
+
+- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — Лютый инструмент управления промптами, построенный вокруг протокола памяти SAIPEN.
 
 ## Скриншоты (Картинки)
 
@@ -126,3 +156,7 @@ bash bootstrap/uninstall.sh                                         # Для м�
 <img src="assets/screenshot-20260801-003853.png" alt="saipen скриншот 2026-08-01" width="600"/>
 
 </details>
+
+<p align="center">
+  <img src="assets/SAIPEN_design2_alpha.png" alt="Печать Деда" width="120"/>
+</p>

@@ -6,44 +6,61 @@
 
 # SAIPEN
 
-**Jätkuvusprotokoll AI koodimisagentidele.** SAIPEN hoiab projekti mälu tavalises markdown-vormingus, nii et külm agent ilma vestlusajaloota käivitab `/saipen continue`, loeb `STATE`, `BOARD` ja `next_action` ning jätkab tööd alla minutiga — ilma uuesti juhendamata, mis tahes tarnija, mis tahes päeval.
+**Jätkuvusprotokoll AI koodimisagentidele.** SAIPEN hoiab projekti mälu tavalises markdown-vormingus, nii et külm agent ilma vestlusajaloota käivitab `/saipen continue`, loeb `STATE.md` -> `BOARD.md` -> aktiivse `LOG.md` lõpu -> `human_note` (kui on määratud), käivitab `next_action` ja jätkab tööd alla minutiga — ilma uuesti juhendamata, mis tahes tarnija, mis tahes päeval.
 
-**Üks käsk. Null amneesiat.**
+**Üks käsk. Null sõltuvust. Null amneesiat.**
 
 **Kiirklahvid:** `cc` jätkab aktiivset Goal Mode’i, `sss` näitab olekut koodi puudutamata ja `ss` salvestab kontrollpunkti ning peatub. [Vaata täielikku 13 kiirklahvi kaarti](saipen/RFC.md#110-command-surface). Kirillitsa kaksikud töötavad ka: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**Paketiklahvid:** `ee`/`qq` valmistavad täieliku tõlke- või vikipaketi ette ilma seda lõimimata; `eee`/`qqq` võtavad vastu ainult valmis paketi, seejärel lõimivad, kontrollivad, vaatavad üle ja lükkavad üles.
-
 **Vastuste keel.** Agent vastab vaikimisi **eesti keeles** — see on säte, mitte veidrus, ja miski muu SAIPEN-is ei ole eestikeelne. Muuda seda ühes kohas: rida `reply_language:` [`saipen/STYLE.md`](saipen/STYLE.md) alguses. `et` eesti, `en` inglise, `ru` vene, `auto` valib selle järgi, mis keeles sa kirjutasid. Protokoll, kood, commitid ja kõik dokumendid jäävad igal väärtusel inglise keelde.
 
-**v7.173.0** | [Spetsifikatsioon](SPEC.md) | [Juhend](GUIDE.md) | [RFC](saipen/RFC.md) | [Stiil](saipen/STYLE.md) | [Kasutajaliides](saipen/UI.md) | [Vastavus](saipen/CONFORMANCE.md) | tavaline markdown | null sõltuvust | MIT
-
-[![Venekeelne juhend](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
-[![Ingliskeelne juhend](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
-[![Eestikeelne juhend](https://img.shields.io/badge/📖_ELI5_Guide-EESTI-black?style=for-the-badge)](guides/GUIDE_EE.md)
-[![Jaapanikeelne juhend](https://img.shields.io/badge/📖_ELI5_Guide-日本語-red?style=for-the-badge)](guides/GUIDE_JA.md)
-[![Vanaisa versiooni juhend](https://img.shields.io/badge/👴_Guide-ВЕРСИЯ_ДЕДА-brown?style=for-the-badge)](guides/GUIDE_DED.md)
+**v7.174.0** | [Spetsifikatsioon](SPEC.md) | [Juhend](GUIDE.md) | [RFC](saipen/RFC.md) | [Stiil](saipen/STYLE.md) | [Kasutajaliides](saipen/UI.md) | [Vastavus](saipen/CONFORMANCE.md) | tavaline markdown | null sõltuvust | MIT
 
 ```text
-Kasutaja -> /saipen continue
-Agent    -> loeb STATE-faili ("Mida ma praegu teen?")
-Agent    -> loeb BOARD-faili ("Mis ülesande ma ette võtan?")
-Agent    -> loeb next_action (käivitab käsu)
-Agent    -> Töötab.
+Kasutaja ->  /saipen continue
+Agent    ->  loeb STATE.md (faas, ülesanne, next_action, režiim, human_note)
+Agent    ->  loeb BOARD.md (DOING / TODO / DONE / BLOCKED piletid)
+Agent    ->  loeb aktiivse LOG.md lõpu (hiljutised sündmused)
+Agent    ->  loeb human_note (kui on määratud, ühekordne juhis)
+Agent    ->  käivitab koheselt next_action (käsk)
+Agent    ->  laeb faasi dokumendi ainult siis, kui reegleid on vaja
+Agent    ->  Töötab.
 ```
 
-### Projekti olek > Mudeli mälu
-Mälu elab projektis, mitte mudeli peas. `Projekt -> Mälu -> LLM` muutub vormi `Projekt -> SAIPENi olek -> LLM`.
+## Kuidas see töötab
 
-### Protokolli põhiloogika ja garantiid
-- **Olekumasina tuum**: `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`
-- **Autonoomia ilma viibadeta**: Avatud ülesandeid pole? Automaatne üleminek `HUNT` (vigade skaneerimine) → `ADD` (funktsioonide arendus) → `HUNT` tsükkel. Küsimusi ei esitata.
-- **Sõnaselged päästikud**: `/saipen plan` (muuda päring või tööloend piletiteks), `/saipen ship` (versioonimine, muudatuste logi, märgis, tõuge), `/saipen clean` (hoidla puhastus), `/saipen translate` (isoleeritud `.saipen/saitranslate/` tehas), `/saipen markhunt` (kuiv piiramatu audit, ainult kirjed), `/saipen prepare` (töö pakendamine üleandmiseks), `/saipen validate` (vastavuskontroll), `/saipen goal` (autonoomne lainerünnak). Meta/juhtimine: `/saipen status` (kirjutuskaitstud aruanne), `/saipen stop` (kontrollpunkt ja peatus). Lisaks `saipen set` ja `saipen continue` — kokku kaksteist käsku, täielik loend: RFC.md § 1.10.
-- **Range töökindlus**: Partii sisendi parsimine (kirurgilised 1-kaupa piletid), määrdunud puu omaksvõtt (ei kustuta kunagi salvestamata tööd), saladuste redigeerimine (`sk-***`).
-- **Eksperimentaalne -- saicrew**: valikuline boonuskiht (`extensions/subs/`, Core'i muudatusteta) mitme agendiga meeskonna käivitamiseks — üks Core'i kirjutaja pluss kirjutuskaitstud `saihunt`/`saipython` töötajad, kes aruandlevad oma `OUTBOX.md` kaudu. Aktiivse reaalajas testimise all, lõpuni kinnitamata — vaata `extensions/subs/crew.md`.
+**Projekti olek on tugevam kui mudeli mälu.** Mälu elab projektis, mitte mudeli peas. `Projekt -> Mälu -> LLM` muutub vormi `Projekt -> SAIPENi olek -> LLM`.
 
-## Projektid, mida käitab SAIPEN
-- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — Kõrge jõudlusega viipade haldamise tööriist, mis on ehitatud SAIPENi mäluprotokolli ümber.
+- **Olekumasina tuum** — `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`
+- **Autonoomia ilma viipadeta** — tahvel peatatud (ühtegi teostatavat `TODO`-d pole, `DOING` on tühi) **ja ei ole `BLOCKED`**? Automaatne üleminek `HUNT` (otsib vigu) → `ADD` (arendab funktsioone) → `HUNT`, ühtegi küsimust esitamata. `BLOCKED` olekus olev sessioon ei käivita kunagi automaatset jahti -- ta ootab, kuni inimene lahendab blokaadi (RFC § 2.1).
+- **Range töökindlus** — partii sisendi parsimine (kirurgilised 1-haaval piletid), määrdunud puu omaksvõtt (ei kustuta kunagi salvestamata tööd), saladuste redigeerimine (`sk-***`).
+
+## Käsud
+
+Kogu pind on 16 käsku; täielik üksikasjalik kirjeldus [RFC § 1.10](saipen/RFC.md#110-command-surface).
+
+| Käsk | Mida teeb |
+|---|---|
+| `/saipen set` | Võta projekt omaks |
+| `/saipen continue` | Jätka täpselt sealt, kus peatuti |
+| `/saipen plan` | Muuda päring või toores tööjärg piletiteks |
+| `/saipen goal <text>` | Autonoomne lainerünnak uue eesmärgi vastu |
+| `/saipen hunt` | Sunni defektide/paranduste otsing kohe |
+| `/saipen ship` | Versioonitõstmine, muudatuste logi, märgis, tõuge |
+| `/saipen clean` | Hoidla puhastus |
+| `/saipen validate` | Vastavuskontroll |
+| `/saipen markhunt` | Kuiv piiramatu audit, ainult kirjed |
+| `/saipen translate` | Isoleeritud tõlkevabrik |
+| `/saipen prepare` | Paki töö üleandmiseks kokku |
+| `/saipen collect` | Integreeri valmis pakett |
+| `/saipen status` | Kirjutuskaitstud aruanne |
+| `/saipen stop` | Kontrollpunkt ja peatus |
+
+<sub>`saipen init` ja `saipen sub` lõpetavad kuueteistkümne; mõlemat kutsub protokoll, mitte igapäevaselt trükitud.</sub>
+
+**Paketiklahvid.** `ee`/`qq` valmistavad täieliku tõlke- või vikipaketi ette ilma seda lõimimata; `eee`/`qqq` võtavad vastu ainult valmis paketi, seejärel lõimivad, kontrollivad, vaatavad üle ja lükkavad üles.
+
+**Eksperimentaalne: saicrew.** Valikuline boonuskiht (`extensions/subs/`, Core'i muudatusteta) mitme agendiga meeskonna käivitamiseks — üks Core'i kirjutaja pluss kirjutuskaitstud `saihunt`/`saipython` töötajad, kes aruandlevad oma `OUTBOX.md` kaudu. Aktiivse reaalajas testimise all, lõpuni kinnitamata — vaata `extensions/subs/crew.md`.
 
 ## Kaks kihti
 
@@ -79,30 +96,46 @@ See eemaldab täpselt märgistatud ploki (jättes ülejäänud faili puutumata),
 > `saipen set`
 
 Pole paigaldatud? Kleebi üks rida mis tahes agendile:
-> Read <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
+> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
 
 Platvormi pole ülaltoodud loendis (DeepSeek, Qwen, eraldiseisev OpenAI jne)?
 Platvormipõhised märkused asuvad kaustas `extensions/adapters/`.
 
-## Dokumentatsiooni ja spetsifikatsiooni lingid
-- **[SPEC.md](SPEC.md)** — ametlik arhitektuur, disainieesmärgid, lakmustest.
-- **[RFC.md](saipen/RFC.md)** — normatiivne spetsifikatsioon, mida agendid täidavad.
-- **[GUIDE.md](GUIDE.md)** — inimetuutor ja ELI5 juhendid:
-  - 🇷🇺 [Русский](guides/GUIDE_RU.md) | 🇺🇸 [English](guides/GUIDE_EN.md) | 🇪🇪 [Eesti](guides/GUIDE_EE.md) | 🇯🇵 [日本語](guides/GUIDE_JA.md) | 👴 [Версия Деда](guides/GUIDE_DED.md)
-  - 🇺🇦 [Українська](guides/GUIDE_UK.md) | 🇩🇪 [Deutsch](guides/GUIDE_DE.md) | 🇫🇷 [Français](guides/GUIDE_FR.md) | 🇪🇸 [Español](guides/GUIDE_ES.md) | 🇮🇹 [Italiano](guides/GUIDE_IT.md)
-  - 🇵🇹 [Português](guides/GUIDE_PT.md) | 🇳🇱 [Nederlands](guides/GUIDE_NL.md) | 🇵🇱 [Polski](guides/GUIDE_PL.md) | 🇸🇪 [Svenska](guides/GUIDE_SV.md) | 🇩🇰 [Dansk](guides/GUIDE_DA.md)
-  - 🇫🇮 [Suomi](guides/GUIDE_FI.md) | 🇳🇴 [Norsk](guides/GUIDE_NO.md) | 🇨🇳 [中文](guides/GUIDE_ZH.md) | 🇰🇷 [한국어](guides/GUIDE_KO.md) | 🇹🇭 [ไทย](guides/GUIDE_TH.md) | 🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) | 🇸🇦 [العربية](guides/GUIDE_AR.md) | 🇮🇱 [עברית](guides/GUIDE_HE.md)
-  - 🇹🇷 [Türkçe](guides/GUIDE_TR.md) | 🇮🇳 [हिन्दी](guides/GUIDE_HI.md) | 🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) | 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) | 🇨🇿 [Čeština](guides/GUIDE_CS.md) | 🇷🇴 [Română](guides/GUIDE_RO.md)
-  - 🇭🇺 [Magyar](guides/GUIDE_HU.md) | 🇧🇬 [Български](guides/GUIDE_BG.md) | 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) | 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
-- **[STYLE.md](saipen/STYLE.md)** — agendi suhtlusstiil ja hääle määratlus.
-- **[UI.md](saipen/UI.md)** — Tume Kuldne Win95 UI disainijuhised.
-- **[CONFORMANCE.md](saipen/CONFORMANCE.md)** — käitumuslikud testistsenaariumid ja validaatori reeglid.
+## Dokumentatsioon
 
-<p align="center">
-  <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
-</p>
+| Dokument | Mis see on |
+|---|---|
+| [SPEC.md](SPEC.md) | Ametlik arhitektuur, disainieesmärgid, lakmustest |
+| [RFC.md](saipen/RFC.md) | Normatiivne spetsifikatsioon, mida agendid täidavad |
+| [GUIDE.md](GUIDE.md) | Inimetuutor ja ELI5 juhendid |
+| [STYLE.md](saipen/STYLE.md) | Agendi suhtlusstiil ja hääle määratlus |
+| [UI.md](saipen/UI.md) | Vintage Golden UI disainijuhised |
+| [CONFORMANCE.md](saipen/CONFORMANCE.md) | Käitumuslikud testistsenaariumid ja validaatori reeglid |
 
-## ## Ekraanitõmmised
+<details>
+<summary><b>Kõik 33 tõlgitud juhendit</b></summary>
+
+🇷🇺 [Русский](guides/GUIDE_RU.md) · 🇺🇸 [English](guides/GUIDE_EN.md) · 🇪🇪 [Eesti](guides/GUIDE_EE.md) · 🇯🇵 [日本語](guides/GUIDE_JA.md) · 👴 [Версия Деда](guides/GUIDE_DED.md)
+
+🇺🇦 [Українська](guides/GUIDE_UK.md) · 🇩🇪 [Deutsch](guides/GUIDE_DE.md) · 🇫🇷 [Français](guides/GUIDE_FR.md) · 🇪🇸 [Español](guides/GUIDE_ES.md) · 🇮🇹 [Italiano](guides/GUIDE_IT.md)
+
+🇵🇹 [Português](guides/GUIDE_PT.md) · 🇳🇱 [Nederlands](guides/GUIDE_NL.md) · 🇵🇱 [Polski](guides/GUIDE_PL.md) · 🇸🇪 [Svenska](guides/GUIDE_SV.md) · 🇩🇰 [Dansk](guides/GUIDE_DA.md)
+
+🇫🇮 [Suomi](guides/GUIDE_FI.md) · 🇳🇴 [Norsk](guides/GUIDE_NO.md) · 🇨🇳 [中文](guides/GUIDE_ZH.md) · 🇰🇷 [한국어](guides/GUIDE_KO.md) · 🇹🇭 [ไทย](guides/GUIDE_TH.md)
+
+🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) · 🇸🇦 [العربية](guides/GUIDE_AR.md) · 🇮🇱 [עברית](guides/GUIDE_HE.md) · 🇹🇷 [Türkçe](guides/GUIDE_TR.md) · 🇮🇳 [हिन्दी](guides/GUIDE_HI.md)
+
+🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) · 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) · 🇨🇿 [Čeština](guides/GUIDE_CS.md) · 🇷🇴 [Română](guides/GUIDE_RO.md) · 🇭🇺 [Magyar](guides/GUIDE_HU.md)
+
+🇧🇬 [Български](guides/GUIDE_BG.md) · 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) · 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
+
+</details>
+
+## Ehitatud SAIPEN-iga
+
+- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — Kõrge jõudlusega viipade haldamise tööriist, mis on ehitatud SAIPENi mäluprotokolli ümber.
+
+## Ekraanitõmmised
 
 <details>
 <summary>Vajuta avamiseks</summary>
@@ -114,3 +147,7 @@ Platvormipõhised märkused asuvad kaustas `extensions/adapters/`.
 <img src="assets/screenshot-20260801-003853.png" alt="saipen screenshot 2026-08-01" width="600"/>
 
 </details>
+
+<p align="center">
+  <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
+</p>

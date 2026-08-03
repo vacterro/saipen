@@ -30,4 +30,5 @@
 - [x] W-024 verify v7.133.0 sync — project HEAD 8f685d6 unchanged; wiki origin/master e2d0ad8, local in sync; CONFORMANCE 157 rows == Scenarios 157 rows; badges v7.133.0; ship.md/BOOT.md claims spot-checked against wiki text; validate.py PASS. Uncommitted T-365 work unshipped, not wiki-relevant. 0 drift. | verify: PASS — all 8 pages match v7.133.0 sources; 0 stale refs; validator PASS
 
 - [x] W-028 prepare v7.157.0-era → v7.170.0 -- 6 pages refreshed (Scenarios 182→195 rows, T-400 wiki half closed), OUTBOX ready | verify: OUTBOX W-028 well-formed (status ready, all fields), Scenarios 195 rows mirror CONFORMANCE 1-195, badges v7.170.0
+- [x] W-029 prepare v7.170.0 → v7.173.0 -- 6 pages refreshed (Scenarios 195→201 rows, 4 new feature bullets, 4 phase checks, audit 79→91), OUTBOX W-029 ready | verify: OUTBOX W-029 well-formed (status ready, all fields), Scenarios 201 rows mirror CONFORMANCE 1-201, badges v7.173.0, validate.py PASS
 ## BLOCKED

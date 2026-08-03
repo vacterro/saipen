@@ -6,44 +6,61 @@
 
 # SAIPEN
 
-**Протокол непрерывности для ИИ-агентов кодинга.** SAIPEN хранит память проекта в формате plain markdown, так что холодный агент без истории чата запускает `/saipen continue`, читает `STATE`, `BOARD` и `next_action` и возобновляет работу менее чем за минуту — без повторных инструкций, с любым провайдером, в любой день.
+**Протокол непрерывности для ИИ-агентов кодинга.** SAIPEN хранит память проекта в формате plain markdown, так что холодный агент без истории чата запускает `/saipen continue`, читает `STATE.md` -> `BOARD.md` -> хвост активного `LOG.md` -> `human_note` (если задан), исполняет `next_action` и возобновляет работу менее чем за минуту — без повторных инструкций, с любым провайдером, в любой день.
 
-**Одна команда. Нуль амнезии.**
+**Одна команда. Нуль зависимостей. Нуль амнезии.**
 
 **Быстрые клавиши:** `cc` продолжает активный Goal Mode, `sss` показывает статус без правок кода, а `ss` сохраняет чекпоинт и останавливается. [Полная карта из 13 клавиш](saipen/RFC.md#110-command-surface). Кириллические близнецы тоже работают: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**Пакетные шорткаты:** `ee`/`qq` готовят полный пакет переводов/вики без внедрения; `eee`/`qqq` принимают только готовый пакет, затем внедряют, проверяют и пушат.
-
 **Язык ответов.** Агент по умолчанию отвечает **на эстонском** — это настройка, а не причуда, и больше ничего в SAIPEN не эстонского. Меняется в одном месте: строка `reply_language:` в начале [`saipen/STYLE.md`](saipen/STYLE.md). `et` эстонский, `en` английский, `ru` русский, `auto` выбирает по языку твоего сообщения. Протокол, код, коммиты и все документы при любом значении остаются на английском.
 
-**v7.173.0** | [Спецификация](SPEC.md) | [Руководство](GUIDE.md) | [RFC](saipen/RFC.md) | [Стиль](saipen/STYLE.md) | [Интерфейс](saipen/UI.md) | [Соответствие](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
-
-[![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
-[![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
-[![Eesti Guide](https://img.shields.io/badge/📖_ELI5_Guide-EESTI-black?style=for-the-badge)](guides/GUIDE_EE.md)
-[![Japanese Guide](https://img.shields.io/badge/📖_ELI5_Guide-日本語-red?style=for-the-badge)](guides/GUIDE_JA.md)
-[![Ded Voice](https://img.shields.io/badge/👴_Guide-ВЕРСИЯ_ДЕДА-brown?style=for-the-badge)](guides/GUIDE_DED.md)
+**v7.174.0** | [Спецификация](SPEC.md) | [Руководство](GUIDE.md) | [RFC](saipen/RFC.md) | [Стиль](saipen/STYLE.md) | [Интерфейс](saipen/UI.md) | [Соответствие](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
 
 ```text
 Пользователь ->  /saipen continue
-Агент        ->  читает STATE ("Что я делаю прямо сейчас?")
-Агент        ->  читает BOARD ("Какую задачу я беру?")
-Агент        ->  читает next_action (выполняет команду)
+Агент        ->  читает STATE.md (фаза, задача, next_action, режим, human_note)
+Агент        ->  читает BOARD.md (тикеты DOING / TODO / DONE / BLOCKED)
+Агент        ->  читает хвост активного LOG.md (недавние события)
+Агент        ->  читает human_note (если задан, одноразовый пинок)
+Агент        ->  сразу исполняет next_action (команду)
+Агент        ->  грузит док по фазе только когда нужны правила
 Агент        ->  Работает.
 ```
 
-### Состояние проекта > Память модели
-Память живет в проекте, а не в голове модели. `Проект -> Память -> LLM` превращается в `Проект -> Состояние SAIPEN -> LLM`.
+## Как это работает
 
-### Ключевая логика протокола и гарантии
-- **Основной конечный автомат**: `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`
-- **Автономия без подсказок**: Не осталось открытых задач? Автоматический переход в цикл `HUNT` (сканирование багов) → `ADD` (развитие функций) → `HUNT`. Без лишних вопросов.
-- **Явные триггеры**: `/saipen plan` (превратить запрос или список задач в тикеты), `/saipen ship` (версионирование, чейнджлог, тег, пуш), `/saipen clean` (очистка репозитория), `/saipen translate` (изолированная фабрика `.saipen/saitranslate/`), `/saipen markhunt` (сухой аудит без ограничений, только запись), `/saipen prepare` (упаковка работы для передачи), `/saipen validate` (проверка соответствия), `/saipen goal` (автономное исполнение волны). Мета/управление: `/saipen status` (отчет только для чтения), `/saipen stop` (сохранение чекпоинта и остановка). Плюс `saipen set` и `saipen continue` — всего двенадцать команд, полный список: RFC.md § 1.10.
-- **Строгая надежность**: Пакетный разбор ввода (хирургически по 1 тикету), принятие нечистого дерева (никогда не стирает незакоммиченную работу), скрытие секретов (`sk-***`).
-- **Экспериментально -- saicrew**: опциональный бонусный слой (`extensions/subs/`, без изменений в Core) для запуска мультиагентной бригады — один Core-писатель плюс read-only воркеры `saihunt`/`saipython`, отчитывающиеся через свой `OUTBOX.md`. Под активным живым тестированием, ещё не проверено end-to-end — см. `extensions/subs/crew.md`.
+**Состояние проекта сильнее памяти модели.** Память живет в проекте, а не в голове модели. `Проект -> Память -> LLM` превращается в `Проект -> Состояние SAIPEN -> LLM`.
 
-## Проекты на базе SAIPEN
-- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — Высокопроизводительный инструмент управления промптами, построенный вокруг протокола памяти SAIPEN.
+- **Основной конечный автомат** — `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`
+- **Автономия без подсказок** — доска остановлена (нет рабочих `TODO`, ничего в `DOING`) **и нет `BLOCKED`**? Автопереход в `HUNT` (сканирование багов) → `ADD` (развитие функций) → `HUNT`, ноль вопросов. Сессия на `BLOCKED` никогда не хантит сама; ждет, пока человек разрешит блокер (RFC § 2.1).
+- **Строгая надежность** — пакетный ввод разбирается на хирургические тикеты по одному, принятие грязного дерева никогда не стирает незакоммиченную работу, скрытие секретов (`sk-***`).
+
+## Команды
+
+Весь фасад — 16 команд; полные детали в [RFC § 1.10](saipen/RFC.md#110-command-surface).
+
+| Команда | Что делает |
+|---|---|
+| `/saipen set` | Принять проект |
+| `/saipen continue` | Возобновить ровно с места остановки |
+| `/saipen plan` | Превратить запрос или бэклог в тикеты |
+| `/saipen goal <text>` | Автономное исполнение волны под новую цель |
+| `/saipen hunt` | Форсировать проход по дефектам/улучшениям сейчас |
+| `/saipen ship` | Бамп версии, чейнджлог, тег, пуш |
+| `/saipen clean` | Зачистка репозитория |
+| `/saipen validate` | Проверка соответствия |
+| `/saipen markhunt` | Сухой аудит без ограничений, только запись |
+| `/saipen translate` | Изолированная фабрика переводов |
+| `/saipen prepare` | Упаковать работу для передачи |
+| `/saipen collect` | Внедрить готовый пакет |
+| `/saipen status` | Отчет только для чтения |
+| `/saipen stop` | Чекпоинт и остановка |
+
+<sub>`saipen init` и `saipen sub` завершают шестнадцать; обе вызываются протоколом, а не набираются каждый день.</sub>
+
+**Пакетные клавиши.** `ee`/`qq` готовят полные пакеты переводов/вики без внедрения; `eee`/`qqq` принимают только готовый пакет, затем внедряют, проверяют, ревьюят и пушат.
+
+**Экспериментально: saicrew.** Опциональный бонусный слой (`extensions/subs/`, ноль изменений в Core) для мультиагентной бригады: один Core-писатель плюс read-only воркеры `saihunt`/`saipython`, отчитывающиеся через свой `OUTBOX.md`. Под активным живым тестированием, ещё не проверено end-to-end — см. `extensions/subs/crew.md`.
 
 ## Два уровня
 
@@ -54,7 +71,7 @@
 
 **Автоматическая эволюция.** Не осталось открытых задач? Введите `/saipen`: `HUNT` проводит аудит на баги, мертвый код, упавшие тесты. Чисто? `ADD` создает следующую очевидную отсутствующую возможность, проверяет ее и снова запускает `HUNT`. Продукт созрел -> гармонично останавливается.
 
-**Режим GOAL.** `/saipen goal <что вы хотите>` меняет приоритет доски (старые тикеты понижаются, но не удаляются) и продвигает новую цель вперед — никаких "продолжить?" между тикетами, VERIFY/REVIEW никогда не пропускаются. SHIP автоматически отправляет push в существующий удаленный репозиторий; абсолютно новый репозиторий спросит только один раз. Отправка (Ship) цели — это тоже не точка остановки: процесс сразу переходит в автономное обслуживание HUNT/ADD, пока продукт не станет зрелым, заблокированным или запуск не достигнет лимита (3 волны / 20 тикетов, затем чекпоинт и отчет).
+**Режим GOAL.** `/saipen goal <что вы хотите>` меняет приоритет доски (старые тикеты понижаются, но не удаляются) и продвигает новую цель вперед — никаких "продолжить?" между тикетами, VERIFY/REVIEW никогда не пропускаются. SHIP автоматически отправляет push в существующий удаленный репозиторий; абсолютно новый репозиторий спросит только один раз. Отправка цели — тоже не точка остановки: процесс сразу переходит в автономное обслуживание HUNT/ADD, пока продукт не станет зрелым, заблокированным или запуск не достигнет лимита (3 волны / 20 тикетов, затем чекпоинт и отчет).
 
 ## Быстрый старт
 
@@ -79,30 +96,46 @@ bash bootstrap/uninstall.sh                                         # macOS / Li
 > `saipen set`
 
 Без установки? Вставьте одну строку любому агенту:
-> Прочитай <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md и следуй им.
+> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
 
 Платформы нет в списке выше (DeepSeek, Qwen, автономный OpenAI и т.д.)?
 Заметки по платформам находятся в `extensions/adapters/`.
 
-## Ссылки на документацию и спецификацию
-- **[SPEC.md](SPEC.md)** — формальная архитектура, цели проектирования, лакмусовый тест.
-- **[RFC.md](saipen/RFC.md)** — нормативная спецификация, исполняемая агентами.
-- **[GUIDE.md](GUIDE.md)** — руководство для человека и ELI5-гайды:
-  - 🇷🇺 [Русский](guides/GUIDE_RU.md) | 🇺🇸 [English](guides/GUIDE_EN.md) | 🇪🇪 [Eesti](guides/GUIDE_EE.md) | 🇯🇵 [日本語](guides/GUIDE_JA.md) | 👴 [Версия Деда](guides/GUIDE_DED.md)
-  - 🇺🇦 [Українська](guides/GUIDE_UK.md) | 🇩🇪 [Deutsch](guides/GUIDE_DE.md) | 🇫🇷 [Français](guides/GUIDE_FR.md) | 🇪🇸 [Español](guides/GUIDE_ES.md) | 🇮🇹 [Italiano](guides/GUIDE_IT.md)
-  - 🇵🇹 [Português](guides/GUIDE_PT.md) | 🇳🇱 [Nederlands](guides/GUIDE_NL.md) | 🇵🇱 [Polski](guides/GUIDE_PL.md) | 🇸🇪 [Svenska](guides/GUIDE_SV.md) | 🇩🇰 [Dansk](guides/GUIDE_DA.md)
-  - 🇫🇮 [Suomi](guides/GUIDE_FI.md) | 🇳🇴 [Norsk](guides/GUIDE_NO.md) | 🇨🇳 [中文](guides/GUIDE_ZH.md) | 🇰🇷 [한국어](guides/GUIDE_KO.md) | 🇹🇭 [ไทย](guides/GUIDE_TH.md) | 🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) | 🇸🇦 [العربية](guides/GUIDE_AR.md) | 🇮🇱 [עברית](guides/GUIDE_HE.md)
-  - 🇹🇷 [Türkçe](guides/GUIDE_TR.md) | 🇮🇳 [हिन्दी](guides/GUIDE_HI.md) | 🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) | 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) | 🇨🇿 [Čeština](guides/GUIDE_CS.md) | 🇷🇴 [Română](guides/GUIDE_RO.md)
-  - 🇭🇺 [Magyar](guides/GUIDE_HU.md) | 🇧🇬 [Български](guides/GUIDE_BG.md) | 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) | 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
-- **[STYLE.md](saipen/STYLE.md)** — стиль общения агента и определение тона.
-- **[UI.md](saipen/UI.md)** — руководства по дизайну интерфейса Vintage Golden.
-- **[CONFORMANCE.md](saipen/CONFORMANCE.md)** — сценарии поведенческого тестирования и правила валидатора.
+## Документация
 
-<p align="center">
-  <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
-</p>
+| Документ | Что это |
+|---|---|
+| [SPEC.md](SPEC.md) | Формальная архитектура, цели проектирования, лакмусовый тест |
+| [RFC.md](saipen/RFC.md) | Нормативная спецификация, исполняемая агентами |
+| [GUIDE.md](GUIDE.md) | Руководство для человека и ELI5-гайды |
+| [STYLE.md](saipen/STYLE.md) | Стиль общения агента и определение голоса |
+| [UI.md](saipen/UI.md) | Дизайн-гайдлайны Vintage Golden UI |
+| [CONFORMANCE.md](saipen/CONFORMANCE.md) | Сценарии поведенческих тестов и правила валидатора |
 
-## ## Скриншоты
+<details>
+<summary><b>Все 33 переведенных гайда</b></summary>
+
+🇷🇺 [Русский](guides/GUIDE_RU.md) · 🇺🇸 [English](guides/GUIDE_EN.md) · 🇪🇪 [Eesti](guides/GUIDE_EE.md) · 🇯🇵 [日本語](guides/GUIDE_JA.md) · 👴 [Версия Деда](guides/GUIDE_DED.md)
+
+🇺🇦 [Українська](guides/GUIDE_UK.md) · 🇩🇪 [Deutsch](guides/GUIDE_DE.md) · 🇫🇷 [Français](guides/GUIDE_FR.md) · 🇪🇸 [Español](guides/GUIDE_ES.md) · 🇮🇹 [Italiano](guides/GUIDE_IT.md)
+
+🇵🇹 [Português](guides/GUIDE_PT.md) · 🇳🇱 [Nederlands](guides/GUIDE_NL.md) · 🇵🇱 [Polski](guides/GUIDE_PL.md) · 🇸🇪 [Svenska](guides/GUIDE_SV.md) · 🇩🇰 [Dansk](guides/GUIDE_DA.md)
+
+🇫🇮 [Suomi](guides/GUIDE_FI.md) · 🇳🇴 [Norsk](guides/GUIDE_NO.md) · 🇨🇳 [中文](guides/GUIDE_ZH.md) · 🇰🇷 [한국어](guides/GUIDE_KO.md) · 🇹🇭 [ไทย](guides/GUIDE_TH.md)
+
+🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) · 🇸🇦 [العربية](guides/GUIDE_AR.md) · 🇮🇱 [עברית](guides/GUIDE_HE.md) · 🇹🇷 [Türkçe](guides/GUIDE_TR.md) · 🇮🇳 [हिन्दी](guides/GUIDE_HI.md)
+
+🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) · 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) · 🇨🇿 [Čeština](guides/GUIDE_CS.md) · 🇷🇴 [Română](guides/GUIDE_RO.md) · 🇭🇺 [Magyar](guides/GUIDE_HU.md)
+
+🇧🇬 [Български](guides/GUIDE_BG.md) · 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) · 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
+
+</details>
+
+## Создано на SAIPEN
+
+- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — Высокопроизводительный инструмент управления промптами, построенный вокруг протокола памяти SAIPEN.
+
+## Скриншоты
 
 <details>
 <summary>Нажми, чтобы развернуть</summary>
@@ -114,3 +147,7 @@ bash bootstrap/uninstall.sh                                         # macOS / Li
 <img src="assets/screenshot-20260801-003853.png" alt="Скриншот saipen 2026-08-01" width="600"/>
 
 </details>
+
+<p align="center">
+  <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
+</p>

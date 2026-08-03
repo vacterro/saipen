@@ -25,7 +25,7 @@ rebriefing, any vendor, any day.
 
 **Reply language.** The agent answers in **Estonian** by default — that is a setting, not a quirk, and nothing else about SAIPEN is Estonian. Change it in one place: the `reply_language:` line at the top of [`saipen/STYLE.md`](saipen/STYLE.md). `et` Estonian, `en` English, `ru` Russian, `auto` picks from the message you sent. The protocol, the code, the commits and every document stay English at every value.
 
-**v7.173.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | MIT | [![CI](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
+**v7.174.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | MIT
 
 ```text
 User  ->  /saipen continue
@@ -156,13 +156,6 @@ a `.uninstalled.bak` copy first, and removes the skill folders.
 | [STYLE.md](saipen/STYLE.md) | Agent communication style and voice |
 | [UI.md](saipen/UI.md) | Vintage Golden UI design guidelines |
 | [CONFORMANCE.md](saipen/CONFORMANCE.md) | Behavioral test scenarios and validator rules |
-
-**ELI5 guides:**
-[![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
-[![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
-[![Eesti Guide](https://img.shields.io/badge/📖_ELI5_Guide-EESTI-black?style=for-the-badge)](guides/GUIDE_EE.md)
-[![Japanese Guide](https://img.shields.io/badge/📖_ELI5_Guide-日本語-red?style=for-the-badge)](guides/GUIDE_JA.md)
-[![Ded Voice](https://img.shields.io/badge/👴_Guide-ВЕРСИЯ_ДЕДА-brown?style=for-the-badge)](guides/GUIDE_DED.md)
 
 <details>
 <summary><b>All 33 translated guides</b></summary>

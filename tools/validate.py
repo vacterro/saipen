@@ -245,6 +245,46 @@ SAIPEN_COMMANDS = frozenset({
     "set", "init", "continue", "goal", "plan", "clean", "translate",
     "markhunt", "prepare", "collect", "ship", "validate", "status", "stop",
     "sub", "hunt"})
+# RFC § 1.2: `PHASE <phase-enum> [T-###]` takes the ticket ref for exactly the
+# five ticket-bearing phases and omits it for every other one. The rule had no
+# witness, and the constitution's own worked example (§ 2.2, translating ADD's
+# RETURN) wrote `PHASE PLAN T-###` -- the form the rule forbids, in the one
+# place § 1.2 warns about by name: "an example that fails the rule below is
+# worse than no example". Deliberately a hand-kept constant plus a drift check
+# against § 1.2's sentence, the same shape the phase enum uses.
+TICKET_BEARING_PHASES = frozenset({"SCOUT", "BUILD", "VERIFY", "REVIEW",
+                                   "SHIP"})
+_PHASE_NA_RE = re.compile(
+    r"^PHASE\s+([A-Za-z_-]+)(?:\s+(T-\d+))?(?:\s+\[[^\]]*\])?\s*$")
+
+
+def _phase_next_action_error(value):
+    """RFC § 1.2's `PHASE` pairing rule, or None when the value obeys it.
+
+    Shared by Core and subSaipen states on purpose: the protocol has twice
+    shipped a rule enforced on only one of the two, in both directions.
+    """
+    m = _PHASE_NA_RE.match(value.strip())
+    if not m:
+        return (f"{value!r} is not a legal `PHASE <phase-enum> [T-###]` -- "
+                f"the argument is one uppercase phase plus at most a ticket "
+                f"ref, and nothing but the optional [...] progress tag may "
+                f"follow it")
+    ph, ref = m.group(1), m.group(2)
+    if ph != ph.upper():
+        return (f"{value!r} writes the phase in lower case -- RFC § 1.2 takes "
+                f"the uppercase § 1.6 enum value, and the phase doc is loaded "
+                f"from its lowercased name, not from what the state says")
+    _five = "/".join(sorted(TICKET_BEARING_PHASES))
+    if ph in TICKET_BEARING_PHASES and not ref:
+        return (f"{value!r} enters ticket-bearing phase {ph} with no T-### -- "
+                f"RFC § 1.2 REQUIRES the ref for {_five}, and a cold agent "
+                f"cannot act on a phase with no subject")
+    if ph not in TICKET_BEARING_PHASES and ref:
+        return (f"{value!r} attaches {ref} to {ph}, which is not one of the "
+                f"five ticket-bearing phases ({_five}) -- RFC § 1.2 omits the "
+                f"ref for every other phase; name the ticket in `task:`")
+    return None
 EXPECTED_SHORTCUT_ROUTES = {
     "gg": "`saipen goal`",
     "hh": "`saipen hunt`",
@@ -804,6 +844,11 @@ if isinstance(next_action, str):
                  f"TEST-001. Phases like HUNT/ADD are reached autonomously "
                  f"(§ 2.1), never invoked by name")
 
+    if next_action.startswith("PHASE "):
+        _phase_err = _phase_next_action_error(next_action)
+        if _phase_err:
+            fail(f"STATE.md next_action {_phase_err}")
+
 if phase in ("SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP") \
         and state.get("task") in ("none", "", None):
     if not (isinstance(next_action, str)
@@ -1064,6 +1109,10 @@ if sub_state_files:
                     fail(f"{sp} next_action invokes 'saipen {_verb}', which RFC "
                          f"§ 1.10 does not define -- its cold agent MUST "
                          f"decline an unrecognized command and stop")
+            if sub_na.startswith("PHASE "):
+                _sub_phase_err = _phase_next_action_error(sub_na)
+                if _sub_phase_err:
+                    fail(f"{sp} next_action {_sub_phase_err}")
 
         # PROTOCOL.md § 1 says a subSaipen is a normal SAIPEN instance: "same
         # STATE.md/BOARD.md/LOG.md shape, same phase enum (RFC § 1.6), same LOG
@@ -2530,6 +2579,21 @@ else:
                              set(VALID_TRANSITIONS) | {"INIT"},
                              "validate.py VALID_TRANSITIONS")
 
+    # 2b. Ticket-bearing five: RFC § 1.2's `PHASE` pairing rule vs the copy
+    #     this file enforces with. Same shape as the phase enum -- the list is
+    #     hand-kept here and pinned to the sentence that owns it, so a
+    #     deliberate change to § 1.2 fails loudly instead of leaving the
+    #     validator quietly enforcing the previous protocol.
+    s = _rfc_sentence(
+        "ticket-bearing",
+        r"names as ticket-bearing\*\* -- (.+?) -- and omitted", rfc)
+    if s is None:
+        drift_ok = False
+    else:
+        drift_ok &= _compare("ticket-bearing", set(_ticks(s)),
+                             set(TICKET_BEARING_PHASES),
+                             "validate.py TICKET_BEARING_PHASES")
+
     # 3. From-any-phase set: RFC § 1.6 vs ANY_FROM here.
     s = _rfc_sentence("any-from", r"\*\*From-any-phase set\*\*: (.+?)\.\n", rfc)
     if s is None:
@@ -2742,6 +2806,26 @@ else:
                     if not (body.startswith("<") or
                             any(body.startswith(c) for c in WAIT_CATEGORIES)):
                         bad_waits.append(f"{doc.as_posix()}: {val[:45]!r}")
+    #    The sweep above reads `next_action:` assignments only, and RFC.md is
+    #    not one of its roots -- which is exactly how § 2.2's worked example
+    #    came to spell out a `PHASE` form § 1.2 forbids, in running prose, in
+    #    the constitution. Only the unambiguous direction is swept here: a
+    #    ticket ref bolted onto a phase that does not take one. The other
+    #    direction (a bare ticket-bearing phase) is legitimate prose all over
+    #    these documents and is checked where it is actually a command, on
+    #    STATE.md itself.
+    _phase_ref_lit = re.compile(r"\bPHASE\s+([A-Z][A-Z_-]{2,})\s+T-(?:\d+|###)")
+    for doc in [rfc_path] + [d for root in doc_roots if root.is_dir()
+                             for d in sorted(root.rglob("*.md"))]:
+        for m in _phase_ref_lit.finditer(doc.read_text(encoding="utf-8-sig")):
+            if m.group(1) not in TICKET_BEARING_PHASES:
+                fail(f"cross-doc drift [phase-ticket-ref] -- "
+                     f"{doc.as_posix()} writes {m.group(0)!r}, attaching a "
+                     f"ticket ref to a phase RFC § 1.2 says omits one. The "
+                     f"ref belongs to "
+                     f"{'/'.join(sorted(TICKET_BEARING_PHASES))} alone; every "
+                     f"other phase names its ticket in `task:`. An example "
+                     f"that fails its own rule is worse than no example")
     for b in bad_actions:
         fail(f"cross-doc drift [prescribed-next-action] -- shipped doc "
              f"prescribes a `next_action` with none of § 1.2's five legal "
@@ -3867,10 +3951,37 @@ else:
                     or "do not invent an undeclared repeated form"
                     not in _shortcut_section
                     or "Doubled is safe, tripled reaches a remote"
-                    in _shortcut_section):
+                    in _shortcut_section
+                    or "never a greeting" not in _shortcut_section
+                    or "MUST execute the exact row" not in _shortcut_section):
                 fail("cross-doc drift [shortcut-rationale] -- length must "
-                     "have no global cost meaning and undeclared repeated "
-                     "forms must not be invented")
+                     "have no global cost meaning, undeclared repeated forms "
+                     "must not be invented, and the repeated-letter paragraph "
+                     "must say a shortcut is a command, never a greeting -- "
+                     "receiving one means executing the exact row (or its "
+                     "exact no-op), never answering with chat")
+                drift_ok = False
+
+            # § 1.10's `saipen stop` paragraph and § 2.4 Entry both describe
+            # what a bare `saipen goal` does to the safety-valve counters, and
+            # they gave opposite answers: § 1.10 said the reset is
+            # unconditional -- while citing § 2.4 Entry, which makes it
+            # conditional on the valve having tripped. Either branch is a real
+            # failure. Unconditional hands a fresh 3-wave/20-ticket budget to
+            # anyone who types the most convenient key mid-run (E-1468);
+            # reading it the other way round would leave a tripped valve with
+            # no way to clear. § 2.4 owns the rule and § 1.10 defers to it.
+            if ("only when they are at or over the caps"
+                    not in _rfc_t[_i:_j]
+                    or "deliberately does NOT preserve the counters"
+                    in _rfc_t[_i:_j]):
+                fail("cross-doc drift [goal-counter-reset] -- RFC § 1.10's "
+                     "`saipen stop` paragraph must defer to § 2.4 Entry and "
+                     "say bare `saipen goal` resets goal_waves/goal_tickets "
+                     "ONLY when they are at or over the caps. Asserting an "
+                     "unconditional reset re-grants a full safety-valve "
+                     "budget to a run nobody re-authorized (§ 2.4 Entry, "
+                     "E-1468)")
                 drift_ok = False
 
             _package_docs = {

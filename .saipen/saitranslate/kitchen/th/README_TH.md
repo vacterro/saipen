@@ -14,13 +14,7 @@
 
 **ภาษาที่ตอบ** เอเจนต์ตอบเป็น**ภาษาเอสโตเนีย** โดยค่าเริ่มต้น — นี่คือการตั้งค่า ไม่ใช่ความแปลก และไม่มีสิ่งอื่นใดใน SAIPEN เป็นภาษาเอสโตเนีย เปลี่ยนได้ที่จุดเดียว: บรรทัด `reply_language:` ที่ด้านบนของ [`saipen/STYLE.md`](saipen/STYLE.md) `et` เอสโตเนีย `en` อังกฤษ `ru` รัสเซีย `auto` เลือกตามภาษาของข้อความที่คุณส่ง โปรโตคอล โค้ด คอมมิต และเอกสารทั้งหมดยังคงเป็นภาษาอังกฤษไม่ว่าค่าใด
 
-**v7.173.0** | [ข้อกำหนด](SPEC.md) | [คู่มือ](GUIDE.md) | [RFC](saipen/RFC.md) | [สไตล์](saipen/STYLE.md) | [UI](saipen/UI.md) | [การปฏิบัติตามมาตรฐาน](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
-
-[![Russian Guide](https://img.shields.io/badge/📖_ELI5_Guide-НА_РУССКОМ-red?style=for-the-badge)](guides/GUIDE_RU.md)
-[![English Guide](https://img.shields.io/badge/📖_ELI5_Guide-IN_ENGLISH-blue?style=for-the-badge)](guides/GUIDE_EN.md)
-[![Eesti Guide](https://img.shields.io/badge/📖_ELI5_Guide-EESTI-black?style=for-the-badge)](guides/GUIDE_EE.md)
-[![Japanese Guide](https://img.shields.io/badge/📖_ELI5_Guide-日本語-red?style=for-the-badge)](guides/GUIDE_JA.md)
-[![Ded Voice](https://img.shields.io/badge/👴_Guide-ВЕРСИЯ_ДЕДА-brown?style=for-the-badge)](guides/GUIDE_DED.md)
+**v7.174.0** | [ข้อกำหนด](SPEC.md) | [คู่มือ](GUIDE.md) | [RFC](saipen/RFC.md) | [สไตล์](saipen/STYLE.md) | [UI](saipen/UI.md) | [การปฏิบัติตามมาตรฐาน](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
 
 ```text
 User  ->  /saipen continue
