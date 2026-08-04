@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.185.0 -- 2026-08-04 -- the board stops ordering work nobody can finish
+
+T-427: two tickets sat in `## TODO` for months owning warnings that immutable history guarantees forever. T-406 owns subsaipen-never-ran, which `MANIFEST.md` makes emit until saipython actually runs; T-407 owns goal-reauth-untripped, which E-1659 put in an append-only file. Both exist so their slug has an owner under row 185, and both carry a `verify:` saying that closing them while the warning emits FAILs that same check.
+
+In `## TODO` they passed every workability test the Pick Rule applies -- open checkbox, no unmet `needs:`, unclaimed -- so the board ORDERED an agent to take work nobody can finish. Two honest agents diverge there and both can defend themselves: one adopts the ticket and produces nothing, the other skips it and breaks the rule that the topmost workable ticket wins. That is the contradiction, and it was reproducible by reading the board.
+
+No new mechanism was added, and the ticket's own three suggestions -- a waiver registry, a known-warnings section, a non-executable ticket kind -- were all declined. `## BLOCKED` already excludes a ticket from the Pick Rule, section 2.1 already excludes it from the halt test so the board still reaches `HUNT`, and `| blocker:` already carries the reason. What had to change was one line of the ownership check, which counted only `## DOING` and `## TODO` as live and therefore pinned these tickets to the one section that hurt. `## DONE` still does not count: that is a closure claim, and nothing was closed. T-464 moved with them for the same reason.
+
+The ownership half of the evidence is a HAND red-test and the row says so rather than shipping a case that cannot fail. Breaking the slug on the blocked owner's line FAILs naming 61 consecutive releases; an audit case cannot reach that check, because it only fires once a slug has survived `WARN_OWNER_SPAN` releases and the harness's synthetic copy carries no release history to age against. The case was written, went not-red for exactly that reason, and was removed rather than left standing as coverage.
+
+audit_checks 140 -> 141 standing controls. CONFORMANCE 230.
+
 ## 7.184.0 -- 2026-08-04 -- `no-publish` is a permission, not an absent git, and no ship step is half-permitted
 
 T-463: `phases/ship.md`'s `mode: no-publish` block fused two independent facts. It called the remote steps skippable because "no remote exists to publish to", and it hardcoded `no git` into the mandatory skipped-publish LOG line -- on a host that may have a repository, a remote and a perfectly readable `HEAD`. That is a false record in an append-only file, and the next agent reading it concludes the project cannot publish at all. Whether git exists is observable: `git rev-parse` answers or it does not. Whether publishing is permitted is `mode:`. They are asked separately now, and the line carries `policy` or `no git`, whichever is true.

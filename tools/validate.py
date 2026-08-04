@@ -3256,6 +3256,20 @@ else:
              "a mode that forbids committing to skip only the push")
         drift_ok = False
 
+    # 1b10. A ticket whose completion condition can never be met belongs in
+    #       `## BLOCKED`, not `## TODO`. In `## TODO` it is workable by every
+    #       test the Pick Rule applies, so the board orders work nobody can
+    #       finish -- and the two defensible responses (adopt it and produce
+    #       nothing, or skip it and break the topmost-workable rule) are the
+    #       divergence this section exists to remove.
+    if "That is also where a ticket goes when its completion" not in rfc:
+        fail("cross-doc drift [permanent-owner-section] -- RFC 1.2 must say "
+             "that a ticket whose completion condition can never be met sits "
+             "in `## BLOCKED` with the reason, not in `## TODO`. A permanent "
+             "warning owner in `## TODO` passes every workability test the "
+             "Pick Rule applies while its own `verify:` says closing it FAILs")
+        drift_ok = False
+
     # 1c. § 2.1's ZERO-PROMPT rule is a MUST, and its exception list has to
     #     carry every live carve-out or the MUST orders a violation. It named
     #     only `phase: BLOCKED` while § 1.3 bans `ADD` outright under
@@ -4151,7 +4165,16 @@ else:
         #      records each tracked slug's first/last seen release and its
         #      rationale; a slug STILL EMITTED this run that has survived
         #      WARN_OWNER_SPAN consecutive releases is standing debt and MUST
-        #      be named by a live BOARD ticket (## DOING or ## TODO). Aging an
+        #      be named by a live BOARD ticket. `## BLOCKED` counts: a ticket
+        #      there is on the board, names the slug and has not been closed,
+        #      and excluding it forced the permanent owners to sit in
+        #      `## TODO` -- where the Pick Rule MUST take the topmost workable
+        #      ticket, so the board ordered an agent to work something whose
+        #      own `verify:` says closing it FAILs. Two honest agents then
+        #      diverge: one adopts it and produces nothing, the other skips it
+        #      and breaks the Pick Rule. `## DONE` still does not count -- that
+        #      is a closure claim, which is the thing being guarded (T-427).
+        #      Aging an
         #      unowned slug in the baseline DATA fails; the identical aged
         #      slug with a live naming ticket passes. The red control mutates
         #      baseline data, never validator wording.
@@ -4189,7 +4212,8 @@ else:
                     continue
                 _live_lines = [
                     board_lines[t["line_no"] - 1] for t in tickets.values()
-                    if t["section"] in ("## DOING", "## TODO")]
+                    if t["section"] in ("## DOING", "## TODO",
+                                        "## BLOCKED")]
                 if not any(_slug in ln for ln in _live_lines):
                     fail(f"warn ownership [release history] -- WARN slug "
                          f"`{_slug}` has survived {_age} consecutive releases "
