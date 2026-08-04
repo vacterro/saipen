@@ -1768,6 +1768,25 @@ if log_files:
             if is_active_log and re.match(
                     r"validate\.py\s*->\s*(PASS|FAIL)\b", content):
                 conf_run_seen = True
+            # MARKHUNT's closure rule tells a later reader to sum "this
+            # pass's [MARKHUNT] tickets", and nothing recorded which they
+            # were. Those tickets legitimately leave ## BLOCKED for ## TODO
+            # with the tag and the `unvetted audit` blocker dropped, and a
+            # dismissed one leaves the board entirely -- BOARD.md is not
+            # append-only, LOG.md is. Four passes already ran here
+            # (findings=3, 12, 6, 1) and not one can be re-checked. Active
+            # log only: those four are sealed and immutable, so scoping the
+            # check here makes it a clean FAIL with nothing to grandfather --
+            # the same narrowing the conformance-record check took at E-1851.
+            if (is_active_log and re.match(r"markhunt\s*->", content)
+                    and "tickets=" not in content):
+                fail(f"{loc} records a MARKHUNT pass with no `tickets=` "
+                     f"list -- phases/markhunt.md requires the completion "
+                     f"line to name every [MARKHUNT] ticket the pass wrote "
+                     f"(or `tickets=none`). Without it the closure sum stops "
+                     f"being checkable the moment triage moves those tickets "
+                     f"off `## BLOCKED`, and a dismissed finding leaves no "
+                     f"trace at all")
             # PREPARE wrote the same success event for `saitranslate`, for
             # `saiwiki` and for an unqualified main-project package alike, so
             # the LOG could not say which handoff became ready and two
@@ -3118,6 +3137,40 @@ else:
              "`goal_mode: false` and the next key is not a command there. "
              "The carve-out is a PAIR, not a loosening of the bare form -- "
              "E-1468 was a lone key mid-run, which is unchanged")
+        drift_ok = False
+
+    # 1b6. MARKHUNT's pass accounting. The closure rule reads durable
+    #      history; the record it reads had no ticket list, so triage erased
+    #      the evidence it depends on. Pass identity is the completion line's
+    #      own E-### -- no new ID scheme was needed for it.
+    _mh_doc = rfc_path.parent / "phases" / "markhunt.md"
+    _mh_t = (_mh_doc.read_text(encoding="utf-8-sig")
+             if _mh_doc.is_file() else "")
+    if _mh_t and ("`tickets=` is the pass's own" not in _mh_t
+                  or "The pass identity is that line's own" not in _mh_t):
+        fail("cross-doc drift [markhunt-pass-id] -- phases/markhunt.md must "
+             "require the completion line to list the tickets the pass wrote "
+             "and must name the line's own E-### as the pass identity. "
+             "BOARD.md is not append-only: triage moves those tickets and "
+             "dismissal removes them, so a closure rule that sums them off "
+             "the board is unexecutable the moment anyone acts on the pass")
+        drift_ok = False
+
+    # 1b7. MARKHUNT's no-git closure. Two faults in one clause: it treated
+    #      `mode: no-publish` as "git unavailable", which mislabels a host
+    #      whose HEAD reads perfectly and switches the tree-movement check
+    #      off for no reason; and on a genuinely git-less host it reported
+    #      "satisfied automatically", which is a check claiming success for
+    #      the one case where it measured nothing -- and an exhaustive pass
+    #      spanning sessions is where movement is MOST likely.
+    if _mh_t and ("means git cannot be READ, and nothing else" not in _mh_t
+                  or "tree_movement=unverified" not in _mh_t):
+        fail("cross-doc drift [markhunt-no-git] -- phases/markhunt.md must "
+             "say `no-git` means git cannot be READ (so `mode: no-publish`, "
+             "which blocks only publishing, still uses the real hash) and "
+             "must declare a genuinely git-less closure unproven rather than "
+             "satisfied. A check that reports success where it measured "
+             "nothing is worse than one that says it could not measure")
         drift_ok = False
 
     # 1c. § 2.1's ZERO-PROMPT rule is a MUST, and its exception list has to

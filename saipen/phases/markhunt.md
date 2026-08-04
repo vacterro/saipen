@@ -105,9 +105,24 @@ Before transitioning to `DONE`, verify the manifest actually closes:
 vector means the surface is NOT exhausted -- keep going, don't round up);
 `head_end` equals the current `git rev-parse --short HEAD` (HEAD moved
 mid-pass -> the coverage is against a stale tree, re-run the moved part) --
-both `head_start`/`head_end` are the literal string `no-git` (no repo, or
-`mode: no-publish`)? This check is satisfied automatically, nothing to
-compare; and `findings:` is fully accounted for by the `[MARKHUNT]` tickets
+both `head_start`/`head_end` are the literal string `no-git`? **`no-git`
+means git cannot be READ, and nothing else.** `mode: no-publish` is a
+publish capability, not a read one -- RFC 1.3 blocks commit, tag and push
+there, while `git rev-parse --short HEAD` answers exactly as it always
+did. Writing `no-git` on a repository whose HEAD is readable disables this
+check by mislabelling the host, so use the real hash whenever git answers,
+and reserve `no-git` for a genuine absence: no repository, or no git at
+all. **And when it IS genuinely absent, the closure is declared unproven
+rather than satisfied.** `no-git` on both ends used to read as "nothing to
+compare, therefore fine", which is a check reporting success for the one
+host where it measured nothing -- and an exhaustive pass can legitimately
+span sessions while the files move underneath it, so this is where tree
+movement is most likely, not least. Without a commit snapshot there is no
+cheap deterministic surface to compare, so do not invent one: LOG the
+closure carrying `tree_movement=unverified` and re-run any vector whose
+covered paths you have reason to believe changed. An honest unproven
+closure is worth more than an automatic pass, because the next reader can
+see which one they are holding; and `findings:` is fully accounted for by the `[MARKHUNT]` tickets
 this pass wrote to `## BLOCKED` -- **accounted for, not numerically equal**:
 this same doc tells you to group related findings under one ticket rather
 than filing one per trivial nit, so 10 findings landing as 3 grouped tickets
@@ -121,8 +136,27 @@ never paper over it. This is the manifest-driven closure HUNT gets for free
 from its hash line; MARKHUNT earns it by checking its own manifest. Only
 then LOG the completion, carrying the manifest summary into that permanent
 line so coverage stays auditable after `kitchen/` is swept: `- DATE [E-###]
-[parent: E-###] RUN: markhunt -> N findings, V/5 vectors, @head_end` (this
-enriched form, not a bare count). A later `VALIDATE` or a human cross-checks
+[parent: E-###] RUN: markhunt -> N findings, V/5 vectors, @head_end tickets=T-###,T-###`
+(this enriched form, not a bare count). **`tickets=` is the pass's own
+accounting and it is required**, listing every `[MARKHUNT]` ticket this pass
+wrote, comma-separated, or the literal `tickets=none` when the pass found
+nothing. Without it the closure rule above is unexecutable the moment triage
+runs: a later validator or human is told to sum "this pass's `[MARKHUNT]`
+tickets", and those tickets legitimately leave `## BLOCKED` for `## TODO`
+with the `[MARKHUNT]` tag and the `unvetted audit` blocker dropped, while a
+dismissed finding leaves the board entirely. `BOARD.md` is not append-only;
+`LOG.md` is, and it is the only place this accounting can survive. Four
+passes already ran on this repository -- `findings=3`, `findings=12`,
+`findings=6`, `findings=1` -- and not one of them can be re-checked today,
+because no line says which tickets it produced.
+
+**The pass identity is that line's own `E-###`.** No new ID scheme, no
+registry, no ticket field: the event number is already unique, already
+monotonic and already immutable, so two passes with overlapping findings are
+separately reconstructable by construction. **Triaging or dismissing a
+`[MARKHUNT]` ticket LOGs a `DEC` naming the ticket and the `E-###` of the
+pass that filed it** -- one line, existing taxonomy -- so accepted and
+dismissed accounting stays provable after the board no longer shows either. A later `VALIDATE` or a human cross-checks
 it trivially -- the line's `N` must equal the findings accounted for across
 this pass's `[MARKHUNT]` tickets on the board (their per-ticket counts summed,
 not the ticket count itself, per the grouping rule above) and `V` must be `5`. Then transition to `DONE`. `DONE`'s own existing priority logic

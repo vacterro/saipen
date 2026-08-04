@@ -2,6 +2,20 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.182.0 -- 2026-08-04 -- a MARKHUNT pass stays countable after triage, and `no-git` stops covering a readable repo
+
+T-461: the closure rule tells a later validator or human to sum "this pass's `[MARKHUNT]` tickets" against the manifest's `findings:` count, and nothing recorded which tickets those were. The rule reads durable history while depending on a surface that legitimately changes -- the same document sends a triaged finding from `## BLOCKED` to `## TODO` with the tag and the `unvetted audit` blocker dropped, and a dismissed finding leaves the board entirely. `BOARD.md` is not append-only; `LOG.md` is. Four passes had already run here (findings=3, 12, 6, 1) and not one can be re-checked today. `tickets=` joins the completion line, `tickets=none` when a pass found nothing, and triage or dismissal LOGs a `DEC` naming the ticket and the pass event.
+
+The pass identity the ticket asked for needed no invention: the completion line's own `E-###` is already unique, monotonic and immutable, so two passes with overlapping findings are separately reconstructable by construction. No ID scheme, no registry, no ticket field. Known limit, stated: the check enforces that a list exists, not that it is complete -- no checker can tell a short list from an honest one.
+
+T-462: two faults in one clause of the manifest check. It named `mode: no-publish` as a case where the hashes are the literal `no-git`, but RFC 1.3 makes that a PUBLISH capability -- commit, tag and push are blocked while `git rev-parse` answers exactly as it always did, so writing `no-git` there mislabels the host and switches the tree-movement check off on a repository whose HEAD is sitting right there. And where git really is absent, both ends reading `no-git` was declared "satisfied automatically, nothing to compare": a check reporting success for the one case where it measured nothing, and doing so precisely where movement is most likely, since an exhaustive pass can span sessions while files change underneath it.
+
+No fingerprint mechanism was invented for the git-less case. There is no cheap deterministic surface to compare, so the closure is LOGged carrying `tree_movement=unverified` and any vector whose covered paths are believed to have changed is re-run. An honest unproven closure beats an automatic pass, because the next reader can tell which one they are holding.
+
+Both tickets edit the same three files, so each was verified in its own isolated worktree carrying that ticket's hunks alone -- 134/134 controls for the accounting half, 135/135 for the no-git half -- and one green run over the pair would have been evidence for neither.
+
+audit_checks 133 -> 136 standing controls. CONFORMANCE 226 and 227.
+
 ## 7.181.0 -- 2026-08-04 -- the seat is derived from the agent home, not chosen
 
 T-456: section 1.4 gave `agent:` a definition and left the one question that made the definition usable unanswered -- where a first value comes from. INIT cannot inherit a name that does not exist yet, and "write your own seat name" is a free choice. This repository's own history is what that costs: claude-opus, claude-sonnet-5, opencode, antigravity, antigravity-gemini, gemini-pro -- six names for two or three actors, four of them naming a MODEL rather than a seat.
