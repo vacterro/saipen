@@ -2,6 +2,20 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.183.0 -- 2026-08-04 -- two orphans, the habit that let them in, and a closed root
+
+The user spotted `.saipen/_scen_cand.md` by its name and was right about it: a leftover. A 194-row snapshot of the saiwiki `Scenarios.md` page, frozen at CONFORMANCE 194 while the maintained page is at 216, committed by accident in 8b8d58c -- a change whose entire subject was the Pick Rule check. A sweep for siblings found one more: `button33.wav`, an 8-bit mono WAV at the repository root, on the v7.176.0 push-failure checkpoint.
+
+Both arrived the same way, `git add -A` in a commit about something else, and neither was referenced by any document or tool. That is exactly why nothing caught them: every cross-doc check in `tools/validate.py` works by comparing a file against something that cites it, so a file nothing cites sits outside all of them, and the stale scenario table could have been read as truth by any agent grepping for one. `.gitignore` already carried three patterns added AFTER a leak -- `/nul`, the saiwiki gitlink, `settings.local.json` -- each closing one instance and leaving the class.
+
+The root is a closed set now. `ROOT_ALLOWED` names the sixteen files that belong there, and anything else FAILs. It reads the DIRECTORY rather than the git index, which catches the file before the commit rather than months later and works where git is absent; it honours `.gitignore` when git answers; it is gated to this repository's own clone, because an installed agent home is a flattened copy whose root legitimately differs; and it excludes `.git` structurally, since a linked worktree makes that a file rather than a directory. The last two were caught by the existing harnesses on the first run, which is T-413's install-layout blind spot arriving in new code.
+
+The sweep cleared the rest. Of 452 tracked files, the `.github/` templates, the nine adapters and the sealed LOG segments are read by convention or glob rather than by name, and the two dual-location pairs (`extensions/subs/MANIFEST.md`, `_shared/inbox.md`) are the shipped library against this project's live state -- RFC 1.9's model, not a conflict. No reorganisation was performed: nothing conflicts, and moving files with no reproduced conflict is the speculative work this protocol spends its time removing.
+
+Two red controls were repaired rather than left standing. `demote_the_pick` demoted the topmost BOARD line and went vacuous the moment that line was an unworkable ticket -- it demotes the ticket `next_action` actually names now, which is the pick by definition. The root-set control could not go red at all while the check read the git index.
+
+audit_checks 136 -> 137 standing controls. CONFORMANCE 228.
+
 ## 7.182.0 -- 2026-08-04 -- a MARKHUNT pass stays countable after triage, and `no-git` stops covering a readable repo
 
 T-461: the closure rule tells a later validator or human to sum "this pass's `[MARKHUNT]` tickets" against the manifest's `findings:` count, and nothing recorded which tickets those were. The rule reads durable history while depending on a surface that legitimately changes -- the same document sends a triaged finding from `## BLOCKED` to `## TODO` with the tag and the `unvetted audit` blocker dropped, and a dismissed finding leaves the board entirely. `BOARD.md` is not append-only; `LOG.md` is. Four passes had already run here (findings=3, 12, 6, 1) and not one can be re-checked today. `tickets=` joins the completion line, `tickets=none` when a pass found nothing, and triage or dismissal LOGs a `DEC` naming the ticket and the pass event.

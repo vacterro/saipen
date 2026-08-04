@@ -1,3 +1,3 @@
-done: v7.181.0 -- T-456 (the seat is derived from the agent home, and a model build name in it now FAILs). Earlier today: v7.177.0-v7.180.0, 13 tickets
-remaining: T-461 tops ## TODO; 12 open below it plus the gated v8 Crew backlog
-awaiting: nothing from you. The saitranslate agent's uncommitted README.ja.md is the live workspace's only FAIL and is theirs to finish
+done: v7.182.0 -- T-461 (a MARKHUNT pass names the tickets it wrote, so its closure stays countable after triage) and T-462 (`no-git` means git cannot be read; a git-less closure is unproven, not automatic)
+remaining: T-463 tops ## TODO; 10 open below it plus the gated v8 Crew backlog
+awaiting: nothing from you. README.ja.md is the live workspace's only FAIL and belongs to the saitranslate agent

@@ -3173,6 +3173,68 @@ else:
              "nothing is worse than one that says it could not measure")
         drift_ok = False
 
+    # 1b8. The repository root is a closed set. Both orphans this session
+    #      removed arrived the same way: `git add -A` during a checkpoint or
+    #      release commit, in a change whose subject had nothing to do with
+    #      them. `button33.wav`, an 8-bit mono WAV, rode in on the v7.176.0
+    #      push-failure checkpoint; `.saipen/_scen_cand.md`, a 194-row
+    #      snapshot of the wiki Scenarios page frozen 22 rows behind the
+    #      live one, rode in on the Pick Rule check. Nothing referenced
+    #      either, so nothing could ever contradict them -- an unreferenced
+    #      file is invisible to every cross-doc check this validator has.
+    #      `.gitignore` already carries three patterns added AFTER something
+    #      leaked (`/nul`, the wiki gitlink, settings.local.json); each fixed
+    #      one instance and left the class. The root is where accidents land
+    #      and its contents are small, stable and deliberate, so a closed set
+    #      catches the next one at the commit that adds it. Adding a real
+    #      root file means adding it here, which is one line and a decision.
+    ROOT_ALLOWED = {
+        ".gitattributes", ".gitignore", "CHANGELOG.md", "CHANGELOG_ARCHIVE.md",
+        "CODE_OF_CONDUCT.md", "CONTRIBUTING.md", "GUIDE.md", "LICENSE",
+        "README.ded.md", "README.ee.md", "README.ja.md", "README.md",
+        "SECURITY.md", "SPEC.md", "VERSION", "ruff.toml",
+    }
+    # Read the DIRECTORY, not the index. `git ls-files` was the first
+    # attempt and it made the check unreachable wherever git is absent --
+    # including the audit harness's own copy, where the red control then
+    # could not go red and reported itself as not-evidence. The filesystem
+    # is always there, and it also catches the file BEFORE the commit, which
+    # is the moment that matters: `git add -A` is how both orphans arrived.
+    # Git is still asked, when it answers, to drop anything gitignored, so a
+    # developer's ignored scratch at the root stays silent.
+    # `.git` is excluded structurally rather than allowlisted: it is not
+    # project content, and in a LINKED worktree it is a FILE holding a gitdir
+    # pointer rather than the directory it is in a normal clone. Reading the
+    # directory therefore sees it in one layout and not the other -- the
+    # install-layout blind spot T-413 names, reproduced here the moment this
+    # check ran inside a scenario fixture's own worktree.
+    # Gated to THIS repository's own clone. An installed agent home is a
+    # FLATTENED copy -- `RFC.md` sits next to the tools rather than under
+    # `saipen/` -- so its root legitimately holds a different file set, and
+    # judging it against this one FAILs a healthy install. Caught by the
+    # injector probes the first time this check ran, which is the same
+    # install-layout blind spot T-413 names.
+    _is_repo_clone = (_tools_parent / "saipen" / "RFC.md").is_file()
+    _root_files = {p.name for p in _tools_parent.iterdir()
+                   if _is_repo_clone and p.is_file() and p.name != ".git"}
+    _ignored = subprocess.run(["git", "check-ignore", "--stdin"],
+                              cwd=str(_tools_parent), input="\n".join(
+                                  sorted(_root_files)),
+                              capture_output=True, text=True)
+    if _ignored.returncode in (0, 1):
+        _root_files -= set(_ignored.stdout.split())
+    _stray = sorted(_root_files - ROOT_ALLOWED)
+    if _stray:
+        fail("cross-doc drift [root-file-set] -- file(s) at the repository "
+             f"root that the closed set does not name: {_stray}. Both orphans "
+             "removed alongside this check arrived that way, on a "
+             "`git add -A` in a commit about something else, and neither was "
+             "referenced by any document or tool -- so no other check here "
+             "could ever see them. A deliberate new root file is a one-line "
+             "addition to ROOT_ALLOWED in tools/validate.py; a scratch file "
+             "belongs in .gitignore, which this check honours")
+        drift_ok = False
+
     # 1c. § 2.1's ZERO-PROMPT rule is a MUST, and its exception list has to
     #     carry every live carve-out or the MUST orders a violation. It named
     #     only `phase: BLOCKED` while § 1.3 bans `ADD` outright under

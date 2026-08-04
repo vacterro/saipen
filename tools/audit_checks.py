@@ -530,50 +530,39 @@ def stamp_log_ahead(text: str) -> str:
 
 
 def demote_the_pick(text: str) -> str:
-    """T-474: reach the topmost-workable branch from either board state.
+    """T-474: reach the topmost-workable branch from any board state.
 
     The pick check compares `next_action` against the topmost workable
     `## TODO` ticket ONLY when nothing is claimed -- a `## DOING` ticket IS
     the pick (T-466) -- so a STATE-only mutation cannot reach that branch
-    while a ticket is in flight. Since T-466 made `## DOING` where a ticket
-    sits all the way through SHIP, that is most of a live session, and the
-    old STATE-only control quietly stopped being evidence exactly when the
-    repository was working. Mutating the board reaches the branch from both
-    sides and is never a no-op: demote the claimed ticket if there is one,
-    otherwise push the topmost `## TODO` ticket to the bottom of its own
-    section. Either way `next_action` still names a workable ticket that is
-    no longer the pick.
-    """
-    def body(src: str, name: str):
-        return re.search(rf"^## {name}$\n(.*?)(?=^## |\Z)", src,
-                         re.MULTILINE | re.DOTALL)
+    while a ticket is in flight. Mutating the board reaches it from both
+    sides.
 
-    moved = None
-    doing = body(text, "DOING")
-    if doing:
-        claimed = re.search(r"^- \[/\] T-\d+ .*$", doing.group(1),
-                            re.MULTILINE)
-        if claimed:
-            moved = claimed.group(0).replace("- [/] ", "- [ ] ", 1)
-            text = (text[:doing.start(1)]
-                    + doing.group(1).replace(claimed.group(0) + "\n", "", 1)
-                    + text[doing.end(1):])
-    if moved is None:
-        todo = body(text, "TODO")
-        top = (re.search(r"^- \[ \] T-\d+ .*$", todo.group(1), re.MULTILINE)
-               if todo else None)
-        if top is None:
-            return text
-        moved = top.group(0)
-        text = (text[:todo.start(1)]
-                + todo.group(1).replace(moved + "\n", "", 1)
-                + text[todo.end(1):])
-    todo = body(text, "TODO")
+    Demote the ticket `next_action` NAMES, wherever it sits. Demoting the
+    topmost LINE instead is what this did first, and it went vacuous the
+    moment the board's first line was an unworkable ticket -- `## TODO` led
+    with one carrying an unmet `needs:`, so moving it changed nothing the
+    check could see and the case reported itself as not-evidence. The named
+    ticket is the pick by definition, so demoting it always produces the
+    mismatch the check exists to catch.
+    """
+    nl = chr(10)
+    state = (HOME / ".saipen" / "STATE.md").read_text(encoding="utf-8-sig")
+    named = re.search(r"next_action:.*?(T-\d+)", state)
+    if named is None:
+        return text
+    ticket = named.group(1)
+    line = re.search(rf"^- \[[ /]\] {ticket} .*$", text, re.MULTILINE)
+    if line is None:
+        return text
+    moved = line.group(0).replace("- [/] ", "- [ ] ", 1)
+    text = text.replace(line.group(0) + nl, "", 1)
+    todo = re.search(r"^## TODO$\n(.*?)(?=^## |\Z)", text,
+                     re.MULTILINE | re.DOTALL)
     if todo is None:
         return text
-    return (text[:todo.start(1)] + todo.group(1).rstrip("\n") + "\n"
-            + moved + "\n\n" + text[todo.end(1):])
-
+    return (text[:todo.start(1)] + todo.group(1).rstrip(nl) + nl
+            + moved + nl + nl + text[todo.end(1):])
 
 CREATE = "<create the file>"
 SWAP = "<swap the last two log entries>"
@@ -786,6 +775,9 @@ CASES: list[tuple[str, str, object, str]] = [
      "saipen/phases/markhunt.md",
      replace("tree_movement=unverified", "tree_movement=fine"),
      "markhunt-no-git"),
+    ("a stray file appears at the repository root",
+     "SPEC_STRAY.md", write_new("stray root file" + chr(10)),
+     "root-file-set"),
     ("markhunt.md stops listing the tickets a pass wrote",
      "saipen/phases/markhunt.md",
      replace("`tickets=` is the pass's own", "`tickets=` is optional and"),
