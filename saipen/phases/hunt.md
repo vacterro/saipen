@@ -8,12 +8,25 @@ pure waste. A user who typed the command has already decided otherwise,
 so honouring the skip there makes the one command for forcing a sweep a
 documented no-op.
 
-Reached autonomously, skip ONLY if `.saipen/LOG.md`'s tail literally
-contains `hunt -> clean @<HASH>` where `<HASH>` is the exact output of
-`git rev-parse --short HEAD` run right now -- compute the hash first,
-then grep for that exact string. Anything else -- no match, an older
-hash, no `hunt -> clean` line at all -- run the full sweep below. No
-exceptions, no substitute heuristic. **No git** (`mode: no-publish`, § 1.3,
+Reached autonomously, skip ONLY if BOTH hold. **First, the worktree is
+clean**: `git status --porcelain` prints nothing. **Second**, `.saipen/LOG.md`'s
+tail literally contains `hunt -> clean @<HASH>` where `<HASH>` is the exact
+output of `git rev-parse --short HEAD` run right now -- compute the hash first,
+then grep for that exact string. Anything else -- a dirty tree, no match, an
+older hash, no `hunt -> clean` line at all -- run the full sweep below. No
+exceptions, no substitute heuristic.
+
+**The clean-tree half is not decoration.** `HEAD` names a commit, not a
+working tree, so the hash alone says nothing about tracked files edited since
+that commit or untracked files added since -- which is most of a live session,
+because work commits at SHIP and not per checkpoint (RFC § 1.5). Without it
+the skip reuses a clean result from a tree that no longer exists, and this
+document argued the point against itself: it rejects mtimes as an insufficient
+signal three paragraphs down while its own cache key ignored every uncommitted
+byte. `--porcelain` already excludes gitignored noise, so build output and
+caches do not invalidate the skip unless they are actually tracked or in
+scope. Cheaper than a fingerprint and it fails safe: when the tree's state
+cannot be established, there is no clean answer, so the sweep runs. **No git** (`mode: no-publish`, § 1.3,
 or no repo at all)? `git rev-parse` can't produce a hash, so the exact skip
 string can never be formed or matched -- which resolves the right way by
 construction: no match means never skip, always run the full sweep. That is
@@ -52,12 +65,32 @@ Signal order, cap 5 tickets:
 5. Symmetry gaps (save/load, undo/redo, import/export, start/stop, CLI params vs internal lists/GUI)
 6. Dead code, orphan files (zero grep refs, not entry/doc/config)
 
-Obvious junk -> delete free, capped at 5 files per sweep (same cap as the
-ambiguous tickets above), and never user data (anything a user created or
-would recognize as their own work -- same floor `phases/clean.md` states
-explicitly). More than that in one pass is mass-deletion territory (RFC
-§ 1.1) regardless of how obvious each file looks individually -- ticket
-the rest for confirmation instead of free-deleting past the cap.
+**Junk is deleted on proof of recovery, never on how obvious it looks.**
+RFC § 1.1 permits an unconfirmed destructive operation only when the active
+ticket pre-authorizes it AND the operation is reversible -- and HUNT routinely
+runs with no active ticket at all, so the pre-authorization half is simply
+absent here. "Obvious" is not a property of the file; it is a feeling about
+it, and an untracked generated artifact is exactly as obvious as an untracked
+file nothing can recreate.
+
+So delete without asking ONLY when recovery is provable, by one of exactly
+two proofs, named in the LOG line that records the deletion:
+- **tracked at HEAD** -- `git ls-files --error-unmatch <path>` succeeds, so
+  `git checkout HEAD -- <path>` restores the exact bytes; or
+- **mechanically regenerable** -- a command in this repository recreates it,
+  and you name that command (a build output, a lockfile, a generated table).
+
+Anything else -- untracked and not regenerable, or regenerable only by a
+command you would have to invent -- is ticketed for confirmation instead, and
+never user data (anything a user created or would recognize as their own work
+-- same floor `phases/clean.md` states explicitly). No git available? Then the
+first proof cannot be obtained at all and the second is the only route.
+
+The 5-file cap per sweep still applies on top and is unchanged, but it is a
+**mass-deletion gate, not a grant of authority**: five recoverable files may
+go, six may not, and one unrecoverable file may not go either. A numeric cap
+limits quantity; it never creates authorization or reversibility, and reading
+it as permission is how "capped at 5" came to mean "five free deletions".
 
 `.saipen/kitchen/` is in scope for this sweep too, not just orphan code --
 use `phases/clean.md`'s stale definition (owning ticket `DONE` and off

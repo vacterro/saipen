@@ -3005,6 +3005,37 @@ else:
                  "passed every check while naming no seat at all")
             drift_ok = False
 
+    # 1b3. HUNT's two destructive/staleness floors. Free deletion "capped at
+    #      5" read a quantity limit as a grant of authority: § 1.1 allows an
+    #      unconfirmed destructive op only when the active ticket
+    #      pre-authorizes it AND it is reversible, and HUNT routinely runs
+    #      with no ticket at all. And the clean-result cache keyed on `HEAD`
+    #      alone reused a verdict from a tree that no longer exists -- the
+    #      same document rejects mtimes as insufficient three paragraphs from
+    #      where its own key ignored every uncommitted byte.
+    _hunt_doc = rfc_path.parent / "phases" / "hunt.md"
+    _hunt_t = (_hunt_doc.read_text(encoding="utf-8-sig")
+               if _hunt_doc.is_file() else "")
+    if _hunt_t:
+        if ("deleted on proof of recovery" not in _hunt_t
+                or "mass-deletion gate, not a grant of authority" not in _hunt_t):
+            fail("cross-doc drift [hunt-delete-proof] -- phases/hunt.md must "
+                 "delete only what it can prove recoverable (tracked at HEAD, "
+                 "or regenerable by a named command) and must say the 5-file "
+                 "cap is a mass-deletion gate rather than authority to delete "
+                 "five files. RFC § 1.1 needs pre-authorization AND "
+                 "reversibility, and HUNT often runs with no ticket to "
+                 "pre-authorize anything")
+            drift_ok = False
+        if "`git status --porcelain` prints nothing" not in _hunt_t:
+            fail("cross-doc drift [hunt-clean-key] -- phases/hunt.md must "
+                 "require a clean worktree before reusing a `hunt -> clean` "
+                 "result. `HEAD` names a commit, not a tree, so the hash "
+                 "alone lets a dirty tree inherit a verdict measured on a "
+                 "different one -- and work commits at SHIP, not per "
+                 "checkpoint, so that is the ordinary case")
+            drift_ok = False
+
     # 1c. § 2.1's ZERO-PROMPT rule is a MUST, and its exception list has to
     #     carry every live carve-out or the MUST orders a violation. It named
     #     only `phase: BLOCKED` while § 1.3 bans `ADD` outright under

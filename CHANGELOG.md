@@ -2,6 +2,22 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.179.0 -- 2026-08-04 -- a compound defect gets a compound fixture, and HUNT stops reading a cap as permission
+
+T-457: `tools/audit_checks.py` mutates ONE file per case, so a validator condition whose trigger spans several files cannot be red-tested there -- mutate `STATE.md` alone and the board still disagrees, mutate `BOARD.md` alone and `next_action` is still legal, and every single-file attempt goes not-red, which reads exactly like a passing control. The route did not have to be invented: a `tests/scenarios/` fixture constructs a whole `.saipen/`, which is what a compound state is. `done-wait-deadlock-goal-mode/` is the worked pair for the branch that had only a hand red-test, and restoring the old `goal_mode is not True` exemption makes ONLY that fixture stop failing while its twin is unaffected -- targeted cause, not incidental red. Sweep result: that branch was the one unowned multi-file condition.
+
+Also from T-457: an `expect: fail` fixture with no `expect_fail_contains:` line is a FAIL now, not a WARN. Unpinned, it asserts only that something somewhere went wrong, so any unrelated failure scores it green. All eleven existing fail-fixtures already carried the pin, so it migrated nothing -- and it caught a real one on its first outing, a fixture left unpinned by this session's own hand red-test.
+
+T-458: HUNT's "obvious junk -> delete free, capped at 5" read a quantity limit as an authorization. RFC section 1.1 permits an unconfirmed destructive operation only when the active ticket pre-authorizes it AND it is reversible, and HUNT routinely runs with no active ticket, so the pre-authorization half was simply absent. "Obvious" is a feeling about a file, not a property of it. Deletion without asking now needs a named proof of recovery -- tracked at HEAD, or regenerable by a command named at the time -- and the cap survives unchanged as the mass-deletion gate it always was.
+
+T-459: the clean-result cache was keyed on `git rev-parse --short HEAD`. A commit hash says nothing about tracked files edited since or untracked files added since, which is most of a live session because work commits at SHIP rather than per checkpoint. The document argued against itself, rejecting mtimes as insufficient three paragraphs from where its own key ignored every uncommitted byte. Reuse now also requires `git status --porcelain` to print nothing: fails safe, no fingerprint machinery, and gitignored noise is already excluded.
+
+Both HUNT tickets are STRUCTURAL_ONLY and CONFORMANCE 222 says so rather than dressing it up -- nothing here executes a sweep, so no fixture can witness a deletion that did not happen. Each was verified in its own isolated worktree carrying that ticket's hunks alone, because the two edit the same three files and one green run over the pair would be evidence for neither.
+
+Correction to v7.178.0, recorded rather than defended: `tests/scenarios/proposal-mode-halt/` shipped described as "the behavioral half". It runs the validator against a state and proves the halt is admissible, which is a STATIC_STATE_SCENARIO; it does not exercise continue then pick then SCOUT, and no fixture here runs an agent.
+
+audit_checks 126 -> 129 standing controls. CONFORMANCE 221 and 222 added, 209 and 220 amended.
+
 ## 7.178.0 -- 2026-08-04 -- Proposal Mode can write down its own halt, and two rules got smaller after a provenance check
 
 T-455: `phases/plan.md` step 4 ordered `phase: DONE` plus a halt, forbade a `WAIT:` prefix as "a violation of RFC section 1.2", and forbade proceeding to `SCOUT`. That leaves only the four prefixes that each mean "do this now", so the one halt the bare `saipen plan` command exists to produce was recordable only as an action the agent was forbidden to perform -- and a cold agent reading `PHASE SCOUT T-###` executes it. There is no parked `PHASE`. The prohibition was wrong on its own terms too: section 1.2 restricts `WAIT:` to three fixed forms at `DONE` only when `## TODO` is EMPTY, and Proposal Mode has just filled it.

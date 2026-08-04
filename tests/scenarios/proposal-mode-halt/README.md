@@ -4,9 +4,16 @@ Test: bare `saipen plan` finished Proposal Mode and halted. `phase: DONE`,
 `## TODO` carrying the proposals it just wrote, `next_action` a `WAIT:` whose
 category is `user brake`.
 
-This is the behavioral half of the rule, and it is here because a marker check
-on `phases/plan.md` proves only that a sentence is still in a file. What has to
-be true is that the state Proposal Mode produces actually validates -- and for
+Evidence class: STATIC_STATE_SCENARIO. It asserts that the state Proposal Mode
+produces is ADMISSIBLE -- it runs the validator against a real `.saipen/` and
+expects exit 0. It does NOT exercise the flow that follows (`saipen continue`
+arrives, the topmost workable ticket is picked, SCOUT begins); nothing here
+runs an agent, so no fixture in this directory can claim that. Shipped once as
+"the behavioral half", which overstated it; corrected rather than defended.
+
+It is still worth more than the marker check on `phases/plan.md`, which proves
+only that a sentence is still in a file. What this adds is that the state
+actually validates -- and for
 six months it could not, from either side. Step 4 ordered `phase: DONE` plus a
 halt, forbade a `WAIT:` prefix as "a violation of RFC section 1.2", and forbade
 proceeding to `SCOUT`. That leaves only the four prefixes that each mean "do

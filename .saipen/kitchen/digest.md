@@ -1,3 +1,3 @@
-done: v7.177.0 -- T-474 (the user's command outranks a stale next_action), T-477 (a CONFORMANCE row could not cite the ticket writing it), T-478 (three red controls that were never evidence, one of them an invisible 0x01 byte), T-475 (the `gg` row's superseded promise), T-476 (a WAIT body is one sentence)
-remaining: T-455 -- phases/plan.md Proposal Mode has no coherent halt checkpoint; 18 more open below it
-awaiting: nothing from you. The saitranslate agent's uncommitted README.ja.md still FAILs the live tree and is theirs to finish
+done: v7.178.0 -- T-455 (Proposal Mode's halt had no legal form; fix narrowed to the WAIT category plus a behavioral fixture after a provenance check) and T-479 (agent: none rejected, template must ship a value the live checks refuse)
+remaining: T-456 -- where the FIRST seat identity deterministically comes from, still open on purpose; then T-457, T-458, T-459 and 15 more
+awaiting: your call on eight untracked .saipen/KNOWLEDGE notes -- thought4.md quotes `PHASE PLAN T-1` and a bare next_action, so the shipped-doc sweep FAILs the live tree on them; they are yours, I did not touch them

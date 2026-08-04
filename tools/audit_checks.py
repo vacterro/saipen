@@ -22,6 +22,16 @@ a check that has gone dead, and it fails here rather than being discovered
 years later.
 
 Exit 0 when every case still goes red, 1 otherwise.
+
+Single file per case, deliberately. A validator condition whose trigger spans
+MORE than one project file cannot be red-tested here: mutate `STATE.md` alone
+and the board still disagrees, mutate `BOARD.md` alone and `next_action` is
+still legal, and every single-file attempt goes not-red. Those belong in
+`tests/scenarios/`, which constructs a whole `.saipen/` and is therefore the
+canonical route for a compound condition -- no new mechanism was needed for it,
+only the observation that this one is the wrong tool (T-457). The DONE-wait
+deadlock under both goal modes is the worked pair:
+`tests/scenarios/done-wait-deadlock/` and `-goal-mode/`.
 """
 from __future__ import annotations
 
@@ -759,6 +769,20 @@ CASES: list[tuple[str, str, object, str]] = [
     # compare. The second control guards the honesty clause: refusing `none`
     # does not derive a first seat name, and a doc that stops saying so
     # promotes an open question to a settled rule by omission.
+    ("hunt.md goes back to five free deletions",
+     "saipen/phases/hunt.md",
+     replace("deleted on proof of recovery", "deleted when obvious"),
+     "hunt-delete-proof"),
+    ("hunt.md reads the cap as authority again",
+     "saipen/phases/hunt.md",
+     replace("mass-deletion gate, not a grant of authority",
+             "budget of five free deletions"),
+     "hunt-delete-proof"),
+    ("hunt.md reuses a clean result on a dirty tree",
+     "saipen/phases/hunt.md",
+     replace("`git status --porcelain` prints nothing",
+             "the commit hash is unchanged"),
+     "hunt-clean-key"),
     ("init.md goes back to ordering agent: none",
      "saipen/phases/init.md",
      replace("**never `none`**", "`none` is fine to start with"),

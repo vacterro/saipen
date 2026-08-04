@@ -64,8 +64,15 @@ EXPECT_RE = re.compile(r"^expect:\s*(pass|fail)\s*$", re.MULTILINE)
 #
 # So a fail-fixture MAY pin the reason with a second line:
 #     expect_fail_contains: <substring of the FAIL message>
-# Unpinned fail-fixtures still run, but WARN -- they are asserting only that
-# something, somewhere, went wrong.
+# A fail-fixture MUST pin its reason. Unpinned, it asserts only that
+# something, somewhere, went wrong -- which is the failure mode this whole
+# harness exists to detect one layer down: red is not evidence unless it is red
+# for the reason the fixture was built to prove. Reproduced twice in one
+# session: three `audit_checks` controls went red on a mangled ticket line
+# rather than on the cap they name, and a new fixture went red on an unrelated
+# `[phase-ticket-ref]` FAIL leaking in from outside its own tree. Every
+# fail-fixture in this repository already carries the pin, so this is a rot
+# guard rather than a migration.
 REASON_RE = re.compile(r"^expect_fail_contains:\s*(.+?)\s*$", re.MULTILINE)
 WARN_RE = re.compile(r"^expect_warn_contains:\s*(.+?)\s*$", re.MULTILINE)
 
@@ -1383,6 +1390,13 @@ for d in sorted(p for p in SCENARIOS.iterdir() if p.is_dir()):
     if declared is None:
         failures.append(f"{d.name}: ships a .saipen/ but declares no "
                         f"'expect: pass|fail' line -- cannot be checked")
+        continue
+
+    if declared == "fail" and not reason:
+        failures.append(f"{d.name}: declares 'expect: fail' with no "
+                        f"'expect_fail_contains:' line -- an unpinned "
+                        f"fail-fixture asserts only that something went "
+                        f"wrong, and any unrelated FAIL then scores it green")
         continue
 
     r = subprocess.run([sys.executable, str(VALIDATOR), "--project-root", str(d)], cwd=d,
