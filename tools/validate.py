@@ -944,6 +944,18 @@ if isinstance(_req, list):
 # mechanical and is the shape that actually escapes.
 AGENT_PLACEHOLDERS = ("id", "<name>", "agentid", "unknown", "agent", "name",
                       "todo", "tbd", "your-agent-id", "<agent>", "none")
+# A seat is the tool driving the project, and RFC 1.4 derives it from the
+# agent home the protocol was loaded from. A MODEL name is the thing that
+# changes underneath that seat, so a value carrying one is a renamed seat by
+# construction -- the false alarm 1.4 names, where the next session sees a
+# stranger because the model was upgraded. This repository's own history
+# carries `claude-opus`, `claude-sonnet-5`, `gemini-pro` and
+# `antigravity-gemini` for what were two actors. Closed list, extended
+# deliberately rather than guessed from shape: matching on digits or hyphens
+# would fail ordinary tool names.
+MODEL_TOKENS = ("opus", "sonnet", "haiku", "gpt", "gemini", "llama",
+                "deepseek", "flash", "mistral", "qwen", "grok", "turbo",
+                "4o", "o1", "o3")
 # `none` was the one placeholder shaped like a real answer. `phases/init.md`
 # and the shipped template both ORDERED it, so every project ever bootstrapped
 # was born with an identity § 1.4 cannot compare -- and unlike `<name>` it
@@ -957,6 +969,14 @@ if isinstance(_ag, str) and _ag.strip().lower() in AGENT_PLACEHOLDERS:
          f"§ 1.4 compares this field against itself to decide whether another "
          f"agent is live, and a placeholder makes that comparison meaningless "
          f"in both directions")
+_ag_tok = [m for m in MODEL_TOKENS
+           if isinstance(_ag, str) and m in _ag.strip().lower()]
+if _ag_tok:
+    fail(f"STATE.md agent is {_ag!r}, which carries the model token "
+         f"{_ag_tok[0]!r} -- RFC 1.4 makes the seat the agent home the "
+         f"protocol was loaded from (`.claude` -> `claude`), not the model "
+         f"build running in it. A model name renames the seat on every "
+         f"upgrade, which is the false alarm that check exists to prevent")
 
 # RFC § 2.4 safety-valve ceilings. Named rather than inlined so the trip check
 # below and any future reader see the same two numbers the RFC states.
@@ -2998,16 +3018,17 @@ else:
     _init_t = (_init_doc.read_text(encoding="utf-8-sig")
                if _init_doc.is_file() else "")
     if _init_t and ("**never `none`**" not in _init_t
-                    or "**What it does NOT do is tell" not in _init_t):
+                    or "**Where the value comes from is not a choice**"
+                    not in _init_t):
         fail("cross-doc drift [bootstrap-identity] -- phases/init.md must "
              "refuse `agent: none` at INIT and must keep saying, in the same "
              "breath, that refusing it does NOT define where the first seat "
              "name comes from. § 1.4 decides whether another agent is live by "
              "comparing that field against itself, so an undefined identity "
-             "is meaningless in both directions -- but 'write your own name' "
-             "is the same free choice that produced six names for three "
-             "actors here, and a doc that stops saying so turns an open "
-             "question into a settled rule by omission")
+             "is meaningless in both directions -- and the value is DERIVED "
+             "from the agent home the protocol was loaded from, never "
+             "chosen, because 'write your own name' is the free choice that "
+             "produced six names for three actors here")
         drift_ok = False
     _tmpl_state = _tools_parent / "extensions" / "templates" / "STATE.md"
     if _tmpl_state.is_file():

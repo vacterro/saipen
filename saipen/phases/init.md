@@ -27,14 +27,7 @@ matching exactly:
   bootstrapped was born with one; unlike an angle-bracket slot it reads as a
   deliberate answer, which is why nothing caught it. `tools/validate.py`
   rejects it with the other placeholders and requires the template to ship
-  one, so the field cannot survive as-copied. **What it does NOT do is tell
-  you where the first seat name comes from** -- writing whatever name you
-  like is the same free choice that produced six names for three actors in
-  this repository's own history, and a rejected `none` is not a derived
-  identity. Until a deterministic source is defined, record the name the
-  human or the platform actually uses for this seat and expect the next
-  session to inherit it verbatim; that open question is a live ticket, not a
-  settled rule), `saipen_version: 7`, `schema_version: 3`,
+  one, so the field cannot survive as-copied. **Where the value comes from is not a choice**: RFC 1.4 derives it from the agent home this protocol was loaded from -- take that directory's own name, strip a leading dot, lowercase it. `.claude` -> `claude`, `.codex` -> `codex`, `.config/opencode` -> `opencode`. BOOT already resolved that path to find the phase docs, so there is nothing new to look up and nothing to invent. A model build name is never a seat and the validator FAILs one. No agent home identifiable at all? Use the platform's canonical name and LOG a `DEC` saying it was self-reported rather than derived), `saipen_version: 7`, `schema_version: 3`,
   `style_contract:` (the boot marker declared at the top of `STYLE.md` --
   § 1.2's voice marker, required from the very first checkpoint; it is the
   only field here whose value lives outside `.saipen/`),

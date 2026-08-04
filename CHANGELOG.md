@@ -2,6 +2,20 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.181.0 -- 2026-08-04 -- the seat is derived from the agent home, not chosen
+
+T-456: section 1.4 gave `agent:` a definition and left the one question that made the definition usable unanswered -- where a first value comes from. INIT cannot inherit a name that does not exist yet, and "write your own seat name" is a free choice. This repository's own history is what that costs: claude-opus, claude-sonnet-5, opencode, antigravity, antigravity-gemini, gemini-pro -- six names for two or three actors, four of them naming a MODEL rather than a seat.
+
+The source is the agent home the protocol was loaded from: take that directory's own name, strip a leading dot, lowercase it. `.claude` to `claude`, `.codex` to `codex`, `.config/opencode` to `opencode`. `BOOT.md` already resolves that path to find the phase docs, so the value costs no new lookup and there is nothing to remember or invent. Every property 1.4 needs falls out of it -- deterministic per tool and machine, stable across model upgrades because the home does not move when the model behind it changes, distinct between real actors because two tools read from two homes, and observable because it is a directory rather than a self-report.
+
+A model build name is never a seat, and that is now mechanical rather than behavioural: a value carrying a model-family token from a closed list FAILs. It caught the session that wrote the rule, whose own STATE read `claude-opus`; renamed to `claude` with the `DEC` 1.4 requires. Matching is on the closed list rather than on shape, because digits or hyphens would fail ordinary tool names.
+
+Two things are stated rather than papered over. The degraded path: no agent home identifiable means the platform's canonical name plus a `DEC` recording that it was self-reported, so the one case a checker cannot distinguish is at least visible in history. And the known limit: two sessions of the SAME tool derive the same seat and are indistinguishable -- which is the concurrency case the Concurrency boundary already puts outside Core's envelope, and the parallel-session damage this repository actually recorded at E-1863 was two different tools, which this does separate.
+
+One audit case was dropped rather than repaired: it anchored on `phases/init.md`'s "what this does NOT do" clause, which the derivation superseded. The harness reported it as not-evidence instead of letting it sit there looking green.
+
+audit_checks 132 -> 133 standing controls. CONFORMANCE 225.
+
 ## 7.180.0 -- 2026-08-04 -- the prepare record names its producer, and `dd cc` stops being a dead pair
 
 T-460: `phases/prepare.md` fixed the completion event as `RUN: prepare -> done` and the failure event as `RUN: prepare -> FAILED <reason>` -- the same two strings for `saitranslate`, for `saiwiki`, and for an unqualified main-project package. A cold agent or `saipen status` reading `LOG.md` could not tell which handoff had become ready, and two prepares of different producers were indistinguishable rather than dedupable. The evidence that the shape was wrong is in this repository's own history: both live prepare events read `RUN: prepare saiwiki -> done`, agents writing the producer in by hand against the phase doc's own fixed format. `<producer>` is required now, with the literal `unqualified` when none was requested. The source revision is deliberately NOT duplicated into the LOG line -- the handoff's own `source_head:` carries it per producer, and a second copy in an append-only file goes stale against the one that refreshes. The check is a FAIL rather than a WARN because the repository holds zero unqualified records to grandfather, verified before the severity was chosen.
