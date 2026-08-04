@@ -69,7 +69,19 @@ does not answer.
 
 7. **Execute the instruction -- and the user's own message outranks the file.**
    Did this message name a command: a § 1.10 verb, a row of its shortcut table
-   (including the Cyrillic twin), or an active extension's word (§ 1.9)? Then
+   (including the Cyrillic twin), or an active extension's word (§ 1.9)?
+   **Then OPEN § 1.10 and read the row. Memory is never a source for it.**
+   That section is the only place the table exists, on purpose, and this is
+   the one time RFC is opened without a rule question -- an agent that
+   believes it knows what a key means never experiences one, which is
+   exactly how a confabulated table reaches the user. It has happened three
+   times, differently each time: a bare `qq` answered as a greeting, a `qq`
+   lost to a stale pre-computed pick, and a `hh` answered with a ten-row
+   reference card in which every row was wrong and six of the command names
+   did not exist. § 1.10's no-invention rule covers a word you do not
+   recognise; this covers believing you recognise one. Do not copy the table
+   here: a second copy drifts, and the gate in § 1.1 rejects a restatement
+   before it rejects anything else. Then
    THAT is the instruction, and `next_action` is merely what a bare continue
    would have run. RFC § 1.11's OBEY priority owns the rule and its placement:
    the command is the newest fact in the session and `next_action` the oldest,

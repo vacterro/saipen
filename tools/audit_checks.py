@@ -1011,6 +1011,18 @@ CASES: list[tuple[str, str, object, str]] = [
      replace("the user's own message outranks the file",
              "run whatever the state recorded"),
      "command-outranks-pick"),
+    ("BOOT step 7 drops the memory ban for shortcut tables", "saipen/BOOT.md",
+     replace("Memory is never a source for it.",
+             "Use memory if you are confident."),
+     "shortcut-memory-ban"),
+    ("BOOT step 7 drops the duplication ban for shortcut tables", "saipen/BOOT.md",
+     replace("Do not copy the table here",
+             "You may copy the table here"),
+     "shortcut-memory-ban"),
+    ("RFC § 1.10 softens the recall penalty", "saipen/RFC.md",
+     replace("answering a row from recall is the same failure as inventing a command",
+             "answering a row from recall is discouraged"),
+     "shortcut-memory-ban"),
     # § 2.1's ZERO-PROMPT MUST named one exception while § 1.3 banned ADD
     # under read-only, so the rule ordered a phase the mode forbids and both
     # rules looked followed on their own.

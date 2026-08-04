@@ -3009,6 +3009,31 @@ else:
                  "how the command the user typed gets dropped")
             drift_ok = False
 
+    # 1c. Shortcuts are resolved by reading § 1.10, never from memory.
+    if _boot_prio.is_file():
+        if "Memory is never a source for it" not in _boot_prio_t:
+            fail("cross-doc drift [shortcut-memory-ban] -- BOOT.md step 7 "
+                 "must order § 1.10's table read before acting on a shortcut "
+                 "and explicitly state that memory is never a source for it. "
+                 "An agent that believes it knows what a key means answers "
+                 "from recall rather than reading the file")
+            drift_ok = False
+        if "a second copy drifts" not in _boot_prio_t:
+            fail("cross-doc drift [shortcut-memory-ban] -- BOOT.md step 7 "
+                 "must explicitly forbid duplicating § 1.10's table into BOOT. "
+                 "A second copy drifts and defeats the read-the-source rule")
+            drift_ok = False
+        
+    _s110_i = rfc.find("### 1.10")
+    _s110 = (rfc[_s110_i:rfc.find("### 1.11", _s110_i)]
+             if _s110_i >= 0 else "")
+    if _s110:
+        if "answering a row from recall is the same failure as inventing a command" not in _s110:
+            fail("cross-doc drift [shortcut-memory-ban] -- RFC § 1.10 must state "
+                 "that answering a row from recall is the same failure as "
+                 "inventing a command, not a lesser one")
+            drift_ok = False
+
     # 1b. CLEAN's board scrub has to keep the dependency graph intact. § 1.2
     #     answers a `needs:` pointing at a ticket that exists nowhere on the
     #     board with `## BLOCKED`, so a scrub with no inbound-reference guard
