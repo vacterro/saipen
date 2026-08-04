@@ -751,6 +751,39 @@ CASES: list[tuple[str, str, object, str]] = [
      "clean-scrub-guard"),
     # The `cc` row's Notes promised "trigger goal mode" while § 1.10 forbids
     # bare `saipen goal` from setting the flag at all.
+    # Proposal Mode's halt was expressible only as an action the agent was
+    # forbidden to perform: step 4 ordered DONE plus a halt, banned `WAIT:`
+    # as a § 1.2 violation, and banned proceeding.
+    # `agent: none` was ordered by both the phase doc and the shipped
+    # template, so every project was born with an identity § 1.4 cannot
+    # compare. The second control guards the honesty clause: refusing `none`
+    # does not derive a first seat name, and a doc that stops saying so
+    # promotes an open question to a settled rule by omission.
+    ("init.md goes back to ordering agent: none",
+     "saipen/phases/init.md",
+     replace("**never `none`**", "`none` is fine to start with"),
+     "bootstrap-identity"),
+    ("init.md claims the seat-name question is settled",
+     "saipen/phases/init.md",
+     replace("**What it does NOT do is tell",
+             "This settles where the first seat name comes from. It tells"),
+     "bootstrap-identity"),
+    # Must be a value the live checks ACCEPT -- `none` is a placeholder now,
+    # so mutating the template to it leaves the template requirement
+    # satisfied and the control proves nothing. A real seat name is the
+    # failure: it copies straight into a first checkpoint and passes.
+    ("the shipped template ships a passable agent value",
+     "extensions/templates/STATE.md",
+     sub_line("agent", "opencode"),
+     "bootstrap-identity"),
+    ("plan.md lets the halt be a PHASE nobody executes",
+     "saipen/phases/plan.md",
+     replace("There is no parked `PHASE`",
+             "A `PHASE` may be recorded without being executed"),
+     "proposal-halt"),
+    ("plan.md drops the halt's category", "saipen/phases/plan.md",
+     replace("category is `user brake`", "category is up to you"),
+     "proposal-halt"),
     ("the cc row promises a pivot its bare form cannot perform",
      "saipen/RFC.md",
      replace("The pivot needs text", "Trigger goal mode"),

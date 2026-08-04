@@ -943,7 +943,14 @@ if isinstance(_req, list):
 # here can tell a genuine handover from a renamed seat), but a placeholder is
 # mechanical and is the shape that actually escapes.
 AGENT_PLACEHOLDERS = ("id", "<name>", "agentid", "unknown", "agent", "name",
-                      "todo", "tbd", "your-agent-id", "<agent>")
+                      "todo", "tbd", "your-agent-id", "<agent>", "none")
+# `none` was the one placeholder shaped like a real answer. `phases/init.md`
+# and the shipped template both ORDERED it, so every project ever bootstrapped
+# was born with an identity § 1.4 cannot compare -- and unlike `<name>` it
+# reads as a deliberate value rather than as a slot nobody filled. INIT is
+# executed by a real agent, so the first canonical checkpoint records that
+# agent's seat; an English sentinel is not a third state with defined
+# comparison semantics, it is an undefined one wearing a word.
 _ag = state.get("agent")
 if isinstance(_ag, str) and _ag.strip().lower() in AGENT_PLACEHOLDERS:
     fail(f"STATE.md agent is {_ag!r} -- a placeholder, not a seat name. RFC "
@@ -2961,6 +2968,43 @@ else:
                  "RFC § 1.2 answers with `## BLOCKED`")
             drift_ok = False
 
+    # 1b2. The bootstrap identity. `phases/init.md` and the shipped template
+    #      both ordered `agent: none`, which § 1.4 cannot compare against
+    #      anything -- and unlike `<name>` it reads as a deliberate answer, so
+    #      every project ever bootstrapped carried it and nothing said a word.
+    #      Two halves: the phase doc must send INIT to its own seat name, and
+    #      the template must ship a value a live state would be FAILed for, so
+    #      the field cannot survive as-copied into the first checkpoint.
+    _init_doc = rfc_path.parent / "phases" / "init.md"
+    _init_t = (_init_doc.read_text(encoding="utf-8-sig")
+               if _init_doc.is_file() else "")
+    if _init_t and ("**never `none`**" not in _init_t
+                    or "**What it does NOT do is tell" not in _init_t):
+        fail("cross-doc drift [bootstrap-identity] -- phases/init.md must "
+             "refuse `agent: none` at INIT and must keep saying, in the same "
+             "breath, that refusing it does NOT define where the first seat "
+             "name comes from. § 1.4 decides whether another agent is live by "
+             "comparing that field against itself, so an undefined identity "
+             "is meaningless in both directions -- but 'write your own name' "
+             "is the same free choice that produced six names for three "
+             "actors here, and a doc that stops saying so turns an open "
+             "question into a settled rule by omission")
+        drift_ok = False
+    _tmpl_state = _tools_parent / "extensions" / "templates" / "STATE.md"
+    if _tmpl_state.is_file():
+        _tm = re.search(r"^agent:\s*(.*)$",
+                        _tmpl_state.read_text(encoding="utf-8-sig"),
+                        re.MULTILINE)
+        if (_tm is None
+                or _tm.group(1).strip().lower() not in AGENT_PLACEHOLDERS):
+            fail("cross-doc drift [bootstrap-identity] -- "
+                 "extensions/templates/STATE.md must ship `agent:` as a value "
+                 f"tools/validate.py rejects ({AGENT_PLACEHOLDERS[1]!r} is the "
+                 "shipped one), so a copied template cannot reach a first "
+                 "checkpoint with the field unfilled. It shipped `none`, which "
+                 "passed every check while naming no seat at all")
+            drift_ok = False
+
     # 1c. § 2.1's ZERO-PROMPT rule is a MUST, and its exception list has to
     #     carry every live carve-out or the MUST orders a violation. It named
     #     only `phase: BLOCKED` while § 1.3 bans `ADD` outright under
@@ -4480,6 +4524,42 @@ else:
                          f"at the front of `## TODO`. Board order is priority "
                          f"(§ 1.6), so a request filed behind existing work is "
                          f"a request denied politely")
+                    drift_ok = False
+
+            # Proposal Mode's halt had no legal expression. Step 4 ordered
+            # `phase: DONE` plus a halt, forbade a `WAIT:` prefix as a § 1.2
+            # violation, and forbade proceeding -- leaving only the four
+            # prefixes that each mean "do this now", so the halt could be
+            # written down only as an action the agent was forbidden to
+            # perform, and a cold agent reading `PHASE SCOUT T-###` executes
+            # it. The prohibition was also simply wrong: § 1.2 restricts
+            # `WAIT:` to three fixed forms at `DONE` only when `## TODO` is
+            # EMPTY, and Proposal Mode has just filled it.
+            _plan_t = (_plan_doc.read_text(encoding="utf-8-sig")
+                       if _plan_doc.is_file() else "")
+            if _plan_t:
+                # Pin the SEMANTICS, not the sentence. `validate.py` matches
+                # the category token `user brake` and nothing beyond it, and
+                # § 1.11's UNBLOCK reads the `WAIT:` prefix -- so mandating a
+                # full sentence would make normative a string no machine
+                # reads, guarded by a marker check and a red control that
+                # both descend from that same sentence. The reason clause is
+                # for the human. `tests/scenarios/proposal-mode-halt/` is the
+                # behavioral half: it puts a real project in the state and
+                # asserts the validator accepts it.
+                _halt = ("category is `user brake`" in _plan_t
+                         and "There is no parked `PHASE`" in _plan_t)
+                _old = "Do NOT use a `WAIT:` prefix" in _plan_t
+                if not _halt or _old:
+                    fail("cross-doc drift [proposal-halt] -- phases/plan.md "
+                         "step 4 must name the one legal Proposal-Mode halt, a "
+                         "`WAIT: user brake` naming the choice, and must not "
+                         "forbid a `WAIT:` there. § 1.2's three-form whitelist "
+                         "governs `DONE` with an EMPTY `## TODO`, which is not "
+                         "the state Proposal Mode produces; without the "
+                         "wording the halt is expressible only as one of the "
+                         "four prefixes that mean act now, which a cold agent "
+                         "then acts on")
                     drift_ok = False
 
             _bad_routes = []

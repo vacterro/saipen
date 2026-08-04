@@ -19,7 +19,22 @@ matching exactly:
 - `STATE.md`: frontmatter `phase: PLAN`, `task: none`, `next_action:
   "WAIT: init -- provide the first project goal or raw backlog"` (RFC § 1.2's
   narrow INIT-bootstrap `WAIT:` exception -- ask for the goal/backlog
-  only, nothing else), `blocker: none`, `agent: none`, `saipen_version: 7`, `schema_version: 3`,
+  only, nothing else), `blocker: none`, `agent:` (**never `none`**: `INIT` is executed by a real
+  agent, and § 1.4 compares this field against itself to decide whether
+  another agent is live, so an undefined identity makes that comparison
+  meaningless in both directions from the very first checkpoint. This step
+  ordered `none` and the shipped template carried it, so every project ever
+  bootstrapped was born with one; unlike an angle-bracket slot it reads as a
+  deliberate answer, which is why nothing caught it. `tools/validate.py`
+  rejects it with the other placeholders and requires the template to ship
+  one, so the field cannot survive as-copied. **What it does NOT do is tell
+  you where the first seat name comes from** -- writing whatever name you
+  like is the same free choice that produced six names for three actors in
+  this repository's own history, and a rejected `none` is not a derived
+  identity. Until a deterministic source is defined, record the name the
+  human or the platform actually uses for this seat and expect the next
+  session to inherit it verbatim; that open question is a live ticket, not a
+  settled rule), `saipen_version: 7`, `schema_version: 3`,
   `style_contract:` (the boot marker declared at the top of `STYLE.md` --
   § 1.2's voice marker, required from the very first checkpoint; it is the
   only field here whose value lives outside `.saipen/`),

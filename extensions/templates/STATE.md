@@ -3,7 +3,7 @@ phase: PLAN
 task: none
 next_action: "WAIT: init -- provide the first project goal or raw backlog"
 blocker: none
-agent: none
+agent: <name>
 saipen_version: 7
 schema_version: 3
 style_contract: ""

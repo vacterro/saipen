@@ -36,7 +36,8 @@
       "type": "string"
     },
     "agent": {
-      "type": "string"
+      "type": "string",
+      "description": "The SEAT this state is worked under, not the model build (RFC 1.4). Inherited by a returning agent; changed only for a genuinely different actor, with a DEC line naming both values. tools/validate.py rejects placeholders, `none` among them: 1.4 compares this field against itself to decide whether another agent is live, so an undefined identity makes the comparison meaningless in both directions. Where the FIRST seat name comes from at INIT is not specified by this schema and is open on the board -- this field records an identity, it does not derive one."
     },
     "saipen_version": {
       "type": "integer",
