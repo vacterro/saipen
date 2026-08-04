@@ -14,7 +14,7 @@
 
 **ภาษาที่ตอบ** เอเจนต์ตอบเป็น**ภาษาเอสโตเนีย** โดยค่าเริ่มต้น — นี่คือการตั้งค่า ไม่ใช่ความแปลก และไม่มีสิ่งอื่นใดใน SAIPEN เป็นภาษาเอสโตเนีย เปลี่ยนได้ที่จุดเดียว: บรรทัด `reply_language:` ที่ด้านบนของ [`saipen/STYLE.md`](saipen/STYLE.md) `et` เอสโตเนีย `en` อังกฤษ `ru` รัสเซีย `auto` เลือกตามภาษาของข้อความที่คุณส่ง โปรโตคอล โค้ด คอมมิต และเอกสารทั้งหมดยังคงเป็นภาษาอังกฤษไม่ว่าค่าใด
 
-**v7.185.0** | [ข้อกำหนด](SPEC.md) | [คู่มือ](GUIDE.md) | [RFC](saipen/RFC.md) | [สไตล์](saipen/STYLE.md) | [UI](saipen/UI.md) | [การปฏิบัติตามมาตรฐาน](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
+**v7.186.0** | [ข้อกำหนด](SPEC.md) | [คู่มือ](GUIDE.md) | [RFC](saipen/RFC.md) | [สไตล์](saipen/STYLE.md) | [UI](saipen/UI.md) | [การปฏิบัติตามมาตรฐาน](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
 
 ```text
 User  ->  /saipen continue
@@ -96,3 +96,5 @@ bash bootstrap/inject.sh                                            # macOS / Li
 <img src="assets/screenshot-20260801-003853.png" alt="ภาพหน้าจอ saipen 2026-08-01" width="600"/>
 
 </details>
+
+<!-- source-digest: README.md sha256:951d8044313a6456 -->

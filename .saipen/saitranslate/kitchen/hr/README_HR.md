@@ -16,7 +16,7 @@ i nastavlja rad za manje od minute -- bez ponovnog brifiranja, bilo koji pružat
 
 **Jezik odgovora.** Agent prema zadanim postavkama odgovara **na estonskom** — to je postavka, a ne hir, i ništa drugo u SAIPEN-u nije estonsko. Mijenja se na jednom mjestu: redak `reply_language:` na vrhu [`saipen/STYLE.md`](saipen/STYLE.md). `et` estonski, `en` engleski, `ru` ruski, `auto` bira prema jeziku tvoje poruke. Protokol, kod, commitovi i svi dokumenti ostaju na engleskom pri svakoj vrijednosti.
 
-**v7.185.0** | [Spec](SPEC.md) | [Vodič](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [Korisničko sučelje](saipen/UI.md) | [Sukladnost](saipen/CONFORMANCE.md) | čist markdown | nula ovisnosti | MIT
+**v7.186.0** | [Spec](SPEC.md) | [Vodič](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [Korisničko sučelje](saipen/UI.md) | [Sukladnost](saipen/CONFORMANCE.md) | čist markdown | nula ovisnosti | MIT
 
 ```text
 Korisnik ->  /saipen continue
@@ -98,3 +98,5 @@ Bilješke po platformi nalaze se u `extensions/adapters/`.
 <img src="assets/screenshot-20260801-003853.png" alt="Snimka zaslona saipen 2026-08-01" width="600"/>
 
 </details>
+
+<!-- source-digest: README.md sha256:951d8044313a6456 -->

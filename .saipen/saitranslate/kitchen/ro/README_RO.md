@@ -16,7 +16,7 @@ markdown simplu, astfel încât un agent nou fără istoric de chat execută `/s
 
 **Limba de răspuns.** Agentul răspunde implicit **în estonă** — este o setare, nu o excentricitate, și nimic altceva în SAIPEN nu este eston. Se schimbă într-un singur loc: linia `reply_language:` de la începutul [`saipen/STYLE.md`](saipen/STYLE.md). `et` estonă, `en` engleză, `ru` rusă, `auto` alege după limba mesajului tău. Protocolul, codul, commit-urile și toate documentele rămân în engleză la orice valoare.
 
-**v7.185.0** | [Spec](SPEC.md) | [Ghid](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformitate](saipen/CONFORMANCE.md) | markdown simplu | zero dependențe | MIT
+**v7.186.0** | [Spec](SPEC.md) | [Ghid](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformitate](saipen/CONFORMANCE.md) | markdown simplu | zero dependențe | MIT
 
 ```text
 Utilizator ->  /saipen continue
@@ -98,3 +98,5 @@ Notele specifice fiecărei platforme se află în `extensions/adapters/`.
 <img src="assets/screenshot-20260801-003853.png" alt="Captură de ecran saipen 2026-08-01" width="600"/>
 
 </details>
+
+<!-- source-digest: README.md sha256:951d8044313a6456 -->

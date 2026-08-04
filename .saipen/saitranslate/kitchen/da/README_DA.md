@@ -14,7 +14,7 @@
 
 **Svarsprog.** Agenten svarer som standard **på estisk** — det er en indstilling, ikke en særhed, og intet andet i SAIPEN er estisk. Ændres ét sted: linjen `reply_language:` øverst i [`saipen/STYLE.md`](saipen/STYLE.md). `et` estisk, `en` engelsk, `ru` russisk, `auto` vælger ud fra sproget i din besked. Protokollen, koden, commits og alle dokumenter forbliver engelske ved enhver værdi.
 
-**v7.185.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | ren markdown | nul afhængigheder | MIT
+**v7.186.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | ren markdown | nul afhængigheder | MIT
 
 ```text
 Bruger ->  /saipen continue
@@ -96,3 +96,5 @@ Platformsspecifikke noter findes i `extensions/adapters/`.
 <img src="assets/screenshot-20260801-003853.png" alt="saipen skærmbillede 2026-08-01" width="600"/>
 
 </details>
+
+<!-- source-digest: README.md sha256:951d8044313a6456 -->

@@ -16,7 +16,7 @@ und die Arbeit in unter einer Minute wiederaufnimmt -- kein Erklärungsbedarf, j
 
 **Antwortsprache.** Der Agent antwortet standardmäßig **auf Estnisch** — das ist eine Einstellung, keine Marotte, und nichts anderes an SAIPEN ist estnisch. Geändert wird das an einer Stelle: die Zeile `reply_language:` am Anfang von [`saipen/STYLE.md`](saipen/STYLE.md). `et` Estnisch, `en` Englisch, `ru` Russisch, `auto` wählt anhand der Sprache deiner Nachricht. Das Protokoll, der Code, die Commits und alle Dokumente bleiben bei jedem Wert englisch.
 
-**v7.185.0** | [Spezifikation](SPEC.md) | [Handbuch](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Konformität](saipen/CONFORMANCE.md) | Plain Markdown | Zero Deps | MIT
+**v7.186.0** | [Spezifikation](SPEC.md) | [Handbuch](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Konformität](saipen/CONFORMANCE.md) | Plain Markdown | Zero Deps | MIT
 
 ```text
 Benutzer ->  /saipen continue
@@ -99,3 +99,5 @@ Plattformspezifische Hinweise befinden sich in `extensions/adapters/`.
 <img src="assets/screenshot-20260801-003853.png" alt="saipen-Screenshot 2026-08-01" width="600"/>
 
 </details>
+
+<!-- source-digest: README.md sha256:951d8044313a6456 -->

@@ -3270,6 +3270,70 @@ else:
              "Pick Rule applies while its own `verify:` says closing it FAILs")
         drift_ok = False
 
+    # 1b11. Stale translation next to updated source. `phases/translate.md`
+    #       states the duty and names the gap in the same breath: a stale
+    #       translation is worse than none "since nothing signals they've
+    #       gone wrong" -- and nothing did. Commit dates cannot serve: every
+    #       release bumps the version badge in all 65 locale files, so they
+    #       always look exactly as fresh as their source. The badge check
+    #       measures the badge, not the prose, and reads like freshness.
+    #
+    #       Each locale source carries the digest of the English source it
+    #       was translated FROM, with version strings normalised out so a
+    #       badge bump moves nothing. This is `style_contract`'s shape one
+    #       surface over: a scalar whose truth lives in another file, so the
+    #       claim can be checked against evidence instead of believed.
+    #
+    #       WARN, not FAIL, and deliberately. The duty section 3 names is a
+    #       SIGNAL -- Core edits English prose constantly and 29 of the 32
+    #       languages are subSaipen work by rule, so a FAIL would gate every
+    #       Core release on a translation pass and be switched off the first
+    #       time it was inconvenient. A WARN that survives releases is then
+    #       owned by a live ticket under T-401's rule, which is the existing
+    #       route for known debt rather than a new one.
+    _tr_dir = _tools_parent / ".saipen" / "saitranslate" / "kitchen"
+    _en_src = _tools_parent / "README.md"
+    if _tr_dir.is_dir() and _en_src.is_file():
+        _want = hashlib.sha256(re.sub(
+            r"\d+\.\d+\.\d+", "VERSION",
+            _en_src.read_text(encoding="utf-8-sig")).encode("utf-8")
+        ).hexdigest()[:16]
+        _stale, _unstamped = [], []
+        for _loc in sorted(_tr_dir.glob("*/README_*.md")):
+            _m = re.search(r"<!-- source-digest: README\.md sha256:([0-9a-f]+) -->",
+                           _loc.read_text(encoding="utf-8-sig"))
+            if _m is None:
+                _unstamped.append(_loc.parent.name)
+            elif _m.group(1) != _want:
+                _stale.append(_loc.parent.name)
+        if _stale:
+            warn("translation-stale",
+                 f"{len(_stale)} locale README(s) carry a source digest that "
+                 f"no longer matches README.md's normalised content "
+                 f"({', '.join(_stale)}) -- the English prose moved and the "
+                 f"translation did not follow. Version strings are normalised "
+                 f"out, so a badge bump can never cause this")
+        if _unstamped:
+            warn("translation-unstamped",
+                 f"{len(_unstamped)} locale README(s) carry no "
+                 f"`source-digest` marker ({', '.join(_unstamped)}), so "
+                 f"nothing can tell whether they followed the English source "
+                 f"or were left behind")
+
+    # 1b12. The translator has to know to restamp, or the marker rots into
+    #       a permanent stale warning nobody can clear by translating.
+    _tr_doc = rfc_path.parent / "phases" / "translate.md"
+    _tr_t = (_tr_doc.read_text(encoding="utf-8-sig")
+             if _tr_doc.is_file() else "")
+    if _tr_t and "Something signals it now, and keeping that signal" not in _tr_t:
+        fail("cross-doc drift [translation-digest] -- phases/translate.md "
+             "must tell the translator to recompute and write the "
+             "`source-digest` marker for the locales it actually translated. "
+             "Without that the marker only ever ages, and section 3's own "
+             "sentence about nothing signalling a stale translation stays "
+             "true with a signal sitting right there")
+        drift_ok = False
+
     # 1c. § 2.1's ZERO-PROMPT rule is a MUST, and its exception list has to
     #     carry every live carve-out or the MUST orders a violation. It named
     #     only `phase: BLOCKED` while § 1.3 bans `ADD` outright under

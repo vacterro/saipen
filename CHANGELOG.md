@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.186.0 -- 2026-08-04 -- a stale translation next to updated source finally has a signal
+
+T-423: `phases/translate.md` section 3 stated the duty and named the gap in the same sentence -- a stale translation is worse than none "since nothing signals they've gone wrong" -- and for 32 languages nothing did. Commit dates cannot serve: every release bumps the version badge in all 65 locale files, so they always look exactly as fresh as their source. The badge check that reports `32 locale README badge(s) match VERSION` measures the badge, not the prose, while reading like freshness.
+
+Each locale README carries, as its last line, the digest of the English source it was translated FROM, with every `N.N.N` version string normalised to the literal `VERSION` first. That is `style_contract`'s shape one surface over: a scalar whose truth lives in another file, so the claim can be checked against evidence instead of believed. Normalising the version out is what makes it usable at all -- a digest that included it would move on every release and mean nothing, which is the same reason commit dates cannot serve. The translator recomputes and writes the marker for the locales it actually translated and no others: stamping a file nobody touched is the exact lie the marker exists to prevent.
+
+WARN, not FAIL, and the severity is a decision rather than a default. The duty is a SIGNAL; Core edits English prose constantly and 29 of the 32 languages are subSaipen work by rule, so a FAIL would gate every Core release on a translation pass and be switched off the first time it was inconvenient -- which is how a check stops existing. A WARN that survives releases is owned by a live ticket under the existing ownership rule rather than a new mechanism.
+
+The digest half is a HAND red-test and the row says so: an audit case cannot assert a WARN, because that harness requires the validator to exit non-zero. Three properties proven by hand -- editing README.md's prose WARNs all 32 locales by name, removing one marker WARNs that locale as unstamped, and bumping only the version badge produces nothing at all.
+
+audit_checks 141 -> 142 standing controls. CONFORMANCE 231.
+
 ## 7.185.0 -- 2026-08-04 -- the board stops ordering work nobody can finish
 
 T-427: two tickets sat in `## TODO` for months owning warnings that immutable history guarantees forever. T-406 owns subsaipen-never-ran, which `MANIFEST.md` makes emit until saipython actually runs; T-407 owns goal-reauth-untripped, which E-1659 put in an append-only file. Both exist so their slug has an owner under row 185, and both carry a `verify:` saying that closing them while the warning emits FAILs that same check.

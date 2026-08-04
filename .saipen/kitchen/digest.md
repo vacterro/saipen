@@ -1,3 +1,3 @@
-done: v7.184.0 -- T-463, `no-publish` is a permission rather than an absent git, and the release step is split so a mode that forbids committing no longer tells its reader to commit
-remaining: T-427 tops ## TODO; 9 open below it plus the gated v8 Crew backlog
+done: v7.185.0 -- T-427, the Pick Rule can no longer be handed a ticket whose completion condition immutable history guarantees can never be met
+remaining: T-423 tops ## TODO; 8 open below it plus the gated v8 Crew backlog
 awaiting: nothing from you. README.ja.md is the live workspace's only FAIL and belongs to the saitranslate agent

@@ -16,7 +16,7 @@ y reanude el trabajo en menos de un minuto: sin explicaciones previas, cualquier
 
 **Idioma de respuesta.** El agente responde por defecto **en estonio** — es un ajuste, no una manía, y nada más en SAIPEN está en estonio. Se cambia en un solo lugar: la línea `reply_language:` al principio de [`saipen/STYLE.md`](saipen/STYLE.md). `et` estonio, `en` inglés, `ru` ruso, `auto` elige según el idioma de tu mensaje. El protocolo, el código, los commits y todos los documentos siguen en inglés con cualquier valor.
 
-**v7.185.0** | [Espec](SPEC.md) | [Guía](GUIDE.md) | [RFC](saipen/RFC.md) | [Estilo](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformidad](saipen/CONFORMANCE.md) | markdown plano | cero dependencias | MIT
+**v7.186.0** | [Espec](SPEC.md) | [Guía](GUIDE.md) | [RFC](saipen/RFC.md) | [Estilo](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformidad](saipen/CONFORMANCE.md) | markdown plano | cero dependencias | MIT
 
 ```text
 Usuario ->  /saipen continue
@@ -99,3 +99,5 @@ Las notas específicas para cada plataforma se encuentran en `extensions/adapter
 <img src="assets/screenshot-20260801-003853.png" alt="Captura de saipen 2026-08-01" width="600"/>
 
 </details>
+
+<!-- source-digest: README.md sha256:951d8044313a6456 -->

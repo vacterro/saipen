@@ -14,7 +14,7 @@
 
 **لغة الرد.** يرد الوكيل افتراضيًا **باللغة الإستونية** — هذه إعدادات، وليست نزوة، ولا شيء آخر في SAIPEN باللغة الإستونية. غيّرها في مكان واحد: سطر `reply_language:` في أعلى [`saipen/STYLE.md`](saipen/STYLE.md). `et` الإستونية، `en` الإنجليزية، `ru` الروسية، `auto` تختار حسب لغة رسالتك. يبقى البروتوكول والكود والالتزامات وكل الوثائق بالإنجليزية مهما كانت القيمة.
 
-**v7.185.0** | [المواصفات](SPEC.md) | [الدليل](GUIDE.md) | [RFC](saipen/RFC.md) | [الأسلوب](saipen/STYLE.md) | [واجهة المستخدم](saipen/UI.md) | [التطابق](saipen/CONFORMANCE.md) | markdown بسيط | صفر تبعيات | MIT
+**v7.186.0** | [المواصفات](SPEC.md) | [الدليل](GUIDE.md) | [RFC](saipen/RFC.md) | [الأسلوب](saipen/STYLE.md) | [واجهة المستخدم](saipen/UI.md) | [التطابق](saipen/CONFORMANCE.md) | markdown بسيط | صفر تبعيات | MIT
 
 ```text
 المستخدم ->  /saipen continue
@@ -96,3 +96,5 @@ bash bootstrap/inject.sh                                            # macOS / Li
 <img src="assets/screenshot-20260801-003853.png" alt="لقطة شاشة saipen 2026-08-01" width="600"/>
 
 </details>
+
+<!-- source-digest: README.md sha256:951d8044313a6456 -->

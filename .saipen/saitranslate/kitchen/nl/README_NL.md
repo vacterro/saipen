@@ -16,7 +16,7 @@ en het werk in minder dan een minuut hervat -- geen herbriefing, elke leverancie
 
 **Antwoordtaal.** De agent antwoordt standaard **in het Estisch** — dat is een instelling, geen eigenaardigheid, en niets anders aan SAIPEN is Estisch. Het wordt op één plek gewijzigd: de regel `reply_language:` bovenaan [`saipen/STYLE.md`](saipen/STYLE.md). `et` Estisch, `en` Engels, `ru` Russisch, `auto` kiest op basis van de taal van je bericht. Het protocol, de code, de commits en alle documenten blijven bij elke waarde Engels.
 
-**v7.185.0** | [Spec](SPEC.md) | [Gids](GUIDE.md) | [RFC](saipen/RFC.md) | [Stijl](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformiteit](saipen/CONFORMANCE.md) | plat markdown | nul afhankelijkheden | MIT
+**v7.186.0** | [Spec](SPEC.md) | [Gids](GUIDE.md) | [RFC](saipen/RFC.md) | [Stijl](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformiteit](saipen/CONFORMANCE.md) | plat markdown | nul afhankelijkheden | MIT
 
 ```text
 Gebruiker ->  /saipen continue
@@ -99,3 +99,5 @@ Notities per platform zijn te vinden in `extensions/adapters/`.
 <img src="assets/screenshot-20260801-003853.png" alt="saipen-schermafbeelding 2026-08-01" width="600"/>
 
 </details>
+
+<!-- source-digest: README.md sha256:951d8044313a6456 -->

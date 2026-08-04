@@ -16,7 +16,7 @@
 
 **Γλώσσα απαντήσεων.** Ο πράκτορας απαντά από προεπιλογή **στα εσθονικά** — είναι ρύθμιση, όχι ιδιοτροπία, και τίποτα άλλο στο SAIPEN δεν είναι εσθονικό. Αλλάζει σε ένα σημείο: η γραμμή `reply_language:` στην αρχή του [`saipen/STYLE.md`](saipen/STYLE.md). `et` εσθονικά, `en` αγγλικά, `ru` ρωσικά, `auto` επιλέγει από τη γλώσσα του μηνύματός σου. Το πρωτόκολλο, ο κώδικας, τα commits και όλα τα έγγραφα παραμένουν στα αγγλικά σε κάθε τιμή.
 
-**v7.185.0** | [Προδιαγραφή](SPEC.md) | [Οδηγός](GUIDE.md) | [RFC](saipen/RFC.md) | [Στυλ](saipen/STYLE.md) | [UI](saipen/UI.md) | [Συμμόρφωση](saipen/CONFORMANCE.md) | απλό markdown | μηδενικές εξαρτήσεις | MIT
+**v7.186.0** | [Προδιαγραφή](SPEC.md) | [Οδηγός](GUIDE.md) | [RFC](saipen/RFC.md) | [Στυλ](saipen/STYLE.md) | [UI](saipen/UI.md) | [Συμμόρφωση](saipen/CONFORMANCE.md) | απλό markdown | μηδενικές εξαρτήσεις | MIT
 
 ```text
 User  ->  /saipen continue
@@ -98,3 +98,5 @@ bash bootstrap/inject.sh                                            # macOS / Li
 <img src="assets/screenshot-20260801-003853.png" alt="Στιγμιότυπο saipen 2026-08-01" width="600"/>
 
 </details>
+
+<!-- source-digest: README.md sha256:951d8044313a6456 -->

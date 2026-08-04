@@ -14,7 +14,7 @@
 
 **Yanıt dili.** Aracı varsayılan olarak **Estonca** yanıtlar — bu bir ayar, tuhaflık değil, ve SAIPEN'de Estonca olan başka hiçbir şey yoktur. Tek bir yerde değişir: [`saipen/STYLE.md`](saipen/STYLE.md) dosyasının başındaki `reply_language:` satırı. `et` Estonca, `en` İngilizce, `ru` Rusça, `auto` gönderdiğin mesajın diline göre seçer. Protokol, kod, commit'ler ve tüm belgeler her değerde İngilizce kalır.
 
-**v7.185.0** | [Spec](SPEC.md) | [Rehber](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [Kullanıcı Arayüzü](saipen/UI.md) | [Uyum](saipen/CONFORMANCE.md) | sade markdown | sıfır bağımlılık | MIT
+**v7.186.0** | [Spec](SPEC.md) | [Rehber](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [Kullanıcı Arayüzü](saipen/UI.md) | [Uyum](saipen/CONFORMANCE.md) | sade markdown | sıfır bağımlılık | MIT
 
 ```text
 Kullanıcı -> /saipen continue
@@ -96,3 +96,5 @@ Platform bazlı notlar `extensions/adapters/` içinde yer alır.
 <img src="assets/screenshot-20260801-003853.png" alt="saipen ekran görüntüsü 2026-08-01" width="600"/>
 
 </details>
+
+<!-- source-digest: README.md sha256:951d8044313a6456 -->
