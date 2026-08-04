@@ -1748,6 +1748,25 @@ if log_files:
             if is_active_log and re.match(
                     r"validate\.py\s*->\s*(PASS|FAIL)\b", content):
                 conf_run_seen = True
+            # PREPARE wrote the same success event for `saitranslate`, for
+            # `saiwiki` and for an unqualified main-project package alike, so
+            # the LOG could not say which handoff became ready and two
+            # prepares were indistinguishable rather than dedupable. The
+            # producer is required now, with the literal `unqualified` for
+            # "no producer requested". Live agents had already started writing
+            # it in by hand, against the phase doc's own fixed format --
+            # practice correcting a shape nobody had fixed. The source
+            # revision is deliberately NOT required here: the handoff's own
+            # `source_head:` carries it, and a second copy in an append-only
+            # file goes stale against the one that gets refreshed.
+            if re.match(r"prepare\s*->", content):
+                fail(f"{loc} records a prepare with no producer -- RFC "
+                     f"1.2's fixed-form rule and phases/prepare.md step 6 "
+                     f"require `RUN: prepare <producer> -> done|FAILED`, "
+                     f"where <producer> is the producer name or the literal "
+                     f"`unqualified`. Unqualified, the record cannot say "
+                     f"which handoff became ready, or which of two prepares "
+                     f"this one was")
             # History is append-only and immutable -- style drift in old lines
             # can't be fixed without rewriting history, so it warns, not fails.
             if taxonomy not in ("RUN", "DEC", "H"):
@@ -3035,6 +3054,50 @@ else:
                  "different one -- and work commits at SHIP, not per "
                  "checkpoint, so that is the ordinary case")
             drift_ok = False
+
+    # 1b4. The prepare record's shape. The duty to READ it (`saipen status`,
+    #      dedup, attribution) existed before anything gave it a form, which
+    #      is the `RUN: validate.py -> PASS|FAIL` argument one phase over.
+    _prep_doc = rfc_path.parent / "phases" / "prepare.md"
+    _prep_t = (_prep_doc.read_text(encoding="utf-8-sig")
+               if _prep_doc.is_file() else "")
+    if _prep_t and ("RUN: prepare <producer> -> done" not in _prep_t
+                    or "the word `unqualified` is the" not in _prep_t):
+        fail("cross-doc drift [prepare-record] -- phases/prepare.md step 6 "
+             "must fix the completion and failure records as "
+             "`RUN: prepare <producer> -> done|FAILED`, with `unqualified` "
+             "named as the producer word when none was requested. "
+             "Unqualified, one shape covers saitranslate, saiwiki and a "
+             "main-project package alike, and no reader can tell which "
+             "handoff became ready")
+        drift_ok = False
+
+    # 1b5. A multi-command message loses nothing. OBEY shipped saying such
+    #      commands run in the order written and said nothing about a command
+    #      whose preconditions are not met -- so the honest-looking outcome
+    #      was to answer it in chat and forget it, which is the same loss the
+    #      step exists to stop, one command later. And the pair the shortcut
+    #      table most invites was dead by construction: bare `dd` ends
+    #      Proposal Mode at `goal_mode: false`, where a bare goal key is not
+    #      a command at all, so `dd cc` could never complete.
+    _s111b = rfc[_s111_i:rfc.find("## Part 2", _s111_i)] if _s111_i >= 0 else ""
+    if _s111b and "cannot execute now is written down, never dropped" not in _s111b:
+        fail("cross-doc drift [command-not-dropped] -- RFC 1.11's OBEY step "
+             "must say a command in a multi-command message that cannot "
+             "execute now is recorded rather than dropped, and name where: "
+             "`next_action` when it will be legal at the next continue, the "
+             "top of `## TODO` when it will not. Ordering alone leaves the "
+             "second command answerable in chat and forgotten")
+        drift_ok = False
+    if "One carve-out, and it is a pair rather than a loosening" not in rfc:
+        fail("cross-doc drift [plan-goal-pair] -- RFC 1.10 must carve out the "
+             "plan-then-bare-goal pair in the same message, which starts the "
+             "plan just written. Without it the shortcut table invites "
+             "`dd cc`, a combination that cannot complete: `dd` ends at "
+             "`goal_mode: false` and the next key is not a command there. "
+             "The carve-out is a PAIR, not a loosening of the bare form -- "
+             "E-1468 was a lone key mid-run, which is unchanged")
+        drift_ok = False
 
     # 1c. § 2.1's ZERO-PROMPT rule is a MUST, and its exception list has to
     #     carry every live carve-out or the MUST orders a violation. It named

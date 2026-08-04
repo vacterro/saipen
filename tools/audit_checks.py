@@ -769,6 +769,18 @@ CASES: list[tuple[str, str, object, str]] = [
     # compare. The second control guards the honesty clause: refusing `none`
     # does not derive a first seat name, and a doc that stops saying so
     # promotes an open question to a settled rule by omission.
+    ("1.11 lets a queued command be dropped", "saipen/RFC.md",
+     replace("cannot execute now is written down, never dropped",
+             "cannot execute now may simply be reported"),
+     "command-not-dropped"),
+    ("1.10 drops the plan-then-goal pair", "saipen/RFC.md",
+     replace("One carve-out, and it is a pair rather than a loosening",
+             "No carve-out exists and the bare form is absolute"),
+     "plan-goal-pair"),
+    ("prepare.md goes back to one unqualified record",
+     "saipen/phases/prepare.md",
+     replace("RUN: prepare <producer> -> done", "RUN: prepare -> done"),
+     "prepare-record"),
     ("hunt.md goes back to five free deletions",
      "saipen/phases/hunt.md",
      replace("deleted on proof of recovery", "deleted when obvious"),

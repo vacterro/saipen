@@ -15,8 +15,26 @@ This phase is primarily used by specialized roles and subSaipens (e.g., `saitran
    - An unqualified main-project preparation may place a non-collectable package in `.saipen/kitchen/`; it MUST NOT impersonate a named producer's ready handoff.
 5. **Isolation**: PREPARE packages only. It MUST NOT integrate the payload into the target, modify a target remote, commit, tag, or push. Those belong to `saipen collect <producer>` followed by the normal Core gates and an explicit SHIP chain.
 6. **Completion**: LOG one Event Graph line per RFC § 1.2 -- `- DATE
-   [E-###] [parent: E-###] RUN: prepare -> done` -- then `STATE.phase ->
-   DONE`. Preparation failed (freshness check found the work stale beyond
-   repair, or delivery target unwritable)? LOG `RUN: prepare -> FAILED
-   <reason>` (this exact text after the taxonomy) instead, then
-   `STATE.phase -> BLOCKED` with the facts.
+   [E-###] [parent: E-###] RUN: prepare <producer> -> done` -- then
+   `STATE.phase -> DONE`. Preparation failed (freshness check found the work
+   stale beyond repair, or delivery target unwritable)? LOG
+   `RUN: prepare <producer> -> FAILED <reason>` (this exact text after the
+   taxonomy) instead, then `STATE.phase -> BLOCKED` with the facts.
+
+   **`<producer>` is required in both, and the word `unqualified` is the
+   producer name when no producer was requested.** The record said
+   `RUN: prepare -> done` for `saitranslate`, for `saiwiki`, and for an
+   unqualified main-project package alike, so a cold agent or `saipen status`
+   reading the LOG could not tell which handoff became ready, and two prepares
+   were indistinguishable rather than dedupable. Live agents had already
+   started writing the producer in by hand, against this document's own fixed
+   format -- practice correcting a shape nobody had fixed. This is § 1.2's
+   `RUN: validate.py -> PASS|FAIL` argument one phase over: a record another
+   rule is required to READ needs a form the reader can find, or the reading
+   is invention.
+
+   **The source revision is deliberately NOT repeated here.** The handoff's
+   own `source_head:` field (step 4) already carries it, per producer, and a
+   second copy in an append-only file is a copy that can go stale against the
+   one that gets refreshed. The LOG line answers "which prepare ran, and did
+   it succeed"; the OUTBOX answers "against what, and is it still current".
