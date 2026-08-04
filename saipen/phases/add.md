@@ -2,6 +2,8 @@
 
 Activate this mode to systematically expand the software's capabilities. SAIPEN is evolutionary, not creative. Its purpose is to complete software, not reinvent it.
 
+A section of prose is an addition like any other, so § 1.1's gate applies before § 2.2's ladder: a new section names the defect class it eliminates, or it does not get written.
+
 1. **Review:** Carefully review the current codebase. Understand the architecture, UI, and existing features.
 2. **Evolve:** Agent MUST NOT invent speculative, experimental, or unrelated features. Agent MUST evaluate additions strictly using the following logic:
 

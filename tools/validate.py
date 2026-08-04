@@ -3338,6 +3338,29 @@ else:
              "true with a signal sitting right there")
         drift_ok = False
 
+    # 1b13. The gate on new prose. A section that eliminates no defect class
+    #       costs every agent that reads it, forever, and implies coverage
+    #       that does not exist. Stated once in 1.1 and cited from the two
+    #       phases where additions actually happen -- restating it in each
+    #       would be the exact failure it names.
+    if "names the defect class it eliminates" not in rfc:
+        fail("cross-doc drift [prose-gate] -- RFC 1.1 must require a new "
+             "section to name the defect class it eliminates. Without it, "
+             "prose that forbids nothing is indistinguishable from prose that "
+             "does, and the reader stops looking for a check that was never "
+             "written")
+        drift_ok = False
+    for _d, _why in ((rfc_path.parent / "phases" / "build.md", "build.md"),
+                     (rfc_path.parent / "phases" / "add.md", "add.md")):
+        if (_d.is_file()
+                and "names the defect class it eliminates"
+                not in _d.read_text(encoding="utf-8-sig")):
+            fail(f"cross-doc drift [prose-gate] -- phases/{_why} must cite "
+                 "1.1's gate before its own addition ladder. The gate lives "
+                 "in one place and is cited, never restated: two copies "
+                 "drift, which is one of the three shapes the gate rejects")
+            drift_ok = False
+
     # 1c. § 2.1's ZERO-PROMPT rule is a MUST, and its exception list has to
     #     carry every live carve-out or the MUST orders a violation. It named
     #     only `phase: BLOCKED` while § 1.3 bans `ADD` outright under

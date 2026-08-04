@@ -3,6 +3,8 @@
 Smallest safe change. Full code: no stubs, null/empty/error paths handled.
 Match repo style even if dated; modernizing = separate ticket.
 
+**Before writing new PROSE, ask what it makes non-conformant.** § 1.1's rule: a new section names the defect class it eliminates or it does not get written, and a restatement of a rule that already exists is cited rather than repeated. Documentation edits are BUILD work and this gate applies to them exactly as the reuse ladder below applies to code.
+
 **Before writing new code, look for existing code, in this order:**
 1. this project's own code -- a helper, a module, a pattern already here;
 2. the standard library of whatever language this is;

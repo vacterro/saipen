@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.188.0 -- 2026-08-04 -- a new section names the defect class it eliminates, or it does not get written
+
+T-420: one question with a yes-or-no answer -- what can a conformant agent do today that this text makes non-conformant tomorrow? No answer means no section. Prose that eliminates no defect costs every agent that reads it forever and implies coverage that does not exist, which is worse than silence: the next reader stops looking for the check that was never there.
+
+Three shapes fail the question and all three are common in this repository. A restatement of a rule that already exists somewhere else -- most of RFC's own history, and the reason so many CONFORMANCE rows record two copies disagreeing. An explanation of why a rule is good rather than what it forbids. And a requirement made of a phrasing nobody reads: row 220 is the worked example, where the exact halt SENTENCE was made normative while the validator matches only the category token, guarded by a marker check and a red control that both descended from that same sentence. It lasted one release before it had to be narrowed.
+
+No byte cap ships with this, and the reason is stated so nobody adds one later. `BOARD.md` has a soft cap because it is read in full at every cold start; none of these files are. `BOOT.md` is the cold-start read, RFC is reached only when a rule question arises, and `CONFORMANCE.md` is never read by a working agent at all. A cap without that cost behind it is a number to argue with, not a defect prevented -- which is exactly what this gate rejects.
+
+Stated once in section 1.1 and cited from `phases/build.md` and `phases/add.md`, the two phases where additions actually happen. Cited, never restated: a third copy would be the first of the three failing shapes.
+
+audit_checks 143 -> 145 standing controls. CONFORMANCE 233.
+
 ## 7.187.0 -- 2026-08-04 -- the Pick Rule stops handing Core work Core is forbidden to do
 
 T-483: `phases/translate.md` gives 29 of the 32 languages to a dedicated saitranslate instance and tells a Core agent that finds them stale not to start grinding through them "while it's here". T-422, whose body is 28 locale guides, sat in `## TODO` passing every workability test the Pick Rule applies -- open checkbox, `needs:` satisfied, unclaimed. Two honest agents diverge there and both can defend themselves: one does the forbidden work, the other skips a ticket the rule says it must take.
