@@ -3,13 +3,15 @@ Test: two conformant agents given the same `.saipen/` reach the same decision.
 RFC § 1.11 exists because "the agent decides" is not a specification. Four
 invariants, no new files or fields:
 
-**Fixed action priority.** RECOVER > UNBLOCK > FINISH > START > MAINTAIN,
-first match wins, no weighing. A corrupt `STATE.md` is repaired before
-anything runs; a `BLOCKED` session or a `WAIT:` is restated rather than
-worked around; an in-flight `## DOING` ticket is carried forward before any
-new one is claimed. Previously nothing said which of these went first, so two
-models facing a blocked session with a workable ticket could legitimately do
-opposite things.
+**Fixed action priority.** RECOVER > OBEY > UNBLOCK > FINISH > START >
+MAINTAIN, first match wins, no weighing. A corrupt `STATE.md` is repaired
+before anything runs; a command the user just typed outranks the previous
+session's pre-computed `next_action`; a `BLOCKED` session or a `WAIT:` nobody
+answered is restated rather than worked around; an in-flight `## DOING` ticket
+is carried forward before any new one is claimed. Previously nothing said which
+of these went first, so two models facing a blocked session with a workable
+ticket could legitimately do opposite things -- and `OBEY` was missing from
+the list entirely, which cost this repository the same `qq` twice.
 
 **One ticket at a time.** At most one `## DOING` in total, not per agent (RFC § 1.11; this README said "per agent" until v7.101.0, six releases after the rule changed and while `tools/validate.py` already FAILed any board with two). Core's model is one agent writing `.saipen/` at a time, so "per agent" invited the reading "that ticket is not mine, so I may claim a second". Finish it, block
 it, or demote it -- with a LOG line, since walking away silently is what

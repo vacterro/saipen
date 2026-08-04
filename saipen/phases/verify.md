@@ -13,6 +13,24 @@ themselves and report the result: `next_action: WAIT: manual-verify -- run
 
 Repo's own harness only (never invent one). Strongest available:
 parse -> import -> unit -> repro -> smoke.
+**That order is cheapest-first, and it is not decoration**: a parse
+error found by the full suite costs the whole suite to learn something
+the first rung would have said in a second. Run them in that order and
+stop climbing when one fails.
+**The first failed MANDATORY gate ends the PASS claim for this pass.**
+No later green restores it -- a green from a rung above a red one is a
+statement about a different question, not a repair of the failed one.
+An advisory gate (a lint warning nobody has made blocking, an optional
+benchmark) may fail without ending the claim, but only if this ticket
+or the repo says it is advisory; unclassified means mandatory.
+**Read the project's canonical commands from `KNOWLEDGE/`, do not
+re-derive them.** `phases/scout.md` writes them there once on the first
+ticket that needs them; every later executor and reviewer cites that
+line. Two agents each guessing a build command is how one of them
+verifies something nobody asked for and reports it green. Not there and
+not derivable from the repo? `WAIT: blocked` naming the missing command
+-- § 1.11 already forbids picking a convenient one and declaring
+victory.
 `verify:` is the minimum -- a ticket's own `| verify:` field (RFC § 1.2,
 set at `phases/plan.md` time) is the concrete check this phase runs for it:
 a shell command -> execute it and LOG the result; a criterion in prose (no
@@ -82,6 +100,15 @@ this line is the debugging instance of it.
 **Cap: 3 dead hypotheses OR 2 failed fix cycles -> move THIS ticket to the
 `## BLOCKED` section on `BOARD.md` with the facts + dead ends noted on it,
 then check for another unblocked `TODO` ticket and work that instead (STATE -> `SCOUT` or `BUILD`).**
+**Count the cycles on the ticket, not in your head.** Every failed fix cycle
+increments `| verify_attempts: N` on the ticket line (RFC § 1.2's closed field
+list; absent reads as zero). `tools/validate.py` FAILs a ticket at or over the
+cap above that carries no `| blocker:`, and it reads the cap out of this very
+sentence rather than keeping its own copy. The field exists for the reason
+`review_passes:` does one phase over: a cap counted from memory is a cap the
+next session does not have, and the hysteresis rule below preserves the
+history as prose that nothing can sum.
+
 **Hysteresis**: this ticket's `| blocker:` field already carries text from
 an earlier round (someone moved it back to `## TODO` and this is a repeat
 trip through the same cap)? Do not silently spend another fresh 3/2 budget

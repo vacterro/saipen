@@ -519,6 +519,52 @@ def stamp_log_ahead(text: str) -> str:
     return "\n".join(lines) + "\n"
 
 
+def demote_the_pick(text: str) -> str:
+    """T-474: reach the topmost-workable branch from either board state.
+
+    The pick check compares `next_action` against the topmost workable
+    `## TODO` ticket ONLY when nothing is claimed -- a `## DOING` ticket IS
+    the pick (T-466) -- so a STATE-only mutation cannot reach that branch
+    while a ticket is in flight. Since T-466 made `## DOING` where a ticket
+    sits all the way through SHIP, that is most of a live session, and the
+    old STATE-only control quietly stopped being evidence exactly when the
+    repository was working. Mutating the board reaches the branch from both
+    sides and is never a no-op: demote the claimed ticket if there is one,
+    otherwise push the topmost `## TODO` ticket to the bottom of its own
+    section. Either way `next_action` still names a workable ticket that is
+    no longer the pick.
+    """
+    def body(src: str, name: str):
+        return re.search(rf"^## {name}$\n(.*?)(?=^## |\Z)", src,
+                         re.MULTILINE | re.DOTALL)
+
+    moved = None
+    doing = body(text, "DOING")
+    if doing:
+        claimed = re.search(r"^- \[/\] T-\d+ .*$", doing.group(1),
+                            re.MULTILINE)
+        if claimed:
+            moved = claimed.group(0).replace("- [/] ", "- [ ] ", 1)
+            text = (text[:doing.start(1)]
+                    + doing.group(1).replace(claimed.group(0) + "\n", "", 1)
+                    + text[doing.end(1):])
+    if moved is None:
+        todo = body(text, "TODO")
+        top = (re.search(r"^- \[ \] T-\d+ .*$", todo.group(1), re.MULTILINE)
+               if todo else None)
+        if top is None:
+            return text
+        moved = top.group(0)
+        text = (text[:todo.start(1)]
+                + todo.group(1).replace(moved + "\n", "", 1)
+                + text[todo.end(1):])
+    todo = body(text, "TODO")
+    if todo is None:
+        return text
+    return (text[:todo.start(1)] + todo.group(1).rstrip("\n") + "\n"
+            + moved + "\n\n" + text[todo.end(1):])
+
+
 CREATE = "<create the file>"
 SWAP = "<swap the last two log entries>"
 
@@ -603,12 +649,30 @@ CASES: list[tuple[str, str, object, str]] = [
      "did not read the current STYLE.md"),
     ("last_event below the log tail", STATE, sub_line("last_event", "1"),
      "lower than the log"),
-    ("next_action picks a ticket that is not the topmost workable", STATE,
-     sub_line("next_action", '"PHASE SCOUT T-419"'),
+    ("next_action picks a ticket that is not the topmost workable", BOARD,
+     demote_the_pick,
      "but the topmost workable ## TODO ticket is"),
+    # A C0 byte is invisible in every reader and still changes what the code
+    # means. Two `\1` backreferences in this file were literal `\x01` bytes,
+    # so both verify_attempts controls substituted a SOH character for the
+    # captured ticket line and scored green while testing nothing.
+    ("a shipped tool carries an invisible control character",
+     "tools/run_scenarios.py",
+     lambda t: t.replace("\n# ", "\n# \x01", 1),
+     "contains control character U+0001"),
     ("next_action has no prefix", STATE,
      sub_line("next_action", '"finish the thing"'),
      "does not start with"),
+    # The category bounds what KIND of stop a WAIT is; nothing bounded what
+    # followed it, so `next_action` became a scratchpad and the next agent
+    # read the notes as a queue -- live on this repository, where a `user
+    # brake` naming a ticket "for a future run" got that ticket scouted
+    # instead of the brake honoured.
+    ("a WAIT body carries a session report after the brake", STATE,
+     sub_line("next_action",
+              '"WAIT: user brake -- hold for the user. Wiki package is ready '
+              'and T-455 is still open for a future run."'),
+     "starts a second sentence"),
     ("WAIT with no category", STATE,
      sub_line("next_action", '"WAIT: need more context"'),
      "WAIT with no category token"),
@@ -691,6 +755,15 @@ CASES: list[tuple[str, str, object, str]] = [
      "saipen/RFC.md",
      replace("The pivot needs text", "Trigger goal mode"),
      "shortcut-notes"),
+    # `gg` routes to the same command as `cc` and kept the superseded promise
+    # for as long as the check named `cc` by key. The requirement is derived
+    # from the route now, so both rows are controlled separately.
+    ("the gg row promises a bare Goal Mode pivot again",
+     "saipen/RFC.md",
+     replace("Same destination as `cc`, so the same truth: the pivot needs "
+             "text, and `gg <objective>` is what sets a new one.",
+             "Goal Mode pivot and re-authorization."),
+     "shortcut-notes"),
     # § 1.10 ordered `saipen status` to report the last validator result from
     # LOG.md before anything gave that record a shape. Break the fixed form
     # and the report has nothing to read -- the same silence the duty had for
@@ -740,6 +813,94 @@ CASES: list[tuple[str, str, object, str]] = [
      replace("Classify the remote BEFORE any external write",
              "Classify the remote at some point"),
      "first-publish-order"),
+    # T-467: step 7 makes the tag push a separate command from the branch
+    # push, so a rejected branch push can still be followed by a successful
+    # tag push -- publishing a tag on a commit that is on no remote branch
+    # (E-1787, E-1882). Pushing the tag before gating on the branch landing
+    # is the exact regression this control catches.
+    ("ship.md pushes the release tag before the branch has landed",
+     "saipen/phases/ship.md",
+     replace("ONLY AFTER step 6's branch push has LANDED",
+             "Once the release is ready, regardless of the branch push"),
+     "tag-after-branch"),
+    # T-466: the ticket that passes REVIEW stays in `## DOING` through SHIP
+    # -- the push has not happened. Closing it at REVIEW made § 1.2's own
+    # `PHASE SHIP T-###` name a `## DONE` ticket and fail the pick check
+    # twice over (E-1879). The rule lives in review.md once; ship.md cites
+    # it. Softening either half silently reopens the defect, so both halves
+    # get a control that goes red on its own anchor.
+    ("review.md lets REVIEW close the passed ticket before SHIP",
+     "saipen/phases/review.md",
+     replace("stays in `## DOING` through SHIP -- do NOT close it",
+             "may be closed here, the review is done"),
+     "ticket-stays-doing"),
+    ("ship.md stops citing the ticket's `## DOING`-through-SHIP rule",
+     "saipen/phases/ship.md",
+     replace("The shipped ticket was still in `## DOING` when this phase "
+             "began",
+             "The shipped ticket may have been closed at REVIEW"),
+     "ticket-stays-doing"),
+    # VERIFY's 3/2 cap was counted from memory while REVIEW's became a field
+    # one document over. Both directions: over the cap with no blocker, and a
+    # value the field cannot hold. The replacement MUST carry the \1
+    # backreference -- without it re.sub swaps the whole ticket line for the
+    # bare field fragment, the board parser rejects the shape, and the
+    # validator FAILs for a reason that has nothing to do with the cap. Red
+    # for the wrong reason is not evidence, and it reads exactly like a
+    # passing control: E-1911 caught this class once, and the repair for it
+    # reintroduced it by losing the group.
+    ("a ticket runs past verify.md's fix-cycle cap with no blocker", BOARD,
+     lambda t: re.sub(r"^(- \[ \] T-\d+ \[P\d\] .*)$",
+                      r"\1 | verify_attempts: 9",
+                      t, count=1, flags=re.MULTILINE),
+     "against phases/verify.md's cap"),
+    ("verify_attempts holds something that is not a number", BOARD,
+     lambda t: re.sub(r"^(- \[ \] T-\d+ \[P\d\] .*)$",
+                      r"\1 | verify_attempts: many",
+                      t, count=1, flags=re.MULTILINE),
+     "is not a number"),
+    # One control per borrowed invariant. Each softens the MUST the way a
+    # later editor plausibly would, rather than deleting the sentence.
+    ("verify.md loses the cheapest-first ordering claim",
+     "saipen/phases/verify.md",
+     replace("That order is cheapest-first", "That order is a suggestion"),
+     "borrowed-invariants"),
+    ("verify.md lets a later green restore a failed PASS claim",
+     "saipen/phases/verify.md",
+     replace("ends the PASS claim for this pass", "is worth noting"),
+     "borrowed-invariants"),
+    ("verify.md goes back to re-deriving the project's commands",
+     "saipen/phases/verify.md",
+     replace("Read the project's canonical commands from `KNOWLEDGE/`",
+             "Find the project's commands however you like"),
+     "borrowed-invariants"),
+    ("scout.md stops writing the commands down",
+     "saipen/phases/scout.md",
+     replace("cited afterwards rather than", "noted mentally rather than"),
+     "borrowed-invariants"),
+    ("BOOT implies the pre-computed pick stands alone", "saipen/BOOT.md",
+     replace("Immediate means without asking, never without looking",
+             "Immediate means immediate"),
+     "borrowed-invariants"),
+    ("review.md goes back to trusting VERIFY's claim",
+     "saipen/phases/review.md",
+     replace("do not read VERIFY's claim of", "you may reuse"),
+     "review-reruns-verify"),
+    # § 1.11's priority list had no entry for the user naming a command, so
+    # BOOT's "execute `next_action` immediately" and § 1.10's "a shortcut is a
+    # command, never a greeting" were two live MUSTs with no precedence
+    # between them -- and at a cold start BOOT is the file read first. The
+    # same `qq` was lost to the same stale pick twice (E-1913). Either half
+    # softening on its own restores the tie, so both are controlled.
+    ("§ 1.11 weighs the user's command instead of obeying it",
+     "saipen/RFC.md",
+     replace("It supersedes `next_action`",
+             "It is weighed against `next_action`"),
+     "command-outranks-pick"),
+    ("BOOT step 7 goes back to unconditional", "saipen/BOOT.md",
+     replace("the user's own message outranks the file",
+             "run whatever the state recorded"),
+     "command-outranks-pick"),
     # § 2.1's ZERO-PROMPT MUST named one exception while § 1.3 banned ADD
     # under read-only, so the rule ordered a phase the mode forbids and both
     # rules looked followed on their own.

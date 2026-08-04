@@ -75,13 +75,22 @@ project. Then STATE -> `DONE` directly, same as a normal successful ship.
    measurement, and a remote someone else published to in between makes it
    stale. Classification changed from first-publish to established -> proceed;
    changed the other way -> stop and re-run step 5's gate.
-7. Create the release tag, then push that exact ref only:
+7. ONLY AFTER step 6's branch push has LANDED -- confirmed by the push
+   returning success, or by `git rev-parse origin/BRANCH` ==
+   `git rev-parse BRANCH` after a fetch -- create the release tag, then
+   push that exact ref only:
    `git tag -a vVERSION -m "line"` followed by
    `git push origin refs/tags/vVERSION:refs/tags/vVERSION`.
-   `git push --tags` and `git push --follow-tags` are forbidden here: both
-   select from unrelated local tag state, so a temporary inspection tag can
-   become a published artifact without appearing in the release plan. The
-   branch push in step 6 and this one named tag push are separate commands.
+   A rejected or failed branch push means NO tag push at all: the tag stays
+   local and step 10 owns recovery. Pushing the tag while the branch is
+   unlanded is the exact defect that hit twice -- E-1787 for v7.171.0,
+   E-1882 for v7.176.0, each time a rejected branch push was followed by a
+   successful tag push publishing a tag whose commit was on no remote
+   branch. `git push --tags` and `git push --follow-tags` are forbidden
+   here: both select from unrelated local tag state, so a temporary
+   inspection tag can become a published artifact without appearing in the
+   release plan. The branch push in step 6 and this one named tag push are
+   separate commands, and the second MUST NOT run unless the first landed.
 8. First publish is settled at step 5, before anything leaves this machine,
    and re-checked at step 6 and step 7. It is named here only because this
    is where the list used to carry it, and a reader who learned the old
@@ -113,8 +122,11 @@ project. Then STATE -> `DONE` directly, same as a normal successful ship.
      commit is a stale pointer), push again. **This delete-and-recreate is
      always a purely local correction, never a remote one** -- it only
      applies to a tag from *this same*, still-failed ship attempt, which by
-     definition was never successfully pushed (the code push that would
-     have carried it already got rejected). Discovering instead that a tag
+     definition was never successfully pushed (the code push that would have
+     carried it already got rejected). The definition holds because step 7
+     gates the tag push on the branch push having LANDED: on this attempt the
+     tag never left this machine, so correcting it here touches nothing
+     public. Discovering instead that a tag
      with this name was already pushed in an *earlier*, separate, since-
      completed ship -- a genuinely different and much rarer situation, not
      what this recovery path is for -- is a remote history rewrite and
@@ -137,3 +149,10 @@ After SHIP: STATE -> DONE. `goal_mode: true`? Do not treat this as a
 stopping point even momentarily -- `next_action` MUST already name the
 next step, never a wait. `phases/done.md` § 1 sends you straight to HUNT;
 board-empty is a waypoint, not an exit (RFC § 2.4).
+
+**The shipped ticket was still in `## DOING` when this phase began, and
+it is `## DONE` only now, after the push landed** -- REVIEW keeps it
+claimed (`phases/review.md`, T-466), which is what makes the
+`PHASE SHIP T-###` `next_action` REVIEW wrote a legal pick rather than a
+stale one. `phases/done.md` performs the `## DOING` -> `## DONE` move as
+its first act.

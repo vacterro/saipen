@@ -1495,8 +1495,194 @@ def run_digest_stale_probes() -> tuple[list[str], int]:
                             "created: " + res2.stdout + res2.stderr)
         else:
             print("PASS: digest-stale -- warned correctly after tag exists")
+    return problems, checked
+
+
+def run_orphan_tag_probes() -> tuple[list[str], int]:
+    """A tag pushed while its branch did not land must FAIL validation.
+
+    Reproduces the E-1787/E-1882 sequence: the branch push is rejected
+    (never lands on the remote branch), the tag push runs anyway and
+    succeeds, so the remote carries a tag whose commit is on no remote
+    branch. Needs a real repository with a real remote -- the orphan check
+    reads refs/remotes and ls-remote, so it cannot live in
+    `tools/audit_checks.py`, whose snapshot excludes `.git`.
+    """
+    problems: list[str] = []
+    checked = 0
+    with tempfile.TemporaryDirectory(prefix="saipen-orphan-") as raw:
+        home = Path(raw) / "home"
+        origin = Path(raw) / "origin.git"
+        shutil.copytree(HOME, home, ignore=shutil.ignore_patterns(
+            ".git", ".venv", "__pycache__", "node_modules", "nul", ".freebuff"))
+        env = {**os.environ, "GIT_AUTHOR_NAME": "probe",
+               "GIT_AUTHOR_EMAIL": "probe@example.invalid",
+               "GIT_COMMITTER_NAME": "probe",
+               "GIT_COMMITTER_EMAIL": "probe@example.invalid"}
+
+        def git(*args: str) -> subprocess.CompletedProcess[str]:
+            return subprocess.run(["git", *args], cwd=home, env=env,
+                                  capture_output=True, text=True, check=False)
+
+        def validate() -> str:
+            r = subprocess.run(
+                [sys.executable, str(home / "tools" / "validate.py"),
+                 "--project-root", str(home)],
+                cwd=home, capture_output=True, text=True, errors="replace")
+            return r.stdout + r.stderr
+
+        def expect(label: str, output: str, contains: str,
+                   absent: str = "") -> None:
+            nonlocal checked
+            checked += 1
+            details = []
+            if contains and contains not in output:
+                details.append(f"missing {contains!r}")
+            if absent and absent in output:
+                details.append(f"unexpected {absent!r}")
+            if details:
+                problems.append(f"{label}: {'; '.join(details)}")
+            else:
+                print(f"PASS: orphan tag -- {label}")
+
+        if git("init", "-q").returncode != 0:
+            print("SKIP: orphan tag probes -- git unavailable")
+            return problems, checked
+        git("add", "-A")
+        git("commit", "-q", "-m", "probe")
+        if git("init", "-q", "--bare", str(origin)).returncode != 0:
+            print("SKIP: orphan tag probes -- cannot create bare remote")
+            return problems, checked
+        git("remote", "add", "origin", str(origin))
+        if git("push", "-q", "-u", "origin", "HEAD:main").returncode != 0:
+            print("SKIP: orphan tag probes -- cannot push initial main")
+            return problems, checked
+
+        # The rejected-branch-then-tag sequence: a release commit is made but
+        # its branch push never lands (here: simply not pushed), while the tag
+        # push succeeds -- the remote now carries a tag whose commit is on no
+        # remote branch.
+        (home / "orphan-release.txt").write_text("orphan\n", encoding="utf-8")
+        git("add", "orphan-release.txt")
+        git("commit", "-q", "-m", "release commit, branch push rejected")
+        git("tag", "v7.176.0")
+        if git("push", "-q", "origin", "refs/tags/v7.176.0").returncode != 0:
+            print("SKIP: orphan tag probes -- cannot push the orphan tag")
+            return problems, checked
+        expect("a published tag whose commit rides no remote branch fails",
+               validate(), "FAIL: orphaned release tag")
+
+        # Repair: the branch push finally lands, the tag's commit becomes
+        # reachable from origin/main, and the same tag now passes.
+        if git("push", "-q", "origin", "HEAD:main").returncode != 0:
+            print("SKIP: orphan tag probes -- cannot land the branch")
+            return problems, checked
+        expect("the same tag passes once its branch has landed",
+               validate(), "", absent="FAIL: orphaned release tag")
 
     return problems, checked
+
+
+def run_ship_pick_probes() -> tuple[list[str], int]:
+    """The ticket that passes REVIEW stays in `## DOING` through SHIP.
+
+    `PHASE SHIP T-###` is RFC § 1.2's prescribed `next_action` for the one
+    state SHIP is ever entered from, and the Pick Rule accepts it exactly
+    while the ticket sits in `## DOING` -- a claimed `## DOING` ticket IS
+    the pick. This repository's habit of closing the ticket at REVIEW
+    (E-1879, T-466) moved it to `## DONE` before anything was pushed, so
+    the same string named a finished ticket and failed the pick check
+    twice over. Lives here rather than in `tools/audit_checks.py` because
+    the condition spans two files -- STATE's `next_action` and the
+    ticket's board section -- and that harness mutates one file per case
+    (the compound-fixture route T-457 asks for).
+    """
+    problems: list[str] = []
+    checked = 0
+    with tempfile.TemporaryDirectory(prefix="saipen-ship-pick-") as raw:
+        home = Path(raw) / "home"
+        shutil.copytree(HOME, home, ignore=shutil.ignore_patterns(
+            ".git", ".venv", "__pycache__", "node_modules", "nul",
+            ".freebuff"))
+
+        style_path = home / "saipen" / "STYLE.md"
+        style_text = (style_path.read_text(encoding="utf-8-sig",
+                                           errors="replace")
+                      if style_path.is_file() else "")
+        _sm = re.search(r"`style_contract:\s*(ded-[0-9a-f]{8})`", style_text)
+        style_token = _sm.group(1) if _sm else "ded-00000000"
+
+        state_path = home / ".saipen" / "STATE.md"
+        board_path = home / ".saipen" / "BOARD.md"
+        log_path = home / ".saipen" / "LOG.md"
+
+        def validate() -> str:
+            r = subprocess.run(
+                [sys.executable, str(home / "tools" / "validate.py"),
+                 "--project-root", str(home)],
+                cwd=home, capture_output=True, text=True, errors="replace")
+            return r.stdout + r.stderr
+
+        def expect(label: str, output: str, contains: str,
+                   absent: str = "") -> None:
+            nonlocal checked
+            checked += 1
+            details = []
+            if contains and contains not in output:
+                details.append(f"missing {contains!r}")
+            if absent and absent in output:
+                details.append(f"unexpected {absent!r}")
+            if details:
+                problems.append(f"{label}: {'; '.join(details)}")
+            else:
+                print(f"PASS: ship pick -- {label}")
+
+        def write_fixture(in_doing: bool) -> None:
+            # A self-contained fixture: minimal LOG (one event) so
+            # last_event: 1 matches, and a board where the shipped ticket
+            # lives in either ## DOING or ## DONE.
+            log_path.write_text(
+                "- 03.08.26 00:00 [E-001] [T-901] RUN: probe\n",
+                encoding="utf-8", newline="\n")
+            state_path.write_text(
+                "---\n"
+                "phase: SHIP\n"
+                "task: T-901\n"
+                "next_action: \"PHASE SHIP T-901\"\n"
+                "blocker: none\n"
+                "transition_from: REVIEW\n"
+                "saipen_version: 7\n"
+                "schema_version: 3\n"
+                "last_event: 1\n"
+                f"style_contract: {style_token}\n"
+                "agent: probe\n"
+                "mode: full\n"
+                "updated: 2026-01-01T00:00:00Z\n"
+                "---\n",
+                encoding="utf-8", newline="\n")
+            section = "## DOING\n- [/] T-901 ship | owner: probe | " \
+                "claim_time: 2026-01-01T00:00:00Z | verify: probe\n" \
+                if in_doing else \
+                "## DONE\n- [x] T-901 ship | verify: probe\n"
+            board_path.write_text(
+                "# Board\n" + section +
+                "## TODO\n" + ("## DONE\n" if in_doing else "## DOING\n") +
+                "## BLOCKED\n",
+                encoding="utf-8", newline="\n")
+
+        write_fixture(in_doing=True)
+        expect("a ticket kept in ## DOING through SHIP validates",
+               validate(), "", absent="finished and blocked tickets are "
+               "not executable")
+
+        write_fixture(in_doing=False)
+        expect("the same ticket closed at REVIEW fails the pick rule",
+               validate(), "finished and blocked tickets are not "
+               "executable")
+
+    return problems, checked
+
+
 injector_failures, injector_checked, injector_skipped = run_injector_probes()
 failures.extend(injector_failures)
 root_failures, root_checked = run_project_root_probes()
@@ -1519,6 +1705,10 @@ failures.extend(hook_failures)
 
 digest_failures, digest_checked = run_digest_stale_probes()
 failures.extend(digest_failures)
+orphan_failures, orphan_checked = run_orphan_tag_probes()
+failures.extend(orphan_failures)
+ship_pick_failures, ship_pick_checked = run_ship_pick_probes()
+failures.extend(ship_pick_failures)
 print(f"\n{checked} executable fixture(s) checked, "
       f"{skipped} behavioral fixture(s) skipped (README-only by design)")
 print(f"{injector_checked} injector(s) executed, "
@@ -1529,6 +1719,8 @@ print(f"{export_checked} export ownership behavior(s) executed, "
 print(f"{crew_checked} crew-launch behavior(s) executed, "
       f"{crew_skipped} skipped for missing interpreters")
 print(f"{digest_checked} digest-stale behavior(s) executed")
+print(f"{orphan_checked} orphan-tag behavior(s) executed")
+print(f"{ship_pick_checked} ship-pick behavior(s) executed")
 print(f"{last_event_checked} last_event migration behavior(s) executed")
 print(f"{hunt_mark_checked} hunt-mark behavior(s) executed")
 print(f"{manifest_checked} manifest-tracking behavior(s) executed")

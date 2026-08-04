@@ -836,6 +836,27 @@ if isinstance(next_action, str):
                  f"RFC § 1.2 requires 'WAIT: <category> -- <question>' where "
                  f"category is one of {'/'.join(WAIT_CATEGORIES)}; got "
                  f"{next_action!r}")
+        # The category bounds what KIND of stop this is; nothing bounded what
+        # came after it, so `next_action` became a scratchpad -- and a stop
+        # instruction carrying notes is one the next agent reads as a queue.
+        # Live on this repository: a `user brake` whose body ran three
+        # sentences of handoff status and ended by naming a ticket as still
+        # open "for a future run", after which the next agent scouted that
+        # ticket instead of honouring the brake. One sentence. The boundary is
+        # a period followed by whitespace and then a capital or a backtick, so
+        # a version string (`v7.176.0`) and a lowercase "e.g." do not trip it,
+        # while a genuine second sentence does. The trailing `[...]` progress
+        # tag § 1.2 permits is stripped first -- it is not prose.
+        _wait_body = re.sub(r"\s*\[[^\]]*\]\s*$", "",
+                            next_action[len("WAIT:"):].strip())
+        _second = re.search(r"\.\s+(?=[A-Z`])", _wait_body)
+        if _second:
+            fail(f"STATE.md next_action is a WAIT whose body starts a second "
+                 f"sentence at offset {_second.start()} -- RFC § 1.2 bounds it "
+                 f"to one. Session status belongs in "
+                 f".saipen/kitchen/digest.md and queued work belongs on "
+                 f"BOARD.md; a stop instruction carrying either is one the "
+                 f"next agent executes as a work queue: {next_action!r}")
 
     if "?" in next_action and not next_action.startswith("WAIT:"):
         fail(f"STATE.md next_action asks a question outside WAIT:: "
@@ -1204,7 +1225,19 @@ if not board_path.is_file():
     sys.exit(1)
 
 REQUIRED_HEADINGS = ["## DOING", "## TODO", "## DONE", "## BLOCKED"]
-KNOWN_FIELDS = {"needs", "owner", "claim_time", "blocker", "verify", "review_passes"}
+KNOWN_FIELDS = {"needs", "owner", "claim_time", "blocker", "verify",
+                "review_passes", "verify_attempts"}
+# The cap number belongs to phases/verify.md, so it is read from there rather
+# than copied here. A missing anchor is a FAIL at the check below, never a
+# silent fallback: a cap this file guessed would be a second source of truth,
+# which is the drift § 1.2 already had to kill five times over.
+_verify_doc = _tools_parent / "saipen" / "phases" / "verify.md"
+if not _verify_doc.is_file():
+    _verify_doc = _tools_parent / "phases" / "verify.md"
+_vc = re.search(r"Cap: (\d+) dead hypotheses OR (\d+) failed fix cycles",
+                _verify_doc.read_text(encoding="utf-8-sig")
+                if _verify_doc.is_file() else "")
+VERIFY_FIX_CYCLE_CAP = int(_vc.group(2)) if _vc else None
 TICKET_RE = re.compile(r"^- \[([ x/])\] (T-\d+)\s+(.*)$")
 PIPE_SENTINEL = "\x00"
 
@@ -1278,6 +1311,35 @@ for line_no, line in enumerate(board_lines, 1):
                      f"{_rps} -- phases/review.md caps re-litigating one "
                      f"finding at two passes, and this field exists so that "
                      f"cap is mechanical rather than remembered")
+
+        # Same argument as review_passes, one phase over. `phases/verify.md`
+        # caps a ticket at 3 dead hypotheses or 2 failed fix cycles and its
+        # hysteresis rule appends each round to `| blocker:` rather than
+        # overwriting it -- which preserves the history as prose nothing can
+        # sum, so a ticket could take a fresh full budget on every visit with
+        # no artifact showing it. The cap number lives in verify.md; this
+        # reads it from there rather than carrying a second copy.
+        _va = fields.get("verify_attempts")
+        if _va is not None:
+            _vas = _va.strip()
+            if not _vas.isdigit():
+                fail(f"BOARD.md:{line_no} ticket {tid} verify_attempts "
+                     f"{_va!r} is not a number (RFC § 1.2)")
+            elif VERIFY_FIX_CYCLE_CAP is None:
+                fail("cross-doc drift [verify-cap] -- phases/verify.md's "
+                     "'Cap: N dead hypotheses OR M failed fix cycles' "
+                     "sentence moved, so verify_attempts has no cap to "
+                     "check against. Update tools/validate.py "
+                     "deliberately; a cap this file guessed would be a "
+                     "second source of truth")
+            elif int(_vas) >= VERIFY_FIX_CYCLE_CAP and not fields.get("blocker"):
+                fail(f"BOARD.md:{line_no} ticket {tid} has verify_attempts "
+                     f"{_vas} against phases/verify.md's cap of "
+                     f"{VERIFY_FIX_CYCLE_CAP} failed fix cycles, but carries "
+                     f"no | blocker: -- at the cap the ticket moves to "
+                     f"## BLOCKED with the facts and dead ends on it, and "
+                     f"this field exists so that is mechanical rather than "
+                     f"remembered")
 
         # An owner with no claim_time, or the reverse, is half a claim:
         # § 1.4 reads liveness from BOTH, so either alone is undecidable.
@@ -2071,17 +2133,31 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
 
             # A CONFORMANCE row is shipped evidence: it says an invariant is
             # enforced NOW, and cites the ticket that landed it. A row citing
-            # a ticket still sitting in ## TODO / ## DOING / ## BLOCKED is
-            # therefore two documents contradicting each other -- one says
-            # shipped, the other says not started -- and whichever the reader
-            # trusts, the other is a lie. This is also the only mechanical
-            # witness this repository has for the wider failure it keeps
-            # committing: work landing in the tree with the board and LOG
-            # untouched. Reproduced verbatim -- rows 193 and 196 shipped
-            # citing T-419 and T-426 while both sat in ## TODO, their code
-            # already in the tree, no LOG event for either. A ticket that is
-            # absent from the board entirely is history, not a contradiction:
-            # ## DONE is pruned deliberately (§ 1.2) and the rows outlive it.
+            # a ticket still sitting in ## TODO / ## BLOCKED is therefore two
+            # documents contradicting each other -- one says shipped, the
+            # other says not started -- and whichever the reader trusts, the
+            # other is a lie. This is also the only mechanical witness this
+            # repository has for the wider failure it keeps committing: work
+            # landing in the tree with the board and LOG untouched.
+            # Reproduced verbatim -- rows 193 and 196 shipped citing T-419 and
+            # T-426 while both sat in ## TODO, their code already in the tree,
+            # no LOG event for either. A ticket that is absent from the board
+            # entirely is history, not a contradiction: ## DONE is pruned
+            # deliberately (§ 1.2) and the rows outlive it.
+            #
+            # `## DOING` is exempt, and row 213 is why. T-466 established that
+            # the ticket stays in `## DOING` through SHIP and reaches
+            # `## DONE` only at the DONE phase once the push has landed --
+            # so `## DOING` is precisely where a ticket sits while its own row
+            # is in the tree waiting to be committed. Requiring `## DONE` here
+            # made every ticket that adds a row unshippable: the pre-commit
+            # hook runs this validator, the row cannot land before the ticket
+            # closes, and the ticket cannot close before the push. Two shipped
+            # rules, no legal state between them; hit live on the first row
+            # written after T-466 shipped. Nothing is lost by the exemption --
+            # the defect this check was built for had both tickets in
+            # `## TODO`, and `## DOING` is capped at one claimed ticket in
+            # total (§ 1.11), so it cannot hide a backlog of unbacked rows.
             _row_cites = []
             for _ln, _line in enumerate(
                     conformance_path.read_text(
@@ -2091,7 +2167,7 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                     continue
                 for _cited in sorted(set(re.findall(r"\(T-\d+\)", _line))):
                     _tk = tickets.get(_cited.strip("()"))
-                    if _tk and _tk["section"] != "## DONE":
+                    if _tk and _tk["section"] not in ("## DONE", "## DOING"):
                         _row_cites.append(
                             f"row {_rm.group(1)} cites {_cited.strip('()')}, "
                             f"which is in {_tk['section']}")
@@ -2165,6 +2241,34 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                     fail(f"{doc.as_posix()} contains split text artifact for "
                          f"{expected!r}")
                     text_ok = False
+        # A C0 control character in a shipped tool is invisible in every
+        # reader an agent uses and changes what the code MEANS. Found live:
+        # `tools/audit_checks.py` carried two `\x01` bytes where a regex
+        # replacement wanted the literal backreference `\1`, so both
+        # `verify_attempts` red controls substituted a SOH character instead
+        # of the captured ticket line -- the mutation destroyed the line, the
+        # validator FAILed on the shape rather than the cap, and the harness
+        # scored them as passing controls for a release. Neither ruff nor the
+        # doc lint above can see it: the file is valid UTF-8 and valid Python.
+        # Tabs, newlines and carriage returns are the only C0 bytes that
+        # legitimately appear.
+        _ctl_ok = True
+        _ctl = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+        for _tool in sorted((_tools_parent / "tools").glob("*.py")):
+            _hit = _ctl.search(_tool.read_text(encoding="utf-8",
+                                               errors="replace"))
+            if _hit:
+                fail(f"tools/{_tool.name} contains control character "
+                     f"U+{ord(_hit.group()):04X} at offset {_hit.start()} -- "
+                     f"invisible in every reader, valid UTF-8 and valid "
+                     f"Python, and it silently changes what the code does "
+                     f"(two red controls scored green on exactly this)")
+                _ctl_ok = False
+                text_ok = False
+        if _ctl_ok:
+            ok(f"shipped tools carry no stray control characters "
+               f"({len(list((_tools_parent / 'tools').glob('*.py')))} files)")
+
         if text_ok:
             ok("core docs text lint clean (no U+FFFD/split keywords/fence drift)")
 
@@ -2701,6 +2805,143 @@ else:
                  "classify the remote before any external write, so the "
                  "first-publish gate is decided while everything is still "
                  "local")
+            drift_ok = False
+
+        # T-467: the tag push is the SECOND command, and it must not run
+        # until the branch push has landed. Step 7 used to push the tag
+        # regardless of step 6's outcome, and a rejected branch push followed
+        # by a successful tag push published a tag on a commit that is on no
+        # remote branch -- twice here (E-1787, E-1882). Step 10's recovery
+        # text claimed such a tag "by definition was never successfully
+        # pushed", which holds only while the tag rides the branch push.
+        _tag_landed = _ship_t.find("step 6's branch push has LANDED")
+        _tag_cmd = _ship_t.find("git push origin refs/tags/vVERSION")
+        if _tag_landed < 0 or _tag_cmd < 0:
+            fail("cross-doc drift [tag-after-branch] -- phases/ship.md no "
+                 "longer names both the branch-landed gate and the tag push; "
+                 "update tools/validate.py deliberately rather than letting "
+                 "the ordering check quietly stop checking")
+            drift_ok = False
+        elif _tag_landed > _tag_cmd:
+            fail("cross-doc drift [tag-after-branch] -- phases/ship.md "
+                 "pushes the release tag before it gates on the branch push "
+                 "having LANDED. A rejected branch push followed by a "
+                 "successful tag push publishes a tag on a commit that is on "
+                 "no remote branch -- E-1787, E-1882 (T-467)")
+            drift_ok = False
+
+        # T-466: the ticket that passes REVIEW is still in `## DOING` -- the
+        # push has not happened. `PHASE SHIP T-###` is the legal next_action
+        # this state emits, and the pick check accepts it precisely because a
+        # claimed `## DOING` ticket IS the pick; it rejects the same string
+        # the moment the ticket reaches `## DONE` ("finished and blocked
+        # tickets are not executable"). Closing the ticket at REVIEW was the
+        # repository habit that made § 1.2's own `PHASE` form unusable for
+        # the one phase it names a ticket for (E-1879). review.md states the
+        # rule once; ship.md cites it. Either anchor drifting away silently
+        # reopens the defect, so this pin FAILs rather than skips.
+        _review_doc = rfc_path.parent / "phases" / "review.md"
+        _review_t = (_review_doc.read_text(encoding="utf-8-sig")
+                     if _review_doc.is_file() else "")
+        _rule_once = _review_t.find(
+            "stays in `## DOING` through SHIP")
+        _ship_cite = _ship_t.find(
+            "The shipped ticket was still in `## DOING` when this phase "
+            "began")
+        if _rule_once < 0 or _ship_cite < 0:
+            fail("cross-doc drift [ticket-stays-doing] -- phases/review.md "
+                 "no longer states that the passed ticket stays in `## DOING` "
+                 "through SHIP, or phases/ship.md no longer cites it. A ticket "
+                 "closed at REVIEW makes `PHASE SHIP T-###` name a `## DONE` "
+                 "ticket and fail the pick check twice over (E-1879, T-466); "
+                 "update tools/validate.py deliberately rather than letting "
+                 "the check quietly stop checking")
+            drift_ok = False
+
+    # REVIEW read the diff and took VERIFY's result as given, so a green claim
+    # reached SHIP on the strength of the phase that produced it. Rosary's
+    # generator/evaluator split, minus the second process: the evaluator
+    # repeats the mandatory check rather than trusting the report.
+    _review_doc = rfc_path.parent / "phases" / "review.md"
+    if _review_doc.is_file():
+        _review_t = _review_doc.read_text(encoding="utf-8-sig")
+        if "do not read VERIFY's claim of" not in _review_t:
+            fail("cross-doc drift [review-reruns-verify] -- phases/review.md "
+                 "must re-run the ticket's own `verify:` rather than reading "
+                 "VERIFY's claim of it. A phase reporting on its own work is "
+                 "the one report nothing downstream can contradict")
+            drift_ok = False
+
+    # Rosary A4/A5/A1, each one sentence in the doc that emits it.
+    _markers = [
+        (rfc_path.parent / "phases" / "verify.md",
+         "That order is cheapest-first",
+         "phases/verify.md must say the ladder runs cheapest-first -- a parse "
+         "error found by the full suite costs the whole suite to learn what "
+         "the first rung says in a second"),
+        (rfc_path.parent / "phases" / "verify.md",
+         "ends the PASS claim for this pass",
+         "phases/verify.md must say the first failed MANDATORY gate ends the "
+         "PASS claim, so a green from a higher rung cannot read as repairing "
+         "a red one below it"),
+        (rfc_path.parent / "phases" / "verify.md",
+         "Read the project's canonical commands from `KNOWLEDGE/`",
+         "phases/verify.md must read the project's commands from KNOWLEDGE/ "
+         "rather than re-deriving them, or executor and reviewer can each "
+         "verify a different thing and both report green"),
+        (rfc_path.parent / "phases" / "scout.md",
+         "cited afterwards rather than",
+         "phases/scout.md must write the harness and build commands into "
+         "KNOWLEDGE/ once and cite them afterwards (RFC § 1.2 makes them "
+         "durable truth)"),
+        (rfc_path.parent / "BOOT.md",
+         "Immediate means without asking, never without looking",
+         "BOOT.md must say `next_action` is the previous session's "
+         "pre-computed pick and is confirmed against BOARD.md where the "
+         "validator cannot re-derive it -- the portable floor does not, since "
+         "a grep cannot walk a needs: graph"),
+    ]
+    for _doc, _marker, _why in _markers:
+        if _doc.is_file() and _marker not in _doc.read_text(encoding="utf-8-sig"):
+            fail(f"cross-doc drift [borrowed-invariants] -- {_why}")
+            drift_ok = False
+
+    # 1a2. § 1.11's priority list had no entry for the user naming a command,
+    #      so BOOT's "execute `next_action` immediately" and § 1.10's "a
+    #      shortcut is a command, never a greeting" were two live MUSTs with
+    #      no precedence between them -- and at a cold start BOOT is the file
+    #      an agent reads first. It cost this repository the same `qq` twice:
+    #      E-1913 lost it to a stale `PHASE SCOUT T-455`, and a second agent's
+    #      session lost it to the same pick again. Both halves are pinned --
+    #      the rule in § 1.11, the conditional in BOOT step 7 -- because
+    #      either one alone restores the tie.
+    _s111_i = rfc.find("### 1.11")
+    _s111 = (rfc[_s111_i:rfc.find("## Part 2", _s111_i)]
+             if _s111_i >= 0 else "")
+    if not _s111:
+        fail("cross-doc check 'command-outranks-pick' cannot find RFC § 1.11 "
+             "-- update tools/validate.py deliberately; a drift check that "
+             "silently stops checking still prints PASS")
+        drift_ok = False
+    else:
+        if ("**OBEY**" not in _s111
+                or "It supersedes `next_action`" not in _s111):
+            fail("cross-doc drift [command-outranks-pick] -- RFC § 1.11's "
+                 "priority list must carry the OBEY step stating that a "
+                 "command the user just named supersedes `next_action`. "
+                 "Without it the list has no entry for the commonest event in "
+                 "a live project, and the previous session's pre-computed "
+                 "pick silently beats the key the user actually pressed")
+            drift_ok = False
+        _boot_prio = rfc_path.parent / "BOOT.md"
+        _boot_prio_t = (_boot_prio.read_text(encoding="utf-8-sig")
+                        if _boot_prio.is_file() else "")
+        if "the user's own message outranks the file" not in _boot_prio_t:
+            fail("cross-doc drift [command-outranks-pick] -- BOOT.md step 7 "
+                 "must say the user's own message outranks `next_action` and "
+                 "defer to § 1.11's OBEY priority. Read as unconditional it "
+                 "is the half a cold agent reaches first, which is exactly "
+                 "how the command the user typed gets dropped")
             drift_ok = False
 
     # 1b. CLEAN's board scrub has to keep the dependency graph intact. § 1.2
@@ -3487,6 +3728,130 @@ else:
                        f"({len(_baseline_tag_only) + len(_baseline_changelog_only)} "
                        "historical exception(s) verified)")
 
+        # 13c. An orphaned release tag. A v* tag exists locally whose commit
+        #      is on no remote branch while the remote carries the same name.
+        #      ship.md step 7 makes the tag push a separate command from the
+        #      branch push, so a rejected branch push can still be followed by
+        #      a successful tag push -- the tag lands on the remote pointing
+        #      at a commit that is on no remote branch. Second occurrence in
+        #      this repository: E-1787 (v7.171.0) and E-1882 (v7.176.0), and
+        #      the recovery text's claim that such a tag was "by definition
+        #      never successfully pushed" held only while the tag rode the
+        #      branch push. The local half (a tag whose commit rides no
+        #      refs/remotes branch) is cheap and network-free; the remote's
+        #      tag set is read with ls-remote ONLY when a candidate exists,
+        #      and where that cannot answer (no remote, offline) the check
+        #      stands down rather than guess -- same fail-safe as the no-git
+        #      gate above.
+        _orphan_candidates = []
+        if _tags_seen:
+            _remote_branches = []
+            try:
+                _rb = subprocess.run(
+                    ["git", "for-each-ref", "refs/remotes",
+                     "--format=%(refname)"],
+                    capture_output=True, text=True, check=False)
+                if _rb.returncode == 0:
+                    _remote_branches = [ln.strip() for ln in
+                                        _rb.stdout.splitlines() if ln.strip()]
+            except (OSError, subprocess.SubprocessError):
+                _remote_branches = []
+            if _remote_branches:
+                for _tag in sorted(_tag_list):
+                    _full = "v" + _tag
+                    _rc = subprocess.run(
+                        ["git", "rev-parse", f"{_full}^{{commit}}"],
+                        capture_output=True, text=True, check=False)
+                    if _rc.returncode != 0:
+                        continue
+                    _sha = _rc.stdout.strip()
+                    _on_branch = False
+                    for _br in _remote_branches:
+                        _mb = subprocess.run(
+                            ["git", "merge-base", "--is-ancestor", _sha, _br],
+                            capture_output=True, check=False)
+                        if _mb.returncode == 0:
+                            _on_branch = True
+                            break
+                    if not _on_branch:
+                        _orphan_candidates.append(_full)
+        _orphan_tags = []
+        if _orphan_candidates:
+            _remote_names = []
+            try:
+                _rn = subprocess.run(["git", "remote"], capture_output=True,
+                                     text=True, check=False)
+                if _rn.returncode == 0:
+                    _remote_names = [ln.strip() for ln in
+                                     _rn.stdout.splitlines() if ln.strip()]
+            except (OSError, subprocess.SubprocessError):
+                _remote_names = []
+            if _remote_names:
+                try:
+                    _lr = subprocess.run(
+                        ["git", "ls-remote", "--tags", _remote_names[0]],
+                        capture_output=True, text=True, check=False)
+                except (OSError, subprocess.SubprocessError):
+                    _lr = None
+                if _lr is not None and _lr.returncode == 0:
+                    _remote_tag_names = {
+                        ln.split("\t")[-1].split("/")[-1]
+                        for ln in _lr.stdout.splitlines()
+                        if "\trefs/tags/" in ln}
+                    _candidates = [t for t in _orphan_candidates
+                                   if t in _remote_tag_names]
+                    # A stale refs/remotes can flag a legitimately landed
+                    # tag: the branch push succeeded but this clone has not
+                    # fetched, so the commit sits on no *local* tracking
+                    # ref while the remote branch tip moved past it. The
+                    # remote itself can answer -- read its live branch heads
+                    # (same round-trip family as --tags) and drop any
+                    # candidate whose commit is provably on one: sha-equal to
+                    # a head, or an ancestor of a head whose object this
+                    # clone already holds.
+                    _live_heads = []
+                    try:
+                        _lh = subprocess.run(
+                            ["git", "ls-remote", "--heads",
+                             _remote_names[0]],
+                            capture_output=True, text=True, check=False)
+                        if _lh.returncode == 0:
+                            _live_heads = [ln.split("\t")[0]
+                                           for ln in _lh.stdout.splitlines()
+                                           if "\trefs/heads/" in ln]
+                    except (OSError, subprocess.SubprocessError):
+                        _live_heads = []
+                    _orphan_tags = []
+                    for _tag in _candidates:
+                        _rc = subprocess.run(
+                            ["git", "rev-parse", f"{_tag}^{{commit}}"],
+                            capture_output=True, text=True, check=False)
+                        if _rc.returncode != 0:
+                            continue
+                        _sha = _rc.stdout.strip()
+                        if _sha in _live_heads:
+                            continue
+                        _landed = False
+                        for _head in _live_heads:
+                            _mb = subprocess.run(
+                                ["git", "merge-base", "--is-ancestor",
+                                 _sha, _head],
+                                capture_output=True, check=False)
+                            if _mb.returncode == 0:
+                                _landed = True
+                                break
+                        if not _landed:
+                            _orphan_tags.append(_tag)
+        if _orphan_tags:
+            fail("orphaned release tag(s) -- the remote carries "
+                 f"{', '.join(_orphan_tags[:4])} but their commit(s) are on "
+                 "no remote branch: a tag push succeeded while the branch "
+                 "push it was supposed to ride did not land (E-1787, E-1882). "
+                 "Repair by force-moving the tag to the release commit on "
+                 "the branch, or deleting it from the remote and re-pushing "
+                 "after the branch push lands")
+            drift_ok = False
+
         # T-401: WARN slug ownership from release history. The baseline
         #      records each tracked slug's first/last seen release and its
         #      rationale; a slug STILL EMITTED this run that has survived
@@ -4092,6 +4457,9 @@ else:
             _shortcut_rows = re.findall(
                 r"^\| `([a-z]{2,3})` \| ([^|]+) \|",
                 _rfc_t[_i:_j], re.MULTILINE)
+            _shortcut_full_rows = re.findall(
+                r"^\| `([a-z]{2,3})` \| ([^|]+) \| ([^|]*)\|",
+                _rfc_t[_i:_j], re.MULTILINE)
             # `saipen plan` is two commands wearing one name, and only the
             # bare one was ever written down. A weak model reading the
             # Proposal-Mode paragraph answers `dd <text>` with four
@@ -4168,14 +4536,31 @@ else:
             # bare `saipen goal` from setting the flag, touching a counter or
             # planning -- it replies with the usage line. The most-used key
             # promised an outcome the row cannot produce.
-            if ("The pivot needs text" not in _shortcut_section
-                    or "trigger goal mode" in _shortcut_section):
-                fail("cross-doc drift [shortcut-notes] -- the `cc` row must "
-                     "say the pivot needs text and that the bare form is a "
-                     "resume or the § 1.10 usage line, never a pivot. Bare "
-                     "`saipen goal` MUST NOT set goal_mode, write a counter "
-                     "or plan, so a Notes column promising a bare pivot "
-                     "describes a command that does not exist")
+            #
+            # Derived from the ROUTE, never from a key name. Fixing `cc` by
+            # name closed the defect on one instance and left its twin: `gg`
+            # routes to the same `saipen goal` and went on reading "Goal Mode
+            # pivot / re-authorization" one row above the row that had just
+            # been repaired -- a bare pivot the destination forbids, and a
+            # re-authorization that only happens with § 2.4's valve tripped.
+            # Keying on the route means a third row assigned to `saipen goal`
+            # inherits the requirement instead of quietly escaping it.
+            _goal_notes_bad = []
+            for _sc, _route, _notes in _shortcut_full_rows:
+                if "`saipen goal`" not in _route:
+                    continue
+                if "pivot needs text" not in _notes or "Bare" not in _notes:
+                    _goal_notes_bad.append(f"`{_sc}`")
+            if _goal_notes_bad or "trigger goal mode" in _shortcut_section:
+                fail("cross-doc drift [shortcut-notes] -- every row routing to "
+                     "`saipen goal` must say the pivot needs text and what its "
+                     "BARE form does, which is a resume or the § 1.10 usage "
+                     "line, never a pivot. Bare `saipen goal` MUST NOT set "
+                     "goal_mode, write a counter or plan, so a Notes column "
+                     "promising a bare pivot describes a command that does not "
+                     "exist. Offending row(s): "
+                     + (", ".join(_goal_notes_bad) or "none named; the "
+                        "superseded literal is back in the section"))
                 drift_ok = False
 
             # § 1.10's `saipen stop` paragraph and § 2.4 Entry both describe

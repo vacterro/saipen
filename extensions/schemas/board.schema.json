@@ -45,6 +45,11 @@
       "review_passes": {
         "type": "integer",
         "description": "RFC 1.2 recognized optional ticket field; phases/review.md uses it to enforce its two-pass cap mechanically rather than from memory. Absent from this schema until v7.101.0."
+      },
+      "verify_attempts": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "RFC 1.2 recognized optional ticket field; absent reads as zero. Counts the failed fix cycles phases/verify.md spends on this ticket, so its cap is mechanical rather than remembered -- the same argument review_passes already carries one phase over. The cap number itself lives in phases/verify.md and is read from there, never copied."
       }
     },
     "required": [

@@ -67,13 +67,34 @@ does not answer.
    the same checkpoint: `DEC: applied human_note: <text>`, or
    `DEC: human_note -> T-###` if it became a ticket. One-shot, not standing law.
 
-7. **Execute `STATE.next_action` immediately.** That value IS the instruction;
+7. **Execute the instruction -- and the user's own message outranks the file.**
+   Did this message name a command: a § 1.10 verb, a row of its shortcut table
+   (including the Cyrillic twin), or an active extension's word (§ 1.9)? Then
+   THAT is the instruction, and `next_action` is merely what a bare continue
+   would have run. RFC § 1.11's OBEY priority owns the rule and its placement:
+   the command is the newest fact in the session and `next_action` the oldest,
+   so a live `WAIT:` is cleared by the user speaking rather than restated, while
+   a corrupt state is still repaired before the command runs against it. Twice
+   on this repository a bare `qq` lost to a stale `PHASE SCOUT T-455`, because
+   this step read as unconditional while § 1.10 said equally absolutely that a
+   shortcut is a command and never a greeting -- two MUSTs, no precedence, and a
+   cold agent reads this file first. Several commands in one message run in the
+   order written, checkpointing between.
+   **No command in the message?** Then `STATE.next_action` IS the
+   instruction -- but it is the PREVIOUS session's pre-computed Pick
+   Rule result, not an independent fact. Where `tools/validate.py` runs
+   it re-derives the pick and FAILs a stale one; where it cannot run,
+   the portable floor does not (a grep cannot walk a `needs:` graph), so
+   confirm against `BOARD.md` yourself before acting on a `PHASE`
+   pick: topmost workable ticket wins, per RFC § 1.11 and § 1.6, which
+   own that rule. Immediate means without asking, never without looking.
+   That value IS the instruction;
    do not ask "what should I do?" (`CONFORMANCE.md` TEST-001). A `WAIT:` means
    output that question verbatim and stop. If `next_action` is absent, vague,
    or fails § 1.2's prefix/category checks, it is corrupt -- RECOVER (step 2),
    do not improvise a replacement. When you must choose what to do at all,
    RFC § 1.11's priority decides and is not a judgement call:
-   RECOVER > UNBLOCK > FINISH > START > MAINTAIN. Its five legal
+   RECOVER > OBEY > UNBLOCK > FINISH > START > MAINTAIN. Its five legal
    forms and their arguments are defined in RFC § 1.2:
    `WAIT:` / `saipen <command>` / `PHASE <phase> [T-###]` / `RUN:` /
    `RESUME: T-### <phase>`.
