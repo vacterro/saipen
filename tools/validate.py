@@ -3262,12 +3262,16 @@ else:
     #       finish -- and the two defensible responses (adopt it and produce
     #       nothing, or skip it and break the topmost-workable rule) are the
     #       divergence this section exists to remove.
-    if "That is also where a ticket goes when its completion" not in rfc:
+    if ("That is also where a ticket goes when its completion" not in rfc
+            or "The same section holds a ticket whose work another"
+            not in rfc):
         fail("cross-doc drift [permanent-owner-section] -- RFC 1.2 must say "
              "that a ticket whose completion condition can never be met sits "
              "in `## BLOCKED` with the reason, not in `## TODO`. A permanent "
              "warning owner in `## TODO` passes every workability test the "
-             "Pick Rule applies while its own `verify:` says closing it FAILs")
+             "Pick Rule applies while its own `verify:` says closing it FAILs, "
+             "and so does a ticket phases/translate.md gives to a dedicated "
+             "instance while forbidding Core to grind through it")
         drift_ok = False
 
     # 1b11. Stale translation next to updated source. `phases/translate.md`

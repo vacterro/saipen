@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.187.0 -- 2026-08-04 -- the Pick Rule stops handing Core work Core is forbidden to do
+
+T-483: `phases/translate.md` gives 29 of the 32 languages to a dedicated saitranslate instance and tells a Core agent that finds them stale not to start grinding through them "while it's here". T-422, whose body is 28 locale guides, sat in `## TODO` passing every workability test the Pick Rule applies -- open checkbox, `needs:` satisfied, unclaimed. Two honest agents diverge there and both can defend themselves: one does the forbidden work, the other skips a ticket the rule says it must take.
+
+Same divergence as v7.185.0's, arrived at from the other side. There the completion condition could never be met; here the performer is wrong. `## BLOCKED` answers both, and `| blocker:` must now name the owner AND the command that clears it -- for T-422 that is an `ee` run -- so the block is one somebody can lift rather than a shelf to park things on.
+
+No new field, ticket kind or scheduling concept was added. The Pick Rule already ignores `## BLOCKED` and section 2.1 already keeps it out of the halt test, so the board still reaches `HUNT` with these tickets parked.
+
+Known limit, the same one v7.185.0 states: no checker can tell that a ticket belongs to another instance, so nothing stops the next one being filed into `## TODO`. The rule tells an agent where to put it; the control only proves the section is honoured once it is there.
+
+audit_checks 142 -> 143 standing controls. CONFORMANCE 232.
+
 ## 7.186.0 -- 2026-08-04 -- a stale translation next to updated source finally has a signal
 
 T-423: `phases/translate.md` section 3 stated the duty and named the gap in the same sentence -- a stale translation is worse than none "since nothing signals they've gone wrong" -- and for 32 languages nothing did. Commit dates cannot serve: every release bumps the version badge in all 65 locale files, so they always look exactly as fresh as their source. The badge check that reports `32 locale README badge(s) match VERSION` measures the badge, not the prose, while reading like freshness.
