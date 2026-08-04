@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.184.0 -- 2026-08-04 -- `no-publish` is a permission, not an absent git, and no ship step is half-permitted
+
+T-463: `phases/ship.md`'s `mode: no-publish` block fused two independent facts. It called the remote steps skippable because "no remote exists to publish to", and it hardcoded `no git` into the mandatory skipped-publish LOG line -- on a host that may have a repository, a remote and a perfectly readable `HEAD`. That is a false record in an append-only file, and the next agent reading it concludes the project cannot publish at all. Whether git exists is observable: `git rev-parse` answers or it does not. Whether publishing is permitted is `mode:`. They are asked separately now, and the line carries `policy` or `no git`, whichever is true.
+
+The worse half was an instruction nobody could follow. The block said "do step 6" and "skip the push half of step 6" in the same breath -- and after v7.176.0 renumbered the phase, step 6 both committed AND pushed. So a mode whose entire content is "do not commit, tag or push" told its reader to commit, and the reader had no legal way to comply. The release step is split: 6a is LOCAL (CHANGELOG plus the validator re-run, no repository touched) and 6b is GIT (commit, then push the branch). The mode's instructions are a per-step DO/SKIP table rather than prose with exceptions, so there is nothing to interpret.
+
+Same error class as v7.182.0's MARKHUNT fix one phase over, where `no-git` covered a readable repository for the same reason.
+
+The split moved the `[tag-after-branch]` anchor and that check FAILed on the first run. It was repointed at the new step name rather than loosened: it compares the branch-landed gate's position against the tag push, and a check that stops naming a real step stops checking.
+
+audit_checks 137 -> 140 standing controls. CONFORMANCE 229.
+
 ## 7.183.0 -- 2026-08-04 -- two orphans, the habit that let them in, and a closed root
 
 The user spotted `.saipen/_scen_cand.md` by its name and was right about it: a leftover. A 194-row snapshot of the saiwiki `Scenarios.md` page, frozen at CONFORMANCE 194 while the maintained page is at 216, committed by accident in 8b8d58c -- a change whose entire subject was the Pick Rule check. A sweep for siblings found one more: `button33.wav`, an 8-bit mono WAV at the repository root, on the v7.176.0 push-failure checkpoint.

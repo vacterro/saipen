@@ -12,7 +12,7 @@ Only on `saipen ship`, or repo has `origin` AND LOG shows prior ship, or
 unopted project. Needs 100% green.
 
 **Fixable preflight failure -> BUILD, not BLOCKED.** Steps 0-4 plus release
-metadata preparation and the validator rerun in step 6 can expose a defect
+metadata preparation and the validator rerun in step 6a can expose a defect
 before anything is committed, tagged, or pushed: a broken release script, a
 stale generated file, a failing validator, or another fault with a known local
 fix. LOG the exact failure, transition the current ticket
@@ -27,16 +27,41 @@ is never a return to BUILD for that shipped ticket.
 git-dependent steps only (commit, tag, push), not `SHIP` itself; a blanket
 ban here would mean a git-less project can never close a ticket at all
 (`phases/review.md` makes `SHIP` mandatory before `DONE`, no exception).
-Do steps 1, 2, 4, 6 below (README, version bump, .gitignore/tmp cleanup,
-CHANGELOG) -- all local, none need git. Skip step 3's tag-matching clause,
-step 5 and step 8 (remote classification and the first-publish gate -- no
-remote exists to publish to), step 7 (tag), and the "push" half of step 6. Replace steps 9/10's LOG line
-with: `- DATE [E-###] [parent: E-###] RUN: ship vX.Y.Z -> skipped publish
-(no-publish: no git)` (this exact text after the taxonomy) -- never phrase
-it as a failure, since nothing failed; publish was never attempted because
-it isn't possible, not because it broke. Write the human digest same as
-always, `awaiting:` noting `git needed to publish` if that matters for this
-project. Then STATE -> `DONE` directly, same as a normal successful ship.
+
+**`no-publish` means publishing is not permitted. It does NOT mean git is
+absent.** Two different facts, and this block used to fuse them: it called
+the remote steps skippable because "no remote exists to publish to" and
+made the mandatory LOG line say `no git`, on a host that may well have a
+repository, a remote, and a perfectly readable `HEAD`. Whether git exists
+is observable -- `git rev-parse --short HEAD` answers or it does not -- and
+whether publishing is permitted is `mode:`. Ask them separately. (Same
+error class as `phases/markhunt.md`'s `no-git` manifest hashes, fixed in
+T-462.)
+
+**Do exactly this, and nothing is half-permitted:**
+
+| Step | Under `no-publish` | Why |
+|------|--------------------|-----|
+| 0, 1, 2, 4 | **DO** | Board pre-flight, README, version bump, junk sweep -- local, no repository touched |
+| 3 | **DO, minus the tag clause** | README and CHANGELOG must still agree with `VERSION`; there is no tag to match |
+| 5 | **SKIP** | Remote classification and the first-publish gate authorize a push that will not happen |
+| 6a | **DO** | CHANGELOG plus the validator re-run: local by construction |
+| 6b | **SKIP** | Commit AND push. Both are forbidden here -- this is the step whose "push half" the old wording tried to skip while leaving the commit |
+| 7 | **SKIP** | Tag creation and tag push |
+| 8 | **SKIP** | First publish is settled at step 5, which is skipped |
+| 9 / 10 | **REPLACE** | See the LOG line below |
+
+Replace steps 9/10's LOG line with: `- DATE [E-###] [parent: E-###]
+RUN: ship vX.Y.Z -> skipped publish (no-publish: <reason>)` (this exact
+text after the taxonomy), where `<reason>` is `policy` when git works and
+publishing is switched off, or `no git` when `git rev-parse` genuinely
+cannot answer. **Write the one that is true.** A fabricated `no git` on a
+host with a live remote is a false record in an append-only file, and the
+next agent reading it will believe this project cannot publish at all.
+Never phrase either as a failure: nothing failed, publish was not
+attempted. Write the human digest same as always, `awaiting:` noting
+`git needed to publish` when that is the actual reason. Then STATE ->
+`DONE` directly, same as a normal successful ship.
 
 0. **Board pre-flight: every work unit done this session MUST have a ticket in `## DONE`.** Inline fixes and sweeps without a ticket must get one before proceeding. Stale `## DONE` blocks SHIP (RFC § 1.2).
 1. README beautiful: pitch, features, install, usage, version + changelog link.
@@ -67,15 +92,23 @@ project. Then STATE -> `DONE` directly, same as a normal successful ship.
    all, the push failed first and dropped into generic push recovery, which
    never asks the question. A gate downstream of the act it authorizes is
    not a gate.
-6. CHANGELOG.md newest-top. Re-run the required validators after every release
-   metadata edit; a gate run before VERSION/README/CHANGELOG changed proves the
-   old release, not the one about to ship. Once green, commit the reviewed
-   changes, then push the branch. **Re-read the remote immediately before this
-   push** and again before the tag push below: step 5's answer is a
-   measurement, and a remote someone else published to in between makes it
-   stale. Classification changed from first-publish to established -> proceed;
-   changed the other way -> stop and re-run step 5's gate.
-7. ONLY AFTER step 6's branch push has LANDED -- confirmed by the push
+6a. **LOCAL. Touches no repository and no remote.** `CHANGELOG.md`
+   newest-top. Re-run the required validators after every release metadata
+   edit; a gate run before VERSION/README/CHANGELOG changed proves the old
+   release, not the one about to ship.
+6b. **GIT. Writes the repository and the remote.** Once 6a is green, commit
+   the reviewed changes, then push the branch. **Re-read the remote
+   immediately before this push** and again before the tag push below:
+   step 5's answer is a measurement, and a remote someone else published to
+   in between makes it stale. Classification changed from first-publish to
+   established -> proceed; changed the other way -> stop and re-run step 5's
+   gate.
+
+   *Why this is two steps.* It was one, and the `mode: no-publish` block
+   above then had to say "do step 6" and "skip the push half of step 6" in
+   the same breath -- leaving the commit, which that mode forbids. A step
+   that is half-permitted cannot be followed; a step is local or it is not.
+7. ONLY AFTER step 6b's branch push has LANDED -- confirmed by the push
    returning success, or by `git rev-parse origin/BRANCH` ==
    `git rev-parse BRANCH` after a fetch -- create the release tag, then
    push that exact ref only:
@@ -89,10 +122,10 @@ project. Then STATE -> `DONE` directly, same as a normal successful ship.
    branch. `git push --tags` and `git push --follow-tags` are forbidden
    here: both select from unrelated local tag state, so a temporary
    inspection tag can become a published artifact without appearing in the
-   release plan. The branch push in step 6 and this one named tag push are
+   release plan. The branch push in step 6b and this one named tag push are
    separate commands, and the second MUST NOT run unless the first landed.
 8. First publish is settled at step 5, before anything leaves this machine,
-   and re-checked at step 6 and step 7. It is named here only because this
+   and re-checked at step 6b and step 7. It is named here only because this
    is where the list used to carry it, and a reader who learned the old
    order needs to be sent forward rather than left looking. Both shapes
    count as brand-new: no `origin` at all, and an `origin` that exists but

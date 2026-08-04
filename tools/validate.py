@@ -2879,7 +2879,7 @@ else:
         # remote branch -- twice here (E-1787, E-1882). Step 10's recovery
         # text claimed such a tag "by definition was never successfully
         # pushed", which holds only while the tag rides the branch push.
-        _tag_landed = _ship_t.find("step 6's branch push has LANDED")
+        _tag_landed = _ship_t.find("step 6b's branch push has LANDED")
         _tag_cmd = _ship_t.find("git push origin refs/tags/vVERSION")
         if _tag_landed < 0 or _tag_cmd < 0:
             fail("cross-doc drift [tag-after-branch] -- phases/ship.md no "
@@ -3233,6 +3233,27 @@ else:
              "could ever see them. A deliberate new root file is a one-line "
              "addition to ROOT_ALLOWED in tools/validate.py; a scratch file "
              "belongs in .gitignore, which this check honours")
+        drift_ok = False
+
+    # 1b9. SHIP's `no-publish` block fused a policy mode with an absence of
+    #      git. It called the remote steps skippable because "no remote
+    #      exists to publish to" and hardcoded `no git` into the mandatory
+    #      LOG line, on a host that may have a repository, a remote and a
+    #      readable HEAD -- a false record in an append-only file. Worse, it
+    #      ordered "do step 6" and "skip the push half of step 6" together,
+    #      and step 6 committed AND pushed: a mode that forbids committing
+    #      told its reader to commit. Splitting the step into a local half
+    #      and a git half is what makes the instruction followable at all.
+    if _ship_t and ("It does NOT mean git is" not in _ship_t
+                    or "(no-publish: <reason>)" not in _ship_t
+                    or "6b. **GIT." not in _ship_t):
+        fail("cross-doc drift [no-publish-split] -- phases/ship.md must say "
+             "`no-publish` is a permission and not an absence of git, must "
+             "record the real reason in the skipped-publish line rather than "
+             "a hardcoded `no git`, and must keep the release step split "
+             "into a LOCAL half and a GIT half. Fused, the block ordered a "
+             "step that commits and pushes while calling it local, and told "
+             "a mode that forbids committing to skip only the push")
         drift_ok = False
 
     # 1c. § 2.1's ZERO-PROMPT rule is a MUST, and its exception list has to
