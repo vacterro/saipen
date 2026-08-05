@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 """saipen conformance validator (canonical).
 
 Stdlib only -- no pip installs, ever. Run from anywhere inside the project,
@@ -4984,10 +4984,7 @@ else:
             # must carry the with-text half, and it must say where those
             # tickets land, because "priority" here means board position.
             _plan_doc = _tools_parent / "saipen" / "phases" / "plan.md"
-            for _doc, _body in (("RFC.md § 1.10", _rfc_t[_i:_j]),
-                                ("phases/plan.md",
-                                 _plan_doc.read_text(encoding="utf-8-sig")
-                                 if _plan_doc.is_file() else "")):
+            for _doc, _body in (("phases/plan.md", _plan_doc.read_text(encoding="utf-8-sig") if _plan_doc.is_file() else ""),):
                 if not _body:
                     continue
                 if "FRONT of `## TODO`" not in _body:

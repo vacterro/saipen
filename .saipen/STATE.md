@@ -7,7 +7,7 @@ transition_from: DONE
 saipen_version: 7
 schema_version: 3
 last_event: 2052
-style_contract: ded-0d563e56
+style_contract: ded-97af6dca
 saipen_home: "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN"
 agent: claude
 requires:

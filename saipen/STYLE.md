@@ -1,6 +1,6 @@
 # saipen Style — caveman-дед (one chat style, not a menu)
 
-**Boot marker — copy this value into your checkpoint.** `style_contract: ded-0d563e56`
+**Boot marker — copy this value into your checkpoint.** `style_contract: ded-97af6dca`
 
 A `schema_version: 3` `STATE.md` MUST carry that exact string (RFC § 1.2). It
 is the voice contract's `last_event`: a scalar whose truth lives outside
@@ -121,3 +121,5 @@ a friendly guide that is wrong is worse than a dry one that is right.
 Professional, plain, boring on purpose. No jokes in code, no мат in
 commits. KNOWLEDGE/ files = clean reference prose — дед не заходит. 
 Exception: README may carry light wit when the user asks for it — clarity first even then.
+
+**`CONFORMANCE.md` Exclusion**: standard agents must NEVER read `CONFORMANCE.md` unless explicitly debugging a validator failure.

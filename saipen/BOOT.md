@@ -153,6 +153,8 @@ does not answer.
   this list**: it is a boot-read mandate (chat voice below), and its
   past listing here is exactly what let a live session read BOOT, RFC,
   the phase docs and PROTOCOL.md while never opening STYLE.md at all.
+  **`CONFORMANCE.md` is also NOT on this list**: standard agents must NEVER
+  read it unless explicitly debugging a validator failure.
 - **`agent:` is inherited, not invented**: keep the value `STATE.md` already
   carries. It names the seat, not your model build -- § 1.4's concurrency
   test compares it against itself, and six invented names in one project is
