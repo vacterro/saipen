@@ -780,6 +780,15 @@ CASES: list[tuple[str, str, object, str]] = [
      replace("Something signals it now, and keeping that signal",
              "Nothing signals it and keeping any signal"),
      "translation-digest"),
+    # The circuit's whole reason: a stage that hands forward a CLAIM instead
+    # of evidence. Observed in a user transcript -- "Production Ready",
+    # "проверил: всё работает", then FileNotFoundError on the next command.
+    ("crew.md lets a stage hand forward a claim",
+     "extensions/subs/crew.md",
+     replace("A stage passes the next stage a reproduction or a verdict. "
+             "Never a claim.",
+             "A stage summarises its result for the next stage."),
+     "circuit-handoff"),
     ("CORE.md drops the ahead-stamp repair", "saipen/CORE.md",
      replace("An ahead-stamp is repaired, not waited out",
              "An ahead-stamp clears on its own"),

@@ -10,7 +10,7 @@ See on lahendus täpselt sellele ühele asjale.
 
 **SAIPEN** on lihtsalt üks kuradi märkmik kaustas `.saipen/`.
 
-**Kiirklahvid:** `cc` jätkab aktiivset Goal Mode'i, `sss` näitab olekut koodi puudutamata ja `ss` salvestab kontrollpunkti ning peatub. [Täielik 14 kiirklahvi kaart](../saipen/RFC.md#110-command-surface); toimivad ka kirillitsa vasted `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Kiirklahvid:** `cc` jätkab aktiivset Goal Mode'i, `sss` näitab olekut koodi puudutamata ja `ss` salvestab kontrollpunkti ning peatub. [Täielik 15 kiirklahvi kaart](../saipen/RFC.md#110-command-surface); toimivad ka kirillitsa vasted `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **Paketiklahvid:** `ee`/`qq` valmistavad täieliku tõlke- või vikipaketi ette ilma seda lõimimata; `eee`/`qqq` võtavad vastu ainult valmis paketi, seejärel lõimivad, kontrollivad, vaatavad üle ja lükkavad üles.
 

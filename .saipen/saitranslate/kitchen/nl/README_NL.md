@@ -12,11 +12,11 @@ en het werk in minder dan een minuut hervat -- geen herbriefing, elke leverancie
 
 **Eén commando. Nul amnesie.**
 
-**Sneltoetsen:** `cc` zet een actieve Goal Mode voort, `sss` meldt status zonder code aan te raken en `ss` slaat een checkpoint op en stopt. [Bekijk de volledige 14-toetsenkaart](saipen/RFC.md#110-command-surface). Cyrillische tweelingen werken ook: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Sneltoetsen:** `cc` zet een actieve Goal Mode voort, `sss` meldt status zonder code aan te raken en `ss` slaat een checkpoint op en stopt. [Bekijk de volledige 15-toetsenkaart](saipen/RFC.md#110-command-surface). Cyrillische tweelingen werken ook: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **Antwoordtaal.** De agent antwoordt standaard **in het Estisch** — dat is een instelling, geen eigenaardigheid, en niets anders aan SAIPEN is Estisch. Het wordt op één plek gewijzigd: de regel `reply_language:` bovenaan [`saipen/STYLE.md`](saipen/STYLE.md). `et` Estisch, `en` Engels, `ru` Russisch, `auto` kiest op basis van de taal van je bericht. Het protocol, de code, de commits en alle documenten blijven bij elke waarde Engels.
 
-**v7.192.0** | [Spec](SPEC.md) | [Gids](GUIDE.md) | [RFC](saipen/RFC.md) | [Stijl](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformiteit](saipen/CONFORMANCE.md) | plat markdown | nul afhankelijkheden | MIT
+**v7.193.0** | [Spec](SPEC.md) | [Gids](GUIDE.md) | [RFC](saipen/RFC.md) | [Stijl](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformiteit](saipen/CONFORMANCE.md) | plat markdown | nul afhankelijkheden | MIT
 
 ```text
 Gebruiker ->  /saipen continue

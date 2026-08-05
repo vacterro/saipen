@@ -251,7 +251,7 @@ def _git(*args):
 SAIPEN_COMMANDS = frozenset({
     "set", "init", "continue", "goal", "plan", "clean", "translate",
     "markhunt", "prepare", "collect", "ship", "validate", "test", "status",
-    "stop", "sub", "hunt"})
+    "stop", "sub", "hunt", "crew"})
 # RFC § 1.2: `PHASE <phase-enum> [T-###]` takes the ticket ref for exactly the
 # five ticket-bearing phases and omits it for every other one. The rule had no
 # witness, and the constitution's own worked example (§ 2.2, translating ADD's
@@ -307,6 +307,7 @@ EXPECTED_SHORTCUT_ROUTES = {
     "eee": "`saipen collect saitranslate` then `saipen ship`",
     "pp": "`saipen sub spawn saipython`",
     "tt": "`saipen test`",
+    "sc": "`saipen crew`",
 }
 PACKAGE_HANDOFF_FIELDS = {
     "status", "producer", "source_head", "coverage", "payload", "verified",
@@ -2519,6 +2520,18 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
                         "`\u0430\u0430`", "`\u0435\u0435`",
                         "`\u0435\u0435\u0435`", "`\u0440\u0440`")
 
+    # Resolved from `_tools_parent`, never from `rfc_path`: that name is
+    # bound hundreds of lines BELOW this one, so reading it here raised
+    # NameError and took the whole callout section down with it -- silently,
+    # which is worse than the false PASS it replaced. Second time in one
+    # session, and CONFORMANCE 118 is the invariant for exactly this.
+    _sc_home = _tools_parent / "saipen"
+    if not (_sc_home / "CORE.md").is_file():
+        _sc_home = _tools_parent
+    _shortcut_key_count = len(re.findall(
+        r"^\| `[a-z]{2,3}` \| ",
+        _read_rfc(_sc_home / "RFC.md"), re.MULTILINE))
+
     def _shortcut_callout(path, expected_link):
         if not path.is_file():
             fail(f"cross-doc drift [shortcut-callouts] -- missing {path}")
@@ -2531,9 +2544,14 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
                  f"{len(_matches)} shortcut callouts; expected exactly one")
             return None
         _index, _line = _matches[0]
-        if "14" not in _line:
+        # The count is DERIVED from the table, never a literal. It was
+        # hardcoded `14`, so adding a 15th row left the check asserting a
+        # number that had stopped being true and passing anyway -- the whole
+        # 70-document rollout then had to be noticed by a human. A literal
+        # here is a check that measures the day it was written.
+        if str(_shortcut_key_count) not in _line:
             fail(f"cross-doc drift [shortcut-callouts] -- {path} does not "
-                 "name the complete 14-key map")
+                 f"name the complete {_shortcut_key_count}-key map")
         _missing = [token for token in _shortcut_tokens
                     if _line.count(token) != 1]
         if _missing:
@@ -3112,6 +3130,27 @@ else:
              "is inherited rather than measured. Without it the only sanctioned "
              "response is waiting, which keeps a false record and reds every "
              "gate until the clock catches up")
+        drift_ok = False
+
+    # 1b16. The circuit's hand-off contract. Every stage of `sc` already has
+    #       a verdict vocabulary of its own; what was missing is the rule that
+    #       a verdict is what travels. A user transcript shows the cost: an
+    #       agent archived a file its own entry point imports at runtime, then
+    #       reported "Production Ready" and "проверил: всё работает", and the
+    #       next command anyone ran raised FileNotFoundError. The import rung
+    #       of verify.md's ladder -- one command, second cheapest -- was never
+    #       run, and a claim travelled where evidence belonged.
+    _crew_doc = (_tools_parent / "extensions" / "subs" / "crew.md")
+    _crew_t = (_crew_doc.read_text(encoding="utf-8-sig")
+               if _crew_doc.is_file() else "")
+    if _crew_t and ("A stage passes the next stage a reproduction or a "
+                    "verdict. Never a claim." not in _crew_t):
+        fail("cross-doc drift [circuit-handoff] -- extensions/subs/crew.md "
+             "must state that a circuit stage hands the next stage a "
+             "reproduction or a verdict and never a claim. Without it `sc` is "
+             "a sequence of commands with the operator's memory between them, "
+             "which is the arrangement that let \"Production Ready\" travel "
+             "one stage ahead of an unrun import check")
         drift_ok = False
 
     # 1c. Shortcuts are resolved by reading § 1.10, never from memory.

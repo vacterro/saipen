@@ -12,11 +12,11 @@ và tiếp tục công việc trong chưa đầy một phút -- không cần gi�
 
 **Một lệnh. Không hề mất trí nhớ.**
 
-**Phím tắt:** `cc` tiếp tục Goal Mode đang chạy, `sss` báo trạng thái mà không đụng vào mã và `ss` lưu điểm kiểm tra rồi dừng. [Xem bản đồ đầy đủ 14 phím](saipen/RFC.md#110-command-surface). Các cặp song sinh Cyrillic cũng hoạt động: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Phím tắt:** `cc` tiếp tục Goal Mode đang chạy, `sss` báo trạng thái mà không đụng vào mã và `ss` lưu điểm kiểm tra rồi dừng. [Xem bản đồ đầy đủ 15 phím](saipen/RFC.md#110-command-surface). Các cặp song sinh Cyrillic cũng hoạt động: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **Ngôn ngữ trả lời.** Tác nhân trả lời mặc định **bằng tiếng Estonia** — đó là cài đặt, không phải sự kỳ quặc, và không có gì khác trong SAIPEN là tiếng Estonia. Thay đổi ở một nơi: dòng `reply_language:` ở đầu [`saipen/STYLE.md`](saipen/STYLE.md). `et` tiếng Estonia, `en` tiếng Anh, `ru` tiếng Nga, `auto` chọn theo ngôn ngữ tin nhắn bạn gửi. Giao thức, mã nguồn, commit và mọi tài liệu vẫn bằng tiếng Anh ở mọi giá trị.
 
-**v7.192.0** | [Đặc tả](SPEC.md) | [Hướng dẫn](GUIDE.md) | [RFC](saipen/RFC.md) | [Phong cách](saipen/STYLE.md) | [Giao diện UI](saipen/UI.md) | [Độ tuân thủ](saipen/CONFORMANCE.md) | markdown thuần túy | không phụ thuộc | MIT
+**v7.193.0** | [Đặc tả](SPEC.md) | [Hướng dẫn](GUIDE.md) | [RFC](saipen/RFC.md) | [Phong cách](saipen/STYLE.md) | [Giao diện UI](saipen/UI.md) | [Độ tuân thủ](saipen/CONFORMANCE.md) | markdown thuần túy | không phụ thuộc | MIT
 
 ```text
 Người dùng -> /saipen continue

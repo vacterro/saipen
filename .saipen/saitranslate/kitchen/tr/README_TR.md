@@ -10,11 +10,11 @@
 
 **Tek komut. Sıfır hafıza kaybı.**
 
-**Kısayol tuşları:** `cc` aktif Goal Mode’u sürdürür, `sss` koda dokunmadan durumu bildirir ve `ss` kontrol noktası kaydedip durur. [14 tuşluk tam haritaya bakın](saipen/RFC.md#110-command-surface). Kiril ikizleri de çalışır: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Kısayol tuşları:** `cc` aktif Goal Mode’u sürdürür, `sss` koda dokunmadan durumu bildirir ve `ss` kontrol noktası kaydedip durur. [15 tuşluk tam haritaya bakın](saipen/RFC.md#110-command-surface). Kiril ikizleri de çalışır: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **Yanıt dili.** Aracı varsayılan olarak **Estonca** yanıtlar — bu bir ayar, tuhaflık değil, ve SAIPEN'de Estonca olan başka hiçbir şey yoktur. Tek bir yerde değişir: [`saipen/STYLE.md`](saipen/STYLE.md) dosyasının başındaki `reply_language:` satırı. `et` Estonca, `en` İngilizce, `ru` Rusça, `auto` gönderdiğin mesajın diline göre seçer. Protokol, kod, commit'ler ve tüm belgeler her değerde İngilizce kalır.
 
-**v7.192.0** | [Spec](SPEC.md) | [Rehber](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [Kullanıcı Arayüzü](saipen/UI.md) | [Uyum](saipen/CONFORMANCE.md) | sade markdown | sıfır bağımlılık | MIT
+**v7.193.0** | [Spec](SPEC.md) | [Rehber](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [Kullanıcı Arayüzü](saipen/UI.md) | [Uyum](saipen/CONFORMANCE.md) | sade markdown | sıfır bağımlılık | MIT
 
 ```text
 Kullanıcı -> /saipen continue

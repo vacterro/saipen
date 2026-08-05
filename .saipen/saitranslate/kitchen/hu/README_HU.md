@@ -12,11 +12,11 @@ paranccsal egy percen belül folytatja a munkát -- újratájékoztatás nélkü
 
 **Egyetlen parancs. Zéró amnézia.**
 
-**Gyorsbillentyűk:** a `cc` folytat egy aktív Goal Mode-ot, az `sss` kód érintése nélkül jelzi az állapotot, az `ss` pedig menti az ellenőrzőpontot és megáll. [Lásd a teljes 14 billentyűs térképet](saipen/RFC.md#110-command-surface). A cirill ikrek is működnek: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Gyorsbillentyűk:** a `cc` folytat egy aktív Goal Mode-ot, az `sss` kód érintése nélkül jelzi az állapotot, az `ss` pedig menti az ellenőrzőpontot és megáll. [Lásd a teljes 15 billentyűs térképet](saipen/RFC.md#110-command-surface). A cirill ikrek is működnek: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **A válasz nyelve.** Az ügynök alapértelmezés szerint **észtül** válaszol — ez beállítás, nem hóbort, és semmi más nem észt a SAIPEN-ben. Egy helyen módosítható: a `reply_language:` sor a [`saipen/STYLE.md`](saipen/STYLE.md) elején. `et` észt, `en` angol, `ru` orosz, `auto` az üzeneted nyelve alapján választ. A protokoll, a kód, a commitok és minden dokumentum minden értéknél angol marad.
 
-**v7.192.0** | [Spec](SPEC.md) | [Útmutató](GUIDE.md) | [RFC](saipen/RFC.md) | [Stílus](saipen/STYLE.md) | [UI](saipen/UI.md) | [Megfelelőség](saipen/CONFORMANCE.md) | egyszerű markdown | zéró függőség | MIT
+**v7.193.0** | [Spec](SPEC.md) | [Útmutató](GUIDE.md) | [RFC](saipen/RFC.md) | [Stílus](saipen/STYLE.md) | [UI](saipen/UI.md) | [Megfelelőség](saipen/CONFORMANCE.md) | egyszerű markdown | zéró függőség | MIT
 
 ```text
 Felhasználó ->  /saipen continue

@@ -12,11 +12,11 @@ und die Arbeit in unter einer Minute wiederaufnimmt -- kein Erklärungsbedarf, j
 
 **Ein Befehl. Null Amnesie.**
 
-**Schnellzugriff:** `cc` setzt einen aktiven Goal Mode fort, `sss` meldet Status ohne Code anzufassen und `ss` speichert einen Checkpoint und stoppt. [Siehe die komplette 14-Tasten-Karte](saipen/RFC.md#110-command-surface). Kyrillische Zwillinge funktionieren auch: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Schnellzugriff:** `cc` setzt einen aktiven Goal Mode fort, `sss` meldet Status ohne Code anzufassen und `ss` speichert einen Checkpoint und stoppt. [Siehe die komplette 15-Tasten-Karte](saipen/RFC.md#110-command-surface). Kyrillische Zwillinge funktionieren auch: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **Antwortsprache.** Der Agent antwortet standardmäßig **auf Estnisch** — das ist eine Einstellung, keine Marotte, und nichts anderes an SAIPEN ist estnisch. Geändert wird das an einer Stelle: die Zeile `reply_language:` am Anfang von [`saipen/STYLE.md`](saipen/STYLE.md). `et` Estnisch, `en` Englisch, `ru` Russisch, `auto` wählt anhand der Sprache deiner Nachricht. Das Protokoll, der Code, die Commits und alle Dokumente bleiben bei jedem Wert englisch.
 
-**v7.192.0** | [Spezifikation](SPEC.md) | [Handbuch](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Konformität](saipen/CONFORMANCE.md) | Plain Markdown | Zero Deps | MIT
+**v7.193.0** | [Spezifikation](SPEC.md) | [Handbuch](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Konformität](saipen/CONFORMANCE.md) | Plain Markdown | Zero Deps | MIT
 
 ```text
 Benutzer ->  /saipen continue

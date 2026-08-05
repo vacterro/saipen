@@ -15,6 +15,20 @@
 ## 7.192.0 -- 2026-08-05 -- T-491: Lazy Load Index
 Added `saipen/INDEX.md` as the table of contents and updated `BOOT.md` to reference it instead of directing agents to blindly read the full 120KB+ protocol. A cold agent can now complete a ticket reading < 50KB of rules total.
 
+## 7.193.0 -- 2026-08-05 -- `sc`: the circuit, and a stage may not hand forward a claim
+
+T-497: `sc` (`saipen crew`) walks the factories in one fixed order -- sense, reproduce, intake, build, translate, document, publish -- instead of the operator driving each by hand and remembering what the last one said. It adds no mechanism: every stage is a command that already exists, the ledger is the `BOARD.md`/`LOG.md`/`OUTBOX.md` that already exist, and a multi-command chain behind one key is what `ccc` and `qqq` already are. If it ever needs a new phase, field or file format, that is the signal it was designed wrong.
+
+What it adds is the hand-off contract, and the contract has a witnessed cost. In a user transcript an agent archived a file its own entry point loads at runtime, reported "Production Ready" and "проверил: всё работает", and the next command anyone typed raised `FileNotFoundError`. The import rung of `phases/verify.md`'s ladder -- one command, second cheapest after parse -- was never run. A claim travelled where evidence belonged, and every stage downstream inherited it.
+
+So: a stage hands the next stage a reproduction or a verdict, never a claim. What passes forward is a file another agent can read -- an OUTBOX entry, a ticket with its `verify:`, a LOG line carrying the command and its output. Chat is not a hand-off surface. An empty stage is a result and is recorded as one. A stage that cannot finish stops the circuit with `BLOCKED` and the missing fact named, rather than passing a partial result forward with a note to be careful.
+
+Found while wiring it in: the callout check asserted "the complete 14-key map" from a hardcoded literal, so adding a fifteenth row left it asserting a number that had stopped being true -- and passing. That is how the previous key shipped half-rolled-out across 70 documents. The count is read off the table now, and it FAILed all 70 callouts the moment the row existed, which is the behaviour the literal could not produce.
+
+And one defect recorded rather than smoothed: the derived count first read `rfc_path`, a name bound hundreds of lines below its use, and the NameError took the entire callout section down SILENTLY -- zero FAILs, no output. A worse failure than the false PASS it replaced, and the second occurrence of row 118's invariant in a single session.
+
+audit_checks 149 -> 150 standing controls. CONFORMANCE 237.
+
 ## 7.191.0 -- 2026-08-05 -- the constitution reaches installed homes again, and saitest joins the crew
 
 T-495 (P0): the RFC split shipped the constitution out of every installed agent home. T-488 moved section 1 into `CORE.md` and section 2 into `MAINTENANCE.md` and left `RFC.md` a three-line stub, while both injectors and the runtime manifest still copied `RFC.md` alone. Every home injected after that commit received three lines and no rules -- no phase table, no `WAIT:` categories, no Pick Rule. `_read_rfc` handles the split correctly when both files are present, which is exactly why the repository looked fine: the defect only exists where the files are absent. The injector probes are the only reason it was visible, because they run the INSTALLED validator against a real flattened home. Third occurrence of the install-layout blind spot.

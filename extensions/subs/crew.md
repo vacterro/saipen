@@ -132,3 +132,81 @@ parks itself `BLOCKED`, PROTOCOL.md § 2).
   by design. The OUTBOX + freshness check is the sync; Core's
   VERIFY/REVIEW/SHIP is the gate. That is the safety, not a limitation to
   paper over.
+
+---
+
+## `sc` -- the circuit (saicrew, serial mode)
+
+The three windows above run in PARALLEL. `sc` is the same crew walked in
+ORDER by one agent: hunt, reproduce, fix, translate, document, ship, in a
+fixed sequence, with each stage handing the next stage its evidence.
+
+**It adds no mechanism.** Every stage is a command that already exists, the
+ledger is the `BOARD.md`/`LOG.md`/`OUTBOX.md` that already exist, and a
+multi-command chain behind one key is precedented -- `ccc` is
+`saipen continue` then `saipen ship`, `qqq` is collect then ship. `sc` is a
+longer chain of the same kind. If it ever needs a new phase, a new field or a
+new file format, that is the signal it was designed wrong.
+
+### The order, and it is fixed
+
+| # | Stage | Command | Hands forward |
+|---|---|---|---|
+| 1 | sense | `saipen hunt` | signals -- suspicions, not facts |
+| 2 | reproduce | `saipen sub spawn saitest`, then its pass | REPRODUCED cases with the minimal input, or NOT_REPRODUCED |
+| 3 | intake | `saipen collect saitest` | tickets on `BOARD.md`, each carrying its reproduction |
+| 4 | build | `SCOUT -> BUILD -> VERIFY -> REVIEW` per ticket | a passed `verify:` re-run by REVIEW, not VERIFY's word for it |
+| 5 | translate | `saipen prepare saitranslate`, then `saipen collect saitranslate` | locale surfaces matching the source digest |
+| 6 | document | `saipen prepare saiwiki`, then `saipen collect saiwiki` | wiki pages mirroring canonical IDs |
+| 7 | publish | `saipen ship` | a pushed release, or a named refusal |
+
+A stage may be EMPTY -- a clean `hunt` hands nothing to stage 2, and the
+circuit skips to the next stage that has input. Empty is a result and is
+recorded as one; skipping a stage because it looked quiet is not.
+
+### The hand-off contract -- the whole point
+
+**A stage passes the next stage a reproduction or a verdict. Never a claim.**
+
+This is the rule the circuit exists for, and it is not abstract. Observed, in
+a user's transcript, an agent that had archived a file its own entry point
+loads at runtime:
+
+> "Всё готово. Production Ready." / "Проверил: всё работает."
+
+The next command anyone typed was `python -c "import SAISENT"`, and it raised
+`FileNotFoundError: SAISENT_GUI.pyw`. The import rung of
+`phases/verify.md`'s ladder -- second from the bottom, one command, cheapest
+after parse -- was never run. A claim travelled where evidence should have,
+and every stage downstream inherited it.
+
+So, concretely, at every hand-off:
+
+- **What passes forward is a file another agent can read**: an OUTBOX entry, a
+  ticket with its `verify:`, a LOG line with the command and its output. Chat
+  is not a hand-off surface; a stage whose result exists only in a
+  conversation has produced nothing (RFC's session-trace rule).
+- **"It works" is not a verdict.** The verdicts are the ones each stage
+  already defines -- REPRODUCED / NOT_REPRODUCED / BLOCKED from saitest,
+  PASS / FAIL from a `verify:`, ready / draft / blocked / stale from an
+  OUTBOX. Use those words, and no others.
+- **A stage that cannot finish says so and stops the circuit there.** It does
+  not hand a partial result forward with a note to be careful. `BLOCKED` with
+  the missing fact named is a complete result; a hedged pass is not.
+- **Notes travel with the work, not instead of it.** A stage that wants the
+  next one to look somewhere specific writes it into the ticket or the OUTBOX
+  entry it is already handing over, or into `_shared/inbox.md` for a
+  cross-factory hint. A note with no artifact under it is a claim wearing a
+  hint's clothes.
+
+### What `sc` does not do
+
+- It does not waive a gate. Stage 4 is the ordinary phase chain, stage 7 is
+  the ordinary `SHIP` with its first-publish confirmation and its
+  branch-before-tag ordering.
+- It does not run the stages in parallel. That is what the three windows
+  above are for, and mixing the two is how two agents end up writing
+  `.saipen/` at once, which is outside Core's envelope.
+- It does not decide that a stage is unnecessary. Empty input skips a stage;
+  a judgement that a stage "probably isn't needed this time" is the
+  hedging the hand-off contract exists to remove.
