@@ -1,8 +1,18 @@
 # Changelog
 
+## [7.189.0] - 2026-08-05
+### Added
+- Added saipen/HABITS.md enumerating statistical LLM habits and mapped them to protocol limits
+- Added RFC 1.11 invariant 'Read to the end, never truncate' to combat board-empty auto-transitions
+- Added saipen/HABITS.md to exempt list in tools/validate.py
+
+### Fixed
+- Fixed STATE.md and LOG.md parsing edge cases related to quotes and timestamps
+- Restored BOARD.md structural integrity broken during automated string replacements
+
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
-## 7.188.0 -- 2026-08-04 -- a new section names the defect class it eliminates, or it does not get written
+## 7.189.0 -- 2026-08-04 -- a new section names the defect class it eliminates, or it does not get written
 
 T-420: one question with a yes-or-no answer -- what can a conformant agent do today that this text makes non-conformant tomorrow? No answer means no section. Prose that eliminates no defect costs every agent that reads it forever and implies coverage that does not exist, which is worse than silence: the next reader stops looking for the check that was never there.
 

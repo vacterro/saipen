@@ -182,3 +182,9 @@
 - 04.08.26 23:27 [E-2027] [parent: E-2026] [T-420] DEC: no byte cap, and the reason is in the rule so nobody adds one later. BOARD.md has a soft cap because it is read in full at every cold start; RFC is escalation-only and CONFORMANCE is never read by a working agent. A cap without that cost is a number to argue with, not a defect prevented -- which is what the gate rejects. The ticket allowed exactly this answer.
 - 04.08.26 23:27 [E-2028] [parent: E-2027] [T-420] RUN: VERIFY -> conformant, run_scenarios green, audit_checks 145/145, ruff clean. STRUCTURAL_ONLY and it cannot be otherwise: whether a section eliminates a defect class is a judgement, and a checker claiming to grade it would be a fourth failing shape.
 - 04.08.26 23:27 [E-2029] [parent: E-2028] [T-420] DEC: goal_tickets 0->1
+- 04.08.26 23:27 [E-2030] [parent: E-2029] [T-420] RUN: ship v7.188.0 -> pushed 5c815b9. Branch confirmed level with origin/main before the tag ref went out.
+- 04.08.26 23:27 [E-2031] [parent: E-2030] RUN: validate.py -> FAIL (1 problem, 19 warnings) on the LIVE workspace, PASS on the release tree -- README.ja.md, the saitranslate agent's uncommitted work.
+- 05.08.26 00:12 [E-2032] [parent: E-2031] [T-484] RUN: SCOUT -> BUILD -> VERIFY -> REVIEW -> SHIP -> 50d5fed
+- 05.08.26 00:12 [E-2033] [parent: E-2032] [T-484] DEC: goal_tickets 1->2
+- 05.08.26 00:11 [E-2035] [parent: E-2033] [T-417] RUN: DONE -> SCOUT
+- 05.08.26 00:11 [E-2036] [parent: E-2035] [T-417] RUN: SCOUT -> BUILD -> VERIFY -> REVIEW (habits documented, RFC updated)
