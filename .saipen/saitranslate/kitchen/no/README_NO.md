@@ -16,7 +16,7 @@ og gjenopptar arbeidet på under ett minutt -- ingen ny brifing, hvilken som hel
 
 **Svarspråk.** Agenten svarer som standard **på estisk** — det er en innstilling, ikke en særhet, og ingenting annet i SAIPEN er estisk. Endres på ett sted: linjen `reply_language:` øverst i [`saipen/STYLE.md`](saipen/STYLE.md). `et` estisk, `en` engelsk, `ru` russisk, `auto` velger ut fra språket i meldingen din. Protokollen, koden, commits og alle dokumenter forblir engelske ved enhver verdi.
 
-**v7.189.0** | [Spesifikasjon](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Samsvar](saipen/CONFORMANCE.md) | ren markdown | null avhengigheter | MIT
+**v7.190.0** | [Spesifikasjon](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Samsvar](saipen/CONFORMANCE.md) | ren markdown | null avhengigheter | MIT
 
 ```text
 Bruker ->  /saipen continue

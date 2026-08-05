@@ -12,6 +12,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.190.0 -- 2026-08-05 -- the wiki mirror is checked by ID, and three controls that could not go red
+
+T-400: W-027 reported 180/180 with zero drift while rows 117-168 of the wiki Scenarios page carried titles belonging to other IDs. The page had been built by POSITION, so equal row counts read as equal meaning and the report was confidently, specifically wrong. Counting proves nothing about which invariant a row names.
+
+The drift itself was already gone when this was built -- rows 118, 130, 150 and 168 match their canonical invariants, because a later refresh rebuilt the page by ID mirror. What was still missing is the half that matters: the guard that stops it recurring. The page carries the digest of the canonical id-to-title map it was built from, over the ID RANGE it claims to cover, so adding new canonical rows below that range never invalidates it while editing a mirrored row's title always does. The range gap is reported separately rather than folded in, because "intact but 17 invariants behind" and "a mirrored row moved" are different facts and a reader needs to know which one they hold. Deliberately not a semantic comparison: nothing here can judge whether a paraphrase still means the same thing, and a checker pretending to would be a fresh false PASS of exactly the kind this closes.
+
+Three broken controls came out of running the harnesses rather than reading them. The shortcut-memory-ban case mutated `Do not copy the table here` while the validator tests for `a second copy drifts` -- different strings in the same paragraph, so the mutation landed, the check stayed silent, and the case shipped as coverage. `BOOT.md`'s own wording had wrapped that anchor across a line break, so a second case reported SKIP for a literal that no longer existed on one line. And this session's new wiki check read `conformance_path`, a name bound further down the file, crashing the validator with a NameError in every scenario run while passing on the live tree where execution happened to reach the assignment first -- literally row 118's own invariant, which did not catch it.
+
+Also: `STATE.md`'s `saipen_home` had lost its escaped backslashes to an unquoted rewrite, which orphaned another control. Restored.
+
+audit_checks 145 -> 148 standing controls. CONFORMANCE 234, 235.
+
 ## 7.189.0 -- 2026-08-04 -- a new section names the defect class it eliminates, or it does not get written
 
 T-420: one question with a yes-or-no answer -- what can a conformant agent do today that this text makes non-conformant tomorrow? No answer means no section. Prose that eliminates no defect costs every agent that reads it forever and implies coverage that does not exist, which is worse than silence: the next reader stops looking for the check that was never there.

@@ -17,7 +17,7 @@ and resumes work in under a minute -- no rebriefing, any vendor, any day.
 
 **Jazyk odpovědí.** Agent ve výchozím nastavení odpovídá **estonsky** — to je nastavení, ne výstřednost, a nic jiného v SAIPEN není estonské. Změní se to na jednom místě: řádek `reply_language:` na začátku [`saipen/STYLE.md`](saipen/STYLE.md). `et` estonština, `en` angličtina, `ru` ruština, `auto` vybere podle jazyka tvé zprávy. Protokol, kód, commity a všechny dokumenty zůstávají anglicky při každé hodnotě.
 
-**v7.189.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
+**v7.190.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
 
 ```text
 User  ->  /saipen continue

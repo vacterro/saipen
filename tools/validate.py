@@ -3009,6 +3009,76 @@ else:
                  "how the command the user typed gets dropped")
             drift_ok = False
 
+    # 1b14. The wiki Scenarios page mirrors CONFORMANCE by ID, and row-count
+    #       equality is not the test. W-027 reported 180/180 with zero drift
+    #       while rows 117-168 carried titles belonging to other IDs -- the
+    #       page had been built by POSITION, so equal counts read as equal
+    #       meaning. Counting proves nothing about which invariant a row
+    #       names. The page carries the digest of the canonical id-to-title
+    #       map it was built from, over the ID RANGE it claims to cover, so
+    #       adding new rows below that range never invalidates it while
+    #       editing a mirrored row's title always does. Same shape as the
+    #       translation digest, and deliberately not a semantic comparison:
+    #       nothing here can judge whether a paraphrase still means the same
+    #       thing, and a checker pretending to would be a fresh false PASS.
+    #
+    #       WARN and SKIP-when-absent, both on purpose. The wiki kitchen is
+    #       gitignored, so a fresh clone does not have the page at all and a
+    #       FAIL would fire on a healthy checkout; and the mirror going stale
+    #       is saiwiki's work to clear, not something a Core release should
+    #       be gated on.
+    _wiki_p = (_tools_parent / ".saipen" / "extensions" / "subs" / "saiwiki"
+               / "kitchen" / "wiki" / "Scenarios.md")
+    # Resolved from `_tools_parent`, not from `conformance_path`: that
+    # name is bound further down this file, so reading it here crashed
+    # the validator with a NameError in every scenario run -- the exact
+    # class CONFORMANCE 118 names, "no tool reads a module-level name
+    # before the line that assigns it", which did not catch it because
+    # the live tree happened to reach the assignment first.
+    _conf_p = _tools_parent / "saipen" / "CONFORMANCE.md"
+    if _wiki_p.is_file() and _conf_p.is_file():
+        _wt = _wiki_p.read_text(encoding="utf-8-sig")
+        _ct = _conf_p.read_text(encoding="utf-8-sig")
+        _wids = sorted(int(_m.group(1))
+                       for _m in re.finditer(r"^\|\s*(\d+)\s*\|", _wt, re.MULTILINE))
+        _cids = sorted(int(_m.group(1))
+                       for _m in re.finditer(r"^\|\s*(\d+)\s*\|", _ct, re.MULTILINE))
+        if _wids and _cids:
+            _top = max(_wids)
+            _cmap = {}
+            for _m in re.finditer(r"^\|\s*(\d+)\s*\|\s*(.*?)\s*\|", _ct, re.MULTILINE):
+                _n = int(_m.group(1))
+                if _n <= _top:
+                    _cmap[_n] = _m.group(2)
+            _payload = chr(10).join("%d|%s" % (_k, _cmap[_k])
+                                    for _k in sorted(_cmap))
+            _want = hashlib.sha256(_payload.encode("utf-8")).hexdigest()[:16]
+            _mk = re.search(
+                r"<!-- mirrors: CONFORMANCE\.md rows 1-(\d+) sha256:([0-9a-f]+) -->",
+                _wt)
+            if _mk is None:
+                warn("wiki-mirror-unstamped",
+                     "the saiwiki Scenarios page carries no `mirrors:` marker, "
+                     "so nothing distinguishes a page rebuilt from the "
+                     "canonical rows from one whose row COUNT merely matches "
+                     "-- which is how rows 117-168 once named other IDs while "
+                     "the report read 180/180 with zero drift")
+            elif _mk.group(2) != _want or int(_mk.group(1)) != _top:
+                warn("wiki-mirror-stale",
+                     f"the saiwiki Scenarios page mirrors CONFORMANCE rows "
+                     f"1-{_mk.group(1)} at digest {_mk.group(2)}, and those "
+                     f"canonical rows now digest to {_want} -- a mirrored "
+                     f"row's title moved and the page did not follow")
+            _gap = [_n for _n in _cids if _n > _top]
+            if _gap:
+                warn("wiki-mirror-behind",
+                     f"CONFORMANCE carries {len(_gap)} row(s) above the "
+                     f"page's highest mirrored ID {_top} (up to {max(_gap)}), "
+                     f"so the wiki is behind by that many invariants. The "
+                     f"digest above covers only what the page claims to "
+                     f"mirror, which is why this is counted separately "
+                     f"instead of hidden inside it")
+
     # 1c. Shortcuts are resolved by reading § 1.10, never from memory.
     if _boot_prio.is_file():
         if "Memory is never a source for it" not in _boot_prio_t:

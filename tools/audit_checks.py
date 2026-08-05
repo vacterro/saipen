@@ -1016,8 +1016,11 @@ CASES: list[tuple[str, str, object, str]] = [
              "Use memory if you are confident."),
      "shortcut-memory-ban"),
     ("BOOT step 7 drops the duplication ban for shortcut tables", "saipen/BOOT.md",
-     replace("Do not copy the table here",
-             "You may copy the table here"),
+     # Must mutate the string the CHECK reads. It mutated "Do not copy the
+     # table here" while validate.py tests for "a second copy drifts", so
+     # the case could not go red at all -- shipped that way in 50d5fed.
+     replace("a second copy drifts",
+             "a second copy is fine"),
      "shortcut-memory-ban"),
     ("RFC § 1.10 softens the recall penalty", "saipen/RFC.md",
      replace("answering a row from recall is the same failure as inventing a command",
