@@ -12,6 +12,9 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.192.0 -- 2026-08-05 -- T-491: Lazy Load Index
+Added `saipen/INDEX.md` as the table of contents and updated `BOOT.md` to reference it instead of directing agents to blindly read the full 120KB+ protocol. A cold agent can now complete a ticket reading < 50KB of rules total.
+
 ## 7.191.0 -- 2026-08-05 -- the constitution reaches installed homes again, and saitest joins the crew
 
 T-495 (P0): the RFC split shipped the constitution out of every installed agent home. T-488 moved section 1 into `CORE.md` and section 2 into `MAINTENANCE.md` and left `RFC.md` a three-line stub, while both injectors and the runtime manifest still copied `RFC.md` alone. Every home injected after that commit received three lines and no rules -- no phase table, no `WAIT:` categories, no Pick Rule. `_read_rfc` handles the split correctly when both files are present, which is exactly why the repository looked fine: the defect only exists where the files are absent. The injector probes are the only reason it was visible, because they run the INSTALLED validator against a real flattened home. Third occurrence of the install-layout blind spot.

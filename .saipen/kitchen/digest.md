@@ -1,3 +1,3 @@
-done: v7.190.0 -- T-400, the wiki mirror is guarded by an ID-anchored digest instead of a row count, plus three red controls that could not go red and a LOG seal to LOG-008
-remaining: T-392 tops ## TODO; 4 open below it, plus T-422 blocked on an `ee` run and the gated v8 Crew backlog
-awaiting: nothing from you. The live workspace validates clean for the first time in two days -- 0 problems
+done: v7.191.0 -- T-495 (installed homes were getting a 3-line stub instead of the constitution), T-496 (24 dead red controls), T-493 (the tt rollout), T-494 (a future-stamped LOG line now has a repair), T-492 (saitest)
+remaining: T-489 tops ## TODO -- phase deduplication; 5 open below it plus the gated v8 Crew backlog
+awaiting: nothing from you. saitest is a charter and a manifest entry; it has no folder until someone runs `saipen sub spawn saitest`

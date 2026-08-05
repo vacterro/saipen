@@ -148,7 +148,8 @@ does not answer.
   first (RFC § 1.9 -- a project extension may define it). Still nothing: list
   the recognized commands and stop. Never guess.
 - Rule questions `STATE`/`BOARD`/`LOG` + the active phase doc don't answer:
-  `saipen/RFC.md` (constitution, authoritative on everything),
+  Read `saipen/INDEX.md` first to find the exact document containing the rule. Do NOT read `CORE.md` or `MAINTENANCE.md` blindly.
+  `saipen/CORE.md` (constitution, authoritative on everything),
   `saipen/UI.md` (UI work only). **`STYLE.md` is deliberately NOT on
   this list**: it is a boot-read mandate (chat voice below), and its
   past listing here is exactly what let a live session read BOOT, RFC,

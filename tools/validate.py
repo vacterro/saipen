@@ -3944,6 +3944,7 @@ else:
     # injector, and SKILL.md is the entry point that tells a skill-reading
     # platform which file to read first.
     EXEMPT = [
+        ("saipen/INDEX.md",   "lazy load index; acts as a table of contents, not a rule source"),
         ("saipen/SKILL.md",   "reading-order entry point for skill platforms; its file references and boot-critical voice/language metadata are checked directly"),
         ("saipen/STYLE.md",   "chat voice; persistence/language contracts and RFC citation are checked directly, while prose tone itself is not machine-checkable"),
         ("saipen/UI.md",      "visual spec for UI work, disjoint from the state protocol"),

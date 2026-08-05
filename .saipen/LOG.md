@@ -20,3 +20,10 @@
 - 05.08.26 16:24 [E-2063] [parent: E-2062] [T-495] DEC: goal_tickets 3->4
 - 05.08.26 16:24 [E-2064] [parent: E-2063] [T-496] DEC: goal_tickets 4->5
 - 05.08.26 16:24 [E-2065] [parent: E-2064] DEC: goal_tickets set to 8, the number § 1.5's rebuild actually counts off the LOG, not the 5 my own arithmetic produced. I resumed a run the previous session had already been incrementing, so four of the eight increments since the newest goal marker are theirs and my `1->2 .. 4->5` labels started from a count that was already stale when I read it. The rebuild is what a crash would resume from and my arithmetic is not, so the rebuild wins -- same repair as E-1912, and append-only keeps the mislabelled lines rather than tidying them.
+- 05.08.26 16:27 [E-2066] [parent: E-2065] [T-492] RUN: ship v7.191.0 -> pushed c464f80. Branch confirmed level with origin/main before the tag ref went out. The previous session's uncommitted autoinject work rode along -- it was already in the tree when Core was handed over and holding it back would have left the injector half-shipped.
+- 05.08.26 16:27 [E-2067] [parent: E-2066] RUN: validate.py -> PASS (0 problems, 13 warnings) on the live workspace and the release tree alike.
+- 26.08.05 16:48 [E-2068] [parent: E-2067] [T-491] RUN: SCOUT -- read BOOT.md, need to create INDEX.md and update BOOT to point to it
+- 26.08.05 16:48 [E-2069] [parent: E-2068] [T-491] RUN: build -> created saipen/INDEX.md and updated BOOT.md for lazy loading
+- 26.08.05 16:50 [E-2070] [parent: E-2069] [T-491] RUN: verify -> conf: high (tools/validate.py PASS, < 50KB total)
+- 26.08.05 16:50 [E-2071] [parent: E-2070] [T-491] DEC: goal_tickets 8->9
+- 26.08.05 16:51 [E-2072] [parent: E-2071] [T-491] DEC: SHIP (lazy loading index created + exempt in validate.py, BOOT updated)
