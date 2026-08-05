@@ -10,13 +10,13 @@
 
 **コマンド1つ。記憶喪失ゼロ。**
 
-**ショートカット:** `cc` は有効な Goal Mode を続行し、`sss` はコードを変更せず状況を表示し、`ss` はチェックポイントを保存して停止する。[全13キーの一覧](saipen/RFC.md#110-command-surface)。キリル文字の同形キーも使える: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`。
+**ショートカット:** `cc` は有効な Goal Mode を続行し、`sss` はコードを変更せず状況を表示し、`ss` はチェックポイントを保存して停止する。[全14キーの一覧](saipen/RFC.md#110-command-surface)。キリル文字の同形キーも使える: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`。
 
 **パッケージ用キー:** `ee`/`qq` は翻訳/Wikiの完全なパッケージを準備するだけで、統合しない。`eee`/`qqq` は ready のパッケージだけを受け取り、統合・検証・レビュー後に push する。
 
 **返信言語。** エージェントはデフォルトで**エストニア語**で応答します — これは設定であり、気まぐれではなく、SAIPEN の中でエストニア語なのはこれだけです。変更は1か所: [`saipen/STYLE.md`](saipen/STYLE.md) 冒頭の `reply_language:` 行。`et` エストニア語、`en` 英語、`ru` ロシア語、`auto` は送ったメッセージの言語から選びます。プロトコル、コード、コミット、すべてのドキュメントはどの値でも英語のままです。
 
-**v7.190.0** | [仕様](SPEC.md) | [ガイド](GUIDE.md) | [RFC](saipen/RFC.md) | [スタイル](saipen/STYLE.md) | [UI](saipen/UI.md) | [適合性](saipen/CONFORMANCE.md) | プレーンMarkdown | 依存関係ゼロ | MIT
+**v7.191.0** | [仕様](SPEC.md) | [ガイド](GUIDE.md) | [RFC](saipen/RFC.md) | [スタイル](saipen/STYLE.md) | [UI](saipen/UI.md) | [適合性](saipen/CONFORMANCE.md) | プレーンMarkdown | 依存関係ゼロ | MIT
 
 ```text
 ユーザー  ->  /saipen continue

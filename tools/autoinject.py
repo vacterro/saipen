@@ -92,9 +92,12 @@ def _installed(target: Path) -> str | None:
 
 
 def _run(cmd: list[str], cwd: Path = HOME) -> tuple[int, str]:
+    kwargs = dict(capture_output=True, text=True, errors="replace",
+                  timeout=300)
+    if os.name == "nt":
+        kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW
     try:
-        r = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True,
-                           errors="replace", timeout=300)
+        r = subprocess.run(cmd, cwd=cwd, **kwargs)
     except (OSError, subprocess.SubprocessError) as exc:
         return 1, f"{type(exc).__name__}: {exc}"
     return r.returncode, (r.stdout + r.stderr).strip()
@@ -204,6 +207,17 @@ def main(argv: list[str] | None = None) -> int:
         if not stale:
             print(f"fresh: {len(present)} agent home(s) at {digest}")
         return 1 if stale else 0
+
+    if args.quiet_when_fresh:
+        if stale or args.force:
+            why = "forced" if args.force and not stale else \
+                f"{len(stale)} of {len(present)} home(s) stale"
+            ok, tail = inject()
+            if ok:
+                stamp_targets(digest)
+            else:
+                print(f"INJECT FAILED ({why}):\n{tail}")
+        return 0
 
     if stale or args.force:
         why = "forced" if args.force and not stale else \

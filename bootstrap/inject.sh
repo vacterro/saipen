@@ -111,7 +111,7 @@ copy_skill() { # $1=dst
           "$1" \
           "$1/extensions" \
           "$1/tests" \
-     && cp "$SKILL_HOME/BOOT.md" "$SKILL_HOME/SKILL.md" "$SKILL_HOME/RFC.md" "$SKILL_HOME/UI.md" "$SKILL_HOME/STYLE.md" "$SKILL_HOME/CONFORMANCE.md" "$root/VERSION" "$1/" \
+     && cp "$SKILL_HOME/BOOT.md" "$SKILL_HOME/SKILL.md" "$SKILL_HOME/RFC.md" "$SKILL_HOME/CORE.md" "$SKILL_HOME/MAINTENANCE.md" "$SKILL_HOME/UI.md" "$SKILL_HOME/STYLE.md" "$SKILL_HOME/CONFORMANCE.md" "$root/VERSION" "$1/" \
      && cp -r "$SKILL_HOME/phases" "$1/" \
      && cp -r "$root/tools" "$1/" \
      && find "$1/tools" -type d -name __pycache__ -prune -exec rm -rf {} + \

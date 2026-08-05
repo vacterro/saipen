@@ -12,6 +12,20 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.191.0 -- 2026-08-05 -- the constitution reaches installed homes again, and saitest joins the crew
+
+T-495 (P0): the RFC split shipped the constitution out of every installed agent home. T-488 moved section 1 into `CORE.md` and section 2 into `MAINTENANCE.md` and left `RFC.md` a three-line stub, while both injectors and the runtime manifest still copied `RFC.md` alone. Every home injected after that commit received three lines and no rules -- no phase table, no `WAIT:` categories, no Pick Rule. `_read_rfc` handles the split correctly when both files are present, which is exactly why the repository looked fine: the defect only exists where the files are absent. The injector probes are the only reason it was visible, because they run the INSTALLED validator against a real flattened home. Third occurrence of the install-layout blind spot.
+
+T-496: the same split left 24 red controls anchored on a file that no longer holds their text, so 17 percent of the harness silently stopped being evidence -- each mutation changed nothing and reported SKIP. Two others went FAIL because the validator's own sweeps still read only the stub, meaning those checks had quietly stopped covering sections 1 and 2 at all. Every case is repointed at the file that now holds its anchor, chosen by testing membership rather than guessing; audit_checks goes from 25 not-evidence to 1.
+
+T-493: a shortcut reached the routes map and the command surface but not the 70 documents that advertise it. `tt` was added to the table, the command list and the route map while every locale README, every guide, the root mirrors and `SKILL.md` still said 13 keys -- the tree FAILed 72 ways until someone finished the rollout. A shortcut addition is a 74-file edit, not a 3-file one.
+
+T-494: a future-stamped LOG line had no sanctioned repair. The rule FAILed a stamp more than five minutes ahead and named no way to clear one, so the only precedent was to wait -- affordable at eleven minutes, not at E-2053's 142, where it holds every gate red while asserting work happened at a time it had not. Restamp to a defensible bound, append a `DEC` naming the original, the replacement, and that the minute is inherited rather than measured.
+
+T-492: `saitest`, the adversary subSaipen. `saipen test` (`tt`) runs the suite a project declares; nothing authored the runs nobody wrote. saitest invents them across seven closed scenario families -- input abuse, boundaries, order and repetition, hostile environments, resource pressure, damaged state, adversarial content -- and returns one of exactly three verdicts: REPRODUCED with the minimal case, NOT_REPRODUCED with what was tried, BLOCKED with what was missing. Read-only toward the project like every sub, so the deliverable is a reproduction and never a fix. Built entirely from mechanisms that already exist: no new command verb, no new phase, no new field.
+
+CONFORMANCE 236.
+
 ## 7.190.0 -- 2026-08-05 -- the wiki mirror is checked by ID, and three controls that could not go red
 
 T-400: W-027 reported 180/180 with zero drift while rows 117-168 of the wiki Scenarios page carried titles belonging to other IDs. The page had been built by POSITION, so equal row counts read as equal meaning and the report was confidently, specifically wrong. Counting proves nothing about which invariant a row names.

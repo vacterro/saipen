@@ -721,14 +721,14 @@ CASES: list[tuple[str, str, object, str]] = [
     # Point a shortcut back at a phase name. The table promises each one lands
     # on a command § 1.10 defines; nothing read that column until v7.148.0,
     # and two rows had already stopped being true.
-    ("shortcut routes to a phase, not a command", "saipen/RFC.md",
+    ("shortcut routes to a phase, not a command", "saipen/CORE.md",
      replace("| `hh` | `saipen hunt` |", "| `hh` | HUNT |"),
      "do not resolve to a command"),
-    ("shortcut routes to a valid but wrong command", "saipen/RFC.md",
+    ("shortcut routes to a valid but wrong command", "saipen/CORE.md",
      replace("| `cc` | `saipen goal` |",
              "| `cc` | `saipen continue` |"),
      "assigned destination changed"),
-    ("shortcut rationale restores stale length magic", "saipen/RFC.md",
+    ("shortcut rationale restores stale length magic", "saipen/CORE.md",
      replace("**Length has no global meaning.**",
              "**Doubled is safe, tripled reaches a remote**"),
      "shortcut-rationale"),
@@ -737,7 +737,7 @@ CASES: list[tuple[str, str, object, str]] = [
     # answered as a greeting instead of run as `saipen prepare saiwiki` --
     # the property was true and the failure still happened, so the paragraph
     # now names the greeting misreading as the failure and orders execution.
-    ("shortcut paragraph loses its never-a-greeting duty", "saipen/RFC.md",
+    ("shortcut paragraph loses its never-a-greeting duty", "saipen/CORE.md",
      replace("never a greeting", "rarely ambiguous"),
      "shortcut-rationale"),
     # CLEAN's board scrub pruned `## DONE` with no inbound-reference guard, so
@@ -758,20 +758,20 @@ CASES: list[tuple[str, str, object, str]] = [
     # compare. The second control guards the honesty clause: refusing `none`
     # does not derive a first seat name, and a doc that stops saying so
     # promotes an open question to a settled rule by omission.
-    ("1.11 lets a queued command be dropped", "saipen/RFC.md",
+    ("1.11 lets a queued command be dropped", "saipen/CORE.md",
      replace("cannot execute now is written down, never dropped",
              "cannot execute now may simply be reported"),
      "command-not-dropped"),
-    ("1.10 drops the plan-then-goal pair", "saipen/RFC.md",
+    ("1.10 drops the plan-then-goal pair", "saipen/CORE.md",
      replace("One carve-out, and it is a pair rather than a loosening",
              "No carve-out exists and the bare form is absolute"),
      "plan-goal-pair"),
     ("1.2 stops sending another instance's work to BLOCKED",
-     "saipen/RFC.md",
+     "saipen/CORE.md",
      replace("The same section holds a ticket whose work another",
              "Core may take a ticket whose work another"),
      "permanent-owner-section"),
-    ("1.2 stops sending unfinishable tickets to BLOCKED", "saipen/RFC.md",
+    ("1.2 stops sending unfinishable tickets to BLOCKED", "saipen/CORE.md",
      replace("That is also where a ticket goes when its completion",
              "Such a ticket stays where it is and when its completion"),
      "permanent-owner-section"),
@@ -780,7 +780,11 @@ CASES: list[tuple[str, str, object, str]] = [
      replace("Something signals it now, and keeping that signal",
              "Nothing signals it and keeping any signal"),
      "translation-digest"),
-    ("1.1 drops the gate on new prose", "saipen/RFC.md",
+    ("CORE.md drops the ahead-stamp repair", "saipen/CORE.md",
+     replace("An ahead-stamp is repaired, not waited out",
+             "An ahead-stamp clears on its own"),
+     "ahead-stamp-repair"),
+    ("1.1 drops the gate on new prose", "saipen/CORE.md",
      replace("names the defect class it eliminates",
              "should ideally be useful"),
      "prose-gate"),
@@ -862,14 +866,14 @@ CASES: list[tuple[str, str, object, str]] = [
      replace("category is `user brake`", "category is up to you"),
      "proposal-halt"),
     ("the cc row promises a pivot its bare form cannot perform",
-     "saipen/RFC.md",
+     "saipen/CORE.md",
      replace("The pivot needs text", "Trigger goal mode"),
      "shortcut-notes"),
     # `gg` routes to the same command as `cc` and kept the superseded promise
     # for as long as the check named `cc` by key. The requirement is derived
     # from the route now, so both rows are controlled separately.
     ("the gg row promises a bare Goal Mode pivot again",
-     "saipen/RFC.md",
+     "saipen/CORE.md",
      replace("Same destination as `cc`, so the same truth: the pivot needs "
              "text, and `gg <objective>` is what sets a new one.",
              "Goal Mode pivot and re-authorization."),
@@ -902,11 +906,11 @@ CASES: list[tuple[str, str, object, str]] = [
     # from-any-phase set, so the DFA's only route in was DONE -> HUNT and the
     # command produced a transition the validator rejects. Three surfaces, one
     # defect: the set, § 2.1's halt phrasing, and hunt.md's hash skip.
-    ("HUNT drops out of the from-any-phase set", "saipen/RFC.md",
+    ("HUNT drops out of the from-any-phase set", "saipen/CORE.md",
      replace("`PLAN`, `HUNT`.", "`PLAN`."),
      "any-from"),
     ("§ 2.1 reads the halt as a precondition on the command too",
-     "saipen/RFC.md",
+     "saipen/MAINTENANCE.md",
      replace("governs the AUTONOMOUS transition only",
              "applies to every entry into this phase"),
      "hunt-entry"),
@@ -1003,7 +1007,7 @@ CASES: list[tuple[str, str, object, str]] = [
     # same `qq` was lost to the same stale pick twice (E-1913). Either half
     # softening on its own restores the tie, so both are controlled.
     ("§ 1.11 weighs the user's command instead of obeying it",
-     "saipen/RFC.md",
+     "saipen/CORE.md",
      replace("It supersedes `next_action`",
              "It is weighed against `next_action`"),
      "command-outranks-pick"),
@@ -1022,14 +1026,14 @@ CASES: list[tuple[str, str, object, str]] = [
      replace("a second copy drifts",
              "a second copy is fine"),
      "shortcut-memory-ban"),
-    ("RFC § 1.10 softens the recall penalty", "saipen/RFC.md",
+    ("RFC § 1.10 softens the recall penalty", "saipen/CORE.md",
      replace("answering a row from recall is the same failure as inventing a command",
              "answering a row from recall is discouraged"),
      "shortcut-memory-ban"),
     # § 2.1's ZERO-PROMPT MUST named one exception while § 1.3 banned ADD
     # under read-only, so the rule ordered a phase the mode forbids and both
     # rules looked followed on their own.
-    ("§ 2.1 drops the read-only carve-out from ZERO-PROMPT", "saipen/RFC.md",
+    ("§ 2.1 drops the read-only carve-out from ZERO-PROMPT", "saipen/MAINTENANCE.md",
      replace("MUST NOT enter `ADD` at all", "SHOULD prefer to skip `ADD`"),
      "zero-prompt-exceptions"),
     # § 1.2's legacy-upgrade sentence named `v2` long after the schema reached
@@ -1037,7 +1041,7 @@ CASES: list[tuple[str, str, object, str]] = [
     # validator WARNs as legacy. A version number reads as fact, which is why
     # nothing saw it; the same rot had the shipped subSaipen TEMPLATE born at
     # schema 1, so every spawn produced a legacy state.
-    ("§ 1.2 re-hardcodes a superseded schema version", "saipen/RFC.md",
+    ("§ 1.2 re-hardcodes a superseded schema version", "saipen/CORE.md",
      replace("MUST upgrade **to the current schema version**",
              "MUST upgrade to `schema_version: 2`"),
      "stale-schema-version"),
@@ -1054,11 +1058,11 @@ CASES: list[tuple[str, str, object, str]] = [
     ("next_action enters a ticket-bearing phase with no ticket", STATE,
      sub_line("next_action", '"PHASE BUILD"'),
      "enters ticket-bearing phase"),
-    ("a shipped doc spells out the forbidden PHASE form", "saipen/RFC.md",
+    ("a shipped doc spells out the forbidden PHASE form", "saipen/MAINTENANCE.md",
      replace("Translate it: `PHASE PLAN` when",
              "Translate it: `PHASE PLAN T-###` when"),
      "phase-ticket-ref"),
-    ("§ 1.2 loses a phase from the ticket-bearing five", "saipen/RFC.md",
+    ("§ 1.2 loses a phase from the ticket-bearing five", "saipen/CORE.md",
      replace("`SCOUT`, `BUILD`, `VERIFY`, `REVIEW`, `SHIP` -- and omitted",
              "`SCOUT`, `BUILD`, `VERIFY`, `REVIEW` -- and omitted"),
      "TICKET_BEARING_PHASES"),
@@ -1066,12 +1070,12 @@ CASES: list[tuple[str, str, object, str]] = [
     # an unconditional counter reset on bare `saipen goal`. That is a fresh
     # 3-wave/20-ticket budget for anyone who types the key out of habit.
     ("stop paragraph re-asserts an unconditional goal-counter reset",
-     "saipen/RFC.md",
+     "saipen/CORE.md",
      replace("only when they are at or over the caps",
              "every time, whatever the counters read"),
      "goal-counter-reset"),
     ("translation collect shortcut silently prepares instead",
-     "saipen/RFC.md",
+     "saipen/CORE.md",
      replace("| `eee` | `saipen collect saitranslate` then `saipen ship` |",
              "| `eee` | `saipen prepare saitranslate` then `saipen ship` |"),
      "assigned destination changed"),
@@ -1080,7 +1084,7 @@ CASES: list[tuple[str, str, object, str]] = [
      replace("`producer`, `source_head`, `coverage`",
              "`producer`, `coverage`"),
      "PREPARE fields"),
-    ("non-ready collect loses its no-write guarantee", "saipen/RFC.md",
+    ("non-ready collect loses its no-write guarantee", "saipen/CORE.md",
      replace("No main-project file, checkpoint, Git ref, or remote may "
              "change on that refusal.",
              "The agent should avoid changing files on refusal."),
@@ -1094,7 +1098,7 @@ CASES: list[tuple[str, str, object, str]] = [
     # Drop a phase-named command from the checkpoint duty. This is how
     # `saipen hunt` shipped: on the surface, absent from the list, and no
     # check compared the two for two releases.
-    ("phase-switching command loses its checkpoint duty", "saipen/RFC.md",
+    ("phase-switching command loses its checkpoint duty", "saipen/CORE.md",
      replace("`ship`, `hunt`) invoked while", "`ship`) invoked while"),
      "as phase-switching but the commands named after a phase"),
     ("requires: a capability nobody defines", STATE,
@@ -1297,7 +1301,7 @@ CASES: list[tuple[str, str, object, str]] = [
     # copies (RFC § 1.6's fence table, and each phases/*.md exit line) are
     # gated against it. Each mutation is a byte in a DIFFERENT copy, so a
     # drift in one is caught no matter which one drifts first.
-    ("RFC transition table loses an edge", "saipen/RFC.md",
+    ("RFC transition table loses an edge", "saipen/CORE.md",
      replace("SCOUT     -> BUILD | BLOCKED", "SCOUT     -> BLOCKED"),
      "transition-table"),
     ("phase doc exit names an edge the DFA rejects", "saipen/phases/scout.md",

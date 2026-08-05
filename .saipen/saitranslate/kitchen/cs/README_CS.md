@@ -13,11 +13,11 @@ and resumes work in under a minute -- no rebriefing, any vendor, any day.
 
 **One command. Zero amnesia.**
 
-**Rychlé klávesy:** `cc` pokračuje v aktivním Goal Mode, `sss` zobrazí stav bez dotyku kódu a `ss` uloží kontrolní bod a zastaví. [Podívej se na úplnou mapu 13 kláves](saipen/RFC.md#110-command-surface). Fungují i cyrilské dvojníky: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Rychlé klávesy:** `cc` pokračuje v aktivním Goal Mode, `sss` zobrazí stav bez dotyku kódu a `ss` uloží kontrolní bod a zastaví. [Podívej se na úplnou mapu 14 kláves](saipen/RFC.md#110-command-surface). Fungují i cyrilské dvojníky: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **Jazyk odpovědí.** Agent ve výchozím nastavení odpovídá **estonsky** — to je nastavení, ne výstřednost, a nic jiného v SAIPEN není estonské. Změní se to na jednom místě: řádek `reply_language:` na začátku [`saipen/STYLE.md`](saipen/STYLE.md). `et` estonština, `en` angličtina, `ru` ruština, `auto` vybere podle jazyka tvé zprávy. Protokol, kód, commity a všechny dokumenty zůstávají anglicky při každé hodnotě.
 
-**v7.190.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
+**v7.191.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
 
 ```text
 User  ->  /saipen continue

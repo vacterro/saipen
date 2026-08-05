@@ -11,7 +11,7 @@
 
 **Üks käsk. Null sõltuvust. Null amneesiat.**
 
-**Kiirklahvid:** `cc` jätkab aktiivset Goal Mode’i, `sss` näitab olekut koodi puudutamata ja `ss` salvestab kontrollpunkti ning peatub. [Vaata täielikku 13 kiirklahvi kaarti](saipen/RFC.md#110-command-surface). Kirillitsa kaksikud töötavad ka: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Kiirklahvid:** `cc` jätkab aktiivset Goal Mode’i, `sss` näitab olekut koodi puudutamata ja `ss` salvestab kontrollpunkti ning peatub. [Vaata täielikku 14 kiirklahvi kaarti](saipen/RFC.md#110-command-surface). Kirillitsa kaksikud töötavad ka: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **Vastuste keel.** Agent vastab vaikimisi **eesti keeles** — see on säte, mitte veidrus, ja miski muu SAIPEN-is ei ole eestikeelne. Muuda seda ühes kohas: rida `reply_language:` [`saipen/STYLE.md`](saipen/STYLE.md) alguses. `et` eesti, `en` inglise, `ru` vene, `auto` valib selle järgi, mis keeles sa kirjutasid. Protokoll, kood, commitid ja kõik dokumendid jäävad igal väärtusel inglise keelde.
 

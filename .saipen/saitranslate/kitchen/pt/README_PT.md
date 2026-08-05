@@ -12,11 +12,11 @@ e retome o trabalho em menos de um minuto -- sem re-instruções, qualquer forne
 
 **Um comando. Zero amnésia.**
 
-**Atalhos rápidos:** `cc` continua uma execução ativa de Goal Mode, `sss` informa o estado sem tocar no código e `ss` salva um ponto de verificação e para. [Veja o mapa completo de 13 teclas](saipen/RFC.md#110-command-surface). Os gêmeos cirílicos também funcionam: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Atalhos rápidos:** `cc` continua uma execução ativa de Goal Mode, `sss` informa o estado sem tocar no código e `ss` salva um ponto de verificação e para. [Veja o mapa completo de 14 teclas](saipen/RFC.md#110-command-surface). Os gêmeos cirílicos também funcionam: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **Idioma de resposta.** O agente responde por padrão **em estoniano** — é uma configuração, não uma excentricidade, e nada mais no SAIPEN está em estoniano. Muda-se em um único lugar: a linha `reply_language:` no topo de [`saipen/STYLE.md`](saipen/STYLE.md). `et` estoniano, `en` inglês, `ru` russo, `auto` escolhe pelo idioma da sua mensagem. O protocolo, o código, os commits e todos os documentos permanecem em inglês em qualquer valor.
 
-**v7.190.0** | [Espec](SPEC.md) | [Guia](GUIDE.md) | [RFC](saipen/RFC.md) | [Estilo](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformidade](saipen/CONFORMANCE.md) | markdown simples | zero deps | MIT
+**v7.191.0** | [Espec](SPEC.md) | [Guia](GUIDE.md) | [RFC](saipen/RFC.md) | [Estilo](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformidade](saipen/CONFORMANCE.md) | markdown simples | zero deps | MIT
 
 ```text
 Usuário ->  /saipen continue

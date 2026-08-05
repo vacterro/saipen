@@ -77,6 +77,16 @@ saipen sub collect
   its own `kitchen/`, hands off page-ready content via OUTBOX.
 - **saihunt** -- reads the project for bugs (null safety, exception
   handling, race conditions, resource leaks), tickets each finding.
+- **saitest** -- the **adversary** (`saitest.md`): authors the runs nobody
+  wrote -- input abuse, boundaries, order and repetition, hostile
+  environments, resource pressure, damaged state, adversarial content -- and
+  hands back a REPRODUCED / NOT_REPRODUCED / BLOCKED verdict with the minimal
+  case. Not the test runner: `saipen test` (`tt`) executes the suite a project
+  already declares, saitest is what makes new cases exist. Read-only toward
+  the project like every sub, so it finds the break and stops; fixing is
+  Core's or saipython's. Turns a saihunt signal from a suspicion into a fact
+  or kills it, and re-runs its own reproduction against saipython's patch
+  before Core is asked to collect anything.
 - **saipython** -- a **fixer** (PROTOCOL.md § 9), not just a researcher:
   works the tail of a Python project (low-severity bugs, lint/type nits,
   small correctness fixes), clones targets into its own `kitchen/pen/`,

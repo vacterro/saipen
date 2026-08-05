@@ -93,7 +93,7 @@ function Copy-Skill([string]$dst) {
         Remove-Item -LiteralPath $target -Recurse -Force -ErrorAction Stop
       }
     }
-    Copy-Item (Join-Path $SkillHome "BOOT.md"),(Join-Path $SkillHome "SKILL.md"),(Join-Path $SkillHome "RFC.md"),(Join-Path $SkillHome "UI.md"),(Join-Path $SkillHome "STYLE.md"),(Join-Path $SkillHome "CONFORMANCE.md"),(Join-Path $root "VERSION") $dst -Force -ErrorAction Stop
+    Copy-Item (Join-Path $SkillHome "BOOT.md"),(Join-Path $SkillHome "SKILL.md"),(Join-Path $SkillHome "RFC.md"),(Join-Path $SkillHome "CORE.md"),(Join-Path $SkillHome "MAINTENANCE.md"),(Join-Path $SkillHome "UI.md"),(Join-Path $SkillHome "STYLE.md"),(Join-Path $SkillHome "CONFORMANCE.md"),(Join-Path $root "VERSION") $dst -Force -ErrorAction Stop
     Copy-Item (Join-Path $SkillHome "phases") $dst -Recurse -Force -ErrorAction Stop
     Copy-Item (Join-Path $root "tools") $dst -Recurse -Force -ErrorAction Stop
     $installedTools = Join-Path $dst "tools"

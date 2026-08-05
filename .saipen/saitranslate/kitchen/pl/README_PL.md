@@ -12,11 +12,11 @@ i wznawia pracę w mniej niż minutę -- bez ponownego wprowadzania, dowolny dos
 
 **Jeden nakaz. Zero amnezji.**
 
-**Szybkie klawisze:** `cc` kontynuuje aktywny Goal Mode, `sss` pokazuje stan bez dotykania kodu, a `ss` zapisuje punkt kontrolny i zatrzymuje się. [Zobacz pełną mapę 13 klawiszy](saipen/RFC.md#110-command-surface). Cyrylickie bliźniaki też działają: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Szybkie klawisze:** `cc` kontynuuje aktywny Goal Mode, `sss` pokazuje stan bez dotykania kodu, a `ss` zapisuje punkt kontrolny i zatrzymuje się. [Zobacz pełną mapę 14 klawiszy](saipen/RFC.md#110-command-surface). Cyrylickie bliźniaki też działają: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **Język odpowiedzi.** Agent domyślnie odpowiada **po estońsku** — to ustawienie, a nie dziwactwo, i nic więcej w SAIPEN nie jest estońskie. Zmienia się to w jednym miejscu: linia `reply_language:` na początku [`saipen/STYLE.md`](saipen/STYLE.md). `et` estoński, `en` angielski, `ru` rosyjski, `auto` wybiera na podstawie języka Twojej wiadomości. Protokół, kod, commity i wszystkie dokumenty pozostają angielskie przy każdej wartości.
 
-**v7.190.0** | [Spec](SPEC.md) | [Przewodnik](GUIDE.md) | [RFC](saipen/RFC.md) | [Styl](saipen/STYLE.md) | [UI](saipen/UI.md) | [Zgodność](saipen/CONFORMANCE.md) | zwykły markdown | zero zależności | MIT
+**v7.191.0** | [Spec](SPEC.md) | [Przewodnik](GUIDE.md) | [RFC](saipen/RFC.md) | [Styl](saipen/STYLE.md) | [UI](saipen/UI.md) | [Zgodność](saipen/CONFORMANCE.md) | zwykły markdown | zero zależności | MIT
 
 ```text
 Użytkownik ->  /saipen continue

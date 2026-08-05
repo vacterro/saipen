@@ -12,11 +12,11 @@ markdown simplu, astfel încât un agent nou fără istoric de chat execută `/s
 
 **O comandă. Zero amnezie.**
 
-**Comenzi rapide:** `cc` continuă un Goal Mode activ, `sss` afișează starea fără să atingă codul, iar `ss` salvează un punct de control și se oprește. [Vezi harta completă cu 13 taste](saipen/RFC.md#110-command-surface). Gemenii chirilici funcționează și ei: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Comenzi rapide:** `cc` continuă un Goal Mode activ, `sss` afișează starea fără să atingă codul, iar `ss` salvează un punct de control și se oprește. [Vezi harta completă cu 14 taste](saipen/RFC.md#110-command-surface). Gemenii chirilici funcționează și ei: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **Limba de răspuns.** Agentul răspunde implicit **în estonă** — este o setare, nu o excentricitate, și nimic altceva în SAIPEN nu este eston. Se schimbă într-un singur loc: linia `reply_language:` de la începutul [`saipen/STYLE.md`](saipen/STYLE.md). `et` estonă, `en` engleză, `ru` rusă, `auto` alege după limba mesajului tău. Protocolul, codul, commit-urile și toate documentele rămân în engleză la orice valoare.
 
-**v7.190.0** | [Spec](SPEC.md) | [Ghid](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformitate](saipen/CONFORMANCE.md) | markdown simplu | zero dependențe | MIT
+**v7.191.0** | [Spec](SPEC.md) | [Ghid](GUIDE.md) | [RFC](saipen/RFC.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformitate](saipen/CONFORMANCE.md) | markdown simplu | zero dependențe | MIT
 
 ```text
 Utilizator ->  /saipen continue

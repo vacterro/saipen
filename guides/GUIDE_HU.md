@@ -8,7 +8,7 @@ Ide figyelj, újonc. A probléma egyszerű: az AI ügynökeidnek aranyhal memór
 
 A **SAIPEN** egy jegyzetfüzet a projekted `.saipen/` mappájában.
 
-**Gyorsbillentyűk:** a `cc` folytat egy aktív Goal Mode-ot, az `sss` kód érintése nélkül jelzi az állapotot, az `ss` pedig menti az ellenőrzőpontot és megáll. [Lásd a teljes 13 billentyűs térképet](../saipen/RFC.md#110-command-surface). A cirill ikrek is működnek: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Gyorsbillentyűk:** a `cc` folytat egy aktív Goal Mode-ot, az `sss` kód érintése nélkül jelzi az állapotot, az `ss` pedig menti az ellenőrzőpontot és megáll. [Lásd a teljes 14 billentyűs térképet](../saipen/RFC.md#110-command-surface). A cirill ikrek is működnek: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 ## Gyors indulás
 

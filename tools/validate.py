@@ -250,8 +250,8 @@ def _git(*args):
 # a module constant, not a variable one of them happens to have built.
 SAIPEN_COMMANDS = frozenset({
     "set", "init", "continue", "goal", "plan", "clean", "translate",
-    "markhunt", "prepare", "collect", "ship", "validate", "status", "stop",
-    "sub", "hunt"})
+    "markhunt", "prepare", "collect", "ship", "validate", "test", "status",
+    "stop", "sub", "hunt"})
 # RFC § 1.2: `PHASE <phase-enum> [T-###]` takes the ticket ref for exactly the
 # five ticket-bearing phases and omits it for every other one. The rule had no
 # witness, and the constitution's own worked example (§ 2.2, translating ADD's
@@ -306,6 +306,7 @@ EXPECTED_SHORTCUT_ROUTES = {
     "ee": "`saipen prepare saitranslate`",
     "eee": "`saipen collect saitranslate` then `saipen ship`",
     "pp": "`saipen sub spawn saipython`",
+    "tt": "`saipen test`",
 }
 PACKAGE_HANDOFF_FIELDS = {
     "status", "producer", "source_head", "coverage", "payload", "verified",
@@ -2386,6 +2387,13 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
             # a completeness list.
             "VERSION",
             "saipen/RFC.md",
+            # The split (T-488) moved the constitution out of RFC.md and
+            # left a stub. Both injectors and this list still copied the
+            # stub alone, so every installed agent home received three
+            # lines and no rules -- caught only because the injector
+            # probes run the INSTALLED validator, which then could not
+            # find its own anchors.
+            "saipen/CORE.md", "saipen/MAINTENANCE.md",
             "saipen/BOOT.md", "saipen/SKILL.md", "saipen/UI.md", "saipen/STYLE.md",
             "saipen/CONFORMANCE.md",
             "tools/validate.py", "tools/install_hook.py", "tools/uninstall_hook.py",
@@ -2523,9 +2531,9 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
                  f"{len(_matches)} shortcut callouts; expected exactly one")
             return None
         _index, _line = _matches[0]
-        if "13" not in _line:
+        if "14" not in _line:
             fail(f"cross-doc drift [shortcut-callouts] -- {path} does not "
-                 "name the complete 13-key map")
+                 "name the complete 14-key map")
         _missing = [token for token in _shortcut_tokens
                     if _line.count(token) != 1]
         if _missing:
@@ -3087,6 +3095,25 @@ else:
                      f"mirror, which is why this is counted separately "
                      f"instead of hidden inside it")
 
+    # 1b15. A future-stamped LOG line has a repair. The rule FAILed one and
+    #       named no way out, so the only precedent was to wait for real time
+    #       to pass -- affordable at E-1912's eleven minutes, not at E-2053's
+    #       142, where it holds every gate red for two and a half hours while
+    #       the line asserts work happened at a time it had not. Two honest
+    #       agents diverge there and the waiting one is defending a false
+    #       record.
+    _core_doc = rfc_path.parent / "CORE.md"
+    _core_t = (_core_doc.read_text(encoding="utf-8-sig")
+               if _core_doc.is_file() else "")
+    if _core_t and "An ahead-stamp is repaired, not waited out" not in _core_t:
+        fail("cross-doc drift [ahead-stamp-repair] -- CORE.md must say a "
+             "future-stamped LOG line is restamped to a defensible bound with "
+             "a DEC naming the original, the replacement, and that the minute "
+             "is inherited rather than measured. Without it the only sanctioned "
+             "response is waiting, which keeps a false record and reds every "
+             "gate until the clock catches up")
+        drift_ok = False
+
     # 1c. Shortcuts are resolved by reading § 1.10, never from memory.
     if _boot_prio.is_file():
         if "Memory is never a source for it" not in _boot_prio_t:
@@ -3501,7 +3528,9 @@ else:
     _schema_roots = [rfc_path.parent / "phases",
                      _tools_parent / "extensions",
                      _tools_parent / ".saipen" / "KNOWLEDGE"]
-    _schema_docs = [rfc_path] + [
+    _schema_docs = [rfc_path,
+                    rfc_path.parent / "CORE.md",
+                    rfc_path.parent / "MAINTENANCE.md"] + [
         d for root in _schema_roots if root.is_dir()
         for d in sorted(root.rglob("*.md"))] + [
         p for p in [rfc_path.parent / "BOOT.md",
@@ -3760,7 +3789,9 @@ else:
     #    these documents and is checked where it is actually a command, on
     #    STATE.md itself.
     _phase_ref_lit = re.compile(r"\bPHASE\s+([A-Z][A-Z_-]{2,})\s+T-(?:\d+|###)")
-    for doc in [rfc_path] + [d for root in doc_roots if root.is_dir()
+    for doc in [rfc_path, rfc_path.parent / "CORE.md",
+                rfc_path.parent / "MAINTENANCE.md"] + [
+                d for root in doc_roots if root.is_dir()
                              for d in sorted(root.rglob("*.md"))]:
         for m in _phase_ref_lit.finditer(doc.read_text(encoding="utf-8-sig")):
             if m.group(1) not in TICKET_BEARING_PHASES:

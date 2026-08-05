@@ -12,11 +12,11 @@ ja jatkaa työtä alle minuutissa -- ilman uudelleenohjeistusta, millä tahansa 
 
 **Yksi komento. Nolla muistinmenetystä.**
 
-**Pikanäppäimet:** `cc` jatkaa aktiivista Goal Mode -ajoa, `sss` näyttää tilan koskematta koodiin ja `ss` tallentaa tarkistuspisteen ja pysähtyy. [Katso täydellinen 13 näppäimen kartta](saipen/RFC.md#110-command-surface). Kyrilliset kaksoset toimivat myös: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Pikanäppäimet:** `cc` jatkaa aktiivista Goal Mode -ajoa, `sss` näyttää tilan koskematta koodiin ja `ss` tallentaa tarkistuspisteen ja pysähtyy. [Katso täydellinen 14 näppäimen kartta](saipen/RFC.md#110-command-surface). Kyrilliset kaksoset toimivat myös: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **Vastauskieli.** Agentti vastaa oletuksena **viroksi** — se on asetus, ei oikku, eikä mikään muu SAIPENissa ole vironkielistä. Muuta se yhdestä paikasta: `reply_language:`-rivi [`saipen/STYLE.md`](saipen/STYLE.md)-tiedoston alussa. `et` viro, `en` englanti, `ru` venäjä, `auto` valitsee viestisi kielen mukaan. Protokolla, koodi, commitit ja kaikki dokumentit pysyvät englanninkielisinä joka arvolla.
 
-**v7.190.0** | [Määrittely](SPEC.md) | [Opas](GUIDE.md) | [RFC](saipen/RFC.md) | [Tyyli](saipen/STYLE.md) | [Käyttöliittymä](saipen/UI.md) | [Yhteensopivuus](saipen/CONFORMANCE.md) | selkeä markdown | nolla riippuvuutta | MIT
+**v7.191.0** | [Määrittely](SPEC.md) | [Opas](GUIDE.md) | [RFC](saipen/RFC.md) | [Tyyli](saipen/STYLE.md) | [Käyttöliittymä](saipen/UI.md) | [Yhteensopivuus](saipen/CONFORMANCE.md) | selkeä markdown | nolla riippuvuutta | MIT
 
 ```text
 Käyttäjä -> /saipen continue
