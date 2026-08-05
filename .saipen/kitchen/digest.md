@@ -1,3 +1,3 @@
-done: v7.191.0 -- T-495 (installed homes were getting a 3-line stub instead of the constitution), T-496 (24 dead red controls), T-493 (the tt rollout), T-494 (a future-stamped LOG line now has a repair), T-492 (saitest)
-remaining: T-489 tops ## TODO -- phase deduplication; 5 open below it plus the gated v8 Crew backlog
-awaiting: nothing from you. saitest is a charter and a manifest entry; it has no folder until someone runs `saipen sub spawn saitest`
+done: v7.193.0 -- T-497, `sc` walks the whole circuit in one fixed order and a stage may not hand the next one a claim. The shortcut key count is derived from the table now instead of a literal
+remaining: T-498 tops ## TODO -- a move breaks whatever imports the moved file, and the deletion gate does not cover it; 5 open below
+awaiting: nothing from you. Another Core session is active on this repo -- it shipped v7.192.0 while I worked, and my version bump collided with it once

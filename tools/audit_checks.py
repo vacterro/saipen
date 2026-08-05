@@ -783,6 +783,11 @@ CASES: list[tuple[str, str, object, str]] = [
     # The circuit's whole reason: a stage that hands forward a CLAIM instead
     # of evidence. Observed in a user transcript -- "Production Ready",
     # "проверил: всё работает", then FileNotFoundError on the next command.
+    ("the sc circuit names a command nobody defined",
+     "extensions/subs/crew.md",
+     replace("| 1 | sense | `saipen hunt` |",
+             "| 1 | sense | `saipen sniff` |"),
+     "circuit-stages"),
     ("crew.md lets a stage hand forward a claim",
      "extensions/subs/crew.md",
      replace("A stage passes the next stage a reproduction or a verdict. "

@@ -3153,6 +3153,26 @@ else:
              "one stage ahead of an unrun import check")
         drift_ok = False
 
+    # 1b17. Every stage of the `sc` circuit names a command that exists.
+    #       The circuit table is prose, so a stage could name a verb nobody
+    #       defined and nothing would notice -- which is precisely the
+    #       fabricated-command failure a live transcript already produced,
+    #       where an agent answered `hh` with a ten-row table naming six
+    #       commands that appear nowhere in the surface. A circuit whose
+    #       stages are unchecked is that table with more ceremony.
+    if _crew_t:
+        _stage_cmds = set(re.findall(r"`saipen ([a-z]+)[^`]*`",
+                                     _crew_t.split("## `sc`")[-1]))
+        _unknown = sorted(_stage_cmds - set(SAIPEN_COMMANDS))
+        if _unknown:
+            fail("cross-doc drift [circuit-stages] -- the `sc` circuit in "
+                 f"extensions/subs/crew.md names command(s) {_unknown} that "
+                 "RFC 1.10 does not define. A stage pointing at a verb nobody "
+                 "wrote is the fabricated-command failure with a table around "
+                 "it: the operator follows the circuit and hits a word the "
+                 "protocol has never heard of")
+            drift_ok = False
+
     # 1c. Shortcuts are resolved by reading § 1.10, never from memory.
     if _boot_prio.is_file():
         if "Memory is never a source for it" not in _boot_prio_t:

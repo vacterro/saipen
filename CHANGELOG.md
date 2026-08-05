@@ -15,6 +15,18 @@
 ## 7.192.0 -- 2026-08-05 -- T-491: Lazy Load Index
 Added `saipen/INDEX.md` as the table of contents and updated `BOOT.md` to reference it instead of directing agents to blindly read the full 120KB+ protocol. A cold agent can now complete a ticket reading < 50KB of rules total.
 
+## 7.194.0 -- 2026-08-06 -- `sc` can actually be walked, and a circuit stage must name a real command
+
+T-499: `sc` shipped defined but not runnable. Four jams, every one found by probing the thing rather than reading it back.
+
+The live `.saipen/extensions/subs/MANIFEST.md` had no saitest entry -- it was registered only in the shipped library -- so spawn and list discovery could not see the sub the circuit's second stage depends on. `saipen collect saitest` had no refusal string while both its siblings have exact ones, leaving stage 3 with no defined no-op. saitest had no invocation route at all: `tt` belongs to `saipen test`, a different command that runs a project's declared suite, and the bare-subname route `extensions/subs/README.md` already defines for every `sai*` sub was never named for it. The refusal is `Not ready: run saitest first.` and the text says why it names the sub rather than a key that would send the reader to the wrong command.
+
+And nothing checked that a circuit stage points at a command that exists. That is the fabricated-command failure with a table around it -- the same shape as the transcript where `hh` produced a ten-row card naming six commands that appear nowhere in the surface. An unchecked circuit is that card with more ceremony. `tools/validate.py` now resolves every verb the circuit names against the command set: the six real ones are collect, continue, hunt, prepare, ship and sub, and a seventh invented one FAILs. Hand red-tested with `saipen sniff`, then red-controlled.
+
+Repository hygiene, since it was asked for and was genuinely untidy: two scratch worktrees left registered in git are pruned, one branch, `main` tracking `origin/main` at 0/0. Three alpha tags from v2/v3 exist locally and not on the remote; deleting a tag is destructive and they are history, so they stay and are named here instead.
+
+audit_checks 150 -> 151 standing controls.
+
 ## 7.193.0 -- 2026-08-05 -- `sc`: the circuit, and a stage may not hand forward a claim
 
 T-497: `sc` (`saipen crew`) walks the factories in one fixed order -- sense, reproduce, intake, build, translate, document, publish -- instead of the operator driving each by hand and remembering what the last one said. It adds no mechanism: every stage is a command that already exists, the ledger is the `BOARD.md`/`LOG.md`/`OUTBOX.md` that already exist, and a multi-command chain behind one key is what `ccc` and `qqq` already are. If it ever needs a new phase, field or file format, that is the signal it was designed wrong.
