@@ -41,6 +41,13 @@ import re
 import subprocess
 import sys
 
+def _read_rfc(p):
+    core = p.parent / "CORE.md"
+    maint = p.parent / "MAINTENANCE.md"
+    if core.is_file() and maint.is_file():
+        return core.read_text(encoding="utf-8-sig") + "\n" + maint.read_text(encoding="utf-8-sig")
+    return p.read_text(encoding="utf-8-sig")
+
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 else:
@@ -2345,7 +2352,7 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
         # injector delivery is executed by tools/run_scenarios.py.
 
         # A. RFC's phase enum <-> phases/ docs, both directions.
-        rfc_text = Path("saipen/RFC.md").read_text(encoding="utf-8-sig")
+        rfc_text = _read_rfc(Path("saipen/RFC.md"))
         enum_line = next((rl for rl in rfc_text.splitlines()
                           if rl.startswith("**Phase enum**")), None)
         if enum_line is None:
@@ -2772,7 +2779,7 @@ conf_path = rfc_path.parent / "CONFORMANCE.md"
 if not rfc_path.is_file():
     fail(f"RFC.md not found at {rfc_path} -- SAIPEN home clone incomplete")
 else:
-    rfc = rfc_path.read_text(encoding="utf-8-sig")
+    rfc = _read_rfc(rfc_path)
     drift_ok = True
 
     # 1. Required STATE field set: RFC § 1.2 vs schema properties.
@@ -3879,7 +3886,9 @@ else:
     #     memory, data rather than protocol text.
     COVERED = [
         ("saipen/HABITS.md", "habit citation + counter-mechanism checks"),
-        ("saipen/RFC.md",            "source of truth for six cross-doc sets"),
+        ("saipen/RFC.md",            "stub for backward compat"),
+        ("saipen/CORE.md",           "source of truth for core cross-doc sets"),
+        ("saipen/MAINTENANCE.md",    "source of truth for maintenance cross-doc sets"),
         ("saipen/BOOT.md",           "re-enumeration + required-field-count checks"),
         ("saipen/CONFORMANCE.md",    "re-enumeration + count + row-ID checks"),
         ("saipen/phases/*.md",       "phase-enum sync + prescribed-WAIT category check"),
@@ -3946,7 +3955,7 @@ else:
     #     no longer exists while the sentence around it still reads fine.
     #     This is the same class as the adapter cross-reference check, applied
     #     to the two things every doc actually cites.
-    _rfc_text = rfc_path.read_text(encoding="utf-8-sig")
+    _rfc_text = _read_rfc(rfc_path)
     _sections = set(re.findall(r"^###\s+(\d+\.\d+)(?![\d.])", _rfc_text, re.MULTILINE))
     _phase_dir = rfc_path.parent / "phases"
     _phase_docs = {q.name for q in _phase_dir.glob("*.md")} if _phase_dir.is_dir() else set()
@@ -4593,7 +4602,7 @@ else:
     for _name, _path in _contract_docs.items():
         if not _path.is_file():
             continue
-        _text = _path.read_text(encoding="utf-8-sig")
+        _text = _read_rfc(_path) if _name == "RFC.md" else _path.read_text(encoding="utf-8-sig")
         if _language_contract not in _text:
             fail(f"cross-doc drift [reply-language] -- {_name} no longer carries "
                  "the exact EE/EN/RU precedence: explicit prose first, Russian "
@@ -4901,7 +4910,7 @@ else:
     #      a cited section EXISTS, never that it says the thing being cited.
     _rfc_p2 = _tools_parent / "saipen" / "RFC.md"
     if _rfc_p2.is_file():
-        _rfc_t = _rfc_p2.read_text(encoding="utf-8-sig")
+        _rfc_t = _read_rfc(_rfc_p2)
         _i = _rfc_t.find("### 1.10")
         _j = _rfc_t.find("### 1.11", _i)
         if _i < 0 or _j < 0:
@@ -5369,7 +5378,7 @@ else:
     _rfc_p = _tools_parent / "saipen" / "RFC.md"
     if _rfc_p.is_file() and _habits_p.is_file():
         _habits_b = _habits_p.read_text(encoding="utf-8-sig")
-        _rfc_b = _rfc_p.read_text(encoding="utf-8-sig")
+        _rfc_b = _read_rfc(_rfc_p)
         
         # Collect all RFC sections
         _rfc_sections = set()
@@ -5401,7 +5410,7 @@ else:
     _rfc_p = _tools_parent / "saipen" / "RFC.md"
     _conf_p = _tools_parent / "saipen" / "CONFORMANCE.md"
     if _rfc_p.is_file() and _conf_p.is_file():
-        _rfc_b = _rfc_p.read_text(encoding="utf-8-sig")
+        _rfc_b = _read_rfc(_rfc_p)
         _must_by_sec, _cur_sec = {}, None
         for _ln in _rfc_b.splitlines():
             _h = re.match(r"^#{2,4}\s*§?\s*(\d+\.\d+)\s", _ln)

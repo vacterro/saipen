@@ -5,3 +5,5 @@
 - 05.08.26 11:14 [E-2048] [parent: E-2047] RUN: validate.py -> PASS (0 problems, 23 warnings) on the live workspace and on the release tree alike -- the saitranslate README.ja.md that FAILed all of yesterday is resolved.
 - 05.08.26 11:44 [E-2049] [parent: E-2048] [T-486] RUN: fix encoding and citation defects in HABITS.md, add validate.py enforcement. -> ddd58f0
 - 05.08.26 11:46 [E-2050] [parent: E-2049] [T-392] RUN: architect reorganization plan ADR-002, output tickets T-488 to T-491 to reduce context bloat.
+- 05.08.26 11:59 [E-2051] [parent: E-2050] RUN: fix remaining mojibake encoding defects across repo history files.
+- 05.08.26 11:59 [E-2052] [parent: E-2051] [T-488] RUN: split RFC.md into CORE.md and MAINTENANCE.md, leave stub RFC.md, update validate.py coverage and contract check loop to parse both.
