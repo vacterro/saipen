@@ -2251,6 +2251,7 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
         # v7.103.0, so an arrow mangled in traps.md sat unseen by the very
         # check whose subject traps.md documents.
         text_targets = [
+            Path("saipen/HABITS.md"),
             Path("saipen/RFC.md"),
             Path("saipen/BOOT.md"),
             Path("saipen/CONFORMANCE.md"),
@@ -3877,6 +3878,7 @@ else:
     #     `.saipen/` is excluded wholesale -- that is this project's own working
     #     memory, data rather than protocol text.
     COVERED = [
+        ("saipen/HABITS.md", "habit citation + counter-mechanism checks"),
         ("saipen/RFC.md",            "source of truth for six cross-doc sets"),
         ("saipen/BOOT.md",           "re-enumeration + required-field-count checks"),
         ("saipen/CONFORMANCE.md",    "re-enumeration + count + row-ID checks"),
@@ -3902,7 +3904,6 @@ else:
     # injector, and SKILL.md is the entry point that tells a skill-reading
     # platform which file to read first.
     EXEMPT = [
-        ("saipen/HABITS.md",   "list of statistical LLM habits, disjoint from state protocol"),
         ("saipen/SKILL.md",   "reading-order entry point for skill platforms; its file references and boot-critical voice/language metadata are checked directly"),
         ("saipen/STYLE.md",   "chat voice; persistence/language contracts and RFC citation are checked directly, while prose tone itself is not machine-checkable"),
         ("saipen/UI.md",      "visual spec for UI work, disjoint from the state protocol"),
@@ -5362,6 +5363,32 @@ else:
                  f"bootloader that POINTS at the home; a copy goes stale the "
                  f"moment the home moves and nothing here would say so")
             drift_ok = False
+
+        # 14. HABITS.md citations must be real.
+    _habits_p = _tools_parent / "saipen" / "HABITS.md"
+    _rfc_p = _tools_parent / "saipen" / "RFC.md"
+    if _rfc_p.is_file() and _habits_p.is_file():
+        _habits_b = _habits_p.read_text(encoding="utf-8-sig")
+        _rfc_b = _rfc_p.read_text(encoding="utf-8-sig")
+        
+        # Collect all RFC sections
+        _rfc_sections = set()
+        for _ln in _rfc_b.splitlines():
+            _h = re.match(r"^#{2,4}\s*§?\s*(\d+\.\d+)\s", _ln)
+            if _h:
+                _rfc_sections.add(_h.group(1))
+                
+        # Check citations
+        for _cit in re.finditer(r"RFC\.md\s*§\s*(\d+\.\d+)", _habits_b):
+            if _cit.group(1) not in _rfc_sections:
+                fail(f"HABITS.md cites non-existent RFC section {_cit.group(1)}")
+                drift_ok = False
+                
+        for _tool in re.finditer(r"tools/[A-Za-z0-9_]+\.py", _habits_b):
+            _tool_p = _tools_parent / _tool.group(0)
+            if not _tool_p.is_file():
+                fail(f"HABITS.md cites non-existent tool {_tool.group(0)}")
+                drift_ok = False
 
     # 13e. Every RFC section that states a MUST is claimed by CONFORMANCE.
     #      The doc-coverage check answers "is any check looking at this file?".
