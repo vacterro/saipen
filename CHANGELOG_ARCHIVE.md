@@ -657,7 +657,7 @@ Minor version: T-104's new WAIT category and T-105's real bug fix plus newly-ope
 
 ## 5.2.0 -- 2026-07-17
 - BREAKING / REWRITE: Converted the core `PROTOCOL.md` from a conversational guide into a strict, RFC-style normative specification.
-- feat: Formalized the State Machine (`INIT РІвЂ вЂ™ PLAN РІвЂ вЂ™ SCOUT РІвЂ вЂ™ BUILD РІвЂ вЂ™ VERIFY РІвЂ вЂ™ REVIEW РІвЂ вЂ™ SHIP РІвЂ вЂ™ DONE | BLOCKED`).
+- feat: Formalized the State Machine (`INIT РІвЂ ’ PLAN РІвЂ ’ SCOUT РІвЂ ’ BUILD РІвЂ ’ VERIFY РІвЂ ’ REVIEW РІвЂ ’ SHIP РІвЂ ’ DONE | BLOCKED`).
 - feat: Formalized Claim/Ownership logic (`owner` and `claim_time` added to `board.schema.json`) to prevent multi-agent race conditions.
 - feat: Added Capability Negotiation handshake (agents MUST check capabilities like git/shell before engaging).
 - feat: Added formal Recovery doctrine.
