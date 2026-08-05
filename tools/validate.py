@@ -3173,6 +3173,31 @@ else:
                  "protocol has never heard of")
             drift_ok = False
 
+    # 1b18. A move is destructive to whatever loads the moved file, and the
+    #       deletion gate cannot see it: the file is recoverable by
+    #       construction -- it is right there in the new place -- while the
+    #       program is broken anyway. Reproduced from a user session where
+    #       "put the rest in the archive" moved a GUI module the entry point
+    #       loads at runtime by absolute path, and the next command raised
+    #       FileNotFoundError. The check is a grep before the move.
+    if _hunt_t and "Moving a file is destructive to whatever loads it" not in _hunt_t:
+        fail("cross-doc drift [move-reference-sweep] -- phases/hunt.md must "
+             "require a reference sweep before a move or rename and say why "
+             "the recovery gate does not cover it: a moved file passes every "
+             "recoverability test and still breaks whatever loads the old "
+             "path, which is the import rung of verify.md's ladder failing "
+             "for a reason nobody looked for")
+        drift_ok = False
+    _clean_doc = rfc_path.parent / "phases" / "clean.md"
+    if (_clean_doc.is_file()
+            and "needs a reference sweep first"
+            not in _clean_doc.read_text(encoding="utf-8-sig")):
+        fail("cross-doc drift [move-reference-sweep] -- phases/clean.md must "
+             "cite the sweep before it prunes or relocates anything. CLEAN "
+             "moves files for tidiness, which is exactly the framing that "
+             "makes the breakage invisible")
+        drift_ok = False
+
     # 1c. Shortcuts are resolved by reading § 1.10, never from memory.
     if _boot_prio.is_file():
         if "Memory is never a source for it" not in _boot_prio_t:

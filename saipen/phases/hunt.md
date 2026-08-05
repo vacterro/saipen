@@ -65,6 +65,8 @@ Signal order, cap 5 tickets:
 5. Symmetry gaps (save/load, undo/redo, import/export, start/stop, CLI params vs internal lists/GUI)
 6. Dead code, orphan files (zero grep refs, not entry/doc/config)
 
+**Moving a file is destructive to whatever loads it, and a move passes the recovery test trivially.** Archiving, renaming and reorganising all read as tidy rather than dangerous, and the gate below asks the wrong question about them: the file IS recoverable -- it is right there in the new place -- and the program is broken anyway, because recoverability is not the property that matters when something loads the old path. Reproduced from a user's session: "put the rest in the archive" moved a GUI module, the entry point loaded it at runtime by absolute path, and the next command raised `FileNotFoundError`. **So before moving or renaming anything, sweep for references to it and treat a hit as a blocker, not a note.** Grep the basename and the path across the project -- source, config, scripts, manifests, docs -- and either move the references in the same act or do not move the file. The sweep is one command and the alternative is a program that starts failing at import time, which is the cheapest rung of `phases/verify.md`'s ladder and therefore the most embarrassing one to skip. This binds `CLEAN` identically: it prunes and relocates, and a scrub that orphans a loader is the same defect wearing a tidier word.
+
 **Junk is deleted on proof of recovery, never on how obvious it looks.**
 RFC § 1.1 permits an unconfirmed destructive operation only when the active
 ticket pre-authorizes it AND the operation is reversible -- and HUNT routinely

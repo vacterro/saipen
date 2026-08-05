@@ -1,3 +1,3 @@
-done: v7.193.0 -- T-497, `sc` walks the whole circuit in one fixed order and a stage may not hand the next one a claim. The shortcut key count is derived from the table now instead of a literal
+done: v7.194.0 -- T-499, `sc` is walkable: saitest is in the live manifest, `collect saitest` has its refusal, saitest has an invocation route, and every circuit stage must name a command that exists
 remaining: T-498 tops ## TODO -- a move breaks whatever imports the moved file, and the deletion gate does not cover it; 5 open below
-awaiting: nothing from you. Another Core session is active on this repo -- it shipped v7.192.0 while I worked, and my version bump collided with it once
+awaiting: nothing. Branch is single and clean: one worktree, main tracking origin/main at 0/0

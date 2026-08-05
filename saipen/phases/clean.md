@@ -4,7 +4,7 @@ Deep repository scrub. Execute strictly in order.
 
 **Safety floor, applies to every step below:** CLEAN MUST NOT delete user data
 (anything the user created or would recognize as their own work) without
-explicit confirmation -- "obviously safe to remove" (§1/§2/§4 below) means
+explicit confirmation. **Moving or renaming a file needs a reference sweep first (`phases/hunt.md`): a move passes every recovery test and still breaks whatever loads the old path.** "obviously safe to remove" (§1/§2/§4 below) means
 scaffolding, cache, and orphaned build artifacts, never something a user
 might have meant to keep. If any step turns out unsafe to complete --
 ambiguous ownership, a deletion candidate that might be load-bearing,

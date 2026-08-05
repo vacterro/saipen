@@ -15,6 +15,18 @@
 ## 7.192.0 -- 2026-08-05 -- T-491: Lazy Load Index
 Added `saipen/INDEX.md` as the table of contents and updated `BOOT.md` to reference it instead of directing agents to blindly read the full 120KB+ protocol. A cold agent can now complete a ticket reading < 50KB of rules total.
 
+## 7.195.0 -- 2026-08-06 -- a move is destructive to whatever loads the moved file
+
+T-498: the deletion gate asks whether a file can be recovered. An archive, a rename or a reorganisation passes that test trivially -- the file is right there in the new place -- and the program is broken anyway, because recoverability is not the property that matters when something loads the old path. Archive, rename and tidy: none of those words sound destructive, and all three are.
+
+Reproduced from a user's session rather than reasoned about. "Put the rest in the archive" moved a GUI module; the entry point loaded it at runtime by absolute path; the very next command raised `FileNotFoundError`. That same session had already reported the work done and verified.
+
+So: sweep for references BEFORE the move. Grep the basename and the path across source, config, scripts, manifests and docs, treat a hit as a blocker rather than a note, and either move the references in the same act or do not move the file. It binds `CLEAN` identically -- pruning and relocating is what that phase does, and tidiness is the exact framing that hides the breakage.
+
+Evidence class is STRUCTURAL_ONLY and cannot be otherwise: nothing here moves a consuming project's files, so no fixture can witness the breakage. What a fixture could witness already exists one layer down -- `phases/verify.md`'s import rung catches this class in a single command, which is why the transcript is best read as two rules missed rather than one.
+
+audit_checks 151 -> 153 standing controls. CONFORMANCE 238.
+
 ## 7.194.0 -- 2026-08-06 -- `sc` can actually be walked, and a circuit stage must name a real command
 
 T-499: `sc` shipped defined but not runnable. Four jams, every one found by probing the thing rather than reading it back.
