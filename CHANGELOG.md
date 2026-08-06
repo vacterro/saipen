@@ -15,6 +15,18 @@
 ## 7.192.0 -- 2026-08-05 -- T-491: Lazy Load Index
 Added `saipen/INDEX.md` as the table of contents and updated `BOOT.md` to reference it instead of directing agents to blindly read the full 120KB+ protocol. A cold agent can now complete a ticket reading < 50KB of rules total.
 
+## 7.196.0 -- 2026-08-06 -- a habit that claimed no counter had two
+
+T-487: `HABITS.md`'s habit 8 -- summarising work instead of doing it -- read "None currently. Tracked in open ticket T-487". Both counters already existed, and both predate the ticket that was filed to invent one.
+
+The habit has two shapes and each is answered. A session that produced nothing and talked about it is caught by the session-trace rule: a session that did anything ends having produced a LOG line, a BOARD change, a STATE change or a change to the project's own files, and one with none of those must say exactly that "rather than summarising activity in chat". A session that produced a trace which is itself a plan is caught by the LOG rule that an entry records what already happened and never what is about to -- and that one is mechanically enforced, rejecting `will`, `going to`, `about to`, `plans to` and their relatives in an entry's first clause, with a standing red control behind it.
+
+A claimed gap is the same waste as a claimed counter that does not exist, arrived at from the other side: it sends the next agent to build a duplicate of an already-enforced rule. No checker can see it, because the absence of a counter is not observable from the text; what closed this was checking before building.
+
+One thing was written and then removed rather than shipped: a guarantor tying the new citation to the future-tense gate's identifier. It could only go red in a state where the validator had already crashed, which makes it not evidence. The gate's own standing control is what keeps the citation honest.
+
+CONFORMANCE 239.
+
 ## 7.195.0 -- 2026-08-06 -- a move is destructive to whatever loads the moved file
 
 T-498: the deletion gate asks whether a file can be recovered. An archive, a rename or a reorganisation passes that test trivially -- the file is right there in the new place -- and the program is broken anyway, because recoverability is not the property that matters when something loads the old path. Archive, rename and tidy: none of those words sound destructive, and all three are.

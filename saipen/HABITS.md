@@ -36,7 +36,7 @@ This document enumerates these habits and maps them to the mechanisms that count
 
 8. **Summarising work instead of doing it**
    Describing what should be done instead of invoking the tools to modify the files.
-   *Counter-mechanism*: None currently. Tracked in open ticket T-487.
+   *Counter-mechanism*: two, both older than the ticket that was filed to invent one. This habit has two shapes and each has its own. **Produced nothing and talked about it**: § 1.11's session-trace rule -- a session that did anything ends having produced a LOG line, a BOARD change, a STATE change or a change to the project's own files, and one that produced none of those MUST say exactly that "rather than summarising activity in chat". **Produced a trace that is itself a plan**: § 1.2's LOG rule -- an entry records what already happened, never what is about to, and its first clause MUST NOT be written as an intention. That second one is mechanically enforced in tools/validate.py, which rejects `will`, `going to`, `about to`, `plans to` and their relatives in that position. That gate has its own standing red control in tools/audit_checks.py, which is what keeps this citation honest -- a counter-mechanism named in prose is only as real as the control behind the check it names. The gap this line used to claim did not exist, and claiming one is its own defect: it sends the next agent to build a duplicate of a rule that is already enforced.
 
 9. **Truncating context and assuming the end**
    Reading only the first N lines of a file, queue, or command output, and acting as if the unread remainder is empty.

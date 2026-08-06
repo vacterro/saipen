@@ -14,7 +14,7 @@
 
 **Язык ответов.** Агент по умолчанию отвечает на **эстонском** — это настройка, а не причуда, и больше ничего эстонского в SAIPEN нет. Меняется в одном месте: строка `reply_language:` в начале [`saipen/STYLE.md`](saipen/STYLE.md). `et` эстонский, `en` английский, `ru` русский, `auto` выбирает по языку твоего сообщения. Протокол, код, коммиты и все документы при любом значении остаются на английском.
 
-**v7.195.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
+**v7.196.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
 
 ```text
 Юзер  ->  /saipen continue
