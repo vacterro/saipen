@@ -58,3 +58,5 @@ requests, discussions), а также применяется, когда отд�
 Этот Кодекс поведения адаптирован из [Contributor Covenant](https://www.contributor-covenant.org),
 версии 2.1, доступной по адресу
 https://www.contributor-covenant.org/version/2/1/code_of_conduct.html.
+
+<!-- source-digest: CODE_OF_CONDUCT.md sha256:84d6c94444a48ba8 -->

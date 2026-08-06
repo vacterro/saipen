@@ -1502,6 +1502,35 @@ if _na_pick:
                  f"{_owner!r} while this state's agent is "
                  f"{state.get('agent')!r} -- executing another agent's claim "
                  f"is the concurrency collision § 1.4 exists to prevent")
+# Session-level BLOCKED is "no ticket anywhere on the board is workable", and
+# nothing checked the second half. A session halted with a full board looks
+# exactly like a legitimate stop: `phase: BLOCKED`, a `WAIT: blocked --`
+# naming a real obstacle, and nobody coming. Observed with 18 workable
+# `## TODO` tickets and a blocker about translating 29 locales -- which is
+# subSaipen work by `phases/translate.md`'s split, so it is a TICKET-level
+# block (a `## BLOCKED` line naming its owner) and never a reason to stop
+# Core. The two are different states that share a word, and conflating them
+# parks a project that had eighteen things to do.
+_blocked_workable = [
+    tid for tid, t in tickets.items()
+    if t["section"] == "## TODO" and t["checkbox"] in (" ", "")
+    and all(tickets.get(r, {}).get("section") == "## DONE" for r in t["needs"])
+] if state.get("phase") == "BLOCKED" else []
+if _blocked_workable:
+    fail(f"STATE.md phase: BLOCKED while {len(_blocked_workable)} workable "
+         f"## TODO ticket(s) exist (topmost {sorted(_blocked_workable)[0]}) -- "
+         f"session-level BLOCKED is reserved for when no ticket anywhere on "
+         f"the board is workable. A block that belongs to one ticket goes on "
+         f"THAT ticket's line in `## BLOCKED` with its owner named, and Core "
+         f"keeps working the rest")
+# RFC 2.4's Exit list makes `phase: BLOCKED` an exit condition, so the two
+# cannot both be true: a blocked session is not a running goal.
+if state.get("phase") == "BLOCKED" and state.get("goal_mode") is True:
+    fail("STATE.md carries phase: BLOCKED with goal_mode: true -- RFC 2.4's "
+         "Exit list names BLOCKED as an exit, so goal_mode MUST be false "
+         "there. Left true, a resume walks straight back into an autonomous "
+         "run the block was supposed to stop")
+
 if _na_pick and not any(t["section"] == "## DOING" for t in tickets.values()):
     _named = _na_pick.group(1)
     _workable = [
@@ -2138,7 +2167,75 @@ for ob in sorted(Path(".").glob(".saipen/extensions/subs/*/kitchen/OUTBOX.md")):
 if outbox_seen and outbox_ok:
     ok(f"subSaipen OUTBOX entries well-formed ({outbox_seen} checked)")
 
-# ----------------------------------------------------------------- KNOWLEDGE
+# ------------------------------------------------------------ SAIUI CHARTER
+
+saiui_charter = Path("extensions/subs/saiui.md")
+saiui_mission = Path(".saipen/kitchen/SAIUI_SAISENT_MISSION.md")
+saiui_ok = True
+
+if IS_SAIPEN_HOME and saiui_charter.is_file():
+    _charter = saiui_charter.read_text(encoding="utf-8-sig", errors="replace")
+
+    # 1. Charter must reference canonical saipen/UI.md.
+    if "saipen/UI.md" not in _charter:
+        fail("saiui charter lost canonical saipen/UI.md reference -- "
+             "the charter must load the one authoritative file by reference")
+        saiui_ok = False
+
+    # 2. No copied palette or second palette.
+    if re.search(r"(?i)(#[0-9a-f]{3,8}\s*;?\s*){3,}", _charter):
+        fail("saiui charter contains a copied palette/token block -- "
+             "colors must trace to saipen/UI.md, never be re-declared")
+        saiui_ok = False
+    if re.search(r"(?i)(second|alternate|alternative)\s+palette\s+(is|may|can|should|shall)",
+                 _charter):
+        fail("saiui charter declares a second palette -- "
+             "Vintage Golden is the single canonical palette")
+        saiui_ok = False
+
+    # 3. Main-tree write ban must not be softened.
+    if not re.search(r"(?i)never\s+write\s+.*main\s+(project\s+)?tree", _charter):
+        fail("saiui charter softened or removed the main-tree write ban -- "
+             "the charter must forbid main-project writes")
+        saiui_ok = False
+
+    # 4. Fixer pen/OUTBOX requirement must be present.
+    if "kitchen/pen/" not in _charter or "OUTBOX.md" not in _charter:
+        fail("saiui charter removed fixer pen or OUTBOX requirement -- "
+             "the charter must bind to PROTOCOL.md § 9 fixer contract")
+        saiui_ok = False
+
+    # 5. UI- prefix must be in the ticket namespace table.
+    _proto = Path("extensions/subs/PROTOCOL.md")
+    if _proto.is_file():
+        _proto_text = _proto.read_text(encoding="utf-8-sig", errors="replace")
+        if not re.search(r"\|\s*`UI-`\s*\|", _proto_text):
+            fail("saiui lacks explicit UI- prefix in PROTOCOL.md ticket table -- "
+                 "built-in roles require a documented namespace")
+            saiui_ok = False
+
+    # 6. Bootstrap must mention sai*.md charters in copy list.
+    if "sai*.md" not in _proto_text:
+        fail("PROTOCOL.md spawn/sync does not mention sai*.md built-in charters -- "
+             "first bootstrap would omit role charters")
+        saiui_ok = False
+
+    if saiui_ok:
+        ok("saiui charter integrity verified (references UI.md, no second palette, "
+           "write ban enforced, fixer contract present, UI- prefix documented, "
+           "bootstrap includes charters)")
+
+# Target mission must not claim SAISENT was audited from this repo.
+if saiui_mission.is_file():
+    _mission = saiui_mission.read_text(encoding="utf-8-sig", errors="replace")
+    if re.search(r"(?i)(SAISENT|target)\s+(was|has been|already)\s+(audited|checked|verified|patched)",
+                 _mission):
+        fail("SAIUI SAISENT mission claims the target was audited from this "
+             "repository -- the mission must label findings as hypotheses to verify")
+    elif "hypothes" in _mission.lower() and "VERIFY" in _mission:
+        ok("SAIUI SAISENT mission labels findings as hypotheses to verify")
+
+# ------------------------------------------------------------ KNOWLEDGE
 
 knowledge = Path(".saipen/KNOWLEDGE")
 if knowledge.is_dir():

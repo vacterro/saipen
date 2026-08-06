@@ -106,3 +106,5 @@ SAIPEN tagab oleku terviklikkuse failipõhiste nõuete (`owner`, `claim_time`) j
 <p align="center">
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
+
+<!-- source-digest: SPEC.md sha256:05ce16f49ccf85dd -->

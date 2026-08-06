@@ -19,8 +19,10 @@ Skips (exit 0, loudly) where no POSIX shell is available.
 """
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import io
+import json
 import os
 import shutil
 import subprocess
@@ -91,19 +93,73 @@ def main() -> int:
     sys.modules["audit_checks"] = ac
     spec.loader.exec_module(ac)
 
+    def compute_cache_key():
+        h = hashlib.sha256()
+        # Source bytes only. It used to hash `repr(ac.CASES)`, and a CASES
+        # entry holds callables -- so the repr embedded memory addresses
+        # (`<function demote_the_pick at 0x000001A898177880>`) and the key
+        # changed every process. The cache could never hit, its
+        # "skipped, unchanged floor and case list" line could never print,
+        # and the 545-second run it exists to avoid ran every single time.
+        # Hashing audit_checks.py instead is deterministic AND stricter: it
+        # invalidates on any change to a case, its mutation or its expected
+        # substring, which `repr` of a tuple of functions never could.
+        for script in ("tests/validate.sh", "tests/validate.ps1",
+                       "tools/validate.py", "tools/audit_checks.py"):
+            p = HOME / script
+            if p.exists():
+                h.update(p.read_bytes())
+        return h.hexdigest()[:16]
+
+    cache_key = compute_cache_key()
+    cache_file = HOME / ".saipen" / "kitchen" / "audit_parity_cache.json"
+    if cache_file.exists():
+        try:
+            cached = json.loads(cache_file.read_text("utf-8"))
+            if cached.get("key") == cache_key:
+                print(f"PASS: skipped, unchanged floor and case list (hash {cache_key})")
+                print(f"Parity result remains {cached.get('caught', BASELINE)} at baseline")
+                return 0
+        except Exception:
+            pass
+
     tmp = Path(tempfile.mkdtemp(prefix="audit_parity_"))
     pristine = tmp / "pristine"
     shutil.copytree(HOME, pristine, ignore=ac.IGNORE)
 
+    class _Result:
+        def __init__(self, rc, out, err):
+            self.returncode = rc
+            self.stdout = out
+            self.stderr = err
+
     def run_validate(root):
-        return subprocess.run(
-            [sys.executable, str(root / "tools" / "validate.py")], cwd=root,
-            capture_output=True, text=True, errors="replace")
+        try:
+            return subprocess.run(
+                [sys.executable, str(root / "tools" / "validate.py")], cwd=root,
+                capture_output=True, text=True, errors="replace", timeout=15)
+        except subprocess.TimeoutExpired:
+            return _Result(124, "", "timeout")
 
     def run_floor(root):
-        return subprocess.run(
-            [bash, "tests/validate.sh"], cwd=root,
-            env=floor_env, capture_output=True, text=True, errors="replace")
+        if sys.platform == "nt":
+            p = subprocess.Popen(
+                [bash, "tests/validate.sh"], cwd=root, env=floor_env,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, errors="replace")
+            try:
+                out, err = p.communicate(timeout=15)
+                return _Result(p.returncode, out, err)
+            except subprocess.TimeoutExpired:
+                subprocess.run(["taskkill", "/F", "/T", "/PID", str(p.pid)], capture_output=True)
+                out, err = p.communicate()
+                return _Result(124, out, err)
+        else:
+            try:
+                return subprocess.run(
+                    [bash, "tests/validate.sh"], cwd=root,
+                    env=floor_env, capture_output=True, text=True, errors="replace", timeout=15)
+            except subprocess.TimeoutExpired:
+                return _Result(124, "", "timeout")
 
     def validate(root):
         return run_validate(root).returncode
@@ -142,7 +198,8 @@ def main() -> int:
     # One copy, restored between cases -- see the same note in audit_checks.py.
     # Every case touches exactly one file, so its bytes are the whole state.
     both, only_canonical, neither, skipped = [], [], [], []
-    for label, rel, mutation, _expected in ac.CASES:
+    for i, (label, rel, mutation, _expected) in enumerate(ac.CASES, 1):
+        print(f"\r[{i}/{len(ac.CASES)}] {label[:70].ljust(70)}", end="", flush=True)
         target = ac.case_target(pristine, rel, mutation)
         saved = target.read_bytes() if target.exists() else None
         try:
@@ -164,13 +221,14 @@ def main() -> int:
                 target.write_bytes(saved)
 
     if validate(pristine) != 0 or floor(pristine) != 0:
-        print("FAIL: the copy did not survive the run -- restoring between "
+        print("\nFAIL: the copy did not survive the run -- restoring between "
               "cases left a mutation behind, so the counts above are measuring "
               "a drifting tree")
         shutil.rmtree(tmp, ignore_errors=True)
         return 1
     shutil.rmtree(tmp, ignore_errors=True)
 
+    print()
     applied = len(both) + len(only_canonical) + len(neither)
     print(f"cases applied: {applied} of {len(ac.CASES)}")
     print(f"  caught by both:                 {len(both)}")
@@ -191,6 +249,10 @@ def main() -> int:
               f"recorded baseline of {BASELINE}. It has LOST coverage -- that "
               f"is the failure this tool exists for, not the gap itself")
         return 1
+
+    cache_file.parent.mkdir(parents=True, exist_ok=True)
+    cache_file.write_text(json.dumps({"key": cache_key, "caught": len(both)}), "utf-8")
+
     print(f"\nPASS: the floor catches {len(both)} of {applied} "
           f"(baseline {BASELINE}). The other {len(only_canonical)} need "
           f"Python, which is why the floor no longer claims conformance in the "

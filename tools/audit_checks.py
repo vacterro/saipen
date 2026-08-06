@@ -837,6 +837,12 @@ CASES: list[tuple[str, str, object, str]] = [
      "saipen/phases/prepare.md",
      replace("RUN: prepare <producer> -> done", "RUN: prepare -> done"),
      "prepare-record"),
+    # Session-level BLOCKED means "no ticket anywhere is workable"; the
+    # second half was never checked, so a session halted with a full board
+    # looked exactly like a legitimate stop.
+    ("a session blocks while the board still has workable tickets", STATE,
+     sub_line("phase", "BLOCKED"),
+     "session-level BLOCKED is reserved for"),
     ("CHANGELOG entries fall out of descending order", "CHANGELOG.md",
      replace("## 7.196.0", "## 7.100.0"),
      "changelog-order"),
@@ -1362,6 +1368,42 @@ CASES: list[tuple[str, str, object, str]] = [
 
     (".saipen/ carries a copy of the protocol", ".saipen/RFC.md",
      CREATE, "§ 1.7"),
+
+    # saiui charter integrity (T-510). Each mutation removes one required
+    # element; the validator must catch it.
+    ("saiui charter drops canonical UI.md reference",
+     "extensions/subs/saiui.md",
+     replace("canonical `<saipen_home>/saipen/UI.md`",
+             "the project's own visual specification"),
+     "lost canonical saipen/UI.md"),
+    ("saiui charter declares a second palette",
+     "extensions/subs/saiui.md",
+     replace("There is no second palette.",
+             "An alternative palette is available for dark-mode projects."),
+     "declares a second palette"),
+    ("saiui charter softens main-tree write ban",
+     "extensions/subs/saiui.md",
+     replace("never write to the main project tree",
+             "write to the main project tree only for urgent fixes"),
+     "main-tree write ban"),
+    ("saiui charter removes fixer pen requirement",
+     "extensions/subs/saiui.md",
+     replace("clone exact target files into `kitchen/pen/`",
+             "edit target files directly in the project tree"),
+     "fixer pen or OUTBOX"),
+    ("PROTOCOL.md drops UI- prefix from ticket table",
+     "extensions/subs/PROTOCOL.md",
+     replace("| `UI-` | saiui (fixer, § 9) |", ""),
+     "lacks explicit UI- prefix"),
+    ("PROTOCOL.md drops sai*.md from bootstrap copy list",
+     "extensions/subs/PROTOCOL.md",
+     replace("all built-in `sai*.md` role charters", "the standard files"),
+     "sai*.md built-in charters"),
+    ("SAIUI mission claims SAISENT was audited from this repo",
+     ".saipen/kitchen/SAIUI_SAISENT_MISSION.md",
+     replace("hypothesis about the current SAISENT UI",
+             "confirmed finding -- SAISENT was audited and is non-compliant"),
+     "claims the target was audited"),
 ]
 
 

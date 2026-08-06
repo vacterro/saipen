@@ -44,3 +44,5 @@ Ebamäärased aruanded ("see tundub vale") on raskemini lahendatavad kui konkree
 - `saipen doctor` käsk või midagi sarnast, mis oleks üleliigne võrreldes `saipen validate` + `saipen status`.
 
 Neid kõiki on varem pakutud ja hinnatud; nende uuesti avamine vajab uusi tõendeid, mitte lihtsalt uuesti küsimist.
+
+<!-- source-digest: CONTRIBUTING.md sha256:11c89001f7db4b43 -->

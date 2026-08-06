@@ -1,3 +1,3 @@
-done: v7.197.0 -- T-500, the changelog names the current release again (order, uniqueness and head-equals-VERSION are checked), 142 entries archived, and the control-character sweep widened from 11 files to 75
-remaining: T-413 tops ## TODO; 3 open below it plus the gated v8 Crew backlog. T-413 was parked mid-measurement to answer the changelog question
-awaiting: nothing. Branch single and clean, main at 0/0
+done: T-506..T-511 (saiui: first-class built-in fixer SubSaipen), shipped v7.201.0
+remaining: T-502 (expert skill routing, needs T-501 which is done -- unblocked), T-473 needs T-443 (HELD)
+awaiting: T-442..T-451 (Crew Mode, HELD FOR SEQUENTIAL STABILITY)

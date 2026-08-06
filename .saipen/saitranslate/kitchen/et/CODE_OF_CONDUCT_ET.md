@@ -37,3 +37,5 @@ Väärkohtlemise, ahistamise või muul viisil vastuvõetamatu käitumise juhtumi
 ## Autorikaitse
 
 See käitumisjuhend on kohandatud [Contributor Covenantist](https://www.contributor-covenant.org), versioonist 2.1, mis on saadaval aadressil https://www.contributor-covenant.org/version/2/1/code_of_conduct.html.
+
+<!-- source-digest: CODE_OF_CONDUCT.md sha256:84d6c94444a48ba8 -->

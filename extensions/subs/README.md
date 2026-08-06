@@ -39,7 +39,7 @@ No manual copying -- one command, even in a project that has never seen
 ```bash
 saipen sub spawn myagent
 # first time in this project: bootstraps .saipen/extensions/subs/ itself from
-# saipen_home (STATE.md, RFC § 1.7) -- PROTOCOL.md, README.md, crew.md, TEMPLATE/, MANIFEST.md
+# saipen_home (STATE.md, RFC § 1.7) -- PROTOCOL.md, README.md, crew.md, TEMPLATE/, MANIFEST.md, and all built-in sai*.md role charters
 # every time: .saipen/extensions/subs/myagent/ created from TEMPLATE/, added to MANIFEST.md
 # open its STATE.md, set next_action; open BOARD.md, write first tickets
 ```
@@ -77,6 +77,16 @@ saipen sub collect
   its own `kitchen/`, hands off page-ready content via OUTBOX.
 - **saihunt** -- reads the project for bugs (null safety, exception
   handling, race conditions, resource leaks), tickets each finding.
+- **saipython** -- fixer-type: clones Python files into its `kitchen/pen/`,
+  fixes P2/P3 bugs, verifies against the project's own pytest/ruff/mypy,
+  outputs a tested unified diff through OUTBOX.
+- **saiui** -- fixer-type UI designer: senior product/interaction/UI-systems
+  designer, accessibility reviewer, strict guardian of Vintage Golden.
+  Audits UI implementation against `saipen/UI.md`, redesigns inside the pen,
+  outputs reviewable patches through OUTBOX. Never writes main tree.
+- **saitest** -- adversary tester: invents cases the project's test suite
+  never covered, produces minimal reproductions. Read-only, three verdicts
+  only (REPRODUCED, NOT_REPRODUCED, BLOCKED).
 - **saitest** -- the **adversary** (`saitest.md`): authors the runs nobody
   wrote -- input abuse, boundaries, order and repetition, hostile
   environments, resource pressure, damaged state, adversarial content -- and

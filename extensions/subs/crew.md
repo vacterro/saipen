@@ -19,6 +19,7 @@ not "the agents are friends" -- it's the contract below.
 | **Core** | the writer -- digs the tunnel | `full` | `.saipen/` + the real code | pick TODO -> BUILD -> VERIFY -> REVIEW -> SHIP -> **collect** -> next |
 | **saihunt** | the sensor -- finds bugs | `read-only` | only `subs/saihunt/` | HUNT 6 signals -> write findings to its OUTBOX -> HUNT again |
 | **saipython** | the fixer -- clears the tail | `read-only` | only `subs/saipython/pen/` + its OUTBOX | clone target -> fix in pen -> VERIFY -> ready patch in OUTBOX -> next |
+| **saiui** | the UI designer -- audits and redesigns interfaces | `read-only` | only `subs/saiui/pen/` + its OUTBOX | audit against saipen/UI.md -> redesign in pen -> VERIFY -> patch in OUTBOX -> next |
 
 Three is the right number: two is a pair (one drops, all stops); five is a
 crowd (coordination eats more tokens than work). Three is a triangle -- one

@@ -59,3 +59,5 @@ will be reviewed and investigated promptly and fairly.
 This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org),
 version 2.1, available at
 https://www.contributor-covenant.org/version/2/1/code_of_conduct.html.
+
+<!-- source-digest: CODE_OF_CONDUCT.md sha256:84d6c94444a48ba8 -->
