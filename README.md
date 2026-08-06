@@ -156,6 +156,7 @@ a `.uninstalled.bak` copy first, and removes the skill folders.
 | [STYLE.md](saipen/STYLE.md) | Agent communication style and voice |
 | [UI.md](saipen/UI.md) | Vintage Golden UI design guidelines |
 | [CONFORMANCE.md](saipen/CONFORMANCE.md) | Behavioral test scenarios and validator rules |
+| [БРОШЮРА](BROCHURE_DED.md) | MUST BE TRANSLATED by saitranslate |
 
 <details>
 <summary><b>All 33 translated guides</b></summary>

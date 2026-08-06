@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python
+#!/usr/bin/env python
 """saipen conformance validator (canonical).
 
 Stdlib only -- no pip installs, ever. Run from anywhere inside the project,
@@ -3472,7 +3472,7 @@ else:
     #      catches the next one at the commit that adds it. Adding a real
     #      root file means adding it here, which is one line and a decision.
     ROOT_ALLOWED = {
-        ".gitattributes", ".gitignore", "CHANGELOG.md", "CHANGELOG_ARCHIVE.md",
+        ".gitattributes", ".gitignore", "BROCHURE_DED.md", "CHANGELOG.md", "CHANGELOG_ARCHIVE.md",
         "CODE_OF_CONDUCT.md", "CONTRIBUTING.md", "GUIDE.md", "LICENSE",
         "README.ded.md", "README.ee.md", "README.ja.md", "README.md",
         "SECURITY.md", "SPEC.md", "VERSION", "ruff.toml",
@@ -4101,6 +4101,7 @@ else:
         ("saipen/SKILL.md",   "reading-order entry point for skill platforms; its file references and boot-critical voice/language metadata are checked directly"),
         ("saipen/STYLE.md",   "chat voice; persistence/language contracts and RFC citation are checked directly, while prose tone itself is not machine-checkable"),
         ("saipen/UI.md",      "visual spec for UI work, disjoint from the state protocol"),
+        ("BROCHURE_DED.md",   "translated presentation brochure for saitranslate"),
         ("SPEC.md",           "design intent and rationale, deliberately not normative"),
         ("CHANGELOG.md",      "history; never read by an agent, never a rule source"),
         ("CHANGELOG_ARCHIVE.md", "sealed history, same as above"),
