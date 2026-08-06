@@ -2205,7 +2205,20 @@ if IS_SAIPEN_HOME and saiui_charter.is_file():
              "the charter must bind to PROTOCOL.md § 9 fixer contract")
         saiui_ok = False
 
+    if saiui_ok:
+        _charter_ok = True
+elif IS_SAIPEN_HOME:
+    fail("saiui built-in role charter extensions/subs/saiui.md is missing -- "
+         "a shipped built-in role must carry its canonical charter")
+    saiui_ok = False
+else:
+    _charter_ok = False
+
+if IS_SAIPEN_HOME:
     # 5. UI- prefix must be in the ticket namespace table.
+    # 6. Bootstrap must mention sai*.md charters in copy list.
+    # 7. Role adoption must load project-local charter.
+    # 8. Sync must guard against touching live sub folders.
     _proto = Path("extensions/subs/PROTOCOL.md")
     if _proto.is_file():
         _proto_text = _proto.read_text(encoding="utf-8-sig", errors="replace")
@@ -2213,12 +2226,19 @@ if IS_SAIPEN_HOME and saiui_charter.is_file():
             fail("saiui lacks explicit UI- prefix in PROTOCOL.md ticket table -- "
                  "built-in roles require a documented namespace")
             saiui_ok = False
-
-    # 6. Bootstrap must mention sai*.md charters in copy list.
-    if "sai*.md" not in _proto_text:
-        fail("PROTOCOL.md spawn/sync does not mention sai*.md built-in charters -- "
-             "first bootstrap would omit role charters")
-        saiui_ok = False
+        if "sai*.md" not in _proto_text:
+            fail("PROTOCOL.md spawn/sync does not mention sai*.md built-in charters -- "
+                 "first bootstrap would omit role charters")
+            saiui_ok = False
+        if "load" not in _proto_text or "charter" not in _proto_text:
+            fail("PROTOCOL.md bare-subname adoption lost charter-loading language -- "
+                 "a subSaipen whose charter exists must load it on adoption")
+            saiui_ok = False
+        if not re.search(r"(?i)never\s+(touch|looks?\s+inside)\s+.*<name>",
+                         _proto_text):
+            fail("PROTOCOL.md sync lost the live-folder guard -- "
+                 "sync must never touch any <name>/ folder")
+            saiui_ok = False
 
     if saiui_ok:
         ok("saiui charter integrity verified (references UI.md, no second palette, "
@@ -4207,6 +4227,7 @@ else:
         ("CODE_OF_CONDUCT.md", "human conduct, not agent-facing"),
         (".github/**/*.md",   "issue/PR templates, not agent-facing"),
         (".github/*.md",      "issue/PR templates, not agent-facing"),
+        ("tests/scenarios/README.md", "scenario format documentation, not a fixture"),
     ]
     if IS_SAIPEN_HOME:
         import fnmatch

@@ -21,9 +21,10 @@ not "the agents are friends" -- it's the contract below.
 | **saipython** | the fixer -- clears the tail | `read-only` | only `subs/saipython/pen/` + its OUTBOX | clone target -> fix in pen -> VERIFY -> ready patch in OUTBOX -> next |
 | **saiui** | the UI designer -- audits and redesigns interfaces | `read-only` | only `subs/saiui/pen/` + its OUTBOX | audit against saipen/UI.md -> redesign in pen -> VERIFY -> patch in OUTBOX -> next |
 
-Three is the right number: two is a pair (one drops, all stops); five is a
+Three is the right crew size: two is a pair (one drops, all stops); five is a
 crowd (coordination eats more tokens than work). Three is a triangle -- one
-buckles, two carry.
+buckles, two carry. Additional built-in roles (saiui, saitest) and
+domain-specific subs are available on demand, one at a time.
 
 **Only Core writes the main project.** The subSaipens never touch the main
 tree (enforced: `mode: read-only`, `tools/validate.py` rejects a sub in

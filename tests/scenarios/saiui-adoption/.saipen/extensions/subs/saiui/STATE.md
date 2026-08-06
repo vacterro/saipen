@@ -1,11 +1,12 @@
 ---
-phase: SCOUT
+phase: BLOCKED
 task: UI-001
-next_action: "PHASE SCOUT UI-001"
-blocker: none
-transition_from: PLAN
+next_action: "WAIT: blocked -- awaiting mission from Core via BOARD.md"
+blocker: "waiting for Core to write first ticket"
+transition_from: HUNT
 saipen_version: 7
 schema_version: 3
+last_event: 1
 style_contract: ded-97af6dca
 saipen_home: "."
 agent: saiui

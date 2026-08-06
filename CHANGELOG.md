@@ -2,6 +2,10 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.202.0 -- 2026-08-07 -- expert skill injection routing at boot
+
+T-502: BOOT.md step 3a — skill injection. When `.saipen/extensions/skill_injection/SPEC.md` exists, the agent detects the problem class from the active ticket, matches the smallest domain skill from the platform registry, injects its context, and ejects when the problem class shifts. The contract (T-501) governs; the step defers to it. Absent contract -> zero overhead.
+
 ## 7.201.0 -- 2026-08-06 -- saiui: first-class built-in fixer SubSaipen for UI work
 
 T-506: Built-in role charter `extensions/subs/saiui.md` -- 6 design roles (senior product designer, interaction designer, UI systems designer, accessibility reviewer, UI fixer/implementer, Vintage Golden guardian), 4-tier asymmetric authority boundary, 7-step deterministic read order on every adoption, 6-step design method (Task Map, Action/State Map, Capability Gap Map, IA, Patch Wave, Verification), 17 control heuristics, 7 control-type rules, backend capability gate, and full OUTBOX patch contract with 9 required analysis items in details.
