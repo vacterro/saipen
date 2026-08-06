@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.198.0 -- 2026-08-06 -- the installed validator and the repository validator agree about the same tree
+
+T-413: run the INSTALLED validator against this repository and it reported two problems the repository's own validator did not. Same tree, same commit, two verdicts. Reproduced before touching anything, and again after each fix.
+
+Both failures were the same shape and it is the shape worth naming: a check gated on the PROJECT while resolving its subject from the TOOL. `IS_SAIPEN_HOME` is project-relative -- `os.chdir(PROJECT_ROOT)` runs before it -- so it correctly asks "is the project under validation the SAIPEN home". The two checks it gated then went looking in `_tools_parent`, the directory the tool ships from, which in an install is an agent home containing neither a `.gitignore` nor entry READMEs. One reported "root `nul` is not excluded" about a repository whose `.gitignore` excludes it on line 7; the other reported "only 0 entry README(s) resolved" about a project that has four. Absence in the wrong directory, read as a violation in the right one.
+
+One wrong turn is recorded because it was instructive. The first fix redefined `IS_SAIPEN_HOME` to measure the tool's location instead, and 29 scenario fixtures went red immediately: that is a different question with a different answer, since the tool ships from a home while validating somebody else's project almost always. The flag was right; the paths were wrong. A second, smaller wrong turn followed -- resolving the entry READMEs from the project without also gating their CONTENT check, which then demanded a reply-language note from any project's own README.md, and ten fixtures said so.
+
+Evidence is the before/after measurement run end-to-end: fix, re-inject, re-run the installed validator against this repository, compare. Recorded rather than dressed up as a control -- an audit case cannot express it, because that harness mutates project files and runs the repository validator, and a marker asserting the tool's own source would be a guarantor that can only go red once the tool has already crashed. The standing guard is `tools/run_scenarios.py`'s two injector probes, which run the installed validator against a real flattened home and caught the constitution-shipped-out-of-installs break the same day.
+
+CONFORMANCE 241.
+
 ## 7.197.0 -- 2026-08-06 -- the changelog says what shipped last, and an invisible byte has nowhere left to hide
 
 T-500: the user opened `CHANGELOG.md` and could not tell what had shipped. Correctly -- its head entry read 7.189.0 while `VERSION` read 7.196.0. Four defects at once, every one a rule stated in prose that nothing checked.

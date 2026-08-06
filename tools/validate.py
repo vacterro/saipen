@@ -1061,6 +1061,13 @@ if not subs_root.is_dir():
 # that as "a shipped template" hard-FAILED such a project and, via
 # tools/install_hook.py's pre-commit wiring, blocked its commits -- caught by
 # testing this path right after shipping the check, not by reasoning about it.
+# Project-root relative, and deliberately: `os.chdir(PROJECT_ROOT)` runs
+# before this, so these four questions ask "is the PROJECT under validation
+# the SAIPEN home", which is what every gated check below means. It was
+# briefly changed to ask the tool's own location instead and 29 scenario
+# fixtures went red, because that is a different question with a different
+# answer -- the tool ships from a home while validating somebody else's
+# project almost always.
 IS_SAIPEN_HOME = (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                   and Path("VERSION").is_file() and Path("README.md").is_file())
 
@@ -4834,17 +4841,29 @@ else:
     # check does not care who wrote a document, only that a reader who lands
     # on it is told (T-419). A locale reader is the one MOST likely to read
     # the Estonian answer as a bug, having arrived in a third language.
+    # Resolved from the PROJECT being validated, not from the home the tool
+    # ships from. Gated on IS_SAIPEN_HOME, which is project-relative, while
+    # the paths were tool-relative -- so an installed validator run against
+    # this repository counted the agent home's entry READMEs, found none, and
+    # reported "only 0 resolved" about a project that has four. Absence in
+    # the wrong directory misread as a violation in the right one.
     _entry_readmes = [
-        (_tools_parent / _n) for _n in
+        Path(_n) for _n in
         ("README.md", "README.ee.md", "README.ded.md", "README.ja.md")
-        if (_tools_parent / _n).is_file()]
-    _kitchen_dir = _tools_parent / ".saipen" / "saitranslate" / "kitchen"
+        if Path(_n).is_file()]
+    _kitchen_dir = Path(".saipen") / "saitranslate" / "kitchen"
     if IS_SAIPEN_HOME and _kitchen_dir.is_dir():
         _entry_readmes += [
             _r for _d in sorted(_kitchen_dir.iterdir()) if _d.is_dir()
             for _r in [_d / f"README_{_d.name.upper()}.md"] if _r.is_file()]
+    # Gated on IS_SAIPEN_HOME like the count below it, and for the same
+    # reason: an entry README carrying the reply-language note is a SAIPEN
+    # HOME artifact. Ungated, resolving these from the project made the check
+    # demand the note from any project's own README.md -- ten scenario
+    # fixtures went red saying "README.md never mentions reply_language:"
+    # about a README that has no business mentioning it.
     _silent_readmes = [
-        _p.name for _p in _entry_readmes
+        _p.name for _p in (_entry_readmes if IS_SAIPEN_HOME else [])
         if "reply_language" not in _p.read_text(encoding="utf-8-sig")
     ]
     if _silent_readmes:
@@ -5440,7 +5459,13 @@ else:
     #      audit_checks.py, which creates a real entry and copies the tree.
     #      A Git query cannot be used here because mutation audits deliberately
     #      copy the repository without `.git/` before running this validator.
-    _ignore_p = _tools_parent / ".gitignore"
+    # The `.gitignore` that matters belongs to the PROJECT being validated,
+    # not to the home the tool ships from. Reading it from `_tools_parent`
+    # made an installed validator report "root `nul` is not excluded" about a
+    # repository whose .gitignore excludes it on line 7 -- absence in the
+    # agent home misread as a violation in the project. T-413's "resolve
+    # paths one way only", in one line.
+    _ignore_p = Path(".gitignore")
     _ignore_lines = (set(_ignore_p.read_text(encoding="utf-8-sig").splitlines())
                      if _ignore_p.is_file() else set())
     if IS_SAIPEN_HOME and "/nul" not in _ignore_lines:
