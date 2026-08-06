@@ -175,7 +175,7 @@ a `.uninstalled.bak` copy first, and removes the skill folders.
 🇧🇬 [Български](guides/GUIDE_BG.md) · 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) · 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
 
 </details>
-<img width="1920" height="1080" alt="clipboard_20260806_183048_d7e9d6c5" src="https://github.com/user-attachments/assets/5830a35b-11ec-44e6-a059-a95348da0d80" />
+<img width="1920" height="1080" alt="clipboard_20260806_183348_73b2c6b5" src="https://github.com/user-attachments/assets/7cc6fe44-cbba-4d8c-85c4-728be4fbb54c" />
 
 ## Built with SAIPEN
 
