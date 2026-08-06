@@ -2329,11 +2329,25 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
         # legitimately appear.
         _ctl_ok = True
         _ctl = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
-        for _tool in sorted((_tools_parent / "tools").glob("*.py")):
+        # Swept across every shipped text file, not just tools/. The two
+        # instances found when this widened were both in documents
+        # DESCRIBING this exact defect: a sealed LOG segment and the
+        # CHANGELOG archive each carried a raw 0x01 where the prose
+        # meant the escape sequence. The bug bit the record of itself,
+        # which is precisely how an invisible byte survives review.
+        _ctl_targets = sorted((_tools_parent / "tools").glob("*.py"))
+        for _sub in ("saipen", "extensions", ".saipen/logs"):
+            _d = _tools_parent / _sub
+            if _d.is_dir():
+                _ctl_targets += sorted(_d.rglob("*.md"))
+        _ctl_targets += [_p for _p in (_tools_parent / "CHANGELOG.md",
+                                       _tools_parent / "CHANGELOG_ARCHIVE.md")
+                         if _p.is_file()]
+        for _tool in _ctl_targets:
             _hit = _ctl.search(_tool.read_text(encoding="utf-8",
                                                errors="replace"))
             if _hit:
-                fail(f"tools/{_tool.name} contains control character "
+                fail(f"{_tool.relative_to(_tools_parent).as_posix()} contains control character "
                      f"U+{ord(_hit.group()):04X} at offset {_hit.start()} -- "
                      f"invisible in every reader, valid UTF-8 and valid "
                      f"Python, and it silently changes what the code does "
@@ -2341,8 +2355,8 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                 _ctl_ok = False
                 text_ok = False
         if _ctl_ok:
-            ok(f"shipped tools carry no stray control characters "
-               f"({len(list((_tools_parent / 'tools').glob('*.py')))} files)")
+            ok(f"no stray control characters in shipped text "
+               f"({len(_ctl_targets)} files swept)")
 
         if text_ok:
             ok("core docs text lint clean (no U+FFFD/split keywords/fence drift)")
@@ -3197,6 +3211,54 @@ else:
              "moves files for tidiness, which is exactly the framing that "
              "makes the breakage invisible")
         drift_ok = False
+
+    # 1b20. CHANGELOG.md is ordered, unique, headed by the current version,
+    #       and bounded. All four were prose and none was checked, so the
+    #       file drifted into a state a reader could not use: 153 entries
+    #       against its own stated "most recent ~10", one version present
+    #       TWICE in two different heading formats, an entry for 7.192.0
+    #       sitting above 7.196.0, the archive pointer buried in the middle
+    #       of the newest entry, and 7.188.0's heading renumbered to 7.189.0
+    #       by a bulk string replace -- so a released version had no entry
+    #       while its tag existed. The top of the file is where anyone looks
+    #       to answer "what shipped last", and it answered wrong.
+    _cl = _tools_parent / "CHANGELOG.md"
+    _ver_f = _tools_parent / "VERSION"
+    if _cl.is_file():
+        _cl_t = _cl.read_text(encoding="utf-8-sig")
+        _heads = re.findall(r"(?m)^## \[?(\d+)\.(\d+)\.(\d+)\]?", _cl_t)
+        _tup = [tuple(int(x) for x in h) for h in _heads]
+        if _tup != sorted(_tup, reverse=True):
+            fail("cross-doc drift [changelog-order] -- CHANGELOG.md's version "
+                 "headings are not in descending order. `phases/ship.md` says "
+                 "newest-top and nothing checked it, so an older entry "
+                 "prepended by one session pushed newer releases below it and "
+                 "the head of the file stopped naming the last release")
+            drift_ok = False
+        if len(_tup) != len(set(_tup)):
+            _dupes = sorted({t for t in _tup if _tup.count(t) > 1})
+            fail(f"cross-doc drift [changelog-order] -- CHANGELOG.md carries "
+                 f"more than one entry for {_dupes}. Two entries for one "
+                 f"version is two accounts of what shipped, and a reader has "
+                 f"no way to tell which is the release")
+            drift_ok = False
+        if _tup and _ver_f.is_file():
+            _cur = tuple(int(x) for x in
+                         _ver_f.read_text(encoding="utf-8").strip().split("."))
+            if _tup[0] != _cur:
+                fail(f"cross-doc drift [changelog-order] -- CHANGELOG.md's "
+                     f"head entry is {_tup[0]} but VERSION is {_cur}. "
+                     f"`phases/ship.md` step 3 requires them to agree before "
+                     f"the tag is created, and the head entry is what a "
+                     f"reader takes for the current release")
+                drift_ok = False
+        if len(_tup) > 12:
+            warn("changelog-unarchived",
+                 f"CHANGELOG.md carries {len(_tup)} version entries while it "
+                 f"states it keeps the most recent ~10 -- the overflow belongs "
+                 f"in CHANGELOG_ARCHIVE.md, moved verbatim the way LOG "
+                 f"segments are sealed, so the top of the file stays the part "
+                 f"anyone actually reads")
 
     # 1c. Shortcuts are resolved by reading § 1.10, never from memory.
     if _boot_prio.is_file():
