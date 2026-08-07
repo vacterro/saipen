@@ -21,11 +21,11 @@ rebriefing, any vendor, any day.
 
 **One command. Zero dependencies. Zero amnesia.**
 
-**Fast keys.** A shortcut is the entire message, never a prefix. `cc` keeps an active Goal Mode run moving, `sss` reports status without touching code, and `ss` checkpoints and stops. [See the full 15-key map](saipen/RFC.md#110-command-surface). Cyrillic twins work too: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Fast keys.** A shortcut is the entire message, never a prefix. `cc` continues the project context to convergence (resuming a running goal if one is set), `sss` reports status without touching code, and `ss` checkpoints and stops. [See the full 15-key map](saipen/RFC.md#110-command-surface). Cyrillic twins work too: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **Reply language.** The agent answers in **Estonian** by default — that is a setting, not a quirk, and nothing else about SAIPEN is Estonian. Change it in one place: the `reply_language:` line at the top of [`saipen/STYLE.md`](saipen/STYLE.md). `et` Estonian, `en` English, `ru` Russian, `auto` picks from the message you sent. The protocol, the code, the commits and every document stay English at every value.
 
-**v7.207.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | MIT
+**v7.208.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | MIT
 
 ```text
 User  ->  /saipen continue

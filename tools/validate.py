@@ -294,8 +294,8 @@ def _phase_next_action_error(value):
 EXPECTED_SHORTCUT_ROUTES = {
     "gg": "`saipen goal`",
     "hh": "`saipen hunt`",
-    "cc": "`saipen goal`",
-    "ccc": "`saipen continue` then `saipen ship`",
+    "cc": "`saipen continue`",
+    "ccc": "`saipen continue` then `saipen ship` then refresh EE + QQ",
     "ss": "`saipen stop`",
     "sss": "`saipen status`",
     "dd": "`saipen plan`",

@@ -2,6 +2,12 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.208.0 -- 2026-08-07 -- `cc` and `gg` get separate destinations
+
+T-550: the Core half of the `gg`/`cc` split lands. `cc` routes to `saipen continue` (continue context / converge: it resumes an active `execution_intent: goal`, resumes convergence, or enters convergence from `normal`, and never asks for an objective -- `cc <args>` replies `Use: gg <objective>` and stops); `gg` is the sole short route for a NEW goal and its bare form is a usage line, never a continuation alias; `ccc` becomes converge, SHIP, then refresh EE and QQ against the shipped revision. `EXPECTED_SHORTCUT_ROUTES`, CONFORMANCE rows 207/218/224 and MAINTENANCE's safety-valve wording follow the new mapping, along with the `cc` callout in five languages.
+
+Two red controls had gone silently dead in the process: the `cc`-row and `gg`-row cases in `tools/audit_checks.py` quoted §1.10 row text this split rewrote, so both mutations were no-ops and the harness scored them SKIP -- the third occurrence of the split-anchor class T-496 and T-532 name. Repointed: the `cc` case now maps the route cell back to `saipen goal` and must FAIL `[shortcut-routes]`, which is the separation's own regression control, and the `gg` case strips the "pivot needs text" clause the `[shortcut-notes]` check reads. audit_checks is back to 165 of 165 with zero not-evidence lines. The 28 non-Core locale callouts still describe the old `cc` semantics and remain T-537's remainder -- `phases/translate.md` gives those languages to saitranslate.
+
 ## 7.207.0 -- 2026-08-07 -- execution_intent replaces goal_mode
 
 T-536: the persisted execution-intent moved from the boolean `goal_mode` to ONE canonical enum `execution_intent: normal | goal | converge` in STATE. `goal_mode` remains READ-compatible only during migration (maps `true` -> goal, `false` -> normal) and a state carrying both fields FAILs validation -- one source of truth after the first canonical checkpoint. The safety-valve counters `goal_waves`/`goal_tickets` re-bind to `execution_intent: goal`; Recovery rebuilds the intent from the `DEC: goal pivot` line; the live state, template, scenario fixtures, portable floors, and the audit harnesses all migrated. The `cc`-semantics and safety-valve-wording changes follow in the next tickets.

@@ -783,9 +783,13 @@ CASES: list[tuple[str, str, object, str]] = [
     ("shortcut routes to a phase, not a command", "saipen/CORE.md",
      replace("| `hh` | `saipen hunt` |", "| `hh` | HUNT |"),
      "do not resolve to a command"),
+    # Scenario 30: the old `cc` -> `saipen goal` mapping must fail validation.
+    # `cc` is the continue/converge key and `gg` is the sole new-goal key; the
+    # canonical table routes `cc` to `saipen continue`, and a regression back
+    # to the duplicated-goal mapping is rejected by the route check.
     ("shortcut routes to a valid but wrong command", "saipen/CORE.md",
-     replace("| `cc` | `saipen goal` |",
-             "| `cc` | `saipen continue` |"),
+     replace("| `cc` | `saipen continue` |",
+             "| `cc` | `saipen goal` |"),
      "assigned destination changed"),
     ("shortcut rationale restores stale length magic", "saipen/CORE.md",
      replace("**Length has no global meaning.**",
@@ -966,18 +970,29 @@ CASES: list[tuple[str, str, object, str]] = [
     ("plan.md drops the halt's category", "saipen/phases/plan.md",
      replace("category is `user brake`", "category is up to you"),
      "proposal-halt"),
-    ("the cc row promises a pivot its bare form cannot perform",
+    # T-537 gave `cc` and `saipen goal` separate destinations, and the pair of
+    # controls that used to guard the old shared route quoted row text the
+    # split rewrote -- so both mutations became no-ops and the harness scored
+    # them SKIP. Repointed at the text that now carries the requirement, which
+    # is the third occurrence of the split-anchor class T-496 and T-532 name.
+    #
+    # The old cc-row control is replaced by the requirement the split exists to
+    # protect: `cc` routes to `saipen continue`, and a table that maps it back
+    # to `saipen goal` is the exact regression the separation forbids. Keyed on
+    # the route cell, so it fires on the mapping itself and not on prose.
+    ("the cc row is mapped back to `saipen goal`",
      "saipen/CORE.md",
-     replace("The pivot needs text", "Trigger goal mode"),
-     "shortcut-notes"),
-    # `gg` routes to the same command as `cc` and kept the superseded promise
-    # for as long as the check named `cc` by key. The requirement is derived
-    # from the route now, so both rows are controlled separately.
+     replace("| `cc` | `saipen continue` |", "| `cc` | `saipen goal` |"),
+     "shortcut-routes"),
+    # `gg` is now the only row routing to `saipen goal`, and the Notes
+    # requirement is derived from the route rather than the key -- so this
+    # control strips the "pivot needs text" clause the check reads, leaving a
+    # Notes column that promises a bare pivot the destination forbids.
     ("the gg row promises a bare Goal Mode pivot again",
      "saipen/CORE.md",
-     replace("Same destination as `cc`, so the same truth: the pivot needs "
-             "text, and `gg <objective>` is what sets a new one.",
-             "Goal Mode pivot and re-authorization."),
+     replace("NEW GOAL ONLY: the pivot needs text, and `gg <objective>` is "
+             "what sets a new one.",
+             "NEW GOAL ONLY: Goal Mode pivot and re-authorization."),
      "shortcut-notes"),
     # § 1.10 ordered `saipen status` to report the last validator result from
     # LOG.md before anything gave that record a shape. Break the fixed form
