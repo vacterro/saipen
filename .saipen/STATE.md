@@ -1,14 +1,14 @@
 ---
 phase: DONE
 task: none
-next_action: "PHASE DONE"
+next_action: "WAIT: blocked -- untriaged MARKHUNT findings in ## BLOCKED; triage into ## TODO or dismiss"
 blocker: none
-transition_from: ADD
+transition_from: PREPARE
 saipen_version: 7
 schema_version: 3
-last_event: 2182
+last_event: 2185
 style_contract: ded-4ae736e4
-saipen_home: "V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN"
+saipen_home: "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN"
 agent: claude
 requires:
   - filesystem
@@ -16,5 +16,5 @@ requires:
   - python
 mode: full
 goal_mode: false
-updated: 2026-08-07T01:09:00Z
+updated: 2026-08-07T01:13:00Z
 ---
