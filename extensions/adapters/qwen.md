@@ -4,6 +4,6 @@
 - Code blocks must carry exact target filenames — local runners depend on it.
 
 Boot order: read `saipen/BOOT.md` first -- the cold-start kernel is all a
-bare `saipen continue` needs. `saipen/RFC.md` is the constitution, reached
+bare `saipen continue` needs. `saipen/BOOT.md -> INDEX -> CORE.md` is the constitution, reached
 only when a rule question comes up. `saipen/STYLE.md` is a boot-read: apply it before any output.
-Everything else: follow `saipen/RFC.md`.
+Everything else: follow `saipen/BOOT.md` -> `saipen/INDEX.md` -> `saipen/CORE.md`.

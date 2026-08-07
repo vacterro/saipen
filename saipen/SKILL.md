@@ -5,7 +5,10 @@ description: >
   subcommands, and shortcuts (gg, hh, cc, ccc, ss, sss, dd, aa, qq, qqq, ee,
   eee, pp, tt, sc; Cyrillic twins: сс, ссс, аа, ее, еее, рр).
   cold-start kernel loads first; phases/ modules load
-  on demand per STATE. RFC.md is the constitution,
+  on demand per STATE. CORE.md is the constitution (successor to RFC.md),
+  which was split in v7.190.0; MAINTENANCE.md covers autonomous evolution.
+  The RFC.md stub is a compatibility redirect only — never treat it as
+  authoritative.
   reached only when a rule question arises.
   Persistent .saipen/ memory lets any agent continue another's work.
   Reply language is STYLE.md's `reply_language:` setting, default `et`
@@ -27,11 +30,11 @@ Thin entry for skill-reading platforms. The system lives elsewhere:
    (STATE -> BOARD -> LOG tail -> execute `next_action`). It's all a bare
    `saipen continue` needs; it points into RFC only when a rule question comes up.**
 2. **Read `STYLE.md` (in the same folder) -- voices; it governs the first token, so read it right after BOOT.md, before RFC.**
-3. **Read `RFC.md` (in the same folder) -- the full boot protocol / constitution. Follow it.**
+3. **Read `BOOT.md` (cold-start kernel), then `INDEX.md` (document map) — both in the same folder. Load `CORE.md` only for specific rule questions. Follow them.**
 4. **Phase modules in `phases/` (in the same folder) -- loaded by boot per STATE.md phase.**
 5. UI work: also read `UI.md` (Win95 dark golden, Verdana, no AA).
 
 Platform notes:
 - Native task lists mirror `.saipen/BOARD.md`, never replace it.
 - Prefer file tools over shell redirects -- UTF-8 no BOM.
-- RFC.md decides. No rule here overrides it.
+- CORE.md decides. No rule here overrides it.
