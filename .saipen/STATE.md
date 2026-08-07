@@ -1,12 +1,12 @@
 ---
-phase: SHIP
-task: T-534
-next_action: "RUN: ship v7.206.8"
+phase: DONE
+task: none
+next_action: "RUN: hunt"
 blocker: none
-transition_from: REVIEW
+transition_from: SHIP
 saipen_version: 7
 schema_version: 3
-last_event: 2258
+last_event: 2259
 style_contract: ded-4ae736e4
 saipen_home: "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN"
 agent: opencode
@@ -16,5 +16,5 @@ requires:
   - python
 mode: full
 goal_mode: false
-updated: 2026-08-07T13:59:00Z
+updated: 2026-08-07T14:02:00Z
 ---
