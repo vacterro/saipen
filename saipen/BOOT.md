@@ -52,8 +52,9 @@ This file gives the execution order. No rule is *defined* here —
 7. **Execute the instruction. User message outranks the file.**
    Message names a command (§1.10 verb, shortcut table row, Cyillic twin,
    or active extension word)? **Open CORE.md §1.10 and read the row.**
-   Memory is never a source — a confabulated table has reached users
-   three times (E-1801, E-1913). Do not copy the table here.
+   Memory is never a source for it — a confabulated table has reached users
+   three times (E-1801, E-1913). Do not copy the table here: a second copy drifts
+   and defeats the read-the-source rule. (§1.1's gate rejects a restatement.)
    That IS the instruction; `next_action` is what a bare continue would run.
    §1.11 OBEY priority: command clears a `WAIT:`; corrupt state is repaired
    first.
@@ -62,7 +63,8 @@ This file gives the execution order. No rule is *defined* here —
    yourself: topmost workable ticket wins (§1.11, §1.6). Where the
    validator cannot re-derive the pick (the portable floor does not —
    a grep cannot walk a `needs:` graph), the confirmation is the only
-   guard. `WAIT:` → output verbatim and stop. When choosing, §1.11's
+   guard. Immediate means without asking, never without looking.
+   `WAIT:` → output verbatim and stop. When choosing, §1.11's
    priority is fixed:
    RECOVER > OBEY > UNBLOCK > FINISH > START > MAINTAIN. Five legal
    forms in §1.2: `WAIT:` / `saipen <command>` / `PHASE <phase> [T-###]` /
