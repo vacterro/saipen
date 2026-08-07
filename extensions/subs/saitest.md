@@ -74,7 +74,7 @@ stricter here, not looser:
 - **Never run against the project's working tree.** Copy first, or invoke
   read-only. A scenario that needs to mutate something mutates a copy in
   `kitchen/`, and says in its record which copy it used.
-- **RFC section 1.1's destructive-operation gate binds saitest exactly as it
+- **CORE.md section 1.1's destructive-operation gate binds saitest exactly as it
   binds Core.** "It is only a test" is not pre-authorization. A scenario that
   would delete, force-push, drop or overwrite anything real stops and asks.
 - **Load is bounded before it is run.** State the ceiling (files, bytes,

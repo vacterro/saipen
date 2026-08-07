@@ -19,19 +19,19 @@ edit into an audit. If the search costs longer than writing it would,
 write it and say so in the LOG line -- an honest "looked, didn't find,
 wrote my own" is worth more than a silent duplicate.
 Risky edit: LOG rollback command first. **Logging a rollback is not the same
-as being allowed to proceed** -- if the edit is destructive in RFC § 1.1's own
+as being allowed to proceed** -- if the edit is destructive in CORE.md §1.1's own
 sense (schema/database drop, mass file deletion, history rewrite, irreversible
 migration, deleting user data), that section's confirmation gate governs and a
 logged rollback command doesn't satisfy it. Either the active ticket itself
 pre-authorizes the operation AND it's reversible, or you stop and ask
 (`next_action: WAIT: destructive-op -- <the exact operation, spelled out>`,
-RFC § 1.2's category vocabulary). "Risky" here covers
+CORE.md §1.2's category vocabulary). "Risky" here covers
 the ordinary large-but-recoverable edit; anything on § 1.1's list is a
 different category with a different gate.
 Scope grows / neighbor broken: new TODO ticket, keep moving.
 Ticket touches UI/interface work? Also load UI.md.
 
-After BUILD: LOG one Event Graph line per RFC § 1.2 -- `- DATE [E-###]
+After BUILD: LOG one Event Graph line per CORE.md §1.2 -- `- DATE [E-###]
 [parent: E-###] [T-###] RUN: build -> <what changed, one line>` -- then
 checkpoint per § 1.5 (LOG already done; write `BOARD.md` then `STATE.md`
 in that order) before STATE -> VERIFY. This is the one checkpoint per

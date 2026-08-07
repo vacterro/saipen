@@ -4,7 +4,7 @@ Tax-auditor mode: find everything, including what the project's own
 maintainers have gone blind to from familiarity -- never HUNT's cheap
 6-category sample, never capped, never fixes anything itself. Triggered
 only by explicit user command (`saipen markhunt` / bare `markhunt`),
-from ANY phase, same as CLEAN/TRANSLATE/VALIDATE (RFC § 1.10).
+from ANY phase, same as CLEAN/TRANSLATE/VALIDATE (CORE.md §1.10).
 
 **Dry means dry**: MARKHUNT MUST NOT edit, delete, or fix anything it
 finds -- not even the "obvious junk, delete free" allowance HUNT has.
@@ -62,7 +62,7 @@ readable, not a wall of noise. Append only -- never reorder or edit
 existing tickets.
 
 **Goal Mode brake.** MARKHUNT never increments `goal_waves` or
-`goal_tickets` (RFC § 2.4) -- its findings are unvetted, so nothing may
+`goal_tickets` (MAINTENANCE.md §2.4) -- its findings are unvetted, so nothing may
 treat finishing a MARKHUNT pass as a waypoint to keep running through.
 The brake itself lives in `phases/done.md`, not here: as long as any
 `[MARKHUNT]`-tagged ticket sits in `## BLOCKED`, `done.md`'s own
@@ -107,7 +107,7 @@ vector means the surface is NOT exhausted -- keep going, don't round up);
 mid-pass -> the coverage is against a stale tree, re-run the moved part) --
 both `head_start`/`head_end` are the literal string `no-git`? **`no-git`
 means git cannot be READ, and nothing else.** `mode: no-publish` is a
-publish capability, not a read one -- RFC 1.3 blocks commit, tag and push
+publish capability, not a read one -- CORE.md 1.3 blocks commit, tag and push
 there, while `git rev-parse --short HEAD` answers exactly as it always
 did. Writing `no-git` on a repository whose HEAD is readable disables this
 check by mislabelling the host, so use the real hash whenever git answers,

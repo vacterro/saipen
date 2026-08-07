@@ -2,6 +2,10 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.203.0 -- 2026-08-07 -- RFC→CORE.md/MAINTENANCE.md reference sweep
+
+T-512: Mechanical sweep of all shipped docs (23 files). Every "RFC § X.Y" reference replaced with "CORE.md § X.Y" (for §1.x) or "MAINTENANCE.md § X.Y" (for §2.x). "RFC.md" → "CORE.md". Zero remaining numeric RFC references. STYLE.md boot marker updated to reflect text change. Cross-doc checks and scenario fixtures pass.
+
 ## 7.202.0 -- 2026-08-07 -- expert skill injection routing at boot
 
 T-502: BOOT.md step 3a — skill injection. When `.saipen/extensions/skill_injection/SPEC.md` exists, the agent detects the problem class from the active ticket, matches the smallest domain skill from the platform registry, injects its context, and ejects when the problem class shifts. The contract (T-501) governs; the step defers to it. Absent contract -> zero overhead.

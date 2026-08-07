@@ -1,7 +1,7 @@
 # Phase: INIT
 
 No `.saipen/` directory found. **Confirm that's actually true before creating
-anything** (RFC § 1.1): bind the project root exactly as BOOT describes. A
+anything** (CORE.md §1.1): bind the project root exactly as BOOT describes. A
 linked worktree resolves through its common Git directory to the main
 worktree's existing memory; a nested non-Git cwd resolves to the nearest
 ancestor already carrying `.saipen/`. No owner found means refuse a relative
@@ -17,7 +17,7 @@ Copy `extensions/templates/` (`STATE.md`,
 Templates missing or unreachable (degraded capability only)? Write by hand,
 matching exactly:
 - `STATE.md`: frontmatter `phase: PLAN`, `task: none`, `next_action:
-  "WAIT: init -- provide the first project goal or raw backlog"` (RFC § 1.2's
+  "WAIT: init -- provide the first project goal or raw backlog"` (CORE.md §1.2's
   narrow INIT-bootstrap `WAIT:` exception -- ask for the goal/backlog
   only, nothing else), `blocker: none`, `agent:` (**never `none`**: `INIT` is executed by a real
   agent, and § 1.4 compares this field against itself to decide whether
@@ -27,7 +27,7 @@ matching exactly:
   bootstrapped was born with one; unlike an angle-bracket slot it reads as a
   deliberate answer, which is why nothing caught it. `tools/validate.py`
   rejects it with the other placeholders and requires the template to ship
-  one, so the field cannot survive as-copied. **Where the value comes from is not a choice**: RFC 1.4 derives it from the agent home this protocol was loaded from -- take that directory's own name, strip a leading dot, lowercase it. `.claude` -> `claude`, `.codex` -> `codex`, `.config/opencode` -> `opencode`. BOOT already resolved that path to find the phase docs, so there is nothing new to look up and nothing to invent. A model build name is never a seat and the validator FAILs one. No agent home identifiable at all? Use the platform's canonical name and LOG a `DEC` saying it was self-reported rather than derived), `saipen_version: 7`, `schema_version: 3`,
+  one, so the field cannot survive as-copied. **Where the value comes from is not a choice**: CORE.md 1.4 derives it from the agent home this protocol was loaded from -- take that directory's own name, strip a leading dot, lowercase it. `.claude` -> `claude`, `.codex` -> `codex`, `.config/opencode` -> `opencode`. BOOT already resolved that path to find the phase docs, so there is nothing new to look up and nothing to invent. A model build name is never a seat and the validator FAILs one. No agent home identifiable at all? Use the platform's canonical name and LOG a `DEC` saying it was self-reported rather than derived), `saipen_version: 7`, `schema_version: 3`,
   `style_contract:` (the boot marker declared at the top of `STYLE.md` --
   § 1.2's voice marker, required from the very first checkpoint; it is the
   only field here whose value lives outside `.saipen/`),
@@ -45,7 +45,7 @@ matching exactly:
   said>").
   The initial STATE omits `last_event` because this LOG has no event. The
   first checkpoint after that real entry writes its numeric `E-###` ID as
-  `last_event`, per RFC § 1.2/§ 1.5.
+  `last_event`, per CORE.md §1.2/§ 1.5.
 - `KNOWLEDGE/` directory (created on first need, not upfront).
 
 After bootstrap is physically written to disk, transition:

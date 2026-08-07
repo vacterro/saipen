@@ -1,8 +1,8 @@
 # saipen Style — caveman-дед (one chat style, not a menu)
 
-**Boot marker — copy this value into your checkpoint.** `style_contract: ded-97af6dca`
+**Boot marker — copy this value into your checkpoint.** `style_contract: ded-4ae736e4`
 
-A `schema_version: 3` `STATE.md` MUST carry that exact string (RFC § 1.2). It
+A `schema_version: 3` `STATE.md` MUST carry that exact string (CORE.md §1.2). It
 is the voice contract's `last_event`: a scalar whose truth lives outside
 `STATE.md`, in this file, so a checkpoint claiming it can be checked against
 evidence instead of believed. The value is derived from this file's own text —
@@ -91,7 +91,7 @@ Voice persistence: caveman-дед applies to every response until explicit "stop
 
 One line stays one line (≤120 chars). Persona never eats facts. The
 skeleton (date, `[E-###]`, optional `[parent:]`/`[T-###]`/`[agent:]`,
-taxonomy) is fixed by RFC.md § 1.2 -- style only wraps commentary AROUND
+taxonomy) is fixed by CORE.md § 1.2 -- style only wraps commentary AROUND
 it, never changes its shape.
 
 Example:

@@ -59,7 +59,7 @@ A section of prose is an addition like any other, so § 1.1's gate applies befor
    - If the product is already mature and logically complete, **STOP**.
      Transition to `DONE` without hallucinating unnecessary features --
      graceful completion is a successful outcome. `goal_mode: true`? This
-     IS the mature-exit condition RFC § 2.4 defines: set `goal_mode:
+     IS the mature-exit condition MAINTENANCE.md §2.4 defines: set `goal_mode:
      false`, clear `goal_waves`/`goal_tickets`, write the final report
      (tickets done/verified/shipped vs blocked, pre-existing backlog vs
      found along the way), then STATE -> `DONE`.
@@ -71,7 +71,7 @@ A section of prose is an addition like any other, so § 1.1's gate applies befor
      `STATE.phase` has already moved to `BUILD`.
    - `goal_mode: true` and this wasn't the mature-exit case above? Either
      branch still completes this HUNT->ADD cycle -- increment
-     `goal_waves` by 1, **write the identifiable LOG line RFC § 2.4 requires
+     `goal_waves` by 1, **write the identifiable LOG line MAINTENANCE.md §2.4 requires
      for it -- `DEC: goal_waves N->M`, that exact text after the taxonomy** --
      and checkpoint STATE. The LOG line is not decoration: § 1.5's Recovery
      rebuilds the counters after a crash by *counting these lines*, so a bump
@@ -89,7 +89,7 @@ A section of prose is an addition like any other, so § 1.1's gate applies befor
      the user to re-invoke `saipen goal`.
 
 4. **The Industrial Completion Rule:**
-   - When the user requests one step of a well-known user workflow, you SHOULD evaluate what else is needed to make the feature industrially complete -- a judgment call, not mechanical (RFC § 2.3).
+   - When the user requests one step of a well-known user workflow, you SHOULD evaluate what else is needed to make the feature industrially complete -- a judgment call, not mechanical (MAINTENANCE.md §2.3).
    - You MUST implement the *minimal coherent set* (e.g., adding "Cancel" and "Save" if asked for "Apply").
    - The smallest complete solution wins. Do not build massive epics (e.g., do not add Cloud Sync when asked for Export).
    - Complete before you extend: finish the requested workflow before proposing a different one (e.g., "Login" implies "Logout" — not OAuth or SSO). The agent SHOULD preserve user expectations before introducing new capabilities.
@@ -101,18 +101,18 @@ A section of prose is an addition like any other, so § 1.1's gate applies befor
    - *No Hardcoding*: prefer user-editable configuration (keybinds,
      controls, templates) over values baked into code.
 
-6. Tickets ADD creates follow the normal Core flow from here -- `BUILD -> VERIFY -> REVIEW -> SHIP -> DONE` (RFC § 1.6) -- ADD itself never implements anything directly or short-circuits past `BUILD`. `ADD` does not run on a fixed per-ticket cadence: it begins again only after a clean `HUNT` (RFC § 2.1), whenever that next occurs.
+6. Tickets ADD creates follow the normal Core flow from here -- `BUILD -> VERIFY -> REVIEW -> SHIP -> DONE` (CORE.md §1.6) -- ADD itself never implements anything directly or short-circuits past `BUILD`. `ADD` does not run on a fixed per-ticket cadence: it begins again only after a clean `HUNT` (MAINTENANCE.md §2.1), whenever that next occurs.
 
 7. **Before leaving ADD, LOG what it decided.** Every other phase doc ends
    with this; `add.md` did not until v7.87.0, which is how the `goal_waves`
-   line above went unwritten for so long. One Event Graph line per RFC § 1.2,
+   line above went unwritten for so long. One Event Graph line per CORE.md §1.2,
    whichever applies:
    - ticketed and claimed a minimal-delta change -> `RUN: add -> T-### <what>`
    - ticketed for planning instead -> `RUN: add -> T-### <what>, RETURN PLAN`
    - concluded mature -> `DEC: add -> mature, goal_mode false` plus the final
      report § 2.4 requires
    - found nothing and the board was already empty -> say exactly that;
-     RFC § 1.11 requires a session to leave a trace, and "ADD ran and found
+     CORE.md §1.11 requires a session to leave a trace, and "ADD ran and found
      nothing" is a real finding worth recording, not silence.
    Then checkpoint per § 1.5 (LOG -> `BOARD.md` -> `STATE.md`) and re-read the
    `STATE.md` you wrote. ADD creates and claims tickets; an unlogged claim is

@@ -1,7 +1,7 @@
 # saicrew -- run a 3-agent crew with one command each
 
 **Bonus layer, zero Core changes.** Everything here is the subSaipen
-extension (RFC § 1.9) plus a launcher script. No RFC rule, no phase doc, no
+extension (CORE.md §1.9) plus a launcher script. No RFC rule, no phase doc, no
 `validate.py` field, no schema is touched -- the crew is built entirely from
 mechanisms Core already ships. If any line here ever fights Core, Core wins.
 
@@ -61,7 +61,7 @@ of the three works standalone, alone, with no crew and no other window
 running. Want it
 fully autonomous between tickets? After adopting, it runs
 `saipen goal "process my board, verify each, report through OUTBOX"` and
-doesn't stop until its wave/ticket valve trips (RFC § 2.4).
+doesn't stop until its wave/ticket valve trips (MAINTENANCE.md §2.4).
 
 That's the whole ask: **type one word -> the agent knows its job -> it works.**
 
@@ -113,7 +113,7 @@ parks itself `BLOCKED`, PROTOCOL.md § 2).
 | Pitfall | Killed by (all pre-existing Core) |
 |---|---|
 | Amnesia ("what do I do?") | State on disk: STATE -> BOARD -> LOG tail -> execute `next_action` (BOOT.md, TEST-001). Never asks. |
-| Two agents grab one ticket | Claim lock + **re-read after write** (RFC § 1.4). Lost the write -> take another ticket, never overwrite. In a crew only Core writes the main board, so this can't even arise there. |
+| Two agents grab one ticket | Claim lock + **re-read after write** (CORE.md §1.4). Lost the write -> take another ticket, never overwrite. In a crew only Core writes the main board, so this can't even arise there. |
 | Zombie ticket (agent crashed) | A `DOING` ticket with a stale/absent claim is adoptable: LOG the takeover, check `kitchen/`, continue (§ 1.4). No "maybe it'll come back". |
 | Fake green | VERIFY is mandatory, real harness only; cap 3 dead hypotheses / 2 fix cycles -> `BLOCKED` (verify.md). A fixer with no toolchain marks `unverified`, never fakes `ready` (PROTOCOL.md § 9). |
 | Infinite "what else?" | Safety valve: 3 waves / 20 tickets per `goal` run, then stop + report (§ 2.4). ADD is evolution not invention. |

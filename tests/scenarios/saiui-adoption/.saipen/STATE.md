@@ -7,7 +7,7 @@ transition_from: INIT
 saipen_version: 7
 schema_version: 3
 last_event: 1
-style_contract: ded-97af6dca
+style_contract: ded-4ae736e4
 saipen_home: "."
 agent: claude
 requires:

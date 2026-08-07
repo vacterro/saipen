@@ -3,10 +3,10 @@
 ## VERIFY -- does it work?
 
 `.saipen/extensions/security/` (or legacy root `extensions/security/`) present? Read it first -- its README states the
-scanners/constraints this repo requires before REVIEW (RFC § 1.9). Absent:
+scanners/constraints this repo requires before REVIEW (CORE.md §1.9). Absent:
 skip, no overhead.
 
-`mode: manual-verify` (RFC § 1.3, no shell on this host)? MUST NOT
+`mode: manual-verify` (CORE.md §1.3, no shell on this host)? MUST NOT
 auto-transition to REVIEW. Ask the user to run the `verify:` command
 themselves and report the result: `next_action: WAIT: manual-verify -- run
 '<verify: command>' and report pass or fail`. Proceed only once they confirm.
@@ -31,7 +31,7 @@ verifies something nobody asked for and reports it green. Not there and
 not derivable from the repo? `WAIT: blocked` naming the missing command
 -- § 1.11 already forbids picking a convenient one and declaring
 victory.
-`verify:` is the minimum -- a ticket's own `| verify:` field (RFC § 1.2,
+`verify:` is the minimum -- a ticket's own `| verify:` field (CORE.md §1.2,
 set at `phases/plan.md` time) is the concrete check this phase runs for it:
 a shell command -> execute it and LOG the result; a criterion in prose (no
 runnable command) -> satisfy it by the strongest harness available above and
@@ -40,7 +40,7 @@ from a subSaipen's OUTBOX or written by a much earlier/different session is
 still just text on `BOARD.md` until this moment. A command matching an
 obviously destructive pattern (`rm -rf`, a database drop, `git push
 --force`, `curl ... | sh`, anything that would delete, overwrite remote
-history, or fetch-and-run) is a destructive op same as RFC § 1.1's own
+history, or fetch-and-run) is a destructive op same as CORE.md §1.1's own
 list -- stop and get explicit user confirmation before running it, never
 treat "it's just the verify step" as pre-authorization the ticket itself
 can't actually grant. Under `mode: manual-verify` the `verify:` command is
@@ -95,13 +95,13 @@ Reproduce exactly, quote decisive error line.
 Cheap suspects first (git log, config, env, named file).
 Hypothesis -> LOG -> test -> fix root cause, not symptom.
 Rejected hypotheses stay logged; never re-test without new evidence --
-RFC § 1.6 states this for every repeated attempt, not just hypotheses;
+CORE.md §1.6 states this for every repeated attempt, not just hypotheses;
 this line is the debugging instance of it.
 **Cap: 3 dead hypotheses OR 2 failed fix cycles -> move THIS ticket to the
 `## BLOCKED` section on `BOARD.md` with the facts + dead ends noted on it,
 then check for another unblocked `TODO` ticket and work that instead (STATE -> `SCOUT` or `BUILD`).**
 **Count the cycles on the ticket, not in your head.** Every failed fix cycle
-increments `| verify_attempts: N` on the ticket line (RFC § 1.2's closed field
+increments `| verify_attempts: N` on the ticket line (CORE.md §1.2's closed field
 list; absent reads as zero). `tools/validate.py` FAILs a ticket at or over the
 cap above that carries no `| blocker:`, and it reads the cap out of this very
 sentence rather than keeping its own copy. The field exists for the reason
@@ -143,12 +143,12 @@ Before picking the next ticket:
   there before this ticket's `SCOUT`/`BUILD` started, and move exactly
   those into `.saipen/kitchen/failed/T-###/` alongside the patch (never a
   blanket `git clean` -- that would just as happily eat someone else's
-  unrelated untracked scratch, which RFC § 1.5's dirty-tree rule already
+  unrelated untracked scratch, which CORE.md §1.5's dirty-tree rule already
   forbids touching). Nothing is lost: the patch re-applies with `git apply`
   if the ticket comes back, the moved files sit right next to it, and both
   auto-clear under kitchen's stale rule once the ticket is done or pruned.
   This revert is pre-authorized by this procedure and reversible via the
-  saved patch, satisfying RFC § 1.1's destructive-op rule. Changes already
+  saved patch, satisfying CORE.md §1.1's destructive-op rule. Changes already
   committed mid-attempt stay in history -- note the commit hash in the
   ticket's `| blocker:` field instead.
 - No git (degraded mode): copy this attempt's edited files to
@@ -157,9 +157,9 @@ Before picking the next ticket:
   tree is clean when it isn't.
 
 After VERIFY pass: STATE -> REVIEW. There is no 'next ticket' branch here -- `REVIEW` and `SHIP` are mandatory for the current ticket before picking up another.
-`goal_mode: true`? Increment `goal_tickets` by 1, write the LOG line RFC
+`goal_mode: true`? Increment `goal_tickets` by 1, write the LOG line MAINTENANCE.md
 § 2.4 requires for it -- `DEC: goal_tickets N->M`, that exact text after
-the taxonomy -- and checkpoint STATE (RFC § 2.4). The line is what makes
+the taxonomy -- and checkpoint STATE (MAINTENANCE.md §2.4). The line is what makes
 § 1.5's Recovery able to rebuild the counter after a crash; a bump
 recorded only in `STATE.md` is invisible to it if `STATE.md` is what was
 lost. That hits the 3-`goal_waves`/20-`goal_tickets` cap? STOP here

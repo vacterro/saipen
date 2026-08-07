@@ -16,7 +16,7 @@ when it actually finished safely, not by default.
 
 1. **Board Scrub:** 
    - Remove `[x]` DONE tasks from `BOARD.md` that are older than the current active work. This prunes `BOARD.md`, not history -- every one of those tickets' real events (created, built, verified, shipped) already lives permanently in `LOG.md`'s append-only graph; nothing is lost, just no longer cluttering the active board.
-   - **A DONE ticket that any live ticket still names in `needs:` MUST NOT be pruned.** Read every `needs:` field on the board first and keep those IDs, however old they are. RFC § 1.2 answers a `needs:` pointing at a ticket that exists nowhere on the board with `## BLOCKED` and `| blocker: needs nonexistent T-###` -- so without this guard the phase whose job is keeping the board honest mechanically blocks a workable ticket, and the block reads as a real dependency failure rather than as damage CLEAN just did. Reproduced on this repository (E-1811): a `## DONE` prune dropped T-421 and T-422 dangled on the next validation. The remedy is refusing the prune, never repairing the dangle afterwards; the dangling check is behaving correctly and is not the thing to soften.
+   - **A DONE ticket that any live ticket still names in `needs:` MUST NOT be pruned.** Read every `needs:` field on the board first and keep those IDs, however old they are. CORE.md §1.2 answers a `needs:` pointing at a ticket that exists nowhere on the board with `## BLOCKED` and `| blocker: needs nonexistent T-###` -- so without this guard the phase whose job is keeping the board honest mechanically blocks a workable ticket, and the block reads as a real dependency failure rather than as damage CLEAN just did. Reproduced on this repository (E-1811): a `## DONE` prune dropped T-421 and T-422 dangled on the next validation. The remedy is refusing the prune, never repairing the dangle afterwards; the dangling check is behaving correctly and is not the thing to soften.
    - Prune stale or abandoned `TODO` tickets -- **stale, concretely, same evidence-based standard as `kitchen/`'s own definition below, not a clock**: `BOARD.md` tickets carry no creation timestamp, so age alone is never checkable and MUST NOT be the criterion. A `TODO` is stale when it is verifiably superseded (a later ticket or `KNOWLEDGE/decisions.md` entry already covers the same ground), or its cited files/behavior no longer exist or no longer apply, or `LOG.md` shows the underlying issue was already resolved by unrelated work since it was filed. Cite the evidence for the prune in the same `LOG.md` line, same as any other CLEAN action -- a ticket that's merely old but still accurate is not stale, it's just waiting.
    - Re-check every `## BLOCKED` ticket: blocker resolved elsewhere since it
      landed there? Move it back to `## TODO`. Still stuck and genuinely
@@ -29,10 +29,10 @@ when it actually finished safely, not by default.
      yes/no or decision it needs -- never "sort out the blocked tickets", but
      the real question (e.g. `WAIT: blocked -- T-149: goal_tickets counts
      verify-passes; accept as-is, or count only on DONE?`; the category
-     prefix is RFC § 1.2's, not optional). It stays blocked until
+     prefix is CORE.md §1.2's, not optional). It stays blocked until
      the human answers; the point is they get asked with a two-word-answerable
      question, not that it auto-unblocks.
-   - **Structural repair (RFC § 1.2)**: any ticket ID appearing more than
+   - **Structural repair (CORE.md §1.2)**: any ticket ID appearing more than
      once -- duplicated verbatim within one section, or listed under two
      different headings at once (e.g. both `[x]` under `## DONE` and `[ ]`
      under `## BLOCKED`) -- is corruption from a status change that copied
@@ -53,7 +53,7 @@ when it actually finished safely, not by default.
    - Delete temporary files, caches, and scaffold leftovers (e.g., `__pycache__`, `.tmp`, outdated `.bak` files).
    - Clear out empty directories.
    - **DO NOT** delete files in `.saipen/kitchen/` unless they are stale or the project is fully completed. Stale, concretely: the file's owning ticket is `DONE` and no longer on `BOARD.md` (its reasoning already folded into `LOG.md`/`CHANGELOG.md`), or its content is fully superseded by what those now record. `phases/hunt.md` checks this same definition every autonomous pass, not just when a user explicitly runs `saipen clean` -- kitchen/ MUST NOT wait indefinitely for a manual trigger to stop growing.
-   - **Seal an oversized `LOG.md`** (RFC § 1.2 segmentation): if the active
+   - **Seal an oversized `LOG.md`** (CORE.md §1.2 segmentation): if the active
      `.saipen/LOG.md` has grown past the soft cap (~300 lines / ~64 KB),
      move its content verbatim into the next `.saipen/logs/LOG-<NNN>.md` and
      start a fresh active `LOG.md` continuing the same `E-###` sequence.
@@ -66,7 +66,7 @@ when it actually finished safely, not by default.
    - Ensure the repository is up to date with correct paths.
    - Confirm project dependencies are clean and aligned.
 
-After cleanup is complete, LOG one normal Event Graph line per RFC § 1.2 --
+After cleanup is complete, LOG one normal Event Graph line per CORE.md §1.2 --
 `- DATE [E-###] [parent: E-###] RUN: clean -> done @SHORT-HASH` -- never an
 ad-hoc marker like `[E-CLEAN]`. `E-###` continues the same numbered
 sequence as every other entry; CLEAN gets no special ID format. Transition

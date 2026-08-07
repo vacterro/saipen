@@ -5,7 +5,7 @@ This index describes all available SAIPEN documents. Agents MUST NOT read these 
 ## Core Protocol
 - `BOOT.md`: Cold-start kernel. Boot sequence, environment binding, and global constraints. You just read this.
 - `STYLE.md`: Voice, tone, and compression contract (caveman-ded). Read automatically during BOOT.
-- `CORE.md`: The main protocol rules (formerly RFC.md). Covers commands, state lifecycle, transition table, verification rules, and agent constraints. Load only if you have a specific rule question not answered by the phase document, or if BOOT.md step 7 sends you to §1.10 for command/shortcut resolution.
+- `CORE.md`: The main protocol rules (formerly CORE.md). Covers commands, state lifecycle, transition table, verification rules, and agent constraints. Load only if you have a specific rule question not answered by the phase document, or if BOOT.md step 7 sends you to §1.10 for command/shortcut resolution.
 - `MAINTENANCE.md`: Maintenance and recovery logic. Load only when executing `clean` or `audit`, or recovering from project corruption.
 
 ## Phase Documents (`saipen/phases/*.md`)

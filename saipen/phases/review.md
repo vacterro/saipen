@@ -2,10 +2,10 @@
 
 ## REVIEW -- is it well made?
 
-`mode: manual-verify` (RFC § 1.3, no shell on this host)? MUST NOT auto-transition to SHIP. Ask the user for a manual review verdict before proceeding.
+`mode: manual-verify` (CORE.md §1.3, no shell on this host)? MUST NOT auto-transition to SHIP. Ask the user for a manual review verdict before proceeding.
 
 `.saipen/extensions/performance/` (or legacy root `extensions/performance/`) present? Read it first -- its README states the
-benchmarks/thresholds this repo requires before SHIP (RFC § 1.9). Absent:
+benchmarks/thresholds this repo requires before SHIP (CORE.md §1.9). Absent:
 skip, no overhead.
 
 On wave/ship diff (`git diff main...` or files changed since STATE.updated).
@@ -31,7 +31,7 @@ was red on the same tree.
 
 P0/P1: fix now (STATE -> BUILD). P2/P3: new tickets.
 Verdict -> LOG: `DEC: SHIP` / `SHIP after FIXES` / `NO -- BLOCKER`.
-**Cap: 2 review passes per finding (RFC § 2.4), identified by its `file:line`
+**Cap: 2 review passes per finding (MAINTENANCE.md §2.4), identified by its `file:line`
 -- pass 1 finds it, BUILD fixes it, pass 2 re-checks. Still broken on pass 2
 -> verdict MUST become `NO -- BLOCKER`, ticket it under `## BLOCKED`, stop cycling on THIS
 finding, and transition to the next workable ticket (STATE -> `SCOUT` or `BUILD`). A NEW finding uncovered by the fix itself starts its own fresh
@@ -46,7 +46,7 @@ two-line bugfix, even under `goal_mode`.
 here.** The push has not happened; the work is not done, so `## DONE`
 would be a lie. `PHASE SHIP T-###` is the legal `next_action` this phase
 emits, and the Pick Rule accepts it precisely because a claimed `## DOING`
-ticket IS the pick (RFC § 1.11): the validator reads `PHASE SHIP T-###`
+ticket IS the pick (CORE.md §1.11): the validator reads `PHASE SHIP T-###`
 as naming the in-flight pick, not as a finished ticket. Closing the
 ticket at REVIEW was this repository's habit (E-1879, T-466) and it made
 § 1.2's own `PHASE` form unusable for the one phase it names a ticket

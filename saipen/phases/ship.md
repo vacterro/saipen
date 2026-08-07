@@ -3,12 +3,12 @@
 ## SHIP -> PUBLISH
 
 "PUBLISH" names the action this phase performs (tag + push), not a
-separate `STATE.md phase:` value -- `SHIP` is the only phase here; RFC
+separate `STATE.md phase:` value -- `SHIP` is the only phase here; CORE.md
 § 1.6's 16-value enum has no `PUBLISH` entry. The arrow above is
 descriptive, not a transition-table row.
 
 Only on `saipen ship`, or repo has `origin` AND LOG shows prior ship, or
-`goal_mode: true` (RFC § 2.4) with an existing `origin`. Never auto-publish
+`goal_mode: true` (MAINTENANCE.md §2.4) with an existing `origin`. Never auto-publish
 unopted project. Needs 100% green.
 
 **Fixable preflight failure -> BUILD, not BLOCKED.** Steps 0-4 plus release
@@ -18,12 +18,12 @@ stale generated file, a failing validator, or another fault with a known local
 fix. LOG the exact failure, transition the current ticket
 `SHIP -> BUILD`, fix it, and repeat `VERIFY -> REVIEW -> SHIP`. `BLOCKED` is
 reserved for a failure that genuinely needs user input or has no safe known
-fix; using it for ordinary repair would falsely end goal mode (RFC section
+fix; using it for ordinary repair would falsely end goal mode (MAINTENANCE.md section
 2.4). This edge closes the pre-publish loop only. Once commit/tag/push begins,
 the failure-specific recovery in step 10 governs; after a successful push there
 is never a return to BUILD for that shipped ticket.
 
-`mode: no-publish`? This phase is still entered -- RFC § 1.3 blocks
+`mode: no-publish`? This phase is still entered -- CORE.md §1.3 blocks
 git-dependent steps only (commit, tag, push), not `SHIP` itself; a blanket
 ban here would mean a git-less project can never close a ticket at all
 (`phases/review.md` makes `SHIP` mandatory before `DONE`, no exception).
@@ -63,7 +63,7 @@ attempted. Write the human digest same as always, `awaiting:` noting
 `git needed to publish` when that is the actual reason. Then STATE ->
 `DONE` directly, same as a normal successful ship.
 
-0. **Board pre-flight: every work unit done this session MUST have a ticket in `## DONE`.** Inline fixes and sweeps without a ticket must get one before proceeding. Stale `## DONE` blocks SHIP (RFC § 1.2).
+0. **Board pre-flight: every work unit done this session MUST have a ticket in `## DONE`.** Inline fixes and sweeps without a ticket must get one before proceeding. Stale `## DONE` blocks SHIP (CORE.md §1.2).
 1. README beautiful: pitch, features, install, usage, version + changelog link.
 2. Version bump (micro -> 3.2.1, feature -> 3.2.0, breaking -> major).
 3. Before push, version consistency across all three MUST hold:
@@ -82,8 +82,8 @@ attempted. Write the human digest same as always, `awaiting:` noting
    exists but has never received a commit or tag). Either answer is a first
    publish, and a first publish stops here for confirmation --
    `next_action: WAIT: first-publish -- confirm repo name '<name>' and
-   public/private before I push` (RFC § 1.2) -- ALWAYS, even under
-   `goal_mode` (RFC § 2.4's SHIP exception). Creating a new public artifact
+   public/private before I push` (CORE.md §1.2) -- ALWAYS, even under
+   `goal_mode` (MAINTENANCE.md §2.4's SHIP exception). Creating a new public artifact
    is a one-way door.
    **This gate used to sit at step 7, after the branch push and the tag
    push.** Its own wording said "before I push" while the push it named had
@@ -131,15 +131,15 @@ attempted. Write the human digest same as always, `awaiting:` noting
    count as brand-new: no `origin` at all, and an `origin` that exists but
    has never received a commit or tag (added early by `git remote add`,
    never published to) -- the same one-way door reached two ways.
-9. LOG one normal Event Graph line per RFC § 1.2 -- `- DATE [E-###]
+9. LOG one normal Event Graph line per CORE.md §1.2 -- `- DATE [E-###]
    [parent: E-###] RUN: ship vX.Y.Z -> pushed HASH` (this exact text after
    the taxonomy).
-10. Push rejected or fails: LOG one normal Event Graph line per RFC § 1.2
+10. Push rejected or fails: LOG one normal Event Graph line per CORE.md §1.2
    -- `- DATE [E-###] [parent: E-###] RUN: ship vX.Y.Z -> push FAILED
    <reason>` (this exact text after the taxonomy) -- never claim success
    on a failed push. Commit/tag stay local. Then by failure class:
    - Transient (network, auth hiccup)? Retry once, then `BLOCKED` -- and
-     the retry still owes RFC § 1.6's question: name what is different
+     the retry still owes CORE.md §1.6's question: name what is different
      in the LOG line (token refreshed, remote reachable again, a
      different branch). "Nothing, but maybe this time" is not a delta,
      and a counter of one does not make it into one.
@@ -166,7 +166,7 @@ attempted. Write the human digest same as always, `awaiting:` noting
      falls under the same force-push confirmation gate as the line below,
      never silently redone the same way. Rebase conflicts -> stop,
      `BLOCKED` with the conflicting files as facts. NEVER resolve a
-     rejected push with force-push (RFC § 1.1 destructive list).
+     rejected push with force-push (CORE.md §1.1 destructive list).
    - Anything else non-transient? `STATE.phase: BLOCKED` -- pushing is
      the one SHIP step an agent must not guess its way through.
 
@@ -176,12 +176,12 @@ human so they read one small file instead of scrolling `LOG.md`:
 `done:` (what this session actually shipped), `remaining:` (the top open
 `TODO`, or `nothing`), `awaiting:` (anything parked on a `WAIT:`/decision,
 or `nothing`). Overwrite every time -- it's a snapshot, not history (history
-stays in `LOG.md`). This is the same file `saipen stop` writes (RFC § 1.10).
+stays in `LOG.md`). This is the same file `saipen stop` writes (CORE.md §1.10).
 
 After SHIP: STATE -> DONE. `goal_mode: true`? Do not treat this as a
 stopping point even momentarily -- `next_action` MUST already name the
 next step, never a wait. `phases/done.md` § 1 sends you straight to HUNT;
-board-empty is a waypoint, not an exit (RFC § 2.4).
+board-empty is a waypoint, not an exit (MAINTENANCE.md §2.4).
 
 **The shipped ticket was still in `## DOING` when this phase began, and
 it is `## DONE` only now, after the push landed** -- REVIEW keeps it

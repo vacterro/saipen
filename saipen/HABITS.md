@@ -12,19 +12,19 @@ This document enumerates these habits and maps them to the mechanisms that count
 
 2. **Agreeing with whoever spoke last**
    Abandoning canonical state or rules if the user's prompt implies otherwise.
-   *Counter-mechanism*: RFC.md § 1.10 (memory ban) and tools/validate.py cross-doc drift checks which ensure authoritative documents overrule memory or recent chat.
+   *Counter-mechanism*: CORE.md § 1.10 (memory ban) and tools/validate.py cross-doc drift checks which ensure authoritative documents overrule memory or recent chat.
 
 3. **Hedging instead of deciding**
    Proposing multiple options instead of picking one and executing it, or guessing instead of stopping.
-   *Counter-mechanism*: RFC.md § 1.11 (Insufficient information is a stop, not a guess) and RFC.md § 1.6 Phase Transitions that force a single deterministic next action.
+   *Counter-mechanism*: CORE.md § 1.11 (Insufficient information is a stop, not a guess) and CORE.md § 1.6 Phase Transitions that force a single deterministic next action.
 
 4. **Claiming a read or a verification that never happened**
    Hallucinating tool output or test success.
-   *Counter-mechanism*: RFC.md § 1.11 (A session MUST leave a trace) and tools/audit_checks.py, which require an agent to actually run the checks and parse the logged proof.
+   *Counter-mechanism*: CORE.md § 1.11 (A session MUST leave a trace) and tools/audit_checks.py, which require an agent to actually run the checks and parse the logged proof.
 
 5. **Inventing plausible detail**
    Making up paths, versions, line numbers, or shortcut keys that look correct statistically but do not exist.
-   *Counter-mechanism*: RFC.md § 1.10 (strict shortcut table enforcement) and tools/validate.py strictly enforcing CONFORMANCE.md row IDs and explicit path validations.
+   *Counter-mechanism*: CORE.md § 1.10 (strict shortcut table enforcement) and tools/validate.py strictly enforcing CONFORMANCE.md row IDs and explicit path validations.
 
 6. **Copying an example instead of applying the rule**
    Treating a documented example as a template and ignoring the normative rule text.
@@ -40,4 +40,4 @@ This document enumerates these habits and maps them to the mechanisms that count
 
 9. **Truncating context and assuming the end**
    Reading only the first N lines of a file, queue, or command output, and acting as if the unread remainder is empty.
-   *Counter-mechanism*: RFC.md § 1.11 (Read to the end, never truncate), which forbids declaring a list or queue empty without reading to End-Of-File.
+   *Counter-mechanism*: CORE.md § 1.11 (Read to the end, never truncate), which forbids declaring a list or queue empty without reading to End-Of-File.

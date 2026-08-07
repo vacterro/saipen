@@ -2,7 +2,7 @@
 
 Isolated, read-only research agents that run alongside the main agent on
 the same project -- they find things and propose things, they never edit
-the project themselves. Defined in RFC § 1.9, detailed in PROTOCOL.md.
+the project themselves. Defined in CORE.md §1.9, detailed in PROTOCOL.md.
 
 **Running in production on this repo since v7.84.0.** Four live instances
 (saihunt, saipython, saiwiki, saitranslate) with real STATE/BOARD/LOG/OUTBOX,
@@ -39,7 +39,7 @@ No manual copying -- one command, even in a project that has never seen
 ```bash
 saipen sub spawn myagent
 # first time in this project: bootstraps .saipen/extensions/subs/ itself from
-# saipen_home (STATE.md, RFC § 1.7) -- PROTOCOL.md, README.md, crew.md, TEMPLATE/, MANIFEST.md, and all built-in sai*.md role charters
+# saipen_home (STATE.md, CORE.md §1.7) -- PROTOCOL.md, README.md, crew.md, TEMPLATE/, MANIFEST.md, and all built-in sai*.md role charters
 # every time: .saipen/extensions/subs/myagent/ created from TEMPLATE/, added to MANIFEST.md
 # open its STATE.md, set next_action; open BOARD.md, write first tickets
 ```

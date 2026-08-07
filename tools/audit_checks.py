@@ -1404,6 +1404,18 @@ CASES: list[tuple[str, str, object, str]] = [
      replace("hypothesis about the current SAISENT UI",
              "confirmed finding -- SAISENT was audited and is non-compliant"),
      "claims the target was audited"),
+    ("saiui built-in role charter deleted from shipped library",
+     "extensions/subs/saiui.md", DELETE,
+     "saiui built-in role charter"),
+    ("PROTOCOL.md drops charter-loading from bare-subname adoption",
+     "extensions/subs/PROTOCOL.md",
+     replace("load it after PROTOCOL.md and before anything else",
+             "proceed with generic adoption"),
+     "charter-loading language"),
+    ("PROTOCOL.md sync softens live-folder guard",
+     "extensions/subs/PROTOCOL.md",
+     replace("MUST NOT touch any", "MAY inspect"),
+     "live-folder guard"),
 ]
 
 

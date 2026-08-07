@@ -19,7 +19,7 @@ exceptions, no substitute heuristic.
 **The clean-tree half is not decoration.** `HEAD` names a commit, not a
 working tree, so the hash alone says nothing about tracked files edited since
 that commit or untracked files added since -- which is most of a live session,
-because work commits at SHIP and not per checkpoint (RFC § 1.5). Without it
+because work commits at SHIP and not per checkpoint (CORE.md §1.5). Without it
 the skip reuses a clean result from a tree that no longer exists, and this
 document argued the point against itself: it rejects mtimes as an insufficient
 signal three paragraphs down while its own cache key ignored every uncommitted
@@ -49,7 +49,7 @@ matter how quiet the filesystem has been. There is no shortcut around
 actually performing the six checks below, every time this phase runs
 for real.
 
-**Subagents available (RFC § 1.3)?** Dispatch the 6 signal categories below
+**Subagents available (CORE.md §1.3)?** Dispatch the 6 signal categories below
 as one batch of parallel subagent tasks instead of scanning them in turn.
 Each subagent is read-only: it investigates and returns findings, it MUST
 NOT touch `.saipen/` itself -- only the orchestrating agent writes BOARD/LOG,
@@ -68,7 +68,7 @@ Signal order, cap 5 tickets:
 **Moving a file is destructive to whatever loads it, and a move passes the recovery test trivially.** Archiving, renaming and reorganising all read as tidy rather than dangerous, and the gate below asks the wrong question about them: the file IS recoverable -- it is right there in the new place -- and the program is broken anyway, because recoverability is not the property that matters when something loads the old path. Reproduced from a user's session: "put the rest in the archive" moved a GUI module, the entry point loaded it at runtime by absolute path, and the next command raised `FileNotFoundError`. **So before moving or renaming anything, sweep for references to it and treat a hit as a blocker, not a note.** Grep the basename and the path across the project -- source, config, scripts, manifests, docs -- and either move the references in the same act or do not move the file. The sweep is one command and the alternative is a program that starts failing at import time, which is the cheapest rung of `phases/verify.md`'s ladder and therefore the most embarrassing one to skip. This binds `CLEAN` identically: it prunes and relocates, and a scrub that orphans a loader is the same defect wearing a tidier word.
 
 **Junk is deleted on proof of recovery, never on how obvious it looks.**
-RFC § 1.1 permits an unconfirmed destructive operation only when the active
+CORE.md §1.1 permits an unconfirmed destructive operation only when the active
 ticket pre-authorizes it AND the operation is reversible -- and HUNT routinely
 runs with no active ticket at all, so the pre-authorization half is simply
 absent here. "Obvious" is not a property of the file; it is a feeling about
@@ -117,11 +117,11 @@ Findings ticketed (not clean)? STATE -> `PLAN` (or straight to `SCOUT` if
 a finding is small/obvious enough to skip planning, same judgment call as
 `phases/plan.md`'s size gate) -- work them same as any other `TODO`, board
 order = priority.
-Nothing found -> LOG one normal Event Graph line per RFC § 1.2 -- `- DATE
+Nothing found -> LOG one normal Event Graph line per CORE.md §1.2 -- `- DATE
 [E-###] [parent: E-###] RUN: hunt -> clean @SHORT-HASH` (this exact text
 after the taxonomy, not a free-text summary) -- then immediately
 transition to `ADD`. This transition is unconditional -- a clean hunt is
-never itself a reason to stop, under `goal_mode` or otherwise (RFC § 2.4).
+never itself a reason to stop, under `goal_mode` or otherwise (MAINTENANCE.md §2.4).
 Never invent busywork.
 
 ## Perf (user asks specifically, or a ticket calls for it)
