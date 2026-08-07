@@ -2,6 +2,10 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.206.6 -- 2026-08-07 -- audit_checks controls board-state independent
+
+T-534: two of the 165 audit_checks controls stayed dependent on the live board/STATE composition after T-532, so CI came back red on the v7.206.4/v7.206.5 ships even though local runs reported 165/165: the session-BLOCKED control cannot fire when the ship commit's board holds no workable `## TODO`, and next_action-topmost cannot fire when STATE sits at DONE with a non-ticket next_action. Both are now fully self-contained through a new MULTI mutation form (a case may edit two files, with save/restore): session-BLOCKED injects a synthetic workable ticket alongside `phase: BLOCKED`; next_action-topmost injects synthetic tickets at the top and bottom of `## TODO` and names the bottom one in STATE.next_action.
+
 ## 7.206.5 -- 2026-08-07 -- safe LOG-append prescribed
 
 T-533: the LOG-append guidance named no safe command, so a Windows agent reached for PowerShell `Add-Content` and corrupted `.saipen/LOG.md` through the console codepage (Cyrillic came back as invalid UTF-8, "recovered" by a byte-patch that quietly transliterated it). CORE.md § 1.5 now states the LOG append is a UTF-8 write and names three byte-safe forms (PowerShell `AppendAllText` with BOM-less UTF8Encoding, bash `printf >>`, Python `open(..., 'a', encoding='utf-8')`); KNOWLEDGE/traps.md's Set-Content/Add-Content trap entry carries the same one-liners. The active LOG also crossed the 64 KB soft cap and was sealed to LOG-009.md (the `log-soft-cap` ownership check FAILs when the slug returns with no owner -- sealing is the fix, as E-2046 recorded).

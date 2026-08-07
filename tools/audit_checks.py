@@ -561,31 +561,23 @@ def demote_the_pick(text: str) -> str:
     while a ticket is in flight. Mutating the board reaches it from both
     sides.
 
-    Demote the ticket `next_action` NAMES, wherever it sits, and inject a
-    synthetic workable ticket at the top of `## TODO`. Demoting alone went
-    vacuous in T-532 when the board carried a single workable ticket: moving
-    it to the bottom leaves it the only workable one, so it stays topmost
-    and the mismatch never appears. The synthetic line guarantees a different
-    workable ticket always sits above the named one, whatever the board holds.
+    Inject two synthetic workable tickets: T-999 at the top of `## TODO`
+    (always the topmost workable) and T-998 at the bottom (so the case's
+    STATE mutation can name a workable ticket that is never topmost). The
+    mismatch holds whatever the real board and real STATE hold -- the old
+    "demote the ticket next_action names" went vacuous twice: once when the
+    board held a single workable ticket, and once when STATE sat at DONE with
+    a non-ticket next_action (T-532).
     """
     nl = chr(10)
-    state = (HOME / ".saipen" / "STATE.md").read_text(encoding="utf-8-sig")
-    named = re.search(r"next_action:.*?(T-\d+)", state)
-    if named is None:
-        return text
-    ticket = named.group(1)
-    line = re.search(rf"^- \[[ /]\] {ticket} .*$", text, re.MULTILINE)
-    if line is None:
-        return text
-    moved = line.group(0).replace("- [/] ", "- [ ] ", 1)
-    text = text.replace(line.group(0) + nl, "", 1)
     todo = re.search(r"^## TODO$\n(.*?)(?=^## |\Z)", text,
                      re.MULTILINE | re.DOTALL)
     if todo is None:
         return text
-    synthetic = "- [ ] T-999 [P3] synthetic red-control workable ticket\n"
-    return (text[:todo.start(1)] + synthetic + todo.group(1).rstrip(nl) + nl
-            + moved + nl + nl + text[todo.end(1):])
+    top = "- [ ] T-999 [P3] synthetic red-control workable ticket\n"
+    bottom = "- [ ] T-998 [P3] synthetic red-control workable ticket\n"
+    return (text[:todo.start(1)] + top + todo.group(1).rstrip(nl) + nl
+            + bottom + nl + text[todo.end(1):])
 
 CREATE = "<create the file>"
 SWAP = "<swap the last two log entries>"
@@ -626,10 +618,19 @@ def case_target(root: Path, rel: str, mutation) -> Path:
     return default
 
 
+def mutation_files(root: Path, rel: str, mutation) -> list[Path]:
+    """Every physical file a logical mutation will edit, for save/restore."""
+    if isinstance(mutation, tuple) and mutation and mutation[0] == "MULTI":
+        return [root / r for r, _ in mutation[1]]
+    return [case_target(root, rel, mutation)]
+
+
 def case_available(root: Path, rel: str, mutation) -> bool:
     if mutation == CREATE or (isinstance(mutation, tuple)
                               and mutation[0] == "WRITE"):
         return True
+    if isinstance(mutation, tuple) and mutation and mutation[0] == "MULTI":
+        return all((root / r).is_file() for r, _ in mutation[1])
     target = case_target(root, rel, mutation)
     if not target.is_file():
         return False
@@ -672,7 +673,8 @@ CASES: list[tuple[str, str, object, str]] = [
     ("last_event below the log tail", STATE, sub_line("last_event", "1"),
      "lower than the log"),
     ("next_action picks a ticket that is not the topmost workable", BOARD,
-     demote_the_pick,
+     ("MULTI", [(BOARD, demote_the_pick),
+                (STATE, sub_line("next_action", '"PHASE SCOUT T-998"'))]),
      "but the topmost workable ## TODO ticket is"),
     # A C0 byte is invisible in every reader and still changes what the code
     # means. Two `\1` backreferences in this file were literal `\x01` bytes,
@@ -868,9 +870,17 @@ CASES: list[tuple[str, str, object, str]] = [
      "prepare-record"),
     # Session-level BLOCKED means "no ticket anywhere is workable"; the
     # second half was never checked, so a session halted with a full board
-    # looked exactly like a legitimate stop.
+    # looked exactly like a legitimate stop. The red condition spans two
+    # files -- STATE.phase: BLOCKED AND a workable ## TODO ticket -- so this
+    # is the one two-file case: setting phase alone went vacuous whenever the
+    # board's workable tickets dried up (T-532), so the mutation injects a
+    # synthetic workable ticket alongside the phase change.
     ("a session blocks while the board still has workable tickets", STATE,
-     sub_line("phase", "BLOCKED"),
+     ("MULTI", [(STATE, sub_line("phase", "BLOCKED")),
+                (BOARD, lambda t: t.replace(
+                    "\n## TODO\n",
+                    "\n## TODO\n- [ ] T-999 [P3] synthetic red-control "
+                    "workable ticket\n", 1))]),
      "session-level BLOCKED is reserved for"),
     ("CHANGELOG entries fall out of descending order", "CHANGELOG.md",
      # 7.196.0 was the old anchor; it has been sealed into the archive, so the
@@ -1511,6 +1521,21 @@ def apply_case(root: Path, rel: str, mutation) -> bool:
         text = p.read_text(encoding="utf-8-sig")
         p.write_bytes(text.encode("utf-16"))
         return True
+    if isinstance(mutation, tuple) and mutation and mutation[0] == "MULTI":
+        # A case whose red condition spans two files (e.g. the session-level
+        # BLOCKED check, which needs STATE.phase AND a workable board ticket).
+        # Every file listed must be present; the case applies if any changed.
+        changed = False
+        for r, fn in mutation[1]:
+            fp = root / r
+            if not fp.is_file():
+                continue
+            text = fp.read_text(encoding="utf-8-sig")
+            mutated = fn(text)
+            if mutated != text:
+                fp.write_text(mutated, encoding="utf-8", newline="\n")
+                changed = True
+        return changed
     if not p.exists():
         return False
     text = p.read_text(encoding="utf-8-sig")
@@ -1661,8 +1686,8 @@ def main() -> int:
         if expected in control:
             always.append((label, expected))
             continue
-        target = case_target(pristine, rel, mutation)
-        saved = target.read_bytes() if target.exists() else None
+        files = mutation_files(pristine, rel, mutation)
+        saved = [(f, f.read_bytes() if f.exists() else None) for f in files]
         try:
             if not apply_case(pristine, rel, mutation):
                 skipped.append(label)
@@ -1670,11 +1695,12 @@ def main() -> int:
             if expected not in validator_output(pristine):
                 dead.append((label, expected))
         finally:
-            if saved is None:
-                if target.exists():
-                    target.unlink()
-            else:
-                target.write_bytes(saved)
+            for f, data in saved:
+                if data is None:
+                    if f.exists():
+                        f.unlink()
+                else:
+                    f.write_bytes(data)
     # The copy must be back to its starting state, or every case after the
     # first was run against a tree carrying the previous mutation.
     if validator_output(pristine) != control:
