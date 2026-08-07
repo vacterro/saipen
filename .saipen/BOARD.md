@@ -1,6 +1,6 @@
 # Board
 ## DOING
-- [/] T-526 [P2] Close validation blind spots. Done: 4 validator checks red-tested (STATE newline, nested VERSION duplicate, INDEX phase parity, RFC-stub-trap) + pre-commit purity probe (2 cases). Coverage for all 11 spots: home-resolution injector probes, manifest-tracking probe, digest-stale probe, VALID_TRANSITIONS check pre-exist; 5 new this session. | owner: claude | claim_time: 2026-08-07T02:20:00Z | verify: validate.py PASS; run_scenarios purity probe green; all 11 spots have a named check or probe
+
 
 ## TODO
 - [ ] T-517 [P1] Pre-commit hook side-effect cascade — trace hook→validate.py chain; any project-file write from validation path is a defect. | verify: validation/pre-commit path is read-only; git status unchanged before/after
@@ -22,6 +22,8 @@
 - [ ] T-451 [P0] GOAL FLAG: SAIPEN v8 Crew Mode is achieved only after the markdown-first system survives a defined real-world soak period without SAIPENVIEW. Run it on real project work long enough to include concurrent Core tasks, translation/wiki preparation, repeated releases, agent limits, process loss, stale proposals, resource waits, application or terminal restarts and at least one automatic takeover. Record every ownership transition, epoch, proposal, checkpoint and external side effect in inspectable files. Do not call the protocol v8 merely because one demonstration succeeds. | needs: T-443, T-444, T-445, T-446, T-447, T-448, T-449, T-450 | verify: before the soak begins, record a fixed minimum duration and workload target that cannot be reduced after failures; the completed run shows no lost work, duplicated release, split brain, unresolved deadlock or unreconstructable state; killing every active agent still leaves one correct next action recoverable from the repository alone | blocker: HELD FOR SEQUENTIAL STABILITY
 
 ## DONE
+- [x] T-526 [P2] Close validation blind spots. Done: 4 validator checks red-tested (STATE newline, nested VERSION duplicate, INDEX phase parity, RFC-stub-trap) + pre-commit purity probe (2 cases). Coverage for all 11 spots: home-resolution injector probes, manifest-tracking probe, digest-stale probe, VALID_TRANSITIONS check pre-exist; 5 new this session. | owner: claude | claim_time: 2026-08-07T02:20:00Z | verify: validate.py PASS; run_scenarios purity probe green; all 11 spots have a named check or probe
+
 - [x] T-518 [P0] Make validation and pre-commit read-only — hook, validate.py, subprocess chain. | verify: commit 33b180d, install_hook.py gen 5 status capture, ci_status.py cache to temp; E-2191
 - [x] T-519 [P0] Define one home resolver — deterministic protocol_dir for source-clone and flattened-install layouts. | verify: commit 1a05a97, BOOT+CORE resolver defined; E-2191
 - [x] T-520 [P1] Create one runtime manifest — replace divergent inject.sh/ps1/autoinject.py/validate.py file lists. | verify: commit 487fc44, canonical MANIFEST.json; E-2191
