@@ -1,0 +1,42 @@
+{
+  "description": "SAIPEN runtime manifest — canonical list of files the protocol references at boot or during normal operation. inject.sh, inject.ps1, autoinject.py, and validate.py MUST consume or verify this single source. No independent handwritten file lists.",
+  "files": [
+    {"src": "saipen/BOOT.md", "required": true},
+    {"src": "saipen/STYLE.md", "required": true},
+    {"src": "saipen/INDEX.md", "required": true},
+    {"src": "saipen/CORE.md", "required": true},
+    {"src": "saipen/MAINTENANCE.md", "required": true},
+    {"src": "saipen/RFC.md", "required": true},
+    {"src": "saipen/SKILL.md", "required": true},
+    {"src": "saipen/UI.md", "required": true},
+    {"src": "saipen/HABITS.md", "required": true},
+    {"src": "saipen/CONFORMANCE.md", "required": true},
+    {"src": "saipen/MANIFEST.json", "required": true},
+    {"src": "VERSION", "required": true},
+    {"src": "tools/validate.py", "required": true},
+    {"src": "tools/install_hook.py", "required": true},
+    {"src": "tools/uninstall_hook.py", "required": true},
+    {"src": "tools/run_scenarios.py", "required": true},
+    {"src": "tools/audit_floor.py", "required": true},
+    {"src": "tools/ci_status.py", "required": true},
+    {"src": "tools/release_ledger_baseline.json", "required": true},
+    {"src": "tests/validate.sh", "required": true},
+    {"src": "tests/validate.ps1", "required": true},
+    {"src": "bootstrap/inject.sh", "required": true},
+    {"src": "bootstrap/inject.ps1", "required": true},
+    {"src": "extensions/schemas/state.schema.json", "required": true},
+    {"src": "extensions/templates/STATE.md", "required": true},
+    {"src": "extensions/templates/BOARD.md", "required": true},
+    {"src": "extensions/templates/LOG.md", "required": true}
+  ],
+  "phase_docs": {
+    "src_dir": "saipen/phases",
+    "required": true,
+    "files": [
+      "init.md", "plan.md", "scout.md", "build.md", "verify.md",
+      "review.md", "ship.md", "done.md", "add.md", "hunt.md",
+      "markhunt.md", "clean.md", "blocked.md", "translate.md",
+      "prepare.md", "validate.md"
+    ]
+  }
+}

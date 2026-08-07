@@ -2519,36 +2519,38 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                 ok(f"phase enum <-> phases/ docs in sync ({len(phase_names)} phases)")
 
         # B. Every runtime file the protocol references must exist in the home.
-        manifest = [
-            # RFC.md was absent from this list until v7.101.0 -- the manifest of
-            # "every runtime file the protocol references" omitted the
-            # constitution itself. Other checks would have noticed its absence,
-            # but a completeness list that skips the most important item is not
-            # a completeness list.
-            "VERSION",
-            "saipen/RFC.md",
-            # The split (T-488) moved the constitution out of RFC.md and
-            # left a stub. Both injectors and this list still copied the
-            # stub alone, so every installed agent home received three
-            # lines and no rules -- caught only because the injector
-            # probes run the INSTALLED validator, which then could not
-            # find its own anchors.
-            "saipen/CORE.md", "saipen/MAINTENANCE.md",
-            "saipen/BOOT.md", "saipen/SKILL.md", "saipen/UI.md", "saipen/STYLE.md",
-            "saipen/CONFORMANCE.md",
-            "tools/validate.py", "tools/install_hook.py", "tools/uninstall_hook.py",
-            "tools/run_scenarios.py", "tools/audit_floor.py",
-            # The generation-4 hook calls this before every commit; a home
-            # without it ships a hook whose dependency exists in no clone,
-            # which is the v7.166.1 defect one layer up (T-428).
-            "tools/ci_status.py",
-            "tools/release_ledger_baseline.json",
-            "tests/validate.sh", "tests/validate.ps1",
-            "bootstrap/inject.sh", "bootstrap/inject.ps1",
-            "extensions/schemas/state.schema.json",
-            "extensions/templates/STATE.md", "extensions/templates/BOARD.md",
-            "extensions/templates/LOG.md",
-        ]
+        # Canonical source is saipen/MANIFEST.json; the hardcoded list below
+        # is the fallback for homes that predate the manifest (v7.190.0+).
+        _manifest_json = _tools_parent / "saipen" / "MANIFEST.json"
+        if _manifest_json.is_file():
+            try:
+                _mj = json.loads(_manifest_json.read_text("utf-8"))
+                _mj_files = [f["src"] for f in _mj.get("files", [])]
+                _phase_dir = _mj.get("phase_docs", {}).get("src_dir", "")
+                for _pf in _mj.get("phase_docs", {}).get("files", []):
+                    _mj_files.append(f"{_phase_dir}/{_pf}")
+                manifest = _mj_files
+            except (json.JSONDecodeError, KeyError, ValueError):
+                fail("saipen/MANIFEST.json is present but unparseable — "
+                     "the canonical manifest is corrupt")
+                manifest = []
+        else:
+            manifest = [
+                "VERSION",
+                "saipen/RFC.md",
+                "saipen/CORE.md", "saipen/MAINTENANCE.md",
+                "saipen/BOOT.md", "saipen/SKILL.md", "saipen/UI.md", "saipen/STYLE.md",
+                "saipen/CONFORMANCE.md", "saipen/INDEX.md", "saipen/HABITS.md",
+                "tools/validate.py", "tools/install_hook.py", "tools/uninstall_hook.py",
+                "tools/run_scenarios.py", "tools/audit_floor.py",
+                "tools/ci_status.py",
+                "tools/release_ledger_baseline.json",
+                "tests/validate.sh", "tests/validate.ps1",
+                "bootstrap/inject.sh", "bootstrap/inject.ps1",
+                "extensions/schemas/state.schema.json",
+                "extensions/templates/STATE.md", "extensions/templates/BOARD.md",
+                "extensions/templates/LOG.md",
+            ]
         manifest_missing = [f for f in manifest if not Path(f).is_file()]
         for f in manifest_missing:
             fail(f"runtime manifest file missing from the home: {f}")
