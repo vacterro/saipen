@@ -196,12 +196,13 @@ def main() -> int:
         return 1
 
     # One copy, restored between cases -- see the same note in audit_checks.py.
-    # Every case touches exactly one file, so its bytes are the whole state.
+    # A MULTI case edits two files, so every file a mutation touches must be
+    # saved and restored, not just the case target (T-534).
     both, only_canonical, neither, skipped = [], [], [], []
     for i, (label, rel, mutation, _expected) in enumerate(ac.CASES, 1):
         print(f"\r[{i}/{len(ac.CASES)}] {label[:70].ljust(70)}", end="", flush=True)
-        target = ac.case_target(pristine, rel, mutation)
-        saved = target.read_bytes() if target.exists() else None
+        files = ac.mutation_files(pristine, rel, mutation)
+        saved = [(f, f.read_bytes() if f.exists() else None) for f in files]
         try:
             if not ac.apply_case(pristine, rel, mutation):
                 skipped.append(label)
@@ -214,11 +215,12 @@ def main() -> int:
             else:
                 neither.append(label)
         finally:
-            if saved is None:
-                if target.exists():
-                    target.unlink()
-            else:
-                target.write_bytes(saved)
+            for f, data in saved:
+                if data is None:
+                    if f.exists():
+                        f.unlink()
+                else:
+                    f.write_bytes(data)
 
     if validate(pristine) != 0 or floor(pristine) != 0:
         print("\nFAIL: the copy did not survive the run -- restoring between "

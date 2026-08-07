@@ -2,6 +2,10 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.206.8 -- 2026-08-07 -- parity restore survives MULTI cases
+
+T-534 (third pass): the v7.206.7 CI run got audit_checks green and then failed the next previously-masked step -- `tools/audit_parity.py` reported "the copy did not survive the run". audit_parity imports audit_checks' CASES but ran its own restore loop that saved/restored only the case target, so the new two-file MULTI cases left the second file mutated and the pristine drifted. The parity loop now uses the same `mutation_files` save/restore as the audit_checks main loop.
+
 ## 7.206.7 -- 2026-08-07 -- audit_checks pick control claim-independent
 
 T-534 (second pass): the v7.206.6 CI run exposed a third board-state dependence in `tools/audit_checks.py` -- the next_action-topmost red control fires locally on a claim-free board, but the pick check only runs when nothing is claimed, and a ship commit's own ticket sits in `## DOING`. `demote_the_pick` now empties `## DOING` (drops the claimed ticket line) before arranging the `## TODO` mismatch, so it goes red from a board WITH a claimed ticket and a zero-workable `## TODO` -- the exact CI composition. Verified 165/165 under both compositions.
