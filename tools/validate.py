@@ -544,6 +544,27 @@ for _cf in (state_path, Path(".saipen/BOARD.md"), Path(".saipen/LOG.md")):
              f"frontmatter match. Rewrite it as UTF-8 without a BOM -- never "
              f"with PowerShell Set-Content (KNOWLEDGE/traps.md)")
 
+# STATE.md must end in a newline. A file whose last byte is not `\n` fails
+# the "read to the end" contract: an append that lands mid-line extends the
+# frontmatter fence instead of adding a new key, and the portable grep floor
+# matches nothing past the last line break. (Blind-spot fixture 11.)
+_state_raw = state_path.read_bytes()
+if _state_raw and not _state_raw.endswith(b"\n"):
+    fail("STATE.md does not end in a newline -- a later append would extend "
+         "the last line instead of adding one, and the portable floor's "
+         "line-based greps would miss the final field. Add the trailing "
+         "newline at the next checkpoint")
+
+# Only root VERSION may exist. A nested duplicate under saipen/ (the
+# protocol home) is a second version source that two checks would disagree
+# about (goal blind spot 8).
+if Path("saipen").is_dir():
+    _dup_version = Path("saipen/VERSION")
+    if _dup_version.is_file():
+        fail("saipen/VERSION is a nested duplicate of the root VERSION file -- "
+             "one version source means one file. Delete the nested copy; the "
+             "root VERSION is canonical")
+
 state, err = parse_frontmatter(read_doc(state_path))
 if state is None:
     fail(f"STATE.md frontmatter: {err}")
@@ -2518,6 +2539,38 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
             if enum_ok:
                 ok(f"phase enum <-> phases/ docs in sync ({len(phase_names)} phases)")
 
+            # INDEX.md must carry the same phase set: the lazy-load index is
+            # how a cold agent finds the current phase document, so an INDEX
+            # that names a phase that doesn't exist (or omits one that does)
+            # sends it to a dead file or hides a real one. (Goal blind spot
+            # 6/7.) Parse the `- <name>.md:` lines under INDEX's phase
+            # heading and require exact parity with the enum + files.
+            _index_p = Path("saipen/INDEX.md")
+            if _index_p.is_file():
+                _idx = _index_p.read_text(encoding="utf-8-sig")
+                _idx_phases = sorted(
+                    re.findall(r"^- `([a-z]+)\.md`:", _idx, re.MULTILINE))
+                _disk_phases = sorted(
+                    p.stem for p in Path("saipen/phases").glob("*.md"))
+                _idx_enum = sorted(n.lower() for n in phase_names)
+                if _idx_phases != _idx_enum:
+                    fail("INDEX.md phase list does not match the canonical "
+                         f"phase enum -- INDEX names {len(_idx_phases)} phases, "
+                         f"enum has {len(_idx_enum)}. Missing: "
+                         f"{sorted(set(_idx_enum)-set(_idx_phases)) or 'none'}; "
+                         f"phantom: {sorted(set(_idx_phases)-set(_idx_enum)) or 'none'}")
+                    enum_ok = False
+                elif _idx_phases != _disk_phases:
+                    fail("INDEX.md phase list does not match the files under "
+                         f"phases/ -- INDEX names {len(_idx_phases)}, disk has "
+                         f"{len(_disk_phases)}. Missing: "
+                         f"{sorted(set(_disk_phases)-set(_idx_phases)) or 'none'}; "
+                         f"phantom: {sorted(set(_idx_phases)-set(_disk_phases)) or 'none'}")
+                    enum_ok = False
+                else:
+                    ok(f"INDEX.md phase list matches enum + files "
+                       f"({len(_idx_phases)} phases)")
+
         # B. Every runtime file the protocol references must exist in the home.
         # Canonical source is saipen/MANIFEST.json; the hardcoded list below
         # is the fallback for homes that predate the manifest (v7.190.0+).
@@ -2607,6 +2660,28 @@ if adapter_dir.is_dir():
     if adapter_ok:
         ok("adapter cross-references valid (checking saipen/ paths in all "
            f"{len(list(adapter_dir.glob('*.md')))} adapters)")
+
+    # RFC.md is a three-line compatibility stub since v7.190.0. Any adapter
+    # or SKILL.md that assigns it normative authority sends a weak agent to
+    # a file with no rules -- the RFC-stub-trap (goal blind spot 5). The
+    # constitution lives in CORE.md; RFC.md is a redirect only.
+    _rfc_stub_trap = []
+    for _doc in sorted(adapter_dir.glob("*.md")) + [Path("saipen/SKILL.md")]:
+        if not _doc.is_file():
+            continue
+        _t = _doc.read_text(encoding="utf-8-sig")
+        if re.search(r"RFC\.md.*is the constitution|RFC\.md.*full protocol|"
+                     r"read.*RFC\.md.*constitution|RFC\.md.*authoritative|"
+                     r"follow.*RFC\.md", _t, re.IGNORECASE):
+            _rfc_stub_trap.append(_doc.as_posix())
+    if _rfc_stub_trap:
+        fail("RFC-stub-trap: " + ", ".join(_rfc_stub_trap)
+             + " assigns normative authority to the RFC.md compatibility "
+               "stub. The constitution was split into CORE.md/MAINTENANCE.md "
+               "in v7.190.0; adapters must load BOOT -> INDEX -> CORE instead")
+        adapter_ok = False
+    elif adapter_dir.is_dir():
+        ok("no adapter treats RFC.md as normative (RFC stub is redirect-only)")
 
 # -------------------------------------------------------- translation drift
 
