@@ -99,7 +99,7 @@ See eemaldab täpselt tähistatud ploki (jättes ülejäänud faili rahule), sal
 > `saipen set`
 
 Paigaldamata? Kopeeri ja kleebi üks rida suvalisele agendile:
-> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
+> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md and follow them.
 
 Platform ei ole ülalolevas nimekirjas (DeepSeek, Qwen, eraldiseisev OpenAI jne)?
 Platvormi-põhised märkmed asuvad `extensions/adapters/`.

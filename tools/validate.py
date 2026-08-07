@@ -2665,23 +2665,45 @@ if adapter_dir.is_dir():
     # or SKILL.md that assigns it normative authority sends a weak agent to
     # a file with no rules -- the RFC-stub-trap (goal blind spot 5). The
     # constitution lives in CORE.md; RFC.md is a redirect only.
+    # The two shell injectors belong in this set and were missing from it for
+    # three releases (T-529). They write the entry block into every agent's
+    # global config -- ~/.claude/CLAUDE.md, ~/.config/opencode/AGENTS.md,
+    # ~/.codex/AGENTS.md, ~/.gemini/GEMINI.md -- so they reach FURTHER than any
+    # adapter does, and a glob restricted to `adapters/*.md` could never see
+    # them. Checking the markdown that describes the boot path while skipping
+    # the code that installs it is the same shape T-495 named.
     _rfc_stub_trap = []
-    for _doc in sorted(adapter_dir.glob("*.md")) + [Path("saipen/SKILL.md")]:
+    _trap_targets = (sorted(adapter_dir.glob("*.md"))
+                     + [Path("saipen/SKILL.md"),
+                        Path("bootstrap/inject.sh"),
+                        Path("bootstrap/inject.ps1")])
+    for _doc in _trap_targets:
         if not _doc.is_file():
             continue
         _t = _doc.read_text(encoding="utf-8-sig")
+        # `RFC\.md\s*\+` and `read[^.\n]*RFC\.md` are the boot-SET shapes, and
+        # they are what the old pattern list could not see: the live text said
+        # "read <home>/RFC.md + <home>/STYLE.md and follow them", where `follow`
+        # trails RFC.md instead of preceding it, so `follow.*RFC\.md` never
+        # matched the exact sentence this check exists to catch. Naming RFC.md
+        # as a file to LOAD is the defect; naming it to say it holds no rules
+        # is the fix, so the gap classes stay newline-bounded and dot-bounded
+        # rather than banning the string outright.
         if re.search(r"RFC\.md.*is the constitution|RFC\.md.*full protocol|"
                      r"read.*RFC\.md.*constitution|RFC\.md.*authoritative|"
-                     r"follow.*RFC\.md", _t, re.IGNORECASE):
+                     r"follow.*RFC\.md|"
+                     r"RFC\.md\s*\+|read[^.\n]*RFC\.md", _t, re.IGNORECASE):
             _rfc_stub_trap.append(_doc.as_posix())
     if _rfc_stub_trap:
         fail("RFC-stub-trap: " + ", ".join(_rfc_stub_trap)
              + " assigns normative authority to the RFC.md compatibility "
                "stub. The constitution was split into CORE.md/MAINTENANCE.md "
-               "in v7.190.0; adapters must load BOOT -> INDEX -> CORE instead")
+               "in v7.190.0; adapters and injectors must load "
+               "BOOT -> INDEX -> CORE instead")
         adapter_ok = False
     elif adapter_dir.is_dir():
-        ok("no adapter treats RFC.md as normative (RFC stub is redirect-only)")
+        ok(f"no adapter or injector treats RFC.md as normative "
+           f"({len(_trap_targets)} checked, RFC stub is redirect-only)")
 
 # -------------------------------------------------------- translation drift
 

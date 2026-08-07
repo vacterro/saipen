@@ -1,20 +1,20 @@
 ---
-phase: SCOUT
-task: T-528
-next_action: "PHASE BUILD T-528"
+phase: SHIP
+task: T-529
+next_action: "RUN: ship v7.206.0"
 blocker: none
-transition_from: DONE
+transition_from: REVIEW
 saipen_version: 7
 schema_version: 3
-last_event: 2225
+last_event: 2231
 style_contract: ded-4ae736e4
 saipen_home: "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN"
-agent: claude
+agent: opencode
 requires:
   - filesystem
   - git
   - python
 mode: full
 goal_mode: false
-updated: 2026-08-07T11:08:00Z
+updated: 2026-08-07T11:59:00Z
 ---

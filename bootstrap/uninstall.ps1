@@ -37,6 +37,18 @@ function Remove-Skill([string]$path) {
   return "clean"
 }
 
+function Remove-Task() {
+  # Remove the auto-scheduled inject task (T-531) when uninstalling, so a
+  # de-advertised protocol does not keep pulling + injecting every 15 minutes.
+  $t = Get-ScheduledTask -TaskName "saipen-inject" -ErrorAction SilentlyContinue
+  if ($t) {
+    schtasks /Delete /TN "saipen-inject" /F 2>&1 | Out-Null
+    if ($LASTEXITCODE -eq 0) { return "task removed" }
+    return "task remove FAILED (schtasks rc $LASTEXITCODE)"
+  }
+  return "clean"
+}
+
 function Remove-Aider([string]$file) {
   # Remove exactly the block the injector wrote (comment + read: key +
   # consecutive saipen RFC/STYLE items), CRLF-tolerant -- never any other
@@ -82,6 +94,7 @@ if (Test-Path $plugRoot) {
   }
 }
 Report "Aider conf" (Remove-Aider "$h\.aider.conf.yml")
+Report "scheduled inject task" (Remove-Task)
 Write-Host "------------------------------------------------------------"
 if ($script:BootstrapFailed) {
   Write-Host "FAILED. Fix reported errors and re-run." -ForegroundColor Red

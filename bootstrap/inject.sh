@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # saipen injector (macOS/Linux) -- installs saipen as default on every agentic system found.
 # Run from clone dir:  bash inject.sh
 # Idempotent: re-run safe.
@@ -6,7 +6,11 @@
 set -u
 FAILURES=0
 SKILL_HOME="$(cd "$(dirname "$0")/../saipen" 2>/dev/null && pwd)"
-[ -f "$SKILL_HOME/RFC.md" ] || { echo "FATAL: saipen/RFC.md not found"; exit 1; }
+# BOOT.md, not RFC.md: the sanity check must name the file the injected block
+# actually sends agents to. RFC.md has been a redirect stub since the v7.190.0
+# split, so a clone missing BOOT.md but carrying the stub would pass this guard
+# and install an entry point with no rules behind it.
+[ -f "$SKILL_HOME/BOOT.md" ] || { echo "FATAL: saipen/BOOT.md not found"; exit 1; }
 
 # Under git bash / MSYS / Cygwin on Windows, `pwd` yields an MSYS path such as
 # /v/proj/saipen. The agents that later READ these instructions are Windows
@@ -34,7 +38,9 @@ BLOCK="
 <!-- SAIPEN:BEGIN -->
 ## saipen protocol (global)
 On \"saipen set\" / \"saipen ...\" commands, or when project root contains
-.saipen/: read $SKILL_HOME/RFC.md + $SKILL_HOME/STYLE.md and follow them.
+.saipen/: read $SKILL_HOME/BOOT.md (cold-start kernel) + $SKILL_HOME/STYLE.md
+and follow them. BOOT.md routes on to INDEX.md, and to CORE.md when a rule
+question comes up. RFC.md is a redirect stub - it holds no rules.
 Chat tone: caveman-ded (STYLE.md) - compressed + blunt, on by default,
 off only on \"stop caveman\"/\"normal mode\".
 Memory: .saipen/ at project root - read .saipen/STATE.md before work;
@@ -137,7 +143,7 @@ report() { # $1=label, remaining=function + args
 }
 
 configure_aider() { # $1=config
-  local A="$1" P="$SKILL_HOME/RFC.md" S="$SKILL_HOME/STYLE.md"
+  local A="$1" P="$SKILL_HOME/BOOT.md" S="$SKILL_HOME/STYLE.md"
   if [ ! -f "$A" ]; then
     mkdir -p "$(dirname "$A")" \
       && printf '# saipen protocol auto-loaded\nread:\n  - %s\n  - %s\n' "$P" "$S" > "$A" \
@@ -198,7 +204,7 @@ if [ -d "$PLUG_ROOT" ]; then
   done
 fi
 
-# Aider boot set is RFC.md + STYLE.md, same promise as every platform.
+# Aider boot set is BOOT.md + STYLE.md, same promise as every platform.
 if command -v aider >/dev/null 2>&1; then
   report "Aider conf" configure_aider "$HOME/.aider.conf.yml"
 else printf '%-28s %s\n' "Aider" "not installed - skip"; fi

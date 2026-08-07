@@ -105,7 +105,7 @@ bash bootstrap/uninstall.sh                                         # Для м�
 > `saipen set`
 
 Не ставил глобально? Закинь эту строчку любому агенту:
-> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
+> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md and follow them.
 
 Платформы нет в списке выше (DeepSeek, Qwen, чистый OpenAI)?
 Заметки по платформам валяются в `extensions/adapters/`.

@@ -2,6 +2,12 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.206.0 -- 2026-08-07 -- RFC stub trap out of the injectors + auto-scheduled inject
+
+T-529: the RFC stub trap was live in the injected block on every installed agent home -- both shell injectors wrote "read RFC.md + STYLE.md and follow them" into CLAUDE.md/AGENTS.md/GEMINI.md, and RFC.md is 144 bytes of redirect since the v7.190.0 split. Both injectors now name BOOT.md as the cold-start kernel and route BOOT -> INDEX -> CORE, sanity-check saipen/BOOT.md (not the stub), and give Aider the BOOT.md + STYLE.md boot set; the four root README entry lines match. The validator's RFC-stub-trap check was blind two ways -- its file set globbed only `adapters/*.md` + saipen/SKILL.md (the shell injectors reach every agent's global config) and its regex wanted `follow.*RFC\.md` while the live sentence has `follow` trailing RFC.md. Both layers closed: inject.sh + inject.ps1 are in the set, and `RFC\.md\s*\+` / `read[^.\n]*RFC\.md` catch the boot-SET shape; red-tested.
+
+T-531: `bootstrap/schedule.ps1` + `schedule-run.ps1` register a `saipen-inject` Windows Task Scheduler task (schtasks /SC MINUTE /MO 15 -- the indefinite form, since New-ScheduledTaskTrigger -RepetitionDuration cannot express "forever") that git-pulls the clone and re-injects every agent config every 15 minutes, logging to %LOCALAPPDATA%\saipen\inject.log. The runner pulls best-effort with GIT_TERMINAL_PROMPT=0 so a dirty tree or offline box never blocks the inject; uninstallers (ps1 + sh) remove the task when present.
+
 ## 7.205.2 -- 2026-08-07 -- pre-commit hook generation 7
 
 T-517: the validation path is read-only, proven rather than asserted — `git status --porcelain=v1 -uall` byte-identical across `validate.py`, and `ci_status.py` writes only inside `.git/` or the system tempdir.

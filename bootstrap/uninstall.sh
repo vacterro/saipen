@@ -98,6 +98,19 @@ rm_aider() {
   fi
 }
 
+rm_task() {
+  if schtasks /Query /TN saipen-inject >/dev/null 2>&1; then
+    if schtasks /Delete /TN saipen-inject /F >/dev/null 2>&1; then
+      echo "task removed"
+    else
+      echo "task remove FAILED (schtasks rc $?)"
+      return 1
+    fi
+  else
+    echo "clean"
+  fi
+}
+
 report() { # $1=label, remaining=function + args
   local label="$1" output status
   shift
@@ -126,6 +139,14 @@ if [ -d "$PLUG_ROOT" ]; then
   done
 fi
 report "Aider conf" rm_aider "$HOME/.aider.conf.yml"
+# The auto-scheduled inject task (T-531) is Windows-only (Task Scheduler).
+# Remove it when present; on macOS/Linux schtasks does not exist and this is
+# simply "clean".
+if command -v schtasks >/dev/null 2>&1; then
+  report "scheduled inject task" rm_task
+else
+  echo "scheduled inject task           clean"
+fi
 echo "------------------------------------------------------------"
 if [ "$FAILURES" -ne 0 ]; then
   echo "FAILED. Fix reported errors and re-run."

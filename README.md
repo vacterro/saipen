@@ -25,7 +25,7 @@ rebriefing, any vendor, any day.
 
 **Reply language.** The agent answers in **Estonian** by default — that is a setting, not a quirk, and nothing else about SAIPEN is Estonian. Change it in one place: the `reply_language:` line at the top of [`saipen/STYLE.md`](saipen/STYLE.md). `et` Estonian, `en` English, `ru` Russian, `auto` picks from the message you sent. The protocol, the code, the commits and every document stay English at every value.
 
-**v7.205.2** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | MIT
+**v7.206.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | MIT
 
 ```text
 User  ->  /saipen continue
@@ -131,7 +131,7 @@ outside those paths, no daemon, no network calls.</sub>
 
 **No install?** Paste one line to any agent:
 
-> Read &lt;clone&gt;/saipen/BOOT.md first (cold-start kernel), then &lt;clone&gt;/saipen/RFC.md + &lt;clone&gt;/saipen/STYLE.md and follow them.
+> Read &lt;clone&gt;/saipen/BOOT.md first (cold-start kernel), then &lt;clone&gt;/saipen/INDEX.md + &lt;clone&gt;/saipen/STYLE.md and follow them.
 
 Platform not in the list above (DeepSeek, Qwen, standalone OpenAI, etc.)?
 Per-platform notes live in `extensions/adapters/`.

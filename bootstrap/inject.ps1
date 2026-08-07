@@ -21,15 +21,21 @@ function Write-NoBom([string]$file, [string]$text) {
 try { $SkillHome = (Resolve-Path $SkillHome).Path } catch {
   Write-Host "FATAL: saipen folder not found at $SkillHome" -ForegroundColor Red; exit 1
 }
-if (-not (Test-Path (Join-Path $SkillHome "RFC.md"))) {
-  Write-Host "FATAL: RFC.md missing in $SkillHome" -ForegroundColor Red; exit 1
+# BOOT.md, not RFC.md: the sanity check must name the file the injected block
+# actually sends agents to. RFC.md has been a redirect stub since the v7.190.0
+# split, so a clone missing BOOT.md but carrying the stub would pass this guard
+# and install an entry point with no rules behind it.
+if (-not (Test-Path (Join-Path $SkillHome "BOOT.md"))) {
+  Write-Host "FATAL: BOOT.md missing in $SkillHome" -ForegroundColor Red; exit 1
 }
 
 $blockCore = @"
 <!-- SAIPEN:BEGIN -->
 ## saipen protocol (global)
 On "saipen set" / "saipen ..." commands, or when project root contains
-.saipen/: read $SkillHome\RFC.md + $SkillHome\STYLE.md and follow them.
+.saipen/: read $SkillHome\BOOT.md (cold-start kernel) + $SkillHome\STYLE.md
+and follow them. BOOT.md routes on to INDEX.md, and to CORE.md when a rule
+question comes up. RFC.md is a redirect stub - it holds no rules.
 Chat tone: caveman-ded (STYLE.md) - compressed + blunt, on by default,
 off only on "stop caveman"/"normal mode".
 Memory: .saipen/ at project root - read .saipen/STATE.md before work;
@@ -158,9 +164,9 @@ if (Test-Path $plugRoot) {
   }
 }
 
-# --- Aider (boot set is RFC.md + STYLE.md, same promise as every platform) ---
+# --- Aider (boot set is BOOT.md + STYLE.md, same promise as every platform) ---
 $aider = "$h\.aider.conf.yml"
-$skillPath = Join-Path $SkillHome "RFC.md"
+$skillPath = Join-Path $SkillHome "BOOT.md"
 $stylePath = Join-Path $SkillHome "STYLE.md"
 if (Get-Command aider -ErrorAction SilentlyContinue) {
   if (Test-Path $aider) {

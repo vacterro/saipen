@@ -83,7 +83,7 @@ bash bootstrap/uninstall.sh                                         # macOS / Li
 > `saipen set`
 
 インストールしていませんか？任意のエージェントに1行貼り付けてください:
-> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
+> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md and follow them.
 
 上記のリストにないプラットフォーム (DeepSeek、Qwen、スタンドアロンOpenAIなど) ですか？
 プラットフォームごとのメモは `extensions/adapters/` にあります。
