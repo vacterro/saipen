@@ -1,3 +1,3 @@
-done: v7.205.0 pushed (a096411, tag v7.205.0). Goal batch T-518..T-525 shipped — pre-commit purity guard, home resolver, runtime manifest, RFC trap removal, INDEX exactness, one VERSION, transition authority, cold-path shrink.
-remaining: T-526 (goal, validation blind spots), T-517 (P1 pre-commit cascade), T-473 (HELD).
+done: v7.205.2 pushed (2d81619, tag v7.205.2). T-517 proved the validation path read-only; T-527 fixed the hook that told every successful commit it was NOT VALIDATED (generation 7, two red controls).
+remaining: T-473 (HELD, needs T-443). New: CI run #201 is RED on 3fcf780 -- untriaged, no ticket yet.
 awaiting: nothing.
