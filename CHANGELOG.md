@@ -2,6 +2,12 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.214.0 -- 2026-08-07 -- role freshness is recorded and compared, never trusted
+
+T-542: a subSaipen's findings are only as trustworthy as the charter it ran under, so the charter revision is recorded and compared. At spawn and every adopt, `role_revision` from the built-in charter's metadata block is recorded into the sub's own `STATE.md`; every ready OUTBOX package records the same revision; at adoption, prepare and collect the recorded revision is compared against the current project-local charter after `saipen sub sync`. A mismatch means the package or instance was produced under a superseded role -- the package is `stale`, not collected, and the producer re-runs; a fixer/scout still carrying an old revision revalidates before reuse. `saipen sub sync` refreshes charters and never a live sub's STATE/BOARD/LOG/kitchen, which is exactly what makes the mismatch visible.
+
+`validate.py`: a ready OUTBOX package whose `role_revision` differs from the project-local charter FAILs; a live sub STATE missing it WARNs (legacy grandfather); one carrying an old revision WARNs. `state.schema.json` accepts `role_revision` on sub STATEs. Three probes (`run_role_freshness_probes`: scenario 17 green+red, scenario 19) and one red control; audit_checks 172 of 172. CONFORMANCE row 247.
+
 ## 7.213.0 -- 2026-08-07 -- role charters become machine-readable
 
 T-541: every shipped `sai*.md` charter now opens with a fenced YAML metadata block declaring `role_kind` (SCOUT/FIXER/PRODUCER/TOOL), `write_scope`, `trigger`, `collect_policy` (automatic/core-review/explicit), `done_condition`, `freshness_inputs`, `output_contract`, `role_revision` -- the eight keys a tool can read without parsing prose. The two existing charters (saitest = TOOL, saiui = FIXER) gain blocks; four new charters land: saihunt (SCOUT), saipython (FIXER), saiwiki (PRODUCER), saitranslate (PRODUCER). A charter existing does not mean a worker exists -- MANIFEST.md lists only live spawned/adopted instances.

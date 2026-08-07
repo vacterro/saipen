@@ -2288,6 +2288,39 @@ for ob in sorted(Path(".").glob(".saipen/extensions/subs/*/kitchen/OUTBOX.md")):
                              f"diff nobody can re-check before applying "
                              f"(PROTOCOL.md § 9)")
                         outbox_ok = False
+            # Role freshness (T-542): a ready package is bound to the charter
+            # revision it was produced under. Absent on a legacy entry is a
+            # grandfather WARN (pre-T-542 packages carry no revision to trust
+            # or distrust); present but different from the current project-local
+            # charter is a FAIL -- the package is stale, collect must refuse.
+            _rr = re.search(r"\*\*role_revision:\*\*\s*(\S+)", e)
+            if _rr:
+                _charter_rr = None
+                _prod = re.search(r"\*\*producer:\*\*\s*(\S+)", e)
+                if _prod:
+                    _cp = Path("extensions/subs") / f"{_prod.group(1)}.md"
+                    if _cp.is_file():
+                        _cbl = re.findall(
+                            r"```yaml\n(.*?)```",
+                            _cp.read_text(encoding="utf-8-sig", errors="replace"),
+                            re.DOTALL)
+                        _m = next((re.search(r"^role_revision:\s*(\S+)", b, re.MULTILINE)
+                                   for b in _cbl), None)
+                        _charter_rr = _m.group(1) if _m else None
+                if _charter_rr is not None and _rr.group(1) != _charter_rr:
+                    fail(f"{loc} carries role_revision {_rr.group(1)!r} but "
+                         f"the project-local sai{_prod.group(1) if _prod else '?'}.md "
+                         f"charter declares {_charter_rr!r} -- produced under a "
+                         f"superseded role, package is stale and MUST NOT be "
+                         f"collected; the producer re-runs under the new "
+                         f"charter (PROTOCOL.md § 6, T-542)")
+                    outbox_ok = False
+            else:
+                warn("outbox-role-revision-legacy",
+                     f"{loc} is status: ready but carries no role_revision -- "
+                     f"pre-T-542 package, no revision to compare; collect "
+                     f"should treat it as stale until the producer re-runs "
+                     f"under the current charter (PROTOCOL.md § 6)")
 if outbox_seen and outbox_ok:
     ok(f"subSaipen OUTBOX entries well-formed ({outbox_seen} checked)")
 
@@ -3153,6 +3186,50 @@ if _subs_root.is_dir():
              f"visible only when someone runs it (extensions/subs/PROTOCOL.md § 4)")
     if not _idle and not _ready_total:
         ok("subSaipen liveness clean (none idle, no uncollected findings)")
+
+# Role freshness, instance side (T-542): a live sub STATE predating the
+# revision recording has no `role_revision` to compare -- WARN, never FAIL,
+# because those instances are exactly the ones whose next adopt must re-record
+# it. The FAIL half lives in the OUTBOX block above (a ready package bound to
+# a superseded charter is stale).
+if _subs_root.is_dir():
+    _rrless, _rrmismatch = [], []
+    for _d in sorted(_subs_root.iterdir()):
+        if not _d.is_dir() or _d.name == "TEMPLATE":
+            continue
+        _st = _d / "STATE.md"
+        if not _st.is_file():
+            continue
+        _stx = _st.read_text(encoding="utf-8-sig", errors="replace")
+        if "role_revision" not in _stx:
+            _rrless.append(_d.name)
+            continue
+        _inst_rr = re.search(r"^role_revision:\s*(\S+)", _stx, re.MULTILINE)
+        _cp = Path("extensions/subs") / f"{_d.name}.md"
+        _charter_rr = None
+        if _cp.is_file():
+            _cbl = re.findall(
+                r"```yaml\n(.*?)```",
+                _cp.read_text(encoding="utf-8-sig", errors="replace"),
+                re.DOTALL)
+            _m = next((re.search(r"^role_revision:\s*(\S+)", b, re.MULTILINE)
+                       for b in _cbl), None)
+            _charter_rr = _m.group(1) if _m else None
+        if _inst_rr and _charter_rr is not None and _inst_rr.group(1) != _charter_rr:
+            _rrmismatch.append(f"{_d.name} ({_inst_rr.group(1)} != charter {_charter_rr})")
+    if _rrless:
+        warn("sub-role-revision-legacy",
+             "subSaipen STATE(s) predate role-revision recording: "
+             + ", ".join(_rrless)
+             + " -- re-record `role_revision` from the current charter at "
+               "their next adopt (PROTOCOL.md § 6, T-542)")
+    if _rrmismatch:
+        warn("sub-role-revision-stale",
+             "subSaipen STATE(s) carry an old role_revision: "
+             + "; ".join(_rrmismatch)
+             + " -- the instance revalidates against the current charter "
+               "before reuse, and a ready OUTBOX it produced under the old "
+               "revision is stale (PROTOCOL.md § 6, T-542)")
 
 # ------------------------------------------- append targets end on a boundary
 

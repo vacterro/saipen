@@ -111,6 +111,7 @@ File: `<name>/kitchen/OUTBOX.md`. The only channel back to the main agent.
 - **severity:** P0 | P1 | P2 (optional -- matches `phases/review.md`'s own taxonomy; helps the main agent pick what to collect first when several are `critical: true`)
 - **producer:** saiwiki (required for a complete package consumed by Core `saipen collect <producer>`)
 - **source_head:** full Git HEAD or `no-git` (required for a complete package)
+- **role_revision:** the charter revision this package was produced under, from the built-in charter's metadata block (section 3.1, T-542) -- a ready package bound to a revision that no longer matches the project-local charter is `stale`, not collectable
 - **coverage:** exact surfaces completed (required for a complete package)
 - **payload:** exact files/artifacts to integrate (required for a complete package)
 - **verified:** checks already run and their results (required for a complete package)
@@ -332,6 +333,24 @@ definition (CORE.md §1.2's kitchen rule, `phases/clean.md`) -- `HUNT`'s
 existing kitchen-staleness check (v7.23.0) already covers it. No separate
 staleness machinery needed here.
 
+**Role freshness** (T-542): a subSaipen's findings are only as trustworthy
+as the charter it ran under, so the charter revision is recorded and
+compared, never trusted. At spawn and at every adopt, record
+`role_revision` -- the deterministic revision declared in the built-in
+charter's metadata block (section 3.1) -- into the sub's own `STATE.md`. Every
+ready OUTBOX package records the same `role_revision` it was produced
+under. At adoption, prepare and collect, compare the recorded revision
+against the CURRENT project-local charter, refreshing it first with
+`saipen sub sync` (which is the only legal way to change the local copy): a
+mismatch means the package or instance was produced under a superseded
+role -- the package is `stale`, not collected, and the producer must re-run
+under the new charter. A fixer or scout instance still carrying an old
+revision revalidates against the new charter before reuse; it does not
+silently keep producing under a role nobody ships. `saipen sub sync`
+refreshes the shared charters and NEVER a live sub's
+`STATE`/`BOARD`/`LOG`/`kitchen` -- the recorded `role_revision` is exactly
+what makes the mismatch visible instead of silently inherited.
+
 ## 7. `saipen sub` commands (extension-defined, CORE.md §1.9)
 
 Legal only while `.saipen/extensions/subs/` (or legacy root `extensions/subs/`) exists in the project.
@@ -340,7 +359,7 @@ Legal only while `.saipen/extensions/subs/` (or legacy root `extensions/subs/`) 
 |---|---|
 | `saipen sub list` | Read `MANIFEST.md`; for each entry, read its `STATE.md` and report `phase`/`task`. Any entry showing `phase: BLOCKED` gets an explicit WARNING appended to the output, not just a quiet status line -- a subSaipen can't escalate itself to a human on its own, so `list` is what surfaces it. |
 | `saipen sub status <name>` | Read-only peek: report `<name>`'s `kitchen/OUTBOX.md` counts (ready/draft/blocked/reviewed, how many critical) without modifying anything or running collect. |
-| `saipen sub spawn <name>` | **First-run bootstrap, then spawn.** If this project has no `.saipen/extensions/subs/` yet: verify `<saipen_home>/extensions/subs/PROTOCOL.md` actually exists first -- `saipen_home` stale or the clone moved/deleted? `BLOCKED` with `blocker: saipen_home stale: <path>`, never copy from a path that didn't check out. Otherwise copy `PROTOCOL.md`, `README.md`, `crew.md`, `TEMPLATE/`, an empty `_shared/inbox.md`, and all built-in `sai*.md` role charters from there (the SAIPEN home's own copy of this extension -- unaffected by where a consuming project attaches it; the home path is already in `STATE.md`'s `saipen_home` field, CORE.md §1.7 -- no manual copy needed, this IS the explicit ask that makes copying it in appropriate, unlike `saipen set`'s general no-auto-populate rule in CORE.md §1.9). Then, every run: if `.saipen/extensions/subs/<name>/` already exists, refuse and report it -- point at `saipen sub clean <name>` first if replacement is actually intended, never silently overwrite an existing subSaipen's history. Otherwise copy `TEMPLATE/` to `.saipen/extensions/subs/<name>/`, set `agent: <name>` (replacing TEMPLATE's placeholder), `saipen_home: <path>` (copied from the main project's own `STATE.md`), **and `updated:` to the real current UTC timestamp** (TEMPLATE's `2026-01-01T00:00:00Z` is a placeholder like the other two, not a value to partially edit -- CORE.md §1.2 requires this field genuinely current at every checkpoint, spawn included; §8 below says this file's shape is identical to Core's own for exactly this reason) in its `STATE.md`, add a line to `MANIFEST.md` (creating it first if this was also the bootstrap run). Two agents spawning concurrently is CORE.md §1.4's existing concurrency boundary (one writer at a time), not a new problem this command invents. |
+| `saipen sub spawn <name>` | **First-run bootstrap, then spawn.** If this project has no `.saipen/extensions/subs/` yet: verify `<saipen_home>/extensions/subs/PROTOCOL.md` actually exists first -- `saipen_home` stale or the clone moved/deleted? `BLOCKED` with `blocker: saipen_home stale: <path>`, never copy from a path that didn't check out. Otherwise copy `PROTOCOL.md`, `README.md`, `crew.md`, `TEMPLATE/`, an empty `_shared/inbox.md`, and all built-in `sai*.md` role charters from there (the SAIPEN home's own copy of this extension -- unaffected by where a consuming project attaches it; the home path is already in `STATE.md`'s `saipen_home` field, CORE.md §1.7 -- no manual copy needed, this IS the explicit ask that makes copying it in appropriate, unlike `saipen set`'s general no-auto-populate rule in CORE.md §1.9). Then, every run: if `.saipen/extensions/subs/<name>/` already exists, refuse and report it -- point at `saipen sub clean <name>` first if replacement is actually intended, never silently overwrite an existing subSaipen's history. Otherwise copy `TEMPLATE/` to `.saipen/extensions/subs/<name>/`, set `agent: <name>` (replacing TEMPLATE's placeholder), `saipen_home: <path>` (copied from the main project's own `STATE.md`), **and `updated:` to the real current UTC timestamp** (TEMPLATE's `2026-01-01T00:00:00Z` is a placeholder like the other two, not a value to partially edit -- CORE.md §1.2 requires this field genuinely current at every checkpoint, spawn included; §8 below says this file's shape is identical to Core's own for exactly this reason) in its `STATE.md`, and record `role_revision` from the spawned instance's built-in charter metadata block (section 3.1, T-542) in the same `STATE.md`, add a line to `MANIFEST.md` (creating it first if this was also the bootstrap run). Two agents spawning concurrently is CORE.md §1.4's existing concurrency boundary (one writer at a time), not a new problem this command invents. |
 | `saipen sub pause <name>` | Set `<name>`'s own `STATE.phase: BLOCKED` with `blocker: paused by main agent` -- freezes it (no new findings, no ticket work) without destroying its board/log/outbox, unlike `clean`. Useful right before a `SHIP` to avoid a subSaipen producing findings mid-ship. |
 | `saipen sub resume <name>` | Set `<name>`'s `STATE.phase` back to whatever it was doing before `pause` (its own `LOG.md` tail says what that was). |
 | `saipen sub collect` | Run the Handoff procedure (§ 4) against every active subSaipen. |

@@ -1564,6 +1564,15 @@ CASES: list[tuple[str, str, object, str]] = [
      "extensions/subs/saitest.md",
      replace("```yaml", "```text"),
      "charter-metadata"),
+    # T-542: a ready OUTBOX package bound to a superseded charter revision is
+    # stale. W-030 is the live ready entry; bind it to a revision the current
+    # saiwiki charter does not declare and the validator must refuse it.
+    ("a ready OUTBOX package carries a superseded role_revision",
+     ".saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md",
+     replace("- **source_head:** 12f56679d655523ef10d48cb631b9f424cc201f0\n",
+             "- **source_head:** 12f56679d655523ef10d48cb631b9f424cc201f0\n"
+             "- **role_revision:** rev999\n"),
+     "superseded role"),
     ("PROTOCOL.md drops UI- prefix from ticket table",
      "extensions/subs/PROTOCOL.md",
      replace("| `UI-` | saiui (fixer, § 9) |", ""),

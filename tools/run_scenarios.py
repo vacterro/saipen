@@ -1536,6 +1536,132 @@ def run_converge_routing_probes() -> tuple[list[str], int]:
     return problems, checked
 
 
+def run_role_freshness_probes() -> tuple[list[str], int]:
+    """Execute the T-542 role-freshness checks against a real project.
+
+    Scenario 17 (same source + changed role charter -> stale package) and
+    scenario 19 (an active instance carrying an old role_revision) both need a
+    subSaipen whose OUTBOX/STATE can be bound to a charter revision, so they
+    live here rather than in audit_checks.py, which copies the tree without
+    building a sub instance.
+    """
+    problems: list[str] = []
+    checked = 0
+
+    def validate(project: Path) -> str:
+        r = subprocess.run(
+            [sys.executable, str(VALIDATOR), "--project-root", str(project)],
+            cwd=project, capture_output=True, text=True, errors="replace")
+        return r.stdout + r.stderr
+
+    def expect(label: str, output: str, contains: str = "",
+               absent: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        details = []
+        if contains and contains not in output:
+            details.append(f"missing {contains!r}")
+        if absent and absent in output:
+            details.append(f"unexpected {absent!r}")
+        if details:
+            problems.append(f"{label}: {'; '.join(details)}")
+        else:
+            print(f"PASS: role freshness -- {label}")
+
+    mismatch = "produced under a superseded role"
+    stale_warn = "carry an old role_revision"
+
+    def write_charter(project: Path, rev: str) -> None:
+        d = project / "extensions" / "subs"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "saiwiki.md").write_text(
+            "# saiwiki -- the documenter\n\n"
+            "```yaml\n"
+            "role_kind: PRODUCER\n"
+            "write_scope: .saipen/extensions/subs/saiwiki/\n"
+            "trigger: bare saiwiki\n"
+            "collect_policy: explicit\n"
+            "done_condition: ready\n"
+            "freshness_inputs: [source_head]\n"
+            "output_contract: outbox\n"
+            f"role_revision: {rev}\n"
+            "```\n",
+            encoding="utf-8", newline="\n")
+
+    def write_sub(project: Path, inst_rev: str, outbox_rev: str) -> None:
+        sd = project / ".saipen" / "extensions" / "subs" / "saiwiki"
+        (sd / "kitchen").mkdir(parents=True, exist_ok=True)
+        (sd / "STATE.md").write_text(
+            "---\n"
+            "phase: DONE\n"
+            "task: none\n"
+            'next_action: "saipen continue"\n'
+            "blocker: none\n"
+            "transition_from: SHIP\n"
+            "saipen_version: 7\n"
+            "agent: saiwiki\n"
+            "mode: read-only\n"
+            f"role_revision: {inst_rev}\n"
+            "updated: 2026-01-01T00:00:00Z\n"
+            "---\n",
+            encoding="utf-8", newline="\n")
+        (sd / "kitchen" / "OUTBOX.md").write_text(
+            "# OUTBOX\n\n"
+            "## WIKI-900: probe package\n"
+            "- **status:** ready\n"
+            "- **summary:** probe\n"
+            "- **critical:** false\n"
+            "- **producer:** saiwiki\n"
+            "- **source_head:** no-git\n"
+            f"- **role_revision:** {outbox_rev}\n"
+            "- **coverage:** probe\n"
+            "- **payload:** probe\n"
+            "- **verified:** probe\n"
+            "- **instructions:** probe\n",
+            encoding="utf-8", newline="\n")
+
+    with tempfile.TemporaryDirectory(prefix="saipen-rolefresh-") as raw:
+        project = Path(raw) / "project"
+        shutil.copytree(SCENARIOS / "stale-state-reconciliation" / ".saipen",
+                        project / ".saipen")
+        env = {**os.environ, "GIT_AUTHOR_NAME": "probe",
+               "GIT_AUTHOR_EMAIL": "probe@example.invalid",
+               "GIT_COMMITTER_NAME": "probe",
+               "GIT_COMMITTER_EMAIL": "probe@example.invalid"}
+
+        def git(*args: str) -> subprocess.CompletedProcess[str]:
+            return subprocess.run(["git", *args], cwd=project, env=env,
+                                  capture_output=True, text=True, check=False)
+
+        if git("init", "-q").returncode != 0:
+            print("SKIP: role freshness probes -- git unavailable")
+            return problems, checked
+        git("add", "-A")
+        git("commit", "-q", "-m", "probe")
+
+        # Scenario 17 green: package bound to rev1 while the charter is rev1
+        # collects normally.
+        write_charter(project, "rev1")
+        write_sub(project, "rev1", "rev1")
+        expect("matching charter+package passes", validate(project),
+               absent=mismatch)
+
+        # Scenario 17 red: same source, charter bumped to rev2 -- the rev1
+        # package is stale and MUST NOT be collected.
+        write_charter(project, "rev2")
+        expect("same source + changed role charter makes the package stale",
+               validate(project), mismatch)
+
+        # Scenario 19: an active instance still carrying rev1 against a rev2
+        # charter is detected -- it revalidates before reuse.
+        write_charter(project, "rev2")
+        write_sub(project, "rev1", "rev2")
+        expect("an instance on the old revision is detected",
+               validate(project), stale_warn)
+
+    return problems, checked
+
+
 def run_last_event_probes() -> tuple[list[str], int]:
     """Execute the legacy-schema to current-schema checkpoint migration."""
     problems = []
@@ -1981,6 +2107,8 @@ hunt_mark_failures, hunt_mark_checked = run_hunt_mark_probes()
 failures.extend(hunt_mark_failures)
 converge_failures, converge_checked = run_converge_routing_probes()
 failures.extend(converge_failures)
+rolefresh_failures, rolefresh_checked = run_role_freshness_probes()
+failures.extend(rolefresh_failures)
 manifest_failures, manifest_checked = run_manifest_tracking_probes()
 failures.extend(manifest_failures)
 hook_failures, hook_checked, hook_skipped = run_hook_probes()
@@ -2012,6 +2140,7 @@ print(f"{ship_pick_checked} ship-pick behavior(s) executed")
 print(f"{last_event_checked} last_event migration behavior(s) executed")
 print(f"{hunt_mark_checked} hunt-mark behavior(s) executed")
 print(f"{converge_checked} converge-routing behavior(s) executed")
+print(f"{rolefresh_checked} role-freshness behavior(s) executed")
 print(f"{purity_checked} pre-commit-purity behavior(s) executed, "
       f"{purity_skipped} skipped for missing interpreters")
 print(f"{manifest_checked} manifest-tracking behavior(s) executed")
