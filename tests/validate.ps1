@@ -48,11 +48,11 @@ if ($stateContent -match "mode:\s+read-only" -and $stateContent -match "phase:\s
     Assert-Format $false "mode: read-only MUST NOT enter INIT/PLAN/ADD/BUILD/SHIP/CLEAN/TRANSLATE (RFC § 1.3)"
 }
 
-# 1b. goal_mode: true requires the persisted safety-valve counters (RFC § 2.4)
-if ($stateContent -match "goal_mode:\s+true") {
-    Assert-Format ($stateContent -match "goal_waves:\s*\d+") "goal_mode: true but goal_waves counter missing -- safety valve can't survive a restart without it"
-    Assert-Format ($stateContent -match "goal_tickets:\s*\d+") "goal_mode: true but goal_tickets counter missing -- safety valve can't survive a restart without it"
-    Write-Host "PASS: goal_mode counters present" -ForegroundColor Green
+# 1b. execution_intent: goal requires the persisted safety-valve counters (RFC § 2.4)
+if ($stateContent -match "execution_intent:\s+goal") {
+    Assert-Format ($stateContent -match "goal_waves:\s*\d+") "execution_intent: goal but goal_waves counter missing -- safety valve can't survive a restart without it"
+    Assert-Format ($stateContent -match "goal_tickets:\s*\d+") "execution_intent: goal but goal_tickets counter missing -- safety valve can't survive a restart without it"
+    Write-Host "PASS: goal intent counters present" -ForegroundColor Green
 }
 
 # 2. Check BOARD.md (cycles)

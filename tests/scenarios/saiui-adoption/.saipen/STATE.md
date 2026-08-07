@@ -15,6 +15,6 @@ requires:
   - git
   - python
 mode: full
-goal_mode: false
+execution_intent: normal
 updated: 2026-08-06T23:15:00Z
 ---

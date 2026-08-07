@@ -1,7 +1,7 @@
 expect: fail
 expect_fail_contains: tripped safety valve
 
-Test: `goal_mode: true` with a counter at section 2.4's cap, but no
+Test: `execution_intent: goal` with a counter at section 2.4's cap, but no
 safety-valve `WAIT:` in `next_action`.
 
 The counters ARE the tripped state -- there is no separate flag -- so an

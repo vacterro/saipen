@@ -9,7 +9,7 @@ schema_version: 3
 style_contract: ""
 saipen_home: ""
 mode: full
-goal_mode: false
+execution_intent: normal
 transition_from: INIT
 updated: 1970-01-01T00:00:00Z
 ---

@@ -57,11 +57,11 @@ if grep -qE "mode:[[:space:]]+read-only" .saipen/STATE.md && grep -qE "phase:[[:
     exit 1
 fi
 
-# 1b. goal_mode: true requires the persisted safety-valve counters (RFC § 2.4)
-if grep -qE "goal_mode:[[:space:]]+true" .saipen/STATE.md; then
-    grep -qE "goal_waves:[[:space:]]*[0-9]+" .saipen/STATE.md || { echo -e "${RED}FAIL: goal_mode: true but goal_waves counter missing -- safety valve can't survive a restart without it${NC}"; exit 1; }
-    grep -qE "goal_tickets:[[:space:]]*[0-9]+" .saipen/STATE.md || { echo -e "${RED}FAIL: goal_mode: true but goal_tickets counter missing -- safety valve can't survive a restart without it${NC}"; exit 1; }
-    echo -e "${GREEN}PASS: goal_mode counters present${NC}"
+# 1b. execution_intent: goal requires the persisted safety-valve counters (RFC § 2.4)
+if grep -qE "execution_intent:[[:space:]]+goal" .saipen/STATE.md; then
+    grep -qE "goal_waves:[[:space:]]*[0-9]+" .saipen/STATE.md || { echo -e "${RED}FAIL: execution_intent: goal but goal_waves counter missing -- safety valve can't survive a restart without it${NC}"; exit 1; }
+    grep -qE "goal_tickets:[[:space:]]*[0-9]+" .saipen/STATE.md || { echo -e "${RED}FAIL: execution_intent: goal but goal_tickets counter missing -- safety valve can't survive a restart without it${NC}"; exit 1; }
+    echo -e "${GREEN}PASS: goal intent counters present${NC}"
 fi
 
 # 2. Check BOARD.md exists, then real cycle detection via Kahn's algorithm

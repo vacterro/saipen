@@ -121,7 +121,7 @@ Nothing found -> LOG one normal Event Graph line per CORE.md §1.2 -- `- DATE
 [E-###] [parent: E-###] RUN: hunt -> clean @SHORT-HASH` (this exact text
 after the taxonomy, not a free-text summary) -- then immediately
 transition to `ADD`. This transition is unconditional -- a clean hunt is
-never itself a reason to stop, under `goal_mode` or otherwise (MAINTENANCE.md §2.4).
+never itself a reason to stop, under a goal run or otherwise (MAINTENANCE.md §2.4).
 Never invent busywork.
 
 ## Perf (user asks specifically, or a ticket calls for it)

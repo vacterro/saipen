@@ -67,12 +67,12 @@ treat finishing a MARKHUNT pass as a waypoint to keep running through.
 The brake itself lives in `phases/done.md`, not here: as long as any
 `[MARKHUNT]`-tagged ticket sits in `## BLOCKED`, `done.md`'s own
 Goal-Mode-Empty-Board step refuses to auto-proceed to `HUNT` even under
-`goal_mode: true`, and halts for the user instead -- in § 1.2's fixed
+`execution_intent: goal`, and halts for the user instead -- in § 1.2's fixed
 wording for that state, which is the third whitelisted `WAIT:` and
 exists precisely so this brake is machine-separable from drift. MARKHUNT itself just
 transitions to `DONE` like any other phase (§ 2.1) -- it never needs to
-know or check `goal_mode` directly; leaving `[MARKHUNT]` tickets behind
-in `## BLOCKED` is what holds the brake. `goal_mode` itself stays
+know or check the execution intent directly; leaving `[MARKHUNT]` tickets behind
+in `## BLOCKED` is what holds the brake. The intent itself stays
 whatever it already was, untouched, until every such ticket is triaged
 out.
 

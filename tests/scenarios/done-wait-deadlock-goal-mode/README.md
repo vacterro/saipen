@@ -2,9 +2,9 @@ expect: fail
 expect_fail_contains: auto-transition HUNT
 
 Test: the deadlocked `DONE` board from `done-wait-deadlock/`, under
-`goal_mode: true`.
+`execution_intent: goal`.
 
-Same defect, the mode that costs most. The check carried a `goal_mode is not
+Same defect, the mode that costs most. The check carried an intent
 True` exemption, so it was switched off in exactly the situation where a
 deadlocked board is worst: an unattended run parked on a `WAIT:` nobody was
 asked. Removing the exemption (T-453) made the branch live, and nothing stood

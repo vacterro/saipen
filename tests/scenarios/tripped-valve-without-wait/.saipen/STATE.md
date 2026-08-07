@@ -9,7 +9,7 @@ schema_version: 1
 agent: test
 mode: full
 updated: 2026-07-28T10:00:00Z
-goal_mode: true
+execution_intent: goal
 goal_waves: 3
 goal_tickets: 5
 ---

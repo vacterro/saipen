@@ -126,7 +126,7 @@ as the first-trip case above does. Nothing else is workable -> `STATE.phase:
 BLOCKED` with a concrete `WAIT:` naming the decision this ticket needs. The
 hysteresis is about never spending a third budget on the same ticket, never
 about halting a session that still has real work available -- one stuck
-ticket MUST NOT halt a session that still has other work, under `goal_mode`
+ticket MUST NOT halt a session that still has other work, under a goal run
 or otherwise.
 
 **Clean tree before the next ticket.** A blocked ticket MUST NOT leave its
@@ -157,7 +157,7 @@ Before picking the next ticket:
   tree is clean when it isn't.
 
 After VERIFY pass: STATE -> REVIEW. There is no 'next ticket' branch here -- `REVIEW` and `SHIP` are mandatory for the current ticket before picking up another.
-`goal_mode: true`? Increment `goal_tickets` by 1, write the LOG line MAINTENANCE.md
+`execution_intent: goal`? Increment `goal_tickets` by 1, write the LOG line MAINTENANCE.md
 § 2.4 requires for it -- `DEC: goal_tickets N->M`, that exact text after
 the taxonomy -- and checkpoint STATE (MAINTENANCE.md §2.4). The line is what makes
 § 1.5's Recovery able to rebuild the counter after a crash; a bump

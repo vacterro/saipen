@@ -58,9 +58,9 @@ A section of prose is an addition like any other, so § 1.1's gate applies befor
    - Pick exactly ONE obvious missing capability.
    - If the product is already mature and logically complete, **STOP**.
      Transition to `DONE` without hallucinating unnecessary features --
-     graceful completion is a successful outcome. `goal_mode: true`? This
-     IS the mature-exit condition MAINTENANCE.md §2.4 defines: set `goal_mode:
-     false`, clear `goal_waves`/`goal_tickets`, write the final report
+      graceful completion is a successful outcome. `execution_intent: goal`? This
+      IS the mature-exit condition MAINTENANCE.md §2.4 defines: clear the goal
+      intent and clear `goal_waves`/`goal_tickets`, write the final report
      (tickets done/verified/shipped vs blocked, pre-existing backlog vs
      found along the way), then STATE -> `DONE`.
    - Otherwise, ticket it and proceed by the two implementation paths
@@ -69,7 +69,7 @@ A section of prose is an addition like any other, so § 1.1's gate applies befor
      `TODO` -> `DOING`) and goes straight to `BUILD`; anything else goes to
      `PLAN` or `SCOUT`. Never leave a ticket unclaimed in `TODO` while
      `STATE.phase` has already moved to `BUILD`.
-   - `goal_mode: true` and this wasn't the mature-exit case above? Either
+   - `execution_intent: goal` and this wasn't the mature-exit case above? Either
      branch still completes this HUNT->ADD cycle -- increment
      `goal_waves` by 1, **write the identifiable LOG line MAINTENANCE.md §2.4 requires
      for it -- `DEC: goal_waves N->M`, that exact text after the taxonomy** --
@@ -109,7 +109,7 @@ A section of prose is an addition like any other, so § 1.1's gate applies befor
    whichever applies:
    - ticketed and claimed a minimal-delta change -> `RUN: add -> T-### <what>`
    - ticketed for planning instead -> `RUN: add -> T-### <what>, RETURN PLAN`
-   - concluded mature -> `DEC: add -> mature, goal_mode false` plus the final
+   - concluded mature -> `DEC: add -> mature, intent normal` plus the final
      report § 2.4 requires
    - found nothing and the board was already empty -> say exactly that;
      CORE.md §1.11 requires a session to leave a trace, and "ADD ran and found

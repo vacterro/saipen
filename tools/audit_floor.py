@@ -147,19 +147,30 @@ def find_pwsh():
 
 # (label, mutate(state, board, log) -> (state, board, log), expected substring)
 # A None value means "do not write this file at all".
+# The harness reads the repo's live STATE, which may itself sit at
+# `execution_intent: goal` with counters during a running goal -- so a goal
+# mutation must strip intent/counter lines first, never blindly append.
+def _force_goal_state(s: str, counters: str) -> str:
+    out = [ln for ln in s.splitlines()
+           if not ln.startswith(("execution_intent:", "goal_mode:",
+                                 "goal_waves:", "goal_tickets:"))]
+    joined = "\n".join(out).replace("mode: full",
+                                    "mode: full\nexecution_intent: goal\n"
+                                    + counters, 1)
+    return joined
+
+
 CASES = [
     ("missing STATE.md", lambda s, b, lg: (None, b, lg), "STATE.md missing"),
     ("missing BOARD.md", lambda s, b, lg: (s, None, lg), "BOARD.md missing"),
     ("missing LOG.md", lambda s, b, lg: (s, b, None), "LOG.md missing"),
     ("bad mode", lambda s, b, lg: (s.replace("mode: full", "mode: banana", 1), b, lg),
      "missing mode"),
-    ("goal_mode without goal_waves",
-     lambda s, b, lg: (s.replace("mode: full",
-                                "mode: full\ngoal_mode: true\ngoal_tickets: 0", 1), b, lg),
+    ("goal intent without goal_waves",
+     lambda s, b, lg: (_force_goal_state(s, "goal_tickets: 0"), b, lg),
      "goal_waves counter missing"),
-    ("goal_mode without goal_tickets",
-     lambda s, b, lg: (s.replace("mode: full",
-                                "mode: full\ngoal_mode: true\ngoal_waves: 0", 1), b, lg),
+    ("goal intent without goal_tickets",
+     lambda s, b, lg: (_force_goal_state(s, "goal_waves: 0"), b, lg),
      "goal_tickets counter missing"),
     ("cyclic needs",
      lambda s, b, lg: (s, "# Board\n## DOING\n\n## TODO\n- [ ] T-001 a | needs: T-002\n"

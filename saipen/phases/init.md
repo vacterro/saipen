@@ -35,7 +35,7 @@ matching exactly:
   protocol from -- § 1.7's bootloader pointer; TEMPLATE COPIES TOO: the
   template ships it empty, fill it in), `mode:` (per § 1.3 capability
   negotiation, `full` unless something's actually missing),
-  `goal_mode: false`, `updated:` (ISO-8601 UTC now).
+  `execution_intent: normal`, `updated:` (ISO-8601 UTC now).
 - `BOARD.md`: `## DOING` / `## TODO` / `## DONE` / `## BLOCKED`, no tickets yet.
 - `LOG.md`: starts empty. The first REAL entry (once work begins) MUST
   already follow the § 1.2 LOG skeleton -- no placeholder/example line

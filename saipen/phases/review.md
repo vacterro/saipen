@@ -40,7 +40,7 @@ whole.**
 
 If P0/P1 clear: STATE -> SHIP. There is no
 "STATE -> DONE" branch here -- SHIP is mandatory before DONE, even for a
-two-line bugfix, even under `goal_mode`.
+two-line bugfix, even under a goal run.
 
 **The passed ticket stays in `## DOING` through SHIP -- do NOT close it
 here.** The push has not happened; the work is not done, so `## DONE`

@@ -572,6 +572,33 @@ if state is None:
 before = len(failures)
 check_against_schema(state, schema, "STATE.md")
 
+# RFC § 2.4: ONE canonical persisted execution-intent enum. The
+# legacy `goal_mode` boolean stays READ-compatible during migration only: it
+# maps deterministically (true -> goal, false -> normal) and MUST be dropped
+# at the next checkpoint. A state carrying BOTH fields is corrupt -- after the
+# first canonical checkpoint there is exactly one source of truth. All later
+# checks read the effective intent from `state["execution_intent"]`.
+_INTENT_VALUES = ("normal", "goal", "converge")
+if "execution_intent" in state and "goal_mode" in state:
+    fail("STATE.md carries BOTH execution_intent and legacy goal_mode -- "
+         "after migration there is exactly one source of truth; the next "
+         "checkpoint MUST drop goal_mode for execution_intent (RFC § 2.4)")
+elif "goal_mode" in state:
+    _legacy_intent = "goal" if state.get("goal_mode") is True else "normal"
+    if _legacy_intent == "goal":
+        warn("goal-mode-legacy",
+             "STATE.md still carries legacy goal_mode: true -- readable and "
+             "migrated to execution_intent: goal, but the next checkpoint "
+             "MUST drop goal_mode (RFC § 2.4)")
+    state["execution_intent"] = _legacy_intent
+    state.pop("goal_mode", None)
+elif "execution_intent" not in state:
+    state["execution_intent"] = "normal"
+intent = state.get("execution_intent", "normal")
+if intent not in _INTENT_VALUES:
+    fail(f"STATE.md execution_intent is {intent!r} -- the closed set is "
+         f"normal/goal/converge (RFC § 2.4)")
+
 # RFC § 1.2: updated MUST be ISO-8601 UTC specifically (Z or +00:00).
 updated = state.get("updated")
 if isinstance(updated, str):
@@ -617,13 +644,13 @@ if state.get("phase") == "DONE" and _na_done.startswith("WAIT:") \
          "brake (RFC § 1.2); otherwise DONE "
          "should transition to SCOUT/PLAN/HUNT per RFC § 1.6 / § 2.1")
 
-# Hard invariant: goal_mode: false -> goal_waves/goal_tickets MUST be absent.
-if state.get("goal_mode") is False:
+# Hard invariant: intent != goal -> goal_waves/goal_tickets MUST be absent.
+if intent != "goal":
     for counter in ("goal_waves", "goal_tickets"):
         if counter in state and state[counter] is not None:
-            fail(f"STATE.md goal_mode: false but {counter} is present "
-                 f"({state[counter]!r}) -- counters MUST be cleared when "
-                 f"goal_mode is off (RFC § 2.4 Exit)")
+            fail(f"STATE.md execution_intent: {intent} but {counter} is present "
+                 f"({state[counter]!r}) -- counters MUST be cleared when no "
+                 f"goal is running (RFC § 2.4 Exit)")
 
 # RFC § 1.7's bootloader pointer has to survive being parsed, and this file
 # is the wrong judge of that: `parse_frontmatter` above reads the YAML SUBSET
@@ -1016,17 +1043,17 @@ GOAL_TICKET_CAP = 20
 # after this many consecutive releases MUST be named by a live BOARD ticket.
 WARN_OWNER_SPAN = 3
 
-# RFC § 2.4: goal_mode: true requires both persisted counters.
-if state.get("goal_mode") is True:
+# RFC § 2.4: execution_intent: goal requires both persisted counters.
+if intent == "goal":
     missing_counters = [c for c in ("goal_waves", "goal_tickets")
                         if not TYPE_CHECKS["integer"](state.get(c))]
     for counter in missing_counters:
-        fail(f"goal_mode: true but {counter} counter missing -- safety valve "
-             f"can't survive a restart without it (RFC § 2.4)")
+        fail(f"execution_intent: goal but {counter} counter missing -- safety "
+             f"valve can't survive a restart without it (RFC § 2.4)")
     if not missing_counters:
-        ok("goal_mode counters present")
+        ok("goal execution_intent counters present")
 
-        # RFC § 2.4: goal_mode: true with a counter at or over its cap IS the
+        # RFC § 2.4: intent=goal with a counter at or over its cap IS the
         # tripped-valve state -- there is no separate flag. A resuming agent
         # MUST re-state the stop rather than continue, so the tripped state has
         # to be visible in STATE.md itself, not just in whatever the last agent
@@ -1037,20 +1064,20 @@ if state.get("goal_mode") is True:
         if waves >= GOAL_WAVE_CAP or ticks >= GOAL_TICKET_CAP:
             na = state.get("next_action", "") or ""
             if not na.startswith("WAIT:") or "safety valve" not in na.lower():
-                fail(f"goal_mode: true with goal_waves={waves}/"
+                fail(f"execution_intent: goal with goal_waves={waves}/"
                      f"goal_tickets={ticks} is the tripped safety valve "
                      f"(caps {GOAL_WAVE_CAP}/{GOAL_TICKET_CAP}), but "
                      f"next_action={na!r} -- RFC § 2.4 requires "
                      f"next_action: WAIT: safety valve reached (N waves / "
-                     f"M tickets) -- run 'saipen goal' to continue")
-            # phase: BLOCKED here would satisfy § 2.4's Exit list and flip
-            # goal_mode to false, making the bare `saipen goal` that the WAIT
-            # line tells the user to run illegal under § 1.10 -- the valve
+                     f"M tickets) -- run 'cc' to continue")
+            # phase: BLOCKED here would satisfy § 2.4's Exit list and flip the
+            # intent back to normal, making the bare `cc` that the WAIT line
+            # tells the user to run refuse to resume under § 1.10 -- the valve
             # destroying its own continuation path.
             if state.get("phase") == "BLOCKED":
                 fail("tripped safety valve MUST NOT set phase: BLOCKED -- "
-                     "that is a § 2.4 Exit condition, so it clears goal_mode "
-                     "and makes bare `saipen goal` (the documented way to "
+                     "that is a § 2.4 Exit condition, so it clears the goal "
+                     "intent and makes bare `cc` (the documented way to "
                      "continue) illegal under § 1.10. Leave phase as-is")
 
 # ------------------------------------------------------------------ SUBSAIPEN
@@ -1266,12 +1293,12 @@ if sub_state_files:
                  f"{_sub_up!r} -- Recovery miscompares staleness across "
                  f"timezones otherwise (RFC § 1.2)")
 
-        if sub_state.get("goal_mode") is True:
+        if sub_state.get("execution_intent") == "goal":
             for _c in ("goal_waves", "goal_tickets"):
                 if not TYPE_CHECKS["integer"](sub_state.get(_c)):
-                    fail(f"{sp} goal_mode: true but {_c} is missing -- "
-                         f"PROTOCOL.md documents `saipen goal` for an "
-                         f"unattended sub run, so § 2.4's valve applies here "
+                    fail(f"{sp} execution_intent: goal but {_c} is missing -- "
+                         f"PROTOCOL.md documents a goal run for an "
+                         f"unattended sub, so § 2.4's valve applies here "
                          f"too and cannot survive a restart without it")
 
         if len(failures) > before_sub:
@@ -1545,11 +1572,11 @@ if _blocked_workable:
          f"keeps working the rest")
 # RFC 2.4's Exit list makes `phase: BLOCKED` an exit condition, so the two
 # cannot both be true: a blocked session is not a running goal.
-if state.get("phase") == "BLOCKED" and state.get("goal_mode") is True:
-    fail("STATE.md carries phase: BLOCKED with goal_mode: true -- RFC 2.4's "
-         "Exit list names BLOCKED as an exit, so goal_mode MUST be false "
-         "there. Left true, a resume walks straight back into an autonomous "
-         "run the block was supposed to stop")
+if state.get("phase") == "BLOCKED" and intent == "goal":
+    fail("STATE.md carries phase: BLOCKED with execution_intent: goal -- RFC "
+         "2.4's Exit list names BLOCKED as an exit, so the goal intent MUST "
+         "be cleared there. Left set, a resume walks straight back into an "
+         "autonomous run the block was supposed to stop")
 
 if _na_pick and not any(t["section"] == "## DOING" for t in tickets.values()):
     _named = _na_pick.group(1)
@@ -2009,7 +2036,7 @@ if log_files:
     # budget on exactly the long unattended runs it protects. WARN, not FAIL:
     # states predating v7.87.0 legitimately carry counters with no lines, and
     # a sealed segment may hold the lines for a very old run.
-    if state.get("goal_mode") is True:
+    if intent == "goal":
         # Anchored to the taxonomy slot -- the token immediately after the
         # bracket group -- so a line that merely QUOTES the marker is not one.
         # Found in review: two `RUN:` lines describing this very rule matched

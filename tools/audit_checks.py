@@ -474,6 +474,28 @@ def add_after(anchor: str, text: str):
     return lambda t: t.replace(anchor, anchor + text, 1)
 
 
+def force_goal(text: str, counters: str = ""):
+    """Set execution_intent: goal in a STATE frontmatter regardless of what
+    the live/pristine state currently holds.
+
+    The harness copies the repo's own live STATE, which may itself sit at
+    `execution_intent: goal` (a running goal) -- so `sub_line("execution_intent",
+    "goal")` is a no-op exactly when the case needs it to fire. This strips any
+    existing intent/counter/legacy lines and writes the goal intent plus the
+    requested counter lines deterministically. Anchored on `\\n---` (the closing
+    frontmatter delimiter) rather than `\\n---\\n`, because the source may or may
+    not carry a trailing newline and the counters must land inside the block
+    either way.
+    """
+    out = [ln for ln in text.splitlines()
+           if not ln.startswith(("execution_intent:", "goal_mode:",
+                                 "goal_waves:", "goal_tickets:"))]
+    joined = "\n".join(out) + "\n"
+    if counters:
+        joined = joined.replace("\n---", "\n" + counters + "\n---", 1)
+    return joined.replace("mode: full", "mode: full\nexecution_intent: goal", 1)
+
+
 def replace(old: str, new: str):
     return lambda t: t.replace(old, new, 1)
 
@@ -718,8 +740,8 @@ CASES: list[tuple[str, str, object, str]] = [
      lambda t: sub_line("phase", "BUILD")(sub_line("mode", "read-only")(
          sub_line("transition_from", "SCOUT")(t))),
      "MUST NOT enter"),
-    ("goal_mode true, counters absent", STATE,
-     sub_line("goal_mode", "true"),
+    ("goal intent, counters absent", STATE,
+     force_goal,
      "counter missing"),
     # Un-double the bootloader pointer's backslashes, exactly as commit
     # 4012bae did. This file's own frontmatter parser never sees it -- it
@@ -740,15 +762,14 @@ CASES: list[tuple[str, str, object, str]] = [
     # The counter STATE carries must survive being rebuilt from the LOG the
     # way § 1.5 Recovery rebuilds it. Mutating STATE alone leaves the log
     # untouched, so the two disagree exactly as they would after an untraced
-    # bare-`saipen goal` reset. The harness STATE carries no counters and sits
-    # at goal_mode: false today, so the old bump was a no-op and the rebuild
-    # rung (gated on goal_mode true) was unreachable (T-532): the mutation
-    # turns goal_mode on and injects a counter set whose goal_tickets (17)
-    # diverges from whatever the LOG replay rebuilds (9 today) without
-    # tripping the safety valve (kept under the 3/20 caps).
+    # goal resume reset. The harness STATE carries no counters and sits at
+    # execution_intent: normal today, so the old bump was a no-op and the
+    # rebuild rung (gated on the goal intent) was unreachable (T-532): the
+    # mutation turns the intent on and injects a counter set whose
+    # goal_tickets (17) diverges from whatever the LOG replay rebuilds (9
+    # today) without tripping the safety valve (kept under the 3/20 caps).
     ("goal counter STATE cannot survive its own rebuild", STATE,
-     lambda s: (sub_line("goal_mode", "true")(
-         s.replace("\n---\n", "\ngoal_waves: 1\ngoal_tickets: 17\n---\n", 1))),
+     lambda s: force_goal(s, "goal_waves: 1\ngoal_tickets: 17"),
      "newest goal marker rebuilds"),
     # Strip the final newline and the file stops mid-line. Nothing else in this
     # list reads a last byte, which is how the real one survived: every

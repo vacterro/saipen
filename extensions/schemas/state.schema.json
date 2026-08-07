@@ -67,19 +67,30 @@
         "manual-verify"
       ]
     },
+    "execution_intent": {
+      "type": "string",
+      "enum": [
+        "normal",
+        "goal",
+        "converge"
+      ],
+      "default": "normal",
+      "description": "The ONE canonical persisted execution-intent enum (RFC § 1.2, § 2.4). `normal` = ordinary one-step continuation; `goal` = an explicit user objective is running (the former `goal_mode: true`, safety-valve counters `goal_waves`/`goal_tickets` REQUIRED and bound to this value); `converge` = bare `cc` continuation to closure with no new objective. The legacy `goal_mode` boolean remains READ-compatible only during migration: `true` maps to `goal`, `false` to `normal`. A state carrying BOTH this field and `goal_mode` is corrupt -- tools/validate.py FAILs it, because after the first canonical checkpoint there is exactly one source of truth."
+    },
     "goal_mode": {
       "type": "boolean",
-      "default": false
+      "default": false,
+      "description": "LEGACY field. Read-compatible during migration only: `goal_mode: true` maps deterministically to `execution_intent: goal`, `false` to `normal`. The next checkpoint MUST drop this field and write `execution_intent`. A state carrying both is corrupt (tools/validate.py FAILs it)."
     },
     "goal_waves": {
       "type": "integer",
       "minimum": 0,
-      "description": "Safety-valve counter, RFC § 2.4. MUST be present when goal_mode: true, MUST be absent when goal_mode: false."
+      "description": "Safety-valve counter, RFC § 2.4. MUST be present when execution_intent is `goal`, MUST be absent otherwise."
     },
     "goal_tickets": {
       "type": "integer",
       "minimum": 0,
-      "description": "Safety-valve counter, RFC § 2.4. MUST be present when goal_mode: true, MUST be absent when goal_mode: false."
+      "description": "Safety-valve counter, RFC § 2.4. MUST be present when execution_intent is `goal`, MUST be absent otherwise."
     },
     "last_event": {
       "type": "integer",
@@ -133,8 +144,8 @@
   ],
   "if": {
     "properties": {
-      "goal_mode": {
-        "const": true
+      "execution_intent": {
+        "const": "goal"
       }
     }
   },

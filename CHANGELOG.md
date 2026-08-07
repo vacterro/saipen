@@ -2,6 +2,10 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.207.0 -- 2026-08-07 -- execution_intent replaces goal_mode
+
+T-536: the persisted execution-intent moved from the boolean `goal_mode` to ONE canonical enum `execution_intent: normal | goal | converge` in STATE. `goal_mode` remains READ-compatible only during migration (maps `true` -> goal, `false` -> normal) and a state carrying both fields FAILs validation -- one source of truth after the first canonical checkpoint. The safety-valve counters `goal_waves`/`goal_tickets` re-bind to `execution_intent: goal`; Recovery rebuilds the intent from the `DEC: goal pivot` line; the live state, template, scenario fixtures, portable floors, and the audit harnesses all migrated. The `cc`-semantics and safety-valve-wording changes follow in the next tickets.
+
 ## 7.206.9 -- 2026-08-07 -- uninstaller survives non-Windows
 
 T-535: uninstall.ps1's Remove-Task (from T-531) called `Get-ScheduledTask`, a Windows-only cmdlet -- on pwsh/Linux it throws and kills the uninstaller, which the first fully-reaching CI run exposed at the run_scenarios step. Remove-Task/rm_task now return "clean" when the cmdlet is unavailable or SAIPEN_UNINSTALL_SKIP_TASK is set, and both injector probes set that var because the scheduled task is machine-global -- a sandboxed test must never delete a real scheduler entry.

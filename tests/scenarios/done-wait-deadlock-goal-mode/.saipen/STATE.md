@@ -8,7 +8,7 @@ saipen_version: 7
 schema_version: 1
 agent: test
 mode: full
-goal_mode: true
+execution_intent: goal
 goal_waves: 1
 goal_tickets: 4
 updated: 2026-07-28T10:00:00Z

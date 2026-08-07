@@ -1,4 +1,4 @@
-Test: under `goal_mode: true` the board empties, a clean `HUNT` falls
+Test: under `execution_intent: goal` the board empties, a clean `HUNT` falls
 through to `ADD`, and ADD's § 2.2 evaluation lands on a non-minimal
 opportunity -- `TICKET(priority); RETURN PLAN`. ADD increments
 `goal_waves` by 1 at its RETURN (RFC § 2.4, `phases/add.md`), counting

@@ -25,7 +25,7 @@ decision. STATE -> SCOUT or BUILD per the normal phase docs, never
 straight to DONE.
 
 **After PLAN (if not in Proposal Mode):** STATE -> SCOUT for first ticket.
-If `goal_mode: true` (MAINTENANCE.md §2.4): do not pause here -- proceed straight into
+If `execution_intent: goal` (MAINTENANCE.md §2.4): do not pause here -- proceed straight into
 SCOUT. Also increment `goal_waves` by 1 (this PLAN run = a new wave), write the LOG line MAINTENANCE.md §2.4 requires for it -- `DEC: goal_waves N->M`, that exact text after the taxonomy, because § 1.5's Recovery rebuilds the counters by counting those lines and cannot find a bump that only ever reached `STATE.md` -- and
 checkpoint STATE -- **except** when this PLAN was entered directly from
 `ADD`'s `RETURN PLAN` (`phases/add.md`): that `HUNT`->`ADD` cycle's wave was

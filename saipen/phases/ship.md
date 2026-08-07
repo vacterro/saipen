@@ -8,7 +8,7 @@ separate `STATE.md phase:` value -- `SHIP` is the only phase here; CORE.md
 descriptive, not a transition-table row.
 
 Only on `saipen ship`, or repo has `origin` AND LOG shows prior ship, or
-`goal_mode: true` (MAINTENANCE.md §2.4) with an existing `origin`. Never auto-publish
+`execution_intent: goal` (MAINTENANCE.md §2.4) with an existing `origin`. Never auto-publish
 unopted project. Needs 100% green.
 
 **Fixable preflight failure -> BUILD, not BLOCKED.** Steps 0-4 plus release
@@ -83,7 +83,7 @@ attempted. Write the human digest same as always, `awaiting:` noting
    publish, and a first publish stops here for confirmation --
    `next_action: WAIT: first-publish -- confirm repo name '<name>' and
    public/private before I push` (CORE.md §1.2) -- ALWAYS, even under
-   `goal_mode` (MAINTENANCE.md §2.4's SHIP exception). Creating a new public artifact
+   the goal intent (MAINTENANCE.md §2.4's SHIP exception). Creating a new public artifact
    is a one-way door.
    **This gate used to sit at step 7, after the branch push and the tag
    push.** Its own wording said "before I push" while the push it named had
@@ -178,7 +178,7 @@ human so they read one small file instead of scrolling `LOG.md`:
 or `nothing`). Overwrite every time -- it's a snapshot, not history (history
 stays in `LOG.md`). This is the same file `saipen stop` writes (CORE.md §1.10).
 
-After SHIP: STATE -> DONE. `goal_mode: true`? Do not treat this as a
+After SHIP: STATE -> DONE. `execution_intent: goal`? Do not treat this as a
 stopping point even momentarily -- `next_action` MUST already name the
 next step, never a wait. `phases/done.md` § 1 sends you straight to HUNT;
 board-empty is a waypoint, not an exit (MAINTENANCE.md §2.4).
