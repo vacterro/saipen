@@ -1386,6 +1386,29 @@ def run_hunt_mark_probes() -> tuple[list[str], int]:
         expect("the exact HEAD mark passes", validate(project),
                "hunt skip marks resolve to real commits", absent=marker)
 
+        # T-528 rung: a commit that exists locally but has never reached a
+        # remote must FAIL, even though the old check passes it -- this is
+        # exactly the db9d775 gap, where a local run stayed green while CI,
+        # a fresh clone of the identical tree, went red.
+        bare = Path(raw) / "remote.git"
+        git("init", "-q", "--bare", str(bare))
+        git("remote", "add", "origin", str(bare))
+        if git("push", "-q", "-u", "origin", "HEAD").returncode == 0:
+            other = project / "scratch.txt"
+            other.write_text("unpushed local-only commit\n", encoding="utf-8")
+            git("add", "-A")
+            git("commit", "-q", "-m", "probe: unpushed local-only commit")
+            unpushed = git("rev-parse", "--short", "HEAD").stdout.strip()
+            if unpushed:
+                write_mark(unpushed)
+                expect("a local-only commit fails (never reached a remote)",
+                       validate(project), "sit on no remote branch")
+                write_mark(head)
+                expect("a remote-backed mark still passes after the stray",
+                       validate(project),
+                       "hunt skip marks resolve to real commits",
+                       absent=marker)
+
     return problems, checked
 
 

@@ -2,6 +2,10 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.206.1 -- 2026-08-07 -- hunt mark must reach the remote
+
+T-528: CI had been red for two runs because a clean-hunt mark named a commit that existed on one machine and on no remote branch -- `@db9d775` in LOG.md:116, an orphan local commit, so the validator passed locally and FAILed on a fresh clone against the identical tree. The check now has a second rung: after the commit exists, it must sit on a remote-tracking branch (`git branch -r --contains`, output-based), active misses FAIL and sealed misses WARN; a project with no remote keeps the old behavior. The mark was repaired by declared amendment to its remote-backed parent `@594a1da` (DEC E-2233). run_scenarios hunt-mark probes 2 -> 4, adding a local bare remote with an unpushed commit that must FAIL.
+
 ## 7.206.0 -- 2026-08-07 -- RFC stub trap out of the injectors + auto-scheduled inject
 
 T-529: the RFC stub trap was live in the injected block on every installed agent home -- both shell injectors wrote "read RFC.md + STYLE.md and follow them" into CLAUDE.md/AGENTS.md/GEMINI.md, and RFC.md is 144 bytes of redirect since the v7.190.0 split. Both injectors now name BOOT.md as the cold-start kernel and route BOOT -> INDEX -> CORE, sanity-check saipen/BOOT.md (not the stub), and give Aider the BOOT.md + STYLE.md boot set; the four root README entry lines match. The validator's RFC-stub-trap check was blind two ways -- its file set globbed only `adapters/*.md` + saipen/SKILL.md (the shell injectors reach every agent's global config) and its regex wanted `follow.*RFC\.md` while the live sentence has `follow` trailing RFC.md. Both layers closed: inject.sh + inject.ps1 are in the set, and `RFC\.md\s*\+` / `read[^.\n]*RFC\.md` catch the boot-SET shape; red-tested.

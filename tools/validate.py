@@ -1944,6 +1944,15 @@ if log_files:
     # what this reads. Sealed segments WARN because append-only history cannot
     # be corrected; the active tail FAILs. Skipped whole where git is absent --
     # hunt.md already says a repo-less project can never satisfy the skip.
+    # T-528 adds the second rung: the commit must have REACHED the remote, not
+    # merely exist locally. db9d775 existed on exactly one machine and on no
+    # remote branch, so the local run passed and CI -- a fresh clone against
+    # the identical tree -- failed: local-green was not evidence of CI-green.
+    # The mark is durable, so the commit it names must be durable too.
+    # `git branch -r --contains` reads remote-tracking refs only (no network,
+    # no fetch), so a stale ref is reported as what it is: not yet reached.
+    # A project with no remote keeps the old local-existence behavior -- no
+    # commit has reached anything there, and hunt.md's skip is unreachable.
     _hunt_marks = []
     for _lf in log_files:
         for _ln, _line in enumerate(_lf.read_text(encoding="utf-8-sig")
@@ -1951,27 +1960,45 @@ if log_files:
             for _h in re.findall(r"hunt -> clean @([0-9a-f]{7,40})\b", _line):
                 _hunt_marks.append((_lf, _ln, _h))
     if _hunt_marks and _git("rev-parse", "--git-dir")[0] == 0:
-        _bad_active, _bad_sealed, _seen = [], [], {}
+        _remote_refs = _git("for-each-ref", "--format=%(refname)", "refs/remotes")
+        _has_remote = _remote_refs[0] == 0 and bool(_remote_refs[1].strip())
+        _bad_active, _bad_sealed, _stray_active, _stray_sealed = [], [], [], []
+        _seen, _reach = {}, {}
         for _lf, _ln, _h in _hunt_marks:
+            _loc = f"{_lf.as_posix()}:{_ln} @{_h}"
             if _h not in _seen:
                 _seen[_h] = _git("cat-file", "-e", f"{_h}^{{commit}}")[0] == 0
-            if _seen[_h]:
-                continue
-            (_bad_active if _lf == active_log else _bad_sealed).append(
-                f"{_lf.as_posix()}:{_ln} @{_h}")
+            if not _seen[_h]:
+                (_bad_active if _lf == active_log else _bad_sealed).append(_loc)
+            elif _has_remote:
+                if _h not in _reach:
+                    _reach[_h] = bool(
+                        _git("branch", "-r", "--contains", _h)[1].strip())
+                if not _reach[_h]:
+                    (_stray_active if _lf == active_log
+                     else _stray_sealed).append(_loc)
         if _bad_active:
             fail("LOG.md records a clean hunt against commit(s) this "
                  "repository does not have: " + "; ".join(_bad_active)
                  + " -- `phases/hunt.md` skips a sweep only on an exact match "
                    "with HEAD, so a mark no commit backs is a skip nothing "
                    "earned")
-        if _bad_sealed:
+        if _stray_active:
+            fail("LOG.md records a clean hunt against commit(s) that sit on "
+                 "no remote branch: " + "; ".join(_stray_active)
+                 + " -- a hunt mark is durable, so the commit it names must "
+                   "be durable too: a commit that only exists locally is "
+                   "invisible to the next clone, which is how a red CI run "
+                   "stays green on the machine that produced it")
+        _sealed_bad = _bad_sealed + _stray_sealed
+        if _sealed_bad:
             warn("hunt-mark-unresolvable",
-                 f"{len(_bad_sealed)} sealed hunt mark(s) name commits this "
-                 f"repository does not have (earliest {_bad_sealed[0]}). "
-                 f"Immutable by append-only; new marks are FAILed instead")
-        if not _bad_active and not _bad_sealed:
-            ok(f"hunt skip marks resolve to real commits "
+                 f"{len(_sealed_bad)} sealed hunt mark(s) name commits this "
+                 f"repository does not have or that never reached the remote "
+                 f"(earliest {_sealed_bad[0]}). Immutable by append-only; "
+                 f"new marks are FAILed instead")
+        if not (_bad_active or _stray_active or _sealed_bad):
+            ok(f"hunt skip marks resolve to real commits on the remote "
                f"({len(_hunt_marks)} checked)")
 
     # RFC § 2.4 requires every goal counter bump to leave `DEC: goal_waves N->M`
@@ -2673,10 +2700,10 @@ if adapter_dir.is_dir():
     # them. Checking the markdown that describes the boot path while skipping
     # the code that installs it is the same shape T-495 named.
     _rfc_stub_trap = []
-    _trap_targets = (sorted(adapter_dir.glob("*.md"))
-                     + [Path("saipen/SKILL.md"),
-                        Path("bootstrap/inject.sh"),
-                        Path("bootstrap/inject.ps1")])
+    _trap_targets = [*sorted(adapter_dir.glob("*.md")),
+                     Path("saipen/SKILL.md"),
+                     Path("bootstrap/inject.sh"),
+                     Path("bootstrap/inject.ps1")]
     for _doc in _trap_targets:
         if not _doc.is_file():
             continue
