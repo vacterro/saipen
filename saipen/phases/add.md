@@ -2,6 +2,8 @@
 
 Activate this mode to systematically expand the software's capabilities. SAIPEN is evolutionary, not creative. Its purpose is to complete software, not reinvent it.
 
+**Never entered under `execution_intent: converge`** (T-539): a converge run never reaches this phase -- a clean `HUNT` under converge routes to `CLEAN` or the closure sequence per `saipen/CONVERGE.md` (stages F/I, referenced not restated), and CONVERGE.md stage C forbids `ADD` outright because invention is the one thing convergence cannot terminate. Everything below applies only to the `normal`/`goal` path.
+
 A section of prose is an addition like any other, so § 1.1's gate applies before § 2.2's ladder: a new section names the defect class it eliminates, or it does not get written.
 
 1. **Review:** Carefully review the current codebase. Understand the architecture, UI, and existing features.

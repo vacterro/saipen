@@ -119,9 +119,13 @@ a finding is small/obvious enough to skip planning, same judgment call as
 order = priority.
 Nothing found -> LOG one normal Event Graph line per CORE.md §1.2 -- `- DATE
 [E-###] [parent: E-###] RUN: hunt -> clean @SHORT-HASH` (this exact text
-after the taxonomy, not a free-text summary) -- then immediately
-transition to `ADD`. This transition is unconditional -- a clean hunt is
-never itself a reason to stop, under a goal run or otherwise (MAINTENANCE.md §2.4).
+after the taxonomy, not a free-text summary) -- then transition. **The
+destination is intent-aware** (T-539): under `execution_intent: converge` this
+sweep is stage F or stage I of `saipen/CONVERGE.md` and a clean result MUST
+NOT enter `ADD` -- F routes to `CLEAN`, I routes into the closure sequence
+(sync, fresh factories, finalize), per that contract. Under `normal`/`goal`
+it immediately transitions to `ADD` (MAINTENANCE.md §2.1). A clean hunt is
+never itself a reason to stop, whichever destination the intent picks.
 Never invent busywork.
 
 ## Perf (user asks specifically, or a ticket calls for it)

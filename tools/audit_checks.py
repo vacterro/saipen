@@ -496,6 +496,25 @@ def force_goal(text: str, counters: str = ""):
     return joined.replace("mode: full", "mode: full\nexecution_intent: goal", 1)
 
 
+def force_converge(text: str, next_action: str = '"PHASE ADD"'):
+    """Write execution_intent: converge plus a given next_action into a STATE
+    frontmatter regardless of what the live/pristine state currently holds.
+
+    The T-539 red controls need a converge state that names ADD (scenario 7)
+    or a goal-keyed valve pause (the wording half); the live STATE sits at
+    `execution_intent: goal` with a ticket-bearing next_action, so both intent
+    and next_action have to be replaced deterministically, not via sub_line.
+    Same `\n---` anchoring as force_goal so the block closes either way.
+    """
+    out = [ln for ln in text.splitlines()
+           if not ln.startswith(("execution_intent:", "goal_mode:",
+                                 "goal_waves:", "goal_tickets:",
+                                 "next_action:"))]
+    joined = "\n".join(out) + "\n"
+    joined = joined.replace("\n---", f"\nnext_action: {next_action}\n---", 1)
+    return joined.replace("mode: full", "mode: full\nexecution_intent: converge", 1)
+
+
 def replace(old: str, new: str):
     return lambda t: t.replace(old, new, 1)
 
@@ -771,6 +790,22 @@ CASES: list[tuple[str, str, object, str]] = [
     ("goal counter STATE cannot survive its own rebuild", STATE,
      lambda s: force_goal(s, "goal_waves: 1\ngoal_tickets: 17"),
      "newest goal marker rebuilds"),
+    # Scenario 7 (T-539): a clean HUNT under `execution_intent: converge` is
+    # stage F/I of CONVERGE.md and MUST NOT enter ADD -- ADD is invention, the
+    # one thing a converge run never does. The live LOG (sealed segments
+    # included) already carries `hunt -> clean @HASH` markers, so flipping the
+    # state to converge with next_action pointing at ADD must FAIL.
+    ("converge clean-HUNT may not name ADD", STATE,
+     lambda s: force_converge(s, '"PHASE ADD"'),
+     "converge clean-HUNT marker present but next_action names ADD"),
+    # T-539 valve-wording half: under converge the safety-valve pause's resume
+    # key is bare `cc`, never `saipen goal` -- there `saipen goal` is a NEW
+    # objective, a substitution. The goal wording in a converge pause FAILs.
+    ("converge safety-valve pause names the goal resume key", STATE,
+     lambda s: force_converge(
+         s, '"WAIT: safety valve reached (N waves / M tickets) -- '
+         "run 'saipen goal' to continue\""),
+     "converge safety-valve pause names the goal resume key"),
     # Strip the final newline and the file stops mid-line. Nothing else in this
     # list reads a last byte, which is how the real one survived: every
     # mutation appended below landed INSIDE the last entry instead of after it,

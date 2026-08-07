@@ -1,3 +1,3 @@
-done: v7.208.0 landed the gg/cc split and repaired 2 dead red controls; v7.210.0 closed the callout blind spot that let 3 Core files ship with the wrong cc description (T-550, T-537)
-remaining: T-538 -- write the canonical CC convergence contract as saipen/CONVERGE.md
+done: v7.210.0 -- saipen/CONVERGE.md now owns the cc stage order A-M, the post-K ordering rule and the closure bar, pinned by a position-checking validator (T-538)
+remaining: T-539 -- make the HUNT->ADD routing intent-aware so a clean HUNT under converge cannot enter ADD
 awaiting: nothing

@@ -1415,7 +1415,123 @@ def run_hunt_mark_probes() -> tuple[list[str], int]:
                 expect("a remote-backed mark still passes after the stray",
                        validate(project),
                        "hunt skip marks resolve to real commits",
-                       absent=marker)
+                        absent=marker)
+
+    return problems, checked
+
+
+def run_converge_routing_probes() -> tuple[list[str], int]:
+    """Execute the T-539 intent-aware routing checks against a real project.
+
+    Scenario 7 (a clean HUNT under `execution_intent: converge` must route to
+    CLEAN/finalization, never ADD) and scenario 8 (the normal intent may still
+    name ADD) both need a repository whose LOG carries the clean-HUNT marker
+    the check reads, so they live here with the hunt-mark probes rather than
+    in audit_checks.py, which copies the tree without writing LOG lines.
+    """
+    problems: list[str] = []
+    checked = 0
+
+    def validate(project: Path) -> str:
+        r = subprocess.run(
+            [sys.executable, str(VALIDATOR), "--project-root", str(project)],
+            cwd=project, capture_output=True, text=True, errors="replace")
+        return r.stdout + r.stderr
+
+    def expect(label: str, output: str, contains: str = "",
+               absent: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        details = []
+        if contains and contains not in output:
+            details.append(f"missing {contains!r}")
+        if absent and absent in output:
+            details.append(f"unexpected {absent!r}")
+        if details:
+            problems.append(f"{label}: {'; '.join(details)}")
+        else:
+            print(f"PASS: converge routing -- {label}")
+
+    add_fail = "converge clean-HUNT marker present but next_action names ADD"
+    valve_fail = "converge safety-valve pause names the goal resume key"
+
+    def write_state(project: Path, intent: str, next_action: str) -> None:
+        (project / ".saipen" / "STATE.md").write_text(
+            "---\n"
+            "phase: PLAN\n"
+            "task: none\n"
+            f"next_action: {next_action}\n"
+            "blocker: none\n"
+            "transition_from: INIT\n"
+            "saipen_version: 7\n"
+            "agent: probe\n"
+            "mode: full\n"
+            f"execution_intent: {intent}\n"
+            "updated: 2026-01-01T00:00:00Z\n"
+            "---\n",
+            encoding="utf-8", newline="\n")
+
+    with tempfile.TemporaryDirectory(prefix="saipen-converge-") as raw:
+        project = Path(raw) / "project"
+        shutil.copytree(SCENARIOS / "stale-state-reconciliation" / ".saipen",
+                        project / ".saipen")
+        env = {**os.environ, "GIT_AUTHOR_NAME": "probe",
+               "GIT_AUTHOR_EMAIL": "probe@example.invalid",
+               "GIT_COMMITTER_NAME": "probe",
+               "GIT_COMMITTER_EMAIL": "probe@example.invalid"}
+
+        def git(*args: str) -> subprocess.CompletedProcess[str]:
+            return subprocess.run(["git", *args], cwd=project, env=env,
+                                  capture_output=True, text=True, check=False)
+
+        if git("init", "-q").returncode != 0:
+            print("SKIP: converge routing probes -- git unavailable")
+            return problems, checked
+        git("add", "-A")
+        git("commit", "-q", "-m", "probe")
+
+        log_path = project / ".saipen" / "LOG.md"
+        base = log_path.read_text(encoding="utf-8-sig").rstrip("\n")
+
+        def write_mark() -> None:
+            log_path.write_text(
+                f"{base}\n- 26.07.17 00:02 [E-002] [parent: E-001] [T-001] "
+                f"RUN: hunt -> clean @dead0be\n",
+                encoding="utf-8", newline="\n")
+
+        # Scenario 7 red: converge + clean-HUNT marker + next_action naming ADD
+        # FAILs -- ADD is invention, the one thing a converge run never does.
+        write_mark()
+        write_state(project, "converge", '"PHASE ADD"')
+        expect("converge clean-HUNT naming ADD fails", validate(project),
+               add_fail)
+
+        # Scenario 7 green: the same state with next_action at CLEAN (stage F
+        # destination) must NOT trigger the converge-ADD failure.
+        write_state(project, "converge", '"PHASE CLEAN"')
+        expect("converge clean-HUNT routing to CLEAN passes",
+               validate(project), absent=add_fail)
+
+        # Scenario 8: the normal intent MAY reference ADD -- the routing check
+        # is scoped to converge and must not over-fire.
+        write_state(project, "normal", '"PHASE ADD"')
+        expect("normal intent may still name ADD", validate(project),
+               absent=add_fail)
+
+        # Valve wording red: a converge safety-valve pause naming `saipen goal`
+        # as its resume key is a substitution, not a continuation.
+        write_state(project, "converge",
+                    '"WAIT: safety valve reached (N waves / M tickets) -- '
+                    "run 'saipen goal' to continue\"")
+        expect("converge valve pause naming saipen goal fails",
+               validate(project), valve_fail)
+
+        # Valve wording green: the cc form is the legal converge resume.
+        write_state(project, "converge",
+                    '"WAIT: safety valve reached (N waves / M tickets) -- '
+                    "run 'cc' to continue\"")
+        expect("converge valve pause naming cc passes",
+               validate(project), absent=valve_fail)
 
     return problems, checked
 
@@ -1863,6 +1979,8 @@ last_event_failures, last_event_checked = run_last_event_probes()
 failures.extend(last_event_failures)
 hunt_mark_failures, hunt_mark_checked = run_hunt_mark_probes()
 failures.extend(hunt_mark_failures)
+converge_failures, converge_checked = run_converge_routing_probes()
+failures.extend(converge_failures)
 manifest_failures, manifest_checked = run_manifest_tracking_probes()
 failures.extend(manifest_failures)
 hook_failures, hook_checked, hook_skipped = run_hook_probes()
@@ -1893,6 +2011,7 @@ print(f"{orphan_checked} orphan-tag behavior(s) executed")
 print(f"{ship_pick_checked} ship-pick behavior(s) executed")
 print(f"{last_event_checked} last_event migration behavior(s) executed")
 print(f"{hunt_mark_checked} hunt-mark behavior(s) executed")
+print(f"{converge_checked} converge-routing behavior(s) executed")
 print(f"{purity_checked} pre-commit-purity behavior(s) executed, "
       f"{purity_skipped} skipped for missing interpreters")
 print(f"{manifest_checked} manifest-tracking behavior(s) executed")

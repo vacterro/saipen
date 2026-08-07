@@ -1067,9 +1067,9 @@ if intent == "goal":
                 fail(f"execution_intent: goal with goal_waves={waves}/"
                      f"goal_tickets={ticks} is the tripped safety valve "
                      f"(caps {GOAL_WAVE_CAP}/{GOAL_TICKET_CAP}), but "
-                     f"next_action={na!r} -- RFC § 2.4 requires "
-                     f"next_action: WAIT: safety valve reached (N waves / "
-                     f"M tickets) -- run 'cc' to continue")
+                 f"next_action={na!r} -- RFC § 2.4 requires "
+                 f"next_action: WAIT: safety valve reached (N waves / "
+                 f"M tickets) -- run 'saipen goal' to continue")
             # phase: BLOCKED here would satisfy § 2.4's Exit list and flip the
             # intent back to normal, making the bare `cc` that the WAIT line
             # tells the user to run refuse to resume under § 1.10 -- the valve
@@ -1079,6 +1079,31 @@ if intent == "goal":
                      "that is a § 2.4 Exit condition, so it clears the goal "
                      "intent and makes bare `cc` (the documented way to "
                      "continue) illegal under § 1.10. Leave phase as-is")
+
+# RFC § 1.2 + § 2.4 (intent-aware valve wording, T-539): the safety-valve
+# pause's resume key must match the intent that owns it. Under
+# `execution_intent: goal` the fixed § 1.2 form (`run 'saipen goal' to
+# continue`) applies. Under `execution_intent: converge` it MUST read
+# `run 'cc' to continue` and MUST NOT read `run 'saipen goal'` -- there
+# `saipen goal` is a NEW objective, a substitution not a continuation,
+# while bare `cc` is the only legal resume. The two wordings once lived in
+# different documents and a weak agent copied the goal wording into a
+# converge pause; this makes the pairing enforced rather than prose.
+if intent == "converge" and isinstance(next_action, str) \
+        and next_action.startswith("WAIT:") \
+        and "safety valve" in next_action.lower():
+    if "run 'saipen goal'" in next_action.lower():
+        fail("converge safety-valve pause names the goal resume key -- "
+             "under execution_intent: converge the pause MUST read "
+             "`-- run 'cc' to continue`, never `run 'saipen goal'`, "
+             "which there is a NEW objective, not a continuation "
+             "(RFC § 1.2, § 2.4)")
+    elif "run 'cc'" not in next_action.lower():
+        fail("converge safety-valve pause carries no resume key -- the "
+             "§ 1.2 form under execution_intent: converge ends "
+             "`-- run 'cc' to continue`, never `run 'saipen goal'`")
+    else:
+        ok("converge safety-valve pause names the cc resume key")
 
 # ------------------------------------------------------------------ SUBSAIPEN
 
@@ -1733,6 +1758,30 @@ if not active_log.is_file():
     fail("LOG.md missing -- RFC § 1.2 requires it, and § 1.5 Recovery has "
          "nothing to rebuild from without it (an empty LOG.md is legal, as "
          "phases/init.md writes on a fresh project; an absent one is not)")
+
+# RFC § 2.1 + CONVERGE.md (intent-aware clean-HUNT routing, T-539): a clean
+# HUNT's destination depends on the execution intent. Under `normal`/`goal` it
+# enters ADD (MAINTENANCE § 2.1). Under `converge` a clean HUNT is stage F or
+# stage I of CONVERGE.md and MUST NOT enter ADD -- F routes to CLEAN, I routes
+# into the closure sequence (sync, fresh factories, finalize); ADD is
+# invention, the one thing a converge run must never do (CONVERGE.md stage C).
+# The marker is hunt.md's canonical clean-hunt line (`RUN: hunt -> clean
+# @HASH`); a converge state that carries it and points next_action at ADD is
+# the failed routing this pins. The normal intent MAY reference ADD -- that is
+# the other half of the same rule and deliberately not checked here.
+if intent == "converge" and log_files and isinstance(next_action, str):
+    _clean_hunt_marker = any(
+        "hunt -> clean @" in ln
+        for p in log_files for ln in read_doc(p).splitlines())
+    if _clean_hunt_marker:
+        if re.search(r"\bADD\b", next_action):
+            fail("converge clean-HUNT marker present but next_action names ADD "
+                 "-- under execution_intent: converge a clean HUNT MUST NOT enter "
+                 "ADD (CONVERGE.md stages F/I route it to CLEAN and the closure "
+                 "sequence; ADD is invention, which converge never does). The "
+                 "normal/goal path may still enter ADD per MAINTENANCE.md § 2.1")
+        else:
+            ok("converge clean-HUNT marker present, next_action avoids ADD")
 
 if log_files:
     # Date prefix optional to allow pre-STYLE.md history; new entries carry one.

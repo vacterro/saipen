@@ -2,6 +2,14 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.211.0 -- 2026-08-07 -- the clean-HUNT destination and the valve resume key follow the execution intent
+
+T-539: the HUNT-to-ADD routing was one unconditional line ("immediately transition to `ADD`") that also bound `execution_intent: converge` -- while CONVERGE.md stage C forbids `ADD` entirely under converge as the invention that can never terminate. A converge run that exhausted the board was ordered into the very phase the contract forbids. The destination is now intent-aware: under converge a clean HUNT is stage F or stage I of CONVERGE.md (F routes to `CLEAN`, I into the closure sequence -- sync, fresh factories, finalize), under normal/goal it keeps the `ADD` destination of MAINTENANCE § 2.1. The clause lives once in § 2.1; `hunt.md`, `done.md` and `add.md` name it without restating it.
+
+The safety-valve pause's resume key is intent-aware too. Under goal intent the fixed § 1.2 form stands (`run 'saipen goal' to continue`); under converge the pause MUST read `run 'cc' to continue`, never `run 'saipen goal'` -- there `saipen goal` is a NEW objective, a substitution, while bare `cc` is the only legal resume. The pending "resume key moves to cc when the intent model lands" note was landed, since T-536 made the intent model real.
+
+`validate.py` gains two checks: a converge state carrying a clean-HUNT LOG marker whose `next_action` names `ADD` FAILs (the normal intent naming `ADD` passes untouched -- scenario 8), and a converge safety-valve `WAIT:` whose body names `run 'saipen goal'` FAILs. Two new red controls in `audit_checks.py` (168 -> 170) and `run_converge_routing_probes` in `run_scenarios.py` (5 behaviors) cover red and green on both intents plus the wording half. CONFORMANCE rows 243/244.
+
 ## 7.210.0 -- 2026-08-07 -- the convergence order gets one owner
 
 T-538: `saipen/CONVERGE.md` is now the only place the `cc` lifecycle is defined -- stages A through M from recovery to fresh producer packages, the rule that no main-source mutation may follow the producer preparation, and the closure bar that decides when a converge run may clear the intent and stop. The order was previously implied by five documents that each knew one hop, so no single reader could answer "what comes after CLEAN" without assembling it, and assembling it is where two conformant agents diverge. `hunt.md`, `clean.md`, `prepare.md` and `done.md` each name their own stage and defer; none restates the sequence.
