@@ -9,34 +9,47 @@ decides every question this file does not answer. RFC references resolve as:
 
 ## Fast path
 
-1. **Read `STYLE.md` -- the file in the same folder as this `BOOT.md` -- before any output.**
+1. **Read `STYLE.md` — the file at `protocol_dir/STYLE.md` — before any output.**
    Voice governs the first token (CORE.md § 1.1), so the read is the
-   first action, not a deferred load: it needs no `<saipen_home>`
-   resolution (that field can be empty or dead), the file sits next
-   to this one. The operative contract is repeated below, in "Chat
+   first action, not a deferred load. `protocol_dir` is resolved in
+   step 2; if it is not yet bound because `saipen_home` is dead,
+   fall back to the file in the same folder as this `BOOT.md` —
+   which needs no resolution and answers the same question either
+   layout. The operative contract is repeated below, in "Chat
    voice & compression"; the file itself holds the nuance (LOG
    voice, artifact voice, auto-clarity overrides).
 
 2. **Bind `project_root`, then read its `.saipen/STATE.md`.** An explicit
-   project-root target wins. Otherwise use `git rev-parse --show-toplevel`
-   plus `git rev-parse --git-common-dir`. The ACTIVE worktree is asked first:
-   a linked worktree carrying its own `.saipen/` is its own project root.
-   Only when it has none -- the normal case, since `.saipen/` is gitignored
-   and a fresh worktree starts without one -- does a common directory ending
-   in `/.git` bind it to that main worktree's root and shared `.saipen/`.
-   Never create a local second copy to force this. Outside Git, use the nearest ancestor already
-   carrying `.saipen/`. This binds location only: missing `STATE.md` there is
-   corruption for step 3 to diagnose, not evidence that the cwd is unowned.
-   Nothing owns the cwd? Refuse to guess or
-   create a relative `.saipen/`; only `saipen set` after INIT confirms genuine
-   absence. Keep the resolved absolute root for the session: every later
-   checkpoint path is `<project_root>/.saipen/...`, even after `cd`. An
-   explicit new root may deliberately retarget the session; an accidental cwd
-   change may not. `saipen_home` points to the protocol install, not this root
-   (CORE.md § 1.1).
-   **Confirm `<saipen_home>/saipen/BOOT.md` exists before trusting it.**
-   Missing -> the path is dead; set `phase: BLOCKED` immediately rather
-   than discovering it at the first phase transition.
+    project-root target wins. Otherwise use `git rev-parse --show-toplevel`
+    plus `git rev-parse --git-common-dir`. The ACTIVE worktree is asked first:
+    a linked worktree carrying its own `.saipen/` is its own project root.
+    Only when it has none -- the normal case, since `.saipen/` is gitignored
+    and a fresh worktree starts without one -- does a common directory ending
+    in `/.git` bind it to that main worktree's root and shared `.saipen/`.
+    Never create a local second copy to force this. Outside Git, use the nearest ancestor already
+    carrying `.saipen/`. This binds location only: missing `STATE.md` there is
+    corruption for step 3 to diagnose, not evidence that the cwd is unowned.
+    Nothing owns the cwd? Refuse to guess or
+    create a relative `.saipen/`; only `saipen set` after INIT confirms genuine
+    absence. Keep the resolved absolute root for the session: every later
+    checkpoint path is `<project_root>/.saipen/...`, even after `cd`. An
+    explicit new root may deliberately retarget the session; an accidental cwd
+    change may not. `saipen_home` points to the protocol install, not this root
+    (CORE.md § 1.1).
+
+    **Resolve `protocol_dir` from `saipen_home` before trusting it.**
+    Two layouts exist, one deterministically:
+    - If `<saipen_home>/saipen/BOOT.md` exists (source clone) →
+      `protocol_dir = <saipen_home>/saipen`
+    - Else if `<saipen_home>/BOOT.md` exists (flattened install) →
+      `protocol_dir = <saipen_home>`
+    - Else: `saipen_home` is dead → set `phase: BLOCKED` immediately
+      rather than discovering it at the first phase transition.
+
+    After resolution, every normative document loads from `protocol_dir`:
+    `protocol_dir/BOOT.md`, `protocol_dir/STYLE.md`, `protocol_dir/INDEX.md`,
+    `protocol_dir/phases/<phase>.md`. Runtime tools, schemas, templates,
+    and `VERSION` resolve from `<saipen_home>`.
 
 3. **Validate STATE before executing anything in it.**
    Every field CORE.md § 1.2's required set names must be present and non-empty
@@ -131,14 +144,14 @@ decides every question this file does not answer. RFC references resolve as:
    session writing it into `STATE.md` is not the user authorizing it.
 
 8. **Load the phase doc only when you need its rules**, from
-   `<saipen_home>/phases/<phase>.md`, one phase at a time.
-   Normalise the path for the host OS (replace `/` with `\` on Windows)
-   before resolving. `saipen_home` empty or dead on this machine? Clone
-   `github.com/vacterro/saipen` and update the field at your next checkpoint
-   (CORE.md § 1.7). No git either -> set `phase: BLOCKED` and
-   `next_action: WAIT: blocked -- saipen_home missing/dead and git
-   unavailable; give me the path to a saipen/ clone on this machine, or
-   install git`.
+    `protocol_dir/phases/<phase>.md`, one phase at a time.
+    Normalise the path for the host OS before resolving.
+    `saipen_home` empty or dead on this machine? Clone
+    `github.com/vacterro/saipen` and update the field at your next checkpoint
+    (CORE.md § 1.7). No git either -> set `phase: BLOCKED` and
+    `next_action: WAIT: blocked -- saipen_home missing/dead and git
+    unavailable; give me the path to a saipen/ clone on this machine, or
+    install git`.
 
 9. **Checkpoint after every ticket, after every phase transition, and before
    you stop** -- not per edit, not saved up for session end: LOG (append) ->
