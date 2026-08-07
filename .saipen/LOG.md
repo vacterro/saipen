@@ -18,3 +18,4 @@
 - 07.08.26 15:26 [E-2265] [parent: E-2264] [T-536] DEC: claim T-536 -- execution_intent migration, entering SCOUT
 - 07.08.26 15:45 [E-2266] [parent: E-2265] [T-536] RUN: verify T-536 -> PASS -- validate.py 0 FAILs, audit_checks 165/165, audit_floor 27/27, run_scenarios green, ruff clean; migration red-tested (dual-field state FAILs "carries BOTH", legacy goal_mode true/false migrate deterministically); live STATE migrated to execution_intent: goal as the first canonical checkpoint; 7 scenario fixtures migrated
 - 07.08.26 15:45 [E-2267] [parent: E-2266] [T-536] DEC: goal_tickets 0->1 -- T-536 passed VERIFY
+- 07.08.26 15:55 [E-2268] [parent: E-2267] [T-536] RUN: ship v7.207.0 -> pushed dbdaa3d. Tag v7.207.0 created on HEAD and pushed as a named ref. execution_intent enum replaces goal_mode across schema/validator/CORE/MAINTENANCE/phases/tools/fixtures; live STATE migrated as first canonical checkpoint
