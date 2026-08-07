@@ -146,4 +146,7 @@
 - 07.08.26 01:19 [E-2186] [parent: E-2185] [T-none] RUN: prepare saitranslate -> confirmed ready
 - 07.08.26 01:23 [E-2187] [parent: E-2186] [T-none] RUN: prepare saitranslate -> SAIT-009 DONE. 29 locale READMEs restructured to ET template. restructure_locales.py batch-processed 28 non-Core + ja kitchen. OUTBOX status: ready. SAIT-010 ticketed.
 
+- 07.08.26 01:26 [E-2188] [parent: E-2187] [T-none] RUN: continue -> DONE, T-473 unworkable (needs T-443 BLOCKED). Transition BLOCKED. Ship: tree clean, nothing to push.
+- 07.08.26 01:31 [E-2189] [parent: E-2188] [T-none] DEC: goal pivot — "Harden cold-start and execution chain." 9 tickets T-518..T-526: validation purity (P0), home resolver (P0), runtime manifest (P1), RFC stub trap (P1), INDEX exactness (P2), one VERSION (P2), transition authority (P1), cold path shrink (P1), 11 blind spot fixtures (P2). T-517 triaged MARKHUNT→TODO. goal_mode: true, waves: 0, tickets: 0. PLAN complete, entering SCOUT for T-518.
+- 07.08.26 01:31 [E-2190] [parent: E-2189] DEC: goal_waves 0->1
 

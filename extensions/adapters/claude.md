@@ -7,4 +7,4 @@
 - Write repo files with editor tools, never shell redirects -- BOM risk.
 - Native todo lists mirror `.saipen/BOARD.md`, never replace it.
 
-Everything else: follow `saipen/BOOT.md` -> `saipen/INDEX.md` -> `saipen/CORE.md`.
+Everything else: follow the BOOT/INDEX/CORE loading contract in `saipen/INDEX.md`.

@@ -59,8 +59,11 @@ This file gives the execution order. No rule is *defined* here —
    first.
    **No command?** `next_action` IS the instruction. It is the previous
    session's pre-computed Pick Rule result. Confirm against `BOARD.md`
-   yourself: topmost workable ticket wins (§1.11, §1.6). `WAIT:` → output
-   verbatim and stop. When choosing, §1.11's priority is fixed:
+   yourself: topmost workable ticket wins (§1.11, §1.6). Where the
+   validator cannot re-derive the pick (the portable floor does not —
+   a grep cannot walk a `needs:` graph), the confirmation is the only
+   guard. `WAIT:` → output verbatim and stop. When choosing, §1.11's
+   priority is fixed:
    RECOVER > OBEY > UNBLOCK > FINISH > START > MAINTAIN. Five legal
    forms in §1.2: `WAIT:` / `saipen <command>` / `PHASE <phase> [T-###]` /
    `RUN:` / `RESUME: T-### <phase>`. Destructive-op confirmation still
@@ -88,10 +91,14 @@ This file gives the execution order. No rule is *defined* here —
   genuinely different actor; LOG a `DEC` naming both.
 - **Reply language, before any output**: read STYLE.md's `reply_language:`
   (step 1 already opened it). Closed set: `et`/`en`/`ru`/`auto`. Outside that
-  set → FAIL. Full rule in STYLE.md and CORE.md §1.1. Repeated here because
-  it governs the first token.
+  set → FAIL. Chat only — every artifact stays English. Under `auto`:
+  Reply-language precedence: explicit current user prose (Estonian/English/Russian) >
+  clearly Russian primary repository for bare/ambiguous input > Estonian default;
+  another detected language uses English. Full rule in STYLE.md and CORE.md §1.1.
+  Repeated here because it governs the first token.
 - `CHANGELOG.md` is never part of a cold start.
 - **Chat voice & compression, before any output.** Step 1 already read
-  STYLE.md — `caveman-дед` is one fused voice, never a menu. Voice
-  persistence: caveman-дед applies to every response until explicit
-  "stop caveman" or "normal mode". Full contract in `saipen/STYLE.md`.
+  STYLE.md — the file in the same folder as this BOOT.md — before any output.
+  `caveman-дед` is one fused voice, never a menu. Voice persistence: caveman-дед
+  applies to every response until explicit "stop caveman" or "normal mode".
+  Full contract in `saipen/STYLE.md`.

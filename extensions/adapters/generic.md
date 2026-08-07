@@ -7,4 +7,4 @@ No skill system, no config hooks? One pasted line is the whole install:
 No file access at all -> read-only advisor mode per the protocol capability
 table: report, never claim work done.
 
-Everything else: follow `saipen/BOOT.md` -> `saipen/INDEX.md` -> `saipen/CORE.md`.
+Everything else: follow the BOOT/INDEX/CORE loading contract in `saipen/INDEX.md`.
