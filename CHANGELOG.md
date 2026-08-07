@@ -2,6 +2,10 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.205.1 -- 2026-08-07 -- validation blind spots closed
+
+T-526: pre-commit purity probe (read-only gate proven, mutating validator trips gen-6 guard) + validator checks for STATE final-newline, nested saipen/VERSION duplicate, INDEX phase parity, and adapter RFC-stub-trap. Gen-6 hook fix: the gen-5 `&& exit 0` short-circuited before the purity guard, making it dead; now captures validator rc, runs purity comparison, then exits. All 11 validation blind spots now covered by a named check or probe.
+
 ## 7.205.0 -- 2026-08-07 -- cold-start + execution chain hardening
 
 Goal wave "Harden cold-start and execution chain" (9 tickets, 8 shipped):
