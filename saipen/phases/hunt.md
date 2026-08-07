@@ -65,46 +65,28 @@ Signal order, cap 5 tickets:
 5. Symmetry gaps (save/load, undo/redo, import/export, start/stop, CLI params vs internal lists/GUI)
 6. Dead code, orphan files (zero grep refs, not entry/doc/config)
 
-**Moving a file is destructive to whatever loads it, and a move passes the recovery test trivially.** Archiving, renaming and reorganising all read as tidy rather than dangerous, and the gate below asks the wrong question about them: the file IS recoverable -- it is right there in the new place -- and the program is broken anyway, because recoverability is not the property that matters when something loads the old path. Reproduced from a user's session: "put the rest in the archive" moved a GUI module, the entry point loaded it at runtime by absolute path, and the next command raised `FileNotFoundError`. **So before moving or renaming anything, sweep for references to it and treat a hit as a blocker, not a note.** Grep the basename and the path across the project -- source, config, scripts, manifests, docs -- and either move the references in the same act or do not move the file. The sweep is one command and the alternative is a program that starts failing at import time, which is the cheapest rung of `phases/verify.md`'s ladder and therefore the most embarrassing one to skip. This binds `CLEAN` identically: it prunes and relocates, and a scrub that orphans a loader is the same defect wearing a tidier word.
+**HUNT deletes, moves and renames nothing** (T-540). Its only mutations are
+the canonical BOARD/LOG/STATE bookkeeping a claim or completion performs;
+every file-system change a sweep could justify -- dead code, orphan, junk, a
+tidy move, a stale kitchen file -- is a finding to ticket, never a mutation
+to perform on the spot. Detect, classify, ticket, report. The deletion gate
+(deletion only on proof of recovery: tracked at `HEAD`, or regenerable by a
+named command), the 5-file mass-deletion cap, and the pre-move reference
+sweep all live in `phases/clean.md`, the phase that owns every proven-safe
+hygiene mutation -- so a HUNT finding is CLEAN's ticket, and the two scopes
+cannot overlap. CORE.md §1.1's gate is part of why: an unconfirmed
+destructive operation needs an active ticket AND reversibility, and HUNT
+routinely runs with no ticket at all.
 
-**Junk is deleted on proof of recovery, never on how obvious it looks.**
-CORE.md §1.1 permits an unconfirmed destructive operation only when the active
-ticket pre-authorizes it AND the operation is reversible -- and HUNT routinely
-runs with no active ticket at all, so the pre-authorization half is simply
-absent here. "Obvious" is not a property of the file; it is a feeling about
-it, and an untracked generated artifact is exactly as obvious as an untracked
-file nothing can recreate.
-
-So delete without asking ONLY when recovery is provable, by one of exactly
-two proofs, named in the LOG line that records the deletion:
-- **tracked at HEAD** -- `git ls-files --error-unmatch <path>` succeeds, so
-  `git checkout HEAD -- <path>` restores the exact bytes; or
-- **mechanically regenerable** -- a command in this repository recreates it,
-  and you name that command (a build output, a lockfile, a generated table).
-
-Anything else -- untracked and not regenerable, or regenerable only by a
-command you would have to invent -- is ticketed for confirmation instead, and
-never user data (anything a user created or would recognize as their own work
--- same floor `phases/clean.md` states explicitly). No git available? Then the
-first proof cannot be obtained at all and the second is the only route.
-
-The 5-file cap per sweep still applies on top and is unchanged, but it is a
-**mass-deletion gate, not a grant of authority**: five recoverable files may
-go, six may not, and one unrecoverable file may not go either. A numeric cap
-limits quantity; it never creates authorization or reversibility, and reading
-it as permission is how "capped at 5" came to mean "five free deletions".
-
-`.saipen/kitchen/` is in scope for this sweep too, not just orphan code --
-use `phases/clean.md`'s stale definition (owning ticket `DONE` and off
-`BOARD.md`, or content fully superseded by `LOG.md`/`CHANGELOG.md`). This
-is what actually keeps kitchen/ bounded: `CLEAN` only runs when a user
-explicitly asks for it, `HUNT` runs every autonomous pass with no tasking
-required, so a kitchen file can't outlive its usefulness for more than one
-maintenance cycle. Same stale definition, same sweep, extends to every
+`.saipen/kitchen/` is in scope for this sweep, but as a detection surface
+only -- use `phases/clean.md`'s stale definition (owning ticket `DONE` and
+off `BOARD.md`, or content fully superseded by `LOG.md`/`CHANGELOG.md`) to
+find stale files and ticket them for CLEAN. The scan extends to every
 `.saipen/extensions/subs/<name>/kitchen/` present -- a subSaipen's own
 scratch is a distinct folder, not `.saipen/kitchen/` itself, but it is
-still this project's kitchen content and doesn't get a free pass just for
-living one level deeper.
+still this project's kitchen content and does not get a free pass for
+living one level deeper. Detection only; the deletion is CLEAN's, whenever
+it next runs.
 
 Before ticketing any finding, check it isn't already tracked anywhere on
 `BOARD.md` -- including `## BLOCKED`, not just `## TODO`/`## DOING`. A

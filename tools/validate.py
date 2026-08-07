@@ -3605,22 +3605,28 @@ else:
     #       "put the rest in the archive" moved a GUI module the entry point
     #       loads at runtime by absolute path, and the next command raised
     #       FileNotFoundError. The check is a grep before the move.
-    if _hunt_t and "Moving a file is destructive to whatever loads it" not in _hunt_t:
-        fail("cross-doc drift [move-reference-sweep] -- phases/hunt.md must "
-             "require a reference sweep before a move or rename and say why "
-             "the recovery gate does not cover it: a moved file passes every "
-             "recoverability test and still breaks whatever loads the old "
-             "path, which is the import rung of verify.md's ladder failing "
-             "for a reason nobody looked for")
+    # 1b19b. HUNT/CLEAN ownership split (T-540): CLEAN owns every proven-safe
+    #        hygiene mutation, HUNT only detects and tickets. The pre-move
+    #        reference sweep therefore lives in clean.md (the phase that moves
+    #        and prunes), and hunt.md must state it mutates nothing -- a hunt.md
+    #        that still carries deletion authority, or a clean.md that lost the
+    #        sweep, is the duplication or the hole this split exists to close.
+    if _hunt_t and "deletes, moves and renames nothing" not in _hunt_t:
+        fail("cross-doc drift [hunt-no-mutation] -- phases/hunt.md must state "
+             "it deletes, moves and renames nothing (detect/classify/ticket/"
+             "report only), so the HUNT/CLEAN scopes cannot overlap (T-540): "
+             "the deletion gate, the mass-deletion cap and the pre-move "
+             "reference sweep all live in phases/clean.md")
         drift_ok = False
     _clean_doc = rfc_path.parent / "phases" / "clean.md"
     if (_clean_doc.is_file()
             and "needs a reference sweep first"
             not in _clean_doc.read_text(encoding="utf-8-sig")):
         fail("cross-doc drift [move-reference-sweep] -- phases/clean.md must "
-             "cite the sweep before it prunes or relocates anything. CLEAN "
-             "moves files for tidiness, which is exactly the framing that "
-             "makes the breakage invisible")
+             "carry the pre-move reference sweep (cite it before it prunes or "
+             "relocates anything). CLEAN is the phase that moves files for "
+             "tidiness, which is exactly the framing that makes the breakage "
+             "invisible; HUNT no longer moves anything (T-540)")
         drift_ok = False
 
     # 1b20. CHANGELOG.md is ordered, unique, headed by the current version,
@@ -3751,28 +3757,33 @@ else:
                  "passed every check while naming no seat at all")
             drift_ok = False
 
-    # 1b3. HUNT's two destructive/staleness floors. Free deletion "capped at
-    #      5" read a quantity limit as a grant of authority: § 1.1 allows an
-    #      unconfirmed destructive op only when the active ticket
-    #      pre-authorizes it AND it is reversible, and HUNT routinely runs
-    #      with no ticket at all. And the clean-result cache keyed on `HEAD`
-    #      alone reused a verdict from a tree that no longer exists -- the
-    #      same document rejects mtimes as insufficient three paragraphs from
-    #      where its own key ignored every uncommitted byte.
+    # 1b3. CLEAN's deletion floors (moved from HUNT by T-540, which split the
+    #      ownership: CLEAN mutates, HUNT only detects and tickets). Free
+    #      deletion "capped at 5" read a quantity limit as a grant of
+    #      authority: § 1.1 allows an unconfirmed destructive op only when the
+    #      active ticket pre-authorizes it AND it is reversible. And the
+    #      clean-result cache keyed on `HEAD` alone reused a verdict from a
+    #      tree that no longer exists -- the same document rejects mtimes as
+    #      insufficient three paragraphs from where its own key ignored every
+    #      uncommitted byte.
     _hunt_doc = rfc_path.parent / "phases" / "hunt.md"
     _hunt_t = (_hunt_doc.read_text(encoding="utf-8-sig")
                if _hunt_doc.is_file() else "")
-    if _hunt_t:
-        if ("deleted on proof of recovery" not in _hunt_t
-                or "mass-deletion gate, not a grant of authority" not in _hunt_t):
-            fail("cross-doc drift [hunt-delete-proof] -- phases/hunt.md must "
-                 "delete only what it can prove recoverable (tracked at HEAD, "
-                 "or regenerable by a named command) and must say the 5-file "
-                 "cap is a mass-deletion gate rather than authority to delete "
-                 "five files. RFC § 1.1 needs pre-authorization AND "
-                 "reversibility, and HUNT often runs with no ticket to "
-                 "pre-authorize anything")
+    _clean_doc = rfc_path.parent / "phases" / "clean.md"
+    _clean_t = (_clean_doc.read_text(encoding="utf-8-sig")
+                if _clean_doc.is_file() else "")
+    if _clean_t:
+        if ("deleted on proof of recovery" not in _clean_t
+                or "mass-deletion gate, not a grant of authority" not in _clean_t):
+            fail("cross-doc drift [clean-delete-proof] -- phases/clean.md must "
+                 "carry the deletion gate that HUNT previously held: delete "
+                 "only what it can prove recoverable (tracked at HEAD, or "
+                 "regenerable by a named command) and say the 5-file cap is a "
+                 "mass-deletion gate rather than authority to delete five "
+                 "files. CLEAN is the only phase that mutates (T-540), so the "
+                 "gate lives where the mutations do")
             drift_ok = False
+    if _hunt_t:
         if "`git status --porcelain` prints nothing" not in _hunt_t:
             fail("cross-doc drift [hunt-clean-key] -- phases/hunt.md must "
                  "require a clean worktree before reusing a `hunt -> clean` "

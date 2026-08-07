@@ -2,6 +2,12 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.212.0 -- 2026-08-07 -- HUNT detects, CLEAN mutates: the ownership split
+
+T-540: two phases both held deletion authority. `hunt.md` carried the proof-of-recovery gate, the 5-file mass-deletion cap and the pre-move reference sweep; `clean.md` carried orphan/trash/kitchen deletion -- two documents, two authority claims, no reader able to tell which scope belonged where, and a sweep that deleted on the spot while the phase meant to own hygiene only ran when asked. Now `HUNT` is detect/classify/ticket/report with no mutation authority beyond BOARD/LOG/STATE bookkeeping: its kitchen scan finds stale files and tickets them for CLEAN, it never removes them. Every deletion, move, rename, prune and relocation happens in `CLEAN` under the gates that moved with the authority.
+
+`validate.py`: [hunt-delete-proof] -> [clean-delete-proof] on clean.md, [move-reference-sweep] repointed to clean.md (the phase that moves now carries the sweep), new [hunt-no-mutation] pin proves the scopes cannot overlap. Four audit cases repointed/rebuilt, each red on its own slug. CONFORMANCE row 222's enforcement updated, row 245 added.
+
 ## 7.211.0 -- 2026-08-07 -- the clean-HUNT destination and the valve resume key follow the execution intent
 
 T-539: the HUNT-to-ADD routing was one unconditional line ("immediately transition to `ADD`") that also bound `execution_intent: converge` -- while CONVERGE.md stage C forbids `ADD` entirely under converge as the invention that can never terminate. A converge run that exhausted the board was ordered into the very phase the contract forbids. The destination is now intent-aware: under converge a clean HUNT is stage F or stage I of CONVERGE.md (F routes to `CLEAN`, I into the closure sequence -- sync, fresh factories, finalize), under normal/goal it keeps the `ADD` destination of MAINTENANCE § 2.1. The clause lives once in § 2.1; `hunt.md`, `done.md` and `add.md` name it without restating it.

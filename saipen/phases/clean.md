@@ -14,6 +14,48 @@ repository in a state CLEAN can't safely finish auditing, transition
 `STATE.phase: BLOCKED` instead of pushing through. CLEAN returns `DONE` only
 when it actually finished safely, not by default.
 
+**CLEAN owns every proven-safe hygiene mutation** (T-540): deletion, move,
+rename, prune and relocation happen here and nowhere else. `HUNT` detects
+and tickets; it deletes, moves and renames nothing, so the two scopes cannot
+overlap. A finding HUNT cannot classify as CLEAN's is a ticket for a human,
+never a mutation by either phase.
+
+**Files are deleted on proof of recovery, never on how obvious they look.**
+CORE.md §1.1 permits an unconfirmed destructive operation only when the
+active ticket pre-authorizes it AND the operation is reversible. "Obvious"
+is not a property of the file; it is a feeling about it, and an untracked
+generated artifact is exactly as obvious as an untracked file nothing can
+recreate. Delete without asking ONLY when recovery is provable, by one of
+exactly two proofs, named in the LOG line that records the deletion:
+- **tracked at HEAD** -- `git ls-files --error-unmatch <path>` succeeds, so
+  `git checkout HEAD -- <path>` restores the exact bytes; or
+- **mechanically regenerable** -- a command in this repository recreates it,
+  and you name that command (a build output, a lockfile, a generated table).
+
+Anything else -- untracked and not regenerable, or regenerable only by a
+command you would have to invent -- is ticketed for confirmation instead,
+and never user data (anything a user created or would recognize as their
+own work). No git available? Then the first proof cannot be obtained at all
+and the second is the only route.
+
+The 5-file cap per sweep still applies and is a **mass-deletion gate, not a grant of authority**: five recoverable files may go, six may not, and one unrecoverable file may not go either. A numeric cap limits quantity; it never creates authorization or reversibility.
+
+**Moving or renaming a file is destructive to whatever loads it, and a move
+passes the recovery test trivially.** Archiving, renaming and reorganising
+all read as tidy rather than dangerous, and the gate above asks the wrong
+question about them: the file IS recoverable -- it is right there in the new
+place -- and the program is broken anyway, because recoverability is not the
+property that matters when something loads the old path. Reproduced from a
+user's session: "put the rest in the archive" moved a GUI module, the entry
+point loaded it at runtime by absolute path, and the next command raised
+`FileNotFoundError`. **So before moving or renaming anything, sweep for
+references to it and treat a hit as a blocker, not a note.** Grep the
+basename and the path across the project -- source, config, scripts,
+manifests, docs -- and either move the references in the same act or do not
+move the file. The sweep is one command and the alternative is a program
+that starts failing at import time, which is the cheapest rung of
+`phases/verify.md`'s ladder and therefore the most embarrassing one to skip.
+
 1. **Board Scrub:** 
    - Remove `[x]` DONE tasks from `BOARD.md` that are older than the current active work. This prunes `BOARD.md`, not history -- every one of those tickets' real events (created, built, verified, shipped) already lives permanently in `LOG.md`'s append-only graph; nothing is lost, just no longer cluttering the active board.
    - **A DONE ticket that any live ticket still names in `needs:` MUST NOT be pruned.** Read every `needs:` field on the board first and keep those IDs, however old they are. CORE.md §1.2 answers a `needs:` pointing at a ticket that exists nowhere on the board with `## BLOCKED` and `| blocker: needs nonexistent T-###` -- so without this guard the phase whose job is keeping the board honest mechanically blocks a workable ticket, and the block reads as a real dependency failure rather than as damage CLEAN just did. Reproduced on this repository (E-1811): a `## DONE` prune dropped T-421 and T-422 dangled on the next validation. The remedy is refusing the prune, never repairing the dangle afterwards; the dangling check is behaving correctly and is not the thing to soften.
@@ -42,7 +84,7 @@ when it actually finished safely, not by default.
      `## DONE` blocks) into one.
 
 2. **Orphan Hunt:**
-   - Identify and delete clearly unconnected files (orphaned assets, unused scripts).
+   - Identify and delete clearly unconnected files (orphaned assets, unused scripts) -- each deletion must satisfy the proof-of-recovery gate above, recorded in its LOG line.
    - Ambiguous items MUST be ticketed for human review instead of deleted.
 
 3. **Link & Path Audit:**
@@ -50,9 +92,9 @@ when it actually finished safely, not by default.
    - Fix incorrect imports or references in code.
 
 4. **Trash Removal:**
-   - Delete temporary files, caches, and scaffold leftovers (e.g., `__pycache__`, `.tmp`, outdated `.bak` files).
+   - Delete temporary files, caches, and scaffold leftovers (e.g., `__pycache__`, `.tmp`, outdated `.bak` files) -- regenerable by a named command (a build output, a cache), so the proof-of-recovery gate's second rung covers them; name the command in the LOG line.
    - Clear out empty directories.
-   - **DO NOT** delete files in `.saipen/kitchen/` unless they are stale or the project is fully completed. Stale, concretely: the file's owning ticket is `DONE` and no longer on `BOARD.md` (its reasoning already folded into `LOG.md`/`CHANGELOG.md`), or its content is fully superseded by what those now record. `phases/hunt.md` checks this same definition every autonomous pass, not just when a user explicitly runs `saipen clean` -- kitchen/ MUST NOT wait indefinitely for a manual trigger to stop growing.
+   - **DO NOT** delete files in `.saipen/kitchen/` unless they are stale or the project is fully completed. Stale, concretely: the file's owning ticket is `DONE` and no longer on `BOARD.md` (its reasoning already folded into `LOG.md`/`CHANGELOG.md`), or its content is fully superseded by what those now record. This phase is the only owner of kitchen deletion (T-540) -- `phases/hunt.md` only scans kitchen for stale files and tickets them; the removal itself waits for `CLEAN`, under converge at stage G or whenever the user explicitly runs `saipen clean`.
    - **Seal an oversized `LOG.md`** (CORE.md §1.2 segmentation): if the active
      `.saipen/LOG.md` has grown past the soft cap (~300 lines / ~64 KB),
      move its content verbatim into the next `.saipen/logs/LOG-<NNN>.md` and
