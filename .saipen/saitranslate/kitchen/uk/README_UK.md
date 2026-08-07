@@ -1,4 +1,4 @@
-<p align="center">
+﻿<p align="center">
   <img src="assets/SAIPEN_TEXT1.png" alt="SAIPEN Logo"/>
   <br>
   <img src="assets/__SAIPEN_Alpha.png" alt="SAIPEN Sticker" width="200"/>
@@ -17,38 +17,55 @@
 **v7.204.0** | [Специфікація](SPEC.md) | [Гайд](GUIDE.md) | [RFC](saipen/RFC.md) | [Стиль](saipen/STYLE.md) | [UI](saipen/UI.md) | [Відповідність](saipen/CONFORMANCE.md) | чистий markdown | нуль залежностей | MIT
 
 ```text
-Користувач ->  /saipen continue
-Агент      ->  читає STATE ("Що я роблю просто зараз?")
-Агент      ->  читає BOARD ("За яку задачу я беруся?")
-Агент      ->  читає next_action (виконує команду)
-Агент      ->  Працює.
-```
 
-### Стан проєкту > Пам'ять моделі
-Пам'ять живе в проєкті, а не в голові моделі. `Проєкт -> Пам'ять -> LLM` стає `Проєкт -> Стан SAIPEN -> LLM`.
+### Project State > Model Memory
 
-### Ключова логіка та гарантії протоколу
-- **Основний автомат станів**: `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`
-- **Автономність без промптів**: Не залишилося відкритих задач? Автоматичний перехід у цикл `HUNT` (сканування багів) → `ADD` (розвиток функціоналу) → `HUNT`. Нуль запитань.
-- **Явні тригери**: `/saipen clean` (очищення репозиторію), `/saipen translate` (ізольована фабрика `.saipen/saitranslate/`), `/saipen markhunt` (сухий необмежений аудит, лише записи), `/saipen prepare` (підготовка роботи для передачі), `/saipen validate` (перевірка відповідності), `/saipen goal` (автономне виконання хвилі). Мета/управління: `/saipen status` (звіт тільки для читання), `/saipen stop` (чекпоїнт і зупинка). Повний список: RFC.md § 1.10.
-- **Сувора надійність**: Пакетний парсинг вхідних даних (хірургічні тикети 1-за-1), пристосування до "брудного" дерева (ніколи не стирає незакомічені зміни), приховування секретів (`sk-***`).
-- **У розробці -- saicrew**: опціональний бонусний шар (`extensions/subs/`, без змін у Core) для запуску мультиагентної бригади -- один Core-письменник плюс read-only робітники `saihunt`/`saipython`, які звітують через свій `OUTBOX.md`. Під активним живим тестуванням, ще не перевірено end-to-end -- див. `extensions/subs/crew.md`.
+**Project state is stronger than model memory.** Memory lives in the project, not the model's head. `Project -> Memory -> LLM` becomes `Project -> SAIPEN state -> LLM`.
 
-## Проєкти на базі SAIPEN
-- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — Високопродуктивний інструмент управління промптами, нативно інтегрований з протоколом пам'яті SAIPEN.
+- **Core state machine** — `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`
+- **Autonomy without prompting** — board stalled (no workable `TODO`, `DOING` empty) **and not `BLOCKED`**? Auto-transition to `HUNT` (bug scanning) → `ADD` (feature development) → `HUNT`, no questions asked. A `BLOCKED` session never launches autonomous hunting — it waits for a human to resolve the block (RFC § 2.1).
+- **Strict reliability** — batch input parsing (surgical 1-at-a-time tickets), dirty tree adoption (never wipes uncommitted work), secret redaction (`sk-***`).
 
-## Два рівні
+## Commands
 
-| Рівень | Обов'язковий | Призначення |
+The full surface is 16 commands; complete details in [RFC § 1.10](saipen/RFC.md#110-command-surface).
+
+| Command | What it does |
+|---|---|
+| `/saipen set` | Adopt a project |
+| `/saipen continue` | Resume exactly where you left off |
+| `/saipen plan` | Turn a request or raw queue into tickets |
+| `/saipen goal <text>` | Autonomous wave assault on a new objective |
+| `/saipen hunt` | Force an immediate defect/improvement scan |
+| `/saipen ship` | Version bump, changelog, tag, push |
+| `/saipen clean` | Repository cleanup |
+| `/saipen validate` | Conformance check |
+| `/saipen markhunt` | Dry uncapped audit, record only |
+| `/saipen translate` | Isolated translation factory |
+| `/saipen prepare` | Package work for handoff |
+| `/saipen collect` | Integrate a ready package |
+| `/saipen status` | Read-only report |
+| `/saipen stop` | Checkpoint and halt |
+
+<sub>`saipen init` and `saipen sub` complete the sixteen; both are called by the protocol, not typed daily.</sub>
+
+**Package keys.** `ee`/`qq` prepare a complete translation or wiki package without integrating; `eee`/`qqq` accept only a ready package, then integrate, verify, review, and push.
+
+**Experimental: saicrew.** Optional bonus layer (`extensions/subs/`, zero Core changes) for running a multi-agent crew — one Core writer plus read-only `saihunt`/`saipython` workers reporting through their own `OUTBOX.md`. Under active live testing, not finalised — see `extensions/subs/crew.md`.
+
+## Two layers
+
+| Layer | Required | Purpose |
 |---|---|---|
-| **Core** | ✅ | Безпечне продовження роботи |
-| **Maintenance** | Понад Core | Розвиток ПЗ без постановки задач |
+| **Core** | ✅ | Resume work safely |
+| **Maintenance** | On top of Core | Evolve software without task direction |
 
-**Автоматизований розвиток.** Не залишилося відкритих задач? Введіть `/saipen`: `HUNT` проводити аудит на наявність багів, мертвого коду, непрацюючих тестів. Все чисто? `ADD` створює наступну очевидну відсутню можливість, перевіряє її та знову запускає `HUNT`. Продукт зрілий -> граційно зупиняється.
+**Automated evolution.** No open tasks remain, type `/saipen`: `HUNT` audits for bugs, dead code, and failing tests. Clean? `ADD` builds the next obvious missing capability, verifies it, and hunts again. Product mature -> stops gracefully.
 
-**Режим GOAL.** `/saipen goal <що ви хочете>` змінює пріоритети дошки (старі тикети понижуються, але ніколи не видаляються) і просуває нову ціль уперед — без запитань "чи продовжувати мені?" між тикетами, VERIFY/REVIEW ніколи не пропускаються. SHIP автоматично робить push у існуючий віддалений репозиторій; абсолютно новий репозиторій усе ще запитає один раз. Відправка (shipping) цілі також не є точкою зупинки — процес одразу переходить до автономного обслуговування HUNT/ADD, поки продукт не стане зрілим, блокованим або не досягне ліміту прогону (3 хвилі / 20 тикетів, після чого робиться чекпоїнт і звіт).
+**GOAL Mode.** `/saipen goal <what you want>` pivots the board (deprioritises old tickets, never deletes them) and drives the new objective forward — no "should I continue?" between tickets, VERIFY/REVIEW never skipped. SHIP auto-pushes to the existing remote; a brand-new repository still asks once. Shipping a goal is not the end point either — it transitions straight into autonomous HUNT/ADD maintenance until the product is mature, blocked, or the run hits its cap (3 waves / 20 tickets, then checkpoints and reports).
 
-## Швидкий старт
+## Quick Start
+
 
 **1. Встановіть один раз на машину** — навчає Claude Code, Gemini, OpenCode, Aider, Antigravity, Codex і будь-який родовий читач `~/.agents/skills` (FreeBuff тощо):
 ```bash
@@ -67,35 +84,57 @@ bash bootstrap/inject.sh                                            # macOS / Li
 Платформи немає у списку вище (DeepSeek, Qwen, автономний OpenAI тощо)?
 Зауваження для кожної платформи знаходяться в `extensions/adapters/`.
 
-## Посилання на документацію та специфікацію
-- **[SPEC.md](SPEC.md)** — формальна архітектура, цілі дизайну, лакмусовий папірець.
-- **[RFC.md](saipen/RFC.md)** — нормативна специфікація, що виконується агентами.
-- **[GUIDE.md](GUIDE.md)** — навчальний посібник для людей та прості гайди (ELI5):
-  - 🇷🇺 [Русский](guides/GUIDE_RU.md) | 🇺🇸 [English](guides/GUIDE_EN.md) | 🇪🇪 [Eesti](guides/GUIDE_EE.md) | 🇯🇵 [日本語](guides/GUIDE_JA.md) | 👴 [Версия Деда](guides/GUIDE_DED.md)
-  - 🇺🇦 [Українська](guides/GUIDE_UK.md) | 🇩🇪 [Deutsch](guides/GUIDE_DE.md) | 🇫🇷 [Français](guides/GUIDE_FR.md) | 🇪🇸 [Español](guides/GUIDE_ES.md) | 🇮🇹 [Italiano](guides/GUIDE_IT.md)
-  - 🇵🇹 [Português](guides/GUIDE_PT.md) | 🇳🇱 [Nederlands](guides/GUIDE_NL.md) | 🇵🇱 [Polski](guides/GUIDE_PL.md) | 🇸🇪 [Svenska](guides/GUIDE_SV.md) | 🇩🇰 [Dansk](guides/GUIDE_DA.md)
-  - 🇫🇮 [Suomi](guides/GUIDE_FI.md) | 🇳🇴 [Norsk](guides/GUIDE_NO.md) | 🇨🇳 [中文](guides/GUIDE_ZH.md) | 🇰🇷 [한국어](guides/GUIDE_KO.md) | 🇹🇭 [ไทย](guides/GUIDE_TH.md) | 🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) | 🇸🇦 [العربية](guides/GUIDE_AR.md) | 🇮🇱 [עברית](guides/GUIDE_HE.md)
-  - 🇹🇷 [Türkçe](guides/GUIDE_TR.md) | 🇮🇳 [हिन्दी](guides/GUIDE_HI.md) | 🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) | 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) | 🇨🇿 [Čeština](guides/GUIDE_CS.md) | 🇷🇴 [Română](guides/GUIDE_RO.md)
-  - 🇭🇺 [Magyar](guides/GUIDE_HU.md) | 🇧🇬 [Български](guides/GUIDE_BG.md) | 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) | 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
-- **[STYLE.md](saipen/STYLE.md)** — стиль спілкування агента та визначення голосу.
-- **[UI.md](saipen/UI.md)** — керівництво з дизайну інтерфейсу Vintage Golden.
-- **[CONFORMANCE.md](saipen/CONFORMANCE.md)** — сценарії тестування поведінки та правила валідатора.
+
+## Documentation
+
+| Document | What it is |
+|---|---|
+| [SPEC.md](SPEC.md) | Formal architecture, design goals, litmus test |
+| [RFC.md](saipen/RFC.md) | Normative specification agents execute |
+| [GUIDE.md](GUIDE.md) | Human tutor and ELI5 guides |
+| [STYLE.md](saipen/STYLE.md) | Agent communication style and voice definition |
+| [UI.md](saipen/UI.md) | Vintage Golden UI design guidelines |
+| [CONFORMANCE.md](saipen/CONFORMANCE.md) | Behavioural test scenarios and validator rules |
+
+<details>
+<summary><b>All 33 translated guides</b></summary>
+
+🇷🇺 [Русский](guides/GUIDE_RU.md) · 🇺🇸 [English](guides/GUIDE_EN.md) · 🇪🇪 [Eesti](guides/GUIDE_EE.md) · 🇯🇵 [日本語](guides/GUIDE_JA.md) · 👴 [Версия Деда](guides/GUIDE_DED.md)
+
+🇺🇦 [Українська](guides/GUIDE_UK.md) · 🇩🇪 [Deutsch](guides/GUIDE_DE.md) · 🇫🇷 [Français](guides/GUIDE_FR.md) · 🇪🇸 [Español](guides/GUIDE_ES.md) · 🇮🇹 [Italiano](guides/GUIDE_IT.md)
+
+🇵🇹 [Português](guides/GUIDE_PT.md) · 🇳🇱 [Nederlands](guides/GUIDE_NL.md) · 🇵🇱 [Polski](guides/GUIDE_PL.md) · 🇸🇪 [Svenska](guides/GUIDE_SV.md) · 🇩🇰 [Dansk](guides/GUIDE_DA.md)
+
+🇫🇮 [Suomi](guides/GUIDE_FI.md) · 🇳🇴 [Norsk](guides/GUIDE_NO.md) · 🇨🇳 [中文](guides/GUIDE_ZH.md) · 🇰🇷 [한국어](guides/GUIDE_KO.md) · 🇹🇭 [ไทย](guides/GUIDE_TH.md)
+
+🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) · 🇸🇦 [العربية](guides/GUIDE_AR.md) · 🇮🇱 [עברית](guides/GUIDE_HE.md) · 🇹🇷 [Türkçe](guides/GUIDE_TR.md) · 🇮🇳 [हिन्दी](guides/GUIDE_HI.md)
+
+🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) · 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) · 🇨🇿 [Čeština](guides/GUIDE_CS.md) · 🇷🇴 [Română](guides/GUIDE_RO.md) · 🇭🇺 [Magyar](guides/GUIDE_HU.md)
+
+🇧🇬 [Български](guides/GUIDE_BG.md) · 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) · 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
+
+</details>
+
+## Built with SAIPEN
+
+- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — High-performance prompt management tool built natively around the SAIPEN memory protocol.
+
+## Screenshots
+
+<details>
+<summary>Click to expand</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="FreeBuff agent instructions" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set in nomadcode" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="saipen screenshot 2026-08-01" width="600"/>
+
+</details>
 
 <p align="center">
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-## ## Скріншоти
+<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
 
-<details>
-<summary>Натисни, щоб розгорнути</summary>
-
-<img src="assets/screenshot-freebuff.png" alt="Інструкції для агента FreeBuff" width="600"/>
-
-<img src="assets/screenshot-nomadcode1.png" alt="saipen set у nomadcode" width="600"/>
-
-<img src="assets/screenshot-20260801-003853.png" alt="Скріншот saipen 2026-08-01" width="600"/>
-
-</details>
-
-<!-- source-digest: README.md sha256:951d8044313a6456 -->

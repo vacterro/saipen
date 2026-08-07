@@ -1,4 +1,4 @@
-<p align="center">
+﻿<p align="center">
   <img src="assets/SAIPEN_TEXT1.png" alt="SAIPEN Logo"/>
   <br>
   <img src="assets/__SAIPEN_Alpha.png" alt="SAIPEN Sticker" width="200"/>
@@ -17,37 +17,52 @@
 **v7.204.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | čistý markdown | nulové závislosti | MIT
 
 ```text
-User  ->  /saipen continue
-Agent ->  reads STATE ("What do I do right now?")
-Agent ->  reads BOARD ("What task am I picking up?")
-Agent ->  reads next_action (executes command)
-Agent ->  Works.
-```
 
 ### Stav projektu > Pamäť modelu
+
 Pamäť žije v projekte, nie v hlave modelu. `Projekt -> Pamäť -> LLM` sa mení na `Projekt -> SAIPEN Stav -> LLM`.
 
-### Kľúčová logika protokolu a záruky
-- **Jadrový stavový stroj**: `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`
-- **Autonómia bez výziev**: Neostali žiadne otvorené úlohy? Automatický prechod `HUNT` (skenovanie chýb) → `ADD` (rozvoj funkcií) → `HUNT` slučka. Žiadne otázky.
-- **Explicitné spúšťače**: `/saipen clean` (vyčistenie repozitára), `/saipen translate` (izolovaná `.saipen/saitranslate/` továreň), `/saipen markhunt` (suchý neobmedzený audit, iba záznamy), `/saipen prepare` (zabaliť prácu na odovzdanie), `/saipen validate` (kontrola zhody), `/saipen goal` (autonómne vykonanie vlny). Meta/riadenie: `/saipen status` (správa len na čítanie), `/saipen stop` (uloženie stavu a zastavenie). Úplný zoznam: RFC.md § 1.10.
-- **Prísna spoľahlivosť**: Dávkové spracovanie vstupov (chirurgické tikety po 1), prevzatie špinavého stromu (nikdy nezmaže neuloženú prácu), redakcia tajomstiev (`sk-***`).
 
-## Projekty poháňané SAIPENom
-- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — Vysoko výkonný nástroj na správu promptov natívne integrovaný s pamäťovým protokolom SAIPEN.
+## Commands
 
-## Dve vrstvy
+The full surface is 16 commands; complete details in [RFC § 1.10](saipen/RFC.md#110-command-surface).
 
-| Vrstva | Vyžadovaná | Účel |
+| Command | What it does |
+|---|---|
+| `/saipen set` | Adopt a project |
+| `/saipen continue` | Resume exactly where you left off |
+| `/saipen plan` | Turn a request or raw queue into tickets |
+| `/saipen goal <text>` | Autonomous wave assault on a new objective |
+| `/saipen hunt` | Force an immediate defect/improvement scan |
+| `/saipen ship` | Version bump, changelog, tag, push |
+| `/saipen clean` | Repository cleanup |
+| `/saipen validate` | Conformance check |
+| `/saipen markhunt` | Dry uncapped audit, record only |
+| `/saipen translate` | Isolated translation factory |
+| `/saipen prepare` | Package work for handoff |
+| `/saipen collect` | Integrate a ready package |
+| `/saipen status` | Read-only report |
+| `/saipen stop` | Checkpoint and halt |
+
+<sub>`saipen init` and `saipen sub` complete the sixteen; both are called by the protocol, not typed daily.</sub>
+
+**Package keys.** `ee`/`qq` prepare a complete translation or wiki package without integrating; `eee`/`qqq` accept only a ready package, then integrate, verify, review, and push.
+
+**Experimental: saicrew.** Optional bonus layer (`extensions/subs/`, zero Core changes) for running a multi-agent crew — one Core writer plus read-only `saihunt`/`saipython` workers reporting through their own `OUTBOX.md`. Under active live testing, not finalised — see `extensions/subs/crew.md`.
+
+## Two layers
+
+| Layer | Required | Purpose |
 |---|---|---|
-| **Jadro (Core)** | ✅ | Bezpečné pokračovanie v práci |
-| **Údržba (Maintenance)** | Nad Jadrom | Rozvoj softvéru bez zadávania úloh |
+| **Core** | ✅ | Resume work safely |
+| **Maintenance** | On top of Core | Evolve software without task direction |
 
-**Automatizovaná evolúcia.** Neostali žiadne otvorené úlohy, napíšte `/saipen`: `HUNT` vykoná audit chýb, mŕtveho kódu, zlyhávajúcich testov. Čisto? `ADD` vybuduje ďalšiu očividne chýbajúcu schopnosť, overí ju a znova spustí hunt. Keď je produkt zrelý -> elegantne sa zastaví.
+**Automated evolution.** No open tasks remain, type `/saipen`: `HUNT` audits for bugs, dead code, and failing tests. Clean? `ADD` builds the next obvious missing capability, verifies it, and hunts again. Product mature -> stops gracefully.
 
-**Režim GOAL.** `/saipen goal <čo chcete>` presmeruje nástenku (staré tikety sú odsunuté, nikdy nezmazané) a posúva nový cieľ vpred -- žiadne "mám pokračovať?" medzi tiketmi, VERIFY/REVIEW sa nikdy nevysadia. SHIP automaticky odosiela do existujúceho vzdialeného repozitára; úplne nový repozitár sa stále raz opýta. Odoslanie cieľa však nie je konečným bodom -- prechádza priamo do autonómnej údržby HUNT/ADD, kým nie je produkt zrelý, zablokovaný, alebo kým beh nedosiahne svoj limit (3 vlny / 20 tiketov, potom uloží stav a podá správu).
+**GOAL Mode.** `/saipen goal <what you want>` pivots the board (deprioritises old tickets, never deletes them) and drives the new objective forward — no "should I continue?" between tickets, VERIFY/REVIEW never skipped. SHIP auto-pushes to the existing remote; a brand-new repository still asks once. Shipping a goal is not the end point either — it transitions straight into autonomous HUNT/ADD maintenance until the product is mature, blocked, or the run hits its cap (3 waves / 20 tickets, then checkpoints and reports).
 
-## Rýchly štart
+## Quick Start
+
 
 **1. Inštalácia raz na zariadenie** -- naučí Claude Code, Gemini, OpenCode, Aider, Antigravity, Codex a akykolvek vseobecny citac ~/.agents/skills (FreeBuff, atd.):
 ```bash
@@ -66,35 +81,57 @@ Bez inštalácie? Vložte jeden riadok akémukoľvek agentovi:
 Platforma nie je v zozname vyššie (DeepSeek, Qwen, samostatné OpenAI atď.)?
 Poznámky pre jednotlivé platformy sa nachádzajú v `extensions/adapters/`.
 
-## Odkazy na dokumentáciu a špecifikáciu
-- **[SPEC.md](SPEC.md)** -- formálna architektúra, dizajnové ciele, lakmusový test.
-- **[RFC.md](saipen/RFC.md)** -- normatívna špecifikácia vykonávaná agentmi.
-- **[GUIDE.md](GUIDE.md)** -- ľudský návod & ELI5 príručky:
-  - 🇷🇺 [Русский](guides/GUIDE_RU.md) | 🇺🇸 [English](guides/GUIDE_EN.md) | 🇪🇪 [Eesti](guides/GUIDE_EE.md) | 🇯🇵 [日本語](guides/GUIDE_JA.md) | 👴 [Версия Деда](guides/GUIDE_DED.md)
-  - 🇺🇦 [Українська](guides/GUIDE_UK.md) | 🇩🇪 [Deutsch](guides/GUIDE_DE.md) | 🇫🇷 [Français](guides/GUIDE_FR.md) | 🇪🇸 [Español](guides/GUIDE_ES.md) | 🇮🇹 [Italiano](guides/GUIDE_IT.md)
-  - 🇵🇹 [Português](guides/GUIDE_PT.md) | 🇳🇱 [Nederlands](guides/GUIDE_NL.md) | 🇵🇱 [Polski](guides/GUIDE_PL.md) | 🇸🇪 [Svenska](guides/GUIDE_SV.md) | 🇩🇰 [Dansk](guides/GUIDE_DA.md)
-  - 🇫🇮 [Suomi](guides/GUIDE_FI.md) | 🇳🇴 [Norsk](guides/GUIDE_NO.md) | 🇨🇳 [中文](guides/GUIDE_ZH.md) | 🇰🇷 [한국어](guides/GUIDE_KO.md) | 🇹🇭 [ไทย](guides/GUIDE_TH.md) | 🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) | 🇸🇦 [العربية](guides/GUIDE_AR.md) | 🇮🇱 [עברית](guides/GUIDE_HE.md)
-  - 🇹🇷 [Türkçe](guides/GUIDE_TR.md) | 🇮🇳 [हिन्दी](guides/GUIDE_HI.md) | 🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) | 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) | 🇨🇿 [Čeština](guides/GUIDE_CS.md) | 🇷🇴 [Română](guides/GUIDE_RO.md)
-  - 🇭🇺 [Magyar](guides/GUIDE_HU.md) | 🇧🇬 [Български](guides/GUIDE_BG.md) | 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) | 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
-- **[STYLE.md](saipen/STYLE.md)** -- komunikačný štýl agenta & definícia hlasu.
-- **[UI.md](saipen/UI.md)** -- pravidlá UI dizajnu Tmavé Zlato Win95.
-- **[CONFORMANCE.md](saipen/CONFORMANCE.md)** -- testovacie scenáre správania & pravidlá validátora.
+
+## Documentation
+
+| Document | What it is |
+|---|---|
+| [SPEC.md](SPEC.md) | Formal architecture, design goals, litmus test |
+| [RFC.md](saipen/RFC.md) | Normative specification agents execute |
+| [GUIDE.md](GUIDE.md) | Human tutor and ELI5 guides |
+| [STYLE.md](saipen/STYLE.md) | Agent communication style and voice definition |
+| [UI.md](saipen/UI.md) | Vintage Golden UI design guidelines |
+| [CONFORMANCE.md](saipen/CONFORMANCE.md) | Behavioural test scenarios and validator rules |
+
+<details>
+<summary><b>All 33 translated guides</b></summary>
+
+🇷🇺 [Русский](guides/GUIDE_RU.md) · 🇺🇸 [English](guides/GUIDE_EN.md) · 🇪🇪 [Eesti](guides/GUIDE_EE.md) · 🇯🇵 [日本語](guides/GUIDE_JA.md) · 👴 [Версия Деда](guides/GUIDE_DED.md)
+
+🇺🇦 [Українська](guides/GUIDE_UK.md) · 🇩🇪 [Deutsch](guides/GUIDE_DE.md) · 🇫🇷 [Français](guides/GUIDE_FR.md) · 🇪🇸 [Español](guides/GUIDE_ES.md) · 🇮🇹 [Italiano](guides/GUIDE_IT.md)
+
+🇵🇹 [Português](guides/GUIDE_PT.md) · 🇳🇱 [Nederlands](guides/GUIDE_NL.md) · 🇵🇱 [Polski](guides/GUIDE_PL.md) · 🇸🇪 [Svenska](guides/GUIDE_SV.md) · 🇩🇰 [Dansk](guides/GUIDE_DA.md)
+
+🇫🇮 [Suomi](guides/GUIDE_FI.md) · 🇳🇴 [Norsk](guides/GUIDE_NO.md) · 🇨🇳 [中文](guides/GUIDE_ZH.md) · 🇰🇷 [한국어](guides/GUIDE_KO.md) · 🇹🇭 [ไทย](guides/GUIDE_TH.md)
+
+🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) · 🇸🇦 [العربية](guides/GUIDE_AR.md) · 🇮🇱 [עברית](guides/GUIDE_HE.md) · 🇹🇷 [Türkçe](guides/GUIDE_TR.md) · 🇮🇳 [हिन्दी](guides/GUIDE_HI.md)
+
+🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) · 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) · 🇨🇿 [Čeština](guides/GUIDE_CS.md) · 🇷🇴 [Română](guides/GUIDE_RO.md) · 🇭🇺 [Magyar](guides/GUIDE_HU.md)
+
+🇧🇬 [Български](guides/GUIDE_BG.md) · 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) · 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
+
+</details>
+
+## Built with SAIPEN
+
+- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — High-performance prompt management tool built natively around the SAIPEN memory protocol.
+
+## Screenshots
+
+<details>
+<summary>Click to expand</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="FreeBuff agent instructions" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set in nomadcode" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="saipen screenshot 2026-08-01" width="600"/>
+
+</details>
 
 <p align="center">
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-## ## Snímky obrazovky
+<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
 
-<details>
-<summary>Kliknutím rozbalíte</summary>
-
-<img src="assets/screenshot-freebuff.png" alt="Inštrukcie pre agenta FreeBuff" width="600"/>
-
-<img src="assets/screenshot-nomadcode1.png" alt="saipen set v nomadcode" width="600"/>
-
-<img src="assets/screenshot-20260801-003853.png" alt="Snímka obrazovky saipen 2026-08-01" width="600"/>
-
-</details>
-
-<!-- source-digest: README.md sha256:951d8044313a6456 -->

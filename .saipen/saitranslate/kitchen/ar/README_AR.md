@@ -1,4 +1,4 @@
-<p align="center">
+﻿<p align="center">
   <img src="assets/SAIPEN_TEXT1.png" alt="SAIPEN Logo"/>
   <br>
   <img src="assets/__SAIPEN_Alpha.png" alt="SAIPEN Sticker" width="200"/>
@@ -17,26 +17,41 @@
 **v7.204.0** | [المواصفات](SPEC.md) | [الدليل](GUIDE.md) | [RFC](saipen/RFC.md) | [الأسلوب](saipen/STYLE.md) | [واجهة المستخدم](saipen/UI.md) | [التطابق](saipen/CONFORMANCE.md) | markdown بسيط | صفر تبعيات | MIT
 
 ```text
-المستخدم ->  /saipen continue
-الوكيل    ->  يقرأ STATE ("ما الذي عليّ فعله الآن؟")
-الوكيل    ->  يقرأ BOARD ("ما هي المهمة التي سأبدأ بها؟")
-الوكيل    ->  يقرأ next_action (ينفذ الأمر)
-الوكيل    ->  يعمل.
-```
 
 ### حالة المشروع > ذاكرة النموذج
+
 الذاكرة تعيش في المشروع، وليس في رأس النموذج. تتحول `المشروع -> الذاكرة -> LLM` إلى `المشروع -> حالة SAIPEN -> LLM`.
 
-### منطق البروتوكول الأساسي والضمانات
-- **آلة الحالة الأساسية**: `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`
-- **استقلالية ذاتية بدون مطالبات**: لم تتبقَ مهام مفتوحة؟ ينتقل تلقائيًا إلى حلقة `HUNT` (فحص الأخطاء) ← `ADD` (تطوير الميزات) ← `HUNT`. بدون طرح أي أسئلة.
-- **مشغلات صريحة**: `/saipen clean` (تنظيف المستودع)، `/saipen translate` (مصنع معزول في `.saipen/saitranslate/`)، `/saipen markhunt` (تدقيق شامل جاف للتسجيل فقط)، `/saipen prepare` (تجميع العمل للتسليم)، `/saipen validate` (فحص التطابق)، `/saipen goal` (تنفيذ موجة مستقلة). التحكم والبيانات: `/saipen status` (تقرير للقراءة فقط)، `/saipen stop` (حفظ نقطة التوقف والتوقف). القائمة الكاملة: RFC.md § 1.10.
-- **موثوقية صارمة**: تحليل الإدخال على الدفعات (تذاكر دقيقة واحدة تلو الأخرى)، تبني شجرة العمل غير النظيفة (لا يمسح العمل غير الملتزم به أبداً)، حجب الأسرار (`sk-***`).
 
-## مشاريع مدعومة بـ SAIPEN
-- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — أداة إدارة مطالبات عالية الأداء مدمجة أصليًا مع بروتوكول ذاكرة SAIPEN.
+## Commands
 
-## طبقتان
+The full surface is 16 commands; complete details in [RFC § 1.10](saipen/RFC.md#110-command-surface).
+
+| Command | What it does |
+|---|---|
+| `/saipen set` | Adopt a project |
+| `/saipen continue` | Resume exactly where you left off |
+| `/saipen plan` | Turn a request or raw queue into tickets |
+| `/saipen goal <text>` | Autonomous wave assault on a new objective |
+| `/saipen hunt` | Force an immediate defect/improvement scan |
+| `/saipen ship` | Version bump, changelog, tag, push |
+| `/saipen clean` | Repository cleanup |
+| `/saipen validate` | Conformance check |
+| `/saipen markhunt` | Dry uncapped audit, record only |
+| `/saipen translate` | Isolated translation factory |
+| `/saipen prepare` | Package work for handoff |
+| `/saipen collect` | Integrate a ready package |
+| `/saipen status` | Read-only report |
+| `/saipen stop` | Checkpoint and halt |
+
+<sub>`saipen init` and `saipen sub` complete the sixteen; both are called by the protocol, not typed daily.</sub>
+
+**Package keys.** `ee`/`qq` prepare a complete translation or wiki package without integrating; `eee`/`qqq` accept only a ready package, then integrate, verify, review, and push.
+
+**Experimental: saicrew.** Optional bonus layer (`extensions/subs/`, zero Core changes) for running a multi-agent crew — one Core writer plus read-only `saihunt`/`saipython` workers reporting through their own `OUTBOX.md`. Under active live testing, not finalised — see `extensions/subs/crew.md`.
+
+## Two layers
+
 
 | الطبقة | مطلوبة | الغرض |
 |---|---|---|
@@ -47,7 +62,9 @@
 
 **وضع الهدف (GOAL Mode).** يقوم `/saipen goal <ما تريده>` بتغيير اتجاه اللوحة (تخفيض أولوية التذاكر القديمة، دون حذفها) والدفع بالهدف الجديد للأمام -- لا أسئلة "هل أستمر؟" بين التذاكر، ولا يتم تخطي VERIFY/REVIEW أبداً. ينفذ SHIP الدفع التلقائي للمستودع البعيد الموجود؛ والمستودع الجديد كليًا يسأل مرة واحدة فقط. شحن الهدف ليس نقطة النهاية أيضاً -- بل ينتقل مباشرة إلى صيانة HUNT/ADD المستقلة حتى ينضج المنتج أو يُحظر أو تصل الدورة إلى حدها الأقصى (3 موجات / 20 تذكرة، ثم يحفظ نقطة التوقف ويصدر تقريراً).
 
-## البداية السريعة
+
+## Quick Start
+
 
 **1. التثبيت مرة واحدة لكل جهاز** -- يعلّم Claude Code و Gemini و OpenCode و Aider و Antigravity? Codex ??? ???? ??? ?? ~/.agents/skills (FreeBuff? ???):
 ```bash
@@ -66,35 +83,57 @@ bash bootstrap/inject.sh                                            # macOS / Li
 المنصة ليست في القائمة أعلاه (DeepSeek, Qwen, standalone OpenAI, إلخ)؟
 توجد ملاحظات كل منصة في `extensions/adapters/`.
 
-## روابط التوثيق والمواصفات
-- **[SPEC.md](SPEC.md)** -- الهندسة المعمارية الرسمية، أهداف التصميم، واختبار الصلاحية.
-- **[RFC.md](saipen/RFC.md)** -- المواصفات المعيارية التي ينفذها الوكلاء.
-- **[GUIDE.md](GUIDE.md)** -- الدليل التعليمي البشري وإدلة المبسطة (ELI5):
-  - 🇷🇺 [Русский](guides/GUIDE_RU.md) | 🇺🇸 [English](guides/GUIDE_EN.md) | 🇪🇪 [Eesti](guides/GUIDE_EE.md) | 🇯🇵 [日本語](guides/GUIDE_JA.md) | 👴 [Версия Деда](guides/GUIDE_DED.md)
-  - 🇺🇦 [Українська](guides/GUIDE_UK.md) | 🇩🇪 [Deutsch](guides/GUIDE_DE.md) | 🇫🇷 [Français](guides/GUIDE_FR.md) | 🇪🇸 [Español](guides/GUIDE_ES.md) | 🇮🇹 [Italiano](guides/GUIDE_IT.md)
-  - 🇵🇹 [Português](guides/GUIDE_PT.md) | 🇳🇱 [Nederlands](guides/GUIDE_NL.md) | 🇵🇱 [Polski](guides/GUIDE_PL.md) | 🇸🇪 [Svenska](guides/GUIDE_SV.md) | 🇩🇰 [Dansk](guides/GUIDE_DA.md)
-  - 🇫🇮 [Suomi](guides/GUIDE_FI.md) | 🇳🇴 [Norsk](guides/GUIDE_NO.md) | 🇨🇳 [中文](guides/GUIDE_ZH.md) | 🇰🇷 [한국어](guides/GUIDE_KO.md) | 🇹🇭 [ไทย](guides/GUIDE_TH.md) | 🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) | 🇸🇦 [العربية](guides/GUIDE_AR.md) | 🇮🇱 [עברית](guides/GUIDE_HE.md)
-  - 🇹🇷 [Türkçe](guides/GUIDE_TR.md) | 🇮🇳 [हिन्दी](guides/GUIDE_HI.md) | 🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) | 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) | 🇨🇿 [Čeština](guides/GUIDE_CS.md) | 🇷🇴 [Română](guides/GUIDE_RO.md)
-  - 🇭🇺 [Magyar](guides/GUIDE_HU.md) | 🇧🇬 [Български](guides/GUIDE_BG.md) | 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) | 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
-- **[STYLE.md](saipen/STYLE.md)** -- أسلوب تواصل الوكيل وتحديد الصوت.
-- **[UI.md](saipen/UI.md)** -- إرشادات تصميم واجهة المستخدم Win95 الذهبي الداكن.
-- **[CONFORMANCE.md](saipen/CONFORMANCE.md)** -- سيناريوهات اختبار السلوك وقواعد أداة التحقق.
+
+## Documentation
+
+| Document | What it is |
+|---|---|
+| [SPEC.md](SPEC.md) | Formal architecture, design goals, litmus test |
+| [RFC.md](saipen/RFC.md) | Normative specification agents execute |
+| [GUIDE.md](GUIDE.md) | Human tutor and ELI5 guides |
+| [STYLE.md](saipen/STYLE.md) | Agent communication style and voice definition |
+| [UI.md](saipen/UI.md) | Vintage Golden UI design guidelines |
+| [CONFORMANCE.md](saipen/CONFORMANCE.md) | Behavioural test scenarios and validator rules |
+
+<details>
+<summary><b>All 33 translated guides</b></summary>
+
+🇷🇺 [Русский](guides/GUIDE_RU.md) · 🇺🇸 [English](guides/GUIDE_EN.md) · 🇪🇪 [Eesti](guides/GUIDE_EE.md) · 🇯🇵 [日本語](guides/GUIDE_JA.md) · 👴 [Версия Деда](guides/GUIDE_DED.md)
+
+🇺🇦 [Українська](guides/GUIDE_UK.md) · 🇩🇪 [Deutsch](guides/GUIDE_DE.md) · 🇫🇷 [Français](guides/GUIDE_FR.md) · 🇪🇸 [Español](guides/GUIDE_ES.md) · 🇮🇹 [Italiano](guides/GUIDE_IT.md)
+
+🇵🇹 [Português](guides/GUIDE_PT.md) · 🇳🇱 [Nederlands](guides/GUIDE_NL.md) · 🇵🇱 [Polski](guides/GUIDE_PL.md) · 🇸🇪 [Svenska](guides/GUIDE_SV.md) · 🇩🇰 [Dansk](guides/GUIDE_DA.md)
+
+🇫🇮 [Suomi](guides/GUIDE_FI.md) · 🇳🇴 [Norsk](guides/GUIDE_NO.md) · 🇨🇳 [中文](guides/GUIDE_ZH.md) · 🇰🇷 [한국어](guides/GUIDE_KO.md) · 🇹🇭 [ไทย](guides/GUIDE_TH.md)
+
+🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) · 🇸🇦 [العربية](guides/GUIDE_AR.md) · 🇮🇱 [עברית](guides/GUIDE_HE.md) · 🇹🇷 [Türkçe](guides/GUIDE_TR.md) · 🇮🇳 [हिन्दी](guides/GUIDE_HI.md)
+
+🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) · 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) · 🇨🇿 [Čeština](guides/GUIDE_CS.md) · 🇷🇴 [Română](guides/GUIDE_RO.md) · 🇭🇺 [Magyar](guides/GUIDE_HU.md)
+
+🇧🇬 [Български](guides/GUIDE_BG.md) · 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) · 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
+
+</details>
+
+## Built with SAIPEN
+
+- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — High-performance prompt management tool built natively around the SAIPEN memory protocol.
+
+## Screenshots
+
+<details>
+<summary>Click to expand</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="FreeBuff agent instructions" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set in nomadcode" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="saipen screenshot 2026-08-01" width="600"/>
+
+</details>
 
 <p align="center">
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-## ## لقطات الشاشة
+<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
 
-<details>
-<summary>انقر للتوسيع</summary>
-
-<img src="assets/screenshot-freebuff.png" alt="إرشادات وكيل FreeBuff" width="600"/>
-
-<img src="assets/screenshot-nomadcode1.png" alt="saipen set في nomadcode" width="600"/>
-
-<img src="assets/screenshot-20260801-003853.png" alt="لقطة شاشة saipen 2026-08-01" width="600"/>
-
-</details>
-
-<!-- source-digest: README.md sha256:951d8044313a6456 -->

@@ -1,4 +1,4 @@
-<p align="center">
+﻿<p align="center">
   <img src="assets/SAIPEN_TEXT1.png" alt="לוגו SAIPEN"/>
   <br>
   <img src="assets/__SAIPEN_Alpha.png" alt="סטיקר SAIPEN" width="200"/>
@@ -17,37 +17,52 @@
 **v7.204.0** | [מפרט](SPEC.md) | [מדריך](GUIDE.md) | [RFC](saipen/RFC.md) | [סגנון](saipen/STYLE.md) | [ממשק משתמש](saipen/UI.md) | [תאימות](saipen/CONFORMANCE.md) | markdown פשוט | אפס תלויות | MIT
 
 ```text
-משתמש  ->  /saipen continue
-סוכן    ->  קורא את STATE ("מה אני עושה כרגע?")
-סוכן    ->  קורא את BOARD ("איזו משימה אני לוקח?")
-סוכן    ->  קורא את next_action (מבצע פקודה)
-סוכן    ->  עובד.
-```
 
 ### מצב פרויקט > זיכרון מודל
+
 הזיכרון שוכן בפרויקט, לא בראש של המודל. `פרויקט -> זיכרון -> LLM` הופך ל-`פרויקט -> מצב SAIPEN -> LLM`.
 
-### לוגיקה מרכזית והבטחות הפרוטוקול
-- **מכונת מצבים מרכזית**: `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`
-- **אוטונומיה ללא הנחיות (Zero-Prompt Autonomy)**: לא נותרו משימות פתוחות? מעבר אוטומטי למעגל `HUNT` (סריקת באגים) ← `ADD` (פיתוח תכונות) ← `HUNT`. אפס שאלות.
-- **טריגרים מפורשים**: `/saipen clean` (ניקוי מאגר), `/saipen translate` (מפעל `.saipen/saitranslate/` מבודד), `/saipen markhunt` (ביקורת יבשה ללא הגבלה, רישום בלבד), `/saipen prepare` (אריזת עבודה להעברה), `/saipen validate` (בדיקת תאימות), `/saipen goal` (הרצת גל אוטונומית). מטא/שליטה: `/saipen status` (דוח לקריאה בלבד), `/saipen stop` (נקודת ביקורת ועצירה). רשימה מלאה: RFC.md § 1.10.
-- **אמינות מחמירה**: ניתוח קלט באצ'ים (כרטיסים כירורגיים אחד-אחד), אימוץ עץ מלוכלך (לעולם לא מוחק עבודה שלא נשמרה ב-commit), הסתרת סודות (`sk-***`).
 
-## פרויקטים המופעלים על ידי SAIPEN
-- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — כלי ניהול פרומפטים בביצועים גבוהים המשולב טבעית עם פרוטוקול הזיכרון של SAIPEN.
+## Commands
 
-## שתי שכבות
+The full surface is 16 commands; complete details in [RFC § 1.10](saipen/RFC.md#110-command-surface).
 
-| שכבה | חובה | מטרה |
+| Command | What it does |
+|---|---|
+| `/saipen set` | Adopt a project |
+| `/saipen continue` | Resume exactly where you left off |
+| `/saipen plan` | Turn a request or raw queue into tickets |
+| `/saipen goal <text>` | Autonomous wave assault on a new objective |
+| `/saipen hunt` | Force an immediate defect/improvement scan |
+| `/saipen ship` | Version bump, changelog, tag, push |
+| `/saipen clean` | Repository cleanup |
+| `/saipen validate` | Conformance check |
+| `/saipen markhunt` | Dry uncapped audit, record only |
+| `/saipen translate` | Isolated translation factory |
+| `/saipen prepare` | Package work for handoff |
+| `/saipen collect` | Integrate a ready package |
+| `/saipen status` | Read-only report |
+| `/saipen stop` | Checkpoint and halt |
+
+<sub>`saipen init` and `saipen sub` complete the sixteen; both are called by the protocol, not typed daily.</sub>
+
+**Package keys.** `ee`/`qq` prepare a complete translation or wiki package without integrating; `eee`/`qqq` accept only a ready package, then integrate, verify, review, and push.
+
+**Experimental: saicrew.** Optional bonus layer (`extensions/subs/`, zero Core changes) for running a multi-agent crew — one Core writer plus read-only `saihunt`/`saipython` workers reporting through their own `OUTBOX.md`. Under active live testing, not finalised — see `extensions/subs/crew.md`.
+
+## Two layers
+
+| Layer | Required | Purpose |
 |---|---|---|
-| **Core** | ✅ | המשך עבודה בבטחה |
-| **Maintenance** | מעל Core | פיתוח התוכנה ללא משימות מפורשות |
+| **Core** | ✅ | Resume work safely |
+| **Maintenance** | On top of Core | Evolve software without task direction |
 
-**אבולוציה אוטומטית.** לא נותרו משימות פתוחות, הקלד `/saipen`: `HUNT` מבצע ביקורת עבור באגים, קוד מת, ובדיקות שנכשלו. נקי? `ADD` בונה את היכולת החסרה הבאה, מאמת אותה, ומבצע ביקורת שוב. המוצר בוגר -> נעצר בצורה מסודרת.
+**Automated evolution.** No open tasks remain, type `/saipen`: `HUNT` audits for bugs, dead code, and failing tests. Clean? `ADD` builds the next obvious missing capability, verifies it, and hunts again. Product mature -> stops gracefully.
 
-**מצב GOAL.** `/saipen goal <מה שאתה רוצה>` משנה את לוח המשימות (כרטיסים ישנים מועברים לדירוג נמוך יותר, לעולם לא נמחקים) ומריץ את היעד החדש קדימה -- ללא "האם להמשיך?" בין כרטיסים, VERIFY/REVIEW לעולם לא מדולגים. SHIP מבצע auto-push ל-remote קיים; מאגר חדש לגמרי עדיין שואל פעם אחת. שילוח היעד אינו נקודת העצירה -- הוא עובר ישירות לתחזוקת HUNT/ADD אוטונומית עד שהמוצר בוגר, חסום, או שההרצה מגיעה למגבלה שלה (3 גלים / 20 כרטיסים, ואז שמירת נקודת ביקורת ודיווח).
+**GOAL Mode.** `/saipen goal <what you want>` pivots the board (deprioritises old tickets, never deletes them) and drives the new objective forward — no "should I continue?" between tickets, VERIFY/REVIEW never skipped. SHIP auto-pushes to the existing remote; a brand-new repository still asks once. Shipping a goal is not the end point either — it transitions straight into autonomous HUNT/ADD maintenance until the product is mature, blocked, or the run hits its cap (3 waves / 20 tickets, then checkpoints and reports).
 
-## התחלה מהירה
+## Quick Start
+
 
 **1. התקנה חד-פעמית למחשב** -- מלמד את Claude Code, Gemini, OpenCode, Aider, Antigravity, Codex ??? ???? ???? ?? ~/.agents/skills (FreeBuff ???'):
 ```bash
@@ -66,35 +81,57 @@ bash bootstrap/inject.sh                                            # macOS / Li
 הפלטפורמה שלך אינה ברשימה לעיל (DeepSeek, Qwen, OpenAI עצמאי וכו')?
 הערות עבור כל פלטפורמה נמצאות ב-`extensions/adapters/`.
 
-## קישורים לתיעוד ומפרטים
-- **[SPEC.md](SPEC.md)** -- ארכיטקטורה רשמית, יעדי עיצוב, מבחן לקמוס.
-- **[RFC.md](saipen/RFC.md)** -- מפרט נורמטיבי המבוצע על ידי סוכנים.
-- **[GUIDE.md](GUIDE.md)** -- מדריך למשתמש ומדריכי ELI5:
-  - 🇷🇺 [Русский](guides/GUIDE_RU.md) | 🇺🇸 [English](guides/GUIDE_EN.md) | 🇪🇪 [Eesti](guides/GUIDE_EE.md) | 🇯🇵 [日本語](guides/GUIDE_JA.md) | 👴 [Версия Деда](guides/GUIDE_DED.md)
-  - 🇺🇦 [Українська](guides/GUIDE_UK.md) | 🇩🇪 [Deutsch](guides/GUIDE_DE.md) | 🇫🇷 [Français](guides/GUIDE_FR.md) | 🇪🇸 [Español](guides/GUIDE_ES.md) | 🇮🇹 [Italiano](guides/GUIDE_IT.md)
-  - 🇵🇹 [Português](guides/GUIDE_PT.md) | 🇳🇱 [Nederlands](guides/GUIDE_NL.md) | 🇵🇱 [Polski](guides/GUIDE_PL.md) | 🇸🇪 [Svenska](guides/GUIDE_SV.md) | 🇩🇰 [Dansk](guides/GUIDE_DA.md)
-  - 🇫🇮 [Suomi](guides/GUIDE_FI.md) | 🇳🇴 [Norsk](guides/GUIDE_NO.md) | 🇨🇳 [中文](guides/GUIDE_ZH.md) | 🇰🇷 [한국어](guides/GUIDE_KO.md) | 🇹🇭 [ไทย](guides/GUIDE_TH.md) | 🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) | 🇸🇦 [العربية](guides/GUIDE_AR.md) | 🇮🇱 [עברית](guides/GUIDE_HE.md)
-  - 🇹🇷 [Türkçe](guides/GUIDE_TR.md) | 🇮🇳 [हिन्दी](guides/GUIDE_HI.md) | 🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) | 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) | 🇨🇿 [Čeština](guides/GUIDE_CS.md) | 🇷🇴 [Română](guides/GUIDE_RO.md)
-  - 🇭🇺 [Magyar](guides/GUIDE_HU.md) | 🇧🇬 [Български](guides/GUIDE_BG.md) | 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) | 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
-- **[STYLE.md](saipen/STYLE.md)** -- סגנון תקשורת והגדרת קול של הסוכן.
-- **[UI.md](saipen/UI.md)** -- הנחיות עיצוב ממשק משתמש Vintage Golden.
-- **[CONFORMANCE.md](saipen/CONFORMANCE.md)** -- תרחישי בדיקת התנהגות וכללי מאמת.
 
-<p align="center">
-  <img src="assets/SAIPEN_design2_alpha.png" alt="חותמת SAIPEN" width="120"/>
-</p>
+## Documentation
 
-## ## צילומי מסך
+| Document | What it is |
+|---|---|
+| [SPEC.md](SPEC.md) | Formal architecture, design goals, litmus test |
+| [RFC.md](saipen/RFC.md) | Normative specification agents execute |
+| [GUIDE.md](GUIDE.md) | Human tutor and ELI5 guides |
+| [STYLE.md](saipen/STYLE.md) | Agent communication style and voice definition |
+| [UI.md](saipen/UI.md) | Vintage Golden UI design guidelines |
+| [CONFORMANCE.md](saipen/CONFORMANCE.md) | Behavioural test scenarios and validator rules |
 
 <details>
-<summary>לחצו להרחבה</summary>
+<summary><b>All 33 translated guides</b></summary>
 
-<img src="assets/screenshot-freebuff.png" alt="הוראות לסוכן FreeBuff" width="600"/>
+🇷🇺 [Русский](guides/GUIDE_RU.md) · 🇺🇸 [English](guides/GUIDE_EN.md) · 🇪🇪 [Eesti](guides/GUIDE_EE.md) · 🇯🇵 [日本語](guides/GUIDE_JA.md) · 👴 [Версия Деда](guides/GUIDE_DED.md)
 
-<img src="assets/screenshot-nomadcode1.png" alt="saipen set ב-nomadcode" width="600"/>
+🇺🇦 [Українська](guides/GUIDE_UK.md) · 🇩🇪 [Deutsch](guides/GUIDE_DE.md) · 🇫🇷 [Français](guides/GUIDE_FR.md) · 🇪🇸 [Español](guides/GUIDE_ES.md) · 🇮🇹 [Italiano](guides/GUIDE_IT.md)
 
-<img src="assets/screenshot-20260801-003853.png" alt="צילום מסך saipen 2026-08-01" width="600"/>
+🇵🇹 [Português](guides/GUIDE_PT.md) · 🇳🇱 [Nederlands](guides/GUIDE_NL.md) · 🇵🇱 [Polski](guides/GUIDE_PL.md) · 🇸🇪 [Svenska](guides/GUIDE_SV.md) · 🇩🇰 [Dansk](guides/GUIDE_DA.md)
+
+🇫🇮 [Suomi](guides/GUIDE_FI.md) · 🇳🇴 [Norsk](guides/GUIDE_NO.md) · 🇨🇳 [中文](guides/GUIDE_ZH.md) · 🇰🇷 [한국어](guides/GUIDE_KO.md) · 🇹🇭 [ไทย](guides/GUIDE_TH.md)
+
+🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) · 🇸🇦 [العربية](guides/GUIDE_AR.md) · 🇮🇱 [עברית](guides/GUIDE_HE.md) · 🇹🇷 [Türkçe](guides/GUIDE_TR.md) · 🇮🇳 [हिन्दी](guides/GUIDE_HI.md)
+
+🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) · 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) · 🇨🇿 [Čeština](guides/GUIDE_CS.md) · 🇷🇴 [Română](guides/GUIDE_RO.md) · 🇭🇺 [Magyar](guides/GUIDE_HU.md)
+
+🇧🇬 [Български](guides/GUIDE_BG.md) · 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) · 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
 
 </details>
 
-<!-- source-digest: README.md sha256:951d8044313a6456 -->
+## Built with SAIPEN
+
+- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — High-performance prompt management tool built natively around the SAIPEN memory protocol.
+
+## Screenshots
+
+<details>
+<summary>Click to expand</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="FreeBuff agent instructions" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set in nomadcode" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="saipen screenshot 2026-08-01" width="600"/>
+
+</details>
+
+<p align="center">
+  <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
+</p>
+
+<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
+

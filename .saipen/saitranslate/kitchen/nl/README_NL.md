@@ -1,4 +1,4 @@
-<p align="center">
+﻿<p align="center">
   <img src="assets/SAIPEN_TEXT1.png" alt="SAIPEN Logo"/>
   <br>
   <img src="assets/__SAIPEN_Alpha.png" alt="SAIPEN Sticker" width="200"/>
@@ -19,40 +19,56 @@ en het werk in minder dan een minuut hervat -- geen herbriefing, elke leverancie
 **v7.204.0** | [Spec](SPEC.md) | [Gids](GUIDE.md) | [RFC](saipen/RFC.md) | [Stijl](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformiteit](saipen/CONFORMANCE.md) | plat markdown | nul afhankelijkheden | MIT
 
 ```text
-Gebruiker ->  /saipen continue
-Agent     ->  leest STATE ("Wat doe ik nu?")
-Agent     ->  leest BOARD ("Welke taak pak ik op?")
-Agent     ->  leest next_action (voert commando uit)
-Agent     ->  Werkt.
-```
 
-### Projectstatus > Modelgeheugen
-Geheugen leeft in het project, niet in het hoofd van een model. `Project -> Geheugen -> LLM` wordt `Project -> SAIPEN Status -> LLM`.
+### Project State > Model Memory
 
-### Kernprotocollogica & Garanties
-- **Kern Statusmachine**: `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`
-- **Nul-Prompt Autonomie**: Geen open to-do's meer? Automatische overgang `HUNT` (scant op bugs) → `ADD` (ontwikkelt functies) → `HUNT` lus. Nul vragen gesteld.
-- **Expliciete Triggers**: `/saipen clean` (repo opschonen), `/saipen translate` (geïsoleerde `.saipen/saitranslate/` fabriek), `/saipen markhunt` (droge onbegrensde audit, legt alleen vast), `/saipen prepare` (verpak werk voor overdracht), `/saipen validate` (conformiteitscontrole), `/saipen goal` (autonome golfuitvoering). Meta/besturing: `/saipen status` (alleen-lezen rapport), `/saipen stop` (checkpoint en stop). Volledige lijst: RFC.md § 1.10.
-- **Strikte Betrouwbaarheid**: Batch-invoerparsing (chirurgische 1-voor-1 tickets), dirty-tree adoptie (wist nooit niet-gecommitteerd werk), redactie van geheimen (`sk-***`).
-- **In ontwikkeling -- saicrew**: een optionele bonuslaag (`extensions/subs/`, zonder wijzigingen aan Core) voor het draaien van een multi-agent crew -- één Core-schrijver plus read-only workers `saihunt`/`saipython`, die rapporteren via hun eigen `OUTBOX.md`. Momenteel actief live getest, nog niet end-to-end geverifieerd -- zie `extensions/subs/crew.md`.
+**Project state is stronger than model memory.** Memory lives in the project, not the model's head. `Project -> Memory -> LLM` becomes `Project -> SAIPEN state -> LLM`.
 
-## Projecten Aangedreven door SAIPEN
-- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — Hoogwaardige promptbeheertool die native is geïntegreerd met het SAIPEN-geheugenprotocol.
+- **Core state machine** — `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`
+- **Autonomy without prompting** — board stalled (no workable `TODO`, `DOING` empty) **and not `BLOCKED`**? Auto-transition to `HUNT` (bug scanning) → `ADD` (feature development) → `HUNT`, no questions asked. A `BLOCKED` session never launches autonomous hunting — it waits for a human to resolve the block (RFC § 2.1).
+- **Strict reliability** — batch input parsing (surgical 1-at-a-time tickets), dirty tree adoption (never wipes uncommitted work), secret redaction (`sk-***`).
 
-## Twee Lagen
+## Commands
 
-| Laag | Vereist | Doel |
+The full surface is 16 commands; complete details in [RFC § 1.10](saipen/RFC.md#110-command-surface).
+
+| Command | What it does |
+|---|---|
+| `/saipen set` | Adopt a project |
+| `/saipen continue` | Resume exactly where you left off |
+| `/saipen plan` | Turn a request or raw queue into tickets |
+| `/saipen goal <text>` | Autonomous wave assault on a new objective |
+| `/saipen hunt` | Force an immediate defect/improvement scan |
+| `/saipen ship` | Version bump, changelog, tag, push |
+| `/saipen clean` | Repository cleanup |
+| `/saipen validate` | Conformance check |
+| `/saipen markhunt` | Dry uncapped audit, record only |
+| `/saipen translate` | Isolated translation factory |
+| `/saipen prepare` | Package work for handoff |
+| `/saipen collect` | Integrate a ready package |
+| `/saipen status` | Read-only report |
+| `/saipen stop` | Checkpoint and halt |
+
+<sub>`saipen init` and `saipen sub` complete the sixteen; both are called by the protocol, not typed daily.</sub>
+
+**Package keys.** `ee`/`qq` prepare a complete translation or wiki package without integrating; `eee`/`qqq` accept only a ready package, then integrate, verify, review, and push.
+
+**Experimental: saicrew.** Optional bonus layer (`extensions/subs/`, zero Core changes) for running a multi-agent crew — one Core writer plus read-only `saihunt`/`saipython` workers reporting through their own `OUTBOX.md`. Under active live testing, not finalised — see `extensions/subs/crew.md`.
+
+## Two layers
+
+| Layer | Required | Purpose |
 |---|---|---|
-| **Kern** | ✅ | Werk veilig hervatten |
-| **Onderhoud** | Bovenop Kern | De software verder ontwikkelen zonder taaktoewijzing |
+| **Core** | ✅ | Resume work safely |
+| **Maintenance** | On top of Core | Evolve software without task direction |
 
-**Geautomatiseerde Evolutie.** Geen open to-do's meer, typ `/saipen`: `HUNT` auditeert op bugs, dode code, mislukte tests. Schoon? `ADD` bouwt de volgende logische ontbrekende functionaliteit, verifieert deze en voert opnieuw een hunt uit. Product is volwassen -> stopt netjes.
+**Automated evolution.** No open tasks remain, type `/saipen`: `HUNT` audits for bugs, dead code, and failing tests. Clean? `ADD` builds the next obvious missing capability, verifies it, and hunts again. Product mature -> stops gracefully.
 
-**GOAL-modus.** `/saipen goal <wat je wilt>` verplaatst het bord (oude tickets worden gedegradeerd, nooit verwijderd) en leidt het nieuwe doel voorwaarts -- geen "zal ik doorgaan?" tussen tickets, VERIFY/REVIEW wordt nooit overgeslagen. SHIP pusht automatisch naar een bestaande remote; een gloednieuwe repo vraagt één keer. Het doel verzenden is ook niet het eindpunt -- het gaat direct over in autonoom HUNT/ADD-onderhoud totdat het product volwassen is, geblokkeerd raakt, of de run zijn limiet bereikt (3 golven / 20 tickets, daarna checkpoints en rapportage).
+**GOAL Mode.** `/saipen goal <what you want>` pivots the board (deprioritises old tickets, never deletes them) and drives the new objective forward — no "should I continue?" between tickets, VERIFY/REVIEW never skipped. SHIP auto-pushes to the existing remote; a brand-new repository still asks once. Shipping a goal is not the end point either — it transitions straight into autonomous HUNT/ADD maintenance until the product is mature, blocked, or the run hits its cap (3 waves / 20 tickets, then checkpoints and reports).
 
-## Snelle Start
+## Quick Start
 
-**1. Eenmalig installeren per machine** -- leert Claude Code, Gemini, OpenCode, Aider, Antigravity, Codex en elke generieke ~/.agents/skills-lezer (FreeBuff, etc.):
+**1. Install once per machine** — teaches Claude Code, Codex, Gemini, OpenCode, Aider, Antigravity and any generic `~/.agents/skills` reader (FreeBuff, etc.):
 ```bash
 git clone https://github.com/vacterro/saipen
 cd saipen
@@ -60,44 +76,74 @@ powershell -ExecutionPolicy Bypass -File .\bootstrap\inject.ps1     # Windows
 bash bootstrap/inject.sh                                            # macOS / Linux
 ```
 
-**2. Start een project** -- open een agent in je map, typ:
+<sub>What this touches, so there are no surprises: the script adds a tagged block `<!-- SAIPEN:BEGIN -->...<!-- SAIPEN:END -->` to your agent instruction files (`~/.claude/CLAUDE.md`, `~/.config/opencode/AGENTS.md`, `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`) — backing up first as `.bak` — and copies the protocol into the relevant skill folders. Nothing outside those paths, no daemon, no network calls.</sub>
+
+**Regret it?** One command takes it back:
+```bash
+powershell -ExecutionPolicy Bypass -File .\bootstrap\uninstall.ps1  # Windows
+bash bootstrap/uninstall.sh                                         # macOS / Linux
+```
+This removes exactly the tagged block (leaving the rest of the file untouched), saves a pre-removal `.uninstalled.bak` copy, and removes the skill folders.
+
+**2. Start a project** — open an agent in your folder and type:
 > `saipen set`
 
-Geen installatie? Plak één regel in elke agent:
-> Lees <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md en volg ze op.
+Not installed? Paste one line into any agent:
+> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
 
-Platform niet in de bovenstaande lijst (DeepSeek, Qwen, standalone OpenAI, enz.)?
-Notities per platform zijn te vinden in `extensions/adapters/`.
+Platform not in the list above (DeepSeek, Qwen, standalone OpenAI, etc.)?
+Platform-specific notes live in `extensions/adapters/`.
 
-## Documentatie & Specificatielinks
-- **[SPEC.md](SPEC.md)** -- formele architectuur, ontwerpdoelen, lakmoestest.
-- **[RFC.md](saipen/RFC.md)** -- normatieve specificatie uitgevoerd door agenten.
-- **[GUIDE.md](GUIDE.md)** -- menselijke handleiding & ELI5-gidsen:
-  - 🇷🇺 [Русский](guides/GUIDE_RU.md) | 🇺🇸 [English](guides/GUIDE_EN.md) | 🇪🇪 [Eesti](guides/GUIDE_EE.md) | 🇯🇵 [日本語](guides/GUIDE_JA.md) | 👴 [Версия Деда](guides/GUIDE_DED.md)
-  - 🇺🇦 [Українська](guides/GUIDE_UK.md) | 🇩🇪 [Deutsch](guides/GUIDE_DE.md) | 🇫🇷 [Français](guides/GUIDE_FR.md) | 🇪🇸 [Español](guides/GUIDE_ES.md) | 🇮🇹 [Italiano](guides/GUIDE_IT.md)
-  - 🇵🇹 [Português](guides/GUIDE_PT.md) | 🇳🇱 [Nederlands](guides/GUIDE_NL.md) | 🇵🇱 [Polski](guides/GUIDE_PL.md) | 🇸🇪 [Svenska](guides/GUIDE_SV.md) | 🇩🇰 [Dansk](guides/GUIDE_DA.md)
-  - 🇫🇮 [Suomi](guides/GUIDE_FI.md) | 🇳🇴 [Norsk](guides/GUIDE_NO.md) | 🇨🇳 [中文](guides/GUIDE_ZH.md) | 🇰🇷 [한국어](guides/GUIDE_KO.md) | 🇹🇭 [ไทย](guides/GUIDE_TH.md) | 🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) | 🇸🇦 [العربية](guides/GUIDE_AR.md) | 🇮🇱 [עברית](guides/GUIDE_HE.md)
-  - 🇹🇷 [Türkçe](guides/GUIDE_TR.md) | 🇮🇳 [हिन्दी](guides/GUIDE_HI.md) | 🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) | 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) | 🇨🇿 [Čeština](guides/GUIDE_CS.md) | 🇷🇴 [Română](guides/GUIDE_RO.md)
-  - 🇭🇺 [Magyar](guides/GUIDE_HU.md) | 🇧🇬 [Български](guides/GUIDE_BG.md) | 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) | 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
-- **[STYLE.md](saipen/STYLE.md)** -- communicatiestijl & stemdefinitie van agent.
-- **[UI.md](saipen/UI.md)** -- Vintage Golden UI-ontwerprichtlijnen.
-- **[CONFORMANCE.md](saipen/CONFORMANCE.md)** -- gedragstestscenario's & validatorregels.
+## Documentation
+
+| Document | What it is |
+|---|---|
+| [SPEC.md](SPEC.md) | Formal architecture, design goals, litmus test |
+| [RFC.md](saipen/RFC.md) | Normative specification agents execute |
+| [GUIDE.md](GUIDE.md) | Human tutor and ELI5 guides |
+| [STYLE.md](saipen/STYLE.md) | Agent communication style and voice definition |
+| [UI.md](saipen/UI.md) | Vintage Golden UI design guidelines |
+| [CONFORMANCE.md](saipen/CONFORMANCE.md) | Behavioural test scenarios and validator rules |
+
+<details>
+<summary><b>All 33 translated guides</b></summary>
+
+🇷🇺 [Русский](guides/GUIDE_RU.md) · 🇺🇸 [English](guides/GUIDE_EN.md) · 🇪🇪 [Eesti](guides/GUIDE_EE.md) · 🇯🇵 [日本語](guides/GUIDE_JA.md) · 👴 [Версия Деда](guides/GUIDE_DED.md)
+
+🇺🇦 [Українська](guides/GUIDE_UK.md) · 🇩🇪 [Deutsch](guides/GUIDE_DE.md) · 🇫🇷 [Français](guides/GUIDE_FR.md) · 🇪🇸 [Español](guides/GUIDE_ES.md) · 🇮🇹 [Italiano](guides/GUIDE_IT.md)
+
+🇵🇹 [Português](guides/GUIDE_PT.md) · 🇳🇱 [Nederlands](guides/GUIDE_NL.md) · 🇵🇱 [Polski](guides/GUIDE_PL.md) · 🇸🇪 [Svenska](guides/GUIDE_SV.md) · 🇩🇰 [Dansk](guides/GUIDE_DA.md)
+
+🇫🇮 [Suomi](guides/GUIDE_FI.md) · 🇳🇴 [Norsk](guides/GUIDE_NO.md) · 🇨🇳 [中文](guides/GUIDE_ZH.md) · 🇰🇷 [한국어](guides/GUIDE_KO.md) · 🇹🇭 [ไทย](guides/GUIDE_TH.md)
+
+🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) · 🇸🇦 [العربية](guides/GUIDE_AR.md) · 🇮🇱 [עברית](guides/GUIDE_HE.md) · 🇹🇷 [Türkçe](guides/GUIDE_TR.md) · 🇮🇳 [हिन्दी](guides/GUIDE_HI.md)
+
+🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) · 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) · 🇨🇿 [Čeština](guides/GUIDE_CS.md) · 🇷🇴 [Română](guides/GUIDE_RO.md) · 🇭🇺 [Magyar](guides/GUIDE_HU.md)
+
+🇧🇬 [Български](guides/GUIDE_BG.md) · 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) · 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
+
+</details>
+
+## Built with SAIPEN
+
+- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — High-performance prompt management tool built natively around the SAIPEN memory protocol.
+
+## Screenshots
+
+<details>
+<summary>Click to expand</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="FreeBuff agent instructions" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set in nomadcode" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="saipen screenshot 2026-08-01" width="600"/>
+
+</details>
 
 <p align="center">
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-## ## Schermafbeeldingen
+<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
 
-<details>
-<summary>Klik om uit te vouwen</summary>
-
-<img src="assets/screenshot-freebuff.png" alt="FreeBuff-agentinstructies" width="600"/>
-
-<img src="assets/screenshot-nomadcode1.png" alt="saipen set in nomadcode" width="600"/>
-
-<img src="assets/screenshot-20260801-003853.png" alt="saipen-schermafbeelding 2026-08-01" width="600"/>
-
-</details>
-
-<!-- source-digest: README.md sha256:951d8044313a6456 -->

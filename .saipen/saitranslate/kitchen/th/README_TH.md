@@ -1,4 +1,4 @@
-<p align="center">
+﻿<p align="center">
   <img src="assets/SAIPEN_TEXT1.png" alt="SAIPEN Logo"/>
   <br>
   <img src="assets/__SAIPEN_Alpha.png" alt="SAIPEN Sticker" width="200"/>
@@ -17,39 +17,53 @@
 **v7.204.0** | [ข้อกำหนด](SPEC.md) | [คู่มือ](GUIDE.md) | [RFC](saipen/RFC.md) | [สไตล์](saipen/STYLE.md) | [UI](saipen/UI.md) | [การปฏิบัติตามมาตรฐาน](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
 
 ```text
-User  ->  /saipen continue
-Agent ->  reads STATE ("What do I do right now?")
-Agent ->  reads BOARD ("What task am I picking up?")
-Agent ->  reads next_action (executes command)
-Agent ->  Works.
-```
 
 ### สถานะโปรเจกต์ > หน่วยความจำของโมเดล
+
 หน่วยความจำเก็บอยู่ในโปรเจกต์ ไม่ใช่ในหัวของโมเดล `Project -> Memory -> LLM` เปลี่ยนเป็น `Project -> SAIPEN State -> LLM`
 
-### ตรรกะหลักและการรับประกันของโพรโทคอล
-- **Core State Machine**: `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`
-- **Zero-Prompt Autonomy**: ไม่เหลืองานค้าง? เปลี่ยนสถานะอัตโนมัติ `HUNT` (สแกนหาบั๊ก) → `ADD` (พัฒนาฟีเจอร์) → วนลูป `HUNT` โดยไม่ต้องตั้งคำถามใดๆ
-- **Explicit Triggers**: `/saipen clean` (เก็บกวาดเรโป), `/saipen translate` (โฟลเดอร์แยก `.saipen/saitranslate/`), `/saipen markhunt` (ตรวจสอบแบบดรายรันไม่จำกัดจำนวน บันทึกผลอย่างเดียว), `/saipen prepare` (แพ็กเกจงานสำหรับส่งต่อ), `/saipen validate` (ตรวจสอบความถูกต้องตามข้อกำหนด), `/saipen goal` (ประมวลผลงานแบบอัตโนมัติเป็นระลอก) คำสั่งควบคุม/เมทา: `/saipen status` (รายงานแบบอ่านอย่างเดียว), `/saipen stop` (สร้างจุดเช็กพอยต์และหยุดทำงาน) รายการทั้งหมด: RFC.md § 1.10
-- **Strict Reliability**: การพาร์สอินพุตแบบกลุ่ม (ตั๋วทีละใบอย่างแม่นยำ), การยอมรับ dirty-tree (ไม่ลบงานที่ยังไม่ได้ commit), การเซ็นเซอร์ความลับ (`sk-***`)
 
-## โปรเจกต์ที่ขับเคลื่อนด้วย SAIPEN
-- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — เครื่องมือจัดการพรอมต์ประสิทธิภาพสูงที่รวมเข้ากับโพรโทคอลความจำ SAIPEN โดยตรง
+## Commands
 
-## สองชั้นการทำงาน (Two Layers)
+The full surface is 16 commands; complete details in [RFC § 1.10](saipen/RFC.md#110-command-surface).
 
-| ชั้น | จำเป็น | วัตถุประสงค์ |
+| Command | What it does |
+|---|---|
+| `/saipen set` | Adopt a project |
+| `/saipen continue` | Resume exactly where you left off |
+| `/saipen plan` | Turn a request or raw queue into tickets |
+| `/saipen goal <text>` | Autonomous wave assault on a new objective |
+| `/saipen hunt` | Force an immediate defect/improvement scan |
+| `/saipen ship` | Version bump, changelog, tag, push |
+| `/saipen clean` | Repository cleanup |
+| `/saipen validate` | Conformance check |
+| `/saipen markhunt` | Dry uncapped audit, record only |
+| `/saipen translate` | Isolated translation factory |
+| `/saipen prepare` | Package work for handoff |
+| `/saipen collect` | Integrate a ready package |
+| `/saipen status` | Read-only report |
+| `/saipen stop` | Checkpoint and halt |
+
+<sub>`saipen init` and `saipen sub` complete the sixteen; both are called by the protocol, not typed daily.</sub>
+
+**Package keys.** `ee`/`qq` prepare a complete translation or wiki package without integrating; `eee`/`qqq` accept only a ready package, then integrate, verify, review, and push.
+
+**Experimental: saicrew.** Optional bonus layer (`extensions/subs/`, zero Core changes) for running a multi-agent crew — one Core writer plus read-only `saihunt`/`saipython` workers reporting through their own `OUTBOX.md`. Under active live testing, not finalised — see `extensions/subs/crew.md`.
+
+## Two layers
+
+| Layer | Required | Purpose |
 |---|---|---|
-| **Core** | ✅ | สานต่อการทำงานได้อย่างปลอดภัย |
-| **Maintenance** | ทำงานบน Core | พัฒนาซอฟต์แวร์ต่อเนื่องโดยไม่ต้องมอบหมายงาน |
+| **Core** | ✅ | Resume work safely |
+| **Maintenance** | On top of Core | Evolve software without task direction |
 
-**การพัฒนาโดยอัตโนมัติ (Automated Evolution)** เมื่อไม่มีงานค้างเหลืออยู่ เพียงพิมพ์ `/saipen`: `HUNT` จะตรวจสอบหาบั๊ก โค้ดที่ไม่ใช้แล้ว หรือเทสต์ที่ล้มเหลว เมื่อสะอาดแล้ว? `ADD` จะสร้างความสามารถที่จำเป็นถัดไป ตรวจสอบความถูกต้อง แล้วกลับไปล่าบั๊กอีกครั้ง เมื่อผลิตภัณฑ์สมบูรณ์แล้ว -> หยุดทำงานอย่างเรียบร้อย
+**Automated evolution.** No open tasks remain, type `/saipen`: `HUNT` audits for bugs, dead code, and failing tests. Clean? `ADD` builds the next obvious missing capability, verifies it, and hunts again. Product mature -> stops gracefully.
 
-**โหมด GOAL** `/saipen goal <สิ่งที่คุณต้องการ>` จะปรับเปลี่ยนกระดานงาน (ตั๋วเก่าจะถูกลดความสำคัญลง แต่ไม่เคยถูกลบ) และดำเนินตามวัตถุประสงค์ใหม่ไปข้างหน้า -- ไม่มีคำถามประเภท "จะให้ฉันทำต่อไหม?" ระหว่างตั๋วงาน ไม่เคยข้าม VERIFY/REVIEW ขั้นตอน SHIP จะ auto-push ไปยัง remote ที่มีอยู่โดยอัตโนมัติ หากเป็นเรโปใหม่จะถามเพียงครั้งเดียว การ SHIP วัตถุประสงค์ไม่ใช่จุดสิ้นสุดการทำงานเช่นกัน -- แต่จะเข้าสู่ขั้นตอนการดูแลรักษาแบบอัตโนมัติ HUNT/ADD ทันที จนกว่าผลิตภัณฑ์จะสมบูรณ์ ติดขัด หรือรันจนครบโควตา (3 ระลอก / 20 ตั๋วงาน จากนั้นจะสร้างจุดเช็กพอยต์และรายงานผล)
+**GOAL Mode.** `/saipen goal <what you want>` pivots the board (deprioritises old tickets, never deletes them) and drives the new objective forward — no "should I continue?" between tickets, VERIFY/REVIEW never skipped. SHIP auto-pushes to the existing remote; a brand-new repository still asks once. Shipping a goal is not the end point either — it transitions straight into autonomous HUNT/ADD maintenance until the product is mature, blocked, or the run hits its cap (3 waves / 20 tickets, then checkpoints and reports).
 
-## เริ่มต้นใช้งานอย่างรวดเร็ว (Quick Start)
+## Quick Start
 
-**1. ติดตั้งครั้งเดียวต่อเครื่อง** -- เพื่อให้ Claude Code, Gemini, OpenCode, Aider, Antigravity รู้จัก:
+**1. Install once per machine** — teaches Claude Code, Codex, Gemini, OpenCode, Aider, Antigravity and any generic `~/.agents/skills` reader (FreeBuff, etc.):
 ```bash
 git clone https://github.com/vacterro/saipen
 cd saipen
@@ -57,44 +71,74 @@ powershell -ExecutionPolicy Bypass -File .\bootstrap\inject.ps1     # Windows
 bash bootstrap/inject.sh                                            # macOS / Linux
 ```
 
-**2. เริ่มต้นโปรเจกต์** -- เปิด agent ในโฟลเดอร์ของคุณ แล้วพิมพ์:
+<sub>What this touches, so there are no surprises: the script adds a tagged block `<!-- SAIPEN:BEGIN -->...<!-- SAIPEN:END -->` to your agent instruction files (`~/.claude/CLAUDE.md`, `~/.config/opencode/AGENTS.md`, `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`) — backing up first as `.bak` — and copies the protocol into the relevant skill folders. Nothing outside those paths, no daemon, no network calls.</sub>
+
+**Regret it?** One command takes it back:
+```bash
+powershell -ExecutionPolicy Bypass -File .\bootstrap\uninstall.ps1  # Windows
+bash bootstrap/uninstall.sh                                         # macOS / Linux
+```
+This removes exactly the tagged block (leaving the rest of the file untouched), saves a pre-removal `.uninstalled.bak` copy, and removes the skill folders.
+
+**2. Start a project** — open an agent in your folder and type:
 > `saipen set`
 
-ไม่ได้ติดตั้ง? คัดลอกหนึ่งบรรทัดนี้วางให้ agent ตัวใดก็ได้:
-> Read <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
+Not installed? Paste one line into any agent:
+> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
 
-แพลตฟอร์มไม่ได้อยู่ในรายการข้างต้น (DeepSeek, Qwen, standalone OpenAI ฯลฯ)?
-หมายเหตุแยกตามแพลตฟอร์มอยู่ใน `extensions/adapters/`
+Platform not in the list above (DeepSeek, Qwen, standalone OpenAI, etc.)?
+Platform-specific notes live in `extensions/adapters/`.
 
-## ลิงก์เอกสารและข้อกำหนด
-- **[SPEC.md](SPEC.md)** -- สถาปัตยกรรมอย่างเป็นทางการ เป้าหมายการออกแบบ และแบบทดสอบ
-- **[RFC.md](saipen/RFC.md)** -- ข้อกำหนดมาตรฐานที่ถูกรันโดย agent
-- **[GUIDE.md](GUIDE.md)** -- คู่มือสำหรับมนุษย์และคำอธิบายแบบเข้าใจง่าย:
-  - 🇷🇺 [Русский](guides/GUIDE_RU.md) | 🇺🇸 [English](guides/GUIDE_EN.md) | 🇪🇪 [Eesti](guides/GUIDE_EE.md) | 🇯🇵 [日本語](guides/GUIDE_JA.md) | 👴 [Версия Деда](guides/GUIDE_DED.md)
-  - 🇺🇦 [Українська](guides/GUIDE_UK.md) | 🇩🇪 [Deutsch](guides/GUIDE_DE.md) | 🇫🇷 [Français](guides/GUIDE_FR.md) | 🇪🇸 [Español](guides/GUIDE_ES.md) | 🇮🇹 [Italiano](guides/GUIDE_IT.md)
-  - 🇵🇹 [Português](guides/GUIDE_PT.md) | 🇳🇱 [Nederlands](guides/GUIDE_NL.md) | 🇵🇱 [Polski](guides/GUIDE_PL.md) | 🇸🇪 [Svenska](guides/GUIDE_SV.md) | 🇩🇰 [Dansk](guides/GUIDE_DA.md)
-  - 🇫🇮 [Suomi](guides/GUIDE_FI.md) | 🇳🇴 [Norsk](guides/GUIDE_NO.md) | 🇨🇳 [中文](guides/GUIDE_ZH.md) | 🇰🇷 [한국어](guides/GUIDE_KO.md) | 🇹🇭 [ไทย](guides/GUIDE_TH.md) | 🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) | 🇸🇦 [العربية](guides/GUIDE_AR.md) | 🇮🇱 [עברית](guides/GUIDE_HE.md)
-  - 🇹🇷 [Türkçe](guides/GUIDE_TR.md) | 🇮🇳 [हिन्दी](guides/GUIDE_HI.md) | 🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) | 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) | 🇨🇿 [Čeština](guides/GUIDE_CS.md) | 🇷🇴 [Română](guides/GUIDE_RO.md)
-  - 🇭🇺 [Magyar](guides/GUIDE_HU.md) | 🇧🇬 [Български](guides/GUIDE_BG.md) | 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) | 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
-- **[STYLE.md](saipen/STYLE.md)** -- ข้อกำหนดรูปแบบการสื่อสารและน้ำเสียงของ agent
-- **[UI.md](saipen/UI.md)** -- แนวทางการออกแบบ UI สไตล์ Vintage Golden
-- **[CONFORMANCE.md](saipen/CONFORMANCE.md)** -- สถานการณ์ทดสอบพฤติกรรมและกฎการตรวจสอบความถูกต้อง
+## Documentation
+
+| Document | What it is |
+|---|---|
+| [SPEC.md](SPEC.md) | Formal architecture, design goals, litmus test |
+| [RFC.md](saipen/RFC.md) | Normative specification agents execute |
+| [GUIDE.md](GUIDE.md) | Human tutor and ELI5 guides |
+| [STYLE.md](saipen/STYLE.md) | Agent communication style and voice definition |
+| [UI.md](saipen/UI.md) | Vintage Golden UI design guidelines |
+| [CONFORMANCE.md](saipen/CONFORMANCE.md) | Behavioural test scenarios and validator rules |
+
+<details>
+<summary><b>All 33 translated guides</b></summary>
+
+🇷🇺 [Русский](guides/GUIDE_RU.md) · 🇺🇸 [English](guides/GUIDE_EN.md) · 🇪🇪 [Eesti](guides/GUIDE_EE.md) · 🇯🇵 [日本語](guides/GUIDE_JA.md) · 👴 [Версия Деда](guides/GUIDE_DED.md)
+
+🇺🇦 [Українська](guides/GUIDE_UK.md) · 🇩🇪 [Deutsch](guides/GUIDE_DE.md) · 🇫🇷 [Français](guides/GUIDE_FR.md) · 🇪🇸 [Español](guides/GUIDE_ES.md) · 🇮🇹 [Italiano](guides/GUIDE_IT.md)
+
+🇵🇹 [Português](guides/GUIDE_PT.md) · 🇳🇱 [Nederlands](guides/GUIDE_NL.md) · 🇵🇱 [Polski](guides/GUIDE_PL.md) · 🇸🇪 [Svenska](guides/GUIDE_SV.md) · 🇩🇰 [Dansk](guides/GUIDE_DA.md)
+
+🇫🇮 [Suomi](guides/GUIDE_FI.md) · 🇳🇴 [Norsk](guides/GUIDE_NO.md) · 🇨🇳 [中文](guides/GUIDE_ZH.md) · 🇰🇷 [한국어](guides/GUIDE_KO.md) · 🇹🇭 [ไทย](guides/GUIDE_TH.md)
+
+🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) · 🇸🇦 [العربية](guides/GUIDE_AR.md) · 🇮🇱 [עברית](guides/GUIDE_HE.md) · 🇹🇷 [Türkçe](guides/GUIDE_TR.md) · 🇮🇳 [हिन्दी](guides/GUIDE_HI.md)
+
+🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) · 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) · 🇨🇿 [Čeština](guides/GUIDE_CS.md) · 🇷🇴 [Română](guides/GUIDE_RO.md) · 🇭🇺 [Magyar](guides/GUIDE_HU.md)
+
+🇧🇬 [Български](guides/GUIDE_BG.md) · 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) · 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
+
+</details>
+
+## Built with SAIPEN
+
+- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — High-performance prompt management tool built natively around the SAIPEN memory protocol.
+
+## Screenshots
+
+<details>
+<summary>Click to expand</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="FreeBuff agent instructions" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set in nomadcode" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="saipen screenshot 2026-08-01" width="600"/>
+
+</details>
 
 <p align="center">
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-## ## ภาพหน้าจอ
+<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
 
-<details>
-<summary>คลิกเพื่อขยาย</summary>
-
-<img src="assets/screenshot-freebuff.png" alt="คำแนะนำเอเจนต์ FreeBuff" width="600"/>
-
-<img src="assets/screenshot-nomadcode1.png" alt="saipen set ใน nomadcode" width="600"/>
-
-<img src="assets/screenshot-20260801-003853.png" alt="ภาพหน้าจอ saipen 2026-08-01" width="600"/>
-
-</details>
-
-<!-- source-digest: README.md sha256:951d8044313a6456 -->

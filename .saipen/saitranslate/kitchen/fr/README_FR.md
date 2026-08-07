@@ -1,4 +1,4 @@
-<p align="center">
+﻿<p align="center">
   <img src="assets/SAIPEN_TEXT1.png" alt="SAIPEN Logo"/>
   <br>
   <img src="assets/__SAIPEN_Alpha.png" alt="SAIPEN Sticker" width="200"/>
@@ -19,38 +19,52 @@ et reprenne le travail en moins d'une minute -- sans réexplication, quel que so
 **v7.204.0** | [Spécification](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformité](saipen/CONFORMANCE.md) | markdown brut | zéro dépendance | MIT
 
 ```text
-Utilisateur -> /saipen continue
-Agent       -> lit STATE ("Que dois-je faire maintenant ?")
-Agent       -> lit BOARD ("Quelle tâche dois-je reprendre ?")
-Agent       -> lit next_action (exécute la commande)
-Agent       -> Travaille.
-```
 
 ### État du projet > Mémoire du modèle
+
 La mémoire réside dans le projet, pas dans la tête d'un modèle. `Projet -> Mémoire -> LLM` devient `Projet -> État SAIPEN -> LLM`.
 
-### Logique clé du protocole et garanties
-- **Machine d'état centrale** : `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`
-- **Autonomie sans prompt** : Plus de to-dos ouvertes ? Transition automatique vers la boucle `HUNT` (analyse des bugs) → `ADD` (évolution des fonctionnalités) → `HUNT`. Zéro question posée.
-- **Déclencheurs explicites** : `/saipen clean` (nettoyage de dépôt), `/saipen translate` (usine isolée `.saipen/saitranslate/`), `/saipen markhunt` (audit à sec non plafonné, enregistre uniquement), `/saipen prepare` (paquète le travail pour le passage de relais), `/saipen validate` (vérification de conformité), `/saipen goal` (exécution autonome par vagues). Méta/contrôle : `/saipen status` (rapport en lecture seule), `/saipen stop` (point de contrôle et arrêt). Liste complète : RFC.md § 1.10.
-- **Fiabilité stricte** : Analyse des entrées par lots (tickets chirurgicaux 1 par 1), adoption d'arbre de travail non propre (ne supprime jamais le travail non validé), masquage des secrets (`sk-***`).
-- **En développement -- saicrew** : une couche bonus optionnelle (`extensions/subs/`, sans changement au Core) pour faire tourner une équipe multi-agents -- un Core rédacteur plus des workers en lecture seule `saihunt`/`saipython`, qui rapportent via leur propre `OUTBOX.md`. En test actif en conditions réelles, pas encore vérifié de bout en bout -- voir `extensions/subs/crew.md`.
 
-## Projets propulsés par SAIPEN
-- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — Outil de gestion de prompts haute performance nativement intégré avec le protocole de mémoire SAIPEN.
+## Commands
 
-## Deux couches
+The full surface is 16 commands; complete details in [RFC § 1.10](saipen/RFC.md#110-command-surface).
 
-| Couche | Requis | Objectif |
+| Command | What it does |
+|---|---|
+| `/saipen set` | Adopt a project |
+| `/saipen continue` | Resume exactly where you left off |
+| `/saipen plan` | Turn a request or raw queue into tickets |
+| `/saipen goal <text>` | Autonomous wave assault on a new objective |
+| `/saipen hunt` | Force an immediate defect/improvement scan |
+| `/saipen ship` | Version bump, changelog, tag, push |
+| `/saipen clean` | Repository cleanup |
+| `/saipen validate` | Conformance check |
+| `/saipen markhunt` | Dry uncapped audit, record only |
+| `/saipen translate` | Isolated translation factory |
+| `/saipen prepare` | Package work for handoff |
+| `/saipen collect` | Integrate a ready package |
+| `/saipen status` | Read-only report |
+| `/saipen stop` | Checkpoint and halt |
+
+<sub>`saipen init` and `saipen sub` complete the sixteen; both are called by the protocol, not typed daily.</sub>
+
+**Package keys.** `ee`/`qq` prepare a complete translation or wiki package without integrating; `eee`/`qqq` accept only a ready package, then integrate, verify, review, and push.
+
+**Experimental: saicrew.** Optional bonus layer (`extensions/subs/`, zero Core changes) for running a multi-agent crew — one Core writer plus read-only `saihunt`/`saipython` workers reporting through their own `OUTBOX.md`. Under active live testing, not finalised — see `extensions/subs/crew.md`.
+
+## Two layers
+
+| Layer | Required | Purpose |
 |---|---|---|
-| **Core** | ✅ | Continuer le travail en toute sécurité |
-| **Maintenance** | Au-dessus du Core | Faire évoluer le logiciel sans assignation de tâche |
+| **Core** | ✅ | Resume work safely |
+| **Maintenance** | On top of Core | Evolve software without task direction |
 
-**Évolution automatisée.** Plus de to-dos ouvertes, tapez `/saipen` : `HUNT` recherche les bugs, le code mort, les tests échoués. Propre ? `ADD` construit la prochaine capacité manquante évidente, la vérifie et lance à nouveau un hunt. Le produit est mûr -> s'arrête proprement.
+**Automated evolution.** No open tasks remain, type `/saipen`: `HUNT` audits for bugs, dead code, and failing tests. Clean? `ADD` builds the next obvious missing capability, verifies it, and hunts again. Product mature -> stops gracefully.
 
-**Mode GOAL.** `/saipen goal <ce que vous voulez>` pivote le tableau (anciens tickets rétrogradés, jamais supprimés) et fait avancer le nouvel objectif de manière autonome -- pas de « dois-je continuer ? » entre les tickets, VERIFY/REVIEW jamais ignorés. SHIP pousse automatiquement vers un dépôt distant existant ; un tout nouveau dépôt demande toujours une confirmation une fois. Livrer l'objectif n'est pas le point d'arrêt non plus -- il bascule directement dans la maintenance autonome HUNT/ADD jusqu'à ce que le produit soit mûr, bloqué ou que la session atteigne sa limite (3 vagues / 20 tickets, puis enregistre un point de contrôle et rapporte).
+**GOAL Mode.** `/saipen goal <what you want>` pivots the board (deprioritises old tickets, never deletes them) and drives the new objective forward — no "should I continue?" between tickets, VERIFY/REVIEW never skipped. SHIP auto-pushes to the existing remote; a brand-new repository still asks once. Shipping a goal is not the end point either — it transitions straight into autonomous HUNT/ADD maintenance until the product is mature, blocked, or the run hits its cap (3 waves / 20 tickets, then checkpoints and reports).
 
-## Démarrage rapide
+## Quick Start
+
 
 **1. Installer une fois par machine** -- enseigne à Claude Code, Gemini, OpenCode, Aider, Codex, Antigravity, et tout lecteur générique de `~/.agents/skills` (FreeBuff, etc.) :
 ```bash
@@ -69,35 +83,57 @@ Pas d'installation ? Collez une ligne à n'importe quel agent :
 Plateforme absente de la liste ci-dessus (DeepSeek, Qwen, OpenAI autonome, etc.) ?
 Les notes par plateforme se trouvent dans `extensions/adapters/`.
 
-## Liens de documentation & spécification
-- **[SPEC.md](SPEC.md)** -- architecture formelle, objectifs de conception, test du tournesol.
-- **[RFC.md](saipen/RFC.md)** -- spécification normative exécutée par les agents.
-- **[GUIDE.md](GUIDE.md)** -- tutoriel humain & guides ELI5 :
-  - 🇷🇺 [Русский](guides/GUIDE_RU.md) | 🇺🇸 [English](guides/GUIDE_EN.md) | 🇪🇪 [Eesti](guides/GUIDE_EE.md) | 🇯🇵 [日本語](guides/GUIDE_JA.md) | 👴 [Версия Деда](guides/GUIDE_DED.md)
-  - 🇺🇦 [Українська](guides/GUIDE_UK.md) | 🇩🇪 [Deutsch](guides/GUIDE_DE.md) | 🇫🇷 [Français](guides/GUIDE_FR.md) | 🇪🇸 [Español](guides/GUIDE_ES.md) | 🇮🇹 [Italiano](guides/GUIDE_IT.md)
-  - 🇵🇹 [Português](guides/GUIDE_PT.md) | 🇳🇱 [Nederlands](guides/GUIDE_NL.md) | 🇵🇱 [Polski](guides/GUIDE_PL.md) | 🇸🇪 [Svenska](guides/GUIDE_SV.md) | 🇩🇰 [Dansk](guides/GUIDE_DA.md)
-  - 🇫🇮 [Suomi](guides/GUIDE_FI.md) | 🇳🇴 [Norsk](guides/GUIDE_NO.md) | 🇨🇳 [中文](guides/GUIDE_ZH.md) | 🇰🇷 [한국어](guides/GUIDE_KO.md) | 🇹🇭 [ไทย](guides/GUIDE_TH.md) | 🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) | 🇸🇦 [العربية](guides/GUIDE_AR.md) | 🇮🇱 [עברית](guides/GUIDE_HE.md)
-  - 🇹🇷 [Türkçe](guides/GUIDE_TR.md) | 🇮🇳 [हिन्दी](guides/GUIDE_HI.md) | 🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) | 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) | 🇨🇿 [Čeština](guides/GUIDE_CS.md) | 🇷🇴 [Română](guides/GUIDE_RO.md)
-  - 🇭🇺 [Magyar](guides/GUIDE_HU.md) | 🇧🇬 [Български](guides/GUIDE_BG.md) | 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) | 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
-- **[STYLE.md](saipen/STYLE.md)** -- style de communication de l'agent & définition de la voix.
-- **[UI.md](saipen/UI.md)** -- directives de conception d'interface Win95 Doré Sombre.
-- **[CONFORMANCE.md](saipen/CONFORMANCE.md)** -- scénarios de test comportemental & règles du validateur.
+
+## Documentation
+
+| Document | What it is |
+|---|---|
+| [SPEC.md](SPEC.md) | Formal architecture, design goals, litmus test |
+| [RFC.md](saipen/RFC.md) | Normative specification agents execute |
+| [GUIDE.md](GUIDE.md) | Human tutor and ELI5 guides |
+| [STYLE.md](saipen/STYLE.md) | Agent communication style and voice definition |
+| [UI.md](saipen/UI.md) | Vintage Golden UI design guidelines |
+| [CONFORMANCE.md](saipen/CONFORMANCE.md) | Behavioural test scenarios and validator rules |
+
+<details>
+<summary><b>All 33 translated guides</b></summary>
+
+🇷🇺 [Русский](guides/GUIDE_RU.md) · 🇺🇸 [English](guides/GUIDE_EN.md) · 🇪🇪 [Eesti](guides/GUIDE_EE.md) · 🇯🇵 [日本語](guides/GUIDE_JA.md) · 👴 [Версия Деда](guides/GUIDE_DED.md)
+
+🇺🇦 [Українська](guides/GUIDE_UK.md) · 🇩🇪 [Deutsch](guides/GUIDE_DE.md) · 🇫🇷 [Français](guides/GUIDE_FR.md) · 🇪🇸 [Español](guides/GUIDE_ES.md) · 🇮🇹 [Italiano](guides/GUIDE_IT.md)
+
+🇵🇹 [Português](guides/GUIDE_PT.md) · 🇳🇱 [Nederlands](guides/GUIDE_NL.md) · 🇵🇱 [Polski](guides/GUIDE_PL.md) · 🇸🇪 [Svenska](guides/GUIDE_SV.md) · 🇩🇰 [Dansk](guides/GUIDE_DA.md)
+
+🇫🇮 [Suomi](guides/GUIDE_FI.md) · 🇳🇴 [Norsk](guides/GUIDE_NO.md) · 🇨🇳 [中文](guides/GUIDE_ZH.md) · 🇰🇷 [한국어](guides/GUIDE_KO.md) · 🇹🇭 [ไทย](guides/GUIDE_TH.md)
+
+🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) · 🇸🇦 [العربية](guides/GUIDE_AR.md) · 🇮🇱 [עברית](guides/GUIDE_HE.md) · 🇹🇷 [Türkçe](guides/GUIDE_TR.md) · 🇮🇳 [हिन्दी](guides/GUIDE_HI.md)
+
+🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) · 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) · 🇨🇿 [Čeština](guides/GUIDE_CS.md) · 🇷🇴 [Română](guides/GUIDE_RO.md) · 🇭🇺 [Magyar](guides/GUIDE_HU.md)
+
+🇧🇬 [Български](guides/GUIDE_BG.md) · 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) · 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
+
+</details>
+
+## Built with SAIPEN
+
+- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — High-performance prompt management tool built natively around the SAIPEN memory protocol.
+
+## Screenshots
+
+<details>
+<summary>Click to expand</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="FreeBuff agent instructions" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set in nomadcode" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="saipen screenshot 2026-08-01" width="600"/>
+
+</details>
 
 <p align="center">
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-## ## Captures d'écran
+<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
 
-<details>
-<summary>Cliquez pour déplier</summary>
-
-<img src="assets/screenshot-freebuff.png" alt="Instructions de l'agent FreeBuff" width="600"/>
-
-<img src="assets/screenshot-nomadcode1.png" alt="saipen set dans nomadcode" width="600"/>
-
-<img src="assets/screenshot-20260801-003853.png" alt="Capture d'écran saipen 2026-08-01" width="600"/>
-
-</details>
-
-<!-- source-digest: README.md sha256:951d8044313a6456 -->

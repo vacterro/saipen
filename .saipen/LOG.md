@@ -140,4 +140,10 @@
 - 07.08.26 01:09 [E-2182] [parent: E-2181] [T-none] RUN: add -> mature, product complete at v7.204.0. No missing capabilities. T-473 HELD behind Crew v8 gate (T-442..T-451). MARKHUNT tickets T-516 fixed (13 guide backtick removal), T-517 (pre-commit hook cascade) valid P1 finding. Board has 0 workable TODO tickets. Transition DONE.
 - 07.08.26 01:10 [E-2183] [parent: E-2182] [T-none] [agent: opencode] RUN: prepare saitranslate -> done -- 13 GUIDE files fixed (AR/DA/FI/HE/IT/KO/NL/NO/PL/PT/SV/TH/VI) with opening prose contract; validate.py 0 FAILs, 9 pre-existing WARNs. OUTBOX written at .saipen/saitranslate/kitchen/OUTBOX.md
 - 07.08.26 01:13 [E-2184] [parent: E-2183] [T-none] [agent: opencode] RUN: collect saitranslate -> done -- OUTBOX status: ready, source_head 0156904 matches HEAD, validate PASS (0 FAILs). Payload: 13 GUIDE prose fixes already live
-- 07.08.26 01:13 [E-2185] [parent: E-2184] [T-none] [agent: opencode] RUN: ship v7.204.0 -> ready to commit -- GUIDE opening drift fixed (AR/DA/FI/HE/IT/KO/NL/NO/PL/PT/SV/TH/VI), validate 0 FAILs, 11 pre-existing WARNs. 17 files: 13 guides + BOARD/LOG/STATE/validate.py
+
+
+- 07.08.26 01:13 [E-2185] [parent: E-2184] [T-none] [agent: opencode] RUN: ship v7.204.0 -> ready to commit
+- 07.08.26 01:19 [E-2186] [parent: E-2185] [T-none] RUN: prepare saitranslate -> confirmed ready
+- 07.08.26 01:23 [E-2187] [parent: E-2186] [T-none] RUN: prepare saitranslate -> SAIT-009 DONE. 29 locale READMEs restructured to ET template. restructure_locales.py batch-processed 28 non-Core + ja kitchen. OUTBOX status: ready. SAIT-010 ticketed.
+
+

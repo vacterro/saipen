@@ -1,7 +1,7 @@
 ---
 status: ready
 producer: saitranslate
-source_head: 0156904
+source_head: 0c73f36
 coverage:
   - 13 locale GUIDE files (GUIDE_AR/DA/FI/HE/IT/KO/NL/NO/PL/PT/SV/TH/VI.md) — opening prose contract fixed
   - guides/ directory (33 guides total, all checked)

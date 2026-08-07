@@ -1,4 +1,4 @@
-<p align="center">
+﻿<p align="center">
   <img src="assets/SAIPEN_TEXT1.png" alt="SAIPEN Logo"/>
   <br>
   <img src="assets/__SAIPEN_Alpha.png" alt="SAIPEN Sticker" width="200"/>
@@ -17,37 +17,52 @@
 **v7.204.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
 
 ```text
-User  ->  /saipen continue
-Agent ->  reads STATE ("What do I do right now?")
-Agent ->  reads BOARD ("What task am I picking up?")
-Agent ->  reads next_action (executes command)
-Agent ->  Works.
-```
 
 ### 프로젝트 상태 > 모델 메모리
+
 메모리는 모델의 기억 속이 아니라 프로젝트 내에 존재합니다. `Project -> Memory -> LLM` 구조가 `Project -> SAIPEN State -> LLM`으로 전환됩니다.
 
-### 핵심 프로토콜 로직 & 보장 사항
-- **핵심 상태 머신**: `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`
-- **제로 프롬프트 자율성**: 미완료 할 일이 없나요? 자동으로 `HUNT` (버그 스캔) → `ADD` (기능 확장) → `HUNT` 루프로 전환됩니다. 질문을 일절 하지 않습니다.
-- **명시적 트리거**: `/saipen clean` (저장소 정리), `/saipen translate` (격리된 `.saipen/saitranslate/` 공장), `/saipen markhunt` (건드리지 않고 기록만 남기는 무제한 감사), `/saipen prepare` (인계용 작업 패키징), `/saipen validate` (적합성 검사), `/saipen goal` (자율 파도형 목표 실행). 메타/제어: `/saipen status` (읽기 전용 보고서), `/saipen stop` (체크포인트 생성 및 중단). 전체 목록: RFC.md § 1.10.
-- **엄격한 신뢰성**: 배치 입력 파싱 (정밀한 1대1 티켓 처리), 커밋되지 않은 트리 수용 (작업 내용 절대 임의 삭제 안 함), 마스킹 처리 (`sk-***`).
 
-## SAIPEN 기반 프로젝트
-- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — SAIPEN 메모리 프로토콜과 네이티브하게 통합된 고성능 프롬프트 관리 도구.
+## Commands
 
-## 2개의 계층
+The full surface is 16 commands; complete details in [RFC § 1.10](saipen/RFC.md#110-command-surface).
 
-| 계층 | 필수 여부 | 목적 |
+| Command | What it does |
+|---|---|
+| `/saipen set` | Adopt a project |
+| `/saipen continue` | Resume exactly where you left off |
+| `/saipen plan` | Turn a request or raw queue into tickets |
+| `/saipen goal <text>` | Autonomous wave assault on a new objective |
+| `/saipen hunt` | Force an immediate defect/improvement scan |
+| `/saipen ship` | Version bump, changelog, tag, push |
+| `/saipen clean` | Repository cleanup |
+| `/saipen validate` | Conformance check |
+| `/saipen markhunt` | Dry uncapped audit, record only |
+| `/saipen translate` | Isolated translation factory |
+| `/saipen prepare` | Package work for handoff |
+| `/saipen collect` | Integrate a ready package |
+| `/saipen status` | Read-only report |
+| `/saipen stop` | Checkpoint and halt |
+
+<sub>`saipen init` and `saipen sub` complete the sixteen; both are called by the protocol, not typed daily.</sub>
+
+**Package keys.** `ee`/`qq` prepare a complete translation or wiki package without integrating; `eee`/`qqq` accept only a ready package, then integrate, verify, review, and push.
+
+**Experimental: saicrew.** Optional bonus layer (`extensions/subs/`, zero Core changes) for running a multi-agent crew — one Core writer plus read-only `saihunt`/`saipython` workers reporting through their own `OUTBOX.md`. Under active live testing, not finalised — see `extensions/subs/crew.md`.
+
+## Two layers
+
+| Layer | Required | Purpose |
 |---|---|---|
-| **Core (핵심)** | ✅ | 안전한 작업 연속성 유지 |
-| **Maintenance (유지보수)** | Core 상위 | 별도 지시 없이 소프트웨어 지속 진화 |
+| **Core** | ✅ | Resume work safely |
+| **Maintenance** | On top of Core | Evolve software without task direction |
 
-**자동화된 소프트웨어 진화.** 열려 있는 할 일이 남지 않았을 때 `/saipen`을 입력하면: `HUNT` 단계에서 버그, 쓰이지 않는 코드, 실패하는 테스트를 감지합니다. 문제가 없나요? `ADD` 단계에서 다음에 필요한 명확한 기능을 구현하고 검증한 뒤 다시 감시(hunt)합니다. 제품이 성숙해지면 우아하게 정지합니다.
+**Automated evolution.** No open tasks remain, type `/saipen`: `HUNT` audits for bugs, dead code, and failing tests. Clean? `ADD` builds the next obvious missing capability, verifies it, and hunts again. Product mature -> stops gracefully.
 
-**GOAL 모드.** `/saipen goal <원하는 목표>`는 보드를 피벗하고 (기존 티켓은 하향 조정되며 절대 삭제되지 않음) 새로운 목표를 향해 자율적으로 진행합니다. 티켓 간에 "계속할까요?"라고 묻지 않으며 VERIFY/REVIEW를 절대 건너뛰지 않습니다. SHIP 단계는 기존 원격 저장소로 자동 푸시합니다 (새 저장소인 경우에만 1회 확인 요청). 목표 배포 완료가 정지 지점도 아닙니다 — 곧바로 자율 HUNT/ADD 유지보수로 들어가지 제품이 성숙해지거나 블록되거나 실행 제한(3 파도 / 20개 티켓, 이후 체크포인트 및 보고)에 도달할 때까지 계속됩니다.
+**GOAL Mode.** `/saipen goal <what you want>` pivots the board (deprioritises old tickets, never deletes them) and drives the new objective forward — no "should I continue?" between tickets, VERIFY/REVIEW never skipped. SHIP auto-pushes to the existing remote; a brand-new repository still asks once. Shipping a goal is not the end point either — it transitions straight into autonomous HUNT/ADD maintenance until the product is mature, blocked, or the run hits its cap (3 waves / 20 tickets, then checkpoints and reports).
 
-## 빠른 시작
+## Quick Start
+
 
 **1. 머신당 1회 설치** -- Claude Code, Gemini, OpenCode, Aider, Antigravity 등에 프로토콜 학습:
 ```bash
@@ -66,35 +81,57 @@ bash bootstrap/inject.sh                                            # macOS / Li
 위 목록에 없는 플랫폼(DeepSeek, Qwen, 단독 OpenAI 등)인가요?
 플랫폼별 설명은 `extensions/adapters/` 폴더에 위치해 있습니다.
 
-## 문서 및 명세 링크
-- **[SPEC.md](SPEC.md)** -- 공식 아키텍처, 설계 목표, 리트머스 테스트.
-- **[RFC.md](saipen/RFC.md)** -- 에이전트가 실행하는 규범적 명세.
-- **[GUIDE.md](GUIDE.md)** -- 인간용 튜토리얼 및 쉬운 가이드:
-  - 🇷🇺 [Русский](guides/GUIDE_RU.md) | 🇺🇸 [English](guides/GUIDE_EN.md) | 🇪🇪 [Eesti](guides/GUIDE_EE.md) | 🇯🇵 [日本語](guides/GUIDE_JA.md) | 👴 [Версия Деда](guides/GUIDE_DED.md)
-  - 🇺🇦 [Українська](guides/GUIDE_UK.md) | 🇩🇪 [Deutsch](guides/GUIDE_DE.md) | 🇫🇷 [Français](guides/GUIDE_FR.md) | 🇪🇸 [Español](guides/GUIDE_ES.md) | 🇮🇹 [Italiano](guides/GUIDE_IT.md)
-  - 🇵🇹 [Português](guides/GUIDE_PT.md) | 🇳🇱 [Nederlands](guides/GUIDE_NL.md) | 🇵🇱 [Polski](guides/GUIDE_PL.md) | 🇸🇪 [Svenska](guides/GUIDE_SV.md) | 🇩🇰 [Dansk](guides/GUIDE_DA.md)
-  - 🇫🇮 [Suomi](guides/GUIDE_FI.md) | 🇳🇴 [Norsk](guides/GUIDE_NO.md) | 🇨🇳 [中文](guides/GUIDE_ZH.md) | 🇰🇷 [한국어](guides/GUIDE_KO.md) | 🇹🇭 [ไทย](guides/GUIDE_TH.md) | 🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) | 🇸🇦 [العربية](guides/GUIDE_AR.md) | 🇮🇱 [עברית](guides/GUIDE_HE.md)
-  - 🇹🇷 [Türkçe](guides/GUIDE_TR.md) | 🇮🇳 [हिन्दी](guides/GUIDE_HI.md) | 🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) | 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) | 🇨🇿 [Čeština](guides/GUIDE_CS.md) | 🇷🇴 [Română](guides/GUIDE_RO.md)
-  - 🇭🇺 [Magyar](guides/GUIDE_HU.md) | 🇧🇬 [Български](guides/GUIDE_BG.md) | 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) | 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
-- **[STYLE.md](saipen/STYLE.md)** -- 에이전트 커뮤니케이션 스타일 및 어조 정의.
-- **[UI.md](saipen/UI.md)** -- 다크 골든 Win95 UI 디자인 가이드라인.
-- **[CONFORMANCE.md](saipen/CONFORMANCE.md)** -- 동작 테스트 시나리오 및 검증기 규칙.
+
+## Documentation
+
+| Document | What it is |
+|---|---|
+| [SPEC.md](SPEC.md) | Formal architecture, design goals, litmus test |
+| [RFC.md](saipen/RFC.md) | Normative specification agents execute |
+| [GUIDE.md](GUIDE.md) | Human tutor and ELI5 guides |
+| [STYLE.md](saipen/STYLE.md) | Agent communication style and voice definition |
+| [UI.md](saipen/UI.md) | Vintage Golden UI design guidelines |
+| [CONFORMANCE.md](saipen/CONFORMANCE.md) | Behavioural test scenarios and validator rules |
+
+<details>
+<summary><b>All 33 translated guides</b></summary>
+
+🇷🇺 [Русский](guides/GUIDE_RU.md) · 🇺🇸 [English](guides/GUIDE_EN.md) · 🇪🇪 [Eesti](guides/GUIDE_EE.md) · 🇯🇵 [日本語](guides/GUIDE_JA.md) · 👴 [Версия Деда](guides/GUIDE_DED.md)
+
+🇺🇦 [Українська](guides/GUIDE_UK.md) · 🇩🇪 [Deutsch](guides/GUIDE_DE.md) · 🇫🇷 [Français](guides/GUIDE_FR.md) · 🇪🇸 [Español](guides/GUIDE_ES.md) · 🇮🇹 [Italiano](guides/GUIDE_IT.md)
+
+🇵🇹 [Português](guides/GUIDE_PT.md) · 🇳🇱 [Nederlands](guides/GUIDE_NL.md) · 🇵🇱 [Polski](guides/GUIDE_PL.md) · 🇸🇪 [Svenska](guides/GUIDE_SV.md) · 🇩🇰 [Dansk](guides/GUIDE_DA.md)
+
+🇫🇮 [Suomi](guides/GUIDE_FI.md) · 🇳🇴 [Norsk](guides/GUIDE_NO.md) · 🇨🇳 [中文](guides/GUIDE_ZH.md) · 🇰🇷 [한국어](guides/GUIDE_KO.md) · 🇹🇭 [ไทย](guides/GUIDE_TH.md)
+
+🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) · 🇸🇦 [العربية](guides/GUIDE_AR.md) · 🇮🇱 [עברית](guides/GUIDE_HE.md) · 🇹🇷 [Türkçe](guides/GUIDE_TR.md) · 🇮🇳 [हिन्दी](guides/GUIDE_HI.md)
+
+🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) · 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) · 🇨🇿 [Čeština](guides/GUIDE_CS.md) · 🇷🇴 [Română](guides/GUIDE_RO.md) · 🇭🇺 [Magyar](guides/GUIDE_HU.md)
+
+🇧🇬 [Български](guides/GUIDE_BG.md) · 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) · 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
+
+</details>
+
+## Built with SAIPEN
+
+- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — High-performance prompt management tool built natively around the SAIPEN memory protocol.
+
+## Screenshots
+
+<details>
+<summary>Click to expand</summary>
+
+<img src="assets/screenshot-freebuff.png" alt="FreeBuff agent instructions" width="600"/>
+
+<img src="assets/screenshot-nomadcode1.png" alt="saipen set in nomadcode" width="600"/>
+
+<img src="assets/screenshot-20260801-003853.png" alt="saipen screenshot 2026-08-01" width="600"/>
+
+</details>
 
 <p align="center">
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-## ## 스크린샷
+<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
 
-<details>
-<summary>클릭하여 펼치기</summary>
-
-<img src="assets/screenshot-freebuff.png" alt="FreeBuff 에이전트 지침" width="600"/>
-
-<img src="assets/screenshot-nomadcode1.png" alt="nomadcode에서 saipen set" width="600"/>
-
-<img src="assets/screenshot-20260801-003853.png" alt="saipen 스크린샷 2026-08-01" width="600"/>
-
-</details>
-
-<!-- source-digest: README.md sha256:951d8044313a6456 -->
