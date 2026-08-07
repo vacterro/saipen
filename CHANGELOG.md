@@ -2,6 +2,10 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.209.0 -- 2026-08-07 -- a callout can no longer name the wrong destination
+
+T-537: the shortcut-callout check counted keys, tokens, order and the link and never read what the sentence claimed, so a document could tell the reader `cc` is the Goal Mode key while §1.10 routed that key to `saipen continue`. Three Core-owned files shipped in v7.208.0 doing exactly that -- the RU locale source, the EN guide and the JA guide, each one's sibling already moved. Fixed, and the blind spot closed: a Core-owned callout still describing `cc` as the Goal Mode key now FAILs `[shortcut-callouts]`, derived from the route the way the `[shortcut-notes]` check is. Scoped to the 15 files Core owns -- `phases/translate.md` gives the other 28 languages to saitranslate, so their remaining semantic drift clears through an `ee` run rather than reddening every Core commit. One new red control; audit_checks 166 of 166.
+
 ## 7.208.0 -- 2026-08-07 -- `cc` and `gg` get separate destinations
 
 T-550: the Core half of the `gg`/`cc` split lands. `cc` routes to `saipen continue` (continue context / converge: it resumes an active `execution_intent: goal`, resumes convergence, or enters convergence from `normal`, and never asks for an objective -- `cc <args>` replies `Use: gg <objective>` and stops); `gg` is the sole short route for a NEW goal and its bare form is a usage line, never a continuation alias; `ccc` becomes converge, SHIP, then refresh EE and QQ against the shipped revision. `EXPECTED_SHORTCUT_ROUTES`, CONFORMANCE rows 207/218/224 and MAINTENANCE's safety-valve wording follow the new mapping, along with the `cc` callout in five languages.

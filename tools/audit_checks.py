@@ -994,6 +994,16 @@ CASES: list[tuple[str, str, object, str]] = [
              "what sets a new one.",
              "NEW GOAL ONLY: Goal Mode pivot and re-authorization."),
      "shortcut-notes"),
+    # The callout check counted keys, tokens, order and the link and never
+    # read what the sentence CLAIMS, so a document could tell the reader `cc`
+    # is the Goal Mode key while § 1.10 routed it to `saipen continue` -- and
+    # three Core-owned files shipped exactly that for a release.
+    ("a Core-owned callout calls `cc` the Goal Mode key",
+     "guides/GUIDE_EN.md",
+     replace("`cc` continues the project context to convergence (resuming a "
+             "running goal if one is set)",
+             "`cc` keeps active Goal Mode moving"),
+     "shortcut-callouts"),
     # § 1.10 ordered `saipen status` to report the last validator result from
     # LOG.md before anything gave that record a shape. Break the fixed form
     # and the report has nothing to read -- the same silence the duty had for

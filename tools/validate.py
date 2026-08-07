@@ -2823,6 +2823,29 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
         r"^\| `[a-z]{2,3}` \| ",
         _read_rfc(_sc_home / "RFC.md"), re.MULTILINE))
 
+    # T-537 gave `cc` a different destination, and this check could not see
+    # it: every rung below counts keys, tokens, order and the link, so a
+    # callout still telling the reader `cc` is the Goal Mode key passes while
+    # describing a command the table no longer assigns to that row. The
+    # rollout was therefore left half-finished in Core's OWN languages -- the
+    # RU locale source, the EN guide and the JA guide kept the superseded
+    # sentence while their siblings had moved -- and nothing failed.
+    #
+    # Scoped to the files Core owns. `phases/translate.md` gives the other 28
+    # languages to saitranslate, so failing on them here would turn one
+    # producer's backlog into a red gate on every Core commit; those stay
+    # T-537's remainder.
+    _core_callouts = {
+        Path("README.md"), Path("README.ee.md"), Path("README.ded.md"),
+        Path("README.ja.md"), Path("GUIDE.md"),
+        Path("guides/GUIDE_EN.md"), Path("guides/GUIDE_EE.md"),
+        Path("guides/GUIDE_DED.md"), Path("guides/GUIDE_JA.md"),
+        Path("guides/GUIDE_RU.md"),
+        kitchen / "en" / "README_EN.md", kitchen / "et" / "README_ET.md",
+        kitchen / "ru" / "README_RU.md", kitchen / "ded" / "README_DED.md",
+        kitchen / "ja" / "README_JA.md",
+    }
+
     def _shortcut_callout(path, expected_link):
         if not path.is_file():
             fail(f"cross-doc drift [shortcut-callouts] -- missing {path}")
@@ -2859,6 +2882,13 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
         if _index >= 40:
             fail(f"cross-doc drift [shortcut-callouts] -- {path} hides its "
                  f"shortcut entry at line {_index + 1}, outside the opening")
+        if path in _core_callouts and re.search(r"goal mode", _line,
+                                                re.IGNORECASE):
+            fail(f"cross-doc drift [shortcut-callouts] -- {path} still "
+                 "describes `cc` as the Goal Mode key, but § 1.10 routes it "
+                 "to `saipen continue`; `gg` is the sole short route for a "
+                 "new goal. A callout naming the wrong destination is the "
+                 "same defect as a Notes column naming one")
         return _line
 
     _locale_sources = {}
