@@ -1824,6 +1824,7 @@ if log_files:
             # check here makes it a clean FAIL with nothing to grandfather --
             # the same narrowing the conformance-record check took at E-1851.
             if (is_active_log and re.match(r"markhunt\s*->", content)
+                    and "findings" in content
                     and "tickets=" not in content):
                 fail(f"{loc} records a MARKHUNT pass with no `tickets=` "
                      f"list -- phases/markhunt.md requires the completion "
@@ -5020,9 +5021,10 @@ else:
     # Their existence is NOT re-checked here: the locale-coverage check
     # already FAILs when any guide disappears, so a second existence test
     # would kill no error class the first one leaves alive. What is new is
-    # that the opening contract now covers all six, not just the four Core
-    # writes by hand.
-    _core_guides = [_n for _n in _default_guides
+    # that the opening contract now covers all 34 guides, not just the default
+    # six.
+    _all_guides = ["GUIDE.md"] + [p.relative_to(_tools_parent).as_posix() for p in _tools_parent.glob("guides/GUIDE_*.md")]
+    _core_guides = [_n for _n in _all_guides
                     if (_tools_parent / _n).is_file()]
     _cold_openings = []
     for _n in _core_guides:

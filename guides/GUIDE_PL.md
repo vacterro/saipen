@@ -1,10 +1,12 @@
-<p align="center">
+﻿<p align="center">
   <img src="assets/SAIPEN_design1.png" alt="SAIPEN Guide Title" width="800"/>
 </p>
 
 # Przewodnik SAIPEN (Polski)
 
-SAIPEN to notatnik pamięci w folderze `.saipen/` dla agentów AI.
+SAIPEN to notatnik pamięci w folderze .saipen/ dla agentów AI.
+
+AI agents have one fatal flaw: they forget. Close the window and everything they learned about your project is gone — what you were building, what failed, which idea died on Tuesday. Every morning you brief a brilliant stranger from scratch. SAIPEN is the fix: a persistent notebook in the .saipen/ folder. The agent reads STATE and BOARD on startup, sees exactly where it left off, and gets back to work without a single repeated word.
 
 **Szybkie klawisze:** `cc` kontynuuje aktywny Goal Mode, `sss` pokazuje stan bez dotykania kodu, a `ss` zapisuje punkt kontrolny i zatrzymuje się. [Zobacz pełną mapę 15 klawiszy](../saipen/RFC.md#110-command-surface). Cyrylickie bliźniaki też działają: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
@@ -48,3 +50,5 @@ bash bootstrap/inject.sh                                            # macOS / Li
 ---
 
 **Full command list / complete command reference:** [RFC § 1.10](../saipen/RFC.md#110-command-surface) — the authoritative list of every `saipen` command.
+
+

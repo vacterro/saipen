@@ -1,10 +1,12 @@
-<p align="center">
+﻿<p align="center">
   <img src="assets/SAIPEN_design1.png" alt="SAIPEN Guide Title" width="800"/>
 </p>
 
 # מדריך SAIPEN (עברית)
 
-SAIPEN הוא פנקס זיכרון בתיקייה `.saipen/` עבור סוכני AI.
+SAIPEN הוא פנקס זיכרון בתיקייה .saipen/ עבור סוכני AI.
+
+AI agents have one fatal flaw: they forget. Close the window and everything they learned about your project is gone — what you were building, what failed, which idea died on Tuesday. Every morning you brief a brilliant stranger from scratch. SAIPEN is the fix: a persistent notebook in the .saipen/ folder. The agent reads STATE and BOARD on startup, sees exactly where it left off, and gets back to work without a single repeated word.
 
 **מקשים מהירים:** `cc` ממשיך Goal Mode פעיל, `sss` מציג סטטוס ללא נגיעה בקוד ו-`ss` שומר נקודת ביקורת ועוצר. [ראה את מפת 15 המקשים המלאה](../saipen/RFC.md#110-command-surface). גם התאומים הקיריליים עובדים: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
@@ -48,3 +50,5 @@ bash bootstrap/inject.sh                                            # macOS / Li
 ---
 
 **Full command list / complete command reference:** [RFC § 1.10](../saipen/RFC.md#110-command-surface) — the authoritative list of every `saipen` command.
+
+

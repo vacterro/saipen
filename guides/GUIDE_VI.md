@@ -1,10 +1,12 @@
-<p align="center">
+﻿<p align="center">
   <img src="assets/SAIPEN_design1.png" alt="SAIPEN Guide Title" width="800"/>
 </p>
 
 # Hướng dẫn SAIPEN (Tiếng Việt)
 
-SAIPEN là sổ ghi nhớ trong thư mục `.saipen/` cho các tác nhân AI.
+SAIPEN là sổ ghi nhớ trong thư mục .saipen/ cho các tác nhân AI.
+
+AI agents have one fatal flaw: they forget. Close the window and everything they learned about your project is gone — what you were building, what failed, which idea died on Tuesday. Every morning you brief a brilliant stranger from scratch. SAIPEN is the fix: a persistent notebook in the .saipen/ folder. The agent reads STATE and BOARD on startup, sees exactly where it left off, and gets back to work without a single repeated word.
 
 **Phím tắt:** `cc` tiếp tục Goal Mode đang chạy, `sss` báo trạng thái mà không đụng vào mã và `ss` lưu điểm kiểm tra rồi dừng. [Xem bản đồ đầy đủ 15 phím](../saipen/RFC.md#110-command-surface). Các cặp song sinh Cyrillic cũng hoạt động: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
@@ -48,3 +50,5 @@ bash bootstrap/inject.sh                                            # macOS / Li
 ---
 
 **Full command list / complete command reference:** [RFC § 1.10](../saipen/RFC.md#110-command-surface) — the authoritative list of every `saipen` command.
+
+
