@@ -1,12 +1,12 @@
 ---
-phase: DONE
-task: none
-next_action: "PHASE SCOUT T-528"
+phase: SCOUT
+task: T-528
+next_action: "PHASE BUILD T-528"
 blocker: none
-transition_from: SHIP
+transition_from: DONE
 saipen_version: 7
 schema_version: 3
-last_event: 2221
+last_event: 2222
 style_contract: ded-4ae736e4
 saipen_home: "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN"
 agent: claude
