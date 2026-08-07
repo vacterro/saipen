@@ -557,19 +557,26 @@ def demote_the_pick(text: str) -> str:
 
     The pick check compares `next_action` against the topmost workable
     `## TODO` ticket ONLY when nothing is claimed -- a `## DOING` ticket IS
-    the pick (T-466) -- so a STATE-only mutation cannot reach that branch
-    while a ticket is in flight. Mutating the board reaches it from both
-    sides.
-
-    Inject two synthetic workable tickets: T-999 at the top of `## TODO`
-    (always the topmost workable) and T-998 at the bottom (so the case's
-    STATE mutation can name a workable ticket that is never topmost). The
-    mismatch holds whatever the real board and real STATE hold -- the old
-    "demote the ticket next_action names" went vacuous twice: once when the
-    board held a single workable ticket, and once when STATE sat at DONE with
-    a non-ticket next_action (T-532).
+    the pick (T-466) -- so the mutation must both empty `## DOING` AND
+    arrange the TODO mismatch. Inject two synthetic workable tickets: T-999
+    at the top of `## TODO` (always the topmost workable) and T-998 at the
+    bottom (so the case's STATE mutation can name a workable ticket that is
+    never topmost). The mismatch holds whatever the real board and real
+    STATE hold -- the old "demote the ticket next_action names" went vacuous
+    three times: once with a single workable ticket, once with a DONE-state
+    non-ticket next_action, and once on a ship commit whose own ticket sat
+    in `## DOING` (T-532, T-534).
     """
     nl = chr(10)
+    doing = re.search(r"^## DOING$\n(.*?)(?=^## |\Z)", text,
+                      re.MULTILINE | re.DOTALL)
+    if doing is not None:
+        body = doing.group(1)
+        if body.strip():
+            cleaned = "\n".join(
+                ln for ln in body.splitlines()
+                if not ln.strip().startswith("- ["))
+            text = text[:doing.start(1)] + cleaned + text[doing.end(1):]
     todo = re.search(r"^## TODO$\n(.*?)(?=^## |\Z)", text,
                      re.MULTILINE | re.DOTALL)
     if todo is None:

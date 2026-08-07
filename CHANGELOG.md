@@ -2,6 +2,10 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.206.7 -- 2026-08-07 -- audit_checks pick control claim-independent
+
+T-534 (second pass): the v7.206.6 CI run exposed a third board-state dependence in `tools/audit_checks.py` -- the next_action-topmost red control fires locally on a claim-free board, but the pick check only runs when nothing is claimed, and a ship commit's own ticket sits in `## DOING`. `demote_the_pick` now empties `## DOING` (drops the claimed ticket line) before arranging the `## TODO` mismatch, so it goes red from a board WITH a claimed ticket and a zero-workable `## TODO` -- the exact CI composition. Verified 165/165 under both compositions.
+
 ## 7.206.6 -- 2026-08-07 -- audit_checks controls board-state independent
 
 T-534: two of the 165 audit_checks controls stayed dependent on the live board/STATE composition after T-532, so CI came back red on the v7.206.4/v7.206.5 ships even though local runs reported 165/165: the session-BLOCKED control cannot fire when the ship commit's board holds no workable `## TODO`, and next_action-topmost cannot fire when STATE sits at DONE with a non-ticket next_action. Both are now fully self-contained through a new MULTI mutation form (a case may edit two files, with save/restore): session-BLOCKED injects a synthetic workable ticket alongside `phase: BLOCKED`; next_action-topmost injects synthetic tickets at the top and bottom of `## TODO` and names the bottom one in STATE.next_action.
