@@ -113,7 +113,7 @@ def release_ledger_probe(source: Path, destination: Path) -> str | None:
     for args in (("init", "-q"),
                  ("config", "user.name", "SAIPEN ledger probe"),
                  ("config", "user.email", "ledger-probe@example.invalid"),
-                 # The tree has to be COMMITTED, not just present: the runtime
+                 # The committed tree, not just present: the runtime
                  # manifest now requires its files to be tracked, and a probe
                  # whose repository contains one empty commit has every file
                  # untracked. That made this fixture fail for a reason it does
@@ -124,6 +124,29 @@ def release_ledger_probe(source: Path, destination: Path) -> str | None:
         result = git(*args)
         if result.returncode:
             return f"git {' '.join(args)} failed: {(result.stderr or result.stdout).strip()}"
+
+    # The copied real `.saipen/LOG.md` carries `hunt -> clean @<hash>` marks
+    # that name this repository's real commits. In this synthetic repo only
+    # the probe's own commit exists, so the hunt-mark gate (tools/validate.py)
+    # FAILs the fixture before any release-ledger control has run -- a reason
+    # the probe does not test. Re-point the active marks at the synthetic
+    # commit and commit the sanitization, so the fixture again resembles a
+    # real clone in every way the validator can see.
+    active_log = tree / ".saipen" / "LOG.md"
+    if active_log.is_file():
+        short = git("rev-parse", "--short", "HEAD").stdout.strip()
+        text = active_log.read_text(encoding="utf-8-sig")
+        sanitized = re.sub(r"hunt -> clean @[0-9a-f]{7,40}\b",
+                           f"hunt -> clean @{short}", text)
+        if sanitized != text:
+            active_log.write_text(sanitized, encoding="utf-8", newline="\n")
+            for args in (("add", ".saipen/LOG.md"),
+                         ("commit", "-q", "-m",
+                          "re-point synthetic hunt marks")):
+                result = git(*args)
+                if result.returncode:
+                    return (f"git {' '.join(args)} failed: "
+                            + (result.stderr or result.stdout).strip())
 
     baseline = json.loads((tree / "tools" / "release_ledger_baseline.json").read_text(
         encoding="utf-8"))
