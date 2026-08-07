@@ -2,6 +2,18 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.205.0 -- 2026-08-07 -- cold-start + execution chain hardening
+
+Goal wave "Harden cold-start and execution chain" (9 tickets, 8 shipped):
+- **T-518** (P0): validation + pre-commit are now provably read-only. install_hook.py generation 5 captures `git status --porcelain=v1 -uall` before/after the gate; any project-file write from the validation path FAILs the commit.
+- **T-519** (P0): one deterministic `protocol_dir` resolver for both source-clone and flattened-install layouts (BOOT + CORE).
+- **T-520** (P1): one canonical runtime manifest (`saipen/MANIFEST.json`) replaces the divergent inject.sh/ps1/autoinject.py/validate.py file lists.
+- **T-521** (P1): RFC stub trap removed — adapters/SKILL.md route to BOOT→INDEX→exact CORE, never to RFC.md as constitution.
+- **T-522** (P2): INDEX.md exact — 16 phases synced with files on disk.
+- **T-523** (P2): one version source — saipen/VERSION deleted, root VERSION only.
+- **T-524** (P1): transition authority removed from conflict — CORE matrix is the single canonical source.
+- **T-525** (P1): cold path shrunk — BOOT.md 13.9KB→5.2KB, v8 backlog moved off the cold-start surface.
+
 ## 7.204.1 -- 2026-08-07 -- guide opening drift fix + protocol hygiene
 
 13 locale guides (AR/DA/FI/HE/IT/KO/NL/NO/PL/PT/SV/TH/VI) fixed: opening prose contract restored. Guides previously started with HTML image tags instead of prose, violating STYLE.md's guide contract. saipen/VERSION now git-tracked. BOOT.md duplicate STYLE.md contract removed. audit_checks.py release_ledger_probe hunt-mark sanitized.

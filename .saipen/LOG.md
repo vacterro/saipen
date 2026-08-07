@@ -162,3 +162,6 @@
 - 07.08.26 01:47 [E-2198] [parent: E-2197] [T-none] DEC: goal_tickets 5->6 (ticket T-523 DONE)
 - 07.08.26 01:47 [E-2199] [parent: E-2198] [T-none] DEC: goal_tickets 6->7 (ticket T-524 DONE)
 - 07.08.26 01:47 [E-2200] [parent: E-2199] [T-none] DEC: goal_tickets 7->8 (ticket T-525 DONE)
+
+- 07.08.26 01:55 [E-2201] [parent: E-2200] [T-none] DEC: SHIP -- REVIEW re-ran 8 wave verifies independently: T-518 purity OK, T-519/T-520/T-524 validator-verified, T-521 clean, T-522 16/16, T-523 one VERSION, T-525 13.2->6.1KB. P0/P1 none. T-526 deferred remains TODO. 
+- 07.08.26 01:58 [E-2202] [parent: E-2201] [T-none] [agent: opencode] RUN: ship v7.205.0 -> release commit -- goal batch T-518..T-525 versioned (claude left it untagged on HEAD d9e0cf7). VERSION 7.204.1->7.205.0, CHANGELOG head entry, README badge, 32 locale README badges. Independent REVIEW re-ran all 8 verifies PASS.
