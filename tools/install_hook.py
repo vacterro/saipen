@@ -85,9 +85,13 @@ fi
 
 if [ -f "$SAIPEN_HOME/tools/validate.py" ]; then
   if command -v python >/dev/null 2>&1; then
-    python "$SAIPEN_HOME/tools/validate.py" || { echo "saipen: validation failed -- fix .saipen/ or commit with --no-verify" >&2; exit 1; }
+    python "$SAIPEN_HOME/tools/validate.py" && exit 0
+    echo "saipen: validation failed -- fix .saipen/ or commit with --no-verify" >&2
+    exit 1
   elif command -v py >/dev/null 2>&1; then
-    py "$SAIPEN_HOME/tools/validate.py" || { echo "saipen: validation failed -- fix .saipen/ or commit with --no-verify" >&2; exit 1; }
+    py "$SAIPEN_HOME/tools/validate.py" && exit 0
+    echo "saipen: validation failed -- fix .saipen/ or commit with --no-verify" >&2
+    exit 1
   fi
 fi
 if [ -f "$SAIPEN_HOME/tests/validate.sh" ]; then
@@ -95,7 +99,9 @@ if [ -f "$SAIPEN_HOME/tests/validate.sh" ]; then
     echo "saipen: validation failed -- Bash is required to run $SAIPEN_HOME/tests/validate.sh" >&2
     exit 1
   fi
-  bash "$SAIPEN_HOME/tests/validate.sh" || { echo "saipen: validation failed -- fix .saipen/ or commit with --no-verify" >&2; exit 1; }
+  bash "$SAIPEN_HOME/tests/validate.sh" && exit 0
+  echo "saipen: validation failed -- fix .saipen/ or commit with --no-verify" >&2
+  exit 1
 fi
 
 # Purity check: the gate MUST NOT mutate any tracked or untracked file.
