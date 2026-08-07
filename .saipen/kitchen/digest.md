@@ -1,3 +1,3 @@
-done: v7.205.2 pushed (2d81619, tag v7.205.2). T-517 proved the validation path read-only; T-527 fixed the hook that told every successful commit it was NOT VALIDATED (generation 7, two red controls).
-remaining: T-473 (HELD, needs T-443). New: CI run #201 is RED on 3fcf780 -- untriaged, no ticket yet.
+done: v7.206.0 pushed (132a4fa, tag v7.206.0). T-529: RFC stub trap out of both injectors + validator (file set + regex), red-tested; T-531: saipen-inject scheduled task every 15 min (pull + inject), uninstallers clean it up.
+remaining: T-528 (red CI -- orphan hunt-mark @db9d775 on no remote branch), then T-473 HELD.
 awaiting: nothing.
