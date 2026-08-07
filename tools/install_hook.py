@@ -33,7 +33,7 @@ MARKER = "# saipen pre-commit hook"
 # out loud when it is red -- the failure mode where this repo's own CI sat red
 # for 30+ commits while every local gate stayed green (the badge is passive;
 # nothing in the commit loop ever looked at it). Warn-only, never blocks.
-HOOK_VERSION = 6
+HOOK_VERSION = 7
 
 home = Path(__file__).resolve().parent.parent
 hooks_dir = Path(".git/hooks")
@@ -120,6 +120,17 @@ fi
 if [ -n "${{_validate_rc:-}}" ] && [ "$_validate_rc" != 0 ]; then
   echo "saipen: validation failed -- fix .saipen/ or commit with --no-verify" >&2
   exit 1
+fi
+
+# Generation 7: a validator ran and passed, so the gate is done -- exit quietly.
+# Generation 6 removed `validate.py && exit 0` so the purity guard could no
+# longer be short-circuited past, and put nothing in its place, so every
+# healthy commit fell into the NOT VALIDATED line below and was told it had
+# not been validated. Exiting here is safe now precisely because the guard
+# above already ran. Keep this exit gated on `_validate_rc` being SET: an
+# unreachable validator leaves it unset and must still reach the diagnostic.
+if [ -n "${{_validate_rc:-}}" ]; then
+  exit 0
 fi
 
 # No validator reachable -- never block commits on a broken install, but never

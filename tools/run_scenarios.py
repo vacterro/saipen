@@ -333,7 +333,48 @@ def run_hook_probes() -> tuple[list[str], int, int]:
         else:
             print("PASS: installed hook reports a RED CI status and still "
                   "exits 0 -- warn-only, as the docs now say")
-    return failures, 4, 0
+
+        # T-527, the two halves of the NOT-VALIDATED diagnostic. It exists to
+        # catch a commit that LOOKS validated and was not, so it is worth
+        # nothing unless it is silent on the healthy path: generation 6 fired
+        # it on every successful commit for want of a success exit, and a
+        # warning that always fires is one nobody reads on the day it is true.
+        # The healthy run is `no_tool` above -- stub validate.py rc 0 and the
+        # Bash floor both ran, which is exactly the case the line must not
+        # describe.
+        not_validated = "saipen: NOT VALIDATED"
+        if not_validated in no_tool_output:
+            failures.append(
+                "installed hook claimed NOT VALIDATED after a validator ran "
+                "and passed -- the success exit is missing or unreachable")
+        else:
+            print("PASS: installed hook is silent on the healthy path -- no "
+                  "false NOT-VALIDATED line after a passing validator")
+
+        # The other half, and the reason the success exit is gated on
+        # `_validate_rc` being SET rather than added unconditionally: with no
+        # validator reachable at all the line must still appear, and the commit
+        # must still go through. Removing both entry points leaves the hook's
+        # `-f` guards unsatisfied and its saipen_home fallback with nothing to
+        # recover, which is the broken install this diagnostic was built for.
+        (fake_home / "tools" / "validate.py").unlink()
+        (fake_home / "tests" / "validate.sh").unlink()
+        broken = subprocess.run(
+            [dash, str(hook)], cwd=project, env=ci_env,
+            capture_output=True, text=True, errors="replace")
+        broken_output = broken.stdout + broken.stderr
+        if broken.returncode != 0:
+            failures.append(
+                f"installed hook blocked a commit on a broken install: "
+                f"rc={broken.returncode} {broken_output.strip()[-160:]}")
+        elif not_validated not in broken_output:
+            failures.append(
+                "installed hook went quiet with no validator reachable -- an "
+                "unvalidated commit that looks validated is the silent PASS")
+        else:
+            print("PASS: installed hook with no validator reachable -- says "
+                  "NOT VALIDATED out loud and still exits 0")
+    return failures, 6, 0
 
 
 def run_precommit_purity_probe() -> tuple[list[str], int, int]:

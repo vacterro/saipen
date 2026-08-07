@@ -2,6 +2,12 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.205.2 -- 2026-08-07 -- pre-commit hook generation 7
+
+T-517: the validation path is read-only, proven rather than asserted — `git status --porcelain=v1 -uall` byte-identical across `validate.py`, and `ci_status.py` writes only inside `.git/` or the system tempdir.
+
+T-527: the hook told every successful commit it had not been validated. Generation 6 removed `validate.py && exit 0` so the purity guard could no longer be skipped, and put no success exit in its place, so control fell past the failure check into the fall-through `saipen: NOT VALIDATED` diagnostic. Generation 7 restores a success exit gated on the validator rc being set, placed *after* the purity guard so generation 6's reason for deleting it does not return. Two red controls added (installed-hook probes 4 → 6): the healthy path must stay silent, and a genuinely unreachable validator must still say so out loud and still exit 0.
+
 ## 7.205.1 -- 2026-08-07 -- validation blind spots closed
 
 T-526: pre-commit purity probe (read-only gate proven, mutating validator trips gen-6 guard) + validator checks for STATE final-newline, nested saipen/VERSION duplicate, INDEX phase parity, and adapter RFC-stub-trap. Gen-6 hook fix: the gen-5 `&& exit 0` short-circuited before the purity guard, making it dead; now captures validator rc, runs purity comparison, then exits. All 11 validation blind spots now covered by a named check or probe.
