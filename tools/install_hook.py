@@ -33,7 +33,7 @@ MARKER = "# saipen pre-commit hook"
 # out loud when it is red -- the failure mode where this repo's own CI sat red
 # for 30+ commits while every local gate stayed green (the badge is passive;
 # nothing in the commit loop ever looked at it). Warn-only, never blocks.
-HOOK_VERSION = 4
+HOOK_VERSION = 5
 
 home = Path(__file__).resolve().parent.parent
 hooks_dir = Path(".git/hooks")
@@ -70,6 +70,10 @@ if [ ! -f "$SAIPEN_HOME/tools/validate.py" ]; then
   SAIPEN_HOME=$(sed -n 's/^saipen_home:[ \\t]*"\\{{0,1\\}}\\([^"]*\\)"\\{{0,1\\}}[ \\t]*$/\\1/p' .saipen/STATE.md | head -1 | tr '\\\\' '/')
 fi
 
+# Generation 5: purity guard. Validation and pre-commit MUST be read-only.
+# Capture tree state before and after; any mutation is a defect.
+_before=$(git status --porcelain=v1 -uall 2>/dev/null || true)
+
 # CI status: if the last completed workflow run for this branch is red, say
 # so out loud BEFORE this commit buries it further. Warn-only and fail-open:
 # a red CI must never block the very commit that fixes it, and a network
@@ -81,13 +85,9 @@ fi
 
 if [ -f "$SAIPEN_HOME/tools/validate.py" ]; then
   if command -v python >/dev/null 2>&1; then
-    python "$SAIPEN_HOME/tools/validate.py" && exit 0
-    echo "saipen: validation failed -- fix .saipen/ or commit with --no-verify" >&2
-    exit 1
+    python "$SAIPEN_HOME/tools/validate.py" || { echo "saipen: validation failed -- fix .saipen/ or commit with --no-verify" >&2; exit 1; }
   elif command -v py >/dev/null 2>&1; then
-    py "$SAIPEN_HOME/tools/validate.py" && exit 0
-    echo "saipen: validation failed -- fix .saipen/ or commit with --no-verify" >&2
-    exit 1
+    py "$SAIPEN_HOME/tools/validate.py" || { echo "saipen: validation failed -- fix .saipen/ or commit with --no-verify" >&2; exit 1; }
   fi
 fi
 if [ -f "$SAIPEN_HOME/tests/validate.sh" ]; then
@@ -95,10 +95,20 @@ if [ -f "$SAIPEN_HOME/tests/validate.sh" ]; then
     echo "saipen: validation failed -- Bash is required to run $SAIPEN_HOME/tests/validate.sh" >&2
     exit 1
   fi
-  bash "$SAIPEN_HOME/tests/validate.sh" && exit 0
-  echo "saipen: validation failed -- fix .saipen/ or commit with --no-verify" >&2
+  bash "$SAIPEN_HOME/tests/validate.sh" || { echo "saipen: validation failed -- fix .saipen/ or commit with --no-verify" >&2; exit 1; }
+fi
+
+# Purity check: the gate MUST NOT mutate any tracked or untracked file.
+_after=$(git status --porcelain=v1 -uall 2>/dev/null || true)
+if [ "$_before" != "$_after" ]; then
+  echo "saipen: VALIDATION MUTATED THE TREE -- the pre-commit gate is not read-only" >&2
+  echo "Before:" >&2
+  echo "$_before" >&2
+  echo "After:" >&2
+  echo "$_after" >&2
   exit 1
 fi
+
 # No validator reachable -- never block commits on a broken install, but never
 # stay quiet about it either. Usually a moved saipen_home; if STATE.md is UTF-16
 # the sed above recovers nothing either. An unvalidated commit that LOOKS

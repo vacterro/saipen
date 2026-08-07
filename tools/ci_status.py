@@ -259,7 +259,13 @@ def main_argv(argv=None):
 
     if args.hook and cache is not None:
         with contextlib.suppress(OSError):
-            cache.write_text(json.dumps({
+            # Write cache to a temp location outside the repo so the
+            # pre-commit gate leaves zero project-directory footprint.
+            # A network hiccup is already fail-open; losing the cache
+            # on the same hiccup costs one extra request next time.
+            import tempfile
+            _td = Path(tempfile.gettempdir()) / "saipen-ci-cache.json"
+            _td.write_text(json.dumps({
                 "branch": branch, "slug": slug, "ts": now,
                 "exit_code": code, "message": message,
             }), encoding="utf-8")
