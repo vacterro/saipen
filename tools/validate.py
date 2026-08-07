@@ -2369,6 +2369,67 @@ if IS_SAIPEN_HOME:
            "write ban enforced, fixer contract present, UI- prefix documented, "
            "bootstrap includes charters)")
 
+# ------------------------------------------------------- CHARTER METADATA
+
+# T-541: every shipped sai*.md charter must declare its machine-readable
+# metadata block -- the eight keys a tool can read without parsing prose.
+# A charter missing the block, a role_kind outside the closed set, or a
+# missing PRODUCER charter for a shipped producer is a contract break, not a
+# documentation gap: outbox.schema.json and the freshness checks (T-542) read
+# role_kind/collect_policy/role_revision from exactly this block.
+_CHARTER_KEYS = ("role_kind", "write_scope", "trigger", "collect_policy",
+                 "done_condition", "freshness_inputs", "output_contract",
+                 "role_revision")
+_CHARTER_ROLE_KINDS = ("SCOUT", "FIXER", "PRODUCER", "TOOL")
+_CHARTER_COLLECT_POLICIES = ("automatic", "core-review", "explicit")
+if IS_SAIPEN_HOME:
+    _subs_dir = Path("extensions/subs")
+    _charters = sorted(_subs_dir.glob("sai*.md")) if _subs_dir.is_dir() else []
+    _bad_charters = []
+    for _c in _charters:
+        _ct = _c.read_text(encoding="utf-8-sig", errors="replace")
+        _blocks = re.findall(r"```yaml\n(.*?)```", _ct, re.DOTALL)
+        if not _blocks:
+            _bad_charters.append(f"{_c.name}: no ```yaml metadata block")
+            continue
+        _block = "\n".join(_blocks)
+        _missing = [k for k in _CHARTER_KEYS
+                    if not re.search(rf"^{re.escape(k)}:", _block, re.MULTILINE)]
+        if _missing:
+            _bad_charters.append(f"{_c.name}: missing keys {', '.join(_missing)}")
+            continue
+        _rk = re.search(r"^role_kind:\s*(\S+)", _block, re.MULTILINE)
+        _cp = re.search(r"^collect_policy:\s*(\S+)", _block, re.MULTILINE)
+        if _rk and _rk.group(1) not in _CHARTER_ROLE_KINDS:
+            _bad_charters.append(
+                f"{_c.name}: role_kind {_rk.group(1)!r} not in "
+                f"{'/'.join(_CHARTER_ROLE_KINDS)}")
+        if _cp and _cp.group(1) not in _CHARTER_COLLECT_POLICIES:
+            _bad_charters.append(
+                f"{_c.name}: collect_policy {_cp.group(1)!r} not in "
+                f"{'/'.join(_CHARTER_COLLECT_POLICIES)}")
+    for _need, _kind in (("saiwiki.md", "PRODUCER"), ("saitranslate.md", "PRODUCER")):
+        _cand = _subs_dir / _need
+        _found_kind = False
+        if _cand.is_file():
+            _bl = re.findall(r"```yaml\n(.*?)```",
+                             _cand.read_text(encoding="utf-8-sig", errors="replace"),
+                             re.DOTALL)
+            _found_kind = any(
+                re.search(rf"^role_kind:\s*{_kind}\b", b, re.MULTILINE)
+                for b in _bl)
+        if not _found_kind:
+            _bad_charters.append(
+                f"{_need} must exist and declare role_kind {_kind}")
+    if _bad_charters:
+        fail("charter-metadata: " + "; ".join(_bad_charters)
+             + " -- every shipped sai*.md must declare all eight metadata "
+               "keys with role_kind/collect_policy from the closed sets "
+               "(T-541)")
+    else:
+        ok(f"{len(_charters)} shipped sai*.md charter(s) declare the full "
+           f"metadata block ({len(_CHARTER_KEYS)} keys, closed enums)")
+
 # CONVERGE.md owns the convergence stage ORDER. The failure this pins is not a
 # missing file -- it is a sequence that quietly loses a stage or swaps two of
 # them, which reads perfectly and produces a run that prepares its factories

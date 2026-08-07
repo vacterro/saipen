@@ -1,5 +1,16 @@
 # saiui -- the UI designer
 
+```yaml
+role_kind: FIXER
+write_scope: ".saipen/extensions/subs/saiui/"
+trigger: "bare saiui / saipen sub spawn saiui / crew UI stage / a UI task from Core"
+collect_policy: core-review
+done_condition: "OUTBOX entry `status: ready` with a verified patch and evidence against the canonical Vintage Golden spec"
+freshness_inputs: ["source_head", "source_tree_fingerprint"]
+output_contract: "PROTOCOL.md § 2 + § 9 complete package with unified diff patch"
+role_revision: "rev1"
+```
+
 A subSaipen (PROTOCOL.md), so everything there binds: `mode: read-only`,
 writes confined to `.saipen/extensions/subs/saiui/`, one door out through
 `kitchen/OUTBOX.md`, collected by Core with `saipen sub collect saiui`.

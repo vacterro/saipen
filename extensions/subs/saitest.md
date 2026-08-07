@@ -1,5 +1,16 @@
 # saitest -- the adversary
 
+```yaml
+role_kind: TOOL
+write_scope: ".saipen/extensions/subs/saitest/"
+trigger: "bare saitest / saipen sub spawn saitest / crew reproduce stage / a target handed from Core or saipython"
+collect_policy: core-review
+done_condition: "every scenario in the run ended REPRODUCED | NOT_REPRODUCED | BLOCKED and the OUTBOX entry records the verdict"
+freshness_inputs: ["source_head", "source_tree_fingerprint"]
+output_contract: "PROTOCOL.md § 2 complete package; scenario verdicts REPRODUCED/NOT_REPRODUCED/BLOCKED"
+role_revision: "rev1"
+```
+
 A subSaipen (PROTOCOL.md), so everything there binds: `mode: read-only`,
 writes confined to `.saipen/extensions/subs/saitest/`, one door out through
 `kitchen/OUTBOX.md`, collected by Core with `saipen sub collect saitest`.

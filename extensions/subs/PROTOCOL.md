@@ -188,6 +188,21 @@ A charter defines the subSaipen's:
 - output contract (OUTBOX shape, fields, verification requirements);
 - non-goals (what it is not and must not become).
 
+**Machine-readable metadata** (T-541): every shipped `sai*.md` charter MUST
+open with a fenced YAML block (a triple-backtick fence with the `yaml`
+language tag) declaring exactly these eight keys --
+`role_kind` (closed set: `SCOUT | FIXER | PRODUCER | TOOL`), `write_scope`,
+`trigger`, `collect_policy` (closed set: `automatic | core-review |
+explicit`), `done_condition`, `freshness_inputs`, `output_contract`,
+`role_revision`. The block is what a tool can read without parsing prose; the
+prose below it stays the binding contract. `role_revision` records which
+revision of THIS charter an instance spawned/adopted against -- the value
+recorded at spawn and carried into every ready OUTBOX package (T-542), never
+a wall-clock date. A charter existing does not mean a worker exists:
+`MANIFEST.md` lists only live spawned/adopted instances, and a charter is
+read by reference from the project-local copy, never copied into the
+instance folder.
+
 **Inheritance, not duplication.** Charters are loaded by reference from the
 project-local copy, never copied into the subSaipen's own instance folder.
 A copied charter would become a second source of truth and drift.

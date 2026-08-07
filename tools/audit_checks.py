@@ -1556,6 +1556,14 @@ CASES: list[tuple[str, str, object, str]] = [
      # (T-532). Drop every occurrence.
      lambda t: t.replace("kitchen/pen/", "kitchen/direct/"),
      "fixer pen or OUTBOX"),
+    # T-541: the machine-readable metadata block is the tool's only way to
+    # read a charter's role_kind/collect_policy/role_revision. Drop the yaml
+    # language tag so the block stops being machine-readable, and the
+    # charter-metadata check must fire.
+    ("a sai*.md charter stops being machine-readable",
+     "extensions/subs/saitest.md",
+     replace("```yaml", "```text"),
+     "charter-metadata"),
     ("PROTOCOL.md drops UI- prefix from ticket table",
      "extensions/subs/PROTOCOL.md",
      replace("| `UI-` | saiui (fixer, § 9) |", ""),

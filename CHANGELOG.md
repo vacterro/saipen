@@ -2,6 +2,12 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.213.0 -- 2026-08-07 -- role charters become machine-readable
+
+T-541: every shipped `sai*.md` charter now opens with a fenced YAML metadata block declaring `role_kind` (SCOUT/FIXER/PRODUCER/TOOL), `write_scope`, `trigger`, `collect_policy` (automatic/core-review/explicit), `done_condition`, `freshness_inputs`, `output_contract`, `role_revision` -- the eight keys a tool can read without parsing prose. The two existing charters (saitest = TOOL, saiui = FIXER) gain blocks; four new charters land: saihunt (SCOUT), saipython (FIXER), saiwiki (PRODUCER), saitranslate (PRODUCER). A charter existing does not mean a worker exists -- MANIFEST.md lists only live spawned/adopted instances.
+
+`validate.py` gains [charter-metadata]: every shipped `extensions/subs/sai*.md` must declare all eight keys with `role_kind`/`collect_policy` from the closed sets, and PRODUCER charters must exist for saiwiki and saitranslate. `outbox.schema.json` accepts `source_tree_fingerprint` and `role_revision` (the freshness fields T-542/T-543 bind packages to). PROTOCOL.md § 3.1 requires the block. One new red control; audit_checks 171 of 171. CONFORMANCE row 246.
+
 ## 7.212.0 -- 2026-08-07 -- HUNT detects, CLEAN mutates: the ownership split
 
 T-540: two phases both held deletion authority. `hunt.md` carried the proof-of-recovery gate, the 5-file mass-deletion cap and the pre-move reference sweep; `clean.md` carried orphan/trash/kitchen deletion -- two documents, two authority claims, no reader able to tell which scope belonged where, and a sweep that deleted on the spot while the phase meant to own hygiene only ran when asked. Now `HUNT` is detect/classify/ticket/report with no mutation authority beyond BOARD/LOG/STATE bookkeeping: its kitchen scan finds stale files and tickets them for CLEAN, it never removes them. Every deletion, move, rename, prune and relocation happens in `CLEAN` under the gates that moved with the authority.

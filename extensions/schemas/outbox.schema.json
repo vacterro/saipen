@@ -37,6 +37,14 @@
         "type": "string",
         "description": "Full source Git HEAD or no-git; required for a complete package"
       },
+      "source_tree_fingerprint": {
+        "type": "string",
+        "description": "Deterministic fingerprint over the producer's relevant source surface including uncommitted tracked/untracked changes, excluding its own kitchen/OUTBOX noise (PROTOCOL.md freshness section, T-542)"
+      },
+      "role_revision": {
+        "type": "string",
+        "description": "The effective charter revision the producer spawned/adopted against (PROTOCOL.md § 3.1 metadata block, T-541/T-542)"
+      },
       "coverage": {
         "description": "Exact source surfaces and locale/page scope completed; required for a complete package"
       },

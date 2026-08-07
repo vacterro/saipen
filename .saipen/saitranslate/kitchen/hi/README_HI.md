@@ -14,7 +14,7 @@
 
 **उत्तर की भाषा।** एजेंट डिफ़ॉल्ट रूप से **एस्टोनियाई** में उत्तर देता है — यह एक सेटिंग है, सनक नहीं, और SAIPEN में और कुछ भी एस्टोनियाई नहीं है। इसे एक ही जगह बदलें: [`saipen/STYLE.md`](saipen/STYLE.md) के शीर्ष पर `reply_language:` पंक्ति। `et` एस्टोनियाई, `en` अंग्रेज़ी, `ru` रूसी, `auto` आपके संदेश की भाषा से चुनता है। प्रोटोकॉल, कोड, कमिट और सभी दस्तावेज़ हर मान पर अंग्रेज़ी में रहते हैं।
 
-**v7.212.0** | [विशिष्टता (Spec)](SPEC_HI.md) | [गाइड (Guide)](GUIDE.md) | [RFC](RFC_HI.md) | [शैली (Style)](STYLE_HI.md) | [UI](saipen/UI.md) | [अनुरूपता (Conformance)](saipen/CONFORMANCE.md) | सादा मार्कडाउन | शून्य निर्भरता | MIT
+**v7.213.0** | [विशिष्टता (Spec)](SPEC_HI.md) | [गाइड (Guide)](GUIDE.md) | [RFC](RFC_HI.md) | [शैली (Style)](STYLE_HI.md) | [UI](saipen/UI.md) | [अनुरूपता (Conformance)](saipen/CONFORMANCE.md) | सादा मार्कडाउन | शून्य निर्भरता | MIT
 
 ```text
 
