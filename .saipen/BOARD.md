@@ -2,7 +2,7 @@
 ## DOING
 
 ## TODO
-- [ ] T-526 [P2] Close 11 validation blind spots — home resolution, manifest, RFC trap, INDEX, VERSION, transition, pre-commit fixtures. | verify: 11 new fixtures in tests/scenarios/
+- [ ] T-526 [P2] Close validation blind spots — implemented 4 validator checks (STATE newline, nested VERSION, INDEX parity, RFC-stub-trap) + red-tested each. 7 fixture-dir blind spots remain as scenario fixtures. — home resolution, manifest, RFC trap, INDEX, VERSION, transition, pre-commit fixtures. | verify: 11 new fixtures in tests/scenarios/
 - [ ] T-517 [P1] Pre-commit hook side-effect cascade — trace hook→validate.py chain; any project-file write from validation path is a defect. | verify: validation/pre-commit path is read-only; git status unchanged before/after
 - [ ] T-473 [P1] HELD, not scheduled: Rosary A3, the concurrent whole-file clobber guard. Witnessed twice this session -- a parallel session overwrote `BOARD.md` and reverted six `## DONE` moves whose work was already committed and pushed (E-1863), caught an hour later by CONFORMANCE 199 rather than at the moment of damage. § 1.5 already reads each file before writing it, so the guard is cheap: compare the content against what was read immediately before the write and refuse on a difference. It is held deliberately because it touches the checkpoint path every session runs and because T-442..T-451 already own the v8 Crew concurrency design; landing a collision detector ahead of that design risks pre-empting it. | needs: T-443 | verify: a read-then-foreign-write-then-write sequence is refused; an unchanged file writes normally; the guard stays a detector and never becomes a scope or locking scheme
 
