@@ -14,7 +14,7 @@
 
 **שפת התשובה.** הסוכן עונה כברירת מחדל **באסטונית** — זו הגדרה, לא גחמה, ושום דבר אחר ב-SAIPEN אינו אסטוני. משנים זאת במקום אחד: השורה `reply_language:` בראש [`saipen/STYLE.md`](saipen/STYLE.md). `et` אסטונית, `en` אנגלית, `ru` רוסית, `auto` בוחר לפי שפת ההודעה שלך. הפרוטוקול, הקוד, הקומיטים וכל המסמכים נשארים באנגלית בכל ערך.
 
-**v7.204.0** | [מפרט](SPEC.md) | [מדריך](GUIDE.md) | [RFC](saipen/RFC.md) | [סגנון](saipen/STYLE.md) | [ממשק משתמש](saipen/UI.md) | [תאימות](saipen/CONFORMANCE.md) | markdown פשוט | אפס תלויות | MIT
+**v7.204.1** | [מפרט](SPEC.md) | [מדריך](GUIDE.md) | [RFC](saipen/RFC.md) | [סגנון](saipen/STYLE.md) | [ממשק משתמש](saipen/UI.md) | [תאימות](saipen/CONFORMANCE.md) | markdown פשוט | אפס תלויות | MIT
 
 ```text
 
@@ -134,4 +134,6 @@ bash bootstrap/inject.sh                                            # macOS / Li
 </p>
 
 <!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
+
+
 

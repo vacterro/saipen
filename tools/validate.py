@@ -4231,6 +4231,7 @@ else:
         (".github/**/*.md",   "issue/PR templates, not agent-facing"),
         (".github/*.md",      "issue/PR templates, not agent-facing"),
         ("tests/scenarios/README.md", "scenario format documentation, not a fixture"),
+        (".pytest_cache/*.md", "generated tool cache, never a shipped document"),
     ]
     if IS_SAIPEN_HOME:
         import fnmatch

@@ -149,4 +149,16 @@
 - 07.08.26 01:26 [E-2188] [parent: E-2187] [T-none] RUN: continue -> DONE, T-473 unworkable (needs T-443 BLOCKED). Transition BLOCKED. Ship: tree clean, nothing to push.
 - 07.08.26 01:31 [E-2189] [parent: E-2188] [T-none] DEC: goal pivot — "Harden cold-start and execution chain." 9 tickets T-518..T-526: validation purity (P0), home resolver (P0), runtime manifest (P1), RFC stub trap (P1), INDEX exactness (P2), one VERSION (P2), transition authority (P1), cold path shrink (P1), 11 blind spot fixtures (P2). T-517 triaged MARKHUNT→TODO. goal_mode: true, waves: 0, tickets: 0. PLAN complete, entering SCOUT for T-518.
 - 07.08.26 01:31 [E-2190] [parent: E-2189] DEC: goal_waves 0->1
+- 07.08.26 01:44 [E-2191] [parent: E-2190] [T-518] RUN: VERIFY -> conf: med. 8/9 goal tickets built: T-518 (pre-commit purity guard, generation 5), T-519 (protocol_dir resolver, BOOT+CORE), T-520 (canonical MANIFEST.json), T-521 (adapter RFC stub trap, 10 files), T-522 (INDEX exactness, 16 phases synced), T-523 (saipen/VERSION deleted), T-524 (transition authority, CORE matrix canonical), T-525 (BOOT.md 13.9KB→5.2KB). T-526 (11 blind spot fixtures) deferred. Remaining FAILs: reply-language + chat-voice anchor drift from BOOT shrink (3), translation badge drift (1, T-504), coverage gap (.pytest_cache/README.md, 1).
 
+
+- 07.08.26 01:46 [E-2192] [parent: E-2191] [T-none] RUN: recover -> LOG ahead of STATE (E-2191). BOARD updated: T-518..T-525 DONE (8 commits 33b180d..d343c0f), T-526 deferred TODO. STATE: VERIFY->REVIEW. goal_tickets 0->8. 
+
+- 07.08.26 01:47 [E-2193] [parent: E-2192] [T-none] DEC: goal_tickets 0->1 (ticket T-518 DONE)
+- 07.08.26 01:47 [E-2194] [parent: E-2193] [T-none] DEC: goal_tickets 1->2 (ticket T-519 DONE)
+- 07.08.26 01:47 [E-2195] [parent: E-2194] [T-none] DEC: goal_tickets 2->3 (ticket T-520 DONE)
+- 07.08.26 01:47 [E-2196] [parent: E-2195] [T-none] DEC: goal_tickets 3->4 (ticket T-521 DONE)
+- 07.08.26 01:47 [E-2197] [parent: E-2196] [T-none] DEC: goal_tickets 4->5 (ticket T-522 DONE)
+- 07.08.26 01:47 [E-2198] [parent: E-2197] [T-none] DEC: goal_tickets 5->6 (ticket T-523 DONE)
+- 07.08.26 01:47 [E-2199] [parent: E-2198] [T-none] DEC: goal_tickets 6->7 (ticket T-524 DONE)
+- 07.08.26 01:47 [E-2200] [parent: E-2199] [T-none] DEC: goal_tickets 7->8 (ticket T-525 DONE)

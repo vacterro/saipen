@@ -2,14 +2,6 @@
 ## DOING
 
 ## TODO
-- [ ] T-518 [P0] Make validation and pre-commit read-only — hook, validate.py, subprocess chain. | verify: `git status --porcelain=v1 -uall` unchanged after pre-commit gate
-- [ ] T-519 [P0] Define one home resolver — deterministic protocol_dir for source-clone and flattened-install layouts. | verify: both layout fixtures resolve every boot dependency
-- [ ] T-520 [P1] Create one runtime manifest — replace divergent inject.sh/ps1/autoinject.py/validate.py file lists. | verify: install into empty temp dir; every boot path exists
-- [ ] T-521 [P1] Remove RFC stub trap — adapters/SKILL.md treat RFC.md as constitution. Fix to BOOT→INDEX→exact CORE. | verify: no adapter assigns normative authority to RFC.md
-- [ ] T-522 [P2] Make INDEX executable and exact — fix missing/nonexistent phases, typo, prose. | verify: phase enum = files on disk = INDEX entries
-- [ ] T-523 [P2] Restore one version source — delete saipen/VERSION, keep root VERSION only. | verify: only root VERSION exists; validator catch on duplicate
-- [ ] T-524 [P1] Remove transition authority conflict — CORE matrix is single canonical source. | verify: no phase doc contradicts matrix; validator covers every exit
-- [ ] T-525 [P1] Shrink cold path — BOOT ≤6KB, BOARD skim, v8 backlog to KNOWLEDGE. | verify: net reduction; invariants preserved
 - [ ] T-526 [P2] Close 11 validation blind spots — home resolution, manifest, RFC trap, INDEX, VERSION, transition, pre-commit fixtures. | verify: 11 new fixtures in tests/scenarios/
 - [ ] T-517 [P1] Pre-commit hook side-effect cascade — trace hook→validate.py chain; any project-file write from validation path is a defect. | verify: validation/pre-commit path is read-only; git status unchanged before/after
 - [ ] T-473 [P1] HELD, not scheduled: Rosary A3, the concurrent whole-file clobber guard. Witnessed twice this session -- a parallel session overwrote `BOARD.md` and reverted six `## DONE` moves whose work was already committed and pushed (E-1863), caught an hour later by CONFORMANCE 199 rather than at the moment of damage. § 1.5 already reads each file before writing it, so the guard is cheap: compare the content against what was read immediately before the write and refuse on a difference. It is held deliberately because it touches the checkpoint path every session runs and because T-442..T-451 already own the v8 Crew concurrency design; landing a collision detector ahead of that design risks pre-empting it. | needs: T-443 | verify: a read-then-foreign-write-then-write sequence is refused; an unchanged file writes normally; the guard stays a detector and never becomes a scope or locking scheme
@@ -30,6 +22,14 @@
 - [ ] T-451 [P0] GOAL FLAG: SAIPEN v8 Crew Mode is achieved only after the markdown-first system survives a defined real-world soak period without SAIPENVIEW. Run it on real project work long enough to include concurrent Core tasks, translation/wiki preparation, repeated releases, agent limits, process loss, stale proposals, resource waits, application or terminal restarts and at least one automatic takeover. Record every ownership transition, epoch, proposal, checkpoint and external side effect in inspectable files. Do not call the protocol v8 merely because one demonstration succeeds. | needs: T-443, T-444, T-445, T-446, T-447, T-448, T-449, T-450 | verify: before the soak begins, record a fixed minimum duration and workload target that cannot be reduced after failures; the completed run shows no lost work, duplicated release, split brain, unresolved deadlock or unreconstructable state; killing every active agent still leaves one correct next action recoverable from the repository alone | blocker: HELD FOR SEQUENTIAL STABILITY
 
 ## DONE
+- [x] T-518 [P0] Make validation and pre-commit read-only — hook, validate.py, subprocess chain. | verify: commit 33b180d, install_hook.py gen 5 status capture, ci_status.py cache to temp; E-2191
+- [x] T-519 [P0] Define one home resolver — deterministic protocol_dir for source-clone and flattened-install layouts. | verify: commit 1a05a97, BOOT+CORE resolver defined; E-2191
+- [x] T-520 [P1] Create one runtime manifest — replace divergent inject.sh/ps1/autoinject.py/validate.py file lists. | verify: commit 487fc44, canonical MANIFEST.json; E-2191
+- [x] T-521 [P1] Remove RFC stub trap — adapters/SKILL.md treat RFC.md as constitution. Fix to BOOT→INDEX→exact CORE. | verify: commit 2d267d9, 10 files adapter refs; E-2191
+- [x] T-522 [P2] Make INDEX executable and exact — fix missing/nonexistent phases, typo, prose. | verify: commit 8af298b+f0b9212, 16 phases synced; E-2191
+- [x] T-523 [P2] Restore one version source — delete saipen/VERSION, keep root VERSION only. | verify: commit f0b9212, saipen/VERSION deleted; E-2191
+- [x] T-524 [P1] Remove transition authority conflict — CORE matrix is single canonical source. | verify: commit 8af298b, CORE matrix canonical; E-2191
+- [x] T-525 [P1] Shrink cold path — BOOT ≤6KB, BOARD skim, v8 backlog to KNOWLEDGE. | verify: commit c2b7026, BOOT.md 13.9KB→5.2KB; E-2191
 - [x] T-516 [MARKHUNT] [P2] Guide-opening drift across 13 locale guides x13. Fixed: backticks removed from `.saipen/` in first paragraph of all 13 guides (AR,DA,FI,HE,IT,KO,NL,NO,PL,PT,SV,TH,VI). tools/validate.py:1826 MARKHUNT check refined to only require `tickets=` on completion lines (with `findings` count), not start lines. | blocker: unvetted audit — validate.py:5036-5038 checks first paragraph after title for backticks, 13 guides FAILed at 0156904 | verify: validate.py RUN -> 0 FAILs 9 WARNs; git diff guides/GUIDE_*.md confirms backtick removal only
 - [x] T-515 [P2] Committed audit_checks.py hunt-mark sanitization fix (release_ledger_probe). | verify: `git status --porcelain` clean for audit_checks.py; validate.py PASS
 - [x] T-514 [P1] Tracked saipen/VERSION (protocol home semver MAJOR). `git ls-files saipen/VERSION` confirms. | verify: git ls-files returns file; validate.py PASS

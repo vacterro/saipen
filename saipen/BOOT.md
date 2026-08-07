@@ -6,9 +6,10 @@ This file gives the execution order. No rule is *defined* here —
 
 ## Fast path
 
-1. **Read `STYLE.md` at `protocol_dir/STYLE.md` before any output.**
-   Voice governs the first token (CORE.md §1.1). If `protocol_dir` is
-   not yet bound (step 2), fall back to the file beside this `BOOT.md`.
+1. **Read `STYLE.md` — the file in the same folder as this `BOOT.md` — before any output.**
+   Voice governs the first token (CORE.md §1.1). `protocol_dir` is
+   resolved in step 2; if not yet bound, the file beside this `BOOT.md`
+   needs no resolution and answers the same question either layout.
 
 2. **Bind `project_root`, resolve `protocol_dir`, read `.saipen/STATE.md`.**
    Explicit target wins; else Git (`git rev-parse --show-toplevel` +
@@ -49,7 +50,7 @@ This file gives the execution order. No rule is *defined* here —
 6. **`human_note:` set?** Apply, clear, LOG trace: `DEC: applied human_note: <text>`
    or `DEC: human_note -> T-###`. One-shot, not standing law.
 
-7. **Execute the instruction. User message outranks the file.**
+7. **Execute the instruction. The user's own message outranks `next_action` and defers to § 1.11's OBEY priority: the user's own message outranks the file.**
    Message names a command (§1.10 verb, shortcut table row, Cyillic twin,
    or active extension word)? **Open CORE.md §1.10 and read the row.**
    Memory is never a source for it — a confabulated table has reached users
@@ -91,16 +92,6 @@ This file gives the execution order. No rule is *defined* here —
   unless debugging a validator failure.
 - `agent:` is inherited from STATE.md, not invented. Change it only for a
   genuinely different actor; LOG a `DEC` naming both.
-- **Reply language, before any output**: read STYLE.md's `reply_language:`
-  (step 1 already opened it). Closed set: `et`/`en`/`ru`/`auto`. Outside that
-  set → FAIL. Chat only — every artifact stays English. Under `auto`:
-  Reply-language precedence: explicit current user prose (Estonian/English/Russian) >
-  clearly Russian primary repository for bare/ambiguous input > Estonian default;
-  another detected language uses English. Full rule in STYLE.md and CORE.md §1.1.
-  Repeated here because it governs the first token.
+- **Reply language, before any output**: read STYLE.md's `reply_language:` (step 1 already opened it). Closed set: `et`/`en`/`ru`/`auto`. Outside that set → FAIL. Chat only — every artifact stays English. Under `auto`: Reply-language precedence: explicit current user prose (Estonian/English/Russian) > clearly Russian primary repository for bare/ambiguous input > Estonian default; another detected language uses English. Full rule in STYLE.md and CORE.md §1.1. Repeated here because it governs the first token.
 - `CHANGELOG.md` is never part of a cold start.
-- **Chat voice & compression, before any output.** Step 1 already read
-  STYLE.md — the file in the same folder as this BOOT.md — before any output.
-  `caveman-дед` is one fused voice, never a menu. Voice persistence: caveman-дед
-  applies to every response until explicit "stop caveman" or "normal mode".
-  Full contract in `saipen/STYLE.md`.
+- **Chat voice & compression, before any output.** Step 1 already read STYLE.md — the file in the same folder as this BOOT.md — before any output. `caveman-дед` is one fused voice, never a menu. Voice persistence: caveman-дед applies to every response until explicit "stop caveman" or "normal mode". Full contract in `saipen/STYLE.md`.

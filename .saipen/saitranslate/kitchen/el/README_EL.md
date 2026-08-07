@@ -16,7 +16,7 @@
 
 **Γλώσσα απαντήσεων.** Ο πράκτορας απαντά από προεπιλογή **στα εσθονικά** — είναι ρύθμιση, όχι ιδιοτροπία, και τίποτα άλλο στο SAIPEN δεν είναι εσθονικό. Αλλάζει σε ένα σημείο: η γραμμή `reply_language:` στην αρχή του [`saipen/STYLE.md`](saipen/STYLE.md). `et` εσθονικά, `en` αγγλικά, `ru` ρωσικά, `auto` επιλέγει από τη γλώσσα του μηνύματός σου. Το πρωτόκολλο, ο κώδικας, τα commits και όλα τα έγγραφα παραμένουν στα αγγλικά σε κάθε τιμή.
 
-**v7.204.0** | [Προδιαγραφή](SPEC.md) | [Οδηγός](GUIDE.md) | [RFC](saipen/RFC.md) | [Στυλ](saipen/STYLE.md) | [UI](saipen/UI.md) | [Συμμόρφωση](saipen/CONFORMANCE.md) | απλό markdown | μηδενικές εξαρτήσεις | MIT
+**v7.204.1** | [Προδιαγραφή](SPEC.md) | [Οδηγός](GUIDE.md) | [RFC](saipen/RFC.md) | [Στυλ](saipen/STYLE.md) | [UI](saipen/UI.md) | [Συμμόρφωση](saipen/CONFORMANCE.md) | απλό markdown | μηδενικές εξαρτήσεις | MIT
 
 ```text
 
@@ -146,4 +146,6 @@ Platform-specific notes live in `extensions/adapters/`.
 </p>
 
 <!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
+
+
 

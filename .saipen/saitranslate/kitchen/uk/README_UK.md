@@ -14,7 +14,7 @@
 
 **Мова відповідей.** Агент за замовчуванням відповідає **естонською** — це налаштування, а не примха, і більше нічого в SAIPEN не естонське. Змінюється в одному місці: рядок `reply_language:` на початку [`saipen/STYLE.md`](saipen/STYLE.md). `et` естонська, `en` англійська, `ru` російська, `auto` обирає за мовою твого повідомлення. Протокол, код, коміти та всі документи за будь-якого значення залишаються англійською.
 
-**v7.204.0** | [Специфікація](SPEC.md) | [Гайд](GUIDE.md) | [RFC](saipen/RFC.md) | [Стиль](saipen/STYLE.md) | [UI](saipen/UI.md) | [Відповідність](saipen/CONFORMANCE.md) | чистий markdown | нуль залежностей | MIT
+**v7.204.1** | [Специфікація](SPEC.md) | [Гайд](GUIDE.md) | [RFC](saipen/RFC.md) | [Стиль](saipen/STYLE.md) | [UI](saipen/UI.md) | [Відповідність](saipen/CONFORMANCE.md) | чистий markdown | нуль залежностей | MIT
 
 ```text
 
@@ -137,4 +137,6 @@ bash bootstrap/inject.sh                                            # macOS / Li
 </p>
 
 <!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
+
+
 
