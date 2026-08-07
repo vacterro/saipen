@@ -336,6 +336,88 @@ def run_hook_probes() -> tuple[list[str], int, int]:
     return failures, 4, 0
 
 
+def run_precommit_purity_probe() -> tuple[list[str], int, int]:
+    """The pre-commit gate MUST be read-only: `git status --porcelain=v1 -uall`
+    byte-identical before and after the hook runs (goal blind spot 10, T-518).
+    The gen-5 hook captures status before validation and FAILs on any change;
+    a stub validator that writes a file must trip that guard."""
+    failures = []
+    bash, dash = find_bash(), find_dash()
+    if not bash or not dash:
+        print("SKIP: pre-commit purity probe -- bash or dash unavailable")
+        return failures, 0, 1
+
+    env = bash_env(bash, Path("."))
+
+    def build(validator_body: str):
+        with tempfile.TemporaryDirectory(prefix="saipen-purity-") as raw:
+            root = Path(raw)
+            fake_home = root / "saipen-home"
+            (fake_home / "tools").mkdir(parents=True)
+            (fake_home / "tests").mkdir()
+            shutil.copy2(HOME / "tools" / "install_hook.py",
+                         fake_home / "tools" / "install_hook.py")
+            (fake_home / "tools" / "validate.py").write_text(
+                validator_body, encoding="utf-8", newline="\n")
+            (fake_home / "tests" / "validate.sh").write_text(
+                "#!/bin/bash\necho FLOOR_OK\n", encoding="utf-8", newline="\n")
+            project = root / "project"
+            (project / ".git" / "hooks").mkdir(parents=True)
+            (project / ".saipen").mkdir()
+            subprocess.run(["git", "init", "-q"], cwd=project, check=True)
+            subprocess.run(["git", "config", "user.name", "purity"],
+                           cwd=project, check=True)
+            subprocess.run(["git", "config", "user.email", "p@example.invalid"],
+                           cwd=project, check=True)
+            install = subprocess.run(
+                [sys.executable, str(fake_home / "tools" / "install_hook.py")],
+                cwd=project, capture_output=True, text=True, errors="replace")
+            if install.returncode:
+                return (root, f"purity probe install failed: "
+                        f"{install.stderr.strip()[:160]}")
+            hook = project / ".git" / "hooks" / "pre-commit"
+
+            before = subprocess.run(
+                ["git", "status", "--porcelain=v1", "-uall"], cwd=project,
+                capture_output=True, text=True, errors="replace").stdout
+            run = subprocess.run(
+                [dash, str(hook)], cwd=project, env=env,
+                capture_output=True, text=True, errors="replace")
+            after = subprocess.run(
+                ["git", "status", "--porcelain=v1", "-uall"], cwd=project,
+                capture_output=True, text=True, errors="replace").stdout
+            return (root, None, run, before, after)
+
+    # Case 1: read-only validator -> hook passes, tree byte-identical.
+    _, err, run, before, after = build(
+        "import sys\nprint('VALIDATOR-OK')\nsys.exit(0)\n")
+    if err:
+        failures.append(err)
+    elif run.returncode != 0:
+        failures.append(f"purity probe: read-only hook failed rc={run.returncode} "
+                        f"{run.stderr.strip()[-160:]}")
+    elif after != before:
+        failures.append("purity probe: git status CHANGED across a read-only "
+                        "hook -- validation is not read-only")
+    else:
+        print("PASS: pre-commit gate leaves git status byte-identical "
+              "(read-only validation)")
+
+    # Case 2: mutating validator -> gen-5 guard must FAIL the hook.
+    _, err, run, before, after = build(
+        "from pathlib import Path\n"
+        "Path('tampered.txt').write_text('mutated', encoding='utf-8')\n"
+        "import sys\nprint('VALIDATOR-MUTATED')\nsys.exit(0)\n")
+    if err:
+        failures.append(err)
+    elif run.returncode == 0:
+        failures.append("purity probe: a validator that WROTE a file did NOT "
+                        "trip the gen-5 mutation guard -- the guard is dead")
+    else:
+        print("PASS: gen-5 guard FAILs a validator that mutates the tree")
+    return failures, 2, 0
+
+
 REQUIRED_INSTALL_FILES = (
     "VERSION",
     "tests/validate.sh",
@@ -1715,6 +1797,8 @@ hook_failures, hook_checked, hook_skipped = run_hook_probes()
 ci_failures, ci_checked = run_ci_status_probes()
 failures.extend(ci_failures)
 failures.extend(hook_failures)
+purity_failures, purity_checked, purity_skipped = run_precommit_purity_probe()
+failures.extend(purity_failures)
 
 
 digest_failures, digest_checked = run_digest_stale_probes()
@@ -1737,6 +1821,8 @@ print(f"{orphan_checked} orphan-tag behavior(s) executed")
 print(f"{ship_pick_checked} ship-pick behavior(s) executed")
 print(f"{last_event_checked} last_event migration behavior(s) executed")
 print(f"{hunt_mark_checked} hunt-mark behavior(s) executed")
+print(f"{purity_checked} pre-commit-purity behavior(s) executed, "
+      f"{purity_skipped} skipped for missing interpreters")
 print(f"{manifest_checked} manifest-tracking behavior(s) executed")
 print(f"{hook_checked} installed-hook behavior(s) executed, "
       f"{hook_skipped} skipped for missing interpreters")

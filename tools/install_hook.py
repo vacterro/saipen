@@ -33,7 +33,7 @@ MARKER = "# saipen pre-commit hook"
 # out loud when it is red -- the failure mode where this repo's own CI sat red
 # for 30+ commits while every local gate stayed green (the badge is passive;
 # nothing in the commit loop ever looked at it). Warn-only, never blocks.
-HOOK_VERSION = 5
+HOOK_VERSION = 6
 
 home = Path(__file__).resolve().parent.parent
 hooks_dir = Path(".git/hooks")
@@ -85,13 +85,11 @@ fi
 
 if [ -f "$SAIPEN_HOME/tools/validate.py" ]; then
   if command -v python >/dev/null 2>&1; then
-    python "$SAIPEN_HOME/tools/validate.py" && exit 0
-    echo "saipen: validation failed -- fix .saipen/ or commit with --no-verify" >&2
-    exit 1
+    python "$SAIPEN_HOME/tools/validate.py"
+    _validate_rc=$?
   elif command -v py >/dev/null 2>&1; then
-    py "$SAIPEN_HOME/tools/validate.py" && exit 0
-    echo "saipen: validation failed -- fix .saipen/ or commit with --no-verify" >&2
-    exit 1
+    py "$SAIPEN_HOME/tools/validate.py"
+    _validate_rc=$?
   fi
 fi
 if [ -f "$SAIPEN_HOME/tests/validate.sh" ]; then
@@ -99,12 +97,13 @@ if [ -f "$SAIPEN_HOME/tests/validate.sh" ]; then
     echo "saipen: validation failed -- Bash is required to run $SAIPEN_HOME/tests/validate.sh" >&2
     exit 1
   fi
-  bash "$SAIPEN_HOME/tests/validate.sh" && exit 0
-  echo "saipen: validation failed -- fix .saipen/ or commit with --no-verify" >&2
-  exit 1
+  bash "$SAIPEN_HOME/tests/validate.sh"
+  _validate_rc=$?
 fi
 
 # Purity check: the gate MUST NOT mutate any tracked or untracked file.
+# Runs BEFORE any success exit so a mutating validator cannot slip through
+# the && exit short-circuit that used to skip straight past this guard.
 _after=$(git status --porcelain=v1 -uall 2>/dev/null || true)
 if [ "$_before" != "$_after" ]; then
   echo "saipen: VALIDATION MUTATED THE TREE -- the pre-commit gate is not read-only" >&2
@@ -112,6 +111,14 @@ if [ "$_before" != "$_after" ]; then
   echo "$_before" >&2
   echo "After:" >&2
   echo "$_after" >&2
+  exit 1
+fi
+
+# A validator that ran and failed blocks the commit -- the purity guard has
+# already been passed, so a mutating failure exits here with the mutation
+# diagnosed, and a clean validation failure exits with its own message.
+if [ -n "${{_validate_rc:-}}" ] && [ "$_validate_rc" != 0 ]; then
+  echo "saipen: validation failed -- fix .saipen/ or commit with --no-verify" >&2
   exit 1
 fi
 
