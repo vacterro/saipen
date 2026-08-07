@@ -1,6 +1,6 @@
 # Board
 ## DOING
-- [/] T-512 [P2] Sweep CORE.md for remaining "RFC § X.Y" references and replace with "CORE.md § X.Y" (§1.x) or "MAINTENANCE.md § X.Y" (§2.x). BOOT.md already done in db9d775. Also sweep STYLE.md, phases/*.md, extensions/subs/*.md, KNOWLEDGE/*.md for RFC references. Goal: no document points at the 3-line RFC.md stub. | verify: grep "RFC §" across all shipped docs returns 0 hits. validate.py cross-doc checks still pass. | owner: claude | claim_time: 2026-08-07T00:01:00Z
+
 
 
 
@@ -26,6 +26,7 @@
 - [ ] T-451 [P0] GOAL FLAG: SAIPEN v8 Crew Mode is achieved only after the markdown-first system survives a defined real-world soak period without SAIPENVIEW. Run it on real project work long enough to include concurrent Core tasks, translation/wiki preparation, repeated releases, agent limits, process loss, stale proposals, resource waits, application or terminal restarts and at least one automatic takeover. Record every ownership transition, epoch, proposal, checkpoint and external side effect in inspectable files. Do not call the protocol v8 merely because one demonstration succeeds. | needs: T-443, T-444, T-445, T-446, T-447, T-448, T-449, T-450 | verify: before the soak begins, record a fixed minimum duration and workload target that cannot be reduced after failures; the completed run shows no lost work, duplicated release, split brain, unresolved deadlock or unreconstructable state; killing every active agent still leaves one correct next action recoverable from the repository alone | blocker: HELD FOR SEQUENTIAL STABILITY
 
 ## DONE
+- [x] T-512 [P2] Sweep all "RFC § X.Y" → "CORE.md/MAINTENANCE.md § X.Y" across 23 shipped docs. Zero remaining numeric RFC refs. STYLE.md marker updated. | verify: grep "RFC §" returns 0. validate.py PASS. Shipped in v7.203.0 (8c16248).
 - [x] T-502 [P2] Implement just-in-time expert skill routing. BOOT.md step 3a: reads SPEC.md, detects problem class, matches smallest domain skill, injects context. Ejects on problem class shift. | verify: all 5 SPEC.md criteria met — structural verification, BOOT.md defers to existing contract. Shipped in v7.202.0 (e8202a5).
 - [x] T-506 [P1] A — saiui built-in role charter: `extensions/subs/saiui.md`. 6 design roles, 4-tier authority boundary, 7-step read order, 6-step design method, 17 control heuristics, 7 control-type rules, backend capability gate, OUTBOX patch contract. | verify: all 6 roles defined, fixer contract bound, canonical saipen/UI.md referenced, validate.py checks PASS. Shipped in v7.201.0 (3782437).
 - [x] T-507 [P1] B — Deterministic built-in role loading. PROTOCOL.md §3.1 built-in charters. Bootstrap copies sai*.md. Sync refreshes charters, never touches live folders. Bare adoption loads charter; missing -> sync recovery. UI- prefix. | verify: validate.py confirms UI- prefix, sai*.md in bootstrap text. Shipped in v7.201.0.

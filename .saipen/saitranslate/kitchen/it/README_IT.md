@@ -14,7 +14,7 @@
 
 **Lingua di risposta.** L'agente risponde di default **in estone** — è un'impostazione, non una stranezza, e nient'altro in SAIPEN è in estone. Si cambia in un solo punto: la riga `reply_language:` all'inizio di [`saipen/STYLE.md`](saipen/STYLE.md). `et` estone, `en` inglese, `ru` russo, `auto` sceglie in base alla lingua del tuo messaggio. Il protocollo, il codice, i commit e tutti i documenti restano in inglese con qualsiasi valore.
 
-**v7.203.0** | [Spec](SPEC.md) | [Guida](GUIDE.md) | [RFC](saipen/RFC.md) | [Stile](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformità](saipen/CONFORMANCE.md) | markdown semplice | zero dipendenze | MIT
+**v7.204.0** | [Spec](SPEC.md) | [Guida](GUIDE.md) | [RFC](saipen/RFC.md) | [Stile](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformità](saipen/CONFORMANCE.md) | markdown semplice | zero dipendenze | MIT
 
 ```text
 Utente  ->  /saipen continue

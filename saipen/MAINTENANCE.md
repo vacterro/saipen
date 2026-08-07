@@ -1,4 +1,4 @@
-﻿## Part 2: MAINTENANCE (Autonomous Evolution)
+## Part 2: MAINTENANCE (Autonomous Evolution)
 
 ### 2.1 Autonomous Transitions
 When the Core state machine reaches a halt, the Maintenance layer MAY take over.
