@@ -14,6 +14,14 @@ the same command corrupted README.md at v3.1.1 seconds after we fixed it.
 Use the editor tools (Write/Edit) for any file with prose or Unicode.
 PowerShell is fine for git commands, not for authoring.
 
+Appending one LOG line is no exception -- `Add-Content` is exactly how a
+LOG landed with invalid UTF-8 in the middle of a run, and the "recovery"
+was a byte-patch that quietly transliterated the text. Safe appends:
+
+- PowerShell: `[System.IO.File]::AppendAllText('.saipen/LOG.md', $line + [Environment]::NewLine, (New-Object System.Text.UTF8Encoding($false)))`
+- bash: `printf '%s\n' 'LINE' >> .saipen/LOG.md`
+- Python: `open('.saipen/LOG.md', 'a', encoding='utf-8').write(line + '\n')`
+
 Recovery: `git checkout <tag> -- <file>` restores clean bytes; strip a BOM
 with `sed -i '1s/^\xEF\xBB\xBF//' <file>`.
 

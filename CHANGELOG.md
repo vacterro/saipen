@@ -2,6 +2,10 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.206.5 -- 2026-08-07 -- safe LOG-append prescribed
+
+T-533: the LOG-append guidance named no safe command, so a Windows agent reached for PowerShell `Add-Content` and corrupted `.saipen/LOG.md` through the console codepage (Cyrillic came back as invalid UTF-8, "recovered" by a byte-patch that quietly transliterated it). CORE.md § 1.5 now states the LOG append is a UTF-8 write and names three byte-safe forms (PowerShell `AppendAllText` with BOM-less UTF8Encoding, bash `printf >>`, Python `open(..., 'a', encoding='utf-8')`); KNOWLEDGE/traps.md's Set-Content/Add-Content trap entry carries the same one-liners. The active LOG also crossed the 64 KB soft cap and was sealed to LOG-009.md (the `log-soft-cap` ownership check FAILs when the slug returns with no owner -- sealing is the fix, as E-2046 recorded).
+
 ## 7.206.4 -- 2026-08-07 -- audit_checks 165/165 evidence again
 
 T-532: 14 of 165 red controls in `tools/audit_checks.py` had stopped being evidence. Split-anchor drift (T-496 class) after the BOOT.md shrink and CHANGELOG archiving; control mutations that removed one occurrence of a string the validator counts anywhere (so survivors satisfied the checks); a harness that copies the repo's live STATE.md, which no longer carries goal-mode counters; and a board with a single workable ticket that `demote_the_pick` could not demote into being not-topmost. Every case repaired to fire on its own condition -- including injecting a synthetic workable ticket, making the goal-mode mutations self-contained, and tightening one genuinely weak validator check (the PROTOCOL.md charter-loading test was satisfied by any occurrence of the words "load"/"charter"). This ship should produce the first fully green validate run since 2026-08-03.
