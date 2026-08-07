@@ -51,6 +51,16 @@ KNOWN_MISMATCHES = {
     "v7.99.0": "the incident that produced the guard: `git tag` ran after a "
                "failed commit and labelled the previous one. Its published "
                "release carries v7.98.0's notes",
+    "v7.199.0": "its true release commit eae5b72 (VERSION 7.199.0) is not on "
+                "origin/main -- orphaned by a later history rewrite -- so a "
+                "tag pointing there would dangle on every fresh clone; the "
+                "tag currently names 594a1da, which carries VERSION 7.201.0. "
+                "Re-pointing would push the orphaned commit and re-run the "
+                "v7.199.0 release",
+    "v7.200.0": "same shape as v7.199.0: its true release commit ea8eef3 "
+                "(VERSION 7.200.0) is not on origin/main; the tag names "
+                "594a1da (VERSION 7.201.0). Re-pointing would push the "
+                "orphaned commit and re-run the v7.200.0 release",
 }
 
 GIT_SHIM_ENV = "SAIPEN_AUDIT_TAGS_GIT_SHIM"

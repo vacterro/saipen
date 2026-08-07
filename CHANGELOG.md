@@ -2,6 +2,10 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.206.3 -- 2026-08-07 -- CI push-loop: portable-floor red harness + tag ledger
+
+Two more pre-existing conformance-step failures surfaced once the validator and lint steps passed. `tools/audit_floor.py` read `saipen/RFC.md` alone -- a 144-byte redirect stub since the v7.190.0 split -- so every red-control anchor was unresolvable (the T-496 split-layout class in the portable-floor harness); it now reads CORE.md + MAINTENANCE.md with an RFC.md fallback. `tools/audit_tags.py` flagged v7.199.0/v7.200.0, both pointing at a commit carrying VERSION 7.201.0 because their true release commits were orphaned by a history rewrite and no longer exist on origin/main; both are now acknowledged in KNOWN_MISMATCHES per user decision rather than re-pointed.
+
 ## 7.206.2 -- 2026-08-07 -- ruff-clean validator
 
 Two legacy `tools/validate.py` errors kept the conformance job's Lint step red after the T-528 fix: E402 (the `pathlib` import sat below the Windows stdout wrapper instead of the top import block) and FURB192 (`sorted(...)[0]` -> `min(...)`). Both pre-dated the CI-red diagnosis; fixing them is what "the next push produces a green run" actually requires.
