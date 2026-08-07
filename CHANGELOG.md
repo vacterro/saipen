@@ -2,6 +2,10 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.204.1 -- 2026-08-07 -- guide opening drift fix + protocol hygiene
+
+13 locale guides (AR/DA/FI/HE/IT/KO/NL/NO/PL/PT/SV/TH/VI) fixed: opening prose contract restored. Guides previously started with HTML image tags instead of prose, violating STYLE.md's guide contract. saipen/VERSION now git-tracked. BOOT.md duplicate STYLE.md contract removed. audit_checks.py release_ledger_probe hunt-mark sanitized.
+
 ## 7.204.0 -- 2026-08-07 -- protocol polish
 
 CHANGELOG archiving: sealed entries 7.197.0 through 7.186.0 into CHANGELOG_ARCHIVE.md. CHANGELOG.md now carries exactly 10 newest releases per its own stated contract. MAINTENANCE.md self-references already bare (§ 2.x) — no change needed.
