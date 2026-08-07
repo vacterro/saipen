@@ -2,6 +2,10 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.206.9 -- 2026-08-07 -- uninstaller survives non-Windows
+
+T-535: uninstall.ps1's Remove-Task (from T-531) called `Get-ScheduledTask`, a Windows-only cmdlet -- on pwsh/Linux it throws and kills the uninstaller, which the first fully-reaching CI run exposed at the run_scenarios step. Remove-Task/rm_task now return "clean" when the cmdlet is unavailable or SAIPEN_UNINSTALL_SKIP_TASK is set, and both injector probes set that var because the scheduled task is machine-global -- a sandboxed test must never delete a real scheduler entry.
+
 ## 7.206.8 -- 2026-08-07 -- parity restore survives MULTI cases
 
 T-534 (third pass): the v7.206.7 CI run got audit_checks green and then failed the next previously-masked step -- `tools/audit_parity.py` reported "the copy did not survive the run". audit_parity imports audit_checks' CASES but ran its own restore loop that saved/restored only the case target, so the new two-file MULTI cases left the second file mutated and the pristine drifted. The parity loop now uses the same `mutation_files` save/restore as the audit_checks main loop.

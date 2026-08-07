@@ -40,6 +40,14 @@ function Remove-Skill([string]$path) {
 function Remove-Task() {
   # Remove the auto-scheduled inject task (T-531) when uninstalling, so a
   # de-advertised protocol does not keep pulling + injecting every 15 minutes.
+  # Windows-only: Get-ScheduledTask does not exist on pwsh/Linux, and a host
+  # that never ran the scheduler has nothing to remove -- both are clean. The
+  # sandboxed injector probe sets SAIPEN_UNINSTALL_SKIP_TASK because the task
+  # is machine-global and a test run must not delete real machine state.
+  if ($env:SAIPEN_UNINSTALL_SKIP_TASK) { return "clean" }
+  if (-not (Get-Command Get-ScheduledTask -ErrorAction SilentlyContinue)) {
+    return "clean"
+  }
   $t = Get-ScheduledTask -TaskName "saipen-inject" -ErrorAction SilentlyContinue
   if ($t) {
     schtasks /Delete /TN "saipen-inject" /F 2>&1 | Out-Null

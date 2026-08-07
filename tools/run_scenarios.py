@@ -101,6 +101,10 @@ def bash_env(bash: str, home: Path) -> dict[str, str]:
     env = os.environ.copy()
     env["HOME"] = str(home)
     env["USERPROFILE"] = str(home)
+    # The injector probe runs uninstall.sh against a sandbox HOME, but the
+    # scheduled task is machine-global -- the probe must not delete a real
+    # scheduler entry (T-531/T-534).
+    env["SAIPEN_UNINSTALL_SKIP_TASK"] = "1"
     if os.name == "nt":
         bindir = Path(bash).resolve().parent
         for tools_dir in (bindir, bindir.parent / "usr" / "bin"):
@@ -730,6 +734,10 @@ def run_injector_probes() -> tuple[list[str], int, int]:
             env = os.environ.copy()
             env["HOME"] = str(home)
             env["USERPROFILE"] = str(home)
+            # The injector probe runs uninstall.ps1 against a sandbox HOME,
+            # but the scheduled task is machine-global -- the probe must not
+            # delete a real scheduler entry (T-531/T-534).
+            env["SAIPEN_UNINSTALL_SKIP_TASK"] = "1"
             problem = run_injector_probe(
                 "bootstrap/inject.ps1",
                 [powershell, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",

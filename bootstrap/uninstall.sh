@@ -99,6 +99,9 @@ rm_aider() {
 }
 
 rm_task() {
+  # Machine-global: the sandboxed injector probe must not delete a real
+  # scheduler entry, so it sets SAIPEN_UNINSTALL_SKIP_TASK (T-531/T-534).
+  if [ -n "${SAIPEN_UNINSTALL_SKIP_TASK:-}" ]; then echo "clean"; return 0; fi
   if schtasks /Query /TN saipen-inject >/dev/null 2>&1; then
     if schtasks /Delete /TN saipen-inject /F >/dev/null 2>&1; then
       echo "task removed"
