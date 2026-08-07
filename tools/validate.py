@@ -2278,7 +2278,7 @@ if IS_SAIPEN_HOME:
             fail("PROTOCOL.md spawn/sync does not mention sai*.md built-in charters -- "
                  "first bootstrap would omit role charters")
             saiui_ok = False
-        if "load" not in _proto_text or "charter" not in _proto_text:
+        if not re.search(r"load\s+it\s+after\s+PROTOCOL\.md", _proto_text):
             fail("PROTOCOL.md bare-subname adoption lost charter-loading language -- "
                  "a subSaipen whose charter exists must load it on adoption")
             saiui_ok = False

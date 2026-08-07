@@ -561,13 +561,12 @@ def demote_the_pick(text: str) -> str:
     while a ticket is in flight. Mutating the board reaches it from both
     sides.
 
-    Demote the ticket `next_action` NAMES, wherever it sits. Demoting the
-    topmost LINE instead is what this did first, and it went vacuous the
-    moment the board's first line was an unworkable ticket -- `## TODO` led
-    with one carrying an unmet `needs:`, so moving it changed nothing the
-    check could see and the case reported itself as not-evidence. The named
-    ticket is the pick by definition, so demoting it always produces the
-    mismatch the check exists to catch.
+    Demote the ticket `next_action` NAMES, wherever it sits, and inject a
+    synthetic workable ticket at the top of `## TODO`. Demoting alone went
+    vacuous in T-532 when the board carried a single workable ticket: moving
+    it to the bottom leaves it the only workable one, so it stays topmost
+    and the mismatch never appears. The synthetic line guarantees a different
+    workable ticket always sits above the named one, whatever the board holds.
     """
     nl = chr(10)
     state = (HOME / ".saipen" / "STATE.md").read_text(encoding="utf-8-sig")
@@ -584,7 +583,8 @@ def demote_the_pick(text: str) -> str:
                      re.MULTILINE | re.DOTALL)
     if todo is None:
         return text
-    return (text[:todo.start(1)] + todo.group(1).rstrip(nl) + nl
+    synthetic = "- [ ] T-999 [P3] synthetic red-control workable ticket\n"
+    return (text[:todo.start(1)] + synthetic + todo.group(1).rstrip(nl) + nl
             + moved + nl + nl + text[todo.end(1):])
 
 CREATE = "<create the file>"
@@ -710,7 +710,7 @@ CASES: list[tuple[str, str, object, str]] = [
          sub_line("transition_from", "SCOUT")(t))),
      "MUST NOT enter"),
     ("goal_mode true, counters absent", STATE,
-     lambda s: drop_line("goal_tickets")(drop_line("goal_waves")(s)),
+     sub_line("goal_mode", "true"),
      "counter missing"),
     # Un-double the bootloader pointer's backslashes, exactly as commit
     # 4012bae did. This file's own frontmatter parser never sees it -- it
@@ -731,9 +731,15 @@ CASES: list[tuple[str, str, object, str]] = [
     # The counter STATE carries must survive being rebuilt from the LOG the
     # way § 1.5 Recovery rebuilds it. Mutating STATE alone leaves the log
     # untouched, so the two disagree exactly as they would after an untraced
-    # bare-`saipen goal` reset.
+    # bare-`saipen goal` reset. The harness STATE carries no counters and sits
+    # at goal_mode: false today, so the old bump was a no-op and the rebuild
+    # rung (gated on goal_mode true) was unreachable (T-532): the mutation
+    # turns goal_mode on and injects a counter set whose goal_tickets (17)
+    # diverges from whatever the LOG replay rebuilds (9 today) without
+    # tripping the safety valve (kept under the 3/20 caps).
     ("goal counter STATE cannot survive its own rebuild", STATE,
-     bump_int_line("goal_tickets"),
+     lambda s: (sub_line("goal_mode", "true")(
+         s.replace("\n---\n", "\ngoal_waves: 1\ngoal_tickets: 17\n---\n", 1))),
      "newest goal marker rebuilds"),
     # Strip the final newline and the file stops mid-line. Nothing else in this
     # list reads a last byte, which is how the real one survived: every
@@ -867,7 +873,10 @@ CASES: list[tuple[str, str, object, str]] = [
      sub_line("phase", "BLOCKED"),
      "session-level BLOCKED is reserved for"),
     ("CHANGELOG entries fall out of descending order", "CHANGELOG.md",
-     replace("## 7.196.0", "## 7.100.0"),
+     # 7.196.0 was the old anchor; it has been sealed into the archive, so the
+     # mutation became a no-op. A mid-file entry is bumped above the head so
+     # only the descending-order rung fires, never the head-vs-VERSION one.
+     replace("## 7.206.0", "## 7.300.0"),
      "changelog-order"),
     ("hunt.md drops the pre-move reference sweep",
      "saipen/phases/hunt.md",
@@ -1070,8 +1079,11 @@ CASES: list[tuple[str, str, object, str]] = [
              "run whatever the state recorded"),
      "command-outranks-pick"),
     ("BOOT step 7 drops the memory ban for shortcut tables", "saipen/BOOT.md",
-     replace("Memory is never a source for it.",
-             "Use memory if you are confident."),
+     # The period-anchored old string did not match the current em-dash text,
+     # so this went a no-op (T-532). The check reads the phrase without the
+     # period, so the mutation drops exactly that.
+     replace("Memory is never a source for it",
+             "Use memory if you are confident"),
      "shortcut-memory-ban"),
     ("BOOT step 7 drops the duplication ban for shortcut tables", "saipen/BOOT.md",
      # Must mutate the string the CHECK reads. It mutated "Do not copy the
@@ -1249,19 +1261,31 @@ CASES: list[tuple[str, str, object, str]] = [
     # session took the cheap reading and never opened the file.
     ("BOOT re-lists STYLE.md as an on-demand rule question",
      "saipen/BOOT.md",
-     replace("`saipen/UI.md` (UI work only). **`STYLE.md` is deliberately NOT on",
-             "`saipen/STYLE.md` (chat voice), `saipen/UI.md` (UI work only)."
-             " **`STYLE.md` is deliberately NOT on"),
+     # Old anchor was pre-shrink text. The T-404 straddler check only counts
+     # `saipen/`-prefixed refs, so the mutation must add a prefixed STYLE.md
+     # to BOTH the on-demand bullet and the before-output bullet -- a bare
+     # mention in one is deliberately ignored (T-532).
+     lambda t: (t.replace("**STYLE.md is NOT on the rule-question list.**",
+                          "**`saipen/STYLE.md` is on the rule-question list.**")
+                .replace("Step 1 already read STYLE.md — the file in the "
+                         "same folder as this BOOT.md",
+                         "Step 1 already read `saipen/STYLE.md` — the file "
+                         "in the same folder as this BOOT.md")),
      "under on-demand 'rule questions' while ordering it"),
     ("BOOT loses a T-404 disjointness anchor bullet",
      "saipen/BOOT.md",
-     replace("- Rule questions `STATE`/`BOARD`/`LOG` + the active phase doc don't answer:",
-             "- Questions `STATE`/`BOARD`/`LOG` + the active phase doc don't answer:"),
+     # Old anchor was pre-shrink text. The check parses a bullet that starts
+     # with "Rule questions"; renaming the bullet to "Questions" makes the
+     # parser lose it entirely, which is the exact failure the check names.
+     replace("Rule questions → `INDEX.md` first.",
+             "Questions → `INDEX.md` first."),
      "lost one of the two T-404 anchor bullets"),
     ("BOOT moves the STYLE.md read out of the numbered fast path",
      "saipen/BOOT.md",
-     replace("1. **Read `STYLE.md` -- the file in the same folder as this `BOOT.md` --",
-             "1. **Read the voice notes -- the file in the same folder as this `BOOT.md` --"),
+     # Old anchor used ASCII `--`; the current BOOT.md writes an em-dash, so
+     # the mutation was a no-op (T-532). Re-pinned to the live em-dash text.
+     replace("1. **Read `STYLE.md` — the file in the same folder as this `BOOT.md` —",
+             "1. **Read the voice notes — the file in the same folder as this `BOOT.md` —"),
      "no longer orders reading STYLE.md before any output"),
     ("STYLE.md contract edited without reprinting its marker",
      "saipen/STYLE.md",
@@ -1298,8 +1322,10 @@ CASES: list[tuple[str, str, object, str]] = [
      "never mentions `reply_language:`"),
     ("BOOT.md presents the precedence rule without the setting",
      "saipen/BOOT.md",
-     replace("`STYLE.md`'s `reply_language:` (step 1",
-             "`STYLE.md`'s language rule (step 1"),
+     # Old anchor back-ticked STYLE.md (`STYLE.md`'s); the current BOOT.md
+     # writes it bare, so the mutation was a no-op (T-532).
+     replace("STYLE.md's `reply_language:` (step 1",
+             "STYLE.md's language rule (step 1"),
      "without naming STYLE.md's `reply_language:` setting"),
     ("BOOT.md leaks STYLE.md's marker value",
      "saipen/BOOT.md", leak_style_marker,
@@ -1396,8 +1422,10 @@ CASES: list[tuple[str, str, object, str]] = [
     # element; the validator must catch it.
     ("saiui charter drops canonical UI.md reference",
      "extensions/subs/saiui.md",
-     replace("canonical `<saipen_home>/saipen/UI.md`",
-             "the project's own visual specification"),
+     # The charter references saipen/UI.md in three places; the old mutation
+     # removed one and the validator's substring check was satisfied by the
+     # survivors (T-532). Drop every occurrence.
+     lambda t: t.replace("saipen/UI.md", "the project's own visual spec"),
      "lost canonical saipen/UI.md"),
     ("saiui charter declares a second palette",
      "extensions/subs/saiui.md",
@@ -1411,8 +1439,10 @@ CASES: list[tuple[str, str, object, str]] = [
      "main-tree write ban"),
     ("saiui charter removes fixer pen requirement",
      "extensions/subs/saiui.md",
-     replace("clone exact target files into `kitchen/pen/`",
-             "edit target files directly in the project tree"),
+     # `kitchen/pen/` also appears in the charter's table of contents row, so
+     # removing the requirement line alone left the substring check satisfied
+     # (T-532). Drop every occurrence.
+     lambda t: t.replace("kitchen/pen/", "kitchen/direct/"),
      "fixer pen or OUTBOX"),
     ("PROTOCOL.md drops UI- prefix from ticket table",
      "extensions/subs/PROTOCOL.md",
@@ -1420,7 +1450,9 @@ CASES: list[tuple[str, str, object, str]] = [
      "lacks explicit UI- prefix"),
     ("PROTOCOL.md drops sai*.md from bootstrap copy list",
      "extensions/subs/PROTOCOL.md",
-     replace("all built-in `sai*.md` role charters", "the standard files"),
+     # `sai*.md` appears in three rows (spawn + sync); the old mutation
+     # removed one and the survivors satisfied the substring check (T-532).
+     lambda t: t.replace("sai*.md", "standard files"),
      "sai*.md built-in charters"),
     ("SAIUI mission claims SAISENT was audited from this repo",
      ".saipen/kitchen/SAIUI_SAISENT_MISSION.md",
@@ -1437,7 +1469,13 @@ CASES: list[tuple[str, str, object, str]] = [
      "charter-loading language"),
     ("PROTOCOL.md sync softens live-folder guard",
      "extensions/subs/PROTOCOL.md",
-     replace("MUST NOT touch any", "MAY inspect"),
+     # The validator's regex accepts either "never touch ... <name>" or "never
+     # looks inside ... <name>"; the old mutation hit an unrelated read-only
+     # sentence and the sync row's second guard phrase survived (T-532). The
+     # sync row carries both phrases, so both must go.
+     lambda t: t.replace("sync MUST NOT touch any", "sync MAY touch any")
+                .replace("it never looks inside a `<name>/` folder",
+                         "it may look inside any `<name>/` folder"),
      "live-folder guard"),
 ]
 

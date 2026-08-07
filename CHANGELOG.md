@@ -2,6 +2,10 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.206.4 -- 2026-08-07 -- audit_checks 165/165 evidence again
+
+T-532: 14 of 165 red controls in `tools/audit_checks.py` had stopped being evidence. Split-anchor drift (T-496 class) after the BOOT.md shrink and CHANGELOG archiving; control mutations that removed one occurrence of a string the validator counts anywhere (so survivors satisfied the checks); a harness that copies the repo's live STATE.md, which no longer carries goal-mode counters; and a board with a single workable ticket that `demote_the_pick` could not demote into being not-topmost. Every case repaired to fire on its own condition -- including injecting a synthetic workable ticket, making the goal-mode mutations self-contained, and tightening one genuinely weak validator check (the PROTOCOL.md charter-loading test was satisfied by any occurrence of the words "load"/"charter"). This ship should produce the first fully green validate run since 2026-08-03.
+
 ## 7.206.3 -- 2026-08-07 -- CI push-loop: portable-floor red harness + tag ledger
 
 Two more pre-existing conformance-step failures surfaced once the validator and lint steps passed. `tools/audit_floor.py` read `saipen/RFC.md` alone -- a 144-byte redirect stub since the v7.190.0 split -- so every red-control anchor was unresolvable (the T-496 split-layout class in the portable-floor harness); it now reads CORE.md + MAINTENANCE.md with an RFC.md fallback. `tools/audit_tags.py` flagged v7.199.0/v7.200.0, both pointing at a commit carrying VERSION 7.201.0 because their true release commits were orphaned by a history rewrite and no longer exist on origin/main; both are now acknowledged in KNOWN_MISMATCHES per user decision rather than re-pointed.
