@@ -40,6 +40,7 @@ import os
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 def _read_rfc(p):
     core = p.parent / "CORE.md"
@@ -52,8 +53,6 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 else:
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
-
-from pathlib import Path
 
 USE_COLOR = sys.stdout.isatty()
 
@@ -1539,7 +1538,7 @@ _blocked_workable = [
 ] if state.get("phase") == "BLOCKED" else []
 if _blocked_workable:
     fail(f"STATE.md phase: BLOCKED while {len(_blocked_workable)} workable "
-         f"## TODO ticket(s) exist (topmost {sorted(_blocked_workable)[0]}) -- "
+         f"## TODO ticket(s) exist (topmost {min(_blocked_workable)}) -- "
          f"session-level BLOCKED is reserved for when no ticket anywhere on "
          f"the board is workable. A block that belongs to one ticket goes on "
          f"THAT ticket's line in `## BLOCKED` with its owner named, and Core "
