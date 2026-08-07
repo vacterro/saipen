@@ -9,3 +9,5 @@ There is no more work to do on the current ticket. Move it from `## DOING` to `#
 4. **New Goals**: If the user wants to start a new project or big feature, run `saipen goal <text>` -- `PLAN` runs first to generate tickets, then the agent proceeds directly into `SCOUT` for the first one (MAINTENANCE.md §2.4); it does not stop at `PLAN`.
 5. **Bugs**: If the user describes a bug in plain language, that is free text for `saipen goal <text>` (a bug report is a valid objective, CORE.md §1.10) -- there is no separate `fix` subcommand or literal command syntax to match the symptom against.
 6. **Brainstorming**: If the user asks to add new features or brainstorm, that's free text for `saipen goal <text>` or a normal ticket via PLAN -- there is no separate `add` command; `ADD` itself is only ever reached autonomously via a clean `HUNT` (MAINTENANCE.md §2.1).
+
+7. **Under `execution_intent: converge`**, reaching this phase is not automatically closure: `saipen/CONVERGE.md` owns the stage order that leads here and the closure bar that decides whether the run may clear the intent and stop. Check it there rather than inferring it from an empty board.

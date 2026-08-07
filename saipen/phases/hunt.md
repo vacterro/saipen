@@ -129,3 +129,5 @@ Never invent busywork.
 Baseline number first (profiler/timer/EXPLAIN -> LOG).
 Fix top proven bottleneck -> re-measure same way.
 Gain under 20% and uglier -> revert + LOG why.
+
+**Under `execution_intent: converge`, this phase is stage F or stage I of the sequence in `saipen/CONVERGE.md`** -- that file says which, what a finding here returns to, and why an existing `hunt -> clean @HASH` marker does not satisfy either stage. It is not restated here.

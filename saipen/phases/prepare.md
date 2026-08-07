@@ -38,3 +38,5 @@ This phase is primarily used by specialized roles and subSaipens (e.g., `saitran
    second copy in an append-only file is a copy that can go stale against the
    one that gets refreshed. The LOG line answers "which prepare ran, and did
    it succeed"; the OUTBOX answers "against what, and is it still current".
+
+**Under `execution_intent: converge`, a producer preparation is stage K or stage L of the sequence in `saipen/CONVERGE.md`** -- that file owns the EE-before-QQ order and the rule that no main-source mutation may follow either of them.

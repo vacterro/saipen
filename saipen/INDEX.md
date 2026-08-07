@@ -7,6 +7,7 @@ This index describes all available SAIPEN documents. Agents MUST NOT read these 
 - `STYLE.md`: Voice, tone, and compression contract (caveman-ded). Read automatically during BOOT.
 - `CORE.md`: The main protocol rules (formerly RFC.md). Covers commands, state lifecycle, transition table, verification rules, and agent constraints. Load only if you have a specific rule question not answered by the phase document, or if BOOT.md step 7 sends you to §1.10 for command/shortcut resolution.
 - `MAINTENANCE.md`: Maintenance and recovery logic. Load only when executing `clean` or `audit`, or recovering from project corruption.
+- `CONVERGE.md`: The convergence contract — the exact stage order `cc` walks from recovery to fresh producer packages, plus the closure bar that decides when it may say DONE. Load when `execution_intent: converge` is set, or when a phase document points here. It owns that order; no other document restates it.
 - `RFC.md`: Compatibility redirect only. The constitution was split into CORE.md and MAINTENANCE.md in v7.190.0. This file is a three-line stub; never treat it as authoritative.
 
 ## Phase Documents (`phases/*.md`)

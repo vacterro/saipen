@@ -2320,6 +2320,61 @@ if IS_SAIPEN_HOME:
            "write ban enforced, fixer contract present, UI- prefix documented, "
            "bootstrap includes charters)")
 
+# CONVERGE.md owns the convergence stage ORDER. The failure this pins is not a
+# missing file -- it is a sequence that quietly loses a stage or swaps two of
+# them, which reads perfectly and produces a run that prepares its factories
+# before the cleanup that invalidates them. The stages are checked by position,
+# so a reordering fails even though every letter is still present.
+if IS_SAIPEN_HOME:
+    _conv = home_doc("CONVERGE.md")
+    if not _conv.is_file():
+        fail("[converge-contract] saipen/CONVERGE.md is missing -- INDEX.md and "
+             "the phase docs point at it as the owner of the cc stage order")
+    else:
+        _conv_text = _conv.read_text(encoding="utf-8-sig", errors="replace")
+        _stages = [
+            ("A", "RECOVER"), ("B", "FINISH CURRENT WORK"),
+            ("C", "EXHAUST REAL BOARD WORK"),
+            ("D", "COLLECT ACTIONABLE SUBSAIPEN RESULTS"),
+            ("E", "CANONICAL TEST / VALIDATE GATE"), ("F", "FORCED HUNT"),
+            ("G", "CLEAN"), ("H", "POST-CLEAN TEST GATE"),
+            ("I", "FINAL FORCED HUNT"), ("J", "SUBSAIPEN FACTORY SYNC"),
+            ("K", "FRESH EE"), ("L", "FRESH QQ"),
+            ("M", "FINAL FRESHNESS CHECK"),
+        ]
+        _positions, _absent = [], []
+        for _letter, _title in _stages:
+            _at = _conv_text.find(f"**{_letter}. {_title}.**")
+            if _at < 0:
+                _absent.append(f"{_letter}. {_title}")
+            else:
+                _positions.append((_letter, _at))
+        if _absent:
+            fail("[converge-contract] CONVERGE.md is missing stage(s): "
+                 + "; ".join(_absent)
+                 + " -- the contract is the whole order, and a run that cannot "
+                   "read a stage skips it")
+        elif [p for _, p in _positions] != sorted(p for _, p in _positions):
+            fail("[converge-contract] CONVERGE.md states its stages out of "
+                 "order: "
+                 + " ".join(letter for letter, _ in
+                            sorted(_positions, key=lambda pair: pair[1]))
+                 + " -- preparing the producer packages before the cleanup and "
+                   "hunts that invalidate them is the exact defect the order "
+                   "exists to prevent")
+        if "## The closure bar" not in _conv_text:
+            fail("[converge-contract] CONVERGE.md carries no closure bar -- the "
+                 "stage order says what to do and the bar is what says a run "
+                 "may stop, which is the half a converge run gets wrong")
+        if "Nothing that mutates main source may run after K." not in _conv_text:
+            fail("[converge-contract] CONVERGE.md lost the ordering rule that "
+                 "no main-source mutation may follow the producer preparation "
+                 "-- without it the factories can be freshly built against a "
+                 "tree the next stage changes")
+        if not any("converge-contract" in problem for problem in failures):
+            ok(f"convergence contract intact ({len(_stages)} stages in order, "
+               "closure bar and post-K ordering rule present)")
+
 # Target mission must not claim SAISENT was audited from this repo.
 if saiui_mission.is_file():
     _mission = saiui_mission.read_text(encoding="utf-8-sig", errors="replace")
@@ -4375,6 +4430,7 @@ else:
         ("saipen/MAINTENANCE.md",    "source of truth for maintenance cross-doc sets"),
         ("saipen/BOOT.md",           "re-enumeration + required-field-count checks"),
         ("saipen/CONFORMANCE.md",    "re-enumeration + count + row-ID checks"),
+        ("saipen/CONVERGE.md",       "convergence stage-order + closure-bar + post-K ordering checks"),
         ("saipen/phases/*.md",       "phase-enum sync + prescribed-WAIT category check"),
         ("extensions/**/*.md",       "prescribed-WAIT category check"),
         ("guides/GUIDE_*.md",        "guide WAIT-shape check"),

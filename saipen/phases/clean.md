@@ -71,3 +71,5 @@ After cleanup is complete, LOG one normal Event Graph line per CORE.md §1.2 --
 ad-hoc marker like `[E-CLEAN]`. `E-###` continues the same numbered
 sequence as every other entry; CLEAN gets no special ID format. Transition
 phase back to `DONE`.
+
+**Under `execution_intent: converge`, this phase is stage G of the sequence in `saipen/CONVERGE.md`** -- what runs before it, what MUST run after it because CLEAN mutates files, and what an ambiguous cleanup does to the run all live there.

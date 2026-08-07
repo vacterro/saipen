@@ -2,6 +2,12 @@
 
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.210.0 -- 2026-08-07 -- the convergence order gets one owner
+
+T-538: `saipen/CONVERGE.md` is now the only place the `cc` lifecycle is defined -- stages A through M from recovery to fresh producer packages, the rule that no main-source mutation may follow the producer preparation, and the closure bar that decides when a converge run may clear the intent and stop. The order was previously implied by five documents that each knew one hop, so no single reader could answer "what comes after CLEAN" without assembling it, and assembling it is where two conformant agents diverge. `hunt.md`, `clean.md`, `prepare.md` and `done.md` each name their own stage and defer; none restates the sequence.
+
+`validate.py` gains `[converge-contract]`, which checks the 13 stages BY POSITION: a reordering FAILs while every stage is still present, because the way this contract actually breaks is two stages swapping and putting the factories before the cleanup that invalidates them -- not a deleted file. Two red controls cover exactly that (one renames a stage heading to another's, one deletes the ordering rule); audit_checks 168 of 168. The doc is registered in INDEX.md, `saipen/MANIFEST.json` and BOTH bootstrap injectors, whose copy lists are still hand-written beside the manifest.
+
 ## 7.209.0 -- 2026-08-07 -- a callout can no longer name the wrong destination
 
 T-537: the shortcut-callout check counted keys, tokens, order and the link and never read what the sentence claimed, so a document could tell the reader `cc` is the Goal Mode key while §1.10 routed that key to `saipen continue`. Three Core-owned files shipped in v7.208.0 doing exactly that -- the RU locale source, the EN guide and the JA guide, each one's sibling already moved. Fixed, and the blind spot closed: a Core-owned callout still describing `cc` as the Goal Mode key now FAILs `[shortcut-callouts]`, derived from the route the way the `[shortcut-notes]` check is. Scoped to the 15 files Core owns -- `phases/translate.md` gives the other 28 languages to saitranslate, so their remaining semantic drift clears through an `ee` run rather than reddening every Core commit. One new red control; audit_checks 166 of 166.

@@ -4,6 +4,7 @@
     {"src": "saipen/BOOT.md", "required": true},
     {"src": "saipen/STYLE.md", "required": true},
     {"src": "saipen/INDEX.md", "required": true},
+    {"src": "saipen/CONVERGE.md", "required": true},
     {"src": "saipen/CORE.md", "required": true},
     {"src": "saipen/MAINTENANCE.md", "required": true},
     {"src": "saipen/RFC.md", "required": true},

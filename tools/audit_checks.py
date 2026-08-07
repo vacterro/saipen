@@ -998,6 +998,19 @@ CASES: list[tuple[str, str, object, str]] = [
     # read what the sentence CLAIMS, so a document could tell the reader `cc`
     # is the Goal Mode key while § 1.10 routed it to `saipen continue` -- and
     # three Core-owned files shipped exactly that for a release.
+    # The convergence order is the whole contract, and the way it breaks is not
+    # a deleted file -- it is two stages swapping, which reads fine and puts the
+    # producer packages before the cleanup that invalidates them. Swap K past M
+    # so every stage is still present and only the ORDER is wrong.
+    ("CONVERGE.md prepares its factories before the closure sweep",
+     "saipen/CONVERGE.md",
+     replace("**K. FRESH EE.**", "**M. FINAL FRESHNESS CHECK.**"),
+     "converge-contract"),
+    ("CONVERGE.md loses the post-K ordering rule",
+     "saipen/CONVERGE.md",
+     replace("Nothing that mutates main source may run after K.",
+             "Main source may be mutated whenever it is convenient."),
+     "converge-contract"),
     ("a Core-owned callout calls `cc` the Goal Mode key",
      "guides/GUIDE_EN.md",
      replace("`cc` continues the project context to convergence (resuming a "
