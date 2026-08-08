@@ -2593,24 +2593,6 @@ def run_role_freshness_probes() -> tuple[list[str], int, int]:
             with contextlib.suppress(OSError):
                 leftover.unlink()
 
-        if hasattr(os, "mkfifo"):
-            fifo = project / "pipe.fifo"
-            os.mkfifo(fifo)
-            try:
-                compute_source_identity(project)
-            except FreshnessError:
-                expect("unsupported filesystem object fails computation",
-                       "failed", contains="failed")
-            else:
-                expect("unsupported filesystem object fails computation",
-                       "passed", contains="failed")
-            finally:
-                fifo.unlink()
-        else:
-            print("SKIP: role freshness -- FIFO probe needs a POSIX host "
-                  "(os.mkfifo unavailable)")
-            skipped += 1
-
         outer = Path(raw) / "outer-repo"
         outer.mkdir()
         inner = outer / "nested-project"
@@ -2799,6 +2781,29 @@ def run_role_freshness_probes() -> tuple[list[str], int, int]:
         expect("no-Git fallback uses its explicit runtime exclusions",
                no_git_after.source_tree_fingerprint,
                contains=no_git_before.source_tree_fingerprint)
+
+        # A FIFO is unsupported fingerprint input. Only the no-Git walk
+        # enumerates every directory entry (scandir), so it is the model that
+        # actually meets the object; the Git-delta model never sees it because
+        # `git ls-files --others` does not report one -- CI measured that
+        # (T-572), so the probe lives against the walk that raises.
+        if hasattr(os, "mkfifo"):
+            fifo = no_git / "pipe.fifo"
+            os.mkfifo(fifo)
+            try:
+                compute_source_identity(no_git)
+            except FreshnessError:
+                expect("unsupported filesystem object fails computation",
+                       "failed", contains="failed")
+            else:
+                expect("unsupported filesystem object fails computation",
+                       "passed", contains="failed")
+            finally:
+                fifo.unlink()
+        else:
+            print("SKIP: role freshness -- FIFO probe needs a POSIX host "
+                  "(os.mkfifo unavailable)")
+            skipped += 1
 
         no_git_exec = no_git / "script.sh"
         no_git_exec.write_text("#!/bin/sh\n", encoding="utf-8")
