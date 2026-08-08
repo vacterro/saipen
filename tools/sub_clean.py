@@ -11,24 +11,76 @@ import argparse
 import hashlib
 import os
 import re
+import stat
 import sys
 from pathlib import Path
 
 
+def _is_reparse_point(path: Path) -> bool:
+    """True for a symlink or a Windows junction/reparse point.
+
+    A junction is NOT a symlink: ``Path.is_symlink()`` is False for it, so
+    junction detection must read the reparse-point attribute. On any other
+    platform the attribute does not exist and the helper degrades to the
+    symlink check (T-572).
+    """
+    if path.is_symlink():
+        return True
+    try:
+        info = path.lstat()
+    except OSError:
+        return True
+    attributes = getattr(info, "st_file_attributes", 0)
+    return bool(attributes & 0x400)  # FILE_ATTRIBUTE_REPARSE_POINT
+
+
 def _file_digest(path: Path) -> str:
+    """Digest of a regular file, without ever following a symlink.
+
+    Evidence ownership is link-boundary-safe: a symlink's digest is its link
+    identity (the target text), never the bytes its target points at, so an
+    outside file can never hash like evidence the instance actually owns.
+    """
+    try:
+        info = path.lstat()
+    except OSError as exc:
+        raise RuntimeError(f"cannot stat cleanup evidence {path}: {exc}") from exc
+    if stat.S_ISLNK(info.st_mode):
+        try:
+            target = os.readlink(path)
+        except OSError as exc:
+            raise RuntimeError(f"cannot read cleanup evidence link {path}: {exc}") from exc
+        return hashlib.sha256(b"link:" + os.fsencode(target)).hexdigest()
+    if not stat.S_ISREG(info.st_mode):
+        raise RuntimeError(
+            f"unsupported cleanup evidence object at {path}")
     digest = hashlib.sha256()
     try:
-        with path.open("rb") as handle:
-            while chunk := handle.read(1024 * 1024):
-                digest.update(chunk)
+        flags = os.O_RDONLY | getattr(os, "O_BINARY", 0)
+        if hasattr(os, "O_NOFOLLOW"):
+            flags |= os.O_NOFOLLOW
+        fd = os.open(path, flags)
+    except OSError as exc:
+        raise RuntimeError(f"cannot open cleanup evidence {path}: {exc}") from exc
+    try:
+        while True:
+            chunk = os.read(fd, 1024 * 1024)
+            if not chunk:
+                break
+            digest.update(chunk)
     except OSError as exc:
         raise RuntimeError(f"cannot read cleanup evidence {path}: {exc}") from exc
+    finally:
+        os.close(fd)
     return digest.hexdigest()
 
 
 def _open_board_items(board: Path) -> list[str]:
     if not board.is_file():
         return [f"missing lifecycle evidence: {board.name}"]
+    if board.is_symlink() or _is_reparse_point(board):
+        return [f"non-regular lifecycle evidence: {board.name} is a "
+                f"symlink or reparse point"]
     try:
         lines = board.read_text(encoding="utf-8-sig").splitlines()
     except (OSError, UnicodeError) as exc:
@@ -112,6 +164,9 @@ def _visible_markdown(text: str) -> tuple[str, str | None]:
 def _outbox_blockers(outbox: Path) -> list[str]:
     if not outbox.is_file():
         return [f"missing lifecycle evidence: kitchen/{outbox.name}"]
+    if outbox.is_symlink() or _is_reparse_point(outbox):
+        return [f"non-regular lifecycle evidence: kitchen/{outbox.name} is a "
+                f"symlink or reparse point"]
     try:
         text = outbox.read_text(encoding="utf-8-sig")
     except (OSError, UnicodeError) as exc:
@@ -179,7 +234,7 @@ def _walk_files(root: Path) -> list[Path]:
         for directory in list(directories):
             path = current_path / directory
             try:
-                if path.is_symlink():
+                if path.is_symlink() or _is_reparse_point(path):
                     files.append(path)
                     directories.remove(directory)
             except OSError as exc:
@@ -211,13 +266,14 @@ def _package_artifacts(kitchen: Path) -> list[str]:
 def _unpreserved_recovery(instance: Path,
                            preserved_root: Path | None) -> list[str]:
     walked = _walk_files(instance)
-    recovery_links = [
-        path for path in walked if path.name == "recovery" and path.is_symlink()
-    ]
-    if recovery_links:
+    link_evidence = [path for path in walked
+                     if (path.is_symlink() or _is_reparse_point(path))
+                     and "recovery" in path.relative_to(instance).parts]
+    if link_evidence:
         return [
-            "unpreserved recovery evidence: "
-            + recovery_links[0].relative_to(instance).as_posix()
+            "non-preserved recovery evidence: "
+            + link_evidence[0].relative_to(instance).as_posix()
+            + " (symlink or reparse point owns no content)"
         ]
     evidence = [path for path in walked
                 if "recovery" in path.relative_to(instance).parts[:-1]]

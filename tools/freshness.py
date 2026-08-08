@@ -80,6 +80,24 @@ def _is_saipen_path(path: bytes) -> bool:
     return path == b".saipen" or path.startswith(b".saipen/")
 
 
+def _is_reparse_point(path: Path) -> bool:
+    """True for a symlink or a Windows junction/reparse point.
+
+    A junction is NOT a symlink: ``stat.S_ISLNK`` is False for it, so the
+    no-Git walk would otherwise recurse through it and hash content outside
+    the declared root. The reparse-point attribute exists only on Windows;
+    elsewhere this degrades to the symlink check (T-572).
+    """
+    if path.is_symlink():
+        return True
+    try:
+        info = path.lstat()
+    except OSError:
+        return True
+    attributes = getattr(info, "st_file_attributes", 0)
+    return bool(attributes & 0x400)  # FILE_ATTRIBUTE_REPARSE_POINT
+
+
 def _frame(record: _Record) -> bytes:
     if len(record.kind) != 1:
         raise FreshnessError("fingerprint record type must be exactly one byte")
@@ -295,7 +313,7 @@ def _walk_no_git(root: Path) -> list[_Record]:
                 continue
             if not rel_parts and entry.name in _NO_GIT_EXCLUDED_ROOT_FILES:
                 continue
-            if stat.S_ISLNK(info.st_mode):
+            if stat.S_ISLNK(info.st_mode) or _is_reparse_point(path):
                 records.append(_Record(b"L", raw_path, 0o120000, _read_symlink(path)))
             elif stat.S_ISDIR(info.st_mode):
                 visit(path, next_parts)

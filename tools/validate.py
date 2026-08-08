@@ -1958,6 +1958,44 @@ if len(doing) > 1:
 else:
     ok(f"BOARD.md at most one ## DOING ticket ({len(doing)} claimed)")
 
+# T-573: STATE.task and ## DOING are ONE binding, not two files that may
+# drift. The v7.215.0 crash checkpoint claimed task T-572 in a ticket-bearing
+# phase while BOARD carried no ## DOING claim and T-572 sat in ## TODO, and
+# the validator called that conformant -- the exact "STATE ahead of BOARD"
+# interruption § 1.5 exists to catch. Recovery may observe an interrupted
+# checkpoint, but canonical validation MUST reject it. One legitimate
+# exception is another agent's live claim, which the Pick Rule refuses rather
+# than mirrors in STATE (the multi-agent-claim-conflict fixture is
+# `expect: pass` precisely because the observing agent has task: none while
+# the claimed ticket sits in ## DOING under someone else's owner) -- so the
+# binding is judged against the agent's OWN claim, not a stranger's.
+if phase in TICKET_BEARING_PHASES:
+    active_task = state.get("task")
+    self_agent = state.get("agent")
+    self_doing = [tid for tid in doing
+                  if not tickets[tid]["fields"].get("owner", "")
+                  or tickets[tid]["fields"].get("owner", "") == self_agent]
+    if isinstance(active_task, str) and re.fullmatch(r"T-\d+", active_task):
+        if active_task not in doing:
+            fail(f"STATE.md task {active_task} is not the claimed ## DOING "
+                 f"ticket ({', '.join(doing) or 'none'}) in ticket-bearing "
+                 f"phase {phase} -- a TODO/DONE/BLOCKED ticket cannot be the "
+                 f"active task; Recovery reconstructs the claim from BOARD "
+                 f"and the LOG tail (RFC § 1.5, T-573)")
+        _na = state.get("next_action", "")
+        if isinstance(_na, str) and (_na.startswith("PHASE ")
+                                     or _na.startswith("RESUME:")):
+            _na_ticket = re.search(r"\bT-\d+\b", _na)
+            if _na_ticket and _na_ticket.group(0) != active_task:
+                fail(f"STATE.md next_action names {_na_ticket.group(0)} while "
+                     f"task is {active_task} in ticket-bearing phase {phase} "
+                     f"-- the pick must agree with the active task (RFC § 1.2, "
+                     f"T-573)")
+    elif active_task in ("none", "", None) and self_doing:
+        fail(f"STATE.md task is none but ## DOING carries {self_doing[0]} "
+             f"claimed by this agent or unclaimed -- STATE is behind BOARD; "
+             f"Recovery adopts the BOARD claim (RFC § 1.5, T-573)")
+
 # ----------------------------------------------------------------------- LOG
 
 # Segmented, append-only (RFC § 1.2): sealed older segments live in

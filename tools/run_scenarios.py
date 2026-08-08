@@ -36,6 +36,7 @@ declaration, so CI fails on it like any other gate.
 """
 
 import contextlib
+import functools
 import importlib.util
 import io
 import json
@@ -60,6 +61,55 @@ from sub_clean import sub_clean_blockers
 HOME = Path(__file__).resolve().parent.parent
 VALIDATOR = HOME / "tools" / "validate.py"
 SCENARIOS = HOME / "tests" / "scenarios"
+
+
+@functools.lru_cache(maxsize=1)
+def symlinks_available() -> bool:
+    """Can this host create a symlink at all?
+
+    Measured, never assumed from `os.name`: Windows creates symlinks fine with
+    Developer Mode or SeCreateSymbolicLinkPrivilege and refuses without either,
+    and restricted containers refuse on any platform. Unguarded `os.symlink`
+    calls do not degrade to a SKIP -- they raise OSError out of the probe
+    function and take the whole scenario suite down with a traceback, which is
+    the worst of the three outcomes because it hides every check after it
+    (T-572). Lazy: the filesystem operation runs on first use, never merely
+    from importing this module.
+    """
+    with tempfile.TemporaryDirectory(prefix="saipen-symlink-probe-") as raw:
+        base = Path(raw)
+        (base / "target").write_text("t\n", encoding="utf-8")
+        try:
+            os.symlink("target", base / "link")
+        except (OSError, NotImplementedError, AttributeError):
+            return False
+        return (base / "link").is_symlink()
+
+
+@functools.lru_cache(maxsize=1)
+def junctions_available() -> bool:
+    """Can this host create a directory junction (reparse point) at all?
+
+    Junctions are not symlinks: `Path.is_symlink()` is False for one, which is
+    exactly why detection must read the reparse-point attribute (T-572).
+    `mklink /J` needs no privilege and works on every Windows host; anything
+    else is not a junction-capable host and SKIPs out loud.
+    """
+    if os.name != "nt":
+        return False
+    with tempfile.TemporaryDirectory(prefix="saipen-junction-probe-") as raw:
+        base = Path(raw)
+        real = base / "real"
+        real.mkdir()
+        link = base / "junction"
+        result = subprocess.run(
+            ["cmd", "/c", "mklink", "/J", os.fspath(link), os.fspath(real)],
+            capture_output=True, text=True, errors="replace")
+        if result.returncode != 0 or not link.exists():
+            return False
+        info = link.lstat()
+        return bool(getattr(info, "st_file_attributes", 0) & 0x400)
+
 
 EXPECT_RE = re.compile(r"^expect:\s*(pass|fail)\s*$", re.MULTILINE)
 
@@ -255,9 +305,11 @@ def run_hook_probes() -> tuple[list[str], int, int]:
         controlled.mkdir()
         if os.name == "nt":
             bash_path = str(Path(bash).resolve().parent)
-        else:
+        elif symlinks_available():
             (controlled / "bash").symlink_to(Path(bash).resolve())
             bash_path = str(controlled)
+        else:
+            bash_path = str(Path(bash).resolve().parent)
         env = os.environ.copy()
         env["PATH"] = bash_path
         working = subprocess.run(
@@ -2248,10 +2300,11 @@ def run_converge_routing_probes() -> tuple[list[str], int]:
     return problems, checked
 
 
-def run_role_freshness_probes() -> tuple[list[str], int]:
+def run_role_freshness_probes() -> tuple[list[str], int, int]:
     """Execute T-542/T-543 role and source freshness controls."""
     problems: list[str] = []
     checked = 0
+    skipped = 0
 
     def validate(project: Path) -> str:
         result = subprocess.run(
@@ -2357,7 +2410,7 @@ def run_role_freshness_probes() -> tuple[list[str], int]:
 
         if git("init", "-q").returncode != 0:
             print("SKIP: role/source freshness probes -- git unavailable")
-            return problems, checked
+            return problems, checked, 1
         git("add", "-A")
         git("commit", "-q", "-m", "probe")
 
@@ -2426,45 +2479,153 @@ def run_role_freshness_probes() -> tuple[list[str], int]:
 
         # The delta model is HEAD vs WORKING TREE, so the mode has to change
         # where that model looks -- on disk. `git update-index --chmod` moves
-        # the INDEX only, and the two readings diverge by platform: with
-        # core.fileMode false (Windows, and any filesystem that cannot carry
-        # the bit) git reports the index mode and the probe passed; with
-        # core.fileMode true (Linux, CI) git reports the filesystem mode, sees
-        # no change, and the probe failed. It was measuring git's fallback,
-        # not the fingerprint. Where the bit is not expressible there is
-        # nothing to measure, so the rung SKIPs out loud instead of passing.
-        file_mode = git("config", "--get", "core.fileMode").stdout.strip()
-        if file_mode == "false" or os.name == "nt":
-            print("SKIP: role freshness -- core.fileMode is off, so this "
-                  "filesystem cannot express a tracked mode change")
-        else:
+        # the INDEX only, which is how this rung used to measure git's
+        # fallback instead of the fingerprint. Whether the host can represent
+        # a tracked executable-bit transition is now MEASURED, never assumed
+        # from `os.name` or `core.fileMode`: chmod on disk, stat it again,
+        # then ask Git for the resulting HEAD-vs-working-tree delta. A
+        # filesystem that cannot carry the bit, or a repository whose Git
+        # config cannot see it, SKIPs out loud (T-572).
+        source_mode = source.stat().st_mode
+        try:
             before = compute_source_identity(project)
-            source.chmod(source.stat().st_mode | 0o111)
-            mode_changed = compute_source_identity(project)
-            expect("tracked mode change changes fingerprint",
-                   mode_changed.source_tree_fingerprint,
-                   absent=before.source_tree_fingerprint)
-            source.chmod(source.stat().st_mode & ~0o111)
+            os.chmod(source, source_mode | 0o111)
+            post_mode = source.stat().st_mode
+            delta = git("diff", "--raw", "-z", "--no-renames", "HEAD", "--",
+                        "source.txt").stdout
+            old_mode = new_mode = None
+            for field in delta.split("\0"):
+                parts = field.split()
+                if field.startswith(":") and len(parts) == 5:
+                    old_mode = int(parts[0][1:], 8)
+                    new_mode = int(parts[1], 8)
+                    break
+            represented = (
+                (post_mode & 0o111) != (source_mode & 0o111)
+                and old_mode is not None
+                and (new_mode & 0o111) != (old_mode & 0o111)
+            )
+            if not represented:
+                print("SKIP: role freshness -- this host cannot represent a "
+                      "tracked executable-bit transition in the "
+                      "HEAD-vs-working-tree delta")
+                skipped += 1
+            else:
+                mode_changed = compute_source_identity(project)
+                expect("tracked mode change changes fingerprint",
+                       mode_changed.source_tree_fingerprint,
+                       absent=before.source_tree_fingerprint)
+        finally:
+            os.chmod(source, source_mode)
 
         outside_one = Path(raw) / "outside-one.txt"
         outside_two = Path(raw) / "outside-two.txt"
         outside_one.write_text("one\n", encoding="utf-8")
         outside_two.write_text("one\n", encoding="utf-8")
-        link = project / "outside-link"
-        os.symlink(os.path.relpath(outside_one, project), link)
-        link_identity = compute_source_identity(project)
-        outside_one.write_text("changed outside bytes\n", encoding="utf-8")
-        outside_bytes_changed = compute_source_identity(project)
-        expect("symlink hashes target text and never outside-root bytes",
-               outside_bytes_changed.source_tree_fingerprint,
-               contains=link_identity.source_tree_fingerprint)
-        link.unlink()
-        os.symlink(os.path.relpath(outside_two, project), link)
-        link_target_changed = compute_source_identity(project)
-        expect("symlink target-text change changes fingerprint",
-               link_target_changed.source_tree_fingerprint,
-               absent=link_identity.source_tree_fingerprint)
-        link.unlink()
+        if symlinks_available():
+            link = project / "outside-link"
+            os.symlink(os.path.relpath(outside_one, project), link)
+            link_identity = compute_source_identity(project)
+            outside_one.write_text("changed outside bytes\n", encoding="utf-8")
+            outside_bytes_changed = compute_source_identity(project)
+            expect("symlink hashes target text and never outside-root bytes",
+                   outside_bytes_changed.source_tree_fingerprint,
+                   contains=link_identity.source_tree_fingerprint)
+            link.unlink()
+            os.symlink(os.path.relpath(outside_two, project), link)
+            link_target_changed = compute_source_identity(project)
+            expect("symlink target-text change changes fingerprint",
+                   link_target_changed.source_tree_fingerprint,
+                   absent=link_identity.source_tree_fingerprint)
+            link.unlink()
+        else:
+            print("SKIP: role freshness -- symlink probes need a host that "
+                  "can create symlinks (Developer Mode or "
+                  "SeCreateSymbolicLinkPrivilege on Windows)")
+            skipped += 2
+
+        spaced = project / "with space.txt"
+        before = compute_source_identity(project)
+        spaced.write_text("space\n", encoding="utf-8")
+        after = compute_source_identity(project)
+        expect("filename with spaces is fingerprinted",
+               after.source_tree_fingerprint,
+               absent=before.source_tree_fingerprint)
+        spaced.unlink()
+
+        unicode_name = project / "tõstrik-ü.txt"
+        before = compute_source_identity(project)
+        unicode_name.write_text("üñïçødé\n", encoding="utf-8")
+        after = compute_source_identity(project)
+        expect("Unicode filename is fingerprinted",
+               after.source_tree_fingerprint,
+               absent=before.source_tree_fingerprint)
+        unicode_name.unlink()
+
+        case_one = project / "CaseDistinct.txt"
+        case_two = project / "casedistinct.txt"
+        case_one.write_text("upper\n", encoding="utf-8")
+        before = compute_source_identity(project)
+        holds_case = False
+        try:
+            case_two.write_text("lower\n", encoding="utf-8")
+            holds_case = (case_one.lstat().st_ino != case_two.lstat().st_ino)
+        except OSError:
+            holds_case = False
+        if holds_case:
+            after = compute_source_identity(project)
+            case_two.unlink()
+            mid = compute_source_identity(project)
+            expect("case-distinct filenames fingerprint independently",
+                   after.source_tree_fingerprint,
+                   absent=before.source_tree_fingerprint)
+            expect("removing one case-distinct file changes fingerprint",
+                   mid.source_tree_fingerprint,
+                   absent=after.source_tree_fingerprint)
+        else:
+            # A case-insensitive host does not raise on the second write -- it
+            # silently aliases the first file, so the inode comparison above
+            # is the capability test, not the write's success (T-572).
+            print("SKIP: role freshness -- host filesystem cannot hold two "
+                  "case-distinct filenames simultaneously")
+            skipped += 2
+        for leftover in (case_one, case_two):
+            with contextlib.suppress(OSError):
+                leftover.unlink()
+
+        if hasattr(os, "mkfifo"):
+            fifo = project / "pipe.fifo"
+            os.mkfifo(fifo)
+            try:
+                compute_source_identity(project)
+            except FreshnessError:
+                expect("unsupported filesystem object fails computation",
+                       "failed", contains="failed")
+            else:
+                expect("unsupported filesystem object fails computation",
+                       "passed", contains="failed")
+            finally:
+                fifo.unlink()
+        else:
+            print("SKIP: role freshness -- FIFO probe needs a POSIX host "
+                  "(os.mkfifo unavailable)")
+            skipped += 1
+
+        outer = Path(raw) / "outer-repo"
+        outer.mkdir()
+        inner = outer / "nested-project"
+        inner.mkdir()
+        (inner / "inner-source.txt").write_text("inner\n", encoding="utf-8")
+        if subprocess.run(["git", "init", "-q"], cwd=outer, env=env,
+                          capture_output=True, text=True).returncode == 0:
+            nested_identity = compute_source_identity(inner)
+            expect("nested project inside another git repository uses the "
+                   "no-Git discovery model",
+                   nested_identity.discovery_model,
+                   contains="no-git-tree-v1")
+        else:
+            print("SKIP: role freshness -- nested-repository probe needs git")
+            skipped += 1
 
         ignored = project / ".freebuff" / "runtime.db"
         ignored.parent.mkdir(parents=True, exist_ok=True)
@@ -2639,13 +2800,64 @@ def run_role_freshness_probes() -> tuple[list[str], int]:
                no_git_after.source_tree_fingerprint,
                contains=no_git_before.source_tree_fingerprint)
 
-    return problems, checked
+        no_git_exec = no_git / "script.sh"
+        no_git_exec.write_text("#!/bin/sh\n", encoding="utf-8")
+        exec_mode = no_git_exec.stat().st_mode
+        try:
+            os.chmod(no_git_exec, exec_mode | 0o111)
+            post_mode = no_git_exec.stat().st_mode
+            if (post_mode & 0o111) != (exec_mode & 0o111):
+                no_git_exec_before = compute_source_identity(no_git)
+                os.chmod(no_git_exec, exec_mode)
+                no_git_exec_after = compute_source_identity(no_git)
+                expect("no-Git executable-bit change changes fingerprint",
+                       no_git_exec_after.source_tree_fingerprint,
+                       absent=no_git_exec_before.source_tree_fingerprint)
+            else:
+                print("SKIP: role freshness -- host cannot express an "
+                      "executable bit in the no-Git discovery model")
+                skipped += 1
+        finally:
+            os.chmod(no_git_exec, exec_mode)
+        no_git_exec.unlink()
+
+        if junctions_available():
+            junction_outside = Path(raw) / "junction-outside"
+            junction_outside.mkdir()
+            (junction_outside / "content.txt").write_text(
+                "v1\n", encoding="utf-8")
+            junction = no_git / "junction-dir"
+            result = subprocess.run(
+                ["cmd", "/c", "mklink", "/J",
+                 os.fspath(junction), os.fspath(junction_outside)],
+                capture_output=True, text=True, errors="replace")
+            if result.returncode == 0 and junction.exists():
+                j_before = compute_source_identity(no_git)
+                (junction_outside / "content.txt").write_text(
+                    "v2\n", encoding="utf-8")
+                j_after = compute_source_identity(no_git)
+                expect("no-Git walk hashes a junction as link identity and "
+                       "never recurses outside the root",
+                       j_after.source_tree_fingerprint,
+                       contains=j_before.source_tree_fingerprint)
+                junction.rmdir()
+            else:
+                print("SKIP: role freshness -- mklink /J failed despite the "
+                      "capability probe")
+                skipped += 1
+        else:
+            print("SKIP: role freshness -- junction probe needs a Windows "
+                  "host able to create junctions (cmd mklink /J)")
+            skipped += 1
+
+    return problems, checked, skipped
 
 
-def run_sub_clean_probes() -> tuple[list[str], int]:
+def run_sub_clean_probes() -> tuple[list[str], int, int]:
     """Execute T-545 evidence-gated cleanup controls (scenarios 22-24)."""
     problems: list[str] = []
     checked = 0
+    skipped = 0
 
     def expect(label: str, blockers: tuple[str, ...], contains: str = "",
                empty: bool = False) -> None:
@@ -2818,11 +3030,76 @@ def run_sub_clean_probes() -> tuple[list[str], int]:
         expect("byte-preserved recovery evidence permits cleanup",
                sub_clean_blockers(instance, preserved), empty=True)
 
-    return problems, checked
+        if symlinks_available():
+            recovery.unlink()
+            os.symlink(os.fspath(preserved / "STATE.md"), recovery)
+            blockers = sub_clean_blockers(instance, preserved)
+            expect("symlink recovery evidence is rejected even when its "
+                   "target content matches preserved bytes",
+                   blockers, contains="non-preserved recovery evidence")
+            recovery.unlink()
+            recovery.write_text("evidence\n", encoding="utf-8", newline="\n")
+
+            outside_ev = Path(raw) / "outside-recovery-dir"
+            outside_ev.mkdir()
+            (outside_ev / "hidden.txt").write_text(
+                "hidden\n", encoding="utf-8", newline="\n")
+            sublink = instance / "recovery" / "sublink"
+            sublink.symlink_to(outside_ev, target_is_directory=True)
+            blockers = sub_clean_blockers(instance, preserved)
+            expect("directory symlink under recovery is never recursed",
+                   blockers, contains="non-preserved recovery evidence")
+            sublink.unlink()
+
+            os.rename(instance / "recovery", instance / "recovery-real")
+            os.symlink(os.fspath(preserved), instance / "recovery")
+            blockers = sub_clean_blockers(instance, preserved)
+            expect("a recovery dir that is itself a symlink is rejected",
+                   blockers, contains="non-preserved recovery evidence")
+            (instance / "recovery").unlink()
+            os.rename(instance / "recovery-real", instance / "recovery")
+        else:
+            print("SKIP: sub-clean safety -- symlink probes need a host that "
+                  "can create symlinks (Developer Mode or "
+                  "SeCreateSymbolicLinkPrivilege on Windows)")
+            skipped += 3
+
+        if junctions_available():
+            real_ev = Path(raw) / "junction-evidence"
+            real_ev.mkdir()
+            (real_ev / "hidden.txt").write_text(
+                "hidden\n", encoding="utf-8", newline="\n")
+            junction = instance / "recovery" / "junction-link"
+            result = subprocess.run(
+                ["cmd", "/c", "mklink", "/J",
+                 os.fspath(junction), os.fspath(real_ev)],
+                capture_output=True, text=True, errors="replace")
+            if result.returncode == 0 and junction.exists():
+                blockers = sub_clean_blockers(instance, preserved)
+                expect("directory junction is never recursed and is rejected",
+                       blockers, contains="non-preserved recovery evidence")
+                junction.rmdir()
+            else:
+                print("SKIP: sub-clean safety -- mklink /J failed on this "
+                      "host despite the capability probe")
+                skipped += 1
+        else:
+            print("SKIP: sub-clean safety -- junction probe needs a Windows "
+                  "host able to create junctions (cmd mklink /J); a Linux "
+                  "symlink test is not proof of junction behavior")
+            skipped += 1
+
+    return problems, checked, skipped
 
 
 def run_hardening_control_inventory() -> tuple[list[str], int]:
-    """Prove all 30 hardening red controls resolve to executable evidence."""
+    """Prove all 30 hardening red controls resolve to executable evidence.
+
+    `hardening_controls.json` is platform-independent data -- every owner is a
+    plain repository-relative file path and every anchor is plain text with no
+    platform branch -- and the checks below prove that shape mechanically, so
+    a future entry cannot quietly make the registry platform-conditional.
+    """
     problems: list[str] = []
     checked = 0
     registry_path = HOME / "tools" / "hardening_controls.json"
@@ -2830,12 +3107,51 @@ def run_hardening_control_inventory() -> tuple[list[str], int]:
         registry = json.loads(registry_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         return [f"hardening control registry unreadable: {exc}"], 0
-    ids = [entry.get("id") for entry in registry if isinstance(entry, dict)]
-    if ids != list(range(1, 31)):
-        return [f"hardening control IDs are {ids!r}, expected 1..30 in order"], 0
+    if not isinstance(registry, list):
+        return [f"hardening control registry must be a JSON list, got "
+                f"{type(registry).__name__}"], 0
+    expected_keys = {"id", "name", "owner", "anchor"}
+    seen_names: set[str] = set()
+    seen_anchors: set[str] = set()
+    ids = []
+    for index, entry in enumerate(registry, 1):
+        if not isinstance(entry, dict):
+            return [f"hardening control #{index} is not a JSON object"], index - 1
+        if set(entry) != expected_keys:
+            return [f"hardening control #{index} keys are {sorted(entry)!r}, "
+                    f"expected {sorted(expected_keys)}"], index - 1
+        name = entry["name"]
+        if not isinstance(name, str) or not name:
+            return [f"hardening control #{index} has an empty name"], index - 1
+        if name in seen_names:
+            return [f"hardening control names are not unique: {name!r}"], index - 1
+        seen_names.add(name)
+        owner = entry["owner"]
+        if (not isinstance(owner, str) or not owner
+                or "\\" in owner or owner.startswith("/")
+                or owner.startswith(".") or ".." in owner.split("/")):
+            return [f"hardening control #{index} owner is not a canonical "
+                    f"repository-relative path: {owner!r}"], index - 1
+        anchor = entry["anchor"]
+        if not isinstance(anchor, str) or not anchor:
+            return [f"hardening control #{index} has an empty anchor"], index - 1
+        if anchor in seen_anchors:
+            return [f"hardening control #{index} anchor {anchor!r} is not "
+                    f"unique -- the anchor resolves ambiguously"], index - 1
+        seen_anchors.add(anchor)
+        ids.append(entry["id"])
+    if len(set(ids)) != len(ids):
+        return ["hardening control IDs are not unique"], len(registry)
+    if ids != list(range(1, len(registry) + 1)):
+        return [f"hardening control IDs are {ids!r}, expected "
+                f"1..{len(registry)} in order"], len(registry)
     for entry in registry:
         checked += 1
         owner = HOME / entry["owner"]
+        if not owner.is_file():
+            problems.append(
+                f"control {entry['id']} owner is not a file: {entry['owner']}")
+            continue
         try:
             source = owner.read_text(encoding="utf-8-sig")
         except OSError as exc:
@@ -2849,6 +3165,9 @@ def run_hardening_control_inventory() -> tuple[list[str], int]:
         else:
             print(f"PASS: hardening control {entry['id']:02d} -- "
                   f"{entry['name']} -> {entry['owner']}")
+    print("hardening_controls.json is platform-independent data: every owner "
+          "is a repository-relative file path and every anchor is plain text "
+          "with no platform branch")
     return problems, checked
 
 
@@ -3283,6 +3602,143 @@ def run_ship_pick_probes() -> tuple[list[str], int]:
     return problems, checked
 
 
+def run_active_task_recovery_probes() -> tuple[list[str], int]:
+    """T-573: the crash pair is rejected, then RFC § 1.5 Recovery rebuilds it.
+
+    The v7.215.0 crash checkpoint made STATE claim a ticket the board never
+    put in ## DOING, and the validator called it conformant. The new check
+    rejects both interruption directions (STATE ahead of BOARD, BOARD ahead
+    of STATE). This probe performs § 1.5's Recovery on each and proves the
+    result validates and that a repeated Recovery is a byte-level no-op. The
+    project carries only a minimal `.saipen/` so no full-repo baggage (sealed
+    LOG segments, sub boards, board barriers) can mask what is being tested.
+    """
+    problems: list[str] = []
+    checked = 0
+    with tempfile.TemporaryDirectory(prefix="saipen-active-task-") as raw:
+        project = Path(raw) / "project"
+        shutil.copytree(SCENARIOS / "stale-state-reconciliation" / ".saipen",
+                        project / ".saipen")
+        state_path = project / ".saipen" / "STATE.md"
+        board_path = project / ".saipen" / "BOARD.md"
+        log_path = project / ".saipen" / "LOG.md"
+        style_token = live_style_marker()
+
+        def validate() -> str:
+            r = subprocess.run(
+                [sys.executable, str(VALIDATOR), "--project-root",
+                 str(project)],
+                cwd=project, capture_output=True, text=True, errors="replace")
+            return r.stdout + r.stderr
+
+        def expect(label: str, output: str, contains: str = "",
+                   absent: str = "") -> None:
+            nonlocal checked
+            checked += 1
+            details = []
+            if contains and contains not in output:
+                details.append(f"missing {contains!r}")
+            if absent and absent in output:
+                details.append(f"unexpected {absent!r}")
+            if details:
+                problems.append(f"{label}: {'; '.join(details)}")
+            else:
+                print(f"PASS: active-task recovery -- {label}")
+
+        def write_state(task: str, na: str, last_event: int) -> None:
+            state_path.write_text(
+                "---\nphase: SCOUT\n"
+                f"task: {task}\n"
+                f"next_action: \"{na}\"\n"
+                "blocker: none\n"
+                "transition_from: DONE\n"
+                "saipen_version: 7\n"
+                "schema_version: 3\n"
+                f"last_event: {last_event}\n"
+                f"style_contract: {style_token}\n"
+                "agent: probe\n"
+                "mode: full\n"
+                "updated: 2026-01-01T00:00:00Z\n"
+                "---\n",
+                encoding="utf-8", newline="\n")
+
+        def write_log(ticket: str) -> None:
+            log_path.write_text(
+                f"- 08.08.26 00:00 [E-001] [{ticket}] RUN: probe\n",
+                encoding="utf-8", newline="\n")
+
+        def recover(ticket: str, claim_board: bool, label: str) -> None:
+            # No-op when the previous recovery already produced this state:
+            # RFC § 1.5's idempotency, proven byte-for-byte by the caller.
+            board = board_path.read_text(encoding="utf-8-sig")
+            state = state_path.read_text(encoding="utf-8-sig")
+            already = (f"task: {ticket}" in state
+                       and re.search(r"^## DOING\n- \[/\] " + ticket + r"\b",
+                                     board, re.MULTILINE))
+            if already:
+                return
+            recovery_dir = project / ".saipen" / "recovery"
+            recovery_dir.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(state_path, recovery_dir / f"{label}-STATE.md")
+            log = log_path.read_text(encoding="utf-8-sig").rstrip()
+            log += (f"\n- 08.08.26 00:01 [E-002] [{ticket}] "
+                    f"DEC: RECOVER -- {label}\n")
+            log_path.write_text(log, encoding="utf-8", newline="\n")
+            if claim_board:
+                board_path.write_text(
+                    "# Board\n## DOING\n"
+                    f"- [/] {ticket} [P0] crash | owner: probe | "
+                    "claim_time: 2026-01-01T00:00:00Z | verify: probe\n"
+                    "## TODO\n## DONE\n## BLOCKED\n",
+                    encoding="utf-8", newline="\n")
+            write_state(ticket, f"PHASE SCOUT {ticket}", 2)
+
+        # Case A: STATE ahead of BOARD -- task claimed, no ## DOING ticket.
+        write_state("T-999", "PHASE SCOUT T-999", 1)
+        write_log("T-999")
+        board_path.write_text(
+            "# Board\n## DOING\n## TODO\n"
+            "- [ ] T-999 [P0] crash | verify: probe\n"
+            "## DONE\n## BLOCKED\n",
+            encoding="utf-8", newline="\n")
+        expect("STATE ahead of BOARD is rejected",
+               validate(), "is not the claimed ## DOING ticket")
+        recover("T-999", claim_board=True, label="crash-A")
+        expect("Recovery of case A validates",
+               validate(), "Agent is conformant")
+        snap = (state_path.read_bytes(), board_path.read_bytes(),
+                log_path.read_bytes())
+        recover("T-999", claim_board=True, label="crash-A")
+        again = (state_path.read_bytes(), board_path.read_bytes(),
+                 log_path.read_bytes())
+        expect("repeated Recovery of case A is byte-idempotent",
+               "same" if snap == again else "differed", contains="same")
+
+        # Case B: BOARD ahead of STATE -- self-claimed ## DOING, task: none.
+        write_state("none", "saipen continue", 1)
+        write_log("T-100")
+        board_path.write_text(
+            "# Board\n## DOING\n"
+            "- [/] T-100 [P0] claimed | owner: probe | "
+            "claim_time: 2026-01-01T00:00:00Z | verify: probe\n"
+            "## TODO\n## DONE\n## BLOCKED\n",
+            encoding="utf-8", newline="\n")
+        expect("BOARD ahead of STATE is rejected",
+               validate(), "STATE is behind BOARD")
+        recover("T-100", claim_board=False, label="crash-B")
+        expect("Recovery of case B validates",
+               validate(), "Agent is conformant")
+        snap = (state_path.read_bytes(), board_path.read_bytes(),
+                log_path.read_bytes())
+        recover("T-100", claim_board=False, label="crash-B")
+        again = (state_path.read_bytes(), board_path.read_bytes(),
+                 log_path.read_bytes())
+        expect("repeated Recovery of case B is byte-idempotent",
+               "same" if snap == again else "differed", contains="same")
+
+    return problems, checked
+
+
 injector_failures, injector_checked, injector_skipped = run_injector_probes()
 failures.extend(injector_failures)
 root_failures, root_checked = run_project_root_probes()
@@ -3303,9 +3759,11 @@ producer_gate_failures, producer_gate_checked = run_producer_gate_probes()
 failures.extend(producer_gate_failures)
 ship_staging_failures, ship_staging_checked = run_ship_staging_probes()
 failures.extend(ship_staging_failures)
-rolefresh_failures, rolefresh_checked = run_role_freshness_probes()
+rolefresh_failures, rolefresh_checked, rolefresh_skipped = \
+    run_role_freshness_probes()
 failures.extend(rolefresh_failures)
-sub_clean_failures, sub_clean_checked = run_sub_clean_probes()
+sub_clean_failures, sub_clean_checked, sub_clean_skipped = \
+    run_sub_clean_probes()
 failures.extend(sub_clean_failures)
 hardening_failures, hardening_checked = run_hardening_control_inventory()
 failures.extend(hardening_failures)
@@ -3326,7 +3784,9 @@ failures.extend(digest_failures)
 orphan_failures, orphan_checked = run_orphan_tag_probes()
 failures.extend(orphan_failures)
 ship_pick_failures, ship_pick_checked = run_ship_pick_probes()
+active_task_failures, active_task_checked = run_active_task_recovery_probes()
 failures.extend(ship_pick_failures)
+failures.extend(active_task_failures)
 print(f"\n{checked} executable fixture(s) checked, "
       f"{skipped} behavioral fixture(s) skipped (README-only by design)")
 print(f"{injector_checked} injector(s) executed, "
@@ -3339,14 +3799,17 @@ print(f"{crew_checked} crew-launch behavior(s) executed, "
 print(f"{digest_checked} digest-stale behavior(s) executed")
 print(f"{orphan_checked} orphan-tag behavior(s) executed")
 print(f"{ship_pick_checked} ship-pick behavior(s) executed")
+print(f"{active_task_checked} active-task recovery behavior(s) executed")
 print(f"{last_event_checked} last_event migration behavior(s) executed")
 print(f"{hunt_mark_checked} hunt-mark behavior(s) executed")
 print(f"{converge_checked} converge-routing behavior(s) executed")
 print(f"{ccc_identity_checked} ccc commit-identity behavior(s) executed")
 print(f"{producer_gate_checked} producer-gate behavior(s) executed")
 print(f"{ship_staging_checked} ship-staging behavior(s) executed")
-print(f"{rolefresh_checked} role-freshness behavior(s) executed")
-print(f"{sub_clean_checked} sub-clean safety behavior(s) executed")
+print(f"{rolefresh_checked} role-freshness behavior(s) executed, "
+      f"{rolefresh_skipped} skipped for missing host capability")
+print(f"{sub_clean_checked} sub-clean safety behavior(s) executed, "
+      f"{sub_clean_skipped} skipped for missing host capability")
 print(f"{hardening_checked} hardening red control(s) resolved")
 print(f"{purity_checked} pre-commit-purity behavior(s) executed, "
       f"{purity_skipped} skipped for missing interpreters")

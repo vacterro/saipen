@@ -836,6 +836,17 @@ CASES: list[tuple[str, str, object, str]] = [
     ("style_contract names a different voice contract", STATE,
      sub_line("style_contract", "ded-deadbeef"),
      "did not read the current STYLE.md"),
+    # T-573: STATE.task and ## DOING are one binding. The v7.215.0 crash
+    # checkpoint claimed task T-572 while no ## DOING ticket existed and
+    # T-572 sat in ## TODO -- validator-conformant until this rule. Both
+    # interruption directions go red: a task naming a ticket the board does
+    # not claim, and a self-claimed ## DOING ticket the state does not name.
+    ("active task not claimed by ## DOING", STATE,
+     sub_line("task", "T-999"),
+     "is not the claimed ## DOING ticket"),
+    ("self-claimed ## DOING ticket with task: none", STATE,
+     sub_line("task", "none"),
+     "STATE is behind BOARD"),
     ("last_event below the log tail", STATE, sub_line("last_event", "1"),
      "lower than the log"),
     ("next_action picks a ticket that is not the topmost workable", BOARD,
