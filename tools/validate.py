@@ -3538,6 +3538,36 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                     ok(f"INDEX.md phase list matches enum + files "
                        f"({len(_idx_phases)} phases)")
 
+            # T-552/T-561: Improve is a meta-control, never a phase. The
+            # no-phase proof is mechanical: no phases/improve.md may exist, no
+            # IMPROVE enum row may appear, and the canonical IMPROVE.md must
+            # state it is not a phase. A `phases/improve.md` would be an
+            # unofficial seventeenth phase hiding inside the phase directory.
+            if Path("saipen/phases/improve.md").is_file():
+                fail("cross-doc drift [improve-meta-control] -- "
+                     "saipen/phases/improve.md exists; Improve is a "
+                     "meta-control and must never become an unofficial "
+                     "seventeenth phase (saipen/IMPROVE.md, T-552)")
+                enum_ok = False
+            if "IMPROVE" in phase_names:
+                fail("cross-doc drift [improve-meta-control] -- the phase enum "
+                     "contains IMPROVE; Improve is a meta-control and the "
+                     "phase count must stay 16 (T-552)")
+                enum_ok = False
+            _improve_doc = Path("saipen/IMPROVE.md")
+            if not _improve_doc.is_file():
+                fail("cross-doc drift [improve-meta-control] -- "
+                     "saipen/IMPROVE.md is the single canonical Improve owner "
+                     "and is missing (T-552)")
+                enum_ok = False
+            else:
+                _imp_t = _improve_doc.read_text(encoding="utf-8-sig")
+                if "meta-control" not in _imp_t.lower():
+                    fail("cross-doc drift [improve-meta-control] -- "
+                         "saipen/IMPROVE.md does not state that Improve is a "
+                         "meta-control, not a phase")
+                    enum_ok = False
+
         # B. Every runtime file the protocol references must exist in the home.
         # Canonical source is saipen/MANIFEST.json; the hardcoded list below
         # is the fallback for homes that predate the manifest (v7.190.0+).
@@ -5424,6 +5454,7 @@ else:
         ("saipen/BOOT.md",           "re-enumeration + required-field-count checks"),
         ("saipen/CONFORMANCE.md",    "re-enumeration + count + row-ID checks"),
         ("saipen/CONVERGE.md",       "convergence stage-order + closure-bar + post-K ordering checks"),
+        ("saipen/IMPROVE.md",        "meta-control proof (no IMPROVE phase row, no phases/improve.md)"),
         ("saipen/phases/*.md",       "phase-enum sync + prescribed-WAIT category check"),
         ("extensions/**/*.md",       "prescribed-WAIT category check"),
         ("guides/GUIDE_*.md",        "guide WAIT-shape check"),
@@ -6622,6 +6653,25 @@ else:
                          "`saipen concurrent`; one command cannot carry two "
                          "execution meanings")
                     drift_ok = False
+                if "Crew Mode" in _cb:
+                    fail("cross-doc drift [crew-naming] -- the v8 Concurrent "
+                         "Mode backlog reintroduces the pre-T-571 name "
+                         "'Crew Mode' for the concurrent design; the decision "
+                         "renamed it Concurrent Mode with command "
+                         "`saipen concurrent`")
+                    drift_ok = False
+            # Live BOARD tickets may not resurrect the decided-against name for
+            # the concurrent design either (T-571's own historical DONE line is
+            # exempt -- it describes the conflict it resolved).
+            _live_crew = "\n".join(
+                board_lines[t["line_no"] - 1] for t in tickets.values()
+                if t["section"] in ("## DOING", "## TODO", "## BLOCKED"))
+            if "Crew Mode" in _live_crew:
+                fail("cross-doc drift [crew-naming] -- a live BOARD ticket "
+                     "reintroduces the pre-T-571 name 'Crew Mode' for the "
+                     "concurrent design; T-571 renamed it Concurrent Mode with "
+                     "command `saipen concurrent`")
+                drift_ok = False
 
             # The shortcut table's right-hand column is a promise that each
             # shortcut lands on a command this surface defines. Nothing read

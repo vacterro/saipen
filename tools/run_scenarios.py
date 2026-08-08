@@ -58,7 +58,7 @@ from freshness import (FreshnessError, SourceIdentity,
                        compute_source_identity)
 from sub_clean import sub_clean_blockers
 from userperson import (merge_profile, onboarding_questions, parse_profile,
-                        projection, remove_preference, render_profile,
+                        project_profile, remove_preference, render_profile,
                         validate_profile)
 
 HOME = Path(__file__).resolve().parent.parent
@@ -3180,14 +3180,19 @@ def run_hardening_control_inventory() -> tuple[list[str], int]:
 
 
 def run_userperson_probes() -> tuple[list[str], int]:
-    """T-574: the optional USERPERSON profile mechanics.
+    """T-574 + T-577: the optional USERPERSON profile mechanics.
 
     The profile is OFF by default -- absence is silent (verified against the
     validator's own output on this very tree, which carries no USERPERSON
-    file) -- and every mechanical property of the profile is measured here:
-    semantic merge (never appended duplicate history), remove, parse/render
-    round-trip, structural validation, the bounded onboarding, and the
-    SubSaipen projections that must never dump the whole profile.
+    file). Preference identity is STRUCTURED (category + exact text) and the
+    merge is deterministic lexical dedup -- never a claim of understanding
+    natural-language semantics. Red controls cover the false-equivalence that
+    shipped in v7.217.0 (a leading-phrase split silently discarded a distinct
+    "Prefer UI: Material Design" beside "Prefer UI: Vintage Golden") and the
+    false-negative case (differently-worded but equivalent preferences are
+    NOT merged by the helper; the agent distills semantics before writing).
+    Projections select actual preferences by category policy and return an
+    auditable handoff -- a short scope string is not a projection.
     """
     problems: list[str] = []
     checked = 0
@@ -3200,34 +3205,55 @@ def run_userperson_probes() -> tuple[list[str], int]:
         else:
             print(f"PASS: userperson -- {label}")
 
+    # Red control: false equivalence. Two distinct UI preferences sharing a
+    # leading phrase must BOTH survive -- the v7.217.0 bug discarded the second.
     merged = merge_profile(
-        ["Prefer safe autonomous continuation."],
-        ["prefer safe autonomous continuation",
-         "Prefer compact reports.",
-         "- Prefer safe autonomous continuation, even on long runs."])
-    expect("add merges by meaning, never appending duplicate history",
-           merged == ["Prefer safe autonomous continuation.",
-                      "Prefer compact reports."],
+        ["- [UI] Vintage Golden"],
+        ["- [UI] Material Design", "- [UI] Vintage Golden"])
+    expect("distinct preferences sharing a leading phrase are both kept",
+           len(merged) == 2
+           and {e["text"] for e in merged} == {"Vintage Golden",
+                                               "Material Design"},
            repr(merged))
 
-    removed = remove_preference(merged, "prefer compact reports")
+    # Red control: false negative. Semantically-equivalent but lexically
+    # different preferences are NOT merged by the helper -- semantic
+    # distillation is the agent's job, recorded as such (T-577).
+    dist = merge_profile(
+        ["- [Automation] Prefer safe autonomous continuation"],
+        ["- [Automation] Automate continuation safely where reversible"])
+    expect("helper never fabricates semantic equivalence between wordings",
+           len(dist) == 2, repr(dist))
+
+    # Exact-duplicate dedup is deterministic and safe.
+    dedup = merge_profile(
+        ["- [Automation] avoid repetitive continue"],
+        ["- [Automation] avoid repetitive continue"])
+    expect("exact duplicate (same category, same text) is deduplicated",
+           len(dedup) == 1, repr(dedup))
+
+    removed = remove_preference(merged, "Material Design")
     expect("remove drops the matching preference",
-           removed == ["Prefer safe autonomous continuation."], repr(removed))
+           len(removed) == 1 and removed[0]["text"] == "Vintage Golden",
+           repr(removed))
 
     rendered = render_profile(merged)
     parsed = parse_profile(rendered)["preferences"]
-    expect("render/parse round-trips", parsed == merged, repr(parsed))
+    expect("render/parse round-trips",
+           [(e["category"], e["text"]) for e in parsed]
+           == [(e["category"], e["text"]) for e in merged],
+           repr(parsed))
 
     expect("validate accepts a well-formed profile",
            validate_profile(rendered) == [],
            repr(validate_profile(rendered)))
-    malformed = "# USERPERSON\n\n- good preference\nnot-a-bullet\n"
+    malformed = "# USERPERSON\n\n- [UI] good preference\nnot-a-bullet\n"
     errs = validate_profile(malformed)
     expect("validate flags a non-bullet line",
            any("markdown bullet" in e for e in errs), repr(errs))
-    dup = render_profile(["Same leading phrase here.",
-                          "Same leading phrase here, restated differently"])
-    expect("validate flags duplicate history that merge forbids",
+    dup = render_profile(["- [UI] Same leading phrase here.",
+                          "- [UI] Same leading phrase here."])
+    expect("validate flags exact duplicate history",
            any("duplicate" in e for e in validate_profile(dup)),
            repr(validate_profile(dup)))
 
@@ -3235,18 +3261,36 @@ def run_userperson_probes() -> tuple[list[str], int]:
            1 <= len(onboarding_questions()) <= 3,
            repr(onboarding_questions()))
 
-    for role in ("saiui", "saitranslate", "saiwiki", "saihunt"):
-        p = projection(role)
-        expect(f"projection exists for {role}", p is not None, repr(p))
-    expect("unknown role has no projection",
-           projection("saifoo") is None, repr(projection("saifoo")))
-
-    # The whole-profile dump is the thing projections must never do; each
-    # projection is a scoped instruction, not the profile content.
-    expect("projection is a scope statement, never the profile",
-           all(projection(r) is not None
-               and len(projection(r) or "") < 200
-               for r in ("saiui", "saitranslate", "saiwiki", "saihunt")))
+    # Real projection behavior: the helper SELECTS preferences by category
+    # policy. A short scope string is not evidence of projection (T-577).
+    profile = [
+        {"id": "p1", "category": "UI", "text": "Vintage Golden"},
+        {"id": "p2", "category": "Language", "text": "Russian explanations"},
+        {"id": "p3", "category": "Automation",
+         "text": "avoid repetitive continue"},
+        {"id": "p4", "category": "Localization", "text": "multilingual-first"},
+    ]
+    ui = project_profile(profile, "saiui", source_fingerprint="fp123")
+    expect("saiui projection selects UI/workflow preferences only",
+           [e["text"] for e in ui["preferences"]] == ["Vintage Golden"],
+           repr(ui))
+    tr = project_profile(profile, "saitranslate", source_fingerprint="fp123")
+    expect("saitranslate projection selects localization/language only",
+           {e["category"] for e in tr["preferences"]} == {"Language",
+                                                          "Localization"},
+           repr(tr))
+    ht = project_profile(profile, "saihunt", source_fingerprint="fp123")
+    expect("saihunt projection excludes UI baggage unless relevant",
+           all(e["category"] != "UI" for e in ht["preferences"]),
+           repr(ht))
+    expect("projection never dumps the whole profile",
+           all(len(project_profile(profile, role, "fp")["preferences"])
+               < len(profile)
+               for role in ("saiui", "saitranslate", "saiwiki", "saihunt")))
+    expect("projection handoff carries the source fingerprint",
+           ui["source_fingerprint"] == "fp123"
+           and ui["projection_policy"] == sorted(["ui", "workflow"]),
+           repr(ui))
 
     core = (HOME / "saipen" / "CORE.md").read_text(encoding="utf-8-sig")
     expect("CORE.md 1.10 documents both report traces",
