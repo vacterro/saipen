@@ -227,3 +227,49 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> None:
     tmp = ledger.with_suffix(".md.tmp")
     tmp.write_text(text + line + "\n", encoding="utf-8", newline="\n")
     tmp.replace(ledger)
+
+
+def register_cycle(project_root: Path, cycle_id: str,
+                   roster_lines: str) -> Path:
+    """Create a cycle directory atomically; refuse if it already exists.
+
+    Core is the sole creator of a cycle. Two simultaneous attempts cannot
+    silently create two "current" cycles: the second admission raises with the
+    existing cycle named.
+    """
+    cdir = cycle_dir(project_root, cycle_id)
+    if cdir.exists():
+        raise FileExistsError(
+            f"improve cycle {cycle_id} already exists -- a project has at most "
+            f"one active Improve cycle")
+    manifest = cdir / "MANIFEST.md"
+    manifest.parent.mkdir(parents=True)
+    tmp = manifest.with_suffix(".md.tmp")
+    tmp.write_text("# IMPROVE CYCLE ROSTER\n\n" + roster_lines,
+                   encoding="utf-8", newline="\n")
+    tmp.replace(manifest)
+    return cdir
+
+
+def register_seat(cycle_dir: Path, seat_id: str, role: str,
+                  report_path: str, availability: str = "expected") -> None:
+    """Add a seat to the roster; a duplicate seat_id registration fails.
+
+    seat_id is one concrete audit seat/session, never a model family. The
+    roster owns stable routing/identity only -- no draft/complete/swept status.
+    """
+    if availability not in AVAILABILITY:
+        raise ValueError(f"availability {availability!r} outside "
+                         f"expected|unavailable")
+    manifest = cycle_dir / "MANIFEST.md"
+    text = _read_maybe(manifest)
+    if not text.startswith("# IMPROVE CYCLE ROSTER"):
+        text = "# IMPROVE CYCLE ROSTER\n\n" + text
+    if re.search(rf"(?m)^seat_id:\s*{re.escape(seat_id)}\s*$", text):
+        raise ValueError(f"duplicate seat registration: {seat_id}")
+    line = (f"seat_id: {seat_id}\nrole: {role}\nreport_path: {report_path}\n"
+            f"availability: {availability}\n")
+    tmp = manifest.with_suffix(".md.tmp")
+    tmp.write_text(text.rstrip() + "\n" + line, encoding="utf-8",
+                   newline="\n")
+    tmp.replace(manifest)

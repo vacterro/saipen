@@ -57,8 +57,8 @@ from freshness import (FreshnessError, SourceIdentity,
                        compute_generic_role_revision, compute_role_revision,
                        compute_source_identity)
 from sub_clean import sub_clean_blockers
-from improve import (derive_status, resolve_report_path, validate_report,
-                     write_sweep_entry)
+from improve import (derive_status, register_cycle, register_seat,
+                     resolve_report_path, validate_report, write_sweep_entry)
 from userperson import (merge_profile, onboarding_questions, parse_profile,
                         project_profile, remove_preference, render_profile,
                         validate_profile)
@@ -3400,6 +3400,38 @@ def run_improve_probes() -> tuple[list[str], int]:
     expect("SWEEP ledger exists with the disposition",
            (cycle / "SWEEP.md").is_file()
            and "CONFIRMED" in (cycle / "SWEEP.md").read_text(encoding="utf-8"))
+
+    # Cycle/seat admission: deterministic, collision-safe (T-570).
+    proot = Path(tempfile.mkdtemp(prefix="saipen-cycle-"))
+    c1 = register_cycle(proot, "imp-key-20260808", "cycle_id: imp-key-20260808\n")
+    try:
+        register_cycle(proot, "imp-key-20260808", "")
+        dup_cycle = False
+    except FileExistsError:
+        dup_cycle = True
+    expect("a second cycle with the same id is refused, not duplicated",
+           dup_cycle)
+    expect("cycle creation writes the roster atomically",
+           (c1 / "MANIFEST.md").is_file()
+           and "imp-key-20260808" in (c1 / "MANIFEST.md").read_text(
+               encoding="utf-8"))
+    rp = "saipen_improve_PROJ.md"
+    register_seat(c1, "opencode-01", "core", rp)
+    try:
+        register_seat(c1, "opencode-01", "core", rp)
+        dup_seat = False
+    except ValueError:
+        dup_seat = True
+    expect("duplicate seat registration fails",
+           dup_seat and (c1 / "MANIFEST.md").read_text(
+               encoding="utf-8").count("seat_id: opencode-01") == 1)
+    try:
+        register_seat(c1, "opencode-02", "core", rp, availability="yolo")
+        bad_avail = False
+    except ValueError:
+        bad_avail = True
+    expect("a roster availability outside the closed set is rejected",
+           bad_avail)
 
     return problems, checked
 
