@@ -57,6 +57,8 @@ from freshness import (FreshnessError, SourceIdentity,
                        compute_generic_role_revision, compute_role_revision,
                        compute_source_identity)
 from sub_clean import sub_clean_blockers
+from improve import (derive_status, resolve_report_path, validate_report,
+                     write_sweep_entry)
 from userperson import (merge_profile, onboarding_questions, parse_profile,
                         project_profile, remove_preference, render_profile,
                         validate_profile)
@@ -3302,6 +3304,106 @@ def run_userperson_probes() -> tuple[list[str], int]:
     return problems, checked
 
 
+def run_improve_probes() -> tuple[list[str], int]:
+    """T-551/T-555/T-556/T-570: the Improve mechanical core.
+
+    The semantics live in saipen/IMPROVE.md; these probes prove the mechanical
+    layer: canonical report paths that never touch the shared protocol
+    install, one path per seat per cycle, report schema validation with closed
+    vocabularies and the mandatory expected/actual/evidence triple, the
+    derived status (roster + report + sweep, one fact one owner), and the
+    Core-owned SWEEP ledger that never mutates the seat report.
+    """
+    problems: list[str] = []
+    checked = 0
+
+    def expect(label: str, ok: bool, detail: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        if not ok:
+            problems.append(f"{label}: {detail}")
+        else:
+            print(f"PASS: improve -- {label}")
+
+    root = Path(tempfile.mkdtemp(prefix="saipen-improve-"))
+    p1 = resolve_report_path(root, "imp-key-20260808", "opencode-01", "PROJ")
+    p2 = resolve_report_path(root, "imp-key-20260808", "opencode-02", "PROJ")
+    p3 = resolve_report_path(root, "imp-key-20260809", "opencode-01", "PROJ")
+    expect("report path lives under project .saipen/improve, never saipen_home",
+           p1.is_relative_to(root / ".saipen" / "improve"), str(p1))
+    expect("two distinct seats resolve to different report paths",
+           p1 != p2, f"{p1} vs {p2}")
+    expect("same seat in a different cycle resolves to a different path",
+           p1 != p3, f"{p1} vs {p3}")
+    expect("requested basename is preserved exactly",
+           p1.name == "saipen_improve_PROJ.md", p1.name)
+
+    good = (
+        "agent: opencode-01\nrole: core\nmodel_or_runtime: probe\n"
+        "project: PROJ\nsaipen_version: 7.218.0\n"
+        "protocol_fingerprint: deadbeef\nsource_head: abc\n"
+        "source_tree_fingerprint: beef\ncontext_scope: tools/improve.py\n"
+        "context_available: complete\nreport_status: draft\n\n"
+        "IMP-001 [P1] [PROTOCOL_VIOLATION] [observed] [ticket]\n"
+        "expected: reports under .saipen/improve\nactual: report in root\n"
+        "evidence: path p\n")
+    expect("a well-formed report validates",
+           validate_report(good) == [], repr(validate_report(good)))
+    bad = good.replace("evidence: path p\n", "")
+    expect("a finding without evidence is rejected",
+           any("expected/actual/evidence" in e
+               for e in validate_report(bad)),
+           repr(validate_report(bad)))
+    bad2 = good.replace("[PROTOCOL_VIOLATION]", "[MAGIC]")
+    expect("a class outside the closed set is rejected",
+           any("outside the closed set" in e
+               for e in validate_report(bad2)),
+           repr(validate_report(bad2)))
+    bad3 = good.replace("context_scope: tools/improve.py", "context_scope: ")
+    expect("context_available complete over an empty scope is refused",
+           any("context_available: complete" in e
+               for e in validate_report(bad3)),
+           repr(validate_report(bad3)))
+
+    roster = "cycle_id: imp-key-20260808\navailability: expected\n"
+    sweep = "# SWEEP\n- IMP-001 [CONFIRMED] T-900 report=seat/report.md "\
+            "reproduced=y\n"
+    expect("derived status: roster-only is expected",
+           derive_status("seat/report.md", roster, "", "")["visible"]
+           == "expected")
+    expect("derived status: report draft is draft",
+           derive_status("seat/report.md", roster, "report_status: draft\n",
+                         "")["visible"] == "draft")
+    expect("derived status: complete without sweep is complete",
+           derive_status("seat/report.md", roster,
+                         "report_status: complete\n", "")["visible"]
+           == "complete")
+    expect("derived status: swept after disposition coverage",
+           derive_status("seat/report.md", roster,
+                         "report_status: complete\n", sweep)["visible"]
+           == "swept")
+    expect("derived status: unavailable roster wins",
+           derive_status("seat/report.md", "availability: unavailable\n",
+                         "report_status: complete\n", sweep)["visible"]
+           == "unavailable")
+
+    cycle = Path(tempfile.mkdtemp(prefix="saipen-sweep-"))
+    report = cycle / "seat" / "saipen_improve_PROJ.md"
+    report.parent.mkdir(parents=True)
+    report.write_text(good, encoding="utf-8")
+    before = report.read_bytes()
+    write_sweep_entry(cycle, {"imp_id": "001", "disposition": "CONFIRMED",
+                              "ticket": "T-900", "report": "r",
+                              "reproduced": "y"})
+    expect("SWEEP ledger write never mutates the seat report",
+           report.read_bytes() == before)
+    expect("SWEEP ledger exists with the disposition",
+           (cycle / "SWEEP.md").is_file()
+           and "CONFIRMED" in (cycle / "SWEEP.md").read_text(encoding="utf-8"))
+
+    return problems, checked
+
+
 def run_last_event_probes() -> tuple[list[str], int]:
     """Execute the legacy-schema to current-schema checkpoint migration."""
     problems = []
@@ -3900,6 +4002,8 @@ hardening_failures, hardening_checked = run_hardening_control_inventory()
 failures.extend(hardening_failures)
 userperson_failures, userperson_checked = run_userperson_probes()
 failures.extend(userperson_failures)
+improve_failures, improve_checked = run_improve_probes()
+failures.extend(improve_failures)
 manifest_failures, manifest_checked = run_manifest_tracking_probes()
 failures.extend(manifest_failures)
 autoinject_failures, autoinject_checked = run_autoinject_manifest_probes()
@@ -3945,6 +4049,7 @@ print(f"{sub_clean_checked} sub-clean safety behavior(s) executed, "
       f"{sub_clean_skipped} skipped for missing host capability")
 print(f"{hardening_checked} hardening red control(s) resolved")
 print(f"{userperson_checked} userperson behavior(s) executed")
+print(f"{improve_checked} improve behavior(s) executed")
 print(f"{purity_checked} pre-commit-purity behavior(s) executed, "
       f"{purity_skipped} skipped for missing interpreters")
 print(f"{manifest_checked} manifest-tracking behavior(s) executed")

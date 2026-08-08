@@ -32,6 +32,7 @@
     {"src": "tools/sub_clean.py", "required": true},
     {"src": "tools/hardening_controls.json", "required": true},
     {"src": "tools/userperson.py", "required": true},
+    {"src": "tools/improve.py", "required": true},
     {"src": "tools/install_hook.py", "required": true},
     {"src": "tools/uninstall_hook.py", "required": true},
     {"src": "tools/run_scenarios.py", "required": true},

@@ -66,6 +66,7 @@ from freshness import (FreshnessError, compute_generic_role_revision,
                        compute_role_revision,
                        compute_source_identity)
 from userperson import validate_profile as _validate_userperson_profile
+from improve import validate_report as _validate_improve_report
 
 def _read_rfc(p):
     core = p.parent / "CORE.md"
@@ -345,7 +346,7 @@ def canonical_commit(ref):
 SAIPEN_COMMANDS = frozenset({
     "set", "init", "continue", "goal", "plan", "clean", "translate",
     "markhunt", "prepare", "collect", "ship", "validate", "test", "status",
-    "stop", "sub", "hunt", "crew", "userperson"})
+    "stop", "sub", "hunt", "crew", "userperson", "improve"})
 # RFC § 1.2: `PHASE <phase-enum> [T-###]` takes the ticket ref for exactly the
 # five ticket-bearing phases and omits it for every other one. The rule had no
 # witness, and the constitution's own worked example (§ 2.2, translating ADD's
@@ -3260,6 +3261,32 @@ if _userperson_path.is_file():
                  f"profile is active but malformed (T-574)")
     else:
         ok(".saipen/USERPERSON.md is a well-formed optional USERPERSON profile")
+
+# ------------------------------------------------- IMPROVE (T-551..T-560)
+
+# Improve reports are read-only evidence owned by seats; the validator checks
+# their schema. Dispositions live in the Core-owned SWEEP ledger, never in the
+# report. The roster is routing-only: carrying draft/complete/swept status
+# would duplicate truth owned by the report and the sweep ledger.
+_improve_root = Path(".saipen/improve")
+if _improve_root.is_dir():
+    for _report in sorted(_improve_root.rglob("saipen_improve_*.md")):
+        _rtext = _report.read_text(encoding="utf-8-sig")
+        if re.search(r"(?m)^saipen_home:\s*\S", _rtext):
+            fail(f"improve report {_report} carries a machine-local "
+                 f"saipen_home path in its header -- report identity uses "
+                 f"saipen_version + protocol_fingerprint (T-555)")
+        for _rerr in _validate_improve_report(_rtext):
+            fail(f"improve report {_report}: {_rerr}")
+    for _manifest in sorted(_improve_root.rglob("MANIFEST.md")):
+        _mtext = _manifest.read_text(encoding="utf-8-sig")
+        for _status_word in ("draft", "complete", "swept"):
+            if re.search(rf"(?m)^status:\s*{_status_word}\b", _mtext):
+                fail(f"improve cycle manifest {_manifest} carries "
+                     f"{_status_word} status -- the roster owns routing only; "
+                     f"report status is owned by the report and dispositions "
+                     f"by the sweep ledger (T-570)")
+                break
 
 # ------------------------------------------------- home-repo-only self-check
 
