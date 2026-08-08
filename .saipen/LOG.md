@@ -160,3 +160,4 @@
 - 08.08.26 16:23 [E-2407] [parent: E-2406] RUN: CI on 063e52e -> RED `tracked mode change changes fingerprint` -- Linux-only; the probe moved the INDEX while the delta model reads HEAD vs working tree.
 - 08.08.26 16:23 [E-2408] [parent: E-2407] DEC: probe fixed to chmod on disk and SKIP where core.fileMode is off; local role-freshness 26 -> 25 because the vacuous pass is gone, not because coverage dropped.
 - 08.08.26 16:23 [E-2409] [parent: E-2408] DEC: T-572 opened -- freshness.py, sub_clean.py and hardening_controls.json were MANIFEST-required while untracked, so no CI run before v7.215.0 ever contained them.
+- 08.08.26 16:30 [E-2410] [parent: E-2409] RUN: CI on add09e6 -> GREEN. v7.215.0 shipped, tagged and CI-verified on Linux; goal steps 1-7 closed.
