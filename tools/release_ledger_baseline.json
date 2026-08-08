@@ -41,8 +41,8 @@
   "warn_slugs": {
     "board-soft-cap": {
       "first_seen": "7.72.0",
-      "last_seen": "7.156.0",
-      "rationale": "BOARD.md outgrew the ~16 KB soft cap; CLEAN pruned it at v7.157.0 so the warning stopped emitting -- kept as history, re-owns only if it returns"
+      "last_seen": "7.216.0",
+      "rationale": "BOARD.md outgrew the ~16 KB soft cap; CLEAN pruned it at v7.157.0 and the warning stopped emitting. The v7.215-v7.216 wave regrew the board and the warning returned; T-464 owns it with the measured remainder (25.1 KB: improve-wave ticket bodies are the irreducible bulk)"
     },
     "log-soft-cap": {
       "first_seen": "7.69.0",
