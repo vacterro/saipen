@@ -57,7 +57,7 @@ from freshness import (FreshnessError, SourceIdentity,
                        compute_generic_role_revision, compute_role_revision,
                        compute_source_identity)
 from sub_clean import sub_clean_blockers
-from improve import (derive_status, register_cycle, register_seat,
+from improve import (append_run, derive_status, register_cycle, register_seat,
                      resolve_report_path, validate_report, write_sweep_entry)
 from userperson import (merge_profile, onboarding_questions, parse_profile,
                         project_profile, remove_preference, render_profile,
@@ -3432,6 +3432,31 @@ def run_improve_probes() -> tuple[list[str], int]:
         bad_avail = True
     expect("a roster availability outside the closed set is rejected",
            bad_avail)
+
+    # RUN append is immutable: a second run appends, never overwrites; a
+    # complete report refuses further RUNs (T-551).
+    seat_report = Path(tempfile.mkdtemp(prefix="saipen-run-")) / "r.md"
+    seat_report.write_text(
+        "report_status: draft\n\n## RUN 1\nfirst\n", encoding="utf-8")
+    append_run(seat_report, "second run")
+    after = seat_report.read_text(encoding="utf-8")
+    expect("a second run appends an immutable RUN section, never overwriting",
+           "## RUN 1" in after and "## RUN 2" in after
+           and "first" in after and "second run" in after)
+    append_run(seat_report, "third run")
+    after2 = seat_report.read_text(encoding="utf-8")
+    expect("multiple RUNs accumulate without overwriting earlier ones",
+           "## RUN 1" in after2 and "## RUN 2" in after2
+           and "## RUN 3" in after2)
+    completed = seat_report.read_text(encoding="utf-8").replace(
+        "report_status: draft", "report_status: complete")
+    seat_report.write_text(completed, encoding="utf-8")
+    try:
+        append_run(seat_report, "late run")
+        immutable = False
+    except ValueError:
+        immutable = True
+    expect("a complete report refuses further RUN sections", immutable)
 
     return problems, checked
 

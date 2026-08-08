@@ -3581,6 +3581,31 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                      "contains IMPROVE; Improve is a meta-control and the "
                      "phase count must stay 16 (T-552)")
                 enum_ok = False
+            _ops_doc = Path("saipen/OPS.md")
+            if not _ops_doc.is_file():
+                fail("cross-doc drift [ops-owner] -- saipen/OPS.md is the "
+                     "mechanical execution layer contract and is missing")
+                enum_ok = False
+            else:
+                _ops_t = _ops_doc.read_text(encoding="utf-8-sig")
+                if "PYTHON DEFINES HOW" not in _ops_t:
+                    fail("cross-doc drift [ops-owner] -- saipen/OPS.md does "
+                         "not state the mechanical boundary")
+                    enum_ok = False
+                # A shipped document the router never names is unreachable on
+                # the cold path: the agent with a mechanical-operation question
+                # reads CORE.md instead and never learns the OPS contract
+                # exists. That is the RFC routing trap T-549 closed, one file
+                # over -- so INDEX.md naming OPS.md is checked, not assumed.
+                _index_doc = Path("saipen/INDEX.md")
+                if _index_doc.is_file() and \
+                        "OPS.md" not in _index_doc.read_text(
+                            encoding="utf-8-sig"):
+                    fail("cross-doc drift [ops-owner] -- saipen/INDEX.md does "
+                         "not route to saipen/OPS.md; a mechanical-operation "
+                         "question has no way to reach the OPS contract")
+                    enum_ok = False
+
             _improve_doc = Path("saipen/IMPROVE.md")
             if not _improve_doc.is_file():
                 fail("cross-doc drift [improve-meta-control] -- "
@@ -5482,6 +5507,7 @@ else:
         ("saipen/CONFORMANCE.md",    "re-enumeration + count + row-ID checks"),
         ("saipen/CONVERGE.md",       "convergence stage-order + closure-bar + post-K ordering checks"),
         ("saipen/IMPROVE.md",        "meta-control proof (no IMPROVE phase row, no phases/improve.md)"),
+        ("saipen/OPS.md",            "mechanical-layer ownership doc (must state the semantic/mechanical boundary)"),
         ("saipen/phases/*.md",       "phase-enum sync + prescribed-WAIT category check"),
         ("extensions/**/*.md",       "prescribed-WAIT category check"),
         ("guides/GUIDE_*.md",        "guide WAIT-shape check"),

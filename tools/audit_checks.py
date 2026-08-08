@@ -67,6 +67,7 @@ MANIFEST = ".saipen/kitchen/markhunt_progress.md"
 SUB = ".saipen/extensions/subs/saiwiki/STATE.md"
 CHANGELOG = "CHANGELOG.md"
 CORE = "saipen/CORE.md"
+INDEX = "saipen/INDEX.md"
 CREW_BACKLOG = ".saipen/KNOWLEDGE/crew-v8-backlog.md"
 STATE_SCHEMA = "extensions/schemas/state.schema.json"
 IMPROVE_REPORT = ".saipen/improve/imp-key-20260808/seat01/" \
@@ -920,6 +921,12 @@ CASES: list[tuple[str, str, object, str]] = [
     # unofficial seventeenth phase and must fail.
     ("improve becomes an unofficial phase", PHASE_IMPROVE, CREATE,
      "improve-meta-control"),
+    # NITRO: OPS.md is only reachable through INDEX. Drop the row and the doc
+    # still ships, still validates its own text, and no cold agent ever finds
+    # it -- the RFC routing trap in a new file.
+    ("index stops routing to the OPS contract", INDEX,
+     lambda t: t.replace("- `OPS.md`:", "- `OPSX.md`:"),
+     "ops-owner"),
     ("last_event below the log tail", STATE, sub_line("last_event", "1"),
      "lower than the log"),
     ("next_action picks a ticket that is not the topmost workable", BOARD,

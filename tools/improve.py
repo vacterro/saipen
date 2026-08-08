@@ -273,3 +273,22 @@ def register_seat(cycle_dir: Path, seat_id: str, role: str,
     tmp.write_text(text.rstrip() + "\n" + line, encoding="utf-8",
                    newline="\n")
     tmp.replace(manifest)
+
+
+def append_run(report_path: Path, run_text: str) -> None:
+    """Append an immutable RUN section to a seat report (T-551).
+
+    A second run from the same seat in the same cycle APPENDS; an earlier RUN
+    is never overwritten. Once report_status is complete the report is
+    immutable and further RUNs are refused.
+    """
+    text = _read_maybe(report_path)
+    if "report_status: complete" in text:
+        raise ValueError("seat report is complete and immutable; no further "
+                         "RUN sections may be appended")
+    run_count = len(re.findall(r"(?m)^## RUN \d+", text))
+    run = f"## RUN {run_count + 1}\n\n{run_text.rstrip()}\n"
+    tmp = report_path.with_suffix(".md.tmp")
+    tmp.write_text(text.rstrip() + "\n\n" + run, encoding="utf-8",
+                   newline="\n")
+    tmp.replace(report_path)

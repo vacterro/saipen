@@ -9,6 +9,7 @@ This index describes all available SAIPEN documents. Agents MUST NOT read these 
 - `MAINTENANCE.md`: Maintenance and recovery logic. Load only when executing `clean` or `audit`, or recovering from project corruption.
 - `CONVERGE.md`: The convergence contract — the exact stage order `cc` walks from recovery to fresh producer packages, plus the closure bar that decides when it may say DONE. Load when `execution_intent: converge` is set, or when a phase document points here. It owns that order; no other document restates it.
 - `RFC.md`: Compatibility redirect only. The constitution was split into CORE.md and MAINTENANCE.md in v7.190.0. This file is a three-line stub; never treat it as authoritative.
+- `OPS.md`: The mechanical execution layer (SAIOPS). Owns HOW protocol state is committed safely — operation lifecycle, transaction/recovery, idempotency, locks, dry-run, result shape, fallback. Load ONLY for a mechanical-operation question. It restates no phase semantics, Pick Rule, HUNT, CLEAN, Improve or SubSaipen rule: CORE says what a claim means, OPS says how a claim is committed.
 - `IMPROVE.md`: The meta-control that audits SAIPEN. Single canonical owner of the Improve lifecycle — cycle admission, seat/report contract, finding schema, sweep, verify, archive. NOT a phase (phase count stays 16). Load when running `saipen improve` or a rule question about improve routing/reports.
 
 ## Phase Documents (`phases/*.md`)
