@@ -69,6 +69,10 @@ CHANGELOG = "CHANGELOG.md"
 CORE = "saipen/CORE.md"
 CREW_BACKLOG = ".saipen/KNOWLEDGE/crew-v8-backlog.md"
 STATE_SCHEMA = "extensions/schemas/state.schema.json"
+IMPROVE_REPORT = ".saipen/improve/imp-key-20260808/seat01/" \
+                 "saipen_improve_PROJ.md"
+IMPROVE_MANIFEST = ".saipen/improve/imp-key-20260808/MANIFEST.md"
+PHASE_IMPROVE = "saipen/phases/improve.md"
 TAG_QUERY = ("git", "tag", "-l", "v*")
 AUDIT_TAGS_GIT_SHIM = "SAIPEN_AUDIT_TAGS_GIT_SHIM"
 AUDIT_TAGS_MODE = "SAIPEN_AUDIT_TAGS_MODE"
@@ -903,6 +907,19 @@ CASES: list[tuple[str, str, object, str]] = [
     ("live board reintroduces the pre-T-571 Crew Mode name", BOARD,
      replace("v8 Concurrent Mode", "v8 Crew Mode"),
      "crew-naming"),
+    # T-551/T-555: a seat report that leaks a machine-local saipen_home path
+    # into its identity is rejected; the manifest is routing-only and may not
+    # duplicate report status.
+    ("improve report leaks a machine-local saipen_home path", IMPROVE_REPORT,
+     write_new("saipen_home: V:/machine/local/path\nreport_status: draft\n"),
+     "saipen_home path in its header"),
+    ("improve cycle manifest duplicates report status", IMPROVE_MANIFEST,
+     write_new("cycle_id: imp-key-20260808\nstatus: complete\n"),
+     "owns routing only"),
+    # T-552: Improve is a meta-control; a phases/improve.md file is an
+    # unofficial seventeenth phase and must fail.
+    ("improve becomes an unofficial phase", PHASE_IMPROVE, CREATE,
+     "improve-meta-control"),
     ("last_event below the log tail", STATE, sub_line("last_event", "1"),
      "lower than the log"),
     ("next_action picks a ticket that is not the topmost workable", BOARD,
