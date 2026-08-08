@@ -4804,7 +4804,7 @@ else:
         ".gitattributes", ".gitignore", "BROCHURE_DED.md", "CHANGELOG.md", "CHANGELOG_ARCHIVE.md",
         "CODE_OF_CONDUCT.md", "CONTRIBUTING.md", "GUIDE.md", "LICENSE",
         "README.ded.md", "README.ee.md", "README.ja.md", "README.md",
-        "SECURITY.md", "SPEC.md", "VERSION", "ruff.toml",
+        "SECURITY.md", "SPEC.md", "THIRD_PARTY_NOTICES.md", "VERSION", "ruff.toml",
     }
     # Read the DIRECTORY, not the index. `git ls-files` was the first
     # attempt and it made the check unreachable wherever git is absent --
@@ -5438,6 +5438,7 @@ else:
         ("CONTRIBUTING.md",   "human process, not agent-facing"),
         ("SECURITY.md",       "disclosure policy, not agent-facing"),
         ("CODE_OF_CONDUCT.md", "human conduct, not agent-facing"),
+        ("THIRD_PARTY_NOTICES.md", "third-party provenance/attribution record, not a rule source"),
         (".github/**/*.md",   "issue/PR templates, not agent-facing"),
         (".github/*.md",      "issue/PR templates, not agent-facing"),
         ("tests/scenarios/README.md", "scenario format documentation, not a fixture"),
