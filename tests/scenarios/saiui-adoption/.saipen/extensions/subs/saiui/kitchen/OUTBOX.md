@@ -7,7 +7,9 @@
 - **critical:** false
 - **severity:** P2
 - **producer:** saiui
-- **source_head:** abc1234
+- **source_head:** no-git
+- **source_tree_fingerprint:** no-git-tree-v1:73748e1d840762e246d7581d5358bdcc6a1a3e151393c13730a968f4df2faaee
+- **role_revision:** sha256:f2e3685b908a3b9837917f12c5414628d847c35fb72567f0306e2c8b19a8dab8
 - **coverage:** edit_dialog.py, test_edit_dialog.py
 - **payload:** unified diff for edit_dialog.py
 - **verified:** pytest PASS (12 passed), ruff clean
@@ -25,7 +27,7 @@
   save or cancel action; keyboard-only users are stuck.
   Existing capability: the backend EditQueueItem API already supports
   save/discard -- the controls are missing from UI.
-  Vintage Golden violation: Iron Law 5 (predictable behavior) -- the
+  Golden Default violation: Iron Law 5 (predictable behavior) -- the
   same text field in view mode does not accept edits, but in edit mode
   it does, with no visible state change beyond cursor.
   Patch boundary: adds Save and Cancel buttons below the text field;

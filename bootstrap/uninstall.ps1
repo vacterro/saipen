@@ -59,18 +59,28 @@ function Remove-Task() {
 
 function Remove-Aider([string]$file) {
   # Remove exactly the block the injector wrote (comment + read: key +
-  # consecutive saipen RFC/STYLE items), CRLF-tolerant -- never any other
+  # consecutive saipen BOOT/STYLE items), CRLF-tolerant -- never any other
   # read: line the user owns.
   if (Test-Path $file) {
     if (-not (Test-Path $file -PathType Leaf)) { throw "config path is not a file: $file" }
-    $text = [System.IO.File]::ReadAllText((Get-NativePath $file))
-    $blockRe = '(?m)(?:\r?\n)?# saipen protocol auto-loaded\r?\nread:\r?\n(?:[ \t]*-[ \t].*saipen[\\/](?:RFC|STYLE)\.md\r?\n?)+'
-    if ($text -match $blockRe) {
-      $clean = [regex]::Replace($text, $blockRe, "")
+    $bytes = [System.IO.File]::ReadAllBytes((Get-NativePath $file))
+    # Latin-1 maps one byte to one character, so regex indices are byte offsets.
+    # Managed lines are ASCII; untouched BOM/non-UTF8/user bytes stay untouched.
+    $byteText = [System.Text.Encoding]::GetEncoding(28591).GetString($bytes)
+    $blockRe = '(?m)(?:^|\r?\n)# saipen protocol auto-loaded\r?\nread:\r?\n[ \t]*-[ \t][^\r\n]*saipen[\\/]BOOT\.md\r?\n[ \t]*-[ \t][^\r\n]*saipen[\\/]STYLE\.md(?:\r?\n)?'
+    $match = [regex]::Match($byteText, $blockRe)
+    if ($match.Success) {
+      $clean = New-Object byte[] ($bytes.Length - $match.Length)
+      [System.Buffer]::BlockCopy($bytes, 0, $clean, 0, $match.Index)
+      $suffixLength = $bytes.Length - $match.Index - $match.Length
+      if ($suffixLength -gt 0) {
+        [System.Buffer]::BlockCopy($bytes, $match.Index + $match.Length,
+          $clean, $match.Index, $suffixLength)
+      }
       Copy-Item $file "$file.uninstalled.bak" -Force -ErrorAction Stop
-      [System.IO.File]::WriteAllText((Get-NativePath $file), $clean, $Utf8NoBom)
+      [System.IO.File]::WriteAllBytes((Get-NativePath $file), $clean)
       return "aider conf cleaned"
-    } elseif ($text -match 'saipen[\\/]RFC\.md') {
+    } elseif ($byteText -match 'saipen[\\/]BOOT\.md') {
       return "manual aider conf (please remove manually)"
     }
   }

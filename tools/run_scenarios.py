@@ -38,6 +38,7 @@ declaration, so CI fails on it like any other gate.
 import contextlib
 import importlib.util
 import io
+import json
 import os
 import re
 import shutil
@@ -48,6 +49,13 @@ import tempfile
 import urllib.error
 import zipfile
 from pathlib import Path
+from unittest import mock
+
+import freshness
+from freshness import (FreshnessError, SourceIdentity,
+                       compute_generic_role_revision, compute_role_revision,
+                       compute_source_identity)
+from sub_clean import sub_clean_blockers
 
 HOME = Path(__file__).resolve().parent.parent
 VALIDATOR = HOME / "tools" / "validate.py"
@@ -463,20 +471,23 @@ def run_precommit_purity_probe() -> tuple[list[str], int, int]:
     return failures, 2, 0
 
 
-REQUIRED_INSTALL_FILES = (
-    "VERSION",
-    "tests/validate.sh",
-    "tests/validate.ps1",
+RUNTIME_MANIFEST = json.loads(
+    (HOME / "saipen" / "MANIFEST.json").read_text(encoding="utf-8"))
+
+
+def install_relative_path(source: str) -> str:
+    prefix = "saipen/"
+    return source[len(prefix):] if source.startswith(prefix) else source
+
+
+REQUIRED_INSTALL_FILES = tuple(
+    install_relative_path(entry["src"])
+    for entry in RUNTIME_MANIFEST["files"] if entry.get("required", False)
+) + tuple(
+    f"phases/{name}" for name in RUNTIME_MANIFEST["phase_docs"]["files"]
 )
 STALE_SENTINEL = "obsolete-from-prior-install.txt"
-MANAGED_DIRS = (
-    "phases",
-    "tools",
-    "tests",
-    "extensions/schemas",
-    "extensions/templates",
-    "extensions/subs",
-)
+MANAGED_DIRS = tuple(RUNTIME_MANIFEST["managed_dirs"])
 
 
 def seed_stale_install(destination: Path) -> None:
@@ -506,10 +517,31 @@ def installed_layout_problems(destination: Path) -> list[str]:
             or (path.is_file() and path.suffix in {".pyc", ".pyo"})))
     if bytecode:
         problems.append(f"installed tools contain generated Python bytecode: {bytecode}")
+    for tree in RUNTIME_MANIFEST["copy_trees"]:
+        source = HOME / tree["src"]
+        installed = destination / tree["dst"]
+
+        def copied_files(root: Path) -> dict[str, bytes]:
+            return {
+                path.relative_to(root).as_posix(): path.read_bytes()
+                for path in root.rglob("*")
+                if (path.is_file() and "__pycache__" not in path.parts
+                    and path.suffix not in {".pyc", ".pyo"})
+            }
+
+        source_files = copied_files(source)
+        installed_files = copied_files(installed) if installed.is_dir() else {}
+        if source_files != installed_files:
+            problems.append(f"installed copy tree differs from source: {tree['src']}")
     return problems
 
 
 ROUND_TRIP_BYTES = b"user-setting: keep  \r\n \t\r\n\r\n"
+AIDER_ROUND_TRIP_BYTES = (
+    b"\xef\xbb\xbfuser-setting: keep  \r\n"
+    b"  - C:/user/decoy/saipen/STYLE.md\r\n\r\n"
+)
+AIDER_SUFFIX_BYTES = b"user-after-install: keep\r\n"
 
 
 def run_injector_probe(label: str, command: list[str],
@@ -519,6 +551,16 @@ def run_injector_probe(label: str, command: list[str],
     (home / ".claude").mkdir(parents=True)
     config = home / ".claude" / "CLAUDE.md"
     config.write_bytes(ROUND_TRIP_BYTES)
+    aider_config = home / ".aider.conf.yml"
+    aider_config.write_bytes(AIDER_ROUND_TRIP_BYTES)
+    shim_dir = home / "bin"
+    shim_dir.mkdir()
+    aider = shim_dir / "aider"
+    aider.write_text("#!/usr/bin/env sh\nexit 0\n", encoding="utf-8", newline="\n")
+    aider.chmod(0o755)
+    (shim_dir / "aider.cmd").write_text("@exit /b 0\r\n", encoding="utf-8")
+    env = env.copy()
+    env["PATH"] = str(shim_dir) + os.pathsep + env.get("PATH", "")
     seed_stale_install(destination)
     source_cache = HOME / "tools" / "__pycache__" / (
         f"saipen_distribution_probe_{os.getpid()}.pyc")
@@ -558,7 +600,20 @@ def run_injector_probe(label: str, command: list[str],
                 f"{validation.returncode}: {first[:120]}")
     if b"<!-- SAIPEN:BEGIN -->" not in config.read_bytes():
         problems.append("injector did not add its managed config block")
+    aider_installed = aider_config.read_bytes()
+    if b"BOOT.md" not in aider_installed or b"STYLE.md" not in aider_installed:
+        problems.append("injector did not add its managed BOOT+STYLE Aider block")
     if not problems:
+        marker = aider_installed.find(b"\n# saipen protocol auto-loaded\n")
+        if marker < 0:
+            problems.append("injector Aider block has no exact managed marker")
+        else:
+            # Editors routinely normalize a managed LF block to CRLF. Both
+            # uninstallers must still remove it without touching user bytes.
+            aider_installed = (aider_installed[:marker]
+                               + aider_installed[marker:].replace(b"\n", b"\r\n"))
+    if not problems:
+        aider_config.write_bytes(aider_installed + AIDER_SUFFIX_BYTES)
         uninstall = subprocess.run(
             uninstall_command, cwd=HOME, env=env, capture_output=True,
             text=True, errors="replace")
@@ -569,14 +624,19 @@ def run_injector_probe(label: str, command: list[str],
             problems.append("uninstaller succeeded without completion text")
         if config.read_bytes() != ROUND_TRIP_BYTES:
             problems.append("install/uninstall changed surrounding user bytes")
+        aider_after = aider_config.read_bytes()
+        aider_expected = AIDER_ROUND_TRIP_BYTES + AIDER_SUFFIX_BYTES
+        if aider_after != aider_expected:
+            problems.append("Aider install/uninstall changed surrounding user bytes: "
+                            f"expected {aider_expected!r}, got {aider_after!r}")
         if destination.exists():
             problems.append("uninstaller left the installed skill directory")
     if problems:
         detail = next((line for line in (result.stdout + result.stderr).splitlines()
                        if "FAILED" in line or "FATAL" in line), "no failure line")
         return f"{label}: {'; '.join(problems)} | {detail[:120]}"
-    print(f"PASS: {label} -- executable install replaced stale dirs, landed "
-          "VERSION + validators, ran validate.py, and uninstalled byte-exact")
+    print(f"PASS: {label} -- manifest-complete install replaced stale dirs, "
+          "ran validate.py, and uninstalled config + Aider byte-exact")
     return None
 
 
@@ -591,6 +651,57 @@ def failed_bootstrap_problem(label: str,
         return f"{label}: failure control had no focused diagnostic"
     print(f"PASS: {label} -- exits nonzero without completion text")
     return None
+
+
+def run_atomic_copy_failure_probes(
+        label: str, source: Path, home: Path, command: list[str],
+        env: dict[str, str]) -> tuple[list[str], int]:
+    """Late source/manifest failures must preserve the active installed copy."""
+    problems: list[str] = []
+    checked = 0
+    destination = home / ".claude" / "skills" / "saipen"
+    destination.mkdir(parents=True)
+    sentinel = destination / "active-install.txt"
+    sentinel_bytes = b"preserve active install\r\n"
+    sentinel.write_bytes(sentinel_bytes)
+    manifest_path = source / "saipen" / "MANIFEST.json"
+    original = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+    def execute(case: str, manifest: dict, expected: str) -> None:
+        nonlocal checked
+        checked += 1
+        manifest_path.write_text(
+            json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8", newline="\n")
+        result = subprocess.run(command, cwd=source, env=env, capture_output=True,
+                                text=True, errors="replace")
+        leftovers = sorted(destination.parent.glob(".saipen.saipen-*"))
+        output = result.stdout + result.stderr
+        failures = []
+        if result.returncode == 0:
+            failures.append("exited 0")
+        if not sentinel.is_file() or sentinel.read_bytes() != sentinel_bytes:
+            failures.append("active install changed")
+        if leftovers:
+            failures.append(f"staging debris remains: {[p.name for p in leftovers]}")
+        if expected not in output:
+            failures.append(f"missing diagnostic {expected!r}")
+        if failures:
+            problems.append(f"{label} {case}: {'; '.join(failures)}")
+        else:
+            print(f"PASS: {label} {case} -- old install preserved, no staging debris")
+
+    missing = json.loads(json.dumps(original))
+    missing["files"].append({"src": "missing-runtime-file", "required": True})
+    execute("late missing source", missing, "runtime manifest file missing")
+
+    traversal = json.loads(json.dumps(original))
+    traversal["copy_trees"][0]["src"] = "../outside"
+    execute("manifest traversal", traversal, "unsafe runtime manifest")
+    manifest_path.write_text(
+        json.dumps(original, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8", newline="\n")
+    return problems, checked
 
 
 def run_injector_probes() -> tuple[list[str], int, int]:
@@ -724,6 +835,19 @@ def run_injector_probes() -> tuple[list[str], int, int]:
                     f"and truthful success, got rc={result.returncode} exists={skill.exists()}")
             else:
                 print("PASS: bootstrap/uninstall.sh regular-file skill -- removed")
+
+        with tempfile.TemporaryDirectory(prefix="saipen-inject-sh-atomic-") as raw:
+            root = Path(raw)
+            source = root / "source"
+            home = root / "home"
+            shutil.copytree(HOME, source, ignore=shutil.ignore_patterns(
+                ".git", ".saipen", ".venv", "__pycache__", "node_modules", "nul"))
+            atomic_failures, atomic_checked = run_atomic_copy_failure_probes(
+                "bootstrap/inject.sh", source, home,
+                [bash, str(source / "bootstrap" / "inject.sh")],
+                bash_env(bash, home))
+            probe_failures.extend(atomic_failures)
+            checked += atomic_checked
     else:
         print("SKIP: bootstrap/inject.sh executable probe -- no usable bash")
         skipped += 1
@@ -781,6 +905,24 @@ def run_injector_probes() -> tuple[list[str], int, int]:
                 "bootstrap/uninstall.ps1 read failure", result)
             if problem:
                 probe_failures.append(problem)
+
+        with tempfile.TemporaryDirectory(prefix="saipen-inject-ps1-atomic-") as raw:
+            root = Path(raw)
+            source = root / "source"
+            home = root / "home"
+            shutil.copytree(HOME, source, ignore=shutil.ignore_patterns(
+                ".git", ".saipen", ".venv", "__pycache__", "node_modules", "nul"))
+            env = os.environ.copy()
+            env["HOME"] = str(home)
+            env["USERPROFILE"] = str(home)
+            env["SAIPEN_UNINSTALL_SKIP_TASK"] = "1"
+            atomic_failures, atomic_checked = run_atomic_copy_failure_probes(
+                "bootstrap/inject.ps1", source, home,
+                [powershell, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
+                 str(source / "bootstrap" / "inject.ps1"), "-SkillHome",
+                 str(source / "saipen")], env)
+            probe_failures.extend(atomic_failures)
+            checked += atomic_checked
     else:
         print("SKIP: bootstrap/inject.ps1 executable probe -- no PowerShell")
         skipped += 1
@@ -1324,6 +1466,71 @@ def run_manifest_tracking_probes() -> tuple[list[str], int]:
     return problems, checked
 
 
+def run_autoinject_manifest_probes() -> tuple[list[str], int]:
+    """Every copied manifest surface must invalidate installed-copy stamps."""
+    problems: list[str] = []
+    checked = 0
+    spec = importlib.util.spec_from_file_location(
+        "saipen_autoinject_probe", HOME / "tools" / "autoinject.py")
+    if spec is None or spec.loader is None:
+        return ["autoinject manifest probe could not load autoinject.py"], checked
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    with tempfile.TemporaryDirectory(prefix="saipen-autoinject-manifest-") as raw:
+        clone = Path(raw)
+        for tree in RUNTIME_MANIFEST["copy_trees"]:
+            shutil.copytree(HOME / tree["src"], clone / tree["src"])
+        for entry in RUNTIME_MANIFEST["files"]:
+            if not entry.get("required", False):
+                continue
+            source = HOME / entry["src"]
+            target = clone / entry["src"]
+            if target.exists():
+                continue
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, target)
+        module.HOME = clone
+
+        first = module._digest()
+        index = clone / "saipen" / "INDEX.md"
+        index.write_text(index.read_text(encoding="utf-8") + "\nprobe\n",
+                         encoding="utf-8", newline="\n")
+        second = module._digest()
+        checked += 1
+        if first == second:
+            problems.append("autoinject digest ignored manifest file saipen/INDEX.md")
+        else:
+            print("PASS: autoinject manifest -- INDEX.md invalidates digest")
+
+        core = clone / "saipen" / "CORE.md"
+        core.write_text(core.read_text(encoding="utf-8") + "\nprobe\n",
+                        encoding="utf-8", newline="\n")
+        third = module._digest()
+        checked += 1
+        if second == third:
+            problems.append("autoinject digest ignored manifest file saipen/CORE.md")
+        else:
+            print("PASS: autoinject manifest -- CORE.md invalidates digest")
+
+        manifest_path = clone / "saipen" / "MANIFEST.json"
+        malformed = json.loads(manifest_path.read_text(encoding="utf-8"))
+        malformed["copy_trees"][0]["src"] = "../outside"
+        manifest_path.write_text(json.dumps(malformed), encoding="utf-8", newline="\n")
+        checked += 1
+        try:
+            module._digest()
+        except RuntimeError as exc:
+            if "unsafe runtime manifest source" not in str(exc):
+                problems.append(f"autoinject traversal failed unclearly: {exc}")
+            else:
+                print("PASS: autoinject manifest -- traversal source fails closed")
+        else:
+            problems.append("autoinject accepted ../ traversal in copy_trees source")
+
+    return problems, checked
+
+
 def run_hunt_mark_probes() -> tuple[list[str], int]:
     """Execute `phases/hunt.md`'s skip condition against a real repository.
 
@@ -1420,6 +1627,478 @@ def run_hunt_mark_probes() -> tuple[list[str], int]:
     return problems, checked
 
 
+def run_ship_staging_probes() -> tuple[list[str], int]:
+    """Execute T-569: a runtime file this ship adds passes the gate once staged.
+
+    The paradox this closes was an ORDERING one, so the probe measures the same
+    file at three states in one repository -- untracked, staged, committed --
+    and the finding must appear at exactly one of them. Asserting only that an
+    untracked file FAILs would have passed before the fix too, and asserting
+    only that a committed file passes proves nothing about the window SHIP
+    actually runs in.
+    """
+    problems: list[str] = []
+    checked = 0
+    env = {**os.environ, "GIT_AUTHOR_NAME": "probe",
+           "GIT_AUTHOR_EMAIL": "probe@example.invalid",
+           "GIT_COMMITTER_NAME": "probe",
+           "GIT_COMMITTER_EMAIL": "probe@example.invalid"}
+    home = VALIDATOR.parent.parent
+    manifest_path = home / "saipen" / "MANIFEST.json"
+    if not manifest_path.is_file():
+        print("SKIP: ship staging probes -- no runtime MANIFEST")
+        return problems, checked
+
+    def expect(label: str, condition: bool, detail: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        if condition:
+            print(f"PASS: ship staging -- {label}")
+        else:
+            problems.append(f"{label}: {detail}")
+
+    with tempfile.TemporaryDirectory(prefix="saipen-ship-staging-") as tmp:
+        home_copy = Path(tmp) / "home"
+        shutil.copytree(home, home_copy, ignore=shutil.ignore_patterns(
+            ".git", ".venv", "__pycache__", ".freebuff", "node_modules", "nul"))
+
+        def git(*args: str) -> subprocess.CompletedProcess[str]:
+            return subprocess.run(["git", *args], cwd=home_copy, env=env,
+                                  capture_output=True, text=True, check=False)
+
+        if git("init", "-q").returncode != 0:
+            print("SKIP: ship staging probes -- git unavailable")
+            return problems, checked
+        git("add", "-A")
+        git("commit", "-q", "-m", "probe: baseline")
+
+        def untracked_names() -> set[str]:
+            r = subprocess.run(
+                [sys.executable, str(home_copy / "tools" / "validate.py"),
+                 "--project-root", str(home_copy), "--gate", "ship"],
+                cwd=home_copy, capture_output=True, text=True, errors="replace")
+            return {line.split(": ")[-1].split(" --")[0].strip()
+                    for line in (r.stdout + r.stderr).splitlines()
+                    if line.startswith("FAIL: runtime manifest names a file "
+                                       "git does not track")}
+
+        expect("baseline home has no untracked runtime file",
+               not untracked_names(),
+               f"unexpected untracked entries: {sorted(untracked_names())}")
+
+        # A required runtime file added by the ticket being shipped.
+        rel = "tools/probe_runtime_addition.py"
+        (home_copy / rel).write_text("# probe runtime file\n",
+                                     encoding="utf-8", newline="\n")
+        manifest_copy = home_copy / "saipen" / "MANIFEST.json"
+        data = json.loads(manifest_copy.read_text(encoding="utf-8"))
+        entries = data.get("files")
+        if not isinstance(entries, list) or not all(
+                isinstance(item, dict) and "src" in item for item in entries):
+            print("SKIP: ship staging probes -- MANIFEST shape unrecognized")
+            return problems, checked
+        data["files"] = [*entries, {"src": rel, "required": True}]
+        manifest_copy.write_text(json.dumps(data, indent=2) + "\n",
+                                 encoding="utf-8", newline="\n")
+        git("add", "--", "saipen/MANIFEST.json")
+        git("commit", "-q", "-m", "probe: manifest names the new file")
+
+        expect("a required runtime file merely present untracked FAILs",
+               rel in untracked_names(),
+               "the gate accepted a manifest entry no clone would receive")
+
+        git("add", "--", rel)
+        expect("the same file staged for THIS ship satisfies the gate",
+               rel not in untracked_names(),
+               "staging is the step SHIP performs before its binding gate, so "
+               "a staged file the manifest requires must pass -- otherwise no "
+               "sequence the protocol describes can ever add one")
+
+        # The staged state is the one SHIP gates on; committing must not
+        # change the answer, or the gate would be measuring the commit rather
+        # than the scope that was reviewed.
+        git("commit", "-q", "-m", "probe: the new runtime file")
+        expect("committing does not change the answer staging gave",
+               rel not in untracked_names(),
+               "the gate disagrees with itself across the commit boundary")
+
+        # Unstaging returns it to the failing state: the pass came from the
+        # index, not from the file existing on disk.
+        git("rm", "-q", "--cached", "--", rel)
+        expect("removing it from the index brings the FAIL back",
+               rel in untracked_names(),
+               "the gate passed on a file's presence on disk, which is the "
+               "exact reading that ships a home no clone can reproduce")
+
+    return problems, checked
+
+
+def run_producer_gate_probes() -> tuple[list[str], int]:
+    """Execute T-568's six red controls: gate context decides producer severity.
+
+    The defect these close is an OWNERSHIP one, not a parsing one. Every check
+    below already existed and already fired correctly -- at the wrong severity,
+    on the wrong occasions, so a stale wiki package produced by a different
+    model blocked an unrelated one-line Core commit. What is under test is
+    therefore the mapping from GATE to severity, which means each fixture is
+    run at several gates and compared against itself.
+    """
+    problems: list[str] = []
+    checked = 0
+    env = {**os.environ, "GIT_AUTHOR_NAME": "probe",
+           "GIT_AUTHOR_EMAIL": "probe@example.invalid",
+           "GIT_COMMITTER_NAME": "probe",
+           "GIT_COMMITTER_EMAIL": "probe@example.invalid"}
+
+    def validate(project: Path, *gate: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [sys.executable, str(VALIDATOR), "--project-root", str(project),
+             *gate],
+            cwd=project, capture_output=True, text=True, errors="replace")
+
+    def expect(label: str, result: subprocess.CompletedProcess[str],
+               contains: str = "", absent: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        output = result.stdout + result.stderr
+        details = []
+        if contains and contains not in output:
+            details.append(f"missing {contains!r}")
+        if absent and absent in output:
+            details.append(f"unexpected {absent!r}")
+        if details:
+            problems.append(f"{label}: {'; '.join(details)}")
+        else:
+            print(f"PASS: producer gate -- {label}")
+
+    stale_fail = "package is stale and MUST NOT be collected"
+    malformed = "parses as zero OUTBOX entries"
+    soft_note = "where this producer is not being consumed"
+
+    def fails_on(result: subprocess.CompletedProcess[str], needle: str) -> bool:
+        return any(line.startswith("FAIL") and needle in line
+                   for line in (result.stdout + result.stderr).splitlines())
+
+    def expect_severity(label: str, result: subprocess.CompletedProcess[str],
+                        needle: str, hard: bool) -> None:
+        nonlocal checked
+        checked += 1
+        got_hard = fails_on(result, needle)
+        if got_hard != hard:
+            problems.append(
+                f"{label}: expected {'FAIL' if hard else 'WARN'} for {needle!r}, "
+                f"got {'FAIL' if got_hard else 'no FAIL'}")
+        else:
+            print(f"PASS: producer gate -- {label}")
+
+    def write_outbox(path: Path, body: str) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(body, encoding="utf-8", newline="\n")
+
+    def ready_package(identity_head: str, fingerprint: str,
+                      role_revision: str) -> str:
+        return (
+            "---\n"
+            "status: ready\n"
+            "producer: saiwiki\n"
+            "summary: probe package\n"
+            "critical: none\n"
+            "coverage: complete\n"
+            "payload: probe\n"
+            "instructions: apply\n"
+            "verified: probe suite green\n"
+            f"source_head: {identity_head}\n"
+            f"source_tree_fingerprint: {fingerprint}\n"
+            f"role_revision: {role_revision}\n"
+            "---\n")
+
+    with tempfile.TemporaryDirectory(prefix="saipen-producer-gate-") as tmp:
+        project = Path(tmp) / "project"
+        shutil.copytree(SCENARIOS / "stale-state-reconciliation" / ".saipen",
+                        project / ".saipen")
+        if subprocess.run(["git", "init", "-q"], cwd=project, env=env,
+                          capture_output=True, text=True).returncode != 0:
+            print("SKIP: producer gate probes -- git unavailable")
+            return problems, checked
+
+        wiki = project / ".saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md"
+        translate = project / ".saipen/saitranslate/kitchen/OUTBOX.md"
+
+        # Control 1 + 2 + 3: ONE stale QQ package, read at three gates.
+        write_outbox(wiki, ready_package("0000000", "sha256:stale", "rev-old"))
+        write_outbox(translate, "# OUTBOX\n")
+        subprocess.run(["git", "add", "-A"], cwd=project, env=env,
+                       capture_output=True)
+        subprocess.run(["git", "commit", "-q", "-m", "probe"], cwd=project,
+                       env=env, capture_output=True)
+
+        expect_severity("1. stale QQ does not fail the default gate",
+                        validate(project), stale_fail, hard=False)
+        expect_severity("1b. stale QQ does not fail the ship gate",
+                        validate(project, "--gate", "ship"), stale_fail,
+                        hard=False)
+        expect("1c. the stale package is still visible as a WARN",
+               validate(project), soft_note)
+        expect_severity("2. the same stale QQ FAILs collect:saiwiki",
+                        validate(project, "--gate", "collect:saiwiki"),
+                        stale_fail, hard=True)
+        expect_severity("3. the same stale QQ FAILs the converge gate",
+                        validate(project, "--gate", "converge"),
+                        stale_fail, hard=True)
+        # Collecting one producer says nothing about another: the whole point
+        # of the split is that severity follows the CONSUMED producer.
+        expect_severity("2b. collecting saitranslate leaves saiwiki soft",
+                        validate(project, "--gate", "collect:saitranslate"),
+                        stale_fail, hard=False)
+
+        # Control 4 + 5: a malformed EE package.
+        write_outbox(translate, "this is not an OUTBOX at all\n")
+        expect_severity("4. malformed EE does not block an ordinary Core ship",
+                        validate(project, "--gate", "ship"), malformed,
+                        hard=False)
+        expect_severity("5. the same malformed EE FAILs collect:saitranslate",
+                        validate(project, "--gate", "collect:saitranslate"),
+                        malformed, hard=True)
+
+        # Control 6: fresh exact EE and QQ pass the converge gate. Both
+        # packages are bound to the identity this tree actually computes, so
+        # the rung proves the gate accepts correctness rather than merely
+        # rejecting everything.
+        sys.path.insert(0, str(VALIDATOR.parent))
+        try:
+            from freshness import (compute_role_revision,
+                                   compute_source_identity)
+            identity = compute_source_identity(project)
+            wiki_charter = VALIDATOR.parent.parent / "extensions/subs/saiwiki.md"
+            translate_charter = (VALIDATOR.parent.parent
+                                 / "extensions/subs/saitranslate.md")
+            fresh_ok = wiki_charter.is_file() and translate_charter.is_file()
+        except Exception as exc:
+            print(f"SKIP: producer gate fresh rung -- {exc}")
+            fresh_ok = False
+        if fresh_ok:
+            for path, charter, producer in (
+                    (wiki, wiki_charter, "saiwiki"),
+                    (translate, translate_charter, "saitranslate")):
+                write_outbox(path, ready_package(
+                    identity.source_head, identity.source_tree_fingerprint,
+                    compute_role_revision(charter)).replace(
+                        "producer: saiwiki", f"producer: {producer}"))
+            # The charters must be project-local for role_revision to derive.
+            local_subs = project / "extensions/subs"
+            local_subs.mkdir(parents=True, exist_ok=True)
+            for charter in (wiki_charter, translate_charter):
+                shutil.copy2(charter, local_subs / charter.name)
+            identity = compute_source_identity(project)
+            for path, charter, producer in (
+                    (wiki, wiki_charter, "saiwiki"),
+                    (translate, translate_charter, "saitranslate")):
+                write_outbox(path, ready_package(
+                    identity.source_head, identity.source_tree_fingerprint,
+                    compute_role_revision(charter)).replace(
+                        "producer: saiwiki", f"producer: {producer}"))
+            result = validate(project, "--gate", "converge")
+            expect("6. fresh exact EE and QQ pass the converge gate", result,
+                   "both closure-required packages (EE, QQ) are ready")
+            expect_severity("6b. no producer finding survives on fresh packages",
+                            result, stale_fail, hard=False)
+            # Absence is a finding at the consumer's gate: nothing to collect
+            # must refuse rather than report a silent green.
+            write_outbox(wiki, "# OUTBOX\n")
+            expect("7. a producer with no ready package cannot be collected",
+                   validate(project, "--gate", "collect:saiwiki"),
+                   "no OUTBOX entry from that producer is `status: ready`")
+            expect("8. converge names the missing closure package",
+                   validate(project, "--gate", "converge"),
+                   "required producer package(s) are missing or not ready: "
+                   "QQ (saiwiki)")
+
+        # An unknown gate must refuse rather than fall back to the soft
+        # default: a typo'd `collect:saiwki` that ran the soft gate would
+        # report green on exactly the package the caller asked to hard-check.
+        typo = validate(project, "--gate", "collect:saiwki")
+        expect("9. a misspelled producer gate still hard-checks (no fallback)",
+               typo, "no OUTBOX entry from that producer is `status: ready`")
+        unknown = validate(project, "--gate", "nonsense")
+        checked += 1
+        if unknown.returncode != 2 or "unknown --gate" not in (
+                unknown.stdout + unknown.stderr):
+            problems.append("10. unknown gate: expected exit 2 and a named "
+                            f"refusal, got exit {unknown.returncode}")
+        else:
+            print("PASS: producer gate -- 10. an unknown gate exits 2, "
+                  "never falls back to soft")
+
+    return problems, checked
+
+
+def run_ccc_identity_probes() -> tuple[list[str], int]:
+    """Execute the T-566 canonical-commit proof in the ccc I -> SHIP -> J route.
+
+    Needs a real repository for the same reason the hunt-mark probes do: the
+    subject is commit RESOLUTION, and `tools/audit_checks.py` copies the tree
+    without `.git`, so every rung here would report green against a validator
+    that resolved nothing. The SHA-256 rung needs its own repository because a
+    repository's object format is fixed at `git init`.
+    """
+    problems: list[str] = []
+    checked = 0
+    env = {**os.environ, "GIT_AUTHOR_NAME": "probe",
+           "GIT_AUTHOR_EMAIL": "probe@example.invalid",
+           "GIT_COMMITTER_NAME": "probe",
+           "GIT_COMMITTER_EMAIL": "probe@example.invalid"}
+
+    def validate(project: Path) -> str:
+        r = subprocess.run(
+            [sys.executable, str(VALIDATOR), "--project-root", str(project)],
+            cwd=project, capture_output=True, text=True, errors="replace")
+        return r.stdout + r.stderr
+
+    def expect(label: str, output: str, contains: str = "",
+               absent: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        details = []
+        if contains and contains not in output:
+            details.append(f"missing {contains!r}")
+        if absent and absent in output:
+            details.append(f"unexpected {absent!r}")
+        if details:
+            problems.append(f"{label}: {'; '.join(details)}")
+        else:
+            print(f"PASS: ccc identity -- {label}")
+
+    unchanged = "ccc SHIP did not change source revision"
+    unresolved = "ccc SHIP evidence names commit(s) this repository cannot resolve"
+    mismatch = "ccc SHIP evidence does not match current source_head"
+
+    def write_state(project: Path) -> None:
+        (project / ".saipen" / "STATE.md").write_text(
+            "---\nphase: SHIP\ntask: none\nnext_action: \"PHASE DONE\"\n"
+            "blocker: none\ntransition_from: REVIEW\nsaipen_version: 7\n"
+            "agent: probe\nmode: full\nexecution_intent: converge\n"
+            "converge_target: ship\nupdated: 2026-01-01T00:00:00Z\n---\n",
+            encoding="utf-8", newline="\n")
+
+    def build(raw: Path, name: str, object_format: str | None) -> Path | None:
+        project = raw / name
+        shutil.copytree(SCENARIOS / "stale-state-reconciliation" / ".saipen",
+                        project / ".saipen")
+        init = ["init", "-q"]
+        if object_format:
+            init += [f"--object-format={object_format}"]
+        if subprocess.run(["git", *init], cwd=project, env=env,
+                          capture_output=True, text=True).returncode != 0:
+            return None
+        write_state(project)
+        return project
+
+    def git(project: Path, *args: str) -> str:
+        return subprocess.run(["git", *args], cwd=project, env=env,
+                              capture_output=True, text=True,
+                              check=False).stdout.strip()
+
+    def commit(project: Path, message: str) -> str:
+        git(project, "add", "-A")
+        git(project, "commit", "-q", "--allow-empty", "-m", message)
+        return git(project, "rev-parse", "HEAD")
+
+    # Split so the literal never forms a version string in this file's source:
+    # the cross-doc drift check scans shipped sources for cited versions, and a
+    # probe fixture is not a release. Same idiom as the audit tag shim.
+    probe_version = "v" + "9.9.9"
+
+    def write_log(project: Path, base: str, entry_at: str, shipped: str) -> None:
+        (project / ".saipen" / "LOG.md").write_text(
+            f"{base}\n"
+            f"- 26.07.17 00:01 [E-002] [parent: E-001] "
+            f"DEC: ccc converge target -> ship @{entry_at}\n"
+            f"- 26.07.17 00:02 [E-003] [parent: E-002] "
+            f"RUN: ship {probe_version} -> pushed {shipped}\n",
+            encoding="utf-8", newline="\n")
+
+    with tempfile.TemporaryDirectory(prefix="saipen-ccc-identity-") as tmp:
+        raw = Path(tmp)
+        project = build(raw, "sha1", None)
+        if project is None:
+            print("SKIP: ccc identity probes -- git unavailable")
+            return problems, checked
+        base = (project / ".saipen" / "LOG.md").read_text(
+            encoding="utf-8-sig").rstrip("\n")
+        first = commit(project, "probe: pre-ship")
+        if not first:
+            print("SKIP: ccc identity probes -- no commit to resolve against")
+            return problems, checked
+
+        # The defect itself. Both references name the SAME commit, one
+        # abbreviated -- string equality says "different", so the check that
+        # exists to catch a SHIP which changed nothing concluded it had.
+        write_log(project, base, first[:7], first)
+        expect("one commit at two widths is caught as unchanged",
+               validate(project), unchanged)
+        # ... and the reverse width order, because `startswith` gets exactly
+        # one of the two directions right by accident.
+        write_log(project, base, first, first[:7])
+        expect("the same pair with the widths swapped is still unchanged",
+               validate(project), unchanged)
+
+        second = commit(project, "probe: the ship commit")
+        write_log(project, base, first[:7], second)
+        expect("distinct commits are a real revision change",
+               validate(project), absent=unchanged)
+        expect("distinct commits match the current HEAD",
+               validate(project), absent=mismatch)
+
+        # Evidence that resolves to nothing proves nothing -- it must FAIL
+        # rather than skip, which is T-528's shape one check over.
+        write_log(project, base, first[:7], "dead0beefdead0beefdead0beefdead0beef0001")
+        expect("evidence naming a commit the repository lacks fails",
+               validate(project), unresolved)
+
+        # A real commit that is simply not the current HEAD: the packages
+        # would bind to a revision the tree has already moved past.
+        commit(project, "probe: work landed after the recorded ship")
+        write_log(project, base, first[:7], second)
+        expect("shipped evidence behind the current HEAD fails",
+               validate(project), mismatch)
+
+        # Outside a repository the proof is unperformable, not failed. Without
+        # this rung the canonicalization would have turned every no-Git project
+        # into a hard FAIL on evidence that was never checkable there.
+        nogit = raw / "nogit"
+        shutil.copytree(SCENARIOS / "stale-state-reconciliation" / ".saipen",
+                        nogit / ".saipen")
+        write_state(nogit)
+        write_log(nogit, base, first[:7], "dead0beefdead0beefdead0beefdead0beef0001")
+        expect("a no-Git project warns instead of failing the proof",
+               validate(nogit), "ccc-identity-unverifiable", absent=unresolved)
+
+        # SHA-256: 64-hex OIDs. The old `{7,40}` pattern did not reject these,
+        # it silently matched their first 40 characters and compared a
+        # truncated string, which is why this rung reads the FULL identity.
+        sha256 = build(raw, "sha256", "sha256")
+        if sha256 is None:
+            print("SKIP: ccc identity sha256 rung -- object-format unsupported")
+        else:
+            base256 = (sha256 / ".saipen" / "LOG.md").read_text(
+                encoding="utf-8-sig").rstrip("\n")
+            head256 = commit(sha256, "probe: sha256 pre-ship")
+            if len(head256) != 64:
+                print("SKIP: ccc identity sha256 rung -- not a 64-hex repository")
+            else:
+                write_log(sha256, base256, head256[:12], head256)
+                expect("a 64-hex OID abbreviated is still one commit",
+                       validate(sha256), unchanged)
+                ship256 = commit(sha256, "probe: sha256 ship")
+                write_log(sha256, base256, head256, ship256)
+                expect("distinct 64-hex OIDs are a real revision change",
+                       validate(sha256), absent=unchanged)
+                expect("the full 64-hex OID resolves rather than truncating",
+                       validate(sha256), absent=unresolved)
+
+    return problems, checked
+
+
 def run_converge_routing_probes() -> tuple[list[str], int]:
     """Execute the T-539 intent-aware routing checks against a real project.
 
@@ -1455,7 +2134,10 @@ def run_converge_routing_probes() -> tuple[list[str], int]:
     add_fail = "converge clean-HUNT marker present but next_action names ADD"
     valve_fail = "converge safety-valve pause names the goal resume key"
 
-    def write_state(project: Path, intent: str, next_action: str) -> None:
+    def write_state(project: Path, intent: str, next_action: str,
+                    converge_target: str | None = None) -> None:
+        target_line = (f"converge_target: {converge_target}\n"
+                       if converge_target else "")
         (project / ".saipen" / "STATE.md").write_text(
             "---\n"
             "phase: PLAN\n"
@@ -1467,6 +2149,7 @@ def run_converge_routing_probes() -> tuple[list[str], int]:
             "agent: probe\n"
             "mode: full\n"
             f"execution_intent: {intent}\n"
+            f"{target_line}"
             "updated: 2026-01-01T00:00:00Z\n"
             "---\n",
             encoding="utf-8", newline="\n")
@@ -1489,6 +2172,7 @@ def run_converge_routing_probes() -> tuple[list[str], int]:
             return problems, checked
         git("add", "-A")
         git("commit", "-q", "-m", "probe")
+        pre_ship_head = git("rev-parse", "HEAD").stdout.strip()
 
         log_path = project / ".saipen" / "LOG.md"
         base = log_path.read_text(encoding="utf-8-sig").rstrip("\n")
@@ -1533,26 +2217,47 @@ def run_converge_routing_probes() -> tuple[list[str], int]:
         expect("converge valve pause naming cc passes",
                validate(project), absent=valve_fail)
 
+        # Scenario 25 red: a persisted ccc route that prepares before its SHIP
+        # boundary is rejected even though all event shapes are individually legal.
+        log_path.write_text(
+            f"{base}\n"
+            "- 17.07.26 00:02 [E-002] [parent: E-001] "
+            f"DEC: ccc converge target -> ship @{pre_ship_head}\n"
+            "- 17.07.26 00:03 [E-003] [parent: E-002] "
+            "RUN: prepare saitranslate -> done\n",
+            encoding="utf-8", newline="\n")
+        write_state(project, "converge", '"PHASE PREPARE"', "ship")
+        expect("scenario 25 ccc preparation before SHIP fails",
+               validate(project), contains="ccc prepared EE/QQ before SHIP")
+
+        # Green order: SHIP appears before either producer preparation.
+        git("commit", "--allow-empty", "-q", "-m", "ccc ship")
+        shipped_head = git("rev-parse", "HEAD").stdout.strip()
+        log_path.write_text(
+            f"{base}\n"
+            "- 17.07.26 00:02 [E-002] [parent: E-001] "
+            f"DEC: ccc converge target -> ship @{pre_ship_head}\n"
+            "- 17.07.26 00:03 [E-003] [parent: E-002] "
+            f"RUN: ship v0.0.0 -> pushed {shipped_head}\n"
+            "- 17.07.26 00:04 [E-004] [parent: E-003] "
+            "RUN: prepare saitranslate -> done\n",
+            encoding="utf-8", newline="\n")
+        expect("scenario 25 ccc SHIP-before-prepare passes",
+               validate(project), absent="ccc prepared EE/QQ before SHIP")
+
     return problems, checked
 
 
 def run_role_freshness_probes() -> tuple[list[str], int]:
-    """Execute the T-542 role-freshness checks against a real project.
-
-    Scenario 17 (same source + changed role charter -> stale package) and
-    scenario 19 (an active instance carrying an old role_revision) both need a
-    subSaipen whose OUTBOX/STATE can be bound to a charter revision, so they
-    live here rather than in audit_checks.py, which copies the tree without
-    building a sub instance.
-    """
+    """Execute T-542/T-543 role and source freshness controls."""
     problems: list[str] = []
     checked = 0
 
     def validate(project: Path) -> str:
-        r = subprocess.run(
+        result = subprocess.run(
             [sys.executable, str(VALIDATOR), "--project-root", str(project)],
             cwd=project, capture_output=True, text=True, errors="replace")
-        return r.stdout + r.stderr
+        return result.stdout + result.stderr
 
     def expect(label: str, output: str, contains: str = "",
                absent: str = "") -> None:
@@ -1566,15 +2271,17 @@ def run_role_freshness_probes() -> tuple[list[str], int]:
         if details:
             problems.append(f"{label}: {'; '.join(details)}")
         else:
-            print(f"PASS: role freshness -- {label}")
+            print(f"PASS: role/source freshness -- {label}")
 
     mismatch = "produced under a superseded role"
     stale_warn = "carry an old role_revision"
+    fp_fail = "the current tree computes"
 
-    def write_charter(project: Path, rev: str) -> None:
-        d = project / "extensions" / "subs"
-        d.mkdir(parents=True, exist_ok=True)
-        (d / "saiwiki.md").write_text(
+    def write_charter(project: Path, behavior: str) -> str:
+        directory = project / ".saipen" / "extensions" / "subs"
+        directory.mkdir(parents=True, exist_ok=True)
+        charter = directory / "saiwiki.md"
+        charter.write_text(
             "# saiwiki -- the documenter\n\n"
             "```yaml\n"
             "role_kind: PRODUCER\n"
@@ -1582,16 +2289,24 @@ def run_role_freshness_probes() -> tuple[list[str], int]:
             "trigger: bare saiwiki\n"
             "collect_policy: explicit\n"
             "done_condition: ready\n"
-            "freshness_inputs: [source_head]\n"
+            "freshness_inputs: [source_head, source_tree_fingerprint, role_revision]\n"
             "output_contract: outbox\n"
-            f"role_revision: {rev}\n"
-            "```\n",
+            "role_revision: sha256:pending\n"
+            "```\n\n"
+            f"Behavior: {behavior}\n",
             encoding="utf-8", newline="\n")
+        revision = compute_role_revision(charter)
+        charter.write_text(
+            charter.read_text(encoding="utf-8").replace(
+                "sha256:pending", revision),
+            encoding="utf-8", newline="\n")
+        return revision
 
-    def write_sub(project: Path, inst_rev: str, outbox_rev: str) -> None:
-        sd = project / ".saipen" / "extensions" / "subs" / "saiwiki"
-        (sd / "kitchen").mkdir(parents=True, exist_ok=True)
-        (sd / "STATE.md").write_text(
+    def write_sub(project: Path, inst_rev: str, outbox_rev: str,
+                  identity: SourceIdentity) -> None:
+        sub = project / ".saipen" / "extensions" / "subs" / "saiwiki"
+        (sub / "kitchen").mkdir(parents=True, exist_ok=True)
+        (sub / "STATE.md").write_text(
             "---\n"
             "phase: DONE\n"
             "task: none\n"
@@ -1605,14 +2320,15 @@ def run_role_freshness_probes() -> tuple[list[str], int]:
             "updated: 2026-01-01T00:00:00Z\n"
             "---\n",
             encoding="utf-8", newline="\n")
-        (sd / "kitchen" / "OUTBOX.md").write_text(
+        (sub / "kitchen" / "OUTBOX.md").write_text(
             "# OUTBOX\n\n"
             "## WIKI-900: probe package\n"
             "- **status:** ready\n"
             "- **summary:** probe\n"
             "- **critical:** false\n"
             "- **producer:** saiwiki\n"
-            "- **source_head:** no-git\n"
+            f"- **source_head:** {identity.source_head}\n"
+            f"- **source_tree_fingerprint:** {identity.source_tree_fingerprint}\n"
             f"- **role_revision:** {outbox_rev}\n"
             "- **coverage:** probe\n"
             "- **payload:** probe\n"
@@ -1624,6 +2340,12 @@ def run_role_freshness_probes() -> tuple[list[str], int]:
         project = Path(raw) / "project"
         shutil.copytree(SCENARIOS / "stale-state-reconciliation" / ".saipen",
                         project / ".saipen")
+        (project / ".gitignore").write_text(
+            ".saipen/\n.freebuff/\n.pytest_cache/\n.ruff_cache/\n"
+            ".claude/\n*.db\n*-wal\n*-shm\nnul\n",
+            encoding="utf-8", newline="\n")
+        source = project / "source.txt"
+        source.write_text("base\n", encoding="utf-8")
         env = {**os.environ, "GIT_AUTHOR_NAME": "probe",
                "GIT_AUTHOR_EMAIL": "probe@example.invalid",
                "GIT_COMMITTER_NAME": "probe",
@@ -1634,31 +2356,485 @@ def run_role_freshness_probes() -> tuple[list[str], int]:
                                   capture_output=True, text=True, check=False)
 
         if git("init", "-q").returncode != 0:
-            print("SKIP: role freshness probes -- git unavailable")
+            print("SKIP: role/source freshness probes -- git unavailable")
             return problems, checked
         git("add", "-A")
         git("commit", "-q", "-m", "probe")
 
-        # Scenario 17 green: package bound to rev1 while the charter is rev1
-        # collects normally.
-        write_charter(project, "rev1")
-        write_sub(project, "rev1", "rev1")
-        expect("matching charter+package passes", validate(project),
+        rev1 = write_charter(project, "v1")
+        identity = compute_source_identity(project)
+        write_sub(project, rev1, rev1, identity)
+        expect("matching derived charter+package passes", validate(project),
                absent=mismatch)
 
-        # Scenario 17 red: same source, charter bumped to rev2 -- the rev1
-        # package is stale and MUST NOT be collected.
-        write_charter(project, "rev2")
-        expect("same source + changed role charter makes the package stale",
+        charter = (project / ".saipen" / "extensions" / "subs"
+                   / "saiwiki.md")
+        charter.write_text(
+            charter.read_text(encoding="utf-8").replace(
+                "Behavior: v1", "Behavior: v2"),
+            encoding="utf-8", newline="\n")
+        expect("charter behavior change without revision edit makes package stale",
                validate(project), mismatch)
 
-        # Scenario 19: an active instance still carrying rev1 against a rev2
-        # charter is detected -- it revalidates before reuse.
-        write_charter(project, "rev2")
-        write_sub(project, "rev1", "rev2")
-        expect("an instance on the old revision is detected",
+        rev2 = write_charter(project, "v2")
+        charter_bytes = charter.read_bytes()
+        charter.write_bytes(charter_bytes.replace(b"\n", b"\r\n"))
+        expect("role revision is stable across LF and CRLF checkouts",
+               compute_role_revision(charter), contains=rev2)
+        charter.write_bytes(charter_bytes)
+        identity = compute_source_identity(project)
+        write_sub(project, rev1, rev2, identity)
+        expect("instance on old derived revision is detected",
                validate(project), stale_warn)
 
+        baseline = compute_source_identity(project)
+        source.write_text("tracked dirty\n", encoding="utf-8")
+        dirty = compute_source_identity(project)
+        expect("tracked dirty source changes fingerprint",
+               dirty.source_tree_fingerprint,
+               absent=baseline.source_tree_fingerprint)
+        source.write_text("base\n", encoding="utf-8")
+
+        untracked = project / "new-source.txt"
+        before = compute_source_identity(project)
+        untracked.write_text("new\n", encoding="utf-8")
+        after = compute_source_identity(project)
+        expect("untracked non-ignored source changes fingerprint",
+               after.source_tree_fingerprint,
+               absent=before.source_tree_fingerprint)
+        untracked.unlink()
+
+        # The pre-T-543 concatenation (`path + NUL + content`, repeated) is
+        # ambiguous: {a:b, c:d} and {a:empty, bc:d} produce identical bytes.
+        # The framed representation must distinguish the two real trees.
+        a_path, c_path, bc_path = (project / "a", project / "c", project / "bc")
+        a_path.write_bytes(b"b")
+        c_path.write_bytes(b"d")
+        framed_one = compute_source_identity(project)
+        c_path.unlink()
+        a_path.write_bytes(b"")
+        bc_path.write_bytes(b"d")
+        framed_two = compute_source_identity(project)
+        legacy_one = b"a\0b" + b"c\0d"
+        legacy_two = b"a\0" + b"bc\0d"
+        expect("framing separates trees that collide under raw concatenation",
+               framed_two.source_tree_fingerprint,
+               absent=(framed_one.source_tree_fingerprint
+                       if legacy_one == legacy_two else "framing-control-broken"))
+        a_path.unlink()
+        bc_path.unlink()
+
+        before = compute_source_identity(project)
+        git("update-index", "--chmod=+x", "source.txt")
+        mode_changed = compute_source_identity(project)
+        expect("tracked mode change changes fingerprint",
+               mode_changed.source_tree_fingerprint,
+               absent=before.source_tree_fingerprint)
+        git("update-index", "--chmod=-x", "source.txt")
+
+        outside_one = Path(raw) / "outside-one.txt"
+        outside_two = Path(raw) / "outside-two.txt"
+        outside_one.write_text("one\n", encoding="utf-8")
+        outside_two.write_text("one\n", encoding="utf-8")
+        link = project / "outside-link"
+        os.symlink(os.path.relpath(outside_one, project), link)
+        link_identity = compute_source_identity(project)
+        outside_one.write_text("changed outside bytes\n", encoding="utf-8")
+        outside_bytes_changed = compute_source_identity(project)
+        expect("symlink hashes target text and never outside-root bytes",
+               outside_bytes_changed.source_tree_fingerprint,
+               contains=link_identity.source_tree_fingerprint)
+        link.unlink()
+        os.symlink(os.path.relpath(outside_two, project), link)
+        link_target_changed = compute_source_identity(project)
+        expect("symlink target-text change changes fingerprint",
+               link_target_changed.source_tree_fingerprint,
+               absent=link_identity.source_tree_fingerprint)
+        link.unlink()
+
+        ignored = project / ".freebuff" / "runtime.db"
+        ignored.parent.mkdir(parents=True, exist_ok=True)
+        before = compute_source_identity(project)
+        ignored.write_text("one\n", encoding="utf-8")
+        ignored.write_text("two\n", encoding="utf-8")
+        after = compute_source_identity(project)
+        expect("ignored runtime mutation does not change fingerprint",
+               after.source_tree_fingerprint,
+               contains=before.source_tree_fingerprint)
+
+        original_run_git = freshness._run_git
+        head_reads = 0
+
+        def moving_head(root: Path, *args: str) -> bytes:
+            nonlocal head_reads
+            result = original_run_git(root, *args)
+            if args[:2] == ("rev-parse", "--verify") and args[2:] == ("HEAD",):
+                head_reads += 1
+                if head_reads == 2:
+                    return b"f" * 40 + b"\n"
+            return result
+
+        try:
+            with mock.patch.object(freshness, "_run_git", side_effect=moving_head):
+                compute_source_identity(project)
+        except FreshnessError:
+            expect("HEAD movement during computation fails", "failed",
+                   contains="failed")
+        else:
+            expect("HEAD movement during computation fails", "passed",
+                   contains="failed")
+
+        noise = project / ".saipen" / "kitchen" / "producer-noise.txt"
+        noise.parent.mkdir(parents=True, exist_ok=True)
+        noise.write_text("baseline\n", encoding="utf-8")
+        git("add", "-f", ".saipen/kitchen/producer-noise.txt")
+        git("commit", "-q", "-m", "tracked producer noise")
+        before = compute_source_identity(project)
+        noise.write_text("checkpoint\n", encoding="utf-8")
+        after = compute_source_identity(project)
+        expect("tracked .saipen bookkeeping mutation does not change fingerprint",
+               after.source_tree_fingerprint,
+               contains=before.source_tree_fingerprint)
+
+        original_parse_delta = freshness._parse_git_delta
+        parse_reads = 0
+
+        def mutate_after_second_read(root: Path, raw_delta: bytes,
+                                     raw_untracked: bytes):
+            nonlocal parse_reads
+            records = original_parse_delta(root, raw_delta, raw_untracked)
+            parse_reads += 1
+            if parse_reads == 2:
+                source.write_text("raced after second read\n", encoding="utf-8")
+            return records
+
+        try:
+            with mock.patch.object(freshness, "_parse_git_delta",
+                                   side_effect=mutate_after_second_read):
+                compute_source_identity(project)
+        except FreshnessError:
+            expect("content race after second sample fails", "failed",
+                   contains="failed")
+        else:
+            expect("content race after second sample fails", "passed",
+                   contains="failed")
+        source.write_text("base\n", encoding="utf-8")
+
+        before = compute_source_identity(project)
+        source.unlink()
+        after = compute_source_identity(project)
+        expect("tracked source deletion changes fingerprint",
+               after.source_tree_fingerprint,
+               absent=before.source_tree_fingerprint)
+        source.write_text("base\n", encoding="utf-8")
+
+        before = compute_source_identity(project)
+        renamed = project / "renamed-source.txt"
+        source.rename(renamed)
+        after = compute_source_identity(project)
+        expect("source rename changes fingerprint",
+               after.source_tree_fingerprint,
+               absent=before.source_tree_fingerprint)
+        renamed.rename(source)
+
+        source.write_text("unreadable probe\n", encoding="utf-8")
+        try:
+            with mock.patch.object(
+                    freshness.os, "read",
+                    side_effect=PermissionError("probe unreadable")):
+                compute_source_identity(project)
+        except FreshnessError:
+            expect("unreadable required input fails computation", "failed",
+                   contains="failed")
+        else:
+            expect("unreadable required input fails computation", "passed",
+                   contains="failed")
+        source.write_text("base\n", encoding="utf-8")
+
+        identity = compute_source_identity(project)
+        write_sub(project, rev2, rev2, identity)
+        expect("package bound to current source passes",
+               validate(project), absent=fp_fail)
+
+        generic_protocol = (project / ".saipen" / "extensions" / "subs"
+                            / "PROTOCOL.md")
+        generic_protocol.write_text("generic contract v1\n", encoding="utf-8")
+        generic_revision = compute_generic_role_revision(generic_protocol)
+        generic_identity = compute_source_identity(project)
+        write_sub(project, generic_revision, generic_revision, generic_identity)
+        generic_outbox = (project / ".saipen" / "extensions" / "subs"
+                          / "saiwiki" / "kitchen" / "OUTBOX.md")
+        generic_outbox.write_text(
+            generic_outbox.read_text(encoding="utf-8").replace(
+                "- **producer:** saiwiki", "- **producer:** saicustom"),
+            encoding="utf-8", newline="\n")
+        expect("generic role binds to its governing PROTOCOL digest",
+               validate(project), absent=mismatch)
+        generic_protocol.write_text("generic contract v2\n", encoding="utf-8")
+        expect("generic role contract change makes package stale",
+               validate(project), contains=mismatch)
+        generic_protocol.unlink()
+        identity = compute_source_identity(project)
+        write_sub(project, rev2, rev2, identity)
+
+        source.write_text("final mutation\n", encoding="utf-8")
+        expect("package produced before final source mutation is stale",
+               validate(project), fp_fail)
+
+        source.write_text("base\n", encoding="utf-8")
+        identity = compute_source_identity(project)
+        write_sub(project, rev2, rev2, identity)
+        noise.write_text("post-package producer noise\n", encoding="utf-8")
+        expect("producer noise after package creation stays fresh",
+               validate(project), absent=fp_fail)
+
+        git("commit", "--allow-empty", "-q", "-m", "head-only movement")
+        expect("package with old source_head is stale even when delta matches",
+               validate(project), contains="current source_head")
+
+        try:
+            with mock.patch.object(
+                    freshness.subprocess, "run",
+                    side_effect=FileNotFoundError("probe git unavailable")):
+                compute_source_identity(project)
+        except FreshnessError:
+            expect("Git discovery failure cannot degrade to no-Git", "failed",
+                   contains="failed")
+        else:
+            expect("Git discovery failure cannot degrade to no-Git", "passed",
+                   contains="failed")
+
+        no_git = Path(raw) / "no-git-project"
+        no_git.mkdir()
+        no_git_source = no_git / "source.txt"
+        no_git_source.write_text("source\n", encoding="utf-8")
+        named_like_runtime = no_git / "node_modules"
+        before_named_file = compute_source_identity(no_git)
+        named_like_runtime.write_text("real source file\n", encoding="utf-8")
+        after_named_file = compute_source_identity(no_git)
+        expect("no-Git runtime names exclude directories, not files",
+               after_named_file.source_tree_fingerprint,
+               absent=before_named_file.source_tree_fingerprint)
+        no_git_before = compute_source_identity(no_git)
+        no_git_noise = no_git / ".freebuff" / "runtime.db"
+        no_git_noise.parent.mkdir()
+        no_git_noise.write_text("one\n", encoding="utf-8")
+        no_git_noise.write_text("two\n", encoding="utf-8")
+        no_git_after = compute_source_identity(no_git)
+        expect("no-Git fallback uses its explicit runtime exclusions",
+               no_git_after.source_tree_fingerprint,
+               contains=no_git_before.source_tree_fingerprint)
+
+    return problems, checked
+
+
+def run_sub_clean_probes() -> tuple[list[str], int]:
+    """Execute T-545 evidence-gated cleanup controls (scenarios 22-24)."""
+    problems: list[str] = []
+    checked = 0
+
+    def expect(label: str, blockers: tuple[str, ...], contains: str = "",
+               empty: bool = False) -> None:
+        nonlocal checked
+        checked += 1
+        joined = "\n".join(blockers)
+        failed = (empty and bool(blockers)) or (contains and contains not in joined)
+        if failed:
+            problems.append(f"{label}: blockers={blockers!r}")
+        else:
+            print(f"PASS: sub-clean safety -- {label}")
+
+    with tempfile.TemporaryDirectory(prefix="saipen-sub-clean-") as raw:
+        instance = (Path(raw) / ".saipen" / "extensions" / "subs"
+                    / "saiwiki")
+        kitchen = instance / "kitchen"
+        kitchen.mkdir(parents=True)
+        board = instance / "BOARD.md"
+        board.write_text(
+            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+            encoding="utf-8", newline="\n")
+        outbox = kitchen / "OUTBOX.md"
+        outbox.write_text(
+            "# OUTBOX\n\n## WIKI-001: history\n"
+            "- **status:** reviewed\n",
+            encoding="utf-8", newline="\n")
+
+        expect("reviewed history alone permits cleanup",
+               sub_clean_blockers(instance), empty=True)
+        cli = subprocess.run(
+            [sys.executable, str(HOME / "tools" / "sub_clean.py"), "saiwiki"],
+            cwd=raw, capture_output=True, text=True, errors="replace")
+        expect("bare sub name resolves from project root",
+               () if cli.returncode == 0 else (cli.stdout + cli.stderr,),
+               empty=True)
+
+        board.unlink()
+        expect("missing BOARD fails closed", sub_clean_blockers(instance),
+               contains="missing lifecycle evidence: BOARD.md")
+        board.write_text(
+            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+            encoding="utf-8", newline="\n")
+        board.write_text(
+            "# Board\n## DOING\n## TOOD\n## DONE\n## BLOCKED\n",
+            encoding="utf-8", newline="\n")
+        expect("malformed BOARD fails closed", sub_clean_blockers(instance),
+               contains="malformed BOARD sections")
+        board.write_text(
+            "# Board\n## DOING\n## TODO\n## DONE\n"
+            "- [ ] SUB-OLD wrong state\n## BLOCKED\n",
+            encoding="utf-8", newline="\n")
+        expect("section-checkbox mismatch fails closed",
+               sub_clean_blockers(instance), contains="malformed DONE item state")
+        board.write_text(
+            "# Board\n## DOING\n## TODO\n  - [ ] SUB-HIDDEN indented\n"
+            "## DONE\n## BLOCKED\n",
+            encoding="utf-8", newline="\n")
+        expect("indented BOARD ticket fails closed",
+               sub_clean_blockers(instance),
+               contains="malformed BOARD item indentation")
+        board.write_text(
+            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+            encoding="utf-8", newline="\n")
+
+        outbox.unlink()
+        expect("missing OUTBOX fails closed", sub_clean_blockers(instance),
+               contains="missing lifecycle evidence: kitchen/OUTBOX.md")
+        outbox.write_text(
+            "# OUTBOX\n\n## WIKI-001: history\n"
+            "- **status:** reviewed\n",
+            encoding="utf-8", newline="\n")
+        outbox.write_text(
+            "# OUTBOX\n\npackage text with no entry or status\n",
+            encoding="utf-8", newline="\n")
+        expect("nonempty unparseable OUTBOX fails closed",
+               sub_clean_blockers(instance),
+               contains="nonempty OUTBOX has no valid package entry")
+        outbox.write_text(
+            "# OUTBOX\n\n## WIKI-001: history\n",
+            encoding="utf-8", newline="\n")
+        expect("OUTBOX entry without status fails closed",
+               sub_clean_blockers(instance), contains="0 status fields")
+        outbox.write_text(
+            "# OUTBOX\n\n## WIKI-001: history\n"
+            "<!-- - **status:** reviewed -->\n"
+            "```markdown\n- **status:** reviewed\n## WIKI-999: fake\n```\n",
+            encoding="utf-8", newline="\n")
+        expect("commented or fenced status cannot authorize cleanup",
+               sub_clean_blockers(instance), contains="0 status fields")
+        outbox.write_text(
+            "# OUTBOX\n\n## WIKI-001: history\n"
+            "    - **status:** reviewed\n",
+            encoding="utf-8", newline="\n")
+        expect("indented-code status cannot authorize cleanup",
+               sub_clean_blockers(instance), contains="0 status fields")
+        outbox.write_text(
+            "# OUTBOX\n\n## WIKI-001: history\n"
+            "- **status:** reviewed\n### Wiki-X: hidden\n",
+            encoding="utf-8", newline="\n")
+        expect("malformed mixed-case entry heading fails closed",
+               sub_clean_blockers(instance),
+               contains="malformed OUTBOX entry heading")
+        outbox.write_text(
+            "# OUTBOX\n\n## WIKI-001: history\n<!-- open\n"
+            "- **status:** reviewed\n",
+            encoding="utf-8", newline="\n")
+        expect("unclosed OUTBOX comment fails closed",
+               sub_clean_blockers(instance), contains="unclosed HTML comment")
+        outbox.write_text(
+            "# OUTBOX\n\n## WIKI-001: history\n````markdown\n"
+            "- **status:** reviewed\n```\n",
+            encoding="utf-8", newline="\n")
+        expect("unclosed long OUTBOX fence fails closed",
+               sub_clean_blockers(instance), contains="unclosed fenced block")
+
+        outbox.write_text(
+            "# OUTBOX\n\n## WIKI-002: package\n"
+            "- **status:** ready\n",
+            encoding="utf-8", newline="\n")
+        expect("scenario 22 ready-unreviewed OUTBOX blocks cleanup",
+               sub_clean_blockers(instance), contains="OUTBOX status ready")
+
+        outbox.write_text("# OUTBOX\n", encoding="utf-8", newline="\n")
+        old = 946684800
+        os.utime(instance, (old, old))
+        os.utime(board, (old, old))
+        os.utime(outbox, (old, old))
+        expect("scenario 23 elapsed time alone cannot delete or block",
+               sub_clean_blockers(instance), empty=True)
+
+        (instance / "LOG.md").write_text(
+            "# Log\n- collect 1\n- collect 2\n- collect 3\n",
+            encoding="utf-8", newline="\n")
+        expect("scenario 24 repeated collects do not make history stale",
+               sub_clean_blockers(instance), empty=True)
+
+        board.write_text(
+            "# Board\n## DOING\n## TODO\n- [ ] SUB-001 open\n"
+            "## DONE\n## BLOCKED\n",
+            encoding="utf-8", newline="\n")
+        expect("open TODO blocks cleanup", sub_clean_blockers(instance),
+               contains="TODO: SUB-001 open")
+        board.write_text(
+            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+            encoding="utf-8", newline="\n")
+
+        nested_outbox = kitchen / "pending" / "OUTBOX.md"
+        nested_outbox.parent.mkdir()
+        nested_outbox.write_text("payload\n", encoding="utf-8", newline="\n")
+        expect("nested OUTBOX is an artifact, not the root exemption",
+               sub_clean_blockers(instance), contains="pending/OUTBOX.md")
+        nested_outbox.unlink()
+        nested_outbox.parent.rmdir()
+
+        patch = kitchen / "pending.patch"
+        patch.write_text("diff\n", encoding="utf-8", newline="\n")
+        expect("unacknowledged patch blocks cleanup",
+               sub_clean_blockers(instance), contains="pending.patch")
+        patch.unlink()
+
+        recovery = instance / "recovery" / "STATE.md"
+        recovery.parent.mkdir()
+        recovery.write_text("evidence\n", encoding="utf-8", newline="\n")
+        expect("unpreserved recovery evidence blocks cleanup",
+               sub_clean_blockers(instance), contains="recovery/STATE.md")
+        preserved = Path(raw) / "preserved"
+        preserved.mkdir()
+        (preserved / "STATE.md").write_text(
+            "evidence\n", encoding="utf-8", newline="\n")
+        expect("byte-preserved recovery evidence permits cleanup",
+               sub_clean_blockers(instance, preserved), empty=True)
+
+    return problems, checked
+
+
+def run_hardening_control_inventory() -> tuple[list[str], int]:
+    """Prove all 30 hardening red controls resolve to executable evidence."""
+    problems: list[str] = []
+    checked = 0
+    registry_path = HOME / "tools" / "hardening_controls.json"
+    try:
+        registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return [f"hardening control registry unreadable: {exc}"], 0
+    ids = [entry.get("id") for entry in registry if isinstance(entry, dict)]
+    if ids != list(range(1, 31)):
+        return [f"hardening control IDs are {ids!r}, expected 1..30 in order"], 0
+    for entry in registry:
+        checked += 1
+        owner = HOME / entry["owner"]
+        try:
+            source = owner.read_text(encoding="utf-8-sig")
+        except OSError as exc:
+            problems.append(f"control {entry['id']} owner unreadable: {exc}")
+            continue
+        if entry["anchor"] not in source:
+            problems.append(
+                f"control {entry['id']} {entry['name']}: anchor "
+                f"{entry['anchor']!r} missing from {entry['owner']}"
+            )
+        else:
+            print(f"PASS: hardening control {entry['id']:02d} -- "
+                  f"{entry['name']} -> {entry['owner']}")
     return problems, checked
 
 
@@ -2107,10 +3283,22 @@ hunt_mark_failures, hunt_mark_checked = run_hunt_mark_probes()
 failures.extend(hunt_mark_failures)
 converge_failures, converge_checked = run_converge_routing_probes()
 failures.extend(converge_failures)
+ccc_identity_failures, ccc_identity_checked = run_ccc_identity_probes()
+failures.extend(ccc_identity_failures)
+producer_gate_failures, producer_gate_checked = run_producer_gate_probes()
+failures.extend(producer_gate_failures)
+ship_staging_failures, ship_staging_checked = run_ship_staging_probes()
+failures.extend(ship_staging_failures)
 rolefresh_failures, rolefresh_checked = run_role_freshness_probes()
 failures.extend(rolefresh_failures)
+sub_clean_failures, sub_clean_checked = run_sub_clean_probes()
+failures.extend(sub_clean_failures)
+hardening_failures, hardening_checked = run_hardening_control_inventory()
+failures.extend(hardening_failures)
 manifest_failures, manifest_checked = run_manifest_tracking_probes()
 failures.extend(manifest_failures)
+autoinject_failures, autoinject_checked = run_autoinject_manifest_probes()
+failures.extend(autoinject_failures)
 hook_failures, hook_checked, hook_skipped = run_hook_probes()
 ci_failures, ci_checked = run_ci_status_probes()
 failures.extend(ci_failures)
@@ -2140,10 +3328,16 @@ print(f"{ship_pick_checked} ship-pick behavior(s) executed")
 print(f"{last_event_checked} last_event migration behavior(s) executed")
 print(f"{hunt_mark_checked} hunt-mark behavior(s) executed")
 print(f"{converge_checked} converge-routing behavior(s) executed")
+print(f"{ccc_identity_checked} ccc commit-identity behavior(s) executed")
+print(f"{producer_gate_checked} producer-gate behavior(s) executed")
+print(f"{ship_staging_checked} ship-staging behavior(s) executed")
 print(f"{rolefresh_checked} role-freshness behavior(s) executed")
+print(f"{sub_clean_checked} sub-clean safety behavior(s) executed")
+print(f"{hardening_checked} hardening red control(s) resolved")
 print(f"{purity_checked} pre-commit-purity behavior(s) executed, "
       f"{purity_skipped} skipped for missing interpreters")
 print(f"{manifest_checked} manifest-tracking behavior(s) executed")
+print(f"{autoinject_checked} autoinject-manifest behavior(s) executed")
 print(f"{hook_checked} installed-hook behavior(s) executed, "
       f"{hook_skipped} skipped for missing interpreters")
 print(f"{ci_checked} ci-status behavior(s) executed")

@@ -6,9 +6,9 @@ write_scope: ".saipen/extensions/subs/saitest/"
 trigger: "bare saitest / saipen sub spawn saitest / crew reproduce stage / a target handed from Core or saipython"
 collect_policy: core-review
 done_condition: "every scenario in the run ended REPRODUCED | NOT_REPRODUCED | BLOCKED and the OUTBOX entry records the verdict"
-freshness_inputs: ["source_head", "source_tree_fingerprint"]
+freshness_inputs: ["source_head", "source_tree_fingerprint", "role_revision"]
 output_contract: "PROTOCOL.md § 2 complete package; scenario verdicts REPRODUCED/NOT_REPRODUCED/BLOCKED"
-role_revision: "rev1"
+role_revision: "sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08"
 ```
 
 A subSaipen (PROTOCOL.md), so everything there binds: `mode: read-only`,

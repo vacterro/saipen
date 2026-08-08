@@ -8,7 +8,7 @@ collect_policy: explicit
 done_condition: "a complete package bound to the current source_head + source_tree_fingerprint + role_revision, internally verified, written outside the main tree, `status: ready`"
 freshness_inputs: ["source_head", "source_tree_fingerprint", "role_revision"]
 output_contract: "PROTOCOL.md § 2 complete package; wiki pages mirroring canonical IDs (CONFORMANCE digest)"
-role_revision: "rev1"
+role_revision: "sha256:54a42475a124ab0f27e83d600a284a9cc54d9668029c4828cfc48512b031df13"
 ```
 
 A subSaipen (PROTOCOL.md), so everything there binds: `mode: read-only`,

@@ -28,34 +28,14 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import os
 import subprocess
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 HOME = Path(__file__).resolve().parent.parent
 STAMP = ".saipen_injected"
-
-# Exactly what bootstrap/inject.* copies into an agent home. Kept as a list of
-# (relative path, is_tree) so the digest and the injector describe the same
-# surface; a file the injector copies and this does not is a file whose
-# staleness stays invisible, which is the whole defect.
-SHIPPED = [
-    ("saipen/BOOT.md", False),
-    ("saipen/SKILL.md", False),
-    ("saipen/RFC.md", False),
-    ("saipen/UI.md", False),
-    ("saipen/STYLE.md", False),
-    ("saipen/CONFORMANCE.md", False),
-    ("VERSION", False),
-    ("saipen/phases", True),
-    ("tools", True),
-    ("extensions/schemas", True),
-    ("extensions/templates", True),
-    ("extensions/subs", True),
-    ("tests/validate.sh", False),
-    ("tests/validate.ps1", False),
-]
 
 # Where the injector installs. Absence is normal -- an agent home that is not
 # installed on this machine is skipped, never created.
@@ -67,20 +47,102 @@ TARGETS = [
 ]
 
 
+def _manifest_source(raw: object) -> Path:
+    if not isinstance(raw, str) or not raw or "\\" in raw:
+        raise RuntimeError(f"unsafe runtime manifest source: {raw!r}")
+    relative = PurePosixPath(raw)
+    if relative.is_absolute() or ".." in relative.parts:
+        raise RuntimeError(f"unsafe runtime manifest source: {raw!r}")
+    source = (HOME / Path(*relative.parts)).resolve()
+    try:
+        source.relative_to(HOME.resolve())
+    except ValueError as exc:
+        raise RuntimeError(
+            f"runtime manifest source escapes repository root: {raw!r}"
+        ) from exc
+    return source
+
+
+def _is_within(path: Path, parent: Path) -> bool:
+    try:
+        path.relative_to(parent)
+    except ValueError:
+        return False
+    return True
+
+
+def _manifest_surface() -> list[tuple[Path, bool]]:
+    """Return exactly what injectors copy, derived from the runtime manifest."""
+    manifest_path = HOME / "saipen" / "MANIFEST.json"
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"cannot read runtime manifest {manifest_path}: {exc}") from exc
+
+    try:
+        trees = manifest["copy_trees"]
+        entries = manifest["files"]
+        if not isinstance(trees, list) or not trees or not isinstance(entries, list):
+            raise TypeError("copy_trees/files must be nonempty arrays")
+        surface: list[tuple[Path, bool]] = []
+        tree_roots: list[Path] = []
+        for entry in trees:
+            source = _manifest_source(entry["src"])
+            if not source.is_dir() or source.is_symlink():
+                raise RuntimeError(f"runtime manifest tree missing or symlinked: {entry['src']}")
+            surface.append((source, True))
+            tree_roots.append(source)
+        for entry in entries:
+            if entry.get("required") is not True:
+                continue
+            source = _manifest_source(entry["src"])
+            if any(_is_within(source, tree) for tree in tree_roots):
+                continue
+            if not source.is_file() or source.is_symlink():
+                raise RuntimeError(f"runtime manifest file missing or symlinked: {entry['src']}")
+            surface.append((source, False))
+    except (KeyError, TypeError) as exc:
+        raise RuntimeError(f"runtime manifest shape invalid: {exc}") from exc
+    return surface
+
+
 def _digest() -> str:
     """Content digest of the shipped surface, path-order stable."""
     h = hashlib.sha256()
-    for rel, is_tree in SHIPPED:
-        p = HOME / rel
-        files = []
-        if is_tree and p.is_dir():
-            files = sorted(f for f in p.rglob("*")
-                           if f.is_file() and "__pycache__" not in f.parts)
-        elif p.is_file():
-            files = [p]
-        for f in files:
-            h.update(f.relative_to(HOME).as_posix().encode())
-            h.update(f.read_bytes())
+
+    def frame(kind: bytes, path: Path, payload: bytes = b"") -> None:
+        relative = path.relative_to(HOME.resolve()).as_posix().encode("utf-8")
+        for part in (kind, relative, payload):
+            h.update(len(part).to_bytes(8, "big"))
+            h.update(part)
+
+    def generated(path: Path) -> bool:
+        relative = path.relative_to(HOME.resolve())
+        return "__pycache__" in relative.parts or path.suffix in {".pyc", ".pyo"}
+
+    for path, is_tree in _manifest_surface():
+        if is_tree:
+            members = sorted(
+                path.rglob("*"),
+                key=lambda item: item.relative_to(HOME.resolve()).as_posix().encode(),
+            )
+        else:
+            members = [path]
+        for member in members:
+            if generated(member):
+                continue
+            if member.is_symlink():
+                raise RuntimeError(
+                    f"runtime manifest surface contains unsupported symlink: {member}"
+                )
+            if member.is_dir():
+                frame(b"D", member)
+            elif member.is_file():
+                frame(b"F", member, member.read_bytes())
+            else:
+                raise RuntimeError(
+                    f"runtime manifest surface contains unsupported entry: {member}"
+                )
     return h.hexdigest()[:16]
 
 
@@ -192,7 +254,11 @@ def main(argv: list[str] | None = None) -> int:
                     help="print nothing when nothing was stale (for timers)")
     args = ap.parse_args(argv)
 
-    digest = _digest()
+    try:
+        digest = _digest()
+    except RuntimeError as exc:
+        print(f"INJECT FAILED (runtime manifest): {exc}")
+        return 1 if args.check else 0
     present = [t for t in TARGETS if t.is_dir()]
     stale = [t for t in present if _installed(t) != digest]
 

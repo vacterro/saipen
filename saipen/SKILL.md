@@ -8,8 +8,7 @@ description: >
   on demand per STATE. CORE.md is the constitution (successor to RFC.md),
   which was split in v7.190.0; MAINTENANCE.md covers autonomous evolution.
   The RFC.md stub is a compatibility redirect only — never treat it as
-  authoritative.
-  reached only when a rule question arises.
+  authoritative and never route a rule question there.
   Persistent .saipen/ memory lets any agent continue another's work.
   Reply language is STYLE.md's `reply_language:` setting, default `et`
   (Estonian, always); `en`/`ru` pin another language and `auto` restores
@@ -26,13 +25,21 @@ description: >
 
 Thin entry for skill-reading platforms. The system lives elsewhere:
 
-1. **Continuing? Read `BOOT.md` (located in the same folder as this SKILL.md) first -- the compact cold-start kernel
-   (STATE -> BOARD -> LOG tail -> execute `next_action`). It's all a bare
-   `saipen continue` needs; it points into RFC only when a rule question comes up.**
-2. **Read `STYLE.md` (in the same folder) -- voices; it governs the first token, so read it right after BOOT.md, before RFC.**
-3. **Read `BOOT.md` (cold-start kernel), then `INDEX.md` (document map) — both in the same folder. Load `CORE.md` only for specific rule questions. Follow them.**
-4. **Phase modules in `phases/` (in the same folder) -- loaded by boot per STATE.md phase.**
-5. UI work: also read `UI.md` (Win95 dark golden, Verdana, no AA).
+1. **Read `BOOT.md`** (the file in the same folder as this SKILL.md) -- the
+   compact cold-start kernel: STATE -> BOARD -> LOG tail -> execute
+   `next_action`. That is everything a bare `saipen continue` needs. **Read it
+   once; this list names it once.**
+2. **`BOOT.md` loads `STYLE.md` before any output** -- voice governs the first
+   token, so the kernel's own step 1 opens it. Nothing here overrides that
+   order.
+3. **Rule question? Route through `INDEX.md`** (same folder), the document map.
+4. **`CORE.md` only for the exact rule you looked up.** It is the constitution;
+   do not read it speculatively.
+5. **`RFC.md` is a compatibility redirect and nothing else.** It holds no
+   rules, it is not a destination, and no step above sends you there.
+6. **Phase modules in `phases/`** (same folder) -- loaded by boot per STATE.md
+   phase.
+7. UI work: also read `UI.md` (Win95 dark golden, Verdana, no AA).
 
 Platform notes:
 - Native task lists mirror `.saipen/BOARD.md`, never replace it.

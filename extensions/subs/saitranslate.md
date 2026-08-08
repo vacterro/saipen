@@ -8,7 +8,7 @@ collect_policy: explicit
 done_condition: "a complete package bound to the current source_head + source_tree_fingerprint + role_revision, internally verified, written outside the main tree, `status: ready`"
 freshness_inputs: ["source_head", "source_tree_fingerprint", "role_revision"]
 output_contract: "PROTOCOL.md § 2 complete package; locale surfaces matching the source digest"
-role_revision: "rev1"
+role_revision: "sha256:f241e6b83c39e9b46bfa586638efb0374bbb39889646f723b9189bbb4912c0c5"
 ```
 
 A subSaipen (PROTOCOL.md), so everything there binds: `mode: read-only`,

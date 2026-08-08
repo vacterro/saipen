@@ -1,5 +1,17 @@
 {
   "description": "SAIPEN runtime manifest — canonical list of files the protocol references at boot or during normal operation. inject.sh, inject.ps1, autoinject.py, and validate.py MUST consume or verify this single source. No independent handwritten file lists.",
+  "managed_dirs": [
+    "phases", "tools", "tests", "bootstrap",
+    "extensions/schemas", "extensions/templates", "extensions/subs"
+  ],
+  "copy_trees": [
+    {"src": "saipen/phases", "dst": "phases"},
+    {"src": "tools", "dst": "tools"},
+    {"src": "bootstrap", "dst": "bootstrap"},
+    {"src": "extensions/schemas", "dst": "extensions/schemas"},
+    {"src": "extensions/templates", "dst": "extensions/templates"},
+    {"src": "extensions/subs", "dst": "extensions/subs"}
+  ],
   "files": [
     {"src": "saipen/BOOT.md", "required": true},
     {"src": "saipen/STYLE.md", "required": true},
@@ -15,6 +27,9 @@
     {"src": "saipen/MANIFEST.json", "required": true},
     {"src": "VERSION", "required": true},
     {"src": "tools/validate.py", "required": true},
+    {"src": "tools/freshness.py", "required": true},
+    {"src": "tools/sub_clean.py", "required": true},
+    {"src": "tools/hardening_controls.json", "required": true},
     {"src": "tools/install_hook.py", "required": true},
     {"src": "tools/uninstall_hook.py", "required": true},
     {"src": "tools/run_scenarios.py", "required": true},

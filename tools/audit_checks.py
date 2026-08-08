@@ -48,6 +48,8 @@ import sys
 import tempfile
 from pathlib import Path
 
+from freshness import compute_role_revision, compute_source_identity
+
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 else:
@@ -67,6 +69,57 @@ STATE_SCHEMA = "extensions/schemas/state.schema.json"
 TAG_QUERY = ("git", "tag", "-l", "v*")
 AUDIT_TAGS_GIT_SHIM = "SAIPEN_AUDIT_TAGS_GIT_SHIM"
 AUDIT_TAGS_MODE = "SAIPEN_AUDIT_TAGS_MODE"
+
+
+def freshen_synthetic_outboxes(tree: Path) -> None:
+    """Make copied producer packages valid without touching live OUTBOXes."""
+    identity = compute_source_identity(tree)
+
+    def upsert_bold(text: str, field: str, value: str) -> str:
+        pattern = rf"(?m)^- \*\*{re.escape(field)}:\*\*.*$"
+        line = f"- **{field}:** {value}"
+        if re.search(pattern, text):
+            return re.sub(pattern, line, text, count=1)
+        return text.replace("- **producer:**", line + "\n- **producer:**", 1)
+
+    wiki = tree / ".saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md"
+    wiki_charter = tree / "extensions/subs/saiwiki.md"
+    if wiki.is_file() and wiki_charter.is_file():
+        text = wiki.read_text(encoding="utf-8-sig")
+        first_entry = text.find("\n## ")
+        if first_entry >= 0:
+            text = "# OUTBOX\n" + text[first_entry:]
+        text = upsert_bold(text, "source_head", identity.source_head)
+        text = upsert_bold(
+            text, "source_tree_fingerprint", identity.source_tree_fingerprint)
+        text = upsert_bold(text, "role_revision",
+                           compute_role_revision(wiki_charter))
+        wiki.write_text(text, encoding="utf-8", newline="\n")
+
+    translate = tree / ".saipen/saitranslate/kitchen/OUTBOX.md"
+    translate_charter = tree / "extensions/subs/saitranslate.md"
+    if translate.is_file() and translate_charter.is_file():
+        text = translate.read_text(encoding="utf-8-sig")
+        fields = {
+            "source_head": identity.source_head,
+            "source_tree_fingerprint": identity.source_tree_fingerprint,
+            "role_revision": compute_role_revision(translate_charter),
+            "summary": "synthetic audit control package",
+            "critical": "false",
+        }
+        for field, value in fields.items():
+            pattern = rf"(?m)^{re.escape(field)}:.*$"
+            line = f"{field}: {value}"
+            if re.search(pattern, text):
+                text = re.sub(pattern, line, text, count=1)
+            else:
+                text = text.replace("producer:", line + "\nproducer:", 1)
+        translate.write_text(text, encoding="utf-8", newline="\n")
+
+    derived_translate = (tree / ".saipen/extensions/subs/saitranslate"
+                         / "kitchen/OUTBOX.md")
+    if derived_translate.is_file():
+        derived_translate.write_text("# OUTBOX\n", encoding="utf-8", newline="\n")
 
 
 def root_device_ignore_probe(tmp: Path) -> str | None:
@@ -105,6 +158,20 @@ def release_ledger_probe(source: Path, destination: Path) -> str | None:
     """Execute clean, new-divergence, and stale-baseline ledger controls."""
     tree = destination / "release-ledger"
     shutil.copytree(source, tree)
+
+    # This probe tests release-ledger divergence, not handoff freshness. The
+    # live repository may deliberately carry producer-owned ready packages
+    # awaiting another model; make those historical in the synthetic clone so
+    # unrelated OUTBOX failures cannot mask this probe's own red controls.
+    outboxes = list(tree.glob(".saipen/extensions/subs/*/kitchen/OUTBOX.md"))
+    translate_outbox = tree / ".saipen" / "saitranslate" / "kitchen" / "OUTBOX.md"
+    if translate_outbox.is_file():
+        outboxes.append(translate_outbox)
+    for outbox in outboxes:
+        text = outbox.read_text(encoding="utf-8-sig")
+        text = text.replace("**status:** ready", "**status:** stale")
+        text = re.sub(r"(?m)^status:\s*ready\s*$", "status: stale", text)
+        outbox.write_text(text, encoding="utf-8", newline="\n")
 
     def git(*args: str) -> subprocess.CompletedProcess[str]:
         return subprocess.run(["git", *args], cwd=tree, capture_output=True,
@@ -171,7 +238,10 @@ def release_ledger_probe(source: Path, destination: Path) -> str | None:
     control = validate()
     control_text = control.stdout + control.stderr
     if control.returncode or "WARN [release-ledger]" in control_text:
-        return "clean synthetic ledger is not clean"
+        first = next((line for line in control_text.splitlines()
+                      if line.startswith(("FAIL", "WARN [release-ledger]"))),
+                     "validator exited without a focused line")
+        return f"clean synthetic ledger is not clean: {first}"
 
     tag_only = "7.83.9"
     if git("tag", f"v{tag_only}").returncode:
@@ -297,6 +367,12 @@ def phase_rename_probe(source: Path, destination: Path) -> str | None:
     old_doc = tree / "saipen" / "phases" / "scout.md"
     if old_doc.is_file():
         old_doc.rename(tree / "saipen" / "phases" / "scoutx.md")
+    for charter in (tree / "extensions" / "subs").glob("sai*.md"):
+        text = charter.read_text(encoding="utf-8-sig")
+        revision = compute_role_revision(charter)
+        text = re.sub(r'(?m)^role_revision:\s*["\']?[^\s"\']+["\']?$',
+                      f'role_revision: "{revision}"', text, count=1)
+        charter.write_text(text, encoding="utf-8", newline="\n")
     if changed == 0:
         return "rename probe changed nothing -- a bug in the probe itself"
     proc = subprocess.run(
@@ -711,6 +787,48 @@ CASES: list[tuple[str, str, object, str]] = [
     ("current schema revision metadata missing", STATE_SCHEMA,
      replace('  "x-current-schema-version": 3,\n', ""),
      "x-current-schema-version must be a positive integer"),
+    # T-565. `minimum` sat on four STATE fields while nothing interpreted it,
+    # so a negative safety-valve counter read as valid: `goal_waves: -1` means
+    # § 2.4's three-wave ceiling is four waves away, and the valve protects the
+    # long unattended runs least able to notice. One control per floor the
+    # schema states, because they are four independent claims -- a fix that
+    # restored only the counters would leave the two LOG/format markers open.
+    ("negative goal_waves passes the schema floor", STATE,
+     lambda s: force_goal(s, "goal_waves: -1\ngoal_tickets: 0"),
+     "goal_waves: -1 is below the schema minimum 0"),
+    ("negative goal_tickets passes the schema floor", STATE,
+     lambda s: force_goal(s, "goal_waves: 0\ngoal_tickets: -1"),
+     "goal_tickets: -1 is below the schema minimum 0"),
+    ("schema_version below its own floor", STATE, sub_line("schema_version", "0"),
+     "schema_version: 0 is below the schema minimum 1"),
+    ("last_event claims an event number that cannot exist", STATE,
+     sub_line("last_event", "0"),
+     "last_event: 0 is below the schema minimum 1"),
+    # The class control, not an instance of it: a keyword added to the schema
+    # with no enforcer used to be a silent no-op, which is why `minimum` could
+    # sit there through four releases. `exclusiveMinimum` is a real draft-07
+    # keyword this validator does not implement -- the audit must say so rather
+    # than let the schema believe it constrains something.
+    ("schema keyword with no enforcer is silently ignored", STATE_SCHEMA,
+     replace('"goal_waves": {\n      "type": "integer",\n      "minimum": 0,',
+             '"goal_waves": {\n      "type": "integer",\n'
+             '      "exclusiveMinimum": -5,\n      "minimum": 0,'),
+     "'exclusiveMinimum' on field goal_waves that tools/validate.py "
+     "does not interpret"),
+    # The second half of the same guarantee: `type` has an enforcer, but that
+    # enforcer knows four of JSON Schema's seven types. A schema declaring
+    # `type: number` would clear the keyword audit and still be interpreted by
+    # nobody, which is the exact shape `minimum` had.
+    ("schema type outside the interpreted set", STATE_SCHEMA,
+     replace('"saipen_version": {\n      "type": "integer"',
+             '"saipen_version": {\n      "type": "number"'),
+     "'type: number' on field saipen_version"),
+    # Array element types. `requires:` is § 1.3's capability handshake, and the
+    # vocabulary WARN below it skips non-strings silently, so a wrong-typed
+    # element was invisible at both rungs.
+    ("requires carries a non-string capability", STATE,
+     replace("  - filesystem\n", "  - 12345\n"),
+     "requires[0]: expected string"),
     ("current-schema state missing last_event", STATE, drop_line("last_event"),
      "requires last_event"),
     ("current-schema state missing style_contract", STATE,
@@ -1030,6 +1148,33 @@ CASES: list[tuple[str, str, object, str]] = [
              "what sets a new one.",
              "NEW GOAL ONLY: Goal Mode pivot and re-authorization."),
      "shortcut-notes"),
+    ("bare cc starts convergence from normal intent",
+     "saipen/CORE.md",
+     replace("enters convergence from `normal`",
+             "continues ordinary work from `normal`"),
+     "shortcut-semantics"),
+    ("cc resumes persisted goal intent",
+     "saipen/CORE.md",
+     replace("resumes `execution_intent: goal`",
+             "replaces `execution_intent: goal`"),
+     "shortcut-semantics"),
+    ("cc never asks for objective text",
+     "saipen/CORE.md",
+     replace("never asks for an objective", "may ask for an objective"),
+     "shortcut-semantics"),
+    ("cc with arguments is rejected rather than becoming a goal",
+     "saipen/CORE.md",
+     replace("`cc <args>` is not a goal", "`cc <args>` starts a goal"),
+     "shortcut-semantics"),
+    ("gg with objective creates a new goal",
+     "saipen/CORE.md",
+     replace("NEW GOAL ONLY", "GOAL CONTINUATION"),
+     "shortcut-semantics"),
+    ("bare gg is never a continuation alias",
+     "saipen/CORE.md",
+     lambda text: text.replace("never a continuation alias",
+                               "is a continuation alias"),
+     "shortcut-semantics"),
     # The callout check counted keys, tokens, order and the link and never
     # read what the sentence CLAIMS, so a document could tell the reader `cc`
     # is the Goal Mode key while § 1.10 routed it to `saipen continue` -- and
@@ -1047,6 +1192,39 @@ CASES: list[tuple[str, str, object, str]] = [
      replace("Nothing that mutates main source may run after K.",
              "Main source may be mutated whenever it is convenient."),
      "converge-contract"),
+    ("CONVERGE keeps EE before QQ",
+     "saipen/CONVERGE.md",
+     replace("**K. FRESH EE.**", "**L. FRESH QQ.**"),
+     "converge-contract"),
+    ("CONVERGE blocks factories while TODO remains",
+     "saipen/CONVERGE.md",
+     replace("no workable `## TODO` ticket", "TODO may remain"),
+     "closure evidence drift"),
+    ("CONVERGE blocks factories after failing tests",
+     "saipen/CONVERGE.md",
+     replace("canonical tests PASS against the tree",
+             "canonical tests were attempted against the tree"),
+     "closure evidence drift"),
+    ("CONVERGE blocks factories on scout or fixer findings",
+     "saipen/CONVERGE.md",
+     replace("no fresh critical scout or fixer OUTBOX",
+             "critical scout or fixer OUTBOX may remain"),
+     "closure evidence drift"),
+    ("CLEAN forces tests and final HUNT before factories",
+     "saipen/CONVERGE.md",
+     replace("CLEAN completed, or proved nothing safe remained",
+             "CLEAN was considered"),
+     "closure evidence drift"),
+    ("final HUNT findings return to Core work",
+     "saipen/CONVERGE.md",
+     replace("final forced HUNT after CLEAN came back clean",
+             "final HUNT was started"),
+     "closure evidence drift"),
+    ("old hunt marker cannot satisfy forced HUNT",
+     "saipen/CONVERGE.md",
+     replace("existing hunt -> clean marker cannot satisfy forced HUNT",
+             "existing hunt marker may satisfy forced HUNT"),
+     "closure evidence drift"),
     ("a Core-owned callout calls `cc` the Goal Mode key",
      "guides/GUIDE_EN.md",
      replace("`cc` continues the project context to convergence (resuming a "
@@ -1139,12 +1317,12 @@ CASES: list[tuple[str, str, object, str]] = [
     # passing control: E-1911 caught this class once, and the repair for it
     # reintroduced it by losing the group.
     ("a ticket runs past verify.md's fix-cycle cap with no blocker", BOARD,
-     lambda t: re.sub(r"^(- \[ \] T-\d+ \[P\d\] .*)$",
+      lambda t: re.sub(r"^(?!.*\| blocker:)(- \[ \] T-\d+ \[P\d\] .*)$",
                       r"\1 | verify_attempts: 9",
                       t, count=1, flags=re.MULTILINE),
      "against phases/verify.md's cap"),
     ("verify_attempts holds something that is not a number", BOARD,
-     lambda t: re.sub(r"^(- \[ \] T-\d+ \[P\d\] .*)$",
+      lambda t: re.sub(r"^(?!.*\| blocker:)(- \[ \] T-\d+ \[P\d\] .*)$",
                       r"\1 | verify_attempts: many",
                       t, count=1, flags=re.MULTILINE),
      "is not a number"),
@@ -1259,8 +1437,9 @@ CASES: list[tuple[str, str, object, str]] = [
      "assigned destination changed"),
     ("ready package loses its source freshness field",
      "saipen/phases/prepare.md",
-     replace("`producer`, `source_head`, `coverage`",
-             "`producer`, `coverage`"),
+     replace("`status`, `producer`, `source_head`, `source_tree_fingerprint`, "
+             "`role_revision`, `coverage`",
+             "`status`, `producer`, `source_head`, `role_revision`, `coverage`"),
      "PREPARE fields"),
     ("non-ready collect loses its no-write guarantee", "saipen/CORE.md",
      replace("No main-project file, checkpoint, Git ref, or remote may "
@@ -1359,6 +1538,21 @@ CASES: list[tuple[str, str, object, str]] = [
      "phase enum"),
     ("shipped doc names the superseded palette", "README.md",
      replace("Vintage Golden", "Dark Golden Win95"), "palette-name"),
+    ("Golden Default token drifts", "saipen/UI.md",
+     replace("--background:#1A1810", "--background:#1A1811"), "ui-palette"),
+    ("Golden Default gains an extra token", "saipen/UI.md",
+     replace("--link:#F0D060;", "--link:#F0D060;\n  --rogue:#FFFFFF;"),
+     "ui-palette"),
+    ("Golden Default gains a later root override", "saipen/UI.md",
+     replace("}\n\n* {", "}\n\n:root {\n  --background:#FFFFFF;\n}\n\n* {"),
+     "ui-palette"),
+    ("Golden Default gains a non-hex override", "saipen/UI.md",
+     replace("* {", ".override { --background:rgb(255,255,255); }\n\n* {"),
+     "ui-palette"),
+    ("Golden Default stops being default", "saipen/UI.md",
+     replace("**Golden Default is the default palette.**",
+             "**Golden Default is an optional palette.**"),
+     "lost the Golden Default default mandate"),
     ("BOOT drops the reply-language rule", "saipen/BOOT.md",
      replace("Reply-language precedence:", "Reply language precedence:"),
      "reply-language"),
@@ -1544,6 +1738,10 @@ CASES: list[tuple[str, str, object, str]] = [
      replace("There is no second palette.",
              "An alternative palette is available for dark-mode projects."),
      "declares a second palette"),
+    ("saiui charter drops Golden Default mandate", "extensions/subs/saiui.md",
+     replace("Golden Default is the mandatory palette.",
+             "A default palette is recommended."),
+     "lost the Golden Default mandate"),
     ("saiui charter softens main-tree write ban",
      "extensions/subs/saiui.md",
      replace("never write to the main project tree",
@@ -1554,25 +1752,145 @@ CASES: list[tuple[str, str, object, str]] = [
      # `kitchen/pen/` also appears in the charter's table of contents row, so
      # removing the requirement line alone left the substring check satisfied
      # (T-532). Drop every occurrence.
-     lambda t: t.replace("kitchen/pen/", "kitchen/direct/"),
-     "fixer pen or OUTBOX"),
+      lambda t: t.replace("kitchen/pen/", "kitchen/direct/"),
+      "fixer pen or OUTBOX"),
+    # T-549. Every earlier RFC-trap pattern required the literal `RFC.md`,
+    # which is how SKILL.md kept routing readers to bare "RFC" through a
+    # release that the check called clean. The mutation uses the exact stale
+    # sentence that shipped, so the control fails on the real defect rather
+    # than on a synthetic one.
+    ("skill loader points a rule question at RFC", "saipen/SKILL.md",
+     replace("3. **Rule question? Route through `INDEX.md`**",
+             "3. It points into RFC only when a rule question comes up. "
+             "Route through `INDEX.md`**"),
+     "RFC-stub-trap"),
+    # T-569. Both halves of the staging order, separately, because they fail
+    # differently: losing the ORDER reinstates the paradox (a gate that cannot
+    # be satisfied by any documented sequence), while losing the explicit-path
+    # rule keeps the order and makes step 5's "staged set equals reviewed
+    # scope" proof describe whatever the tree happened to carry.
+    # The pre-T-569 shape: the binding gate named in the LOCAL half, above the
+    # staging it cannot see. The check reads positions, so the mutation has to
+    # move text rather than renumber a label.
+    ("ship runs its binding gate before staging", "saipen/phases/ship.md",
+     replace("6a. **LOCAL. Touches no repository and no remote.**",
+             "6a. **LOCAL. Touches no repository and no remote.** "
+             "Run `tools/validate.py --gate ship` NOW."),
+     "ship-stage-before-gate"),
+    ("ship permits a blind add", "saipen/phases/ship.md",
+     replace("**`git add .` and `git add -A` are\n      forbidden here**",
+             "`git add .` is fine here"),
+     "must forbid blind `git add .`"),
+    # Gated at the consumer (T-568): a malformed package is REFUSED where it
+    # would be consumed, and merely reported everywhere else. Run at the
+    # default gate this control would still find its substring -- on a WARN
+    # line -- and go on calling itself evidence of a refusal it no longer
+    # measured.
+    ("nonempty OUTBOX that parses as zero entries fails",
+     ".saipen/extensions/subs/saihunt/kitchen/OUTBOX.md",
+     lambda t: t.rstrip() + "\n\nmalformed package without an entry\n",
+     "parses as zero OUTBOX entries", "collect:saihunt"),
     # T-541: the machine-readable metadata block is the tool's only way to
     # read a charter's role_kind/collect_policy/role_revision. Drop the yaml
     # language tag so the block stops being machine-readable, and the
     # charter-metadata check must fire.
     ("a sai*.md charter stops being machine-readable",
      "extensions/subs/saitest.md",
-     replace("```yaml", "```text"),
-     "charter-metadata"),
-    # T-542: a ready OUTBOX package bound to a superseded charter revision is
-    # stale. W-030 is the live ready entry; bind it to a revision the current
-    # saiwiki charter does not declare and the validator must refuse it.
-    ("a ready OUTBOX package carries a superseded role_revision",
-     ".saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md",
-     replace("- **source_head:** 12f56679d655523ef10d48cb631b9f424cc201f0\n",
-             "- **source_head:** 12f56679d655523ef10d48cb631b9f424cc201f0\n"
-             "- **role_revision:** rev999\n"),
-     "superseded role"),
+      replace("```yaml", "```text"),
+      "charter-metadata"),
+    ("specialized producer loses canonical OUTBOX citation",
+     "extensions/subs/saitranslate.md",
+     replace("PROTOCOL.md § 2 complete package",
+             "PROTOCOL.md § 20 complete package"),
+     "output_contract must cite PROTOCOL.md"),
+    ("specialized producer restores a drifting local OUTBOX field list",
+     "extensions/subs/saiui.md",
+     replace("the sole owner, and its current § 2 plus § 9 contract binds every entry.",
+             "Required fields:\n\n- `status`\n- `producer`\n- `source_head`"),
+     "restates moving OUTBOX required fields"),
+    ("a charter cannot use an arbitrary manual role revision",
+     "extensions/subs/saiwiki.md",
+     replace("role_revision: \"sha256:54a42475a124ab0f27e83d600a284a9cc54d966"
+             "8029c4828cfc48512b031df13\"",
+             "role_revision: \"rev1\""),
+     "effective charter digest"),
+    ("every collectable charter binds role revision",
+     "extensions/subs/saihunt.md",
+     replace("freshness_inputs: [\"source_head\", \"source_tree_fingerprint\", \"role_revision\"]",
+             "freshness_inputs: [\"source_head\", \"source_tree_fingerprint\"]"),
+     "freshness_inputs"),
+    ("producer packages can never become auto-collected",
+     "extensions/subs/saiwiki.md",
+     replace("collect_policy: explicit", "collect_policy: automatic"),
+     "role_kind PRODUCER requires collect_policy"),
+    ("scout output cannot bypass Core review",
+     "extensions/subs/saihunt.md",
+     replace("collect_policy: core-review", "collect_policy: automatic"),
+     "role_kind SCOUT requires collect_policy"),
+    ("collection flow must enforce charter collect_policy",
+     "extensions/subs/PROTOCOL.md",
+     replace("`collect_policy` is executable routing, not a label",
+             "`collect_policy` is descriptive metadata"),
+     "collect_policy` is executable routing"),
+    ("fingerprint framing cannot lose its path length",
+     "extensions/subs/PROTOCOL.md",
+     replace("path_length[uint64be]", "path"),
+     "uint64be"),
+    ("fingerprint input errors cannot be skipped",
+     "extensions/subs/PROTOCOL.md",
+     replace("`except OSError: continue` escape hatch.",
+             "best-effort unreadable inputs."),
+     "except OSError: continue"),
+    ("consumer cannot refresh stale package evidence",
+     "saipen/CORE.md",
+     replace("MUST NOT edit, revalidate, refresh",
+             "may edit, revalidate, or refresh"),
+     "MUST NOT edit, revalidate, refresh"),
+    ("forced-fresh prepare cannot reuse ready output by default",
+     "saipen/phases/prepare.md",
+     replace("deterministic cache contract", "available cache"),
+     "deterministic cache contract"),
+    ("elapsed time cannot authorize SubSaipen deletion",
+     "extensions/subs/PROTOCOL.md",
+     replace("Age MAY emit a warning.", "Age makes the instance stale."),
+     "Age MAY emit a warning"),
+    ("repeated collect cannot make a package stale",
+     "extensions/subs/PROTOCOL.md",
+     replace("Repeated collects MAY leave reviewed",
+             "Repeated collects make reviewed"),
+     "Repeated collects MAY leave reviewed"),
+    ("sub clean refuses unpreserved recovery evidence",
+     "extensions/subs/PROTOCOL.md",
+     replace("unpreserved recovery evidence", "old recovery evidence"),
+     "unpreserved recovery evidence"),
+    ("ccc must prepare against the shipped HEAD",
+     "saipen/CORE.md",
+     replace("against the shipped HEAD", "against the current tree"),
+     "against the shipped HEAD"),
+    ("ccc persists its ship-first routing target",
+     "saipen/CORE.md",
+     replace("`saipen continue` with `converge_target: ship`, then `saipen ship`, then stages J-M",
+             "`saipen continue` then `saipen ship` then refresh EE + QQ"),
+     "assigned destination changed"),
+    ("HUNT helpers remain ephemeral rather than SubSaipen",
+     "saipen/phases/hunt.md",
+     replace("EPHEMERAL WORKERS, not SubSaipen instances",
+             "SubSaipen workers"),
+     "EPHEMERAL WORKERS, not SubSaipen instances"),
+    ("ephemeral workers cannot gain persistent lifecycle state",
+     "extensions/subs/PROTOCOL.md",
+     replace("never MANIFEST, STATE, BOARD, LOG, kitchen, charter adoption, or lifecycle",
+             "temporary MANIFEST and lifecycle records allowed"),
+     "never MANIFEST, STATE, BOARD, LOG, kitchen, charter adoption, or lifecycle"),
+    ("a local PROTOCOL section is checked as local, not RFC",
+     "extensions/subs/PROTOCOL.md",
+     replace("### 3.1 Built-in role charters",
+             "### 3.2 Built-in role charters"),
+     "### 3.1 Built-in role charters"),
+    ("T-551 cannot bypass unresolved T-549",
+     ".saipen/BOARD.md",
+     replace(" | needs: T-549 | verify:", " | verify:"),
+     "hardening wave barrier missing"),
     ("PROTOCOL.md drops UI- prefix from ticket table",
      "extensions/subs/PROTOCOL.md",
      replace("| `UI-` | saiui (fixer, § 9) |", ""),
@@ -1665,17 +1983,33 @@ def apply_case(root: Path, rel: str, mutation) -> bool:
     return True
 
 
-def validator_output(root: Path) -> str:
+def validator_output(root: Path, gate: str | None = None) -> str:
     """Only the FAIL/WARN lines. Searching the whole output matched PASS text:
     "at most one", "cyclic" and "dangling needs" all appear in the lines that
     say those very checks PASSED, so five cases scored as proving nothing when
     the harness was the thing at fault."""
-    r = subprocess.run([sys.executable, str(root / "tools" / "validate.py")],
+    r = subprocess.run([sys.executable, str(root / "tools" / "validate.py"),
+                        *(["--gate", gate] if gate else [])],
                        cwd=root, capture_output=True, text=True,
                        errors="replace")
     keep = [ln for ln in (r.stdout + r.stderr).splitlines()
             if ln.startswith(("FAIL", "WARN", "Traceback")) or "Error" in ln]
     return "\n".join(keep)
+
+
+def case_parts(case):
+    """Unpack a CASES entry, which is 4 items or 5.
+
+    The optional 5th is the validator GATE the case must run at. T-568 made
+    producer-package severity a property of the gate, so a producer control
+    left on the default gate would see its FAIL demoted to a WARN -- and this
+    harness deliberately keeps WARN lines, so such a case would go on
+    reporting itself as evidence while proving only that the defect is
+    NOTICED, never that it is refused. A control has to run where its finding
+    is hard.
+    """
+    label, rel, mutation, expected = case[:4]
+    return label, rel, mutation, expected, (case[4] if len(case) > 4 else None)
 
 
 def main() -> int:
@@ -1689,6 +2023,18 @@ def main() -> int:
 
     pristine = tmp / "pristine"
     shutil.copytree(HOME, pristine, ignore=IGNORE)
+    freshen_synthetic_outboxes(pristine)
+    synthetic_outboxes = list(
+        pristine.glob(".saipen/extensions/subs/*/kitchen/OUTBOX.md"))
+    synthetic_translate = (pristine / ".saipen" / "saitranslate"
+                           / "kitchen" / "OUTBOX.md")
+    if synthetic_translate.is_file():
+        synthetic_outboxes.append(synthetic_translate)
+    for outbox in synthetic_outboxes:
+        text = outbox.read_text(encoding="utf-8-sig")
+        text = text.replace("**status:** ready", "**status:** stale")
+        text = re.sub(r"(?m)^status:\s*ready\s*$", "status: stale", text)
+        outbox.write_text(text, encoding="utf-8", newline="\n")
 
     ledger_error = release_ledger_probe(pristine, tmp)
     if ledger_error:
@@ -1785,8 +2131,26 @@ def main() -> int:
         return 1
     print("PASS: callable no-op mutations are rejected before validation")
 
-    unavailable = [label for label, rel, mutation, _expected in CASES
-                   if not case_available(pristine, rel, mutation)]
+    # A producer-package case that names no gate is a case running where its
+    # finding is only a WARN, and this harness keeps WARN lines -- so it would
+    # pass while measuring nothing. Structural, because the weakening is
+    # invisible in the result: the count stays 218 either way.
+    ungated = [parts[0] for parts in map(case_parts, CASES)
+               if isinstance(parts[1], str) and parts[1].endswith("OUTBOX.md")
+               and parts[4] is None]
+    if ungated:
+        for label in ungated:
+            print(f"FAIL: {label!r} mutates a producer OUTBOX but names no "
+                  f"gate -- producer findings are WARNs outside "
+                  f"`--gate collect:<producer>`, so this case would pass on a "
+                  f"warning and prove no refusal (T-568)")
+        shutil.rmtree(tmp, ignore_errors=True)
+        return 1
+    print("PASS: every producer-OUTBOX control runs at a gate where its "
+          "finding is hard")
+
+    unavailable = [parts[0] for parts in map(case_parts, CASES)
+                   if not case_available(pristine, parts[1], parts[2])]
     if unavailable:
         for label in unavailable:
             print(f"FAIL: skipped canonical mutation: {label}")
@@ -1800,9 +2164,33 @@ def main() -> int:
     # tree and turns 41 copytrees of a repo carrying 32 locale directories into
     # one. The difference is four minutes against twenty seconds, which is the
     # difference between a gate CI runs and a gate someone deletes.
+    # One control per gate in use, measured on the UNMODIFIED copy. A gated
+    # case must be judged against its own gate's baseline: a finding the
+    # pristine tree already prints at that gate proves nothing there either.
+    gate_controls = {None: control}
+
+    def control_for(gate):
+        if gate not in gate_controls:
+            gate_controls[gate] = validator_output(pristine, gate)
+        return gate_controls[gate]
+
+    def matched(output: str, expected: str, gate: str | None) -> bool:
+        """Did the validator report `expected`, at the severity the case claims?
+
+        Naming a gate IS the claim that the finding is hard there, so a gated
+        case is only satisfied by a FAIL line. Without this the gate would be
+        decoration: the WARN this harness keeps on purpose carries the same
+        text, and a control that accepts it proves the defect was noticed
+        rather than refused (T-568).
+        """
+        if gate is None:
+            return expected in output
+        return any(ln.startswith("FAIL") and expected in ln
+                   for ln in output.splitlines())
+
     dead, skipped, always = [], [], []
-    for label, rel, mutation, expected in CASES:
-        if expected in control:
+    for label, rel, mutation, expected, gate in map(case_parts, CASES):
+        if matched(control_for(gate), expected, gate):
             always.append((label, expected))
             continue
         files = mutation_files(pristine, rel, mutation)
@@ -1811,7 +2199,7 @@ def main() -> int:
             if not apply_case(pristine, rel, mutation):
                 skipped.append(label)
                 continue
-            if expected not in validator_output(pristine):
+            if not matched(validator_output(pristine, gate), expected, gate):
                 dead.append((label, expected))
         finally:
             for f, data in saved:

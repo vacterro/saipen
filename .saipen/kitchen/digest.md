@@ -1,3 +1,3 @@
-done: v7.213.0 -- role charters machine-readable (T-541): 8-key YAML metadata block in every sai*.md, 4 new charters (saihunt/saipython/saiwiki/saitranslate), [charter-metadata] check, outbox freshness fields. Shipped ff6cb74. Earlier: v7.212.0 (T-540 HUNT/CLEAN split), v7.211.0 (T-539 intent-aware routing)
-remaining: T-542 -- make role freshness real (role_revision recorded at spawn, carried in OUTBOX, compared at collect)
-awaiting: nothing
+done: T-543..T-548 verified; scenarios green, 30 hardening controls resolved, mutation audit 202/202, ruff and diff-check clean
+remaining: T-549 final live-validator gate, then commit/ship and the blocked T-551+ improve wave
+awaiting: fresh EE/QQ packages from the other models assigned by the user

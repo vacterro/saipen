@@ -17,6 +17,14 @@ it differently.
 Stages run in order. A stage that produces work does not skip ahead — it returns
 to the stage named in its own return rule, and the sequence resumes from there.
 
+`converge_target` preserves which closure the user requested. Absent or `done`
+is plain `cc`: run A-M. `ship` is `ccc`: LOG
+`DEC: ccc converge target -> ship @<pre-SHIP-source_head>`,
+run A-I, execute normal REVIEW/SHIP gates, and only after successful SHIP resume
+at J so K/L/M bind to the shipped HEAD. This is the **CCC SHIP boundary between
+I and J**. A crash keeps the field; it cannot silently resume as plain `cc` and
+prepare K/L before SHIP. Clear the field only when the convergence intent clears.
+
 **A. RECOVER.** Repair invalid or stale `STATE.md`/`BOARD.md`/`LOG.md` before
 any work, per CORE.md § 1.5. This is first because every later stage reads the
 state it would otherwise corrupt further.
@@ -48,6 +56,7 @@ not PASS. Skipped is not PASS. Timeout is not PASS.
 `hunt -> clean @HASH` marker does not satisfy this stage** — an explicit
 convergence claim needs evidence produced by this run, not by an earlier one.
 Findings are ticketed and return to C, after which E and F both run again.
+In validator terms: an existing hunt -> clean marker cannot satisfy forced HUNT.
 
 **G. CLEAN.** Only after F is clean. `phases/clean.md` owns what may be mutated
 and what may not. Ambiguous or destructive cleanup produces an exact ticket or a
@@ -58,7 +67,8 @@ describes the tree. Re-run it. Failure returns to C.
 
 **I. FINAL FORCED HUNT.** Run `HUNT` again, after CLEAN and after H passed.
 This is the closure sweep, and it is the last stage that may find work: anything
-it reports returns to C.
+it reports returns to C. With `converge_target: ship`, successful I routes to
+normal REVIEW/SHIP and then J; it MUST NOT execute J, K, or L before SHIP.
 
 **J. SUBSAIPEN FACTORY SYNC.** Only now, `saipen sub sync` — refresh inherited
 role charters and detect role drift, touching no live SubSaipen
@@ -73,9 +83,13 @@ unless a future change proves parallel preparation safe.
 
 **M. FINAL FRESHNESS CHECK.** Both producer packages must be `status: ready`,
 produced after I, bound to the current source fingerprint and role revision,
-internally verified, and written outside the main tree. Then: write the closing
-LOG evidence, clear `execution_intent` back to `normal`, enter `DONE`, and name
-in the report every package still waiting on an explicit `eee`/`qqq`.
+internally verified, and written outside the main tree. **This stage runs
+`tools/validate.py --gate converge`** — the one gate under which a missing,
+unready or stale EE/QQ package is a hard FAIL. Nothing earlier in this sequence
+runs it, and nothing earlier may: producer readiness is a closure requirement,
+not a precondition for the Core work in stages A–I (T-568). Then: write the
+closing LOG evidence, clear `execution_intent` back to `normal`, enter `DONE`,
+and name in the report every package still waiting on an explicit `eee`/`qqq`.
 
 ## The ordering rule
 

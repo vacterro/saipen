@@ -95,19 +95,67 @@ attempted. Write the human digest same as always, `awaiting:` noting
 6a. **LOCAL. Touches no repository and no remote.** `CHANGELOG.md`
    newest-top. Re-run the required validators after every release metadata
    edit; a gate run before VERSION/README/CHANGELOG changed proves the old
-   release, not the one about to ship.
-6b. **GIT. Writes the repository and the remote.** Once 6a is green, commit
-   the reviewed changes, then push the branch. **Re-read the remote
-   immediately before this push** and again before the tag push below:
-   step 5's answer is a measurement, and a remote someone else published to
-   in between makes it stale. Classification changed from first-publish to
-   established -> proceed; changed the other way -> stop and re-run step 5's
-   gate.
+   release, not the one about to ship. The gate is
+   `tools/validate.py --gate ship`: everything required to ship THIS tree
+   safely. **A stale, malformed or unrefreshed producer package does not
+   block it** — an EE or QQ package is required fresh when it is consumed
+   (`--gate collect:<producer>`) or at CONVERGE.md stage M
+   (`--gate converge`), never as a precondition for an unrelated Core commit.
+   Those packages still report, as WARNs naming the producer, so nobody
+   mistakes soft for invisible. Reversing this once put an ordinary one-line
+   Core ship behind regenerating every producer in the project (T-568).
+
+   A run here is a **signal, not the authorization**: some gates can only be
+   answered once the staging set exists, so the binding run is 6b's, after
+   staging. Both run the same command; only the second decides.
+6b. **GIT. Writes the repository and the remote.** Once 6a is green, in this
+   exact order. **Staging comes before the binding gate**, because a gate
+   that cannot see the index cannot answer questions about it.
+
+   1. **Read the index and the working tree.** `git status --porcelain=v1
+      -uall` and `git diff --cached --name-only`. Two separate facts: what
+      is already staged, and what has changed at all.
+   2. **Attribute every intended file** to the ticket or wave being shipped.
+      An unattributed change is step 0's problem, not something to stage and
+      explain in the commit message.
+   3. **Preserve anything the user staged before this run.** It is not
+      yours; it stays staged and it is named in the ship report. Never
+      `git reset` a staged set you did not create.
+   4. **Stage ONLY the reviewed files this ship owns**, by explicit path:
+      `git add -- <path> [<path> ...]`. **`git add .` and `git add -A` are
+      forbidden here** — both stage whatever else the tree happens to be
+      carrying, which is how an unreviewed file reaches a release.
+   5. **Re-read the staged set and prove it equals the intended scope.**
+      `git diff --cached --name-only` compared against the list from 2.
+      A difference stops the ship; it does not get committed and explained.
+   6. **Run `tools/validate.py --gate ship` NOW.** This is the binding gate.
+      A required runtime file added by this ticket is tracked from the moment
+      it is staged, so the MANIFEST check can finally be satisfied — before
+      this order existed, the gate ran first and a newly-added required file
+      could not pass it at all without an undocumented staging step the
+      protocol never named (T-569).
+   7. **`git diff --cached --check`** — whitespace and conflict markers in
+      the exact bytes about to be committed, not in the working tree.
+   8. **Commit exactly the staged scope.** No `-a`, no path arguments that
+      would widen it past what 5 proved.
+   9. **Push the branch.** **Re-read the remote immediately before this
+      push** and again before the tag push below: step 5's answer is a
+      measurement, and a remote someone else published to in between makes
+      it stale. Classification changed from first-publish to established ->
+      proceed; changed the other way -> stop and re-run step 5's gate.
+
+   **If 6 or 7 fails: no commit, no push.** Any staging this run added is
+   undone (`git restore --staged -- <path>`) and any pre-existing staged
+   state is left exactly as found. Then return through the ordinary fixable
+   SHIP -> BUILD edge; a failing gate is work to do, not a gate to route
+   around.
 
    *Why this is two steps.* It was one, and the `mode: no-publish` block
    above then had to say "do step 6" and "skip the push half of step 6" in
    the same breath -- leaving the commit, which that mode forbids. A step
    that is half-permitted cannot be followed; a step is local or it is not.
+   Staging lives in this half for the same reason: the index is repository
+   state, so `mode: no-publish` reaches nothing here at all.
 7. ONLY AFTER step 6b's branch push has LANDED -- confirmed by the push
    returning success, or by `git rev-parse origin/BRANCH` ==
    `git rev-parse BRANCH` after a fetch -- create the release tag, then

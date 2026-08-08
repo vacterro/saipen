@@ -1,12 +1,19 @@
-# saipen UI -- Vintage Golden
+# saipen UI -- Golden Default (Wintage)
 
 Applies to every interface: web, app, panel, dialog, HTML report, TUI, desktop tool, or embedded utility.
 
-**Vintage Golden is the default palette.** Not a theme, not a preset, not one
-option among several -- it is what a saipen interface looks like unless the
-user asks for something else in so many words. There is no second palette in
-this document to choose from, and that is deliberate: a document with two
-defaults has none.
+**Golden Default is the default palette.** Its values are copied exactly from
+Wintage's shipped `themes/goldendefault.json`, not reconstructed from a generic
+"dark golden" description. It is not one preset among several: it is what a
+saipen interface looks like unless the user explicitly asks for another theme.
+There is no second palette in this document to choose from.
+
+**Vintage Golden names the design language; Golden Default names its palette.**
+The design language supplies compact Win95 geometry, instant states and bevel
+rules. The 21 values below supply colour. If a generic vintage-theme skill,
+remembered prompt, screenshot estimate or old implementation gives
+different colour values, this file wins. A model that follows those different
+values has not followed the saipen UI contract.
 
 ## Intent
 
@@ -36,7 +43,7 @@ The goal is not nostalgia as a costume. The goal is clarity that happens to look
 2. **Zero rounded corners, zero shadow, zero gradients, zero blur, zero transparency, zero animation, zero transition.**
 3. **Depth is 2px bevel only.** Raised and sunken states are the only depth language allowed.
 4. **Compact by default.** Fit 640x480 without horizontal scroll. Prefer dense vertical rhythm over wide empty space.
-5. **Color comes only from tokens.** Every visible color must trace back to the palette below.
+5. **Color comes only from Golden Default tokens.** Every visible color must trace back to the palette below.
 6. **Visible states must be instant.** Hover, focus, active, disabled, selected, and error must never rely on motion.
 7. **Labels beat placeholders.** Placeholder text is never allowed to be the only explanation.
 8. **No visual decoration without function.** If it does not clarify state or improve reading, remove it.
@@ -88,51 +95,53 @@ built on that distrust.
    instant, it is physical feedback for a press the user themselves caused,
    and it is the entire motion budget. It is not precedent for anything else.
 
-## Tokens + base CSS -- Vintage Golden
+## Tokens + base CSS -- Golden Default
 
-Paste this into every saipen UI implementation. These eighteen values ARE the
-palette: naming it means the numbers below are the reference, and an interface
-that has drifted from them is wrong rather than merely different.
+Paste this into every saipen UI implementation. These 21 values ARE Golden
+Default. Naming the palette means these exact numbers, and an interface that
+has drifted from them is wrong rather than merely different.
 
-The set was lightened once, after the original darker values proved hard to
-read on a glossy panel in daylight. The old numbers are not kept here as an
-alternative -- superseded is superseded, and `git log` remembers them.
+Canonical upstream evidence: Wintage `themes/goldendefault.json`. This copy is
+self-contained so an injected agent does not need the Wintage repository, but
+the values remain byte-for-byte identical to that shipped theme.
 
-**Extending it.** An implementation MAY add tokens its own domain needs -- a
-softer surface, an accent for one recurring mark. Two conditions: declare them
-in this same `:root` block alongside the eighteen, and name them by role, never
-by colour. What is never allowed is a hex value inline in a rule; that is iron
-law 5, and an added token is how you obey it, not how you get around it.
+**Closed colour set.** An implementation MUST NOT alter these values or add a
+second colour system. Domain-specific token names may alias one of these 21
+values. A genuinely new colour requires the user's explicit theme request;
+"the model thought it looked better" is never authorization.
 
 ```css
 :root {
-  --background:#342012;
-  --backgroundSoft:#3A2616;
-  --surface:#4A341B;
-  --surfaceRaised:#5A4324;
-  --surfaceAlt:#634B2B;
+  --background:#1A1810;
+  --backgroundSoft:#232018;
+  --surface:#332E22;
+  --surfaceRaised:#3D372A;
+  --surfaceAlt:#453D30;
 
-  --borderDark:#1C1208;
-  --borderHighlight:#D3B57A;
-  --borderMuted:#665033;
+  --borderDark:#100E08;
+  --borderHighlight:#F0D060;
+  --bevelLight:#75663D;
+  --borderMuted:#5A5040;
 
-  --textPrimary:#E2CA95;
-  --textSecondary:#C5AB6E;
-  --textMuted:#95804C;
+  --textPrimary:#D4C89A;
+  --textSecondary:#9C9371;
+  --textMuted:#6E674E;
 
   --accentTeal:#008080;
-  --accentTealDeep:#006060;
+  --accentTealDeep:#004C4C;
 
-  --success:#5B9630;
-  --warning:#969630;
-  --danger:#963030;
+  --success:#4A7A20;
+  --warning:#7A7A20;
+  --danger:#7A2020;
+  --dangerText:#D66464;
 
-  --selection:#5A4324;
-  --compareBack:#24170C;
+  --selection:#3D372A;
+  --compareBack:#14120C;
+  --link:#F0D060;
 }
 
 * {
-  font-family: Verdana !important (cover 100%);
+  font-family: Verdana, sans-serif !important;
   -webkit-font-smoothing: none !important;
   -moz-osx-font-smoothing: unset !important;
   font-smooth: never !important;
@@ -160,13 +169,13 @@ body {
 
 .raised, button {
   border: 2px solid;
-  border-color: var(--borderHighlight) var(--borderDark) var(--borderDark) var(--borderHighlight);
+  border-color: var(--bevelLight) var(--borderDark) var(--borderDark) var(--bevelLight);
   background: var(--surfaceRaised);
 }
 
 .sunken, input, select, textarea {
   border: 2px solid;
-  border-color: var(--borderDark) var(--borderHighlight) var(--borderHighlight) var(--borderDark);
+  border-color: var(--borderDark) var(--bevelLight) var(--bevelLight) var(--borderDark);
   background: var(--surface);
 }
 
@@ -183,7 +192,7 @@ button:hover {
 }
 
 button:active {
-  border-color: var(--borderDark) var(--borderHighlight) var(--borderHighlight) var(--borderDark);
+  border-color: var(--borderDark) var(--bevelLight) var(--bevelLight) var(--borderDark);
   background: var(--surface);
   transform: translate(1px, 1px);
 }
@@ -208,6 +217,10 @@ textarea {
 ::selection {
   background: var(--selection);
   color: var(--textPrimary);
+}
+
+a, a:link, a:visited {
+  color: var(--link);
 }
 ```
 

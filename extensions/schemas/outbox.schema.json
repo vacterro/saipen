@@ -39,7 +39,7 @@
       },
       "source_tree_fingerprint": {
         "type": "string",
-        "description": "Deterministic fingerprint over the producer's relevant source surface including uncommitted tracked/untracked changes, excluding its own kitchen/OUTBOX noise (PROTOCOL.md freshness section, T-542)"
+        "description": "Deterministic fingerprint over the producer's relevant source surface including uncommitted tracked/untracked changes, excluding its own kitchen/OUTBOX noise (PROTOCOL.md freshness section, T-543)"
       },
       "role_revision": {
         "type": "string",
@@ -61,6 +61,26 @@
         "type": "string"
       }
     },
+    "allOf": [
+      {
+        "if": {
+          "properties": { "status": { "const": "ready" } },
+          "required": ["status"]
+        },
+        "then": {
+          "required": [
+            "producer",
+            "source_head",
+            "source_tree_fingerprint",
+            "role_revision",
+            "coverage",
+            "payload",
+            "verified",
+            "instructions"
+          ]
+        }
+      }
+    ],
     "required": ["id", "status", "summary", "critical"]
   }
 }

@@ -77,6 +77,11 @@
       "default": "normal",
       "description": "The ONE canonical persisted execution-intent enum (RFC § 1.2, § 2.4). `normal` = ordinary one-step continuation; `goal` = an explicit user objective is running (the former `goal_mode: true`, safety-valve counters `goal_waves`/`goal_tickets` REQUIRED and bound to this value); `converge` = bare `cc` continuation to closure with no new objective. The legacy `goal_mode` boolean remains READ-compatible only during migration: `true` maps to `goal`, `false` to `normal`. A state carrying BOTH this field and `goal_mode` is corrupt -- tools/validate.py FAILs it, because after the first canonical checkpoint there is exactly one source of truth."
     },
+    "converge_target": {
+      "type": "string",
+      "enum": ["done", "ship"],
+      "description": "Optional only with execution_intent: converge. Absent or done is plain cc (A-M). ship is ccc: converge through I, SHIP, then run J-M against the shipped HEAD. Cleared with execution_intent at closure."
+    },
     "goal_mode": {
       "type": "boolean",
       "default": false,

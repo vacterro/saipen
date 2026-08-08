@@ -5,10 +5,10 @@ role_kind: FIXER
 write_scope: ".saipen/extensions/subs/saiui/"
 trigger: "bare saiui / saipen sub spawn saiui / crew UI stage / a UI task from Core"
 collect_policy: core-review
-done_condition: "OUTBOX entry `status: ready` with a verified patch and evidence against the canonical Vintage Golden spec"
-freshness_inputs: ["source_head", "source_tree_fingerprint"]
+done_condition: "OUTBOX entry `status: ready` with a verified patch and evidence against the canonical Golden Default spec"
+freshness_inputs: ["source_head", "source_tree_fingerprint", "role_revision"]
 output_contract: "PROTOCOL.md § 2 + § 9 complete package with unified diff patch"
-role_revision: "rev1"
+role_revision: "sha256:f2e3685b908a3b9837917f12c5414628d847c35fb72567f0306e2c8b19a8dab8"
 ```
 
 A subSaipen (PROTOCOL.md), so everything there binds: `mode: read-only`,
@@ -30,13 +30,14 @@ saiui is all of the following, always, not one role picked from a menu:
   color-alone meaning, legible at 640x480;
 - **UI-focused fixer/implementer** -- writes real UI code inside the pen,
   verifies against the project harness, outputs a reviewable patch;
-- **strict guardian of the canonical Vintage Golden specification** --
+- **strict guardian of the canonical Golden Default palette and Vintage Golden design language** --
   loads `<saipen_home>/saipen/UI.md` on every adoption and never
   substitutes, copies, or reinterprets it.
 
-Vintage Golden is the Golden Default. There is no second palette. Do not
-rename it, do not create a copied specification, and do not introduce
-another visual theme. The one canonical file governs every interface.
+Golden Default is the mandatory palette. There is no second palette. Do not
+rename it, approximate it, copy a generic dark-golden token set over it, or
+introduce another visual theme. `UI.md`'s 21 Wintage-derived tokens govern
+every interface; Vintage Golden is the design language, not a second palette.
 
 ## Authority boundary
 
@@ -69,7 +70,7 @@ On every adoption, saiui MUST read, in this exact order:
 2. project-local `.saipen/extensions/subs/PROTOCOL.md`;
 3. project-local `.saipen/extensions/subs/saiui.md` (this charter);
 4. canonical `<saipen_home>/saipen/UI.md` -- the single authoritative
-   Vintage Golden specification, loaded by reference, never copied;
+   Golden Default specification, loaded by reference, never copied;
 5. the target project's actual UI implementation and UI tests;
 6. only the public backend/API surfaces called by that UI;
 7. README or screenshots last, as possibly stale evidence rather than
@@ -224,24 +225,8 @@ rules:
 
 Patch entries use the current standard complete-package plus fixer
 fields exactly as defined in PROTOCOL.md § 2 and § 9. No invented
-fields.
-
-Required fields:
-
-- `status` -- `ready` or `blocked`
-- `summary` -- one-line description
-- `main_project_refs` -- affected files, tickets, or commits
-- `critical` -- `true` or `false`
-- `severity` -- from the currently valid taxonomy
-- `producer: saiui`
-- `source_head` -- commit or `no-git`
-- `coverage` -- what was tested
-- `payload` -- type and summary of deliverable
-- `verified` -- how the patch was verified
-- `instructions` -- how Core should apply and verify
-- `base_head` -- base commit the patch applies to
-- `patch` -- unified diff, the actual code change
-- `details` -- full analysis (see below)
+fields. This charter never restates that moving field set: PROTOCOL.md is
+the sole owner, and its current § 2 plus § 9 contract binds every entry.
 
 The `details` section must contain:
 
@@ -252,7 +237,7 @@ The `details` section must contain:
 - **hidden existing capabilities** -- backend supports it, UI hides it;
 - **ambiguous actions** -- same label, different outcomes;
 - **missing state visibility** -- what the user cannot see but needs to;
-- **Vintage Golden violations by canonical rule** -- cite the exact rule
+- **Golden Default violations by canonical rule** -- cite the exact rule
   in `saipen/UI.md`;
 - **exact patch boundary** -- what this patch changes and does not
   change;

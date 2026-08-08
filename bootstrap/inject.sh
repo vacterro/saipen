@@ -28,6 +28,75 @@ case "$(uname -s 2>/dev/null)" in
     ;;
 esac
 
+ROOT="$(dirname "$SKILL_HOME")"
+MANIFEST="$SKILL_HOME/MANIFEST.json"
+[ -f "$MANIFEST" ] || { echo "FATAL: saipen/MANIFEST.json not found"; exit 1; }
+if command -v python3 >/dev/null 2>&1; then
+  PYTHON_BIN=python3
+elif command -v python >/dev/null 2>&1; then
+  PYTHON_BIN=python
+else
+  echo "FATAL: Python is required to parse saipen/MANIFEST.json safely"
+  exit 1
+fi
+
+manifest_query() {
+  "$PYTHON_BIN" - "$MANIFEST" "$1" <<'PY'
+import json
+import sys
+from pathlib import PurePosixPath
+
+manifest_path, query = sys.argv[1:]
+sys.stdout.reconfigure(newline="\n")
+with open(manifest_path, encoding="utf-8") as handle:
+    manifest = json.load(handle)
+
+def safe(value):
+    if not isinstance(value, str) or not value or "\\" in value or "|" in value:
+        raise ValueError(f"unsafe runtime manifest path: {value!r}")
+    path = PurePosixPath(value)
+    if path.is_absolute() or ".." in path.parts:
+        raise ValueError(f"unsafe runtime manifest path: {value!r}")
+    return value
+
+managed = manifest.get("managed_dirs")
+trees = manifest.get("copy_trees")
+files = manifest.get("files")
+phases = manifest.get("phase_docs", {}).get("files")
+if not all(isinstance(group, list) and group for group in (managed, trees, files, phases)):
+    raise ValueError("runtime manifest lacks nonempty managed_dirs/copy_trees/files/phase_docs.files")
+managed = [safe(item) for item in managed]
+trees = [(safe(item["src"]), safe(item["dst"])) for item in trees]
+files = [safe(item["src"]) for item in files if item.get("required") is True]
+phases = [safe(f"phases/{item}")[len("phases/"):] for item in phases]
+if not files:
+    raise ValueError("runtime manifest has no required files")
+if query == "all":
+    for item in managed:
+        print(f"M|{item}|")
+    for src, dst in trees:
+        print(f"T|{src}|{dst}")
+    for item in files:
+        print(f"F|{item}|")
+    for item in phases:
+        print(f"P|{item}|")
+else:
+    raise ValueError(f"unknown manifest query: {query}")
+PY
+}
+
+MANIFEST_ROWS=$(manifest_query all) \
+  || { echo "FATAL: saipen/MANIFEST.json is invalid"; exit 1; }
+[ -n "$MANIFEST_ROWS" ] \
+  || { echo "FATAL: saipen/MANIFEST.json produced an empty inventory"; exit 1; }
+
+install_rel() {
+  case "$1" in
+    saipen/*) printf '%s\n' "${1#saipen/}" ;;
+    *) printf '%s\n' "$1" ;;
+  esac
+}
+
 backup_file() {
   if [ -f "$1" ] && [ ! -f "$1.bak" ]; then
     cp "$1" "$1.bak" || { echo "backup FAILED ($1)"; return 1; }
@@ -98,39 +167,99 @@ add_block() { # $1=file
   echo "block added"
 }
 
+build_skill_stage() { # $1=empty stage
+  local stage="$1"
+  local kind src rel target symlink
+  while IFS='|' read -r kind src rel; do
+    case "$kind" in
+      M|P) ;;
+      T)
+        [ -d "$ROOT/$src" ] \
+          || { echo "runtime manifest tree missing: $src"; return 1; }
+        symlink=$(find "$ROOT/$src" -type l -print -quit) \
+          || { echo "runtime manifest tree scan failed: $src"; return 1; }
+        [ -z "$symlink" ] \
+          || { echo "runtime manifest tree contains symlink: $symlink"; return 1; }
+        target="$stage/$rel"
+        mkdir -p "$(dirname "$target")" \
+          && cp -R "$ROOT/$src" "$target" \
+          || { echo "tree copy failed: $src"; return 1; }
+        ;;
+      F)
+        rel="$(install_rel "$src")"
+        [ -f "$ROOT/$src" ] \
+          || { echo "runtime manifest file missing: $src"; return 1; }
+        [ ! -L "$ROOT/$src" ] \
+          || { echo "runtime manifest file is a symlink: $src"; return 1; }
+        target="$stage/$rel"
+        mkdir -p "$(dirname "$target")" \
+          && cp "$ROOT/$src" "$target" \
+          || { echo "file copy failed: $src"; return 1; }
+        ;;
+      *) echo "runtime manifest cache contains unknown row: $kind"; return 1 ;;
+    esac
+  done <<< "$MANIFEST_ROWS"
+
+  find "$stage" -type d -name __pycache__ -prune -exec rm -rf {} + \
+    && find "$stage" -type f \( -name '*.pyc' -o -name '*.pyo' \) -exec rm -f {} + \
+    || { echo "bytecode cleanup failed"; return 1; }
+
+  while IFS='|' read -r kind src rel; do
+    case "$kind" in
+      F)
+        rel="$(install_rel "$src")"
+        [ -f "$stage/$rel" ] \
+          || { echo "staged runtime file missing: $src"; return 1; }
+        ;;
+      P)
+        [ -f "$stage/phases/$src" ] \
+          || { echo "staged phase document missing: $src"; return 1; }
+        ;;
+    esac
+  done <<< "$MANIFEST_ROWS"
+}
+
 copy_skill() { # $1=dst
-  # validate.py resolves the schema relative to itself (../extensions/schemas),
-  # so both must travel together for the skill copy to validate standalone.
-  # templates/ makes init.md's "copy, do NOT freehand" reachable; tests/ makes
-  # validate.md's no-Python shell fallback reachable.
-  # Any cp failure must surface in the report -- a claimed "copied" over a
-  # half-copy is exactly the silent-failure class hunt.md exists to catch.
-  local root; root="$(dirname "$SKILL_HOME")"
+  # Build and verify a sibling stage before moving the old install. A failed
+  # copy therefore leaves the active skill byte-for-byte untouched.
   local dst="${1%/}"
   [ -n "$dst" ] && [ "$dst" != "/" ] && [ "$dst" != "." ] || {
-    echo "copy FAILED ($1) -- unsafe destination"; return
+    echo "copy FAILED ($1) -- unsafe destination"; return 1
   }
-  if rm -rf "$dst/phases" "$dst/tools" "$dst/tests" \
-               "$dst/extensions/schemas" "$dst/extensions/templates" \
-               "$dst/extensions/subs" \
-     && mkdir -p \
-          "$1" \
-          "$1/extensions" \
-          "$1/tests" \
-     && cp "$SKILL_HOME/BOOT.md" "$SKILL_HOME/SKILL.md" "$SKILL_HOME/RFC.md" "$SKILL_HOME/CORE.md" "$SKILL_HOME/MAINTENANCE.md" "$SKILL_HOME/CONVERGE.md" "$SKILL_HOME/UI.md" "$SKILL_HOME/STYLE.md" "$SKILL_HOME/CONFORMANCE.md" "$root/VERSION" "$1/" \
-     && cp -r "$SKILL_HOME/phases" "$1/" \
-     && cp -r "$root/tools" "$1/" \
-     && find "$1/tools" -type d -name __pycache__ -prune -exec rm -rf {} + \
-     && find "$1/tools" -type f \( -name '*.pyc' -o -name '*.pyo' \) -exec rm -f {} + \
-     && cp -r "$root/extensions/schemas" "$1/extensions/" \
-     && cp -r "$root/extensions/templates" "$1/extensions/" \
-     && cp -r "$root/extensions/subs" "$1/extensions/" \
-     && cp "$root/tests/validate.sh" "$root/tests/validate.ps1" "$1/tests/"; then
-    echo "copied (re-run after updates)"
-  else
-    echo "copy FAILED ($1) -- fix and re-run"
+  local parent leaf stage backup had_old=0
+  parent="$(dirname "$dst")"
+  leaf="$(basename "$dst")"
+  stage="$parent/.$leaf.saipen-stage-$$"
+  backup="$parent/.$leaf.saipen-backup-$$"
+  mkdir -p "$parent" \
+    || { echo "copy FAILED ($1) -- create destination parent"; return 1; }
+  if [ -e "$stage" ] || [ -L "$stage" ] || [ -e "$backup" ] || [ -L "$backup" ]; then
+    echo "copy FAILED ($1) -- stale staging/backup path exists; inspect before retry"
     return 1
   fi
+  mkdir "$stage" \
+    || { echo "copy FAILED ($1) -- create staging directory"; return 1; }
+  if ! build_skill_stage "$stage"; then
+    rm -rf "$stage" 2>/dev/null || true
+    echo "copy FAILED ($1) -- staged copy or verification failed"
+    return 1
+  fi
+  if [ -e "$dst" ] || [ -L "$dst" ]; then
+    mv "$dst" "$backup" \
+      || { rm -rf "$stage" 2>/dev/null || true; echo "copy FAILED ($1) -- preserve active install"; return 1; }
+    had_old=1
+  fi
+  if ! mv "$stage" "$dst"; then
+    [ "$had_old" -eq 0 ] || mv "$backup" "$dst" 2>/dev/null || true
+    rm -rf "$stage" 2>/dev/null || true
+    echo "copy FAILED ($1) -- activate staged install; old install restored"
+    return 1
+  fi
+  if [ "$had_old" -eq 1 ] && ! rm -rf "$backup"; then
+    echo "copy FAILED ($1) -- new install active but old backup cleanup failed: $backup"
+    return 1
+  fi
+  echo "copied (re-run after updates)"
 }
 
 report() { # $1=label, remaining=function + args
@@ -164,6 +293,8 @@ configure_aider() { # $1=config
       || { echo "read key check FAILED ($A)"; return 1; }
     if [ "$read_status" -eq 1 ]; then
       backup_file "$A" || return 1
+      # Always add one separator byte. uninstall.sh removes that exact byte
+      # with byte offsets, preserving CRLF/LF and surrounding user content.
       printf '\n# saipen protocol auto-loaded\nread:\n  - %s\n  - %s\n' "$P" "$S" >> "$A" \
         || { echo "write FAILED ($A)"; return 1; }
       echo "read: appended"

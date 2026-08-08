@@ -49,13 +49,14 @@ matter how quiet the filesystem has been. There is no shortcut around
 actually performing the six checks below, every time this phase runs
 for real.
 
-**Subagents available (CORE.md §1.3)?** Dispatch the 6 signal categories below
-as one batch of parallel subagent tasks instead of scanning them in turn.
-Each subagent is read-only: it investigates and returns findings, it MUST
-NOT touch `.saipen/` itself -- only the orchestrating agent writes BOARD/LOG,
-once, after merging every subagent's results. This avoids write races by
-construction. No subagent support -> run the same 6 categories sequentially,
-exactly as below. Either path, the cap and output are identical.
+**Ephemeral workers available (CORE.md §1.3)?** Dispatch the 6 signal
+categories as one batch of bounded read-only investigations. These are
+EPHEMERAL WORKERS, not SubSaipen instances: one assigned investigation,
+one returned result, then disappear; never enter `MANIFEST.md`, never receive
+STATE/BOARD/LOG/kitchen or lifecycle state, and never become `saihunt` by
+accident. They MUST NOT touch `.saipen/` -- only the orchestrating Core agent
+writes BOARD/LOG once after merging results. No ephemeral-worker support ->
+run the same categories sequentially. Either path, cap and output are equal.
 
 Signal order, cap 5 tickets:
 1. Failing tests
@@ -79,14 +80,14 @@ destructive operation needs an active ticket AND reversibility, and HUNT
 routinely runs with no ticket at all.
 
 `.saipen/kitchen/` is in scope for this sweep, but as a detection surface
-only -- use `phases/clean.md`'s stale definition (owning ticket `DONE` and
-off `BOARD.md`, or content fully superseded by `LOG.md`/`CHANGELOG.md`) to
+only -- use `phases/clean.md`'s evidence-based Core kitchen definition to
 find stale files and ticket them for CLEAN. The scan extends to every
 `.saipen/extensions/subs/<name>/kitchen/` present -- a subSaipen's own
 scratch is a distinct folder, not `.saipen/kitchen/` itself, but it is
 still this project's kitchen content and does not get a free pass for
-living one level deeper. Detection only; the deletion is CLEAN's, whenever
-it next runs.
+living one level deeper. For those packages use `extensions/subs/PROTOCOL.md`
+§ 6: age and repeated collection never mean stale. Detection only; deletion
+is CLEAN's explicit evidence-gated work.
 
 Before ticketing any finding, check it isn't already tracked anywhere on
 `BOARD.md` -- including `## BLOCKED`, not just `## TODO`/`## DOING`. A

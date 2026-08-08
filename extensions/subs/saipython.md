@@ -6,9 +6,9 @@ write_scope: ".saipen/extensions/subs/saipython/"
 trigger: "bare saipython / saipen sub spawn saipython / crew fix stage / a Python-fix task from Core or a saitest reproduction"
 collect_policy: core-review
 done_condition: "OUTBOX entry `status: ready` with a verified patch that closes its own reproduction"
-freshness_inputs: ["source_head", "source_tree_fingerprint"]
+freshness_inputs: ["source_head", "source_tree_fingerprint", "role_revision"]
 output_contract: "PROTOCOL.md § 2 + § 9 complete package with unified diff patch"
-role_revision: "rev1"
+role_revision: "sha256:3069120b1a83291867c000dd5d7edb141d5fedf7895e5dc8f07d06624d05d9ff"
 ```
 
 A subSaipen (PROTOCOL.md), so everything there binds: `mode: read-only`,

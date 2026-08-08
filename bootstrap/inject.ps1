@@ -28,6 +28,90 @@ try { $SkillHome = (Resolve-Path $SkillHome).Path } catch {
 if (-not (Test-Path (Join-Path $SkillHome "BOOT.md"))) {
   Write-Host "FATAL: BOOT.md missing in $SkillHome" -ForegroundColor Red; exit 1
 }
+$Root = Split-Path $SkillHome
+$ManifestPath = Join-Path $SkillHome "MANIFEST.json"
+try {
+  $RuntimeManifest = Get-Content -LiteralPath $ManifestPath -Raw -Encoding utf8 | ConvertFrom-Json
+} catch {
+  Write-Host "FATAL: runtime manifest unreadable at $ManifestPath`: $($_.Exception.Message)" -ForegroundColor Red
+  exit 1
+}
+function Get-InstallRelativePath([string]$sourcePath) {
+  $normalized = $sourcePath.Replace('\', '/')
+  if ([string]::IsNullOrWhiteSpace($normalized) -or
+      $normalized.StartsWith('/') -or
+      $normalized -match '^[A-Za-z]:' -or
+      $normalized -match '(^|/)\.\.(/|$)') {
+    throw "unsafe runtime manifest path: $sourcePath"
+  }
+  if ($normalized.StartsWith('saipen/')) { $normalized = $normalized.Substring(7) }
+  return $normalized.Replace('/', [System.IO.Path]::DirectorySeparatorChar)
+}
+
+function Get-SourcePath([string]$sourcePath) {
+  $normalized = $sourcePath.Replace('\', '/')
+  if ([string]::IsNullOrWhiteSpace($normalized) -or
+      $normalized.StartsWith('/') -or
+      $normalized -match '^[A-Za-z]:' -or
+      $normalized -match '(^|/)\.\.(/|$)') {
+    throw "unsafe runtime manifest source: $sourcePath"
+  }
+  $native = $normalized.Replace('/', [System.IO.Path]::DirectorySeparatorChar)
+  $candidate = [System.IO.Path]::GetFullPath((Join-Path $Root $native))
+  $rootPrefix = [System.IO.Path]::GetFullPath($Root).TrimEnd(
+    [System.IO.Path]::DirectorySeparatorChar,
+    [System.IO.Path]::AltDirectorySeparatorChar) + [System.IO.Path]::DirectorySeparatorChar
+  $comparison = if ([System.Environment]::OSVersion.Platform -eq [System.PlatformID]::Win32NT) {
+    [System.StringComparison]::OrdinalIgnoreCase
+  } else {
+    [System.StringComparison]::Ordinal
+  }
+  if (-not $candidate.StartsWith($rootPrefix, $comparison)) {
+    throw "runtime manifest source escapes repository root: $sourcePath"
+  }
+  return $candidate
+}
+
+try {
+  if (@($RuntimeManifest.files).Count -eq 0 -or
+      @($RuntimeManifest.copy_trees).Count -eq 0 -or
+      @($RuntimeManifest.managed_dirs).Count -eq 0 -or
+      @($RuntimeManifest.phase_docs.files).Count -eq 0) {
+    throw "runtime manifest lacks nonempty files/copy_trees/managed_dirs/phase_docs.files"
+  }
+  foreach ($rel in @($RuntimeManifest.managed_dirs)) {
+    if ($rel -isnot [string]) { throw "managed_dirs entries must be strings" }
+    [void](Get-InstallRelativePath $rel)
+  }
+  foreach ($tree in @($RuntimeManifest.copy_trees)) {
+    $names = @($tree.PSObject.Properties.Name)
+    if ($names -notcontains "src" -or $names -notcontains "dst" -or
+        $tree.src -isnot [string] -or $tree.dst -isnot [string]) {
+      throw "copy_trees entries require string src/dst"
+    }
+    [void](Get-SourcePath $tree.src)
+    [void](Get-InstallRelativePath $tree.dst)
+  }
+  $requiredCount = 0
+  foreach ($entry in @($RuntimeManifest.files)) {
+    $names = @($entry.PSObject.Properties.Name)
+    if ($names -notcontains "src" -or $names -notcontains "required" -or
+        $entry.src -isnot [string] -or $entry.required -isnot [bool]) {
+      throw "files entries require string src and boolean required"
+    }
+    [void](Get-SourcePath $entry.src)
+    [void](Get-InstallRelativePath $entry.src)
+    if ($entry.required) { $requiredCount++ }
+  }
+  if ($requiredCount -eq 0) { throw "runtime manifest has no required files" }
+  foreach ($phase in @($RuntimeManifest.phase_docs.files)) {
+    if ($phase -isnot [string]) { throw "phase_docs.files entries must be strings" }
+    [void](Get-InstallRelativePath "phases/$phase")
+  }
+} catch {
+  Write-Host "FATAL: runtime manifest invalid: $($_.Exception.Message)" -ForegroundColor Red
+  exit 1
+}
 
 $blockCore = @"
 <!-- SAIPEN:BEGIN -->
@@ -83,40 +167,86 @@ function Add-Block([string]$file) {
 }
 
 function Copy-Skill([string]$dst) {
-  # validate.py resolves the schema relative to itself (../extensions/schemas),
-  # so both must travel together for the skill copy to validate standalone.
-  # templates/ makes init.md's "copy, do NOT freehand" reachable; tests/ makes
-  # validate.md's no-Python shell fallback reachable.
-  # Any copy failure must surface in the report -- a claimed "copied" over a
-  # half-copy is exactly the silent-failure class hunt.md exists to catch.
+  # MANIFEST.json owns every copied file/tree and replaced destination. Any
+  # copy failure surfaces -- a claimed "copied" over a half-copy is exactly
+  # the silent-failure class hunt.md exists to catch.
   if ([string]::IsNullOrWhiteSpace($dst)) { return "copy FAILED ($dst): unsafe destination" }
+  $stage = $null
+  $backup = $null
   try {
-    if (-not (Test-Path $dst)) { New-Item -ItemType Directory -Force $dst -ErrorAction Stop | Out-Null }
-    $root = Split-Path $SkillHome
-    foreach ($rel in @("phases", "tools", "tests", "extensions\schemas", "extensions\templates", "extensions\subs")) {
-      $target = Join-Path $dst $rel
-      if (Test-Path $target) {
-        Remove-Item -LiteralPath $target -Recurse -Force -ErrorAction Stop
-      }
+    $parent = Split-Path $dst
+    if ([string]::IsNullOrWhiteSpace($parent)) { throw "unsafe destination parent" }
+    if (-not (Test-Path $parent)) { New-Item -ItemType Directory -Force $parent -ErrorAction Stop | Out-Null }
+    $leaf = Split-Path $dst -Leaf
+    $stage = Join-Path $parent ".$leaf.saipen-stage-$PID"
+    $backup = Join-Path $parent ".$leaf.saipen-backup-$PID"
+    if ((Test-Path $stage) -or (Test-Path $backup)) {
+      throw "stale staging/backup path exists; inspect before retry"
     }
-    Copy-Item (Join-Path $SkillHome "BOOT.md"),(Join-Path $SkillHome "SKILL.md"),(Join-Path $SkillHome "RFC.md"),(Join-Path $SkillHome "CORE.md"),(Join-Path $SkillHome "MAINTENANCE.md"),(Join-Path $SkillHome "CONVERGE.md"),(Join-Path $SkillHome "UI.md"),(Join-Path $SkillHome "STYLE.md"),(Join-Path $SkillHome "CONFORMANCE.md"),(Join-Path $root "VERSION") $dst -Force -ErrorAction Stop
-    Copy-Item (Join-Path $SkillHome "phases") $dst -Recurse -Force -ErrorAction Stop
-    Copy-Item (Join-Path $root "tools") $dst -Recurse -Force -ErrorAction Stop
-    $installedTools = Join-Path $dst "tools"
-    Get-ChildItem -LiteralPath $installedTools -Directory -Recurse -Force -ErrorAction Stop |
+    New-Item -ItemType Directory $stage -ErrorAction Stop | Out-Null
+    foreach ($rel in $RuntimeManifest.managed_dirs) {
+      [void](Get-InstallRelativePath ([string]$rel))
+    }
+    foreach ($tree in $RuntimeManifest.copy_trees) {
+      $source = Get-SourcePath ([string]$tree.src)
+      $target = Join-Path $stage (Get-InstallRelativePath ([string]$tree.dst))
+      if (-not (Test-Path $source -PathType Container)) { throw "runtime manifest tree missing: $($tree.src)" }
+      if (((Get-Item -LiteralPath $source -Force).Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0) {
+        throw "runtime manifest tree is a reparse point: $($tree.src)"
+      }
+      $reparse = Get-ChildItem -LiteralPath $source -Recurse -Force -ErrorAction Stop |
+        Where-Object { ($_.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0 }
+      if ($reparse) { throw "runtime manifest tree contains reparse point: $($reparse[0].FullName)" }
+      New-Item -ItemType Directory -Force $target -ErrorAction Stop | Out-Null
+      Get-ChildItem -LiteralPath $source -Force -ErrorAction Stop |
+        Copy-Item -Destination $target -Recurse -Force -ErrorAction Stop
+    }
+    foreach ($entry in @($RuntimeManifest.files | Where-Object { $_.required -eq $true })) {
+      $source = Get-SourcePath ([string]$entry.src)
+      $target = Join-Path $stage (Get-InstallRelativePath ([string]$entry.src))
+      if (-not (Test-Path $source -PathType Leaf)) { throw "runtime manifest file missing: $($entry.src)" }
+      if (((Get-Item -LiteralPath $source -Force).Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0) {
+        throw "runtime manifest file is a reparse point: $($entry.src)"
+      }
+      $parent = Split-Path $target
+      if (-not (Test-Path $parent)) { New-Item -ItemType Directory -Force $parent -ErrorAction Stop | Out-Null }
+      Copy-Item -LiteralPath $source -Destination $target -Force -ErrorAction Stop
+    }
+    Get-ChildItem -LiteralPath $stage -Directory -Recurse -Force -ErrorAction Stop |
       Where-Object Name -eq "__pycache__" |
       Remove-Item -Recurse -Force -ErrorAction Stop
-    Get-ChildItem -LiteralPath $installedTools -File -Recurse -Force -ErrorAction Stop |
+    Get-ChildItem -LiteralPath $stage -File -Recurse -Force -ErrorAction Stop |
       Where-Object Extension -in ".pyc", ".pyo" |
       Remove-Item -Force -ErrorAction Stop
-    New-Item -ItemType Directory -Force (Join-Path $dst "extensions") -ErrorAction Stop | Out-Null
-    Copy-Item (Join-Path $root "extensions\schemas") (Join-Path $dst "extensions") -Recurse -Force -ErrorAction Stop
-    Copy-Item (Join-Path $root "extensions\templates") (Join-Path $dst "extensions") -Recurse -Force -ErrorAction Stop
-    Copy-Item (Join-Path $root "extensions\subs") (Join-Path $dst "extensions") -Recurse -Force -ErrorAction Stop
-    New-Item -ItemType Directory -Force (Join-Path $dst "tests") -ErrorAction Stop | Out-Null
-    Copy-Item (Join-Path $root "tests\validate.sh"),(Join-Path $root "tests\validate.ps1") (Join-Path $dst "tests") -Force -ErrorAction Stop
+    foreach ($entry in @($RuntimeManifest.files | Where-Object { $_.required -eq $true })) {
+      $target = Join-Path $stage (Get-InstallRelativePath ([string]$entry.src))
+      if (-not (Test-Path $target -PathType Leaf)) { throw "installed runtime file missing: $($entry.src)" }
+    }
+    foreach ($phase in $RuntimeManifest.phase_docs.files) {
+      if (-not (Test-Path (Join-Path $stage "phases\$phase") -PathType Leaf)) {
+        throw "installed phase document missing: $phase"
+      }
+    }
+    if (Test-Path $dst) { Move-Item -LiteralPath $dst -Destination $backup -ErrorAction Stop }
+    try {
+      Move-Item -LiteralPath $stage -Destination $dst -ErrorAction Stop
+      $stage = $null
+    } catch {
+      if ((Test-Path $backup) -and -not (Test-Path $dst)) {
+        Move-Item -LiteralPath $backup -Destination $dst -ErrorAction SilentlyContinue
+      }
+      throw
+    }
+    if (Test-Path $backup) { Remove-Item -LiteralPath $backup -Recurse -Force -ErrorAction Stop }
+    $backup = $null
     return "copied (re-run after updates)"
   } catch {
+    if ($stage -and (Test-Path $stage)) {
+      Remove-Item -LiteralPath $stage -Recurse -Force -ErrorAction SilentlyContinue
+    }
+    if ($backup -and (Test-Path $backup) -and -not (Test-Path $dst)) {
+      Move-Item -LiteralPath $backup -Destination $dst -ErrorAction SilentlyContinue
+    }
     return "copy FAILED ($dst): $($_.Exception.Message)"
   }
 }
@@ -174,7 +304,13 @@ if (Get-Command aider -ErrorAction SilentlyContinue) {
     if (($conf -match [regex]::Escape($skillPath)) -and ($conf -match [regex]::Escape($stylePath))) {
       [void]$report.Add(@("Aider conf", "already"))
     } elseif ($conf -notmatch '(?m)^read:') {
-      Write-NoBom $aider ($conf + "`n# saipen protocol auto-loaded`nread:`n  - $skillPath`n  - $stylePath`n")
+      if (-not (Test-Path "$aider.bak")) { Copy-Item $aider "$aider.bak" -Force -ErrorAction Stop }
+      $original = [System.IO.File]::ReadAllBytes((Get-NativePath $aider))
+      $addition = $Utf8NoBom.GetBytes("`n# saipen protocol auto-loaded`nread:`n  - $skillPath`n  - $stylePath`n")
+      $combined = New-Object byte[] ($original.Length + $addition.Length)
+      [System.Buffer]::BlockCopy($original, 0, $combined, 0, $original.Length)
+      [System.Buffer]::BlockCopy($addition, 0, $combined, $original.Length, $addition.Length)
+      [System.IO.File]::WriteAllBytes((Get-NativePath $aider), $combined)
       [void]$report.Add(@("Aider conf", "read: appended"))
     } else {
       [void]$report.Add(@("Aider conf", "has own read: - add manually: $skillPath + $stylePath"))

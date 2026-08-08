@@ -5,6 +5,24 @@ Stdlib only -- no pip installs, ever. Run from anywhere inside the project,
 or name the owning root explicitly:
 
     python <saipen-home>/tools/validate.py [--strict] [--project-root PATH]
+                                           [--gate CONTEXT]
+
+`--gate` names WHY the validator is running, because producer readiness and
+Core conformance are different questions and one severity for both is what put
+an unrelated Core commit behind regenerating every producer in the project:
+
+    (omitted) / --gate core      Core/project structural conformance.
+    --gate ship                  Everything needed to ship THIS tree safely.
+                                 Unrelated producer readiness is NOT required.
+    --gate collect:<producer>    That producer's OUTBOX must parse and be
+                                 complete, ready, fresh, role-current and
+                                 identity-verified. Other producers stay soft.
+    --gate converge              Core plus CONVERGE.md stage M's fresh EE/QQ.
+
+Under the soft gates a producer defect is a visible WARN naming the producer
+and the gate that would fail it -- soft, never silent. The validator is
+read-only under every gate: it never edits an OUTBOX into the shape it wanted
+to find (T-568).
 
 Covers every check tests/validate.sh / validate.ps1 perform (those two
 are the frozen portable floor for hosts without Python -- new checks land
@@ -13,7 +31,9 @@ E-### monotonicity/uniqueness, parent-reference resolution, ticket-line
 grammar, unknown BOARD fields, UTC enforcement on `updated`.
 
 STATE.md's shape is validated against extensions/schemas/state.schema.json
-directly (required/enum/type subset of JSON Schema, interpreted natively).
+directly (required/enum/type/minimum/items subset of JSON Schema, interpreted
+natively; `audit_schema_keywords` FAILs on any keyword the schema uses and no
+enforcer here interprets, so the subset can never silently fall behind).
 The schema is the machine-readable mirror of the field list, never a second
 opinion about it: RFC § 1.2's required set is normative, and the schema's
 `required` array is deliberately narrower because it cannot express the two
@@ -41,6 +61,10 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+
+from freshness import (FreshnessError, compute_generic_role_revision,
+                       compute_role_revision,
+                       compute_source_identity)
 
 def _read_rfc(p):
     core = p.parent / "CORE.md"
@@ -115,9 +139,32 @@ def style_contract_token(text):
     return "ded-" + hashlib.sha256(body.encode("utf-8")).hexdigest()[:8]
 
 
+def _parse_gate(raw):
+    """Validate a --gate value, returning (kind, producer-or-None).
+
+    Closed set, no guessing: an unrecognized gate exits 2 rather than falling
+    back to the default, because a typo'd `--gate collect:saiwki` that silently
+    ran the SOFT gate would report green on exactly the package the caller
+    asked to hard-check. Failing loudly on the spelling is the only reading
+    that cannot approve an uninspected package."""
+    if raw in ("ship", "converge", "core"):
+        return raw, None
+    if raw.startswith("collect:"):
+        producer = raw.split(":", 1)[1]
+        if re.fullmatch(r"[a-z][a-z0-9_-]*", producer or ""):
+            return "collect", producer
+        print(f"FAIL: --gate collect:<producer> needs a producer name, got "
+              f"{producer!r}")
+        sys.exit(2)
+    print(f"FAIL: unknown --gate {raw!r} -- one of: core (default), ship, "
+          f"collect:<producer>, converge")
+    sys.exit(2)
+
+
 def _parse_cli(argv):
     strict = False
     project_root = None
+    gate, gate_producer = "core", None
     i = 0
     while i < len(argv):
         arg = argv[i]
@@ -134,11 +181,19 @@ def _parse_cli(argv):
             if not project_root:
                 print("FAIL: --project-root requires a path")
                 sys.exit(2)
+        elif arg == "--gate":
+            i += 1
+            if i >= len(argv):
+                print("FAIL: --gate requires a context")
+                sys.exit(2)
+            gate, gate_producer = _parse_gate(argv[i])
+        elif arg.startswith("--gate="):
+            gate, gate_producer = _parse_gate(arg.split("=", 1)[1])
         else:
             print(f"FAIL: unknown argument: {arg}")
             sys.exit(2)
         i += 1
-    return strict, project_root
+    return strict, project_root, gate, gate_producer
 
 
 def _git_from(cwd, *args):
@@ -224,7 +279,7 @@ def _resolve_project_root(start, explicit):
                   "--project-root PATH")
 
 
-STRICT, _requested_root = _parse_cli(sys.argv[1:])
+STRICT, _requested_root, GATE, GATE_PRODUCER = _parse_cli(sys.argv[1:])
 PROJECT_ROOT, PROJECT_ROOT_SOURCE = _resolve_project_root(
     Path.cwd().resolve(), _requested_root)
 if PROJECT_ROOT is None:
@@ -242,6 +297,45 @@ def _git(*args):
     except (OSError, subprocess.SubprocessError):
         return 1, ""
     return r.returncode, r.stdout
+
+
+# Git object-ID lengths: 40 hex for SHA-1, 64 for SHA-256 (`git init
+# --object-format=sha256`, stable since 2.42). Abbreviations run from Git's own
+# 4-character floor upward. The old `[0-9a-f]{7,40}` pattern was wrong at BOTH
+# ends: it could not match a SHA-256 repository's OIDs, and being unanchored it
+# did not simply skip them -- it matched the first 40 characters of a 64-hex OID
+# and handed a truncated string to a comparison that then read as a DIFFERENT
+# commit. Silent truncation is worse than no match (T-566).
+OID_RE = r"[0-9a-f]{4,64}"
+
+
+def canonical_commit(ref):
+    """Resolve a commit reference to its full OID, or None if it does not resolve.
+
+    Two references to one commit at different abbreviation lengths are the same
+    commit, and only Git can say so: `b8b086d` and `b8b086d6cf9b...` compare
+    unequal as strings, and `startswith` gets the common case right while
+    quietly accepting a 7-character prefix that resolves to nothing, or to a
+    different object in a repository large enough to collide at that length.
+    Both readings were live in the ccc ship-HEAD proof -- the equality rung
+    concluded the revision HAD changed whenever the LOG abbreviated it, which is
+    exactly backwards: the check exists to catch a SHIP that changed nothing.
+
+    Returns None rather than raising, and callers MUST treat None as evidence
+    that does not resolve (a FAIL), never as "unknown, carry on" -- an
+    unresolvable reference is precisely the state this proof must reject.
+    """
+    if not ref or not re.fullmatch(OID_RE, ref):
+        return None
+    # `^{commit}` makes the resolution type-exact: a tag or tree whose name
+    # happens to abbreviate the same way is not a commit and must not pass.
+    rc, out = _git("rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}")
+    if rc != 0:
+        return None
+    resolved = out.strip()
+    return resolved if re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", resolved) else None
+
+
 # RFC § 1.10's closed command list. Was a local inside Core's own next_action
 # branch, so it existed only when Core's next_action happened to start with
 # "saipen " -- the moment the subSaipen check reused it against a Core state
@@ -295,7 +389,7 @@ EXPECTED_SHORTCUT_ROUTES = {
     "gg": "`saipen goal`",
     "hh": "`saipen hunt`",
     "cc": "`saipen continue`",
-    "ccc": "`saipen continue` then `saipen ship` then refresh EE + QQ",
+    "ccc": "`saipen continue` with `converge_target: ship`, then `saipen ship`, then stages J-M",
     "ss": "`saipen stop`",
     "sss": "`saipen status`",
     "dd": "`saipen plan`",
@@ -309,8 +403,8 @@ EXPECTED_SHORTCUT_ROUTES = {
     "sc": "`saipen crew`",
 }
 PACKAGE_HANDOFF_FIELDS = {
-    "status", "producer", "source_head", "coverage", "payload", "verified",
-    "instructions",
+    "status", "producer", "source_head", "source_tree_fingerprint",
+    "role_revision", "coverage", "payload", "verified", "instructions",
 }
 failures = []
 warnings = {}
@@ -472,10 +566,110 @@ TYPE_CHECKS = {
 }
 
 
+# Every JSON Schema keyword this file is allowed to meet, and who enforces it.
+# The three sets are exhaustive by construction: `audit_schema_keywords` below
+# FAILs on anything outside their union, so a keyword added to a schema without
+# an enforcer can never again be interpreted as satisfied. That silent-skip is
+# what T-565 closed -- `minimum` sat in state.schema.json on four fields while
+# the docstring here said the interpreted subset "is everything the schema
+# actually uses", so `goal_waves: -1` passed the gate and handed the § 2.4
+# safety valve a budget below its own floor.
+SCHEMA_KEYWORDS_ENFORCED = frozenset({"type", "enum", "minimum", "items"})
+# Annotations. They constrain nothing, so nothing needs to enforce them.
+# `default` is deliberately here: JSON Schema `default` is documentation of an
+# omitted value, never an instruction to supply one, and a validator that
+# "applied" it would be inventing state nobody wrote.
+SCHEMA_KEYWORDS_ANNOTATION = frozenset({"description", "default", "title",
+                                        "$schema", "x-current-schema-version"})
+# Structural keywords: they carry subschemas rather than constraints, so the
+# walk descends through them instead of demanding an enforcer for them.
+SCHEMA_KEYWORDS_STRUCTURAL = frozenset({"properties"})
+# Enforced by a DEDICATED check elsewhere in this file, each mapped to the rule
+# that owns it. An entry here is a claim that a stricter or more specific check
+# exists, and it is deliberately NOT machine-verified: the only mechanical proof
+# available would assert on this file's own source text, which this module's
+# Guards rule rejects outright. What the audit guarantees is narrower and still
+# worth having -- a keyword can never be *silently* unenforced, only explicitly
+# delegated by someone who had to name its owner to get past the gate.
+SCHEMA_KEYWORDS_DELEGATED = {
+    # `format: date-time` would accept a local-time stamp. RFC § 1.2 requires
+    # UTC specifically, so the dedicated check below is the stricter one.
+    "format": "STATE.md `updated` ISO-8601 UTC check (RFC § 1.2)",
+    # Top-level `if`/`then` expresses "goal counters required under
+    # execution_intent: goal". Enforced by the § 2.4 counter check, which also
+    # owns the cap/trip semantics a generic reading could not express.
+    "if": "execution_intent: goal counter presence (RFC § 2.4)",
+    "then": "execution_intent: goal counter presence (RFC § 2.4)",
+    # additionalProperties: false is enforced unconditionally below -- an
+    # unknown field is always a FAIL, never a branch on this keyword.
+    "additionalProperties": "unknown-field FAIL in check_against_schema",
+    # The required array is read directly by check_against_schema.
+    "required": "required-field FAIL in check_against_schema",
+}
+
+
+def audit_schema_keywords(schema, label):
+    """FAIL on any JSON Schema keyword no enforcer in this file interprets.
+
+    Runs once against the SCHEMA, not against an instance: the subject is a
+    static artifact, so auditing it per instance would only repeat one answer.
+    Without this, extending a schema is silently a no-op for the validator --
+    the failure mode is invisible precisely because nothing complains."""
+    known = (SCHEMA_KEYWORDS_ENFORCED | SCHEMA_KEYWORDS_ANNOTATION
+             | frozenset(SCHEMA_KEYWORDS_DELEGATED))
+    unknown = []
+
+    def visit(node, where):
+        if not isinstance(node, dict):
+            return
+        # A keyword having an enforcer is only half the guarantee: `type` is
+        # enforced through TYPE_CHECKS, which knows four of JSON Schema's seven
+        # types, so `type: number` would pass the keyword audit and still be
+        # interpreted by nobody. The VALUE has to be in range too. `object` is
+        # the one exemption, and only at the top level, where the instance is a
+        # parsed frontmatter mapping by construction -- there is no other value
+        # parse_frontmatter can return.
+        _t = node.get("type")
+        if isinstance(_t, str) and _t not in TYPE_CHECKS \
+                and not (_t == "object" and not where):
+            unknown.append((where, f"type: {_t}"))
+        for kw, sub in node.items():
+            if kw in SCHEMA_KEYWORDS_STRUCTURAL:
+                # A `properties` map's KEYS are field names, never keywords.
+                for name, spec in (sub or {}).items():
+                    visit(spec, f"{where}.{name}" if where else name)
+                continue
+            if kw not in known:
+                unknown.append((where, kw))
+            elif kw == "items":
+                # `items` holds a subschema whose own keywords need enforcers.
+                visit(sub, f"{where}[]" if where else "[]")
+            # `if`/`then` are delegated as ONE unit to the § 2.4 counter check,
+            # which owns the whole conditional. Descending into them would
+            # demand an enforcer for `const`, a keyword this validator never
+            # interprets on its own and never needs to.
+
+    visit(schema, "")
+    if unknown:
+        for where, kw in unknown:
+            fail(f"{label} declares {kw!r}"
+                 f"{f' on field {where}' if where else ' at the top level'} "
+                 f"that tools/validate.py does not interpret -- the schema "
+                 f"believes it constrains something the gate never checks. "
+                 f"Implement it in check_against_schema, or map it to the "
+                 f"dedicated check that owns it in SCHEMA_KEYWORDS_DELEGATED")
+    else:
+        ok(f"{label} states nothing the validator ignores "
+           f"({len(SCHEMA_KEYWORDS_ENFORCED)} keywords enforced natively, "
+           f"{len(SCHEMA_KEYWORDS_DELEGATED)} delegated, "
+           f"{len(TYPE_CHECKS)} types interpreted)")
+
+
 def check_against_schema(fields, schema, label):
-    """Interpret the required/enum/type/additionalProperties subset of JSON Schema.
-    That subset is everything state.schema.json actually uses -- if the schema ever
-    grows past it, extend this, don't silently skip."""
+    """Interpret the required/enum/type/minimum/items/additionalProperties subset
+    of JSON Schema. `audit_schema_keywords` proves that subset still covers every
+    keyword the schema uses -- extending one without the other is a FAIL, not a
+    silent skip."""
     props = schema.get("properties", {})
     for req in schema.get("required", []):
         if req not in fields:
@@ -501,6 +695,28 @@ def check_against_schema(fields, schema, label):
         if "enum" in spec and value not in spec["enum"]:
             fail(f"{label} field {key}: {value!r} not one of "
                  f"{'|'.join(spec['enum'])}")
+        # `minimum` gates the floor of every counter STATE persists. Unenforced,
+        # `goal_waves: -1` reads as valid and hands § 2.4's safety valve four
+        # waves of budget instead of three; `last_event: 0` claims a LOG event
+        # that cannot exist, which is the number § 1.5 Recovery replays from.
+        # Booleans are excluded because Python orders True above 0 and a
+        # boolean in an integer field is already a type FAIL above -- comparing
+        # it again would report the same defect twice under two names.
+        if "minimum" in spec and isinstance(value, (int, float)) \
+                and not isinstance(value, bool) and value < spec["minimum"]:
+            fail(f"{label} field {key}: {value!r} is below the schema minimum "
+                 f"{spec['minimum']}")
+        # Array element types. `requires:` is the § 1.3 capability handshake,
+        # and the vocabulary check below skips non-strings silently, so an
+        # element of the wrong type was invisible at both rungs.
+        if "items" in spec and isinstance(value, list):
+            item_type = (spec["items"] or {}).get("type")
+            if item_type in TYPE_CHECKS:
+                for idx, item in enumerate(value):
+                    if not TYPE_CHECKS[item_type](item):
+                        fail(f"{label} field {key}[{idx}]: expected "
+                             f"{item_type}, got {type(item).__name__} "
+                             f"({item!r})")
 
 
 # --------------------------------------------------------------------- STATE
@@ -569,6 +785,8 @@ if state is None:
     fail(f"STATE.md frontmatter: {err}")
     sys.exit(1)
 
+audit_schema_keywords(schema, "state.schema.json")
+
 before = len(failures)
 check_against_schema(state, schema, "STATE.md")
 
@@ -598,6 +816,11 @@ intent = state.get("execution_intent", "normal")
 if intent not in _INTENT_VALUES:
     fail(f"STATE.md execution_intent is {intent!r} -- the closed set is "
          f"normal/goal/converge (RFC § 2.4)")
+converge_target = state.get("converge_target")
+if converge_target is not None and intent != "converge":
+    fail(f"STATE.md converge_target is {converge_target!r} while "
+         f"execution_intent is {intent!r} -- the ccc routing discriminator "
+         "exists only during convergence")
 
 # RFC § 1.2: updated MUST be ISO-8601 UTC specifically (Z or +00:00).
 updated = state.get("updated")
@@ -1783,6 +2006,80 @@ if intent == "converge" and log_files and isinstance(next_action, str):
         else:
             ok("converge clean-HUNT marker present, next_action avoids ADD")
 
+if converge_target == "ship" and log_files:
+    _ccc_lines = [line for path in log_files for line in read_doc(path).splitlines()]
+    _ccc_markers = [(index, match.group(1))
+                    for index, line in enumerate(_ccc_lines)
+                    if (match := re.search(
+                        rf"DEC: ccc converge target -> ship @({OID_RE})\b",
+                        line))]
+    if not _ccc_markers:
+        fail("STATE.md converge_target: ship has no ccc entry marker -- a crash "
+             "cannot recover the I -> SHIP -> J route without its LOG evidence")
+    else:
+        _ccc_start, _pre_ship_head = _ccc_markers[-1]
+        _ship_result = next((
+            (index, match.group(1))
+            for index in range(_ccc_start + 1, len(_ccc_lines))
+            if (match := re.search(
+                rf"RUN: ship .* -> pushed ({OID_RE})\b",
+                _ccc_lines[index]))
+        ), None)
+        _ship_at = _ship_result[0] if _ship_result else None
+        _prepare_at = [index for index in range(_ccc_start + 1, len(_ccc_lines))
+                       if ("RUN: prepare saitranslate -> done" in _ccc_lines[index]
+                           or "RUN: prepare saiwiki -> done" in _ccc_lines[index])]
+        if _prepare_at and (_ship_at is None or min(_prepare_at) < _ship_at):
+            fail("ccc prepared EE/QQ before SHIP -- converge_target: ship MUST "
+                 "run A-I, SHIP, then J-M so packages bind to the shipped HEAD")
+        if _ship_result is not None:
+            _shipped_head = _ship_result[1]
+            # Canonicalize BOTH references before comparing either of them.
+            # Every rung below is an identity question about commits, and a
+            # commit's identity is its full OID, never the width someone
+            # happened to write it at.
+            _canon_shipped = canonical_commit(_shipped_head)
+            _canon_pre_ship = canonical_commit(_pre_ship_head)
+            _unresolved = [raw for raw, canon in
+                           ((_pre_ship_head, _canon_pre_ship),
+                            (_shipped_head, _canon_shipped)) if canon is None]
+            # Distinguish "this reference is wrong" from "nothing here can
+            # resolve any reference". Outside a repository the proof is not
+            # failed, it is unperformable, and reporting the two the same way
+            # is how a check earns a reputation for crying wolf. Inside one,
+            # a reference that does not resolve is the finding.
+            _ccc_in_repo = _git("rev-parse", "--is-inside-work-tree")[0] == 0
+            if _unresolved and not _ccc_in_repo:
+                warn("ccc-identity-unverifiable",
+                     "ccc SHIP evidence cannot be canonicalized: this project "
+                     "is not a Git repository, so no commit reference resolves "
+                     "and the I -> SHIP -> J proof has nothing to compare")
+            elif _unresolved:
+                # An unresolvable reference is not a reason to skip the proof:
+                # a ccc route whose LOG names commits this repository does not
+                # have has no evidence at all, which is the state the check
+                # exists to catch (T-528 closed the same shape for hunt marks).
+                fail(f"ccc SHIP evidence names commit(s) this repository cannot "
+                     f"resolve: {', '.join(repr(r) for r in _unresolved)} -- the "
+                     f"I -> SHIP -> J proof compares commit identities, and a "
+                     f"reference that resolves to nothing proves nothing")
+            elif _canon_shipped == _canon_pre_ship:
+                fail(f"ccc SHIP did not change source revision -- post-SHIP "
+                     f"packages would bind to the same pre-SHIP source_head "
+                     f"({_shipped_head} and {_pre_ship_head} are the same "
+                     f"commit {_canon_shipped})")
+            try:
+                _ccc_identity = compute_source_identity(Path("."))
+            except FreshnessError as exc:
+                fail(f"ccc cannot verify shipped source_head: {exc}")
+            else:
+                _canon_current = canonical_commit(_ccc_identity.source_head)
+                if _canon_shipped is not None and _canon_current is not None \
+                        and _canon_shipped != _canon_current:
+                    fail("ccc SHIP evidence does not match current source_head -- "
+                         f"LOG says {_shipped_head!r} ({_canon_shipped}), current "
+                         f"HEAD is {_ccc_identity.source_head!r}")
+
 if log_files:
     # Date prefix optional to allow pre-STYLE.md history; new entries carry one.
     # [agent: <id>] is a MAY field for writer identity (RFC § 1.2, v7.27.0).
@@ -2253,76 +2550,292 @@ if log_files:
 # is not, and no amount of tooling will make it so.
 outbox_ok = True
 outbox_seen = 0
-for ob in sorted(Path(".").glob(".saipen/extensions/subs/*/kitchen/OUTBOX.md")):
+
+# T-543: one shared implementation owns the current source identity. Failure
+# is evidence, not an empty/partial digest: no ready package can validate when
+# any required input could not be discovered, stat'ed, classified, or read.
+try:
+    _source_identity = compute_source_identity(Path("."))
+except FreshnessError as exc:
+    _source_identity = None
+    fail("source freshness computation BLOCKED -- " + str(exc)
+         + "; no package may become ready or be collected with unknown input")
+
+_outbox_paths = set(Path(".").glob(".saipen/extensions/subs/*/kitchen/OUTBOX.md"))
+_translate_outbox = Path(".saipen/saitranslate/kitchen/OUTBOX.md")
+if _translate_outbox.is_file():
+    _outbox_paths.add(_translate_outbox)
+
+# ------------------------------------------------------- PRODUCER GATE (T-568)
+#
+# Producer readiness and Core conformance are two different questions, and
+# answering them with one severity is what made an unrefreshed EE package block
+# an unrelated Core commit. The rule the gate restores:
+#
+#     a producer's package must be complete, fresh and role-current WHEN IT IS
+#     CONSUMED, or when the convergence closure explicitly requires it fresh --
+#     never as a precondition for editing one Core line.
+#
+# So severity is a property of the ACTIVE GATE, not of the finding:
+#
+#   core (default) / ship   every producer finding is a visible WARN. Core
+#                           ships on its own conformance.
+#   collect:<producer>      that producer is hard. Malformed, incomplete,
+#                           stale, wrong role_revision, wrong source identity
+#                           and not-ready are each a FAIL. Other producers stay
+#                           soft -- collecting saiwiki says nothing about
+#                           saitranslate.
+#   converge                every producer CONVERGE.md stage M requires fresh
+#                           is hard, and a required package that is missing
+#                           entirely is a FAIL too.
+#
+# The validator remains read-only under every gate: it reports what a package
+# is, and never edits an OUTBOX into the shape it wanted to find.
+#
+# EE and QQ, named rather than discovered: `--gate converge` must not depend on
+# which producer folders happen to exist in a given project, or a closure could
+# pass by deleting the producer instead of refreshing it.
+CONVERGE_REQUIRED_PRODUCERS = (("saitranslate", "EE"), ("saiwiki", "QQ"))
+
+
+def _producer_of(path):
+    """The producer that owns an OUTBOX, from its canonical location."""
+    parts = path.as_posix().split("/")
+    if "subs" in parts and len(parts) > parts.index("subs") + 1:
+        return parts[parts.index("subs") + 1]
+    # saitranslate's kitchen sits directly under `.saipen/` (T-504 layout).
+    if len(parts) > 2 and parts[0] == ".saipen":
+        return parts[1]
+    return None
+
+
+def producer_gate_is_hard(producer):
+    if GATE == "collect":
+        return producer == GATE_PRODUCER
+    if GATE == "converge":
+        return producer in {name for name, _ in CONVERGE_REQUIRED_PRODUCERS}
+    return False
+
+
+_producers_failed_hard = set()
+
+
+def producer_problem(producer, slug, message):
+    """Report a producer-package defect at the severity the active gate owns."""
+    if producer_gate_is_hard(producer):
+        _producers_failed_hard.add(producer)
+        fail(message)
+        return True
+    warn(slug, f"{message} -- reported under `--gate {GATE}`, where this "
+               f"producer is not being consumed; it FAILs under "
+               f"`--gate collect:{producer}` and blocks nothing else")
+    return False
+
+
+def _role_contract_path(producer: str):
+    candidates = (
+        Path(".saipen/extensions/subs") / f"{producer}.md",
+        Path("extensions/subs") / f"{producer}.md",
+        _tools_parent / "extensions" / "subs" / f"{producer}.md",
+    )
+    return next((path for path in candidates if path.is_file()), None)
+
+
+def _generic_protocol_path():
+    candidates = (
+        Path(".saipen/extensions/subs/PROTOCOL.md"),
+        Path("extensions/subs/PROTOCOL.md"),
+        _tools_parent / "extensions" / "subs" / "PROTOCOL.md",
+    )
+    return next((path for path in candidates if path.is_file()), None)
+
+
+def _current_role_revision(producer: str):
+    charter = _role_contract_path(producer)
+    if charter is not None:
+        return compute_role_revision(charter), charter
+    protocol = _generic_protocol_path()
+    if protocol is None:
+        raise FreshnessError(
+            f"no charter or generic PROTOCOL.md resolves for producer {producer!r}"
+        )
+    return compute_generic_role_revision(protocol), protocol
+
+
+def _outbox_value(entry: str, field: str):
+    return re.search(
+        rf"(?:\*\*{re.escape(field)}:\*\*|^{re.escape(field)}:)\s*(\S+)",
+        entry, flags=re.MULTILINE)
+
+
+def _outbox_has_content(entry: str, field: str) -> bool:
+    if _outbox_value(entry, field):
+        return True
+    return bool(re.search(
+        rf"(?:\*\*{re.escape(field)}:\*\*|^{re.escape(field)}:)\s*\n"
+        rf"[ \t]+(?:-\s+|\d+\.\s+|\S)", entry, flags=re.MULTILINE))
+
+
+_producers_with_ready = set()
+for ob in sorted(_outbox_paths):
+    _prod_owner = _producer_of(ob)
     text = read_doc(ob)
     # Entries are `## <ID>: description` followed by bold-field lines (§ 2).
-    entries = re.split(r"^## (?=[A-Z]+-\d+)", text, flags=re.MULTILINE)[1:]
+    _entry_heads = list(re.finditer(
+        r"^## [A-Z]+-\d+:\s*\S.*$", text, flags=re.MULTILINE))
+    entries = []
+    if _entry_heads and text[:_entry_heads[0].start()].strip() == "# OUTBOX":
+        _all_h2 = re.findall(r"^## .+$", text, flags=re.MULTILINE)
+        if len(_entry_heads) == len(_all_h2):
+            entries = [
+                text[head.start() + 3:
+                     _entry_heads[index + 1].start()
+                     if index + 1 < len(_entry_heads) else len(text)]
+                for index, head in enumerate(_entry_heads)
+            ]
+    frontmatter_only = False
+    if not entries:
+        frontmatter = re.fullmatch(r"---\s*\n(.*?)\n---\s*", text,
+                                   flags=re.DOTALL)
+        if frontmatter:
+            entries = [frontmatter.group(1)]
+            frontmatter_only = True
+    if not entries and text.strip() != "# OUTBOX":
+        producer_problem(
+            _prod_owner, "producer-package-malformed",
+            f"{ob.as_posix()} is nonempty but parses as zero OUTBOX entries -- "
+            "malformed package text cannot be treated as an empty queue "
+            "(PROTOCOL.md § 2)")
+        outbox_ok = False
     for e in entries:
         outbox_seen += 1
-        eid = e.split(":", 1)[0].strip()
+        eid = "PACKAGE" if frontmatter_only else e.split(":", 1)[0].strip()
         loc = f"{ob.as_posix()} [{eid}]"
-        status = re.search(r"\*\*status:\*\*\s*([a-z]+)", e)
+        status = _outbox_value(e, "status")
         status = status.group(1) if status else None
         if status is None:
-            fail(f"{loc} has no **status:** -- the main agent cannot tell "
-                 f"whether this is collectable (PROTOCOL.md § 2)")
+            producer_problem(
+                _prod_owner, "producer-package-malformed",
+                f"{loc} has no **status:** -- the main agent cannot tell "
+                f"whether this is collectable (PROTOCOL.md § 2)")
             outbox_ok = False
             continue
         if status not in OUTBOX_STATUSES:
-            fail(f"{loc} status {status!r} is not one of "
-                 f"ready/draft/blocked/reviewed/stale (PROTOCOL.md § 2)")
+            producer_problem(
+                _prod_owner, "producer-package-malformed",
+                f"{loc} status {status!r} is not one of "
+                f"ready/draft/blocked/reviewed/stale (PROTOCOL.md § 2)")
             outbox_ok = False
         if status == "ready":
+            _producers_with_ready.add(_prod_owner)
+            for field in PACKAGE_HANDOFF_FIELDS:
+                if not _outbox_has_content(e, field):
+                    producer_problem(
+                        _prod_owner, "producer-package-incomplete",
+                        f"{loc} is status: ready but has no usable "
+                        f"**{field}:** -- complete ready packages bind every "
+                        f"handoff and freshness field (PROTOCOL.md § 2/§ 6)")
+                    outbox_ok = False
             for field in ("summary", "critical"):
-                if not re.search(rf"\*\*{field}:\*\*", e):
-                    fail(f"{loc} is status: ready but has no **{field}:** -- "
-                         f"collect reads that field to decide what to do with "
-                         f"it (PROTOCOL.md § 2)")
+                if not _outbox_has_content(e, field):
+                    producer_problem(
+                        _prod_owner, "producer-package-incomplete",
+                        f"{loc} is status: ready but has no **{field}:** -- "
+                        f"collect reads that field to decide what to do with "
+                        f"it (PROTOCOL.md § 2)")
                     outbox_ok = False
             # Fixer-type entry: carries a patch, so § 9 requires provenance.
             if re.search(r"\*\*patch:\*\*", e):
                 for field in ("base_head", "verified"):
                     if not re.search(rf"\*\*{field}:\*\*", e):
-                        fail(f"{loc} hands over a patch as ready but has no "
-                             f"**{field}:** -- a patch with no {field} is a "
-                             f"diff nobody can re-check before applying "
-                             f"(PROTOCOL.md § 9)")
+                        producer_problem(
+                            _prod_owner, "producer-package-incomplete",
+                            f"{loc} hands over a patch as ready but has no "
+                            f"**{field}:** -- a patch with no {field} is a "
+                            f"diff nobody can re-check before applying "
+                            f"(PROTOCOL.md § 9)")
                         outbox_ok = False
-            # Role freshness (T-542): a ready package is bound to the charter
-            # revision it was produced under. Absent on a legacy entry is a
-            # grandfather WARN (pre-T-542 packages carry no revision to trust
-            # or distrust); present but different from the current project-local
-            # charter is a FAIL -- the package is stale, collect must refuse.
-            _rr = re.search(r"\*\*role_revision:\*\*\s*(\S+)", e)
+            # Role freshness is derived from effective charter content with
+            # only the role_revision field removed. The declared value is
+            # checked separately in the charter block; a package label never
+            # becomes evidence merely because somebody bumped it by hand.
+            _rr = _outbox_value(e, "role_revision")
             if _rr:
                 _charter_rr = None
-                _prod = re.search(r"\*\*producer:\*\*\s*(\S+)", e)
+                _prod = _outbox_value(e, "producer")
                 if _prod:
-                    _cp = Path("extensions/subs") / f"{_prod.group(1)}.md"
-                    if _cp.is_file():
-                        _cbl = re.findall(
-                            r"```yaml\n(.*?)```",
-                            _cp.read_text(encoding="utf-8-sig", errors="replace"),
-                            re.DOTALL)
-                        _m = next((re.search(r"^role_revision:\s*(\S+)", b, re.MULTILINE)
-                                   for b in _cbl), None)
-                        _charter_rr = _m.group(1) if _m else None
+                    try:
+                        _charter_rr, _cp = _current_role_revision(_prod.group(1))
+                    except FreshnessError as exc:
+                        producer_problem(
+                            _prod_owner, "producer-package-stale",
+                            f"{loc} cannot derive current role_revision: {exc}")
+                        outbox_ok = False
                 if _charter_rr is not None and _rr.group(1) != _charter_rr:
-                    fail(f"{loc} carries role_revision {_rr.group(1)!r} but "
-                         f"the project-local sai{_prod.group(1) if _prod else '?'}.md "
-                         f"charter declares {_charter_rr!r} -- produced under a "
-                         f"superseded role, package is stale and MUST NOT be "
-                         f"collected; the producer re-runs under the new "
-                         f"charter (PROTOCOL.md § 6, T-542)")
+                    producer_problem(
+                        _prod_owner, "producer-package-stale",
+                        f"{loc} carries role_revision {_rr.group(1)!r} but "
+                        f"the effective project-local "
+                        f"{_prod.group(1) if _prod else '?'}.md charter derives "
+                        f"{_charter_rr!r} -- produced under a "
+                        f"superseded role, package is stale and MUST NOT be "
+                        f"collected; the producer re-runs under the new "
+                        f"charter (PROTOCOL.md § 6, T-542)")
                     outbox_ok = False
-            else:
-                warn("outbox-role-revision-legacy",
-                     f"{loc} is status: ready but carries no role_revision -- "
-                     f"pre-T-542 package, no revision to compare; collect "
-                     f"should treat it as stale until the producer re-runs "
-                     f"under the current charter (PROTOCOL.md § 6)")
+            # Source identity: HEAD binds committed bytes; the fingerprint
+            # binds only the delta from that HEAD in Git mode. Both must match.
+            _head = _outbox_value(e, "source_head")
+            _fp = _outbox_value(e, "source_tree_fingerprint")
+            if _source_identity is not None:
+                if _head and _head.group(1) != _source_identity.source_head:
+                    producer_problem(
+                        _prod_owner, "producer-package-stale",
+                        f"{loc} carries source_head {_head.group(1)!r} but "
+                        f"current source_head is {_source_identity.source_head!r} "
+                        f"-- package is stale and MUST NOT be collected")
+                    outbox_ok = False
+                if _fp and _fp.group(1) != _source_identity.source_tree_fingerprint:
+                    producer_problem(
+                        _prod_owner, "producer-package-stale",
+                        f"{loc} carries source_tree_fingerprint "
+                        f"{_fp.group(1)!r} but the current tree computes "
+                        f"{_source_identity.source_tree_fingerprint!r} -- the "
+                        f"tree changed since the "
+                        f"package was produced (same HEAD or not), so it is "
+                        f"stale and MUST NOT be collected (PROTOCOL.md § 6, "
+                        f"T-543)")
+                    outbox_ok = False
 if outbox_seen and outbox_ok:
     ok(f"subSaipen OUTBOX entries well-formed ({outbox_seen} checked)")
+
+# `--gate collect:<producer>` is the consumer's gate, so ABSENCE is a finding
+# there too: collecting a producer that has published no ready package is the
+# `Not ready: run ee first.` refusal (T-544), and a validator that stayed
+# silent would let the caller read "no FAILs" as "safe to collect".
+if GATE == "collect" and GATE_PRODUCER not in _producers_with_ready:
+    fail(f"--gate collect:{GATE_PRODUCER} but no OUTBOX entry from that "
+         f"producer is `status: ready` -- there is nothing to collect. Run the "
+         f"producer's forced-fresh preparation first (CORE.md § 1.10 ee/qq)")
+elif GATE == "collect" and GATE_PRODUCER not in _producers_failed_hard:
+    ok(f"producer gate: {GATE_PRODUCER} has a ready package and every "
+       f"completeness, freshness and role check above ran hard against it")
+
+# CONVERGE.md stage M: the final freshness gate. Both required producers must
+# have published a ready package, and every package check above ran hard for
+# them. Missing entirely is a FAIL here and nowhere else -- outside the closure,
+# a project with no wiki package is a project that has not run qq yet, which is
+# not a defect.
+if GATE == "converge":
+    _missing = [f"{label} ({name})" for name, label in CONVERGE_REQUIRED_PRODUCERS
+                if name not in _producers_with_ready]
+    if _missing:
+        fail(f"--gate converge but the closure's required producer package(s) "
+             f"are missing or not ready: {', '.join(_missing)} -- CONVERGE.md "
+             f"stages K/L/M require fresh EE and QQ bound to the current "
+             f"source identity before the run may reach DONE")
+    elif not _producers_failed_hard:
+        ok("producer gate: both closure-required packages (EE, QQ) are ready "
+           "and were checked hard for completeness, freshness and role currency")
 
 # ------------------------------------------------------------ SAIUI CHARTER
 
@@ -2337,6 +2850,12 @@ if IS_SAIPEN_HOME and saiui_charter.is_file():
     if "saipen/UI.md" not in _charter:
         fail("saiui charter lost canonical saipen/UI.md reference -- "
              "the charter must load the one authoritative file by reference")
+        saiui_ok = False
+
+    if "Golden Default is the mandatory palette." not in _charter:
+        fail("saiui charter lost the Golden Default mandate -- Vintage Golden "
+             "is the design language, while UI.md's Wintage-derived Golden "
+             "Default token set is the only palette")
         saiui_ok = False
 
     # 2. No copied palette or second palette.
@@ -2441,6 +2960,50 @@ if IS_SAIPEN_HOME:
             _bad_charters.append(
                 f"{_c.name}: collect_policy {_cp.group(1)!r} not in "
                 f"{'/'.join(_CHARTER_COLLECT_POLICIES)}")
+        _required_policy = {
+            "PRODUCER": "explicit",
+            "SCOUT": "core-review",
+            "FIXER": "core-review",
+        }.get(_rk.group(1) if _rk else "")
+        if (_required_policy is not None and _cp
+                and _cp.group(1) != _required_policy):
+            _bad_charters.append(
+                f"{_c.name}: role_kind {_rk.group(1)} requires collect_policy "
+                f"{_required_policy!r}, got {_cp.group(1)!r}")
+        _fi = re.search(r"^freshness_inputs:\s*\[(.*?)\]", _block,
+                        re.MULTILINE)
+        _inputs = set(re.findall(r'["\']([a-z_]+)["\']',
+                                 _fi.group(1) if _fi else ""))
+        _required_inputs = {"source_head", "source_tree_fingerprint",
+                            "role_revision"}
+        if _inputs != _required_inputs:
+            _bad_charters.append(
+                f"{_c.name}: freshness_inputs {sorted(_inputs)} != "
+                f"{sorted(_required_inputs)}")
+        _oc = re.search(r"^output_contract:\s*[\"']?([^\n\"']+)",
+                        _block, re.MULTILINE)
+        if _oc is None or not re.search(
+                r"PROTOCOL\.md § 2(?!\d)", _oc.group(1)):
+            _bad_charters.append(
+                f"{_c.name}: output_contract must cite PROTOCOL.md § 2")
+        _local_field_names = set(re.findall(
+            r"(?m)^- `([a-z_]+)(?::[^`]*)?`(?:\s|$)", _ct))
+        if len(_local_field_names & PACKAGE_HANDOFF_FIELDS) >= 3:
+            _bad_charters.append(
+                f"{_c.name}: restates moving OUTBOX required fields instead "
+                "of citing PROTOCOL.md § 2/§ 9")
+        _declared = re.search(r"^role_revision:\s*[\"']?([^\s\"']+)",
+                              _block, re.MULTILINE)
+        try:
+            _derived = compute_role_revision(_c)
+        except FreshnessError as exc:
+            _bad_charters.append(f"{_c.name}: {exc}")
+        else:
+            if _declared is None or _declared.group(1) != _derived:
+                _bad_charters.append(
+                    f"{_c.name}: declared role_revision "
+                    f"{_declared.group(1) if _declared else None!r} != "
+                    f"effective charter digest {_derived!r}")
     for _need, _kind in (("saiwiki.md", "PRODUCER"), ("saitranslate.md", "PRODUCER")):
         _cand = _subs_dir / _need
         _found_kind = False
@@ -2462,6 +3025,83 @@ if IS_SAIPEN_HOME:
     else:
         ok(f"{len(_charters)} shipped sai*.md charter(s) declare the full "
            f"metadata block ({len(_CHARTER_KEYS)} keys, closed enums)")
+
+    # T-543..T-547 hardening invariants. Runtime fingerprint behavior has
+    # executable probes; these checks pin the command/cleanup/worker contracts
+    # that have no universal agent runtime to execute for us.
+    _hardening_docs = {
+        "PROTOCOL.md": Path("extensions/subs/PROTOCOL.md"),
+        "prepare.md": Path("saipen/phases/prepare.md"),
+        "hunt.md": Path("saipen/phases/hunt.md"),
+        "CORE.md": Path("saipen/CORE.md"),
+    }
+    _hardening_text = {
+        name: path.read_text(encoding="utf-8-sig", errors="replace")
+        for name, path in _hardening_docs.items() if path.is_file()
+    }
+    _hardening_required = {
+        "PROTOCOL.md": (
+            "git-delta-v1", "--exclude-standard", "path_length[uint64be]",
+            "`except OSError: continue` escape hatch.",
+            "Age MAY emit a warning.", "Repeated collects MAY leave reviewed",
+            "unpreserved recovery evidence",
+            "never MANIFEST, STATE, BOARD, LOG, kitchen, charter adoption, or lifecycle",
+            "`collect_policy` is executable routing, not a label",
+            "autonomous HUNT/continue/",
+            "`core-review` creates normal Core work",
+            "### 3.1 Built-in role charters",
+        ),
+        "prepare.md": (
+            "Forced-fresh preparation", "deterministic cache contract",
+            "source_head`, `source_tree_fingerprint`, `role_revision",
+            "only this producer preparation writes replacement evidence",
+        ),
+        "hunt.md": (
+            "EPHEMERAL WORKERS, not SubSaipen instances",
+            "never enter `MANIFEST.md`",
+            "never receive", "STATE/BOARD/LOG/kitchen or lifecycle state",
+        ),
+        "CORE.md": (
+            "Core is a consumer", "MUST NOT edit, revalidate, refresh",
+            "after the shipped revision", "against the shipped HEAD",
+            "With `execution_intent: converge`, continue resumes convergence",
+        ),
+    }
+    _hardening_missing = []
+    for _doc_name, _markers in _hardening_required.items():
+        _body = _hardening_text.get(_doc_name, "")
+        for _marker in _markers:
+            if _marker not in _body:
+                _hardening_missing.append(f"{_doc_name}: {_marker!r}")
+    if _hardening_missing:
+        fail("freshness hardening contract drift -- missing "
+             + "; ".join(_hardening_missing))
+    else:
+        ok("freshness hardening command/cleanup/worker contracts intact")
+
+    # T-549 is the single hard barrier for the improve wave. The generic DAG
+    # makes T-551 unworkable while T-549 is unresolved; every later improve
+    # ticket already depends transitively on T-551. Visual order is irrelevant.
+    _board_body = Path(".saipen/BOARD.md").read_text(
+        encoding="utf-8-sig", errors="replace")
+    _t549_done = bool(re.search(
+        r"(?ms)^## DONE\s.*?^- \[x\] T-549\b", _board_body))
+    _t551 = re.search(r"(?m)^- \[[ /x]\] T-551\b([^\n]*)", _board_body)
+    _t551_needs = (set(re.findall(r"T-\d+", re.search(
+        r"\| needs:\s*([^|]+)", _t551.group(1)).group(1)))
+        if _t551 and re.search(r"\| needs:\s*([^|]+)", _t551.group(1))
+        else set())
+    if not _t549_done and "T-549" not in _t551_needs:
+        fail("hardening wave barrier missing -- unresolved T-549 must make "
+             "T-551 unworkable via `needs: T-549`; BOARD order cannot block "
+             "the Pick Rule from entering T-551..T-561")
+    elif not _t549_done and re.search(
+            r"(?m)^- \[/\] T-55(?:1|[2-9])\b|^- \[/\] T-56[01]\b",
+            _board_body):
+        fail("hardening wave barrier breached -- an improve-wave ticket is "
+             "DOING while T-549 remains unresolved")
+    else:
+        ok("T-549 hard barrier blocks the T-551..T-561 improve wave")
 
 # CONVERGE.md owns the convergence stage ORDER. The failure this pins is not a
 # missing file -- it is a sequence that quietly loses a stage or swaps two of
@@ -2513,7 +3153,26 @@ if IS_SAIPEN_HOME:
             fail("[converge-contract] CONVERGE.md lost the ordering rule that "
                  "no main-source mutation may follow the producer preparation "
                  "-- without it the factories can be freshly built against a "
-                 "tree the next stage changes")
+                  "tree the next stage changes")
+        _closure_markers = (
+            "no workable `## TODO` ticket",
+            "canonical tests PASS against the tree",
+            "no fresh critical scout or fixer OUTBOX",
+            "CLEAN completed, or proved nothing safe remained",
+            "final forced HUNT after CLEAN came back clean",
+            "existing hunt -> clean marker cannot satisfy forced HUNT",
+        )
+        _missing_closure = [marker for marker in _closure_markers
+                            if marker not in _conv_text]
+        if _missing_closure:
+            fail("[converge-contract] closure evidence drift -- missing "
+                 + "; ".join(repr(marker) for marker in _missing_closure))
+        if ("converge_target: ship" not in _conv_text
+                or "CCC SHIP boundary between" not in _conv_text
+                or "MUST NOT execute J, K, or L before SHIP" not in _conv_text):
+            fail("[converge-contract] ccc lost its persisted I -> SHIP -> J "
+                 "boundary -- plain cc would prepare EE/QQ before the ship that "
+                 "changes their source_head")
         if not any("converge-contract" in problem for problem in failures):
             ok(f"convergence contract intact ({len(_stages)} stages in order, "
                "closure bar and post-K ordering rule present)")
@@ -2846,6 +3505,7 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                 "saipen/BOOT.md", "saipen/SKILL.md", "saipen/UI.md", "saipen/STYLE.md",
                 "saipen/CONFORMANCE.md", "saipen/INDEX.md", "saipen/HABITS.md",
                 "tools/validate.py", "tools/install_hook.py", "tools/uninstall_hook.py",
+                "tools/freshness.py",
                 "tools/run_scenarios.py", "tools/audit_floor.py",
                 "tools/ci_status.py",
                 "tools/release_ledger_baseline.json",
@@ -2945,6 +3605,29 @@ if adapter_dir.is_dir():
                      r"follow.*RFC\.md|"
                      r"RFC\.md\s*\+|read[^.\n]*RFC\.md", _t, re.IGNORECASE):
             _rfc_stub_trap.append(_doc.as_posix())
+        # Every pattern above requires the literal `RFC.md`, and that is how
+        # the drift survived a release: `saipen/SKILL.md` routed a reader to
+        # bare "RFC" -- "it points into RFC only when a rule question comes
+        # up", "read it right after BOOT.md, before RFC" -- naming the stub as
+        # a rule DESTINATION with no file extension for the check to catch.
+        # This rung is semantic rather than literal: a routing verb pointed at
+        # RFC is the defect regardless of how the file is spelled. Mentioning
+        # RFC to say it holds no rules stays legal, which is why the exemption
+        # is scoped to the same sentence rather than to the whole document --
+        # one redirect sentence elsewhere must not license a route here.
+        for _seg in re.split(r"(?<=[.!?])\s+|\n", _t):
+            if not re.search(r"\bRFC\b", _seg, re.IGNORECASE):
+                continue
+            if not re.search(
+                    r"\b(?:read|go\s+to|open|consult|refer\s+to|load|"
+                    r"points?\s+in(?:to)?|routes?\s+(?:in)?to|before|see)\b"
+                    r"[^.\n]{0,40}\bRFC\b", _seg, re.IGNORECASE):
+                continue
+            if re.search(r"redirect|stub|compatibility|holds no rules|"
+                         r"no rules|never|not a destination|superseded|"
+                         r"successor|split", _seg, re.IGNORECASE):
+                continue
+            _rfc_stub_trap.append(f"{_doc.as_posix()} ({_seg.strip()[:80]})")
     if _rfc_stub_trap:
         fail("RFC-stub-trap: " + ", ".join(_rfc_stub_trap)
              + " assigns normative authority to the RFC.md compatibility "
@@ -3205,16 +3888,20 @@ if _subs_root.is_dir():
             _rrless.append(_d.name)
             continue
         _inst_rr = re.search(r"^role_revision:\s*(\S+)", _stx, re.MULTILINE)
-        _cp = Path("extensions/subs") / f"{_d.name}.md"
+        _cp = _role_contract_path(_d.name)
         _charter_rr = None
-        if _cp.is_file():
-            _cbl = re.findall(
-                r"```yaml\n(.*?)```",
-                _cp.read_text(encoding="utf-8-sig", errors="replace"),
-                re.DOTALL)
-            _m = next((re.search(r"^role_revision:\s*(\S+)", b, re.MULTILINE)
-                       for b in _cbl), None)
-            _charter_rr = _m.group(1) if _m else None
+        if _cp is not None:
+            try:
+                _charter_rr = compute_role_revision(_cp)
+            except FreshnessError as exc:
+                fail(f"cannot derive {_d.name} charter revision: {exc}")
+        else:
+            _protocol = _generic_protocol_path()
+            if _protocol is not None:
+                try:
+                    _charter_rr = compute_generic_role_revision(_protocol)
+                except FreshnessError as exc:
+                    fail(f"cannot derive {_d.name} generic role revision: {exc}")
         if _inst_rr and _charter_rr is not None and _inst_rr.group(1) != _charter_rr:
             _rrmismatch.append(f"{_d.name} ({_inst_rr.group(1)} != charter {_charter_rr})")
     if _rrless:
@@ -3448,7 +4135,10 @@ else:
     if _ship_doc.is_file():
         _ship_t = _ship_doc.read_text(encoding="utf-8-sig")
         _gate = _ship_t.find("WAIT: first-publish")
-        _push = _ship_t.find("then push the branch")
+        # Anchor updated with T-569's staging rewrite, which turned "then push
+        # the branch" into a numbered step. Updated deliberately, exactly as
+        # the failure message below demands, rather than left to go quiet.
+        _push = _ship_t.find("**Push the branch.**")
         if _gate < 0 or _push < 0:
             fail("cross-doc drift [first-publish-order] -- phases/ship.md no "
                  "longer names both the first-publish gate and the branch "
@@ -3467,6 +4157,43 @@ else:
                  "classify the remote before any external write, so the "
                  "first-publish gate is decided while everything is still "
                  "local")
+            drift_ok = False
+
+        # T-569: the binding ship gate runs AFTER staging, and the staging is
+        # explicit-path. Pinned BY POSITION rather than by presence, because
+        # every piece of this was already in the document when the paradox was
+        # live -- the gate existed, the commit existed, and the order between
+        # them was the defect: a required runtime file added by the ticket
+        # being shipped is untracked until it is staged, so a gate run before
+        # staging could not be satisfied by any sequence the protocol
+        # described. Three releases carried a MANIFEST entry that went green
+        # locally and red in CI for exactly that reason.
+        _stage_at = _ship_t.find("Stage ONLY the reviewed files this ship owns")
+        _gate_at = _ship_t.find("Run `tools/validate.py --gate ship` NOW")
+        _commit_at = _ship_t.find("Commit exactly the staged scope")
+        if _stage_at < 0 or _gate_at < 0 or _commit_at < 0:
+            fail("cross-doc drift [ship-stage-before-gate] -- phases/ship.md no "
+                 "longer names the explicit staging step, the post-stage ship "
+                 "gate, or the exact-scope commit. Update tools/validate.py "
+                 "deliberately rather than letting the ordering check quietly "
+                 "stop checking")
+            drift_ok = False
+        elif not _stage_at < _gate_at < _commit_at:
+            fail("cross-doc drift [ship-stage-before-gate] -- phases/ship.md "
+                 "must stage the reviewed files, THEN run the ship gate, THEN "
+                 "commit. Gate before staging is the SHIP/MANIFEST paradox: a "
+                 "required runtime file this ticket adds is untracked until it "
+                 "is staged, so the gate can never be satisfied and the agent "
+                 "has to invent an undocumented staging step (T-569)")
+            drift_ok = False
+        if ("**`git add .` and `git add -A` are\n      forbidden here**"
+                not in _ship_t):
+            fail("cross-doc drift [ship-stage-before-gate] -- phases/ship.md "
+                 "must forbid blind `git add .`/`git add -A` in the staging "
+                 "step. Staging by explicit path is what makes step 5's "
+                 "'staged set equals reviewed scope' provable; a blind add "
+                 "stages whatever else the tree is carrying and the proof "
+                 "becomes a description of the accident (T-569)")
             drift_ok = False
 
         # T-467: the tag push is the SECOND command, and it must not run
@@ -4137,7 +4864,7 @@ else:
         _want = hashlib.sha256(re.sub(
             r"\d+\.\d+\.\d+", "VERSION",
             _en_src.read_text(encoding="utf-8-sig")).encode("utf-8")
-        ).hexdigest()[:16]
+        ).hexdigest()
         _stale, _unstamped = [], []
         for _loc in sorted(_tr_dir.glob("*/README_*.md")):
             _m = re.search(r"<!-- source-digest: README\.md sha256:([0-9a-f]+) -->",
@@ -4698,7 +5425,21 @@ else:
     #     This is the same class as the adapter cross-reference check, applied
     #     to the two things every doc actually cites.
     _rfc_text = _read_rfc(rfc_path)
-    _sections = set(re.findall(r"^###\s+(\d+\.\d+)(?![\d.])", _rfc_text, re.MULTILINE))
+    _section_paths = {
+        "CORE": rfc_path.parent / "CORE.md",
+        "MAINTENANCE": rfc_path.parent / "MAINTENANCE.md",
+        "PROTOCOL": _tools_parent / "extensions" / "subs" / "PROTOCOL.md",
+    }
+    _section_sets = {}
+    for _owner, _owner_path in _section_paths.items():
+        _owner_text = (_owner_path.read_text(encoding="utf-8-sig")
+                       if _owner_path.is_file() else "")
+        _section_sets[_owner] = set(re.findall(
+            r"^#{2,4}\s+§?\s*(\d+\.\d+)(?![\d.])", _owner_text,
+            re.MULTILINE))
+    _section_sets["RFC"] = (_section_sets["CORE"]
+                            | _section_sets["MAINTENANCE"])
+    _sections = _section_sets["RFC"]
     _phase_dir = rfc_path.parent / "phases"
     _phase_docs = {q.name for q in _phase_dir.glob("*.md")} if _phase_dir.is_dir() else set()
     if not _sections or not _phase_docs:
@@ -4718,9 +5459,40 @@ else:
             if not _doc.is_file() or "CHANGELOG" in _doc.name:
                 continue
             _body = _doc.read_text(encoding="utf-8-sig", errors="replace")
-            for _s in sorted(set(re.findall(r"\u00a7\s*(\d+\.\d+)", _body))):
-                if _s not in _sections:
-                    _dangling.append(f"{_doc.name} cites RFC \u00a7 {_s}")
+            # Citation ownership is explicit. `CORE.md § x`,
+            # `MAINTENANCE.md § x`, and `PROTOCOL.md § x` resolve only against
+            # that document. An unqualified `§ x` is local to the document
+            # carrying it; it is never silently reassigned to the old RFC
+            # union. Documents with no numbered sections retain legacy bare
+            # prose references without pretending the checker verified them.
+            _qualified_spans = []
+            for _cit in re.finditer(
+                    r"\b(CORE|MAINTENANCE|PROTOCOL|RFC)\.md\s*§\s*"
+                    r"(\d+\.\d+)", _body):
+                _owner, _s = _cit.group(1), _cit.group(2)
+                _qualified_spans.append(_cit.span())
+                if _s not in _section_sets[_owner]:
+                    _dangling.append(
+                        f"{_doc.name} cites {_owner}.md § {_s}")
+            _local_sections = set(re.findall(
+                r"^#{2,4}\s+§?\s*(\d+\.\d+)(?![\d.])", _body,
+                re.MULTILINE))
+            if _local_sections:
+                _local_families = {s.split(".", 1)[0]
+                                   for s in _local_sections}
+                for _cit in re.finditer(r"§\s*(\d+\.\d+)", _body):
+                    if any(a <= _cit.start() < b for a, b in _qualified_spans):
+                        continue
+                    _s = _cit.group(1)
+                    # Bare citations are local. Only a number in this
+                    # document's own section family can therefore be checked
+                    # as local; another family's legacy bare cross-reference
+                    # is not silently reassigned to RFC and makes no verified
+                    # claim. New cross-document references use a qualifier.
+                    if (_s.split(".", 1)[0] in _local_families
+                            and _s not in _local_sections):
+                        _dangling.append(
+                            f"{_doc.name} cites local § {_s}")
             for _d in sorted(set(re.findall(r"phases/([a-z_]+\.md)", _body))):
                 if _d not in _phase_docs:
                     _dangling.append(f"{_doc.name} cites phases/{_d}")
@@ -4731,7 +5503,7 @@ else:
             # the protocol itself names. An arbitrary `Foo.md` reference is
             # somebody else's filename and deliberately not adjudicated here.
             for _f in sorted(set(re.findall(
-                    r"\b(RFC|BOOT|STYLE|UI|CONFORMANCE|SKILL)\.md\b", _body))):
+                    r"\b(RFC|CORE|MAINTENANCE|BOOT|STYLE|UI|CONFORMANCE|SKILL)\.md\b", _body))):
                 if not (rfc_path.parent / f"{_f}.md").is_file():
                     _dangling.append(f"{_doc.name} cites {_f}.md")
             if "extensions/subs/PROTOCOL.md" in _body and not (
@@ -5165,16 +5937,11 @@ else:
                    "tracked slug(s)")
 
 
-    # 13c. The palette has one name, and every document uses it. UI.md's
-    #      palette was renamed to Wintage Golden and declared the default; the
-    #      old name lived in 46 files, two of them shipped root docs and the
-    #      rest locale copies. A rename that lands in the defining document and
-    #      nowhere else is the shape this repo keeps re-finding -- the 33
-    #      guides teaching a superseded WAIT form, the root GUIDE.md outside
-    #      the glob, seven adapters pointing at the constitution. The old
-    #      literal is assembled here rather than written out, because
-    #      CONFORMANCE.md is itself scanned and a rule that trips on its own
-    #      illustration is one nobody can keep.
+    # 13c. Vintage Golden is the design language; Golden Default is its one
+    #      palette. UI.md owns the values, while this digest is the mechanical
+    #      witness that prevents a plausible generic dark-golden set from being
+    #      substituted under the same name. The stale-name list remains because
+    #      historical palette renames once drifted across 46 shipped docs.
     def _rel_doc(_p):
         try:
             return _p.relative_to(_tools_parent).as_posix()
@@ -5184,7 +5951,8 @@ else:
     _ui = _tools_parent / "saipen" / "UI.md"
     if _ui.is_file():
         _ui_body = _ui.read_text(encoding="utf-8-sig")
-        _palette = "Vintage Golden"
+        _design_language = "Vintage Golden"
+        _palette = "Golden Default"
         # Every name the palette has HAD. Assembled from fragments so this
         # file, CONFORMANCE.md and the row describing the rename can all
         # discuss it without tripping it -- the fifth rule this session that
@@ -5193,11 +5961,74 @@ else:
         # after the first, which is exactly why this is a list and not a
         # constant.
         _superseded = ("Dark" + " Golden", "Win" + "tage Golden")
+        if _design_language not in _ui_body:
+            fail(f"UI.md no longer names its design language "
+                 f"{_design_language!r} -- palette and design language are "
+                 "distinct contracts")
+            drift_ok = False
         if _palette not in _ui_body:
             fail(f"UI.md no longer names its palette {_palette!r} -- the "
                  f"palette name is normative and every other document "
                  f"references it")
             drift_ok = False
+        if "**Golden Default is the default palette.**" not in _ui_body:
+            fail("UI.md lost the Golden Default default mandate -- merely "
+                 "mentioning the palette does not make it the mandatory "
+                 "default")
+            drift_ok = False
+        _token_names = (
+            "background", "backgroundSoft", "surface", "surfaceRaised",
+            "surfaceAlt", "borderDark", "borderHighlight", "bevelLight",
+            "borderMuted", "textPrimary", "textSecondary", "textMuted",
+            "accentTeal", "accentTealDeep", "success", "warning", "danger",
+            "dangerText", "selection", "compareBack", "link",
+        )
+        _root_matches = re.findall(r":root\s*\{(.*?)\n\}", _ui_body, re.DOTALL)
+        if len(_root_matches) != 1:
+            fail("UI.md Golden Default token drift [ui-palette] -- no :root "
+                 f"single-owner token block found (count={len(_root_matches)})")
+            drift_ok = False
+        else:
+            _token_pairs = re.findall(
+                r"--([A-Za-z][A-Za-z0-9]*):\s*(#[0-9A-Fa-f]{6})\s*;",
+                _root_matches[0])
+            _tokens = dict(_token_pairs)
+            _all_custom_properties = re.findall(
+                r"--([A-Za-z][A-Za-z0-9]*):\s*([^;\n]+)\s*;", _ui_body)
+            _all_token_pairs = re.findall(
+                r"--([A-Za-z][A-Za-z0-9]*):\s*(#[0-9A-Fa-f]{6})\s*;",
+                _ui_body)
+            _all_hex = re.findall(r"#[0-9A-Fa-f]{6}\b", _ui_body)
+            if (_all_custom_properties != _token_pairs
+                    or _all_token_pairs != _token_pairs
+                    or len(_all_hex) != len(_token_names)):
+                fail("UI.md Golden Default token drift [ui-palette] -- colour "
+                     "custom-property declaration or raw hex exists outside the "
+                     "single canonical :root block, or uses a non-#RRGGBB value")
+                drift_ok = False
+            elif (len(_token_pairs) != len(_token_names)
+                    or tuple(_tokens) != _token_names):
+                fail("UI.md Golden Default token drift [ui-palette] -- expected "
+                     f"the closed 21-token Wintage order, got "
+                     f"{len(_token_pairs)} entries: {tuple(_tokens)!r}")
+                drift_ok = False
+            else:
+                _payload = "\n".join(
+                    f"{name}={_tokens[name].upper()}" for name in _token_names)
+                _palette_digest = hashlib.sha256(
+                    _payload.encode("ascii")).hexdigest()
+                _expected_palette_digest = (
+                    "271ba26cd75948e8aeb866006f2c96d02dd25d1878028a6e3b15b3a34fe92979"
+                )
+                if _palette_digest != _expected_palette_digest:
+                    fail("UI.md Golden Default token drift [ui-palette] -- "
+                         "21-token map no longer matches Wintage "
+                         "themes/goldendefault.json; got sha256:"
+                         f"{_palette_digest}")
+                    drift_ok = False
+                else:
+                    ok("Golden Default palette integrity verified (21 Wintage "
+                       f"tokens, sha256:{_palette_digest[:16]})")
         _stale_name = []
         for _doc in sorted(set(_cite_docs)):
             # CHANGELOG is history and records what the name WAS. A rule that
@@ -5865,6 +6696,30 @@ else:
                      "exist. Offending row(s): "
                      + (", ".join(_goal_notes_bad) or "none named; the "
                         "superseded literal is back in the section"))
+                drift_ok = False
+
+            _shortcut_notes = {shortcut: notes for shortcut, _, notes
+                               in _shortcut_full_rows}
+            _cc_required = (
+                "enters convergence from `normal`",
+                "resumes `execution_intent: goal`",
+                "never asks for an objective",
+                "`cc <args>` is not a goal",
+            )
+            _gg_required = (
+                "NEW GOAL ONLY", "`gg <objective>`",
+                "never a continuation alias",
+            )
+            _shortcut_semantic_missing = [
+                f"cc:{fragment}" for fragment in _cc_required
+                if fragment not in _shortcut_notes.get("cc", "")
+            ] + [
+                f"gg:{fragment}" for fragment in _gg_required
+                if fragment not in _shortcut_notes.get("gg", "")
+            ]
+            if _shortcut_semantic_missing:
+                fail("cross-doc drift [shortcut-semantics] -- "
+                     + "; ".join(_shortcut_semantic_missing))
                 drift_ok = False
 
             # § 1.10's `saipen stop` paragraph and § 2.4 Entry both describe

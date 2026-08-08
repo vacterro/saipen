@@ -6,9 +6,9 @@ write_scope: ".saipen/extensions/subs/saihunt/"
 trigger: "bare saihunt / saipen sub spawn saihunt / crew sense stage / a HUNT-signal investigation from Core"
 collect_policy: core-review
 done_condition: "OUTBOX entries carry the six-signal findings with evidence, each DISPOSED as REPRODUCED | NOT_REPRODUCED | BLOCKED"
-freshness_inputs: ["source_head", "source_tree_fingerprint"]
+freshness_inputs: ["source_head", "source_tree_fingerprint", "role_revision"]
 output_contract: "PROTOCOL.md § 2 complete package; findings with file:line evidence and a verdict"
-role_revision: "rev1"
+role_revision: "sha256:4edb04181cb07e0946afd06fbe711166fa9dcc403e56b52e9be3844f0a71b0a5"
 ```
 
 A subSaipen (PROTOCOL.md), so everything there binds: `mode: read-only`,

@@ -66,7 +66,7 @@ rm_skill() {
 rm_aider() {
   # Remove exactly the block the injector wrote: the comment line, the
   # read: key that immediately follows it, and the consecutive saipen
-  # RFC/STYLE items -- never any other read: line the user owns.
+  # BOOT/STYLE items -- never any other read: line the user owns.
   if [ -f "$1" ]; then
     local managed_status manual_status
     grep -q "# saipen protocol auto-loaded" "$1"; managed_status=$?
@@ -75,16 +75,45 @@ rm_aider() {
     if [ "$managed_status" -eq 0 ]; then
       cp "$1" "$1.uninstalled.bak" \
         || { echo "backup FAILED ($1)"; return 1; }
-      awk '
-        /^# saipen protocol auto-loaded$/ { inblk = 1; next }
-        inblk && /^read:$/ { next }
-        inblk && /^[[:space:]]*-[[:space:]].*saipen\/(RFC|STYLE)\.md$/ { next }
-        { inblk = 0; print }
-      ' "$1" > "$1.tmp" && mv "$1.tmp" "$1" \
+      # Byte offsets, not sed/awk: Git Bash text processors normalize CRLF in
+      # untouched user lines. The injector adds LF before BEGIN; an editor may
+      # normalize that managed separator and its block to CRLF.
+      local begin_line end_line begin end file_size line_size
+      local begin_number read_number boot_number style_number
+      local begin_no prefix_count suffix_start separator_hex
+      begin_line=$(grep -b -m1 '^# saipen protocol auto-loaded[[:space:]]*$' "$1") \
+        || { echo "aider BEGIN read FAILED ($1)"; return 1; }
+      begin=${begin_line%%:*}
+      begin_number=$(grep -n -m1 '^# saipen protocol auto-loaded[[:space:]]*$' "$1")
+      begin_no=${begin_number%%:*}
+      read_number=$(grep -n '^read:[[:space:]]*$' "$1" | awk -F: -v at="$((begin_no + 1))" '$1 == at { print; exit }')
+      boot_number=$(grep -n 'saipen[/\\]BOOT\.md[[:space:]]*$' "$1" | awk -F: -v at="$((begin_no + 2))" '$1 == at { print; exit }')
+      style_number=$(grep -n 'saipen[/\\]STYLE\.md[[:space:]]*$' "$1" | awk -F: -v at="$((begin_no + 3))" '$1 == at { print; exit }')
+      [ -n "$read_number" ] && [ -n "$boot_number" ] && [ -n "$style_number" ] \
+        || { echo "aider managed BOOT/STYLE block malformed ($1)"; return 1; }
+      end_line=$(grep -b 'saipen[/\\]STYLE\.md[[:space:]]*$' "$1" |
+        awk -F: -v floor="$begin" '$1 > floor { print; exit }')
+      [ -n "$end_line" ] || { echo "aider END read FAILED ($1)"; return 1; }
+      end=${end_line%%:*}
+      file_size=$(wc -c < "$1") \
+        || { echo "aider size read FAILED ($1)"; return 1; }
+      line_size=$(tail -c "+$((end + 1))" "$1" | head -n 1 | wc -c) \
+        || { echo "aider END size FAILED ($1)"; return 1; }
+      separator_hex=$(head -c "$begin" "$1" | tail -c 2 | od -An -tx1 | tr -d ' \r\n')
+      if [ "$separator_hex" = "0d0a" ]; then
+        prefix_count=$((begin > 1 ? begin - 2 : 0))
+      else
+        prefix_count=$((begin > 0 ? begin - 1 : 0))
+      fi
+      suffix_start=$((end + line_size))
+      : > "$1.tmp" \
+        && { [ "$prefix_count" -eq 0 ] || head -c "$prefix_count" "$1" >> "$1.tmp"; } \
+        && { [ "$suffix_start" -ge "$file_size" ] || tail -c "+$((suffix_start + 1))" "$1" >> "$1.tmp"; } \
+        && mv "$1.tmp" "$1" \
         || { rm -f "$1.tmp" 2>/dev/null || true; echo "aider clean FAILED ($1)"; return 1; }
       echo "aider conf cleaned"
     else
-      grep -q "saipen/RFC.md" "$1"; manual_status=$?
+      grep -q "saipen/BOOT.md" "$1"; manual_status=$?
       [ "$manual_status" -le 1 ] \
         || { echo "aider path read FAILED ($1)"; return 1; }
       if [ "$manual_status" -eq 0 ]; then
