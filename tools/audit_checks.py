@@ -65,6 +65,7 @@ LOG = ".saipen/LOG.md"
 DIGEST = ".saipen/kitchen/digest.md"
 MANIFEST = ".saipen/kitchen/markhunt_progress.md"
 SUB = ".saipen/extensions/subs/saiwiki/STATE.md"
+CHANGELOG = "CHANGELOG.md"
 STATE_SCHEMA = "extensions/schemas/state.schema.json"
 TAG_QUERY = ("git", "tag", "-l", "v*")
 AUDIT_TAGS_GIT_SHIM = "SAIPEN_AUDIT_TAGS_GIT_SHIM"
@@ -703,6 +704,34 @@ def demote_the_pick(text: str) -> str:
     return (text[:todo.start(1)] + top + todo.group(1).rstrip(nl) + nl
             + bottom + nl + text[todo.end(1):])
 
+
+def inject_unclaimed_doing(text: str) -> str:
+    """T-573: put an unclaimed ticket in ## DOING whatever the live board holds.
+
+    An ownerless ## DOING ticket is 'unclaimed by definition' (RFC § 1.4), so
+    STATE.task: none beside it is the BOARD-ahead-of-STATE interruption. The
+    first version of this case mutated STATE.task alone and went dead the
+    moment a checkpoint moved the live phase to DONE (its task line was
+    already `none`), which is exactly the live-state dependence the synthetic
+    tickets in this harness exist to remove.
+    """
+    nl = chr(10)
+    doing = re.search(r"^## DOING$\n(.*?)(?=^## |\Z)", text,
+                      re.MULTILINE | re.DOTALL)
+    if doing is None:
+        return text
+    body = doing.group(1)
+    if "- [/] T-999 audit" in body:
+        return text
+    cleaned = "\n".join(
+        ln for ln in body.splitlines()
+        if not ln.strip().startswith("- ["))
+    if cleaned.strip():
+        cleaned += nl
+    return (text[:doing.start(1)] + cleaned
+            + "- [/] T-999 audit | verify: probe\n"
+            + text[doing.end(1):])
+
 CREATE = "<create the file>"
 SWAP = "<swap the last two log entries>"
 
@@ -839,14 +868,25 @@ CASES: list[tuple[str, str, object, str]] = [
     # T-573: STATE.task and ## DOING are one binding. The v7.215.0 crash
     # checkpoint claimed task T-572 while no ## DOING ticket existed and
     # T-572 sat in ## TODO -- validator-conformant until this rule. Both
-    # interruption directions go red: a task naming a ticket the board does
-    # not claim, and a self-claimed ## DOING ticket the state does not name.
+    # interruption directions go red. The mutations force the crash shape
+    # whatever the live state holds (the first versions mutated STATE alone
+    # and went dead when a checkpoint moved the live phase to DONE): a task
+    # naming a ticket the board does not claim, and an unclaimed ## DOING
+    # ticket the state does not name.
     ("active task not claimed by ## DOING", STATE,
-     sub_line("task", "T-999"),
+     lambda s: sub_line("task", "T-999")(sub_line("phase", "SCOUT")(s)),
      "is not the claimed ## DOING ticket"),
     ("self-claimed ## DOING ticket with task: none", STATE,
-     sub_line("task", "none"),
+     ("MULTI", [(STATE, lambda s: sub_line("task", "none")(
+                 sub_line("phase", "SCOUT")(s))),
+                (BOARD, inject_unclaimed_doing)]),
      "STATE is behind BOARD"),
+    # The changelog-unarchived warning names the header's "~10" claim as its
+    # reason; a header edited to a looser number would silently make that
+    # warning a lie, so the exact archive pointer is a FAIL, not a WARN.
+    ("changelog archive pointer loosened", CHANGELOG,
+     replace("keeps the most recent ~10.", "keeps the most recent ~50."),
+     "changelog-archive-pointer"),
     ("last_event below the log tail", STATE, sub_line("last_event", "1"),
      "lower than the log"),
     ("next_action picks a ticket that is not the topmost workable", BOARD,

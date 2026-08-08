@@ -4546,6 +4546,17 @@ else:
     _ver_f = _tools_parent / "VERSION"
     if _cl.is_file():
         _cl_t = _cl.read_text(encoding="utf-8-sig")
+        _archive_pointer = (
+            "> Older entries live in [CHANGELOG_ARCHIVE.md]"
+            "(CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.")
+        if _archive_pointer not in _cl_t:
+            fail("cross-doc drift [changelog-archive-pointer] -- CHANGELOG.md "
+                 "must carry exactly the pointer line: "
+                 f"{_archive_pointer!r}. The ~10 contract is the reason the "
+                 "`changelog-unarchived` warning fires at an overflow; a "
+                 "header edited to a looser number would silently make that "
+                 "warning a lie")
+            drift_ok = False
         _heads = re.findall(r"(?m)^## \[?(\d+)\.(\d+)\.(\d+)\]?", _cl_t)
         _tup = [tuple(int(x) for x in h) for h in _heads]
         if _tup != sorted(_tup, reverse=True):
