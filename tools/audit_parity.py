@@ -185,7 +185,8 @@ def main() -> int:
         shutil.rmtree(tmp, ignore_errors=True)
         return 1
 
-    unavailable = [label for label, rel, mutation, _expected in ac.CASES
+    cases = [ac.case_parts(case) for case in ac.CASES]
+    unavailable = [label for label, rel, mutation, _expected, _gate in cases
                    if not ac.case_available(pristine, rel, mutation)]
     if unavailable:
         for label in unavailable:
@@ -199,7 +200,7 @@ def main() -> int:
     # A MULTI case edits two files, so every file a mutation touches must be
     # saved and restored, not just the case target (T-534).
     both, only_canonical, neither, skipped = [], [], [], []
-    for i, (label, rel, mutation, _expected) in enumerate(ac.CASES, 1):
+    for i, (label, rel, mutation, _expected, _gate) in enumerate(cases, 1):
         print(f"\r[{i}/{len(ac.CASES)}] {label[:70].ljust(70)}", end="", flush=True)
         files = ac.mutation_files(pristine, rel, mutation)
         saved = [(f, f.read_bytes() if f.exists() else None) for f in files]
