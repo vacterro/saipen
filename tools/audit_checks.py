@@ -1887,9 +1887,15 @@ CASES: list[tuple[str, str, object, str]] = [
      replace("### 3.1 Built-in role charters",
              "### 3.2 Built-in role charters"),
      "### 3.1 Built-in role charters"),
-    ("T-551 cannot bypass unresolved T-549",
-     ".saipen/BOARD.md",
-     replace(" | needs: T-549 | verify:", " | verify:"),
+    # The barrier only speaks while T-549 is unresolved, and T-549 closed in
+    # v7.215.0 -- so stripping T-551's `needs:` alone can no longer go red, and
+    # the control silently stopped being evidence. It is not obsolete, it is
+    # CONDITIONAL: reopening T-549 must still make T-551 unworkable. The
+    # mutation therefore reconstructs both halves of the condition, which is
+    # what the check has always been about.
+    ("T-551 cannot bypass unresolved T-549", ".saipen/BOARD.md",
+     lambda t: t.replace(" | needs: T-549 | verify:", " | verify:", 1)
+                .replace("- [x] T-549 [P1]", "- [ ] T-549 [P1]", 1),
      "hardening wave barrier missing"),
     ("PROTOCOL.md drops UI- prefix from ticket table",
      "extensions/subs/PROTOCOL.md",

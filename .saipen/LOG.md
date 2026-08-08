@@ -142,3 +142,16 @@
 - 08.08.26 15:34 [E-2389] [parent: E-2388] [T-569] DEC: [first-publish-order]'s anchor updated deliberately -- the staging rewrite turned 'then push the branch' into a numbered step, and the check's own message demands the deliberate update.
 - 08.08.26 15:34 [E-2390] [parent: E-2389] DEC: goal_tickets 3->4
 - 08.08.26 15:34 [E-2391] [parent: E-2390] DEC: the 3 remaining ship-gate FAILs are the untracked runtime files; by the new order they are resolved AT STAGING during the wave ship, never by editing the tree.
+- 08.08.26 15:54 [E-2392] [parent: E-2391] DEC: T-562/T-563/T-567/T-549 unblocked -- the external EE/QQ blocker was T-568's defect, and it is fixed; all four re-verified on the final tree, never reused.
+- 08.08.26 15:54 [E-2393] [parent: E-2392] [T-549] RUN: build -> SKILL.md loader says BOOT once, STYLE via BOOT, INDEX routes, CORE answers, RFC is a redirect; a semantic rung FAILs a routing verb aimed at bare RFC.
+- 08.08.26 15:54 [E-2394] [parent: E-2393] [T-549] RUN: verify -> PASS -- four routing phrasings red incl. the two exact sentences that shipped; redirect wording stays legal; audit 221/221 zero not-evidence.
+- 08.08.26 15:54 [E-2395] [parent: E-2394] DEC: goal_tickets 4->8; T-549/T-562/T-563/T-567 verified.
+- 08.08.26 15:54 [E-2396] [parent: E-2395] DEC: the portable floor read `needs:` out of my own prose in a T-568 verify field and reported a false T-568<->T-569 cycle; reworded rather than loosened -- `needs:` is a field name, not a word to use in a ticket line.
+- 08.08.26 15:54 [E-2397] [parent: E-2396] RUN: ship v7.215.0 -> pushed 375ea50be7e4361279c0875dce4fd0b733b2c737; tag v7.215.0 pushed after the branch landed.
+- 08.08.26 15:54 [E-2398] [parent: E-2397] DEC: T-569 proved on its own release -- the identical tree FAILed 3 tracked-runtime checks before staging and printed `Validation complete. Agent is conformant.` after, staged set 72 of 72 equal to the reviewed scope.
+- 08.08.26 15:57 [E-2399] [parent: E-2398] DEC: E-2395 collapsed four verify-passes into one `4->8` line, and § 1.5 replay counts LINES, not deltas -- the next three lines restate them one per ticket so a rebuild reaches 8.
+- 08.08.26 15:57 [E-2400] [parent: E-2399] [T-562] DEC: goal_tickets 5->6
+- 08.08.26 15:57 [E-2401] [parent: E-2400] [T-563] DEC: goal_tickets 6->7
+- 08.08.26 15:57 [E-2402] [parent: E-2401] [T-567] DEC: goal_tickets 7->8
+- 08.08.26 15:57 [E-2403] [parent: E-2402] DEC: T-551/T-552/T-553/T-464 rewritten from current evidence; T-570 seat roster and T-571 crew-name decision opened. Improve stays meta-control unless a failure proves a phase is needed.
+- 08.08.26 16:12 [E-2404] [parent: E-2403] DEC: closing T-549 killed its own audit control -- the barrier only speaks while T-549 is unresolved, so stripping T-551's needs alone could no longer go red. Mutation now reconstructs BOTH halves; 221/221 again.
