@@ -6581,6 +6581,48 @@ else:
                      f"{sorted(SAIPEN_COMMANDS)}")
                 drift_ok = False
 
+            # T-571: `saipen crew` carries exactly one execution meaning. The
+            # future concurrent design has a distinct command name and must
+            # never reuse `saipen crew`; the sequential row must state that it
+            # is never the concurrent design, and the gated backlog must cite
+            # the decision and carry the distinct command name. A command that
+            # reads as both "runs nothing in parallel" and "multi-agent
+            # concurrency" is precisely the ambiguity a weak model resolves
+            # wrongly while believing it followed SAIPEN.
+            _crew_row_m = re.search(r"`saipen crew` -- walk[^\n]*",
+                                    _rfc_t[_i:_j])
+            if _crew_row_m is None:
+                fail("cross-doc drift [crew-naming] -- RFC § 1.10's `saipen "
+                     "crew` row is missing; the sequential circuit must be "
+                     "defined (T-571)")
+                drift_ok = False
+            else:
+                _crew_row = _crew_row_m.group(0)
+                if ("exactly one execution meaning" not in _crew_row
+                        or "never the concurrent" not in _crew_row):
+                    fail("cross-doc drift [crew-naming] -- RFC § 1.10's "
+                         "`saipen crew` row does not state its single "
+                         "execution meaning (strictly sequential, never the "
+                         "concurrent multi-agent design) -- one command cannot "
+                         "carry two execution meanings (T-571)")
+                    drift_ok = False
+            _crew_backlog = _tools_parent / ".saipen" / "KNOWLEDGE" / \
+                "crew-v8-backlog.md"
+            if _crew_backlog.is_file():
+                _cb = _crew_backlog.read_text(encoding="utf-8-sig")
+                if "T-571" not in _cb:
+                    fail("cross-doc drift [crew-naming] -- the v8 Concurrent "
+                         "Mode backlog does not cite T-571's naming decision; "
+                         "the concurrent design must not silently reuse "
+                         "`saipen crew`")
+                    drift_ok = False
+                if "`saipen concurrent`" not in _cb:
+                    fail("cross-doc drift [crew-naming] -- the v8 Concurrent "
+                         "Mode backlog must carry the distinct command name "
+                         "`saipen concurrent`; one command cannot carry two "
+                         "execution meanings")
+                    drift_ok = False
+
             # The shortcut table's right-hand column is a promise that each
             # shortcut lands on a command this surface defines. Nothing read
             # that column until v7.148.0, and two rows had stopped being true:

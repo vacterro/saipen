@@ -66,6 +66,8 @@ DIGEST = ".saipen/kitchen/digest.md"
 MANIFEST = ".saipen/kitchen/markhunt_progress.md"
 SUB = ".saipen/extensions/subs/saiwiki/STATE.md"
 CHANGELOG = "CHANGELOG.md"
+CORE = "saipen/CORE.md"
+CREW_BACKLOG = ".saipen/KNOWLEDGE/crew-v8-backlog.md"
 STATE_SCHEMA = "extensions/schemas/state.schema.json"
 TAG_QUERY = ("git", "tag", "-l", "v*")
 AUDIT_TAGS_GIT_SHIM = "SAIPEN_AUDIT_TAGS_GIT_SHIM"
@@ -887,6 +889,17 @@ CASES: list[tuple[str, str, object, str]] = [
     ("changelog archive pointer loosened", CHANGELOG,
      replace("keeps the most recent ~10.", "keeps the most recent ~50."),
      "changelog-archive-pointer"),
+    # T-571: `saipen crew` carries exactly one execution meaning. A crew row
+    # that gains a concurrent reading, or a gated backlog that reuses the
+    # `saipen crew` name for the concurrent design, is the ambiguity a weak
+    # model resolves wrongly while believing it followed SAIPEN.
+    ("crew command row loses its single-meaning statement", CORE,
+     replace("exactly one execution meaning",
+             "a meaning that may include concurrency"),
+     "crew-naming"),
+    ("concurrent backlog reuses the crew command name", CREW_BACKLOG,
+     lambda t: t.replace("`saipen concurrent`", "`saipen crew`"),
+     "crew-naming"),
     ("last_event below the log tail", STATE, sub_line("last_event", "1"),
      "lower than the log"),
     ("next_action picks a ticket that is not the topmost workable", BOARD,
