@@ -65,6 +65,7 @@ from pathlib import Path
 from freshness import (FreshnessError, compute_generic_role_revision,
                        compute_role_revision,
                        compute_source_identity)
+from userperson import validate_profile as _validate_userperson_profile
 
 def _read_rfc(p):
     core = p.parent / "CORE.md"
@@ -344,7 +345,7 @@ def canonical_commit(ref):
 SAIPEN_COMMANDS = frozenset({
     "set", "init", "continue", "goal", "plan", "clean", "translate",
     "markhunt", "prepare", "collect", "ship", "validate", "test", "status",
-    "stop", "sub", "hunt", "crew"})
+    "stop", "sub", "hunt", "crew", "userperson"})
 # RFC § 1.2: `PHASE <phase-enum> [T-###]` takes the ticket ref for exactly the
 # five ticket-bearing phases and omits it for every other one. The rule had no
 # witness, and the constitution's own worked example (§ 2.2, translating ADD's
@@ -3241,6 +3242,24 @@ if knowledge.is_dir():
                     leaked = True
     if not leaked:
         ok("KNOWLEDGE/ clean")
+
+# ------------------------------------------------- USERPERSON (T-574)
+
+# Optional preference profile, OFF by default. Absence is silent -- no
+# warning, no boot failure, no placeholder, no cold-start cost. When the
+# file exists it must be well-formed, because `saipen userperson add` merges
+# semantically and duplicate preference history is the failure mode that
+# rule exists to stop.
+_userperson_path = Path(".saipen/USERPERSON.md")
+if _userperson_path.is_file():
+    _up_errors = _validate_userperson_profile(
+        _userperson_path.read_text(encoding="utf-8-sig"))
+    if _up_errors:
+        for _up_err in _up_errors:
+            fail(f".saipen/USERPERSON.md {_up_err} -- the optional USERPERSON "
+                 f"profile is active but malformed (T-574)")
+    else:
+        ok(".saipen/USERPERSON.md is a well-formed optional USERPERSON profile")
 
 # ------------------------------------------------- home-repo-only self-check
 

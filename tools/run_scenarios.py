@@ -57,6 +57,9 @@ from freshness import (FreshnessError, SourceIdentity,
                        compute_generic_role_revision, compute_role_revision,
                        compute_source_identity)
 from sub_clean import sub_clean_blockers
+from userperson import (merge_profile, onboarding_questions, parse_profile,
+                        projection, remove_preference, render_profile,
+                        validate_profile)
 
 HOME = Path(__file__).resolve().parent.parent
 VALIDATOR = HOME / "tools" / "validate.py"
@@ -3176,6 +3179,85 @@ def run_hardening_control_inventory() -> tuple[list[str], int]:
     return problems, checked
 
 
+def run_userperson_probes() -> tuple[list[str], int]:
+    """T-574: the optional USERPERSON profile mechanics.
+
+    The profile is OFF by default -- absence is silent (verified against the
+    validator's own output on this very tree, which carries no USERPERSON
+    file) -- and every mechanical property of the profile is measured here:
+    semantic merge (never appended duplicate history), remove, parse/render
+    round-trip, structural validation, the bounded onboarding, and the
+    SubSaipen projections that must never dump the whole profile.
+    """
+    problems: list[str] = []
+    checked = 0
+
+    def expect(label: str, ok: bool, detail: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        if not ok:
+            problems.append(f"{label}: {detail}")
+        else:
+            print(f"PASS: userperson -- {label}")
+
+    merged = merge_profile(
+        ["Prefer safe autonomous continuation."],
+        ["prefer safe autonomous continuation",
+         "Prefer compact reports.",
+         "- Prefer safe autonomous continuation, even on long runs."])
+    expect("add merges by meaning, never appending duplicate history",
+           merged == ["Prefer safe autonomous continuation.",
+                      "Prefer compact reports."],
+           repr(merged))
+
+    removed = remove_preference(merged, "prefer compact reports")
+    expect("remove drops the matching preference",
+           removed == ["Prefer safe autonomous continuation."], repr(removed))
+
+    rendered = render_profile(merged)
+    parsed = parse_profile(rendered)["preferences"]
+    expect("render/parse round-trips", parsed == merged, repr(parsed))
+
+    expect("validate accepts a well-formed profile",
+           validate_profile(rendered) == [],
+           repr(validate_profile(rendered)))
+    malformed = "# USERPERSON\n\n- good preference\nnot-a-bullet\n"
+    errs = validate_profile(malformed)
+    expect("validate flags a non-bullet line",
+           any("markdown bullet" in e for e in errs), repr(errs))
+    dup = render_profile(["Same leading phrase here.",
+                          "Same leading phrase here, restated differently"])
+    expect("validate flags duplicate history that merge forbids",
+           any("duplicate" in e for e in validate_profile(dup)),
+           repr(validate_profile(dup)))
+
+    expect("onboarding asks at most three broad questions",
+           1 <= len(onboarding_questions()) <= 3,
+           repr(onboarding_questions()))
+
+    for role in ("saiui", "saitranslate", "saiwiki", "saihunt"):
+        p = projection(role)
+        expect(f"projection exists for {role}", p is not None, repr(p))
+    expect("unknown role has no projection",
+           projection("saifoo") is None, repr(projection("saifoo")))
+
+    # The whole-profile dump is the thing projections must never do; each
+    # projection is a scoped instruction, not the profile content.
+    expect("projection is a scope statement, never the profile",
+           all(projection(r) is not None
+               and len(projection(r) or "") < 200
+               for r in ("saiui", "saitranslate", "saiwiki", "saihunt")))
+
+    core = (HOME / "saipen" / "CORE.md").read_text(encoding="utf-8-sig")
+    expect("CORE.md 1.10 documents both report traces",
+           "USERPERSON alignment:" in core and "USERPERSON deviation:" in core)
+    expect("CORE.md 1.10 documents the precedence chain",
+           "current explicit request > project/task requirements > SAIPEN > "
+           "verified evidence > USERPERSON" in core)
+
+    return problems, checked
+
+
 def run_last_event_probes() -> tuple[list[str], int]:
     """Execute the legacy-schema to current-schema checkpoint migration."""
     problems = []
@@ -3772,6 +3854,8 @@ sub_clean_failures, sub_clean_checked, sub_clean_skipped = \
 failures.extend(sub_clean_failures)
 hardening_failures, hardening_checked = run_hardening_control_inventory()
 failures.extend(hardening_failures)
+userperson_failures, userperson_checked = run_userperson_probes()
+failures.extend(userperson_failures)
 manifest_failures, manifest_checked = run_manifest_tracking_probes()
 failures.extend(manifest_failures)
 autoinject_failures, autoinject_checked = run_autoinject_manifest_probes()
@@ -3816,6 +3900,7 @@ print(f"{rolefresh_checked} role-freshness behavior(s) executed, "
 print(f"{sub_clean_checked} sub-clean safety behavior(s) executed, "
       f"{sub_clean_skipped} skipped for missing host capability")
 print(f"{hardening_checked} hardening red control(s) resolved")
+print(f"{userperson_checked} userperson behavior(s) executed")
 print(f"{purity_checked} pre-commit-purity behavior(s) executed, "
       f"{purity_skipped} skipped for missing interpreters")
 print(f"{manifest_checked} manifest-tracking behavior(s) executed")
