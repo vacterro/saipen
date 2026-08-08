@@ -2424,13 +2424,27 @@ def run_role_freshness_probes() -> tuple[list[str], int]:
         a_path.unlink()
         bc_path.unlink()
 
-        before = compute_source_identity(project)
-        git("update-index", "--chmod=+x", "source.txt")
-        mode_changed = compute_source_identity(project)
-        expect("tracked mode change changes fingerprint",
-               mode_changed.source_tree_fingerprint,
-               absent=before.source_tree_fingerprint)
-        git("update-index", "--chmod=-x", "source.txt")
+        # The delta model is HEAD vs WORKING TREE, so the mode has to change
+        # where that model looks -- on disk. `git update-index --chmod` moves
+        # the INDEX only, and the two readings diverge by platform: with
+        # core.fileMode false (Windows, and any filesystem that cannot carry
+        # the bit) git reports the index mode and the probe passed; with
+        # core.fileMode true (Linux, CI) git reports the filesystem mode, sees
+        # no change, and the probe failed. It was measuring git's fallback,
+        # not the fingerprint. Where the bit is not expressible there is
+        # nothing to measure, so the rung SKIPs out loud instead of passing.
+        file_mode = git("config", "--get", "core.fileMode").stdout.strip()
+        if file_mode == "false" or os.name == "nt":
+            print("SKIP: role freshness -- core.fileMode is off, so this "
+                  "filesystem cannot express a tracked mode change")
+        else:
+            before = compute_source_identity(project)
+            source.chmod(source.stat().st_mode | 0o111)
+            mode_changed = compute_source_identity(project)
+            expect("tracked mode change changes fingerprint",
+                   mode_changed.source_tree_fingerprint,
+                   absent=before.source_tree_fingerprint)
+            source.chmod(source.stat().st_mode & ~0o111)
 
         outside_one = Path(raw) / "outside-one.txt"
         outside_two = Path(raw) / "outside-two.txt"

@@ -156,3 +156,7 @@
 - 08.08.26 15:57 [E-2403] [parent: E-2402] DEC: T-551/T-552/T-553/T-464 rewritten from current evidence; T-570 seat roster and T-571 crew-name decision opened. Improve stays meta-control unless a failure proves a phase is needed.
 - 08.08.26 16:12 [E-2404] [parent: E-2403] DEC: closing T-549 killed its own audit control -- the barrier only speaks while T-549 is unresolved, so stripping T-551's needs alone could no longer go red. Mutation now reconstructs BOTH halves; 221/221 again.
 - 08.08.26 16:14 [E-2405] [parent: E-2404] DEC: T-464 leaves ## BLOCKED -- its blocker was the premise the goal disproved, and a ticket CLEAN can finish is workable, not blocked.
+- 08.08.26 16:23 [E-2406] [parent: E-2405] RUN: CI #226 on 375ea50 -> RED `1 of 221 case(s) are not evidence` -- the T-549 barrier control, already fixed in 6124e6e.
+- 08.08.26 16:23 [E-2407] [parent: E-2406] RUN: CI on 063e52e -> RED `tracked mode change changes fingerprint` -- Linux-only; the probe moved the INDEX while the delta model reads HEAD vs working tree.
+- 08.08.26 16:23 [E-2408] [parent: E-2407] DEC: probe fixed to chmod on disk and SKIP where core.fileMode is off; local role-freshness 26 -> 25 because the vacuous pass is gone, not because coverage dropped.
+- 08.08.26 16:23 [E-2409] [parent: E-2408] DEC: T-572 opened -- freshness.py, sub_clean.py and hardening_controls.json were MANIFEST-required while untracked, so no CI run before v7.215.0 ever contained them.
