@@ -155,3 +155,4 @@
 - 08.08.26 15:57 [E-2402] [parent: E-2401] [T-567] DEC: goal_tickets 7->8
 - 08.08.26 15:57 [E-2403] [parent: E-2402] DEC: T-551/T-552/T-553/T-464 rewritten from current evidence; T-570 seat roster and T-571 crew-name decision opened. Improve stays meta-control unless a failure proves a phase is needed.
 - 08.08.26 16:12 [E-2404] [parent: E-2403] DEC: closing T-549 killed its own audit control -- the barrier only speaks while T-549 is unresolved, so stripping T-551's needs alone could no longer go red. Mutation now reconstructs BOTH halves; 221/221 again.
+- 08.08.26 16:14 [E-2405] [parent: E-2404] DEC: T-464 leaves ## BLOCKED -- its blocker was the premise the goal disproved, and a ticket CLEAN can finish is workable, not blocked.
