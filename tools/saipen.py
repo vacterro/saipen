@@ -186,6 +186,37 @@ def _sub(project_root: Path, args: list[str], as_json: bool,
     return 2
 
 
+def _context(project_root: Path, args: list[str], as_json: bool,
+             dry_run: bool) -> int:
+    """saipen context cold|hot|audit (NITRO M9, read-only)."""
+    from saipen_engine.context import context_audit, context_cold, context_hot
+
+    mode = args[0]
+    fn = {"cold": context_cold, "hot": context_hot,
+          "audit": context_audit}.get(mode)
+    if fn is None:
+        _emit({"ok": False, "code": "VALIDATION_FAILED",
+               "detail": f"unknown context mode {mode!r}; use cold|hot|audit"},
+              as_json)
+        return 2
+    result = fn(project_root)
+    if as_json:
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
+    if not result.ok:
+        _emit(result.to_dict(), as_json)
+        return 1
+    if mode == "audit":
+        import json
+        payload = result.to_dict()
+        payload.pop("ok", None)
+        payload.pop("code", None)
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+    else:
+        print(result.get("surface", ""), end="")
+    return 0
+
+
 def _userperson(project_root: Path, args: list[str], as_json: bool,
                 dry_run: bool) -> int:
     """saipen userperson show/add/remove/reset (NITRO M7, journaled)."""
@@ -334,6 +365,8 @@ def main(argv: list[str] | None = None) -> int:
         return _userperson(project_root, args[1:], as_json, dry_run)
     if command == "sub" and len(args) >= 1:
         return _sub(project_root, args[1:], as_json, dry_run)
+    if command == "context" and len(args) >= 1:
+        return _context(project_root, args[1:], as_json, dry_run)
     print(f"unknown command: {command}")
     return 2
 

@@ -43,3 +43,8 @@
 - 09.08.26 14:23 [E-2504] [parent: E-2503] [agent: claude] [op: transition-5cce9337] RUN: M8 closed
 - 09.08.26 14:24 [E-2505] [parent: E-2504] [T-585] [agent: claude] [op: checkpoint-a25147ce] DEC: goal_tickets 11->12 (T-585 passed VERIFY)
 - 09.08.26 14:24 [E-2506] [parent: E-2505] [T-585] [agent: claude] [op: checkpoint-ee29caf7] RUN: goal_tickets counter synced to STATE (12); M8 closed
+- 09.08.26 14:24 [E-2507] [parent: E-2506] [T-586] [agent: claude] [op: ticket-a72c89e0] DEC: ticket added via SAIOPS
+- 09.08.26 14:24 [E-2508] [parent: E-2507] [T-586] [agent: claude] [op: claim-68416b68] DEC: claimed via SAIOPS -- owner claude
+- 09.08.26 14:24 [E-2509] [parent: E-2508] [T-586] [agent: claude] [op: transition-28230286] RUN: M9 begins: context compiler on trustworthy mechanical layer
+- 09.08.26 14:34 [E-2510] [parent: E-2509] [T-586] [agent: claude] [op: transition-e53cb7e3] RUN: SCOUT done: M9 context compiler landed -- cold/hot/audit modes, engine-derived (no duplicated parsing), read-only; 62 nitro-integrity behaviors
+- 09.08.26 14:34 [E-2511] [parent: E-2510] [T-586] [agent: claude] [op: checkpoint-7ff0d40b] RUN: BUILD: context cold/hot/audit emitting bounded surfaces (cold ~5.4KB vs 55.5KB raw), token accounting per source + repeated-unchanged-bytes metric; CLI + import floor + 5 red controls

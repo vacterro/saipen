@@ -1,5 +1,6 @@
 # Board
 ## DOING
+- [/] T-586 [P1] NITRO M9: context compiler -- saipen context cold/hot/audit. Build the deterministic context compiler on the NOW-TRUSTWORTHY mechanical layer (saipen status/next, ProjectSnapshot, ticket parser, phase routing, log indexing). saipen context cold emits the minimal cold-start surface (STATE + BOARD + LOG tail + phase doc routing) as a compact bounded artifact a cold agent consumes instead of re-reading raw files; saipen context hot emits the current-work surface (status + next + active ticket + recent log + recovery_pending); saipen context audit emits a bounded token/bytes accounting per source so repeated unchanged bytes are measurable. All three read-only. The compiler consumes the engine's parsers and snapshot -- never duplicated parsing. Token optimization priority: fresh reasoning surface + repeated parsing + unnecessary bookkeeping, NOT nominal cached count at any cost. Stable protocol prefix ordering preserved. | verify: verify: TBD | owner: claude | claim_time: 2026-08-09T14:24:47Z
 ## TODO
 
 

@@ -4025,9 +4025,9 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         return out
 
     # Import floor: every shipped engine module imports in isolation.
-    from saipen_engine import (board, codec, errors, fast_check, journal,  # noqa: F401
-                               lock, log, operations, paths, phases, plan,
-                               result, snapshot, state, subs)
+    from saipen_engine import (board, codec, context, errors, fast_check,  # noqa: F401
+                               journal, lock, log, operations, paths, phases,
+                               plan, result, snapshot, state, subs)
     expect("every shipped saipen_engine module imports in isolation", True)
 
     # ---- R1/R2: checkpoint and ticket_add preserve phase/task.
@@ -4569,6 +4569,34 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            collect_res.get("ok")
            and collect_res.get("code") == "COLLECT_PREFLIGHT",
            repr(collect_res))
+
+    # ---- NITRO M9: context compiler is read-only and derives from the engine.
+    from saipen_engine import context as ctx
+    ctx_root = make_project()
+    tree_before = project_tree(ctx_root)
+    cold = ctx.context_cold(ctx_root)
+    hot = ctx.context_hot(ctx_root)
+    audit = ctx.context_audit(ctx_root)
+    tree_after = project_tree(ctx_root)
+    expect("context cold is read-only (zero bytes written)",
+           cold.get("ok") and tree_before == tree_after, repr(cold))
+    expect("context hot is read-only and names the claimed ticket",
+           hot.get("ok")
+           and "claimed_ticket:" in hot.get("surface", "")
+           and "recovery_pending:" in hot.get("surface", ""), repr(hot))
+    expect("context audit accounts bytes/tokens per source",
+           audit.get("ok")
+           and len(audit["sources"]) >= 3
+           and "cold_surface" in audit
+           and "repeated_unchanged_bytes" in audit, repr(audit))
+    cold_bytes = cold.get("bytes", 0)
+    raw_bytes = audit["total_bytes"]
+    expect("cold surface is bounded well below the raw canonical files",
+           cold_bytes > 0 and raw_bytes > 0 and cold_bytes < raw_bytes,
+           f"cold={cold_bytes} raw={raw_bytes}")
+    cold_tokens = cold.get("tokens", 0)
+    expect("cold surface token count is modest (token optimization target)",
+           cold_tokens > 0 and cold_tokens < 5000, repr(cold_tokens))
 
     return problems, checked
 
