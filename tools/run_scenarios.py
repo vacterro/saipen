@@ -69,7 +69,9 @@ from saipen_engine.journal import Journal, recover, run_mutation
 from saipen_engine.lock import WriterLock
 from saipen_engine.log import parse_log_line
 from saipen_engine.operations import (apply_claim, checkpoint, next_ticket_id,
-                                       plan_claim, ticket_add, ticket_move,
+                                       plan_claim, reauthorize_valve,
+                                       set_goal_intent, stop_checkpoint,
+                                       ticket_add, ticket_move,
                                        transition_phase)
 from saipen_engine.snapshot import ProjectSnapshot
 from saipen_engine.state import parse_frontmatter
@@ -3833,6 +3835,24 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
            moved.get("ok") and moved.get("code") == "DONE"
            and parse_board(codec.read_doc(saipen / "BOARD.md"))
            ["tickets"]["T-778"]["section"] == "## DONE", repr(moved))
+
+    # M5: goal/cc mechanics. reauthorize refuses without a tripped valve.
+    refused = reauthorize_valve(root, "probe")
+    expect("reauthorize_valve refuses a valve that has not tripped",
+           not refused.get("ok") and refused.get("code") == "VALIDATION_FAILED",
+           repr(refused))
+    goal = set_goal_intent(root, "probe", "M5 probe")
+    expect("set_goal_intent pivots to goal with counters from 0",
+           goal.get("ok") and goal.get("code") == "GOAL_SET"
+           and parse_state(codec.read_doc(saipen / "STATE.md")).get(
+               "execution_intent") == "goal"
+           and parse_state(codec.read_doc(saipen / "STATE.md")).get(
+               "goal_waves") == 0, repr(goal))
+    stop = stop_checkpoint(root, "probe", "probe stop")
+    expect("stop_checkpoint writes a resumable next_action",
+           stop.get("ok") and stop.get("code") == "STOPPED"
+           and parse_state(codec.read_doc(saipen / "STATE.md")).get(
+               "next_action"), repr(stop))
 
     return problems, checked
 

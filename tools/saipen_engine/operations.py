@@ -116,8 +116,9 @@ def _claim_targets(root: Path, ticket_id: str, agent: str,
 def _render_state(state: dict, ticket_id: str, agent: str, event: int,
                   utc: str) -> str:
     prev_phase = state.get("phase", "DONE")
+    intent = state.get("execution_intent")
     lines = ["---",
-             "phase: SCOUT",
+             f"phase: SCOUT",
              f"task: {ticket_id}",
              f'next_action: "PHASE SCOUT {ticket_id}"',
              "blocker: \"\"",
@@ -132,9 +133,13 @@ def _render_state(state: dict, ticket_id: str, agent: str, event: int,
              "  - filesystem",
              "  - git",
              "  - python",
-             "mode: full",
-             "updated: " + utc,
-             "---"]
+             "mode: full"]
+    if intent is not None:
+        lines.append(f"execution_intent: {intent}")
+        lines.append(f"goal_waves: {state.get('goal_waves', 0)}")
+        lines.append(f"goal_tickets: {state.get('goal_tickets', 0)}")
+    lines.append("updated: " + utc)
+    lines.append("---")
     return "\n".join(lines) + "\n"
 
 
@@ -460,6 +465,145 @@ def ticket_move(project_root: Path | str, action: str, ticket_id: str,
     preconditions = {
         ".saipen/STATE.md": snap.state_hash,
         ".saipen/BOARD.md": snap.board_hash,
+        ".saipen/LOG.md": snap.log_hash,
+    }
+    with project_writer_lock(root):
+        commit = run_mutation(root, result["op_id"], agent,
+                              snap.project_identity, preconditions, targets)
+    return {**commit, **result}
+
+
+GOAL_WAVE_CAP = 3
+GOAL_TICKET_CAP = 20
+
+
+def _state_targets(root: Path, agent: str, mutate_state, event_text: str,
+                   now: str, utc: str) -> tuple[list[dict], dict]:
+    state_text = codec.read_doc(root / ".saipen" / "STATE.md")
+    log_text = codec.read_doc(root / ".saipen" / "LOG.md")
+    state = parse_state(state_text)
+    event = _alloc_event(log_text)
+    new_log = log_text.rstrip("\n") + "\n" + (
+        f"- {now} [E-{event}] [T-none] DEC: {event_text}")
+    new_state = _render_state(mutate_state(state), state.get("task") or "none",
+                              agent, event, utc)
+    board_text = codec.read_doc(root / ".saipen" / "BOARD.md")
+    targets = [
+        {"path": ".saipen/LOG.md", "content": new_log + "\n"},
+        {"path": ".saipen/BOARD.md", "content": board_text},
+        {"path": ".saipen/STATE.md", "content": new_state},
+    ]
+    return targets, {"ok": True, "event_id": f"E-{event}"}
+
+
+def set_goal_intent(project_root: Path | str, agent: str, objective: str,
+                    dry_run: bool = False) -> dict:
+    """Pivot to a NEW objective: execution_intent goal, counters from 0,
+    straight into SCOUT for the topmost workable ticket. Python records the
+    decided intent; the model supplies the objective."""
+    root = Path(project_root)
+    now = _now()
+    utc = _utc_iso()
+
+    def mutate(state):
+        state["execution_intent"] = "goal"
+        state["goal_waves"] = 0
+        state["goal_tickets"] = 0
+        return state
+
+    targets, result = _state_targets(root, agent, mutate,
+                                     f"goal pivot -- {objective}", now, utc)
+    result["code"] = "GOAL_SET"
+    result["op_id"] = "goal-" + uuid.uuid4().hex[:8]
+    result["changed_files"] = [t["path"] for t in targets]
+    if dry_run:
+        result["dry_run"] = True
+        return result
+    snap = ProjectSnapshot.capture(root)
+    preconditions = {
+        ".saipen/STATE.md": snap.state_hash,
+        ".saipen/LOG.md": snap.log_hash,
+    }
+    with project_writer_lock(root):
+        commit = run_mutation(root, result["op_id"], agent,
+                              snap.project_identity, preconditions, targets)
+    return {**commit, **result}
+
+
+def reauthorize_valve(project_root: Path | str, agent: str,
+                      dry_run: bool = False) -> dict:
+    """Conditional safety-valve reauthorization: reset goal_waves/goal_tickets
+    to 0 ONLY when the valve has tripped (a counter is at/over its cap).
+    Never grants a fresh budget on a run that did not trip the valve."""
+    root = Path(project_root)
+    now = _now()
+    utc = _utc_iso()
+    state = parse_state(codec.read_doc(root / ".saipen" / "STATE.md"))
+    waves = state.get("goal_waves") or 0
+    tickets = state.get("goal_tickets") or 0
+    if not (state.get("execution_intent") == "goal"
+            and (waves >= GOAL_WAVE_CAP or tickets >= GOAL_TICKET_CAP)):
+        return {"ok": False, "code": "VALIDATION_FAILED",
+                "detail": "valve has not tripped; no fresh budget is owed"}
+
+    def mutate(st):
+        st["goal_waves"] = 0
+        st["goal_tickets"] = 0
+        return st
+
+    targets, result = _state_targets(root, agent, mutate,
+                                     "goal reauthorized", now, utc)
+    result["code"] = "VALVE_REAUTHORIZED"
+    result["op_id"] = "valve-" + uuid.uuid4().hex[:8]
+    result["changed_files"] = [t["path"] for t in targets]
+    if dry_run:
+        result["dry_run"] = True
+        return result
+    snap = ProjectSnapshot.capture(root)
+    preconditions = {
+        ".saipen/STATE.md": snap.state_hash,
+        ".saipen/LOG.md": snap.log_hash,
+    }
+    with project_writer_lock(root):
+        commit = run_mutation(root, result["op_id"], agent,
+                              snap.project_identity, preconditions, targets)
+    return {**commit, **result}
+
+
+def stop_checkpoint(project_root: Path | str, agent: str, reason: str = "",
+                    dry_run: bool = False) -> dict:
+    """The brake: checkpoint with a resumable next_action and write the
+    human digest. Never changes the execution intent, never touches counters."""
+    root = Path(project_root)
+    now = _now()
+    utc = _utc_iso()
+    state = parse_state(codec.read_doc(root / ".saipen" / "STATE.md"))
+    task = state.get("task")
+    na = f"PHASE SCOUT {task}" if task and task != "none" else "saipen continue"
+
+    def mutate(st):
+        st["next_action"] = na
+        return st
+
+    targets, result = _state_targets(root, agent, mutate,
+                                     f"stop checkpoint{': ' + reason if reason else ''}",
+                                     now, utc)
+    digest = root / ".saipen" / "kitchen" / "digest.md"
+    digest.parent.mkdir(parents=True, exist_ok=True)
+    digest.write_text(
+        "done: stopped via SAIOPS checkpoint\n"
+        f"remaining: {task or 'see BOARD'}\n"
+        f"awaiting: {reason or 'nothing'}\n", encoding="utf-8")
+    result["code"] = "STOPPED"
+    result["op_id"] = "stop-" + uuid.uuid4().hex[:8]
+    result["changed_files"] = [t["path"] for t in targets]
+    if dry_run:
+        result["dry_run"] = True
+        result["digest"] = str(digest)
+        return result
+    snap = ProjectSnapshot.capture(root)
+    preconditions = {
+        ".saipen/STATE.md": snap.state_hash,
         ".saipen/LOG.md": snap.log_hash,
     }
     with project_writer_lock(root):

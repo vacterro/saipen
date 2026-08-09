@@ -1,8 +1,9 @@
 # Board
 ## DOING
+- [/] T-582 [P1] NITRO M5: goal/cc + stop/checkpoint mechanics on the engine. Mechanize execution_intent writes, goal_waves/goal_tickets counters, legal safety-valve reauthorization, pause representation and the exact resume key: saipen_engine/operations.py gains set_goal_intent, reauthorize_valve (conditional reset of both counters only when the owning rule says so), and stop_checkpoint (the brake: checkpoint + digest). The CONVERGE contract still decides stage order; Python only records the decided intent/counters/checkpoint. | verify: goal intent writes are journalled; reauthorize_valve resets counters only when the valve tripped (never a silent fresh budget); stop_checkpoint writes the resumable next_action and the digest; dry-run zero bytes; counters derive from evidence, no independent copy | owner: claude | claim_time: 2026-08-09T03:15:00Z
 ## TODO
 
-- [ ] T-582 [P1] NITRO M5: goal/cc + stop/checkpoint mechanics on the engine. Mechanize execution_intent writes, goal_waves/goal_tickets counters, legal safety-valve reauthorization, pause representation and the exact resume key: saipen_engine/operations.py gains set_goal_intent, reauthorize_valve (conditional reset of both counters only when the owning rule says so), and stop_checkpoint (the brake: checkpoint + digest). The CONVERGE contract still decides stage order; Python only records the decided intent/counters/checkpoint. | verify: goal intent writes are journalled; reauthorize_valve resets counters only when the valve tripped (never a silent fresh budget); stop_checkpoint writes the resumable next_action and the digest; dry-run zero bytes; counters derive from evidence, no independent copy
+
 
 
 
