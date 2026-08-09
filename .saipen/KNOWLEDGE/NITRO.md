@@ -126,19 +126,31 @@ Regressions recorded under T-584 (R1..R12) and proven by
 ## Milestones (one red-test -> implementation -> gates -> release each)
 
 M1: shared parser + ProjectSnapshot extraction; saipen status; saipen next.
+    DONE (T-578).
 M2: lock + journal + recovery; crash-injection harness
-    (NITRO_CRASH_AFTER_PREPARE/LOG/BOARD/STATE).
-M3: saipen claim, transition, checkpoint.
+    (NITRO_CRASH_AFTER_PREPARE/LOG/BOARD/STATE). DONE (T-579).
+M3: saipen claim, transition, checkpoint. DONE (T-580).
 M4: ticket lifecycle (add/done/block/unblock/update) + canonical ticket-ID
-    allocation (ignores synthetic T-998/T-999 fixtures).
-M5: goal/cc counters, safety-valve reauthorization, stop/checkpoint.
+    allocation (ignores synthetic T-998/T-999 fixtures). DONE (T-581).
+M5: goal/cc counters, safety-valve reauthorization, stop/checkpoint. DONE
+    (T-582).
 M6: migrate Improve mechanics (register_cycle/register_seat/
     write_sweep_entry/append_run) onto the common transaction primitive --
     register_cycle currently creates the cycle dir before the MANIFEST replace,
     so a crash can expose a roster-less cycle; fix via the general primitive.
-M7: USERPERSON writers on common path/atomic/result/dry-run.
-M8: SubSaipen operations (reuse freshness.py/sub_clean.py).
-M9: context compiler (saipen context cold/hot/audit) + token accounting.
+    DONE (T-583, closed under the strengthened done bar of the integrity sweep).
+M7: USERPERSON writers on common path/atomic/result/dry-run. DONE (T-577) --
+    saipen userperson show/add/remove/reset via journaled write_profile.
+M8: SubSaipen operations (reuse freshness.py/sub_clean.py). DONE (T-585) --
+    saipen sub list/status/spawn/pause/resume/clean/collect on common machinery.
+M9: context compiler (saipen context cold/hot/audit) + token accounting. DONE
+    (T-586) -- bounded engine-derived surfaces, ~90% byte reduction, per-source
+    token accounting with repeated-unchanged-bytes metric.
+
+NITRO M1-M9 shipped together in the v7.219.0 integrity release and the
+M7-M9 commits that followed. The next phase is FULL NITRO DOGFOOD on SAIPEN
+core (use the engine for real maintenance), then SAICRITIC from the queued
+directive, then real Improve cycles.
 
 The first vertical slice is claim/transition/checkpoint. After those are
 mechanical, STOP adding commands and use them in real Improve work; choose the
