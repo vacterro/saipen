@@ -104,3 +104,10 @@
 - 09.08.26 19:06 [E-2565] [parent: E-2564] [agent: claude] [op: transition-81ddaeaa] RUN: T-590 command truth closed
 - 09.08.26 19:06 [E-2566] [parent: E-2565] [T-590] [agent: claude] [op: checkpoint-d587be41] RUN: goal_tickets synced (17); T-590 closed; closure-order lesson recorded (transition-then-done)
 - 09.08.26 19:28 [E-2567] [parent: E-2566] [T-590] [agent: claude] [op: checkpoint-3469b5d0] RUN: forced audit red-control repair: goal-counter-rebuild case injected 17 which now equals the live LOG's mechanical rebuild; injected 29 (guaranteed divergent) restores 231/231
+- 09.08.26 19:42 [E-2568] [parent: E-2567] [T-591] [agent: claude] [op: ticket-0cff97de] DEC: ticket added via SAIOPS
+- 09.08.26 19:42 [E-2569] [parent: E-2568] [T-592] [agent: claude] [op: ticket-3bc42c0a] DEC: ticket added via SAIOPS
+- 09.08.26 19:43 [E-2570] [parent: E-2569] [T-591] [agent: claude] [op: claim-bb61ffd6] DEC: claimed via SAIOPS -- owner claude
+- 09.08.26 19:43 [E-2571] [parent: E-2570] [T-591] [agent: claude] [op: transition-75231bab] RUN: P0 closure + router truth begins (explicit claim per goal directive: T-553 held)
+- 09.08.26 19:43 [E-2572] [parent: E-2571] [T-593] [agent: claude] [op: ticket-57731fdf] DEC: ticket added via SAIOPS
+- 09.08.26 19:43 [E-2573] [parent: E-2572] [T-591] [agent: claude] [op: checkpoint-8db113a8] DEC: ss stop: accidental add_t591.py re-run minted T-592/T-593 carrying T-591's closure text -- these are WRONG-TEXT artifacts of this session, to be rewritten with their true root-cause text (conflict-resolution / improve-truth) next session; T-591 (closure+router) is the correct DOING ticket
+- 09.08.26 19:44 [E-2574] [parent: E-2573] [T-591] [agent: claude] [op: checkpoint-92c95433] DEC: cleanup: removed accidental duplicate T-592/T-593 lines (carried T-591's text from a re-run of the creation script); the real T-592 (conflict resolution) / T-593 (Improve truth) will be created with their true root-cause text next
