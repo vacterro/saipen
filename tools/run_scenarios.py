@@ -5062,6 +5062,71 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     expect("cold surface token count is modest (token optimization target)",
            cold_tokens > 0 and cold_tokens < 5000, repr(cold_tokens))
 
+    # ---- NITRO dogfood IV (T-600): context projection integrity.
+    # Real current shape: 10+ TODO tickets, the top several unworkable (needs
+    # unmet), the ACTUAL top workable below the orientation limit, long
+    # description, nonempty needs, long verify. A small budget must still
+    # include in full: routed action, exact ticket, needs, verify, routed
+    # phase doc, recovery state -- and the board map must be TRUTHFULLY
+    # capped (never print a ticket AND count it as omitted).
+    from saipen_engine.context import _board_map as _ctx_board_map
+    shape_root = make_project()
+    sf = shape_root / ".saipen"
+    lines = ["# Board", "## DOING", "## TODO"]
+    lines.append("- [ ] T-1 [P1] unworkable one | needs: T-2 | verify: v1")
+    lines.append("- [ ] T-2 [P1] unworkable two | needs: T-3 | verify: v2")
+    lines.append("- [ ] T-3 [P1] unworkable three | needs: T-4 | verify: v3")
+    for i in range(4, 13):
+        lines.append(f"- [ ] T-{i} [P1] ticket {i} with a long descriptive "
+                     f"body {'x' * 120} | verify: run a very long "
+                     f"verification command for T-{i} {'y' * 120}")
+    lines.append("## DONE\n## BLOCKED\n")
+    (sf / "BOARD.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    cold_shape = ctx.context_cold(shape_root, limit=1500)
+    surf = cold_shape.get("surface", "")
+    expect("context: with a small budget the exact routed ticket (the top "
+           "workable below the orientation limit) survives in full "
+           "(description + verify intact)",
+           "## NEXT TICKET" in surf
+           and "ticket 4 with a long descriptive body" in surf
+           and "verify: run a very long verification command for T-4" in surf,
+           repr(surf[:400]))
+    expect("context: routed action + phase doc + recovery state survive a "
+           "small budget",
+           "PHASE SCOUT T-4" in surf
+           and "phase_doc: saipen/phases/scout.md" in surf
+           and "recovery_pending:" in surf, repr(surf[:400]))
+    expect("context: the board map is present and truthfully capped",
+           "## BOARD MAP" in surf and bool(re.search(r"\+ ?\d+ more", surf)),
+           repr(surf[-300:]))
+    bm = _ctx_board_map(parse_board(codec.read_doc(sf / "BOARD.md")),
+                        full_ticket="T-4", cap=2)
+    expect("context: _board_map omits exactly the right count (+9 more from "
+           "12 TODO tickets with cap 2 + protected full T-4)",
+           "  ... +9 more" in bm
+           and "ticket 4 with a long descriptive body" in bm,
+           repr(bm))
+
+    # Byte accounting MUST describe the FINAL emitted surface: bytes ==
+    # len(surface.encode('utf-8')) and characters == len(surface), exactly --
+    # proven with Cyrillic + Japanese multibyte content.
+    unicode_root = make_project()
+    (unicode_root / ".saipen" / "BOARD.md").write_text(
+        "# Board\n## DOING\n## TODO\n"
+        "- [ ] T-1 [P1] тест японский 日本語プロジェクト | verify: прогон "
+        "コマンド検証\n## DONE\n## BLOCKED\n", encoding="utf-8")
+    cold_uni = ctx.context_cold(unicode_root, limit=2000)
+    surf_uni = cold_uni.get("surface", "")
+    expect("context: bytes == len(surface.encode('utf-8')) and characters == "
+           "len(surface) exactly (Cyrillic + Japanese)",
+           cold_uni.get("bytes") == len(surf_uni.encode("utf-8"))
+           and cold_uni.get("characters") == len(surf_uni),
+           repr((cold_uni.get("bytes"), len(surf_uni.encode("utf-8")),
+                 cold_uni.get("characters"), len(surf_uni))))
+    expect("context: multibyte content makes real bytes > characters",
+           cold_uni.get("bytes") > cold_uni.get("characters"),
+           repr((cold_uni.get("bytes"), cold_uni.get("characters"))))
+
     # ---- T-587: unresolved CONFLICT blocks every new mutation.
     from saipen_engine.journal import pending_conflicts, recovery_preflight
     root_c = make_project()

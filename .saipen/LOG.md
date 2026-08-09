@@ -163,3 +163,10 @@
 - 09.08.26 23:06 [E-2624] [parent: E-2623] [op: transition-dc67eb9b] DEC: goal_tickets 1->2
 - 09.08.26 23:07 [E-2625] [parent: E-2624] [T-601] [agent: claude] [op: transition-1b09190f] RUN: REVIEW verdict DEC: SHIP -- verify re-run fresh (49/49 improve + 162/162 nitro-integrity + validate PASS); diff reviewed, no P0/P1
 - 09.08.26 23:07 [E-2626] [parent: E-2625] [T-601] [agent: claude] [op: finish-2fabb265] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 09.08.26 23:08 [E-2627] [parent: E-2626] [T-600] [agent: claude] [op: claim-eea55146] DEC: claimed via SAIOPS -- owner claude
+- 09.08.26 23:11 [E-2628] [parent: E-2627] [T-600] [agent: claude] [op: transition-28f9b3a1] RUN: SCOUT done: reproduced metrics-lie (9365 reported vs 4028 emitted), ROUTING/phase_doc/recovery lost to global truncation; context.py rewritten with structural budgeting
+- 09.08.26 23:14 [E-2629] [parent: E-2628] [T-600] [agent: claude] [op: transition-3b7690ce] RUN: BUILD complete: context.py structural budgeting (NEXT TICKET protected, truthful board cap, mandatory sections never cut, metrics from emitted surface, pre_bound/truncation separate); 6 new T-600 probes (shape fixture, byte identity Cyrillic+Japanese, truthful cap); full scenario suite green
+- 09.08.26 23:19 [E-2630] [parent: E-2629] [T-600] [agent: claude] [op: transition-14afb788] RUN: VERIFY done: validate.py PASS, run_scenarios full green (168 nitro-integrity incl. 6 new context probes), audit_checks 231/231 fresh
+- 09.08.26 23:19 [E-2631] [parent: E-2630] [op: transition-14afb788] DEC: goal_tickets 2->3
+- 09.08.26 23:19 [E-2632] [parent: E-2631] [T-600] [agent: claude] [op: transition-4176b597] RUN: REVIEW verdict DEC: SHIP -- verify re-run fresh (168/168 nitro-integrity + validate PASS); context.py diff reviewed, no P0/P1
+- 09.08.26 23:19 [E-2633] [parent: E-2632] [T-600] [agent: claude] [op: finish-9a00b1b7] DEC: ticket finished via SAIOPS -- completion (from SHIP)
