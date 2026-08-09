@@ -4598,6 +4598,130 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     expect("cold surface token count is modest (token optimization target)",
            cold_tokens > 0 and cold_tokens < 5000, repr(cold_tokens))
 
+    # ---- T-587: unresolved CONFLICT blocks every new mutation.
+    from saipen_engine.journal import pending_conflicts, recovery_preflight
+    root_c = make_project()
+    saipen_c = root_c / ".saipen"
+    log_c = (saipen_c / "LOG.md").read_bytes()
+    state_c = (saipen_c / "STATE.md").read_bytes()
+    new_log_c = log_c + b"\n- 09.08.26 00:01 [E-901] RUN: op\n"
+    new_state_c = state_c.replace(b"phase: DONE", b"phase: BUILD")
+    j_c = Journal(root_c, "op-conf")
+    j_c.start("checkpoint", "probe", "id", "h", [
+        {"path": ".saipen/LOG.md", "role": "log", "content": new_log_c,
+         "before_hash": hash_bytes(log_c),
+         "after_hash": hash_bytes(new_log_c)},
+        {"path": ".saipen/STATE.md", "role": "state",
+         "content": new_state_c, "before_hash": hash_bytes(state_c),
+         "after_hash": hash_bytes(new_state_c)},
+    ], verification_policy="core_fast")
+    (saipen_c / "LOG.md").write_bytes(new_log_c)
+    j_c.mark("APPLYING", progress_index=1, target_index=0)
+    external_c = state_c + b"\n# third party\n"
+    (saipen_c / "STATE.md").write_bytes(external_c)
+    res_c = recover(root_c, "op-conf")
+    expect("crash control A: changed unfinished write target CONFLICTs",
+           res_c.get("code") == "CONFLICT"
+           and (saipen_c / "STATE.md").read_bytes() == external_c,
+           repr(res_c))
+    expect("unresolved CONFLICT is listed by pending_ops",
+           "op-conf" in [p["op_id"] for p in pending_ops(root_c)], repr(
+               pending_ops(root_c)))
+    expect("unresolved CONFLICT is listed by pending_conflicts",
+           "op-conf" in [c["op_id"] for c in pending_conflicts(root_c)])
+    blocked_c = ticket_add(root_c, "probe", "P2", "after conflict", [],
+                           "verify")
+    expect("new mutation over unresolved CONFLICT refuses "
+           "(RECOVERY_CONFLICT)",
+           not blocked_c.get("ok")
+           and blocked_c.get("code") == "RECOVERY_CONFLICT", repr(blocked_c))
+    pre_c = recovery_preflight(root_c)
+    expect("recovery preflight over a conflict refuses RECOVERY_CONFLICT",
+           pre_c.get("code") == "RECOVERY_CONFLICT", repr(pre_c))
+
+    # ---- T-587 control B: read-only dependency drift -> CONFLICT.
+    root_b = make_project()
+    saipen_b = root_b / ".saipen"
+    log_b = (saipen_b / "LOG.md").read_bytes()
+    state_b = (saipen_b / "STATE.md").read_bytes()
+    board_b = (saipen_b / "BOARD.md").read_bytes()
+    new_log_b = log_b + b"\n- 09.08.26 00:01 [E-901] RUN: op\n"
+    new_state_b = state_b.replace(b"phase: DONE", b"phase: BUILD")
+    j_b = Journal(root_b, "op-rdep")
+    j_b.start("checkpoint", "probe", "id", "h", [
+        {"path": ".saipen/LOG.md", "role": "log", "content": new_log_b,
+         "before_hash": hash_bytes(log_b),
+         "after_hash": hash_bytes(new_log_b)},
+        {"path": ".saipen/STATE.md", "role": "state",
+         "content": new_state_b, "before_hash": hash_bytes(state_b),
+         "after_hash": hash_bytes(new_state_b)},
+    ], verification_policy="core_fast",
+        read_preconditions={".saipen/BOARD.md": hash_bytes(board_b)})
+    (saipen_b / "LOG.md").write_bytes(new_log_b)
+    j_b.mark("APPLYING", progress_index=1, target_index=0)
+    (saipen_b / "BOARD.md").write_text(
+        "# Board\n## DOING\n- [/] T-1 [P1] probe | owner: probe | "
+        "claim_time: 2026-08-09T00:00:00Z\n## TODO\n## DONE\n## BLOCKED\n",
+        encoding="utf-8")
+    res_b = recover(root_b, "op-rdep")
+    expect("crash control B: changed read-only dependency CONFLICTs",
+           res_b.get("code") == "CONFLICT"
+           and b"DOING" in (saipen_b / "BOARD.md").read_bytes(),
+           repr(res_b))
+    expect("recovered state never COMMITTED over a drifted read dependency",
+           j_b.read()["status"] == "CONFLICT")
+    blocked_b = ticket_add(root_b, "probe", "P2", "after rdep", [], "verify")
+    expect("new mutation refuses after read-dependency conflict",
+           not blocked_b.get("ok")
+           and blocked_b.get("code") in ("RECOVERY_CONFLICT",
+                                         "VALIDATION_FAILED"), repr(
+               blocked_b))
+
+    # ---- T-587: semantically invalid recovered state cannot COMMIT.
+    root_s = make_project()
+    saipen_s = root_s / ".saipen"
+    log_s = (saipen_s / "LOG.md").read_bytes()
+    state_s = (saipen_s / "STATE.md").read_bytes()
+    board_s = (saipen_s / "BOARD.md").read_bytes()
+    new_log_s = log_s + b"\n- 09.08.26 00:01 [E-901] RUN: op\n"
+    new_state_s = (b"---\nphase: DONE\ntask: none\n"
+                   b'next_action: "saipen continue"\n'
+                   b'blocker: ""\ntransition_from: SHIP\nsaipen_version: 7\n'
+                   b"schema_version: 3\nlast_event: 901\n"
+                   b"style_contract: ded-4ae736e4\nsaipen_home: \".\"\n"
+                   b"agent: probe\nmode: full\n"
+                   b"updated: 2026-08-09T00:00:00Z\n---\n")
+    j_s = Journal(root_s, "op-sem")
+    j_s.start("checkpoint", "probe", "id", "h", [
+        {"path": ".saipen/LOG.md", "role": "log", "content": new_log_s,
+         "before_hash": hash_bytes(log_s),
+         "after_hash": hash_bytes(new_log_s)},
+        {"path": ".saipen/STATE.md", "role": "state",
+         "content": new_state_s, "before_hash": hash_bytes(state_s),
+         "after_hash": hash_bytes(new_state_s)},
+    ], verification_policy="core_fast",
+        read_preconditions={".saipen/BOARD.md": hash_bytes(board_s)})
+    (saipen_s / "LOG.md").write_bytes(new_log_s)
+    j_s.mark("APPLYING", progress_index=1, target_index=0)
+    # BOARD DOING T-1 but STATE task:none: byte-valid, semantically invalid.
+    (saipen_s / "BOARD.md").write_text(
+        "# Board\n## DOING\n- [/] T-1 [P1] probe | owner: probe | "
+        "claim_time: 2026-08-09T00:00:00Z\n## TODO\n## DONE\n## BLOCKED\n",
+        encoding="utf-8")
+    res_s = recover(root_s, "op-sem")
+    expect("recovered invalid state cannot become COMMITTED (CONFLICT)",
+           res_s.get("code") == "CONFLICT"
+           and j_s.read()["status"] == "CONFLICT", repr(res_s))
+
+    # ---- T-587: public saipen recover --json refuses a conflict.
+    rec_c = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "recover",
+         "--json"],
+        cwd=str(root_c), capture_output=True, text=True, timeout=60)
+    expect("saipen recover --json refuses a conflict and names the op",
+           '"code": "CONFLICT"' in rec_c.stdout
+           and "op-conf" in rec_c.stdout, repr(rec_c.stdout[:200]))
+
     return problems, checked
 
 

@@ -54,3 +54,8 @@
 - 09.08.26 14:37 [E-2515] [parent: E-2514] [agent: claude] [op: transition-2d7418e8] RUN: M9 closed
 - 09.08.26 14:38 [E-2516] [parent: E-2515] [T-586] [agent: claude] [op: checkpoint-78b8bb5d] DEC: goal_tickets 12->13 (T-586 passed VERIFY)
 - 09.08.26 14:38 [E-2517] [parent: E-2516] [T-586] [agent: claude] [op: checkpoint-34b4b84f] RUN: goal_tickets counter synced (13); M9 closed
+- 09.08.26 15:03 [E-2518] [parent: E-2517] [T-587] [agent: claude] [op: ticket-6731c81d] DEC: ticket added via SAIOPS
+- 09.08.26 15:03 [E-2519] [parent: E-2518] [T-587] [agent: claude] [op: claim-1b371f4e] DEC: claimed via SAIOPS -- owner claude
+- 09.08.26 15:03 [E-2520] [parent: E-2519] [T-587] [agent: claude] [op: transition-633a52db] RUN: P0 trust wave begins
+- 09.08.26 15:27 [E-2521] [parent: E-2520] [T-587] [agent: claude] [op: transition-4cd9dfc1] RUN: SCOUT done: P0 reproduced (CONFLICT terminal -> pending_ops [] -> second commit), lifecycle fixed (SETTLED vs UNRESOLVED), read-dep recheck + semantic verifier + conflict-block + public recover all landed; 9 new red controls (72 total)
+- 09.08.26 15:27 [E-2522] [parent: E-2521] [T-587] [agent: claude] [op: checkpoint-ab500c36] RUN: BUILD: CONFLICT now UNRESOLVED; pending_conflicts separate; RECOVERY_CONFLICT preflight blocks new mutation; recovery rechecks read-only preconditions + reruns verification_policy verifier; recovered invalid state never COMMITTED; status/next expose conflict; saipen recover REFUSEs conflict naming op; OPS.md lifecycle vocabulary + recovery policy documented

@@ -98,6 +98,20 @@ def _hex8() -> str:
     return uuid.uuid4().hex[:8]
 
 
+def _read_only_preconditions(plan: OperationPlan) -> dict[str, str]:
+    """The plan's preconditions that are NOT write targets.
+
+    A write target's own before_hash already covers its write precondition;
+    recovery validates it per-target. A file the plan READ but did not write
+    (e.g. BOARD read to decide a transition) is a READ-ONLY dependency: its
+    live bytes must still match the plan's allowed state at recovery time,
+    or the plan is no longer the authorized decision (NITRO dogfood II).
+    """
+    written = {t.path for t in plan.targets}
+    return {path: expected for path, expected in plan.preconditions.items()
+            if path not in written}
+
+
 def apply_plan(project_root: Path | str, plan: OperationPlan) -> Result:
     """APPLY the exact plan through lock + journal + recovery + verification.
 
@@ -116,7 +130,9 @@ def apply_plan(project_root: Path | str, plan: OperationPlan) -> Result:
                   "before_hash": t.before_hash, "after_hash": t.after_hash}
                  for t in plan.targets],
                 preconditions=plan.preconditions,
-                verify=fast_check.validate_project)
+                read_preconditions=_read_only_preconditions(plan),
+                verify=fast_check.validate_project,
+                verification_policy="core_fast")
     except PermissionError as exc:
         if "WRITER_BUSY" in str(exc):
             return Result(ok=False, code="WRITER_BUSY", op_id=plan.op_id,

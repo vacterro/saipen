@@ -19,7 +19,8 @@ from pathlib import Path
 
 from saipen_engine import codec, snapshot
 from saipen_engine.board import parse_board
-from saipen_engine.journal import auto_recover_pending, pending_ops
+from saipen_engine.journal import (auto_recover_pending, pending_conflicts,
+                                   pending_ops)
 from saipen_engine.operations import (apply_claim, checkpoint, plan_claim,
                                        ticket_add, ticket_move,
                                        transition_phase)
@@ -56,6 +57,10 @@ def _pending(project_root: Path) -> list[str]:
     return [op["op_id"] for op in pending_ops(project_root)]
 
 
+def _conflicts(project_root: Path) -> list[str]:
+    return [op["op_id"] for op in pending_conflicts(project_root)]
+
+
 def _status(project_root: Path, as_json: bool) -> int:
     state_path = _state_path(project_root)
     if not state_path.is_file():
@@ -75,6 +80,7 @@ def _status(project_root: Path, as_json: bool) -> int:
             top_workable = ticket["id"]
             break
     pending = _pending(project_root)
+    conflicts = _conflicts(project_root)
     _emit({
         "ok": True,
         "project_identity": snap.project_identity,
@@ -90,7 +96,9 @@ def _status(project_root: Path, as_json: bool) -> int:
         "head": snap.head,
         "board_errors": board["errors"],
         "recovery_pending": bool(pending),
+        "recovery_conflict": bool(conflicts),
         "pending_ops": pending,
+        "conflict_ops": conflicts,
     }, as_json)
     return 0
 
@@ -105,18 +113,42 @@ def _next_action(project_root: Path, as_json: bool) -> int:
     phase = (state.get("phase") or "").lower()
     subject = state.get("task")
     pending = _pending(project_root)
+    conflicts = _conflicts(project_root)
+    # Unresolved CONFLICT outranks everything: no canonical work may start
+    # over it (NITRO dogfood II, T-587).
+    if conflicts:
+        _emit({
+            "ok": False,
+            "code": "RECOVERY_CONFLICT",
+            "action": f"saipen recover",
+            "detail": f"unresolved conflict: {', '.join(conflicts)}",
+            "recovery_pending": True,
+            "recovery_conflict": True,
+            "conflict_ops": conflicts,
+        }, as_json)
+        return 1
     _emit({
         "ok": True,
         "action": na,
         "ticket": subject,
         "load": f"saipen/phases/{phase}.md" if phase else None,
         "recovery_pending": bool(pending),
+        "recovery_conflict": False,
         "pending_ops": pending,
     }, as_json)
     return 0
 
 
 def _recover(project_root: Path, as_json: bool) -> int:
+    conflicts = _conflicts(project_root)
+    if conflicts:
+        _emit({"ok": False, "code": "CONFLICT",
+               "op_ids": conflicts,
+               "recovery_required": True,
+               "detail": "unresolved conflict(s): " + ", ".join(conflicts)
+                         + "; evidence preserved, resolve explicitly before "
+                         "further mutation"}, as_json)
+        return 1
     pending = _pending(project_root)
     if not pending:
         _emit({"ok": True, "code": "CLEAN", "pending_ops": []}, as_json)

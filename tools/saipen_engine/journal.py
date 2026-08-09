@@ -33,9 +33,25 @@ import datetime
 from pathlib import Path
 
 STATUS = ("PREPARED", "APPLYING", "VERIFIED", "COMMITTED", "ABORTED", "CONFLICT")
-TERMINAL = ("COMMITTED", "ABORTED", "CONFLICT")
+# SETTLED: no further mutation work needed; recovery may not act.
+SETTLED = ("COMMITTED", "ABORTED")
+# UNRESOLVED: the operation still owns mutation state. CONFLICT is stable
+# evidence but NOT permission to continue -- a conflict must be resolved
+# explicitly before any new canonical mutation (NITRO dogfood II, T-587).
+UNRESOLVED = ("PREPARED", "APPLYING", "VERIFIED", "CONFLICT")
 ROLES = ("log", "board", "state", "manifest", "report", "sweep", "generic")
 OPS_DIR = ".saipen/recovery/ops"
+
+# Closed verification-policy registry. Recovery must run the SAME semantic
+# postcondition class as the original APPLY; a policy names the verifier
+# WITHOUT serializing Python callables (NITRO dogfood II, T-587).
+VERIFICATION_POLICIES = frozenset({
+    "core_fast",
+    "improve_atomic_file",
+    "userperson",
+    "sub_lifecycle",
+    "none",
+})
 
 _CRASH_MAP = {
     "PREPARED": "NITRO_CRASH_AFTER_PREPARE",
@@ -88,11 +104,12 @@ def _crash_after(key: str) -> None:
 
 
 def pending_ops(project_root: Path | str) -> list[dict]:
-    """Every unresolved operation journal, oldest first.
+    """Every UNRESOLVED operation journal, oldest first.
 
-    A pending op is one whose status is not terminal. COMMITTED / ABORTED /
-    CONFLICT are settled; PREPARED / APPLYING / VERIFIED are open and must be
-    resolved before any new mutation.
+    PREPARED / APPLYING / VERIFIED / CONFLICT are all unresolved: they own
+    mutation state that must be resolved before any new mutation. CONFLICT is
+    excluded from SETTLED deliberately -- a conflict is evidence a mutation
+    must stop at, not a permission to continue (NITRO dogfood II, T-587).
     """
     root = Path(project_root)
     ops_dir = root / OPS_DIR
@@ -111,21 +128,38 @@ def pending_ops(project_root: Path | str) -> list[dict]:
             found.append({"op_id": entry.name, "status": "PREPARED",
                           "corrupt": True})
             continue
-        if record.get("status") not in TERMINAL:
+        if record.get("status") not in SETTLED:
             found.append({"op_id": record.get("op_id", entry.name),
                           "status": record.get("status", "PREPARED")})
     return found
+
+
+def pending_conflicts(project_root: Path | str) -> list[dict]:
+    """Every CONFLICT journal -- stable evidence that still blocks mutation."""
+    return [op for op in pending_ops(project_root)
+            if op.get("status") == "CONFLICT"]
 
 
 def recovery_preflight(project_root: Path | str,
                        exclude_op_id: str | None = None) -> dict:
     """Mandatory scan before any new mutation.
 
-    - none pending          -> proceed
-    - exactly one pending   -> recover it first
-    - recovery hits conflict -> refuse, evidence preserved
-    - multiple pending      -> refuse RECOVERY_REQUIRED with the op_ids
+    - an unresolved CONFLICT exists -> REFUSE RECOVERY_CONFLICT, evidence
+      preserved, exact op named (a conflict must be resolved explicitly).
+    - none pending                 -> proceed
+    - exactly one pending          -> recover it first
+    - recovery hits conflict       -> refuse, evidence preserved
+    - multiple pending             -> refuse RECOVERY_REQUIRED with op_ids
     """
+    conflicts = [op for op in pending_conflicts(project_root)
+                 if op["op_id"] != exclude_op_id]
+    if conflicts:
+        return {"ok": False, "code": "RECOVERY_CONFLICT",
+                "op_ids": [op["op_id"] for op in conflicts],
+                "recovery_required": True,
+                "detail": f"unresolved conflict {conflicts[0]['op_id']} "
+                          "blocks new mutation; resolve it explicitly (saipen "
+                          "recover) before any further canonical write"}
     pending = [op for op in pending_ops(project_root)
                if op["op_id"] != exclude_op_id]
     if not pending:
@@ -154,7 +188,9 @@ class Journal:
 
     def start(self, operation: str, agent: str, project_identity: str,
               semantic_payload_hash: str, targets: list[dict],
-              preconditions: dict | None = None) -> None:
+              preconditions: dict | None = None,
+              verification_policy: str = "none",
+              read_preconditions: dict | None = None) -> None:
         """Write PREPARED: op metadata, per-target before/after hashes, and
         the exact staged final bytes of every target.
 
@@ -162,7 +198,18 @@ class Journal:
         before_hash, after_hash}. Staged bytes are stored under the journal
         directory so recovery can replay exact intended bytes -- never
         recomputed from the current state.
+
+        `verification_policy` names the semantic verifier class recovery must
+        rerun before VERIFIED (closed registry, never a serialized callable).
+        `read_preconditions` are READ-ONLY dependencies: files the plan read
+        but did not write. Recovery must recheck them against the plan's
+        allowed state before roll-forward, so an intervening edit to a read
+        dependency cannot be silently committed over (NITRO dogfood II).
         """
+        if verification_policy not in VERIFICATION_POLICIES:
+            raise ValueError(
+                f"verification_policy {verification_policy!r} outside "
+                f"{sorted(VERIFICATION_POLICIES)}")
         self.dir.mkdir(parents=True, exist_ok=True)
         record_targets = []
         for index, target in enumerate(targets):
@@ -186,6 +233,8 @@ class Journal:
             "project_identity": project_identity,
             "semantic_payload_hash": semantic_payload_hash,
             "preconditions": preconditions or {},
+            "read_preconditions": read_preconditions or {},
+            "verification_policy": verification_policy,
             "status": "PREPARED",
             "progress_index": 0,
             "targets": record_targets,
@@ -228,19 +277,23 @@ def run_mutation(project_root: Path | str, op_id: str, operation: str,
                  targets: list[dict],
                  preconditions: dict | None = None,
                  verify: object | None = None,
-                 skip_preflight: bool = False) -> dict:
+                 skip_preflight: bool = False,
+                 verification_policy: str = "none",
+                 read_preconditions: dict | None = None) -> dict:
     """Commit an ordered, journaled mutation with conflict-safe recovery.
 
     `targets` is an ordered list of {"path", "role", "content"} where path is
     relative to the project root. before_hash/after_hash are computed here from
     the live file and the staged content, and stored in the journal. The
-    `preconditions` dict maps path -> expected live hash for every file the
-    operation read (write targets and read-only dependencies alike).
+    `preconditions` dict maps path -> expected live hash for every WRITE target.
 
-    `verify` is an optional callable(project_root) -> list[str] of cross-file
-    invariant errors. When provided it runs AFTER all targets are written and
-    before VERIFIED is marked; a failure leaves the journal CONFLICT with
-    evidence preserved.
+    `read_preconditions` maps path -> expected live hash for READ-ONLY
+    dependencies (files the plan read but did not write). They are journaled
+    so recovery can recheck them before roll-forward.
+
+    `verification_policy` names the closed semantic-verifier class recovery
+    must rerun before VERIFIED (never a serialized callable). `verify` is the
+    live callable for THIS apply; the policy is what survives in the journal.
     """
     root = Path(project_root)
     journal = Journal(root, op_id)
@@ -276,17 +329,25 @@ def run_mutation(project_root: Path | str, op_id: str, operation: str,
                          "before_hash": before,
                          "after_hash": hash_bytes(content)})
 
-    # Every file the operation depends on (write targets + read-only deps)
-    # must match the preconditions captured at plan time.
+    # Every WRITE target and every read-only dependency must match the
+    # hashes captured at plan time.
     for path, expected in (preconditions or {}).items():
         actual = _hash_file(root / path)
         if actual != expected:
             return {"ok": False, "code": "STALE_STATE", "op_id": op_id,
                     "detail": f"precondition {path} changed (live {actual!r}, "
                               f"expected {expected!r})"}
+    for path, expected in (read_preconditions or {}).items():
+        actual = _hash_file(root / path)
+        if actual != expected:
+            return {"ok": False, "code": "STALE_STATE", "op_id": op_id,
+                    "detail": f"read dependency {path} changed (live "
+                              f"{actual!r}, expected {expected!r})"}
 
     journal.start(operation, agent, project_identity, semantic_payload_hash,
-                  prepared, preconditions)
+                  prepared, preconditions,
+                  verification_policy=verification_policy,
+                  read_preconditions=read_preconditions)
     _crash_after("PREPARED")
 
     journal.mark("APPLYING")
@@ -320,7 +381,7 @@ def run_mutation(project_root: Path | str, op_id: str, operation: str,
 
 
 def recover(project_root: Path | str, op_id: str) -> dict:
-    """Roll-forward, conflict-safe recovery.
+    """Roll-forward, conflict-safe recovery (NITRO dogfood II).
 
     Per unfinished target:
       current == before_hash -> apply the staged planned bytes
@@ -330,6 +391,13 @@ def recover(project_root: Path | str, op_id: str) -> dict:
 
     Per already-applied target the live bytes MUST equal after_hash, or the
     applied work was overwritten: CONFLICT. Repeated recovery is idempotent.
+
+    Before roll-forward, every READ-ONLY precondition captured by the original
+    plan is rechecked against the plan's allowed state: a read dependency that
+    changed is CONFLICT (an intervening edit to a file the operation decided
+    against cannot be silently committed over). After roll-forward, the
+    operation's registered semantic verifier (verification_policy) reruns;
+    an invalid recovered state becomes CONFLICT, never COMMITTED.
     """
     root = Path(project_root)
     journal = Journal(root, op_id)
@@ -339,17 +407,38 @@ def recover(project_root: Path | str, op_id: str) -> dict:
     status = record["status"]
     if status == "COMMITTED":
         return {"ok": True, "code": "ALREADY_APPLIED", "op_id": op_id}
-    if status in ("ABORTED", "CONFLICT"):
+    if status in SETTLED:
         return {"ok": False, "code": status, "op_id": op_id,
                 "recovery_required": True,
                 "detail": f"op is {status}; resolve explicitly before "
                           "further mutation"}
+    if status == "CONFLICT":
+        return {"ok": False, "code": "CONFLICT", "op_id": op_id,
+                "recovery_required": True,
+                "detail": f"op is CONFLICT; resolve explicitly before "
+                          "further mutation (saipen recover, evidence "
+                          "preserved)"}
 
     targets = record["targets"]
     # PREPARED with nothing applied: no canonical byte changed -> abort safely.
     if status == "PREPARED" and not any(t["applied"] for t in targets):
         journal.mark("ABORTED")
         return {"ok": True, "code": "ABORTED", "op_id": op_id}
+
+    # Recheck READ-ONLY preconditions before any roll-forward. A read
+    # dependency is a file the plan decided against but did not write; if its
+    # live bytes differ from what the plan allowed, the plan is no longer the
+    # authorized decision for the current repository -> CONFLICT.
+    for path, expected in (record.get("read_preconditions") or {}).items():
+        live = _hash_file(root / path)
+        if live != expected:
+            journal.mark("CONFLICT")
+            return {"ok": False, "code": "CONFLICT", "op_id": op_id,
+                    "recovery_required": True,
+                    "detail": f"read-only dependency {path} changed (live "
+                              f"{live!r}, planned {expected!r}); the plan is "
+                              "no longer the authorized decision, refuse to "
+                              "roll forward"}
 
     for index, target in enumerate(targets):
         live = _hash_file(root / target["path"])
@@ -388,11 +477,42 @@ def recover(project_root: Path | str, op_id: str) -> dict:
                               f"{target['before_hash']!r}, after "
                               f"{target['after_hash']!r}); refuse to guess"}
 
+    # Byte-level verification of every written target.
+    byte_error = _verify_target_bytes(root, targets)
+    if byte_error:
+        journal.mark("CONFLICT")
+        return {"ok": False, "code": "CONFLICT", "op_id": op_id,
+                "recovery_required": True,
+                "detail": f"recovered byte verification failed: {byte_error}"}
+
+    # Semantic verification per the operation's registered policy. This is the
+    # same postcondition class the original APPLY ran; without it, VERIFIED
+    # would be a false stage name on the recovery path.
+    policy = record.get("verification_policy", "none")
+    verifier = _verifier_for(policy)
+    if verifier is not None:
+        errors = verifier(root)
+        if errors:
+            journal.mark("CONFLICT")
+            return {"ok": False, "code": "CONFLICT", "op_id": op_id,
+                    "recovery_required": True,
+                    "detail": "recovered state fails the registered semantic "
+                              "verifier: " + "; ".join(errors[:5])}
+
     journal.mark("VERIFIED")
     journal.mark("COMMITTED")
     return {"ok": True, "code": "COMMITTED", "op_id": op_id,
             "changed_files": [t["path"] for t in targets],
             "recovery_required": True}
+
+
+def _verifier_for(policy: str):
+    """The semantic verifier callable for a closed verification policy, or
+    None when the policy carries no cross-file postcondition."""
+    if policy == "core_fast":
+        from . import fast_check
+        return fast_check.validate_project
+    return None
 
 
 def auto_recover_pending(project_root: Path | str) -> dict:

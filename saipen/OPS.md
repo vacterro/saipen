@@ -90,6 +90,27 @@ The journal is GENERIC: every target is identified by path + role (log,
 board, state, manifest, report, sweep, generic), never by its position in the
 target list. A MANIFEST is never reported as LOG_WRITTEN.
 
+### Lifecycle vocabulary (NITRO dogfood II)
+
+Operation statuses split into two closed classes:
+
+- **SETTLED** (`COMMITTED`, `ABORTED`): the operation owns no further
+  mutation state. Recovery may not act; a committed retry returns
+  ALREADY_APPLIED.
+- **UNRESOLVED** (`PREPARED`, `APPLYING`, `VERIFIED`, `CONFLICT`): the
+  operation still owns mutation state that must be resolved before any new
+  canonical mutation.
+
+CONFLICT is stable evidence but NOT permission to continue. `pending_ops()`
+lists every UNRESOLVED journal; `pending_conflicts()` lists the CONFLICT
+subset. Before ANY mutation, an unresolved CONFLICT REFUSES
+RECOVERY_CONFLICT naming the exact op -- no new canonical mutation may start
+over a conflict. `saipen status` / `saipen next` surface recovery_pending and
+recovery_conflict; `saipen recover` on a conflict REFUSEs with the op named
+and evidence preserved.
+
+### Recovery
+
 Recovery is ROLL-FORWARD and CONFLICT-SAFE. LOG is append-only evidence; once
 the operation's LOG event exists, do not "rollback" by deleting it.
 
@@ -103,16 +124,34 @@ Per unfinished target:
 Per already-applied target the live bytes MUST equal after_hash; otherwise the
 applied work was overwritten: CONFLICT.
 
+Every journal records a `verification_policy` from a closed registry
+(core_fast / improve_atomic_file / userperson / sub_lifecycle / none) and the
+READ-ONLY preconditions the original plan read but did not write. Recovery:
+
+1. rechecks every READ-ONLY precondition against the plan's allowed state --
+   a changed read dependency is CONFLICT (the plan is no longer the authorized
+   decision), never rolled forward over;
+2. applies/validates each unfinished target (staged bytes MUST hash to the
+   planned after_hash);
+3. byte-verifies every written target;
+4. reruns the operation's registered semantic verifier (the SAME postcondition
+   class the original APPLY ran) -- a semantically invalid recovered state is
+   CONFLICT, never VERIFIED/COMMITTED.
+
+"VERIFIED" on the recovery path means the verifier actually ran and passed.
+
 Before ANY new mutation, `pending_ops` journals are scanned (Recovery
 preflight):
 
+- an unresolved CONFLICT exists -> refuse RECOVERY_CONFLICT naming the op;
 - none pending -> proceed;
 - exactly one recoverable -> recover/complete it first;
-- conflict -> refuse, evidence preserved;
+- recovery hits conflict -> refuse, evidence preserved;
 - multiple unresolved -> refuse RECOVERY_REQUIRED naming the exact op_ids.
 
 `saipen recover` lists pending operations and recovers the mechanically safe
-ones. Repeated recovery is idempotent.
+ones; it refuses a conflict rather than hiding it. Repeated recovery is
+idempotent.
 
 ## 4. Idempotency
 
@@ -172,9 +211,10 @@ CLI prints concise human text by default; `--json` emits JSON only. Stable
 error codes: STALE_STATE, TICKET_NOT_FOUND, TICKET_NOT_WORKABLE,
 TICKET_ALREADY_DONE, ILLEGAL_TICKET_LIFECYCLE, NOT_TOP_WORKABLE,
 ACTIVE_TICKET_MISMATCH, ALREADY_CLAIMED, ILLEGAL_TRANSITION, WRITER_BUSY,
-VALIDATION_FAILED, RECOVERY_REQUIRED, DESTRUCTIVE_CONFIRMATION_REQUIRED,
-CONFLICT, PATH_ESCAPE, ACTIVE_IMPROVE_CYCLE, INVALID_DISPOSITION. Error
-messages name one exact refusal and the executable next action.
+VALIDATION_FAILED, RECOVERY_REQUIRED, RECOVERY_CONFLICT,
+DESTRUCTIVE_CONFIRMATION_REQUIRED, CONFLICT, PATH_ESCAPE,
+ACTIVE_IMPROVE_CYCLE, INVALID_DISPOSITION. Error messages name one exact
+refusal and the executable next action.
 
 COMMIT FAILURE ALWAYS WINS: a failed commit returns its own refusal
 (STALE_STATE / RECOVERY_REQUIRED / CONFLICT / WRITER_BUSY), never the plan's
