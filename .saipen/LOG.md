@@ -17,3 +17,8 @@
 - 09.08.26 10:32 [E-2478] [parent: E-2477] [T-584] [agent: claude] [op: checkpoint-e9ffe3c7] RUN: exceptional manual STATE.task repair if needed (engine now clears task on DONE); integrity wave regression closed
 - 09.08.26 10:36 [E-2479] [parent: E-2478] [T-584] [agent: claude] [op: checkpoint-98cb9f53] RUN: SHIP v7.219.0: NITRO integrity sweep release -- truthful journal stages, conflict-safe recovery, OperationPlan/apply, owned-field state patches, provenance, Improve path safety, 50-item red-control set
 - 09.08.26 10:37 [E-2480] [parent: E-2479] [T-584] [agent: claude] [op: checkpoint-41eb6290] RUN: SHIP v7.219.0 -> pushed 40a0511 (branch main) + tag v7.219.0 created and pushed
+- 09.08.26 10:38 [E-2481] [parent: E-2480] [T-583] [agent: claude] [op: checkpoint-1e313871] DEC: goal_tickets 8->9 (T-583 passed VERIFY)
+- 09.08.26 10:38 [E-2482] [parent: E-2481] [T-584] [agent: claude] [op: checkpoint-3401aa33] DEC: goal_tickets 9->10 (T-584 passed VERIFY)
+- 09.08.26 10:38 [E-2483] [parent: E-2482] [T-584] [agent: claude] [op: checkpoint-1016fa01] RUN: goal_tickets counter synced to STATE (10); ship + release + counter maintenance complete
+- 09.08.26 10:39 [E-2484] [parent: E-2483] [T-577] [agent: claude] [op: claim-0be9ad95] DEC: claimed via SAIOPS -- owner claude
+- 09.08.26 10:39 [E-2485] [parent: E-2484] [T-577] [agent: claude] [op: transition-4c1e730b] RUN: SCOUT: NITRO integrity wave shipped (v7.219.0); M7 begins -- USERPERSON contract repair
