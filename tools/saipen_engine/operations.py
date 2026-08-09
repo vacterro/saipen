@@ -1,244 +1,181 @@
-"""Operations. M1 ships the two read-only ones.
+"""Core operations: claim / transition / checkpoint (NITRO M3).
 
-`status` and `next` are the first things a cold agent can ask instead of
-reading three complete files and re-deriving the answer by hand. Both are
-strictly read-only: they take no lock, write no byte, and run no full validator.
+Every operation is PLAN / APPLY separated. PLAN reads the project snapshot and
+returns the intended LOG/BOARD/STATE bytes plus a refusal code, writing zero
+canonical bytes. APPLY commits the verified plan through the common lock +
+write-ahead journal + roll-forward recovery machinery (saipen_engine.journal).
 
-The plan/apply split that the mutating operations will need is already visible
-here in miniature — everything is computed from a `ProjectSnapshot` and nothing
-touches disk after it is read. When `claim`, `transition` and `checkpoint`
-arrive in M3 they take the same snapshot, declare preconditions against it, and
-only then reach the journal.
-
-The engine deliberately does not decide semantic work. `next` reports the
-mechanically legal action and why it is legal. It never says "rewrite the
-Improve architecture because I think that is best" — that is the model's job,
-and a Python function pretending to have made that judgement would be exactly
-the fuzzy-reasoning-in-deterministic-clothing OPS.md forbids.
+The model never hand-edits STATE/BOARD fields once these operations exist:
+it supplies the semantic request (ticket, agent, phase, event text); Python
+records it correctly. OPS.md owns the contract.
 """
 
 from __future__ import annotations
 
+import datetime
+import uuid
 from pathlib import Path
 
-from .board import MalformedLine
-from .model import ProjectSnapshot, snapshot
-from .paths import ProjectPaths, resolve_project_root
-from .phases import (TICKET_BEARING_PHASES, VALID_TRANSITIONS,
-                     phase_document, phase_next_action_error,
-                     transition_legal)
-from .result import Result
+from . import codec
+from .board import parse_board
+from .journal import run_mutation
+from .lock import project_writer_lock
+from .log import log_tail_event
+from .snapshot import ProjectSnapshot
+from .state import parse_state
+
+REQUIRED_HEADINGS = ["## DOING", "## TODO", "## DONE", "## BLOCKED"]
 
 
-def open_project(root: str | Path | None = None) -> ProjectSnapshot:
-    """Resolve a project and read one snapshot of it, or refuse."""
-    resolved, source = resolve_project_root(explicit=root)
-    if resolved is None:
-        from .errors import EngineError
-        raise EngineError(source, code="VALIDATION_FAILED",
-                          next_action="saipen status --project-root PATH")
-    snap = snapshot(paths=ProjectPaths(resolved))
-    snap.__dict__["root_source"] = source
-    return snap
+def _now() -> str:
+    return datetime.datetime.now(datetime.timezone.utc).strftime(
+        "%d.%m.%y %H:%M")
 
 
-def _fast_state_findings(snap: ProjectSnapshot) -> list[str]:
-    """The cross-file invariants a mutation preflight must check.
+def _utc_iso() -> str:
+    return datetime.datetime.now(datetime.timezone.utc).strftime(
+        "%Y-%m-%dT%H:%M:%SZ")
 
-    Deliberately NOT the full validator: this is the set covering the files
-    SAIOPS mutates, so a checkpoint does not pay for a 7k-line conformance run.
-    Fast validation is mutation preflight, never release proof — `validate.py`
-    still owns the canonical gates.
+
+def _alloc_event(log_text: str) -> int:
+    tail = log_tail_event(log_text)
+    return (tail or 0) + 1
+
+
+def _claim_targets(root: Path, ticket_id: str, agent: str,
+                   now: str, utc: str) -> tuple[list[dict], dict] | None:
+    """PLAN a claim. Returns (targets, result) or None with a refusal dict."""
+    state_text = codec.read_doc(root / ".saipen" / "STATE.md")
+    board_text = codec.read_doc(root / ".saipen" / "BOARD.md")
+    log_text = codec.read_doc(root / ".saipen" / "LOG.md")
+
+    state = parse_state(state_text)
+    board = parse_board(board_text)
+    tickets = board["tickets"]
+
+    if ticket_id not in tickets:
+        return None, {"ok": False, "code": "TICKET_NOT_FOUND", "ticket":
+                      ticket_id}
+    ticket = tickets[ticket_id]
+    if ticket["section"] == "## DOING":
+        return None, {"ok": False, "code": "ALREADY_CLAIMED",
+                      "detail": f"{ticket_id} is already in ## DOING"}
+    if ticket["section"] != "## TODO":
+        return None, {"ok": False, "code": "TICKET_NOT_WORKABLE",
+                      "detail": f"{ticket_id} is under {ticket['section']}"}
+    for need in ticket["needs"]:
+        if need not in tickets or tickets[need]["section"] != "## DONE":
+            return None, {"ok": False, "code": "TICKET_NOT_WORKABLE",
+                          "detail": f"unmet needs: {need}"}
+    doing = [t for t in tickets.values() if t["section"] == "## DOING"]
+    if doing:
+        return None, {"ok": False, "code": "ALREADY_CLAIMED",
+                      "detail": f"DOING holds {doing[0]['id']}"}
+
+    event = _alloc_event(log_text)
+    date_line = now
+    new_log = log_text.rstrip("\n") + "\n" + (
+        f"- {date_line} [E-{event}] [{ticket_id}] DEC: claimed via SAIOPS "
+        f"-- owner {agent}")
+    new_state = _render_state(state, ticket_id, agent, event, utc)
+    new_board = _move_ticket(board_text, ticket_id, agent, utc)
+
+    targets = [
+        {"path": ".saipen/LOG.md", "content": new_log + "\n"},
+        {"path": ".saipen/BOARD.md", "content": new_board},
+        {"path": ".saipen/STATE.md", "content": new_state},
+    ]
+    return targets, {"ok": True, "code": "CLAIMED", "ticket": ticket_id,
+                     "event_id": f"E-{event}"}
+
+
+def _render_state(state: dict, ticket_id: str, agent: str, event: int,
+                  utc: str) -> str:
+    prev_phase = state.get("phase", "DONE")
+    lines = ["---",
+             "phase: SCOUT",
+             f"task: {ticket_id}",
+             f'next_action: "PHASE SCOUT {ticket_id}"',
+             "blocker: \"\"",
+             f"transition_from: {prev_phase}",
+             f"saipen_version: {state.get('saipen_version', 7)}",
+             f"schema_version: {state.get('schema_version', 3)}",
+             f"last_event: {event}",
+             f"style_contract: {state.get('style_contract', '')}",
+             f"saipen_home: \"{state.get('saipen_home', '')}\"",
+             f"agent: {agent}",
+             "requires:",
+             "  - filesystem",
+             "  - git",
+             "  - python",
+             "mode: full",
+             "updated: " + utc,
+             "---"]
+    return "\n".join(lines) + "\n"
+
+
+def _move_ticket(board_text: str, ticket_id: str, agent: str,
+                 utc: str) -> str:
+    """Surgical ticket move: only the target ticket's placement/fields change.
+
+    The board already carries the four canonical headings; the claimed ticket
+    line is inserted immediately after the existing `## DOING` heading and
+    removed from `## TODO`.
     """
-    findings: list[str] = []
-    if snap.state.error:
-        findings.append(f"STATE.md {snap.state.error}")
-    binding = snap.binding_error()
-    if binding:
-        findings.append(f"ACTIVE_TICKET_MISMATCH {binding}")
-    last_event = snap.last_event_error()
-    if last_event:
-        findings.append(last_event)
-    malformed = [e for e in snap.board.entries if isinstance(e, MalformedLine)]
-    for entry in malformed[:3]:
-        findings.append(
-            f"BOARD.md:{entry.line_no} is not a legal ticket line")
-    duplicates = [e for e in snap.board.entries
-                  if not isinstance(e, MalformedLine) and e.duplicate_of]
-    for entry in duplicates[:3]:
-        findings.append(
-            f"BOARD.md:{entry.line_no} duplicate ticket {entry.ticket_id}")
-    doing = snap.board.doing
-    if len(doing) > 1:
-        findings.append(
-            f"BOARD.md carries {len(doing)} ## DOING tickets; at most one is "
-            f"legal")
-    if snap.log.malformed:
-        line_no, _ = snap.log.malformed[0]
-        findings.append(
-            f"LOG.md:{line_no} violates the Event Graph skeleton "
-            f"({len(snap.log.malformed)} line(s))")
-    phase = snap.state.phase
-    if phase and phase not in VALID_TRANSITIONS:
-        findings.append(f"STATE.phase {phase!r} is not in the phase enum")
-    next_action = snap.state.next_action
-    if next_action.startswith("PHASE "):
-        error = phase_next_action_error(next_action)
-        if error:
-            findings.append(f"next_action {error}")
-    transition_from = snap.state.transition_from
-    if phase and transition_from and \
-            not transition_legal(transition_from, phase):
-        findings.append(
-            f"STATE claims {transition_from} -> {phase}, which is not a "
-            f"transition CORE section 1.6 allows")
-    return findings
+    lines = board_text.splitlines(keepends=True)
+    out = []
+    ticket_line = None
+    doing_idx = None
+    for line in lines:
+        stripped = line.rstrip("\n")
+        if stripped.startswith("- [ ] " + ticket_id + " "):
+            ticket_line = stripped
+            continue  # drop from TODO
+        if stripped.startswith("## DOING"):
+            doing_idx = len(out)
+        out.append(line)
+    if ticket_line is None or doing_idx is None:
+        raise ValueError("cannot locate ticket or DOING section")
+    marked = ticket_line.replace("- [ ] ", "- [/] ", 1).rstrip() + \
+        f" | owner: {agent} | claim_time: {utc}"
+    out.insert(doing_idx + 1, marked + "\n")
+    return "".join(out)
 
 
-def _pending_recovery(snap: ProjectSnapshot) -> list[str]:
-    """Unfinished operation journals, if the recovery directory exists.
-
-    M1 writes no journals, so this is always empty here. It is present because
-    `status` must surface `recovery_required` from the very first release: a
-    field that appears only once something can set it is a field every caller
-    learns to ignore.
-    """
-    directory = snap.paths.recovery_ops
-    if not directory.is_dir():
-        return []
-    pending = []
-    for entry in sorted(directory.iterdir()):
-        if (entry / "operation.json").is_file():
-            pending.append(entry.name)
-    return pending
+def plan_claim(project_root: Path | str, ticket_id: str, agent: str) -> dict:
+    """PLAN a claim: intended result or a stable refusal. Zero disk writes."""
+    now = _now()
+    utc = _utc_iso()
+    targets, result = _claim_targets(Path(project_root), ticket_id, agent,
+                                     now, utc)
+    if targets is None:
+        return result
+    result["op_id"] = "claim-" + uuid.uuid4().hex[:8]
+    result["changed_files"] = [t["path"] for t in targets]
+    result["phase"] = "SCOUT"
+    result["next_action"] = f"PHASE SCOUT {ticket_id}"
+    result["dry_run"] = True
+    return result
 
 
-def status(root: str | Path | None = None) -> Result:
-    """Read-only projection of everything routing depends on.
-
-    Replaces "read STATE.md, then BOARD.md, then the LOG tail, then work out
-    whether they agree" — three files and a judgement call — with one answer.
-    """
-    snap = open_project(root)
-    active = snap.board.active_ticket
-    top = snap.board.top_workable()
-    pending = _pending_recovery(snap)
-    findings = _fast_state_findings(snap)
-
-    data = {
-        "project_root": str(snap.root),
-        "project_identity": snap.identity,
-        "root_source": snap.__dict__.get("root_source", "unknown"),
-        "protocol_version": snap.state.fields.get("saipen_version"),
-        "schema_version": snap.state.fields.get("schema_version"),
-        "phase": snap.state.phase,
-        "task": snap.state.task,
-        "next_action": snap.state.next_action,
-        "blocker": snap.state.blocker,
-        "execution_intent": snap.state.execution_intent,
-        "agent": snap.state.agent,
-        "claimed_ticket": active.ticket_id if active else None,
-        "top_workable_ticket": top.ticket_id if top else None,
-        "log_tail": f"E-{snap.log_tail}" if snap.log_tail else None,
-        "last_event": snap.state.last_event,
-        "head": snap.head,
-        "fast_state": "PASS" if not findings else "FAIL",
-        "fast_state_findings": findings,
-        "pending_recovery_ops": pending,
+def apply_claim(project_root: Path | str, ticket_id: str, agent: str) -> dict:
+    """APPLY a claim through the lock + journal + roll-forward machinery."""
+    root = Path(project_root)
+    now = _now()
+    utc = _utc_iso()
+    targets, result = _claim_targets(root, ticket_id, agent, now, utc)
+    if targets is None:
+        return result
+    op_id = "claim-" + uuid.uuid4().hex[:8]
+    snap = ProjectSnapshot.capture(root)
+    preconditions = {
+        ".saipen/STATE.md": snap.state_hash,
+        ".saipen/BOARD.md": snap.board_hash,
+        ".saipen/LOG.md": snap.log_hash,
     }
-    return Result(ok=True, code="STATUS", data=data,
-                  recovery_required=bool(pending))
-
-
-def next_action(root: str | Path | None = None) -> Result:
-    """Read-only routing projection: the executable action and why it is legal.
-
-    `STATE.next_action` is the previous session's pre-computed Pick Rule result.
-    This does not replace confirming it — the model still has to look at the
-    board — but it hands over the mechanical half already checked: does the
-    action parse, does the phase it names exist, is the ticket it names really
-    claimed, and which phase document that phase requires.
-    """
-    snap = open_project(root)
-    action = snap.state.next_action.strip()
-    active = snap.board.active_ticket
-    top = snap.board.top_workable()
-
-    subject: str | None = None
-    phase: str | None = None
-    legality: list[str] = []
-    load: str | None = None
-
-    if action.startswith("PHASE "):
-        error = phase_next_action_error(action)
-        if error:
-            return Result.refuse(
-                "VALIDATION_FAILED",
-                f"STATE.next_action is not executable: {error}",
-                "saipen status")
-        parts = action.split()
-        phase = parts[1]
-        subject = parts[2] if len(parts) > 2 and \
-            parts[2].startswith("T-") else None
-        load = phase_document(phase)
-        source = snap.state.transition_from
-        if snap.state.phase == phase:
-            legality.append(f"STATE is already in {phase}; the action "
-                            f"continues it rather than transitioning")
-        elif transition_legal(snap.state.phase, phase):
-            legality.append(f"{snap.state.phase} -> {phase} is an edge of the "
-                            f"CORE section 1.6 transition table")
-        else:
-            return Result.refuse(
-                "ILLEGAL_TRANSITION",
-                f"STATE.next_action names {phase} but {snap.state.phase} -> "
-                f"{phase} is not a legal transition (from {source!r})",
-                "saipen status")
-        if phase in TICKET_BEARING_PHASES:
-            if subject is None:
-                return Result.refuse(
-                    "VALIDATION_FAILED",
-                    f"{phase} is ticket-bearing and next_action names no "
-                    f"T-###", "saipen status")
-            ticket = snap.board.tickets.get(subject)
-            if ticket is None:
-                return Result.refuse(
-                    "TICKET_NOT_FOUND",
-                    f"next_action names {subject}, which is not on the board",
-                    "saipen status")
-            if ticket.is_claimed:
-                legality.append(f"{subject} is claimed in {ticket.section}")
-            else:
-                legality.append(f"{subject} sits in {ticket.section} and is "
-                                f"not yet claimed")
-    elif action.startswith("WAIT:"):
-        legality.append("WAIT: is output verbatim and stops execution "
-                        "(CORE section 1.2)")
-    elif action:
-        legality.append("the action is a command form; CORE section 1.10 "
-                        "resolves it, not the engine")
-
-    binding = snap.binding_error()
-    if binding:
-        return Result.refuse(
-            "CONFLICT",
-            f"ACTIVE_TICKET_MISMATCH {binding}", "saipen recover")
-
-    dependencies: list[str] = []
-    if subject and subject in snap.board.tickets:
-        for dep in snap.board.tickets[subject].needs:
-            dep_ticket = snap.board.tickets.get(dep)
-            state = "missing" if dep_ticket is None else (
-                "done" if dep_ticket.is_done else "open")
-            dependencies.append(f"{dep}:{state}")
-
-    data = {
-        "action": action,
-        "ticket": subject or (active.ticket_id if active else None),
-        "phase": phase,
-        "load": load,
-        "legal_because": legality,
-        "dependencies": dependencies,
-        "top_workable_ticket": top.ticket_id if top else None,
-    }
-    return Result(ok=True, code="NEXT", data=data)
+    with project_writer_lock(root):
+        commit = run_mutation(root, op_id, agent, snap.project_identity,
+                              preconditions, targets)
+    result.update(commit)
+    result["ticket"] = ticket_id
+    return result

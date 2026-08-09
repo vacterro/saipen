@@ -62,10 +62,13 @@ from improve import (append_run, derive_status, register_cycle, register_seat,
 from userperson import (merge_profile, onboarding_questions, parse_profile,
                         project_profile, remove_preference, render_profile,
                         validate_profile)
+from saipen_engine import codec
 from saipen_engine.board import parse_board
+from saipen_engine.state import parse_state
 from saipen_engine.journal import Journal, recover, run_mutation
 from saipen_engine.lock import WriterLock
 from saipen_engine.log import parse_log_line
+from saipen_engine.operations import apply_claim, plan_claim
 from saipen_engine.snapshot import ProjectSnapshot
 from saipen_engine.state import parse_frontmatter
 
@@ -3704,6 +3707,83 @@ def run_nitro_m2_probes() -> tuple[list[str], int]:
     return problems, checked
 
 
+def run_nitro_m3_probes() -> tuple[list[str], int]:
+    """NITRO M3 (T-580): claim as a journalled SAIOPS operation.
+
+    PLAN writes zero canonical bytes; APPLY moves exactly one ticket, sets
+    STATE to SCOUT/T-ID with the allocated event, and a second claim on the
+    same ticket is refused.
+    """
+    problems: list[str] = []
+    checked = 0
+
+    def expect(label: str, ok: bool, detail: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        if not ok:
+            problems.append(f"{label}: {detail}")
+        else:
+            print(f"PASS: nitro-m3 -- {label}")
+
+    root = Path(tempfile.mkdtemp(prefix="saipen-m3-"))
+    saipen = root / ".saipen"
+    saipen.mkdir()
+    (saipen / "LOG.md").write_text(
+        "- 09.08.26 00:00 [E-900] [T-none] DEC: base\n", encoding="utf-8")
+    (saipen / "BOARD.md").write_text(
+        "# Board\n## DOING\n## TODO\n- [ ] T-777 [P1] probe ticket | "
+        "verify: probe\n## DONE\n## BLOCKED\n", encoding="utf-8")
+    (saipen / "STATE.md").write_text(
+        "---\nphase: DONE\ntask: none\nnext_action: \"saipen continue\"\n"
+        "blocker: \"\"\ntransition_from: SHIP\nsaipen_version: 7\n"
+        "schema_version: 3\nlast_event: 900\nstyle_contract: ded-4ae736e4\n"
+        "agent: probe\nmode: full\nupdated: 2026-08-09T00:00:00Z\n---\n",
+        encoding="utf-8")
+
+    board_before = (saipen / "BOARD.md").read_bytes()
+    state_before = (saipen / "STATE.md").read_bytes()
+    log_before = (saipen / "LOG.md").read_bytes()
+
+    planned = plan_claim(root, "T-777", "probe")
+    expect("plan_claim returns a dry-run plan with no refusal",
+           planned.get("ok") and planned.get("dry_run")
+           and planned.get("code") == "CLAIMED", repr(planned))
+    expect("plan writes zero canonical bytes",
+           (saipen / "BOARD.md").read_bytes() == board_before
+           and (saipen / "STATE.md").read_bytes() == state_before
+           and (saipen / "LOG.md").read_bytes() == log_before)
+
+    result = apply_claim(root, "T-777", "probe")
+    expect("apply_claim commits the claim",
+           result.get("ok") and result.get("code") == "COMMITTED",
+           repr(result))
+    board_after = parse_board(codec.read_doc(saipen / "BOARD.md"))
+    expect("claim moves exactly one ticket to DOING with / checkbox",
+           [t["id"] for t in board_after["tickets"].values()
+            if t["section"] == "## DOING"] == ["T-777"]
+           and board_after["tickets"]["T-777"]["checkbox"] == "/",
+           repr([(t["id"], t["checkbox"]) for t in board_after["tickets"]
+                 .values() if t["section"] == "## DOING"]))
+    state_after = parse_state(codec.read_doc(saipen / "STATE.md"))
+    expect("claim sets STATE to SCOUT/T-777 with a new event",
+           state_after.get("phase") == "SCOUT"
+           and state_after.get("task") == "T-777"
+           and state_after.get("last_event") == 901,
+           repr((state_after.get("phase"), state_after.get("task"),
+                 state_after.get("last_event"))))
+    log_text = codec.read_doc(saipen / "LOG.md")
+    expect("claim appends exactly one LOG event with a real taxonomy",
+           log_text.count("E-901") == 1
+           and "DEC:" in log_text, repr(log_text[-120:]))
+
+    again = apply_claim(root, "T-777", "probe")
+    expect("a second claim on the claimed ticket is refused",
+           not again.get("ok") and again.get("code") == "ALREADY_CLAIMED",
+           repr(again))
+
+    return problems, checked
+
+
 def run_last_event_probes() -> tuple[list[str], int]:
     """Execute the legacy-schema to current-schema checkpoint migration."""
     problems = []
@@ -4308,6 +4388,8 @@ nitro_failures, nitro_checked = run_nitro_probes()
 failures.extend(nitro_failures)
 nitro_m2_failures, nitro_m2_checked = run_nitro_m2_probes()
 failures.extend(nitro_m2_failures)
+nitro_m3_failures, nitro_m3_checked = run_nitro_m3_probes()
+failures.extend(nitro_m3_failures)
 manifest_failures, manifest_checked = run_manifest_tracking_probes()
 failures.extend(manifest_failures)
 autoinject_failures, autoinject_checked = run_autoinject_manifest_probes()
@@ -4356,6 +4438,7 @@ print(f"{userperson_checked} userperson behavior(s) executed")
 print(f"{improve_checked} improve behavior(s) executed")
 print(f"{nitro_checked} nitro behavior(s) executed")
 print(f"{nitro_m2_checked} nitro-m2 behavior(s) executed")
+print(f"{nitro_m3_checked} nitro-m3 behavior(s) executed")
 print(f"{purity_checked} pre-commit-purity behavior(s) executed, "
       f"{purity_skipped} skipped for missing interpreters")
 print(f"{manifest_checked} manifest-tracking behavior(s) executed")
