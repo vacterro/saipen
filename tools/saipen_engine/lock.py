@@ -44,7 +44,8 @@ class WriterLock:
             if _MSVCRT is not None:
                 _MSVCRT.locking(self._handle.fileno(), _MSVCRT.LK_NBLCK, 1)
             else:
-                _FCNTL.flock(self._handle.fileno(), _FCNTL.LOCK_EX)
+                _FCNTL.flock(self._handle.fileno(),
+                             _FCNTL.LOCK_EX | _FCNTL.LOCK_NB)
         except OSError:
             self._handle.close()
             self._handle = None
