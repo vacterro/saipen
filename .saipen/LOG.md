@@ -76,3 +76,8 @@
 - 09.08.26 16:21 [E-2537] [parent: E-2536] [agent: claude] [op: transition-94724495] RUN: M8 regression closed
 - 09.08.26 16:21 [E-2538] [parent: E-2537] [T-588] [agent: claude] [op: checkpoint-be169599] DEC: goal_tickets 14->15 (T-588 passed VERIFY)
 - 09.08.26 16:21 [E-2539] [parent: E-2538] [T-588] [agent: claude] [op: checkpoint-d63054ee] RUN: goal_tickets synced (15); T-588 closed
+- 09.08.26 16:22 [E-2540] [parent: E-2539] [T-589] [agent: claude] [op: ticket-c90bb078] DEC: ticket added via SAIOPS
+- 09.08.26 16:22 [E-2541] [parent: E-2540] [T-589] [agent: claude] [op: claim-92656ebb] DEC: claimed via SAIOPS -- owner claude
+- 09.08.26 16:22 [E-2542] [parent: E-2541] [T-589] [agent: claude] [op: transition-caf13319] RUN: Improve regression begins
+- 09.08.26 16:52 [E-2543] [parent: E-2542] [T-589] [agent: claude] [op: transition-c8042cdf] RUN: SCOUT done: stale-base CAS + composite finding identity + cycle lifecycle + deterministic allocator landed
+- 09.08.26 16:52 [E-2544] [parent: E-2543] [T-589] [agent: claude] [op: checkpoint-e49d906a] RUN: BUILD: _journaled_write binds content to base_hash (STALE_STATE on drift, no silent lost update); finding identity composite + per-report sweep filter (one seat IMP-001 cannot sweep another); cycle lifecycle cycle_status active/complete (complete allows next, evidence preserved); allocate_cycle_id deterministic NN allocator; red controls: stale-plan CAS A+B preserved, cycle #2 after complete, allocator collision-safety

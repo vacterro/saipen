@@ -81,9 +81,41 @@ def seat_key(seat_id: str, agent: str = "") -> str:
 
 
 def cycle_id(project_key: str, now: str) -> str:
-    """Deterministic unique cycle id: imp-<key>-<date>-<nn>."""
+    """Deterministic unique cycle id: imp-<key>-<date>-<nn>.
+
+    Kept for compatibility with the existing signature; new code MUST use
+    allocate_cycle_id() which implements the actual deterministic allocator
+    (NITRO dogfood II): the NN counter is derived from the existing cycles on
+    disk, never smuggled in by the caller.
+    """
     safe = re.sub(r"[^A-Za-z0-9_-]", "-", project_key).lower()
     return f"imp-{safe}-{now}"
+
+
+def allocate_cycle_id(project_root: Path, project_key: str,
+                      now: str | None = None) -> str:
+    """The real deterministic cycle-id allocator.
+
+    Returns imp-<safe-project>-<YYYYMMDD>-<NN> where NN is one past the
+    highest existing cycle number for this project prefix. Collision-safe by
+    construction: two calls on the same tree yield different NN because the
+    first committed MANIFEST is visible to the second scan. (NITRO dogfood II
+    fixes the old contract that delegated uniqueness to the caller's `now`.)"""
+    import datetime
+    safe = re.sub(r"[^A-Za-z0-9_-]", "-", project_key).lower()
+    if now is None:
+        now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d")
+    prefix = f"imp-{safe}-{now}"
+    owner = (Path(project_root) / _IMP_DIR)
+    highest = 0
+    if owner.is_dir():
+        for entry in owner.iterdir():
+            if not entry.is_dir():
+                continue
+            match = re.match(re.escape(prefix) + r"-(\d+)$", entry.name)
+            if match:
+                highest = max(highest, int(match.group(1)))
+    return f"{prefix}-{highest + 1}"
 
 
 def resolve_report_path(project_root: Path, cycle_id: str, seat_id: str,
@@ -126,6 +158,19 @@ def _read_maybe(path: Path) -> str:
     if not path.is_file():
         return ""
     return path.read_text(encoding="utf-8-sig")
+
+
+def _base_hash(path: Path) -> str:
+    """The content-base hash a caller derived its plan from.
+
+    Passed to _journaled_write so APPLY refuses STALE_STATE when the live
+    file no longer matches the base the caller read -- stale content can
+    never overwrite an intervening update (NITRO dogfood II)."""
+    from saipen_engine.journal import hash_bytes
+    try:
+        return hash_bytes(path.read_bytes())
+    except OSError:
+        return ""
 
 
 def _field(text: str, key: str) -> str:
@@ -195,9 +240,24 @@ def _finding_ids(report_text: str) -> list[str]:
             for m in re.finditer(_FINDING_RE, report_text)]
 
 
-def _disposed_ids(sweep_text: str) -> list[str]:
-    """Every IMP-### with a disposition in the Core sweep ledger."""
-    return [f"IMP-{m.group(1)}" for m in re.finditer(_SWEEP_RE, sweep_text)]
+def _disposed_ids(sweep_text: str, report_ident: str | None = None) -> list[str]:
+    """Every IMP-### with a disposition in the Core sweep ledger, optionally
+    filtered to one report identity.
+
+    FINDING IDENTITY IS COMPOSITE (NITRO dogfood II): an IMP-### is not
+    globally unique across seats. A sweep disposition carries `report=<ident>`;
+    coverage for report X counts ONLY dispositions whose report identity equals
+    X, so one seat's IMP-001 can never satisfy another seat's IMP-001."""
+    disposed = []
+    for match in re.finditer(_SWEEP_RE, sweep_text):
+        line_end = sweep_text.find("\n", match.end())
+        line = sweep_text[match.start():line_end if line_end != -1 else None]
+        if report_ident is not None:
+            rm = re.search(r"\breport=([^\s]+)", line)
+            if not rm or rm.group(1) != report_ident:
+                continue
+        disposed.append(f"IMP-{match.group(1)}")
+    return disposed
 
 
 def derive_status(report_ident: str, roster_text: str, report_text: str,
@@ -206,11 +266,12 @@ def derive_status(report_ident: str, roster_text: str, report_text: str,
 
     - roster entry for THIS seat (exact seat_id block) owns availability;
     - the report owns report_status;
-    - the sweep ledger owns dispositions.
+    - the sweep ledger owns dispositions, matched by EXACT report identity.
 
     `swept` means EVERY finding requiring disposition has a final Core
-    disposition -- a single appearance of the report identifier in the ledger
-    is NOT coverage.
+    disposition FOR THIS REPORT -- a disposition against a different report's
+    IMP-### is not coverage, and a bare appearance of the report identifier
+    is not coverage either.
     """
     seat = re.sub(r"^saipen_improve_", "", Path(report_ident).stem)
     availability = "expected"
@@ -219,7 +280,7 @@ def derive_status(report_ident: str, roster_text: str, report_text: str,
         availability = _field(block, "availability") or "expected"
     status = _field(report_text, "report_status")
     expected = set(_finding_ids(report_text))
-    disposed = set(_disposed_ids(sweep_text))
+    disposed = set(_disposed_ids(sweep_text, report_ident))
     missing = sorted(expected - disposed)
     fully_swept = bool(expected) and not missing
     if availability == "unavailable":
@@ -277,7 +338,8 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
                 ticket=entry.get("ticket", "-"),
                 report=entry.get("report", "-"),
                 reproduced=entry.get("reproduced", "-")))
-    result = _journaled_write(ledger, text + line + "\n", "sweep")
+    result = _journaled_write(ledger, text + line + "\n", "sweep",
+                              base_hash=_base_hash(ledger))
     if not result.get("ok"):
         raise ImproveError(
             f"sweep entry for {imp_id} not committed: "
@@ -285,12 +347,19 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
     return result
 
 
-def _journaled_write(path: Path, content: str, kind: str) -> dict:
+def _journaled_write(path: Path, content: str, kind: str,
+                     base_hash: str | None = None) -> dict:
     """Write one file through the common lock + journal + roll-forward
     machinery. Returns the transaction result; callers inspect and propagate.
 
     The target is a single ATOMIC_FILE transaction: one target, its own
     before/after hashes, staged exact bytes, post-write byte verification.
+
+    CONTENT-BASE BINDING (NITRO dogfood II): the caller derived `content` from
+    a specific base read of the file. That base's hash MUST be passed as
+    `base_hash`; APPLY refuses STALE_STATE if the live file no longer matches
+    it. No helper may silently refresh the before hash while preserving stale
+    content -- a stale caller plan must never overwrite an intervening update.
     """
     import uuid
     from saipen_engine import codec
@@ -305,7 +374,8 @@ def _journaled_write(path: Path, content: str, kind: str) -> dict:
     op_id = f"{kind}-" + uuid.uuid4().hex[:8]
     doc = codec.read_document(path)
     content_bytes = doc.encode(content)
-    before = _hash_file(path) if path.is_file() else ""
+    live = _hash_file(path) if path.is_file() else ""
+    before = base_hash if base_hash is not None else live
     with project_writer_lock(root):
         return run_mutation(
             root, op_id, kind, "saipen", _identity(root),
@@ -321,14 +391,23 @@ def _identity(root: Path) -> str:
     return project_identity(root)
 
 
+def _cycle_status(manifest: Path) -> str:
+    """The lifecycle status of a cycle manifest, defaulting to active for
+    legacy manifests that predate the explicit lifecycle field."""
+    text = _read_maybe(manifest)
+    match = re.search(r"(?m)^cycle_status:\s*([A-Za-z]+)", text)
+    return match.group(1) if match else "active"
+
+
 def register_cycle(project_root: Path, cycle_id: str,
                    roster_lines: str) -> Path:
-    """Create a cycle directory journaled; refuse if ANY active cycle exists.
+    """Create a cycle directory journaled; refuse if an ACTIVE cycle exists.
 
     A cycle is admitted only by a valid committed MANIFEST. A bare directory
     is incomplete runtime debris, never an admitted cycle. `register_cycle`
-    refuses while another cycle's MANIFEST exists anywhere under the owner
-    root: one active Improve cycle per project.
+    refuses while another ACTIVE cycle's MANIFEST exists anywhere under the
+    owner root: one active Improve cycle per project. COMPLETE/ARCHIVED
+    historical cycles do NOT block a new cycle (NITRO dogfood II).
     """
     root = Path(project_root)
     cdir = cycle_dir(root, cycle_id)
@@ -336,20 +415,47 @@ def register_cycle(project_root: Path, cycle_id: str,
     owner = _owner_root(root)
     if owner.is_dir():
         for manifest in owner.glob("*/MANIFEST.md"):
-            raise ImproveError(
-                f"improve cycle {manifest.parent.name} already exists -- a "
-                f"project has at most one active Improve cycle")
+            if _cycle_status(manifest) == "active":
+                raise ImproveError(
+                    f"improve cycle {manifest.parent.name} is ACTIVE -- a "
+                    f"project has at most one active Improve cycle; complete "
+                    "it first to admit the next")
     if (cdir / "MANIFEST.md").exists():
         raise ImproveError(
             f"improve cycle {cycle_id} already exists -- a project has at "
             f"most one active Improve cycle")
-    content = ("# IMPROVE CYCLE ROSTER\n\n" + roster_lines)
+    content = ("# IMPROVE CYCLE ROSTER\n\ncycle_status: active\n\n"
+               + roster_lines)
     result = _journaled_write(cdir / "MANIFEST.md", content, "cycle")
     if not result.get("ok"):
         raise ImproveError(
             f"cycle {cycle_id} not committed: {result.get('code')} "
             f"{result.get('message', '')}")
     return cdir
+
+
+def complete_cycle(cycle_dir: Path) -> dict:
+    """Mark a cycle COMPLETE: no longer active, so the next cycle can start.
+    The cycle's evidence stays in place (never deleted to admit the next
+    cycle); only the lifecycle status changes, journaled (NITRO dogfood II)."""
+    manifest = cycle_dir / "MANIFEST.md"
+    _prove_inside(_project_root_of(manifest), manifest)
+    text = _read_maybe(manifest)
+    if not text.strip():
+        raise ImproveError(f"cycle manifest missing: {manifest}")
+    if _cycle_status(manifest) == "complete":
+        raise ImproveError(f"cycle {cycle_dir.name} is already complete")
+    new_text = re.sub(r"(?m)^cycle_status:\s*[A-Za-z]+",
+                      "cycle_status: complete", text, count=1)
+    if new_text == text:
+        new_text = text.rstrip() + "\ncycle_status: complete\n"
+    result = _journaled_write(manifest, new_text, "cycle",
+                              base_hash=_base_hash(manifest))
+    if not result.get("ok"):
+        raise ImproveError(
+            f"cycle {cycle_dir.name} not completed: {result.get('code')} "
+            f"{result.get('message', '')}")
+    return result
 
 
 def register_seat(cycle_dir: Path, seat_id: str, role: str,
@@ -375,7 +481,8 @@ def register_seat(cycle_dir: Path, seat_id: str, role: str,
         raise ImproveError(f"duplicate seat registration: {seat}")
     line = (f"seat_id: {seat}\nrole: {role}\nreport_path: {report_path}\n"
             f"availability: {availability}\n")
-    result = _journaled_write(manifest, text.rstrip() + "\n" + line, "seat")
+    result = _journaled_write(manifest, text.rstrip() + "\n" + line, "seat",
+                              base_hash=_base_hash(manifest))
     if not result.get("ok"):
         raise ImproveError(
             f"seat {seat} not committed: {result.get('code')} "
@@ -398,7 +505,7 @@ def append_run(report_path: Path, run_text: str) -> dict:
     run_count = len(re.findall(r"(?m)^## RUN \d+", text))
     run = f"## RUN {run_count + 1}\n\n{run_text.rstrip()}\n"
     result = _journaled_write(report_path, text.rstrip() + "\n\n" + run,
-                              "run")
+                              "run", base_hash=_base_hash(report_path))
     if not result.get("ok"):
         raise ImproveError(
             f"RUN not committed: {result.get('code')} "

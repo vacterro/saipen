@@ -57,9 +57,9 @@ from freshness import (FreshnessError, SourceIdentity,
                        compute_generic_role_revision, compute_role_revision,
                        compute_source_identity)
 from sub_clean import sub_clean_blockers
-from improve import (append_run, cycle_dir, derive_status, register_cycle,
-                     register_seat, resolve_report_path, validate_report,
-                     write_sweep_entry)
+from improve import (allocate_cycle_id, append_run, complete_cycle, cycle_dir,
+                     derive_status, register_cycle, register_seat,
+                     resolve_report_path, validate_report, write_sweep_entry)
 from userperson import (merge_profile, onboarding_questions, parse_profile,
                         project_profile, remove_preference, render_profile,
                         validate_profile)
@@ -3383,8 +3383,10 @@ def run_improve_probes() -> tuple[list[str], int]:
 
     roster = ("# IMPROVE CYCLE ROSTER\nseat_id: report\nrole: core\n"
               "report_path: saipen_improve_REPORT.md\navailability: expected\n")
-    sweep = "# SWEEP\n- IMP-001 [CONFIRMED] T-900 report=r.md reproduced=y\n"
-    full_sweep = sweep + "- IMP-002 [CONFIRMED] T-900 report=r.md reproduced=y\n"
+    sweep = ("# SWEEP\n- IMP-001 [CONFIRMED] T-900 "
+             "report=saipen_improve_REPORT.md reproduced=y\n")
+    full_sweep = sweep + ("- IMP-002 [CONFIRMED] T-900 "
+                          "report=saipen_improve_REPORT.md reproduced=y\n")
     expect("derived status: roster-only is expected",
            derive_status("saipen_improve_REPORT.md", roster, "", "")["visible"]
            == "expected")
@@ -3414,12 +3416,34 @@ def run_improve_probes() -> tuple[list[str], int]:
                     "availability: unavailable\n"
                     "seat_id: seat-b\nrole: core\nreport_path: b.md\n"
                     "availability: expected\n")
+    seat2_sweep = ("# SWEEP\n- IMP-001 [CONFIRMED] T-900 report=b.md "
+                   "reproduced=y\n- IMP-002 [CONFIRMED] T-900 report=b.md "
+                   "reproduced=y\n")
     expect("derived status: per-seat availability, not the first field",
            derive_status("b.md", seat2_roster,
-                         report_two, full_sweep)["visible"] == "swept"
+                         report_two, seat2_sweep)["visible"] == "swept"
            and derive_status("a.md", seat2_roster,
-                             report_two, full_sweep)["visible"]
+                             report_two, seat2_sweep)["visible"]
            == "unavailable")
+
+    # NITRO dogfood II: same IMP-001 in two reports stays independent and one
+    # report disposition cannot sweep another.
+    cross_roster = ("# IMPROVE CYCLE ROSTER\n"
+                    "seat_id: seat-a\nrole: core\nreport_path: a.md\n"
+                    "availability: expected\n"
+                    "seat_id: seat-b\nrole: core\nreport_path: b.md\n"
+                    "availability: expected\n")
+    report_a = ("report_status: complete\n\n"
+                "IMP-001 [P1] [PROTOCOL_VIOLATION] [proven] [ticket]\n")
+    report_b = ("report_status: complete\n\n"
+                "IMP-001 [P1] [PROTOCOL_VIOLATION] [proven] [ticket]\n")
+    sweep_a_only = "# SWEEP\n- IMP-001 [CONFIRMED] T-900 report=a.md reproduced=y\n"
+    expect("same IMP-001 in two reports stays independent",
+           derive_status("a.md", cross_roster, report_a, sweep_a_only)[
+               "visible"] == "swept"
+           and derive_status("b.md", cross_roster, report_b, sweep_a_only)[
+               "visible"] == "complete",
+           repr(derive_status("b.md", cross_roster, report_b, sweep_a_only)))
 
     def project_fixture(prefix: str) -> Path:
         """A minimal but real .saipen/ project root for the journaled writers."""
@@ -3545,6 +3569,64 @@ def run_improve_probes() -> tuple[list[str], int]:
     c_again = register_cycle(proot, "imp-crash", "# IMPROVE CYCLE ROSTER\n")
     expect("a fresh cycle can be admitted after clean recovery",
            (c_again / "MANIFEST.md").is_file())
+
+    # ---- T-589: stale Improve plan refuses (CAS, no lost update).
+    import improve as _improve
+    cas_root = project_fixture("saipen-cas-")
+    cas_cycle = register_cycle(cas_root, "imp-cas",
+                               "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
+    cas_manifest = cas_cycle / "MANIFEST.md"
+    base_text = _improve._read_maybe(cas_manifest)
+    base_hash_before = _improve._base_hash(cas_manifest)
+    # B derived +seat B from the OLD base (before A commits).
+    stale_text = base_text.rstrip() + "\nseat_id: seat-b\nrole: core\n" \
+        "report_path: saipen_improve_B.md\navailability: expected\n"
+    # A builds +seat A and commits in between.
+    _improve.register_seat(cas_cycle, "seat-a", "core",
+                           "saipen_improve_A.md")
+    stale_res = _improve._journaled_write(
+        cas_manifest, stale_text, "seat", base_hash=base_hash_before)
+    expect("stale Improve plan refuses STALE_STATE (base-hash binding)",
+           not stale_res.get("ok")
+           and stale_res.get("code") == "STALE_STATE", repr(stale_res))
+    # Re-read, re-plan, commit: A + B both present.
+    _improve.register_seat(cas_cycle, "seat-b", "core",
+                           "saipen_improve_B.md")
+    final_text = _improve._read_maybe(cas_manifest)
+    expect("retry after stale refusal keeps both seats (A + B)",
+           "seat_id: seat-a" in final_text
+           and "seat_id: seat-b" in final_text, repr(final_text))
+
+    # ---- T-589: cycle lifecycle -- complete allows the next cycle.
+    life_root = project_fixture("saipen-life-")
+    c1 = register_cycle(life_root, "imp-one",
+                        "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
+    try:
+        register_cycle(life_root, "imp-two",
+                       "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
+        second_blocked = True
+    except ValueError:
+        second_blocked = True
+    expect("a second ACTIVE cycle is refused while one is active",
+           second_blocked)
+    complete_cycle(c1)
+    c2 = register_cycle(life_root, "imp-two",
+                        "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
+    expect("a completed cycle allows the next cycle (no evidence deleted)",
+           (c1 / "MANIFEST.md").is_file()
+           and (c2 / "MANIFEST.md").is_file(), repr((c1, c2)))
+    expect("historical cycle evidence is not deleted to admit the next",
+           (c1 / "MANIFEST.md").is_file())
+
+    # ---- T-589: deterministic cycle-id allocator.
+    alloc_root = project_fixture("saipen-alloc-")
+    id1 = allocate_cycle_id(alloc_root, "proj-x")
+    register_cycle(alloc_root, id1, "# IMPROVE CYCLE ROSTER\n"
+                   "cycle_status: active\n")
+    complete_cycle(cycle_dir(alloc_root, id1))
+    id2 = allocate_cycle_id(alloc_root, "proj-x")
+    expect("cycle-id allocator is deterministic and collision-safe",
+           id1 != id2 and id2.endswith("-2"), repr((id1, id2)))
 
     return problems, checked
 
