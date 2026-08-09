@@ -3631,6 +3631,32 @@ def run_nitro_m2_probes() -> tuple[list[str], int]:
     expect("the LOG event was not duplicated by recovery",
            log.read_text(encoding="utf-8").count("E-901") == 1)
 
+    # Crash after BOARD: LOG+BOARD written, STATE not; recover rolls STATE.
+    log.write_bytes(log_before)
+    board.write_bytes(board_before)
+    state.write_bytes(state_before)
+    run_crash("NITRO_CRASH_AFTER_BOARD", "op-board")
+    expect("crash after BOARD leaves STATE unbuilt",
+           b"phase: BUILD" not in state.read_bytes())
+    result = recover(root, "op-board")
+    expect("recovery rolls STATE forward after BOARD",
+           result["ok"] and b"phase: BUILD" in state.read_bytes()
+           and result.get("code") == "COMMITTED", repr(result))
+
+    # Crash after STATE: all three written; recover validates and commits.
+    log.write_bytes(log_before)
+    board.write_bytes(board_before)
+    state.write_bytes(state_before)
+    run_crash("NITRO_CRASH_AFTER_STATE", "op-state")
+    expect("crash after STATE leaves the full mutation written",
+           b"E-901" in log.read_bytes()
+           and b"phase: BUILD" in state.read_bytes())
+    result = recover(root, "op-state")
+    expect("recovery after STATE validates and commits",
+           result["ok"] and result.get("code") == "COMMITTED", repr(result))
+    expect("the crash-after-STATE op was not double-written by recovery",
+           log.read_text(encoding="utf-8").count("E-901") == 1)
+
     # A committed op's retry returns ALREADY_APPLIED without a second event.
     journal = Journal(root, "op-log")
     record = journal.read()
