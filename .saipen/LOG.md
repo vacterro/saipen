@@ -48,3 +48,9 @@
 - 09.08.26 14:24 [E-2509] [parent: E-2508] [T-586] [agent: claude] [op: transition-28230286] RUN: M9 begins: context compiler on trustworthy mechanical layer
 - 09.08.26 14:34 [E-2510] [parent: E-2509] [T-586] [agent: claude] [op: transition-e53cb7e3] RUN: SCOUT done: M9 context compiler landed -- cold/hot/audit modes, engine-derived (no duplicated parsing), read-only; 62 nitro-integrity behaviors
 - 09.08.26 14:34 [E-2511] [parent: E-2510] [T-586] [agent: claude] [op: checkpoint-7ff0d40b] RUN: BUILD: context cold/hot/audit emitting bounded surfaces (cold ~5.4KB vs 55.5KB raw), token accounting per source + repeated-unchanged-bytes metric; CLI + import floor + 5 red controls
+- 09.08.26 14:35 [E-2512] [parent: E-2511] [T-586] [agent: claude] [op: transition-1f0e61f4] RUN: M9 complete; verify gates
+- 09.08.26 14:37 [E-2513] [parent: E-2512] [T-586] [agent: claude] [op: ticket-ac1cb6f4] DEC: ticket done via SAIOPS -- PASS -- NITRO M9 context compiler: saipen context cold/hot/audit are read-only (zero bytes proven), consume the engine's shared parsers + ProjectSnapshot (no duplicated parsing), and emit bounded surfaces: cold = STATE+BOARD map+LOG tail+phase routing (~90% byte reduction on live repo), hot = current-work surface with recovery state, audit = per-source bytes/tokens accounting with repeated-unchanged-bytes metric. 62 nitro-integrity behaviors; validator/scenarios/audit(231)/floor green
+- 09.08.26 14:37 [E-2514] [parent: E-2513] [agent: claude] [op: transition-3b3316a2] RUN: gate run
+- 09.08.26 14:37 [E-2515] [parent: E-2514] [agent: claude] [op: transition-2d7418e8] RUN: M9 closed
+- 09.08.26 14:38 [E-2516] [parent: E-2515] [T-586] [agent: claude] [op: checkpoint-78b8bb5d] DEC: goal_tickets 12->13 (T-586 passed VERIFY)
+- 09.08.26 14:38 [E-2517] [parent: E-2516] [T-586] [agent: claude] [op: checkpoint-34b4b84f] RUN: goal_tickets counter synced (13); M9 closed
