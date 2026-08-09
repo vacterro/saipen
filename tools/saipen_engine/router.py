@@ -64,6 +64,19 @@ def route_next(state_text: str, board_text: str,
     active = doing[0]["id"] if doing else None
     blocker = state.get("blocker") or ""
 
+    # BINDING: a STATE.task / BOARD.DOING split is structural corruption and
+    # must be surfaced, never silently routed past (NITRO dogfood II).
+    if active and task and task != active:
+        return {"ok": False, "action": "saipen status",
+                "reason": "binding-mismatch",
+                "detail": f"STATE.task={task} but BOARD.DOING={active}; "
+                          "repair the split before routing"}
+    if task and task != "none" and not active:
+        return {"ok": False, "action": "saipen status",
+                "reason": "binding-mismatch",
+                "detail": f"STATE.task={task} but no BOARD.DOING ticket; "
+                          "repair the split before routing"}
+
     # UNBLOCK: an active ticket parked in BLOCKED (with a DOING ticket) or a
     # live blocker.
     if active and blocker and blocker.strip():
