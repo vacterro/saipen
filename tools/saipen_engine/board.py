@@ -63,3 +63,44 @@ def parse_board(text: str) -> dict:
                 "description": parts[0] if parts else "",
             }
     return {"tickets": tickets, "headings": headings, "errors": errors}
+
+
+def _fields_split(raw: str) -> list[str]:
+    """Split a ticket line into checkbox/prefix and pipe-delimited fields,
+    honouring `\\|` escapes."""
+    return raw.replace("\\|", PIPE_SENTINEL).split(" | ")
+
+
+def _fields_join(parts: list[str]) -> str:
+    return " | ".join(parts).replace(PIPE_SENTINEL, "\\|")
+
+
+def set_ticket_field(raw: str, field: str, value: str) -> str:
+    """Replace or append `field: value` on a ticket line, preserving every
+    other field byte-for-byte."""
+    parts = _fields_split(raw)
+    out = []
+    replaced = False
+    pattern = re.compile(rf"^{re.escape(field)}:\s*")
+    for part in parts:
+        if part.startswith("- ") or pattern.match(part):
+            if pattern.match(part):
+                if not replaced:
+                    out.append(f"{field}: {value}")
+                    replaced = True
+                    continue
+            out.append(part)
+            continue
+        out.append(part)
+    if not replaced:
+        out.append(f"{field}: {value}")
+    return _fields_join(out)
+
+
+def remove_ticket_field(raw: str, field: str) -> str:
+    """Remove exactly `| field: <value>` structurally. The leftover value
+    cannot survive as free text."""
+    parts = _fields_split(raw)
+    pattern = re.compile(rf"^{re.escape(field)}:\s*")
+    kept = [part for part in parts if not pattern.match(part)]
+    return _fields_join(kept)

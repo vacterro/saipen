@@ -1,0 +1,137 @@
+"""Fast proposed-state validation (NITRO integrity).
+
+Every mutating SAIOPS operation validates its IN-MEMORY proposed result before
+the journal is ever PREPARED, and re-runs the cross-file invariants on the live
+files after writing before VERIFIED is marked. This module is that check. It is
+FAST and deliberate: it covers exactly what SAIOPS can mutate and refuses a
+mutation whose proposed state would not survive the release gate.
+
+The full tools/validate.py remains the release/gate proof; this is
+transactional safety, not a replacement.
+"""
+
+from __future__ import annotations
+
+import re
+
+from . import phases
+from .board import parse_board
+from .log import parse_log_line, log_tail_event
+from .state import parse_state
+
+
+def _log_errors(log_text: str) -> list[str]:
+    errors = []
+    seen: set[int] = set()
+    parents: set[int] = set()
+    prev = None
+    for lineno, line in enumerate(log_text.splitlines(), 1):
+        if not line.strip():
+            continue
+        if line.lstrip().startswith("#"):
+            continue
+        parsed = parse_log_line(line)
+        if parsed is None:
+            errors.append(f"LOG.md:{lineno} not a legal event line")
+            continue
+        event = parsed["event"]
+        if event in seen:
+            errors.append(f"LOG.md:{lineno} duplicate event E-{event}")
+        seen.add(event)
+        if prev is not None and event != prev + 1:
+            errors.append(f"LOG.md:{lineno} E-{event} breaks monotonicity "
+                          f"after E-{prev}")
+        prev = event
+        if parsed["parent"] is not None:
+            parents.add(parsed["parent"])
+            if parsed["parent"] >= event:
+                errors.append(f"LOG.md:{lineno} parent E-{parsed['parent']} "
+                              f"is not older than E-{event}")
+    return errors
+
+
+def validate_texts(state_text: str, board_text: str, log_text: str) -> list[str]:
+    """Validate the proposed STATE/BOARD/LOG texts. Returns every error."""
+    errors: list[str] = []
+
+    state = parse_state(state_text)
+    missing = [k for k in ("phase", "task", "next_action", "blocker", "agent",
+                           "saipen_version", "mode", "updated")
+               if k not in state]
+    for key in missing:
+        errors.append(f"STATE proposed missing required field {key}")
+    phase = state.get("phase")
+    if phase not in phases.VALID_TRANSITIONS and phase not in phases.ANY_FROM:
+        errors.append(f"STATE proposed phase {phase!r} outside the enum")
+    na = state.get("next_action")
+    if isinstance(na, str):
+        if na.startswith("PHASE "):
+            error = phases.phase_next_action_error(na)
+            if error:
+                errors.append(f"STATE proposed next_action invalid: {error}")
+        else:
+            prefixes = ("WAIT:", "saipen ", "RUN:", "RESUME:")
+            if not na.startswith(prefixes):
+                errors.append(f"STATE proposed next_action {na!r} does not "
+                              "start with WAIT:/saipen /PHASE /RUN:/RESUME:")
+        subject = state.get("task")
+        m = re.match(r"^PHASE\s+([A-Za-z_-]+)(?:\s+(T-\d+))?", na.strip())
+        if m and m.group(2) and subject and m.group(2) != subject:
+            errors.append(f"STATE proposed next_action names {m.group(2)} "
+                          f"but task is {subject}")
+    intent = state.get("execution_intent")
+    if intent == "goal":
+        if "goal_waves" not in state or "goal_tickets" not in state:
+            errors.append("STATE proposed intent=goal without goal_waves/"
+                          "goal_tickets")
+    elif intent not in (None, "normal", "converge"):
+        errors.append(f"STATE proposed execution_intent {intent!r} outside "
+                      "normal|goal|converge")
+    if state.get("phase") and state.get("transition_from") and state.get(
+            "phase") != "INIT":
+        tf = state.get("transition_from")
+        if tf not in phases.VALID_TRANSITIONS and tf not in phases.ANY_FROM:
+            errors.append(f"STATE proposed transition_from {tf!r} outside "
+                          "the enum")
+
+    board = parse_board(board_text)
+    errors.extend(f"BOARD: {e}" for e in board["errors"])
+    tickets = board["tickets"]
+    doing = [t for t in tickets.values() if t["section"] == "## DOING"]
+    if len(doing) > 1:
+        errors.append("BOARD proposed has more than one ## DOING ticket")
+    for ticket in tickets.values():
+        if ticket["section"] == "## DOING" and ticket["checkbox"] != "/":
+            errors.append(f"BOARD proposed {ticket['id']} in DOING with "
+                          f"[{ticket['checkbox']}] instead of [/]")
+        for need in ticket["needs"]:
+            if need not in tickets:
+                errors.append(f"BOARD proposed {ticket['id']} needs "
+                              f"nonexistent {need}")
+            elif (ticket["section"] == "## DOING"
+                  and tickets[need]["section"] != "## DONE"):
+                errors.append(f"BOARD proposed {ticket['id']} needs {need} "
+                              f"which is not DONE")
+
+    errors.extend(f"LOG: {e}" for e in _log_errors(log_text))
+
+    tail = log_tail_event(log_text)
+    last_event = state.get("last_event")
+    if last_event is not None and tail is not None and last_event != tail:
+        errors.append(f"STATE proposed last_event {last_event} != LOG tail "
+                      f"{tail}")
+
+    task = state.get("task")
+    active = doing[0]["id"] if doing else None
+    if active and task and task != active:
+        errors.append(f"STATE proposed task {task} != BOARD DOING {active}")
+    return errors
+
+
+def validate_project(root) -> list[str]:
+    """Validate the live canonical files (post-write / recovery verification)."""
+    from . import codec
+    state = codec.read_doc(root / ".saipen" / "STATE.md")
+    board = codec.read_doc(root / ".saipen" / "BOARD.md")
+    log = codec.read_doc(root / ".saipen" / "LOG.md")
+    return validate_texts(state, board, log)

@@ -53,6 +53,9 @@ source-text assertions (e.g. naive string inclusion) to verify runtime logic.
 """
 
 import datetime
+from saipen_engine.phases import (ANY_FROM, TICKET_BEARING_PHASES,
+                                  VALID_TRANSITIONS,
+                                  transition_legal)
 import hashlib
 import io
 import json
@@ -359,8 +362,7 @@ SAIPEN_COMMANDS = frozenset({
 # place § 1.2 warns about by name: "an example that fails the rule below is
 # worse than no example". Deliberately a hand-kept constant plus a drift check
 # against § 1.2's sentence, the same shape the phase enum uses.
-TICKET_BEARING_PHASES = frozenset({"SCOUT", "BUILD", "VERIFY", "REVIEW",
-                                   "SHIP"})
+
 _PHASE_NA_RE = re.compile(
     r"^PHASE\s+([A-Za-z_-]+)(?:\s+(T-\d+))?(?:\s+\[[^\]]*\])?\s*$")
 
@@ -978,36 +980,6 @@ else:
 
 # RFC § 1.6 phase transition validation. transition_from tracks the
 # previous phase; check every non-self transition against the table.
-VALID_TRANSITIONS = {
-    "INIT": ["PLAN", "BLOCKED"],
-    "PLAN": ["SCOUT", "BUILD", "DONE", "BLOCKED"],
-    "SCOUT": ["BUILD", "BLOCKED"],
-    "BUILD": ["VERIFY", "BLOCKED"],
-    "VERIFY": ["REVIEW", "SCOUT", "BUILD", "BLOCKED"],
-    "REVIEW": ["SHIP", "BUILD", "SCOUT", "BLOCKED"],
-    "SHIP": ["DONE", "BUILD", "BLOCKED"],
-    "DONE": ["SCOUT", "PLAN", "HUNT", "BLOCKED"],
-    "VALIDATE": ["SCOUT", "PLAN", "DONE", "BLOCKED"],
-    "HUNT": ["ADD", "PLAN", "SCOUT", "BLOCKED"],
-    "MARKHUNT": ["DONE", "BLOCKED"],
-    "ADD": ["BUILD", "PLAN", "SCOUT", "DONE", "BLOCKED"],
-    "CLEAN": ["DONE", "BLOCKED"],
-    "TRANSLATE": ["DONE", "BLOCKED"],
-    "PREPARE": ["DONE", "BLOCKED"],
-    "BLOCKED": ["PLAN", "SCOUT", "DONE"],
-}
-# These seven phases are entered by explicit user command from ANY phase
-# (RFC § 1.6/§ 1.10) -- the transition table's FROM row doesn't restrict them.
-# PLAN joined in v7.92.0: § 2.4's goal-mode Entry mandates a PLAN for the new
-# objective from wherever the pivot happens, so `saipen goal` out of REVIEW
-# (whose row allows only SHIP/BUILD/SCOUT/BLOCKED) was an invalid state
-# produced by following the protocol exactly. Caught on a live pivot.
-# NOTE: SHIP is deliberately absent. `saipen ship` is recognized from any
-# phase as a COMMAND (RFC § 1.10), but `phase: SHIP` is reachable only from
-# REVIEW -- § 1.10 says so in as many words while this set said otherwise
-# from v7.83.0 to v7.94.0. A command is not a transition.
-ANY_FROM = {"VALIDATE", "MARKHUNT", "CLEAN", "TRANSLATE", "PREPARE", "PLAN",
-            "HUNT"}
 
 t_from = state.get("transition_from")
 t_current = state.get("phase")

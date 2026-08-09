@@ -9,6 +9,7 @@ __pycache__/
 *.py[cod]
 .freebuff/
 .saipen/recovery/
+.saipen/locks/
 # bootstrap/export.* drops its archive in the project root by design
 saipen_export_*.tar.gz
 saipen_export_*.zip

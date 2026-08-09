@@ -49,6 +49,18 @@ class Result:
         out.update(self.data)
         return out
 
+    def get(self, key: str, default: Any = None) -> Any:
+        return self.to_dict().get(key, default)
+
+    def __getitem__(self, key: str) -> Any:
+        return self.to_dict()[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.to_dict()
+
+    def __bool__(self) -> bool:
+        return self.ok
+
     def to_json(self) -> str:
         return json.dumps(self.to_dict(), indent=2, sort_keys=False,
                           ensure_ascii=False)

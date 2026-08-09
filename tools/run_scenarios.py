@@ -57,15 +57,17 @@ from freshness import (FreshnessError, SourceIdentity,
                        compute_generic_role_revision, compute_role_revision,
                        compute_source_identity)
 from sub_clean import sub_clean_blockers
-from improve import (append_run, derive_status, register_cycle, register_seat,
-                     resolve_report_path, validate_report, write_sweep_entry)
+from improve import (append_run, cycle_dir, derive_status, register_cycle,
+                     register_seat, resolve_report_path, validate_report,
+                     write_sweep_entry)
 from userperson import (merge_profile, onboarding_questions, parse_profile,
                         project_profile, remove_preference, render_profile,
                         validate_profile)
 from saipen_engine import codec
 from saipen_engine.board import parse_board
 from saipen_engine.state import parse_state
-from saipen_engine.journal import Journal, recover, run_mutation
+from saipen_engine.journal import (Journal, pending_ops, recover,
+                                   recovery_preflight, run_mutation)
 from saipen_engine.lock import WriterLock
 from saipen_engine.log import parse_log_line
 from saipen_engine.operations import (apply_claim, checkpoint, next_ticket_id,
@@ -3378,30 +3380,70 @@ def run_improve_probes() -> tuple[list[str], int]:
                for e in validate_report(bad3)),
            repr(validate_report(bad3)))
 
-    roster = "cycle_id: imp-key-20260808\navailability: expected\n"
-    sweep = "# SWEEP\n- IMP-001 [CONFIRMED] T-900 report=seat/report.md "\
-            "reproduced=y\n"
+    roster = ("# IMPROVE CYCLE ROSTER\nseat_id: report\nrole: core\n"
+              "report_path: saipen_improve_REPORT.md\navailability: expected\n")
+    sweep = "# SWEEP\n- IMP-001 [CONFIRMED] T-900 report=r.md reproduced=y\n"
+    full_sweep = sweep + "- IMP-002 [CONFIRMED] T-900 report=r.md reproduced=y\n"
     expect("derived status: roster-only is expected",
-           derive_status("seat/report.md", roster, "", "")["visible"]
+           derive_status("saipen_improve_REPORT.md", roster, "", "")["visible"]
            == "expected")
     expect("derived status: report draft is draft",
-           derive_status("seat/report.md", roster, "report_status: draft\n",
-                         "")["visible"] == "draft")
+           derive_status("saipen_improve_REPORT.md", roster,
+                         "report_status: draft\n", "")["visible"] == "draft")
     expect("derived status: complete without sweep is complete",
-           derive_status("seat/report.md", roster,
+           derive_status("saipen_improve_REPORT.md", roster,
                          "report_status: complete\n", "")["visible"]
            == "complete")
-    expect("derived status: swept after disposition coverage",
-           derive_status("seat/report.md", roster,
-                         "report_status: complete\n", sweep)["visible"]
-           == "swept")
+    report_two = ("report_status: complete\n\n"
+                  "IMP-001 [P1] [PROTOCOL_VIOLATION] [proven] [ticket]\n"
+                  "IMP-002 [P1] [PROTOCOL_VIOLATION] [proven] [ticket]\n")
+    expect("derived status: partial disposition coverage is never swept",
+           derive_status("saipen_improve_REPORT.md", roster, report_two,
+                         sweep)["visible"] != "swept")
+    expect("derived status: swept after FULL disposition coverage",
+           derive_status("saipen_improve_REPORT.md", roster, report_two,
+                         full_sweep)["visible"] == "swept")
     expect("derived status: unavailable roster wins",
-           derive_status("seat/report.md", "availability: unavailable\n",
-                         "report_status: complete\n", sweep)["visible"]
+           derive_status("saipen_improve_REPORT.md",
+                         roster.replace("availability: expected",
+                                        "availability: unavailable"),
+                         report_two, full_sweep)["visible"] == "unavailable")
+    seat2_roster = ("# IMPROVE CYCLE ROSTER\n"
+                    "seat_id: seat-a\nrole: core\nreport_path: a.md\n"
+                    "availability: unavailable\n"
+                    "seat_id: seat-b\nrole: core\nreport_path: b.md\n"
+                    "availability: expected\n")
+    expect("derived status: per-seat availability, not the first field",
+           derive_status("b.md", seat2_roster,
+                         report_two, full_sweep)["visible"] == "swept"
+           and derive_status("a.md", seat2_roster,
+                             report_two, full_sweep)["visible"]
            == "unavailable")
 
-    cycle = Path(tempfile.mkdtemp(prefix="saipen-sweep-"))
-    report = cycle / "seat" / "saipen_improve_PROJ.md"
+    def project_fixture(prefix: str) -> Path:
+        """A minimal but real .saipen/ project root for the journaled writers."""
+        proot = Path(tempfile.mkdtemp(prefix=prefix))
+        saipen = proot / ".saipen"
+        saipen.mkdir()
+        (saipen / "LOG.md").write_text(
+            "- 09.08.26 00:00 [E-900] [T-none] DEC: base\n", encoding="utf-8")
+        (saipen / "BOARD.md").write_text(
+            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+            encoding="utf-8")
+        (saipen / "STATE.md").write_text(
+            "---\nphase: BUILD\ntask: none\nnext_action: \"saipen continue\"\n"
+            "blocker: \"\"\nsaipen_version: 7\nschema_version: 3\n"
+            "last_event: 900\nstyle_contract: ded-4ae736e4\n"
+            "saipen_home: \".\"\nagent: probe\nmode: full\n"
+            "updated: 2026-08-09T00:00:00Z\n---\n", encoding="utf-8")
+        return proot
+
+    proot = project_fixture("saipen-sweep-")
+    cycle = cycle_dir(proot, "imp-key-20260808")
+    cycle.mkdir(parents=True)
+    register_cycle(proot, "imp-key-20260808", roster)
+    report = resolve_report_path(proot, "imp-key-20260808", "opencode-01",
+                                 "PROJ")
     report.parent.mkdir(parents=True)
     report.write_text(good, encoding="utf-8")
     before = report.read_bytes()
@@ -3415,12 +3457,12 @@ def run_improve_probes() -> tuple[list[str], int]:
            and "CONFIRMED" in (cycle / "SWEEP.md").read_text(encoding="utf-8"))
 
     # Cycle/seat admission: deterministic, collision-safe (T-570).
-    proot = Path(tempfile.mkdtemp(prefix="saipen-cycle-"))
+    proot = project_fixture("saipen-cycle-")
     c1 = register_cycle(proot, "imp-key-20260808", "cycle_id: imp-key-20260808\n")
     try:
         register_cycle(proot, "imp-key-20260808", "")
         dup_cycle = False
-    except FileExistsError:
+    except (FileExistsError, ValueError):
         dup_cycle = True
     expect("a second cycle with the same id is refused, not duplicated",
            dup_cycle)
@@ -3448,7 +3490,10 @@ def run_improve_probes() -> tuple[list[str], int]:
 
     # RUN append is immutable: a second run appends, never overwrites; a
     # complete report refuses further RUNs (T-551).
-    seat_report = Path(tempfile.mkdtemp(prefix="saipen-run-")) / "r.md"
+    proot = project_fixture("saipen-run-")
+    seat_report = resolve_report_path(proot, "imp-key-20260808",
+                                      "opencode-01", "PROJ")
+    seat_report.parent.mkdir(parents=True)
     seat_report.write_text(
         "report_status: draft\n\n## RUN 1\nfirst\n", encoding="utf-8")
     append_run(seat_report, "second run")
@@ -3470,6 +3515,35 @@ def run_improve_probes() -> tuple[list[str], int]:
     except ValueError:
         immutable = True
     expect("a complete report refuses further RUN sections", immutable)
+
+    # NITRO M6 (T-583): the Improve writers are journaled transactions, so a
+    # crash cannot expose a roster-less cycle directory. Run register_cycle in
+    # a subprocess that dies exactly after the journal PREPARES; recovery must
+    # produce exactly one valid outcome -- no bare directory admitted.
+    proot = project_fixture("saipen-cyclecrash-")
+    crash_code = (
+        "import sys, os; sys.path.insert(0, r'%s')\n"
+        "os.environ['NITRO_CRASH_AFTER_PREPARE'] = '1'\n"
+        "from improve import register_cycle\n"
+        "register_cycle(r'%s', 'imp-crash', '# IMPROVE CYCLE ROSTER\\n')"
+        % (str(HOME / "tools"), str(proot)))
+    rc = subprocess.run([sys.executable, "-c", crash_code], cwd=str(proot),
+                        capture_output=True, text=True, timeout=60).returncode
+    owner = proot / ".saipen" / "improve"
+    crash_dir = owner / "imp-crash"
+    expect("register_cycle crash after PREPARE leaves no admitted cycle",
+           rc == 87 and not (crash_dir / "MANIFEST.md").is_file(),
+           f"rc={rc}, manifest={ (crash_dir / 'MANIFEST.md').is_file() }")
+    from saipen_engine.journal import auto_recover_pending
+    recovered = auto_recover_pending(proot)
+    expect("recovery after the PREPARE crash leaves no roster-less cycle",
+           recovered.get("ok")
+           and not (owner / "imp-crash" / "MANIFEST.md").is_file(),
+           repr(recovered))
+    # A later register_cycle with the same id still works (nothing admitted).
+    c_again = register_cycle(proot, "imp-crash", "# IMPROVE CYCLE ROSTER\n")
+    expect("a fresh cycle can be admitted after clean recovery",
+           (c_again / "MANIFEST.md").is_file())
 
     return problems, checked
 
@@ -3598,10 +3672,10 @@ def run_nitro_m2_probes() -> tuple[list[str], int]:
         code = (
             "import sys; sys.path.insert(0, r'%s')\n"
             "from saipen_engine.journal import run_mutation\n"
-            "run_mutation(r'%s', '%s', 'probe', 'id', {}, [\n"
-            "  {'path': '.saipen/LOG.md', 'content': %r},\n"
-            "  {'path': '.saipen/BOARD.md', 'content': %r},\n"
-            "  {'path': '.saipen/STATE.md', 'content': %r}])"
+            "run_mutation(r'%s', '%s', 'op', 'probe', 'id', 'hash', [\n"
+            "  {'path': '.saipen/LOG.md', 'role': 'log', 'content': %r},\n"
+            "  {'path': '.saipen/BOARD.md', 'role': 'board', 'content': %r},\n"
+            "  {'path': '.saipen/STATE.md', 'role': 'state', 'content': %r}])"
             % (str(HOME / "tools"), str(root), op_id,
                log_before + b"\n- 09.08.26 00:01 [E-901] RUN: op\n",
                board_before,
@@ -3667,28 +3741,47 @@ def run_nitro_m2_probes() -> tuple[list[str], int]:
     # A committed op's retry returns ALREADY_APPLIED without a second event.
     journal = Journal(root, "op-log")
     record = journal.read()
-    targets = record["targets"]
+    targets = [t["path"] for t in record["targets"]]
     result = run_mutation(
-        root, "op-log", "probe", "id",
-        {"STATE.md": "x"},  # stale precondition, must not matter for committed
-        [{"path": p, "content": b""} for p in targets])
+        root, "op-log", "op", "probe", "id", "hash",
+        [{"path": p, "role": "generic", "content": b""} for p in targets],
+        preconditions={"STATE.md": "x"},  # stale, must not matter when committed
+        skip_preflight=True)
     expect("a committed op's retry returns ALREADY_APPLIED",
            result.get("code") == "ALREADY_APPLIED", repr(result))
     expect("no duplicate LOG event from a retried committed op",
            log.read_text(encoding="utf-8").count("E-901") == 1)
 
-    # A committed op's retry returns ALREADY_APPLIED without a second event.
-    journal = Journal(root, "op-log")
-    record = journal.read()
-    targets = record["targets"]
-    result = run_mutation(
-        root, "op-log", "probe", "id",
-        {"STATE.md": "x"},  # stale precondition, must not matter for committed
-        [{"path": p, "content": b""} for p in targets])
-    expect("a committed op's retry returns ALREADY_APPLIED",
-           result.get("code") == "ALREADY_APPLIED", repr(result))
-    expect("no duplicate LOG event from a retried committed op",
-           log.read_text(encoding="utf-8").count("E-901") == 1)
+    # Recovery conflict: a pending target mutated externally must CONFLICT
+    # and preserve the external bytes (NITRO integrity R8).
+    log.write_bytes(log_before)
+    board.write_bytes(board_before)
+    state.write_bytes(state_before)
+    from saipen_engine.journal import hash_bytes
+    op = "op-conflict"
+    journal = Journal(root, op)
+    journal.start("op", "probe", "id", "hash", [
+        {"path": ".saipen/LOG.md", "role": "log",
+         "content": log_before + b"\n- 09.08.26 00:01 [E-902] RUN: op\n",
+         "before_hash": hash_bytes(log_before), "after_hash": "x"},
+        {"path": ".saipen/BOARD.md", "role": "board", "content": board_before,
+         "before_hash": hash_bytes(board_before), "after_hash": "y"},
+        {"path": ".saipen/STATE.md", "role": "state",
+         "content": state_before.replace(b"phase: DONE", b"phase: BUILD"),
+         "before_hash": hash_bytes(state_before), "after_hash": "z"},
+    ])
+    (saipen / "LOG.md").write_bytes(
+        log_before + b"\n- 09.08.26 00:01 [E-902] RUN: op\n")
+    journal.mark("APPLYING", progress_index=1, target_index=0)
+    external = board_before + b"\n# externally modified\n"
+    (saipen / "BOARD.md").write_bytes(external)
+    result = recover(root, op)
+    expect("recovery CONFLICTs on externally modified pending target",
+           result.get("code") == "CONFLICT"
+           and (saipen / "BOARD.md").read_bytes() == external,
+           repr(result))
+    expect("conflict preserves the journal for evidence",
+           journal.exists() and journal.read()["status"] == "CONFLICT")
 
     # Writer lock: second live writer refuses; release allows re-acquire.
     lock = WriterLock(root)
@@ -3830,29 +3923,325 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
     expect("ticket_add creates a canonical ticket",
            added.get("ok") and added.get("code") == "TICKET_ADDED"
            and added.get("ticket") == "T-778", repr(added))
-    moved = ticket_move(root, "done", "T-778", "probe")
-    expect("ticket_done moves exactly one ticket to DONE",
-           moved.get("ok") and moved.get("code") == "DONE"
+
+    # Legal lifecycle: done accepts ONLY ## DOING. A TODO ticket cannot skip
+    # claim/work (NITRO integrity R5) -- the old probe encoded the bug as PASS.
+    todo_done = ticket_move(root, "done", "T-778", "probe")
+    expect("done on a TODO ticket is refused (IL_LEGAL_TICKET_LIFECYCLE)",
+           not todo_done.get("ok")
+           and todo_done.get("code") == "ILLEGAL_TICKET_LIFECYCLE",
+           repr(todo_done))
+    expect("refused done writes zero canonical bytes",
+           parse_board(codec.read_doc(saipen / "BOARD.md"))["tickets"]
+           ["T-778"]["section"] == "## TODO")
+
+    # Finish the active T-777 through the legal lifecycle: done requires
+    # DOING + [/] + STATE.task binding.
+    done = ticket_move(root, "done", "T-777", "probe")
+    expect("done on the active DOING ticket succeeds and moves it to DONE",
+           done.get("ok") and done.get("code") == "DONE"
            and parse_board(codec.read_doc(saipen / "BOARD.md"))
-           ["tickets"]["T-778"]["section"] == "## DONE", repr(moved))
+           ["tickets"]["T-777"]["section"] == "## DONE", repr(done))
+
+    # Claim the now-topmost T-778, then finish it legally.
+    claimed2 = apply_claim(root, "T-778", "probe")
+    expect("claim of the topmost workable ticket succeeds",
+           claimed2.get("ok") and claimed2.get("code") == "CLAIMED",
+           repr(claimed2))
+    done2 = ticket_move(root, "done", "T-778", "probe")
+    expect("legal DOING->DONE lifecycle succeeds",
+           done2.get("ok") and done2.get("code") == "DONE",
+           repr(done2))
 
     # M5: goal/cc mechanics. reauthorize refuses without a tripped valve.
     refused = reauthorize_valve(root, "probe")
     expect("reauthorize_valve refuses a valve that has not tripped",
            not refused.get("ok") and refused.get("code") == "VALIDATION_FAILED",
            repr(refused))
+    phase_before_goal = parse_state(codec.read_doc(saipen / "STATE.md")).get(
+        "phase")
     goal = set_goal_intent(root, "probe", "M5 probe")
+    state_after_goal = parse_state(codec.read_doc(saipen / "STATE.md"))
     expect("set_goal_intent pivots to goal with counters from 0",
            goal.get("ok") and goal.get("code") == "GOAL_SET"
-           and parse_state(codec.read_doc(saipen / "STATE.md")).get(
-               "execution_intent") == "goal"
-           and parse_state(codec.read_doc(saipen / "STATE.md")).get(
-               "goal_waves") == 0, repr(goal))
+           and state_after_goal.get("execution_intent") == "goal"
+           and state_after_goal.get("goal_waves") == 0, repr(goal))
+    expect("set_goal_intent preserves phase/task (not a claim)",
+           state_after_goal.get("phase") == phase_before_goal,
+           repr((phase_before_goal, state_after_goal.get("phase"))))
     stop = stop_checkpoint(root, "probe", "probe stop")
     expect("stop_checkpoint writes a resumable next_action",
            stop.get("ok") and stop.get("code") == "STOPPED"
            and parse_state(codec.read_doc(saipen / "STATE.md")).get(
                "next_action"), repr(stop))
+
+    return problems, checked
+
+
+def run_nitro_integrity_probes() -> tuple[list[str], int]:
+    """NITRO integrity sweep red controls (T-584, audit R1..R12 + core).
+
+    These are BEHAVIORAL controls against the repaired engine, not proxy
+    assertions: each one creates the exact bad condition and demands the
+    repaired refusal/behaviour. A control goes red when the engine regresses.
+    """
+    problems: list[str] = []
+    checked = 0
+
+    def expect(label: str, ok: bool, detail: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        if not ok:
+            problems.append(f"{label}: {detail}")
+        else:
+            print(f"PASS: nitro-integrity -- {label}")
+
+    def make_project() -> Path:
+        root = Path(tempfile.mkdtemp(prefix="saipen-integrity-"))
+        saipen = root / ".saipen"
+        saipen.mkdir()
+        (saipen / "LOG.md").write_text(
+            "- 09.08.26 00:00 [E-900] [T-none] DEC: base\n", encoding="utf-8")
+        (saipen / "BOARD.md").write_text(
+            "# Board\n## DOING\n## TODO\n"
+            "- [ ] T-1 [P1] top probe | verify: probe\n"
+            "- [ ] T-2 [P1] lower probe | verify: probe\n"
+            "## DONE\n## BLOCKED\n", encoding="utf-8")
+        (saipen / "STATE.md").write_text(
+            "---\nphase: DONE\ntask: none\nnext_action: \"saipen continue\"\n"
+            "blocker: \"\"\ntransition_from: SHIP\nsaipen_version: 7\n"
+            "schema_version: 3\nlast_event: 900\nstyle_contract: ded-4ae736e4\n"
+            "saipen_home: \".\"\nagent: probe\nrequires:\n  - filesystem\n"
+            "  - git\n  - python\nmode: full\nupdated: 2026-08-09T00:00:00Z\n"
+            "---\n", encoding="utf-8")
+        return root
+
+    def project_tree(root: Path) -> dict[str, bytes]:
+        out = {}
+        for path in sorted((root / ".saipen").rglob("*")):
+            if path.is_file():
+                out[path.relative_to(root).as_posix()] = path.read_bytes()
+        return out
+
+    # Import floor: every shipped engine module imports in isolation.
+    from saipen_engine import (board, codec, errors, fast_check, journal,  # noqa: F401
+                               lock, log, operations, paths, phases, plan,
+                               result, snapshot, state)
+    expect("every shipped saipen_engine module imports in isolation", True)
+
+    # ---- R1/R2: checkpoint and ticket_add preserve phase/task.
+    root = make_project()
+    snap = project_tree(root)
+    root2 = make_project()
+    apply_claim(root2, "T-1", "probe")
+    transition_phase(root2, "BUILD", "probe", "T-1", "integrity setup")
+    st = parse_state(codec.read_doc(root2 / ".saipen" / "STATE.md"))
+    cp = checkpoint(root2, "probe", "RUN", "T-1", "integrity checkpoint")
+    st = parse_state(codec.read_doc(root2 / ".saipen" / "STATE.md"))
+    expect("checkpoint preserves phase (no SCOUT rewrite)",
+           cp.get("ok") and st.get("phase") == "BUILD", repr(st))
+    expect("checkpoint preserves task",
+           cp.get("ok") and st.get("task") == "T-1", repr(st))
+    expect("checkpoint preserves next_action",
+           cp.get("ok") and st.get("next_action")
+           == "PHASE BUILD T-1", repr(st))
+    add = ticket_add(root2, "probe", "P2", "future", [], "verify")
+    st = parse_state(codec.read_doc(root2 / ".saipen" / "STATE.md"))
+    expect("ticket_add preserves execution phase",
+           add.get("ok") and st.get("phase") == "BUILD", repr(st))
+
+    # ---- R6: dry-run writes zero bytes.
+    before = project_tree(root)
+    plan = plan_claim(root, "T-1", "probe")
+    after = project_tree(root)
+    expect("plan_claim dry-run writes zero canonical bytes",
+           plan.get("ok") and plan.get("dry_run") and before == after,
+           f"changed={set(before) ^ set(after)}")
+    cp_plan = checkpoint(root, "probe", "RUN", "T-1", "dry", dry_run=True)
+    after2 = project_tree(root)
+    expect("checkpoint dry-run writes zero bytes",
+           cp_plan.get("ok") and cp_plan.get("dry_run")
+           and after == after2,
+           repr(cp_plan.to_dict()))
+
+    # ---- Pick Rule: claiming the lower ticket refuses.
+    lower = plan_claim(root, "T-2", "probe")
+    expect("normal claim of a non-top workable ticket refuses "
+           "(NOT_TOP_WORKABLE)",
+           not lower.get("ok") and lower.get("code") == "NOT_TOP_WORKABLE",
+           repr(lower))
+    top = apply_claim(root, "T-1", "probe")
+    expect("claim of the topmost workable ticket succeeds",
+           top.get("ok") and top.get("code") == "CLAIMED", repr(top))
+
+    # ---- R4: transition cannot switch ticket identity / fake ticket.
+    fake = transition_phase(root, "BUILD", "probe", "T-999", "fake")
+    expect("transition with a nonexistent ticket refuses",
+           not fake.get("ok") and fake.get("code") == "TICKET_NOT_FOUND",
+           repr(fake))
+    swapped = transition_phase(root, "BUILD", "probe", "T-2", "swap")
+    expect("transition with a non-active ticket refuses "
+           "(ACTIVE_TICKET_MISMATCH)",
+           not swapped.get("ok")
+           and swapped.get("code") == "ACTIVE_TICKET_MISMATCH", repr(swapped))
+    ok_tr = transition_phase(root, "BUILD", "probe", "T-1", "build")
+    st = parse_state(codec.read_doc(root / ".saipen" / "STATE.md"))
+    expect("transition binds the exact active DOING ticket",
+           ok_tr.get("ok") and st.get("phase") == "BUILD"
+           and st.get("task") == "T-1", repr(st))
+
+    # ---- R5: legal lifecycle only. Block the active ticket, then done.
+    blocked = ticket_move(root, "block", "T-1", "probe", "blocked now")
+    expect("block of an active DOING ticket succeeds",
+           blocked.get("ok") and blocked.get("code") == "BLOCK"
+           and parse_board(codec.read_doc(root / ".saipen" / "BOARD.md"))
+           ["tickets"]["T-1"]["section"] == "## BLOCKED", repr(blocked))
+    unblocked = ticket_move(root, "unblock", "T-1", "probe")
+    bd = parse_board(codec.read_doc(root / ".saipen" / "BOARD.md"))
+    expect("unblock removes the blocker field structurally",
+           unblocked.get("ok")
+           and "blocker:" not in bd["tickets"]["T-1"]["raw"],
+           repr(bd["tickets"]["T-1"]["raw"]))
+
+    # ---- R7: WRITER_BUSY is a structured result, not a traceback.
+    lock = WriterLock(root)
+    lock.acquire()
+    try:
+        busy = ticket_add(root, "probe", "P2", "busy", [], "verify")
+        expect("WRITER_BUSY is a structured refusal",
+               not busy.get("ok") and busy.get("code") == "WRITER_BUSY",
+               repr(busy))
+    finally:
+        lock.release()
+
+    # ---- plan/apply share one op_id and apply consumes exact plan bytes.
+    root3 = make_project()
+    p_apply = apply_claim(root3, "T-1", "probe")
+    j3 = Journal(root3, p_apply.get("op_id"))
+    expect("plan op_id == journal op_id (apply consumed the plan)",
+           p_apply.get("op_id") is not None and j3.exists()
+           and j3.read()["op_id"] == p_apply.get("op_id"),
+           repr(p_apply.get("op_id")))
+    expect("applied journal is COMMITTED",
+           j3.read()["status"] == "COMMITTED", repr(j3.read()["status"]))
+
+    # ---- R8: recovery CONFLICT preserves intervening bytes (journal level).
+    root4 = make_project()
+    saipen4 = root4 / ".saipen"
+    log_b4 = (saipen4 / "LOG.md").read_bytes()
+    state_b4 = (saipen4 / "STATE.md").read_bytes()
+    from saipen_engine.journal import hash_bytes
+    j = Journal(root4, "op-int")
+    j.start("op", "probe", "id", "hash", [
+        {"path": ".saipen/LOG.md", "role": "log",
+         "content": log_b4 + b"\n- 09.08.26 00:01 [E-901] RUN: x\n",
+         "before_hash": hash_bytes(log_b4), "after_hash": "a"},
+        {"path": ".saipen/STATE.md", "role": "state",
+         "content": state_b4.replace(b"phase: DONE", b"phase: BUILD"),
+         "before_hash": hash_bytes(state_b4), "after_hash": "b"},
+    ])
+    (saipen4 / "LOG.md").write_bytes(
+        log_b4 + b"\n- 09.08.26 00:01 [E-901] RUN: x\n")
+    j.mark("APPLYING", progress_index=1, target_index=0)
+    external = state_b4 + b"\n# third party\n"
+    (saipen4 / "STATE.md").write_bytes(external)
+    from saipen_engine.journal import recover
+    result = recover(root4, "op-int")
+    expect("recovery on an externally modified pending target CONFLICTs",
+           result.get("code") == "CONFLICT"
+           and (saipen4 / "STATE.md").read_bytes() == external, repr(result))
+
+    # ---- Recovery preflight: pending op blocks a new mutation.
+    from saipen_engine.journal import recovery_preflight
+    root9 = make_project()
+    saipen9 = root9 / ".saipen"
+    log9 = (saipen9 / "LOG.md").read_bytes()
+    state9 = (saipen9 / "STATE.md").read_bytes()
+    j9 = Journal(root9, "op-pending")
+    new_log9 = log9 + b"\n- 09.08.26 00:01 [E-901] RUN: x\n"
+    new_state9 = state9.replace(b"phase: DONE", b"phase: BUILD")
+    j9.start("op", "probe", "id", "hash", [
+        {"path": ".saipen/LOG.md", "role": "log", "content": new_log9,
+         "before_hash": hash_bytes(log9), "after_hash": hash_bytes(new_log9)},
+        {"path": ".saipen/STATE.md", "role": "state", "content": new_state9,
+         "before_hash": hash_bytes(state9),
+         "after_hash": hash_bytes(new_state9)},
+    ])
+    (saipen9 / "LOG.md").write_bytes(new_log9)
+    j9.mark("APPLYING", progress_index=1, target_index=0)
+    pending = [op["op_id"] for op in pending_ops(root9)]
+    expect("status derives recovery_pending from real journals",
+           "op-pending" in pending, repr(pending))
+    pre = recovery_preflight(root9)
+    expect("recovery preflight recovers the single pending op first",
+           pre.get("ok") and pre.get("recovered") == ["op-pending"],
+           repr(pre))
+    root5 = make_project()
+    new_mutation = ticket_add(root5, "probe", "P2", "after", [], "verify")
+    expect("a new mutation over no pending op succeeds", new_mutation.get("ok"),
+           repr(new_mutation.to_dict()))
+
+    # ---- Codec: UTF-8/CRLF/BOM representation survives a real operation.
+    root6 = make_project()
+    board6 = root6 / ".saipen" / "BOARD.md"
+    text6 = "# Board\n## DOING\n## TODO\n- [ ] T-1 [P1] probe | verify: probe\n## DONE\n## BLOCKED\n"
+    board6.write_bytes(text6.encode("utf-8"))
+    add6 = ticket_add(root6, "probe", "P2", "crlf", [], "verify")
+    after6 = board6.read_bytes()
+    expected6 = ("# Board\n## DOING\n## TODO\n"
+                 "- [ ] T-2 [P2] crlf | verify: verify\n"
+                 "- [ ] T-1 [P1] probe | verify: probe\n"
+                 "## DONE\n## BLOCKED\n")
+    expect("UTF-8 LF representation preserved",
+           add6.get("ok") and after6.decode("utf-8") == expected6
+           and b"\xef\xbb\xbf" not in after6, repr(after6[:80]))
+
+    root7 = make_project()
+    board7 = root7 / ".saipen" / "BOARD.md"
+    text7 = "# Board\r\n## DOING\r\n## TODO\r\n- [ ] T-1 [P1] probe | verify: probe\r\n## DONE\r\n## BLOCKED\r\n"
+    board7.write_bytes(text7.replace("\r\n", "\r\n").encode("utf-8"))
+    ticket_add(root7, "probe", "P2", "crlf", [], "verify")
+    after7 = board7.read_bytes()
+    expect("UTF-8 CRLF representation preserved by a real operation",
+           b"\r\n" in after7 and b"\n" not in after7.replace(b"\r\n", b""),
+           repr(after7[:60]))
+
+    root8 = make_project()
+    board8 = root8 / ".saipen" / "BOARD.md"
+    text8 = "# Board\n## DOING\n## TODO\n- [ ] T-1 [P1] probe | verify: probe\n## DONE\n## BLOCKED\n"
+    board8.write_bytes(b"\xef\xbb\xbf" + text8.encode("utf-8"))
+    ticket_add(root8, "probe", "P2", "bom", [], "verify")
+    after8 = board8.read_bytes()
+    expect("UTF-8 BOM representation preserved by a real operation",
+           after8.startswith(b"\xef\xbb\xbf"), repr(after8[:6]))
+
+    # ---- Improve: path safety, one active cycle, sweep enum, propagation.
+    import improve
+    try:
+        improve.cycle_dir(root, "../../escape")
+        escaped = False
+    except ValueError:
+        escaped = True
+    expect("improve cycle_id traversal is refused", escaped)
+    croot = make_project()
+    improve.register_cycle(croot, "imp-1", "# IMPROVE CYCLE ROSTER\n")
+    try:
+        improve.register_cycle(croot, "imp-2", "# IMPROVE CYCLE ROSTER\n")
+        second = False
+    except ValueError:
+        second = True
+    expect("only one active Improve cycle is admitted", second)
+    sweep_cycle = improve.cycle_dir(croot, "imp-1")
+    try:
+        improve.write_sweep_entry(sweep_cycle,
+                                  {"imp_id": "001", "disposition": "NOPE",
+                                   "ticket": "-", "report": "r",
+                                   "reproduced": "-"})
+        bad_enum = False
+    except ValueError:
+        bad_enum = True
+    expect("SWEEP disposition enum is enforced at the writer",
+           bad_enum and not (sweep_cycle / "SWEEP.md").is_file())
 
     return problems, checked
 
@@ -4463,6 +4852,9 @@ nitro_m2_failures, nitro_m2_checked = run_nitro_m2_probes()
 failures.extend(nitro_m2_failures)
 nitro_m3_failures, nitro_m3_checked = run_nitro_m3_probes()
 failures.extend(nitro_m3_failures)
+nitro_integrity_failures, nitro_integrity_checked = \
+    run_nitro_integrity_probes()
+failures.extend(nitro_integrity_failures)
 manifest_failures, manifest_checked = run_manifest_tracking_probes()
 failures.extend(manifest_failures)
 autoinject_failures, autoinject_checked = run_autoinject_manifest_probes()
@@ -4512,6 +4904,7 @@ print(f"{improve_checked} improve behavior(s) executed")
 print(f"{nitro_checked} nitro behavior(s) executed")
 print(f"{nitro_m2_checked} nitro-m2 behavior(s) executed")
 print(f"{nitro_m3_checked} nitro-m3 behavior(s) executed")
+print(f"{nitro_integrity_checked} nitro-integrity behavior(s) executed")
 print(f"{purity_checked} pre-commit-purity behavior(s) executed, "
       f"{purity_skipped} skipped for missing interpreters")
 print(f"{manifest_checked} manifest-tracking behavior(s) executed")

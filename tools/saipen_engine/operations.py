@@ -1,54 +1,42 @@
-"""Core operations: claim / transition / checkpoint (NITRO M3).
+"""Core operations: claim / transition / checkpoint / ticket lifecycle /
+goal / stop (NITRO M3-M5, integrity-repaired).
 
-Every operation is PLAN / APPLY separated. PLAN reads the project snapshot and
-returns the intended LOG/BOARD/STATE bytes plus a refusal code, writing zero
-canonical bytes. APPLY commits the verified plan through the common lock +
-write-ahead journal + roll-forward recovery machinery (saipen_engine.journal).
+Every operation is PLAN / APPLY separated around an immutable OperationPlan.
 
-The model never hand-edits STATE/BOARD fields once these operations exist:
-it supplies the semantic request (ticket, agent, phase, event text); Python
-records it correctly. OPS.md owns the contract.
+PLAN reads the project snapshot, validates the request, computes the intended
+exact bytes for every target (encoding already applied by the codec), and
+returns the plan -- writing ZERO bytes. `--dry-run` renders the plan and
+nothing else.
+
+APPLY consumes THAT plan object under the writer lock: runs Recovery
+preflight, re-checks every declared precondition against the live files
+(STALE_STATE refusal), journals PREPARED, applies the ordered targets, verifies
+the written result, and only then marks VERIFIED + COMMITTED. The plan's op_id
+is the applied op_id; the plan's bytes are the committed bytes. A commit
+failure always wins over the semantic success metadata.
+
+STATE is mutated ONLY through owned-field patches (state.patch_state): every
+operation declares exactly which keys it owns, everything else is preserved.
+There is no `_render_state` anymore.
 """
 
 from __future__ import annotations
 
-import datetime
 import re
-import uuid
+import datetime
 from pathlib import Path
 
-from . import codec
-from .board import parse_board
-from .journal import run_mutation
-from .lock import project_writer_lock
-from .log import log_tail_event
-from .snapshot import ProjectSnapshot
-from .state import parse_state
+from . import codec, phases
+from .board import parse_board, remove_ticket_field, set_ticket_field
+from .fast_check import validate_texts
+from .log import build_event, log_tail_event
+from .plan import OperationPlan, TargetPlan, apply_plan, build_plan
+from .result import Result
+from .state import parse_state, patch_state
 
-REQUIRED_HEADINGS = ["## DOING", "## TODO", "## DONE", "## BLOCKED"]
+SYNTHETIC_TICKET_IDS = {998, 999}
 
-# The canonical transition table (CORE section 1.6), as data. The engine only
-# records a legal transition; deciding whether the work deserves REVIEW stays
-# the model's job.
-VALID_TRANSITIONS = {
-    "INIT": {"PLAN", "BLOCKED"},
-    "PLAN": {"SCOUT", "BUILD", "DONE", "BLOCKED"},
-    "SCOUT": {"BUILD", "BLOCKED"},
-    "BUILD": {"VERIFY", "BLOCKED"},
-    "VERIFY": {"REVIEW", "SCOUT", "BUILD", "BLOCKED"},
-    "REVIEW": {"SHIP", "BUILD", "SCOUT", "BLOCKED"},
-    "SHIP": {"DONE", "BUILD", "BLOCKED"},
-    "DONE": {"SCOUT", "PLAN", "HUNT", "BLOCKED"},
-    "VALIDATE": {"SCOUT", "PLAN", "DONE", "BLOCKED"},
-    "HUNT": {"ADD", "PLAN", "SCOUT", "BLOCKED"},
-    "MARKHUNT": {"DONE", "BLOCKED"},
-    "ADD": {"BUILD", "PLAN", "SCOUT", "DONE", "BLOCKED"},
-    "CLEAN": {"DONE", "BLOCKED"},
-    "TRANSLATE": {"DONE", "BLOCKED"},
-    "PREPARE": {"DONE", "BLOCKED"},
-    "BLOCKED": {"PLAN", "SCOUT", "DONE"},
-}
-TICKET_BEARING_PHASES = {"SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP"}
+_TAXONOMIES = {"DEC", "RUN"}
 
 
 def _now() -> str:
@@ -61,96 +49,124 @@ def _utc_iso() -> str:
         "%Y-%m-%dT%H:%M:%SZ")
 
 
-def _alloc_event(log_text: str) -> int:
-    tail = log_tail_event(log_text)
-    return (tail or 0) + 1
+def _read(root: Path) -> tuple[dict, dict, dict, dict]:
+    """Read STATE/BOARD/LOG docs + their parsed forms (normalised view)."""
+    state_doc = codec.read_document(root / ".saipen" / "STATE.md")
+    board_doc = codec.read_document(root / ".saipen" / "BOARD.md")
+    log_doc = codec.read_document(root / ".saipen" / "LOG.md")
+    state = parse_state(state_doc.text_norm)
+    board = parse_board(board_doc.text_norm)
+    log_tail = log_tail_event(log_doc.text_norm)
+    return ({"state": state_doc, "board": board_doc, "log": log_doc},
+            state, board, log_tail)
 
 
-def _claim_targets(root: Path, ticket_id: str, agent: str,
-                   now: str, utc: str) -> tuple[list[dict], dict] | None:
-    """PLAN a claim. Returns (targets, result) or None with a refusal dict."""
-    state_text = codec.read_doc(root / ".saipen" / "STATE.md")
-    board_text = codec.read_doc(root / ".saipen" / "BOARD.md")
-    log_text = codec.read_doc(root / ".saipen" / "LOG.md")
+def _target(doc, path: str, role: str, new_text: str) -> TargetPlan:
+    """One planned write target: exact bytes + before/after hashes computed
+    from the read document and the planned content."""
+    from .journal import hash_bytes
+    return TargetPlan(path, role, doc.encode(new_text), doc.raw_hash,
+                      hash_bytes(doc.encode(new_text)))
 
-    state = parse_state(state_text)
-    board = parse_board(board_text)
+
+def _docs_preconditions(docs: dict, *keys: str) -> dict:
+    return {f".saipen/{key.upper()}.md": docs[key].raw_hash for key in keys}
+
+
+def _event_line(docs: dict, log_tail: int | None, taxonomy: str,
+                ticket: str | None, agent: str, message: str,
+                now: str) -> tuple[int, str]:
+    if taxonomy not in _TAXONOMIES:
+        raise ValueError(f"taxonomy {taxonomy!r} outside {_TAXONOMIES}")
+    return build_event(log_tail, taxonomy, message, ticket=ticket,
+                       agent=agent, now=now)
+
+
+def _refuse(code: str, detail: str = "", **extra) -> Result:
+    return Result(ok=False, code=code, message=detail, data=extra)
+
+
+# --------------------------------------------------------------------------- claim
+
+def _plan_claim(root: Path, ticket_id: str, agent: str, now: str, utc: str,
+                explicit: bool = False) -> OperationPlan | Result:
+    docs, state, board, log_tail = _read(root)
     tickets = board["tickets"]
-
     if ticket_id not in tickets:
-        return None, {"ok": False, "code": "TICKET_NOT_FOUND", "ticket":
-                      ticket_id}
+        return _refuse("TICKET_NOT_FOUND", f"{ticket_id} not on the board",
+                       ticket=ticket_id)
     ticket = tickets[ticket_id]
     if ticket["section"] == "## DOING":
-        return None, {"ok": False, "code": "ALREADY_CLAIMED",
-                      "detail": f"{ticket_id} is already in ## DOING"}
+        return _refuse("ALREADY_CLAIMED",
+                       f"{ticket_id} is already in ## DOING", ticket=ticket_id)
     if ticket["section"] != "## TODO":
-        return None, {"ok": False, "code": "TICKET_NOT_WORKABLE",
-                      "detail": f"{ticket_id} is under {ticket['section']}"}
+        return _refuse("TICKET_NOT_WORKABLE",
+                       f"{ticket_id} is under {ticket['section']}",
+                       ticket=ticket_id)
     for need in ticket["needs"]:
         if need not in tickets or tickets[need]["section"] != "## DONE":
-            return None, {"ok": False, "code": "TICKET_NOT_WORKABLE",
-                          "detail": f"unmet needs: {need}"}
+            return _refuse("TICKET_NOT_WORKABLE",
+                           f"unmet needs: {need}", ticket=ticket_id)
     doing = [t for t in tickets.values() if t["section"] == "## DOING"]
     if doing:
-        return None, {"ok": False, "code": "ALREADY_CLAIMED",
-                      "detail": f"DOING holds {doing[0]['id']}"}
+        return _refuse("ALREADY_CLAIMED",
+                       f"DOING holds {doing[0]['id']}", ticket=ticket_id)
 
-    event = _alloc_event(log_text)
-    date_line = now
-    new_log = log_text.rstrip("\n") + "\n" + (
-        f"- {date_line} [E-{event}] [{ticket_id}] DEC: claimed via SAIOPS "
-        f"-- owner {agent}")
-    new_state = _render_state(state, ticket_id, agent, event, utc)
-    new_board = _move_ticket(board_text, ticket_id, agent, utc)
+    if not explicit:
+        top_workable = None
+        for t in tickets.values():
+            if t["section"] != "## TODO":
+                continue
+            if all(need in tickets and tickets[need]["section"] == "## DONE"
+                   for need in t["needs"]):
+                top_workable = t["id"]
+                break
+        if top_workable is None or top_workable != ticket_id:
+            return _refuse("NOT_TOP_WORKABLE",
+                           f"topmost workable ticket is {top_workable or 'none'}, "
+                           f"requested {ticket_id}; use the explicit-claim "
+                           "flag to override with evidence",
+                           ticket=ticket_id, top_workable=top_workable)
+
+    event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent,
+                              f"claimed via SAIOPS -- owner {agent}", now)
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    new_board = _claim_move(docs["board"].text_norm, ticket_id, agent, utc)
+    owned = {
+        "phase": "SCOUT",
+        "task": ticket_id,
+        "next_action": f"PHASE SCOUT {ticket_id}",
+        "transition_from": state.get("phase") or "DONE",
+        "last_event": event,
+        "updated": utc,
+        "agent": agent,
+    }
+    new_state = patch_state(docs["state"].text_norm, owned)
+
+    errors = validate_texts(new_state, new_board, new_log)
+    if errors:
+        return _refuse("VALIDATION_FAILED",
+                       "proposed state fails fast validation: "
+                       + "; ".join(errors[:5]))
 
     targets = [
-        {"path": ".saipen/LOG.md", "content": new_log + "\n"},
-        {"path": ".saipen/BOARD.md", "content": new_board},
-        {"path": ".saipen/STATE.md", "content": new_state},
+        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        _target(docs["board"], ".saipen/BOARD.md", "board", new_board),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
-    return targets, {"ok": True, "code": "CLAIMED", "ticket": ticket_id,
-                     "event_id": f"E-{event}"}
+    return build_plan(
+        "claim", agent, _identity(root),
+        {"operation": "claim", "ticket": ticket_id, "agent": agent,
+         "explicit": explicit},
+        _docs_preconditions(docs, "state", "board", "log"),
+        targets,
+        {"ok": True, "code": "CLAIMED", "ticket": ticket_id,
+         "event_id": f"E-{event}", "phase": "SCOUT",
+         "next_action": f"PHASE SCOUT {ticket_id}"})
 
 
-def _render_state(state: dict, ticket_id: str, agent: str, event: int,
-                  utc: str) -> str:
-    prev_phase = state.get("phase", "DONE")
-    intent = state.get("execution_intent")
-    lines = ["---",
-             f"phase: SCOUT",
-             f"task: {ticket_id}",
-             f'next_action: "PHASE SCOUT {ticket_id}"',
-             "blocker: \"\"",
-             f"transition_from: {prev_phase}",
-             f"saipen_version: {state.get('saipen_version', 7)}",
-             f"schema_version: {state.get('schema_version', 3)}",
-             f"last_event: {event}",
-             f"style_contract: {state.get('style_contract', '')}",
-             f"saipen_home: \"{state.get('saipen_home', '')}\"",
-             f"agent: {agent}",
-             "requires:",
-             "  - filesystem",
-             "  - git",
-             "  - python",
-             "mode: full"]
-    if intent is not None:
-        lines.append(f"execution_intent: {intent}")
-        lines.append(f"goal_waves: {state.get('goal_waves', 0)}")
-        lines.append(f"goal_tickets: {state.get('goal_tickets', 0)}")
-    lines.append("updated: " + utc)
-    lines.append("---")
-    return "\n".join(lines) + "\n"
-
-
-def _move_ticket(board_text: str, ticket_id: str, agent: str,
-                 utc: str) -> str:
-    """Surgical ticket move: only the target ticket's placement/fields change.
-
-    The board already carries the four canonical headings; the claimed ticket
-    line is inserted immediately after the existing `## DOING` heading and
-    removed from `## TODO`.
-    """
+def _claim_move(board_text: str, ticket_id: str, agent: str, utc: str) -> str:
+    """Surgical claim move: target ticket TODO -> DOING with [/] owner."""
     lines = board_text.splitlines(keepends=True)
     out = []
     ticket_line = None
@@ -159,7 +175,7 @@ def _move_ticket(board_text: str, ticket_id: str, agent: str,
         stripped = line.rstrip("\n")
         if stripped.startswith("- [ ] " + ticket_id + " "):
             ticket_line = stripped
-            continue  # drop from TODO
+            continue
         if stripped.startswith("## DOING"):
             doing_idx = len(out)
         out.append(line)
@@ -171,187 +187,268 @@ def _move_ticket(board_text: str, ticket_id: str, agent: str,
     return "".join(out)
 
 
-def plan_claim(project_root: Path | str, ticket_id: str, agent: str) -> dict:
-    """PLAN a claim: intended result or a stable refusal. Zero disk writes."""
-    now = _now()
-    utc = _utc_iso()
-    targets, result = _claim_targets(Path(project_root), ticket_id, agent,
-                                     now, utc)
-    if targets is None:
-        return result
-    result["op_id"] = "claim-" + uuid.uuid4().hex[:8]
-    result["changed_files"] = [t["path"] for t in targets]
-    result["phase"] = "SCOUT"
-    result["next_action"] = f"PHASE SCOUT {ticket_id}"
-    result["dry_run"] = True
-    return result
+def plan_claim(project_root: Path | str, ticket_id: str, agent: str,
+               explicit: bool = False) -> Result:
+    now, utc = _now(), _utc_iso()
+    plan = _plan_claim(Path(project_root), ticket_id, agent, now, utc,
+                       explicit=explicit)
+    if isinstance(plan, Result):
+        return plan
+    return _render_plan(plan)
 
 
-def apply_claim(project_root: Path | str, ticket_id: str, agent: str) -> dict:
-    """APPLY a claim through the lock + journal + roll-forward machinery."""
-    root = Path(project_root)
-    now = _now()
-    utc = _utc_iso()
-    targets, result = _claim_targets(root, ticket_id, agent, now, utc)
-    if targets is None:
-        return result
-    op_id = "claim-" + uuid.uuid4().hex[:8]
-    snap = ProjectSnapshot.capture(root)
-    preconditions = {
-        ".saipen/STATE.md": snap.state_hash,
-        ".saipen/BOARD.md": snap.board_hash,
-        ".saipen/LOG.md": snap.log_hash,
-    }
-    with project_writer_lock(root):
-        commit = run_mutation(root, op_id, agent, snap.project_identity,
-                              preconditions, targets)
-    result = {**commit, **result}
-    result["ticket"] = ticket_id
-    return result
+def apply_claim(project_root: Path | str, ticket_id: str, agent: str,
+                explicit: bool = False) -> Result:
+    now, utc = _now(), _utc_iso()
+    plan = _plan_claim(Path(project_root), ticket_id, agent, now, utc,
+                       explicit=explicit)
+    if isinstance(plan, Result):
+        return plan
+    return apply_plan(Path(project_root), plan)
 
 
-def _transition_targets(root: Path, destination: str, agent: str,
-                        ticket_id: str | None, event_text: str,
-                        now: str, utc: str) -> tuple[list[dict], dict] | None:
-    state_text = codec.read_doc(root / ".saipen" / "STATE.md")
-    log_text = codec.read_doc(root / ".saipen" / "LOG.md")
-    state = parse_state(state_text)
+# ------------------------------------------------------------ transition
+
+def _plan_transition(root: Path, destination: str, agent: str,
+                     ticket_id: str | None, event_text: str, now: str,
+                     utc: str) -> OperationPlan | Result:
+    destination = destination.upper()
+    docs, state, board, log_tail = _read(root)
     current = state.get("phase")
-    if destination not in VALID_TRANSITIONS.get(current or "", set()):
-        return None, {"ok": False, "code": "ILLEGAL_TRANSITION",
-                      "detail": f"{current} -> {destination}"}
-    if destination in TICKET_BEARING_PHASES and not ticket_id:
-        return None, {"ok": False, "code": "ILLEGAL_TRANSITION",
-                      "detail": f"{destination} is ticket-bearing and needs "
-                                "a T-ID"}
-    subject = ticket_id or state.get("task")
-    event = _alloc_event(log_text)
-    taxonomy = "RUN"
-    new_log = log_text.rstrip("\n") + "\n" + (
-        f"- {now} [E-{event}]"
-        + (f" [{subject}]" if subject else "")
-        + f" {taxonomy}: {event_text}")
-    prev_phase = current
-    new_state = _render_state(state, subject or "none", agent, event, utc)
-    lines = new_state.splitlines(keepends=True)
-    phase_line = next(i for i, ln in enumerate(lines)
-                      if ln.startswith("phase: "))
-    lines[phase_line] = f"phase: {destination}\n"
-    na = f"saipen {destination.lower()}" if destination not in (
-        TICKET_BEARING_PHASES) else f"PHASE {destination} {subject}"
-    na_line = next(i for i, ln in enumerate(lines)
-                   if ln.startswith("next_action:"))
-    lines[na_line] = f'next_action: "{na}"\n'
-    tf_line = next(i for i, ln in enumerate(lines)
-                   if ln.startswith("transition_from:"))
-    lines[tf_line] = f"transition_from: {prev_phase}\n"
-    new_state = "".join(lines)
-    board_text = codec.read_doc(root / ".saipen" / "BOARD.md")
+    if destination not in phases.VALID_TRANSITIONS and \
+            destination not in phases.ANY_FROM:
+        return _refuse("ILLEGAL_TRANSITION",
+                       f"{current} -> {destination}: destination outside the "
+                       "phase enum", phase=destination)
+    if not phases.transition_legal(current, destination):
+        return _refuse("ILLEGAL_TRANSITION",
+                       f"{current} -> {destination} is not a legal edge",
+                       phase=destination)
+
+    subject = None
+    if destination in phases.TICKET_BEARING_PHASES:
+        doing = [t for t in board["tickets"].values()
+                 if t["section"] == "## DOING"]
+        active = doing[0]["id"] if doing else None
+        state_task = state.get("task")
+        if active is None:
+            return _refuse("ACTIVE_TICKET_MISMATCH",
+                           f"{destination} is ticket-bearing but no ticket is "
+                           "DOING", phase=destination)
+        if state_task and active != state_task:
+            return _refuse("ACTIVE_TICKET_MISMATCH",
+                           f"STATE.task={state_task} but BOARD.DOING={active}",
+                           phase=destination)
+        if ticket_id is not None and ticket_id != active:
+            if ticket_id not in board["tickets"]:
+                return _refuse("TICKET_NOT_FOUND", f"{ticket_id} is not on "
+                               "the board", ticket=ticket_id)
+            return _refuse("ACTIVE_TICKET_MISMATCH",
+                           f"requested ticket {ticket_id} != active DOING "
+                           f"{active}; a ticket-bearing transition binds the "
+                           "exact active DOING ticket", ticket=ticket_id)
+        subject = active
+        if subject not in board["tickets"]:
+            return _refuse("TICKET_NOT_FOUND", f"active ticket {subject} "
+                           "missing from the board", ticket=subject)
+
+    event, line = _event_line(docs, log_tail, "RUN", subject, agent,
+                              event_text or f"transition to {destination}",
+                              now)
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    if destination in phases.TICKET_BEARING_PHASES:
+        na = f"PHASE {destination} {subject}"
+    else:
+        na = f"PHASE {destination}"
+    owned = {
+        "phase": destination,
+        "next_action": na,
+        "transition_from": current,
+        "last_event": event,
+        "updated": utc,
+        "agent": agent,
+    }
+    if destination == "DONE":
+        owned["task"] = "none"
+    new_state = patch_state(docs["state"].text_norm, owned)
+
+    errors = validate_texts(new_state, docs["board"].text_norm, new_log)
+    if errors:
+        return _refuse("VALIDATION_FAILED",
+                       "proposed state fails fast validation: "
+                       + "; ".join(errors[:5]))
+
     targets = [
-        {"path": ".saipen/LOG.md", "content": new_log + "\n"},
-        {"path": ".saipen/BOARD.md", "content": board_text},
-        {"path": ".saipen/STATE.md", "content": new_state},
+        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
-    return targets, {"ok": True, "code": "TRANSITIONED", "phase": destination,
-                     "event_id": f"E-{event}"}
+    return build_plan(
+        "transition", agent, _identity(root),
+        {"operation": "transition", "destination": destination,
+         "ticket": subject, "agent": agent},
+        _docs_preconditions(docs, "state", "board", "log"),
+        targets,
+        {"ok": True, "code": "TRANSITIONED", "phase": destination,
+         "next_action": na, "event_id": f"E-{event}",
+         "ticket": subject})
 
 
 def transition_phase(project_root: Path | str, destination: str,
                      agent: str, ticket_id: str | None = None,
-                     event_text: str = "", dry_run: bool = False) -> dict:
-    """Transition to a legal destination phase, journalled. The engine records
-    only a legal transition; the model decides whether the work deserves it."""
-    root = Path(project_root)
-    now = _now()
-    utc = _utc_iso()
-    targets, result = _transition_targets(
-        root, destination.upper(), agent, ticket_id, event_text or
-        f"transition to {destination}", now, utc)
-    if targets is None:
-        return result
-    result["op_id"] = "transition-" + uuid.uuid4().hex[:8]
-    result["changed_files"] = [t["path"] for t in targets]
+                     event_text: str = "", dry_run: bool = False) -> Result:
+    now, utc = _now(), _utc_iso()
+    plan = _plan_transition(Path(project_root), destination, agent, ticket_id,
+                            event_text, now, utc)
+    if isinstance(plan, Result):
+        return plan
     if dry_run:
-        result["dry_run"] = True
-        return result
-    snap = ProjectSnapshot.capture(root)
-    preconditions = {
-        ".saipen/STATE.md": snap.state_hash,
-        ".saipen/LOG.md": snap.log_hash,
+        return _render_plan(plan)
+    return apply_plan(Path(project_root), plan)
+
+
+# ------------------------------------------------------------- checkpoint
+
+def _plan_checkpoint(root: Path, agent: str, taxonomy: str,
+                     ticket_id: str | None, description: str, now: str,
+                     utc: str) -> OperationPlan | Result:
+    docs, state, board, log_tail = _read(root)
+    event, line = _event_line(docs, log_tail, taxonomy.upper(), ticket_id,
+                              agent, description, now)
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    owned = {
+        "last_event": event,
+        "updated": utc,
+        "agent": agent,
     }
-    with project_writer_lock(root):
-        commit = run_mutation(root, result["op_id"], agent,
-                              snap.project_identity, preconditions, targets)
-    result = {**commit, **result}
-    return result
+    new_state = patch_state(docs["state"].text_norm, owned)
+
+    errors = validate_texts(new_state, docs["board"].text_norm, new_log)
+    if errors:
+        return _refuse("VALIDATION_FAILED",
+                       "proposed state fails fast validation: "
+                       + "; ".join(errors[:5]))
+
+    targets = [
+        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+    ]
+    return build_plan(
+        "checkpoint", agent, _identity(root),
+        {"operation": "checkpoint", "taxonomy": taxonomy.upper(),
+         "ticket": ticket_id, "description": description},
+        _docs_preconditions(docs, "state", "board", "log"),
+        targets,
+        {"ok": True, "code": "CHECKPOINTED", "event_id": f"E-{event}"})
 
 
 def checkpoint(project_root: Path | str, agent: str, taxonomy: str,
                ticket_id: str | None, description: str,
-               dry_run: bool = False) -> dict:
-    """Generic high-frequency checkpoint: one allocated E-ID LOG event plus
-    the STATE last_event bump. The model never hand-numbers events."""
-    root = Path(project_root)
-    now = _now()
-    utc = _utc_iso()
-    state_text = codec.read_doc(root / ".saipen" / "STATE.md")
-    log_text = codec.read_doc(root / ".saipen" / "LOG.md")
-    event = _alloc_event(log_text)
-    new_log = log_text.rstrip("\n") + "\n" + (
-        f"- {now} [E-{event}]"
-        + (f" [{ticket_id}]" if ticket_id else "")
-        + f" {taxonomy.upper()}: {description}")
-    state = parse_state(state_text)
-    new_state = _render_state(state, state.get("task") or "none", agent,
-                              event, utc)
-    board_text = codec.read_doc(root / ".saipen" / "BOARD.md")
-    targets = [
-        {"path": ".saipen/LOG.md", "content": new_log + "\n"},
-        {"path": ".saipen/BOARD.md", "content": board_text},
-        {"path": ".saipen/STATE.md", "content": new_state},
-    ]
-    result = {"ok": True, "code": "CHECKPOINTED", "event_id": f"E-{event}",
-              "op_id": "checkpoint-" + uuid.uuid4().hex[:8],
-              "changed_files": [t["path"] for t in targets]}
+               dry_run: bool = False) -> Result:
+    if taxonomy.upper() not in _TAXONOMIES:
+        return _refuse("VALIDATION_FAILED",
+                       f"taxonomy {taxonomy!r} outside {sorted(_TAXONOMIES)}")
+    now, utc = _now(), _utc_iso()
+    plan = _plan_checkpoint(Path(project_root), agent, taxonomy, ticket_id,
+                            description, now, utc)
+    if isinstance(plan, Result):
+        return plan
     if dry_run:
-        result["dry_run"] = True
-        return result
-    snap = ProjectSnapshot.capture(root)
-    preconditions = {
-        ".saipen/STATE.md": snap.state_hash,
-        ".saipen/LOG.md": snap.log_hash,
-    }
-    with project_writer_lock(root):
-        commit = run_mutation(root, result["op_id"], agent,
-                              snap.project_identity, preconditions, targets)
-    result = {**commit, **result}
-    return result
+        return _render_plan(plan)
+    return apply_plan(Path(project_root), plan)
 
-SYNTHETIC_TICKET_IDS = {998, 999}
 
+# ---------------------------------------------------------- ticket numbers
 
 def next_ticket_id(board_text: str, log_text: str) -> int:
-    """The next canonical production ticket ID.
+    """The next canonical production ticket ID, skipping the synthetic
+    fixture namespace (T-998/T-999)."""
+    ids = [int(m) for m in re.findall(r"\bT-(\d+)\b",
+                                      board_text + "\n" + log_text)]
+    return max((i for i in ids if i not in SYNTHETIC_TICKET_IDS),
+               default=0) + 1
 
-    Scans the canonical BOARD and production LOG for T-### and returns
-    max+1, excluding the synthetic fixture namespace (T-998/T-999) so a
-    regression fixture can never shift the allocator.
-    """
-    ids = [int(m) for m in re.findall(r"\bT-(\d+)\b", board_text + "\n" + log_text)]
-    return max((i for i in ids if i not in SYNTHETIC_TICKET_IDS), default=0) + 1
+
+def _insert_todo(board_text: str, line: str) -> str:
+    lines = board_text.splitlines(keepends=True)
+    todo_idx = next(i for i, ln in enumerate(lines)
+                    if ln.startswith("## TODO"))
+    lines.insert(todo_idx + 1, line + "\n")
+    return "".join(lines)
 
 
 def _ticket_targets(root: Path, action: str, ticket_id: str, agent: str,
-                    payload: str, now: str, utc: str) -> tuple[list[dict], dict] | None:
-    state_text = codec.read_doc(root / ".saipen" / "STATE.md")
-    board_text = codec.read_doc(root / ".saipen" / "BOARD.md")
-    log_text = codec.read_doc(root / ".saipen" / "LOG.md")
-    board = parse_board(board_text)
+                    payload: str, now: str, utc: str) -> OperationPlan | Result:
+    docs, state, board, log_tail = _read(root)
     tickets = board["tickets"]
     if ticket_id not in tickets:
-        return None, {"ok": False, "code": "TICKET_NOT_FOUND", "ticket": ticket_id}
-    target = {"done": "## DONE", "block": "## BLOCKED", "unblock": "## TODO"}[action]
-    checkbox = {"done": "[x]", "block": "[ ]", "unblock": "[ ]"}[action]
+        return _refuse("TICKET_NOT_FOUND", f"{ticket_id} not on the board",
+                       ticket=ticket_id)
+    ticket = tickets[ticket_id]
+
+    if action == "done":
+        if ticket["section"] != "## DOING":
+            return _refuse("ILLEGAL_TICKET_LIFECYCLE",
+                           f"done accepts only ## DOING source; {ticket_id} "
+                           f"is under {ticket['section']}", ticket=ticket_id)
+        if ticket["checkbox"] != "/":
+            return _refuse("ILLEGAL_TICKET_LIFECYCLE",
+                           f"done requires [/] claim marker, got "
+                           f"[{ticket['checkbox']}]", ticket=ticket_id)
+        if state.get("task") != ticket_id:
+            return _refuse("ACTIVE_TICKET_MISMATCH",
+                           f"STATE.task={state.get('task')} but done target "
+                           f"is {ticket_id}", ticket=ticket_id)
+        target_section, checkbox = "## DONE", "[x]"
+    elif action == "block":
+        if ticket["section"] not in ("## DOING", "## TODO"):
+            return _refuse("ILLEGAL_TICKET_LIFECYCLE",
+                           f"block accepts DOING or TODO; {ticket_id} is "
+                           f"under {ticket['section']}", ticket=ticket_id)
+        target_section, checkbox = "## BLOCKED", "[ ]"
+    elif action == "unblock":
+        if ticket["section"] != "## BLOCKED":
+            return _refuse("ILLEGAL_TICKET_LIFECYCLE",
+                           f"unblock accepts only BLOCKED; {ticket_id} is "
+                           f"under {ticket['section']}", ticket=ticket_id)
+        target_section, checkbox = "## TODO", "[ ]"
+    else:
+        return _refuse("VALIDATION_FAILED", f"unknown ticket action {action!r}")
+
+    new_board = _move_ticket(docs["board"].text_norm, ticket_id,
+                             target_section, checkbox, action, payload)
+    event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent,
+                              f"ticket {action} via SAIOPS"
+                              + (f" -- {payload}" if payload else ""), now)
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    owned = {
+        "last_event": event,
+        "updated": utc,
+        "agent": agent,
+    }
+    new_state = patch_state(docs["state"].text_norm, owned)
+
+    errors = validate_texts(new_state, new_board, new_log)
+    if errors:
+        return _refuse("VALIDATION_FAILED",
+                       "proposed state fails fast validation: "
+                       + "; ".join(errors[:5]))
+
+    targets = [
+        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        _target(docs["board"], ".saipen/BOARD.md", "board", new_board),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+    ]
+    return build_plan(
+        "ticket_move", agent, _identity(root),
+        {"operation": "ticket_move", "action": action, "ticket": ticket_id},
+        _docs_preconditions(docs, "state", "board", "log"),
+        targets,
+        {"ok": True, "code": action.upper(), "ticket": ticket_id,
+         "event_id": f"E-{event}"})
+
+
+def _move_ticket(board_text: str, ticket_id: str, target_section: str,
+                 checkbox: str, action: str, payload: str) -> str:
     lines = board_text.splitlines(keepends=True)
     out = []
     ticket_line = None
@@ -362,251 +459,242 @@ def _ticket_targets(root: Path, action: str, ticket_id: str, agent: str,
            stripped.startswith("- [ ] " + ticket_id + " "):
             ticket_line = stripped
             continue
-        for h in ("## DOING", "## TODO", "## DONE", "## BLOCKED"):
-            if stripped.startswith(h):
-                heading_idx[h] = len(out)
+        for heading in ("## DOING", "## TODO", "## DONE", "## BLOCKED"):
+            if stripped.startswith(heading):
+                heading_idx[heading] = len(out)
         out.append(line)
     if ticket_line is None:
-        return None, {"ok": False, "code": "TICKET_NOT_FOUND", "ticket": ticket_id}
-    target_idx = heading_idx.get(target)
+        raise ValueError(f"cannot locate ticket {ticket_id}")
+    target_idx = heading_idx.get(target_section)
     if target_idx is None:
-        return None, {"ok": False, "code": "VALIDATION_FAILED"}
-    mark = ticket_line.replace("- [/] ", "- " + checkbox + " ", 1).replace(
-        "- [ ] ", "- " + checkbox + " ", 1)
+        raise ValueError(f"cannot locate section {target_section}")
     if action == "done":
-        mark = mark + " | verify: " + (payload or "verified")
+        marked = ticket_line.replace("- [/] ", "- [x] ", 1)
     elif action == "block":
-        mark = mark + " | blocker: " + (payload or "blocked")
+        marked = ticket_line.replace("- [/] ", "- [ ] ", 1)
+        marked = set_ticket_field(marked, "blocker", payload or "blocked")
     elif action == "unblock":
-        mark = mark.replace(" | blocker:", " | ")
-    out.insert(target_idx + 1, mark + "\n")
-    event = _alloc_event(log_text)
-    new_log = log_text.rstrip("\n") + "\n" + (
-        f"- {now} [E-{event}] [{ticket_id}] DEC: ticket {action} via SAIOPS"
-        + (f" -- {payload}" if payload else ""))
-    state = parse_state(state_text)
-    new_state = _render_state(state, state.get("task") or "none", agent,
-                              event, utc)
-    return [
-        {"path": ".saipen/LOG.md", "content": new_log + "\n"},
-        {"path": ".saipen/BOARD.md", "content": "".join(out)},
-        {"path": ".saipen/STATE.md", "content": new_state},
-    ], {"ok": True, "code": action.upper(), "event_id": f"E-{event}"}
+        marked = ticket_line.replace("- [/] ", "- [ ] ", 1)
+        marked = remove_ticket_field(marked, "blocker")
+    else:  # pragma: no cover
+        marked = ticket_line.replace("- [/] ", "- [ ] ", 1)
+    out.insert(target_idx + 1, marked.rstrip() + "\n")
+    return "".join(out)
 
 
 def ticket_add(project_root: Path | str, agent: str, priority: str,
                description: str, needs: list[str], verify: str,
-               dry_run: bool = False) -> dict:
-    """Add a ticket at the top of ## TODO with the next canonical ID."""
+               dry_run: bool = False) -> Result:
     root = Path(project_root)
-    now = _now()
-    utc = _utc_iso()
-    board_text = codec.read_doc(root / ".saipen" / "BOARD.md")
-    log_text = codec.read_doc(root / ".saipen" / "LOG.md")
-    tid = next_ticket_id(board_text, log_text)
-    board = parse_board(board_text)
+    now, utc = _now(), _utc_iso()
+    docs, state, board, log_tail = _read(root)
+    tid = next_ticket_id(docs["board"].text_norm, docs["log"].text_norm)
     for need in needs:
         if need not in board["tickets"]:
-            return {"ok": False, "code": "TICKET_NOT_FOUND",
-                    "detail": f"dangling needs: {need}"}
+            return _refuse("TICKET_NOT_FOUND", f"dangling needs: {need}")
     desc = (f"- [ ] T-{tid} [{priority}] {description}"
             + (f" | needs: {', '.join(needs)}" if needs else "")
             + f" | verify: {verify}")
-    lines = board_text.splitlines(keepends=True)
-    todo_idx = next(i for i, ln in enumerate(lines)
-                    if ln.startswith("## TODO"))
-    lines.insert(todo_idx + 1, desc + "\n")
-    event = _alloc_event(log_text)
-    new_log = log_text.rstrip("\n") + "\n" + (
-        f"- {now} [E-{event}] [T-{tid}] DEC: ticket added via SAIOPS")
-    state = parse_state(codec.read_doc(root / ".saipen" / "STATE.md"))
-    new_state = _render_state(state, state.get("task") or "none", agent,
-                              event, utc)
-    targets = [
-        {"path": ".saipen/LOG.md", "content": new_log + "\n"},
-        {"path": ".saipen/BOARD.md", "content": "".join(lines)},
-        {"path": ".saipen/STATE.md", "content": new_state},
-    ]
-    result = {"ok": True, "code": "TICKET_ADDED", "ticket": f"T-{tid}",
-              "op_id": "ticket-" + uuid.uuid4().hex[:8],
-              "changed_files": [t["path"] for t in targets],
-              "event_id": f"E-{event}"}
-    if dry_run:
-        result["dry_run"] = True
-        return result
-    snap = ProjectSnapshot.capture(root)
-    preconditions = {
-        ".saipen/STATE.md": snap.state_hash,
-        ".saipen/BOARD.md": snap.board_hash,
-        ".saipen/LOG.md": snap.log_hash,
+    new_board = _insert_todo(docs["board"].text_norm, desc)
+    event, line = _event_line(docs, log_tail, "DEC", f"T-{tid}", agent,
+                              "ticket added via SAIOPS", now)
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    owned = {
+        "last_event": event,
+        "updated": utc,
+        "agent": agent,
     }
-    with project_writer_lock(root):
-        commit = run_mutation(root, result["op_id"], agent,
-                              snap.project_identity, preconditions, targets)
-    return {**commit, **result}
+    new_state = patch_state(docs["state"].text_norm, owned)
+
+    errors = validate_texts(new_state, new_board, new_log)
+    if errors:
+        return _refuse("VALIDATION_FAILED",
+                       "proposed state fails fast validation: "
+                       + "; ".join(errors[:5]))
+
+    targets = [
+        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        _target(docs["board"], ".saipen/BOARD.md", "board", new_board),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+    ]
+    plan = build_plan(
+        "ticket_add", agent, _identity(root),
+        {"operation": "ticket_add", "priority": priority,
+         "description": description, "needs": needs},
+        _docs_preconditions(docs, "state", "board", "log"),
+        targets,
+        {"ok": True, "code": "TICKET_ADDED", "ticket": f"T-{tid}",
+         "event_id": f"E-{event}"})
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
 
 
 def ticket_move(project_root: Path | str, action: str, ticket_id: str,
-                agent: str, payload: str = "", dry_run: bool = False) -> dict:
-    """done / block / unblock: move exactly one ticket between sections."""
+                agent: str, payload: str = "", dry_run: bool = False) -> Result:
     root = Path(project_root)
-    now = _now()
-    utc = _utc_iso()
-    targets, result = _ticket_targets(root, action, ticket_id, agent,
-                                      payload, now, utc)
-    if targets is None:
-        return result
-    result["op_id"] = "ticket-" + uuid.uuid4().hex[:8]
-    result["changed_files"] = [t["path"] for t in targets]
+    now, utc = _now(), _utc_iso()
+    plan = _ticket_targets(root, action, ticket_id, agent, payload, now, utc)
+    if isinstance(plan, Result):
+        return plan
     if dry_run:
-        result["dry_run"] = True
-        return result
-    snap = ProjectSnapshot.capture(root)
-    preconditions = {
-        ".saipen/STATE.md": snap.state_hash,
-        ".saipen/BOARD.md": snap.board_hash,
-        ".saipen/LOG.md": snap.log_hash,
-    }
-    with project_writer_lock(root):
-        commit = run_mutation(root, result["op_id"], agent,
-                              snap.project_identity, preconditions, targets)
-    return {**commit, **result}
+        return _render_plan(plan)
+    return apply_plan(root, plan)
 
 
-GOAL_WAVE_CAP = 3
-GOAL_TICKET_CAP = 20
+# ------------------------------------------------------------------ goal
 
-
-def _state_targets(root: Path, agent: str, mutate_state, event_text: str,
-                   now: str, utc: str) -> tuple[list[dict], dict]:
-    state_text = codec.read_doc(root / ".saipen" / "STATE.md")
-    log_text = codec.read_doc(root / ".saipen" / "LOG.md")
-    state = parse_state(state_text)
-    event = _alloc_event(log_text)
-    new_log = log_text.rstrip("\n") + "\n" + (
-        f"- {now} [E-{event}] [T-none] DEC: {event_text}")
-    new_state = _render_state(mutate_state(state), state.get("task") or "none",
-                              agent, event, utc)
-    board_text = codec.read_doc(root / ".saipen" / "BOARD.md")
+def _state_only_plan(root: Path, operation: str, agent: str, mutate,
+                     event_message: str, expected: dict, now: str,
+                     utc: str, owned_keys: set) -> OperationPlan | Result:
+    docs, state, board, log_tail = _read(root)
+    event, line = _event_line(docs, log_tail, "DEC", None, agent,
+                              event_message, now)
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    new_state = mutate(docs["state"].text_norm, event)
+    errors = validate_texts(new_state, docs["board"].text_norm, new_log)
+    if errors:
+        return _refuse("VALIDATION_FAILED",
+                       "proposed state fails fast validation: "
+                       + "; ".join(errors[:5]))
     targets = [
-        {"path": ".saipen/LOG.md", "content": new_log + "\n"},
-        {"path": ".saipen/BOARD.md", "content": board_text},
-        {"path": ".saipen/STATE.md", "content": new_state},
+        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
-    return targets, {"ok": True, "event_id": f"E-{event}"}
+    expected["event_id"] = f"E-{event}"
+    return build_plan(
+        operation, agent, _identity(root),
+        {"operation": operation, "agent": agent},
+        _docs_preconditions(docs, "state", "board", "log"),
+        targets, expected)
 
 
 def set_goal_intent(project_root: Path | str, agent: str, objective: str,
-                    dry_run: bool = False) -> dict:
-    """Pivot to a NEW objective: execution_intent goal, counters from 0,
-    straight into SCOUT for the topmost workable ticket. Python records the
-    decided intent; the model supplies the objective."""
+                    dry_run: bool = False) -> Result:
+    """Record a decided goal pivot: execution_intent goal, counters from 0.
+    Owns ONLY intent/counters/last_event/updated/agent -- never phase, task or
+    next_action. Claiming the top ticket is a separate operation."""
     root = Path(project_root)
-    now = _now()
-    utc = _utc_iso()
+    now, utc = _now(), _utc_iso()
 
-    def mutate(state):
-        state["execution_intent"] = "goal"
-        state["goal_waves"] = 0
-        state["goal_tickets"] = 0
-        return state
+    def mutate(text: str, event: int) -> str:
+        return patch_state(text, {
+            "execution_intent": "goal",
+            "goal_waves": 0,
+            "goal_tickets": 0,
+            "last_event": event,
+            "updated": utc,
+            "agent": agent,
+        })
 
-    targets, result = _state_targets(root, agent, mutate,
-                                     f"goal pivot -- {objective}", now, utc)
-    result["code"] = "GOAL_SET"
-    result["op_id"] = "goal-" + uuid.uuid4().hex[:8]
-    result["changed_files"] = [t["path"] for t in targets]
+    plan = _state_only_plan(root, "goal", agent, mutate,
+                            f"goal pivot -- {objective}",
+                            {"ok": True, "code": "GOAL_SET"}, now, utc,
+                            {"execution_intent", "goal_waves", "goal_tickets"})
+    if isinstance(plan, Result):
+        return plan
     if dry_run:
-        result["dry_run"] = True
-        return result
-    snap = ProjectSnapshot.capture(root)
-    preconditions = {
-        ".saipen/STATE.md": snap.state_hash,
-        ".saipen/LOG.md": snap.log_hash,
-    }
-    with project_writer_lock(root):
-        commit = run_mutation(root, result["op_id"], agent,
-                              snap.project_identity, preconditions, targets)
-    return {**commit, **result}
+        return _render_plan(plan)
+    return apply_plan(root, plan)
 
 
 def reauthorize_valve(project_root: Path | str, agent: str,
-                      dry_run: bool = False) -> dict:
-    """Conditional safety-valve reauthorization: reset goal_waves/goal_tickets
-    to 0 ONLY when the valve has tripped (a counter is at/over its cap).
-    Never grants a fresh budget on a run that did not trip the valve."""
+                      dry_run: bool = False) -> Result:
+    """Conditional safety-valve reauthorization: reset BOTH counters to 0 only
+    when a counter has tripped its cap. Never grants a fresh budget on a run
+    that did not trip the valve."""
     root = Path(project_root)
-    now = _now()
-    utc = _utc_iso()
-    state = parse_state(codec.read_doc(root / ".saipen" / "STATE.md"))
+    now, utc = _now(), _utc_iso()
+    docs, state, board, log_tail = _read(root)
     waves = state.get("goal_waves") or 0
     tickets = state.get("goal_tickets") or 0
     if not (state.get("execution_intent") == "goal"
-            and (waves >= GOAL_WAVE_CAP or tickets >= GOAL_TICKET_CAP)):
-        return {"ok": False, "code": "VALIDATION_FAILED",
-                "detail": "valve has not tripped; no fresh budget is owed"}
+            and (waves >= 3 or tickets >= 20)):
+        return _refuse("VALIDATION_FAILED",
+                       "valve has not tripped; no fresh budget is owed",
+                       goal_waves=waves, goal_tickets=tickets)
 
-    def mutate(st):
-        st["goal_waves"] = 0
-        st["goal_tickets"] = 0
-        return st
+    def mutate(text: str, event: int) -> str:
+        return patch_state(text, {
+            "goal_waves": 0,
+            "goal_tickets": 0,
+            "last_event": event,
+            "updated": utc,
+            "agent": agent,
+        })
 
-    targets, result = _state_targets(root, agent, mutate,
-                                     "goal reauthorized", now, utc)
-    result["code"] = "VALVE_REAUTHORIZED"
-    result["op_id"] = "valve-" + uuid.uuid4().hex[:8]
-    result["changed_files"] = [t["path"] for t in targets]
+    plan = _state_only_plan(root, "valve", agent, mutate,
+                            "goal reauthorized",
+                            {"ok": True, "code": "VALVE_REAUTHORIZED"},
+                            now, utc,
+                            {"goal_waves", "goal_tickets"})
+    if isinstance(plan, Result):
+        return plan
     if dry_run:
-        result["dry_run"] = True
-        return result
-    snap = ProjectSnapshot.capture(root)
-    preconditions = {
-        ".saipen/STATE.md": snap.state_hash,
-        ".saipen/LOG.md": snap.log_hash,
-    }
-    with project_writer_lock(root):
-        commit = run_mutation(root, result["op_id"], agent,
-                              snap.project_identity, preconditions, targets)
-    return {**commit, **result}
+        return _render_plan(plan)
+    return apply_plan(root, plan)
 
 
 def stop_checkpoint(project_root: Path | str, agent: str, reason: str = "",
-                    dry_run: bool = False) -> dict:
-    """The brake: checkpoint with a resumable next_action and write the
-    human digest. Never changes the execution intent, never touches counters."""
+                    dry_run: bool = False) -> Result:
+    """The brake: checkpoint the exact current execution with a resumable
+    next_action. Never resets phase; never changes intent or counters. The
+    human digest is written ONLY on APPLY -- dry-run writes zero bytes."""
     root = Path(project_root)
-    now = _now()
-    utc = _utc_iso()
-    state = parse_state(codec.read_doc(root / ".saipen" / "STATE.md"))
+    now, utc = _now(), _utc_iso()
+    docs, state, board, log_tail = _read(root)
     task = state.get("task")
-    na = f"PHASE SCOUT {task}" if task and task != "none" else "saipen continue"
+    phase = state.get("phase")
+    if task and task != "none":
+        na = f"PHASE {phase} {task}"
+    else:
+        na = "saipen continue"
 
-    def mutate(st):
-        st["next_action"] = na
-        return st
+    def mutate(text: str, event: int) -> str:
+        return patch_state(text, {
+            "next_action": na,
+            "last_event": event,
+            "updated": utc,
+            "agent": agent,
+        })
 
-    targets, result = _state_targets(root, agent, mutate,
-                                     f"stop checkpoint{': ' + reason if reason else ''}",
-                                     now, utc)
-    digest = root / ".saipen" / "kitchen" / "digest.md"
-    digest.parent.mkdir(parents=True, exist_ok=True)
-    digest.write_text(
-        "done: stopped via SAIOPS checkpoint\n"
-        f"remaining: {task or 'see BOARD'}\n"
-        f"awaiting: {reason or 'nothing'}\n", encoding="utf-8")
-    result["code"] = "STOPPED"
-    result["op_id"] = "stop-" + uuid.uuid4().hex[:8]
-    result["changed_files"] = [t["path"] for t in targets]
+    plan = _state_only_plan(root, "stop", agent, mutate,
+                            f"stop checkpoint{': ' + reason if reason else ''}",
+                            {"ok": True, "code": "STOPPED", "next_action": na,
+                             "digest": str(root / ".saipen" / "kitchen"
+                                           / "digest.md")},
+                            now, utc, {"next_action"})
+    if isinstance(plan, Result):
+        return plan
     if dry_run:
-        result["dry_run"] = True
-        result["digest"] = str(digest)
+        result = _render_plan(plan)
+        result.data["digest"] = str(root / ".saipen" / "kitchen" / "digest.md")
         return result
-    snap = ProjectSnapshot.capture(root)
-    preconditions = {
-        ".saipen/STATE.md": snap.state_hash,
-        ".saipen/LOG.md": snap.log_hash,
-    }
-    with project_writer_lock(root):
-        commit = run_mutation(root, result["op_id"], agent,
-                              snap.project_identity, preconditions, targets)
-    return {**commit, **result}
+    result = apply_plan(root, plan)
+    if result.ok:
+        digest = root / ".saipen" / "kitchen" / "digest.md"
+        digest.parent.mkdir(parents=True, exist_ok=True)
+        digest.write_text(
+            "done: stopped via SAIOPS checkpoint\n"
+            f"remaining: {task or 'see BOARD'}\n"
+            f"awaiting: {reason or 'nothing'}\n", encoding="utf-8")
+    return result
+
+
+# ------------------------------------------------------------------ helpers
+
+def _identity(root: Path) -> str:
+    from .paths import project_identity
+    return project_identity(root)
+
+
+def _render_plan(plan: OperationPlan) -> Result:
+    """Render an OperationPlan as the dry-run result. Reads nothing live,
+    writes nothing."""
+    expected = dict(plan.expected)
+    expected["op_id"] = plan.op_id
+    expected["dry_run"] = True
+    expected["changed_files"] = plan.changed_files
+    return Result(ok=True, code=expected.get("code", "PLANNED"),
+                  data=expected, op_id=plan.op_id,
+                  changed_files=plan.changed_files)

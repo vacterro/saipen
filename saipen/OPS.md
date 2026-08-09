@@ -39,42 +39,80 @@ shape. The model chooses, Python records.
 
 ## 2. Operation lifecycle
 
-Every mutating operation:
+Every mutating operation is PLAN / APPLY separated around one immutable
+OperationPlan.
+
+PLAN:
+
+1. read a ProjectSnapshot (state_hash, board_hash, log_hash, log tail E-ID,
+   HEAD where Git exists);
+2. validate the semantic request (ticket exists, needs, binding, legal
+   transition, lifecycle source);
+3. compute ALL intended final bytes in memory, encoding/BOM/newline already
+   applied (the codec preserves representation; the journal stores EXACT
+   bytes);
+4. validate the IN-MEMORY proposed STATE/BOARD/LOG (fast cross-file
+   invariants);
+5. return the OperationPlan with its stable op_id, semantic_payload_hash,
+   preconditions and ordered targets -- writing ZERO bytes.
+
+`--dry-run` calls PLAN and renders it. Nothing else.
+
+APPLY consumes THAT plan object under the writer lock:
 
 1. acquire the project writer lock (real OS lock, `.saipen/locks/core.lock`);
-2. run Recovery preflight first (unfinished op journals);
-3. read a ProjectSnapshot (state_hash, board_hash, log_hash, log tail E-ID,
-   HEAD where Git exists);
-4. validate preconditions against the snapshot;
-5. compute ALL intended final bytes in memory;
-6. run fast validation on the proposed state;
-7. write the journal PREPARED;
-8. write LOG by temp + replace; journal LOG_WRITTEN;
-9. write BOARD by temp + replace; journal BOARD_WRITTEN;
-10. write STATE by temp + replace; journal STATE_WRITTEN;
-11. re-read all affected files; run fast cross-file invariants; journal
-    VERIFIED;
-12. mark COMMITTED; release the lock.
+2. run Recovery preflight first (unfinished op journals) -- exactly one
+   unambiguous recoverable op is recovered first; a conflict or multiple
+   pending ops REFUSE before any new mutation;
+3. re-read every declared precondition under the lock; compare; refuse
+   STALE_STATE;
+4. compute each target's before_hash (live file) and after_hash (planned
+   bytes); journal PREPARED with those hashes and the staged final bytes;
+5. apply targets in the plan's declared order; journal progress per target;
+6. re-read all affected files; verify exact bytes AND fast cross-file
+   invariants; only then journal VERIFIED;
+7. journal COMMITTED; release the lock.
 
-The LOG -> BOARD -> STATE order is preserved because LOG ahead of STATE after a
-crash is recoverable. Multi-file atomicity is NOT claimed: there is no atomic
+The plan's op_id is the applied op_id; the plan's bytes are the committed
+bytes; the plan is never recomputed during APPLY. A retry of a committed op
+returns ALREADY_APPLIED.
+
+The LOG -> BOARD -> STATE order is preserved for canonical Core checkpoints
+(TransactionPolicy.CORE_CHECKPOINT): LOG ahead of STATE after a crash is
+recoverable. Single-file Improve writes use TransactionPolicy.ATOMIC_FILE:
+one ordered target. Multi-file atomicity is NOT claimed: there is no atomic
 multi-file primitive. The write-ahead journal is the truth about how far a
 crash got.
 
 ## 3. Transaction / recovery behavior
 
-Recovery is ROLL-FORWARD after LOG. LOG is append-only evidence; once the
-operation's LOG event exists, do not "rollback" by deleting it.
+The journal is GENERIC: every target is identified by path + role (log,
+board, state, manifest, report, sweep, generic), never by its position in the
+target list. A MANIFEST is never reported as LOG_WRITTEN.
 
-- PREPARED: if no canonical target changed, ABORT safely.
-- LOG_WRITTEN: if hashes prove the planned operation is still valid, roll
-  BOARD + STATE forward.
-- BOARD_WRITTEN: roll STATE forward.
-- STATE_WRITTEN: validate and mark committed.
-- Unexpected target hash: CONFLICT. Preserve evidence, refuse to guess.
+Recovery is ROLL-FORWARD and CONFLICT-SAFE. LOG is append-only evidence; once
+the operation's LOG event exists, do not "rollback" by deleting it.
 
-This encodes the existing CORE section 1.5 recovery model into code. Repeated
-recovery is idempotent.
+Per unfinished target:
+
+- current hash == before_hash: apply the staged planned bytes;
+- current hash == after_hash: already applied; advance;
+- anything else: CONFLICT. Preserve journal + staged bytes, write nothing
+  further, refuse to guess.
+
+Per already-applied target the live bytes MUST equal after_hash; otherwise the
+applied work was overwritten: CONFLICT.
+
+Before ANY new mutation, `pending_ops` journals are scanned (Recovery
+preflight):
+
+- none pending -> proceed;
+- exactly one recoverable -> recover/complete it first;
+- conflict -> refuse, evidence preserved;
+- multiple unresolved -> refuse RECOVERY_REQUIRED naming the exact op_ids.
+
+`saipen recover` lists pending operations and recovers the mechanically safe
+ones. Repeated recovery is idempotent.
 
 ## 4. Idempotency
 
@@ -114,9 +152,16 @@ Every operation returns a structured result:
 
 CLI prints concise human text by default; `--json` emits JSON only. Stable
 error codes: STALE_STATE, TICKET_NOT_FOUND, TICKET_NOT_WORKABLE,
-ALREADY_CLAIMED, ILLEGAL_TRANSITION, WRITER_BUSY, VALIDATION_FAILED,
-RECOVERY_REQUIRED, DESTRUCTIVE_CONFIRMATION_REQUIRED, CONFLICT. Error messages
-name one exact refusal and the executable next action.
+TICKET_ALREADY_DONE, ILLEGAL_TICKET_LIFECYCLE, NOT_TOP_WORKABLE,
+ACTIVE_TICKET_MISMATCH, ALREADY_CLAIMED, ILLEGAL_TRANSITION, WRITER_BUSY,
+VALIDATION_FAILED, RECOVERY_REQUIRED, DESTRUCTIVE_CONFIRMATION_REQUIRED,
+CONFLICT, PATH_ESCAPE, ACTIVE_IMPROVE_CYCLE, INVALID_DISPOSITION. Error
+messages name one exact refusal and the executable next action.
+
+COMMIT FAILURE ALWAYS WINS: a failed commit returns its own refusal
+(STALE_STATE / RECOVERY_REQUIRED / CONFLICT / WRITER_BUSY), never the plan's
+semantic success metadata. WRITER_BUSY is a structured result, not a
+traceback.
 
 ## 8. Fallback
 

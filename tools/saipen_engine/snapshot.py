@@ -27,12 +27,12 @@ def canonical_identity(project_root: Path) -> str:
     """Canonical project identity, not raw path spelling.
 
     Two aliases to the same project must yield the same identity (used by the
-    lock and the cycle id).
+    lock and the cycle id). ONE implementation owns this: paths.project_identity
+    (normcase + realpath). Keep it here as the single public name the lock and
+    snapshot consume.
     """
-    try:
-        return str(Path(project_root).resolve())
-    except OSError:
-        return str(project_root)
+    from .paths import project_identity
+    return project_identity(project_root)
 
 
 def git_head(project_root: Path) -> str:

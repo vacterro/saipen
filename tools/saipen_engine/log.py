@@ -35,3 +35,42 @@ def log_tail_event(text: str) -> int | None:
         if parsed is not None:
             highest = parsed["event"]
     return highest
+
+
+VALID_TAXONOMIES = frozenset({
+    "DEC", "RUN", "WAIT", "REVERT", "NOTE", "OPS",
+})
+
+
+def build_event(tail: int | None, taxonomy: str, message: str,
+                ticket: str | None = None,
+                agent: str | None = None,
+                now: str | None = None) -> tuple[int, str]:
+    """The ONE mechanical LOG event builder (NITRO integrity).
+
+    Given the current LOG tail E-N, allocates E-(N+1) with parent E-N, renders
+    the full line skeleton (date, E-ID, parent, optional ticket/agent,
+    taxonomy, payload), and returns (event_id, line) WITHOUT the trailing
+    newline. Every operation uses this; no caller hand-concatenates LOG
+    structure.
+
+    `now` is a "dd.MM.yy HH:mm" timestamp; the caller supplies it so PLAN and
+    APPLY of one operation share one frozen clock.
+    """
+    if taxonomy not in VALID_TAXONOMIES:
+        raise ValueError(
+            f"taxonomy {taxonomy!r} outside {sorted(VALID_TAXONOMIES)}")
+    if now is None:
+        import datetime
+        now = datetime.datetime.now(datetime.timezone.utc).strftime(
+            "%d.%m.%y %H:%M")
+    event = (tail or 0) + 1
+    parts = [f"- {now} [E-{event}]"]
+    if tail:
+        parts.append(f"[parent: E-{tail}]")
+    if ticket:
+        parts.append(f"[{ticket}]")
+    if agent:
+        parts.append(f"[agent: {agent}]")
+    parts.append(f"{taxonomy}: {message}")
+    return event, " ".join(parts)
