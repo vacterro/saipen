@@ -26,3 +26,4 @@ thoughts/
 # local trust, not project content, and `git add -A` would otherwise publish
 # one machine's allowlist as everyone's.
 .claude/settings.local.json
+.saipen/extensions/subs/*/kitchen/_gen_*.py
