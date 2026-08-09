@@ -94,3 +94,4 @@
 - 09.08.26 17:34 [E-2555] [parent: E-2554] [T-590] [agent: claude] [op: checkpoint-804ad808] RUN: ss stop: run full gates then stop
 - 09.08.26 17:40 [E-2556] [parent: E-2555] [T-590] [agent: claude] [op: checkpoint-7a7a2d00] DEC: ss stop requested -- commit T-590 BUILD progress, leave coherent next_action
 - 09.08.26 17:40 [E-2557] [parent: E-2556] [T-590] [agent: claude] [op: checkpoint-3ef9365a] RUN: ss stop checkpoint 2 -- T-590 BUILD: router, ticket-verify, userperson, goal-counters, digest, compaction all landed; suite+validator+audit green
+- 09.08.26 17:41 [E-2558] [parent: E-2557] [agent: claude] [op: stop-b5a9df2c] DEC: stop checkpoint: ss stop requested
