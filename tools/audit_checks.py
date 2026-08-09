@@ -990,14 +990,17 @@ CASES: list[tuple[str, str, object, str]] = [
     # The counter STATE carries must survive being rebuilt from the LOG the
     # way § 1.5 Recovery rebuilds it. Mutating STATE alone leaves the log
     # untouched, so the two disagree exactly as they would after an untraced
-    # goal resume reset. The harness STATE carries no counters and sits at
-    # execution_intent: normal today, so the old bump was a no-op and the
-    # rebuild rung (gated on the goal intent) was unreachable (T-532): the
-    # mutation turns the intent on and injects a counter set whose
-    # goal_tickets (17) diverges from whatever the LOG replay rebuilds (9
-    # today) without tripping the safety valve (kept under the 3/20 caps).
+    # goal resume reset. The harness copies the repo's own live STATE, whose
+    # goal_tickets is produced by mechanical DEC lines that the rebuild replays
+    # 1:1 -- so an injected value that happens to equal the replayed count
+    # would NOT diverge and the case would silently stop being evidence (the
+    # NITRO dogfood II lesson: a fixture tuned to a snapshot goes stale). Inject
+    # a value far above any plausible replay (29, over the 3/20 caps' budget)
+    # so the divergence is guaranteed: the rebuild can never reach 29 because
+    # the safety valve would have tripped long before, and a replay that did
+    # reach it would itself be a separate corruption.
     ("goal counter STATE cannot survive its own rebuild", STATE,
-     lambda s: force_goal(s, "goal_waves: 1\ngoal_tickets: 17"),
+     lambda s: force_goal(s, "goal_waves: 1\ngoal_tickets: 29"),
      "newest goal marker rebuilds"),
     # Scenario 7 (T-539): a clean HUNT under `execution_intent: converge` is
     # stage F/I of CONVERGE.md and MUST NOT enter ADD -- ADD is invention, the

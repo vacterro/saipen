@@ -103,3 +103,4 @@
 - 09.08.26 19:06 [E-2564] [parent: E-2563] [agent: claude] [op: transition-dafb6460] RUN: gate run
 - 09.08.26 19:06 [E-2565] [parent: E-2564] [agent: claude] [op: transition-81ddaeaa] RUN: T-590 command truth closed
 - 09.08.26 19:06 [E-2566] [parent: E-2565] [T-590] [agent: claude] [op: checkpoint-d587be41] RUN: goal_tickets synced (17); T-590 closed; closure-order lesson recorded (transition-then-done)
+- 09.08.26 19:28 [E-2567] [parent: E-2566] [T-590] [agent: claude] [op: checkpoint-3469b5d0] RUN: forced audit red-control repair: goal-counter-rebuild case injected 17 which now equals the live LOG's mechanical rebuild; injected 29 (guaranteed divergent) restores 231/231
