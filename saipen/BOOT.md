@@ -70,6 +70,17 @@ This file gives the execution order. No rule is *defined* here —
    RECOVER > OBEY > UNBLOCK > FINISH > START > MAINTAIN. Five legal
    forms in §1.2: `WAIT:` / `saipen <command>` / `PHASE <phase> [T-###]` /
    `RUN:` / `RESUME: T-### <phase>`. Destructive-op confirmation still
+   **SAIOPS is the preferred projection when it is available.** In
+   `mode: full` with working Python, the deterministic mechanical router is
+   TRUSTWORTHY (NITRO dogfood III, T-591): run `saipen status` then
+   `saipen next` and execute the routed action -- the persisted
+   `next_action` remains canonical recovery evidence and the fallback, but a
+   cold full-mode agent does not re-derive the Pick Rule by hand when the
+   engine already computed it (and WAIT/user-brake/BLOCKED/recovery all
+   outrank START in the router). Load the phase doc from the ROUTED action
+   (`saipen next`'s `load`), never from a stale persisted phase echo. When
+   Python/SAIOPS is unavailable, fall back to the manual path unchanged -- a
+   repository must remain cold-readable without the engine.
    binds (§1.1).
 
 8. **Load the phase doc from `protocol_dir/phases/<phase>.md`, one at a time.**
