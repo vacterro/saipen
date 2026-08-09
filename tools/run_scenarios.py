@@ -4113,7 +4113,12 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
 
     # Finish the active T-777 through the legal lifecycle: done is the atomic
     # finish operation (NITRO dogfood III) requiring DOING + [/] + STATE.task
-    # binding; it closes LOG+BOARD+STATE in one plan and reports FINISHED.
+    # binding, and under the T-602 gate it requires the full phase chain to
+    # have reached SHIP; it closes LOG+BOARD+STATE in one plan and reports
+    # FINISHED.
+    transition_phase(root, "VERIFY", "probe", "T-777", "verify")
+    transition_phase(root, "REVIEW", "probe", "T-777", "review")
+    transition_phase(root, "SHIP", "probe", "T-777", "ship")
     done = ticket_move(root, "done", "T-777", "probe")
     expect("done on the active DOING ticket succeeds and moves it to DONE",
            done.get("ok") and done.get("code") == "FINISHED"
@@ -4122,11 +4127,15 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
            and parse_state(codec.read_doc(saipen / "STATE.md")).get("phase")
            == "DONE", repr(done))
 
-    # Claim the now-topmost T-778, then finish it legally.
+    # Claim the now-topmost T-778, then finish it legally (full chain).
     claimed2 = apply_claim(root, "T-778", "probe")
     expect("claim of the topmost workable ticket succeeds",
            claimed2.get("ok") and claimed2.get("code") == "CLAIMED",
            repr(claimed2))
+    transition_phase(root, "BUILD", "probe", "T-778", "b")
+    transition_phase(root, "VERIFY", "probe", "T-778", "v")
+    transition_phase(root, "REVIEW", "probe", "T-778", "r")
+    transition_phase(root, "SHIP", "probe", "T-778", "s")
     done2 = ticket_move(root, "done", "T-778", "probe")
     expect("legal DOING->DONE lifecycle succeeds",
            done2.get("ok") and done2.get("code") == "FINISHED",
@@ -5296,9 +5305,11 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            and '"code": "SUB_RESUMED"' in pub_resume.stdout,
            repr((pub_pause.stdout[:120], pub_resume.stdout[:120])))
 
-    # T-591: PUBLIC full-closure composition -- claim through the CLI, finish
-    # through the CLI, full validator green (section 47: public completion
-    # command leaves a validator-green final state).
+    # T-602: PUBLIC gate composition -- `ticket done` through the CLI after
+    # claim->BUILD must REFUSE ILLEGAL_PHASE and write zero canonical bytes,
+    # because REVIEW/SHIP never ran. The old claim->BUILD->done "validator
+    # green" precedent was FALSE_EVIDENCE: it laundered an illegal execution
+    # history into a legal-looking DONE (NITRO dogfood IV, T-602).
     pubc_root = make_project()
     pubc_claim = subprocess.run(
         [sys.executable, str(HOME / "tools" / "saipen.py"), "claim", "T-1",
@@ -5312,17 +5323,30 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         [sys.executable, str(HOME / "tools" / "saipen.py"), "ticket", "done",
          "T-1", "--json"],
         cwd=str(pubc_root), capture_output=True, text=True, timeout=60)
+    pubc_st = parse_state(codec.read_doc(
+        pubc_root / ".saipen" / "STATE.md"))
+    pubc_board = parse_board(codec.read_doc(
+        pubc_root / ".saipen" / "BOARD.md"))
+    pubc_t1 = pubc_board["tickets"]["T-1"]
     pubc_validator = subprocess.run(
         [sys.executable, str(VALIDATOR), "--project-root", str(pubc_root)],
         cwd=str(pubc_root), capture_output=True, text=True, errors="replace",
         timeout=120)
-    expect("public closure: claim->BUILD->ticket done ends validator-green",
+    expect("public closure: claim->BUILD->ticket done REFUSEs ILLEGAL_PHASE",
            '"code": "CLAIMED"' in pubc_claim.stdout
            and '"code": "TRANSITIONED"' in pubc_tr.stdout
-           and '"code": "FINISHED"' in pubc_done.stdout
-           and pubc_validator.returncode == 0,
+           and '"code": "ILLEGAL_PHASE"' in pubc_done.stdout,
            repr((pubc_claim.stdout[:80], pubc_tr.stdout[:80],
-                 pubc_done.stdout[:80], pubc_validator.returncode)))
+                 pubc_done.stdout[:80])))
+    expect("public closure: the refused done writes zero bytes (ticket stays "
+           "DOING, phase stays BUILD)",
+           pubc_st.get("phase") == "BUILD"
+           and pubc_st.get("task") == "T-1"
+           and pubc_t1["section"] == "## DOING",
+           repr((pubc_st, pubc_t1["section"])))
+    expect("public closure: the state stays validator-green after the refusal",
+           pubc_validator.returncode == 0,
+           pubc_validator.stdout[-300:] if pubc_validator.returncode else "")
 
     # T-591: `saipen next` action/load agreement through the public path.
     pubn_root = make_project()
@@ -5371,7 +5395,9 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     transition_phase(cC, "BUILD", "probe", "T-1", "b")
     transition_phase(cC, "VERIFY", "probe", "T-1", "v")
     transition_phase(cC, "REVIEW", "probe", "T-1", "r")
-    # finish with crash after LOG
+    transition_phase(cC, "SHIP", "probe", "T-1", "s")
+    # finish with crash after LOG (the ticket is in SHIP -- the only legal
+    # closure phase; T-602 gate)
     crash_code = (
         "import sys, os; sys.path.insert(0, r'%s')\n"
         "os.environ['NITRO_CRASH_AFTER_LOG'] = '1'\n"
@@ -5396,6 +5422,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     transition_phase(cE, "BUILD", "probe", "T-1", "b")
     transition_phase(cE, "VERIFY", "probe", "T-1", "v")
     transition_phase(cE, "REVIEW", "probe", "T-1", "r")
+    transition_phase(cE, "SHIP", "probe", "T-1", "s")
     from saipen_engine.plan import apply_plan as _apply_plan
     from saipen_engine.operations import (_now as _now_e,
                                            _plan_finish_ticket,
@@ -5434,6 +5461,200 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            and boardF["tickets"]["T-1"]["section"] == "## DOING",
            repr((split_res, stF.get("phase"),
                  boardF["tickets"]["T-1"]["section"])))
+
+    # ---- NITRO dogfood IV (T-602): the finish GATE. `finish_ticket` may only
+    # close a ticket from phase SHIP; from SCOUT/BUILD/VERIFY/REVIEW it REFUSEs
+    # ILLEGAL_PHASE with zero canonical bytes written, and transition_from
+    # records the ACTUAL phase -- never a laundered SHIP.
+    from saipen_engine.operations import (finish_ticket as _gate_ft,
+                                          _plan_finish_ticket as _gate_pft)
+    from saipen_engine.operations import (_now as _now_g, _utc_iso as _utc_g)
+    from saipen_engine.plan import apply_plan as _gate_apply_plan
+    from saipen_engine.journal import hash_bytes as _gate_hb
+    from saipen_engine.state import patch_state as _gate_patch_state
+    import hashlib as _gate_hashlib
+
+    def _tree_hash(_root: Path) -> str:
+        _h = _gate_hashlib.sha256()
+        for _p in sorted((_root / ".saipen").rglob("*")):
+            if _p.is_file():
+                _h.update(_p.relative_to(_root).as_posix().encode("utf-8"))
+                _h.update(_p.read_bytes())
+        return _h.hexdigest()[:16]
+
+    gate_cases = [
+        ("SCOUT", []),
+        ("BUILD", ["BUILD"]),
+        ("VERIFY", ["BUILD", "VERIFY"]),
+        ("REVIEW", ["BUILD", "VERIFY", "REVIEW"]),
+    ]
+    for _phase, _steps in gate_cases:
+        _g = make_project()
+        apply_claim(_g, "T-1", "probe")
+        for _step in _steps:
+            transition_phase(_g, _step, "probe", "T-1", "g")
+        _before = _tree_hash(_g)
+        _res = _gate_ft(_g, "T-1", "probe")
+        _after = _tree_hash(_g)
+        _st = parse_state(codec.read_doc(_g / ".saipen" / "STATE.md"))
+        expect(f"gate control: finish from {_phase} REFUSEs ILLEGAL_PHASE",
+               _res.get("code") == "ILLEGAL_PHASE" and not _res.get("ok"),
+               repr(_res))
+        expect(f"gate control: finish from {_phase} writes zero canonical "
+               "bytes",
+               _before == _after, f"tree changed {_before} -> {_after}")
+        expect(f"gate control: finish from {_phase} leaves phase/task "
+               "untouched",
+               _st.get("phase") == _phase and _st.get("task") == "T-1",
+               repr(_st))
+
+    # Gate control D: the FULL legal chain claim->BUILD->VERIFY->REVIEW->SHIP
+    # -> finish -> FINISHED; transition_from is the ACTUAL phase (SHIP) and the
+    # resulting repository is validator-green.
+    gD = make_project()
+    apply_claim(gD, "T-1", "probe")
+    for _step in ("BUILD", "VERIFY", "REVIEW", "SHIP"):
+        transition_phase(gD, _step, "probe", "T-1", "d")
+    _gD_res = _gate_ft(gD, "T-1", "probe")
+    _gD_st = parse_state(codec.read_doc(gD / ".saipen" / "STATE.md"))
+    expect("gate control D: full chain SHIP->finish ends FINISHED",
+           _gD_res.get("ok") and _gD_res.get("code") == "FINISHED"
+           and _gD_st.get("phase") == "DONE"
+           and _gD_st.get("transition_from") == "SHIP", repr(_gD_st))
+    _gD_val = subprocess.run(
+        [sys.executable, str(VALIDATOR), "--project-root", str(gD)],
+        cwd=str(gD), capture_output=True, text=True, errors="replace",
+        timeout=120)
+    expect("gate control D: full chain ends validator-green",
+           _gD_val.returncode == 0, _gD_val.stdout[-300:])
+
+    # [gate-closure] validator red control (T-602): a fabricated non-SHIP
+    # finish event AT/AFTER the first SHIP-finish boundary FAILs the
+    # validator; the identical LOG with only the SHIP-finish passes.
+    def _gate_project(log_events: list[tuple[str, str]]) -> Path:
+        _r = make_project()
+        _sf = _r / ".saipen"
+        _log = "- 09.08.26 00:00 [E-900] [T-none] DEC: base\n"
+        _e = 900
+        for _msg, _tid in log_events:
+            _e += 1
+            _ticket = f"[{_tid}] " if _tid else ""
+            _log += (f"- 09.08.26 00:01 [E-{_e}] {_ticket}"
+                     f"DEC: {_msg}\n")
+        (_sf / "LOG.md").write_text(_log, encoding="utf-8")
+        _st = (_sf / "STATE.md").read_text(encoding="utf-8")
+        _st = _st.replace("last_event: 900", f"last_event: {_e}")
+        (_sf / "STATE.md").write_text(_st, encoding="utf-8")
+        return _r
+
+    _g_ok = _gate_project([
+        ("ticket finished via SAIOPS -- completion (from SHIP)", "T-1"),
+    ])
+    _g_ok_val = subprocess.run(
+        [sys.executable, str(VALIDATOR), "--project-root", str(_g_ok)],
+        cwd=str(_g_ok), capture_output=True, text=True, errors="replace",
+        timeout=120)
+    _g_bad = _gate_project([
+        ("ticket finished via SAIOPS -- completion (from SHIP)", "T-1"),
+        ("ticket finished via SAIOPS -- completion (from VERIFY)", "T-2"),
+    ])
+    _g_bad_val = subprocess.run(
+        [sys.executable, str(VALIDATOR), "--project-root", str(_g_bad)],
+        cwd=str(_g_bad), capture_output=True, text=True, errors="replace",
+        timeout=120)
+    expect("gate-closure red control: pre-boundary history passes, "
+           "post-boundary non-SHIP finish FAILs the validator",
+           _g_ok_val.returncode == 0 and _g_bad_val.returncode != 0,
+           repr((_g_ok_val.returncode, _g_bad_val.returncode))
+           + "\nOK-STDOUT:\n" + _g_ok_val.stdout[-1200:]
+           + "\nBAD-STDOUT:\n" + _g_bad_val.stdout[-1200:])
+
+    # Mutation red-control: removing the SHIP precondition (restoring the old
+    # closure_from = "SHIP" laundering) must flip the BUILD-refuse control to
+    # FINISHED -- proving the refuse controls are coupled to the gate, not
+    # vacuous.
+    import inspect as _gate_inspect
+    from saipen_engine import operations as _gate_ops
+    from saipen_engine.router import route_next as _gate_route_next
+    _gate_src = _gate_inspect.getsource(_gate_ops._plan_finish_ticket)
+    _gate_src = _gate_src.replace("    from .router import route_next\n", "")
+    _gate_start = _gate_src.index(
+        "    # GATE: the canonical closure is SHIP -> DONE")
+    _gate_end = _gate_src.index("    closure_from = prev_phase",
+                                _gate_start)
+    _gate_end = _gate_src.index("\n", _gate_end) + 1
+    _gate_mut = (_gate_src[:_gate_start]
+                 + '    closure_from = "SHIP"\n'
+                 + _gate_src[_gate_end:])
+    _gate_ns = dict(vars(_gate_ops))
+    _gate_ns["route_next"] = _gate_route_next
+    exec(compile(_gate_mut, "<mutated-finish-no-gate>", "exec"), _gate_ns)
+    _gate_mut_pft = _gate_ns["_plan_finish_ticket"]
+    _gM = make_project()
+    apply_claim(_gM, "T-1", "probe")
+    transition_phase(_gM, "BUILD", "probe", "T-1", "m")
+    _mut_plan = _gate_mut_pft(_gM, "T-1", "probe", _now_g(), _utc_g())
+    _mut_res = _gate_apply_plan(_gM, _mut_plan)
+    expect("mutation red-control: removing the SHIP gate makes the BUILD "
+           "closure succeed (the refuse controls are NOT vacuous)",
+           _mut_res.get("ok") and _mut_res.get("code") == "FINISHED",
+           repr(_mut_res))
+
+    # Gate control E (goal counter composition): goal_tickets bumps
+    # mechanically at VERIFY->REVIEW under execution_intent goal -- NEVER at
+    # finish. The safety valve can trip MID-ticket: VERIFY->REVIEW at cap
+    # leaves phase REVIEW, ticket DOING, goal_tickets at cap, next_action the
+    # exact safety-valve WAIT; premature finish behind the valve refuses; after
+    # explicit reauthorization the chain continues REVIEW -> SHIP -> FINISH
+    # legally.
+    gE = make_project()
+    set_goal_intent(gE, "probe", "valve mid-ticket control")
+    apply_claim(gE, "T-1", "probe")
+    transition_phase(gE, "BUILD", "probe", "T-1", "e")
+    transition_phase(gE, "VERIFY", "probe", "T-1", "e")
+    transition_phase(gE, "REVIEW", "probe", "T-1", "e")
+    _stE = parse_state(codec.read_doc(gE / ".saipen" / "STATE.md"))
+    expect("gate control E: VERIFY->REVIEW bumps goal_tickets (0->1), never "
+           "at finish",
+           _stE.get("goal_tickets") == 1 and _stE.get("phase") == "REVIEW",
+           repr(_stE))
+    # drive goal_tickets to just under the cap: the VERIFY->REVIEW bump must
+    # be the mechanical owner of reaching the cap
+    _stateE = gE / ".saipen" / "STATE.md"
+    _textE = _gate_patch_state(codec.read_doc(_stateE), {"goal_tickets": 19})
+    _stateE.write_text(_textE, encoding="utf-8")
+    transition_phase(gE, "BUILD", "probe", "T-1", "e2")
+    transition_phase(gE, "VERIFY", "probe", "T-1", "e2")
+    _rv = transition_phase(gE, "REVIEW", "probe", "T-1", "e2")
+    _stV = parse_state(codec.read_doc(_stateE))
+    expect("valve control: VERIFY->REVIEW trips at the 20-ticket cap",
+           _rv.get("ok") and _stV.get("goal_tickets") == 20
+           and _stV.get("phase") == "REVIEW" and _stV.get("task") == "T-1",
+           repr((_rv, _stV)))
+    expect("valve control: next_action is the exact safety-valve WAIT",
+           _stV.get("next_action").startswith("WAIT: safety valve reached")
+           and "run 'saipen goal' to continue" in _stV.get("next_action"),
+           repr(_stV.get("next_action")))
+    _bdV = parse_board(codec.read_doc(gE / ".saipen" / "BOARD.md"))
+    _doingV = [t for t in _bdV["tickets"].values()
+               if t["section"] == "## DOING"]
+    expect("valve control: the ticket stays DOING behind the valve",
+           len(_doingV) == 1 and _doingV[0]["id"] == "T-1", repr(_doingV))
+    _finV = _gate_ft(gE, "T-1", "probe")
+    expect("valve control: finish behind the valve REFUSEs ILLEGAL_PHASE",
+           _finV.get("code") == "ILLEGAL_PHASE", repr(_finV))
+    _re = reauthorize_valve(gE, "probe")
+    expect("valve control: explicit reauthorization resets the counters",
+           _re.get("ok") and _re.get("code") == "VALVE_REAUTHORIZED",
+           repr(_re))
+    transition_phase(gE, "SHIP", "probe", "T-1", "e3")
+    _finV2 = _gate_ft(gE, "T-1", "probe")
+    _stV3 = parse_state(codec.read_doc(_stateE))
+    expect("valve control: after reauthorization REVIEW->SHIP->FINISH "
+           "completes",
+           _finV2.get("ok") and _finV2.get("code") == "FINISHED"
+           and _stV3.get("phase") == "DONE"
+           and _stV3.get("transition_from") == "SHIP", repr(_stV3))
 
     # Router precedent controls (section 12-15): WAIT/BLOCKED stop before
     # START.

@@ -143,3 +143,16 @@
 - 09.08.26 21:39 [E-2604] [parent: E-2603] [T-595] [agent: claude] [op: checkpoint-24566aae] DEC: goal_tickets 19->20 (T-595 passed VERIFY via atomic finish)
 - 09.08.26 21:39 [E-2605] [parent: E-2604] [T-595] [agent: claude] [op: checkpoint-1b80358e] RUN: goal_tickets synced (20, cap); T-595 closed; next_action routes to next legal work
 - 09.08.26 21:40 [E-2606] [parent: E-2605] [T-595] [agent: claude] [op: checkpoint-cedfdf60] RUN: valve tripped at 20 tickets -- canonical WAIT set (manual sync because closure used atomic finish, not the VERIFY->REVIEW mechanical bump); recorded per T-590 lesson
+- 09.08.26 22:33 [E-2607] [parent: E-2606] [T-596] [agent: claude] [op: ticket-ac515a71] DEC: ticket added via SAIOPS
+- 09.08.26 22:33 [E-2608] [parent: E-2607] [T-600] [agent: claude] [op: ticket-73cf740c] DEC: ticket added via SAIOPS
+- 09.08.26 22:33 [E-2609] [parent: E-2608] [T-601] [agent: claude] [op: ticket-9869b785] DEC: ticket added via SAIOPS
+- 09.08.26 22:33 [E-2610] [parent: E-2609] [T-602] [agent: claude] [op: ticket-81c364ff] DEC: ticket added via SAIOPS
+- 09.08.26 22:33 [E-2611] [parent: E-2610] [agent: claude] [op: goal-caed376a] DEC: goal pivot -- NITRO DOGFOOD IV -- GATE INTEGRITY: fix finish_ticket gate-laundering (P0 T-596), Improve lifecycle/verifier composition (P1 T-597), context projection integrity (P1 T-598), claim-to-proof IV + fresh closure gates (P1 T-599). The user's message is the explicit re-authorization of the tripped safety valve.
+- 09.08.26 22:33 [E-2612] [parent: E-2611] [agent: claude] [op: checkpoint-c078b29a] DEC: goal_waves 0->1
+- 09.08.26 22:34 [E-2613] [parent: E-2612] [T-602] [agent: claude] [op: claim-567469e5] DEC: claimed via SAIOPS -- owner claude
+- 09.08.26 22:48 [E-2614] [parent: E-2613] [T-602] [agent: claude] [op: transition-9aeff4d3] RUN: SCOUT done: finish bypass reproduced (finish from SCOUT/BUILD/VERIFY/REVIEW -> FINISHED, transition_from SHIP launder); R13 added to repro corpus
+- 09.08.26 22:48 [E-2615] [parent: E-2614] [T-602] [agent: claude] [op: transition-ab442a35] RUN: BUILD complete: finish_ticket SHIP gate + ILLEGAL_PHASE + transition_from actual; public false-PASS inverted; gate controls A/B/C/D + mutation red-control + valve-mid-ticket + [gate-closure] validator + R13 repro; full scenario suite green; audit running
+- 09.08.26 22:53 [E-2616] [parent: E-2615] [T-602] [agent: claude] [op: transition-ef6c6033] RUN: VERIFY done: finish gate fixes proven fresh -- validate.py PASS, run_scenarios full suite green (162 nitro-integrity incl. new gate controls), audit_checks 231/231, audit_floor green, R1-R13 repro NOT REPRODUCED
+- 09.08.26 22:53 [E-2617] [parent: E-2616] [op: transition-ef6c6033] DEC: goal_tickets 0->1
+- 09.08.26 22:54 [E-2618] [parent: E-2617] [T-602] [agent: claude] [op: transition-000e3ecf] RUN: REVIEW verdict DEC: SHIP -- re-ran verify fresh (162/162 nitro-integrity gate controls, validate.py PASS); diff reviewed, no P0/P1
+- 09.08.26 22:54 [E-2619] [parent: E-2618] [T-602] [agent: claude] [op: finish-5506f954] DEC: ticket finished via SAIOPS -- completion (from SHIP)

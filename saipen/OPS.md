@@ -210,12 +210,18 @@ Every operation returns a structured result:
 CLI prints concise human text by default; `--json` emits JSON only. Stable
 error codes: STALE_STATE, TICKET_NOT_FOUND, TICKET_NOT_WORKABLE,
 TICKET_ALREADY_DONE, ILLEGAL_TICKET_LIFECYCLE, NOT_TOP_WORKABLE,
-ACTIVE_TICKET_MISMATCH, ALREADY_CLAIMED, ILLEGAL_TRANSITION, WRITER_BUSY,
-VALIDATION_FAILED, RECOVERY_REQUIRED, RECOVERY_CONFLICT,
-DESTRUCTIVE_CONFIRMATION_REQUIRED, CONFLICT, PATH_ESCAPE, INVALID_ID,
-ACTIVE_IMPROVE_CYCLE, INVALID_DISPOSITION, PACKAGE_INCOMPLETE,
-MALFORMED_PACKAGE, INCOMPLETE_TICKET. Error messages name one exact
-refusal and the executable next action.
+ACTIVE_TICKET_MISMATCH, ALREADY_CLAIMED, ILLEGAL_TRANSITION,
+ILLEGAL_PHASE, WRITER_BUSY, VALIDATION_FAILED, RECOVERY_REQUIRED,
+RECOVERY_CONFLICT, DESTRUCTIVE_CONFIRMATION_REQUIRED, CONFLICT,
+NEEDS_REPAIR, PATH_ESCAPE, INVALID_ID, ACTIVE_IMPROVE_CYCLE,
+INVALID_DISPOSITION, PACKAGE_INCOMPLETE, MALFORMED_PACKAGE,
+INCOMPLETE_TICKET. Error messages name one exact
+refusal and the executable next action. `ILLEGAL_PHASE` is the gate refusal:
+`finish_ticket` (the atomic ticket-closure operation behind `ticket done`)
+accepts a ticket only from `phase: SHIP` (the canonical SHIP -> DONE closure
+edge); from SCOUT/BUILD/VERIFY/REVIEW it REFUSEs ILLEGAL_PHASE and writes
+zero canonical bytes, because a ticket whose required gates did not run must
+not be laundered into a legal-looking DONE state (NITRO dogfood IV, T-602).
 
 COMMIT FAILURE ALWAYS WINS: a failed commit returns its own refusal
 (STALE_STATE / RECOVERY_REQUIRED / CONFLICT / WRITER_BUSY), never the plan's

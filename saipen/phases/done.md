@@ -1,6 +1,13 @@
 # Phase: DONE
 
-There is no more work to do on the current ticket. Move it from `## DOING` to `## DONE` and mark its checkbox `[x]`. LOG one Event Graph line: `- DATE [E-###] [parent: E-###] [T-###] RUN: DONE -> ticket complete`.
+There is no more work to do on the current ticket. The ticket is closed by
+the atomic `finish_ticket` operation (`saipen ticket done`), which requires
+the ticket to have actually reached `phase: SHIP` (NITRO dogfood IV, T-602):
+a ticket whose REVIEW/SHIP gates never ran REFUSEs `ILLEGAL_PHASE` with zero
+canonical bytes written -- a skipped gate must never be laundered into a
+legal-looking DONE. The operation performs the `## DOING` -> `## DONE` move,
+the `[x]` checkbox, the `SHIP -> DONE` transition (recording the ACTUAL
+`transition_from`) and the completion LOG event in ONE journaled plan.
 
 1. **Pending Tickets FIRST**: If there are `TODO` tickets remaining on `BOARD.md`, the agent MUST transition to `SCOUT` to begin the next workable ticket (or `PLAN` if the board explicitly calls for a new wave to be planned). Do not stop. If all remaining `TODO` tickets are unworkable (e.g. blocked by unmet `needs:` that aren't in `DONE`), transition to `BLOCKED`.
 2. **Empty Board**: If there are NO `TODO` tickets left (even if `DONE` or `BLOCKED` tickets remain), proceed immediately to `HUNT`. This does not depend on the execution intent, and it is not a judgement call: CORE.md §1.11's MAINTAIN priority and § 2.1's zero-prompt rule both say an empty board at `DONE` auto-transitions into `HUNT` with no human asked, and this line said the opposite for the normal intent until v7.148.0 -- it told the agent to park with `WAIT: user brake` instead. Same state, two mandates: whether a plain `saipen continue` kept maintaining or stopped depended on which document the agent had read. § 1.11 wins; this step defers to it rather than restating it. A `WAIT: user brake` at `DONE` remains legal to SIT at when the user actually asked for the brake (§ 1.2 whitelists it for exactly this state) -- what is gone is this step manufacturing one on its own, from nothing but an empty board.

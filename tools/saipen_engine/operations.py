@@ -530,9 +530,18 @@ def _plan_finish_ticket(root: Path, ticket_id: str, agent: str, now: str,
 
     LOG:   ticket completion event
     BOARD: DOING -> DONE, [/] -> [x]
-    STATE: phase -> DONE, task -> none, transition_from -> previous phase,
-           last_event -> completion event, updated, agent
+    STATE: phase -> DONE, task -> none, transition_from -> SHIP (the ACTUAL
+           previous phase), last_event -> completion event, updated, agent
     NEXT:  computed from the resulting proposed state by the shared router.
+
+    GATE PRECONDITION (NITRO dogfood IV, T-602): the ordinary ticket
+    completion requires the ticket to have actually passed its required
+    gates -- STATE.phase MUST be SHIP, STATE.task MUST be the ticket, and
+    exactly one BOARD.DOING MUST be the ticket. From SCOUT/BUILD/VERIFY/
+    REVIEW the finish REFUSEs ILLEGAL_PHASE with zero canonical bytes
+    written. `transition_from` records the ACTUAL previous phase -- never a
+    fabricated legal-looking DONE source. The SHIP gate cannot be skipped by
+    laundering the phase history into a legal-looking final STATE.
 
     Required preconditions: exactly one BOARD.DOING, STATE.task == that
     ticket, ticket identity matches. No split-state window exists.
@@ -560,14 +569,26 @@ def _plan_finish_ticket(root: Path, ticket_id: str, agent: str, now: str,
                        f"{ticket_id}", ticket=ticket_id)
     prev_phase = state.get("phase") or "DONE"
 
-    # The canonical closure is SHIP -> DONE (CORE section 1.6: DONE is
-    # reachable from SHIP, and the DFA has no REVIEW -> DONE edge). The
-    # finish operation IS the ship step for this ticket, so the recorded
-    # transition_from must be a legal source of DONE -- SHIP -- while the
-    # actual prior phase is preserved in the LOG message for evidence.
-    closure_from = "SHIP"
+    # GATE: the canonical closure is SHIP -> DONE (CORE section 1.6). A
+    # ticket may only be closed after its required gates (SCOUT/BUILD/VERIFY/
+    # REVIEW/SHIP) actually ran in a legal path. The DFA makes SHIP reachable
+    # only from REVIEW, and every transition is journaled, so requiring
+    # phase == SHIP here IS the gate proof. Refusing from any earlier phase
+    # with zero canonical bytes written is what makes skipped gates
+    # mechanically impossible (NITRO dogfood IV, T-602).
+    if prev_phase != "SHIP":
+        return _refuse(
+            "ILLEGAL_PHASE",
+            f"finish requires phase SHIP (the canonical closure edge "
+            f"SHIP -> DONE); actual phase {prev_phase} cannot close a ticket "
+            "without its required REVIEW/SHIP gates. Run the ticket through "
+            "REVIEW then SHIP first; the gates cannot be skipped by "
+            "laundering the phase history",
+            ticket=ticket_id, phase=prev_phase)
+    closure_from = prev_phase  # the ACTUAL phase: SHIP.
 
-    # One LOG completion event.
+    # One LOG completion event naming the ACTUAL closure phase -- the event
+    # is the provenance that the gate chain actually ended at SHIP.
     event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent,
                               f"ticket finished via SAIOPS -- completion "
                               f"(from {prev_phase})", now, op_id)
@@ -577,8 +598,9 @@ def _plan_finish_ticket(root: Path, ticket_id: str, agent: str, now: str,
     new_board = _move_ticket(docs["board"].text_norm, ticket_id, "## DONE",
                              "[x]", "done", "")
 
-    # STATE: phase -> DONE, task -> none, transition_from -> the legal DONE
-    # source, and the next_action computed from the RESULTING proposed state.
+    # STATE: phase -> DONE, task -> none, transition_from -> the ACTUAL
+    # previous phase (SHIP), and the next_action computed from the RESULTING
+    # proposed state.
     owned = {
         "phase": "DONE",
         "task": "none",
@@ -846,7 +868,8 @@ def reauthorize_valve(project_root: Path | str, agent: str,
         })
 
     plan = _state_only_plan(root, "valve", agent, mutate,
-                            "goal reauthorized",
+                            f"goal reauthorized -- goal_waves {waves}->0, "
+                            f"goal_tickets {tickets}->0",
                             {"ok": True, "code": "VALVE_REAUTHORIZED"},
                             now, utc,
                             {"goal_waves", "goal_tickets"})

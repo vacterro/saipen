@@ -256,6 +256,24 @@ def r12_utf16_corruption() -> tuple[bool, str]:
                 f"or explicit refusal)")
 
 
+def r13_finish_launders_transition_from() -> tuple[bool, str]:
+    """Dogfood IV (T-602): the pre-fix finish wrote transition_from SHIP
+    regardless of the actual phase, converting an illegal execution history
+    (ticket never ran REVIEW/SHIP) into a syntactically legal DONE state."""
+    root = fixture()
+    apply_claim(root, "T-1", "probe")
+    transition_phase(root, "BUILD", "probe", "T-1", "repro R13")
+    transition_phase(root, "VERIFY", "probe", "T-1", "repro R13")
+    result = ticket_move(root, "done", "T-1", "probe")
+    phase = state_phase(root)
+    tf = state_field(root, "transition_from")
+    ok = result.get("ok") and result.get("code") == "FINISHED" \
+        and phase == "DONE" and tf == "SHIP"
+    return ok, (f"finish from VERIFY, result={result.get('code')}, "
+                f"phase={phase}, transition_from={tf} (required: REFUSE "
+                f"ILLEGAL_PHASE, zero bytes, actual history preserved)")
+
+
 REPROS = [
     ("R1 checkpoint changes phase", r1_checkpoint_changes_phase),
     ("R2 ticket_add changes phase", r2_ticket_add_changes_phase),
@@ -269,11 +287,12 @@ REPROS = [
     ("R10 multiple active Improve cycles", r10_multiple_active_cycles),
     ("R11 partial sweep becomes swept", r11_partial_sweep_becomes_swept),
     ("R12 UTF-16 representation corruption", r12_utf16_corruption),
+    ("R13 finish launders transition_from", r13_finish_launders_transition_from),
 ]
 
 
 def main() -> int:
-    print("NITRO integrity reproduction (R1..R12) -- defect present = REPRODUCED\n")
+    print("NITRO integrity reproduction (R1..R13) -- defect present = REPRODUCED\n")
     all_ok = True
     for label, fn in REPROS:
         ok, detail = fn()
@@ -282,7 +301,7 @@ def main() -> int:
             all_ok = False
         print(f"[{tag}] {label}")
         print(f"    {detail}")
-    print("\n" + ("ALL 12 REPRODUCED (every claimed defect is live)"
+    print("\n" + ("ALL 13 REPRODUCED (every claimed defect is live)"
                   if all_ok else "NOT ALL REPRODUCED -- audit claims need "
                   "re-checking"))
     return 0 if all_ok else 1

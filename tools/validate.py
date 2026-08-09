@@ -2340,6 +2340,47 @@ if log_files:
                  "structural edit cannot be distinguished from a mechanized "
                  "one: " + "; ".join(_provenance_missing[:6]) + " (T-584)")
 
+    # [gate-closure] (NITRO dogfood IV, T-602): a ticket's DONE state is
+    # evidence of the phase chain that produced it, NEVER of a legal-looking
+    # final STATE. finish_ticket now REFUSEs every non-SHIP closure (the
+    # primary mechanical gate), so this check is defense-in-depth against a
+    # fabricated or skipped-gate closure event reaching the append-only LOG.
+    # The boundary is SELF-ESTABLISHING, exactly like [saio]: the first
+    # `ticket finished via SAIOPS -- completion (from SHIP)` event marks where
+    # the gate fix is in force. Earlier non-SHIP finish events are the
+    # recorded HISTORICAL skipped-gate closures (T-591/T-594/T-595 closed from
+    # VERIFY by the pre-fix defect: ACCIDENTAL_SUCCESS with incomplete gate
+    # proof, never rewritten). Any non-SHIP finish event at/after the boundary
+    # is fabrication and FAILs.
+    if log_ok:
+        from saipen_engine.log import parse_log_line as _gate_parse
+        _finish_re = re.compile(
+            r"ticket finished via SAIOPS -- completion \(from (\w+)\)")
+        _finish_evs = []
+        for _lf in log_files:
+            for _line_no, _line in enumerate(read_doc(_lf).splitlines(), 1):
+                if not _line.strip() or _line.startswith("#"):
+                    continue
+                _ev = _gate_parse(_line)
+                if _ev is None or _ev["taxonomy"] != "DEC":
+                    continue
+                _m = _finish_re.search(_ev.get("text") or "")
+                if _m:
+                    _finish_evs.append((_ev["event"], _m.group(1),
+                                        _ev.get("ticket"), _lf, _line_no))
+        _finish_evs.sort(key=lambda e: e[0])
+        _gate_boundary = next((e for e in _finish_evs if e[1] == "SHIP"),
+                              None)
+        if _gate_boundary is not None:
+            for _e in _finish_evs:
+                if _e[1] != "SHIP" and _e[0] >= _gate_boundary[0]:
+                    fail("gate-closure -- ticket "
+                         f"{_e[2] or '?'} closed by a finish event naming "
+                         f"actual phase {_e[1]} at/after the gate-fix "
+                         f"boundary (first SHIP-finish E-{_gate_boundary[0]}); "
+                         "a ticket must pass REVIEW -> SHIP before finish, and "
+                         "skipped gates must never produce DONE (T-602)")
+
     # § 1.10 orders `saipen status` to report "the result of the last
     # tools/validate.py run if one is recorded in LOG.md" -- a duty handed out
     # before anything gave that record a shape, so the reader either grepped

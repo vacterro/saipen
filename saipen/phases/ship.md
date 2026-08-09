@@ -226,14 +226,21 @@ human so they read one small file instead of scrolling `LOG.md`:
 or `nothing`). Overwrite every time -- it's a snapshot, not history (history
 stays in `LOG.md`). This is the same file `saipen stop` writes (CORE.md §1.10).
 
-After SHIP: STATE -> DONE. `execution_intent: goal`? Do not treat this as a
+After SHIP: the ticket is closed by the atomic `finish_ticket` operation
+(`saipen ticket done`) -- the SHIP -> DONE transition, the `## DOING` ->
+`## DONE` move and the completion LOG event in ONE journaled plan (NITRO
+dogfood IV, T-602). The gate is mechanical: `finish_ticket` accepts the
+ticket ONLY from `phase: SHIP`; from SCOUT/BUILD/VERIFY/REVIEW it REFUSEs
+`ILLEGAL_PHASE` and writes zero canonical bytes. `execution_intent: goal`? Do
+not treat this as a
 stopping point even momentarily -- `next_action` MUST already name the
 next step, never a wait. `phases/done.md` § 1 sends you straight to HUNT;
 board-empty is a waypoint, not an exit (MAINTENANCE.md §2.4).
 
 **The shipped ticket was still in `## DOING` when this phase began, and
-it is `## DONE` only now, after the push landed** -- REVIEW keeps it
+it is `## DONE` only after the atomic finish** -- REVIEW keeps it
 claimed (`phases/review.md`, T-466), which is what makes the
 `PHASE SHIP T-###` `next_action` REVIEW wrote a legal pick rather than a
-stale one. `phases/done.md` performs the `## DOING` -> `## DONE` move as
-its first act.
+stale one, and it is what makes the finish gate sound: the ticket cannot
+leave `## DOING` until it has really passed through REVIEW into SHIP.
+`finish_ticket` performs the `## DOING` -> `## DONE` move atomically.
