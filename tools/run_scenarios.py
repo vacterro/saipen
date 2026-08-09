@@ -76,6 +76,7 @@ from saipen_engine.operations import (apply_claim, checkpoint, next_ticket_id,
                                        ticket_add, ticket_move,
                                        transition_phase, _now, _plan_claim,
                                        _utc_iso)
+from saipen_engine.result import Result
 from saipen_engine.snapshot import ProjectSnapshot
 from saipen_engine.state import parse_frontmatter
 
@@ -4018,13 +4019,16 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
            parse_board(codec.read_doc(saipen / "BOARD.md"))["tickets"]
            ["T-778"]["section"] == "## TODO")
 
-    # Finish the active T-777 through the legal lifecycle: done requires
-    # DOING + [/] + STATE.task binding.
+    # Finish the active T-777 through the legal lifecycle: done is the atomic
+    # finish operation (NITRO dogfood III) requiring DOING + [/] + STATE.task
+    # binding; it closes LOG+BOARD+STATE in one plan and reports FINISHED.
     done = ticket_move(root, "done", "T-777", "probe")
     expect("done on the active DOING ticket succeeds and moves it to DONE",
-           done.get("ok") and done.get("code") == "DONE"
+           done.get("ok") and done.get("code") == "FINISHED"
            and parse_board(codec.read_doc(saipen / "BOARD.md"))
-           ["tickets"]["T-777"]["section"] == "## DONE", repr(done))
+           ["tickets"]["T-777"]["section"] == "## DONE"
+           and parse_state(codec.read_doc(saipen / "STATE.md")).get("phase")
+           == "DONE", repr(done))
 
     # Claim the now-topmost T-778, then finish it legally.
     claimed2 = apply_claim(root, "T-778", "probe")
@@ -4033,7 +4037,7 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
            repr(claimed2))
     done2 = ticket_move(root, "done", "T-778", "probe")
     expect("legal DOING->DONE lifecycle succeeds",
-           done2.get("ok") and done2.get("code") == "DONE",
+           done2.get("ok") and done2.get("code") == "FINISHED",
            repr(done2))
 
     # M5: goal/cc mechanics. reauthorize refuses without a tripped valve.
@@ -5199,6 +5203,121 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            '"code": "SUB_PAUSED"' in pub_pause.stdout
            and '"code": "SUB_RESUMED"' in pub_resume.stdout,
            repr((pub_pause.stdout[:120], pub_resume.stdout[:120])))
+
+    # ---- T-591 closure composition controls (NITRO dogfood III, section 10).
+    from saipen_engine.operations import finish_ticket
+    from saipen_engine.journal import recover as _recover_op
+
+    # Control A: claim->BUILD->VERIFY->REVIEW->SHIP->FINISH -> validator PASS.
+    cA = make_project()
+    apply_claim(cA, "T-1", "probe")
+    transition_phase(cA, "BUILD", "probe", "T-1", "b")
+    transition_phase(cA, "VERIFY", "probe", "T-1", "v")
+    transition_phase(cA, "REVIEW", "probe", "T-1", "r")
+    transition_phase(cA, "SHIP", "probe", "T-1", "s")
+    finA = finish_ticket(cA, "T-1", "probe")
+    stA = parse_state(codec.read_doc(cA / ".saipen" / "STATE.md"))
+    expect("closure control A: SHIP->FINISH ends DONE/task none",
+           finA.get("ok") and stA.get("phase") == "DONE"
+           and stA.get("task") == "none", repr(stA))
+
+    # Control B: after finish, no DOING, ticket DONE [x], next routes legally.
+    boardB = parse_board(codec.read_doc(cA / ".saipen" / "BOARD.md"))
+    doingB = [t for t in boardB["tickets"].values()
+              if t["section"] == "## DOING"]
+    t1B = boardB["tickets"]["T-1"]
+    expect("closure control B: no DOING + ticket DONE[x] after finish",
+           not doingB and t1B["section"] == "## DONE"
+           and t1B["checkbox"] == "x", repr((doingB, t1B["checkbox"])))
+
+    # Control C: crash during FINISH after LOG -> recovery -> validator PASS.
+    cC = make_project()
+    apply_claim(cC, "T-1", "probe")
+    transition_phase(cC, "BUILD", "probe", "T-1", "b")
+    transition_phase(cC, "VERIFY", "probe", "T-1", "v")
+    transition_phase(cC, "REVIEW", "probe", "T-1", "r")
+    # finish with crash after LOG
+    crash_code = (
+        "import sys, os; sys.path.insert(0, r'%s')\n"
+        "os.environ['NITRO_CRASH_AFTER_LOG'] = '1'\n"
+        "from saipen_engine.operations import finish_ticket\n"
+        "finish_ticket(r'%s', 'T-1', 'probe')"
+        % (str(HOME / "tools"), str(cC)))
+    rc = subprocess.run([sys.executable, "-c", crash_code], cwd=str(cC),
+                        capture_output=True, text=True, timeout=60).returncode
+    expect("closure control C: crash during finish leaves an unresolved op",
+           rc == 87 and bool(pending_ops(cC)), f"rc={rc}")
+    _recover_op(cC, pending_ops(cC)[0]["op_id"])
+    boardC = parse_board(codec.read_doc(cC / ".saipen" / "BOARD.md"))
+    stC = parse_state(codec.read_doc(cC / ".saipen" / "STATE.md"))
+    expect("closure control C: recovery finishes exactly one ticket",
+           boardC["tickets"]["T-1"]["section"] == "## DONE"
+           and stC.get("phase") == "DONE" and stC.get("task") == "none",
+           repr((boardC["tickets"]["T-1"]["section"], stC.get("phase"))))
+
+    # Control E: repeat FINISH same op_id -> ALREADY_APPLIED, no 2nd event.
+    cE = make_project()
+    apply_claim(cE, "T-1", "probe")
+    transition_phase(cE, "BUILD", "probe", "T-1", "b")
+    transition_phase(cE, "VERIFY", "probe", "T-1", "v")
+    transition_phase(cE, "REVIEW", "probe", "T-1", "r")
+    from saipen_engine.plan import apply_plan as _apply_plan
+    from saipen_engine.operations import (_now as _now_e,
+                                           _plan_finish_ticket,
+                                           _utc_iso as _utc_e)
+    planE = _plan_finish_ticket(cE, "T-1", "probe", _now_e(), _utc_e())
+    finE1 = _apply_plan(cE, planE)
+    logE = codec.read_doc(cE / ".saipen" / "LOG.md")
+    countE = logE.count(f"E-{finE1.get('event_id')[2:]}")
+    # Apply the SAME plan object again: the committed op's retry must return
+    # ALREADY_APPLIED with no second completion event.
+    retryE = _apply_plan(cE, planE)
+    expect("closure control E: repeat finish returns ALREADY_APPLIED",
+           retryE.get("code") == "ALREADY_APPLIED", repr(retryE))
+    expect("closure control E: no second completion event",
+           codec.read_doc(cE / ".saipen" / "LOG.md").count(
+               f"E-{finE1.get('event_id')[2:]}") == countE)
+
+    # Control F: old ticket done cannot leave REVIEW/T-X + BOARD DONE (the
+    # split is now refused at plan time).
+    cF = make_project()
+    apply_claim(cF, "T-1", "probe")
+    transition_phase(cF, "BUILD", "probe", "T-1", "b")
+    transition_phase(cF, "VERIFY", "probe", "T-1", "v")
+    transition_phase(cF, "REVIEW", "probe", "T-1", "r")
+    from saipen_engine.operations import (_now as _now_f, _ticket_targets,
+                                           _utc_iso as _utc_f)
+    split_res = _ticket_targets(cF, "done", "T-1", "probe", "",
+                                _now_f(), _utc_f())
+    stF = parse_state(codec.read_doc(cF / ".saipen" / "STATE.md"))
+    boardF = parse_board(codec.read_doc(cF / ".saipen" / "BOARD.md"))
+    expect("closure control F: raw done split is refused (no REVIEW/T-X + "
+           "BOARD DONE)",
+           isinstance(split_res, Result)
+           and not split_res.get("ok")
+           and stF.get("phase") == "REVIEW"
+           and boardF["tickets"]["T-1"]["section"] == "## DOING",
+           repr((split_res, stF.get("phase"),
+                 boardF["tickets"]["T-1"]["section"])))
+
+    # Router precedent controls (section 12-15): WAIT/BLOCKED stop before
+    # START.
+    from saipen_engine.router import route_next as _route_next
+    rc_state = ("---\nphase: BLOCKED\ntask: none\n"
+                 "next_action: \"WAIT: user brake -- user asked to stop\"\n"
+                 "blocker: \"user brake\"\ntransition_from: SHIP\n"
+                 "saipen_version: 7\nschema_version: 3\nlast_event: 900\n"
+                 "style_contract: ded-4ae736e4\nsaipen_home: \".\"\n"
+                 "agent: probe\nmode: full\n"
+                 "updated: 2026-08-09T00:00:00Z\n---\n")
+    rc_board = ("# Board\n## DOING\n## TODO\n"
+                "- [ ] T-1 [P1] probe | verify: probe\n"
+                "## DONE\n## BLOCKED\n")
+    rcA = _route_next(rc_state, rc_board)
+    expect("router: user brake outranks START (RESTATE_AND_STOP)",
+           rcA.get("reason") == "wait"
+           and rcA.get("executable_behavior") == "RESTATE_AND_STOP",
+           repr(rcA))
 
     return problems, checked
 

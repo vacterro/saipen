@@ -485,6 +485,18 @@ def _ticket_targets(root: Path, action: str, ticket_id: str, agent: str,
         "updated": utc,
         "agent": agent,
     }
+    # Blocking the ACTIVE DOING ticket parks the current work: the ticket
+    # leaves ## DOING, so the execution state must not keep naming it in a
+    # ticket-bearing phase. The block owns phase -> BLOCKED / task -> none /
+    # transition_from -> previous, exactly like pausing the session (NITRO
+    # dogfood III, T-591). Blocking a merely-TODO ticket leaves execution
+    # state untouched.
+    if action == "block" and state.get("task") == ticket_id \
+            and ticket["section"] == "## DOING":
+        owned["phase"] = "BLOCKED"
+        owned["task"] = "none"
+        owned["next_action"] = "saipen continue"
+        owned["transition_from"] = state.get("phase") or "BUILD"
     new_state = patch_state(docs["state"].text_norm, owned)
 
     errors = validate_texts(new_state, new_board, new_log)
