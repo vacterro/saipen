@@ -4547,6 +4547,29 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            resumed.get("ok") and "paused by main agent" not in st_resume,
            repr(st_resume))
 
+    # Clean preflight: read-only, refuses outstanding evidence, never deletes.
+    clean_bad = subs.sub_clean_preflight(sub_root, "saiscout")
+    clean_ok = subs.sub_clean_preflight(sub_root, "does-not-exist")
+    expect("sub clean preflight refuses a fresh instance with evidence",
+           not clean_bad.get("ok")
+           and clean_bad.get("code") == "VALIDATION_FAILED"
+           and (sub_root / ".saipen" / "extensions" / "subs" / "saiscout"
+                ).is_dir(), repr(clean_bad))
+    expect("sub clean preflight refuses a nonexistent instance",
+           not clean_ok.get("ok")
+           and clean_ok.get("code") == "TICKET_NOT_FOUND", repr(clean_ok))
+    st_clean = sub_state_path.read_text(encoding="utf-8")
+    expect("sub clean preflight never mutates the instance",
+           st_clean == st_resume, "state changed")
+
+    # Collect preflight: read-only freshness gate; a spawned sub with an empty
+    # OUTBOX passes (no ready package to stale), nothing is judged semantically.
+    collect_res = subs.sub_collect(sub_root, "saiscout")
+    expect("sub collect preflight passes an empty OUTBOX (read-only)",
+           collect_res.get("ok")
+           and collect_res.get("code") == "COLLECT_PREFLIGHT",
+           repr(collect_res))
+
     return problems, checked
 
 

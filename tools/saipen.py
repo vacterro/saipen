@@ -129,7 +129,8 @@ def _recover(project_root: Path, as_json: bool) -> int:
 def _sub(project_root: Path, args: list[str], as_json: bool,
          dry_run: bool) -> int:
     """saipen sub list|status|spawn|pause|resume (NITRO M8, journaled)."""
-    from saipen_engine.subs import (sub_list, sub_pause, sub_resume, sub_spawn,
+    from saipen_engine.subs import (sub_clean_preflight, sub_collect,
+                                    sub_list, sub_pause, sub_resume, sub_spawn,
                                     sub_status)
 
     action = args[0]
@@ -162,6 +163,22 @@ def _sub(project_root: Path, args: list[str], as_json: bool,
             return 2
         fn = sub_pause if action == "pause" else sub_resume
         result = fn(project_root, args[1])
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
+    if action == "clean":
+        if len(args) < 2:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": "sub clean needs <name>"}, as_json)
+            return 2
+        result = sub_clean_preflight(project_root, args[1])
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
+    if action == "collect":
+        if len(args) < 2:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": "sub collect needs <name>"}, as_json)
+            return 2
+        result = sub_collect(project_root, args[1])
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
     _emit({"ok": False, "code": "VALIDATION_FAILED",

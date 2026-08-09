@@ -206,6 +206,121 @@ def sub_resume(project_root: Path | str, name: str) -> Result:
                             "resume", "SUB_RESUMED", "")
 
 
+def sub_clean_preflight(project_root: Path | str, name: str) -> Result:
+    """Evidence-gated removal preflight (PROTOCOL section 7, read-only).
+
+    Delegates the deterministic evidence scan to tools/sub_clean.py's
+    sub_clean_blockers. The engine NEVER deletes; this reports every blocker
+    and, when clean, leaves removal to the human-confirmed path.
+    """
+    root = Path(project_root)
+    instance = _sub_dir(root, name)
+    if not instance.is_dir():
+        return _refuse("TICKET_NOT_FOUND", f"no subSaipen {name!r}", name=name)
+    try:
+        from sub_clean import sub_clean_blockers
+        blockers = sub_clean_blockers(
+            instance,
+            root / ".saipen" / "recovery" / "subs" / name)
+    except RuntimeError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc), name=name)
+    if blockers:
+        return _refuse("VALIDATION_FAILED", "clean refused; " +
+                       "; ".join(blockers[:5]), name=name, blockers=list(
+                           blockers))
+    return Result(ok=True, code="CLEAN_PREFLIGHT", data={"name": name})
+
+
+def sub_collect(project_root: Path | str, name: str) -> Result:
+    """Read-only collect preflight: freshness gate per ready OUTBOX package
+    (PROTOCOL section 6). No semantic acceptance is mechanized -- this checks
+    the mechanical freshness bindings (source_head + tree fingerprint + role
+    revision) and reports, it never judges a finding."""
+    root = Path(project_root)
+    outbox = _sub_dir(root, name) / "kitchen" / "OUTBOX.md"
+    if not outbox.is_file():
+        return _refuse("TICKET_NOT_FOUND", f"no subSaipen {name!r}", name=name)
+    text = _read_maybe(outbox)
+    from freshness import (compute_generic_role_revision,
+                           compute_source_identity, compute_role_revision)
+    try:
+        current = compute_source_identity(root)
+    except Exception as exc:  # noqa: BLE001
+        return _refuse("VALIDATION_FAILED",
+                       f"source identity UNKNOWN: {exc}", name=name)
+    issues = []
+    packages = []
+    for block in _outbox_blocks(text):
+        entry = {"summary": _field(block, "summary"),
+                 "status": _field(block, "status")}
+        if _field(block, "status") != "ready":
+            packages.append({**entry, "fresh": None})
+            continue
+        head = _field(block, "source_head")
+        tree = _field(block, "source_tree_fingerprint")
+        role = _field(block, "role_revision")
+        fresh = True
+        reasons = []
+        if head and current.source_head and head != current.source_head:
+            fresh, reasons = False, ["source_head stale"]
+        if tree and tree != current.source_tree_fingerprint:
+            fresh, reasons = False, ["source_tree_fingerprint differs"]
+        if role and not _role_current(saipen_home_of(root), name, role):
+            fresh, reasons = False, ["role_revision superseded"]
+        if not fresh:
+            issues.append(f"{entry['summary'][:40]}: {', '.join(reasons)}")
+        packages.append({**entry, "fresh": fresh})
+    if issues:
+        return _refuse("STALE_STATE",
+                       "collect refused; stale package(s): " + "; ".join(
+                           issues[:5]), name=name, packages=packages)
+    return Result(ok=True, code="COLLECT_PREFLIGHT", data={"name": name,
+                                                           "packages":
+                                                           packages})
+
+
+def _field(text: str, key: str) -> str:
+    import re
+    match = re.search(rf"(?m)^\*\*{re.escape(key)}:\*\*\s*(.*)$", text)
+    if match:
+        return match.group(1).strip()
+    match = re.search(rf"(?m)^{re.escape(key)}:\s*(.*)$", text)
+    return match.group(1).strip() if match else ""
+
+
+def _outbox_blocks(text: str) -> list[str]:
+    import re
+    blocks = []
+    current = []
+    for line in text.splitlines():
+        if line.startswith("## "):
+            if current:
+                blocks.append("\n".join(current))
+            current = [line]
+        elif current:
+            current.append(line)
+    if current:
+        blocks.append("\n".join(current))
+    return blocks
+
+
+def _role_current(saipen_home: str, name: str, recorded: str) -> bool:
+    try:
+        from freshness import compute_role_revision
+        charter = Path(saipen_home) / "extensions" / "subs" / f"{name}.md"
+        if charter.is_file():
+            return compute_role_revision(charter) == recorded
+    except Exception:  # noqa: BLE001
+        pass
+    return True
+
+
+def saipen_home_of(project_root: Path) -> str:
+    from .state import parse_state
+    st = parse_state(codec.read_doc(project_root / ".saipen" / "STATE.md"))
+    return st.get("saipen_home") or ""
+
+
 def _sub_state_patch(project_root: Path | str, name: str, owned: dict,
                      operation: str, code: str,
                      log_message: str) -> Result:
