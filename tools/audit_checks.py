@@ -921,6 +921,17 @@ CASES: list[tuple[str, str, object, str]] = [
     # unofficial seventeenth phase and must fail.
     ("improve becomes an unofficial phase", PHASE_IMPROVE, CREATE,
      "improve-meta-control"),
+    # T-553: improve routing/status is DERIVED from the manifest + reports +
+    # sweep ledger, never carried in STATE.md. Finding text and independent
+    # improve_* counters in STATE are both the drift the derived model forbids.
+    ("STATE carries an independent improve_ routing field", STATE,
+     lambda t: t.replace("blocker: \"\"",
+                         "blocker: \"\"\nimprove_cycle: imp-x"),
+     "improve-state-purity"),
+    ("STATE carries finding text", STATE,
+     lambda t: t.rstrip() + "\n\nIMP-001 [P1] [LOGIC_ERROR] [proven] "
+                            "[ticket]\nexpected: x\nactual: y\nevidence: z\n",
+     "improve-state-purity"),
     # NITRO: OPS.md is only reachable through INDEX. Drop the row and the doc
     # still ships, still validates its own text, and no cold agent ever finds
     # it -- the RFC routing trap in a new file.

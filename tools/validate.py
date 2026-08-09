@@ -3670,6 +3670,30 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                          "meta-control, not a phase")
                     enum_ok = False
 
+        # T-553: Improve routing/status is DERIVED from the cycle manifest +
+        # reports + SWEEP ledger -- never maintained as independent STATE
+        # fields. A flat `improve_*` field survives only if a routing decision
+        # cannot be answered by reading the manifest; finding text never
+        # belongs in canonical STATE (findings live in seat reports under
+        # .saipen/improve/, judgment in SWEEP.md).
+        _imp_state_keys = [k for k in state if k.lower().startswith("improve")]
+        if _imp_state_keys:
+            fail("cross-doc drift [improve-state-purity] -- STATE.md carries "
+                 "improve routing field(s) "
+                 + ", ".join(sorted(_imp_state_keys))
+                 + "; improve status is DERIVED from the cycle manifest + "
+                 "reports + sweep ledger, never maintained as independent "
+                 "STATE counters (T-553)")
+        _state_finding = re.search(
+            r"(?m)^(?:expected|actual|evidence):\s*\S|^IMP-\d+\b",
+            read_doc(state_path))
+        if _state_finding:
+            fail("cross-doc drift [improve-state-purity] -- STATE.md carries "
+                 "finding text (an expected/actual/evidence triple or an "
+                 "IMP-### marker); findings live in seat reports under "
+                 ".saipen/improve/, judgment lives in SWEEP.md -- never in "
+                 "canonical STATE (T-553)")
+
         # B. Every runtime file the protocol references must exist in the home.
         # Canonical source is saipen/MANIFEST.json; the hardcoded list below
         # is the fallback for homes that predate the manifest (v7.190.0+).

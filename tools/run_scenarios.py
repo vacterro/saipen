@@ -3826,6 +3826,36 @@ def run_improve_probes() -> tuple[list[str], int]:
            and "semantic verifier" in rec_res.get("detail", ""),
            repr(rec_res))
 
+    # ---- T-553: improve routing is DERIVED -- manifest/sweep edits change
+    # the visible status with ZERO STATE writes (no independent counters).
+    derive_root = project_fixture("saipen-derive-")
+    d_cycle = register_cycle(derive_root, "imp-derive",
+                             "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
+    register_seat(d_cycle, "seat-1", "core", "saipen_improve_A.md")
+    state_bytes_before = (derive_root / ".saipen" / "STATE.md").read_bytes()
+    report_d = resolve_report_path(derive_root, "imp-derive", "seat-1", "A")
+    report_d.parent.mkdir(parents=True, exist_ok=True)
+    report_d.write_text(
+        "report_status: complete\n\n"
+        "IMP-001 [P1] [PROTOCOL_VIOLATION] [proven] [ticket]\n"
+        "expected: x\nactual: y\nevidence: z\n", encoding="utf-8")
+    write_sweep_entry(d_cycle, {"imp_id": "001", "disposition": "CONFIRMED",
+                                "ticket": "T-900",
+                                "report": "saipen_improve_A.md",
+                                "reproduced": "y"})
+    manifest_text = (d_cycle / "MANIFEST.md").read_text(encoding="utf-8")
+    st_after = derive_status("saipen_improve_A.md", manifest_text,
+                             report_d.read_text(encoding="utf-8"),
+                             (d_cycle / "SWEEP.md").read_text(encoding="utf-8"))
+    expect("improve routing: manifest+sweep edits flip the derived status "
+           "(complete->swept) with zero STATE writes",
+           st_after["visible"] == "swept"
+           and (derive_root / ".saipen" / "STATE.md").read_bytes()
+           == state_bytes_before,
+           repr((st_after["visible"],
+                 (derive_root / ".saipen" / "STATE.md").read_bytes()
+                 == state_bytes_before)))
+
     # ---- T-601: resolver race -- two processes resolving the same conflict
     # yield exactly one canonical settlement (WRITER_BUSY or a settled-journal
     # refusal for the loser, never two RESOLVED).

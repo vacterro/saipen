@@ -55,6 +55,14 @@ byte-unchanged.
   separate-cycle operation exists.
 - A completed cycle is immutable.
 
+Improve routing/status is DERIVED, never carried in `STATE.md` (T-553): the
+visible status per seat (expected / draft / complete / swept / unavailable)
+is computed from the cycle roster + the seat report + the SWEEP ledger, and a
+manifest/sweep edit changes it with ZERO STATE writes. No independent
+`improve_*` counter may live in STATE -- the validator's
+`[improve-state-purity]` check FAILs such a field and FAILs finding text in
+STATE (findings live in seat reports, judgment lives in SWEEP.md).
+
 One real lifecycle order (NITRO dogfood IV, T-601):
 
 ```
