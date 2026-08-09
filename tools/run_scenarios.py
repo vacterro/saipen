@@ -4152,6 +4152,35 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            result.get("code") == "CONFLICT"
            and (saipen4 / "STATE.md").read_bytes() == external, repr(result))
 
+    # ---- §69#19b: corrupt STAGED bytes are never committed as truth.
+    root4b = make_project()
+    saipen4b = root4b / ".saipen"
+    log_b4b = (saipen4b / "LOG.md").read_bytes()
+    state_b4b = (saipen4b / "STATE.md").read_bytes()
+    new_log_b4b = log_b4b + b"\n- 09.08.26 00:01 [E-901] RUN: y\n"
+    new_state_b4b = state_b4b.replace(b"phase: DONE", b"phase: BUILD")
+    j4b = Journal(root4b, "op-staged")
+    j4b.start("op", "probe", "id", "hash", [
+        {"path": ".saipen/LOG.md", "role": "log", "content": new_log_b4b,
+         "before_hash": hash_bytes(log_b4b),
+         "after_hash": hash_bytes(new_log_b4b)},
+        {"path": ".saipen/STATE.md", "role": "state",
+         "content": new_state_b4b,
+         "before_hash": hash_bytes(state_b4b),
+         "after_hash": hash_bytes(new_state_b4b)},
+    ])
+    # Corrupt the staged STATE bytes on disk after the journal was written.
+    staged_candidates = [p for p in j4b.dir.glob("*STATE*.staged")]
+    assert staged_candidates, f"no staged STATE file in {j4b.dir}"
+    staged_candidates[0].write_bytes(b"# corrupt staged evidence\n")
+    (saipen4b / "LOG.md").write_bytes(new_log_b4b)
+    j4b.mark("APPLYING", progress_index=1, target_index=0)
+    result4b = recover(root4b, "op-staged")
+    expect("recovery refuses corrupt staged bytes (CONFLICT, not COMMIT)",
+           result4b.get("code") == "CONFLICT"
+           and b"phase: BUILD" not in (saipen4b / "STATE.md").read_bytes(),
+           repr(result4b))
+
     # ---- Recovery preflight: pending op blocks a new mutation.
     from saipen_engine.journal import recovery_preflight
     root9 = make_project()

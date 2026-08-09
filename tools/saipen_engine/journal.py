@@ -364,6 +364,15 @@ def recover(project_root: Path | str, op_id: str) -> dict:
             continue
         if live == target["before_hash"]:
             staged = journal.staged_content(index)
+            if hash_bytes(staged) != target["after_hash"]:
+                journal.mark("CONFLICT")
+                return {"ok": False, "code": "CONFLICT", "op_id": op_id,
+                        "recovery_required": True,
+                        "detail": f"staged bytes for {target['path']} hash to "
+                                  f"{hash_bytes(staged)!r}, not the planned "
+                                  f"after {target['after_hash']!r}; the "
+                                  "journal evidence is corrupt, refuse to "
+                                  "guess"}
             _atomic_write(root / target["path"], staged)
             journal.mark("APPLYING", progress_index=index + 1,
                          target_index=index)
