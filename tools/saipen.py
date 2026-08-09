@@ -18,6 +18,7 @@ from pathlib import Path
 from saipen_engine import codec, snapshot
 from saipen_engine.board import parse_board
 from saipen_engine.operations import (apply_claim, checkpoint, plan_claim,
+                                       ticket_add, ticket_move,
                                        transition_phase)
 from saipen_engine.state import parse_state
 
@@ -157,6 +158,22 @@ def main(argv: list[str] | None = None) -> int:
                             dry_run=dry_run)
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
+    if command == "ticket" and len(args) >= 2:
+        action = args[1]
+        rest = args[2:]
+        if action == "add":
+            if len(rest) < 2:
+                _emit({"ok": False, "code": "VALIDATION_FAILED"}, as_json)
+                return 2
+            result = ticket_add(project_root, AGENT, rest[0], rest[1],
+                                [], "verify: TBD", dry_run=dry_run)
+            _emit(result, as_json)
+            return 0 if result.get("ok") else 1
+        if action in ("done", "block", "unblock") and rest:
+            result = ticket_move(project_root, action, rest[0], AGENT,
+                                 " ".join(rest[1:]), dry_run=dry_run)
+            _emit(result, as_json)
+            return 0 if result.get("ok") else 1
     print(f"unknown command: {command}")
     return 2
 

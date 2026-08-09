@@ -68,7 +68,8 @@ from saipen_engine.state import parse_state
 from saipen_engine.journal import Journal, recover, run_mutation
 from saipen_engine.lock import WriterLock
 from saipen_engine.log import parse_log_line
-from saipen_engine.operations import (apply_claim, checkpoint, plan_claim,
+from saipen_engine.operations import (apply_claim, checkpoint, next_ticket_id,
+                                       plan_claim, ticket_add, ticket_move,
                                        transition_phase)
 from saipen_engine.snapshot import ProjectSnapshot
 from saipen_engine.state import parse_frontmatter
@@ -3814,6 +3815,24 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
     expect("checkpoint bumps STATE last_event to the new event",
            parse_state(codec.read_doc(saipen / "STATE.md")).get("last_event")
            == int(cp.get("event_id", "E-0")[2:]), repr(cp))
+
+    # Ticket lifecycle: canonical ID allocation ignores synthetic T-999.
+    tid = next_ticket_id(
+        "# Board\n## DOING\n## TODO\n- [ ] T-901 probe\n## DONE\n## BLOCKED\n"
+        "- [ ] T-999 synthetic fixture\n",
+        "- 09.08.26 00:00 [E-1] [T-901] RUN: base\n")
+    expect("next_ticket_id skips the synthetic T-999 namespace",
+           tid == 902, repr(tid))
+    added = ticket_add(root, "probe", "P2", "probe ticket", [], "verify",
+                       dry_run=False)
+    expect("ticket_add creates a canonical ticket",
+           added.get("ok") and added.get("code") == "TICKET_ADDED"
+           and added.get("ticket") == "T-778", repr(added))
+    moved = ticket_move(root, "done", "T-778", "probe")
+    expect("ticket_done moves exactly one ticket to DONE",
+           moved.get("ok") and moved.get("code") == "DONE"
+           and parse_board(codec.read_doc(saipen / "BOARD.md"))
+           ["tickets"]["T-778"]["section"] == "## DONE", repr(moved))
 
     return problems, checked
 

@@ -13,6 +13,7 @@ records it correctly. OPS.md owns the contract.
 from __future__ import annotations
 
 import datetime
+import re
 import uuid
 from pathlib import Path
 
@@ -320,3 +321,148 @@ def checkpoint(project_root: Path | str, agent: str, taxonomy: str,
                               snap.project_identity, preconditions, targets)
     result = {**commit, **result}
     return result
+
+SYNTHETIC_TICKET_IDS = {998, 999}
+
+
+def next_ticket_id(board_text: str, log_text: str) -> int:
+    """The next canonical production ticket ID.
+
+    Scans the canonical BOARD and production LOG for T-### and returns
+    max+1, excluding the synthetic fixture namespace (T-998/T-999) so a
+    regression fixture can never shift the allocator.
+    """
+    ids = [int(m) for m in re.findall(r"\bT-(\d+)\b", board_text + "\n" + log_text)]
+    return max((i for i in ids if i not in SYNTHETIC_TICKET_IDS), default=0) + 1
+
+
+def _ticket_targets(root: Path, action: str, ticket_id: str, agent: str,
+                    payload: str, now: str, utc: str) -> tuple[list[dict], dict] | None:
+    state_text = codec.read_doc(root / ".saipen" / "STATE.md")
+    board_text = codec.read_doc(root / ".saipen" / "BOARD.md")
+    log_text = codec.read_doc(root / ".saipen" / "LOG.md")
+    board = parse_board(board_text)
+    tickets = board["tickets"]
+    if ticket_id not in tickets:
+        return None, {"ok": False, "code": "TICKET_NOT_FOUND", "ticket": ticket_id}
+    target = {"done": "## DONE", "block": "## BLOCKED", "unblock": "## TODO"}[action]
+    checkbox = {"done": "[x]", "block": "[ ]", "unblock": "[ ]"}[action]
+    lines = board_text.splitlines(keepends=True)
+    out = []
+    ticket_line = None
+    heading_idx = {}
+    for line in lines:
+        stripped = line.rstrip("\n")
+        if stripped.startswith("- [/] " + ticket_id + " ") or \
+           stripped.startswith("- [ ] " + ticket_id + " "):
+            ticket_line = stripped
+            continue
+        for h in ("## DOING", "## TODO", "## DONE", "## BLOCKED"):
+            if stripped.startswith(h):
+                heading_idx[h] = len(out)
+        out.append(line)
+    if ticket_line is None:
+        return None, {"ok": False, "code": "TICKET_NOT_FOUND", "ticket": ticket_id}
+    target_idx = heading_idx.get(target)
+    if target_idx is None:
+        return None, {"ok": False, "code": "VALIDATION_FAILED"}
+    mark = ticket_line.replace("- [/] ", "- " + checkbox + " ", 1).replace(
+        "- [ ] ", "- " + checkbox + " ", 1)
+    if action == "done":
+        mark = mark + " | verify: " + (payload or "verified")
+    elif action == "block":
+        mark = mark + " | blocker: " + (payload or "blocked")
+    elif action == "unblock":
+        mark = mark.replace(" | blocker:", " | ")
+    out.insert(target_idx + 1, mark + "\n")
+    event = _alloc_event(log_text)
+    new_log = log_text.rstrip("\n") + "\n" + (
+        f"- {now} [E-{event}] [{ticket_id}] DEC: ticket {action} via SAIOPS"
+        + (f" -- {payload}" if payload else ""))
+    state = parse_state(state_text)
+    new_state = _render_state(state, state.get("task") or "none", agent,
+                              event, utc)
+    return [
+        {"path": ".saipen/LOG.md", "content": new_log + "\n"},
+        {"path": ".saipen/BOARD.md", "content": "".join(out)},
+        {"path": ".saipen/STATE.md", "content": new_state},
+    ], {"ok": True, "code": action.upper(), "event_id": f"E-{event}"}
+
+
+def ticket_add(project_root: Path | str, agent: str, priority: str,
+               description: str, needs: list[str], verify: str,
+               dry_run: bool = False) -> dict:
+    """Add a ticket at the top of ## TODO with the next canonical ID."""
+    root = Path(project_root)
+    now = _now()
+    utc = _utc_iso()
+    board_text = codec.read_doc(root / ".saipen" / "BOARD.md")
+    log_text = codec.read_doc(root / ".saipen" / "LOG.md")
+    tid = next_ticket_id(board_text, log_text)
+    board = parse_board(board_text)
+    for need in needs:
+        if need not in board["tickets"]:
+            return {"ok": False, "code": "TICKET_NOT_FOUND",
+                    "detail": f"dangling needs: {need}"}
+    desc = (f"- [ ] T-{tid} [{priority}] {description}"
+            + (f" | needs: {', '.join(needs)}" if needs else "")
+            + f" | verify: {verify}")
+    lines = board_text.splitlines(keepends=True)
+    todo_idx = next(i for i, ln in enumerate(lines)
+                    if ln.startswith("## TODO"))
+    lines.insert(todo_idx + 1, desc + "\n")
+    event = _alloc_event(log_text)
+    new_log = log_text.rstrip("\n") + "\n" + (
+        f"- {now} [E-{event}] [T-{tid}] DEC: ticket added via SAIOPS")
+    state = parse_state(codec.read_doc(root / ".saipen" / "STATE.md"))
+    new_state = _render_state(state, state.get("task") or "none", agent,
+                              event, utc)
+    targets = [
+        {"path": ".saipen/LOG.md", "content": new_log + "\n"},
+        {"path": ".saipen/BOARD.md", "content": "".join(lines)},
+        {"path": ".saipen/STATE.md", "content": new_state},
+    ]
+    result = {"ok": True, "code": "TICKET_ADDED", "ticket": f"T-{tid}",
+              "op_id": "ticket-" + uuid.uuid4().hex[:8],
+              "changed_files": [t["path"] for t in targets],
+              "event_id": f"E-{event}"}
+    if dry_run:
+        result["dry_run"] = True
+        return result
+    snap = ProjectSnapshot.capture(root)
+    preconditions = {
+        ".saipen/STATE.md": snap.state_hash,
+        ".saipen/BOARD.md": snap.board_hash,
+        ".saipen/LOG.md": snap.log_hash,
+    }
+    with project_writer_lock(root):
+        commit = run_mutation(root, result["op_id"], agent,
+                              snap.project_identity, preconditions, targets)
+    return {**commit, **result}
+
+
+def ticket_move(project_root: Path | str, action: str, ticket_id: str,
+                agent: str, payload: str = "", dry_run: bool = False) -> dict:
+    """done / block / unblock: move exactly one ticket between sections."""
+    root = Path(project_root)
+    now = _now()
+    utc = _utc_iso()
+    targets, result = _ticket_targets(root, action, ticket_id, agent,
+                                      payload, now, utc)
+    if targets is None:
+        return result
+    result["op_id"] = "ticket-" + uuid.uuid4().hex[:8]
+    result["changed_files"] = [t["path"] for t in targets]
+    if dry_run:
+        result["dry_run"] = True
+        return result
+    snap = ProjectSnapshot.capture(root)
+    preconditions = {
+        ".saipen/STATE.md": snap.state_hash,
+        ".saipen/BOARD.md": snap.board_hash,
+        ".saipen/LOG.md": snap.log_hash,
+    }
+    with project_writer_lock(root):
+        commit = run_mutation(root, result["op_id"], agent,
+                              snap.project_identity, preconditions, targets)
+    return {**commit, **result}
