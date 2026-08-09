@@ -15,3 +15,4 @@
 - 09.08.26 10:32 [E-2476] [parent: E-2475] [agent: claude] [op: transition-53c2f13c] RUN: closure gate run fresh
 - 09.08.26 10:32 [E-2477] [parent: E-2476] [agent: claude] [op: transition-f94e7f82] RUN: NITRO integrity regression closed
 - 09.08.26 10:32 [E-2478] [parent: E-2477] [T-584] [agent: claude] [op: checkpoint-e9ffe3c7] RUN: exceptional manual STATE.task repair if needed (engine now clears task on DONE); integrity wave regression closed
+- 09.08.26 10:36 [E-2479] [parent: E-2478] [T-584] [agent: claude] [op: checkpoint-98cb9f53] RUN: SHIP v7.219.0: NITRO integrity sweep release -- truthful journal stages, conflict-safe recovery, OperationPlan/apply, owned-field state patches, provenance, Improve path safety, 50-item red-control set
