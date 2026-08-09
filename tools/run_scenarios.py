@@ -4442,6 +4442,45 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            parsed_manual is not None and parsed_manual["op_id"] is None,
            repr(parsed_manual))
 
+    # ---- §69#24: a committed op retried returns ALREADY_APPLIED.
+    from saipen_engine.journal import run_mutation as _run_mutation
+    root_retry = make_project()
+    saipen_retry = root_retry / ".saipen"
+    log_r = (saipen_retry / "LOG.md").read_bytes()
+    state_r = (saipen_retry / "STATE.md").read_bytes()
+    new_log_r = log_r + b"\n- 09.08.26 00:01 [E-901] RUN: op\n"
+    new_state_r = state_r.replace(b"phase: DONE", b"phase: BUILD")
+    commit_retry = _run_mutation(
+        root_retry, "op-retry", "op", "probe", "id", "hash",
+        [{"path": ".saipen/LOG.md", "role": "log", "content": new_log_r,
+          "before_hash": hash_bytes(log_r),
+          "after_hash": hash_bytes(new_log_r)},
+         {"path": ".saipen/STATE.md", "role": "state",
+          "content": new_state_r, "before_hash": hash_bytes(state_r),
+          "after_hash": hash_bytes(new_state_r)}],
+        skip_preflight=True)
+    retry_result = _run_mutation(
+        root_retry, "op-retry", "op", "probe", "id", "hash",
+        [{"path": ".saipen/LOG.md", "role": "log", "content": new_log_r,
+          "before_hash": hash_bytes(log_r),
+          "after_hash": hash_bytes(new_log_r)}],
+        skip_preflight=True)
+    expect("a committed op retried returns ALREADY_APPLIED, no second write",
+           commit_retry.get("code") == "COMMITTED"
+           and retry_result.get("code") == "ALREADY_APPLIED",
+           repr((commit_retry, retry_result)))
+
+    # ---- §69#23: `saipen recover --json` returns a machine result.
+    rec_root = make_project()
+    saipen_rec = rec_root / ".saipen"
+    rec_proc = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "recover",
+         "--json"],
+        cwd=str(rec_root), capture_output=True, text=True, timeout=60)
+    expect("saipen recover --json returns structured JSON",
+           rec_proc.returncode == 0 and '"code": "CLEAN"' in rec_proc.stdout,
+           repr(rec_proc.stdout[:160]))
+
     return problems, checked
 
 
