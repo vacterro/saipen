@@ -4481,6 +4481,37 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            rec_proc.returncode == 0 and '"code": "CLEAN"' in rec_proc.stdout,
            repr(rec_proc.stdout[:160]))
 
+    # ---- NITRO M7: USERPERSON writer on the common journal machinery.
+    import userperson
+    up_root = make_project()
+    up_path = userperson.profile_path(up_root)
+    up_add = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "userperson",
+         "add", "Prefer UI: Vintage Golden", "--json"],
+        cwd=str(up_root), capture_output=True, text=True, timeout=60)
+    expect("saipen userperson add writes through the journal (COMMITTED)",
+           up_add.returncode == 0 and '"code": "COMMITTED"' in up_add.stdout
+           and up_path.is_file(), repr(up_add.stdout[:120]))
+    up_add2 = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "userperson",
+         "add", "Prefer UI: Material Design"],
+        cwd=str(up_root), capture_output=True, text=True, timeout=60)
+    up_text = up_path.read_text(encoding="utf-8-sig")
+    expect("userperson add keeps distinct preferences sharing a leading phrase",
+           up_add2.returncode == 0
+           and "Vintage Golden" in up_text
+           and "Material Design" in up_text, repr(up_text))
+    up_reset = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "userperson",
+         "reset"],
+        cwd=str(up_root), capture_output=True, text=True, timeout=60)
+    up_after = up_path.read_text(encoding="utf-8-sig") \
+        if up_path.is_file() else ""
+    expect("userperson reset empties the profile atomically",
+           up_reset.returncode == 0
+           and "Vintage Golden" not in up_after
+           and "Material Design" not in up_after, repr(up_after))
+
     return problems, checked
 
 

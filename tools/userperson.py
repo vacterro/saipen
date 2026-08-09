@@ -217,3 +217,32 @@ def onboarding_questions() -> list[str]:
 
 def profile_path(project_root: Path | str) -> Path:
     return Path(project_root) / PROFILE_PATH
+
+
+def write_profile(project_root: Path | str, text: str,
+                  agent: str = "saipen") -> dict:
+    """Write the profile through the common lock + journal + roll-forward
+    machinery (NITRO M7). One ATOMIC_FILE target, exact bytes via the codec,
+    before/after hashes, post-write byte verification. Returns the transaction
+    result; callers inspect and propagate."""
+    import uuid
+    from saipen_engine import codec
+    from saipen_engine.journal import _hash_file, hash_bytes, run_mutation
+    from saipen_engine.lock import project_writer_lock
+    from saipen_engine.paths import project_identity
+
+    root = Path(project_root)
+    path = root / PROFILE_PATH
+    rel = PROFILE_PATH.replace("\\", "/")
+    op_id = f"userperson-{uuid.uuid4().hex[:8]}"
+    doc = codec.read_document(path)
+    content_bytes = doc.encode(text)
+    before = _hash_file(path) if path.is_file() else ""
+    with project_writer_lock(root):
+        return run_mutation(
+            root, op_id, "userperson", agent, project_identity(root),
+            hash_bytes(rel.encode("utf-8")),
+            [{"path": rel, "role": "generic", "content": content_bytes,
+              "before_hash": before,
+              "after_hash": hash_bytes(content_bytes)}],
+            preconditions={rel: before})

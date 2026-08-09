@@ -126,6 +126,68 @@ def _recover(project_root: Path, as_json: bool) -> int:
     return 0 if result.get("ok") else 1
 
 
+def _userperson(project_root: Path, args: list[str], as_json: bool,
+                dry_run: bool) -> int:
+    """saipen userperson show/add/remove/reset (NITRO M7, journaled)."""
+    from userperson import (merge_profile, parse_profile, profile_path,
+                            remove_preference, render_profile,
+                            write_profile)
+
+    path = profile_path(project_root)
+    action = args[0]
+    current_text = path.read_text(encoding="utf-8-sig") if path.is_file() else ""
+    if action == "show":
+        if not current_text:
+            _emit({"ok": True, "code": "EMPTY", "preferences": []}, as_json)
+            return 0
+        if as_json:
+            _emit({"ok": True, "code": "SHOW",
+                   "preferences": parse_profile(current_text)["preferences"]},
+                  as_json)
+        else:
+            print(current_text, end="")
+        return 0
+    if action == "reset":
+        if not path.is_file():
+            _emit({"ok": False, "code": "TICKET_NOT_FOUND",
+                   "detail": "no profile to reset"}, as_json)
+            return 1
+        if dry_run:
+            _emit({"ok": True, "code": "RESET", "dry_run": True}, as_json)
+            return 0
+        # The journal writes targets; deletion is expressed as a committed
+        # empty profile (functionally absent: zero preferences, no warnings,
+        # validator passes) so the reset is atomic, journaled and recoverable.
+        result = write_profile(project_root, "# USERPERSON\n\n",
+                               _agent_for(project_root))
+        if result.get("ok"):
+            result["code"] = "RESET"
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+    if action in ("add", "remove"):
+        if len(args) < 2:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": f"userperson {action} needs <text>"}, as_json)
+            return 2
+        text = " ".join(args[1:])
+        current = parse_profile(current_text)["preferences"] \
+            if current_text else []
+        if action == "add":
+            updated = merge_profile(current, [f"- [General] {text}"])
+        else:
+            updated = remove_preference(current, text)
+        new_text = render_profile(updated)
+        if new_text == current_text:
+            _emit({"ok": True, "code": "UNCHANGED"}, as_json)
+            return 0
+        result = write_profile(project_root, new_text, _agent_for(project_root))
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+    _emit({"ok": False, "code": "VALIDATION_FAILED",
+           "detail": f"unknown userperson action {action!r}"}, as_json)
+    return 2
+
+
 def _emit(payload: dict, as_json: bool) -> None:
     if as_json:
         print(json.dumps(payload, ensure_ascii=False, indent=2))
@@ -208,6 +270,8 @@ def main(argv: list[str] | None = None) -> int:
                                  " ".join(rest[1:]), dry_run=dry_run)
             _emit(result.to_dict(), as_json)
             return 0 if result.ok else 1
+    if command == "userperson" and len(args) >= 1:
+        return _userperson(project_root, args[1:], as_json, dry_run)
     print(f"unknown command: {command}")
     return 2
 
