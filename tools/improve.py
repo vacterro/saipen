@@ -320,12 +320,17 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
             f"disposition {disposition!r} outside the closed set "
             f"{sorted(DISPOSITION)}")
     imp_raw = str(entry.get("imp_id", ""))
+    # ONE finding-id representation (NITRO dogfood III, T-594): the internal
+    # identity is the numeric part; "IMP-###" is the canonical rendering,
+    # produced exactly once at the boundary. Shuttling "001"/"IMP-001" through
+    # string concatenation once produced IMP-IMP-001, unreadable by the parser.
     if re.fullmatch(r"\d+", imp_raw):
-        imp_id = f"IMP-{imp_raw}"
-    elif re.fullmatch(r"IMP-\d+", imp_raw):
-        imp_id = imp_raw
+        imp_num = imp_raw
+    elif re.fullmatch(r"IMP-(\d+)", imp_raw):
+        imp_num = re.match(r"IMP-(\d+)", imp_raw).group(1)
     else:
         raise ImproveError(f"imp_id {imp_raw!r} is not IMP-###")
+    imp_id = f"IMP-{imp_num}"
     ledger = cycle_dir / "SWEEP.md"
     _prove_inside(_project_root_of(ledger), ledger)
     text = _read_maybe(ledger)
@@ -360,6 +365,10 @@ def _journaled_write(path: Path, content: str, kind: str,
     `base_hash`; APPLY refuses STALE_STATE if the live file no longer matches
     it. No helper may silently refresh the before hash while preserving stale
     content -- a stale caller plan must never overwrite an intervening update.
+
+    The journal carries the improve_atomic_file verification policy so
+    recovery reruns the Improve semantic postcondition, not a silent None
+    (NITRO dogfood III, T-594).
     """
     import uuid
     from saipen_engine import codec
@@ -383,7 +392,8 @@ def _journaled_write(path: Path, content: str, kind: str,
             [{"path": rel, "role": "generic", "content": content_bytes,
               "before_hash": before,
               "after_hash": hash_bytes(content_bytes)}],
-            preconditions={rel: before})
+            preconditions={rel: before},
+            verification_policy="improve_atomic_file")
 
 
 def _identity(root: Path) -> str:

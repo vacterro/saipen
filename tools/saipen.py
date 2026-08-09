@@ -148,15 +148,45 @@ def _next_action(project_root: Path, as_json: bool) -> int:
     return 0
 
 
-def _recover(project_root: Path, as_json: bool) -> int:
+def _recover(project_root: Path, args: list[str], as_json: bool) -> int:
+    # `saipen recover inspect <op_id>` -- read-only conflict inspection.
+    if args and args[0] == "inspect":
+        if len(args) < 2:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": "recover inspect needs <op_id>"}, as_json)
+            return 2
+        from saipen_engine.journal import inspect_op
+        result = inspect_op(project_root, args[1])
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+    # `saipen recover resolve <op_id> [--resolution accept_live|replan]` --
+    # the explicit conflict-resolution lifecycle (NITRO dogfood III, T-594).
+    if args and args[0] == "resolve":
+        if len(args) < 2:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": "recover resolve needs <op_id>"}, as_json)
+            return 2
+        resolution = "accept_live"
+        rest = args[2:]
+        if "--resolution" in rest:
+            idx = rest.index("--resolution")
+            if idx + 1 < len(rest):
+                resolution = rest[idx + 1]
+        from saipen_engine.journal import resolve_conflict
+        result = resolve_conflict(project_root, args[1], resolution,
+                                  agent=_agent_for(project_root))
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
     conflicts = _conflicts(project_root)
     if conflicts:
         _emit({"ok": False, "code": "CONFLICT",
                "op_ids": conflicts,
                "recovery_required": True,
                "detail": "unresolved conflict(s): " + ", ".join(conflicts)
-                         + "; evidence preserved, resolve explicitly before "
-                         "further mutation"}, as_json)
+                         + "; evidence preserved, resolve explicitly (saipen "
+                         "recover inspect <op_id> / resolve <op_id> "
+                         "--resolution accept_live|replan) before further "
+                         "mutation"}, as_json)
         return 1
     pending = _pending(project_root)
     if not pending:
@@ -382,7 +412,7 @@ def main(argv: list[str] | None = None) -> int:
     if command == "next":
         return _next_action(project_root, as_json)
     if command == "recover":
-        return _recover(project_root, as_json)
+        return _recover(project_root, args[1:], as_json)
     if command == "claim":
         if len(args) < 2:
             _emit({"ok": False, "code": "TICKET_NOT_FOUND"}, as_json)

@@ -245,4 +245,5 @@ def write_profile(project_root: Path | str, text: str,
             [{"path": rel, "role": "generic", "content": content_bytes,
               "before_hash": before,
               "after_hash": hash_bytes(content_bytes)}],
-            preconditions={rel: before})
+            preconditions={rel: before},
+            verification_policy="userperson")

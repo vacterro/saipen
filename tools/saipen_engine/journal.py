@@ -32,9 +32,14 @@ import sys
 import datetime
 from pathlib import Path
 
-STATUS = ("PREPARED", "APPLYING", "VERIFIED", "COMMITTED", "ABORTED", "CONFLICT")
-# SETTLED: no further mutation work needed; recovery may not act.
-SETTLED = ("COMMITTED", "ABORTED")
+STATUS = ("PREPARED", "APPLYING", "VERIFIED", "COMMITTED", "ABORTED",
+          "CONFLICT", "RESOLVED")
+# SETTLED: no further mutation work needed; recovery may not act. RESOLVED is
+# a conflict that was explicitly settled (accept-live or replan) with its
+# partial-application evidence preserved -- distinct from ABORTED, which would
+# falsely imply nothing happened when the op already appended LOG (NITRO
+# dogfood III, T-594).
+SETTLED = ("COMMITTED", "ABORTED", "RESOLVED")
 # UNRESOLVED: the operation still owns mutation state. CONFLICT is stable
 # evidence but NOT permission to continue -- a conflict must be resolved
 # explicitly before any new canonical mutation (NITRO dogfood II, T-587).
@@ -508,11 +513,252 @@ def recover(project_root: Path | str, op_id: str) -> dict:
 
 def _verifier_for(policy: str):
     """The semantic verifier callable for a closed verification policy, or
-    None when the policy carries no cross-file postcondition."""
+    None when the policy carries no cross-file postcondition.
+
+    Every NAMED policy must behave truthfully (NITRO dogfood III, T-594):
+    a named semantic verifier actually verifies the semantic postcondition the
+    mutation claims, never a silent None.
+    """
     if policy == "core_fast":
         from . import fast_check
         return fast_check.validate_project
+    if policy == "improve_atomic_file":
+        return _verify_improve_file
+    if policy == "userperson":
+        return _verify_userperson
+    if policy == "sub_lifecycle":
+        return _verify_sub_lifecycle
     return None
+
+
+def _verify_improve_file(root) -> list[str]:
+    """Verify the semantic postcondition of an Improve atomic-file write: the
+    owned manifest/sweep parses with the same parser its readers use."""
+    errors = []
+    try:
+        import improve
+        sweep = root / ".saipen" / "improve"
+        if sweep.is_dir():
+            for cycle in sorted(sweep.iterdir()):
+                manifest = cycle / "MANIFEST.md"
+                if manifest.is_file():
+                    text = manifest.read_text(encoding="utf-8-sig")
+                    if not text.startswith("# IMPROVE CYCLE ROSTER"):
+                        errors.append(f"{manifest}: not a valid roster header")
+                    seats = [ln for ln in text.splitlines()
+                             if ln.startswith("seat_id:")]
+                    if len(seats) != len(set(seats)):
+                        errors.append(f"{manifest}: duplicate seat_id")
+                    st = improve._cycle_status(manifest)
+                    if st not in ("active", "complete", "archived"):
+                        errors.append(f"{manifest}: cycle_status {st!r} "
+                                      "outside active|complete|archived")
+    except Exception as exc:  # noqa: BLE001
+        errors.append(f"improve file verification failed: {exc}")
+    return errors
+
+
+def _verify_userperson(root) -> list[str]:
+    """Verify the semantic postcondition of a USERPERSON write: an absent
+    profile is the canonical OFF state; a present profile parses structurally."""
+    errors = []
+    profile = root / ".saipen" / "USERPERSON.md"
+    if not profile.is_file():
+        return errors  # absence is the canonical OFF state
+    try:
+        from userperson import validate_profile
+        errors.extend(validate_profile(profile.read_text(encoding="utf-8-sig")))
+    except Exception as exc:  # noqa: BLE001
+        errors.append(f"userperson verification failed: {exc}")
+    return errors
+
+
+def _verify_sub_lifecycle(root) -> list[str]:
+    """Verify the semantic postcondition of a SubSaipen lifecycle write: the
+    sub STATE parses and pause metadata pairs correctly with the phase."""
+    errors = []
+    subs_dir = root / ".saipen" / "extensions" / "subs"
+    if not subs_dir.is_dir():
+        return errors
+    try:
+        from .state import parse_state
+        for instance in sorted(subs_dir.iterdir()):
+            state_file = instance / "STATE.md"
+            if not state_file.is_file():
+                continue
+            st = parse_state(state_file.read_text(encoding="utf-8-sig"))
+            if not st:
+                errors.append(f"{instance.name}: STATE unparseable")
+            phase = st.get("phase")
+            if phase == "BLOCKED" and st.get("blocker") == "paused by main agent":
+                if not st.get("paused_from_phase"):
+                    errors.append(f"{instance.name}: paused without "
+                                  "paused_from_phase")
+                if not st.get("paused_from_na"):
+                    errors.append(f"{instance.name}: paused without "
+                                  "paused_from_na")
+    except Exception as exc:  # noqa: BLE001
+        errors.append(f"sub lifecycle verification failed: {exc}")
+    return errors
+
+
+def inspect_op(project_root: Path | str, op_id: str) -> dict:
+    """READ-ONLY conflict inspection (NITRO dogfood III, T-594).
+
+    Returns the full evidence a resolver needs: operation, status, targets
+    with expected-before/planned-after/current hashes, read-only dependencies,
+    which locations currently conflict, the verification policy, the staged
+    identity, and the safe resolution classes. Zero mutation, JSON-first.
+    """
+    root = Path(project_root)
+    journal = Journal(root, op_id)
+    if not journal.exists():
+        return {"ok": False, "code": "TICKET_NOT_FOUND", "op_id": op_id}
+    record = journal.read()
+    targets = []
+    conflicts = []
+    for target in record.get("targets", []):
+        live = _hash_file(root / target["path"])
+        entry = {
+            "path": target["path"],
+            "role": target["role"],
+            "applied": target.get("applied", False),
+            "expected_before": target.get("before_hash", ""),
+            "planned_after": target.get("after_hash", ""),
+            "current": live,
+        }
+        expected = target.get("after_hash") if target.get("applied") \
+            else target.get("before_hash")
+        if live != expected:
+            entry["conflicts"] = True
+            conflicts.append(target["path"])
+        else:
+            entry["conflicts"] = False
+        targets.append(entry)
+    return {
+        "ok": True,
+        "op_id": op_id,
+        "operation": record.get("operation"),
+        "status": record.get("status"),
+        "created_at": record.get("created_at"),
+        "agent": record.get("agent"),
+        "verification_policy": record.get("verification_policy", "none"),
+        "read_dependencies": record.get("read_preconditions", {}),
+        "targets": targets,
+        "conflicting_locations": conflicts,
+        "staged_identity": record.get("semantic_payload_hash"),
+        "safe_resolution_classes": (
+            ["accept_live", "replan"]
+            if record.get("status") == "CONFLICT" else []),
+        "code": "CONFLICT_INSPECT" if record.get("status") == "CONFLICT"
+        else "OP_INSPECT",
+    }
+
+
+def resolve_conflict(project_root: Path | str, op_id: str,
+                     resolution: str = "accept_live",
+                     agent: str = "saipen") -> dict:
+    """Settle ONE unresolved CONFLICT through an explicit bounded lifecycle
+    (NITRO dogfood III, T-594). No --force exists: a conflict means live
+    evidence diverged from the authorized plan, and the resolver never writes
+    planned bytes over live ones.
+
+    ACCEPT_LIVE_ABORT_PLAN: keep the current conflicting live bytes as truth;
+    abandon every remaining unapplied plan effect. Any target already applied
+    stays (its after_hash IS the live truth); anything not applied stays live.
+
+    REPLAN: retire this operation (conflict evidence preserved), requiring a
+    fresh semantic OperationPlan built from the current canonical state.
+
+    Both produce a RESOLVED journal with applied/skipped targets, the resolver
+    event and validation evidence. Resolution bypasses ONLY this op from the
+    preflight gate: it refuses when another unrelated unresolved operation or
+    conflict exists, and it re-verifies the live repository afterwards.
+    """
+    root = Path(project_root)
+    journal = Journal(root, op_id)
+    if not journal.exists():
+        return {"ok": False, "code": "TICKET_NOT_FOUND", "op_id": op_id}
+    record = journal.read()
+    if record.get("status") != "CONFLICT":
+        return {"ok": False, "code": "VALIDATION_FAILED",
+                "detail": f"op {op_id} is {record.get('status')}, not "
+                          "CONFLICT; only an unresolved conflict is "
+                          "resolvable"}
+    if resolution not in ("accept_live", "replan"):
+        return {"ok": False, "code": "VALIDATION_FAILED",
+                "detail": f"resolution {resolution!r} outside "
+                          "accept_live|replan"}
+
+    # Only the selected conflict may be settled: any OTHER unresolved op or
+    # conflict blocks this resolution (no global bypass).
+    for other in pending_ops(root):
+        if other["op_id"] != op_id:
+            return {"ok": False, "code": "RECOVERY_REQUIRED",
+                    "op_ids": [other["op_id"]],
+                    "detail": f"unrelated unresolved op {other['op_id']} "
+                              "blocks resolving this conflict; resolve it "
+                              "first"}
+
+    # Re-read the live state before settling: if hashes changed again during
+    # the decision, refuse (the evidence moved under us). ACCEPT_LIVE and
+    # REPLAN both keep the current live bytes as the new baseline -- an
+    # unfinished target's divergent bytes ARE the accepted truth, they do not
+    # need to equal before/after. The only refusal is the evidence moving
+    # mid-resolution.
+    applied = []
+    skipped = []
+    live_snapshot = {}
+    for target in record.get("targets", []):
+        live = _hash_file(root / target["path"])
+        live_snapshot[target["path"]] = live
+        if target.get("applied"):
+            if live != target.get("after_hash"):
+                return {"ok": False, "code": "CONFLICT",
+                        "detail": f"applied target {target['path']} changed "
+                                  f"again during resolution; evidence moved, "
+                                  "re-inspect"}
+            applied.append(target["path"])
+        else:
+            skipped.append(target["path"])
+    # Stability guard: the live bytes must not move between the pre-resolution
+    # read and the settle.
+    for path, expected in live_snapshot.items():
+        if _hash_file(root / path) != expected:
+            return {"ok": False, "code": "CONFLICT",
+                    "detail": f"target {path} changed during resolution; "
+                              "evidence moved, re-inspect"}
+
+    # ACCEPT_LIVE: the current live bytes are the new truth. Verify the
+    # resulting canonical repository before settling.
+    policy = record.get("verification_policy", "none")
+    verifier = _verifier_for(policy)
+    errors = verifier(root) if verifier is not None else []
+    if errors:
+        return {"ok": False, "code": "NEEDS_REPAIR",
+                "detail": "resolving to current live leaves an invalid "
+                          "repository: " + "; ".join(errors[:5]),
+                "conflict_op_id": op_id, "repair_evidence": errors}
+
+    # Settle: mark RESOLVED with the resolution record. Never touch the live
+    # canonical files -- the resolution IS the decision to keep them.
+    import datetime
+    now = datetime.datetime.now(datetime.timezone.utc).strftime(
+        "%Y-%m-%dT%H:%M:%SZ")
+    record["status"] = "RESOLVED"
+    record["resolution"] = resolution
+    record["resolved_at"] = now
+    record["resolver_agent"] = agent
+    record["resolution_applied_targets"] = applied
+    record["resolution_skipped_targets"] = skipped
+    record["resolution_evidence"] = "live accepted" if resolution \
+        == "accept_live" else "operation retired; fresh plan required"
+    _atomic_json(journal.manifest, record)
+    return {"ok": True, "code": "RESOLVED", "op_id": op_id,
+            "resolution": resolution, "applied_targets": applied,
+            "skipped_targets": skipped,
+            "detail": "conflict settled; live bytes accepted as truth, "
+                      "unapplied plan effects abandoned"}
 
 
 def auto_recover_pending(project_root: Path | str) -> dict:

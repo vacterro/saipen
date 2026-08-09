@@ -5362,6 +5362,97 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            and rcA.get("executable_behavior") == "RESTATE_AND_STOP",
            repr(rcA))
 
+    # ---- T-592: conflict inspection + safe resolution lifecycle.
+    from saipen_engine.journal import (inspect_op as _inspect_op,
+                                       resolve_conflict as _resolve_conflict)
+    conf_root = make_project()
+    saipen_cf = conf_root / ".saipen"
+    log_cf = (saipen_cf / "LOG.md").read_bytes()
+    state_cf = (saipen_cf / "STATE.md").read_bytes()
+    new_log_cf = log_cf + b"\n- 09.08.26 00:01 [E-901] RUN: op\n"
+    new_state_cf = state_cf.replace(b"phase: DONE", b"phase: BUILD")
+    j_cf = Journal(conf_root, "op-t592")
+    j_cf.start("checkpoint", "probe", "id", "h", [
+        {"path": ".saipen/LOG.md", "role": "log", "content": new_log_cf,
+         "before_hash": hash_bytes(log_cf),
+         "after_hash": hash_bytes(new_log_cf)},
+        {"path": ".saipen/STATE.md", "role": "state",
+         "content": new_state_cf, "before_hash": hash_bytes(state_cf),
+         "after_hash": hash_bytes(new_state_cf)},
+    ], verification_policy="core_fast")
+    (saipen_cf / "LOG.md").write_bytes(new_log_cf)
+    j_cf.mark("APPLYING", progress_index=1, target_index=0)
+    external_cf = state_cf.replace(b"phase: DONE", b"phase: HUNT").replace(
+        b"last_event: 900", b"last_event: 901")
+    (saipen_cf / "STATE.md").write_bytes(external_cf)
+    recover(conf_root, "op-t592")
+    insp = _inspect_op(conf_root, "op-t592")
+    expect("conflict inspect reports the conflicting location read-only",
+           insp.get("code") == "CONFLICT_INSPECT"
+           and insp.get("conflicting_locations") == [".saipen/STATE.md"]
+           and insp.get("safe_resolution_classes") == ["accept_live",
+                                                       "replan"],
+           repr(insp))
+    # Only the selected conflict may be settled: a second unrelated unresolved
+    # op blocks.
+    second_log = (saipen_cf / "LOG.md").read_bytes()
+    j2 = Journal(conf_root, "op-other")
+    j2.start("checkpoint", "probe", "id", "h", [
+        {"path": ".saipen/LOG.md", "role": "log", "content": second_log,
+         "before_hash": hash_bytes(second_log),
+         "after_hash": hash_bytes(second_log)},
+    ], verification_policy="core_fast")
+    j2.mark("APPLYING", progress_index=1, target_index=0)
+    blocked_res = _resolve_conflict(conf_root, "op-t592", "accept_live")
+    expect("resolution refuses when another unrelated op is unresolved",
+           not blocked_res.get("ok")
+           and blocked_res.get("code") == "RECOVERY_REQUIRED",
+           repr(blocked_res))
+    # Clear the unrelated op (abort it: PREPARED-nothing-applied) then resolve.
+    j2.mark("ABORTED")
+    res_cf = _resolve_conflict(conf_root, "op-t592", "accept_live",
+                               agent="probe")
+    expect("accept_live settles the conflict (RESOLVED)",
+           res_cf.get("ok") and res_cf.get("code") == "RESOLVED"
+           and res_cf.get("resolution") == "accept_live"
+           and res_cf.get("applied_targets") == [".saipen/LOG.md"]
+           and res_cf.get("skipped_targets") == [".saipen/STATE.md"],
+           repr(res_cf))
+    expect("pending_ops clears after resolution",
+           "op-t592" not in [p["op_id"] for p in pending_ops(conf_root)])
+    new_mut = ticket_add(conf_root, "probe", "P2", "after conflict resolve",
+                         [], "verify")
+    expect("a new mutation succeeds after the conflict is resolved",
+           new_mut.get("ok"), repr(new_mut))
+    # REPLAN branch: a fresh conflict resolved as replan retires the op.
+    conf2 = make_project()
+    saipen2 = conf2 / ".saipen"
+    log2 = (saipen2 / "LOG.md").read_bytes()
+    state2 = (saipen2 / "STATE.md").read_bytes()
+    new_log2 = log2 + b"\n- 09.08.26 00:01 [E-901] RUN: op\n"
+    new_state2 = state2.replace(b"phase: DONE", b"phase: BUILD")
+    j3 = Journal(conf2, "op-replan")
+    j3.start("checkpoint", "probe", "id", "h", [
+        {"path": ".saipen/LOG.md", "role": "log", "content": new_log2,
+         "before_hash": hash_bytes(log2),
+         "after_hash": hash_bytes(new_log2)},
+        {"path": ".saipen/STATE.md", "role": "state",
+         "content": new_state2, "before_hash": hash_bytes(state2),
+         "after_hash": hash_bytes(new_state2)},
+    ], verification_policy="core_fast")
+    (saipen2 / "LOG.md").write_bytes(new_log2)
+    j3.mark("APPLYING", progress_index=1, target_index=0)
+    ext2 = state2.replace(b"phase: DONE", b"phase: HUNT").replace(
+        b"last_event: 900", b"last_event: 901")
+    (saipen2 / "STATE.md").write_bytes(ext2)
+    recover(conf2, "op-replan")
+    res2 = _resolve_conflict(conf2, "op-replan", "replan", agent="probe")
+    expect("replan retires the conflict op (RESOLVED)",
+           res2.get("ok") and res2.get("code") == "RESOLVED"
+           and res2.get("resolution") == "replan", repr(res2))
+    expect("replan does not touch live canonical bytes",
+           b"phase: HUNT" in (saipen2 / "STATE.md").read_bytes())
+
     return problems, checked
 
 

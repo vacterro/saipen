@@ -223,7 +223,8 @@ def sub_spawn(project_root: Path | str, name: str, saipen_home: str,
         commit = run_mutation(
             root, op_id, "sub_spawn", agent or name, project_identity(root),
             hash_bytes(("sub_spawn:" + name).encode("utf-8")),
-            targets, preconditions={MANIFEST_REL: _hash_or_empty(manifest)})
+            targets, preconditions={MANIFEST_REL: _hash_or_empty(manifest)},
+                    verification_policy="sub_lifecycle")
     if not commit.get("ok"):
         return _refuse(commit.get("code", "VALIDATION_FAILED"),
                        commit.get("detail", ""), name=name)
@@ -285,7 +286,8 @@ def sub_adopt(project_root: Path | str, name: str, saipen_home: str) -> Result:
             [{"path": rel, "role": "state", "content": doc.encode(new_text),
               "before_hash": doc.raw_hash,
               "after_hash": hash_bytes(doc.encode(new_text))}],
-            preconditions={rel: doc.raw_hash})
+            preconditions={rel: doc.raw_hash},
+            verification_policy="sub_lifecycle")
     if not commit.get("ok"):
         return _refuse(commit.get("code", "VALIDATION_FAILED"),
                        commit.get("detail", ""), name=name)
@@ -337,7 +339,8 @@ def sub_pause(project_root: Path | str, name: str) -> Result:
             targets,
             preconditions={rel: doc.raw_hash,
                            f"{SUBS_REL}/{name}/LOG.md":
-                           _hash_or_empty(root / f"{SUBS_REL}/{name}/LOG.md")})
+                           _hash_or_empty(root / f"{SUBS_REL}/{name}/LOG.md")},
+            verification_policy="sub_lifecycle")
     if not commit.get("ok"):
         return _refuse(commit.get("code", "VALIDATION_FAILED"),
                        commit.get("detail", ""), name=name)
@@ -398,7 +401,8 @@ def sub_resume(project_root: Path | str, name: str) -> Result:
             targets,
             preconditions={rel: doc.raw_hash,
                            f"{SUBS_REL}/{name}/LOG.md":
-                           _hash_or_empty(root / f"{SUBS_REL}/{name}/LOG.md")})
+                           _hash_or_empty(root / f"{SUBS_REL}/{name}/LOG.md")},
+            verification_policy="sub_lifecycle")
     if not commit.get("ok"):
         return _refuse(commit.get("code", "VALIDATION_FAILED"),
                        commit.get("detail", ""), name=name)
