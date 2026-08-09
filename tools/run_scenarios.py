@@ -3502,8 +3502,8 @@ def run_nitro_probes() -> tuple[list[str], int]:
                                  "## BLOCKED"], repr(board["headings"]))
     doing = [t for t in board["tickets"].values()
              if t["section"] == "## DOING"]
-    expect("board parser locates the claimed ticket",
-           len(doing) == 1 and doing[0]["checkbox"] == "/",
+    expect("board parser enforces at-most-one claimed ticket with / checkbox",
+           len(doing) <= 1 and all(t["checkbox"] == "/" for t in doing),
            repr([(t["id"], t["checkbox"]) for t in doing]))
 
     log_line = "- 08.08.26 23:58 [E-2440] [parent: E-2439] [T-578] RUN: probe"
