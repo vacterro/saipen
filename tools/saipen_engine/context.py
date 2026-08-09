@@ -40,9 +40,9 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from . import codec, phases
+from . import codec
 from .board import parse_board
-from .log import log_tail_event, parse_log_line
+from .log import parse_log_line
 from .result import Result
 from .snapshot import ProjectSnapshot
 from .state import parse_state

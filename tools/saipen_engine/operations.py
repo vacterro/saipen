@@ -699,7 +699,7 @@ def _is_placeholder_verify(verify: str) -> bool:
     return (not cleaned
             or cleaned in ("tbd", "todo", "verify: tbd", "verify: todo",
                            "tbd -", "todo -", "placeholder")
-            or cleaned.startswith("verify:") and len(cleaned) < 12)
+            or (cleaned.startswith("verify:") and len(cleaned) < 12))
 
 
 def ticket_add(project_root: Path | str, agent: str, priority: str,

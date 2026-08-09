@@ -96,13 +96,22 @@ that starts failing at import time, which is the cheapest rung of
    - Clear out empty directories.
    - **DO NOT** delete files in `.saipen/kitchen/` unless evidence proves them superseded and recoverable, or the project is fully completed. For Core kitchen, stale means the owning ticket is `DONE` and no longer on `BOARD.md` with its reasoning fully folded into `LOG.md`/`CHANGELOG.md`, or later canonical content explicitly supersedes it. For a SubSaipen kitchen, `extensions/subs/PROTOCOL.md` § 6 owns the stricter five-class STALE verdict; age and collection count never qualify. This phase is the only owner of kitchen deletion (T-540) -- `phases/hunt.md` only scans and tickets; explicit `saipen sub clean <name>` additionally enforces the live-work and recovery-evidence refusals before any instance removal.
    - **Seal an oversized `LOG.md`** (CORE.md §1.2 segmentation): if the active
-     `.saipen/LOG.md` has grown past the soft cap (~300 lines / ~64 KB),
-     move its content verbatim into the next `.saipen/logs/LOG-<NNN>.md` and
-     start a fresh active `LOG.md` continuing the same `E-###` sequence.
-     Whole lines only, never a rewrite -- history is relocated, not edited.
-     This keeps the file agents actually read small enough to open and parse
-     on weak hardware; `tools/validate.py` reads the sealed segments + the
-     active tail as one sequence, so nothing about the graph checks changes.
+      `.saipen/LOG.md` has grown past the soft cap (~300 lines / ~64 KB),
+      move its content verbatim into the next `.saipen/logs/LOG-<NNN>.md` and
+      start a fresh active `LOG.md` continuing the same `E-###` sequence.
+      Whole lines only, never a rewrite -- history is relocated, not edited.
+      This keeps the file agents actually read small enough to open and parse
+      on weak hardware; `tools/validate.py` reads the sealed segments + the
+      active tail as one sequence, so nothing about the graph checks changes.
+   - **Journal compaction (NITRO dogfood IV, T-596):** run the bounded
+      maintenance compaction of settled operation journals
+      (`saipen_engine.journal.compact_committed`). It deletes the `.staged`
+      bytes of COMMITTED and RESOLVED operations only -- keeping the full
+      tombstone (op_id, operation, status, semantic payload hash, per-target
+      final hashes, timestamp) -- and NEVER compacts PREPARED / APPLYING /
+      VERIFIED / CONFLICT / ABORTED, whose evidence is still required. This is
+      a maintenance mutation; ordinary checkpointing never compacts
+      automatically.
 
 5. **Freshness Check:**
    - Ensure the repository is up to date with correct paths.

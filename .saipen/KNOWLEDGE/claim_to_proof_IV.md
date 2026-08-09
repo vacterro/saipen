@@ -45,7 +45,7 @@ Their historical DONE state is NOT rewritten (append-only). Their diffs and
 relevant verification are re-audited with current evidence below; the skipped
 lifecycle is never called retrospectively executed.
 
-## Fresh re-verification by current evidence (T-602 BUILD, 2026-08-09)
+## Fresh re-verification by current evidence (FINAL, T-596 closure, 2026-08-09)
 
 Independent re-review of the actual diffs + exact relevant verification, run
 fresh on the current HEAD (T-602..T-596 wave). The lifecycle column records
@@ -61,3 +61,19 @@ The three historical closures remain ACCIDENTAL_SUCCESS for GATE proof (their
 REVIEW/SHIP lifecycle was bypassed); the RESULT layer is re-proven correct by
 the fresh suite above, and the GATE layer is now mechanically enforced for all
 new closures.
+
+## Dogfood IV wave proof (T-602 / T-601 / T-600)
+
+Every claim below was produced fresh THIS wave; no result was reused from
+historical evidence.
+
+| Ticket | Claim | Direct (UNIT) | Composition | Canonical | Gate |
+|---|---|---|---|---|---|
+| T-602 | finish refuses every non-SHIP closure; transition_from is actual | gate controls A/B/C zero-bytes + ILLEGAL_PHASE; mutation red-control | full-chain control D validator-green; valve-mid-ticket control | validate.py PASS | finish-requires-SHIP + `[gate-closure]` validator check |
+| T-601 | complete_cycle requires sweep coverage; target-aware verifier; resolver serialized | lifecycle REFUSE/COMMITTED controls; malformed-SWEEP verifier red control; recovery same-verifier control | next-cycle-admitted control; resolver two-process race | validate.py PASS | complete_cycle sweep-coverage gate; APPLY/Recovery one verifier class |
+| T-600 | context metrics describe the emitted surface; mandatory sections never cut | byte identity (Cyrillic+Japanese) exact; truthful board-map cap | real-shape small-budget fixture keeps routed action/ticket/needs/verify/phase-doc/recovery | validate.py PASS | n/a (read-only projection; no workflow gate) |
+
+Full wave gates: run_scenarios.py green (168 nitro-integrity + 49 improve +
+all fixtures), tools/validate.py PASS, tools/audit_checks.py 231/231,
+audit_floor + audit_order + audit_tags green, R1..R13 repro all NOT
+REPRODUCED.

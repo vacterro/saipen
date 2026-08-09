@@ -144,13 +144,62 @@ M7: USERPERSON writers on common path/atomic/result/dry-run. DONE (T-577) --
 M8: SubSaipen operations (reuse freshness.py/sub_clean.py). DONE (T-585) --
     saipen sub list/status/spawn/pause/resume/clean/collect on common machinery.
 M9: context compiler (saipen context cold/hot/audit) + token accounting. DONE
-    (T-586) -- bounded engine-derived surfaces, ~90% byte reduction, per-source
-    token accounting with repeated-unchanged-bytes metric.
+    (T-586, integrity-repaired T-600) -- bounded engine-derived surfaces,
+    ~90% byte reduction, per-source token accounting with the HONEST
+    projection metric (`projection_reduction_bytes` = raw canonical bytes
+    minus cold-surface bytes; it measures what the projection OMITS, never
+    "unchanged across revisions"). The old `repeated_unchanged_bytes` name
+    was retired in T-590 because it claimed a historical comparison nothing
+    performed. Dogfood IV (T-600) made the surface STRUCTURAL: mandatory
+    sections (recovery, computed next action, protected exact next ticket,
+    STATE essentials, routed phase doc, needs/verify) are never truncated;
+    only optional BOARD orientation and bounded LOG evidence shrink, and the
+    byte/character/token metrics describe the FINAL emitted surface exactly
+    (bytes == len(surface.encode('utf-8'))).
 
 NITRO M1-M9 shipped together in the v7.219.0 integrity release and the
 M7-M9 commits that followed. The next phase is FULL NITRO DOGFOOD on SAIPEN
 core (use the engine for real maintenance), then SAICRITIC from the queued
 directive, then real Improve cycles.
+
+## Dogfood IV -- GATE INTEGRITY (T-602, T-601, T-600, T-596)
+
+The fourth proof level. The learned hierarchy was UNIT / COMPOSITION /
+CANONICAL. Dogfood IV exposed a defect that hierarchy cannot name:
+
+> A mechanically valid final state can still be invalid evidence of the work
+> that supposedly produced it.
+
+`finish_ticket` previously wrote `transition_from: SHIP` regardless of the
+actual phase, so finishing a ticket from SCOUT/BUILD/VERIFY/REVIEW produced
+a syntactically legal `DONE` whose phase history was fabricated. Final bytes
+validated; the gates never ran. The permanent invariant:
+
+    VALID END STATE != PROOF OF REQUIRED PROCESS.
+
+Gate proof needs event/provenance evidence from the append-only LOG, and the
+mutator must make skipping the gate mechanically impossible (the engine
+refusal), never rely on the validator to spot the omission after the fact.
+
+The four proof levels SAICRITIC audits:
+
+| Level | Question |
+|---|---|
+| UNIT | is the operation locally correct? |
+| COMPOSITION | does the predecessor/successor chain work? |
+| CANONICAL | do the repository invariants validate? |
+| GATE | did the REQUIRED semantic/protocol gates actually occur? |
+
+Dogfood IV closures: `finish_ticket` requires phase SHIP (ILLEGAL_PHASE
+refusal, zero bytes, T-602); Improve `complete_cycle` requires full sweep
+disposition coverage (T-601); the Improve semantic verifier is target-aware
+and shared by APPLY + Recovery (T-601); `resolve_conflict` serializes under
+the project writer lock (T-601); the context compiler budgets structurally
+and reports only what the model receives (T-600); the `[gate-closure]`
+validator check FAILs a fabricated post-boundary non-SHIP closure (T-602).
+Historical skipped-gate closures (T-591/T-594/T-595 closed from VERIFY) are
+recorded as ACCIDENTAL_SUCCESS with incomplete gate proof and re-verified by
+current evidence (KNOWLEDGE/claim_to_proof_IV.md).
 
 The first vertical slice is claim/transition/checkpoint. After those are
 mechanical, STOP adding commands and use them in real Improve work; choose the

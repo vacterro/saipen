@@ -436,7 +436,7 @@ def recover(project_root: Path | str, op_id: str) -> dict:
     if status == "CONFLICT":
         return {"ok": False, "code": "CONFLICT", "op_id": op_id,
                 "recovery_required": True,
-                "detail": f"op is CONFLICT; resolve explicitly before "
+                "detail": "op is CONFLICT; resolve explicitly before "
                           "further mutation (saipen recover, evidence "
                           "preserved)"}
 
@@ -581,7 +581,7 @@ def verify_improve(root, targets) -> list[str]:
                 errors.extend(improve.validate_report_target(text))
             elif role == "generic":
                 pass  # no domain grammar for an unknown Improve file
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         errors.append(f"improve verification failed: {exc}")
     return errors
 
@@ -596,7 +596,7 @@ def _verify_userperson(root) -> list[str]:
     try:
         from userperson import validate_profile
         errors.extend(validate_profile(profile.read_text(encoding="utf-8-sig")))
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         errors.append(f"userperson verification failed: {exc}")
     return errors
 
@@ -625,7 +625,7 @@ def _verify_sub_lifecycle(root) -> list[str]:
                 if not st.get("paused_from_na"):
                     errors.append(f"{instance.name}: paused without "
                                   "paused_from_na")
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         errors.append(f"sub lifecycle verification failed: {exc}")
     return errors
 
@@ -835,14 +835,22 @@ def auto_recover_pending(project_root: Path | str) -> dict:
 
 
 def compact_committed(project_root: Path | str) -> dict:
-    """Compaction of COMMITTED operation journals (NITRO dogfood II).
+    """Bounded explicit maintenance compaction of SETTLED operation journals
+    (NITRO dogfood II + IV, T-596).
 
-    A COMMITTED op no longer needs its staged bytes for recovery -- idempotent
-    retry only needs a compact tombstone. This deletes the large `.staged`
-    payloads and keeps the operation metadata, so repeated checkpointing does
-    not accumulate unbounded write amplification. NEVER compacts PREPARED /
-    APPLYING / VERIFIED / CONFLICT -- those still require evidence. A retried
-    compacted op still returns ALREADY_APPLIED.
+    A COMMITTED or RESOLVED op no longer needs its staged bytes for recovery:
+    idempotent retry only needs the compact tombstone. Compaction deletes the
+    large `.staged` payloads and KEEPS the full tombstone -- op_id, operation,
+    status, result identity (semantic_payload_hash), the per-target final
+    hashes (before_hash/after_hash), timestamp (created_at) -- so a repeated
+    checkpoint does not accumulate unbounded write amplification and every
+    settled op stays attributable.
+
+    NEVER compacts PREPARED / APPLYING / VERIFIED / CONFLICT / ABORTED --
+    those still require evidence. A retried compacted op still returns
+    ALREADY_APPLIED. This is the journal-compaction operation the CLEAN phase
+    runs (saipen/phases/clean.md step 4); it is a maintenance mutation, never
+    an automatic side effect of ordinary checkpointing.
     """
     root = Path(project_root)
     ops_dir = root / OPS_DIR
@@ -861,7 +869,7 @@ def compact_committed(project_root: Path | str) -> dict:
         except (OSError, json.JSONDecodeError):
             skipped.append(entry.name)
             continue
-        if record.get("status") != "COMMITTED":
+        if record.get("status") not in ("COMMITTED", "RESOLVED"):
             skipped.append(entry.name)
             continue
         for staged in entry.glob("*.staged"):

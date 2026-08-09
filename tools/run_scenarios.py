@@ -5436,6 +5436,64 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     expect("a conflict journal is never compacted",
            len(cf_staged) > 0, repr(cf_staged))
 
+    # ---- T-596: compaction is the bounded SETTLED maintenance op -- a
+    # RESOLVED op compacts (tombstone keeps identity + final hashes), while
+    # PREPARED / APPLYING journals are never compacted.
+    res_root = make_project()
+    saipen_res = res_root / ".saipen"
+    log_rs = (saipen_res / "LOG.md").read_bytes()
+    state_rs = (saipen_res / "STATE.md").read_bytes()
+    j_rs = Journal(res_root, "op-rs")
+    j_rs.start("checkpoint", "probe", "id", "h", [
+        {"path": ".saipen/LOG.md", "role": "log",
+         "content": log_rs + b"\n- 09.08.26 00:01 [E-901] RUN: x\n",
+         "before_hash": hash_bytes(log_rs),
+         "after_hash": hash_bytes(
+             log_rs + b"\n- 09.08.26 00:01 [E-901] RUN: x\n")},
+        {"path": ".saipen/STATE.md", "role": "state",
+         "content": state_rs.replace(b"phase: DONE", b"phase: BUILD"),
+         "before_hash": hash_bytes(state_rs),
+         "after_hash": hash_bytes(
+             state_rs.replace(b"phase: DONE", b"phase: BUILD"))},
+    ], verification_policy="core_fast")
+    (saipen_res / "LOG.md").write_bytes(
+        log_rs + b"\n- 09.08.26 00:01 [E-901] RUN: x\n")
+    j_rs.mark("APPLYING", progress_index=1, target_index=0)
+    (saipen_res / "STATE.md").write_bytes(state_rs.replace(
+        b"phase: DONE", b"phase: HUNT").replace(b"last_event: 900",
+                                                b"last_event: 901"))
+    recover(res_root, "op-rs")
+    from saipen_engine.journal import resolve_conflict as _rs_resolve
+    _rs_resolve(res_root, "op-rs", "accept_live", agent="probe")
+    rs_dir = res_root / ".saipen" / "recovery" / "ops" / "op-rs"
+    rs_record = json.loads((rs_dir / "operation.json").read_text(
+        encoding="utf-8"))
+    compact_committed(res_root)
+    rs_staged = list(rs_dir.glob("*.staged"))
+    rs_record2 = json.loads((rs_dir / "operation.json").read_text(
+        encoding="utf-8"))
+    expect("compaction compacts a RESOLVED journal (settled maintenance op)",
+           len(rs_staged) == 0, repr(rs_staged))
+    expect("compaction keeps the full tombstone for a resolved op",
+           rs_record2.get("op_id") == "op-rs"
+           and rs_record2.get("status") == "RESOLVED"
+           and rs_record2.get("operation") == "checkpoint"
+           and bool(rs_record2.get("semantic_payload_hash"))
+           and bool(rs_record2.get("created_at"))
+           and all(t.get("before_hash") and t.get("after_hash")
+                   for t in rs_record2.get("targets", [])),
+           repr(rs_record2))
+    pre_root = make_project()
+    j_pre = Journal(pre_root, "op-pre")
+    j_pre.start("checkpoint", "probe", "id", "h", [
+        {"path": ".saipen/LOG.md", "role": "log",
+         "content": b"x", "before_hash": "a", "after_hash": "b"}])
+    compact_committed(pre_root)
+    pre_staged = list((pre_root / ".saipen" / "recovery" / "ops" / "op-pre")
+                      .glob("*.staged"))
+    expect("a PREPARED journal is never compacted (evidence still required)",
+           len(pre_staged) > 0, repr(pre_staged))
+
     # ---- T-590: validator rejects a placeholder verify on a new ticket.
     vp_root = make_project()
     (vp_root / ".saipen" / "BOARD.md").write_text(
