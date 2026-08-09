@@ -12,7 +12,7 @@ i nastavlja rad za manje od minute -- bez ponovnog brifiranja, bilo koji pružat
 
 **Jedna naredba. Nula amnezije.**
 
-**Brzi prečaci:** `cc` nastavlja aktivni Goal Mode, `sss` prikazuje status bez diranja koda, a `ss` sprema kontrolnu točku i zaustavlja se. [Pogledaj punu kartu od 15 tipki](saipen/RFC.md#110-command-surface). Ćirilični blizanci također rade: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Brzi prečaci:** `cc` nastavlja kontekst projekta do konvergencije (nastavlja aktivni cilj ako je postavljen), `sss` prikazuje status bez diranja koda, a `ss` sprema kontrolnu točku i zaustavlja se. [Pogledaj punu kartu od 15 tipki](saipen/RFC.md#110-command-surface). Ćirilični blizanci također rade: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **Jezik odgovora.** Agent prema zadanim postavkama odgovara **na estonskom** — to je postavka, a ne hir, i ništa drugo u SAIPEN-u nije estonsko. Mijenja se na jednom mjestu: redak `reply_language:` na vrhu [`saipen/STYLE.md`](saipen/STYLE.md). `et` estonski, `en` engleski, `ru` ruski, `auto` bira prema jeziku tvoje poruke. Protokol, kod, commitovi i svi dokumenti ostaju na engleskom pri svakoj vrijednosti.
 
@@ -78,7 +78,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 > `saipen set`
 
 Nema instalacije? Zalijepite jedan redak bilo kojem agentu:
-> Čitaj <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md i slijedi ih.
+> Čitaj <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md i slijedi ih.
 
 Platforma nije na gornjem popisu (DeepSeek, Qwen, samostalni OpenAI, itd.)?
 Bilješke po platformi nalaze se u `extensions/adapters/`.
@@ -135,7 +135,7 @@ Bilješke po platformi nalaze se u `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
+<!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
 
 
 

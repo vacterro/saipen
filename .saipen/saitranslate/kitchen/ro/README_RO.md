@@ -12,7 +12,7 @@ markdown simplu, astfel încât un agent nou fără istoric de chat execută `/s
 
 **O comandă. Zero amnezie.**
 
-**Comenzi rapide:** `cc` continuă un Goal Mode activ, `sss` afișează starea fără să atingă codul, iar `ss` salvează un punct de control și se oprește. [Vezi harta completă cu 15 taste](saipen/RFC.md#110-command-surface). Gemenii chirilici funcționează și ei: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Comenzi rapide:** `cc` continuă contextul proiectului până la convergență (reia un obiectiv activ dacă este setat), `sss` afișează starea fără să atingă codul, iar `ss` salvează un punct de control și se oprește. [Vezi harta completă cu 15 taste](saipen/RFC.md#110-command-surface). Gemenii chirilici funcționează și ei: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **Limba de răspuns.** Agentul răspunde implicit **în estonă** — este o setare, nu o excentricitate, și nimic altceva în SAIPEN nu este eston. Se schimbă într-un singur loc: linia `reply_language:` de la începutul [`saipen/STYLE.md`](saipen/STYLE.md). `et` estonă, `en` engleză, `ru` rusă, `auto` alege după limba mesajului tău. Protocolul, codul, commit-urile și toate documentele rămân în engleză la orice valoare.
 
@@ -89,7 +89,7 @@ This removes exactly the tagged block (leaving the rest of the file untouched), 
 > `saipen set`
 
 Not installed? Paste one line into any agent:
-> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
+> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md and follow them.
 
 Platform not in the list above (DeepSeek, Qwen, standalone OpenAI, etc.)?
 Platform-specific notes live in `extensions/adapters/`.
@@ -145,7 +145,7 @@ Platform-specific notes live in `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
+<!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
 
 
 

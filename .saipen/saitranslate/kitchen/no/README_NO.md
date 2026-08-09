@@ -12,7 +12,7 @@ og gjenopptar arbeidet på under ett minutt -- ingen ny brifing, hvilken som hel
 
 **Én kommando. Null hukommelsestap.**
 
-**Hurtigtaster:** `cc` fortsetter en aktiv Goal Mode-kjøring, `sss` viser status uten å røre koden, og `ss` lagrer et sjekkpunkt og stopper. [Se hele 15-tasters kartet](saipen/RFC.md#110-command-surface). Kyrilliske tvillinger fungerer også: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Hurtigtaster:** `cc` fortsetter prosjektets kontekst til konvergens (gjenopptar et aktivt mål hvis et er satt), `sss` viser status uten å røre koden, og `ss` lagrer et sjekkpunkt og stopper. [Se hele 15-tasters kartet](saipen/RFC.md#110-command-surface). Kyrilliske tvillinger fungerer også: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **Svarspråk.** Agenten svarer som standard **på estisk** — det er en innstilling, ikke en særhet, og ingenting annet i SAIPEN er estisk. Endres på ett sted: linjen `reply_language:` øverst i [`saipen/STYLE.md`](saipen/STYLE.md). `et` estisk, `en` engelsk, `ru` russisk, `auto` velger ut fra språket i meldingen din. Protokollen, koden, commits og alle dokumenter forblir engelske ved enhver verdi.
 
@@ -86,7 +86,7 @@ This removes exactly the tagged block (leaving the rest of the file untouched), 
 > `saipen set`
 
 Not installed? Paste one line into any agent:
-> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
+> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md and follow them.
 
 Platform not in the list above (DeepSeek, Qwen, standalone OpenAI, etc.)?
 Platform-specific notes live in `extensions/adapters/`.
@@ -142,7 +142,7 @@ Platform-specific notes live in `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
+<!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
 
 
 

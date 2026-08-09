@@ -451,19 +451,13 @@ def _ticket_targets(root: Path, action: str, ticket_id: str, agent: str,
     ticket = tickets[ticket_id]
 
     if action == "done":
-        if ticket["section"] != "## DOING":
-            return _refuse("ILLEGAL_TICKET_LIFECYCLE",
-                           f"done accepts only ## DOING source; {ticket_id} "
-                           f"is under {ticket['section']}", ticket=ticket_id)
-        if ticket["checkbox"] != "/":
-            return _refuse("ILLEGAL_TICKET_LIFECYCLE",
-                           f"done requires [/] claim marker, got "
-                           f"[{ticket['checkbox']}]", ticket=ticket_id)
-        if state.get("task") != ticket_id:
-            return _refuse("ACTIVE_TICKET_MISMATCH",
-                           f"STATE.task={state.get('task')} but done target "
-                           f"is {ticket_id}", ticket=ticket_id)
-        target_section, checkbox = "## DONE", "[x]"
+        # `done` is the atomic finish operation, never a raw section move
+        # (NITRO dogfood III, T-591); the split it used to leave is now a
+        # corruption the fast binding rejects.
+        return _refuse("ILLEGAL_TICKET_LIFECYCLE",
+                       "done is the atomic finish operation; use finish_ticket "
+                       "or `saipen ticket done` (it closes LOG+BOARD+STATE "
+                       "together)", ticket=ticket_id)
     elif action == "block":
         if ticket["section"] not in ("## DOING", "## TODO"):
             return _refuse("ILLEGAL_TICKET_LIFECYCLE",
@@ -732,6 +726,17 @@ def ticket_add(project_root: Path | str, agent: str, priority: str,
 
 def ticket_move(project_root: Path | str, action: str, ticket_id: str,
                 agent: str, payload: str = "", dry_run: bool = False) -> Result:
+    """Move a ticket between BOARD sections.
+
+    `done` is NOT a section move: it is the atomic ticket-closure operation
+    (NITRO dogfood III, T-591). A standalone `done` here would leave the split
+    (BOARD DONE[x] while STATE still names the ticket in a ticket-bearing
+    phase) that the composition audit reproduced. `done` delegates to
+    finish_ticket so one public operation, one lifecycle meaning.
+    """
+    if action == "done":
+        return finish_ticket(project_root, ticket_id, agent,
+                             dry_run=dry_run)
     root = Path(project_root)
     now, utc = _now(), _utc_iso()
     plan = _ticket_targets(root, action, ticket_id, agent, payload, now, utc)

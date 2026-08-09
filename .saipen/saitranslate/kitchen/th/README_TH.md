@@ -10,7 +10,7 @@
 
 **คำสั่งเดียว ศูนย์การสูญเสียความจำ**
 
-**คีย์ลัด:** `cc` ให้ Goal Mode ที่กำลังทำงานอยู่ดำเนินต่อ, `sss` แสดงสถานะโดยไม่แตะโค้ด และ `ss` บันทึกจุดตรวจสอบแล้วหยุด [ดูแผนที่ปุ่มลัดทั้ง 15 รายการ](saipen/RFC.md#110-command-surface) ปุ่มอักษรซีริลลิกที่มีรูปเหมือนกันก็ใช้ได้: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`
+**คีย์ลัด:** `cc` ให้ดำเนินการต่อบริบทของโปรเจกต์จนถึงจุดบรรจบ (ดำเนินเป้าหมายที่กำลังทำงานต่อไปหากมีการตั้งไว้), `sss` แสดงสถานะโดยไม่แตะโค้ด และ `ss` บันทึกจุดตรวจสอบแล้วหยุด [ดูแผนที่ปุ่มลัดทั้ง 15 รายการ](saipen/RFC.md#110-command-surface) ปุ่มอักษรซีริลลิกที่มีรูปเหมือนกันก็ใช้ได้: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`
 
 **ภาษาที่ตอบ** เอเจนต์ตอบเป็น**ภาษาเอสโตเนีย** โดยค่าเริ่มต้น — นี่คือการตั้งค่า ไม่ใช่ความแปลก และไม่มีสิ่งอื่นใดใน SAIPEN เป็นภาษาเอสโตเนีย เปลี่ยนได้ที่จุดเดียว: บรรทัด `reply_language:` ที่ด้านบนของ [`saipen/STYLE.md`](saipen/STYLE.md) `et` เอสโตเนีย `en` อังกฤษ `ru` รัสเซีย `auto` เลือกตามภาษาของข้อความที่คุณส่ง โปรโตคอล โค้ด คอมมิต และเอกสารทั้งหมดยังคงเป็นภาษาอังกฤษไม่ว่าค่าใด
 
@@ -84,7 +84,7 @@ This removes exactly the tagged block (leaving the rest of the file untouched), 
 > `saipen set`
 
 Not installed? Paste one line into any agent:
-> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
+> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md and follow them.
 
 Platform not in the list above (DeepSeek, Qwen, standalone OpenAI, etc.)?
 Platform-specific notes live in `extensions/adapters/`.
@@ -140,7 +140,7 @@ Platform-specific notes live in `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
+<!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
 
 
 

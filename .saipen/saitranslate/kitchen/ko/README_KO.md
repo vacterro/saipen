@@ -10,7 +10,7 @@
 
 **단 하나의 명령. 건망증 제로.**
 
-**빠른 키:** `cc`는 활성 Goal Mode 실행을 계속하고, `sss`는 코드를 건드리지 않고 상태를 보여주며, `ss`는 체크포인트를 저장하고 멈춥니다. [전체 15 키 맵 보기](saipen/RFC.md#110-command-surface). 키릴 문자 쌍둥이도 작동합니다: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**빠른 키:** `cc`는 프로젝트 컨텍스트를 수렴까지 계속합니다 (설정된 실행 중인 목표가 있으면 재개합니다), `sss`는 코드를 건드리지 않고 상태를 보여주며, `ss`는 체크포인트를 저장하고 멈춥니다. [전체 15 키 맵 보기](saipen/RFC.md#110-command-surface). 키릴 문자 쌍둥이도 작동합니다: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **응답 언어.** 에이전트는 기본적으로 **에스토니아어**로 응답합니다 — 이것은 설정이지 기벽이 아니며, SAIPEN에서 에스토니아어인 것은 이것뿐입니다. 한 곳에서 변경합니다: [`saipen/STYLE.md`](saipen/STYLE.md) 맨 위의 `reply_language:` 줄. `et` 에스토니아어, `en` 영어, `ru` 러시아어, `auto`는 보낸 메시지의 언어로 선택합니다. 프로토콜, 코드, 커밋과 모든 문서는 어떤 값에서도 영어로 유지됩니다.
 
@@ -76,7 +76,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 > `saipen set`
 
 설치 없이 사용하고 싶으신가요? 임의의 에이전트에 한 줄을 붙여넣으세요:
-> Read <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
+> Read <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md and follow them.
 
 위 목록에 없는 플랫폼(DeepSeek, Qwen, 단독 OpenAI 등)인가요?
 플랫폼별 설명은 `extensions/adapters/` 폴더에 위치해 있습니다.
@@ -133,7 +133,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
+<!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
 
 
 

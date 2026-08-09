@@ -10,7 +10,7 @@
 
 **Un comando. Zero amnesia.**
 
-**Tasti rapidi:** `cc` prosegue un Goal Mode attivo, `sss` segnala lo stato senza toccare il codice e `ss` salva un checkpoint e si ferma. [Guarda la mappa completa degli 15 tasti](saipen/RFC.md#110-command-surface). Funzionano anche i gemelli cirillici: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Tasti rapidi:** `cc` prosegue il contesto del progetto fino alla convergenza (riprende un obiettivo attivo se ne è impostato uno), `sss` segnala lo stato senza toccare il codice e `ss` salva un checkpoint e si ferma. [Guarda la mappa completa degli 15 tasti](saipen/RFC.md#110-command-surface). Funzionano anche i gemelli cirillici: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **Lingua di risposta.** L'agente risponde di default **in estone** — è un'impostazione, non una stranezza, e nient'altro in SAIPEN è in estone. Si cambia in un solo punto: la riga `reply_language:` all'inizio di [`saipen/STYLE.md`](saipen/STYLE.md). `et` estone, `en` inglese, `ru` russo, `auto` sceglie in base alla lingua del tuo messaggio. Il protocollo, il codice, i commit e tutti i documenti restano in inglese con qualsiasi valore.
 
@@ -87,7 +87,7 @@ This removes exactly the tagged block (leaving the rest of the file untouched), 
 > `saipen set`
 
 Not installed? Paste one line into any agent:
-> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
+> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md and follow them.
 
 Platform not in the list above (DeepSeek, Qwen, standalone OpenAI, etc.)?
 Platform-specific notes live in `extensions/adapters/`.
@@ -143,7 +143,7 @@ Platform-specific notes live in `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
+<!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
 
 
 

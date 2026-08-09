@@ -10,7 +10,7 @@
 
 **一条命令，决不失忆。**
 
-**快捷键:** `cc` 继续正在运行的 Goal Mode，`sss` 在不触碰代码的情况下报告状态，`ss` 保存检查点并停止。[查看完整的 15 键快捷键地图](saipen/RFC.md#110-command-surface)。西里尔字母的同型键也可用：`сс`、`ссс`、`аа`、`ее`、`еее`、`рр`。
+**快捷键:** `cc` 继续项目上下文直至收敛（如果设置了正在运行的目标，则恢复该目标），`sss` 在不触碰代码的情况下报告状态，`ss` 保存检查点并停止。[查看完整的 15 键快捷键地图](saipen/RFC.md#110-command-surface)。西里尔字母的同型键也可用：`сс`、`ссс`、`аа`、`ее`、`еее`、`рр`。
 
 **回复语言。** 代理默认用**爱沙尼亚语**回答 —— 这是设置，不是怪癖，SAIPEN 中其他任何内容都不是爱沙尼亚语。只需在一处更改：[`saipen/STYLE.md`](saipen/STYLE.md) 顶部的 `reply_language:` 行。`et` 爱沙尼亚语，`en` 英语，`ru` 俄语，`auto` 根据你发送消息的语言选择。协议、代码、提交和所有文档在任何值下都保持英文。
 
@@ -79,7 +79,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 > `saipen set`
 
 未安装？直接将以下这行复制给任何 Agent：
-> 读取 <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md 并按其要求执行。
+> 读取 <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md 并按其要求执行。
 
 使用的平台不在上述列表中（DeepSeek、Qwen、独立 OpenAI 等）？
 针对各平台的说明位于 `extensions/adapters/` 目录中。
@@ -136,7 +136,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
+<!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
 
 
 

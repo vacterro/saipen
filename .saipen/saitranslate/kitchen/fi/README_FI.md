@@ -12,7 +12,7 @@ ja jatkaa työtä alle minuutissa -- ilman uudelleenohjeistusta, millä tahansa 
 
 **Yksi komento. Nolla muistinmenetystä.**
 
-**Pikanäppäimet:** `cc` jatkaa aktiivista Goal Mode -ajoa, `sss` näyttää tilan koskematta koodiin ja `ss` tallentaa tarkistuspisteen ja pysähtyy. [Katso täydellinen 15 näppäimen kartta](saipen/RFC.md#110-command-surface). Kyrilliset kaksoset toimivat myös: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Pikanäppäimet:** `cc` jatkaa projektin kontekstia konvergenssiin (jatkaa käynnissä olevaa tavoitetta, jos sellainen on asetettu), `sss` näyttää tilan koskematta koodiin ja `ss` tallentaa tarkistuspisteen ja pysähtyy. [Katso täydellinen 15 näppäimen kartta](saipen/RFC.md#110-command-surface). Kyrilliset kaksoset toimivat myös: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **Vastauskieli.** Agentti vastaa oletuksena **viroksi** — se on asetus, ei oikku, eikä mikään muu SAIPENissa ole vironkielistä. Muuta se yhdestä paikasta: `reply_language:`-rivi [`saipen/STYLE.md`](saipen/STYLE.md)-tiedoston alussa. `et` viro, `en` englanti, `ru` venäjä, `auto` valitsee viestisi kielen mukaan. Protokolla, koodi, commitit ja kaikki dokumentit pysyvät englanninkielisinä joka arvolla.
 
@@ -78,7 +78,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 > `saipen set`
 
 Ei asennusta? Liitä yksi rivi mille tahansa agentille:
-> Read <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
+> Read <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md and follow them.
 
 Alusta ei ole yllä olevassa listassa (DeepSeek, Qwen, erillinen OpenAI jne.)?
 Alustakohtaiset muistiinpanot löytyvät kansiosta `extensions/adapters/`.
@@ -135,7 +135,7 @@ Alustakohtaiset muistiinpanot löytyvät kansiosta `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
+<!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
 
 
 

@@ -10,7 +10,7 @@
 
 **פקודה אחת. אפס אמנזיה.**
 
-**מקשים מהירים:** `cc` ממשיך Goal Mode פעיל, `sss` מציג סטטוס ללא נגיעה בקוד ו-`ss` שומר נקודת ביקורת ועוצר. [ראה את מפת 15 המקשים המלאה](saipen/RFC.md#110-command-surface). גם התאומים הקיריליים עובדים: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**מקשים מהירים:** `cc` ממשיך את ההקשר של הפרויקט עד להתכנסות (מחדש יעד פעיל אם הוגדר), `sss` מציג סטטוס ללא נגיעה בקוד ו-`ss` שומר נקודת ביקורת ועוצר. [ראה את מפת 15 המקשים המלאה](saipen/RFC.md#110-command-surface). גם התאומים הקיריליים עובדים: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **שפת התשובה.** הסוכן עונה כברירת מחדל **באסטונית** — זו הגדרה, לא גחמה, ושום דבר אחר ב-SAIPEN אינו אסטוני. משנים זאת במקום אחד: השורה `reply_language:` בראש [`saipen/STYLE.md`](saipen/STYLE.md). `et` אסטונית, `en` אנגלית, `ru` רוסית, `auto` בוחר לפי שפת ההודעה שלך. הפרוטוקול, הקוד, הקומיטים וכל המסמכים נשארים באנגלית בכל ערך.
 
@@ -76,7 +76,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 > `saipen set`
 
 אין התקנה? הדבק שורה אחת לכל סוכן:
-> Read <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
+> Read <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md and follow them.
 
 הפלטפורמה שלך אינה ברשימה לעיל (DeepSeek, Qwen, OpenAI עצמאי וכו')?
 הערות עבור כל פלטפורמה נמצאות ב-`extensions/adapters/`.
@@ -133,7 +133,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
+<!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
 
 
 

@@ -13,7 +13,7 @@ and resumes work in under a minute -- no rebriefing, any vendor, any day.
 
 **One command. Zero amnesia.**
 
-**Tombol cepat:** `cc` melanjutkan Goal Mode aktif, `sss` melaporkan status tanpa menyentuh kode, dan `ss` menyimpan titik periksa lalu berhenti. [Lihat peta 15 tombol lengkap](saipen/RFC.md#110-command-surface). Kembar Sirilik juga berfungsi: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Tombol cepat:** `cc` melanjutkan konteks proyek hingga konvergensi (melanjutkan tujuan aktif jika ada yang ditetapkan), `sss` melaporkan status tanpa menyentuh kode, dan `ss` menyimpan titik periksa lalu berhenti. [Lihat peta 15 tombol lengkap](saipen/RFC.md#110-command-surface). Kembar Sirilik juga berfungsi: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **Bahasa balasan.** Agen menjawab secara default **dalam bahasa Estonia** — itu pengaturan, bukan keanehan, dan tidak ada hal lain tentang SAIPEN yang berbahasa Estonia. Ubah di satu tempat: baris `reply_language:` di bagian atas [`saipen/STYLE.md`](saipen/STYLE.md). `et` Estonia, `en` Inggris, `ru` Rusia, `auto` memilih dari bahasa pesan yang Anda kirim. Protokol, kode, commit, dan semua dokumen tetap dalam bahasa Inggris pada nilai apa pun.
 
@@ -82,7 +82,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 > `saipen set`
 
 No install? Paste one line to any agent:
-> Read <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
+> Read <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md and follow them.
 
 Platform not in the list above (DeepSeek, Qwen, standalone OpenAI, etc.)?
 Per-platform notes live in `extensions/adapters/`.
@@ -139,7 +139,7 @@ Per-platform notes live in `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
+<!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
 
 
 

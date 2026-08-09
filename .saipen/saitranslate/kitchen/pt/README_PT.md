@@ -12,7 +12,7 @@ e retome o trabalho em menos de um minuto -- sem re-instruções, qualquer forne
 
 **Um comando. Zero amnésia.**
 
-**Atalhos rápidos:** `cc` continua uma execução ativa de Goal Mode, `sss` informa o estado sem tocar no código e `ss` salva um ponto de verificação e para. [Veja o mapa completo de 15 teclas](saipen/RFC.md#110-command-surface). Os gêmeos cirílicos também funcionam: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Atalhos rápidos:** `cc` continua o contexto do projeto até a convergência (retoma um objetivo ativo, se houver um definido), `sss` informa o estado sem tocar no código e `ss` salva um ponto de verificação e para. [Veja o mapa completo de 15 teclas](saipen/RFC.md#110-command-surface). Os gêmeos cirílicos também funcionam: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **Idioma de resposta.** O agente responde por padrão **em estoniano** — é uma configuração, não uma excentricidade, e nada mais no SAIPEN está em estoniano. Muda-se em um único lugar: a linha `reply_language:` no topo de [`saipen/STYLE.md`](saipen/STYLE.md). `et` estoniano, `en` inglês, `ru` russo, `auto` escolhe pelo idioma da sua mensagem. O protocolo, o código, os commits e todos os documentos permanecem em inglês em qualquer valor.
 
@@ -86,7 +86,7 @@ This removes exactly the tagged block (leaving the rest of the file untouched), 
 > `saipen set`
 
 Not installed? Paste one line into any agent:
-> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
+> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md and follow them.
 
 Platform not in the list above (DeepSeek, Qwen, standalone OpenAI, etc.)?
 Platform-specific notes live in `extensions/adapters/`.
@@ -142,7 +142,7 @@ Platform-specific notes live in `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
+<!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
 
 
 

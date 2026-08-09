@@ -10,7 +10,7 @@
 
 **Jeden príkaz. Nulová amnézia.**
 
-**Rýchle klávesy:** `cc` pokračuje v aktívnom Goal Mode, `sss` zobrazí stav bez dotyku kódu a `ss` uloží kontrolný bod a zastaví. [Pozri si úplnú mapu 15 kláves](saipen/RFC.md#110-command-surface). Fungujú aj cyrilské dvojníky: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Rýchle klávesy:** `cc` pokračuje v konvergencii projektového kontextu (obnoví bežiaci cieľ, ak je nastavený), `sss` zobrazí stav bez dotyku kódu a `ss` uloží kontrolný bod a zastaví. [Pozri si úplnú mapu 15 kláves](saipen/RFC.md#110-command-surface). Fungujú aj cyrilské dvojníky: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **Jazyk odpovedí.** Agent štandardne odpovedá **po estónsky** — to je nastavenie, nie výstrelok, a nič iné v SAIPEN nie je estónske. Zmení sa to na jednom mieste: riadok `reply_language:` na začiatku [`saipen/STYLE.md`](saipen/STYLE.md). `et` estónčina, `en` angličtina, `ru` ruština, `auto` vyberie podľa jazyka tvojej správy. Protokol, kód, commity a všetky dokumenty zostávajú anglicky pri akejkoľvek hodnote.
 
@@ -76,7 +76,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 > `saipen set`
 
 Bez inštalácie? Vložte jeden riadok akémukoľvek agentovi:
-> Prečítaj <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md a riaď sa jimi.
+> Prečítaj <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md a riaď sa jimi.
 
 Platforma nie je v zozname vyššie (DeepSeek, Qwen, samostatné OpenAI atď.)?
 Poznámky pre jednotlivé platformy sa nachádzajú v `extensions/adapters/`.
@@ -133,7 +133,7 @@ Poznámky pre jednotlivé platformy sa nachádzajú v `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
+<!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
 
 
 

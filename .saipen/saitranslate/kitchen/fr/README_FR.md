@@ -12,7 +12,7 @@ et reprenne le travail en moins d'une minute -- sans réexplication, quel que so
 
 **Une commande. Zéro amnésie.**
 
-**Raccourcis clavier :** `cc` poursuit un Goal Mode actif, `sss` signale l’état sans toucher au code et `ss` enregistre un point de contrôle puis s’arrête. [Voir la carte complète des 15 touches](saipen/RFC.md#110-command-surface). Les jumeaux cyrilliques fonctionnent aussi : `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Raccourcis clavier :** `cc` poursuit le contexte du projet jusqu'à la convergence (reprend un objectif actif s'il en existe un), `sss` signale l'état sans toucher au code et `ss` enregistre un point de contrôle puis s'arrête. [Voir la carte complète des 15 touches](saipen/RFC.md#110-command-surface). Les jumeaux cyrilliques fonctionnent aussi : `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **Langue de réponse.** L'agent répond par défaut **en estonien** — c'est un réglage, pas une lubie, et rien d'autre dans SAIPEN n'est en estonien. Cela se change à un seul endroit : la ligne `reply_language:` en haut de [`saipen/STYLE.md`](saipen/STYLE.md). `et` estonien, `en` anglais, `ru` russe, `auto` choisit selon la langue de votre message. Le protocole, le code, les commits et tous les documents restent en anglais, quelle que soit la valeur.
 
@@ -78,7 +78,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 > `saipen set`
 
 Pas d'installation ? Collez une ligne à n'importe quel agent :
-> Lire <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md et les suivre.
+> Lire <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md et les suivre.
 
 Plateforme absente de la liste ci-dessus (DeepSeek, Qwen, OpenAI autonome, etc.) ?
 Les notes par plateforme se trouvent dans `extensions/adapters/`.
@@ -135,7 +135,7 @@ Les notes par plateforme se trouvent dans `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
+<!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
 
 
 

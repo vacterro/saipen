@@ -13,7 +13,7 @@ and resumes work in under a minute -- no rebriefing, any vendor, any day.
 
 **One command. Zero amnesia.**
 
-**Rychlé klávesy:** `cc` pokračuje v aktivním Goal Mode, `sss` zobrazí stav bez dotyku kódu a `ss` uloží kontrolní bod a zastaví. [Podívej se na úplnou mapu 15 kláves](saipen/RFC.md#110-command-surface). Fungují i cyrilské dvojníky: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Rychlé klávesy:** `cc` pokračuje v konvergenci projektového kontextu (obnoví běžící cíl, pokud je nastaven), `sss` zobrazí stav bez dotyku kódu a `ss` uloží kontrolní bod a zastaví. [Podívej se na úplnou mapu 15 kláves](saipen/RFC.md#110-command-surface). Fungují i cyrilské dvojníky: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **Jazyk odpovědí.** Agent ve výchozím nastavení odpovídá **estonsky** — to je nastavení, ne výstřednost, a nic jiného v SAIPEN není estonské. Změní se to na jednom místě: řádek `reply_language:` na začátku [`saipen/STYLE.md`](saipen/STYLE.md). `et` estonština, `en` angličtina, `ru` ruština, `auto` vybere podle jazyka tvé zprávy. Protokol, kód, commity a všechny dokumenty zůstávají anglicky při každé hodnotě.
 
@@ -82,7 +82,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 > `saipen set`
 
 No install? Paste one line to any agent:
-> Read <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
+> Read <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md and follow them.
 
 Platform not in the list above (DeepSeek, Qwen, standalone OpenAI, etc.)?
 Per-platform notes live in `extensions/adapters/`.
@@ -139,7 +139,7 @@ Per-platform notes live in `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
+<!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
 
 
 

@@ -10,7 +10,7 @@
 
 **Én kommando. Nul amnesi.**
 
-**Hurtigtaster:** `cc` fortsætter en aktiv Goal Mode-kørsel, `sss` viser status uden at røre koden, og `ss` gemmer et kontrolpunkt og stopper. [Se hele 15-tasters kortet](saipen/RFC.md#110-command-surface). Kyrilliske tvillinger virker også: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Hurtigtaster:** `cc` fortsætter projektets kontekst til konvergens (genoptager et aktivt mål, hvis et er sat), `sss` viser status uden at røre koden, og `ss` gemmer et kontrolpunkt og stopper. [Se hele 15-tasters kortet](saipen/RFC.md#110-command-surface). Kyrilliske tvillinger virker også: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **Svarsprog.** Agenten svarer som standard **på estisk** — det er en indstilling, ikke en særhed, og intet andet i SAIPEN er estisk. Ændres ét sted: linjen `reply_language:` øverst i [`saipen/STYLE.md`](saipen/STYLE.md). `et` estisk, `en` engelsk, `ru` russisk, `auto` vælger ud fra sproget i din besked. Protokollen, koden, commits og alle dokumenter forbliver engelske ved enhver værdi.
 
@@ -76,7 +76,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 > `saipen set`
 
 Ingen installation? Indsæt én linje til enhver agent:
-> Read <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
+> Read <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md and follow them.
 
 Platform ikke på listen ovenfor (DeepSeek, Qwen, fritstående OpenAI, osv.)?
 Platformsspecifikke noter findes i `extensions/adapters/`.
@@ -133,7 +133,7 @@ Platformsspecifikke noter findes i `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
+<!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
 
 
 

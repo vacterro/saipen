@@ -10,7 +10,7 @@
 
 **أمر واحد. صفر فقدان للذاكرة.**
 
-**مفاتيح سريعة:** `cc` يواصل تشغيل وضع الأهداف النشط، `sss` يعرض الحالة دون لمس الكود، و`ss` يحفظ نقطة تحقق ويتوقف. [انظر خريطة المفاتيح الكاملة 15](saipen/RFC.md#110-command-surface). التوائم السيريلية تعمل أيضًا: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**مفاتيح سريعة:** `cc` يواصل سياق المشروع إلى التقارب (يستأنف الهدف النشط إذا كان مضبوطًا)، `sss` يعرض الحالة دون لمس الكود، و`ss` يحفظ نقطة تحقق ويتوقف. [انظر خريطة المفاتيح الكاملة 15](saipen/RFC.md#110-command-surface). التوائم السيريلية تعمل أيضًا: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
 **لغة الرد.** يرد الوكيل افتراضيًا **باللغة الإستونية** — هذه إعدادات، وليست نزوة، ولا شيء آخر في SAIPEN باللغة الإستونية. غيّرها في مكان واحد: سطر `reply_language:` في أعلى [`saipen/STYLE.md`](saipen/STYLE.md). `et` الإستونية، `en` الإنجليزية، `ru` الروسية، `auto` تختار حسب لغة رسالتك. يبقى البروتوكول والكود والالتزامات وكل الوثائق بالإنجليزية مهما كانت القيمة.
 
@@ -78,7 +78,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 > `saipen set`
 
 بدون تثبيت؟ انسخ خطاً واحداً لأي وكيل:
-> اقرأ <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md واتبعهما.
+> اقرأ <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md واتبعهما.
 
 المنصة ليست في القائمة أعلاه (DeepSeek, Qwen, standalone OpenAI, إلخ)؟
 توجد ملاحظات كل منصة في `extensions/adapters/`.
@@ -135,7 +135,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
+<!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
 
 
 

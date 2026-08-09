@@ -97,7 +97,7 @@ bash bootstrap/uninstall.sh                                         # macOS / Li
 > `saipen set`
 
 Без установки? Вставьте одну строку любому агенту:
-> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/RFC.md + <clone>/saipen/STYLE.md and follow them.
+> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md and follow them.
 
 Платформы нет в списке выше (DeepSeek, Qwen, автономный OpenAI и т.д.)?
 Заметки по платформам находятся в `extensions/adapters/`.
@@ -153,7 +153,7 @@ bash bootstrap/uninstall.sh                                         # macOS / Li
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-<!-- source-digest: README.md sha256:535e0088a9f9fcb5b9dc4d0a6e1072ac643101e0083789f57d4850be564931ce -->
+<!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
 
 
 
