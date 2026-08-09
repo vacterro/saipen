@@ -5204,6 +5204,49 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            and '"code": "SUB_RESUMED"' in pub_resume.stdout,
            repr((pub_pause.stdout[:120], pub_resume.stdout[:120])))
 
+    # T-591: PUBLIC full-closure composition -- claim through the CLI, finish
+    # through the CLI, full validator green (section 47: public completion
+    # command leaves a validator-green final state).
+    pubc_root = make_project()
+    pubc_claim = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "claim", "T-1",
+         "--json"],
+        cwd=str(pubc_root), capture_output=True, text=True, timeout=60)
+    pubc_tr = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "transition",
+         "BUILD", "T-1", "b", "--json"],
+        cwd=str(pubc_root), capture_output=True, text=True, timeout=60)
+    pubc_done = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "ticket", "done",
+         "T-1", "--json"],
+        cwd=str(pubc_root), capture_output=True, text=True, timeout=60)
+    pubc_validator = subprocess.run(
+        [sys.executable, str(VALIDATOR), "--project-root", str(pubc_root)],
+        cwd=str(pubc_root), capture_output=True, text=True, errors="replace",
+        timeout=120)
+    expect("public closure: claim->BUILD->ticket done ends validator-green",
+           '"code": "CLAIMED"' in pubc_claim.stdout
+           and '"code": "TRANSITIONED"' in pubc_tr.stdout
+           and '"code": "FINISHED"' in pubc_done.stdout
+           and pubc_validator.returncode == 0,
+           repr((pubc_claim.stdout[:80], pubc_tr.stdout[:80],
+                 pubc_done.stdout[:80], pubc_validator.returncode)))
+
+    # T-591: `saipen next` action/load agreement through the public path.
+    pubn_root = make_project()
+    pubn_next = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "next", "--json"],
+        cwd=str(pubn_root), capture_output=True, text=True, timeout=60)
+    import json as _json
+    try:
+        pubn = _json.loads(pubn_next.stdout)
+        load_ok = pubn.get("load") == "saipen/phases/scout.md"
+    except Exception:  # noqa: BLE001
+        load_ok = False
+    expect("public `saipen next` pairs action with the routed phase doc",
+           '"action": "PHASE SCOUT T-1"' in pubn_next.stdout and load_ok,
+           repr(pubn_next.stdout[:200]))
+
     # ---- T-591 closure composition controls (NITRO dogfood III, section 10).
     from saipen_engine.operations import finish_ticket
     from saipen_engine.journal import recover as _recover_op
