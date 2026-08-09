@@ -179,3 +179,4 @@
 - 09.08.26 23:43 [E-2640] [parent: E-2639] [op: transition-79881e55] DEC: goal_tickets 3->4
 - 09.08.26 23:45 [E-2641] [parent: E-2640] [T-596] [agent: claude] [op: transition-feea7261] RUN: REVIEW verdict DEC: SHIP -- verify re-run fresh (171/171 nitro-integrity + validate PASS); diff reviewed (compaction tombstone, knowledge, BOARD prune, clean.md wiring) no P0/P1; release v7.220.0 prepared
 - 09.08.26 23:45 [E-2642] [parent: E-2641] [T-596] [agent: claude] [op: finish-dd3b8089] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 09.08.26 23:46 [E-2643] [parent: E-2642] [T-596] [agent: claude] [op: checkpoint-78d1e031] RUN: SHIP v7.220.0: NITRO dogfood IV gate-integrity wave released -- pushed 9b72a8e (branch main, 30 commits) + tag v7.220.0; wave = T-602 (finish gate) + T-601 (improve lifecycle/verifier) + T-600 (context projection) + T-596 (claim-to-proof IV + compaction + cleanup)
