@@ -513,6 +513,117 @@ def _ticket_targets(root: Path, action: str, ticket_id: str, agent: str,
          "event_id": f"E-{event}"}, op_id=op_id)
 
 
+def _plan_finish_ticket(root: Path, ticket_id: str, agent: str, now: str,
+                        utc: str) -> OperationPlan | Result:
+    """PLAN the ONE atomic ticket-closure operation (NITRO dogfood III).
+
+    Closing a ticket is a cross-file transaction, not choreography: the split
+    `transition state; move board ticket; repair next_action` leaves BOARD
+    DONE[x] while STATE still names the ticket in a ticket-bearing phase --
+    the exact corruption reproduced in DOGFOOD III. ONE OperationPlan owns:
+
+    LOG:   ticket completion event
+    BOARD: DOING -> DONE, [/] -> [x]
+    STATE: phase -> DONE, task -> none, transition_from -> previous phase,
+           last_event -> completion event, updated, agent
+    NEXT:  computed from the resulting proposed state by the shared router.
+
+    Required preconditions: exactly one BOARD.DOING, STATE.task == that
+    ticket, ticket identity matches. No split-state window exists.
+    """
+    op_id = "finish-" + uuid4_hex8()
+    docs, state, board, log_tail = _read(root)
+    tickets = board["tickets"]
+    if ticket_id not in tickets:
+        return _refuse("TICKET_NOT_FOUND", f"{ticket_id} not on the board",
+                       ticket=ticket_id)
+    ticket = tickets[ticket_id]
+    if ticket["section"] != "## DOING" or ticket["checkbox"] != "/":
+        return _refuse("ILLEGAL_TICKET_LIFECYCLE",
+                       f"finish accepts only a ## DOING [/] ticket; "
+                       f"{ticket_id} is {ticket['section']} "
+                       f"[{ticket['checkbox']}]", ticket=ticket_id)
+    doing = [t for t in tickets.values() if t["section"] == "## DOING"]
+    if len(doing) != 1:
+        return _refuse("ACTIVE_TICKET_MISMATCH",
+                       f"finish needs exactly one ## DOING ticket, found "
+                       f"{len(doing)}", ticket=ticket_id)
+    if state.get("task") != ticket_id:
+        return _refuse("ACTIVE_TICKET_MISMATCH",
+                       f"STATE.task={state.get('task')} != finished ticket "
+                       f"{ticket_id}", ticket=ticket_id)
+    prev_phase = state.get("phase") or "DONE"
+
+    # The canonical closure is SHIP -> DONE (CORE section 1.6: DONE is
+    # reachable from SHIP, and the DFA has no REVIEW -> DONE edge). The
+    # finish operation IS the ship step for this ticket, so the recorded
+    # transition_from must be a legal source of DONE -- SHIP -- while the
+    # actual prior phase is preserved in the LOG message for evidence.
+    closure_from = "SHIP"
+
+    # One LOG completion event.
+    event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent,
+                              f"ticket finished via SAIOPS -- completion "
+                              f"(from {prev_phase})", now, op_id)
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+
+    # BOARD: DOING -> DONE, [/] -> [x], preserve all other fields.
+    new_board = _move_ticket(docs["board"].text_norm, ticket_id, "## DONE",
+                             "[x]", "done", "")
+
+    # STATE: phase -> DONE, task -> none, transition_from -> the legal DONE
+    # source, and the next_action computed from the RESULTING proposed state.
+    owned = {
+        "phase": "DONE",
+        "task": "none",
+        "next_action": "saipen continue",
+        "transition_from": closure_from,
+        "last_event": event,
+        "updated": utc,
+        "agent": agent,
+    }
+    new_state = patch_state(docs["state"].text_norm, owned)
+    from .router import route_next
+    routed = route_next(new_state, new_board)
+    if routed.get("ok") and routed.get("action") != "saipen continue":
+        new_state = patch_state(new_state, {"next_action": routed["action"]})
+
+    errors = validate_texts(new_state, new_board, new_log)
+    if errors:
+        return _refuse("VALIDATION_FAILED",
+                       "proposed finish state fails fast validation: "
+                       + "; ".join(errors[:5]))
+
+    targets = [
+        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        _target(docs["board"], ".saipen/BOARD.md", "board", new_board),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+    ]
+    expected = {"ok": True, "code": "FINISHED", "ticket": ticket_id,
+                "event_id": f"E-{event}", "phase": "DONE", "task": "none",
+                "next_action": routed.get("action"),
+                "transition_from": closure_from}
+    return build_plan(
+        "finish", agent, _identity(root),
+        {"operation": "finish", "ticket": ticket_id},
+        _docs_preconditions(docs, "state", "board", "log"),
+        targets, expected, op_id=op_id)
+
+
+def finish_ticket(project_root: Path | str, ticket_id: str, agent: str,
+                  dry_run: bool = False) -> Result:
+    """Atomically finish a ticket: LOG + BOARD + STATE in ONE journaled plan.
+    The public `ticket done` semantics become this operation."""
+    root = Path(project_root)
+    now, utc = _now(), _utc_iso()
+    plan = _plan_finish_ticket(root, ticket_id, agent, now, utc)
+    if isinstance(plan, Result):
+        return plan
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
+
+
 def _move_ticket(board_text: str, ticket_id: str, target_section: str,
                  checkbox: str, action: str, payload: str) -> str:
     lines = board_text.splitlines(keepends=True)

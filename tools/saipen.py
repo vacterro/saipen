@@ -21,8 +21,8 @@ from saipen_engine import codec, snapshot
 from saipen_engine.board import parse_board
 from saipen_engine.journal import (auto_recover_pending, pending_conflicts,
                                    pending_ops)
-from saipen_engine.operations import (apply_claim, checkpoint, plan_claim,
-                                       ticket_add, ticket_move,
+from saipen_engine.operations import (apply_claim, checkpoint, finish_ticket,
+                                       plan_claim, ticket_add, ticket_move,
                                        transition_phase)
 from saipen_engine.state import parse_state
 
@@ -115,12 +115,11 @@ def _next_action(project_root: Path, as_json: bool) -> int:
         return 3
     state_text = codec.read_doc(state_path)
     state = parse_state(state_text)
-    phase = (state.get("phase") or "").lower()
     subject = state.get("task")
     pending = _pending(project_root)
     conflicts = _conflicts(project_root)
     board_text = codec.read_doc(project_root / ".saipen" / "BOARD.md")
-    from saipen_engine.router import route_next
+    from saipen_engine.router import load_for_action, route_next
     routed = route_next(state_text, board_text, pending, conflicts)
     if not routed.get("ok"):
         _emit({
@@ -135,12 +134,13 @@ def _next_action(project_root: Path, as_json: bool) -> int:
             "pending_ops": pending,
         }, as_json)
         return 1
+    load = load_for_action(routed.get("action"))
     _emit({
         "ok": True,
         "action": routed.get("action"),
         "ticket": routed.get("ticket") or subject,
         "reason": routed.get("reason"),
-        "load": f"saipen/phases/{phase}.md" if phase else None,
+        "load": load,
         "recovery_pending": bool(pending),
         "recovery_conflict": False,
         "pending_ops": pending,
@@ -448,7 +448,18 @@ def main(argv: list[str] | None = None) -> int:
                                 needs_arg, verify_arg, dry_run=dry_run)
             _emit(result.to_dict(), as_json)
             return 0 if result.ok else 1
-        if action in ("done", "block", "unblock") and rest:
+        if action == "done" and rest:
+            # `ticket done` IS the canonical atomic finish operation (NITRO
+            # dogfood III, T-591): LOG + BOARD + STATE close in ONE plan, so a
+            # successful completion can never leave the old split
+            # (BOARD DONE[x] while STATE names the ticket in a ticket-bearing
+            # phase). block/unblock stay surgical moves.
+            result = finish_ticket(project_root, rest[0],
+                                   _agent_for(project_root),
+                                   dry_run=dry_run)
+            _emit(result.to_dict(), as_json)
+            return 0 if result.ok else 1
+        if action in ("block", "unblock") and rest:
             result = ticket_move(project_root, action, rest[0], _agent_for(project_root),
                                  " ".join(rest[1:]), dry_run=dry_run)
             _emit(result.to_dict(), as_json)

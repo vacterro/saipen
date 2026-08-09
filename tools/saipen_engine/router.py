@@ -62,7 +62,6 @@ def route_next(state_text: str, board_text: str,
     doing = [t for t in board["tickets"].values()
              if t["section"] == "## DOING"]
     active = doing[0]["id"] if doing else None
-    blocker = state.get("blocker") or ""
 
     # BINDING: a STATE.task / BOARD.DOING split is structural corruption and
     # must be surfaced, never silently routed past (NITRO dogfood II).
@@ -77,11 +76,34 @@ def route_next(state_text: str, board_text: str,
                 "detail": f"STATE.task={task} but no BOARD.DOING ticket; "
                           "repair the split before routing"}
 
-    # UNBLOCK: an active ticket parked in BLOCKED (with a DOING ticket) or a
-    # live blocker.
-    if active and blocker and blocker.strip():
-        return {"ok": True, "action": f"saipen unblock {active}",
-                "reason": "unblock", "ticket": active}
+    # WAIT: a legitimate persisted WAIT is a HARD STOP (CORE 1.11 OBEY/UNBLOCK
+    # priority). It must never be walked through merely because TODO has
+    # workable tickets. The narrow exception is exactly CORE's: DONE + empty
+    # TODO + a WAIT that is not one of the explicitly legal DONE brakes may
+    # route onward -- a genuine user brake remains a stop with 100 workable
+    # tickets.
+    if na.startswith("WAIT:"):
+        _empty_todo = not any(t["section"] == "## TODO"
+                              for t in board["tickets"].values())
+        _done_brakes = ("WAIT: blocked", "WAIT: user brake",
+                        "WAIT: first-publish", "WAIT: manual-verify",
+                        "WAIT: destructive-op")
+        _not_done_brake = not na.startswith(_done_brakes)
+        if not (phase == "DONE" and _empty_todo and _not_done_brake):
+            return {"ok": True, "action": na, "reason": "wait",
+                    "executable_behavior": "RESTATE_AND_STOP",
+                    "detail": "persisted WAIT is a hard stop; do not route "
+                              "past it"}
+
+    # BLOCKED phase: a hard stop, whatever the board holds. UNBLOCK is a
+    # routing-priority NAME (CORE 1.11), not necessarily a `ticket unblock`
+    # command -- the router must not emit a mutation the executor refuses.
+    if phase == "BLOCKED":
+        return {"ok": True, "action": "saipen status",
+                "reason": "unblock",
+                "executable_behavior": "RESTATE_AND_STOP",
+                "detail": "phase BLOCKED; resolve the blocker before any "
+                          "further work (saipen sub list / status to inspect)"}
 
     # FINISH: phase in a ticket-bearing phase with an active ticket -> the
     # persisted next_action names the exact phase work; fall back to the
@@ -104,8 +126,10 @@ def route_next(state_text: str, board_text: str,
 
     # MAINTAIN: fall through to the persisted next_action only when it is a
     # legal non-ticket action (saipen continue / saipen <verb>), never a stale
-    # PHASE echo.
-    if na.startswith("saipen ") or na.startswith("WAIT:"):
+    # PHASE echo and never a WAIT -- a WAIT reaching here already failed the
+    # hard-stop gate above (the narrow DONE+empty-TODO exception), so it is a
+    # stale WAIT to route past, not a brake to restate.
+    if na.startswith("saipen ") or na.startswith("RUN:"):
         return {"ok": True, "action": na, "reason": "maintain"}
     return {"ok": True, "action": "saipen continue", "reason": "maintain",
             "detail": "no pending recovery, no active ticket, no workable "
@@ -122,3 +146,19 @@ def route_next_result(project_root, state_text: str, board_text: str,
     return Result(ok=bool(out.get("ok")),
                   code=("ROUTED" if out.get("ok") else "RECOVERY_CONFLICT"),
                   data=data)
+
+
+def load_for_action(action: str) -> str | None:
+    """The phase doc the ROUTED action needs, derived from the action itself
+    (NITRO dogfood III, T-591): `next.action` and `next.load` can never
+    disagree. For a PHASE <X> [T-###] action the doc is phases/<x>.md; a
+    recovery/command/WAIT action carries no phase doc (the command/routing
+    owner governs instead).
+    """
+    if not action or not action.startswith("PHASE "):
+        return None
+    parts = action.split()
+    if len(parts) < 2:
+        return None
+    phase = parts[1].lower()
+    return f"saipen/phases/{phase}.md"

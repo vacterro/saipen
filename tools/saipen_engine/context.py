@@ -98,14 +98,15 @@ def context_cold(project_root: Path | str, limit: int = 4000) -> Result:
     log_text = codec.read_doc(root / ".saipen" / "LOG.md")
     state = parse_state(state_text)
     board = parse_board(board_text)
-    phase = state.get("phase", "DONE")
-    doc = f"saipen/phases/{str(phase).lower()}.md" if phase else ""
     from .journal import pending_conflicts, pending_ops
     pending = [op["op_id"] for op in pending_ops(root)]
     conflicts = [op["op_id"] for op in pending_conflicts(root)]
-    from .router import route_next
+    from .router import load_for_action, route_next
     routed = route_next(state_text, board_text, pending, conflicts)
     next_ticket = routed.get("ticket")
+    # phase_doc derives from the ROUTED action, never from the persisted
+    # STATE.phase -- action and instructions can never disagree.
+    phase_doc = load_for_action(routed.get("action"))
     out = [
         "# SAIPEN COLD CONTEXT",
         "",
@@ -124,7 +125,7 @@ def context_cold(project_root: Path | str, limit: int = 4000) -> Result:
         _log_tail(log_text),
         "",
         "## ROUTING",
-        f"phase_doc: {doc}",
+        f"phase_doc: {phase_doc}",
         f"recovery_pending: {bool(pending)}",
         f"recovery_conflict: {bool(conflicts)}",
         f"conflict_ops: {', '.join(conflicts) or 'none'}",

@@ -74,9 +74,15 @@ def validate_texts(state_text: str, board_text: str, log_text: str) -> list[str]
             if not na.startswith(prefixes):
                 errors.append(f"STATE proposed next_action {na!r} does not "
                               "start with WAIT:/saipen /PHASE /RUN:/RESUME:")
+        # A PHASE next_action naming a ticket must agree with the active task
+        # ONLY in a ticket-bearing phase, where task is the active DOING
+        # ticket. In a non-ticket-bearing phase (DONE after closure) task is
+        # none and next_action legitimately names the next workable ticket --
+        # the router's START projection, not a task-binding violation.
         subject = state.get("task")
         m = re.match(r"^PHASE\s+([A-Za-z_-]+)(?:\s+(T-\d+))?", na.strip())
-        if m and m.group(2) and subject and m.group(2) != subject:
+        if (m and m.group(2) and subject and m.group(2) != subject
+                and phase in phases.TICKET_BEARING_PHASES):
             errors.append(f"STATE proposed next_action names {m.group(2)} "
                           f"but task is {subject}")
     intent = state.get("execution_intent")
@@ -121,10 +127,47 @@ def validate_texts(state_text: str, board_text: str, log_text: str) -> list[str]
         errors.append(f"STATE proposed last_event {last_event} != LOG tail "
                       f"{tail}")
 
+    # Active-ticket binding (NITRO dogfood III, T-591): the one-way check
+    # "BOARD has DOING and STATE has task and they differ" is not a proof of
+    # the actual invariant. For every ticket-bearing phase the binding is
+    # bidirectional: exactly one BOARD.DOING must exist, STATE.task must be a
+    # real T-### equal to it, and next_action's ticket subject must equal it.
+    # Any ticket-bearing phase with task:none, no DOING, a mismatched task, or
+    # a next_action naming a different ticket is structural corruption.
     task = state.get("task")
     active = doing[0]["id"] if doing else None
-    if active and task and task != active:
-        errors.append(f"STATE proposed task {task} != BOARD DOING {active}")
+    phase = state.get("phase")
+    ticket_bearing = phase in phases.TICKET_BEARING_PHASES
+
+    if ticket_bearing:
+        if not active:
+            errors.append(f"STATE proposed phase {phase} is ticket-bearing "
+                          "but BOARD has no ## DOING ticket")
+        if not task or task == "none":
+            errors.append(f"STATE proposed phase {phase} is ticket-bearing "
+                          "but task is not a real T-###")
+        elif active and task != active:
+            errors.append(f"STATE proposed task {task} != BOARD DOING "
+                          f"{active}")
+        na = state.get("next_action")
+        if isinstance(na, str):
+            m = re.match(r"^PHASE\s+([A-Za-z_-]+)(?:\s+(T-\d+))?",
+                         na.strip())
+            if m and m.group(2) and active and m.group(2) != active:
+                errors.append(f"STATE proposed next_action names "
+                              f"{m.group(2)} but the active DOING ticket is "
+                              f"{active}")
+    else:
+        if active:
+            errors.append(f"STATE proposed phase {phase} is not ticket-bearing "
+                          "but BOARD has a ## DOING ticket; a DOING ticket "
+                          "requires a ticket-bearing phase (a completed "
+                          "ticket's execution state must be closed, not "
+                          "left in a non-ticket phase)")
+        if task and task != "none":
+            errors.append(f"STATE proposed phase {phase} is not ticket-bearing "
+                          f"but task is {task!r}; task must be none outside a "
+                          "ticket-bearing phase")
     return errors
 
 
