@@ -4722,6 +4722,40 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            '"code": "CONFLICT"' in rec_c.stdout
            and "op-conf" in rec_c.stdout, repr(rec_c.stdout[:200]))
 
+    # ---- T-587: real subprocess crash (NITRO_CRASH_AFTER_LOG) leaves a
+    # recoverable op; an intervening read-dependency edit CONFLICTs recovery
+    # and the conflict then blocks a new mutation -- through the live CLI.
+    root_sp = make_project()
+    saipen_sp = root_sp / ".saipen"
+    log_sp = (saipen_sp / "LOG.md").read_bytes()
+    state_sp = (saipen_sp / "STATE.md").read_bytes()
+    board_sp = (saipen_sp / "BOARD.md").read_bytes()
+    crash_code = (
+        "import sys, os; sys.path.insert(0, r'%s')\n"
+        "os.environ['NITRO_CRASH_AFTER_LOG'] = '1'\n"
+        "from saipen_engine.operations import checkpoint\n"
+        "checkpoint(r'%s', 'probe', 'RUN', 'T-1', 'crash probe')"
+        % (str(HOME / "tools"), str(root_sp)))
+    rc = subprocess.run([sys.executable, "-c", crash_code], cwd=str(root_sp),
+                        capture_output=True, text=True, timeout=60).returncode
+    expect("subprocess crash after LOG leaves an unresolved op",
+           rc == 87
+           and bool(pending_ops(root_sp)), f"rc={rc}")
+    (saipen_sp / "BOARD.md").write_text(
+        "# Board\n## DOING\n- [/] T-1 [P1] probe | owner: probe | "
+        "claim_time: 2026-08-09T00:00:00Z\n## TODO\n## DONE\n## BLOCKED\n",
+        encoding="utf-8")
+    from saipen_engine.journal import recover as _recover
+    sp_recover = _recover(root_sp, pending_ops(root_sp)[0]["op_id"])
+    expect("crash-then-drifted-read-dep recover CONFLICTs in a real op",
+           sp_recover.get("code") == "CONFLICT", repr(sp_recover))
+    sp_new = ticket_add(root_sp, "probe", "P2", "after sp crash", [],
+                        "verify")
+    expect("new mutation refuses after the subprocess-crash conflict",
+           not sp_new.get("ok")
+           and sp_new.get("code") in ("RECOVERY_CONFLICT",
+                                      "VALIDATION_FAILED"), repr(sp_new))
+
     return problems, checked
 
 
