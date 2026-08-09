@@ -30,7 +30,7 @@ saipen_engine/
     __init__.py  errors.py  result.py  paths.py  codec.py
     state.py     board.py    log.py     lock.py   journal.py
     phases.py    fast_check.py  plan.py  operations.py
-    snapshot.py
+    snapshot.py  subs.py
 ```
 
 plus one thin executable adapter `tools/saipen.py`. Existing tools may import

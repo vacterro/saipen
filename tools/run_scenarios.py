@@ -4027,7 +4027,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     # Import floor: every shipped engine module imports in isolation.
     from saipen_engine import (board, codec, errors, fast_check, journal,  # noqa: F401
                                lock, log, operations, paths, phases, plan,
-                               result, snapshot, state)
+                               result, snapshot, state, subs)
     expect("every shipped saipen_engine module imports in isolation", True)
 
     # ---- R1/R2: checkpoint and ticket_add preserve phase/task.
@@ -4511,6 +4511,41 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            up_reset.returncode == 0
            and "Vintage Golden" not in up_after
            and "Material Design" not in up_after, repr(up_after))
+
+    # ---- NITRO M8: SubSaipen lifecycle on the common machinery.
+    from saipen_engine import subs
+    sub_root = make_project()
+    home = str(HOME)
+    spawn_res = subs.sub_spawn(sub_root, "saiscout", home)
+    sub_state_path = sub_root / ".saipen" / "extensions" / "subs" \
+        / "saiscout" / "STATE.md"
+    expect("sub spawn creates a journaled instance (SPAWNED)",
+           spawn_res.get("ok") and spawn_res.get("code") == "SPAWNED"
+           and sub_state_path.is_file(), repr(spawn_res))
+    st_spawn = sub_state_path.read_text(encoding="utf-8")
+    expect("spawned sub has its own agent + real updated timestamp",
+           "agent: saiscout" in st_spawn
+           and "2026-08-09T" in st_spawn
+           and "2026-01-01" not in st_spawn, repr(st_spawn[-200:]))
+    dup = subs.sub_spawn(sub_root, "saiscout", home)
+    expect("sub spawn refuses an existing instance, never overwrites",
+           not dup.get("ok") and dup.get("code") == "ALREADY_CLAIMED",
+           repr(dup))
+    listed = subs.sub_list(sub_root)
+    expect("sub list reports the spawned instance",
+           listed.get("ok")
+           and any(s["name"] == "saiscout" for s in listed["subs"]),
+           repr(listed))
+    paused = subs.sub_pause(sub_root, "saiscout")
+    st_pause = sub_state_path.read_text(encoding="utf-8")
+    expect("sub pause is a journaled owned-field BLOCKED patch",
+           paused.get("ok") and "phase: BLOCKED" in st_pause
+           and "paused by main agent" in st_pause, repr(paused))
+    resumed = subs.sub_resume(sub_root, "saiscout")
+    st_resume = sub_state_path.read_text(encoding="utf-8")
+    expect("sub resume clears the paused blocker",
+           resumed.get("ok") and "paused by main agent" not in st_resume,
+           repr(st_resume))
 
     return problems, checked
 

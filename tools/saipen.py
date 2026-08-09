@@ -126,6 +126,49 @@ def _recover(project_root: Path, as_json: bool) -> int:
     return 0 if result.get("ok") else 1
 
 
+def _sub(project_root: Path, args: list[str], as_json: bool,
+         dry_run: bool) -> int:
+    """saipen sub list|status|spawn|pause|resume (NITRO M8, journaled)."""
+    from saipen_engine.subs import (sub_list, sub_pause, sub_resume, sub_spawn,
+                                    sub_status)
+
+    action = args[0]
+    if action == "list":
+        result = sub_list(project_root)
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
+    if action == "status":
+        if len(args) < 2:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": "sub status needs <name>"}, as_json)
+            return 2
+        result = sub_status(project_root, args[1])
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
+    if action == "spawn":
+        if len(args) < 2:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": "sub spawn needs <name>"}, as_json)
+            return 2
+        state = parse_state(codec.read_doc(_state_path(project_root)))
+        saipen_home = state.get("saipen_home") or str(HOME)
+        result = sub_spawn(project_root, args[1], saipen_home)
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
+    if action in ("pause", "resume"):
+        if len(args) < 2:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": f"sub {action} needs <name>"}, as_json)
+            return 2
+        fn = sub_pause if action == "pause" else sub_resume
+        result = fn(project_root, args[1])
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
+    _emit({"ok": False, "code": "VALIDATION_FAILED",
+           "detail": f"unknown sub action {action!r}"}, as_json)
+    return 2
+
+
 def _userperson(project_root: Path, args: list[str], as_json: bool,
                 dry_run: bool) -> int:
     """saipen userperson show/add/remove/reset (NITRO M7, journaled)."""
@@ -272,6 +315,8 @@ def main(argv: list[str] | None = None) -> int:
             return 0 if result.ok else 1
     if command == "userperson" and len(args) >= 1:
         return _userperson(project_root, args[1:], as_json, dry_run)
+    if command == "sub" and len(args) >= 1:
+        return _sub(project_root, args[1:], as_json, dry_run)
     print(f"unknown command: {command}")
     return 2
 
