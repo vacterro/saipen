@@ -4027,7 +4027,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     # Import floor: every shipped engine module imports in isolation.
     from saipen_engine import (board, codec, context, errors, fast_check,  # noqa: F401
                                journal, lock, log, operations, paths, phases,
-                               plan, result, snapshot, state, subs)
+                               plan, result, safeid, snapshot, state, subs)
     expect("every shipped saipen_engine module imports in isolation", True)
 
     # ---- R1/R2: checkpoint and ticket_add preserve phase/task.
@@ -4540,12 +4540,25 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     st_pause = sub_state_path.read_text(encoding="utf-8")
     expect("sub pause is a journaled owned-field BLOCKED patch",
            paused.get("ok") and "phase: BLOCKED" in st_pause
-           and "paused by main agent" in st_pause, repr(paused))
+           and "paused by main agent" in st_pause
+           and "paused_from_phase: PLAN" in st_pause
+           and "paused_from_na:" in st_pause, repr(st_pause))
+    sub_log_path = sub_root / ".saipen" / "extensions" / "subs" \
+        / "saiscout" / "LOG.md"
+    expect("sub pause leaves a trace in the sub LOG",
+           "main agent pause" in sub_log_path.read_text(encoding="utf-8"))
     resumed = subs.sub_resume(sub_root, "saiscout")
     st_resume = sub_state_path.read_text(encoding="utf-8")
-    expect("sub resume clears the paused blocker",
-           resumed.get("ok") and "paused by main agent" not in st_resume,
-           repr(st_resume))
+    expect("sub resume restores the prior phase and next_action",
+           resumed.get("ok") and "phase: PLAN" in st_resume
+           and 'next_action: "saipen plan"' in st_resume
+           and "paused by main agent" not in st_resume
+           and "paused_from_phase: \"\"" in st_resume
+           and "paused_from_na: \"\"" in st_resume, repr(st_resume))
+    expect("sub resume leaves a trace in the sub LOG",
+           "main agent resume" in sub_log_path.read_text(encoding="utf-8"))
+    expect("resume of a non-paused sub refuses (no fake success)",
+           not subs.sub_resume(sub_root, "saiscout").get("ok"))
 
     # Clean preflight: read-only, refuses outstanding evidence, never deletes.
     clean_bad = subs.sub_clean_preflight(sub_root, "saiscout")
@@ -4569,6 +4582,109 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            collect_res.get("ok")
            and collect_res.get("code") == "COLLECT_PREFLIGHT",
            repr(collect_res))
+
+    # ---- T-588: SubSaipen path-escape regression (dogfood II).
+    from saipen_engine import subs as _subs
+    esc_root = make_project()
+    esc_home = str(HOME)
+    for bad in ("..", ".", "../x", "x/../y", "..\\x", r"V:\abs",
+                "a\nb", "a\x00b"):
+        try:
+            _subs.sub_spawn(esc_root, bad, esc_home)
+            refused = False
+        except (ValueError, Exception):  # noqa: BLE001
+            refused = True
+        if not refused:
+            r = _subs.sub_spawn(esc_root, bad, esc_home)
+            refused = (not r.get("ok")
+                       and r.get("code") in ("INVALID_ID", "PATH_ESCAPE"))
+        expect(f"sub name {bad!r} is refused (no path escape)",
+               refused, repr(bad))
+    # Zero bytes escaped anywhere outside the owner root. The fixture's own
+    # three canonical files are expected; anything else outside
+    # .saipen/extensions/subs/ would be an escape (e.g. .saipen/extensions/
+    # STATE.md from a ".." spawn).
+    canonical = {".saipen/STATE.md", ".saipen/BOARD.md", ".saipen/LOG.md"}
+    escaped_files = [p for p in (esc_root / ".saipen").rglob("*")
+                     if p.is_file()
+                     and "extensions/subs" not in p.as_posix()
+                     and p.relative_to(esc_root).as_posix() not in canonical]
+    expect("path-escape attempts write zero bytes outside the owner root",
+           len(escaped_files) == 0,
+           repr([p.relative_to(esc_root).as_posix()
+                 for p in escaped_files]))
+
+    # ---- T-588: first-spawn bootstrap installs the shared extension files.
+    boot_root = make_project()
+    _subs.sub_spawn(boot_root, "saiscout", esc_home)
+    subs_dir = boot_root / ".saipen" / "extensions" / "subs"
+    expect("first spawn installs PROTOCOL.md",
+           (subs_dir / "PROTOCOL.md").is_file())
+    expect("first spawn installs TEMPLATE/",
+           (subs_dir / "TEMPLATE" / "STATE.md").is_file())
+    expect("first spawn installs built-in sai*.md charters",
+           (subs_dir / "saihunt.md").is_file())
+    expect("first spawn does NOT bootstrap on a second instance",
+           not _subs.sub_spawn(boot_root, "saiscout2", esc_home).get("ok")
+           or (subs_dir / "PROTOCOL.md").is_file())
+
+    # ---- T-588: ready OUTBOX package completeness (dogfood II).
+    comp_root = make_project()
+    _subs.sub_spawn(comp_root, "saiscout", esc_home)
+    comp_outbox = comp_root / ".saipen" / "extensions" / "subs" \
+        / "saiscout" / "kitchen" / "OUTBOX.md"
+    from freshness import compute_source_identity
+    _current = compute_source_identity(comp_root)
+    complete = ("# OUTBOX\n\n## F-001: finding\n"
+                "- **status:** ready\n"
+                "- **summary:** a finding\n"
+                f"- **source_head:** {_current.source_head}\n"
+                f"- **source_tree_fingerprint:** "
+                f"{_current.source_tree_fingerprint}\n"
+                "- **role_revision:** recorded-role\n"
+                "- **producer:** saiscout\n")
+    comp_outbox.write_text(complete, encoding="utf-8")
+    res_ok = _subs.sub_collect(comp_root, "saiscout")
+    expect("complete ready OUTBOX package passes collect",
+           res_ok.get("ok"), repr(res_ok))
+    for missing_field in ("source_head", "source_tree_fingerprint",
+                          "role_revision"):
+        partial = complete.replace(
+            f"- **{missing_field}:** ", f"- **{missing_field}:** ")
+        partial = "\n".join(
+            line for line in complete.splitlines()
+            if not line.startswith(f"- **{missing_field}:**"))
+        comp_outbox.write_text(partial, encoding="utf-8")
+        res_missing = _subs.sub_collect(comp_root, "saiscout")
+        expect(f"ready OUTBOX missing {missing_field} refuses "
+               f"(PACKAGE_INCOMPLETE)",
+               not res_missing.get("ok")
+               and res_missing.get("code") == "PACKAGE_INCOMPLETE",
+               repr(res_missing))
+        comp_outbox.write_text(complete, encoding="utf-8")
+
+    # ---- T-588: malformed nonempty OUTBOX is not an empty queue.
+    mal_root = make_project()
+    _subs.sub_spawn(mal_root, "saiscout", esc_home)
+    mal_outbox = mal_root / ".saipen" / "extensions" / "subs" \
+        / "saiscout" / "kitchen" / "OUTBOX.md"
+    mal_outbox.write_text(
+        "# OUTBOX\n\n## status: ready\nsome stray text that is not a "
+        "package\n", encoding="utf-8")
+    res_mal = _subs.sub_collect(mal_root, "saiscout")
+    expect("malformed nonempty OUTBOX refuses (MALFORMED_PACKAGE)",
+           not res_mal.get("ok")
+           and res_mal.get("code") == "MALFORMED_PACKAGE", repr(res_mal))
+
+    # ---- T-588: sub collect (no name) aggregates all active subs.
+    agg_root = make_project()
+    _subs.sub_spawn(agg_root, "saiscout", esc_home)
+    _subs.sub_spawn(agg_root, "saiscout2", esc_home)
+    agg_res = _subs.sub_collect(agg_root)
+    expect("sub collect with no name aggregates all active subs",
+           agg_res.get("ok")
+           and {p["name"] for p in agg_res["packages"]}
+           == {"saiscout", "saiscout2"}, repr(agg_res))
 
     # ---- NITRO M9: context compiler is read-only and derives from the engine.
     from saipen_engine import context as ctx

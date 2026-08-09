@@ -48,7 +48,6 @@ DISPOSITION = {
 
 _MISSING = object()
 
-_SAFE_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
 _FINDING_RE = re.compile(r"^IMP-(\d+)", re.MULTILINE)
 _SWEEP_RE = re.compile(
     r"^- IMP-(\d+) \[([A-Z_]+)\]", re.MULTILINE)
@@ -62,38 +61,18 @@ class ImproveError(ValueError):
 
 def _validate_safe_id(value: str, kind: str) -> str:
     """Reject any identity that could escape the owner root or inject a
-    field/newline: empty, path separators, dots alone, absolute/drive
-    qualification, whitespace, control characters, alternates."""
-    value = (value or "").strip()
-    if not value:
-        raise ImproveError(f"{kind} is empty")
-    if any(ch in value for ch in "/\\\n\r\x00"):
-        raise ImproveError(f"{kind} {value!r} contains a path separator or "
-                           "control character")
-    if value in (".", ".."):
-        raise ImproveError(f"{kind} {value!r} is a dot path")
-    if value.startswith("..") or ".." in value.split("."):
-        raise ImproveError(f"{kind} {value!r} contains a .. component")
-    if value[0].isdigit() and re.match(r"^\d", value):
-        pass
-    if not _SAFE_ID_RE.match(value):
-        raise ImproveError(f"{kind} {value!r} is not path-safe "
-                           "([A-Za-z0-9_.-])")
-    if Path(value).is_absolute():
-        raise ImproveError(f"{kind} {value!r} is an absolute path")
-    return value
+    field/newline. ONE shared primitive owns this: saipen_engine.safeid.
+    (NITRO dogfood II -- no third sanitizer.)"""
+    from saipen_engine.safeid import validate_safe_id as _shared
+    try:
+        return _shared(value or "", kind=kind)
+    except ValueError as exc:
+        raise ImproveError(str(exc)) from exc
 
 
 def _validate_report_path(value: str, seat_id: str) -> str:
     """A report path must be a bare safe file name under the seat owner root."""
-    if not value or value in (".", ".."):
-        raise ImproveError("report_path is empty")
-    if any(ch in value for ch in "/\\\n\r\x00"):
-        raise ImproveError("report_path contains a separator or control "
-                           "character")
-    if not _SAFE_ID_RE.match(value):
-        raise ImproveError("report_path is not path-safe")
-    return value
+    return _validate_safe_id(value or "", "report_path")
 
 
 def seat_key(seat_id: str, agent: str = "") -> str:
@@ -133,12 +112,14 @@ def _owner_root(project_root: Path) -> Path:
 
 def _prove_inside(project_root: Path, path: Path) -> None:
     """Canonicalize the owned path and prove it stays under the owner root.
-    Called after construction; an escape raises rather than writes."""
-    owner = _owner_root(project_root)
-    resolved = path.resolve()
-    if not resolved.is_relative_to(owner):
-        raise ImproveError(
-            f"path {path} escapes the Improve owner root {owner}")
+    ONE shared primitive (saipen_engine.safeid.prove_inside) owns containment
+    proof -- realpath + normcase, an escape raises rather than writes
+    (NITRO dogfood II)."""
+    from saipen_engine.safeid import prove_inside as _shared
+    try:
+        _shared(path, _owner_root(project_root), kind="Improve path")
+    except ValueError as exc:
+        raise ImproveError(str(exc)) from exc
 
 
 def _read_maybe(path: Path) -> str:

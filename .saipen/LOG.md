@@ -65,3 +65,8 @@
 - 09.08.26 15:32 [E-2526] [parent: E-2525] [agent: claude] [op: transition-e1a05a09] RUN: P0 trust wave 1 closed
 - 09.08.26 15:33 [E-2527] [parent: E-2526] [T-587] [agent: claude] [op: checkpoint-dbec70e4] DEC: goal_tickets 13->14 (T-587 passed VERIFY)
 - 09.08.26 15:33 [E-2528] [parent: E-2527] [T-587] [agent: claude] [op: checkpoint-f4dbebeb] RUN: goal_tickets counter synced (14); T-587 P0 closed
+- 09.08.26 15:34 [E-2529] [parent: E-2528] [T-588] [agent: claude] [op: ticket-1d102951] DEC: ticket added via SAIOPS
+- 09.08.26 15:34 [E-2530] [parent: E-2529] [T-588] [agent: claude] [op: claim-9bb30d3c] DEC: claimed via SAIOPS -- owner claude
+- 09.08.26 15:34 [E-2531] [parent: E-2530] [T-588] [agent: claude] [op: transition-d7050086] RUN: M8 regression begins
+- 09.08.26 16:18 [E-2532] [parent: E-2531] [T-588] [agent: claude] [op: transition-c882c5e3] RUN: SCOUT done: path-escape reproduced + fixed via shared safeid primitive; bootstrap + pause/resume restore + package completeness + malformed OUTBOX + collect aggregate + adopt all landed
+- 09.08.26 16:18 [E-2533] [parent: E-2532] [T-588] [agent: claude] [op: checkpoint-07926809] RUN: BUILD: saipen_engine/safeid.py shared ID primitive (used by subs + improve); sub_spawn '..' escapes refused + zero bytes outside owner root; first-spawn bootstrap copies PROTOCOL/README/crew/TEMPLATE/_shared/sai*.md charters as one journaled admission; pause records paused_from_phase/na, resume restores both + clears metadata + traces to sub LOG, refuses non-paused; ready OUTBOX missing source_head/tree/role REFUSEs PACKAGE_INCOMPLETE; malformed nonempty OUTBOX REFUSEs MALFORMED_PACKAGE; sub collect aggregates all active subs; sub adopt implements re-anchoring role_revision
