@@ -63,6 +63,8 @@ from userperson import (merge_profile, onboarding_questions, parse_profile,
                         project_profile, remove_preference, render_profile,
                         validate_profile)
 from saipen_engine.board import parse_board
+from saipen_engine.journal import Journal, recover, run_mutation
+from saipen_engine.lock import WriterLock
 from saipen_engine.log import parse_log_line
 from saipen_engine.snapshot import ProjectSnapshot
 from saipen_engine.state import parse_frontmatter
@@ -3498,10 +3500,11 @@ def run_nitro_probes() -> tuple[list[str], int]:
     expect("board parser finds every live section",
            board["headings"] == ["## DOING", "## TODO", "## DONE",
                                  "## BLOCKED"], repr(board["headings"]))
+    doing = [t for t in board["tickets"].values()
+             if t["section"] == "## DOING"]
     expect("board parser locates the claimed ticket",
-           board["tickets"].get("T-578", {}).get("section") == "## DOING"
-           and board["tickets"]["T-578"]["checkbox"] == "/",
-           repr(board["tickets"].get("T-578", {}).get("section")))
+           len(doing) == 1 and doing[0]["checkbox"] == "/",
+           repr([(t["id"], t["checkbox"]) for t in doing]))
 
     log_line = "- 08.08.26 23:58 [E-2440] [parent: E-2439] [T-578] RUN: probe"
     ev = parse_log_line(log_line)
@@ -3542,6 +3545,135 @@ def run_nitro_probes() -> tuple[list[str], int]:
     expect("saipen next --json returns the action deterministically",
            nxt.returncode == 0 and '"action":' in nxt.stdout
            and '"load":' in nxt.stdout, repr(nxt.stdout[:120]))
+
+    return problems, checked
+
+
+def run_nitro_m2_probes() -> tuple[list[str], int]:
+    """NITRO M2 (T-579): OS single-writer lock + write-ahead journal +
+    roll-forward recovery with crash injection at every commit boundary.
+
+    A subprocess performs run_mutation with NITRO_CRASH_AFTER_<STAGE> set and
+    dies (exit 87) exactly there; recovery must produce exactly one valid
+    outcome and be idempotent. The LOG event is never deleted (roll-forward,
+    not rollback).
+    """
+    problems: list[str] = []
+    checked = 0
+
+    def expect(label: str, ok: bool, detail: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        if not ok:
+            problems.append(f"{label}: {detail}")
+        else:
+            print(f"PASS: nitro-m2 -- {label}")
+
+    root = Path(tempfile.mkdtemp(prefix="saipen-m2-"))
+    saipen = root / ".saipen"
+    saipen.mkdir()
+    log = saipen / "LOG.md"
+    board = saipen / "BOARD.md"
+    state = saipen / "STATE.md"
+    log.write_text("- 09.08.26 00:00 [E-900] [T-none] DEC: base\n",
+                   encoding="utf-8")
+    board.write_text("# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+                     encoding="utf-8")
+    state.write_text("---\nphase: DONE\ntask: none\n"
+                     'next_action: "saipen continue"\n---\n', encoding="utf-8")
+
+    log_before = log.read_bytes()
+    board_before = board.read_bytes()
+    state_before = state.read_bytes()
+
+    def run_crash(stage_env: str, op_id: str) -> int:
+        env = {**os.environ, stage_env: "1"}
+        code = (
+            "import sys; sys.path.insert(0, r'%s')\n"
+            "from saipen_engine.journal import run_mutation\n"
+            "run_mutation(r'%s', '%s', 'probe', 'id', {}, [\n"
+            "  {'path': '.saipen/LOG.md', 'content': %r},\n"
+            "  {'path': '.saipen/BOARD.md', 'content': %r},\n"
+            "  {'path': '.saipen/STATE.md', 'content': %r}])"
+            % (str(HOME / "tools"), str(root), op_id,
+               log_before + b"\n- 09.08.26 00:01 [E-901] RUN: op\n",
+               board_before,
+               state_before.replace(b"phase: DONE", b"phase: BUILD")))
+        return subprocess.run([sys.executable, "-c", code], cwd=str(root),
+                              env=env, capture_output=True, text=True,
+                              timeout=60).returncode
+
+    # Crash before LOG (NITRO_CRASH_AFTER_PREPARE): canonical state unchanged.
+    rc = run_crash("NITRO_CRASH_AFTER_PREPARE", "op-prepare")
+    expect("crash before LOG leaves canonical state unchanged",
+           rc == 87 and log.read_bytes() == log_before
+           and board.read_bytes() == board_before
+           and state.read_bytes() == state_before,
+           f"rc={rc}")
+    recover(root, "op-prepare")
+    expect("PREPARED recovery aborts safely",
+           log.read_bytes() == log_before)
+
+    # Crash after LOG: LOG written, BOARD/STATE not; recover rolls forward.
+    run_crash("NITRO_CRASH_AFTER_LOG", "op-log")
+    expect("crash after LOG leaves the LOG event and nothing else",
+           b"E-901" in log.read_bytes()
+           and board.read_bytes() == board_before
+           and b"phase: BUILD" not in state.read_bytes())
+    result = recover(root, "op-log")
+    expect("recovery rolls BOARD+STATE forward after LOG",
+           result["ok"] and b"phase: BUILD" in state.read_bytes()
+           and result.get("code") == "COMMITTED", repr(result))
+    again = recover(root, "op-log")
+    expect("repeated recovery is idempotent (ALREADY_APPLIED)",
+           again["ok"] and again.get("code") == "ALREADY_APPLIED",
+           repr(again))
+    expect("the LOG event was not duplicated by recovery",
+           log.read_text(encoding="utf-8").count("E-901") == 1)
+
+    # A committed op's retry returns ALREADY_APPLIED without a second event.
+    journal = Journal(root, "op-log")
+    record = journal.read()
+    targets = record["targets"]
+    result = run_mutation(
+        root, "op-log", "probe", "id",
+        {"STATE.md": "x"},  # stale precondition, must not matter for committed
+        [{"path": p, "content": b""} for p in targets])
+    expect("a committed op's retry returns ALREADY_APPLIED",
+           result.get("code") == "ALREADY_APPLIED", repr(result))
+    expect("no duplicate LOG event from a retried committed op",
+           log.read_text(encoding="utf-8").count("E-901") == 1)
+
+    # A committed op's retry returns ALREADY_APPLIED without a second event.
+    journal = Journal(root, "op-log")
+    record = journal.read()
+    targets = record["targets"]
+    result = run_mutation(
+        root, "op-log", "probe", "id",
+        {"STATE.md": "x"},  # stale precondition, must not matter for committed
+        [{"path": p, "content": b""} for p in targets])
+    expect("a committed op's retry returns ALREADY_APPLIED",
+           result.get("code") == "ALREADY_APPLIED", repr(result))
+    expect("no duplicate LOG event from a retried committed op",
+           log.read_text(encoding="utf-8").count("E-901") == 1)
+
+    # Writer lock: second live writer refuses; release allows re-acquire.
+    lock = WriterLock(root)
+    lock.acquire()
+    try:
+        try:
+            second = WriterLock(root)
+            second.acquire()
+            refused = False
+        except PermissionError:
+            refused = True
+        expect("a second live writer is refused (WRITER_BUSY)", refused)
+    finally:
+        lock.release()
+    reacquire = WriterLock(root)
+    reacquire.acquire()
+    reacquire.release()
+    expect("the lock releases and re-acquires cleanly", True)
 
     return problems, checked
 
@@ -4148,6 +4280,8 @@ improve_failures, improve_checked = run_improve_probes()
 failures.extend(improve_failures)
 nitro_failures, nitro_checked = run_nitro_probes()
 failures.extend(nitro_failures)
+nitro_m2_failures, nitro_m2_checked = run_nitro_m2_probes()
+failures.extend(nitro_m2_failures)
 manifest_failures, manifest_checked = run_manifest_tracking_probes()
 failures.extend(manifest_failures)
 autoinject_failures, autoinject_checked = run_autoinject_manifest_probes()
@@ -4195,6 +4329,7 @@ print(f"{hardening_checked} hardening red control(s) resolved")
 print(f"{userperson_checked} userperson behavior(s) executed")
 print(f"{improve_checked} improve behavior(s) executed")
 print(f"{nitro_checked} nitro behavior(s) executed")
+print(f"{nitro_m2_checked} nitro-m2 behavior(s) executed")
 print(f"{purity_checked} pre-commit-purity behavior(s) executed, "
       f"{purity_skipped} skipped for missing interpreters")
 print(f"{manifest_checked} manifest-tracking behavior(s) executed")
