@@ -17,7 +17,11 @@ from pathlib import Path
 
 from saipen_engine import codec, snapshot
 from saipen_engine.board import parse_board
+from saipen_engine.operations import (apply_claim, checkpoint, plan_claim,
+                                       transition_phase)
 from saipen_engine.state import parse_state
+
+AGENT = "saipen-cli"
 
 HOME = Path(__file__).resolve().parent.parent
 VERSION_FILE = HOME / "VERSION"
@@ -110,9 +114,12 @@ def _emit(payload: dict, as_json: bool) -> None:
 def main(argv: list[str] | None = None) -> int:
     args = argv if argv is not None else sys.argv[1:]
     as_json = "--json" in args
-    args = [a for a in args if a != "--json"]
+    dry_run = "--dry-run" in args
+    args = [a for a in args if a not in ("--json", "--dry-run")]
     if not args or args[0] in ("-h", "--help"):
-        print("usage: saipen (status|next) [--json]")
+        print("usage: saipen (status|next|claim <T-###>|transition <PHASE> "
+              "[T-###] [text]|checkpoint <TAXONOMY> [T-###] [text]) "
+              "[--dry-run] [--json]")
         return 2
     command = args[0]
     project_root = Path.cwd()
@@ -120,6 +127,36 @@ def main(argv: list[str] | None = None) -> int:
         return _status(project_root, as_json)
     if command == "next":
         return _next_action(project_root, as_json)
+    if command == "claim":
+        if len(args) < 2:
+            _emit({"ok": False, "code": "TICKET_NOT_FOUND"}, as_json)
+            return 2
+        result = plan_claim(project_root, args[1], AGENT) if dry_run \
+            else apply_claim(project_root, args[1], AGENT)
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+    if command == "transition":
+        if len(args) < 2:
+            _emit({"ok": False, "code": "ILLEGAL_TRANSITION"}, as_json)
+            return 2
+        ticket = args[2] if len(args) > 2 and args[2].upper().startswith(
+            "T-") else None
+        text = " ".join(args[3:] if ticket else args[2:])
+        result = transition_phase(project_root, args[1], AGENT, ticket, text,
+                                  dry_run=dry_run)
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+    if command == "checkpoint":
+        if len(args) < 2:
+            _emit({"ok": False, "code": "VALIDATION_FAILED"}, as_json)
+            return 2
+        ticket = args[2] if len(args) > 2 and args[2].upper().startswith(
+            "T-") else None
+        text = " ".join(args[3:] if ticket else args[2:])
+        result = checkpoint(project_root, AGENT, args[1], ticket, text,
+                            dry_run=dry_run)
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
     print(f"unknown command: {command}")
     return 2
 

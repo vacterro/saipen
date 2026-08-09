@@ -26,6 +26,29 @@ from .state import parse_state
 
 REQUIRED_HEADINGS = ["## DOING", "## TODO", "## DONE", "## BLOCKED"]
 
+# The canonical transition table (CORE section 1.6), as data. The engine only
+# records a legal transition; deciding whether the work deserves REVIEW stays
+# the model's job.
+VALID_TRANSITIONS = {
+    "INIT": {"PLAN", "BLOCKED"},
+    "PLAN": {"SCOUT", "BUILD", "DONE", "BLOCKED"},
+    "SCOUT": {"BUILD", "BLOCKED"},
+    "BUILD": {"VERIFY", "BLOCKED"},
+    "VERIFY": {"REVIEW", "SCOUT", "BUILD", "BLOCKED"},
+    "REVIEW": {"SHIP", "BUILD", "SCOUT", "BLOCKED"},
+    "SHIP": {"DONE", "BUILD", "BLOCKED"},
+    "DONE": {"SCOUT", "PLAN", "HUNT", "BLOCKED"},
+    "VALIDATE": {"SCOUT", "PLAN", "DONE", "BLOCKED"},
+    "HUNT": {"ADD", "PLAN", "SCOUT", "BLOCKED"},
+    "MARKHUNT": {"DONE", "BLOCKED"},
+    "ADD": {"BUILD", "PLAN", "SCOUT", "DONE", "BLOCKED"},
+    "CLEAN": {"DONE", "BLOCKED"},
+    "TRANSLATE": {"DONE", "BLOCKED"},
+    "PREPARE": {"DONE", "BLOCKED"},
+    "BLOCKED": {"PLAN", "SCOUT", "DONE"},
+}
+TICKET_BEARING_PHASES = {"SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP"}
+
 
 def _now() -> str:
     return datetime.datetime.now(datetime.timezone.utc).strftime(
@@ -176,6 +199,124 @@ def apply_claim(project_root: Path | str, ticket_id: str, agent: str) -> dict:
     with project_writer_lock(root):
         commit = run_mutation(root, op_id, agent, snap.project_identity,
                               preconditions, targets)
-    result.update(commit)
+    result = {**commit, **result}
     result["ticket"] = ticket_id
+    return result
+
+
+def _transition_targets(root: Path, destination: str, agent: str,
+                        ticket_id: str | None, event_text: str,
+                        now: str, utc: str) -> tuple[list[dict], dict] | None:
+    state_text = codec.read_doc(root / ".saipen" / "STATE.md")
+    log_text = codec.read_doc(root / ".saipen" / "LOG.md")
+    state = parse_state(state_text)
+    current = state.get("phase")
+    if destination not in VALID_TRANSITIONS.get(current or "", set()):
+        return None, {"ok": False, "code": "ILLEGAL_TRANSITION",
+                      "detail": f"{current} -> {destination}"}
+    if destination in TICKET_BEARING_PHASES and not ticket_id:
+        return None, {"ok": False, "code": "ILLEGAL_TRANSITION",
+                      "detail": f"{destination} is ticket-bearing and needs "
+                                "a T-ID"}
+    subject = ticket_id or state.get("task")
+    event = _alloc_event(log_text)
+    taxonomy = "RUN"
+    new_log = log_text.rstrip("\n") + "\n" + (
+        f"- {now} [E-{event}]"
+        + (f" [{subject}]" if subject else "")
+        + f" {taxonomy}: {event_text}")
+    prev_phase = current
+    new_state = _render_state(state, subject or "none", agent, event, utc)
+    lines = new_state.splitlines(keepends=True)
+    phase_line = next(i for i, ln in enumerate(lines)
+                      if ln.startswith("phase: "))
+    lines[phase_line] = f"phase: {destination}\n"
+    na = f"saipen {destination.lower()}" if destination not in (
+        TICKET_BEARING_PHASES) else f"PHASE {destination} {subject}"
+    na_line = next(i for i, ln in enumerate(lines)
+                   if ln.startswith("next_action:"))
+    lines[na_line] = f'next_action: "{na}"\n'
+    tf_line = next(i for i, ln in enumerate(lines)
+                   if ln.startswith("transition_from:"))
+    lines[tf_line] = f"transition_from: {prev_phase}\n"
+    new_state = "".join(lines)
+    board_text = codec.read_doc(root / ".saipen" / "BOARD.md")
+    targets = [
+        {"path": ".saipen/LOG.md", "content": new_log + "\n"},
+        {"path": ".saipen/BOARD.md", "content": board_text},
+        {"path": ".saipen/STATE.md", "content": new_state},
+    ]
+    return targets, {"ok": True, "code": "TRANSITIONED", "phase": destination,
+                     "event_id": f"E-{event}"}
+
+
+def transition_phase(project_root: Path | str, destination: str,
+                     agent: str, ticket_id: str | None = None,
+                     event_text: str = "", dry_run: bool = False) -> dict:
+    """Transition to a legal destination phase, journalled. The engine records
+    only a legal transition; the model decides whether the work deserves it."""
+    root = Path(project_root)
+    now = _now()
+    utc = _utc_iso()
+    targets, result = _transition_targets(
+        root, destination.upper(), agent, ticket_id, event_text or
+        f"transition to {destination}", now, utc)
+    if targets is None:
+        return result
+    result["op_id"] = "transition-" + uuid.uuid4().hex[:8]
+    result["changed_files"] = [t["path"] for t in targets]
+    if dry_run:
+        result["dry_run"] = True
+        return result
+    snap = ProjectSnapshot.capture(root)
+    preconditions = {
+        ".saipen/STATE.md": snap.state_hash,
+        ".saipen/LOG.md": snap.log_hash,
+    }
+    with project_writer_lock(root):
+        commit = run_mutation(root, result["op_id"], agent,
+                              snap.project_identity, preconditions, targets)
+    result = {**commit, **result}
+    return result
+
+
+def checkpoint(project_root: Path | str, agent: str, taxonomy: str,
+               ticket_id: str | None, description: str,
+               dry_run: bool = False) -> dict:
+    """Generic high-frequency checkpoint: one allocated E-ID LOG event plus
+    the STATE last_event bump. The model never hand-numbers events."""
+    root = Path(project_root)
+    now = _now()
+    utc = _utc_iso()
+    state_text = codec.read_doc(root / ".saipen" / "STATE.md")
+    log_text = codec.read_doc(root / ".saipen" / "LOG.md")
+    event = _alloc_event(log_text)
+    new_log = log_text.rstrip("\n") + "\n" + (
+        f"- {now} [E-{event}]"
+        + (f" [{ticket_id}]" if ticket_id else "")
+        + f" {taxonomy.upper()}: {description}")
+    state = parse_state(state_text)
+    new_state = _render_state(state, state.get("task") or "none", agent,
+                              event, utc)
+    board_text = codec.read_doc(root / ".saipen" / "BOARD.md")
+    targets = [
+        {"path": ".saipen/LOG.md", "content": new_log + "\n"},
+        {"path": ".saipen/BOARD.md", "content": board_text},
+        {"path": ".saipen/STATE.md", "content": new_state},
+    ]
+    result = {"ok": True, "code": "CHECKPOINTED", "event_id": f"E-{event}",
+              "op_id": "checkpoint-" + uuid.uuid4().hex[:8],
+              "changed_files": [t["path"] for t in targets]}
+    if dry_run:
+        result["dry_run"] = True
+        return result
+    snap = ProjectSnapshot.capture(root)
+    preconditions = {
+        ".saipen/STATE.md": snap.state_hash,
+        ".saipen/LOG.md": snap.log_hash,
+    }
+    with project_writer_lock(root):
+        commit = run_mutation(root, result["op_id"], agent,
+                              snap.project_identity, preconditions, targets)
+    result = {**commit, **result}
     return result

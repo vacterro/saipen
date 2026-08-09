@@ -68,7 +68,8 @@ from saipen_engine.state import parse_state
 from saipen_engine.journal import Journal, recover, run_mutation
 from saipen_engine.lock import WriterLock
 from saipen_engine.log import parse_log_line
-from saipen_engine.operations import apply_claim, plan_claim
+from saipen_engine.operations import (apply_claim, checkpoint, plan_claim,
+                                       transition_phase)
 from saipen_engine.snapshot import ProjectSnapshot
 from saipen_engine.state import parse_frontmatter
 
@@ -3755,7 +3756,7 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
 
     result = apply_claim(root, "T-777", "probe")
     expect("apply_claim commits the claim",
-           result.get("ok") and result.get("code") == "COMMITTED",
+           result.get("ok") and result.get("code") == "CLAIMED",
            repr(result))
     board_after = parse_board(codec.read_doc(saipen / "BOARD.md"))
     expect("claim moves exactly one ticket to DOING with / checkbox",
@@ -3780,6 +3781,39 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
     expect("a second claim on the claimed ticket is refused",
            not again.get("ok") and again.get("code") == "ALREADY_CLAIMED",
            repr(again))
+
+    # Transition: SCOUT -> BUILD legal and journalled; illegal refused; dry-run
+    # writes nothing.
+    state_before = (saipen / "STATE.md").read_bytes()
+    log_before = (saipen / "LOG.md").read_bytes()
+    illegal = transition_phase(root, "REVIEW", "probe", "T-777")
+    expect("an illegal transition is refused with ILLEGAL_TRANSITION",
+           not illegal.get("ok")
+           and illegal.get("code") == "ILLEGAL_TRANSITION", repr(illegal))
+    plan = transition_phase(root, "BUILD", "probe", "T-777",
+                            "building", dry_run=True)
+    expect("transition dry-run writes zero canonical bytes",
+           plan.get("ok") and plan.get("dry_run")
+           and (saipen / "STATE.md").read_bytes() == state_before
+           and (saipen / "LOG.md").read_bytes() == log_before, repr(plan))
+    result = transition_phase(root, "BUILD", "probe", "T-777", "building")
+    expect("SCOUT->BUILD transition commits with a new event",
+           result.get("ok") and result.get("code") == "TRANSITIONED"
+           and parse_state(codec.read_doc(saipen / "STATE.md")).get("phase")
+           == "BUILD", repr(result))
+
+    # Checkpoint: allocates exactly one event, bumps last_event.
+    log_before = (saipen / "LOG.md").read_bytes()
+    state_before = (saipen / "STATE.md").read_bytes()
+    cp = checkpoint(root, "probe", "RUN", "T-777", "probe checkpoint")
+    log_after = codec.read_doc(saipen / "LOG.md")
+    expect("checkpoint appends exactly one event with an allocated E-ID",
+           cp.get("ok") and cp.get("code") == "CHECKPOINTED"
+           and log_after.count(cp.get("event_id", "E-0")) == 1,
+           repr(cp))
+    expect("checkpoint bumps STATE last_event to the new event",
+           parse_state(codec.read_doc(saipen / "STATE.md")).get("last_event")
+           == int(cp.get("event_id", "E-0")[2:]), repr(cp))
 
     return problems, checked
 
