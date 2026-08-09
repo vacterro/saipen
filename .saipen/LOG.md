@@ -28,3 +28,5 @@
 - 09.08.26 10:56 [E-2489] [parent: E-2488] [T-577] [agent: claude] [op: ticket-11635119] DEC: ticket done via SAIOPS -- PASS -- USERPERSON contract repaired (T-574's two false claims): structured preference identity (category + exact text), deterministic lexical dedup, no fabricated semantic equivalence; projection_policy + project_profile select real preferences into auditable handoffs, no length-only test; 16 userperson probes exercise both red controls. M7: userperson writer (show/add/remove/reset) migrated onto common lock+journal+codec machinery via write_profile; 3 new nitro-integrity red controls; validator/scenarios/audit green
 - 09.08.26 10:56 [E-2490] [parent: E-2489] [agent: claude] [op: transition-bd2b876d] RUN: gate run
 - 09.08.26 10:56 [E-2491] [parent: E-2490] [agent: claude] [op: transition-58495ab2] RUN: M7 USERPERSON closed
+- 09.08.26 10:57 [E-2492] [parent: E-2491] [T-577] [agent: claude] [op: checkpoint-f6186875] DEC: goal_tickets 10->11 (T-577 passed VERIFY)
+- 09.08.26 10:57 [E-2493] [parent: E-2492] [T-577] [agent: claude] [op: checkpoint-4f1eeb6a] RUN: goal_tickets counter synced to STATE (11)
