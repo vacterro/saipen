@@ -1630,6 +1630,25 @@ for line_no, line in enumerate(board_lines, 1):
                  f" -- § 1.4 decides liveness from the pair, so one "
                  f"alone cannot be judged live or stale")
 
+        # NITRO dogfood II (T-590): a TODO/DOING ticket whose verify is a bare
+        # placeholder is canonical work with no DONE proof. The SAIOPS
+        # ticket-quality boundary made placeholders a FAIL rather than a
+        # silent no-op: a weak model can no longer create mechanically perfect
+        # tickets whose completion can never be proven. Absence of the field
+        # is not flagged (legacy fixtures may omit it); a PRESENT placeholder
+        # -- including the old `verify: verify: TBD` double-prefix -- is.
+        if section in ("## TODO", "## DOING") and "verify" in fields:
+            _vf = fields.get("verify", "").strip().lower()
+            _placeholder = (not _vf or _vf in ("tbd", "todo", "placeholder",
+                                               "verify: tbd", "verify: todo",
+                                               "verify: verify: tbd")
+                            or _vf.startswith("verify: verify:"))
+            if _placeholder:
+                fail(f"BOARD.md:{line_no} ticket {tid} carries a placeholder "
+                     f"verify ({fields.get('verify', '').strip()!r}) -- a "
+                     f"ticket needs a real DONE proof, not TBD/TODO/empty "
+                     f"(NITRO dogfood II, T-590)")
+
         tickets[tid] = {"section": section, "line_no": line_no,
                         "checkbox": checkbox, "needs": needs, "fields": fields,
                         "raw": line}

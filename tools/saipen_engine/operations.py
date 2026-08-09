@@ -307,6 +307,29 @@ def _plan_transition(root: Path, destination: str, agent: str,
                 "continue")
         new_state = patch_state(docs["state"].text_norm, owned)
 
+    # Goal-wave mechanics (NITRO dogfood II, T-590): a HUNT -> ADD transition
+    # under execution_intent: goal is the contract point where a
+    # HUNT->ADD cycle completes (MAINTENANCE section 2.4). The operation owns
+    # the bump: goal_waves N->N+1 with its DEC line, and the valve WAIT.
+    elif (destination == "ADD" and current == "HUNT"
+          and state.get("execution_intent") == "goal"):
+        waves = int(state.get("goal_waves") or 0)
+        new_waves = waves + 1
+        from .log import build_event as _build_event
+        wave_event, wave_line = _build_event(
+            event, "DEC",
+            f"goal_waves {waves}->{new_waves}", now=now, op_id=op_id)
+        new_log = new_log.rstrip("\n") + "\n" + wave_line + "\n"
+        cap_reached = new_waves >= GOAL_WAVE_CAP
+        owned["goal_waves"] = new_waves
+        owned["last_event"] = wave_event
+        if cap_reached:
+            owned["next_action"] = (
+                f"WAIT: safety valve reached ({new_waves} waves / "
+                f"{state.get('goal_tickets') or 0} tickets) -- run 'saipen "
+                "goal' to continue")
+        new_state = patch_state(docs["state"].text_norm, owned)
+
     errors = validate_texts(new_state, docs["board"].text_norm, new_log)
     if errors:
         return _refuse("VALIDATION_FAILED",

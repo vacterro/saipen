@@ -5044,6 +5044,27 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     expect("goal_tickets bump emits the DEC line mechanically",
            "goal_tickets 5->6" in log_g, repr(log_g[-200:]))
 
+    # ---- T-590: HUNT->ADD under goal mechanically bumps goal_waves.
+    wave_root = make_project()
+    (wave_root / ".saipen" / "STATE.md").write_text(
+        codec.read_doc(wave_root / ".saipen" / "STATE.md").replace(
+            "mode: full", "mode: full\nexecution_intent: goal\n"
+            "goal_waves: 1\ngoal_tickets: 3"),
+        encoding="utf-8")
+    (wave_root / ".saipen" / "STATE.md").write_text(
+        codec.read_doc(wave_root / ".saipen" / "STATE.md").replace(
+            "phase: DONE", "phase: HUNT").replace(
+            "next_action: \"saipen continue\"",
+            "next_action: \"PHASE HUNT\""), encoding="utf-8")
+    tr_w = transition_phase(wave_root, "ADD", "probe", None, "wave gate")
+    st_w = parse_state(codec.read_doc(wave_root / ".saipen" / "STATE.md"))
+    expect("HUNT->ADD under goal mechanically bumps goal_waves",
+           tr_w.get("ok")
+           and st_w.get("goal_waves") == 2, repr(st_w))
+    log_w = codec.read_doc(wave_root / ".saipen" / "LOG.md")
+    expect("goal_waves bump emits the DEC line mechanically",
+           "goal_waves 1->2" in log_w, repr(log_w[-200:]))
+
     # ---- T-590: committed-journal compaction preserves ALREADY_APPLIED.
     from saipen_engine.journal import compact_committed, run_mutation as _rm
     comp_root = make_project()
@@ -5089,6 +5110,95 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
                              / "op-cf").glob("*.staged")]
     expect("a conflict journal is never compacted",
            len(cf_staged) > 0, repr(cf_staged))
+
+    # ---- T-590: validator rejects a placeholder verify on a new ticket.
+    vp_root = make_project()
+    (vp_root / ".saipen" / "BOARD.md").write_text(
+        "# Board\n## DOING\n## TODO\n"
+        "- [ ] T-1 [P1] weak ticket | verify: TBD\n"
+        "## DONE\n## BLOCKED\n", encoding="utf-8")
+    vp_proc = subprocess.run(
+        [sys.executable, str(VALIDATOR), "--project-root", str(vp_root)],
+        cwd=str(vp_root), capture_output=True, text=True, errors="replace",
+        timeout=120)
+    expect("validator FAILs a new TODO ticket with placeholder verify",
+           vp_proc.returncode != 0
+           and "placeholder verify" in (vp_proc.stdout + vp_proc.stderr),
+           repr((vp_proc.stdout + vp_proc.stderr)[-300:]))
+
+    # ---- T-590: >8 TODO tickets with the 9th workable -- cold context must
+    # include the exact next ticket (not truncated).
+    ctx9_root = make_project()
+    lines = ["# Board", "## DOING", "## TODO"]
+    for i in range(8):
+        lines.append(f"- [ ] T-{i+1} [P1] unworkable {i+1} | "
+                     f"needs: T-999 | verify: probe")
+    lines.append(f"- [ ] T-9 [P1] the workable one | verify: probe")
+    lines += ["## DONE", "## BLOCKED"]
+    (ctx9_root / ".saipen" / "BOARD.md").write_text(
+        "\n".join(lines) + "\n", encoding="utf-8")
+    cold9 = ctx.context_cold(ctx9_root)
+    expect("cold context includes the exact next ticket below the 8-ticket "
+           "truncation boundary",
+           "PHASE SCOUT T-9" in cold9.get("surface", "")
+           and "the workable one" in cold9.get("surface", "")
+           and "verify: probe" in cold9.get("surface", ""),
+           repr(cold9.get("surface", "")[:400]))
+
+    # ---- T-590: PUBLIC adapter path -- every public NITRO command through
+    # `python tools/saipen.py`, not just the engine functions.
+    pub_root = make_project()
+    pub_next = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "next", "--json"],
+        cwd=str(pub_root), capture_output=True, text=True, timeout=60)
+    expect("public `saipen next` routes DONE+workable to the ticket",
+           '"action": "PHASE SCOUT T-1"' in pub_next.stdout,
+           repr(pub_next.stdout[:160]))
+    pub_status = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "status",
+         "--json"],
+        cwd=str(pub_root), capture_output=True, text=True, timeout=60)
+    expect("public `saipen status` exposes computed_next_action",
+           '"computed_next_action": "PHASE SCOUT T-1"'
+           in pub_status.stdout, repr(pub_status.stdout[:200]))
+    pub_context = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "context", "hot"],
+        cwd=str(pub_root), capture_output=True, text=True, timeout=60)
+    expect("public `saipen context hot` includes the computed next",
+           "PHASE SCOUT T-1" in pub_context.stdout,
+           repr(pub_context.stdout[:160]))
+    pub_sub = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "sub", "spawn",
+         "saipub", "--json"],
+        cwd=str(pub_root), capture_output=True, text=True, timeout=60)
+    if pub_sub.returncode != 0:
+        # make_project writes saipen_home: "." which has no TEMPLATE; point the
+        # fixture at the real home and retry so the public path is exercised.
+        from saipen_engine.state import patch_state as _patch_state
+        sp_state = pub_root / ".saipen" / "STATE.md"
+        sp_state.write_text(
+            _patch_state(codec.read_doc(sp_state),
+                         {"saipen_home": str(HOME)}), encoding="utf-8")
+        pub_sub = subprocess.run(
+            [sys.executable, str(HOME / "tools" / "saipen.py"), "sub",
+             "spawn", "saipub", "--json"],
+            cwd=str(pub_root), capture_output=True, text=True, timeout=60)
+    expect("public `saipen sub spawn` works through the adapter",
+           pub_sub.returncode == 0
+           and '"code": "SPAWNED"' in pub_sub.stdout,
+           repr(pub_sub.stdout[:160]))
+    pub_pause = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "sub", "pause",
+         "saipub", "--json"],
+        cwd=str(pub_root), capture_output=True, text=True, timeout=60)
+    pub_resume = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "sub", "resume",
+         "saipub", "--json"],
+        cwd=str(pub_root), capture_output=True, text=True, timeout=60)
+    expect("public sub pause/resume work through the adapter",
+           '"code": "SUB_PAUSED"' in pub_pause.stdout
+           and '"code": "SUB_RESUMED"' in pub_resume.stdout,
+           repr((pub_pause.stdout[:120], pub_resume.stdout[:120])))
 
     return problems, checked
 
