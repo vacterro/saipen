@@ -62,6 +62,10 @@ from improve import (append_run, derive_status, register_cycle, register_seat,
 from userperson import (merge_profile, onboarding_questions, parse_profile,
                         project_profile, remove_preference, render_profile,
                         validate_profile)
+from saipen_engine.board import parse_board
+from saipen_engine.log import parse_log_line
+from saipen_engine.snapshot import ProjectSnapshot
+from saipen_engine.state import parse_frontmatter
 
 HOME = Path(__file__).resolve().parent.parent
 VALIDATOR = HOME / "tools" / "validate.py"
@@ -3461,6 +3465,87 @@ def run_improve_probes() -> tuple[list[str], int]:
     return problems, checked
 
 
+def run_nitro_probes() -> tuple[list[str], int]:
+    """NITRO M1 (T-578): the shared mechanical parsers, snapshot, and the
+    read-only saipen status/next commands.
+
+    The parsers are the SAME implementation validate.py imports; these probes
+    prove the engine consumes them correctly and that the snapshot detects a
+    stale precondition.
+    """
+    problems: list[str] = []
+    checked = 0
+
+    def expect(label: str, ok: bool, detail: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        if not ok:
+            problems.append(f"{label}: {detail}")
+        else:
+            print(f"PASS: nitro -- {label}")
+
+    state_text = (HOME / ".saipen" / "STATE.md").read_text(
+        encoding="utf-8-sig")
+    fields, err = parse_frontmatter(state_text)
+    expect("frontmatter parses the live STATE",
+           err is None and fields.get("phase") in (
+               "SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP", "DONE"),
+           repr((err, fields and fields.get("phase"))))
+
+    board_text = (HOME / ".saipen" / "BOARD.md").read_text(
+        encoding="utf-8-sig")
+    board = parse_board(board_text)
+    expect("board parser finds every live section",
+           board["headings"] == ["## DOING", "## TODO", "## DONE",
+                                 "## BLOCKED"], repr(board["headings"]))
+    expect("board parser locates the claimed ticket",
+           board["tickets"].get("T-578", {}).get("section") == "## DOING"
+           and board["tickets"]["T-578"]["checkbox"] == "/",
+           repr(board["tickets"].get("T-578", {}).get("section")))
+
+    log_line = "- 08.08.26 23:58 [E-2440] [parent: E-2439] [T-578] RUN: probe"
+    ev = parse_log_line(log_line)
+    expect("log parser reads event, parent, ticket, taxonomy",
+           ev is not None and ev["event"] == 2440
+           and ev["parent"] == 2439 and ev["ticket"] == "T-578"
+           and ev["taxonomy"] == "RUN", repr(ev))
+    expect("log parser rejects a non-event line",
+           parse_log_line("just prose") is None)
+
+    snap = ProjectSnapshot.capture(HOME)
+    expect("snapshot carries hashes, log tail and head",
+           snap.state_hash and snap.board_hash and snap.log_hash
+           and snap.log_tail is not None and snap.head,
+           repr((snap.log_tail, snap.head)))
+    expect("snapshot is not stale against the unchanged project",
+           not snap.stale(HOME))
+    board_path = HOME / ".saipen" / "BOARD.md"
+    original = board_path.read_bytes()
+    try:
+        board_path.write_bytes(original + b"\n")
+        expect("snapshot detects a changed board precondition",
+               snap.stale(HOME))
+    finally:
+        board_path.write_bytes(original)
+    expect("snapshot is fresh again after restoring the board",
+           not snap.stale(HOME))
+
+    status = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "status"],
+        cwd=HOME, capture_output=True, text=True)
+    expect("saipen status is read-only and reports the phase",
+           status.returncode == 0 and f"phase: {fields.get('phase')}"
+           in status.stdout, repr(status.stdout[:120]))
+    nxt = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "next", "--json"],
+        cwd=HOME, capture_output=True, text=True)
+    expect("saipen next --json returns the action deterministically",
+           nxt.returncode == 0 and '"action":' in nxt.stdout
+           and '"load":' in nxt.stdout, repr(nxt.stdout[:120]))
+
+    return problems, checked
+
+
 def run_last_event_probes() -> tuple[list[str], int]:
     """Execute the legacy-schema to current-schema checkpoint migration."""
     problems = []
@@ -4061,6 +4146,8 @@ userperson_failures, userperson_checked = run_userperson_probes()
 failures.extend(userperson_failures)
 improve_failures, improve_checked = run_improve_probes()
 failures.extend(improve_failures)
+nitro_failures, nitro_checked = run_nitro_probes()
+failures.extend(nitro_failures)
 manifest_failures, manifest_checked = run_manifest_tracking_probes()
 failures.extend(manifest_failures)
 autoinject_failures, autoinject_checked = run_autoinject_manifest_probes()
@@ -4107,6 +4194,7 @@ print(f"{sub_clean_checked} sub-clean safety behavior(s) executed, "
 print(f"{hardening_checked} hardening red control(s) resolved")
 print(f"{userperson_checked} userperson behavior(s) executed")
 print(f"{improve_checked} improve behavior(s) executed")
+print(f"{nitro_checked} nitro behavior(s) executed")
 print(f"{purity_checked} pre-commit-purity behavior(s) executed, "
       f"{purity_skipped} skipped for missing interpreters")
 print(f"{manifest_checked} manifest-tracking behavior(s) executed")

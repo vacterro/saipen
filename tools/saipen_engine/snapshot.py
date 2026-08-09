@@ -1,0 +1,81 @@
+"""Project snapshot -- the stale-operation guard (NITRO M1).
+
+Before any mutating operation the snapshot records the canonical files and
+their hashes; immediately before committing, the operation re-reads the
+affected files and REFUSES if a precondition hash changed. This is optimistic
+concurrency and the sequential precursor of v8 stale-plan refusal.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import subprocess
+from dataclasses import dataclass
+from pathlib import Path
+
+from . import codec
+
+
+def _sha256(path: Path) -> str:
+    try:
+        return hashlib.sha256(path.read_bytes()).hexdigest()[:16]
+    except OSError:
+        return ""
+
+
+def canonical_identity(project_root: Path) -> str:
+    """Canonical project identity, not raw path spelling.
+
+    Two aliases to the same project must yield the same identity (used by the
+    lock and the cycle id).
+    """
+    try:
+        return str(Path(project_root).resolve())
+    except OSError:
+        return str(project_root)
+
+
+def git_head(project_root: Path) -> str:
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(project_root), "rev-parse", "--short", "HEAD"],
+            capture_output=True, text=True, timeout=5, check=False)
+        return result.stdout.strip() if result.returncode == 0 else ""
+    except (OSError, subprocess.SubprocessError):
+        return ""
+
+
+@dataclass(frozen=True)
+class ProjectSnapshot:
+    project_root: Path
+    project_identity: str
+    state_hash: str = ""
+    board_hash: str = ""
+    log_hash: str = ""
+    log_tail: int | None = None
+    head: str = ""
+
+    @staticmethod
+    def capture(project_root: Path | str) -> "ProjectSnapshot":
+        root = Path(project_root)
+        state = root / ".saipen" / "STATE.md"
+        board = root / ".saipen" / "BOARD.md"
+        log = root / ".saipen" / "LOG.md"
+        from .log import log_tail_event
+        return ProjectSnapshot(
+            project_root=root,
+            project_identity=canonical_identity(root),
+            state_hash=_sha256(state),
+            board_hash=_sha256(board),
+            log_hash=_sha256(log),
+            log_tail=log_tail_event(codec.read_doc(log)) if log.is_file()
+            else None,
+            head=git_head(root),
+        )
+
+    def stale(self, project_root: Path | str) -> bool:
+        """True if any canonical precondition hash differs from the snapshot."""
+        fresh = ProjectSnapshot.capture(project_root)
+        return (fresh.state_hash != self.state_hash
+                or fresh.board_hash != self.board_hash
+                or fresh.log_hash != self.log_hash)

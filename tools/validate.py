@@ -67,6 +67,11 @@ from freshness import (FreshnessError, compute_generic_role_revision,
                        compute_source_identity)
 from userperson import validate_profile as _validate_userperson_profile
 from improve import validate_report as _validate_improve_report
+# NITRO M1: the shared mechanical parsers. validate.py and the engine consume
+# the SAME implementation by construction -- no parser drift (T-578).
+from saipen_engine.board import TICKET_RE
+from saipen_engine.log import LOG_RE
+from saipen_engine.state import parse_frontmatter
 
 def _read_rfc(p):
     core = p.parent / "CORE.md"
@@ -520,45 +525,8 @@ def warn(category, msg):
 
 # ---------------------------------------------------------------- frontmatter
 
-def parse_frontmatter(text):
-    """Parse the YAML subset STATE.md actually uses: scalar `key: value`
-    lines and simple `- item` lists. Returns (dict, error-or-None)."""
-    lines = text.splitlines()
-    if not lines or lines[0].strip() != "---":
-        return None, "no opening --- frontmatter fence"
-    fields = {}
-    current_list_key = None
-    for line in lines[1:]:
-        if line.strip() == "---":
-            return fields, None
-        if not line.strip():
-            continue
-        item = re.match(r"^\s+-\s+(.*)$", line)
-        if item and current_list_key:
-            fields[current_list_key].append(coerce(item.group(1).strip()))
-            continue
-        kv = re.match(r"^([A-Za-z_][A-Za-z0-9_]*):\s*(.*)$", line)
-        if not kv:
-            return None, f"unparseable frontmatter line: {line!r}"
-        key, raw = kv.group(1), kv.group(2).strip()
-        if raw == "":
-            fields[key] = []
-            current_list_key = key
-        else:
-            fields[key] = coerce(raw)
-            current_list_key = None
-    return None, "no closing --- frontmatter fence"
-
-
-def coerce(raw):
-    if len(raw) >= 2 and raw[0] == raw[-1] and raw[0] in "\"'":
-        return raw[1:-1]
-    if raw in ("true", "false"):
-        return raw == "true"
-    if re.fullmatch(r"-?\d+", raw):
-        return int(raw)
-    return raw
-
+# parse_frontmatter and coerce moved to saipen_engine/state (NITRO M1); this
+# validator imports them so the two can never drift.
 
 TYPE_CHECKS = {
     "string": lambda v: isinstance(v, str),
@@ -1578,7 +1546,7 @@ _vc = re.search(r"Cap: (\d+) dead hypotheses OR (\d+) failed fix cycles",
                 _verify_doc.read_text(encoding="utf-8-sig")
                 if _verify_doc.is_file() else "")
 VERIFY_FIX_CYCLE_CAP = int(_vc.group(2)) if _vc else None
-TICKET_RE = re.compile(r"^- \[([ x/])\] (T-\d+)\s+(.*)$")
+# TICKET_RE moved to saipen_engine/board (NITRO M1); imported above.
 PIPE_SENTINEL = "\x00"
 
 board_lines = read_doc(board_path).splitlines()
@@ -2123,13 +2091,7 @@ if converge_target == "ship" and log_files:
 if log_files:
     # Date prefix optional to allow pre-STYLE.md history; new entries carry one.
     # [agent: <id>] is a MAY field for writer identity (RFC § 1.2, v7.27.0).
-    LOG_RE = re.compile(
-        r"^- (?:\d{2}[./]\d{2}[./]\d{2} \d{2}:\d{2} )?"
-        r"\[E-(\d+)\]"
-        r"(?: \[parent: E-(\d+)\])?"
-        r"(?: \[(T-[^\]]*)\])?"
-        r"(?: \[agent: [^\]]+\])?"
-        r" ([A-Z]+): (.*)$")
+    # LOG_RE moved to saipen_engine/log (NITRO M1); imported above.
     # A LOG line records what HAPPENED. An entry written in the future tense
     # records an intention instead, and every later reader -- § 1.5's Recovery
     # rebuild, an audit, the next agent's cold start -- counts it as evidence
