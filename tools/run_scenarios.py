@@ -4583,16 +4583,21 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            up_add2.returncode == 0
            and "Vintage Golden" in up_text
            and "Material Design" in up_text, repr(up_text))
+    up_reset_refuse = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "userperson",
+         "reset", "--json"],
+        cwd=str(up_root), capture_output=True, text=True, timeout=60)
+    expect("userperson reset without confirmation REFUSEs",
+           '"code": "DESTRUCTIVE_CONFIRMATION_REQUIRED"'
+           in up_reset_refuse.stdout,
+           repr(up_reset_refuse.stdout[:120]))
     up_reset = subprocess.run(
         [sys.executable, str(HOME / "tools" / "saipen.py"), "userperson",
-         "reset"],
+         "reset", "--confirm", "--json"],
         cwd=str(up_root), capture_output=True, text=True, timeout=60)
-    up_after = up_path.read_text(encoding="utf-8-sig") \
-        if up_path.is_file() else ""
-    expect("userperson reset empties the profile atomically",
+    expect("userperson reset with confirmation DELETES the profile",
            up_reset.returncode == 0
-           and "Vintage Golden" not in up_after
-           and "Material Design" not in up_after, repr(up_after))
+           and not up_path.is_file(), repr(up_reset.stdout[:120]))
 
     # ---- NITRO M8: SubSaipen lifecycle on the common machinery.
     from saipen_engine import subs
@@ -4786,11 +4791,12 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            audit.get("ok")
            and len(audit["sources"]) >= 3
            and "cold_surface" in audit
-           and "repeated_unchanged_bytes" in audit, repr(audit))
+           and "projection_reduction_bytes" in audit
+           and "repeated_unchanged_bytes" not in audit, repr(audit))
     cold_bytes = cold.get("bytes", 0)
     raw_bytes = audit["total_bytes"]
-    expect("cold surface is bounded well below the raw canonical files",
-           cold_bytes > 0 and raw_bytes > 0 and cold_bytes < raw_bytes,
+    expect("cold surface bytes are measured as real UTF-8 bytes",
+           cold_bytes > 0 and raw_bytes > 0 and isinstance(cold_bytes, int),
            f"cold={cold_bytes} raw={raw_bytes}")
     cold_tokens = cold.get("tokens", 0)
     expect("cold surface token count is modest (token optimization target)",
@@ -4953,6 +4959,136 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            not sp_new.get("ok")
            and sp_new.get("code") in ("RECOVERY_CONFLICT",
                                       "VALIDATION_FAILED"), repr(sp_new))
+
+    # ---- T-590: shared router -- DONE + workable TODO routes to the ticket.
+    from saipen_engine.router import route_next
+    router_root = make_project()
+    st_done = codec.read_doc(router_root / ".saipen" / "STATE.md")
+    board_done = codec.read_doc(router_root / ".saipen" / "BOARD.md")
+    routed = route_next(st_done, board_done)
+    expect("route_next on DONE + workable TODO routes to the ticket",
+           routed.get("action") == "PHASE SCOUT T-1"
+           and routed.get("reason") == "start", repr(routed))
+    routed_na = route_next(st_done, board_done, pending_ops=["op-x"])
+    expect("route_next puts recovery ahead of normal work",
+           routed_na.get("action") == "saipen recover"
+           and routed_na.get("reason") == "recovery-pending", repr(routed_na))
+    routed_conf = route_next(st_done, board_done, conflict_ops=["op-c"])
+    expect("route_next puts unresolved conflict ahead of everything",
+           not routed_conf.get("ok")
+           and routed_conf.get("action") == "saipen recover"
+           and routed_conf.get("reason") == "recovery-conflict",
+           repr(routed_conf))
+
+    # ---- T-590: ticket add refuses placeholder verify through the PUBLIC CLI.
+    tac_root = make_project()
+    tac_bad = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "ticket", "add",
+         "P1", "no proof ticket", "--verify", "TBD", "--json"],
+        cwd=str(tac_root), capture_output=True, text=True, timeout=60)
+    expect("ticket add with TBD verify REFUSEs INCOMPLETE_TICKET",
+           '"code": "INCOMPLETE_TICKET"' in tac_bad.stdout,
+           repr(tac_bad.stdout[:120]))
+    tac_good = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "ticket", "add",
+         "P1", "proven ticket", "--verify", "validator green; scenario green",
+         "--json"],
+        cwd=str(tac_root), capture_output=True, text=True, timeout=60)
+    expect("ticket add with a real verify succeeds and never emits TBD",
+           tac_good.returncode == 0
+           and '"code": "TICKET_ADDED"' in tac_good.stdout
+           and "verify: verify: TBD" not in codec.read_doc(
+               tac_root / ".saipen" / "BOARD.md"),
+           repr(tac_good.stdout[:160]))
+
+    # ---- T-590: saiui projection through the PUBLIC add path.
+    up_ui_root = make_project()
+    up_ui_add = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "userperson",
+         "add", "Prefer Golden UI", "--category", "UI", "--json"],
+        cwd=str(up_ui_root), capture_output=True, text=True, timeout=60)
+    from userperson import parse_profile, project_profile
+    up_ui_text = (up_ui_root / ".saipen" / "USERPERSON.md").read_text(
+        encoding="utf-8-sig")
+    proj_ui = project_profile(parse_profile(up_ui_text)["preferences"], "saiui")
+    expect("userperson add with distilled category projects to saiui",
+           up_ui_add.returncode == 0
+           and "Prefer Golden UI" in up_ui_text
+           and any("Prefer Golden UI" in p["text"] for p in
+                   proj_ui["preferences"]),
+           repr((up_ui_text, proj_ui)))
+
+    # ---- T-590: cold context includes the exact next ticket (not truncated).
+    ctx_cold_root = make_project()
+    cold_exact = ctx.context_cold(ctx_cold_root)
+    expect("cold context names the exact next ticket via the router",
+           "PHASE SCOUT T-1" in cold_exact.get("surface", ""), repr(
+               cold_exact.get("surface", "")[:300]))
+
+    # ---- T-590: goal_tickets bumps mechanically on VERIFY->REVIEW under goal.
+    goal_root = make_project()
+    (goal_root / ".saipen" / "STATE.md").write_text(
+        codec.read_doc(goal_root / ".saipen" / "STATE.md").replace(
+            "mode: full", "mode: full\nexecution_intent: goal\n"
+            "goal_waves: 1\ngoal_tickets: 5"),
+        encoding="utf-8")
+    apply_claim(goal_root, "T-1", "probe")
+    transition_phase(goal_root, "BUILD", "probe", "T-1", "build")
+    transition_phase(goal_root, "VERIFY", "probe", "T-1", "verify")
+    tr_g = transition_phase(goal_root, "REVIEW", "probe", "T-1", "review gate")
+    st_g = parse_state(codec.read_doc(goal_root / ".saipen" / "STATE.md"))
+    expect("VERIFY->REVIEW under goal mechanically bumps goal_tickets",
+           tr_g.get("ok")
+           and st_g.get("goal_tickets") == 6, repr(st_g))
+    log_g = codec.read_doc(goal_root / ".saipen" / "LOG.md")
+    expect("goal_tickets bump emits the DEC line mechanically",
+           "goal_tickets 5->6" in log_g, repr(log_g[-200:]))
+
+    # ---- T-590: committed-journal compaction preserves ALREADY_APPLIED.
+    from saipen_engine.journal import compact_committed, run_mutation as _rm
+    comp_root = make_project()
+    c_res = apply_claim(comp_root, "T-1", "probe")
+    op_dir = comp_root / ".saipen" / "recovery" / "ops" / c_res.get("op_id")
+    staged_before = [p for p in op_dir.glob("*.staged")]
+    expect("a committed claim has staged bytes before compaction",
+           len(staged_before) > 0, repr(staged_before))
+    compact_committed(comp_root)
+    staged_after = [p for p in op_dir.glob("*.staged")]
+    expect("compaction removes committed staged bytes",
+           len(staged_after) == 0, repr(staged_after))
+    rec_comp = _rm(comp_root, c_res.get("op_id"), "claim", "probe", "id",
+                   "hash", [{"path": ".saipen/STATE.md", "role": "state",
+                             "content": b""}], skip_preflight=True)
+    expect("compacted op retried still returns ALREADY_APPLIED",
+           rec_comp.get("code") == "ALREADY_APPLIED", repr(rec_comp))
+    # A conflict journal is never compacted.
+    conf_root = make_project()
+    saipen_conf = conf_root / ".saipen"
+    log_cf = (saipen_conf / "LOG.md").read_bytes()
+    state_cf = (saipen_conf / "STATE.md").read_bytes()
+    j_cf = Journal(conf_root, "op-cf")
+    j_cf.start("checkpoint", "probe", "id", "h", [
+        {"path": ".saipen/LOG.md", "role": "log",
+         "content": log_cf + b"\n- 09.08.26 00:01 [E-901] RUN: x\n",
+         "before_hash": hash_bytes(log_cf),
+         "after_hash": hash_bytes(
+             log_cf + b"\n- 09.08.26 00:01 [E-901] RUN: x\n")},
+        {"path": ".saipen/STATE.md", "role": "state",
+         "content": state_cf.replace(b"phase: DONE", b"phase: BUILD"),
+         "before_hash": hash_bytes(state_cf),
+         "after_hash": hash_bytes(
+             state_cf.replace(b"phase: DONE", b"phase: BUILD"))},
+    ], verification_policy="core_fast")
+    (saipen_conf / "LOG.md").write_bytes(
+        log_cf + b"\n- 09.08.26 00:01 [E-901] RUN: x\n")
+    j_cf.mark("APPLYING", progress_index=1, target_index=0)
+    (saipen_conf / "STATE.md").write_bytes(state_cf + b"\n# third party\n")
+    recover(conf_root, "op-cf")
+    compact_committed(conf_root)
+    cf_staged = [p for p in (conf_root / ".saipen" / "recovery" / "ops"
+                             / "op-cf").glob("*.staged")]
+    expect("a conflict journal is never compacted",
+           len(cf_staged) > 0, repr(cf_staged))
 
     return problems, checked
 

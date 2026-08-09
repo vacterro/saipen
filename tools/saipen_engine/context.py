@@ -39,10 +39,16 @@ def _tokens(text: str) -> int:
     return words + symbols
 
 
+def _bytes(text: str) -> int:
+    """REAL UTF-8 byte count -- len(str) counts characters, not bytes, and
+    this protocol is multilingual (NITRO dogfood II)."""
+    return len(text.encode("utf-8"))
+
+
 def _bounded(text: str, limit: int) -> str:
     if len(text) <= limit:
         return text
-    return text[:limit] + f"\n... (truncated {len(text) - limit} bytes)"
+    return text[:limit] + f"\n... (truncated {len(text) - limit} chars)"
 
 
 def _state_fields(state: dict) -> str:
@@ -55,15 +61,22 @@ def _state_fields(state: dict) -> str:
     return "\n".join(lines)
 
 
-def _board_map(board: dict) -> str:
+def _board_map(board: dict, full_ticket: str | None = None) -> str:
+    """Board projection: FULL exact text for the one ticket the model must
+    execute (never truncated: needs + verify + description preserved), compact
+    one-line map for the rest (NITRO dogfood II)."""
     lines = []
     for section in ("## DOING", "## TODO", "## BLOCKED", "## DONE"):
         tickets = [t for t in board["tickets"].values()
                    if t["section"] == section]
         lines.append(f"{section} ({len(tickets)})")
-        for ticket in tickets[:8]:
+        for ticket in tickets:
+            if full_ticket and ticket["id"] == full_ticket:
+                lines.append(f"  - {ticket['raw'].strip()}")
+                continue
             desc = (ticket["description"] or "").replace(" | ", " / ")
-            lines.append(f"  - {ticket['id']} [{ticket['checkbox']}] {desc[:80]}")
+            lines.append(f"  - {ticket['id']} [{ticket['checkbox']}] "
+                         f"{desc[:80]}")
         if len(tickets) > 8:
             lines.append(f"  ... +{len(tickets) - 8} more")
     return "\n".join(lines)
@@ -76,7 +89,9 @@ def _log_tail(log_text: str, count: int = _TAIL_EVENTS) -> str:
 
 
 def context_cold(project_root: Path | str, limit: int = 4000) -> Result:
-    """Minimal cold-start surface: STATE + BOARD map + LOG tail + routing."""
+    """Minimal cold-start surface: STATE + exact next ticket + compact BOARD
+    map + LOG tail + routing. Uses the SHARED router (NITRO dogfood II), so
+    it cannot echo a stale next_action."""
     root = Path(project_root)
     state_text = codec.read_doc(root / ".saipen" / "STATE.md")
     board_text = codec.read_doc(root / ".saipen" / "BOARD.md")
@@ -85,32 +100,47 @@ def context_cold(project_root: Path | str, limit: int = 4000) -> Result:
     board = parse_board(board_text)
     phase = state.get("phase", "DONE")
     doc = f"saipen/phases/{str(phase).lower()}.md" if phase else ""
+    from .journal import pending_conflicts, pending_ops
+    pending = [op["op_id"] for op in pending_ops(root)]
+    conflicts = [op["op_id"] for op in pending_conflicts(root)]
+    from .router import route_next
+    routed = route_next(state_text, board_text, pending, conflicts)
+    next_ticket = routed.get("ticket")
     out = [
         "# SAIPEN COLD CONTEXT",
         "",
         "## STATE",
         _state_fields(state),
         "",
+        "## ROUTED NEXT",
+        f"action: {routed.get('action')}",
+        f"reason: {routed.get('reason')}",
+        f"ticket: {next_ticket or 'none'}",
+        "",
         "## BOARD",
-        _board_map(board),
+        _board_map(board, full_ticket=next_ticket),
         "",
         "## LOG TAIL",
         _log_tail(log_text),
         "",
         "## ROUTING",
         f"phase_doc: {doc}",
-        f"next_action: {state.get('next_action', '')}",
+        f"recovery_pending: {bool(pending)}",
+        f"recovery_conflict: {bool(conflicts)}",
+        f"conflict_ops: {', '.join(conflicts) or 'none'}",
     ]
     body = "\n".join(out) + "\n"
     return Result(ok=True, code="CONTEXT_COLD", data={
         "surface": _bounded(body, limit),
-        "bytes": len(body),
+        "bytes": _bytes(body),
+        "characters": len(body),
         "tokens": _tokens(body),
     })
 
 
 def context_hot(project_root: Path | str, limit: int = 3000) -> Result:
-    """Current-work surface: status + next + active ticket + recovery state."""
+    """Current-work surface: STATE + computed next + active ticket + recent
+    LOG + recovery state. Shares the router (NITRO dogfood II)."""
     root = Path(project_root)
     snap = ProjectSnapshot.capture(root)
     state_text = codec.read_doc(root / ".saipen" / "STATE.md")
@@ -120,8 +150,11 @@ def context_hot(project_root: Path | str, limit: int = 3000) -> Result:
     board = parse_board(board_text)
     doing = [t for t in board["tickets"].values()
              if t["section"] == "## DOING"]
-    from .journal import pending_ops
+    from .journal import pending_conflicts, pending_ops
     pending = [op["op_id"] for op in pending_ops(root)]
+    conflicts = [op["op_id"] for op in pending_conflicts(root)]
+    from .router import route_next
+    routed = route_next(state_text, board_text, pending, conflicts)
     out = [
         "# SAIPEN HOT CONTEXT",
         "",
@@ -129,24 +162,36 @@ def context_hot(project_root: Path | str, limit: int = 3000) -> Result:
         _state_fields(state),
         f"claimed_ticket: {doing[0]['id'] if doing else None}",
         "",
+        "## COMPUTED NEXT",
+        f"action: {routed.get('action')}",
+        f"reason: {routed.get('reason')}",
+        f"ticket: {routed.get('ticket') or 'none'}",
+        "",
         "## RECENT LOG",
         _log_tail(log_text),
         "",
         "## MACHINE",
         f"recovery_pending: {bool(pending)}",
+        f"recovery_conflict: {bool(conflicts)}",
         f"pending_ops: {', '.join(pending) or 'none'}",
         f"log_tail_event: {snap.log_tail}",
     ]
     body = "\n".join(out) + "\n"
     return Result(ok=True, code="CONTEXT_HOT", data={
         "surface": _bounded(body, limit),
-        "bytes": len(body),
+        "bytes": _bytes(body),
+        "characters": len(body),
         "tokens": _tokens(body),
     })
 
 
 def context_audit(project_root: Path | str) -> Result:
-    """Bytes/tokens accounting per source, with repeated-unchanged bytes."""
+    """Bytes/tokens accounting per source with an HONEST projection metric.
+
+    `projection_reduction_bytes` = raw canonical bytes minus cold-surface
+    bytes: it measures what the projection omits, NOT what is "unchanged"
+    across revisions (NITRO dogfood II renames the old dishonest
+    repeated_unchanged_bytes)."""
     root = Path(project_root)
     sources = {
         "STATE.md": codec.read_doc(root / ".saipen" / "STATE.md"),
@@ -160,7 +205,8 @@ def context_audit(project_root: Path | str) -> Result:
     for name, text in sources.items():
         rows.append({
             "source": name,
-            "bytes": len(text),
+            "bytes": _bytes(text),
+            "characters": len(text),
             "tokens": _tokens(text),
         })
     total_bytes = sum(r["bytes"] for r in rows)
@@ -172,9 +218,11 @@ def context_audit(project_root: Path | str) -> Result:
         "cold_surface": {"bytes": cold.get("bytes"), "tokens": cold.get(
             "tokens")},
         "hot_surface": {"bytes": hot.get("bytes"), "tokens": hot.get("tokens")},
-        "repeated_unchanged_bytes": total_bytes - cold.get("bytes", 0),
-        "note": ("token optimization targets fresh reasoning surface and "
-                 "repeated parsing, not nominal cached count at any cost"),
+        "projection_reduction_bytes": total_bytes - cold.get("bytes", 0),
+        "note": ("projection_reduction_bytes = raw canonical bytes minus "
+                 "cold-surface bytes; it measures what the projection omits, "
+                 "never 'unchanged across revisions' (no historical comparison "
+                 "is made)"),
         "log_tail_event": snap.log_tail,
         "recovery_pending": pending,
     }

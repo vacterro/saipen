@@ -81,6 +81,9 @@ def _status(project_root: Path, as_json: bool) -> int:
             break
     pending = _pending(project_root)
     conflicts = _conflicts(project_root)
+    from saipen_engine.router import route_next
+    routed = route_next(codec.read_doc(state_path), codec.read_doc(
+        project_root / ".saipen" / "BOARD.md"), pending, conflicts)
     _emit({
         "ok": True,
         "project_identity": snap.project_identity,
@@ -88,6 +91,8 @@ def _status(project_root: Path, as_json: bool) -> int:
         "phase": state.get("phase"),
         "task": state.get("task"),
         "next_action": state.get("next_action"),
+        "computed_next_action": routed.get("action"),
+        "computed_reason": routed.get("reason"),
         "blocker": state.get("blocker"),
         "execution_intent": state.get("execution_intent"),
         "claimed_ticket": doing[0]["id"] if doing else None,
@@ -108,29 +113,33 @@ def _next_action(project_root: Path, as_json: bool) -> int:
     if not state_path.is_file():
         _emit({"ok": False, "code": "NOT_SAIPEN_PROJECT"}, as_json)
         return 3
-    state = parse_state(codec.read_doc(state_path))
-    na = state.get("next_action") or ""
+    state_text = codec.read_doc(state_path)
+    state = parse_state(state_text)
     phase = (state.get("phase") or "").lower()
     subject = state.get("task")
     pending = _pending(project_root)
     conflicts = _conflicts(project_root)
-    # Unresolved CONFLICT outranks everything: no canonical work may start
-    # over it (NITRO dogfood II, T-587).
-    if conflicts:
+    board_text = codec.read_doc(project_root / ".saipen" / "BOARD.md")
+    from saipen_engine.router import route_next
+    routed = route_next(state_text, board_text, pending, conflicts)
+    if not routed.get("ok"):
         _emit({
             "ok": False,
-            "code": "RECOVERY_CONFLICT",
-            "action": f"saipen recover",
-            "detail": f"unresolved conflict: {', '.join(conflicts)}",
+            "code": "RECOVERY_CONFLICT" if conflicts else "RECOVERY_REQUIRED",
+            "action": routed.get("action"),
+            "reason": routed.get("reason"),
+            "detail": routed.get("detail", ""),
             "recovery_pending": True,
-            "recovery_conflict": True,
+            "recovery_conflict": bool(conflicts),
             "conflict_ops": conflicts,
+            "pending_ops": pending,
         }, as_json)
         return 1
     _emit({
         "ok": True,
-        "action": na,
-        "ticket": subject,
+        "action": routed.get("action"),
+        "ticket": routed.get("ticket") or subject,
+        "reason": routed.get("reason"),
         "load": f"saipen/phases/{phase}.md" if phase else None,
         "recovery_pending": bool(pending),
         "recovery_conflict": False,
@@ -282,15 +291,22 @@ def _userperson(project_root: Path, args: list[str], as_json: bool,
             _emit({"ok": False, "code": "TICKET_NOT_FOUND",
                    "detail": "no profile to reset"}, as_json)
             return 1
+        if "--confirm" not in args:
+            _emit({"ok": False, "code": "DESTRUCTIVE_CONFIRMATION_REQUIRED",
+                   "detail": "userperson reset deletes the profile; pass "
+                             "--confirm to authorize"}, as_json)
+            return 1
         if dry_run:
             _emit({"ok": True, "code": "RESET", "dry_run": True}, as_json)
             return 0
-        # The journal writes targets; deletion is expressed as a committed
-        # empty profile (functionally absent: zero preferences, no warnings,
-        # validator passes) so the reset is atomic, journaled and recoverable.
+        # CORE says reset DELETES the profile; absence is the canonical OFF
+        # state. The journal writes targets, so deletion is expressed as a
+        # committed empty profile followed by removing the file -- absence is
+        # achieved, and the commit is recoverable evidence.
         result = write_profile(project_root, "# USERPERSON\n\n",
                                _agent_for(project_root))
         if result.get("ok"):
+            path.unlink(missing_ok=True)
             result["code"] = "RESET"
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
@@ -299,11 +315,24 @@ def _userperson(project_root: Path, args: list[str], as_json: bool,
             _emit({"ok": False, "code": "VALIDATION_FAILED",
                    "detail": f"userperson {action} needs <text>"}, as_json)
             return 2
-        text = " ".join(args[1:])
+        category = "general"
+        clean_args = []
+        idx = 0
+        while idx < len(args):
+            if args[idx] == "--category" and idx + 1 < len(args):
+                category = args[idx + 1]
+                idx += 2
+            else:
+                clean_args.append(args[idx])
+                idx += 1
+        text = " ".join(clean_args[1:])
         current = parse_profile(current_text)["preferences"] \
             if current_text else []
         if action == "add":
-            updated = merge_profile(current, [f"- [General] {text}"])
+            # The MODEL supplies the distilled category (semantic decision);
+            # the writer never invents one (NITRO dogfood II).
+            updated = merge_profile(current,
+                                    [f"- [{category}] {text}"])
         else:
             updated = remove_preference(current, text)
         new_text = render_profile(updated)
@@ -389,10 +418,34 @@ def main(argv: list[str] | None = None) -> int:
         rest = args[2:]
         if action == "add":
             if len(rest) < 2:
-                _emit({"ok": False, "code": "VALIDATION_FAILED"}, as_json)
+                _emit({"ok": False, "code": "VALIDATION_FAILED",
+                       "detail": "ticket add <PRIORITY> <description> "
+                                 "[--verify <text>] [--needs T-X,T-Y]"},
+                      as_json)
                 return 2
-            result = ticket_add(project_root, _agent_for(project_root), rest[0], rest[1],
-                                [], "verify: TBD", dry_run=dry_run)
+            verify_arg = ""
+            needs_arg = []
+            clean_rest = []
+            idx = 0
+            while idx < len(rest):
+                if rest[idx] == "--verify" and idx + 1 < len(rest):
+                    verify_arg = rest[idx + 1]
+                    idx += 2
+                elif rest[idx] == "--needs" and idx + 1 < len(rest):
+                    needs_arg = [n.strip() for n in rest[idx + 1].split(",")
+                                 if n.strip()]
+                    idx += 2
+                else:
+                    clean_rest.append(rest[idx])
+                    idx += 1
+            if len(clean_rest) < 2:
+                _emit({"ok": False, "code": "VALIDATION_FAILED",
+                       "detail": "ticket add needs <PRIORITY> <description>"},
+                      as_json)
+                return 2
+            result = ticket_add(project_root, _agent_for(project_root),
+                                clean_rest[0], " ".join(clean_rest[1:]),
+                                needs_arg, verify_arg, dry_run=dry_run)
             _emit(result.to_dict(), as_json)
             return 0 if result.ok else 1
         if action in ("done", "block", "unblock") and rest:

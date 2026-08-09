@@ -534,3 +534,42 @@ def auto_recover_pending(project_root: Path | str) -> dict:
         recovered.append(op["op_id"])
     return {"ok": True, "code": "RECOVERED", "recovered": recovered,
             "recovery_required": False}
+
+
+def compact_committed(project_root: Path | str) -> dict:
+    """Compaction of COMMITTED operation journals (NITRO dogfood II).
+
+    A COMMITTED op no longer needs its staged bytes for recovery -- idempotent
+    retry only needs a compact tombstone. This deletes the large `.staged`
+    payloads and keeps the operation metadata, so repeated checkpointing does
+    not accumulate unbounded write amplification. NEVER compacts PREPARED /
+    APPLYING / VERIFIED / CONFLICT -- those still require evidence. A retried
+    compacted op still returns ALREADY_APPLIED.
+    """
+    root = Path(project_root)
+    ops_dir = root / OPS_DIR
+    if not ops_dir.is_dir():
+        return {"ok": True, "compacted": [], "skipped": []}
+    compacted = []
+    skipped = []
+    for entry in sorted(ops_dir.iterdir()):
+        if not entry.is_dir():
+            continue
+        manifest = entry / "operation.json"
+        if not manifest.is_file():
+            continue
+        try:
+            record = json.loads(manifest.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            skipped.append(entry.name)
+            continue
+        if record.get("status") != "COMMITTED":
+            skipped.append(entry.name)
+            continue
+        for staged in entry.glob("*.staged"):
+            try:
+                staged.unlink()
+            except OSError:
+                pass
+        compacted.append(entry.name)
+    return {"ok": True, "compacted": compacted, "skipped": skipped}

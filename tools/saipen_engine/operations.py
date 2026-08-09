@@ -30,6 +30,7 @@ from pathlib import Path
 from . import codec, phases
 from .board import parse_board, remove_ticket_field, set_ticket_field
 from .fast_check import validate_texts
+from .journal import hash_bytes
 from .log import build_event, log_tail_event
 from .plan import OperationPlan, TargetPlan, apply_plan, build_plan
 from .result import Result
@@ -281,6 +282,31 @@ def _plan_transition(root: Path, destination: str, agent: str,
         owned["task"] = "none"
     new_state = patch_state(docs["state"].text_norm, owned)
 
+    # Goal-counter mechanics (NITRO dogfood II, T-590): a VERIFY -> REVIEW
+    # transition under execution_intent: goal is the contract point where a
+    # ticket has passed VERIFY. The OPERATION owns the bookkeeping -- it
+    # bumps goal_tickets, emits DEC: goal_tickets N->N+1, updates last_event,
+    # and writes the WAIT when the valve trips. The model no longer has to
+    # remember deterministic accounting.
+    if (destination == "REVIEW" and current == "VERIFY"
+            and state.get("execution_intent") == "goal"):
+        tickets = int(state.get("goal_tickets") or 0)
+        new_tickets = tickets + 1
+        from .log import build_event as _build_event
+        dec_event, dec_line = _build_event(
+            event, "DEC",
+            f"goal_tickets {tickets}->{new_tickets}", now=now, op_id=op_id)
+        new_log = new_log.rstrip("\n") + "\n" + dec_line + "\n"
+        cap_reached = new_tickets >= GOAL_TICKET_CAP
+        owned["goal_tickets"] = new_tickets
+        owned["last_event"] = dec_event
+        if cap_reached:
+            owned["next_action"] = (
+                f"WAIT: safety valve reached ({state.get('goal_waves') or 0} "
+                f"waves / {new_tickets} tickets) -- run 'saipen goal' to "
+                "continue")
+        new_state = patch_state(docs["state"].text_norm, owned)
+
     errors = validate_texts(new_state, docs["board"].text_norm, new_log)
     if errors:
         return _refuse("VALIDATION_FAILED",
@@ -291,15 +317,19 @@ def _plan_transition(root: Path, destination: str, agent: str,
         _target(docs["log"], ".saipen/LOG.md", "log", new_log),
         _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
+    expected = {"ok": True, "code": "TRANSITIONED", "phase": destination,
+                "next_action": na, "event_id": f"E-{event}",
+                "ticket": subject}
+    if destination == "REVIEW" and current == "VERIFY" \
+            and state.get("execution_intent") == "goal":
+        expected["goal_tickets"] = int(state.get("goal_tickets") or 0) + 1
     return build_plan(
         "transition", agent, _identity(root),
         {"operation": "transition", "destination": destination,
          "ticket": subject, "agent": agent},
         _docs_preconditions(docs, "state", "board", "log"),
         targets,
-        {"ok": True, "code": "TRANSITIONED", "phase": destination,
-         "next_action": na, "event_id": f"E-{event}",
-         "ticket": subject}, op_id=op_id)
+        expected, op_id=op_id)
 
 
 def transition_phase(project_root: Path | str, destination: str,
@@ -495,10 +525,32 @@ def _move_ticket(board_text: str, ticket_id: str, target_section: str,
     return "".join(out)
 
 
+def _is_placeholder_verify(verify: str) -> bool:
+    """A verify value that proves nothing about DONE (NITRO dogfood II).
+
+    Python owns mechanics, not missing semantic content: a ticket's verify
+    clause is the model's DONE proof. Refusing a placeholder keeps a weak
+    model from creating mechanically perfect tickets whose completion can
+    never be proven.
+    """
+    cleaned = (verify or "").strip().lower()
+    return (not cleaned
+            or cleaned in ("tbd", "todo", "verify: tbd", "verify: todo",
+                           "tbd -", "todo -", "placeholder")
+            or cleaned.startswith("verify:") and len(cleaned) < 12)
+
+
 def ticket_add(project_root: Path | str, agent: str, priority: str,
                description: str, needs: list[str], verify: str,
                dry_run: bool = False) -> Result:
     root = Path(project_root)
+    if not description or not description.strip():
+        return _refuse("INCOMPLETE_TICKET",
+                       "ticket description is required (semantic input)")
+    if _is_placeholder_verify(verify):
+        return _refuse("INCOMPLETE_TICKET",
+                       "verify is a placeholder; a ticket needs a real DONE "
+                       "proof (no TBD/TODO/empty)", verify=verify)
     op_id = "ticket-" + uuid4_hex8()
     now, utc = _now(), _utc_iso()
     docs, state, board, log_tail = _read(root)
@@ -613,6 +665,10 @@ def set_goal_intent(project_root: Path | str, agent: str, objective: str,
     return apply_plan(root, plan)
 
 
+GOAL_WAVE_CAP = 3
+GOAL_TICKET_CAP = 20
+
+
 def reauthorize_valve(project_root: Path | str, agent: str,
                       dry_run: bool = False) -> Result:
     """Conditional safety-valve reauthorization: reset BOTH counters to 0 only
@@ -654,7 +710,9 @@ def stop_checkpoint(project_root: Path | str, agent: str, reason: str = "",
                     dry_run: bool = False) -> Result:
     """The brake: checkpoint the exact current execution with a resumable
     next_action. Never resets phase; never changes intent or counters. The
-    human digest is written ONLY on APPLY -- dry-run writes zero bytes."""
+    human digest is a PLAN TARGET (NITRO dogfood II): it commits inside the
+    same journaled transaction as LOG/STATE, so a stop can never report
+    STOPPED with a missing/stale digest."""
     root = Path(project_root)
     now, utc = _now(), _utc_iso()
     docs, state, board, log_tail = _read(root)
@@ -665,35 +723,47 @@ def stop_checkpoint(project_root: Path | str, agent: str, reason: str = "",
     else:
         na = "saipen continue"
 
-    def mutate(text: str, event: int) -> str:
-        return patch_state(text, {
-            "next_action": na,
-            "last_event": event,
-            "updated": utc,
-            "agent": agent,
-        })
-
-    plan = _state_only_plan(root, "stop", agent, mutate,
-                            f"stop checkpoint{': ' + reason if reason else ''}",
-                            {"ok": True, "code": "STOPPED", "next_action": na,
-                             "digest": str(root / ".saipen" / "kitchen"
-                                           / "digest.md")},
-                            now, utc, {"next_action"})
-    if isinstance(plan, Result):
-        return plan
+    op_id = "stop-" + uuid4_hex8()
+    event, line = _event_line(docs, log_tail, "DEC", None, agent,
+                              f"stop checkpoint{': ' + reason if reason else ''}",
+                              now, op_id)
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    new_state = patch_state(docs["state"].text_norm, {
+        "next_action": na,
+        "last_event": event,
+        "updated": utc,
+        "agent": agent,
+    })
+    errors = validate_texts(new_state, docs["board"].text_norm, new_log)
+    if errors:
+        return _refuse("VALIDATION_FAILED",
+                       "proposed state fails fast validation: "
+                       + "; ".join(errors[:5]))
+    digest_content = ("done: stopped via SAIOPS checkpoint\n"
+                      f"remaining: {task or 'see BOARD'}\n"
+                      f"awaiting: {reason or 'nothing'}\n")
+    targets = [
+        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+    ]
+    digest_doc = codec.read_document(root / ".saipen" / "kitchen" / "digest.md")
+    targets.append(TargetPlan(".saipen/kitchen/digest.md", "report",
+                              digest_doc.encode(digest_content),
+                              digest_doc.raw_hash,
+                              hash_bytes(digest_doc.encode(digest_content))))
+    plan = build_plan(
+        "stop", agent, _identity(root),
+        {"operation": "stop", "reason": reason},
+        _docs_preconditions(docs, "state", "board", "log"),
+        targets,
+        {"ok": True, "code": "STOPPED", "next_action": na,
+         "digest": str(root / ".saipen" / "kitchen" / "digest.md")},
+        op_id=op_id)
     if dry_run:
         result = _render_plan(plan)
         result.data["digest"] = str(root / ".saipen" / "kitchen" / "digest.md")
         return result
-    result = apply_plan(root, plan)
-    if result.ok:
-        digest = root / ".saipen" / "kitchen" / "digest.md"
-        digest.parent.mkdir(parents=True, exist_ok=True)
-        digest.write_text(
-            "done: stopped via SAIOPS checkpoint\n"
-            f"remaining: {task or 'see BOARD'}\n"
-            f"awaiting: {reason or 'nothing'}\n", encoding="utf-8")
-    return result
+    return apply_plan(root, plan)
 
 
 # ------------------------------------------------------------------ helpers

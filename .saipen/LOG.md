@@ -87,3 +87,10 @@
 - 09.08.26 16:55 [E-2548] [parent: E-2547] [agent: claude] [op: transition-62290859] RUN: Improve regression closed
 - 09.08.26 16:55 [E-2549] [parent: E-2548] [T-589] [agent: claude] [op: checkpoint-50c8f56c] DEC: goal_tickets 15->16 (T-589 passed VERIFY)
 - 09.08.26 16:55 [E-2550] [parent: E-2549] [T-589] [agent: claude] [op: checkpoint-08c88cf8] RUN: goal_tickets synced (16); T-589 closed
+- 09.08.26 16:56 [E-2551] [parent: E-2550] [T-590] [agent: claude] [op: ticket-1da9db9f] DEC: ticket added via SAIOPS
+- 09.08.26 16:56 [E-2552] [parent: E-2551] [T-590] [agent: claude] [op: claim-5b400b05] DEC: claimed via SAIOPS -- owner claude
+- 09.08.26 16:56 [E-2553] [parent: E-2552] [T-590] [agent: claude] [op: transition-5d136fa6] RUN: command truth begins
+- 09.08.26 17:34 [E-2554] [parent: E-2553] [T-590] [agent: claude] [op: checkpoint-a72947ed] RUN: ss stop checkpoint: T-590 BUILD largely complete -- router (route_next shared by status/next/context), ticket add structured verify (INCOMPLETE_TICKET on placeholder), userperson reset confirmation+delete, userperson add distilled category, goal_tickets mechanical bump on VERIFY->REVIEW under goal, stop digest transactional, journal compaction (ALREADY_APPLIED preserved, conflict never compacted), cold context exact next ticket. All scenario suite green
+- 09.08.26 17:34 [E-2555] [parent: E-2554] [T-590] [agent: claude] [op: checkpoint-804ad808] RUN: ss stop: run full gates then stop
+- 09.08.26 17:40 [E-2556] [parent: E-2555] [T-590] [agent: claude] [op: checkpoint-7a7a2d00] DEC: ss stop requested -- commit T-590 BUILD progress, leave coherent next_action
+- 09.08.26 17:40 [E-2557] [parent: E-2556] [T-590] [agent: claude] [op: checkpoint-3ef9365a] RUN: ss stop checkpoint 2 -- T-590 BUILD: router, ticket-verify, userperson, goal-counters, digest, compaction all landed; suite+validator+audit green
