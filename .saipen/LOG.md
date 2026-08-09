@@ -30,3 +30,7 @@
 - 09.08.26 10:56 [E-2491] [parent: E-2490] [agent: claude] [op: transition-58495ab2] RUN: M7 USERPERSON closed
 - 09.08.26 10:57 [E-2492] [parent: E-2491] [T-577] [agent: claude] [op: checkpoint-f6186875] DEC: goal_tickets 10->11 (T-577 passed VERIFY)
 - 09.08.26 10:57 [E-2493] [parent: E-2492] [T-577] [agent: claude] [op: checkpoint-4f1eeb6a] RUN: goal_tickets counter synced to STATE (11)
+- 09.08.26 10:58 [E-2494] [parent: E-2493] [T-585] [agent: claude] [op: ticket-c634b390] DEC: ticket added via SAIOPS
+- 09.08.26 10:58 [E-2495] [parent: E-2494] [T-585] [agent: claude] [op: claim-4a566e81] DEC: claimed via SAIOPS -- owner claude
+- 09.08.26 10:58 [E-2496] [parent: E-2495] [T-585] [agent: claude] [op: transition-8f4b27d1] RUN: M8 begins: SubSaipen operations on common machinery
+- 09.08.26 10:59 [E-2497] [parent: E-2496] [T-585] [agent: claude] [op: checkpoint-db162541] RUN: SCOUT: M8 (SubSaipen operations) scoped -- lifecycle mutations live in extensions/subs/PROTOCOL.md; reuse freshness.py/sub_clean.py logic but route mutation boundaries through common lock+journal+OperationPlan+Result+codec+dry-run; OUTBOX/state writes need before/after hashes + [op:...] provenance; no semantic finding acceptance mechanized. Full migration is a large multi-step effort requiring a fresh session context

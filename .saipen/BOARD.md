@@ -1,5 +1,6 @@
 # Board
 ## DOING
+- [/] T-585 [P1] NITRO M8: SubSaipen operations on the common engine machinery. Mechanize only the deterministic SubSaipen lifecycle mechanics: spawn, status, adopt, collect, clean preflight, freshness checks -- reusing tools/freshness.py and tools/sub_clean.py where the logic already exists, but routing their mutation/file boundaries through the shared lock + journal + OperationPlan + Result + codec + dry-run primitives (saipen_engine). No semantic acceptance of a finding is mechanized: Core still judges work; SAIOPS guarantees boundaries and mechanics. A sub's OUTBOX writes, spawn/adopt state transitions and clean operations must be journaled, conflict-safe, and carry [op: ...] provenance like every other covered mutation. | verify: verify: TBD | owner: claude | claim_time: 2026-08-09T10:58:33Z
 ## TODO
 
 
