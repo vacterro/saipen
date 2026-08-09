@@ -2109,7 +2109,8 @@ if log_files:
                      f"(RFC § 1.2): {line[:100]!r}")
                 log_ok = False
                 continue
-            eid, parent, ticket, taxonomy, content = m.groups()
+            eid, parent, ticket, agent, op_id, taxonomy, content = \
+                m.groups()
             eid = int(eid)
             ts = re.match(r"^- (\d{2})\.(\d{2})\.(\d{2}) (\d{2}):(\d{2}) ", line)
             # RFC § 1.2 makes DATE mandatory, but LOG_RE has always accepted a
@@ -2264,6 +2265,61 @@ if log_files:
     if log_ok:
         ok(f"LOG.md format valid (skeleton, E-### unique + monotonic, parents "
            f"resolve; {len(log_files)} segment(s))")
+
+    # NITRO integrity (T-584): after the migration boundary the covered
+    # structural operations MUST carry mechanical provenance (`[op: ...]`),
+    # so a manual structural edit that bypasses the engine is detectable.
+    # Only SAIOPS-owned structural events are checked -- ordinary semantic
+    # LOG entries stay unmarked. Historical pre-boundary events are exempt.
+    # The boundary is SELF-ESTABLISHING: the first event ever written with an
+    # `[op: ...]` marker. Every structural event at/after it must carry one;
+    # anything older is pre-provenance history that cannot be rewritten.
+    _provenance_markers = (
+        "claimed via SAIOPS",
+        "ticket added via SAIOPS",
+        "ticket done via SAIOPS",
+        "ticket block via SAIOPS",
+        "ticket unblock via SAIOPS",
+        "goal pivot",
+        "goal reauthorized",
+        "stop checkpoint",
+        "transition to ",
+        "transition",
+    )
+    _saio_ops = {"claim", "transition", "checkpoint", "ticket", "goal",
+                 "valve", "stop"}
+    _provenance_missing = []
+    _first_op_event = None
+    if log_ok:
+        from saipen_engine.log import parse_log_line as _engine_log_parse
+        _all_events = []
+        for _lf in log_files:
+            for _line_no, _line in enumerate(read_doc(_lf).splitlines(), 1):
+                if not _line.strip() or _line.startswith("#"):
+                    continue
+                _ev = _engine_log_parse(_line)
+                if _ev is None:
+                    continue
+                _all_events.append((_lf, _line_no, _ev))
+        for _lf, _line_no, _ev in sorted(_all_events,
+                                         key=lambda e: e[2]["event"]):
+            if _ev["op_id"] and _first_op_event is None:
+                _first_op_event = _ev["event"]
+            if _first_op_event is None or _ev["event"] < _first_op_event:
+                continue
+            if _ev["op_id"]:
+                continue
+            _text = _ev["text"] or ""
+            if _ev["taxonomy"] in ("DEC", "RUN") and any(
+                    _mk in _text for _mk in _provenance_markers):
+                _provenance_missing.append(
+                    f"{_lf.as_posix()}:{_line_no} E-{_ev['event']}")
+        if _provenance_missing:
+            fail("mechanical provenance [saio] -- structural SAIOPS-owned "
+                 "events after the first provenanced event "
+                 f"(E-{_first_op_event}) lack `[op: ...]`, so a manual "
+                 "structural edit cannot be distinguished from a mechanized "
+                 "one: " + "; ".join(_provenance_missing[:6]) + " (T-584)")
 
     # § 1.10 orders `saipen status` to report "the result of the last
     # tools/validate.py run if one is recorded in LOG.md" -- a duty handed out

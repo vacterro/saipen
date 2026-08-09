@@ -9,12 +9,14 @@ LOG_RE = re.compile(
     r"\[E-(\d+)\]"
     r"(?: \[parent: E-(\d+)\])?"
     r"(?: \[(T-[^\]]*)\])?"
-    r"(?: \[agent: [^\]]+\])?"
+    r"(?: \[agent: ([^\]]+)\])?"
+    r"(?: \[op: ([^\]]+)\])?"
     r" ([A-Z]+): (.*)$")
 
 
 def parse_log_line(line: str) -> dict | None:
-    """Parse one LOG line into {event, parent, ticket, taxonomy, text} or None."""
+    """Parse one LOG line into {event, parent, ticket, agent, op_id, taxonomy,
+    text} or None."""
     m = LOG_RE.match(line)
     if not m:
         return None
@@ -22,8 +24,10 @@ def parse_log_line(line: str) -> dict | None:
         "event": int(m.group(1)),
         "parent": int(m.group(2)) if m.group(2) else None,
         "ticket": m.group(3),
-        "taxonomy": m.group(4),
-        "text": m.group(5),
+        "agent": m.group(4),
+        "op_id": m.group(5),
+        "taxonomy": m.group(6),
+        "text": m.group(7),
     }
 
 
@@ -45,14 +49,19 @@ VALID_TAXONOMIES = frozenset({
 def build_event(tail: int | None, taxonomy: str, message: str,
                 ticket: str | None = None,
                 agent: str | None = None,
-                now: str | None = None) -> tuple[int, str]:
+                now: str | None = None,
+                op_id: str | None = None) -> tuple[int, str]:
     """The ONE mechanical LOG event builder (NITRO integrity).
 
     Given the current LOG tail E-N, allocates E-(N+1) with parent E-N, renders
-    the full line skeleton (date, E-ID, parent, optional ticket/agent,
+    the full line skeleton (date, E-ID, parent, optional ticket/agent/op_id,
     taxonomy, payload), and returns (event_id, line) WITHOUT the trailing
     newline. Every operation uses this; no caller hand-concatenates LOG
     structure.
+
+    `op_id` is the SAIOPS operation provenance marker: structural mutations
+    carry `[op: <op_id>]` so post-migration validator/audit can detect a
+    manual structural edit that bypassed the engine.
 
     `now` is a "dd.MM.yy HH:mm" timestamp; the caller supplies it so PLAN and
     APPLY of one operation share one frozen clock.
@@ -72,5 +81,7 @@ def build_event(tail: int | None, taxonomy: str, message: str,
         parts.append(f"[{ticket}]")
     if agent:
         parts.append(f"[agent: {agent}]")
+    if op_id:
+        parts.append(f"[op: {op_id}]")
     parts.append(f"{taxonomy}: {message}")
     return event, " ".join(parts)

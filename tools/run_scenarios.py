@@ -74,7 +74,8 @@ from saipen_engine.operations import (apply_claim, checkpoint, next_ticket_id,
                                        plan_claim, reauthorize_valve,
                                        set_goal_intent, stop_checkpoint,
                                        ticket_add, ticket_move,
-                                       transition_phase)
+                                       transition_phase, _now, _plan_claim,
+                                       _utc_iso)
 from saipen_engine.snapshot import ProjectSnapshot
 from saipen_engine.state import parse_frontmatter
 
@@ -4242,6 +4243,175 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         bad_enum = True
     expect("SWEEP disposition enum is enforced at the writer",
            bad_enum and not (sweep_cycle / "SWEEP.md").is_file())
+
+    # ---- §69#05: checkpoint emits a mechanically parented event.
+    rootp = make_project()
+    apply_claim(rootp, "T-1", "probe")
+    cp_p = checkpoint(rootp, "probe", "RUN", "T-1", "parent check")
+    log_p = codec.read_doc(rootp / ".saipen" / "LOG.md")
+    expect("checkpoint event carries [parent: E-<prev>]",
+           cp_p.get("ok") and f"[parent: E-{int(cp_p.get('event_id')[2:]) - 1}]"
+           in log_p, repr(log_p[-140:]))
+
+    # ---- §69#04: checkpoint preserves unrelated STATE fields.
+    rootu = make_project()
+    state_u = (rootu / ".saipen" / "STATE.md").read_text(encoding="utf-8")
+    (rootu / ".saipen" / "STATE.md").write_text(
+        state_u.replace("phase: DONE", "phase: BUILD").replace(
+            "next_action: \"saipen continue\"",
+            "next_action: \"PHASE BUILD T-1\"").replace(
+            "updated:", "execution_intent: goal\ngoal_waves: 1\n"
+            "goal_tickets: 2\nupdated:"), encoding="utf-8")
+    apply_claim(rootu, "T-1", "probe")
+    transition_phase(rootu, "BUILD", "probe", "T-1", "setup")
+    before_u = codec.read_doc(rootu / ".saipen" / "STATE.md")
+    cp_u = checkpoint(rootu, "probe", "RUN", "T-1", "unrelated preserve")
+    after_u = codec.read_doc(rootu / ".saipen" / "STATE.md")
+    expect("checkpoint preserves unrelated fields (intent/counters/mode)",
+           cp_u.get("ok")
+           and "execution_intent: goal" in after_u
+           and "goal_waves: 1" in after_u and "goal_tickets: 2" in after_u
+           and "mode: full" in after_u and "requires:" in after_u
+           and "blocker:" in after_u, repr(after_u))
+
+    # ---- §69#07: goal intent from DONE/task:none never fabricates SCOUT.
+    rootg = make_project()
+    goal_g = set_goal_intent(rootg, "probe", "goal control")
+    st_g = parse_state(codec.read_doc(rootg / ".saipen" / "STATE.md"))
+    expect("goal intent from DONE/none does not create SCOUT/none",
+           goal_g.get("ok")
+           and st_g.get("phase") == "DONE"
+           and st_g.get("task") == "none"
+           and st_g.get("execution_intent") == "goal", repr(st_g))
+
+    # ---- §69#17: commit failure cannot be overwritten by semantic success.
+    rootf = make_project()
+    plan_f = _plan_claim(rootf, "T-1", "probe", _now(), _utc_iso())
+    (rootf / ".saipen" / "BOARD.md").write_text(
+        (rootf / ".saipen" / "BOARD.md").read_text(encoding="utf-8").replace(
+            "- [ ] T-1 [P1] top probe | verify: probe",
+            "- [/] T-1 [P1] top probe | owner: probe | "
+            "claim_time: 2026-01-01T00:00:00Z"), encoding="utf-8")
+    from saipen_engine.plan import apply_plan
+    result_f = apply_plan(rootf, plan_f)
+    expect("stale apply returns failure, never semantic success",
+           not result_f.get("ok")
+           and result_f.get("code") in ("STALE_STATE", "ALREADY_CLAIMED"),
+           repr(result_f))
+
+    # ---- §69#18: journal stores per-target before+after hashes.
+    j18 = Journal(root3, p_apply.get("op_id"))
+    rec18 = j18.read()
+    expect("every journal target carries before_hash and after_hash",
+           all("before_hash" in t and "after_hash" in t
+               for t in rec18["targets"])
+           and all(t["before_hash"] and t["after_hash"]
+                   for t in rec18["targets"]),
+           repr([{k: t[k] for k in ("path", "before_hash", "after_hash")}
+                 for t in rec18["targets"]]))
+
+    # ---- §69#27/#50: corrupt proposed state never reaches PREPARED.
+    rootc = make_project()
+    ops_dir = rootc / ".saipen" / "recovery" / "ops"
+    log_c = (rootc / ".saipen" / "LOG.md").read_text(encoding="utf-8")
+    # A duplicate event in the live LOG survives into the proposed LOG and
+    # must refuse the mutation before any journal is PREPARED.
+    (rootc / ".saipen" / "LOG.md").write_text(
+        log_c + log_c.splitlines()[-1] + "\n", encoding="utf-8")
+    before_ops = sorted(p.name for p in ops_dir.glob("*")) \
+        if ops_dir.is_dir() else []
+    claim_c = apply_claim(rootc, "T-1", "probe")
+    after_ops = sorted(p.name for p in ops_dir.glob("*")) \
+        if ops_dir.is_dir() else []
+    expect("proposed-state invalidity refuses before any journal PREPARED",
+           not claim_c.get("ok")
+           and claim_c.get("code") == "VALIDATION_FAILED"
+           and before_ops == after_ops, repr(claim_c))
+
+    # ---- §69#32: UTF-16 supported path preserves representation (or refuses).
+    rootu16 = make_project()
+    board16 = rootu16 / ".saipen" / "BOARD.md"
+    text16 = ("# Board\n## DOING\n## TODO\n- [ ] T-1 [P1] probe | "
+              "verify: probe\n## DONE\n## BLOCKED\n")
+    board16.write_bytes(b"\xff\xfe" + text16.encode("utf-16-le"))
+    add16 = ticket_add(rootu16, "probe", "P2", "u16", [], "verify")
+    raw16 = board16.read_bytes()
+    expect("UTF-16LE BOM representation preserved by a real operation",
+           add16.get("ok") and raw16.startswith(b"\xff\xfe")
+           and codec.encoding_of(board16) == "utf-16-le", repr(raw16[:4]))
+
+    # ---- §69#33: a one-file generic journal never claims LOG_WRITTEN.
+    rootone = make_project()
+    j_one = Journal(rootone, "op-single")
+    content_one = (rootone / ".saipen" / "STATE.md").read_bytes()
+    j_one.start("op", "probe", "id", "h", [
+        {"path": ".saipen/STATE.md", "role": "state",
+         "content": content_one.replace(b"phase: DONE", b"phase: BUILD"),
+         "before_hash": hash_bytes(content_one),
+         "after_hash": hash_bytes(
+             content_one.replace(b"phase: DONE", b"phase: BUILD"))},
+    ])
+    rec_one = j_one.read()
+    expect("one-file journal uses generic truthful stage, never LOG_WRITTEN",
+           rec_one["targets"][0]["role"] == "state"
+           and rec_one["targets"][0]["applied"] is False,
+           repr(rec_one["targets"]))
+
+    # ---- §69#35/#36: seat_id / report_path injection refused.
+    croot35 = make_project()
+    improve.register_cycle(croot35, "imp-s", "# IMPROVE CYCLE ROSTER\n")
+    cdir35 = improve.cycle_dir(croot35, "imp-s")
+    try:
+        improve.register_seat(cdir35, "a\navailability: complete", "core",
+                              "saipen_improve_X.md")
+        seat_inject = False
+    except ValueError:
+        seat_inject = True
+    expect("seat_id newline injection is refused", seat_inject)
+    try:
+        improve.register_seat(cdir35, "seat-1", "core", "../../escape.md")
+        path_escape = False
+    except ValueError:
+        path_escape = True
+    expect("report_path traversal is refused", path_escape)
+
+    # ---- §69#38/#39: append_run journalled; Improve writer propagates failure.
+    rroot = make_project()
+    rreport = improve.resolve_report_path(rroot, "imp-s", "seat-1", "PROJ")
+    rreport.parent.mkdir(parents=True)
+    rreport.write_text("report_status: draft\n", encoding="utf-8")
+    run_res = improve.append_run(rreport, "first run")
+    expect("append_run returns a committed transaction result",
+           run_res.get("ok") and run_res.get("code") == "COMMITTED",
+           repr(run_res))
+    complete_t = rreport.read_text(encoding="utf-8").replace(
+        "report_status: draft", "report_status: complete")
+    rreport.write_text(complete_t, encoding="utf-8")
+    try:
+        improve.append_run(rreport, "late")
+        prop = False
+    except ValueError:
+        prop = True
+    expect("Improve writer refuses a complete report and propagates",
+           prop)
+
+    # ---- §69#47/#48: mechanical provenance -- structural events after the
+    # first [op: ...] marker carry one; a manual structural edit is detected.
+    import saipen_engine.log as engine_log
+    _, event_line = engine_log.build_event(
+        999, "DEC", "ticket added via SAIOPS", ticket="T-1",
+        agent="probe", now="09.08.26 00:00", op_id="claim-abc")
+    parsed = engine_log.parse_log_line(event_line)
+    expect("SAIOPS structural event carries [op: ...] provenance",
+           parsed is not None and parsed["op_id"] == "claim-abc",
+           repr(parsed))
+    _, manual_line = engine_log.build_event(
+        1000, "DEC", "ticket added via SAIOPS -- manual", ticket="T-1",
+        agent="probe", now="09.08.26 00:00")
+    parsed_manual = engine_log.parse_log_line(manual_line)
+    expect("manual structural event lacks provenance (detectable)",
+           parsed_manual is not None and parsed_manual["op_id"] is None,
+           repr(parsed_manual))
 
     return problems, checked
 

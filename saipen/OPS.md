@@ -123,6 +123,24 @@ returns ALREADY_APPLIED with the original result; interrupted operations are
 recovered first. Never create a second equivalent operation while an unresolved
 first one exists.
 
+## 4a. Mechanical provenance
+
+Every SAIOPS structural operation writes its LOG event WITH its op_id as an
+`[op: <op_id>]` marker: claim, transition, checkpoint, ticket lifecycle, goal
+pivot, valve reauthorization, stop. Ordinary semantic LOG entries carry no
+marker.
+
+The migration boundary is self-establishing: the first event in a project's
+LOG history that ever carries an `[op: ...]` marker. Every structural event
+at/after that boundary MUST carry one. The validator's `[saio]` check fails a
+structural SAIOPS-owned event after the boundary that lacks `[op: ...]`, so a
+manual structural edit that bypassed the engine is detectable and reported.
+Pre-boundary history is exempt (append-only, cannot be rewritten).
+
+In `mode: full` with Python available, covered maintenance MUST use SAIOPS;
+manual structural editing is FALLBACK / RECOVERY ONLY and must record why the
+mechanical path was unavailable.
+
 ## 5. Locks
 
 One project-local lock file, `.saipen/locks/core.lock`, using real OS file

@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import re
 import datetime
+import uuid
 from pathlib import Path
 
 from . import codec, phases
@@ -42,6 +43,10 @@ _TAXONOMIES = {"DEC", "RUN"}
 def _now() -> str:
     return datetime.datetime.now(datetime.timezone.utc).strftime(
         "%d.%m.%y %H:%M")
+
+
+def uuid4_hex8() -> str:
+    return uuid.uuid4().hex[:8]
 
 
 def _utc_iso() -> str:
@@ -75,11 +80,11 @@ def _docs_preconditions(docs: dict, *keys: str) -> dict:
 
 def _event_line(docs: dict, log_tail: int | None, taxonomy: str,
                 ticket: str | None, agent: str, message: str,
-                now: str) -> tuple[int, str]:
+                now: str, op_id: str | None = None) -> tuple[int, str]:
     if taxonomy not in _TAXONOMIES:
         raise ValueError(f"taxonomy {taxonomy!r} outside {_TAXONOMIES}")
     return build_event(log_tail, taxonomy, message, ticket=ticket,
-                       agent=agent, now=now)
+                       agent=agent, now=now, op_id=op_id)
 
 
 def _refuse(code: str, detail: str = "", **extra) -> Result:
@@ -90,6 +95,7 @@ def _refuse(code: str, detail: str = "", **extra) -> Result:
 
 def _plan_claim(root: Path, ticket_id: str, agent: str, now: str, utc: str,
                 explicit: bool = False) -> OperationPlan | Result:
+    op_id = "claim-" + uuid4_hex8()
     docs, state, board, log_tail = _read(root)
     tickets = board["tickets"]
     if ticket_id not in tickets:
@@ -129,7 +135,8 @@ def _plan_claim(root: Path, ticket_id: str, agent: str, now: str, utc: str,
                            ticket=ticket_id, top_workable=top_workable)
 
     event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent,
-                              f"claimed via SAIOPS -- owner {agent}", now)
+                              f"claimed via SAIOPS -- owner {agent}", now,
+                              op_id)
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     new_board = _claim_move(docs["board"].text_norm, ticket_id, agent, utc)
     owned = {
@@ -162,7 +169,8 @@ def _plan_claim(root: Path, ticket_id: str, agent: str, now: str, utc: str,
         targets,
         {"ok": True, "code": "CLAIMED", "ticket": ticket_id,
          "event_id": f"E-{event}", "phase": "SCOUT",
-         "next_action": f"PHASE SCOUT {ticket_id}"})
+         "next_action": f"PHASE SCOUT {ticket_id}"},
+        op_id=op_id)
 
 
 def _claim_move(board_text: str, ticket_id: str, agent: str, utc: str) -> str:
@@ -213,6 +221,7 @@ def _plan_transition(root: Path, destination: str, agent: str,
                      ticket_id: str | None, event_text: str, now: str,
                      utc: str) -> OperationPlan | Result:
     destination = destination.upper()
+    op_id = "transition-" + uuid4_hex8()
     docs, state, board, log_tail = _read(root)
     current = state.get("phase")
     if destination not in phases.VALID_TRANSITIONS and \
@@ -254,7 +263,7 @@ def _plan_transition(root: Path, destination: str, agent: str,
 
     event, line = _event_line(docs, log_tail, "RUN", subject, agent,
                               event_text or f"transition to {destination}",
-                              now)
+                              now, op_id)
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     if destination in phases.TICKET_BEARING_PHASES:
         na = f"PHASE {destination} {subject}"
@@ -290,7 +299,7 @@ def _plan_transition(root: Path, destination: str, agent: str,
         targets,
         {"ok": True, "code": "TRANSITIONED", "phase": destination,
          "next_action": na, "event_id": f"E-{event}",
-         "ticket": subject})
+         "ticket": subject}, op_id=op_id)
 
 
 def transition_phase(project_root: Path | str, destination: str,
@@ -311,9 +320,10 @@ def transition_phase(project_root: Path | str, destination: str,
 def _plan_checkpoint(root: Path, agent: str, taxonomy: str,
                      ticket_id: str | None, description: str, now: str,
                      utc: str) -> OperationPlan | Result:
+    op_id = "checkpoint-" + uuid4_hex8()
     docs, state, board, log_tail = _read(root)
     event, line = _event_line(docs, log_tail, taxonomy.upper(), ticket_id,
-                              agent, description, now)
+                              agent, description, now, op_id)
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     owned = {
         "last_event": event,
@@ -338,7 +348,8 @@ def _plan_checkpoint(root: Path, agent: str, taxonomy: str,
          "ticket": ticket_id, "description": description},
         _docs_preconditions(docs, "state", "board", "log"),
         targets,
-        {"ok": True, "code": "CHECKPOINTED", "event_id": f"E-{event}"})
+        {"ok": True, "code": "CHECKPOINTED", "event_id": f"E-{event}"},
+        op_id=op_id)
 
 
 def checkpoint(project_root: Path | str, agent: str, taxonomy: str,
@@ -378,6 +389,7 @@ def _insert_todo(board_text: str, line: str) -> str:
 
 def _ticket_targets(root: Path, action: str, ticket_id: str, agent: str,
                     payload: str, now: str, utc: str) -> OperationPlan | Result:
+    op_id = "ticket-" + uuid4_hex8()
     docs, state, board, log_tail = _read(root)
     tickets = board["tickets"]
     if ticket_id not in tickets:
@@ -418,7 +430,8 @@ def _ticket_targets(root: Path, action: str, ticket_id: str, agent: str,
                              target_section, checkbox, action, payload)
     event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent,
                               f"ticket {action} via SAIOPS"
-                              + (f" -- {payload}" if payload else ""), now)
+                              + (f" -- {payload}" if payload else ""), now,
+                              op_id)
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     owned = {
         "last_event": event,
@@ -444,7 +457,7 @@ def _ticket_targets(root: Path, action: str, ticket_id: str, agent: str,
         _docs_preconditions(docs, "state", "board", "log"),
         targets,
         {"ok": True, "code": action.upper(), "ticket": ticket_id,
-         "event_id": f"E-{event}"})
+         "event_id": f"E-{event}"}, op_id=op_id)
 
 
 def _move_ticket(board_text: str, ticket_id: str, target_section: str,
@@ -486,6 +499,7 @@ def ticket_add(project_root: Path | str, agent: str, priority: str,
                description: str, needs: list[str], verify: str,
                dry_run: bool = False) -> Result:
     root = Path(project_root)
+    op_id = "ticket-" + uuid4_hex8()
     now, utc = _now(), _utc_iso()
     docs, state, board, log_tail = _read(root)
     tid = next_ticket_id(docs["board"].text_norm, docs["log"].text_norm)
@@ -497,7 +511,7 @@ def ticket_add(project_root: Path | str, agent: str, priority: str,
             + f" | verify: {verify}")
     new_board = _insert_todo(docs["board"].text_norm, desc)
     event, line = _event_line(docs, log_tail, "DEC", f"T-{tid}", agent,
-                              "ticket added via SAIOPS", now)
+                              "ticket added via SAIOPS", now, op_id)
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     owned = {
         "last_event": event,
@@ -524,7 +538,7 @@ def ticket_add(project_root: Path | str, agent: str, priority: str,
         _docs_preconditions(docs, "state", "board", "log"),
         targets,
         {"ok": True, "code": "TICKET_ADDED", "ticket": f"T-{tid}",
-         "event_id": f"E-{event}"})
+         "event_id": f"E-{event}"}, op_id=op_id)
     if dry_run:
         return _render_plan(plan)
     return apply_plan(root, plan)
@@ -547,9 +561,10 @@ def ticket_move(project_root: Path | str, action: str, ticket_id: str,
 def _state_only_plan(root: Path, operation: str, agent: str, mutate,
                      event_message: str, expected: dict, now: str,
                      utc: str, owned_keys: set) -> OperationPlan | Result:
+    op_id = operation + "-" + uuid4_hex8()
     docs, state, board, log_tail = _read(root)
     event, line = _event_line(docs, log_tail, "DEC", None, agent,
-                              event_message, now)
+                              event_message, now, op_id)
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     new_state = mutate(docs["state"].text_norm, event)
     errors = validate_texts(new_state, docs["board"].text_norm, new_log)
@@ -566,7 +581,7 @@ def _state_only_plan(root: Path, operation: str, agent: str, mutate,
         operation, agent, _identity(root),
         {"operation": operation, "agent": agent},
         _docs_preconditions(docs, "state", "board", "log"),
-        targets, expected)
+        targets, expected, op_id=op_id)
 
 
 def set_goal_intent(project_root: Path | str, agent: str, objective: str,
