@@ -207,9 +207,11 @@ def derive_status(report_ident: str, roster_text: str, report_text: str,
 
 
 def write_sweep_entry(cycle_dir: Path, entry: dict) -> None:
-    """Append a disposition to the Core-owned SWEEP ledger (atomic write).
+    """Append a disposition to the Core-owned SWEEP ledger (journaled write).
 
-    The seat report is never touched by sweep.
+    The seat report is never touched by sweep. Uses the common lock +
+    journal + roll-forward machinery (NITRO M6) so a crash mid-write leaves
+    exactly one valid outcome.
     """
     ledger = cycle_dir / "SWEEP.md"
     text = _read_maybe(ledger)
@@ -222,32 +224,48 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> None:
                 ticket=entry.get("ticket", "-"),
                 report=entry.get("report", "-"),
                 reproduced=entry.get("reproduced", "-")))
-    # Atomic write: sibling temp + rename.
-    ledger.parent.mkdir(parents=True, exist_ok=True)
-    tmp = ledger.with_suffix(".md.tmp")
-    tmp.write_text(text + line + "\n", encoding="utf-8", newline="\n")
-    tmp.replace(ledger)
+    _journaled_write(ledger, text + line + "\n", "sweep")
+
+
+def _journaled_write(path: Path, content: str, kind: str) -> None:
+    """Write one file through the common lock + journal + roll-forward
+    machinery. The journal is PREPARED before any filesystem mutation, so a
+    crash never exposes a half-written target (NITRO M6)."""
+    import uuid
+    from saipen_engine import journal as _journal
+    from saipen_engine.lock import project_writer_lock
+    from saipen_engine.snapshot import ProjectSnapshot
+
+    root = path
+    while root.parent != root.parent.parent and root.name != ".saipen":
+        root = root.parent
+    root = root.parent  # project root (parent of .saipen)
+    rel = path.relative_to(root).as_posix()
+    op_id = f"{kind}-" + uuid.uuid4().hex[:8]
+    snap = ProjectSnapshot.capture(root)
+    preconditions = {rel: _journal._hash_file(path)}
+    with project_writer_lock(root):
+        _journal.run_mutation(
+            root, op_id, "saipen", snap.project_identity, preconditions,
+            [{"path": rel, "content": content.encode("utf-8")}])
 
 
 def register_cycle(project_root: Path, cycle_id: str,
                    roster_lines: str) -> Path:
-    """Create a cycle directory atomically; refuse if it already exists.
+    """Create a cycle directory journaled; refuse if it already exists.
 
-    Core is the sole creator of a cycle. Two simultaneous attempts cannot
-    silently create two "current" cycles: the second admission raises with the
-    existing cycle named.
+    Core is the sole creator of a cycle. The MANIFEST is committed through the
+    common transaction machinery, so a crash can never expose a roster-less
+    cycle directory (NITRO M6 fixes the old create-then-replace window).
     """
     cdir = cycle_dir(project_root, cycle_id)
-    if cdir.exists():
+    manifest = cdir / "MANIFEST.md"
+    if manifest.exists():
         raise FileExistsError(
             f"improve cycle {cycle_id} already exists -- a project has at most "
             f"one active Improve cycle")
-    manifest = cdir / "MANIFEST.md"
-    manifest.parent.mkdir(parents=True)
-    tmp = manifest.with_suffix(".md.tmp")
-    tmp.write_text("# IMPROVE CYCLE ROSTER\n\n" + roster_lines,
-                   encoding="utf-8", newline="\n")
-    tmp.replace(manifest)
+    content = ("# IMPROVE CYCLE ROSTER\n\n" + roster_lines)
+    _journaled_write(manifest, content, "cycle")
     return cdir
 
 
@@ -269,10 +287,7 @@ def register_seat(cycle_dir: Path, seat_id: str, role: str,
         raise ValueError(f"duplicate seat registration: {seat_id}")
     line = (f"seat_id: {seat_id}\nrole: {role}\nreport_path: {report_path}\n"
             f"availability: {availability}\n")
-    tmp = manifest.with_suffix(".md.tmp")
-    tmp.write_text(text.rstrip() + "\n" + line, encoding="utf-8",
-                   newline="\n")
-    tmp.replace(manifest)
+    _journaled_write(manifest, text.rstrip() + "\n" + line, "seat")
 
 
 def append_run(report_path: Path, run_text: str) -> None:

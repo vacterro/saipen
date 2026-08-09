@@ -1,8 +1,9 @@
 # Board
 ## DOING
+- [/] T-583 [P1] NITRO M6: migrate the Improve writers onto the common engine machinery. register_cycle currently creates the cycle directory BEFORE the MANIFEST replace, so a crash can expose .saipen/improve/<cycle>/ with no valid roster; register_seat and write_sweep_entry use independent read/modify/temp/replace patterns. Rewrite them as consumers of the common lock + journal + roll-forward primitives (saipen_engine.journal/lock/operations), fixing the crash-window via the general transaction primitive rather than a local trick. tools/improve.py keeps its semantic API; only the mutation internals change. | verify: crash injection after MANIFEST replace leaves a fully valid cycle (never a roster-less directory); a crash before the replace aborts with no partial cycle; register_seat and write_sweep_entry survive a crash mid-write with exactly one valid outcome; the general primitive fixed the class, not just the instance (no local special-case in tools/improve.py); 231/231 audit, suite green | owner: claude | claim_time: 2026-08-09T03:45:00Z
 ## TODO
 
-- [ ] T-583 [P1] NITRO M6: migrate the Improve writers onto the common engine machinery. register_cycle currently creates the cycle directory BEFORE the MANIFEST replace, so a crash can expose .saipen/improve/<cycle>/ with no valid roster; register_seat and write_sweep_entry use independent read/modify/temp/replace patterns. Rewrite them as consumers of the common lock + journal + roll-forward primitives (saipen_engine.journal/lock/operations), fixing the crash-window via the general transaction primitive rather than a local trick. tools/improve.py keeps its semantic API; only the mutation internals change. | verify: crash injection after MANIFEST replace leaves a fully valid cycle (never a roster-less directory); a crash before the replace aborts with no partial cycle; register_seat and write_sweep_entry survive a crash mid-write with exactly one valid outcome; the general primitive fixed the class, not just the instance (no local special-case in tools/improve.py); 231/231 audit, suite green
+
 
 
 

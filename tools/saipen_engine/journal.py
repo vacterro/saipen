@@ -124,9 +124,10 @@ def run_mutation(project_root: Path | str, op_id: str, agent: str,
 
     journal.start(op_id, agent, project_identity, preconditions, targets)
     _crash_after("PREPARED")
-    for index, stage in enumerate(
-            ("LOG_WRITTEN", "BOARD_WRITTEN", "STATE_WRITTEN")):
-        target = targets[index]
+    _stage_names = ("LOG_WRITTEN", "BOARD_WRITTEN", "STATE_WRITTEN")
+    for index, target in enumerate(targets):
+        stage = _stage_names[index] if index < len(_stage_names) \
+            else f"TARGET_{index}"
         _atomic_write(root / target["path"], target["content"])
         journal.mark(stage)
         _crash_after(stage)
