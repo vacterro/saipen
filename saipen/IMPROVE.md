@@ -55,6 +55,34 @@ byte-unchanged.
   separate-cycle operation exists.
 - A completed cycle is immutable.
 
+One real lifecycle order (NITRO dogfood IV, T-601):
+
+```
+ACTIVE
+    seat reports written / completed (per-seat, parallel)
+    ↓
+    Core sweep dispositions written to SWEEP.md (judgment is Core-owned)
+    ↓
+    complete_cycle
+    ↓
+COMPLETE
+    immutable historical evidence (every ordinary mutator refuses)
+    ↓
+ARCHIVED
+    retention state only (saipen improve clean)
+```
+
+- COMPLETE means the cycle's mutation-producing work is over: before marking
+  complete, every expected seat's report MUST have `report_status: complete`
+  AND every finding in it MUST carry a final Core SWEEP disposition for its
+  exact composite identity (cycle + seat/report + run + IMP id). A partial
+  sweep REFUSES `complete_cycle` -- Core can never freeze the artifact before
+  its own sweep finished. One seat's disposition never satisfies another's
+  finding (composite identity).
+- After COMPLETE every ordinary mutator (register_seat, append_run,
+  write_sweep_entry) refuses; only permitted archive metadata may change the
+  cycle, and a new cycle may then be admitted without deleting history.
+
 Cycle directory:
 
 ```

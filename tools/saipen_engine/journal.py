@@ -368,7 +368,23 @@ def run_mutation(project_root: Path | str, op_id: str, operation: str,
                 "recovery_required": True,
                 "detail": f"post-write byte verification failed: {byte_error}"}
 
-    if verify is not None:
+    # Semantic verification runs BEFORE VERIFIED -- and it is the SAME
+    # postcondition class the recovery path runs from the journaled policy
+    # (NITRO dogfood IV, T-601): a named policy verifier is invoked here on
+    # APPLY with the actual changed targets, so APPLY and Recovery can never
+    # disagree about what a verified result means. The legacy caller-supplied
+    # `verify` callable remains the fallback for a "none" policy.
+    policy_verifier = _verifier_for(verification_policy)
+    if policy_verifier is not None:
+        errors = policy_verifier(root, prepared)
+        if errors:
+            journal.mark("CONFLICT")
+            return {"ok": False, "code": "CONFLICT", "op_id": op_id,
+                    "recovery_required": True,
+                    "detail": "post-write semantic verification (policy "
+                              f"{verification_policy}) failed: "
+                              + "; ".join(errors[:5])}
+    elif verify is not None:
         errors = verify(root)
         if errors:
             journal.mark("CONFLICT")
@@ -491,12 +507,14 @@ def recover(project_root: Path | str, op_id: str) -> dict:
                 "detail": f"recovered byte verification failed: {byte_error}"}
 
     # Semantic verification per the operation's registered policy. This is the
-    # same postcondition class the original APPLY ran; without it, VERIFIED
+    # same postcondition class the original APPLY ran -- the verifier receives
+    # the operation's actual changed targets, so a domain verifier validates
+    # the exact files it wrote (NITRO dogfood IV, T-601). Without it, VERIFIED
     # would be a false stage name on the recovery path.
     policy = record.get("verification_policy", "none")
     verifier = _verifier_for(policy)
     if verifier is not None:
-        errors = verifier(root)
+        errors = verifier(root, targets)
         if errors:
             journal.mark("CONFLICT")
             return {"ok": False, "code": "CONFLICT", "op_id": op_id,
@@ -517,44 +535,54 @@ def _verifier_for(policy: str):
 
     Every NAMED policy must behave truthfully (NITRO dogfood III, T-594):
     a named semantic verifier actually verifies the semantic postcondition the
-    mutation claims, never a silent None.
-    """
+    mutation claims, never a silent None. Every callable takes
+    (root, targets) -- the operation's actual changed targets -- so APPLY and
+    Recovery share ONE postcondition class and a domain verifier validates
+    the file it changed, never an unrelated scan (NITRO dogfood IV, T-601)."""
     if policy == "core_fast":
         from . import fast_check
-        return fast_check.validate_project
+        return lambda root, targets: fast_check.validate_project(root)
     if policy == "improve_atomic_file":
-        return _verify_improve_file
+        return verify_improve
     if policy == "userperson":
-        return _verify_userperson
+        return lambda root, targets: _verify_userperson(root)
     if policy == "sub_lifecycle":
-        return _verify_sub_lifecycle
+        return lambda root, targets: _verify_sub_lifecycle(root)
     return None
 
 
-def _verify_improve_file(root) -> list[str]:
-    """Verify the semantic postcondition of an Improve atomic-file write: the
-    owned manifest/sweep parses with the same parser its readers use."""
+def verify_improve(root, targets) -> list[str]:
+    """TARGET-AWARE Improve semantic postcondition (NITRO dogfood IV, T-601).
+
+    The ONE semantic verifier both APPLY and Recovery run for the
+    improve_atomic_file policy. It validates the ACTUAL changed targets --
+    never a generic scan of unrelated files -- with the SAME grammar the
+    consumers parse (improve.py's own manifest/sweep/report validators). A
+    malformed SWEEP.md therefore FAILs its own semantic verifier even when an
+    unrelated MANIFEST is valid.
+    """
     errors = []
     try:
         import improve
-        sweep = root / ".saipen" / "improve"
-        if sweep.is_dir():
-            for cycle in sorted(sweep.iterdir()):
-                manifest = cycle / "MANIFEST.md"
-                if manifest.is_file():
-                    text = manifest.read_text(encoding="utf-8-sig")
-                    if not text.startswith("# IMPROVE CYCLE ROSTER"):
-                        errors.append(f"{manifest}: not a valid roster header")
-                    seats = [ln for ln in text.splitlines()
-                             if ln.startswith("seat_id:")]
-                    if len(seats) != len(set(seats)):
-                        errors.append(f"{manifest}: duplicate seat_id")
-                    st = improve._cycle_status(manifest)
-                    if st not in ("active", "complete", "archived"):
-                        errors.append(f"{manifest}: cycle_status {st!r} "
-                                      "outside active|complete|archived")
+        for target in targets or []:
+            rel = target.get("path", "")
+            role = target.get("role", "generic")
+            path = root / rel
+            if not path.is_file():
+                errors.append(f"{rel}: written Improve target missing after "
+                              "apply")
+                continue
+            text = path.read_text(encoding="utf-8-sig")
+            if role in ("manifest", "cycle", "seat"):
+                errors.extend(improve.validate_manifest(text))
+            elif role == "sweep":
+                errors.extend(improve.validate_sweep(text))
+            elif role in ("report", "run"):
+                errors.extend(improve.validate_report_target(text))
+            elif role == "generic":
+                pass  # no domain grammar for an unknown Improve file
     except Exception as exc:  # noqa: BLE001
-        errors.append(f"improve file verification failed: {exc}")
+        errors.append(f"improve verification failed: {exc}")
     return errors
 
 
@@ -674,8 +702,31 @@ def resolve_conflict(project_root: Path | str, op_id: str,
     event and validation evidence. Resolution bypasses ONLY this op from the
     preflight gate: it refuses when another unrelated unresolved operation or
     conflict exists, and it re-verifies the live repository afterwards.
+
+    SERIALIZATION (NITRO dogfood IV, T-601): resolve is a MUTATION (it settles
+    the journal status), so it runs under the canonical project writer lock.
+    Two simultaneous resolvers of the same conflict therefore cannot race the
+    journal status/evidence: the loser either blocks on the lock (WRITER_BUSY)
+    or, if it acquires the lock after the winner settled, re-reads the journal
+    under the lock and refuses because the op is no longer CONFLICT. Exactly
+    one canonical settlement. `inspect` stays read-only and takes no lock.
     """
     root = Path(project_root)
+    from .lock import project_writer_lock as _resolver_lock
+    try:
+        with _resolver_lock(root):
+            return _resolve_conflict_locked(root, op_id, resolution, agent)
+    except PermissionError:
+        return {"ok": False, "code": "WRITER_BUSY", "op_id": op_id,
+                "detail": "another live writer holds the project lock; "
+                          "retry after it releases"}
+
+
+def _resolve_conflict_locked(root: Path, op_id: str, resolution: str,
+                             agent: str) -> dict:
+    """The locked body of resolve_conflict (T-601). Called only under the
+    project writer lock, so the journal read, the pending-op scan and the
+    live-hash snapshot all observe one consistent world."""
     journal = Journal(root, op_id)
     if not journal.exists():
         return {"ok": False, "code": "TICKET_NOT_FOUND", "op_id": op_id}
@@ -733,7 +784,8 @@ def resolve_conflict(project_root: Path | str, op_id: str,
     # resulting canonical repository before settling.
     policy = record.get("verification_policy", "none")
     verifier = _verifier_for(policy)
-    errors = verifier(root) if verifier is not None else []
+    errors = verifier(root, record.get("targets", [])) \
+        if verifier is not None else []
     if errors:
         return {"ok": False, "code": "NEEDS_REPAIR",
                 "detail": "resolving to current live leaves an invalid "

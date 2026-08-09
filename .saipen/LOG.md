@@ -156,3 +156,10 @@
 - 09.08.26 22:53 [E-2617] [parent: E-2616] [op: transition-ef6c6033] DEC: goal_tickets 0->1
 - 09.08.26 22:54 [E-2618] [parent: E-2617] [T-602] [agent: claude] [op: transition-000e3ecf] RUN: REVIEW verdict DEC: SHIP -- re-ran verify fresh (162/162 nitro-integrity gate controls, validate.py PASS); diff reviewed, no P0/P1
 - 09.08.26 22:54 [E-2619] [parent: E-2618] [T-602] [agent: claude] [op: finish-5506f954] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 09.08.26 22:55 [E-2620] [parent: E-2619] [T-601] [agent: claude] [op: claim-c548448d] DEC: claimed via SAIOPS -- owner claude
+- 09.08.26 23:00 [E-2621] [parent: E-2620] [T-601] [agent: claude] [op: transition-12a501d2] RUN: SCOUT done: 3 defects reproduced (complete_cycle freezes before sweep; malformed SWEEP passes _verify_improve_file; resolve_conflict takes no writer lock)
+- 09.08.26 23:01 [E-2622] [parent: E-2621] [T-601] [agent: claude] [op: transition-c79613fc] RUN: BUILD complete: complete_cycle sweep-coverage requirement; target-aware verify_improve(root, targets) shared by APPLY + Recovery; malformed SWEEP red controls; resolver writer-lock + two-process race control; SWEEP header writer fix; IMPROVE.md lifecycle order; full scenario suite green (49 improve + 162 nitro-integrity)
+- 09.08.26 23:06 [E-2623] [parent: E-2622] [T-601] [agent: claude] [op: transition-dc67eb9b] RUN: VERIFY done: validate.py PASS, run_scenarios full green (49 improve + 162 nitro-integrity), audit_checks 231/231 fresh
+- 09.08.26 23:06 [E-2624] [parent: E-2623] [op: transition-dc67eb9b] DEC: goal_tickets 1->2
+- 09.08.26 23:07 [E-2625] [parent: E-2624] [T-601] [agent: claude] [op: transition-1b09190f] RUN: REVIEW verdict DEC: SHIP -- verify re-run fresh (49/49 improve + 162/162 nitro-integrity + validate PASS); diff reviewed, no P0/P1
+- 09.08.26 23:07 [E-2626] [parent: E-2625] [T-601] [agent: claude] [op: finish-2fabb265] DEC: ticket finished via SAIOPS -- completion (from SHIP)

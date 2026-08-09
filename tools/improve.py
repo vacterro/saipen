@@ -335,7 +335,11 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
     _prove_inside(_project_root_of(ledger), ledger)
     _require_cycle_active(cycle_dir, "write_sweep_entry")
     text = _read_maybe(ledger)
-    if text and not text.startswith("# SWEEP"):
+    # The ledger is ALWAYS well-formed, from the first entry on: a missing or
+    # headerless ledger gets the canonical '# SWEEP' header (NITRO dogfood IV,
+    # T-601 -- the semantic verifier consumes the same grammar, so a headerless
+    # first entry would CONFLICT after write).
+    if not text.startswith("# SWEEP"):
         text = "# SWEEP\n\n" + text
     line = ("- IMP-{imp_num} [{disposition}] {ticket} report={report} "
             "reproduced={reproduced}".format(
@@ -386,11 +390,18 @@ def _journaled_write(path: Path, content: str, kind: str,
     content_bytes = doc.encode(content)
     live = _hash_file(path) if path.is_file() else ""
     before = base_hash if base_hash is not None else live
+    # TARGET ROLE (NITRO dogfood IV, T-601): the journal target must name the
+    # DOMAIN the file belongs to (manifest/sweep/report), not a generic role,
+    # so the target-aware semantic verifier validates the ACTUAL changed file
+    # with the correct grammar -- a malformed SWEEP can never hide behind a
+    # manifest-only scan, and APPLY + Recovery use one verifier.
+    role = {"cycle": "manifest", "seat": "manifest", "sweep": "sweep",
+            "run": "report"}.get(kind, "generic")
     with project_writer_lock(root):
         return run_mutation(
             root, op_id, kind, "saipen", _identity(root),
             hash_bytes(rel.encode("utf-8")),
-            [{"path": rel, "role": "generic", "content": content_bytes,
+            [{"path": rel, "role": role, "content": content_bytes,
               "before_hash": before,
               "after_hash": hash_bytes(content_bytes)}],
             preconditions={rel: before},
@@ -466,11 +477,15 @@ def complete_cycle(cycle_dir: Path) -> dict:
     The cycle's evidence stays in place (never deleted to admit the next
     cycle); only the lifecycle status changes, journaled (NITRO dogfood II).
 
-    "Complete" must mean something (NITRO dogfood III, T-595): before marking
-    complete, every `expected` seat must have a registered report whose
-    `report_status` is complete. A cycle with seats still missing or draft
-    reports refuses -- Core cannot mark it complete merely by invoking the
-    function."""
+    "Complete" must mean something (NITRO dogfood III, T-595 + IV, T-601):
+    before marking complete, every `expected` seat must have a registered
+    report whose `report_status` is complete, AND every finding in that
+    report requiring disposition must have a final Core SWEEP disposition for
+    its EXACT composite identity. A cycle with seats still missing, draft
+    reports, or findings without a disposition refuses -- Core cannot mark it
+    complete merely by invoking the function, and it must NEVER freeze a cycle
+    whose Core sweep has not finished (complete-before-sweep is the T-601
+    deadlock this requirement closes)."""
     manifest = cycle_dir / "MANIFEST.md"
     _prove_inside(_project_root_of(manifest), manifest)
     text = _read_maybe(manifest)
@@ -480,6 +495,8 @@ def complete_cycle(cycle_dir: Path) -> dict:
         raise ImproveError(f"cycle {cycle_dir.name} is already complete")
     missing = []
     draft = []
+    unswept = []
+    sweep_text = _read_maybe(cycle_dir / "SWEEP.md")
     for seat in _seat_blocks(text):
         if _field(seat, "availability") == "unavailable":
             continue
@@ -493,15 +510,25 @@ def complete_cycle(cycle_dir: Path) -> dict:
         if not report.is_file():
             missing.append(seat_id)
             continue
-        if _field(_read_maybe(report), "report_status") != "complete":
+        report_text = _read_maybe(report)
+        if _field(report_text, "report_status") != "complete":
             draft.append(seat_id)
-    if missing or draft:
+            continue
+        # SWEEP COVERAGE (NITRO dogfood IV, T-601): every finding of a
+        # complete report must carry a final disposition for its exact
+        # composite identity -- one seat's IMP-### can never satisfy another's.
+        derived = derive_status(report_path, text, report_text, sweep_text)
+        for imp in derived.get("missing", []):
+            unswept.append(f"{seat_id}:{imp}")
+    if missing or draft or unswept:
         raise ImproveError(
-            "complete_cycle refused: required reports not complete -- "
-            "missing: " + (", ".join(missing) or "none")
+            "complete_cycle refused: not every required report is complete "
+            "and fully swept -- missing: " + (", ".join(missing) or "none")
             + "; draft: " + (", ".join(draft) or "none")
-            + "; complete every expected seat's report before marking the "
-            "cycle complete")
+            + "; unswept dispositions: " + (", ".join(unswept) or "none")
+            + "; complete every expected seat's report AND dispose every "
+            "finding with a final Core disposition before marking the cycle "
+            "complete")
     new_text = re.sub(r"(?m)^cycle_status:\s*[A-Za-z]+",
                       "cycle_status: complete", text, count=1)
     if new_text == text:
@@ -644,4 +671,114 @@ def validate_report(text: str) -> list[str]:
         if action not in ACTION:
             errors.append(f"finding at line {finding['start']}: action "
                           f"{action!r} outside the closed set")
+    return errors
+
+
+def validate_manifest(text: str) -> list[str]:
+    """Roster manifest grammar (NITRO dogfood IV, T-601).
+
+    Parsed with the SAME primitives the manifest's consumers read
+    (_seat_blocks / _field / _cycle_status), so the semantic verifier and the
+    writer can never disagree about what the file means. A missing
+    cycle_status defaults to active, exactly like _cycle_status() does for
+    legacy manifests."""
+    errors = []
+    if not text.startswith("# IMPROVE CYCLE ROSTER"):
+        errors.append("manifest must open with '# IMPROVE CYCLE ROSTER'")
+    status = re.search(r"(?m)^cycle_status:\s*([A-Za-z]+)", text)
+    if status and status.group(1) not in ("active", "complete", "archived"):
+        errors.append(f"cycle_status {status.group(1)!r} outside "
+                      "active|complete|archived")
+    seen: set[str] = set()
+    for block in _seat_blocks(text):
+        seat_id = _field(block, "seat_id")
+        if not seat_id:
+            errors.append("roster has a seat block without seat_id")
+            continue
+        if seat_id in seen:
+            errors.append(f"duplicate seat_id: {seat_id}")
+        seen.add(seat_id)
+        if not _field(block, "role"):
+            errors.append(f"seat {seat_id}: missing role")
+        report_path = _field(block, "report_path")
+        if not report_path:
+            errors.append(f"seat {seat_id}: missing report_path")
+        else:
+            try:
+                _validate_report_path(report_path, seat_id)
+            except ImproveError as exc:
+                errors.append(f"seat {seat_id}: {exc}")
+        availability = _field(block, "availability")
+        if availability and availability not in AVAILABILITY:
+            errors.append(f"seat {seat_id}: availability {availability!r} "
+                          "outside expected|unavailable")
+    return errors
+
+
+# The SWEEP ledger grammar, exactly as the consumers read it: _SWEEP_RE for
+# the IMP-### + disposition token and the `report=` identity on the same line
+# for the COMPOSITE finding identity (cycle + seat/report + run + IMP id).
+_SWEEP_LINE_RE = re.compile(
+    r"^-\s+IMP-(\d+)\s+\[([A-Z_]+)\]\s+(\S+)\s+"
+    r"report=([^\s]+)\s+reproduced=(\S+)\s*$")
+
+
+def validate_sweep(text: str) -> list[str]:
+    """SWEEP ledger grammar (NITRO dogfood IV, T-601).
+
+    Validates the ACTUAL ledger grammar with the parser the consumers use:
+    disposition enum, the composite `report=` identity, and the required
+    ticket/reproduced fields. Arbitrary malformed garbage in SWEEP.md is a
+    semantic violation -- an otherwise-valid MANIFEST cannot excuse it."""
+    errors = []
+    if not text.strip():
+        return errors
+    if not text.startswith("# SWEEP"):
+        errors.append("SWEEP ledger must open with '# SWEEP'")
+    for index, line in enumerate(text.splitlines(), 1):
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        match = _SWEEP_LINE_RE.match(stripped)
+        if not match:
+            errors.append(
+                f"SWEEP.md line {index}: {stripped!r} does not match the "
+                "ledger grammar "
+                "'- IMP-### [DISPOSITION] <ticket> report=<report_ident> "
+                "reproduced=<value>'")
+            continue
+        _imp_num, disposition, ticket, report, reproduced = match.groups()
+        if disposition not in DISPOSITION:
+            errors.append(f"SWEEP.md line {index}: disposition "
+                          f"{disposition!r} outside the closed set "
+                          f"{sorted(DISPOSITION)}")
+        if not report:
+            errors.append(f"SWEEP.md line {index}: missing report identity -- "
+                          "the composite finding identity is cycle + "
+                          "seat/report + run + IMP id")
+        if not ticket:
+            errors.append(f"SWEEP.md line {index}: missing canonical ticket "
+                          "reference")
+        if not reproduced:
+            errors.append(f"SWEEP.md line {index}: missing reproduced value")
+    return errors
+
+
+def validate_report_target(text: str) -> list[str]:
+    """Report/run target invariants available at the WRITE stage (NITRO
+    dogfood IV, T-601). A report is constructed incrementally, so the full
+    validate_report completion bar is checked at complete_cycle time; what is
+    checkable the moment a report/run target commits is its closed-field
+    vocabulary and the full-context claim."""
+    errors = []
+    status = _field(text, "report_status")
+    if status and status not in REPORT_STATUS:
+        errors.append(f"report_status {status!r} outside draft|complete")
+    avail = _field(text, "context_available")
+    if avail and avail not in ("complete", "partial", "none"):
+        errors.append(f"context_available {avail!r} outside "
+                      "complete|partial|none")
+    if avail == "complete" and not _field(text, "context_scope"):
+        errors.append("context_available: complete refused over an empty "
+                      "context_scope")
     return errors

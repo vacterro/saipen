@@ -3721,6 +3721,161 @@ def run_improve_probes() -> tuple[list[str], int]:
     expect("cycle-id allocator is deterministic and collision-safe",
            id1 != id2 and id2.endswith("-2"), repr((id1, id2)))
 
+    # ---- NITRO dogfood IV (T-601): complete_cycle must NOT freeze the
+    # artifact before its Core sweep finishes. Real lifecycle test, not a
+    # completion-then-refusal proof: active -> reports complete -> PARTIAL
+    # sweep -> complete_cycle REFUSE -> remaining dispositions -> complete_cycle
+    # COMMITTED -> every ordinary mutator REFUSEs -> next cycle admitted.
+    from saipen_engine.journal import verify_improve as _verify_improve
+    life2 = project_fixture("saipen-life2-")
+    cL = register_cycle(life2, "imp-life2",
+                        "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
+    register_seat(cL, "seat-1", "core", "saipen_improve_A.md")
+    repL = resolve_report_path(life2, "imp-life2", "seat-1", "A")
+    repL.parent.mkdir(parents=True, exist_ok=True)
+    repL.write_text(
+        "report_status: complete\n\n"
+        "IMP-001 [P1] [PROTOCOL_VIOLATION] [proven] [ticket]\n"
+        "expected: x\nactual: y\nevidence: z\n"
+        "IMP-002 [P1] [PROTOCOL_VIOLATION] [proven] [ticket]\n"
+        "expected: x\nactual: y\nevidence: z\n", encoding="utf-8")
+    # partial sweep: only IMP-001 disposed
+    write_sweep_entry(cL, {"imp_id": "001", "disposition": "CONFIRMED",
+                           "ticket": "T-900", "report": "saipen_improve_A.md",
+                           "reproduced": "y"})
+    try:
+        complete_cycle(cL)
+        partial_ok = False
+    except ValueError:
+        partial_ok = True
+    expect("lifecycle: partial sweep REFUSEs complete_cycle (unswept IMP-002)",
+           partial_ok and _improve._cycle_status(cL / "MANIFEST.md") == "active",
+           repr(_improve._cycle_status(cL / "MANIFEST.md")))
+    write_sweep_entry(cL, {"imp_id": "002", "disposition": "CONFIRMED",
+                           "ticket": "T-900", "report": "saipen_improve_A.md",
+                           "reproduced": "y"})
+    complete_cycle(cL)
+    expect("lifecycle: full sweep coverage permits complete_cycle",
+           _improve._cycle_status(cL / "MANIFEST.md") == "complete")
+    for mutator, label in [
+        (lambda: register_seat(cL, "seat-2", "core", "saipen_improve_B.md"),
+         "register_seat"),
+        (lambda: write_sweep_entry(
+            cL, {"imp_id": "003", "disposition": "CONFIRMED",
+                 "ticket": "T-900", "report": "saipen_improve_A.md",
+                 "reproduced": "y"}), "write_sweep_entry"),
+    ]:
+        try:
+            mutator()
+            refused = False
+        except ValueError:
+            refused = True
+        expect(f"lifecycle: {label} REFUSEs a completed cycle (immutable)",
+               refused)
+    cL2 = register_cycle(life2, "imp-life2-2",
+                         "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
+    expect("lifecycle: the next cycle is admitted after completion",
+           (cL2 / "MANIFEST.md").is_file())
+
+    # ---- T-601: malformed SWEEP fails its OWN semantic verifier while a
+    # valid SWEEP passes (writer and verifier consume the SAME grammar).
+    sweep_bad = cL2 / "SWEEP.md"
+    sweep_bad.write_text("arbitrary malformed garbage\nNOT A SWEEP\n",
+                         encoding="utf-8")
+    bad_errs = _verify_improve(life2, [{"path": sweep_bad.relative_to(
+        life2).as_posix(), "role": "sweep"}])
+    expect("verifier: malformed SWEEP FAILs the semantic verifier",
+           len(bad_errs) >= 3 and "ledger grammar" in " ".join(bad_errs),
+           repr(bad_errs))
+    # fresh ledger: the writer's own output must satisfy the verifier
+    sweep_bad.unlink()
+    write_sweep_entry(cL2, {"imp_id": "001", "disposition": "CONFIRMED",
+                            "ticket": "T-900", "report": "saipen_improve_A.md",
+                            "reproduced": "y"})
+    sweep_text2 = (cL2 / "SWEEP.md").read_text(encoding="utf-8")
+    good_errs = _verify_improve(life2, [{"path": ".saipen/improve/"
+                                         "imp-life2-2/SWEEP.md",
+                                         "role": "sweep"}])
+    expect("verifier: the writer's own SWEEP output passes (same grammar)",
+           good_errs == [] and sweep_text2.startswith("# SWEEP"),
+           repr((good_errs, sweep_text2[:40])))
+
+    # ---- T-601: Recovery uses the SAME target-aware verifier as APPLY. A
+    # journaled improve op whose applied SWEEP is malformed must CONFLICT on
+    # recovery (never COMMITTED) -- the policy postcondition class is one.
+    from saipen_engine.journal import Journal as _RecJournal
+    from saipen_engine.journal import hash_bytes as _rec_hb
+    rec_root = project_fixture("saipen-recover-")
+    register_cycle(rec_root, "imp-rec",
+                   "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
+    sweep_path = ".saipen/improve/imp-rec/SWEEP.md"
+    garbage = "arbitrary malformed garbage\n"
+    jrec = _RecJournal(rec_root, "op-rec")
+    jrec.start("sweep", "probe", "id", "h",
+               [{"path": sweep_path, "role": "sweep",
+                 "content": garbage.encode("utf-8"),
+                 "before_hash": _rec_hb(b""),
+                 "after_hash": _rec_hb(garbage.encode("utf-8"))}],
+               verification_policy="improve_atomic_file")
+    (rec_root / sweep_path).write_bytes(garbage.encode("utf-8"))
+    jrec.mark("APPLYING", progress_index=1, target_index=0)
+    rec_res = recover(rec_root, "op-rec")
+    expect("recovery runs the same target-aware verifier: malformed SWEEP "
+           "CONFLICTs on recovery, never COMMITTED",
+           not rec_res.get("ok") and rec_res.get("code") == "CONFLICT"
+           and "semantic verifier" in rec_res.get("detail", ""),
+           repr(rec_res))
+
+    # ---- T-601: resolver race -- two processes resolving the same conflict
+    # yield exactly one canonical settlement (WRITER_BUSY or a settled-journal
+    # refusal for the loser, never two RESOLVED).
+    from saipen_engine.journal import (Journal as _RaceJournal,
+                                       hash_bytes as _race_hb,
+                                       resolve_conflict as _race_resolve)
+    race_root = project_fixture("saipen-race-")
+    saipen_r = race_root / ".saipen"
+    # a DONE-state root so the external phase HUNT modification is real
+    (saipen_r / "STATE.md").write_text(
+        "---\nphase: DONE\ntask: none\nnext_action: \"saipen continue\"\n"
+        "blocker: \"\"\nsaipen_version: 7\nschema_version: 3\nlast_event: 900\n"
+        "style_contract: ded-4ae736e4\nsaipen_home: \".\"\nagent: probe\nmode: full\n"
+        "updated: 2026-08-09T00:00:00Z\n---\n", encoding="utf-8")
+    log_r = (saipen_r / "LOG.md").read_bytes()
+    state_r = (saipen_r / "STATE.md").read_bytes()
+    new_log_r = log_r + b"\n- 09.08.26 00:01 [E-901] RUN: op\n"
+    new_state_r = state_r.replace(b"phase: DONE", b"phase: BUILD")
+    jr = _RaceJournal(race_root, "op-race")
+    jr.start("checkpoint", "probe", "id", "h", [
+        {"path": ".saipen/LOG.md", "role": "log", "content": new_log_r,
+         "before_hash": _race_hb(log_r), "after_hash": _race_hb(new_log_r)},
+        {"path": ".saipen/STATE.md", "role": "state", "content": new_state_r,
+         "before_hash": _race_hb(state_r), "after_hash": _race_hb(new_state_r)},
+    ], verification_policy="core_fast")
+    (saipen_r / "LOG.md").write_bytes(new_log_r)
+    jr.mark("APPLYING", progress_index=1, target_index=0)
+    ext_r = state_r.replace(b"phase: DONE", b"phase: HUNT").replace(
+        b"last_event: 900", b"last_event: 901")
+    (saipen_r / "STATE.md").write_bytes(ext_r)
+    recover(race_root, "op-race")
+    race_code = (
+        "import sys; sys.path.insert(0, r'%s')\n"
+        "from saipen_engine.journal import resolve_conflict\n"
+        "print(resolve_conflict(r'%s', 'op-race', 'accept_live', 'probe'))"
+        % (str(HOME / "tools"), str(race_root)))
+    procs = [subprocess.Popen([sys.executable, "-c", race_code],
+                              cwd=str(race_root), stdout=subprocess.PIPE,
+                              stderr=subprocess.STDOUT, text=True)
+             for _ in range(2)]
+    outs = [p.communicate(timeout=90)[0] for p in procs]
+    n_resolved = sum("'code': 'RESOLVED'" in o for o in outs)
+    settled_status = _RaceJournal(race_root, "op-race").read().get("status")
+    expect("resolver race: exactly one process settles the conflict, the "
+           "loser refuses (WRITER_BUSY or settled-journal refusal)",
+           n_resolved == 1 and settled_status == "RESOLVED"
+           and all(("'code': 'RESOLVED'" in o or "WRITER_BUSY" in o)
+                   for o in outs),
+           repr((n_resolved, settled_status, outs)))
+
     return problems, checked
 
 
