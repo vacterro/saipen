@@ -3599,17 +3599,25 @@ def run_improve_probes() -> tuple[list[str], int]:
            and "seat_id: seat-b" in final_text, repr(final_text))
 
     # ---- T-589: cycle lifecycle -- complete allows the next cycle.
+    # (NITRO dogfood III, T-595: this red control was vacuous -- both branches
+    # set second_blocked=True. Now the success path sets False, so a mutation
+    # removing the active-cycle refusal turns the scenario red.)
     life_root = project_fixture("saipen-life-")
     c1 = register_cycle(life_root, "imp-one",
                         "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
     try:
         register_cycle(life_root, "imp-two",
                        "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
-        second_blocked = True
+        second_blocked = False
     except ValueError:
         second_blocked = True
     expect("a second ACTIVE cycle is refused while one is active",
            second_blocked)
+    # Complete prerequisites: one expected seat with a complete report.
+    register_seat(c1, "seat-1", "core", "saipen_improve_A.md")
+    report1 = resolve_report_path(life_root, "imp-one", "seat-1", "A")
+    report1.parent.mkdir(parents=True, exist_ok=True)
+    report1.write_text("report_status: complete\n", encoding="utf-8")
     complete_cycle(c1)
     c2 = register_cycle(life_root, "imp-two",
                         "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
@@ -3619,12 +3627,96 @@ def run_improve_probes() -> tuple[list[str], int]:
     expect("historical cycle evidence is not deleted to admit the next",
            (c1 / "MANIFEST.md").is_file())
 
+    # T-595: complete_cycle refuses when a required report is missing/draft;
+    # completed cycle is immutable under register_seat/append_run.
+    imm_root = project_fixture("saipen-imm-")
+    cimm = register_cycle(imm_root, "imp-imm",
+                          "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
+    register_seat(cimm, "seat-1", "core", "saipen_improve_A.md")
+    imm_report = resolve_report_path(imm_root, "imp-imm", "seat-1", "A")
+    imm_report.parent.mkdir(parents=True, exist_ok=True)
+    imm_report.write_text("report_status: draft\n", encoding="utf-8")
+    try:
+        complete_cycle(cimm)
+        early = False
+    except ValueError:
+        early = True
+    expect("complete_cycle refuses a draft report (completion means something)",
+           early)
+    imm_report.write_text("report_status: complete\n", encoding="utf-8")
+    complete_cycle(cimm)
+    try:
+        register_seat(cimm, "seat-2", "core", "saipen_improve_B.md")
+        late_seat = False
+    except ValueError:
+        late_seat = True
+    expect("register_seat refuses a completed cycle (immutable)",
+           late_seat)
+    try:
+        append_run(imm_report, "late run")
+        late_run = False
+    except ValueError:
+        late_run = True
+    expect("append_run refuses a completed cycle (immutable)",
+           late_run)
+    from improve import write_sweep_entry as _wse
+    try:
+        _wse(cimm, {"imp_id": "001", "disposition": "CONFIRMED",
+                    "ticket": "-", "report": "r", "reproduced": "-"})
+        late_sweep = False
+    except ValueError:
+        late_sweep = True
+    expect("write_sweep_entry refuses a completed cycle (immutable)",
+           late_sweep)
+
+    # ---- T-595: end-to-end writer -> filesystem -> parser -> derive_status
+    # with NO hand-built intermediate strings. write_sweep_entry(imp_id="001")
+    # must write exactly one IMP-001 that derive_status reads back.
+    e2e_root = project_fixture("saipen-e2e-")
+    e2e_cycle = register_cycle(e2e_root, "imp-e2e",
+                               "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
+    register_seat(e2e_cycle, "seat-a", "core", "saipen_improve_A.md")
+    register_seat(e2e_cycle, "seat-b", "core", "saipen_improve_B.md")
+    rep_a = resolve_report_path(e2e_root, "imp-e2e", "seat-a", "A")
+    rep_b = resolve_report_path(e2e_root, "imp-e2e", "seat-b", "B")
+    rep_a.parent.mkdir(parents=True, exist_ok=True)
+    rep_b.parent.mkdir(parents=True, exist_ok=True)
+    rep_a.write_text("report_status: complete\n\n"
+                     "IMP-001 [P1] [PROTOCOL_VIOLATION] [proven] [ticket]\n"
+                     "expected: a\nactual: b\nevidence: c\n", encoding="utf-8")
+    rep_b.write_text("report_status: complete\n\n"
+                     "IMP-001 [P1] [PROTOCOL_VIOLATION] [proven] [ticket]\n"
+                     "expected: d\nactual: e\nevidence: f\n", encoding="utf-8")
+    roster_e2e = (e2e_cycle / "MANIFEST.md").read_text(encoding="utf-8-sig")
+    # Write one disposition for seat A only, using the numeric-id input that
+    # once produced IMP-IMP-001.
+    _wse(e2e_cycle, {"imp_id": "001", "disposition": "CONFIRMED",
+                     "ticket": "T-900", "report": "saipen_improve_A.md",
+                     "reproduced": "y"})
+    sweep_text = (e2e_cycle / "SWEEP.md").read_text(encoding="utf-8")
+    expect("sweep writer emits exactly one IMP-001 (never IMP-IMP-001)",
+           sweep_text.count("IMP-001") == 1
+           and "IMP-IMP-001" not in sweep_text, repr(sweep_text))
+    # derive_status over the ACTUAL written SWEEP: A swept, B not.
+    st_a = derive_status("saipen_improve_A.md", roster_e2e,
+                         rep_a.read_text(encoding="utf-8"), sweep_text)
+    st_b = derive_status("saipen_improve_B.md", roster_e2e,
+                         rep_b.read_text(encoding="utf-8"), sweep_text)
+    expect("writer->parser->derive_status: A swept, B not (same local IMP-001)",
+           st_a["visible"] == "swept" and st_b["visible"] == "complete",
+           repr((st_a, st_b)))
+
     # ---- T-589: deterministic cycle-id allocator.
     alloc_root = project_fixture("saipen-alloc-")
     id1 = allocate_cycle_id(alloc_root, "proj-x")
     register_cycle(alloc_root, id1, "# IMPROVE CYCLE ROSTER\n"
                    "cycle_status: active\n")
-    complete_cycle(cycle_dir(alloc_root, id1))
+    cid1 = cycle_dir(alloc_root, id1)
+    register_seat(cid1, "seat-1", "core", "saipen_improve_A.md")
+    a_report = resolve_report_path(alloc_root, id1, "seat-1", "A")
+    a_report.parent.mkdir(parents=True, exist_ok=True)
+    a_report.write_text("report_status: complete\n", encoding="utf-8")
+    complete_cycle(cid1)
     id2 = allocate_cycle_id(alloc_root, "proj-x")
     expect("cycle-id allocator is deterministic and collision-safe",
            id1 != id2 and id2.endswith("-2"), repr((id1, id2)))

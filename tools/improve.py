@@ -333,12 +333,13 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
     imp_id = f"IMP-{imp_num}"
     ledger = cycle_dir / "SWEEP.md"
     _prove_inside(_project_root_of(ledger), ledger)
+    _require_cycle_active(cycle_dir, "write_sweep_entry")
     text = _read_maybe(ledger)
     if text and not text.startswith("# SWEEP"):
         text = "# SWEEP\n\n" + text
-    line = ("- IMP-{imp_id} [{disposition}] {ticket} report={report} "
+    line = ("- IMP-{imp_num} [{disposition}] {ticket} report={report} "
             "reproduced={reproduced}".format(
-                imp_id=imp_id,
+                imp_num=imp_num,
                 disposition=disposition,
                 ticket=entry.get("ticket", "-"),
                 report=entry.get("report", "-"),
@@ -409,6 +410,20 @@ def _cycle_status(manifest: Path) -> str:
     return match.group(1) if match else "active"
 
 
+def _require_cycle_active(cycle_dir: Path, mutator: str) -> Path:
+    """Refuse any mutator on a cycle that is not ACTIVE (NITRO dogfood III,
+    T-595). A completed/archived cycle is immutable under all normal writers."""
+    manifest = cycle_dir / "MANIFEST.md"
+    _prove_inside(_project_root_of(manifest), manifest)
+    status = _cycle_status(manifest)
+    if status != "active":
+        raise ImproveError(
+            f"{mutator} refuses: cycle {cycle_dir.name} is {status}, not "
+            "active; a completed cycle is immutable except permitted archive "
+            "metadata")
+    return manifest
+
+
 def register_cycle(project_root: Path, cycle_id: str,
                    roster_lines: str) -> Path:
     """Create a cycle directory journaled; refuse if an ACTIVE cycle exists.
@@ -436,6 +451,8 @@ def register_cycle(project_root: Path, cycle_id: str,
             f"most one active Improve cycle")
     content = ("# IMPROVE CYCLE ROSTER\n\ncycle_status: active\n\n"
                + roster_lines)
+    if re.search(r"(?m)^cycle_status:\s*active\s*$", roster_lines):
+        content = ("# IMPROVE CYCLE ROSTER\n\n" + roster_lines)
     result = _journaled_write(cdir / "MANIFEST.md", content, "cycle")
     if not result.get("ok"):
         raise ImproveError(
@@ -447,7 +464,13 @@ def register_cycle(project_root: Path, cycle_id: str,
 def complete_cycle(cycle_dir: Path) -> dict:
     """Mark a cycle COMPLETE: no longer active, so the next cycle can start.
     The cycle's evidence stays in place (never deleted to admit the next
-    cycle); only the lifecycle status changes, journaled (NITRO dogfood II)."""
+    cycle); only the lifecycle status changes, journaled (NITRO dogfood II).
+
+    "Complete" must mean something (NITRO dogfood III, T-595): before marking
+    complete, every `expected` seat must have a registered report whose
+    `report_status` is complete. A cycle with seats still missing or draft
+    reports refuses -- Core cannot mark it complete merely by invoking the
+    function."""
     manifest = cycle_dir / "MANIFEST.md"
     _prove_inside(_project_root_of(manifest), manifest)
     text = _read_maybe(manifest)
@@ -455,6 +478,30 @@ def complete_cycle(cycle_dir: Path) -> dict:
         raise ImproveError(f"cycle manifest missing: {manifest}")
     if _cycle_status(manifest) == "complete":
         raise ImproveError(f"cycle {cycle_dir.name} is already complete")
+    missing = []
+    draft = []
+    for seat in _seat_blocks(text):
+        if _field(seat, "availability") == "unavailable":
+            continue
+        seat_id = _field(seat, "seat_id") or "?"
+        report_path = _field(seat, "report_path")
+        if not report_path:
+            missing.append(seat_id)
+            continue
+        # The report lives at <cycle>/<seat_id>/<report_path>.
+        report = cycle_dir / seat_id / report_path
+        if not report.is_file():
+            missing.append(seat_id)
+            continue
+        if _field(_read_maybe(report), "report_status") != "complete":
+            draft.append(seat_id)
+    if missing or draft:
+        raise ImproveError(
+            "complete_cycle refused: required reports not complete -- "
+            "missing: " + (", ".join(missing) or "none")
+            + "; draft: " + (", ".join(draft) or "none")
+            + "; complete every expected seat's report before marking the "
+            "cycle complete")
     new_text = re.sub(r"(?m)^cycle_status:\s*[A-Za-z]+",
                       "cycle_status: complete", text, count=1)
     if new_text == text:
@@ -482,8 +529,7 @@ def register_seat(cycle_dir: Path, seat_id: str, role: str,
     if availability not in AVAILABILITY:
         raise ImproveError(f"availability {availability!r} outside "
                            f"expected|unavailable")
-    manifest = cycle_dir / "MANIFEST.md"
-    _prove_inside(_project_root_of(manifest), manifest)
+    manifest = _require_cycle_active(cycle_dir, "register_seat")
     text = _read_maybe(manifest)
     if not text.startswith("# IMPROVE CYCLE ROSTER"):
         text = "# IMPROVE CYCLE ROSTER\n\n" + text
@@ -512,6 +558,14 @@ def append_run(report_path: Path, run_text: str) -> dict:
     if "report_status: complete" in text:
         raise ImproveError("seat report is complete and immutable; no "
                            "further RUN sections may be appended")
+    # The report lives under .saipen/improve/<cycle>/<seat>/; the cycle must
+    # still be ACTIVE for its report to be appended (completed-cycle
+    # immutability, NITRO dogfood III, T-595).
+    try:
+        cycle_dir_of_report = report_path.parent.parent
+        _require_cycle_active(cycle_dir_of_report, "append_run")
+    except (ImproveError, ValueError):
+        raise
     run_count = len(re.findall(r"(?m)^## RUN \d+", text))
     run = f"## RUN {run_count + 1}\n\n{run_text.rstrip()}\n"
     result = _journaled_write(report_path, text.rstrip() + "\n\n" + run,

@@ -133,3 +133,8 @@
 - 09.08.26 21:17 [E-2594] [parent: E-2593] [T-594] [agent: claude] [op: finish-3b8629d7] DEC: ticket finished via SAIOPS -- completion (from VERIFY)
 - 09.08.26 21:17 [E-2595] [parent: E-2594] [T-594] [agent: claude] [op: checkpoint-0b12a024] DEC: goal_tickets 18->19 (T-594 passed VERIFY via atomic finish)
 - 09.08.26 21:17 [E-2596] [parent: E-2595] [T-594] [agent: claude] [op: checkpoint-373f0ea8] RUN: goal_tickets synced (19); T-594 closed
+- 09.08.26 21:19 [E-2597] [parent: E-2596] [T-595] [agent: claude] [op: ticket-be50a8d3] DEC: ticket added via SAIOPS
+- 09.08.26 21:19 [E-2598] [parent: E-2597] [T-595] [agent: claude] [op: claim-fd548312] DEC: claimed via SAIOPS -- owner claude
+- 09.08.26 21:19 [E-2599] [parent: E-2598] [T-595] [agent: claude] [op: transition-b5db5856] RUN: Improve writer/parser/lifecycle end-to-end truth begins
+- 09.08.26 21:36 [E-2600] [parent: E-2599] [T-595] [agent: claude] [op: transition-4f4a8cb3] RUN: SCOUT done: vacuous cycle test + IMP-IMP-001 + completed-cycle immutability + completion prerequisites + end-to-end writer/parser all landed
+- 09.08.26 21:36 [E-2601] [parent: E-2600] [T-595] [agent: claude] [op: checkpoint-8a563009] RUN: BUILD: sweep writer emits exactly one IMP-001 (IMP-IMP-001 fixed, render uses numeric identity); end-to-end write_sweep_entry->SWEEP.md->derive_status (A swept, B not, same local IMP-001); vacuous active-cycle red control fixed (success branch sets False); completed-cycle immutable under register_seat/append_run/write_sweep_entry; complete_cycle refuses draft/missing reports (completion means something) and passes with complete reports; allocator test updated; 40 improve + 137 integrity behaviors green; validator+audit(231)+floor green
