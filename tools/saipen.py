@@ -394,6 +394,178 @@ def _emit(payload: dict, as_json: bool) -> None:
             print(f"{key}: {value}")
 
 
+def _improve(project_root: Path, args: list[str], as_json: bool,
+             dry_run: bool) -> int:
+    """saipen improve -- the meta-control command family (T-554, T-606).
+
+    Five routes, all journaled/read-only per the spec: `status` (read-only
+    derived per-seat visible status, zero writes), `sweep <cycle> <imp_id>
+    <disposition>` (Core-only disposition write through write_sweep_entry),
+    `verify <cycle>` (delta-only semantic verification of the cycle's
+    artifacts, never a new cycle), `clean <cycle>` (archive-with-provenance:
+    refuses unswept, then marks the cycle archived). The bare form prints the
+    derived status and the audit entry point -- it never fabricates a report.
+    """
+    from improve import (archive_cycle, complete_cycle, cycle_dir,
+                         derive_status, resolve_report_path,
+                         validate_report, write_sweep_entry)
+
+    imp_root = project_root / ".saipen" / "improve"
+
+    def _cycle_statuses() -> list[dict]:
+        rows = []
+        if not imp_root.is_dir():
+            return rows
+        for cycle in sorted(imp_root.iterdir()):
+            manifest = cycle / "MANIFEST.md"
+            if not manifest.is_file():
+                continue
+            roster = manifest.read_text(encoding="utf-8-sig")
+            sweep = (cycle / "SWEEP.md").read_text(encoding="utf-8-sig") \
+                if (cycle / "SWEEP.md").is_file() else ""
+            status = "active"
+            import re as _re
+            m = _re.search(r"(?m)^cycle_status:\s*([A-Za-z]+)", roster)
+            if m:
+                status = m.group(1)
+            seats = []
+            for block in roster.splitlines():
+                if not block.startswith("seat_id:"):
+                    continue
+                seat = block.split(":", 1)[1].strip()
+                report_path = ""
+                in_block = False
+                for line in roster.splitlines():
+                    if line == block:
+                        in_block = True
+                        continue
+                    if line.startswith("seat_id:") and line != block:
+                        in_block = False
+                    if in_block and line.startswith("report_path:"):
+                        report_path = line.split(":", 1)[1].strip()
+                if not report_path:
+                    seats.append({"seat": seat, "visible": "missing"})
+                    continue
+                report = cycle / seat / report_path
+                report_text = report.read_text(encoding="utf-8-sig") \
+                    if report.is_file() else ""
+                derived = derive_status(report_path, roster, report_text,
+                                        sweep)
+                seats.append({"seat": seat, **derived})
+            rows.append({"cycle": cycle.name, "cycle_status": status,
+                         "seats": seats})
+        return rows
+
+    action = args[0] if args else "status"
+    if action == "status":
+        rows = _cycle_statuses()
+        if as_json:
+            _emit({"ok": True, "code": "IMPROVE_STATUS",
+                   "cycles": rows}, as_json)
+        else:
+            for row in rows:
+                print(f"{row['cycle']} ({row['cycle_status']})")
+                for seat in row["seats"]:
+                    print(f"  {seat['seat']}: {seat.get('visible', '?')}"
+                          + (f" (report_status "
+                             f"{seat.get('report_status')})"
+                             if seat.get("report_status") else "")
+                          + (f" missing={seat.get('missing')}"
+                             if seat.get("missing") else ""))
+        return 0
+    if action == "verify":
+        if len(args) < 2:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": "improve verify needs <cycle_id>"}, as_json)
+            return 2
+        cycle = cycle_dir(project_root, args[1])
+        from saipen_engine.journal import verify_improve
+        targets = []
+        for rel in (".saipen/improve",):
+            pass
+        targets = [{"path": p.relative_to(project_root).as_posix(),
+                    "role": "manifest" if p.name == "MANIFEST.md" else
+                    ("sweep" if p.name == "SWEEP.md" else "report")}
+                   for p in sorted(cycle.rglob("*.md"))]
+        errors = verify_improve(project_root, targets)
+        if errors:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": "; ".join(errors[:5]),
+                   "delta_only": True}, as_json)
+            return 1
+        _emit({"ok": True, "code": "IMPROVE_VERIFY_PASS",
+               "delta_only": True, "cycle": args[1]}, as_json)
+        return 0
+    if action == "sweep":
+        if len(args) < 4:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": "improve sweep needs <cycle> <imp_id> "
+                             "<disposition> [--ticket T-###] [--report "
+                             "<ident>] [--reproduced y|n]"}, as_json)
+            return 2
+        cycle = cycle_dir(project_root, args[1])
+        imp_id, disposition = args[2], args[3]
+        ticket = "-"
+        report = "-"
+        reproduced = "-"
+        rest = args[4:]
+        while rest:
+            if rest[0] == "--ticket" and len(rest) > 1:
+                ticket, rest = rest[1], rest[2:]
+            elif rest[0] == "--report" and len(rest) > 1:
+                report, rest = rest[1], rest[2:]
+            elif rest[0] == "--reproduced" and len(rest) > 1:
+                reproduced, rest = rest[1], rest[2:]
+            else:
+                rest = rest[1:]
+        if dry_run:
+            _emit({"ok": True, "code": "IMPROVE_SWEEP_PLAN",
+                   "cycle": args[1], "imp_id": imp_id,
+                   "disposition": disposition}, as_json)
+            return 0
+        try:
+            result = write_sweep_entry(cycle, {"imp_id": imp_id,
+                                               "disposition": disposition,
+                                               "ticket": ticket,
+                                               "report": report,
+                                               "reproduced": reproduced})
+            _emit(result, as_json)
+            return 0 if result.get("ok") else 1
+        except ValueError as exc:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": str(exc)}, as_json)
+            return 1
+    if action == "clean":
+        if len(args) < 2:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": "improve clean needs <cycle_id>"}, as_json)
+            return 2
+        cycle = cycle_dir(project_root, args[1])
+        # archive-with-provenance: only a COMPLETE (fully swept) cycle may be
+        # archived; the sweep ledger + reports are preserved verbatim.
+        if dry_run:
+            _emit({"ok": True, "code": "IMPROVE_CLEAN_PLAN",
+                   "cycle": args[1], "archive_only": True}, as_json)
+            return 0
+        try:
+            result = archive_cycle(cycle)
+            _emit({"ok": result.get("ok", False),
+                   "code": "IMPROVE_CLEAN" if result.get("ok")
+                   else "VALIDATION_FAILED",
+                   "cycle": args[1],
+                   "archive_only": True,
+                   "detail": result.get("message", "")}, as_json)
+            return 0 if result.get("ok") else 1
+        except ValueError as exc:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": str(exc), "archive_only": True}, as_json)
+            return 1
+    _emit({"ok": False, "code": "VALIDATION_FAILED",
+           "detail": f"unknown saipen improve action {action!r}; use "
+                     "status|sweep|verify|clean"}, as_json)
+    return 2
+
+
 def main(argv: list[str] | None = None) -> int:
     args = argv if argv is not None else sys.argv[1:]
     as_json = "--json" in args
@@ -500,6 +672,8 @@ def main(argv: list[str] | None = None) -> int:
         return _sub(project_root, args[1:], as_json, dry_run)
     if command == "context" and len(args) >= 1:
         return _context(project_root, args[1:], as_json, dry_run)
+    if command == "improve":
+        return _improve(project_root, args[1:], as_json, dry_run)
     print(f"unknown command: {command}")
     return 2
 

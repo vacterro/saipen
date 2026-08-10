@@ -2424,7 +2424,7 @@ if log_files:
                 _man = _rep.parent.parent / "MANIFEST.md"
                 if _man.is_file():
                     _mst = _man.read_text(encoding="utf-8-sig")
-                    if re.search(r"(?m)^cycle_status:\s*complete",
+                    if re.search(r"(?m)^cycle_status:\s*(?:complete|archived)",
                                  _mst):
                         _cycle_active = False
                 _src_head = _imp_mod._field(_rt, "source_head")
@@ -3987,6 +3987,26 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                      + "); an auditing seat writes only inside its own home, "
                      "improve never silently enters ADD, and verify is "
                      "delta-only without recursion (T-557)")
+
+        # T-606: a registered command route MUST have an executor -- a route
+        # that resolves in section 1.10 but cannot run is the
+        # register-without-executor defect SAICRITIC found (IMP-001/IMP-003).
+        _saipen_cli = Path("tools/saipen.py")
+        if _saipen_cli.is_file():
+            _cli_t = _saipen_cli.read_text(encoding="utf-8-sig")
+            _improve_actions = ("status", "sweep", "verify", "clean")
+            _missing_exec = [a for a in _improve_actions
+                             if f'action == "{a}"' not in _cli_t]
+            if 'if command == "improve"' not in _cli_t or _missing_exec:
+                fail("cross-doc drift [improve-executor] -- a registered "
+                     "saipen improve route has no CLI executor (missing: "
+                     + ", ".join(["improve"]
+                                 + [f"improve {a}" for a in _missing_exec])
+                     + "); a registered route that cannot execute is a "
+                     "validator FAIL, never prose (T-606)")
+            else:
+                ok("saipen improve routes have CLI executors (status/sweep/"
+                   "verify/clean)")
 
         # T-603: SAICRITIC is the self-critique process doc. It must carry the
         # four proof levels and the invariant, so the process it defines is

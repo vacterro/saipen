@@ -268,3 +268,10 @@
 - 10.08.26 09:29 [E-2729] [parent: E-2728] [op: transition-79bd73d0] DEC: goal_tickets 14->15
 - 10.08.26 09:29 [E-2730] [parent: E-2729] [T-607] [agent: claude] [op: transition-740b7706] RUN: REVIEW verdict DEC: SHIP -- diff reviewed (sub-write-boundary scan + red case) no P0/P1
 - 10.08.26 09:29 [E-2731] [parent: E-2730] [T-607] [agent: claude] [op: finish-3860ff75] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 10.08.26 09:29 [E-2732] [parent: E-2731] [T-606] [agent: claude] [op: claim-43dc659f] DEC: claimed via SAIOPS -- owner claude
+- 10.08.26 09:38 [E-2733] [parent: E-2732] [T-606] [agent: claude] [op: transition-27a8020f] RUN: SCOUT done: SAICRITIC register-without-executor defect confirmed (saipen improve status -> unknown command); CLI gap is the root cause
+- 10.08.26 09:38 [E-2734] [parent: E-2733] [T-606] [agent: claude] [op: transition-8d74a499] RUN: BUILD complete: saipen improve CLI family executes (status read-only + derives, verify delta-only, sweep journaled, clean archives via archive_cycle); [improve-executor] validator check; archive_cycle added to improve.py; reload-check exempts complete+archived; full suite green (73 improve)
+- 10.08.26 09:43 [E-2735] [parent: E-2734] [T-606] [agent: claude] [op: transition-60ea3079] RUN: VERIFY done: validate PASS, full suite green (73 improve), audit 243/243
+- 10.08.26 09:43 [E-2736] [parent: E-2735] [op: transition-60ea3079] DEC: goal_tickets 15->16
+- 10.08.26 09:43 [E-2737] [parent: E-2736] [T-606] [agent: claude] [op: transition-6f37b82b] RUN: REVIEW verdict DEC: SHIP -- diff reviewed (CLI routes + archive_cycle + executor check) no P0/P1
+- 10.08.26 09:43 [E-2738] [parent: E-2737] [T-606] [agent: claude] [op: finish-078b9257] DEC: ticket finished via SAIOPS -- completion (from SHIP)

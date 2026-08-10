@@ -978,6 +978,11 @@ CASES: list[tuple[str, str, object, str]] = [
      lambda t: t.replace("---\n", "---\ntask: T-999\n", 1).replace(
          "saipen_home", "apply_to_main: .saipen/BOARD.md\nsaipen_home", 1),
      "sub-write-boundary"),
+    # T-606: a registered route must have a CLI executor -- SAICRITIC's
+    # register-without-executor defect.
+    ("improve CLI loses the verify executor", "tools/saipen.py",
+     lambda t: t.replace('action == "verify"', 'action == "verifx"'),
+     "improve-executor"),
     # NITRO: OPS.md is only reachable through INDEX. Drop the row and the doc
     # still ships, still validates its own text, and no cold agent ever finds
     # it -- the RFC routing trap in a new file.

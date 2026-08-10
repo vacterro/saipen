@@ -4105,6 +4105,55 @@ def run_improve_probes() -> tuple[list[str], int]:
                cwd=str(fresh_root), capture_output=True, text=True,
                errors="replace", timeout=120).stdout[-800:])
 
+    # T-606: the saipen improve CLI family EXECUTES (SAICRITIC's
+    # register-without-executor fix). status is read-only and derives the
+    # visible per-seat status with zero STATE writes; verify runs the
+    # delta-only semantic verifier; clean archives a completed cycle.
+    cli_root = project_fixture("saipen-cli-")
+    cli_cycle = register_cycle(cli_root, "imp-cli",
+                               "# IMPROVE CYCLE ROSTER\ncycle_status: "
+                               "active\n")
+    register_seat(cli_cycle, "seat-1", "core", "saipen_improve_A.md")
+    cli_rep = resolve_report_path(cli_root, "imp-cli", "seat-1", "A")
+    cli_rep.parent.mkdir(parents=True, exist_ok=True)
+    cli_rep.write_text("report_status: complete\n", encoding="utf-8")
+    state_before = (cli_root / ".saipen" / "STATE.md").read_bytes()
+    cli_proc = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "improve",
+         "status", "--json"],
+        cwd=str(cli_root), capture_output=True, text=True, timeout=60)
+    expect("saipen improve status executes and derives per-seat status",
+           '"code": "IMPROVE_STATUS"' in cli_proc.stdout
+           and '"visible": "complete"' in cli_proc.stdout,
+           repr(cli_proc.stdout[:200]))
+    expect("saipen improve status is read-only (zero STATE writes)",
+           (cli_root / ".saipen" / "STATE.md").read_bytes() == state_before,
+           "state changed")
+    cli_verify = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "improve",
+         "verify", "imp-cli", "--json"],
+        cwd=str(cli_root), capture_output=True, text=True, timeout=60)
+    expect("saipen improve verify executes the delta-only verifier",
+           '"code": "IMPROVE_VERIFY_PASS"' in cli_verify.stdout
+           and '"delta_only": true' in cli_verify.stdout,
+           repr(cli_verify.stdout[:200]))
+    cli_clean = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "improve",
+         "clean", "imp-cli", "--json"],
+        cwd=str(cli_root), capture_output=True, text=True, timeout=60)
+    expect("saipen improve clean refuses an ACTIVE cycle (archive needs "
+           "complete)",
+           '"code": "VALIDATION_FAILED"' in cli_clean.stdout,
+           repr(cli_clean.stdout[:200]))
+    _cli_sweep = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "improve",
+         "sweep", "imp-cli", "001", "CONFIRMED", "--ticket", "T-900",
+         "--report", "saipen_improve_A.md", "--reproduced", "y", "--json"],
+        cwd=str(cli_root), capture_output=True, text=True, timeout=60)
+    expect("saipen improve sweep writes a disposition through the journal",
+           '"code": "COMMITTED"' in _cli_sweep.stdout,
+           repr(_cli_sweep.stdout[:200]))
+
     # ---- T-601: resolver race -- two processes resolving the same conflict
     # yield exactly one canonical settlement (WRITER_BUSY or a settled-journal
     # refusal for the loser, never two RESOLVED).

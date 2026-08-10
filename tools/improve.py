@@ -542,6 +542,44 @@ def complete_cycle(cycle_dir: Path) -> dict:
     return result
 
 
+def archive_cycle(cycle_dir: Path) -> dict:
+    """ARCHIVE a completed cycle: retention state only (T-559, T-606).
+
+    `saipen improve clean` is archive-with-provenance and nothing else. It
+    refuses while the cycle is not COMPLETE (an active cycle is still
+    mutation-producing; a complete cycle with unswept findings cannot exist
+    because complete_cycle requires full sweep coverage). It preserves the
+    original findings and the sweep ledger verbatim -- archived evidence keeps
+    resolving through the [sweep-ticket-link] check. The mutation is the same
+    journaled manifest write complete_cycle uses, changing only the lifecycle
+    status to `archived`."""
+    manifest = cycle_dir / "MANIFEST.md"
+    _prove_inside(_project_root_of(manifest), manifest)
+    text = _read_maybe(manifest)
+    if not text.strip():
+        raise ImproveError(f"cycle manifest missing: {manifest}")
+    status = _cycle_status(manifest)
+    if status == "archived":
+        raise ImproveError(f"cycle {cycle_dir.name} is already archived")
+    if status != "complete":
+        raise ImproveError(
+            f"archive refused: cycle {cycle_dir.name} is {status}, not "
+            "complete; only a completed (fully swept) cycle may be archived "
+            "-- archive-with-provenance never freezes active or unswept "
+            "evidence (T-559)")
+    new_text = re.sub(r"(?m)^cycle_status:\s*[A-Za-z]+",
+                      "cycle_status: archived", text, count=1)
+    if new_text == text:
+        new_text = text.rstrip() + "\ncycle_status: archived\n"
+    result = _journaled_write(manifest, new_text, "cycle",
+                              base_hash=_base_hash(manifest))
+    if not result.get("ok"):
+        raise ImproveError(
+            f"cycle {cycle_dir.name} not archived: {result.get('code')} "
+            f"{result.get('message', '')}")
+    return result
+
+
 def register_seat(cycle_dir: Path, seat_id: str, role: str,
                   report_path: str, availability: str = "expected") -> dict:
     """Add a seat to the roster; a duplicate seat_id registration fails.
