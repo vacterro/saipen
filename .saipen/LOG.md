@@ -15,3 +15,13 @@
 - 10.08.26 10:48 [E-2772] [parent: E-2771] [T-610] [agent: claude] [op: transition-b181a898] RUN: REVIEW verdict DEC: SHIP -- one-line OUTBOX fix, no P0/P1
 - 10.08.26 10:48 [E-2773] [parent: E-2772] [T-610] [agent: claude] [op: finish-7f8e041d] DEC: ticket finished via SAIOPS -- completion (from SHIP)
 - 10.08.26 10:48 [E-2774] [parent: E-2773] [T-610] [agent: claude] [op: checkpoint-b3151951] RUN: valve tripped at 20 tickets -- canonical WAIT set; mechanical bumps this wave: goal_waves 1->2 (HUNT->ADD), goal_tickets to 20 (T-603/607/606/604/612/611/610); pause awaiting re-authorization
+- 10.08.26 11:59 [E-2775] [parent: E-2774] [agent: claude] [op: valve-647582b6] DEC: goal reauthorized -- goal_waves 2->0, goal_tickets 20->0
+- 10.08.26 12:00 [E-2776] [parent: E-2775] [T-609] [agent: claude] [op: claim-79a2139a] DEC: claimed via SAIOPS -- owner claude
+- 10.08.26 12:00 [E-2777] [parent: E-2776] [T-609] [agent: claude] [op: ticket-586d7a1e] DEC: ticket block via SAIOPS -- external producer evidence required: the saiwiki producer must regenerate the OUTBOX package against the current HEAD + tree fingerprint (W-031 carries source_head 7d2bd0e; the wiki content is v7.170-173 while the tree is at 7.221+); Core cannot fabricate the producer audit
+- 10.08.26 12:01 [E-2778] [parent: E-2777] [T-608] [agent: claude] [op: claim-12cef1ae] DEC: claimed via SAIOPS -- owner claude
+- 10.08.26 12:01 [E-2779] [parent: E-2778] [T-608] [agent: claude] [op: transition-647e4dd5] RUN: SCOUT done: changelog overflow already archived during real cycle #1 (T-604); CHANGELOG at 10 entries, archive holds 267 verbatim; verify the fix
+- 10.08.26 12:01 [E-2780] [parent: E-2779] [T-608] [agent: claude] [op: transition-ee45c865] RUN: BUILD complete: CHANGELOG 10 version entries (header keeps ~10), overflow verbatim in CHANGELOG_ARCHIVE.md, changelog-unarchived warning cleared; validate PASS
+- 10.08.26 12:01 [E-2781] [parent: E-2780] [T-608] [agent: claude] [op: transition-45e2a1d3] RUN: verify re-run fresh: validate PASS, no changelog warning
+- 10.08.26 12:01 [E-2782] [parent: E-2781] [op: transition-45e2a1d3] DEC: goal_tickets 0->1
+- 10.08.26 12:01 [E-2783] [parent: E-2782] [T-608] [agent: claude] [op: transition-dabc4147] RUN: REVIEW verdict DEC: SHIP -- fix already landed in T-604, verify-close only
+- 10.08.26 12:01 [E-2784] [parent: E-2783] [T-608] [agent: claude] [op: finish-3bfa7ede] DEC: ticket finished via SAIOPS -- completion (from SHIP)
