@@ -117,3 +117,38 @@
 - 10.08.26 15:10 [E-2874] [parent: E-2873] [op: transition-d3ac2b8b] DEC: goal_tickets 11->12
 - 10.08.26 15:10 [E-2875] [parent: E-2874] [T-613] [agent: claude] [op: transition-806e61d1] RUN: RUN: SHIP: v8 evaluation landed
 - 10.08.26 15:10 [E-2876] [parent: E-2875] [T-613] [agent: claude] [op: finish-d6a4b47a] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 10.08.26 16:56 [E-2877] [parent: E-2876] [agent: claude] [op: goal-20da33b3] DEC: goal pivot -- PRE-v8 DOGFOOD VI: meta-control identity, command truth, concurrency preflight
+- 10.08.26 16:56 [E-2878] [parent: E-2877] [T-622] [agent: claude] [op: ticket-f17d6734] DEC: ticket added via SAIOPS
+- 10.08.26 16:57 [E-2879] [parent: E-2878] [T-623] [agent: claude] [op: ticket-2e2f8153] DEC: ticket added via SAIOPS
+- 10.08.26 16:57 [E-2880] [parent: E-2879] [T-624] [agent: claude] [op: ticket-65869ffc] DEC: ticket added via SAIOPS
+- 10.08.26 16:57 [E-2881] [parent: E-2880] [T-625] [agent: claude] [op: ticket-121aba8a] DEC: ticket added via SAIOPS
+- 10.08.26 16:58 [E-2882] [parent: E-2881] [agent: claude] [op: goal-wave-14fb7e09] DEC: goal_waves 0->1
+- 10.08.26 16:58 [E-2883] [parent: E-2882] [T-622] [agent: claude] [op: claim-8093d707] DEC: claimed via SAIOPS -- owner claude
+- 10.08.26 17:05 [E-2884] [parent: E-2883] [T-622] [agent: claude] [op: checkpoint-138c9272] RUN: SCOUT: SAICRITIC.md is stale four-level owner; assignment emits hardcoded five; validator and mutations protect four; CORE routes obsolete five-action subset while IMPROVE/CLI expose ten and CLI leaks explicit prepare; fix via canonical table parser plus exact doc/AST parity
+- 10.08.26 17:05 [E-2885] [parent: E-2884] [T-622] [agent: claude] [op: transition-ada04f7b] RUN: implement canonical proof vocabulary and exact command-surface parity
+- 10.08.26 17:10 [E-2886] [parent: E-2885] [T-622] [agent: claude] [op: checkpoint-e2ed8c23] RUN: BUILD complete: SAICRITIC owns ordered five-level table and new lenses; assignment derives table; CORE/IMPROVE/CLI exact AST parity replaces obsolete subset; explicit prepare refuses; manifest/index and historical Core-role reclassification updated
+- 10.08.26 17:10 [E-2887] [parent: E-2886] [T-622] [agent: claude] [op: transition-482c9703] RUN: run proof/action mutation controls and command scenarios
+- 10.08.26 17:14 [E-2888] [parent: E-2887] [T-622] [agent: claude] [op: checkpoint-31582c9c] RUN: VERIFY FAIL: canonical proof reader raised NameError because tools/saipen.py had no re import; run_scenarios reached bare Improve then crashed on empty JSON output; fix differs by adding required stdlib import
+- 10.08.26 17:14 [E-2889] [parent: E-2888] [T-622] [agent: claude] [op: transition-539e6d1e] RUN: fix missing regex import found by smoke
+- 10.08.26 17:15 [E-2890] [parent: E-2889] [T-622] [agent: claude] [op: checkpoint-e3223660] RUN: BUILD fix: imported stdlib re for canonical SAICRITIC table parser; direct ordered-level smoke and py_compile pass
+- 10.08.26 17:15 [E-2891] [parent: E-2890] [T-622] [agent: claude] [op: transition-57d6d7f9] RUN: rerun mandatory command/proof controls from clean fix
+- 10.08.26 17:24 [E-2892] [parent: E-2891] [T-622] [agent: claude] [op: checkpoint-61241176] RUN: VERIFY PASS conf: high -- py_compile; core gate PASS; run_scenarios all passed (102 Improve, 171 nitro-integrity); audit_checks 248/248 red controls live; explicit prepare UNKNOWN_ACTION; proof parser emits exact five
+- 10.08.26 17:24 [E-2893] [parent: E-2892] [T-622] [agent: claude] [op: transition-38181390] RUN: proof/action contract verified
+- 10.08.26 17:24 [E-2894] [parent: E-2893] [op: transition-38181390] DEC: goal_tickets 0->1
+- 10.08.26 17:32 [E-2895] [parent: E-2894] [T-622] [agent: claude] [op: checkpoint-39a19ac6] RUN: REVIEW findings P1: canonical doc lookup fails flattened install and runs after mutations; CLI AST counts refusal/dead comparisons; proof binding can be blessed by decoy dict; missing SAICRITIC reachability silently skips. Verdict SHIP after fixes
+- 10.08.26 17:32 [E-2896] [parent: E-2895] [T-622] [agent: claude] [op: transition-13566c84] RUN: fix adversarial review findings
+- 10.08.26 17:36 [E-2897] [parent: E-2896] [T-622] [agent: claude] [op: checkpoint-1642fa4f] RUN: BUILD review fixes: dual-layout proof owner loaded before writes with expected-error normalization; AST counts successful top-level routes and exact pre-write assignment-to-emit binding; SAICRITIC INDEX/MANIFEST reachability mandatory; installed-layout + missing-owner scenarios and decoy mutations added
+- 10.08.26 17:36 [E-2898] [parent: E-2897] [T-622] [agent: claude] [op: transition-03456cdf] RUN: rerun all proof/action controls after review fixes
+- 10.08.26 17:52 [E-2899] [parent: E-2898] [T-622] [agent: claude] [op: checkpoint-a8f55d0d] RUN: VERIFY FAIL review follow-up: validator AST walk admits nested return-0 decoy as route and does not reject a second proof_levels assignment after canonical read; prior 251/251 and 104 scenarios pass but do not cover these laundering classes
+- 10.08.26 17:52 [E-2900] [parent: E-2899] [T-622] [agent: claude] [op: transition-7c14604a] RUN: close AST nested-route and proof-rebind laundering
+- 10.08.26 17:54 [E-2901] [parent: E-2900] [T-622] [agent: claude] [op: checkpoint-1ae536dd] RUN: BUILD fix: route AST walk excludes nested definitions; proof contract requires exactly one proof_levels store; nested-success and post-read-rebind red controls added; core gate and py_compile pass
+- 10.08.26 17:54 [E-2902] [parent: E-2901] [T-622] [agent: claude] [op: transition-55ddca14] RUN: final rerun after AST laundering controls
+- 10.08.26 18:07 [E-2903] [parent: E-2902] [T-622] [agent: claude] [op: checkpoint-03ede226] RUN: VERIFY FAIL final review: 253/253 mutations and 104 Improve scenarios pass, but constant-false AST decoys can still satisfy canonical assignment/emit checks while reachable path differs; add reachable-walk + unique assignment-emission control
+- 10.08.26 18:07 [E-2904] [parent: E-2903] [T-622] [agent: claude] [op: transition-92e35dfc] RUN: exclude statically dead assignment/emit decoys
+- 10.08.26 18:09 [E-2905] [parent: E-2904] [T-622] [agent: claude] [op: checkpoint-0f8f1e97] RUN: BUILD fix: AST walk prunes constant-dead branches and requires one reachable assignment payload; constant-false route and proof-emission laundering controls added; pycompile/core gate pass
+- 10.08.26 18:09 [E-2906] [parent: E-2905] [T-622] [agent: claude] [op: transition-b3f995d1] RUN: closure rerun with dead-branch controls
+- 10.08.26 18:30 [E-2907] [parent: E-2906] [T-622] [agent: claude] [op: checkpoint-7bb5dd13] RUN: VERIFY PASS conf: high -- core gate PASS; scenarios all passed (104 Improve, 171 nitro-integrity); isolated audit_checks 255/255; dead-branch route and proof-decoy targeted controls fail correctly; git diff --check clean
+- 10.08.26 18:30 [E-2908] [parent: E-2907] [T-622] [agent: claude] [op: transition-0741b34d] RUN: definitive proof/action verification complete
+- 10.08.26 18:30 [E-2909] [parent: E-2908] [op: transition-0741b34d] DEC: goal_tickets 1->2
+- 10.08.26 18:32 [E-2910] [parent: E-2909] [T-622] [agent: claude] [op: checkpoint-46536bff] RUN: REVIEW verdict DEC: SHIP -- independent core gate PASS, git diff --check clean, 15/15 T-622 proof/action mutations rerun and red; no remaining P0/P1 after two adversarial review rounds
+- 10.08.26 18:32 [E-2911] [parent: E-2910] [T-622] [agent: claude] [op: transition-8bea7a33] RUN: review pass: ship proof-contract and command-parity repair

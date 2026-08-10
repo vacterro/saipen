@@ -933,11 +933,47 @@ CASES: list[tuple[str, str, object, str]] = [
      lambda t: t.rstrip() + "\n\nIMP-001 [P1] [LOGIC_ERROR] [proven] "
                             "[ticket]\nexpected: x\nactual: y\nevidence: z\n",
      "improve-state-purity"),
-    # T-554: the improve command family has a closed route set; an undeclared
-    # verb is rejected, `improve clean` never means CLEAN, no shortcut key.
-    ("improve command family loses the clean route", CORE,
-     lambda t: t.replace("`saipen improve clean`", "`saipen improve cleanx`"),
-     "improve-command-family"),
+    # T-622: CORE, IMPROVE and the CLI carry one exact public action set.
+    ("CORE Improve declaration loses cycle-complete", CORE,
+     lambda t: t.replace(", cycle-complete,", ","),
+     "improve-command-parity"),
+    ("IMPROVE declaration loses submit", IMPROVE,
+     lambda t: t.replace("bare, status, submit,", "bare, status,"),
+     "improve-command-parity"),
+    ("Improve CLI gains an undeclared action", "tools/saipen.py",
+     lambda t: t.replace(
+         '    if action == "clean":',
+         '    if action == "extra":\n        return 0\n    if action == "clean":'),
+     "improve-command-parity"),
+    ("nested success decoy launders a declared action", CORE,
+     ("MULTI", [
+         (CORE, lambda t: t.replace("abort, clean]", "abort, extra, clean]")),
+         (IMPROVE,
+          lambda t: t.replace("abort, clean]", "abort, extra, clean]")),
+         ("tools/saipen.py", lambda t: t.replace(
+             '    if action == "clean":',
+             '    if action == "extra":\n'
+             '        def decoy():\n'
+             '            return 0\n'
+             '        return 2\n'
+             '    if action == "clean":'))]),
+     "improve-command-parity"),
+    ("constant-false success decoy launders a declared action", CORE,
+     ("MULTI", [
+         (CORE, lambda t: t.replace("abort, clean]", "abort, extra, clean]")),
+         (IMPROVE,
+          lambda t: t.replace("abort, clean]", "abort, extra, clean]")),
+         ("tools/saipen.py", lambda t: t.replace(
+             '    if action == "clean":',
+             '    if action == "extra":\n'
+             '        if False:\n'
+             '            return 0\n'
+             '        return 2\n'
+             '    if action == "clean":'))]),
+     "improve-command-parity"),
+    ("Improve CLI loses the verify executor", "tools/saipen.py",
+     lambda t: t.replace('action == "verify"', 'action == "verifx"'),
+     "improve-command-parity"),
     ("improve clean route loses its never-CLEAN statement", CORE,
      lambda t: t.replace("never enters the CLEAN phase",
                          "may archive reports"),
@@ -967,10 +1003,57 @@ CASES: list[tuple[str, str, object, str]] = [
                "IMP-001 [P1] [LOGIC_ERROR] [observed] [ticket]\n"
                "expected: x\nactual: y\nevidence: z\n"),
      "improve report [improve-report]"),
-    # T-603: SAICRITIC.md must carry the four proof levels and the invariant.
-    ("SAICRITIC drops the GATE proof level", "saipen/SAICRITIC.md",
-     lambda t: t.replace("GATE", "GEAT").replace("| GATE |", "| GEAT |"),
+    # T-622: exact ordered five-level proof contract, including assignment.
+    ("SAICRITIC drops PROVENANCE", "saipen/SAICRITIC.md",
+     lambda t: t.replace(
+         "| PROVENANCE | does the evidence bind the exact source, session, run, finding and result it claims? |\n",
+         ""),
      "saicritic"),
+    ("SAICRITIC swaps GATE and PROVENANCE", "saipen/SAICRITIC.md",
+     lambda t: t.replace(
+         "| GATE | did the REQUIRED semantic/protocol gates actually occur? |\n"
+         "| PROVENANCE | does the evidence bind the exact source, session, run, finding and result it claims? |",
+         "| PROVENANCE | does the evidence bind the exact source, session, run, finding and result it claims? |\n"
+         "| GATE | did the REQUIRED semantic/protocol gates actually occur? |"),
+     "saicritic"),
+    ("SAICRITIC duplicates UNIT", "saipen/SAICRITIC.md",
+     lambda t: t.replace(
+         "| UNIT | is the operation locally correct? |",
+         "| UNIT | is the operation locally correct? |\n"
+         "| UNIT | is the operation locally correct? |"),
+     "saicritic"),
+    ("Improve assignment omits canonical PROVENANCE", "tools/saipen.py",
+     lambda t: t.replace('proof_levels = _canonical_proof_levels()',
+                         'proof_levels = _canonical_proof_levels()[:-1]'),
+     "saicritic-assignment"),
+    ("Improve assignment emits a sliced decoy", "tools/saipen.py",
+     lambda t: t.replace('"proof_levels": proof_levels,',
+                         '"proof_levels": proof_levels[:-1],'),
+     "saicritic-assignment"),
+    ("Improve assignment rebinds canonical proof levels", "tools/saipen.py",
+     lambda t: t.replace(
+         "proof_levels = _canonical_proof_levels()",
+         "proof_levels = _canonical_proof_levels()\n"
+         "            proof_levels = proof_levels[:-1]"),
+     "saicritic-assignment"),
+    ("dead proof assignment launders reachable sliced output", "tools/saipen.py",
+     lambda t: t.replace(
+         "proof_levels = _canonical_proof_levels()",
+         "actual_levels = _canonical_proof_levels()[:-1]\n"
+         "            if False:\n"
+         "                proof_levels = _canonical_proof_levels()\n"
+         "                _emit({\"code\": \"IMPROVE_AUDIT_ASSIGNMENT\", "
+         "\"proof_levels\": proof_levels}, as_json)").replace(
+             '"proof_levels": proof_levels,',
+             '"proof_levels": actual_levels,'),
+     "saicritic-assignment"),
+    ("INDEX stops routing to SAICRITIC", INDEX,
+     lambda t: t.replace("- `SAICRITIC.md`:", "- `SAICRITICX.md`:"),
+     "saicritic-reachability"),
+    ("manifest stops installing SAICRITIC", "saipen/MANIFEST.json",
+     lambda t: t.replace(
+         '    {"src": "saipen/SAICRITIC.md", "required": true},\n', ""),
+     "saicritic-reachability"),
     # T-607: the SubSaipen write boundary is continuously mechanical -- a sub
     # STATE that names a main-project canonical file outside a boundary
     # comment is a violation.
@@ -978,11 +1061,6 @@ CASES: list[tuple[str, str, object, str]] = [
      lambda t: t.replace("---\n", "---\ntask: T-999\n", 1).replace(
          "saipen_home", "apply_to_main: .saipen/BOARD.md\nsaipen_home", 1),
      "sub-write-boundary"),
-    # T-606: a registered route must have a CLI executor -- SAICRITIC's
-    # register-without-executor defect.
-    ("improve CLI loses the verify executor", "tools/saipen.py",
-     lambda t: t.replace('action == "verify"', 'action == "verifx"'),
-     "improve-executor"),
     # NITRO: OPS.md is only reachable through INDEX. Drop the row and the doc
     # still ships, still validates its own text, and no cold agent ever finds
     # it -- the RFC routing trap in a new file.

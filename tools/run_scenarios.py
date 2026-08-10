@@ -4247,12 +4247,45 @@ def run_improve_probes() -> tuple[list[str], int]:
            and '"cycle_id"' in bare_proc.stdout
            and '"source_tree_fingerprint"' in bare_proc.stdout,
            repr(bare_proc.stdout[:300]))
+    _bare_data = json.loads(bare_proc.stdout)
+    expect("bare Improve assignment emits SAICRITIC's exact ordered proof set",
+           _bare_data.get("proof_levels") == [
+               "UNIT", "COMPOSITION", "CANONICAL", "GATE", "PROVENANCE"],
+           repr(_bare_data.get("proof_levels")))
+    _saipen_spec = importlib.util.spec_from_file_location(
+        "saipen_flattened_proof_probe", HOME / "tools" / "saipen.py")
+    _saipen_module = importlib.util.module_from_spec(_saipen_spec)
+    _saipen_spec.loader.exec_module(_saipen_module)
+    with tempfile.TemporaryDirectory(prefix="saipen-flat-proof-") as _flat_raw:
+        _flat_home = Path(_flat_raw)
+        shutil.copy2(HOME / "saipen" / "SAICRITIC.md",
+                     _flat_home / "SAICRITIC.md")
+        _saipen_module.HOME = _flat_home
+        expect("installed flattened layout exposes canonical SAICRITIC proof set",
+               _saipen_module._canonical_proof_levels() == [
+                   "UNIT", "COMPOSITION", "CANONICAL", "GATE", "PROVENANCE"])
+        (_flat_home / "SAICRITIC.md").unlink()
+        try:
+            _saipen_module._canonical_proof_levels()
+            _missing_proof_refused = False
+        except ValueError:
+            _missing_proof_refused = True
+        expect("missing installed SAICRITIC proof owner refuses before assignment",
+               _missing_proof_refused)
+    _prepare_proc = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "improve",
+         "prepare", "--json"], cwd=str(meta_root), capture_output=True,
+        text=True, timeout=60)
+    expect("explicit improve prepare is not a hidden public action",
+           _prepare_proc.returncode == 2
+           and '"code": "UNKNOWN_ACTION"' in _prepare_proc.stdout,
+           repr(_prepare_proc.stdout[:300]))
     expect("bare saipen improve never changes phase/task (audit prep is "
            "read-only for STATE)",
            (meta_root / ".saipen" / "STATE.md").read_bytes()
            == state_before_meta)
-    _mcycle = json.loads(bare_proc.stdout)["cycle_id"]
-    _mseat = json.loads(bare_proc.stdout)["seat_id"]
+    _mcycle = _bare_data["cycle_id"]
+    _mseat = _bare_data["seat_id"]
     _cycles_before_verify = len(list(
         (meta_root / ".saipen" / "improve").iterdir()))
     _mv = subprocess.run(

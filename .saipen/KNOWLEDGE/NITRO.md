@@ -181,7 +181,8 @@ Gate proof needs event/provenance evidence from the append-only LOG, and the
 mutator must make skipping the gate mechanically impossible (the engine
 refusal), never rely on the validator to spot the omission after the fact.
 
-The four proof levels SAICRITIC audits:
+The four proof levels established by Dogfood IV (historical; current
+SAICRITIC adds PROVENANCE as its fifth permanent level):
 
 | Level | Question |
 |---|---|

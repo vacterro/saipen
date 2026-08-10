@@ -52,6 +52,7 @@ tests the text and the thing it claims to protect is unprotected. Do not use
 source-text assertions (e.g. naive string inclusion) to verify runtime logic.
 """
 
+import ast
 import datetime
 from saipen_engine.phases import (ANY_FROM, TICKET_BEARING_PHASES,
                                   VALID_TRANSITIONS,
@@ -82,6 +83,126 @@ def _read_rfc(p):
     if core.is_file() and maint.is_file():
         return core.read_text(encoding="utf-8-sig") + "\n" + maint.read_text(encoding="utf-8-sig")
     return p.read_text(encoding="utf-8-sig")
+
+
+def _declared_improve_actions(text):
+    matches = re.findall(
+        r"(?m)^`IMPROVE_ACTIONS = \[([a-z0-9, -]+)\]`\s*$", text)
+    if len(matches) != 1:
+        return (), "expected exactly one IMPROVE_ACTIONS declaration"
+    actions = tuple(item.strip() for item in matches[0].split(","))
+    if not all(actions) or len(actions) != len(set(actions)):
+        return actions, "IMPROVE_ACTIONS contains an empty or duplicate action"
+    return actions, ""
+
+
+def _implemented_improve_contract(path):
+    """Return successful top-level routes plus assignment binding truth."""
+    tree = ast.parse(path.read_text(encoding="utf-8-sig"), filename=str(path))
+    function = next((node for node in tree.body
+                     if isinstance(node, ast.FunctionDef)
+                     and node.name == "_improve"), None)
+    if function is None:
+        return set(), False
+
+    def route_nodes(root):
+        """Walk one route's control flow without entering nested definitions."""
+        stack = [root]
+        while stack:
+            current = stack.pop()
+            yield current
+            if (isinstance(current, (ast.If, ast.While))
+                    and isinstance(current.test, ast.Constant)):
+                raw_children = (current.body if bool(current.test.value)
+                                else current.orelse)
+            else:
+                raw_children = ast.iter_child_nodes(current)
+            children = []
+            for child in raw_children:
+                if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef,
+                                      ast.ClassDef, ast.Lambda)):
+                    continue
+                children.append(child)
+            stack.extend(reversed(children))
+
+    actions = set()
+    bare_branch = None
+    for node in function.body:
+        if not isinstance(node, ast.If) or not isinstance(node.test, ast.Compare):
+            continue
+        test = node.test
+        if not (isinstance(test.left, ast.Name) and test.left.id == "action"
+                and len(test.ops) == 1 and len(test.comparators) == 1):
+            continue
+        # A rejection/dead comparison is not an executor. Every real branch
+        # reaches return 0 on its successful path.
+        has_success = any(
+            isinstance(part, ast.Return)
+            and ((isinstance(part.value, ast.Constant)
+                  and part.value.value == 0)
+                 or (isinstance(part.value, ast.IfExp)
+                     and any(isinstance(result, ast.Constant)
+                             and result.value == 0
+                             for result in (part.value.body,
+                                            part.value.orelse))))
+            for part in route_nodes(node))
+        if not has_success:
+            continue
+        value = test.comparators[0]
+        if isinstance(test.ops[0], ast.Eq) and isinstance(value, ast.Constant) \
+                and isinstance(value.value, str):
+            actions.add(value.value)
+        elif isinstance(test.ops[0], ast.Is) and isinstance(value, ast.Constant) \
+                and value.value is None:
+            actions.add("bare")
+            bare_branch = node
+
+    canonical_assignment = False
+    if bare_branch is not None:
+        assignments = []
+        proof_stores = []
+        write_lines = []
+        assignment_payloads = []
+        for node in route_nodes(bare_branch):
+            if (isinstance(node, ast.Name) and node.id == "proof_levels"
+                    and isinstance(node.ctx, ast.Store)):
+                proof_stores.append(node.lineno)
+            if isinstance(node, ast.Assign) and len(node.targets) == 1 \
+                    and isinstance(node.targets[0], ast.Name) \
+                    and node.targets[0].id == "proof_levels":
+                value = node.value
+                if (isinstance(value, ast.Call)
+                        and isinstance(value.func, ast.Name)
+                        and value.func.id == "_canonical_proof_levels"
+                        and not value.args and not value.keywords):
+                    assignments.append(node.lineno)
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) \
+                    and node.func.id in {
+                        "create_cycle", "register_seat", "create_report"}:
+                write_lines.append(node.lineno)
+            if not (isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Name)
+                    and node.func.id == "_emit" and node.args
+                    and isinstance(node.args[0], ast.Dict)):
+                continue
+            fields = {key.value: value for key, value in
+                      zip(node.args[0].keys, node.args[0].values)
+                      if isinstance(key, ast.Constant)
+                      and isinstance(key.value, str)}
+            code = fields.get("code")
+            proof = fields.get("proof_levels")
+            if (isinstance(code, ast.Constant)
+                    and code.value == "IMPROVE_AUDIT_ASSIGNMENT"):
+                assignment_payloads.append(proof)
+        assignment_emitted = (
+            len(assignment_payloads) == 1
+            and isinstance(assignment_payloads[0], ast.Name)
+            and assignment_payloads[0].id == "proof_levels")
+        canonical_assignment = (
+            len(assignments) == 1 and len(proof_stores) == 1
+            and assignment_emitted
+            and (not write_lines or assignments[0] < min(write_lines)))
+    return actions, canonical_assignment
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -4066,24 +4187,33 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                  ".saipen/improve/, judgment lives in SWEEP.md -- never in "
                  "canonical STATE (T-553)")
 
-        # T-554: saipen improve is a META-CONTROL command family with a closed
-        # route set. All five routes must resolve in CORE section 1.10 and in
-        # this command-surface section; an undeclared `saipen improve <word>`
-        # is rejected rather than guessed; `saipen improve clean` is archive
-        # with provenance and NEVER means or enters the CLEAN phase; no
-        # repeated-letter shortcut is assigned (the shortcut key count stays
-        # byte-unchanged).
-        _improve_rfc_t = _read_rfc(_tools_parent / "saipen" / "RFC.md")
-        _improve_routes = ("`saipen improve status`", "`saipen improve sweep`",
-                           "`saipen improve verify`", "`saipen improve clean`")
-        _missing_routes = [r for r in _improve_routes if r not in _improve_rfc_t]
-        if "`saipen improve`" not in _improve_rfc_t or _missing_routes:
-            fail("cross-doc drift [improve-command-family] -- saipen improve "
-                 "must resolve all five routes in section 1.10 (missing: "
-                 + ", ".join(["`saipen improve`"] + _missing_routes) + "); an "
-                 "undeclared `saipen improve <word>` is rejected rather than "
-                 "guessed (T-554)")
-        _imp_sec = _improve_rfc_t[_improve_rfc_t.find("saipen improve"):]
+        # T-622: CORE owns Improve routing, IMPROVE owns lifecycle semantics,
+        # and the CLI executes exactly the same public set. Parse structured
+        # declarations and the executor AST; source-text action greps proved
+        # only that old names occurred somewhere, not that parity held.
+        _core_improve_t = (_tools_parent / "saipen" / "CORE.md").read_text(
+            encoding="utf-8-sig")
+        _improve_doc_p = _tools_parent / "saipen" / "IMPROVE.md"
+        _imp_doc = _improve_doc_p.read_text(encoding="utf-8-sig") \
+            if _improve_doc_p.is_file() else ""
+        _core_actions, _core_action_error = _declared_improve_actions(
+            _core_improve_t)
+        _doc_actions, _doc_action_error = _declared_improve_actions(_imp_doc)
+        _saipen_cli = _tools_parent / "tools" / "saipen.py"
+        _cli_actions, _assignment_canonical = _implemented_improve_contract(
+            _saipen_cli) if _saipen_cli.is_file() else (set(), False)
+        if (_core_action_error or _doc_action_error
+                or _core_actions != _doc_actions
+                or set(_core_actions) != _cli_actions):
+            fail("cross-doc drift [improve-command-parity] -- CORE declared "
+                 f"{list(_core_actions)}, IMPROVE declared {list(_doc_actions)}, "
+                 f"CLI implements {sorted(_cli_actions)}; declared and "
+                 "executable Improve action sets must be exactly equal"
+                 + (f" (CORE: {_core_action_error})" if _core_action_error else "")
+                 + (f" (IMPROVE: {_doc_action_error})" if _doc_action_error else ""))
+        else:
+            ok("CORE / IMPROVE / CLI Improve action sets match exactly")
+        _imp_sec = _core_improve_t[_core_improve_t.find("saipen improve"):]
         _imp_sec = _imp_sec[:_imp_sec.find("\n- `saipen improve") + 1] \
             if "\n- `saipen improve" in _imp_sec else _imp_sec[:2000]
         if "never enters the CLEAN phase" not in _imp_sec:
@@ -4101,9 +4231,7 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
         # ADD, and `saipen improve verify` is delta-only and never re-enters a
         # full cycle (red controls 7/17/18/21). Skips a partial home copy that
         # lacks IMPROVE.md -- the meta-control check already FAILs its absence.
-        if Path("saipen/IMPROVE.md").is_file():
-            _imp_doc = Path("saipen/IMPROVE.md").read_text(
-                encoding="utf-8-sig")
+        if _improve_doc_p.is_file():
             _imp_doc_low = _imp_doc.lower()
             _imp_boundary_missing = []
             for _marker in ("writes only inside its own home",
@@ -4122,42 +4250,50 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                      "improve never silently enters ADD, and verify is "
                      "delta-only without recursion (T-557)")
 
-        # T-606: a registered command route MUST have an executor -- a route
-        # that resolves in section 1.10 but cannot run is the
-        # register-without-executor defect SAICRITIC found (IMP-001/IMP-003).
-        _saipen_cli = Path("tools/saipen.py")
-        if _saipen_cli.is_file():
-            _cli_t = _saipen_cli.read_text(encoding="utf-8-sig")
-            _improve_actions = ("status", "sweep", "verify", "clean")
-            _missing_exec = [a for a in _improve_actions
-                             if f'action == "{a}"' not in _cli_t]
-            if 'if command == "improve"' not in _cli_t or _missing_exec:
-                fail("cross-doc drift [improve-executor] -- a registered "
-                     "saipen improve route has no CLI executor (missing: "
-                     + ", ".join(["improve"]
-                                 + [f"improve {a}" for a in _missing_exec])
-                     + "); a registered route that cannot execute is a "
-                     "validator FAIL, never prose (T-606)")
-            else:
-                ok("saipen improve routes have CLI executors (status/sweep/"
-                   "verify/clean)")
-
-        # T-603: SAICRITIC is the self-critique process doc. It must carry the
-        # four proof levels and the invariant, so the process it defines is
-        # mechanically anchored rather than prose nobody checks.
-        _saicritic_p = Path("saipen/SAICRITIC.md")
-        if _saicritic_p.is_file():
+        # T-622: SAICRITIC owns one canonical ordered five-level vocabulary.
+        # Assignment must call the canonical reader directly; slicing or
+        # replacing that result is command-contract drift.
+        _saicritic_p = _tools_parent / "saipen" / "SAICRITIC.md"
+        _saicritic_index = (_tools_parent / "saipen" / "INDEX.md").read_text(
+            encoding="utf-8-sig")
+        try:
+            _saicritic_manifest = json.loads(
+                (_tools_parent / "saipen" / "MANIFEST.json").read_text(
+                    encoding="utf-8-sig"))
+        except (OSError, ValueError):
+            _saicritic_manifest = {}
+        _saicritic_manifest_entries = {
+            entry.get("src") for entry in _saicritic_manifest.get("files", [])
+            if isinstance(entry, dict) and entry.get("required") is True}
+        if ("- `SAICRITIC.md`:" not in _saicritic_index
+                or "saipen/SAICRITIC.md" not in _saicritic_manifest_entries):
+            fail("cross-doc drift [saicritic-reachability] -- INDEX.md must "
+                 "route to SAICRITIC.md and MANIFEST.json must install it as "
+                 "a required runtime file")
+        if not _saicritic_p.is_file():
+            fail("cross-doc drift [saicritic] -- canonical "
+                 "saipen/SAICRITIC.md is missing")
+        else:
             _st_t = _saicritic_p.read_text(encoding="utf-8-sig")
-            _st_missing = [m for m in (
-                "UNIT", "COMPOSITION", "CANONICAL", "GATE",
-                "VALID END STATE != PROOF OF REQUIRED PROCESS")
-                if m not in _st_t]
-            if _st_missing:
+            _proof_section = _st_t[_st_t.find("## What it does"):]
+            _proof_section = _proof_section[:_proof_section.find("\n## ", 3)]
+            _proof_levels = tuple(re.findall(
+                r"(?m)^\| ([A-Z]+) \|", _proof_section))
+            _expected_levels = ("UNIT", "COMPOSITION", "CANONICAL", "GATE",
+                                "PROVENANCE")
+            if (_proof_levels != _expected_levels
+                    or "VALID END STATE != PROOF OF REQUIRED PROCESS" not in _st_t
+                    or "VALID RESULT + VALID PROCESS != VALID EVIDENCE LINK" not in _st_t):
                 fail("cross-doc drift [saicritic] -- saipen/SAICRITIC.md "
-                     "must define the four proof levels and the invariant "
-                     "(missing: " + ", ".join(_st_missing)
-                     + "); a self-critique process with no named proof "
-                     "levels cannot classify findings (T-603)")
+                     "must define the canonical ordered proof levels exactly "
+                     f"as {list(_expected_levels)} (observed "
+                     f"{list(_proof_levels)}) and retain both invariants")
+            if not _assignment_canonical:
+                fail("cross-doc drift [saicritic-assignment] -- bare Improve "
+                     "must load _canonical_proof_levels() exactly once before "
+                     "any cycle/seat/report write and emit that exact value; "
+                     "omitting, slicing or decoy-binding a level breaks the "
+                     "command proof contract")
 
     # T-555: Improve seat reports are MECHANICALLY checkable, and T-556: Core
     # sweep is the only path from report to canonical work. Both scans run on
@@ -6055,7 +6191,7 @@ else:
         ("saipen/CONFORMANCE.md",    "re-enumeration + count + row-ID checks"),
         ("saipen/CONVERGE.md",       "convergence stage-order + closure-bar + post-K ordering checks"),
         ("saipen/IMPROVE.md",        "meta-control proof (no IMPROVE phase row, no phases/improve.md)"),
-        ("saipen/SAICRITIC.md",      "four proof levels + invariant classification check (T-603)"),
+        ("saipen/SAICRITIC.md",      "ordered five proof levels + invariant classification check (T-622)"),
         ("saipen/OPS.md",            "mechanical-layer ownership doc (must state the semantic/mechanical boundary)"),
         ("saipen/phases/*.md",       "phase-enum sync + prescribed-WAIT category check"),
         ("extensions/**/*.md",       "prescribed-WAIT category check"),

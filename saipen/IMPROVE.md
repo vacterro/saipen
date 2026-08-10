@@ -21,6 +21,11 @@ error this file exists to prevent.
 
 ## 1. Command surface (routing lives in CORE.md 1.10)
 
+This lifecycle declaration must exactly mirror CORE's routing declaration;
+the validator compares both with the CLI executor set.
+
+`IMPROVE_ACTIONS = [bare, status, submit, complete, sweep, sweep-queue, verify, cycle-complete, abort, clean]`
+
 - `saipen improve` — the meta-control entry point: binds the current project,
   finds or mechanically admits the one active cycle, registers this seat,
   creates the DRAFT report mechanically with the real captured source

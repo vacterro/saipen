@@ -14,6 +14,7 @@ Exit codes: 0 success, 1 refused, 2 usage, 3 not a SAIPEN project.
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -394,6 +395,22 @@ def _emit(payload: dict, as_json: bool) -> None:
             print(f"{key}: {value}")
 
 
+def _canonical_proof_levels() -> list[str]:
+    """Read SAICRITIC's ordered proof vocabulary from its canonical table."""
+    candidates = (HOME / "saipen" / "SAICRITIC.md", HOME / "SAICRITIC.md")
+    critic = next((path for path in candidates if path.is_file()), None)
+    if critic is None:
+        raise ValueError("SAICRITIC.md is missing from the protocol install")
+    text = critic.read_text(encoding="utf-8-sig")
+    start = text.find("## What it does")
+    end = text.find("\n## ", start + 3)
+    section = text[start:end if end >= 0 else None]
+    levels = re.findall(r"(?m)^\| ([A-Z]+) \|", section)
+    if not levels or len(levels) != len(set(levels)):
+        raise ValueError("SAICRITIC proof vocabulary is missing or duplicated")
+    return levels
+
+
 def _improve(project_root: Path, args: list[str], as_json: bool,
              dry_run: bool) -> int:
     """saipen improve -- the meta-control command family (T-554, T-606,
@@ -509,8 +526,8 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
                          "sweep_errors": sweep_errors[:3]})
         return rows
 
-    action = args[0] if args else "prepare"
-    if action == "prepare":
+    action = args[0] if args else None
+    if action is None:
         # DOGFOOD V (T-617): bare `saipen improve` is the documented
         # meta-control -- it PREPARES the current seat's bounded audit
         # assignment, never an alias for status. It binds the project, finds
@@ -518,8 +535,15 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
         # creates the DRAFT report mechanically with the real captured source
         # identity, and returns the exact assignment the current agent must
         # execute. It never changes phase/task/next_action.
+        try:
+            proof_levels = _canonical_proof_levels()
+        except (OSError, ValueError) as exc:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": f"cannot load canonical SAICRITIC proof "
+                             f"vocabulary: {exc}"}, as_json)
+            return 1
         from improve import (allocate_cycle_id, append_run, create_cycle,
-                             create_report, register_seat)
+                              create_report, register_seat)
         from freshness import compute_source_identity
         try:
             source = compute_source_identity(project_root)
@@ -600,8 +624,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
                        "discovery_model": source.discovery_model},
             "scope": {"phase": state_phase(project_root),
                       "task": state_field(project_root, "task")},
-            "proof_levels": ["UNIT", "COMPOSITION", "CANONICAL", "GATE",
-                             "PROVENANCE"],
+            "proof_levels": proof_levels,
             "schema": "cycle + seat/report + RUN-N/IMP-NNN composite finding "
                       "ref; dispositions go to SWEEP.md via saipen improve "
                       "sweep; report completion via saipen improve complete",
@@ -865,10 +888,10 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
             _emit({"ok": False, "code": "VALIDATION_FAILED",
                    "detail": str(exc), "archive_only": True}, as_json)
             return 1
-    _emit({"ok": False, "code": "VALIDATION_FAILED",
+    _emit({"ok": False, "code": "UNKNOWN_ACTION",
            "detail": f"unknown saipen improve action {action!r}; use "
-                     "prepare|status|submit|complete|sweep|sweep-queue|"
-                     "verify|cycle-complete|abort|clean"}, as_json)
+                      "status|submit|complete|sweep|sweep-queue|"
+                      "verify|cycle-complete|abort|clean"}, as_json)
     return 2
 
 

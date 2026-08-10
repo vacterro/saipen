@@ -84,10 +84,10 @@ records in legacy cycles under historical compatibility; a bare ref FAILs once
 the only matching records live in strict cycles. All newly created cycles use
 the strict schema; the new writers never emit the legacy form.
 
-## Cold SAICRITIC dogfood (cycle imp-vacterro-saipen-20260810-1, archived)
+## Cold strict Core-role Improve audit (cycle imp-vacterro-saipen-20260810-1, archived)
 
-A NEW SAICRITIC cycle ran AFTER the strict evidence boundary through ONLY the
-public/mechanical path, with no seeded expectations:
+A NEW strict Improve cycle ran AFTER the strict evidence boundary through ONLY
+the public/mechanical path, with no seeded expectations:
 
 `saipen improve` (audit assignment, strict cycle + draft report + real
 `git-delta-v1` fingerprint) -> `saipen improve submit` (RUN-1, journaled) ->
@@ -96,6 +96,13 @@ public/mechanical path, with no seeded expectations:
 `source_reports` -> `saipen improve sweep` (4 dispositions) -> `saipen improve
 verify` PASS -> `saipen improve cycle-complete` -> `saipen improve clean`
 (archived). Zero raw MANIFEST/report/SWEEP writes.
+
+Its findings remain useful and its mechanical lifecycle evidence remains
+valid. Its immutable manifest and report both say `role: core`, however, so it
+is not direct execution proof of the `critic`-role public path required by
+SAICRITIC.md. Calling it SAICRITIC was ACCIDENTAL_SUCCESS: semantic behavior
+resembled a critic audit, but the required role gate did not occur. The
+historical cycle itself remains byte-identical.
 
 The critic independently detected real remaining gaps:
 

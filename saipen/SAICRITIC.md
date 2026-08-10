@@ -1,6 +1,6 @@
 # SAICRITIC -- the self-critique process (T-603)
 
-SAICRITIC is the periodic full self-critique of SAIPEN against the four proof
+SAICRITIC is the periodic full self-critique of SAIPEN against the five proof
 levels. It is not a separate phase -- it is a real Improve cycle whose seat
 role is `critic` and whose subject is the protocol's own mechanical layer.
 
@@ -15,9 +15,11 @@ that implement them), classify the proof as:
 | COMPOSITION | does the predecessor/successor chain work? |
 | CANONICAL | do the repository invariants validate? |
 | GATE | did the REQUIRED semantic/protocol gates actually occur? |
+| PROVENANCE | does the evidence bind the exact source, session, run, finding and result it claims? |
 
 A claim with a missing layer is NOT PROVEN -- record it as such, never PASS.
 The permanent invariant: VALID END STATE != PROOF OF REQUIRED PROCESS.
+The provenance invariant: VALID RESULT + VALID PROCESS != VALID EVIDENCE LINK.
 
 ## How it runs
 
@@ -27,7 +29,7 @@ The permanent invariant: VALID END STATE != PROOF OF REQUIRED PROCESS.
 2. The audit targets the wave's mechanical layer: the finish gate, the
    sweep-ticket linkage, the report schema, the reasoning gates, the
    target-aware verifier, the context projection, the command surface.
-3. Every finding carries the four-level classification in its `expected/
+3. Every finding carries the five-level classification in its `expected/
    actual/evidence` block; a `PROTOCOL_VIOLATION` finding records the
    cross-project recurrence reasoning and the weak-model answer on its
    canonical ticket (IMP-003 spec, T-558).
@@ -38,6 +40,20 @@ The permanent invariant: VALID END STATE != PROOF OF REQUIRED PROCESS.
    real defect (LOGIC_ERROR) or dispose it as unverified -- never flip it to
    PASS in the sweep.
 6. The cycle completes (full sweep coverage) and is archived with provenance.
+
+## Permanent lenses
+
+The proof levels are also applied to recurring boundary failures. These names
+are audit lenses, not a demand for one new enum per phrase:
+
+- `COMMAND_SURFACE_SPLIT`: declared and executable action sets differ.
+- `ROLE_LAUNDERING`: evidence is called critic evidence while its roster or
+  report role says otherwise.
+- `SESSION_COLLAPSE`: independent workers share one logical seat or report.
+- `PROVENANCE_FABRICATION`: runtime or protocol identity comes from a constant
+  instead of captured evidence.
+- `ERROR_NORMALIZATION_GAP`: expected contention is a stable Result in one
+  public domain but escapes as a traceback in another.
 
 The first SAICRITIC run (T-603) found the register-without-executor defect:
 `saipen improve` was registered in the command surface but the CLI had no
