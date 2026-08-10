@@ -2567,6 +2567,58 @@ if log_files:
             fail("core sweep [sweep-ticket-link] -- scan failed: "
                  + str(_exc))
 
+    # T-607: the SubSaipen write boundary is CONTINUOUSLY mechanical, not
+    # admission-only. A settled sub's artifacts must never target the
+    # main-project canonical files: a ready OUTBOX package carrying
+    # .saipen/BOARD.md|STATE.md|LOG.md as an actionable target, or a sub
+    # STATE referencing them OUTSIDE a boundary comment, is a violation
+    # (red control 7). The boundary-injunction comment every spawned sub
+    # carries names the forbidden paths on purpose -- that is the doc, not
+    # the violation, so comment blocks are excluded.
+    _subs_root = Path(".saipen/extensions/subs")
+    if _subs_root.is_dir():
+        _boundary_errors = []
+        _main_canonical = (".saipen/BOARD.md", ".saipen/STATE.md",
+                           ".saipen/LOG.md")
+        for _sub in sorted(_subs_root.iterdir()):
+            if not _sub.is_dir():
+                continue
+            _outbox = _sub / "kitchen" / "OUTBOX.md"
+            if _outbox.is_file():
+                _ot = _outbox.read_text(encoding="utf-8-sig")
+                if any(m in _ot for m in _main_canonical):
+                    _boundary_errors.append(
+                        f"{_sub.name} OUTBOX references a main-project "
+                        "canonical path; a SubSaipen writes only inside its "
+                        "own home -- a package may not target "
+                        ".saipen/BOARD.md|STATE.md|LOG.md (red control 7)")
+            _st = _sub / "STATE.md"
+            if _st.is_file():
+                _st_lines = []
+                _in_comment = False
+                for _ln in _st.read_text(encoding="utf-8-sig").splitlines():
+                    if "<!--" in _ln:
+                        _in_comment = True
+                        continue
+                    if "-->" in _ln:
+                        _in_comment = False
+                        continue
+                    if not _in_comment and _ln.strip():
+                        _st_lines.append(_ln)
+                _stt = "\n".join(_st_lines)
+                for _main in _main_canonical:
+                    if _main in _stt:
+                        _boundary_errors.append(
+                            f"{_sub.name} STATE references main-project "
+                            f"canonical {_main} outside a boundary comment")
+        if _boundary_errors:
+            fail("subsaipen [sub-write-boundary] -- "
+                 + "; ".join(_boundary_errors[:6])
+                 + "; a SubSaipen writes only inside its own home (T-607)")
+        else:
+            ok("subsaipen write boundary continuous: no sub artifact targets "
+               "a main-project canonical file (red control 7)")
+
     # § 1.10 orders `saipen status` to report "the result of the last
     # tools/validate.py run if one is recorded in LOG.md" -- a duty handed out
     # before anything gave that record a shape, so the reader either grepped

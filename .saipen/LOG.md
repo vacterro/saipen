@@ -261,3 +261,10 @@
 - 10.08.26 09:10 [E-2722] [parent: E-2721] [op: transition-3d1f32b5] DEC: goal_tickets 13->14
 - 10.08.26 09:10 [E-2723] [parent: E-2722] [T-603] [agent: claude] [op: transition-a7780640] RUN: REVIEW verdict DEC: SHIP -- verify re-run fresh; report + sweep + cycle diff reviewed, no P0/P1; reload-check refined to active-cycles-only (sealed evidence not retroactively stale)
 - 10.08.26 09:10 [E-2724] [parent: E-2723] [T-603] [agent: claude] [op: finish-a0fe3c0d] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 10.08.26 09:12 [E-2725] [parent: E-2724] [T-607] [agent: claude] [op: claim-860a4441] DEC: claimed via SAIOPS -- owner claude
+- 10.08.26 09:12 [E-2726] [parent: E-2725] [T-607] [agent: claude] [op: transition-4fe449a7] RUN: SCOUT done: boundary is admission-only (safeid at spawn + doc marker); added [sub-write-boundary] continuous validator scan (OUTBOX + STATE outside comment blocks); live subs clean (saitest boundary comment correctly excluded); audit red case added
+- 10.08.26 09:23 [E-2727] [parent: E-2726] [T-607] [agent: claude] [op: transition-7fe3adef] RUN: BUILD complete: [sub-write-boundary] continuous scan landed (OUTBOX + STATE, comment-excluded), live subs clean, audit red case (242/242); full suite running
+- 10.08.26 09:29 [E-2728] [parent: E-2727] [T-607] [agent: claude] [op: transition-79bd73d0] RUN: VERIFY done: validate PASS, full suite green (68 improve + 171 nitro-integrity), audit 242/242
+- 10.08.26 09:29 [E-2729] [parent: E-2728] [op: transition-79bd73d0] DEC: goal_tickets 14->15
+- 10.08.26 09:29 [E-2730] [parent: E-2729] [T-607] [agent: claude] [op: transition-740b7706] RUN: REVIEW verdict DEC: SHIP -- diff reviewed (sub-write-boundary scan + red case) no P0/P1
+- 10.08.26 09:29 [E-2731] [parent: E-2730] [T-607] [agent: claude] [op: finish-3860ff75] DEC: ticket finished via SAIOPS -- completion (from SHIP)

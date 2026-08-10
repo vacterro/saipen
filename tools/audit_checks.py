@@ -971,6 +971,13 @@ CASES: list[tuple[str, str, object, str]] = [
     ("SAICRITIC drops the GATE proof level", "saipen/SAICRITIC.md",
      lambda t: t.replace("GATE", "GEAT").replace("| GATE |", "| GEAT |"),
      "saicritic"),
+    # T-607: the SubSaipen write boundary is continuously mechanical -- a sub
+    # STATE that names a main-project canonical file outside a boundary
+    # comment is a violation.
+    ("sub STATE targets a main-project canonical file", SUB,
+     lambda t: t.replace("---\n", "---\ntask: T-999\n", 1).replace(
+         "saipen_home", "apply_to_main: .saipen/BOARD.md\nsaipen_home", 1),
+     "sub-write-boundary"),
     # NITRO: OPS.md is only reachable through INDEX. Drop the row and the doc
     # still ships, still validates its own text, and no cold agent ever finds
     # it -- the RFC routing trap in a new file.
