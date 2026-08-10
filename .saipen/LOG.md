@@ -94,3 +94,12 @@
 - 10.08.26 14:10 [E-2851] [parent: E-2850] [op: transition-5243e5a2] DEC: goal_tickets 8->9
 - 10.08.26 14:10 [E-2852] [parent: E-2851] [T-621] [agent: claude] [op: transition-602d4151] RUN: RUN: SHIP: mechanical abort landed
 - 10.08.26 14:10 [E-2853] [parent: E-2852] [T-621] [agent: claude] [op: finish-5a8fa5c1] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 10.08.26 15:05 [E-2854] [parent: E-2853] [T-464] [agent: claude] [op: ticket-e1402778] DEC: ticket unblock via SAIOPS -- board-soft-cap warning cleared: BOARD pruned to 12.7 KB (was 21.4 KB); premise expired
+- 10.08.26 15:05 [E-2855] [parent: E-2854] [T-464] [agent: claude] [op: claim-0e75f32f] DEC: claimed via SAIOPS -- owner claude
+- 10.08.26 15:05 [E-2856] [parent: E-2855] [T-464] [agent: claude] [op: transition-5954d2f4] RUN: RUN: BUILD complete: DONE bodies pruned (14 tickets -> compact summaries with preserved provenance fields); BOARD 21.4 KB -> 12.7 KB; board-soft-cap warning cleared; evidence lives in LOG (sealed)
+- 10.08.26 15:05 [E-2857] [parent: E-2856] [T-464] [agent: claude] [op: transition-21049844] RUN: RUN: VERIFY: validate.py core PASS with 7 warnings, board-soft-cap no longer emits; needs-guard respected
+- 10.08.26 15:05 [E-2858] [parent: E-2857] [T-464] [agent: claude] [op: transition-7f25231c] RUN: RUN: REVIEW: prune diff reviewed -- DONE bodies compacted, provenance fields (source_reports/recurrence/weak_model/needs) preserved, no P0/P1
+- 10.08.26 15:05 [E-2859] [parent: E-2858] [op: transition-7f25231c] DEC: goal_tickets 9->10
+- 10.08.26 15:05 [E-2860] [parent: E-2859] [T-464] [agent: claude] [op: transition-087a96c8] RUN: RUN: SHIP: board prune landed
+- 10.08.26 15:05 [E-2861] [parent: E-2860] [T-464] [agent: claude] [op: finish-93064d39] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 10.08.26 15:05 [E-2862] [parent: E-2861] [T-613] [agent: claude] [op: checkpoint-7c693b3d] DEC: DEC: T-613 needs: T-614 bound (v8 evaluation waits on the backlog/foundation review); board-soft-cap cleared at 12.7 KB so T-464 closed on current evidence
