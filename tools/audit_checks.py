@@ -941,6 +941,24 @@ CASES: list[tuple[str, str, object, str]] = [
      lambda t: t.replace("never enters the CLEAN phase",
                          "may archive reports"),
      "improve-command-family"),
+    # T-555: a seat report is mechanically checkable -- a finding without the
+    # expected/actual/evidence triple, a complete report over an unmet
+    # completion bar, and a partial scope claiming full context all fail.
+    ("improve report finding lacks the evidence triple", IMPROVE_REPORT,
+     write_new("report_status: draft\ncontext_scope: tools/\n"
+               "context_available: partial\n\n"
+               "IMP-001 [P1] [LOGIC_ERROR] [observed] [ticket]\n"
+               "expected: x\nactual: y\n"),
+     "improve report [improve-report]"),
+    ("improve report complete over an unmet completion bar", IMPROVE_REPORT,
+     write_new("report_status: complete\n"),
+     "improve report [improve-report]"),
+    ("improve report partial scope claims full context", IMPROVE_REPORT,
+     write_new("report_status: draft\ncontext_scope: partial: tools only\n"
+               "context_available: complete\n\n"
+               "IMP-001 [P1] [LOGIC_ERROR] [observed] [ticket]\n"
+               "expected: x\nactual: y\nevidence: z\n"),
+     "improve report [improve-report]"),
     # NITRO: OPS.md is only reachable through INDEX. Drop the row and the doc
     # still ships, still validates its own text, and no cold agent ever finds
     # it -- the RFC routing trap in a new file.

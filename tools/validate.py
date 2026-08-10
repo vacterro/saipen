@@ -3723,6 +3723,38 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                  "improve row must state no repeated-letter shortcut is "
                  "assigned (shortcut key count stays byte-unchanged, T-554)")
 
+    # T-555: Improve seat reports are MECHANICALLY checkable. Every report
+    # under .saipen/improve/ is scanned with improve.py's own validate_report
+    # (the same grammar the report consumer reads): a finding without an
+    # observable expected/actual/evidence triple is rejected, a class/severity
+    # outside the closed set is rejected, report_status: complete over an
+    # unmet completion bar is rejected, and context_available: complete over a
+    # partial or empty scope is rejected. NO_FINDINGS with a stated scope
+    # passes.
+    _imp_root = Path(".saipen/improve")
+    if _imp_root.is_dir():
+        try:
+            import improve as _imp_mod
+            _report_errors = []
+            _reports = sorted(_imp_root.rglob("saipen_improve_*.md"))
+            for _rep in _reports:
+                _rt = _rep.read_text(encoding="utf-8-sig")
+                _errs = list(_imp_mod.validate_report(_rt))
+                for _e in _errs:
+                    _report_errors.append(f"{_rep}: {_e}")
+            if _report_errors:
+                fail("improve report [improve-report] -- "
+                     + "; ".join(_report_errors[:6])
+                     + "; a finding is rejected, not softened; "
+                     "report_status: complete requires the completion bar; "
+                     "a partial scope can never claim full context (T-555)")
+            else:
+                ok(f"improve seat report schema valid "
+                   f"({len(_reports)} report(s) scanned)")
+        except Exception as _exc:  # noqa: BLE001
+            fail("improve report [improve-report] -- scan failed: "
+                 + str(_exc))
+
         # B. Every runtime file the protocol references must exist in the home.
         # Canonical source is saipen/MANIFEST.json; the hardcoded list below
         # is the fallback for homes that predate the manifest (v7.190.0+).

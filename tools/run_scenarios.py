@@ -3856,6 +3856,27 @@ def run_improve_probes() -> tuple[list[str], int]:
                  (derive_root / ".saipen" / "STATE.md").read_bytes()
                  == state_bytes_before)))
 
+    # ---- T-555: the report completion bar is mechanical. NO_FINDINGS with a
+    # stated scope passes; report_status: complete without a context_scope is
+    # an unmet completion bar; a partial scope cannot claim full context.
+    nf_report = good.split("\nIMP-001")[0].rstrip() + "\n"
+    expect("improve report: NO_FINDINGS with a stated scope validates",
+           validate_report(nf_report) == [], repr(validate_report(nf_report)))
+    complete_noscope = nf_report.replace(
+        "context_scope: tools/improve.py", "context_scope: ").replace(
+        "report_status: draft", "report_status: complete")
+    expect("improve report: report_status complete over an unmet completion "
+           "bar is rejected",
+           any("completion bar" in e
+               for e in validate_report(complete_noscope)),
+           repr(validate_report(complete_noscope)))
+    partial_full = good.replace("context_scope: tools/improve.py",
+                                "context_scope: partial: tools only")
+    expect("improve report: a partial scope cannot claim complete context",
+           any("partial" in e and "complete" in e
+               for e in validate_report(partial_full)),
+           repr(validate_report(partial_full)))
+
     # ---- T-601: resolver race -- two processes resolving the same conflict
     # yield exactly one canonical settlement (WRITER_BUSY or a settled-journal
     # refusal for the loser, never two RESOLVED).

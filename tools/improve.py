@@ -641,10 +641,18 @@ def validate_report(text: str) -> list[str]:
         errors.append("report header missing required fields: "
                       + ", ".join(sorted(missing)))
 
-    if header.get("context_available") == "complete" and not header.get(
-            "context_scope"):
+    scope = header.get("context_scope") or ""
+    if header.get("context_available") == "complete" and not scope:
         errors.append("context_available: complete refused over an empty "
                       "context_scope")
+    if (header.get("context_available") == "complete"
+            and "partial" in scope.lower()):
+        errors.append("context_available: complete refused over a partial "
+                      "context_scope -- a partial scope can never claim a "
+                      "full-context result (red control 3, T-555)")
+    if header.get("report_status") == "complete" and not scope:
+        errors.append("report_status: complete without a context_scope -- "
+                      "the completion bar is unmet (T-555)")
 
     for finding in findings:
         for field in ("expected", "actual", "evidence"):
