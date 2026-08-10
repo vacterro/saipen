@@ -67,6 +67,7 @@ MANIFEST = ".saipen/kitchen/markhunt_progress.md"
 SUB = ".saipen/extensions/subs/saiwiki/STATE.md"
 CHANGELOG = "CHANGELOG.md"
 CORE = "saipen/CORE.md"
+IMPROVE = "saipen/IMPROVE.md"
 INDEX = "saipen/INDEX.md"
 CREW_BACKLOG = ".saipen/KNOWLEDGE/crew-v8-backlog.md"
 STATE_SCHEMA = "extensions/schemas/state.schema.json"
@@ -941,6 +942,13 @@ CASES: list[tuple[str, str, object, str]] = [
      lambda t: t.replace("never enters the CLEAN phase",
                          "may archive reports"),
      "improve-command-family"),
+    ("improve loses the writer boundary", IMPROVE,
+     lambda t: t.replace("writes only inside its own home",
+                         "may write anywhere it likes"),
+     "improve-boundary"),
+    ("improve verify stops being delta-only", IMPROVE,
+     lambda t: t.replace("delta-only", "full-audit"),
+     "improve-boundary"),
     # T-555: a seat report is mechanically checkable -- a finding without the
     # expected/actual/evidence triple, a complete report over an unmet
     # completion bar, and a partial scope claiming full context all fail.

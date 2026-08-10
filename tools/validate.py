@@ -2400,6 +2400,18 @@ if log_files:
                 _errs = list(_imp_mod.validate_report(_rt))
                 for _e in _errs:
                     _report_errors.append(f"{_rep}: {_e}")
+                # red control 22 (T-557): a seat report is evidence, never
+                # canonical BOARD state -- a report carrying board section
+                # headings is a report mistreated as a board.
+                _board_headings = [h for h in ("## DOING", "## TODO",
+                                               "## DONE", "## BLOCKED")
+                                   if h in _rt]
+                if _board_headings:
+                    _report_errors.append(
+                        f"{_rep}: carries BOARD section heading(s) "
+                        + ", ".join(_board_headings)
+                        + "; a seat report is evidence, never canonical "
+                        "BOARD state (red control 22)")
             if _report_errors:
                 fail("improve report [improve-report] -- "
                      + "; ".join(_report_errors[:6])
@@ -3839,6 +3851,26 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
             fail("cross-doc drift [improve-command-family] -- the saipen "
                  "improve row must state no repeated-letter shortcut is "
                  "assigned (shortcut key count stays byte-unchanged, T-554)")
+
+        # T-557: the Improve writer boundary and recursion stop are stated
+        # contract. IMPROVE.md must say a seat writes only inside its own home
+        # during SELF-AUDIT/REPORT, `saipen improve` never silently enters
+        # ADD, and `saipen improve verify` is delta-only and never re-enters a
+        # full cycle (red controls 7/17/18/21).
+        _imp_doc = _improve_doc.read_text(encoding="utf-8-sig")
+        _imp_boundary_missing = []
+        for _marker in ("writes only inside its own home",
+                        "never silently enters ADD",
+                        "delta-only", "MUST NOT recurse"):
+            if _marker not in _imp_doc:
+                _imp_boundary_missing.append(_marker)
+        if _imp_boundary_missing:
+            fail("cross-doc drift [improve-boundary] -- saipen/IMPROVE.md "
+                 "must state the writer boundary and recursion stop (missing: "
+                 + ", ".join(_imp_boundary_missing)
+                 + "); an auditing seat writes only inside its own home, "
+                 "improve never silently enters ADD, and verify is delta-only "
+                 "without recursion (T-557)")
 
     # T-555: Improve seat reports are MECHANICALLY checkable, and T-556: Core
     # sweep is the only path from report to canonical work. Both scans run on

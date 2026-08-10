@@ -3973,6 +3973,20 @@ def run_improve_probes() -> tuple[list[str], int]:
     expect("sweep: an edited-away original finding loses its disposition "
            "(red control 19, validator red)",
            validator_rc(bad19) != 0, repr(validator_rc(bad19)))
+    # red control 22 (T-557): a seat report is evidence, never canonical
+    # BOARD state -- a report carrying board section headings is rejected.
+    report_as_board = sweep_project(
+        ["- IMP-001 [CONFIRMED] T-900 report=saipen_improve_A.md "
+         "reproduced=y"],
+        ["T-900"], {"T-900": "IMP-001"},
+        _rep_header.replace("report_status: complete", "report_status: "
+                            "complete\n## DOING\n## TODO")
+        + "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+        + "expected: x\nactual: y\nevidence: z\n")
+    expect("sweep: a report treated as canonical BOARD state is rejected "
+           "(red control 22, validator red)",
+           validator_rc(report_as_board) != 0,
+           repr(validator_rc(report_as_board)))
 
     # ---- T-601: resolver race -- two processes resolving the same conflict
     # yield exactly one canonical settlement (WRITER_BUSY or a settled-journal

@@ -288,7 +288,21 @@ Improve being a meta-control means:
 - INDEX does not list IMPROVE as a phase;
 - no transition table contains IMPROVE;
 - `saipen improve` may checkpoint current work before an audit but never
-  changes phase/task/next_action merely to run the audit.
+  changes phase/task/next_action merely to run the audit;
+- `saipen improve` never silently enters ADD -- an audit run never routes
+  into the ADD phase (T-557).
+
+## 12. Writer boundary and recursion stop (T-557)
+
+During SELF-AUDIT/REPORT no seat may touch Core protocol, main source, or the
+canonical BOARD/LOG/STATE except the bookkeeping that registers the audit. A
+SubSaipen writes only inside its own home (`extensions/subs/PROTOCOL.md`);
+an auditing sub that writes a main-project file violates the boundary. A seat
+report is evidence, never canonical BOARD state: a report that carries BOARD
+section headings (`## DOING` / `## TODO` / `## DONE` / `## BLOCKED`) is
+rejected (red control 22). `saipen improve verify` is delta-only (section 9)
+and NEVER re-enters a full improve cycle -- a verify pass that reopens
+unrelated history or starts a fresh cycle fails (red controls 17/18).
 
 A real IMPROVE phase may still be proposed only by first proving a failure the
 meta-control design cannot solve.
