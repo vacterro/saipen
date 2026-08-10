@@ -242,7 +242,7 @@ def _spawn_role_revision(saipen_home: str, name: str) -> str:
         charter = Path(saipen_home) / "extensions" / "subs" / f"{name}.md"
         if charter.is_file():
             return compute_role_revision(charter)
-    except Exception:  # noqa: BLE001 -- freshness failure means no revision
+    except Exception:
         pass
     return ""
 
@@ -421,9 +421,9 @@ def _sub_trace_targets(root: Path, name: str, action: str,
     from .log import log_tail_event
     tail = log_tail_event(text)
     from .log import build_event
-    event, line = build_event(tail, "DEC",
-                              f"main agent {action}: {message}",
-                              ticket=None, agent="saipen-cli", now=_now())
+    _event, line = build_event(tail, "DEC",
+                               f"main agent {action}: {message}",
+                               ticket=None, agent="saipen-cli", now=_now())
     new_log = (text.rstrip("\n") + "\n" + line + "\n") if text else \
         ("# Log\n\n" + line + "\n")
     return [{"path": log_rel, "role": "log", "content": new_log.encode("utf-8"),
@@ -498,14 +498,14 @@ def sub_collect(project_root: Path | str, name: str | None = None) -> Result:
             stripped = line.strip()
             if not stripped.startswith("- "):
                 continue
-            first = [f.strip() for f in stripped[2:].split("|")][0]
+            first = next(f.strip() for f in stripped[2:].split("|"))
             n = first.split(" -- ")[0].strip() if " -- " in first else first
             if n and " " not in n:
                 names.append(n)
     from freshness import compute_source_identity
     try:
         current = compute_source_identity(root)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return _refuse("VALIDATION_FAILED",
                        f"source identity UNKNOWN: {exc}")
     all_packages = []
@@ -598,7 +598,7 @@ def _role_current(saipen_home: str, name: str, recorded: str) -> bool:
         charter = Path(saipen_home) / "extensions" / "subs" / f"{name}.md"
         if charter.is_file():
             return compute_role_revision(charter) == recorded
-    except Exception:  # noqa: BLE001
+    except Exception:
         pass
     return True
 

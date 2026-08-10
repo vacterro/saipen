@@ -12,22 +12,21 @@ Run:  python tools/nitro_integrity_repro.py
 
 from __future__ import annotations
 
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from saipen_engine import codec  # noqa: E402
-from saipen_engine.board import parse_board  # noqa: E402
-from saipen_engine.journal import Journal, hash_bytes, run_mutation  # noqa: E402
-from saipen_engine.lock import WriterLock  # noqa: E402
-from saipen_engine.operations import (  # noqa: E402
+from saipen_engine import codec
+from saipen_engine.board import parse_board
+from saipen_engine.journal import Journal, hash_bytes
+from saipen_engine.lock import WriterLock
+from saipen_engine.operations import (
     apply_claim, checkpoint, set_goal_intent, stop_checkpoint, ticket_add,
     ticket_move, transition_phase,
 )
-from saipen_engine.state import parse_state  # noqa: E402
+from saipen_engine.state import parse_state
 
 LOG_BASE = "- 09.08.26 00:00 [E-900] [T-none] DEC: base\n"
 BOARD_BASE = ("# Board\n## DOING\n## TODO\n- [ ] T-1 [P1] probe | "
@@ -149,7 +148,7 @@ def r7_writer_busy_leaks_exception() -> tuple[bool, str]:
             ok, detail = False, "no exception raised under held lock"
         except PermissionError as exc:
             ok, detail = True, f"PermissionError leaked: {exc}"
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             ok, detail = True, f"exception leaked: {type(exc).__name__}: {exc}"
     finally:
         held.release()
@@ -202,7 +201,7 @@ def r9_cycle_path_traversal() -> tuple[bool, str]:
             str((root / ".saipen" / "improve").resolve()))
         detail = (f"cycle_dir resolves to {escaped.resolve()} -- "
                   f"{'ESCAPES owner root' if ok else 'inside owner root'}")
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         ok = False
         detail = f"raised {type(exc).__name__}: {exc} (no clean validation)"
     return ok, detail + " (required: .. refused before path construction)"
@@ -227,7 +226,7 @@ def r11_multi_run_collision() -> tuple[bool, str]:
     that only share a local IMP number across RUNs. RUN-1/IMP-001 and
     RUN-2/IMP-001 are DIFFERENT findings; a bare `IMP-001` sweep record may
     not sweep both. Defect present when derive_status reports swept."""
-    root = fixture()
+    _root = fixture()
     import improve
     roster = ("# IMPROVE CYCLE ROSTER\ncycle_status: active\n"
               "seat_id: seat-1\nrole: audit\n"

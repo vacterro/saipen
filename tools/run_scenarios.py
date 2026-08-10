@@ -4107,8 +4107,9 @@ def run_improve_probes() -> tuple[list[str], int]:
         ["- IMP-001 [CONFIRMED] T-900 report=saipen_improve_A.md "
          "reproduced=y"],
         ["T-900"], {"T-900": "IMP-001"}, _rep_text)
-    _arch_sweep = list((ok_archive / ".saipen" / "improve").rglob(
-        "SWEEP.md"))[0]
+    _arch_sweeps = list((ok_archive / ".saipen" / "improve").rglob(
+        "SWEEP.md"))
+    _arch_sweep = _arch_sweeps[0]
     _arch_sweep.unlink()
     expect("sweep: deleting SWEEP.md breaks archived-report ticket "
            "provenance (red control 24, validator red)",
@@ -4168,8 +4169,9 @@ def run_improve_probes() -> tuple[list[str], int]:
                    check=False)
     _head2 = subprocess.run(["git", "rev-parse", "HEAD"], cwd=str(fresh_root),
                             capture_output=True, text=True).stdout.strip()
-    _rep2 = list((fresh_root / ".saipen" / "improve").rglob(
-        "saipen_improve_*.md"))[0]
+    _reps2 = list((fresh_root / ".saipen" / "improve").rglob(
+        "saipen_improve_*.md"))
+    _rep2 = _reps2[0]
     _rep2.write_text(
         _rep2.read_text(encoding="utf-8").replace("source_head: ",
                                                   f"source_head: {_head2}"),
@@ -4189,10 +4191,10 @@ def run_improve_probes() -> tuple[list[str], int]:
     # visible per-seat status with zero STATE writes; verify runs the
     # delta-only semantic verifier; clean archives a completed cycle.
     cli_root = project_fixture("saipen-cli-")
-    cli_cycle, cli_rep = mech_cycle(cli_root, "imp-cli", "seat-1", "A",
-                                    ["IMP-001 [P1] [LOGIC_ERROR] [proven] "
-                                     "[ticket]\n"
-                                     "expected: x\nactual: y\nevidence: z\n"])
+    _cli_cycle, _cli_rep = mech_cycle(
+        cli_root, "imp-cli", "seat-1", "A",
+        ["IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+         "expected: x\nactual: y\nevidence: z\n"])
     state_before = (cli_root / ".saipen" / "STATE.md").read_bytes()
     cli_proc = subprocess.run(
         [sys.executable, str(HOME / "tools" / "saipen.py"), "improve",
@@ -4880,8 +4882,7 @@ def run_improve_probes() -> tuple[list[str], int]:
     # yield exactly one canonical settlement (WRITER_BUSY or a settled-journal
     # refusal for the loser, never two RESOLVED).
     from saipen_engine.journal import (Journal as _RaceJournal,
-                                       hash_bytes as _race_hb,
-                                       resolve_conflict as _race_resolve)
+                                       hash_bytes as _race_hb)
     race_root = project_fixture("saipen-race-")
     saipen_r = race_root / ".saipen"
     # a DONE-state root so the external phase HUNT modification is real
@@ -5425,7 +5426,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
 
     # ---- R1/R2: checkpoint and ticket_add preserve phase/task.
     root = make_project()
-    snap = project_tree(root)
+    _snap = project_tree(root)
     root2 = make_project()
     apply_claim(root2, "T-1", "probe")
     transition_phase(root2, "BUILD", "probe", "T-1", "integrity setup")
@@ -5446,10 +5447,11 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
 
     # ---- R6: dry-run writes zero bytes.
     before = project_tree(root)
-    plan = plan_claim(root, "T-1", "probe")
+    claim_plan = plan_claim(root, "T-1", "probe")
     after = project_tree(root)
     expect("plan_claim dry-run writes zero canonical bytes",
-           plan.get("ok") and plan.get("dry_run") and before == after,
+           claim_plan.get("ok") and claim_plan.get("dry_run")
+           and before == after,
            f"changed={set(before) ^ set(after)}")
     cp_plan = checkpoint(root, "probe", "RUN", "T-1", "dry", dry_run=True)
     after2 = project_tree(root)
@@ -5498,15 +5500,15 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            repr(bd["tickets"]["T-1"]["raw"]))
 
     # ---- R7: WRITER_BUSY is a structured result, not a traceback.
-    lock = WriterLock(root)
-    lock.acquire()
+    writer_lock = WriterLock(root)
+    writer_lock.acquire()
     try:
         busy = ticket_add(root, "probe", "P2", "busy", [], "verify")
         expect("WRITER_BUSY is a structured refusal",
                not busy.get("ok") and busy.get("code") == "WRITER_BUSY",
                repr(busy))
     finally:
-        lock.release()
+        writer_lock.release()
 
     # ---- plan/apply share one op_id and apply consumes exact plan bytes.
     root3 = make_project()
@@ -5540,10 +5542,11 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     external = state_b4 + b"\n# third party\n"
     (saipen4 / "STATE.md").write_bytes(external)
     from saipen_engine.journal import recover
-    result = recover(root4, "op-int")
+    recovery_result = recover(root4, "op-int")
     expect("recovery on an externally modified pending target CONFLICTs",
-           result.get("code") == "CONFLICT"
-           and (saipen4 / "STATE.md").read_bytes() == external, repr(result))
+           recovery_result.get("code") == "CONFLICT"
+           and (saipen4 / "STATE.md").read_bytes() == external,
+           repr(recovery_result))
 
     # ---- §69#19b: corrupt STAGED bytes are never committed as truth.
     root4b = make_project()
@@ -5575,7 +5578,6 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            repr(result4b))
 
     # ---- Recovery preflight: pending op blocks a new mutation.
-    from saipen_engine.journal import recovery_preflight
     root9 = make_project()
     saipen9 = root9 / ".saipen"
     log9 = (saipen9 / "LOG.md").read_bytes()
@@ -5607,7 +5609,9 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     # ---- Codec: UTF-8/CRLF/BOM representation survives a real operation.
     root6 = make_project()
     board6 = root6 / ".saipen" / "BOARD.md"
-    text6 = "# Board\n## DOING\n## TODO\n- [ ] T-1 [P1] probe | verify: probe\n## DONE\n## BLOCKED\n"
+    text6 = ("# Board\n## DOING\n## TODO\n"
+             "- [ ] T-1 [P1] probe | verify: probe\n"
+             "## DONE\n## BLOCKED\n")
     board6.write_bytes(text6.encode("utf-8"))
     add6 = ticket_add(root6, "probe", "P2", "crlf", [], "verify")
     after6 = board6.read_bytes()
@@ -5621,7 +5625,9 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
 
     root7 = make_project()
     board7 = root7 / ".saipen" / "BOARD.md"
-    text7 = "# Board\r\n## DOING\r\n## TODO\r\n- [ ] T-1 [P1] probe | verify: probe\r\n## DONE\r\n## BLOCKED\r\n"
+    text7 = ("# Board\r\n## DOING\r\n## TODO\r\n"
+             "- [ ] T-1 [P1] probe | verify: probe\r\n"
+             "## DONE\r\n## BLOCKED\r\n")
     board7.write_bytes(text7.replace("\r\n", "\r\n").encode("utf-8"))
     ticket_add(root7, "probe", "P2", "crlf", [], "verify")
     after7 = board7.read_bytes()
@@ -5631,7 +5637,9 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
 
     root8 = make_project()
     board8 = root8 / ".saipen" / "BOARD.md"
-    text8 = "# Board\n## DOING\n## TODO\n- [ ] T-1 [P1] probe | verify: probe\n## DONE\n## BLOCKED\n"
+    text8 = ("# Board\n## DOING\n## TODO\n"
+             "- [ ] T-1 [P1] probe | verify: probe\n"
+             "## DONE\n## BLOCKED\n")
     board8.write_bytes(b"\xef\xbb\xbf" + text8.encode("utf-8"))
     ticket_add(root8, "probe", "P2", "bom", [], "verify")
     after8 = board8.read_bytes()
@@ -5686,7 +5694,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
             "goal_tickets: 2\nupdated:"), encoding="utf-8")
     apply_claim(rootu, "T-1", "probe")
     transition_phase(rootu, "BUILD", "probe", "T-1", "setup")
-    before_u = codec.read_doc(rootu / ".saipen" / "STATE.md")
+    _before_u = codec.read_doc(rootu / ".saipen" / "STATE.md")
     cp_u = checkpoint(rootu, "probe", "RUN", "T-1", "unrelated preserve")
     after_u = codec.read_doc(rootu / ".saipen" / "STATE.md")
     expect("checkpoint preserves unrelated fields (intent/counters/mode)",
@@ -5865,7 +5873,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
 
     # ---- §69#23: `saipen recover --json` returns a machine result.
     rec_root = make_project()
-    saipen_rec = rec_root / ".saipen"
+    _saipen_rec = rec_root / ".saipen"
     rec_proc = subprocess.run(
         [sys.executable, str(HOME / "tools" / "saipen.py"), "recover",
          "--json"],
@@ -5911,7 +5919,6 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            and not up_path.is_file(), repr(up_reset.stdout[:120]))
 
     # ---- NITRO M8: SubSaipen lifecycle on the common machinery.
-    from saipen_engine import subs
     sub_root = make_project()
     home = str(HOME)
     spawn_res = subs.sub_spawn(sub_root, "saiscout", home)
@@ -5992,7 +5999,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         try:
             _subs.sub_spawn(esc_root, bad, esc_home)
             refused = False
-        except (ValueError, Exception):  # noqa: BLE001
+        except (ValueError, Exception):
             refused = True
         if not refused:
             r = _subs.sub_spawn(esc_root, bad, esc_home)
@@ -6181,7 +6188,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            repr((cold_uni.get("bytes"), cold_uni.get("characters"))))
 
     # ---- T-587: unresolved CONFLICT blocks every new mutation.
-    from saipen_engine.journal import pending_conflicts, recovery_preflight
+    from saipen_engine.journal import pending_conflicts
     root_c = make_project()
     saipen_c = root_c / ".saipen"
     log_c = (saipen_c / "LOG.md").read_bytes()
@@ -6309,9 +6316,9 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     # and the conflict then blocks a new mutation -- through the live CLI.
     root_sp = make_project()
     saipen_sp = root_sp / ".saipen"
-    log_sp = (saipen_sp / "LOG.md").read_bytes()
-    state_sp = (saipen_sp / "STATE.md").read_bytes()
-    board_sp = (saipen_sp / "BOARD.md").read_bytes()
+    _log_sp = (saipen_sp / "LOG.md").read_bytes()
+    _state_sp = (saipen_sp / "STATE.md").read_bytes()
+    _board_sp = (saipen_sp / "BOARD.md").read_bytes()
     crash_code = (
         "import sys, os; sys.path.insert(0, r'%s')\n"
         "os.environ['NITRO_CRASH_AFTER_LOG'] = '1'\n"
@@ -6519,7 +6526,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     from saipen_engine.journal import resolve_conflict as _rs_resolve
     _rs_resolve(res_root, "op-rs", "accept_live", agent="probe")
     rs_dir = res_root / ".saipen" / "recovery" / "ops" / "op-rs"
-    rs_record = json.loads((rs_dir / "operation.json").read_text(
+    _rs_record = json.loads((rs_dir / "operation.json").read_text(
         encoding="utf-8"))
     compact_committed(res_root)
     rs_staged = list(rs_dir.glob("*.staged"))
@@ -6569,7 +6576,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     for i in range(8):
         lines.append(f"- [ ] T-{i+1} [P1] unworkable {i+1} | "
                      f"needs: T-999 | verify: probe")
-    lines.append(f"- [ ] T-9 [P1] the workable one | verify: probe")
+    lines.append("- [ ] T-9 [P1] the workable one | verify: probe")
     lines += ["## DONE", "## BLOCKED"]
     (ctx9_root / ".saipen" / "BOARD.md").write_text(
         "\n".join(lines) + "\n", encoding="utf-8")
@@ -6688,7 +6695,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     try:
         pubn = _json.loads(pubn_next.stdout)
         load_ok = pubn.get("load") == "saipen/phases/scout.md"
-    except Exception:  # noqa: BLE001
+    except Exception:
         load_ok = False
     expect("public `saipen next` pairs action with the routed phase doc",
            '"action": "PHASE SCOUT T-1"' in pubn_next.stdout and load_ok,
@@ -6797,11 +6804,9 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     # close a ticket from phase SHIP; from SCOUT/BUILD/VERIFY/REVIEW it REFUSEs
     # ILLEGAL_PHASE with zero canonical bytes written, and transition_from
     # records the ACTUAL phase -- never a laundered SHIP.
-    from saipen_engine.operations import (finish_ticket as _gate_ft,
-                                          _plan_finish_ticket as _gate_pft)
+    from saipen_engine.operations import (finish_ticket as _gate_ft)
     from saipen_engine.operations import (_now as _now_g, _utc_iso as _utc_g)
     from saipen_engine.plan import apply_plan as _gate_apply_plan
-    from saipen_engine.journal import hash_bytes as _gate_hb
     from saipen_engine.state import patch_state as _gate_patch_state
     import hashlib as _gate_hashlib
 

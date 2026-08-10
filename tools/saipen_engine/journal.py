@@ -25,6 +25,7 @@ exit the process at exactly that point, simulating process death mid-transaction
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
 import os
@@ -873,9 +874,7 @@ def compact_committed(project_root: Path | str) -> dict:
             skipped.append(entry.name)
             continue
         for staged in entry.glob("*.staged"):
-            try:
+            with contextlib.suppress(OSError):
                 staged.unlink()
-            except OSError:
-                pass
         compacted.append(entry.name)
     return {"ok": True, "compacted": compacted, "skipped": skipped}

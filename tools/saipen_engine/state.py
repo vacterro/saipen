@@ -97,7 +97,7 @@ def patch_state(text: str, owned: dict) -> str:
     pending = dict(owned)
     out: list[str] = []
     index = 0
-    list_key_re = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*):\s*$")
+    _list_key_re = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*):\s*$")
 
     def emit_block(key: str, value) -> None:
         if isinstance(value, (list, tuple)):
@@ -109,7 +109,7 @@ def patch_state(text: str, owned: dict) -> str:
 
     while index < len(body):
         line = body[index]
-        stripped = line.strip()
+        _stripped = line.strip()
         match = re.match(r"^([A-Za-z_][A-Za-z0-9_]*):\s*(.*)$", line)
         is_list_item = bool(re.match(r"^\s+-\s+", line))
         if match and match.group(1) in pending:

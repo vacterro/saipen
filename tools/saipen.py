@@ -429,8 +429,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
     ACTIVE -> COMPLETE, `clean <cycle>` is archive-with-provenance.
     """
     from improve import (archive_cycle, complete_cycle, cycle_dir,
-                         derive_status, resolve_report_path,
-                         validate_report, write_sweep_entry)
+                         derive_status, write_sweep_entry)
 
     from improve import _sweep_records
     import re as _re
@@ -780,7 +779,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
             return 2
         cycle = cycle_dir(project_root, args[1])
         finding_ref, disposition = args[2], args[3]
-        run = None
+        _run = None
         import re as _re
         _fm = _re.fullmatch(r"(?:RUN-(\d+)/)?IMP-(\d+)", finding_ref)
         if not _fm:

@@ -382,7 +382,7 @@ def _plan_checkpoint(root: Path, agent: str, taxonomy: str,
                      ticket_id: str | None, description: str, now: str,
                      utc: str) -> OperationPlan | Result:
     op_id = "checkpoint-" + uuid4_hex8()
-    docs, state, board, log_tail = _read(root)
+    docs, _state, _board, log_tail = _read(root)
     event, line = _event_line(docs, log_tail, taxonomy.upper(), ticket_id,
                               agent, description, now, op_id)
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
@@ -723,7 +723,7 @@ def ticket_add(project_root: Path | str, agent: str, priority: str,
                        "proof (no TBD/TODO/empty)", verify=verify)
     op_id = "ticket-" + uuid4_hex8()
     now, utc = _now(), _utc_iso()
-    docs, state, board, log_tail = _read(root)
+    docs, _state, board, log_tail = _read(root)
     tid = next_ticket_id(docs["board"].text_norm, docs["log"].text_norm)
     for need in needs:
         if need not in board["tickets"]:
@@ -795,7 +795,7 @@ def _state_only_plan(root: Path, operation: str, agent: str, mutate,
                      event_message: str, expected: dict, now: str,
                      utc: str, owned_keys: set) -> OperationPlan | Result:
     op_id = operation + "-" + uuid4_hex8()
-    docs, state, board, log_tail = _read(root)
+    docs, _state, _board, log_tail = _read(root)
     event, line = _event_line(docs, log_tail, "DEC", None, agent,
                               event_message, now, op_id)
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
@@ -857,7 +857,7 @@ def reauthorize_valve(project_root: Path | str, agent: str,
     that did not trip the valve."""
     root = Path(project_root)
     now, utc = _now(), _utc_iso()
-    docs, state, board, log_tail = _read(root)
+    _docs, state, _board, _log_tail = _read(root)
     waves = state.get("goal_waves") or 0
     tickets = state.get("goal_tickets") or 0
     if not (state.get("execution_intent") == "goal"
@@ -897,13 +897,11 @@ def stop_checkpoint(project_root: Path | str, agent: str, reason: str = "",
     STOPPED with a missing/stale digest."""
     root = Path(project_root)
     now, utc = _now(), _utc_iso()
-    docs, state, board, log_tail = _read(root)
+    docs, state, _board, log_tail = _read(root)
     task = state.get("task")
     phase = state.get("phase")
-    if task and task != "none":
-        na = f"PHASE {phase} {task}"
-    else:
-        na = "saipen continue"
+    na = (f"PHASE {phase} {task}" if task and task != "none"
+          else "saipen continue")
 
     op_id = "stop-" + uuid4_hex8()
     event, line = _event_line(docs, log_tail, "DEC", None, agent,

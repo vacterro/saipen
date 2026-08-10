@@ -170,3 +170,10 @@
 - 10.08.26 20:56 [E-2927] [parent: E-2926] [op: transition-7f1f9eda] DEC: goal_tickets 3->4
 - 10.08.26 20:56 [E-2928] [parent: E-2927] [T-626] [agent: claude] [op: transition-f74d0217] RUN: employer evidence pass ready for commit and remote verification
 - 10.08.26 20:58 [E-2929] [parent: E-2928] [T-626] [agent: claude] [op: finish-adc39b16] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 10.08.26 21:01 [E-2930] [parent: E-2929] [T-627] [agent: claude] [op: ticket-b4d9554f] DEC: ticket added via SAIOPS
+- 10.08.26 21:02 [E-2931] [parent: E-2930] [T-627] [agent: claude] [op: claim-09a3e062] DEC: claimed via SAIOPS -- owner claude
+- 10.08.26 21:02 [E-2932] [parent: E-2931] [T-627] [agent: claude] [op: transition-524df767] RUN: 68 Ruff diagnostics reproduced across T-623 runtime and regression harness files
+- 10.08.26 21:22 [E-2933] [parent: E-2932] [T-627] [agent: claude] [op: transition-2bd0ff10] RUN: Ruff, core validator, scenarios, and validator red controls pass
+- 10.08.26 21:22 [E-2934] [parent: E-2933] [T-627] [agent: claude] [op: transition-523ff250] RUN: mechanical lint diff review found no behavior regressions
+- 10.08.26 21:22 [E-2935] [parent: E-2934] [op: transition-523ff250] DEC: goal_tickets 4->5
+- 10.08.26 21:22 [E-2936] [parent: E-2935] [T-627] [agent: claude] [op: transition-519d13ff] RUN: lint regression cleanup ready for CI verification

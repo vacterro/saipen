@@ -55,8 +55,7 @@ source-text assertions (e.g. naive string inclusion) to verify runtime logic.
 import ast
 import datetime
 from saipen_engine.phases import (ANY_FROM, TICKET_BEARING_PHASES,
-                                  VALID_TRANSITIONS,
-                                  transition_legal)
+                                  VALID_TRANSITIONS)
 import hashlib
 import io
 import json
@@ -2597,7 +2596,7 @@ if log_files:
                                 "cannot authorize fresh canonical work "
                                 "without current reproduction (DOGFOOD V, "
                                 "T-618)")
-                    except Exception:  # noqa: BLE001
+                    except Exception:
                         pass
             if _report_errors:
                 fail("improve report [improve-report] -- "
@@ -2608,7 +2607,7 @@ if log_files:
             else:
                 ok(f"improve seat report schema valid "
                    f"({len(_reports)} report(s) scanned)")
-        except Exception as _exc:  # noqa: BLE001
+        except Exception as _exc:
             fail("improve report [improve-report] -- scan failed: "
                  + str(_exc))
 
@@ -2826,7 +2825,7 @@ if log_files:
                    "a real finding/ticket, no unverified or INVALID/ALREADY_"
                    "FIXED finding produced a ticket, source_reports resolve "
                    "exactly")
-        except Exception as _exc:  # noqa: BLE001
+        except Exception as _exc:
             fail("core sweep [sweep-ticket-link] -- scan failed: "
                  + str(_exc))
 

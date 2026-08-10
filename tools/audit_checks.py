@@ -1057,14 +1057,17 @@ CASES: list[tuple[str, str, object, str]] = [
     # T-622: exact ordered five-level proof contract, including assignment.
     ("SAICRITIC drops PROVENANCE", "saipen/SAICRITIC.md",
      lambda t: t.replace(
-         "| PROVENANCE | does the evidence bind the exact source, session, run, finding and result it claims? |\n",
+         "| PROVENANCE | does the evidence bind the exact source, session, "
+         "run, finding and result it claims? |\n",
          ""),
      "saicritic"),
     ("SAICRITIC swaps GATE and PROVENANCE", "saipen/SAICRITIC.md",
      lambda t: t.replace(
          "| GATE | did the REQUIRED semantic/protocol gates actually occur? |\n"
-         "| PROVENANCE | does the evidence bind the exact source, session, run, finding and result it claims? |",
-         "| PROVENANCE | does the evidence bind the exact source, session, run, finding and result it claims? |\n"
+         "| PROVENANCE | does the evidence bind the exact source, session, "
+         "run, finding and result it claims? |",
+         "| PROVENANCE | does the evidence bind the exact source, session, "
+         "run, finding and result it claims? |\n"
          "| GATE | did the REQUIRED semantic/protocol gates actually occur? |"),
      "saicritic"),
     ("SAICRITIC duplicates UNIT", "saipen/SAICRITIC.md",

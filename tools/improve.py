@@ -483,7 +483,7 @@ def derive_status(report_ident: str, roster_text: str, report_text: str,
     different report's or different RUN's IMP-### is not coverage, and a bare
     appearance of the report identifier is not coverage either (DOGFOOD V,
     T-615: RUN-1/IMP-001 never satisfies RUN-2/IMP-001)."""
-    seat = re.sub(r"^saipen_improve_", "", Path(report_ident).stem)
+    _seat = re.sub(r"^saipen_improve_", "", Path(report_ident).stem)
     availability = "expected"
     if seat_id is None:
         owners = [_field(candidate, "seat_id")
@@ -599,11 +599,11 @@ def _ticket_exists(project_root: Path, ticket: str) -> bool:
         paths.append(log)
     if logs.is_dir():
         paths.extend(sorted(logs.glob("LOG-*.md")))
-    for path in paths:
-        if path.is_file() and ticket in path.read_text(
-                encoding="utf-8-sig"):
-            return True
-    return False
+    return any(
+        path.is_file()
+        and ticket in path.read_text(encoding="utf-8-sig")
+        for path in paths
+    )
 
 
 def _cycle_schema(manifest: Path) -> str:
