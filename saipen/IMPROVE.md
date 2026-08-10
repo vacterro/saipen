@@ -268,11 +268,15 @@ If it starts another historical self-audit, it fails.
 
 ## 10. Archive / clean semantics
 
-`saipen improve clean` archives with provenance and nothing else: it refuses
-while any finding is unswept or any disposition is missing, preserves original
-findings verbatim, and every archived report keeps the canonical ticket
-references pointing back at it. Partial or timed-out test evidence can never
-mark an IMP fixed.
+`saipen improve clean` is archive-with-provenance and NOTHING else: it
+refuses while any finding is unswept or any disposition is missing (naming
+the finding, red control 23), it preserves the original findings verbatim,
+and every archived report keeps the canonical ticket references that point
+back at it (the `[sweep-ticket-link]` check must still resolve an archived
+report's `source_reports` -- deleting SWEEP.md or the report to "clean up"
+breaks provenance, red control 24). Partial or timed-out test evidence can
+never mark an IMP fixed (a CONFIRMED disposition with `reproduced` other
+than `y` fails, red control 25).
 
 Prefer immutable cycle directories plus a compact index/archive marker over
 renaming paths that tickets reference. Do not create link rot as a cleanup

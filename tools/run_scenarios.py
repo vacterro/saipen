@@ -4019,6 +4019,27 @@ def run_improve_probes() -> tuple[list[str], int]:
     expect("sweep: an ACCIDENTAL_SUCCESS result recorded as PASS fails "
            "(red control 5, validator red)",
            validator_rc(acc_success) != 0, repr(validator_rc(acc_success)))
+    # T-559 archive-with-provenance: deleting SWEEP.md to "clean up" breaks an
+    # archived report's ticket provenance (red control 24); partial/timed-out
+    # evidence can never mark an IMP fixed (red control 25).
+    ok_archive = sweep_project(
+        ["- IMP-001 [CONFIRMED] T-900 report=saipen_improve_A.md "
+         "reproduced=y"],
+        ["T-900"], {"T-900": "IMP-001"}, _rep_text)
+    _arch_sweep = list((ok_archive / ".saipen" / "improve").rglob(
+        "SWEEP.md"))[0]
+    _arch_sweep.unlink()
+    expect("sweep: deleting SWEEP.md breaks archived-report ticket "
+           "provenance (red control 24, validator red)",
+           validator_rc(ok_archive) != 0, repr(validator_rc(ok_archive)))
+    partial_evidence = sweep_project(
+        ["- IMP-001 [CONFIRMED] T-900 report=saipen_improve_A.md "
+         "reproduced=partial"],
+        ["T-900"], {"T-900": "IMP-001"}, _rep_text)
+    expect("sweep: partial/timed-out evidence cannot mark an IMP fixed "
+           "(red control 25, validator red)",
+           validator_rc(partial_evidence) != 0,
+           repr(validator_rc(partial_evidence)))
 
     # ---- T-601: resolver race -- two processes resolving the same conflict
     # yield exactly one canonical settlement (WRITER_BUSY or a settled-journal

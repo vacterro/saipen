@@ -222,3 +222,10 @@
 - 10.08.26 00:54 [E-2683] [parent: E-2682] [op: transition-956731d1] DEC: goal_tickets 9->10
 - 10.08.26 00:54 [E-2684] [parent: E-2683] [T-558] [agent: claude] [op: transition-3b328050] RUN: REVIEW verdict DEC: SHIP -- diff reviewed no P0/P1
 - 10.08.26 00:54 [E-2685] [parent: E-2684] [T-558] [agent: claude] [op: finish-b7150c78] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 10.08.26 00:55 [E-2686] [parent: E-2685] [T-559] [agent: claude] [op: claim-1cd60b18] DEC: claimed via SAIOPS -- owner claude
+- 10.08.26 00:58 [E-2687] [parent: E-2686] [T-559] [agent: claude] [op: transition-f32d54ed] RUN: SCOUT done: archive-with-provenance contract -- IMPROVE.md section 10 refined (refuses unswept, preserves verbatim, provenance resolves, partial/timeout never fixes), boundary check extended (red 23 markers); probes red 24/25 (64/64)
+- 10.08.26 01:04 [E-2688] [parent: E-2687] [T-559] [agent: claude] [op: transition-92b92af9] RUN: VERIFY done: validate PASS, improve probes 64/64, audit 240/240 fresh
+- 10.08.26 01:04 [E-2689] [parent: E-2688] [T-559] [agent: claude] [op: transition-6a2015f9] RUN: verify re-run fresh
+- 10.08.26 01:04 [E-2690] [parent: E-2689] [op: transition-6a2015f9] DEC: goal_tickets 10->11
+- 10.08.26 01:04 [E-2691] [parent: E-2690] [T-559] [agent: claude] [op: transition-2ecc5d01] RUN: REVIEW verdict DEC: SHIP -- diff reviewed no P0/P1
+- 10.08.26 01:04 [E-2692] [parent: E-2691] [T-559] [agent: claude] [op: finish-774d40a7] DEC: ticket finished via SAIOPS -- completion (from SHIP)

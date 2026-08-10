@@ -3890,11 +3890,15 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
         # ADD, and `saipen improve verify` is delta-only and never re-enters a
         # full cycle (red controls 7/17/18/21).
         _imp_doc = _improve_doc.read_text(encoding="utf-8-sig")
+        _imp_doc_low = _imp_doc.lower()
         _imp_boundary_missing = []
         for _marker in ("writes only inside its own home",
                         "never silently enters ADD",
-                        "delta-only", "MUST NOT recurse"):
-            if _marker not in _imp_doc:
+                        "delta-only", "must not recurse",
+                        "refuses while any finding is unswept",
+                        "partial or timed-out test evidence",
+                        "preserves the original findings verbatim"):
+            if _marker.lower() not in _imp_doc_low:
                 _imp_boundary_missing.append(_marker)
         if _imp_boundary_missing:
             fail("cross-doc drift [improve-boundary] -- saipen/IMPROVE.md "
