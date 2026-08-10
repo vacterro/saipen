@@ -14,3 +14,4 @@
 - 10.08.26 10:48 [E-2771] [parent: E-2770] [op: transition-c880b0c2] DEC: goal_tickets 19->20
 - 10.08.26 10:48 [E-2772] [parent: E-2771] [T-610] [agent: claude] [op: transition-b181a898] RUN: REVIEW verdict DEC: SHIP -- one-line OUTBOX fix, no P0/P1
 - 10.08.26 10:48 [E-2773] [parent: E-2772] [T-610] [agent: claude] [op: finish-7f8e041d] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 10.08.26 10:48 [E-2774] [parent: E-2773] [T-610] [agent: claude] [op: checkpoint-b3151951] RUN: valve tripped at 20 tickets -- canonical WAIT set; mechanical bumps this wave: goal_waves 1->2 (HUNT->ADD), goal_tickets to 20 (T-603/607/606/604/612/611/610); pause awaiting re-authorization
