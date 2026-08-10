@@ -2414,11 +2414,21 @@ if log_files:
                         + "; a seat report is evidence, never canonical "
                         "BOARD state (red control 22)")
                 # red controls 1/2 (T-560): the audit MUST reload before it
-                # audits and never trusts previous conclusions -- a report
-                # whose source_head is stale (or fabricated) against the
-                # current HEAD is evidence of an audit that did not reload.
+                # audits and never trusts previous conclusions -- a report in
+                # an ACTIVE cycle whose source_head is stale (or fabricated)
+                # against the current HEAD is evidence of an audit that did
+                # not reload. A COMPLETED cycle's report is sealed historical
+                # evidence: its source_head records the tree it audited, and
+                # the ever-moving HEAD does not invalidate it retroactively.
+                _cycle_active = True
+                _man = _rep.parent.parent / "MANIFEST.md"
+                if _man.is_file():
+                    _mst = _man.read_text(encoding="utf-8-sig")
+                    if re.search(r"(?m)^cycle_status:\s*complete",
+                                 _mst):
+                        _cycle_active = False
                 _src_head = _imp_mod._field(_rt, "source_head")
-                if _src_head:
+                if _cycle_active and _src_head:
                     _cur_head = _git("rev-parse", "HEAD")[1].strip()
                     if _cur_head and _src_head not in (_cur_head,
                                                        _cur_head[:7]):
@@ -3925,6 +3935,23 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                      + "); an auditing seat writes only inside its own home, "
                      "improve never silently enters ADD, and verify is "
                      "delta-only without recursion (T-557)")
+
+        # T-603: SAICRITIC is the self-critique process doc. It must carry the
+        # four proof levels and the invariant, so the process it defines is
+        # mechanically anchored rather than prose nobody checks.
+        _saicritic_p = Path("saipen/SAICRITIC.md")
+        if _saicritic_p.is_file():
+            _st_t = _saicritic_p.read_text(encoding="utf-8-sig")
+            _st_missing = [m for m in (
+                "UNIT", "COMPOSITION", "CANONICAL", "GATE",
+                "VALID END STATE != PROOF OF REQUIRED PROCESS")
+                if m not in _st_t]
+            if _st_missing:
+                fail("cross-doc drift [saicritic] -- saipen/SAICRITIC.md "
+                     "must define the four proof levels and the invariant "
+                     "(missing: " + ", ".join(_st_missing)
+                     + "); a self-critique process with no named proof "
+                     "levels cannot classify findings (T-603)")
 
     # T-555: Improve seat reports are MECHANICALLY checkable, and T-556: Core
     # sweep is the only path from report to canonical work. Both scans run on
@@ -5818,6 +5845,7 @@ else:
         ("saipen/CONFORMANCE.md",    "re-enumeration + count + row-ID checks"),
         ("saipen/CONVERGE.md",       "convergence stage-order + closure-bar + post-K ordering checks"),
         ("saipen/IMPROVE.md",        "meta-control proof (no IMPROVE phase row, no phases/improve.md)"),
+        ("saipen/SAICRITIC.md",      "four proof levels + invariant classification check (T-603)"),
         ("saipen/OPS.md",            "mechanical-layer ownership doc (must state the semantic/mechanical boundary)"),
         ("saipen/phases/*.md",       "phase-enum sync + prescribed-WAIT category check"),
         ("extensions/**/*.md",       "prescribed-WAIT category check"),

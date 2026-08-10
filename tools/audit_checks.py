@@ -967,6 +967,10 @@ CASES: list[tuple[str, str, object, str]] = [
                "IMP-001 [P1] [LOGIC_ERROR] [observed] [ticket]\n"
                "expected: x\nactual: y\nevidence: z\n"),
      "improve report [improve-report]"),
+    # T-603: SAICRITIC.md must carry the four proof levels and the invariant.
+    ("SAICRITIC drops the GATE proof level", "saipen/SAICRITIC.md",
+     lambda t: t.replace("GATE", "GEAT").replace("| GATE |", "| GEAT |"),
+     "saicritic"),
     # NITRO: OPS.md is only reachable through INDEX. Drop the row and the doc
     # still ships, still validates its own text, and no cold agent ever finds
     # it -- the RFC routing trap in a new file.
