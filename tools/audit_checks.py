@@ -932,6 +932,15 @@ CASES: list[tuple[str, str, object, str]] = [
      lambda t: t.rstrip() + "\n\nIMP-001 [P1] [LOGIC_ERROR] [proven] "
                             "[ticket]\nexpected: x\nactual: y\nevidence: z\n",
      "improve-state-purity"),
+    # T-554: the improve command family has a closed route set; an undeclared
+    # verb is rejected, `improve clean` never means CLEAN, no shortcut key.
+    ("improve command family loses the clean route", CORE,
+     lambda t: t.replace("`saipen improve clean`", "`saipen improve cleanx`"),
+     "improve-command-family"),
+    ("improve clean route loses its never-CLEAN statement", CORE,
+     lambda t: t.replace("never enters the CLEAN phase",
+                         "may archive reports"),
+     "improve-command-family"),
     # NITRO: OPS.md is only reachable through INDEX. Drop the row and the doc
     # still ships, still validates its own text, and no cold agent ever finds
     # it -- the RFC routing trap in a new file.

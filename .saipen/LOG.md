@@ -187,3 +187,10 @@
 - 09.08.26 23:59 [E-2648] [parent: E-2647] [op: transition-9f472d7f] DEC: goal_tickets 4->5
 - 09.08.26 23:59 [E-2649] [parent: E-2648] [T-553] [agent: claude] [op: transition-25dab32a] RUN: REVIEW verdict DEC: SHIP -- verify re-run fresh; diff reviewed (validator check + red cases + IMPROVE.md note) no P0/P1
 - 09.08.26 23:59 [E-2650] [parent: E-2649] [T-553] [agent: claude] [op: finish-cc4b25c6] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 09.08.26 23:59 [E-2651] [parent: E-2650] [T-554] [agent: claude] [op: claim-8843ad38] DEC: claimed via SAIOPS -- owner claude
+- 10.08.26 00:03 [E-2652] [parent: E-2651] [T-554] [agent: claude] [op: transition-34674a98] RUN: SCOUT done: CORE 1.10 improve row already defines all five routes + no-shortcut + clean!=CLEAN; added [improve-command-family] validator check + 2 audit red cases; shortcut key count unchanged (validate locale callout check green)
+- 10.08.26 00:09 [E-2653] [parent: E-2652] [T-554] [agent: claude] [op: transition-c3dd8113] RUN: VERIFY done: validate PASS, audit 235/235 (2 new improve-command-family red cases), shortcut key count unchanged
+- 10.08.26 00:09 [E-2654] [parent: E-2653] [T-554] [agent: claude] [op: transition-3379875d] RUN: verify re-run: validate + audit green
+- 10.08.26 00:09 [E-2655] [parent: E-2654] [op: transition-3379875d] DEC: goal_tickets 5->6
+- 10.08.26 00:09 [E-2656] [parent: E-2655] [T-554] [agent: claude] [op: transition-1c34686b] RUN: REVIEW verdict DEC: SHIP -- diff reviewed (validator check + red cases) no P0/P1
+- 10.08.26 00:09 [E-2657] [parent: E-2656] [T-554] [agent: claude] [op: finish-c871429a] DEC: ticket finished via SAIOPS -- completion (from SHIP)

@@ -3694,6 +3694,35 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                  ".saipen/improve/, judgment lives in SWEEP.md -- never in "
                  "canonical STATE (T-553)")
 
+        # T-554: saipen improve is a META-CONTROL command family with a closed
+        # route set. All five routes must resolve in CORE section 1.10 and in
+        # this command-surface section; an undeclared `saipen improve <word>`
+        # is rejected rather than guessed; `saipen improve clean` is archive
+        # with provenance and NEVER means or enters the CLEAN phase; no
+        # repeated-letter shortcut is assigned (the shortcut key count stays
+        # byte-unchanged).
+        _improve_rfc_t = _read_rfc(_tools_parent / "saipen" / "RFC.md")
+        _improve_routes = ("`saipen improve status`", "`saipen improve sweep`",
+                           "`saipen improve verify`", "`saipen improve clean`")
+        _missing_routes = [r for r in _improve_routes if r not in _improve_rfc_t]
+        if "`saipen improve`" not in _improve_rfc_t or _missing_routes:
+            fail("cross-doc drift [improve-command-family] -- saipen improve "
+                 "must resolve all five routes in section 1.10 (missing: "
+                 + ", ".join(["`saipen improve`"] + _missing_routes) + "); an "
+                 "undeclared `saipen improve <word>` is rejected rather than "
+                 "guessed (T-554)")
+        _imp_sec = _improve_rfc_t[_improve_rfc_t.find("saipen improve"):]
+        _imp_sec = _imp_sec[:_imp_sec.find("\n- `saipen improve") + 1] \
+            if "\n- `saipen improve" in _imp_sec else _imp_sec[:2000]
+        if "never enters the CLEAN phase" not in _imp_sec:
+            fail("cross-doc drift [improve-command-family] -- the saipen "
+                 "improve clean route must state it NEVER enters the CLEAN "
+                 "phase (archive/retention meta-operation, T-554)")
+        if "no repeated-letter shortcut" not in _imp_sec.lower():
+            fail("cross-doc drift [improve-command-family] -- the saipen "
+                 "improve row must state no repeated-letter shortcut is "
+                 "assigned (shortcut key count stays byte-unchanged, T-554)")
+
         # B. Every runtime file the protocol references must exist in the home.
         # Canonical source is saipen/MANIFEST.json; the hardcoded list below
         # is the fallback for homes that predate the manifest (v7.190.0+).
