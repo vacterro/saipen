@@ -1,6 +1,8 @@
 # Board
 ## DOING
 ## TODO
+- [ ] T-614 [P1] Continue the Improve backlog + remaining protocol work after the Improve meta-control wave: the Improve-wave backlog tickets still open (T-553..T-561 remain done; any Improve-spec follow-ups the SAICRITIC cycles recorded), the HELD tickets (T-442..T-451 Crew, T-473 Rosary, T-575 v9 gate, T-576 orphaned recovery scripts), and the external producer obligations (T-609 saiwiki regeneration). One ticket per concept, dependency-ordered. | verify: the remaining open tickets are reviewed and either advanced, held with reason, or pruned with evidence; the board is honest about what remains; gates green
+- [ ] T-613 [P1] Evaluate v8 after the NITRO/Improve foundation: the Improve meta-control wave, SAICRITIC, and two real cycles are complete and mechanical. Decide the v8 direction with evidence: the Crew backlog (T-442..T-451, Concurrent Mode design), the SAICRITIC findings that remain open (T-609 producer-boundary, T-473 held), and the platform lessons from the NITRO layers. Record the evaluation and the next real wave. | verify: a v8 evaluation decision recorded in KNOWLEDGE with fresh evidence from the completed NITRO + Improve waves; the Crew/Concurrent backlog and the open SAICRITIC findings named with their disposition; gates green
 
 
 
