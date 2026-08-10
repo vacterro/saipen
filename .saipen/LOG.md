@@ -201,3 +201,10 @@
 - 10.08.26 00:18 [E-2662] [parent: E-2661] [op: transition-8794010b] DEC: goal_tickets 6->7
 - 10.08.26 00:18 [E-2663] [parent: E-2662] [T-555] [agent: claude] [op: transition-d5f1da99] RUN: REVIEW verdict DEC: SHIP -- diff reviewed (validate_report completion-bar + validator scan + red cases) no P0/P1
 - 10.08.26 00:18 [E-2664] [parent: E-2663] [T-555] [agent: claude] [op: finish-2ef3e0b9] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 10.08.26 00:19 [E-2665] [parent: E-2664] [T-556] [agent: claude] [op: claim-8ba4c180] DEC: claimed via SAIOPS -- owner claude
+- 10.08.26 00:26 [E-2666] [parent: E-2665] [T-556] [agent: claude] [op: transition-c2671d59] RUN: SCOUT done: sweep-link design -- source_reports ticket field (CORE 1.2 + KNOWN_FIELDS + board.schema.json + engine board parser), [sweep-ticket-link] validator check (red 10/12/13/19/20), dedup scenario (red 11); 5 sweep probes + 3 report probes
+- 10.08.26 00:36 [E-2667] [parent: E-2666] [T-556] [agent: claude] [op: transition-9b9b262f] RUN: VERIFY done: validate PASS, full suite green (58 improve + 171 nitro-integrity), sweep red controls 10/11/12/13/19/20 proven
+- 10.08.26 00:36 [E-2668] [parent: E-2667] [T-556] [agent: claude] [op: transition-732bd45e] RUN: verify re-run fresh: validate + full suite green
+- 10.08.26 00:36 [E-2669] [parent: E-2668] [op: transition-732bd45e] DEC: goal_tickets 7->8
+- 10.08.26 00:36 [E-2670] [parent: E-2669] [T-556] [agent: claude] [op: transition-c607b5ac] RUN: REVIEW verdict DEC: SHIP -- diff reviewed (source_reports field x4 owners + sweep-link check + probes) no P0/P1; date-rollover probe bug fixed
+- 10.08.26 00:36 [E-2671] [parent: E-2670] [T-556] [agent: claude] [op: finish-8b8f9d89] DEC: ticket finished via SAIOPS -- completion (from SHIP)

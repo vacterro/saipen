@@ -3877,6 +3877,103 @@ def run_improve_probes() -> tuple[list[str], int]:
                for e in validate_report(partial_full)),
            repr(validate_report(partial_full)))
 
+    # ---- T-556: Core sweep is the only path from report to canonical work.
+    # Sweep dispositions are mechanically linked to tickets: CONFIRMED must
+    # reference a real board ticket and be reproduced; INVALID/ALREADY_FIXED
+    # must never carry a ticket; a disposition must still resolve to its
+    # report's finding; a ticket's source_reports must resolve to SWEEP.md;
+    # one root cause across reports produces ONE ticket.
+    def sweep_project(dispositions: list[str], tickets: list[str],
+                      source_reports: dict[str, str],
+                      report_text: str) -> Path:
+        _root = project_fixture("saipen-sweep")
+        (_root / ".saipen" / "STATE.md").write_text(
+            "---\nphase: DONE\ntask: none\nnext_action: \"saipen continue\"\n"
+            "blocker: \"\"\ntransition_from: SHIP\nsaipen_version: 7\n"
+            "schema_version: 3\nlast_event: 900\nstyle_contract: ded-4ae736e4\n"
+            "saipen_home: \".\"\nagent: probe\nmode: full\n"
+            "updated: 2026-08-09T00:00:00Z\n---\n", encoding="utf-8")
+        _cycle = register_cycle(_root, "imp-sweep",
+                                "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
+        _rep = _cycle / "seat1" / "saipen_improve_A.md"
+        _rep.parent.mkdir(parents=True, exist_ok=True)
+        _rep.write_text(report_text, encoding="utf-8")
+        (_cycle / "SWEEP.md").write_text(
+            "# SWEEP\n" + "\n".join(dispositions) + "\n", encoding="utf-8")
+        board_lines = ["# Board", "## DOING", "## TODO"]
+        for _tid, _sr in source_reports.items():
+            board_lines.append(f"- [ ] {_tid} [P1] swept ticket | verify: "
+                               f"probe"
+                               + (f" | source_reports: {_sr}" if _sr else ""))
+        board_lines += ["## DONE", "## BLOCKED"]
+        (_root / ".saipen" / "BOARD.md").write_text(
+            "\n".join(board_lines) + "\n", encoding="utf-8")
+        return _root
+
+    def validator_rc(_root: Path) -> int:
+        return subprocess.run(
+            [sys.executable, str(VALIDATOR), "--project-root", str(_root)],
+            cwd=str(_root), capture_output=True, text=True, errors="replace",
+            timeout=120).returncode
+
+    _rep_header = ("agent: probe\nrole: core\nmodel_or_runtime: test\n"
+                   "project: PROJ\nsaipen_version: 7.220.0\n"
+                   "protocol_fingerprint: deadbeef\nsource_head: abc\n"
+                   "source_tree_fingerprint: beef\n"
+                   "context_scope: tools/\ncontext_available: partial\n"
+                   "report_status: complete\n\n")
+    _rep_text = (_rep_header
+                 + "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+                 + "expected: x\nactual: y\nevidence: z\n"
+                 + "IMP-002 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+                 + "expected: x\nactual: y\nevidence: z\n"
+                 + "IMP-003 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+                 + "expected: x\nactual: y\nevidence: z\n")
+    ok_root = sweep_project(
+        ["- IMP-001 [CONFIRMED] T-900 report=saipen_improve_A.md "
+         "reproduced=y",
+         "- IMP-002 [CONFIRMED] T-900 report=saipen_improve_A.md "
+         "reproduced=y",
+         "- IMP-003 [CONFIRMED] T-900 report=saipen_improve_A.md "
+         "reproduced=y"],
+        ["T-900"],
+        {"T-900": "IMP-001,IMP-002,IMP-003"}, _rep_text)
+    expect("sweep: three reports' root cause deduplicates into ONE ticket "
+           "(red control 11, validator green)",
+           validator_rc(ok_root) == 0,
+           validator_rc(ok_root))
+    bad10 = sweep_project(
+        ["- IMP-001 [CONFIRMED] T-900 report=saipen_improve_A.md "
+         "reproduced=n"],
+        ["T-900"], {"T-900": "IMP-001"}, _rep_text)
+    expect("sweep: an unverified finding cannot produce a ticket (red "
+           "control 10, validator red)",
+           validator_rc(bad10) != 0, repr(validator_rc(bad10)))
+    bad12 = sweep_project(
+        ["- IMP-001 [INVALID] T-900 report=saipen_improve_A.md "
+         "reproduced=n"],
+        ["T-900"], {"T-900": "IMP-001"}, _rep_text)
+    expect("sweep: an INVALID finding must never produce a ticket (red "
+           "control 12, validator red)",
+           validator_rc(bad12) != 0, repr(validator_rc(bad12)))
+    bad20 = sweep_project(
+        ["- IMP-001 [CONFIRMED] T-900 report=saipen_improve_A.md "
+         "reproduced=y"],
+        ["T-900"], {"T-900": "IMP-999"}, _rep_text)
+    expect("sweep: an unresolvable source_reports ref fails (red control 20, "
+           "validator red)",
+           validator_rc(bad20) != 0, repr(validator_rc(bad20)))
+    bad19 = sweep_project(
+        ["- IMP-001 [CONFIRMED] T-900 report=saipen_improve_A.md "
+         "reproduced=y"],
+        ["T-900"], {"T-900": "IMP-001"},
+        _rep_header
+        + "IMP-002 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+        + "expected: x\nactual: y\nevidence: z\n")
+    expect("sweep: an edited-away original finding loses its disposition "
+           "(red control 19, validator red)",
+           validator_rc(bad19) != 0, repr(validator_rc(bad19)))
+
     # ---- T-601: resolver race -- two processes resolving the same conflict
     # yield exactly one canonical settlement (WRITER_BUSY or a settled-journal
     # refusal for the loser, never two RESOLVED).
@@ -4921,9 +5018,11 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            spawn_res.get("ok") and spawn_res.get("code") == "SPAWNED"
            and sub_state_path.is_file(), repr(spawn_res))
     st_spawn = sub_state_path.read_text(encoding="utf-8")
+    import datetime as _dt
+    _today_utc = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT")
     expect("spawned sub has its own agent + real updated timestamp",
            "agent: saiscout" in st_spawn
-           and "2026-08-09T" in st_spawn
+           and _today_utc in st_spawn
            and "2026-01-01" not in st_spawn, repr(st_spawn[-200:]))
     dup = subs.sub_spawn(sub_root, "saiscout", home)
     expect("sub spawn refuses an existing instance, never overwrites",

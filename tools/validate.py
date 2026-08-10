@@ -72,7 +72,7 @@ from userperson import validate_profile as _validate_userperson_profile
 from improve import validate_report as _validate_improve_report
 # NITRO M1: the shared mechanical parsers. validate.py and the engine consume
 # the SAME implementation by construction -- no parser drift (T-578).
-from saipen_engine.board import TICKET_RE
+from saipen_engine.board import TICKET_RE, parse_board
 from saipen_engine.log import LOG_RE
 from saipen_engine.state import parse_frontmatter
 
@@ -1506,7 +1506,7 @@ if not board_path.is_file():
 
 REQUIRED_HEADINGS = ["## DOING", "## TODO", "## DONE", "## BLOCKED"]
 KNOWN_FIELDS = {"needs", "owner", "claim_time", "blocker", "verify",
-                "review_passes", "verify_attempts"}
+                "review_passes", "verify_attempts", "source_reports"}
 # The cap number belongs to phases/verify.md, so it is read from there rather
 # than copied here. A missing anchor is a FAIL at the check below, never a
 # silent fallback: a cap this file guessed would be a second source of truth,
@@ -2380,6 +2380,123 @@ if log_files:
                          f"boundary (first SHIP-finish E-{_gate_boundary[0]}); "
                          "a ticket must pass REVIEW -> SHIP before finish, and "
                          "skipped gates must never produce DONE (T-602)")
+
+    # T-555: Improve seat reports are MECHANICALLY checkable. Every report
+    # under .saipen/improve/ is scanned with improve.py's own validate_report
+    # (the same grammar the report consumer reads): a finding without an
+    # observable expected/actual/evidence triple is rejected, a class/severity
+    # outside the closed set is rejected, report_status: complete over an
+    # unmet completion bar is rejected, and context_available: complete over a
+    # partial or empty scope is rejected. NO_FINDINGS with a stated scope
+    # passes.
+    _imp_root = Path(".saipen/improve")
+    if _imp_root.is_dir():
+        try:
+            import improve as _imp_mod
+            _report_errors = []
+            _reports = sorted(_imp_root.rglob("saipen_improve_*.md"))
+            for _rep in _reports:
+                _rt = _rep.read_text(encoding="utf-8-sig")
+                _errs = list(_imp_mod.validate_report(_rt))
+                for _e in _errs:
+                    _report_errors.append(f"{_rep}: {_e}")
+            if _report_errors:
+                fail("improve report [improve-report] -- "
+                     + "; ".join(_report_errors[:6])
+                     + "; a finding is rejected, not softened; "
+                     "report_status: complete requires the completion bar; "
+                     "a partial scope can never claim full context (T-555)")
+            else:
+                ok(f"improve seat report schema valid "
+                   f"({len(_reports)} report(s) scanned)")
+        except Exception as _exc:  # noqa: BLE001
+            fail("improve report [improve-report] -- scan failed: "
+                 + str(_exc))
+
+    # T-556: Core sweep is the only path from report to canonical work. The
+    # SWEEP ledger dispositions are mechanically linked to canonical tickets:
+    # a CONFIRMED finding must reference an existing board ticket and be
+    # reproduced (an unverified finding can never authorize a ticket -- red
+    # control 10); an INVALID/ALREADY_FIXED/NOT_REPRODUCED finding must never
+    # carry a ticket (red controls 12/13); a disposition's composite identity
+    # must still exist in the report it names (an edited/removed original
+    # finding loses its disposition -- red control 19); and a ticket's
+    # `source_reports:` field must resolve to real SWEEP dispositions (red
+    # control 20).
+    _imp_root = Path(".saipen/improve")
+    if _imp_root.is_dir():
+        try:
+            import improve as _imp_mod
+            _board_tickets = parse_board(
+                Path(".saipen/BOARD.md").read_text(
+                    encoding="utf-8-sig"))["tickets"]
+            _sweep_errors = []
+            _sweep_texts = {}
+            for _sweep in sorted(_imp_root.rglob("SWEEP.md")):
+                _st = _sweep.read_text(encoding="utf-8-sig")
+                _sweep_texts[_sweep] = _st
+                _cycle_dir = _sweep.parent
+                for _line_no, _line in enumerate(_st.splitlines(), 1):
+                    _m = re.match(
+                        r"^- IMP-(\d+) \[([A-Z_]+)\]\s+(\S+)\s+"
+                        r"report=([^\s]+)\s+reproduced=(\S+)", _line.strip())
+                    if not _m:
+                        continue
+                    _imp, _disp, _ticket, _report, _repro = _m.groups()
+                    if _disp == "CONFIRMED":
+                        if _ticket == "-" or _ticket not in _board_tickets:
+                            _sweep_errors.append(
+                                f"{_sweep}:{_line_no} CONFIRMED IMP-{_imp} "
+                                "has no canonical board ticket; Core sweep is "
+                                "the only path from a report to canonical "
+                                "work")
+                        if _repro != "y":
+                            _sweep_errors.append(
+                                f"{_sweep}:{_line_no} IMP-{_imp} produced "
+                                f"ticket {_ticket} with reproduced={_repro}; "
+                                "an unverified finding cannot authorize a "
+                                "ticket")
+                    elif _disp in ("INVALID", "ALREADY_FIXED",
+                                   "NOT_REPRODUCED"):
+                        if _ticket != "-":
+                            _sweep_errors.append(
+                                f"{_sweep}:{_line_no} {_disp} IMP-{_imp} "
+                                f"carries ticket {_ticket}; a {_disp} finding "
+                                "must never produce a ticket")
+                    _rep_files = list(_cycle_dir.rglob(_report))
+                    if _rep_files:
+                        _rep_file = _rep_files[0]
+                        if f"IMP-{_imp}" not in _rep_file.read_text(
+                                encoding="utf-8-sig"):
+                            _sweep_errors.append(
+                                f"{_sweep}:{_line_no} disposition IMP-{_imp} "
+                                "names a finding absent from its report; an "
+                                "edited or removed original finding cannot "
+                                "keep its disposition")
+            # red control 20: every `source_reports:` ref must resolve to a
+            # real SWEEP disposition.
+            _all_sweep_text = "\n".join(_sweep_texts.values())
+            for _tid, _t in _board_tickets.items():
+                _sr = _t.get("fields", {}).get("source_reports", "")
+                if not _sr:
+                    continue
+                for _ref in re.split(r"[, ]+", _sr):
+                    if not _ref.strip():
+                        continue
+                    if _ref not in _all_sweep_text:
+                        _sweep_errors.append(
+                            f"{_tid} source_reports: {_ref} resolves to no "
+                            "SWEEP disposition (red control 20)")
+            if _sweep_errors:
+                fail("core sweep [sweep-ticket-link] -- "
+                     + "; ".join(_sweep_errors[:6]))
+            else:
+                ok("core sweep linkage valid: every disposition resolves to "
+                   "a real finding/ticket, no unverified or INVALID/ALREADY_"
+                   "FIXED finding produced a ticket, source_reports resolve")
+        except Exception as _exc:  # noqa: BLE001
+            fail("core sweep [sweep-ticket-link] -- scan failed: "
+                 + str(_exc))
 
     # § 1.10 orders `saipen status` to report "the result of the last
     # tools/validate.py run if one is recorded in LOG.md" -- a duty handed out
@@ -3723,37 +3840,10 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                  "improve row must state no repeated-letter shortcut is "
                  "assigned (shortcut key count stays byte-unchanged, T-554)")
 
-    # T-555: Improve seat reports are MECHANICALLY checkable. Every report
-    # under .saipen/improve/ is scanned with improve.py's own validate_report
-    # (the same grammar the report consumer reads): a finding without an
-    # observable expected/actual/evidence triple is rejected, a class/severity
-    # outside the closed set is rejected, report_status: complete over an
-    # unmet completion bar is rejected, and context_available: complete over a
-    # partial or empty scope is rejected. NO_FINDINGS with a stated scope
-    # passes.
-    _imp_root = Path(".saipen/improve")
-    if _imp_root.is_dir():
-        try:
-            import improve as _imp_mod
-            _report_errors = []
-            _reports = sorted(_imp_root.rglob("saipen_improve_*.md"))
-            for _rep in _reports:
-                _rt = _rep.read_text(encoding="utf-8-sig")
-                _errs = list(_imp_mod.validate_report(_rt))
-                for _e in _errs:
-                    _report_errors.append(f"{_rep}: {_e}")
-            if _report_errors:
-                fail("improve report [improve-report] -- "
-                     + "; ".join(_report_errors[:6])
-                     + "; a finding is rejected, not softened; "
-                     "report_status: complete requires the completion bar; "
-                     "a partial scope can never claim full context (T-555)")
-            else:
-                ok(f"improve seat report schema valid "
-                   f"({len(_reports)} report(s) scanned)")
-        except Exception as _exc:  # noqa: BLE001
-            fail("improve report [improve-report] -- scan failed: "
-                 + str(_exc))
+    # T-555: Improve seat reports are MECHANICALLY checkable, and T-556: Core
+    # sweep is the only path from report to canonical work. Both scans run on
+    # ANY project with a .saipen/improve/ tree (a consuming project included),
+    # so they live at top level, not under the SAIPEN-home-only guard above.
 
         # B. Every runtime file the protocol references must exist in the home.
         # Canonical source is saipen/MANIFEST.json; the hardcoded list below

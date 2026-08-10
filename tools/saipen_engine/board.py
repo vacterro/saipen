@@ -8,7 +8,8 @@ REQUIRED_HEADINGS = ["## DOING", "## TODO", "## DONE", "## BLOCKED"]
 TICKET_RE = re.compile(r"^- \[([ x/])\] (T-\d+)\s+(.*)$")
 PIPE_SENTINEL = "\x00"
 KNOWN_FIELDS = frozenset({"needs", "owner", "claim_time", "blocker", "verify",
-                          "review_passes", "verify_attempts"})
+                          "review_passes", "verify_attempts",
+                          "source_reports"})
 
 
 def parse_board(text: str) -> dict:
