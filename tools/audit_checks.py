@@ -1224,10 +1224,10 @@ CASES: list[tuple[str, str, object, str]] = [
                     "workable ticket\n", 1))]),
      "session-level BLOCKED is reserved for"),
     ("CHANGELOG entries fall out of descending order", "CHANGELOG.md",
-     # 7.196.0 was the old anchor; it has been sealed into the archive, so the
+     # 7.206.0 was the old anchor; it has been sealed into the archive, so the
      # mutation became a no-op. A mid-file entry is bumped above the head so
      # only the descending-order rung fires, never the head-vs-VERSION one.
-     replace("## 7.206.0", "## 7.300.0"),
+     replace("## 7.212.0", "## 7.300.0"),
      "changelog-order"),
     ("clean.md loses the pre-move reference sweep",
      "saipen/phases/clean.md",
