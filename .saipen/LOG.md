@@ -103,3 +103,17 @@
 - 10.08.26 15:05 [E-2860] [parent: E-2859] [T-464] [agent: claude] [op: transition-087a96c8] RUN: RUN: SHIP: board prune landed
 - 10.08.26 15:05 [E-2861] [parent: E-2860] [T-464] [agent: claude] [op: finish-93064d39] DEC: ticket finished via SAIOPS -- completion (from SHIP)
 - 10.08.26 15:05 [E-2862] [parent: E-2861] [T-613] [agent: claude] [op: checkpoint-7c693b3d] DEC: DEC: T-613 needs: T-614 bound (v8 evaluation waits on the backlog/foundation review); board-soft-cap cleared at 12.7 KB so T-464 closed on current evidence
+- 10.08.26 15:07 [E-2863] [parent: E-2862] [T-614] [agent: claude] [op: claim-ed6c4518] DEC: claimed via SAIOPS -- owner claude
+- 10.08.26 15:07 [E-2864] [parent: E-2863] [T-614] [agent: claude] [op: transition-bda52242] RUN: RUN: BUILD complete: backlog review -- every remaining open ticket reviewed; dispositions recorded (see KNOWLEDGE/backlog_review_v8.md)
+- 10.08.26 15:07 [E-2865] [parent: E-2864] [T-614] [agent: claude] [op: transition-ba815006] RUN: RUN: VERIFY: board honest, gates green, dispositions with evidence
+- 10.08.26 15:07 [E-2866] [parent: E-2865] [T-614] [agent: claude] [op: transition-56e4ced3] RUN: RUN: REVIEW: review evidence reviewed, no P0/P1
+- 10.08.26 15:07 [E-2867] [parent: E-2866] [op: transition-56e4ced3] DEC: goal_tickets 10->11
+- 10.08.26 15:07 [E-2868] [parent: E-2867] [T-614] [agent: claude] [op: transition-75d210ff] RUN: RUN: SHIP: backlog review landed
+- 10.08.26 15:07 [E-2869] [parent: E-2868] [T-614] [agent: claude] [op: finish-fc7d37cd] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 10.08.26 15:10 [E-2870] [parent: E-2869] [T-613] [agent: claude] [op: claim-5b4c9e67] DEC: claimed via SAIOPS -- owner claude
+- 10.08.26 15:10 [E-2871] [parent: E-2870] [T-613] [agent: claude] [op: transition-2a09dac4] RUN: RUN: BUILD complete: v8 evaluation recorded in KNOWLEDGE/v8_evaluation.md from the repaired foundation -- gate T-442 conditions satisfiable, Crew backlog next, open SAICRITIC findings disposed
+- 10.08.26 15:10 [E-2872] [parent: E-2871] [T-613] [agent: claude] [op: transition-4817a745] RUN: RUN: VERIFY: fresh gates green (validate, scenarios, audits, parity), evaluation evidence current
+- 10.08.26 15:10 [E-2873] [parent: E-2872] [T-613] [agent: claude] [op: transition-d3ac2b8b] RUN: RUN: REVIEW: evaluation diff reviewed, no P0/P1
+- 10.08.26 15:10 [E-2874] [parent: E-2873] [op: transition-d3ac2b8b] DEC: goal_tickets 11->12
+- 10.08.26 15:10 [E-2875] [parent: E-2874] [T-613] [agent: claude] [op: transition-806e61d1] RUN: RUN: SHIP: v8 evaluation landed
+- 10.08.26 15:10 [E-2876] [parent: E-2875] [T-613] [agent: claude] [op: finish-d6a4b47a] DEC: ticket finished via SAIOPS -- completion (from SHIP)
