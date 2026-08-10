@@ -58,10 +58,10 @@ from freshness import (FreshnessError, SourceIdentity,
                        compute_source_identity)
 from sub_clean import sub_clean_blockers
 from improve import (allocate_cycle_id, append_run, complete_cycle,
-                     complete_report, create_cycle, create_report, cycle_dir,
-                     derive_status, register_cycle, register_seat,
-                     resolve_report_path, validate_manifest, validate_report,
-                     write_sweep_entry)
+                      complete_report, create_cycle, create_report, cycle_dir,
+                      derive_status, prepare_audit_seat, register_cycle, register_seat,
+                      resolve_report_path, validate_manifest, validate_report,
+                      write_sweep_entry)
 from userperson import (merge_profile, onboarding_questions, parse_profile,
                         project_profile, remove_preference, render_profile,
                         validate_profile)
@@ -3975,6 +3975,7 @@ def run_improve_probes() -> tuple[list[str], int]:
             "updated: 2026-08-09T00:00:00Z\n---\n", encoding="utf-8")
         _cycle = register_cycle(_root, "imp-sweep",
                                 "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
+        register_seat(_cycle, "seat1", "core", "saipen_improve_A.md")
         _rep = _cycle / "seat1" / "saipen_improve_A.md"
         _rep.parent.mkdir(parents=True, exist_ok=True)
         _rep.write_text(report_text, encoding="utf-8")
@@ -4120,16 +4121,15 @@ def run_improve_probes() -> tuple[list[str], int]:
            "(red control 25, validator red)",
            validator_rc(partial_evidence) != 0,
            repr(validator_rc(partial_evidence)))
-    # T-560 coverage: red controls 1/2 (reload-before-audit), 8 (one-report
-    # one-owner), 14 (confidence never overrides Core).
+    # Seat directories own report identity. Equal basenames in different seat
+    # homes are distinct reports, not shared ownership.
     shared_roster = ("# IMPROVE CYCLE ROSTER\n"
                      "seat_id: seat-a\nrole: core\nreport_path: a.md\n"
                      "availability: expected\n"
                      "seat_id: seat-b\nrole: core\nreport_path: a.md\n"
                      "availability: expected\n")
-    expect("improve roster: one report has one owner (red control 8)",
-           any("one report has one owner" in e
-               for e in validate_manifest(shared_roster)),
+    expect("improve roster: same basename in distinct seat homes is valid",
+           validate_manifest(shared_roster) == [],
            repr(validate_manifest(shared_roster)))
     proven_unverified = sweep_ticket_project("LOGIC_ERROR", {},
                                              reproduced="n")
@@ -4284,6 +4284,269 @@ def run_improve_probes() -> tuple[list[str], int]:
            "read-only for STATE)",
            (meta_root / ".saipen" / "STATE.md").read_bytes()
            == state_before_meta)
+    _admit_journal = json.loads((meta_root / ".saipen" / "recovery" / "ops"
+                                 / _bare_data["op_id"]
+                                 / "operation.json").read_text(encoding="utf-8"))
+    expect("Improve admission journals roster and report as one operation",
+           _admit_journal.get("operation") == "improve_admit"
+           and len(_admit_journal.get("targets", [])) == 2
+           and _admit_journal.get("status") == "COMMITTED",
+           repr(_admit_journal))
+    _crash_root = project_fixture("saipen-admit-crash-")
+    import saipen_engine.journal as _admit_journal_module
+
+    def _crash_between_admission_targets(stage: str) -> None:
+        if stage == "manifest":
+            raise SystemExit(91)
+
+    with mock.patch.object(_admit_journal_module, "_crash_after",
+                           side_effect=_crash_between_admission_targets):
+        try:
+            prepare_audit_seat(
+                _crash_root, agent_family="probe", role="core",
+                session_id="probe-crash", project_name="SAIPEN",
+                model_or_runtime="probe", protocol_fingerprint="probe",
+                context_scope="atomic admission crash control")
+            _admit_crashed = False
+        except SystemExit:
+            _admit_crashed = True
+    _pending_admit = pending_ops(_crash_root)
+    _pending_admit_record = Journal(
+        _crash_root, _pending_admit[0]["op_id"]).read() \
+        if _pending_admit else {}
+    _crash_manifest_exists = any(
+        (_crash_root / target["path"]).is_file()
+        for target in _pending_admit_record.get("targets", [])
+        if target.get("role") == "manifest")
+    _crash_report_absent = all(
+        not (_crash_root / target["path"]).exists()
+        for target in _pending_admit_record.get("targets", [])
+        if target.get("role") == "report")
+    _admit_recovered = recover(
+        _crash_root, _pending_admit[0]["op_id"]) if _pending_admit else {}
+    _recovered_targets_exist = all(
+        (_crash_root / target["path"]).is_file()
+        for target in _pending_admit_record.get("targets", [])) \
+        if _pending_admit else False
+    expect("admission crash between roster/report rolls forward both targets",
+           _admit_crashed and _crash_manifest_exists and _crash_report_absent
+           and _admit_recovered.get("ok") and _recovered_targets_exist
+           and not pending_ops(_crash_root),
+           repr((_pending_admit, _admit_recovered)))
+
+    # ---- PRE-v8 DOGFOOD VI (T-623): role/session admission contract.
+    def _prepare(*options: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [sys.executable, str(HOME / "tools" / "saipen.py"), "improve",
+             *options, "--json"], cwd=str(meta_root), capture_output=True,
+            text=True, timeout=60)
+
+    _second_proc = _prepare("--new-seat")
+    _second = json.loads(_second_proc.stdout)
+    expect("bare/new-seat allocates an independent seat in the active cycle",
+           _second_proc.returncode == 0
+           and _second["cycle_id"] == _bare_data["cycle_id"]
+           and _second["seat_id"] != _bare_data["seat_id"]
+           and _second["report_path"] != _bare_data["report_path"],
+           repr(_second))
+    _critic_proc = _prepare("--role", "critic", "--session",
+                            "critic-session-01")
+    _critic = json.loads(_critic_proc.stdout)
+    _critic_manifest_before = (meta_root / ".saipen" / "improve"
+                               / _critic["cycle_id"] / "MANIFEST.md").read_bytes()
+    _critic_report = meta_root / _critic["report_path"]
+    _critic_report_before = _critic_report.read_bytes()
+    _critic_retry_proc = _prepare("--role", "critic", "--session",
+                                  "critic-session-01")
+    _critic_retry = json.loads(_critic_retry_proc.stdout)
+    expect("explicit session retry resumes idempotently without rewriting",
+           _critic_proc.returncode == 0
+           and _critic_retry_proc.returncode == 0
+           and _critic_retry.get("resumed") is True
+           and _critic_retry["seat_id"] == _critic["seat_id"]
+           and (meta_root / ".saipen" / "improve" / _critic["cycle_id"]
+                / "MANIFEST.md").read_bytes() == _critic_manifest_before
+           and _critic_report.read_bytes() == _critic_report_before,
+           repr(_critic_retry))
+    _wrong_role = _prepare("--role", "core", "--session",
+                           "critic-session-01")
+    expect("explicit session retry refuses role drift",
+           _wrong_role.returncode != 0
+           and "is registered as role" in _wrong_role.stdout,
+           repr(_wrong_role.stdout[:300]))
+    _bad_role = _prepare("--role", "reviewer")
+    expect("Improve role vocabulary is closed to core and critic",
+           _bad_role.returncode != 0 and "outside core|critic" in _bad_role.stdout,
+           repr(_bad_role.stdout[:300]))
+
+    _status = _prepare("status", _critic["cycle_id"])
+    expect("status derives independent same-basename seats by seat identity",
+           _status.returncode == 0
+           and _bare_data["seat_id"] in _status.stdout
+           and _second["seat_id"] in _status.stdout
+           and _critic["seat_id"] in _status.stdout
+           and '"role": "critic"' in _status.stdout,
+           repr(_status.stdout[:500]))
+    _critic_report.write_bytes(
+        _critic_report_before.replace(b"role: critic", b"role: core"))
+    _mismatch_status = _prepare("status", _critic["cycle_id"])
+    expect("status rejects roster/report role mismatch",
+           "roster/report role mismatch" in _mismatch_status.stdout
+           and '"visible": "INVALID_REPORT"' in _mismatch_status.stdout,
+           repr(_mismatch_status.stdout[:500]))
+    _critic_report.write_bytes(_critic_report_before)
+
+    _identity_root = project_fixture("saipen-seat-identity-")
+    _identity_assignments = [prepare_audit_seat(
+        _identity_root, agent_family="probe", role="core", session_id=seat,
+        project_name="SAME", model_or_runtime="probe",
+        protocol_fingerprint="probe", context_scope="seat identity control")
+        for seat in ("seat-a", "seat-b")]
+    for _assignment in _identity_assignments:
+        _identity_report = Path(_assignment["report_path"])
+        append_run(_identity_report,
+                   "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+                   "expected: independent disposition\n"
+                   "actual: shared basename\n"
+                   "evidence: seat identity control\n")
+        complete_report(_identity_report)
+    _identity_cycle = cycle_dir(
+        _identity_root, _identity_assignments[0]["cycle_id"])
+    write_sweep_entry(_identity_cycle, {
+        "run": "RUN-1", "imp_id": "001", "disposition": "INVALID",
+        "ticket": "-", "report": "seat-a/saipen_improve_SAME.md",
+        "reproduced": "y"})
+    _identity_roster = (_identity_cycle / "MANIFEST.md").read_text(
+        encoding="utf-8-sig")
+    _identity_sweep = (_identity_cycle / "SWEEP.md").read_text(
+        encoding="utf-8-sig")
+    _identity_report_texts = [Path(a["report_path"]).read_text(
+        encoding="utf-8-sig") for a in _identity_assignments]
+    expect("same-basename disposition is isolated by exact seat/report key",
+           derive_status("saipen_improve_SAME.md", _identity_roster,
+                         _identity_report_texts[0], _identity_sweep,
+                         seat_id="seat-a")["visible"] == "swept"
+           and derive_status("saipen_improve_SAME.md", _identity_roster,
+                             _identity_report_texts[1], _identity_sweep,
+                             seat_id="seat-b")["visible"] == "complete")
+    try:
+        derive_status("saipen_improve_SAME.md", _identity_roster,
+                      _identity_report_texts[1], _identity_sweep)
+        _ambiguous_status_refused = False
+    except ValueError as _ambiguous_status_exc:
+        _ambiguous_status_refused = "pass exact seat_id" in str(
+            _ambiguous_status_exc)
+    expect("status derivation refuses ambiguous basename without seat_id",
+           _ambiguous_status_refused)
+    try:
+        write_sweep_entry(_identity_cycle, {
+            "run": "RUN-1", "imp_id": "001", "disposition": "INVALID",
+            "ticket": "-", "report": "saipen_improve_SAME.md",
+            "reproduced": "y"})
+        _ambiguous_report_refused = False
+    except ValueError as _identity_exc:
+        _ambiguous_report_refused = "multiple seat owners" in str(_identity_exc)
+    expect("ambiguous legacy report basename refuses disposition",
+           _ambiguous_report_refused)
+    _identity_queue_proc = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "improve",
+         "sweep-queue", _identity_cycle.name, "--json"],
+        cwd=str(_identity_root), capture_output=True, text=True, timeout=60)
+    _identity_queue = json.loads(_identity_queue_proc.stdout).get("queue", [])
+    expect("sweep queue keeps unswept same-basename seat addressable",
+           len(_identity_queue) == 1
+           and _identity_queue[0].get("report")
+           == "seat-b/saipen_improve_SAME.md",
+           repr(_identity_queue))
+    _legacy_identity_root = project_fixture("saipen-legacy-identity-")
+    _legacy_first = prepare_audit_seat(
+        _legacy_identity_root, agent_family="probe", role="core",
+        session_id="seat-a", project_name="SAME",
+        model_or_runtime="probe", protocol_fingerprint="probe",
+        context_scope="legacy identity control")
+    _legacy_report = Path(_legacy_first["report_path"])
+    append_run(_legacy_report,
+               "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+               "expected: stable provenance\nactual: legacy basename\n"
+               "evidence: late admission control\n")
+    complete_report(_legacy_report)
+    _legacy_cycle = cycle_dir(_legacy_identity_root,
+                              _legacy_first["cycle_id"])
+    write_sweep_entry(_legacy_cycle, {
+        "run": "RUN-1", "imp_id": "001", "disposition": "INVALID",
+        "ticket": "-", "report": "saipen_improve_SAME.md",
+        "reproduced": "y"})
+    _legacy_sweep_path = _legacy_cycle / "SWEEP.md"
+    _legacy_sweep_path.write_bytes(_legacy_sweep_path.read_bytes().replace(
+        b"report=seat-a/saipen_improve_SAME.md",
+        b"report=saipen_improve_SAME.md"))
+    _legacy_manifest_before = (_legacy_cycle / "MANIFEST.md").read_bytes()
+    _legacy_sweep_before = (_legacy_cycle / "SWEEP.md").read_bytes()
+    try:
+        register_seat(_legacy_cycle, "seat-b", "core",
+                      "saipen_improve_SAME.md")
+        _legacy_register_refused = False
+    except ValueError as _legacy_register_exc:
+        _legacy_register_refused = "existing bare SWEEP identity" in str(
+            _legacy_register_exc)
+    try:
+        prepare_audit_seat(
+            _legacy_identity_root, agent_family="probe", role="core",
+            session_id="seat-b", project_name="SAME",
+            model_or_runtime="probe", protocol_fingerprint="probe",
+            context_scope="legacy identity control")
+        _late_duplicate_refused = False
+    except ValueError as _legacy_identity_exc:
+        _late_duplicate_refused = "existing bare SWEEP identity" in str(
+            _legacy_identity_exc)
+    expect("late duplicate-basename admission preserves legacy provenance",
+           _legacy_register_refused and _late_duplicate_refused
+           and (_legacy_cycle / "MANIFEST.md").read_bytes()
+           == _legacy_manifest_before
+           and (_legacy_cycle / "SWEEP.md").read_bytes()
+           == _legacy_sweep_before
+           and not (_legacy_cycle / "seat-b").exists())
+
+    _public_cmd = [sys.executable, str(HOME / "tools" / "saipen.py"),
+                   "improve", "--new-seat", "--json"]
+    _parallel = [subprocess.Popen(
+        _public_cmd, cwd=str(meta_root), stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE, text=True) for _ in range(2)]
+    _parallel_results = []
+    for _proc in _parallel:
+        _out, _err = _proc.communicate(timeout=60)
+        _parallel_results.append((_proc.returncode, json.loads(_out), _err))
+    _parallel_assignments = [r[1] for r in _parallel_results
+                             if r[1].get("code") == "IMPROVE_AUDIT_ASSIGNMENT"]
+    for _result in _parallel_results:
+        if _result[1].get("code") == "WRITER_BUSY":
+            _retry = _prepare("--new-seat")
+            if _retry.returncode == 0:
+                _parallel_assignments.append(json.loads(_retry.stdout))
+    expect("simultaneous admissions lose no seat and allocate no duplicate",
+           len(_parallel_assignments) == 2
+           and len({a["seat_id"] for a in _parallel_assignments}) == 2
+           and all("Traceback" not in r[2] for r in _parallel_results),
+           repr(_parallel_results))
+
+    with WriterLock(meta_root):
+        _busy_proc = _prepare("--new-seat")
+    expect("live Improve contention returns structured WRITER_BUSY",
+           _busy_proc.returncode != 0
+           and json.loads(_busy_proc.stdout).get("code") == "WRITER_BUSY"
+           and "Traceback" not in _busy_proc.stderr,
+           repr((_busy_proc.stdout, _busy_proc.stderr)))
+
+    _saipen_module.HOME = HOME
+    with mock.patch.object(_saipen_module, "_improve",
+                           side_effect=TypeError("programming defect")):
+        try:
+            _saipen_module._public_improve(meta_root, [], True, False)
+            _programming_error_raised = False
+        except TypeError:
+            _programming_error_raised = True
+    expect("public Improve boundary never normalizes programming errors",
+           _programming_error_raised)
     _mcycle = _bare_data["cycle_id"]
     _mseat = _bare_data["seat_id"]
     _cycles_before_verify = len(list(

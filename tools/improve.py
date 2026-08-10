@@ -42,6 +42,7 @@ CONFIDENCE = {"observed", "reproduced", "proven", "suspected"}
 ACTION = {"fix", "ticket", "note", "reject"}
 REPORT_STATUS = {"draft", "complete"}
 AVAILABILITY = {"expected", "unavailable"}
+ROLES = {"core", "critic"}
 DISPOSITION = {
     "CONFIRMED", "DUPLICATE", "ALREADY_FIXED", "SUPERSEDED", "LATER_RULE",
     "NOT_REPRODUCED", "INVALID", "NEEDS_EXTERNAL_EVIDENCE",
@@ -155,6 +156,13 @@ def _validate_safe_id(value: str, kind: str) -> str:
 def _validate_report_path(value: str, seat_id: str) -> str:
     """A report path must be a bare safe file name under the seat owner root."""
     return _validate_safe_id(value or "", "report_path")
+
+
+def _validate_role(value: str) -> str:
+    role = _validate_safe_id(value or "", "role")
+    if role not in ROLES:
+        raise ImproveError(f"role {role!r} outside {'|'.join(sorted(ROLES))}")
+    return role
 
 
 def seat_key(seat_id: str, agent: str = "") -> str:
@@ -284,14 +292,16 @@ def _seat_block(text: str, seat_id: str) -> str | None:
     return "\n".join(block)
 
 
-def _block_for_report(roster_text: str, report_ident: str) -> str | None:
+def _block_for_report(roster_text: str, report_ident: str,
+                      seat_id: str | None = None) -> str | None:
     """Locate the roster block whose report_path names `report_ident`.
 
     A seat is found by its registered report path -- never by deriving the
     seat from the report file name, which would break multi-seat rosters.
     """
     for block in _seat_blocks(roster_text):
-        if _field(block, "report_path") == report_ident:
+        if (_field(block, "report_path") == report_ident
+                and (seat_id is None or _field(block, "seat_id") == seat_id)):
             return block
     return None
 
@@ -461,7 +471,7 @@ def _disposed_ids(sweep_text: str, report_ident: str | None = None
 
 
 def derive_status(report_ident: str, roster_text: str, report_text: str,
-                  sweep_text: str) -> dict:
+                   sweep_text: str, seat_id: str | None = None) -> dict:
     """The visible status, DERIVED per seat.
 
     - roster entry for THIS seat (exact seat_id block) owns availability;
@@ -475,14 +485,25 @@ def derive_status(report_ident: str, roster_text: str, report_text: str,
     T-615: RUN-1/IMP-001 never satisfies RUN-2/IMP-001)."""
     seat = re.sub(r"^saipen_improve_", "", Path(report_ident).stem)
     availability = "expected"
-    block = _block_for_report(roster_text, report_ident)
+    if seat_id is None:
+        owners = [_field(candidate, "seat_id")
+                  for candidate in _seat_blocks(roster_text)
+                  if _field(candidate, "report_path") == report_ident]
+        if len(owners) > 1:
+            raise ImproveError(
+                f"derive_status refuses ambiguous report basename "
+                f"{report_ident!r}; pass exact seat_id")
+        if owners:
+            seat_id = owners[0]
+    block = _block_for_report(roster_text, report_ident, seat_id)
     if block is not None:
         availability = _field(block, "availability") or "expected"
     status = _field(report_text, "report_status")
     parsed = parse_report(report_text)
     expected = {(f.run, f.imp) for f in parsed.findings}
+    ledger_keys = _report_ledger_keys(roster_text, seat_id, report_ident)
     disposed = {(r.run(), r.imp()) for r in _sweep_records(sweep_text)
-                if r.report == report_ident}
+                if r.report in ledger_keys}
     missing = sorted(f"{'' if f.run is None else f'RUN-{f.run}/'}{f.imp}"
                      for f in parsed.findings
                      if (f.run, f.imp) not in disposed)
@@ -602,20 +623,78 @@ def _report_roster_block(cycle_dir: Path, report_ident: str) -> str | None:
     return _block_for_report(_read_maybe(manifest), report_ident)
 
 
-def _require_finding(cycle_dir: Path, report_ident: str, run: int | None,
+def _report_ledger_keys(roster_text: str, seat_id: str | None,
+                        report_ident: str) -> set[str]:
+    """Ledger identities resolving to one seat/report without basename bleed."""
+    if not seat_id:
+        return {report_ident}
+    keys = {f"{seat_id}/{report_ident}"}
+    owners = [_field(block, "seat_id") for block in _seat_blocks(roster_text)
+              if _field(block, "report_path") == report_ident]
+    if owners == [seat_id]:
+        keys.add(report_ident)  # Unique-owner compatibility for old ledgers.
+    return keys
+
+
+def _refuse_duplicate_owner_over_bare_sweep(cycle_dir: Path,
+                                             roster_text: str,
+                                             report_ident: str,
+                                             new_seat: str) -> None:
+    """Preserve persisted legacy provenance when owner cardinality changes."""
+    owners = [_field(block, "seat_id") for block in _seat_blocks(roster_text)
+              if _field(block, "report_path") == report_ident]
+    sweep_text = _read_maybe(cycle_dir / "SWEEP.md")
+    if (owners and any(record.report == report_ident
+                       for record in _sweep_records(sweep_text))):
+        raise ImproveError(
+            f"cannot admit seat {new_seat}: report basename {report_ident!r} "
+            "already has an existing bare SWEEP identity; adding a second "
+            "owner would reinterpret Core provenance -- start independent "
+            "seats before sweep or use a distinct report identity")
+
+
+def _resolve_report_owner(cycle_dir: Path, report_identity: str
+                          ) -> tuple[str, str, str]:
+    """Resolve `seat/report` exactly; permit basename only when unambiguous."""
+    raw = report_identity.strip()
+    parts = raw.split("/")
+    if len(parts) == 2:
+        wanted_seat = _validate_safe_id(parts[0], "seat_id")
+        wanted_report = _validate_report_path(parts[1], wanted_seat)
+    elif len(parts) == 1:
+        wanted_seat = ""
+        wanted_report = _validate_report_path(parts[0], "")
+    else:
+        raise ImproveError(f"report identity {raw!r} must be <seat>/<report> "
+                           "or one unambiguous legacy basename")
+    matches = []
+    manifest_text = _read_maybe(cycle_dir / "MANIFEST.md")
+    for block in _seat_blocks(manifest_text):
+        seat = _field(block, "seat_id")
+        report = _field(block, "report_path")
+        if report == wanted_report and (not wanted_seat or seat == wanted_seat):
+            matches.append((seat, report))
+    if not matches:
+        raise ImproveError(
+            f"write_sweep_entry refuses: report {raw!r} is not a registered "
+            "seat report in this cycle")
+    if len(matches) != 1:
+        raise ImproveError(
+            f"write_sweep_entry refuses: report basename {raw!r} has multiple "
+            "seat owners; use exact <seat>/<report> identity")
+    seat, report = matches[0]
+    # All NEW writes are seat-qualified. Bare report names remain read-only
+    # compatibility for persisted pre-T-623 ledgers.
+    ledger_key = f"{seat}/{report}"
+    return seat, report, ledger_key
+
+
+def _require_finding(cycle_dir: Path, seat_dir: str, report_ident: str,
+                     run: int | None,
                      imp: str, strict: bool) -> None:
     """A Core sweep mutation must name a finding that ACTUALLY exists in the
     named run of the named report (DOGFOOD V, T-615). A nonexistent
     finding/run/report is a refusal, not a ledger append."""
-    seat_dir = None
-    for block in _seat_blocks(_read_maybe(cycle_dir / "MANIFEST.md")):
-        if _field(block, "report_path") == report_ident:
-            seat_dir = _field(block, "seat_id")
-            break
-    if seat_dir is None:
-        raise ImproveError(
-            f"write_sweep_entry refuses: report {report_ident!r} is not a "
-            "registered seat report in this cycle")
     report = cycle_dir / seat_dir / report_ident
     if not report.is_file():
         raise ImproveError(
@@ -670,22 +749,19 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
             "write_sweep_entry refuses: report identity is required -- a "
             "sweep disposition must name its exact report")
     strict = _cycle_schema(cycle_dir / "MANIFEST.md") == "strict"
+    seat_dir, report_path, report_key = _resolve_report_owner(
+        cycle_dir, report_ident)
+    roster_text = _read_maybe(cycle_dir / "MANIFEST.md")
+    equivalent_report_keys = _report_ledger_keys(
+        roster_text, seat_dir, report_path)
     # DOGFOOD V (T-619): a CONFIRMED disposition on STALE evidence cannot
     # authorize fresh canonical work. The report's source identity must match
     # the current tree (same HEAD + dirty tree is stale); a stale report
     # demands current reproduction or a non-CONFIRMED disposition.
     if strict and disposition == "CONFIRMED":
         project_root = _project_root_of(cycle_dir)
-        report_text = ""
-        seat_dir = None
-        for block in _seat_blocks(_read_maybe(cycle_dir / "MANIFEST.md")):
-            if _field(block, "report_path") == report_ident:
-                seat_dir = _field(block, "seat_id")
-                break
-        if seat_dir is not None:
-            _rep = cycle_dir / seat_dir / report_ident
-            if _rep.is_file():
-                report_text = _read_maybe(_rep)
+        _rep = cycle_dir / seat_dir / report_path
+        report_text = _read_maybe(_rep)
         fresh_errors = _freshness_errors(project_root, report_text, strict,
                                          True)
         if fresh_errors:
@@ -719,7 +795,7 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
     ledger = cycle_dir / "SWEEP.md"
     _prove_inside(_project_root_of(ledger), ledger)
     _require_cycle_active(cycle_dir, "write_sweep_entry")
-    _require_finding(cycle_dir, report_ident, run, imp_id, strict)
+    _require_finding(cycle_dir, seat_dir, report_path, run, imp_id, strict)
 
     reproduced = str(entry.get("reproduced", "-"))
     if reproduced not in {"y", "n"}:
@@ -752,15 +828,16 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
     text = _read_maybe(ledger)
     if not text.startswith("# SWEEP"):
         text = "# SWEEP\n\n" + text
-    if any(r.finding_ref == finding_ref and r.report == report_ident
+    if any(r.finding_ref == finding_ref
+           and r.report in equivalent_report_keys
            for r in _sweep_records(text)):
         raise ImproveError(
             f"write_sweep_entry refuses: a disposition for "
-            f"{finding_ref} in {report_ident} already exists in the ledger")
+            f"{finding_ref} in {report_key} already exists in the ledger")
 
     record = SweepRecord(
         finding_ref=finding_ref, disposition=disposition, ticket=ticket,
-        report=report_ident, reproduced=reproduced,
+        report=report_key, reproduced=reproduced,
         fixed_by=str(entry.get("fixed_by", "-") or "-"),
         verification=str(entry.get("verification", "-") or "-"))
     result = _journaled_write(ledger, text.rstrip() + "\n" + record.render()
@@ -881,6 +958,169 @@ def portable_project_key(project_root: Path) -> str:
     return safe.strip("-.").lower() or "project"
 
 
+def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
+                       session_id: str | None, project_name: str,
+                       model_or_runtime: str, protocol_fingerprint: str,
+                       context_scope: str,
+                       context_available: str = "complete") -> dict:
+    """Atomically admit or resume one concrete Improve seat.
+
+    Active-cycle selection, seat allocation, roster registration and report
+    creation share the existing project writer lock and one journaled
+    multi-target mutation. An explicit session id is idempotent; no session id
+    allocates a new independent <agent>-NN seat under the lock.
+    """
+    import datetime
+    import uuid
+    from freshness import FreshnessError, compute_source_identity
+    from saipen_engine.journal import (_hash_file, hash_bytes,
+                                       recovery_preflight, run_mutation)
+    from saipen_engine.lock import project_writer_lock
+
+    root = Path(project_root)
+    selected_role = _validate_role(role)
+    family = re.sub(r"[^A-Za-z0-9_-]", "-", agent_family).strip("-").lower()
+    family = _validate_safe_id(family or "agent", "agent_family")
+    report_ident = f"saipen_improve_{_validate_safe_id(project_name, 'project_name')}.md"
+    project_key = portable_project_key(root)
+
+    with project_writer_lock(root):
+        preflight = recovery_preflight(root)
+        if not preflight.get("ok"):
+            return preflight
+
+        owner = _owner_root(root)
+        active = []
+        if owner.is_dir():
+            active = sorted(manifest for manifest in owner.glob("*/MANIFEST.md")
+                            if _cycle_status(manifest) == "active")
+        if len(active) > 1:
+            raise ImproveError("multiple ACTIVE Improve cycles exist; refuse "
+                               "ambiguous admission")
+
+        created_at = datetime.datetime.now(
+            datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        if active:
+            manifest = active[0]
+            active_cycle = manifest.parent.name
+            manifest_text = _read_maybe(manifest)
+        else:
+            active_cycle = allocate_cycle_id(root, project_key)
+            manifest = cycle_dir(root, active_cycle) / "MANIFEST.md"
+            manifest_text = (
+                "# IMPROVE CYCLE ROSTER\n\n"
+                "manifest_schema: strict\n"
+                f"cycle_id: {active_cycle}\n"
+                f"created_at: {created_at}\n"
+                f"project_identity: {project_key}\n"
+                "cycle_status: active\n")
+
+        if session_id is not None:
+            seat = _validate_safe_id(session_id, "session_id")
+        else:
+            highest = 0
+            for block in _seat_blocks(manifest_text):
+                candidate = _field(block, "seat_id")
+                match = re.fullmatch(re.escape(family) + r"-(\d+)", candidate)
+                if match:
+                    highest = max(highest, int(match.group(1)))
+            seat = f"{family}-{highest + 1:02d}"
+
+        block = _seat_block(manifest_text, seat)
+        report = resolve_report_path(root, active_cycle, seat, project_name)
+        if block is not None:
+            roster_role = _field(block, "role")
+            roster_report = _field(block, "report_path")
+            if roster_role != selected_role:
+                raise ImproveError(
+                    f"session {seat} is registered as role {roster_role!r}, "
+                    f"not {selected_role!r}")
+            if roster_report != report_ident:
+                raise ImproveError(
+                    f"session {seat} owns report {roster_report!r}, not "
+                    f"{report_ident!r}")
+            if report.is_file():
+                report_text = _read_maybe(report)
+                report_role = _field(report_text, "role")
+                if report_role != roster_role:
+                    raise ImproveError(
+                        f"session {seat} roster/report role mismatch: "
+                        f"{roster_role!r} != {report_role!r}")
+                return {
+                    "ok": True, "code": "ALREADY_ASSIGNED",
+                    "cycle_id": active_cycle, "seat_id": seat,
+                    "role": selected_role, "report_path": report,
+                    "report_created": False, "resumed": True,
+                    "source_head": _field(report_text, "source_head"),
+                    "source_tree_fingerprint": _field(
+                        report_text, "source_tree_fingerprint"),
+                    "discovery_model": _field(report_text, "discovery_model"),
+                }
+            new_manifest = manifest_text
+        else:
+            _refuse_duplicate_owner_over_bare_sweep(
+                manifest.parent, manifest_text, report_ident, seat)
+            seat_line = (f"seat_id: {seat}\nrole: {selected_role}\n"
+                         f"report_path: {report_ident}\n"
+                         "availability: expected\n")
+            new_manifest = manifest_text.rstrip() + "\n" + seat_line
+
+        try:
+            source = compute_source_identity(root)
+        except FreshnessError as exc:
+            raise ImproveError(
+                f"cannot capture mechanical source identity: {exc}") from exc
+        saipen_version = ""
+        for candidate in (root / "VERSION",
+                          Path(__file__).resolve().parent.parent / "VERSION"):
+            if candidate.is_file():
+                saipen_version = candidate.read_text(
+                    encoding="utf-8").strip().split("\n")[0]
+                break
+        report_text = (
+            f"agent: {seat}\n"
+            f"role: {selected_role}\n"
+            f"model_or_runtime: {model_or_runtime}\n"
+            f"project: {project_key}\n"
+            f"saipen_version: {saipen_version}\n"
+            f"protocol_fingerprint: {protocol_fingerprint}\n"
+            f"source_head: {source.source_head}\n"
+            f"source_tree_fingerprint: {source.source_tree_fingerprint}\n"
+            f"discovery_model: {source.discovery_model}\n"
+            f"context_scope: {context_scope}\n"
+            f"context_available: {context_available}\n"
+            "report_status: draft\n")
+
+        manifest_rel = manifest.relative_to(root).as_posix()
+        report_rel = report.relative_to(root).as_posix()
+        targets = []
+        preconditions = {}
+        if block is None:
+            targets.append({"path": manifest_rel, "role": "manifest",
+                            "content": new_manifest})
+            preconditions[manifest_rel] = _hash_file(manifest)
+        targets.append({"path": report_rel, "role": "report",
+                        "content": report_text})
+        preconditions[report_rel] = _hash_file(report)
+        op_id = "improve-admit-" + uuid.uuid4().hex[:8]
+        committed = run_mutation(
+            root, op_id, "improve_admit", seat, _identity(root),
+            hash_bytes(f"{active_cycle}:{seat}:{selected_role}".encode("utf-8")),
+            targets, preconditions=preconditions, skip_preflight=True,
+            verification_policy="improve_atomic_file")
+        if not committed.get("ok"):
+            return committed
+        return {
+            "ok": True, "code": committed.get("code", "COMMITTED"),
+            "op_id": committed.get("op_id"), "cycle_id": active_cycle,
+            "seat_id": seat, "role": selected_role, "report_path": report,
+            "report_created": True, "resumed": False,
+            "source_head": source.source_head,
+            "source_tree_fingerprint": source.source_tree_fingerprint,
+            "discovery_model": source.discovery_model,
+        }
+
+
 def create_cycle(project_root: Path, cycle_id: str, *,
                  created_at: str | None = None,
                  project_identity: str | None = None) -> Path:
@@ -996,6 +1236,12 @@ def verify_cycle(cycle_dir: Path) -> list[str]:
                           "does not exist")
             continue
         report_text = _read_maybe(report)
+        roster_role = _field(seat, "role")
+        report_role = _field(report_text, "role")
+        if report_role != roster_role:
+            errors.append(f"seat {seat_id}: roster/report role mismatch: "
+                          f"{roster_role!r} != {report_role!r}")
+            continue
         if _field(report_text, "report_status") != "complete":
             errors.append(f"seat {seat_id}: report {report_path} is not "
                           "complete")
@@ -1009,7 +1255,8 @@ def verify_cycle(cycle_dir: Path) -> list[str]:
         for err in _report_fresh(_project_root_of(cycle_dir), cycle_dir,
                                  report_path, report_text, strict):
             errors.append(f"seat {seat_id} report: {err}")
-        derived = derive_status(report_path, text, report_text, sweep_text)
+        derived = derive_status(report_path, text, report_text, sweep_text,
+                                seat_id=seat_id)
         for missing_ref in derived.get("missing", []):
             errors.append(f"seat {seat_id}: finding {missing_ref} has no "
                           "final Core disposition for its exact composite "
@@ -1127,12 +1374,20 @@ def create_report(project_root: Path, cycle_id: str, seat_id: str,
     _prove_inside(root, cdir)
     _require_cycle_active(cdir, "create_report")
     seat = _validate_safe_id(seat_id, "seat_id")
+    selected_role = _validate_role(role)
     roster_text = _read_maybe(cdir / "MANIFEST.md")
-    if _block_for_report(roster_text, f"saipen_improve_{project_name}.md") \
-            is None:
+    roster_block = _seat_block(roster_text, seat)
+    if (roster_block is None
+            or _field(roster_block, "report_path")
+            != f"saipen_improve_{project_name}.md"):
         raise ImproveError(
             f"create_report refuses: seat {seat} has no roster entry owning "
             f"saipen_improve_{project_name}.md -- register the seat first")
+    if _field(roster_block, "role") != selected_role:
+        raise ImproveError(
+            f"create_report refuses: seat {seat} roster role "
+            f"{_field(roster_block, 'role')!r} does not match report role "
+            f"{selected_role!r}")
     try:
         ident = compute_source_identity(root)
     except FreshnessError as exc:
@@ -1148,7 +1403,7 @@ def create_report(project_root: Path, cycle_id: str, seat_id: str,
             break
     header = (
         f"agent: {agent}\n"
-        f"role: {role}\n"
+        f"role: {selected_role}\n"
         f"model_or_runtime: {model_or_runtime}\n"
         f"project: {portable_project_key(root)}\n"
         f"saipen_version: {saipen_version}\n"
@@ -1257,7 +1512,7 @@ def register_seat(cycle_dir: Path, seat_id: str, role: str,
     routing/identity only.
     """
     seat = _validate_safe_id(seat_id, "seat_id")
-    _validate_safe_id(role, "role") if role else None
+    selected_role = _validate_role(role)
     _validate_report_path(report_path, seat)
     if availability not in AVAILABILITY:
         raise ImproveError(f"availability {availability!r} outside "
@@ -1268,7 +1523,9 @@ def register_seat(cycle_dir: Path, seat_id: str, role: str,
         text = "# IMPROVE CYCLE ROSTER\n\n" + text
     if _seat_block(text, seat) is not None:
         raise ImproveError(f"duplicate seat registration: {seat}")
-    line = (f"seat_id: {seat}\nrole: {role}\nreport_path: {report_path}\n"
+    _refuse_duplicate_owner_over_bare_sweep(
+        cycle_dir, text, report_path, seat)
+    line = (f"seat_id: {seat}\nrole: {selected_role}\nreport_path: {report_path}\n"
             f"availability: {availability}\n")
     result = _journaled_write(manifest, text.rstrip() + "\n" + line, "seat",
                               base_hash=_base_hash(manifest))
@@ -1340,6 +1597,9 @@ def validate_report(text: str, require_runs: bool = False) -> list[str]:
     if header.get("report_status") and header["report_status"] not in REPORT_STATUS:
         errors.append(f"report_status {header['report_status']!r} outside "
                       "draft|complete")
+    if header.get("role") and header["role"] not in ROLES:
+        errors.append(f"role {header['role']!r} outside "
+                      f"{'|'.join(sorted(ROLES))}")
     avail = header.get("context_available")
     if avail and avail not in ("complete", "partial", "none"):
         errors.append(f"context_available {avail!r} outside "
@@ -1477,7 +1737,6 @@ def validate_manifest(text: str,
         errors.append(f"cycle_status {status.group(1)!r} outside "
                       "active|complete|archived")
     seen: set[str] = set()
-    report_owners: dict[str, str] = {}
     for block in _seat_blocks(text):
         seat_id = _field(block, "seat_id")
         if not seat_id:
@@ -1486,8 +1745,12 @@ def validate_manifest(text: str,
         if seat_id in seen:
             errors.append(f"duplicate seat_id: {seat_id}")
         seen.add(seat_id)
-        if not _field(block, "role"):
+        role = _field(block, "role")
+        if not role:
             errors.append(f"seat {seat_id}: missing role")
+        elif role not in ROLES:
+            errors.append(f"seat {seat_id}: role {role!r} outside "
+                          f"{'|'.join(sorted(ROLES))}")
         report_path = _field(block, "report_path")
         if not report_path:
             errors.append(f"seat {seat_id}: missing report_path")
@@ -1496,14 +1759,6 @@ def validate_manifest(text: str,
                 _validate_report_path(report_path, seat_id)
             except ImproveError as exc:
                 errors.append(f"seat {seat_id}: {exc}")
-            # red control 8 (T-560): ONE report, ONE owner -- two seats must
-            # never share a report path.
-            if report_path in report_owners and report_owners[
-                    report_path] != seat_id:
-                errors.append(f"report_path {report_path!r} is owned by both "
-                              f"{report_owners[report_path]} and {seat_id}; "
-                              "one report has one owner (red control 8)")
-            report_owners[report_path] = seat_id
         availability = _field(block, "availability")
         if availability and availability not in AVAILABILITY:
             errors.append(f"seat {seat_id}: availability {availability!r} "

@@ -341,7 +341,9 @@ The complete set of recognized user-facing commands. Phase-affecting ones are de
   complete public family is declared below and mechanically compared with
   IMPROVE.md and the CLI executor. `clean` is archive/retention only and never enters the CLEAN phase. No repeated-letter shortcut is assigned; reports
   live under `.saipen/improve/<cycle_id>/<seat_id>/`, never under the shared
-  protocol install.
+  protocol install. Bare/`--new-seat` allocates a new independent seat;
+  `--session <seat_id>` alone resumes one exact seat; `--role core|critic`
+  selects the closed identity role while Core remains the only adjudicator.
 
 `IMPROVE_ACTIONS = [bare, status, submit, complete, sweep, sweep-queue, verify, cycle-complete, abort, clean]`
 

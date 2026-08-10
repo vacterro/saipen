@@ -32,7 +32,11 @@ the validator compares both with the CLI executor set.
   identity, and returns a bounded AUDIT ASSIGNMENT (cycle_id, seat_id, report
   path, source identity, scope, proof levels, schema, write boundary, next
   mechanical submission action). It NEVER changes phase/task/next_action merely
-  to run an audit, and it is NEVER an alias for status.
+  to run an audit, and it is NEVER an alias for status. Bare invocation admits
+  a NEW independent `core` seat. `--new-seat` states that choice explicitly;
+  `--session <seat_id>` admits or resumes exactly one stable concrete session;
+  `--role core|critic` selects the closed role, with `core` as default. A
+  session retry returns the same assignment and never allocates another seat.
 - `saipen improve status` — read-only; derives each registered seat's visible
   status from the roster, the report's `report_status`, and the sweep ledger.
   Refuses to round malformed evidence up to a normal lifecycle state: invalid
@@ -173,11 +177,23 @@ availability        (expected | unavailable)
 ```
 
 - `seat_id` is path-safe.
+- Roles are closed to `core | critic`; roster and report roles must match.
 - Duplicate seat registration fails.
 - A seat cannot silently attach itself to another project's cycle.
 - Unavailable historical seats are explicitly `availability: unavailable`.
 - Seat identity is NEVER inferred from `STATE.agent` (latest actor only) or
   from LOG agent tags (optional field).
+- Bare/`--new-seat` allocates the next `<agent>-NN` while holding SAIOPS's
+  project writer lock. `--session <seat_id>` is the only resume selector; no
+  model/client family guess can merge independent sessions. Selection,
+  registration and initial report creation are one journaled admission.
+- Expected writer contention returns the stable `WRITER_BUSY` Result; it never
+  escapes as a traceback. Other `PermissionError`, `TypeError` and programming
+  failures remain loud rather than being mislabeled as contention.
+- Once Core has written a legacy bare-basename SWEEP record, admission refuses
+  a second seat owning that basename: changing owner cardinality would
+  reinterpret persisted provenance. Admit independent seats before sweep (new
+  records are seat-qualified) or use a distinct report identity.
 - Python owns manifest formatting: `create_cycle`/`register_seat` render the
   roster; no caller supplies preformatted MANIFEST prose.
 
@@ -316,13 +332,17 @@ parser, `derive_status`, the validator and ticket provenance:
 finding_ref        RUN-N/IMP-NNN (strict) or IMP-NNN (legacy)
 disposition        closed set
 ticket             canonical ticket or -
+report             <seat_id>/<report_path> exact identity
 reproduced         y | n
 fixed_by           resolution identity or -
 verification       verification evidence/ref or -
 ```
 
-SWEEP.md records per finding: `report_path, run_id, IMP-id, disposition,
-reproduced, canonical ticket, fixed_by, verification`.
+SWEEP.md records per finding: `seat_id/report_path, run_id, IMP-id,
+disposition, reproduced, canonical ticket, fixed_by, verification`. A bare
+legacy `report_path` resolves only while exactly one roster seat owns that
+basename; duplicate owners MUST use the seat-qualified identity and never
+share disposition coverage.
 
 Disposition set (closed): `CONFIRMED | DUPLICATE | ALREADY_FIXED |
 SUPERSEDED | LATER_RULE | NOT_REPRODUCED | INVALID | NEEDS_EXTERNAL_EVIDENCE`.

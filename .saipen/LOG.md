@@ -152,3 +152,13 @@
 - 10.08.26 18:30 [E-2909] [parent: E-2908] [op: transition-0741b34d] DEC: goal_tickets 1->2
 - 10.08.26 18:32 [E-2910] [parent: E-2909] [T-622] [agent: claude] [op: checkpoint-46536bff] RUN: REVIEW verdict DEC: SHIP -- independent core gate PASS, git diff --check clean, 15/15 T-622 proof/action mutations rerun and red; no remaining P0/P1 after two adversarial review rounds
 - 10.08.26 18:32 [E-2911] [parent: E-2910] [T-622] [agent: claude] [op: transition-8bea7a33] RUN: review pass: ship proof-contract and command-parity repair
+- 10.08.26 18:35 [E-2912] [parent: E-2911] [T-622] [agent: claude] [op: checkpoint-f13f1cc9] RUN: SHIP checkpoint -> pushed cb9866b to origin/main; staged scope excluded pre-existing SAIUI deletion; no release tag (Dogfood VI release remains T-625)
+- 10.08.26 18:35 [E-2913] [parent: E-2912] [T-622] [agent: claude] [op: finish-72b240c6] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 10.08.26 18:36 [E-2914] [parent: E-2913] [T-623] [agent: claude] [op: claim-812a6cd1] DEC: claimed via SAIOPS -- owner claude
+- 10.08.26 18:39 [E-2915] [parent: E-2914] [T-623] [agent: claude] [op: checkpoint-6180c359] RUN: SCOUT: public prepare hardcodes core and STATE.agent-01, with cycle/seat/report split across three lock transactions; role set is open; report owner/status lookup is basename-only; Improve PermissionError bypasses Core WRITER_BUSY normalization. Reuse project_writer_lock + run_mutation for one multi-target admission
+- 10.08.26 18:39 [E-2916] [parent: E-2915] [T-623] [agent: claude] [op: transition-f9188608] RUN: implement closed critic role and atomic session admission
+- 10.08.26 20:21 [E-2917] [parent: E-2916] [T-623] [agent: claude] [op: transition-42e34426] RUN: role/session admission controls pass
+- 10.08.26 20:21 [E-2918] [parent: E-2917] [T-623] [agent: claude] [op: transition-0920cfbb] RUN: full scenarios, audit mutations and core gate pass
+- 10.08.26 20:21 [E-2919] [parent: E-2918] [op: transition-0920cfbb] DEC: goal_tickets 2->3
+- 10.08.26 20:23 [E-2920] [parent: E-2919] [T-623] [agent: claude] [op: transition-da950ffa] RUN: critical review clean
+- 10.08.26 20:23 [E-2921] [parent: E-2920] [T-623] [agent: claude] [op: finish-ab382aa6] DEC: ticket finished via SAIOPS -- completion (from SHIP)

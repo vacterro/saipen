@@ -23,8 +23,9 @@ The provenance invariant: VALID RESULT + VALID PROCESS != VALID EVIDENCE LINK.
 
 ## How it runs
 
-1. Register a real Improve cycle (`cycle_status: active`) with a `critic`
-   seat; the report is written like any seat report under
+1. Run `saipen improve --role critic --new-seat` to register a real Improve
+   cycle (`cycle_status: active`) with a `critic` seat; the report is written
+   like any seat report under
    `.saipen/improve/<cycle>/<seat>/`.
 2. The audit targets the wave's mechanical layer: the finish gate, the
    sweep-ticket linkage, the report schema, the reasoning gates, the

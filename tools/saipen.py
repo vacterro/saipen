@@ -462,6 +462,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
         from improve import validate_sweep as _vs
         from improve import _report_fresh as _rf
         from improve import _cycle_schema as _cs
+        from improve import _field as _imp_field
         for cycle in sorted(imp_root.iterdir()):
             manifest = cycle / "MANIFEST.md"
             if not manifest.is_file():
@@ -486,6 +487,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
                     continue
                 seat = block.split(":", 1)[1].strip()
                 report_path = ""
+                roster_role = ""
                 in_block = False
                 for line in roster.splitlines():
                     if line == block:
@@ -495,30 +497,43 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
                         in_block = False
                     if in_block and line.startswith("report_path:"):
                         report_path = line.split(":", 1)[1].strip()
+                    if in_block and line.startswith("role:"):
+                        roster_role = line.split(":", 1)[1].strip()
                 if not report_path:
-                    seats.append({"seat": seat, "visible": "missing"})
+                    seats.append({"seat": seat, "role": roster_role,
+                                  "visible": "missing"})
                     continue
                 report = cycle / seat / report_path
                 report_text = report.read_text(encoding="utf-8-sig") \
                     if report.is_file() else ""
                 if not report_text:
-                    seats.append({"seat": seat, "visible": "expected"})
+                    seats.append({"seat": seat, "role": roster_role,
+                                  "visible": "expected"})
                     continue
                 # DOGFOOD V (T-620): status applies the SAME report-validation
                 # depth the validator applies -- schema AND mechanical source
                 # identity (fingerprint format + freshness for strict cycles).
-                report_invalid = bool(_vr(report_text)) or bool(
-                    _rf(project_root, cycle, report_path, report_text, strict))
-                if report_invalid:
+                report_role = _imp_field(report_text, "role")
+                report_errors = _vr(report_text)
+                if report_role != roster_role:
+                    report_errors.append(
+                        f"roster/report role mismatch: {roster_role!r} != "
+                        f"{report_role!r}")
+                report_errors.extend(_rf(project_root, cycle, report_path,
+                                         report_text, strict))
+                if report_errors:
                     status_m = _re.search(r"(?m)^report_status:\s*(\S+)",
                                           report_text)
-                    seats.append({"seat": seat, "visible": "INVALID_REPORT",
+                    seats.append({"seat": seat, "role": roster_role,
+                                  "visible": "INVALID_REPORT",
                                   "report_status": status_m.group(1)
-                                  if status_m else ""})
+                                  if status_m else "",
+                                  "errors": report_errors[:3]})
                 else:
                     derived = derive_status(report_path, roster, report_text,
-                                            sweep)
-                    seats.append({"seat": seat, **derived})
+                                            sweep, seat_id=seat)
+                    seats.append({"seat": seat, "role": roster_role,
+                                  **derived})
             rows.append({"cycle": cycle.name, "cycle_status": status,
                          "seats": seats,
                          "invalid": invalid,
@@ -526,7 +541,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
                          "sweep_errors": sweep_errors[:3]})
         return rows
 
-    action = args[0] if args else None
+    action = args[0] if args and not args[0].startswith("--") else None
     if action is None:
         # DOGFOOD V (T-617): bare `saipen improve` is the documented
         # meta-control -- it PREPARES the current seat's bounded audit
@@ -542,86 +557,58 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
                    "detail": f"cannot load canonical SAICRITIC proof "
                              f"vocabulary: {exc}"}, as_json)
             return 1
-        from improve import (allocate_cycle_id, append_run, create_cycle,
-                              create_report, register_seat)
-        from freshness import compute_source_identity
-        try:
-            source = compute_source_identity(project_root)
-        except Exception as exc:  # noqa: BLE001
+        role = "core"
+        session_id = None
+        explicit_new = False
+        rest = list(args)
+        while rest:
+            if rest[0] == "--role" and len(rest) > 1:
+                role, rest = rest[1], rest[2:]
+            elif rest[0] == "--session" and len(rest) > 1:
+                session_id, rest = rest[1], rest[2:]
+            elif rest[0] == "--new-seat":
+                explicit_new, rest = True, rest[1:]
+            else:
+                _emit({"ok": False, "code": "VALIDATION_FAILED",
+                       "detail": f"unknown or incomplete Improve prepare "
+                                 f"option {rest[0]!r}"}, as_json)
+                return 2
+        if session_id is not None and explicit_new:
             _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": f"cannot capture mechanical source identity: "
-                             f"{exc}"}, as_json)
-            return 1
-        imp_root = project_root / ".saipen" / "improve"
-        active_cycle = None
-        if imp_root.is_dir():
-            for cycle in sorted(imp_root.iterdir()):
-                manifest = cycle / "MANIFEST.md"
-                if not manifest.is_file():
-                    continue
-                roster = manifest.read_text(encoding="utf-8-sig")
-                if _re.search(r"(?m)^cycle_status:\s*active\s*$", roster):
-                    active_cycle = cycle.name
-                    break
-        project_key = None
+                   "detail": "--session and --new-seat are mutually "
+                             "exclusive"}, as_json)
+            return 2
+        from improve import ImproveError, prepare_audit_seat
         try:
-            from improve import portable_project_key
-            project_key = portable_project_key(project_root)
-        except Exception:  # noqa: BLE001
-            project_key = "project"
-        if active_cycle is None:
-            new_id = allocate_cycle_id(project_root, project_key)
-            try:
-                create_cycle(project_root, new_id)
-                active_cycle = new_id
-            except ValueError as exc:
-                _emit({"ok": False, "code": "VALIDATION_FAILED",
-                       "detail": f"cannot admit an Improve cycle: {exc}"},
-                      as_json)
-                return 1
-        cycle = cycle_dir(project_root, active_cycle)
-        seat_id = _seat_for_agent(project_root)
-        project_name = "SAIPEN"
-        report_ident = f"saipen_improve_{project_name}.md"
-        from improve import _seat_blocks, _field as _imp_field
-        roster = (cycle / "MANIFEST.md").read_text(encoding="utf-8-sig")
-        registered = any(_imp_field(b, "seat_id") == seat_id
-                         and _imp_field(b, "report_path") == report_ident
-                         for b in _seat_blocks(roster))
-        if not registered:
-            try:
-                register_seat(cycle, seat_id, "core", report_ident)
-            except ValueError as exc:
-                _emit({"ok": False, "code": "VALIDATION_FAILED",
-                       "detail": f"cannot register seat {seat_id}: {exc}"},
-                      as_json)
-                return 1
-        report_path = cycle / seat_id / report_ident
-        report_created = False
-        if not report_path.is_file():
-            try:
-                report_path = create_report(
-                    project_root, active_cycle, seat_id, project_name,
-                    agent=_seat_for_agent(project_root), role="core",
-                    model_or_runtime="deepseek-reasoner",
-                    protocol_fingerprint="ded-4ae736e4",
-                    context_scope=f"SAIPEN audit, phase "
-                                  f"{state_phase(project_root)}")
-                report_created = True
-            except ValueError as exc:
-                _emit({"ok": False, "code": "VALIDATION_FAILED",
-                       "detail": f"cannot create the seat report: {exc}"},
-                      as_json)
-                return 1
+            prepared = prepare_audit_seat(
+                project_root, agent_family=state_field(project_root, "agent")
+                or "agent", role=role, session_id=session_id,
+                project_name="SAIPEN", model_or_runtime="deepseek-reasoner",
+                protocol_fingerprint="ded-4ae736e4",
+                context_scope=f"SAIPEN audit, phase {state_phase(project_root)}")
+        except ImproveError as exc:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": str(exc)}, as_json)
+            return 1
+        if not prepared.get("ok"):
+            _emit(prepared, as_json)
+            return 1
+        active_cycle = prepared["cycle_id"]
+        seat_id = prepared["seat_id"]
+        report_path = Path(prepared["report_path"])
         _emit({
             "ok": True, "code": "IMPROVE_AUDIT_ASSIGNMENT",
+            "op_id": prepared.get("op_id"),
             "cycle_id": active_cycle,
             "seat_id": seat_id,
+            "role": prepared["role"],
             "report_path": report_path.relative_to(project_root).as_posix(),
-            "report_created": report_created,
-            "source": {"source_head": source.source_head,
-                       "source_tree_fingerprint": source.source_tree_fingerprint,
-                       "discovery_model": source.discovery_model},
+            "report_created": prepared["report_created"],
+            "resumed": prepared["resumed"],
+            "source": {"source_head": prepared["source_head"],
+                       "source_tree_fingerprint": prepared[
+                           "source_tree_fingerprint"],
+                       "discovery_model": prepared["discovery_model"]},
             "scope": {"phase": state_phase(project_root),
                       "task": state_field(project_root, "task")},
             "proof_levels": proof_levels,
@@ -632,7 +619,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
                               "completion via saipen improve complete; no raw "
                               "report/MANIFEST/SWEEP editing",
             "next": f"perform the semantic audit, then: saipen improve submit "
-                    f"{active_cycle} {seat_id} {project_name} <findings.json>",
+                    f"{active_cycle} {seat_id} SAIPEN <findings.json>",
         }, as_json)
         return 0
     if action == "submit":
@@ -703,32 +690,37 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
                    "detail": "improve sweep-queue needs <cycle_id>"}, as_json)
             return 2
         from improve import (composite_finding_ref, parse_report, verify_cycle,
-                             _seat_blocks, _field as _imp_field)
+                             _report_ledger_keys, _seat_blocks,
+                             _field as _imp_field)
         cycle = cycle_dir(project_root, args[1])
         precheck = verify_cycle(cycle)
         roster = (cycle / "MANIFEST.md").read_text(encoding="utf-8-sig")
         sweep = (cycle / "SWEEP.md").read_text(encoding="utf-8-sig") \
             if (cycle / "SWEEP.md").is_file() else ""
-        disposed = {(r.run(), r.imp()) for r in _sweep_records(sweep)}
+        disposed = list(_sweep_records(sweep))
         queue = []
         for block in _seat_blocks(roster):
             if _imp_field(block, "availability") == "unavailable":
                 continue
             seat_id = _imp_field(block, "seat_id")
             report_ident = _imp_field(block, "report_path")
+            report_keys = _report_ledger_keys(roster, seat_id, report_ident)
             report = cycle / seat_id / report_ident
             if not report.is_file():
                 continue
             for finding in parse_report(
                     report.read_text(encoding="utf-8-sig")).findings:
-                if (finding.run, finding.imp) in disposed:
+                if any(record.report in report_keys
+                       and record.run() == finding.run
+                       and record.imp() == finding.imp
+                       for record in disposed):
                     continue
                 queue.append({
                     "finding_ref": composite_finding_ref(
                         cycle.name, seat_id, report_ident, finding.run,
                         finding.imp),
                     "run": finding.run, "imp": finding.imp,
-                    "report": report_ident,
+                    "report": f"{seat_id}/{report_ident}",
                     "severity": finding.severity, "class": finding.cls,
                     "expected": finding.expected, "actual": finding.actual,
                     "evidence": finding.evidence,
@@ -895,6 +887,20 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
     return 2
 
 
+def _public_improve(project_root: Path, args: list[str], as_json: bool,
+                    dry_run: bool) -> int:
+    """Normalize expected Improve writer contention at the public boundary."""
+    try:
+        return _improve(project_root, args, as_json, dry_run)
+    except PermissionError as exc:
+        if str(exc) == "WRITER_BUSY":
+            _emit({"ok": False, "code": "WRITER_BUSY",
+                   "detail": "another live writer holds the project lock"},
+                  as_json)
+            return 1
+        raise
+
+
 def main(argv: list[str] | None = None) -> int:
     args = argv if argv is not None else sys.argv[1:]
     as_json = "--json" in args
@@ -1008,7 +1014,7 @@ def main(argv: list[str] | None = None) -> int:
     if command == "context" and len(args) >= 1:
         return _context(project_root, args[1:], as_json, dry_run)
     if command == "improve":
-        return _improve(project_root, args[1:], as_json, dry_run)
+        return _public_improve(project_root, args[1:], as_json, dry_run)
     print(f"unknown command: {command}")
     return 2
 

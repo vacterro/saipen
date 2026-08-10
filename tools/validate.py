@@ -2687,9 +2687,15 @@ if log_files:
                     # report. A run-qualified ref that names a nonexistent
                     # run/finding is red; a legacy bare ref must find its IMP
                     # in the report.
-                    _rep_files = list(_cycle_dir.rglob(_report))
-                    if _rep_files:
-                        _rep_file = _rep_files[0]
+                    try:
+                        _owner_seat, _owner_report, _ledger_key = \
+                            _imp_mod._resolve_report_owner(_cycle_dir, _report)
+                        _rep_file = _cycle_dir / _owner_seat / _owner_report
+                    except _imp_mod.ImproveError as _resolve_exc:
+                        _rep_file = None
+                        _sweep_errors.append(
+                            f"{_sweep}:{_line_no} {_resolve_exc}")
+                    if _rep_file is not None and _rep_file.is_file():
                         _rt2 = _rep_file.read_text(encoding="utf-8-sig")
                         _parsed_rep = _imp_mod.parse_report(_rt2)
                         if _run is not None:
@@ -2765,7 +2771,9 @@ if log_files:
                     if _cm:
                         _ccycle, _cseat, _creport, _crun, _cimp = _cm.groups()
                         _matched = any(
-                            cid == _ccycle and rec.report == _creport
+                            cid == _ccycle
+                            and rec.report in _imp_mod._report_ledger_keys(
+                                _ros, _cseat, _creport)
                             and rec.run() == int(_crun)
                             and rec.imp() == f"IMP-{_cimp}"
                             for cid, _cd, _ros, rec in _sweep_records)
@@ -4213,6 +4221,55 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                  + (f" (IMPROVE: {_doc_action_error})" if _doc_action_error else ""))
         else:
             ok("CORE / IMPROVE / CLI Improve action sets match exactly")
+        # T-623: admission options are part of CORE routing, not hidden CLI
+        # behavior. Mechanical markers guard one locked multi-target admit and
+        # narrow contention normalization; runtime process controls live in
+        # run_scenarios.py.
+        _saipen_cli_t = _saipen_cli.read_text(encoding="utf-8-sig") \
+            if _saipen_cli.is_file() else ""
+        _improve_core_p = _tools_parent / "tools" / "improve.py"
+        _improve_core_t = _improve_core_p.read_text(encoding="utf-8-sig") \
+            if _improve_core_p.is_file() else ""
+        _admission_markers = (
+            ("CORE", _core_improve_t,
+             ("Bare/`--new-seat` allocates a new independent seat",
+              "`--session <seat_id>` alone resumes one exact seat",
+              "`--role core|critic`")),
+            ("IMPROVE", _imp_doc,
+             ("NEW independent `core` seat",
+              "`--session <seat_id>` admits or resumes exactly one stable concrete session",
+              "`--role core|critic` selects the closed role",
+              "duplicate owners MUST use the seat-qualified identity")),
+            ("CLI", _saipen_cli_t,
+             (('rest[0] == "--role"'), ('rest[0] == "--session"'),
+              ('rest[0] == "--new-seat"'), "role=role",
+              "session_id=session_id",
+              "except PermissionError as exc:",
+              'if str(exc) == "WRITER_BUSY":',
+              "report_role != roster_role",
+              '"report": f"{seat_id}/{report_ident}"')),
+            ("mechanical core", _improve_core_t,
+             ('ROLES = {"core", "critic"}',
+              "with project_writer_lock(root):",
+              'root, op_id, "improve_admit"',
+              "targets, preconditions=preconditions, skip_preflight=True",
+              '"code": "ALREADY_ASSIGNED"',
+              "if r.report in ledger_keys",
+              "seat owners; use exact",
+              "record.report == report_ident",
+              "existing bare SWEEP identity",
+              "if len(owners) > 1")),
+        )
+        _admission_missing = [
+            f"{owner}:{marker}" for owner, text, markers in _admission_markers
+            for marker in markers if marker not in text]
+        if _admission_missing:
+            fail("cross-doc drift [improve-admission-contract] -- role/session "
+                 "admission must keep closed core|critic roles, explicit "
+                 "new-seat/resume routing, one project lock + one roster/report "
+                 "mutation, exact-session idempotence, role-consistent status, "
+                 "and PermissionError(WRITER_BUSY)-only normalization (missing: "
+                 + ", ".join(_admission_missing) + ")")
         _imp_sec = _core_improve_t[_core_improve_t.find("saipen improve"):]
         _imp_sec = _imp_sec[:_imp_sec.find("\n- `saipen improve") + 1] \
             if "\n- `saipen improve" in _imp_sec else _imp_sec[:2000]
