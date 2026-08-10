@@ -14,18 +14,16 @@
 # SAIPEN
 
 **Continuation protocol for AI coding agents.** SAIPEN keeps project memory in
-plain markdown, so a cold agent with no chat history runs `/saipen continue`,
-reads `STATE.md` -> `BOARD.md` -> active `LOG.md` tail -> `human_note` (if
-set), executes `next_action`, and resumes work in under a minute -- no
-rebriefing, any vendor, any day.
+plain Markdown, so a cold agent with no chat history can run
+`/saipen continue`, read `STATE.md` -> `BOARD.md` -> active `LOG.md` tail ->
+`human_note` (if set), and execute the persisted `next_action` without relying
+on chat history or one model vendor's memory.
 
-**One command. Zero dependencies. Zero amnesia.**
+**One command to resume. Plain-file state. Machine-checked contracts.**
 
-**Fast keys.** A shortcut is the entire message, never a prefix. `cc` continues the project context to convergence (resuming a running goal if one is set), `sss` reports status without touching code, and `ss` checkpoints and stops. [See the full 15-key map](saipen/RFC.md#110-command-surface). Cyrillic twins work too: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+**Fast keys.** A shortcut is the entire message, never a prefix. `cc` continues the project context to convergence (resuming a running goal if one is set), `sss` reports status without touching code, and `ss` checkpoints and stops. [See the full 15-key map](saipen/CORE.md#110-command-surface). Cyrillic twins work too: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**Reply language.** The agent answers in **Estonian** by default — that is a setting, not a quirk, and nothing else about SAIPEN is Estonian. Change it in one place: the `reply_language:` line at the top of [`saipen/STYLE.md`](saipen/STYLE.md). `et` Estonian, `en` English, `ru` Russian, `auto` picks from the message you sent. The protocol, the code, the commits and every document stay English at every value.
-
-**v7.221.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | MIT
+**v7.221.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | MIT
 
 ```text
 User  ->  /saipen continue
@@ -44,19 +42,56 @@ Agent ->  Works.
 model's head. `Project -> Memory -> LLM` becomes `Project -> SAIPEN State -> LLM`.
 
 - **Core state machine** — `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`
-- **Zero-prompt autonomy** — board halted (no workable `TODO`, nothing in
+- **Autonomous maintenance** — board halted (no workable `TODO`, nothing in
   `DOING`) **and not `BLOCKED`**? Auto-transitions `HUNT` (scan bugs) → `ADD`
   (evolve features) → `HUNT`, zero questions asked. A session sitting at
   `BLOCKED` never auto-hunts; it waits for the human to resolve the blocker
-  (RFC § 2.1).
-- **Strict reliability** — batch input parsed into surgical one-by-one tickets,
-  dirty-tree adoption that never wipes uncommitted work, secret redaction
-  (`sk-***`).
+  ([Maintenance § 2.1](saipen/MAINTENANCE.md#21-autonomous-transitions)).
+- **Safety rules** — batch input parsed into surgical one-by-one tickets,
+  dirty-tree adoption preserves uncommitted work, and secret-like values are
+  redacted from logs (`sk-***`).
 
-## Commands
+## Engineering evidence
 
-The whole surface is 16 commands; full detail in
-[RFC § 1.10](saipen/RFC.md#110-command-surface).
+SAIPEN combines a normative plain-file protocol with executable, failure-oriented
+checks. The repository demonstrates protocol/state-machine design, Python
+tooling, schema-driven state, recovery reasoning, regression testing,
+multi-agent workflow boundaries, and specification discipline.
+
+- **Designed contract:** [SPEC.md](SPEC.md) defines the file-backed continuation
+  model and stable on-disk contract; [CORE.md](saipen/CORE.md) and
+  [MAINTENANCE.md](saipen/MAINTENANCE.md) own current normative behavior.
+- **Machine-checked state:** the stdlib-only
+  [canonical validator](tools/validate.py) reads the live
+  [STATE schema](extensions/schemas/state.schema.json) and checks phase
+  transitions, ticket dependencies, event-graph links, cross-document
+  invariants, capabilities, and recovery state.
+- **Failure coverage:** [CONFORMANCE.md](saipen/CONFORMANCE.md) maps requirements
+  to [scenario fixtures](tests/scenarios/); the
+  [scenario runner](tools/run_scenarios.py) executes structural pass/fail cases
+  including corrupt recovery state, invalid transitions, dependency cycles,
+  and read-only restrictions.
+- **Regression controls:** [audit_checks.py](tools/audit_checks.py) mutates
+  known-good copies and proves validator checks can still go red, rather than
+  treating a permanently green check as evidence.
+- **Executable layer:** [saipen.py](tools/saipen.py) provides journaled state
+  operations; [bootstrap/](bootstrap/) contains install, uninstall, and export
+  helpers, with an optional [pre-commit hook installer](tools/install_hook.py).
+- **Explicit tradeoffs:** Core protocol state is plain files with no runtime
+  dependency. Canonical validation and CLI tooling require Python, but use only
+  its standard library and need no `pip` install. Journaled SAIOPS state
+  mutations use a project-scoped OS lock and recovery journal; ordinary project
+  edits and disconnected writers are outside that lock. SAIPEN is not
+  distributed consensus, so disconnected writers require external coordination
+  ([boundary](SPEC.md#concurrency--distribution-boundaries),
+  [mechanics](saipen/OPS.md#5-locks)).
+
+**Reply language.** The agent answers in **Estonian** by default — that is a setting, not a quirk, and nothing else about SAIPEN is Estonian. Change it in one place: the `reply_language:` line at the top of [`saipen/STYLE.md`](saipen/STYLE.md). `et` Estonian, `en` English, `ru` Russian, `auto` picks from the message you sent. The protocol, the code, the commits and every document stay English at every value.
+
+## Common commands
+
+Common entry points are below; the complete current surface lives in
+[Core § 1.10](saipen/CORE.md#110-command-surface).
 
 | Command | Does |
 |---|---|
@@ -65,7 +100,7 @@ The whole surface is 16 commands; full detail in
 | `/saipen plan` | Turn a request or raw backlog into tickets |
 | `/saipen goal <text>` | Autonomous wave execution against a new objective |
 | `/saipen hunt` | Force the defect/improvement sweep now |
-| `/saipen ship` | Version bump, changelog, tag, push |
+| `/saipen ship` | Run release gates; commit, tag, and push when permitted |
 | `/saipen clean` | Repo scrub |
 | `/saipen validate` | Conformance check |
 | `/saipen markhunt` | Dry uncapped audit, records only |
@@ -75,9 +110,6 @@ The whole surface is 16 commands; full detail in
 | `/saipen status` | Read-only report |
 | `/saipen stop` | Checkpoint and halt |
 
-<sub>`saipen init` and `saipen sub` complete the sixteen; both are invoked by the
-protocol rather than typed day to day.</sub>
-
 **Package keys.** `ee`/`qq` prepare complete translation/wiki packages without
 integrating; `eee`/`qqq` accept only ready packages, then integrate, verify,
 review, and push.
@@ -85,26 +117,29 @@ review, and push.
 **Experimental: saicrew.** An optional bonus layer (`extensions/subs/`, zero Core
 changes) for running a multi-agent crew: one Core writer plus read-only
 `saihunt`/`saipython` workers reporting through their own `OUTBOX.md`. Under live
-testing, not yet verified end to end — see `extensions/subs/crew.md`.
+testing, not yet verified end to end — see
+[extensions/subs/crew.md](extensions/subs/crew.md).
 
 ## Two layers
 
 | Layer | Required | Purpose |
 |---|---|---|
-| **Core** | ✅ | Continue work safely |
+| **Core** | ✅ | Continue work from project-backed state |
 | **Maintenance** | On top of Core | Evolve the software with no tasking |
 
 **Automated evolution.** No open to-dos left, type `/saipen`: `HUNT` audits for
-bugs, dead code, failing tests. Clean? `ADD` builds the next obvious missing
-capability, verifies it, hunts again. Product's mature -> stops gracefully.
+bugs, dead code, failing tests. Clean? `ADD` builds the next justified missing
+capability, verifies it, and hunts again. When its completion rule finds no
+justified addition, it stops.
 
 **Goal Mode.** `/saipen goal <what you want>` pivots the board (old tickets
 demoted, never deleted) and runs the new objective forward -- no "shall I
-continue?" between tickets, VERIFY/REVIEW never skipped. SHIP auto-pushes to an
-existing remote; a brand-new repo still asks once. Shipping the objective isn't
-the stopping point either -- it falls straight into autonomous HUNT/ADD
-maintenance until the product is mature, blocked, or the run hits its cap
-(3 waves / 20 tickets, then checkpoints and reports).
+continue?" between tickets, with each ticket routed through VERIFY/REVIEW. In a
+publish-capable mode, SHIP pushes to an existing remote; a brand-new repo still
+asks once. Shipping the objective isn't the stopping point either -- it falls
+straight into autonomous HUNT/ADD maintenance until the completion rule fires,
+work is blocked, or the run hits its cap (3 waves / 20 tickets, then checkpoints
+and reports).
 
 ## Quick start
 
@@ -151,7 +186,9 @@ a `.uninstalled.bak` copy first, and removes the skill folders.
 | Document | What it is |
 |---|---|
 | [SPEC.md](SPEC.md) | Formal architecture, design goals, litmus test |
-| [RFC.md](saipen/RFC.md) | Normative specification executed by agents |
+| [CORE.md](saipen/CORE.md) | Normative continuation, state machine, and command contract |
+| [MAINTENANCE.md](saipen/MAINTENANCE.md) | Autonomous maintenance and Goal Mode |
+| [RFC.md](saipen/RFC.md) | Compatibility redirect to the split normative documents |
 | [GUIDE.md](GUIDE.md) | Human tutorial and ELI5 guides |
 | [STYLE.md](saipen/STYLE.md) | Agent communication style and voice |
 | [UI.md](saipen/UI.md) | Vintage Golden UI design guidelines |

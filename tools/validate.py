@@ -4672,7 +4672,7 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
                  f"from locale source {_code}")
 
     _shortcut_callout(Path("README.md"),
-                      "saipen/RFC.md#110-command-surface")
+                      "saipen/CORE.md#110-command-surface")
     _shortcut_callout(Path("GUIDE.md"),
                       "saipen/RFC.md#110-command-surface")
     _guide_paths = sorted(Path("guides").glob("GUIDE_*.md"))
