@@ -304,5 +304,26 @@ rejected (red control 22). `saipen improve verify` is delta-only (section 9)
 and NEVER re-enters a full improve cycle -- a verify pass that reopens
 unrelated history or starts a fresh cycle fails (red controls 17/18).
 
+## 13. Reasoning gates are checked artifacts (T-558)
+
+A protocol-level improve ticket (a `PROTOCOL_VIOLATION` finding that produced
+a canonical ticket) MUST record two checked artifacts on the ticket itself:
+
+- `recurrence:` -- the META-IMPROVEMENT rule. The cross-project recurrence
+  analysis: does this defect recur across projects, or is it local? A
+  protocol-level fix records the reasoning; a local bug stays local.
+- `weak_model:` -- the WEAK-MODEL PRECEDENT test. The answer to "could a weak
+  but compliant model still choose wrong while honestly believing it followed
+  SAIPEN?", strengthened in the fixed preference order: state field,
+  transition rule, validator, red scenario, canonical example, prose last.
+
+The `[sweep-ticket-link]` check FAILs a `PROTOCOL_VIOLATION` finding that
+produced a ticket without both fields (red controls 15/16). A fix answered
+only with prose where a state field or validator was available is flagged.
+`ACCIDENTAL_SUCCESS` is first-class: a finding whose result was correct but
+whose verification never ran is classified `ACCIDENTAL_SUCCESS`, never PASS
+-- a sweep disposition recording it as verified (`reproduced=y`) fails (red
+control 5).
+
 A real IMPROVE phase may still be proposed only by first proving a failure the
 meta-control design cannot solve.

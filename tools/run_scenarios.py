@@ -3987,6 +3987,38 @@ def run_improve_probes() -> tuple[list[str], int]:
            "(red control 22, validator red)",
            validator_rc(report_as_board) != 0,
            repr(validator_rc(report_as_board)))
+    # T-558 reasoning gates: a PROTOCOL_VIOLATION finding that produced a
+    # ticket MUST carry recurrence + weak_model (red 15/16); ACCIDENTAL_SUCCESS
+    # is never PASS (red 5).
+    def sweep_ticket_project(finding_class: str, fields: dict[str, str],
+                             reproduced: str = "y") -> Path:
+        _extra = "".join(f" | {k}: {v}" for k, v in fields.items())
+        _root = sweep_project(
+            ["- IMP-001 [CONFIRMED] T-900 "
+             "report=saipen_improve_A.md reproduced=" + reproduced],
+            ["T-900"],
+            {"T-900": "IMP-001" + _extra},
+            _rep_header + ("IMP-001 [P1] [" + finding_class
+                           + "] [proven] [ticket]\n"
+                           + "expected: x\nactual: y\nevidence: z\n"))
+        return _root
+
+    no_gates = sweep_ticket_project("PROTOCOL_VIOLATION", {})
+    expect("sweep: a PROTOCOL_VIOLATION ticket without recurrence/weak_model "
+           "fails (red controls 15/16, validator red)",
+           validator_rc(no_gates) != 0, repr(validator_rc(no_gates)))
+    with_gates = sweep_ticket_project(
+        "PROTOCOL_VIOLATION",
+        {"recurrence": "recurs across projects (protocol rule)",
+         "weak_model": "a weak model could still route past it; fixed by "
+                       "the validator check"})
+    expect("sweep: a PROTOCOL_VIOLATION ticket with both reasoning gates "
+           "passes",
+           validator_rc(with_gates) == 0, repr(validator_rc(with_gates)))
+    acc_success = sweep_ticket_project("ACCIDENTAL_SUCCESS", {})
+    expect("sweep: an ACCIDENTAL_SUCCESS result recorded as PASS fails "
+           "(red control 5, validator red)",
+           validator_rc(acc_success) != 0, repr(validator_rc(acc_success)))
 
     # ---- T-601: resolver race -- two processes resolving the same conflict
     # yield exactly one canonical settlement (WRITER_BUSY or a settled-journal

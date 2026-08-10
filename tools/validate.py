@@ -1506,7 +1506,8 @@ if not board_path.is_file():
 
 REQUIRED_HEADINGS = ["## DOING", "## TODO", "## DONE", "## BLOCKED"]
 KNOWN_FIELDS = {"needs", "owner", "claim_time", "blocker", "verify",
-                "review_passes", "verify_attempts", "source_reports"}
+                "review_passes", "verify_attempts", "source_reports",
+                "recurrence", "weak_model"}
 # The cap number belongs to phases/verify.md, so it is read from there rather
 # than copied here. A missing anchor is a FAIL at the check below, never a
 # silent fallback: a cap this file guessed would be a second source of truth,
@@ -2485,6 +2486,37 @@ if log_files:
                                 "names a finding absent from its report; an "
                                 "edited or removed original finding cannot "
                                 "keep its disposition")
+                        # T-558 reasoning gates: a PROTOCOL_VIOLATION finding
+                        # that produced a ticket MUST carry the META-IMPROVEMENT
+                        # recurrence reasoning and the WEAK-MODEL PRECEDENT
+                        # answer on the ticket (red controls 15/16); an
+                        # ACCIDENTAL_SUCCESS result is never recorded as PASS
+                        # (red control 5).
+                        _rt2 = _rep_file.read_text(encoding="utf-8-sig")
+                        _cls_m = re.search(
+                            rf"^IMP-{_imp}\b[^\n]*?\[[^\]]*\]\s*"
+                            r"\[([A-Z_]+)\]", _rt2, re.MULTILINE)
+                        _cls = _cls_m.group(1) if _cls_m else ""
+                        if (_disp == "CONFIRMED"
+                                and _ticket in _board_tickets):
+                            _tf = _board_tickets[_ticket].get("fields", {})
+                            if _cls == "PROTOCOL_VIOLATION" and (
+                                    not _tf.get("recurrence")
+                                    or not _tf.get("weak_model")):
+                                _sweep_errors.append(
+                                    f"{_sweep}:{_line_no} PROTOCOL_VIOLATION "
+                                    f"IMP-{_imp} produced ticket {_ticket} "
+                                    "without recurrence: and weak_model: "
+                                    "(META-IMPROVEMENT + WEAK-MODEL PRECEDENT "
+                                    "reasoning gates, red controls 15/16)")
+                            if _cls == "ACCIDENTAL_SUCCESS" and _repro == "y":
+                                _sweep_errors.append(
+                                    f"{_sweep}:{_line_no} ACCIDENTAL_SUCCESS "
+                                    f"IMP-{_imp} recorded as verified "
+                                    "(reproduced=y); a correct result reached "
+                                    "without the required verification is "
+                                    "ACCIDENTAL_SUCCESS, never PASS (red "
+                                    "control 5)")
             # red control 20: every `source_reports:` ref must resolve to a
             # real SWEEP disposition.
             _all_sweep_text = "\n".join(_sweep_texts.values())
