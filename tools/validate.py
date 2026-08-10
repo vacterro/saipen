@@ -2468,6 +2468,15 @@ if log_files:
             _board_tickets = parse_board(
                 Path(".saipen/BOARD.md").read_text(
                     encoding="utf-8-sig"))["tickets"]
+            # Provenance resolves through the durable record, not just the
+            # live board: a CLEAN-pruned DONE ticket still exists in the
+            # append-only LOG. A CONFIRMED disposition's ticket must be on the
+            # board OR in the LOG -- archive-with-provenance keeps resolving
+            # after pruning (T-612).
+            _known_tickets = set(_board_tickets)
+            for _lf in log_files:
+                _known_tickets.update(
+                    re.findall(r"\bT-\d+\b", read_doc(_lf)))
             _sweep_errors = []
             _sweep_texts = {}
             for _sweep in sorted(_imp_root.rglob("SWEEP.md")):
@@ -2482,12 +2491,12 @@ if log_files:
                         continue
                     _imp, _disp, _ticket, _report, _repro = _m.groups()
                     if _disp == "CONFIRMED":
-                        if _ticket == "-" or _ticket not in _board_tickets:
+                        if _ticket == "-" or _ticket not in _known_tickets:
                             _sweep_errors.append(
                                 f"{_sweep}:{_line_no} CONFIRMED IMP-{_imp} "
-                                "has no canonical board ticket; Core sweep is "
-                                "the only path from a report to canonical "
-                                "work")
+                                "has no canonical ticket (board or LOG); Core "
+                                "sweep is the only path from a report to "
+                                "canonical work")
                         if _repro != "y":
                             _sweep_errors.append(
                                 f"{_sweep}:{_line_no} IMP-{_imp} produced "

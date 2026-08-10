@@ -287,3 +287,10 @@
 - 10.08.26 10:06 [E-2748] [parent: E-2747] [op: transition-19de60e0] DEC: goal_tickets 16->17
 - 10.08.26 10:06 [E-2749] [parent: E-2748] [T-604] [agent: claude] [op: transition-a7e8197c] RUN: REVIEW verdict DEC: SHIP -- cycle #2 diff reviewed (report/sweep/fixes/verify/complete/archive + changelog) no P0/P1
 - 10.08.26 10:06 [E-2750] [parent: E-2749] [T-604] [agent: claude] [op: finish-963eaf03] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 10.08.26 10:07 [E-2751] [parent: E-2750] [T-612] [agent: claude] [op: claim-29e1b8c5] DEC: claimed via SAIOPS -- owner claude
+- 10.08.26 10:08 [E-2752] [parent: E-2751] [T-612] [agent: claude] [op: transition-eb7890b2] RUN: SCOUT done: needs-guard respected (T-604 kept, T-549 barrier); sweep-linkage provenance now resolves through LOG for pruned tickets; dropping needs from DONE T-604
+- 10.08.26 10:08 [E-2753] [parent: E-2752] [T-612] [agent: claude] [op: transition-3e8d9d3c] RUN: BUILD complete: BOARD pruned to 11.2KB (19 closed tickets archived, evidence in LOG/CHANGELOG/commits); sweep-link check LOG-resolving fix; T-604 needs dropped; validate PASS
+- 10.08.26 10:20 [E-2754] [parent: E-2753] [T-612] [agent: claude] [op: transition-e6df3b4b] RUN: VERIFY done: validate PASS, full suite green (73 improve), audit 243/243
+- 10.08.26 10:20 [E-2755] [parent: E-2754] [op: transition-e6df3b4b] DEC: goal_tickets 17->18
+- 10.08.26 10:20 [E-2756] [parent: E-2755] [T-612] [agent: claude] [op: transition-ff8d964a] RUN: REVIEW verdict DEC: SHIP -- prune + sweep-link fix diff reviewed no P0/P1
+- 10.08.26 10:20 [E-2757] [parent: E-2756] [T-612] [agent: claude] [op: finish-7b1c68e9] DEC: ticket finished via SAIOPS -- completion (from SHIP)
