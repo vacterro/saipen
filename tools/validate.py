@@ -4446,6 +4446,10 @@ if _subs_root.is_dir():
             _rrless.append(_d.name)
             continue
         _inst_rr = re.search(r"^role_revision:\s*(\S+)", _stx, re.MULTILINE)
+        # The STATE stores the revision quoted (`"sha256:..."`); the charter
+        # derivation returns the bare value. Compare the UNQUOTED form so a
+        # freshly-adopted sub is not falsely stale (T-611).
+        _inst_rr_val = _inst_rr.group(1).strip('"') if _inst_rr else None
         _cp = _role_contract_path(_d.name)
         _charter_rr = None
         if _cp is not None:
@@ -4460,8 +4464,8 @@ if _subs_root.is_dir():
                     _charter_rr = compute_generic_role_revision(_protocol)
                 except FreshnessError as exc:
                     fail(f"cannot derive {_d.name} generic role revision: {exc}")
-        if _inst_rr and _charter_rr is not None and _inst_rr.group(1) != _charter_rr:
-            _rrmismatch.append(f"{_d.name} ({_inst_rr.group(1)} != charter {_charter_rr})")
+        if _inst_rr_val and _charter_rr is not None and _inst_rr_val != _charter_rr:
+            _rrmismatch.append(f"{_d.name} ({_inst_rr_val} != charter {_charter_rr})")
     if _rrless:
         warn("sub-role-revision-legacy",
              "subSaipen STATE(s) predate role-revision recording: "

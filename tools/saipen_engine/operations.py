@@ -62,7 +62,15 @@ def _read(root: Path) -> tuple[dict, dict, dict, dict]:
     log_doc = codec.read_document(root / ".saipen" / "LOG.md")
     state = parse_state(state_doc.text_norm)
     board = parse_board(board_doc.text_norm)
-    log_tail = log_tail_event(log_doc.text_norm)
+    # The LOG tail is the max event across the sealed segments AND the active
+    # LOG: after a seal, the active log starts empty but the E-### sequence
+    # continues from the sealed tail -- otherwise the next checkpoint mints a
+    # duplicate E-001 (NITRO dogfood IV, T-611).
+    _log_text = log_doc.text_norm
+    _sealed = sorted((root / ".saipen" / "logs").glob("LOG-*.md"))
+    for _seg in _sealed:
+        _log_text = codec.read_document(_seg).text_norm + "\n" + _log_text
+    log_tail = log_tail_event(_log_text)
     return ({"state": state_doc, "board": board_doc, "log": log_doc},
             state, board, log_tail)
 
