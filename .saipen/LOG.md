@@ -244,3 +244,4 @@
 - 10.08.26 02:13 [E-2705] [parent: E-2704] [op: transition-b08ac544] DEC: goal_tickets 12->13
 - 10.08.26 02:13 [E-2706] [parent: E-2705] [T-561] [agent: claude] [op: transition-8b22e86f] RUN: REVIEW verdict DEC: SHIP -- verify re-run fresh; wave closure diff reviewed no P0/P1; release v7.221.0 prepared
 - 10.08.26 02:13 [E-2707] [parent: E-2706] [T-561] [agent: claude] [op: finish-84ff63d1] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 10.08.26 02:14 [E-2708] [parent: E-2707] [T-561] [agent: claude] [op: checkpoint-54ab0adb] RUN: SHIP v7.221.0: Improve wave released -- pushed 2b831c6 (branch main) + tag v7.221.0; T-553..T-561 all DONE; Improve meta-control wave mechanical (command family, report schema, sweep linkage, reasoning gates, 25-red-control coverage); board now empty of the wave; goal run at 1 wave / 13 tickets
