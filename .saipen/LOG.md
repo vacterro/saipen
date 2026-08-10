@@ -245,3 +245,10 @@
 - 10.08.26 02:13 [E-2706] [parent: E-2705] [T-561] [agent: claude] [op: transition-8b22e86f] RUN: REVIEW verdict DEC: SHIP -- verify re-run fresh; wave closure diff reviewed no P0/P1; release v7.221.0 prepared
 - 10.08.26 02:13 [E-2707] [parent: E-2706] [T-561] [agent: claude] [op: finish-84ff63d1] DEC: ticket finished via SAIOPS -- completion (from SHIP)
 - 10.08.26 02:14 [E-2708] [parent: E-2707] [T-561] [agent: claude] [op: checkpoint-54ab0adb] RUN: SHIP v7.221.0: Improve wave released -- pushed 2b831c6 (branch main) + tag v7.221.0; T-553..T-561 all DONE; Improve meta-control wave mechanical (command family, report schema, sweep linkage, reasoning gates, 25-red-control coverage); board now empty of the wave; goal run at 1 wave / 13 tickets
+- 10.08.26 02:15 [E-2709] [parent: E-2708] [agent: claude] [op: transition-4c3cec9c] RUN: board empty after the Improve wave; forced full sweep: failing tests none, unverified commits none, stale TODO/FIXME none, silent failures none, symmetry gaps none, dead code none; all wave gates green
+- 10.08.26 02:15 [E-2710] [parent: E-2709] [agent: claude] [op: checkpoint-4d8487dc] RUN: hunt -> clean @53e85ba
+- 10.08.26 02:15 [E-2711] [parent: E-2710] [agent: claude] [op: transition-582c3c67] RUN: HUNT clean -> ADD; next wave is the SAICRITIC directive + real Improve cycles (handoff steps 42-48)
+- 10.08.26 02:15 [E-2712] [parent: E-2711] [op: transition-582c3c67] DEC: goal_waves 1->2
+- 10.08.26 02:15 [E-2713] [parent: E-2712] [T-603] [agent: claude] [op: ticket-9c706de2] DEC: ticket added via SAIOPS
+- 10.08.26 02:15 [E-2714] [parent: E-2713] [T-604] [agent: claude] [op: ticket-636ad32d] DEC: ticket added via SAIOPS
+- 10.08.26 02:15 [E-2715] [parent: E-2714] [T-605] [agent: claude] [op: ticket-689da603] DEC: ticket added via SAIOPS
