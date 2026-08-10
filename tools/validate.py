@@ -2428,6 +2428,17 @@ if log_files:
                                  _mst):
                         _cycle_active = False
                 _src_head = _imp_mod._field(_rt, "source_head")
+                _src_tree = _imp_mod._field(_rt, "source_tree_fingerprint")
+                # DOGFOOD V (T-618): a source_tree_fingerprint must be a REAL
+                # mechanical fingerprint, never a friendly label. A fake
+                # label cannot claim fresh audit evidence. The requirement
+                # binds STRICT cycles only -- legacy pre-boundary reports are
+                # historical evidence whose symbolic fingerprints stay valid.
+                _strict_cycle = False
+                if _man.is_file():
+                    if re.search(r"(?m)^manifest_schema:\s*strict\s*$",
+                                 _man.read_text(encoding="utf-8-sig")):
+                        _strict_cycle = True
                 if _cycle_active and _src_head:
                     _cur_head = _git("rev-parse", "HEAD")[1].strip()
                     if _cur_head and _src_head not in (_cur_head,
@@ -2438,6 +2449,35 @@ if log_files:
                             "the current tree -- reload-before-audit and "
                             "previous-conclusions-not-trusted (red controls "
                             "1/2)")
+                if _strict_cycle and _cycle_active and _src_tree and not \
+                        re.match(r"^(git-delta-v1|no-git-tree-v1):", _src_tree):
+                    _report_errors.append(
+                        f"{_rep}: source_tree_fingerprint {_src_tree!r} is "
+                        "not a mechanical fingerprint (git-delta-v1: or "
+                        "no-git-tree-v1:); a fabricated friendly label "
+                        "cannot claim fresh audit evidence (DOGFOOD V, "
+                        "T-618)")
+                # DOGFOOD V (T-618): a STRICT cycle's report must be fresh
+                # against the CURRENT source identity -- same HEAD plus a
+                # changed/dirty tree is exactly why the tree fingerprint
+                # exists. A stale report cannot authorize fresh work.
+                if (_strict_cycle and _cycle_active and _src_head and _src_tree
+                        and _cur_head and _src_head in (_cur_head, _cur_head[:7])):
+                    try:
+                        from freshness import compute_source_identity as _csi
+                        _now = _csi(Path.cwd())
+                        if _now.source_tree_fingerprint != _src_tree:
+                            _report_errors.append(
+                                f"{_rep}: source_tree_fingerprint "
+                                f"{_src_tree[:24]}... != current tree "
+                                f"{_now.source_tree_fingerprint[:24]}... at "
+                                f"the same HEAD -- the audited tree differs "
+                                f"from the live one; stale audit evidence "
+                                "cannot authorize fresh canonical work "
+                                "without current reproduction (DOGFOOD V, "
+                                "T-618)")
+                    except Exception:  # noqa: BLE001
+                        pass
             if _report_errors:
                 fail("improve report [improve-report] -- "
                      + "; ".join(_report_errors[:6])
@@ -2478,28 +2518,39 @@ if log_files:
                 _known_tickets.update(
                     re.findall(r"\bT-\d+\b", read_doc(_lf)))
             _sweep_errors = []
-            _sweep_texts = {}
+            _sweep_records = []
             for _sweep in sorted(_imp_root.rglob("SWEEP.md")):
                 _st = _sweep.read_text(encoding="utf-8-sig")
-                _sweep_texts[_sweep] = _st
                 _cycle_dir = _sweep.parent
+                _cycle_id = _cycle_dir.name
+                _roster = (_cycle_dir / "MANIFEST.md").read_text(
+                    encoding="utf-8-sig") \
+                    if (_cycle_dir / "MANIFEST.md").is_file() else ""
+                for _rec in _imp_mod._sweep_records(_st):
+                    _sweep_records.append((_cycle_id, _cycle_dir, _roster,
+                                           _rec))
                 for _line_no, _line in enumerate(_st.splitlines(), 1):
                     _m = re.match(
-                        r"^- IMP-(\d+) \[([A-Z_]+)\]\s+(\S+)\s+"
+                        r"^- (IMP-\d+|RUN-\d+/IMP-\d+) \[([A-Z_]+)\]\s+(\S+)\s+"
                         r"report=([^\s]+)\s+reproduced=(\S+)", _line.strip())
                     if not _m:
                         continue
-                    _imp, _disp, _ticket, _report, _repro = _m.groups()
+                    _ref, _disp, _ticket, _report, _repro = _m.groups()
+                    _imp = _ref.split("/")[-1]
+                    _run = None
+                    _run_m = re.match(r"^RUN-(\d+)/", _ref)
+                    if _run_m:
+                        _run = int(_run_m.group(1))
                     if _disp == "CONFIRMED":
                         if _ticket == "-" or _ticket not in _known_tickets:
                             _sweep_errors.append(
-                                f"{_sweep}:{_line_no} CONFIRMED IMP-{_imp} "
-                                "has no canonical ticket (board or LOG); Core "
-                                "sweep is the only path from a report to "
-                                "canonical work")
+                                f"{_sweep}:{_line_no} CONFIRMED "
+                                f"{_ref} has no canonical ticket (board or "
+                                "LOG); Core sweep is the only path from a "
+                                "report to canonical work")
                         if _repro != "y":
                             _sweep_errors.append(
-                                f"{_sweep}:{_line_no} IMP-{_imp} produced "
+                                f"{_sweep}:{_line_no} {_ref} produced "
                                 f"ticket {_ticket} with reproduced={_repro}; "
                                 "an unverified finding cannot authorize a "
                                 "ticket")
@@ -2507,28 +2558,46 @@ if log_files:
                                    "NOT_REPRODUCED"):
                         if _ticket != "-":
                             _sweep_errors.append(
-                                f"{_sweep}:{_line_no} {_disp} IMP-{_imp} "
+                                f"{_sweep}:{_line_no} {_disp} {_ref} "
                                 f"carries ticket {_ticket}; a {_disp} finding "
                                 "must never produce a ticket")
+                    # DOGFOOD V (T-615): the disposition must name a finding
+                    # that ACTUALLY exists in the exact run of the exact
+                    # report. A run-qualified ref that names a nonexistent
+                    # run/finding is red; a legacy bare ref must find its IMP
+                    # in the report.
                     _rep_files = list(_cycle_dir.rglob(_report))
                     if _rep_files:
                         _rep_file = _rep_files[0]
-                        if f"IMP-{_imp}" not in _rep_file.read_text(
-                                encoding="utf-8-sig"):
-                            _sweep_errors.append(
-                                f"{_sweep}:{_line_no} disposition IMP-{_imp} "
-                                "names a finding absent from its report; an "
-                                "edited or removed original finding cannot "
-                                "keep its disposition")
+                        _rt2 = _rep_file.read_text(encoding="utf-8-sig")
+                        _parsed_rep = _imp_mod.parse_report(_rt2)
+                        if _run is not None:
+                            _found = any(
+                                f.run == _run and f.imp == _imp
+                                for f in _parsed_rep.findings)
+                            if not _found:
+                                _sweep_errors.append(
+                                    f"{_sweep}:{_line_no} disposition "
+                                    f"{_ref} names a finding absent from "
+                                    f"RUN {_run} of its report; an edited or "
+                                    "removed original finding cannot keep "
+                                    "its disposition")
+                        else:
+                            if not any(f.imp == _imp
+                                       for f in _parsed_rep.findings):
+                                _sweep_errors.append(
+                                    f"{_sweep}:{_line_no} disposition "
+                                    f"{_ref} names a finding absent from its "
+                                    "report; an edited or removed original "
+                                    "finding cannot keep its disposition")
                         # T-558 reasoning gates: a PROTOCOL_VIOLATION finding
                         # that produced a ticket MUST carry the META-IMPROVEMENT
                         # recurrence reasoning and the WEAK-MODEL PRECEDENT
                         # answer on the ticket (red controls 15/16); an
                         # ACCIDENTAL_SUCCESS result is never recorded as PASS
                         # (red control 5).
-                        _rt2 = _rep_file.read_text(encoding="utf-8-sig")
                         _cls_m = re.search(
-                            rf"^IMP-{_imp}\b[^\n]*?\[[^\]]*\]\s*"
+                            rf"^{_imp}\b[^\n]*?\[[^\]]*\]\s*"
                             r"\[([A-Z_]+)\]", _rt2, re.MULTILINE)
                         _cls = _cls_m.group(1) if _cls_m else ""
                         if (_disp == "CONFIRMED"
@@ -2539,21 +2608,29 @@ if log_files:
                                     or not _tf.get("weak_model")):
                                 _sweep_errors.append(
                                     f"{_sweep}:{_line_no} PROTOCOL_VIOLATION "
-                                    f"IMP-{_imp} produced ticket {_ticket} "
+                                    f"{_ref} produced ticket {_ticket} "
                                     "without recurrence: and weak_model: "
                                     "(META-IMPROVEMENT + WEAK-MODEL PRECEDENT "
                                     "reasoning gates, red controls 15/16)")
                             if _cls == "ACCIDENTAL_SUCCESS" and _repro == "y":
                                 _sweep_errors.append(
                                     f"{_sweep}:{_line_no} ACCIDENTAL_SUCCESS "
-                                    f"IMP-{_imp} recorded as verified "
+                                    f"{_ref} recorded as verified "
                                     "(reproduced=y); a correct result reached "
                                     "without the required verification is "
                                     "ACCIDENTAL_SUCCESS, never PASS (red "
                                     "control 5)")
-            # red control 20: every `source_reports:` ref must resolve to a
-            # real SWEEP disposition.
-            _all_sweep_text = "\n".join(_sweep_texts.values())
+            # red control 20 + DOGFOOD V (T-615): every `source_reports:` ref
+            # must resolve EXACTLY to a real SWEEP disposition -- no substring
+            # search. A composite ref (cycle/seat/report#RUN-N/IMP-NNN) must
+            # match the exact cycle + report + run + IMP. A bare IMP ref is
+            # LEGACY evidence only: it may resolve against legacy (run-less)
+            # sweep records in legacy cycles; it FAILs once the only matching
+            # records live in strict cycles, so a new ticket can never launder
+            # a strict finding through a bare IMP.
+            _strict_cycle_ids = {
+                cid for cid, _cd, _ros, _r in _sweep_records
+                if re.search(r"(?m)^manifest_schema:\s*strict\s*$", _ros)}
             for _tid, _t in _board_tickets.items():
                 _sr = _t.get("fields", {}).get("source_reports", "")
                 if not _sr:
@@ -2561,17 +2638,65 @@ if log_files:
                 for _ref in re.split(r"[, ]+", _sr):
                     if not _ref.strip():
                         continue
-                    if _ref not in _all_sweep_text:
+                    _cm = re.fullmatch(
+                        r"([A-Za-z0-9_-]+)/([A-Za-z0-9_-]+)/([^\s#]+)#"
+                        r"RUN-(\d+)/IMP-(\d+)", _ref)
+                    if _cm:
+                        _ccycle, _cseat, _creport, _crun, _cimp = _cm.groups()
+                        _matched = any(
+                            cid == _ccycle and rec.report == _creport
+                            and rec.run() == int(_crun)
+                            and rec.imp() == f"IMP-{_cimp}"
+                            for cid, _cd, _ros, rec in _sweep_records)
+                        if not _matched:
+                            _sweep_errors.append(
+                                f"{_tid} source_reports: {_ref} resolves to "
+                                "no EXACT composite SWEEP disposition "
+                                "(cycle + report + run + IMP); substring "
+                                "matching is never provenance")
+                        continue
+                    if re.fullmatch(r"RUN-\d+/IMP-\d+", _ref):
                         _sweep_errors.append(
-                            f"{_tid} source_reports: {_ref} resolves to no "
-                            "SWEEP disposition (red control 20)")
+                            f"{_tid} source_reports: {_ref} is a run-qualified "
+                            "ref without the cycle/seat/report prefix; use the "
+                            "full composite form "
+                            "<cycle>/<seat>/<report>#<ref>")
+                        continue
+                    if re.fullmatch(r"IMP-\d+", _ref):
+                        _legacy = any(
+                            rec.legacy and rec.imp() == _ref
+                            and cid not in _strict_cycle_ids
+                            for cid, _cd, _ros, rec in _sweep_records)
+                        _strict_only = any(
+                            rec.imp() == _ref
+                            and cid in _strict_cycle_ids
+                            for cid, _cd, _ros, rec in _sweep_records)
+                        if _legacy:
+                            continue
+                        if _strict_only:
+                            _sweep_errors.append(
+                                f"{_tid} source_reports: bare {_ref} names a "
+                                "strict-cycle finding; a new ticket must carry "
+                                "the full composite reference "
+                                "<cycle>/<seat>/<report>#RUN-N/IMP-NNN "
+                                "(DOGFOOD V provenance boundary)")
+                        else:
+                            _sweep_errors.append(
+                                f"{_tid} source_reports: {_ref} resolves to "
+                                "no legacy SWEEP disposition (red control 20)")
+                        continue
+                    _sweep_errors.append(
+                        f"{_tid} source_reports: {_ref!r} is not a valid "
+                        "finding reference (bare IMP-NNN legacy or the full "
+                        "composite <cycle>/<seat>/<report>#RUN-N/IMP-NNN)")
             if _sweep_errors:
                 fail("core sweep [sweep-ticket-link] -- "
                      + "; ".join(_sweep_errors[:6]))
             else:
                 ok("core sweep linkage valid: every disposition resolves to "
                    "a real finding/ticket, no unverified or INVALID/ALREADY_"
-                   "FIXED finding produced a ticket, source_reports resolve")
+                   "FIXED finding produced a ticket, source_reports resolve "
+                   "exactly")
         except Exception as _exc:  # noqa: BLE001
             fail("core sweep [sweep-ticket-link] -- scan failed: "
                  + str(_exc))

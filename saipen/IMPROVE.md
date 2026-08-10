@@ -21,21 +21,50 @@ error this file exists to prevent.
 
 ## 1. Command surface (routing lives in CORE.md 1.10)
 
-- `saipen improve` — checkpoint current work if necessary (never orphaning a
-  DOING ticket), reload the current protocol, audit this seat's observable
-  context, write only this seat's report. Does NOT change phase/task/
-  next_action merely to run an audit.
+- `saipen improve` — the meta-control entry point: binds the current project,
+  finds or mechanically admits the one active cycle, registers this seat,
+  creates the DRAFT report mechanically with the real captured source
+  identity, and returns a bounded AUDIT ASSIGNMENT (cycle_id, seat_id, report
+  path, source identity, scope, proof levels, schema, write boundary, next
+  mechanical submission action). It NEVER changes phase/task/next_action merely
+  to run an audit, and it is NEVER an alias for status.
 - `saipen improve status` — read-only; derives each registered seat's visible
   status from the roster, the report's `report_status`, and the sweep ledger.
-- `saipen improve sweep` — Core-only. Reads reports in deterministic order,
-  verifies findings, deduplicates root causes, writes dispositions into the
-  Core-owned sweep ledger, creates normal T-### TODO tickets for confirmed
-  defects. Never silently pre-empts an existing DOING ticket.
-- `saipen improve verify` — a bounded DELTA audit of the current cycle's own
-  output (fixes, new rules, new tests, final state). It MUST NOT re-enter a
-  full improve cycle and MUST NOT recurse.
-- `saipen improve clean` — archive/retention meta-operation. Never means phase
-  CLEAN, never enters the CLEAN phase.
+  Refuses to round malformed evidence up to a normal lifecycle state: invalid
+  manifests/reports/sweeps are reported as INVALID_CYCLE / INVALID_REPORT.
+- `saipen improve submit <cycle> <seat> <project> <findings.json>` — the
+  mechanical RUN submission path: Python appends the semantic RUN text through
+  the journaled writer; the agent never edits the report file directly.
+- `saipen improve complete <cycle> <seat> <project>` — mechanical report
+  completion: full report validation, then draft -> complete, journaled and
+  immutable.
+- `saipen improve sweep-queue <cycle>` — read-only enumeration of the exact
+  unswept composite finding queue (cycle + seat/report + RUN + IMP), in
+  deterministic order. Semantic adjudication (reproduce/classify/dedupe/decide)
+  is Core-owned; each decision is committed through `saipen improve sweep`.
+- `saipen improve sweep <cycle> <RUN-N/IMP-NNN> <DISPOSITION> [--ticket T-###]
+  [--report <ident>] [--reproduced y|n]` — Core-only disposition write through
+  write_sweep_entry. It validates BEFORE write that the cycle is active, the
+  report exists and is complete, the exact RUN and finding exist, the
+  disposition/reproduced values are legal, and a CONFIRMED disposition names a
+  canonical ticket that actually exists. Fictional findings can never COMMIT.
+- `saipen improve verify <cycle>` — a bounded DELTA audit of the current
+  cycle's COMPLETE output (strict manifest, every expected report full-valid,
+  exact composite sweep coverage). It MUST NOT re-enter a full improve cycle
+  and MUST NOT recurse. It can never PASS a report that only says
+  `report_status: complete`.
+- `saipen improve cycle-complete <cycle>` — runs the full cycle bar (strict
+  manifest, every expected report full-valid, exact composite sweep coverage)
+  and flips ACTIVE -> COMPLETE through complete_cycle. A partial sweep REFUSES
+  it; complete-before-sweep is impossible.
+- `saipen improve abort <cycle>` — the sanctioned mechanical exit for a STUCK
+  DRAFT cycle whose report cannot complete (an interrupted audit, a committed
+  RUN missing a required field). Refuses once any disposition exists, flips
+  the manifest to archived with a journaled `cycle_aborted` marker, and
+  byte-preserves the never-completed draft reports under a `.discarded`
+  suffix. No raw file deletion; the next cycle can be admitted.
+- `saipen improve clean <cycle>` — archive/retention meta-operation. Never
+  means phase CLEAN, never enters the CLEAN phase.
 
 No repeated-letter shortcut is assigned; the shortcut key count stays
 byte-unchanged.
@@ -100,6 +129,23 @@ Cycle directory:
     <seat_id>/saipen_improve_<PROJECTNAME>.md     seat report (immutable once complete)
 ```
 
+Strict-schema manifest (all new cycles; written by create_cycle, validated by
+the same grammar):
+
+```
+# IMPROVE CYCLE ROSTER
+
+manifest_schema: strict
+cycle_id
+created_at            (valid UTC timestamp, exactly once)
+project_identity      (portable key, never a machine-local absolute path)
+cycle_status          (exactly once)
+```
+
+Legacy pre-boundary cycles carry none of the strict identity fields and the
+historical reports' symbolic `source_tree_fingerprint` values stay valid legacy
+evidence -- read-only compatibility, never emitted by a new writer.
+
 ## 3. Seat roster (MANIFEST.md)
 
 Core registers the expected seat roster before fan-out. `seat_id` identifies
@@ -111,6 +157,7 @@ the same registered seat.
 Roster fields (stable routing/identity only):
 
 ```
+manifest_schema         (strict cycles)
 cycle_id
 created_at
 project_identity
@@ -126,6 +173,8 @@ availability        (expected | unavailable)
 - Unavailable historical seats are explicitly `availability: unavailable`.
 - Seat identity is NEVER inferred from `STATE.agent` (latest actor only) or
   from LOG agent tags (optional field).
+- Python owns manifest formatting: `create_cycle`/`register_seat` render the
+  roster; no caller supplies preformatted MANIFEST prose.
 
 The roster is NOT a second report: it carries no `draft`/`complete`/`swept`
 status. Those are derived (section 5).
@@ -148,6 +197,17 @@ SubSaipen seat: <sub_home>/improve/<cycle_id>/
   a different cycle gets a different directory.
 - A second run from the SAME seat in the SAME cycle APPENDS an immutable RUN
   section; an earlier RUN is never overwritten.
+- Every new report is created mechanically (`create_report`), RUNs append
+  through the journaled writer, and `report_status` flips draft -> complete
+  only through `complete_report` after the FULL report validation passes. Raw
+  report file construction by Core/agent is banned after the migration
+  boundary.
+- Every semantic audit invocation produces an explicit `## RUN N` section.
+  A strict cycle's completed report carries at least one RUN; a RUN with no
+  findings MUST declare the explicit `NO_FINDINGS` marker, so an intentional
+  empty audit is distinguishable from an interrupted one.
+- Once complete the report is immutable; lifecycle state is PARSER-derived,
+  never a substring search.
 
 Report header identity — NO absolute machine-local path. Report identity uses:
 
@@ -180,13 +240,27 @@ MANIFEST never mirrors report status. SWEEP owns dispositions.
 
 ## 6. Finding schema
 
-A finding is `IMP-###`, numeric order inside a report. Required header block:
+A finding is `IMP-###`, numeric order inside a RUN. FINDING IDENTITY IS
+COMPOSITE: the canonical reference is
+`<cycle_id>/<seat_id>/<report_path>#<RUN-N>/<IMP-NNN>` (a legacy pre-boundary
+finding has no RUN and uses the bare `IMP-NNN` local form). One RUN's IMP-001
+never satisfies another RUN's IMP-001; one cycle's IMP-001 never satisfies
+another cycle's ticket provenance. No subsystem resolves provenance by a bare
+IMP-### substring. Required header block:
 
 ```
 agent, role, model_or_runtime, project,
 saipen_version, protocol_fingerprint, source_head, source_tree_fingerprint,
-context_scope, context_available, report_status
+discovery_model, context_scope, context_available, report_status
 ```
+
+`source_tree_fingerprint` MUST be a real mechanical fingerprint
+(`git-delta-v1:...` or `no-git-tree-v1:...`), captured by Python through
+`freshness.compute_source_identity()` at report creation -- a hand-typed hash
+or a friendly label never passes as fresh audit evidence. For strict active
+cycles the report must also be fresh against the CURRENT source identity:
+same HEAD plus a changed/dirty tree is detected, and stale evidence cannot
+authorize fresh canonical work without current reproduction.
 
 No `saipen_home` absolute path. Every finding MUST carry an observable
 expected/actual/evidence triple — a finding without it is rejected, not
@@ -211,12 +285,36 @@ was legitimately given via a projection (section 8).
 
 Core sweep is the only path from report to canonical work:
 
-1. deterministic report order; numeric IMP order inside a report;
+1. deterministic report order; `sweep-queue` enumerates the exact unswept
+   composite findings (cycle + seat/report + RUN + IMP) with no substring
+   guessing;
 2. reproduce; reject invalid findings;
 3. root-cause deduplication: several reports naming one root cause produce ONE
    ticket with every `source_reports:` reference;
 4. dispositions are written to the Core-owned ledger `.saipen/improve/
    <cycle_id>/SWEEP.md`, NEVER into the seat report;
+5. `write_sweep_entry` validates BEFORE write: the named cycle is active, the
+   named seat/report exists, the report is complete, the named RUN exists, the
+   named IMP exists in that exact RUN, the disposition and reproduced values
+   are legal, the disposition/ticket relation is legal, a CONFIRMED
+   disposition names a canonical ticket that exists on the board or in the
+   LOG, and -- for a strict cycle -- a CONFIRMED disposition is refused on
+   STALE evidence (the report's source identity no longer matches the current
+   tree; same HEAD + dirty tree is stale). Fictional reports/runs/findings/
+   tickets can never COMMIT, and stale evidence demands current reproduction
+   (a new RUN) or a non-CONFIRMED disposition.
+
+ONE structured sweep record (`SweepRecord`) is shared by the writer, the
+parser, `derive_status`, the validator and ticket provenance:
+
+```
+finding_ref        RUN-N/IMP-NNN (strict) or IMP-NNN (legacy)
+disposition        closed set
+ticket             canonical ticket or -
+reproduced         y | n
+fixed_by           resolution identity or -
+verification       verification evidence/ref or -
+```
 
 SWEEP.md records per finding: `report_path, run_id, IMP-id, disposition,
 reproduced, canonical ticket, fixed_by, verification`.
@@ -227,6 +325,13 @@ SUPERSEDED | LATER_RULE | NOT_REPRODUCED | INVALID | NEEDS_EXTERNAL_EVIDENCE`.
 A report's own `confidence: proven` is evidence to inspect, never a ticket
 authorization. Canonical tickets carry: `source_reports, reproduced,
 invariant, defect, impact, exact_fix_scope, red_control, done_condition`.
+
+`source_reports:` MUST use the exact composite reference
+`<cycle>/<seat>/<report>#RUN-N/IMP-NNN`. A bare `IMP-NNN` ref is LEGACY
+evidence only: it may resolve against legacy (run-less) sweep records in
+legacy cycles, and FAILs once the only matching records live in strict cycles
+-- a new ticket can never launder a strict finding through a bare IMP.
+Substring search is never provenance.
 
 Chain of custody:
 
@@ -262,9 +367,17 @@ already-distilled representation. USERPERSON preference identity is structured
 
 ## 9. Verify (delta-only)
 
-`saipen improve verify` audits ONLY the delta produced by this cycle. It MUST
-NOT reopen unrelated history and MUST NOT recurse into a full improve cycle.
-If it starts another historical self-audit, it fails.
+`saipen improve verify` validates the COMPLETE cycle output of the current
+cycle: strict manifest schema, every expected report full-valid (header,
+intentional RUN evidence, well-formed findings), exact composite sweep
+coverage, and -- for strict active cycles -- source freshness against the
+current tree. It MUST NOT reopen unrelated history and MUST NOT recurse into a
+full improve cycle. It can never PASS a report that contains only
+`report_status: complete` -- the completion bar is: a valid header, at least
+one explicit `## RUN N` (or an explicit `NO_FINDINGS` run), every finding with
+its composite identity and full expected/actual/evidence triple, and a final
+Core disposition for every finding's exact identity. If it starts another
+historical self-audit, it fails.
 
 ## 10. Archive / clean semantics
 

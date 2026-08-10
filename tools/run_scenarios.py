@@ -57,7 +57,8 @@ from freshness import (FreshnessError, SourceIdentity,
                        compute_generic_role_revision, compute_role_revision,
                        compute_source_identity)
 from sub_clean import sub_clean_blockers
-from improve import (allocate_cycle_id, append_run, complete_cycle, cycle_dir,
+from improve import (allocate_cycle_id, append_run, complete_cycle,
+                     complete_report, create_cycle, create_report, cycle_dir,
                      derive_status, register_cycle, register_seat,
                      resolve_report_path, validate_manifest, validate_report,
                      write_sweep_entry)
@@ -3458,36 +3459,72 @@ def run_improve_probes() -> tuple[list[str], int]:
             "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n",
             encoding="utf-8")
         (saipen / "STATE.md").write_text(
-            "---\nphase: BUILD\ntask: none\nnext_action: \"saipen continue\"\n"
-            "blocker: \"\"\nsaipen_version: 7\nschema_version: 3\n"
+            "---\nphase: DONE\ntask: none\nnext_action: \"saipen continue\"\n"
+            "blocker: \"\"\ntransition_from: SHIP\n"
+            "saipen_version: 7\nschema_version: 3\n"
             "last_event: 900\nstyle_contract: ded-4ae736e4\n"
             "saipen_home: \".\"\nagent: probe\nmode: full\n"
             "updated: 2026-08-09T00:00:00Z\n---\n", encoding="utf-8")
         return proot
 
+    def ticket_fixture(root: Path, tid: str = "T-900") -> None:
+        """Put a real canonical ticket on the temp board so CONFIRMED sweeps
+        can bind it (DOGFOOD V: a ledger may never claim a nonexistent
+        ticket)."""
+        board = root / ".saipen" / "BOARD.md"
+        text = board.read_text(encoding="utf-8-sig")
+        if tid in text:
+            return
+        text = text.replace(
+            "## TODO\n",
+            f"## TODO\n- [ ] {tid} [P1] probe | verify: probe\n")
+        board.write_text(text, encoding="utf-8")
+
+    def mech_cycle(root: Path, cycle_id: str, seat_id: str, project_name: str,
+                   run_texts: list[str], ticket: str = "T-900",
+                   findings_ok: bool = True) -> tuple[Path, Path]:
+        """Build a STRICT cycle entirely through the mechanical writers:
+        create_cycle -> register_seat -> create_report -> append_run ->
+        complete_report. Zero raw canonical Improve writes."""
+        cdir = create_cycle(root, cycle_id,
+                            created_at="2026-08-10T00:00:00Z",
+                            project_identity="probe-project")
+        register_seat(cdir, seat_id, "core",
+                      f"saipen_improve_{project_name}.md")
+        ticket_fixture(root, ticket)
+        report = create_report(
+            root, cycle_id, seat_id, project_name, agent="probe", role="core",
+            model_or_runtime="probe", protocol_fingerprint="ded-4ae736e4",
+            context_scope="probe scope")
+        if findings_ok:
+            for run_text in run_texts:
+                append_run(report, run_text)
+            complete_report(report)
+        return cdir, report
+
     proot = project_fixture("saipen-sweep-")
-    cycle = cycle_dir(proot, "imp-key-20260808")
-    cycle.mkdir(parents=True)
-    register_cycle(proot, "imp-key-20260808", roster)
-    report = resolve_report_path(proot, "imp-key-20260808", "opencode-01",
-                                 "PROJ")
-    report.parent.mkdir(parents=True)
-    report.write_text(good, encoding="utf-8")
+    cycle, report = mech_cycle(proot, "imp-key-20260808", "opencode-01",
+                               "PROJ",
+                               ["IMP-001 [P1] [PROTOCOL_VIOLATION] "
+                                "[proven] [ticket]\n"
+                                "expected: x\nactual: y\nevidence: z\n"])
     before = report.read_bytes()
-    write_sweep_entry(cycle, {"imp_id": "001", "disposition": "CONFIRMED",
-                              "ticket": "T-900", "report": "r",
+    write_sweep_entry(cycle, {"run": "RUN-1", "imp_id": "001",
+                              "disposition": "CONFIRMED", "ticket": "T-900",
+                              "report": "saipen_improve_PROJ.md",
                               "reproduced": "y"})
     expect("SWEEP ledger write never mutates the seat report",
            report.read_bytes() == before)
     expect("SWEEP ledger exists with the disposition",
            (cycle / "SWEEP.md").is_file()
-           and "CONFIRMED" in (cycle / "SWEEP.md").read_text(encoding="utf-8"))
+           and "RUN-1/IMP-001" in (cycle / "SWEEP.md").read_text(
+               encoding="utf-8"))
 
     # Cycle/seat admission: deterministic, collision-safe (T-570).
     proot = project_fixture("saipen-cycle-")
-    c1 = register_cycle(proot, "imp-key-20260808", "cycle_id: imp-key-20260808\n")
+    c1 = create_cycle(proot, "imp-key-20260808")
     try:
-        register_cycle(proot, "imp-key-20260808", "")
+        create_cycle(proot, "imp-key-20260808")
         dup_cycle = False
     except (FileExistsError, ValueError):
         dup_cycle = True
@@ -3516,7 +3553,7 @@ def run_improve_probes() -> tuple[list[str], int]:
            bad_avail)
 
     # RUN append is immutable: a second run appends, never overwrites; a
-    # complete report refuses further RUNs (T-551).
+    # complete report refuses further RUNs (T-551, DOGFOOD V T-616).
     proot = project_fixture("saipen-run-")
     seat_report = resolve_report_path(proot, "imp-key-20260808",
                                       "opencode-01", "PROJ")
@@ -3575,8 +3612,7 @@ def run_improve_probes() -> tuple[list[str], int]:
     # ---- T-589: stale Improve plan refuses (CAS, no lost update).
     import improve as _improve
     cas_root = project_fixture("saipen-cas-")
-    cas_cycle = register_cycle(cas_root, "imp-cas",
-                               "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
+    cas_cycle = create_cycle(cas_root, "imp-cas")
     cas_manifest = cas_cycle / "MANIFEST.md"
     base_text = _improve._read_maybe(cas_manifest)
     base_hash_before = _improve._base_hash(cas_manifest)
@@ -3604,11 +3640,9 @@ def run_improve_probes() -> tuple[list[str], int]:
     # set second_blocked=True. Now the success path sets False, so a mutation
     # removing the active-cycle refusal turns the scenario red.)
     life_root = project_fixture("saipen-life-")
-    c1 = register_cycle(life_root, "imp-one",
-                        "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
+    c1 = create_cycle(life_root, "imp-one")
     try:
-        register_cycle(life_root, "imp-two",
-                       "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
+        create_cycle(life_root, "imp-two")
         second_blocked = False
     except ValueError:
         second_blocked = True
@@ -3616,12 +3650,30 @@ def run_improve_probes() -> tuple[list[str], int]:
            second_blocked)
     # Complete prerequisites: one expected seat with a complete report.
     register_seat(c1, "seat-1", "core", "saipen_improve_A.md")
-    report1 = resolve_report_path(life_root, "imp-one", "seat-1", "A")
-    report1.parent.mkdir(parents=True, exist_ok=True)
-    report1.write_text("report_status: complete\n", encoding="utf-8")
+    report1 = create_report(life_root, "imp-one", "seat-1", "A",
+                            agent="probe", role="core",
+                            model_or_runtime="probe",
+                            protocol_fingerprint="ded-4ae736e4",
+                            context_scope="probe scope")
+    # A strict cycle cannot be completed by a bare status skeleton.
+    try:
+        complete_report(report1)
+        bare_ok = False
+    except ValueError:
+        bare_ok = True
+    expect("complete_report refuses a report with no RUN evidence "
+           "(DOGFOOD V)",
+           bare_ok)
+    append_run(report1, "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+                        "expected: x\nactual: y\nevidence: z\n")
+    complete_report(report1)
+    ticket_fixture(life_root, "T-900")
+    write_sweep_entry(c1, {"run": "RUN-1", "imp_id": "001",
+                           "disposition": "CONFIRMED", "ticket": "T-900",
+                           "report": "saipen_improve_A.md",
+                           "reproduced": "y"})
     complete_cycle(c1)
-    c2 = register_cycle(life_root, "imp-two",
-                        "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
+    c2 = create_cycle(life_root, "imp-two")
     expect("a completed cycle allows the next cycle (no evidence deleted)",
            (c1 / "MANIFEST.md").is_file()
            and (c2 / "MANIFEST.md").is_file(), repr((c1, c2)))
@@ -3631,12 +3683,13 @@ def run_improve_probes() -> tuple[list[str], int]:
     # T-595: complete_cycle refuses when a required report is missing/draft;
     # completed cycle is immutable under register_seat/append_run.
     imm_root = project_fixture("saipen-imm-")
-    cimm = register_cycle(imm_root, "imp-imm",
-                          "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
+    cimm = create_cycle(imm_root, "imp-imm")
     register_seat(cimm, "seat-1", "core", "saipen_improve_A.md")
-    imm_report = resolve_report_path(imm_root, "imp-imm", "seat-1", "A")
-    imm_report.parent.mkdir(parents=True, exist_ok=True)
-    imm_report.write_text("report_status: draft\n", encoding="utf-8")
+    imm_report = create_report(imm_root, "imp-imm", "seat-1", "A",
+                               agent="probe", role="core",
+                               model_or_runtime="probe",
+                               protocol_fingerprint="ded-4ae736e4",
+                               context_scope="probe scope")
     try:
         complete_cycle(cimm)
         early = False
@@ -3644,7 +3697,14 @@ def run_improve_probes() -> tuple[list[str], int]:
         early = True
     expect("complete_cycle refuses a draft report (completion means something)",
            early)
-    imm_report.write_text("report_status: complete\n", encoding="utf-8")
+    append_run(imm_report, "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+                           "expected: x\nactual: y\nevidence: z\n")
+    complete_report(imm_report)
+    ticket_fixture(imm_root, "T-900")
+    write_sweep_entry(cimm, {"run": "RUN-1", "imp_id": "001",
+                             "disposition": "CONFIRMED", "ticket": "T-900",
+                             "report": "saipen_improve_A.md",
+                             "reproduced": "y"})
     complete_cycle(cimm)
     try:
         register_seat(cimm, "seat-2", "core", "saipen_improve_B.md")
@@ -3662,8 +3722,9 @@ def run_improve_probes() -> tuple[list[str], int]:
            late_run)
     from improve import write_sweep_entry as _wse
     try:
-        _wse(cimm, {"imp_id": "001", "disposition": "CONFIRMED",
-                    "ticket": "-", "report": "r", "reproduced": "-"})
+        _wse(cimm, {"run": "RUN-1", "imp_id": "001",
+                    "disposition": "CONFIRMED", "ticket": "T-900",
+                    "report": "saipen_improve_A.md", "reproduced": "y"})
         late_sweep = False
     except ValueError:
         late_sweep = True
@@ -3674,26 +3735,30 @@ def run_improve_probes() -> tuple[list[str], int]:
     # with NO hand-built intermediate strings. write_sweep_entry(imp_id="001")
     # must write exactly one IMP-001 that derive_status reads back.
     e2e_root = project_fixture("saipen-e2e-")
-    e2e_cycle = register_cycle(e2e_root, "imp-e2e",
-                               "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
+    e2e_cycle = create_cycle(e2e_root, "imp-e2e")
     register_seat(e2e_cycle, "seat-a", "core", "saipen_improve_A.md")
     register_seat(e2e_cycle, "seat-b", "core", "saipen_improve_B.md")
-    rep_a = resolve_report_path(e2e_root, "imp-e2e", "seat-a", "A")
-    rep_b = resolve_report_path(e2e_root, "imp-e2e", "seat-b", "B")
-    rep_a.parent.mkdir(parents=True, exist_ok=True)
-    rep_b.parent.mkdir(parents=True, exist_ok=True)
-    rep_a.write_text("report_status: complete\n\n"
-                     "IMP-001 [P1] [PROTOCOL_VIOLATION] [proven] [ticket]\n"
-                     "expected: a\nactual: b\nevidence: c\n", encoding="utf-8")
-    rep_b.write_text("report_status: complete\n\n"
-                     "IMP-001 [P1] [PROTOCOL_VIOLATION] [proven] [ticket]\n"
-                     "expected: d\nactual: e\nevidence: f\n", encoding="utf-8")
+    rep_a = create_report(e2e_root, "imp-e2e", "seat-a", "A", agent="probe",
+                          role="core", model_or_runtime="probe",
+                          protocol_fingerprint="ded-4ae736e4",
+                          context_scope="scope")
+    rep_b = create_report(e2e_root, "imp-e2e", "seat-b", "B", agent="probe",
+                          role="core", model_or_runtime="probe",
+                          protocol_fingerprint="ded-4ae736e4",
+                          context_scope="scope")
+    append_run(rep_a, "IMP-001 [P1] [PROTOCOL_VIOLATION] [proven] [ticket]\n"
+                      "expected: a\nactual: b\nevidence: c\n")
+    append_run(rep_b, "IMP-001 [P1] [PROTOCOL_VIOLATION] [proven] [ticket]\n"
+                      "expected: d\nactual: e\nevidence: f\n")
+    complete_report(rep_a)
+    complete_report(rep_b)
+    ticket_fixture(e2e_root, "T-900")
     roster_e2e = (e2e_cycle / "MANIFEST.md").read_text(encoding="utf-8-sig")
     # Write one disposition for seat A only, using the numeric-id input that
     # once produced IMP-IMP-001.
-    _wse(e2e_cycle, {"imp_id": "001", "disposition": "CONFIRMED",
-                     "ticket": "T-900", "report": "saipen_improve_A.md",
-                     "reproduced": "y"})
+    _wse(e2e_cycle, {"run": "RUN-1", "imp_id": "001",
+                     "disposition": "CONFIRMED", "ticket": "T-900",
+                     "report": "saipen_improve_A.md", "reproduced": "y"})
     sweep_text = (e2e_cycle / "SWEEP.md").read_text(encoding="utf-8")
     expect("sweep writer emits exactly one IMP-001 (never IMP-IMP-001)",
            sweep_text.count("IMP-001") == 1
@@ -3710,13 +3775,20 @@ def run_improve_probes() -> tuple[list[str], int]:
     # ---- T-589: deterministic cycle-id allocator.
     alloc_root = project_fixture("saipen-alloc-")
     id1 = allocate_cycle_id(alloc_root, "proj-x")
-    register_cycle(alloc_root, id1, "# IMPROVE CYCLE ROSTER\n"
-                   "cycle_status: active\n")
-    cid1 = cycle_dir(alloc_root, id1)
+    cid1 = create_cycle(alloc_root, id1)
     register_seat(cid1, "seat-1", "core", "saipen_improve_A.md")
-    a_report = resolve_report_path(alloc_root, id1, "seat-1", "A")
-    a_report.parent.mkdir(parents=True, exist_ok=True)
-    a_report.write_text("report_status: complete\n", encoding="utf-8")
+    a_report = create_report(alloc_root, id1, "seat-1", "A", agent="probe",
+                             role="core", model_or_runtime="probe",
+                             protocol_fingerprint="ded-4ae736e4",
+                             context_scope="scope")
+    append_run(a_report, "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+                         "expected: x\nactual: y\nevidence: z\n")
+    complete_report(a_report)
+    ticket_fixture(alloc_root, "T-900")
+    write_sweep_entry(cid1, {"run": "RUN-1", "imp_id": "001",
+                             "disposition": "CONFIRMED", "ticket": "T-900",
+                             "report": "saipen_improve_A.md",
+                             "reproduced": "y"})
     complete_cycle(cid1)
     id2 = allocate_cycle_id(alloc_root, "proj-x")
     expect("cycle-id allocator is deterministic and collision-safe",
@@ -3729,20 +3801,22 @@ def run_improve_probes() -> tuple[list[str], int]:
     # COMMITTED -> every ordinary mutator REFUSEs -> next cycle admitted.
     from saipen_engine.journal import verify_improve as _verify_improve
     life2 = project_fixture("saipen-life2-")
-    cL = register_cycle(life2, "imp-life2",
-                        "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
+    cL = create_cycle(life2, "imp-life2")
     register_seat(cL, "seat-1", "core", "saipen_improve_A.md")
-    repL = resolve_report_path(life2, "imp-life2", "seat-1", "A")
-    repL.parent.mkdir(parents=True, exist_ok=True)
-    repL.write_text(
-        "report_status: complete\n\n"
-        "IMP-001 [P1] [PROTOCOL_VIOLATION] [proven] [ticket]\n"
-        "expected: x\nactual: y\nevidence: z\n"
-        "IMP-002 [P1] [PROTOCOL_VIOLATION] [proven] [ticket]\n"
-        "expected: x\nactual: y\nevidence: z\n", encoding="utf-8")
+    repL = create_report(life2, "imp-life2", "seat-1", "A", agent="probe",
+                         role="core", model_or_runtime="probe",
+                         protocol_fingerprint="ded-4ae736e4",
+                         context_scope="scope")
+    append_run(repL, "IMP-001 [P1] [PROTOCOL_VIOLATION] [proven] [ticket]\n"
+                     "expected: x\nactual: y\nevidence: z\n"
+                     "IMP-002 [P1] [PROTOCOL_VIOLATION] [proven] [ticket]\n"
+                     "expected: x\nactual: y\nevidence: z\n")
+    complete_report(repL)
+    ticket_fixture(life2, "T-900")
     # partial sweep: only IMP-001 disposed
-    write_sweep_entry(cL, {"imp_id": "001", "disposition": "CONFIRMED",
-                           "ticket": "T-900", "report": "saipen_improve_A.md",
+    write_sweep_entry(cL, {"run": "RUN-1", "imp_id": "001",
+                           "disposition": "CONFIRMED", "ticket": "T-900",
+                           "report": "saipen_improve_A.md",
                            "reproduced": "y"})
     try:
         complete_cycle(cL)
@@ -3752,8 +3826,9 @@ def run_improve_probes() -> tuple[list[str], int]:
     expect("lifecycle: partial sweep REFUSEs complete_cycle (unswept IMP-002)",
            partial_ok and _improve._cycle_status(cL / "MANIFEST.md") == "active",
            repr(_improve._cycle_status(cL / "MANIFEST.md")))
-    write_sweep_entry(cL, {"imp_id": "002", "disposition": "CONFIRMED",
-                           "ticket": "T-900", "report": "saipen_improve_A.md",
+    write_sweep_entry(cL, {"run": "RUN-1", "imp_id": "002",
+                           "disposition": "CONFIRMED", "ticket": "T-900",
+                           "report": "saipen_improve_A.md",
                            "reproduced": "y"})
     complete_cycle(cL)
     expect("lifecycle: full sweep coverage permits complete_cycle",
@@ -3762,9 +3837,10 @@ def run_improve_probes() -> tuple[list[str], int]:
         (lambda: register_seat(cL, "seat-2", "core", "saipen_improve_B.md"),
          "register_seat"),
         (lambda: write_sweep_entry(
-            cL, {"imp_id": "003", "disposition": "CONFIRMED",
-                 "ticket": "T-900", "report": "saipen_improve_A.md",
-                 "reproduced": "y"}), "write_sweep_entry"),
+            cL, {"run": "RUN-1", "imp_id": "003",
+                 "disposition": "CONFIRMED", "ticket": "T-900",
+                 "report": "saipen_improve_A.md", "reproduced": "y"}),
+         "write_sweep_entry"),
     ]:
         try:
             mutator()
@@ -3773,8 +3849,7 @@ def run_improve_probes() -> tuple[list[str], int]:
             refused = True
         expect(f"lifecycle: {label} REFUSEs a completed cycle (immutable)",
                refused)
-    cL2 = register_cycle(life2, "imp-life2-2",
-                         "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
+    cL2 = create_cycle(life2, "imp-life2-2")
     expect("lifecycle: the next cycle is admitted after completion",
            (cL2 / "MANIFEST.md").is_file())
 
@@ -3790,8 +3865,17 @@ def run_improve_probes() -> tuple[list[str], int]:
            repr(bad_errs))
     # fresh ledger: the writer's own output must satisfy the verifier
     sweep_bad.unlink()
-    write_sweep_entry(cL2, {"imp_id": "001", "disposition": "CONFIRMED",
-                            "ticket": "T-900", "report": "saipen_improve_A.md",
+    register_seat(cL2, "seat-1", "core", "saipen_improve_A.md")
+    repL2 = create_report(life2, "imp-life2-2", "seat-1", "A", agent="probe",
+                          role="core", model_or_runtime="probe",
+                          protocol_fingerprint="ded-4ae736e4",
+                          context_scope="scope")
+    append_run(repL2, "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+                      "expected: x\nactual: y\nevidence: z\n")
+    complete_report(repL2)
+    write_sweep_entry(cL2, {"run": "RUN-1", "imp_id": "001",
+                            "disposition": "CONFIRMED", "ticket": "T-900",
+                            "report": "saipen_improve_A.md",
                             "reproduced": "y"})
     sweep_text2 = (cL2 / "SWEEP.md").read_text(encoding="utf-8")
     good_errs = _verify_improve(life2, [{"path": ".saipen/improve/"
@@ -3830,18 +3914,13 @@ def run_improve_probes() -> tuple[list[str], int]:
     # ---- T-553: improve routing is DERIVED -- manifest/sweep edits change
     # the visible status with ZERO STATE writes (no independent counters).
     derive_root = project_fixture("saipen-derive-")
-    d_cycle = register_cycle(derive_root, "imp-derive",
-                             "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
-    register_seat(d_cycle, "seat-1", "core", "saipen_improve_A.md")
+    d_cycle, report_d = mech_cycle(derive_root, "imp-derive", "seat-1", "A",
+                                   ["IMP-001 [P1] [PROTOCOL_VIOLATION] "
+                                    "[proven] [ticket]\n"
+                                    "expected: x\nactual: y\nevidence: z\n"])
     state_bytes_before = (derive_root / ".saipen" / "STATE.md").read_bytes()
-    report_d = resolve_report_path(derive_root, "imp-derive", "seat-1", "A")
-    report_d.parent.mkdir(parents=True, exist_ok=True)
-    report_d.write_text(
-        "report_status: complete\n\n"
-        "IMP-001 [P1] [PROTOCOL_VIOLATION] [proven] [ticket]\n"
-        "expected: x\nactual: y\nevidence: z\n", encoding="utf-8")
-    write_sweep_entry(d_cycle, {"imp_id": "001", "disposition": "CONFIRMED",
-                                "ticket": "T-900",
+    write_sweep_entry(d_cycle, {"run": "RUN-1", "imp_id": "001",
+                                "disposition": "CONFIRMED", "ticket": "T-900",
                                 "report": "saipen_improve_A.md",
                                 "reproduced": "y"})
     manifest_text = (d_cycle / "MANIFEST.md").read_text(encoding="utf-8")
@@ -4110,13 +4189,10 @@ def run_improve_probes() -> tuple[list[str], int]:
     # visible per-seat status with zero STATE writes; verify runs the
     # delta-only semantic verifier; clean archives a completed cycle.
     cli_root = project_fixture("saipen-cli-")
-    cli_cycle = register_cycle(cli_root, "imp-cli",
-                               "# IMPROVE CYCLE ROSTER\ncycle_status: "
-                               "active\n")
-    register_seat(cli_cycle, "seat-1", "core", "saipen_improve_A.md")
-    cli_rep = resolve_report_path(cli_root, "imp-cli", "seat-1", "A")
-    cli_rep.parent.mkdir(parents=True, exist_ok=True)
-    cli_rep.write_text("report_status: complete\n", encoding="utf-8")
+    cli_cycle, cli_rep = mech_cycle(cli_root, "imp-cli", "seat-1", "A",
+                                    ["IMP-001 [P1] [LOGIC_ERROR] [proven] "
+                                     "[ticket]\n"
+                                     "expected: x\nactual: y\nevidence: z\n"])
     state_before = (cli_root / ".saipen" / "STATE.md").read_bytes()
     cli_proc = subprocess.run(
         [sys.executable, str(HOME / "tools" / "saipen.py"), "improve",
@@ -4129,14 +4205,6 @@ def run_improve_probes() -> tuple[list[str], int]:
     expect("saipen improve status is read-only (zero STATE writes)",
            (cli_root / ".saipen" / "STATE.md").read_bytes() == state_before,
            "state changed")
-    cli_verify = subprocess.run(
-        [sys.executable, str(HOME / "tools" / "saipen.py"), "improve",
-         "verify", "imp-cli", "--json"],
-        cwd=str(cli_root), capture_output=True, text=True, timeout=60)
-    expect("saipen improve verify executes the delta-only verifier",
-           '"code": "IMPROVE_VERIFY_PASS"' in cli_verify.stdout
-           and '"delta_only": true' in cli_verify.stdout,
-           repr(cli_verify.stdout[:200]))
     cli_clean = subprocess.run(
         [sys.executable, str(HOME / "tools" / "saipen.py"), "improve",
          "clean", "imp-cli", "--json"],
@@ -4147,12 +4215,370 @@ def run_improve_probes() -> tuple[list[str], int]:
            repr(cli_clean.stdout[:200]))
     _cli_sweep = subprocess.run(
         [sys.executable, str(HOME / "tools" / "saipen.py"), "improve",
-         "sweep", "imp-cli", "001", "CONFIRMED", "--ticket", "T-900",
-         "--report", "saipen_improve_A.md", "--reproduced", "y", "--json"],
+         "sweep", "imp-cli", "RUN-1/IMP-001", "CONFIRMED", "--ticket",
+         "T-900", "--report", "saipen_improve_A.md", "--reproduced", "y",
+         "--json"],
         cwd=str(cli_root), capture_output=True, text=True, timeout=60)
     expect("saipen improve sweep writes a disposition through the journal",
            '"code": "COMMITTED"' in _cli_sweep.stdout,
            repr(_cli_sweep.stdout[:200]))
+    # verify runs AFTER the sweep, so the complete cycle bar is actually met.
+    cli_verify = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "improve",
+         "verify", "imp-cli", "--json"],
+        cwd=str(cli_root), capture_output=True, text=True, timeout=60)
+    expect("saipen improve verify executes the delta-only verifier on a "
+           "fully-swept cycle",
+           '"code": "IMPROVE_VERIFY_PASS"' in cli_verify.stdout
+           and '"delta_only": true' in cli_verify.stdout,
+           repr(cli_verify.stdout[:200]))
+
+    # ---- DOGFOOD V (T-617): bare `saipen improve` is the documented
+    # meta-control -- it prepares the bounded audit assignment, never an alias
+    # for status, and never changes phase/task/next_action.
+    meta_root = project_fixture("saipen-meta-")
+    state_before_meta = (meta_root / ".saipen" / "STATE.md").read_bytes()
+    bare_proc = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "improve",
+         "--json"],
+        cwd=str(meta_root), capture_output=True, text=True, timeout=60)
+    expect("bare saipen improve prepares the audit assignment (not status)",
+           '"code": "IMPROVE_AUDIT_ASSIGNMENT"' in bare_proc.stdout
+           and '"cycle_id"' in bare_proc.stdout
+           and '"source_tree_fingerprint"' in bare_proc.stdout,
+           repr(bare_proc.stdout[:300]))
+    expect("bare saipen improve never changes phase/task (audit prep is "
+           "read-only for STATE)",
+           (meta_root / ".saipen" / "STATE.md").read_bytes()
+           == state_before_meta)
+    _mcycle = json.loads(bare_proc.stdout)["cycle_id"]
+    _mseat = json.loads(bare_proc.stdout)["seat_id"]
+    _cycles_before_verify = len(list(
+        (meta_root / ".saipen" / "improve").iterdir()))
+    _mv = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "improve",
+         "verify", _mcycle, "--json"],
+        cwd=str(meta_root), capture_output=True, text=True, timeout=60)
+    expect("saipen improve verify validates the complete cycle output and "
+           "does not recurse into a new cycle",
+           '"code": "VALIDATION_FAILED"' in _mv.stdout
+           and len(list((meta_root / ".saipen" / "improve").iterdir()))
+           == _cycles_before_verify,
+           repr(_mv.stdout[:200]))
+
+    # ---- DOGFOOD V (T-616): saipen improve verify can no longer PASS an
+    # incomplete completed report (a bare report_status skeleton).
+    false_root = project_fixture("saipen-false-")
+    _fc = register_cycle(false_root, "imp-false",
+                         "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
+    register_seat(_fc, "seat-1", "core", "saipen_improve_A.md")
+    _fr = resolve_report_path(false_root, "imp-false", "seat-1", "A")
+    _fr.parent.mkdir(parents=True, exist_ok=True)
+    _fr.write_text("report_status: complete\n", encoding="utf-8")
+    _fv = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "improve",
+         "verify", "imp-false", "--json"],
+        cwd=str(false_root), capture_output=True, text=True, timeout=60)
+    expect("improve verify rejects a report containing only report_status: "
+           "complete (false PASS closed)",
+           '"code": "VALIDATION_FAILED"' in _fv.stdout,
+           repr(_fv.stdout[:200]))
+
+    # ---- DOGFOOD V (T-615): one disposition can never cover two findings
+    # that share a local IMP number across RUNs; sweep-queue enumerates the
+    # exact composite unswept findings; strict manifest + real fingerprint +
+    # fake-fingerprint refusal through the public path.
+    dg_root = project_fixture("saipen-dg5-")
+    _dg_cycle, _dg_rep = mech_cycle(
+        dg_root, "imp-dg5", "seat-1", "A",
+        ["IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+         "expected: x\nactual: y\nevidence: z\n"],
+        ticket="T-900", findings_ok=False)
+    append_run(_dg_rep, "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+                        "expected: x\nactual: y\nevidence: z\n")
+    append_run(_dg_rep, "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+                        "expected: d\nactual: e\nevidence: f\n")
+    complete_report(_dg_rep)
+    # sweep only RUN-1/IMP-001; RUN-2/IMP-001 must stay unswept.
+    write_sweep_entry(_dg_cycle, {"run": "RUN-1", "imp_id": "001",
+                                  "disposition": "CONFIRMED",
+                                  "ticket": "T-900",
+                                  "report": "saipen_improve_A.md",
+                                  "reproduced": "y"})
+    st = derive_status("saipen_improve_A.md",
+                       (_dg_cycle / "MANIFEST.md").read_text(
+                           encoding="utf-8-sig"),
+                       _dg_rep.read_text(encoding="utf-8"),
+                       (_dg_cycle / "SWEEP.md").read_text(encoding="utf-8"))
+    expect("RUN-1/IMP-001 disposition never covers RUN-2/IMP-001 "
+           "(composite identity)",
+           "RUN-2/IMP-001" in st["missing"] and st["visible"] == "complete",
+           repr((st["missing"], st["visible"])))
+    _qproc = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "improve",
+         "sweep-queue", "imp-dg5", "--json"],
+        cwd=str(dg_root), capture_output=True, text=True, timeout=60)
+    expect("high-level sweep enumerates the exact unswept composite finding",
+           '"code": "IMPROVE_SWEEP_QUEUE"' in _qproc.stdout
+           and 'RUN-2/IMP-001' in _qproc.stdout
+           and 'RUN-1/IMP-001' not in _qproc.stdout,
+           repr(_qproc.stdout[:300]))
+    _manifest = (_dg_cycle / "MANIFEST.md").read_text(encoding="utf-8-sig")
+    expect("strict manifest carries cycle_id/created_at/project_identity "
+           "exactly once and round-trips the validator",
+           validate_manifest(_manifest, expected_cycle_id="imp-dg5") == []
+           and _manifest.count("manifest_schema: strict") == 1
+           and _manifest.count("cycle_id: imp-dg5") == 1,
+           repr(validate_manifest(_manifest, expected_cycle_id="imp-dg5")))
+    # fake fingerprint cannot claim fresh strict-cycle evidence.
+    _fp_root = project_fixture("saipen-fakefp-")
+    _fp_cycle, _fp_rep = mech_cycle(
+        _fp_root, "imp-fakefp", "seat-1", "A",
+        ["IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+         "expected: x\nactual: y\nevidence: z\n"], ticket="T-900")
+    _fp_lines = _fp_rep.read_text(encoding="utf-8").splitlines()
+    _fp_out = []
+    for _line in _fp_lines:
+        if _line.startswith("source_tree_fingerprint:"):
+            _fp_out.append("source_tree_fingerprint: improve-cycle-9")
+        else:
+            _fp_out.append(_line)
+    _fp_rep.write_text("\n".join(_fp_out) + "\n", encoding="utf-8")
+    expect("a fabricated friendly fingerprint fails the strict-cycle "
+           "validator (DOGFOOD V)",
+           validator_rc(_fp_root) != 0,
+           repr(validator_rc(_fp_root)))
+
+    # ---- DOGFOOD V (T-615): write_sweep_entry refuses a nonexistent
+    # run/finding and a CONFIRMED nonexistent ticket; INVALID never carries a
+    # ticket.
+    dgv_root = project_fixture("saipen-dgv-")
+    _v_cycle, _v_rep = mech_cycle(
+        dgv_root, "imp-dgv", "seat-1", "A",
+        ["IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+         "expected: x\nactual: y\nevidence: z\n"], ticket="T-900")
+    for _label, _entry in [
+        ("nonexistent run refuses",
+         {"run": "RUN-99", "imp_id": "001", "disposition": "CONFIRMED",
+          "ticket": "T-900", "report": "saipen_improve_A.md",
+          "reproduced": "y"}),
+        ("nonexistent finding refuses",
+         {"run": "RUN-1", "imp_id": "999", "disposition": "CONFIRMED",
+          "ticket": "T-900", "report": "saipen_improve_A.md",
+          "reproduced": "y"}),
+        ("CONFIRMED nonexistent ticket cannot COMMIT",
+         {"run": "RUN-1", "imp_id": "001", "disposition": "CONFIRMED",
+          "ticket": "T-999999", "report": "saipen_improve_A.md",
+          "reproduced": "y"}),
+        ("INVALID never authorizes a ticket",
+         {"run": "RUN-1", "imp_id": "001", "disposition": "INVALID",
+          "ticket": "T-900", "report": "saipen_improve_A.md",
+          "reproduced": "n"}),
+    ]:
+        try:
+            write_sweep_entry(_v_cycle, _entry)
+            _refused = False
+        except ValueError:
+            _refused = True
+        expect(f"sweep authorization: {_label}",
+               _refused)
+
+    # ---- DOGFOOD V (T-615): source_reports resolves EXACT composite refs;
+    # an unrelated cycle's IMP-001 never satisfies provenance; a bare ref
+    # into a strict cycle fails.
+    prov_root = project_fixture("saipen-prov-")
+    _p_cycle, _p_rep = mech_cycle(
+        prov_root, "imp-prov-a", "seat-a", "A",
+        ["IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+         "expected: x\nactual: y\nevidence: z\n"], ticket="T-900")
+    ticket_fixture(prov_root, "T-902")
+    write_sweep_entry(_p_cycle, {"run": "RUN-1", "imp_id": "001",
+                                 "disposition": "CONFIRMED",
+                                 "ticket": "T-900",
+                                 "report": "saipen_improve_A.md",
+                                 "reproduced": "y"})
+    # good: T-900 cites the EXACT composite ref of imp-prov-a
+    good_board = (prov_root / ".saipen" / "BOARD.md").read_text(
+        encoding="utf-8-sig")
+    good_board = good_board.replace(
+        "| verify: probe",
+        "| verify: probe | source_reports: "
+        "imp-prov-a/seat-a/saipen_improve_A.md#RUN-1/IMP-001", 1)
+    (prov_root / ".saipen" / "BOARD.md").write_text(good_board,
+                                                   encoding="utf-8")
+    expect("source_reports resolves an EXACT composite ref (validator green)",
+           validator_rc(prov_root) == 0,
+           repr(validator_rc(prov_root)))
+    # wrong-cycle: cite a ref naming a cycle that was never swept -- the same
+    # local IMP number in another cycle must never satisfy provenance.
+    bad_board = good_board.replace(
+        "imp-prov-a/seat-a", "imp-prov-b/seat-b")
+    (prov_root / ".saipen" / "BOARD.md").write_text(bad_board,
+                                                   encoding="utf-8")
+    expect("an unrelated cycle's IMP-001 cannot satisfy ticket provenance "
+           "(validator red)",
+           validator_rc(prov_root) != 0,
+           repr(validator_rc(prov_root)))
+    # bare ref into a strict cycle fails.
+    bare_board = good_board.replace(
+        " | source_reports: "
+        "imp-prov-a/seat-a/saipen_improve_A.md#RUN-1/IMP-001",
+        " | source_reports: IMP-001")
+    (prov_root / ".saipen" / "BOARD.md").write_text(bare_board,
+                                                   encoding="utf-8")
+    expect("a bare IMP ref can never launder a strict-cycle finding "
+           "(validator red)",
+           validator_rc(prov_root) != 0,
+           repr(validator_rc(prov_root)))
+
+    # ---- DOGFOOD V (T-615): SWEEP writer/parser round-trip exact composite
+    # identity (one structured record).
+    from improve import SweepRecord, _sweep_records as _parse_records
+    _sr = SweepRecord("RUN-1/IMP-001", "CONFIRMED", "T-900",
+                      "saipen_improve_A.md", "y", "-", "-")
+    _rendered = _sr.render()
+    _parsed = _parse_records("# SWEEP\n" + _rendered + "\n")
+    expect("SweepRecord writer/parser round-trip preserves exact identity",
+           len(_parsed) == 1 and _parsed[0] == _sr,
+           repr((_rendered, _parsed)))
+
+    # ---- DOGFOOD V (T-616): complete_report refuses an empty draft and a
+    # strict cycle's report needs intentional RUN evidence (already covered);
+    # append after completion refuses via the parser, not substring.
+    imm2_root = project_fixture("saipen-imm2-")
+    _i_cycle, _i_rep = mech_cycle(
+        imm2_root, "imp-imm2", "seat-1", "A",
+        ["IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+         "expected: x\nactual: y\nevidence: z\n"], ticket="T-900")
+    _i_text = _i_rep.read_text(encoding="utf-8")
+    _mention = _i_text.replace("report_status: complete",
+                               "report_status: complete\n\n"
+                               "note: an earlier report said "
+                               "report_status: complete and was frozen")
+    try:
+        append_run(_i_rep, "late after complete")
+        _append_late = False
+    except ValueError:
+        _append_late = True
+    expect("append after completion refuses via the PARSER, not substring "
+           "(an evidence mention of the phrase does not freeze a draft)",
+           _append_late)
+
+    # ---- DOGFOOD V (T-616): NO_FINDINGS is intentional evidence, not
+    # absence of output.
+    nf_root = project_fixture("saipen-nf-")
+    _nf_cycle = create_cycle(nf_root, "imp-nf")
+    register_seat(_nf_cycle, "seat-1", "core", "saipen_improve_A.md")
+    ticket_fixture(nf_root, "T-900")
+    _nf_rep = create_report(nf_root, "imp-nf", "seat-1", "A", agent="probe",
+                            role="core", model_or_runtime="probe",
+                            protocol_fingerprint="ded-4ae736e4",
+                            context_scope="scope")
+    try:
+        complete_report(_nf_rep)
+        _empty_ok = False
+    except ValueError:
+        _empty_ok = True
+    expect("an empty strict run without NO_FINDINGS cannot complete",
+           _empty_ok)
+    append_run(_nf_rep, "NO_FINDINGS\n")
+    complete_report(_nf_rep)
+    expect("an explicit NO_FINDINGS run completes as intentional evidence",
+           "report_status: complete" in _nf_rep.read_text(encoding="utf-8"))
+    # verify the completed NO_FINDINGS report passes the strict validator
+    expect("NO_FINDINGS report passes strict report validation",
+           validate_report(_nf_rep.read_text(encoding="utf-8"),
+                           require_runs=True) == [],
+           repr(validate_report(_nf_rep.read_text(encoding="utf-8"),
+                                require_runs=True)))
+
+    # ---- DOGFOOD V (SAICRITIC #4): source freshness at the gates (T-619),
+    # status validation depth (T-620), mechanical abort (T-621).
+    fs_root = project_fixture("saipen-fresh-")
+    (fs_root / "src.txt").write_text("v1\n", encoding="utf-8")
+    _fs_cycle, _fs_rep = mech_cycle(
+        fs_root, "imp-fresh", "seat-1", "A",
+        ["IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+         "expected: x\nactual: y\nevidence: z\n"], ticket="T-900")
+    write_sweep_entry(_fs_cycle, {"run": "RUN-1", "imp_id": "001",
+                                  "disposition": "CONFIRMED",
+                                  "ticket": "T-900",
+                                  "report": "saipen_improve_A.md",
+                                  "reproduced": "y"})
+    (fs_root / "src.txt").write_text("v2\n", encoding="utf-8")
+    _fsv = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "improve",
+         "verify", "imp-fresh", "--json"],
+        cwd=str(fs_root), capture_output=True, text=True, timeout=60)
+    expect("source freshness: verify refuses a fully-swept but STALE strict "
+           "cycle (SAICRITIC #4)",
+           '"code": "VALIDATION_FAILED"' in _fsv.stdout
+           and "tree differs" in _fsv.stdout,
+           repr(_fsv.stdout[:300]))
+    try:
+        write_sweep_entry(_fs_cycle, {"run": "RUN-1", "imp_id": "001",
+                                      "disposition": "CONFIRMED",
+                                      "ticket": "T-900",
+                                      "report": "saipen_improve_A.md",
+                                      "reproduced": "y"})
+        _stale_sweep = False
+    except ValueError:
+        _stale_sweep = True
+    expect("source freshness: write_sweep_entry refuses CONFIRMED on stale "
+           "evidence (SAICRITIC #4)",
+           _stale_sweep)
+    (fs_root / "src.txt").write_text("v1\n", encoding="utf-8")
+    _fp_text = _fs_rep.read_text(encoding="utf-8").splitlines()
+    _fp_out = []
+    for _line in _fp_text:
+        if _line.startswith("source_tree_fingerprint:"):
+            _fp_out.append("source_tree_fingerprint: fake-label")
+        else:
+            _fp_out.append(_line)
+    _fs_rep.write_text("\n".join(_fp_out) + "\n", encoding="utf-8")
+    _fss = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "improve",
+         "status", "--json"],
+        cwd=str(fs_root), capture_output=True, text=True, timeout=60)
+    _fss_data = json.loads(_fss.stdout)
+    _fss_visible = _fss_data["cycles"][0]["seats"][0].get("visible")
+    expect("status depth: a fabricated fingerprint is INVALID_REPORT, never "
+           "swept (SAICRITIC #4)",
+           _fss_visible == "INVALID_REPORT",
+           repr(_fss_visible))
+
+    # T-621: mechanical abort rescues a stuck draft cycle.
+    ab_root = project_fixture("saipen-abort-")
+    (ab_root / "src.txt").write_text("v1\n", encoding="utf-8")
+    _ab_cycle = create_cycle(ab_root, "imp-ab")
+    register_seat(_ab_cycle, "seat-1", "core", "saipen_improve_A.md")
+    _ab_rep = create_report(ab_root, "imp-ab", "seat-1", "A", agent="probe",
+                            role="core", model_or_runtime="probe",
+                            protocol_fingerprint="ded-4ae736e4",
+                            context_scope="scope")
+    append_run(_ab_rep, "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+                        "expected: x\nactual: y\n")  # no evidence -> stuck
+    try:
+        complete_report(_ab_rep)
+        _ab_stuck = False
+    except ValueError:
+        _ab_stuck = True
+    expect("abort: an incomplete report is genuinely stuck (cannot complete)",
+           _ab_stuck)
+    _abr = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "improve",
+         "abort", "imp-ab", "--json"],
+        cwd=str(ab_root), capture_output=True, text=True, timeout=60)
+    _ab_ok = json.loads(_abr.stdout).get("code") == "COMMITTED"
+    expect("abort: the stuck cycle aborts mechanically with byte-preserved "
+           "evidence",
+           _ab_ok and (_ab_rep.with_name(_ab_rep.name + ".discarded")).is_file()
+           and "cycle_aborted" in (_ab_cycle / "MANIFEST.md").read_text(
+               encoding="utf-8"),
+           repr(_abr.stdout[:200]))
+    _ab_cycle2 = create_cycle(ab_root, "imp-ab2")
+    expect("abort: a new cycle is admitted after the abort",
+           (_ab_cycle2 / "MANIFEST.md").is_file())
 
     # ---- T-601: resolver race -- two processes resolving the same conflict
     # yield exactly one canonical settlement (WRITER_BUSY or a settled-journal
@@ -4200,7 +4626,8 @@ def run_improve_probes() -> tuple[list[str], int]:
     expect("resolver race: exactly one process settles the conflict, the "
            "loser refuses (WRITER_BUSY or settled-journal refusal)",
            n_resolved == 1 and settled_status == "RESOLVED"
-           and all(("'code': 'RESOLVED'" in o or "WRITER_BUSY" in o)
+           and all(("'code': 'RESOLVED'" in o or "WRITER_BUSY" in o
+                    or "is RESOLVED, not CONFLICT" in o)
                    for o in outs),
            repr((n_resolved, settled_status, outs)))
 

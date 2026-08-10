@@ -38,3 +38,59 @@
 - 10.08.26 12:10 [E-2795] [parent: E-2794] [op: transition-d2584a9f] DEC: goal_waves 0->1
 - 10.08.26 12:10 [E-2796] [parent: E-2795] [T-613] [agent: claude] [op: ticket-9fc6d31c] DEC: ticket added via SAIOPS
 - 10.08.26 12:10 [E-2797] [parent: E-2796] [T-614] [agent: claude] [op: ticket-24631e75] DEC: ticket added via SAIOPS
+- 10.08.26 12:48 [E-2798] [parent: E-2797] [T-615] [agent: claude] [op: ticket-ea276dbc] DEC: ticket added via SAIOPS
+- 10.08.26 12:48 [E-2799] [parent: E-2798] [T-616] [agent: claude] [op: ticket-67818943] DEC: ticket added via SAIOPS
+- 10.08.26 12:48 [E-2800] [parent: E-2799] [T-617] [agent: claude] [op: ticket-c80873de] DEC: ticket added via SAIOPS
+- 10.08.26 12:48 [E-2801] [parent: E-2800] [T-618] [agent: claude] [op: ticket-2f8990f7] DEC: ticket added via SAIOPS
+- 10.08.26 12:49 [E-2802] [parent: E-2801] [T-615] [agent: claude] [op: claim-d35deef9] DEC: claimed via SAIOPS -- owner claude
+- 10.08.26 13:46 [E-2803] [parent: E-2802] [T-619] [agent: claude] [op: ticket-aa298eca] DEC: ticket added via SAIOPS
+- 10.08.26 13:46 [E-2804] [parent: E-2803] [T-620] [agent: claude] [op: ticket-9feab853] DEC: ticket added via SAIOPS
+- 10.08.26 13:46 [E-2805] [parent: E-2804] [T-621] [agent: claude] [op: ticket-003f8be5] DEC: ticket added via SAIOPS
+- 10.08.26 14:10 [E-2806] [parent: E-2805] [T-615] [agent: claude] [op: transition-3484fe84] RUN: RUN: BUILD complete: composite finding identity -- run_id into parser/writer/status/validator; SweepRecord one grammar; source_reports exact resolution; write_sweep_entry pre-write authorization
+- 10.08.26 14:10 [E-2807] [parent: E-2806] [T-615] [agent: claude] [op: transition-b1e39cb8] RUN: RUN: VERIFY: multi-RUN collision + fiction-refusal + exact provenance controls all green
+- 10.08.26 14:10 [E-2808] [parent: E-2807] [T-615] [agent: claude] [op: transition-7e7bab30] RUN: RUN: REVIEW: diff reviewed, no P0/P1
+- 10.08.26 14:10 [E-2809] [parent: E-2808] [op: transition-7e7bab30] DEC: goal_tickets 2->3
+- 10.08.26 14:10 [E-2810] [parent: E-2809] [T-615] [agent: claude] [op: transition-8bdaa17e] RUN: RUN: SHIP: composite identity landed
+- 10.08.26 14:10 [E-2811] [parent: E-2810] [T-615] [agent: claude] [op: finish-5eef9ed4] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 10.08.26 14:10 [E-2812] [parent: E-2811] [T-616] [agent: claude] [op: claim-59c9ec46] DEC: claimed via SAIOPS -- owner claude
+- 10.08.26 14:10 [E-2813] [parent: E-2812] [T-616] [agent: claude] [op: transition-c43e163e] RUN: RUN: BUILD complete: create_report/complete_report, RUN + NO_FINDINGS identity, parser-derived immutability, full completion bar, verify false-PASS closed
+- 10.08.26 14:10 [E-2814] [parent: E-2813] [T-616] [agent: claude] [op: transition-2e9dbb96] RUN: RUN: VERIFY: bare-skeleton refusal + NO_FINDINGS + verify-incomplete controls green
+- 10.08.26 14:10 [E-2815] [parent: E-2814] [T-616] [agent: claude] [op: transition-0ba1b257] RUN: RUN: REVIEW: lifecycle diff reviewed, no P0/P1
+- 10.08.26 14:10 [E-2816] [parent: E-2815] [op: transition-0ba1b257] DEC: goal_tickets 3->4
+- 10.08.26 14:10 [E-2817] [parent: E-2816] [T-616] [agent: claude] [op: transition-d0b06446] RUN: RUN: SHIP: report lifecycle landed
+- 10.08.26 14:10 [E-2818] [parent: E-2817] [T-616] [agent: claude] [op: finish-2c4069cb] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 10.08.26 14:10 [E-2819] [parent: E-2818] [T-617] [agent: claude] [op: claim-5ffcf9c3] DEC: claimed via SAIOPS -- owner claude
+- 10.08.26 14:10 [E-2820] [parent: E-2819] [T-617] [agent: claude] [op: transition-3cb2d507] RUN: RUN: BUILD complete: bare improve = audit assignment meta-control, submit/complete/sweep-queue/cycle-complete/abort CLI routes, verify delta-only, help surface
+- 10.08.26 14:10 [E-2821] [parent: E-2820] [T-617] [agent: claude] [op: transition-a0dd27cc] RUN: RUN: VERIFY: public end-to-end cycle controls + CLI help tests green
+- 10.08.26 14:10 [E-2822] [parent: E-2821] [T-617] [agent: claude] [op: transition-ed1fe4cf] RUN: RUN: REVIEW: command semantics diff reviewed, no P0/P1
+- 10.08.26 14:10 [E-2823] [parent: E-2822] [op: transition-ed1fe4cf] DEC: goal_tickets 4->5
+- 10.08.26 14:10 [E-2824] [parent: E-2823] [T-617] [agent: claude] [op: transition-bc53d976] RUN: RUN: SHIP: high-level command semantics landed
+- 10.08.26 14:10 [E-2825] [parent: E-2824] [T-617] [agent: claude] [op: finish-fcd594eb] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 10.08.26 14:10 [E-2826] [parent: E-2825] [T-618] [agent: claude] [op: claim-2a64257a] DEC: claimed via SAIOPS -- owner claude
+- 10.08.26 14:10 [E-2827] [parent: E-2826] [T-618] [agent: claude] [op: transition-83be1128] RUN: RUN: BUILD complete: strict manifest schema, portable project key, real fingerprints, stale-audit gates, claim-to-proof V
+- 10.08.26 14:10 [E-2828] [parent: E-2827] [T-618] [agent: claude] [op: transition-79fd28f8] RUN: RUN: VERIFY: strict-manifest round-trip + fake-fingerprint + stale-tree controls green
+- 10.08.26 14:10 [E-2829] [parent: E-2828] [T-618] [agent: claude] [op: transition-14cf6ffb] RUN: RUN: REVIEW: manifest/freshness diff reviewed, no P0/P1
+- 10.08.26 14:10 [E-2830] [parent: E-2829] [op: transition-14cf6ffb] DEC: goal_tickets 5->6
+- 10.08.26 14:10 [E-2831] [parent: E-2830] [T-618] [agent: claude] [op: transition-5deac60e] RUN: RUN: SHIP: strict evidence boundary landed
+- 10.08.26 14:10 [E-2832] [parent: E-2831] [T-618] [agent: claude] [op: finish-8250b843] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 10.08.26 14:10 [E-2833] [parent: E-2832] [T-619] [agent: claude] [op: claim-6a620a19] DEC: claimed via SAIOPS -- owner claude
+- 10.08.26 14:10 [E-2834] [parent: E-2833] [T-619] [agent: claude] [op: transition-15000634] RUN: RUN: BUILD complete: source freshness enforced at write_sweep_entry (CONFIRMED) and verify_cycle
+- 10.08.26 14:10 [E-2835] [parent: E-2834] [T-619] [agent: claude] [op: transition-b5e561b0] RUN: RUN: VERIFY: stale fully-swept cycle refuses verify; CONFIRMED on stale evidence refuses
+- 10.08.26 14:10 [E-2836] [parent: E-2835] [T-619] [agent: claude] [op: transition-1370c439] RUN: RUN: REVIEW: freshness gate diff reviewed, no P0/P1
+- 10.08.26 14:10 [E-2837] [parent: E-2836] [op: transition-1370c439] DEC: goal_tickets 6->7
+- 10.08.26 14:10 [E-2838] [parent: E-2837] [T-619] [agent: claude] [op: transition-194ce158] RUN: RUN: SHIP: freshness gates landed
+- 10.08.26 14:10 [E-2839] [parent: E-2838] [T-619] [agent: claude] [op: finish-bc4f726f] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 10.08.26 14:10 [E-2840] [parent: E-2839] [T-620] [agent: claude] [op: claim-166115d4] DEC: claimed via SAIOPS -- owner claude
+- 10.08.26 14:10 [E-2841] [parent: E-2840] [T-620] [agent: claude] [op: transition-ae57dd82] RUN: RUN: BUILD complete: improve status applies the validator's report-validation depth (fingerprint + freshness) -> INVALID_REPORT
+- 10.08.26 14:10 [E-2842] [parent: E-2841] [T-620] [agent: claude] [op: transition-8401a960] RUN: RUN: VERIFY: fake-fingerprint report no longer derives swept
+- 10.08.26 14:10 [E-2843] [parent: E-2842] [T-620] [agent: claude] [op: transition-4721eb45] RUN: RUN: REVIEW: status-depth diff reviewed, no P0/P1
+- 10.08.26 14:10 [E-2844] [parent: E-2843] [op: transition-4721eb45] DEC: goal_tickets 7->8
+- 10.08.26 14:10 [E-2845] [parent: E-2844] [T-620] [agent: claude] [op: transition-353b7929] RUN: RUN: SHIP: status evidence refusal landed
+- 10.08.26 14:10 [E-2846] [parent: E-2845] [T-620] [agent: claude] [op: finish-a42ad1b0] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 10.08.26 14:10 [E-2847] [parent: E-2846] [T-621] [agent: claude] [op: claim-1a1f1b08] DEC: claimed via SAIOPS -- owner claude
+- 10.08.26 14:10 [E-2848] [parent: E-2847] [T-621] [agent: claude] [op: transition-3f566aa7] RUN: RUN: BUILD complete: saipen improve abort -- journaled stuck-draft exit, disposition-guarded, byte-preserving
+- 10.08.26 14:10 [E-2849] [parent: E-2848] [T-621] [agent: claude] [op: transition-de66175c] RUN: RUN: VERIFY: abort rescues a stuck cycle; refuses once a disposition exists; next cycle admitted
+- 10.08.26 14:10 [E-2850] [parent: E-2849] [T-621] [agent: claude] [op: transition-5243e5a2] RUN: RUN: REVIEW: abort diff reviewed, no P0/P1
+- 10.08.26 14:10 [E-2851] [parent: E-2850] [op: transition-5243e5a2] DEC: goal_tickets 8->9
+- 10.08.26 14:10 [E-2852] [parent: E-2851] [T-621] [agent: claude] [op: transition-602d4151] RUN: RUN: SHIP: mechanical abort landed
+- 10.08.26 14:10 [E-2853] [parent: E-2852] [T-621] [agent: claude] [op: finish-5a8fa5c1] DEC: ticket finished via SAIOPS -- completion (from SHIP)

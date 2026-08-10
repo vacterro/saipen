@@ -222,23 +222,32 @@ def r10_multiple_active_cycles() -> tuple[bool, str]:
     return ok, detail + " (required: one active Improve cycle per project)"
 
 
-def r11_partial_sweep_becomes_swept() -> tuple[bool, str]:
+def r11_multi_run_collision() -> tuple[bool, str]:
+    """DOGFOOD V (T-615): one legacy disposition must not cover two findings
+    that only share a local IMP number across RUNs. RUN-1/IMP-001 and
+    RUN-2/IMP-001 are DIFFERENT findings; a bare `IMP-001` sweep record may
+    not sweep both. Defect present when derive_status reports swept."""
     root = fixture()
     import improve
-    roster = ("# IMPROVE CYCLE ROSTER\nseat_id: seat-1\nrole: audit\n"
+    roster = ("# IMPROVE CYCLE ROSTER\ncycle_status: active\n"
+              "seat_id: seat-1\nrole: audit\n"
               "report_path: saipen_improve_SEAT.md\navailability: expected\n")
     report = ("report_status: complete\n\n"
-              "## IMP-001 [P1] [PROTOCOL_VIOLATION] [reproduced] [fix]\n"
-              "expected: a\nactual: b\nevidence: c\n"
-              "## IMP-002 [P1] [PROTOCOL_VIOLATION] [reproduced] [fix]\n"
+              "## RUN 1\n\n"
+              "IMP-001 [P1] [PROTOCOL_VIOLATION] [reproduced] [fix]\n"
+              "expected: a\nactual: b\nevidence: c\n\n"
+              "## RUN 2\n\n"
+              "IMP-001 [P1] [PROTOCOL_VIOLATION] [reproduced] [fix]\n"
               "expected: d\nactual: e\nevidence: f\n")
-    sweep = "# SWEEP\n- IMP-001 [CONFIRMED] - report=r.md reproduced=true\n"
+    sweep = ("# SWEEP\n- IMP-001 [CONFIRMED] T-1 "
+             "report=saipen_improve_SEAT.md reproduced=y\n")
     status = improve.derive_status("saipen_improve_SEAT.md", roster, report,
                                    sweep)
     ok = status["visible"] == "swept" and status["swept"]
-    return ok, (f"two findings, one disposition, visible={status['visible']}, "
-                f"missing={status.get('missing')} "
-                f"(required: NOT swept while IMP-002 lacks disposition)")
+    return ok, (f"two RUNs both carry IMP-001, one bare disposition, "
+                f"visible={status['visible']}, missing={status.get('missing')} "
+                f"(required: RUN-2/IMP-001 stays missing -- the composite "
+                f"identity is cycle + report + run + IMP)")
 
 
 def r12_utf16_corruption() -> tuple[bool, str]:
@@ -285,7 +294,8 @@ REPROS = [
     ("R8 recovery clobbers intervening work", r8_recovery_clobbers_intervening_work),
     ("R9 improve cycle path traversal", r9_cycle_path_traversal),
     ("R10 multiple active Improve cycles", r10_multiple_active_cycles),
-    ("R11 partial sweep becomes swept", r11_partial_sweep_becomes_swept),
+    ("R11 multi-RUN IMP collision sweeps both findings",
+     r11_multi_run_collision),
     ("R12 UTF-16 representation corruption", r12_utf16_corruption),
     ("R13 finish launders transition_from", r13_finish_launders_transition_from),
 ]

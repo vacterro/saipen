@@ -396,19 +396,43 @@ def _emit(payload: dict, as_json: bool) -> None:
 
 def _improve(project_root: Path, args: list[str], as_json: bool,
              dry_run: bool) -> int:
-    """saipen improve -- the meta-control command family (T-554, T-606).
+    """saipen improve -- the meta-control command family (T-554, T-606,
+    DOGFOOD V T-615..T-618).
 
-    Five routes, all journaled/read-only per the spec: `status` (read-only
-    derived per-seat visible status, zero writes), `sweep <cycle> <imp_id>
-    <disposition>` (Core-only disposition write through write_sweep_entry),
-    `verify <cycle>` (delta-only semantic verification of the cycle's
-    artifacts, never a new cycle), `clean <cycle>` (archive-with-provenance:
-    refuses unswept, then marks the cycle archived). The bare form prints the
-    derived status and the audit entry point -- it never fabricates a report.
+    Bare `improve` PREPARES the bounded audit assignment (cycle, seat, draft
+    report, real source identity, proof levels) and never aliases status.
+    `status` derives per-seat visible status read-only and refuses to round
+    malformed evidence up to a normal lifecycle state. `submit` appends a RUN
+    mechanically, `complete` finishes a report through full validation,
+    `sweep-queue` enumerates the exact unswept composite findings, `sweep
+    <cycle> <RUN-N/IMP-NNN> <DISPOSITION>` commits a validated Core
+    disposition (the finding/run/report/ticket must exist BEFORE write),
+    `verify <cycle>` validates the COMPLETE cycle output (delta-only, never a
+    new cycle), `cycle-complete <cycle>` runs the full cycle bar and flips
+    ACTIVE -> COMPLETE, `clean <cycle>` is archive-with-provenance.
     """
     from improve import (archive_cycle, complete_cycle, cycle_dir,
                          derive_status, resolve_report_path,
                          validate_report, write_sweep_entry)
+
+    from improve import _sweep_records
+    import re as _re
+
+    def _state_text(root: Path) -> str:
+        st = root / ".saipen" / "STATE.md"
+        return st.read_text(encoding="utf-8-sig") if st.is_file() else ""
+
+    def state_phase(root: Path) -> str:
+        m = _re.search(r"(?m)^phase:\s*(\S+)", _state_text(root))
+        return m.group(1) if m else "?"
+
+    def state_field(root: Path, key: str) -> str:
+        m = _re.search(rf"(?m)^{key}:\s*(.*)$", _state_text(root))
+        return m.group(1).strip() if m else ""
+
+    def _seat_for_agent(root: Path) -> str:
+        m = _re.search(r"(?m)^agent:\s*(\S+)", _state_text(root))
+        return (m.group(1) if m else "core").strip() + "-01"
 
     imp_root = project_root / ".saipen" / "improve"
 
@@ -416,6 +440,11 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
         rows = []
         if not imp_root.is_dir():
             return rows
+        from improve import validate_manifest as _vm
+        from improve import validate_report as _vr
+        from improve import validate_sweep as _vs
+        from improve import _report_fresh as _rf
+        from improve import _cycle_schema as _cs
         for cycle in sorted(imp_root.iterdir()):
             manifest = cycle / "MANIFEST.md"
             if not manifest.is_file():
@@ -424,10 +453,16 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
             sweep = (cycle / "SWEEP.md").read_text(encoding="utf-8-sig") \
                 if (cycle / "SWEEP.md").is_file() else ""
             status = "active"
-            import re as _re
             m = _re.search(r"(?m)^cycle_status:\s*([A-Za-z]+)", roster)
             if m:
                 status = m.group(1)
+            # DOGFOOD V (T-616): status never rounds corruption up to a
+            # normal lifecycle state -- invalid evidence is reported as
+            # INVALID_CYCLE / INVALID_REPORT, never as swept.
+            manifest_errors = _vm(roster, expected_cycle_id=cycle.name)
+            sweep_errors = _vs(sweep) if sweep else []
+            invalid = bool(manifest_errors or sweep_errors)
+            strict = _cs(manifest) == "strict"
             seats = []
             for block in roster.splitlines():
                 if not block.startswith("seat_id:"):
@@ -449,14 +484,239 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
                 report = cycle / seat / report_path
                 report_text = report.read_text(encoding="utf-8-sig") \
                     if report.is_file() else ""
-                derived = derive_status(report_path, roster, report_text,
-                                        sweep)
-                seats.append({"seat": seat, **derived})
+                if not report_text:
+                    seats.append({"seat": seat, "visible": "expected"})
+                    continue
+                # DOGFOOD V (T-620): status applies the SAME report-validation
+                # depth the validator applies -- schema AND mechanical source
+                # identity (fingerprint format + freshness for strict cycles).
+                report_invalid = bool(_vr(report_text)) or bool(
+                    _rf(project_root, cycle, report_path, report_text, strict))
+                if report_invalid:
+                    status_m = _re.search(r"(?m)^report_status:\s*(\S+)",
+                                          report_text)
+                    seats.append({"seat": seat, "visible": "INVALID_REPORT",
+                                  "report_status": status_m.group(1)
+                                  if status_m else ""})
+                else:
+                    derived = derive_status(report_path, roster, report_text,
+                                            sweep)
+                    seats.append({"seat": seat, **derived})
             rows.append({"cycle": cycle.name, "cycle_status": status,
-                         "seats": seats})
+                         "seats": seats,
+                         "invalid": invalid,
+                         "manifest_errors": manifest_errors[:3],
+                         "sweep_errors": sweep_errors[:3]})
         return rows
 
-    action = args[0] if args else "status"
+    action = args[0] if args else "prepare"
+    if action == "prepare":
+        # DOGFOOD V (T-617): bare `saipen improve` is the documented
+        # meta-control -- it PREPARES the current seat's bounded audit
+        # assignment, never an alias for status. It binds the project, finds
+        # or mechanically admits the one active cycle, registers this seat,
+        # creates the DRAFT report mechanically with the real captured source
+        # identity, and returns the exact assignment the current agent must
+        # execute. It never changes phase/task/next_action.
+        from improve import (allocate_cycle_id, append_run, create_cycle,
+                             create_report, register_seat)
+        from freshness import compute_source_identity
+        try:
+            source = compute_source_identity(project_root)
+        except Exception as exc:  # noqa: BLE001
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": f"cannot capture mechanical source identity: "
+                             f"{exc}"}, as_json)
+            return 1
+        imp_root = project_root / ".saipen" / "improve"
+        active_cycle = None
+        if imp_root.is_dir():
+            for cycle in sorted(imp_root.iterdir()):
+                manifest = cycle / "MANIFEST.md"
+                if not manifest.is_file():
+                    continue
+                roster = manifest.read_text(encoding="utf-8-sig")
+                if _re.search(r"(?m)^cycle_status:\s*active\s*$", roster):
+                    active_cycle = cycle.name
+                    break
+        project_key = None
+        try:
+            from improve import portable_project_key
+            project_key = portable_project_key(project_root)
+        except Exception:  # noqa: BLE001
+            project_key = "project"
+        if active_cycle is None:
+            new_id = allocate_cycle_id(project_root, project_key)
+            try:
+                create_cycle(project_root, new_id)
+                active_cycle = new_id
+            except ValueError as exc:
+                _emit({"ok": False, "code": "VALIDATION_FAILED",
+                       "detail": f"cannot admit an Improve cycle: {exc}"},
+                      as_json)
+                return 1
+        cycle = cycle_dir(project_root, active_cycle)
+        seat_id = _seat_for_agent(project_root)
+        project_name = "SAIPEN"
+        report_ident = f"saipen_improve_{project_name}.md"
+        from improve import _seat_blocks, _field as _imp_field
+        roster = (cycle / "MANIFEST.md").read_text(encoding="utf-8-sig")
+        registered = any(_imp_field(b, "seat_id") == seat_id
+                         and _imp_field(b, "report_path") == report_ident
+                         for b in _seat_blocks(roster))
+        if not registered:
+            try:
+                register_seat(cycle, seat_id, "core", report_ident)
+            except ValueError as exc:
+                _emit({"ok": False, "code": "VALIDATION_FAILED",
+                       "detail": f"cannot register seat {seat_id}: {exc}"},
+                      as_json)
+                return 1
+        report_path = cycle / seat_id / report_ident
+        report_created = False
+        if not report_path.is_file():
+            try:
+                report_path = create_report(
+                    project_root, active_cycle, seat_id, project_name,
+                    agent=_seat_for_agent(project_root), role="core",
+                    model_or_runtime="deepseek-reasoner",
+                    protocol_fingerprint="ded-4ae736e4",
+                    context_scope=f"SAIPEN audit, phase "
+                                  f"{state_phase(project_root)}")
+                report_created = True
+            except ValueError as exc:
+                _emit({"ok": False, "code": "VALIDATION_FAILED",
+                       "detail": f"cannot create the seat report: {exc}"},
+                      as_json)
+                return 1
+        _emit({
+            "ok": True, "code": "IMPROVE_AUDIT_ASSIGNMENT",
+            "cycle_id": active_cycle,
+            "seat_id": seat_id,
+            "report_path": report_path.relative_to(project_root).as_posix(),
+            "report_created": report_created,
+            "source": {"source_head": source.source_head,
+                       "source_tree_fingerprint": source.source_tree_fingerprint,
+                       "discovery_model": source.discovery_model},
+            "scope": {"phase": state_phase(project_root),
+                      "task": state_field(project_root, "task")},
+            "proof_levels": ["UNIT", "COMPOSITION", "CANONICAL", "GATE",
+                             "PROVENANCE"],
+            "schema": "cycle + seat/report + RUN-N/IMP-NNN composite finding "
+                      "ref; dispositions go to SWEEP.md via saipen improve "
+                      "sweep; report completion via saipen improve complete",
+            "write_boundary": "RUNs append via saipen improve submit; report "
+                              "completion via saipen improve complete; no raw "
+                              "report/MANIFEST/SWEEP editing",
+            "next": f"perform the semantic audit, then: saipen improve submit "
+                    f"{active_cycle} {seat_id} {project_name} <findings.json>",
+        }, as_json)
+        return 0
+    if action == "submit":
+        # DOGFOOD V (T-617): structured report submission -- the current agent
+        # supplies the semantic RUN text in a JSON file, Python appends the
+        # RUN mechanically through append_run (validated, journaled).
+        if len(args) < 5:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": "improve submit needs <cycle> <seat> <project> "
+                             "<findings.json>"}, as_json)
+            return 2
+        from improve import append_run as _append_run
+        from improve import resolve_report_path as _resolve_report_path
+        cycle = cycle_dir(project_root, args[1])
+        payload = Path(args[4])
+        if not payload.is_file():
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": f"findings file not found: {args[4]}"}, as_json)
+            return 2
+        import json as _json
+        try:
+            data = _json.loads(payload.read_text(encoding="utf-8-sig"))
+        except ValueError as exc:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": f"findings file is not valid JSON: {exc}"},
+                  as_json)
+            return 2
+        run_text = data.get("run_text", "")
+        if not run_text.strip():
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": "findings payload needs a non-empty run_text "
+                             "field"}, as_json)
+            return 2
+        report = _resolve_report_path(project_root, args[1], args[2],
+                                      args[3])
+        try:
+            result = _append_run(report, run_text)
+            _emit(result, as_json)
+            return 0 if result.get("ok") else 1
+        except ValueError as exc:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": str(exc)}, as_json)
+            return 1
+    if action == "complete":
+        # DOGFOOD V (T-616): mechanical report completion -- full validation,
+        # then draft -> complete, journaled and immutable.
+        if len(args) < 4:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": "improve complete needs <cycle> <seat> <project>"},
+                  as_json)
+            return 2
+        from improve import complete_report as _complete_report
+        from improve import resolve_report_path as _resolve_report_path
+        report = _resolve_report_path(project_root, args[1], args[2], args[3])
+        try:
+            result = _complete_report(report)
+            _emit(result, as_json)
+            return 0 if result.get("ok") else 1
+        except ValueError as exc:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": str(exc)}, as_json)
+            return 1
+    if action == "sweep-queue":
+        # DOGFOOD V (T-617): deterministic enumeration of the unswept finding
+        # queue -- read-only; the semantic adjudication stays Core-owned.
+        if len(args) < 2:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": "improve sweep-queue needs <cycle_id>"}, as_json)
+            return 2
+        from improve import (composite_finding_ref, parse_report, verify_cycle,
+                             _seat_blocks, _field as _imp_field)
+        cycle = cycle_dir(project_root, args[1])
+        precheck = verify_cycle(cycle)
+        roster = (cycle / "MANIFEST.md").read_text(encoding="utf-8-sig")
+        sweep = (cycle / "SWEEP.md").read_text(encoding="utf-8-sig") \
+            if (cycle / "SWEEP.md").is_file() else ""
+        disposed = {(r.run(), r.imp()) for r in _sweep_records(sweep)}
+        queue = []
+        for block in _seat_blocks(roster):
+            if _imp_field(block, "availability") == "unavailable":
+                continue
+            seat_id = _imp_field(block, "seat_id")
+            report_ident = _imp_field(block, "report_path")
+            report = cycle / seat_id / report_ident
+            if not report.is_file():
+                continue
+            for finding in parse_report(
+                    report.read_text(encoding="utf-8-sig")).findings:
+                if (finding.run, finding.imp) in disposed:
+                    continue
+                queue.append({
+                    "finding_ref": composite_finding_ref(
+                        cycle.name, seat_id, report_ident, finding.run,
+                        finding.imp),
+                    "run": finding.run, "imp": finding.imp,
+                    "report": report_ident,
+                    "severity": finding.severity, "class": finding.cls,
+                    "expected": finding.expected, "actual": finding.actual,
+                    "evidence": finding.evidence,
+                })
+        _emit({"ok": True, "code": "IMPROVE_SWEEP_QUEUE",
+               "cycle": args[1], "queue": queue,
+               "precheck_errors": precheck[:5],
+               "note": "semantic adjudication (reproduce/classify/dedupe/"
+                       "decide) is Core-owned; commit each decision via "
+                       "saipen improve sweep"}, as_json)
+        return 0
     if action == "status":
         rows = _cycle_statuses()
         if as_json:
@@ -479,15 +739,13 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
                    "detail": "improve verify needs <cycle_id>"}, as_json)
             return 2
         cycle = cycle_dir(project_root, args[1])
-        from saipen_engine.journal import verify_improve
-        targets = []
-        for rel in (".saipen/improve",):
-            pass
-        targets = [{"path": p.relative_to(project_root).as_posix(),
-                    "role": "manifest" if p.name == "MANIFEST.md" else
-                    ("sweep" if p.name == "SWEEP.md" else "report")}
-                   for p in sorted(cycle.rglob("*.md"))]
-        errors = verify_improve(project_root, targets)
+        # DOGFOOD V (T-616): verify validates the COMPLETE cycle output --
+        # strict manifest, every expected report full-valid, exact composite
+        # sweep coverage -- never whether individual files merely resemble
+        # writable intermediate targets. A report that only says
+        # `report_status: complete` can never PASS this.
+        from improve import verify_cycle
+        errors = verify_cycle(cycle)
         if errors:
             _emit({"ok": False, "code": "VALIDATION_FAILED",
                    "detail": "; ".join(errors[:5]),
@@ -499,12 +757,23 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
     if action == "sweep":
         if len(args) < 4:
             _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "improve sweep needs <cycle> <imp_id> "
+                   "detail": "improve sweep needs <cycle> <finding_ref> "
                              "<disposition> [--ticket T-###] [--report "
-                             "<ident>] [--reproduced y|n]"}, as_json)
+                             "<ident>] [--reproduced y|n] where finding_ref "
+                             "is RUN-N/IMP-NNN (strict) or IMP-NNN (legacy)"},
+                  as_json)
             return 2
         cycle = cycle_dir(project_root, args[1])
-        imp_id, disposition = args[2], args[3]
+        finding_ref, disposition = args[2], args[3]
+        run = None
+        import re as _re
+        _fm = _re.fullmatch(r"(?:RUN-(\d+)/)?IMP-(\d+)", finding_ref)
+        if not _fm:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": f"finding_ref {finding_ref!r} is not "
+                             "RUN-N/IMP-NNN or IMP-NNN"}, as_json)
+            return 2
+        run_raw, imp_id = _fm.group(1), _fm.group(2)
         ticket = "-"
         report = "-"
         reproduced = "-"
@@ -520,15 +789,51 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
                 rest = rest[1:]
         if dry_run:
             _emit({"ok": True, "code": "IMPROVE_SWEEP_PLAN",
-                   "cycle": args[1], "imp_id": imp_id,
+                   "cycle": args[1], "finding_ref": finding_ref,
                    "disposition": disposition}, as_json)
             return 0
         try:
-            result = write_sweep_entry(cycle, {"imp_id": imp_id,
-                                               "disposition": disposition,
-                                               "ticket": ticket,
-                                               "report": report,
-                                               "reproduced": reproduced})
+            entry = {"imp_id": imp_id, "disposition": disposition,
+                     "ticket": ticket, "report": report,
+                     "reproduced": reproduced}
+            if run_raw is not None:
+                entry["run"] = f"RUN-{run_raw}"
+            result = write_sweep_entry(cycle, entry)
+            _emit(result, as_json)
+            return 0 if result.get("ok") else 1
+        except ValueError as exc:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": str(exc)}, as_json)
+            return 1
+    if action == "cycle-complete":
+        # DOGFOOD V (T-616): mechanical cycle completion through the public
+        # path -- full cycle bar (strict manifest, every report full-valid,
+        # exact composite sweep coverage), then ACTIVE -> COMPLETE.
+        if len(args) < 2:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": "improve cycle-complete needs <cycle_id>"},
+                  as_json)
+            return 2
+        cycle = cycle_dir(project_root, args[1])
+        try:
+            result = complete_cycle(cycle)
+            _emit(result, as_json)
+            return 0 if result.get("ok") else 1
+        except ValueError as exc:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": str(exc)}, as_json)
+            return 1
+    if action == "abort":
+        # DOGFOOD V (T-621): mechanical abort for a stuck draft cycle -- the
+        # journaled exit for an active cycle whose report cannot complete.
+        if len(args) < 2:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": "improve abort needs <cycle_id>"}, as_json)
+            return 2
+        from improve import abort_cycle as _abort_cycle
+        cycle = cycle_dir(project_root, args[1])
+        try:
+            result = _abort_cycle(cycle)
             _emit(result, as_json)
             return 0 if result.get("ok") else 1
         except ValueError as exc:
@@ -562,7 +867,8 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
             return 1
     _emit({"ok": False, "code": "VALIDATION_FAILED",
            "detail": f"unknown saipen improve action {action!r}; use "
-                     "status|sweep|verify|clean"}, as_json)
+                     "prepare|status|submit|complete|sweep|sweep-queue|"
+                     "verify|cycle-complete|abort|clean"}, as_json)
     return 2
 
 
@@ -575,7 +881,13 @@ def main(argv: list[str] | None = None) -> int:
         print("usage: saipen (status|next|recover|claim <T-###>|"
               "transition <PHASE> [T-###] [text]|checkpoint <TAXONOMY> "
               "[T-###] [text]|ticket add <PRIORITY> <text>|ticket "
-              "done|block|unblock <T-###> [text]) [--dry-run] [--json]")
+              "done|block|unblock <T-###> [text]|improve|improve "
+              "status|improve sweep <cycle> <RUN-N/IMP-NNN> <DISPOSITION> "
+               "|improve sweep-queue <cycle>|improve submit <cycle> <seat> "
+               "<project> <findings.json>|improve complete <cycle> <seat> "
+               "<project>|improve verify <cycle>|improve cycle-complete "
+               "<cycle>|improve abort <cycle>|improve clean <cycle>|"
+               "userperson|sub|context) [--dry-run] [--json]")
         return 2
     command = args[0]
     project_root = Path.cwd()
