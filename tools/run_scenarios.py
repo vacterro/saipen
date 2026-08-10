@@ -59,7 +59,8 @@ from freshness import (FreshnessError, SourceIdentity,
 from sub_clean import sub_clean_blockers
 from improve import (allocate_cycle_id, append_run, complete_cycle, cycle_dir,
                      derive_status, register_cycle, register_seat,
-                     resolve_report_path, validate_report, write_sweep_entry)
+                     resolve_report_path, validate_manifest, validate_report,
+                     write_sweep_entry)
 from userperson import (merge_profile, onboarding_questions, parse_profile,
                         project_profile, remove_preference, render_profile,
                         validate_profile)
@@ -4040,6 +4041,69 @@ def run_improve_probes() -> tuple[list[str], int]:
            "(red control 25, validator red)",
            validator_rc(partial_evidence) != 0,
            repr(validator_rc(partial_evidence)))
+    # T-560 coverage: red controls 1/2 (reload-before-audit), 8 (one-report
+    # one-owner), 14 (confidence never overrides Core).
+    shared_roster = ("# IMPROVE CYCLE ROSTER\n"
+                     "seat_id: seat-a\nrole: core\nreport_path: a.md\n"
+                     "availability: expected\n"
+                     "seat_id: seat-b\nrole: core\nreport_path: a.md\n"
+                     "availability: expected\n")
+    expect("improve roster: one report has one owner (red control 8)",
+           any("one report has one owner" in e
+               for e in validate_manifest(shared_roster)),
+           repr(validate_manifest(shared_roster)))
+    proven_unverified = sweep_ticket_project("LOGIC_ERROR", {},
+                                             reproduced="n")
+    expect("sweep: confidence: proven does not override Core's verification "
+           "requirement (red control 14, validator red)",
+           validator_rc(proven_unverified) != 0,
+           repr(validator_rc(proven_unverified)))
+    stale_report = _rep_header.replace("source_head: abc",
+                                       "source_head: deadbeef")
+    stale_root = sweep_project(
+        ["- IMP-001 [CONFIRMED] T-900 report=saipen_improve_A.md "
+         "reproduced=y"],
+        ["T-900"], {"T-900": "IMP-001"}, stale_report)
+    subprocess.run(["git", "init", "-q"], cwd=str(stale_root), check=False)
+    subprocess.run(["git", "add", "-A"], cwd=str(stale_root), check=False)
+    subprocess.run(["git", "-c", "user.email=t@t", "-c", "user.name=t",
+                    "commit", "-qm", "base"], cwd=str(stale_root),
+                   check=False)
+    expect("sweep: a report auditing a stale head fails (reload-before-"
+           "audit, red controls 1/2, validator red)",
+           validator_rc(stale_root) != 0, repr(validator_rc(stale_root)))
+    fresh_report = (_rep_header.replace("source_head: abc",
+                                        "source_head: ")
+                    + "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+                    + "expected: x\nactual: y\nevidence: z\n")
+    # a fresh report with the ACTUAL current head (after git init+commit) is
+    # not flagged by the reload check
+    fresh_root = sweep_project(
+        ["- IMP-001 [CONFIRMED] T-900 report=saipen_improve_A.md "
+         "reproduced=y"],
+        ["T-900"], {"T-900": "IMP-001"}, fresh_report)
+    subprocess.run(["git", "init", "-q"], cwd=str(fresh_root), check=False)
+    subprocess.run(["git", "add", "-A"], cwd=str(fresh_root), check=False)
+    subprocess.run(["git", "-c", "user.email=t@t", "-c", "user.name=t",
+                    "commit", "-qm", "base"], cwd=str(fresh_root),
+                   check=False)
+    _head2 = subprocess.run(["git", "rev-parse", "HEAD"], cwd=str(fresh_root),
+                            capture_output=True, text=True).stdout.strip()
+    _rep2 = list((fresh_root / ".saipen" / "improve").rglob(
+        "saipen_improve_*.md"))[0]
+    _rep2.write_text(
+        _rep2.read_text(encoding="utf-8").replace("source_head: ",
+                                                  f"source_head: {_head2}"),
+        encoding="utf-8")
+    expect("sweep: a report audited against the current head passes the "
+           "reload check (no false positive)",
+           validator_rc(fresh_root) == 0,
+           repr(validator_rc(fresh_root))
+           + "\n" + subprocess.run(
+               [sys.executable, str(VALIDATOR), "--project-root",
+                str(fresh_root)],
+               cwd=str(fresh_root), capture_output=True, text=True,
+               errors="replace", timeout=120).stdout[-800:])
 
     # ---- T-601: resolver race -- two processes resolving the same conflict
     # yield exactly one canonical settlement (WRITER_BUSY or a settled-journal

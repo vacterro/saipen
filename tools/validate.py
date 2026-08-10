@@ -2413,6 +2413,21 @@ if log_files:
                         + ", ".join(_board_headings)
                         + "; a seat report is evidence, never canonical "
                         "BOARD state (red control 22)")
+                # red controls 1/2 (T-560): the audit MUST reload before it
+                # audits and never trusts previous conclusions -- a report
+                # whose source_head is stale (or fabricated) against the
+                # current HEAD is evidence of an audit that did not reload.
+                _src_head = _imp_mod._field(_rt, "source_head")
+                if _src_head:
+                    _cur_head = _git("rev-parse", "HEAD")[1].strip()
+                    if _cur_head and _src_head not in (_cur_head,
+                                                       _cur_head[:7]):
+                        _report_errors.append(
+                            f"{_rep}: source_head {_src_head} != current "
+                            f"HEAD {_cur_head[:7]}; the audit did not reload "
+                            "the current tree -- reload-before-audit and "
+                            "previous-conclusions-not-trusted (red controls "
+                            "1/2)")
             if _report_errors:
                 fail("improve report [improve-report] -- "
                      + "; ".join(_report_errors[:6])
@@ -3888,25 +3903,28 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
         # contract. IMPROVE.md must say a seat writes only inside its own home
         # during SELF-AUDIT/REPORT, `saipen improve` never silently enters
         # ADD, and `saipen improve verify` is delta-only and never re-enters a
-        # full cycle (red controls 7/17/18/21).
-        _imp_doc = _improve_doc.read_text(encoding="utf-8-sig")
-        _imp_doc_low = _imp_doc.lower()
-        _imp_boundary_missing = []
-        for _marker in ("writes only inside its own home",
-                        "never silently enters ADD",
-                        "delta-only", "must not recurse",
-                        "refuses while any finding is unswept",
-                        "partial or timed-out test evidence",
-                        "preserves the original findings verbatim"):
-            if _marker.lower() not in _imp_doc_low:
-                _imp_boundary_missing.append(_marker)
-        if _imp_boundary_missing:
-            fail("cross-doc drift [improve-boundary] -- saipen/IMPROVE.md "
-                 "must state the writer boundary and recursion stop (missing: "
-                 + ", ".join(_imp_boundary_missing)
-                 + "); an auditing seat writes only inside its own home, "
-                 "improve never silently enters ADD, and verify is delta-only "
-                 "without recursion (T-557)")
+        # full cycle (red controls 7/17/18/21). Skips a partial home copy that
+        # lacks IMPROVE.md -- the meta-control check already FAILs its absence.
+        if Path("saipen/IMPROVE.md").is_file():
+            _imp_doc = Path("saipen/IMPROVE.md").read_text(
+                encoding="utf-8-sig")
+            _imp_doc_low = _imp_doc.lower()
+            _imp_boundary_missing = []
+            for _marker in ("writes only inside its own home",
+                            "never silently enters ADD",
+                            "delta-only", "must not recurse",
+                            "refuses while any finding is unswept",
+                            "partial or timed-out test evidence",
+                            "preserves the original findings verbatim"):
+                if _marker.lower() not in _imp_doc_low:
+                    _imp_boundary_missing.append(_marker)
+            if _imp_boundary_missing:
+                fail("cross-doc drift [improve-boundary] -- saipen/IMPROVE.md "
+                     "must state the writer boundary and recursion stop "
+                     "(missing: " + ", ".join(_imp_boundary_missing)
+                     + "); an auditing seat writes only inside its own home, "
+                     "improve never silently enters ADD, and verify is "
+                     "delta-only without recursion (T-557)")
 
     # T-555: Improve seat reports are MECHANICALLY checkable, and T-556: Core
     # sweep is the only path from report to canonical work. Both scans run on

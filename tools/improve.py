@@ -698,6 +698,7 @@ def validate_manifest(text: str) -> list[str]:
         errors.append(f"cycle_status {status.group(1)!r} outside "
                       "active|complete|archived")
     seen: set[str] = set()
+    report_owners: dict[str, str] = {}
     for block in _seat_blocks(text):
         seat_id = _field(block, "seat_id")
         if not seat_id:
@@ -716,6 +717,14 @@ def validate_manifest(text: str) -> list[str]:
                 _validate_report_path(report_path, seat_id)
             except ImproveError as exc:
                 errors.append(f"seat {seat_id}: {exc}")
+            # red control 8 (T-560): ONE report, ONE owner -- two seats must
+            # never share a report path.
+            if report_path in report_owners and report_owners[
+                    report_path] != seat_id:
+                errors.append(f"report_path {report_path!r} is owned by both "
+                              f"{report_owners[report_path]} and {seat_id}; "
+                              "one report has one owner (red control 8)")
+            report_owners[report_path] = seat_id
         availability = _field(block, "availability")
         if availability and availability not in AVAILABILITY:
             errors.append(f"seat {seat_id}: availability {availability!r} "
