@@ -33,3 +33,13 @@
 - 11.08.26 12:39 [E-3090] [parent: E-3089] [op: transition-02ab05f0] DEC: goal_tickets 0->1
 - 11.08.26 12:40 [E-3091] [parent: E-3090] [T-630] [agent: claude] [op: checkpoint-183ee19f] RUN: review pass 2 -- independent re-run of verify: scenarios PASS, validate.py -> PASS, ruff PASS, audit 270/270; diff scan P0/P1/P2/P3 clean; verdict DEC: SHIP
 - 11.08.26 12:40 [E-3092] [parent: E-3091] [T-630] [agent: claude] [op: transition-36a47538] RUN: review passed; SHIP T-630
+- 11.08.26 12:42 [E-3093] [parent: E-3092] [T-630] [agent: claude] [op: finish-032f9334] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 11.08.26 12:42 [E-3094] [parent: E-3093] [T-632] [agent: claude] [op: claim-918d6cd2] DEC: claimed via SAIOPS -- owner claude
+- 11.08.26 12:42 [E-3095] [parent: E-3094] [T-632] [agent: claude] [op: transition-3f76722f] RUN: claim T-632; scope: abort is already implemented and committed (a0c0bdc); enter SCOUT
+- 11.08.26 12:43 [E-3096] [parent: E-3095] [T-632] [agent: claude] [op: transition-52e5c42c] RUN: no build needed; abort single-journal-write design landed with T-630
+- 11.08.26 12:43 [E-3097] [parent: E-3096] [T-632] [agent: claude] [op: transition-36dcfc3b] RUN: verify abort crash-safety controls + gates
+- 11.08.26 12:45 [E-3098] [parent: E-3097] [T-632] [agent: claude] [op: checkpoint-e840c12f] RUN: validate.py -> PASS -- abort crash-safety controls green (failure-before-target, crash-after-manifest, recovery roll-forward, retry refusal, external-conflict CONFLICT); scenarios PASS
+- 11.08.26 12:45 [E-3099] [parent: E-3098] [T-632] [agent: claude] [op: transition-88d23fad] RUN: verify PASS; review
+- 11.08.26 12:45 [E-3100] [parent: E-3099] [op: transition-88d23fad] DEC: goal_tickets 1->2
+- 11.08.26 12:45 [E-3101] [parent: E-3100] [T-632] [agent: claude] [op: checkpoint-63345733] DEC: review: single journaled manifest write, no raw rename anywhere in improve.py (grep clean); invariant met; verdict DEC: SHIP
+- 11.08.26 12:45 [E-3102] [parent: E-3101] [T-632] [agent: claude] [op: transition-585fd3db] RUN: review passed; SHIP T-632
