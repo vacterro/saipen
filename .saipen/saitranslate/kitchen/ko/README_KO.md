@@ -14,7 +14,7 @@
 
 **응답 언어.** 에이전트는 기본적으로 **에스토니아어**로 응답합니다 — 이것은 설정이지 기벽이 아니며, SAIPEN에서 에스토니아어인 것은 이것뿐입니다. 한 곳에서 변경합니다: [`saipen/STYLE.md`](saipen/STYLE.md) 맨 위의 `reply_language:` 줄. `et` 에스토니아어, `en` 영어, `ru` 러시아어, `auto`는 보낸 메시지의 언어로 선택합니다. 프로토콜, 코드, 커밋과 모든 문서는 어떤 값에서도 영어로 유지됩니다.
 
-**v7.223.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
+**v7.223.1** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
 
 ```text
 
@@ -134,6 +134,5 @@ bash bootstrap/inject.sh                                            # macOS / Li
 </p>
 
 <!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
-
 
 

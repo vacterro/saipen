@@ -1033,6 +1033,904 @@ def run_injector_probes() -> tuple[list[str], int, int]:
     return probe_failures, checked, skipped
 
 
+def run_scheduler_probes() -> tuple[list[str], int, int]:
+    """Canonical scheduler owns one task lifecycle without dirtying the clone."""
+    problems: list[str] = []
+    checked = skipped = 0
+    schedule = HOME / "bootstrap" / "schedule.ps1"
+    schedule_text = schedule.read_text(encoding="utf-8")
+    schedule_run = HOME / "bootstrap" / "schedule-run.ps1"
+    schedule_run_text = schedule_run.read_text(encoding="utf-8")
+    uninstall_ps = (HOME / "bootstrap" / "uninstall.ps1").read_text(encoding="utf-8")
+    uninstall_sh = (HOME / "bootstrap" / "uninstall.sh").read_text(encoding="utf-8")
+
+    def expect(label: str, ok: bool, detail: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        if ok:
+            print(f"PASS: scheduler -- {label}")
+        else:
+            problems.append(f"scheduler {label}: {detail or 'condition false'}")
+
+    def atomic_wrapper_contract(source: str) -> bool:
+        return (
+            '$RuntimeDir = Join-Path $env:LOCALAPPDATA "saipen"' in source
+            and "[System.Guid]::NewGuid" in source
+            and "[System.IO.File]::Move" in source
+            and "[System.IO.File]::Replace" in source
+            and "[System.Text.Encoding]::Unicode" in source
+            and 'Join-Path $PSScriptRoot "schedule-run-hidden.vbs"' not in source)
+
+    expect(
+        "one manager and no generated repository wrapper",
+        not (HOME / "tools" / "schedule_autoinject.py").exists()
+        and not (HOME / "bootstrap" / "schedule-run-hidden.vbs").exists(),
+        "legacy manager or machine-local wrapper still exists in source tree")
+    expect(
+        "wrapper publication is atomic and outside the repository",
+        atomic_wrapper_contract(schedule_text),
+        "external path or atomic temp-and-replace contract missing")
+    expect(
+        "external-wrapper contract red control",
+        not atomic_wrapper_contract(schedule_text.replace(
+            '$RuntimeDir = Join-Path $env:LOCALAPPDATA "saipen"',
+            '$RuntimeDir = $PSScriptRoot', 1)),
+        "repository-local mutation stayed green")
+    expect(
+        "all removers own current task, legacy task, and runtime wrapper",
+        all(name in text for text in (schedule_text, uninstall_ps, uninstall_sh)
+            for name in ("saipen-inject", "saipen-autoinject"))
+        and all("schedule-run-hidden.vbs" in text
+                for text in (schedule_text, uninstall_ps, uninstall_sh))
+        and all("scheduled-source" in text
+                for text in (schedule_text, uninstall_ps, uninstall_sh)),
+        "a removal path can orphan a shipped task or wrapper")
+    expect(
+        "background runner never updates the development clone",
+        " pull " not in schedule_run_text.lower()
+        and '"pull"' not in schedule_run_text.lower()
+        and '"merge"' not in schedule_run_text.lower()
+        and '"checkout"' not in schedule_run_text.lower()
+        and '"reset"' not in schedule_run_text.lower(),
+        "background runner still carries a working-tree mutation command")
+    expect(
+        "background Git disables optional index mutation",
+        '$env:GIT_OPTIONAL_LOCKS = "0"' in schedule_run_text,
+        "git status may refresh the active development clone index")
+
+    powershell = find_powershell()
+    if not powershell:
+        print("SKIP: scheduler lifecycle probes -- no PowerShell")
+        return problems, checked, skipped + 1
+
+    with tempfile.TemporaryDirectory(prefix="saipen-scheduler-") as raw:
+        sandbox = Path(raw)
+        state = sandbox / "tasks"
+        local_app_data = sandbox / "local-app-data"
+        state.mkdir()
+        local_app_data.mkdir()
+        scheduler_home = sandbox / "unicode-\u043f\u0443\u0442\u044c-\u03a9" / "bootstrap"
+        scheduler_home.mkdir(parents=True)
+        schedule_under_test = scheduler_home / "schedule.ps1"
+        shutil.copy2(schedule, schedule_under_test)
+        runner = scheduler_home / "schedule-run.ps1"
+        runner.write_text(
+            '[System.IO.File]::WriteAllText($env:MOCK_RUNNER_MARKER, "ran")\n'
+            'exit 37\n',
+            encoding="utf-8", newline="\n")
+        (scheduler_home / "inject.ps1").write_text(
+            "# scheduler probe sentinel\n", encoding="utf-8", newline="\n")
+        harness = sandbox / "scheduler-harness.ps1"
+        harness.write_text(r'''param(
+  [string]$ScriptPath,
+  [string]$CommandName
+)
+$ErrorActionPreference = "Stop"
+
+function global:Get-ScheduledTask {
+  [CmdletBinding()]
+  param([string]$TaskName)
+  if ($env:MOCK_QUERY_FAIL -eq $TaskName) {
+    Write-Error "mock query failure" -Category ResourceUnavailable
+    return $null
+  }
+  $path = Join-Path $env:MOCK_TASK_STATE $TaskName
+  if (Test-Path -LiteralPath $path) {
+    $definition = [System.IO.File]::ReadAllText($path)
+    $state = if ($definition -match '<Enabled>false</Enabled>') { "Disabled" } else { "Ready" }
+    return [pscustomobject]@{ State = $state }
+  }
+  return $null
+}
+
+function global:Get-ScheduledTaskInfo {
+  [CmdletBinding()]
+  param([string]$TaskName)
+  return [pscustomobject]@{
+    LastTaskResult = 0
+    LastRunTime = "probe-last"
+    NextRunTime = "probe-next"
+  }
+}
+
+function global:Start-ScheduledTask {
+  [CmdletBinding()]
+  param([string]$TaskName)
+  [System.IO.File]::WriteAllText($env:MOCK_START_MARKER, $TaskName)
+}
+
+function global:Export-ScheduledTask {
+  [CmdletBinding()]
+  param([string]$TaskName)
+  return [System.IO.File]::ReadAllText((Join-Path $env:MOCK_TASK_STATE $TaskName))
+}
+
+function global:Register-ScheduledTask {
+  [CmdletBinding()]
+  param([string]$TaskName, [string]$Xml, [switch]$Force)
+  [System.IO.File]::WriteAllText((Join-Path $env:MOCK_TASK_STATE $TaskName), $Xml)
+  return [pscustomobject]@{ TaskName = $TaskName }
+}
+
+function global:New-ScheduledTaskSettingsSet {
+  [CmdletBinding()]
+  param(
+    [switch]$StartWhenAvailable,
+    [switch]$AllowStartIfOnBatteries,
+    [switch]$DontStopIfGoingOnBatteries,
+    [TimeSpan]$ExecutionTimeLimit,
+    [string]$MultipleInstances
+  )
+  return [pscustomobject]@{}
+}
+
+function global:Set-ScheduledTask {
+  [CmdletBinding()]
+  param([string]$TaskName, [object]$Settings)
+  if ($env:MOCK_SET_FAIL) { throw "mock settings failure" }
+  return [pscustomobject]@{ TaskName = $TaskName }
+}
+
+function global:schtasks {
+  $operation = [string]$args[0]
+  $taskName = ""
+  for ($i = 0; $i -lt $args.Count; $i++) {
+    if ([string]$args[$i] -ieq "/TN") {
+      $taskName = [string]$args[$i + 1]
+      break
+    }
+  }
+  $taskPath = Join-Path $env:MOCK_TASK_STATE $taskName
+  if ($operation -ieq "/Create") {
+    $wrapper = Join-Path $env:LOCALAPPDATA "saipen\schedule-run-hidden.vbs"
+    $escapedWrapper = [System.Security.SecurityElement]::Escape($wrapper)
+    $currentSid = [System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+    $definition = @"
+<Task>
+  <Principals><Principal><UserId>$currentSid</UserId><LogonType>InteractiveToken</LogonType></Principal></Principals>
+  <Triggers><TimeTrigger><Repetition><Interval>PT15M</Interval></Repetition></TimeTrigger></Triggers>
+  <Settings>
+    <Enabled>true</Enabled>
+    <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
+    <ExecutionTimeLimit>PT10M</ExecutionTimeLimit>
+    <StartWhenAvailable>true</StartWhenAvailable>
+    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
+    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
+  </Settings>
+  <Actions><Exec><Command>wscript.exe</Command><Arguments>$escapedWrapper</Arguments></Exec></Actions>
+</Task>
+"@
+    [System.IO.File]::WriteAllText($taskPath, $definition)
+    $global:LASTEXITCODE = 0
+    return "created $taskName"
+  }
+  if ($operation -ieq "/Delete") {
+    if ($env:MOCK_DELETE_FAIL -eq $taskName) {
+      $global:LASTEXITCODE = 5
+      return "access denied"
+    }
+    Remove-Item -LiteralPath $taskPath -Force -ErrorAction SilentlyContinue
+    $global:LASTEXITCODE = 0
+    return "deleted $taskName"
+  }
+  $global:LASTEXITCODE = 1
+  return "unsupported mock operation"
+}
+
+if ($CommandName) { & $ScriptPath $CommandName } else { & $ScriptPath }
+if ($LASTEXITCODE) { exit $LASTEXITCODE }
+exit 0
+''', encoding="utf-8", newline="\n")
+
+        base_env = os.environ.copy()
+        base_env["LOCALAPPDATA"] = str(local_app_data)
+        base_env["MOCK_TASK_STATE"] = str(state)
+        base_env["MOCK_RUNNER_MARKER"] = str(sandbox / "runner-ran.txt")
+        base_env["MOCK_START_MARKER"] = str(sandbox / "task-started.txt")
+        base_env["MOCK_SET_FAIL"] = ""
+        base_env["MOCK_DELETE_FAIL"] = ""
+        base_env["MOCK_QUERY_FAIL"] = ""
+
+        def invoke_script(script: Path, command: str = "",
+                          **changes: str) -> subprocess.CompletedProcess[str]:
+            env = {**base_env, **changes}
+            return subprocess.run(
+                [powershell, "-NoProfile", "-ExecutionPolicy", "Bypass",
+                 "-File", str(harness), str(script), command],
+                cwd=HOME, env=env, capture_output=True, text=True,
+                errors="replace")
+
+        def invoke(command: str, **changes: str) -> subprocess.CompletedProcess[str]:
+            return invoke_script(schedule_under_test, command, **changes)
+
+        def git_status() -> str:
+            result = subprocess.run(
+                ["git", "status", "--short"], cwd=HOME,
+                capture_output=True, text=True, errors="replace")
+            if result.returncode != 0:
+                problems.append(f"scheduler git status failed: {result.stderr.strip()}")
+            return result.stdout
+
+        wrapper = local_app_data / "saipen" / "schedule-run-hidden.vbs"
+        runtime_source = local_app_data / "saipen" / "scheduled-source"
+        runtime_backup = local_app_data / "saipen" / "scheduled-source-previous-probe"
+        runtime_backup_fixed = local_app_data / "saipen" / "scheduled-source-previous"
+        current = state / "saipen-inject"
+        legacy = state / "saipen-autoinject"
+        before = git_status()
+        not_installed = invoke("status")
+        expect(
+            "status distinguishes NOT_INSTALLED",
+            not_installed.returncode != 0
+            and "STATUS: NOT_INSTALLED" in not_installed.stdout,
+            (not_installed.stdout + not_installed.stderr).strip())
+        invalid = invoke("typo-command")
+        expect(
+            "unknown command is nonzero with concise usage",
+            invalid.returncode != 0 and "usage: schedule.ps1" in invalid.stdout,
+            (invalid.stdout + invalid.stderr).strip())
+        legacy.write_text("present", encoding="ascii")
+        installed = invoke("install")
+        expect(
+            "install migrates legacy task and publishes external wrapper",
+            installed.returncode == 0 and current.is_file()
+            and not legacy.exists() and wrapper.is_file(),
+            (installed.stdout + installed.stderr).strip())
+        expect(
+            "atomic install leaves no temporary wrapper",
+            not list(wrapper.parent.glob(".schedule-run-hidden.vbs.*.tmp")),
+            "temporary publication file remains")
+        wrapper_bytes = wrapper.read_bytes() if wrapper.is_file() else b""
+        expect(
+            "wrapper preserves a Unicode runner path",
+            wrapper_bytes.startswith(b"\xff\xfe")
+            and str(runner) in wrapper_bytes.decode("utf-16"),
+            "wrapper is not UTF-16 with the exact Unicode runner path")
+        healthy = invoke("status")
+        expect(
+            "status distinguishes HEALTHY",
+            healthy.returncode == 0 and "STATUS: HEALTHY" in healthy.stdout,
+            (healthy.stdout + healthy.stderr).strip())
+        canonical_task_xml = current.read_text(encoding="utf-8")
+        current.write_text(canonical_task_xml.replace(
+            "wscript.exe", r"C:\malware\wscript.exe", 1), encoding="utf-8")
+        wrong_action = invoke("status")
+        expect(
+            "wrong scheduled action is DEGRADED",
+            wrong_action.returncode != 0
+            and "STATUS: DEGRADED" in wrong_action.stdout
+            and "task action" in wrong_action.stdout,
+            (wrong_action.stdout + wrong_action.stderr).strip())
+        current.write_text(canonical_task_xml, encoding="utf-8")
+
+        quoted_wrapper = canonical_task_xml.replace(
+            "<Arguments>",
+            "<Arguments>&quot;", 1).replace("</Arguments>",
+                                           "&quot;</Arguments>", 1)
+        current.write_text(quoted_wrapper, encoding="utf-8")
+        quoted_action = invoke("status")
+        expect(
+            "quoted wrapper path is DEGRADED",
+            quoted_action.returncode != 0
+            and "STATUS: DEGRADED" in quoted_action.stdout
+            and "task action" in quoted_action.stdout,
+            (quoted_action.stdout + quoted_action.stderr).strip())
+        current.write_text(canonical_task_xml, encoding="utf-8")
+
+        current_sid = re.search(
+            r"<UserId>([^<]+)</UserId>", canonical_task_xml).group(1)
+        current.write_text(canonical_task_xml.replace(
+            current_sid, "S-1-5-21-0-0-0-9999", 1), encoding="utf-8")
+        wrong_principal = invoke("status")
+        expect(
+            "wrong task principal is DEGRADED",
+            wrong_principal.returncode != 0
+            and "STATUS: DEGRADED" in wrong_principal.stdout
+            and "task principal" in wrong_principal.stdout,
+            (wrong_principal.stdout + wrong_principal.stderr).strip())
+        current.write_text(canonical_task_xml, encoding="utf-8")
+
+        current.write_text(canonical_task_xml.replace(
+            "</Task>", "<Enabled>false</Enabled></Task>", 1), encoding="utf-8")
+        disabled = invoke("status")
+        expect(
+            "disabled scheduled task is DEGRADED",
+            disabled.returncode != 0 and "STATUS: DEGRADED" in disabled.stdout
+            and "task is disabled" in disabled.stdout,
+            (disabled.stdout + disabled.stderr).strip())
+        current.write_text(canonical_task_xml, encoding="utf-8")
+
+        current.write_text(canonical_task_xml.replace(
+            "TimeTrigger", "BootTrigger"), encoding="utf-8")
+        wrong_trigger_type = invoke("status")
+        expect(
+            "wrong task trigger type is DEGRADED",
+            wrong_trigger_type.returncode != 0
+            and "STATUS: DEGRADED" in wrong_trigger_type.stdout
+            and "task trigger" in wrong_trigger_type.stdout,
+            (wrong_trigger_type.stdout + wrong_trigger_type.stderr).strip())
+        current.write_text(canonical_task_xml, encoding="utf-8")
+
+        current.write_text(canonical_task_xml.replace(
+            "</Repetition>", "<Duration>PT1H</Duration></Repetition>", 1),
+            encoding="utf-8")
+        finite_duration = invoke("status")
+        expect(
+            "finite repetition duration is DEGRADED",
+            finite_duration.returncode != 0
+            and "STATUS: DEGRADED" in finite_duration.stdout
+            and "task trigger" in finite_duration.stdout,
+            (finite_duration.stdout + finite_duration.stderr).strip())
+        current.write_text(canonical_task_xml, encoding="utf-8")
+
+        current.write_text(canonical_task_xml.replace(
+            "PT15M", "PT30M", 1).replace("IgnoreNew", "Parallel", 1),
+            encoding="utf-8")
+        wrong_policy = invoke("status")
+        expect(
+            "wrong task trigger or runtime policy is DEGRADED",
+            wrong_policy.returncode != 0
+            and "STATUS: DEGRADED" in wrong_policy.stdout
+            and "task trigger" in wrong_policy.stdout
+            and "task settings" in wrong_policy.stdout,
+            (wrong_policy.stdout + wrong_policy.stderr).strip())
+        current.write_text(canonical_task_xml, encoding="utf-8")
+        start_marker = Path(base_env["MOCK_START_MARKER"])
+        start_marker.unlink(missing_ok=True)
+        run_now = invoke("run-now")
+        expect(
+            "run-now triggers only a healthy installation",
+            run_now.returncode == 0 and start_marker.is_file()
+            and start_marker.read_text(encoding="utf-8") == "saipen-inject",
+            (run_now.stdout + run_now.stderr).strip())
+        saved_canonical_wrapper = wrapper.read_bytes()
+        wrapper.write_text(
+            f"' -File \"\"{runner}\"\"\r\nWScript.Quit 0\r\n",
+            encoding="utf-16")
+        start_marker.unlink(missing_ok=True)
+        hostile_wrapper = invoke("status")
+        hostile_wrapper_run = invoke("run-now")
+        expect(
+            "wrapper with canonical path hidden in dead text is DEGRADED",
+            hostile_wrapper.returncode != 0
+            and "STATUS: DEGRADED" in hostile_wrapper.stdout
+            and "canonical command body" in hostile_wrapper.stdout,
+            (hostile_wrapper.stdout + hostile_wrapper.stderr).strip())
+        expect(
+            "run-now refuses a noncanonical wrapper body",
+            hostile_wrapper_run.returncode != 0 and not start_marker.exists(),
+            (hostile_wrapper_run.stdout + hostile_wrapper_run.stderr).strip())
+        wrapper.write_bytes(saved_canonical_wrapper)
+        wscript = shutil.which("wscript.exe") if os.name == "nt" else None
+        if wscript:
+            marker = Path(base_env["MOCK_RUNNER_MARKER"])
+            marker.unlink(missing_ok=True)
+            executed = subprocess.run(
+                [wscript, str(wrapper)], env=base_env,
+                capture_output=True, text=True, errors="replace")
+            expect(
+                "generated wrapper waits and returns runner status",
+                executed.returncode == 37 and marker.is_file()
+                and marker.read_text(encoding="utf-8") == "ran",
+                (executed.stdout + executed.stderr).strip())
+        else:
+            print("SKIP: scheduler Unicode wrapper execution -- no Windows Script Host")
+            skipped += 1
+
+        legacy.write_text("present", encoding="ascii")
+        start_marker.unlink(missing_ok=True)
+        duplicate = invoke("status")
+        duplicate_run = invoke("run-now")
+        expect(
+            "duplicate current and legacy tasks are DEGRADED",
+            duplicate.returncode != 0 and "STATUS: DEGRADED" in duplicate.stdout
+            and "duplicate legacy task" in duplicate.stdout,
+            (duplicate.stdout + duplicate.stderr).strip())
+        expect(
+            "run-now refuses a DEGRADED duplicate installation",
+            duplicate_run.returncode != 0 and not start_marker.exists(),
+            (duplicate_run.stdout + duplicate_run.stderr).strip())
+        legacy.unlink()
+
+        saved_wrapper = wrapper.read_bytes()
+        wrapper.unlink()
+        start_marker.unlink(missing_ok=True)
+        missing_wrapper = invoke("status")
+        missing_wrapper_run = invoke("run-now")
+        expect(
+            "missing VBS wrapper is DEGRADED",
+            missing_wrapper.returncode != 0
+            and "STATUS: DEGRADED" in missing_wrapper.stdout
+            and "VBS wrapper missing" in missing_wrapper.stdout,
+            (missing_wrapper.stdout + missing_wrapper.stderr).strip())
+        expect(
+            "run-now refuses a task with missing wrapper",
+            missing_wrapper_run.returncode != 0 and not start_marker.exists(),
+            (missing_wrapper_run.stdout + missing_wrapper_run.stderr).strip())
+        wrapper.write_bytes(saved_wrapper)
+
+        runner_missing = runner.with_suffix(".missing")
+        runner.rename(runner_missing)
+        missing_runner = invoke("status")
+        expect(
+            "wrapper referencing a missing runner is DEGRADED",
+            missing_runner.returncode != 0
+            and "STATUS: DEGRADED" in missing_runner.stdout
+            and "referenced runner missing" in missing_runner.stdout,
+            (missing_runner.stdout + missing_runner.stderr).strip())
+        runner_missing.rename(runner)
+
+        legacy.write_text("present", encoding="ascii")
+        runtime_source.mkdir()
+        runtime_backup.mkdir()
+        runtime_backup_fixed.mkdir()
+        removed = invoke("remove")
+        expect(
+            "remove cleans both task names and scheduler runtime",
+            removed.returncode == 0 and not current.exists()
+            and not legacy.exists() and not wrapper.exists()
+            and not runtime_source.exists() and not runtime_backup.exists()
+            and not runtime_backup_fixed.exists(),
+            (removed.stdout + removed.stderr).strip())
+        expect(
+            "install and remove leave repository status unchanged",
+            git_status() == before,
+            "scheduler lifecycle changed working-tree status")
+
+        previous_task = "old-task-xml"
+        previous_wrapper = b"previous-wrapper-bytes"
+        current.write_text(previous_task, encoding="ascii")
+        wrapper.parent.mkdir(parents=True, exist_ok=True)
+        wrapper.write_bytes(previous_wrapper)
+        upgrade_failed = invoke("install", MOCK_SET_FAIL="1")
+        expect(
+            "failed reinstall restores previous task and wrapper",
+            upgrade_failed.returncode != 0
+            and current.read_text(encoding="ascii") == previous_task
+            and wrapper.read_bytes() == previous_wrapper,
+            (upgrade_failed.stdout + upgrade_failed.stderr).strip())
+        invoke("remove")
+
+        rolled_back = invoke("install", MOCK_SET_FAIL="1")
+        expect(
+            "fresh settings failure removes new task and wrapper",
+            rolled_back.returncode != 0 and not current.exists()
+            and not wrapper.exists(),
+            (rolled_back.stdout + rolled_back.stderr).strip())
+
+        current.write_text("preserve-task", encoding="ascii")
+        wrapper.parent.mkdir(parents=True, exist_ok=True)
+        wrapper.write_text("preserve-wrapper", encoding="ascii")
+        query_failed = invoke("remove", MOCK_QUERY_FAIL="saipen-inject")
+        expect(
+            "query failure is nonzero and preserves task and wrapper",
+            query_failed.returncode != 0
+            and current.read_text(encoding="ascii") == "preserve-task"
+            and wrapper.read_text(encoding="ascii") == "preserve-wrapper",
+            (query_failed.stdout + query_failed.stderr).strip())
+        current.unlink()
+        wrapper.unlink()
+
+        current.write_text("present", encoding="ascii")
+        wrapper.write_text("preserve", encoding="ascii")
+        delete_failed = invoke("remove", MOCK_DELETE_FAIL="saipen-inject")
+        expect(
+            "delete failure is nonzero and preserves runnable wrapper",
+            delete_failed.returncode != 0 and current.is_file()
+            and wrapper.read_text(encoding="ascii") == "preserve",
+            (delete_failed.stdout + delete_failed.stderr).strip())
+
+        current.unlink()
+        wrapper.unlink()
+        current.write_text("present", encoding="ascii")
+        legacy.write_text("present", encoding="ascii")
+        wrapper.write_text("present", encoding="ascii")
+        runtime_source.mkdir()
+        runtime_backup.mkdir()
+        runtime_backup_fixed.mkdir()
+        uninstall_home = sandbox / "powershell-uninstall-home"
+        uninstall_home.mkdir()
+        ps_uninstalled = invoke_script(
+            HOME / "bootstrap" / "uninstall.ps1",
+            HOME=str(uninstall_home), USERPROFILE=str(uninstall_home),
+            SAIPEN_UNINSTALL_SKIP_TASK="")
+        expect(
+            "PowerShell global uninstall removes both tasks and wrapper",
+            ps_uninstalled.returncode == 0 and not current.exists()
+            and not legacy.exists() and not wrapper.exists()
+            and not runtime_source.exists() and not runtime_backup.exists()
+            and not runtime_backup_fixed.exists(),
+            (ps_uninstalled.stdout + ps_uninstalled.stderr).strip())
+
+        current.write_text("preserve", encoding="ascii")
+        wrapper.write_text("preserve", encoding="ascii")
+        ps_query_failed = invoke_script(
+            HOME / "bootstrap" / "uninstall.ps1",
+            HOME=str(uninstall_home), USERPROFILE=str(uninstall_home),
+            SAIPEN_UNINSTALL_SKIP_TASK="", MOCK_QUERY_FAIL="saipen-inject")
+        expect(
+            "PowerShell global uninstall fails closed on query error",
+            ps_query_failed.returncode != 0 and current.is_file()
+            and wrapper.is_file(),
+            (ps_query_failed.stdout + ps_query_failed.stderr).strip())
+        current.unlink()
+        wrapper.unlink()
+
+        fallback_harness = sandbox / "scheduler-fallback-harness.ps1"
+        fallback_harness.write_text(r'''param([string]$ScriptPath)
+$ErrorActionPreference = "Stop"
+$env:PSModulePath = ""
+Remove-Module ScheduledTasks -Force -ErrorAction SilentlyContinue
+
+function global:Get-Command {
+  [CmdletBinding()]
+  param([string]$Name)
+  if ($Name -eq "Get-ScheduledTask") { return $null }
+  if ($Name -eq "schtasks") { return [pscustomobject]@{ Name = "schtasks" } }
+  return Microsoft.PowerShell.Core\Get-Command $Name
+}
+
+function global:schtasks {
+  $operation = [string]$args[0]
+  $taskName = ""
+  for ($i = 0; $i -lt $args.Count; $i++) {
+    if ([string]$args[$i] -ieq "/TN") {
+      $taskName = [string]$args[$i + 1]
+      break
+    }
+  }
+  if ($env:MOCK_QUERY_FAIL -and $operation -ieq "/Query") {
+    $global:LASTEXITCODE = 5
+    return "query failed"
+  }
+  $taskPath = Join-Path $env:MOCK_TASK_STATE $taskName
+  if ($operation -ieq "/Query") {
+    if (-not $taskName -or (Test-Path -LiteralPath $taskPath)) {
+      $global:LASTEXITCODE = 0
+    } else {
+      $global:LASTEXITCODE = 1
+    }
+    return "query"
+  }
+  if ($operation -ieq "/Delete") {
+    Remove-Item -LiteralPath $taskPath -Force -ErrorAction SilentlyContinue
+    $global:LASTEXITCODE = 0
+    return "deleted"
+  }
+  $global:LASTEXITCODE = 9
+}
+
+& $ScriptPath
+if ($LASTEXITCODE) { exit $LASTEXITCODE }
+exit 0
+''', encoding="utf-8", newline="\n")
+        fallback_env = {
+            **base_env,
+            "HOME": str(uninstall_home),
+            "USERPROFILE": str(uninstall_home),
+            "PSModulePath": "",
+            "SAIPEN_UNINSTALL_SKIP_TASK": "",
+        }
+        current.write_text("present", encoding="ascii")
+        legacy.write_text("present", encoding="ascii")
+        wrapper.write_text("present", encoding="ascii")
+        runtime_source.mkdir()
+        runtime_backup.mkdir()
+        runtime_backup_fixed.mkdir()
+        fallback_uninstalled = subprocess.run(
+            [powershell, "-NoProfile", "-ExecutionPolicy", "Bypass",
+             "-File", str(fallback_harness),
+             str(HOME / "bootstrap" / "uninstall.ps1")],
+            cwd=HOME, env=fallback_env, capture_output=True, text=True,
+            errors="replace")
+        expect(
+            "PowerShell uninstall falls back when ScheduledTasks cmdlets are absent",
+            fallback_uninstalled.returncode == 0 and not current.exists()
+            and not legacy.exists() and not wrapper.exists()
+            and not runtime_source.exists() and not runtime_backup.exists()
+            and not runtime_backup_fixed.exists(),
+            (fallback_uninstalled.stdout + fallback_uninstalled.stderr).strip())
+
+        current.write_text("preserve", encoding="ascii")
+        wrapper.write_text("preserve", encoding="ascii")
+        fallback_env["MOCK_QUERY_FAIL"] = "1"
+        fallback_query_failed = subprocess.run(
+            [powershell, "-NoProfile", "-ExecutionPolicy", "Bypass",
+             "-File", str(fallback_harness),
+             str(HOME / "bootstrap" / "uninstall.ps1")],
+            cwd=HOME, env=fallback_env, capture_output=True, text=True,
+            errors="replace")
+        expect(
+            "PowerShell schtasks fallback fails closed on query error",
+            fallback_query_failed.returncode != 0 and current.is_file()
+            and wrapper.is_file(),
+            (fallback_query_failed.stdout + fallback_query_failed.stderr).strip())
+        current.unlink(missing_ok=True)
+        wrapper.unlink(missing_ok=True)
+
+        bash = find_bash()
+        if bash:
+            shim_dir = sandbox / "scheduler-shims"
+            shim_dir.mkdir()
+            schtasks = shim_dir / "schtasks"
+            schtasks.write_text(r'''#!/usr/bin/env bash
+state=${MOCK_TASK_STATE:?}
+operation=${1:-}
+shift || true
+task=""
+while [ "$#" -gt 0 ]; do
+  if [ "$1" = "/TN" ]; then task=${2:-}; shift 2; continue; fi
+  shift
+done
+if [ "$operation" = "/Query" ]; then
+  [ -z "${MOCK_QUERY_FAIL:-}" ] || exit 5
+  [ -z "$task" ] && exit 0
+  [ -f "$state/$task" ] && exit 0
+  exit 1
+fi
+if [ "$operation" = "/Delete" ]; then
+  rm -f "$state/$task"
+  exit $?
+fi
+exit 9
+''', encoding="utf-8", newline="\n")
+            schtasks.chmod(0o755)
+            shell_home = sandbox / "shell-uninstall-home"
+            shell_home.mkdir()
+            if os.name == "nt":
+                path_result = subprocess.run(
+                    [bash, "-lc", 'cygpath -u "$1"', "_", str(state)],
+                    capture_output=True, text=True, errors="replace")
+                shell_state = path_result.stdout.strip()
+            else:
+                path_result = subprocess.CompletedProcess([], 0, "", "")
+                shell_state = str(state)
+            shell_env = bash_env(bash, shell_home)
+            shell_env["PATH"] = str(shim_dir) + os.pathsep + shell_env["PATH"]
+            shell_env["LOCALAPPDATA"] = str(local_app_data)
+            shell_env["MOCK_TASK_STATE"] = shell_state
+            shell_env["SAIPEN_UNINSTALL_SKIP_TASK"] = ""
+            current.write_text("present", encoding="ascii")
+            legacy.write_text("present", encoding="ascii")
+            wrapper.write_text("present", encoding="ascii")
+            runtime_source.mkdir()
+            runtime_backup.mkdir()
+            runtime_backup_fixed.mkdir()
+            sh_uninstalled = subprocess.run(
+                [bash, str(HOME / "bootstrap" / "uninstall.sh")],
+                cwd=HOME, env=shell_env, capture_output=True, text=True,
+                errors="replace")
+            expect(
+                "shell global uninstall removes both tasks and wrapper",
+                path_result.returncode == 0 and sh_uninstalled.returncode == 0
+                and not current.exists() and not legacy.exists()
+                and not wrapper.exists() and not runtime_source.exists()
+                and not runtime_backup.exists() and not runtime_backup_fixed.exists(),
+                (sh_uninstalled.stdout + sh_uninstalled.stderr).strip())
+
+            current.write_text("preserve", encoding="ascii")
+            wrapper.write_text("preserve", encoding="ascii")
+            shell_env["MOCK_QUERY_FAIL"] = "1"
+            sh_query_failed = subprocess.run(
+                [bash, str(HOME / "bootstrap" / "uninstall.sh")],
+                cwd=HOME, env=shell_env, capture_output=True, text=True,
+                errors="replace")
+            expect(
+                "shell global uninstall fails closed on query error",
+                sh_query_failed.returncode != 0 and current.is_file()
+                and wrapper.is_file(),
+                (sh_query_failed.stdout + sh_query_failed.stderr).strip())
+            current.unlink()
+            wrapper.unlink()
+            runtime_source.mkdir()
+            runtime_backup.mkdir()
+            runtime_backup_fixed.mkdir()
+            no_schtasks_env = {
+                **shell_env,
+                "PATH": "/usr/bin:/bin",
+                "MOCK_QUERY_FAIL": "",
+            }
+            shell_without_schtasks = subprocess.run(
+                [bash, str(HOME / "bootstrap" / "uninstall.sh")],
+                cwd=HOME, env=no_schtasks_env, capture_output=True, text=True,
+                errors="replace")
+            expect(
+                "shell uninstall without schtasks still cleans runtime source",
+                shell_without_schtasks.returncode == 0
+                and not runtime_source.exists() and not runtime_backup.exists()
+                and not runtime_backup_fixed.exists(),
+                (shell_without_schtasks.stdout
+                 + shell_without_schtasks.stderr).strip())
+        else:
+            print("SKIP: scheduler shell uninstaller probes -- no usable bash")
+            skipped += 1
+
+        # Execute schedule-run.ps1 against a real temporary repository. The
+        # injected marker stands in for every installed config, making refusal
+        # preservation observable without touching the user's agent homes.
+        source_repo = sandbox / "scheduled-source"
+        source_bootstrap = source_repo / "bootstrap"
+        source_bootstrap.mkdir(parents=True)
+        shutil.copy2(schedule_run, source_bootstrap / "schedule-run.ps1")
+        (source_repo / "SOURCE_SENTINEL.txt").write_text(
+            "committed-source\n", encoding="utf-8", newline="\n")
+        (source_bootstrap / "inject.ps1").write_text(r'''
+$root = Split-Path $PSScriptRoot -Parent
+$value = [System.IO.File]::ReadAllText((Join-Path $root "SOURCE_SENTINEL.txt"))
+[System.IO.File]::WriteAllText($env:MOCK_SCHEDULE_DESTINATION, $value)
+[System.IO.File]::WriteAllText($env:MOCK_SCHEDULE_SOURCE_PATH, $root)
+exit 0
+'''.lstrip(), encoding="utf-8", newline="\n")
+
+        def source_git(*args: str) -> subprocess.CompletedProcess[str]:
+            return subprocess.run(["git", *args], cwd=source_repo,
+                                  capture_output=True, text=True, errors="replace")
+
+        source_git("init", "-q")
+        source_git("config", "user.name", "scheduler probe")
+        source_git("config", "user.email", "scheduler@example.invalid")
+        source_git("add", "-A")
+        source_git("commit", "-q", "-m", "probe: committed source")
+        source_git("remote", "add", "origin", "https://127.0.0.1:9/unreachable")
+        runner_local = sandbox / "runner-local-app-data"
+        runner_local.mkdir()
+        destination = sandbox / "installed-snapshot.txt"
+        source_path_marker = sandbox / "installed-source-path.txt"
+        runner_env = {
+            **base_env,
+            "LOCALAPPDATA": str(runner_local),
+            "MOCK_SCHEDULE_DESTINATION": str(destination),
+            "MOCK_SCHEDULE_SOURCE_PATH": str(source_path_marker),
+        }
+
+        def invoke_runner(script: Path | None = None) -> subprocess.CompletedProcess[str]:
+            return subprocess.run(
+                [powershell, "-NoProfile", "-ExecutionPolicy", "Bypass",
+                 "-File", str(script or source_bootstrap / "schedule-run.ps1"),
+                 "-CloneRoot", str(source_repo)],
+                cwd=source_repo, env=runner_env, capture_output=True, text=True,
+                errors="replace", timeout=60)
+
+        source_head = source_git("rev-parse", "HEAD").stdout.strip()
+        source_bytes = (source_repo / "SOURCE_SENTINEL.txt").read_bytes()
+        source_index_bytes = (source_repo / ".git" / "index").read_bytes()
+        clean_run = invoke_runner()
+        expect(
+            "clean committed source injects exact HEAD without network access",
+            clean_run.returncode == 0 and destination.is_file()
+            and destination.read_text(encoding="utf-8-sig")
+            == source_bytes.decode("utf-8"),
+            (clean_run.stdout + clean_run.stderr).strip())
+        published_source = runner_local / "saipen" / "scheduled-source"
+        advertised_source = source_path_marker.read_text(
+            encoding="utf-8-sig").strip() if source_path_marker.is_file() else ""
+        expect(
+            "successful injection keeps its advertised source path alive",
+            source_path_marker.is_file() and published_source.is_dir()
+            and os.path.normcase(os.path.normpath(advertised_source))
+            == os.path.normcase(os.path.normpath(str(published_source)))
+            and (published_source / "SOURCE_SENTINEL.txt").read_text(
+                encoding="utf-8-sig") == source_bytes.decode("utf-8"),
+            f"advertised source missing after cleanup: {advertised_source!r}")
+        expect(
+            "background run never changes HEAD or working-tree bytes",
+            source_git("rev-parse", "HEAD").stdout.strip() == source_head
+            and not source_git("status", "--short").stdout
+            and (source_repo / "SOURCE_SENTINEL.txt").read_bytes() == source_bytes
+            and (source_repo / ".git" / "index").read_bytes() == source_index_bytes,
+            "clean run moved HEAD, index, or source bytes")
+
+        destination.write_text("previous-install\n", encoding="utf-8", newline="\n")
+        (source_repo / "SOURCE_SENTINEL.txt").write_text(
+            "half-edited\n", encoding="utf-8", newline="\n")
+        dirty_tracked = invoke_runner()
+        runner_log = runner_local / "saipen" / "inject.log"
+        expect(
+            "dirty tracked source skips and preserves installed snapshot",
+            dirty_tracked.returncode != 0
+            and destination.read_text(encoding="utf-8") == "previous-install\n"
+            and "SKIP: DIRTY_SOURCE" in runner_log.read_text(encoding="utf-8-sig"),
+            (dirty_tracked.stdout + dirty_tracked.stderr).strip())
+        (source_repo / "SOURCE_SENTINEL.txt").write_bytes(source_bytes)
+
+        untracked = source_repo / "UNTRACKED_PROJECT_FILE.txt"
+        untracked.write_text("not committed\n", encoding="utf-8", newline="\n")
+        dirty_untracked = invoke_runner()
+        expect(
+            "dirty untracked project source skips and preserves installed snapshot",
+            dirty_untracked.returncode != 0
+            and destination.read_text(encoding="utf-8") == "previous-install\n",
+            (dirty_untracked.stdout + dirty_untracked.stderr).strip())
+        untracked.unlink()
+
+        git_dir = source_repo / ".git"
+        hidden_git = source_repo / ".git-hidden"
+        git_dir.rename(hidden_git)
+        source_failure = invoke_runner()
+        hidden_git.rename(git_dir)
+        expect(
+            "source operation failure never falls through into injection",
+            source_failure.returncode != 0
+            and destination.read_text(encoding="utf-8") == "previous-install\n",
+            (source_failure.stdout + source_failure.stderr).strip())
+
+        race_runner = sandbox / "schedule-run-race.ps1"
+        race_anchor = (
+            "  Expand-Archive -LiteralPath $archive -DestinationPath $snapshot -Force\n")
+        race_body = schedule_run_text.replace(
+            race_anchor,
+            race_anchor
+            + "  [System.IO.File]::AppendAllText((Join-Path $sourceRoot "
+              "\"SOURCE_SENTINEL.txt\"), \"race-edit\")\n",
+            1)
+        race_runner.write_text(race_body, encoding="utf-8", newline="\n")
+        source_race = invoke_runner(race_runner)
+        expect(
+            "source change during preflight refuses mixed-source injection",
+            source_race.returncode != 0
+            and destination.read_text(encoding="utf-8") == "previous-install\n"
+            and "SKIP: DIRTY_SOURCE" in runner_log.read_text(encoding="utf-8-sig"),
+            (source_race.stdout + source_race.stderr).strip())
+        (source_repo / "SOURCE_SENTINEL.txt").write_bytes(source_bytes)
+        expect(
+            "every refusal preserves previous installed snapshot and HEAD",
+            destination.read_text(encoding="utf-8") == "previous-install\n"
+            and source_git("rev-parse", "HEAD").stdout.strip() == source_head
+            and published_source.is_dir()
+            and (published_source / "SOURCE_SENTINEL.txt").read_text(
+                encoding="utf-8-sig") == source_bytes.decode("utf-8"),
+            "a refusal changed installed bytes or HEAD")
+
+        stale_backup = runner_local / "saipen" / "scheduled-source-previous"
+        stale_backup.mkdir(parents=True)
+        stale_backup_run = invoke_runner()
+        expect(
+            "stale snapshot backup from a killed run is refused",
+            stale_backup_run.returncode != 0
+            and "REFUSE: PUBLISHED_SOURCE_BACKUP_EXISTS"
+            in runner_log.read_text(encoding="utf-8-sig")
+            and destination.read_text(encoding="utf-8") == "previous-install\n",
+            (stale_backup_run.stdout + stale_backup_run.stderr).strip())
+        stale_backup.rmdir()
+
+        (source_repo / "SOURCE_SENTINEL.txt").write_text(
+            "new-committed-source\n", encoding="utf-8", newline="\n")
+        (source_bootstrap / "inject.ps1").write_text(
+            "exit 9\n", encoding="utf-8", newline="\n")
+        source_git("add", "-A")
+        source_git("commit", "-q", "-m", "probe: failing injector update")
+        failed_update = invoke_runner()
+        expect(
+            "failed injector restores previous persistent source snapshot",
+            failed_update.returncode != 0 and published_source.is_dir()
+            and (published_source / "SOURCE_SENTINEL.txt").read_text(
+                encoding="utf-8-sig") == source_bytes.decode("utf-8")
+            and destination.read_text(encoding="utf-8") == "previous-install\n",
+            (failed_update.stdout + failed_update.stderr).strip())
+
+    return problems, checked, skipped
+
+
 def run_project_root_probes() -> tuple[list[str], int]:
     problems = []
     checked = 0
@@ -1806,6 +2704,197 @@ def run_ship_staging_probes() -> tuple[list[str], int]:
                rel in untracked_names(),
                "the gate passed on a file's presence on disk, which is the "
                "exact reading that ships a home no clone can reproduce")
+
+    return problems, checked
+
+
+def run_release_freshness_probes() -> tuple[list[str], int]:
+    """A pre-metadata green gate must not authorize mutated release bytes."""
+    problems: list[str] = []
+    checked = 0
+    env = {**os.environ, "GIT_AUTHOR_NAME": "probe",
+           "GIT_AUTHOR_EMAIL": "probe@example.invalid",
+           "GIT_COMMITTER_NAME": "probe",
+           "GIT_COMMITTER_EMAIL": "probe@example.invalid"}
+    home = VALIDATOR.parent.parent
+
+    def expect(label: str, condition: bool, detail: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        if condition:
+            print(f"PASS: release freshness -- {label}")
+        else:
+            problems.append(f"release freshness {label}: {detail}")
+
+    with tempfile.TemporaryDirectory(prefix="saipen-release-freshness-") as tmp:
+        project = Path(tmp) / "home"
+        shutil.copytree(home, project, ignore=shutil.ignore_patterns(
+            ".git", ".venv", "__pycache__", ".freebuff", "node_modules", "nul"))
+
+        def git(*args: str) -> subprocess.CompletedProcess[str]:
+            return subprocess.run(["git", *args], cwd=project, env=env,
+                                  capture_output=True, text=True, check=False,
+                                  errors="replace")
+
+        def validate(*, bind: bool = False,
+                     gate: str = "ship") -> subprocess.CompletedProcess[str]:
+            return subprocess.run(
+                [sys.executable, str(project / "tools" / "validate.py"),
+                 "--project-root", str(project), "--gate", gate,
+                 *(["--require-release-index"] if bind else [])],
+                cwd=project, capture_output=True, text=True, errors="replace")
+
+        if git("init", "-q").returncode != 0:
+            print("SKIP: release freshness probes -- git unavailable")
+            return problems, checked
+        git("add", "-A")
+        git("commit", "-q", "-m", "probe: baseline")
+
+        locale_paths = sorted((project / ".saipen" / "saitranslate" /
+                               "kitchen").glob("*/README_*.md"))
+        old_version = (project / "VERSION").read_text(
+            encoding="utf-8-sig").strip()
+        parts = [int(part) for part in old_version.split(".")]
+        new_version = f"{parts[0]}.{parts[1]}.{parts[2] + 1}"
+        old_badge = f"**v{old_version}**"
+        new_badge = f"**v{new_version}**"
+        digest_re = re.compile(
+            r"<!-- source-digest: README\.md sha256:([0-9a-f]+) -->")
+        digests_before = {
+            path.relative_to(project).as_posix(): digest_re.search(
+                path.read_text(encoding="utf-8-sig")).group(1)
+            for path in locale_paths
+            if digest_re.search(path.read_text(encoding="utf-8-sig"))
+        }
+
+        initial_gate = validate(gate="core")
+        expect("pre-metadata core signal is green",
+               initial_gate.returncode == 0,
+               (initial_gate.stdout + initial_gate.stderr).strip())
+        empty_binding_gate = validate()
+        expect("binding gate rejects an empty release index",
+               empty_binding_gate.returncode != 0
+               and "requires every release metadata path staged" in
+               (empty_binding_gate.stdout + empty_binding_gate.stderr),
+               (empty_binding_gate.stdout + empty_binding_gate.stderr).strip())
+
+        # A partial README stage exists before this ship. The release changes
+        # that same path, so rollback must restore its exact old index blob,
+        # not reset the path to HEAD or leave final metadata staged.
+        root_readme = project / "README.md"
+        root_text = root_readme.read_text(encoding="utf-8-sig")
+        partial_marker = "\n<!-- pre-existing partial-stage probe -->\n"
+        root_readme.write_text(root_text + partial_marker,
+                               encoding="utf-8", newline="\n")
+        git("add", "--", root_readme.name)
+        partial_index_before = git(
+            "ls-files", "-s", "--", root_readme.name).stdout
+        pre_ship_tree = git("write-tree").stdout.strip()
+        head_before = git("rev-parse", "HEAD").stdout.strip()
+        tags_before = git("tag", "--list").stdout
+
+        (project / "VERSION").write_text(new_version + "\n", encoding="utf-8",
+                                         newline="\n")
+        root_readme.write_text(
+            root_text.replace(old_badge, new_badge, 1) + partial_marker,
+                               encoding="utf-8", newline="\n")
+        changelog = project / "CHANGELOG.md"
+        changelog_text = changelog.read_text(encoding="utf-8-sig")
+        changelog.write_text(re.sub(
+            rf"(?m)^(##\s+\[?){re.escape(old_version)}(\]?(?=\s|$))",
+            rf"\g<1>{new_version}\2", changelog_text, count=1),
+            encoding="utf-8", newline="\n")
+        release_paths = [Path("VERSION"), Path("README.md"),
+                         Path("CHANGELOG.md"),
+                         *(path.relative_to(project) for path in locale_paths)]
+        git("add", "--", *(str(path) for path in release_paths[:3]))
+
+        stale_gate = validate(bind=True)
+        stale_output = stale_gate.stdout + stale_gate.stderr
+        expect("post-metadata binding gate rejects stale locale badges",
+               stale_gate.returncode != 0
+               and "translation README badge drift: 32 locale(s)" in stale_output,
+               stale_output.strip())
+        expect("failed post-metadata gate creates no commit or tag",
+               git("rev-parse", "HEAD").stdout.strip() == head_before
+               and git("tag", "--list").stdout == tags_before,
+               "HEAD or tag set changed after the failed gate")
+
+        restored = git("restore", f"--source={pre_ship_tree}", "--staged", "--",
+                       *(str(path) for path in release_paths))
+        staged_after_rollback = set(filter(None, git(
+            "diff", "--cached", "--name-only").stdout.splitlines()))
+        expect("rollback removes only staging introduced by this ship",
+               restored.returncode == 0
+               and staged_after_rollback == {root_readme.name}
+               and git("ls-files", "-s", "--", root_readme.name).stdout
+               == partial_index_before,
+               (restored.stdout + restored.stderr).strip())
+
+        git("restore", "--staged", "--", root_readme.name)
+        root_readme.write_text(root_text.replace(old_badge, new_badge, 1),
+                               encoding="utf-8", newline="\n")
+        for path in locale_paths:
+            text = path.read_text(encoding="utf-8-sig")
+            path.write_text(text.replace(old_badge, new_badge, 1),
+                            encoding="utf-8", newline="\n")
+        git("add", "--", *(str(path) for path in release_paths))
+
+        final_gate = validate(bind=True)
+        probe_locale = locale_paths[0]
+        final_locale_text = probe_locale.read_text(encoding="utf-8-sig")
+        probe_locale.write_text(
+            final_locale_text.replace(new_badge, new_badge + new_badge, 1),
+            encoding="utf-8", newline="\n")
+        duplicate_badge_gate = validate(bind=True)
+        probe_locale.write_text(
+            final_locale_text.replace(new_badge, "", 1),
+            encoding="utf-8", newline="\n")
+        missing_badge_gate = validate(bind=True)
+        probe_locale.write_text(final_locale_text, encoding="utf-8", newline="\n")
+        probe_locale.write_text(
+            final_locale_text.replace(new_badge, old_badge, 1),
+            encoding="utf-8", newline="\n")
+        git("add", "--", str(probe_locale.relative_to(project)))
+        probe_locale.write_text(final_locale_text, encoding="utf-8", newline="\n")
+        staged_worktree_divergence_gate = validate(bind=True)
+        git("add", "--", str(probe_locale.relative_to(project)))
+        cached_check = git("diff", "--cached", "--check")
+        staged_final = set(filter(None, git(
+            "diff", "--cached", "--name-only").stdout.splitlines()))
+        expected_final = {path.as_posix() for path in release_paths}
+        digests_after = {
+            path.relative_to(project).as_posix(): digest_re.search(
+                path.read_text(encoding="utf-8-sig")).group(1)
+            for path in locale_paths
+            if digest_re.search(path.read_text(encoding="utf-8-sig"))
+        }
+        expect("all mechanically discovered locale mirrors pass",
+               final_gate.returncode == 0 and len(locale_paths) == 32,
+               (final_gate.stdout + final_gate.stderr).strip())
+        expect("duplicate locale badge fails the ship gate",
+               duplicate_badge_gate.returncode != 0
+               and "translation README badge drift" in
+               (duplicate_badge_gate.stdout + duplicate_badge_gate.stderr),
+               (duplicate_badge_gate.stdout + duplicate_badge_gate.stderr).strip())
+        expect("missing locale badge fails the ship gate",
+               missing_badge_gate.returncode != 0
+               and "translation README badge drift" in
+               (missing_badge_gate.stdout + missing_badge_gate.stderr),
+               (missing_badge_gate.stdout + missing_badge_gate.stderr).strip())
+        expect("stale staged badge cannot hide behind clean working bytes",
+               staged_worktree_divergence_gate.returncode != 0
+               and "staged release metadata differs from working-tree bytes" in
+               (staged_worktree_divergence_gate.stdout
+                + staged_worktree_divergence_gate.stderr),
+               (staged_worktree_divergence_gate.stdout
+                + staged_worktree_divergence_gate.stderr).strip())
+        expect("final binding scope and cached diff are exact",
+               staged_final == expected_final and cached_check.returncode == 0,
+               f"staged={sorted(staged_final)}; check={cached_check.stderr.strip()}")
+        expect("version-only mirror update leaves source digests unchanged",
+               digests_after == digests_before,
+               "a release badge update restamped translation freshness")
 
     return problems, checked
 
@@ -8553,8 +9642,16 @@ def run_active_task_recovery_probes() -> tuple[list[str], int]:
     return problems, checked
 
 
+if os.environ.get("SAIPEN_SCHEDULER_PROBES_ONLY") == "1":
+    scheduler_failures, scheduler_checked, scheduler_skipped = run_scheduler_probes()
+    for problem in scheduler_failures:
+        print(f"FAILED: {problem}")
+    raise SystemExit(1 if scheduler_failures else 0)
+
 injector_failures, injector_checked, injector_skipped = run_injector_probes()
 failures.extend(injector_failures)
+scheduler_failures, scheduler_checked, scheduler_skipped = run_scheduler_probes()
+failures.extend(scheduler_failures)
 root_failures, root_checked = run_project_root_probes()
 failures.extend(root_failures)
 export_failures, export_checked, export_skipped = run_export_probes()
@@ -8575,6 +9672,9 @@ producer_gate_failures, producer_gate_checked = run_producer_gate_probes()
 failures.extend(producer_gate_failures)
 ship_staging_failures, ship_staging_checked = run_ship_staging_probes()
 failures.extend(ship_staging_failures)
+release_freshness_failures, release_freshness_checked = \
+    run_release_freshness_probes()
+failures.extend(release_freshness_failures)
 rolefresh_failures, rolefresh_checked, rolefresh_skipped = \
     run_role_freshness_probes()
 failures.extend(rolefresh_failures)
@@ -8620,6 +9720,8 @@ print(f"\n{checked} executable fixture(s) checked, "
       f"{skipped} behavioral fixture(s) skipped (README-only by design)")
 print(f"{injector_checked} injector(s) executed, "
       f"{injector_skipped} skipped for missing interpreters")
+print(f"{scheduler_checked} scheduler behavior(s) executed, "
+      f"{scheduler_skipped} skipped for missing interpreters")
 print(f"{root_checked} project-root behavior(s) executed")
 print(f"{export_checked} export ownership behavior(s) executed, "
       f"{export_skipped} skipped for missing interpreters")
@@ -8636,6 +9738,7 @@ print(f"{converge_checked} converge-routing behavior(s) executed")
 print(f"{ccc_identity_checked} ccc commit-identity behavior(s) executed")
 print(f"{producer_gate_checked} producer-gate behavior(s) executed")
 print(f"{ship_staging_checked} ship-staging behavior(s) executed")
+print(f"{release_freshness_checked} release-freshness behavior(s) executed")
 print(f"{rolefresh_checked} role-freshness behavior(s) executed, "
       f"{rolefresh_skipped} skipped for missing host capability")
 print(f"{sub_clean_checked} sub-clean safety behavior(s) executed, "

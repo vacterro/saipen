@@ -37,6 +37,31 @@ function Remove-Skill([string]$path) {
   return "clean"
 }
 
+function Get-SchedulerTask([string]$Name) {
+  $queryErrors = @()
+  $task = Get-ScheduledTask -TaskName $Name -ErrorAction SilentlyContinue `
+    -ErrorVariable +queryErrors
+  $unexpected = @($queryErrors | Where-Object {
+    $_.CategoryInfo.Category -ne [System.Management.Automation.ErrorCategory]::ObjectNotFound
+  })
+  if ($unexpected.Count -gt 0) {
+    throw "could not query $Name`: $($unexpected[0].Exception.Message)"
+  }
+  return $task
+}
+
+function Test-SchedulerTaskWithSchtasks([string]$Name) {
+  schtasks /Query /TN $Name 2>&1 | Out-Null
+  $specificRc = $LASTEXITCODE
+  if ($specificRc -eq 0) { return $true }
+  # A successful all-task query proves Task Scheduler is reachable, so only
+  # this name is absent. Two failed queries mean unknown service/access state.
+  schtasks /Query /FO CSV /NH 2>&1 | Out-Null
+  $allRc = $LASTEXITCODE
+  if ($allRc -eq 0) { return $false }
+  throw "could not query $Name (schtasks rc $specificRc; all-task query rc $allRc)"
+}
+
 function Remove-Task() {
   # Remove the auto-scheduled inject task (T-531) when uninstalling, so a
   # de-advertised protocol does not keep pulling + injecting every 15 minutes.
@@ -45,15 +70,60 @@ function Remove-Task() {
   # sandboxed injector probe sets SAIPEN_UNINSTALL_SKIP_TASK because the task
   # is machine-global and a test run must not delete real machine state.
   if ($env:SAIPEN_UNINSTALL_SKIP_TASK) { return "clean" }
-  if (-not (Get-Command Get-ScheduledTask -ErrorAction SilentlyContinue)) {
+  $hasScheduledTaskCmdlet = [bool](Get-Command Get-ScheduledTask -ErrorAction SilentlyContinue)
+  if (-not $hasScheduledTaskCmdlet -and
+      -not (Get-Command schtasks -ErrorAction SilentlyContinue)) {
     return "clean"
   }
-  $t = Get-ScheduledTask -TaskName "saipen-inject" -ErrorAction SilentlyContinue
-  if ($t) {
-    schtasks /Delete /TN "saipen-inject" /F 2>&1 | Out-Null
-    if ($LASTEXITCODE -eq 0) { return "task removed" }
-    return "task remove FAILED (schtasks rc $LASTEXITCODE)"
+  $removed = @()
+  $failures = @()
+  foreach ($taskName in @("saipen-inject", "saipen-autoinject")) {
+    try {
+      if ($hasScheduledTaskCmdlet) {
+        $present = [bool](Get-SchedulerTask $taskName)
+      } else {
+        $present = Test-SchedulerTaskWithSchtasks $taskName
+      }
+    } catch {
+      $failures += $_.Exception.Message
+      continue
+    }
+    if (-not $present) { continue }
+    schtasks /Delete /TN $taskName /F 2>&1 | Out-Null
+    $deleteRc = $LASTEXITCODE
+    if ($deleteRc -eq 0) {
+      $removed += $taskName
+    } else {
+      $failures += "$taskName rc $deleteRc"
+    }
   }
+  if ($failures.Count -gt 0) {
+    return "task remove FAILED ($($failures -join ', ')); wrapper preserved"
+  }
+  $runtimeDir = Join-Path $env:LOCALAPPDATA "saipen"
+  $runtimeWrapper = Join-Path $runtimeDir "schedule-run-hidden.vbs"
+  $runtimeSource = Join-Path $runtimeDir "scheduled-source"
+  try {
+    if (Test-Path -LiteralPath $runtimeWrapper) {
+      Remove-Item -LiteralPath $runtimeWrapper -Force -ErrorAction Stop
+      $removed += "runtime wrapper"
+    }
+    if (Test-Path -LiteralPath $runtimeSource) {
+      Remove-Item -LiteralPath $runtimeSource -Recurse -Force -ErrorAction Stop
+      $removed += "runtime source"
+    }
+    if (Test-Path -LiteralPath $runtimeDir) {
+      Get-ChildItem -LiteralPath $runtimeDir -Directory -Force -ErrorAction Stop |
+        Where-Object Name -like "scheduled-source-previous*" |
+        ForEach-Object {
+          Remove-Item -LiteralPath $_.FullName -Recurse -Force -ErrorAction Stop
+          $removed += "runtime source backup"
+        }
+    }
+  } catch {
+    return "scheduler runtime remove FAILED ($runtimeDir): $($_.Exception.Message)"
+  }
+  if ($removed.Count -gt 0) { return "removed: $($removed -join ', ')" }
   return "clean"
 }
 

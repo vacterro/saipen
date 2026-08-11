@@ -127,20 +127,62 @@ rm_aider() {
   fi
 }
 
+task_exists() {
+  schtasks /Query /TN "$1" >/dev/null 2>&1 && return 0
+  # A successful all-task query proves Task Scheduler is reachable, so only
+  # this name is absent. If that query also fails, access/service state is
+  # unknown and cleanup must fail closed instead of deleting the wrapper.
+  schtasks /Query /FO CSV /NH >/dev/null 2>&1 && return 1
+  return 2
+}
+
 rm_task() {
   # Machine-global: the sandboxed injector probe must not delete a real
   # scheduler entry, so it sets SAIPEN_UNINSTALL_SKIP_TASK (T-531/T-534).
   if [ -n "${SAIPEN_UNINSTALL_SKIP_TASK:-}" ]; then echo "clean"; return 0; fi
-  if schtasks /Query /TN saipen-inject >/dev/null 2>&1; then
-    if schtasks /Delete /TN saipen-inject /F >/dev/null 2>&1; then
-      echo "task removed"
-    else
-      echo "task remove FAILED (schtasks rc $?)"
-      return 1
-    fi
-  else
-    echo "clean"
+  local task rc artifact removed=0 failed=0
+  if command -v schtasks >/dev/null 2>&1; then
+    for task in saipen-inject saipen-autoinject; do
+      task_exists "$task"
+      rc=$?
+      if [ "$rc" -eq 1 ]; then continue; fi
+      if [ "$rc" -ne 0 ]; then
+        echo "$task query FAILED"
+        failed=1
+        continue
+      fi
+      if schtasks /Delete /TN "$task" /F >/dev/null 2>&1; then
+        removed=1
+      else
+        rc=$?
+        echo "$task remove FAILED (schtasks rc $rc)"
+        failed=1
+      fi
+    done
   fi
+  [ "$failed" -eq 0 ] || return 1
+
+  local runtime_root="${LOCALAPPDATA:-}" wrapper=""
+  if [ -n "$runtime_root" ]; then
+    if command -v cygpath >/dev/null 2>&1; then
+      runtime_root=$(cygpath -u "$runtime_root") \
+        || { echo "runtime path conversion FAILED"; return 1; }
+    fi
+    wrapper="$runtime_root/saipen/schedule-run-hidden.vbs"
+    if [ -e "$wrapper" ]; then
+      rm -f "$wrapper" \
+        || { echo "wrapper remove FAILED ($wrapper)"; return 1; }
+      removed=1
+    fi
+    for artifact in "$runtime_root/saipen/scheduled-source" \
+                    "$runtime_root/saipen"/scheduled-source-previous*; do
+      [ -e "$artifact" ] || continue
+      rm -rf -- "$artifact" \
+        || { echo "runtime source remove FAILED ($artifact)"; return 1; }
+      removed=1
+    done
+  fi
+  if [ "$removed" -eq 1 ]; then echo "scheduler artifacts removed"; else echo "clean"; fi
 }
 
 report() { # $1=label, remaining=function + args
@@ -171,14 +213,8 @@ if [ -d "$PLUG_ROOT" ]; then
   done
 fi
 report "Aider conf" rm_aider "$HOME/.aider.conf.yml"
-# The auto-scheduled inject task (T-531) is Windows-only (Task Scheduler).
-# Remove it when present; on macOS/Linux schtasks does not exist and this is
-# simply "clean".
-if command -v schtasks >/dev/null 2>&1; then
-  report "scheduled inject task" rm_task
-else
-  echo "scheduled inject task           clean"
-fi
+# Task Scheduler is Windows-only; runtime snapshot cleanup is portable.
+report "scheduled inject task" rm_task
 echo "------------------------------------------------------------"
 if [ "$FAILURES" -ne 0 ]; then
   echo "FAILED. Fix reported errors and re-run."

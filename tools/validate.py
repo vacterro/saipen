@@ -6,6 +6,7 @@ or name the owning root explicitly:
 
     python <saipen-home>/tools/validate.py [--strict] [--project-root PATH]
                                            [--gate CONTEXT]
+                                           [--require-release-index]
 
 `--gate` names WHY the validator is running, because producer readiness and
 Core conformance are different questions and one severity for both is what put
@@ -297,6 +298,7 @@ def _parse_cli(argv):
     strict = False
     project_root = None
     gate, gate_producer = "core", None
+    require_release_index = False
     i = 0
     while i < len(argv):
         arg = argv[i]
@@ -321,11 +323,23 @@ def _parse_cli(argv):
             gate, gate_producer = _parse_gate(argv[i])
         elif arg.startswith("--gate="):
             gate, gate_producer = _parse_gate(arg.split("=", 1)[1])
+        elif arg == "--require-release-index":
+            require_release_index = True
         else:
             print(f"FAIL: unknown argument: {arg}")
             sys.exit(2)
         i += 1
-    return strict, project_root, gate, gate_producer
+    if require_release_index and gate != "ship":
+        print("FAIL: --require-release-index requires --gate ship")
+        sys.exit(2)
+    # The release-index binding is NOT optional for the ship gate: a run that
+    # authorizes a ship must always require every release metadata path to be
+    # staged. The pre-staging "signal" shape lives in `--gate core`, never in a
+    # ship gate run that passes with an empty index.
+    if gate == "ship":
+        require_release_index = True
+    return (strict, project_root, gate, gate_producer,
+            require_release_index)
 
 
 def _git_from(cwd, *args):
@@ -411,7 +425,8 @@ def _resolve_project_root(start, explicit):
                   "--project-root PATH")
 
 
-STRICT, _requested_root, GATE, GATE_PRODUCER = _parse_cli(sys.argv[1:])
+STRICT, _requested_root, GATE, GATE_PRODUCER, REQUIRE_RELEASE_INDEX = _parse_cli(
+    sys.argv[1:])
 PROJECT_ROOT, PROJECT_ROOT_SOURCE = _resolve_project_root(
     Path.cwd().resolve(), _requested_root)
 if PROJECT_ROOT is None:
@@ -625,6 +640,29 @@ def read_doc(path):
                 except UnicodeDecodeError:
                     text = raw.decode("utf-8", errors="replace")
     return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
+_VERSION_BADGE_RE = re.compile(r"\*\*v\d+\.\d+\.\d+\*\*")
+
+
+def locale_readme_paths(kitchen_dir):
+    """Return every mechanically named locale README, including missing ones."""
+    kitchen_dir = Path(kitchen_dir)
+    if not kitchen_dir.is_dir():
+        return []
+    return [directory / f"README_{directory.name.upper()}.md"
+            for directory in sorted(kitchen_dir.iterdir())
+            if directory.is_dir()]
+
+
+def release_metadata_paths(kitchen_dir):
+    return [Path("VERSION"), Path("README.md"), Path("CHANGELOG.md"),
+            *locale_readme_paths(kitchen_dir)]
+
+
+def version_badges(path):
+    return _VERSION_BADGE_RE.findall(
+        Path(path).read_text(encoding="utf-8-sig"))
 
 
 def color(code, text):
@@ -3935,9 +3973,10 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
              "foreign saipen/.git before assuming plain file corruption.")
     else:
         repo_version = Path("VERSION").read_text(encoding="utf-8-sig").strip()
-        if f"**v{repo_version}**" not in Path("README.md").read_text(encoding="utf-8-sig"):
-            fail(f"README.md badge doesn't match VERSION ({repo_version}) -- "
-                 f"this has drifted before, update the badge")
+        expected_badge = f"**v{repo_version}**"
+        if version_badges("README.md") != [expected_badge]:
+            fail(f"README.md badge doesn't match VERSION ({repo_version}) "
+                 f"exactly once -- this has drifted before")
         else:
             ok("README.md badge matches VERSION")
 
@@ -4597,11 +4636,36 @@ if adapter_dir.is_dir():
 kitchen = Path(".saipen/saitranslate/kitchen")
 if IS_SAIPEN_HOME and kitchen.is_dir():
     repo_version = Path("VERSION").read_text(encoding="utf-8-sig").strip()
+    if GATE == "ship":
+        _release_paths = [path.as_posix()
+                          for path in release_metadata_paths(kitchen)]
+        _staged_rc, _staged_text = _git(
+            "diff", "--cached", "--name-only", "--", *_release_paths)
+        if REQUIRE_RELEASE_INDEX and _staged_rc != 0:
+            fail("binding ship gate cannot read staged release metadata")
+        elif _staged_rc == 0:
+            _staged_paths = set(_staged_text.splitlines())
+            if REQUIRE_RELEASE_INDEX:
+                _missing_staged = sorted(set(_release_paths) - _staged_paths)
+                if _missing_staged:
+                    fail("binding ship gate requires every release metadata "
+                         "path staged: " + ", ".join(_missing_staged))
+        if _staged_rc == 0 and (_staged_text.strip() or
+                                REQUIRE_RELEASE_INDEX):
+            _unstaged_rc, _unstaged_text = _git(
+                "diff", "--name-only", "--", *_release_paths)
+            if _unstaged_rc != 0:
+                fail("ship gate cannot compare staged release metadata with "
+                     "working-tree bytes")
+            elif _unstaged_text.strip():
+                fail("staged release metadata differs from working-tree bytes: "
+                     + ", ".join(sorted(_unstaged_text.splitlines()))
+                     + " -- the binding ship gate must inspect the exact "
+                       "release bytes selected for commit")
     stale, absent, checked = [], [], 0
-    for locale_dir in sorted(kitchen.iterdir()):
-        if not locale_dir.is_dir():
-            continue
-        readme = locale_dir / f"README_{locale_dir.name.upper()}.md"
+    expected_badge = f"**v{repo_version}**"
+    for readme in locale_readme_paths(kitchen):
+        locale_dir = readme.parent
         if not readme.is_file():
             # A missing README used to be skipped in silence while the success
             # line still counted DIRECTORIES -- so deleting one left the run
@@ -4610,8 +4674,7 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
             absent.append(locale_dir.name)
             continue
         checked += 1
-        content = readme.read_text(encoding="utf-8-sig")
-        if f"**v{repo_version}**" not in content:
+        if version_badges(readme) != [expected_badge]:
             stale.append(readme.name)
     if absent:
         warn("locale-readme-absent",
@@ -4718,9 +4781,8 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
         return _line
 
     _locale_sources = {}
-    for _locale_dir in sorted(p for p in kitchen.iterdir() if p.is_dir()):
-        _code = _locale_dir.name.upper()
-        _source = _locale_dir / f"README_{_code}.md"
+    for _source in locale_readme_paths(kitchen):
+        _code = _source.parent.name.upper()
         _locale_sources[_code] = _shortcut_callout(
             _source, "saipen/RFC.md#110-command-surface")
     if len(_locale_sources) != 32:
@@ -5712,7 +5774,8 @@ else:
     #      catches the next one at the commit that adds it. Adding a real
     #      root file means adding it here, which is one line and a decision.
     ROOT_ALLOWED = {
-        ".gitattributes", ".gitignore", "BROCHURE_DED.md", "CHANGELOG.md", "CHANGELOG_ARCHIVE.md",
+        ".gitattributes", ".gitignore", "BROCHURE_DED.md", "BROCHURE_EN.md", "BROCHURE_ET.md",
+        "BROCHURE_JA.md", "BROCHURE_RU.md", "CHANGELOG.md", "CHANGELOG_ARCHIVE.md",
         "CODE_OF_CONDUCT.md", "CONTRIBUTING.md", "GUIDE.md", "LICENSE",
         "README.ded.md", "README.ee.md", "README.ja.md", "README.md",
         "SECURITY.md", "SPEC.md", "THIRD_PARTY_NOTICES.md", "VERSION", "ruff.toml",
@@ -5826,7 +5889,9 @@ else:
             _en_src.read_text(encoding="utf-8-sig")).encode("utf-8")
         ).hexdigest()
         _stale, _unstamped = [], []
-        for _loc in sorted(_tr_dir.glob("*/README_*.md")):
+        for _loc in locale_readme_paths(_tr_dir):
+            if not _loc.is_file():
+                continue
             _m = re.search(r"<!-- source-digest: README\.md sha256:([0-9a-f]+) -->",
                            _loc.read_text(encoding="utf-8-sig"))
             if _m is None:
@@ -6345,7 +6410,12 @@ else:
         ("saipen/SKILL.md",   "reading-order entry point for skill platforms; its file references and boot-critical voice/language metadata are checked directly"),
         ("saipen/STYLE.md",   "chat voice; persistence/language contracts and RFC citation are checked directly, while prose tone itself is not machine-checkable"),
         ("saipen/UI.md",      "visual spec for UI work, disjoint from the state protocol"),
-        ("BROCHURE_DED.md",   "translated presentation brochure for saitranslate"),
+        ("BROCHURE_DED.md",   "non-normative presentation brochure"),
+        ("BROCHURE_EN.md",    "non-normative presentation brochure"),
+        ("BROCHURE_RU.md",    "non-normative presentation brochure"),
+        ("BROCHURE_ET.md",    "non-normative presentation brochure"),
+        ("BROCHURE_JA.md",    "non-normative presentation brochure"),
+        ("KNOWLEDGE/HABITS-browser-hang.md", "cross-agent habit note, not a rule source"),
         ("SPEC.md",           "design intent and rationale, deliberately not normative"),
         ("CHANGELOG.md",      "history; never read by an agent, never a rule source"),
         ("CHANGELOG_ARCHIVE.md", "sealed history, same as above"),
@@ -7206,8 +7276,8 @@ else:
     _kitchen_dir = Path(".saipen") / "saitranslate" / "kitchen"
     if IS_SAIPEN_HOME and _kitchen_dir.is_dir():
         _entry_readmes += [
-            _r for _d in sorted(_kitchen_dir.iterdir()) if _d.is_dir()
-            for _r in [_d / f"README_{_d.name.upper()}.md"] if _r.is_file()]
+            _readme for _readme in locale_readme_paths(_kitchen_dir)
+            if _readme.is_file()]
     # Gated on IS_SAIPEN_HOME like the count below it, and for the same
     # reason: an entry README carrying the reply-language note is a SAIPEN
     # HOME artifact. Ungated, resolving these from the project made the check

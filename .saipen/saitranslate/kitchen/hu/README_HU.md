@@ -16,7 +16,7 @@ paranccsal egy percen belül folytatja a munkát -- újratájékoztatás nélkü
 
 **A válasz nyelve.** Az ügynök alapértelmezés szerint **észtül** válaszol — ez beállítás, nem hóbort, és semmi más nem észt a SAIPEN-ben. Egy helyen módosítható: a `reply_language:` sor a [`saipen/STYLE.md`](saipen/STYLE.md) elején. `et` észt, `en` angol, `ru` orosz, `auto` az üzeneted nyelve alapján választ. A protokoll, a kód, a commitok és minden dokumentum minden értéknél angol marad.
 
-**v7.223.0** | [Spec](SPEC.md) | [Útmutató](GUIDE.md) | [RFC](saipen/RFC.md) | [Stílus](saipen/STYLE.md) | [UI](saipen/UI.md) | [Megfelelőség](saipen/CONFORMANCE.md) | egyszerű markdown | zéró függőség | MIT
+**v7.223.1** | [Spec](SPEC.md) | [Útmutató](GUIDE.md) | [RFC](saipen/RFC.md) | [Stílus](saipen/STYLE.md) | [UI](saipen/UI.md) | [Megfelelőség](saipen/CONFORMANCE.md) | egyszerű markdown | zéró függőség | MIT
 
 ```text
 
@@ -143,6 +143,5 @@ Platform-specific notes live in `extensions/adapters/`.
 </p>
 
 <!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
-
 
 

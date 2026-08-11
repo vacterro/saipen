@@ -14,7 +14,7 @@
 
 **Vastuste keel.** Agent vastab vaikimisi **eesti keeles** — see on säte, mitte veidrus, ja miski muu SAIPEN-is ei ole eestikeelne. Muuda seda ühes kohas: rida `reply_language:` [`saipen/STYLE.md`](saipen/STYLE.md) alguses. `et` eesti, `en` inglise, `ru` vene, `auto` valib selle järgi, mis keeles sa kirjutasid. Protokoll, kood, commitid ja kõik dokumendid jäävad igal väärtusel inglise keelde.
 
-**v7.223.0** | [Spetsifikatsioon](SPEC.md) | [Juhend](GUIDE.md) | [RFC](saipen/RFC.md) | [Stiil](saipen/STYLE.md) | [Kasutajaliides](saipen/UI.md) | [Vastavus](saipen/CONFORMANCE.md) | tavaline markdown | null sõltuvust | MIT
+**v7.223.1** | [Spetsifikatsioon](SPEC.md) | [Juhend](GUIDE.md) | [RFC](saipen/RFC.md) | [Stiil](saipen/STYLE.md) | [Kasutajaliides](saipen/UI.md) | [Vastavus](saipen/CONFORMANCE.md) | tavaline markdown | null sõltuvust | MIT
 | [BROŠÜÜR](BROCHURE_DED.md) | PEAB TÕLKIMA saitranslate |
 
 ```text
@@ -154,7 +154,6 @@ Platvormipõhised märkused asuvad kaustas `extensions/adapters/`.
 </p>
 
 <!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
-
 
 
 

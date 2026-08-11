@@ -14,7 +14,7 @@
 
 **Jazyk odpovedí.** Agent štandardne odpovedá **po estónsky** — to je nastavenie, nie výstrelok, a nič iné v SAIPEN nie je estónske. Zmení sa to na jednom mieste: riadok `reply_language:` na začiatku [`saipen/STYLE.md`](saipen/STYLE.md). `et` estónčina, `en` angličtina, `ru` ruština, `auto` vyberie podľa jazyka tvojej správy. Protokol, kód, commity a všetky dokumenty zostávajú anglicky pri akejkoľvek hodnote.
 
-**v7.223.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | čistý markdown | nulové závislosti | MIT
+**v7.223.1** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | čistý markdown | nulové závislosti | MIT
 
 ```text
 
@@ -134,6 +134,5 @@ Poznámky pre jednotlivé platformy sa nachádzajú v `extensions/adapters/`.
 </p>
 
 <!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
-
 
 

@@ -66,15 +66,18 @@ attempted. Write the human digest same as always, `awaiting:` noting
 0. **Board pre-flight: every work unit done this session MUST have a ticket in `## DONE`.** Inline fixes and sweeps without a ticket must get one before proceeding. Stale `## DONE` blocks SHIP (CORE.md §1.2).
 1. README beautiful: pitch, features, install, usage, version + changelog link.
 2. Version bump (micro -> 3.2.1, feature -> 3.2.0, breaking -> major).
-3. Before push, version consistency across all three MUST hold:
-   - README's version badge matches the bumped version.
-   - `CHANGELOG.md`'s head entry matches the bumped version.
-   - The git tag about to be created matches the bumped version.
-   If this repo has a `VERSION` file, the README half of this is already
-   automated (`tests/validate.sh`/`.ps1`'s self-check, gated to this
-   repo's own clone root); manual equivalent: `grep -q "v$(cat VERSION)"
-   README.md`. The CHANGELOG/tag halves have no automated check -- eyeball
-   them here, before tagging, not after.
+3. Before push, one release identity MUST agree across the complete version
+   surface:
+   - `VERSION` is the canonical release value.
+   - The root README badge and every mechanically mirrored locale README badge
+     match `VERSION` exactly once.
+   - `CHANGELOG.md`'s head entry matches `VERSION`.
+   - The exact git tag about to be created is `vVERSION`.
+   `tools/validate.py --gate ship` discovers the locale mirrors from the
+   translation kitchen and checks the README plus CHANGELOG surfaces; do not
+   replace that discovery with a handwritten locale list. The intended tag is
+   still checked here before creation, then against the committed `VERSION`
+   before its push.
 4. .gitignore covers junk + secrets. Empty tmp/, strip debug prints.
 5. **Classify the remote BEFORE any external write, and clear the
    first-publish gate here.** `git remote get-url origin` (absent -> no
@@ -92,35 +95,45 @@ attempted. Write the human digest same as always, `awaiting:` noting
    all, the push failed first and dropped into generic push recovery, which
    never asks the question. A gate downstream of the act it authorizes is
    not a gate.
-6a. **LOCAL. Touches no repository and no remote.** `CHANGELOG.md`
-   newest-top. Re-run the required validators after every release metadata
-   edit; a gate run before VERSION/README/CHANGELOG changed proves the old
-   release, not the one about to ship. The gate is
-   `tools/validate.py --gate ship`: everything required to ship THIS tree
-   safely. **A stale, malformed or unrefreshed producer package does not
-   block it** — an EE or QQ package is required fresh when it is consumed
-   (`--gate collect:<producer>`) or at CONVERGE.md stage M
-   (`--gate converge`), never as a precondition for an unrelated Core commit.
-   Those packages still report, as WARNs naming the producer, so nobody
-   mistakes soft for invisible. Reversing this once put an ordinary one-line
-   Core ship behind regenerating every producer in the project (T-568).
+ 6a. **LOCAL. Touches no repository and no remote.** Prepare the FINAL release
+    metadata: `VERSION`, the root README badge, every discovered locale badge,
+    and `CHANGELOG.md` newest-top. Re-run the required validators after every
+    release metadata edit. Any metadata mutation invalidates earlier
+    VERIFY/REVIEW/gate evidence: proof produced before the mutation describes
+    old bytes and cannot authorize the release bytes. The signal gate is
+    `tools/validate.py --gate core`: everything required to ship THIS tree
+    safely, short of the release-index binding. **A stale, malformed or
+    unrefreshed producer package does not
+    block it** — an EE or QQ package is required fresh when it is consumed
+    (`--gate collect:<producer>`) or at CONVERGE.md stage M
+    (`--gate converge`), never as a precondition for an unrelated Core commit.
+    Those packages still report, as WARNs naming the producer, so nobody
+    mistakes soft for invisible. Reversing this once put an ordinary one-line
+    Core ship behind regenerating every producer in the project (T-568).
 
-   A run here is a **signal, not the authorization**: some gates can only be
-   answered once the staging set exists, so the binding run is 6b's, after
-   staging. Both run the same command; only the second decides.
+    A run here is a **signal, not the authorization**: some gates can only be
+    answered once the staging set exists, so the binding run is 6b's, after
+    staging. The ship gate ALWAYS requires the release index — `--gate ship`
+    refuses an empty index. There is no "non-binding ship gate" shape; the
+    pre-staging signal uses `--gate core` instead.
 6b. **GIT. Writes the repository and the remote.** Once 6a is green, in this
    exact order. **Staging comes before the binding gate**, because a gate
    that cannot see the index cannot answer questions about it.
 
-   1. **Read the index and the working tree.** `git status --porcelain=v1
-      -uall` and `git diff --cached --name-only`. Two separate facts: what
-      is already staged, and what has changed at all.
+    1. **Read the index and the working tree.** `git status --porcelain=v1
+       -uall` and `git diff --cached --name-only`. Two separate facts: what
+       is already staged, and what has changed at all. Snapshot the pre-ship
+       index exactly (`git write-tree`) before adding anything; this tree is
+       the rollback source for release paths if a later check fails.
    2. **Attribute every intended file** to the ticket or wave being shipped.
       An unattributed change is step 0's problem, not something to stage and
       explain in the commit message.
-   3. **Preserve anything the user staged before this run.** It is not
-      yours; it stays staged and it is named in the ship report. Never
-      `git reset` a staged set you did not create.
+    3. **Preserve anything the user staged before this run.** It is not
+       yours; it stays staged and it is named in the ship report. Never
+       `git reset` a staged set you did not create. A foreign pre-existing
+       staged path may not enter this release: stop before committing unless
+       the release mechanism can isolate the intended index without changing
+       that foreign entry.
    4. **Stage ONLY the reviewed files this ship owns**, by explicit path:
       `git add -- <path> [<path> ...]`. **`git add .` and `git add -A` are
       forbidden here** — both stage whatever else the tree happens to be
@@ -128,8 +141,12 @@ attempted. Write the human digest same as always, `awaiting:` noting
    5. **Re-read the staged set and prove it equals the intended scope.**
       `git diff --cached --name-only` compared against the list from 2.
       A difference stops the ship; it does not get committed and explained.
-   6. **Run `tools/validate.py --gate ship` NOW.** This is the binding gate.
-      A required runtime file added by this ticket is tracked from the moment
+    6. **Run `tools/validate.py --gate ship` NOW.** This is the
+       binding gate; it fails unless every discovered release path is staged.
+       It also refuses any staged/working divergence on that version surface;
+       otherwise a clean working badge could hide stale bytes already selected
+       for commit.
+       A required runtime file added by this ticket is tracked from the moment
       it is staged, so the MANIFEST check can finally be satisfied — before
       this order existed, the gate ran first and a newly-added required file
       could not pass it at all without an undocumented staging step the
@@ -144,11 +161,12 @@ attempted. Write the human digest same as always, `awaiting:` noting
       it stale. Classification changed from first-publish to established ->
       proceed; changed the other way -> stop and re-run step 5's gate.
 
-   **If 6 or 7 fails: no commit, no push.** Any staging this run added is
-   undone (`git restore --staged -- <path>`) and any pre-existing staged
-   state is left exactly as found. Then return through the ordinary fixable
-   SHIP -> BUILD edge; a failing gate is work to do, not a gate to route
-   around.
+   **If 6 or 7 fails: no commit, no push, no tag.** Restore each release path
+   in the index from the exact pre-ship index tree recorded in step 1; do not
+   restore it from `HEAD`, because that destroys a pre-existing partial stage
+   of the same path. Foreign/pre-existing staging stays byte-identical. Then
+   return through the ordinary fixable SHIP -> BUILD edge; a failing gate is
+   work to do, not a gate to route around.
 
    *Why this is two steps.* It was one, and the `mode: no-publish` block
    above then had to say "do step 6" and "skip the push half of step 6" in

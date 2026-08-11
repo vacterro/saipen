@@ -26,7 +26,7 @@ uninstall are all local — no cloud service, no daemon, no database.
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.223.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | MIT
+**v7.223.1** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | MIT
 
 **Shortcut keys.** A shortcut is the whole message, never a prefix: `cc` continues, `sss` reports status, `ss` stops; Cyrillic twins `сс`, `ссс`, `аа`, `ее`, `еее`, `рр` work too. [Full 15-key map](saipen/CORE.md#110-command-surface).
 
@@ -261,7 +261,7 @@ coordination ([SPEC](SPEC.md#concurrency--distribution-boundaries)).
 | [RFC.md](saipen/RFC.md) | Compatibility redirect to the split normative documents |
 | [STYLE.md](saipen/STYLE.md) | Agent communication style and voice |
 | [UI.md](saipen/UI.md) | Vintage Golden UI design guidelines |
-| [БРОШЮРА](BROCHURE_DED.md) | MUST BE TRANSLATED by saitranslate |
+| Brochure | Presentation brochure — [EN](BROCHURE_EN.md) / [RU](BROCHURE_RU.md) / [ET](BROCHURE_ET.md) / [DED](BROCHURE_DED.md) / [JA](BROCHURE_JA.md) |
 
 <details>
 <summary><b>All 33 translated guides</b></summary>
