@@ -43,3 +43,13 @@
 - 11.08.26 12:45 [E-3100] [parent: E-3099] [op: transition-88d23fad] DEC: goal_tickets 1->2
 - 11.08.26 12:45 [E-3101] [parent: E-3100] [T-632] [agent: claude] [op: checkpoint-63345733] DEC: review: single journaled manifest write, no raw rename anywhere in improve.py (grep clean); invariant met; verdict DEC: SHIP
 - 11.08.26 12:45 [E-3102] [parent: E-3101] [T-632] [agent: claude] [op: transition-585fd3db] RUN: review passed; SHIP T-632
+- 11.08.26 12:46 [E-3103] [parent: E-3102] [T-632] [agent: claude] [op: finish-08ebaab5] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 11.08.26 12:46 [E-3104] [parent: E-3103] [T-633] [agent: claude] [op: claim-8fa9294f] DEC: claimed via SAIOPS -- owner claude
+- 11.08.26 12:46 [E-3105] [parent: E-3104] [T-633] [agent: claude] [op: transition-500d0772] RUN: claim T-633; scope: log_tail_event root fix already committed (a0c0bdc)
+- 11.08.26 12:46 [E-3106] [parent: E-3105] [T-633] [agent: claude] [op: transition-b3992139] RUN: no build needed; actual-max E-ID primitive + numeric segment sort landed
+- 11.08.26 12:46 [E-3107] [parent: E-3106] [T-633] [agent: claude] [op: transition-8c30bf47] RUN: verify log-tail controls + gates
+- 11.08.26 12:50 [E-3108] [parent: E-3107] [T-633] [agent: claude] [op: checkpoint-2b2416f8] RUN: validate.py -> PASS -- log-tail controls green (E-100 then E-9 = 100, reordering, 999/1000 numeric sort, next allocation max+1 once); scenarios PASS
+- 11.08.26 12:50 [E-3109] [parent: E-3108] [T-633] [agent: claude] [op: transition-1e04b976] RUN: verify PASS; review
+- 11.08.26 12:50 [E-3110] [parent: E-3109] [op: transition-1e04b976] DEC: goal_tickets 2->3
+- 11.08.26 12:50 [E-3111] [parent: E-3110] [T-633] [agent: claude] [op: checkpoint-abc97ab1] DEC: review: root primitive returns actual max E-ID; operations._read comment simplified; no order-dependent allocation; verdict DEC: SHIP
+- 11.08.26 12:50 [E-3112] [parent: E-3111] [T-633] [agent: claude] [op: transition-f2fcf848] RUN: review passed; SHIP T-633
