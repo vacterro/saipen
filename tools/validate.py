@@ -2575,7 +2575,24 @@ if log_files:
             _reports = sorted(_imp_root.rglob("saipen_improve_*.md"))
             for _rep in _reports:
                 _rt = _rep.read_text(encoding="utf-8-sig")
-                _errs = list(_imp_mod.validate_report(_rt))
+                # DOGFOOD V (T-618) + A5: report strictness and authority are
+                # properties of the OWNING CYCLE. A strict cycle's report is
+                # validated under the strict header/identity contract; an
+                # aborted cycle's drafts are non-authoritative by manifest
+                # (cycle_aborted + archived) and are NOT scanned as evidence.
+                _man = _rep.parent.parent / "MANIFEST.md"
+                _strict_cycle = False
+                _aborted_cycle = False
+                if _man.is_file():
+                    _mst = _man.read_text(encoding="utf-8-sig")
+                    if re.search(r"(?m)^manifest_schema:\s*strict\s*$", _mst):
+                        _strict_cycle = True
+                    if re.search(r"(?m)^cycle_aborted:", _mst):
+                        _aborted_cycle = True
+                if _aborted_cycle:
+                    continue
+                _errs = list(_imp_mod.validate_report(_rt,
+                                                      strict=_strict_cycle))
                 for _e in _errs:
                     _report_errors.append(f"{_rep}: {_e}")
                 # red control 22 (T-557): a seat report is evidence, never
@@ -2598,7 +2615,6 @@ if log_files:
                 # evidence: its source_head records the tree it audited, and
                 # the ever-moving HEAD does not invalidate it retroactively.
                 _cycle_active = True
-                _man = _rep.parent.parent / "MANIFEST.md"
                 if _man.is_file():
                     _mst = _man.read_text(encoding="utf-8-sig")
                     if re.search(r"(?m)^cycle_status:\s*(?:complete|archived)",
@@ -2611,11 +2627,8 @@ if log_files:
                 # label cannot claim fresh audit evidence. The requirement
                 # binds STRICT cycles only -- legacy pre-boundary reports are
                 # historical evidence whose symbolic fingerprints stay valid.
-                _strict_cycle = False
-                if _man.is_file():
-                    if re.search(r"(?m)^manifest_schema:\s*strict\s*$",
-                                 _man.read_text(encoding="utf-8-sig")):
-                        _strict_cycle = True
+                # (_strict_cycle is derived above from the same manifest, so
+                # report validation and freshness checks agree on one truth.)
                 if _cycle_active and _src_head:
                     _cur_head = _git("rev-parse", "HEAD")[1].strip()
                     if _cur_head and _src_head not in (_cur_head,

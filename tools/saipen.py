@@ -516,7 +516,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
                 # depth the validator applies -- schema AND mechanical source
                 # identity (fingerprint format + freshness for strict cycles).
                 report_role = _imp_field(report_text, "role")
-                report_errors = _vr(report_text)
+                report_errors = _vr(report_text, strict=strict)
                 if report_role != roster_role:
                     report_errors.append(
                         f"roster/report role mismatch: {roster_role!r} != "

@@ -57,11 +57,12 @@ from freshness import (FreshnessError, SourceIdentity,
                        compute_generic_role_revision, compute_role_revision,
                        compute_source_identity)
 from sub_clean import sub_clean_blockers
-from improve import (allocate_cycle_id, append_run, complete_cycle,
-                      complete_report, create_cycle, create_report, cycle_dir,
-                      derive_status, prepare_audit_seat, register_cycle, register_seat,
-                      resolve_report_path, validate_manifest, validate_report,
-                      write_sweep_entry)
+from improve import (ImproveError, abort_cycle, allocate_cycle_id,
+                     append_run, complete_cycle,
+                     complete_report, create_cycle, create_report, cycle_dir,
+                     derive_status, prepare_audit_seat, register_cycle, register_seat,
+                     resolve_report_path, validate_manifest, validate_report,
+                     write_sweep_entry)
 from userperson import (merge_profile, onboarding_questions, parse_profile,
                         project_profile, remove_preference, render_profile,
                         validate_profile)
@@ -4398,6 +4399,206 @@ def run_improve_probes() -> tuple[list[str], int]:
            repr(_mismatch_status.stdout[:500]))
     _critic_report.write_bytes(_critic_report_before)
 
+    # ---- PRE-v8 DOGFOOD VII (T-630): an existing seat's state is a decision,
+    # never a blank slate -- missing/malformed/complete/unavailable evidence
+    # refuses with zero writes instead of being recreated under the same
+    # identity. Runs on its OWN fixture project so the corruption it creates
+    # cannot poison the shared meta_root cycle used by later controls.
+    _seatc_root = project_fixture("saipen-seat-continuity-")
+
+    def _scprep(*options: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [sys.executable, str(HOME / "tools" / "saipen.py"), "improve",
+             *options, "--json"], cwd=str(_seatc_root), capture_output=True,
+            text=True, timeout=60)
+
+    def _recovery_ops_snapshot(root: Path) -> dict[str, bytes]:
+        ops = root / ".saipen" / "recovery" / "ops"
+        if not ops.is_dir():
+            return {}
+        return {p.relative_to(ops).as_posix(): p.read_bytes()
+                for p in sorted(ops.rglob("*")) if p.is_file()}
+
+    _gap_proc = _scprep("--role", "critic", "--session", "critic-gap-01")
+    _gap = json.loads(_gap_proc.stdout)
+    _gap_report = _seatc_root / _gap["report_path"]
+    _gap_manifest = (_seatc_root / ".saipen" / "improve" / _gap["cycle_id"]
+                     / "MANIFEST.md")
+    _gap_manifest_before = _gap_manifest.read_bytes()
+    _gap_recovery_before = _recovery_ops_snapshot(_seatc_root)
+    _gap_report.unlink()
+    _gap_retry = json.loads(_scprep(
+        "--role", "critic", "--session", "critic-gap-01").stdout)
+    expect("missing report under a registered seat REFUSEs SEAT_EVIDENCE_MISSING",
+           _gap_proc.returncode == 0
+           and _gap_retry.get("code") == "SEAT_EVIDENCE_MISSING"
+           and _gap_retry.get("ok") is False,
+           repr(_gap_retry))
+    expect("missing report causes zero writes and no new provenance",
+           not _gap_report.exists()
+           and _gap_manifest.read_bytes() == _gap_manifest_before
+           and _recovery_ops_snapshot(_seatc_root) == _gap_recovery_before,
+           repr((_gap_report.exists(),
+                 _gap_manifest.read_bytes() == _gap_manifest_before,
+                 sorted(set(_recovery_ops_snapshot(_seatc_root))
+                        - set(_gap_recovery_before)))))
+
+    _complete_proc = _scprep("--role", "critic", "--session",
+                             "critic-complete-01")
+    _complete = json.loads(_complete_proc.stdout)
+    _complete_report_path = _seatc_root / _complete["report_path"]
+    append_run(_complete_report_path,
+               "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+               "expected: executable next action\n"
+               "actual: resumed immutable report\n"
+               "evidence: seat continuity control\n")
+    complete_report(_complete_report_path)
+    _complete_retry = json.loads(_scprep(
+        "--role", "critic", "--session", "critic-complete-01").stdout)
+    expect("COMPLETE report cannot resume (SEAT_COMPLETE, resumed false)",
+           _complete_retry.get("code") == "SEAT_COMPLETE"
+           and _complete_retry.get("resumed") is False,
+           repr(_complete_retry))
+    expect("COMPLETE report yields an executable stable instruction",
+           _complete_retry.get("next")
+           and "saipen improve sweep" in _complete_retry.get("next", ""),
+           repr(_complete_retry.get("next", "")))
+
+    _unavail_proc = _scprep("--role", "critic", "--session",
+                            "critic-unavail-01")
+    _unavail = json.loads(_unavail_proc.stdout)
+    _unavail_manifest = (_seatc_root / ".saipen" / "improve"
+                         / _unavail["cycle_id"] / "MANIFEST.md")
+    _unavail_report = _seatc_root / _unavail["report_path"]
+    _unavail_report.unlink()
+
+    def _set_seat_availability(manifest_text: str, seat_id: str,
+                               value: str) -> str:
+        lines = manifest_text.splitlines()
+        out = []
+        in_block = False
+        for raw in lines:
+            ln = raw
+            if ln.startswith("seat_id: "):
+                in_block = ln.strip() == f"seat_id: {seat_id}"
+            if in_block and ln.strip().startswith("availability: "):
+                ln = f"availability: {value}"
+            out.append(ln)
+        return "\n".join(out) + "\n"
+
+    _unavail_manifest.write_text(
+        _set_seat_availability(
+            _unavail_manifest.read_text(encoding="utf-8-sig"),
+            _unavail["seat_id"], "unavailable"),
+        encoding="utf-8")
+    _unavail_retry = json.loads(_scprep(
+        "--role", "critic", "--session", "critic-unavail-01").stdout)
+    expect("unavailable roster seat cannot revive (SEAT_UNAVAILABLE, "
+           "zero writes)",
+           _unavail_retry.get("code") == "SEAT_UNAVAILABLE"
+           and not _unavail_report.exists(),
+           repr(_unavail_retry))
+
+    _malformed_proc = _scprep("--role", "critic", "--session",
+                              "critic-malformed-01")
+    _malformed = json.loads(_malformed_proc.stdout)
+    _malformed_report = _seatc_root / _malformed["report_path"]
+    _malformed_report.write_text(
+        _malformed_report.read_text(encoding="utf-8-sig").replace(
+            "report_status: draft", "report_status:", 1),
+        encoding="utf-8")
+    _malformed_retry = json.loads(_scprep(
+        "--role", "critic", "--session", "critic-malformed-01").stdout)
+    expect("malformed registered report refuses INVALID_REPORT, never "
+           "replaced by prepare",
+           _malformed_retry.get("code") == "INVALID_REPORT"
+           and "report_status" in _malformed_report.read_text(
+               encoding="utf-8-sig"),
+           repr(_malformed_retry))
+    _malformed_report.write_text(
+        _malformed_report.read_text(encoding="utf-8-sig").replace(
+            "report_status:", "report_status: bogus", 1),
+        encoding="utf-8")
+    _bogus_retry = json.loads(_scprep(
+        "--role", "critic", "--session", "critic-malformed-01").stdout)
+    expect("an unexpected report_status (bogus) refuses INVALID_REPORT -- "
+           "only an exact draft resumes",
+           _bogus_retry.get("code") == "INVALID_REPORT"
+           and "bogus" in _bogus_retry.get("detail", ""),
+           repr(_bogus_retry))
+    _no_prov_proc = _scprep("--role", "critic", "--session",
+                            "critic-noprov-01")
+    _no_prov = json.loads(_no_prov_proc.stdout)
+    _no_prov_report = _seatc_root / _no_prov["report_path"]
+    _no_prov_report.write_text(
+        _no_prov_report.read_text(encoding="utf-8-sig").replace(
+            "source_head: ", "source_head_missing: ", 1),
+        encoding="utf-8")
+    _no_prov_retry = json.loads(_scprep(
+        "--role", "critic", "--session", "critic-noprov-01").stdout)
+    expect("a draft missing required provenance refuses INVALID_REPORT "
+           "(validate_report gates the resume)",
+           _no_prov_retry.get("code") == "INVALID_REPORT"
+           and "source_head" in _no_prov_retry.get("detail", ""),
+           repr(_no_prov_retry))
+    _binary_proc = _scprep("--role", "critic", "--session",
+                           "critic-binary-01")
+    _binary = json.loads(_binary_proc.stdout)
+    (_seatc_root / _binary["report_path"]).write_bytes(b"\x80\x81\x82\xff")
+    _binary_retry = json.loads(_scprep(
+        "--role", "critic", "--session", "critic-binary-01").stdout)
+    expect("an undecodable report refuses INVALID_REPORT without a traceback",
+           _binary_retry.get("code") == "INVALID_REPORT"
+           and "cannot be decoded" in _binary_retry.get("detail", ""),
+           repr(_binary_retry))
+    _runless_proc = _scprep("--role", "critic", "--session",
+                            "critic-runless-01")
+    _runless = json.loads(_runless_proc.stdout)
+    _runless_report = _seatc_root / _runless["report_path"]
+    _runless_report.write_text(
+        _runless_report.read_text(encoding="utf-8-sig").replace(
+            "report_status: draft", "report_status: complete", 1),
+        encoding="utf-8")
+    _runless_retry = json.loads(_scprep(
+        "--role", "critic", "--session", "critic-runless-01").stdout)
+    expect("a runless complete skeleton refuses INVALID_REPORT, never "
+           "SEAT_COMPLETE",
+           _runless_retry.get("code") == "INVALID_REPORT"
+           and "without run evidence" in _runless_retry.get("detail", ""),
+           repr(_runless_retry))
+    _duph_proc = _scprep("--role", "critic", "--session",
+                         "critic-duphdr-01")
+    _duph = json.loads(_duph_proc.stdout)
+    _duph_report = _seatc_root / _duph["report_path"]
+    _duph_report.write_text(
+        _duph_report.read_text(encoding="utf-8-sig").replace(
+            "role: critic", "role: critic\nrole: critic", 1),
+        encoding="utf-8")
+    _duph_retry = json.loads(_scprep(
+        "--role", "critic", "--session", "critic-duphdr-01").stdout)
+    expect("a report repeating a required header field refuses "
+           "INVALID_REPORT",
+           _duph_retry.get("code") == "INVALID_REPORT"
+           and "repeats required header" in _duph_retry.get("detail", ""),
+           repr(_duph_retry))
+    _prose_proc = _scprep("--role", "critic", "--session",
+                          "critic-prose-01")
+    _prose = json.loads(_prose_proc.stdout)
+    _prose_report = _seatc_root / _prose["report_path"]
+    append_run(_prose_report,
+               "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+               "report_status: mentioned inside finding evidence is prose\n"
+               "expected: anchored header counting\n"
+               "actual: prose ignored\n"
+               "evidence: seat continuity control\n")
+    _prose_retry = json.loads(_scprep(
+        "--role", "critic", "--session", "critic-prose-01").stdout)
+    expect("a prose line mentioning report_status does not false-reject a "
+           "draft resume (header-anchored count)",
+           _prose_retry.get("ok") is True
+           and _prose_retry.get("resumed") is True,
+           repr(_prose_retry))
+
     _identity_root = project_fixture("saipen-seat-identity-")
     _identity_assignments = [prepare_audit_seat(
         _identity_root, agent_family="probe", role="core", session_id=seat,
@@ -4508,6 +4709,253 @@ def run_improve_probes() -> tuple[list[str], int]:
            and (_legacy_cycle / "SWEEP.md").read_bytes()
            == _legacy_sweep_before
            and not (_legacy_cycle / "seat-b").exists())
+
+    # ---- PRE-v8 DOGFOOD VIII (A1-A6): hostile evidence-continuity closeout.
+    # A1: a DRAFT seat may resume only while its mechanical source identity
+    # still matches the CURRENT source identity. Tracked source mutation
+    # between prepare and retry must refuse -- never resume with the OLD
+    # report fingerprint bound to fresh work, never silently rebase.
+    _stale_root = project_fixture("saipen-stale-draft-")
+    (_stale_root / "src.txt").write_text("v1\n", encoding="utf-8")
+    _stale_first = prepare_audit_seat(
+        _stale_root, agent_family="probe", role="critic",
+        session_id="critic-stale-01", project_name="STALE",
+        model_or_runtime="probe", protocol_fingerprint="probe",
+        context_scope="stale draft control")
+    _stale_report = _stale_root / _stale_first["report_path"]
+    _stale_manifest = (_stale_root / ".saipen" / "improve"
+                       / _stale_first["cycle_id"] / "MANIFEST.md")
+    _stale_manifest_before = _stale_manifest.read_bytes()
+    _stale_report_before = _stale_report.read_bytes()
+    _stale_recovery_before = _recovery_ops_snapshot(_stale_root)
+    (_stale_root / "src.txt").write_text("v2 -- tracked source changed\n",
+                                         encoding="utf-8")
+    _stale_retry = prepare_audit_seat(
+        _stale_root, agent_family="probe", role="critic",
+        session_id="critic-stale-01", project_name="STALE",
+        model_or_runtime="probe", protocol_fingerprint="probe",
+        context_scope="stale draft control")
+    expect("A1: stale DRAFT resume refuses STALE_REPORT with zero writes",
+           _stale_retry.get("code") == "STALE_REPORT"
+           and _stale_retry.get("resumed") is False
+           and _stale_retry.get("ok") is False
+           and _stale_manifest.read_bytes() == _stale_manifest_before
+           and _stale_report.read_bytes() == _stale_report_before
+           and _recovery_ops_snapshot(_stale_root) == _stale_recovery_before,
+           repr(_stale_retry))
+    (_stale_root / "src.txt").write_text("v1\n", encoding="utf-8")
+    _stale_restored = prepare_audit_seat(
+        _stale_root, agent_family="probe", role="critic",
+        session_id="critic-stale-01", project_name="STALE",
+        model_or_runtime="probe", protocol_fingerprint="probe",
+        context_scope="stale draft control")
+    expect("A1: restoring the source restores the DRAFT resume",
+           _stale_restored.get("code") == "ALREADY_ASSIGNED"
+           and _stale_restored.get("resumed") is True,
+           repr(_stale_restored))
+
+    # A2: an invalid active MANIFEST is never consumed or mutated. validate
+    # _manifest(expected_cycle_id) gates admission, unavailable handling and
+    # resume; an invalid roster returns structured INVALID_MANIFEST with zero
+    # new mutation and byte-identical evidence.
+    _manifest_root = project_fixture("saipen-invalid-manifest-")
+    _mf_first = prepare_audit_seat(
+        _manifest_root, agent_family="probe", role="critic",
+        session_id="critic-mf-01", project_name="MF",
+        model_or_runtime="probe", protocol_fingerprint="probe",
+        context_scope="invalid manifest control")
+    _mf_cycle = cycle_dir(_manifest_root, _mf_first["cycle_id"])
+    _mf_manifest = _mf_cycle / "MANIFEST.md"
+    _mf_recovery_before = _recovery_ops_snapshot(_manifest_root)
+    _mf_manifest.write_text(
+        _mf_manifest.read_text(encoding="utf-8-sig").replace(
+            "cycle_id: " + _mf_first["cycle_id"], "cycle_id: WRONG", 1),
+        encoding="utf-8")
+    _mf_manifest_before = _mf_manifest.read_bytes()
+    _mf_second = prepare_audit_seat(
+        _manifest_root, agent_family="probe", role="critic",
+        session_id="critic-mf-02", project_name="MF",
+        model_or_runtime="probe", protocol_fingerprint="probe",
+        context_scope="invalid manifest control")
+    expect("A2: admission on an invalid active manifest refuses "
+           "INVALID_MANIFEST with zero new mutation",
+           _mf_second.get("code") == "INVALID_MANIFEST"
+           and _mf_second.get("ok") is False
+           and not (_mf_cycle / "critic-mf-02").exists()
+           and _mf_manifest.read_bytes() == _mf_manifest_before
+           and _recovery_ops_snapshot(_manifest_root) == _mf_recovery_before,
+           repr(_mf_second))
+    try:
+        register_seat(_mf_cycle, "critic-mf-03", "critic",
+                      "saipen_improve_MF.md")
+        _mf_register_refused = False
+    except ImproveError as _mf_exc:
+        _mf_register_refused = "invalid active manifest" in str(_mf_exc)
+    expect("A2: register_seat refuses an invalid active manifest",
+           _mf_register_refused, "")
+
+    # A3: strict seat field cardinality -- exactly one identity/lifecycle
+    # field per seat; duplicate fields and out-of-set availability refuse.
+    _card_root = project_fixture("saipen-seat-cardinality-")
+    _card_first = prepare_audit_seat(
+        _card_root, agent_family="probe", role="critic",
+        session_id="critic-card-01", project_name="CARD",
+        model_or_runtime="probe", protocol_fingerprint="probe",
+        context_scope="cardinality control")
+    _card_cycle = cycle_dir(_card_root, _card_first["cycle_id"])
+    _card_manifest = _card_cycle / "MANIFEST.md"
+    _card_manifest.write_text(
+        _card_manifest.read_text(encoding="utf-8-sig").replace(
+            "role: critic", "role: critic\nrole: critic", 1),
+        encoding="utf-8")
+    _card_second = prepare_audit_seat(
+        _card_root, agent_family="probe", role="critic",
+        session_id="critic-card-02", project_name="CARD",
+        model_or_runtime="probe", protocol_fingerprint="probe",
+        context_scope="cardinality control")
+    expect("A3: a duplicated strict seat role field refuses INVALID_MANIFEST "
+           "(exactly-once, no first/last-value ambiguity)",
+           _card_second.get("code") == "INVALID_MANIFEST"
+           and "exactly once" in _card_second.get("detail", ""),
+           repr(_card_second))
+    _bogus_root = project_fixture("saipen-availability-bogus-")
+    _bg_first = prepare_audit_seat(
+        _bogus_root, agent_family="probe", role="critic",
+        session_id="critic-bg-01", project_name="BG",
+        model_or_runtime="probe", protocol_fingerprint="probe",
+        context_scope="bogus availability control")
+    _bg_cycle = cycle_dir(_bogus_root, _bg_first["cycle_id"])
+    _bg_manifest = _bg_cycle / "MANIFEST.md"
+    (_bogus_root / _bg_first["report_path"]).unlink()
+    _bg_manifest.write_text(
+        _bg_manifest.read_text(encoding="utf-8-sig").replace(
+            "availability: expected", "availability: bogus", 1),
+        encoding="utf-8")
+    _bg_retry = prepare_audit_seat(
+        _bogus_root, agent_family="probe", role="critic",
+        session_id="critic-bg-01", project_name="BG",
+        model_or_runtime="probe", protocol_fingerprint="probe",
+        context_scope="bogus availability control")
+    expect("A3: availability bogus can never resume as ALREADY_ASSIGNED",
+           _bg_retry.get("code") == "INVALID_MANIFEST"
+           and _bg_retry.get("ok") is False,
+           repr(_bg_retry))
+
+    # A4: strict RUN + finding identity is INJECTIVE -- unique, ascending,
+    # contiguous 1..N RUNs, canonical IMP-NNN grammar, unique composite
+    # <RUN>/<IMP> identities. False evidence cannot validate, and a duplicate
+    # composite can never reach complete/swept state.
+    _a4_strict = ("agent: a\nrole: core\nmodel_or_runtime: probe\nproject: P\n"
+                  "saipen_version: 7\nprotocol_fingerprint: fp\n"
+                  "source_head: no-git\n"
+                  "source_tree_fingerprint: no-git-tree-v1:abc\n"
+                  "discovery_model: no-git-tree-v1\n"
+                  "context_scope: tools\ncontext_available: complete\n"
+                  "report_status: complete\n")
+    _a4_run = ("\n## RUN {n}\nIMP-{i} [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+               "expected: a\nactual: b\nevidence: c\n")
+
+    def _a4_errs(body: str) -> list[str]:
+        return validate_report(_a4_strict + body, require_runs=True,
+                               strict=True)
+
+    expect("A4: a strict report with unique contiguous RUNs validates",
+           _a4_errs(_a4_run.format(n=1, i="001")) == [],
+           repr(_a4_errs(_a4_run.format(n=1, i="001"))))
+    expect("A4: duplicate RUN 1 rejects (repeated section number)",
+           any("repeats RUN section" in e
+               for e in _a4_errs(_a4_run.format(n=1, i="001")
+                                 + _a4_run.format(n=1, i="002"))),
+           repr(_a4_errs(_a4_run.format(n=1, i="001")
+                         + _a4_run.format(n=1, i="002"))))
+    expect("A4: RUN 1 then RUN 3 rejects (not contiguous 1..N)",
+           any("not contiguous" in e
+               for e in _a4_errs(_a4_run.format(n=1, i="001")
+                                 + _a4_run.format(n=3, i="002"))),
+           repr(_a4_errs(_a4_run.format(n=1, i="001")
+                         + _a4_run.format(n=3, i="002"))))
+    expect("A4: RUN 2 as the first run rejects (not contiguous 1..N)",
+           any("not contiguous" in e
+               for e in _a4_errs(_a4_run.format(n=2, i="001"))),
+           repr(_a4_errs(_a4_run.format(n=2, i="001"))))
+    expect("A4: swapped/decreasing RUN numbers reject (not ascending)",
+           any("not ascending" in e
+               for e in _a4_errs(_a4_run.format(n=2, i="001")
+                                 + _a4_run.format(n=1, i="002"))),
+           repr(_a4_errs(_a4_run.format(n=2, i="001")
+                         + _a4_run.format(n=1, i="002"))))
+    _a4_dup_imp = _a4_run.format(n=1, i="001").replace(
+        "evidence: c", "evidence: c\n"
+        "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+        "expected: d\nactual: e\nevidence: f", 1)
+    expect("A4: duplicate IMP-001 inside one RUN rejects before any dedup",
+           any("repeats composite finding identity" in e
+               for e in _a4_errs(_a4_dup_imp)),
+           repr(_a4_errs(_a4_dup_imp)))
+    expect("A4: malformed IMP width (IMP-1) rejects canonical IMP-NNN",
+           any("not canonical IMP-NNN" in e
+               for e in _a4_errs(_a4_run.format(n=1, i="1"))),
+           repr(_a4_errs(_a4_run.format(n=1, i="1"))))
+    _a4_same_in_two_runs = _a4_run.format(n=1, i="001") \
+        + _a4_run.format(n=2, i="001")
+    expect("A4: the same IMP-001 in two DIFFERENT RUNs stays distinct",
+           _a4_errs(_a4_same_in_two_runs) == [],
+           repr(_a4_errs(_a4_same_in_two_runs)))
+    _dc_root = project_fixture("saipen-dupcomposite-")
+    _dc_cycle = create_cycle(_dc_root, "imp-dup")
+    register_seat(_dc_cycle, "seat-1", "core", "saipen_improve_D.md")
+    _dc_rep = create_report(_dc_root, "imp-dup", "seat-1", "D",
+                            agent="probe", role="core",
+                            model_or_runtime="probe",
+                            protocol_fingerprint="fp", context_scope="scope")
+    append_run(_dc_rep, "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+                        "expected: a\nactual: b\nevidence: c\n"
+                        "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+                        "expected: d\nactual: e\nevidence: f\n")
+    try:
+        complete_report(_dc_rep)
+        _dc_completed = False
+    except ImproveError:
+        _dc_completed = True
+    expect("A4: a duplicate composite identity can never complete (refused "
+           "before any set/map dedup into a swept verdict)",
+           _dc_completed, "")
+
+    # A5: strict report requires discovery_model exactly once; legacy reports
+    # keep the deliberate boundary and stay valid without it.
+    _a5_root = project_fixture("saipen-a5-header-")
+    _a5_first = prepare_audit_seat(
+        _a5_root, agent_family="probe", role="critic",
+        session_id="critic-a5-01", project_name="A5",
+        model_or_runtime="probe", protocol_fingerprint="probe",
+        context_scope="header parity control")
+    _a5_report = _a5_root / _a5_first["report_path"]
+    _a5_report.write_text(
+        _a5_report.read_text(encoding="utf-8-sig").replace(
+            "discovery_model: ", "removed_discovery_model: ", 1),
+        encoding="utf-8")
+    _a5_retry = prepare_audit_seat(
+        _a5_root, agent_family="probe", role="critic",
+        session_id="critic-a5-01", project_name="A5",
+        model_or_runtime="probe", protocol_fingerprint="probe",
+        context_scope="header parity control")
+    expect("A5: a strict report missing discovery_model refuses "
+           "INVALID_REPORT (writer/spec/validator field parity)",
+           _a5_retry.get("code") == "INVALID_REPORT"
+           and "discovery_model" in _a5_retry.get("detail", ""),
+           repr(_a5_retry))
+    _a5_legacy = validate_report(
+        _a4_strict.replace("discovery_model: no-git-tree-v1\n", ""))
+    expect("A5: a legacy (non-strict) report may omit discovery_model "
+           "(deliberate legacy boundary only where history needs it)",
+           _a5_legacy == [], repr(_a5_legacy))
+    _a5_dup = _a4_strict.replace(
+        "discovery_model: no-git-tree-v1",
+        "discovery_model: no-git-tree-v1\ndiscovery_model: x", 1)
+    expect("A5: a duplicated discovery_model in a strict report rejects",
+           any("repeats required header" in e
+               for e in validate_report(_a5_dup, strict=True)),
+           repr(validate_report(_a5_dup, strict=True)))
 
     _public_cmd = [sys.executable, str(HOME / "tools" / "saipen.py"),
                    "improve", "--new-seat", "--json"]
@@ -4845,7 +5293,11 @@ def run_improve_probes() -> tuple[list[str], int]:
            _fss_visible == "INVALID_REPORT",
            repr(_fss_visible))
 
-    # T-621: mechanical abort rescues a stuck draft cycle.
+    # T-621 + P0 (T-632): mechanical abort rescues a stuck draft cycle, and
+    # abort is crash-safe -- ONE journaled manifest write, no raw rename, no
+    # report byte ever moved. The draft reports stay byte-identical at their
+    # same path; the manifest's archived + cycle_aborted markers are the single
+    # source of truth that they are non-authoritative.
     ab_root = project_fixture("saipen-abort-")
     (ab_root / "src.txt").write_text("v1\n", encoding="utf-8")
     _ab_cycle = create_cycle(ab_root, "imp-ab")
@@ -4863,20 +5315,136 @@ def run_improve_probes() -> tuple[list[str], int]:
         _ab_stuck = True
     expect("abort: an incomplete report is genuinely stuck (cannot complete)",
            _ab_stuck)
+    _ab_bytes_before = _ab_rep.read_bytes()
     _abr = subprocess.run(
         [sys.executable, str(HOME / "tools" / "saipen.py"), "improve",
          "abort", "imp-ab", "--json"],
         cwd=str(ab_root), capture_output=True, text=True, timeout=60)
-    _ab_ok = json.loads(_abr.stdout).get("code") == "COMMITTED"
-    expect("abort: the stuck cycle aborts mechanically with byte-preserved "
-           "evidence",
-           _ab_ok and (_ab_rep.with_name(_ab_rep.name + ".discarded")).is_file()
+    _ab_data = json.loads(_abr.stdout)
+    _ab_ok = _ab_data.get("code") == "COMMITTED"
+    expect("abort: the stuck cycle aborts mechanically, reports byte-preserved "
+           "at the same path, no .discarded split state",
+           _ab_ok and _ab_rep.is_file()
+           and _ab_rep.read_bytes() == _ab_bytes_before
+           and not _ab_rep.with_name(_ab_rep.name + ".discarded").exists()
            and "cycle_aborted" in (_ab_cycle / "MANIFEST.md").read_text(
-               encoding="utf-8"),
-           repr(_abr.stdout[:200]))
+               encoding="utf-8")
+           and "cycle_status: archived" in (_ab_cycle / "MANIFEST.md")
+               .read_text(encoding="utf-8"),
+           repr(_abr.stdout[:300]))
     _ab_cycle2 = create_cycle(ab_root, "imp-ab2")
     expect("abort: a new cycle is admitted after the abort",
            (_ab_cycle2 / "MANIFEST.md").is_file())
+
+    # P0 (T-632) crash-safety: a forced _journaled_write failure must leave no
+    # split active-manifest/discarded-report state -- report bytes intact,
+    # manifest still active, retry still possible.
+    import saipen_engine.journal as _ab_journal_mod
+    ab_crash_root = project_fixture("saipen-abort-crash-")
+    (ab_crash_root / "src.txt").write_text("v1\n", encoding="utf-8")
+    _abc_cycle = create_cycle(ab_crash_root, "imp-ab-crash")
+    register_seat(_abc_cycle, "seat-1", "core", "saipen_improve_C.md")
+    _abc_rep = create_report(ab_crash_root, "imp-ab-crash", "seat-1", "C",
+                             agent="probe", role="core",
+                             model_or_runtime="probe",
+                             protocol_fingerprint="ded-4ae736e4",
+                             context_scope="scope")
+    _abc_bytes = _abc_rep.read_bytes()
+
+    def _fail_before_any_target(stage: str) -> None:
+        raise OSError("forced abort write failure before first target")
+
+    with mock.patch.object(_improve, "_journaled_write",
+                           side_effect=_fail_before_any_target):
+        try:
+            abort_cycle(_abc_cycle)
+            _ab_failed = False
+        except Exception:
+            _ab_failed = True
+    _abc_manifest_now = (_abc_cycle / "MANIFEST.md").read_text(
+        encoding="utf-8-sig")
+    expect("abort failure before first target: no split state -- manifest "
+           "still active, report byte-identical, no .discarded",
+           _ab_failed
+           and "cycle_status: active" in _abc_manifest_now
+           and "cycle_aborted" not in _abc_manifest_now
+           and _abc_rep.is_file() and _abc_rep.read_bytes() == _abc_bytes
+           and not _abc_rep.with_name(_abc_rep.name + ".discarded").exists(),
+           repr((_abc_manifest_now, _abc_rep.exists())))
+
+    # Crash after the journal writes the manifest target: recovery must roll
+    # the operation forward (archived manifest, reports untouched) -- never
+    # leave a half-aborted cycle.
+    def _crash_after_manifest(stage: str) -> None:
+        if stage == "manifest":
+            raise SystemExit(91)
+
+    with mock.patch.object(_ab_journal_mod, "_crash_after",
+                           side_effect=_crash_after_manifest):
+        try:
+            abort_cycle(_abc_cycle)
+            _ab_crashed = False
+        except SystemExit:
+            _ab_crashed = True
+    _ab_pending = pending_ops(ab_crash_root)
+    expect("abort crash after manifest write leaves one pending op",
+           _ab_crashed and len(_ab_pending) == 1,
+           repr((_ab_crashed, _ab_pending)))
+    _ab_recovered = recover(ab_crash_root,
+                            _ab_pending[0]["op_id"]) if _ab_pending else {}
+    _abc_manifest_now = (_abc_cycle / "MANIFEST.md").read_text(
+        encoding="utf-8-sig")
+    expect("abort crash recovery rolls forward: manifest archived, report "
+           "byte-identical at same path, no split state",
+           _ab_recovered.get("ok")
+           and "cycle_status: archived" in _abc_manifest_now
+           and "cycle_aborted" in _abc_manifest_now
+           and _abc_rep.is_file() and _abc_rep.read_bytes() == _abc_bytes
+           and not pending_ops(ab_crash_root),
+           repr((_ab_recovered, _abc_manifest_now)))
+    # Already-applied retry after recovery is idempotent (refused: not active).
+    try:
+        abort_cycle(_abc_cycle)
+        _ab_retry_refused = False
+    except ImproveError:
+        _ab_retry_refused = True
+    expect("abort retry after recovery refuses (cycle no longer active) with "
+           "evidence untouched",
+           _ab_retry_refused
+           and _abc_rep.is_file() and _abc_rep.read_bytes() == _abc_bytes,
+           repr(_abc_rep.exists()))
+
+    # External conflicting edit before recovery: recovery must refuse
+    # CONFLICT and leave the report bytes intact.
+    ab_conf_root = project_fixture("saipen-abort-conflict-")
+    (ab_conf_root / "src.txt").write_text("v1\n", encoding="utf-8")
+    _abcf_cycle = create_cycle(ab_conf_root, "imp-ab-conflict")
+    register_seat(_abcf_cycle, "seat-1", "core", "saipen_improve_F.md")
+    _abcf_rep = create_report(ab_conf_root, "imp-ab-conflict", "seat-1", "F",
+                              agent="probe", role="core",
+                              model_or_runtime="probe",
+                              protocol_fingerprint="ded-4ae736e4",
+                              context_scope="scope")
+    _abcf_bytes = _abcf_rep.read_bytes()
+    with mock.patch.object(_ab_journal_mod, "_crash_after",
+                           side_effect=_crash_after_manifest):
+        try:
+            abort_cycle(_abcf_cycle)
+            _abcf_crashed = False
+        except SystemExit:
+            _abcf_crashed = True
+    _abcf_pending = pending_ops(ab_conf_root)
+    # External edit to the manifest between crash and recovery.
+    (_abcf_cycle / "MANIFEST.md").write_text(
+        "cycle_status: active\ncycle_id: hijacked\n", encoding="utf-8")
+    _abcf_recovered = recover(ab_conf_root,
+                              _abcf_pending[0]["op_id"]) if _abcf_pending else {}
+    expect("abort recovery over an external conflicting manifest edit refuses "
+           "CONFLICT and never touches report bytes",
+           _abcf_crashed and not _abcf_recovered.get("ok")
+           and _abcf_recovered.get("code") in ("CONFLICT", "RECOVERY_CONFLICT")
+           and _abcf_rep.is_file() and _abcf_rep.read_bytes() == _abcf_bytes,
+           repr((_abcf_crashed, _abcf_recovered)))
 
     # ---- T-601: resolver race -- two processes resolving the same conflict
     # yield exactly one canonical settlement (WRITER_BUSY or a settled-journal
@@ -5887,6 +6455,32 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            and st_g.get("phase") == "DONE"
            and st_g.get("task") == "none"
            and st_g.get("execution_intent") == "goal", repr(st_g))
+
+    # ---- T-630: after a LOG seal the engine must continue the E-### sequence
+    # from the NEWEST sealed segment, never the oldest. The old _read
+    # prepended segments, so a fresh active log read LOG-001's tail as the
+    # sequence head and minted a bogus low event.
+    sealr = make_project()
+    seal_log = sealr / ".saipen" / "LOG.md"
+    (sealr / ".saipen" / "logs").mkdir()
+    (sealr / ".saipen" / "logs" / "LOG-001.md").write_text(
+        "- 09.08.26 00:00 [E-900] [T-none] DEC: base\n", encoding="utf-8")
+    (sealr / ".saipen" / "logs" / "LOG-002.md").write_text(
+        "- 09.08.26 00:01 [E-901] [T-none] DEC: sealed two\n"
+        "- 09.08.26 00:02 [E-902] [T-none] DEC: sealed three\n",
+        encoding="utf-8")
+    seal_log.write_text("# Log\n", encoding="utf-8")
+    from saipen_engine.state import patch_state as _seal_patch
+    seal_state = sealr / ".saipen" / "STATE.md"
+    seal_state.write_text(_seal_patch(codec.read_doc(seal_state),
+                                      {"last_event": 902}), encoding="utf-8")
+    seal_cp = checkpoint(sealr, "probe", "RUN", "T-1", "seal tail control")
+    seal_st = parse_state(codec.read_doc(seal_state))
+    expect("checkpoint after a seal continues from the newest sealed event "
+           "(E-903, not the oldest segment's E-901)",
+           seal_cp.get("ok") and seal_st.get("last_event") == 903
+           and seal_cp.get("event_id") == "E-903",
+           repr((seal_cp, seal_st)))
 
     # ---- §69#17: commit failure cannot be overwritten by semantic success.
     rootf = make_project()
@@ -7368,6 +7962,89 @@ def run_last_event_probes() -> tuple[list[str], int]:
 
     return problems, checked
 
+
+def run_log_tail_probes() -> tuple[list[str], int]:
+    """T-633 root cause: log_tail_event must return the ACTUAL maximum E-###
+    across the LOG text, independent of line or file enumeration order.
+
+    The old implementation returned the FINAL parsed E-###, so 'E-100 then
+    E-9' minted a tail of 9 and a next checkpoint allocated E-10 -- reusing
+    an already-used id. Allocation correctness never depends on ordering."""
+    from saipen_engine import operations as _ops
+    from saipen_engine.log import log_tail_event
+    problems: list[str] = []
+    checked = 0
+
+    def expect(label: str, ok: bool, detail: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        if not ok:
+            problems.append(f"{label}: {detail}")
+        else:
+            print(f"PASS: log-tail -- {label}")
+
+    line = "- 09.08.26 00:00 [E-{n}] [parent: E-{p}] [T-none] DEC: ctl\n"
+    e100_then_9 = line.format(n=100, p=99) + line.format(n=9, p=8)
+    expect("E-100 then E-9 returns 100 (not the final parsed 9)",
+           log_tail_event(e100_then_9) == 100,
+           repr(log_tail_event(e100_then_9)))
+    expect("reordered (E-9 first) still returns 100",
+           log_tail_event(line.format(n=9, p=8)
+                          + line.format(n=100, p=99)) == 100,
+           repr(log_tail_event(line.format(n=9, p=8)
+                               + line.format(n=100, p=99))))
+    expect("empty text returns None", log_tail_event("") is None,
+           repr(log_tail_event("")))
+    expect("999 vs 1000: max wins regardless of order",
+           log_tail_event(line.format(n=999, p=998)
+                          + line.format(n=1000, p=999)) == 1000,
+           repr(log_tail_event(line.format(n=999, p=998)
+                               + line.format(n=1000, p=999))))
+
+    # Engine-level: a checkpoint after a seal derives max(E)+1 exactly once,
+    # and segment enumeration order cannot change allocation.
+    root = Path(tempfile.mkdtemp(prefix="saipen-logtail-"))
+    saipen = root / ".saipen"
+    saipen.mkdir()
+    logs = saipen / "logs"
+    logs.mkdir()
+    # Two sealed segments with a HIGHER event in the older file and the active
+    # log empty after the seal -- the tail must be the global max.
+    (logs / "LOG-001.md").write_text(
+        line.format(n=100, p=99) + line.format(n=9, p=8), encoding="utf-8")
+    (logs / "LOG-002.md").write_text(
+        line.format(n=50, p=49), encoding="utf-8")
+    (saipen / "LOG.md").write_text("", encoding="utf-8")
+    (saipen / "BOARD.md").write_text(
+        "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8")
+    (saipen / "STATE.md").write_text(
+        "---\nphase: DONE\ntask: none\nnext_action: \"saipen continue\"\n"
+        "blocker: \"\"\ntransition_from: SHIP\nsaipen_version: 7\n"
+        "schema_version: 3\nlast_event: 100\nstyle_contract: ded-4ae736e4\n"
+        "saipen_home: \".\"\nagent: probe\nmode: full\n"
+        "updated: 2026-08-09T00:00:00Z\n---\n", encoding="utf-8")
+    _docs, _state, _board, _tail = _ops._read(root)
+    expect("engine tail across sealed segments + empty active = global max",
+           _tail == 100, repr(_tail))
+    # Segment 999 vs 1000 names: numeric sort, never lexicographic.
+    (logs / "LOG-999.md").write_text(
+        line.format(n=3, p=2), encoding="utf-8")
+    (logs / "LOG-1000.md").write_text(
+        line.format(n=4, p=3), encoding="utf-8")
+    _docs, _state, _board, _tail2 = _ops._read(root)
+    expect("LOG-1000 sorts after LOG-999 numerically; tail still 100",
+           _tail2 == 100, repr(_tail2))
+    # Next checkpoint allocates max(E)+1 exactly once from the global max.
+    _event, _rendered = _ops._event_line(
+        _docs, _tail2, "DEC", "T-none", "probe",
+        "log-tail control: next allocation", "09.08.26 00:01")
+    expect("next checkpoint allocates max(E)+1 = 101 exactly once",
+           _event == 101 and "[E-101]" in _rendered
+           and "[parent: E-100]" in _rendered,
+           repr((_event, _rendered)))
+    return problems, checked
+
+
 if not SCENARIOS.is_dir():
     print(f"FAIL: no {SCENARIOS} -- run this from the SAIPEN home")
     sys.exit(1)
@@ -7857,6 +8534,8 @@ crew_failures, crew_checked, crew_skipped = run_crew_probes()
 failures.extend(crew_failures)
 last_event_failures, last_event_checked = run_last_event_probes()
 failures.extend(last_event_failures)
+log_tail_failures, log_tail_checked = run_log_tail_probes()
+failures.extend(log_tail_failures)
 hunt_mark_failures, hunt_mark_checked = run_hunt_mark_probes()
 failures.extend(hunt_mark_failures)
 converge_failures, converge_checked = run_converge_routing_probes()
@@ -7922,6 +8601,7 @@ print(f"{orphan_checked} orphan-tag behavior(s) executed")
 print(f"{ship_pick_checked} ship-pick behavior(s) executed")
 print(f"{active_task_checked} active-task recovery behavior(s) executed")
 print(f"{last_event_checked} last_event migration behavior(s) executed")
+print(f"{log_tail_checked} log-tail behavior(s) executed")
 print(f"{hunt_mark_checked} hunt-mark behavior(s) executed")
 print(f"{converge_checked} converge-routing behavior(s) executed")
 print(f"{ccc_identity_checked} ccc commit-identity behavior(s) executed")

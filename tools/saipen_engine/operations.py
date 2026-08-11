@@ -57,6 +57,11 @@ def _utc_iso() -> str:
         "%Y-%m-%dT%H:%M:%SZ")
 
 
+def _segment_number(path: Path) -> int:
+    m = re.match(r"LOG-(\d+)\.md$", path.name)
+    return int(m.group(1)) if m else -1
+
+
 def _read(root: Path) -> tuple[dict, dict, dict, dict]:
     """Read STATE/BOARD/LOG docs + their parsed forms (normalised view)."""
     state_doc = codec.read_document(root / ".saipen" / "STATE.md")
@@ -64,14 +69,17 @@ def _read(root: Path) -> tuple[dict, dict, dict, dict]:
     log_doc = codec.read_document(root / ".saipen" / "LOG.md")
     state = parse_state(state_doc.text_norm)
     board = parse_board(board_doc.text_norm)
-    # The LOG tail is the max event across the sealed segments AND the active
-    # LOG: after a seal, the active log starts empty but the E-### sequence
-    # continues from the sealed tail -- otherwise the next checkpoint mints a
-    # duplicate E-001 (NITRO dogfood IV, T-611).
-    _log_text = log_doc.text_norm
-    _sealed = sorted((root / ".saipen" / "logs").glob("LOG-*.md"))
+    # Sealed segments are read in ascending NUMERIC id order (LOG-999 before
+    # LOG-1000, never a lexicographic sort). log_tail_event returns the actual
+    # maximum E-ID across the whole text, so concatenation order can never
+    # affect allocation correctness -- a fresh post-seal active log still
+    # derives the newest sealed event as its tail.
+    _log_text = ""
+    _sealed = sorted((root / ".saipen" / "logs").glob("LOG-*.md"),
+                     key=_segment_number)
     for _seg in _sealed:
-        _log_text = codec.read_document(_seg).text_norm + "\n" + _log_text
+        _log_text += codec.read_document(_seg).text_norm + "\n"
+    _log_text += log_doc.text_norm
     log_tail = log_tail_event(_log_text)
     return ({"state": state_doc, "board": board_doc, "log": log_doc},
             state, board, log_tail)

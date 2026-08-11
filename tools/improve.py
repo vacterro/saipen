@@ -26,12 +26,16 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 # Report header fields (no machine-local path; identity is version + fingerprint).
+# discovery_model is REQUIRED for strict reports only: the legacy pre-boundary
+# reports predate the field, so the strict/legacy boundary lives where history
+# needs it and never leaks into strict evidence (A5).
 REQUIRED_HEADER = {
     "agent", "role", "model_or_runtime", "project",
     "saipen_version", "protocol_fingerprint",
-    "source_head", "source_tree_fingerprint",
+    "source_head", "source_tree_fingerprint", "discovery_model",
     "context_scope", "context_available", "report_status",
 }
+_LEGACY_OPTIONAL_HEADER = frozenset({"discovery_model"})
 
 SEVERITY = {"P0", "P1", "P2", "P3"}
 FINDING_CLASS = {
@@ -50,7 +54,7 @@ DISPOSITION = {
 
 _MISSING = object()
 
-_RUN_RE = re.compile(r"^## RUN (\d+)", re.MULTILINE)
+_RUN_RE = re.compile(r"^## RUN (\d+)\s*$", re.MULTILINE)
 _NO_FINDINGS_RE = re.compile(r"^NO_FINDINGS\b", re.MULTILINE)
 # ONE finding reference grammar (DOGFOOD V, T-615): a composite finding is
 # RUN-<N>/IMP-<NNN>; a legacy (pre-boundary) record is a bare IMP-<NNN>. The
@@ -366,7 +370,12 @@ def parse_report(text: str) -> ReportRuns:
     identity; no IMP-### floats unanchored.
     """
     header: dict[str, str] = {}
-    for match in re.finditer(r"(?m)^([A-Za-z_]+):[ \t]*(.*)$", text):
+    # Header fields come ONLY from the top block (everything before the first
+    # `## ` section heading): a finding's prose line that happens to start
+    # with `report_status:` is evidence text, never a second header, and a
+    # whole-text scan let the LAST occurrence win (T-630).
+    _header_block = text.split("\n## ", 1)[0]
+    for match in re.finditer(r"(?m)^([A-Za-z_]+):[ \t]*(.*)$", _header_block):
         header[match.group(1)] = match.group(2).strip()
 
     run_headers = list(re.finditer(_RUN_RE, text))
@@ -723,6 +732,13 @@ def _require_finding(cycle_dir: Path, seat_dir: str, report_ident: str,
         raise ImproveError(
             f"write_sweep_entry refuses: finding {target} does not exist in "
             f"report {report_ident!r}")
+    if len(matching) > 1:
+        target = f"RUN-{run}/{imp}" if run is not None else imp
+        raise ImproveError(
+            f"write_sweep_entry refuses: report {report_ident!r} carries "
+            f"{len(matching)} findings with the ambiguous composite identity "
+            f"{target}; one disposition can never satisfy duplicates -- "
+            "repair or regenerate the report (A4)")
 
 
 def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
@@ -969,6 +985,10 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
     creation share the existing project writer lock and one journaled
     multi-target mutation. An explicit session id is idempotent; no session id
     allocates a new independent <agent>-NN seat under the lock.
+
+    A6: the public root is normalized ONCE at this entry (resolved absolute),
+    so relative and absolute references to the same project behave identically
+    everywhere below -- no scattered .resolve() patches in consumers.
     """
     import datetime
     import uuid
@@ -977,7 +997,7 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
                                        recovery_preflight, run_mutation)
     from saipen_engine.lock import project_writer_lock
 
-    root = Path(project_root)
+    root = Path(project_root).resolve()
     selected_role = _validate_role(role)
     family = re.sub(r"[^A-Za-z0-9_-]", "-", agent_family).strip("-").lower()
     family = _validate_safe_id(family or "agent", "agent_family")
@@ -985,6 +1005,17 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
     project_key = portable_project_key(root)
 
     with project_writer_lock(root):
+        # Recovery runs before ANY decision: with no pending op it is a
+        # zero-write no-op, and with a crash-left pending admission it is the
+        # GOAL § 13 control-11 repair (roll forward), so a retry after an
+        # admission crash resumes instead of being refused as missing
+        # evidence. The refusal checks below therefore read the RECOVERED
+        # state, and the admit plan is built from the post-recovery manifest,
+        # so recovery can never be overwritten by a stale plan. A2: this is
+        # documented precisely -- the command is never "zero-write before
+        # recovery"; recovery_preflight may FINISH a previously authorized
+        # pending operation (roll-forward), and only NEW mutation is refused
+        # once a manifest is found invalid.
         preflight = recovery_preflight(root)
         if not preflight.get("ok"):
             return preflight
@@ -1015,6 +1046,21 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
                 f"project_identity: {project_key}\n"
                 "cycle_status: active\n")
 
+        # A2: before ANY seat allocation, admission, unavailable handling or
+        # resume, the active manifest MUST validate against its own directory
+        # identity. An invalid active manifest is never consumed or mutated --
+        # zero new mutation, evidence byte-identically preserved.
+        _manifest_errors = validate_manifest(
+            manifest_text, expected_cycle_id=active_cycle)
+        if _manifest_errors:
+            return {"ok": False, "code": "INVALID_MANIFEST",
+                    "cycle_id": active_cycle,
+                    "detail": "active Improve manifest is invalid; refuse "
+                              "any admission/admission/resume against it: "
+                              + "; ".join(_manifest_errors[:3])}
+        _strict_manifest = bool(re.search(
+            r"(?m)^manifest_schema:\s*strict\s*$", manifest_text))
+
         if session_id is not None:
             seat = _validate_safe_id(session_id, "session_id")
         else:
@@ -1031,6 +1077,20 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
         if block is not None:
             roster_role = _field(block, "role")
             roster_report = _field(block, "report_path")
+            availability = _field(block, "availability") or "expected"
+            # T-630: an existing roster seat's state is a decision, not a
+            # blank slate, and every refusal below is decided READ-ONLY,
+            # BEFORE any journal recovery or mutation -- zero bytes are
+            # written, no pending op is rolled forward to mask the refusal.
+            # Unavailable is a roster decision prepare does not override,
+            # whatever the rest of the block says.
+            if availability == "unavailable":
+                return {"ok": False, "code": "SEAT_UNAVAILABLE",
+                        "cycle_id": active_cycle, "seat_id": seat,
+                        "role": selected_role,
+                        "report_path": report.relative_to(root).as_posix(),
+                        "detail": f"session {seat} is unavailable on the "
+                                  "roster; prepare does not override it"}
             if roster_role != selected_role:
                 raise ImproveError(
                     f"session {seat} is registered as role {roster_role!r}, "
@@ -1039,24 +1099,141 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
                 raise ImproveError(
                     f"session {seat} owns report {roster_report!r}, not "
                     f"{report_ident!r}")
-            if report.is_file():
+            if not report.is_file():
+                return {"ok": False, "code": "SEAT_EVIDENCE_MISSING",
+                        "cycle_id": active_cycle, "seat_id": seat,
+                        "role": selected_role,
+                        "report_path": report.relative_to(root).as_posix(),
+                        "detail": f"session {seat} is registered but its "
+                                  "report is missing; an existing seat's "
+                                  "evidence cannot be recreated by prepare -- "
+                                  "recover any pending journaled admission or "
+                                  "use the abort/discard/recovery lifecycle if "
+                                  "replacement is intentional"}
+            try:
                 report_text = _read_maybe(report)
-                report_role = _field(report_text, "role")
-                if report_role != roster_role:
-                    raise ImproveError(
-                        f"session {seat} roster/report role mismatch: "
-                        f"{roster_role!r} != {report_role!r}")
-                return {
-                    "ok": True, "code": "ALREADY_ASSIGNED",
-                    "cycle_id": active_cycle, "seat_id": seat,
-                    "role": selected_role, "report_path": report,
-                    "report_created": False, "resumed": True,
-                    "source_head": _field(report_text, "source_head"),
-                    "source_tree_fingerprint": _field(
-                        report_text, "source_tree_fingerprint"),
-                    "discovery_model": _field(report_text, "discovery_model"),
-                }
-            new_manifest = manifest_text
+            except (UnicodeDecodeError, OSError) as _rd_exc:
+                return {"ok": False, "code": "INVALID_REPORT",
+                        "cycle_id": active_cycle, "seat_id": seat,
+                        "role": selected_role,
+                        "report_path": report.relative_to(root).as_posix(),
+                        "detail": f"session {seat} report cannot be decoded "
+                                  f"({type(_rd_exc).__name__}); cannot resume"}
+            _header_block = report_text.split("\n## ", 1)[0]
+            _status_lines = [ln for ln in _header_block.splitlines()
+                             if ln.startswith("report_status:")]
+            if len(_status_lines) != 1:
+                return {"ok": False, "code": "INVALID_REPORT",
+                        "cycle_id": active_cycle, "seat_id": seat,
+                        "role": selected_role,
+                        "report_path": report.relative_to(root).as_posix(),
+                        "detail": f"session {seat} report carries "
+                                  f"{len(_status_lines)} report_status "
+                                  "fields; cannot resume"}
+            _report_violations = validate_report(report_text,
+                                                 strict=_strict_manifest)
+            if _report_violations:
+                return {"ok": False, "code": "INVALID_REPORT",
+                        "cycle_id": active_cycle, "seat_id": seat,
+                        "role": selected_role,
+                        "report_path": report.relative_to(root).as_posix(),
+                        "detail": f"session {seat} report is invalid and not "
+                                  "resumable: " + "; ".join(
+                                      _report_violations[:3])}
+            report_role = _field(report_text, "role")
+            if report_role != roster_role:
+                raise ImproveError(
+                    f"session {seat} roster/report role mismatch: "
+                    f"{roster_role!r} != {report_role!r}")
+            report_status = _field(report_text, "report_status")
+            if report_status == "complete":
+                # A complete report is immutable only when it is REALLY
+                # complete: the strict schema requires explicit RUN evidence,
+                # so a runless skeleton cannot be classified SEAT_COMPLETE.
+                _strict_violations = validate_report(report_text,
+                                                     require_runs=True,
+                                                     strict=_strict_manifest)
+                if _strict_violations:
+                    return {"ok": False, "code": "INVALID_REPORT",
+                            "cycle_id": active_cycle, "seat_id": seat,
+                            "role": selected_role,
+                            "report_path": report.relative_to(root).as_posix(),
+                            "detail": f"session {seat} report declares "
+                                      "complete without run evidence: "
+                                      + "; ".join(_strict_violations[:3])}
+                return {"ok": False, "code": "SEAT_COMPLETE",
+                        "cycle_id": active_cycle, "seat_id": seat,
+                        "role": selected_role,
+                        "report_path": report.relative_to(root).as_posix(),
+                        "resumed": False,
+                        "detail": "report is complete and immutable; this "
+                                  "audit is not resumable",
+                        "next": f"list unswept findings with `saipen improve "
+                                f"sweep-queue {active_cycle}`, dispose each "
+                                f"with `saipen improve sweep {active_cycle} "
+                                f"<RUN-N/IMP-NNN> <DISPOSITION>`, then "
+                                f"`saipen improve verify {active_cycle}` and "
+                                f"`saipen improve cycle-complete "
+                                f"{active_cycle}`; a new audit requires a new "
+                                "session"}
+            if report_status != "draft":
+                return {"ok": False, "code": "INVALID_REPORT",
+                        "cycle_id": active_cycle, "seat_id": seat,
+                        "role": selected_role,
+                        "report_path": report.relative_to(root).as_posix(),
+                        "detail": f"session {seat} report carries unexpected "
+                                  f"report_status {report_status!r}; only a "
+                                  "single exact `report_status: draft` is "
+                                  "resumable, and nothing replaces it"}
+            # A1: a DRAFT seat may resume only while its mechanical source
+            # identity still matches the CURRENT source identity. A tracked
+            # source change between prepare and retry makes the old report
+            # evidence for a tree that no longer exists -- resuming would
+            # bind stale evidence to fresh work. Refuse structured, zero
+            # writes, no silent rebase and no provenance rewrite; the
+            # lifecycle out (a new seat/cycle against the current tree) is
+            # made explicit.
+            try:
+                _current_src = compute_source_identity(root)
+            except FreshnessError as exc:
+                return {"ok": False, "code": "STALE_REPORT",
+                        "cycle_id": active_cycle, "seat_id": seat,
+                        "role": selected_role,
+                        "report_path": report.relative_to(root).as_posix(),
+                        "resumed": False,
+                        "detail": f"cannot verify source freshness before "
+                                  f"resume: {exc}; refuse to bind a DRAFT to "
+                                  "an unverifiable source"}
+            _r_model = _field(report_text, "discovery_model")
+            _r_head = _field(report_text, "source_head")
+            _r_tree = _field(report_text, "source_tree_fingerprint")
+            if (re.match(r"^(git-delta-v1|no-git-tree-v1):", _r_tree) is None
+                    or (_r_model and _current_src.discovery_model != _r_model)
+                    or _current_src.source_head not in (_r_head, _r_head[:7])
+                    or _current_src.source_tree_fingerprint != _r_tree):
+                return {"ok": False, "code": "STALE_REPORT",
+                        "cycle_id": active_cycle, "seat_id": seat,
+                        "role": selected_role,
+                        "report_path": report.relative_to(root).as_posix(),
+                        "resumed": False,
+                        "detail": "the project source identity changed since "
+                                  "this DRAFT report was captured; resuming "
+                                  "under the old identity would bind stale "
+                                  "evidence to fresh work -- capture a new "
+                                  "seat/cycle against the current tree (or "
+                                  "regenerate the draft) instead of resuming",
+                        "current_source_head": _current_src.source_head,
+                        "current_discovery_model": _current_src.discovery_model}
+            return {
+                "ok": True, "code": "ALREADY_ASSIGNED",
+                "cycle_id": active_cycle, "seat_id": seat,
+                "role": selected_role, "report_path": report,
+                "report_created": False, "resumed": True,
+                "source_head": _field(report_text, "source_head"),
+                "source_tree_fingerprint": _field(
+                    report_text, "source_tree_fingerprint"),
+                "discovery_model": _field(report_text, "discovery_model"),
+            }
         else:
             _refuse_duplicate_owner_over_bare_sweep(
                 manifest.parent, manifest_text, report_ident, seat)
@@ -1090,6 +1267,19 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
             f"context_scope: {context_scope}\n"
             f"context_available: {context_available}\n"
             "report_status: draft\n")
+
+        # A5: the writer's own output must satisfy the strict report contract
+        # before it is committed -- a writer that can emit a report the
+        # validator rejects would mint evidence the consumers must then
+        # refuse. One canonical field set, parity-tested at write time.
+        _writer_violations = validate_report(report_text, strict=True)
+        if _writer_violations:
+            return {"ok": False, "code": "VALIDATION_FAILED",
+                    "cycle_id": active_cycle, "seat_id": seat,
+                    "role": selected_role,
+                    "report_path": report.relative_to(root).as_posix(),
+                    "detail": "prepared report fails its own strict contract: "
+                              + "; ".join(_writer_violations[:3])}
 
         manifest_rel = manifest.relative_to(root).as_posix()
         report_rel = report.relative_to(root).as_posix()
@@ -1246,7 +1436,8 @@ def verify_cycle(cycle_dir: Path) -> list[str]:
             errors.append(f"seat {seat_id}: report {report_path} is not "
                           "complete")
             continue
-        report_errors = validate_report(report_text, require_runs=strict)
+        report_errors = validate_report(report_text, require_runs=strict,
+                                        strict=strict)
         for err in report_errors:
             errors.append(f"seat {seat_id} report: {err}")
         # DOGFOOD V (T-619): verify_cycle validates source freshness for
@@ -1275,9 +1466,15 @@ def abort_cycle(cycle_dir: Path) -> dict:
     Abort is the sanctioned exit: it refuses once ANY disposition exists (a
     cycle whose sweep started is not abortable), flips the manifest to
     archived with a journaled `cycle_aborted` marker, and byte-preserves the
-    never-completed draft reports under a `.discarded` suffix (a DRAFT is not
-    yet evidence, so it stops being scanned as one, but no byte is deleted).
-    The next cycle can then be admitted without destroying the trace."""
+    never-completed draft reports AT THEIR SAME PATH. No report byte is ever
+    renamed, moved or deleted (P0, T-632): a raw Path.rename outside the
+    journal was the crash hole -- a forced journal write failure left the
+    report already renamed while the manifest stayed active. The report
+    staying in place is not a split state: the manifest's archived +
+    cycle_aborted markers are the single source of truth that the cycle and
+    its drafts are non-authoritative, and every lifecycle consumer refuses an
+    archived cycle. The next cycle can then be admitted without destroying
+    the trace."""
     manifest = cycle_dir / "MANIFEST.md"
     _prove_inside(_project_root_of(manifest), manifest)
     text = _read_maybe(manifest)
@@ -1293,29 +1490,30 @@ def abort_cycle(cycle_dir: Path) -> dict:
             "abort refuses: the sweep ledger already carries dispositions; a "
             "cycle whose Core sweep started is not abortable -- finish or "
             "dispose it properly")
-    discarded = []
-    for block in _seat_blocks(text):
-        seat_id = _field(block, "seat_id")
-        report_path = _field(block, "report_path")
-        if not seat_id or not report_path:
-            continue
-        report = cycle_dir / seat_id / report_path
-        if not report.is_file():
-            continue
-        if _field(_read_maybe(report), "report_status") != "complete":
-            discarded_name = report.name + ".discarded"
-            report.rename(report.with_name(discarded_name))
-            discarded.append(f"{seat_id}/{discarded_name}")
+    # The manifest write is the ONLY filesystem effect, and it is the single
+    # journaled transaction. A crash at any stage leaves either the active
+    # manifest unchanged (retry re-aborts idempotently) or an archived +
+    # cycle_aborted manifest whose draft reports stay byte-identical -- there
+    # is no intermediate state where a report moved but the manifest did not.
     new_text = re.sub(r"(?m)^cycle_status:\s*[A-Za-z]+",
                       "cycle_status: archived", text, count=1)
-    new_text = new_text.rstrip() + "\ncycle_aborted: draft-discarded\n"
+    new_text = new_text.rstrip() + "\ncycle_aborted: draft-preserved\n"
     result = _journaled_write(manifest, new_text, "cycle",
                               base_hash=_base_hash(manifest))
     if not result.get("ok"):
         raise ImproveError(
             f"cycle {cycle_dir.name} not aborted: {result.get('code')} "
             f"{result.get('message', '')}")
-    result["discarded"] = discarded
+    preserved = []
+    for block in _seat_blocks(text):
+        seat_id = _field(block, "seat_id")
+        report_path = _field(block, "report_path")
+        if not seat_id or not report_path:
+            continue
+        report = cycle_dir / seat_id / report_path
+        if report.is_file():
+            preserved.append(f"{seat_id}/{report_path}")
+    result["preserved_reports"] = sorted(preserved)
     return result
 
 
@@ -1337,6 +1535,11 @@ def complete_cycle(cycle_dir: Path) -> dict:
         raise ImproveError(f"cycle manifest missing: {manifest}")
     if _cycle_status(manifest) == "complete":
         raise ImproveError(f"cycle {cycle_dir.name} is already complete")
+    if _cycle_status(manifest) == "archived":
+        raise ImproveError(
+            f"cycle {cycle_dir.name} is archived (aborted/archived); an "
+            "aborted cycle's drafts are non-authoritative and can never be "
+            "completed -- admit a fresh cycle instead")
     errors = verify_cycle(cycle_dir)
     if errors:
         raise ImproveError(
@@ -1447,7 +1650,8 @@ def complete_report(report_path: Path) -> dict:
     # schema, and a report with only report_status: complete refuses.
     completion_text = re.sub(r"(?m)^report_status:[ \t]*[A-Za-z]+",
                              "report_status: complete", text, count=1)
-    errors = validate_report(completion_text, require_runs=strict)
+    errors = validate_report(completion_text, require_runs=strict,
+                             strict=strict)
     if errors:
         raise ImproveError(
             "complete_report refused -- the completion schema is unmet:\n- "
@@ -1521,6 +1725,13 @@ def register_seat(cycle_dir: Path, seat_id: str, role: str,
     text = _read_maybe(manifest)
     if not text.startswith("# IMPROVE CYCLE ROSTER"):
         text = "# IMPROVE CYCLE ROSTER\n\n" + text
+    # A2: a manifest that fails its own grammar is never mutated -- seat
+    # registration on a corrupt roster would commit a decision the validator
+    # would then reject as INVALID_MANIFEST.
+    _manifest_errors = validate_manifest(text, expected_cycle_id=cycle_dir.name)
+    if _manifest_errors:
+        raise ImproveError("register_seat refuses an invalid active manifest: "
+                           + "; ".join(_manifest_errors[:3]))
     if _seat_block(text, seat) is not None:
         raise ImproveError(f"duplicate seat registration: {seat}")
     _refuse_duplicate_owner_over_bare_sweep(
@@ -1565,7 +1776,7 @@ def append_run(report_path: Path, run_text: str) -> dict:
             "append_run refuses: a strict-cycle report must be created "
             "through create_report (it needs the mechanical header) before "
             "any RUN is appended")
-    run_count = len(re.findall(r"(?m)^## RUN \d+", text))
+    run_count = len(re.findall(r"(?m)^## RUN \d+\s*$", text))
     run = f"## RUN {run_count + 1}\n\n{run_text.rstrip()}\n"
     result = _journaled_write(report_path, text.rstrip() + "\n\n" + run,
                               "run", base_hash=_base_hash(report_path))
@@ -1576,23 +1787,41 @@ def append_run(report_path: Path, run_text: str) -> dict:
     return result
 
 
-def validate_report(text: str, require_runs: bool = False) -> list[str]:
+def validate_report(text: str, require_runs: bool = False,
+                    strict: bool = False) -> list[str]:
     """Return every report violation; empty means valid.
 
     `require_runs=True` applies the DOGFOOD V strict completion schema: a
     report declared `report_status: complete` MUST carry at least one explicit
     `## RUN N` section (or an explicit `NO_FINDINGS` run) -- an empty skeleton
-    that merely says complete is never a completed audit. `validate_report`
-    alone keeps the legacy report rules so the three historical archived
-    cycles remain valid legacy evidence.
+    that merely says complete is never a completed audit. `strict=True` applies
+    the STRICT-cycle header contract (discovery_model required exactly once)
+    and the STRICT finding-identity contract (A4): RUN numbers unique /
+    ascending / contiguous 1..N with canonical IMP-NNN grammar and injective
+    composite <RUN>/<IMP> identities. `validate_report` alone keeps the legacy
+    report rules so the three historical archived cycles remain valid legacy
+    evidence.
     """
     errors = []
     parsed = parse_report(text)
     header = parsed.header
-    missing = sorted(REQUIRED_HEADER - set(header))
+    required = REQUIRED_HEADER if strict \
+        else REQUIRED_HEADER - _LEGACY_OPTIONAL_HEADER
+    missing = sorted(required - set(header))
     if missing:
         errors.append("report header missing required fields: "
                       + ", ".join(sorted(missing)))
+    # Header fields are unique, and they come only from the top block: a
+    # repeated required header is corruption every consumer must refuse, not
+    # just the admission path -- `_field` reads the first while the strict
+    # RUN check would read the last (T-630).
+    _hblock = text.split("\n## ", 1)[0]
+    _dup_header = sorted(
+        k for k in required
+        if sum(1 for ln in _hblock.splitlines() if ln.startswith(k + ":")) > 1)
+    if _dup_header:
+        errors.append("report repeats required header field(s): "
+                      + ", ".join(_dup_header))
 
     if header.get("report_status") and header["report_status"] not in REPORT_STATUS:
         errors.append(f"report_status {header['report_status']!r} outside "
@@ -1623,6 +1852,22 @@ def validate_report(text: str, require_runs: bool = False) -> list[str]:
                           "section -- a completed audit needs intentional RUN "
                           "evidence (DOGFOOD V, T-616)")
         else:
+            # A4: RUN identity is INJECTIVE -- numbers unique, ascending and
+            # contiguous 1..N. A duplicate or out-of-order RUN section is
+            # false evidence (RUN 1 duplicated, RUN 1 then RUN 3, a gap, a
+            # descending renumber): every finding's composite <RUN>/<IMP>
+            # identity must resolve to exactly one section.
+            runs = list(parsed.runs)
+            if len(runs) != len(set(runs)):
+                dup = sorted({n for n in runs if runs.count(n) > 1})
+                errors.append("strict report repeats RUN section number(s): "
+                              + ", ".join(f"RUN {n}" for n in dup))
+            if runs != sorted(runs):
+                errors.append("strict report RUN numbers are not ascending: "
+                              + ", ".join(f"RUN {n}" for n in runs))
+            if runs and sorted(runs) != list(range(1, max(runs) + 1)):
+                errors.append("strict report RUN numbers are not contiguous "
+                              "1..N: " + ", ".join(f"RUN {n}" for n in sorted(runs)))
             # A run with NO_FINDINGS must actually have zero findings.
             for run_number in sorted(parsed.no_findings_runs):
                 if any(f.run == run_number for f in parsed.findings):
@@ -1641,6 +1886,28 @@ def validate_report(text: str, require_runs: bool = False) -> list[str]:
                         f"RUN {run_number} carries no findings and no "
                         "NO_FINDINGS marker -- an empty audit run is not "
                         "intentional evidence (DOGFOOD V, T-616)")
+
+    if strict:
+        # A4: strict finding identity is INJECTIVE. Canonical IMP-NNN grammar
+        # (three-digit id); composite <RUN>/<IMP> identities unique across the
+        # whole report. These checks run BEFORE any set/map conversion of the
+        # findings, so a duplicate composite identity can never be silently
+        # deduplicated into a "covered" verdict (the duplicate would already
+        # have failed the report).
+        seen_identities: set[tuple[int | None, str]] = set()
+        for finding in parsed.findings:
+            if not re.fullmatch(r"IMP-\d{3}", finding.imp):
+                errors.append(f"finding at line {finding.start}: IMP id "
+                              f"{finding.imp!r} is not canonical IMP-NNN "
+                              "(three-digit); strict reports use the "
+                              "mechanical finding grammar")
+            identity = (finding.run, finding.imp)
+            if identity in seen_identities:
+                errors.append(
+                    f"strict report repeats composite finding identity "
+                    f"{finding.ref()} -- one sweep disposition can never "
+                    "satisfy two findings with the same identity")
+            seen_identities.add(identity)
 
     for finding in parsed.findings:
         for fname in ("expected", "actual", "evidence"):
@@ -1745,6 +2012,19 @@ def validate_manifest(text: str,
         if seat_id in seen:
             errors.append(f"duplicate seat_id: {seat_id}")
         seen.add(seat_id)
+        # A3: STRICT seat field cardinality -- seat_id/role/report_path/
+        # availability each exactly once inside one seat block. `_field`
+        # reads the FIRST occurrence, so a duplicated field would silently
+        # pick one value and the other is dead corruption; reject the block
+        # instead of resolving first-vs-last ambiguity.
+        if strict:
+            for key in ("seat_id", "role", "report_path", "availability"):
+                count = len(re.findall(
+                    rf"(?m)^{key}:[ \t]*\S", block))
+                if count != 1:
+                    errors.append(
+                        f"seat {seat_id}: strict field {key} must appear "
+                        f"exactly once, found {count}")
         role = _field(block, "role")
         if not role:
             errors.append(f"seat {seat_id}: missing role")

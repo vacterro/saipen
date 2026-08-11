@@ -32,12 +32,18 @@ def parse_log_line(line: str) -> dict | None:
 
 
 def log_tail_event(text: str) -> int | None:
-    """The highest E-### in the LOG text (sealed + active read as one)."""
+    """The actual maximum E-### across the LOG text (sealed + active as one).
+
+    Order-independent by contract: allocation correctness never depends on
+    line or file ordering, so E-100 followed by E-9 is still 100 (red control).
+    """
     highest = None
     for line in text.splitlines():
         parsed = parse_log_line(line)
         if parsed is not None:
-            highest = parsed["event"]
+            event = parsed["event"]
+            if highest is None or event > highest:
+                highest = event
     return highest
 
 
