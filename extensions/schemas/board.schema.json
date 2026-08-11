@@ -26,7 +26,7 @@
       },
       "blocker": {
         "type": "string",
-        "description": "Facts + dead ends, set when status is BLOCKED"
+        "description": "Active facts + dead ends. Present and non-empty exactly when status is BLOCKED; absent for every other status."
       },
       "needs": {
         "type": "array",
@@ -49,7 +49,7 @@
       "verify_attempts": {
         "type": "integer",
         "minimum": 0,
-        "description": "RFC 1.2 recognized optional ticket field; absent reads as zero. Counts the failed fix cycles phases/verify.md spends on this ticket, so its cap is mechanical rather than remembered -- the same argument review_passes already carries one phase over. The cap number itself lives in phases/verify.md and is read from there, never copied."
+        "description": "RFC 1.2 recognized optional ticket field; absent reads as zero. Counts the current failed-fix-cycle budget phases/verify.md spends on this ticket. Canonical unblock clears the current budget while journaled events retain history. The cap number itself lives in phases/verify.md and is read from there, never copied."
       },
       "source_reports": {
         "type": "string",
@@ -64,6 +64,22 @@
         "description": "RFC 1.2 recognized optional ticket field (T-558): the WEAK-MODEL PRECEDENT answer -- could a weak but compliant model still choose wrong while honestly believing it followed SAIPEN? Required by the [sweep-ticket-link] check for a PROTOCOL_VIOLATION finding that produced a ticket."
       }
     },
+    "allOf": [
+      {
+        "description": "blocker is active blocked-state data: present and non-empty exactly under BLOCKED (T-631)",
+        "if": {
+          "properties": { "status": { "const": "BLOCKED" } },
+          "required": ["status"]
+        },
+        "then": {
+          "required": ["blocker"],
+          "properties": { "blocker": { "minLength": 1, "pattern": "\\S" } }
+        },
+        "else": {
+          "not": { "required": ["blocker"] }
+        }
+      }
+    ],
     "required": [
       "status",
       "id",

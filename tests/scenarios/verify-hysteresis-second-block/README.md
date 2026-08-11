@@ -1,11 +1,8 @@
-Test: a ticket already carries `| blocker:` text from an earlier VERIFY
-cap trip (3 dead hypotheses / 2 failed fix cycles), gets moved back to
-`## TODO`, and hits the same VERIFY cap a second time. Per
-`phases/verify.md`'s hysteresis rule, the agent MUST NOT spend a fresh
-retry budget on an identical cycle -- it appends this round's facts to
-the existing `| blocker:` text and escalates straight to session-level
-`STATE.phase: BLOCKED` instead of picking up other work. This is a
-behavioral test (agent decision-making across two separate VERIFY
-attempts), not a structural one -- no `.saipen/` fixture to validate
-against; the assertion is entirely in whether the agent recognizes the
-repeat trip and escalates instead of retrying silently.
+Test: a ticket hits VERIFY's cap and is canonically blocked. Its active
+`| blocker:` exists only while the ticket is under `## BLOCKED`; failed
+attempt history remains in `verify_attempts:` and journaled LOG events.
+Canonical unblock records the decision, returns the ticket to `## TODO`,
+removes `blocker:`, and clears the current attempt budget. A later retry
+MUST name changed evidence under CORE.md section 1.6; identical retry stays
+forbidden. This is a behavioral test (agent reasoning across two separate
+VERIFY attempts), while blocker/section shape is covered mechanically.

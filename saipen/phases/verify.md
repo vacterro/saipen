@@ -106,28 +106,21 @@ list; absent reads as zero). `tools/validate.py` FAILs a ticket at or over the
 cap above that carries no `| blocker:`, and it reads the cap out of this very
 sentence rather than keeping its own copy. The field exists for the reason
 `review_passes:` does one phase over: a cap counted from memory is a cap the
-next session does not have, and the hysteresis rule below preserves the
-history as prose that nothing can sum.
+next session does not have.
 
-**Hysteresis**: this ticket's `| blocker:` field already carries text from
-an earlier round (someone moved it back to `## TODO` and this is a repeat
-trip through the same cap)? Do not silently spend another fresh 3/2 budget
-retrying the same approach -- append this round's facts to the existing
-`| blocker:` text rather than overwriting it. Two independent failed attempts
-at the same ticket is itself the signal that mechanically retrying won't help;
-it needs a human decision, not a third identical cycle -- so this ticket is
-done being retried either way. **What that means for the session depends on
+**Hysteresis**: `| blocker:` is ACTIVE blocked status, never attempt history.
+At the cap, use canonical `ticket block`: it moves the ticket to `## BLOCKED`
+and sets the current blocker atomically. Failed-attempt history stays in
+`verify_attempts:` plus the journaled LOG hypotheses/fix results. A canonical
+`ticket unblock` records the decision, moves the ticket to `## TODO`, removes
+the blocker, and clears the current attempt budget; carrying `| blocker:` into
+`## TODO` is status corruption, not preservation. An identical retry remains
+forbidden by CORE.md §1.6's repeated-attempt rule; a newly authorized attempt
+must name changed evidence. **What the block means for the session depends on
 the rest of the board, and `phases/blocked.md`'s own entry condition decides
-it, not this cap**: that doc opens by stating you land in session-level
-`BLOCKED` only after confirming no other ticket is workable, so check that
-first. Another unblocked `TODO` exists -> leave this ticket in `## BLOCKED`
-carrying its appended history and go work that one (`SCOUT`/`BUILD`), exactly
-as the first-trip case above does. Nothing else is workable -> `STATE.phase:
-BLOCKED` with a concrete `WAIT:` naming the decision this ticket needs. The
-hysteresis is about never spending a third budget on the same ticket, never
-about halting a session that still has real work available -- one stuck
-ticket MUST NOT halt a session that still has other work, under a goal run
-or otherwise.
+it, not this cap**: another workable `TODO` exists -> leave this ticket in
+`## BLOCKED` and work that one. Nothing else is workable -> `STATE.phase:
+BLOCKED` with a concrete `WAIT:` naming the decision this ticket needs.
 
 **Clean tree before the next ticket.** A blocked ticket MUST NOT leave its
 half-broken edits sitting in the working tree -- the next ticket would

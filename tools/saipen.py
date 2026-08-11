@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 from saipen_engine import codec, snapshot
-from saipen_engine.board import parse_board
+from saipen_engine.board import parse_board, ticket_is_workable
 from saipen_engine.journal import (auto_recover_pending, pending_conflicts,
                                    pending_ops)
 from saipen_engine.operations import (apply_claim, checkpoint, finish_ticket,
@@ -73,13 +73,16 @@ def _status(project_root: Path, as_json: bool) -> int:
     doing = [t for t in board["tickets"].values()
              if t["section"] == "## DOING"]
     todo = [t for t in board["tickets"].values() if t["section"] == "## TODO"]
+    # A board the parser cannot read whole is not a work surface: the router
+    # reports board-malformed, so the workable/claimed projections must not
+    # advertise an executable-looking ticket from a partial parse.
     top_workable = None
-    for ticket in todo:
-        needs = ticket["needs"]
-        if all(n in board["tickets"] and board["tickets"][n]["section"]
-               == "## DONE" for n in needs):
-            top_workable = ticket["id"]
-            break
+    if not board["errors"]:
+        for ticket in todo:
+            if ticket_is_workable(ticket, board["tickets"],
+                                  agent=state.get("agent")):
+                top_workable = ticket["id"]
+                break
     pending = _pending(project_root)
     conflicts = _conflicts(project_root)
     from saipen_engine.router import route_next
@@ -909,7 +912,8 @@ def main(argv: list[str] | None = None) -> int:
         print("usage: saipen (status|next|recover|claim <T-###>|"
               "transition <PHASE> [T-###] [text]|checkpoint <TAXONOMY> "
               "[T-###] [text]|ticket add <PRIORITY> <text>|ticket "
-              "done|block|unblock <T-###> [text]|improve|improve "
+              "done <T-###>|ticket block <T-###> <reason>|ticket "
+              "unblock <T-###> <decision>|improve|improve "
               "status|improve sweep <cycle> <RUN-N/IMP-NNN> <DISPOSITION> "
                "|improve sweep-queue <cycle>|improve submit <cycle> <seat> "
                "<project> <findings.json>|improve complete <cycle> <seat> "

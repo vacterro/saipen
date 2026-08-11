@@ -28,7 +28,9 @@ import uuid
 from pathlib import Path
 
 from . import codec, phases
-from .board import parse_board, remove_ticket_field, set_ticket_field
+from .board import (_claim_is_live, escape_ticket_description, parse_board,
+                    remove_ticket_field, set_ticket_field,
+                    ticket_has_blocker, ticket_is_workable)
 from .fast_check import validate_texts
 from .journal import hash_bytes
 from .log import build_event, log_tail_event
@@ -106,17 +108,42 @@ def _plan_claim(root: Path, ticket_id: str, agent: str, now: str, utc: str,
                 explicit: bool = False) -> OperationPlan | Result:
     op_id = "claim-" + uuid4_hex8()
     docs, state, board, log_tail = _read(root)
+    if board["errors"]:
+        return _refuse("VALIDATION_FAILED",
+                       "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+                       ticket=ticket_id)
     tickets = board["tickets"]
     if ticket_id not in tickets:
         return _refuse("TICKET_NOT_FOUND", f"{ticket_id} not on the board",
                        ticket=ticket_id)
     ticket = tickets[ticket_id]
+    if ticket_has_blocker(ticket):
+        return _refuse(
+            "TICKET_NOT_WORKABLE",
+            f"{ticket_id} carries a blocker; explicit priority override does "
+            "not override authorization",
+            ticket=ticket_id,
+        )
     if ticket["section"] == "## DOING":
         return _refuse("ALREADY_CLAIMED",
                        f"{ticket_id} is already in ## DOING", ticket=ticket_id)
     if ticket["section"] != "## TODO":
         return _refuse("TICKET_NOT_WORKABLE",
                        f"{ticket_id} is under {ticket['section']}",
+                       ticket=ticket_id)
+    if ticket["checkbox"] not in (" ", ""):
+        return _refuse("TICKET_NOT_WORKABLE",
+                       f"{ticket_id} is [{ticket['checkbox']}] but sits under "
+                       f"## TODO -- checkbox/section disagreement is malformed "
+                       f"input and cannot be claimed",
+                       ticket=ticket_id)
+    _tfields = ticket["fields"]
+    if _claim_is_live(_tfields.get("owner", ""),
+                      _tfields.get("claim_time", ""), agent, None):
+        return _refuse("TICKET_NOT_WORKABLE",
+                       f"{ticket_id} sits under ## TODO but carries a live "
+                       f"claim by {_tfields.get('owner')} -- § 1.4's active "
+                       f"claim is not claimable by this agent",
                        ticket=ticket_id)
     for need in ticket["needs"]:
         if need not in tickets or tickets[need]["section"] != "## DONE":
@@ -130,10 +157,7 @@ def _plan_claim(root: Path, ticket_id: str, agent: str, now: str, utc: str,
     if not explicit:
         top_workable = None
         for t in tickets.values():
-            if t["section"] != "## TODO":
-                continue
-            if all(need in tickets and tickets[need]["section"] == "## DONE"
-                   for need in t["needs"]):
+            if ticket_is_workable(t, tickets, agent=agent):
                 top_workable = t["id"]
                 break
         if top_workable is None or top_workable != ticket_id:
@@ -452,6 +476,10 @@ def _ticket_targets(root: Path, action: str, ticket_id: str, agent: str,
                     payload: str, now: str, utc: str) -> OperationPlan | Result:
     op_id = "ticket-" + uuid4_hex8()
     docs, state, board, log_tail = _read(root)
+    if board["errors"]:
+        return _refuse("VALIDATION_FAILED",
+                       "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+                       ticket=ticket_id)
     tickets = board["tickets"]
     if ticket_id not in tickets:
         return _refuse("TICKET_NOT_FOUND", f"{ticket_id} not on the board",
@@ -467,12 +495,20 @@ def _ticket_targets(root: Path, action: str, ticket_id: str, agent: str,
                        "or `saipen ticket done` (it closes LOG+BOARD+STATE "
                        "together)", ticket=ticket_id)
     elif action == "block":
+        if not payload or not payload.strip():
+            return _refuse("VALIDATION_FAILED",
+                           "block requires the facts/dead ends that justify "
+                           "the block", ticket=ticket_id)
         if ticket["section"] not in ("## DOING", "## TODO"):
             return _refuse("ILLEGAL_TICKET_LIFECYCLE",
                            f"block accepts DOING or TODO; {ticket_id} is "
                            f"under {ticket['section']}", ticket=ticket_id)
         target_section, checkbox = "## BLOCKED", "[ ]"
     elif action == "unblock":
+        if not payload or not payload.strip():
+            return _refuse("VALIDATION_FAILED",
+                           "unblock requires the decision/evidence that "
+                           "lifts the block", ticket=ticket_id)
         if ticket["section"] != "## BLOCKED":
             return _refuse("ILLEGAL_TICKET_LIFECYCLE",
                            f"unblock accepts only BLOCKED; {ticket_id} is "
@@ -483,8 +519,33 @@ def _ticket_targets(root: Path, action: str, ticket_id: str, agent: str,
 
     new_board = _move_ticket(docs["board"].text_norm, ticket_id,
                              target_section, checkbox, action, payload)
+    # Blocking the ACTIVE DOING ticket parks the current work: the ticket
+    # leaves ## DOING, so the execution state must not keep naming it in a
+    # ticket-bearing phase, and the block MUST NOT become a session-level
+    # phase: BLOCKED -- that state is reserved for when no ticket anywhere is
+    # workable (CORE.md § 1.11), carries its own STATE.blocker + WAIT, and
+    # contradicts a running goal intent. The block therefore neutralizes the
+    # execution state to DONE/task none (the same no-active-ticket form
+    # finish_ticket uses) and routes the next_action from the RESULTING
+    # board. Blocking a merely-TODO ticket leaves execution state untouched.
+    # The ACTIVE case must be provable from the LOG alone: the block event
+    # carries an explicit (active) marker so the validator's block-park
+    # exception can never be satisfied by a TODO-ticket block event.
+    is_active_block = (action == "block"
+                       and state.get("task") == ticket_id
+                       and ticket["section"] == "## DOING"
+                       and state.get("phase") in phases.TICKET_BEARING_PHASES)
+    if (action == "block" and ticket["section"] == "## DOING"
+            and not is_active_block):
+        return _refuse("ILLEGAL_TICKET_LIFECYCLE",
+                       f"blocking DOING ticket {ticket_id} requires a "
+                       f"ticket-bearing source phase "
+                       f"({', '.join(sorted(phases.TICKET_BEARING_PHASES))}); "
+                       f"STATE is {state.get('phase')!r} with task "
+                       f"{state.get('task')!r}", ticket=ticket_id)
     event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent,
                               f"ticket {action} via SAIOPS"
+                              + (" (active)" if is_active_block else "")
                               + (f" -- {payload}" if payload else ""), now,
                               op_id)
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
@@ -493,19 +554,36 @@ def _ticket_targets(root: Path, action: str, ticket_id: str, agent: str,
         "updated": utc,
         "agent": agent,
     }
-    # Blocking the ACTIVE DOING ticket parks the current work: the ticket
-    # leaves ## DOING, so the execution state must not keep naming it in a
-    # ticket-bearing phase. The block owns phase -> BLOCKED / task -> none /
-    # transition_from -> previous, exactly like pausing the session (NITRO
-    # dogfood III, T-591). Blocking a merely-TODO ticket leaves execution
-    # state untouched.
-    if action == "block" and state.get("task") == ticket_id \
-            and ticket["section"] == "## DOING":
-        owned["phase"] = "BLOCKED"
+    if is_active_block:
+        if not state.get("phase"):
+            return _refuse("VALIDATION_FAILED",
+                           "blocking the active ticket needs a real source "
+                           "phase; STATE carries none, so transition_from "
+                           "would be fabricated",
+                           ticket=ticket_id)
+        owned["phase"] = "DONE"
         owned["task"] = "none"
-        owned["next_action"] = "saipen continue"
-        owned["transition_from"] = state.get("phase") or "BUILD"
+        if str(state.get("next_action") or "").startswith("WAIT:"):
+            owned["next_action"] = state.get("next_action")
+        else:
+            owned["next_action"] = "saipen continue"
+        owned["transition_from"] = state.get("phase")
     new_state = patch_state(docs["state"].text_norm, owned)
+    # Routing after a structural move must not walk over a hard stop: a
+    # safety-valve or user WAIT is preserved, never replaced by a fresh pick.
+    # Unblock also re-routes, because moving a line back into ## TODO changes
+    # the topmost-workable order the neutral state's next_action points at.
+    from .router import route_next
+    if action in ("block", "unblock") \
+            and not str(state.get("next_action") or "").startswith("WAIT:"):
+        _neutral = (state.get("task") in (None, "none")
+                    and not any(t["section"] == "## DOING"
+                                for t in parse_board(new_board)["tickets"].values()))
+        if _neutral or is_active_block:
+            routed = route_next(new_state, new_board)
+            if routed.get("ok"):
+                new_state = patch_state(new_state,
+                                        {"next_action": routed["action"]})
 
     errors = validate_texts(new_state, new_board, new_log)
     if errors:
@@ -556,6 +634,10 @@ def _plan_finish_ticket(root: Path, ticket_id: str, agent: str, now: str,
     """
     op_id = "finish-" + uuid4_hex8()
     docs, state, board, log_tail = _read(root)
+    if board["errors"]:
+        return _refuse("VALIDATION_FAILED",
+                       "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+                       ticket=ticket_id)
     tickets = board["tickets"]
     if ticket_id not in tickets:
         return _refuse("TICKET_NOT_FOUND", f"{ticket_id} not on the board",
@@ -685,10 +767,12 @@ def _move_ticket(board_text: str, ticket_id: str, target_section: str,
         marked = ticket_line.replace("- [/] ", "- [x] ", 1)
     elif action == "block":
         marked = ticket_line.replace("- [/] ", "- [ ] ", 1)
-        marked = set_ticket_field(marked, "blocker", payload or "blocked")
+        marked = set_ticket_field(marked, "blocker",
+                                  escape_ticket_description(payload or "blocked"))
     elif action == "unblock":
         marked = ticket_line.replace("- [/] ", "- [ ] ", 1)
         marked = remove_ticket_field(marked, "blocker")
+        marked = remove_ticket_field(marked, "verify_attempts")
     else:  # pragma: no cover
         marked = ticket_line.replace("- [/] ", "- [ ] ", 1)
     out.insert(target_idx + 1, marked.rstrip() + "\n")
@@ -717,17 +801,29 @@ def ticket_add(project_root: Path | str, agent: str, priority: str,
     if not description or not description.strip():
         return _refuse("INCOMPLETE_TICKET",
                        "ticket description is required (semantic input)")
+    if "\n" in description or "\r" in description:
+        return _refuse("VALIDATION_FAILED",
+                       "ticket description may not contain line breaks -- "
+                       "one ticket_add must render exactly one ticket line")
     if _is_placeholder_verify(verify):
         return _refuse("INCOMPLETE_TICKET",
                        "verify is a placeholder; a ticket needs a real DONE "
                        "proof (no TBD/TODO/empty)", verify=verify)
+    if "\n" in verify or "\r" in verify:
+        return _refuse("VALIDATION_FAILED",
+                       "verify text may not contain line breaks")
     op_id = "ticket-" + uuid4_hex8()
     now, utc = _now(), _utc_iso()
     docs, _state, board, log_tail = _read(root)
+    if board["errors"]:
+        return _refuse("VALIDATION_FAILED",
+                       "BOARD parse error(s): " + "; ".join(board["errors"][:3]))
     tid = next_ticket_id(docs["board"].text_norm, docs["log"].text_norm)
     for need in needs:
         if need not in board["tickets"]:
             return _refuse("TICKET_NOT_FOUND", f"dangling needs: {need}")
+    description = escape_ticket_description(description)
+    verify = escape_ticket_description(verify)
     desc = (f"- [ ] T-{tid} [{priority}] {description}"
             + (f" | needs: {', '.join(needs)}" if needs else "")
             + f" | verify: {verify}")

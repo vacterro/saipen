@@ -713,6 +713,57 @@ def demote_the_pick(text: str) -> str:
             + bottom + nl + text[todo.end(1):])
 
 
+def move_blocker_ticket_to_todo(text: str) -> str:
+    """Reproduce T-576's unjournaled BLOCKED -> TODO drift byte-for-byte."""
+    lines = text.splitlines()
+    section = ""
+    blocked_index = None
+    ticket_line = None
+    todo_index = None
+    for index, line in enumerate(lines):
+        if line.startswith("## "):
+            section = line
+            if line == "## TODO":
+                todo_index = index
+            continue
+        if (section == "## BLOCKED" and line.startswith("- [ ] T-")
+                and " | blocker:" in line):
+            blocked_index = index
+            ticket_line = line
+            break
+    if blocked_index is None or ticket_line is None or todo_index is None:
+        return text
+    del lines[blocked_index]
+    lines.insert(todo_index + 1, ticket_line)
+    return "\n".join(lines) + "\n"
+
+
+def add_blocker_to_doing(text: str) -> str:
+    """Make the active ticket claim work while carrying blocked status."""
+    return re.sub(
+        r"^(- \[/\] T-\d+ .*?)( \| verify:)",
+        r"\1 | blocker: WAIT_USER_CONFIRMATION\2",
+        text,
+        count=1,
+        flags=re.MULTILINE,
+    )
+
+
+def remove_blocker_from_blocked(text: str) -> str:
+    """Leave a ticket in BLOCKED while deleting its active reason."""
+    lines = text.splitlines()
+    section = ""
+    for index, line in enumerate(lines):
+        if line.startswith("## "):
+            section = line
+            continue
+        if (section == "## BLOCKED" and line.startswith("- [ ] T-")
+                and " | blocker:" in line):
+            lines[index] = re.sub(r" \| blocker:.*$", "", line)
+            return "\n".join(lines) + "\n"
+    return text
+
+
 def inject_unclaimed_doing(text: str) -> str:
     """T-573: put an unclaimed ticket in ## DOING whatever the live board holds.
 
@@ -1127,6 +1178,23 @@ CASES: list[tuple[str, str, object, str]] = [
      ("MULTI", [(BOARD, demote_the_pick),
                 (STATE, sub_line("next_action", '"PHASE SCOUT T-998"'))]),
      "but the topmost workable ## TODO ticket is"),
+    ("T-576-style drift moves a blocker ticket under TODO", BOARD,
+     move_blocker_ticket_to_todo,
+     "carries | blocker: outside ## BLOCKED"),
+    ("a DOING ticket carries an active blocker", BOARD,
+     add_blocker_to_doing,
+     "carries | blocker: outside ## BLOCKED"),
+    ("a BLOCKED ticket loses its blocker", BOARD,
+     remove_blocker_from_blocked,
+     "sits under ## BLOCKED without a non-empty | blocker:"),
+    # A block-parked DONE state (phase DONE + transition_from a mid-flight
+    # phase) is legal only while the active LOG's most recent ticket event is
+    # a canonical `ticket block via SAIOPS` line. The live LOG tail is a
+    # transition, not a block, so this mutation must FAIL on the transition
+    # edge -- proving the exception cannot be forged by hand.
+    ("block-parked DONE without a canonical block line", STATE,
+     lambda t: sub_line("phase", "DONE")(sub_line("transition_from", "BUILD")(t)),
+     "invalid phase transition"),
     # A C0 byte is invisible in every reader and still changes what the code
     # means. Two `\1` backreferences in this file were literal `\x01` bytes,
     # so both verify_attempts controls substituted a SOH character for the

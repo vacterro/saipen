@@ -5470,6 +5470,90 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     expect("claim of the topmost workable ticket succeeds",
            top.get("ok") and top.get("code") == "CLAIMED", repr(top))
 
+    # ---- T-631: blocker is an authorization boundary, even on malformed
+    # TODO input that a caller passes without running the full validator.
+    from saipen_engine.router import route_next as _blocker_route_next
+    blocker_root = make_project()
+    blocker_board = blocker_root / ".saipen" / "BOARD.md"
+    blocker_board.write_text(
+        blocker_board.read_text(encoding="utf-8").replace(
+            "T-1 [P1] top probe | verify: probe",
+            "T-1 [P1] top probe | blocker: WAIT_USER_CONFIRMATION | "
+            "verify: probe",
+        ),
+        encoding="utf-8",
+    )
+    blocker_before = project_tree(blocker_root)
+    blocker_normal = apply_claim(blocker_root, "T-1", "probe")
+    blocker_explicit = apply_claim(
+        blocker_root, "T-1", "probe", explicit=True)
+    expect("normal claim refuses a TODO ticket carrying blocker",
+           blocker_normal.get("code") == "TICKET_NOT_WORKABLE",
+           repr(blocker_normal))
+    expect("explicit claim cannot override blocker authorization",
+           blocker_explicit.get("code") == "TICKET_NOT_WORKABLE",
+           repr(blocker_explicit))
+    expect("refused normal and explicit blocker claims write zero bytes",
+           blocker_before == project_tree(blocker_root))
+    blocker_state = codec.read_doc(blocker_root / ".saipen" / "STATE.md")
+    blocker_text = codec.read_doc(blocker_board)
+    blocker_route = _blocker_route_next(blocker_state, blocker_text)
+    expect("router skips malformed TODO+blocker and never emits SCOUT for it",
+           blocker_route.get("action") == "PHASE SCOUT T-2",
+           repr(blocker_route))
+
+    blocker_status = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "status",
+         "--json"], cwd=str(blocker_root), capture_output=True, text=True,
+        timeout=60)
+    blocker_status_data = json.loads(blocker_status.stdout)
+    expect("public status excludes TODO+blocker from top_workable",
+           blocker_status_data.get("top_workable_ticket") == "T-2"
+           and blocker_status_data.get("computed_next_action")
+           == "PHASE SCOUT T-2", repr(blocker_status_data))
+    blocker_next = subprocess.run(
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "next", "--json"],
+        cwd=str(blocker_root), capture_output=True, text=True, timeout=60)
+    blocker_next_data = json.loads(blocker_next.stdout)
+    expect("public next never emits SCOUT for TODO+blocker",
+           blocker_next_data.get("action") == "PHASE SCOUT T-2",
+           repr(blocker_next_data))
+
+    # Hypothetical T-624/T-625 completion cannot make a human gate executable.
+    gated_root = make_project()
+    (gated_root / ".saipen" / "BOARD.md").write_text(
+        "# Board\n## DOING\n## TODO\n"
+        "- [ ] T-3 [P3] human decision | needs: T-1,T-2 | "
+        "blocker: WAIT_USER_CONFIRMATION | verify: human decision\n"
+        "## DONE\n"
+        "- [x] T-1 [P1] prerequisite one | verify: done\n"
+        "- [x] T-2 [P1] prerequisite two | verify: done\n"
+        "## BLOCKED\n",
+        encoding="utf-8",
+    )
+    gated_route = _blocker_route_next(
+        codec.read_doc(gated_root / ".saipen" / "STATE.md"),
+        codec.read_doc(gated_root / ".saipen" / "BOARD.md"),
+    )
+    gated_claim = apply_claim(gated_root, "T-3", "probe", explicit=True)
+    expect("satisfied prerequisites never activate a human-decision blocker",
+           gated_route.get("action") != "PHASE SCOUT T-3"
+           and gated_claim.get("code") == "TICKET_NOT_WORKABLE",
+           repr((gated_route, gated_claim)))
+
+    # Mutation: restore old Pick Rule by ignoring blocker. Forbidden ticket is
+    # immediately routed, proving the controls are coupled to blocker defense.
+    with mock.patch(
+            "saipen_engine.router.ticket_is_workable",
+            side_effect=lambda ticket, tickets, agent=None, now=None: (
+                ticket.get("section") == "## TODO"
+                and all(tickets.get(need, {}).get("section") == "## DONE"
+                        for need in ticket.get("needs", [])))):
+        mutated_route = _blocker_route_next(blocker_state, blocker_text)
+    expect("mutation ignoring blocker makes Pick Rule route forbidden ticket",
+           mutated_route.get("action") == "PHASE SCOUT T-1",
+           repr(mutated_route))
+
     # ---- R4: transition cannot switch ticket identity / fake ticket.
     fake = transition_phase(root, "BUILD", "probe", "T-999", "fake")
     expect("transition with a nonexistent ticket refuses",
@@ -5486,18 +5570,108 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            ok_tr.get("ok") and st.get("phase") == "BUILD"
            and st.get("task") == "T-1", repr(st))
 
-    # ---- R5: legal lifecycle only. Block the active ticket, then done.
+    # ---- R5: legal lifecycle only. Block the active ticket, then unblock.
+    active_board = root / ".saipen" / "BOARD.md"
+    active_board.write_text(
+        active_board.read_text(encoding="utf-8").replace(
+            " | owner: probe", " | verify_attempts: 1 | owner: probe", 1),
+        encoding="utf-8",
+    )
     blocked = ticket_move(root, "block", "T-1", "probe", "blocked now")
+    blocked_ticket = parse_board(codec.read_doc(active_board))["tickets"]["T-1"]
+    blocked_state = parse_state(codec.read_doc(root / ".saipen" / "STATE.md"))
     expect("block of an active DOING ticket succeeds",
            blocked.get("ok") and blocked.get("code") == "BLOCK"
-           and parse_board(codec.read_doc(root / ".saipen" / "BOARD.md"))
-           ["tickets"]["T-1"]["section"] == "## BLOCKED", repr(blocked))
-    unblocked = ticket_move(root, "unblock", "T-1", "probe")
+           and blocked_ticket["section"] == "## BLOCKED"
+           and blocked_ticket["fields"].get("blocker") == "blocked now",
+           repr((blocked, blocked_ticket)))
+    expect("block of the active ticket never parks the session in a "
+           "session-level BLOCKED state",
+           blocked_state.get("phase") != "BLOCKED"
+           and blocked_state.get("task") == "none"
+           and blocked_state.get("blocker") in ("", "none"),
+           repr(blocked_state))
+    expect("block routes the next_action to the remaining workable TODO",
+           blocked_state.get("next_action") == "PHASE SCOUT T-2",
+           repr(blocked_state))
+    unblock_no_evidence = ticket_move(root, "unblock", "T-1", "probe")
+    expect("unblock without the lifting decision/evidence refuses",
+           not unblock_no_evidence.get("ok")
+           and unblock_no_evidence.get("code") == "VALIDATION_FAILED",
+           repr(unblock_no_evidence))
+    unblocked = ticket_move(root, "unblock", "T-1", "probe",
+                            "block cleared by recorded decision")
     bd = parse_board(codec.read_doc(root / ".saipen" / "BOARD.md"))
-    expect("unblock removes the blocker field structurally",
+    expect("unblock atomically creates TODO without active blocker/history",
            unblocked.get("ok")
-           and "blocker:" not in bd["tickets"]["T-1"]["raw"],
+           and bd["tickets"]["T-1"]["section"] == "## TODO"
+           and "blocker" not in bd["tickets"]["T-1"]["fields"]
+           and "verify_attempts" not in bd["tickets"]["T-1"]["fields"],
            repr(bd["tickets"]["T-1"]["raw"]))
+
+    # ---- T-631: a malformed ticket line must not launder a blocker into a
+    # workable ticket -- a typo'd `| blockr:` is exactly that laundering.
+    malformed_root = make_project()
+    (malformed_root / ".saipen" / "BOARD.md").write_text(
+        (malformed_root / ".saipen" / "BOARD.md")
+        .read_text(encoding="utf-8").replace(
+            "T-1 [P1] top probe | verify: probe",
+            "T-1 [P1] top probe | blockr: WAIT_USER_CONFIRMATION | "
+            "verify: probe",
+        ),
+        encoding="utf-8",
+    )
+    malformed_claim = apply_claim(malformed_root, "T-1", "probe")
+    malformed_route = _blocker_route_next(
+        codec.read_doc(malformed_root / ".saipen" / "STATE.md"),
+        codec.read_doc(malformed_root / ".saipen" / "BOARD.md"),
+    )
+    expect("claim refuses a board the parser cannot read whole",
+           not malformed_claim.get("ok")
+           and malformed_claim.get("code") == "VALIDATION_FAILED",
+           repr(malformed_claim))
+    expect("router routes malformed board to inspection, never a ticket",
+           malformed_route.get("action") == "saipen status"
+           and malformed_route.get("reason") == "board-malformed",
+           repr(malformed_route))
+
+    escaped_root = make_project()
+    escaped = ticket_add(escaped_root, "probe", "P1",
+                         "literal | blocker: description", [], "probe")
+    escaped_board = parse_board(codec.read_doc(
+        escaped_root / ".saipen" / "BOARD.md"))
+    escaped_ticket = escaped_board["tickets"][escaped.get("ticket")]
+    expect("ticket add escapes description pipes instead of injecting fields",
+           escaped.get("ok") and "blocker" not in escaped_ticket["fields"]
+           and "literal | blocker: description" in escaped_ticket["description"]
+           and "\\| blocker:" in escaped_ticket["raw"],
+           repr(escaped_ticket))
+
+    # ---- T-631: pipe-bearing verify/blocker payloads must not inject fields.
+    inject_root = make_project()
+    inject = ticket_add(inject_root, "probe", "P1", "inject probe",
+                        [], "a | owner: eve | claim_time: 2026-08-10T00:00:00Z")
+    inject_board = parse_board(codec.read_doc(
+        inject_root / ".saipen" / "BOARD.md"))
+    inject_ticket = inject_board["tickets"][inject.get("ticket")]
+    expect("verify text with pipe delimiters cannot inject claim fields",
+           inject.get("ok")
+           and "owner" not in inject_ticket["fields"]
+           and "a | owner: eve | claim_time: 2026-08-10T00:00:00Z"
+           in inject_ticket["fields"].get("verify", ""),
+           repr(inject_ticket))
+    block_root = make_project()
+    block_claimed = apply_claim(block_root, "T-1", "probe")
+    pipe_block = ticket_move(block_root, "block", "T-1", "probe",
+                             "stuck | verify: fake")
+    pipe_block_ticket = parse_board(codec.read_doc(
+        block_root / ".saipen" / "BOARD.md"))["tickets"]["T-1"]
+    expect("blocker payload with pipe delimiters cannot inject a verify field",
+           block_claimed.get("ok") and pipe_block.get("ok")
+           and pipe_block_ticket["fields"].get("verify") == "probe"
+           and "stuck | verify: fake"
+           in pipe_block_ticket["fields"].get("blocker", ""),
+           repr(pipe_block_ticket))
 
     # ---- R7: WRITER_BUSY is a structured result, not a traceback.
     writer_lock = WriterLock(root)

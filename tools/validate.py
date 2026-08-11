@@ -72,8 +72,10 @@ from userperson import validate_profile as _validate_userperson_profile
 from improve import validate_report as _validate_improve_report
 # NITRO M1: the shared mechanical parsers. validate.py and the engine consume
 # the SAME implementation by construction -- no parser drift (T-578).
-from saipen_engine.board import TICKET_RE, parse_board
-from saipen_engine.log import LOG_RE
+from saipen_engine.board import (TICKET_RE, parse_board, ticket_has_blocker,
+                                 ticket_is_workable, ticket_status_error,
+                                 unescape_ticket_part)
+from saipen_engine.log import LOG_RE, parse_log_line
 from saipen_engine.state import parse_frontmatter
 
 def _read_rfc(p):
@@ -1123,8 +1125,59 @@ if t_from and t_current:
     elif t_current not in ANY_FROM:
         allowed = VALID_TRANSITIONS.get(t_from, [])
         if t_current not in allowed:
-            fail(f"STATE.md invalid phase transition: {t_from} -> {t_current} "
-                 f"(RFC § 1.6). Allowed from {t_from}: {', '.join(allowed)}")
+            # Narrow documented exception (T-631): canonical `ticket block` on
+            # the ACTIVE ticket moves the line to ## BLOCKED and parks the
+            # execution state at DONE/task none with transition_from = the
+            # ACTUAL mid-flight phase. The DFA has no DONE edge from SCOUT/
+            # BUILD/VERIFY/REVIEW, and session-level BLOCKED would be a lie
+            # whenever other work is workable, so the block produces exactly
+            # this one transitional shape. It is legal ONLY while the active
+            # LOG's most recent TICKET event is a canonical SAIOPS block line
+            # -- structurally valid, [op:] provenanced, `DEC: ticket block via
+            # SAIOPS (active)`, naming a ticket that now sits in ## BLOCKED --
+            # because the block and its evidence commit atomically. The
+            # `(active)` marker proves it was a DOING-ticket block (a TODO
+            # block can never satisfy it), and being the ticket's own last
+            # event keeps the exception alive across later session-level
+            # checkpoints that do not re-name the ticket. A forged or manual
+            # DONE-without-block fails like any other forgery.
+            _block_parked = False
+            if t_current == "DONE" and t_from in (
+                    "SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP"):
+                _seg_dir = Path(".saipen/logs")
+                _segs = sorted(
+                    (p for p in _seg_dir.glob("LOG-*.md")
+                     if re.fullmatch(r"LOG-\d+\.md", p.name))
+                    if _seg_dir.is_dir() else [],
+                    key=lambda _p: int(_p.stem[len("LOG-"):]))
+                _log_files = [*[Path(".saipen/logs", s.name) for s in _segs],
+                              Path(".saipen/LOG.md")]
+                _bd = parse_board(read_doc(Path(".saipen/BOARD.md")))
+                _blocked_tids = [tid for tid, t in _bd.get("tickets", {}).items()
+                                 if t["section"] == "## BLOCKED"]
+                for _tid in _blocked_tids:
+                    _last_for_ticket = ""
+                    for _p in reversed(_log_files):
+                        if not _p.is_file():
+                            continue
+                        for _ln in reversed(read_doc(_p).splitlines()):
+                            _cand = parse_log_line(_ln)
+                            if _cand and _cand.get("ticket") == _tid:
+                                _last_for_ticket = _ln
+                                break
+                        if _last_for_ticket:
+                            break
+                    _be = (parse_log_line(_last_for_ticket)
+                           if _last_for_ticket else None)
+                    if _be and _be.get("taxonomy") == "DEC" \
+                            and (_be.get("op_id") or "").startswith("ticket-") \
+                            and _be.get("text", "").startswith(
+                                "ticket block via SAIOPS (active)"):
+                        _block_parked = True
+                        break
+            if not _block_parked:
+                fail(f"STATE.md invalid phase transition: {t_from} -> {t_current} "
+                     f"(RFC § 1.6). Allowed from {t_from}: {', '.join(allowed)}")
         if t_from not in VALID_TRANSITIONS and t_from not in ANY_FROM:
             fail(f"STATE.md transition_from has unknown phase: {t_from!r} "
                  f"-- must be one of the 16 enum values (RFC § 1.6)")
@@ -1669,7 +1722,8 @@ for line_no, line in enumerate(board_lines, 1):
                  f"{tickets[tid]['line_no']}) -- a status change must move the "
                  f"line (cut+paste), never copy it (RFC § 1.2)")
             continue
-        parts = [p.strip() for p in rest.split(" | ")]
+        parts = [unescape_ticket_part(p.strip())
+                 for p in rest.split(" | ")]
         needs, fields = [], {}
         for part in parts[1:]:
             fm = re.match(r"^([a-z_]+):\s*(.*)$", part)
@@ -1865,6 +1919,10 @@ if _na_pick:
              f"{_t['section']} -- finished and blocked tickets are not "
              f"executable, and § 1.11's Pick Rule selects from ## TODO "
              f"(## BLOCKED is excluded on purpose)")
+    elif ticket_has_blocker(_t):
+        fail(f"STATE.md next_action names {_named}, which carries | blocker: "
+             f"outside ## BLOCKED -- malformed status cannot become "
+             f"executable, even before the board-status failure is repaired")
     else:
         _unmet = [r for r in _t["needs"]
                   if tickets.get(r, {}).get("section") != "## DONE"]
@@ -1890,8 +1948,7 @@ if _na_pick:
 # parks a project that had eighteen things to do.
 _blocked_workable = [
     tid for tid, t in tickets.items()
-    if t["section"] == "## TODO" and t["checkbox"] in (" ", "")
-    and all(tickets.get(r, {}).get("section") == "## DONE" for r in t["needs"])
+    if ticket_is_workable(t, tickets, agent=state.get("agent"))
 ] if state.get("phase") == "BLOCKED" else []
 if _blocked_workable:
     fail(f"STATE.md phase: BLOCKED while {len(_blocked_workable)} workable "
@@ -1912,8 +1969,7 @@ if _na_pick and not any(t["section"] == "## DOING" for t in tickets.values()):
     _named = _na_pick.group(1)
     _workable = [
         (t["line_no"], tid) for tid, t in tickets.items()
-        if t["section"] == "## TODO"
-        and all(tickets.get(r, {}).get("section") == "## DONE" for r in t["needs"])
+        if ticket_is_workable(t, tickets, agent=state.get("agent"))
     ]
     _top = min(_workable)[1] if _workable else None
     if _top is not None and _named != _top:
@@ -1973,10 +2029,11 @@ if board_kb > 16:
          f"CLEAN (RFC § 1.2, phases/clean.md step 1)")
 
 for tid, t in tickets.items():
-    if t["section"] == "## BLOCKED" and "blocker" not in t["fields"]:
-        warn("blocked-no-blocker", f"BOARD.md:{t['line_no']} ticket {tid} is in "
-             f"## BLOCKED with no | blocker: field -- facts + dead ends belong "
-             f"on the ticket (RFC § 1.2)")
+    _status_error = ticket_status_error(t)
+    if _status_error:
+        fail(f"BOARD.md:{t['line_no']} ticket {tid} {_status_error} -- "
+             f"section is ticket status and blocker is active blocked-state "
+             f"data, not advisory history (RFC § 1.2)")
     # RFC § 1.2 (rule stated v7.93.0): the section IS the status, the checkbox
     # is how a human skims it. A board where they disagree answers "is this
     # done" differently depending on which one the reader trusts. FAIL, not

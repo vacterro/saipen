@@ -23,7 +23,7 @@ on chat history or one model vendor's memory.
 
 **Fast keys.** A shortcut is the entire message, never a prefix. `cc` continues the project context to convergence (resuming a running goal if one is set), `sss` reports status without touching code, and `ss` checkpoints and stops. [See the full 15-key map](saipen/CORE.md#110-command-surface). Cyrillic twins work too: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**v7.221.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | MIT
+**v7.222.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | MIT
 
 ```text
 User  ->  /saipen continue

@@ -13,19 +13,17 @@ exact next EXECUTABLE mechanical action the state demands.
 from __future__ import annotations
 
 from . import phases
-from .board import parse_board
+from .board import parse_board, ticket_is_workable
 from .result import Result
 from .state import parse_state
 
 
-def _top_workable(board: dict) -> str | None:
-    """Deterministic Pick Rule: topmost TODO ticket whose needs are all DONE."""
+def _top_workable(board: dict, agent: str | None = None) -> str | None:
+    """Deterministic Pick Rule: topmost TODO ticket whose needs are all DONE
+    and which no other agent holds under a live claim."""
     tickets = board["tickets"]
     for ticket in tickets.values():
-        if ticket["section"] != "## TODO":
-            continue
-        if all(need in tickets and tickets[need]["section"] == "## DONE"
-               for need in ticket["needs"]):
+        if ticket_is_workable(ticket, tickets, agent=agent):
             return ticket["id"]
     return None
 
@@ -58,6 +56,17 @@ def route_next(state_text: str, board_text: str,
         return {"ok": False, "action": "saipen recover",
                 "reason": "recovery-pending",
                 "detail": f"unresolved operation: {', '.join(pending)}"}
+
+    # A board the shared parser cannot read whole (an unrecognized ticket
+    # field, a malformed ticket line) is not a work surface: a typo'd
+    # `| blockr:` is exactly how a blocker-bearing ticket launders itself
+    # into workable, so malformed input is routed to inspection, never to a
+    # ticket.
+    if board["errors"]:
+        return {"ok": True, "action": "saipen status",
+                "reason": "board-malformed",
+                "detail": "BOARD parse error(s): "
+                          + "; ".join(board["errors"][:3])}
 
     doing = [t for t in board["tickets"].values()
              if t["section"] == "## DOING"]
@@ -118,7 +127,7 @@ def route_next(state_text: str, board_text: str,
 
     # START: no DOING + a workable TODO -> Pick Rule claims the top ticket.
     if not active:
-        top = _top_workable(board)
+        top = _top_workable(board, agent=state.get("agent"))
         if top is not None:
             return {"ok": True, "action": f"PHASE SCOUT {top}",
                     "reason": "start", "ticket": top,

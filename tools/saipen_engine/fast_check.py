@@ -15,7 +15,7 @@ from __future__ import annotations
 import re
 
 from . import phases
-from .board import parse_board
+from .board import parse_board, ticket_status_error
 from .log import parse_log_line, log_tail_event
 from .state import parse_state
 
@@ -107,6 +107,9 @@ def validate_texts(state_text: str, board_text: str, log_text: str) -> list[str]
     if len(doing) > 1:
         errors.append("BOARD proposed has more than one ## DOING ticket")
     for ticket in tickets.values():
+        status_error = ticket_status_error(ticket)
+        if status_error:
+            errors.append(f"BOARD proposed {ticket['id']} {status_error}")
         if ticket["section"] == "## DOING" and ticket["checkbox"] != "/":
             errors.append(f"BOARD proposed {ticket['id']} in DOING with "
                           f"[{ticket['checkbox']}] instead of [/]")
