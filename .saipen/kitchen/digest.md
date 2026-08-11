@@ -1,3 +1,3 @@
-done: T-631 shipped as v7.222.0 (c7fef09). T-630 seat/report continuity fully built and verified in REVIEW, gates green, but the goal safety valve tripped at the 20-ticket cap before the review loop concluded, so T-630 is NOT yet shipped.
-remaining: T-630 (REVIEW, uncommitted) is the next ticket; then T-629, T-628, T-624, T-625.
-awaiting: safety valve re-authorization -- run 'saipen goal' to continue. T-576 stays BLOCKED until the user decides the fate of the two orphaned recovery scripts; T-609 awaits the saiwiki producer.
+done: T-630 (A1-A6 evidence-continuity closeout), T-632 (crash-safe Improve abort), T-633 (log tail = actual max E-ID) shipped as v7.223.0 (bc23c2b) with a hostile HUNT closeout (sweep duplicate-composite refusal, create_report manifest gate). Goal reauthorized once; valve counters reset to 0 then consumed 3 tickets.
+remaining: T-634 (P1 scheduler hygiene -- the scheduler/VBS work stays foreign/untouched), then T-629, T-628, T-624, T-625.
+awaiting: T-634..T-625 are all workable (no human gate). T-576 stays BLOCKED until the user decides the fate of the two orphaned recovery scripts; T-609 awaits the saiwiki producer regeneration; T-407/T-406 are permanent-warning owners; T-442/T-575 are HELD v8/v9 gates.
