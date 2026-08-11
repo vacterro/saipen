@@ -27,3 +27,9 @@
 - 11.08.26 11:52 [E-3084] [parent: E-3083] [T-633] [agent: claude] [op: ticket-3da7013f] DEC: ticket added via SAIOPS
 - 11.08.26 11:52 [E-3085] [parent: E-3084] [T-634] [agent: claude] [op: ticket-9e951677] DEC: ticket added via SAIOPS
 - 11.08.26 12:15 [E-3086] [parent: E-3085] [T-630] [agent: claude] [op: checkpoint-5637917c] DEC: board scrub -- pruned DONE T-631/T-614/T-604/T-549 (board-soft-cap over 16KB; history stays in LOG; T-623/T-622 kept, T-624 needs T-623)
+- 11.08.26 12:29 [E-3087] [parent: E-3086] [T-630] [agent: claude] [op: transition-aa858f0d] RUN: A1-A6 hostile controls + HUNT closeout landed; entering fresh verify
+- 11.08.26 12:39 [E-3088] [parent: E-3087] [T-630] [agent: claude] [op: checkpoint-f05cd71f] RUN: validate.py -> PASS -- A1-A6 hostile controls, HUNT closeout, abort crash-safety, log-tail root cause; 11 known warnings
+- 11.08.26 12:39 [E-3089] [parent: E-3088] [T-630] [agent: claude] [op: transition-02ab05f0] RUN: fresh verify PASS (hostile repros impossible); review pass 1
+- 11.08.26 12:39 [E-3090] [parent: E-3089] [op: transition-02ab05f0] DEC: goal_tickets 0->1
+- 11.08.26 12:40 [E-3091] [parent: E-3090] [T-630] [agent: claude] [op: checkpoint-183ee19f] RUN: review pass 2 -- independent re-run of verify: scenarios PASS, validate.py -> PASS, ruff PASS, audit 270/270; diff scan P0/P1/P2/P3 clean; verdict DEC: SHIP
+- 11.08.26 12:40 [E-3092] [parent: E-3091] [T-630] [agent: claude] [op: transition-36a47538] RUN: review passed; SHIP T-630
