@@ -4957,6 +4957,35 @@ def run_improve_probes() -> tuple[list[str], int]:
                for e in validate_report(_a5_dup, strict=True)),
            repr(validate_report(_a5_dup, strict=True)))
 
+    # HUNT closeout controls: the ledger side of A4 and the create_report
+    # side of A2 -- no identity ambiguity survives on either write path.
+    from improve import validate_sweep as _vsweep
+    _dup_sweep = ("# SWEEP\n- RUN-1/IMP-001 [CONFIRMED] T-900 "
+                  "report=saipen_improve_D.md reproduced=y\n"
+                  "- RUN-1/IMP-001 [CONFIRMED] T-900 "
+                  "report=saipen_improve_D.md reproduced=y\n")
+    expect("A4: a SWEEP ledger repeating one composite identity rejects "
+           "(one disposition per composite finding identity)",
+           any("repeats composite identity" in e
+               for e in _vsweep(_dup_sweep)),
+           repr(_vsweep(_dup_sweep)))
+    _cr_root = project_fixture("saipen-create-report-gate-")
+    _cr_cycle = create_cycle(_cr_root, "imp-cr")
+    register_seat(_cr_cycle, "seat-1", "core", "saipen_improve_CR.md")
+    (_cr_cycle / "MANIFEST.md").write_text(
+        (_cr_cycle / "MANIFEST.md").read_text(encoding="utf-8-sig").replace(
+            "cycle_id: imp-cr", "cycle_id: WRONG", 1), encoding="utf-8")
+    try:
+        create_report(_cr_root, "imp-cr", "seat-1", "CR", agent="probe",
+                      role="core", model_or_runtime="probe",
+                      protocol_fingerprint="fp", context_scope="scope")
+        _cr_gated = False
+    except ImproveError as _cr_exc:
+        _cr_gated = "invalid active manifest" in str(_cr_exc)
+    expect("A2: create_report refuses an invalid active manifest "
+           "(no first-value roster interpretation)",
+           _cr_gated, "")
+
     _public_cmd = [sys.executable, str(HOME / "tools" / "saipen.py"),
                    "improve", "--new-seat", "--json"]
     _parallel = [subprocess.Popen(

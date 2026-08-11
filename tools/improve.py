@@ -1579,6 +1579,13 @@ def create_report(project_root: Path, cycle_id: str, seat_id: str,
     seat = _validate_safe_id(seat_id, "seat_id")
     selected_role = _validate_role(role)
     roster_text = _read_maybe(cdir / "MANIFEST.md")
+    # A2: create_report makes a decision from the roster (which report path a
+    # seat owns, which role), so the manifest it consumes must validate first
+    # -- an invalid active manifest is never interpreted for a write.
+    _manifest_errors = validate_manifest(roster_text, expected_cycle_id=cdir.name)
+    if _manifest_errors:
+        raise ImproveError("create_report refuses an invalid active manifest: "
+                           + "; ".join(_manifest_errors[:3]))
     roster_block = _seat_block(roster_text, seat)
     if (roster_block is None
             or _field(roster_block, "report_path")
@@ -2096,6 +2103,19 @@ def validate_sweep(text: str) -> list[str]:
         if finding_ref.count("/") > 1:
             errors.append(f"SWEEP.md line {index}: malformed finding "
                           f"reference {finding_ref!r}")
+    # A4 ledger side: one composite identity, one disposition. A duplicated
+    # ledger line for the same <finding_ref, report> pair is ambiguous
+    # evidence -- a set/map consumer would silently deduplicate it, so the
+    # ledger itself must reject the duplicate.
+    seen_composite: set[tuple[str, str]] = set()
+    for record in _sweep_records(text):
+        identity = (record.finding_ref, record.report)
+        if identity in seen_composite:
+            errors.append(
+                f"SWEEP.md repeats composite identity {record.finding_ref} "
+                f"report={record.report}; one disposition per composite "
+                "finding identity")
+        seen_composite.add(identity)
     return errors
 
 
