@@ -740,6 +740,25 @@ def move_blocker_ticket_to_todo(text: str) -> str:
 
 def add_blocker_to_doing(text: str) -> str:
     """Make the active ticket claim work while carrying blocked status."""
+    # SYNTHETIC ANCHOR: the harness must not depend on a live ## DOING ticket
+    # existing -- a board between tickets has none (observed after T-630/T-632/
+    # T-633 closed). Same pattern as inject_unclaimed_doing (T-573): build the
+    # DOING line to mutate first, then add the blocker to it.
+    doing = re.search(r"^## DOING$\n(.*?)(?=^## |\Z)", text,
+                      re.MULTILINE | re.DOTALL)
+    if doing is None:
+        return text
+    body = doing.group(1)
+    if not re.search(r"^- \[/\] T-\d+ .*? \| verify:", body, re.MULTILINE):
+        nl = chr(10)
+        cleaned = "\n".join(
+            ln for ln in body.splitlines()
+            if not ln.strip().startswith("- ["))
+        if cleaned.strip():
+            cleaned += nl
+        text = (text[:doing.start(1)] + cleaned
+                + "- [/] T-999 audit | verify: probe\n"
+                + text[doing.end(1):])
     return re.sub(
         r"^(- \[/\] T-\d+ .*?)( \| verify:)",
         r"\1 | blocker: WAIT_USER_CONFIRMATION\2",
