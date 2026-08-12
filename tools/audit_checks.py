@@ -347,6 +347,17 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
     if green.returncode:
         return ("aged slug with live owning ticket still fails: "
                 + (green.stdout + green.stderr).strip()[-300:])
+    # T-639: the probe's OWN action (filing the owning ticket) must not
+    # create a second failing warn slug -- if adding the ticket pushed the
+    # board over the soft cap and aged an unrelated unowned slug, the green
+    # leg would fail for a condition the probe itself created. returncode 0
+    # above already proves no FAIL of any kind; name it explicitly so the
+    # isolation guarantee is asserted, not incidental.
+    green_fails = [ln for ln in (green.stdout + green.stderr).splitlines()
+                   if ln.startswith("FAIL: warn ownership")]
+    if green_fails:
+        return ("owning ticket created another failing warn slug: "
+                + "; ".join(green_fails))
     return None
 
 

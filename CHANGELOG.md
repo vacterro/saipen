@@ -1,6 +1,10 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.223.9 -- 2026-08-12 -- audit harness warn-slug isolation
+
+The `audit_checks.py` warn-slug ownership probe was failing for a condition it created: the probe's own synthetic owning ticket pushed the board over the soft cap, so `board-soft-cap` became another aged unowned WARN and the run failed on harness contamination rather than on the slug under test. The probe's green leg now explicitly asserts that filing the owning ticket creates no other failing warn slug -- the isolation guarantee is proven, not incidental. The probe red/green pair isolates exactly the aged unowned slug: the red leg fails with "no live BOARD ticket names it", the identical slug with a live naming ticket passes, and the probe's own action cannot introduce a second failure. (T-639)
+
 ## 7.223.8 -- 2026-08-12 -- SubSaipen role freshness fails closed: UNKNOWN is never FRESH
 
 `sub_collect` no longer treats an unverifiable role revision as current. `_role_status` is a tri-state verdict: `current` (readable charter, matching revision), `stale` (readable charter, different revision), or `unavailable` (missing home, missing charter, or a read/hash failure). `_role_current` now returns True ONLY for `current` -- a missing home, missing charter, or exception is UNAVAILABLE, never silently fresh. `sub_collect` refuses ready evidence whose role revision is superseded (STALE) or unverifiable (UNAVAILABLE) with a structured `PACKAGE_INCOMPLETE` reason. Empty role revisions were already refused by the completeness check. The blanket `except Exception: pass` in the freshness path is gone. Controls cover the verifiable-pass, superseded-stale, and unverifiable-unavailable cases. (T-991)

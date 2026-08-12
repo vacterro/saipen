@@ -183,3 +183,14 @@
 - 12.08.26 03:55 [E-3240] [parent: E-3239] [op: transition-ea110b0b] DEC: goal_tickets 17->18
 - 12.08.26 03:55 [E-3241] [parent: E-3240] [T-991] [agent: claude] [op: checkpoint-9e8fca9a] DEC: review -> P0/P1/P2/P3 clear: _role_status tri-state fail-closed, sub_collect refuses STALE+UNAVAILABLE, empty role_revision refused by missing-check; _spawn_role_revision empty acceptable (consumers refuse); verdict SHIP
 - 12.08.26 03:55 [E-3242] [parent: E-3241] [T-991] [agent: claude] [op: transition-99c21e63] RUN: review -> P0/P1/P2/P3 clear; verdict SHIP
+- 12.08.26 03:57 [E-3243] [parent: E-3242] [T-991] [agent: claude] [op: checkpoint-526e8da6] RUN: ship v7.223.8 -> pushed aafec106; tag v7.223.8 pushed; release metadata + checkpoint state staged
+- 12.08.26 03:57 [E-3244] [parent: E-3243] [T-991] [agent: claude] [op: finish-f7c69b7c] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 12.08.26 03:58 [E-3245] [parent: E-3244] [T-639] [agent: claude] [op: claim-88a945f9] DEC: claimed via SAIOPS -- owner claude
+- 12.08.26 04:16 [E-3246] [parent: E-3245] [T-639] [agent: claude] [op: checkpoint-f6b20d70] RUN: SCOUT -- root cause was T-639 ticket text itself owning the warn-slug (validator's warn-ownership check reads live BOARD tickets naming the slug; my ticket description contained 'log-missing-date' making the RED leg's unowned state impossible). Fixed by rewording ticket to name 'the warn-slug warning'. audit_checks warn-slug probe now PASSES: aged-unowned fails + identical with live ticket passes; green leg returncode 0 proves no self-created failing slug
+- 12.08.26 04:17 [E-3247] [parent: E-3246] [T-639] [agent: claude] [op: checkpoint-13a58d58] RUN: build -> probe hardened: green leg now explicitly asserts filing the owning ticket creates no other failing warn slug (isolation provable, not incidental); root-cause ticket-text ownership fixed; warn probe passes
+- 12.08.26 04:17 [E-3248] [parent: E-3247] [T-639] [agent: claude] [op: transition-bbd7e08a] RUN: SCOUT complete; probe hardening plan
+- 12.08.26 04:17 [E-3249] [parent: E-3248] [T-639] [agent: claude] [op: transition-2595ed4a] RUN: build complete: probe hardened + root cause fixed
+- 12.08.26 04:20 [E-3250] [parent: E-3249] [T-639] [agent: claude] [op: transition-bb565d68] RUN: verify -> full scenarios PASS; validate conformant; audit_checks full run all PASS (warn-slug red/green + no self-created failing slug); ruff clean; conf: high
+- 12.08.26 04:20 [E-3251] [parent: E-3250] [op: transition-bb565d68] DEC: goal_tickets 18->19
+- 12.08.26 04:21 [E-3252] [parent: E-3251] [T-639] [agent: claude] [op: checkpoint-5046c57b] DEC: review -> P0/P1/P2/P3 clear: probe green leg explicitly asserts no self-created failing slug; ticket text no longer owns the slug; audit_checks fresh green; verdict SHIP
+- 12.08.26 04:21 [E-3253] [parent: E-3252] [T-639] [agent: claude] [op: transition-b5a69ea0] RUN: review -> P0/P1/P2/P3 clear; verdict SHIP
