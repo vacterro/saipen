@@ -17,7 +17,7 @@ and resumes work in under a minute -- no rebriefing, any vendor, any day.
 
 **Bahasa balasan.** Agen menjawab secara default **dalam bahasa Estonia** — itu pengaturan, bukan keanehan, dan tidak ada hal lain tentang SAIPEN yang berbahasa Estonia. Ubah di satu tempat: baris `reply_language:` di bagian atas [`saipen/STYLE.md`](saipen/STYLE.md). `et` Estonia, `en` Inggris, `ru` Rusia, `auto` memilih dari bahasa pesan yang Anda kirim. Protokol, kode, commit, dan semua dokumen tetap dalam bahasa Inggris pada nilai apa pun.
 
-**v7.223.10** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
+**v7.223.11** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [RFC](saipen/RFC.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
 
 ```text
 

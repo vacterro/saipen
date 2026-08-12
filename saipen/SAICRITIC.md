@@ -55,6 +55,13 @@ are audit lenses, not a demand for one new enum per phrase:
   instead of captured evidence.
 - `ERROR_NORMALIZATION_GAP`: expected contention is a stable Result in one
   public domain but escapes as a traceback in another.
+- `EVIDENCE_ADVERSARY`: can this currently-green proof stay green after its
+  witness is made false while the claimed end-state is left superficially
+  valid? Adversarially mutate only the proof linkage of a recent green claim
+  -- a stale fingerprint, a wrong seat, a duplicate identity, a missing gate
+  receipt, a wrong source, a malformed-but-parseable ledger -- and a gate that
+  stays green is a normal finding, never a PASS. A green proof is useful only
+  if falsifying its witness makes it red.
 
 The first SAICRITIC run (T-603) found the register-without-executor defect:
 `saipen improve` was registered in the command surface but the CLI had no
