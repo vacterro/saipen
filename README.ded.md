@@ -120,6 +120,7 @@ bash bootstrap/uninstall.sh                                         # Для м�
 | [STYLE.md](saipen/STYLE.md) | Стиль базара агента |
 | [UI.md](saipen/UI.md) | Дизайн-гайдлайны Vintage Golden UI |
 | [CONFORMANCE.md](saipen/CONFORMANCE.md) | Сценарии тестов и правила валидации |
+| БРОШЮРА | Презентационная брошюра — [EN](BROCHURE_EN.md) / [RU](BROCHURE_RU.md) / [ET](BROCHURE_ET.md) / [DED](BROCHURE_DED.md) / [JA](BROCHURE_JA.md) |
 
 <details>
 <summary><b>Все 33 переведенных гайда</b></summary>

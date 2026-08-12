@@ -1,6 +1,10 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.223.3 -- 2026-08-12 -- brochure adoption: translated presentation brochures join the README
+
+The user-requested brochure set produced in E-3115 is adopted without rewriting history. `BROCHURE_EN.md`, `BROCHURE_RU.md`, `BROCHURE_ET.md`, and `BROCHURE_JA.md` join the existing `BROCHURE_DED.md` at the repository root; the README Documentation rows on `README.md`, `README.ded.md`, `README.ee.md`, and `README.ja.md` link all five. The validator already declared the set in `ROOT_ALLOWED` and `EXEMPT`. Content-only change, no code touched. (T-636)
+
 ## 7.223.2 -- 2026-08-12 -- scheduler cleanup sweeps killed-run temp files
 
 `bootstrap/schedule.ps1 remove` and both global uninstallers now also remove the runId-scoped temp artifacts a hard-killed background run leaks under `%LOCALAPPDATA%\saipen`: the `source-<runId>.zip` archive, the `source-<runId>` snapshot directory, and the `inject-<runId>.log` capture. The canonical `inject.log` is never touched. The sweep was previously limited to the fixed-path `scheduled-source-previous` backup, so repeated kills (taskkill, power loss) grew unbounded temp state that nothing cleaned. Hostile controls seed each leftover shape and prove schedule remove plus both uninstallers clear them while the canonical log survives. (T-637)

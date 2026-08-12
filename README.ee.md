@@ -114,6 +114,7 @@ Platvormi-põhised märkmed asuvad `extensions/adapters/`.
 | [STYLE.md](saipen/STYLE.md) | Agendi suhtlusstiil ja hääle defineerimine |
 | [UI.md](saipen/UI.md) | Vintage Golden UI disaini suunised |
 | [CONFORMANCE.md](saipen/CONFORMANCE.md) | Käitumuslikud testistsenaariumid ja valiveerija reeglid |
+| BROŠÜÜR | Tutvustusvoldik — [EN](BROCHURE_EN.md) / [RU](BROCHURE_RU.md) / [ET](BROCHURE_ET.md) / [DED](BROCHURE_DED.md) / [JA](BROCHURE_JA.md) |
 
 <details>
 <summary><b>Kõik 33 tõlgitud juhendit</b></summary>

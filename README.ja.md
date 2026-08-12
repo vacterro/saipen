@@ -101,6 +101,7 @@ bash bootstrap/uninstall.sh                                         # macOS / Li
 - **[STYLE.md](saipen/STYLE.md)** -- エージェントのコミュニケーションスタイルと声の定義。
 - **[UI.md](saipen/UI.md)** -- ヴィンテージゴールデンUIデザインガイドライン。
 - **[CONFORMANCE.md](saipen/CONFORMANCE.md)** -- 動作テストシナリオと検証ルール。
+- **パンフレット** -- 紹介パンフレット — [EN](BROCHURE_EN.md) / [RU](BROCHURE_RU.md) / [ET](BROCHURE_ET.md) / [DED](BROCHURE_DED.md) / [JA](BROCHURE_JA.md)。
 
 <p align="center">
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
