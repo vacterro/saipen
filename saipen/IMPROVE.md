@@ -70,8 +70,11 @@ the validator compares both with the CLI executor set.
   DRAFT cycle whose report cannot complete (an interrupted audit, a committed
   RUN missing a required field). Refuses once any disposition exists, flips
   the manifest to archived with a journaled `cycle_aborted` marker, and
-  byte-preserves the never-completed draft reports under a `.discarded`
-  suffix. No raw file deletion; the next cycle can be admitted.
+  byte-preserves the never-completed draft reports AT THEIR SAME PATH (no
+  rename, no move, no raw file deletion): the manifest's archived +
+  cycle_aborted markers are the single source of truth that the cycle and
+  its drafts are non-authoritative (T-632). No raw file deletion; the next
+  cycle can be admitted.
 - `saipen improve clean <cycle>` — archive/retention meta-operation. Never
   means phase CLEAN, never enters the CLEAN phase.
 

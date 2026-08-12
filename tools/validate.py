@@ -2658,6 +2658,37 @@ if log_files:
                     if re.search(r"(?m)^cycle_status:\s*(?:complete|archived)",
                                  _mst):
                         _cycle_active = False
+                # T-992/§2: an ACTIVE strict report's provenance identity must
+                # match current installed truth -- agent vs roster seat,
+                # project vs manifest identity, saipen_version vs the
+                # INSTALLED version, protocol_fingerprint vs the installed
+                # fingerprint. Archived/complete history keeps its historical
+                # identity and is never compared to today's install.
+                if _strict_cycle and _cycle_active and _man.is_file():
+                    try:
+                        # Installed truth is the PROTOCOL INSTALL running this
+                        # validator, not the audited project root -- a consuming
+                        # project has no saipen/ tree of its own.
+                        _installed_fp = _imp_mod.installed_protocol_fingerprint(
+                            _tools_parent)
+                        _installed_version = _imp_mod._saipen_install_version()
+                    except Exception as _pf_exc:
+                        _installed_fp = None
+                        _installed_version = None
+                        _report_errors.append(
+                            f"{_rep}: cannot derive installed protocol "
+                            f"fingerprint/version for ACTIVE strict report: "
+                            f"{_pf_exc} -- UNKNOWN is never FRESH (T-992)")
+                    else:
+                        _m_project = _imp_mod._field(_mst, "project_identity")
+                        _m_seat = _imp_mod._field(_rt, "agent")
+                        for _pv in _imp_mod.validate_strict_provenance(
+                                _rt, roster=_mst,
+                                manifest_project_identity=_m_project,
+                                seat_id=_m_seat,
+                                installed_saipen_version=_installed_version,
+                                installed_protocol_fp=_installed_fp):
+                            _report_errors.append(f"{_rep}: {_pv}")
                 _src_head = _imp_mod._field(_rt, "source_head")
                 _src_tree = _imp_mod._field(_rt, "source_tree_fingerprint")
                 # DOGFOOD V (T-618): a source_tree_fingerprint must be a REAL
@@ -2689,11 +2720,20 @@ if log_files:
                 # against the CURRENT source identity -- same HEAD plus a
                 # changed/dirty tree is exactly why the tree fingerprint
                 # exists. A stale report cannot authorize fresh work.
+                # T-992/§6: UNKNOWN is never FRESH -- if current source
+                # identity cannot be computed for an ACTIVE strict report,
+                # that is an explicit non-green, never a silent pass.
                 if (_strict_cycle and _cycle_active and _src_head and _src_tree
                         and _cur_head and _src_head in (_cur_head, _cur_head[:7])):
+                    from freshness import compute_source_identity as _csi
                     try:
-                        from freshness import compute_source_identity as _csi
                         _now = _csi(Path.cwd())
+                    except Exception as _fresh_exc:
+                        _report_errors.append(
+                            f"{_rep}: cannot compute current source identity "
+                            f"for an ACTIVE strict report: {_fresh_exc} -- "
+                            "UNKNOWN is never FRESH (T-992)")
+                    else:
                         if _now.source_tree_fingerprint != _src_tree:
                             _report_errors.append(
                                 f"{_rep}: source_tree_fingerprint "
@@ -2704,8 +2744,6 @@ if log_files:
                                 "cannot authorize fresh canonical work "
                                 "without current reproduction (DOGFOOD V, "
                                 "T-618)")
-                    except Exception:
-                        pass
             if _report_errors:
                 fail("improve report [improve-report] -- "
                      + "; ".join(_report_errors[:6])

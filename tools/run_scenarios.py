@@ -60,9 +60,12 @@ from sub_clean import sub_clean_blockers
 from improve import (ImproveError, abort_cycle, allocate_cycle_id,
                      append_run, complete_cycle,
                      complete_report, create_cycle, create_report, cycle_dir,
-                     derive_status, prepare_audit_seat, protocol_fingerprint,
+                     derive_status, installed_protocol_fingerprint,
+                     _saipen_install_version,
+                     prepare_audit_seat,
                      register_cycle, register_seat,
                      resolve_report_path, validate_manifest, validate_report,
+                     validate_strict_provenance,
                      write_sweep_entry)
 from userperson import (merge_profile, onboarding_questions, parse_profile,
                         project_profile, remove_preference, render_profile,
@@ -551,6 +554,14 @@ def run_precommit_purity_probe() -> tuple[list[str], int, int]:
 
 RUNTIME_MANIFEST = json.loads(
     (HOME / "saipen" / "MANIFEST.json").read_text(encoding="utf-8"))
+
+# T-992: fixtures that create STRICT ACTIVE reports validated by the real
+# validator must carry the INSTALLED protocol fingerprint and version --
+# the validator compares ACTIVE strict evidence to current installed truth,
+# so a fixture digest would fail on purpose. Historical/archived fixtures
+# keep their own historical values.
+PROBE_INSTALLED_FP = installed_protocol_fingerprint(HOME)
+PROBE_SAIPEN_VERSION = _saipen_install_version()
 
 
 def install_relative_path(source: str) -> str:
@@ -4713,8 +4724,8 @@ def run_improve_probes() -> tuple[list[str], int]:
                       f"saipen_improve_{project_name}.md")
         ticket_fixture(root, ticket)
         report = create_report(
-            root, cycle_id, seat_id, project_name, agent="probe", role="core",
-            model_or_runtime="probe", protocol_fingerprint="ded-4ae736e4",
+            root, cycle_id, seat_id, project_name, agent=seat_id, role="core",
+            model_or_runtime="probe", protocol_fingerprint=PROBE_INSTALLED_FP,
             context_scope="probe scope")
         if findings_ok:
             for run_text in run_texts:
@@ -4871,9 +4882,9 @@ def run_improve_probes() -> tuple[list[str], int]:
     # Complete prerequisites: one expected seat with a complete report.
     register_seat(c1, "seat-1", "core", "saipen_improve_A.md")
     report1 = create_report(life_root, "imp-one", "seat-1", "A",
-                            agent="probe", role="core",
+                            agent="seat-1", role="core",
                             model_or_runtime="probe",
-                            protocol_fingerprint="ded-4ae736e4",
+                            protocol_fingerprint=PROBE_INSTALLED_FP,
                             context_scope="probe scope")
     # A strict cycle cannot be completed by a bare status skeleton.
     try:
@@ -4906,9 +4917,9 @@ def run_improve_probes() -> tuple[list[str], int]:
     cimm = create_cycle(imm_root, "imp-imm")
     register_seat(cimm, "seat-1", "core", "saipen_improve_A.md")
     imm_report = create_report(imm_root, "imp-imm", "seat-1", "A",
-                               agent="probe", role="core",
+                               agent="seat-1", role="core",
                                model_or_runtime="probe",
-                               protocol_fingerprint="ded-4ae736e4",
+                               protocol_fingerprint=PROBE_INSTALLED_FP,
                                context_scope="probe scope")
     try:
         complete_cycle(cimm)
@@ -4958,13 +4969,13 @@ def run_improve_probes() -> tuple[list[str], int]:
     e2e_cycle = create_cycle(e2e_root, "imp-e2e")
     register_seat(e2e_cycle, "seat-a", "core", "saipen_improve_A.md")
     register_seat(e2e_cycle, "seat-b", "core", "saipen_improve_B.md")
-    rep_a = create_report(e2e_root, "imp-e2e", "seat-a", "A", agent="probe",
+    rep_a = create_report(e2e_root, "imp-e2e", "seat-a", "A", agent="seat-a",
                           role="core", model_or_runtime="probe",
-                          protocol_fingerprint="ded-4ae736e4",
+                          protocol_fingerprint=PROBE_INSTALLED_FP,
                           context_scope="scope")
-    rep_b = create_report(e2e_root, "imp-e2e", "seat-b", "B", agent="probe",
+    rep_b = create_report(e2e_root, "imp-e2e", "seat-b", "B", agent="seat-b",
                           role="core", model_or_runtime="probe",
-                          protocol_fingerprint="ded-4ae736e4",
+                          protocol_fingerprint=PROBE_INSTALLED_FP,
                           context_scope="scope")
     append_run(rep_a, "IMP-001 [P1] [PROTOCOL_VIOLATION] [proven] [ticket]\n"
                       "expected: a\nactual: b\nevidence: c\n")
@@ -4997,9 +5008,9 @@ def run_improve_probes() -> tuple[list[str], int]:
     id1 = allocate_cycle_id(alloc_root, "proj-x")
     cid1 = create_cycle(alloc_root, id1)
     register_seat(cid1, "seat-1", "core", "saipen_improve_A.md")
-    a_report = create_report(alloc_root, id1, "seat-1", "A", agent="probe",
+    a_report = create_report(alloc_root, id1, "seat-1", "A", agent="seat-1",
                              role="core", model_or_runtime="probe",
-                             protocol_fingerprint="ded-4ae736e4",
+                             protocol_fingerprint=PROBE_INSTALLED_FP,
                              context_scope="scope")
     append_run(a_report, "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
                          "expected: x\nactual: y\nevidence: z\n")
@@ -5023,9 +5034,9 @@ def run_improve_probes() -> tuple[list[str], int]:
     life2 = project_fixture("saipen-life2-")
     cL = create_cycle(life2, "imp-life2")
     register_seat(cL, "seat-1", "core", "saipen_improve_A.md")
-    repL = create_report(life2, "imp-life2", "seat-1", "A", agent="probe",
+    repL = create_report(life2, "imp-life2", "seat-1", "A", agent="seat-1",
                          role="core", model_or_runtime="probe",
-                         protocol_fingerprint="ded-4ae736e4",
+                         protocol_fingerprint=PROBE_INSTALLED_FP,
                          context_scope="scope")
     append_run(repL, "IMP-001 [P1] [PROTOCOL_VIOLATION] [proven] [ticket]\n"
                      "expected: x\nactual: y\nevidence: z\n"
@@ -5086,9 +5097,9 @@ def run_improve_probes() -> tuple[list[str], int]:
     # fresh ledger: the writer's own output must satisfy the verifier
     sweep_bad.unlink()
     register_seat(cL2, "seat-1", "core", "saipen_improve_A.md")
-    repL2 = create_report(life2, "imp-life2-2", "seat-1", "A", agent="probe",
+    repL2 = create_report(life2, "imp-life2-2", "seat-1", "A", agent="seat-1",
                           role="core", model_or_runtime="probe",
-                          protocol_fingerprint="ded-4ae736e4",
+                          protocol_fingerprint=PROBE_INSTALLED_FP,
                           context_scope="scope")
     append_run(repL2, "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
                       "expected: x\nactual: y\nevidence: z\n")
@@ -5481,7 +5492,7 @@ def run_improve_probes() -> tuple[list[str], int]:
     _bare_report = meta_root / _bare_data["report_path"]
     _bare_header = _bare_report.read_text(encoding="utf-8-sig").split(
         "\n## ", 1)[0]
-    _derived_fp = protocol_fingerprint(HOME)
+    _derived_fp = installed_protocol_fingerprint(HOME)
     expect("CLI-prepared report derives its protocol fingerprint from owned "
            "protocol evidence",
            f"protocol_fingerprint: {_derived_fp}" in _bare_header
@@ -5499,18 +5510,95 @@ def run_improve_probes() -> tuple[list[str], int]:
         _proto_home = Path(_proto_raw) / "home"
         shutil.copytree(HOME, _proto_home, ignore=shutil.ignore_patterns(
             ".git", ".venv", "__pycache__", "node_modules", "nul", ".freebuff"))
-        _fp_before = protocol_fingerprint(_proto_home)
+        _fp_before = installed_protocol_fingerprint(_proto_home)
         _mutated_proto = _proto_home / "saipen" / "CORE.md"
         if _mutated_proto.is_file():
             _mutated_proto.write_text(
                 _mutated_proto.read_text(encoding="utf-8-sig")
                 + "\nT-624 provenance probe marker\n",
                 encoding="utf-8")
-        _fp_after = protocol_fingerprint(_proto_home)
+        _fp_after = installed_protocol_fingerprint(_proto_home)
         expect("editing a protocol document changes the derived fingerprint",
                _fp_after != _fp_before
                and _fp_after.startswith("sha256:"),
                f"{_fp_before} vs {_fp_after}")
+
+    # T-992/§2 + §3: strict provenance value semantics -- fabricated identity
+    # scalars, blank scalars, unknown headers, agent/seat mismatch, project/
+    # manifest mismatch, and a foreign project VERSION laundering into
+    # saipen_version must ALL be refused by the shared validator and the writer.
+    _prov_truth = ("agent: seat-01\nrole: core\nmodel_or_runtime: unknown\n"
+                   f"project: probe-project\n"
+                   f"saipen_version: {PROBE_SAIPEN_VERSION}\n"
+                   f"protocol_fingerprint: {PROBE_INSTALLED_FP}\n"
+                   "source_head: abc\nsource_tree_fingerprint: "
+                   "git-delta-v1:beef\ndiscovery_model: git-delta-v1\n"
+                   "context_scope: tools\ncontext_available: partial\n"
+                   "report_status: draft\n\n")
+    for _label, _needle in [
+            ("fabricated protocol fingerprint", "protocol_fingerprint"),
+            ("blank required scalar", "non-empty"),
+            ("agent != seat", "agent"),
+            ("unknown header field", "unknown field"),
+            ("control injection in runtime", "control")]:
+        # rebuild precisely per case
+        if _label == "fabricated protocol fingerprint":
+            _bad = _prov_truth.replace(
+                f"protocol_fingerprint: {PROBE_INSTALLED_FP}",
+                "protocol_fingerprint: totally-fabricated")
+        elif _label == "blank required scalar":
+            _bad = _prov_truth.replace("saipen_version: "
+                                       + PROBE_SAIPEN_VERSION,
+                                       "saipen_version: ")
+        elif _label == "agent != seat":
+            _bad = _prov_truth.replace("agent: seat-01",
+                                       "agent: not-seat-01")
+        elif _label == "unknown header field":
+            _bad = "extra: x\n" + _prov_truth
+        elif _label == "control injection in runtime":
+            _bad = _prov_truth.replace("model_or_runtime: unknown",
+                                       "model_or_runtime: a\x00b")
+        _errs = validate_strict_provenance(
+            _bad, roster=_prov_truth,
+            manifest_project_identity="probe-project", seat_id="seat-01",
+            installed_saipen_version=PROBE_SAIPEN_VERSION,
+            installed_protocol_fp=PROBE_INSTALLED_FP)
+        expect(f"strict provenance refuses {_label}",
+               any(_needle in e for e in _errs), repr(_errs))
+
+    # §3: the writer must never read the target project's VERSION into
+    # saipen_version -- install-only, even when the project VERSION differs.
+    with tempfile.TemporaryDirectory(prefix="saipen-fp-version-") as _fv_raw:
+        _fv_root = Path(_fv_raw) / "proj"
+        _fv_root.mkdir()
+        (_fv_root / ".saipen").mkdir()
+        (_fv_root / ".saipen" / "LOG.md").write_text(
+            "- 09.08.26 00:00 [E-900] DEC: base\n", encoding="utf-8")
+        (_fv_root / ".saipen" / "BOARD.md").write_text(
+            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+            encoding="utf-8")
+        (_fv_root / ".saipen" / "STATE.md").write_text(
+            "---\nphase: DONE\ntask: none\nnext_action: \"saipen continue\"\n"
+            "blocker: \"\"\ntransition_from: SHIP\nsaipen_version: 7\n"
+            "schema_version: 3\nlast_event: 900\nstyle_contract: ded-4ae736e4\n"
+            "saipen_home: \".\"\nagent: probe\nmode: full\n"
+            "updated: 2026-08-09T00:00:00Z\n---\n", encoding="utf-8")
+        (_fv_root / "VERSION").write_text("1.2.3\n", encoding="utf-8")
+        _fv_cycle = create_cycle(_fv_root, "imp-fv",
+                                 created_at="2026-08-12T00:00:00Z",
+                                 project_identity="p")
+        register_seat(_fv_cycle, "seat-1", "core",
+                      "saipen_improve_A.md")
+        _fv_rep = create_report(
+            _fv_root, "imp-fv", "seat-1", "A", agent="seat-1", role="core",
+            model_or_runtime="probe",
+            protocol_fingerprint=PROBE_INSTALLED_FP,
+            context_scope="scope")
+        _fv_header = _fv_rep.read_text(encoding="utf-8-sig").split("\n## ", 1)[0]
+        expect("foreign project VERSION can never become saipen_version",
+               f"saipen_version: {PROBE_SAIPEN_VERSION}" in _fv_header
+               and "saipen_version: 1.2.3" not in _fv_header,
+               _fv_header)
     _saipen_spec = importlib.util.spec_from_file_location(
         "saipen_flattened_proof_probe", HOME / "tools" / "saipen.py")
     _saipen_module = importlib.util.module_from_spec(_saipen_spec)
@@ -6161,7 +6249,7 @@ def run_improve_probes() -> tuple[list[str], int]:
     _dc_cycle = create_cycle(_dc_root, "imp-dup")
     register_seat(_dc_cycle, "seat-1", "core", "saipen_improve_D.md")
     _dc_rep = create_report(_dc_root, "imp-dup", "seat-1", "D",
-                            agent="probe", role="core",
+                            agent="seat-1", role="core",
                             model_or_runtime="probe",
                             protocol_fingerprint="fp", context_scope="scope")
     append_run(_dc_rep, "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
@@ -6232,7 +6320,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         (_cr_cycle / "MANIFEST.md").read_text(encoding="utf-8-sig").replace(
             "cycle_id: imp-cr", "cycle_id: WRONG", 1), encoding="utf-8")
     try:
-        create_report(_cr_root, "imp-cr", "seat-1", "CR", agent="probe",
+        create_report(_cr_root, "imp-cr", "seat-1", "CR", agent="seat-1",
                       role="core", model_or_runtime="probe",
                       protocol_fingerprint="fp", context_scope="scope")
         _cr_gated = False
@@ -6325,8 +6413,8 @@ def run_improve_probes() -> tuple[list[str], int]:
         created_at="2026-08-10T00:00:00Z", project_identity="probe-project")
     register_seat(_submit_cycle, "seat-1", "core", "saipen_improve_A.md")
     _submit_report = create_report(
-        _submit_root, "imp-submit", "seat-1", "A", agent="probe", role="core",
-        model_or_runtime="probe", protocol_fingerprint="ded-4ae736e4",
+        _submit_root, "imp-submit", "seat-1", "A", agent="seat-1", role="core",
+        model_or_runtime="probe", protocol_fingerprint=PROBE_INSTALLED_FP,
         context_scope="probe scope")
     _submit_payload = _submit_root / "findings.json"
     _submit_args = [sys.executable, str(HOME / "tools" / "saipen.py"),
@@ -6559,9 +6647,9 @@ def run_improve_probes() -> tuple[list[str], int]:
     _nf_cycle = create_cycle(nf_root, "imp-nf")
     register_seat(_nf_cycle, "seat-1", "core", "saipen_improve_A.md")
     ticket_fixture(nf_root, "T-900")
-    _nf_rep = create_report(nf_root, "imp-nf", "seat-1", "A", agent="probe",
+    _nf_rep = create_report(nf_root, "imp-nf", "seat-1", "A", agent="seat-1",
                             role="core", model_or_runtime="probe",
-                            protocol_fingerprint="ded-4ae736e4",
+                            protocol_fingerprint=PROBE_INSTALLED_FP,
                             context_scope="scope")
     try:
         complete_report(_nf_rep)
@@ -6645,9 +6733,9 @@ def run_improve_probes() -> tuple[list[str], int]:
     (ab_root / "src.txt").write_text("v1\n", encoding="utf-8")
     _ab_cycle = create_cycle(ab_root, "imp-ab")
     register_seat(_ab_cycle, "seat-1", "core", "saipen_improve_A.md")
-    _ab_rep = create_report(ab_root, "imp-ab", "seat-1", "A", agent="probe",
+    _ab_rep = create_report(ab_root, "imp-ab", "seat-1", "A", agent="seat-1",
                             role="core", model_or_runtime="probe",
-                            protocol_fingerprint="ded-4ae736e4",
+                            protocol_fingerprint=PROBE_INSTALLED_FP,
                             context_scope="scope")
     append_run(_ab_rep, "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
                         "expected: x\nactual: y\n")  # no evidence -> stuck
@@ -6679,6 +6767,15 @@ def run_improve_probes() -> tuple[list[str], int]:
     expect("abort: a new cycle is admitted after the abort",
            (_ab_cycle2 / "MANIFEST.md").is_file())
 
+    # T-992/§8: IMPROVE.md's abort contract must match the writer -- drafts
+    # preserved AT THE SAME PATH (never a .discarded rename).
+    _abort_doc = (HOME / "saipen" / "IMPROVE.md").read_text(
+        encoding="utf-8-sig")
+    expect("IMPROVE.md documents same-path abort preservation, never .discarded",
+           "AT THEIR SAME PATH" in _abort_doc
+           and ".discarded" not in _abort_doc,
+           "IMPROVE.md abort contract drifted from the writer")
+
     # P0 (T-632) crash-safety: a forced _journaled_write failure must leave no
     # split active-manifest/discarded-report state -- report bytes intact,
     # manifest still active, retry still possible.
@@ -6688,9 +6785,9 @@ def run_improve_probes() -> tuple[list[str], int]:
     _abc_cycle = create_cycle(ab_crash_root, "imp-ab-crash")
     register_seat(_abc_cycle, "seat-1", "core", "saipen_improve_C.md")
     _abc_rep = create_report(ab_crash_root, "imp-ab-crash", "seat-1", "C",
-                             agent="probe", role="core",
+                             agent="seat-1", role="core",
                              model_or_runtime="probe",
-                             protocol_fingerprint="ded-4ae736e4",
+                             protocol_fingerprint=PROBE_INSTALLED_FP,
                              context_scope="scope")
     _abc_bytes = _abc_rep.read_bytes()
 
@@ -6764,9 +6861,9 @@ def run_improve_probes() -> tuple[list[str], int]:
     _abcf_cycle = create_cycle(ab_conf_root, "imp-ab-conflict")
     register_seat(_abcf_cycle, "seat-1", "core", "saipen_improve_F.md")
     _abcf_rep = create_report(ab_conf_root, "imp-ab-conflict", "seat-1", "F",
-                              agent="probe", role="core",
+                              agent="seat-1", role="core",
                               model_or_runtime="probe",
-                              protocol_fingerprint="ded-4ae736e4",
+                              protocol_fingerprint=PROBE_INSTALLED_FP,
                               context_scope="scope")
     _abcf_bytes = _abcf_rep.read_bytes()
     with mock.patch.object(_ab_journal_mod, "_crash_after",

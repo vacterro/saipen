@@ -415,6 +415,21 @@ def _canonical_proof_levels() -> list[str]:
     return levels
 
 
+def _runtime_identity() -> str:
+    """The runtime identifier supplied by the adapter/environment, else unknown
+    (T-992/§5). This is an untrusted input, never mechanically detected model
+    identity: it is stripped, bounded, and control-free before use, and a
+    value that cannot be made safe becomes the truthful neutral 'unknown'."""
+    import re as _re
+    value = os.environ.get("SAIPEN_RUNTIME", "") or ""
+    value = value.strip()
+    if not value or len(value) > 128:
+        return "unknown"
+    if _re.search(r"[\x00-\x1f\x7f]", value):
+        return "unknown"
+    return value
+
+
 def _improve(project_root: Path, args: list[str], as_json: bool,
              dry_run: bool) -> int:
     """saipen improve -- the meta-control command family (T-554, T-606,
@@ -582,10 +597,10 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
                              "exclusive"}, as_json)
             return 2
         from improve import ImproveError, prepare_audit_seat
-        from improve import protocol_fingerprint as _protocol_fingerprint
+        from improve import installed_protocol_fingerprint as _proto_fp
         try:
-            runtime = os.environ.get("SAIPEN_RUNTIME") or "unknown"
-            fingerprint = _protocol_fingerprint(HOME)
+            runtime = _runtime_identity()
+            fingerprint = _proto_fp(HOME)
             prepared = prepare_audit_seat(
                 project_root, agent_family=state_field(project_root, "agent")
                 or "agent", role=role, session_id=session_id,

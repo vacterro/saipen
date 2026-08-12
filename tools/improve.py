@@ -943,41 +943,166 @@ def _require_cycle_active(cycle_dir: Path, mutator: str) -> Path:
     return manifest
 
 
-def protocol_fingerprint(protocol_root: Path) -> str:
-    """Derive the Improve protocol fingerprint from OWNED evidence (T-624).
+def installed_protocol_fingerprint(protocol_root: Path) -> str:
+    """Derive the installed protocol fingerprint from MANIFEST-owned evidence
+    (T-624 follow-up, T-992).
 
-    The fingerprint hashes the protocol's normative documents as they are
-    INSTALLED on this host -- CORE.md, MAINTENANCE.md, BOOT.md, STYLE.md,
-    INDEX.md and every phase document. A report's protocol_fingerprint is
-    therefore bound to the exact protocol bytes the agent audited against,
-    not to a copied style marker or a guessed constant: change any protocol
-    file and every subsequently prepared report records a different
-    fingerprint. The hash is content-only (no paths), so it stays portable
-    across machines that share a protocol version.
+    The fingerprint surface is the ONE canonical inventory in
+    `saipen/MANIFEST.json`: every `files[]` entry whose `src` lives under
+    `saipen/` and is `required:true`, plus every `phase_docs.files[]` member.
+    That set owns IMPROVE.md, SAICRITIC.md, CORE.md, MAINTENANCE.md, BOOT.md,
+    STYLE.md and INDEX.md, so a change to any of them changes the fingerprint;
+    it also means no freehand file list can drift from the manifest. A
+    REQUIRED owned document that is missing on the installed host is a broken
+    install -- the fingerprint REFUSES rather than hashing "whatever exists".
+
+    Records are FRAMED, never naked-concatenated: each file contributes
+    `relative_path` + `byte_length` + `raw_bytes`, emitted in deterministic
+    sorted relative-path order. Framing makes the hash robust to a byte moving
+    across a file boundary (the concatenated stream could be identical while
+    the files changed) and to enumeration-order changes. The hash is
+    content-plus-relative-identity only -- no absolute path, so the same
+    protocol under two different directories fingerprints identically.
+
+    Naming is deliberate: "installed" -- Python can prove the bytes installed
+    on this host, not what an LLM cognitively read during a session.
     """
     import hashlib
+    import json as _json
     root = Path(protocol_root)
-    candidates = (root / "saipen", root)
-    proto = next((p for p in candidates if (p / "CORE.md").is_file()),
-                 None)
+    proto = next((p for p in (root / "saipen", root)
+                  if (p / "CORE.md").is_file()), None)
     if proto is None:
         raise ImproveError(
-            "cannot derive the protocol fingerprint: no CORE.md under "
-            f"{root}")
-    names = ("CORE.md", "MAINTENANCE.md", "BOOT.md", "STYLE.md",
-             "INDEX.md")
-    files = [proto / name for name in names if (proto / name).is_file()]
-    phases = proto / "phases"
-    if phases.is_dir():
-        files += sorted(phases.glob("*.md"))
-    if not files:
+            "cannot derive the installed protocol fingerprint: no CORE.md "
+            f"under {root}")
+    manifest = proto / "MANIFEST.json"
+    if not manifest.is_file():
         raise ImproveError(
-            "cannot derive the protocol fingerprint: no normative protocol "
-            f"documents under {proto}")
+            "cannot derive the installed protocol fingerprint: "
+            f"{manifest} is missing -- the manifest is the canonical "
+            "protocol-evidence inventory")
+    try:
+        inventory = _json.loads(manifest.read_text(encoding="utf-8-sig"))
+    except ValueError as exc:
+        raise ImproveError(
+            "cannot derive the installed protocol fingerprint: "
+            f"{manifest} is not valid JSON ({exc})") from exc
+    rels = []
+    for entry in inventory.get("files", []):
+        src = entry.get("src", "")
+        if (src.startswith("saipen/") or src.startswith("saipen\\")) \
+                and entry.get("required", False):
+            rels.append(src.replace("\\", "/"))
+    for phase in inventory.get("phase_docs", {}).get("files", []):
+        rels.append(f"saipen/phases/{phase}")
+    if not rels:
+        raise ImproveError(
+            "cannot derive the installed protocol fingerprint: "
+            f"{manifest} declares no required saipen/ owned documents")
+    missing = [rel for rel in rels
+               if not (proto / rel[len("saipen/"):]).is_file()]
+    if missing:
+        raise ImproveError(
+            "cannot derive the installed protocol fingerprint: REQUIRED "
+            "owned document(s) missing from the install: "
+            + ", ".join(sorted(missing)))
     digest = hashlib.sha256()
-    for path in files:
-        digest.update(path.read_bytes())
+    for rel in sorted(set(rels)):
+        path = proto / rel[len("saipen/"):]
+        raw = path.read_bytes()
+        digest.update(rel.encode("utf-8"))
+        digest.update(b"\n")
+        digest.update(str(len(raw)).encode("ascii"))
+        digest.update(b"\n")
+        digest.update(raw)
     return "sha256:" + digest.hexdigest()
+
+
+def _saipen_install_version() -> str:
+    """The SAIPEN version executing Improve -- the INSTALL, never the target
+    project (T-992/§3). The project's own VERSION is a different fact with a
+    different owner and must never be written into `saipen_version`.
+    """
+    candidates = (Path(__file__).resolve().parent.parent / "VERSION",
+                  Path(__file__).resolve().parent.parent
+                  / "saipen" / "VERSION")
+    for candidate in candidates:
+        if candidate.is_file():
+            value = candidate.read_text(encoding="utf-8").strip()
+            return value.split("\n")[0]
+    raise ImproveError(
+        "cannot derive the installed SAIPEN version: VERSION is missing "
+        "from the SAIPEN install")
+
+
+def validate_strict_provenance(
+        text: str, *, roster: str | None = None,
+        manifest_project_identity: str | None = None,
+        seat_id: str | None = None,
+        installed_saipen_version: str | None = None,
+        installed_protocol_fp: str | None = None) -> list[str]:
+    """Validate a STRICT report's provenance identity (T-992/§2).
+
+    Extends `validate_report(strict=True)` (which checks shape) with value
+    semantics: every required identity scalar must be non-empty and free of
+    CR/LF/control injection, unknown header fields are rejected, and every
+    mechanically knowable identity -- agent vs seat, project vs manifest
+    identity, saipen_version vs the INSTALLED version, protocol fingerprint
+    vs the installed fingerprint -- must MATCH when the corresponding ground
+    truth is supplied. Missing ground truth is an error (UNKNOWN is never
+    FRESH), never a silent pass.
+
+    Callers pass ground truth from the roster/manifest and the SAIPEN install;
+    fixtures that build hand-crafted evidence pass nothing and get the
+    structural checks only.
+    """
+    errors = []
+    parsed = parse_report(text)
+    header = parsed.header
+    _hblock = text.split("\n## ", 1)[0]
+    required = REQUIRED_HEADER
+    for key in required:
+        value = header.get(key, "")
+        if not value or not value.strip():
+            errors.append(f"report header field {key} must be non-empty")
+        elif any(ch in value for ch in ("\r", "\n", "\x00", "\x1b")):
+            errors.append(f"report header field {key} carries CR/LF/control "
+                          "characters")
+    _unknown = sorted(set(_field_keys(_hblock)) - required)
+    if _unknown:
+        errors.append("report header carries unknown field(s): "
+                      + ", ".join(_unknown))
+    if seat_id is not None:
+        agent = header.get("agent", "")
+        if agent != seat_id:
+            errors.append(f"report agent {agent!r} != roster seat {seat_id!r}")
+    if manifest_project_identity is not None:
+        project = header.get("project", "")
+        if project != manifest_project_identity:
+            errors.append(
+                f"report project {project!r} != manifest project_identity "
+                f"{manifest_project_identity!r}")
+    if installed_saipen_version is not None:
+        reported = header.get("saipen_version", "")
+        if reported != installed_saipen_version:
+            errors.append(
+                f"report saipen_version {reported!r} != installed SAIPEN "
+                f"version {installed_saipen_version!r}")
+    if installed_protocol_fp is not None:
+        reported = header.get("protocol_fingerprint", "")
+        if reported != installed_protocol_fp:
+            errors.append(
+                f"report protocol_fingerprint {reported!r} != installed "
+                f"protocol fingerprint {installed_protocol_fp!r}")
+    return errors
+
+
+def _field_keys(header_block: str) -> list[str]:
+    """The distinct header keys present in a report's top block."""
+    return sorted({ln.split(":", 1)[0].strip()
+                   for ln in header_block.splitlines()
+                   if ":" in ln and not ln.startswith("#")})
 
 
 def portable_project_key(project_root: Path) -> str:
@@ -1284,13 +1409,7 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
         except FreshnessError as exc:
             raise ImproveError(
                 f"cannot capture mechanical source identity: {exc}") from exc
-        saipen_version = ""
-        for candidate in (root / "VERSION",
-                          Path(__file__).resolve().parent.parent / "VERSION"):
-            if candidate.is_file():
-                saipen_version = candidate.read_text(
-                    encoding="utf-8").strip().split("\n")[0]
-                break
+        saipen_version = _saipen_install_version()
         report_text = (
             f"agent: {seat}\n"
             f"role: {selected_role}\n"
@@ -1310,6 +1429,14 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
         # validator rejects would mint evidence the consumers must then
         # refuse. One canonical field set, parity-tested at write time.
         _writer_violations = validate_report(report_text, strict=True)
+        # T-992/§2: provenance identity must match current installed truth --
+        # agent/version/fingerprint are mechanically knowable, and the writer
+        # proves its own output against them, never trusting the caller.
+        _writer_violations += validate_strict_provenance(
+            report_text, roster=manifest_text,
+            manifest_project_identity=project_key, seat_id=seat,
+            installed_saipen_version=saipen_version,
+            installed_protocol_fp=protocol_fingerprint)
         if _writer_violations:
             return {"ok": False, "code": "VALIDATION_FAILED",
                     "cycle_id": active_cycle, "seat_id": seat,
@@ -1607,7 +1734,9 @@ def create_report(project_root: Path, cycle_id: str, seat_id: str,
     The header is rendered by Python. Source identity is captured MECHANICALLY
     via freshness.compute_source_identity() -- source_head + the real tree
     fingerprint + discovery model, never a hand-typed hash or a friendly
-    label pretending to be one. `saipen_version` is read from VERSION."""
+    label pretending to be one. `saipen_version` comes ONLY from the SAIPEN
+    install executing Improve, never from the target project's VERSION
+    (T-992/§3)."""
     from freshness import FreshnessError, compute_source_identity
     root = Path(project_root)
     cdir = cycle_dir(root, cycle_id)
@@ -1641,18 +1770,27 @@ def create_report(project_root: Path, cycle_id: str, seat_id: str,
         raise ImproveError(
             f"create_report refuses: cannot capture mechanical source "
             f"identity: {exc}") from exc
-    saipen_version = ""
-    for candidate in (root / "VERSION",
-                      Path(__file__).resolve().parent.parent / "VERSION"):
-        if candidate.is_file():
-            saipen_version = candidate.read_text(
-                encoding="utf-8").strip().split("\n")[0]
-            break
+    # T-992/§4: the report's agent IS the seat -- the seat identity is the
+    # mechanically knowable fact, a caller may not attach a conflicting label.
+    if agent != seat:
+        raise ImproveError(
+            f"create_report refuses: agent {agent!r} conflicts with seat "
+            f"{seat!r}; the report agent is derived from the seat identity, "
+            "a caller cannot choose a different identity label")
+    saipen_version = _saipen_install_version()
+    # T-992/§4: project identity comes from the OWNING MANIFEST's
+    # project_identity -- the report and the cycle it belongs to must agree on
+    # one project identity, and the caller cannot recompute a divergent one.
+    _manifest_project = _field(roster_text, "project_identity")
+    if not _manifest_project:
+        raise ImproveError(
+            f"create_report refuses: cycle {cdir.name} manifest carries no "
+            "project_identity")
     header = (
-        f"agent: {agent}\n"
+        f"agent: {seat}\n"
         f"role: {selected_role}\n"
         f"model_or_runtime: {model_or_runtime}\n"
-        f"project: {portable_project_key(root)}\n"
+        f"project: {_manifest_project}\n"
         f"saipen_version: {saipen_version}\n"
         f"protocol_fingerprint: {protocol_fingerprint}\n"
         f"source_head: {ident.source_head}\n"
@@ -1661,6 +1799,15 @@ def create_report(project_root: Path, cycle_id: str, seat_id: str,
         f"context_scope: {context_scope}\n"
         f"context_available: {context_available}\n"
         "report_status: draft\n")
+    # T-992/§4: the writer never mints evidence its own consumer would
+    # refuse -- every required scalar non-empty, no control injection, no
+    # unknown header fields. The agent==seat conflict was already refused
+    # above; this catches blank/control/unknown identity on the way out.
+    _writer_provenance = validate_strict_provenance(header)
+    if _writer_provenance:
+        raise ImproveError(
+            "create_report refuses its own output: "
+            + "; ".join(_writer_provenance[:3]))
     report = resolve_report_path(root, cycle_id, seat, project_name)
     if report.is_file():
         raise ImproveError(
