@@ -175,7 +175,9 @@ rm_task() {
       removed=1
     fi
     for artifact in "$runtime_root/saipen/scheduled-source" \
-                    "$runtime_root/saipen"/scheduled-source-previous*; do
+                    "$runtime_root/saipen"/scheduled-source-previous* \
+                    "$runtime_root/saipen"/source-* \
+                    "$runtime_root/saipen"/inject-*.log; do
       [ -e "$artifact" ] || continue
       rm -rf -- "$artifact" \
         || { echo "runtime source remove FAILED ($artifact)"; return 1; }

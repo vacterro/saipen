@@ -321,8 +321,12 @@ switch ($Command) {
       }
     }
     if (Test-Path -LiteralPath $RuntimeDir) {
-      Get-ChildItem -LiteralPath $RuntimeDir -Directory -Force |
-        Where-Object Name -like "scheduled-source-previous*" |
+      Get-ChildItem -LiteralPath $RuntimeDir -Force |
+        Where-Object {
+          $_.Name -like "scheduled-source-previous*" -or
+          $_.Name -like "source-*" -or
+          $_.Name -like "inject-*.log"
+        } |
         ForEach-Object {
           Remove-Item -LiteralPath $_.FullName -Recurse -Force
           Write-Host "Removed: $($_.FullName)" -ForegroundColor DarkGray

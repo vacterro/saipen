@@ -113,8 +113,12 @@ function Remove-Task() {
       $removed += "runtime source"
     }
     if (Test-Path -LiteralPath $runtimeDir) {
-      Get-ChildItem -LiteralPath $runtimeDir -Directory -Force -ErrorAction Stop |
-        Where-Object Name -like "scheduled-source-previous*" |
+      Get-ChildItem -LiteralPath $runtimeDir -Force -ErrorAction Stop |
+        Where-Object {
+          $_.Name -like "scheduled-source-previous*" -or
+          $_.Name -like "source-*" -or
+          $_.Name -like "inject-*.log"
+        } |
         ForEach-Object {
           Remove-Item -LiteralPath $_.FullName -Recurse -Force -ErrorAction Stop
           $removed += "runtime source backup"

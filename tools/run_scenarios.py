@@ -1275,6 +1275,10 @@ exit 0
         runtime_source = local_app_data / "saipen" / "scheduled-source"
         runtime_backup = local_app_data / "saipen" / "scheduled-source-previous-probe"
         runtime_backup_fixed = local_app_data / "saipen" / "scheduled-source-previous"
+        runtime_temp_zip = local_app_data / "saipen" / "source-deadbeef0123.zip"
+        runtime_temp_dir = local_app_data / "saipen" / "source-deadbeef0123"
+        runtime_temp_raw = local_app_data / "saipen" / "inject-deadbeef0123.log"
+        runtime_log = local_app_data / "saipen" / "inject.log"
         current = state / "saipen-inject"
         legacy = state / "saipen-autoinject"
         before = git_status()
@@ -1484,6 +1488,10 @@ exit 0
         runtime_source.mkdir()
         runtime_backup.mkdir()
         runtime_backup_fixed.mkdir()
+        runtime_temp_dir.mkdir()
+        runtime_temp_zip.write_bytes(b"dead zip")
+        runtime_temp_raw.write_text("dead raw", encoding="ascii")
+        runtime_log.write_text("canonical log survives", encoding="ascii")
         removed = invoke("remove")
         expect(
             "remove cleans both task names and scheduler runtime",
@@ -1493,9 +1501,17 @@ exit 0
             and not runtime_backup_fixed.exists(),
             (removed.stdout + removed.stderr).strip())
         expect(
+            "remove sweeps killed-run temp files but keeps the canonical log",
+            not runtime_temp_dir.exists()
+            and not runtime_temp_zip.exists()
+            and not runtime_temp_raw.exists()
+            and runtime_log.read_text(encoding="ascii") == "canonical log survives",
+            (removed.stdout + removed.stderr).strip())
+        expect(
             "install and remove leave repository status unchanged",
             git_status() == before,
             "scheduler lifecycle changed working-tree status")
+        runtime_log.unlink()
 
         previous_task = "old-task-xml"
         previous_wrapper = b"previous-wrapper-bytes"
@@ -1548,6 +1564,10 @@ exit 0
         runtime_source.mkdir()
         runtime_backup.mkdir()
         runtime_backup_fixed.mkdir()
+        runtime_temp_dir.mkdir()
+        runtime_temp_zip.write_bytes(b"dead zip")
+        runtime_temp_raw.write_text("dead raw", encoding="ascii")
+        runtime_log.write_text("canonical log survives", encoding="ascii")
         uninstall_home = sandbox / "powershell-uninstall-home"
         uninstall_home.mkdir()
         ps_uninstalled = invoke_script(
@@ -1561,6 +1581,14 @@ exit 0
             and not runtime_source.exists() and not runtime_backup.exists()
             and not runtime_backup_fixed.exists(),
             (ps_uninstalled.stdout + ps_uninstalled.stderr).strip())
+        expect(
+            "PowerShell uninstall sweeps killed-run temp files but keeps the canonical log",
+            not runtime_temp_dir.exists()
+            and not runtime_temp_zip.exists()
+            and not runtime_temp_raw.exists()
+            and runtime_log.read_text(encoding="ascii") == "canonical log survives",
+            (ps_uninstalled.stdout + ps_uninstalled.stderr).strip())
+        runtime_log.unlink()
 
         current.write_text("preserve", encoding="ascii")
         wrapper.write_text("preserve", encoding="ascii")
@@ -1637,6 +1665,10 @@ exit 0
         runtime_source.mkdir()
         runtime_backup.mkdir()
         runtime_backup_fixed.mkdir()
+        runtime_temp_dir.mkdir()
+        runtime_temp_zip.write_bytes(b"dead zip")
+        runtime_temp_raw.write_text("dead raw", encoding="ascii")
+        runtime_log.write_text("canonical log survives", encoding="ascii")
         fallback_uninstalled = subprocess.run(
             [powershell, "-NoProfile", "-ExecutionPolicy", "Bypass",
              "-File", str(fallback_harness),
@@ -1650,6 +1682,14 @@ exit 0
             and not runtime_source.exists() and not runtime_backup.exists()
             and not runtime_backup_fixed.exists(),
             (fallback_uninstalled.stdout + fallback_uninstalled.stderr).strip())
+        expect(
+            "PowerShell fallback uninstall sweeps temp files, keeps canonical log",
+            not runtime_temp_dir.exists()
+            and not runtime_temp_zip.exists()
+            and not runtime_temp_raw.exists()
+            and runtime_log.read_text(encoding="ascii") == "canonical log survives",
+            (fallback_uninstalled.stdout + fallback_uninstalled.stderr).strip())
+        runtime_log.unlink()
 
         current.write_text("preserve", encoding="ascii")
         wrapper.write_text("preserve", encoding="ascii")
@@ -1716,6 +1756,10 @@ exit 9
             runtime_source.mkdir()
             runtime_backup.mkdir()
             runtime_backup_fixed.mkdir()
+            runtime_temp_dir.mkdir()
+            runtime_temp_zip.write_bytes(b"dead zip")
+            runtime_temp_raw.write_text("dead raw", encoding="ascii")
+            runtime_log.write_text("canonical log survives", encoding="ascii")
             sh_uninstalled = subprocess.run(
                 [bash, str(HOME / "bootstrap" / "uninstall.sh")],
                 cwd=HOME, env=shell_env, capture_output=True, text=True,
@@ -1727,6 +1771,14 @@ exit 9
                 and not wrapper.exists() and not runtime_source.exists()
                 and not runtime_backup.exists() and not runtime_backup_fixed.exists(),
                 (sh_uninstalled.stdout + sh_uninstalled.stderr).strip())
+            expect(
+                "shell uninstall sweeps killed-run temp files but keeps the canonical log",
+                not runtime_temp_dir.exists()
+                and not runtime_temp_zip.exists()
+                and not runtime_temp_raw.exists()
+                and runtime_log.read_text(encoding="ascii") == "canonical log survives",
+                (sh_uninstalled.stdout + sh_uninstalled.stderr).strip())
+            runtime_log.unlink()
 
             current.write_text("preserve", encoding="ascii")
             wrapper.write_text("preserve", encoding="ascii")
@@ -1745,6 +1797,10 @@ exit 9
             runtime_source.mkdir()
             runtime_backup.mkdir()
             runtime_backup_fixed.mkdir()
+            runtime_temp_dir.mkdir()
+            runtime_temp_zip.write_bytes(b"dead zip")
+            runtime_temp_raw.write_text("dead raw", encoding="ascii")
+            runtime_log.write_text("canonical log survives", encoding="ascii")
             no_schtasks_env = {
                 **shell_env,
                 "PATH": "/usr/bin:/bin",
@@ -1761,6 +1817,15 @@ exit 9
                 and not runtime_backup_fixed.exists(),
                 (shell_without_schtasks.stdout
                  + shell_without_schtasks.stderr).strip())
+            expect(
+                "shell uninstall without schtasks sweeps temp files, keeps canonical log",
+                not runtime_temp_dir.exists()
+                and not runtime_temp_zip.exists()
+                and not runtime_temp_raw.exists()
+                and runtime_log.read_text(encoding="ascii") == "canonical log survives",
+                (shell_without_schtasks.stdout
+                 + shell_without_schtasks.stderr).strip())
+            runtime_log.unlink()
         else:
             print("SKIP: scheduler shell uninstaller probes -- no usable bash")
             skipped += 1
