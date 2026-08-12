@@ -953,7 +953,7 @@ def main(argv: list[str] | None = None) -> int:
                "<project> <findings.json>|improve complete <cycle> <seat> "
                "<project>|improve verify <cycle>|improve cycle-complete "
                "<cycle>|improve abort <cycle>|improve clean <cycle>|"
-               "userperson|sub|context) [--dry-run] [--json]")
+               "ship|push|userperson|sub|context) [--dry-run] [--json]")
         return 2
     command = args[0]
     project_root = Path.cwd()
@@ -1052,6 +1052,24 @@ def main(argv: list[str] | None = None) -> int:
         return _context(project_root, args[1:], as_json, dry_run)
     if command == "improve":
         return _public_improve(project_root, args[1:], as_json, dry_run)
+    if command in ("ship", "push"):
+        # T-635: both invocations dispatch to ONE release executor; the
+        # invocation name is normalized out of the plan identity so their
+        # dry-runs are structurally identical.
+        from saipen_engine.release import execute_release, plan_release
+        try:
+            plan = plan_release(project_root, command, dry_run=dry_run)
+        except ValueError as exc:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": str(exc)}, as_json)
+            return 1
+        if dry_run:
+            result = execute_release(project_root, plan)
+            _emit(result, as_json)
+            return 0 if result.get("ok") else 1
+        result = execute_release(project_root, plan)
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
     print(f"unknown command: {command}")
     return 2
 

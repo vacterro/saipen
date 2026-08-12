@@ -3040,6 +3040,92 @@ def run_release_freshness_probes() -> tuple[list[str], int]:
     return problems, checked
 
 
+def run_release_executor_probes() -> tuple[list[str], int]:
+    """T-635: `saipen ship` and `saipen push` dispatch to ONE release
+    executor. Dry-runs are zero-write and structurally identical after
+    invocation-name normalization; foreign pre-existing staging is refused
+    (never committed, pushed or tagged)."""
+    problems: list[str] = []
+    checked = 0
+    env = {**os.environ, "GIT_AUTHOR_NAME": "probe",
+           "GIT_AUTHOR_EMAIL": "probe@example.invalid",
+           "GIT_COMMITTER_NAME": "probe",
+           "GIT_COMMITTER_EMAIL": "probe@example.invalid"}
+    home = VALIDATOR.parent.parent
+
+    def expect(label: str, condition: bool, detail: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        if condition:
+            print(f"PASS: release executor -- {label}")
+        else:
+            problems.append(f"release executor {label}: {detail}")
+
+    with tempfile.TemporaryDirectory(prefix="saipen-release-executor-") as tmp:
+        project = Path(tmp) / "home"
+        shutil.copytree(home, project, ignore=shutil.ignore_patterns(
+            ".git", ".venv", "__pycache__", ".freebuff", "node_modules", "nul"))
+
+        def git(*args: str) -> subprocess.CompletedProcess[str]:
+            return subprocess.run(["git", "-C", str(project), *args], env=env,
+                                  capture_output=True, text=True, check=False)
+
+        def cli(*args: str) -> subprocess.CompletedProcess[str]:
+            return subprocess.run(
+                [sys.executable, str(project / "tools" / "saipen.py"), *args],
+                cwd=str(project), env=env, capture_output=True, text=True,
+                errors="replace")
+
+        if git("init", "-q").returncode != 0:
+            print("SKIP: release executor probes -- git unavailable")
+            return problems, checked
+        git("add", "-A")
+        git("commit", "-q", "-m", "probe: baseline")
+        git("remote", "add", "origin",
+            f"file://{Path(tmp) / 'origin.git'}")
+        origin = Path(tmp) / "origin.git"
+        subprocess.run(["git", "init", "-q", "--bare", str(origin)],
+                       capture_output=True)
+        git("push", "-q", "origin", "HEAD:main")
+        git("branch", "-M", "main")
+
+        ship_plan = cli("ship", "--dry-run", "--json")
+        push_plan = cli("push", "--dry-run", "--json")
+        expect("ship and push dry-run plans are structurally identical "
+               "after invocation-name normalization",
+               ship_plan.returncode == 0 and push_plan.returncode == 0
+               and json.loads(ship_plan.stdout).get("plan")
+               == json.loads(push_plan.stdout).get("plan"),
+               f"ship={ship_plan.stdout[:200]} push={push_plan.stdout[:200]}")
+        expect("dry-run mutates no file/index/commit/tag",
+               git("status", "--short").stdout == ""
+               and git("log", "--oneline").stdout.count("\n") == 1
+               and git("tag", "--list").stdout == "",
+               git("status", "--short").stdout)
+
+        # Foreign pre-existing staging must be refused, not committed.
+        foreign = project / "foreign_untracked.txt"
+        foreign.write_text("foreign\n", encoding="utf-8")
+        git("add", "--", foreign.name)
+        plan_foreign = cli("ship", "--dry-run", "--json")
+        expect("a pre-existing foreign staged path refuses the release plan",
+               plan_foreign.returncode != 0
+               and json.loads(plan_foreign.stdout).get("code")
+               == "VALIDATION_FAILED"
+               and "foreign" in json.loads(
+                   plan_foreign.stdout).get("detail", ""),
+               plan_foreign.stdout)
+        expect("foreign staging stays untouched after the refusal",
+               foreign.is_file()
+               and foreign.read_text(encoding="utf-8") == "foreign\n"
+               and foreign.name in git("diff", "--cached", "--name-only").stdout,
+               "foreign file was altered or unstaged")
+        git("reset", "-q")
+        foreign.unlink()
+
+    return problems, checked
+
+
 def run_producer_gate_probes() -> tuple[list[str], int]:
     """Execute T-568's six red controls: gate context decides producer severity.
 
@@ -10210,6 +10296,9 @@ failures.extend(ship_staging_failures)
 release_freshness_failures, release_freshness_checked = \
     run_release_freshness_probes()
 failures.extend(release_freshness_failures)
+release_executor_failures, release_executor_checked = \
+    run_release_executor_probes()
+failures.extend(release_executor_failures)
 rolefresh_failures, rolefresh_checked, rolefresh_skipped = \
     run_role_freshness_probes()
 failures.extend(rolefresh_failures)
@@ -10276,6 +10365,7 @@ print(f"{ccc_identity_checked} ccc commit-identity behavior(s) executed")
 print(f"{producer_gate_checked} producer-gate behavior(s) executed")
 print(f"{ship_staging_checked} ship-staging behavior(s) executed")
 print(f"{release_freshness_checked} release-freshness behavior(s) executed")
+print(f"{release_executor_checked} release-executor behavior(s) executed")
 print(f"{rolefresh_checked} role-freshness behavior(s) executed, "
       f"{rolefresh_skipped} skipped for missing host capability")
 print(f"{sub_clean_checked} sub-clean safety behavior(s) executed, "
