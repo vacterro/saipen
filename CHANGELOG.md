@@ -1,6 +1,10 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.223.6 -- 2026-08-12 -- Improve evidence provenance truth: derived fingerprint, truthful runtime, honest context
+
+`saipen improve` no longer fabricates report identity. The protocol fingerprint is derived by hashing the installed protocol's normative documents (CORE, MAINTENANCE, BOOT, STYLE, INDEX + every phase doc) -- a report binds to the exact protocol bytes the audit ran against, and editing any protocol file changes the fingerprint of every subsequently prepared report. The model/runtime is no longer a guessed `deepseek-reasoner` constant: it reads the `SAIPEN_RUNTIME` environment variable when present and falls back to the truthful neutral value `unknown`. Context begins as `partial` instead of claiming `complete`, because a freshly prepared assignment has not proven completeness. Red controls prove the CLI-prepared header carries the derived fingerprint, never a guessed model constant, and that mutating a protocol document changes the fingerprint; strict and legacy cycles still validate. (T-624)
+
 ## 7.223.5 -- 2026-08-12 -- CI/local lint parity: one canonical pinned ruff surface
 
 `harness.md` and `.github/workflows/validate.yml` now run the SAME canonical lint command (`python -m ruff check tools/ tests/`) against the SAME pinned ruff version (`ruff==0.16.0`) -- CI no longer installs an unpinned ruff against VERIFY's pin-gate-dependencies rule, and the local doc no longer documents a narrower `tools/` surface than CI enforces. `tools/validate.py` gains a lint-parity check that reads both files and FAILs on a surface divergence, a version drift, or a missing pin. `harness.md` states that a host without Ruff must report lint as missing evidence, never as green. Red controls prove the parity check can go red on surface drift, version drift, and an unpinned CI install. (T-628)

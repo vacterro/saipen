@@ -943,6 +943,43 @@ def _require_cycle_active(cycle_dir: Path, mutator: str) -> Path:
     return manifest
 
 
+def protocol_fingerprint(protocol_root: Path) -> str:
+    """Derive the Improve protocol fingerprint from OWNED evidence (T-624).
+
+    The fingerprint hashes the protocol's normative documents as they are
+    INSTALLED on this host -- CORE.md, MAINTENANCE.md, BOOT.md, STYLE.md,
+    INDEX.md and every phase document. A report's protocol_fingerprint is
+    therefore bound to the exact protocol bytes the agent audited against,
+    not to a copied style marker or a guessed constant: change any protocol
+    file and every subsequently prepared report records a different
+    fingerprint. The hash is content-only (no paths), so it stays portable
+    across machines that share a protocol version.
+    """
+    import hashlib
+    root = Path(protocol_root)
+    candidates = (root / "saipen", root)
+    proto = next((p for p in candidates if (p / "CORE.md").is_file()),
+                 None)
+    if proto is None:
+        raise ImproveError(
+            "cannot derive the protocol fingerprint: no CORE.md under "
+            f"{root}")
+    names = ("CORE.md", "MAINTENANCE.md", "BOOT.md", "STYLE.md",
+             "INDEX.md")
+    files = [proto / name for name in names if (proto / name).is_file()]
+    phases = proto / "phases"
+    if phases.is_dir():
+        files += sorted(phases.glob("*.md"))
+    if not files:
+        raise ImproveError(
+            "cannot derive the protocol fingerprint: no normative protocol "
+            f"documents under {proto}")
+    digest = hashlib.sha256()
+    for path in files:
+        digest.update(path.read_bytes())
+    return "sha256:" + digest.hexdigest()
+
+
 def portable_project_key(project_root: Path) -> str:
     """A deterministic PORTABLE project identity (DOGFOOD V, T-618).
 

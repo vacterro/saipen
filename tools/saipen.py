@@ -14,6 +14,7 @@ Exit codes: 0 success, 1 refused, 2 usage, 3 not a SAIPEN project.
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -581,13 +582,17 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
                              "exclusive"}, as_json)
             return 2
         from improve import ImproveError, prepare_audit_seat
+        from improve import protocol_fingerprint as _protocol_fingerprint
         try:
+            runtime = os.environ.get("SAIPEN_RUNTIME") or "unknown"
+            fingerprint = _protocol_fingerprint(HOME)
             prepared = prepare_audit_seat(
                 project_root, agent_family=state_field(project_root, "agent")
                 or "agent", role=role, session_id=session_id,
-                project_name="SAIPEN", model_or_runtime="deepseek-reasoner",
-                protocol_fingerprint="ded-4ae736e4",
-                context_scope=f"SAIPEN audit, phase {state_phase(project_root)}")
+                project_name="SAIPEN", model_or_runtime=runtime,
+                protocol_fingerprint=fingerprint,
+                context_scope=f"SAIPEN audit, phase {state_phase(project_root)}",
+                context_available="partial")
         except ImproveError as exc:
             _emit({"ok": False, "code": "VALIDATION_FAILED",
                    "detail": str(exc)}, as_json)

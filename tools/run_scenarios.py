@@ -60,7 +60,8 @@ from sub_clean import sub_clean_blockers
 from improve import (ImproveError, abort_cycle, allocate_cycle_id,
                      append_run, complete_cycle,
                      complete_report, create_cycle, create_report, cycle_dir,
-                     derive_status, prepare_audit_seat, register_cycle, register_seat,
+                     derive_status, prepare_audit_seat, protocol_fingerprint,
+                     register_cycle, register_seat,
                      resolve_report_path, validate_manifest, validate_report,
                      write_sweep_entry)
 from userperson import (merge_profile, onboarding_questions, parse_profile,
@@ -5473,6 +5474,43 @@ def run_improve_probes() -> tuple[list[str], int]:
            _bare_data.get("proof_levels") == [
                "UNIT", "COMPOSITION", "CANONICAL", "GATE", "PROVENANCE"],
            repr(_bare_data.get("proof_levels")))
+    # ---- T-624: provenance truth -- the CLI-prepared report header must
+    # carry a DERIVED protocol fingerprint (never a copied style marker), a
+    # truthful neutral runtime (never a guessed model constant), and a
+    # partial/unknown context (completeness is not yet proven).
+    _bare_report = meta_root / _bare_data["report_path"]
+    _bare_header = _bare_report.read_text(encoding="utf-8-sig").split(
+        "\n## ", 1)[0]
+    _derived_fp = protocol_fingerprint(HOME)
+    expect("CLI-prepared report derives its protocol fingerprint from owned "
+           "protocol evidence",
+           f"protocol_fingerprint: {_derived_fp}" in _bare_header
+           and "ded-4ae736e4" not in _bare_header,
+           _bare_header)
+    expect("CLI-prepared report never carries a guessed model constant",
+           re.search(r"(?m)^model_or_runtime:\s*deepseek", _bare_header) is None
+           and "model_or_runtime: unknown" in _bare_header,
+           _bare_header)
+    expect("CLI-prepared report begins context as partial, not complete",
+           "context_available: partial" in _bare_header
+           and "context_available: complete" not in _bare_header,
+           _bare_header)
+    with tempfile.TemporaryDirectory(prefix="saipen-proto-fp-") as _proto_raw:
+        _proto_home = Path(_proto_raw) / "home"
+        shutil.copytree(HOME, _proto_home, ignore=shutil.ignore_patterns(
+            ".git", ".venv", "__pycache__", "node_modules", "nul", ".freebuff"))
+        _fp_before = protocol_fingerprint(_proto_home)
+        _mutated_proto = _proto_home / "saipen" / "CORE.md"
+        if _mutated_proto.is_file():
+            _mutated_proto.write_text(
+                _mutated_proto.read_text(encoding="utf-8-sig")
+                + "\nT-624 provenance probe marker\n",
+                encoding="utf-8")
+        _fp_after = protocol_fingerprint(_proto_home)
+        expect("editing a protocol document changes the derived fingerprint",
+               _fp_after != _fp_before
+               and _fp_after.startswith("sha256:"),
+               f"{_fp_before} vs {_fp_after}")
     _saipen_spec = importlib.util.spec_from_file_location(
         "saipen_flattened_proof_probe", HOME / "tools" / "saipen.py")
     _saipen_module = importlib.util.module_from_spec(_saipen_spec)
