@@ -307,6 +307,14 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
         return ("control copy with calibrated warn_slugs is not clean: "
                 + (control.stdout + control.stderr).strip()[-300:])
 
+    def _warn_slugs(output: str) -> set[str]:
+        """The set of WARN slugs the validator reports, for set-delta proof
+        (T-639): RED must differ from CONTROL only by the target ownership
+        failure, and GREEN must remove only that failure."""
+        return {ln.split("[", 1)[1].split("]", 1)[0]
+                for ln in output.splitlines() if ln.startswith("WARN [")}
+    control_slugs = _warn_slugs(control.stdout + control.stderr)
+
     # Age an unowned slug: log-missing-date emits in every clean copy (125
     # sealed pre-DATE entries are immutable), and no ticket names it.
     baseline["warn_slugs"]["log-missing-date"] = {
@@ -324,6 +332,13 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
             or "log-missing-date" not in red_text):
         return ("aged unowned slug did not fail the validator: "
                 + red_text.strip()[-300:])
+    # T-639: aging the target slug must not disturb the WARN slug set beyond
+    # the target slug itself -- the probe's own mutation introduces no
+    # unrelated warning.
+    red_slugs = _warn_slugs(red_text)
+    if red_slugs != control_slugs:
+        return ("aging the target slug changed the WARN slug set: "
+                f"{sorted(control_slugs ^ red_slugs)}")
 
     # The identical aged slug with a live naming ticket must pass.
     board = tree / ".saipen" / "BOARD.md"
@@ -344,16 +359,19 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
     board_text = board_text[:cut] + ticket + board_text[cut:]
     board.write_text(board_text, encoding="utf-8", newline="\n")
     green = validate()
+    green_text = green.stdout + green.stderr
     if green.returncode:
         return ("aged slug with live owning ticket still fails: "
-                + (green.stdout + green.stderr).strip()[-300:])
-    # T-639: the probe's OWN action (filing the owning ticket) must not
-    # create a second failing warn slug -- if adding the ticket pushed the
-    # board over the soft cap and aged an unrelated unowned slug, the green
-    # leg would fail for a condition the probe itself created. returncode 0
-    # above already proves no FAIL of any kind; name it explicitly so the
-    # isolation guarantee is asserted, not incidental.
-    green_fails = [ln for ln in (green.stdout + green.stderr).splitlines()
+                + green_text.strip()[-300:])
+    # T-639: the green leg (owning ticket added) must not create a SECOND
+    # failing warn slug, and must not disturb the WARN slug set -- e.g. a
+    # board pushed over the soft cap would age board-soft-cap into an
+    # unowned failure. Assert the slug SET, not just the returncode.
+    green_slugs = _warn_slugs(green_text)
+    if green_slugs != red_slugs:
+        return ("adding the owning ticket changed the WARN slug set: "
+                f"{sorted(red_slugs ^ green_slugs)}")
+    green_fails = [ln for ln in green_text.splitlines()
                    if ln.startswith("FAIL: warn ownership")]
     if green_fails:
         return ("owning ticket created another failing warn slug: "

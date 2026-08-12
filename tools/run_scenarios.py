@@ -58,7 +58,7 @@ from freshness import (FreshnessError, SourceIdentity,
                        compute_source_identity)
 from sub_clean import sub_clean_blockers
 from improve import (ImproveError, abort_cycle, allocate_cycle_id,
-                     append_run, complete_cycle,
+                     append_run, archive_cycle, complete_cycle,
                      complete_report, create_cycle, create_report, cycle_dir,
                      derive_status, installed_protocol_fingerprint,
                      _saipen_install_version,
@@ -4725,7 +4725,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         ticket_fixture(root, ticket)
         report = create_report(
             root, cycle_id, seat_id, project_name, agent=seat_id, role="core",
-            model_or_runtime="probe", protocol_fingerprint=PROBE_INSTALLED_FP,
+            model_or_runtime="probe",
             context_scope="probe scope")
         if findings_ok:
             for run_text in run_texts:
@@ -4784,13 +4784,20 @@ def run_improve_probes() -> tuple[list[str], int]:
            bad_avail)
 
     # RUN append is immutable: a second run appends, never overwrites; a
-    # complete report refuses further RUNs (T-551, DOGFOOD V T-616).
+    # complete report refuses further RUNs (T-551, DOGFOOD V T-616). T-638:
+    # append_run requires a valid ACTIVE cycle manifest -- the report lives
+    # under .saipen/improve/<cycle>/<seat>/ and the cycle must exist.
     proot = project_fixture("saipen-run-")
-    seat_report = resolve_report_path(proot, "imp-key-20260808",
-                                      "opencode-01", "PROJ")
-    seat_report.parent.mkdir(parents=True)
-    seat_report.write_text(
-        "report_status: draft\n\n## RUN 1\nfirst\n", encoding="utf-8")
+    _run_cycle = create_cycle(proot, "imp-key-20260808",
+                              created_at="2026-08-10T00:00:00Z",
+                              project_identity="p")
+    register_seat(_run_cycle, "opencode-01", "core",
+                  "saipen_improve_PROJ.md")
+    seat_report = create_report(
+        proot, "imp-key-20260808", "opencode-01", "PROJ",
+        agent="opencode-01", role="core", model_or_runtime="probe",
+        context_scope="scope")
+    append_run(seat_report, "first run")
     append_run(seat_report, "second run")
     after = seat_report.read_text(encoding="utf-8")
     expect("a second run appends an immutable RUN section, never overwriting",
@@ -4884,7 +4891,6 @@ def run_improve_probes() -> tuple[list[str], int]:
     report1 = create_report(life_root, "imp-one", "seat-1", "A",
                             agent="seat-1", role="core",
                             model_or_runtime="probe",
-                            protocol_fingerprint=PROBE_INSTALLED_FP,
                             context_scope="probe scope")
     # A strict cycle cannot be completed by a bare status skeleton.
     try:
@@ -4919,7 +4925,6 @@ def run_improve_probes() -> tuple[list[str], int]:
     imm_report = create_report(imm_root, "imp-imm", "seat-1", "A",
                                agent="seat-1", role="core",
                                model_or_runtime="probe",
-                               protocol_fingerprint=PROBE_INSTALLED_FP,
                                context_scope="probe scope")
     try:
         complete_cycle(cimm)
@@ -4971,11 +4976,9 @@ def run_improve_probes() -> tuple[list[str], int]:
     register_seat(e2e_cycle, "seat-b", "core", "saipen_improve_B.md")
     rep_a = create_report(e2e_root, "imp-e2e", "seat-a", "A", agent="seat-a",
                           role="core", model_or_runtime="probe",
-                          protocol_fingerprint=PROBE_INSTALLED_FP,
                           context_scope="scope")
     rep_b = create_report(e2e_root, "imp-e2e", "seat-b", "B", agent="seat-b",
                           role="core", model_or_runtime="probe",
-                          protocol_fingerprint=PROBE_INSTALLED_FP,
                           context_scope="scope")
     append_run(rep_a, "IMP-001 [P1] [PROTOCOL_VIOLATION] [proven] [ticket]\n"
                       "expected: a\nactual: b\nevidence: c\n")
@@ -5010,7 +5013,6 @@ def run_improve_probes() -> tuple[list[str], int]:
     register_seat(cid1, "seat-1", "core", "saipen_improve_A.md")
     a_report = create_report(alloc_root, id1, "seat-1", "A", agent="seat-1",
                              role="core", model_or_runtime="probe",
-                             protocol_fingerprint=PROBE_INSTALLED_FP,
                              context_scope="scope")
     append_run(a_report, "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
                          "expected: x\nactual: y\nevidence: z\n")
@@ -5036,7 +5038,6 @@ def run_improve_probes() -> tuple[list[str], int]:
     register_seat(cL, "seat-1", "core", "saipen_improve_A.md")
     repL = create_report(life2, "imp-life2", "seat-1", "A", agent="seat-1",
                          role="core", model_or_runtime="probe",
-                         protocol_fingerprint=PROBE_INSTALLED_FP,
                          context_scope="scope")
     append_run(repL, "IMP-001 [P1] [PROTOCOL_VIOLATION] [proven] [ticket]\n"
                      "expected: x\nactual: y\nevidence: z\n"
@@ -5099,7 +5100,6 @@ def run_improve_probes() -> tuple[list[str], int]:
     register_seat(cL2, "seat-1", "core", "saipen_improve_A.md")
     repL2 = create_report(life2, "imp-life2-2", "seat-1", "A", agent="seat-1",
                           role="core", model_or_runtime="probe",
-                          protocol_fingerprint=PROBE_INSTALLED_FP,
                           context_scope="scope")
     append_run(repL2, "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
                       "expected: x\nactual: y\nevidence: z\n")
@@ -5592,7 +5592,6 @@ def run_improve_probes() -> tuple[list[str], int]:
         _fv_rep = create_report(
             _fv_root, "imp-fv", "seat-1", "A", agent="seat-1", role="core",
             model_or_runtime="probe",
-            protocol_fingerprint=PROBE_INSTALLED_FP,
             context_scope="scope")
         _fv_header = _fv_rep.read_text(encoding="utf-8-sig").split("\n## ", 1)[0]
         expect("foreign project VERSION can never become saipen_version",
@@ -5652,7 +5651,7 @@ def run_improve_probes() -> tuple[list[str], int]:
             prepare_audit_seat(
                 _crash_root, agent_family="probe", role="core",
                 session_id="probe-crash", project_name="SAIPEN",
-                model_or_runtime="probe", protocol_fingerprint="probe",
+                model_or_runtime="probe",
                 context_scope="atomic admission crash control")
             _admit_crashed = False
         except SystemExit:
@@ -5947,7 +5946,7 @@ def run_improve_probes() -> tuple[list[str], int]:
     _identity_assignments = [prepare_audit_seat(
         _identity_root, agent_family="probe", role="core", session_id=seat,
         project_name="SAME", model_or_runtime="probe",
-        protocol_fingerprint="probe", context_scope="seat identity control")
+        context_scope="seat identity control")
         for seat in ("seat-a", "seat-b")]
     for _assignment in _identity_assignments:
         _identity_report = Path(_assignment["report_path"])
@@ -6009,7 +6008,7 @@ def run_improve_probes() -> tuple[list[str], int]:
     _legacy_first = prepare_audit_seat(
         _legacy_identity_root, agent_family="probe", role="core",
         session_id="seat-a", project_name="SAME",
-        model_or_runtime="probe", protocol_fingerprint="probe",
+        model_or_runtime="probe",
         context_scope="legacy identity control")
     _legacy_report = Path(_legacy_first["report_path"])
     append_run(_legacy_report,
@@ -6040,7 +6039,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         prepare_audit_seat(
             _legacy_identity_root, agent_family="probe", role="core",
             session_id="seat-b", project_name="SAME",
-            model_or_runtime="probe", protocol_fingerprint="probe",
+            model_or_runtime="probe",
             context_scope="legacy identity control")
         _late_duplicate_refused = False
     except ValueError as _legacy_identity_exc:
@@ -6064,7 +6063,7 @@ def run_improve_probes() -> tuple[list[str], int]:
     _stale_first = prepare_audit_seat(
         _stale_root, agent_family="probe", role="critic",
         session_id="critic-stale-01", project_name="STALE",
-        model_or_runtime="probe", protocol_fingerprint="probe",
+        model_or_runtime="probe",
         context_scope="stale draft control")
     _stale_report = _stale_root / _stale_first["report_path"]
     _stale_manifest = (_stale_root / ".saipen" / "improve"
@@ -6077,7 +6076,7 @@ def run_improve_probes() -> tuple[list[str], int]:
     _stale_retry = prepare_audit_seat(
         _stale_root, agent_family="probe", role="critic",
         session_id="critic-stale-01", project_name="STALE",
-        model_or_runtime="probe", protocol_fingerprint="probe",
+        model_or_runtime="probe",
         context_scope="stale draft control")
     expect("A1: stale DRAFT resume refuses STALE_REPORT with zero writes",
            _stale_retry.get("code") == "STALE_REPORT"
@@ -6091,7 +6090,7 @@ def run_improve_probes() -> tuple[list[str], int]:
     _stale_restored = prepare_audit_seat(
         _stale_root, agent_family="probe", role="critic",
         session_id="critic-stale-01", project_name="STALE",
-        model_or_runtime="probe", protocol_fingerprint="probe",
+        model_or_runtime="probe",
         context_scope="stale draft control")
     expect("A1: restoring the source restores the DRAFT resume",
            _stale_restored.get("code") == "ALREADY_ASSIGNED"
@@ -6106,7 +6105,7 @@ def run_improve_probes() -> tuple[list[str], int]:
     _mf_first = prepare_audit_seat(
         _manifest_root, agent_family="probe", role="critic",
         session_id="critic-mf-01", project_name="MF",
-        model_or_runtime="probe", protocol_fingerprint="probe",
+        model_or_runtime="probe",
         context_scope="invalid manifest control")
     _mf_cycle = cycle_dir(_manifest_root, _mf_first["cycle_id"])
     _mf_manifest = _mf_cycle / "MANIFEST.md"
@@ -6119,7 +6118,7 @@ def run_improve_probes() -> tuple[list[str], int]:
     _mf_second = prepare_audit_seat(
         _manifest_root, agent_family="probe", role="critic",
         session_id="critic-mf-02", project_name="MF",
-        model_or_runtime="probe", protocol_fingerprint="probe",
+        model_or_runtime="probe",
         context_scope="invalid manifest control")
     expect("A2: admission on an invalid active manifest refuses "
            "INVALID_MANIFEST with zero new mutation",
@@ -6144,7 +6143,7 @@ def run_improve_probes() -> tuple[list[str], int]:
     _card_first = prepare_audit_seat(
         _card_root, agent_family="probe", role="critic",
         session_id="critic-card-01", project_name="CARD",
-        model_or_runtime="probe", protocol_fingerprint="probe",
+        model_or_runtime="probe",
         context_scope="cardinality control")
     _card_cycle = cycle_dir(_card_root, _card_first["cycle_id"])
     _card_manifest = _card_cycle / "MANIFEST.md"
@@ -6155,7 +6154,7 @@ def run_improve_probes() -> tuple[list[str], int]:
     _card_second = prepare_audit_seat(
         _card_root, agent_family="probe", role="critic",
         session_id="critic-card-02", project_name="CARD",
-        model_or_runtime="probe", protocol_fingerprint="probe",
+        model_or_runtime="probe",
         context_scope="cardinality control")
     expect("A3: a duplicated strict seat role field refuses INVALID_MANIFEST "
            "(exactly-once, no first/last-value ambiguity)",
@@ -6166,7 +6165,7 @@ def run_improve_probes() -> tuple[list[str], int]:
     _bg_first = prepare_audit_seat(
         _bogus_root, agent_family="probe", role="critic",
         session_id="critic-bg-01", project_name="BG",
-        model_or_runtime="probe", protocol_fingerprint="probe",
+        model_or_runtime="probe",
         context_scope="bogus availability control")
     _bg_cycle = cycle_dir(_bogus_root, _bg_first["cycle_id"])
     _bg_manifest = _bg_cycle / "MANIFEST.md"
@@ -6178,7 +6177,7 @@ def run_improve_probes() -> tuple[list[str], int]:
     _bg_retry = prepare_audit_seat(
         _bogus_root, agent_family="probe", role="critic",
         session_id="critic-bg-01", project_name="BG",
-        model_or_runtime="probe", protocol_fingerprint="probe",
+        model_or_runtime="probe",
         context_scope="bogus availability control")
     expect("A3: availability bogus can never resume as ALREADY_ASSIGNED",
            _bg_retry.get("code") == "INVALID_MANIFEST"
@@ -6251,19 +6250,20 @@ def run_improve_probes() -> tuple[list[str], int]:
     _dc_rep = create_report(_dc_root, "imp-dup", "seat-1", "D",
                             agent="seat-1", role="core",
                             model_or_runtime="probe",
-                            protocol_fingerprint="fp", context_scope="scope")
-    append_run(_dc_rep, "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
-                        "expected: a\nactual: b\nevidence: c\n"
-                        "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
-                        "expected: d\nactual: e\nevidence: f\n")
+                            context_scope="scope")
+    _dc_bytes_before = _dc_rep.read_bytes()
     try:
-        complete_report(_dc_rep)
-        _dc_completed = False
+        append_run(_dc_rep, "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+                            "expected: a\nactual: b\nevidence: c\n"
+                            "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+                            "expected: d\nactual: e\nevidence: f\n")
+        _dc_append = False
     except ImproveError:
-        _dc_completed = True
-    expect("A4: a duplicate composite identity can never complete (refused "
-           "before any set/map dedup into a swept verdict)",
-           _dc_completed, "")
+        _dc_append = True
+    expect("A4 + T-638/§2: a duplicate composite identity is refused at "
+           "append with ZERO writes (never enters a report that could be "
+           "swept)",
+           _dc_append and _dc_rep.read_bytes() == _dc_bytes_before, "")
 
     # A5: strict report requires discovery_model exactly once; legacy reports
     # keep the deliberate boundary and stay valid without it.
@@ -6271,7 +6271,7 @@ def run_improve_probes() -> tuple[list[str], int]:
     _a5_first = prepare_audit_seat(
         _a5_root, agent_family="probe", role="critic",
         session_id="critic-a5-01", project_name="A5",
-        model_or_runtime="probe", protocol_fingerprint="probe",
+        model_or_runtime="probe",
         context_scope="header parity control")
     _a5_report = _a5_root / _a5_first["report_path"]
     _a5_report.write_text(
@@ -6281,7 +6281,7 @@ def run_improve_probes() -> tuple[list[str], int]:
     _a5_retry = prepare_audit_seat(
         _a5_root, agent_family="probe", role="critic",
         session_id="critic-a5-01", project_name="A5",
-        model_or_runtime="probe", protocol_fingerprint="probe",
+        model_or_runtime="probe",
         context_scope="header parity control")
     expect("A5: a strict report missing discovery_model refuses "
            "INVALID_REPORT (writer/spec/validator field parity)",
@@ -6322,7 +6322,7 @@ def run_improve_probes() -> tuple[list[str], int]:
     try:
         create_report(_cr_root, "imp-cr", "seat-1", "CR", agent="seat-1",
                       role="core", model_or_runtime="probe",
-                      protocol_fingerprint="fp", context_scope="scope")
+                      context_scope="scope")
         _cr_gated = False
     except ImproveError as _cr_exc:
         _cr_gated = "invalid active manifest" in str(_cr_exc)
@@ -6414,7 +6414,7 @@ def run_improve_probes() -> tuple[list[str], int]:
     register_seat(_submit_cycle, "seat-1", "core", "saipen_improve_A.md")
     _submit_report = create_report(
         _submit_root, "imp-submit", "seat-1", "A", agent="seat-1", role="core",
-        model_or_runtime="probe", protocol_fingerprint=PROBE_INSTALLED_FP,
+        model_or_runtime="probe",
         context_scope="probe scope")
     _submit_payload = _submit_root / "findings.json"
     _submit_args = [sys.executable, str(HOME / "tools" / "saipen.py"),
@@ -6423,7 +6423,8 @@ def run_improve_probes() -> tuple[list[str], int]:
 
     _submit_payload.write_text(
         json.dumps({"run_text": "IMP-001 [P1] [LOGIC_ERROR] [proven] "
-                                "[ticket]\nexpected: x\nactual: y\n"}),
+                                "[ticket]\nexpected: x\nactual: y\n"
+                                "evidence: z\n"}),
         encoding="utf-8")
     _submit_positive = subprocess.run(
         [*_submit_args, str(_submit_payload)],
@@ -6649,7 +6650,6 @@ def run_improve_probes() -> tuple[list[str], int]:
     ticket_fixture(nf_root, "T-900")
     _nf_rep = create_report(nf_root, "imp-nf", "seat-1", "A", agent="seat-1",
                             role="core", model_or_runtime="probe",
-                            protocol_fingerprint=PROBE_INSTALLED_FP,
                             context_scope="scope")
     try:
         complete_report(_nf_rep)
@@ -6735,10 +6735,15 @@ def run_improve_probes() -> tuple[list[str], int]:
     register_seat(_ab_cycle, "seat-1", "core", "saipen_improve_A.md")
     _ab_rep = create_report(ab_root, "imp-ab", "seat-1", "A", agent="seat-1",
                             role="core", model_or_runtime="probe",
-                            protocol_fingerprint=PROBE_INSTALLED_FP,
                             context_scope="scope")
     append_run(_ab_rep, "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
-                        "expected: x\nactual: y\n")  # no evidence -> stuck
+                        "expected: x\nactual: y\nevidence: z\n")
+    # Make the report genuinely stuck by removing the evidence triple AFTER
+    # the mechanical append -- a malformed finding can never complete, which
+    # is exactly the stuck state abort exists to exit.
+    _ab_rep.write_text(
+        _ab_rep.read_text(encoding="utf-8-sig").replace(
+            "evidence: z", ""), encoding="utf-8")
     try:
         complete_report(_ab_rep)
         _ab_stuck = False
@@ -6776,6 +6781,164 @@ def run_improve_probes() -> tuple[list[str], int]:
            and ".discarded" not in _abort_doc,
            "IMPROVE.md abort contract drifted from the writer")
 
+    # ---- T-638 (P0): a known-INVALID base is never mutated. Every lifecycle
+    # mutator must validate the manifest/report it consumes BEFORE writing --
+    # abort/archive/complete on an invalid manifest, and append on a
+    # malformed strict report, commit ZERO bytes.
+    _ib_root = project_fixture("saipen-invalid-base-")
+    _ib_cycle = create_cycle(_ib_root, "imp-ib",
+                             created_at="2026-08-12T00:00:00Z",
+                             project_identity="p")
+    register_seat(_ib_cycle, "seat-1", "core", "saipen_improve_A.md")
+    _ib_rep = create_report(_ib_root, "imp-ib", "seat-1", "A",
+                            agent="seat-1", role="core",
+                            model_or_runtime="probe",
+                            context_scope="scope")
+    _ib_manifest = _ib_cycle / "MANIFEST.md"
+    _ib_manifest_ok = _ib_manifest.read_text(encoding="utf-8-sig")
+    _ib_manifest_bad = _ib_manifest_ok.replace(
+        "cycle_id: imp-ib", "cycle_id: WRONG")
+    _ib_manifest.write_text(_ib_manifest_bad, encoding="utf-8")
+    _ib_manifest_bytes = _ib_manifest.read_bytes()
+    for _label, _call in [
+            ("abort", lambda: abort_cycle(_ib_cycle)),
+            ("complete", lambda: complete_cycle(_ib_cycle)),
+            ("archive", lambda: archive_cycle(_ib_cycle))]:
+        try:
+            _call()
+            _ib_refused = False
+        except Exception:
+            _ib_refused = True
+        expect(f"invalid-manifest {_label} refuses with ZERO writes",
+               _ib_refused
+               and _ib_manifest.read_bytes() == _ib_manifest_bytes,
+               "base mutated or not refused")
+    _ib_rep_bad = _ib_rep.read_text(encoding="utf-8-sig")
+    _ib_rep_bad = _ib_rep_bad.replace("role: core",
+                                      "role: critic\nrole: core", 1)
+    _ib_rep.write_text(_ib_rep_bad, encoding="utf-8")
+    _ib_rep_bytes = _ib_rep.read_bytes()
+    try:
+        append_run(_ib_rep, "NO_FINDINGS\n")
+        _ib_append_refused = False
+    except Exception:
+        _ib_append_refused = True
+    expect("append_run on a malformed strict report refuses with ZERO writes",
+           _ib_append_refused and _ib_rep.read_bytes() == _ib_rep_bytes,
+           "malformed report was extended")
+    _ib_manifest.write_text(_ib_manifest_ok, encoding="utf-8")
+    _ib_rep.write_text(_ib_rep.read_text(encoding="utf-8-sig").replace(
+        "role: critic\nrole: core", "role: core"), encoding="utf-8")
+    _ib_after_restore = True
+    expect("restored valid manifest + report still validate",
+           validate_report(_ib_rep.read_text(encoding="utf-8-sig"),
+                           strict=True) == [],
+           "restored report invalid")
+
+    # ---- T-638/§2 + §10: PROPOSED-state validation, mutator by mutator --
+    # a known-invalid PROPOSED state never enters PREPARED/APPLY, never
+    # leaves bytes, and no journal claims COMMITTED.
+    _pc_root = project_fixture("saipen-proposed-")
+    # create_cycle with invalid created_at: ZERO writes, no directory appears.
+    _pc_owner = _pc_root / ".saipen" / "improve"
+    try:
+        create_cycle(_pc_root, "imp-bad-time",
+                     created_at="NOT-A-TIME", project_identity="p")
+        _pc_time_refused = False
+    except Exception:
+        _pc_time_refused = True
+    expect("create_cycle invalid created_at refuses with ZERO writes "
+           "(no manifest, no directory)",
+           _pc_time_refused
+           and not (_pc_owner / "imp-bad-time" / "MANIFEST.md").exists()
+           and not (_pc_owner / "imp-bad-time").exists(),
+           "invalid created_at left bytes behind")
+    try:
+        create_cycle(_pc_root, "imp-bad-proj",
+                     created_at="2026-08-12T00:00:00Z",
+                     project_identity="V:/absolute/path")
+        _pc_proj_refused = False
+    except Exception:
+        _pc_proj_refused = True
+    expect("create_cycle non-portable project_identity refuses with ZERO "
+           "writes",
+           _pc_proj_refused
+           and not (_pc_owner / "imp-bad-proj" / "MANIFEST.md").exists(),
+           "invalid project_identity left bytes behind")
+    # write_sweep_entry on a malformed SWEEP base: ZERO writes.
+    _pc_cycle = create_cycle(_pc_root, "imp-pc",
+                             created_at="2026-08-12T00:00:00Z",
+                             project_identity="p")
+    register_seat(_pc_cycle, "seat-1", "core", "saipen_improve_A.md")
+    _pc_rep = create_report(_pc_root, "imp-pc", "seat-1", "A",
+                            agent="seat-1", role="core",
+                            model_or_runtime="probe",
+                            context_scope="scope")
+    append_run(_pc_rep, "IMP-001 [P1] [LOGIC_ERROR] [proven] [ticket]\n"
+                        "expected: x\nactual: y\nevidence: z\n")
+    complete_report(_pc_rep)
+    _pc_cycle_ticket = ticket_fixture(_pc_root, "T-900")
+    (_pc_cycle / "SWEEP.md").write_text(
+        "# SWEEP\nTHIS IS GARBAGE\n", encoding="utf-8")
+    _pc_sweep_bytes = (_pc_cycle / "SWEEP.md").read_bytes()
+    try:
+        write_sweep_entry(_pc_cycle, {"run": "RUN-1", "imp_id": "001",
+                                      "disposition": "CONFIRMED",
+                                      "ticket": "T-900",
+                                      "report": "saipen_improve_A.md",
+                                      "reproduced": "y"})
+        _pc_sweep_refused = False
+    except Exception:
+        _pc_sweep_refused = True
+    expect("write_sweep_entry on a malformed SWEEP ledger refuses with ZERO "
+           "writes",
+           _pc_sweep_refused
+           and (_pc_cycle / "SWEEP.md").read_bytes() == _pc_sweep_bytes,
+           "malformed SWEEP was extended")
+    # write_sweep_entry on a malformed COMPLETE report: ZERO sweep writes.
+    (_pc_cycle / "SWEEP.md").write_text("# SWEEP\n", encoding="utf-8")
+    _pc_rep_malformed = _pc_rep.read_text(encoding="utf-8-sig").replace(
+        "role: core", "role: critic\nrole: core", 1)
+    _pc_rep.write_text(_pc_rep_malformed, encoding="utf-8")
+    _pc_sweep_bytes = (_pc_cycle / "SWEEP.md").read_bytes()
+    try:
+        write_sweep_entry(_pc_cycle, {"run": "RUN-1", "imp_id": "001",
+                                      "disposition": "CONFIRMED",
+                                      "ticket": "T-900",
+                                      "report": "saipen_improve_A.md",
+                                      "reproduced": "y"})
+        _pc_sweep_report_refused = False
+    except Exception:
+        _pc_sweep_report_refused = True
+    expect("write_sweep_entry on a malformed COMPLETE report refuses with "
+           "ZERO writes",
+           _pc_sweep_report_refused
+           and (_pc_cycle / "SWEEP.md").read_bytes() == _pc_sweep_bytes,
+           "malformed report's finding was swept")
+    _pc_rep.write_text(_pc_rep.read_text(encoding="utf-8-sig").replace(
+        "role: critic\nrole: core", "role: core"), encoding="utf-8")
+    # A valid full sweep, then complete_cycle -- the archive-corruption test
+    # needs a genuinely COMPLETE+SWEPT cycle to corrupt.
+    write_sweep_entry(_pc_cycle, {"run": "RUN-1", "imp_id": "001",
+                                  "disposition": "CONFIRMED",
+                                  "ticket": "T-900",
+                                  "report": "saipen_improve_A.md",
+                                  "reproduced": "y"})
+    complete_cycle(_pc_cycle)
+    _pc_manifest_bytes = (_pc_cycle / "MANIFEST.md").read_bytes()
+    _pc_corrupt_rep = _pc_rep.read_text(encoding="utf-8-sig").replace(
+        "role: core", "role: critic\nrole: core", 1)
+    _pc_rep.write_text(_pc_corrupt_rep, encoding="utf-8")
+    try:
+        archive_cycle(_pc_cycle)
+        _pc_archive_refused = False
+    except Exception:
+        _pc_archive_refused = True
+    expect("archive of a corrupted COMPLETE cycle refuses with ZERO writes",
+           _pc_archive_refused
+           and (_pc_cycle / "MANIFEST.md").read_bytes() == _pc_manifest_bytes,
+           "corrupted completed cycle was archived")
+
     # P0 (T-632) crash-safety: a forced _journaled_write failure must leave no
     # split active-manifest/discarded-report state -- report bytes intact,
     # manifest still active, retry still possible.
@@ -6787,7 +6950,6 @@ def run_improve_probes() -> tuple[list[str], int]:
     _abc_rep = create_report(ab_crash_root, "imp-ab-crash", "seat-1", "C",
                              agent="seat-1", role="core",
                              model_or_runtime="probe",
-                             protocol_fingerprint=PROBE_INSTALLED_FP,
                              context_scope="scope")
     _abc_bytes = _abc_rep.read_bytes()
 
@@ -6863,7 +7025,6 @@ def run_improve_probes() -> tuple[list[str], int]:
     _abcf_rep = create_report(ab_conf_root, "imp-ab-conflict", "seat-1", "F",
                               agent="seat-1", role="core",
                               model_or_runtime="probe",
-                              protocol_fingerprint=PROBE_INSTALLED_FP,
                               context_scope="scope")
     _abcf_bytes = _abcf_rep.read_bytes()
     with mock.patch.object(_ab_journal_mod, "_crash_after",
@@ -7302,13 +7463,20 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
            parse_state(codec.read_doc(saipen / "STATE.md")).get("last_event")
            == int(cp.get("event_id", "E-0")[2:]), repr(cp))
 
-    # Ticket lifecycle: canonical ID allocation ignores synthetic T-999.
+    # Ticket lifecycle: canonical ID allocation reads STRUCTURED records only
+    # (T-639/§9) -- prose that mentions T-NNN is not identity, canonical
+    # ticket lines are.
     tid = next_ticket_id(
         "# Board\n## DOING\n## TODO\n- [ ] T-901 probe\n## DONE\n## BLOCKED\n"
-        "- [ ] T-999 synthetic fixture\n",
+        "note: synthetic T-900000 fixture mentioned in prose\n",
         "- 09.08.26 00:00 [E-1] [T-901] RUN: base\n")
-    expect("next_ticket_id skips the synthetic T-999 namespace",
+    expect("next_ticket_id ignores prose T-NNN mentions (structured-only)",
            tid == 902, repr(tid))
+    tid_log = next_ticket_id(
+        "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+        "- 09.08.26 00:00 [E-1] RUN: shipped T-800 in message prose\n")
+    expect("next_ticket_id ignores LOG prose T-NNN mentions",
+           tid_log == 1, repr(tid_log))
     added = ticket_add(root, "probe", "P2", "probe ticket", [], "verify",
                        dry_run=False)
     expect("ticket_add creates a canonical ticket",
@@ -8014,10 +8182,17 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     expect("report_path traversal is refused", path_escape)
 
     # ---- §69#38/#39: append_run journalled; Improve writer propagates failure.
+    # T-638: append_run requires a valid ACTIVE cycle manifest.
     rroot = make_project()
-    rreport = improve.resolve_report_path(rroot, "imp-s", "seat-1", "PROJ")
-    rreport.parent.mkdir(parents=True)
-    rreport.write_text("report_status: draft\n", encoding="utf-8")
+    _r_cycle = improve.create_cycle(rroot, "imp-s",
+                                    created_at="2026-08-12T00:00:00Z",
+                                    project_identity="p")
+    improve.register_seat(_r_cycle, "seat-1", "core",
+                          "saipen_improve_PROJ.md")
+    rreport = improve.create_report(
+        rroot, "imp-s", "seat-1", "PROJ", agent="seat-1", role="core",
+        model_or_runtime="probe",
+        context_scope="scope")
     run_res = improve.append_run(rreport, "first run")
     expect("append_run returns a committed transaction result",
            run_res.get("ok") and run_res.get("code") == "COMMITTED",

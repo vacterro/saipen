@@ -714,6 +714,18 @@ def _require_finding(cycle_dir: Path, seat_dir: str, report_ident: str,
         raise ImproveError(
             f"write_sweep_entry refuses: report {report_ident!r} is not "
             "complete; only a complete report's findings may be disposed")
+    # T-638/§3: a sweep may only consume a FULLY VALID strict report -- a
+    # malformed-but-parseable report with a real IMP must never authorize a
+    # disposition (ZERO sweep writes on malformed evidence).
+    if strict:
+        _report_errors = validate_bound_report(
+            cycle_dir, seat_dir, text,
+            require_runs=True, require_fresh=False, cycle_active=True)
+        if _report_errors:
+            raise ImproveError(
+                "write_sweep_entry refuses: report "
+                f"{report_ident!r} fails the bound bar: "
+                + "; ".join(_report_errors[:3]))
     parsed = parse_report(text)
     if strict:
         if not parsed.has_runs:
@@ -844,6 +856,16 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
     text = _read_maybe(ledger)
     if not text.startswith("# SWEEP"):
         text = "# SWEEP\n\n" + text
+    # T-638/§3: a malformed EXISTING sweep ledger is never extended -- the new
+    # disposition would compound the corruption and the post-write verifier
+    # would discover predictable invalidity after bytes were written. ZERO
+    # writes on a known-invalid base.
+    _base_sweep_errors = validate_sweep(text)
+    if _base_sweep_errors:
+        raise ImproveError(
+            "write_sweep_entry refuses to extend a malformed SWEEP ledger: "
+            + "; ".join(_base_sweep_errors[:3])
+            + " -- a known-INVALID base is never mutated (T-638)")
     if any(r.finding_ref == finding_ref
            and r.report in equivalent_report_keys
            for r in _sweep_records(text)):
@@ -856,8 +878,16 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
         report=report_key, reproduced=reproduced,
         fixed_by=str(entry.get("fixed_by", "-") or "-"),
         verification=str(entry.get("verification", "-") or "-"))
-    result = _journaled_write(ledger, text.rstrip() + "\n" + record.render()
-                              + "\n", "sweep", base_hash=_base_hash(ledger))
+    proposed = text.rstrip() + "\n" + record.render() + "\n"
+    # T-638/§2+§3: the PROPOSED sweep ledger must validate before journal.
+    _proposed_sweep_errors = validate_sweep(proposed)
+    if _proposed_sweep_errors:
+        raise ImproveError(
+            "write_sweep_entry refuses its own proposed SWEEP ledger: "
+            + "; ".join(_proposed_sweep_errors[:3])
+            + " -- a known-INVALID proposed state is never written (T-638)")
+    result = _journaled_write(ledger, proposed, "sweep",
+                              base_hash=_base_hash(ledger))
     if not result.get("ok"):
         raise ImproveError(
             f"sweep entry for {finding_ref} not committed: "
@@ -929,18 +959,68 @@ def _cycle_status(manifest: Path) -> str:
     return match.group(1) if match else "active"
 
 
-def _require_cycle_active(cycle_dir: Path, mutator: str) -> Path:
-    """Refuse any mutator on a cycle that is not ACTIVE (NITRO dogfood III,
-    T-595). A completed/archived cycle is immutable under all normal writers."""
+class _ValidManifest:
+    """One validated manifest snapshot (T-638/§1): text, its derived status,
+    and its derived strictness all come from the SAME bytes that were
+    validated -- no mutator may validate one read then decide on another."""
+    __slots__ = ("path", "status", "strict", "text")
+
+    def __init__(self, path: Path, text: str, status: str, strict: bool):
+        self.path = path
+        self.text = text
+        self.status = status
+        self.strict = strict
+
+
+def load_valid_manifest(cycle_dir: Path, mutator: str,
+                        allowed_statuses: tuple[str, ...] = ("active",)) \
+        -> _ValidManifest:
+    """Read, validate, and snapshot a cycle manifest in ONE consistent pass
+    (T-638/§1). The manifest is read once, validated against the directory
+    identity, its status and strictness derived FROM THAT SAME TEXT, and an
+    allowed-status gate is enforced. A known-INVALID base (missing, empty,
+    wrong identity, broken grammar) is never mutated -- the caller receives a
+    snapshot whose bytes it may extend, never a path to re-read."""
     manifest = cycle_dir / "MANIFEST.md"
     _prove_inside(_project_root_of(manifest), manifest)
-    status = _cycle_status(manifest)
-    if status != "active":
+    text = _read_maybe(manifest)
+    if not text.strip():
+        raise ImproveError(f"cycle manifest missing: {manifest}")
+    _manifest_errors = validate_manifest(text, expected_cycle_id=cycle_dir.name)
+    if _manifest_errors:
         raise ImproveError(
-            f"{mutator} refuses: cycle {cycle_dir.name} is {status}, not "
-            "active; a completed cycle is immutable except permitted archive "
-            "metadata")
-    return manifest
+            f"{mutator} refuses an invalid active manifest: "
+            + "; ".join(_manifest_errors[:3])
+            + " -- a known-INVALID base is never mutated (T-638)")
+    status = _status_of(text)
+    if status not in allowed_statuses:
+        raise ImproveError(
+            f"{mutator} refuses: cycle {cycle_dir.name} is {status}, not one "
+            f"of {', '.join(allowed_statuses)}")
+    strict = _schema_of(text) == "strict"
+    return _ValidManifest(manifest, text, status, strict)
+
+
+def _status_of(text: str) -> str:
+    """Lifecycle status derived from an already-loaded manifest TEXT."""
+    match = re.search(r"(?m)^cycle_status:\s*([A-Za-z]+)", text)
+    return match.group(1) if match else "active"
+
+
+def _schema_of(text: str) -> str:
+    """Schema derived from an already-loaded manifest TEXT."""
+    return "strict" if re.search(
+        r"(?m)^manifest_schema:\s*strict\s*$", text) else "legacy"
+
+
+def _require_cycle_active(cycle_dir: Path, mutator: str) -> Path:
+    """Refuse any mutator on a cycle that is not ACTIVE (NITRO dogfood III,
+    T-595). A completed/archived cycle is immutable under all normal writers.
+    T-638/§7: the manifest consumed by any mutator MUST validate against its
+    directory identity first -- a known-INVALID base is never read-and-mutated;
+    ZERO writes on a base whose grammar/semantics are broken."""
+    snapshot = load_valid_manifest(cycle_dir, mutator, ("active",))
+    return snapshot.path
 
 
 def installed_protocol_fingerprint(protocol_root: Path) -> str:
@@ -1105,6 +1185,86 @@ def _field_keys(header_block: str) -> list[str]:
                    if ":" in ln and not ln.startswith("#")})
 
 
+def validate_bound_report(
+        cycle_dir: Path, seat_id: str, report_text: str, *,
+        require_runs: bool = False, require_fresh: bool = False,
+        cycle_active: bool = True) -> list[str]:
+    """The ONE shared bound proof bar for a strict seat report (T-638/§6).
+
+    Resolves ground truth itself from the validated cycle manifest (roster
+    seat/role/report path, project_identity) and the SAIPEN install (version,
+    protocol fingerprint), then requires the report to satisfy ALL of:
+
+      - structural validity (validate_report, strict)
+      - bound provenance (validate_strict_provenance with NON-optional truth:
+        agent == roster seat, project == manifest identity, saipen_version ==
+        installed, protocol_fingerprint == installed)
+      - source freshness (when require_fresh, via _freshness_errors)
+
+    NO optional ground truth: a bound validator either receives the real
+    roster/install facts or it refuses. Historical COMPLETE/ARCHIVED evidence
+    is validated structurally against its OWN stored cycle (require_fresh
+    False) -- it is never retroactively compared to today's HEAD/install.
+
+    Consumers: prepare resume, append_run base, complete_report proposed,
+    write_sweep_entry, verify_cycle, complete_cycle, Improve status, and
+    tools/validate.py's ACTIVE strict scan -- ONE bar, not per-consumer copies.
+    """
+    errors: list[str] = []
+    if not seat_id:
+        errors.append("bound report validation requires a roster seat_id")
+        return errors
+    manifest = cycle_dir / "MANIFEST.md"
+    if not manifest.is_file():
+        errors.append(f"cycle manifest missing: {manifest}")
+        return errors
+    roster_text = _read_maybe(manifest)
+    _manifest_errors = validate_manifest(
+        roster_text, expected_cycle_id=cycle_dir.name)
+    if _manifest_errors:
+        errors.append("invalid cycle manifest: "
+                      + "; ".join(_manifest_errors[:3]))
+        return errors
+    strict = _schema_of(roster_text) == "strict"
+    block = _seat_block(roster_text, seat_id)
+    if block is None:
+        errors.append(f"seat {seat_id} is not registered on the roster")
+        return errors
+    roster_role = _field(block, "role")
+    project_identity = _field(roster_text, "project_identity")
+    errors += validate_report(report_text, require_runs=require_runs,
+                              strict=strict)
+    try:
+        installed_fp = installed_protocol_fingerprint(
+            _protocol_root_for())
+        installed_version = _saipen_install_version()
+    except ImproveError as exc:
+        errors.append(f"cannot derive installed provenance truth: {exc}")
+        installed_fp = None
+        installed_version = None
+    if installed_fp is not None and installed_version is not None:
+        errors += validate_strict_provenance(
+            report_text, roster=roster_text,
+            manifest_project_identity=project_identity,
+            seat_id=seat_id,
+            installed_saipen_version=installed_version,
+            installed_protocol_fp=installed_fp)
+        # role must match the roster binding, not just be closed.
+        _r_role = _field(report_text, "role")
+        if roster_role and _r_role != roster_role:
+            errors.append(
+                f"report role {_r_role!r} != roster role {roster_role!r}")
+    if strict and require_fresh:
+        errors += _freshness_errors(_project_root_of(cycle_dir),
+                                    report_text, True, cycle_active)
+    return errors
+
+
+def _protocol_root_for() -> Path:
+    """The SAIPEN install home Improve runs from -- the parent of this tool."""
+    return Path(__file__).resolve().parent.parent
+
+
 def portable_project_key(project_root: Path) -> str:
     """A deterministic PORTABLE project identity (DOGFOOD V, T-618).
 
@@ -1138,8 +1298,8 @@ def portable_project_key(project_root: Path) -> str:
 
 def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
                        session_id: str | None, project_name: str,
-                       model_or_runtime: str, protocol_fingerprint: str,
-                       context_scope: str,
+                       model_or_runtime: str, context_scope: str,
+                       protocol_fingerprint: str | None = None,
                        context_available: str = "complete") -> dict:
     """Atomically admit or resume one concrete Improve seat.
 
@@ -1386,6 +1546,24 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
                                   "regenerate the draft) instead of resuming",
                         "current_source_head": _current_src.source_head,
                         "current_discovery_model": _current_src.discovery_model}
+            # T-638/§5: forged provenance must never round up to a resumable
+            # seat -- before ANY ALREADY_ASSIGNED result, the report must
+            # satisfy the FULL bound bar: structural + roster-bound provenance
+            # (agent == roster seat, project == manifest identity, version and
+            # fingerprint == installed) + source freshness. All three or no
+            # resume.
+            _bound_errors = validate_bound_report(
+                manifest.parent, seat, report_text,
+                require_runs=False, require_fresh=True, cycle_active=True)
+            if _bound_errors:
+                return {"ok": False, "code": "INVALID_REPORT",
+                        "cycle_id": active_cycle, "seat_id": seat,
+                        "role": selected_role,
+                        "report_path": report.relative_to(root).as_posix(),
+                        "resumed": False,
+                        "detail": f"session {seat} report fails the bound "
+                                  f"provenance bar: "
+                                  + "; ".join(_bound_errors[:3])}
             return {
                 "ok": True, "code": "ALREADY_ASSIGNED",
                 "cycle_id": active_cycle, "seat_id": seat,
@@ -1410,6 +1588,18 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
             raise ImproveError(
                 f"cannot capture mechanical source identity: {exc}") from exc
         saipen_version = _saipen_install_version()
+        # T-638/§4: the writer DERIVES the protocol fingerprint from the
+        # installed protocol -- a caller-supplied digest is never accepted as
+        # truth. If the caller passed one, it must equal the installed value
+        # or the admission refuses.
+        _installed_fp = installed_protocol_fingerprint(_protocol_root_for())
+        if protocol_fingerprint and protocol_fingerprint != _installed_fp:
+            raise ImproveError(
+                "prepare_audit_seat refuses: the supplied protocol "
+                "fingerprint does not match the installed protocol -- "
+                "mechanical identity is derived, never caller-supplied "
+                "(T-638/§4)")
+        protocol_fingerprint = _installed_fp
         report_text = (
             f"agent: {seat}\n"
             f"role: {selected_role}\n"
@@ -1513,6 +1703,16 @@ def create_cycle(project_root: Path, cycle_id: str, *,
                f"created_at: {created_at}\n"
                f"project_identity: {project_identity}\n"
                "cycle_status: active\n")
+    # T-638/§2: the PROPOSED manifest must validate before ANY byte is
+    # written -- an invalid created_at/project_identity/lifecycle must never
+    # leave a cycle directory or manifest behind (ZERO writes on known-invalid
+    # proposed state).
+    _proposed_errors = validate_manifest(content, expected_cycle_id=cycle_id)
+    if _proposed_errors:
+        raise ImproveError(
+            "create_cycle refuses its own proposed manifest: "
+            + "; ".join(_proposed_errors[:3])
+            + " -- a known-INVALID proposed state is never written (T-638)")
     result = _journaled_write(cdir / "MANIFEST.md", content, "cycle")
     if not result.get("ok"):
         raise ImproveError(
@@ -1600,15 +1800,10 @@ def verify_cycle(cycle_dir: Path) -> list[str]:
             errors.append(f"seat {seat_id}: report {report_path} is not "
                           "complete")
             continue
-        report_errors = validate_report(report_text, require_runs=strict,
-                                        strict=strict)
+        report_errors = validate_bound_report(
+            cycle_dir, seat_id, report_text,
+            require_runs=strict, require_fresh=strict, cycle_active=True)
         for err in report_errors:
-            errors.append(f"seat {seat_id} report: {err}")
-        # DOGFOOD V (T-619): verify_cycle validates source freshness for
-        # strict active cycles -- a stale report can never PASS a complete
-        # cycle, and complete_cycle inherits this bar.
-        for err in _report_fresh(_project_root_of(cycle_dir), cycle_dir,
-                                 report_path, report_text, strict):
             errors.append(f"seat {seat_id} report: {err}")
         derived = derive_status(report_path, text, report_text, sweep_text,
                                 seat_id=seat_id)
@@ -1644,10 +1839,9 @@ def abort_cycle(cycle_dir: Path) -> dict:
     text = _read_maybe(manifest)
     if not text.strip():
         raise ImproveError(f"cycle manifest missing: {manifest}")
-    if _cycle_status(manifest) != "active":
-        raise ImproveError(
-            f"abort refuses: cycle {cycle_dir.name} is {_cycle_status(manifest)}, "
-            "not active; only an active stuck cycle may be aborted")
+    snapshot = load_valid_manifest(cycle_dir, "abort", ("active",))
+    text = snapshot.text
+    manifest = snapshot.path
     sweep = _read_maybe(cycle_dir / "SWEEP.md")
     if _sweep_records(sweep):
         raise ImproveError(
@@ -1662,6 +1856,16 @@ def abort_cycle(cycle_dir: Path) -> dict:
     new_text = re.sub(r"(?m)^cycle_status:\s*[A-Za-z]+",
                       "cycle_status: archived", text, count=1)
     new_text = new_text.rstrip() + "\ncycle_aborted: draft-preserved\n"
+    # T-638/§2: the PROPOSED manifest (archived + cycle_aborted) must validate
+    # before it is written -- a known-invalid proposed state never enters
+    # PREPARED/APPLY.
+    _proposed_errors = validate_manifest(
+        new_text, expected_cycle_id=cycle_dir.name)
+    if _proposed_errors:
+        raise ImproveError(
+            "abort refuses its own proposed manifest: "
+            + "; ".join(_proposed_errors[:3])
+            + " -- a known-INVALID proposed state is never written (T-638)")
     result = _journaled_write(manifest, new_text, "cycle",
                               base_hash=_base_hash(manifest))
     if not result.get("ok"):
@@ -1692,18 +1896,12 @@ def complete_cycle(cycle_dir: Path) -> dict:
     (a report containing only `report_status: complete` refuses), every
     finding carrying a final Core SWEEP disposition for its EXACT composite
     identity. complete_cycle is never a glorified report_status counter."""
-    manifest = cycle_dir / "MANIFEST.md"
-    _prove_inside(_project_root_of(manifest), manifest)
-    text = _read_maybe(manifest)
-    if not text.strip():
-        raise ImproveError(f"cycle manifest missing: {manifest}")
-    if _cycle_status(manifest) == "complete":
+    snapshot = load_valid_manifest(cycle_dir, "complete_cycle",
+                                   ("active", "complete"))
+    text = snapshot.text
+    manifest = snapshot.path
+    if snapshot.status == "complete":
         raise ImproveError(f"cycle {cycle_dir.name} is already complete")
-    if _cycle_status(manifest) == "archived":
-        raise ImproveError(
-            f"cycle {cycle_dir.name} is archived (aborted/archived); an "
-            "aborted cycle's drafts are non-authoritative and can never be "
-            "completed -- admit a fresh cycle instead")
     errors = verify_cycle(cycle_dir)
     if errors:
         raise ImproveError(
@@ -1713,6 +1911,14 @@ def complete_cycle(cycle_dir: Path) -> dict:
                       "cycle_status: complete", text, count=1)
     if new_text == text:
         new_text = text.rstrip() + "\ncycle_status: complete\n"
+    # T-638/§2: the PROPOSED manifest must validate before it is written.
+    _proposed_errors = validate_manifest(
+        new_text, expected_cycle_id=cycle_dir.name)
+    if _proposed_errors:
+        raise ImproveError(
+            "complete_cycle refuses its own proposed manifest: "
+            + "; ".join(_proposed_errors[:3])
+            + " -- a known-INVALID proposed state is never written (T-638)")
     result = _journaled_write(manifest, new_text, "cycle",
                               base_hash=_base_hash(manifest))
     if not result.get("ok"):
@@ -1724,7 +1930,7 @@ def complete_cycle(cycle_dir: Path) -> dict:
 
 def create_report(project_root: Path, cycle_id: str, seat_id: str,
                   project_name: str, *, agent: str, role: str,
-                  model_or_runtime: str, protocol_fingerprint: str,
+                  model_or_runtime: str,
                   context_scope: str,
                   context_available: str = "complete") -> Path:
     """Create a DRAFT seat report mechanically and journaled (DOGFOOD V,
@@ -1735,8 +1941,9 @@ def create_report(project_root: Path, cycle_id: str, seat_id: str,
     via freshness.compute_source_identity() -- source_head + the real tree
     fingerprint + discovery model, never a hand-typed hash or a friendly
     label pretending to be one. `saipen_version` comes ONLY from the SAIPEN
-    install executing Improve, never from the target project's VERSION
-    (T-992/§3)."""
+    install executing Improve, never from the target project's VERSION, and
+    `protocol_fingerprint` is DERIVED from the installed protocol -- a caller
+    never supplies a digest Python can derive itself (T-992/§3, T-638/§4)."""
     from freshness import FreshnessError, compute_source_identity
     root = Path(project_root)
     cdir = cycle_dir(root, cycle_id)
@@ -1778,6 +1985,8 @@ def create_report(project_root: Path, cycle_id: str, seat_id: str,
             f"{seat!r}; the report agent is derived from the seat identity, "
             "a caller cannot choose a different identity label")
     saipen_version = _saipen_install_version()
+    protocol_fingerprint = installed_protocol_fingerprint(
+        _protocol_root_for())
     # T-992/§4: project identity comes from the OWNING MANIFEST's
     # project_identity -- the report and the cycle it belongs to must agree on
     # one project identity, and the caller cannot recompute a divergent one.
@@ -1841,11 +2050,16 @@ def complete_report(report_path: Path) -> dict:
     # schema, and a report with only report_status: complete refuses.
     completion_text = re.sub(r"(?m)^report_status:[ \t]*[A-Za-z]+",
                              "report_status: complete", text, count=1)
-    errors = validate_report(completion_text, require_runs=strict,
-                             strict=strict)
+    # T-638/§6: complete_report applies the ONE bound bar to the PROPOSED
+    # completion -- structural + roster-bound provenance + source freshness
+    # for strict active cycles. A fabricated provenance report can never be
+    # completed into sealed evidence.
+    errors = validate_bound_report(
+        cycle_dir_of_report, report_path.parent.name, completion_text,
+        require_runs=strict, require_fresh=strict, cycle_active=True)
     if errors:
         raise ImproveError(
-            "complete_report refused -- the completion schema is unmet:\n- "
+            "complete_report refused -- the bound completion bar is unmet:\n- "
             + "\n- ".join(errors[:12]))
     new_text = re.sub(r"(?m)^report_status:\s*[A-Za-z]+",
                       "report_status: complete", text, count=1)
@@ -1871,24 +2085,29 @@ def archive_cycle(cycle_dir: Path) -> dict:
     resolving through the [sweep-ticket-link] check. The mutation is the same
     journaled manifest write complete_cycle uses, changing only the lifecycle
     status to `archived`."""
-    manifest = cycle_dir / "MANIFEST.md"
-    _prove_inside(_project_root_of(manifest), manifest)
-    text = _read_maybe(manifest)
-    if not text.strip():
-        raise ImproveError(f"cycle manifest missing: {manifest}")
-    status = _cycle_status(manifest)
-    if status == "archived":
-        raise ImproveError(f"cycle {cycle_dir.name} is already archived")
-    if status != "complete":
+    snapshot = load_valid_manifest(cycle_dir, "archive", ("complete",))
+    text = snapshot.text
+    manifest = snapshot.path
+    # T-638/§10: a corrupted COMPLETE cycle must not become accepted ARCHIVED
+    # history -- validate the sealed cycle structurally before freezing it.
+    _sealed_errors = verify_cycle(cycle_dir)
+    if _sealed_errors:
         raise ImproveError(
-            f"archive refused: cycle {cycle_dir.name} is {status}, not "
-            "complete; only a completed (fully swept) cycle may be archived "
-            "-- archive-with-provenance never freezes active or unswept "
-            "evidence (T-559)")
+            "archive refused: the completed cycle no longer passes its own "
+            "verification bar:\n- " + "\n- ".join(_sealed_errors[:20])
+            + " -- corrupted history is never accepted as archived (T-638)")
     new_text = re.sub(r"(?m)^cycle_status:\s*[A-Za-z]+",
                       "cycle_status: archived", text, count=1)
     if new_text == text:
         new_text = text.rstrip() + "\ncycle_status: archived\n"
+    # T-638/§2: the PROPOSED manifest must validate before it is written.
+    _proposed_errors = validate_manifest(
+        new_text, expected_cycle_id=cycle_dir.name)
+    if _proposed_errors:
+        raise ImproveError(
+            "archive refuses its own proposed manifest: "
+            + "; ".join(_proposed_errors[:3])
+            + " -- a known-INVALID proposed state is never written (T-638)")
     result = _journaled_write(manifest, new_text, "cycle",
                               base_hash=_base_hash(manifest))
     if not result.get("ok"):
@@ -1967,10 +2186,36 @@ def append_run(report_path: Path, run_text: str) -> dict:
             "append_run refuses: a strict-cycle report must be created "
             "through create_report (it needs the mechanical header) before "
             "any RUN is appended")
+    # T-638/§7: appending to a report whose EXISTING structure is invalid
+    # would compound malformed evidence -- validate the base before extending
+    # it (ZERO writes on a known-INVALID base). The bound bar also catches
+    # forged provenance in the base draft.
+    if strict:
+        _base_errors = validate_bound_report(
+            cycle_dir_of_report, report_path.parent.name, text,
+            require_runs=False, require_fresh=False, cycle_active=True)
+        if _base_errors:
+            raise ImproveError(
+                "append_run refuses to extend a malformed strict report: "
+                + "; ".join(_base_errors[:3])
+                + " -- a known-INVALID base is never mutated (T-638)")
     run_count = len(re.findall(r"(?m)^## RUN \d+\s*$", text))
     run = f"## RUN {run_count + 1}\n\n{run_text.rstrip()}\n"
-    result = _journaled_write(report_path, text.rstrip() + "\n\n" + run,
-                              "run", base_hash=_base_hash(report_path))
+    proposed = text.rstrip() + "\n\n" + run
+    # T-638/§2: the PROPOSED report (with the new RUN) must validate before
+    # it is journaled.
+    if strict:
+        _proposed_errors = validate_bound_report(
+            cycle_dir_of_report, report_path.parent.name, proposed,
+            require_runs=False, require_fresh=False, cycle_active=True)
+        if _proposed_errors:
+            raise ImproveError(
+                "append_run refuses its own proposed report: "
+                + "; ".join(_proposed_errors[:3])
+                + " -- a known-INVALID proposed state is never written "
+                "(T-638)")
+    result = _journaled_write(report_path, proposed, "run",
+                              base_hash=_base_hash(report_path))
     if not result.get("ok"):
         raise ImproveError(
             f"RUN not committed: {result.get('code')} "
@@ -2194,6 +2439,21 @@ def validate_manifest(text: str,
     if status and status.group(1) not in ("active", "complete", "archived"):
         errors.append(f"cycle_status {status.group(1)!r} outside "
                       "active|complete|archived")
+    # T-638/§7: `cycle_aborted` is ONE legal lifecycle meaning -- it marks an
+    # ARCHIVED cycle whose drafts are non-authoritative. ACTIVE or COMPLETE
+    # with the marker is a contradictory state; a duplicate or non-canonical
+    # value is corruption. An aborted manifest can never pose as a normal
+    # archived completed cycle.
+    abort_markers = re.findall(r"(?m)^cycle_aborted:\s*(.*)$", text)
+    if abort_markers:
+        if status is None or status.group(1) != "archived":
+            errors.append("cycle_aborted is legal ONLY with "
+                          "cycle_status: archived")
+        if len(abort_markers) != 1:
+            errors.append("cycle_aborted must appear exactly once")
+        elif abort_markers[0].strip() != "draft-preserved":
+            errors.append(f"cycle_aborted value {abort_markers[0].strip()!r} "
+                          "is not the canonical 'draft-preserved'")
     seen: set[str] = set()
     for block in _seat_blocks(text):
         seat_id = _field(block, "seat_id")

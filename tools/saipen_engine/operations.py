@@ -38,8 +38,6 @@ from .plan import OperationPlan, TargetPlan, apply_plan, build_plan
 from .result import Result
 from .state import parse_state, patch_state
 
-SYNTHETIC_TICKET_IDS = {998, 999}
-
 _TAXONOMIES = {"DEC", "RUN"}
 
 
@@ -463,13 +461,35 @@ def checkpoint(project_root: Path | str, agent: str, taxonomy: str,
 
 # ---------------------------------------------------------- ticket numbers
 
+# BOARD canonical ticket-line shape: a list item whose text starts with the
+# checkbox and an uppercase T-NNN. Only these lines are ticket IDENTITY --
+# prose that merely mentions "T-900000" in a description or verify clause is
+# not a ticket record (T-639/§9).
+_BOARD_TICKET_LINE_RE = re.compile(
+    r"^-\s*\[[ x/]\]\s*T-(\d+)\b")
+
+
 def next_ticket_id(board_text: str, log_text: str) -> int:
-    """The next canonical production ticket ID, skipping the synthetic
-    fixture namespace (T-998/T-999)."""
-    ids = [int(m) for m in re.findall(r"\bT-(\d+)\b",
-                                      board_text + "\n" + log_text)]
-    return max((i for i in ids if i not in SYNTHETIC_TICKET_IDS),
-               default=0) + 1
+    """The next canonical production ticket ID, from STRUCTURED records only
+    (T-639/§9): canonical BOARD ticket lines (`- [ ] T-###`) and the LOG's
+    structured `[T-###]` event field. Prose that merely mentions a T-NNN --
+    in a ticket description, a verify clause, or LOG message text -- is never
+    ticket identity, so a fixture note like "synthetic T-990" or a
+    prose-mentioned T-777 cannot poison allocation. The tiny synthetic-id
+    exclusion set is gone; structure is what keeps fixtures out."""
+    ids: set[int] = set()
+    for line in board_text.splitlines():
+        match = _BOARD_TICKET_LINE_RE.match(line.strip())
+        if match:
+            ids.add(int(match.group(1)))
+    from .log import parse_log_line
+    for line in log_text.splitlines():
+        parsed = parse_log_line(line)
+        if parsed is not None and parsed["ticket"]:
+            match = re.fullmatch(r"T-(\d+)", parsed["ticket"])
+            if match:
+                ids.add(int(match.group(1)))
+    return (max(ids, default=0) + 1) if ids else 1
 
 
 def _insert_todo(board_text: str, line: str) -> str:
