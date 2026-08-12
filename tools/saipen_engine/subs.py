@@ -551,7 +551,12 @@ def sub_collect(project_root: Path | str, name: str | None = None) -> Result:
             if tree != current.source_tree_fingerprint:
                 fresh, reasons = False, ["source_tree_fingerprint differs"]
             if role and not _role_current(saipen_home_of(root), n, role):
-                fresh, reasons = False, ["role_revision superseded"]
+                _role_state = _role_status(saipen_home_of(root), n, role)
+                if _role_state == "unavailable":
+                    fresh, reasons = False, [
+                        "role_revision unverifiable (UNAVAILABLE)"]
+                else:
+                    fresh, reasons = False, ["role_revision superseded"]
             if not fresh:
                 all_issues.append(f"{n}: {'; '.join(reasons)}")
             packages.append({**entry, "fresh": fresh})
@@ -592,15 +597,35 @@ def _outbox_blocks(text: str) -> list[str]:
     return blocks
 
 
-def _role_current(saipen_home: str, name: str, recorded: str) -> bool:
+def _role_status(saipen_home: str, name: str, recorded: str) -> str:
+    """Tri-state role-freshness verdict (T-991/§10): `current` (readable
+    charter with a matching revision), `stale` (readable charter with a
+    different revision), or `unavailable` (missing home, missing charter, or a
+    read/hash failure). UNKNOWN is never FRESH: a revision that cannot be
+    verified against the charter is UNAVAILABLE, never silently current."""
     try:
-        from freshness import compute_role_revision
-        charter = Path(saipen_home) / "extensions" / "subs" / f"{name}.md"
-        if charter.is_file():
-            return compute_role_revision(charter) == recorded
-    except Exception:
-        pass
-    return True
+        from freshness import compute_role_revision, FreshnessError
+    except ImportError:
+        return "unavailable"
+    if not saipen_home:
+        return "unavailable"
+    charter = Path(saipen_home) / "extensions" / "subs" / f"{name}.md"
+    if not charter.is_file():
+        return "unavailable"
+    try:
+        current = compute_role_revision(charter)
+    except (FreshnessError, OSError):
+        return "unavailable"
+    if current == recorded:
+        return "current"
+    return "stale"
+
+
+def _role_current(saipen_home: str, name: str, recorded: str) -> bool:
+    """Fail-closed role freshness: True ONLY when the charter is readable and
+    its revision matches the recorded one (T-991). Any unverifiable state --
+    missing home, missing charter, read/hash failure -- is NOT current."""
+    return _role_status(saipen_home, name, recorded) == "current"
 
 
 def saipen_home_of(project_root: Path) -> str:

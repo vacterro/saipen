@@ -8243,40 +8243,78 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            not _subs.sub_spawn(boot_root, "saiscout2", esc_home).get("ok")
            or (subs_dir / "PROTOCOL.md").is_file())
 
-    # ---- T-588: ready OUTBOX package completeness (dogfood II).
+    # ---- T-588: ready OUTBOX package completeness (dogfood II). T-991:
+    # role freshness fails CLOSED -- a charter-backed sub (saiwiki) with its
+    # computed revision passes; missing/unverifiable role evidence refuses.
     comp_root = make_project()
-    _subs.sub_spawn(comp_root, "saiscout", esc_home)
+    _comp_state = comp_root / ".saipen" / "STATE.md"
+    _comp_state.write_text(
+        _comp_state.read_text(encoding="utf-8-sig").replace(
+            "saipen_home: \".\"", f'saipen_home: "{esc_home}"'),
+        encoding="utf-8")
+    _subs.sub_spawn(comp_root, "saiwiki", esc_home)
     comp_outbox = comp_root / ".saipen" / "extensions" / "subs" \
-        / "saiscout" / "kitchen" / "OUTBOX.md"
-    from freshness import compute_source_identity
+        / "saiwiki" / "kitchen" / "OUTBOX.md"
+    from freshness import compute_source_identity, compute_role_revision
     _current = compute_source_identity(comp_root)
+    _wiki_charter = esc_home + "/extensions/subs/saiwiki.md"
+    _wiki_rev = compute_role_revision(_wiki_charter)
     complete = ("# OUTBOX\n\n## F-001: finding\n"
                 "- **status:** ready\n"
                 "- **summary:** a finding\n"
                 f"- **source_head:** {_current.source_head}\n"
                 f"- **source_tree_fingerprint:** "
                 f"{_current.source_tree_fingerprint}\n"
-                "- **role_revision:** recorded-role\n"
-                "- **producer:** saiscout\n")
+                f"- **role_revision:** {_wiki_rev}\n"
+                "- **producer:** saiwiki\n")
     comp_outbox.write_text(complete, encoding="utf-8")
-    res_ok = _subs.sub_collect(comp_root, "saiscout")
-    expect("complete ready OUTBOX package passes collect",
+    res_ok = _subs.sub_collect(comp_root, "saiwiki")
+    expect("complete ready OUTBOX package with a verifiable role passes collect",
            res_ok.get("ok"), repr(res_ok))
     for missing_field in ("source_head", "source_tree_fingerprint",
                           "role_revision"):
-        partial = complete.replace(
-            f"- **{missing_field}:** ", f"- **{missing_field}:** ")
         partial = "\n".join(
             line for line in complete.splitlines()
             if not line.startswith(f"- **{missing_field}:**"))
         comp_outbox.write_text(partial, encoding="utf-8")
-        res_missing = _subs.sub_collect(comp_root, "saiscout")
+        res_missing = _subs.sub_collect(comp_root, "saiwiki")
         expect(f"ready OUTBOX missing {missing_field} refuses "
                f"(PACKAGE_INCOMPLETE)",
                not res_missing.get("ok")
                and res_missing.get("code") == "PACKAGE_INCOMPLETE",
                repr(res_missing))
         comp_outbox.write_text(complete, encoding="utf-8")
+    # A superseded role revision is STALE, never fresh.
+    comp_outbox.write_text(
+        complete.replace(f"- **role_revision:** {_wiki_rev}\n",
+                         "- **role_revision:** stale-revision\n"),
+        encoding="utf-8")
+    res_stale_role = _subs.sub_collect(comp_root, "saiwiki")
+    expect("ready OUTBOX with a superseded role revision refuses "
+           "(PACKAGE_INCOMPLETE, STALE)",
+           not res_stale_role.get("ok")
+           and res_stale_role.get("code") == "PACKAGE_INCOMPLETE"
+           and "superseded" in res_stale_role.get("message", ""),
+           repr(res_stale_role))
+    # A sub whose role charter cannot be found (missing home/charter) is
+    # UNAVAILABLE, never fresh -- collect refuses ready evidence it cannot
+    # verify against a charter.
+    _subs.sub_spawn(comp_root, "saiscout", esc_home)
+    scout_outbox = comp_root / ".saipen" / "extensions" / "subs" \
+        / "saiscout" / "kitchen" / "OUTBOX.md"
+    scout_outbox.write_text(
+        complete.replace(f"- **role_revision:** {_wiki_rev}\n",
+                         "- **role_revision:** recorded-role\n")
+        .replace("- **producer:** saiwiki\n", "- **producer:** saiscout\n"),
+        encoding="utf-8")
+    res_unverifiable = _subs.sub_collect(comp_root, "saiscout")
+    expect("ready OUTBOX with an unverifiable role revision refuses "
+           "(PACKAGE_INCOMPLETE, UNAVAILABLE)",
+           not res_unverifiable.get("ok")
+           and res_unverifiable.get("code") == "PACKAGE_INCOMPLETE"
+           and "unverifiable" in res_unverifiable.get("message", ""),
+           repr(res_unverifiable))
+    comp_outbox.write_text(complete, encoding="utf-8")
 
     # ---- T-588: malformed nonempty OUTBOX is not an empty queue.
     mal_root = make_project()
