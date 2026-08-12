@@ -633,6 +633,12 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
                    "detail": "improve submit needs <cycle> <seat> <project> "
                              "<findings.json>"}, as_json)
             return 2
+        if len(args) > 5:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": f"improve submit takes <cycle> <seat> <project> "
+                             f"<findings.json>; unsupported surplus argument "
+                             f"{args[5]!r}"}, as_json)
+            return 2
         from improve import append_run as _append_run
         from improve import resolve_report_path as _resolve_report_path
         cycle = cycle_dir(project_root, args[1])
@@ -649,11 +655,19 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
                    "detail": f"findings file is not valid JSON: {exc}"},
                   as_json)
             return 2
-        run_text = data.get("run_text", "")
-        if not run_text.strip():
+        # Shape-check before any .get(): array/scalar/null payloads would
+        # otherwise crash with a raw AttributeError instead of a structured
+        # refusal, and a non-string run_text must never reach .strip().
+        if not isinstance(data, dict):
             _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "findings payload needs a non-empty run_text "
-                             "field"}, as_json)
+                   "detail": "findings payload must be a JSON object with a "
+                             "run_text field"}, as_json)
+            return 2
+        run_text = data.get("run_text")
+        if not isinstance(run_text, str) or not run_text.strip():
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": "findings payload needs a non-empty string "
+                             "run_text field"}, as_json)
             return 2
         report = _resolve_report_path(project_root, args[1], args[2],
                                       args[3])

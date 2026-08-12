@@ -1,6 +1,10 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.223.4 -- 2026-08-12 -- Improve submit input normalization: structured refusal instead of tracebacks
+
+`saipen improve submit` now validates the findings payload shape before any access: a top-level array, scalar, null, or string refusals with a structured `VALIDATION_FAILED`, and `run_text` must be a non-empty string (non-string, empty, whitespace-only, and missing values all refuse the same way). Previously these crashed with a raw `AttributeError` traceback, and an object missing `run_text` returned an untyped exit code. Unsupported surplus positional arguments are rejected where the submit grammar owns exactly four. The expected-vs-programming-error distinction from T-623 is preserved: shape errors are structured refusals, genuine programming errors still propagate. Hostile controls cover every malformed shape plus a valid append and the surplus-arg refusal. (T-629)
+
 ## 7.223.3 -- 2026-08-12 -- brochure adoption: translated presentation brochures join the README
 
 The user-requested brochure set produced in E-3115 is adopted without rewriting history. `BROCHURE_EN.md`, `BROCHURE_RU.md`, `BROCHURE_ET.md`, and `BROCHURE_JA.md` join the existing `BROCHURE_DED.md` at the repository root; the README Documentation rows on `README.md`, `README.ded.md`, `README.ee.md`, and `README.ja.md` link all five. The validator already declared the set in `ROOT_ALLOWED` and `EXEMPT`. Content-only change, no code touched. (T-636)

@@ -6213,6 +6213,64 @@ def run_improve_probes() -> tuple[list[str], int]:
            '"code": "VALIDATION_FAILED"' in _fv.stdout,
            repr(_fv.stdout[:200]))
 
+    # ---- T-629: public submit boundary validates JSON shape before any
+    # access -- array/scalar/null/non-string/empty/missing run_text all
+    # refuse with a structured VALIDATION_FAILED and no traceback, surplus
+    # args are rejected, and a valid payload still appends.
+    _submit_root = project_fixture("saipen-submit-shape-")
+    _submit_cycle = create_cycle(
+        _submit_root, "imp-submit",
+        created_at="2026-08-10T00:00:00Z", project_identity="probe-project")
+    register_seat(_submit_cycle, "seat-1", "core", "saipen_improve_A.md")
+    _submit_report = create_report(
+        _submit_root, "imp-submit", "seat-1", "A", agent="probe", role="core",
+        model_or_runtime="probe", protocol_fingerprint="ded-4ae736e4",
+        context_scope="probe scope")
+    _submit_payload = _submit_root / "findings.json"
+    _submit_args = [sys.executable, str(HOME / "tools" / "saipen.py"),
+                    "improve", "submit", "imp-submit", "seat-1", "A",
+                    "--json"]
+
+    _submit_payload.write_text(
+        json.dumps({"run_text": "IMP-001 [P1] [LOGIC_ERROR] [proven] "
+                                "[ticket]\nexpected: x\nactual: y\n"}),
+        encoding="utf-8")
+    _submit_positive = subprocess.run(
+        [*_submit_args, str(_submit_payload)],
+        cwd=str(_submit_root), capture_output=True, text=True, timeout=60)
+    expect("submit with a valid string run_text appends a RUN",
+           _submit_positive.returncode == 0
+           and json.loads(_submit_positive.stdout).get("ok") is True
+           and "Traceback" not in _submit_positive.stderr,
+           repr((_submit_positive.stdout, _submit_positive.stderr)))
+
+    for _shape_label, _bad in [
+            ("array", []), ("scalar", 42), ("null", None),
+            ("string", "plain text"),
+            ("run_text non-string", {"run_text": 7}),
+            ("empty run_text", {"run_text": ""}),
+            ("whitespace run_text", {"run_text": "   "}),
+            ("missing run_text", {"other": 1})]:
+        _submit_payload.write_text(json.dumps(_bad), encoding="utf-8")
+        _submit_probe = subprocess.run(
+            [*_submit_args, str(_submit_payload)],
+            cwd=str(_submit_root), capture_output=True, text=True, timeout=60)
+        expect(f"submit refuses a {_shape_label} findings payload without "
+               f"traceback",
+               _submit_probe.returncode != 0
+               and '"code": "VALIDATION_FAILED"' in _submit_probe.stdout
+               and "Traceback" not in _submit_probe.stderr,
+               repr((_submit_probe.stdout, _submit_probe.stderr)))
+    _submit_payload.unlink()
+    _submit_surplus = subprocess.run(
+        [*_submit_args, str(_submit_payload), "extra"],
+        cwd=str(_submit_root), capture_output=True, text=True, timeout=60)
+    expect("submit rejects an unsupported surplus argument",
+           _submit_surplus.returncode != 0
+           and '"code": "VALIDATION_FAILED"' in _submit_surplus.stdout
+           and "unsupported surplus argument" in _submit_surplus.stdout,
+           repr(_submit_surplus.stdout))
+
     # ---- DOGFOOD V (T-615): one disposition can never cover two findings
     # that share a local IMP number across RUNs; sweep-queue enumerates the
     # exact composite unswept findings; strict manifest + real fingerprint +
