@@ -2506,6 +2506,70 @@ def run_manifest_tracking_probes() -> tuple[list[str], int]:
     return problems, checked
 
 
+def run_lint_parity_probes() -> tuple[list[str], int]:
+    """T-628: local-doc vs CI lint surface + ruff pin must stay in one voice.
+
+    harness.md documents the canonical lint command and the pinned ruff
+    version; validate.yml must run exactly that. A surface divergence or a
+    version drift is a reproducibility defect (a local host lints a different
+    tree than CI, or an unpinned ruff shifts the rule set between runs), so
+    the validator FAILs it -- these probes prove that check can go red.
+    """
+    problems: list[str] = []
+    checked = 0
+    harness = HOME / ".saipen" / "KNOWLEDGE" / "harness.md"
+    ci = HOME / ".github" / "workflows" / "validate.yml"
+    if not harness.is_file() or not ci.is_file():
+        return ["lint parity probe could not find harness.md or validate.yml"], checked
+
+    def validate(home: Path) -> str:
+        r = subprocess.run(
+            [sys.executable, str(home / "tools" / "validate.py"),
+             "--project-root", str(home)],
+            cwd=home, capture_output=True, text=True, errors="replace",
+            timeout=120)
+        return r.stdout + r.stderr
+
+    def probe(label: str, mutation, contains: str) -> None:
+        nonlocal checked
+        checked += 1
+        with tempfile.TemporaryDirectory(prefix="saipen-lint-parity-") as raw:
+            home = Path(raw) / "home"
+            shutil.copytree(HOME, home, ignore=shutil.ignore_patterns(
+                ".git", ".venv", "__pycache__", "node_modules", "nul",
+                ".freebuff"))
+            mutation(home / ".saipen" / "KNOWLEDGE" / "harness.md",
+                     home / ".github" / "workflows" / "validate.yml")
+            output = validate(home)
+            if contains in output:
+                print(f"PASS: lint parity -- {label}")
+            else:
+                problems.append(f"{label}: missing {contains!r}")
+                print(f"FAIL: lint parity -- {label}")
+
+    probe("surface divergence fails the validator",
+          lambda h, c: h.write_text(
+              h.read_text(encoding="utf-8").replace(
+                  "python -m ruff check tools/ tests/",
+                  "python -m ruff check tools/"),
+              encoding="utf-8"),
+          "lint parity [T-628]")
+    probe("ruff version drift fails the validator",
+          lambda h, c: h.write_text(
+              h.read_text(encoding="utf-8").replace(
+                  "ruff==0.16.0", "ruff==0.17.0"),
+              encoding="utf-8"),
+          "lint parity [T-628]")
+    probe("unpinned CI ruff fails the validator",
+          lambda h, c: c.write_text(
+              c.read_text(encoding="utf-8").replace(
+                  "pip install --quiet ruff==0.16.0",
+                  "pip install --quiet ruff"),
+              encoding="utf-8"),
+          "lint parity [T-628]")
+    return problems, checked
+
+
 def run_autoinject_manifest_probes() -> tuple[list[str], int]:
     """Every copied manifest surface must invalidate installed-copy stamps."""
     problems: list[str] = []
@@ -9821,6 +9885,8 @@ nitro_integrity_failures, nitro_integrity_checked = \
 failures.extend(nitro_integrity_failures)
 manifest_failures, manifest_checked = run_manifest_tracking_probes()
 failures.extend(manifest_failures)
+lint_parity_failures, lint_parity_checked = run_lint_parity_probes()
+failures.extend(lint_parity_failures)
 autoinject_failures, autoinject_checked = run_autoinject_manifest_probes()
 failures.extend(autoinject_failures)
 hook_failures, hook_checked, hook_skipped = run_hook_probes()
@@ -9876,6 +9942,7 @@ print(f"{nitro_integrity_checked} nitro-integrity behavior(s) executed")
 print(f"{purity_checked} pre-commit-purity behavior(s) executed, "
       f"{purity_skipped} skipped for missing interpreters")
 print(f"{manifest_checked} manifest-tracking behavior(s) executed")
+print(f"{lint_parity_checked} lint-parity behavior(s) executed")
 print(f"{autoinject_checked} autoinject-manifest behavior(s) executed")
 print(f"{hook_checked} installed-hook behavior(s) executed, "
       f"{hook_skipped} skipped for missing interpreters")

@@ -70,9 +70,11 @@ jobs:
       # section signs sitting in its own FAIL messages -- valid UTF-8, so the
       # validator's own U+FFFD check could not see them. ruff.toml documents a
       # reason for every rule that is switched off.
+      # The lint command + pinned ruff version are the SAME canonical set
+      # harness.md documents -- T-628's parity check proves the two agree.
       - name: Lint (ruff)
         run: |
-          python -m pip install --quiet ruff
+          python -m pip install --quiet ruff==0.16.0
           python -m ruff check tools/ tests/
 
       # Everything above runs the validator from the development layout, where

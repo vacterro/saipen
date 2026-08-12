@@ -1,6 +1,10 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.223.5 -- 2026-08-12 -- CI/local lint parity: one canonical pinned ruff surface
+
+`harness.md` and `.github/workflows/validate.yml` now run the SAME canonical lint command (`python -m ruff check tools/ tests/`) against the SAME pinned ruff version (`ruff==0.16.0`) -- CI no longer installs an unpinned ruff against VERIFY's pin-gate-dependencies rule, and the local doc no longer documents a narrower `tools/` surface than CI enforces. `tools/validate.py` gains a lint-parity check that reads both files and FAILs on a surface divergence, a version drift, or a missing pin. `harness.md` states that a host without Ruff must report lint as missing evidence, never as green. Red controls prove the parity check can go red on surface drift, version drift, and an unpinned CI install. (T-628)
+
 ## 7.223.4 -- 2026-08-12 -- Improve submit input normalization: structured refusal instead of tracebacks
 
 `saipen improve submit` now validates the findings payload shape before any access: a top-level array, scalar, null, or string refusals with a structured `VALIDATION_FAILED`, and `run_text` must be a non-empty string (non-string, empty, whitespace-only, and missing values all refuse the same way). Previously these crashed with a raw `AttributeError` traceback, and an object missing `run_text` returned an untyped exit code. Unsupported surplus positional arguments are rejected where the submit grammar owns exactly four. The expected-vs-programming-error distinction from T-623 is preserved: shape errors are structured refusals, genuine programming errors still propagate. Hostile controls cover every malformed shape plus a valid append and the surplus-arg refusal. (T-629)

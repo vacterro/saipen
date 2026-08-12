@@ -5306,6 +5306,48 @@ else:
             fail(f"cross-doc drift [borrowed-invariants] -- {_why}")
             drift_ok = False
 
+    # T-628: local-doc vs CI lint parity. harness.md documents the ONE canonical
+    # ruff surface + pinned version, and validate.yml must run exactly that. A
+    # divergence is the failure mode the ticket named: harness.md said `tools/`
+    # while CI linted `tools/ tests/`, and CI installed an unpinned ruff against
+    # VERIFY's pin-gate-dependencies rule. Both facts are text the validator
+    # reads, so both are checked here, not trusted to stay in sync by hand.
+    _harness_path = Path(".saipen/KNOWLEDGE/harness.md")
+    _ci_path = Path(".github/workflows/validate.yml")
+    if IS_SAIPEN_HOME and _harness_path.is_file() and _ci_path.is_file():
+        import re as _harness_re
+        _harness_text = _harness_path.read_text(encoding="utf-8-sig")
+        _ci_text = _ci_path.read_text(encoding="utf-8-sig")
+        _harness_lint = _harness_re.search(
+            r"python -m ruff check ([^\s]+ [^\s]+).*ruff==([0-9.]+)",
+            _harness_text)
+        _ci_lint = _harness_re.search(
+            r"python -m ruff check ([^\s]+ [^\s]+)", _ci_text)
+        _ci_pin = _harness_re.search(r"ruff==([0-9.]+)", _ci_text)
+        if not _harness_lint or not _ci_lint or not _ci_pin:
+            fail("lint parity [T-628] -- could not find the canonical ruff "
+                 "surface + pin in harness.md and validate.yml")
+            drift_ok = False
+        else:
+            _harness_surface = _harness_lint.group(1)
+            _ci_surface = _ci_lint.group(1)
+            _harness_pin = _harness_lint.group(2)
+            _ci_pin_value = _ci_pin.group(1)
+            if _harness_surface != _ci_surface:
+                fail("lint parity [T-628] -- harness.md lints "
+                     f"{_harness_surface!r} but CI lints {_ci_surface!r}; "
+                     "one canonical surface required")
+                drift_ok = False
+            elif _harness_pin != _ci_pin_value:
+                fail("lint parity [T-628] -- harness.md pins ruff "
+                     f"{_harness_pin!r} but CI installs ruff=={_ci_pin_value!r}; "
+                     "one pinned version required")
+                drift_ok = False
+            else:
+                ok(f"lint parity [T-628] -- harness.md and validate.yml agree "
+                   f"on `python -m ruff check {_harness_surface}` with "
+                   f"ruff=={_harness_pin}")
+
     # 1a2. § 1.11's priority list had no entry for the user naming a command,
     #      so BOOT's "execute `next_action` immediately" and § 1.10's "a
     #      shortcut is a command, never a greeting" were two live MUSTs with

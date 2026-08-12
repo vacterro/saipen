@@ -15,9 +15,16 @@ python tools/audit_floor.py         # portable-floor parity
 python tools/audit_parity.py        # phase/command/shortcut parity
 python tools/audit_order.py         # document ordering
 python tools/audit_tags.py          # release ledger vs git tags
-python -m ruff check tools/         # lint
+python -m ruff check tools/ tests/  # lint, pinned to ruff==0.16.0
 git diff --check                    # whitespace
 ```
+
+The lint line is the ONE canonical ruff surface: `tools/` and `tests/` both, pinned to
+`ruff==0.16.0`. `.github/workflows/validate.yml` runs exactly this command and this
+version; `tools/validate.py`'s parity check proves the two stay in agreement. A host
+without Ruff MUST report the lint gate as missing evidence, never as green -- run the
+rest of the suite, LOG `lint: not run (ruff unavailable)`, and do not claim full-green
+for a pass that never linted.
 
 `tools/validate.py --gate <name>` narrows the gate (`core`, `ship`,
 `collect:<sub>`). `tests/validate.sh` / `tests/validate.ps1` are the portable
