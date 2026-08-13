@@ -1,0 +1,12 @@
+{
+  "op_id": "scope-5e0f0e2b",
+  "paths": {
+    ".saipen/SAIUI_CORE_INTEGRATION_COMMAND_V2.md": null
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "recorded_at": "2026-08-13T06:35:36Z",
+  "schema_version": 1,
+  "source_head": "952c85c799e7dc7906737d6e9fdd397c95ea30da",
+  "source_tree_fingerprint": "git-delta-v1:0c3d01ca12a2cb8a5ea1ec6dfb511b23420ef42097553080469d09fe4852b00f",
+  "ticket": "T-997"
+}

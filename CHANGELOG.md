@@ -1,6 +1,11 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.223.14 -- 2026-08-13 -- orphan cleanup (T-997): remove tracked zero-ref SAIUI command doc; board ## DONE scrub under RFC 1.2 soft cap
+
+- T-997: delete the tracked orphan .saipen/SAIUI_CORE_INTEGRATION_COMMAND_V2.md (zero references) via the release executor scope deletion path.
+- T-996/T-997 wave: board scrub pruned 11 stale ## DONE tickets, kept the T-549 barrier anchor.
+
 ## 7.223.13 -- 2026-08-13 -- release trust repair (T-994): one recovery-visible release operation, exact reviewed scope, no-publish matching ship.md, canonical first-publish WAIT, project-bound immutable plan
 
 - T-994: release executor is one SAIOPS recovery operation (release-<hex>) under .saipen/recovery/ops/; every external fact is classified expected-BEFORE / expected-AFTER / CONFLICT and recovery never repeats a side effect (crash A->B->tag edges proven).
