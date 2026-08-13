@@ -263,3 +263,16 @@
 - 13.08.26 01:28 [E-3320] [parent: E-3319] [T-994] [agent: claude] [op: scope-94ab177b] DEC: release scope recorded -- 12 path(s) bound to a477d64170dc
 - 13.08.26 01:28 [E-3321] [parent: E-3320] [T-994] [agent: claude] [op: finish-e3705bfa] RUN: ship v7.223.13 -> content commit e94623ee3579 pushed
 - 13.08.26 01:28 [E-3322] [parent: E-3321] [T-994] [agent: claude] [op: finish-e3705bfa] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 13.08.26 06:25 [E-3323] [parent: E-3322] [agent: claude] [op: transition-48c6bbcc] RUN: post-release fresh hunt per brief step 23
+- 13.08.26 06:27 [E-3324] [parent: E-3323] [T-996] [agent: claude] [op: ticket-2156db82] DEC: ticket added via SAIOPS
+- 13.08.26 06:27 [E-3325] [parent: E-3324] [T-997] [agent: claude] [op: ticket-4c154c59] DEC: ticket added via SAIOPS
+- 13.08.26 06:27 [E-3326] [parent: E-3325] [T-997] [agent: claude] [op: claim-5d171cf0] DEC: claimed via SAIOPS -- owner claude
+- 13.08.26 06:27 [E-3327] [parent: E-3326] [T-997] [agent: claude] [op: transition-757e8fe6] RUN: commit the orphan deletion (tracked at HEAD, zero refs)
+- 13.08.26 06:35 [E-3328] [parent: E-3327] [T-997] [agent: claude] [op: checkpoint-cd970586] RUN: clean: board scrub -- pruned 11 stale ## DONE tickets (T-624/625/635/638/639/622/623/991/992/994/995), kept T-549 barrier anchor; board 16.4KB -> 7.5KB (RFC 1.2 soft cap)
+- 13.08.26 06:35 [E-3329] [parent: E-3328] [T-997] [agent: claude] [op: transition-d5a74222] RUN: orphan zero refs proven; board scrub validated; probe 11c + full suite cover the deletion path
+- 13.08.26 06:35 [E-3330] [parent: E-3329] [T-997] [agent: claude] [op: transition-4abee8d5] RUN: reviewed
+- 13.08.26 06:35 [E-3331] [parent: E-3330] [op: transition-4abee8d5] DEC: goal_tickets 4->5
+- 13.08.26 06:35 [E-3332] [parent: E-3331] [T-997] [agent: claude] [op: transition-a897eaf9] RUN: ship the orphan deletion + board scrub
+- 13.08.26 06:35 [E-3333] [parent: E-3332] [T-997] [agent: claude] [op: scope-5e0f0e2b] DEC: release scope recorded -- 1 path(s) bound to 952c85c799e7
+- 13.08.26 06:36 [E-3334] [parent: E-3333] [T-997] [agent: claude] [op: finish-c5e885e0] RUN: ship v7.223.14 -> content commit c9376cbc1ece pushed
+- 13.08.26 06:36 [E-3335] [parent: E-3334] [T-997] [agent: claude] [op: finish-c5e885e0] DEC: ticket finished via SAIOPS -- completion (from SHIP)
