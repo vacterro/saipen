@@ -2,7 +2,6 @@
 ## DOING
 
 ## TODO
-- [ ] T-996 [P2] KNOWLEDGE/HABITS-browser-hang.md is named in validate.py's shipped-doc accounting (doc-coverage EXEMPT list, cross-agent habit note) but is untracked -- a fresh clone of v7.223.13 lacks a file the validator accounts for | verify: file tracked; fresh clone carries it; validate.py doc coverage passes with it tracked
 
 
 
@@ -13,6 +12,7 @@
 - [ ] T-473 [P1] HELD, not scheduled: Rosary A3, the concurrent whole-file clobber guard. Witnessed twice this session -- a parallel session overwrote `BOARD.md` and reverted six `## DONE` moves whose work was already committed and pushed (E-1863), caught an hour later by CONFORMANCE 199 rather than at the moment of damage. Р В Р’В Р вЂ™Р’В Р В Р вЂ Р В РІР‚С™Р Р†РІР‚С›РЎС›Р В Р’В Р Р†Р вЂљРІвЂћСћР В РІР‚в„ўР вЂ™Р’В§ 1.5 already reads each file before writing it, so the guard is cheap: compare the content against what was read immediately before the write and refuse on a difference. It is held deliberately because it touches the checkpoint path every session runs and because T-442..T-451 already own the v8 Crew concurrency design; landing a collision detector ahead of that design risks pre-empting it. | needs: T-442 | verify: a read-then-foreign-write-then-write sequence is refused; an unchanged file writes normally; the guard stays a detector and never becomes a scope or locking scheme
 
 ## DONE
+- [x] T-996 [P2] KNOWLEDGE/HABITS-browser-hang.md is named in validate.py's shipped-doc accounting (doc-coverage EXEMPT list, cross-agent habit note) but is untracked -- a fresh clone of v7.223.13 lacks a file the validator accounts for | verify: file tracked; fresh clone carries it; validate.py doc coverage passes with it tracked | owner: claude | claim_time: 2026-08-13T06:37:05Z
 - [x] T-997 [P2] .saipen/SAIUI_CORE_INTEGRATION_COMMAND_V2.md is a tracked orphan with zero references anywhere in the repo (grep across tools/, saipen/, .saipen/ all empty); locally deleted but still in HEAD, so every clone carries a dead file | verify: deletion committed via CLEAN evidence gate (tracked at HEAD, zero refs); fresh clone lacks the file; validator + scenarios pass | owner: claude | claim_time: 2026-08-13T06:27:56Z
 - [x] T-549 [P1] Document ownership consolidation + final gate suite (hardening-wave barrier retention anchor; validator requires this DONE line on board) | verify: gates green; evidence in LOG (sealed)
 ## BLOCKED

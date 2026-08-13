@@ -276,3 +276,12 @@
 - 13.08.26 06:35 [E-3333] [parent: E-3332] [T-997] [agent: claude] [op: scope-5e0f0e2b] DEC: release scope recorded -- 1 path(s) bound to 952c85c799e7
 - 13.08.26 06:36 [E-3334] [parent: E-3333] [T-997] [agent: claude] [op: finish-c5e885e0] RUN: ship v7.223.14 -> content commit c9376cbc1ece pushed
 - 13.08.26 06:36 [E-3335] [parent: E-3334] [T-997] [agent: claude] [op: finish-c5e885e0] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 13.08.26 06:37 [E-3336] [parent: E-3335] [T-996] [agent: claude] [op: claim-45533bcd] DEC: claimed via SAIOPS -- owner claude
+- 13.08.26 06:37 [E-3337] [parent: E-3336] [T-996] [agent: claude] [op: transition-e056b02f] RUN: track KNOWLEDGE/HABITS-browser-hang.md (referenced by AGENTS.md + validate.py doc coverage)
+- 13.08.26 06:37 [E-3338] [parent: E-3337] [T-996] [agent: claude] [op: transition-87c24259] RUN: doc tracked; fresh clone carries it; validate coverage passes
+- 13.08.26 06:37 [E-3339] [parent: E-3338] [T-996] [agent: claude] [op: transition-3f8ded7a] RUN: reviewed
+- 13.08.26 06:37 [E-3340] [parent: E-3339] [op: transition-3f8ded7a] DEC: goal_tickets 5->6
+- 13.08.26 06:37 [E-3341] [parent: E-3340] [T-996] [agent: claude] [op: transition-8f7bb7a2] RUN: ship the habit doc
+- 13.08.26 06:37 [E-3342] [parent: E-3341] [T-996] [agent: claude] [op: scope-e2e5d006] DEC: release scope recorded -- 1 path(s) bound to 627103436961
+- 13.08.26 06:37 [E-3343] [parent: E-3342] [T-996] [agent: claude] [op: finish-0d4dd64a] RUN: ship v7.223.15 -> content commit 627103436961 pushed
+- 13.08.26 06:37 [E-3344] [parent: E-3343] [T-996] [agent: claude] [op: finish-0d4dd64a] DEC: ticket finished via SAIOPS -- completion (from SHIP)
