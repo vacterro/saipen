@@ -114,6 +114,10 @@
       "type": "string",
       "description": "Optional one-line human->agent nudge, read on continue (RFC § 1.2) and cleared once applied. Not a ticket, not a goal."
     },
+    "first_publish_confirmation": {
+      "type": "string",
+      "description": "T-994 first-publish authorization evidence: '<sanitized remote identity> <public|private>', recorded canonically via `saipen first-publish-confirm`. Present ONLY after a human confirmed the one-way door; a release may publish a brand-new remote only when this field matches the current push endpoint."
+    },
     "role_revision": {
       "type": "string",
       "description": "SubSaipen only (T-542): the deterministic revision of the effective built-in charter this instance spawned/adopted against (PROTOCOL.md section 3.1 metadata block). Recorded at spawn and adopt; every ready OUTBOX package records the same value; collect compares against the current project-local charter after `saipen sub sync`. Absent on instances predating the recording."

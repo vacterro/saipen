@@ -36,6 +36,18 @@ CODES = frozenset({
     "PACKAGE_INCOMPLETE",
     "MALFORMED_PACKAGE",
     "INCOMPLETE_TICKET",
+    # Release executor codes (T-994)
+    "STALE_PLAN",
+    "RELEASE_CLOSURE_PENDING",
+    "TAG_CONFLICT",
+    "FIRST_PUBLISH_WAIT",
+    "NO_PUBLISH_MODE",
+    "SOURCE_SCOPE_MISSING",
+    # T-994 / § 1: every public release refusal that is not a named
+    # preflight gate collapses to ONE stable code. The diagnostic stage and
+    # the underlying subprocess failure stay in `detail`/`stage` -- they must
+    # never become a zoo of global codes the weak model has to parse.
+    "RELEASE_FAILED",
 })
 
 

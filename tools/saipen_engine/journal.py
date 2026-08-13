@@ -258,6 +258,45 @@ class Journal:
             record["targets"][target_index]["applied"] = True
         _atomic_json(self.manifest, record)
 
+    def append_targets(self, targets: list[dict]) -> None:
+        """Append write targets to an existing operation (T-994 release).
+
+        A release operation learns its canonical closure bytes only after its
+        content commit exists (the RUN event names the pushed commit), so the
+        journal must be able to grow: the appended targets are staged exactly
+        like the initial ones and recovery replays them by the same rules.
+        The record's progress_index stays put; appended targets start
+        unapplied.
+        """
+        record = self.read()
+        record_targets = record.setdefault("targets", [])
+        for target in targets:
+            content = target["content"]
+            if isinstance(content, str):
+                content = content.encode("utf-8")
+            index = len(record_targets)
+            (self.dir / f"{index}_{_slug(target['path'])}.staged").write_bytes(
+                content)
+            record_targets.append({
+                "path": target["path"],
+                "role": target["role"],
+                "before_hash": target["before_hash"],
+                "after_hash": target["after_hash"],
+                "applied": False,
+            })
+        _atomic_json(self.manifest, record)
+
+    def update(self, **fields) -> None:
+        """Merge extra fields into the operation record (T-994 release).
+
+        Release operations record git facts (commits, remote tips, trees)
+        that the generic byte-replay model does not own; they live alongside
+        the standard status/targets keys in the SAME atomic journal write.
+        """
+        record = self.read()
+        record.update(fields)
+        _atomic_json(self.manifest, record)
+
     def read(self) -> dict:
         return json.loads(self.manifest.read_text(encoding="utf-8"))
 
@@ -440,6 +479,14 @@ def recover(project_root: Path | str, op_id: str) -> dict:
                 "detail": "op is CONFLICT; resolve explicitly before "
                           "further mutation (saipen recover, evidence "
                           "preserved)"}
+
+    # Release operations own git side effects (commits/pushes/tags) that the
+    # byte-replay path below cannot redo. Dispatch to the release recovery,
+    # which classifies every external fact against the journal's recorded
+    # expectations and never blindly repeats a side effect (T-994).
+    if record.get("operation") == "release":
+        from .release import recover_release_op
+        return recover_release_op(project_root, op_id)
 
     targets = record["targets"]
     # PREPARED with nothing applied: no canonical byte changed -> abort safely.

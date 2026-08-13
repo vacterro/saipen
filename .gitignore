@@ -10,6 +10,8 @@ __pycache__/
 .freebuff/
 .saipen/recovery/
 .saipen/locks/
+# T-994: process-local runtime caches must never enter the tree.
+.saipen/cache/
 # bootstrap/export.* drops its archive in the project root by design
 saipen_export_*.tar.gz
 saipen_export_*.zip

@@ -215,8 +215,14 @@ ILLEGAL_PHASE, WRITER_BUSY, VALIDATION_FAILED, RECOVERY_REQUIRED,
 RECOVERY_CONFLICT, DESTRUCTIVE_CONFIRMATION_REQUIRED, CONFLICT,
 NEEDS_REPAIR, PATH_ESCAPE, INVALID_ID, ACTIVE_IMPROVE_CYCLE,
 INVALID_DISPOSITION, PACKAGE_INCOMPLETE, MALFORMED_PACKAGE,
-INCOMPLETE_TICKET. Error messages name one exact
-refusal and the executable next action. `ILLEGAL_PHASE` is the gate refusal:
+INCOMPLETE_TICKET, STALE_PLAN, RELEASE_CLOSURE_PENDING,
+TAG_CONFLICT, FIRST_PUBLISH_WAIT, NO_PUBLISH_MODE,
+SOURCE_SCOPE_MISSING, RELEASE_FAILED. Error messages name one exact
+refusal and the executable next action. `RELEASE_FAILED` is the single stable
+code every public release refusal that is not a named preflight gate
+collapses to (subprocess/staging/commit/push/tag/receipt failures): the
+diagnostic stage and the underlying error stay in the result's `detail` /
+`stage` fields, never as new global codes. `ILLEGAL_PHASE` is the gate refusal:
 `finish_ticket` (the atomic ticket-closure operation behind `ticket done`)
 accepts a ticket only from `phase: SHIP` (the canonical SHIP -> DONE closure
 edge); from SCOUT/BUILD/VERIFY/REVIEW it REFUSEs ILLEGAL_PHASE and writes

@@ -112,7 +112,10 @@ def main() -> int:
         return h.hexdigest()[:16]
 
     cache_key = compute_cache_key()
-    cache_file = HOME / ".saipen" / "kitchen" / "audit_parity_cache.json"
+    # T-640 / § 14: the cache is derived runtime state, never canonical
+    # project truth. It lives under .saipen/cache/ (gitignored) so a
+    # validation/audit run can never dirty the tracked tree.
+    cache_file = HOME / ".saipen" / "cache" / "audit_parity_cache.json"
     if cache_file.exists():
         try:
             cached = json.loads(cache_file.read_text("utf-8"))

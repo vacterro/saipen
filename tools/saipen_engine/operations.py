@@ -634,7 +634,11 @@ def _ticket_targets(root: Path, action: str, ticket_id: str, agent: str,
 
 
 def _plan_finish_ticket(root: Path, ticket_id: str, agent: str, now: str,
-                        utc: str) -> OperationPlan | Result:
+                        utc: str, digest_text: str | None = None,
+                        digest_done: str | None = None,
+                        digest_awaiting: str | None = None,
+                        prefix_run: str | None = None,
+                        ) -> OperationPlan | Result:
     """PLAN the ONE atomic ticket-closure operation (NITRO dogfood III).
 
     Closing a ticket is a cross-file transaction, not choreography: the split
@@ -642,7 +646,11 @@ def _plan_finish_ticket(root: Path, ticket_id: str, agent: str, now: str,
     DONE[x] while STATE still names the ticket in a ticket-bearing phase --
     the exact corruption reproduced in DOGFOOD III. ONE OperationPlan owns:
 
-    LOG:   ticket completion event
+    LOG:   ticket completion event (and, for a release closure, ONE truthful
+           RUN event emitted immediately before it -- `prefix_run`, T-994 /
+           § 15 -- so the release evidence is written by the SAME canonical
+           LOG machinery, never a second writer, and the journal carries a
+           single LOG target recovery can verify)
     BOARD: DOING -> DONE, [/] -> [x]
     STATE: phase -> DONE, task -> none, transition_from -> SHIP (the ACTUAL
            previous phase), last_event -> completion event, updated, agent
@@ -707,10 +715,26 @@ def _plan_finish_ticket(root: Path, ticket_id: str, agent: str, now: str,
 
     # One LOG completion event naming the ACTUAL closure phase -- the event
     # is the provenance that the gate chain actually ended at SHIP.
-    event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent,
-                              f"ticket finished via SAIOPS -- completion "
-                              f"(from {prev_phase})", now, op_id)
-    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    if prefix_run:
+        # ONE truthful RUN event emitted immediately before the completion
+        # event, both through the canonical LOG builder (T-994 / § 15). The
+        # journal then carries a SINGLE LOG target whose after-bytes recovery
+        # can verify -- a second sequential LOG target would defeat per-target
+        # before/after classification.
+        run_event, run_line = build_event(
+            log_tail, "RUN", prefix_run, ticket=ticket_id, agent=agent,
+            now=now, op_id=op_id)
+        event, line = build_event(
+            run_event, "DEC",
+            f"ticket finished via SAIOPS -- completion (from {prev_phase})",
+            ticket=ticket_id, agent=agent, now=now, op_id=op_id)
+        new_log = (docs["log"].text_norm.rstrip("\n") + "\n" + run_line
+                   + "\n" + line + "\n")
+    else:
+        event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent,
+                                  f"ticket finished via SAIOPS -- completion "
+                                  f"(from {prev_phase})", now, op_id)
+        new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
 
     # BOARD: DOING -> DONE, [/] -> [x], preserve all other fields.
     new_board = _move_ticket(docs["board"].text_norm, ticket_id, "## DONE",
@@ -745,10 +769,24 @@ def _plan_finish_ticket(root: Path, ticket_id: str, agent: str, now: str,
         _target(docs["board"], ".saipen/BOARD.md", "board", new_board),
         _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
+    # T-994 / § 16: the release closure OWNS the human digest. ship.md's
+    # digest is a PLAN TARGET of the same journaled closure so a ship can
+    # never report RELEASED with a stale/missing digest. Ordinary `ticket
+    # done` passes no digest and stays LOG+BOARD+STATE only.
+    if digest_text is not None:
+        digest_doc = codec.read_document(
+            root / ".saipen" / "kitchen" / "digest.md")
+        targets.append(TargetPlan(
+            ".saipen/kitchen/digest.md", "report",
+            digest_doc.encode(digest_text),
+            digest_doc.raw_hash,
+            hash_bytes(digest_doc.encode(digest_text))))
     expected = {"ok": True, "code": "FINISHED", "ticket": ticket_id,
                 "event_id": f"E-{event}", "phase": "DONE", "task": "none",
                 "next_action": routed.get("action"),
                 "transition_from": closure_from}
+    if digest_text is not None:
+        expected["digest"] = str(root / ".saipen" / "kitchen" / "digest.md")
     return build_plan(
         "finish", agent, _identity(root),
         {"operation": "finish", "ticket": ticket_id},
@@ -757,12 +795,27 @@ def _plan_finish_ticket(root: Path, ticket_id: str, agent: str, now: str,
 
 
 def finish_ticket(project_root: Path | str, ticket_id: str, agent: str,
-                  dry_run: bool = False) -> Result:
+                  dry_run: bool = False,
+                  digest_text: str | None = None,
+                  digest_done: str | None = None,
+                  digest_awaiting: str | None = None,
+                  prefix_run: str | None = None) -> Result:
     """Atomically finish a ticket: LOG + BOARD + STATE in ONE journaled plan.
-    The public `ticket done` semantics become this operation."""
+    The public `ticket done` semantics become this operation.
+
+    The release closure passes `digest_text` so the human digest commits in
+    the SAME journaled transaction as the ticket closure (T-994 / § 16), and
+    `prefix_run` to emit its ONE truthful release RUN event through the same
+    canonical LOG builder (§ 15). The `digest_done` / `digest_awaiting` hints
+    are reserved for the no-publish digest shape.
+    """
     root = Path(project_root)
     now, utc = _now(), _utc_iso()
-    plan = _plan_finish_ticket(root, ticket_id, agent, now, utc)
+    plan = _plan_finish_ticket(root, ticket_id, agent, now, utc,
+                               digest_text=digest_text,
+                               digest_done=digest_done,
+                               digest_awaiting=digest_awaiting,
+                               prefix_run=prefix_run)
     if isinstance(plan, Result):
         return plan
     if dry_run:
@@ -1070,8 +1123,275 @@ def stop_checkpoint(project_root: Path | str, agent: str, reason: str = "",
     return apply_plan(root, plan)
 
 
-# ------------------------------------------------------------------ helpers
+# ------------------------------------------------------- release scope (T-994)
 
+RELEASE_SCOPE_DIR = ".saipen/kitchen/release_scope"
+
+
+def _plan_record_scope(root: Path, ticket_id: str, agent: str, paths: list[str],
+                       now: str, utc: str) -> OperationPlan | Result:
+    """PLAN the exact reviewed release scope for a ticket (T-994 / § 2).
+
+    The scope is the model's EXACT reviewed file list -- never inferred from
+    dirty files, never `git add .`. It is bound to the ticket, the project
+    identity and the source identity (HEAD + per-path content hashes), so the
+    release planner can prove the bytes about to ship are the bytes that were
+    reviewed. The record lives under `.saipen/kitchen/release_scope/` and is
+    journaled through SAIOPS like any other canonical mutation.
+    """
+    op_id = "scope-" + uuid4_hex8()
+    docs, state, board, log_tail = _read(root)
+    if board["errors"]:
+        return _refuse("VALIDATION_FAILED",
+                       "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+                       ticket=ticket_id)
+    phase = state.get("phase")
+    if phase not in ("REVIEW", "SHIP"):
+        return _refuse(
+            "ILLEGAL_PHASE",
+            f"release scope may be recorded at REVIEW -> SHIP; actual phase "
+            f"{phase} cannot name the reviewed scope for a release",
+            ticket=ticket_id, phase=phase)
+    if state.get("task") != ticket_id:
+        return _refuse("ACTIVE_TICKET_MISMATCH",
+                       f"STATE.task={state.get('task')} != scope ticket "
+                       f"{ticket_id}", ticket=ticket_id)
+    tickets = board["tickets"]
+    ticket = tickets.get(ticket_id)
+    if ticket is None or ticket["section"] != "## DOING":
+        return _refuse("TICKET_NOT_FOUND",
+                       f"{ticket_id} is not the active ## DOING ticket",
+                       ticket=ticket_id)
+    clean: list[str] = []
+    for raw in paths:
+        rel = Path(raw).as_posix()
+        candidate = (root / rel).resolve()
+        try:
+            candidate.relative_to(root)
+        except ValueError:
+            return _refuse("PATH_ESCAPE", f"scope path escapes project root: "
+                            f"{rel}")
+        clean.append(rel)
+    clean = sorted(set(clean))
+    if not clean:
+        return _refuse("SOURCE_SCOPE_MISSING",
+                       "release scope cannot be empty; name the exact reviewed "
+                       "files", ticket=ticket_id)
+    try:
+        from freshness import compute_source_identity
+        ident = compute_source_identity(root)
+    except Exception as exc:
+        return _refuse("VALIDATION_FAILED",
+                       f"cannot compute source identity for scope binding: "
+                       f"{exc}")
+    hashes: dict[str, str] = {}
+    for rel in clean:
+        fp = root / rel
+        if not fp.is_file():
+            return _refuse("SOURCE_SCOPE_MISSING",
+                           f"scope path does not exist: {rel}", ticket=ticket_id)
+        hashes[rel] = hash_bytes(fp.read_bytes())
+    import json
+    record = {
+        "schema_version": 1,
+        "ticket": ticket_id,
+        "project_identity": _identity(root),
+        "source_head": ident.source_head,
+        "source_tree_fingerprint": ident.source_tree_fingerprint,
+        "paths": hashes,
+        "recorded_at": utc,
+        "op_id": op_id,
+    }
+    content = json.dumps(record, indent=2, sort_keys=True) + "\n"
+
+    event, line = _event_line(
+        docs, log_tail, "DEC", ticket_id, agent,
+        f"release scope recorded -- {len(clean)} path(s) bound to "
+        f"{ident.source_head[:12]}", now, op_id)
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    owned = {"last_event": event, "updated": utc, "agent": agent}
+    new_state = patch_state(docs["state"].text_norm, owned)
+
+    errors = validate_texts(new_state, docs["board"].text_norm, new_log)
+    if errors:
+        return _refuse("VALIDATION_FAILED",
+                       "proposed scope state fails fast validation: "
+                       + "; ".join(errors[:5]))
+
+    scope_rel = f"{RELEASE_SCOPE_DIR}/{ticket_id}.json"
+    scope_doc = codec.read_document(root / scope_rel)
+    targets = [
+        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+        TargetPlan(scope_rel, "report", scope_doc.encode(content),
+                   scope_doc.raw_hash, hash_bytes(scope_doc.encode(content))),
+    ]
+    return build_plan(
+        "scope", agent, _identity(root),
+        {"operation": "scope", "ticket": ticket_id, "paths": clean},
+        _docs_preconditions(docs, "state", "board", "log"),
+        targets,
+        {"ok": True, "code": "SCOPE_RECORDED", "ticket": ticket_id,
+         "paths": clean, "event_id": f"E-{event}",
+         "scope": scope_rel},
+        op_id=op_id)
+
+
+def record_scope(project_root: Path | str, ticket_id: str, agent: str,
+                 paths: list[str], dry_run: bool = False) -> Result:
+    """Journal the exact reviewed release scope for a ticket (T-994 / § 2)."""
+    root = Path(project_root)
+    now, utc = _now(), _utc_iso()
+    plan = _plan_record_scope(root, ticket_id, agent, paths, now, utc)
+    if isinstance(plan, Result):
+        return plan
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
+
+
+# ------------------------------------------- first-publish wait (T-994 / § 11)
+
+def _sanitize_remote(url: str) -> str:
+    """Endpoint identity without credentials, normalized so `file://V:\\x`
+    and `file://V:/x` are the same endpoint (T-994 / § 11)."""
+    url = url.strip()
+    if "://" in url:
+        scheme, rest = url.split("://", 1)
+        rest = rest.split("@", 1)[-1]
+        return f"{scheme}://{rest.replace(chr(92), '/')}"
+    if "@" in url:
+        return url.split("@", 1)[-1].replace(chr(92), "/")
+    return url.replace(chr(92), "/")
+
+
+def _plan_first_publish_wait(root: Path, agent: str, remote_name: str,
+                             now: str, utc: str) -> OperationPlan | Result:
+    """PLAN the canonical first-publish WAIT checkpoint.
+
+    ZERO commit/tag/push: the WAIT is a journaled canonical checkpoint that
+    parks STATE.next_action on the exact ship.md line so the decision is
+    recoverable evidence, not chat memory.
+    """
+    op_id = "wait-" + uuid4_hex8()
+    docs, state, _board, log_tail = _read(root)
+    task = state.get("task")
+    remote_name = _sanitize_remote(remote_name)
+    message = (f"first-publish -- confirm repo name '{remote_name}' and "
+               "public/private before I push")
+    event, line = build_event(log_tail, "WAIT", message, ticket=task,
+                              agent=agent, now=now, op_id=op_id)
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    na = f"WAIT: {message}"
+    owned = {"next_action": na, "last_event": event, "updated": utc,
+             "agent": agent}
+    new_state = patch_state(docs["state"].text_norm, owned)
+    errors = validate_texts(new_state, docs["board"].text_norm, new_log)
+    if errors:
+        return _refuse("VALIDATION_FAILED",
+                       "proposed first-publish WAIT state fails fast "
+                       "validation: " + "; ".join(errors[:5]))
+    targets = [
+        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+    ]
+    return build_plan(
+        "wait", agent, _identity(root),
+        {"operation": "wait", "remote": remote_name},
+        _docs_preconditions(docs, "state", "board", "log"),
+        targets,
+        {"ok": True, "code": "FIRST_PUBLISH_WAIT", "next_action": na,
+         "event_id": f"E-{event}"},
+        op_id=op_id)
+
+
+def record_first_publish_wait(project_root: Path | str, agent: str,
+                              remote_name: str,
+                              dry_run: bool = False) -> Result:
+    """Park STATE on the canonical first-publish WAIT (T-994 / § 11)."""
+    root = Path(project_root)
+    now, utc = _now(), _utc_iso()
+    plan = _plan_first_publish_wait(root, agent, remote_name, now, utc)
+    if isinstance(plan, Result):
+        return plan
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
+
+
+def _plan_first_publish_confirm(root: Path, agent: str, remote_name: str,
+                                visibility: str, now: str,
+                                utc: str) -> OperationPlan | Result:
+    """PLAN the canonical first-publish confirmation record.
+
+    Confirmation is canonical evidence, never chat memory: the confirming
+    agent journal-records the repo name + public/private decision into STATE
+    bound to the exact remote identity, so a later `saipen ship` can verify
+    the publication is authorized for THIS endpoint.
+    """
+    op_id = "fpc-" + uuid4_hex8()
+    docs, state, _board, log_tail = _read(root)
+    na = str(state.get("next_action") or "")
+    if not na.startswith("WAIT: first-publish"):
+        return _refuse("VALIDATION_FAILED",
+                       "first-publish confirmation requires a pending "
+                       "first-publish WAIT in STATE.next_action; current "
+                       f"next_action is {na!r}")
+    if visibility not in ("public", "private"):
+        return _refuse("VALIDATION_FAILED",
+                       f"visibility {visibility!r} outside public|private")
+    remote_name = _sanitize_remote(remote_name)
+    task = state.get("task")
+    event, line = _event_line(
+        docs, log_tail, "DEC", task, agent,
+        f"first publish confirmed -- repo '{remote_name}' ({visibility})",
+        now, op_id)
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    owned = {
+        "first_publish_confirmation": f"{remote_name} {visibility}",
+        "next_action": (f"PHASE SHIP {task}" if task and task != "none"
+                        else "saipen continue"),
+        "last_event": event,
+        "updated": utc,
+        "agent": agent,
+    }
+    new_state = patch_state(docs["state"].text_norm, owned)
+    errors = validate_texts(new_state, docs["board"].text_norm, new_log)
+    if errors:
+        return _refuse("VALIDATION_FAILED",
+                       "proposed first-publish confirmation state fails fast "
+                       "validation: " + "; ".join(errors[:5]))
+    targets = [
+        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+    ]
+    return build_plan(
+        "fpc", agent, _identity(root),
+        {"operation": "fpc", "remote": remote_name, "visibility": visibility},
+        _docs_preconditions(docs, "state", "board", "log"),
+        targets,
+        {"ok": True, "code": "FIRST_PUBLISH_CONFIRMED",
+         "confirmation": f"{remote_name} {visibility}",
+         "event_id": f"E-{event}"},
+        op_id=op_id)
+
+
+def confirm_first_publish(project_root: Path | str, agent: str,
+                          remote_name: str, visibility: str,
+                          dry_run: bool = False) -> Result:
+    """Record canonical first-publish confirmation (T-994 / § 11)."""
+    root = Path(project_root)
+    now, utc = _now(), _utc_iso()
+    plan = _plan_first_publish_confirm(root, agent, remote_name, visibility,
+                                       now, utc)
+    if isinstance(plan, Result):
+        return plan
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
+
+
+# ------------------------------------------------------------------ helpers
 def _identity(root: Path) -> str:
     from .paths import project_identity
     return project_identity(root)

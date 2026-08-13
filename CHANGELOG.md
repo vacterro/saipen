@@ -1,6 +1,15 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.223.13 -- 2026-08-13 -- release trust repair (T-994): one recovery-visible release operation, exact reviewed scope, no-publish matching ship.md, canonical first-publish WAIT, project-bound immutable plan
+
+- T-994: release executor is one SAIOPS recovery operation (release-<hex>) under .saipen/recovery/ops/; every external fact is classified expected-BEFORE / expected-AFTER / CONFLICT and recovery never repeats a side effect (crash A->B->tag edges proven).
+- T-994: release scope = the exact reviewed ticket scope recorded at REVIEW->SHIP (`saipen scope`) + mechanical release metadata; a real source change now ships into a fresh clone.
+- T-994: no-publish matches ship.md exactly (zero staging/commit/tag/push, local validation, truthful skipped-publish event, digest, SHIP->DONE, works git-less).
+- T-994: first publish is a journaled canonical WAIT with confirmation evidence, never chat memory.
+- T-994: every public refusal returns a code from errors.CODES; internal stage failures collapse to RELEASE_FAILED.
+- T-995: release receipt write failure surfaces through the public result (RELEASE_FAILED) with zero later remote stages.
+
 ## 7.223.12 -- 2026-08-12 -- one canonical release executor for `saipen ship` and `saipen push`
 
 `saipen ship` and `saipen push` now dispatch to ONE release executor (`saipen_engine/release.py`). A frozen `ReleasePlan` owns the decision: release version, branch, commit message, tag, the exact release metadata surface (VERSION + README + CHANGELOG + all 32 mechanically mirrored locale badges), foreign pre-existing staging detection, and the pre-ship index snapshot. `plan_release` builds the plan with ZERO writes and validates version parity; `execute_release` is the only place bytes change: exact staging -> `--gate ship` -> `git diff --cached --check` -> commit -> current-branch push -> tag push, in that order. Foreign pre-existing staged paths refuse the plan before any write (never committed, pushed or tagged) and stay byte-identical. Dry-runs are zero-write and, after invocation-name normalization, `ship` and `push` produce structurally identical plans. Scenario controls prove plan parity, dry-run no-mutation, foreign-staging refusal + preservation. (T-635)

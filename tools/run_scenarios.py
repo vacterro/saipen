@@ -2888,6 +2888,48 @@ def run_release_freshness_probes() -> tuple[list[str], int]:
         if git("init", "-q").returncode != 0:
             print("SKIP: release freshness probes -- git unavailable")
             return problems, checked
+        # T-994 / § 21: cut the copied LOG at the sealed boundary so the
+        # fixture holds no hunt marks naming commits its fresh `git init`
+        # cannot back, and reconcile STATE (last_event + § 1.5 goal replay)
+        # to the cut so the fixture is internally valid.
+        saipen_dir = project / ".saipen"
+        sealed_max = 0
+        logs_dir = saipen_dir / "logs"
+        if logs_dir.is_dir():
+            for seg in sorted(logs_dir.glob("LOG-*.md")):
+                for ln in seg.read_text(encoding="utf-8-sig").splitlines():
+                    m = re.search(r"\[E-(\d+)\]", ln)
+                    if m:
+                        sealed_max = max(sealed_max, int(m.group(1)))
+        if sealed_max:
+            log_text = (saipen_dir / "LOG.md").read_text(encoding="utf-8-sig")
+            kept = [ln for ln in log_text.splitlines()
+                    if not (m := re.search(r"\[E-(\d+)\]", ln))
+                    or int(m.group(1)) <= sealed_max]
+            (saipen_dir / "LOG.md").write_text("\n".join(kept) + "\n",
+                                               encoding="utf-8")
+            st = (saipen_dir / "STATE.md").read_text(encoding="utf-8")
+            st = re.sub(r"(?m)^(\s*last_event:\s*)\d+$",
+                        f"\\g<1>{sealed_max}", st)
+            all_lines = list(kept)
+            if logs_dir.is_dir():
+                for seg in sorted(logs_dir.glob("LOG-*.md")):
+                    all_lines += seg.read_text(
+                        encoding="utf-8-sig").splitlines()
+            marker = re.compile(r"\]\s+DEC: goal (?:pivot|reauthorized)\b")
+            last_marker = max(
+                (i for i, ln in enumerate(all_lines) if marker.search(ln)),
+                default=None)
+            for counter in ("goal_waves", "goal_tickets"):
+                if not re.search(rf"(?m)^{counter}:", st) or last_marker is None:
+                    continue
+                rebuilt = sum(
+                    1 for ln in all_lines[last_marker + 1:]
+                    for m in [re.search(rf"DEC: {counter} (\d+)->(\d+)", ln)]
+                    if m and int(m.group(2)) > int(m.group(1)))
+                st = re.sub(rf"(?m)^({counter}:\s*)\d+$",
+                            f"\\g<1>{rebuilt}", st)
+            (saipen_dir / "STATE.md").write_text(st, encoding="utf-8")
         git("add", "-A")
         git("commit", "-q", "-m", "probe: baseline")
 
@@ -3041,16 +3083,27 @@ def run_release_freshness_probes() -> tuple[list[str], int]:
 
 
 def run_release_executor_probes() -> tuple[list[str], int]:
-    """T-635: `saipen ship` and `saipen push` dispatch to ONE release
-    executor. Dry-runs are zero-write and structurally identical after
-    invocation-name normalization; foreign pre-existing staging is refused
-    (never committed, pushed or tagged)."""
+    """T-994: comprehensive hostile release matrix.
+
+    Tests the release executor against every identified failure class with
+    ISOLATED fixtures (one scenario never contaminates another's Git history,
+    T-635's original blindness): PLAN identity, zero-write dry-run, first
+    publish WAIT, no-publish policy, foreign staging, phase gate, stderr
+    capture, REAL source release into a fresh clone, ALREADY_APPLIED full
+    evidence, crash recovery between every A -> B -> tag edge, journal-write
+    refusal surfacing, exact index rollback, and the closed-code guarantee
+    (every public ok:false code is in errors.CODES).
+
+    Every identity assertion demands a NON-EMPTY expected AND actual witness;
+    empty == empty is never proof.
+    """
     problems: list[str] = []
     checked = 0
     env = {**os.environ, "GIT_AUTHOR_NAME": "probe",
            "GIT_AUTHOR_EMAIL": "probe@example.invalid",
            "GIT_COMMITTER_NAME": "probe",
            "GIT_COMMITTER_EMAIL": "probe@example.invalid"}
+
     home = VALIDATOR.parent.parent
 
     def expect(label: str, condition: bool, detail: str = "") -> None:
@@ -3061,10 +3114,91 @@ def run_release_executor_probes() -> tuple[list[str], int]:
         else:
             problems.append(f"release executor {label}: {detail}")
 
-    with tempfile.TemporaryDirectory(prefix="saipen-release-executor-") as tmp:
-        project = Path(tmp) / "home"
+    def expect_refusal(label: str, rd: dict) -> None:
+        """A public refusal MUST return a closed-code from errors.CODES."""
+        nonlocal checked
+        checked += 1
+        from saipen_engine.errors import CODES
+        code = rd.get("code")
+        ok = (not rd.get("ok")
+              and isinstance(code, str) and code in CODES)
+        if ok:
+            print(f"PASS: release executor -- {label}")
+        else:
+            problems.append(
+                f"release executor {label}: ok={rd.get('ok')} "
+                f"code={code!r} not in errors.CODES -- detail="
+                f"{str(rd.get('detail'))[:200]}")
+
+    def j(result) -> dict:
+        try:
+            return json.loads(result.stdout)
+        except (json.JSONDecodeError, ValueError):
+            return {"ok": False, "code": "PARSE_ERROR",
+                    "detail": result.stdout[:200]}
+
+    def _cut_log(saipen_dir: Path) -> None:
+        """Cut the copied LOG at the last sealed-segment boundary so the
+        fixture history holds no commit references (hunt marks etc.) the fresh
+        `git init` cannot back. Aligns STATE.last_event / goal counters to the
+        validator's OWN § 1.5 replay rule so the fixture is internally valid
+        (T-994 / § 21: one valid fixture, never hand-hacked STATE shapes)."""
+        sealed_max = 0
+        logs_dir = saipen_dir / "logs"
+        if logs_dir.is_dir():
+            for seg in sorted(logs_dir.glob("LOG-*.md")):
+                for ln in seg.read_text(encoding="utf-8-sig").splitlines():
+                    m = re.search(r"\[E-(\d+)\]", ln)
+                    if m:
+                        sealed_max = max(sealed_max, int(m.group(1)))
+        if not sealed_max:
+            return
+        log_text = (saipen_dir / "LOG.md").read_text(encoding="utf-8-sig")
+        kept = [ln for ln in log_text.splitlines()
+                if not (m := re.search(r"\[E-(\d+)\]", ln))
+                or int(m.group(1)) <= sealed_max]
+        (saipen_dir / "LOG.md").write_text("\n".join(kept) + "\n",
+                                           encoding="utf-8")
+        st = (saipen_dir / "STATE.md").read_text(encoding="utf-8")
+        st = re.sub(r"(?m)^(\s*last_event:\s*)\d+$",
+                    f"\\g<1>{sealed_max}", st)
+        # § 1.5 replay: goal counters rebuild from the NEWEST
+        # `DEC: goal pivot|reauthorized` marker across SEALED + active logs
+        # (the validator reads every log file). Reconcile STATE to the cut log
+        # so the ship gate never fails on the fixture's own editing.
+        all_lines = list(kept)
+        if logs_dir.is_dir():
+            for seg in sorted(logs_dir.glob("LOG-*.md")):
+                all_lines += seg.read_text(
+                    encoding="utf-8-sig").splitlines()
+        marker = re.compile(r"\]\s+DEC: goal (?:pivot|reauthorized)\b")
+        last_marker = max(
+            (i for i, ln in enumerate(all_lines) if marker.search(ln)),
+            default=None)
+        for counter in ("goal_waves", "goal_tickets"):
+            if not re.search(rf"(?m)^{counter}:", st):
+                continue
+            if last_marker is None:
+                continue  # validator only WARNs in the no-marker shape
+            rebuilt = sum(
+                1 for ln in all_lines[last_marker + 1:]
+                for m in [re.search(rf"DEC: {counter} (\d+)->(\d+)", ln)]
+                if m and int(m.group(2)) > int(m.group(1)))
+            st = re.sub(rf"(?m)^({counter}:\s*)\d+$",
+                        f"\\g<1>{rebuilt}", st)
+        (saipen_dir / "STATE.md").write_text(st, encoding="utf-8")
+
+    def build_fixture(tmp: Path, *, mode: str = "full",
+                      gitless: bool = False) -> tuple:
+        """ONE valid SHIP-phase fixture builder (T-994 / § 21): the copied
+        project's real STATE keeps every required field (blocker,
+        saipen_version, mode, ...) and only the SHIP-relevant fields are
+        patched, so the ship gate never fails on the fixture's own corruption.
+        """
+        project = tmp / "home"
         shutil.copytree(home, project, ignore=shutil.ignore_patterns(
-            ".git", ".venv", "__pycache__", ".freebuff", "node_modules", "nul"))
+            ".git", ".venv", "__pycache__", ".freebuff", "node_modules",
+            "nul"))
 
         def git(*args: str) -> subprocess.CompletedProcess[str]:
             return subprocess.run(["git", "-C", str(project), *args], env=env,
@@ -3072,58 +3206,651 @@ def run_release_executor_probes() -> tuple[list[str], int]:
 
         def cli(*args: str) -> subprocess.CompletedProcess[str]:
             return subprocess.run(
-                [sys.executable, str(project / "tools" / "saipen.py"), *args],
+                [sys.executable, str(project / "tools" / "saipen.py"),
+                 *args],
                 cwd=str(project), env=env, capture_output=True, text=True,
                 errors="replace")
 
-        if git("init", "-q").returncode != 0:
-            print("SKIP: release executor probes -- git unavailable")
-            return problems, checked
-        git("add", "-A")
-        git("commit", "-q", "-m", "probe: baseline")
-        git("remote", "add", "origin",
-            f"file://{Path(tmp) / 'origin.git'}")
-        origin = Path(tmp) / "origin.git"
-        subprocess.run(["git", "init", "-q", "--bare", str(origin)],
-                       capture_output=True)
-        git("push", "-q", "origin", "HEAD:main")
-        git("branch", "-M", "main")
+        if not gitless:
+            if git("init", "-q").returncode != 0:
+                print("SKIP: release executor probes -- git unavailable")
+                return None
+            git("add", "-A")
+            git("commit", "-q", "-m", "probe: baseline")
+            git("branch", "-M", "main")
+            origin = tmp / "origin.git"
+            subprocess.run(["git", "init", "-q", "--bare", str(origin)],
+                           capture_output=True)
+            git("remote", "add", "origin", f"file://{origin}")
+            git("push", "-q", "origin", "HEAD:main")
+            subprocess.run(["git", "-C", str(origin), "symbolic-ref", "HEAD",
+                            "refs/heads/main"], capture_output=True)
+        else:
+            origin = tmp / "origin.git"
+            origin.mkdir()
 
+        saipen_dir = project / ".saipen"
+        st = (saipen_dir / "STATE.md").read_text(encoding="utf-8-sig")
+        lines = st.splitlines()
+        out = []
+        for ln in lines:
+            new_ln = ln
+            for key, val in (("phase:", "SHIP"), ("task:", "T-9000"),
+                             ("next_action:", "PHASE SHIP T-9000"),
+                             ("transition_from:", "REVIEW"),
+                             ("mode:", mode), ("agent:", "probe")):
+                if new_ln.strip().startswith(key):
+                    new_ln = new_ln.replace(new_ln.split(":", 1)[1], " " + val)
+                    break
+            out.append(new_ln)
+        (saipen_dir / "STATE.md").write_text("\n".join(out) + "\n",
+                                             encoding="utf-8")
+
+        board_text = (saipen_dir / "BOARD.md").read_text(
+            encoding="utf-8-sig")
+        board_text = re.sub(
+            r"(?ms)^## DOING\n.*?(?=^## )",
+            "## DOING\n- [/] T-9000 synthetic fixture ticket "
+            "| owner: probe | claim_time: 2026-01-01T00:00:00Z\n",
+            board_text)
+        (saipen_dir / "BOARD.md").write_text(board_text, encoding="utf-8")
+
+        _cut_log(saipen_dir)
+        if not gitless:
+            git("add", "-A")
+            git("commit", "-q", "-m", "probe: fixture ship")
+            git("push", "-q", "origin", "HEAD:main")
+
+        # Real, non-metadata source change: the reviewed scope the release
+        # must actually ship (T-994 / § 2, § 22).
+        src = project / "tools" / "saipen_engine" / "release_contract.py"
+        src.write_text(
+            src.read_text(encoding="utf-8-sig").replace(
+                "version_badges(path)", "version_badges_owned(path)"),
+            encoding="utf-8")
+        r = cli("scope", "T-9000",
+                "tools/saipen_engine/release_contract.py")
+        if r.returncode != 0:
+            raise RuntimeError("fixture scope failed: " + r.stdout + r.stderr)
+
+        old_ver = (project / "VERSION").read_text(
+            encoding="utf-8").strip()
+        major, minor, patch = old_ver.split(".")
+        new_ver = f"{major}.{minor}.{int(patch) + 1}"
+        (project / "VERSION").write_text(new_ver + "\n", encoding="utf-8")
+        readme = (project / "README.md").read_text(encoding="utf-8-sig")
+        (project / "README.md").write_text(
+            readme.replace(f"**v{old_ver}**", f"**v{new_ver}**"),
+            encoding="utf-8")
+        changelog = (project / "CHANGELOG.md").read_text(encoding="utf-8-sig")
+        (project / "CHANGELOG.md").write_text(
+            f"## {new_ver}\n\nTest release.\n\n" + changelog,
+            encoding="utf-8")
+        kitchen = saipen_dir / "saitranslate" / "kitchen"
+        if kitchen.is_dir():
+            for rm in kitchen.glob("*/README_*.md"):
+                t = rm.read_text(encoding="utf-8-sig")
+                rm.write_text(t.replace(f"**v{old_ver}**", f"**v{new_ver}**"),
+                              encoding="utf-8")
+        return project, origin, git, cli, new_ver
+
+    def remote_branch_tip(origin: Path) -> str:
+        r = subprocess.run(["git", "ls-remote", str(origin),
+                            "refs/heads/main"], capture_output=True,
+                           text=True)
+        parts = r.stdout.strip().split()
+        return parts[0] if parts else ""
+
+    def remote_tag_commit(origin: Path, tag: str) -> str:
+        r = subprocess.run(["git", "ls-remote", str(origin),
+                            f"refs/tags/{tag}^{{}}"], capture_output=True,
+                           text=True)
+        parts = r.stdout.strip().split()
+        return parts[0] if parts else ""
+
+    # ======================================================================
+    # 1. PLAN: ship and push dry-run plans are structurally identical
+    # ======================================================================
+    with tempfile.TemporaryDirectory(prefix="saipen-rel-1-") as tmp:
+        built = build_fixture(Path(tmp))
+        if built is None:
+            return problems, checked
+        project, origin, git, cli, _new_ver = built
         ship_plan = cli("ship", "--dry-run", "--json")
         push_plan = cli("push", "--dry-run", "--json")
-        expect("ship and push dry-run plans are structurally identical "
-               "after invocation-name normalization",
-               ship_plan.returncode == 0 and push_plan.returncode == 0
-               and json.loads(ship_plan.stdout).get("plan")
-               == json.loads(push_plan.stdout).get("plan"),
-               f"ship={ship_plan.stdout[:200]} push={push_plan.stdout[:200]}")
-        expect("dry-run mutates no file/index/commit/tag",
-               git("status", "--short").stdout == ""
-               and git("log", "--oneline").stdout.count("\n") == 1
-               and git("tag", "--list").stdout == "",
-               git("status", "--short").stdout)
+        sp = j(ship_plan)
+        pp = j(push_plan)
+        expect("1. ship and push dry-run plans are structurally identical",
+               sp.get("ok") and pp.get("ok")
+               and sp.get("plan") == pp.get("plan"),
+               f"ship={sp.get('plan')} push={pp.get('plan')} "
+               f"{sp.get('detail')} {pp.get('detail')}")
 
-        # Foreign pre-existing staging must be refused, not committed.
+    # ======================================================================
+    # 2. DRY_RUN: zero writes (no file/index/commit/tag/object change)
+    # ======================================================================
+    with tempfile.TemporaryDirectory(prefix="saipen-rel-2-") as tmp:
+        built = build_fixture(Path(tmp))
+        if built is None:
+            return problems, checked
+        project, origin, git, cli, _new_ver = built
+        pre_obj = git("count-objects", "-v").stdout
+        pre_status = git("status", "--short").stdout
+        pre_log = git("log", "--oneline").stdout
+        pre_tags = git("tag", "--list").stdout
+        pre_refs = git("show-ref").stdout
+        result = cli("ship", "--dry-run", "--json")
+        rd = j(result)
+        post_obj = git("count-objects", "-v").stdout
+        post_status = git("status", "--short").stdout
+        post_log = git("log", "--oneline").stdout
+        post_tags = git("tag", "--list").stdout
+        post_refs = git("show-ref").stdout
+        expect("2a. dry-run reports writes=none",
+               rd.get("ok") and rd.get("writes") == "none",
+               f"ok={rd.get('ok')} writes={rd.get('writes')}")
+        expect("2b. dry-run does not change index/staged set",
+               pre_status == post_status,
+               f"before={pre_status!r} after={post_status!r}")
+        expect("2c. dry-run creates no new commits", pre_log == post_log, "")
+        expect("2d. dry-run creates no tags",
+               pre_tags == post_tags == "", f"tags={post_tags!r}")
+        expect("2e. dry-run creates no git objects", pre_obj == post_obj,
+               f"before={pre_obj!r} after={post_obj!r}")
+        expect("2f. dry-run does not change refs", pre_refs == post_refs, "")
+
+    # ======================================================================
+    # 3. FIRST-PUBLISH WAIT is canonical, not an error string (T-994 / § 11)
+    # ======================================================================
+    with tempfile.TemporaryDirectory(prefix="saipen-rel-3-") as tmp:
+        built = build_fixture(Path(tmp))
+        if built is None:
+            return problems, checked
+        project, origin, git, cli, new_ver = built
+        origin_empty = Path(tmp) / "origin_empty.git"
+        subprocess.run(["git", "init", "-q", "--bare", str(origin_empty)],
+                       capture_output=True)
+        git("remote", "set-url", "origin", f"file://{origin_empty}")
+        pre_head = git("rev-parse", "HEAD").stdout
+
+        result = cli("ship", "--json")
+        rd = j(result)
+        expect_refusal("3a. first publish refuses with FIRST_PUBLISH_WAIT",
+                       rd)
+        expect("3a-code", rd.get("code") == "FIRST_PUBLISH_WAIT",
+               f"code={rd.get('code')}")
+        expect("3b. first-publish does not create commits",
+               git("rev-parse", "HEAD").stdout == pre_head, "")
+        expect("3c. first-publish does not create tags",
+               git("tag", "--list").stdout == "", "")
+        st = (project / ".saipen" / "STATE.md").read_text(encoding="utf-8")
+        expect("3d. canonical WAIT persisted in STATE",
+               'next_action: "WAIT: first-publish' in st
+               or "next_action: WAIT: first-publish" in st
+               or "next_action: WAIT:first-publish" in st,
+               [ln for ln in st.splitlines()
+                if "next_action" in ln][:1])
+        expect("3e. phase stays SHIP during the WAIT", "phase: SHIP" in st, "")
+
+        result = cli("fpc", f"file://{origin_empty}", "public", "--json")
+        rd = j(result)
+        expect("3f. confirmation is canonical evidence",
+               rd.get("ok") and rd.get("code") == "FIRST_PUBLISH_CONFIRMED",
+               f"code={rd.get('code')} detail={rd.get('detail')}")
+        st = (project / ".saipen" / "STATE.md").read_text(encoding="utf-8")
+        expect("3g. confirmation recorded in STATE",
+               "first_publish_confirmation:" in st,
+               [ln for ln in st.splitlines()
+                if "first_publish_confirmation" in ln][:1])
+
+        result = cli("ship", "--json")
+        rd = j(result)
+        expect("3h. confirmed first publish proceeds to RELEASED",
+               rd.get("ok") and rd.get("code") == "RELEASED",
+               f"code={rd.get('code')} detail={str(rd.get('detail'))[:200]}")
+        tag = remote_tag_commit(origin_empty, f"v{new_ver}")
+        expect("3i. tag published after confirmation",
+               tag != "" and tag == remote_branch_tip(origin_empty),
+               f"tag={tag} tip={remote_branch_tip(origin_empty)}")
+
+    # ======================================================================
+    # 4. POLICY: no-publish matches ship.md exactly (T-994 / § 10)
+    # ======================================================================
+    with tempfile.TemporaryDirectory(prefix="saipen-rel-4-") as tmp:
+        built = build_fixture(Path(tmp), mode="no-publish")
+        if built is None:
+            return problems, checked
+        project, origin, git, cli, new_ver = built
+        pre_head = git("rev-parse", "HEAD").stdout
+        pre_index = git("diff", "--cached", "--name-only").stdout
+        pre_tags = git("tag", "--list").stdout
+        pre_remote = subprocess.run(["git", "ls-remote", str(origin)],
+                                    capture_output=True, text=True).stdout
+
+        result = cli("ship", "--json")
+        rd = j(result)
+        expect("4a. no-publish returns a truthful success",
+               rd.get("ok") and rd.get("code") == "NO_PUBLISH_MODE",
+               f"code={rd.get('code')} detail={rd.get('detail')}")
+        expect("4b. no-publish does not create a local commit",
+               git("rev-parse", "HEAD").stdout == pre_head,
+               "HEAD changed under no-publish")
+        expect("4c. no-publish does not stage anything",
+               git("diff", "--cached", "--name-only").stdout == pre_index,
+               f"index={git('diff', '--cached', '--name-only').stdout!r}")
+        expect("4d. no-publish creates no tags",
+               git("tag", "--list").stdout == pre_tags == "", "")
+        expect("4e. no-publish remote refs unchanged",
+               subprocess.run(["git", "ls-remote", str(origin)],
+                              capture_output=True,
+                              text=True).stdout == pre_remote,
+               "remote changed under no-publish")
+        st = (project / ".saipen" / "STATE.md").read_text(encoding="utf-8")
+        expect("4f. canonical STATE becomes DONE",
+               "phase: DONE" in st and "task: none" in st, st[:160])
+        board = (project / ".saipen" / "BOARD.md").read_text(encoding="utf-8")
+        expect("4g. ticket becomes DONE", "- [x] T-9000" in board, "")
+        log_text = (project / ".saipen" / "LOG.md").read_text(
+            encoding="utf-8")
+        expect("4h. truthful skipped-publish LOG event",
+               f"ship v{new_ver} -> skipped publish (no-publish: policy)"
+               in log_text,
+               [ln for ln in log_text.splitlines()
+                if "skipped publish" in ln][:1])
+        digest = (project / ".saipen" / "kitchen" / "digest.md").read_text(
+            encoding="utf-8")
+        expect("4i. digest updated", "done:" in digest and "awaiting:" in digest,
+               digest[:120])
+
+    # ======================================================================
+    # 4b. no-publish works when Git is genuinely unavailable
+    # ======================================================================
+    with tempfile.TemporaryDirectory(prefix="saipen-rel-4b-") as tmp:
+        built = build_fixture(Path(tmp), mode="no-publish", gitless=True)
+        if built is None:
+            return problems, checked
+        project, origin, git, cli, new_ver = built
+        result = cli("ship", "--json")
+        rd = j(result)
+        expect("4j. git-less no-publish succeeds", rd.get("ok"),
+               f"code={rd.get('code')} detail={rd.get('detail')}")
+        log_text = (project / ".saipen" / "LOG.md").read_text(encoding="utf-8")
+        expect("4k. git-less no-publish records the true reason",
+               "(no-publish: no git)" in log_text,
+               [ln for ln in log_text.splitlines()
+                if "skipped publish" in ln][:1])
+        st = (project / ".saipen" / "STATE.md").read_text(encoding="utf-8")
+        expect("4l. git-less no-publish closes SHIP -> DONE",
+               "phase: DONE" in st, "")
+
+    # ======================================================================
+    # 5. FOREIGN STAGING: refused and preserved
+    # ======================================================================
+    with tempfile.TemporaryDirectory(prefix="saipen-rel-5-") as tmp:
+        built = build_fixture(Path(tmp))
+        if built is None:
+            return problems, checked
+        project, origin, git, cli, _new_ver = built
         foreign = project / "foreign_untracked.txt"
         foreign.write_text("foreign\n", encoding="utf-8")
         git("add", "--", foreign.name)
-        plan_foreign = cli("ship", "--dry-run", "--json")
-        expect("a pre-existing foreign staged path refuses the release plan",
-               plan_foreign.returncode != 0
-               and json.loads(plan_foreign.stdout).get("code")
-               == "VALIDATION_FAILED"
-               and "foreign" in json.loads(
-                   plan_foreign.stdout).get("detail", ""),
-               plan_foreign.stdout)
-        expect("foreign staging stays untouched after the refusal",
+        result = cli("ship", "--dry-run", "--json")
+        rd = j(result)
+        expect_refusal("5a. foreign pre-existing staging is refused", rd)
+        foreign_still_staged = (
+            foreign.name in git("diff", "--cached", "--name-only").stdout)
+        expect("5b. foreign staging is preserved after refusal",
                foreign.is_file()
                and foreign.read_text(encoding="utf-8") == "foreign\n"
-               and foreign.name in git("diff", "--cached", "--name-only").stdout,
-               "foreign file was altered or unstaged")
-        git("reset", "-q")
-        foreign.unlink()
+               and foreign_still_staged,
+               f"staged={foreign_still_staged}")
+
+    # ======================================================================
+    # 6. PHASE gate: release refuses a non-SHIP state
+    # ======================================================================
+    with tempfile.TemporaryDirectory(prefix="saipen-rel-6-") as tmp:
+        built = build_fixture(Path(tmp))
+        if built is None:
+            return problems, checked
+        project, origin, git, cli, _new_ver = built
+        st = (project / ".saipen" / "STATE.md").read_text(encoding="utf-8")
+        st = re.sub(r"(?m)^(\s*phase:\s*).*$", "\\g<1>DONE", st)
+        st = re.sub(r"(?m)^(\s*task:\s*).*$", "\\g<1>none", st)
+        st = re.sub(r"(?m)^(\s*next_action:\s*).*$",
+                    "\\g<1>saipen continue", st)
+        (project / ".saipen" / "STATE.md").write_text(st, encoding="utf-8")
+        git("add", ".saipen/STATE.md")
+        git("commit", "-q", "-m", "probe: set DONE")
+        git("push", "-q", "origin", "HEAD:main")
+        result = cli("ship", "--dry-run", "--json")
+        rd = j(result)
+        expect_refusal("6. release from an unproven DONE state is refused", rd)
+        expect("6-code. refusal names the phase/evidence problem",
+               ("DONE" in str(rd.get("detail")) or "SHIP" in str(rd.get(
+                   "detail"))) or rd.get("code") == "ILLEGAL_PHASE",
+               f"code={rd.get('code')} detail={rd.get('detail')}")
+
+    # ======================================================================
+    # 7. COMMIT failure detail is not discarded (stderr captured)
+    # ======================================================================
+    with tempfile.TemporaryDirectory(prefix="saipen-rel-7-") as tmp:
+        built = build_fixture(Path(tmp))
+        if built is None:
+            return problems, checked
+        project, origin, git, cli, _new_ver = built
+        hook = project / ".git" / "hooks" / "pre-commit"
+        hook.write_text("#!/bin/sh\necho HOOK REJECTION\n"
+                        "exit 1\n", encoding="utf-8")
+        pre_remote_tip = remote_branch_tip(origin)
+        result = cli("ship", "--json")
+        rd = j(result)
+        expect_refusal("7a. commit rejection is a closed refusal", rd)
+        expect("7b. failure detail is non-empty (stderr captured)",
+               len(rd.get("detail", "")) > 0,
+               f"detail={str(rd.get('detail'))[:300]}")
+        expect("7c. no push happened on commit failure",
+               remote_branch_tip(origin) == pre_remote_tip,
+               f"before={pre_remote_tip[:12] or '(none)'} after="
+               f"{remote_branch_tip(origin)[:12] or '(none)'}")
+
+    # ======================================================================
+    # 8. FULL SUCCESS: REAL source change ships into a fresh clone
+    # ======================================================================
+    with tempfile.TemporaryDirectory(prefix="saipen-rel-8-") as tmp:
+        built = build_fixture(Path(tmp))
+        if built is None:
+            return problems, checked
+        project, origin, git, cli, new_ver = built
+        foreign = project / "tools" / "foreign_file.py"
+        foreign.write_text("FOREIGN = True\n", encoding="utf-8")
+
+        result = cli("ship", "--json")
+        rd = j(result)
+        tag = f"v{new_ver}"
+        release_commit = rd.get("commit", "")
+        closure_commit = rd.get("closure_commit", "")
+        stages = rd.get("stages_reached", [])
+
+        expect("8a. full release returns RELEASED",
+               rd.get("ok") and rd.get("code") == "RELEASED",
+               f"ok={rd.get('ok')} code={rd.get('code')} "
+               f"detail={str(rd.get('detail'))[:200]}")
+        expect("8b. closure B is a separate non-empty commit after A",
+               bool(release_commit) and bool(closure_commit)
+               and closure_commit != release_commit,
+               f"A={release_commit[:12]} B={closure_commit[:12]}")
+        remote_tip = remote_branch_tip(origin)
+        remote_tag = remote_tag_commit(origin, tag)
+        local_tag = git("rev-parse", f"{tag}^{{commit}}").stdout.strip()
+        expect("8c. remote branch tip == closure commit (non-empty)",
+               remote_tip and remote_tip == closure_commit,
+               f"remote={remote_tip[:12] or '(none)'} closure="
+               f"{closure_commit[:12]}")
+        expect("8d. remote tag^{commit} == closure commit (non-empty)",
+               remote_tag and remote_tag == closure_commit,
+               f"remote tag={remote_tag[:12] or '(none)'}")
+        expect("8e. local tag^{commit} == closure commit (non-empty)",
+               local_tag and local_tag == closure_commit,
+               f"local tag={local_tag[:12] or '(none)'} closure="
+               f"{closure_commit[:12]}")
+        expect("8f. tag is created AFTER the closure is published",
+               stages.index("TAG_CREATED") > stages.index("CLOSURE_PUBLISHED")
+               if "TAG_CREATED" in stages and "CLOSURE_PUBLISHED" in stages
+               else False,
+               f"stages={stages}")
+        parent_of_b = git("rev-parse", f"{closure_commit}^").stdout.strip()
+        expect("8g. B.parent == A",
+               parent_of_b and parent_of_b == release_commit,
+               f"B^={parent_of_b[:12]} A={release_commit[:12]}")
+
+        # Fresh clone must carry the exact real source change + metadata
+        clone = Path(tmp) / "fresh_clone"
+        crc = subprocess.run(["git", "clone", "-q", f"file://{origin}",
+                              str(clone)], capture_output=True, text=True)
+        expect("8h. fresh clone succeeded", crc.returncode == 0,
+               crc.stderr)
+        if crc.returncode == 0:
+            cloned_src = (clone / "tools" / "saipen_engine"
+                          / "release_contract.py").read_text(
+                encoding="utf-8-sig")
+            expect("8i. fresh clone carries the exact reviewed source change",
+                   "version_badges_owned(path)" in cloned_src,
+                   "source change missing in fresh clone")
+            clone_state = (clone / ".saipen" / "STATE.md").read_text(
+                encoding="utf-8-sig")
+            expect("8j. fresh clone sees STATE DONE / task none",
+                   "phase: DONE" in clone_state
+                   and "task: none" in clone_state, "")
+            clone_board = (clone / ".saipen" / "BOARD.md").read_text(
+                encoding="utf-8-sig")
+            expect("8k. fresh clone sees ticket DONE",
+                   "- [x] T-9000" in clone_board, "")
+            clone_log = (clone / ".saipen" / "LOG.md").read_text(
+                encoding="utf-8-sig")
+            expect("8l. fresh clone LOG carries truthful release evidence",
+                   "ship v" + new_ver in clone_log
+                   and "T-9000" in clone_log
+                   and "content commit" in clone_log,
+                    "release evidence missing in cloned LOG")
+            scope_rec = clone / ".saipen" / "kitchen" / "release_scope" \
+                / "T-9000.json"
+            expect("8m. scope record reaches the fresh clone",
+                   scope_rec.is_file(), "scope record missing in clone")
+
+        # Foreign file must NOT be in either commit and must stay in worktree
+        for commit in (release_commit, closure_commit):
+            in_commit = git("cat-file", "-e",
+                            f"{commit}:tools/foreign_file.py").returncode
+            expect("8n. foreign file did not enter the release commits",
+                   in_commit != 0, f"{commit}:tools/foreign_file.py present")
+        expect("8o. foreign file still in the worktree",
+               foreign.is_file()
+               and foreign.read_text(encoding="utf-8") == "FOREIGN = True\n",
+               "")
+        status = git("status", "--porcelain").stdout
+        expect("8p. no owned work remains dirty (only the foreign untracked)",
+               all(ln.startswith("??") for ln in status.splitlines()
+                   if ln.strip()),
+               f"status={status!r}")
+        expect("8q. scope record is committed (no tracked dirt)",
+               git("ls-files", "--error-unmatch",
+                   ".saipen/kitchen/release_scope/T-9000.json").returncode == 0,
+               "scope record untracked")
+
+        # Retry: full remote + canonical evidence -> already applied, no writes
+        pre_retry_head = git("rev-parse", "HEAD").stdout
+        result = cli("ship", "--json")
+        rd = j(result)
+        expect("8r. retry recognizes ALREADY_APPLIED from full evidence",
+               rd.get("ok") and rd.get("code") == "RELEASED"
+               and rd.get("already_applied") is True,
+               f"code={rd.get('code')} already_applied="
+               f"{rd.get('already_applied')}")
+        expect("8s. retry writes nothing",
+               git("rev-parse", "HEAD").stdout == pre_retry_head, "")
+
+    # ======================================================================
+    # 9. CRASH RECOVERY between every A -> B -> tag edge (T-994 / § 17, § 18)
+    # ======================================================================
+    for crash_point, probe_label in (
+            ("SAIPEN_CRASH_AFTER_CONTENT_PUBLISH", "A after content push"),
+            ("SAIPEN_CRASH_AFTER_CLOSURE_PUBLISH", "B after closure push"),
+            ("SAIPEN_CRASH_AFTER_TAG_PUSH", "C after tag push")):
+        with tempfile.TemporaryDirectory(
+                prefix="saipen-rel-9-") as tmp:
+            built = build_fixture(Path(tmp))
+            if built is None:
+                return problems, checked
+            project, origin, git, cli, new_ver = built
+            env_crash = {**env, crash_point: "1"}
+            r = subprocess.run(
+                [sys.executable, str(project / "tools" / "saipen.py"),
+                 "ship", "--json"],
+                cwd=str(project), env=env_crash, capture_output=True,
+                text=True, errors="replace")
+            expect(f"9. {probe_label}: crash injected at the edge",
+                   r.returncode == 86, f"rc={r.returncode}")
+            before_commits = git("rev-list", "--count", "HEAD").stdout
+            result = cli("recover", "--json")
+            rd = j(result)
+            expect(f"9. {probe_label}: recovery settles",
+                   rd.get("ok"), f"rc={result.returncode} {rd}")
+            after_commits = git("rev-list", "--count", "HEAD").stdout
+            after_tag = remote_tag_commit(origin, f"v{new_ver}")
+            tip = remote_branch_tip(origin)
+            expect(f"9. {probe_label}: remote branch reaches closure",
+                   tip != "" and after_tag != "" and after_tag == tip,
+                   f"tip={tip[:12] or '(none)'} tag={after_tag[:12] or '(none)'}")
+            expect(f"9. {probe_label}: no duplicate commits on recovery",
+                   before_commits == after_commits or crash_point.endswith(
+                       "CONTENT_PUBLISH"),
+                   f"{before_commits}->{after_commits}")
+            expect(f"9. {probe_label}: pending ops cleared",
+                   cli("recover").stdout.count("CLEAN") > 0, "")
+
+    # ======================================================================
+    # 9b. FRESH-CLONE CONTINUATION (worktree destroyed, committed evidence)
+    # ======================================================================
+    with tempfile.TemporaryDirectory(prefix="saipen-rel-9b-") as tmp:
+        built = build_fixture(Path(tmp))
+        if built is None:
+            return problems, checked
+        project, origin, git, cli, new_ver = built
+        env_crash = {**env, "SAIPEN_CRASH_AFTER_CLOSURE_PUBLISH": "1"}
+        r = subprocess.run(
+            [sys.executable, str(project / "tools" / "saipen.py"), "ship",
+             "--json"], cwd=str(project), env=env_crash,
+            capture_output=True, text=True, errors="replace")
+        expect("9b. crash injected after closure publish", r.returncode == 86,
+               f"rc={r.returncode}")
+        expect("9b. closure B pushed, tag absent",
+               remote_branch_tip(origin) != ""
+               and remote_tag_commit(origin, f"v{new_ver}") == "",
+               "")
+        shutil.rmtree(project, ignore_errors=True)
+        clone = Path(tmp) / "clone"
+        crc = subprocess.run(["git", "clone", "-q", f"file://{origin}",
+                              str(clone)], capture_output=True, text=True)
+        expect("9b. fresh clone succeeded", crc.returncode == 0, crc.stderr)
+        if crc.returncode == 0:
+            def cli_clone(*args: str):
+                return subprocess.run(
+                    [sys.executable, str(clone / "tools" / "saipen.py"),
+                     *args], cwd=str(clone), env=env, capture_output=True,
+                    text=True, errors="replace")
+            result = cli_clone("ship", "--json")
+            rd = j(result)
+            expect("9b. fresh-clone continuation publishes only the missing "
+                   "tag", rd.get("ok") and rd.get("code") == "RELEASED",
+                   f"code={rd.get('code')} detail={rd.get('detail')}")
+            tip = remote_branch_tip(origin)
+            tag = remote_tag_commit(origin, f"v{new_ver}")
+            expect("9b. tag now matches the closure tip (non-empty)",
+                   tip != "" and tag == tip,
+                   f"tag={tag[:12] or '(none)'} tip={tip[:12] or '(none)'}")
+
+    # ======================================================================
+    # 10. RECEIPT/JOURNAL write failure surfaces through the PUBLIC result
+    # ======================================================================
+    with tempfile.TemporaryDirectory(prefix="saipen-rel-10-") as tmp:
+        built = build_fixture(Path(tmp))
+        if built is None:
+            return problems, checked
+        project, origin, git, cli, _new_ver = built
+        from saipen_engine import journal as journal_mod
+        from saipen_engine.release import execute_release, plan_release
+        plan = plan_release(project, "ship")
+
+        class _FailingJournal:
+            manifest = "simulated-journal/operation.json"
+
+            def __init__(self, *a, **k):
+                pass
+
+            def start(self, *a, **k):
+                raise OSError("simulated receipt write failure")
+
+            def exists(self):
+                return False
+
+            def read(self):
+                return {}
+
+        original_journal = journal_mod.Journal
+        journal_mod.Journal = _FailingJournal
+        pre_remote_tip = remote_branch_tip(origin)
+        try:
+            result = execute_release(project, plan)
+        finally:
+            journal_mod.Journal = original_journal
+        expect_refusal("10a. journal write failure is a public closed refusal",
+                       result)
+        expect("10b. no remote stage ran after the receipt failure",
+               remote_branch_tip(origin) == pre_remote_tip,
+               f"before={pre_remote_tip[:12] or '(none)'} after="
+               f"{remote_branch_tip(origin)[:12] or '(none)'}")
+        expect("10c. no tag pushed after the receipt failure",
+               remote_tag_commit(origin, f"v{_new_ver}") == "", "")
+
+    # ======================================================================
+    # 11. EXACT INDEX ROLLBACK preserves a staged deletion (T-994 / § 19)
+    # ======================================================================
+    with tempfile.TemporaryDirectory(prefix="saipen-rel-11-") as tmp:
+        project = Path(tmp) / "idx"
+        project.mkdir()
+        subprocess.run(["git", "init", "-q", str(project)], env=env,
+                       capture_output=True, text=True, check=False)
+
+        def git11(*args: str):
+            return subprocess.run(["git", "-C", str(project), *args], env=env,
+                                  capture_output=True, text=True, check=False)
+
+        (project / "a.txt").write_text("a\n", encoding="utf-8")
+        git11("add", "a.txt")
+        git11("commit", "-q", "-m", "add a")
+        git11("rm", "--cached", "-q", "a.txt")
+        from saipen_engine.release import _capture_index_state, _restore_index
+        snap = _capture_index_state(project)
+        has_deletion = any(mode == "D" for _p, mode, _b in snap.entries)
+        expect("11a. index snapshot records the staged deletion", has_deletion,
+               f"entries={snap.entries}")
+        _restore_index(project, snap)
+        status = git11("diff", "--cached", "--name-status").stdout
+        expect("11b. staged deletion is restored exactly",
+               "D\ta.txt" in status or "D a.txt" in status,
+               f"status={status!r}")
+
+    # ======================================================================
+    # 12. OBJECT COUNT detector responds to a new loose object (T-994 / § 20)
+    # ======================================================================
+    with tempfile.TemporaryDirectory(prefix="saipen-rel-12-") as tmp:
+        project = Path(tmp) / "oc"
+        project.mkdir()
+        subprocess.run(["git", "init", "-q", str(project)], env=env,
+                       capture_output=True, text=True, check=False)
+
+        def git12(*args: str):
+            return subprocess.run(["git", "-C", str(project), *args], env=env,
+                                  capture_output=True, text=True, check=False)
+
+        from saipen_engine.release import _git_object_count
+        before = _git_object_count(project)
+        git12("hash-object", "-w", "--stdin")
+        after = _git_object_count(project)
+        expect("12. loose object creation changes the detector",
+               after > before, f"{before}->{after}")
+
+    # ======================================================================
+    # 13. Closed-code guarantee: every refusal path returns an OPS code
+    # ======================================================================
+    from saipen_engine.errors import CODES
+    expect("13. errors.CODES is non-empty and closed",
+           len(CODES) > 0 and "RELEASE_FAILED" in CODES
+           and "FIRST_PUBLISH_WAIT" in CODES,
+           f"codes={sorted(CODES)}")
 
     return problems, checked
+
 
 
 def run_producer_gate_probes() -> tuple[list[str], int]:

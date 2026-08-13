@@ -953,7 +953,9 @@ def main(argv: list[str] | None = None) -> int:
                "<project> <findings.json>|improve complete <cycle> <seat> "
                "<project>|improve verify <cycle>|improve cycle-complete "
                "<cycle>|improve abort <cycle>|improve clean <cycle>|"
-               "ship|push|userperson|sub|context) [--dry-run] [--json]")
+               "ship|push|scope <T-###> <path>...|first-publish-confirm "
+               "<name> <public|private>|userperson|sub|context) [--dry-run] "
+               "[--json]")
         return 2
     command = args[0]
     project_root = Path.cwd()
@@ -1052,13 +1054,53 @@ def main(argv: list[str] | None = None) -> int:
         return _context(project_root, args[1:], as_json, dry_run)
     if command == "improve":
         return _public_improve(project_root, args[1:], as_json, dry_run)
+    if command == "scope":
+        # T-994 / § 2: record the EXACT reviewed release scope for a ticket.
+        if len(args) < 3:
+            _emit({"ok": False, "code": "SOURCE_SCOPE_MISSING",
+                   "detail": "scope needs <T-###> <path> [path ...]"}, as_json)
+            return 2
+        from saipen_engine.operations import record_scope
+        result = record_scope(project_root, args[1],
+                              _agent_for(project_root), args[2:],
+                              dry_run=dry_run)
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
+    if command in ("first-publish-confirm", "fpc"):
+        # T-994 / § 11: canonical first-publish confirmation evidence.
+        if len(args) < 3:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": "first-publish-confirm needs <name> "
+                             "<public|private>"}, as_json)
+            return 2
+        from saipen_engine.operations import confirm_first_publish
+        result = confirm_first_publish(project_root,
+                                       _agent_for(project_root), args[1],
+                                       args[2], dry_run=dry_run)
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
     if command in ("ship", "push"):
+        # T-994 / § 17: strict grammar -- surplus positional arguments and
+        # unknown flags are a structured refusal, never silently ignored.
+        surplus = [a for a in args[1:] if not a.startswith("--")]
+        unknown_flags = [a for a in args[1:] if a.startswith("--")]
+        if surplus or unknown_flags:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": (
+                       f"{command} accepts no arguments; surplus: "
+                       f"{' '.join(surplus + unknown_flags)}")}, as_json)
+            return 2
         # T-635: both invocations dispatch to ONE release executor; the
         # invocation name is normalized out of the plan identity so their
         # dry-runs are structurally identical.
-        from saipen_engine.release import execute_release, plan_release
+        from saipen_engine.release import (ReleaseRefusal,
+                                           execute_release, plan_release)
         try:
             plan = plan_release(project_root, command, dry_run=dry_run)
+        except ReleaseRefusal as exc:
+            _emit({"ok": False, "code": exc.code, "detail": exc.detail},
+                  as_json)
+            return 1
         except ValueError as exc:
             _emit({"ok": False, "code": "VALIDATION_FAILED",
                    "detail": str(exc)}, as_json)

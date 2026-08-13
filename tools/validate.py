@@ -77,6 +77,10 @@ from saipen_engine.board import (TICKET_RE, parse_board, ticket_has_blocker,
                                  ticket_is_workable, ticket_status_error,
                                  unescape_ticket_part)
 from saipen_engine.log import LOG_RE, parse_log_line
+# T-994: release metadata inventory is owned by one shared module. validate.py
+# and the release executor import the SAME functions so they can never drift.
+from saipen_engine.release_contract import (
+    locale_readme_paths, release_metadata_paths, version_badges)
 from saipen_engine.state import parse_frontmatter
 
 def _read_rfc(p):
@@ -640,29 +644,6 @@ def read_doc(path):
                 except UnicodeDecodeError:
                     text = raw.decode("utf-8", errors="replace")
     return text.replace("\r\n", "\n").replace("\r", "\n")
-
-
-_VERSION_BADGE_RE = re.compile(r"\*\*v\d+\.\d+\.\d+\*\*")
-
-
-def locale_readme_paths(kitchen_dir):
-    """Return every mechanically named locale README, including missing ones."""
-    kitchen_dir = Path(kitchen_dir)
-    if not kitchen_dir.is_dir():
-        return []
-    return [directory / f"README_{directory.name.upper()}.md"
-            for directory in sorted(kitchen_dir.iterdir())
-            if directory.is_dir()]
-
-
-def release_metadata_paths(kitchen_dir):
-    return [Path("VERSION"), Path("README.md"), Path("CHANGELOG.md"),
-            *locale_readme_paths(kitchen_dir)]
-
-
-def version_badges(path):
-    return _VERSION_BADGE_RE.findall(
-        Path(path).read_text(encoding="utf-8-sig"))
 
 
 def color(code, text):
@@ -4660,7 +4641,7 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
     repo_version = Path("VERSION").read_text(encoding="utf-8-sig").strip()
     if GATE == "ship":
         _release_paths = [path.as_posix()
-                          for path in release_metadata_paths(kitchen)]
+                          for path in release_metadata_paths(Path("."))]
         _staged_rc, _staged_text = _git(
             "diff", "--cached", "--name-only", "--", *_release_paths)
         if REQUIRE_RELEASE_INDEX and _staged_rc != 0:
