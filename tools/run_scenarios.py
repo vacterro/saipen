@@ -3821,6 +3821,47 @@ def run_release_executor_probes() -> tuple[list[str], int]:
                f"status={status!r}")
 
     # ======================================================================
+    # 11c. A REVIEWED DELETION scope ships the removal (T-994 / § 2)
+    # ======================================================================
+    with tempfile.TemporaryDirectory(prefix="saipen-rel-11c-") as tmp:
+        built = build_fixture(Path(tmp))
+        if built is None:
+            return problems, checked
+        project, origin, git, cli, new_ver = built
+        doomed = project / "tools" / "doomed_helper.py"
+        doomed.write_text("DOOMED = True\n", encoding="utf-8")
+        git("add", "--", "tools/doomed_helper.py")
+        git("commit", "-q", "-m", "probe: add a tracked file to delete")
+        git("push", "-q", "origin", "HEAD:main")
+        doomed.unlink()
+        # Re-record the scope with the deletion path (the existing source file
+        # is still the review subject; the deleted file is a reviewed removal).
+        r = cli("scope", "T-9000",
+                "tools/saipen_engine/release_contract.py",
+                "tools/doomed_helper.py", "--json")
+        expect("11c. scope accepts a tracked deletion path",
+               r.returncode == 0 and "SCOPE_RECORDED" in r.stdout,
+               r.stdout[:200])
+        result = cli("ship", "--json")
+        rd = j(result)
+        expect("11c. deletion-scope release succeeds",
+               rd.get("ok") and rd.get("code") == "RELEASED",
+               f"code={rd.get('code')} detail={str(rd.get('detail'))[:200]}")
+        clone = Path(tmp) / "clone11c"
+        crc = subprocess.run(["git", "clone", "-q", f"file://{origin}",
+                              str(clone)], capture_output=True, text=True)
+        expect("11c. fresh clone lacks the reviewed deletion",
+               crc.returncode == 0
+               and not (clone / "tools" / "doomed_helper.py").exists(),
+               f"clone rc={crc.returncode} "
+               f"exists={(clone / 'tools' / 'doomed_helper.py').exists()}")
+        expect("11c. fresh clone still carries the reviewed source change",
+               "version_badges_owned(path)" in (
+                   clone / "tools" / "saipen_engine"
+                   / "release_contract.py").read_text(encoding="utf-8-sig"),
+               "source change missing")
+
+    # ======================================================================
     # 12. OBJECT COUNT detector responds to a new loose object (T-994 / § 20)
     # ======================================================================
     with tempfile.TemporaryDirectory(prefix="saipen-rel-12-") as tmp:
@@ -3848,6 +3889,58 @@ def run_release_executor_probes() -> tuple[list[str], int]:
            len(CODES) > 0 and "RELEASE_FAILED" in CODES
            and "FIRST_PUBLISH_WAIT" in CODES,
            f"codes={sorted(CODES)}")
+
+    # ======================================================================
+    # 14. UNTRACKED-ONLY scope still creates a content commit (regression:
+    #     v7.223.15 false-success -- `git diff` missed an untracked scope
+    #     file, so the continuation skipped the content commit entirely)
+    # ======================================================================
+    with tempfile.TemporaryDirectory(prefix="saipen-rel-14-") as tmp:
+        built = build_fixture(Path(tmp))
+        if built is None:
+            return problems, checked
+        project, origin, git, cli, _new_ver = built
+        # Revert the tracked edit; the ONLY remaining scope change must be a
+        # brand-new untracked file (the exact trap that skipped v7.223.15's
+        # content commit).
+        git("checkout", "HEAD", "--",
+            "tools/saipen_engine/release_contract.py")
+        new_file = project / "tools" / "brand_new_helper.py"
+        new_file.write_text("BRAND_NEW = True\n", encoding="utf-8")
+        r = cli("scope", "T-9000", "tools/brand_new_helper.py", "--json")
+        expect("14. scope records a brand-new untracked file",
+               r.returncode == 0 and "SCOPE_RECORDED" in r.stdout,
+               r.stdout[:200])
+        head_before = git("rev-parse", "HEAD").stdout.strip()
+        remote_before = remote_branch_tip(origin)
+        expect("14. trap precondition: HEAD == remote tip (clean surface)",
+               head_before == remote_before, "")
+
+        result = cli("ship", "--json")
+        rd = j(result)
+        expect("14. untracked-only release returns RELEASED",
+               rd.get("ok") and rd.get("code") == "RELEASED",
+               f"code={rd.get('code')} detail={str(rd.get('detail'))[:200]}")
+        release_commit = rd.get("commit", "")
+        closure_commit = rd.get("closure_commit", "")
+        expect("14. a content commit A was created (not skipped)",
+               bool(release_commit) and release_commit != head_before,
+               f"A={release_commit[:12]} parent={head_before[:12]}")
+        expect("14. closure B is a child of the content commit",
+               bool(closure_commit)
+               and git("rev-parse", f"{closure_commit}^").stdout.strip()
+               == release_commit,
+               f"B={closure_commit[:12]} A={release_commit[:12]}")
+        clone14 = Path(tmp) / "clone14"
+        crc = subprocess.run(["git", "clone", "-q", f"file://{origin}",
+                              str(clone14)], capture_output=True, text=True)
+        expect("14. fresh clone carries the untracked scope file",
+               crc.returncode == 0
+               and (clone14 / "tools" / "brand_new_helper.py").is_file()
+               and "BRAND_NEW = True" in (
+                   clone14 / "tools" / "brand_new_helper.py").read_text(
+                       encoding="utf-8"),
+               f"clone rc={crc.returncode}")
 
     return problems, checked
 

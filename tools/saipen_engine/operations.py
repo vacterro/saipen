@@ -1184,13 +1184,31 @@ def _plan_record_scope(root: Path, ticket_id: str, agent: str, paths: list[str],
         return _refuse("VALIDATION_FAILED",
                        f"cannot compute source identity for scope binding: "
                        f"{exc}")
-    hashes: dict[str, str] = {}
+    hashes: dict[str, object] = {}
     for rel in clean:
         fp = root / rel
-        if not fp.is_file():
+        if fp.is_file():
+            hashes[rel] = hash_bytes(fp.read_bytes())
+        elif not fp.exists():
+            # Deletion intent (T-994 / § 2): a reviewed removal is a scope
+            # path too -- recorded as JSON null so APPLY stages `git add -u`
+            # instead of failing the missing file. Only a TRACKED path can be
+            # a legal deletion; an untracked missing path is a mistake.
+            import subprocess
+            tracked = subprocess.run(
+                ["git", "-C", str(root), "ls-files", "--error-unmatch",
+                 "--", rel], capture_output=True, check=False)
+            if tracked.returncode != 0:
+                return _refuse(
+                    "SOURCE_SCOPE_MISSING",
+                    f"scope path {rel} does not exist and is not tracked -- "
+                    "a deletion scope must name a tracked file",
+                    ticket=ticket_id)
+            hashes[rel] = None
+        else:
             return _refuse("SOURCE_SCOPE_MISSING",
-                           f"scope path does not exist: {rel}", ticket=ticket_id)
-        hashes[rel] = hash_bytes(fp.read_bytes())
+                           f"scope path {rel} is not a regular file",
+                           ticket=ticket_id)
     import json
     record = {
         "schema_version": 1,

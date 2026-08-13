@@ -1,0 +1,12 @@
+{
+  "op_id": "scope-e2e5d006",
+  "paths": {
+    "KNOWLEDGE/HABITS-browser-hang.md": "42e8ccc6593e9aae"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "recorded_at": "2026-08-13T06:37:12Z",
+  "schema_version": 1,
+  "source_head": "627103436961cfb48becf318722b57fe294b0d5a",
+  "source_tree_fingerprint": "git-delta-v1:0c3d01ca12a2cb8a5ea1ec6dfb511b23420ef42097553080469d09fe4852b00f",
+  "ticket": "T-996"
+}

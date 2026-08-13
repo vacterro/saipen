@@ -575,7 +575,16 @@ def _recovery_preflight(root: Path) -> None:
 
 
 def _surface_dirty(root: Path, paths: list[str]) -> list[str]:
-    """Paths with a staged or unstaged delta against HEAD (literal paths)."""
+    """Paths with a staged, unstaged OR untracked non-ignored delta against
+    HEAD (literal paths).
+
+    `git diff` alone MISSES untracked files, so a scope consisting of a brand
+    new (untracked) file would read as a clean surface and the continuation
+    classification would skip its content commit -- the v7.223.15 false-success
+    defect. Untracked non-ignored files are part of the canonical source
+    identity (freshness.py `git-delta-v1`), and the continuation decision
+    uses the SAME surface.
+    """
     dirty = set()
     cached = _git(root, "diff", "--cached", "--name-only", "-z",
                   "--", *paths, literal=True)
@@ -585,6 +594,11 @@ def _surface_dirty(root: Path, paths: list[str]) -> list[str]:
     work = _git(root, "diff", "--name-only", "-z",
                 "--", *paths, literal=True)
     for p in work.stdout.split("\0"):
+        if p:
+            dirty.add(p)
+    untracked = _git(root, "ls-files", "--others", "--exclude-standard",
+                     "-z", "--", *paths, literal=True)
+    for p in untracked.stdout.split("\0"):
         if p:
             dirty.add(p)
     return sorted(dirty)
@@ -761,6 +775,16 @@ def _load_scope(root: Path, ticket_id: str, head: str | None,
             f"release scope record {path} carries no paths")
     for rel, expected in paths.items():
         fp = root / rel
+        if expected is None:
+            # Deletion scope entry: the reviewed file must STILL be absent at
+            # APPLY (a file that reappeared is a stale scope, not a ship).
+            if fp.exists():
+                raise ReleaseRefusal(
+                    "STALE_PLAN",
+                    f"scope path {rel} is recorded as a reviewed deletion but "
+                    "exists in the worktree; re-record the scope or restore "
+                    "the deletion")
+            continue
         if not fp.is_file():
             raise ReleaseRefusal(
                 "SOURCE_SCOPE_MISSING",
@@ -1416,12 +1440,29 @@ def _mark_stage(journal, stage: str) -> None:
 
 
 def _stage_release_content(root: Path, plan: ReleasePlan) -> dict:
-    """Stage ONLY the exact owned scope + release metadata paths."""
-    result = _git(root, "add", "--", *sorted(plan.release_paths),
-                  literal=True)
-    if not result.ok:
-        return {"ok": False, "stage": "STAGING",
-                "detail": result.stderr or result.stdout}
+    """Stage ONLY the exact owned scope + release metadata paths.
+
+    A reviewed DELETION scope entry (JSON null in the scope record) is staged
+    with `git add -u` so the removal reaches the commit; every present path is
+    staged exactly by name. Nothing else is ever staged.
+    """
+    present = [p for p in sorted(plan.release_paths)
+               if (root / p).exists()]
+    deleted = [p for p in sorted(plan.release_paths)
+               if not (root / p).exists()]
+    if present:
+        result = _git(root, "add", "--", *present, literal=True)
+        if not result.ok:
+            return {"ok": False, "stage": "STAGING",
+                    "detail": result.stderr or result.stdout}
+    if deleted:
+        # `git add -u` stages a tracked path's deletion without touching
+        # anything else; an untracked missing path is a scope mistake and the
+        # command's failure is the refusal.
+        result = _git(root, "add", "-u", "--", *deleted, literal=True)
+        if not result.ok:
+            return {"ok": False, "stage": "STAGING",
+                    "detail": result.stderr or result.stdout}
     return {"ok": True}
 
 

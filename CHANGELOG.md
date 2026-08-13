@@ -1,6 +1,15 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.223.16 -- 2026-08-13 -- false-success repair (T-998): ship pending v7.223.15 content + untracked-scope fix
+
+- T-998: _surface_dirty now includes untracked non-ignored files (git ls-files --others) so a scope whose only change is a new file can never round into NEEDS_CLOSURE and skip its content commit (v7.223.15 false-success). Regression test 14 proves an untracked-only scope now creates content commit A.
+- T-998: ship the pending content v7.223.15 omitted: KNOWLEDGE/HABITS-browser-hang.md, the executor deletion-scope support, the T-996 scope record.
+
+## 7.223.15 -- 2026-08-13 -- track the cross-agent browser-hang habit note (T-996)
+
+- T-996: track KNOWLEDGE/HABITS-browser-hang.md so a fresh clone carries the habit note validate.py already accounts for in shipped-doc coverage.
+
 ## 7.223.14 -- 2026-08-13 -- orphan cleanup (T-997): remove tracked zero-ref SAIUI command doc; board ## DONE scrub under RFC 1.2 soft cap
 
 - T-997: delete the tracked orphan .saipen/SAIUI_CORE_INTEGRATION_COMMAND_V2.md (zero references) via the release executor scope deletion path.

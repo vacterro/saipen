@@ -1,0 +1,16 @@
+{
+  "op_id": "scope-e71acf56",
+  "paths": {
+    ".saipen/kitchen/release_scope/T-996.json": "bcbf8e64f8937edc",
+    "KNOWLEDGE/HABITS-browser-hang.md": "45f9ce040d420bf0",
+    "tools/run_scenarios.py": "2b042bc936c32a93",
+    "tools/saipen_engine/operations.py": "f1b2648673ddd871",
+    "tools/saipen_engine/release.py": "a46a68869cc8aa53"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "recorded_at": "2026-08-13T06:47:16Z",
+  "schema_version": 1,
+  "source_head": "88ddbbaa64231de763681f36e53ed2f22cf515a0",
+  "source_tree_fingerprint": "git-delta-v1:25554e84d2ce7492ba16b34de3093285dd70f16775b74be3d519c00caf81a667",
+  "ticket": "T-998"
+}
