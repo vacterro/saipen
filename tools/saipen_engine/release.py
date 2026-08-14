@@ -112,6 +112,20 @@ CLOSURE_FILES = (
 )
 
 
+def _closure_stage_paths(root: Path) -> list[str]:
+    """The exact closure staging set: the four canonical files PLUS every
+    sealed LOG segment that exists. A segment sealed between releases
+    (`clean.md` step 4) is canonical history -- if the closure did not stage
+    it, a fresh clone would lack the E-### events Recovery depends on and the
+    released tag would be broken (the v7.223.16 sealed-segment omission)."""
+    paths = list(CLOSURE_FILES)
+    logs_dir = root / ".saipen" / "logs"
+    if logs_dir.is_dir():
+        paths += sorted(str(p.relative_to(root).as_posix())
+                        for p in logs_dir.glob("LOG-*.md"))
+    return paths
+
+
 # ---------------------------------------------------------------------------
 # Index snapshot: exact, deletion-preserving rollback (T-994 / § 19).
 # ---------------------------------------------------------------------------
@@ -1263,6 +1277,21 @@ def _apply_release_locked(root: Path, plan: ReleasePlan) -> dict:
             f"release op {plan.op_id} already exists; recover first")
     stages = []
     try:
+        crew_context = None
+        try:
+            from .state import parse_state
+            active_state = parse_state(codec.read_doc(
+                root / ".saipen" / "STATE.md"))
+            if (active_state.get("execution_intent") == "converge"
+                    and active_state.get("converge_target") == "crew"):
+                from .crew import crew_release_context
+                crew_context = crew_release_context(root)
+                if not crew_context.get("ok"):
+                    return _release_failure(
+                        "CREW_NOT_READY", crew_context.get("detail", ""))
+        except OSError as exc:
+            return _release_failure("CREW_NOT_READY",
+                                    f"cannot read crew release context: {exc}")
         _try_journal(journal, "start", "release", _agent(root),
                      plan.project_identity,
                      hashlib.sha256(
@@ -1280,9 +1309,14 @@ def _apply_release_locked(root: Path, plan: ReleasePlan) -> dict:
                      remote_classification=plan.remote_classification,
                      content_commit="", closure_commit="", remote_tag_sha="",
                      intended_content_tree="", intended_closure_tree="",
-                     start_stage=plan.start_stage,
-                     plan_canonical=list(plan.canonical()),
-                     confirmation=plan.confirmation)
+                      start_stage=plan.start_stage,
+                      plan_canonical=list(plan.canonical()),
+                      confirmation=plan.confirmation)
+        if crew_context:
+            _try_journal(
+                journal, "update", crew_epoch=crew_context["crew_epoch"],
+                crew_pre_ship_source=crew_context["crew_pre_ship_source"],
+                crew_pre_ship_evidence=crew_context["crew_pre_ship_evidence"])
 
         if plan.start_stage == START_TAG:
             # ---- continuation: only the tag is missing (T-994 / § 18 B/C) --
@@ -1630,8 +1664,9 @@ def _mark_target(journal, index: int) -> None:
 
 
 def _commit_closure(root: Path, plan: ReleasePlan) -> tuple[str, str]:
-    """Stage ONLY the canonical closure files, write-tree, commit B."""
-    add = _git(root, "add", "--", *CLOSURE_FILES, literal=True)
+    """Stage ONLY the canonical closure files (+ sealed LOG segments),
+    write-tree, commit B."""
+    add = _git(root, "add", "--", *_closure_stage_paths(root), literal=True)
     if not add.ok:
         raise ReleaseRefusal("RELEASE_FAILED",
                              f"closure staging failed: "
@@ -2225,7 +2260,8 @@ def _recover_release_git(root: Path, journal, record: dict) -> dict:
             return _conflict(journal, op_id,
                              "HEAD is an unexpected intermediate commit; "
                              "refuse to guess")
-        add = _git(root, "add", "--", *CLOSURE_FILES, literal=True)
+        add = _git(root, "add", "--", *_closure_stage_paths(root),
+                   literal=True)
         if not add.ok:
             return _conflict(journal, op_id, f"closure staging failed: "
                                              f"{add.stderr or add.stdout}")

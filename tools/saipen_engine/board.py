@@ -150,6 +150,43 @@ def ticket_is_workable(ticket: dict, tickets: dict, agent: str | None = None,
     )
 
 
+_NON_CLOSURE_BLOCKER_MARKERS = (
+    "held", "future gate", "permanent warning owner", "wait_user_confirmation",
+)
+
+
+def convergence_closure_problems(board: dict,
+                                 agent: str | None = None) -> list[str]:
+    """Canonical mechanically-decidable Core work-closure predicate.
+
+    Closure means no active work, no currently workable TODO, and no blocker
+    that claims to prevent present closure. Explicit held/future/historical
+    blockers remain on BOARD without turning fixed point into "empty BOARD".
+    """
+    errors = list(board.get("errors", []))
+    tickets = board.get("tickets", {})
+    doing = [ticket["id"] for ticket in tickets.values()
+             if ticket.get("section") == "## DOING"]
+    if doing:
+        errors.append("active DOING: " + ", ".join(doing[:3]))
+    workable = [ticket["id"] for ticket in tickets.values()
+                if ticket_is_workable(ticket, tickets, agent=agent)]
+    if workable:
+        errors.append("workable TODO: " + ", ".join(workable[:3]))
+    blocking = []
+    for ticket in tickets.values():
+        if ticket.get("section") != "## BLOCKED":
+            continue
+        text = (ticket.get("description", "") + " "
+                + ticket.get("fields", {}).get("blocker", "")).lower()
+        if any(marker in text for marker in _NON_CLOSURE_BLOCKER_MARKERS):
+            continue
+        blocking.append(ticket["id"])
+    if blocking:
+        errors.append("closure-blocking ticket(s): " + ", ".join(blocking[:3]))
+    return errors
+
+
 def escape_ticket_description(description: str) -> str:
     """Reversibly escape payload text so it renders as ONE ticket field.
 

@@ -36,6 +36,7 @@ CODES = frozenset({
     "PACKAGE_INCOMPLETE",
     "MALFORMED_PACKAGE",
     "INCOMPLETE_TICKET",
+    "INVALID_MANIFEST",
     # Release executor codes (T-994)
     "STALE_PLAN",
     "RELEASE_CLOSURE_PENDING",

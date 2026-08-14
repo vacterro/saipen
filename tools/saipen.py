@@ -204,69 +204,117 @@ def _recover(project_root: Path, args: list[str], as_json: bool) -> int:
 
 def _sub(project_root: Path, args: list[str], as_json: bool,
          dry_run: bool) -> int:
-    """saipen sub list|status|spawn|pause|resume (NITRO M8, journaled)."""
-    from saipen_engine.subs import (sub_adopt, sub_clean_preflight, sub_collect,
-                                    sub_list, sub_pause, sub_resume, sub_spawn,
-                                    sub_status)
+    """saipen sub list|status|spawn|adopt|pause|resume|sync|clean|collect.
 
+    Strict grammar (SAICREW G): `list`/`sync` take zero positional args;
+    `status`/`spawn`/`adopt`/`pause`/`resume`/`clean` take exactly one;
+    `collect` takes zero or one. Unknown or surplus tokens are a structured
+    VALIDATION_FAILED with ZERO writes -- ignored garbage is never accepted
+    as implied semantics. Every mutator honors --dry-run (same validation,
+    same proposed outcome, ZERO writes/LOG/STATE/MANIFEST/journal).
+    """
+    from saipen_engine.subs import (sub_adopt, sub_clean, sub_collect,
+                                    sub_list, sub_pause, sub_resume, sub_spawn,
+                                    sub_status, sub_sync)
+
+    if not args:
+        _emit({"ok": False, "code": "VALIDATION_FAILED",
+               "detail": "sub needs an action: list|sync|status|spawn|adopt|"
+                          "pause|resume|clean|collect"}, as_json)
+        return 2
     action = args[0]
+    rest = args[1:]
+    grammar = {
+        "list": (0, 0), "sync": (0, 0),
+        "status": (1, 1), "spawn": (1, 1), "adopt": (1, 1),
+        "pause": (1, 1), "resume": (1, 1), "clean": (1, 1),
+        "collect": (0, 1),
+    }
+    if action not in grammar:
+        _emit({"ok": False, "code": "VALIDATION_FAILED",
+               "detail": f"unknown sub action {action!r}; use "
+                          "list|sync|status|spawn|adopt|pause|resume|clean|"
+                          "collect"}, as_json)
+        return 2
+    minimum, maximum = grammar[action]
+    if len(rest) < minimum or len(rest) > maximum:
+        wanted = f"exactly {minimum}" if minimum == maximum else \
+            f"at most {maximum}"
+        _emit({"ok": False, "code": "VALIDATION_FAILED",
+               "detail": f"sub {action} takes {wanted} positional "
+                          f"argument(s); surplus: {' '.join(rest[maximum:])}"},
+              as_json)
+        return 2
+    state = parse_state(codec.read_doc(_state_path(project_root)))
+    saipen_home = state.get("saipen_home") or ""
+    if action in ("sync", "spawn", "adopt") and not saipen_home:
+        _emit({"ok": False, "code": "HOME_REQUIRED",
+               "detail": "STATE.saipen_home is required; project root is "
+                         "not installation provenance"}, as_json)
+        return 1
     if action == "list":
         result = sub_list(project_root)
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
+    if action == "sync":
+        result = sub_sync(project_root, saipen_home, dry_run=dry_run)
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
     if action == "status":
-        if len(args) < 2:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "sub status needs <name>"}, as_json)
-            return 2
-        result = sub_status(project_root, args[1])
+        result = sub_status(project_root, rest[0])
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
     if action == "spawn":
-        if len(args) < 2:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "sub spawn needs <name>"}, as_json)
-            return 2
-        state = parse_state(codec.read_doc(_state_path(project_root)))
-        saipen_home = state.get("saipen_home") or str(HOME)
-        result = sub_spawn(project_root, args[1], saipen_home)
-        _emit(result.to_dict(), as_json)
-        return 0 if result.ok else 1
-    if action in ("pause", "resume"):
-        if len(args) < 2:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": f"sub {action} needs <name>"}, as_json)
-            return 2
-        fn = sub_pause if action == "pause" else sub_resume
-        result = fn(project_root, args[1])
+        result = sub_spawn(project_root, rest[0], saipen_home, dry_run=dry_run)
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
     if action == "adopt":
-        if len(args) < 2:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "sub adopt needs <name>"}, as_json)
-            return 2
-        state = parse_state(codec.read_doc(_state_path(project_root)))
-        saipen_home = state.get("saipen_home") or str(HOME)
-        result = sub_adopt(project_root, args[1], saipen_home)
+        result = sub_adopt(project_root, rest[0], saipen_home, dry_run=dry_run)
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
+    if action in ("pause", "resume"):
+        fn = sub_pause if action == "pause" else sub_resume
+        result = fn(project_root, rest[0], dry_run=dry_run)
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
     if action == "clean":
-        if len(args) < 2:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "sub clean needs <name>"}, as_json)
-            return 2
-        result = sub_clean_preflight(project_root, args[1])
+        result = sub_clean(project_root, rest[0], dry_run=dry_run)
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
     if action == "collect":
-        name = args[1] if len(args) > 1 else None
-        result = sub_collect(project_root, name)
+        name = rest[0] if rest else None
+        result = sub_collect(project_root, name, dry_run=dry_run)
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
-    _emit({"ok": False, "code": "VALIDATION_FAILED",
-           "detail": f"unknown sub action {action!r}"}, as_json)
     return 2
+
+
+def _crew(project_root: Path, args: list[str], as_json: bool,
+          dry_run: bool) -> int:
+    """saipen crew -- the serial full-platoon convergence circuit (SAICREW).
+
+    `--dry-run` derives the full circuit, shows per-role health and the first
+    unsatisfied stage, and writes NOTHING. Apply persists
+    `execution_intent: converge` + `converge_target: crew`, runs the
+    mechanical transitions (sub sync + required instances), and hands the
+    semantic stage work back to the agent; `saipen crew`/`cc` then resumes
+    the same target. The launcher scripts stay an OPTIONAL manual multi-window
+    helper -- never `saipen crew` semantics.
+    """
+    if args:
+        _emit({"ok": False, "code": "VALIDATION_FAILED",
+               "detail": "crew accepts no positional arguments; surplus: "
+                          + " ".join(args)}, as_json)
+        return 2
+    from saipen_engine.crew import crew_apply, crew_plan
+    if dry_run:
+        plan = crew_plan(project_root)
+        _emit({"ok": plan.get("ok"), "code": "CREW_PLAN",
+               "dry_run": True, **plan}, as_json)
+        return 0 if plan.get("ok") else 1
+    result = crew_apply(project_root)
+    _emit(result.to_dict(), as_json)
+    return 0 if result.ok else 1
 
 
 def _context(project_root: Path, args: list[str], as_json: bool,
@@ -1050,6 +1098,8 @@ def main(argv: list[str] | None = None) -> int:
         return _userperson(project_root, args[1:], as_json, dry_run)
     if command == "sub" and len(args) >= 1:
         return _sub(project_root, args[1:], as_json, dry_run)
+    if command == "crew":
+        return _crew(project_root, args[1:], as_json, dry_run)
     if command == "context" and len(args) >= 1:
         return _context(project_root, args[1:], as_json, dry_run)
     if command == "improve":

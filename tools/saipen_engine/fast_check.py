@@ -90,6 +90,20 @@ def validate_texts(state_text: str, board_text: str, log_text: str) -> list[str]
         if "goal_waves" not in state or "goal_tickets" not in state:
             errors.append("STATE proposed intent=goal without goal_waves/"
                           "goal_tickets")
+        if "converge_target" in state:
+            errors.append("STATE proposed intent=goal with converge_target")
+    elif intent == "converge":
+        if state.get("converge_target") not in ("done", "ship", "crew"):
+            errors.append("STATE proposed intent=converge without target "
+                          "done|ship|crew")
+        if "goal_waves" in state or "goal_tickets" in state:
+            errors.append("STATE proposed intent=converge with goal counters")
+    elif intent in (None, "normal"):
+        if "goal_waves" in state or "goal_tickets" in state:
+            errors.append("STATE proposed non-goal intent with goal counters")
+        if "converge_target" in state:
+            errors.append("STATE proposed non-converge intent with "
+                          "converge_target")
     elif intent not in (None, "normal", "converge"):
         errors.append(f"STATE proposed execution_intent {intent!r} outside "
                       "normal|goal|converge")

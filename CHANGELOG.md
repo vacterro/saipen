@@ -1,6 +1,13 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.224.0 -- 2026-08-14 -- SAICREW fixed-point orchestration and SubSaipen trust completion (T-999)
+
+- T-999: `sc` / `saipen crew` is now a mechanically resumable serial circuit over the full built-in crew. Its durable `converge_target: crew` state is derived from live role, OUTBOX, shared-contract, release and Core evidence instead of a mutable stage counter.
+- T-999: shared-contract sync now has receipt-bound ownership, safe regular-file inventory, exact obsolete-path reconciliation and source/read CAS. Spawn establishes that contract first; collect treats a truly empty targeted OUTBOX as a truthful no-op while refusing malformed or non-ready evidence.
+- T-999: crew snapshots and finalization close every evidence race found in REVIEW. File/tree/source identities, role packages, pending operations and release receipts are captured before the snapshot barrier and rechecked at APPLY; stale proof writes zero Core bytes.
+- T-999: journal recovery now covers directory and missing-file dependencies plus the crash boundary where a target already carries its after-hash. The hostile matrix carries 138 SAICREW controls and the full scenario suite passes.
+
 ## 7.223.16 -- 2026-08-13 -- false-success repair (T-998): ship pending v7.223.15 content + untracked-scope fix
 
 - T-998: _surface_dirty now includes untracked non-ignored files (git ls-files --others) so a scope whose only change is a new file can never round into NEEDS_CLOSURE and skip its content commit (v7.223.15 false-success). Regression test 14 proves an untracked-only scope now creates content commit A.

@@ -36,7 +36,7 @@ from .journal import hash_bytes
 from .log import build_event, log_tail_event
 from .plan import OperationPlan, TargetPlan, apply_plan, build_plan
 from .result import Result
-from .state import parse_state, patch_state
+from .state import parse_state, patch_state, transition_execution_intent
 
 _TAXONOMIES = {"DEC", "RUN"}
 
@@ -969,11 +969,14 @@ def ticket_move(project_root: Path | str, action: str, ticket_id: str,
 # ------------------------------------------------------------------ goal
 
 def _state_only_plan(root: Path, operation: str, agent: str, mutate,
-                     event_message: str, expected: dict, now: str,
-                     utc: str, owned_keys: set) -> OperationPlan | Result:
+                      event_message: str, expected: dict, now: str,
+                      utc: str, owned_keys: set,
+                      ticket_id: str | None = None,
+                      evidence_preconditions: dict[str, str] | None = None) \
+        -> OperationPlan | Result:
     op_id = operation + "-" + uuid4_hex8()
     docs, _state, _board, log_tail = _read(root)
-    event, line = _event_line(docs, log_tail, "DEC", None, agent,
+    event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent,
                               event_message, now, op_id)
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     new_state = mutate(docs["state"].text_norm, event)
@@ -987,10 +990,15 @@ def _state_only_plan(root: Path, operation: str, agent: str, mutate,
         _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
     expected["event_id"] = f"E-{event}"
+    preconditions = _docs_preconditions(docs, "state", "board", "log")
+    # Snapshot evidence wins on overlap. If STATE/LOG moved after the domain
+    # snapshot but before this generic planner read them, APPLY must refuse
+    # the mixed plan rather than authorize against the later bytes.
+    preconditions.update(evidence_preconditions or {})
     return build_plan(
         operation, agent, _identity(root),
         {"operation": operation, "agent": agent},
-        _docs_preconditions(docs, "state", "board", "log"),
+        preconditions,
         targets, expected, op_id=op_id)
 
 
@@ -1003,10 +1011,9 @@ def set_goal_intent(project_root: Path | str, agent: str, objective: str,
     now, utc = _now(), _utc_iso()
 
     def mutate(text: str, event: int) -> str:
-        return patch_state(text, {
-            "execution_intent": "goal",
-            "goal_waves": 0,
-            "goal_tickets": 0,
+        transitioned = transition_execution_intent(
+            text, "goal", goal_waves=0, goal_tickets=0)
+        return patch_state(transitioned, {
             "last_event": event,
             "updated": utc,
             "agent": agent,
@@ -1016,6 +1023,97 @@ def set_goal_intent(project_root: Path | str, agent: str, objective: str,
                             f"goal pivot -- {objective}",
                             {"ok": True, "code": "GOAL_SET"}, now, utc,
                             {"execution_intent", "goal_waves", "goal_tickets"})
+    if isinstance(plan, Result):
+        return plan
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
+
+
+def set_converge_intent(project_root: Path | str, agent: str,
+                        target: str = "done", dry_run: bool = False) -> Result:
+    """Persist a complete converge-family transition without losing work.
+
+    Active ticket continuation remains exact. With no immediate ticket action,
+    crew becomes the outer orchestration action; other converge targets retain
+    ordinary continuation semantics.
+    """
+    root = Path(project_root)
+    now, utc = _now(), _utc_iso()
+
+    _docs, before_state, _board, _tail = _read(root)
+    entry_ticket = before_state.get("task")
+    if entry_ticket in (None, "", "none"):
+        entry_ticket = None
+
+    def mutate(text: str, event: int) -> str:
+        before = parse_state(text)
+        transitioned = transition_execution_intent(text, "converge", target)
+        active = (before.get("task") not in (None, "", "none")
+                  and before.get("phase") in phases.TICKET_BEARING_PHASES)
+        next_action = before.get("next_action") if active else (
+            "saipen crew" if target == "crew" else "saipen continue")
+        return patch_state(transitioned, {
+            "next_action": next_action,
+            "last_event": event,
+            "updated": utc,
+            "agent": agent,
+        })
+
+    plan = _state_only_plan(
+        root, "converge_intent", agent, mutate,
+        f"execution intent -> converge/{target}",
+        {"ok": True, "code": "CONVERGE_SET",
+         "execution_intent": "converge", "converge_target": target},
+        now, utc, {"execution_intent", "converge_target", "goal_waves",
+                   "goal_tickets", "next_action"},
+        ticket_id=entry_ticket)
+    if isinstance(plan, Result):
+        return plan
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
+
+
+def finalize_converge_intent(project_root: Path | str, agent: str,
+                             target: str, evidence: str,
+                             ticket_id: str | None = None,
+                             dry_run: bool = False,
+                             evidence_preconditions: dict[str, str] | None = None) \
+        -> Result:
+    """Close one proven converge target through canonical LOG+STATE mutation."""
+    root = Path(project_root)
+    now, utc = _now(), _utc_iso()
+    _docs, state, _board, _tail = _read(root)
+    if state.get("execution_intent") != "converge" \
+            or state.get("converge_target") != target:
+        return _refuse("VALIDATION_FAILED",
+                       f"active converge target is not {target!r}")
+    if state.get("phase") != "DONE" or state.get("task") not in (
+            None, "", "none"):
+        return _refuse("VALIDATION_FAILED",
+                       "converge finalization requires local Core phase DONE "
+                       "with task none")
+
+    def mutate(text: str, event: int) -> str:
+        transitioned = transition_execution_intent(text, "normal")
+        return patch_state(transitioned, {
+            "phase": "DONE",
+            "task": "none",
+            "next_action": "saipen continue",
+            "blocker": "",
+            "last_event": event,
+            "updated": utc,
+            "agent": agent,
+        })
+
+    plan = _state_only_plan(
+        root, f"finalize_{target}", agent, mutate, evidence,
+        {"ok": True, "code": "CONVERGE_FINALIZED", "target": target},
+        now, utc, {"execution_intent", "converge_target", "goal_waves",
+                   "goal_tickets", "phase", "task", "next_action",
+                   "blocker"}, ticket_id=ticket_id,
+        evidence_preconditions=evidence_preconditions)
     if isinstance(plan, Result):
         return plan
     if dry_run:

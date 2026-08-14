@@ -125,8 +125,9 @@ off only on "stop caveman"/"normal mode".
 Memory: .saipen/ at project root - read .saipen/STATE.md before work;
 checkpoint BOARD + STATE after every ticket, LOG line after every run.
 Path missing (new machine)? clone github.com/vacterro/saipen.
-Crew (bonus): a bare subSaipen name (saihunt/saipython/saiwiki) = adopt that
-role and start working (extensions/subs/crew.md); saipen crew = 3-window layout.
+Crew: a bare subSaipen name (saihunt/saipython/saiwiki) = adopt that role and
+start working (extensions/subs/crew.md); saipen crew = the serial
+full-platoon convergence circuit (never a window layout).
 UI work: also obey $SkillHome\UI.md (Win95 dark golden, Verdana, no AA).
 <!-- SAIPEN:END -->
 "@

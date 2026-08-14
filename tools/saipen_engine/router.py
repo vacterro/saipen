@@ -122,8 +122,20 @@ def route_next(state_text: str, board_text: str,
         if na.startswith("PHASE ") and task and task == active:
             return {"ok": True, "action": na, "reason": "finish",
                     "ticket": active}
+        if na.startswith(("RUN:", "RESUME:")) and task == active:
+            return {"ok": True, "action": na, "reason": "finish",
+                    "ticket": active}
         return {"ok": True, "action": f"PHASE {phase} {active}",
                 "reason": "finish", "ticket": active}
+
+    # Crew is an outer convergence target. Once local ticket execution has no
+    # immediate continuation, ordinary `cc` returns to crew orchestration from
+    # persisted semantics rather than relying on a lucky next_action string.
+    if (state.get("execution_intent") == "converge"
+            and state.get("converge_target") == "crew"):
+        return {"ok": True, "action": "saipen crew",
+                "reason": "crew-converge",
+                "detail": "active crew target owns continuation"}
 
     # START: no DOING + a workable TODO -> Pick Rule claims the top ticket.
     if not active:

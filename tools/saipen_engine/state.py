@@ -139,6 +139,78 @@ def patch_state(text: str, owned: dict) -> str:
     return "---\n" + "\n".join(out) + "\n---\n"
 
 
+def remove_state_fields(text: str, keys) -> str:
+    """Remove exact frontmatter fields, including their list items.
+
+    Intent-family transitions need absence, not an empty scalar: goal counters
+    left behind as `""` are still fields from the wrong schema family.
+    """
+    if not text or not text.startswith("---"):
+        raise ValueError("STATE has no opening --- frontmatter fence")
+    remove = set(keys)
+    lines = text.split("\n")
+    close = next((i for i, line in enumerate(lines[1:], 1)
+                  if line.strip() == "---"), None)
+    if close is None:
+        raise ValueError("STATE has no closing --- frontmatter fence")
+    out = ["---"]
+    index = 1
+    while index < close:
+        match = re.match(r"^([A-Za-z_][A-Za-z0-9_]*):\s*(.*)$",
+                         lines[index])
+        if match and match.group(1) in remove:
+            list_field = match.group(2).strip() == ""
+            index += 1
+            if list_field:
+                while index < close and re.match(r"^\s+-\s+", lines[index]):
+                    index += 1
+            continue
+        out.append(lines[index])
+        index += 1
+    out.append("---")
+    return "\n".join(out) + "\n"
+
+
+def transition_execution_intent(text: str, intent: str,
+                                converge_target: str | None = None,
+                                goal_waves: int = 0,
+                                goal_tickets: int = 0) -> str:
+    """Apply one complete execution-intent family transition.
+
+    Every transition first removes fields owned by all intent families, then
+    introduces only target-family fields. Callers cannot accidentally retain
+    goal counters in converge state or a converge target in normal state.
+    """
+    if intent not in ("normal", "goal", "converge"):
+        raise ValueError(f"execution_intent {intent!r} outside closed enum")
+    if intent == "converge" and converge_target not in ("done", "ship", "crew"):
+        raise ValueError("converge intent requires target done|ship|crew")
+    if intent != "converge" and converge_target is not None:
+        raise ValueError("converge_target is legal only for converge intent")
+    if goal_waves < 0 or goal_tickets < 0:
+        raise ValueError("goal counters must be non-negative")
+
+    clean = remove_state_fields(
+        text, ("execution_intent", "goal_mode", "goal_waves",
+               "goal_tickets", "converge_target"))
+    owned = {"execution_intent": intent}
+    if intent == "goal":
+        owned.update({"goal_waves": goal_waves,
+                      "goal_tickets": goal_tickets})
+    elif intent == "converge":
+        owned["converge_target"] = converge_target
+    result = patch_state(clean, owned)
+    parsed = parse_state(result)
+    family = {key for key in ("goal_waves", "goal_tickets",
+                              "converge_target") if key in parsed}
+    expected = ({"goal_waves", "goal_tickets"} if intent == "goal"
+                else {"converge_target"} if intent == "converge" else set())
+    if family != expected:
+        raise ValueError(f"intent transition produced fields {family}, "
+                         f"expected {expected}")
+    return result
+
+
 def patch_owned_text(original: str, state: dict, owned: dict) -> str:
     """Patch `original` STATE text using `owned`; convenience wrapper that
     guarantees the result re-parses with every non-owned key preserved."""

@@ -47,7 +47,8 @@ launch() { # $1=title  $2=hint line
   return 1
 }
 
-echo "saipen crew -- launching three windows (project: $PROJ)"
+echo "SAIPEN crew launcher -- optional manual multi-window helper "
+        "(never what \`saipen crew\` means; project: $PROJ)"
 launched=0
 printed=0
 failed=0

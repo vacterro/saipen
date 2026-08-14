@@ -66,8 +66,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from freshness import (FreshnessError, compute_generic_role_revision,
-                       compute_role_revision,
+from freshness import (FreshnessError, compute_role_revision,
                        compute_source_identity)
 from userperson import validate_profile as _validate_userperson_profile
 from improve import validate_report as _validate_improve_report
@@ -82,6 +81,15 @@ from saipen_engine.log import LOG_RE, parse_log_line
 from saipen_engine.release_contract import (
     locale_readme_paths, release_metadata_paths, version_badges)
 from saipen_engine.state import parse_frontmatter
+# SAICREW: the validator consumes the SAME strict parsers and crew gate the
+# engine CLI uses -- a malformed MANIFEST, an incoherent sub BOARD and a
+# crew gate condition can never be reported differently by the two halves.
+from saipen_engine.subs import (CREW_ROLES, CREW_STAGES,
+                                 current_local_role_revision,
+                                 parse_manifest as _parse_sub_manifest,
+                                 parse_outbox as _parse_outbox,
+                                 parse_sub_board as _parse_sub_board)
+from saipen_engine.crew import crew_gate_problems as _crew_gate_problems
 
 def _read_rfc(p):
     core = p.parent / "CORE.md"
@@ -284,7 +292,7 @@ def _parse_gate(raw):
     ran the SOFT gate would report green on exactly the package the caller
     asked to hard-check. Failing loudly on the spelling is the only reading
     that cannot approve an uninspected package."""
-    if raw in ("ship", "converge", "core"):
+    if raw in ("ship", "converge", "core", "crew"):
         return raw, None
     if raw.startswith("collect:"):
         producer = raw.split(":", 1)[1]
@@ -294,7 +302,7 @@ def _parse_gate(raw):
               f"{producer!r}")
         sys.exit(2)
     print(f"FAIL: unknown --gate {raw!r} -- one of: core (default), ship, "
-          f"collect:<producer>, converge")
+          f"collect:<producer>, converge, crew")
     sys.exit(2)
 
 
@@ -1584,17 +1592,24 @@ if sub_state_files:
         # comparing `agent:` against itself, and a spawned worker still called
         # `<name>` makes every liveness comparison meaningless.
         if sp.parts[0] != "extensions":
-            _tmpl = _tools_parent / "extensions" / "subs" / "TEMPLATE" / "STATE.md"
-            if _tmpl.is_file():
-                _tf, _ = parse_frontmatter(read_doc(_tmpl))
-                for _k in ("agent", "updated"):
-                    _pv = (_tf or {}).get(_k)
-                    if _pv and sub_state.get(_k) == _pv:
-                        fail(f"{sp} still carries TEMPLATE's placeholder "
-                             f"{_k}: {_pv!r} -- `saipen sub spawn` replaces it "
-                             f"at spawn (PROTOCOL.md § 6). A live subSaipen "
-                             f"named {_pv!r} defeats RFC § 1.4's concurrency "
-                             f"comparison, which is agent-against-agent")
+            # A folder literally named TEMPLATE under the live root is the
+            # inherited template itself (`saipen sub sync` copies it), not a
+            # live instance -- its placeholders are the starting point, so
+            # the placeholder comparison below applies only to real instances.
+            if sp.parts[-2] == "TEMPLATE":
+                pass
+            else:
+                _tmpl = _tools_parent / "extensions" / "subs" / "TEMPLATE" / "STATE.md"
+                if _tmpl.is_file():
+                    _tf, _ = parse_frontmatter(read_doc(_tmpl))
+                    for _k in ("agent", "updated"):
+                        _pv = (_tf or {}).get(_k)
+                        if _pv and sub_state.get(_k) == _pv:
+                            fail(f"{sp} still carries TEMPLATE's placeholder "
+                                 f"{_k}: {_pv!r} -- `saipen sub spawn` replaces it "
+                                 f"at spawn (PROTOCOL.md § 6). A live subSaipen "
+                                 f"named {_pv!r} defeats RFC § 1.4's concurrency "
+                                 f"comparison, which is agent-against-agent")
 
         # RFC § 1.2: subSaipen next_action MUST follow same prefix rules as Core.
         sub_na = sub_state.get("next_action")
@@ -1688,6 +1703,49 @@ if sub_state_files:
     if subs_ok:
         ok(f"subSaipen STATE.md shape valid ({len(sub_state_files)} checked, "
            f"live + shipped library)")
+
+# SAICREW B: ONE strict MANIFEST parser, used by every consumer. A malformed
+# manifest is INVALID_MANIFEST, never "skip bad line and continue" -- this
+# validator applies the same parser the engine does, so a duplicate entry or
+# a prose line that list/collect would refuse can never pass here.
+for _manifest_path in sorted({
+        subs_root / "MANIFEST.md",
+        Path("extensions/subs/MANIFEST.md")}):
+    if not _manifest_path.is_file():
+        continue
+    _m_entries, _m_errors = _parse_sub_manifest(read_doc(_manifest_path))
+    if _m_errors:
+        fail(f"{_manifest_path.as_posix()} is malformed under the strict "
+             f"manifest grammar: {'; '.join(_m_errors[:4])} (SAICREW B)")
+    else:
+        ok(f"{_manifest_path.as_posix()} parses strictly "
+           f"({len(_m_entries)} entr{'y' if len(_m_entries) == 1 else 'ies'})")
+
+# SAICREW H: sub BOARD/STATE are validated as ONE coherent machine, not a
+# shape. Duplicate/missing headings, duplicate ticket IDs, checkbox/section
+# disagreement, Core T-### IDs and more than one DOING fail; and phase DONE
+# can never coexist with TODO/DOING/unresolved BLOCKED work -- a worker
+# cannot say DONE while its board says unresolved work. TEMPLATE is a
+# starting point, not a live board.
+for _board_path in sorted(subs_root.glob("*/BOARD.md")):
+    _sub_name = _board_path.parent.name
+    if _sub_name == "TEMPLATE":
+        continue
+    _parsed_board = _parse_sub_board(read_doc(_board_path))
+    if _parsed_board["errors"]:
+        fail(f"{_board_path.as_posix()} is an invalid sub board: "
+             + "; ".join(_parsed_board["errors"][:4]) + " (SAICREW H)")
+    _st_file = _board_path.parent / "STATE.md"
+    _st_phase = None
+    if _st_file.is_file():
+        _st_front, _ = parse_frontmatter(read_doc(_st_file))
+        _st_phase = (_st_front or {}).get("phase")
+    if _st_phase == "DONE" and (_parsed_board["counts"]["TODO"]
+                                or _parsed_board["counts"]["DOING"]
+                                or _parsed_board["counts"]["BLOCKED"]):
+        fail(f"{_board_path.as_posix()} is phase DONE but its board still "
+             "holds open work (TODO/DOING/BLOCKED) -- a worker cannot say "
+             "DONE while its board says unresolved work (SAICREW H)")
 
 # --------------------------------------------------------------------- BOARD
 
@@ -3342,164 +3400,58 @@ def _role_contract_path(producer: str):
     return next((path for path in candidates if path.is_file()), None)
 
 
-def _generic_protocol_path():
-    candidates = (
-        Path(".saipen/extensions/subs/PROTOCOL.md"),
-        Path("extensions/subs/PROTOCOL.md"),
-        _tools_parent / "extensions" / "subs" / "PROTOCOL.md",
-    )
-    return next((path for path in candidates if path.is_file()), None)
-
-
-def _current_role_revision(producer: str):
-    charter = _role_contract_path(producer)
-    if charter is not None:
-        return compute_role_revision(charter), charter
-    protocol = _generic_protocol_path()
-    if protocol is None:
-        raise FreshnessError(
-            f"no charter or generic PROTOCOL.md resolves for producer {producer!r}"
-        )
-    return compute_generic_role_revision(protocol), protocol
-
-
-def _outbox_value(entry: str, field: str):
-    return re.search(
-        rf"(?:\*\*{re.escape(field)}:\*\*|^{re.escape(field)}:)\s*(\S+)",
-        entry, flags=re.MULTILINE)
-
-
-def _outbox_has_content(entry: str, field: str) -> bool:
-    if _outbox_value(entry, field):
-        return True
-    return bool(re.search(
-        rf"(?:\*\*{re.escape(field)}:\*\*|^{re.escape(field)}:)\s*\n"
-        rf"[ \t]+(?:-\s+|\d+\.\s+|\S)", entry, flags=re.MULTILINE))
-
-
 _producers_with_ready = set()
 for ob in sorted(_outbox_paths):
     _prod_owner = _producer_of(ob)
     text = read_doc(ob)
-    # Entries are `## <ID>: description` followed by bold-field lines (§ 2).
-    _entry_heads = list(re.finditer(
-        r"^## [A-Z]+-\d+:\s*\S.*$", text, flags=re.MULTILINE))
-    entries = []
-    if _entry_heads and text[:_entry_heads[0].start()].strip() == "# OUTBOX":
-        _all_h2 = re.findall(r"^## .+$", text, flags=re.MULTILINE)
-        if len(_entry_heads) == len(_all_h2):
-            entries = [
-                text[head.start() + 3:
-                     _entry_heads[index + 1].start()
-                     if index + 1 < len(_entry_heads) else len(text)]
-                for index, head in enumerate(_entry_heads)
-            ]
-    frontmatter_only = False
-    if not entries:
-        frontmatter = re.fullmatch(r"---\s*\n(.*?)\n---\s*", text,
-                                   flags=re.DOTALL)
-        if frontmatter:
-            entries = [frontmatter.group(1)]
-            frontmatter_only = True
-    if not entries and text.strip() != "# OUTBOX":
+    model = _parse_outbox(text, _prod_owner)
+    if model.errors:
         producer_problem(
             _prod_owner, "producer-package-malformed",
-            f"{ob.as_posix()} is nonempty but parses as zero OUTBOX entries -- "
-            "malformed package text cannot be treated as an empty queue "
-            "(PROTOCOL.md § 2)")
+            f"{ob.as_posix()} fails strict OUTBOX parsing: "
+            + "; ".join(model.errors[:5]) + " (PROTOCOL.md § 2)")
         outbox_ok = False
-    for e in entries:
+    for package in model.packages:
         outbox_seen += 1
-        eid = "PACKAGE" if frontmatter_only else e.split(":", 1)[0].strip()
-        loc = f"{ob.as_posix()} [{eid}]"
-        status = _outbox_value(e, "status")
-        status = status.group(1) if status else None
-        if status is None:
-            producer_problem(
-                _prod_owner, "producer-package-malformed",
-                f"{loc} has no **status:** -- the main agent cannot tell "
-                f"whether this is collectable (PROTOCOL.md § 2)")
-            outbox_ok = False
-            continue
-        if status not in OUTBOX_STATUSES:
-            producer_problem(
-                _prod_owner, "producer-package-malformed",
-                f"{loc} status {status!r} is not one of "
-                f"ready/draft/blocked/reviewed/stale (PROTOCOL.md § 2)")
-            outbox_ok = False
+        loc = f"{ob.as_posix()} [{package.package_id}]"
+        fields = package.fields
+        status = fields.get("status")
         if status == "ready":
             _producers_with_ready.add(_prod_owner)
-            for field in PACKAGE_HANDOFF_FIELDS:
-                if not _outbox_has_content(e, field):
-                    producer_problem(
-                        _prod_owner, "producer-package-incomplete",
-                        f"{loc} is status: ready but has no usable "
-                        f"**{field}:** -- complete ready packages bind every "
-                        f"handoff and freshness field (PROTOCOL.md § 2/§ 6)")
-                    outbox_ok = False
-            for field in ("summary", "critical"):
-                if not _outbox_has_content(e, field):
-                    producer_problem(
-                        _prod_owner, "producer-package-incomplete",
-                        f"{loc} is status: ready but has no **{field}:** -- "
-                        f"collect reads that field to decide what to do with "
-                        f"it (PROTOCOL.md § 2)")
-                    outbox_ok = False
-            # Fixer-type entry: carries a patch, so § 9 requires provenance.
-            if re.search(r"\*\*patch:\*\*", e):
-                for field in ("base_head", "verified"):
-                    if not re.search(rf"\*\*{field}:\*\*", e):
-                        producer_problem(
-                            _prod_owner, "producer-package-incomplete",
-                            f"{loc} hands over a patch as ready but has no "
-                            f"**{field}:** -- a patch with no {field} is a "
-                            f"diff nobody can re-check before applying "
-                            f"(PROTOCOL.md § 9)")
-                        outbox_ok = False
-            # Role freshness is derived from effective charter content with
-            # only the role_revision field removed. The declared value is
-            # checked separately in the charter block; a package label never
-            # becomes evidence merely because somebody bumped it by hand.
-            _rr = _outbox_value(e, "role_revision")
-            if _rr:
-                _charter_rr = None
-                _prod = _outbox_value(e, "producer")
-                if _prod:
-                    try:
-                        _charter_rr, _cp = _current_role_revision(_prod.group(1))
-                    except FreshnessError as exc:
-                        producer_problem(
-                            _prod_owner, "producer-package-stale",
-                            f"{loc} cannot derive current role_revision: {exc}")
-                        outbox_ok = False
-                if _charter_rr is not None and _rr.group(1) != _charter_rr:
-                    producer_problem(
-                        _prod_owner, "producer-package-stale",
-                        f"{loc} carries role_revision {_rr.group(1)!r} but "
-                        f"the effective project-local "
-                        f"{_prod.group(1) if _prod else '?'}.md charter derives "
-                        f"{_charter_rr!r} -- produced under a "
-                        f"superseded role, package is stale and MUST NOT be "
-                        f"collected; the producer re-runs under the new "
-                        f"charter (PROTOCOL.md § 6, T-542)")
-                    outbox_ok = False
-            # Source identity: HEAD binds committed bytes; the fingerprint
-            # binds only the delta from that HEAD in Git mode. Both must match.
-            _head = _outbox_value(e, "source_head")
-            _fp = _outbox_value(e, "source_tree_fingerprint")
+            _charter_rr = current_local_role_revision(
+                Path("."), _prod_owner, state.get("saipen_home") or "")
+            if _charter_rr is None:
+                producer_problem(
+                    _prod_owner, "producer-package-stale",
+                    f"{loc} cannot derive project-local role_revision; "
+                    "SYNC_REQUIRED / ROLE_EVIDENCE_UNAVAILABLE")
+                outbox_ok = False
+            elif fields.get("role_revision") != _charter_rr:
+                producer_problem(
+                    _prod_owner, "producer-package-stale",
+                    f"{loc} carries role_revision "
+                    f"{fields.get('role_revision')!r} but the project-local "
+                    f"charter derives {_charter_rr!r} -- produced under a "
+                    "superseded role, package is stale and MUST NOT be "
+                    "collected; the producer re-runs under the current "
+                    "charter (PROTOCOL.md section 6, T-542)")
+                outbox_ok = False
             if _source_identity is not None:
-                if _head and _head.group(1) != _source_identity.source_head:
+                if fields.get("source_head") != _source_identity.source_head:
                     producer_problem(
                         _prod_owner, "producer-package-stale",
-                        f"{loc} carries source_head {_head.group(1)!r} but "
+                        f"{loc} carries source_head "
+                        f"{fields.get('source_head')!r} but "
                         f"current source_head is {_source_identity.source_head!r} "
                         f"-- package is stale and MUST NOT be collected")
                     outbox_ok = False
-                if _fp and _fp.group(1) != _source_identity.source_tree_fingerprint:
+                if fields.get("source_tree_fingerprint") != \
+                        _source_identity.source_tree_fingerprint:
                     producer_problem(
                         _prod_owner, "producer-package-stale",
                         f"{loc} carries source_tree_fingerprint "
-                        f"{_fp.group(1)!r} but the current tree computes "
+                        f"{fields.get('source_tree_fingerprint')!r} but the "
+                        "current tree computes "
                         f"{_source_identity.source_tree_fingerprint!r} -- the "
                         f"tree changed since the "
                         f"package was produced (same HEAD or not), so it is "
@@ -3537,6 +3489,19 @@ if GATE == "converge":
     elif not _producers_failed_hard:
         ok("producer gate: both closure-required packages (EE, QQ) are ready "
            "and were checked hard for completeness, freshness and role currency")
+
+# SAICREW S: --gate crew is the full-platoon fixed-point gate. It reuses ONE
+# implementation (saipen_engine.crew.crew_gate_problems) with the CLI planner
+# so the validator and `saipen crew --dry-run` can never disagree about what
+# "SC DONE" means. The ordinary core gate never requires it -- this gate is
+# requested only when SC is the requested target.
+if GATE == "crew":
+    _crew_problems = _crew_gate_problems(Path("."))
+    for _problem in _crew_problems:
+        fail(f"--gate crew -- {_problem}")
+    if not _crew_problems:
+        ok("crew gate: every required role has current, mechanically "
+           "verifiable evidence against one coherent source state")
 
 # ------------------------------------------------------------ SAIUI CHARTER
 
@@ -4902,20 +4867,8 @@ if _subs_root.is_dir():
         # derivation returns the bare value. Compare the UNQUOTED form so a
         # freshly-adopted sub is not falsely stale (T-611).
         _inst_rr_val = _inst_rr.group(1).strip('"') if _inst_rr else None
-        _cp = _role_contract_path(_d.name)
-        _charter_rr = None
-        if _cp is not None:
-            try:
-                _charter_rr = compute_role_revision(_cp)
-            except FreshnessError as exc:
-                fail(f"cannot derive {_d.name} charter revision: {exc}")
-        else:
-            _protocol = _generic_protocol_path()
-            if _protocol is not None:
-                try:
-                    _charter_rr = compute_generic_role_revision(_protocol)
-                except FreshnessError as exc:
-                    fail(f"cannot derive {_d.name} generic role revision: {exc}")
+        _charter_rr = current_local_role_revision(
+            Path("."), _d.name, state.get("saipen_home") or "")
         if _inst_rr_val and _charter_rr is not None and _inst_rr_val != _charter_rr:
             _rrmismatch.append(f"{_d.name} ({_inst_rr_val} != charter {_charter_rr})")
     if _rrless:
@@ -5517,6 +5470,28 @@ else:
                  "wrote is the fabricated-command failure with a table around "
                  "it: the operator follows the circuit and hits a word the "
                  "protocol has never heard of")
+            drift_ok = False
+
+        _registry_section = _crew_t.split(
+            "## The built-in registry (one source of truth)", 1)[-1].split(
+                "## Two execution shapes", 1)[0]
+        _documented_roles = set(re.findall(
+            r"(?m)^\| \*\*([a-z][a-z0-9]*)\*\* \|", _registry_section))
+        _expected_roles = {role.name for role in CREW_ROLES}
+        if _documented_roles != _expected_roles:
+            fail("cross-doc drift [crew-registry] -- crew.md role table names "
+                 f"{sorted(_documented_roles)}, machine registry names "
+                 f"{sorted(_expected_roles)}")
+            drift_ok = False
+
+        _documented_stages = tuple(re.findall(
+            r"(?m)^\| (SC-\d+) \| `([^`]+)` \|", _crew_t))
+        _machine_stages = tuple((stage, name)
+                                for stage, name, _condition in CREW_STAGES)
+        if _documented_stages != _machine_stages:
+            fail("cross-doc drift [crew-stages] -- crew.md stage ids/names "
+                 f"{_documented_stages!r}, machine registry "
+                 f"{_machine_stages!r}")
             drift_ok = False
 
     # 1b18. A move is destructive to whatever loads the moved file, and the
@@ -7837,6 +7812,52 @@ else:
                      + (", ".join(_goal_notes_bad) or "none named; the "
                         "superseded literal is back in the section"))
                 drift_ok = False
+
+            # SAICREW N: every shipped doc that defines `saipen crew` must
+            # define the SAME thing -- the serial full-platoon convergence
+            # circuit with a durable orchestration target. The launcher
+            # scripts are an OPTIONAL manual multi-window helper and must
+            # never be presented as `saipen crew` semantics; and the crew
+            # DOES add a durable convergence intent, so the "adds no
+            # mechanism" claim is false evidence. The validator's PASS over
+            # a contradiction is FALSE_EVIDENCE.
+            _crew_doc_paths = (
+                Path("saipen/CORE.md"),
+                Path("extensions/subs/PROTOCOL.md"),
+                Path("extensions/subs/crew.md"),
+                Path("README.md"),
+            )
+            _crew_serial = ("serial", "sequential", "fixed order",
+                            "strictly sequential")
+            for _cd_path in _crew_doc_paths:
+                if not _cd_path.is_file():
+                    continue
+                _cd_text = _cd_path.read_text(encoding="utf-8-sig")
+                if "saipen crew" not in _cd_text and "`sc`" not in _cd_text:
+                    continue
+                if (re.search(r"(?i)saipen crew.{0,220}print.{0,40}"
+                              r"(layout|window)", _cd_text)
+                        or ("saipen crew" in _cd_text
+                            and "print" in _cd_text
+                            and "window" in _cd_text.lower()
+                            and "convergence" not in _cd_text)):
+                    fail("cross-doc drift [crew] -- "
+                         f"{_cd_path.as_posix()} defines `saipen crew` as "
+                         "printing a window layout; the canonical meaning is "
+                         "the serial full-platoon convergence circuit "
+                         "(SAICREW N). The launcher stays an optional manual "
+                         "multi-window helper")
+                    drift_ok = False
+                if "adds no mechanism" in _cd_text and \
+                        ("saipen crew" in _cd_text or "`sc`" in _cd_text):
+                    fail("cross-doc drift [crew] -- "
+                         f"{_cd_path.as_posix()} claims the crew 'adds no "
+                         "mechanism'; the requested SC requires a durable "
+                         "orchestration target / derived fixed-point "
+                         "semantics (execution_intent: converge + "
+                         "converge_target: crew), so the claim is false "
+                         "evidence (SAICREW N)")
+                    drift_ok = False
 
             _shortcut_notes = {shortcut: notes for shortcut, _, notes
                                in _shortcut_full_rows}

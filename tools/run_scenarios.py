@@ -2447,6 +2447,1224 @@ def run_crew_probes() -> tuple[list[str], int, int]:
     return problems, checked, skipped
 
 
+def run_saicrew_probes() -> tuple[list[str], int]:
+    """SAICREW hostile controls: strict MANIFEST, dry-run byte-identity,
+    sync repair/idempotency, local-charter role authority, sub-board
+    coherence, truthful status, collect refusal, crew fixed-point blocking.
+
+    Every probe runs in a fresh temp project whose `.saipen/extensions/subs/`
+    is seeded from a minimal fake saipen_home, so a broken engine can never
+    hide behind this repository's already-corrected live state.
+    """
+    problems: list[str] = []
+    checked = 0
+
+    def expect(label: str, ok: bool, detail: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        if ok:
+            print(f"PASS: saicrew -- {label}")
+        else:
+            problems.append(f"{label}: {detail}")
+            print(f"FAIL: saicrew -- {label}")
+
+    from saipen_engine.subs import (
+        parse_manifest, parse_outbox, parse_sub_board,
+        sub_adopt, sub_clean, sub_collect,
+        sub_list, sub_pause, sub_resume, sub_spawn, sub_sync,
+        shared_contract_status, sub_instance_health, current_local_role_revision,
+        role_freshness, SUBS_REL, MANIFEST_REL, HEALTH_CURRENT,
+        HEALTH_BLOCKED, HEALTH_NOT_RUN, HEALTH_INVALID,
+        HEALTH_READY_FOR_REVIEW)
+    try:
+        from saipen_engine.crew import (crew_gate_problems, crew_plan,
+                                        crew_ready_to_finalize, finalize_crew)
+    except ImportError as exc:
+        return [f"saicrew import failed: {exc}"], checked
+
+    def tree_snapshot(root: Path) -> str:
+        """A deterministic hash of every file under root (byte-identity)."""
+        import hashlib
+        h = hashlib.sha256()
+        for path in sorted(p for p in root.rglob("*") if p.is_file()):
+            rel = path.relative_to(root).as_posix()
+            h.update(rel.encode("utf-8"))
+            h.update(path.read_bytes())
+        return h.hexdigest()
+
+    with tempfile.TemporaryDirectory(prefix="saipen-saicrew-") as raw:
+        home = Path(raw) / "home"
+        (home / "saipen").mkdir(parents=True)
+        (home / "saipen" / "BOOT.md").write_text(
+            "# probe installed protocol\n", encoding="utf-8")
+        (home / "extensions" / "subs" / "TEMPLATE" / "kitchen").mkdir(
+            parents=True)
+        (home / "extensions" / "subs" / "_shared").mkdir(parents=True)
+        charter = (
+            "# {name} -- role\n\n```yaml\n"
+            "role_kind: {role_kind}\nwrite_scope: \".saipen/extensions/subs/"
+            "{name}/\"\ntrigger: \"probe\"\ncollect_policy: {collect_policy}\n"
+            "done_condition: \"probe\"\nfreshness_inputs: [\"source_head\", "
+            "\"source_tree_fingerprint\", \"role_revision\"]\n"
+            "output_contract: \"PROTOCOL.md \u00a7 2 complete package\"\n"
+            "role_revision: \"sha256:probe-{name}\"\n```\n")
+        for name in ("saihunt", "saitest", "saipython", "saiui",
+                      "saitranslate", "saiwiki"):
+            producer = name in ("saitranslate", "saiwiki")
+            (home / "extensions" / "subs" / f"{name}.md").write_text(
+                charter.format(name=name,
+                               role_kind="PRODUCER" if producer else "SCOUT",
+                               collect_policy="explicit" if producer else
+                               "core-review"), encoding="utf-8")
+        for shared in ("PROTOCOL.md", "README.md", "crew.md"):
+            (home / "extensions" / "subs" / shared).write_text(
+                f"# {shared}\nprobe shared content\n", encoding="utf-8")
+        (home / "extensions" / "subs" / "TEMPLATE" / "STATE.md").write_text(
+            "---\nphase: PLAN\ntask: none\nnext_action: \"saipen plan\"\n"
+            "blocker: none\nagent: <name>\nsaipen_version: 7\n"
+            "schema_version: 3\nstyle_contract: ded-probe\n"
+            "saipen_home: \"\"\nmode: read-only\ntransition_from: INIT\n"
+            "updated: 2026-01-01T00:00:00Z\n---\n", encoding="utf-8")
+        (home / "extensions" / "subs" / "TEMPLATE" / "BOARD.md").write_text(
+            "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n",
+            encoding="utf-8")
+        (home / "extensions" / "subs" / "TEMPLATE" / "LOG.md").write_text(
+            "# Log\n", encoding="utf-8")
+        (home / "extensions" / "subs" / "TEMPLATE" / "kitchen" /
+         "OUTBOX.md").write_text("# OUTBOX\n", encoding="utf-8")
+        (home / "extensions" / "subs" / "_shared" / "inbox.md").write_text(
+            "# shared inbox\n\n- seed entry\n", encoding="utf-8")
+
+        def refresh_charter_revisions() -> None:
+            for path in (home / "extensions" / "subs").glob("sai*.md"):
+                text = path.read_text(encoding="utf-8")
+                path.write_text(
+                    text.replace(
+                        re.search(r'role_revision: "[^"]+"', text).group(0),
+                        f'role_revision: "{compute_role_revision(path)}"'),
+                    encoding="utf-8")
+
+        refresh_charter_revisions()
+
+        def seed_project(proj: Path) -> None:
+            (proj / ".saipen").mkdir(parents=True, exist_ok=True)
+            (proj / ".saipen" / "STATE.md").write_text(
+                "---\nphase: DONE\ntask: none\nnext_action: \"saipen "
+                "continue\"\nblocker: \"\"\ntransition_from: SHIP\n"
+                "saipen_version: 7\nschema_version: 3\nstyle_contract: "
+                "ded-probe\nsaipen_home: \"" + home.as_posix() +
+                "\"\nagent: probe\nmode: full\nupdated: "
+                "\"2026-08-13T00:00:00Z\"\n---\n", encoding="utf-8")
+            (proj / ".saipen" / "LOG.md").write_text(
+                "# Log\n", encoding="utf-8")
+            (proj / ".saipen" / "BOARD.md").write_text(
+                "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n",
+                encoding="utf-8")
+            (proj / ".saipen" / "extensions").mkdir(exist_ok=True)
+
+        # 1. STRICT MANIFEST (hostile control 3): duplicate name, duplicate
+        # path, malformed line and non-entry lines are ALL INVALID_MANIFEST.
+        base = Path(raw) / "manifest"
+        seed_project(base)
+        entries, errors = parse_manifest(
+            "# SubSaipen Manifest\n\n- saihunt -- "
+            ".saipen/extensions/subs/saihunt/\n- saihunt -- "
+            ".saipen/extensions/subs/saihunt/\n")
+        expect("duplicate instance name FAILs", bool(errors),
+                f"expected errors, got {errors}")
+        entries, errors = parse_manifest(
+            "# SubSaipen Manifest\n\n- saihunt -- "
+            ".saipen/extensions/subs/saihunt/\n- saiwiki -- "
+            ".saipen/extensions/subs/saihunt/\n")
+        expect("duplicate canonical path FAILs", bool(errors),
+                f"expected errors, got {errors}")
+        entries, errors = parse_manifest(
+            "# SubSaipen Manifest\n\n- saihunt -> /etc/passwd\n")
+        expect("malformed entry FAILs", bool(errors), f"got {errors}")
+        entries, errors = parse_manifest(
+            "# SubSaipen Manifest\n\n- saihunt -- "
+            "../outside/saihunt/\n")
+        expect("traversal path FAILs", bool(errors), f"got {errors}")
+        entries, errors = parse_manifest(
+            "# SubSaipen Manifest\n\nfree prose line\n- saihunt -- "
+            ".saipen/extensions/subs/saihunt/\n")
+        expect("non-entry line FAILs (never skip+continue)", bool(errors),
+                f"got {errors}")
+        entries, errors = parse_manifest(
+            "# Wrong Header\n\n- saihunt -- "
+            ".saipen/extensions/subs/saihunt/\n")
+        expect("exact header required", bool(errors), f"got {errors}")
+        entries, errors = parse_manifest(
+            "# SubSaipen Manifest\n\n- saihunt -- "
+            ".saipen/extensions/subs/saihunt/ | last_collect: "
+            "2026-08-13T00:00:00Z\n")
+        expect("valid canonical manifest passes",
+               not errors and entries[0].path.endswith("/saihunt/"),
+               f"got {errors}")
+        entries, errors = parse_manifest(
+            "# SubSaipen Manifest\n\n- saihunt -- "
+            ".saipen/extensions/subs/saihunt/ | last_collect: sha256:"
+            + "a" * 64 + "@2026-08-13T00:00:00Z\n")
+        expect("identity-bound last_collect passes strict manifest",
+               not errors and entries[0].metadata["last_collect"].startswith(
+                   "sha256:"), f"got {errors}")
+        for label, manifest_text in (
+                ("legacy current path FAILs",
+                 "# SubSaipen Manifest\n\n- saihunt -- extensions/subs/saihunt/\n"),
+                ("unknown metadata FAILs",
+                 "# SubSaipen Manifest\n\n- saihunt -- "
+                 ".saipen/extensions/subs/saihunt/ | spawned: now\n"),
+                ("duplicate metadata FAILs",
+                 "# SubSaipen Manifest\n\n- saihunt -- "
+                 ".saipen/extensions/subs/saihunt/ | last_collect: "
+                 "2026-08-13T00:00:00Z | last_collect: "
+                 "2026-08-13T00:00:00Z\n"),
+                ("absolute path FAILs",
+                 "# SubSaipen Manifest\n\n- saihunt -- C:/subs/saihunt/\n")):
+            _entries, errors = parse_manifest(manifest_text)
+            expect(label, bool(errors), f"got {errors}")
+        manifest_file = base / MANIFEST_REL
+        manifest_file.parent.mkdir(parents=True, exist_ok=True)
+        manifest_file.write_text(
+            "# SubSaipen Manifest\n\n- saihunt -- "
+            ".saipen/extensions/subs/saihunt/\n- saihunt -- "
+            ".saipen/extensions/subs/saihunt/\n", encoding="utf-8")
+        result = sub_list(base)
+        expect("sub list refuses INVALID_MANIFEST",
+               not result.ok and result.code == "INVALID_MANIFEST",
+               f"got {result.code}")
+
+        # 2. DRY-RUN BYTE-IDENTITY (hostile control 2): pause/resume/spawn/
+        # sync tree byte-identical.
+        base = Path(raw) / "dry"
+        seed_project(base)
+        spawn = sub_spawn(base, "saihunt", home.as_posix())
+        expect("spawn succeeds in probe project", spawn.ok, spawn.message)
+        before = tree_snapshot(Path(raw) / "dry")
+        dry_pause = sub_pause(base, "saihunt", dry_run=True)
+        sub_resume(base, "saihunt", dry_run=True)
+        dry_adopt = sub_adopt(base, "saihunt", home.as_posix(), dry_run=True)
+        sub_spawn(base, "saipython", home.as_posix(), dry_run=True)
+        sub_sync(base, home.as_posix(), dry_run=True)
+        after = tree_snapshot(Path(raw) / "dry")
+        expect("pause/resume/spawn/sync --dry-run write nothing",
+               before == after,
+               "tree changed under dry-run")
+        expect("dry-run pause reports the same proposed outcome",
+               dry_pause.ok and dry_pause.data.get("dry_run") is True,
+               f"got {dry_pause.code} {dry_pause.message}")
+        expect("dry-run adopt reports proposed outcome without writes",
+               dry_adopt.ok and dry_adopt.data.get("dry_run") is True,
+               f"got {dry_adopt.code} {dry_adopt.message}")
+        expect("dry-run spawn does not create an instance",
+               not (Path(raw) / "dry" / SUBS_REL / "saipython" /
+                    "STATE.md").is_file(),
+               "saipython STATE exists after dry-run spawn")
+
+        # 3. SYNC (hostile control 4): partial bootstrap repaired, live
+        # histories untouched, shared inbox preserved, second sync no drift.
+        base = Path(raw) / "sync"
+        seed_project(base)
+        spawn = sub_spawn(base, "saihunt", home.as_posix())
+        expect("sync-probe spawn ok", spawn.ok, spawn.message)
+        inbox = base / SUBS_REL / "_shared" / "inbox.md"
+        inbox_text = inbox.read_text(encoding="utf-8") if inbox.is_file() else ""
+        # Delete a shared file to simulate a partial/outdated bootstrap.
+        (base / SUBS_REL / "PROTOCOL.md").unlink(missing_ok=True)
+        status = shared_contract_status(base, home.as_posix())
+        expect("partial bootstrap reported not current",
+               not status["current"],
+               f"status={status}")
+        expect("missing file named exactly",
+               f"{SUBS_REL}/PROTOCOL.md" in status["missing_files"],
+               f"missing={status['missing_files']}")
+        dry = sub_sync(base, home.as_posix(), dry_run=True)
+        expect("sync --dry-run reports the exact diff",
+               dry.ok and dry.data.get("drift") is True
+               and f"{SUBS_REL}/PROTOCOL.md" in dry.data.get("would_write", []),
+               f"got {dry.data}")
+        expect("sync --dry-run did not repair",
+               not (base / SUBS_REL / "PROTOCOL.md").is_file(),
+               "PROTOCOL.md exists after dry-run")
+        live_state = tree_snapshot(base / SUBS_REL / "saihunt")
+        sync = sub_sync(base, home.as_posix())
+        expect("sync succeeds", sync.ok, sync.message)
+        expect("sync repaired the missing file",
+               (base / SUBS_REL / "PROTOCOL.md").is_file(),
+               "PROTOCOL.md still missing")
+        expect("live instance history untouched by sync",
+               live_state == tree_snapshot(base / SUBS_REL / "saihunt"),
+               "saihunt STATE/BOARD/LOG/kitchen changed")
+        expect("shared inbox preserved byte-identically",
+               (inbox.is_file() and inbox.read_text(encoding="utf-8")
+                == inbox_text),
+               "inbox changed")
+        second = sub_sync(base, home.as_posix(), dry_run=True)
+        expect("second sync -> no drift",
+               second.ok and second.data.get("drift") is False,
+               f"drift={second.data.get('drift')} changed={second.data.get('changed')}")
+
+        # Exact inherited bytes without an ownership receipt used to form an
+        # SC-0 fixed-point trap: the planner required sync, while sync returned
+        # "no drift" and wrote no receipt forever. A metadata-only journal op
+        # must establish provenance without touching the inherited files.
+        receipt_only = Path(raw) / "sync-receipt-only"
+        seed_project(receipt_only)
+        shutil.copytree(home / "extensions" / "subs",
+                        receipt_only / SUBS_REL, dirs_exist_ok=True)
+        before_receipt = shared_contract_status(receipt_only, home.as_posix())
+        established = sub_sync(receipt_only, home.as_posix())
+        after_receipt = shared_contract_status(receipt_only, home.as_posix())
+        expect("byte-current contract without receipt is not falsely terminal",
+               not before_receipt["current"]
+               and before_receipt.get("inventory_establishment") is True,
+               repr(before_receipt))
+        expect("metadata-only sync establishes ownership receipt",
+               established.ok and bool(established.op_id)
+               and established.changed_files == []
+               and established.data.get("inventory_established") is True
+               and after_receipt["current"],
+               f"result={established.to_json()} status={after_receipt}")
+
+        # Removed inherited paths are owned only through the previous receipt.
+        # Exact old bytes may be deleted, deepest file/directory first; local
+        # edits refuse before a journal exists.
+        obsolete_root = Path(raw) / "sync-obsolete"
+        seed_project(obsolete_root)
+        spawned = sub_spawn(obsolete_root, "saihunt", home.as_posix())
+        expect("obsolete-sync fixture spawn ok", spawned.ok, spawned.message)
+        obsolete_source = home / "extensions" / "subs" / "TEMPLATE" \
+            / "retired" / "nested.txt"
+        obsolete_source.parent.mkdir(parents=True)
+        obsolete_source.write_text("owned old bytes\n", encoding="utf-8")
+        admitted = sub_sync(obsolete_root, home.as_posix())
+        obsolete_local = obsolete_root / SUBS_REL / "TEMPLATE" \
+            / "retired" / "nested.txt"
+        expect("sync admits new inherited nested file with receipt",
+               admitted.ok and obsolete_local.is_file(), admitted.to_json())
+        obsolete_source.unlink()
+        obsolete_source.parent.rmdir()
+        removed = sub_sync(obsolete_root, home.as_posix())
+        expect("sync deletes receipt-owned obsolete file and empty directory",
+               removed.ok and not obsolete_local.exists()
+               and not obsolete_local.parent.exists()
+               and f"{SUBS_REL}/TEMPLATE/retired/nested.txt"
+               in removed.data.get("deleted", [])
+               and shared_contract_status(obsolete_root,
+                                          home.as_posix())["current"],
+               removed.to_json())
+
+        conflict_root = Path(raw) / "sync-obsolete-conflict"
+        seed_project(conflict_root)
+        conflict_source = home / "extensions" / "subs" / "saiconflict.md"
+        conflict_source.write_text("owned source\n", encoding="utf-8")
+        conflict_spawn = sub_spawn(conflict_root, "saihunt", home.as_posix())
+        conflict_local = conflict_root / SUBS_REL / "saiconflict.md"
+        conflict_local.write_text("local edit\n", encoding="utf-8")
+        conflict_source.unlink()
+        ops_before = set((conflict_root / ".saipen" / "recovery" /
+                          "ops").iterdir())
+        refused = sub_sync(conflict_root, home.as_posix())
+        ops_after = set((conflict_root / ".saipen" / "recovery" /
+                         "ops").iterdir())
+        expect("sync refuses modified obsolete inherited file with zero writes",
+               conflict_spawn.ok and not refused.ok
+               and "refusing deletion" in refused.message
+               and conflict_local.read_text(encoding="utf-8") == "local edit\n"
+               and ops_before == ops_after, refused.to_json())
+
+        # A crash after an obsolete-file deletion resumes from the same staged
+        # receipt and reaches the identical current fixed point.
+        crash_root = Path(raw) / "sync-obsolete-crash"
+        seed_project(crash_root)
+        crash_source = home / "extensions" / "subs" / "saicrash.md"
+        crash_source.write_text("crash-owned\n", encoding="utf-8")
+        crash_spawn = sub_spawn(crash_root, "saihunt", home.as_posix())
+        crash_local = crash_root / SUBS_REL / "saicrash.md"
+        crash_source.unlink()
+        from saipen_engine import journal as sync_journal
+        from saipen_engine.journal import pending_ops as sync_pending, recover
+
+        def crash_after_delete(key: str) -> None:
+            if key == "delete_file":
+                raise RuntimeError("simulated sync crash after delete")
+
+        crashed = False
+        with mock.patch.object(sync_journal, "_crash_after",
+                               side_effect=crash_after_delete):
+            try:
+                sub_sync(crash_root, home.as_posix())
+            except RuntimeError:
+                crashed = True
+        pending = sync_pending(crash_root)
+        recovered = recover(crash_root, pending[0]["op_id"]) if pending else {}
+        expect("obsolete sync crash resumes to receipt-bound current state",
+               crash_spawn.ok and crashed and len(pending) == 1
+               and recovered.get("ok") and not crash_local.exists()
+               and shared_contract_status(crash_root,
+                                          home.as_posix())["current"],
+               f"pending={pending} recovered={recovered}")
+
+        # 4. ROLE REVISION AUTHORITY (hostile control 5): the PROJECT-LOCAL
+        # charter is the only authority; missing local evidence is
+        # UNAVAILABLE, never a silent fallback to the home charter.
+        base = Path(raw) / "role"
+        seed_project(base)
+        spawn = sub_spawn(base, "saihunt", home.as_posix())
+        expect("role-probe spawn ok", spawn.ok, spawn.message)
+        recorded = spawn.data.get("role_revision") or ""
+        expect("spawned built-in worker has a real role_revision",
+               recorded.startswith("sha256:"), f"got {recorded!r}")
+        current = current_local_role_revision(base, "saihunt")
+        expect("local charter is the authority",
+               current is not None and current == recorded,
+               f"current={current} recorded={recorded}")
+        expect("role freshness CURRENT with local charter",
+               role_freshness(base, "saihunt", recorded) == "current",
+               "not current")
+        # Delete the LOCAL charter only; the home copy still exists.
+        (base / SUBS_REL / "saihunt.md").unlink()
+        expect("local missing -> UNAVAILABLE, never home fallback",
+               role_freshness(base, "saihunt", recorded,
+                              home.as_posix()) == "unavailable",
+               "fell back to home charter")
+        # Generic role: revision derives from local PROTOCOL.md, never blank.
+        spawn_gen = sub_spawn(base, "saiscan", home.as_posix())
+        expect("generic spawn succeeds", spawn_gen.ok, spawn_gen.message)
+        generic_rev = spawn_gen.data.get("role_revision") or ""
+        expect("generic worker revision never blank",
+               generic_rev.startswith("sha256:"), f"got {generic_rev!r}")
+        expect("generic revision derives from local PROTOCOL",
+               generic_rev == current_local_role_revision(base, "saiscan"),
+               "generic revision mismatch")
+
+        # 5. SUB-BOARD COHERENCE (hostile control 6).
+        board = parse_sub_board(
+            "## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n\n## TODO\n")
+        expect("duplicate heading FAILs", bool(board["errors"]),
+                f"got {board['errors']}")
+        board = parse_sub_board(
+            "## DOING\n\n## TODO\n- [ ] H-1 open\n\n## DONE\n\n## BLOCKED\n",
+            ticket_prefix="H")
+        expect("valid board passes", not board["errors"],
+                f"got {board['errors']}")
+        board = parse_sub_board(
+            "## DOING\n- [x] H-1 wrong checkbox\n\n## TODO\n\n## DONE\n\n## BLOCKED\n")
+        expect("checkbox/section mismatch FAILs", bool(board["errors"]),
+                f"got {board['errors']}")
+        board = parse_sub_board(
+            "## DOING\n- [/] H-1 a\n- [/] H-2 b\n\n## TODO\n\n## DONE\n\n## BLOCKED\n")
+        expect("two DOING FAILs", bool(board["errors"]),
+                f"got {board['errors']}")
+        board = parse_sub_board(
+            "## DOING\n\n## TODO\n- [ ] T-1 core id\n\n## DONE\n\n## BLOCKED\n")
+        expect("Core T-### namespace FAILs on a sub board",
+               bool(board["errors"]), f"got {board['errors']}")
+        for role, prefix in (("saihunt", "HUNT"), ("saitest", "TEST"),
+                             ("saipython", "PY"), ("saiui", "UI"),
+                             ("saiwiki", "W")):
+            board = parse_sub_board(
+                f"## DOING\n\n## TODO\n- [ ] {prefix}-1 open\n\n"
+                "## DONE\n\n## BLOCKED\n", expected_role=role)
+            expect(f"{role} canonical {prefix}- board prefix passes",
+                   not board["errors"], f"got {board['errors']}")
+        board = parse_sub_board(
+            "## DOING\n\n## TODO\n- [ ] PY-1 wrong\n\n## DONE\n\n"
+            "## BLOCKED\n", expected_role="saihunt")
+        expect("wrong role ticket prefix FAILs", bool(board["errors"]),
+               f"got {board['errors']}")
+        board = parse_sub_board(
+            "## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n\n"
+            "## UNKNOWN\n", expected_role="saihunt")
+        expect("unknown board heading FAILs", bool(board["errors"]),
+               f"got {board['errors']}")
+
+        # 6. TRUTHFUL STATUS (hostile control 7): the real board state is
+        # reported, and an empty OUTBOX never implies CURRENT.
+        base = Path(raw) / "status"
+        seed_project(base)
+        spawn = sub_spawn(base, "saihunt", home.as_posix())
+        expect("status-probe spawn ok", spawn.ok, spawn.message)
+        (base / SUBS_REL / "saihunt" / "BOARD.md").write_text(
+            "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n"
+            "- [ ] HUNT-1 unresolved\n- [ ] HUNT-2 unresolved\n",
+            encoding="utf-8")
+        (base / SUBS_REL / "saihunt" / "STATE.md").write_text(
+            (base / SUBS_REL / "saihunt" / "STATE.md").read_text(
+                encoding="utf-8").replace("phase: PLAN", "phase: DONE"),
+            encoding="utf-8")
+        health = sub_instance_health(base, "saihunt")
+        expect("DONE + unresolved BLOCKED board is INVALID, not DONE",
+               health["health"] == HEALTH_INVALID,
+               f"got {health['health']}")
+        # Empty OUTBOX + no evidence: NOT_RUN, never CURRENT.
+        (base / SUBS_REL / "saihunt" / "BOARD.md").write_text(
+            "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n",
+            encoding="utf-8")
+        health = sub_instance_health(base, "saihunt")
+        expect("empty OUTBOX never implies CURRENT",
+               health["health"] != HEALTH_CURRENT
+               and health["health"] == HEALTH_NOT_RUN,
+               f"got {health['health']}")
+        (base / SUBS_REL / "saihunt" / "STATE.md").write_text(
+            (base / SUBS_REL / "saihunt" / "STATE.md").read_text(
+                encoding="utf-8").replace("phase: DONE", "phase: BLOCKED"),
+            encoding="utf-8")
+        health = sub_instance_health(base, "saihunt")
+        expect("phase BLOCKED reports BLOCKED",
+               health["health"] == HEALTH_BLOCKED,
+               f"got {health['health']}")
+
+        # 7. TRUTHFUL JOURNALED COLLECT: incomplete/malformed packages refuse;
+        # complete current evidence creates one Core review hypothesis.
+        base = Path(raw) / "collect"
+        seed_project(base)
+        spawn = sub_spawn(base, "saihunt", home.as_posix())
+        expect("collect-probe spawn ok", spawn.ok, spawn.message)
+        outbox = base / SUBS_REL / "saihunt" / "kitchen" / "OUTBOX.md"
+        outbox.write_text(
+            "# OUTBOX\n\n## HUNT-1: finding\n- **status:** ready\n"
+            "- **summary:** no triple\n", encoding="utf-8")
+        result = sub_collect(base, "saihunt")
+        expect("ready package without source triple refused",
+               not result.ok and result.code == "MALFORMED_PACKAGE",
+               f"got {result.code}")
+        outbox.write_text(
+            "# OUTBOX\n\n## not-a-package\nrandom prose\n",
+            encoding="utf-8")
+        result = sub_collect(base, "saihunt")
+        expect("malformed OUTBOX refused",
+               not result.ok and result.code == "MALFORMED_PACKAGE",
+               f"got {result.code}")
+
+        # 7b. ONE OUTBOX model backs health + collect. Header-only TEMPLATE is
+        # valid; complete current evidence is ready for review/current after
+        # review; duplicate/unknown/wrong-owner/ambiguous evidence fails.
+        empty = parse_outbox("# OUTBOX\n\n<!-- template -->\n", "saihunt")
+        expect("header-only OUTBOX template is a valid empty queue",
+               not empty.errors and not empty.packages,
+               f"errors={empty.errors}")
+        from freshness import compute_source_identity
+        current = compute_source_identity(base)
+        role_revision = current_local_role_revision(
+            base, "saihunt", home.as_posix())
+
+        def complete_package(package_id="HUNT-1", producer="saihunt",
+                             status="ready"):
+            return (
+                f"# OUTBOX\n\n## {package_id}: complete evidence\n"
+                f"- **status:** {status}\n- **producer:** {producer}\n"
+                f"- **source_head:** {current.source_head}\n"
+                f"- **source_tree_fingerprint:** "
+                f"{current.source_tree_fingerprint}\n"
+                f"- **role_revision:** {role_revision}\n"
+                "- **coverage:** all requested surfaces\n"
+                "- **payload:** []\n- **verified:** probe PASS\n"
+                "- **instructions:** review evidence\n")
+
+        outbox.write_text(complete_package(), encoding="utf-8")
+        (base / SUBS_REL / "saihunt" / "BOARD.md").write_text(
+            "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n",
+            encoding="utf-8")
+        (base / SUBS_REL / "saihunt" / "STATE.md").write_text(
+            (base / SUBS_REL / "saihunt" / "STATE.md").read_text(
+                encoding="utf-8").replace("phase: PLAN", "phase: DONE"),
+            encoding="utf-8")
+        health = sub_instance_health(base, "saihunt", current)
+        expect("complete current READY OUTBOX -> READY_FOR_REVIEW",
+               health["health"] == HEALTH_READY_FOR_REVIEW,
+               f"got {health['health']} {health['outbox']}")
+        dry_before = tree_snapshot(base)
+        dry_collect = sub_collect(base, "saihunt", dry_run=True)
+        dry_after = tree_snapshot(base)
+        expect("collect dry-run computes ticket and writes zero bytes/journal",
+               dry_collect.ok and dry_collect.code == "SUB_COLLECTED"
+               and dry_collect.data.get("dry_run") is True
+               and dry_before == dry_after,
+               f"result={dry_collect.to_dict()} changed={dry_before != dry_after}")
+        collected = sub_collect(base, "saihunt")
+        core_board = (base / ".saipen" / "BOARD.md").read_text(encoding="utf-8")
+        core_log = (base / ".saipen" / "LOG.md").read_text(encoding="utf-8")
+        manifest_text = (base / MANIFEST_REL).read_text(encoding="utf-8")
+        identity_match = re.search(
+            r"last_collect: (sha256:[0-9a-f]{64})@"
+            r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", manifest_text)
+        expect("complete current collection creates one Core TODO hypothesis",
+               collected.ok and collected.code == "SUB_COLLECTED"
+               and core_board.count("Review SubSaipen hypothesis") == 1
+               and "not accepted fact" in core_board,
+               f"result={collected.to_dict()} board={core_board}")
+        expect("collection marks OUTBOX reviewed and binds immutable identity",
+               "- **status:** reviewed" in outbox.read_text(encoding="utf-8")
+               and identity_match is not None
+               and identity_match.group(1) in core_board
+               and identity_match.group(1) in core_log,
+               f"manifest={manifest_text} log={core_log}")
+        from saipen_engine.fast_check import validate_project as fast_validate
+        expect("collection preserves Core LOG/STATE binding",
+               not fast_validate(base), repr(fast_validate(base)))
+        health = sub_instance_health(base, "saihunt", current)
+        expect("complete current reviewed OUTBOX -> CURRENT",
+               health["health"] == HEALTH_CURRENT,
+               f"got {health['health']} {health['outbox']}")
+        retry_before = tree_snapshot(base)
+        retried = sub_collect(base, "saihunt")
+        retry_after = tree_snapshot(base)
+        expect("collect retry deduplicates without second Core ticket",
+               retried.ok and retried.code == "ALREADY_COLLECTED"
+               and retry_before == retry_after
+               and (base / ".saipen" / "BOARD.md").read_text(
+                   encoding="utf-8").count("Review SubSaipen hypothesis") == 1,
+               retried.to_json())
+        hostile_outboxes = (
+            ("duplicate OUTBOX field FAILs",
+             complete_package().replace("- **producer:** saihunt\n",
+                                        "- **producer:** saihunt\n"
+                                        "- **producer:** saihunt\n")),
+            ("unknown OUTBOX field FAILs",
+             complete_package() + "- **mystery:** nope\n"),
+            ("wrong OUTBOX producer FAILs",
+             complete_package(producer="saiwiki")),
+            ("duplicate OUTBOX package ID FAILs",
+             complete_package() + complete_package().split("# OUTBOX\n", 1)[1]),
+            ("invalid OUTBOX source_head FAILs",
+             complete_package().replace(current.source_head, "not-a-sha")),
+            ("invalid OUTBOX tree fingerprint FAILs",
+             complete_package().replace(current.source_tree_fingerprint,
+                                        "git-delta-v1:beef")),
+            ("invalid OUTBOX role revision FAILs",
+             complete_package().replace(role_revision, "sha256:beef")),
+        )
+        for label, hostile in hostile_outboxes:
+            parsed = parse_outbox(hostile, "saihunt")
+            expect(label, bool(parsed.errors), f"got {parsed.errors}")
+        ambiguous = (complete_package("HUNT-1")
+                     + complete_package("HUNT-2").split("# OUTBOX\n", 1)[1])
+        outbox.write_text(ambiguous, encoding="utf-8")
+        result = sub_collect(base, "saihunt")
+        expect("two current READY packages refuse as ambiguous",
+               not result.ok and result.code == "MALFORMED_PACKAGE",
+               f"got {result.code} {result.message}")
+
+        # Explicit producers are never swallowed by generic collection.
+        explicit = Path(raw) / "collect-explicit"
+        seed_project(explicit)
+        expect("explicit-probe spawn core role",
+               sub_spawn(explicit, "saihunt", home.as_posix()).ok)
+        expect("explicit-probe spawn saiwiki",
+               sub_spawn(explicit, "saiwiki", home.as_posix()).ok)
+        expect("explicit-probe spawn saitranslate",
+               sub_spawn(explicit, "saitranslate", home.as_posix()).ok)
+        targeted_explicit = sub_collect(explicit, "saiwiki")
+        expect("targeted explicit producer refuses with EXPLICIT_POLICY",
+               not targeted_explicit.ok
+               and "EXPLICIT_POLICY" in targeted_explicit.message,
+               targeted_explicit.to_json())
+        aggregate = sub_collect(explicit)
+        skipped_names = {item["name"] for item in aggregate.data.get("skipped", [])}
+        expect("aggregate skips explicit saiwiki/saitranslate",
+               aggregate.ok and skipped_names == {"saiwiki", "saitranslate"},
+               aggregate.to_json())
+
+        # 7c. Stale-CAS simulations mutate captured dependencies immediately
+        # after lock acquisition. No timing, threads, or sleeps.
+        cas = Path(raw) / "cas"
+        seed_project(cas)
+        spawn = sub_spawn(cas, "saihunt", home.as_posix())
+        expect("CAS-probe spawn ok", spawn.ok, spawn.message)
+
+        class MutatingLock:
+            def __init__(self, mutation):
+                self.mutation = mutation
+
+            def __enter__(self):
+                self.mutation()
+                return self
+
+            def __exit__(self, *_args):
+                return False
+
+        state_path = cas / SUBS_REL / "saihunt" / "STATE.md"
+        original_state = state_path.read_bytes()
+        with mock.patch("saipen_engine.subs.project_writer_lock",
+                        lambda _root: MutatingLock(
+                            lambda: state_path.write_bytes(
+                                original_state + b"\nforeign\n"))):
+            stale = sub_adopt(cas, "saihunt", home.as_posix())
+        expect("adopt stale STATE CAS refuses",
+               not stale.ok and stale.code == "STALE_STATE",
+               f"got {stale.code}")
+        state_path.write_bytes(original_state)
+        local_charter = cas / SUBS_REL / "saihunt.md"
+        charter_before = local_charter.read_bytes()
+        with mock.patch("saipen_engine.subs.project_writer_lock",
+                        lambda _root: MutatingLock(
+                            lambda: local_charter.write_bytes(
+                                charter_before + b"foreign\n"))):
+            stale = sub_adopt(cas, "saihunt", home.as_posix())
+        expect("adopt stale charter CAS refuses",
+               not stale.ok and stale.code == "STALE_STATE",
+               f"got {stale.code}")
+        local_charter.write_bytes(charter_before)
+        log_path = cas / SUBS_REL / "saihunt" / "LOG.md"
+        original_log = log_path.read_bytes()
+        with mock.patch("saipen_engine.subs.project_writer_lock",
+                        lambda _root: MutatingLock(
+                            lambda: log_path.write_bytes(
+                                original_log + b"foreign\n"))):
+            stale = sub_pause(cas, "saihunt")
+        expect("pause stale LOG CAS refuses",
+               not stale.ok and stale.code == "STALE_STATE",
+               f"got {stale.code}")
+        log_path.write_bytes(original_log)
+        manifest_path = cas / MANIFEST_REL
+        manifest_before = manifest_path.read_bytes()
+        with mock.patch("saipen_engine.subs.project_writer_lock",
+                        lambda _root: MutatingLock(
+                            lambda: manifest_path.write_bytes(
+                                manifest_before + b"\n"))):
+            stale = sub_pause(cas, "saihunt")
+        expect("pause stale MANIFEST CAS refuses",
+               not stale.ok and stale.code == "STALE_STATE",
+               f"got {stale.code}")
+        manifest_path.write_bytes(manifest_before)
+        paused = sub_pause(cas, "saihunt")
+        expect("CAS-probe pause setup ok", paused.ok, paused.message)
+        paused_log = log_path.read_bytes()
+        with mock.patch("saipen_engine.subs.project_writer_lock",
+                        lambda _root: MutatingLock(
+                            lambda: log_path.write_bytes(
+                                paused_log + b"foreign\n"))):
+            stale = sub_resume(cas, "saihunt")
+        expect("resume stale LOG CAS refuses",
+               not stale.ok and stale.code == "STALE_STATE",
+               f"got {stale.code}")
+        log_path.write_bytes(paused_log)
+        resumed = sub_resume(cas, "saihunt")
+        expect("CAS-probe resume setup ok", resumed.ok, resumed.message)
+        target_state = cas / SUBS_REL / "saiui" / "STATE.md"
+        with mock.patch("saipen_engine.subs.project_writer_lock",
+                        lambda _root: MutatingLock(
+                            lambda: (target_state.parent.mkdir(parents=True),
+                                     target_state.write_text("foreign\n",
+                                                             encoding="utf-8")))):
+            stale = sub_spawn(cas, "saiui", home.as_posix())
+        expect("spawn target-absence CAS refuses",
+               not stale.ok and stale.code == "STALE_STATE",
+               f"got {stale.code}")
+        shutil.rmtree(target_state.parent)
+        protocol_source = home / "extensions" / "subs" / "PROTOCOL.md"
+        source_before = protocol_source.read_bytes()
+        (cas / SUBS_REL / "PROTOCOL.md").unlink()
+        try:
+            with mock.patch("saipen_engine.subs.project_writer_lock",
+                            lambda _root: MutatingLock(
+                                lambda: protocol_source.write_bytes(
+                                    source_before + b"foreign\n"))):
+                stale = sub_sync(cas, home.as_posix())
+            expect("sync stale source CAS refuses",
+                   not stale.ok and stale.code == "STALE_STATE",
+                   f"got {stale.code}")
+        finally:
+            protocol_source.write_bytes(source_before)
+
+        collect_cas = Path(raw) / "collect-cas"
+        seed_project(collect_cas)
+        expect("collect-CAS spawn ok",
+               sub_spawn(collect_cas, "saihunt", home.as_posix()).ok)
+        collect_outbox = collect_cas / SUBS_REL / "saihunt" / "kitchen" / \
+            "OUTBOX.md"
+        collect_source = compute_source_identity(collect_cas)
+        collect_role = current_local_role_revision(
+            collect_cas, "saihunt", home.as_posix())
+        collect_ready = (
+            "# OUTBOX\n\n## HUNT-77: CAS evidence\n"
+            "- **status:** ready\n- **producer:** saihunt\n"
+            f"- **source_head:** {collect_source.source_head}\n"
+            "- **source_tree_fingerprint:** "
+            f"{collect_source.source_tree_fingerprint}\n"
+            f"- **role_revision:** {collect_role}\n"
+            "- **coverage:** CAS surface\n- **payload:** []\n"
+            "- **verified:** probe PASS\n- **instructions:** review\n")
+        collect_outbox.write_text(collect_ready, encoding="utf-8")
+        core_before = {rel: (collect_cas / rel).read_bytes() for rel in (
+            ".saipen/LOG.md", ".saipen/BOARD.md", ".saipen/STATE.md",
+            MANIFEST_REL)}
+        with mock.patch("saipen_engine.subs.project_writer_lock",
+                        lambda _root: MutatingLock(
+                            lambda: collect_outbox.write_bytes(
+                                collect_outbox.read_bytes() + b"\nforeign\n"))):
+            stale_collect = sub_collect(collect_cas, "saihunt")
+        expect("collect stale OUTBOX CAS refuses with zero Core writes",
+               not stale_collect.ok and stale_collect.code == "STALE_STATE"
+               and all((collect_cas / rel).read_bytes() == before
+                       for rel, before in core_before.items()),
+               stale_collect.to_json())
+
+        # 7d. Actual clean: exact archive first, strict unregister, journaled
+        # file/dir deletion, CAS refusal, crash roll-forward, and confinement.
+        def clean_fixture(label: str, name: str = "saihunt"):
+            project = Path(raw) / label
+            seed_project(project)
+            spawned = sub_spawn(project, name, home.as_posix())
+            instance = project / SUBS_REL / name
+            state_path = instance / "STATE.md"
+            state_path.write_text(state_path.read_text(encoding="utf-8").replace(
+                "phase: PLAN", "phase: DONE"), encoding="utf-8")
+            (instance / "nested" / "empty").mkdir(parents=True)
+            (instance / "nested" / "payload.bin").write_bytes(
+                b"\x00exact-clean-archive\xff")
+            return project, instance, spawned
+
+        def surface_snapshot(path: Path):
+            entries = []
+            for candidate in sorted(path.rglob("*")):
+                rel = candidate.relative_to(path).as_posix()
+                entries.append((rel, "d", b"") if candidate.is_dir() else
+                               (rel, "f", candidate.read_bytes()))
+            return tuple(entries)
+
+        clean_root, clean_instance, clean_spawn = clean_fixture("clean-actual")
+        expect("clean fixture spawn succeeds", clean_spawn.ok,
+               clean_spawn.message)
+        expect("clean sibling spawn succeeds",
+               sub_spawn(clean_root, "saiui", home.as_posix()).ok)
+        source_bytes = {path.relative_to(clean_instance).as_posix(): path.read_bytes()
+                        for path in clean_instance.rglob("*") if path.is_file()}
+        sibling_before = surface_snapshot(clean_root / SUBS_REL / "saiui")
+        shared_before = {
+            path.relative_to(clean_root / SUBS_REL).as_posix(): path.read_bytes()
+            for path in (clean_root / SUBS_REL).iterdir()
+            if path.is_file() and path.name != "MANIFEST.md"
+        }
+        cleaned = sub_clean(clean_root, "saihunt")
+        archive = clean_root / cleaned.data.get("archive", "") / "instance"
+        expect("safe terminal worker is archived, removed, and unregistered",
+               cleaned.ok and cleaned.code == "SUB_CLEANED"
+               and not clean_instance.exists()
+               and "- saihunt --" not in (clean_root / MANIFEST_REL).read_text(
+                   encoding="utf-8")
+               and "- saiui --" in (clean_root / MANIFEST_REL).read_text(
+                   encoding="utf-8"), cleaned.to_json())
+        archived_bytes = {
+            path.relative_to(archive).as_posix(): path.read_bytes()
+            for path in archive.rglob("*") if path.is_file()
+        } if archive.is_dir() else {}
+        expect("clean archive preserves every source file byte-exactly",
+               archived_bytes == source_bytes,
+               repr((sorted(source_bytes), sorted(archived_bytes))))
+        expect("clean leaves sibling worker and shared files untouched",
+               sibling_before == surface_snapshot(clean_root / SUBS_REL / "saiui")
+               and shared_before == {
+                   path.relative_to(clean_root / SUBS_REL).as_posix(): path.read_bytes()
+                   for path in (clean_root / SUBS_REL).iterdir()
+                   if path.is_file() and path.name != "MANIFEST.md"
+               }, "sibling or shared contract changed")
+        retry = sub_clean(clean_root, "saihunt")
+        expect("clean retry after COMMITTED is idempotent ALREADY_CLEAN",
+               retry.ok and retry.code == "ALREADY_CLEAN", retry.to_json())
+
+        dry_root, _dry_instance, _ = clean_fixture("clean-dry")
+        dry_before = surface_snapshot(dry_root)
+        dry_clean = sub_clean(dry_root, "saihunt", dry_run=True)
+        expect("clean dry-run reports exact writes/deletes and changes zero bytes",
+               dry_clean.ok and dry_clean.data.get("would_write")
+               and dry_clean.data.get("would_delete")
+               and dry_before == surface_snapshot(dry_root)
+               and not (dry_root / ".saipen" / "recovery" / "subs" /
+                        "saihunt" / dry_clean.op_id).exists(),
+               dry_clean.to_json())
+
+        open_root, open_instance, _ = clean_fixture("clean-open")
+        (open_instance / "BOARD.md").write_text(
+            "# Board\n## DOING\n## TODO\n- [ ] HUNT-1 open\n"
+            "## DONE\n## BLOCKED\n", encoding="utf-8")
+        open_before = surface_snapshot(open_root)
+        open_clean = sub_clean(open_root, "saihunt")
+        expect("clean refuses open board work with zero writes",
+               not open_clean.ok and open_clean.code == "VALIDATION_FAILED"
+               and open_before == surface_snapshot(open_root), open_clean.to_json())
+        (open_instance / "BOARD.md").write_text(
+            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+            encoding="utf-8")
+        (open_instance / "kitchen" / "OUTBOX.md").write_text(
+            "# OUTBOX\n\n## HUNT-1: pending\n- **status:** ready\n",
+            encoding="utf-8")
+        ready_before = surface_snapshot(open_root)
+        ready_clean = sub_clean(open_root, "saihunt")
+        expect("clean refuses READY OUTBOX with zero writes",
+               not ready_clean.ok and ready_clean.code == "VALIDATION_FAILED"
+               and ready_before == surface_snapshot(open_root), ready_clean.to_json())
+
+        stale_root, stale_instance, _ = clean_fixture("clean-stale-manifest")
+        stale_manifest = stale_root / MANIFEST_REL
+        stale_raw = stale_manifest.read_bytes()
+        ops_before = set((stale_root / ".saipen" / "recovery" / "ops").iterdir())
+        with mock.patch("saipen_engine.subs.project_writer_lock",
+                        lambda _root: MutatingLock(
+                            lambda: stale_manifest.write_bytes(stale_raw + b"\n"))):
+            stale_clean = sub_clean(stale_root, "saihunt")
+        ops_after = set((stale_root / ".saipen" / "recovery" / "ops").iterdir())
+        expect("clean stale MANIFEST CAS refuses before journal/archive writes",
+               not stale_clean.ok and stale_clean.code == "STALE_STATE"
+               and ops_before == ops_after and stale_instance.is_dir(),
+               stale_clean.to_json())
+
+        tree_root, tree_instance, _ = clean_fixture("clean-stale-tree")
+        tree_ops_before = set((tree_root / ".saipen" / "recovery" / "ops").iterdir())
+        foreign = tree_instance / "foreign.txt"
+        with mock.patch("saipen_engine.subs.project_writer_lock",
+                        lambda _root: MutatingLock(
+                            lambda: foreign.write_bytes(b"foreign\n"))):
+            tree_clean = sub_clean(tree_root, "saihunt")
+        tree_ops_after = set((tree_root / ".saipen" / "recovery" / "ops").iterdir())
+        expect("clean stale instance-tree CAS refuses before cleanup writes",
+               not tree_clean.ok and tree_clean.code == "STALE_STATE"
+               and tree_ops_before == tree_ops_after and foreign.is_file(),
+               tree_clean.to_json())
+
+        from saipen_engine import journal as clean_journal
+        from saipen_engine.journal import pending_ops as clean_pending, recover
+
+        def crash_clean(label: str, crash_key: str):
+            project, instance, _spawned = clean_fixture(label)
+
+            def injected(key: str):
+                if key == crash_key:
+                    raise RuntimeError(f"crash after {crash_key}")
+
+            crashed = False
+            with mock.patch.object(clean_journal, "_crash_after",
+                                   side_effect=injected):
+                try:
+                    sub_clean(project, "saihunt")
+                except RuntimeError:
+                    crashed = True
+            pending = clean_pending(project)
+            recovered = recover(project, pending[0]["op_id"]) if pending else {}
+            return project, instance, crashed, pending, recovered
+
+        crash_manifest = crash_clean("clean-crash-manifest", "manifest")
+        expect("clean crash after MANIFEST recovers to same final state",
+               crash_manifest[2] and len(crash_manifest[3]) == 1
+               and crash_manifest[4].get("ok")
+               and not crash_manifest[1].exists()
+               and "- saihunt --" not in (crash_manifest[0] / MANIFEST_REL).read_text(
+                   encoding="utf-8"), repr(crash_manifest[4]))
+        crash_delete = crash_clean("clean-crash-delete", "delete_file")
+        expect("clean crash after first deletion recovers to same final state",
+               crash_delete[2] and len(crash_delete[3]) == 1
+               and crash_delete[4].get("ok")
+               and not crash_delete[1].exists()
+               and "- saihunt --" not in (crash_delete[0] / MANIFEST_REL).read_text(
+                   encoding="utf-8"), repr(crash_delete[4]))
+
+        escape_root, _escape_instance, _ = clean_fixture("clean-escape")
+        escape_manifest = escape_root / MANIFEST_REL
+        escape_manifest.write_text(
+            escape_manifest.read_text(encoding="utf-8").replace(
+                f"{SUBS_REL}/saihunt/", "../outside/saihunt/"),
+            encoding="utf-8")
+        escape_before = surface_snapshot(escape_root)
+        escaped = sub_clean(escape_root, "saihunt")
+        expect("clean rejects manifest path escape with zero writes",
+               not escaped.ok and escaped.code == "INVALID_MANIFEST"
+               and escape_before == surface_snapshot(escape_root), escaped.to_json())
+
+        # 8. CREW FIXED-POINT (hostile controls 9/10): one blocked role
+        # blocks terminal SC; the plan derives the FIRST unsatisfied stage.
+        base = Path(raw) / "crew"
+        seed_project(base)
+        for name in ("saihunt", "saitest", "saipython", "saiui", "saiwiki"):
+            spawn = sub_spawn(base, name, home.as_posix())
+            expect(f"crew-probe spawn {name}", spawn.ok, spawn.message)
+        plan = crew_plan(base)
+        expect("crew plan derives the circuit",
+               bool(plan.get("stages")) and plan["ok"] is False,
+               "crew plan did not derive an unsatisfied circuit")
+        expect("crew plan names the first unsatisfied stage",
+               plan.get("first_unsatisfied") == "SC-2",
+               f"got {plan.get('first_unsatisfied')}")
+        gate = crew_gate_problems(base)
+        expect("--gate crew FAILs with unresolved role work",
+               any("saihunt" in p for p in gate),
+               f"gate problems={gate}")
+        # One role blocked => terminal SC impossible.
+        (base / SUBS_REL / "saihunt" / "BOARD.md").write_text(
+            "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n"
+            "- [ ] HUNT-1 blocked\n", encoding="utf-8")
+        gate = crew_gate_problems(base)
+        expect("blocked role keeps --gate crew red",
+               any("SC-2" in p or "saihunt" in p for p in gate), f"gate={gate}")
+
+        # 9. FULL POSITIVE WITNESS. Facts live under .saipen, which source
+        # identity intentionally excludes; one immutable source triple binds
+        # every package in each planner pass.
+        pre = Path(raw) / "crew-positive-pre"
+        seed_project(pre)
+        durable = ("saihunt", "saitest", "saipython", "saiui", "saiwiki")
+        for name in durable:
+            spawned = sub_spawn(pre, name, home.as_posix())
+            expect(f"positive fixture spawn {name}", spawned.ok,
+                   spawned.message)
+            state_path = pre / SUBS_REL / name / "STATE.md"
+            text = state_path.read_text(encoding="utf-8")
+            state_path.write_text(text.replace("phase: PLAN", "phase: DONE"),
+                                  encoding="utf-8")
+            (pre / SUBS_REL / name / "BOARD.md").write_text(
+                "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n"
+                "## BLOCKED\n", encoding="utf-8")
+
+        pre_source = compute_source_identity(pre)
+
+        def package_text(name: str, package_id: str, status: str,
+                         source=pre_source) -> str:
+            revision = current_local_role_revision(pre, name, home.as_posix())
+            return (
+                f"# OUTBOX\n\n## {package_id}: complete evidence\n"
+                f"- **status:** {status}\n- **producer:** {name}\n"
+                f"- **source_head:** {source.source_head}\n"
+                f"- **source_tree_fingerprint:** "
+                f"{source.source_tree_fingerprint}\n"
+                f"- **role_revision:** {revision}\n"
+                "- **coverage:** complete role surface\n"
+                "- **payload:** []\n- **verified:** probe PASS\n"
+                "- **instructions:** Core reviews evidence\n")
+
+        package_ids = {"saihunt": "HUNT-900", "saitest": "TEST-900",
+                       "saipython": "PY-900", "saiui": "UI-900",
+                       "saiwiki": "W-900", "saitranslate": "SAIT-900"}
+        for name in ("saihunt", "saitest", "saipython", "saiui"):
+            (pre / SUBS_REL / name / "kitchen" / "OUTBOX.md").write_text(
+                package_text(name, package_ids[name], "reviewed"),
+                encoding="utf-8")
+        (pre / SUBS_REL / "saiwiki" / "kitchen" / "OUTBOX.md").write_text(
+            package_text("saiwiki", package_ids["saiwiki"], "reviewed"),
+            encoding="utf-8")
+        translate_outbox = pre / ".saipen" / "saitranslate" / "kitchen" \
+            / "OUTBOX.md"
+        translate_outbox.parent.mkdir(parents=True)
+        translate_outbox.write_text(
+            package_text("saitranslate", package_ids["saitranslate"],
+                         "reviewed"), encoding="utf-8")
+
+        from saipen_engine.operations import set_converge_intent
+        entered = set_converge_intent(pre, "probe", "crew")
+        expect("positive fixture crew intent entered canonically", entered.ok,
+               entered.message)
+        plan_a = crew_plan(pre)
+        expect("A perfect pre-ship fixed point routes exactly to SHIP",
+               plan_a.get("action", {}).get("action") == "SHIP",
+               repr(plan_a.get("action")))
+
+        post = Path(raw) / "crew-positive-post"
+        shutil.copytree(pre, post)
+        receipt = post / ".saipen" / "recovery" / "ops" \
+            / "release-crewprobe" / "operation.json"
+        receipt.parent.mkdir(parents=True)
+        receipt.write_text(json.dumps({
+            "op_id": "release-crewprobe", "operation": "release",
+            "created_at": "2099-01-01T00:00:00Z", "status": "COMMITTED",
+            "release_stage": "COMMITTED", "ticket_id": "T-900",
+            "tag": "v9.9.9", "source_head": pre_source.source_head,
+            "closure_commit": pre_source.source_head,
+            "stages": ["CONTENT_COMMIT_CREATED", "CONTENT_PUBLISHED",
+                       "CLOSURE_COMMIT_CREATED", "CLOSURE_PUBLISHED",
+                       "TAG_CREATED", "TAG_PUBLISHED", "REMOTE_VERIFIED"],
+            "crew_epoch": entered.op_id,
+            "crew_pre_ship_evidence": {
+                name: [{"package_id": package_ids[name],
+                        "status": "reviewed"}]
+                for name in (*durable, "saitranslate")
+            },
+        }, indent=2), encoding="utf-8")
+
+        def write_post_package(name: str, status: str) -> None:
+            target = (post / ".saipen" / "saitranslate" / "kitchen" /
+                      "OUTBOX.md" if name == "saitranslate" else
+                      post / SUBS_REL / name / "kitchen" / "OUTBOX.md")
+            # Source is unchanged by copied .saipen evidence.
+            source = compute_source_identity(post)
+            revision = current_local_role_revision(post, name,
+                                                   home.as_posix())
+            target.write_text(
+                f"# OUTBOX\n\n## {package_ids[name]}: final evidence\n"
+                f"- **status:** {status}\n- **producer:** {name}\n"
+                f"- **source_head:** {source.source_head}\n"
+                f"- **source_tree_fingerprint:** "
+                f"{source.source_tree_fingerprint}\n"
+                f"- **role_revision:** {revision}\n"
+                "- **coverage:** complete role surface\n"
+                "- **payload:** []\n- **verified:** probe PASS\n"
+                "- **instructions:** leave READY at terminal\n",
+                encoding="utf-8")
+
+        write_post_package("saiwiki", "ready")
+        plan_b = crew_plan(post)
+        expect("B post-ship except EE routes PREPARE_TRANSLATE_FINAL",
+               plan_b.get("action", {}).get("action")
+               == "PREPARE_TRANSLATE_FINAL", repr(plan_b.get("action")))
+        write_post_package("saitranslate", "ready")
+        write_post_package("saiwiki", "reviewed")
+        plan_c = crew_plan(post)
+        expect("C EE current and QQ stale routes PREPARE_WIKI_FINAL",
+               plan_c.get("action", {}).get("action")
+               == "PREPARE_WIKI_FINAL", repr(plan_c.get("action")))
+        write_post_package("saiwiki", "ready")
+        plan_d = crew_plan(post)
+        ready_d, ready_problems = crew_ready_to_finalize(post)
+        expect("D all-green active crew plan is reachable",
+               plan_d.get("ok") is True and ready_d,
+               f"plan={plan_d} problems={ready_problems}")
+
+        # A snapshot must bind every role artifact it used. Mutating final EE
+        # immediately after its read must route SC-0 to STALE_PLAN rather than
+        # combine old parsed evidence with new live bytes.
+        snapshot_race = Path(raw) / "crew-positive-snapshot-race"
+        shutil.copytree(post, snapshot_race)
+        from saipen_engine import crew as crew_engine
+        translate_race = (snapshot_race / ".saipen" / "saitranslate" /
+                          "kitchen" / "OUTBOX.md")
+        original_crew_read = crew_engine._read_maybe
+        moved = {"done": False}
+
+        def moving_evidence(path: Path) -> str:
+            text = original_crew_read(path)
+            if Path(path) == translate_race and not moved["done"]:
+                moved["done"] = True
+                translate_race.write_text(
+                    text.replace("probe PASS", "probe MOVED"),
+                    encoding="utf-8")
+            return text
+
+        with mock.patch.object(crew_engine, "_read_maybe",
+                               side_effect=moving_evidence):
+            raced_plan = crew_engine.crew_plan(snapshot_race)
+        expect("moving role evidence makes the crew snapshot STALE_PLAN",
+               moved["done"]
+               and raced_plan.get("first_unsatisfied") == "SC-0"
+               and "STALE_PLAN" in raced_plan["stages"][0].get("reason", ""),
+               repr(raced_plan.get("stages", [])[:2]))
+
+        # The pending-op scan belongs before the closing dependency hash too.
+        # If an op vanishes while that scan runs, the snapshot must be stale;
+        # reading pending state after the barrier could falsely finalize.
+        pending_race = Path(raw) / "crew-positive-pending-race"
+        shutil.copytree(post, pending_race)
+        vanishing_dir = (pending_race / ".saipen/recovery/ops" /
+                         "vanishing-op")
+        vanishing_dir.mkdir(parents=True)
+        vanishing_receipt = vanishing_dir / "operation.json"
+        vanishing_receipt.write_text(json.dumps({
+            "op_id": "vanishing-op", "operation": "probe",
+            "status": "PREPARED", "targets": [],
+        }), encoding="utf-8")
+
+        def remove_during_pending(_root):
+            vanishing_receipt.unlink()
+            vanishing_dir.rmdir()
+            return []
+
+        with mock.patch.object(crew_engine, "pending_ops",
+                               side_effect=remove_during_pending):
+            pending_plan = crew_engine.crew_plan(pending_race)
+        expect("pending-op movement before the closing hash is STALE_PLAN",
+               pending_plan.get("first_unsatisfied") == "SC-0"
+               and "STALE_PLAN" in pending_plan["stages"][0].get("reason", ""),
+               repr(pending_plan.get("stages", [])[:2]))
+
+        # A change after the green snapshot but before APPLY is the other side
+        # of the race. The finalizer passes exact evidence preconditions into
+        # the journal, so it must refuse before touching Core LOG/STATE.
+        finalize_race = Path(raw) / "crew-positive-finalize-race"
+        shutil.copytree(post, finalize_race)
+        wiki_race = (finalize_race / SUBS_REL / "saiwiki" / "kitchen" /
+                     "OUTBOX.md")
+        core_before = ((finalize_race / ".saipen/LOG.md").read_bytes(),
+                       (finalize_race / ".saipen/STATE.md").read_bytes())
+        from saipen_engine import plan as plan_engine
+        real_writer_lock = plan_engine.project_writer_lock
+
+        @contextlib.contextmanager
+        def drift_before_apply(lock_root):
+            wiki_race.write_text(
+                wiki_race.read_text(encoding="utf-8").replace(
+                    "probe PASS", "probe DRIFT"), encoding="utf-8")
+            with real_writer_lock(lock_root):
+                yield
+
+        with mock.patch.object(plan_engine, "project_writer_lock",
+                               drift_before_apply):
+            refused_finalize = finalize_crew(finalize_race)
+        core_after = ((finalize_race / ".saipen/LOG.md").read_bytes(),
+                      (finalize_race / ".saipen/STATE.md").read_bytes())
+        expect("finalizer CAS refuses evidence drift with zero Core writes",
+               not refused_finalize.ok
+               and refused_finalize.code == "STALE_STATE"
+               and core_before == core_after,
+               refused_finalize.to_json())
+
+        finalized = finalize_crew(post)
+        final_state = parse_state(codec.read_doc(post / ".saipen" / "STATE.md"))
+        expect("E finalizer clears target and returns normal DONE",
+               finalized.ok
+               and final_state.get("execution_intent") == "normal"
+               and "converge_target" not in final_state
+               and final_state.get("phase") == "DONE",
+               f"result={finalized.to_dict()} state={final_state}")
+        final_gate = crew_gate_problems(post)
+        expect("E finalized all-green crew gate passes",
+               not final_gate, repr(final_gate))
+        cold_plan = crew_plan(Path(str(post)))
+        cold_gate = crew_gate_problems(Path(str(post)))
+        expect("F cold re-read derives same terminal answer",
+               cold_plan.get("finalized") is True
+               and cold_plan.get("action", {}).get("action") == "DONE"
+               and not cold_gate, f"plan={cold_plan} gate={cold_gate}")
+
+        # Intent-family and router controls: no field from an old family may
+        # survive, and active ticket continuation outranks outer crew routing.
+        from saipen_engine.state import transition_execution_intent
+        from saipen_engine.router import route_next
+        base_state = (
+            "---\nphase: DONE\ntask: none\nnext_action: \"saipen continue\"\n"
+            "blocker: \"\"\nagent: probe\nsaipen_version: 7\nmode: full\n"
+            "updated: 2026-01-01T00:00:00Z\nexecution_intent: goal\n"
+            "goal_waves: 1\ngoal_tickets: 7\n---\n")
+        converged = transition_execution_intent(base_state, "converge", "crew")
+        parsed_converged = parse_state(converged)
+        expect("goal -> converge/crew drops both goal counters",
+               parsed_converged.get("converge_target") == "crew"
+               and "goal_waves" not in parsed_converged
+               and "goal_tickets" not in parsed_converged,
+               repr(parsed_converged))
+        normal = transition_execution_intent(converged, "normal")
+        parsed_normal = parse_state(normal)
+        expect("crew -> normal terminal drops converge target",
+               parsed_normal.get("execution_intent") == "normal"
+               and "converge_target" not in parsed_normal,
+               repr(parsed_normal))
+        active_state = converged.replace("phase: DONE", "phase: VERIFY") \
+            .replace("task: none", "task: T-1") \
+            .replace('next_action: "saipen continue"',
+                     'next_action: "RUN: binding tests"')
+        active_board = (
+            "# Board\n## DOING\n- [/] T-1 work\n## TODO\n## DONE\n"
+            "## BLOCKED\n")
+        active_route = route_next(active_state, active_board)
+        idle_route = route_next(converged,
+                                "# Board\n## DOING\n## TODO\n## DONE\n"
+                                "## BLOCKED\n")
+        expect("active ticket keeps exact continuation under crew target",
+               active_route.get("action") == "RUN: binding tests",
+               repr(active_route))
+        expect("cold idle continuation resumes crew from intent semantics",
+               idle_route.get("action") == "saipen crew",
+               repr(idle_route))
+
+    return problems, checked
+
+
 def live_style_marker() -> str:
     """STYLE.md's declared boot marker, read the way an agent reads it.
 
@@ -3682,6 +4900,7 @@ def run_release_executor_probes() -> tuple[list[str], int]:
             if built is None:
                 return problems, checked
             project, origin, git, cli, new_ver = built
+
             env_crash = {**env, crash_point: "1"}
             r = subprocess.run(
                 [sys.executable, str(project / "tools" / "saipen.py"),
@@ -3942,6 +5161,42 @@ def run_release_executor_probes() -> tuple[list[str], int]:
                        encoding="utf-8"),
                f"clone rc={crc.returncode}")
 
+    # ======================================================================
+    # 15. SEALED LOG SEGMENT ships in the closure (regression: v7.223.16
+    #     shipped a tag whose fresh clone lacked the sealed E-### events --
+    #     the closure did not stage `.saipen/logs/`)
+    # ======================================================================
+    with tempfile.TemporaryDirectory(prefix="saipen-rel-15-") as tmp:
+        built = build_fixture(Path(tmp))
+        if built is None:
+            return problems, checked
+        project, origin, git, cli, _new_ver = built
+        saipen_dir = project / ".saipen"
+        segment = saipen_dir / "logs" / "LOG-999.md"
+        segment.write_text("# Log\n", encoding="utf-8")
+        result = cli("ship", "--json")
+        rd = j(result)
+        expect("15. seal-with-release succeeds",
+               rd.get("ok") and rd.get("code") == "RELEASED",
+               f"code={rd.get('code')} detail={str(rd.get('detail'))[:200]}")
+        clone15 = Path(tmp) / "clone15"
+        crc = subprocess.run(["git", "clone", "-q", f"file://{origin}",
+                              str(clone15)], capture_output=True, text=True)
+        seg_in_clone = (clone15 / ".saipen" / "logs" / "LOG-999.md").is_file()
+        expect("15. fresh clone carries the sealed segment",
+               crc.returncode == 0 and seg_in_clone,
+               f"clone rc={crc.returncode} seg={seg_in_clone}")
+        if crc.returncode == 0:
+            cv = subprocess.run(
+                [sys.executable, str(clone15 / "tools" / "validate.py")],
+                cwd=str(clone15), capture_output=True, text=True)
+            log_graph_fails = [
+                ln for ln in (cv.stdout + cv.stderr).splitlines()
+                if ln.startswith("FAIL") and ("LOG" in ln or "parent" in ln
+                                              or "duplicate event" in ln)]
+            expect("15. fresh clone LOG graph validates (no dangling E-###)",
+                   not log_graph_fails, str(log_graph_fails[:2]))
+
     return problems, checked
 
 
@@ -3985,7 +5240,7 @@ def run_producer_gate_probes() -> tuple[list[str], int]:
             print(f"PASS: producer gate -- {label}")
 
     stale_fail = "package is stale and MUST NOT be collected"
-    malformed = "parses as zero OUTBOX entries"
+    malformed = "fails strict OUTBOX parsing"
     soft_note = "where this producer is not being consumed"
 
     def fails_on(result: subprocess.CompletedProcess[str], needle: str) -> bool:
@@ -4009,21 +5264,21 @@ def run_producer_gate_probes() -> tuple[list[str], int]:
         path.write_text(body, encoding="utf-8", newline="\n")
 
     def ready_package(identity_head: str, fingerprint: str,
-                      role_revision: str) -> str:
+                      role_revision: str, producer: str = "saiwiki") -> str:
         return (
-            "---\n"
-            "status: ready\n"
-            "producer: saiwiki\n"
-            "summary: probe package\n"
-            "critical: none\n"
-            "coverage: complete\n"
-            "payload: probe\n"
-            "instructions: apply\n"
-            "verified: probe suite green\n"
-            f"source_head: {identity_head}\n"
-            f"source_tree_fingerprint: {fingerprint}\n"
-            f"role_revision: {role_revision}\n"
-            "---\n")
+            "# OUTBOX\n\n"
+            "## PROBE-1: probe package\n"
+            "- **status:** ready\n"
+            f"- **producer:** {producer}\n"
+            "- **summary:** probe package\n"
+            "- **critical:** none\n"
+            "- **coverage:** complete\n"
+            "- **payload:** probe\n"
+            "- **instructions:** apply\n"
+            "- **verified:** probe suite green\n"
+            f"- **source_head:** {identity_head}\n"
+            f"- **source_tree_fingerprint:** {fingerprint}\n"
+            f"- **role_revision:** {role_revision}\n")
 
     with tempfile.TemporaryDirectory(prefix="saipen-producer-gate-") as tmp:
         project = Path(tmp) / "project"
@@ -4038,7 +5293,9 @@ def run_producer_gate_probes() -> tuple[list[str], int]:
         translate = project / ".saipen/saitranslate/kitchen/OUTBOX.md"
 
         # Control 1 + 2 + 3: ONE stale QQ package, read at three gates.
-        write_outbox(wiki, ready_package("0000000", "sha256:stale", "rev-old"))
+        write_outbox(wiki, ready_package(
+            "0000000", "git-delta-v1:" + "0" * 64,
+            "sha256:" + "0" * 64))
         write_outbox(translate, "# OUTBOX\n")
         subprocess.run(["git", "add", "-A"], cwd=project, env=env,
                        capture_output=True)
@@ -4081,7 +5338,6 @@ def run_producer_gate_probes() -> tuple[list[str], int]:
         try:
             from freshness import (compute_role_revision,
                                    compute_source_identity)
-            identity = compute_source_identity(project)
             wiki_charter = VALIDATOR.parent.parent / "extensions/subs/saiwiki.md"
             translate_charter = (VALIDATOR.parent.parent
                                  / "extensions/subs/saitranslate.md")
@@ -4090,15 +5346,8 @@ def run_producer_gate_probes() -> tuple[list[str], int]:
             print(f"SKIP: producer gate fresh rung -- {exc}")
             fresh_ok = False
         if fresh_ok:
-            for path, charter, producer in (
-                    (wiki, wiki_charter, "saiwiki"),
-                    (translate, translate_charter, "saitranslate")):
-                write_outbox(path, ready_package(
-                    identity.source_head, identity.source_tree_fingerprint,
-                    compute_role_revision(charter)).replace(
-                        "producer: saiwiki", f"producer: {producer}"))
             # The charters must be project-local for role_revision to derive.
-            local_subs = project / "extensions/subs"
+            local_subs = project / ".saipen/extensions/subs"
             local_subs.mkdir(parents=True, exist_ok=True)
             for charter in (wiki_charter, translate_charter):
                 shutil.copy2(charter, local_subs / charter.name)
@@ -4108,8 +5357,7 @@ def run_producer_gate_probes() -> tuple[list[str], int]:
                     (translate, translate_charter, "saitranslate")):
                 write_outbox(path, ready_package(
                     identity.source_head, identity.source_tree_fingerprint,
-                    compute_role_revision(charter)).replace(
-                        "producer: saiwiki", f"producer: {producer}"))
+                    compute_role_revision(charter), producer))
             result = validate(project, "--gate", "converge")
             expect("6. fresh exact EE and QQ pass the converge gate", result,
                    "both closure-required packages (EE, QQ) are ready")
@@ -4878,19 +6126,25 @@ def run_role_freshness_probes() -> tuple[list[str], int, int]:
                             / "PROTOCOL.md")
         generic_protocol.write_text("generic contract v1\n", encoding="utf-8")
         generic_revision = compute_generic_role_revision(generic_protocol)
-        generic_identity = compute_source_identity(project)
-        write_sub(project, generic_revision, generic_revision, generic_identity)
         generic_outbox = (project / ".saipen" / "extensions" / "subs"
-                          / "saiwiki" / "kitchen" / "OUTBOX.md")
+                          / "saicustom" / "kitchen" / "OUTBOX.md")
+        generic_outbox.parent.mkdir(parents=True)
+        wiki_outbox = (project / ".saipen" / "extensions" / "subs"
+                       / "saiwiki" / "kitchen" / "OUTBOX.md")
         generic_outbox.write_text(
-            generic_outbox.read_text(encoding="utf-8").replace(
-                "- **producer:** saiwiki", "- **producer:** saicustom"),
+            wiki_outbox.read_text(encoding="utf-8")
+            .replace("## WIKI-900:", "## CUSTOM-900:")
+            .replace("- **producer:** saiwiki", "- **producer:** saicustom")
+            .replace(rev2, generic_revision),
             encoding="utf-8", newline="\n")
         expect("generic role binds to its governing PROTOCOL digest",
                validate(project), absent=mismatch)
         generic_protocol.write_text("generic contract v2\n", encoding="utf-8")
         expect("generic role contract change makes package stale",
                validate(project), contains=mismatch)
+        generic_outbox.unlink()
+        generic_outbox.parent.rmdir()
+        generic_outbox.parent.parent.rmdir()
         generic_protocol.unlink()
         identity = compute_source_identity(project)
         write_sub(project, rev2, rev2, identity)
@@ -9271,12 +10525,11 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     expect("sub clean preflight never mutates the instance",
            st_clean == st_resume, "state changed")
 
-    # Collect preflight: read-only freshness gate; a spawned sub with an empty
-    # OUTBOX passes (no ready package to stale), nothing is judged semantically.
+    # Aggregate collect is a truthful no-op when eligible OUTBOXes are empty.
     collect_res = subs.sub_collect(sub_root, "saiscout")
-    expect("sub collect preflight passes an empty OUTBOX (read-only)",
+    expect("sub collect reports an empty eligible OUTBOX without writes",
            collect_res.get("ok")
-           and collect_res.get("code") == "COLLECT_PREFLIGHT",
+           and collect_res.get("code") == "SUB_COLLECT",
            repr(collect_res))
 
     # ---- T-588: SubSaipen path-escape regression (dogfood II).
@@ -9325,7 +10578,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            or (subs_dir / "PROTOCOL.md").is_file())
 
     # ---- T-588: ready OUTBOX package completeness (dogfood II). T-991:
-    # role freshness fails CLOSED -- a charter-backed sub (saiwiki) with its
+    # role freshness fails CLOSED -- a charter-backed sub (saihunt) with its
     # computed revision passes; missing/unverifiable role evidence refuses.
     comp_root = make_project()
     _comp_state = comp_root / ".saipen" / "STATE.md"
@@ -9333,12 +10586,12 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         _comp_state.read_text(encoding="utf-8-sig").replace(
             "saipen_home: \".\"", f'saipen_home: "{esc_home}"'),
         encoding="utf-8")
-    _subs.sub_spawn(comp_root, "saiwiki", esc_home)
+    _subs.sub_spawn(comp_root, "saihunt", esc_home)
     comp_outbox = comp_root / ".saipen" / "extensions" / "subs" \
-        / "saiwiki" / "kitchen" / "OUTBOX.md"
+        / "saihunt" / "kitchen" / "OUTBOX.md"
     from freshness import compute_source_identity, compute_role_revision
     _current = compute_source_identity(comp_root)
-    _wiki_charter = esc_home + "/extensions/subs/saiwiki.md"
+    _wiki_charter = esc_home + "/extensions/subs/saihunt.md"
     _wiki_rev = compute_role_revision(_wiki_charter)
     complete = ("# OUTBOX\n\n## F-001: finding\n"
                 "- **status:** ready\n"
@@ -9346,10 +10599,14 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
                 f"- **source_head:** {_current.source_head}\n"
                 f"- **source_tree_fingerprint:** "
                 f"{_current.source_tree_fingerprint}\n"
-                f"- **role_revision:** {_wiki_rev}\n"
-                "- **producer:** saiwiki\n")
+                 f"- **role_revision:** {_wiki_rev}\n"
+                 "- **producer:** saihunt\n"
+                 "- **coverage:** requested surface\n"
+                 "- **payload:** []\n"
+                 "- **verified:** probe PASS\n"
+                 "- **instructions:** review package\n")
     comp_outbox.write_text(complete, encoding="utf-8")
-    res_ok = _subs.sub_collect(comp_root, "saiwiki")
+    res_ok = _subs.sub_collect(comp_root, "saihunt", dry_run=True)
     expect("complete ready OUTBOX package with a verifiable role passes collect",
            res_ok.get("ok"), repr(res_ok))
     for missing_field in ("source_head", "source_tree_fingerprint",
@@ -9358,11 +10615,11 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
             line for line in complete.splitlines()
             if not line.startswith(f"- **{missing_field}:**"))
         comp_outbox.write_text(partial, encoding="utf-8")
-        res_missing = _subs.sub_collect(comp_root, "saiwiki")
+        res_missing = _subs.sub_collect(comp_root, "saihunt")
         expect(f"ready OUTBOX missing {missing_field} refuses "
-               f"(PACKAGE_INCOMPLETE)",
+               f"(MALFORMED_PACKAGE)",
                not res_missing.get("ok")
-               and res_missing.get("code") == "PACKAGE_INCOMPLETE",
+               and res_missing.get("code") == "MALFORMED_PACKAGE",
                repr(res_missing))
         comp_outbox.write_text(complete, encoding="utf-8")
     # A superseded role revision is STALE, never fresh.
@@ -9370,12 +10627,11 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         complete.replace(f"- **role_revision:** {_wiki_rev}\n",
                          "- **role_revision:** stale-revision\n"),
         encoding="utf-8")
-    res_stale_role = _subs.sub_collect(comp_root, "saiwiki")
+    res_stale_role = _subs.sub_collect(comp_root, "saihunt")
     expect("ready OUTBOX with a superseded role revision refuses "
-           "(PACKAGE_INCOMPLETE, STALE)",
+           "(MALFORMED_PACKAGE, STALE)",
            not res_stale_role.get("ok")
-           and res_stale_role.get("code") == "PACKAGE_INCOMPLETE"
-           and "superseded" in res_stale_role.get("message", ""),
+           and res_stale_role.get("code") == "MALFORMED_PACKAGE",
            repr(res_stale_role))
     # A sub whose role charter cannot be found (missing home/charter) is
     # UNAVAILABLE, never fresh -- collect refuses ready evidence it cannot
@@ -9385,15 +10641,15 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         / "saiscout" / "kitchen" / "OUTBOX.md"
     scout_outbox.write_text(
         complete.replace(f"- **role_revision:** {_wiki_rev}\n",
-                         "- **role_revision:** recorded-role\n")
-        .replace("- **producer:** saiwiki\n", "- **producer:** saiscout\n"),
+                         "- **role_revision:** sha256:"
+                         + "0" * 64 + "\n")
+        .replace("- **producer:** saihunt\n", "- **producer:** saiscout\n"),
         encoding="utf-8")
     res_unverifiable = _subs.sub_collect(comp_root, "saiscout")
     expect("ready OUTBOX with an unverifiable role revision refuses "
-           "(PACKAGE_INCOMPLETE, UNAVAILABLE)",
+           "(PACKAGE_INCOMPLETE)",
            not res_unverifiable.get("ok")
-           and res_unverifiable.get("code") == "PACKAGE_INCOMPLETE"
-           and "unverifiable" in res_unverifiable.get("message", ""),
+           and res_unverifiable.get("code") == "PACKAGE_INCOMPLETE",
            repr(res_unverifiable))
     comp_outbox.write_text(complete, encoding="utf-8")
 
@@ -11083,6 +12339,42 @@ def run_active_task_recovery_probes() -> tuple[list[str], int]:
     return problems, checked
 
 
+if os.environ.get("SAIPEN_PRODUCER_GATE_PROBES_ONLY") == "1":
+    producer_failures, producer_checked = run_producer_gate_probes()
+    for problem in producer_failures:
+        print(f"FAILED: {problem}")
+    print(f"{producer_checked} producer-gate behavior(s) executed")
+    raise SystemExit(1 if producer_failures else 0)
+
+if os.environ.get("SAIPEN_ROLE_FRESHNESS_PROBES_ONLY") == "1":
+    role_failures, role_checked, role_skipped = run_role_freshness_probes()
+    for problem in role_failures:
+        print(f"FAILED: {problem}")
+    print(f"{role_checked} role-freshness behavior(s) executed, "
+          f"{role_skipped} skipped")
+    raise SystemExit(1 if role_failures else 0)
+
+if os.environ.get("SAIPEN_NITRO_M2_PROBES_ONLY") == "1":
+    nitro_m2_failures, nitro_m2_checked = run_nitro_m2_probes()
+    for problem in nitro_m2_failures:
+        print(f"FAILED: {problem}")
+    print(f"{nitro_m2_checked} nitro-m2 behavior(s) executed")
+    raise SystemExit(1 if nitro_m2_failures else 0)
+
+if os.environ.get("SAIPEN_SAICREW_PROBES_ONLY") == "1":
+    saicrew_failures, saicrew_checked = run_saicrew_probes()
+    for problem in saicrew_failures:
+        print(f"FAILED: {problem}")
+    print(f"{saicrew_checked} saicrew behavior(s) executed")
+    raise SystemExit(1 if saicrew_failures else 0)
+
+if os.environ.get("SAIPEN_NITRO_INTEGRITY_PROBES_ONLY") == "1":
+    nitro_failures, nitro_checked = run_nitro_integrity_probes()
+    for problem in nitro_failures:
+        print(f"FAILED: {problem}")
+    print(f"{nitro_checked} nitro-integrity behavior(s) executed")
+    raise SystemExit(1 if nitro_failures else 0)
+
 if os.environ.get("SAIPEN_SCHEDULER_PROBES_ONLY") == "1":
     scheduler_failures, scheduler_checked, scheduler_skipped = run_scheduler_probes()
     for problem in scheduler_failures:
@@ -11099,6 +12391,8 @@ export_failures, export_checked, export_skipped = run_export_probes()
 failures.extend(export_failures)
 crew_failures, crew_checked, crew_skipped = run_crew_probes()
 failures.extend(crew_failures)
+saicrew_failures, saicrew_checked = run_saicrew_probes()
+failures.extend(saicrew_failures)
 last_event_failures, last_event_checked = run_last_event_probes()
 failures.extend(last_event_failures)
 log_tail_failures, log_tail_checked = run_log_tail_probes()
@@ -11173,6 +12467,7 @@ print(f"{export_checked} export ownership behavior(s) executed, "
       f"{export_skipped} skipped for missing interpreters")
 print(f"{crew_checked} crew-launch behavior(s) executed, "
       f"{crew_skipped} skipped for missing interpreters")
+print(f"{saicrew_checked} saicrew hostile-control behavior(s) executed")
 print(f"{digest_checked} digest-stale behavior(s) executed")
 print(f"{orphan_checked} orphan-tag behavior(s) executed")
 print(f"{ship_pick_checked} ship-pick behavior(s) executed")

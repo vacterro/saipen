@@ -26,7 +26,7 @@ uninstall are all local — no cloud service, no daemon, no database.
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.223.16** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | MIT
+**v7.224.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | MIT
 
 **Shortcut keys.** A shortcut is the whole message, never a prefix: `cc` continues, `sss` reports status, `ss` stops; Cyrillic twins `сс`, `ссс`, `аа`, `ее`, `еее`, `рр` work too. [Full 15-key map](saipen/CORE.md#110-command-surface).
 
@@ -213,10 +213,15 @@ Everyday entry points; the complete current surface lives in
 integrating; `eee`/`qqq` accept only ready packages, then integrate, verify,
 review, and push.
 
-**Experimental: saicrew.** An optional bonus layer (`extensions/subs/`, zero
-Core changes) for running a multi-agent crew: one Core writer plus read-only
-`saihunt`/`saipython` workers reporting through their own `OUTBOX.md`. Under
-live testing, not yet verified end to end — see
+**saicrew.** `sc` / `saipen crew` (`extensions/subs/crew.md`) walks the whole
+built-in crew in a fixed order — sensors (saihunt, saitest, saipython, saiui),
+producers (saitranslate, saiwiki) and Core as the sole main-tree writer —
+until another fresh pass has nothing real left to change. It adds exactly one
+mechanism of its own: the durable orchestration target (`execution_intent:
+converge` with `converge_target: crew`) that makes the circuit resumable and
+crash-derivable from evidence. `saipen crew --dry-run --json` derives the
+circuit read-only; `bootstrap/saipen_crew.*` is an OPTIONAL manual
+multi-window helper, never what `saipen crew` means. See
 [extensions/subs/crew.md](extensions/subs/crew.md).
 </details>
 

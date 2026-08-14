@@ -79,8 +79,8 @@
     },
     "converge_target": {
       "type": "string",
-      "enum": ["done", "ship"],
-      "description": "Optional only with execution_intent: converge. Absent or done is plain cc (A-M). ship is ccc: converge through I, SHIP, then run J-M against the shipped HEAD. Cleared with execution_intent at closure."
+      "enum": ["done", "ship", "crew"],
+      "description": "Optional only with execution_intent: converge. Absent or done is plain cc (A-M). ship is ccc: converge through I, SHIP, then run J-M against the shipped HEAD. crew is sc/saipen crew: the serial full-platoon convergence circuit (SC-0..SC-13, extensions/subs/crew.md) whose fixed point is the whole built-in crew; `cc` while crew is active resumes the crew. Cleared with execution_intent at closure."
     },
     "goal_mode": {
       "type": "boolean",
@@ -121,6 +121,14 @@
     "role_revision": {
       "type": "string",
       "description": "SubSaipen only (T-542): the deterministic revision of the effective built-in charter this instance spawned/adopted against (PROTOCOL.md section 3.1 metadata block). Recorded at spawn and adopt; every ready OUTBOX package records the same value; collect compares against the current project-local charter after `saipen sub sync`. Absent on instances predating the recording."
+    },
+    "paused_from_phase": {
+      "type": "string",
+      "description": "SubSaipen-only pause receipt: exact phase restored by sub resume. Empty after resume."
+    },
+    "paused_from_na": {
+      "type": "string",
+      "description": "SubSaipen-only pause receipt: exact next_action restored by sub resume. Empty after resume."
     },
     "transition_from": {
       "type": "string",

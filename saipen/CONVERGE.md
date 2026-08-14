@@ -22,7 +22,13 @@ is plain `cc`: run A-M. `ship` is `ccc`: LOG
 `DEC: ccc converge target -> ship @<pre-SHIP-source_head>`,
 run A-I, execute normal REVIEW/SHIP gates, and only after successful SHIP resume
 at J so K/L/M bind to the shipped HEAD. This is the **CCC SHIP boundary between
-I and J**. A crash keeps the field; it cannot silently resume as plain `cc` and
+I and J**. `crew` is `sc`/`saipen crew`: the serial full-platoon convergence
+circuit (SC-0..SC-13), whose fixed point is the whole built-in crew — the
+circuit is defined ONCE in `extensions/subs/crew.md` and mechanically in
+`tools/saipen_engine/subs.py`'s `CREW_STAGES`, and this document does not
+restate it. While `crew` is active, `cc` resumes the crew, not ordinary
+convergence; the ordinary A-M sequence is the `sc`-internal stages it already
+reuses. A crash keeps the field; it cannot silently resume as plain `cc` and
 prepare K/L before SHIP. Clear the field only when the convergence intent clears.
 
 **A. RECOVER.** Repair invalid or stale `STATE.md`/`BOARD.md`/`LOG.md` before
