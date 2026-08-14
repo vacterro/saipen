@@ -37,3 +37,18 @@
 - 14.08.26 08:01 [E-3389] [parent: E-3388] [T-999] [agent: claude] [op: scope-f1a1dfd9] DEC: release scope recorded -- 42 path(s) bound to 95787ecc055b
 - 14.08.26 08:03 [E-3390] [parent: E-3389] [T-999] [agent: claude] [op: finish-0925e866] RUN: ship v7.224.0 -> content commit 94814c735ea1 pushed
 - 14.08.26 08:03 [E-3391] [parent: E-3390] [T-999] [agent: claude] [op: finish-0925e866] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 14.08.26 08:04 [E-3392] [parent: E-3391] [T-473] [agent: claude] [op: ticket-9d64672f] DEC: ticket block via SAIOPS -- HELD FOR T-442 -- unmet dependency; not schedulable until concurrent-mode gate completes
+- 14.08.26 08:04 [E-3393] [parent: E-3392] [agent: claude] [op: transition-9de8efaa] RUN: autonomous halt: no workable TODO; begin six-signal logical-hole sweep
+- 14.08.26 08:12 [E-3394] [parent: E-3393] [T-1000] [agent: claude] [op: ticket-1ba7d87e] DEC: ticket added via SAIOPS
+- 14.08.26 08:12 [E-3395] [parent: E-3394] [T-1001] [agent: claude] [op: ticket-0855e8e3] DEC: ticket added via SAIOPS
+- 14.08.26 08:12 [E-3396] [parent: E-3395] [T-1002] [agent: claude] [op: ticket-970628d7] DEC: ticket added via SAIOPS
+- 14.08.26 08:12 [E-3397] [parent: E-3396] [T-1002] [agent: claude] [op: claim-a2f4be42] DEC: claimed via SAIOPS -- owner claude
+- 14.08.26 08:13 [E-3398] [parent: E-3397] [T-1002] [agent: claude] [op: transition-0eff8316] RUN: SCOUT -- crew.py snapshot receipt_hashes must include contract_status.inventory_receipt; run_scenarios.py positive finalizer fixture owns delete/mutate APPLY-race controls; existing journal CAS is the neighbor and needs no new mechanism
+- 14.08.26 08:14 [E-3399] [parent: E-3398] [T-1002] [agent: claude] [op: checkpoint-eadf8d4d] DEC: rollback for selected sub-sync receipt CAS -- git diff -- tools/saipen_engine/subs.py tools/saipen_engine/crew.py tools/run_scenarios.py
+- 14.08.26 08:17 [E-3400] [parent: E-3399] [T-1002] [agent: claude] [op: transition-f0c17ae0] RUN: build -> selected sub-sync receipt exact path is snapshot-bound; delete/mutate APPLY controls return STALE_STATE with zero Core writes
+- 14.08.26 08:44 [E-3401] [parent: E-3400] [T-1002] [agent: claude] [op: transition-3cac3d75] RUN: verification pass: 140 SAICREW behaviors PASS incl both new receipt CAS probes; break-it-once proven (revert -> FAIL ok:true); full scenarios matrix exit 0; ruff + diff-check clean; validate.py --gate core PASS (14 known warnings); conf: high
+- 14.08.26 08:44 [E-3402] [parent: E-3401] [op: transition-3cac3d75] DEC: goal_tickets 10->11
+- 14.08.26 08:46 [E-3403] [parent: E-3402] [T-1002] [agent: claude] [op: transition-5be04386] RUN: Independent review pass: ticket verify re-run green (receipt CAS probes PASS + positive finalizer DONE); CAS wiring confirmed at finalize_crew -> evidence_preconditions=snapshot.input_hashes; no _receipt_path serialization leak (receipt_metadata/sub_clean fresh dicts); no P0/P1/P2 findings; DEC: SHIP
+- 14.08.26 08:48 [E-3404] [parent: E-3403] [T-1002] [agent: claude] [op: scope-00080dc4] DEC: release scope recorded -- 3 path(s) bound to a10d5a608cc3
+- 14.08.26 08:49 [E-3405] [parent: E-3404] [T-1002] [agent: claude] [op: finish-d106eb77] RUN: ship v7.224.1 -> content commit 2894679fc0df pushed
+- 14.08.26 08:49 [E-3406] [parent: E-3405] [T-1002] [agent: claude] [op: finish-d106eb77] DEC: ticket finished via SAIOPS -- completion (from SHIP)
