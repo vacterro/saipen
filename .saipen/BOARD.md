@@ -2,7 +2,6 @@
 ## DOING
 
 ## TODO
-- [ ] T-1000 [P3] Dead private SubSaipen helpers _outbox_blocks and _hash_or_empty are definition-only after the strict OUTBOX and lifecycle rewrites; confirm no dynamic contract before removal | verify: repo-wide Python reference scan is definition-only; removing both changes no focused behavior; SAICREW, Ruff and full scenarios pass
 
 
 
@@ -12,6 +11,7 @@
 
 
 ## DONE
+- [x] T-1000 [P3] Dead private SubSaipen helpers _outbox_blocks and _hash_or_empty are definition-only after the strict OUTBOX and lifecycle rewrites; confirm no dynamic contract before removal | verify: repo-wide Python reference scan is definition-only; removing both changes no focused behavior; SAICREW, Ruff and full scenarios pass | owner: claude | claim_time: 2026-08-14T09:18:03Z
 - [x] T-1001 [P1] Sub-sync ownership receipt selection sorts first by operation.json filesystem mtime; copy or touch can make an older committed inventory authoritative and feed the wrong obsolete reconciliation | verify: two valid receipts with inverted mtimes still select the durable canonical successor; ambiguous or broken lineage fails closed; sync hostile controls and full gates pass | owner: claude | claim_time: 2026-08-14T08:50:07Z
 - [x] T-1002 [P0] SAICREW finalizer verdict consumes shared_contract_status from the selected sub-sync ownership receipt but final APPLY CAS binds only epoch and release receipts; ownership proof may disappear or mutate while stale proof still returns CONVERGE_FINALIZED | verify: delete or mutate the selected sub-sync receipt after the green snapshot and before APPLY returns STALE_STATE with zero Core writes; unchanged positive finalizer plus SAICREW and full gates pass | owner: claude | claim_time: 2026-08-14T08:12:35Z
 - [x] T-999 [P0] SAICREW fixed-point and SubSaipen trust completion | verify: sc is mechanically completable, crash-resumable, evidence-derived; positive crew fixture and all fresh gates pass | owner: claude | claim_time: 2026-08-13T20:27:35Z

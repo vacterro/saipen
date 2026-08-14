@@ -62,3 +62,13 @@
 - 14.08.26 09:16 [E-3414] [parent: E-3413] [T-1001] [agent: claude] [op: scope-4c55b32d] DEC: release scope recorded -- 3 path(s) bound to 2447b490b00c
 - 14.08.26 09:17 [E-3415] [parent: E-3414] [T-1001] [agent: claude] [op: finish-c53af96b] RUN: ship v7.224.2 -> content commit 8b9c676d0431 pushed
 - 14.08.26 09:17 [E-3416] [parent: E-3415] [T-1001] [agent: claude] [op: finish-c53af96b] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 14.08.26 09:18 [E-3417] [parent: E-3416] [T-1000] [agent: claude] [op: claim-b40f080b] DEC: claimed via SAIOPS -- owner claude
+- 14.08.26 09:18 [E-3418] [parent: E-3417] [T-1000] [agent: claude] [op: transition-83263eb2] RUN: DONE -> SCOUT per done.md step 1; next workable TODO T-1000
+- 14.08.26 09:18 [E-3419] [parent: E-3418] [T-1000] [agent: claude] [op: transition-eff1450b] RUN: SCOUT -- repo-wide git grep shows only definitions (subs.py:1088, :1609) + doc mentions; no dynamic contract; both private underscore helpers, safe to remove
+- 14.08.26 09:25 [E-3420] [parent: E-3419] [T-1000] [agent: claude] [op: transition-90713205] RUN: build -> removed dead private helpers _outbox_blocks and _hash_or_empty (definition-only, git grep zero refs); 148 SAICREW, full matrix, ruff, diff-check, validator core all green
+- 14.08.26 09:25 [E-3421] [parent: E-3420] [T-1000] [agent: claude] [op: transition-bae9c7b2] RUN: verification pass: repo-wide git grep zero code references; 148 SAICREW behaviors, full matrix, ruff, diff-check, validator core PASS; dead-code removal behavior-neutral; conf: high
+- 14.08.26 09:25 [E-3422] [parent: E-3421] [op: transition-bae9c7b2] DEC: goal_tickets 12->13
+- 14.08.26 09:26 [E-3423] [parent: E-3422] [T-1000] [agent: claude] [op: transition-d1b9cf11] RUN: Independent review pass: ticket verify re-run green; pure 16-line dead-code deletion, zero references, no import-time side effects; no P0/P1/P2 findings; DEC: SHIP
+- 14.08.26 09:26 [E-3424] [parent: E-3423] [T-1000] [agent: claude] [op: scope-5f70d326] DEC: release scope recorded -- 1 path(s) bound to 0ef8842d95e9
+- 14.08.26 09:27 [E-3425] [parent: E-3424] [T-1000] [agent: claude] [op: finish-9b0ca694] RUN: ship v7.224.3 -> content commit 4d17768cfc35 pushed
+- 14.08.26 09:27 [E-3426] [parent: E-3425] [T-1000] [agent: claude] [op: finish-9b0ca694] DEC: ticket finished via SAIOPS -- completion (from SHIP)
