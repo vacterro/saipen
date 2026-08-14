@@ -1,0 +1,12 @@
+{
+  "op_id": "scope-5f70d326",
+  "paths": {
+    "tools/saipen_engine/subs.py": "fc3da3b669d9c849"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "recorded_at": "2026-08-14T09:26:38Z",
+  "schema_version": 1,
+  "source_head": "0ef8842d95e9464baad579fab97ee0733e348ede",
+  "source_tree_fingerprint": "git-delta-v1:7edce20388c13822af28e1aa8348a9b6f58c208a29ca186e502d2ae5b2124aac",
+  "ticket": "T-1000"
+}

@@ -1,6 +1,10 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.224.3 -- 2026-08-14 -- remove dead SubSaipen helpers (T-1000)
+
+- T-1000: `_outbox_blocks` and `_hash_or_empty` were definition-only after the strict OUTBOX and lifecycle rewrites; a repo-wide reference scan found zero uses and no dynamic contract, so both were deleted. SAICREW, Ruff and the full scenario suite stay green.
+
 ## 7.224.2 -- 2026-08-14 -- durable sub-sync receipt lineage selection (T-1001)
 
 - T-1001: the canonical sub-sync ownership receipt is now the one whose OWN `created_at` is newest, never the `operation.json` filesystem mtime -- a copy or touch can push an older committed inventory's mtime forward and feed the wrong obsolete reconciliation. Receipts sharing the newest committed second with different inventories are ambiguous and fail closed (sync refuses, zero writes); a receipt with a broken durable timestamp is never selected and a fresh sync self-heals. Six hostile lineage controls plus the obsolete-delete and crash-resume controls pass.

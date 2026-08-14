@@ -1085,15 +1085,6 @@ def parse_outbox(text: str, producer: str | None = None) -> OutboxModel:
     return OutboxModel(tuple(packages), tuple(errors))
 
 
-def _outbox_blocks(text: str) -> list[str]:
-    model = parse_outbox(text)
-    ready = [package for package in model.packages
-             if package.fields.get("status") == "ready"]
-    if model.errors or len(ready) > 1:
-        return []
-    return [package.block for package in model.packages]
-
-
 def _field(text: str, key: str) -> str:
     values = [match.group(2).strip() for line in text.splitlines()
               if (match := OUTBOX_FIELD_RE.match(line))
@@ -1604,13 +1595,6 @@ def sub_spawn(project_root: Path | str, name: str, saipen_home: str,
                         "bootstrap": bool(sync_changed),
                         "sync_op_id": sync_result.op_id if sync_result else None,
                         "role_revision": role_revision})
-
-
-def _hash_or_empty(path: Path) -> str:
-    try:
-        return hash_bytes(path.read_bytes())
-    except OSError:
-        return ""
 
 
 def _lifecycle_read_preconditions(root: Path, name: str,

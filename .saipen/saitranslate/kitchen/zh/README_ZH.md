@@ -14,7 +14,7 @@
 
 **回复语言。** 代理默认用**爱沙尼亚语**回答 —— 这是设置，不是怪癖，SAIPEN 中其他任何内容都不是爱沙尼亚语。只需在一处更改：[`saipen/STYLE.md`](saipen/STYLE.md) 顶部的 `reply_language:` 行。`et` 爱沙尼亚语，`en` 英语，`ru` 俄语，`auto` 根据你发送消息的语言选择。协议、代码、提交和所有文档在任何值下都保持英文。
 
-**v7.224.2** | [规范](SPEC.md) | [指南](GUIDE.md) | [RFC](saipen/RFC.md) | [风格](saipen/STYLE.md) | [UI 指南](saipen/UI.md) | [一致性](saipen/CONFORMANCE.md) | 纯 Markdown | 零依赖 | MIT 协议
+**v7.224.3** | [规范](SPEC.md) | [指南](GUIDE.md) | [RFC](saipen/RFC.md) | [风格](saipen/STYLE.md) | [UI 指南](saipen/UI.md) | [一致性](saipen/CONFORMANCE.md) | 纯 Markdown | 零依赖 | MIT 协议
 
 ```text
 
