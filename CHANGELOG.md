@@ -1,6 +1,10 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.224.1 -- 2026-08-14 -- sub-sync ownership receipt bound into the SAICREW finalizer CAS (T-1002)
+
+- T-1002: the crew snapshot now binds the exact selected sub-sync ownership receipt (path + bytes) into the finalizer's CAS alongside the epoch and release receipts. Deleting or mutating that receipt after the green snapshot and before APPLY returns `STALE_STATE` with zero Core writes; the positive finalizer is unchanged.
+
 ## 7.224.0 -- 2026-08-14 -- SAICREW fixed-point orchestration and SubSaipen trust completion (T-999)
 
 - T-999: `sc` / `saipen crew` is now a mechanically resumable serial circuit over the full built-in crew. Its durable `converge_target: crew` state is derived from live role, OUTBOX, shared-contract, release and Core evidence instead of a mutable stage counter.

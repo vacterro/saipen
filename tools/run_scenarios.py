@@ -3573,6 +3573,75 @@ def run_saicrew_probes() -> tuple[list[str], int]:
                and "STALE_PLAN" in pending_plan["stages"][0].get("reason", ""),
                repr(pending_plan.get("stages", [])[:2]))
 
+        # shared_contract_status derives its green ownership verdict from one
+        # exact sub-sync receipt. The whole ops tree cannot be a finalizer CAS
+        # dependency because the finalizer creates its own op there, so the
+        # selected receipt must be bound by path and bytes instead. Removing
+        # or mutating it after the snapshot must touch zero Core bytes.
+        from saipen_engine import plan as plan_engine
+        real_writer_lock = plan_engine.project_writer_lock
+
+        sync_drop_race = Path(raw) / "crew-positive-sync-receipt-drop"
+        shutil.copytree(post, sync_drop_race)
+        drop_status = shared_contract_status(sync_drop_race, home.as_posix())
+        drop_receipt = sync_drop_race / drop_status["inventory_receipt_path"]
+        drop_core_before = (
+            (sync_drop_race / ".saipen/LOG.md").read_bytes(),
+            (sync_drop_race / ".saipen/STATE.md").read_bytes())
+
+        @contextlib.contextmanager
+        def drop_receipt_before_apply(lock_root):
+            raw_receipt = drop_receipt.read_bytes()
+            drop_receipt.unlink()
+            try:
+                with real_writer_lock(lock_root):
+                    yield
+            finally:
+                drop_receipt.write_bytes(raw_receipt)
+
+        with mock.patch.object(plan_engine, "project_writer_lock",
+                               drop_receipt_before_apply):
+            refused_drop = finalize_crew(sync_drop_race)
+        drop_core_after = (
+            (sync_drop_race / ".saipen/LOG.md").read_bytes(),
+            (sync_drop_race / ".saipen/STATE.md").read_bytes())
+        expect("finalizer CAS refuses missing sub-sync ownership receipt",
+               not refused_drop.ok and refused_drop.code == "STALE_STATE"
+               and drop_core_before == drop_core_after,
+               refused_drop.to_json())
+
+        sync_mutate_race = Path(raw) / "crew-positive-sync-receipt-mutate"
+        shutil.copytree(post, sync_mutate_race)
+        mutate_status = shared_contract_status(
+            sync_mutate_race, home.as_posix())
+        mutate_receipt = (sync_mutate_race /
+                          mutate_status["inventory_receipt_path"])
+        mutate_core_before = (
+            (sync_mutate_race / ".saipen/LOG.md").read_bytes(),
+            (sync_mutate_race / ".saipen/STATE.md").read_bytes())
+
+        @contextlib.contextmanager
+        def mutate_receipt_before_apply(lock_root):
+            raw_receipt = mutate_receipt.read_bytes()
+            mutate_receipt.write_bytes(raw_receipt + b"\n")
+            try:
+                with real_writer_lock(lock_root):
+                    yield
+            finally:
+                mutate_receipt.write_bytes(raw_receipt)
+
+        with mock.patch.object(plan_engine, "project_writer_lock",
+                               mutate_receipt_before_apply):
+            refused_mutation = finalize_crew(sync_mutate_race)
+        mutate_core_after = (
+            (sync_mutate_race / ".saipen/LOG.md").read_bytes(),
+            (sync_mutate_race / ".saipen/STATE.md").read_bytes())
+        expect("finalizer CAS refuses mutated sub-sync ownership receipt",
+               not refused_mutation.ok
+               and refused_mutation.code == "STALE_STATE"
+               and mutate_core_before == mutate_core_after,
+               refused_mutation.to_json())
+
         # A change after the green snapshot but before APPLY is the other side
         # of the race. The finalizer passes exact evidence preconditions into
         # the journal, so it must refuse before touching Core LOG/STATE.
@@ -3582,7 +3651,6 @@ def run_saicrew_probes() -> tuple[list[str], int]:
                      "OUTBOX.md")
         core_before = ((finalize_race / ".saipen/LOG.md").read_bytes(),
                        (finalize_race / ".saipen/STATE.md").read_bytes())
-        from saipen_engine import plan as plan_engine
         real_writer_lock = plan_engine.project_writer_lock
 
         @contextlib.contextmanager

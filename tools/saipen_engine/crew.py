@@ -288,13 +288,19 @@ def crew_snapshot(project_root: Path | str) -> CrewSnapshot:
     epoch = _crew_epoch(root, log_text)
     release = _release_evidence(root, epoch)
     pending = tuple(pending_ops(root))
-    receipt_hashes = {}
-    for op_id in {item for item in (
+    receipt_paths = {
+        f".saipen/recovery/ops/{op_id}/operation.json"
+        for op_id in {item for item in (
             epoch.op_id if epoch else None,
-            release.op_id if release else None) if item}:
-        receipt = root / ".saipen/recovery/ops" / op_id / "operation.json"
-        receipt_hashes[receipt.relative_to(root).as_posix()] = \
-            hash_file_dependency(receipt)
+            release.op_id if release else None) if item}
+    }
+    contract_receipt_path = status.get("inventory_receipt_path")
+    if isinstance(contract_receipt_path, str) and contract_receipt_path:
+        receipt_paths.add(contract_receipt_path)
+    receipt_hashes = {}
+    for receipt_path in sorted(receipt_paths):
+        receipt_hashes[receipt_path] = hash_file_dependency(
+            root / receipt_path)
     repeated_source, repeated_error = _source_identity(root)
     repeated_token = (source_identity_dependency(repeated_source)
                       if repeated_source is not None else "")

@@ -546,14 +546,15 @@ def _latest_sub_sync_inventory(root: Path) -> tuple[dict | None,
                     and inventory is not None):
                 candidates.append((manifest.stat().st_mtime_ns,
                                    record.get("created_at", ""),
-                                   record.get("op_id", ""), record, inventory))
+                                   record.get("op_id", ""), record, inventory,
+                                   manifest.relative_to(root).as_posix()))
         except (OSError, json.JSONDecodeError, AttributeError):
             continue
     if not candidates:
         return None, None
-    _mtime, _created, _op_id, record, inventory = max(candidates,
-                                                       key=lambda item: item[:3])
-    return record, inventory
+    _mtime, _created, _op_id, record, inventory, receipt_path = max(
+        candidates, key=lambda item: item[:3])
+    return {**record, "_receipt_path": receipt_path}, inventory
 
 
 def _owned_local_path(root: Path, rel: str) -> Path:
@@ -661,6 +662,8 @@ def shared_contract_status(project_root: Path | str,
         "inventory_establishment": receipt is None,
         "inventory_changed": inventory_changed,
         "inventory_receipt": receipt.get("op_id") if receipt else None,
+        "inventory_receipt_path": receipt.get("_receipt_path")
+        if receipt else None,
     }
 
 
