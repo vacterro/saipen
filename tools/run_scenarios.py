@@ -2726,6 +2726,163 @@ def run_saicrew_probes() -> tuple[list[str], int]:
                and after_receipt["current"],
                f"result={established.to_json()} status={after_receipt}")
 
+        # 3b. RECEIPT LINEAGE (hostile control, T-1001): the durable
+        # canonical successor is the receipt's OWN created_at, never the
+        # operation.json filesystem mtime -- a copy or touch can push an
+        # older committed inventory's mtime forward and feed the wrong
+        # obsolete reconciliation. Ambiguous or broken lineage fails closed.
+        from saipen_engine.subs import _latest_sub_sync_inventory
+
+        def write_receipt(root: Path, dir_name: str, op_id: str,
+                          created_at: str, extra_path: str, mtime: int
+                          ) -> Path:
+            """Craft one committed sub_sync receipt over the base shared
+            inventory plus one extra path, with a pinned durable timestamp
+            and a pinned filesystem mtime."""
+            inventory = [{"path": "PROTOCOL.md", "kind": "file",
+                          "source_hash": "0123456789abcdef"},
+                         {"path": "README.md", "kind": "file",
+                          "source_hash": "0123456789abcdef"},
+                         {"path": "crew.md", "kind": "file",
+                          "source_hash": "0123456789abcdef"}]
+            if extra_path:
+                inventory.append({"path": extra_path, "kind": "file",
+                                  "source_hash": "0123456789abcdef"})
+            ops = root / ".saipen" / "recovery" / "ops" / dir_name
+            ops.mkdir(parents=True, exist_ok=True)
+            op_file = ops / "operation.json"
+            op_file.write_text(json.dumps(
+                {"op_id": op_id, "operation": "sub_sync",
+                 "status": "COMMITTED", "created_at": created_at,
+                 "receipt_metadata": {
+                     "owned_source_inventory": inventory,
+                     "obsolete_reconciliation": []}},
+                indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            os.utime(op_file, (mtime, mtime))
+            return op_file
+
+        late = 0x7FE000000000
+        early = 0x100000000
+        lineage_root = Path(raw) / "sync-lineage"
+        seed_project(lineage_root)
+        write_receipt(lineage_root, "sub-sync-old", "sub-sync-old",
+                      "2026-08-13T00:00:00Z", "", late)
+        write_receipt(lineage_root, "sub-sync-new", "sub-sync-new",
+                      "2026-08-14T00:00:00Z",
+                      "TEMPLATE/sync-lineage-extra.txt", early)
+        lineage_chosen, _inv, lineage_kind = _latest_sub_sync_inventory(
+            lineage_root)
+        expect("durable successor wins over inverted receipt mtime",
+               lineage_kind == "ok" and lineage_chosen is not None
+               and lineage_chosen.get("op_id") == "sub-sync-new",
+               f"chosen={lineage_chosen and lineage_chosen.get('op_id')} "
+               f"lineage={lineage_kind}")
+        lineage_status = shared_contract_status(lineage_root, home.as_posix())
+        expect("obsolete reconciliation follows the durable successor",
+               f"{SUBS_REL}/TEMPLATE/sync-lineage-extra.txt"
+               in lineage_status["obsolete_files"],
+               f"obsolete_files={lineage_status['obsolete_files']}")
+
+        amb_root = Path(raw) / "sync-lineage-ambiguous"
+        seed_project(amb_root)
+        write_receipt(amb_root, "sub-sync-amb-a", "sub-sync-amb",
+                      "2026-08-14T00:00:00Z", "", early)
+        write_receipt(amb_root, "sub-sync-amb-b", "sub-sync-amb",
+                      "2026-08-14T00:00:00Z",
+                      "TEMPLATE/sync-lineage-amb-extra.txt", early)
+        amb_ops = amb_root / ".saipen" / "recovery" / "ops"
+        amb_before = sorted(p.name for p in amb_ops.iterdir())
+        amb_chosen, _amb_inv, amb_kind = _latest_sub_sync_inventory(
+            amb_root)
+        amb_status = shared_contract_status(amb_root, home.as_posix())
+        refused_amb = sub_sync(amb_root, home.as_posix())
+        amb_after = sorted(p.name for p in amb_ops.iterdir())
+        expect("ambiguous receipt lineage fails closed",
+               amb_chosen is None and amb_kind == "ambiguous"
+               and amb_status["current"] is False
+               and amb_status.get("inventory_lineage") == "ambiguous"
+               and not refused_amb.ok and "ambiguous" in refused_amb.message
+               and amb_before == amb_after,
+               f"lineage={amb_kind} current={amb_status['current']} "
+               f"refused={refused_amb.to_json()}")
+
+        broken_root = Path(raw) / "sync-lineage-broken"
+        seed_project(broken_root)
+        broken_first = sub_sync(broken_root, home.as_posix())
+        expect("broken-lineage fixture receipt",
+               broken_first.ok and bool(broken_first.op_id),
+               broken_first.to_json())
+        broken_op = broken_root / ".saipen" / "recovery" / "ops" \
+            / broken_first.op_id / "operation.json"
+        broken_record = json.loads(broken_op.read_text(encoding="utf-8"))
+        broken_record["created_at"] = "not-a-timestamp"
+        broken_op.write_text(
+            json.dumps(broken_record, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8")
+        broken_chosen, _broken_inv, broken_kind = \
+            _latest_sub_sync_inventory(broken_root)
+        expect("broken receipt lineage fails closed",
+               broken_chosen is None and broken_kind == "broken",
+               f"chosen={broken_chosen} lineage={broken_kind}")
+        healed = sub_sync(broken_root, home.as_posix())
+        healed_chosen, _healed_inv, healed_kind = \
+            _latest_sub_sync_inventory(broken_root)
+        expect("broken lineage self-heals with a fresh valid receipt",
+               healed.ok and healed_kind == "ok"
+               and healed_chosen is not None
+               and healed_chosen.get("op_id") == healed.op_id
+               and shared_contract_status(broken_root,
+                                          home.as_posix())["current"],
+               f"healed={healed.to_json()} kind={healed_kind}")
+
+        mix_root = Path(raw) / "sync-lineage-mixed"
+        seed_project(mix_root)
+        write_receipt(mix_root, "sub-sync-mix-broken", "sub-sync-mix-broken",
+                      "garbage", "", late)
+        write_receipt(mix_root, "sub-sync-mix-valid", "sub-sync-mix-valid",
+                      "2026-08-14T00:00:00Z",
+                      "TEMPLATE/sync-lineage-mix-extra.txt", early)
+        mix_chosen, _mix_inv, mix_kind = _latest_sub_sync_inventory(
+            mix_root)
+        expect("broken receipt never wins selection",
+               mix_kind == "ok" and mix_chosen is not None
+               and mix_chosen.get("op_id") == "sub-sync-mix-valid",
+               f"chosen={mix_chosen and mix_chosen.get('op_id')} "
+               f"lineage={mix_kind}")
+
+        equal_root = Path(raw) / "sync-lineage-equal-distance"
+        seed_project(equal_root)
+        write_receipt(equal_root, "sub-sync-eq-a", "sub-sync-eq-a",
+                      "2026-08-14T00:00:00Z",
+                      "TEMPLATE/sync-lineage-eq-x.txt", early)
+        write_receipt(equal_root, "sub-sync-eq-b", "sub-sync-eq-b",
+                      "2026-08-14T00:00:00Z",
+                      "TEMPLATE/sync-lineage-eq-y.txt", early)
+        eq_chosen, _eq_inv, eq_kind = _latest_sub_sync_inventory(
+            equal_root)
+        eq_refused = sub_sync(equal_root, home.as_posix())
+        expect("equally-close same-second lineages fail closed",
+               eq_chosen is None and eq_kind == "ambiguous"
+               and not eq_refused.ok and "ambiguous" in eq_refused.message,
+               f"lineage={eq_kind} refused={eq_refused.to_json()}")
+
+        def bump_receipt_ts(root: Path, op_id: str | None, ts: str) -> None:
+            """Pin one committed receipt's durable timestamp. The obsolete
+            and crash fixtures below run several syncs within the same real
+            second; their lineages must be durably ordered for the durable
+            selection (T-1001), exactly as spaced-out real syncs are."""
+            if not op_id:
+                return
+            op_file = root / ".saipen" / "recovery" / "ops" / op_id \
+                / "operation.json"
+            if not op_file.is_file():
+                return
+            record = json.loads(op_file.read_text(encoding="utf-8"))
+            record["created_at"] = ts
+            op_file.write_text(
+                json.dumps(record, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8")
+
         # Removed inherited paths are owned only through the previous receipt.
         # Exact old bytes may be deleted, deepest file/directory first; local
         # edits refuse before a journal exists.
@@ -2733,11 +2890,15 @@ def run_saicrew_probes() -> tuple[list[str], int]:
         seed_project(obsolete_root)
         spawned = sub_spawn(obsolete_root, "saihunt", home.as_posix())
         expect("obsolete-sync fixture spawn ok", spawned.ok, spawned.message)
+        bump_receipt_ts(obsolete_root, spawned.data.get("sync_op_id"),
+                        "2026-08-14T00:00:00Z")
         obsolete_source = home / "extensions" / "subs" / "TEMPLATE" \
             / "retired" / "nested.txt"
         obsolete_source.parent.mkdir(parents=True)
         obsolete_source.write_text("owned old bytes\n", encoding="utf-8")
         admitted = sub_sync(obsolete_root, home.as_posix())
+        bump_receipt_ts(obsolete_root, admitted.op_id,
+                        "2026-08-14T00:00:01Z")
         obsolete_local = obsolete_root / SUBS_REL / "TEMPLATE" \
             / "retired" / "nested.txt"
         expect("sync admits new inherited nested file with receipt",
@@ -2780,6 +2941,8 @@ def run_saicrew_probes() -> tuple[list[str], int]:
         crash_source = home / "extensions" / "subs" / "saicrash.md"
         crash_source.write_text("crash-owned\n", encoding="utf-8")
         crash_spawn = sub_spawn(crash_root, "saihunt", home.as_posix())
+        bump_receipt_ts(crash_root, crash_spawn.data.get("sync_op_id"),
+                        "2026-08-14T00:00:00Z")
         crash_local = crash_root / SUBS_REL / "saicrash.md"
         crash_source.unlink()
         from saipen_engine import journal as sync_journal

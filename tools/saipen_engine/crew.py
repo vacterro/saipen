@@ -522,7 +522,9 @@ def _evaluate(snapshot: CrewSnapshot) -> tuple[list[dict], CrewAction | None]:
                  + contract.get("stale_files", [])
                  + contract.get("obsolete_files", [])
                  + contract.get("obsolete_dirs", []))
-        if contract.get("inventory_establishment"):
+        if contract.get("inventory_lineage") == "ambiguous":
+            drift.append("sub-sync receipt lineage ambiguous")
+        elif contract.get("inventory_establishment"):
             drift.append("shared-contract ownership receipt missing")
         elif contract.get("inventory_changed") and not drift:
             drift.append("shared-contract source inventory changed")

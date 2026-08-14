@@ -528,13 +528,36 @@ def _normalize_owned_inventory(value) -> list[dict] | None:
     return sorted(normalized, key=lambda item: (item["path"], item["kind"]))
 
 
-def _latest_sub_sync_inventory(root: Path) -> tuple[dict | None,
-                                                     list[dict] | None]:
-    """Newest committed normal sub_sync receipt carrying valid inventory."""
+_DURABLE_TS_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+
+
+def _valid_durable_timestamp(value) -> bool:
+    """A receipt's OWN committed UTC timestamp is the durable lineage key."""
+    return isinstance(value, str) and _DURABLE_TS_RE.fullmatch(value) is not None
+
+
+def _inventory_key(inventory: list[dict]) -> tuple:
+    return tuple(sorted((i["path"], i["kind"], i["source_hash"])
+                        for i in inventory))
+
+
+def _latest_sub_sync_inventory(
+        root: Path) -> tuple[dict | None, list[dict] | None, str]:
+    """Durable canonical sub_sync receipt selection (T-1001).
+
+    The successor is the receipt whose OWN created_at is newest, never the
+    operation.json filesystem mtime -- a copy or touch can push an older
+    committed inventory's mtime forward and feed the wrong obsolete
+    reconciliation. The third element reports lineage so callers can fail
+    closed: "none" (no committed receipt), "broken" (every candidate lacks
+    a valid durable timestamp), "ambiguous" (receipts sharing the newest
+    timestamp disagree about the inventory -- the same committed second
+    cannot be durably ordered), or "ok".
+    """
     ops = root / ".saipen" / "recovery" / "ops"
-    candidates = []
     if not ops.is_dir():
-        return None, None
+        return None, None, "none"
+    candidates = []
     for manifest in ops.glob("*/operation.json"):
         try:
             record = json.loads(manifest.read_text(encoding="utf-8"))
@@ -544,17 +567,23 @@ def _latest_sub_sync_inventory(root: Path) -> tuple[dict | None,
             if (record.get("operation") == "sub_sync"
                     and record.get("status") == "COMMITTED"
                     and inventory is not None):
-                candidates.append((manifest.stat().st_mtime_ns,
-                                   record.get("created_at", ""),
+                candidates.append((record.get("created_at", ""),
                                    record.get("op_id", ""), record, inventory,
                                    manifest.relative_to(root).as_posix()))
         except (OSError, json.JSONDecodeError, AttributeError):
             continue
     if not candidates:
-        return None, None
-    _mtime, _created, _op_id, record, inventory, receipt_path = max(
-        candidates, key=lambda item: item[:3])
-    return {**record, "_receipt_path": receipt_path}, inventory
+        return None, None, "none"
+    valid = [c for c in candidates if _valid_durable_timestamp(c[0])]
+    if not valid:
+        return None, None, "broken"
+    newest = max(c[0] for c in valid)
+    top = [c for c in valid if c[0] == newest]
+    if len({_inventory_key(c[3]) for c in top}) > 1:
+        return None, None, "ambiguous"
+    _ts, _op, record, inventory, receipt_path = max(top,
+                                                    key=lambda item: item[1])
+    return {**record, "_receipt_path": receipt_path}, inventory, "ok"
 
 
 def _owned_local_path(root: Path, rel: str) -> Path:
@@ -624,8 +653,9 @@ def shared_contract_status(project_root: Path | str,
                 "missing_files": [], "stale_files": [],
                 "obsolete_files": [], "obsolete_dirs": [],
                 "obsolete_conflicts": [], "inventory_known": False,
-                "inventory_establishment": False}
-    receipt, prior_inventory = _latest_sub_sync_inventory(root)
+                "inventory_establishment": False,
+                "inventory_lineage": "unknown"}
+    receipt, prior_inventory, lineage = _latest_sub_sync_inventory(root)
     obsolete, conflicts = _obsolete_contract_status(
         root, prior_inventory, source_inventory)
     missing, stale, missing_dirs = [], [], []
@@ -660,6 +690,7 @@ def shared_contract_status(project_root: Path | str,
         "obsolete_conflicts": [f"{SUBS_REL}/{path}" for path in conflicts],
         "inventory_known": receipt is not None,
         "inventory_establishment": receipt is None,
+        "inventory_lineage": lineage,
         "inventory_changed": inventory_changed,
         "inventory_receipt": receipt.get("op_id") if receipt else None,
         "inventory_receipt_path": receipt.get("_receipt_path")
@@ -1261,7 +1292,13 @@ def sub_sync(project_root: Path | str, saipen_home: str,
                        invalid + " -- run `saipen sub sync` after refreshing "
                        "the install (BLOCKED, never copy from a path that did "
                        "not check out)")
-    receipt, prior_inventory = _latest_sub_sync_inventory(root)
+    receipt, prior_inventory, lineage = _latest_sub_sync_inventory(root)
+    if lineage == "ambiguous":
+        return _refuse(
+            "VALIDATION_FAILED",
+            "ambiguous sub-sync receipt lineage; refuse obsolete "
+            "reconciliation until a durable canonical successor is "
+            "committed")
     obsolete, conflicts = _obsolete_contract_status(
         root, prior_inventory, source_inventory)
     prior_kinds = {item["path"]: item["kind"]

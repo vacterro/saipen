@@ -1,0 +1,14 @@
+{
+  "op_id": "scope-4c55b32d",
+  "paths": {
+    "tools/run_scenarios.py": "cada3ade3d3d51cb",
+    "tools/saipen_engine/crew.py": "6efe34868e3045d4",
+    "tools/saipen_engine/subs.py": "06132b51260c8f8c"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "recorded_at": "2026-08-14T09:16:47Z",
+  "schema_version": 1,
+  "source_head": "2447b490b00c446121b1c17d9ea80ade730303b7",
+  "source_tree_fingerprint": "git-delta-v1:043416a6a2a574957429d9704a83afd11b35d47c86d0fffd7262ce97c37ec4b0",
+  "ticket": "T-1001"
+}

@@ -1,6 +1,10 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.224.2 -- 2026-08-14 -- durable sub-sync receipt lineage selection (T-1001)
+
+- T-1001: the canonical sub-sync ownership receipt is now the one whose OWN `created_at` is newest, never the `operation.json` filesystem mtime -- a copy or touch can push an older committed inventory's mtime forward and feed the wrong obsolete reconciliation. Receipts sharing the newest committed second with different inventories are ambiguous and fail closed (sync refuses, zero writes); a receipt with a broken durable timestamp is never selected and a fresh sync self-heals. Six hostile lineage controls plus the obsolete-delete and crash-resume controls pass.
+
 ## 7.224.1 -- 2026-08-14 -- sub-sync ownership receipt bound into the SAICREW finalizer CAS (T-1002)
 
 - T-1002: the crew snapshot now binds the exact selected sub-sync ownership receipt (path + bytes) into the finalizer's CAS alongside the epoch and release receipts. Deleting or mutating that receipt after the green snapshot and before APPLY returns `STALE_STATE` with zero Core writes; the positive finalizer is unchanged.
