@@ -3,3 +3,37 @@
 - 13.08.26 06:47 [E-3355] [parent: E-3354] [T-998] [agent: claude] [op: scope-e71acf56] DEC: release scope recorded -- 5 path(s) bound to 88ddbbaa6423
 - 13.08.26 06:47 [E-3356] [parent: E-3355] [T-998] [agent: claude] [op: finish-b22dc36e] RUN: ship v7.223.16 -> content commit 120352021aa5 pushed
 - 13.08.26 06:47 [E-3357] [parent: E-3356] [T-998] [agent: claude] [op: finish-b22dc36e] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 13.08.26 06:49 [E-3358] [parent: E-3357] [agent: claude] [op: transition-2f87ae86] RUN: post-release fresh hunt after v7.223.16
+- 13.08.26 07:54 [E-3359] [parent: E-3358] [agent: saipen-cli] RUN: sub sync -> 13 shared file(s) refreshed
+- 13.08.26 20:27 [E-3360] [parent: E-3359] [agent: claude] [op: checkpoint-8234a0a1] RUN: repair sub sync LOG/STATE binding through canonical checkpoint
+- 13.08.26 20:27 [E-3361] [parent: E-3360] [T-999] [agent: claude] [op: ticket-a644b881] DEC: ticket added via SAIOPS
+- 13.08.26 20:27 [E-3362] [parent: E-3361] [T-999] [agent: claude] [op: claim-47fbb133] DEC: claimed via SAIOPS -- owner claude
+- 14.08.26 05:24 [E-3363] [parent: E-3362] [T-999] [agent: claude] [op: transition-b4418012] RUN: SCOUT -- crew.py/subs.py/operations.py own orchestration; run_scenarios.py is canonical harness; release.py remains dependency with receipt binding only
+- 14.08.26 06:32 [E-3364] [parent: E-3363] [T-999] [agent: claude] H: injected python-pro -- Python orchestration scope + run_scenarios.py harness matched; SAIPEN remains authoritative
+- 14.08.26 06:32 [E-3365] [parent: E-3364] [T-999] [agent: claude] DEC: rollback for shared-contract fixed-point edit -- git diff -- tools/saipen_engine/subs.py tools/saipen_engine/crew.py tools/run_scenarios.py
+- 14.08.26 06:50 [E-3366] [parent: E-3365] [T-999] [agent: claude] DEC: rollback for crash-boundary and strict-OUTBOX regression repair -- git diff -- tools/saipen_engine/journal.py tools/saipen_engine/subs.py tools/validate.py tools/run_scenarios.py
+- 14.08.26 07:04 [E-3367] [parent: E-3366] [T-999] [agent: claude] [op: checkpoint-bc00da23] RUN: run_scenarios.py -> PASS; 28 fixtures; SAICREW 135; NITRO integrity 190
+- 14.08.26 07:04 [E-3368] [parent: E-3367] [T-999] [agent: claude] [op: transition-612f4cac] RUN: T-999 implementation complete; execute canonical verification gates
+- 14.08.26 07:06 [E-3369] [parent: E-3368] [T-999] [agent: claude] [op: checkpoint-d614953f] RUN: validate.py -> PASS
+- 14.08.26 07:06 [E-3370] [parent: E-3369] [T-999] [agent: claude] [op: transition-cfec3f1e] RUN: verification PASS: py_compile, ruff tools/tests, diff-check, full scenarios, validator; conf: high
+- 14.08.26 07:06 [E-3371] [parent: E-3370] [op: transition-cfec3f1e] DEC: goal_tickets 7->8
+- 14.08.26 07:11 [E-3372] [parent: E-3371] [T-999] [agent: claude] [op: transition-05bd5072] RUN: REVIEW P0 tools/saipen_engine/crew.py:670 -- crew finalization lacks CAS over role/shared/release evidence; stale proof can finalize
+- 14.08.26 07:11 [E-3373] [parent: E-3372] [T-999] [agent: claude] [op: checkpoint-7a3583ae] DEC: rollback for crew snapshot/finalize CAS repair -- git diff -- tools/saipen_engine/crew.py tools/saipen_engine/operations.py tools/saipen_engine/journal.py tools/run_scenarios.py
+- 14.08.26 07:18 [E-3374] [parent: E-3373] [T-999] [agent: claude] [op: transition-a7b8aff1] RUN: REVIEW P0 fixed: coherent crew snapshot plus evidence CAS; SAICREW 137, NITRO integrity 190, M2 17 focused PASS
+- 14.08.26 07:24 [E-3375] [parent: E-3374] [T-999] [agent: claude] [op: checkpoint-078a35e7] RUN: validate.py -> PASS
+- 14.08.26 07:24 [E-3376] [parent: E-3375] [T-999] [agent: claude] [op: transition-37ece8b2] RUN: verification pass 2 PASS: coherent-snapshot races, full scenarios 1034 lines, ruff, validator; conf: high
+- 14.08.26 07:24 [E-3377] [parent: E-3376] [op: transition-37ece8b2] DEC: goal_tickets 8->9
+- 14.08.26 07:26 [E-3378] [parent: E-3377] [T-999] [agent: claude] [op: transition-2fb3604e] RUN: REVIEW new P0 tools/saipen_engine/crew.py:300,479 -- pending/home/package reads occur after snapshot barrier; mixed evidence remains possible
+- 14.08.26 07:29 [E-3379] [parent: E-3378] [T-999] [agent: claude] [op: transition-1b9b421c] RUN: new snapshot-tail P0 fixed: all filesystem reads captured before closing hashes; SAICREW 138 and NITRO integrity 190 PASS
+- 14.08.26 07:36 [E-3380] [parent: E-3379] [T-999] [agent: claude] [op: checkpoint-08568423] RUN: validate.py -> PASS
+- 14.08.26 07:36 [E-3381] [parent: E-3380] [T-999] [agent: claude] [op: transition-7394c9d7] RUN: verification pass 3 PASS: SAICREW 138, full scenarios, ruff, validator; conf: high
+- 14.08.26 07:36 [E-3382] [parent: E-3381] [op: transition-7394c9d7] DEC: goal_tickets 9->10
+- 14.08.26 07:49 [E-3383] [parent: E-3382] [T-999] [agent: claude] [op: checkpoint-b26bde44] RUN: REVIEW run_scenarios.py -> PASS; 138 SAICREW hostile controls; full matrix exit 0 in 322s
+- 14.08.26 07:49 [E-3384] [parent: E-3383] [T-999] [agent: claude] [op: checkpoint-53f0c48e] RUN: REVIEW ruff + git diff --check -> PASS
+- 14.08.26 07:49 [E-3385] [parent: E-3384] [T-999] [agent: claude] [op: checkpoint-ce00a4d6] RUN: validate.py -> PASS
+- 14.08.26 07:49 [E-3386] [parent: E-3385] [T-999] [agent: claude] [op: checkpoint-20118c5d] DEC: SHIP
+- 14.08.26 07:49 [E-3387] [parent: E-3386] [T-999] [agent: claude] [op: transition-98201bad] RUN: Independent REVIEW passed; P0/P1 audit clear; all fresh gates green
+- 14.08.26 08:01 [E-3388] [parent: E-3387] [T-999] [agent: claude] [op: checkpoint-a382ab84] RUN: SHIP metadata v7.224.0; run_scenarios.py 138 SAICREW/full matrix -> PASS; validate.py --gate core, ruff, diff-check -> PASS
+- 14.08.26 08:01 [E-3389] [parent: E-3388] [T-999] [agent: claude] [op: scope-f1a1dfd9] DEC: release scope recorded -- 42 path(s) bound to 95787ecc055b
+- 14.08.26 08:03 [E-3390] [parent: E-3389] [T-999] [agent: claude] [op: finish-0925e866] RUN: ship v7.224.0 -> content commit 94814c735ea1 pushed
+- 14.08.26 08:03 [E-3391] [parent: E-3390] [T-999] [agent: claude] [op: finish-0925e866] DEC: ticket finished via SAIOPS -- completion (from SHIP)
