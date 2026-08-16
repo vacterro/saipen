@@ -18,6 +18,11 @@ saipen_export_*.zip
 
 thoughts/
 
+# Project scratch directory for ad-hoc debugging artifacts. It is not shipped
+# documentation or source; the validator's coverage stage and the audit checks
+# must never classify a file under it as a released Markdown document.
+/_tmp_dbg/
+
 # A subSaipen's kitchen is a sandbox, and saiwiki's holds a CLONE of the
 # GitHub wiki -- a nested git repository. `git add -A` turns that into a
 # gitlink: a 160000 entry pointing at a commit no clone of this repo can

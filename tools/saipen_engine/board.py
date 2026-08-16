@@ -7,6 +7,65 @@ import re
 
 REQUIRED_HEADINGS = ["## DOING", "## TODO", "## DONE", "## BLOCKED"]
 TICKET_RE = re.compile(r"^- \[([ x/])\] (T-\d+)\s+(.*)$")
+
+# ONE canonical strict-UTC timestamp parser (hostile-regression, P1#5). The
+# three duplicated "_strict_iso_utc" copies in operations/journal/release only
+# tested ``tzinfo`` and thereby accepted any timezone-aware offset; a +03:00
+# stamp is NOT UTC. This requires ``utcoffset() == 0`` (true UTC), canonicalizes
+# to a single Z representation, and returns a comparable sort key. Garbage,
+# naive (no zone), and non-zero-offset stamps all refuse.
+_UTC_ZERO = datetime.timedelta(0)
+
+
+def strict_iso_utc(value: object) -> str:
+    """Strict ISO-8601 UTC (Z or +00:00, ``utcoffset() == 0``) -> canonical Z.
+
+    Returns the canonical ``YYYY-MM-DDTHH:MM[:SS[.fff]]Z`` form, or ``""`` for
+    any non-string, unparseable, naive, or non-zero-offset stamp."""
+    if not isinstance(value, str):
+        return ""
+    text = value.strip()
+    if not text:
+        return ""
+    try:
+        stamp = datetime.datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return ""
+    if stamp.tzinfo is None:
+        return ""
+    if stamp.utcoffset() != _UTC_ZERO:
+        return ""
+    canonical = stamp.astimezone(datetime.timezone.utc).replace(tzinfo=None)
+    return canonical.isoformat() + "Z"
+
+
+def iso_utc_sort_key(value: object) -> datetime.datetime | None:
+    """The actual UTC instant of ``value``, or None when not strict-UTC.
+
+    Use as the sort key for pending-op and terminal-receipt ordering so two
+    admissible but differently-formatted instants tie by the real clock and
+    never by their spelling."""
+    if not isinstance(value, str):
+        return None
+    text = value.strip()
+    if not text:
+        return None
+    try:
+        stamp = datetime.datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if stamp.tzinfo is None:
+        return None
+    if stamp.utcoffset() != _UTC_ZERO:
+        return None
+    return stamp.astimezone(datetime.timezone.utc)
+# A second canonical ticket-record opener anywhere AFTER the first on the same
+# physical line. ONE PHYSICAL BOARD RECORD == ONE TICKET IDENTITY (T-1003): a
+# merged record silently deletes the second ticket's identity (T-473/T-576 and
+# T-407/T-406 both shipped merged once). A description may legitimately hold
+# `- [ ]` prose; a `- [ ] T-###`/`- [/] T-###`/`- [x] T-###` marker is NEVER
+# prose -- it is a second identity and a parse error.
+EMBEDDED_TICKET_RE = re.compile(r"\[[ x/]\]\s+T-\d+")
 PIPE_SENTINEL = "\x00"
 KNOWN_FIELDS = frozenset({"needs", "owner", "claim_time", "blocker", "verify",
                           "review_passes", "verify_attempts",
@@ -39,6 +98,14 @@ def parse_board(text: str) -> dict:
                     f"RFC section 1.2 shape `- [ ] T-### description`")
                 continue
             checkbox, tid, rest = m.groups()
+            if EMBEDDED_TICKET_RE.search(rest):
+                errors.append(
+                    f"BOARD.md:{line_no} ticket {tid} embeds a second "
+                    f"ticket-record opener -- ONE PHYSICAL BOARD RECORD == "
+                    f"ONE TICKET IDENTITY; split the records onto separate "
+                    f"lines or the embedded ticket silently loses its "
+                    f"identity")
+                continue
             if section not in REQUIRED_HEADINGS:
                 errors.append(
                     f"BOARD.md:{line_no} ticket {tid} sits under "
@@ -55,6 +122,12 @@ def parse_board(text: str) -> dict:
                     errors.append(
                         f"BOARD.md:{line_no} ticket {tid} has unrecognized "
                         f"field {part!r}")
+                    continue
+                if fm.group(1) in fields:
+                    errors.append(
+                        f"BOARD.md:{line_no} ticket {tid} duplicates the "
+                        f"known field {fm.group(1)!r} -- a weak model must "
+                        f"never read one value while Python uses another")
                     continue
                 fields[fm.group(1)] = fm.group(2)
                 if fm.group(1) == "needs":
@@ -82,6 +155,50 @@ def parse_board(text: str) -> dict:
     return {"tickets": tickets, "headings": headings, "errors": errors}
 
 
+def board_semantic_errors(ticket: dict) -> list[str]:
+    """Mechanically-decidable BOARD lifecycle invariants, ONE shared home.
+
+    fast_check (transactional verifier: does this proposed board survive
+    the release gate?) and validate.py (canonical validator) must reject the
+    SAME checkbox/section/evidence mismatches -- an unrelated mutation may
+    otherwise COMMIT an already-invalid board that the full release gate
+    rejects, and the two gates would disagree (T-1003).
+
+    Rules (RFC § 1.2): the section IS the status; the checkbox is how a
+    human skims it.
+      - [x] belongs only under ## DONE
+      - [/] belongs only under ## DOING
+      - open [ ] belongs only under ## TODO / ## BLOCKED
+      - ## DONE requires non-empty | verify: evidence (a completion claim
+        with no evidence attached is indistinguishable from one never tested)
+      - ## BLOCKED requires a non-empty | blocker:
+      - | blocker: outside ## BLOCKED is stale advisory data
+    """
+    errors = []
+    section = ticket.get("section")
+    checkbox = ticket.get("checkbox")
+    fields = ticket.get("fields", {})
+    tid = ticket.get("id", "?")
+    if checkbox == "x" and section != "## DONE":
+        errors.append(f"{tid} is checked [x] but sits under {section} -- "
+                      "checkbox and section disagree; [x] belongs only "
+                      "under ## DONE")
+    if checkbox == "/" and section != "## DOING":
+        errors.append(f"{tid} is [/] in-progress but sits under {section} -- "
+                      "in-progress work belongs only under ## DOING")
+    if checkbox in (" ", "") and section in ("## DONE", "## DOING"):
+        errors.append(f"{tid} has an open [ ] checkbox under {section} -- "
+                      "open boxes belong under ## TODO or ## BLOCKED")
+    if section == "## DONE" and not str(fields.get("verify", "")).strip():
+        errors.append(f"{tid} sits under ## DONE with no | verify: evidence "
+                      "-- ## DONE is a claim that the ticket's own verify "
+                      "condition was met")
+    status_error = ticket_status_error(ticket)
+    if status_error:
+        errors.append(f"{tid} {status_error}")
+    return errors
+
+
 def ticket_has_blocker(ticket: dict) -> bool:
     """Whether a blocker field exists, including a malformed empty one."""
     return "blocker" in ticket.get("fields", {})
@@ -100,49 +217,83 @@ def ticket_status_error(ticket: dict) -> str | None:
 
 CLAIM_LIVENESS_WINDOW = datetime.timedelta(minutes=15)
 
+# The ONE claim-ownership classifier (hostile-regression, P0): every consumer
+# (validator, fast gate, router, workability, claim) decides claim truth through
+# this, never a divergent half-check. CORE's both-or-neither rule is enforced
+# here: a half pair (owner xor claim_time) or an unparsable/non-UTC stamp is
+# INVALID, which fails closed and can never be picked.
+CLAIM_STATUS = ("UNCLAIMED", "SELF", "FOREIGN_LIVE", "FOREIGN_STALE", "INVALID")
 
-def _claim_is_live(owner: str, claim_time: str, agent: str | None,
-                   now: datetime.datetime | None) -> bool:
-    """A ticket under ## TODO that still carries a live § 1.4 claim pair.
 
-    Claims live in ## DOING, so a TODO ticket holding owner+claim_time is
-    either stale (forfeited after 15 minutes) or someone else's live claim.
-    A malformed or zone-less stamp is FAIL-CLOSED: it cannot be proven
-    forfeited, so the ticket is excluded whatever the owner -- a bad stamp is
-    anomalous either way and a self-owner exemption must not hide it.
+def claim_status(ticket: dict, agent: str | None = None,
+                 now: datetime.datetime | None = None) -> str:
+    """Classify a ticket's § 1.4 claim relative to ``agent`` at ``now``.
+
+    Returns one of UNCLAIMED | SELF | FOREIGN_LIVE | FOREIGN_STALE | INVALID.
+      - UNCLAIMED: no owner and no claim_time.
+      - SELF:       owner == agent (this agent owns it).
+      - FOREIGN_LIVE:   another agent owns it and the claim is still within the
+                        15-minute liveness window.
+      - FOREIGN_STALE:  another agent owns it but the claim has lapsed.
+      - INVALID:    half pair (owner xor claim_time), or an unparsable /
+                    non-UTC (utcoffset != 0) claim_time -- CORE's both-or-neither
+                    rule, fail closed.
     """
-    if not owner or not claim_time:
-        return False
+    fields = ticket.get("fields", {})
+    owner = (fields.get("owner") or "").strip()
+    claim_time = (fields.get("claim_time") or "").strip()
+    has_owner = bool(owner)
+    has_time = bool(claim_time)
+    if has_owner != has_time:
+        return "INVALID"
+    if not has_owner:
+        return "UNCLAIMED"
     if now is None:
         now = datetime.datetime.now(datetime.timezone.utc)
     elif now.tzinfo is None:
         now = now.replace(tzinfo=datetime.timezone.utc)
-    try:
-        stamp = datetime.datetime.fromisoformat(
-            claim_time.replace("Z", "+00:00"))
-    except ValueError:
-        return True
-    if stamp.tzinfo is None:
-        return True
+    stamp = iso_utc_sort_key(claim_time)
+    if stamp is None:
+        return "INVALID"
+    if agent and owner == agent:
+        return "SELF"
+    expired = (now - stamp).total_seconds() >= CLAIM_LIVENESS_WINDOW.total_seconds()
+    return "FOREIGN_STALE" if expired else "FOREIGN_LIVE"
+
+
+def _claim_is_live(owner: str, claim_time: str, agent: str | None,
+                   now: datetime.datetime | None) -> bool:
+    """Backward-compatible live-foreign-claim probe (delegates to claim_status).
+
+    True only for a present, well-formed, foreign-owned claim still inside the
+    § 1.4 liveness window. A half pair or bad stamp is INVALID and therefore
+    never "live" -- fail closed, never picked (P0 both-or-neither rule).
+    """
+    owner = (owner or "").strip()
+    claim_time = (claim_time or "").strip()
+    if not owner or not claim_time:
+        return False
     if agent and owner == agent:
         return False
-    return (now - stamp).total_seconds() < CLAIM_LIVENESS_WINDOW.total_seconds()
+    return claim_status({"fields": {"owner": owner, "claim_time": claim_time}},
+                        agent, now) == "FOREIGN_LIVE"
 
 
 def ticket_is_workable(ticket: dict, tickets: dict, agent: str | None = None,
-                       now: datetime.datetime | None = None) -> bool:
+                        now: datetime.datetime | None = None) -> bool:
     """Defense-in-depth Pick Rule for possibly malformed BOARD input.
 
     Workable means: open ## TODO, no blocker (even malformed), every needs:
-    DONE, and not under another agent's live § 1.4 claim.
+    DONE, and not under another agent's live § 1.4 claim. A half pair or
+    non-UTC claim_time is INVALID and fails closed -- it can never be picked
+    (CORE's both-or-neither rule, P0).
     """
     fields = ticket.get("fields", {})
     return (
         ticket.get("section") == "## TODO"
         and ticket.get("checkbox") in (" ", "")
         and not ticket_has_blocker(ticket)
-        and not _claim_is_live(fields.get("owner", ""),
-                               fields.get("claim_time", ""), agent, now)
+        and claim_status(ticket, agent, now) not in ("FOREIGN_LIVE", "INVALID")
         and all(
             need in tickets and tickets[need].get("section") == "## DONE"
             for need in ticket.get("needs", [])
@@ -150,18 +301,62 @@ def ticket_is_workable(ticket: dict, tickets: dict, agent: str | None = None,
     )
 
 
-_NON_CLOSURE_BLOCKER_MARKERS = (
-    "held", "future gate", "permanent warning owner", "wait_user_confirmation",
-)
+# The closed blocker-class vocabulary. A ## BLOCKED ticket is closure-exempt
+# ONLY when its blocker field opens with one of these EXACT class tokens
+# (prose is never a class). HELD/FUTURE_GATE/PERMANENT_WARNING_OWNER/
+# WAIT_USER_CONFIRMATION are exempt by design; ACTIVE is a recognized class
+# that genuinely blocks closure. Any other blocker text fails closed and
+# blocks closure (T-1003 sweep: prose never decides control flow).
+_NON_CLOSURE_BLOCKER_TOKENS = frozenset({
+    "HELD", "FUTURE_GATE", "PERMANENT_WARNING_OWNER",
+    "WAIT_USER_CONFIRMATION", "WAIT_USER_DECISION", "ACTIVE", "WAIT_ROLE",
+})
+_CLOSURE_EXEMPT_BLOCKER_CLASSES = frozenset({
+    "HELD", "FUTURE_GATE", "PERMANENT_WARNING_OWNER",
+    "WAIT_USER_CONFIRMATION", "WAIT_USER_DECISION",
+})
+
+
+def blocker_class(blocker: str) -> str | None:
+    """The exact class token a blocker field opens with, or None when it does
+    not open with one of the closed tokens. Exact-match only -- a substring
+    mention inside free prose is not a class. `WAIT_ROLE:<role>` is the
+    structured crew-owned blocker: the CREW planner routes to that built-in
+    role; it is NOT globally closure-exempt -- ordinary Core treats it as a
+    genuine blocker."""
+    head = blocker.strip().split(" -- ", 1)[0].strip().upper()
+    if head in _NON_CLOSURE_BLOCKER_TOKENS:
+        return head
+    wait_role = re.match(r"^WAIT_ROLE:([A-Za-z0-9_-]+)$",
+                         blocker.strip().split(" -- ", 1)[0].strip())
+    return "WAIT_ROLE" if wait_role else None
+
+
+def wait_role_target(blocker: str) -> str | None:
+    """The role name a WAIT_ROLE:<role> blocker names, or None."""
+    m = re.match(r"^WAIT_ROLE:([A-Za-z0-9_-]+)",
+                 blocker.strip().split(" -- ", 1)[0].strip())
+    return m.group(1) if m else None
 
 
 def convergence_closure_problems(board: dict,
-                                 agent: str | None = None) -> list[str]:
+                                 agent: str | None = None,
+                                 wait_role_roles: frozenset = frozenset()) \
+        -> list[str]:
     """Canonical mechanically-decidable Core work-closure predicate.
 
     Closure means no active work, no currently workable TODO, and no blocker
-    that claims to prevent present closure. Explicit held/future/historical
-    blockers remain on BOARD without turning fixed point into "empty BOARD".
+    that claims to prevent present closure. A ## BLOCKED ticket is exempt
+    ONLY when its blocker field opens with an exact closed-class token from
+    the exempt set; the description is inert and arbitrary prose inside the
+    blocker details is inert. Explicit held/future/historical blockers remain
+    on BOARD without turning fixed point into "empty BOARD".
+
+    WAIT_ROLE:<role> is NEVER exempt by itself (ordinary Core: blocked remains
+    blocked). Only the CREW planner may pass `wait_role_roles` = the built-in
+    crew registry; a WAIT_ROLE ticket whose role is in that set is work FOR
+    the crew, so it does not block the crew's Core-convergence stage -- the
+    planner routes to that role instead (T-1003 hostile finding 10).
     """
     errors = list(board.get("errors", []))
     tickets = board.get("tickets", {})
@@ -177,10 +372,14 @@ def convergence_closure_problems(board: dict,
     for ticket in tickets.values():
         if ticket.get("section") != "## BLOCKED":
             continue
-        text = (ticket.get("description", "") + " "
-                + ticket.get("fields", {}).get("blocker", "")).lower()
-        if any(marker in text for marker in _NON_CLOSURE_BLOCKER_MARKERS):
+        blocker = ticket.get("fields", {}).get("blocker", "")
+        cls = blocker_class(blocker)
+        if cls is not None and cls in _CLOSURE_EXEMPT_BLOCKER_CLASSES:
             continue
+        if cls == "WAIT_ROLE" and wait_role_roles:
+            role = wait_role_target(blocker)
+            if role in wait_role_roles:
+                continue
         blocking.append(ticket["id"])
     if blocking:
         errors.append("closure-blocking ticket(s): " + ", ".join(blocking[:3]))
@@ -212,9 +411,31 @@ def _fields_join(parts: list[str]) -> str:
     return " | ".join(parts).replace(PIPE_SENTINEL, "\\|")
 
 
+def _reject_duplicate_fields(raw: str) -> None:
+    """Refuse to MUTATE a ticket line that repeats a field name.
+
+    A board with `| owner: a | owner: b` is already a parse error; a mutator
+    must never rewrite only the first occurrence and leave the second -- the
+    effective value would silently disagree with the mutation (T-1003).
+    """
+    seen: set[str] = set()
+    for part in _fields_split(raw):
+        if part.startswith("- "):
+            continue
+        fm = re.match(r"^([a-z_]+):\s*", part)
+        if not fm:
+            continue
+        if fm.group(1) in seen:
+            raise ValueError(
+                f"ticket line repeats field {fm.group(1)!r}; parse the board "
+                "before mutating -- refusing to edit a malformed record")
+        seen.add(fm.group(1))
+
+
 def set_ticket_field(raw: str, field: str, value: str) -> str:
     """Replace or append `field: value` on a ticket line, preserving every
     other field byte-for-byte."""
+    _reject_duplicate_fields(raw)
     parts = _fields_split(raw)
     out = []
     replaced = False
@@ -237,6 +458,7 @@ def set_ticket_field(raw: str, field: str, value: str) -> str:
 def remove_ticket_field(raw: str, field: str) -> str:
     """Remove exactly `| field: <value>` structurally. The leftover value
     cannot survive as free text."""
+    _reject_duplicate_fields(raw)
     parts = _fields_split(raw)
     pattern = re.compile(rf"^{re.escape(field)}:\s*")
     kept = [part for part in parts if not pattern.match(part)]

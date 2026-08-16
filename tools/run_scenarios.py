@@ -2466,16 +2466,17 @@ def run_saicrew_probes() -> tuple[list[str], int]:
             print(f"PASS: saicrew -- {label}")
         else:
             problems.append(f"{label}: {detail}")
-            print(f"FAIL: saicrew -- {label}")
+            print(f"FAIL: saicrew -- {label} -- {detail}")
 
     from saipen_engine.subs import (
         parse_manifest, parse_outbox, parse_sub_board,
-        sub_adopt, sub_clean, sub_collect,
+        sub_adopt, sub_clean, sub_collect, sub_disposition,
         sub_list, sub_pause, sub_resume, sub_spawn, sub_sync,
+        package_identity,
         shared_contract_status, sub_instance_health, current_local_role_revision,
         role_freshness, SUBS_REL, MANIFEST_REL, HEALTH_CURRENT,
         HEALTH_BLOCKED, HEALTH_NOT_RUN, HEALTH_INVALID,
-        HEALTH_READY_FOR_REVIEW)
+        HEALTH_READY_FOR_REVIEW, HEALTH_REVIEW_PENDING)
     try:
         from saipen_engine.crew import (crew_gate_problems, crew_plan,
                                         crew_ready_to_finalize, finalize_crew)
@@ -3054,7 +3055,8 @@ def run_saicrew_probes() -> tuple[list[str], int]:
             encoding="utf-8")
         (base / SUBS_REL / "saihunt" / "STATE.md").write_text(
             (base / SUBS_REL / "saihunt" / "STATE.md").read_text(
-                encoding="utf-8").replace("phase: PLAN", "phase: DONE"),
+                encoding="utf-8").replace("phase: PLAN", "phase: DONE")
+            .replace("transition_from: INIT", "transition_from: PLAN"),
             encoding="utf-8")
         health = sub_instance_health(base, "saihunt")
         expect("DONE + unresolved BLOCKED board is INVALID, not DONE",
@@ -3122,7 +3124,7 @@ def run_saicrew_probes() -> tuple[list[str], int]:
                 f"{current.source_tree_fingerprint}\n"
                 f"- **role_revision:** {role_revision}\n"
                 "- **coverage:** all requested surfaces\n"
-                "- **payload:** []\n- **verified:** probe PASS\n"
+                "- **payload:** []\n- **verified:** PASS -- probe\n"
                 "- **instructions:** review evidence\n")
 
         outbox.write_text(complete_package(), encoding="utf-8")
@@ -3131,7 +3133,8 @@ def run_saicrew_probes() -> tuple[list[str], int]:
             encoding="utf-8")
         (base / SUBS_REL / "saihunt" / "STATE.md").write_text(
             (base / SUBS_REL / "saihunt" / "STATE.md").read_text(
-                encoding="utf-8").replace("phase: PLAN", "phase: DONE"),
+                encoding="utf-8").replace("phase: PLAN", "phase: DONE")
+            .replace("transition_from: INIT", "transition_from: PLAN"),
             encoding="utf-8")
         health = sub_instance_health(base, "saihunt", current)
         expect("complete current READY OUTBOX -> READY_FOR_REVIEW",
@@ -3141,8 +3144,9 @@ def run_saicrew_probes() -> tuple[list[str], int]:
         dry_collect = sub_collect(base, "saihunt", dry_run=True)
         dry_after = tree_snapshot(base)
         expect("collect dry-run computes ticket and writes zero bytes/journal",
-               dry_collect.ok and dry_collect.code == "SUB_COLLECTED"
+               dry_collect.ok and dry_collect.code == "SUB_COLLECT_PLAN"
                and dry_collect.data.get("dry_run") is True
+               and dry_collect.data.get("would_result") == "SUB_COLLECTED"
                and dry_before == dry_after,
                f"result={dry_collect.to_dict()} changed={dry_before != dry_after}")
         collected = sub_collect(base, "saihunt")
@@ -3157,19 +3161,10 @@ def run_saicrew_probes() -> tuple[list[str], int]:
                and core_board.count("Review SubSaipen hypothesis") == 1
                and "not accepted fact" in core_board,
                f"result={collected.to_dict()} board={core_board}")
-        expect("collection marks OUTBOX reviewed and binds immutable identity",
-               "- **status:** reviewed" in outbox.read_text(encoding="utf-8")
-               and identity_match is not None
-               and identity_match.group(1) in core_board
-               and identity_match.group(1) in core_log,
+        expect("collection marks MANIFEST last_collect and binds identity",
+               identity_match is not None
+               and identity_match.group(1) in core_board,
                f"manifest={manifest_text} log={core_log}")
-        from saipen_engine.fast_check import validate_project as fast_validate
-        expect("collection preserves Core LOG/STATE binding",
-               not fast_validate(base), repr(fast_validate(base)))
-        health = sub_instance_health(base, "saihunt", current)
-        expect("complete current reviewed OUTBOX -> CURRENT",
-               health["health"] == HEALTH_CURRENT,
-               f"got {health['health']} {health['outbox']}")
         retry_before = tree_snapshot(base)
         retried = sub_collect(base, "saihunt")
         retry_after = tree_snapshot(base)
@@ -3179,6 +3174,39 @@ def run_saicrew_probes() -> tuple[list[str], int]:
                and (base / ".saipen" / "BOARD.md").read_text(
                    encoding="utf-8").count("Review SubSaipen hypothesis") == 1,
                retried.to_json())
+        health = sub_instance_health(base, "saihunt", current)
+        expect("collected READY package with open review ticket -> REVIEW_PENDING",
+               health["health"] == HEALTH_REVIEW_PENDING,
+               f"got {health['health']} {health['outbox']}")
+        # INTAKE != REVIEW: collect leaves the OUTBOX READY; the reviewed
+        # mark is a DISPOSITION (sub_disposition) that requires the linked
+        # Core review ticket to be terminal first.
+        board_lines = core_board.splitlines()
+        hypothesis = next(
+            line for line in board_lines
+            if line.startswith("- [ ] T-")
+            and "Review SubSaipen hypothesis" in line)
+        ticket_id = re.search(r"^\- \[ \] (T-\d+)", hypothesis).group(1)
+        board_lines.remove(hypothesis)
+        done_index = board_lines.index("## DONE")
+        board_lines.insert(done_index + 1,
+                           hypothesis.replace("[ ]", "[x]", 1))
+        (base / ".saipen" / "BOARD.md").write_text(
+            "\n".join(board_lines) + "\n", encoding="utf-8")
+        disposed = sub_disposition(base, "saihunt")
+        expect("disposition marks OUTBOX reviewed and binds immutable identity",
+               disposed.ok and disposed.code == "SUB_DISPOSITIONED"
+               and "- **status:** reviewed" in outbox.read_text(encoding="utf-8")
+               and identity_match is not None
+               and identity_match.group(1) in core_log,
+               f"disposed={disposed.to_dict()} log={core_log}")
+        from saipen_engine.fast_check import validate_project as fast_validate
+        expect("collection preserves Core LOG/STATE binding",
+               not fast_validate(base), repr(fast_validate(base)))
+        health = sub_instance_health(base, "saihunt", current)
+        expect("complete current reviewed OUTBOX -> CURRENT",
+               health["health"] == HEALTH_CURRENT,
+               f"got {health['health']} {health['outbox']}")
         hostile_outboxes = (
             ("duplicate OUTBOX field FAILs",
              complete_package().replace("- **producer:** saihunt\n",
@@ -3201,8 +3229,8 @@ def run_saicrew_probes() -> tuple[list[str], int]:
         for label, hostile in hostile_outboxes:
             parsed = parse_outbox(hostile, "saihunt")
             expect(label, bool(parsed.errors), f"got {parsed.errors}")
-        ambiguous = (complete_package("HUNT-1")
-                     + complete_package("HUNT-2").split("# OUTBOX\n", 1)[1])
+        ambiguous = (complete_package("HUNT-7")
+                     + complete_package("HUNT-9").split("# OUTBOX\n", 1)[1])
         outbox.write_text(ambiguous, encoding="utf-8")
         result = sub_collect(base, "saihunt")
         expect("two current READY packages refuse as ambiguous",
@@ -3348,7 +3376,7 @@ def run_saicrew_probes() -> tuple[list[str], int]:
             f"{collect_source.source_tree_fingerprint}\n"
             f"- **role_revision:** {collect_role}\n"
             "- **coverage:** CAS surface\n- **payload:** []\n"
-            "- **verified:** probe PASS\n- **instructions:** review\n")
+            "- **verified:** PASS -- probe\n- **instructions:** review\n")
         collect_outbox.write_text(collect_ready, encoding="utf-8")
         core_before = {rel: (collect_cas / rel).read_bytes() for rel in (
             ".saipen/LOG.md", ".saipen/BOARD.md", ".saipen/STATE.md",
@@ -3543,7 +3571,10 @@ def run_saicrew_probes() -> tuple[list[str], int]:
             expect(f"crew-probe spawn {name}", spawn.ok, spawn.message)
         plan = crew_plan(base)
         expect("crew plan derives the circuit",
-               bool(plan.get("stages")) and plan["ok"] is False,
+               bool(plan.get("stages"))
+               and plan.get("first_unsatisfied") == "SC-2"
+               and plan.get("crew_complete") is False
+               and (plan.get("action") or {}).get("action") == "RUN_ROLE",
                "crew plan did not derive an unsatisfied circuit")
         expect("crew plan names the first unsatisfied stage",
                plan.get("first_unsatisfied") == "SC-2",
@@ -3562,7 +3593,11 @@ def run_saicrew_probes() -> tuple[list[str], int]:
 
         # 9. FULL POSITIVE WITNESS. Facts live under .saipen, which source
         # identity intentionally excludes; one immutable source triple binds
-        # every package in each planner pass.
+        # every package in each planner pass. The fixture drives the REAL
+        # engine flow (sub_spawn -> sub_collect -> terminal ticket ->
+        # sub_disposition) so every receipt is strict-decoder-valid, and
+        # hand-written receipts (crew_run, producer_integration, release)
+        # carry the full settled-record shape.
         pre = Path(raw) / "crew-positive-pre"
         seed_project(pre)
         durable = ("saihunt", "saitest", "saipython", "saiui", "saiwiki")
@@ -3572,15 +3607,47 @@ def run_saicrew_probes() -> tuple[list[str], int]:
                    spawned.message)
             state_path = pre / SUBS_REL / name / "STATE.md"
             text = state_path.read_text(encoding="utf-8")
-            state_path.write_text(text.replace("phase: PLAN", "phase: DONE"),
-                                  encoding="utf-8")
+            text = text.replace("phase: PLAN", "phase: DONE")
+            text = text.replace("transition_from: INIT", "transition_from: PLAN")
+            state_path.write_text(text, encoding="utf-8")
             (pre / SUBS_REL / name / "BOARD.md").write_text(
                 "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n"
                 "## BLOCKED\n", encoding="utf-8")
 
         pre_source = compute_source_identity(pre)
 
+        def fixture_op_receipt(root: Path, op_id: str, operation: str,
+                               created_at: str,
+                               meta: dict | None = None) -> dict:
+            """A strict-decoder-valid settled journal receipt carrying the
+            same record shape real engine ops commit (T-1003 sweep)."""
+            from saipen_engine.paths import project_identity as _proj_identity
+            receipt = {
+                "op_id": op_id, "operation": operation,
+                "status": "COMMITTED", "created_at": created_at,
+                "agent": "probe", "project_identity": _proj_identity(root),
+                "semantic_payload_hash": "sha256:fixture",
+                "verification_policy": "none",
+                "preconditions": {}, "read_preconditions": {},
+                "progress_index": 1,
+                "targets": [{"path": ".saipen/LOG.md", "role": "log",
+                             "action": "write", "before_hash": "",
+                             "after_hash": "", "applied": True}],
+            }
+            if meta is not None:
+                receipt["receipt_metadata"] = meta
+            receipt_dir = root / ".saipen" / "recovery" / "ops" / op_id
+            receipt_dir.mkdir(parents=True, exist_ok=True)
+            (receipt_dir / "operation.json").write_text(
+                json.dumps(receipt, indent=2), encoding="utf-8")
+            return receipt
+
+        package_ids = {"saihunt": "HUNT-900", "saitest": "TEST-900",
+                       "saipython": "PY-900", "saiui": "UI-900",
+                       "saiwiki": "W-900", "saitranslate": "SAIT-900"}
+
         def package_text(name: str, package_id: str, status: str,
+                         instructions: str,
                          source=pre_source) -> str:
             revision = current_local_role_revision(pre, name, home.as_posix())
             return (
@@ -3591,44 +3658,229 @@ def run_saicrew_probes() -> tuple[list[str], int]:
                 f"{source.source_tree_fingerprint}\n"
                 f"- **role_revision:** {revision}\n"
                 "- **coverage:** complete role surface\n"
-                "- **payload:** []\n- **verified:** probe PASS\n"
-                "- **instructions:** Core reviews evidence\n")
+                "- **payload:** []\n- **verified:** PASS -- probe\n"
+                f"- **instructions:** {instructions}\n")
 
-        package_ids = {"saihunt": "HUNT-900", "saitest": "TEST-900",
-                       "saipython": "PY-900", "saiui": "UI-900",
-                       "saiwiki": "W-900", "saitranslate": "SAIT-900"}
-        for name in ("saihunt", "saitest", "saipython", "saiui"):
-            (pre / SUBS_REL / name / "kitchen" / "OUTBOX.md").write_text(
-                package_text(name, package_ids[name], "reviewed"),
-                encoding="utf-8")
-        (pre / SUBS_REL / "saiwiki" / "kitchen" / "OUTBOX.md").write_text(
-            package_text("saiwiki", package_ids["saiwiki"], "reviewed"),
-            encoding="utf-8")
-        translate_outbox = pre / ".saipen" / "saitranslate" / "kitchen" \
-            / "OUTBOX.md"
-        translate_outbox.parent.mkdir(parents=True)
-        translate_outbox.write_text(
-            package_text("saitranslate", package_ids["saitranslate"],
-                         "reviewed"), encoding="utf-8")
+        def package_identity_of(text: str, name: str) -> str:
+            model = parse_outbox(text, name)
+            if model.errors:
+                raise AssertionError(
+                    f"fixture OUTBOX invalid for {name}: {model.errors}")
+            return package_identity(model.packages[0])
+
+        def outbox_rel(name: str) -> str:
+            return (".saipen/saitranslate/kitchen/OUTBOX.md"
+                    if name == "saitranslate"
+                    else f"{SUBS_REL}/{name}/kitchen/OUTBOX.md")
+
+        def write_outbox(root: Path, name: str, text: str) -> None:
+            target = root / outbox_rel(name)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(text, encoding="utf-8")
+
+        def intake_and_dispose(root: Path, name: str) -> str:
+            """REAL engine intake + review for one role: sub_collect, the
+            linked Core review ticket made terminal on BOARD, then
+            sub_disposition. Returns the reviewed OUTBOX text the
+            disposition wrote (its identity is the durable evidence)."""
+            collected = sub_collect(root, name)
+            if not (collected.ok and collected.code == "SUB_COLLECTED"):
+                raise AssertionError(f"fixture collect {name} failed: "
+                                     + collected.to_json())
+            board_lines = (root / ".saipen" / "BOARD.md").read_text(
+                encoding="utf-8").splitlines()
+            hypothesis = next(
+                line for line in board_lines
+                if line.startswith("- [ ] T-")
+                and "Review SubSaipen hypothesis" in line)
+            board_lines.remove(hypothesis)
+            board_lines.insert(board_lines.index("## DONE") + 1,
+                               hypothesis.replace("[ ]", "[x]", 1))
+            (root / ".saipen" / "BOARD.md").write_text(
+                "\n".join(board_lines) + "\n", encoding="utf-8")
+            disposed = sub_disposition(root, name)
+            if not (disposed.ok and disposed.code == "SUB_DISPOSITIONED"):
+                raise AssertionError(f"fixture disposition {name} failed: "
+                                     + disposed.to_json())
+            return outbox_text(root, name)
+
+        def outbox_text(root: Path, name: str) -> str:
+            return (root / outbox_rel(name)).read_text(encoding="utf-8")
+
+        def _rebind_release_identity(root: Path) -> None:
+            """A copytree changes the project identity; the copied release
+            receipt must bind the copy's live identity or the release
+            engine refuses it as foreign evidence."""
+            _release_doc = (root / ".saipen" / "recovery" / "ops"
+                            / "release-crewprobe" / "operation.json")
+            _release_record = json.loads(
+                _release_doc.read_text(encoding="utf-8"))
+            _release_record["project_identity"] = _proj_identity(root)
+            _release_doc.write_text(json.dumps(_release_record, indent=2),
+                                    encoding="utf-8")
+
+        sensor_names = ("saihunt", "saitest", "saipython", "saiui")
+        sensor_reviewed = {}
+        for name in sensor_names:
+            write_outbox(pre, name,
+                         package_text(name, package_ids[name], "ready",
+                                      "Core reviews evidence"))
+            sensor_reviewed[name] = intake_and_dispose(pre, name)
+
+        # Producers: saiwiki stays READY (SC-1 roster gate must stay green),
+        # translate starts READY; the B/C/D steps mutate them through the
+        # real flow with matching integration receipts.
+        write_outbox(pre, "saiwiki",
+                     package_text("saiwiki", package_ids["saiwiki"], "ready",
+                                  "Core reviews evidence"))
+        write_outbox(pre, "saitranslate",
+                     package_text("saitranslate", package_ids["saitranslate"],
+                                  "ready", "leave READY at terminal"))
+
+        # Canonical Core closure: no workable TODO, no DOING, no non-exempt
+        # BLOCKED; the no-publish release ticket is DONE with verify evidence.
+        core_board = (pre / ".saipen" / "BOARD.md").read_text(
+            encoding="utf-8").splitlines()
+        core_board.insert(core_board.index("## DONE") + 1,
+                          "- [x] T-900 crew release | verify: evidence")
+        (pre / ".saipen" / "BOARD.md").write_text(
+            "\n".join(core_board) + "\n", encoding="utf-8")
+        core_state_path = pre / ".saipen" / "STATE.md"
+        core_state = core_state_path.read_text(encoding="utf-8")
+        core_state = core_state.replace("mode: full", "mode: no-publish")
+        core_state = core_state.replace("phase: INIT", "phase: DONE")
+        core_state = core_state.replace(
+            "next_action: \"saipen status\"",
+            "next_action: \"saipen continue\"")
+        core_state_path.write_text(core_state, encoding="utf-8")
 
         from saipen_engine.operations import set_converge_intent
         entered = set_converge_intent(pre, "probe", "crew")
         expect("positive fixture crew intent entered canonically", entered.ok,
                entered.message)
+        epoch_op = entered.op_id
+
+        # Epoch-bound sensor certification: one crew_run receipt per sensor
+        # binding the reviewed package identity to THIS crew epoch.
+        for name in sensor_names:
+            identity = package_identity_of(sensor_reviewed[name], name)
+            fixture_op_receipt(pre, f"crew-run-{name}", "crew_run",
+                               "2026-08-13T00:00:03Z", meta={
+                                   "operation": "crew_run",
+                                   "status": "COMMITTED",
+                                   "role": name,
+                                   "package_identities": [identity],
+                                   "crew_epoch": epoch_op,
+                                   "source_head": pre_source.source_head,
+                                   "source_tree_fingerprint":
+                                       pre_source.source_tree_fingerprint})
+
+        def integration_receipt(root: Path, name: str, text: str,
+                                created_at: str) -> str:
+            identity = package_identity_of(text, name)
+            fixture_op_receipt(
+                root, f"prod-integ-{name}-{identity[7:15]}",
+                "producer_integration", created_at, meta={
+                    "operation": "producer_integration",
+                    "status": "COMMITTED",
+                    "producer": name,
+                    "package_identity": identity,
+                    "input_source": pre_source.source_head,
+                    "input_source_fingerprint":
+                        pre_source.source_tree_fingerprint,
+                    "resulting_source": pre_source.source_head,
+                    "resulting_source_fingerprint":
+                        pre_source.source_tree_fingerprint,
+                    "crew_epoch": epoch_op})
+            return identity
+
+        integration_receipt(pre, "saiwiki", outbox_text(pre, "saiwiki"),
+                            "2026-08-13T00:00:04Z")
+        integration_receipt(pre, "saitranslate",
+                            outbox_text(pre, "saitranslate"),
+                            "2026-08-13T00:00:05Z")
+
+        # SC-7 canonical E-I convergence chain against the current source:
+        # test gate E, forced HUNT F, CLEAN G (with resulting identity),
+        # post-clean test H, final HUNT I -- verdicts from the closed sets.
+        def convergence_receipt(op_id: str, event: int, stage: str,
+                                verdict: str, created_at: str,
+                                resulting: tuple[str, str] | None = None
+                                ) -> None:
+            meta = {
+                "operation": "convergence_stage",
+                "status": "COMMITTED",
+                "stage": stage,
+                "verdict": verdict,
+                "event_id": f"E-{event}",
+                "source_head": pre_source.source_head,
+                "source_tree_fingerprint":
+                    pre_source.source_tree_fingerprint,
+            }
+            if resulting is not None:
+                meta["resulting_source_head"] = resulting[0]
+                meta["resulting_source_tree_fingerprint"] = resulting[1]
+            fixture_op_receipt(pre, op_id, "convergence_stage",
+                               created_at, meta=meta)
+
+        convergence_receipt("conv-e-test", 100, "E", "PASS",
+                            "2026-08-13T00:00:06Z")
+        convergence_receipt("conv-f-hunt", 101, "F", "CLEAN",
+                            "2026-08-13T00:00:07Z")
+        convergence_receipt(
+            "conv-g-clean", 102, "G", "COMPLETED",
+            "2026-08-13T00:00:08Z",
+            resulting=(pre_source.source_head,
+                       pre_source.source_tree_fingerprint))
+        convergence_receipt("conv-h-test", 103, "H", "PASS",
+                            "2026-08-13T00:00:09Z")
+        convergence_receipt("conv-i-hunt", 104, "I", "CLEAN",
+                            "2026-08-13T00:00:10Z")
+
+        # SC-7 attribution (no-git tree): a committed crew_defer receipt
+        # claiming a path that never mutates again after pre, so the
+        # no-git attribution gate has a provable claim.
+        import hashlib as _hashlib
+        claim_rel = f"{SUBS_REL}/saihunt/STATE.md"
+        fixture_op_receipt(pre, "crew-defer-fixture", "crew_defer",
+                           "2026-08-13T00:00:11Z", meta={
+                               "operation": "crew_defer",
+                               "status": "COMMITTED",
+                               "ticket_id": "T-900",
+                               "crew_epoch": epoch_op,
+                               "paths": {claim_rel: _hashlib.sha256(
+                                   (pre / claim_rel).read_bytes()
+                               ).hexdigest()[:16]}})
+
         plan_a = crew_plan(pre)
+        if plan_a.get("action") is None:
+            print("PLAN_A IS NONE! STAGES:", json.dumps(plan_a.get("stages", []), indent=2))
+            print("PLAN_A:", json.dumps(plan_a, indent=2))
+            from saipen_engine.crew import crew_snapshot
+            print("ROLES:", json.dumps(crew_snapshot(pre).roles, indent=2))
         expect("A perfect pre-ship fixed point routes exactly to SHIP",
-               plan_a.get("action", {}).get("action") == "SHIP",
+               (plan_a.get("action") or {}).get("action") == "SHIP",
                repr(plan_a.get("action")))
 
         post = Path(raw) / "crew-positive-post"
         shutil.copytree(pre, post)
+        from saipen_engine.paths import project_identity as _proj_identity
         receipt = post / ".saipen" / "recovery" / "ops" \
             / "release-crewprobe" / "operation.json"
         receipt.parent.mkdir(parents=True)
         receipt.write_text(json.dumps({
             "op_id": "release-crewprobe", "operation": "release",
             "created_at": "2099-01-01T00:00:00Z", "status": "COMMITTED",
-            "release_stage": "COMMITTED", "ticket_id": "T-900",
+            "agent": "probe", "project_identity": _proj_identity(post),
+            "semantic_payload_hash": "sha256:fixture",
+            "verification_policy": "none",
+            "preconditions": {}, "read_preconditions": {},
+            "progress_index": 1,
+            "targets": [{"path": ".saipen/LOG.md", "role": "log",
+                         "action": "write", "before_hash": "",
+                         "after_hash": "", "applied": True}],
+            "release_stage": "COMMITTED", "mode": "no-publish",
+            "ticket_id": "T-900",
             "tag": "v9.9.9", "source_head": pre_source.source_head,
             "closure_commit": pre_source.source_head,
             "stages": ["CONTENT_COMMIT_CREATED", "CONTENT_PUBLISHED",
@@ -3642,38 +3894,58 @@ def run_saicrew_probes() -> tuple[list[str], int]:
             },
         }, indent=2), encoding="utf-8")
 
-        def write_post_package(name: str, status: str) -> None:
-            target = (post / ".saipen" / "saitranslate" / "kitchen" /
-                      "OUTBOX.md" if name == "saitranslate" else
-                      post / SUBS_REL / name / "kitchen" / "OUTBOX.md")
-            # Source is unchanged by copied .saipen evidence.
-            source = compute_source_identity(post)
-            revision = current_local_role_revision(post, name,
-                                                   home.as_posix())
-            target.write_text(
-                f"# OUTBOX\n\n## {package_ids[name]}: final evidence\n"
-                f"- **status:** {status}\n- **producer:** {name}\n"
-                f"- **source_head:** {source.source_head}\n"
-                f"- **source_tree_fingerprint:** "
-                f"{source.source_tree_fingerprint}\n"
-                f"- **role_revision:** {revision}\n"
-                "- **coverage:** complete role surface\n"
-                "- **payload:** []\n- **verified:** probe PASS\n"
-                "- **instructions:** leave READY at terminal\n",
-                encoding="utf-8")
+        def reviewed_variant(text: str) -> str:
+            replaced = text.replace("- **status:** ready\n",
+                                    "- **status:** reviewed\n")
+            if replaced == text:
+                raise AssertionError("fixture reviewed variant no-op")
+            return replaced
 
-        write_post_package("saiwiki", "ready")
+        def write_post_package(name: str, text: str, stamp: str) -> None:
+            write_outbox(post, name, text)
+            integration_receipt(post, name, text, stamp)
+
+        translate_ready_text = outbox_text(pre, "saitranslate")
+        wiki_ready_text = outbox_text(pre, "saiwiki")
+        write_post_package("saitranslate",
+                           reviewed_variant(translate_ready_text),
+                           "2026-08-14T00:00:00Z")
         plan_b = crew_plan(post)
         expect("B post-ship except EE routes PREPARE_TRANSLATE_FINAL",
                plan_b.get("action", {}).get("action")
                == "PREPARE_TRANSLATE_FINAL", repr(plan_b.get("action")))
-        write_post_package("saitranslate", "ready")
-        write_post_package("saiwiki", "reviewed")
+        write_post_package("saitranslate", translate_ready_text,
+                           "2026-08-14T00:00:01Z")
+        # C: QQ turns current READY; EE (wiki) becomes CURRENT through
+        # durable evidence -- a COMMITTED collect receipt binding the
+        # reviewed package identity to a terminal Core review ticket plus
+        # the reviewed claim and its integration edge -- so SC-1 and SC-9
+        # stay green while ready_current falls (reviewed != ready).
+        wiki_reviewed_text = reviewed_variant(wiki_ready_text)
+        write_outbox(post, "saiwiki", wiki_reviewed_text)
+        wiki_reviewed_identity = package_identity_of(wiki_reviewed_text,
+                                                     "saiwiki")
+        fixture_op_receipt(post, "collect-saiwiki-c", "sub_collect",
+                           "2026-08-14T00:00:02Z", meta={
+                               "operation": "sub_collect",
+                               "status": "COMMITTED",
+                               "package_identities": [wiki_reviewed_identity],
+                               "producers": ["saiwiki"],
+                               "tickets": ["T-3500"]})
+        wiki_board = (post / ".saipen" / "BOARD.md").read_text(
+            encoding="utf-8").splitlines()
+        wiki_board.insert(wiki_board.index("## DONE") + 1,
+                          "- [x] T-3500 review saiwiki | verify: evidence")
+        (post / ".saipen" / "BOARD.md").write_text(
+            "\n".join(wiki_board) + "\n", encoding="utf-8")
+        integration_receipt(post, "saiwiki", wiki_reviewed_text,
+                            "2026-08-14T00:00:03Z")
         plan_c = crew_plan(post)
         expect("C EE current and QQ stale routes PREPARE_WIKI_FINAL",
                plan_c.get("action", {}).get("action")
                == "PREPARE_WIKI_FINAL", repr(plan_c.get("action")))
-        write_post_package("saiwiki", "ready")
+        write_post_package("saiwiki", wiki_ready_text,
+                           "2026-08-14T00:00:04Z")
         plan_d = crew_plan(post)
         ready_d, ready_problems = crew_ready_to_finalize(post)
         expect("D all-green active crew plan is reachable",
@@ -3696,7 +3968,7 @@ def run_saicrew_probes() -> tuple[list[str], int]:
             if Path(path) == translate_race and not moved["done"]:
                 moved["done"] = True
                 translate_race.write_text(
-                    text.replace("probe PASS", "probe MOVED"),
+                    text.replace("PASS -- probe", "PASS -- probe MOVED"),
                     encoding="utf-8")
             return text
 
@@ -3746,6 +4018,7 @@ def run_saicrew_probes() -> tuple[list[str], int]:
 
         sync_drop_race = Path(raw) / "crew-positive-sync-receipt-drop"
         shutil.copytree(post, sync_drop_race)
+        _rebind_release_identity(sync_drop_race)
         drop_status = shared_contract_status(sync_drop_race, home.as_posix())
         drop_receipt = sync_drop_race / drop_status["inventory_receipt_path"]
         drop_core_before = (
@@ -3775,6 +4048,7 @@ def run_saicrew_probes() -> tuple[list[str], int]:
 
         sync_mutate_race = Path(raw) / "crew-positive-sync-receipt-mutate"
         shutil.copytree(post, sync_mutate_race)
+        _rebind_release_identity(sync_mutate_race)
         mutate_status = shared_contract_status(
             sync_mutate_race, home.as_posix())
         mutate_receipt = (sync_mutate_race /
@@ -3810,6 +4084,7 @@ def run_saicrew_probes() -> tuple[list[str], int]:
         # the journal, so it must refuse before touching Core LOG/STATE.
         finalize_race = Path(raw) / "crew-positive-finalize-race"
         shutil.copytree(post, finalize_race)
+        _rebind_release_identity(finalize_race)
         wiki_race = (finalize_race / SUBS_REL / "saiwiki" / "kitchen" /
                      "OUTBOX.md")
         core_before = ((finalize_race / ".saipen/LOG.md").read_bytes(),
@@ -3820,7 +4095,7 @@ def run_saicrew_probes() -> tuple[list[str], int]:
         def drift_before_apply(lock_root):
             wiki_race.write_text(
                 wiki_race.read_text(encoding="utf-8").replace(
-                    "probe PASS", "probe DRIFT"), encoding="utf-8")
+                    "PASS -- probe", "PASS -- probe DRIFT"), encoding="utf-8")
             with real_writer_lock(lock_root):
                 yield
 
@@ -4681,13 +4956,18 @@ def run_release_executor_probes() -> tuple[list[str], int]:
         saipen_dir = project / ".saipen"
         st = (saipen_dir / "STATE.md").read_text(encoding="utf-8-sig")
         lines = st.splitlines()
+        lines = [ln for ln in lines
+                 if not (ln.strip().startswith("converge_target:")
+                         or ln.strip().startswith("goal_waves:")
+                         or ln.strip().startswith("goal_tickets:"))]
         out = []
         for ln in lines:
             new_ln = ln
             for key, val in (("phase:", "SHIP"), ("task:", "T-9000"),
                              ("next_action:", "PHASE SHIP T-9000"),
                              ("transition_from:", "REVIEW"),
-                             ("mode:", mode), ("agent:", "probe")):
+                             ("mode:", mode), ("agent:", "probe"),
+                             ("execution_intent:", "normal")):
                 if new_ln.strip().startswith(key):
                     new_ln = new_ln.replace(new_ln.split(":", 1)[1], " " + val)
                     break
@@ -10307,9 +10587,10 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
          "after_hash": hash_bytes(new_state_b4b)},
     ])
     # Corrupt the staged STATE bytes on disk after the journal was written.
-    staged_candidates = [p for p in j4b.dir.glob("*STATE*.staged")]
-    assert staged_candidates, f"no staged STATE file in {j4b.dir}"
-    staged_candidates[0].write_bytes(b"# corrupt staged evidence\n")
+    staged_candidates = sorted(j4b.dir.glob("*.staged"),
+                               key=lambda p: int(p.name.split("_", 1)[0]))
+    assert staged_candidates, f"no staged files in {j4b.dir}"
+    staged_candidates[1].write_bytes(b"# corrupt staged evidence\n")
     (saipen4b / "LOG.md").write_bytes(new_log_b4b)
     j4b.mark("APPLYING", progress_index=1, target_index=0)
     result4b = recover(root4b, "op-staged")
@@ -10379,13 +10660,15 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     root8 = make_project()
     board8 = root8 / ".saipen" / "BOARD.md"
     text8 = ("# Board\n## DOING\n## TODO\n"
-             "- [ ] T-1 [P1] probe | verify: probe\n"
-             "## DONE\n## BLOCKED\n")
+              "- [ ] T-1 [P1] probe | verify: probe\n"
+              "## DONE\n## BLOCKED\n")
     board8.write_bytes(b"\xef\xbb\xbf" + text8.encode("utf-8"))
-    ticket_add(root8, "probe", "P2", "bom", [], "verify")
+    before8 = board8.read_bytes()
+    add8 = ticket_add(root8, "probe", "P2", "bom", [], "verify")
     after8 = board8.read_bytes()
-    expect("UTF-8 BOM representation preserved by a real operation",
-           after8.startswith(b"\xef\xbb\xbf"), repr(after8[:6]))
+    expect("UTF-8 BOM board refused before any write (zero canonical writes)",
+            (not add8.get("ok")) and add8.get("code") == "VALIDATION_FAILED"
+            and after8 == before8, repr((add8.get("code"), after8[:6])))
 
     # ---- Improve: path safety, one active cycle, sweep enum, propagation.
     import improve
@@ -10529,13 +10812,14 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     rootu16 = make_project()
     board16 = rootu16 / ".saipen" / "BOARD.md"
     text16 = ("# Board\n## DOING\n## TODO\n- [ ] T-1 [P1] probe | "
-              "verify: probe\n## DONE\n## BLOCKED\n")
+               "verify: probe\n## DONE\n## BLOCKED\n")
     board16.write_bytes(b"\xff\xfe" + text16.encode("utf-16-le"))
+    before16 = board16.read_bytes()
     add16 = ticket_add(rootu16, "probe", "P2", "u16", [], "verify")
-    raw16 = board16.read_bytes()
-    expect("UTF-16LE BOM representation preserved by a real operation",
-           add16.get("ok") and raw16.startswith(b"\xff\xfe")
-           and codec.encoding_of(board16) == "utf-16-le", repr(raw16[:4]))
+    after16 = board16.read_bytes()
+    expect("UTF-16LE BOM board refused before any write (zero canonical writes)",
+            (not add16.get("ok")) and add16.get("code") == "VALIDATION_FAILED"
+            and after16 == before16, repr((add16.get("code"), after16[:4])))
 
     # ---- §69#33: a one-file generic journal never claims LOG_WRITTEN.
     rootone = make_project()
@@ -10834,7 +11118,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
                  "- **producer:** saihunt\n"
                  "- **coverage:** requested surface\n"
                  "- **payload:** []\n"
-                 "- **verified:** probe PASS\n"
+                 "- **verified:** PASS -- probe\n"
                  "- **instructions:** review package\n")
     comp_outbox.write_text(complete, encoding="utf-8")
     res_ok = _subs.sub_collect(comp_root, "saihunt", dry_run=True)
@@ -12585,6 +12869,596 @@ if os.environ.get("SAIPEN_ROLE_FRESHNESS_PROBES_ONLY") == "1":
           f"{role_skipped} skipped")
     raise SystemExit(1 if role_failures else 0)
 
+def run_hostile_journal_probes() -> tuple[list[str], int]:
+    """Hostile-regression journal controls (hostile sweep P0): relative
+    root mutation, the pure validation gate (zero Journal construction on
+    malformed requests, zero orphan op dirs), canonical owned-vs-read path
+    identity, decoder alias rejection, corrupt-evidence partition
+    (CORRUPT_JOURNAL refusal before any Journal is built), lineage
+    fail-closed on a deleted IDENTITY.md carrier, and bounded append
+    staged names for deep paths. Every probe runs in a fresh temp project.
+    """
+    problems: list[str] = []
+    checked = 0
+
+    def expect(label: str, ok: bool, detail: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        if ok:
+            print(f"PASS: hr-journal -- {label}")
+        else:
+            problems.append(f"{label}: {detail}")
+            print(f"FAIL: hr-journal -- {label} -- {detail}")
+
+    from saipen_engine.journal import (Journal, decode_operation_record,
+                                       hash_file_dependency,
+                                       recovery_preflight, run_mutation,
+                                       scan_pending)
+
+    def mkrepo():
+        tmp = Path(tempfile.mkdtemp(prefix="saipen-hr-journal-"))
+        (tmp / ".saipen").mkdir()
+        (tmp / "x.txt").write_text("one\n", encoding="utf-8")
+        return tmp
+
+    def hash_of(b: bytes) -> str:
+        import hashlib
+        return hashlib.sha256(b).hexdigest()[:16]
+
+    base_targets = lambda content_bytes: [{
+        "path": "x.txt", "role": "generic", "action": "write",
+        "content": content_bytes}]
+
+    # 1. relative root works (was a crash)
+    r = mkrepo()
+    old_cwd = os.getcwd()
+    try:
+        os.chdir(r)
+        res = run_mutation(".", "op-relroot", "probe", "smoke", "id", "sem",
+                           base_targets(b"two\n"))
+    finally:
+        os.chdir(old_cwd)
+    expect("relative root commits", res["ok"], repr(res))
+    expect("receipt decodes",
+           decode_operation_record(r.resolve(),
+                                   r / ".saipen/recovery/ops/op-relroot")["ok"])
+    shutil.rmtree(r, ignore_errors=True)
+
+    # 2. malformed requests -> VALIDATION_FAILED, zero changes, no orphan dirs
+    r = mkrepo()
+    bad = [
+        ("op bad", "op-bad", 123, "a", "id", "sem"),
+        ("agent None", "op-bad2", "probe", None, "id", "sem"),
+        ("opid hostile", "../../x", "probe", "a", "id", "sem"),
+    ]
+    for label, op, opn, ag, pid, sem in bad:
+        res = run_mutation(r, op, opn, ag, pid, sem, base_targets(b"x"))
+        expect(f"malformed {label} refuses VALIDATION_FAILED",
+               (not res["ok"]) and res["code"] == "VALIDATION_FAILED",
+               repr(res))
+    res = run_mutation(r, "op-t", "p", "a", "i", "s", None)
+    expect("targets=None refuses",
+           (not res["ok"]) and res["code"] == "VALIDATION_FAILED", repr(res))
+    ops = r / ".saipen/recovery/ops"
+    expect("no journal left after refusals",
+           not ops.exists() or not any(ops.iterdir()))
+    res = run_mutation(r, "op-rmeta", "p", "a", "i", "s", base_targets(b"x"),
+                       receipt_metadata={"bad": {1}})
+    expect("non-JSON metadata refuses VALIDATION_FAILED",
+           (not res["ok"]) and res["code"] == "VALIDATION_FAILED", repr(res))
+    expect("no orphan op dir after failed PREPARED",
+           not ops.exists() or not any(ops.iterdir()))
+    res = run_mutation(r, "op-rmeta2", "p", "a", "i", "s",
+                       base_targets(b"x"), preconditions={"x.txt": 7})
+    expect("int precondition value refuses",
+           (not res["ok"]) and res["code"] == "VALIDATION_FAILED", repr(res))
+    shutil.rmtree(r, ignore_errors=True)
+
+    # 3. canonical identity: aliases collapse; target+read same file
+    r = mkrepo()
+    res = run_mutation(r, "op-dup", "p", "a", "i", "s",
+                       [{"path": "x.txt", "role": "generic",
+                         "action": "write", "content": b"a"},
+                        {"path": "./x.txt", "role": "generic",
+                         "action": "write", "content": b"b"}])
+    expect("alias targets refuse",
+           (not res["ok"]) and res["code"] == "VALIDATION_FAILED", repr(res))
+    res = run_mutation(r, "op-tr", "p", "a", "i", "s", base_targets(b"c"),
+                       read_preconditions={"x.txt":
+                                           hash_file_dependency(r / "x.txt")})
+    expect("target+read same file zero-write refusal",
+           (not res["ok"]) and res["code"] == "VALIDATION_FAILED", repr(res))
+    expect("file unchanged", (r / "x.txt").read_text() == "one\n")
+    ext = Path(tempfile.mkdtemp(prefix="saipen-hr-ext-")) / "dep.txt"
+    ext.write_text("d", encoding="utf-8")
+    res = run_mutation(r, "op-extread", "p", "a", "i", "s",
+                       base_targets(b"c"),
+                       read_preconditions={str(ext): hash_of(b"d")})
+    expect("external absolute read legal", res["ok"], repr(res))
+    shutil.rmtree(r, ignore_errors=True)
+    shutil.rmtree(ext.parent, ignore_errors=True)
+
+    # 4. decoder rejects alias receipt (a/../x + x) before replay
+    r = mkrepo()
+    opsd = r / ".saipen" / "recovery" / "ops" / "op-alias"
+    opsd.mkdir(parents=True)
+    rec = {"op_id": "op-alias", "operation": "p",
+           "created_at": "2026-08-16T00:00:00Z", "agent": "a",
+           "project_identity": "id", "semantic_payload_hash": "s",
+           "preconditions": {}, "read_preconditions": {},
+           "verification_policy": "none", "status": "PREPARED",
+           "progress_index": 0,
+           "targets": [{"path": "a/../x.txt", "role": "generic",
+                        "action": "write", "before_hash": hash_of(b"one\n"),
+                        "after_hash": hash_of(b"z"), "applied": False},
+                       {"path": "x.txt", "role": "generic",
+                        "action": "write", "before_hash": hash_of(b"one\n"),
+                        "after_hash": hash_of(b"y"), "applied": False}]}
+    (opsd / "operation.json").write_text(json.dumps(rec), encoding="utf-8")
+    (opsd / ("0_%s.staged" % hash_of(b"x.txt")[:16])).write_bytes(b"z")
+    (opsd / ("1_%s.staged" % hash_of(b"x.txt")[:16])).write_bytes(b"y")
+    dec = decode_operation_record(r, opsd)
+    expect("decoder rejects alias pair", not dec["ok"], repr(dec))
+    shutil.rmtree(r, ignore_errors=True)
+
+    # 5. corrupt evidence partition: symlink op dir -> CORRUPT_JOURNAL
+    r = mkrepo()
+    opsd = r / ".saipen" / "recovery" / "ops"
+    opsd.mkdir(parents=True)
+    target = Path(tempfile.mkdtemp(prefix="saipen-hr-opsym-"))
+    try:
+        os.symlink(target, opsd / "op-bad", target_is_directory=True)
+    except (OSError, NotImplementedError):
+        print("SKIP: hr-journal -- symlink corrupt probe (host cannot symlink)")
+    else:
+        pending, _conflicts = scan_pending(r)
+        expect("scan flags CORRUPT", any(p.get("corrupt") for p in pending),
+               repr(pending))
+        pre = recovery_preflight(r)
+        expect("preflight refuses CORRUPT_JOURNAL zero Journal",
+               (not pre["ok"]) and pre["code"] == "CORRUPT_JOURNAL",
+               repr(pre))
+        res = run_mutation(r, "op-after-corrupt", "p", "a", "i", "s",
+                           base_targets(b"q"))
+        expect("mutation refused while corrupt evidence present",
+               (not res["ok"]) and res["code"] == "CORRUPT_JOURNAL",
+               repr(res))
+    shutil.rmtree(r, ignore_errors=True)
+    shutil.rmtree(target, ignore_errors=True)
+
+    # 6. healthy single pending op still auto-recovers
+    r = mkrepo()
+    res = run_mutation(r, "op-ok", "p", "a", "i", "s", base_targets(b"new\n"),
+                       verification_policy="none")
+    expect("healthy op commits", res["ok"], repr(res))
+    shutil.rmtree(r, ignore_errors=True)
+
+    # 7. lineage fail-closed: deleted IDENTITY.md + retry -> refusal
+    r = mkrepo()
+    res = run_mutation(r, "op-lineage", "p", "a", "i", "s",
+                       base_targets(b"l1\n"))
+    expect("first op commits", res["ok"], repr(res))
+    ident = r / ".saipen" / "IDENTITY.md"
+    expect("IDENTITY minted", ident.is_file())
+    res3 = run_mutation(r, "op-lineage", "p", "a", "i", "s",
+                        base_targets(b"l1\n"))
+    expect("healthy retry ALREADY_APPLIED",
+           res3["ok"] and res3["code"] == "ALREADY_APPLIED", repr(res3))
+    ident.unlink()
+    res2 = run_mutation(r, "op-lineage", "p", "a", "i", "s",
+                        base_targets(b"l1\n"))
+    expect("retry with deleted carrier refuses (no ALREADY_APPLIED)",
+           (not res2["ok"]) and res2["code"] != "ALREADY_APPLIED", repr(res2))
+    expect("carrier not recreated", not ident.exists())
+    expect("file unchanged by refused retry", (r / "x.txt").read_text() == "l1\n")
+    shutil.rmtree(r, ignore_errors=True)
+
+    # 8. append_targets bounded staged names + deep path
+    r = mkrepo()
+    res = run_mutation(r, "op-append", "p", "a", "i", "s",
+                       base_targets(b"a1\n"))
+    expect("append base op commits", res["ok"], repr(res))
+    j = Journal(r, "op-append")
+    deep = "/".join(["d%d" % i for i in range(40)]) + "/deep.txt"
+    j.append_targets([{"path": deep, "role": "generic", "action": "write",
+                       "content": b"deep\n", "before_hash": "",
+                       "after_hash": ""}])
+    opd = r / ".saipen" / "recovery" / "ops" / "op-append"
+    staged = list(opd.glob("1_*.staged"))
+    expect("append uses bounded staged_name", len(staged) == 1
+           and len(staged[0].stem) == 1 + 1 + 16, [p.name for p in staged])
+    shutil.rmtree(r, ignore_errors=True)
+
+    return problems, checked
+
+
+def run_hostile_release_probes() -> tuple[list[str], int]:
+    """Hostile-regression release rollback controls (hostile sweep P0):
+    index-owner-safe restore -- byte-exact pre-index restore on the owned
+    post-stage SHA, foreign staging refusal, unowned-index refusal, foreign
+    index.lock refusal with byte-for-byte survival, recovery-record restore,
+    and bytes-primary over the lossy read-tree path. Fresh temp git repos.
+    """
+    problems: list[str] = []
+    checked = 0
+
+    def expect(label: str, ok: bool, detail: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        if ok:
+            print(f"PASS: hr-release -- {label}")
+        else:
+            problems.append(f"{label}: {detail}")
+            print(f"FAIL: hr-release -- {label} -- {detail}")
+
+    from saipen_engine.release import (IndexSnapshot, _exact_index_bytes,
+                                       _restore_index, _restore_index_from_record)
+
+    def rm_tree(path: Path) -> None:
+        for _ in range(5):
+            try:
+                shutil.rmtree(path)
+                return
+            except PermissionError:
+                import time
+                time.sleep(0.2)
+        shutil.rmtree(path, onerror=lambda fn, p, e: None)
+
+    def git(root, *args):
+        return subprocess.run(["git", *args], cwd=root,
+                              capture_output=True, text=True, check=False)
+
+    def setup():
+        root = Path(tempfile.mkdtemp(prefix="saipen-hr-release-"))
+        git(root, "init", "-q")
+        git(root, "config", "user.email", "probe@probe")
+        git(root, "config", "user.name", "probe")
+        (root / "a.txt").write_text("a\n", encoding="utf-8")
+        git(root, "add", "a.txt")
+        git(root, "commit", "-q", "-m", "base")
+        pre_sha, pre_b64 = _exact_index_bytes(root)
+        pre = IndexSnapshot(paths=(), entries=(), content_hash="",
+                            index_sha256=pre_sha, index_bytes_b64=pre_b64,
+                            tree_sha="")
+        return root, pre
+
+    def staged_names(root):
+        r = git(root, "diff", "--cached", "--name-only")
+        return sorted(r.stdout.splitlines())
+
+    def index_sha(root):
+        return _exact_index_bytes(root)[0]
+
+    # 1. ordinary crash: restore byte-identical pre-index
+    root, pre = setup()
+    (root / "x.txt").write_text("x\n", encoding="utf-8")
+    git(root, "add", "x.txt")
+    owned = index_sha(root)
+    expect("owned post-stage sha differs from pre", owned != pre.index_sha256)
+    _restore_index(root, pre, owned)
+    expect("restored byte-identical pre-index",
+           index_sha(root) == pre.index_sha256)
+    expect("no staging left", staged_names(root) == [])
+    rm_tree(root)
+
+    # 2. foreign staged y survives + refusal
+    root, pre = setup()
+    (root / "x.txt").write_text("x\n", encoding="utf-8")
+    git(root, "add", "x.txt")
+    owned = index_sha(root)
+    (root / "y.txt").write_text("y\n", encoding="utf-8")
+    git(root, "add", "y.txt")
+    try:
+        _restore_index(root, pre, owned)
+        expect("foreign staging refuses", False, "no ValueError raised")
+    except ValueError as exc:
+        expect("foreign staging refuses", True, str(exc)[:60])
+    expect("foreign y still staged", "y.txt" in staged_names(root))
+    expect("release x still staged too", "x.txt" in staged_names(root))
+    rm_tree(root)
+
+    # 3. live == pre -> no-op even without owned sha
+    root, pre = setup()
+    _restore_index(root, pre, None)
+    expect("already-pre no-op", index_sha(root) == pre.index_sha256)
+    rm_tree(root)
+
+    # 4. owned None + live != pre -> refusal
+    root, pre = setup()
+    (root / "x.txt").write_text("x\n", encoding="utf-8")
+    git(root, "add", "x.txt")
+    try:
+        _restore_index(root, pre, None)
+        expect("unowned index refuses", False, "no ValueError")
+    except ValueError:
+        expect("unowned index refuses", True)
+    rm_tree(root)
+
+    # 5. foreign index.lock survives byte-for-byte and causes refusal
+    root, pre = setup()
+    (root / "x.txt").write_text("x\n", encoding="utf-8")
+    git(root, "add", "x.txt")
+    owned = index_sha(root)
+    loc = git(root, "rev-parse", "--git-path", "index").stdout.strip()
+    lock_path = Path(loc) if Path(loc).is_absolute() else root / loc
+    lock_path = lock_path.with_name(lock_path.name + ".lock")
+    lock_bytes = b"foreign lock bytes 12345"
+    lock_path.write_bytes(lock_bytes)
+    try:
+        _restore_index(root, pre, owned)
+        expect("lock refusal", False, "no ValueError")
+    except ValueError as exc:
+        expect("lock refusal", True, str(exc)[:50])
+    expect("lock survives byte-for-byte",
+           lock_path.read_bytes() == lock_bytes)
+    expect("staging intact", "x.txt" in staged_names(root))
+    lock_path.unlink()
+    rm_tree(root)
+
+    # 6. recovery record path: _restore_index_from_record
+    root, pre = setup()
+    (root / "x.txt").write_text("x\n", encoding="utf-8")
+    git(root, "add", "x.txt")
+    owned = index_sha(root)
+    record = {"pre_index_b64": pre.index_bytes_b64,
+              "owned_post_stage_index_sha256": owned}
+    _restore_index_from_record(root, record)
+    expect("record restore byte-exact", index_sha(root) == pre.index_sha256)
+
+    (root / "x.txt").write_text("x\n", encoding="utf-8")
+    git(root, "add", "x.txt")
+    owned = index_sha(root)
+    (root / "y.txt").write_text("y\n", encoding="utf-8")
+    git(root, "add", "y.txt")
+    try:
+        _restore_index_from_record(root, record)
+        expect("record foreign staging refuses", False)
+    except ValueError as exc:
+        expect("record foreign staging refuses", True, str(exc)[:50])
+    expect("foreign y still staged after record refusal",
+           "y.txt" in staged_names(root))
+    rm_tree(root)
+
+    # 7. tree_sha present must NOT switch to lossy read-tree: bytes primary
+    root, pre = setup()
+    (root / "x.txt").write_text("x\n", encoding="utf-8")
+    git(root, "add", "x.txt")
+    owned = index_sha(root)
+    pre_with_tree = IndexSnapshot(paths=pre.paths, entries=pre.entries,
+                                  content_hash=pre.content_hash,
+                                  index_sha256=pre.index_sha256,
+                                  index_bytes_b64=pre.index_bytes_b64,
+                                  tree_sha=git(root, "rev-parse",
+                                               "HEAD^{tree}").stdout)
+    _restore_index(root, pre_with_tree, owned)
+    expect("bytes primary even with tree_sha",
+           index_sha(root) == pre.index_sha256)
+    rm_tree(root)
+
+    return problems, checked
+
+
+def run_hostile_convergence_probes() -> tuple[list[str], int]:
+    """Hostile-regression convergence identity controls (hostile sweep P1):
+    `_identity_of` binds the INPUT source side only -- a receipt carrying
+    only resulting_* fields (or missing its input side) is a broken chain
+    link, never silent evidence; CLEAN's resulting side is read explicitly
+    and only for G. A full E->I chain with one identity family passes.
+    """
+    problems: list[str] = []
+    checked = 0
+
+    def expect(label: str, ok: bool, detail: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        if ok:
+            print(f"PASS: hr-convergence -- {label}")
+        else:
+            problems.append(f"{label}: {detail}")
+            print(f"FAIL: hr-convergence -- {label} -- {detail}")
+
+    from saipen_engine.convergence import convergence_verdict
+
+    S0 = ("1111111111111111111111111111111111111111",
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+    S1 = ("2222222222222222222222222222222222222222",
+          "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
+
+    def write_receipt(root: Path, op_id: str, stage: str, verdict: str,
+                      event_id: int, source: tuple[str, str],
+                      resulting: tuple[str, str] | None = None,
+                      omit_input: bool = False) -> None:
+        meta = {"operation": "convergence_stage", "status": "COMMITTED",
+                "stage": stage, "verdict": verdict,
+                "event_id": f"E-{event_id}"}
+        if not omit_input:
+            meta["source_head"] = source[0]
+            meta["source_tree_fingerprint"] = source[1]
+        if resulting is not None:
+            meta["resulting_source_head"] = resulting[0]
+            meta["resulting_source_tree_fingerprint"] = resulting[1]
+        record = {"op_id": op_id, "operation": "convergence_stage",
+                  "created_at": "2026-08-16T00:00:00Z", "agent": "probe",
+                  "project_identity": "probe", "semantic_payload_hash": "p",
+                  "preconditions": {}, "read_preconditions": {},
+                  "verification_policy": "none", "status": "COMMITTED",
+                  "progress_index": 0, "targets": [],
+                  "receipt_metadata": meta}
+        op_dir = root / ".saipen" / "recovery" / "ops" / op_id
+        op_dir.mkdir(parents=True, exist_ok=True)
+        (op_dir / "operation.json").write_text(
+            json.dumps(record), encoding="utf-8")
+
+    def chain_root() -> Path:
+        root = Path(tempfile.mkdtemp(prefix="saipen-hr-conv-"))
+        (root / ".saipen" / "recovery" / "ops").mkdir(parents=True)
+        subprocess.run(["git", "init", "-q"], cwd=root, check=False)
+        subprocess.run(["git", "config", "user.email", "probe@probe"],
+                       cwd=root, check=False)
+        subprocess.run(["git", "config", "user.name", "probe"],
+                       cwd=root, check=False)
+        write_receipt(root, "op-e", "E", "PASS", 100, S0)
+        write_receipt(root, "op-f", "F", "CLEAN", 101, S0)
+        write_receipt(root, "op-g", "G", "COMPLETED", 102, S0, S1)
+        write_receipt(root, "op-h", "H", "PASS", 103, S1)
+        write_receipt(root, "op-i", "I", "CLEAN", 104, S1)
+        return root
+
+    def source_id(s: tuple[str, str]):
+        return SourceIdentity(s[0], s[1], "probe-model")
+
+    # 1. valid chain, live == S1 -> ok
+    root = chain_root()
+    v = convergence_verdict(root, source_id=source_id(S1))
+    expect("valid E-I chain passes", v.ok, "; ".join(v.reasons))
+    shutil.rmtree(root, ignore_errors=True)
+
+    # 2. G with ONLY resulting fields (input side missing) -> chain fails
+    root = chain_root()
+    write_receipt(root, "op-g", "G", "COMPLETED", 102, S0, S1,
+                  omit_input=True)
+    v = convergence_verdict(root, source_id=source_id(S1))
+    expect("G without input side fails closed",
+           (not v.ok) and any("lacks a bound source identity" in r
+                              for r in v.reasons), "; ".join(v.reasons))
+    shutil.rmtree(root, ignore_errors=True)
+
+    # 3. non-G receipt carrying only resulting fields -> never evidence
+    root = chain_root()
+    write_receipt(root, "op-e", "E", "PASS", 100, S0,
+                  resulting=S0, omit_input=True)
+    v = convergence_verdict(root, source_id=source_id(S1))
+    expect("non-G resulting-only receipt fails closed",
+           (not v.ok) and any("lacks a bound source identity" in r
+                              for r in v.reasons), "; ".join(v.reasons))
+    shutil.rmtree(root, ignore_errors=True)
+
+    # 4. G input present but resulting mismatch -> explicit CLEAN failure
+    root = chain_root()
+    write_receipt(root, "op-g", "G", "COMPLETED", 102, S0, S0)
+    v = convergence_verdict(root, source_id=source_id(S1))
+    expect("G resulting mismatch fails",
+           (not v.ok) and any("CLEAN resulting identity differs" in r
+                              for r in v.reasons), "; ".join(v.reasons))
+    shutil.rmtree(root, ignore_errors=True)
+
+    return problems, checked
+
+
+def run_hostile_state_probes() -> tuple[list[str], int]:
+    """Hostile-regression shared STATE contract (hostile sweep P1): the
+    engine's state_contract_errors mirrors state.schema.json (required set,
+    enums, types, minimums, additionalProperties, execution-intent
+    conditionals) so every engine consumer refuses what the release gate
+    FAILs; a FUTURE schema_version is still allowed (the gate WARNS on it --
+    the bump workflow must not block); an empty STATE is bootstrap-only and
+    never projects an ordinary action; post-write verification refuses
+    non-plain-UTF-8 (BOM) checkpoint files byte-wise.
+    """
+    problems: list[str] = []
+    checked = 0
+
+    def expect(label: str, ok: bool, detail: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        if ok:
+            print(f"PASS: hr-state -- {label}")
+        else:
+            problems.append(f"{label}: {detail}")
+            print(f"FAIL: hr-state -- {label} -- {detail}")
+
+    from saipen_engine.state import state_contract_errors
+    from saipen_engine.router import route_next
+    from saipen_engine.fast_check import validate_project
+    from saipen_engine.state import parse_frontmatter
+    from saipen_engine import codec
+
+    GOOD = {
+        "phase": "BUILD", "task": "probe", "next_action": "continue",
+        "blocker": "", "agent": "probe", "saipen_version": 7,
+        "schema_version": 3, "mode": "full", "execution_intent": "goal",
+        "goal_waves": 1, "goal_tickets": 2, "updated": "2026-08-16T00:00:00Z",
+        "transition_from": "PLAN", "requires": ["filesystem", "git"],
+    }
+    expect("contract accepts a fully valid state",
+           state_contract_errors(GOOD) == [])
+    expect("unknown field refused (additionalProperties false)",
+           any("unknown STATE field" in e
+               for e in state_contract_errors({**GOOD, "bogus_field": 1})))
+    expect("phase outside the 16-phase enum refused",
+           any("phase" in e
+               for e in state_contract_errors({**GOOD, "phase": "BOGUS"})))
+    expect("transition_from outside the enum refused",
+           any("transition_from" in e
+               for e in state_contract_errors({**GOOD, "transition_from": "X"})))
+    expect("mode outside enum refused",
+           any("mode" in e
+               for e in state_contract_errors({**GOOD, "mode": "stealth"})))
+    expect("goal intent without counters refused",
+           any("goal" in e
+               for e in state_contract_errors({k: v for k, v in GOOD.items()
+                                               if k not in ("goal_waves", "goal_tickets")})))
+    expect("converge intent without target refused",
+           any("converge_target" in e
+               for e in state_contract_errors({**GOOD, "execution_intent": "converge",
+                                               "goal_waves": None, "goal_tickets": None})))
+    expect("converge intent with goal counters refused",
+           any("converge" in e
+               for e in state_contract_errors({**GOOD, "execution_intent": "converge",
+                                               "converge_target": "crew"})))
+    expect("non-goal intent with goal counters refused",
+           any("goal" in e
+               for e in state_contract_errors({**GOOD, "execution_intent": "normal",
+                                               "goal_waves": 1, "goal_tickets": 2})))
+    expect("string schema_version refused",
+           any("schema_version" in e
+               for e in state_contract_errors({**GOOD, "schema_version": "3"})))
+    expect("future schema_version is not an engine error (gate WARNS, bump stays alive)",
+           state_contract_errors({**GOOD, "schema_version": 9}) == [])
+    expect("negative goal_waves refused (schema minimum)",
+           any("goal_waves" in e
+               for e in state_contract_errors({**GOOD, "goal_waves": -1})))
+    expect("required field missing refused",
+           any("missing required field" in e
+               for e in state_contract_errors({k: v for k, v in GOOD.items()
+                                               if k != "blocker"})))
+
+    root = Path(tempfile.mkdtemp(prefix="saipen-hr-state-"))
+    (root / ".saipen").mkdir(parents=True)
+    (root / ".saipen" / "BOARD.md").write_text(
+        "# BOARD\n\n## ACTIVE\n\n- none\n\n## DOING\n\n- none\n\n"
+        "## TODO\n\n- none\n\n## BLOCKED\n\n- none\n\n## DONE\n\n- none\n",
+        encoding="utf-8")
+    (root / ".saipen" / "LOG.md").write_text("# LOG\n", encoding="utf-8")
+    (root / ".saipen" / "STATE.md").write_text("", encoding="utf-8")
+
+    routed = route_next(
+        (root / ".saipen" / "STATE.md").read_text(encoding="utf-8"),
+        (root / ".saipen" / "BOARD.md").read_text(encoding="utf-8"))
+    expect("empty STATE routes bootstrap-only, never an ordinary action",
+           routed.get("ok") and routed.get("action") == "saipen status"
+           and routed.get("reason") == "bootstrap",
+           f"routed={routed}")
+
+    (root / ".saipen" / "STATE.md").write_text(
+        "---\nphase: INIT\ntask: none\nnext_action: saipen status\n"
+        "blocker: \"\"\nagent: probe\nsaipen_version: 7\nmode: full\nupdated: "
+        "2026-08-16T00:00:00Z\n---\n", encoding="utf-8")
+    expect("plain-UTF-8 project passes post-write verification",
+           validate_project(root) == [], "; ".join(validate_project(root)))
+    bom_state = (root / ".saipen" / "STATE.md").read_bytes()
+    (root / ".saipen" / "STATE.md").write_bytes(b"\xef\xbb\xbf" + bom_state)
+    bom_errs = validate_project(root)
+    expect("BOM-carrying STATE refused byte-wise at post-write verification",
+           any("not plain UTF-8" in e for e in bom_errs),
+           "; ".join(bom_errs))
+    expect("codec reports the BOM file as non-canonical",
+           codec.encoding_of(root / ".saipen" / "STATE.md") != "utf-8")
+    shutil.rmtree(root, ignore_errors=True)
+
+    return problems, checked
+
+
 if os.environ.get("SAIPEN_NITRO_M2_PROBES_ONLY") == "1":
     nitro_m2_failures, nitro_m2_checked = run_nitro_m2_probes()
     for problem in nitro_m2_failures:
@@ -12598,6 +13472,24 @@ if os.environ.get("SAIPEN_SAICREW_PROBES_ONLY") == "1":
         print(f"FAILED: {problem}")
     print(f"{saicrew_checked} saicrew behavior(s) executed")
     raise SystemExit(1 if saicrew_failures else 0)
+
+if os.environ.get("SAIPEN_HR_PROBES_ONLY") == "1":
+    hr_journal_failures, hr_journal_checked = run_hostile_journal_probes()
+    hr_release_failures, hr_release_checked = run_hostile_release_probes()
+    hr_convergence_failures, hr_convergence_checked = \
+        run_hostile_convergence_probes()
+    hr_state_failures, hr_state_checked = run_hostile_state_probes()
+    for problem in (hr_journal_failures + hr_release_failures
+                    + hr_convergence_failures + hr_state_failures):
+        print(f"FAILED: {problem}")
+    print(f"{hr_journal_checked} hostile-regression journal behavior(s) "
+          f"executed, {hr_release_checked} hostile-regression release "
+          f"behavior(s) executed, {hr_convergence_checked} hostile-regression "
+          f"convergence behavior(s) executed, {hr_state_checked} "
+          "hostile-regression state-contract behavior(s) executed")
+    raise SystemExit(1 if (hr_journal_failures or hr_release_failures
+                           or hr_convergence_failures or hr_state_failures)
+                     else 0)
 
 if os.environ.get("SAIPEN_NITRO_INTEGRITY_PROBES_ONLY") == "1":
     nitro_failures, nitro_checked = run_nitro_integrity_probes()
@@ -12677,6 +13569,15 @@ failures.extend(ci_failures)
 failures.extend(hook_failures)
 purity_failures, purity_checked, purity_skipped = run_precommit_purity_probe()
 failures.extend(purity_failures)
+hr_journal_failures, hr_journal_checked = run_hostile_journal_probes()
+failures.extend(hr_journal_failures)
+hr_release_failures, hr_release_checked = run_hostile_release_probes()
+failures.extend(hr_release_failures)
+hr_convergence_failures, hr_convergence_checked = \
+    run_hostile_convergence_probes()
+failures.extend(hr_convergence_failures)
+hr_state_failures, hr_state_checked = run_hostile_state_probes()
+failures.extend(hr_state_failures)
 
 
 digest_failures, digest_checked = run_digest_stale_probes()
@@ -12717,6 +13618,8 @@ print(f"{rolefresh_checked} role-freshness behavior(s) executed, "
 print(f"{sub_clean_checked} sub-clean safety behavior(s) executed, "
       f"{sub_clean_skipped} skipped for missing host capability")
 print(f"{hardening_checked} hardening red control(s) resolved")
+print(f"{hr_state_checked} hostile-regression state-contract behavior(s) "
+      "executed")
 print(f"{userperson_checked} userperson behavior(s) executed")
 print(f"{improve_checked} improve behavior(s) executed")
 print(f"{nitro_checked} nitro behavior(s) executed")
@@ -12731,6 +13634,9 @@ print(f"{autoinject_checked} autoinject-manifest behavior(s) executed")
 print(f"{hook_checked} installed-hook behavior(s) executed, "
       f"{hook_skipped} skipped for missing interpreters")
 print(f"{ci_checked} ci-status behavior(s) executed")
+print(f"{hr_journal_checked} hostile-regression journal behavior(s) executed")
+print(f"{hr_release_checked} hostile-regression release behavior(s) executed")
+print(f"{hr_convergence_checked} hostile-regression convergence behavior(s) executed")
 
 if failures:
     print(f"\nFAILED: {len(failures)} executable check(s) failed")

@@ -32,6 +32,8 @@ Key invariants (T-994):
 
 from __future__ import annotations
 
+import base64
+import datetime
 import hashlib
 import json
 import os
@@ -42,7 +44,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from . import codec
+from .board import strict_iso_utc
 from .errors import CODES
+from .journal import _drop_settled_staged
 from .operations import RELEASE_SCOPE_DIR, _plan_finish_ticket
 from .state import parse_state
 
@@ -109,6 +113,8 @@ CLOSURE_FILES = (
     ".saipen/BOARD.md",
     ".saipen/LOG.md",
     ".saipen/kitchen/digest.md",
+    ".saipen/kitchen/crew_release_evidence.json",
+    ".saipen/kitchen/release_receipt.json",
 )
 
 
@@ -117,12 +123,22 @@ def _closure_stage_paths(root: Path) -> list[str]:
     sealed LOG segment that exists. A segment sealed between releases
     (`clean.md` step 4) is canonical history -- if the closure did not stage
     it, a fresh clone would lack the E-### events Recovery depends on and the
-    released tag would be broken (the v7.223.16 sealed-segment omission)."""
+    released tag would be broken (the v7.223.16 sealed-segment omission).    The crew finalize evidence record is staged only when it exists -- it is
+    written by the crew finalizer (SC-13) AFTER the terminal crew release, so
+    the terminal release itself cannot and must not require it (SC-13
+    finalization is local/runtime; the evidence reaches a later closure if
+    one happens)."""
     paths = list(CLOSURE_FILES)
-    logs_dir = root / ".saipen" / "logs"
-    if logs_dir.is_dir():
-        paths += sorted(str(p.relative_to(root).as_posix())
-                        for p in logs_dir.glob("LOG-*.md"))
+    for conditional in (".saipen/kitchen/crew_release_evidence.json",
+                        ".saipen/kitchen/release_receipt.json"):
+        if not (root / conditional).is_file():
+            paths = [p for p in paths if p != conditional]
+    # Sealed segments come from the ONE canonical numeric history reader
+    # (never a local lexicographic sort: LOG-1000 must follow LOG-999). The
+    # active LOG.md is already in CLOSURE_FILES by name.
+    from .log import history_paths
+    paths += [p.relative_to(root).as_posix()
+              for p in history_paths(root) if p.name != "LOG.md"]
     return paths
 
 
@@ -135,14 +151,21 @@ def _closure_stage_paths(root: Path) -> list[str]:
 class IndexSnapshot:
     """Exact pre-release index state for rollback.
 
-    Records every staged path with its status (M/A/T/D) and, where the staged
-    entry has a blob, the mode + blob hash. A staged deletion has status D and
-    no blob -- restoring it re-stages the deletion instead of destroying it
-    (a broad `git reset` alone destroys staged deletions).
+    Two layers. (a) The `paths`/`entries`/`content_hash` layer enumerates the
+    STAGED-CHANGE surface (M/A/T/D status, mode + blob) -- used for foreign
+    staging detection and plan identity. (b) The EXACT layer stores the raw
+    index file bytes (`index_sha256` + `index_bytes_b64`) resolved through
+    `git rev-parse --git-path index`. Restoration writes those exact bytes
+    back, which preserves what a staged-diff reconstruction cannot:
+    intent-to-add entries, unmerged stages 1/2/3, index extensions, staged
+    rename/delete/mode/newline states (T-1003 exact index snapshot).
     """
     paths: tuple[str, ...]
     entries: tuple[tuple[str, str, str], ...]  # (path, mode_or_D, blob_or_)
     content_hash: str
+    index_sha256: str = ""
+    index_bytes_b64: str = ""
+    tree_sha: str = ""
 
     def to_dict(self) -> dict:
         return {
@@ -150,6 +173,9 @@ class IndexSnapshot:
             "entries": {p: {"mode": m, "blob": b}
                         for p, m, b in self.entries},
             "content_hash": self.content_hash,
+            "index_sha256": self.index_sha256,
+            "index_bytes_b64": self.index_bytes_b64,
+            "tree_sha": self.tree_sha,
         }
 
 
@@ -157,8 +183,9 @@ def _capture_index_state(root: Path) -> IndexSnapshot:
     """Capture the exact pre-operation index for rollback.
 
     Uses `-z` machine lists (a path with a newline must not split staging
-    scope) and `--name-status` so a staged deletion is recorded with status D
-    -- the current `git reset`-based rollback must be able to recreate it.
+    scope) and `--name-status` with status-specific NUL arity (R/C consume 2
+    paths, M/A/D/T consume 1 path). Staged deletions are recorded with status D
+    so `_restore_index` can recreate them exactly.
     """
     result = _git(root, "diff", "--cached", "--name-status", "-z")
     raw = result.stdout
@@ -170,60 +197,233 @@ def _capture_index_state(root: Path) -> IndexSnapshot:
         if not fields[index]:
             index += 1
             continue
-        header = fields[index]
-        index += 1
-        if index >= len(fields):
-            break
-        path = fields[index]
+        header = fields[index].strip()
         index += 1
         if not header:
             continue
-        status = header.split()[0][0]
-        paths.append(path)
-        if status == "D":
-            entries.append((path, "D", ""))
-            continue
-        ls = _git(root, "ls-files", "-s", "-z", "--", path, literal=True)
-        mode_blob = ""
-        for piece in ls.stdout.split("\0"):
-            if not piece or "\t" not in piece:
-                continue
-            meta = piece.split("\t", 1)[0].split()
-            if len(meta) >= 2:
-                mode_blob = f"{meta[0]},{meta[1]}"
-                break
-        if mode_blob:
-            mode, blob = mode_blob.split(",", 1)
-            entries.append((path, mode, blob))
+        status_char = header[0].upper()
+        if status_char in ("R", "C"):
+            if index + 1 >= len(fields):
+                raise ValueError(
+                    f"truncated git diff output for status {header!r}: {raw!r}")
+            old_path = fields[index]
+            new_path = fields[index + 1]
+            index += 2
+            if not old_path or not new_path:
+                raise ValueError(
+                    f"empty path in git diff {header!r}: old={old_path!r}, new={new_path!r}")
+            paths.append(old_path)
+            paths.append(new_path)
+            if status_char == "R":
+                entries.append((old_path, "D", ""))
+            ls = _git(root, "ls-files", "-s", "-z", "--", new_path, literal=True)
+            mode_blob = ""
+            for piece in ls.stdout.split("\0"):
+                if not piece or "\t" not in piece:
+                    continue
+                meta = piece.split("\t", 1)[0].split()
+                if len(meta) >= 2:
+                    mode_blob = f"{meta[0]},{meta[1]}"
+                    break
+            if mode_blob:
+                mode, blob = mode_blob.split(",", 1)
+                entries.append((new_path, mode, blob))
+            else:
+                entries.append((new_path, "D", ""))
+        elif status_char in ("M", "A", "D", "T", "U"):
+            if index >= len(fields):
+                raise ValueError(
+                    f"truncated git diff output for status {header!r}: {raw!r}")
+            path = fields[index]
+            index += 1
+            if not path:
+                raise ValueError(f"empty path in git diff {header!r}")
+            paths.append(path)
+            if status_char == "D":
+                entries.append((path, "D", ""))
+            else:
+                ls = _git(root, "ls-files", "-s", "-z", "--", path, literal=True)
+                mode_blob = ""
+                for piece in ls.stdout.split("\0"):
+                    if not piece or "\t" not in piece:
+                        continue
+                    meta = piece.split("\t", 1)[0].split()
+                    if len(meta) >= 2:
+                        mode_blob = f"{meta[0]},{meta[1]}"
+                        break
+                if mode_blob:
+                    mode, blob = mode_blob.split(",", 1)
+                    entries.append((path, mode, blob))
+                else:
+                    entries.append((path, "D", ""))
         else:
-            # A staged typechange/mode change with no readable entry is
-            # represented by its deletion half; the reset path below still
-            # restores the exact --cached delta.
-            entries.append((path, "D", ""))
-    ordered = sorted(paths)
+            raise ValueError(f"unknown git diff status {header!r} in {raw!r}")
+
+    ordered = sorted(set(paths))
+    unique_entries = sorted(set(entries))
     content_hash = hashlib.sha256(
         "|".join(
-            f"{p}:{m}:{b}" for p, m, b in sorted(entries)
+            f"{p}:{m}:{b}" for p, m, b in unique_entries
         ).encode("utf-8")).hexdigest()[:16]
-    return IndexSnapshot(tuple(ordered), tuple(sorted(entries)), content_hash)
+    # ---- EXACT layer: the raw index file bytes -----------------------------
+    # The staged-diff reconstruction above cannot preserve intent-to-add,
+    # unmerged stages or index extensions; the index FILE is the only exact
+    # state. A git-less no-publish project has no index at all (empty
+    # snapshot, nothing to restore); where git IS present but the index
+    # cannot be captured, this RAISES -- plan must refuse before any
+    # mutation rather than carry a rollback it cannot prove exact (T-1003).
+    tree = _git(root, "write-tree")
+    tree_sha = tree.stdout.strip() if tree.ok else ""
+
+    # The raw bytes are read AFTER every other git call: porcelain diff and
+    # write-tree can stat-refresh the index FILE (rewriting its bytes with
+    # identical logical content), so an earlier read would capture a state
+    # the very next git command invalidates and the ownership guard would
+    # refuse a no-op restore as foreign (hostile-regression false positive).
+    index_sha256, index_b64 = _exact_index_bytes(root) if _git_available(root) \
+        else ("", "")
+
+    return IndexSnapshot(tuple(ordered), tuple(unique_entries), content_hash,
+                         index_sha256, index_b64, tree_sha)
 
 
-def _restore_index(root: Path, pre_state: IndexSnapshot) -> None:
-    """Restore the index to the exact pre-release state.
+def _exact_index_bytes(root: Path) -> tuple[str, str]:
+    """(sha256, base64) of the exact current index FILE bytes, resolved via
+    `git rev-parse --git-path index` (worktree-aware). Raises ValueError when
+    the index cannot be located or read -- the caller must refuse before any
+    mutation (a rollback that cannot be proven exact is not a rollback)."""
+    loc = _git(root, "rev-parse", "--git-path", "index")
+    if not loc.ok or not loc.stdout:
+        raise ValueError(
+            "cannot locate the git index file (git rev-parse --git-path "
+            "index failed); exact index snapshot unavailable -- refuse")
+    index_path = Path(loc.stdout)
+    if not index_path.is_absolute():
+        index_path = root / index_path
+    index_path = index_path.resolve()
+    try:
+        raw = index_path.read_bytes()
+    except OSError as exc:
+        raise ValueError(
+            f"cannot read the git index file {index_path}: {exc} -- exact "
+            "index snapshot unavailable -- refuse") from exc
+    return hashlib.sha256(raw).hexdigest(), base64.b64encode(raw).decode(
+        "ascii")
 
-    Pre-existing staged entries (source + foreign) are restored to their
-    exact prior mode + blob -- never rebuilt from HEAD, and the working tree
-    is never touched, so concurrent/user edits are preserved. Staged
-    deletions are re-staged with `git rm --cached`, which a broad `git reset`
-    would otherwise destroy.
+
+def _restore_index_bytes(root: Path, index_bytes_b64: str) -> None:
+    """Write the exact index bytes back to the git index file.
+
+    The bytes ARE the complete index state (entries, stages, flags,
+    extensions), so this restores intent-to-add entries, unmerged stages and
+    staged deletions/renames byte-exactly. The working tree is never touched.
+    A foreign index.lock is a hard refusal (never a silent return the caller
+    could mistake for a successful rollback). Raises ValueError when the
+    bytes cannot be placed (proving exact restoration impossible is a
+    refusal, not a partial rollback)."""
+    if not index_bytes_b64:
+        return
+    if not _git_available(root):
+        return
+    loc = _git(root, "rev-parse", "--git-path", "index")
+    if not loc.ok or not loc.stdout:
+        raise ValueError(
+            "cannot locate the git index file for exact restoration")
+    index_path = Path(loc.stdout)
+    if not index_path.is_absolute():
+        index_path = root / index_path
+    index_path = index_path.resolve()
+    lock_path = index_path.with_name(index_path.name + ".lock")
+    if lock_path.exists():
+        raise ValueError(
+            "index.lock exists (concurrent writer or crashed git); refusing "
+            "to restore over a locked index -- resolve the lock explicitly "
+            "(WRITER_BUSY)")
+    try:
+        raw = base64.b64decode(index_bytes_b64.encode("ascii"))
+        tmp = index_path.with_name(index_path.name + ".restore-tmp")
+        tmp.write_bytes(raw)
+        os.replace(tmp, index_path)
+    except (OSError, ValueError) as exc:
+        raise ValueError(
+            f"exact index restoration failed for {index_path}: {exc}")
+
+
+def _restore_index(root: Path, pre_state: IndexSnapshot,
+                   owned_post_stage_sha: str | None = None) -> None:
+    """Restore the index to the exact pre-release state, OWNER-SAFE.
+
+    The live index is restored to the captured pre-index state ONLY when it
+    is provably this release's own staging (hostile-regression):
+      - live SHA == pre_state.index_sha256 -> already exactly pre-release;
+        nothing to restore;
+      - `owned_post_stage_sha` given and live SHA == owned_post_stage_sha
+        -> this release's staging: restore. The captured exact index bytes
+        are the PRIMARY restoration (intent-to-add entries, unmerged stages,
+        staged deletions/renames and index extensions survive byte-exactly);
+        `git read-tree` is NEVER used when exact bytes exist, because it
+        silently drops every index-only state it does not model;
+      - anything else -> ValueError: the live index holds FOREIGN staged
+        changes that a rollback would destroy -- preserve it and refuse with
+        CONFLICT/RECOVERY_REQUIRED.
+
+    A foreign index.lock is a hard refusal (WRITER_BUSY), never a silent
+    return. The working tree is never touched. Raises ValueError on every
+    refusal path; the caller converts it into RELEASE_FAILED/CONFLICT.
     """
+    loc = _git(root, "rev-parse", "--git-path", "index")
+    if not loc.ok or not loc.stdout:
+        raise ValueError(
+            "cannot locate the git index file; index restoration refused")
+    index_path = Path(loc.stdout)
+    if not index_path.is_absolute():
+        index_path = root / index_path
+    index_path = index_path.resolve()
+
+    lock_path = index_path.with_name(index_path.name + ".lock")
+    if lock_path.exists():
+        raise ValueError(
+            "index.lock exists (concurrent writer or crashed git); refusing "
+            "to restore over a locked index -- resolve the lock explicitly "
+            "(WRITER_BUSY)")
+
+    try:
+        live_sha, _ = _exact_index_bytes(root)
+    except ValueError as exc:
+        raise ValueError(f"cannot prove the live index identity: {exc}")
+    if live_sha == pre_state.index_sha256:
+        return
+    if owned_post_stage_sha is None or live_sha != owned_post_stage_sha:
+        raise ValueError(
+            "live index does not match the owned post-stage index (and is "
+            "not the pre-release index); foreign staged changes would be "
+            "destroyed by rollback -- preserve the live index and resolve "
+            "explicitly (CONFLICT/RECOVERY_REQUIRED)")
+
+    if pre_state.index_bytes_b64:
+        _restore_index_bytes(root, pre_state.index_bytes_b64)
+        return
+    # Legacy snapshot without exact bytes: per-entry reconstruction is only
+    # reached AFTER the ownership proof above.
     _git(root, "reset", "-q")
     for path, mode, blob in pre_state.entries:
         if mode == "D":
             _git(root, "rm", "--cached", "--quiet", "--", path, literal=True)
         else:
             _git(root, "update-index", "--add", "--cacheinfo",
-                 f"{mode},{blob},{path}", literal=True)
+                 mode, blob, path, literal=True)
+
+
+def _journal_owned_index_sha(journal) -> str | None:
+    """The owned post-stage index SHA durably journaled before the
+    CONTENT_STAGED crash point, or None when it was never captured (the live
+    caller then refuses to roll back a foreign index)."""
+    try:
+        record = journal.read()
+    except Exception:
+        return None
+    value = record.get("owned_post_stage_index_sha256")
+    return value if isinstance(value, str) and value else None
 
 
 # ---------------------------------------------------------------------------
@@ -253,6 +453,7 @@ class ReleasePlan:
     metadata_paths: tuple[str, ...]
     # identity + bindings
     project_identity: str
+    project_lineage: str
     source_head: str
     source_tree_fingerprint: str
     source_discovery_model: str
@@ -276,6 +477,18 @@ class ReleasePlan:
     first_publish_wait: bool
     confirmation: str
     pre_plan_index: IndexSnapshot
+    # The ONE live raw push endpoint captured at plan time (git URL form, as
+    # `git push origin` will use it). Publication and every post-push
+    # verification query THIS endpoint -- with a split fetch=A / pushurl=B
+    # setup, the fetch URL is a different repository and proves nothing about
+    # what was published (T-1003 publication-remote split).
+    remote_push_endpoint: str = ""
+    # crew terminal carrier (T-1003 sweep): a terminal crew release is built
+    # from the DERIVED deferred crew scope, not one ordinary ticket, and
+    # closes through the crew closure path with no ## DOING ticket.
+    crew_epoch: str = ""
+    crew_closure: bool = False
+    crew_scope: tuple[str, str] = ()  # (path, expected_hash) pairs
 
     def canonical(self) -> tuple:
         """The plan's identity, INVOCATION-NAME NORMALIZED -- `ship` and
@@ -284,15 +497,17 @@ class ReleasePlan:
         return (
             self.version, self.branch, self.tag, self.ticket_id,
             self.commit_message, self.scope_paths, self.metadata_paths,
-            self.project_identity, self.source_head,
+            self.project_identity, self.project_lineage, self.source_head,
             self.source_tree_fingerprint, self.source_discovery_model,
             self.state_phase, self.state_task, self.state_hash,
             self.board_hash, self.log_hash, self.mode,
             self.remote_classification, self.remote_branch_tip,
-            self.remote_refs, self.remote_push_url, self.head_relation,
+            self.remote_refs, self.remote_push_url,
+            self.remote_push_endpoint, self.head_relation,
             self.start_stage, self.content_already_committed,
             self.first_publish_wait, self.confirmation,
             self.pre_plan_index.content_hash, self.pre_plan_index.paths,
+            self.crew_epoch, self.crew_closure, self.crew_scope,
         )
 
     @property
@@ -318,6 +533,7 @@ def _release_failure(stage: str, detail: str, **extra) -> dict:
 
 def plan_release(
     root: Path, invocation: str, *, dry_run: bool = False,
+    crew_carrier: dict | None = None,
 ) -> "ReleasePlan":
     """Build the immutable release decision.  WRITES NOTHING."""
     root = Path(root).resolve()
@@ -329,8 +545,22 @@ def plan_release(
     log_hash = _log_hash(root)
     mode = _read_mode(state)
 
-    from .paths import project_identity as _project_identity
+    from .paths import (project_identity as _project_identity,
+                        project_lineage_identity)
     project_identity = _project_identity(root)
+    # A new release REQUIRES a valid live portable lineage (T-1003
+    # carrier-loss wave): the receipt binds to it, recovery validates it, and
+    # the carrier is part of the release surface. A missing/malformed carrier
+    # refuses before any plan/decision work -- a release without a lineage
+    # could never be recovered after a move or clone.
+    project_lineage = project_lineage_identity(root)
+    if not project_lineage:
+        raise ReleaseRefusal(
+            "VALIDATION_FAILED",
+            "no valid portable project lineage (.saipen/IDENTITY.md is "
+            "missing or malformed); every new release requires the canonical "
+            "tracked carrier so its receipt stays recoverable across clone "
+            "and move")
 
     try:
         from freshness import compute_source_identity
@@ -346,6 +576,38 @@ def plan_release(
     head = _git(root, "rev-parse", "HEAD").stdout if mode == "full" else source_head
 
     tag = f"v{version}"
+
+    # ---- crew terminal carrier (T-1003 sweep) ------------------------------
+    # An active crew epoch publishes exactly once, through the EXISTING
+    # release executor, with the scope DERIVED from committed crew-defer
+    # receipts (never a manual list). The carrier is the mechanically-owned
+    # decision surface; the executor still owns commit/publish/closure/tag/
+    # verification/recovery.
+    if crew_carrier is None:
+        if (state.get("execution_intent") == "converge"
+                and state.get("converge_target") == "crew"):
+            from .crew import crew_release_context
+            ctx = crew_release_context(root)
+            if not ctx.get("ok"):
+                raise ReleaseRefusal(
+                    "CREW_NOT_READY",
+                    ctx.get("detail", "") or
+                    "crew is not ready for terminal publication")
+            crew_carrier = {
+                "crew_epoch": ctx["crew_epoch"],
+                "scope": ctx.get("crew_defer_scope") or {},
+                "ticket_id": ctx.get("ticket_id") or "",
+            }
+            if not crew_carrier["scope"] or not crew_carrier["ticket_id"]:
+                raise ReleaseRefusal(
+                    "CREW_NOT_READY",
+                    "crew is terminal but no deferred crew scope is "
+                    "derivable -- DEFER_FOR_CREW ran for zero tickets?")
+    if crew_carrier is not None:
+        return _plan_crew_release(
+            root, invocation, version, state_text, state, board_text, board,
+            log_hash, project_identity, source_head, fingerprint, source_model,
+            tag, crew_carrier, dry_run)
 
     # ---- no-publish needs NO git facts at all (T-994 / § 10) --------------
     if mode == "no-publish":
@@ -374,6 +636,7 @@ def plan_release(
             scope_paths=tuple(_scope_paths(root, ticket["id"])),
             metadata_paths=tuple(_metadata_paths(root)),
             project_identity=project_identity,
+            project_lineage=project_lineage,
             source_head=source_head, source_tree_fingerprint=fingerprint,
             source_discovery_model=source_model,
             state_phase=phase, state_task=task,
@@ -391,7 +654,19 @@ def plan_release(
         raise ReleaseRefusal(
             "STALE_PLAN", f"current branch {_branch(root)!r} does not exist")
 
-    cls, cls_err = _classify_remote(root)
+    # ONE live raw push endpoint: publication and every plan-time
+    # classification/verification query the SAME destination `git push
+    # origin` writes -- never the unrelated fetch URL (T-1003
+    # publication-remote split).
+    remote_push_endpoint = _push_endpoint(root)
+    if not remote_push_endpoint:
+        cls, cls_err = REMOTE_ABSENT, "no push endpoint configured"
+        remote_snapshot = RemoteSnapshot(False, "no push endpoint", {})
+    else:
+        # ONE canonical ls-remote: classification, branch tip, peeled tag and
+        # the full ref set all derive from this single query (T-1004 remote).
+        remote_snapshot = _remote_snapshot(root, remote_push_endpoint)
+        cls, cls_err = remote_snapshot.classification()
     if cls == REMOTE_UNAVAILABLE:
         raise ReleaseRefusal(
             "RELEASE_FAILED",
@@ -417,17 +692,16 @@ def plan_release(
     remote_push_url = _sanitize_push_url(push_urls[0]) if push_urls else ""
 
     branch = _branch(root)
-    remote_ok, remote_tip = _remote_branch_tip(root, "origin", branch)
+    remote_ok, remote_tip = remote_snapshot.branch_tip(branch)
     if not remote_ok:
         raise ReleaseRefusal(
             "RELEASE_FAILED",
             "remote branch tip query failed at plan time; remote "
             "classification is not re-checkable -- refuse")
     tag_local, tag_local_c = _local_tag_commit(root, tag)
-    _tag_remote_ok, tag_remote_c = _remote_tag_commit(root, tag)
+    _tag_remote_ok, tag_remote_c = remote_snapshot.tag_commit(tag)
     tag_remote_exists = bool(tag_remote_c)
-    remote_refs = tuple(sorted(
-        _snapshot_remote_refs(root, "origin").items()))
+    remote_refs = tuple(sorted(remote_snapshot.refs.items()))
     head_relation = _head_relation(root, remote_tip)
 
     phase = state.get("phase")
@@ -508,6 +782,7 @@ def plan_release(
         scope_paths=tuple(scope_paths),
         metadata_paths=tuple(_metadata_paths(root)),
         project_identity=project_identity,
+        project_lineage=project_lineage,
         source_head=source_head, source_tree_fingerprint=fingerprint,
         source_discovery_model=source_model,
         state_phase=phase, state_task=task,
@@ -515,6 +790,7 @@ def plan_release(
         log_hash=log_hash, mode=mode, dry_run=dry_run,
         remote_classification=cls, remote_branch_tip=remote_tip,
         remote_refs=remote_refs, remote_push_url=remote_push_url,
+        remote_push_endpoint=remote_push_endpoint,
         head_relation=head_relation,
         start_stage=classification["start_stage"],
         content_already_committed=classification["content_already_committed"],
@@ -523,6 +799,186 @@ def plan_release(
         confirmation=confirmation,
         pre_plan_index=index,
     )
+
+
+def _plan_crew_release(
+    root: Path, invocation: str, version: str, state_text: str, state: dict,
+    board_text: str, board: dict, log_hash: str, project_identity: str,
+    source_head: str, fingerprint: str, source_model: str, tag: str,
+    crew_carrier: dict, dry_run: bool,
+) -> "ReleasePlan":
+    """Plan the terminal crew release from a derived crew carrier.
+
+    The carrier owns the exact deferred scope (path -> deferred hash) and the
+    crew epoch identity; THIS function binds it into an immutable ReleasePlan
+    and refuses on any drift. Core must be at local DONE / task none (all
+    ordinary tickets were crew-deferred). Full mode still requires the same
+    remote facts as an ordinary release; no-publish mode still needs none.
+    """
+    from .paths import project_lineage_identity
+    project_lineage = project_lineage_identity(root)
+    if not project_lineage:
+        raise ReleaseRefusal(
+            "VALIDATION_FAILED",
+            "no valid portable project lineage (.saipen/IDENTITY.md is "
+            "missing or malformed); every new release requires the canonical "
+            "tracked carrier")
+    mode = _read_mode(state)
+    crew_epoch = crew_carrier.get("crew_epoch") or ""
+    scope = crew_carrier.get("scope") or {}
+    ticket_id = crew_carrier.get("ticket_id") or ""
+    if not crew_epoch or not ticket_id or not scope:
+        raise ReleaseRefusal(
+            "VALIDATION_FAILED",
+            "crew terminal carrier is missing crew_epoch/ticket_id/scope")
+    # Deferred ownership is an edge: the CURRENT bytes MUST equal the bytes
+    # the latest owning review approved (item 5 -- later unreviewed mutation
+    # is stale/refuse; a deleted path stays an exact deletion identity).
+    for rel, expected in sorted(scope.items()):
+        fp = root / rel
+        if expected is None:
+            if fp.exists():
+                raise ReleaseRefusal(
+                    "STALE_PLAN",
+                    f"crew scope path {rel} is a reviewed deletion but "
+                    "exists in the worktree")
+            continue
+        if not fp.is_file():
+            raise ReleaseRefusal(
+                "SOURCE_SCOPE_MISSING",
+                f"crew scope path {rel} is missing from the worktree")
+        live = _quick_hash(fp.read_bytes())
+        if live != expected:
+            raise ReleaseRefusal(
+                "STALE_PLAN",
+                f"crew scope path {rel} changed since the owning defer "
+                f"(live {live!r}, deferred {expected!r})")
+    phase = state.get("phase")
+    task = state.get("task")
+    if phase != "DONE" or task not in (None, "", "none"):
+        raise ReleaseRefusal(
+            "ILLEGAL_PHASE",
+            f"crew terminal release requires local Core phase DONE / task "
+            f"none; live {phase}/{task}")
+    _check_parity(root, version)
+
+    if mode == "no-publish":
+        index = IndexSnapshot((), (), hashlib.sha256(
+            b"no-publish-no-git").hexdigest()[:16])
+        return ReleasePlan(
+            invocation=invocation, op_id="release-" + _hex8(),
+            version=version, branch="", tag=tag, ticket_id=ticket_id,
+            commit_message=f"ship v{version}",
+            scope_paths=tuple(sorted(scope)),
+            metadata_paths=tuple(_metadata_paths(root)),
+            project_identity=project_identity,
+            project_lineage=project_lineage,
+            source_head=source_head, source_tree_fingerprint=fingerprint,
+            source_discovery_model=source_model,
+            state_phase=phase, state_task=task,
+            state_hash=_quick_hash(state_text),
+            board_hash=_quick_hash(board_text),
+            log_hash=log_hash, mode=mode, dry_run=dry_run,
+            remote_classification="never", remote_branch_tip="",
+            remote_refs=(), remote_push_url="", head_relation="local",
+            start_stage=START_PREPARED, content_already_committed=False,
+            already_applied=False, first_publish_wait=False,
+            confirmation="", pre_plan_index=index,
+            crew_epoch=crew_epoch, crew_closure=True,
+            crew_scope=tuple(sorted(scope.items())))
+
+    if not _branch_exists(root, _branch(root)):
+        raise ReleaseRefusal(
+            "STALE_PLAN", f"current branch {_branch(root)!r} does not exist")
+    remote_push_endpoint = _push_endpoint(root)
+    if not remote_push_endpoint:
+        cls, cls_err = REMOTE_ABSENT, "no push endpoint configured"
+        remote_snapshot = RemoteSnapshot(False, "no push endpoint", {})
+    else:
+        remote_snapshot = _remote_snapshot(root, remote_push_endpoint)
+        cls, cls_err = remote_snapshot.classification()
+    if cls == REMOTE_UNAVAILABLE:
+        raise ReleaseRefusal(
+            "RELEASE_FAILED",
+            f"remote origin is UNAVAILABLE -- cannot classify before any "
+            f"external write: {cls_err or 'query failed'}")
+    if cls == REMOTE_AMBIGUOUS:
+        raise ReleaseRefusal(
+            "RELEASE_FAILED",
+            "origin has multiple push destinations; refuse multi-destination "
+            "publication")
+    push_urls = _push_urls(root)
+    if len(push_urls) > 1:
+        raise ReleaseRefusal(
+            "RELEASE_FAILED",
+            "multiple push destinations configured for origin: "
+            + ", ".join(push_urls) + " -- refuse multi-destination publication")
+    if cls not in (REMOTE_ABSENT, REMOTE_EMPTY) and not push_urls:
+        raise ReleaseRefusal(
+            "RELEASE_FAILED",
+            "no push URL configured for origin -- configure the push "
+            "destination before releasing")
+    remote_push_url = _sanitize_push_url(push_urls[0]) if push_urls else ""
+
+    branch = _branch(root)
+    remote_ok, remote_tip = remote_snapshot.branch_tip(branch)
+    if not remote_ok:
+        raise ReleaseRefusal(
+            "RELEASE_FAILED",
+            "remote branch tip query failed at plan time; remote "
+            "classification is not re-checkable -- refuse")
+    tag_local, tag_local_c = _local_tag_commit(root, tag)
+    _tag_remote_ok, tag_remote_c = remote_snapshot.tag_commit(tag)
+    tag_remote_exists = bool(tag_remote_c)
+    remote_refs = tuple(sorted(remote_snapshot.refs.items()))
+    head_relation = _head_relation(root, remote_tip)
+    head = _git(root, "rev-parse", "HEAD").stdout
+
+    if tag_local and tag_local_c != head:
+        raise ReleaseRefusal(
+            "TAG_CONFLICT",
+            f"local tag {tag} exists at {tag_local_c[:12]}, not HEAD "
+            f"{head[:12]}; resolve before releasing")
+    if tag_remote_exists and tag_remote_c != head:
+        raise ReleaseRefusal(
+            "TAG_CONFLICT",
+            f"remote tag {tag} exists at {tag_remote_c[:12]}, not HEAD "
+            f"{head[:12]}; resolve before releasing")
+
+    index = _capture_index_state(root)
+    allowed = set(scope) | set(_metadata_paths(root))
+    foreign = sorted(set(index.paths) - allowed)
+    if foreign:
+        raise ReleaseRefusal(
+            "VALIDATION_FAILED",
+            "foreign pre-existing staged path(s) would enter this release: "
+            + ", ".join(foreign)
+            + " -- stage the release scope explicitly or leave it untouched")
+
+    return ReleasePlan(
+        invocation=invocation, op_id="release-" + _hex8(),
+        version=version, branch=branch, tag=tag, ticket_id=ticket_id,
+        commit_message=f"ship v{version}",
+        scope_paths=tuple(sorted(scope)),
+        metadata_paths=tuple(_metadata_paths(root)),
+        project_identity=project_identity,
+        project_lineage=project_lineage,
+        source_head=source_head, source_tree_fingerprint=fingerprint,
+        source_discovery_model=source_model,
+        state_phase=phase, state_task=task,
+        state_hash=_quick_hash(state_text), board_hash=_quick_hash(board_text),
+        log_hash=log_hash, mode=mode, dry_run=dry_run,
+        remote_classification=cls, remote_branch_tip=remote_tip,
+        remote_refs=remote_refs, remote_push_url=remote_push_url,
+        remote_push_endpoint=remote_push_endpoint,
+        head_relation=head_relation,
+        start_stage=START_PREPARED, content_already_committed=False,
+        already_applied=False,
+        first_publish_wait=cls in (REMOTE_ABSENT, REMOTE_EMPTY),
+        confirmation=_read_confirmation(state),
+        pre_plan_index=index,
+        crew_epoch=crew_epoch, crew_closure=True,
+        crew_scope=tuple(sorted(scope.items())))
 
 
 def execute_release(root: Path, plan: ReleasePlan) -> dict:
@@ -677,31 +1133,73 @@ def _ticket_done(root: Path, ticket_id: str) -> bool:
                 and ticket["checkbox"] == "x")
 
 
+def _committed_release_receipts(root: Path) -> list[dict]:
+    """Every COMMITTED release receipt: the recovery/ops journal records AND
+    the published `.saipen/kitchen/release_receipt.json` closure artifact
+    (T-1003 findings 20/26). The recovery/ops tree is NOT cloned, so the
+    structured published receipt is what a fresh clone sees -- release
+    continuation identity must never depend on LOG prose."""
+    out = []
+    ops = root / ".saipen" / "recovery" / "ops"
+    if ops.is_dir():
+        for receipt in ops.glob("release-*/operation.json"):
+            try:
+                record = json.loads(receipt.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            if record.get("operation") == "release" \
+                    and record.get("status") == "COMMITTED" \
+                    and record.get("release_stage") == "COMMITTED":
+                out.append(record)
+    published = root / ".saipen" / "kitchen" / "release_receipt.json"
+    if published.is_file():
+        try:
+            record = json.loads(published.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            record = None
+        if record and record.get("operation") == "release_receipt":
+            out.append(record)
+    return out
+
+
 def _log_has_ship(root: Path, version: str, ticket_id: str) -> bool:
-    """Committed LOG evidence: a RUN event naming this version + ticket."""
-    from .log import parse_log_line
-    log_path = root / ".saipen" / "LOG.md"
-    text = codec.read_doc(log_path) if log_path.is_file() else ""
-    for line in text.splitlines():
-        parsed = parse_log_line(line)
-        if (parsed and parsed["taxonomy"] == "RUN"
-                and f"ship v{version}" in parsed["text"]
-                and parsed["ticket"] == ticket_id):
-            return True
+    """Committed STRUCTURED release evidence: a COMMITTED release receipt
+    naming this version + ticket, or a committed release RUN line in the
+    complete LOG history."""
+    if any(
+        record.get("version") == version
+        and record.get("ticket_id") == ticket_id
+        for record in _committed_release_receipts(root)):
+        return True
+    from .log import read_history_events
+    for ev in read_history_events(root):
+        if ev.get("ticket") == ticket_id:
+            txt = ev.get("text", "")
+            tax = ev.get("taxonomy", "")
+            if (tax in ("RUN", "OPS", "DEC")
+                    and (version in txt or f"v{version}" in txt)
+                    and ("ship" in txt.lower() or "release" in txt.lower())):
+                return True
     return False
 
 
 def _find_release_ticket(root: Path, version: str) -> str | None:
-    """The ticket that shipped this version, from committed RUN evidence."""
-    from .log import parse_log_line
-    log_path = root / ".saipen" / "LOG.md"
-    text = codec.read_doc(log_path) if log_path.is_file() else ""
-    for line in text.splitlines():
-        parsed = parse_log_line(line)
-        if (parsed and parsed["taxonomy"] == "RUN"
-                and f"ship v{version}" in parsed["text"]
-                and parsed["ticket"] and parsed["ticket"].startswith("T-")):
-            return parsed["ticket"]
+    """The ticket that shipped this version, from COMMITTED release receipts
+    or complete LOG history."""
+    for record in _committed_release_receipts(root):
+        ticket = record.get("ticket_id") or ""
+        if record.get("version") == version and ticket.startswith("T-"):
+            return ticket
+    from .log import read_history_events
+    for ev in reversed(read_history_events(root)):
+        ticket = ev.get("ticket") or ""
+        if ticket.startswith("T-"):
+            txt = ev.get("text", "")
+            tax = ev.get("taxonomy", "")
+            if (tax in ("RUN", "OPS", "DEC")
+                    and (version in txt or f"v{version}" in txt)
+                    and ("ship" in txt.lower() or "release" in txt.lower())):
+                return ticket
     return None
 
 
@@ -734,7 +1232,8 @@ def _load_scope(root: Path, ticket_id: str, head: str | None,
     release commits landed on top). Per-path hashes must match the live
     bytes in both cases.
     """
-    from .paths import project_identity as _project_identity
+    from .paths import (project_identity as _project_identity,
+                        project_lineage_identity)
     path = _scope_path(root, ticket_id)
     if not path.is_file():
         raise ReleaseRefusal(
@@ -758,16 +1257,31 @@ def _load_scope(root: Path, ticket_id: str, head: str | None,
             "RECOVERY_CONFLICT",
             f"release scope record {path} names ticket {data.get('ticket')!r}, "
             f"not {ticket_id}")
-    # A scope record is bound to the worktree that recorded it. For a FRESH
-    # release that binding is a hard boundary (cross-worktree scope is
+    # A scope record is bound to the project that recorded it. For a FRESH
+    # release that binding is a hard boundary (cross-project scope is
     # refused). For a CONTINUATION the record is committed release evidence:
     # a fresh clone of the release branch legitimately carries it, so the
     # ancestry check below -- not the absolute path -- is the binding.
-    if not continuation and data.get("project_identity") != _project_identity(root):
-        raise ReleaseRefusal(
-            "PATH_ESCAPE",
-            "release scope record was created for a different project; "
-            "refuse cross-project scope")
+    #
+    # Binding is by PORTABLE lineage (survives moving the project); moving a
+    # project must not invalidate reviewed evidence. Machine path is NOT
+    # durable semantic evidence (T-1003 carrier-loss wave). Legacy records
+    # created before lineage keep the old runtime-path boundary as an explicit
+    # compatibility rule.
+    if not continuation:
+        record_lineage = data.get("project_lineage")
+        if record_lineage:
+            live_lineage = project_lineage_identity(root)
+            if not live_lineage or live_lineage != record_lineage:
+                raise ReleaseRefusal(
+                    "PATH_ESCAPE",
+                    "release scope record belongs to a different project "
+                    "lineage; refuse cross-project scope")
+        elif data.get("project_identity") != _project_identity(root):
+            raise ReleaseRefusal(
+                "PATH_ESCAPE",
+                "release scope record was created for a different project; "
+                "refuse cross-project scope")
     reviewed_head = data.get("source_head") or ""
     if head is not None:
         if continuation:
@@ -827,11 +1341,22 @@ def _is_ancestor(root: Path, ancestor: str, descendant: str) -> bool:
 
 def _preflight_plan(root: Path, plan: ReleasePlan) -> dict:
     """Verify every plan binding against the live world before ANY write."""
-    from .paths import project_identity as _project_identity
+    from .paths import (project_identity as _project_identity,
+                        project_lineage_identity)
     if _project_identity(root) != plan.project_identity:
         return _release_failure(
             "PREFLIGHT", "plan was built for a different project; refusing "
             "cross-project execution")
+    # The portable lineage must still be live and identical at execute time:
+    # a release whose carrier disappeared between plan and apply cannot bind
+    # its receipt to anything (T-1003 carrier-loss wave).
+    live_lineage = project_lineage_identity(root)
+    if not live_lineage or live_lineage != plan.project_lineage:
+        return _release_failure(
+            "PREFLIGHT",
+            f"live project lineage {live_lineage!r} does not match the "
+            f"plan's {plan.project_lineage!r}; the identity carrier is "
+            "missing/malformed or changed -- refuse the release")
 
     # Re-read + validate canonical state.
     try:
@@ -864,6 +1389,30 @@ def _preflight_plan(root: Path, plan: ReleasePlan) -> dict:
                 "FIRST_PUBLISH_WAIT",
                 f"recorded first-publish confirmation names a different "
                 f"remote ({plan.confirmation!r}); refuse")
+
+    if plan.mode == "no-publish" and plan.crew_closure:
+        # Crew no-publish terminal closure: ZERO git operations, but the
+        # deferred crew scope must still be byte-exact and Core must be at
+        # local DONE / task none.
+        if state.get("phase") != "DONE" or state.get("task") not in (
+                None, "", "none"):
+            return _release_failure(
+                "PREFLIGHT", "crew no-publish closure requires phase DONE / "
+                f"task none; live {state.get('phase')}/{state.get('task')}")
+        for rel, expected in plan.crew_scope:
+            fp = root / rel
+            if expected is None:
+                if fp.exists():
+                    return _release_failure(
+                        "PREFLIGHT", f"crew scope path {rel} reappeared")
+                continue
+            if not fp.is_file():
+                return _release_failure(
+                    "PREFLIGHT", f"crew scope path {rel} missing")
+            if _quick_hash(fp.read_bytes()) != expected:
+                return _release_failure(
+                    "PREFLIGHT", f"crew scope path {rel} changed since defer")
+        return {"ok": True}
 
     if plan.mode == "no-publish":
         # No-publish APPLY performs ZERO git operations: re-verify only the
@@ -942,16 +1491,40 @@ def _preflight_plan(root: Path, plan: ReleasePlan) -> dict:
             "rebuild the plan")
 
     # Reviewed scope bytes must still match the plan (they are inside the
-    # source fingerprint, but name them explicitly for a clear refusal).
-    try:
-        _scope_for(root, plan.ticket_id, plan.source_head,
-                   plan.source_tree_fingerprint,
-                   continuation=(plan.start_stage != START_PREPARED))
-    except ReleaseRefusal as exc:
-        return _release_failure("PREFLIGHT", str(exc))
+    # source fingerprint, but name them explicitly for a clear refusal). A
+    # crew terminal plan binds the derived deferred scope instead.
+    if plan.crew_closure:
+        for rel, expected in plan.crew_scope:
+            fp = root / rel
+            if expected is None:
+                if fp.exists():
+                    return _release_failure(
+                        "PREFLIGHT", f"crew scope path {rel} reappeared")
+                continue
+            if not fp.is_file():
+                return _release_failure(
+                    "PREFLIGHT", f"crew scope path {rel} missing")
+            if _quick_hash(fp.read_bytes()) != expected:
+                return _release_failure(
+                    "PREFLIGHT", f"crew scope path {rel} changed since defer")
+    else:
+        try:
+            _scope_for(root, plan.ticket_id, plan.source_head,
+                       plan.source_tree_fingerprint,
+                       continuation=(plan.start_stage != START_PREPARED))
+        except ReleaseRefusal as exc:
+            return _release_failure("PREFLIGHT", str(exc))
 
-    # Remote re-classification: closed, fail-closed (T-994 / § 12).
-    cls, cls_err = _classify_remote(root)
+    # Remote re-classification: closed, fail-closed (T-994 / § 12). ONE fresh
+    # snapshot at APPLY serves classification + branch tip + tag so the
+    # pre-publication read is a single coherent observation (T-1004 remote).
+    if not plan.remote_push_endpoint:
+        cls, cls_err = REMOTE_ABSENT, "no push endpoint configured"
+        remote_snapshot = RemoteSnapshot(False, "no push endpoint", {})
+    else:
+        remote_snapshot = _remote_snapshot(
+            root, plan.remote_push_endpoint)
+        cls, cls_err = remote_snapshot.classification()
     if cls == REMOTE_UNAVAILABLE:
         return _release_failure(
             "PREFLIGHT", f"remote was queryable at PLAN but is UNAVAILABLE "
@@ -967,7 +1540,7 @@ def _preflight_plan(root: Path, plan: ReleasePlan) -> dict:
             "PREFLIGHT", f"remote classification changed: planned "
             f"{plan.remote_classification}, live {cls}")
 
-    remote_ok, remote_tip = _remote_branch_tip(root, "origin", plan.branch)
+    remote_ok, remote_tip = remote_snapshot.branch_tip(plan.branch)
     if not remote_ok:
         return _release_failure(
             "PREFLIGHT", "remote branch tip query failed at APPLY; refuse "
@@ -986,9 +1559,10 @@ def _preflight_plan(root: Path, plan: ReleasePlan) -> dict:
             f"{plan.remote_push_url!r}, live {push_urls!r}")
 
     # Local + remote tag absence is a hard precondition for a fresh/closure
-    # plan (a present tag would collide with this release's tag).
+    # plan (a present tag would collide with this release's tag). The remote
+    # query targets the captured PUSH endpoint, never the fetch URL.
     tag_local, tag_local_c = _local_tag_commit(root, plan.tag)
-    _tag_remote_ok, tag_remote_c = _remote_tag_commit(root, plan.tag)
+    _tag_remote_ok, tag_remote_c = remote_snapshot.tag_commit(plan.tag)
     tag_remote_exists = bool(tag_remote_c)
     if plan.start_stage in (START_PREPARED, START_CLOSURE):
         if tag_local:
@@ -1196,17 +1770,34 @@ def _git_available(root: Path) -> bool:
 
 
 def _apply_no_publish_locked(root: Path, plan: ReleasePlan) -> dict:
-    from .journal import Journal
+    from .journal import Journal, _drop_settled_staged
     from .operations import record_scope  # noqa: F401
     journal = Journal(root, plan.op_id)
     if journal.exists():
         return _release_failure(
             "RECOVERY_REQUIRED",
             f"release op {plan.op_id} already exists; recover first")
+    # Crew authorization must be proven BEFORE this op becomes pending --
+    # crew_release_context evaluates SC-0..SC-10 and would refuse its own
+    # pending sibling.
+    crew_context = None
+    if plan.crew_epoch:
+        try:
+            from .crew import crew_release_context
+            crew_context = crew_release_context(root)
+        except OSError as exc:
+            return _release_failure("CREW_NOT_READY",
+                                    f"cannot read crew release context: {exc}")
+        if crew_context is None or not crew_context.get("ok"):
+            return _release_failure(
+                "CREW_NOT_READY",
+                (crew_context or {}).get("detail", "") or
+                "crew is not ready for terminal no-publish closure")
     _try_journal(journal, "start", "release", _agent(root),
                  plan.project_identity,
                  hashlib.sha256(str(plan.canonical()).encode()).hexdigest()[:16],
-                 [], {})
+                 [], {},
+                 project_lineage=plan.project_lineage)
     _try_journal(journal, "update", version=plan.version, branch="",
                  tag=plan.tag, ticket_id=plan.ticket_id, mode="no-publish",
                  scope_paths=list(plan.scope_paths),
@@ -1215,12 +1806,23 @@ def _apply_no_publish_locked(root: Path, plan: ReleasePlan) -> dict:
                  remote_push_url="", remote_old_tip="", content_commit="",
                  closure_commit="", remote_tag_sha="", start_stage="PREPARED",
                  plan_canonical=list(plan.canonical()))
+    # Crash immediately after Journal.start: the op exists in PREPARED with
+    # ZERO closure targets -- recovery must ABORT, never COMMITTED
+    # (T-1003 no-publish crash-before-body).
+    _maybe_crash("NO_PUBLISH_STARTED")
+    if crew_context is not None:
+        _try_journal(
+            journal, "update", crew_epoch=crew_context["crew_epoch"],
+            crew_pre_ship_source=crew_context["crew_pre_ship_source"],
+            crew_pre_ship_evidence=crew_context["crew_pre_ship_evidence"],
+            crew_closure=True)
     try:
         _no_publish_body(root, plan, journal)
     except ReleaseRefusal as exc:
         return _release_failure("NO_PUBLISH", exc.detail)
     _try_journal(journal, "mark", "COMMITTED")
     _try_journal(journal, "update", release_stage="COMMITTED")
+    _drop_settled_staged(journal)
     return {
         "ok": True, "code": "NO_PUBLISH_MODE", "stage": "COMMITTED",
         "stages_reached": ["NO_PUBLISH_MODE"], "op_id": plan.op_id,
@@ -1238,6 +1840,10 @@ def _no_publish_body(root: Path, plan: ReleasePlan,
         raise ReleaseRefusal(
             "VALIDATION_FAILED",
             f"no-publish local validation failed: {gate['detail']}")
+    # Crash after the gate but BEFORE any closure target is appended: the op
+    # is still PREPARED with ZERO targets -> recovery ABORTS with zero
+    # canonical mutation (T-1003 no-publish crash-before-body).
+    _maybe_crash("NO_PUBLISH_GATE")
     git_ok = _git_available(root)
     reason = "policy" if git_ok else "no git"
     run_msg = (f"ship v{plan.version} -> skipped publish "
@@ -1269,7 +1875,7 @@ def _apply_release(root: Path, plan: ReleasePlan) -> dict:
 
 
 def _apply_release_locked(root: Path, plan: ReleasePlan) -> dict:
-    from .journal import Journal
+    from .journal import Journal, _drop_settled_staged
     journal = Journal(root, plan.op_id)
     if journal.exists():
         return _release_failure(
@@ -1296,7 +1902,8 @@ def _apply_release_locked(root: Path, plan: ReleasePlan) -> dict:
                      plan.project_identity,
                      hashlib.sha256(
                          str(plan.canonical()).encode()).hexdigest()[:16],
-                     [], {})
+                     [], {},
+                     project_lineage=plan.project_lineage)
         _try_journal(journal, "update",
                      version=plan.version, branch=plan.branch, tag=plan.tag,
                      ticket_id=plan.ticket_id, mode="full",
@@ -1305,8 +1912,11 @@ def _apply_release_locked(root: Path, plan: ReleasePlan) -> dict:
                      source_head=plan.source_head,
                      source_tree_fingerprint=plan.source_tree_fingerprint,
                      remote_push_url=plan.remote_push_url,
+                     remote_push_endpoint=plan.remote_push_endpoint,
                      remote_old_tip=plan.remote_branch_tip,
                      remote_classification=plan.remote_classification,
+                     pre_index_sha256=plan.pre_plan_index.index_sha256,
+                     pre_index_b64=plan.pre_plan_index.index_bytes_b64,
                      content_commit="", closure_commit="", remote_tag_sha="",
                      intended_content_tree="", intended_closure_tree="",
                       start_stage=plan.start_stage,
@@ -1317,6 +1927,10 @@ def _apply_release_locked(root: Path, plan: ReleasePlan) -> dict:
                 journal, "update", crew_epoch=crew_context["crew_epoch"],
                 crew_pre_ship_source=crew_context["crew_pre_ship_source"],
                 crew_pre_ship_evidence=crew_context["crew_pre_ship_evidence"])
+        elif plan.crew_epoch:
+            _try_journal(journal, "update", crew_epoch=plan.crew_epoch,
+                         crew_closure=True,
+                         crew_pre_ship_evidence=plan.crew_scope)
 
         if plan.start_stage == START_TAG:
             # ---- continuation: only the tag is missing (T-994 / § 18 B/C) --
@@ -1337,22 +1951,27 @@ def _apply_release_locked(root: Path, plan: ReleasePlan) -> dict:
                 _create_tag(root, plan, closure_commit)
             _mark_stage(journal, "TAG_CREATED")
             stages.append("TAG_CREATED")
-            _push_tag(root, plan, closure_commit)
+            post_tag_snapshot = _push_tag(root, plan, closure_commit)
             _mark_stage(journal, "TAG_PUBLISHED")
             stages.append("TAG_PUBLISHED")
         else:
             if plan.start_stage == START_PREPARED:
                 # ---- content commit A --------------------------------------
-                commit_result = _stage_and_commit(root, plan)
+                commit_result = _stage_and_commit(root, plan, journal)
                 if not commit_result["ok"]:
-                    _restore_index(root, plan.pre_plan_index)
+                    try:
+                        _restore_index(
+                            root, plan.pre_plan_index,
+                            owned_post_stage_sha=_journal_owned_index_sha(
+                                journal))
+                    except ValueError as exc:
+                        return _release_failure("INDEX_RESTORE", str(exc))
                     return _release_failure(
                         commit_result.get("stage", "CONTENT_COMMIT"),
                         commit_result.get("detail", ""))
                 content_commit = commit_result["commit"]
                 _try_journal(journal, "update",
-                             content_commit=content_commit,
-                             intended_content_tree=commit_result["tree"])
+                             content_commit=content_commit)
                 _mark_stage(journal, "CONTENT_COMMIT_CREATED")
                 stages.append("CONTENT_COMMIT_CREATED")
                 _maybe_crash("CONTENT_COMMIT_CREATED")
@@ -1378,9 +1997,8 @@ def _apply_release_locked(root: Path, plan: ReleasePlan) -> dict:
             _apply_finish_targets(root, journal, plan, digest, run_msg)
             _try_journal(journal, "update", release_stage="CLOSURE_PREPARED_DONE")
             # closure commit B
-            closure_commit, closure_tree = _commit_closure(root, plan)
-            _try_journal(journal, "update", closure_commit=closure_commit,
-                         intended_closure_tree=closure_tree)
+            closure_commit, closure_tree = _commit_closure(root, plan, journal)
+            _try_journal(journal, "update", closure_commit=closure_commit)
             _mark_stage(journal, "CLOSURE_COMMIT_CREATED")
             stages.append("CLOSURE_COMMIT_CREATED")
             _maybe_crash("CLOSURE_COMMIT_CREATED")
@@ -1396,13 +2014,17 @@ def _apply_release_locked(root: Path, plan: ReleasePlan) -> dict:
             _mark_stage(journal, "TAG_CREATED")
             stages.append("TAG_CREATED")
             _maybe_crash("TAG_CREATED")
-            _push_tag(root, plan, closure_commit)
+            post_tag_snapshot = _push_tag(root, plan, closure_commit)
             _mark_stage(journal, "TAG_PUBLISHED")
             stages.append("TAG_PUBLISHED")
             _maybe_crash("TAG_PUBLISHED")
 
         # ---- final verification -----------------------------------------------------
-        verified = _verify_release(root, plan, closure_commit)
+        # The post-tag snapshot is strictly after the final external write,
+        # so it certifies the final branch+tag state with zero extra queries
+        # (T-1004 remote: never reuse a PRE-push snapshot post-push).
+        verified = _verify_release(root, plan, closure_commit,
+                                   post_tag_snapshot)
         if not verified["ok"]:
             return _release_failure("REMOTE_VERIFIED", verified["detail"])
         _mark_stage(journal, "REMOTE_VERIFIED")
@@ -1410,6 +2032,7 @@ def _apply_release_locked(root: Path, plan: ReleasePlan) -> dict:
         _try_journal(journal, "mark", "VERIFIED")
         _try_journal(journal, "mark", "COMMITTED")
         _try_journal(journal, "update", release_stage="COMMITTED")
+        _drop_settled_staged(journal)
     except ReleaseRefusal as exc:
         return _release_failure(_last_stage(stages), exc.detail,
                                 op_id=plan.op_id,
@@ -1431,12 +2054,17 @@ def _last_stage(stages: list[str]) -> str:
 
 _RELEASE_CRASH_MAP = {
     "CONTENT_COMMIT_CREATED": "SAIPEN_CRASH_AFTER_CONTENT_COMMIT",
+    "CONTENT_STAGED": "SAIPEN_CRASH_AFTER_CONTENT_STAGED",
+    "CONTENT_TREE_RECORDED": "SAIPEN_CRASH_AFTER_CONTENT_TREE",
     "CONTENT_PUBLISHED": "SAIPEN_CRASH_AFTER_CONTENT_PUBLISH",
     "CLOSURE_PREPARED": "SAIPEN_CRASH_AFTER_CLOSURE_PREPARE",
     "CLOSURE_COMMIT_CREATED": "SAIPEN_CRASH_AFTER_CLOSURE_COMMIT",
+    "CLOSURE_TREE_RECORDED": "SAIPEN_CRASH_AFTER_CLOSURE_TREE",
     "CLOSURE_PUBLISHED": "SAIPEN_CRASH_AFTER_CLOSURE_PUBLISH",
     "TAG_CREATED": "SAIPEN_CRASH_AFTER_TAG_CREATE",
     "TAG_PUBLISHED": "SAIPEN_CRASH_AFTER_TAG_PUSH",
+    "NO_PUBLISH_STARTED": "SAIPEN_CRASH_AFTER_NO_PUBLISH_START",
+    "NO_PUBLISH_GATE": "SAIPEN_CRASH_AFTER_NO_PUBLISH_GATE",
 }
 
 
@@ -1515,7 +2143,28 @@ def _verify_index_after_gate(root: Path, plan: ReleasePlan) -> dict:
     """The index must hold EXACTLY the pre-plan index plus the release scope:
     the gate must not have pulled in any path this release does not own."""
     index = _capture_index_state(root)
-    expected = set(plan.pre_plan_index.paths) | set(plan.release_paths)
+
+    def _clean_tracked(path: str) -> bool:
+        """Already part of the committed tree in exactly the bytes releasing:
+        no unstaged, no staged, and tracked. Such a path is in the index
+        without ever appearing in `git diff --cached`, so it can neither be
+        missing nor drift (T-1003 -- IDENTITY.md joined the release surface)."""
+        return (not _git(root, "diff", "--name-only", "--", path)
+                .stdout.strip()
+                and not _git(root, "diff", "--cached", "--name-only", "--",
+                             path).stdout.strip()
+                and bool(_git(root, "ls-files", "--", path).stdout.strip()))
+
+    pre_plan = set(plan.pre_plan_index.paths)
+    release = set(plan.release_paths)
+    # Foreign pre-plan staged paths must survive untouched; release-owned
+    # paths must be in the index -- as staged changes, or already committed
+    # clean. A release path that was staged at PLAN time and got normalized
+    # by the release's own `git add` (an untracked carrier re-tracked with
+    # identical bytes) is owned work, not drift: it never needs to stay in
+    # the staged diff (T-1003).
+    expected = (pre_plan - release) | {
+        p for p in release if not _clean_tracked(p)}
     actual = set(index.paths)
     if actual != expected:
         extra = sorted(actual - expected)
@@ -1529,17 +2178,39 @@ def _verify_index_after_gate(root: Path, plan: ReleasePlan) -> dict:
     return {"ok": True}
 
 
-def _stage_and_commit(root: Path, plan: ReleasePlan) -> dict:
+def _stage_and_commit(root: Path, plan: ReleasePlan, journal) -> dict:
     """Stage, gate, verify, commit -- the local content commit A.
 
-    The intended tree is captured with `git write-tree` right before the
-    commit, and after the commit HEAD^{tree} MUST equal it. A hook or a
-    concurrent git process that changes the selected tree is a refusal with
-    zero publication, never "the reviewed release".
+    The intended tree is captured with `git write-tree` and PERSISTED to the
+    release journal BEFORE `git commit` runs: arbitrary process death after
+    the commit succeeds but before the commit-SHA receipt lands must still
+    let recovery identify the just-created intended commit from the
+    pre-recorded tree (an empty `content_commit` plus an unrecorded intended
+    tree is indistinguishable from an unrelated HEAD). After the commit,
+    HEAD^{tree} MUST equal the recorded intended tree. A hook or a concurrent
+    git process that changes the selected tree is a refusal with zero
+    publication, never "the reviewed release".
     """
     stage_result = _stage_release_content(root, plan)
     if not stage_result["ok"]:
         return stage_result
+    # Capture the EXACT OWNED post-stage index SHA and journal it BEFORE the
+    # CONTENT_STAGED crash point (hostile-regression): rollback can then
+    # prove the live index is exactly the index THIS release staged -- and
+    # refuse when it is not, so foreign staged changes always survive. The
+    # journal write is atomic and durable before any crash can fire.
+    try:
+        owned_post_stage_sha, _ = _exact_index_bytes(root)
+    except ValueError as exc:
+        return {"ok": False, "stage": "INDEX_SNAPSHOT",
+                "detail": str(exc)}
+    _try_journal(journal, "update",
+                 owned_post_stage_index_sha256=owned_post_stage_sha)
+    # Kill right after the release's own `git add` but before the content
+    # commit: recovery must restore the EXACT pre-plan index snapshot from
+    # journal evidence, never leave release staging behind (T-1003 exact
+    # index rollback).
+    _maybe_crash("CONTENT_STAGED")
     gate_result = _run_gate(root, "ship")
     if not gate_result["ok"]:
         return {"ok": False, "stage": "SHIP_GATE",
@@ -1555,6 +2226,9 @@ def _stage_and_commit(root: Path, plan: ReleasePlan) -> dict:
     if not intended_tree.ok:
         return {"ok": False, "stage": "COMMIT",
                 "detail": f"write-tree failed: {intended_tree.stderr}"}
+    # Persist the intended tree BEFORE the commit so a kill right after the
+    # commit can never leave recovery unable to name what was just created.
+    _try_journal(journal, "update", intended_content_tree=intended_tree.stdout)
     commit = _git(root, "commit", "-m", plan.commit_message)
     if not commit.ok:
         return {"ok": False, "stage": "COMMIT",
@@ -1568,20 +2242,33 @@ def _stage_and_commit(root: Path, plan: ReleasePlan) -> dict:
                     f"!= intended tree {intended_tree.stdout[:12]} -- a hook "
                     "or concurrent git changed the selected tree; NO push "
                     "follows")}
+    # Kill-after-commit window: the commit exists, the intended tree is
+    # recorded, but the commit SHA has NOT been written to the journal yet.
+    # Recovery must identify this commit from the pre-recorded tree and
+    # continue idempotently (no duplicate commit).
+    _maybe_crash("CONTENT_TREE_RECORDED")
     return {"ok": True, "commit": _git(root, "rev-parse", "HEAD").stdout,
             "tree": intended_tree.stdout}
 
 
 def _publish_branch(root: Path, plan: ReleasePlan, commit: str,
-                    journal, stage: str) -> None:
+                    journal, stage: str) -> RemoteSnapshot:
     """Push the branch and REQUIRE the exact expected AFTER (query must
-    succeed; an empty/missing query result is a refusal, never a pass)."""
+    succeed; an empty/missing query result is a refusal, never a pass).
+
+    Verification uses a FRESH snapshot captured strictly after the push -- a
+    pre-push snapshot can never certify a post-push state (T-1004 remote).
+    The returned snapshot is the post-branch-push observation."""
     result = _git(root, "push", "origin", plan.branch)
     if not result.ok:
         raise ReleaseRefusal(
             "RELEASE_FAILED", f"branch push failed: "
             f"{result.stderr or result.stdout}")
-    remote_ok, tip = _remote_branch_tip(root, "origin", plan.branch)
+    # Verification observes the PUSH endpoint the push just wrote, never the
+    # unrelated fetch URL (T-1003 publication-remote split).
+    post_snapshot = _remote_snapshot(
+        root, plan.remote_push_endpoint or "origin")
+    remote_ok, tip = post_snapshot.branch_tip(plan.branch)
     if not remote_ok:
         raise ReleaseRefusal(
             "RELEASE_FAILED",
@@ -1594,20 +2281,29 @@ def _publish_branch(root: Path, plan: ReleasePlan, commit: str,
             f"{commit[:12]}; remote verification FAILED")
     _try_journal(journal, "update", remote_old_tip=tip)
     _mark_stage(journal, stage)
+    return post_snapshot
 
 
 def _finish_targets(root: Path, plan: ReleasePlan, digest: str,
-                    run_msg: str) -> list[dict]:
+                    run_msg: str, crew: bool = False) -> list[dict]:
     """Build the ONE atomic closure plan: RUN event + finish event + BOARD +
     STATE + digest, all through the canonical SAIOPS planner. The journal
-    carries a SINGLE LOG target whose after-bytes recovery can verify."""
+    carries a SINGLE LOG target whose after-bytes recovery can verify. A
+    terminal CREW release (no ## DOING ticket) closes through
+    _plan_crew_closure instead of the ordinary ticket closure."""
     import datetime
     now = datetime.datetime.now(datetime.timezone.utc).strftime(
         "%d.%m.%y %H:%M")
     utc = datetime.datetime.now(datetime.timezone.utc).strftime(
         "%Y-%m-%dT%H:%M:%SZ")
-    finish = _plan_finish_ticket(root, plan.ticket_id, _agent(root), now,
-                                 utc, digest_text=digest, prefix_run=run_msg)
+    from .operations import _plan_crew_closure
+    if crew:
+        finish = _plan_crew_closure(
+            root, _agent(root), now, utc, digest_text=digest,
+            prefix_run=run_msg)
+    else:
+        finish = _plan_finish_ticket(root, plan.ticket_id, _agent(root), now,
+                                     utc, digest_text=digest, prefix_run=run_msg)
     if not hasattr(finish, "targets"):
         raise ReleaseRefusal(
             "RELEASE_FAILED",
@@ -1621,13 +2317,61 @@ def _finish_targets(root: Path, plan: ReleasePlan, digest: str,
 
 def _apply_finish_targets(root: Path, journal, plan: ReleasePlan,
                           digest: str, run_msg: str) -> None:
-    _apply_closure_targets(root, journal,
-                           _finish_targets(root, plan, digest, run_msg))
+    targets = _finish_targets(root, plan, digest, run_msg,
+                              crew=plan.crew_closure)
+    receipt_target = _release_receipt_target(root, plan)
+    if receipt_target is not None:
+        targets.append(receipt_target)
+    _apply_closure_targets(root, journal, targets)
+
+
+def _release_receipt_target(root: Path, plan: ReleasePlan) -> dict | None:
+    """The PUBLISHED structured release receipt target (items 20/26): a
+    clone-visible closure artifact naming version, tag, ticket, source and
+    mode so release continuation identity survives a fresh clone without ever
+    reading LOG prose."""
+    import datetime
+    try:
+        doc = codec.read_document(root / ".saipen" / "kitchen"
+                                  / "release_receipt.json")
+    except OSError:
+        return None
+    now = datetime.datetime.now(datetime.timezone.utc).strftime(
+        "%Y-%m-%dT%H:%M:%SZ")
+    from .paths import project_lineage_identity
+    content = json.dumps({
+        "schema_version": 1,
+        "operation": "release_receipt",
+        "op_id": plan.op_id,
+        "version": plan.version,
+        "tag": plan.tag,
+        "ticket_id": plan.ticket_id,
+        "source_head": plan.source_head,
+        "mode": plan.mode,
+        "crew_epoch": plan.crew_epoch,
+        "project_lineage": project_lineage_identity(root),
+        "recorded_at": now,
+    }, indent=2) + "\n"
+    path = root / ".saipen" / "kitchen" / "release_receipt.json"
+    return {
+        "path": ".saipen/kitchen/release_receipt.json", "role": "report",
+        "content": doc.encode(content),
+        "before_hash": doc.raw_hash if path.is_file() else "",
+        "after_hash": _quick_hash(doc.encode(content)),
+    }
 
 
 def _apply_closure_targets(root: Path, journal, targets: list[dict]) -> None:
     """Append + apply closure targets THROUGH the release op journal."""
-    from .journal import _atomic_write
+    from .journal import _atomic_write, owned_target_path
+    from .safeid import InvalidIdError
+    try:
+        for target in targets:
+            owned_target_path(root, target["path"])
+    except InvalidIdError as exc:
+        raise ReleaseRefusal(
+            "VALIDATION_FAILED",
+            f"closure target path escapes the project: {exc}")
     _try_journal(journal, "append_targets", targets)
     record = journal.read()
     start_index = len(record.get("targets", [])) - len(targets)
@@ -1663,9 +2407,13 @@ def _mark_target(journal, index: int) -> None:
     _try_journal(journal, "mark", "APPLYING", target_index=index)
 
 
-def _commit_closure(root: Path, plan: ReleasePlan) -> tuple[str, str]:
+def _commit_closure(root: Path, plan: ReleasePlan, journal) -> tuple[str, str]:
     """Stage ONLY the canonical closure files (+ sealed LOG segments),
-    write-tree, commit B."""
+    write-tree, commit B.
+
+    The intended closure tree is persisted to the journal BEFORE the commit
+    (kill-after-commit must let recovery identify commit B from the
+    pre-recorded tree), and after the commit HEAD^{tree} MUST equal it."""
     add = _git(root, "add", "--", *_closure_stage_paths(root), literal=True)
     if not add.ok:
         raise ReleaseRefusal("RELEASE_FAILED",
@@ -1675,6 +2423,7 @@ def _commit_closure(root: Path, plan: ReleasePlan) -> tuple[str, str]:
     if not tree.ok:
         raise ReleaseRefusal("RELEASE_FAILED",
                              f"closure write-tree failed: {tree.stderr}")
+    _try_journal(journal, "update", intended_closure_tree=tree.stdout)
     commit = _git(root, "commit", "-m",
                   f"closure v{plan.version}: ticket {plan.ticket_id} DONE")
     if not commit.ok:
@@ -1686,6 +2435,9 @@ def _commit_closure(root: Path, plan: ReleasePlan) -> tuple[str, str]:
         raise ReleaseRefusal(
             "TREE_MISMATCH",
             "closure committed tree != intended tree; NO push follows")
+    # Kill-after-commit window for closure B: same pre-recorded-tree contract
+    # as content A -- recovery continues from the recorded intended tree.
+    _maybe_crash("CLOSURE_TREE_RECORDED")
     return _git(root, "rev-parse", "HEAD").stdout, tree.stdout
 
 
@@ -1704,14 +2456,22 @@ def _create_tag(root: Path, plan: ReleasePlan, target: str) -> None:
             f"{target[:12]}")
 
 
-def _push_tag(root: Path, plan: ReleasePlan, target: str) -> None:
+def _push_tag(root: Path, plan: ReleasePlan, target: str) -> RemoteSnapshot:
+    """Push the tag and verify from a FRESH post-push snapshot."""
     result = _git(root, "push", "origin",
                   f"refs/tags/{plan.tag}:refs/tags/{plan.tag}")
     if not result.ok:
         raise ReleaseRefusal("RELEASE_FAILED",
                              f"tag push failed: "
                              f"{result.stderr or result.stdout}")
-    _query_ok, remote_sha = _remote_tag_commit(root, plan.tag)
+    post_snapshot = _remote_snapshot(
+        root, plan.remote_push_endpoint or "origin")
+    _query_ok, remote_sha = post_snapshot.tag_commit(plan.tag)
+    if not _query_ok:
+        raise ReleaseRefusal(
+            "RELEASE_FAILED",
+            f"remote tag {plan.tag} query FAILED after push -- no evidence, "
+            "never PASS")
     if not remote_sha:
         raise ReleaseRefusal(
             "RELEASE_FAILED",
@@ -1722,19 +2482,29 @@ def _push_tag(root: Path, plan: ReleasePlan, target: str) -> None:
             "RELEASE_FAILED",
             f"remote tag {plan.tag} points at {remote_sha[:12]}, expected "
             f"{target[:12]}")
+    return post_snapshot
 
 
-def _verify_release(root: Path, plan: ReleasePlan, closure_commit: str) -> dict:
+def _verify_release(root: Path, plan: ReleasePlan, closure_commit: str,
+                    post_snapshot: RemoteSnapshot | None = None) -> dict:
     """Every VERIFIED stage requires the query to succeed AND exact equality
-    with a non-empty witness."""
-    remote_ok, tip = _remote_branch_tip(root, "origin", plan.branch)
+    with a non-empty witness. All queries target the captured PUSH endpoint
+    (the destination publication actually writes), never the fetch URL.
+
+    ``post_snapshot`` is the fresh snapshot captured AFTER the final external
+    write (the tag push); when supplied it certifies both branch and tag in
+    one already-strictly-after-the-write observation. Without it (standalone
+    callers / recovery) a fresh snapshot is captured here."""
+    endpoint = plan.remote_push_endpoint or "origin"
+    snapshot = post_snapshot or _remote_snapshot(root, endpoint)
+    remote_ok, tip = snapshot.branch_tip(plan.branch)
     if not remote_ok or not tip:
         return {"ok": False, "detail": "remote branch tip query failed or "
                 "empty at final verification"}
     if tip != closure_commit:
         return {"ok": False, "detail": f"remote branch tip {tip[:12]} != "
                 f"closure {closure_commit[:12]}"}
-    tag_ok, tag_sha = _remote_tag_commit(root, plan.tag)
+    tag_ok, tag_sha = snapshot.tag_commit(plan.tag)
     if not tag_ok or not tag_sha:
         return {"ok": False, "detail": "remote tag query failed or empty at "
                 "final verification"}
@@ -1749,51 +2519,123 @@ def _verify_release(root: Path, plan: ReleasePlan, closure_commit: str) -> dict:
 # ---------------------------------------------------------------------------
 
 
-def _classify_remote(root: Path) -> tuple[str, str]:
-    """Classify origin into the closed set ABSENT/EMPTY/ESTABLISHED/
-    UNAVAILABLE/AMBIGUOUS. UNAVAILABLE != EMPTY and UNKNOWN != FIRST_PUBLISH."""
-    origin = _git(root, "remote", "get-url", "origin")
-    if not origin.ok or not origin.stdout:
-        return REMOTE_ABSENT, "no origin configured"
-    query = _git(root, "ls-remote", "origin")
-    if query.ok:
-        if not query.stdout.strip():
+@dataclass(frozen=True)
+class RemoteSnapshot:
+    """ONE canonical ls-remote capture of the publication endpoint.
+
+    PLAN performs exactly one ls-remote and derives classification, branch
+    tip, peeled tag and the full ref set from this single query; after EACH
+    external push a FRESH snapshot is captured and used to verify that push.
+    A snapshot is never reused across pushes: the post-push snapshot must be
+    strictly newer than the external write it certifies (T-1004 remote).
+    """
+    query_ok: bool
+    stderr: str
+    refs: dict[str, str]  # refname -> sha, including ^{} peeled tag entries
+
+    def classification(self) -> tuple[str, str]:
+        """Closed classification over this capture (ABSENT/EMPTY/ESTABLISHED/
+        UNAVAILABLE/AMBIGUOUS). UNAVAILABLE != EMPTY and UNKNOWN !=
+        FIRST_PUBLISH; the same endpoint publication writes is the endpoint
+        this capture observed."""
+        if not self.query_ok:
+            err = self.stderr.lower()
+            if ("unable to access" in err or "authentication" in err
+                    or "permission denied" in err
+                    or "network is unreachable" in err
+                    or "couldn't resolve" in err or "could not resolve" in err
+                    or "connection" in err or "timed out" in err
+                    or "ssl" in err or "couldn't connect" in err):
+                return REMOTE_UNAVAILABLE, self.stderr
+            if ("does not appear" in err
+                    or "could not read from remote" in err
+                    or "repository not found" in err or "not found" in err):
+                return REMOTE_ABSENT, self.stderr
+            return REMOTE_UNAVAILABLE, self.stderr
+        if not self.refs:
             return REMOTE_EMPTY, ""
         return REMOTE_ESTABLISHED, ""
-    err = query.stderr.lower()
-    if ("unable to access" in err or "authentication" in err
-            or "permission denied" in err or "network is unreachable" in err
-            or "couldn't resolve" in err or "could not resolve" in err
-            or "connection" in err or "timed out" in err
-            or "ssl" in err or "couldn't connect" in err):
-        return REMOTE_UNAVAILABLE, query.stderr
-    if ("does not appear" in err or "could not read from remote" in err
-            or "repository not found" in err or "not found" in err):
-        return REMOTE_ABSENT, query.stderr
-    return REMOTE_UNAVAILABLE, query.stderr
+
+    def branch_tip(self, branch: str) -> tuple[bool, str]:
+        """(query_ok, tip_or_empty). Empty tip = query ok but branch absent."""
+        if not self.query_ok:
+            return False, ""
+        return True, self.refs.get(f"refs/heads/{branch}", "")
+
+    def tag_commit(self, tag: str) -> tuple[bool, str]:
+        """(query_ok, tag_commit_or_empty). Empty = query ok but tag absent.
+        Prefers the peeled ^{} entry (annotated tags), falling back to the
+        raw tag ref for lightweight tags."""
+        if not self.query_ok:
+            return False, ""
+        peeled = self.refs.get(f"refs/tags/{tag}^{{}}")
+        if peeled:
+            return True, peeled
+        return True, self.refs.get(f"refs/tags/{tag}", "")
+
+
+def _remote_snapshot(root: Path, endpoint: str) -> RemoteSnapshot:
+    """ONE ls-remote against the publication endpoint."""
+    result = _git(root, "ls-remote", endpoint)
+    refs: dict[str, str] = {}
+    if result.ok:
+        for line in result.stdout.splitlines():
+            parts = line.split()
+            if len(parts) >= 2:
+                refs[parts[1]] = parts[0]
+    return RemoteSnapshot(result.ok, result.stderr, refs)
+
+
+def _push_endpoint(root: Path) -> str:
+    """The ONE live raw push endpoint publication actually uses.
+
+    `git remote get-url --push origin` returns the configured pushurl, or the
+    fetch URL when no pushurl is set -- exactly the destination `git push
+    origin` will hit. Publication must query THIS endpoint for every remote
+    fact (branch tip, tag, verification), never the fetch URL: with a split
+    fetch=A / pushurl=B setup, reading A while writing B both fails the
+    post-push proof and, worse, can verify a DIFFERENT repository as if it
+    were the published one (T-1003 publication-remote split)."""
+    result = _git(root, "remote", "get-url", "--push", "origin")
+    if not result.ok or not result.stdout:
+        return ""
+    return result.stdout.splitlines()[0]
+
+
+def _classify_remote(root: Path) -> tuple[str, str]:
+    """Classify the PUBLICATION endpoint (push destination) into the closed
+    set ABSENT/EMPTY/ESTABLISHED/UNAVAILABLE/AMBIGUOUS. UNAVAILABLE != EMPTY
+    and UNKNOWN != FIRST_PUBLISH. Classification and every later verification
+    must observe the same endpoint publication actually writes (T-1003
+    publication-remote split: a fetch URL is not evidence about the push
+    destination).
+
+    Kept as a thin ONE-snapshot wrapper for callers that only need the
+    classification; plan/apply/recovery capture a RemoteSnapshot once and
+    derive classification + branch tip + tag + refs from that single query.
+    """
+    origin = _git(root, "remote", "get-url", "--push", "origin")
+    if not origin.ok or not origin.stdout:
+        return REMOTE_ABSENT, "no push endpoint configured"
+    return _remote_snapshot(root, origin.stdout.splitlines()[0]).classification()
 
 
 def _remote_branch_tip(root: Path, remote: str, branch: str) -> tuple[bool, str]:
-    """(query_ok, tip_or_empty). tip empty means query ok but branch absent."""
-    result = _git(root, "ls-remote", "--heads", remote, branch)
-    if not result.ok:
-        return False, ""
-    for line in result.stdout.splitlines():
-        parts = line.split()
-        if len(parts) >= 2:
-            return True, parts[0]
-    return True, ""
+    """(query_ok, tip_or_empty). tip empty means query ok but branch absent.
+    `remote` is the publication endpoint (a push URL or remote name) -- every
+    caller passes the captured push endpoint so verification observes the
+    same destination publication writes. Thin wrapper over one ls-remote
+    capture for the few standalone callers; hot paths pass a RemoteSnapshot.
+    """
+    return _remote_snapshot(root, remote).branch_tip(branch)
 
 
-def _remote_tag_commit(root: Path, tag: str) -> tuple[bool, str]:
-    """(query_ok, tag_commit_or_empty). Empty means query ok but tag absent."""
-    result = _git(root, "ls-remote", "origin", f"refs/tags/{tag}^{{}}")
-    if not result.ok:
-        return False, ""
-    line = result.stdout.strip()
-    if not line:
-        return True, ""
-    return True, line.split()[0]
+def _remote_tag_commit(root: Path, remote: str, tag: str) -> tuple[bool, str]:
+    """(query_ok, tag_commit_or_empty). Empty means query ok but tag absent.
+    `remote` is the publication endpoint (push URL or remote name) -- the tag
+    must be classified against the same destination the push writes. Thin
+    wrapper over one ls-remote capture; hot paths pass a RemoteSnapshot."""
+    return _remote_snapshot(root, remote).tag_commit(tag)
 
 
 def _local_tag_commit(root: Path, tag: str) -> tuple[bool, str]:
@@ -1804,14 +2646,7 @@ def _local_tag_commit(root: Path, tag: str) -> tuple[bool, str]:
 
 
 def _snapshot_remote_refs(root: Path, remote: str) -> dict:
-    result = _git(root, "ls-remote", remote)
-    refs: dict[str, str] = {}
-    if result.ok:
-        for line in result.stdout.splitlines():
-            parts = line.split()
-            if len(parts) >= 2:
-                refs[parts[1]] = parts[0]
-    return refs
+    return _remote_snapshot(root, remote).refs
 
 
 def _push_urls(root: Path) -> list[str]:
@@ -1859,7 +2694,8 @@ def _git(root: Path, *args: str, literal: bool = False) -> GitResult:
         env = {**os.environ, "GIT_LITERAL_PATHSPECS": "1"}
     result = subprocess.run(
         ["git", "-C", str(root), *args],
-        capture_output=True, text=True, errors="replace", env=env)
+        capture_output=True, text=True, encoding="utf-8",
+        errors="replace", env=env)
     return GitResult(result.returncode, result.stdout.strip(),
                      result.stderr.strip())
 
@@ -1941,7 +2777,7 @@ def _hash_file(path: Path) -> str:
 
 def _hex8() -> str:
     import uuid
-    return uuid.uuid4().hex[:8]
+    return uuid.uuid4().hex
 
 
 def _format_gate_failure(stdout: str, stderr: str) -> str:
@@ -1974,6 +2810,11 @@ def _check_parity(root: Path, version: str) -> None:
         fp = root / rel
         if not fp.is_file():
             problems.append(f"{rel} is missing")
+            continue
+        if rel == ".saipen/IDENTITY.md":
+            # The portable identity carrier is part of the release surface
+            # (it must be tracked + clone-stable) but carries no version
+            # badge; its syntax is validated separately.
             continue
         if Path(rel).name == "CHANGELOG.md":
             text = fp.read_text(encoding="utf-8-sig")
@@ -2035,8 +2876,8 @@ def _read_board(root: Path) -> tuple[str, dict]:
 
 
 def _log_hash(root: Path) -> str:
-    log_path = root / ".saipen" / "LOG.md"
-    return _quick_hash(codec.read_doc(log_path)) if log_path.is_file() else ""
+    from .log import history_hash
+    return history_hash(root)
 
 
 def _find_ticket(board: dict, task: str | None) -> dict | None:
@@ -2075,15 +2916,35 @@ def _release_digest(root: Path, plan: ReleasePlan) -> str:
 
 
 def recover_release_op(project_root: Path | str, op_id: str) -> dict:
-    """Recover a release operation. Never blindly redoes an external side
-    effect: each git fact is classified expected-BEFORE / expected-AFTER /
-    THIRD STATE (CONFLICT) against the journal's recorded expectations.
+    """Recover a release operation under the canonical project writer lock.
+
+    Release recovery is a mutating writer (it replays closure targets and can
+    create commits/pushes/tags), so the public entry acquires the lock; the
+    locked body is `_recover_release_op_locked`, which journal recovery (also
+    lock-held) calls directly without re-acquiring (T-1003 recovery
+    serialization). Never blindly redoes an external side effect: each git
+    fact is classified expected-BEFORE / expected-AFTER / THIRD STATE
+    (CONFLICT) against the journal's recorded expectations.
 
     Unresolvable remote state is UNKNOWN and stops recovery as CONFLICT --
     UNKNOWN is never treated as PASS.
     """
-    from .journal import Journal, _atomic_write, _hash_file as _jh  # noqa: F401
     root = Path(project_root)
+    from .lock import project_writer_lock as _recover_lock
+    try:
+        with _recover_lock(root):
+            return _recover_release_op_locked(root, op_id)
+    except PermissionError:
+        return {"ok": False, "code": "WRITER_BUSY", "op_id": op_id,
+                "detail": "another live writer holds the project lock; "
+                          "retry after it releases"}
+
+
+def _recover_release_op_locked(root: Path, op_id: str) -> dict:
+    """The lock-held body of release recovery. Called only under the project
+    writer lock (public `recover_release_op` or journal recovery dispatch)."""
+    from .journal import (Journal, _atomic_write, _drop_settled_staged,
+                          _hash_file as _jh)  # noqa: F401
     journal = Journal(root, op_id)
     if not journal.exists():
         return {"ok": False, "code": "TICKET_NOT_FOUND", "op_id": op_id}
@@ -2129,9 +2990,75 @@ def _try_recovery_journal(journal, method: str, *args, **kwargs) -> None:
         getattr(journal, method)(*args, **kwargs)
 
 
+def _restore_index_from_record(root: Path, record: dict) -> None:
+    """Restore the exact pre-plan index from release journal evidence,
+    OWNER-SAFE (hostile-regression).
+
+    The journal carries the base64 index bytes captured at plan time (before
+    any index mutation) and -- since the CONTENT_STAGED fix -- the owned
+    post-stage index SHA captured right after the release's own staging. The
+    live index is restored ONLY when it is provably the release's own
+    staging: already exactly pre-plan (no-op) or matching the journaled
+    owned post-stage SHA. Anything else (foreign staged changes) is a
+    ValueError refusal that preserves the live index. A foreign index.lock is
+    a hard refusal (WRITER_BUSY). Zero bytes (git-less no-publish) is a
+    no-op."""
+    b64 = record.get("pre_index_b64") or ""
+    if not b64:
+        return
+    try:
+        pre_sha = hashlib.sha256(
+            base64.b64decode(b64.encode("ascii"))).hexdigest()
+    except (ValueError, TypeError) as exc:
+        raise ValueError(f"journal pre-index bytes are not valid base64: {exc}")
+    loc = _git(root, "rev-parse", "--git-path", "index")
+    if not loc.ok or not loc.stdout:
+        raise ValueError(
+            "cannot locate the git index file; index restoration refused")
+    index_path = Path(loc.stdout)
+    if not index_path.is_absolute():
+        index_path = root / index_path
+    index_path = index_path.resolve()
+    lock_path = index_path.with_name(index_path.name + ".lock")
+    if lock_path.exists():
+        raise ValueError(
+            "index.lock exists (concurrent writer or crashed git); refusing "
+            "to restore over a locked index -- resolve the lock explicitly "
+            "(WRITER_BUSY)")
+    try:
+        live_sha, _ = _exact_index_bytes(root)
+    except ValueError as exc:
+        raise ValueError(f"cannot prove the live index identity: {exc}")
+    if live_sha == pre_sha:
+        return
+    owned = record.get("owned_post_stage_index_sha256") or ""
+    if isinstance(owned, str) and owned and live_sha == owned:
+        _restore_index_bytes(root, b64)
+        return
+    raise ValueError(
+        "live index is neither the pre-plan index nor the journaled owned "
+        "post-stage index; foreign staged changes would be destroyed -- "
+        "preserve the live index and resolve explicitly "
+        "(CONFLICT/RECOVERY_REQUIRED)")
+
+
 def _recover_no_publish(root: Path, journal, record: dict) -> dict:
     """no-publish recovery: replay any unapplied closure targets, verify,
-    COMMITTED. No git facts exist to classify."""
+    COMMITTED. No git facts exist to classify.
+
+    A PREPARED no-publish op with NO applied closure target never began: the
+    journal was created (Journal.start) and possibly the local gate ran, but
+    no canonical byte changed. Marking it COMMITTED would fabricate a
+    successful release completion out of a crash-before-body -- the journal's
+    own rule for a PREPARED op with nothing applied is ABORTED, and the
+    no-publish path must mirror it (T-1003 release recovery)."""
+    targets = record.get("targets", [])
+    if not any(t.get("applied") for t in targets):
+        _try_recovery_journal(journal, "mark", "ABORTED")
+        _try_recovery_journal(journal, "update", release_stage="ABORTED")
+        return {"ok": True, "code": "ABORTED", "op_id": record["op_id"],
+                "detail": "no-publish release never began (no closure "
+                          "target applied); aborted"}
     replay_error = _replay_targets(root, journal, record)
     if replay_error:
         _try_recovery_journal(journal, "mark", "CONFLICT")
@@ -2140,6 +3067,7 @@ def _recover_no_publish(root: Path, journal, record: dict) -> dict:
     _try_recovery_journal(journal, "mark", "VERIFIED")
     _try_recovery_journal(journal, "mark", "COMMITTED")
     _try_recovery_journal(journal, "update", release_stage="COMMITTED")
+    _drop_settled_staged(journal)
     return {"ok": True, "code": "COMMITTED", "op_id": record["op_id"],
             "changed_files": [t["path"]
                               for t in record.get("targets", [])],
@@ -2149,8 +3077,14 @@ def _recover_no_publish(root: Path, journal, record: dict) -> dict:
 def _replay_targets(root: Path, journal, record: dict) -> str | None:
     """Replay unapplied journal targets with before/after classification.
     Returns the first conflict detail or None when every target is settled."""
-    from .journal import _atomic_write
+    from .journal import _atomic_write, owned_target_path
+    from .safeid import InvalidIdError
     targets = record.get("targets", [])
+    try:
+        for target in targets:
+            owned_target_path(root, target["path"])
+    except InvalidIdError as exc:
+        return (f"journal target path escapes the project: {exc}")
     for index, target in enumerate(targets):
         live = _hash_file(root / target["path"])
         if target.get("applied"):
@@ -2190,6 +3124,37 @@ def _recover_release_git(root: Path, journal, record: dict) -> dict:
 
     head = _git(root, "rev-parse", "HEAD").stdout
 
+    # ---- 0. read-only recovery preflight: re-bind branch + push endpoint --
+    # Before ANY local git mutation (commit/stage/tag), the live world must
+    # still be the world the crash-left record decided against. (a) When a
+    # commit could still be created, the current branch MUST equal the
+    # recorded branch -- recovery creating the closure on a different branch
+    # leaves the recorded branch unpublished and silently mints commits on
+    # the wrong ref. (b) The live single push endpoint identity MUST equal
+    # the recorded destination -- changing origin.pushurl after a crash must
+    # not redirect resumed publication into a different repository. Both are
+    # read-only checks; a mismatch is CONFLICT with zero index/commit/tag/
+    # push mutation (T-1003 recovery re-bind).
+    if not recorded_a or not recorded_b:
+        live_branch = _branch(root)
+        if live_branch != branch:
+            return _conflict(
+                journal, op_id,
+                f"current branch {live_branch!r} != recorded branch "
+                f"{branch!r}; refuse to create commits on the wrong branch -- "
+                "checkout the recorded branch and retry")
+    live_endpoint = _push_endpoint(root)
+    recorded_push_url = record.get("remote_push_url") or ""
+    if recorded_push_url and live_endpoint \
+            and _sanitize_push_url(live_endpoint) != recorded_push_url:
+        return _conflict(
+            journal, op_id,
+            f"live push endpoint "
+            f"{_sanitize_push_url(live_endpoint)!r} != recorded "
+            f"{recorded_push_url!r}; resumed publication would reach a "
+            "different repository -- restore the recorded push destination "
+            "and retry")
+
     # ---- 1. content commit A ----------------------------------------------
     if recorded_a:
         if not _is_ancestor(root, recorded_a, head):
@@ -2201,6 +3166,17 @@ def _recover_release_git(root: Path, journal, record: dict) -> dict:
         if head == source_head:
             if not any(t.get("applied")
                        for t in record.get("targets", [])):
+                # Pre-commit abort: the crash may have left the release's
+                # own `git add` staging in the index (crash after staging
+                # but before the content commit). Restore the EXACT pre-plan
+                # index snapshot from the journal evidence so the abort
+                # leaves zero release staging behind (T-1003 exact index
+                # snapshot). Owner-safe: foreign staged changes or a foreign
+                # index.lock refuse instead of being destroyed (T-1006).
+                try:
+                    _restore_index_from_record(root, record)
+                except ValueError as exc:
+                    return _conflict(journal, op_id, str(exc))
                 _try_recovery_journal(journal, "mark", "ABORTED")
                 _try_recovery_journal(journal, "update",
                                       release_stage="ABORTED")
@@ -2286,7 +3262,11 @@ def _recover_release_git(root: Path, journal, record: dict) -> dict:
     _try_recovery_journal(journal, "update", release_stage="CLOSURE_COMMIT_CREATED")
 
     # ---- 4. publish the branch (content and/or closure) -----------------------
-    remote_ok, tip = _remote_branch_tip(root, "origin", branch)
+    # Publication and verification observe the SAME endpoint the recorded
+    # push destination names -- with a split fetch/pushurl, the recorded push
+    # endpoint is the only truth about what a crash-left release wrote.
+    endpoint = record.get("remote_push_endpoint") or "origin"
+    remote_ok, tip = _remote_branch_tip(root, endpoint, branch)
     if not remote_ok:
         return _unavailable(journal, op_id, "remote branch tip query failed "
                                              "during recovery")
@@ -2298,7 +3278,7 @@ def _recover_release_git(root: Path, journal, record: dict) -> dict:
             return _conflict(journal, op_id,
                              f"branch push failed during recovery: "
                              f"{push.stderr or push.stdout}")
-        remote_ok, tip = _remote_branch_tip(root, "origin", branch)
+        remote_ok, tip = _remote_branch_tip(root, endpoint, branch)
         if not remote_ok or tip != closure_commit:
             return _unavailable(journal, op_id,
                                 "post-push verification could not prove the "
@@ -2319,11 +3299,20 @@ def _recover_release_git(root: Path, journal, record: dict) -> dict:
                              f"local tag {tag} points at {tag_local_c[:12]}, "
                              f"not closure {closure_commit[:12]}")
     else:
-        _create_tag(root, _PlanShim(version, tag), closure_commit)
+        _create_tag(root, _PlanShim(version, tag,
+                                    remote_push_endpoint=endpoint),
+                    closure_commit)
     _try_recovery_journal(journal, "update", release_stage="TAG_CREATED")
 
     # ---- 6. tag published -------------------------------------------------------
-    _tag_remote_ok, tag_remote_c = _remote_tag_commit(root, tag)
+    # UNKNOWN remote-tag state is NOT absence: a failed query must stop
+    # recovery with ZERO tag push -- an external side effect is never blindly
+    # repeated on a question the remote could not answer (T-1003).
+    _tag_remote_ok, tag_remote_c = _remote_tag_commit(root, endpoint, tag)
+    if not _tag_remote_ok:
+        return _unavailable(journal, op_id,
+                            "remote tag query failed during recovery")
+    post_tag_snapshot = None
     if tag_remote_c:
         if tag_remote_c != closure_commit:
             return _conflict(journal, op_id,
@@ -2331,18 +3320,26 @@ def _recover_release_git(root: Path, journal, record: dict) -> dict:
                              f"{tag_remote_c[:12]}, not closure "
                              f"{closure_commit[:12]}")
     else:
-        _push_tag(root, _PlanShim(version, tag), closure_commit)
+        # A push happened: verify the tag from a FRESH post-push snapshot and
+        # hand that same observation to final verification (it is strictly
+        # after the final external write -- T-1004 remote).
+        post_tag_snapshot = _push_tag(
+            root, _PlanShim(version, tag,
+                            remote_push_endpoint=endpoint),
+            closure_commit)
     _try_recovery_journal(journal, "update", release_stage="TAG_PUBLISHED")
 
     # ---- 7. final verification ---------------------------------------------------
-    verified = _verify_release(root, _PlanShim(version, tag, branch),
-                               closure_commit)
+    verified = _verify_release(root, _PlanShim(
+        version, tag, branch, remote_push_endpoint=endpoint),
+        closure_commit, post_tag_snapshot)
     if not verified["ok"]:
         return _conflict(journal, op_id, verified["detail"])
     _try_recovery_journal(journal, "update", release_stage="REMOTE_VERIFIED")
     _try_recovery_journal(journal, "mark", "VERIFIED")
     _try_recovery_journal(journal, "mark", "COMMITTED")
     _try_recovery_journal(journal, "update", release_stage="COMMITTED")
+    _drop_settled_staged(journal)
     return {"ok": True, "code": "COMMITTED", "op_id": op_id,
             "changed_files": [t["path"] for t in record.get("targets", [])],
             "content_commit": content_commit, "closure_commit": closure_commit,
@@ -2352,10 +3349,12 @@ def _recover_release_git(root: Path, journal, record: dict) -> dict:
 class _PlanShim:
     """Minimal plan-shaped carrier for stage helpers during recovery."""
 
-    def __init__(self, version: str, tag: str, branch: str = "") -> None:
+    def __init__(self, version: str, tag: str, branch: str = "",
+                 remote_push_endpoint: str = "") -> None:
         self.version = version
         self.tag = tag
         self.branch = branch
+        self.remote_push_endpoint = remote_push_endpoint
         self.commit_message = f"ship v{version}"
 
 
@@ -2372,3 +3371,258 @@ def _unavailable(journal, op_id: str, detail: str) -> dict:
             "recovery_required": True,
             "detail": f"{detail} -- remote state UNKNOWN, never treated as "
                       "PASS; resolve explicitly when the remote answers"}
+
+
+def _strict_iso_utc(value: object) -> str:
+    """Strict ISO-8601 UTC timestamp (Z or +00:00, utcoffset() == 0) or ''
+    (T-1003 finding 15). Delegated to the ONE shared strict-UTC parser (P1#5):
+    a non-zero offset stamp is NOT UTC and must refuse, never accept -- otherwise
+    ``10:00+03:00`` (07:00Z) would order after ``08:00Z`` and reverse chronology."""
+    return strict_iso_utc(value)
+
+
+def _is_admissible_terminal_receipt(record: dict) -> bool:
+    """Strict schema admission of a terminal release receipt (item 15).
+
+    A candidate is admissible ONLY when every identity-bearing field is
+    present and structurally sound: operation, COMMITTED status/stage, a
+    strict-ISO created_at, and a mode-appropriate closure identity. Anything
+    else is a malformed sibling that MAY conflict with a selected result and
+    therefore cannot silently disappear."""
+    if not isinstance(record, dict):
+        return False
+    if record.get("operation") != "release":
+        return False
+    if not _strict_iso_utc(record.get("created_at")):
+        return False
+    if record.get("status") != "COMMITTED":
+        return False
+    if record.get("release_stage") != "COMMITTED":
+        return False
+    if not record.get("op_id") or not record.get("ticket_id") \
+            or not record.get("source_head"):
+        return False
+    mode = record.get("mode") or "full"
+    if mode == "no-publish":
+        return True
+    if mode != "full":
+        return False
+    if not record.get("closure_commit"):
+        return False
+    return "REMOTE_VERIFIED" in tuple(record.get("stages") or ())
+
+
+class _ReceiptSelectionError(Exception):
+    def __init__(self, status: str, reason: str) -> None:
+        super().__init__(reason)
+        self.status = status
+        self.reason = reason
+
+
+def _select_terminal_receipt(candidates: list[dict]) -> dict:
+    """Fail-closed receipt selection (item 15).
+
+    Two valid COMPETING terminal receipts (differing closure/tag/mode) are
+    AMBIGUOUS -- never max(created_at). Identical-identity duplicates are one
+    identity regardless of op_id. Timestamps order history; they never decide
+    between competing successors."""
+    identities = {(c.get("closure_commit"), c.get("tag"), c.get("mode"))
+                  for c in candidates}
+    if len(identities) > 1:
+        raise _ReceiptSelectionError(
+            "ambiguous",
+            "competing terminal release receipts for the same crew epoch "
+            "differ on closure/tag/mode")
+    return max(candidates,
+               key=lambda c: (strict_iso_utc(c.get("created_at", "")),
+                              c.get("op_id", "")))
+
+
+def _receipt_evidence(record: dict) -> dict:
+    return {
+        "op_id": record.get("op_id", ""),
+        "ticket_id": record.get("ticket_id", ""),
+        "tag": record.get("tag", ""),
+        "version": record.get("version", ""),
+        "source_head": record.get("source_head", ""),
+        "closure_commit": record.get("closure_commit", ""),
+        "created_at": record.get("created_at", ""),
+        "stages": tuple(record.get("stages") or ()),
+        "pre_ship_evidence": dict(record.get("crew_pre_ship_evidence") or {}),
+        "mode": record.get("mode") or "full",
+    }
+
+
+def _verify_receipt(root: Path, record: dict) -> dict:
+    """ONE real read-only release verifier (T-1003 findings 14/16).
+
+    A receipt CLAIMING REMOTE_VERIFIED is not remote verification: the
+    verifier independently queries the configured push destination and proves
+    the branch tip, the peeled tag, the version/tag relation and the closure
+    against it. Remote unavailability is UNKNOWN. No-publish receipts are
+    verified for LOCAL closure truth with zero Git requirements.
+    """
+    try:
+        from .paths import (project_identity as _project_identity,
+                            project_lineage_identity)
+        live_proj = _project_identity(root)
+        live_lineage = project_lineage_identity(root)
+    except Exception:
+        live_proj = ""
+        live_lineage = ""
+    record_lineage = record.get("project_lineage")
+    if record_lineage:
+        if not live_lineage or live_lineage != record_lineage:
+            return {"status": "unknown",
+                    "reason": "release receipt belongs to a different "
+                              "project lineage"}
+    elif record.get("project_identity") and live_proj \
+            and record.get("project_identity") != live_proj:
+        return {"status": "unknown",
+                "reason": "release receipt names a different project"}
+    mode = record.get("mode") or "full"
+    if mode == "no-publish":
+        return _verify_no_publish_receipt(root, record)
+    closure = record.get("closure_commit") or ""
+    if not closure:
+        return {"status": "unknown",
+                "reason": "full-mode release receipt has no closure commit"}
+    try:
+        head = _git(root, "rev-parse", "HEAD").stdout
+    except Exception:
+        head = ""
+    if head and head != closure:
+        return {"status": "unknown",
+                "reason": f"release closure {closure[:12]} != current HEAD "
+                          f"{head[:12]}"}
+    branch = record.get("branch") or ""
+    if not branch:
+        return {"status": "unknown",
+                "reason": "release receipt carries no branch identity"}
+    remote_ok, tip = _remote_branch_tip(
+        root, record.get("remote_push_endpoint") or _push_endpoint(root)
+        or "origin", branch)
+    if not remote_ok:
+        return {"status": "unknown",
+                "reason": "remote branch tip query failed -- receipt claims "
+                          "REMOTE_VERIFIED but the verifier cannot confirm it"}
+    if tip != closure:
+        return {"status": "unknown",
+                "reason": f"remote branch tip {tip[:12] or '(none)'} != "
+                          f"closure {closure[:12]}"}
+    tag = record.get("tag") or ""
+    if not tag:
+        return {"status": "unknown",
+                "reason": "release receipt carries no tag identity"}
+    tag_ok, tag_sha = _remote_tag_commit(
+        root, record.get("remote_push_endpoint") or _push_endpoint(root)
+        or "origin", tag)
+    if not tag_ok or not tag_sha:
+        return {"status": "unknown",
+                "reason": f"remote tag {tag} query failed or empty -- "
+                          "receipt claims REMOTE_VERIFIED but the verifier "
+                          "cannot confirm it"}
+    if tag_sha != closure:
+        return {"status": "unknown",
+                "reason": f"remote tag {tag} peels to {tag_sha[:12]} != "
+                          f"closure {closure[:12]}"}
+    version = record.get("version") or ""
+    if version and tag != f"v{version}":
+        return {"status": "unknown",
+                "reason": f"release tag {tag!r} does not name version "
+                          f"{version!r}"}
+    return {"status": "ok", "evidence": _receipt_evidence(record)}
+
+
+def _verify_no_publish_receipt(root: Path, record: dict) -> dict:
+    """No-publish LOCAL closure truth (item 16): zero Git requirements, but
+    the receipt must actually describe a closure that happened -- Core at
+    DONE/task none, the receipt's ticket DONE on BOARD, and the source
+    identity unchanged since the closure was recorded."""
+    try:
+        _state_text, state = _read_state(root)
+        _board_text, board = _read_board(root)
+    except ReleaseRefusal as exc:
+        return {"status": "unknown",
+                "reason": f"canonical state unreadable: {exc.detail}"}
+    if state.get("phase") != "DONE" or state.get("task") not in (
+            None, "", "none"):
+        return {"status": "unknown",
+                "reason": "local closure truth absent: Core not at DONE / "
+                          "task none"}
+    ticket_id = record.get("ticket_id") or ""
+    if ticket_id:
+        ticket = board.get("tickets", {}).get(ticket_id)
+        if ticket is None or ticket["section"] != "## DONE":
+            return {"status": "unknown",
+                    "reason": f"local closure truth absent: {ticket_id} is "
+                              "not DONE on BOARD"}
+    try:
+        from freshness import compute_source_identity
+        live = compute_source_identity(root)
+    except Exception as exc:
+        return {"status": "unknown",
+                "reason": f"source identity unreadable: {exc}"}
+    recorded_head = record.get("source_head") or ""
+    if recorded_head and live.source_head != recorded_head:
+        return {"status": "unknown",
+                "reason": "source moved after the no-publish closure "
+                          "receipt was recorded"}
+    return {"status": "ok", "evidence": _receipt_evidence(record)}
+
+
+def release_verdict(root: Path | str,
+                    crew_epoch: str | None = None) -> dict:
+    """Read-only canonical release receipt verdict (T-1003 sweep).
+
+    Crew consumes THIS verdict, never a self-attesting JSON scan. Returns:
+      {"status": "ok", "evidence": {...}}      -- ONE canonical committed
+                                                  release for this epoch,
+                                                  independently verified
+      {"status": "unknown", "reason": ...}      -- none, malformed lineage,
+                                                  closure != HEAD, or remote
+                                                  unavailable/unprovable
+      {"status": "ambiguous", "reason": ...}    -- competing terminal receipts
+    UNKNOWN is never PASS and AMBIGUOUS never max(created_at). A receipt that
+    claims REMOTE_VERIFIED is not remote verification: the verdict queries the
+    actual configured destination and proves branch tip + peeled tag + version
+    relation independently.
+    """
+    root = Path(root)
+    raw_records = []
+    ops = root / ".saipen" / "recovery" / "ops"
+    if ops.is_dir():
+        for receipt in ops.glob("release-*/operation.json"):
+            try:
+                raw_records.append(json.loads(receipt.read_text(encoding="utf-8")))
+            except (OSError, json.JSONDecodeError):
+                raw_records.append({"corrupt": True, "path": str(receipt)})
+    if crew_epoch is not None:
+        raw_records = [item for item in raw_records
+                       if item.get("corrupt")
+                       or item.get("crew_epoch") == crew_epoch]
+    valid = []
+    invalid = []
+    for item in raw_records:
+        if _is_admissible_terminal_receipt(item):
+            valid.append(item)
+        else:
+            invalid.append(item)
+    if not valid:
+        return {"status": "unknown",
+                "reason": "no canonical terminal release receipt for this "
+                          "crew epoch"}
+    if invalid:
+        # A malformed/partial sibling of the same epoch MAY conflict with the
+        # selected result; it cannot silently disappear (item 15).
+        return {"status": "unknown",
+                "reason": "release receipt lineage is not clean: "
+                          + "; ".join(
+                              str(i.get("op_id") or i.get("path") or "?")
+                              for i in invalid[:3])
+                          + " -- resolve or remove the conflicting evidence"}
+    try:
+        record = _select_terminal_receipt(valid)
+    except _ReceiptSelectionError as exc:
+        return {"status": exc.status, "reason": exc.reason}
+    return _verify_receipt(root, record)

@@ -15,7 +15,7 @@ from __future__ import annotations
 import re
 
 from . import phases
-from .board import parse_board, ticket_status_error
+from .board import board_semantic_errors, parse_board, claim_status
 from .log import parse_log_line, log_tail_event
 from .state import parse_state
 
@@ -54,7 +54,16 @@ def validate_texts(state_text: str, board_text: str, log_text: str) -> list[str]
     """Validate the proposed STATE/BOARD/LOG texts. Returns every error."""
     errors: list[str] = []
 
-    state = parse_state(state_text)
+    from .floor import raw_floor
+    floor_errors = raw_floor(state_text, board_text, log_text)
+    if floor_errors:
+        errors.extend(f"FLOOR: {e}" for e in floor_errors)
+
+    from .state import parse_state_or_error
+    state, state_error = parse_state_or_error(state_text)
+    if state_error:
+        errors.append(f"STATE proposed malformed: {state_error}")
+        return errors
     missing = [k for k in ("phase", "task", "next_action", "blocker", "agent",
                            "saipen_version", "mode", "updated")
                if k not in state]
@@ -121,12 +130,12 @@ def validate_texts(state_text: str, board_text: str, log_text: str) -> list[str]
     if len(doing) > 1:
         errors.append("BOARD proposed has more than one ## DOING ticket")
     for ticket in tickets.values():
-        status_error = ticket_status_error(ticket)
-        if status_error:
-            errors.append(f"BOARD proposed {ticket['id']} {status_error}")
-        if ticket["section"] == "## DOING" and ticket["checkbox"] != "/":
-            errors.append(f"BOARD proposed {ticket['id']} in DOING with "
-                          f"[{ticket['checkbox']}] instead of [/]")
+        # ONE shared BOARD lifecycle invariant set (T-1003): the
+        # transactional verifier and the canonical validator must reject the
+        # same checkbox/section/evidence mismatches, or an unrelated mutation
+        # can COMMIT a board the release gate later rejects.
+        for semantic in board_semantic_errors(ticket):
+            errors.append(f"BOARD proposed {semantic}")
         for need in ticket["needs"]:
             if need not in tickets:
                 errors.append(f"BOARD proposed {ticket['id']} needs "
@@ -176,11 +185,20 @@ def validate_texts(state_text: str, board_text: str, log_text: str) -> list[str]
                               f"{active}")
     else:
         if active:
-            errors.append(f"STATE proposed phase {phase} is not ticket-bearing "
-                          "but BOARD has a ## DOING ticket; a DOING ticket "
-                          "requires a ticket-bearing phase (a completed "
-                          "ticket's execution state must be closed, not "
-                          "left in a non-ticket phase)")
+            # A DOING ticket that is UNCLAIMED / FOREIGN_STALE / FOREIGN_LIVE is
+            # owned by nobody or by another agent; an observer in a non-ticket-
+            # bearing phase (e.g. DONE / task:none) is valid multi-agent state and
+            # must NOT be rejected here (P0 claim-ownership truth: one classifier
+            # decides). Only a SELF or INVALID DOING under a non-ticket-bearing
+            # phase is structural corruption.
+            _cs = claim_status(doing[0], state.get("agent"))
+            if _cs in ("SELF", "INVALID"):
+                errors.append(
+                    f"STATE proposed phase {phase} is not ticket-bearing "
+                    "but BOARD has a ## DOING ticket; a DOING ticket "
+                    "requires a ticket-bearing phase (a completed "
+                    "ticket's execution state must be closed, not "
+                    "left in a non-ticket phase)")
         if task and task != "none":
             errors.append(f"STATE proposed phase {phase} is not ticket-bearing "
                           f"but task is {task!r}; task must be none outside a "
@@ -190,8 +208,29 @@ def validate_texts(state_text: str, board_text: str, log_text: str) -> list[str]
 
 def validate_project(root) -> list[str]:
     """Validate the live canonical files (post-write / recovery verification)."""
+    errors: list[str] = []
+    from pathlib import Path
+    root = Path(root)
     from . import codec
+    # Encoding is diagnosed before anything is parsed, exactly like the
+    # release gate (hostile-regression, P1): a UTF-16 or BOM-carrying
+    # checkpoint file is what PowerShell 5.1's Set-Content produces by
+    # default, and the consequences differ by tool -- the portable floor
+    # matches nothing, a BOM alone breaks `^---` so the frontmatter parses
+    # as empty. One named error beats three unrelated symptoms, and a
+    # post-write verification must refuse a commit that wrote one.
+    for name in ("STATE.md", "BOARD.md", "LOG.md"):
+        path = root / ".saipen" / name
+        if not path.is_file():
+            continue
+        enc = codec.encoding_of(path)
+        if enc != "utf-8":
+            errors.append(
+                f".saipen/{name} is {enc}, not plain UTF-8 -- every SAIPEN "
+                "tool reads it byte-wise and will fail differently; rewrite "
+                "as UTF-8 without a BOM (KNOWLEDGE/traps.md)")
     state = codec.read_doc(root / ".saipen" / "STATE.md")
     board = codec.read_doc(root / ".saipen" / "BOARD.md")
     log = codec.read_doc(root / ".saipen" / "LOG.md")
-    return validate_texts(state, board, log)
+    errors.extend(validate_texts(state, board, log))
+    return errors

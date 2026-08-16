@@ -72,15 +72,19 @@ from userperson import validate_profile as _validate_userperson_profile
 from improve import validate_report as _validate_improve_report
 # NITRO M1: the shared mechanical parsers. validate.py and the engine consume
 # the SAME implementation by construction -- no parser drift (T-578).
-from saipen_engine.board import (TICKET_RE, parse_board, ticket_has_blocker,
-                                 ticket_is_workable, ticket_status_error,
-                                 unescape_ticket_part)
-from saipen_engine.log import LOG_RE, parse_log_line
+from saipen_engine.board import (KNOWN_FIELDS, REQUIRED_HEADINGS,
+                                 board_semantic_errors, parse_board,
+                                 ticket_has_blocker, ticket_is_workable,
+                                 claim_status)
+from saipen_engine.paths import (parse_identity_content,
+                                 resolve_project_root)
+from saipen_engine.log import LOG_RE, history_paths, parse_log_line
 # T-994: release metadata inventory is owned by one shared module. validate.py
 # and the release executor import the SAME functions so they can never drift.
 from saipen_engine.release_contract import (
     locale_readme_paths, release_metadata_paths, version_badges)
 from saipen_engine.state import parse_frontmatter
+from saipen_engine.state import state_contract_errors
 # SAICREW: the validator consumes the SAME strict parsers and crew gate the
 # engine CLI uses -- a malformed MANIFEST, an incoherent sub BOARD and a
 # crew gate condition can never be reported differently by the two halves.
@@ -88,8 +92,10 @@ from saipen_engine.subs import (CREW_ROLES, CREW_STAGES,
                                  current_local_role_revision,
                                  parse_manifest as _parse_sub_manifest,
                                  parse_outbox as _parse_outbox,
-                                 parse_sub_board as _parse_sub_board)
+                                 parse_sub_board as _parse_sub_board,
+                                 validate_sub_lifecycle)
 from saipen_engine.crew import crew_gate_problems as _crew_gate_problems
+from saipen_engine.manifest import copy_tree_members
 
 def _read_rfc(p):
     core = p.parent / "CORE.md"
@@ -364,82 +370,9 @@ def _git_from(cwd, *args):
     return result.returncode, result.stdout.strip()
 
 
-def _nearest_checkpoint_root(start):
-    for candidate in (start, *start.parents):
-        if (candidate / ".saipen").is_dir():
-            return candidate
-    return None
-
-
-def _resolve_project_root(start, explicit):
-    """Resolve the one root whose checkpoint files this run may inspect.
-
-    Explicit selection is intentional and therefore overrides cwd. Implicit
-    Git selection follows the common directory so a linked worktree reaches
-    the main worktree's gitignored `.saipen/` instead of inventing a second
-    one. Non-Git projects use the nearest ancestor carrying `.saipen/`;
-    validation separately diagnoses a missing or corrupt STATE.md there.
-    """
-    if explicit is not None:
-        root = Path(explicit).expanduser()
-        if not root.is_absolute():
-            root = start / root
-        root = root.resolve()
-        if not root.is_dir():
-            return None, "explicit --project-root is not a directory: " + str(root)
-        if not (root / ".saipen").is_dir():
-            return None, ("explicit --project-root has no .saipen/ directory: "
-                          + str(root))
-        return root, "explicit"
-
-    rc, top_text = _git_from(start, "rev-parse", "--show-toplevel")
-    if rc == 0 and top_text:
-        worktree_root = Path(top_text).resolve()
-        common_rc, common_text = _git_from(start, "rev-parse", "--git-common-dir")
-        candidates = []
-        if common_rc == 0 and common_text:
-            common_dir = Path(common_text)
-            if not common_dir.is_absolute():
-                common_dir = start / common_dir
-            common_dir = common_dir.resolve()
-        # The ACTIVE worktree is asked first, the main worktree second. A
-        # linked worktree normally has no `.saipen/` of its own -- the folder
-        # is gitignored, so a fresh one starts without it -- and that common
-        # case still falls through to the shared state below. But when a
-        # linked worktree DOES carry one, somebody put it there deliberately,
-        # and asking git-common first meant the validator read a different
-        # tree than the agent was editing: a linked worktree whose local
-        # STATE.md said `phase: NOT-A-PHASE` validated EXIT=0, reporting the
-        # main repository. Green for the wrong tree is the one answer this
-        # resolver must never give.
-        candidates.append((worktree_root, "git-worktree"))
-        if common_rc == 0 and common_text:
-            if common_dir.name.lower() == ".git":
-                candidates.append((common_dir.parent, "git-common"))
-        seen = set()
-        for root, source in candidates:
-            key = os.path.normcase(str(root))
-            if key in seen:
-                continue
-            seen.add(key)
-            if (root / ".saipen").is_dir():
-                return root, source
-        return None, ("cwd belongs to Git worktree " + str(worktree_root)
-                      + " but its owning repository has no .saipen/; "
-                      "refusing to guess or create a second .saipen/. Run from "
-                      "the intended project or pass --project-root PATH")
-
-    root = _nearest_checkpoint_root(start)
-    if root is not None:
-        return root, "ancestor"
-    return None, ("cwd has no owning .saipen/; refusing to guess or "
-                  "create one. Run from the intended project or pass "
-                  "--project-root PATH")
-
-
 STRICT, _requested_root, GATE, GATE_PRODUCER, REQUIRE_RELEASE_INDEX = _parse_cli(
     sys.argv[1:])
-PROJECT_ROOT, PROJECT_ROOT_SOURCE = _resolve_project_root(
+PROJECT_ROOT, PROJECT_ROOT_SOURCE = resolve_project_root(
     Path.cwd().resolve(), _requested_root)
 if PROJECT_ROOT is None:
     print(f"FAIL: {PROJECT_ROOT_SOURCE}")
@@ -861,6 +794,40 @@ if not isinstance(CURRENT_SCHEMA_VERSION, int) or CURRENT_SCHEMA_VERSION < 1:
     fail("state.schema.json x-current-schema-version must be a positive integer")
     sys.exit(1)
 
+# Engine-state-contract parity (hostile-regression, P1): the engine enforces
+# the STATE contract from hand-maintained constants in saipen_engine/state.py
+# (state_contract_errors), because every engine consumer -- router, fast_check,
+# journal reads -- must refuse a state the release gate would FAIL. The schema
+# is the gate's mirror; if the two drift, an engine-committed state can be
+# green in one and corrupt in the other. The constants are compared here so
+# the drift FAILs at the gate instead of silently diverging.
+from saipen_engine import state as _eng_state_contract
+_engine_schema_mismatch = []
+_schema_props = set(schema.get("properties", {}))
+if _schema_props != _eng_state_contract.STATE_KNOWN_FIELDS:
+    _engine_schema_mismatch.append(
+        "properties " + ", ".join(sorted(
+            _schema_props ^ _eng_state_contract.STATE_KNOWN_FIELDS)))
+if set(schema.get("required", [])) != set(_eng_state_contract.STATE_REQUIRED_FIELDS):
+    _engine_schema_mismatch.append(
+        "required " + ", ".join(sorted(
+            set(schema.get("required", []))
+            ^ set(_eng_state_contract.STATE_REQUIRED_FIELDS))))
+if tuple(schema["properties"]["phase"]["enum"]) != _eng_state_contract.STATE_PHASE_ENUM:
+    _engine_schema_mismatch.append("phase enum")
+if tuple(schema["properties"]["mode"]["enum"]) != _eng_state_contract.STATE_MODE_ENUM:
+    _engine_schema_mismatch.append("mode enum")
+if tuple(schema["properties"]["execution_intent"]["enum"]) != _eng_state_contract.STATE_INTENT_ENUM:
+    _engine_schema_mismatch.append("execution_intent enum")
+if tuple(schema["properties"]["converge_target"]["enum"]) != _eng_state_contract.STATE_CONVERGE_TARGETS:
+    _engine_schema_mismatch.append("converge_target enum")
+if _engine_schema_mismatch:
+    fail("engine-state-contract -- state.schema.json drifted from "
+         "saipen_engine/state.py STATE contract constants: "
+         + "; ".join(_engine_schema_mismatch) + ". Update BOTH deliberately")
+else:
+    ok("state.schema.json and the engine STATE contract constants agree")
+
 # Encoding is diagnosed before anything is parsed, on all three checkpoint
 # files. A UTF-16 or BOM-carrying `.saipen/` file is what PowerShell 5.1's
 # `Set-Content`/`Out-File` produce by default (KNOWLEDGE/traps.md), and the
@@ -900,6 +867,17 @@ if Path("saipen").is_dir():
         fail("saipen/VERSION is a nested duplicate of the root VERSION file -- "
              "one version source means one file. Delete the nested copy; the "
              "root VERSION is canonical")
+
+from saipen_engine.floor import raw_floor
+board_path = Path(".saipen/BOARD.md")
+log_path = Path(".saipen/LOG.md")
+floor_errs = raw_floor(
+    read_doc(state_path),
+    read_doc(board_path) if board_path.is_file() else "",
+    read_doc(log_path) if log_path.is_file() else ""
+)
+for e in floor_errs:
+    fail(f"FLOOR: {e}")
 
 state, err = parse_frontmatter(read_doc(state_path))
 if state is None:
@@ -943,12 +921,9 @@ if converge_target is not None and intent != "converge":
          f"execution_intent is {intent!r} -- the ccc routing discriminator "
          "exists only during convergence")
 
-# RFC § 1.2: updated MUST be ISO-8601 UTC specifically (Z or +00:00).
-updated = state.get("updated")
-if isinstance(updated, str):
-    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|\+00:00)", updated):
-        fail(f"STATE.md updated must be ISO-8601 UTC (Z or +00:00), got: {updated!r} "
-             f"-- Recovery's staleness comparison miscompares across timezones otherwise (RFC § 1.2)")
+# RFC § 1.2: updated MUST be ISO-8601 UTC specifically (Z or +00:00). Enforced
+# by the shared canonical STATE semantic validator above (P0#1); no separate
+# check here so the two cannot drift.
 
 # RFC § 1.2: blocker MUST be non-empty when phase: BLOCKED.
 if state.get("phase") == "BLOCKED" and state.get("blocker") in ("", "none", None):
@@ -1073,6 +1048,50 @@ elif sv > CURRENT_SCHEMA_VERSION:
 if len(failures) == before:
     ok("STATE.md schema valid (checked against state.schema.json)")
 
+# ------------------------------------------------------------- IDENTITY
+
+# The portable project lineage carrier (.saipen/IDENTITY.md) is the durable
+# TRACKED identity a release receipt binds to and recovery validates against
+# (T-1003 carrier-loss wave). The validator enforces the canonical carrier
+# grammar here -- one fenced `project_lineage:` field, nothing else -- so a
+# release can never publish a malformed identity, and the ship gate requires
+# the carrier to be staged with every other release-metadata path
+# (release_metadata_paths owns the exact set; see the translation-drift
+# section below).
+_identity_path = Path(".saipen/IDENTITY.md")
+if _identity_path.is_file():
+    _id_lineage, _id_error = parse_identity_content(
+        read_doc(_identity_path))
+    if _id_error:
+        fail(f".saipen/IDENTITY.md is malformed: {_id_error} -- the portable "
+             "lineage carrier must hold exactly one fenced `project_lineage: "
+             "lineage-<hex32>` field and nothing else; a malformed carrier is "
+             "fail-closed material for every strict receipt and every new "
+             "release")
+    else:
+        ok(f".saipen/IDENTITY.md is a canonical portable lineage carrier "
+           f"({_id_lineage})")
+    # A carrier that exists on disk but is not tracked by git will not
+    # survive a clone -- the exact defect the carrier contract exists to
+    # prevent (release metadata cannot publish what Git does not track).
+    # Only enforceable inside a real Git repository: a no-git project has no
+    # clone to lose the carrier to.
+    _rc_git, _ = _git("rev-parse", "--is-inside-work-tree")
+    if _rc_git == 0:
+        _tracked_rc, _tracked_out = _git(
+            "ls-files", "--error-unmatch", "--", ".saipen/IDENTITY.md")
+        if _tracked_rc != 0:
+            fail(".saipen/IDENTITY.md exists but is not tracked by git -- a "
+                 "release can leave the portable lineage outside the "
+                 "repository and a fresh clone would lose it. `git add "
+                 ".saipen/IDENTITY.md` so the next release commits the "
+                 "carrier")
+else:
+    # Absence is legal ONLY for a project that has never been migrated: the
+    # first mutation mints the carrier journaled.
+    ok(".saipen/IDENTITY.md absent -- project not yet lineage-migrated "
+       "(the first mutation mints it journaled)")
+
 # The voice marker, gated exactly the way `last_event` is: REQUIRED once the
 # state is at the current revision, exempt while it is readable legacy, and
 # always enforced when present. A missing STYLE.md fails loud instead of
@@ -1113,19 +1132,20 @@ else:
              f"marker value {_style_expected}; it MUST appear in STYLE.md "
              f"alone, or the checkpoint can copy it without ever reading the "
              f"contract it stands for (RFC § 1.2)")
-    _sc = state.get("style_contract")
-    if sv == CURRENT_SCHEMA_VERSION and _sc is None:
-        fail(f"STATE.md schema_version {CURRENT_SCHEMA_VERSION} requires "
-             f"style_contract: {_style_expected} -- RFC § 1.2's voice marker, "
-             f"declared at the top of saipen/STYLE.md. Legacy states below "
-             f"v{CURRENT_SCHEMA_VERSION} may omit it only until their next "
-             f"checkpoint (RFC § 1.2, § 1.5)")
-    elif _sc is not None and _sc != _style_expected:
-        fail(f"STATE.md style_contract is {_sc!r} but the installed STYLE.md's "
-             f"marker is {_style_expected} -- this checkpoint was written "
-             f"against a different voice contract than the one installed, so "
-             f"the agent that wrote it did not read the current STYLE.md "
-             f"(RFC § 1.2)")
+    # STATE.style_contract equivalence with the installed STYLE.md marker is now
+    # enforced by the shared canonical STATE validator above (P0#1): presence at
+    # current schema_version and exact-match against `_style_expected` both live
+    # there, so this gate and the engine cannot disagree about the voice marker.
+
+# ONE shared canonical STATE semantic validator (hostile-regression, P0#1): the
+# engine, the fast gate and this gate must refuse the SAME in-memory STATE
+# defects. Runs AFTER the installed STYLE.md marker (`_style_expected`) is known
+# so the voice-contract check is identical here and in the engine. The cross-file
+# checks below (block-parked LOG proof, vague next_action) stay here only.
+for err in state_contract_errors(
+        state, style_token=_style_expected,
+        current_schema_version=CURRENT_SCHEMA_VERSION):
+    fail(f"STATE.md {err}")
 
 # RFC § 1.6 phase transition validation. transition_from tracks the
 # previous phase; check every non-self transition against the table.
@@ -1133,81 +1153,59 @@ else:
 t_from = state.get("transition_from")
 t_current = state.get("phase")
 
-# Invariant: transition_from absent on non-INIT → FAIL.
-# Absence tolerated only for fresh INIT bootstrap.
-if t_from is None:
-    if t_current != "INIT":
-        fail("STATE.md missing transition_from -- required on all "
-             "non-INIT states to validate phase transitions (RFC § 1.6)")
-    else:
-        warn("transition-from", "STATE.md phase: INIT but transition_from "
-             "is absent -- set transition_from: INIT at next checkpoint "
-             "to make it explicit")
+# Cross-file transition check (hostile-regression, P0#1): presence and DFA
+# legality are owned by the shared STATE validator above, so they are NOT
+# re-checked here. ONLY the block-parked transitional shape -- DONE reached from
+# an active-ticket block -- needs cross-file LOG evidence the shared validator
+# cannot witness. DONE with one of those mid-flight transition_from values is
+# legal ONLY with a matching active-block LOG event; otherwise it is the forgery
+# the shared validator would otherwise accept.
+if (state.get("transition_from") is None
+        and state.get("phase") == "INIT"):
+    warn("transition-from", "STATE.md phase: INIT but transition_from "
+         "is absent -- set transition_from: INIT at next checkpoint "
+         "to make it explicit")
 
-if t_from and t_current:
-    if t_from == t_current:
-        if t_from not in VALID_TRANSITIONS and t_from not in ANY_FROM:
-            fail(f"STATE.md self-transition at {t_from} but {t_from!r} is not "
-                 f"a known phase -- must be one of the 16 enum values (RFC § 1.6)")
-    elif t_current not in ANY_FROM:
-        allowed = VALID_TRANSITIONS.get(t_from, [])
-        if t_current not in allowed:
-            # Narrow documented exception (T-631): canonical `ticket block` on
-            # the ACTIVE ticket moves the line to ## BLOCKED and parks the
-            # execution state at DONE/task none with transition_from = the
-            # ACTUAL mid-flight phase. The DFA has no DONE edge from SCOUT/
-            # BUILD/VERIFY/REVIEW, and session-level BLOCKED would be a lie
-            # whenever other work is workable, so the block produces exactly
-            # this one transitional shape. It is legal ONLY while the active
-            # LOG's most recent TICKET event is a canonical SAIOPS block line
-            # -- structurally valid, [op:] provenanced, `DEC: ticket block via
-            # SAIOPS (active)`, naming a ticket that now sits in ## BLOCKED --
-            # because the block and its evidence commit atomically. The
-            # `(active)` marker proves it was a DOING-ticket block (a TODO
-            # block can never satisfy it), and being the ticket's own last
-            # event keeps the exception alive across later session-level
-            # checkpoints that do not re-name the ticket. A forged or manual
-            # DONE-without-block fails like any other forgery.
-            _block_parked = False
-            if t_current == "DONE" and t_from in (
-                    "SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP"):
-                _seg_dir = Path(".saipen/logs")
-                _segs = sorted(
-                    (p for p in _seg_dir.glob("LOG-*.md")
-                     if re.fullmatch(r"LOG-\d+\.md", p.name))
-                    if _seg_dir.is_dir() else [],
-                    key=lambda _p: int(_p.stem[len("LOG-"):]))
-                _log_files = [*[Path(".saipen/logs", s.name) for s in _segs],
-                              Path(".saipen/LOG.md")]
-                _bd = parse_board(read_doc(Path(".saipen/BOARD.md")))
-                _blocked_tids = [tid for tid, t in _bd.get("tickets", {}).items()
-                                 if t["section"] == "## BLOCKED"]
-                for _tid in _blocked_tids:
-                    _last_for_ticket = ""
-                    for _p in reversed(_log_files):
-                        if not _p.is_file():
-                            continue
-                        for _ln in reversed(read_doc(_p).splitlines()):
-                            _cand = parse_log_line(_ln)
-                            if _cand and _cand.get("ticket") == _tid:
-                                _last_for_ticket = _ln
-                                break
-                        if _last_for_ticket:
-                            break
-                    _be = (parse_log_line(_last_for_ticket)
-                           if _last_for_ticket else None)
-                    if _be and _be.get("taxonomy") == "DEC" \
-                            and (_be.get("op_id") or "").startswith("ticket-") \
-                            and _be.get("text", "").startswith(
-                                "ticket block via SAIOPS (active)"):
-                        _block_parked = True
-                        break
-            if not _block_parked:
-                fail(f"STATE.md invalid phase transition: {t_from} -> {t_current} "
-                     f"(RFC § 1.6). Allowed from {t_from}: {', '.join(allowed)}")
-        if t_from not in VALID_TRANSITIONS and t_from not in ANY_FROM:
-            fail(f"STATE.md transition_from has unknown phase: {t_from!r} "
-                 f"-- must be one of the 16 enum values (RFC § 1.6)")
+_block_parked = False
+_t_from = state.get("transition_from")
+_t_current = state.get("phase")
+# The block-parked transitional shape (DONE from a mid-flight phase) is the only
+# DONE transition the DFA does NOT allow; it is legal ONLY with cross-file LOG
+# proof of the active ticket block. A legal DFA edge such as SHIP -> DONE must
+# never enter this branch (it would be a false failure), so gate on the
+# transition being otherwise illegal (RFC § 1.6).
+if (_t_from and _t_current == "DONE"
+        and _t_from in ("SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP")
+        and _t_current not in VALID_TRANSITIONS.get(_t_from, [])):
+    _log_files = history_paths(Path("."))
+    _bd = parse_board(read_doc(Path(".saipen/BOARD.md")))
+    _blocked_tids = [tid for tid, t in _bd.get("tickets", {}).items()
+                     if t["section"] == "## BLOCKED"]
+    for _tid in _blocked_tids:
+        _last_for_ticket = ""
+        for _p in reversed(_log_files):
+            if not _p.is_file():
+                continue
+            for _ln in reversed(read_doc(_p).splitlines()):
+                _cand = parse_log_line(_ln)
+                if _cand and _cand.get("ticket") == _tid:
+                    _last_for_ticket = _ln
+                    break
+            if _last_for_ticket:
+                break
+        _be = (parse_log_line(_last_for_ticket)
+               if _last_for_ticket else None)
+        if _be and _be.get("taxonomy") == "DEC" \
+                and (_be.get("op_id") or "").startswith("ticket-") \
+                and _be.get("text", "").startswith(
+                    "ticket block via SAIOPS (active)"):
+            _block_parked = True
+            break
+    if not _block_parked:
+        fail(f"STATE.md invalid phase transition: {_t_from} -> {_t_current} "
+             f"(RFC § 1.6). The block-parked shape is legal only with a "
+             f"matching active-block LOG event proving the ticket block "
+             f"(cross-file evidence the shared validator cannot see)")
 
 # RFC § 1.3 mode/phase restrictions.
 # NOTE: `no-publish` + `SHIP` is NOT checked here, deliberately. It used to
@@ -1250,13 +1248,10 @@ if isinstance(next_action, str):
     # the human what kind of answer unblocks it.
     WAIT_CATEGORIES = ("manual-verify", "destructive-op", "first-publish",
                        "user brake", "blocked", "safety valve", "init")
+    # The WAIT category token check now lives in the shared canonical STATE
+    # validator (P0#1). The second-sentence bound (paragraph below) is a prose
+    # style rule with no equivalent in the engine and stays here.
     if next_action.startswith("WAIT:"):
-        body = next_action[len("WAIT:"):].strip().lower()
-        if not any(body.startswith(c) for c in WAIT_CATEGORIES):
-            fail(f"STATE.md next_action is a WAIT with no category token -- "
-                 f"RFC § 1.2 requires 'WAIT: <category> -- <question>' where "
-                 f"category is one of {'/'.join(WAIT_CATEGORIES)}; got "
-                 f"{next_action!r}")
         # The category bounds what KIND of stop this is; nothing bounded what
         # came after it, so `next_action` became a scratchpad -- and a stop
         # instruction carrying notes is one the next agent reads as a queue.
@@ -1731,21 +1726,37 @@ for _board_path in sorted(subs_root.glob("*/BOARD.md")):
     _sub_name = _board_path.parent.name
     if _sub_name == "TEMPLATE":
         continue
-    _parsed_board = _parse_sub_board(read_doc(_board_path))
+    # T-1003 sweep (SAICREW H parity): the validator checks a sub board
+    # against the SAME expected ticket-prefix the engine uses -- a mixed or
+    # wrong-prefix board that `sub list` calls INVALID must not pass here.
+    _parsed_board = _parse_sub_board(read_doc(_board_path),
+                                     expected_role=_sub_name)
     if _parsed_board["errors"]:
         fail(f"{_board_path.as_posix()} is an invalid sub board: "
              + "; ".join(_parsed_board["errors"][:4]) + " (SAICREW H)")
     _st_file = _board_path.parent / "STATE.md"
-    _st_phase = None
     if _st_file.is_file():
         _st_front, _ = parse_frontmatter(read_doc(_st_file))
-        _st_phase = (_st_front or {}).get("phase")
-    if _st_phase == "DONE" and (_parsed_board["counts"]["TODO"]
-                                or _parsed_board["counts"]["DOING"]
-                                or _parsed_board["counts"]["BLOCKED"]):
-        fail(f"{_board_path.as_posix()} is phase DONE but its board still "
-             "holds open work (TODO/DOING/BLOCKED) -- a worker cannot say "
-             "DONE while its board says unresolved work (SAICREW H)")
+        if _st_front:
+            # T-1003 sweep (hostile finding 2): the SAME lifecycle validator
+            # the engine consumes binds STATE phase/task to the parsed BOARD.
+            # DONE + a live task (saiwiki W-031), task/DOING splits and
+            # wrong-prefix tasks are INVALID here exactly as in
+            # sub_instance_health -- one helper, zero drift.
+            _lifecycle = validate_sub_lifecycle(
+                _st_front, _parsed_board, _sub_name)
+            if _lifecycle:
+                fail(f"{_st_file.as_posix()} state/board lifecycle is "
+                     f"incoherent: " + "; ".join(_lifecycle[:3])
+                     + " (SAICREW H)")
+            if (_st_front.get("phase") == "DONE"
+                    and (_parsed_board["counts"]["TODO"]
+                         or _parsed_board["counts"]["DOING"]
+                         or _parsed_board["counts"]["BLOCKED"])):
+                fail(f"{_board_path.as_posix()} is phase DONE but its board "
+                     "still holds open work (TODO/DOING/BLOCKED) -- a worker "
+                     "cannot say DONE while its board says unresolved work "
+                     "(SAICREW H)")
 
 # --------------------------------------------------------------------- BOARD
 
@@ -1754,10 +1765,6 @@ if not board_path.is_file():
     fail("BOARD.md missing")
     sys.exit(1)
 
-REQUIRED_HEADINGS = ["## DOING", "## TODO", "## DONE", "## BLOCKED"]
-KNOWN_FIELDS = {"needs", "owner", "claim_time", "blocker", "verify",
-                "review_passes", "verify_attempts", "source_reports",
-                "recurrence", "weak_model"}
 # The cap number belongs to phases/verify.md, so it is read from there rather
 # than copied here. A missing anchor is a FAIL at the check below, never a
 # silent fallback: a cap this file guessed would be a second source of truth,
@@ -1769,141 +1776,98 @@ _vc = re.search(r"Cap: (\d+) dead hypotheses OR (\d+) failed fix cycles",
                 _verify_doc.read_text(encoding="utf-8-sig")
                 if _verify_doc.is_file() else "")
 VERIFY_FIX_CYCLE_CAP = int(_vc.group(2)) if _vc else None
-# TICKET_RE moved to saipen_engine/board (NITRO M1); imported above.
-PIPE_SENTINEL = "\x00"
 
 board_lines = read_doc(board_path).splitlines()
-headings_seen = []
-tickets = {}          # id -> {"section", "line_no", "checkbox", "needs", "fields"}
-section = None
+# The shared board parser owns ALL ticket syntax and field shape (T-1003
+# sweep, NITRO M1). validate.py consumes its model and layers semantic
+# checks on top; the engine and the validator can never parse one board
+# into two different ticket maps.
+parsed_board = parse_board(read_doc(board_path))
+headings_seen = parsed_board["headings"]
+tickets = parsed_board["tickets"]
+for _parse_err in parsed_board["errors"]:
+    fail(_parse_err)
 
-for line_no, line in enumerate(board_lines, 1):
-    if line.startswith("## "):
-        section = line.strip()
-        headings_seen.append(section)
-        continue
-    if not line.strip():
-        continue
-    if line.lstrip().startswith("- ["):
-        m = TICKET_RE.match(line.strip().replace("\\|", PIPE_SENTINEL))
-        if not m:
-            fail(f"BOARD.md:{line_no} ticket-ish line doesn't match RFC § 1.2 shape "
-                 f"`- [ ] T-### description`: {line.strip()!r}")
-            continue
-        checkbox, tid, rest = m.groups()
-        if section not in REQUIRED_HEADINGS:
-            fail(f"BOARD.md:{line_no} ticket {tid} sits under "
-                 f"{section or 'no heading'} -- not one of the four RFC sections")
-        if tid in tickets:
-            fail(f"BOARD.md:{line_no} duplicate ticket ID {tid} (first at line "
-                 f"{tickets[tid]['line_no']}) -- a status change must move the "
-                 f"line (cut+paste), never copy it (RFC § 1.2)")
-            continue
-        parts = [unescape_ticket_part(p.strip())
-                 for p in rest.split(" | ")]
-        needs, fields = [], {}
-        for part in parts[1:]:
-            fm = re.match(r"^([a-z_]+):\s*(.*)$", part)
-            if not fm or fm.group(1) not in KNOWN_FIELDS:
-                fail(f"BOARD.md:{line_no} ticket {tid} has unrecognized field "
-                     f"{part!r} -- RFC § 1.2's field list is closed "
-                     f"(needs/owner/claim_time/blocker/verify); a literal | in "
-                     f"the description must be escaped as \\|")
-                continue
-            fields[fm.group(1)] = fm.group(2)
-            if fm.group(1) == "needs":
-                needs = re.findall(r"T-\d+", fm.group(2))
-        # RFC § 1.4 claim fields. `claim_time` is compared against a 15-minute
-        # window to decide whether a ticket is live or forfeitable, and it was
-        # recognised as a known field NAME and never once looked at. Without a
-        # zone marker that comparison miscompares across agents in different
-        # timezones -- the identical argument § 1.2 already makes for
-        # `updated`, which is checked. A fixture shipped a zone-less
-        # `claim_time` for releases and nothing noticed.
-        _ct = fields.get("claim_time")
-        if _ct and not re.fullmatch(
-                r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|\+00:00)",
-                _ct.strip()):
-            fail(f"BOARD.md:{line_no} ticket {tid} claim_time {_ct!r} is not "
-                 f"ISO-8601 UTC (Z or +00:00) -- § 1.4 decides a live claim "
-                 f"from a 15-minute window, and a stamp with no zone is not "
-                 f"comparable across agents (RFC § 1.4)")
-        # RFC § 1.2 says review_passes exists so phases/review.md enforces its
-        # two-pass cap "mechanically instead of from memory". The field name
-        # was recognised and the number never read, which leaves the cap
-        # exactly where the RFC says it should not be: in memory.
-        _rp = fields.get("review_passes")
-        if _rp is not None:
-            _rps = _rp.strip()
-            if not _rps.isdigit():
-                fail(f"BOARD.md:{line_no} ticket {tid} review_passes "
-                     f"{_rp!r} is not a number (RFC § 1.2)")
-            elif int(_rps) > 2:
-                fail(f"BOARD.md:{line_no} ticket {tid} has review_passes "
-                     f"{_rps} -- phases/review.md caps re-litigating one "
-                     f"finding at two passes, and this field exists so that "
-                     f"cap is mechanical rather than remembered")
+# Layered semantic checks over the shared parsed ticket model: the parser
+# owns syntax and field identity, validate.py owns meaning. Each check keeps
+# its historical wording so audit parity is preserved.
+for tid, t in tickets.items():
+    fields = t["fields"]
+    line_no = t["line_no"]
+    section = t["section"]
+    # RFC § 1.4 claim fields. `claim_time` is compared against a 15-minute
+    # window to decide whether a ticket is live or forfeitable, and it was
+    # recognised as a known field NAME and never once looked at. Without a
+    # zone marker that comparison miscompares across agents in different
+    # timezones -- the identical argument § 1.2 already makes for `updated`.
+    _ct = fields.get("claim_time")
+    if _ct and not re.fullmatch(
+            r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|\+00:00)",
+            _ct.strip()):
+        fail(f"BOARD.md:{line_no} ticket {tid} claim_time {_ct!r} is not "
+             f"ISO-8601 UTC (Z or +00:00) -- § 1.4 decides a live claim "
+             f"from a 15-minute window, and a stamp with no zone is not "
+             f"comparable across agents (RFC § 1.4)")
+    # RFC § 1.2 says review_passes exists so phases/review.md enforces its
+    # two-pass cap "mechanically instead of from memory".
+    _rp = fields.get("review_passes")
+    if _rp is not None:
+        _rps = _rp.strip()
+        if not _rps.isdigit():
+            fail(f"BOARD.md:{line_no} ticket {tid} review_passes "
+                 f"{_rp!r} is not a number (RFC § 1.2)")
+        elif int(_rps) > 2:
+            fail(f"BOARD.md:{line_no} ticket {tid} has review_passes "
+                 f"{_rps} -- phases/review.md caps re-litigating one "
+                 f"finding at two passes, and this field exists so that "
+                 f"cap is mechanical rather than remembered")
+    # Same argument as review_passes, one phase over. `phases/verify.md`
+    # caps a ticket at 3 dead hypotheses or 2 failed fix cycles and its
+    # hysteresis rule appends each round to `| blocker:` rather than
+    # overwriting it.
+    _va = fields.get("verify_attempts")
+    if _va is not None:
+        _vas = _va.strip()
+        if not _vas.isdigit():
+            fail(f"BOARD.md:{line_no} ticket {tid} verify_attempts "
+                 f"{_va!r} is not a number (RFC § 1.2)")
+        elif VERIFY_FIX_CYCLE_CAP is None:
+            fail("cross-doc drift [verify-cap] -- phases/verify.md's "
+                 "'Cap: N dead hypotheses OR M failed fix cycles' "
+                 "sentence moved, so verify_attempts has no cap to "
+                 "check against. Update tools/validate.py "
+                 "deliberately; a cap this file guessed would be a "
+                 "second source of truth")
+        elif int(_vas) >= VERIFY_FIX_CYCLE_CAP and not fields.get("blocker"):
+            fail(f"BOARD.md:{line_no} ticket {tid} has verify_attempts "
+                 f"{_vas} against phases/verify.md's cap of "
+                 f"{VERIFY_FIX_CYCLE_CAP} failed fix cycles, but carries "
+                 f"no | blocker: -- at the cap the ticket moves to "
+                 f"## BLOCKED with the facts and dead ends on it, and "
+                 f"this field exists so that is mechanical rather than "
+                 f"remembered")
 
-        # Same argument as review_passes, one phase over. `phases/verify.md`
-        # caps a ticket at 3 dead hypotheses or 2 failed fix cycles and its
-        # hysteresis rule appends each round to `| blocker:` rather than
-        # overwriting it -- which preserves the history as prose nothing can
-        # sum, so a ticket could take a fresh full budget on every visit with
-        # no artifact showing it. The cap number lives in verify.md; this
-        # reads it from there rather than carrying a second copy.
-        _va = fields.get("verify_attempts")
-        if _va is not None:
-            _vas = _va.strip()
-            if not _vas.isdigit():
-                fail(f"BOARD.md:{line_no} ticket {tid} verify_attempts "
-                     f"{_va!r} is not a number (RFC § 1.2)")
-            elif VERIFY_FIX_CYCLE_CAP is None:
-                fail("cross-doc drift [verify-cap] -- phases/verify.md's "
-                     "'Cap: N dead hypotheses OR M failed fix cycles' "
-                     "sentence moved, so verify_attempts has no cap to "
-                     "check against. Update tools/validate.py "
-                     "deliberately; a cap this file guessed would be a "
-                     "second source of truth")
-            elif int(_vas) >= VERIFY_FIX_CYCLE_CAP and not fields.get("blocker"):
-                fail(f"BOARD.md:{line_no} ticket {tid} has verify_attempts "
-                     f"{_vas} against phases/verify.md's cap of "
-                     f"{VERIFY_FIX_CYCLE_CAP} failed fix cycles, but carries "
-                     f"no | blocker: -- at the cap the ticket moves to "
-                     f"## BLOCKED with the facts and dead ends on it, and "
-                     f"this field exists so that is mechanical rather than "
-                     f"remembered")
+    # An owner with no claim_time, or the reverse, is half a claim.
+    if bool(fields.get("owner")) != bool(_ct):
+        warn("half-claim",
+             f"BOARD.md:{line_no} ticket {tid} carries "
+             f"{'owner but no claim_time' if fields.get('owner') else 'claim_time but no owner'}"
+             f" -- § 1.4 decides liveness from the pair, so one "
+             f"alone cannot be judged live or stale")
 
-        # An owner with no claim_time, or the reverse, is half a claim:
-        # § 1.4 reads liveness from BOTH, so either alone is undecidable.
-        if bool(fields.get("owner")) != bool(_ct):
-            warn("half-claim",
-                 f"BOARD.md:{line_no} ticket {tid} carries "
-                 f"{'owner but no claim_time' if fields.get('owner') else 'claim_time but no owner'}"
-                 f" -- § 1.4 decides liveness from the pair, so one "
-                 f"alone cannot be judged live or stale")
-
-        # NITRO dogfood II (T-590): a TODO/DOING ticket whose verify is a bare
-        # placeholder is canonical work with no DONE proof. The SAIOPS
-        # ticket-quality boundary made placeholders a FAIL rather than a
-        # silent no-op: a weak model can no longer create mechanically perfect
-        # tickets whose completion can never be proven. Absence of the field
-        # is not flagged (legacy fixtures may omit it); a PRESENT placeholder
-        # -- including the old `verify: verify: TBD` double-prefix -- is.
-        if section in ("## TODO", "## DOING") and "verify" in fields:
-            _vf = fields.get("verify", "").strip().lower()
-            _placeholder = (not _vf or _vf in ("tbd", "todo", "placeholder",
-                                               "verify: tbd", "verify: todo",
-                                               "verify: verify: tbd")
-                            or _vf.startswith("verify: verify:"))
-            if _placeholder:
-                fail(f"BOARD.md:{line_no} ticket {tid} carries a placeholder "
-                     f"verify ({fields.get('verify', '').strip()!r}) -- a "
-                     f"ticket needs a real DONE proof, not TBD/TODO/empty "
-                     f"(NITRO dogfood II, T-590)")
-
-        tickets[tid] = {"section": section, "line_no": line_no,
-                        "checkbox": checkbox, "needs": needs, "fields": fields,
-                        "raw": line}
+    # NITRO dogfood II (T-590): a TODO/DOING ticket whose verify is a bare
+    # placeholder is canonical work with no DONE proof.
+    if section in ("## TODO", "## DOING") and "verify" in fields:
+        _vf = fields.get("verify", "").strip().lower()
+        _placeholder = (not _vf or _vf in ("tbd", "todo", "placeholder",
+                                           "verify: tbd", "verify: todo",
+                                           "verify: verify: tbd")
+                        or _vf.startswith("verify: verify:"))
+        if _placeholder:
+            fail(f"BOARD.md:{line_no} ticket {tid} carries a placeholder "
+                 f"verify ({fields.get('verify', '').strip()!r}) -- a "
+                 f"ticket needs a real DONE proof, not TBD/TODO/empty "
+                 f"(NITRO dogfood II, T-590)")
 
 for heading in REQUIRED_HEADINGS:
     if heading not in headings_seen:
@@ -2106,45 +2070,15 @@ if board_kb > 16:
          f"CLEAN (RFC § 1.2, phases/clean.md step 1)")
 
 for tid, t in tickets.items():
-    _status_error = ticket_status_error(t)
-    if _status_error:
-        fail(f"BOARD.md:{t['line_no']} ticket {tid} {_status_error} -- "
-             f"section is ticket status and blocker is active blocked-state "
-             f"data, not advisory history (RFC § 1.2)")
-    # RFC § 1.2 (rule stated v7.93.0): the section IS the status, the checkbox
-    # is how a human skims it. A board where they disagree answers "is this
-    # done" differently depending on which one the reader trusts. FAIL, not
-    # WARN -- there is no legacy shape here to tolerate, only a mistake.
-    if t["checkbox"] == "x" and t["section"] != "## DONE":
-        fail(f"BOARD.md:{t['line_no']} ticket {tid} is checked [x] but sits "
-             f"under {t['section']} -- checkbox and section disagree; [x] "
-             f"belongs only under ## DONE (RFC § 1.2)")
-    if t["checkbox"] == "/" and t["section"] != "## DOING":
-        fail(f"BOARD.md:{t['line_no']} ticket {tid} is [/] in-progress but "
-             f"sits under {t['section']} -- in-progress work belongs only "
-             f"under ## DOING (RFC § 1.2)")
-    if t["checkbox"] in (" ", "") and t["section"] in ("## DONE", "## DOING"):
-        fail(f"BOARD.md:{t['line_no']} ticket {tid} has an open [ ] checkbox "
-             f"under {t['section']} -- open boxes belong under ## TODO or "
-             f"## BLOCKED (RFC § 1.2)")
-    # A ticket in ## DONE is a completion claim, and until now it could be
-    # made with no evidence at all: `verify:` was a recognised field nothing
-    # required, so moving a line into ## DONE was enough to make the board
-    # say the work was proven. Reproduced on this repository (E-1767): a
-    # ticket went DOING -> DONE with "no verify -- not built work" and every
-    # gate stayed green. DONE must mean the same thing on every board, and
-    # what it means is "the verify: condition this ticket set for itself was
-    # met" -- so the ticket has to say what met it. The field's CONTENT is
-    # not judged here and cannot be: it is evidence for a human or a reviewer
-    # to weigh, and the check that pretends to grade it would be the third
-    # lie in the chain. Absence is what nothing could see before.
-    if t["section"] == "## DONE" and not t["fields"].get("verify", "").strip():
-        fail(f"BOARD.md:{t['line_no']} ticket {tid} sits under ## DONE with "
-             f"no | verify: evidence -- ## DONE is a claim that the ticket's "
-             f"own verify condition was met, and a claim with no evidence "
-             f"attached is indistinguishable from one that was never tested "
-             f"(RFC § 1.2). Closing without building it? Say so in verify: "
-             f"and the board stops overstating what happened")
+    # ONE shared BOARD lifecycle invariant set (T-1003): board_semantic_errors
+    # is the single home for checkbox/section/blocker/verify lifecycle
+    # semantics, consumed by BOTH validate.py and fast_check's transactional
+    # verifier. A proposed board fast_check rejects is rejected here and vice
+    # versa -- an unrelated mutation can never COMMIT a board this gate
+    # rejects (or the reverse).
+    for _semantic in board_semantic_errors(t):
+        fail(f"BOARD.md:{t['line_no']} ticket {tid} {_semantic} "
+             f"(RFC § 1.2)")
 
 # RFC § 1.11: at most one ticket in ## DOING per agent. Shipped as prose in
 # v7.86.0 with nothing enforcing it until v7.90.0 -- which is exactly the
@@ -2167,6 +2101,7 @@ for tid, t in tickets.items():
              f"ticket'), not a bare 'unvetted audit'")
 
 doing = [tid for tid, t in tickets.items() if t["section"] == "## DOING"]
+self_agent = state.get("agent")
 if len(doing) > 1:
     fail(f"BOARD.md has {len(doing)} tickets in ## DOING ({', '.join(sorted(doing))}) "
          f"-- RFC § 1.11 allows at most one per agent. Finish, block, or demote "
@@ -2212,16 +2147,26 @@ if phase in TICKET_BEARING_PHASES:
              f"claimed by this agent or unclaimed -- STATE is behind BOARD; "
              f"Recovery adopts the BOARD claim (RFC § 1.5, T-573)")
 
+# One shared claim-ownership truth (P0): a DOING ticket whose claim pair is a
+# half pair (owner xor claim_time) or carries a non-UTC / unparsable claim_time
+# is INVALID and must fail closed at the gate -- CORE's both-or-neither rule.
+# The classifier decides, never a divergent check; this runs for every phase
+# (a half claim is invalid whether or not the observer is ticket-bearing).
+for tid in doing:
+    _cs = claim_status(tickets[tid], self_agent)
+    if _cs == "INVALID":
+        fail(f"## DOING {tid} carries an INVALID claim (half owner/claim_time "
+             f"pair or non-UTC stamp) -- repair before validating")
+
 # ----------------------------------------------------------------------- LOG
 
 # Segmented, append-only (RFC § 1.2): sealed older segments live in
 # .saipen/logs/LOG-NNN.md, the active tail in .saipen/LOG.md. Checks run over
 # the whole sequence in NNN order (segments first, active last) so E-### stays
 # globally monotonic and [parent: E-###] resolves across segment boundaries.
-log_seg_dir = Path(".saipen/logs")
-log_segments = sorted(log_seg_dir.glob("LOG-*.md")) if log_seg_dir.is_dir() else []
+log_files = history_paths(Path("."))
+log_segments = [p for p in log_files if p.name != "LOG.md"]
 active_log = Path(".saipen/LOG.md")
-log_files = [p for p in ([*log_segments, active_log]) if p.is_file()]
 
 # A gate that cannot fail is not a gate (phases/verify.md). Until v7.75.0 this
 # whole block hung off `if log_files:` -- so a `.saipen/` with NO `LOG.md` at
@@ -2383,7 +2328,7 @@ if log_files:
                      f"(RFC § 1.2): {line[:100]!r}")
                 log_ok = False
                 continue
-            eid, parent, ticket, agent, op_id, taxonomy, content = \
+            date, eid, parent, ticket, agent, op_id, taxonomy, content = \
                 m.groups()
             eid = int(eid)
             ts = re.match(r"^- (\d{2})\.(\d{2})\.(\d{2}) (\d{2}):(\d{2}) ", line)
@@ -2635,6 +2580,57 @@ if log_files:
                          f"boundary (first SHIP-finish E-{_gate_boundary[0]}); "
                          "a ticket must pass REVIEW -> SHIP before finish, and "
                          "skipped gates must never produce DONE (T-602)")
+
+    # [closure-evidence] (hostile-regression): DONE is a verdict, and a
+    # verdict needs evidence. Every ## DONE ticket on the canonical board
+    # must carry current-cycle verification evidence under the SAME machine
+    # classifier the engine gate runs (log.verification_evidence): an exact
+    # machine-owned VERIFY boundary plus an exact PASS/conf: high or
+    # confirmed MANUAL-VERIFY RUN event after it. A ticket that reached
+    # DONE without such evidence is an unproven closure and FAILs. The
+    # engine and this backstop share one grammar, so gate and validator can
+    # never drift.
+    # The grammar boundary is SELF-ESTABLISHING, exactly like [saio] and
+    # [gate-closure]: the first exact `transition to VERIFY` marker in the
+    # complete history marks where the strict grammar is in force. Tickets
+    # finished BEFORE that boundary closed under the old classifier
+    # semantics (PASS + conf: high anywhere in their cycle) -- recorded
+    # HISTORICAL closures, never rewritten. A ticket finished at/after the
+    # boundary must prove itself under the strict grammar.
+    if log_ok:
+        from saipen_engine.log import _is_verify_boundary, \
+            read_history_events, \
+            verification_evidence as _closure_evidence
+        _closure_events = read_history_events(Path("."))
+        _ev_boundary = None
+        _last_ticket_event: dict[str, int] = {}
+        for _cev in _closure_events:
+            if (_ev_boundary is None and _cev["taxonomy"] == "RUN"
+                    and _is_verify_boundary(_cev)):
+                _ev_boundary = _cev["event"]
+            _ctid = _cev.get("ticket")
+            if _ctid:
+                _last_ticket_event[_ctid] = _cev["event"]
+        _done_ids = sorted(
+            t["id"] for t in tickets.values()
+            if t.get("section") == "## DONE")
+        for _done_id in _done_ids:
+            _last_ev = _last_ticket_event.get(_done_id)
+            if (_ev_boundary is not None and _last_ev is not None
+                    and _last_ev < _ev_boundary):
+                # Entire lifecycle predates the strict grammar; it closed
+                # under the old classifier semantics (PASS + conf: high
+                # anywhere in its cycle). Recorded HISTORICAL closure,
+                # never rewritten (append-only).
+                continue
+            _ev_ok, _ev_reason = _closure_evidence(
+                _done_id, _closure_events)
+            if not _ev_ok:
+                fail(f"closure-evidence -- ticket {_done_id} is ## DONE but "
+                     "carries no current-cycle verification evidence "
+                     f"(classifier: {_ev_reason}); an unproven closure is "
+                     "never protocol-green -- re-verify with real evidence "
+                     "before DONE")
 
     # T-555: Improve seat reports are MECHANICALLY checkable. Every report
     # under .saipen/improve/ is scanned with improve.py's own validate_report
@@ -3568,6 +3564,17 @@ if IS_SAIPEN_HOME:
             fail("saiui lacks explicit UI- prefix in PROTOCOL.md ticket table -- "
                  "built-in roles require a documented namespace")
             saiui_ok = False
+        # T-1003 sweep (SAICREW M parity): every built-in role's DOCUMENTED
+        # ticket prefix must equal the executable registry's prefix -- the
+        # docs and the engine can never disagree about a namespace.
+        for _role in CREW_ROLES:
+            _prefix = _role.ticket_prefix
+            if not re.search(rf"\|\s*`{re.escape(_prefix)}-`\s*\|",
+                             _proto_text):
+                fail(f"{_role.name} lacks explicit {_prefix}- prefix in "
+                     f"PROTOCOL.md ticket table -- the documented namespace "
+                     f"must match the executable registry (SAICREW M parity)")
+                saiui_ok = False
         if "sai*.md" not in _proto_text:
             fail("PROTOCOL.md spawn/sync does not mention sai*.md built-in charters -- "
                  "first bootstrap would omit role charters")
@@ -4444,6 +4451,16 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
                 _phase_dir = _mj.get("phase_docs", {}).get("src_dir", "")
                 for _pf in _mj.get("phase_docs", {}).get("files", []):
                     _mj_files.append(f"{_phase_dir}/{_pf}")
+                for tree in _mj.get("copy_trees", []):
+                    try:
+                        _tree_src, _tree_members = copy_tree_members(
+                            _tools_parent, tree["src"])
+                    except RuntimeError as exc:
+                        fail(f"runtime manifest copy tree broken: {exc}")
+                        continue
+                    for _member in _tree_members:
+                        _mj_files.append(
+                            _member.relative_to(_tools_parent).as_posix())
                 manifest = _mj_files
             except (json.JSONDecodeError, KeyError, ValueError):
                 fail("saipen/MANIFEST.json is present but unparseable — "
@@ -4479,9 +4496,15 @@ if (Path("saipen").is_dir() and Path("bootstrap").is_dir()
         # on every CI run, and no local gate could see the difference.
         manifest_untracked = []
         if not manifest_missing and _git("rev-parse", "--git-dir")[0] == 0:
-            for f in manifest:
-                if not _git("ls-files", "--", f)[1].strip():
-                    manifest_untracked.append(f)
+            # ONE tracked-set query for the whole manifest instead of one
+            # `git ls-files -- <file>` per entry: untracked paths simply do
+            # not appear in the -z output, so membership is exact and the
+            # fork count does not scale with manifest size (T-1004 perf).
+            _tr_rc, _tr_out = _git("ls-files", "-z", "--", *manifest)
+            if _tr_rc == 0:
+                _tracked_set = {p for p in _tr_out.split("\x00") if p}
+                manifest_untracked = [f for f in manifest
+                                      if f not in _tracked_set]
         for f in manifest_untracked:
             fail(f"runtime manifest names a file git does not track: {f} -- it "
                  f"exists here and in no clone, so this home ships complete "
@@ -4607,29 +4630,48 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
     if GATE == "ship":
         _release_paths = [path.as_posix()
                           for path in release_metadata_paths(Path("."))]
-        _staged_rc, _staged_text = _git(
-            "diff", "--cached", "--name-only", "--", *_release_paths)
-        if REQUIRE_RELEASE_INDEX and _staged_rc != 0:
-            fail("binding ship gate cannot read staged release metadata")
-        elif _staged_rc == 0:
-            _staged_paths = set(_staged_text.splitlines())
-            if REQUIRE_RELEASE_INDEX:
-                _missing_staged = sorted(set(_release_paths) - _staged_paths)
+        # A metadata path only NEEDS staging if it differs from the index or
+        # is untracked: an unchanged tracked carrier is already in the tree
+        # in exactly the bytes being released, and `git diff --cached` can
+        # never list it (T-1003 -- IDENTITY.md joined the metadata surface).
+        _need_staging = [
+            p for p in _release_paths
+            if _git("diff", "--name-only", "--", p)[1]
+            or (Path(p).exists() and not _git("ls-files", "--", p)[1])]
+        if REQUIRE_RELEASE_INDEX and _need_staging:
+            _staged_rc, _staged_text = _git(
+                "diff", "--cached", "--name-only", "--", *_need_staging)
+            if _staged_rc != 0:
+                fail("binding ship gate cannot read staged release metadata")
+            else:
+                # A path is bound only when its CONTENT is in the index. A
+                # cached D entry does not bind an untracked-but-present file
+                # (`git rm --cached` stages a deletion while the worktree
+                # keeps the bytes) -- that is the T-1003 carrier-loss shape.
+                # Reviewed scope deletions (worktree-absent) are bound by
+                # their staged D entry and are never listed here.
+                _missing_staged = sorted(
+                    p for p in _need_staging
+                    if Path(p).exists()
+                    and not _git("ls-files", "--", p)[1])
                 if _missing_staged:
                     fail("binding ship gate requires every release metadata "
                          "path staged: " + ", ".join(_missing_staged))
-        if _staged_rc == 0 and (_staged_text.strip() or
-                                REQUIRE_RELEASE_INDEX):
-            _unstaged_rc, _unstaged_text = _git(
-                "diff", "--name-only", "--", *_release_paths)
-            if _unstaged_rc != 0:
-                fail("ship gate cannot compare staged release metadata with "
-                     "working-tree bytes")
-            elif _unstaged_text.strip():
-                fail("staged release metadata differs from working-tree bytes: "
-                     + ", ".join(sorted(_unstaged_text.splitlines()))
-                     + " -- the binding ship gate must inspect the exact "
-                       "release bytes selected for commit")
+        # The unstaged comparison ALWAYS runs against the FULL release
+        # surface, never a pathspec-less `git diff` (that would sweep
+        # non-metadata dirt such as the release's own LOG/STATE closure
+        # writes): a staged metadata path whose working bytes drifted must
+        # be refused.
+        _unstaged_rc, _unstaged_text = _git(
+            "diff", "--name-only", "--", *_release_paths)
+        if _unstaged_rc != 0:
+            fail("ship gate cannot compare staged release metadata with "
+                 "working-tree bytes")
+        elif _unstaged_text.strip():
+            fail("staged release metadata differs from working-tree bytes: "
+                 + ", ".join(sorted(_unstaged_text.splitlines()))
+                 + " -- the binding ship gate must inspect the exact "
+                   "release bytes selected for commit")
     stale, absent, checked = [], [], 0
     expected_badge = f"**v{repo_version}**"
     for readme in locale_readme_paths(kitchen):
@@ -4898,7 +4940,7 @@ if _subs_root.is_dir():
 # Checked by reading the last byte -- the one thing no other check here does.
 _append_targets = [Path(".saipen/STATE.md"), Path(".saipen/BOARD.md"),
                    Path(".saipen/LOG.md")]
-_append_targets += sorted(Path(".saipen/logs").glob("LOG-*.md"))
+_append_targets += [p for p in history_paths(Path(".")) if p.name != "LOG.md"]
 _subs_root = Path(".saipen/extensions/subs")
 if _subs_root.is_dir():
     _append_targets.append(_subs_root / "MANIFEST.md")
@@ -5485,11 +5527,14 @@ else:
             drift_ok = False
 
         _documented_stages = tuple(re.findall(
-            r"(?m)^\| (SC-\d+) \| `([^`]+)` \|", _crew_t))
-        _machine_stages = tuple((stage, name)
-                                for stage, name, _condition in CREW_STAGES)
+            r"(?m)^\| (SC-\d+) \| `([^`]+)` \| ([A-Z_]+) \| [^|]* \| "
+            r"([A-Z_]+) \|", _crew_t))
+        _machine_stages = tuple((stage, name, owner, condition)
+                                for stage, name, _condition, owner, condition
+                                in CREW_STAGES)
         if _documented_stages != _machine_stages:
-            fail("cross-doc drift [crew-stages] -- crew.md stage ids/names "
+            fail("cross-doc drift [crew-stages] -- crew.md stage ids/names/"
+                 "owner/condition "
                  f"{_documented_stages!r}, machine registry "
                  f"{_machine_stages!r}")
             drift_ok = False
@@ -6436,6 +6481,7 @@ else:
         ("BROCHURE_ET.md",    "non-normative presentation brochure"),
         ("BROCHURE_JA.md",    "non-normative presentation brochure"),
         ("KNOWLEDGE/HABITS-browser-hang.md", "cross-agent habit note, not a rule source"),
+        ("KNOWLEDGE/HABITS-vs-buildtools-install-fix.md", "cross-agent habit note, not a rule source"),
         ("SPEC.md",           "design intent and rationale, deliberately not normative"),
         ("CHANGELOG.md",      "history; never read by an agent, never a rule source"),
         ("CHANGELOG_ARCHIVE.md", "sealed history, same as above"),
@@ -6831,24 +6877,74 @@ else:
             except (OSError, subprocess.SubprocessError):
                 _remote_branches = []
             if _remote_branches:
-                for _tag in sorted(_tag_list):
-                    _full = "v" + _tag
-                    _rc = subprocess.run(
-                        ["git", "rev-parse", f"{_full}^{{commit}}"],
+                # Bulk-load the two sets the loop needs instead of forking
+                # Git once per (tag, branch): every local tag's peeled
+                # commit in one for-each-ref, and every commit reachable
+                # from a remote-tracking ref in one rev-list --remotes.
+                # "Ancestor of some remote branch" is exactly set membership
+                # in the rev-list --remotes output, and annotated-tag
+                # peeling is preserved by preferring %(*objectname) only when
+                # the peeled object is a commit (a tag naming a tree or blob
+                # must be skipped the way `^{commit}`'s non-zero exit was).
+                _tag_peeled = {}
+                try:
+                    _tp = subprocess.run(
+                        ["git", "for-each-ref", "refs/tags",
+                         "--format=%(refname)%00%(objectname)%00"
+                         "%(*objectname)%00%(objecttype)%00%(*objecttype)"],
                         capture_output=True, text=True, check=False)
-                    if _rc.returncode != 0:
-                        continue
-                    _sha = _rc.stdout.strip()
-                    _on_branch = False
-                    for _br in _remote_branches:
-                        _mb = subprocess.run(
-                            ["git", "merge-base", "--is-ancestor", _sha, _br],
-                            capture_output=True, check=False)
-                        if _mb.returncode == 0:
-                            _on_branch = True
-                            break
-                    if not _on_branch:
-                        _orphan_candidates.append(_full)
+                    if _tp.returncode == 0:
+                        for _ln in _tp.stdout.splitlines():
+                            _f = _ln.split("\x00")
+                            if len(_f) != 5:
+                                continue
+                            _refname, _obj, _peeled, _otype, _ptype = _f
+                            if _ptype == "commit":
+                                _tag_peeled[_refname] = _peeled
+                            elif _otype == "commit":
+                                _tag_peeled[_refname] = _obj
+                except (OSError, subprocess.SubprocessError):
+                    _tag_peeled = {}
+                _reachable = None
+                try:
+                    _rl = subprocess.run(
+                        ["git", "rev-list", "--remotes"],
+                        capture_output=True, text=True, check=False)
+                    if _rl.returncode == 0:
+                        _reachable = {ln.strip() for ln in
+                                      _rl.stdout.splitlines() if ln.strip()}
+                except (OSError, subprocess.SubprocessError):
+                    _reachable = None
+                if _reachable is not None:
+                    for _tag in sorted(_tag_list):
+                        _full = "v" + _tag
+                        _sha = _tag_peeled.get("refs/tags/" + _full)
+                        if _sha and _sha not in _reachable:
+                            _orphan_candidates.append(_full)
+                else:
+                    # rev-list cannot answer (missing objects, partial
+                    # clone): fall back to the per-(tag, branch) loop so the
+                    # decision stays identical instead of silently standing
+                    # down on data it can partially read.
+                    for _tag in sorted(_tag_list):
+                        _full = "v" + _tag
+                        _rc = subprocess.run(
+                            ["git", "rev-parse", f"{_full}^{{commit}}"],
+                            capture_output=True, text=True, check=False)
+                        if _rc.returncode != 0:
+                            continue
+                        _sha = _rc.stdout.strip()
+                        _on_branch = False
+                        for _br in _remote_branches:
+                            _mb = subprocess.run(
+                                ["git", "merge-base", "--is-ancestor",
+                                 _sha, _br],
+                                capture_output=True, check=False)
+                            if _mb.returncode == 0:
+                                _on_branch = True
+                                break
+                        if not _on_branch:
+                            _orphan_candidates.append(_full)
         _orphan_tags = []
         if _orphan_candidates:
             _remote_names = []

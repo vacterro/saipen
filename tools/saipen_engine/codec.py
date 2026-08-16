@@ -48,14 +48,23 @@ def _bomless_utf16(raw: bytes):
 
 
 def encoding_of(path: Path | str) -> str:
-    """Name the encoding of a file, without decoding it."""
+    """Name the encoding of a file, without decoding it.
+
+    A BOM-carrying UTF-8 file is named `utf-8-sig`, NOT the clean `utf-8`:
+    the release gate's own encoder names it that way, and callers gate on
+    `!= "utf-8"` (validate.py, fast_check.validate_project) to refuse a file
+    the strict parser cannot read whole -- a BOM alone breaks `^---`, so
+    frontmatter silently parses as empty. Naming it clean would let a
+    BOM'd checkpoint through post-write verification while every other tool
+    misreads it.
+    """
     try:
         raw = Path(path).read_bytes()
     except OSError:
         return "unreadable"
     for bom, _dec, clean in _BOMS:
         if raw.startswith(bom):
-            return clean
+            return _dec
     bomless = _bomless_utf16(raw)
     if bomless:
         return bomless
@@ -83,6 +92,50 @@ def _decode(raw: bytes) -> tuple[str, str, bytes]:
             return raw.decode("utf-8", errors="replace"), "utf-8", b""
 
 
+def is_canonical_encoding(raw: bytes) -> bool:
+    """True ONLY for exactly UTF-8 WITHOUT a BOM and without surrogates.
+
+    A BOM is three valid UTF-8 bytes, so a naive strict decode accepts a
+    `utf-8-sig` file -- but every SAIPEN tool reads the checkpoint byte-wise
+    and a leading BOM breaks `^---`, so the frontmatter silently parses as
+    empty. Canonical means clean `utf-8`, never `utf-8-sig` (T-1003 / P1#3)."""
+    if raw[:3] == b"\xef\xbb\xbf":
+        return False
+    try:
+        raw.decode("utf-8", errors="strict")
+        return True
+    except UnicodeDecodeError:
+        return False
+
+
+def checkpoint_paths(root: Path | str) -> list[Path]:
+    """The three canonical checkpoint files, in load order."""
+    root = Path(root)
+    return [root / ".saipen" / name
+            for name in ("STATE.md", "BOARD.md", "LOG.md")]
+
+
+def checkpoint_preflight(root: Path | str) -> str | None:
+    """Refuse a checkpoint that is not readable as canonical UTF-8 (no BOM).
+
+    Returns a human problem string when any canonical file is MISSING or NOT
+    plain UTF-8-without-a-BOM, else None. Callers MUST run this BEFORE any
+    decode/parse/write so a BOM/UTF-16 or absent checkpoint is refused with
+    zero canonical writes, never transcoded implicitly (T-1003 / P1#3, P1#4)."""
+    for path in checkpoint_paths(root):
+        if not path.is_file():
+            return (f"{path.name} is missing -- a SAIPEN checkpoint requires "
+                     f"STATE.md, BOARD.md and LOG.md to all be present")
+        raw = path.read_bytes()
+        if not is_canonical_encoding(raw):
+            enc = encoding_of(path)
+            return (f"{path.name} is {enc}, not canonical UTF-8 without a BOM "
+                     f"-- every SAIPEN tool reads it byte-wise and will fail "
+                     f"differently; rewrite as UTF-8 without a BOM "
+                     f"(KNOWLEDGE/traps.md)")
+    return None
+
+
 @dataclass(frozen=True)
 class Document:
     """Decoded text plus the representation facts needed to write it back."""
@@ -106,11 +159,21 @@ class Document:
     def encode(self, new_text: str) -> bytes:
         """Encode `new_text` (LF-normalised) into the ORIGINAL representation:
         same encoding, same BOM, same newline convention, same final-newline
-        state. Returns the exact bytes a mutation should journal."""
+        state. Returns the exact bytes a mutation should journal.
+
+        Final-newline state is enforced BOTH ways (T-1003): a document whose
+        original ended WITHOUT a terminal newline must not gain one from a
+        mutation that happens to supply trailing LF -- a semantic edit would
+        otherwise silently change representation. The trailing newline (in
+        the document's own convention) is stripped when the original had none.
+        """
         body = new_text
         if self.newline != "\n":
             body = body.replace("\n", self.newline)
-        if not body.endswith(self.newline) and self.final_newline:
+        if not self.final_newline:
+            while body.endswith(self.newline):
+                body = body[:-len(self.newline)]
+        elif not body.endswith(self.newline):
             body += self.newline
         if self.bom:
             return self.bom + body.encode(self.encoding)
@@ -121,6 +184,18 @@ def read_document(path: Path | str) -> Document:
     """Read a file and record its encoding/BOM/newline/final-newline facts."""
     path = Path(path)
     raw = path.read_bytes() if path.is_file() else b""
+    
+    if path.name in ("STATE.md", "BOARD.md", "LOG.md"):
+        if not is_canonical_encoding(raw):
+            return Document(
+                text="---\nphase: CORRUPT\ncorrupt_detail: non-canonical encoding\n---\n",
+                encoding="utf-8",
+                bom=b"",
+                newline="\n",
+                final_newline=True,
+                raw_hash=hashlib.sha256(raw).hexdigest()[:16],
+            )
+            
     text, encoding, bom = _decode(raw)
     newline = "\n"
     for candidate in ("\r\n", "\r", "\n"):

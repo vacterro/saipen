@@ -37,6 +37,25 @@ CODES = frozenset({
     "MALFORMED_PACKAGE",
     "INCOMPLETE_TICKET",
     "INVALID_MANIFEST",
+    # Crew executor codes (T-1003 sweep): HOME_REQUIRED tells the operator the
+    # configured saipen_home is unusable (missing/invalid); CREW_BLOCKED is the
+    # EXPECTED structured result when the crew circuit has no executable
+    # semantic continuation -- inspection is the next action, never an
+    # invented action and never a traceback.
+    "HOME_REQUIRED",
+    "CREW_BLOCKED",
+    # CREW_NOT_READY (T-1003 sweep): the human explicitly asked to publish
+    # while the crew epoch is not terminal (SC-0..SC-10 not all proven), or a
+    # fresh release was requested under an active crew epoch. The refusal is
+    # valid -- the crew either defers the ordinary ticket or finishes its
+    # circuit first; explicit publication under a non-terminal crew is never
+    # authorized by omission.
+    "CREW_NOT_READY",
+    # INVALID_SOURCE_HOME (T-1003 sweep): the shared-contract SOURCE is a
+    # closed mandatory inventory; a broken/incomplete saipen_home refuses with
+    # zero writes and zero obsolete deletion -- absence in a broken source is
+    # never deletion authority.
+    "INVALID_SOURCE_HOME",
     # Release executor codes (T-994)
     "STALE_PLAN",
     "RELEASE_CLOSURE_PENDING",
