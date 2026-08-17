@@ -1,6 +1,7 @@
 # OUTBOX
 
 ## SAIT-008: translated fast-keys callout roll-out -- superseded by SAIT-011
+- **legacy:** true
 - **status:** stale
 - **superseded_by:** SAIT-011 -- README.md prose moved again (cc routes to `saipen continue`, no-install reads INDEX.md), FORCE-FRESH re-pass landed
 - **summary:** Translated fast-keys callout (T-394) deployed across 32 kitchen locales, 3 root mirrors, 28 non-Core guides at v7.146.0-era. Old cc description ("Goal Mode") superseded by convergence semantics in SAIT-011.
@@ -12,9 +13,7 @@
   - guides/ directory (33 guides total, all checked)
 - **payload:**
   - guides/GUIDE_AR.md, GUIDE_DA.md, GUIDE_FI.md, GUIDE_HE.md, GUIDE_IT.md, GUIDE_KO.md, GUIDE_NL.md, GUIDE_NO.md, GUIDE_PL.md, GUIDE_PT.md, GUIDE_SV.md, GUIDE_TH.md, GUIDE_VI.md -- English narrative prose paragraph before fast keys
-- **verified:**
-  - tools/validate.py PASS (0 FAILs) at production time
-  - All 13 guides parse-valid, prose contract satisfied
+- **verified:** PASS -- tools/validate.py PASS (0 FAILs) at production time; all 13 guides parse-valid, prose contract satisfied
 - **instructions:**
   1. Superseded -- collect SAIT-011 instead.
 
@@ -34,11 +33,7 @@
 - **payload:**
   - guides/GUIDE_AR.md, GUIDE_BG.md, GUIDE_CS.md, GUIDE_DA.md, GUIDE_DE.md, GUIDE_EL.md, GUIDE_ES.md, GUIDE_FI.md, GUIDE_FR.md, GUIDE_HE.md, GUIDE_HI.md, GUIDE_HR.md, GUIDE_HU.md, GUIDE_ID.md, GUIDE_IT.md, GUIDE_KO.md, GUIDE_NL.md, GUIDE_NO.md, GUIDE_PL.md, GUIDE_PT.md, GUIDE_RO.md, GUIDE_SK.md, GUIDE_SV.md, GUIDE_TH.md, GUIDE_TR.md, GUIDE_UK.md, GUIDE_VI.md, GUIDE_ZH.md -- fast-keys callout updated to new cc semantics (link-adjusted ../saipen/RFC.md#110-command-surface)
   - Kitchen working copies already carry the new callouts/digests (sub-owned surface, not a collect payload)
-- **verified:**
-  - tools/validate.py PASS: "shortcut callouts aligned across 32 locale sources, 3 mirrors, 33 locale guides, and both root entry docs"; translation-stale WARN cleared (32/32 digests = 7550073e...)
-  - Per-locale check: every kitchen README_*.md carries the new source-digest marker; no 'Goal Mode' cc clause remains in any of the 28 non-Core kitchen READMEs
-  - Guide-sync spot checks (bg/zh/fr): guide callout == locale source callout link-adjusted
-  - freshness triple computed from current tree (source_head 2720d5d1, fingerprint git-delta-v1:c66baf69..., role_revision sha256:f241e6b8...)
+- **verified:** PASS -- tools/validate.py PASS: "shortcut callouts aligned across 32 locale sources, 3 mirrors, 33 locale guides, and both root entry docs"; translation-stale WARN cleared (32/32 digests = 7550073e...); per-locale marker check, guide-sync spot checks (bg/zh/fr), and freshness triple all satisfied
 - **instructions:**
   1. Verify source_head: `git rev-parse --short HEAD` == 2720d5d1 and `python tools/freshness.py` triple matches the fields above.
   2. Validate: `python tools/validate.py` -- expect no FAILs; translation-stale must not list any locale.
