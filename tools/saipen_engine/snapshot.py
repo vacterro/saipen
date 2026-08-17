@@ -13,8 +13,6 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
-from . import codec
-
 
 def _sha256(path: Path) -> str:
     try:
@@ -60,16 +58,15 @@ class ProjectSnapshot:
         root = Path(project_root)
         state = root / ".saipen" / "STATE.md"
         board = root / ".saipen" / "BOARD.md"
-        log = root / ".saipen" / "LOG.md"
-        from .log import log_tail_event
+        from .log import read_history_snapshot
+        history = read_history_snapshot(root)
         return ProjectSnapshot(
             project_root=root,
             project_identity=canonical_identity(root),
             state_hash=_sha256(state),
             board_hash=_sha256(board),
-            log_hash=_sha256(log),
-            log_tail=log_tail_event(codec.read_doc(log)) if log.is_file()
-            else None,
+            log_hash=history.hash,
+            log_tail=history.tail,
             head=git_head(root),
         )
 

@@ -15,10 +15,14 @@ description: >
   the precedence rule below. Under `auto` only:
   Reply-language precedence: explicit current user prose (Estonian/English/Russian) > clearly Russian primary repository for bare/ambiguous input > Estonian default; another detected language uses English.
   Voice persistence: caveman-дед applies to every response until explicit "stop caveman" or "normal mode".
-  IMPORTANT - Path Resolution: Before executing any commands or reading files,
-  determine this skill's directory based on the absolute path where you loaded
-  this SKILL.md file (provided in your system prompt). Do not run disk searches
-  for BOOT.md. Alternatively, read `saipen_home` from `.saipen/STATE.md`.
+  IMPORTANT - Path Resolution: determine this skill's directory from the
+  absolute path where you loaded this SKILL.md file (provided in your system
+  prompt) — the anchor for `protocol_dir`/`saipen_home`. Do NOT run disk
+  searches for BOOT.md and do NOT scan the workspace, its parents or siblings
+  for `.saipen/`: the SAIPEN home is often a sibling of the workspace. Project
+  memory is exactly `<project_root>/.saipen/` (BOOT.md step 2); absent there
+  means "not bootstrapped", never "no saipen state to load". Alternatively,
+  read `saipen_home` from a bound `.saipen/STATE.md`.
 ---
 
 # saipen -- skill adapter

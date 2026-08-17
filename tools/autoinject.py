@@ -32,7 +32,9 @@ import json
 import os
 import subprocess
 import sys
-from pathlib import Path, PurePosixPath
+from pathlib import Path
+
+from saipen_engine.manifest import copy_tree_members, manifest_source
 
 HOME = Path(__file__).resolve().parent.parent
 STAMP = ".saipen_injected"
@@ -48,19 +50,7 @@ TARGETS = [
 
 
 def _manifest_source(raw: object) -> Path:
-    if not isinstance(raw, str) or not raw or "\\" in raw:
-        raise RuntimeError(f"unsafe runtime manifest source: {raw!r}")
-    relative = PurePosixPath(raw)
-    if relative.is_absolute() or ".." in relative.parts:
-        raise RuntimeError(f"unsafe runtime manifest source: {raw!r}")
-    source = (HOME / Path(*relative.parts)).resolve()
-    try:
-        source.relative_to(HOME.resolve())
-    except ValueError as exc:
-        raise RuntimeError(
-            f"runtime manifest source escapes repository root: {raw!r}"
-        ) from exc
-    return source
+    return manifest_source(HOME, raw)
 
 
 def _is_within(path: Path, parent: Path) -> bool:
@@ -87,9 +77,7 @@ def _manifest_surface() -> list[tuple[Path, bool]]:
         surface: list[tuple[Path, bool]] = []
         tree_roots: list[Path] = []
         for entry in trees:
-            source = _manifest_source(entry["src"])
-            if not source.is_dir() or source.is_symlink():
-                raise RuntimeError(f"runtime manifest tree missing or symlinked: {entry['src']}")
+            source, _members = copy_tree_members(HOME, entry["src"])
             surface.append((source, True))
             tree_roots.append(source)
         for entry in entries:

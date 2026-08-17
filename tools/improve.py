@@ -923,7 +923,7 @@ def _journaled_write(path: Path, content: str, kind: str,
         root = root.parent
     root = root.parent  # project root (parent of .saipen)
     rel = path.relative_to(root).as_posix()
-    op_id = f"{kind}-" + uuid.uuid4().hex[:8]
+    op_id = f"{kind}-" + uuid.uuid4().hex
     doc = codec.read_document(path)
     content_bytes = doc.encode(content)
     live = _hash_file(path) if path.is_file() else ""
@@ -1272,7 +1272,16 @@ def portable_project_key(project_root: Path) -> str:
     never be persisted inside portable Improve evidence. This key is derived
     from the Git remote origin when present (owner/repo, machine-independent),
     else from the project directory name -- either way a slug safe for
-    cycle_id derivation, with no drive letter or local mount leak."""
+    cycle_id derivation, with no drive letter or local mount leak.
+
+    Scope note (T-1003 carrier-loss wave): this key is a HUMAN-READABLE
+    Improve report slug, NOT the authoritative durable project identity. Two
+    no-git projects sharing a folder name or two forks sharing a remote can
+    collide here, and remotes can change, so it must never be used to bind
+    recovery/evidence authority. Recovery and evidence bind to
+    `paths.project_lineage_identity()` -- the tracked, random, durable
+    `.saipen/IDENTITY.md` lineage that survives moves, clones and forks.
+    """
     import subprocess
     root = Path(project_root)
     remote = ""
@@ -1646,7 +1655,7 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
         targets.append({"path": report_rel, "role": "report",
                         "content": report_text})
         preconditions[report_rel] = _hash_file(report)
-        op_id = "improve-admit-" + uuid.uuid4().hex[:8]
+        op_id = "improve-admit-" + uuid.uuid4().hex
         committed = run_mutation(
             root, op_id, "improve_admit", seat, _identity(root),
             hash_bytes(f"{active_cycle}:{seat}:{selected_role}".encode("utf-8")),

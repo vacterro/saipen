@@ -217,7 +217,26 @@ NEEDS_REPAIR, PATH_ESCAPE, INVALID_ID, ACTIVE_IMPROVE_CYCLE,
 INVALID_DISPOSITION, PACKAGE_INCOMPLETE, MALFORMED_PACKAGE,
 INCOMPLETE_TICKET, INVALID_MANIFEST, STALE_PLAN, RELEASE_CLOSURE_PENDING,
 TAG_CONFLICT, FIRST_PUBLISH_WAIT, NO_PUBLISH_MODE,
-SOURCE_SCOPE_MISSING, RELEASE_FAILED. Error messages name one exact
+SOURCE_SCOPE_MISSING, RELEASE_FAILED. `HOME_REQUIRED` is the crew refusal
+when STATE.saipen_home is missing or unusable -- the executable next action
+is `saipen rebind-home <candidate>`: the ONE mechanical rebind path that
+proves the candidate install (readable `VERSION`, compatible major, `BOOT`
+layout, required protocol files) and journals a single narrowly-owned
+`STATE.saipen_home` pointer update (T-1003 carrier-loss wave). `CREW_BLOCKED` is the EXPECTED crew
+result when the circuit has no executable semantic continuation (an
+unsatisfied stage needs inspection, not invention): the result carries the
+unsatisfied `stage`/`role`/`reason` and an inspect-required next action --
+a legitimate crew blocker is a structured result, never a traceback.
+`CREW_NOT_READY` is the release executor's refusal when the human explicitly
+asks to publish while the crew epoch is not terminal: an ordinary ticket under
+an active crew epoch is DEFERRED to the crew (never silently published), and a
+terminal publication requires SC-0..SC-10 all explicitly satisfied -- missing
+evidence is never PASS (T-1003 hostile findings 3/4/6).
+`INVALID_SOURCE_HOME` is the shared-contract refusal when the configured
+saipen_home is missing any REQUIRED source item (PROTOCOL.md/README.md/
+crew.md, the complete TEMPLATE surface, or any built-in role charter):
+zero writes, zero obsolete deletion, and the operator refreshes the install.
+Error messages name one exact
 refusal and the executable next action. `RELEASE_FAILED` is the single stable
 code every public release refusal that is not a named preflight gate
 collapses to (subprocess/staging/commit/push/tag/receipt failures): the

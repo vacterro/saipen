@@ -7,16 +7,30 @@ The worktree-before-common order is not a detail — asking git-common first onc
 made the validator read a different tree than the agent was editing and report
 green for the wrong repository.
 
-`project_identity` exists for the lock and the journal: two paths that reach the
-same project (a symlink, a substituted drive, a case-different Windows path)
-must produce ONE identity, or the single-writer guarantee is a single writer per
-spelling.
+TWO identities, never one (T-1003 carrier-loss wave):
+
+1. `project_identity` / `runtime_lock_identity` — machine-local
+   (`os.path.realpath` + `normcase`). It exists for the lock and journal
+   runtime binding: two paths that reach the same project (a symlink, a
+   substituted drive, a case-different Windows path) must produce ONE identity,
+   or the single-writer guarantee is a single writer per spelling. It is NEVER
+   durable portable evidence: moving the project changes it.
+
+2. `project_lineage_identity` — a durable PORTABLE lineage stored canonically
+   in the tracked `.saipen/IDENTITY.md`. It survives directory moves, machine
+   replacement, Git clone and `saipen export`, and differs between unrelated
+   initialized projects (a random lineage id, so two no-git projects sharing a
+   folder name or two forks sharing a remote are still distinct). Journals,
+   evidence and recovery bind to THIS identity. Moving the carrier must not
+   change the meaning of the project.
 """
 
 from __future__ import annotations
 
 import os
+import re
 import subprocess
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -27,6 +41,9 @@ LOG_NAME = "LOG.md"
 LOGS_DIR = "logs"
 LOCKS_DIR = "locks"
 RECOVERY_OPS_DIR = "recovery/ops"
+IDENTITY_NAME = "IDENTITY.md"
+LINEAGE_FIELD = "project_lineage"
+LINEAGE_RE = re.compile(r"^lineage-[0-9a-f]{32}$")
 
 
 def _git_from(cwd: str | Path, *args: str) -> tuple[int, str]:
@@ -64,9 +81,9 @@ def resolve_project_root(start: Path | None = None,
             root = start / root
         root = root.resolve()
         if not root.is_dir():
-            return None, f"explicit project root is not a directory: {root}"
+            return None, f"explicit --project-root is not a directory: {root}"
         if not (root / SAIPEN_DIR).is_dir():
-            return None, f"explicit project root has no .saipen/: {root}"
+            return None, f"explicit --project-root has no .saipen/ directory: {root}"
         return root, "explicit"
 
     rc, top_text = _git_from(start, "rev-parse", "--show-toplevel")
@@ -92,24 +109,111 @@ def resolve_project_root(start: Path | None = None,
                 return root, source
         return None, (f"cwd belongs to Git worktree {worktree_root} but its "
                       f"owning repository has no .saipen/; refusing to guess "
-                      f"or create a second one")
+                      f"or create a second .saipen/. Run from the intended "
+                      f"project or pass --project-root PATH")
 
     root = _nearest_checkpoint_root(start)
     if root is not None:
         return root, "ancestor"
     return None, ("cwd has no owning .saipen/; refusing to guess or create "
-                  "one")
+                  "one. Run from the intended project or pass "
+                  "--project-root PATH")
 
 
 def project_identity(root: Path) -> str:
-    """One stable identity per project, whatever path spelled it.
+    """One stable RUNTIME identity per project, whatever path spelled it.
 
     `os.path.realpath` collapses symlinks and junctions; `normcase` collapses
     the case and separator differences Windows treats as the same file. Without
     both, `V:\\proj` and `v:/proj/` are two writers holding two locks over one
     set of files.
+
+    This is the machine-local lock/journal-runtime identity. It must never be
+    treated as durable portable evidence: moving the project changes it. Durable
+    portable binding uses `project_lineage_identity` instead.
     """
     return os.path.normcase(os.path.realpath(str(root)))
+
+
+def runtime_lock_identity(root: Path | str) -> str:
+    """Machine-local lock identity: aliases of one project share it.
+
+    Never persisted as durable evidence. Two path spellings of one project
+    (symlink, junction, case difference) must collapse to one value so two
+    spellings cannot take two writer locks.
+    """
+    return project_identity(Path(root))
+
+
+def new_project_lineage() -> str:
+    """A fresh portable project lineage id (random: unrelated projects differ
+    even when they share a remote, a folder name, or both)."""
+    return "lineage-" + uuid.uuid4().hex
+
+
+def identity_file_content(lineage: str) -> str:
+    """Canonical tracked content of `.saipen/IDENTITY.md`."""
+    return (f"---\n{LINEAGE_FIELD}: {lineage}\n---\n")
+
+
+def parse_identity_content(text: str) -> tuple[str | None, str | None]:
+    """STRICT canonical parse of `.saipen/IDENTITY.md` content (T-1003
+    carrier-loss wave).
+
+    The canonical form is exactly one frontmatter fence holding exactly one
+    `project_lineage:` field naming a lineage-id:
+
+        ---
+        project_lineage: lineage-<hex32>
+        ---
+
+    Duplicate fields, a missing/broken fence, a second lineage field, or any
+    other body content ("body garbage") are all INVALID -- a carrier is the
+    project's only durable portable identity, so leniency here is how one
+    project silently becomes another. Returns (lineage, None) on success and
+    (None, error) on any malformation.
+    """
+    if not text or not text.strip():
+        return None, "identity file is empty"
+    lines = text.splitlines()
+    if lines[0].strip() != "---":
+        return None, "missing opening --- frontmatter fence"
+    if len(lines) < 3 or lines[-1].strip() != "---":
+        return None, "missing closing --- frontmatter fence"
+    body = lines[1:-1]
+    body_lines = [line for line in body if line.strip()]
+    if len(body_lines) != 1:
+        return None, ("canonical IDENTITY.md holds exactly one lineage field "
+                      "inside the fence; found "
+                      f"{len(body_lines)} non-empty line(s)")
+    line = body_lines[0]
+    match = re.fullmatch(rf"{re.escape(LINEAGE_FIELD)}:\s*(\S+)\s*", line)
+    if not match:
+        return None, f"unexpected identity body line {line!r}"
+    value = match.group(1)
+    if not LINEAGE_RE.match(value):
+        return None, f"lineage value {value!r} fails the lineage-id grammar"
+    return value, None
+
+
+def project_lineage_identity(root: Path | str) -> str | None:
+    """The durable portable lineage of this project, or None.
+
+    Reads the tracked `.saipen/IDENTITY.md` and validates the canonical
+    carrier grammar (one fenced lineage field, no body garbage). None means:
+    project not yet migrated, or the identity file is missing/malformed. A
+    missing/malformed lineage is fail-closed material for NEW strict receipts
+    -- it must never silently become "same project".
+    """
+    path = Path(root) / SAIPEN_DIR / IDENTITY_NAME
+    if not path.is_file():
+        return None
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    lineage, _error = parse_identity_content(text)
+    return lineage
 
 
 @dataclass(frozen=True)
@@ -136,10 +240,8 @@ class ProjectPaths:
 
     @property
     def sealed_logs(self) -> list[Path]:
-        directory = self.saipen / LOGS_DIR
-        if not directory.is_dir():
-            return []
-        return sorted(directory.glob("LOG-*.md"))
+        from .log import history_paths
+        return [p for p in history_paths(self.root) if p.name != "LOG.md"]
 
     @property
     def lock(self) -> Path:

@@ -147,11 +147,37 @@ def merge_profile(current: list[dict] | list[str],
     return result
 
 
-def remove_preference(current: list[dict], text: str) -> list[dict]:
-    """Remove preferences whose text matches the given text, ignoring category."""
+def remove_preference(current: list[dict], text: str,
+                      category: str | None = None) -> list[dict]:
+    """Remove one preference by its identity `(category, text)`.
+
+    The preference identity is the pair, so removal must be category-aware:
+    `[ui] X` and `[workflow] X` are two distinct entries and one remove must
+    not bulk-delete both. `category=None` means the caller did NOT supply a
+    category: a unique text match may be removed, but an AMBIGUOUS
+    multi-category text match must refuse (the caller must scope it) instead
+    of silently deleting every entry with that text.
+
+    Returns (new_list, refusal-or-None): refusal is set when the remove is
+    ambiguous and no write may happen.
+    """
     target = _canonical(text)
-    return [preference for preference in current
-            if _canonical(preference["text"]) != target]
+    matches = [p for p in current if _canonical(p.get("text", "")) == target]
+    if not matches:
+        return current, None
+    if category is not None:
+        wanted = _canonical(category)
+        return ([p for p in current
+                 if not (_canonical(p.get("text", "")) == target
+                         and _canonical(p.get("category", "")) == wanted)],
+                None)
+    if len(matches) > 1:
+        cats = sorted({_canonical(p.get("category", "")) for p in matches})
+        return (current,
+                f"remove is ambiguous: {len(matches)} entries share text "
+                f"{text!r} across categories {cats}; pass "
+                "--category <name> to scope the removal")
+    return ([p for p in current if p not in matches], None)
 
 
 def validate_profile(text: str) -> list[str]:
@@ -234,7 +260,7 @@ def write_profile(project_root: Path | str, text: str,
     root = Path(project_root)
     path = root / PROFILE_PATH
     rel = PROFILE_PATH.replace("\\", "/")
-    op_id = f"userperson-{uuid.uuid4().hex[:8]}"
+    op_id = f"userperson-{uuid.uuid4().hex}"
     doc = codec.read_document(path)
     content_bytes = doc.encode(text)
     before = _hash_file(path) if path.is_file() else ""
@@ -245,5 +271,38 @@ def write_profile(project_root: Path | str, text: str,
             [{"path": rel, "role": "generic", "content": content_bytes,
               "before_hash": before,
               "after_hash": hash_bytes(content_bytes)}],
+            preconditions={rel: before},
+            verification_policy="userperson")
+
+
+def reset_profile(project_root: Path | str, agent: str = "saipen") -> dict:
+    """Delete the profile as ONE journaled `delete_file` operation.
+
+    Reset is a mutation with a real before_hash and an empty after_hash; the
+    committed target leaves the file ABSENT (the canonical OFF state), and
+    recovery rolls the deletion forward the same way. There is deliberately
+    NO post-commit unlink: a crash between COMMIT and unlink previously left
+    a state recovery could never complete (T-1003 operational integrity).
+    """
+    import uuid
+    from saipen_engine.journal import _hash_file, hash_bytes, run_mutation
+    from saipen_engine.lock import project_writer_lock
+    from saipen_engine.paths import project_identity
+
+    root = Path(project_root)
+    path = root / PROFILE_PATH
+    rel = PROFILE_PATH.replace("\\", "/")
+    op_id = f"userperson-reset-{uuid.uuid4().hex}"
+    if not path.is_file():
+        return {"ok": False, "code": "TICKET_NOT_FOUND", "op_id": op_id,
+                "recovery_required": False,
+                "detail": "no profile to reset"}
+    before = _hash_file(path)
+    with project_writer_lock(root):
+        return run_mutation(
+            root, op_id, "userperson_reset", agent, project_identity(root),
+            hash_bytes(rel.encode("utf-8")),
+            [{"path": rel, "role": "generic", "action": "delete_file",
+              "before_hash": before, "after_hash": ""}],
             preconditions={rel: before},
             verification_policy="userperson")

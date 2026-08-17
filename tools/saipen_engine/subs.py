@@ -2,22 +2,37 @@
 
 Mechanizes the DETERMINISTIC parts of the SubSaipen lifecycle (extensions/subs/
 PROTOCOL.md section 7): manifest parsing, spawn, list, status, adopt, pause,
-resume, sync, clean preflight, collect preflight, and the one built-in crew
-registry the crew planner/gate/docs/tests all consume.
+resume, sync, evidence-gated clean, INTAKE (sub collect), Core DISPOSITION
+(sub dispose), and the one built-in crew registry the crew planner/gate/docs/
+tests all consume.
 
 The mechanical truth contract (SAICREW):
 
 - ONE strict MANIFEST parser is used by every consumer (list/status/collect/
   spawn/adopt/sync/crew/validator). A malformed manifest is INVALID_MANIFEST,
   never "skip bad line and continue".
+- KNOWN INVALID BASE MUST NOT BE MUTATED: every predictable spawn
+  prerequisite (strict MANIFEST grammar, shared-contract sync PLAN, TEMPLATE,
+  role evidence, proposed MANIFEST/STATE/BOARD grammar) is validated READ-ONLY
+  before any write; dry-run consumes the SAME plans/verdicts as APPLY, so a
+  refusal APPLY would reach is always visible to --dry-run.
 - The PROJECT-LOCAL charter (`.saipen/extensions/subs/<name>.md`) is the only
   role-revision authority for an attached project. The installation charter is
   only the `saipen sub sync` source. Missing local evidence is
   SYNC_REQUIRED / ROLE_EVIDENCE_UNAVAILABLE, never a silent fallback.
 - A generic `sai*` worker's role_revision is the deterministic digest of the
   project-local PROTOCOL.md (never blank).
+- INTAKE != REVIEW (Wave 2): `sub collect` only queues the hypothesis as an
+  ordinary Core review ticket with a durable collect receipt binding package
+  identity -> ticket; the package stays READY. `sub dispose` writes the
+  `reviewed` claim ONLY after the linked Core ticket is terminal. Health
+  derivation reports REVIEW_PENDING between the two, never CURRENT.
+- `sub clean` performs evidence-gated DELETION (archive, unregister, remove)
+  after a deterministic blocker scan; `sub clean --dry-run`/preflight are the
+  read-only windows into that same evidence.
 - Every mutating sub command honors `dry_run`: same validation, same proposed
-  outcome, ZERO writes/LOG/STATE/MANIFEST/journal.
+  outcome, ZERO writes/LOG/STATE/MANIFEST/journal. Successful dry-run results
+  use plan codes (SUB_*_PLAN) with `would_result`, never a past-tense success.
 - Board/STATE are validated as one coherent machine: DONE cannot coexist with
   TODO/DOING/unresolved BLOCKED, duplicate headings/IDs fail, at most one
   DOING, checkbox matches section.
@@ -108,26 +123,49 @@ CREW_PRODUCERS = tuple(role.name for role in CREW_ROLES
                        if role.role_class == "producer")
 CREW_REGISTRY = CREW_ROLES
 
-# The serial full-platoon convergence circuit (SAICREW sections O/P). The
-# stage ids match the spec exactly; a stage's mechanical precondition is what
-# the planner and the `--gate crew` validator evaluate.
+# The serial full-platoon convergence circuit (SAICREW sections O/P). One
+# immutable record per stage: (id, name, human condition prose, owner_kind,
+# condition_key). The machine evaluator dispatches ONLY on condition_key and
+# owner_kind -- the prose column is display, never machine truth (Wave 2 item
+# 10: a stage description may explain, it may not silently redefine the
+# condition). Docs parity checks id, name, owner_kind and condition_key, so a
+# doc that redefines a condition is mechanically detectable.
 CREW_STAGES = (
     ("SC-0", "recover-sync",
-     "no unresolved recovery; shared contract surface current; strict MANIFEST"),
-    ("SC-1", "instances", "required durable crew instances exist"),
-    ("SC-2", "saihunt", "saihunt board valid, no pending work, current evidence"),
-    ("SC-3", "saitest", "saitest board valid, no pending work, current evidence"),
-    ("SC-4", "saipython", "saipython board valid, no pending work, current evidence"),
-    ("SC-5", "saiui", "saiui board valid, no pending work, current evidence"),
-    ("SC-6", "core-collect", "core-review packages reviewed or disposed"),
-    ("SC-7", "core-converge", "Core board/tests/HUNT at fixed point"),
-    ("SC-8", "saitranslate", "EE package ready + current against source identity"),
-    ("SC-9", "saiwiki", "QQ package ready + current against source identity"),
-    ("SC-10", "final-fixed-point", "all crew evidence re-verified after producer integration"),
-    ("SC-11", "ship", "exactly one final ship through the canonical release executor"),
-    ("SC-12", "post-ship", "post-ship certification bound to the shipped HEAD"),
+     "no unresolved recovery; shared contract surface current; strict MANIFEST",
+     "CORE", "CORE_RECOVERY_CURRENT"),
+    ("SC-1", "instances", "required durable crew instances exist",
+     "CORE", "ROSTER_CURRENT"),
+    ("SC-2", "saihunt", "saihunt board valid, no pending work, current evidence",
+     "SENSOR", "SENSOR_EVIDENCE_CURRENT"),
+    ("SC-3", "saitest", "saitest board valid, no pending work, current evidence",
+     "SENSOR", "SENSOR_EVIDENCE_CURRENT"),
+    ("SC-4", "saipython", "saipython board valid, no pending work, current evidence",
+     "SENSOR", "SENSOR_EVIDENCE_CURRENT"),
+    ("SC-5", "saiui", "saiui board valid, no pending work, current evidence",
+     "SENSOR", "SENSOR_EVIDENCE_CURRENT"),
+    ("SC-6", "core-collect",
+     "each core-review package durably ingested; reviewed claim only after "
+     "the linked Core ticket is terminal (INTAKE != REVIEW)",
+     "CORE", "SENSOR_INTAKE_DISPOSED"),
+    ("SC-7", "core-converge",
+     "canonical Core convergence verdict current against one source identity; "
+     "working tree fully attributed",
+     "CORE", "CORE_CONVERGENCE_CURRENT"),
+    ("SC-8", "saitranslate", "EE prepared AND integrated",
+     "PRODUCER", "PRODUCER_INTEGRATION_CURRENT"),
+    ("SC-9", "saiwiki", "QQ prepared AND integrated",
+     "PRODUCER", "PRODUCER_INTEGRATION_CURRENT"),
+    ("SC-10", "final-fixed-point",
+     "all crew evidence re-verified after producer integration",
+     "CORE_AND_SENSORS", "FINAL_FIXED_POINT_CURRENT"),
+    ("SC-11", "ship", "exactly one COMMITTED verified release binds the epoch",
+     "RELEASE_EXECUTOR", "RELEASE_VERIFIED"),
+    ("SC-12", "post-ship", "post-ship certification bound to the shipped HEAD",
+     "CORE", "POST_SHIP_CERTIFIED"),
     ("SC-13", "finalize",
-     "canonical finalizer clears crew target; final --gate crew passes"),
+     "canonical finalizer clears crew target; final --gate crew passes",
+     "CORE_FINALIZER", "CREW_FINALIZED"),
 )
 
 # ---------------------------------------------------------------------------
@@ -136,6 +174,7 @@ CREW_STAGES = (
 HEALTH_CURRENT = "CURRENT"
 HEALTH_WORK_PENDING = "WORK_PENDING"
 HEALTH_READY_FOR_REVIEW = "READY_FOR_REVIEW"
+HEALTH_REVIEW_PENDING = "REVIEW_PENDING"
 HEALTH_BLOCKED = "BLOCKED"
 HEALTH_STALE = "STALE"
 HEALTH_INVALID = "INVALID"
@@ -409,12 +448,29 @@ def _registered_entry(root: Path, name: str) -> tuple[bytes | None,
 # ---------------------------------------------------------------------------
 def _shared_contract_source(saipen_home: str) -> tuple[list[dict], list[dict],
                                                         str | None]:
-    """Return file targets plus exact file/directory source inventory."""
+    """Return file targets plus exact file/directory source inventory.
+
+    The source is a CLOSED mandatory inventory (T-1003 sweep): PROTOCOL.md,
+    README.md, crew.md, the complete TEMPLATE required surface and every
+    built-in CREW_ROLES charter MUST exist. Absence in a broken source is
+    NEVER evidence that a shipped contract was deliberately removed -- a
+    missing required source refuses with INVALID_SOURCE_HOME and zero writes.
+    """
     src = Path(saipen_home) / "extensions" / "subs"
-    if not (src / "PROTOCOL.md").is_file():
-        return [], [], (f"saipen_home stale: {saipen_home} -- "
-                        "extensions/subs/PROTOCOL.md missing; refresh the "
-                        "install before syncing")
+    required = [*_SHARED_FILES,
+                *(f"{role.name}.md" for role in CREW_ROLES)]
+    missing = [name for name in required if not (src / name).is_file()]
+    template_required = ("STATE.md", "BOARD.md", "LOG.md", "kitchen/OUTBOX.md")
+    missing_template = [
+        f"TEMPLATE/{path}" for path in template_required
+        if not (src / "TEMPLATE" / path).is_file()]
+    if missing or missing_template:
+        return [], [], (
+            "INVALID_SOURCE_HOME: saipen_home "
+            f"{saipen_home!r} is missing required shared-contract source: "
+            + ", ".join(missing + missing_template)
+            + "; refresh the install before syncing -- absence in a broken "
+              "source is not deletion authority")
     targets: list[dict] = []
     inventory: list[dict] = []
 
@@ -542,7 +598,9 @@ def _inventory_key(inventory: list[dict]) -> tuple:
 
 
 def _latest_sub_sync_inventory(
-        root: Path) -> tuple[dict | None, list[dict] | None, str]:
+        root: Path,
+        records: tuple[dict, ...] | None = None) \
+        -> tuple[dict | None, list[dict] | None, str]:
     """Durable canonical sub_sync receipt selection (T-1001).
 
     The successor is the receipt whose OWN created_at is newest, never the
@@ -558,20 +616,43 @@ def _latest_sub_sync_inventory(
     if not ops.is_dir():
         return None, None, "none"
     candidates = []
-    for manifest in ops.glob("*/operation.json"):
-        try:
-            record = json.loads(manifest.read_text(encoding="utf-8"))
-            inventory = _normalize_owned_inventory(
-                (record.get("receipt_metadata") or {}).get(
-                    "owned_source_inventory"))
-            if (record.get("operation") == "sub_sync"
-                    and record.get("status") == "COMMITTED"
-                    and inventory is not None):
-                candidates.append((record.get("created_at", ""),
-                                   record.get("op_id", ""), record, inventory,
-                                   manifest.relative_to(root).as_posix()))
-        except (OSError, json.JSONDecodeError, AttributeError):
-            continue
+    if records is not None:
+        for record in records:
+            try:
+                inventory = _normalize_owned_inventory(
+                    (record.get("receipt_metadata") or {}).get(
+                        "owned_source_inventory"))
+                if (record.get("operation") == "sub_sync"
+                        and record.get("status") == "COMMITTED"
+                        and inventory is not None):
+                    candidates.append((record.get("created_at", ""),
+                                       record.get("op_id", ""), record,
+                                       inventory, ""))
+            except (AttributeError, TypeError):
+                continue
+        # The pre-captured records carry no per-receipt path; reconstruct the
+        # receipt path from the op_id for the returned receipt when needed.
+        _rel = root / ".saipen" / "recovery" / "ops"
+        candidates = [(ts, op, rec, inv,
+                       (_rel / str(op) / "operation.json")
+                       .relative_to(root).as_posix())
+                      for ts, op, rec, inv, _p in candidates]
+    else:
+        for manifest in ops.glob("*/operation.json"):
+            try:
+                record = json.loads(manifest.read_text(encoding="utf-8"))
+                inventory = _normalize_owned_inventory(
+                    (record.get("receipt_metadata") or {}).get(
+                        "owned_source_inventory"))
+                if (record.get("operation") == "sub_sync"
+                        and record.get("status") == "COMMITTED"
+                        and inventory is not None):
+                    candidates.append((record.get("created_at", ""),
+                                       record.get("op_id", ""), record,
+                                       inventory,
+                                       manifest.relative_to(root).as_posix()))
+            except (OSError, json.JSONDecodeError, AttributeError):
+                continue
     if not candidates:
         return None, None, "none"
     valid = [c for c in candidates if _valid_durable_timestamp(c[0])]
@@ -638,8 +719,52 @@ def _obsolete_contract_status(root: Path, prior: list[dict] | None,
     return obsolete, sorted(set(conflicts))
 
 
+def _unexpected_inherited(root: Path, source_inventory: list[dict],
+                          prior_inventory: list[dict] | None = None
+                          ) -> tuple[list[str], list[str]]:
+    """Files/directories present under an inherited directory locally that the
+    source inventory does NOT own. Unknown extras are never auto-deleted --
+    they surface here so the shared contract reads NOT current (T-1003). A
+    path the PRIOR receipt inventory owns is either current or obsolete --
+    never unexpected; only a path owned by neither source nor any committed
+    receipt is a foreign extra."""
+    owned_files = {item["path"] for item in source_inventory
+                   if item["kind"] == "file"}
+    owned_dirs = {item["path"] for item in source_inventory
+                  if item["kind"] == "directory"}
+    for item in prior_inventory or ():
+        if item["kind"] == "file":
+            owned_files.add(item["path"])
+        else:
+            owned_dirs.add(item["path"])
+    unexpected_files = set()
+    unexpected_dirs = set()
+    for item in source_inventory:
+        if item["kind"] != "directory":
+            continue
+        directory = _owned_local_path(root, item["path"])
+        if not directory.is_dir():
+            continue
+        for current, dirnames, filenames in os.walk(
+                directory, topdown=True, followlinks=False):
+            rel_current = Path(current).relative_to(
+                root / SUBS_REL).as_posix()
+            for dirname in dirnames:
+                rel = f"{rel_current}/{dirname}" if rel_current != "." \
+                    else dirname
+                if rel not in owned_dirs:
+                    unexpected_dirs.add(rel)
+            for filename in filenames:
+                rel = f"{rel_current}/{filename}" if rel_current != "." \
+                    else filename
+                if rel not in owned_files:
+                    unexpected_files.add(rel)
+    return sorted(unexpected_files), sorted(unexpected_dirs)
+
+
 def shared_contract_status(project_root: Path | str,
-                           saipen_home: str) -> dict:
+                           saipen_home: str,
+                           records: tuple[dict, ...] | None = None) -> dict:
     """The exact shared-contract drift report.
 
     Returns {"current", "invalid_source_home", "missing_files",
@@ -655,7 +780,8 @@ def shared_contract_status(project_root: Path | str,
                 "obsolete_conflicts": [], "inventory_known": False,
                 "inventory_establishment": False,
                 "inventory_lineage": "unknown"}
-    receipt, prior_inventory, lineage = _latest_sub_sync_inventory(root)
+    receipt, prior_inventory, lineage = _latest_sub_sync_inventory(
+        root, records)
     obsolete, conflicts = _obsolete_contract_status(
         root, prior_inventory, source_inventory)
     missing, stale, missing_dirs = [], [], []
@@ -670,17 +796,24 @@ def shared_contract_status(project_root: Path | str,
             continue
         if not live:
             missing_dirs.append(rel)
-        elif not live.startswith("delete-tree-sha256:"):
+        elif live != item["source_hash"]:
             stale.append(rel)
+    unexpected_files, unexpected_dirs = _unexpected_inherited(
+        root, source_inventory, prior_inventory)
     inventory_changed = prior_inventory != source_inventory
     return {
         "current": (receipt is not None and not inventory_changed
                     and not missing and not stale and not missing_dirs
-                    and not conflicts),
+                    and not conflicts and not unexpected_files
+                    and not unexpected_dirs),
         "invalid_source_home": None,
         "missing_files": sorted(missing),
         "missing_dirs": sorted(missing_dirs),
         "stale_files": sorted(stale),
+        "unexpected_files": sorted(
+            f"{SUBS_REL}/{path}" for path in unexpected_files),
+        "unexpected_dirs": sorted(
+            f"{SUBS_REL}/{path}" for path in unexpected_dirs),
         "obsolete_files": sorted(f"{SUBS_REL}/{item['path']}" for item in obsolete
                                  if item["kind"] == "file"),
         "obsolete_dirs": sorted(
@@ -713,10 +846,9 @@ def verify_sub_sync_receipt(root: Path, receipt_metadata: dict | None) -> list[s
         if item["kind"] == "file" and live != item["source_hash"]:
             errors.append(f"{SUBS_REL}/{item['path']}: live {live!r} != source "
                           f"{item['source_hash']!r}")
-        elif item["kind"] == "directory" and not live.startswith(
-                "delete-tree-sha256:"):
+        elif item["kind"] == "directory" and live != item["source_hash"]:
             errors.append(f"{SUBS_REL}/{item['path']}: inherited directory "
-                          f"missing or unsafe ({live!r})")
+                          f"live {live!r} != source {item['source_hash']!r}")
     for item in reconciled:
         if not isinstance(item, dict) or _normalize_owned_inventory([{
                 "path": item.get("path"), "kind": item.get("kind"),
@@ -835,7 +967,11 @@ def parse_sub_board(text: str, expected_role: str | None = None,
     headings: list[str] = []
     errors: list[str] = []
     section = None
+    legacy_history = False
     for line_no, line in enumerate(text.splitlines(), 1):
+        if line.strip().startswith("# LEGACY"):
+            legacy_history = True
+            continue
         if line.startswith("## "):
             section = line.strip()
             headings.append(section)
@@ -868,10 +1004,17 @@ def parse_sub_board(text: str, expected_role: str | None = None,
                 continue
             prefix = tid.rsplit("-", 1)[0]
             if expected_prefix is not None and prefix != expected_prefix:
-                errors.append(
-                    f"ticket {tid} has prefix {prefix}-, expected "
-                    f"{expected_prefix}- for {expected_role or 'declared role'}")
-                continue
+                if not legacy_history:
+                    errors.append(
+                        f"ticket {tid} has prefix {prefix}-, expected "
+                        f"{expected_prefix}- for {expected_role or 'declared role'}")
+                    continue
+                if checkbox != "x" or section != "## DONE":
+                    errors.append(
+                        f"legacy ticket {tid} is not read-only DONE history "
+                        "-- legacy IDs stay historical and can never become "
+                        "actionable")
+                    continue
             expected_checkbox = {"## DOING": "/", "## TODO": " ",
                                  "## DONE": "x", "## BLOCKED": " "}[section]
             if checkbox != expected_checkbox:
@@ -879,7 +1022,8 @@ def parse_sub_board(text: str, expected_role: str | None = None,
                     f"ticket {tid} checkbox [{checkbox}] disagrees with "
                     f"section {section}; expected [{expected_checkbox}]")
             tickets[tid] = {"id": tid, "section": section,
-                            "checkbox": checkbox, "description": rest or ""}
+                            "checkbox": checkbox, "description": rest or "",
+                            "legacy": legacy_history}
     for heading in SUB_HEADINGS:
         seen = headings.count(heading)
         if seen != 1:
@@ -895,7 +1039,7 @@ def parse_sub_board(text: str, expected_role: str | None = None,
 
 
 def _derive_health(state: dict, board: dict, outbox: dict,
-                   role_state: str) -> str:
+                   role_state: str, collect_state: dict | None = None) -> str:
     """Mechanical health from STATE + BOARD + OUTBOX + role evidence.
 
     Order of precedence (each higher rule wins):
@@ -904,12 +1048,19 @@ def _derive_health(state: dict, board: dict, outbox: dict,
     3. phase BLOCKED                     -> BLOCKED
     4. role evidence unavailable         -> STALE
     5. open TODO/DOING work              -> WORK_PENDING
-    6. DONE + current-source package     -> CURRENT
-    7. DONE + ready-but-stale package    -> STALE
-    8. DONE + no package                 -> NOT_RUN (J: empty OUTBOX is not
-                                           proof of running)
-    9. PLAN/INIT with no work/evidence   -> NOT_RUN
-    10. otherwise                        -> WORK_PENDING
+    6. reviewed claim without a terminal linked Core disposition
+                                          -> INVALID (item 13/16: REVIEWED
+                                             TEXT IS NOT A REVIEW DISPOSITION)
+    7. collected READY package with open/terminal linked review ticket
+                                          -> REVIEW_PENDING (INTAKE != REVIEW;
+                                             Core owns the disposition now)
+    8. current READY package, not collected -> READY_FOR_REVIEW
+    9. DONE + current-source package     -> CURRENT
+    10. DONE + ready-but-stale package    -> STALE
+    11. DONE + no package                 -> NOT_RUN (J: empty OUTBOX is not
+                                            proof of running)
+    12. PLAN/INIT with no work/evidence   -> NOT_RUN
+    13. otherwise                        -> WORK_PENDING
     """
     phase = state.get("phase") or "?"
     if board["errors"] or outbox.get("errors"):
@@ -922,6 +1073,12 @@ def _derive_health(state: dict, board: dict, outbox: dict,
         return HEALTH_BLOCKED
     if counts["TODO"] or counts["DOING"]:
         return HEALTH_WORK_PENDING
+    collect_state = collect_state or {}
+    if collect_state.get("reviewed_without_disposition"):
+        return HEALTH_INVALID
+    if collect_state.get("ready_collected_open") \
+            or collect_state.get("ready_collected_terminal"):
+        return HEALTH_REVIEW_PENDING
     if outbox.get("counts", {}).get("ready"):
         if outbox.get("ready_current"):
             return HEALTH_READY_FOR_REVIEW
@@ -944,7 +1101,7 @@ OUTBOX_FIELDS = frozenset({
     "status", "summary", "main_project_refs", "critical", "severity",
     "producer", "source_head", "source_tree_fingerprint", "role_revision",
     "coverage", "payload", "verified", "instructions", "details",
-    "superseded_by", "base_head", "patch",
+    "superseded_by", "base_head", "patch", "legacy",
 })
 OUTBOX_COMPLETE_FIELDS = frozenset({
     "status", "producer", "source_head", "source_tree_fingerprint",
@@ -964,6 +1121,7 @@ class OutboxPackage:
     description: str
     fields: dict[str, str]
     block: str
+    legacy: bool = False
 
     @property
     def status(self) -> str:
@@ -1045,51 +1203,77 @@ def parse_outbox(text: str, producer: str | None = None) -> OutboxModel:
             errors.append(
                 f"OUTBOX:{start + 1} producer {fields['producer']!r} "
                 f"does not match owner {producer!r}")
-        head = fields.get("source_head", "")
-        if head and head != "no-git" and not GIT_SHA_RE.fullmatch(head):
-            errors.append(f"OUTBOX:{start + 1} invalid source_head")
-        tree = fields.get("source_tree_fingerprint", "")
-        if tree and not TREE_FINGERPRINT_RE.fullmatch(tree):
-            errors.append(
-                f"OUTBOX:{start + 1} invalid source_tree_fingerprint")
-        if head == "no-git" and tree and not tree.startswith("no-git-tree-v1:"):
-            errors.append(
-                f"OUTBOX:{start + 1} no-git source_head requires "
-                "no-git-tree-v1 fingerprint")
-        if GIT_SHA_RE.fullmatch(head) and tree \
-                and not tree.startswith("git-delta-v1:"):
-            errors.append(
-                f"OUTBOX:{start + 1} Git source_head requires "
-                "git-delta-v1 fingerprint")
-        role = fields.get("role_revision", "")
-        if role and not ROLE_REVISION_RE.fullmatch(role):
-            errors.append(f"OUTBOX:{start + 1} invalid role_revision")
-        missing = sorted(OUTBOX_COMPLETE_FIELDS - fields.keys())
-        if missing:
-            errors.append(f"OUTBOX:{start + 1} package missing "
-                          + ", ".join(missing))
-        for key in OUTBOX_COMPLETE_FIELDS:
-            if key in fields and not fields[key].strip():
-                errors.append(f"OUTBOX:{start + 1} field {key} is empty")
-        verified = fields.get("verified", "").lower()
-        if verified and re.search(
-                r"\b(?:unverified|pending|unknown|not[- ]run|not verified)\b",
-                verified):
-            errors.append(
-                f"OUTBOX:{start + 1} verified field is not closed evidence")
+        # T-1003 sweep: an EXPLICIT `legacy: true` marker is the one boundary
+        # that exempts a package from today's provenance schema. Legacy is
+        # never inferred from missing fields (that would be fail-open); the
+        # historical package keeps its bytes, is never collectable, and must
+        # not poison a strict current package in the same OUTBOX.
+        legacy = fields.get("legacy") == "true"
+        if not legacy:
+            head = fields.get("source_head", "")
+            if head and head != "no-git" and not GIT_SHA_RE.fullmatch(head):
+                errors.append(f"OUTBOX:{start + 1} invalid source_head")
+            tree = fields.get("source_tree_fingerprint", "")
+            if tree and not TREE_FINGERPRINT_RE.fullmatch(tree):
+                errors.append(
+                    f"OUTBOX:{start + 1} invalid source_tree_fingerprint")
+            if head == "no-git" and tree and not tree.startswith(
+                    "no-git-tree-v1:"):
+                errors.append(
+                    f"OUTBOX:{start + 1} no-git source_head requires "
+                    "no-git-tree-v1 fingerprint")
+            if GIT_SHA_RE.fullmatch(head) and tree \
+                    and not tree.startswith("git-delta-v1:"):
+                errors.append(
+                    f"OUTBOX:{start + 1} Git source_head requires "
+                    "git-delta-v1 fingerprint")
+            role = fields.get("role_revision", "")
+            if role and not ROLE_REVISION_RE.fullmatch(role):
+                errors.append(f"OUTBOX:{start + 1} invalid role_revision")
+            missing = sorted(OUTBOX_COMPLETE_FIELDS - fields.keys())
+            if missing:
+                errors.append(f"OUTBOX:{start + 1} package missing "
+                              + ", ".join(missing))
+            for key in OUTBOX_COMPLETE_FIELDS:
+                if key in fields and not fields[key].strip():
+                    errors.append(f"OUTBOX:{start + 1} field {key} is empty")
+            # Wave 2 item 12: `verified` is a CLOSED verdict, not a prose
+            # field. Arbitrary nonempty text ("verified: looks good",
+            # "verified: banana") is not evidence -- only a positive closed
+            # verdict may certify a READY package. The shape is
+            # `PASS -- <command/result evidence>` | `FAIL -- <evidence>` |
+            # `BLOCKED -- <missing fact>`.
+            verified = fields.get("verified", "").strip()
+            if verified:
+                verdict_match = re.fullmatch(
+                    r"(?i)(PASS|FAIL|BLOCKED)(?:\s*--\s*.*)?", verified)
+                if not verdict_match:
+                    errors.append(
+                        f"OUTBOX:{start + 1} verified field must be a closed "
+                        "verdict (`PASS -- <command/result evidence>` | "
+                        "`FAIL -- <evidence>` | `BLOCKED -- <missing fact>`); "
+                        "arbitrary prose is never positive evidence")
+                elif status == "ready" and \
+                        verdict_match.group(1).upper() != "PASS":
+                    errors.append(
+                        f"OUTBOX:{start + 1} status ready but verified "
+                        f"verdict is {verdict_match.group(1).upper()} -- only "
+                        "a positive closed PASS may certify READY work")
         packages.append(OutboxPackage(package_id, description, fields,
-                                      "\n".join(block_lines)))
+                                      "\n".join(block_lines), legacy=legacy))
     if not starts and not errors:
         # Header plus comments is canonical empty queue (TEMPLATE included).
         pass
     return OutboxModel(tuple(packages), tuple(errors))
 
 
-def _field(text: str, key: str) -> str:
-    values = [match.group(2).strip() for line in text.splitlines()
-              if (match := OUTBOX_FIELD_RE.match(line))
-              and match.group(1) == key]
-    return values[0] if len(values) == 1 else ""
+def _outbox_model(root: Path, name: str, source_id,
+                  saipen_home: str = "") -> OutboxModel:
+    """The parsed OUTBOX model for one role (used by health + linkage)."""
+    outbox_path = root / SUBS_REL / name / "kitchen" / "OUTBOX.md"
+    if not outbox_path.is_file():
+        return OutboxModel((), ())
+    return parse_outbox(_read_maybe(outbox_path), name)
 
 
 def _outbox_health(root: Path, name: str, source_id,
@@ -1124,6 +1308,8 @@ def _outbox_health(root: Path, name: str, source_id,
     if source_id is not None and current_role is not None:
         current_ready = []
         for package in model.packages:
+            if package.legacy:
+                continue
             status = package.fields.get("status", "")
             if status not in ("ready", "reviewed"):
                 continue
@@ -1149,10 +1335,136 @@ def _outbox_health(root: Path, name: str, source_id,
             "errors": list(model.errors)}
 
 
+def validate_sub_state(state: dict) -> list[str]:
+    """Semantic validation of one Sub STATE -- the SAME contract the validator
+    applies (T-1003 sweep). A syntactically parseable but schema-invalid
+    worker state must report INVALID, never CURRENT. Consumed by
+    sub_instance_health, the crew snapshot/gate, lifecycle verifiers and the
+    validator (which layers per-file detail over these errors)."""
+    from . import phases
+    errors: list[str] = []
+    required = ("phase", "task", "next_action", "blocker", "agent",
+                "saipen_version", "mode", "updated")
+    for key in required:
+        if key not in state:
+            errors.append(f"missing required field {key}")
+    phase = state.get("phase")
+    if phase not in phases.VALID_TRANSITIONS and phase not in phases.ANY_FROM:
+        errors.append(f"phase {phase!r} outside the 16-value enum")
+    tf = state.get("transition_from")
+    if tf is None:
+        if phase != "INIT":
+            errors.append("missing transition_from -- required except on INIT")
+    elif tf not in phases.VALID_TRANSITIONS and tf not in phases.ANY_FROM:
+        errors.append(f"transition_from {tf!r} is not in the phase enum")
+    elif phase and tf != phase and phase not in phases.ANY_FROM:
+        allowed = list(phases.VALID_TRANSITIONS.get(tf, []))
+        if tf == "HUNT":
+            allowed.append("DONE")
+        if phase not in allowed:
+            errors.append(f"{tf} -> {phase} is not in the transition table")
+    mode = state.get("mode")
+    if mode not in ("full", "read-only", "no-publish", "manual-verify"):
+        errors.append(f"mode {mode!r} outside the closed capability set")
+    updated = state.get("updated")
+    if isinstance(updated, str) and not re.fullmatch(
+            r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|\+00:00)",
+            updated):
+        errors.append("updated must be ISO-8601 UTC (Z or +00:00)")
+    na = state.get("next_action")
+    if isinstance(na, str):
+        if na.startswith("PHASE "):
+            err = phases.phase_next_action_error(na)
+            if err:
+                errors.append(f"next_action {err}")
+        elif not na.startswith(("WAIT:", "saipen ", "RUN:", "RESUME:")):
+            errors.append("next_action does not start with "
+                          "WAIT:/saipen /PHASE /RUN:/RESUME:")
+    if state.get("execution_intent") == "goal":
+        for counter in ("goal_waves", "goal_tickets"):
+            if not isinstance(state.get(counter), int):
+                errors.append(f"execution_intent: goal but {counter} is "
+                              "missing/not an integer")
+    return errors
+
+
+def validate_sub_lifecycle(state: dict, board: dict,
+                           role_name: str) -> list[str]:
+    """Bind ONE sub STATE phase/task to its parsed BOARD as one coherent
+    machine (T-1003 sweep, hostile finding 2). The shared validator every
+    consumer uses -- validate.py, sub_instance_health, verify_sub_lifecycle
+    and the crew snapshot/gate -- so DONE+task, task/DOING splits and
+    wrong-prefix tasks cannot pass one path while failing another.
+
+    Invariants:
+    - DONE: task == none; zero TODO, zero DOING, zero unresolved BLOCKED.
+    - ticket-bearing phase: a concrete role-valid ticket ID, exactly one
+      DOING ticket, task == that DOING ticket.
+    - non-ticket phase: task present iff exactly one matching DOING ticket
+      (no impossible active-ticket binding).
+    - BLOCKED: truthful non-empty blocker; no active task, no DOING ticket.
+    """
+    errors: list[str] = []
+    phase = state.get("phase")
+    task = state.get("task")
+    ticket = None if task in (None, "", "none") else str(task).strip()
+    tickets = board.get("tickets", {})
+    counts = board.get("counts", {})
+    doing = [t for t in tickets.values() if t["section"] == "## DOING"]
+    prefix = ticket_prefix_for_role(role_name)
+    if phase == "DONE":
+        if ticket:
+            errors.append(f"phase DONE but task is {task!r} -- Core's "
+                          "terminal invariant requires task none in a DONE "
+                          "worker state")
+        if doing:
+            errors.append("phase DONE but the board still carries a "
+                          "## DOING ticket")
+        if counts.get("TODO") or counts.get("BLOCKED"):
+            errors.append("phase DONE but the board still holds open work "
+                          "(TODO/BLOCKED) -- a worker cannot say DONE while "
+                          "its board says unresolved work")
+        return errors
+    if phase == "BLOCKED":
+        # Truthful blocker/WAIT relation (item 2): a blocked worker MUST
+        # carry a real reason. A BLOCKED worker MAY hold a mission/task ref
+        # while it waits for external input (shipped saiui-adoption pattern),
+        # so task/DOING binding is NOT restricted here -- the blocker is the
+        # invariant, not the ticket.
+        if not str(state.get("blocker") or "").strip():
+            errors.append("phase BLOCKED but blocker is empty")
+        return errors
+    if ticket:
+        if len(doing) != 1:
+            errors.append(
+                f"task {task!r} does not bind a single ## DOING ticket "
+                f"(board holds {len(doing)}) -- task and DOING must be one "
+                "coherent binding")
+        elif doing[0]["id"] != ticket:
+            errors.append(
+                f"task {task!r} != the board's ## DOING ticket "
+                f"{doing[0]['id']} -- an active-ticket binding split is "
+                "impossible")
+        elif not re.fullmatch(rf"{re.escape(prefix)}-\d+", ticket):
+            errors.append(
+                f"task {task!r} is not a {prefix}- role ticket ID -- a task "
+                "must be a concrete role-valid ticket ID, not a description")
+    elif doing:
+        errors.append(
+            f"no active task but the board has a ## DOING ticket "
+            f"{doing[0]['id']} -- an active-ticket binding without a task is "
+            "impossible")
+    return errors
+
+
 def sub_instance_health(project_root: Path | str, name: str,
                         source_id=None,
-                        manifest_entry: ManifestEntry | None = None) -> dict:
-    """The full mechanically-derived health record for one sub (SAICREW I)."""
+                        manifest_entry: ManifestEntry | None = None,
+                        records: tuple[dict, ...] | None = None) -> dict:
+    """The full mechanically-derived health record for one sub (SAICREW I).
+
+    ``records`` is the pre-captured crew receipt snapshot; when given, every
+    subs evidence helper iterates it instead of reopening disk (T-1004)."""
     root = Path(project_root)
     info = {"name": name}
     if manifest_entry is None:
@@ -1177,15 +1489,45 @@ def sub_instance_health(project_root: Path | str, name: str,
                 "role_revision": "", "role_revision_state": "UNAVAILABLE",
                 "outbox": {"present": False, "counts": {},
                            "package_current": False, "ready_current": False}}
-    from .state import parse_state
-    st = parse_state(codec.read_doc(state_path))
-    saipen_home = st.get("saipen_home") or ""
+    from .state import parse_state_or_error
+    st, state_error = parse_state_or_error(codec.read_doc(state_path))
+    state_errors = ([state_error] if state_error
+                    else validate_sub_state(st or {}))
+    saipen_home = (st or {}).get("saipen_home") or ""
     board = parse_sub_board(_read_maybe(instance / "BOARD.md"),
                             expected_role=name)
+    # A malformed STATE must NEVER reach the lifecycle/derivation logic:
+    # `st` is None on a parse error, and health must report HEALTH_INVALID
+    # with the exact parse error instead of tracebacking (T-1003).
+    lifecycle_errors = ([] if state_error
+                        else validate_sub_lifecycle(st, board, name))
+    if lifecycle_errors:
+        board = {**board, "errors": tuple(board["errors"]) + tuple(
+            lifecycle_errors)}
     outbox = _outbox_health(root, name, source_id, saipen_home)
-    role_state = role_freshness(root, name, st.get("role_revision") or "",
+    role_state = role_freshness(root, name, (st or {}).get("role_revision") or "",
                                 saipen_home)
-    health = _derive_health(st, board, outbox, role_state)
+    collect_state = _collect_review_state(root, name, _outbox_model(
+        root, name, source_id, saipen_home), source_id, saipen_home,
+        records)
+    if state_errors:
+        return {
+            **info,
+            "phase": (st or {}).get("phase"),
+            "task": (st or {}).get("task"),
+            "board": {"valid": not board["errors"],
+                      "errors": board["errors"][:5],
+                      "counts": board["counts"]},
+            "outbox": outbox,
+            "local_charter_present": bool(
+                (root / SUBS_REL / f"{name}.md").is_file()),
+            "role_revision": (st or {}).get("role_revision") or "",
+            "role_revision_state": role_state.upper(),
+            "health": HEALTH_INVALID,
+            "state_errors": state_errors,
+            "collect": collect_state,
+        }
+    health = _derive_health(st, board, outbox, role_state, collect_state)
     return {
         **info,
         "phase": st.get("phase"),
@@ -1199,6 +1541,7 @@ def sub_instance_health(project_root: Path | str, name: str,
         "role_revision": st.get("role_revision") or "",
         "role_revision_state": role_state.upper(),
         "health": health,
+        "collect": collect_state,
     }
 
 
@@ -1263,33 +1606,20 @@ def sub_status(project_root: Path | str, name: str) -> Result:
 # ---------------------------------------------------------------------------
 # sync
 # ---------------------------------------------------------------------------
-def sub_sync(project_root: Path | str, saipen_home: str,
-             dry_run: bool = False) -> Result:
-    """Refresh the inherited shared contract surface -- never a sub's history.
+def plan_sub_sync(project_root: Path | str, saipen_home: str) -> dict:
+    """The ONE pure, READ-ONLY sub-sync planner (Wave 2 items 6/7/8).
 
-    Copies PROTOCOL.md/README.md/crew.md/TEMPLATE/** and every built-in
-    sai*.md charter from <saipen_home>/extensions/subs/. Creates a missing
-    _shared/inbox.md once; preserves an existing one byte-identically. Never
-    looks inside a `<name>/` folder. One journaled mutation; a second sync
-    with no drift performs ZERO writes (idempotent). `dry_run` performs the
-    same validation and computes the same diff with ZERO writes.
+    `sub_sync` (dry-run AND APPLY) and `sub_spawn` consume this SAME
+    plan/verdict, so a refusal APPLY would reach is always visible to
+    --dry-run and to spawn's read-only preflight, and NO mutation can
+    precede a predictable refusal. Only writes differ between dry-run and
+    APPLY; the semantic verdict is computed once, here.
     """
     root = Path(project_root)
     source_root = Path(saipen_home) / "extensions" / "subs"
     source_tree_plan_hash = hash_tree(source_root)
     targets, source_inventory, invalid = _shared_contract_source(saipen_home)
-    if invalid:
-        return _refuse("VALIDATION_FAILED",
-                       invalid + " -- run `saipen sub sync` after refreshing "
-                       "the install (BLOCKED, never copy from a path that did "
-                       "not check out)")
     receipt, prior_inventory, lineage = _latest_sub_sync_inventory(root)
-    if lineage == "ambiguous":
-        return _refuse(
-            "VALIDATION_FAILED",
-            "ambiguous sub-sync receipt lineage; refuse obsolete "
-            "reconciliation until a durable canonical successor is "
-            "committed")
     obsolete, conflicts = _obsolete_contract_status(
         root, prior_inventory, source_inventory)
     prior_kinds = {item["path"]: item["kind"]
@@ -1298,28 +1628,18 @@ def sub_sync(project_root: Path | str, saipen_home: str,
                      for item in source_inventory}
     kind_changes = sorted(path for path in prior_kinds.keys() & current_kinds
                           if prior_kinds[path] != current_kinds[path])
-    if kind_changes:
-        return _refuse(
-            "VALIDATION_FAILED",
-            "shared-contract path kind changed; one journal target cannot "
-            "safely delete and recreate the same path: "
-            + ", ".join(f"{SUBS_REL}/{path}" for path in kind_changes[:5]))
-    if conflicts:
-        return _refuse(
-            "VALIDATION_FAILED",
-            "obsolete inherited path has local changes; refusing deletion: "
-            + ", ".join(f"{SUBS_REL}/{path}" for path in conflicts[:5]),
-            obsolete_conflicts=[f"{SUBS_REL}/{path}" for path in conflicts])
     inbox_src = Path(saipen_home) / "extensions" / "subs" / "_shared" \
         / "inbox.md"
     local_inbox = root / f"{SUBS_REL}/_shared/inbox.md"
     local_inbox_raw = _read_bytes_maybe(local_inbox)
+    inbox_target = None
     if inbox_src.is_file() and local_inbox_raw is None:
         inbox_raw = inbox_src.read_bytes()
-        targets.append({"path": f"{SUBS_REL}/_shared/inbox.md",
+        inbox_target = {"path": f"{SUBS_REL}/_shared/inbox.md",
                         "content": inbox_raw,
                         "source_path": str(inbox_src.resolve()),
-                        "source_hash": hash_bytes(inbox_raw)})
+                        "source_hash": hash_bytes(inbox_raw)}
+        targets.append(inbox_target)
     changed = []
     for target in targets:
         local = root / target["path"]
@@ -1327,7 +1647,10 @@ def sub_sync(project_root: Path | str, saipen_home: str,
         if local_raw != target["content"]:
             changed.append({**target,
                             "before_hash": _captured_hash(local_raw)})
-
+    unexpected_files, unexpected_dirs = _unexpected_inherited(
+        root, source_inventory, prior_inventory)
+    unexpected = [f"{SUBS_REL}/{path}"
+                  for path in (*unexpected_files, *unexpected_dirs)]
     delete_files = []
     delete_dirs = []
     for item in obsolete:
@@ -1347,7 +1670,6 @@ def sub_sync(project_root: Path | str, saipen_home: str,
                                         item["path"]))
     delete_dirs.sort(key=lambda item: (-len(Path(item["path"]).parts),
                                        item["path"]))
-
     receipt_metadata = {
         "owned_source_inventory": source_inventory,
         "obsolete_reconciliation": obsolete,
@@ -1355,12 +1677,91 @@ def sub_sync(project_root: Path | str, saipen_home: str,
     inventory_changed = prior_inventory != source_inventory
     drift = bool(changed or delete_files or delete_dirs
                  or receipt is None or inventory_changed)
-    if not drift:
+    return {
+        "source_root": source_root,
+        "source_tree_plan_hash": source_tree_plan_hash,
+        "targets": targets,
+        "source_inventory": source_inventory,
+        "invalid": invalid,
+        "receipt": receipt,
+        "prior_inventory": prior_inventory,
+        "lineage": lineage,
+        "obsolete": obsolete,
+        "conflicts": conflicts,
+        "kind_changes": kind_changes,
+        "changed": changed,
+        "unexpected": unexpected,
+        "delete_files": delete_files,
+        "delete_dirs": delete_dirs,
+        "inventory_changed": inventory_changed,
+        "drift": drift,
+        "receipt_metadata": receipt_metadata,
+    }
+
+
+def _sync_plan_problem(plan: dict, *, for_spawn: bool = False) -> Result | None:
+    """The shared refusal the sync APPLY and spawn preflight both reach, so
+    a refusal is always computed BEFORE any mutation (items 6/7/8)."""
+    if plan.get("invalid"):
+        return _refuse("INVALID_SOURCE_HOME",
+                       plan["invalid"] + " -- run `saipen sub sync` after "
+                       "refreshing the install (BLOCKED, never copy from a "
+                       "path that did not check out)")
+    if plan.get("lineage") == "ambiguous":
+        return _refuse(
+            "VALIDATION_FAILED",
+            "ambiguous sub-sync receipt lineage; refuse obsolete "
+            "reconciliation until a durable canonical successor is "
+            "committed")
+    if plan.get("kind_changes"):
+        return _refuse(
+            "VALIDATION_FAILED",
+            "shared-contract path kind changed; one journal target cannot "
+            "safely delete and recreate the same path: "
+            + ", ".join(f"{SUBS_REL}/{path}"
+                         for path in plan["kind_changes"][:5]))
+    if plan.get("conflicts"):
+        return _refuse(
+            "VALIDATION_FAILED",
+            "obsolete inherited path has local changes; refusing deletion: "
+            + ", ".join(f"{SUBS_REL}/{path}" for path in plan["conflicts"][:5]),
+            obsolete_conflicts=[f"{SUBS_REL}/{path}"
+                                for path in plan["conflicts"]])
+    if plan.get("unexpected"):
+        return _refuse(
+            "VALIDATION_FAILED",
+            "unexpected inherited file(s) present outside the shipped "
+            "source inventory: " + ", ".join(plan["unexpected"][:5])
+            + " -- never auto-delete unknown extras; remove them or adopt "
+              "them explicitly")
+    return None
+
+
+def sub_sync(project_root: Path | str, saipen_home: str,
+             dry_run: bool = False) -> Result:
+    """Refresh the inherited shared contract surface -- never a sub's history.
+
+    Copies PROTOCOL.md/README.md/crew.md/TEMPLATE/** and every built-in
+    sai*.md charter from <saipen_home>/extensions/subs/. Creates a missing
+    _shared/inbox.md once; preserves an existing one byte-identically. Never
+    looks inside a `<name>/` folder. One journaled mutation; a second sync
+    with no drift performs ZERO writes (idempotent). `dry_run` consumes the
+    SAME plan_sub_sync verdict as APPLY with ZERO writes.
+    """
+    root = Path(project_root)
+    plan = plan_sub_sync(root, saipen_home)
+    problem = _sync_plan_problem(plan)
+    if problem is not None:
+        return problem
+    if not plan["drift"]:
         return Result(ok=True, code="SUB_SYNC",
                       data={"changed": [], "deleted": [], "drift": False,
                             "inventory_established": False,
                             "dry_run": dry_run})
 
+    changed = plan["changed"]
+    delete_files = plan["delete_files"]
+    delete_dirs = plan["delete_dirs"]
     writes = [{"path": item["path"], "role": item.get("role", "manifest"),
                "content": item["content"]} for item in changed]
     mutation_targets = [*delete_files, *delete_dirs, *writes]
@@ -1374,12 +1775,12 @@ def sub_sync(project_root: Path | str, saipen_home: str,
                             "would_write": proposed_writes,
                             "would_delete": proposed_deletes,
                             "would_record_receipt": True,
-                            "inventory_established": receipt is None})
+                            "inventory_established": plan["receipt"] is None})
     op_id = "sub-sync-" + __import__("uuid").uuid4().hex[:8]
     preconditions = {item["path"]: item["before_hash"] for item in changed}
     preconditions.update({item["path"]: item["expected_hash"]
                           for item in delete_files})
-    semantic = json.dumps(receipt_metadata, sort_keys=True,
+    semantic = json.dumps(plan["receipt_metadata"], sort_keys=True,
                           separators=(",", ":")).encode("utf-8")
     with project_writer_lock(root):
         if not _sources_unchanged(changed):
@@ -1390,11 +1791,12 @@ def sub_sync(project_root: Path | str, saipen_home: str,
             root, op_id, "sub_sync", "saipen-cli", project_identity(root),
             hash_bytes(b"sub_sync:" + semantic), mutation_targets,
             preconditions=preconditions,
-            read_preconditions={**{str(source_root.resolve()):
-                                    source_tree_plan_hash},
-                                **_external_read_preconditions(changed)},
+            read_preconditions={
+                **{str(plan["source_root"].resolve()):
+                   plan["source_tree_plan_hash"]},
+                **_external_read_preconditions(changed)},
             verification_policy="sub_sync",
-            receipt_metadata=receipt_metadata)
+            receipt_metadata=plan["receipt_metadata"])
     if not commit.get("ok"):
         return _refuse(commit.get("code", "VALIDATION_FAILED"),
                        commit.get("detail", ""))
@@ -1402,7 +1804,7 @@ def sub_sync(project_root: Path | str, saipen_home: str,
                   changed_files=proposed,
                   data={"changed": proposed, "deleted": proposed_deletes,
                         "drift": True,
-                        "inventory_established": receipt is None})
+                        "inventory_established": plan["receipt"] is None})
 
 
 # ---------------------------------------------------------------------------
@@ -1412,53 +1814,35 @@ def sub_spawn(project_root: Path | str, name: str, saipen_home: str,
               agent: str | None = None, dry_run: bool = False) -> Result:
     """Bootstrap-and-spawn a subSaipen, journaled (PROTOCOL.md section 7).
 
-    The shared contract surface is repaired if partial (a directory existing
-    is NOT a complete bootstrap), then the instance is created from TEMPLATE
-    with a REAL role_revision anchored to the local charter / local PROTOCOL
-    -- a blank role identity refuses spawn. `dry_run` computes the same
-    outcome with ZERO writes.
+    KNOWN INVALID BASE MUST NOT BE MUTATED (Wave 2 item 6): every
+    predictable spawn prerequisite is validated READ-ONLY before any write --
+    safe role ID, target absence, strict MANIFEST grammar, the shared-contract
+    sync PLAN (the SAME verdict sub_sync APPLY uses, item 7/8), source-home
+    and TEMPLATE completeness, role charter/generic role evidence, the
+    proposed role_revision, the proposed resulting MANIFEST and the proposed
+    worker STATE/BOARD grammar. Only when all are valid may mutation begin;
+    there is no rollback because a predictable invalid plan never started.
+
+    The shared contract surface is repaired first as a SEPARATE committed
+    sync operation when the plan needs it, then the spawn plan is REPLANNED
+    against the new canonical state (one operation's AFTER is the next
+    operation's BEFORE). `dry_run` consumes the same plan/verdicts with ZERO
+    writes and reports would_result -- the mutation did not happen.
     """
     root = Path(project_root)
     try:
         target = _sub_dir(root, name)
     except ValueError as exc:
         return _refuse("INVALID_ID", str(exc), name=name)
-    instance_tree_hash = hash_tree(target)
     if target.exists():
         return _refuse("ALREADY_CLAIMED",
                        f"subSaipen {name!r} already exists; run "
                        f"`saipen sub clean {name}` first if replacement is "
                        "intended", name=name)
+    instance_tree_hash = hash_tree(target)
 
-    sync_result = None
-    sync_changed = []
-    if not dry_run:
-        sync_result = sub_sync(root, saipen_home)
-        if not sync_result.ok:
-            return _refuse(sync_result.code,
-                           "shared-contract bootstrap refused: "
-                           + sync_result.message, name=name,
-                           sync=sync_result.data)
-        sync_changed = list(sync_result.changed_files)
-    source_tree_plan_hash = hash_tree(
-        Path(saipen_home) / "extensions" / "subs")
-
-    template_root = Path(saipen_home) / "extensions" / "subs" / "TEMPLATE"
-    template_paths = {
-        "STATE.md": template_root / "STATE.md",
-        "BOARD.md": template_root / "BOARD.md",
-        "LOG.md": template_root / "LOG.md",
-        "kitchen/OUTBOX.md": template_root / "kitchen" / "OUTBOX.md",
-    }
-    template_raw = {rel: _read_bytes_maybe(path)
-                    for rel, path in template_paths.items()}
-    if any(raw is None for raw in template_raw.values()):
-        return _refuse("VALIDATION_FAILED",
-                       f"saipen_home {saipen_home!r} has incomplete subSaipen TEMPLATE; "
-                       "clone/refresh before spawning", name=name)
-
-    # A malformed MANIFEST refuses spawn -- the manifest is a registry, not
-    # a scratchpad, and adding a line to a corrupt registry would launder it.
+    # 1. Strict MANIFEST grammar FIRST -- a malformed registry is a KNOWN
+    # invalid base; refusing it must not follow any write (item 6).
     manifest = root / MANIFEST_REL
     manifest_raw = _read_bytes_maybe(manifest)
     try:
@@ -1483,12 +1867,107 @@ def sub_spawn(project_root: Path | str, name: str, saipen_home: str,
             manifest_text = MANIFEST_HEADER + "\n\n" + manifest_text
         new_manifest = manifest_text.rstrip("\n") + "\n" + \
             f"- {name} -- {SUBS_REL}/{name}/\n"
-    now = _utc_iso()
+    _parsed_new_manifest, new_manifest_errors = parse_manifest(new_manifest)
+    if new_manifest_errors:
+        return _refuse("VALIDATION_FAILED",
+                       "proposed resulting MANIFEST invalid: "
+                       + "; ".join(new_manifest_errors[:3]), name=name)
 
+    # 2. READ-ONLY shared-contract sync PLAN (items 6/7/8): the SAME verdict
+    # sub_sync APPLY computes, so dry-run and APPLY refuse identically and no
+    # predictable refusal (invalid source home, ambiguous lineage, kind
+    # changes, conflicts, unexpected inherited files) can follow a mutation.
+    sync_plan = plan_sub_sync(root, saipen_home)
+    problem = _sync_plan_problem(sync_plan)
+    if problem is not None:
+        return problem
+
+    # 3. Template completeness + role evidence + proposed role_revision and
+    # proposed STATE/BOARD grammar -- all read-only (item 6).
+    template_root = Path(saipen_home) / "extensions" / "subs" / "TEMPLATE"
+    template_paths = {
+        "STATE.md": template_root / "STATE.md",
+        "BOARD.md": template_root / "BOARD.md",
+        "LOG.md": template_root / "LOG.md",
+        "kitchen/OUTBOX.md": template_root / "kitchen" / "OUTBOX.md",
+    }
+    template_raw = {rel: _read_bytes_maybe(path)
+                    for rel, path in template_paths.items()}
+    if any(raw is None for raw in template_raw.values()):
+        return _refuse("VALIDATION_FAILED",
+                       f"saipen_home {saipen_home!r} has incomplete subSaipen TEMPLATE; "
+                       "clone/refresh before spawning", name=name)
+    role_source = Path(saipen_home) / "extensions" / "subs" / f"{name}.md"
+    generic_role = not role_source.is_file()
+    if generic_role:
+        role_source = Path(saipen_home) / "extensions" / "subs" / "PROTOCOL.md"
+    role_raw = _read_bytes_maybe(role_source)
+    try:
+        role_revision = (_role_revision_from_bytes(role_raw, generic=generic_role)
+                         if role_raw is not None else None)
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc), name=name)
+    if not role_revision or role_raw is None:
+        return _refuse("VALIDATION_FAILED",
+                       f"no role evidence to anchor spawn of {name!r}: no "
+                       "built-in charter and no PROTOCOL.md (ROLE_EVIDENCE_"
+                       "UNAVAILABLE) -- a strict worker never gets a blank "
+                       "role identity; refresh the install and run "
+                       "`saipen sub sync`", name=name)
+    now = _utc_iso()
+    template_state_doc = codec.read_document(template_paths["STATE.md"])
+    state = template_state_doc.text_norm
+    state = patch_state(state, {
+        "agent": name,
+        "saipen_home": saipen_home,
+        "updated": now,
+        "role_revision": role_revision,
+    })
+    from .state import parse_state as _parse_sub_state_text
+    proposed_state = _parse_sub_state_text(state)
+    state_errors = validate_sub_state(proposed_state)
+    if state_errors:
+        return _refuse("VALIDATION_FAILED",
+                       "proposed worker STATE fails lifecycle grammar: "
+                       + "; ".join(state_errors[:3]), name=name)
+    board_errors = parse_sub_board(
+        _decode_captured(template_raw["BOARD.md"],
+                         f"{SUBS_REL}/{name}/BOARD.md"),
+        expected_role=name)["errors"]
+    if board_errors:
+        return _refuse("VALIDATION_FAILED",
+                       "proposed worker BOARD fails lifecycle grammar: "
+                       + "; ".join(board_errors[:3]), name=name)
+
+    # 4. APPLY sync as a SEPARATE committed operation only when the plan
+    # needs it, then REPLAN spawn from the new canonical state (item 8).
+    sync_result = None
+    sync_changed = []
+    if not dry_run and sync_plan["drift"]:
+        sync_result = sub_sync(root, saipen_home)
+        if not sync_result.ok:
+            return _refuse(sync_result.code,
+                           "shared-contract bootstrap refused: "
+                           + sync_result.message, name=name,
+                           sync=sync_result.data)
+        sync_changed = list(sync_result.changed_files)
+        # REPLAN against post-sync truth: re-read the MANIFEST and re-verify
+        # target absence (sync never touches either, but the AFTER state is
+        # the only state the spawn plan may be built from).
+        manifest_raw = _read_bytes_maybe(manifest)
+        if target.exists():
+            return _refuse("ALREADY_CLAIMED",
+                           f"subSaipen {name!r} appeared during bootstrap; "
+                           "refusing overwrite", name=name)
+
+    source_tree_plan_hash = hash_tree(
+        Path(saipen_home) / "extensions" / "subs")
     targets, invalid = _shared_contract_targets(saipen_home)
     if invalid:
         return _refuse("VALIDATION_FAILED", invalid, name=name)
-    # Only copy what is missing/stale locally (partial-bootstrap repair).
+    # Only copy what is still missing/stale locally AFTER sync (partial-
+    # bootstrap repair); a shared contract that moves during the transaction
+    # is a race, not a bootstrap to paper over.
     shared = []
     for t in targets:
         local = root / t["path"]
@@ -1511,33 +1990,6 @@ def sub_spawn(project_root: Path | str, name: str, saipen_home: str,
                        "before_hash": "",
                        "source_path": str(inbox_src.resolve()),
                        "source_hash": hash_bytes(inbox_raw)})
-
-    role_source = Path(saipen_home) / "extensions" / "subs" / f"{name}.md"
-    generic_role = not role_source.is_file()
-    if generic_role:
-        role_source = Path(saipen_home) / "extensions" / "subs" / "PROTOCOL.md"
-    role_raw = _read_bytes_maybe(role_source)
-    try:
-        role_revision = (_role_revision_from_bytes(role_raw, generic=generic_role)
-                         if role_raw is not None else None)
-    except ValueError as exc:
-        return _refuse("VALIDATION_FAILED", str(exc), name=name)
-    if not role_revision or role_raw is None:
-        return _refuse("VALIDATION_FAILED",
-                       f"no role evidence to anchor spawn of {name!r}: no "
-                       "built-in charter and no PROTOCOL.md (ROLE_EVIDENCE_"
-                       "UNAVAILABLE) -- a strict worker never gets a blank "
-                       "role identity; refresh the install and run "
-                       "`saipen sub sync`", name=name)
-
-    template_state_doc = codec.read_document(template_paths["STATE.md"])
-    state = template_state_doc.text_norm
-    state = patch_state(state, {
-        "agent": name,
-        "saipen_home": saipen_home,
-        "updated": now,
-        "role_revision": role_revision,
-    })
 
     mutation_targets = [t for t in shared]
     mutation_targets += [
@@ -1566,12 +2018,15 @@ def sub_spawn(project_root: Path | str, name: str, saipen_home: str,
                            for item in mutation_targets}
     proposed = [t["path"] for t in mutation_targets]
     if dry_run:
-        return Result(ok=True, code="SPAWNED",
+        return Result(ok=True, code="SUB_SPAWN_PLAN",
                       data={"name": name,
                             "path": f"{SUBS_REL}/{name}/",
-                            "bootstrap": bool(shared),
+                            "bootstrap": bool(sync_plan["drift"] or shared),
+                            "would_sync": bool(sync_plan["drift"]),
                             "role_revision": role_revision,
-                            "dry_run": True, "would_write": proposed})
+                            "dry_run": True,
+                            "would_result": "SPAWNED",
+                            "would_write": proposed})
     op_id = "sub-spawn-" + __import__("uuid").uuid4().hex[:8]
     with project_writer_lock(root):
         if hash_tree(target) != instance_tree_hash:
@@ -1678,9 +2133,10 @@ def sub_adopt(project_root: Path | str, name: str, saipen_home: str,
     lifecycle_reads = _lifecycle_read_preconditions(
         root, name, manifest_raw, saipen_home)
     if dry_run:
-        return Result(ok=True, code="SUB_ADOPTED",
+        return Result(ok=True, code="SUB_ADOPT_PLAN",
                       data={"name": name, "role_revision": role_revision,
                             "dry_run": True,
+                            "would_result": "SUB_ADOPTED",
                             "would_write": [rel]})
     op_id = "sub-adopt-" + __import__("uuid").uuid4().hex[:8]
     with project_writer_lock(root):
@@ -1727,8 +2183,12 @@ def sub_pause(project_root: Path | str, name: str,
     if not state_path.is_file():
         return _refuse("TICKET_NOT_FOUND", f"no subSaipen {name!r}", name=name)
     doc = codec.read_document(state_path)
-    from .state import parse_state
-    st = parse_state(doc.text_norm)
+    from .state import parse_state_or_error
+    st, state_error = parse_state_or_error(doc.text_norm)
+    if state_error:
+        return _refuse("VALIDATION_FAILED",
+                       f"subSaipen {name!r} STATE is malformed: {state_error}",
+                       name=name)
     if st.get("phase") == "BLOCKED":
         return _refuse("VALIDATION_FAILED",
                        f"subSaipen {name!r} is already BLOCKED", name=name)
@@ -1751,10 +2211,11 @@ def sub_pause(project_root: Path | str, name: str,
     lifecycle_reads = _lifecycle_read_preconditions(
         root, name, manifest_raw, st.get("saipen_home") or "")
     if dry_run:
-        return Result(ok=True, code="SUB_PAUSED",
+        return Result(ok=True, code="SUB_PAUSE_PLAN",
                       data={"name": name,
                             "paused_from_phase": st.get("phase"),
                             "dry_run": True,
+                            "would_result": "SUB_PAUSED",
                             "would_write": [t["path"] for t in targets]})
     op_id = "sub-pause-" + __import__("uuid").uuid4().hex[:8]
     with project_writer_lock(root):
@@ -1797,8 +2258,12 @@ def sub_resume(project_root: Path | str, name: str,
     if not state_path.is_file():
         return _refuse("TICKET_NOT_FOUND", f"no subSaipen {name!r}", name=name)
     doc = codec.read_document(state_path)
-    from .state import parse_state
-    st = parse_state(doc.text_norm)
+    from .state import parse_state_or_error
+    st, state_error = parse_state_or_error(doc.text_norm)
+    if state_error:
+        return _refuse("VALIDATION_FAILED",
+                       f"subSaipen {name!r} STATE is malformed: {state_error}",
+                       name=name)
     if st.get("phase") != "BLOCKED" or \
             st.get("blocker") != "paused by main agent":
         return _refuse("VALIDATION_FAILED",
@@ -1830,10 +2295,11 @@ def sub_resume(project_root: Path | str, name: str,
     lifecycle_reads = _lifecycle_read_preconditions(
         root, name, manifest_raw, st.get("saipen_home") or "")
     if dry_run:
-        return Result(ok=True, code="SUB_RESUMED",
+        return Result(ok=True, code="SUB_RESUME_PLAN",
                       data={"name": name, "restored_phase": prior_phase,
                             "restored_next_action": prior_na,
                             "dry_run": True,
+                            "would_result": "SUB_RESUMED",
                             "would_write": [t["path"] for t in targets]})
     op_id = "sub-resume-" + __import__("uuid").uuid4().hex[:8]
     with project_writer_lock(root):
@@ -1876,8 +2342,9 @@ def sub_clean_preflight(project_root: Path | str, name: str) -> Result:
     """Evidence-gated removal preflight (PROTOCOL section 7, read-only).
 
     Delegates the deterministic evidence scan to tools/sub_clean.py's
-    sub_clean_blockers. The engine NEVER deletes; this reports every blocker
-    and, when clean, leaves removal to the human-confirmed path.
+    sub_clean_blockers -- the SAME blockers `sub_clean` gates on. This
+    read-only preflight reports every blocker; when clean, `sub_clean` may
+    archive, unregister and remove the instance in one journaled mutation.
     """
     root = Path(project_root)
     try:
@@ -2248,9 +2715,168 @@ def _core_log_context(root: Path, active_log: str) -> tuple[str, dict[str, str]]
     return "\n".join(chunks), dependencies
 
 
+def _iter_operation_records(root: Path,
+                            records: tuple[dict, ...] | None = None):
+    """Yield every parseable operation.json under .saipen/recovery/ops.
+
+    When ``records`` is given (a pre-captured crew receipt snapshot), iterate
+    it instead of reopening disk (T-1004 perf): every subs evidence helper
+    consumes the SAME coherent capture.
+    """
+    if records is not None:
+        yield from records
+        return
+    ops = root / ".saipen" / "recovery" / "ops"
+    if not ops.is_dir():
+        return
+    for op_dir in sorted(ops.iterdir()):
+        manifest = op_dir / "operation.json"
+        if not manifest.is_file():
+            continue
+        try:
+            record = json.loads(manifest.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        yield record
+
+
+def _durable_collect_witness(root: Path, last_collect: str,
+                             identity: str,
+                             records: tuple[dict, ...] | None = None) -> bool:
+    """Structured-only collection dedup witness (T-1003 sweep).
+
+    Free prose is never mechanical evidence: a package_identity SHA mentioned
+    inside an arbitrary BOARD description or LOG message is NOT proof an
+    intake happened. The only witnesses are (1) the MANIFEST's structured
+    `last_collect` identity and (2) a COMMITTED `sub_collect` operation
+    receipt whose structured receipt_metadata carries the exact
+    `package_identity` -- the LOG line is display, the receipt is identity.
+    """
+    if last_collect.startswith(identity + "@"):
+        return True
+    for record in _iter_operation_records(root, records):
+        if record.get("operation") != "sub_collect":
+            continue
+        if record.get("status") != "COMMITTED":
+            continue
+        meta = record.get("receipt_metadata") or {}
+        if identity in (meta.get("package_identities") or ()):
+            return True
+    return False
+
+
+def _collect_linkage(root: Path,
+                     records: tuple[dict, ...] | None = None) \
+        -> tuple[set[str], dict[str, str]]:
+    """Durable intake linkage (items 4/13/16): every package identity with a
+    COMMITTED sub_collect receipt, and its exact linked Core review ticket.
+
+    The receipt's structured receipt_metadata binds package_identities to
+    tickets positionally -- that binding is the INTAKE != REVIEW relation.
+    The MANIFEST last_collect marker is a dedup witness; the ticket link is
+    the disposition relation.
+    """
+    collected: set[str] = set()
+    links: dict[str, str] = {}
+    for record in _iter_operation_records(root, records):
+        meta = record.get("receipt_metadata") or {}
+        if record.get("operation") != "sub_collect":
+            continue
+        if record.get("status") != "COMMITTED":
+            continue
+        identities = meta.get("package_identities") or []
+        tickets = meta.get("tickets") or []
+        for index, identity in enumerate(identities):
+            collected.add(identity)
+            if index < len(tickets):
+                links[identity] = tickets[index]
+    return collected, links
+
+
+def _terminal_tickets(root: Path) -> dict[str, bool]:
+    """Terminal state of every Core ticket: DONE or BLOCKED is a terminal
+    disposition; everything else is open review work."""
+    from .board import parse_board
+    board = parse_board(_read_maybe(root / ".saipen" / "BOARD.md"))
+    return {tid: ticket["section"] in ("## DONE", "## BLOCKED")
+            for tid, ticket in board.get("tickets", {}).items()}
+
+
+def _collect_review_state(root: Path, name: str, model: OutboxModel,
+                          source_id, saipen_home: str,
+                          records: tuple[dict, ...] | None = None) -> dict:
+    """The INTAKE/REVIEW relation for one role's current packages (item 16).
+
+    Returns structured flags the health derivation consumes:
+    - reviewed_without_disposition: a current package claims 'reviewed' but
+      has no durable collect receipt with a terminal linked Core ticket --
+      REVIEWED TEXT IS NOT A REVIEW DISPOSITION, this is INVALID.
+    - ready_collected_open: current READY package durably collected, linked
+      Core review ticket not terminal -- REVIEW_PENDING (Core owns it now).
+    - ready_collected_terminal: collected and the linked ticket IS terminal,
+      but the disposition mark has not been applied -- REVIEW_PENDING with
+      disposition_pending True (a mechanical DISPOSE action remains).
+    - ready_uncollected: current READY package with no collect receipt --
+      READY_FOR_REVIEW (intake is the missing action).
+    """
+    out = {"reviewed_without_disposition": False,
+           "ready_collected_open": False,
+           "ready_collected_terminal": False,
+           "ready_uncollected": False,
+           "disposition_pending": False,
+           "review_ticket": None}
+    if source_id is None:
+        return out
+    current_role = current_local_role_revision(root, name, saipen_home)
+    if current_role is None:
+        return out
+    collected, links = _collect_linkage(root, records)
+    terminal = _terminal_tickets(root)
+    for package in model.packages:
+        if package.legacy:
+            continue
+        status = package.fields.get("status")
+        if status not in ("ready", "reviewed"):
+            continue
+        if package.fields.get("source_head") != source_id.source_head:
+            continue
+        if package.fields.get("source_tree_fingerprint") != \
+                source_id.source_tree_fingerprint:
+            continue
+        if package.fields.get("role_revision") != current_role:
+            continue
+        identity = package_identity(package)
+        ticket = links.get(identity)
+        disposed = bool(ticket and terminal.get(ticket) is True)
+        if status == "reviewed":
+            if not (identity in collected and disposed):
+                out["reviewed_without_disposition"] = True
+                out["review_ticket"] = ticket
+        else:
+            if identity in collected:
+                if disposed:
+                    out["ready_collected_terminal"] = True
+                    out["disposition_pending"] = True
+                else:
+                    out["ready_collected_open"] = True
+                out["review_ticket"] = ticket
+            else:
+                out["ready_uncollected"] = True
+    return out
+
+
 def sub_collect(project_root: Path | str, name: str | None = None,
                 dry_run: bool = False) -> Result:
-    """Journal ready SubSaipen hypotheses into ordinary Core review tickets.
+    """INTAKE: journal ready SubSaipen hypotheses as ordinary Core review
+    tickets (items 4/5/13). INTAKE != REVIEW.
+
+    The operation validates the package, creates exactly one Core review TODO
+    ticket carrying the immutable package identity + provenance, and commits
+    a durable collect receipt binding package_identity -> Core ticket id +
+    producer + source identity. The package is NOT marked reviewed here: a
+    reviewed claim is a Core DISPOSITION, and only `sub_disposition` (after
+    the linked Core ticket is terminal) may write it. Health derivation turns
+    a collected package into REVIEW_PENDING, never CURRENT, until then.
 
     Aggregate collection considers only automatic/core-review policies and
     skips explicit producers. Targeting an explicit producer refuses because
@@ -2339,6 +2965,11 @@ def sub_collect(project_root: Path | str, name: str | None = None,
         stale_ready = []
         reviewed = []
         for package in model.packages:
+            if package.legacy:
+                package_reports.append({"name": producer, "packages": [
+                    {"id": package.package_id, "status": package.status,
+                     "legacy": True}]})
+                continue
             identity = package_identity(package)
             info = {"id": package.package_id, "status": package.status,
                     "package_identity": identity}
@@ -2347,9 +2978,13 @@ def sub_collect(project_root: Path | str, name: str | None = None,
                 continue
             if package.status != "ready":
                 continue
+            try:
+                _core_home = saipen_home_of(root)
+            except ValueError as exc:
+                return _refuse("VALIDATION_FAILED", str(exc), name=producer)
             role_state = role_freshness(root, producer,
                                         package.fields["role_revision"],
-                                        saipen_home_of(root))
+                                        _core_home)
             reasons = []
             if package.fields["source_head"] != current.source_head:
                 reasons.append("source_head stale")
@@ -2363,44 +2998,52 @@ def sub_collect(project_root: Path | str, name: str | None = None,
             else:
                 current_ready.append((package, identity, info))
         last_collect = entry.metadata.get("last_collect", "")
-        durable = {identity for _package, identity in reviewed
-                   if identity in board_doc.text_norm
-                   or identity in log_doc.text_norm
-                   or last_collect.startswith(identity + "@")}
-        if not current_ready and durable:
-            deduplicated.extend({"name": producer,
-                                 "package_identity": identity}
-                                for identity in sorted(durable))
-            package_reports.append({"name": producer, "packages": [
-                {"id": package.package_id, "status": package.status,
-                 "package_identity": identity, "deduplicated": True}
-                for package, identity in reviewed if identity in durable]})
-            continue
+        # Dedup is by durable intake receipt for BOTH statuses: a collected
+        # package stays READY until Core disposes it, so 'ready + durable
+        # receipt' is ALREADY_COLLECTED, never a second ticket.
+        durable = {identity for identity in (
+            {identity for _package, identity, _info in current_ready}
+            | {identity for _package, identity in reviewed})
+                   if _durable_collect_witness(root, last_collect, identity)}
+        fresh_ready = [(package, identity, info) for package, identity, info
+                       in current_ready if identity not in durable]
         if stale_ready:
             detail = "; ".join(
                 f"{producer}/{package.package_id}: {', '.join(reasons)}"
                 for package, reasons in stale_ready)
             return _refuse("PACKAGE_INCOMPLETE",
                            "collect refused; stale READY package(s): " + detail)
-        if len(current_ready) != 1:
+        if not fresh_ready:
+            if durable:
+                deduplicated.extend({"name": producer,
+                                     "package_identity": identity}
+                                    for identity in sorted(durable))
+                package_reports.append({"name": producer, "packages": [
+                    {"id": package.package_id, "status": package.status,
+                     "package_identity": identity, "deduplicated": True}
+                    for package, identity, _info in current_ready
+                    if identity in durable] + [
+                    {"id": package.package_id, "status": package.status,
+                     "package_identity": identity, "deduplicated": True}
+                    for package, identity in reviewed if identity in durable]})
+                continue
             # An existing canonical empty queue is truthful evidence that
             # there is currently nothing to collect, including for a targeted
             # diagnostic. A targeted nonempty queue with no READY package is
             # different: it is incomplete and must still refuse.
-            if not current_ready and (name is None or not model.packages):
+            if name is None or not model.packages:
                 package_reports.append({"name": producer, "packages": []})
                 continue
             return _refuse(
-                "PACKAGE_INCOMPLETE" if not current_ready else
+                "PACKAGE_INCOMPLETE",
+                f"{producer}: expected exactly one current READY package; "
+                f"found 0")
+        if len(fresh_ready) != 1:
+            return _refuse(
                 "MALFORMED_PACKAGE",
                 f"{producer}: expected exactly one current READY package; "
-                f"found {len(current_ready)}")
-        package, identity, info = current_ready[0]
-        if (identity in board_doc.text_norm or identity in log_doc.text_norm
-                or last_collect.startswith(identity + "@")):
-            deduplicated.append({"name": producer,
-                                 "package_identity": identity})
-            continue
+                f"found {len(fresh_ready)}")
+        package, identity, info = fresh_ready[0]
         planned.append({"producer": producer, "entry": entry,
                         "package": package, "identity": identity,
                         "outbox_path": outbox_path})
@@ -2423,7 +3066,6 @@ def sub_collect(project_root: Path | str, name: str | None = None,
     new_log = log_doc.text_norm
     tickets = []
     manifest_updates = {}
-    outbox_targets = []
     for offset, item in enumerate(planned):
         producer = item["producer"]
         package = item["package"]
@@ -2448,15 +3090,23 @@ def sub_collect(project_root: Path | str, name: str | None = None,
              else "P2")
         line = f"- [ ] {ticket} [{priority}] {description} | verify: {verify}"
         board_lines = new_board.splitlines(keepends=True)
-        todo_index = next(index for index, value in enumerate(board_lines)
-                          if value.startswith("## TODO"))
-        board_lines.insert(todo_index + 1, line + "\n")
+        # T-1003 sweep: an autonomous collected hypothesis must NOT preempt
+        # already-workable Core work (board order is priority). Collected
+        # review hypotheses go at the END of ## TODO, deterministic and
+        # batch-order-preserved.
+        done_index = next(index for index, value in enumerate(board_lines)
+                          if value.startswith("## DONE"))
+        board_lines.insert(done_index, line + "\n")
         new_board = "".join(board_lines)
+        # T-1003 Wave 2 item 5: the Core mutation event agent is the ACTUAL
+        # Core writer (saipen-cli executes this operation), never the evidence
+        # producer. The producer identity is structured provenance in the
+        # ticket/receipt, not the LOG writer's identity.
         event, log_line = build_event(
             tail, "RUN",
             f"collect {producer}/{package.package_id} -> {ticket}; "
             f"{provenance}; queued as Core review hypothesis",
-            ticket=ticket, agent=producer, now=now_log,
+            ticket=ticket, agent="saipen-cli", now=now_log,
             op_id=op_id)
         tail = event
         new_log = new_log.rstrip("\n") + "\n" + log_line + "\n"
@@ -2464,12 +3114,6 @@ def sub_collect(project_root: Path | str, name: str | None = None,
                         "package": package.package_id,
                         "package_identity": identity})
         manifest_updates[producer] = identity + "@" + now_iso
-        outbox_doc = outbox_docs[producer]
-        reviewed_text = _mark_package_reviewed(outbox_doc.text_norm,
-                                               package.package_id)
-        rel = item["outbox_path"].relative_to(root).as_posix()
-        outbox_targets.append({"path": rel, "role": "report",
-                               "content": outbox_doc.encode(reviewed_text)})
 
     new_state = patch_state(state_doc.text_norm, {
         "last_event": tail,
@@ -2491,7 +3135,6 @@ def sub_collect(project_root: Path | str, name: str | None = None,
          "content": board_doc.encode(new_board)},
         {"path": ".saipen/STATE.md", "role": "state",
          "content": state_doc.encode(new_state)},
-        *outbox_targets,
         {"path": MANIFEST_REL, "role": "manifest",
          "content": manifest_doc.encode(new_manifest)},
     ]
@@ -2501,16 +3144,20 @@ def sub_collect(project_root: Path | str, name: str | None = None,
         ".saipen/STATE.md": state_doc.raw_hash,
         MANIFEST_REL: manifest_doc.raw_hash,
     }
-    preconditions.update({target["path"]: outbox_docs[item["producer"]].raw_hash
-                          for target, item in zip(outbox_targets, planned)})
+    # The OUTBOX is a READ-ONLY dependency of intake: the package stays READY
+    # (INTAKE != REVIEW) and must not move during the transaction.
     read_preconditions = {".": source_dependency, **sealed_dependencies,
-                          **charter_dependencies}
+                          **charter_dependencies,
+                          **{item["outbox_path"].relative_to(root).as_posix():
+                             outbox_docs[item["producer"]].raw_hash
+                             for item in planned}}
     changed = [target["path"] for target in targets]
     if dry_run:
-        return Result(ok=True, code="SUB_COLLECTED",
+        return Result(ok=True, code="SUB_COLLECT_PLAN",
                       data={"names": eligible, "packages": package_reports,
                             "tickets": tickets, "skipped": skipped,
                             "deduplicated": deduplicated, "dry_run": True,
+                            "would_result": "SUB_COLLECTED",
                             "would_write": changed})
     with project_writer_lock(root):
         commit = run_mutation(
@@ -2519,7 +3166,14 @@ def sub_collect(project_root: Path | str, name: str | None = None,
                 item["identity"] for item in planned)).encode("utf-8")),
             targets, preconditions=preconditions,
             read_preconditions=read_preconditions,
-            verification_policy="sub_collect")
+            verification_policy="sub_collect",
+            receipt_metadata={
+                "operation": "sub_collect",
+                "status": "COMMITTED",
+                "package_identities": [item["identity"] for item in planned],
+                "producers": sorted({item["producer"] for item in planned}),
+                "tickets": [t["ticket"] for t in tickets],
+            })
     if not commit.get("ok"):
         return _refuse(commit.get("code", "VALIDATION_FAILED"),
                        commit.get("detail", ""), tickets=tickets)
@@ -2530,7 +3184,187 @@ def sub_collect(project_root: Path | str, name: str | None = None,
                         "deduplicated": deduplicated})
 
 
+def sub_disposition(project_root: Path | str, name: str,
+                    package_id: str | None = None,
+                    dry_run: bool = False) -> Result:
+    """CORE DISPOSITION: mark a collected core-review package `reviewed` ONLY
+    after its linked Core review ticket is terminal (items 4/13/16).
+
+    INTAKE != REVIEW: sub_collect only queues the hypothesis; this operation
+    writes the reviewed claim, and only when:
+      - the package is current (source triple + role revision),
+      - a durable collect receipt links its immutable identity to a Core
+        review ticket,
+      - that ticket is terminal (DONE or BLOCKED) on the Core board.
+    Health derivation turns the role CURRENT only after this receipt exists;
+    until then the role is REVIEW_PENDING.
+    """
+    from .fast_check import validate_texts
+    from .log import build_event, log_tail_event
+
+    root = Path(project_root)
+    try:
+        instance = _sub_dir(root, name)
+    except ValueError as exc:
+        return _refuse("INVALID_ID", str(exc), name=name)
+    manifest_raw, entry, manifest_errors = _registered_entry(root, name)
+    if manifest_errors:
+        return _refuse("INVALID_MANIFEST", "; ".join(manifest_errors[:5]),
+                       name=name, errors=manifest_errors)
+    outbox_path = instance / "kitchen" / "OUTBOX.md"
+    if not outbox_path.is_file():
+        return _refuse("PACKAGE_INCOMPLETE", f"{name}: no OUTBOX", name=name)
+    outbox_doc = codec.read_document(outbox_path)
+    model = parse_outbox(outbox_doc.text_norm, name)
+    if model.errors:
+        return _refuse("MALFORMED_PACKAGE",
+                       f"{name}: " + "; ".join(model.errors[:5]),
+                       name=name, errors=list(model.errors))
+    from freshness import compute_source_identity
+    try:
+        current = compute_source_identity(root)
+        source_dependency = hash_source_identity(root)
+    except Exception as exc:
+        return _refuse("VALIDATION_FAILED", f"source identity UNKNOWN: {exc}")
+    try:
+        core_home = saipen_home_of(root)
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc), name=name)
+    current_role = current_local_role_revision(root, name, core_home)
+    candidates = []
+    for package in model.packages:
+        if package.legacy:
+            continue
+        if package.status != "ready":
+            continue
+        if package_id is not None and package.package_id != package_id:
+            continue
+        if package.fields.get("source_head") != current.source_head:
+            continue
+        if package.fields.get("source_tree_fingerprint") != \
+                current.source_tree_fingerprint:
+            continue
+        if package.fields.get("role_revision") != current_role:
+            continue
+        candidates.append(package)
+    if not candidates:
+        return _refuse(
+            "PACKAGE_INCOMPLETE",
+            f"{name}: no current READY package to dispose"
+            + (f" ({package_id})" if package_id else ""), name=name)
+    if len(candidates) > 1:
+        return _refuse(
+            "MALFORMED_PACKAGE",
+            f"{name}: multiple current READY packages; dispose exactly one "
+            "by package id", name=name)
+    package = candidates[0]
+    identity = package_identity(package)
+    collected, links = _collect_linkage(root)
+    ticket = links.get(identity)
+    if identity not in collected or not ticket:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"{name}/{package.package_id}: no durable collect receipt links "
+            "this package to a Core review ticket -- INTAKE must precede a "
+            "reviewed claim", name=name)
+    terminal = _terminal_tickets(root)
+    if not terminal.get(ticket):
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"{name}/{package.package_id}: linked Core review ticket {ticket} "
+            "is not terminal -- a reviewed claim requires an independent "
+            "Core disposition (DONE or BLOCKED) first", name=name,
+            ticket=ticket)
+
+    try:
+        reviewed_text = _mark_package_reviewed(outbox_doc.text_norm,
+                                               package.package_id)
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc), name=name,
+                       package=package.package_id)
+    rel = outbox_path.relative_to(root).as_posix()
+    state_doc = codec.read_document(root / ".saipen" / "STATE.md")
+    board_doc = codec.read_document(root / ".saipen" / "BOARD.md")
+    log_doc = codec.read_document(root / ".saipen" / "LOG.md")
+    full_log, sealed_dependencies = _core_log_context(root, log_doc.text_norm)
+    tail = log_tail_event(full_log)
+    now_iso = _utc_iso()
+    now_log = _now()
+    op_id = "sub-disposition-" + __import__("uuid").uuid4().hex[:8]
+    event, log_line = build_event(
+        tail, "DEC",
+        f"disposition {name}/{package.package_id} reviewed after Core "
+        f"review {ticket} terminal; package_identity={identity}",
+        ticket=None, agent="saipen-cli", now=now_log, op_id=op_id)
+    new_log = log_doc.text_norm.rstrip("\n") + "\n" + log_line + "\n"
+    new_state = patch_state(state_doc.text_norm, {
+        "last_event": event,
+        "updated": now_iso,
+    })
+    errors = validate_texts(new_state, board_doc.text_norm, new_log)
+    if errors:
+        return _refuse("VALIDATION_FAILED",
+                       "proposed disposition fails fast validation: "
+                       + "; ".join(errors[:5]))
+    targets = [
+        {"path": ".saipen/LOG.md", "role": "log",
+         "content": log_doc.encode(new_log)},
+        {"path": ".saipen/STATE.md", "role": "state",
+         "content": state_doc.encode(new_state)},
+        {"path": rel, "role": "report",
+         "content": outbox_doc.encode(reviewed_text)},
+    ]
+    preconditions = {
+        ".saipen/LOG.md": log_doc.raw_hash,
+        ".saipen/STATE.md": state_doc.raw_hash,
+        rel: outbox_doc.raw_hash,
+    }
+    read_preconditions = {".": source_dependency,
+                          ".saipen/BOARD.md": board_doc.raw_hash,
+                          **sealed_dependencies}
+    changed = [target["path"] for target in targets]
+    if dry_run:
+        return Result(ok=True, code="SUB_DISPOSITION_PLAN",
+                      data={"name": name, "package": package.package_id,
+                            "package_identity": identity, "ticket": ticket,
+                            "dry_run": True,
+                            "would_result": "SUB_DISPOSITIONED",
+                            "would_write": changed})
+    with project_writer_lock(root):
+        commit = run_mutation(
+            root, op_id, "sub_disposition", "saipen-cli",
+            project_identity(root),
+            hash_bytes(("sub_disposition:" + identity).encode("utf-8")),
+            targets, preconditions=preconditions,
+            read_preconditions=read_preconditions,
+            verification_policy="sub_disposition",
+            receipt_metadata={
+                "operation": "sub_disposition",
+                "status": "COMMITTED",
+                "package_identity": identity,
+                "producer": name,
+                "package": package.package_id,
+                "ticket_id": ticket,
+                "source_head": package.fields.get("source_head"),
+                "source_tree_fingerprint": package.fields.get(
+                    "source_tree_fingerprint"),
+            })
+    if not commit.get("ok"):
+        return _refuse(commit.get("code", "VALIDATION_FAILED"),
+                       commit.get("detail", ""), name=name, ticket=ticket)
+    return Result(ok=True, code="SUB_DISPOSITIONED", op_id=op_id,
+                  changed_files=changed,
+                  data={"name": name, "package": package.package_id,
+                        "package_identity": identity, "ticket": ticket})
+
+
 def saipen_home_of(project_root: Path) -> str:
-    from .state import parse_state
-    st = parse_state(codec.read_doc(project_root / ".saipen" / "STATE.md"))
+    """The Core STATE's saipen_home, or a fail-closed raise: a malformed
+    Core STATE must never synthesize an empty home -- an empty home is a
+    real value with real consequences, not a lenient default (T-1003)."""
+    from .state import parse_state_or_error
+    st, state_error = parse_state_or_error(
+        codec.read_doc(project_root / ".saipen" / "STATE.md"))
+    if state_error:
+        raise ValueError(f"state-malformed: {state_error}")
     return st.get("saipen_home") or ""

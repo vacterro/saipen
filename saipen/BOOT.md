@@ -26,6 +26,16 @@ This file gives the execution order. No rule is *defined* here —
    Normative docs load from `protocol_dir`; tools/schemas/templates/VERSION
    from `saipen_home`. No other path derivation is conformant.
 
+   **Anchors, never discovery.** `protocol_dir`/`saipen_home` come from
+   where this `BOOT.md` actually loaded (the skill path in the system
+   prompt, or a bound STATE's `saipen_home:` field) — never from scanning
+   the workspace, its parents, or its siblings; the SAIPEN home is often a
+   sibling of the workspace. Never `find`/glob for `BOOT.md` or `.saipen/`
+   outside the bound root. `.saipen/` means exactly
+   `<project_root>/.saipen/`; absent there means the project is NOT
+   bootstrapped → INIT (§1.7), never "no saipen state, skip the protocol" —
+   STYLE.md still governs the first token.
+
 3. **Validate STATE before executing anything.**
    Every field CORE.md §1.2's required set names must be present
    (read it there — this file does not copy it). `transition_from` is
@@ -84,8 +94,15 @@ This file gives the execution order. No rule is *defined* here —
    binds (§1.1).
 
 8. **Load the phase doc from `protocol_dir/phases/<phase>.md`, one at a time.**
-   Normalise the path for the host OS. `saipen_home` dead? Clone
-   `github.com/vacterro/saipen`, update the field. No git → `BLOCKED`.
+   Normalise the path for the host OS. `saipen_home` dead? Do NOT edit
+   `STATE.md` by hand and do not guess a home. Install/clone SAIPEN at an
+   explicit candidate path, then run the ONE mechanical rebind operation
+   `saipen rebind-home <candidate>`: it proves the candidate (readable
+   `VERSION`, compatible major, `BOOT` layout, required protocol files),
+   journals a single narrowly-owned `STATE.saipen_home` pointer update with
+   truthful LOG evidence, and preserves phase/task/board. Only if the engine
+   is unavailable (no Python/SAIOPS) does the manual path apply: clone
+   `github.com/vacterro/saipen` and update the field, with no git → `BLOCKED`.
 
 9. **Checkpoint after every ticket, phase transition, and before stop.**
    LOG (append) → `BOARD.md` → `STATE.md`, that order (§1.5). **Read back

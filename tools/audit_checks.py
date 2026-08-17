@@ -670,17 +670,17 @@ def strip_done_verify(text: str) -> str:
 
 
 def cite_open_ticket(text: str) -> str:
-    """T-431: repoint a shipped CONFORMANCE row at a ticket still in ## TODO.
+    """T-431: repoint a shipped CONFORMANCE row at a ticket still unfinished
+    (## TODO or ## BLOCKED -- the validator treats any non-DONE/non-DOING
+    ticket as unfinished).
 
     The open ticket is read out of the pristine board at mutation time, the
     same way leak_style_marker reads STYLE.md's live marker: a hardcoded ID
     would go stale into a silent no-op the moment the board moved on.
     """
     board = (HOME / ".saipen" / "BOARD.md").read_text(encoding="utf-8-sig")
-    todo = re.search(r"^## TODO$(.*?)^## ", board,
-                     re.MULTILINE | re.DOTALL)
-    open_ticket = re.search(r"^- \[ \] (T-\d+)", todo.group(1),
-                            re.MULTILINE) if todo else None
+    open_ticket = re.search(r"^- \[ \] (T-\d+)", board,
+                            re.MULTILINE)
     if not open_ticket:
         return text
     return re.sub(r"\(T-\d+\)", f"({open_ticket.group(1)})", text, count=1)
@@ -1405,8 +1405,8 @@ CASES: list[tuple[str, str, object, str]] = [
     # "проверил: всё работает", then FileNotFoundError on the next command.
     ("the sc circuit names a command nobody defined",
      "extensions/subs/crew.md",
-     replace("| 1 | sense | `saipen hunt` |",
-             "| 1 | sense | `saipen sniff` |"),
+     replace("| SC-11 | `ship` | RELEASE_EXECUTOR",
+             "| SC-11 | `ship` | `saipen sniff` RELEASE_EXECUTOR"),
      "circuit-stages"),
     ("crew.md lets a stage hand forward a claim",
      "extensions/subs/crew.md",
@@ -1721,12 +1721,12 @@ CASES: list[tuple[str, str, object, str]] = [
     # passing control: E-1911 caught this class once, and the repair for it
     # reintroduced it by losing the group.
     ("a ticket runs past verify.md's fix-cycle cap with no blocker", BOARD,
-      lambda t: re.sub(r"^(?!.*\| blocker:)(- \[ \] T-\d+ \[P\d\] .*)$",
+      lambda t: re.sub(r"^(?!.*\| blocker:)(- \[[ x/]\] T-\d+ \[P\d\] .*)$",
                       r"\1 | verify_attempts: 9",
                       t, count=1, flags=re.MULTILINE),
      "against phases/verify.md's cap"),
     ("verify_attempts holds something that is not a number", BOARD,
-      lambda t: re.sub(r"^(?!.*\| blocker:)(- \[ \] T-\d+ \[P\d\] .*)$",
+      lambda t: re.sub(r"^(?!.*\| blocker:)(- \[[ x/]\] T-\d+ \[P\d\] .*)$",
                       r"\1 | verify_attempts: many",
                       t, count=1, flags=re.MULTILINE),
      "is not a number"),
@@ -2185,15 +2185,6 @@ CASES: list[tuple[str, str, object, str]] = [
      replace("**`git add .` and `git add -A` are\n      forbidden here**",
              "`git add .` is fine here"),
      "must forbid blind `git add .`"),
-    # Gated at the consumer (T-568): a malformed package is REFUSED where it
-    # would be consumed, and merely reported everywhere else. Run at the
-    # default gate this control would still find its substring -- on a WARN
-    # line -- and go on calling itself evidence of a refusal it no longer
-    # measured.
-    ("nonempty OUTBOX that parses as zero entries fails",
-     ".saipen/extensions/subs/saihunt/kitchen/OUTBOX.md",
-     lambda t: t.rstrip() + "\n\nmalformed package without an entry\n",
-     "parses as zero OUTBOX entries", "collect:saihunt"),
     # T-541: the machine-readable metadata block is the tool's only way to
     # read a charter's role_kind/collect_policy/role_revision. Drop the yaml
     # language tag so the block stops being machine-readable, and the

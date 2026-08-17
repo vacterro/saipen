@@ -1,6 +1,27 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.224.4 -- 2026-08-14 -- hostile integrity sweep: prose is never mechanical evidence (T-1003)
+
+- T-1003: every expected crew blocker is now a structured closed-code REFUSE (HOME_REQUIRED, CREW_BLOCKED) -- never a traceback; the blocked circuit names stage/role/reason and an inspect-required next action.
+- T-1003: Core closure exemption comes only from an exact closed blocker-class token (HELD/FUTURE_GATE/PERMANENT_WARNING_OWNER/WAIT_USER_CONFIRMATION/ACTIVE); free prose in a description or blocker detail is inert.
+- T-1003: `parse_board` is the ONE Core ticket parser (validator consumes its model); a duplicated known field is a parse error, never first-wins or last-wins.
+- T-1003: the shared-contract SOURCE is a closed mandatory inventory -- a broken/incomplete saipen_home refuses INVALID_SOURCE_HOME with zero writes and zero obsolete deletion.
+- T-1003: the inherited shared tree is exact -- unexpected descendants (TEMPLATE/EVIL.md) make the contract NOT current, are reported by path, and are never auto-deleted.
+- T-1003: saiwiki has ONE current ticket namespace (W-), an explicit read-only LEGACY boundary for pre-current history, and the validator enforces the same expected role/prefix as worker health; PROTOCOL.md's documented prefixes match the executable registry.
+- T-1003: producer OUTBOX packages carry an explicit `legacy: true` boundary -- pre-provenance history stays readable, immutable and non-collectable without poisoning a strict current package.
+- T-1003: collection dedup uses only structured witnesses (MANIFEST last_collect + the journaled collect event); a package_identity SHA in free prose is not evidence, and autonomous collected hypotheses insert at the end of Core TODO without preempting existing work.
+- T-1003: one shared `validate_sub_state` backs worker health and the validator; a schema-invalid worker state reports INVALID, never CURRENT.
+- T-1003: crew release truth comes from one canonical release-engine verdict (UNKNOWN/AMBIGUOUS are not PASS); post-ship certification requires the working tree to equal the shipped commit exactly.
+- T-1003 second hostile root pass: ONE PHYSICAL BOARD RECORD == ONE TICKET IDENTITY -- a second `- [ ] T-###` opener embedded in a ticket line is a parse error (the live T-473/T-576 and T-407/T-406 merges are split back into independent records); `parse_board` rejects them and the validator goes red on the reproduced corruption.
+- T-1003: the sub STATE/BOARD pair is one coherent machine -- one shared `validate_sub_lifecycle` binds DONE/task-none, task == the single DOING ticket, role-valid ticket prefixes and truthful BLOCKED blockers; the real saiwiki DONE/W-031 mismatch is INVALID in the validator and in worker health.
+- T-1003: ordinary tickets reaching SHIP under an active crew epoch DEFER_FOR_CREW instead of deadlocking -- a committed structured crew-defer receipt (crew_epoch, ticket, exact reviewed scope identity + per-path hashes, source identity) closes the ticket locally with zero git writes and Core returns to the planner.
+- T-1003: the terminal crew release surface is DERIVED from committed defer receipts (never git status, never prose); the SHIP is executable through the existing release executor via a mechanically-owned carrier, and terminal authorization is one explicit `crew_ready_for_terminal_ship` predicate requiring SC-0..SC-10 all present and satisfied (missing evidence != PASS).
+- T-1003: CURRENT != FRESH FOR THIS CREW EPOCH -- role evidence certifies a new SC stage only when a committed `crew_run` receipt binds the package identity to epoch + role + exact source + role_revision; producer integration is a structured S0->S1 edge, never a rewritten package provenance.
+- T-1003: the crew epoch derives from the structured COMMITTED converge_intent operation receipt (not LOG prose); the final gate binds the committed finalize_crew operation receipt and a published `crew_release_evidence` record; release continuation identity comes from committed release receipts, not a `ship vX` substring in LOG text.
+- T-1003: `release_verdict` calls ONE real read-only verifier -- a receipt claiming REMOTE_VERIFIED is not remote verification (branch tip + peeled tag + version relation queried independently; remote unavailable is UNKNOWN); receipt selection fails closed on malformed siblings and competing terminal receipts are AMBIGUOUS; no-publish crew closures verify LOCAL closure truth with zero Git requirements.
+- T-1003: WAIT_ROLE:<role> is a structured crew-owned blocker -- the planner routes to the owning built-in role and disposes the ticket on real evidence; `.saipen*` prefix names like `.saipenicious.py` are NOT excluded from post-ship certification (exact `.saipen/` boundary); crew plan `ok`/`crew_complete`/`action_required` are separated so a valid nonterminal plan is not a CLI failure; every serial SC role runs IN THE CURRENT AGENT.
+
 ## 7.224.3 -- 2026-08-14 -- remove dead SubSaipen helpers (T-1000)
 
 - T-1000: `_outbox_blocks` and `_hash_or_empty` were definition-only after the strict OUTBOX and lifecycle rewrites; a repo-wide reference scan found zero uses and no dynamic contract, so both were deleted. SAICREW, Ruff and the full scenario suite stay green.

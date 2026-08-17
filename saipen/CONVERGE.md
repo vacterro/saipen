@@ -133,6 +133,20 @@ Four things that are NOT closure, each of which has been offered as one:
 "nothing obvious remains", "`HEAD` is unchanged", "a ready package already
 exists", and "tests passed before the cleanup".
 
+## How the crew gate proves E-I is current
+
+This document owns the sequence; the mechanical proof that the sequence is
+CURRENT against one source identity is owned once, by the shared read-only
+convergence verdict (`saipen_engine.convergence.convergence_verdict`), which
+SC-7 and `--gate crew` consume. Every executed stage records a structured
+`convergence_stage` receipt (E/F/G/H/I, closed verdict, bound to the live
+source identity; CLEAN also binds its input and resulting identities) through
+the public `record_convergence` operation. The verdict requires the ordered
+terminal chain E,F,G,H,I with consistent identities, the current tree equal to
+I's identity (no mutation after the final HUNT), and a fully attributed
+working tree. `phase: DONE` + an empty workable board is NEVER this proof;
+missing or stale proof keeps SC-7 red with `CONVERGE_CORE`.
+
 ## What this document does not own
 
 The phase mechanics belong to the phase docs, the command rows to CORE.md

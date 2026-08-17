@@ -92,6 +92,4 @@ def prove_inside(path: Path, owner_root: Path, *, kind: str = "path") -> Path:
 def _realpath(path: Path) -> Path:
     import os
     text = os.path.realpath(str(path))
-    if os.name == "nt":
-        text = os.path.normcase(text)
     return Path(text)

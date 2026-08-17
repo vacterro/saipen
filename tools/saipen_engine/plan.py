@@ -63,6 +63,7 @@ class OperationPlan:
     preconditions: dict[str, str]
     targets: tuple[TargetPlan, ...]
     expected: dict  # the semantic success metadata (ok/code/event_id/...)
+    receipt_metadata: dict | None = None  # structured receipt facts for journal
 
     @property
     def changed_files(self) -> list[str]:
@@ -72,7 +73,8 @@ class OperationPlan:
 def build_plan(operation: str, agent: str, project_identity: str,
                semantic_request: dict, preconditions: dict[str, str],
                targets: list[TargetPlan], expected: dict,
-               op_id: str | None = None) -> OperationPlan:
+               op_id: str | None = None,
+               receipt_metadata: dict | None = None) -> OperationPlan:
     """Construct an OperationPlan with a stable op_id.
 
     `op_id` defaults to `<operation>-<uuid8>`. PLAN and APPLY share it; APPLY
@@ -90,12 +92,13 @@ def build_plan(operation: str, agent: str, project_identity: str,
         preconditions=dict(preconditions),
         targets=tuple(targets),
         expected=dict(expected),
+        receipt_metadata=receipt_metadata,
     )
 
 
 def _hex8() -> str:
     import uuid
-    return uuid.uuid4().hex[:8]
+    return uuid.uuid4().hex
 
 
 def _read_only_preconditions(plan: OperationPlan) -> dict[str, str]:
@@ -123,16 +126,25 @@ def apply_plan(project_root: Path | str, plan: OperationPlan) -> Result:
     root = Path(project_root)
     try:
         with project_writer_lock(root):
+            written = {t.path for t in plan.targets}
+            # WRITE CAS only for targets (their own before_hash also covers
+            # them); everything else the plan READ is a READ-ONLY dependency
+            # and may legitimately reference the absolute SAIPEN home
+            # (T-1003 owned-target resolver). Sending home paths through the
+            # write-precondition channel would wrongly refuse valid plans.
             commit = run_mutation(
                 root, plan.op_id, plan.operation, plan.agent,
                 plan.project_identity, plan.semantic_payload_hash,
                 [{"path": t.path, "role": t.role, "content": t.content,
                   "before_hash": t.before_hash, "after_hash": t.after_hash}
                  for t in plan.targets],
-                preconditions=plan.preconditions,
+                preconditions={path: expected
+                               for path, expected in plan.preconditions.items()
+                               if path in written},
                 read_preconditions=_read_only_preconditions(plan),
                 verify=fast_check.validate_project,
-                verification_policy="core_fast")
+                verification_policy="core_fast",
+                receipt_metadata=plan.receipt_metadata)
     except PermissionError as exc:
         if "WRITER_BUSY" in str(exc):
             return Result(ok=False, code="WRITER_BUSY", op_id=plan.op_id,
