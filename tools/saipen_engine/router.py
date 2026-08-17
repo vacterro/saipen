@@ -15,9 +15,10 @@ from __future__ import annotations
 from pathlib import Path
 
 from . import phases
-from .board import parse_board, ticket_is_workable, claim_status
+from .board import (parse_board, ticket_is_workable, claim_status,
+                     board_graph_errors)
 from .result import Result
-from .state import parse_state
+from .state import parse_state, is_legal_wait, binding_wait
 
 
 def _top_workable(board: dict, agent: str | None = None) -> str | None:
@@ -33,7 +34,8 @@ def _top_workable(board: dict, agent: str | None = None) -> str | None:
 def route_next(state_text: str, board_text: str,
                 pending_ops: list | None = None,
                 conflict_ops: list | None = None,
-                now: datetime.datetime | None = None) -> dict:
+                now: datetime.datetime | None = None,
+                current_capability: str | None = None) -> dict:
     """Compute the exact next executable action.
 
     Returns a dict with `action` (an executable mechanical action), `reason`
@@ -41,6 +43,12 @@ def route_next(state_text: str, board_text: str,
     STATE.next_action -- it is a projection, not a mirror (NITRO dogfood II).
     `now` (UTC) drives § 1.4 claim-liveness for the active-ticket binding; tests
     inject a fixed instant (P0 claim-ownership truth).
+
+    `current_capability` is the FRESHLY NEGOTIATED session capability
+    ("full"/"read-only"/...), supplied by the caller. CORE § 1.3: a persisted
+    `STATE.mode` is only the LAST handshake outcome and MUST NOT prove current
+    authority, so routing never infers write authority from STATE.mode -- it
+    gates only on an explicit current-capability value when one is supplied.
     """
     pending = list(pending_ops or [])
     conflicts = list(conflict_ops or [])
@@ -70,18 +78,29 @@ def route_next(state_text: str, board_text: str,
     task = state.get("task")
     na = state.get("next_action") or ""
 
-    # READ-ONLY MODE outranks everything (T-1003 carrier-loss wave): a state
-    # whose mode forbids mutation must never receive a mutating routed action
-    # -- no PHASE/SHIP/RUN, and not even recovery (recovery writes). The
-    # closed rule lives here once: mode == "read-only" forbids ALL mutation;
-    # "full" and "no-publish" both allow local mutation (no-publish only
-    # forbids git publish steps, which the router never emits anyway).
-    if state.get("mode") == "read-only":
+    # CURRENT-SESSION CAPABILITY gate (CORE § 1.3): only an explicitly supplied,
+    # freshly negotiated capability may grant/revoke write authority. A persisted
+    # STATE.mode is the LAST handshake outcome and is NEVER used to infer current
+    # authority (a stale read-only must not suppress a newly writable session,
+    # nor a stale full route mutation into a newly read-only one). Callers that
+    # do not pass current_capability get pure state-semantic routing.
+    #
+    # A capability that was supplied but is not one of the four closed values is
+    # a broken handshake, never permission: fail closed rather than route as if
+    # the session were writable.
+    if current_capability is not None:
+        from .capability import capability_error
+        _cap_problem = capability_error(current_capability)
+        if _cap_problem is not None:
+            return {"ok": False, "action": "saipen status",
+                    "reason": "capability-invalid",
+                    "detail": _cap_problem}
+    if current_capability == "read-only":
         return {"ok": True, "action": "saipen status",
                 "reason": "read-only-mode",
                 "executable_behavior": "RESTATE_AND_STOP",
-                "detail": "STATE mode is read-only; no mutating next action "
-                          "may be routed -- inspect only"}
+                "detail": "current session capability is read-only; no mutating "
+                          "next action may be routed -- inspect only"}
 
     # RECOVER outranks everything (after the read-only brake): an unresolved
     # op or conflict must be resolved before any canonical work.
@@ -170,13 +189,20 @@ def route_next(state_text: str, board_text: str,
     # route onward -- a genuine user brake remains a stop with 100 workable
     # tickets.
     if na.startswith("WAIT:"):
+        # THE contextual brake classifier (hostile-regression, P1#5). A WAIT
+        # that `binding_wait` recognizes is a HARD STOP (RESTATE_AND_STOP); one
+        # it does not bind in this exact context may route onward. Outside
+        # DONE+empty-TODO every legal WAIT binds (a user brake is a stop with
+        # one hundred workable tickets). At DONE+empty-TODO only the three
+        # fixed § 1.2 brakes bind; any other legal WAIT there is a question
+        # about work in flight that does not exist, so CORE's UNBLOCK exception
+        # routes it to documented repair rather than a stop. A malformed WAIT
+        # never reaches here: parse_state_or_error already refused it.
         _empty_todo = not any(t["section"] == "## TODO"
                               for t in board["tickets"].values())
-        _done_brakes = ("WAIT: blocked", "WAIT: user brake",
-                        "WAIT: first-publish", "WAIT: manual-verify",
-                        "WAIT: destructive-op")
-        _not_done_brake = not na.startswith(_done_brakes)
-        if not (phase == "DONE" and _empty_todo and _not_done_brake):
+        _brake = binding_wait(na, phase=phase, empty_todo=_empty_todo,
+                              intent=state.get("execution_intent"))
+        if _brake:
             return {"ok": True, "action": na, "reason": "wait",
                     "executable_behavior": "RESTATE_AND_STOP",
                     "detail": "persisted WAIT is a hard stop; do not route "
@@ -224,6 +250,19 @@ def route_next(state_text: str, board_text: str,
                     "reason": "start", "ticket": top,
                     "detail": "topmost workable ticket",
                     "load": load_for_action(f"PHASE SCOUT {top}")}
+        # A cyclic or dangling `needs:` graph with NOTHING workable is corrupt
+        # work state, not "no work left" (4th-wave P1#4): routing to
+        # maintenance / `saipen continue` there hides the damage behind a
+        # healthy-looking action. The gate sits HERE, after the Pick Rule, on
+        # purpose: CORE § 1.2's remedy for a cycle or a dangling reference is to
+        # block that ticket and KEEP WORKING the other tickets, so a broken edge
+        # must never suppress a genuinely workable one.
+        _graph_errors = board_graph_errors(board["tickets"])
+        if _graph_errors:
+            return {"ok": False, "action": "saipen status",
+                    "reason": "board-graph-invalid",
+                    "detail": "BOARD needs: graph invalid with no workable "
+                              "ticket: " + "; ".join(_graph_errors[:3])}
 
     # MAINTAIN: fall through to the persisted next_action only when it is a
     # legal non-ticket action (saipen continue / saipen <verb>), never a stale
@@ -249,6 +288,8 @@ ROUTING_FAILURE_CODES = {
     "state-malformed": "VALIDATION_FAILED",
     "binding-mismatch": "VALIDATION_FAILED",
     "board-malformed": "VALIDATION_FAILED",
+    "board-graph-invalid": "VALIDATION_FAILED",
+    "capability-invalid": "VALIDATION_FAILED",
 }
 
 

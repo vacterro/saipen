@@ -36,6 +36,7 @@ declaration, so CI fails on it like any other gate.
 """
 
 import contextlib
+import datetime
 import functools
 import importlib.util
 import io
@@ -3912,7 +3913,7 @@ def run_saicrew_probes() -> tuple[list[str], int]:
                            "2026-08-14T00:00:00Z")
         plan_b = crew_plan(post)
         expect("B post-ship except EE routes PREPARE_TRANSLATE_FINAL",
-               plan_b.get("action", {}).get("action")
+               (plan_b.get("action") or {}).get("action")
                == "PREPARE_TRANSLATE_FINAL", repr(plan_b.get("action")))
         write_post_package("saitranslate", translate_ready_text,
                            "2026-08-14T00:00:01Z")
@@ -3942,7 +3943,7 @@ def run_saicrew_probes() -> tuple[list[str], int]:
                             "2026-08-14T00:00:03Z")
         plan_c = crew_plan(post)
         expect("C EE current and QQ stale routes PREPARE_WIKI_FINAL",
-               plan_c.get("action", {}).get("action")
+               (plan_c.get("action") or {}).get("action")
                == "PREPARE_WIKI_FINAL", repr(plan_c.get("action")))
         write_post_package("saiwiki", wiki_ready_text,
                            "2026-08-14T00:00:04Z")
@@ -4125,7 +4126,7 @@ def run_saicrew_probes() -> tuple[list[str], int]:
         cold_gate = crew_gate_problems(Path(str(post)))
         expect("F cold re-read derives same terminal answer",
                cold_plan.get("finalized") is True
-               and cold_plan.get("action", {}).get("action") == "DONE"
+               and (cold_plan.get("action") or {}).get("action") == "DONE"
                and not cold_gate, f"plan={cold_plan} gate={cold_gate}")
 
         # Intent-family and router controls: no field from an old family may
@@ -4134,6 +4135,7 @@ def run_saicrew_probes() -> tuple[list[str], int]:
         from saipen_engine.router import route_next
         base_state = (
             "---\nphase: DONE\ntask: none\nnext_action: \"saipen continue\"\n"
+            "transition_from: DONE\n"
             "blocker: \"\"\nagent: probe\nsaipen_version: 7\nmode: full\n"
             "updated: 2026-01-01T00:00:00Z\nexecution_intent: goal\n"
             "goal_waves: 1\ngoal_tickets: 7\n---\n")
@@ -4151,6 +4153,7 @@ def run_saicrew_probes() -> tuple[list[str], int]:
                and "converge_target" not in parsed_normal,
                repr(parsed_normal))
         active_state = converged.replace("phase: DONE", "phase: VERIFY") \
+            .replace("transition_from: DONE", "transition_from: BUILD") \
             .replace("task: none", "task: T-1") \
             .replace('next_action: "saipen continue"',
                      'next_action: "RUN: binding tests"')
@@ -10265,6 +10268,29 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
                 out[path.relative_to(root).as_posix()] = path.read_bytes()
         return out
 
+    def verify_pass(root: Path, ticket: str = "T-1") -> None:
+        """Record the RUN evidence the VERIFY -> REVIEW edge requires.
+
+        `log.verification_evidence` refuses that edge without a current-cycle
+        PASS for the ticket, so a probe chain walking BUILD -> VERIFY ->
+        REVIEW must write the same evidence a real run writes. Without it the
+        whole chain silently stalls at VERIFY and every control after it
+        measures the wrong state.
+        """
+        checkpoint(root, "probe", "RUN", ticket,
+                   f"probe suite {ticket} -> PASS conf: high")
+
+    def verify_cycle(root: Path, ticket: str = "T-1") -> None:
+        """Write a COMPLETE verification cycle without leaving the phase.
+
+        `verify_pass` relies on a real VERIFY transition to have written the
+        machine-owned entry marker. A control that must stay in another
+        phase records the marker and the PASS as plain checkpoints, which
+        preserve phase/task, so the evidence exists without the transition.
+        """
+        checkpoint(root, "probe", "RUN", ticket, "transition to VERIFY")
+        verify_pass(root, ticket)
+
     # Import floor: every shipped engine module imports in isolation.
     from saipen_engine import (board, codec, context, errors, fast_check,  # noqa: F401
                                journal, lock, log, operations, paths, phases,
@@ -11518,6 +11544,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     apply_claim(goal_root, "T-1", "probe")
     transition_phase(goal_root, "BUILD", "probe", "T-1", "build")
     transition_phase(goal_root, "VERIFY", "probe", "T-1", "verify")
+    verify_pass(goal_root)
     tr_g = transition_phase(goal_root, "REVIEW", "probe", "T-1", "review gate")
     st_g = parse_state(codec.read_doc(goal_root / ".saipen" / "STATE.md"))
     expect("VERIFY->REVIEW under goal mechanically bumps goal_tickets",
@@ -11808,6 +11835,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     apply_claim(cA, "T-1", "probe")
     transition_phase(cA, "BUILD", "probe", "T-1", "b")
     transition_phase(cA, "VERIFY", "probe", "T-1", "v")
+    verify_pass(cA)
     transition_phase(cA, "REVIEW", "probe", "T-1", "r")
     transition_phase(cA, "SHIP", "probe", "T-1", "s")
     finA = finish_ticket(cA, "T-1", "probe")
@@ -11830,6 +11858,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     apply_claim(cC, "T-1", "probe")
     transition_phase(cC, "BUILD", "probe", "T-1", "b")
     transition_phase(cC, "VERIFY", "probe", "T-1", "v")
+    verify_pass(cC)
     transition_phase(cC, "REVIEW", "probe", "T-1", "r")
     transition_phase(cC, "SHIP", "probe", "T-1", "s")
     # finish with crash after LOG (the ticket is in SHIP -- the only legal
@@ -11842,9 +11871,14 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         % (str(HOME / "tools"), str(cC)))
     rc = subprocess.run([sys.executable, "-c", crash_code], cwd=str(cC),
                         capture_output=True, text=True, timeout=60).returncode
+    _pending_cC = pending_ops(cC)
     expect("closure control C: crash during finish leaves an unresolved op",
-           rc == 87 and bool(pending_ops(cC)), f"rc={rc}")
-    _recover_op(cC, pending_ops(cC)[0]["op_id"])
+           rc == 87 and bool(_pending_cC), f"rc={rc}")
+    # A harness that raises on the FIRST unmet expectation hides every control
+    # after it: the expectation above already recorded the failure, so recovery
+    # is only attempted when there is actually an op to recover.
+    if _pending_cC:
+        _recover_op(cC, _pending_cC[0]["op_id"])
     boardC = parse_board(codec.read_doc(cC / ".saipen" / "BOARD.md"))
     stC = parse_state(codec.read_doc(cC / ".saipen" / "STATE.md"))
     expect("closure control C: recovery finishes exactly one ticket",
@@ -11857,6 +11891,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     apply_claim(cE, "T-1", "probe")
     transition_phase(cE, "BUILD", "probe", "T-1", "b")
     transition_phase(cE, "VERIFY", "probe", "T-1", "v")
+    verify_pass(cE)
     transition_phase(cE, "REVIEW", "probe", "T-1", "r")
     transition_phase(cE, "SHIP", "probe", "T-1", "s")
     from saipen_engine.plan import apply_plan as _apply_plan
@@ -11882,6 +11917,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     apply_claim(cF, "T-1", "probe")
     transition_phase(cF, "BUILD", "probe", "T-1", "b")
     transition_phase(cF, "VERIFY", "probe", "T-1", "v")
+    verify_pass(cF)
     transition_phase(cF, "REVIEW", "probe", "T-1", "r")
     from saipen_engine.operations import (_now as _now_f, _ticket_targets,
                                            _utc_iso as _utc_f)
@@ -11926,6 +11962,8 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         _g = make_project()
         apply_claim(_g, "T-1", "probe")
         for _step in _steps:
+            if _step == "REVIEW":
+                verify_pass(_g)
             transition_phase(_g, _step, "probe", "T-1", "g")
         _before = _tree_hash(_g)
         _res = _gate_ft(_g, "T-1", "probe")
@@ -11948,6 +11986,8 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     gD = make_project()
     apply_claim(gD, "T-1", "probe")
     for _step in ("BUILD", "VERIFY", "REVIEW", "SHIP"):
+        if _step == "REVIEW":
+            verify_pass(gD)
         transition_phase(gD, _step, "probe", "T-1", "d")
     _gD_res = _gate_ft(gD, "T-1", "probe")
     _gD_st = parse_state(codec.read_doc(gD / ".saipen" / "STATE.md"))
@@ -12027,6 +12067,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     _gM = make_project()
     apply_claim(_gM, "T-1", "probe")
     transition_phase(_gM, "BUILD", "probe", "T-1", "m")
+    verify_cycle(_gM)
     _mut_plan = _gate_mut_pft(_gM, "T-1", "probe", _now_g(), _utc_g())
     _mut_res = _gate_apply_plan(_gM, _mut_plan)
     expect("mutation red-control: removing the SHIP gate makes the BUILD "
@@ -12046,6 +12087,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     apply_claim(gE, "T-1", "probe")
     transition_phase(gE, "BUILD", "probe", "T-1", "e")
     transition_phase(gE, "VERIFY", "probe", "T-1", "e")
+    verify_pass(gE)
     transition_phase(gE, "REVIEW", "probe", "T-1", "e")
     _stE = parse_state(codec.read_doc(gE / ".saipen" / "STATE.md"))
     expect("gate control E: VERIFY->REVIEW bumps goal_tickets (0->1), never "
@@ -12059,6 +12101,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     _stateE.write_text(_textE, encoding="utf-8")
     transition_phase(gE, "BUILD", "probe", "T-1", "e2")
     transition_phase(gE, "VERIFY", "probe", "T-1", "e2")
+    verify_pass(gE)
     _rv = transition_phase(gE, "REVIEW", "probe", "T-1", "e2")
     _stV = parse_state(codec.read_doc(_stateE))
     expect("valve control: VERIFY->REVIEW trips at the 20-ticket cap",
@@ -13345,6 +13388,671 @@ def run_hostile_convergence_probes() -> tuple[list[str], int]:
     return problems, checked
 
 
+def run_hostile_authority_probes() -> tuple[list[str], int]:
+    """Hostile-regression AUTHORITY partition: what may PLAN a canonical write.
+
+    Four independent authorities were each failing OPEN, and each is proved
+    here against a hostile artifact:
+
+      * P0#2 the complete LOG history -- sealed segments + active LOG.md are
+        one immutable ledger. A void ledger (dangling parent, duplicate/out-of
+        -order E-ID, forged line) must refuse BEFORE journaling, and the sealed
+        tree is a bound read precondition, so creating/removing/altering
+        `.saipen/logs` between PLAN and APPLY is STALE_STATE with zero writes.
+      * P0#3 the RUNNING installation owns VERSION/schema/STYLE, and the
+        persisted `saipen_home` is validated separately as a POINTER: a dead
+        absolute pointer refuses ordinary mutation with HOME_REQUIRED, and
+        `rebind-home` is the only repair.
+      * P0#4 the CURRENT-SESSION capability is the only write/publish
+        authority; the persisted `STATE.mode` is the last handshake outcome and
+        proves nothing about now.
+      * P1#6 corrupt recovery evidence classifies as CORRUPT_JOURNAL
+        everywhere (status/next/preflight/recover) and is never replayed, while
+        a genuinely absent/empty ops dir stays CLEAN.
+      * P1#8 a stale-claim TAKEOVER records the predecessor and the staleness
+        that authorized it; ordinary adoption invents no predecessor.
+    """
+    problems: list[str] = []
+    checked = 0
+
+    def expect(label: str, ok: bool, detail: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        if ok:
+            print(f"PASS: hr-authority -- {label}")
+        else:
+            problems.append(f"{label}: {detail}")
+            print(f"FAIL: hr-authority -- {label} -- {detail}")
+
+    from saipen_engine import codec
+    from saipen_engine.journal import (auto_recover_pending,
+                                       recovery_preflight, scan_pending)
+    from saipen_engine.operations import (_now, _plan_checkpoint, _read,
+                                          _utc_iso, apply_claim, checkpoint,
+                                          rebind_saipen_home)
+    from saipen_engine.plan import apply_plan
+    from saipen_engine.router import route_next
+    from saipen_engine.state import (parse_state,
+                                     persisted_home_error, running_home,
+                                     running_protocol_major,
+                                     running_schema_version,
+                                     state_contract_errors)
+
+    STATE_TMPL = (
+        "---\nphase: DONE\ntask: none\nnext_action: \"saipen continue\"\n"
+        "blocker: \"\"\ntransition_from: SHIP\nsaipen_version: 7\n"
+        "schema_version: 3\nlast_event: 902\nstyle_contract: %(style)s\n"
+        "saipen_home: \"%(home)s\"\nagent: probe\nmode: %(mode)s\n"
+        "updated: 2026-08-16T00:00:00Z\n---\n")
+
+    def style_token() -> str:
+        from saipen_engine.state import running_style_token
+        return running_style_token() or "ded-4ae736e4"
+
+    def mkproject(home: str | None = None, mode: str = "full",
+                  log_lines: str | None = None) -> Path:
+        root = Path(tempfile.mkdtemp(prefix="saipen-hr-auth-"))
+        saipen = root / ".saipen"
+        saipen.mkdir()
+        (saipen / "LOG.md").write_text(
+            log_lines if log_lines is not None else
+            "# Log\n- 09.08.26 00:00 [E-901] [agent: probe] DEC: base\n"
+            "- 09.08.26 00:01 [E-902] [parent: E-901] [agent: probe] "
+            "DEC: second\n",
+            encoding="utf-8")
+        (saipen / "BOARD.md").write_text(
+            "# Board\n## DOING\n## TODO\n"
+            "- [ ] T-1 [P1] top probe | verify: probe\n"
+            "- [ ] T-2 [P1] lower probe | verify: probe\n"
+            "## DONE\n## BLOCKED\n", encoding="utf-8")
+        (saipen / "STATE.md").write_text(
+            STATE_TMPL % {"style": style_token(),
+                          "home": (home if home is not None
+                                   else running_home().as_posix()),
+                          "mode": mode},
+            encoding="utf-8")
+        return root
+
+    def canon(root: Path) -> dict[str, bytes]:
+        return {p.relative_to(root).as_posix(): p.read_bytes()
+                for p in sorted((root / ".saipen").rglob("*")) if p.is_file()}
+
+    # The canonical checkpoint is exactly STATE/BOARD/LOG (+ the sealed ledger
+    # under `.saipen/logs`); a STALE_STATE refusal may still create transient
+    # infra (`.saipen/locks`, the project `.saipen/IDENTITY.md`) but must NOT
+    # touch these decision-relevant files.
+    _CANONICAL_FILES = {".saipen/STATE.md", ".saipen/BOARD.md",
+                        ".saipen/LOG.md"}
+
+    # ---- P0#2 -- the complete ledger is validated before planning ---------
+    void = mkproject(log_lines=(
+        "# Log\n- 09.08.26 00:00 [E-901] [agent: probe] DEC: base\n"
+        "- 09.08.26 00:01 [E-902] [parent: E-899] [agent: probe] "
+        "DEC: dangling parent\n"))
+    before = canon(void)
+    res = checkpoint(void, "probe", "RUN", None, "probe", dry_run=True)
+    expect("dangling parent in the ledger refuses even a dry-run PLAN",
+           not res.ok and "history-void" in (res.message or ""),
+           res.to_json())
+    expect("refused history PLAN wrote nothing", canon(void) == before)
+    shutil.rmtree(void, ignore_errors=True)
+
+    dupe = mkproject(log_lines=(
+        "# Log\n- 09.08.26 00:00 [E-901] [agent: probe] DEC: base\n"
+        "- 09.08.26 00:01 [E-901] [agent: probe] DEC: replayed\n"))
+    res = checkpoint(dupe, "probe", "RUN", None, "probe")
+    expect("duplicate E-ID refuses with zero writes",
+           not res.ok and "history-void" in (res.message or ""),
+           res.to_json())
+    shutil.rmtree(dupe, ignore_errors=True)
+
+    forged = mkproject(log_lines=(
+        "# Log\n- 09.08.26 00:00 [E-901] [agent: probe] DEC: base\n"
+        "- 09.08.26 00:02 [E-903] DEC: forged line with no agent marker "
+        "and no legal shape |\n"))
+    res = checkpoint(forged, "probe", "RUN", None, "probe")
+    expect("a forged non-event line refuses with its file:line",
+           not res.ok and "LOG.md:" in (res.message or ""), res.to_json())
+    shutil.rmtree(forged, ignore_errors=True)
+
+    healthy = mkproject()
+    res = checkpoint(healthy, "probe", "RUN", None, "healthy ledger probe")
+    expect("a VALID ledger still checkpoints normally", res.ok, res.to_json())
+    shutil.rmtree(healthy, ignore_errors=True)
+
+    # The sealed tree is a bound read precondition: appearing, disappearing or
+    # changing between PLAN and APPLY is STALE_STATE, never a silent skip.
+    for label, mutate in (
+            ("creating the sealed logs tree",
+             lambda r: ((r / ".saipen" / "logs").mkdir(parents=True),
+                        (r / ".saipen" / "logs" / "LOG-001.md").write_text(
+                            "# Log\n- 09.08.26 00:00 [E-1] [agent: probe] "
+                            "DEC: fabricated seal\n", encoding="utf-8"))),
+            ("adding a second sealed segment",
+             lambda r: (r / ".saipen" / "logs" / "LOG-002.md").write_text(
+                 "# Log\n", encoding="utf-8")),
+            ("changing sealed segment bytes",
+             lambda r: (r / ".saipen" / "logs" / "LOG-001.md").write_text(
+                 "# Log\n- 09.08.26 00:00 [E-1] [agent: probe] DEC: altered\n",
+                 encoding="utf-8")),
+            ("removing the sealed logs tree",
+             lambda r: shutil.rmtree(r / ".saipen" / "logs"))):
+        root = mkproject()
+        if "creating" not in label:
+            (root / ".saipen" / "logs").mkdir(parents=True)
+            (root / ".saipen" / "logs" / "LOG-001.md").write_text(
+                "# Log\n- 09.08.26 00:00 [E-1] [agent: probe] DEC: sealed\n",
+                encoding="utf-8")
+        plan = _plan_checkpoint(root, "probe", "RUN", None, "cas probe",
+                               _now(), _utc_iso())
+        expect(f"PLAN built before {label}", not isinstance(plan, Result),
+               repr(plan))
+        if isinstance(plan, Result):
+            shutil.rmtree(root, ignore_errors=True)
+            continue
+        pre = canon(root)
+        mutate(root)
+        applied = apply_plan(root, plan)
+        expect(f"{label} between PLAN and APPLY is STALE_STATE",
+               not applied.ok and applied.code == "STALE_STATE",
+               applied.to_json())
+        expect(f"{label} left STATE/BOARD/LOG untouched",
+               {k: v for k, v in canon(root).items()
+                if k in _CANONICAL_FILES}
+               == {k: v for k, v in pre.items()
+                   if k in _CANONICAL_FILES})
+        shutil.rmtree(root, ignore_errors=True)
+
+    # ---- P0#3 -- running install authoritative, pointer validated apart ---
+    expect("the running install answers the schema/protocol questions",
+           running_schema_version() == 3 and running_protocol_major() == 7,
+           f"schema={running_schema_version()} "
+           f"major={running_protocol_major()}")
+    dead = (Path(tempfile.gettempdir()) / "saipen-hr-auth-dead-home").resolve()
+    shutil.rmtree(dead, ignore_errors=True)
+    expect("a dead absolute pointer is reported dead",
+           persisted_home_error(str(dead)) is not None)
+    expect("an empty/relative pointer stays unverifiable, not dead",
+           persisted_home_error("") is None
+           and persisted_home_error(".") is None)
+    expect("the running home is a live pointer",
+           persisted_home_error(str(running_home())) is None,
+           str(persisted_home_error(str(running_home()))))
+
+    dead_root = mkproject(home=dead.as_posix())
+    before = canon(dead_root)
+    res = checkpoint(dead_root, "probe", "RUN", None, "probe")
+    expect("dead home refuses an ordinary checkpoint with HOME_REQUIRED",
+           not res.ok and res.code == "HOME_REQUIRED", res.to_json())
+    expect("dead-home refusal wrote nothing", canon(dead_root) == before)
+    res = apply_claim(dead_root, "T-1", "probe")
+    expect("dead home refuses a claim too",
+           not res.ok and res.code == "HOME_REQUIRED", res.to_json())
+    res = rebind_saipen_home(dead_root, "probe", str(running_home()))
+    expect("rebind-home is the ONE repair and it succeeds",
+           res.ok and res.code == "HOME_REBOUND", res.to_json())
+    st = parse_state(codec.read_doc(dead_root / ".saipen" / "STATE.md"))
+    expect("the repaired pointer names the candidate",
+           Path(st.get("saipen_home", "")).resolve() == running_home(),
+           repr(st.get("saipen_home")))
+    res = checkpoint(dead_root, "probe", "RUN", None, "after rebind")
+    expect("ordinary mutation resumes after the rebind", res.ok,
+           res.to_json())
+    shutil.rmtree(dead_root, ignore_errors=True)
+
+    GOOD_V3 = {
+        "phase": "DONE", "task": "none", "next_action": "saipen continue",
+        "blocker": "", "agent": "probe", "saipen_version": 7,
+        "schema_version": 3, "mode": "full", "transition_from": "SHIP",
+        "updated": "2026-08-16T00:00:00Z", "last_event": 902,
+        "style_contract": style_token(), "saipen_home": str(running_home()),
+    }
+    expect("a schema-v3 state with the running style token passes",
+           state_contract_errors(GOOD_V3, style_token=style_token(),
+                                 current_schema_version=3) == [],
+           "; ".join(state_contract_errors(
+               GOOD_V3, style_token=style_token(),
+               current_schema_version=3)))
+    errs = state_contract_errors(
+        {**GOOD_V3, "saipen_home": str(dead), "style_contract": "ded-deadbeef"},
+        style_token=style_token(), current_schema_version=3)
+    expect("a wrong style_contract fails against the RUNNING install EVEN "
+           "with a dead pointer (the running install owns STYLE)",
+           any("style_contract" in e for e in errs), "; ".join(errs))
+    errs = state_contract_errors({**GOOD_V3, "saipen_version": 8})
+    expect("a project protocol major newer than the running one refuses",
+           any("newer than the running" in e for e in errs), "; ".join(errs))
+    expect("an older/equal protocol major stays readable",
+           not any("newer than the running" in e
+                   for e in state_contract_errors(GOOD_V3)))
+
+    # ---- P0#4 -- current capability, never the persisted mode -------------
+    stale_full = mkproject(mode="full")
+    state_text = codec.read_doc(stale_full / ".saipen" / "STATE.md")
+    board_text = codec.read_doc(stale_full / ".saipen" / "BOARD.md")
+    routed = route_next(state_text, board_text,
+                        current_capability="read-only")
+    expect("stale disk `full` + current read-only routes inspect-only",
+           routed.get("ok")
+           and routed.get("executable_behavior") == "RESTATE_AND_STOP"
+           and routed.get("action") == "saipen status", repr(routed))
+    routed = route_next(state_text, board_text, current_capability="full")
+    expect("current full routes real work",
+           routed.get("ok") and routed.get("action") == "PHASE SCOUT T-1",
+           repr(routed))
+    routed = route_next(state_text, board_text,
+                        current_capability="all-powerful")
+    expect("an unknown capability fails closed, never as `full`",
+           not routed.get("ok")
+           and routed.get("reason") == "capability-invalid", repr(routed))
+    shutil.rmtree(stale_full, ignore_errors=True)
+
+    stale_ro = mkproject(mode="read-only")
+    routed = route_next(codec.read_doc(stale_ro / ".saipen" / "STATE.md"),
+                        codec.read_doc(stale_ro / ".saipen" / "BOARD.md"),
+                        current_capability="full")
+    expect("stale disk `read-only` does NOT suppress a writable session",
+           routed.get("ok") and routed.get("action") == "PHASE SCOUT T-1",
+           repr(routed))
+    shutil.rmtree(stale_ro, ignore_errors=True)
+
+    from saipen_engine.release import _read_mode
+    expect("release publish policy follows the CURRENT capability",
+           _read_mode({"mode": "no-publish"}, "full") == "full"
+           and _read_mode({"mode": "full"}, "no-publish") == "no-publish")
+    for bad in ("read-only", "manual-verify", "bogus"):
+        try:
+            _read_mode({"mode": "full"}, bad)
+        except Exception as exc:
+            expect(f"current capability {bad!r} cannot authorize a release",
+                   getattr(exc, "code", "") == "VALIDATION_FAILED", repr(exc))
+        else:
+            expect(f"current capability {bad!r} cannot authorize a release",
+                   False, "no refusal raised")
+
+    ro_crew = mkproject()
+    before = canon(ro_crew)
+    from saipen_engine.crew import crew_apply
+    res = crew_apply(ro_crew, current_capability="read-only")
+    expect("a read-only session cannot execute a crew action",
+           not res.ok and res.code == "VALIDATION_FAILED", res.to_json())
+    expect("refused crew action wrote nothing", canon(ro_crew) == before)
+    shutil.rmtree(ro_crew, ignore_errors=True)
+
+    from saipen_engine.capability import (may_mutate, may_publish,
+                                         negotiate_capability)
+    expect("capability negotiation reads the session, never STATE",
+           negotiate_capability({}) == "full"
+           and negotiate_capability({"SAIPEN_CAPABILITY": "read-only"})
+           == "read-only"
+           and negotiate_capability({"SAIPEN_CAPABILITY": "nonsense"})
+           == "full")
+    expect("capability predicates are closed",
+           may_mutate("full") and not may_mutate("read-only")
+           and may_publish("full") and not may_publish("no-publish")
+           and not may_mutate(None) and not may_publish(None))
+
+    # ---- P1#6 -- corrupt recovery evidence, one verdict everywhere --------
+    clean = mkproject()
+    pending, _conf = scan_pending(clean)
+    expect("an absent ops dir is CLEAN", pending == [], repr(pending))
+    (clean / ".saipen" / "recovery" / "ops").mkdir(parents=True)
+    pending, _conf = scan_pending(clean)
+    expect("an EMPTY ops dir is CLEAN", pending == [], repr(pending))
+    expect("preflight is clean over an empty ops dir",
+           recovery_preflight(clean).get("ok"), repr(recovery_preflight(clean)))
+    shutil.rmtree(clean, ignore_errors=True)
+
+    parent_file = mkproject()
+    (parent_file / ".saipen" / "recovery").write_text("not a dir\n",
+                                                      encoding="utf-8")
+    pending, _conf = scan_pending(parent_file)
+    expect("an ops PARENT that is a file is CORRUPT_JOURNAL, never CLEAN",
+           len(pending) == 1 and pending[0].get("corrupt")
+           and pending[0].get("status") == "CORRUPT_JOURNAL", repr(pending))
+    pre = recovery_preflight(parent_file)
+    expect("preflight refuses that artifact as CORRUPT_JOURNAL",
+           not pre.get("ok") and pre.get("code") == "CORRUPT_JOURNAL",
+           repr(pre))
+    rec = auto_recover_pending(parent_file)
+    expect("auto recovery REFUSES corrupt evidence before any replay",
+           not rec.get("ok") and rec.get("code") == "CORRUPT_JOURNAL",
+           repr(rec))
+    before = canon(parent_file)
+    res = checkpoint(parent_file, "probe", "RUN", None, "probe")
+    expect("a mutation over corrupt evidence refuses",
+           not res.ok and res.code in ("CORRUPT_JOURNAL", "VALIDATION_FAILED"),
+           res.to_json())
+    expect("corrupt-evidence refusal wrote nothing",
+           canon(parent_file) == before)
+    for command in ("status", "next"):
+        proc = subprocess.run(
+            [sys.executable, str(HOME / "tools" / "saipen.py"), command,
+             "--json"], cwd=str(parent_file), capture_output=True, text=True,
+            timeout=90)
+        expect(f"`saipen {command}` reports CORRUPT_JOURNAL with its detail",
+               "CORRUPT_JOURNAL" in proc.stdout
+               and "OPS_DIR" in proc.stdout,
+               repr(proc.stdout[-300:]))
+    shutil.rmtree(parent_file, ignore_errors=True)
+
+    bad_receipt = mkproject()
+    opsd = bad_receipt / ".saipen" / "recovery" / "ops" / "op-broken"
+    opsd.mkdir(parents=True)
+    (opsd / "operation.json").write_text("{not json", encoding="utf-8")
+    pending, _conf = scan_pending(bad_receipt)
+    expect("an undecodable receipt is CORRUPT_JOURNAL with a detail",
+           len(pending) == 1 and pending[0].get("corrupt")
+           and pending[0].get("detail"), repr(pending))
+    rec = auto_recover_pending(bad_receipt)
+    expect("auto recovery names the corrupt op instead of replaying it",
+           not rec.get("ok") and rec.get("op_ids") == ["op-broken"],
+           repr(rec))
+    shutil.rmtree(bad_receipt, ignore_errors=True)
+
+    symlinked = mkproject()
+    opsd = symlinked / ".saipen" / "recovery" / "ops"
+    opsd.mkdir(parents=True)
+    target = Path(tempfile.mkdtemp(prefix="saipen-hr-auth-sym-"))
+    try:
+        os.symlink(target, opsd / "op-sym", target_is_directory=True)
+    except (OSError, NotImplementedError):
+        print("SKIP: hr-authority -- symlinked op dir (host cannot symlink)")
+    else:
+        pending, _conf = scan_pending(symlinked)
+        expect("an EXISTING symlinked op dir is CORRUPT_JOURNAL",
+               any(p.get("corrupt") for p in pending), repr(pending))
+        (opsd / "op-sym").unlink()
+        shutil.rmtree(target, ignore_errors=True)
+        try:
+            os.symlink(target, opsd / "op-dangling",
+                       target_is_directory=True)
+        except OSError:
+            pass
+        else:
+            pending, _conf = scan_pending(symlinked)
+            expect("a DANGLING symlinked op dir is CORRUPT_JOURNAL too",
+                   any(p.get("corrupt") for p in pending), repr(pending))
+    shutil.rmtree(target, ignore_errors=True)
+    shutil.rmtree(symlinked, ignore_errors=True)
+
+    # ---- P1#8 -- a takeover records its predecessor -----------------------
+    takeover = mkproject()
+    board = takeover / ".saipen" / "BOARD.md"
+    board.write_text(
+        "# Board\n## DOING\n"
+        "- [/] T-1 [P1] stale-claimed | owner: ghost | "
+        "claim_time: 2020-01-01T00:00:00Z | verify: probe\n"
+        "## TODO\n"
+        "- [ ] T-2 [P1] unclaimed | verify: probe\n"
+        "## DONE\n## BLOCKED\n", encoding="utf-8")
+    res = apply_claim(takeover, "T-1", "probe")
+    expect("a stale foreign claim can be taken over", res.ok, res.to_json())
+    log_text = codec.read_doc(takeover / ".saipen" / "LOG.md")
+    takeover_line = [ln for ln in log_text.splitlines()
+                     if "claimed via SAIOPS" in ln][-1]
+    expect("the takeover DEC names the predecessor and its stale claim_time",
+           "ghost" in takeover_line
+           and "2020-01-01T00:00:00Z" in takeover_line
+           and "STALE" in takeover_line, takeover_line)
+    _docs, st, brd, _tail = _read(takeover)
+    expect("the takeover claim landed on the ticket",
+           brd["tickets"]["T-1"]["fields"].get("owner") == "probe",
+           repr(brd["tickets"]["T-1"]["fields"]))
+    shutil.rmtree(takeover, ignore_errors=True)
+
+    adopt = mkproject()
+    res = apply_claim(adopt, "T-1", "probe")
+    expect("an unclaimed adoption succeeds", res.ok, res.to_json())
+    log_text = codec.read_doc(adopt / ".saipen" / "LOG.md")
+    adopt_line = [ln for ln in log_text.splitlines()
+                  if "claimed via SAIOPS" in ln][-1]
+    expect("ordinary adoption invents no predecessor",
+           adopt_line.endswith("claimed via SAIOPS -- owner probe"),
+           adopt_line)
+    shutil.rmtree(adopt, ignore_errors=True)
+
+    live = mkproject()
+    (live / ".saipen" / "BOARD.md").write_text(
+        "# Board\n## DOING\n"
+        "- [/] T-1 [P1] live-claimed | owner: ghost | claim_time: %s | "
+        "verify: probe\n## TODO\n## DONE\n## BLOCKED\n"
+        % datetime.datetime.now(datetime.timezone.utc).strftime(
+            "%Y-%m-%dT%H:%M:%SZ"), encoding="utf-8")
+    res = apply_claim(live, "T-1", "probe")
+    expect("a LIVE foreign claim still refuses", not res.ok, res.to_json())
+    shutil.rmtree(live, ignore_errors=True)
+
+    # ---- P1#7 -- one strict UTC parser for Core and subs ------------------
+    from saipen_engine.subs import validate_sub_state
+    SUB = {"phase": "DONE", "task": "none", "next_action": "saipen continue",
+           "blocker": "", "agent": "probe", "saipen_version": 7,
+           "mode": "full", "updated": "2026-08-16T00:00:00Z"}
+    for bad_stamp in ("2026-99-99T25:61:61Z", "2026-08-16 00:00:00Z",
+                      "2026-08-16T00:00:00+03:00", "2026-08-16T00:00:00+0000",
+                      "2026-08-16T00:00Z"):
+        core_errs = state_contract_errors({**GOOD_V3, "updated": bad_stamp})
+        sub_errs = validate_sub_state({**SUB, "updated": bad_stamp})
+        expect(f"impossible/noncanonical `updated` {bad_stamp!r} fails "
+               f"Core AND sub",
+               any("updated" in e for e in core_errs)
+               and any("updated" in e for e in sub_errs),
+               f"core={core_errs} sub={sub_errs}")
+    for good_stamp in ("2026-08-16T00:00:00Z", "2026-08-16T00:00:00+00:00",
+                       "2026-08-16T00:00:00.250000Z"):
+        expect(f"canonical `updated` {good_stamp!r} is accepted identically",
+               not any("updated" in e for e in state_contract_errors(
+                   {**GOOD_V3, "updated": good_stamp}))
+               and not any("updated" in e for e in validate_sub_state(
+                   {**SUB, "updated": good_stamp})))
+
+    return problems, checked
+
+
+def run_hostile_wait_probes() -> tuple[list[str], int]:
+    """Hostile-regression WAIT grammar (P1#5).
+
+    CORE.md § 1.2 fixes the shape of a stop instruction at
+    `WAIT: <category> -- <one sentence>`, plus the engine's own verbatim
+    safety-valve pause. Three properties are load-bearing and each one was
+    violated by the prefix/substring classifier this replaced:
+
+      * the ` -- ` DELIMITER is mandatory (a bare `WAIT: blocked` names a kind
+        of stop and asks nothing);
+      * the body is ONE SENTENCE (a stop carrying notes is a queue);
+      * the DONE brakes have FIXED wordings, and the MARKHUNT phrase makes a
+        string legal only as that exact whole string -- never as a substring.
+
+    At `phase: DONE` with an empty `## TODO`, CORE permits exactly THREE brakes
+    (safety valve with the resume key its own intent owns, user brake, the
+    untriaged-MARKHUNT brake). Every other legal WAIT there asks about work in
+    flight that does not exist, so § 1.11's UNBLOCK exception routes it onward
+    to documented repair instead of stopping. Router, validator and `saipen
+    stop` all read the SAME parser, so a WAIT legal in one half can never be
+    rejected by another.
+    """
+    problems: list[str] = []
+    checked = 0
+
+    def expect(label: str, ok: bool, detail: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        if ok:
+            print(f"PASS: hr-wait -- {label}")
+        else:
+            problems.append(f"{label}: {detail}")
+            print(f"FAIL: hr-wait -- {label} -- {detail}")
+
+    from saipen_engine.state import (DONE_EMPTY_BRAKES, MARKHUNT_BRAKE,
+                                     WAIT_CATEGORIES, binding_wait,
+                                     is_legal_wait, parse_wait,
+                                     safety_valve_resume_key,
+                                     state_contract_errors)
+    from saipen_engine.router import route_next
+
+    VALVE = ("WAIT: safety valve reached (3 waves / 20 tickets) -- "
+             "run 'saipen goal' to continue")
+    VALVE_CC = ("WAIT: safety valve reached (1 waves / 4 tickets) -- "
+                "run 'cc' to continue")
+
+    # ---- rejected shapes -------------------------------------------------
+    hostile = [
+        ("bare category, no delimiter", "WAIT: blocked"),
+        ("bare category with trailing spaces", "WAIT:   blocked   "),
+        ("no delimiter, prose glued on", "WAIT: blocked fake"),
+        ("empty body after the delimiter", "WAIT: blocked --"),
+        ("prefix collision on a real category",
+         "WAIT: blockedness -- fake"),
+        ("reversed label/sentence order",
+         "WAIT: did the manual check pass? -- manual-verify"),
+        ("second sentence in the body",
+         "WAIT: blocked -- the sub is down. Also triage the three findings "
+         "in ## BLOCKED"),
+        ("second sentence introduced by a backtick",
+         "WAIT: user brake -- stop here. `saipen status` shows the rest"),
+        ("category outside the closed seven",
+         "WAIT: vibes -- should I keep going?"),
+        ("empty WAIT", "WAIT:"),
+         ("safety valve with reversed units",
+          "WAIT: safety valve reached (3 tickets / 20 tickets) -- nonsense"),
+        ("safety valve with an arbitrary suffix",
+         "WAIT: safety valve reached (3 waves / 20 tickets) -- nonsense"),
+         ("safety valve with an unknown resume command",
+          "WAIT: safety valve reached (3 waves / 20 tickets) -- run "
+          "'rm -rf /' to continue"),
+    ]
+    for label, value in hostile:
+        expect(f"REJECTS {label}", not is_legal_wait(value), repr(value))
+
+    # A MARKHUNT mention INSIDE another category's body must NOT hijack the
+    # classification: the WAIT's OWN category (`user brake`) decides, and the
+    # substring is inert (hostile-regression, P1#5 substring collision).
+    _markhunt_in_user_brake = ("WAIT: user brake -- untriaged MARKHUNT findings "
+                               "in ## BLOCKED")
+    expect("a MARKHUNT substring inside another category stays that category",
+           is_legal_wait(_markhunt_in_user_brake)
+           and parse_wait(_markhunt_in_user_brake) == "user brake"
+           and parse_wait(_markhunt_in_user_brake) != "markhunt",
+           repr(_markhunt_in_user_brake))
+
+    # A NON-WAIT string carrying the brake phrase is not a WAIT at all, and
+    # must never be classified as one (the substring matcher accepted it).
+    for label, value in (
+            ("plain prose carrying the MARKHUNT phrase",
+             "saipen continue -- untriaged MARKHUNT findings in ## BLOCKED"),
+            ("PHASE action carrying 'safety valve'",
+             "PHASE HUNT T-1 safety valve reached (3 waves / 20 tickets)")):
+        expect(f"REJECTS {label} (not a WAIT)",
+               parse_wait(value) is None and binding_wait(
+                   value, phase="DONE", empty_todo=True) is None,
+               repr(value))
+
+    # ---- accepted shapes -------------------------------------------------
+    for category in WAIT_CATEGORIES:
+        value = f"WAIT: {category} -- is this exact question answerable?"
+        expect(f"ACCEPTS category {category!r} in a normal context",
+               parse_wait(value) == category, repr(value))
+    expect("ACCEPTS a mixed-case category",
+           parse_wait("WAIT: Manual-Verify -- did the check pass?")
+           == "manual-verify")
+    expect("ACCEPTS the § 1.2 progress tag as a trailing suffix",
+           parse_wait("WAIT: blocked -- is the sub back up? [2/7]")
+           == "blocked")
+    expect("ACCEPTS a body containing a version number (not a sentence break)",
+           parse_wait("WAIT: first-publish -- publish v7.176.0 to the remote?")
+           == "first-publish")
+    expect("ACCEPTS the exact MARKHUNT brake", parse_wait(MARKHUNT_BRAKE)
+           == "blocked", MARKHUNT_BRAKE)
+    expect("ACCEPTS the exact safety-valve pause",
+           parse_wait(VALVE) == "safety valve", VALVE)
+    expect("safety-valve resume key is read from the pause itself",
+           safety_valve_resume_key(VALVE) == "saipen goal"
+           and safety_valve_resume_key(VALVE_CC) == "cc"
+           and safety_valve_resume_key("WAIT: blocked -- x?") is None)
+
+    # ---- the STATE contract refuses the same set -------------------------
+    GOOD = {
+        "phase": "DONE", "task": "none", "next_action": "saipen continue",
+        "blocker": "", "agent": "probe", "saipen_version": 7,
+        "schema_version": 3, "mode": "full",
+        "updated": "2026-08-16T00:00:00Z", "transition_from": "DONE",
+    }
+    expect("STATE contract refuses a bare WAIT",
+           any("malformed WAIT" in e for e in state_contract_errors(
+               {**GOOD, "next_action": "WAIT: blocked"})))
+    expect("STATE contract refuses a two-sentence WAIT",
+           any("malformed WAIT" in e for e in state_contract_errors(
+               {**GOOD, "next_action": "WAIT: blocked -- sub down. Triage "
+                                       "the findings"})))
+    expect("STATE contract accepts a legal WAIT",
+           state_contract_errors(
+               {**GOOD, "next_action": "WAIT: blocked -- is the sub back?"})
+           == [])
+    expect("STATE contract accepts the exact safety-valve pause",
+           state_contract_errors({**GOOD, "next_action": VALVE}) == [])
+
+    # ---- DONE + empty TODO: exactly three brakes bind --------------------
+    expect("exactly three DONE-empty brakes are declared",
+           DONE_EMPTY_BRAKES == ("safety valve", "user brake", "markhunt"),
+           repr(DONE_EMPTY_BRAKES))
+    expect("DONE+empty binds the user brake",
+           binding_wait("WAIT: user brake -- stop here?", phase="DONE",
+                        empty_todo=True) == "user brake")
+    expect("DONE+empty binds the exact MARKHUNT brake",
+           binding_wait(MARKHUNT_BRAKE, phase="DONE", empty_todo=True)
+           == "markhunt")
+    expect("DONE+empty binds a goal-intent safety valve naming `saipen goal`",
+           binding_wait(VALVE, phase="DONE", empty_todo=True, intent="goal")
+           == "safety valve")
+    expect("DONE+empty binds a converge-intent valve naming `cc`",
+           binding_wait(VALVE_CC, phase="DONE", empty_todo=True,
+                        intent="converge") == "safety valve")
+    expect("DONE+empty REFUSES a valve naming the other intent's resume key",
+           binding_wait(VALVE, phase="DONE", empty_todo=True,
+                        intent="converge") is None)
+    for category in ("blocked", "manual-verify", "destructive-op",
+                     "first-publish", "init"):
+        value = f"WAIT: {category} -- is this answerable?"
+        expect(f"DONE+empty does NOT bind {category!r} (routes to repair)",
+               binding_wait(value, phase="DONE", empty_todo=True) is None
+               and parse_wait(value) == category, repr(value))
+    expect("every legal WAIT binds OUTSIDE the DONE+empty context",
+           all(binding_wait(f"WAIT: {c} -- answerable?", phase="BUILD",
+                            empty_todo=False) == c for c in WAIT_CATEGORIES))
+
+    # ---- router agreement -------------------------------------------------
+    def _state(na: str, phase: str = "DONE", task: str = "none",
+               tf: str = "DONE") -> str:
+        return ("---\nphase: %s\ntask: %s\nnext_action: \"%s\"\n"
+                "transition_from: %s\nblocker: \"\"\nagent: probe\n"
+                "saipen_version: 7\nmode: full\n"
+                "updated: 2026-08-16T00:00:00Z\n---\n"
+                % (phase, task, na, tf))
+
+    EMPTY_BOARD = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+    WORKABLE_BOARD = ("# Board\n## DOING\n"
+                      "- [/] T-7 [P2] real work | verify: probe\n"
+                      "## TODO\n## DONE\n## BLOCKED\n")
+    stop = route_next(_state("WAIT: user brake -- stop here?"), EMPTY_BOARD)
+    expect("router restates a DONE+empty user brake",
+           stop.get("action") == "WAIT: user brake -- stop here?"
+           and stop.get("executable_behavior") == "RESTATE_AND_STOP",
+           repr(stop))
+    routed_on = route_next(_state("WAIT: blocked -- is the sub back?"),
+                           EMPTY_BOARD)
+    expect("router routes PAST a non-brake WAIT at DONE+empty",
+           routed_on.get("ok") and routed_on.get("reason") != "wait",
+           repr(routed_on))
+    held = route_next(_state("WAIT: blocked -- is the sub back?",
+                             phase="BUILD", task="T-7", tf="PLAN"),
+                      WORKABLE_BOARD)
+    expect("router holds a legal WAIT with workable tickets present",
+           held.get("reason") == "wait"
+           and held.get("executable_behavior") == "RESTATE_AND_STOP",
+           repr(held))
+    return problems, checked
+
+
 def run_hostile_state_probes() -> tuple[list[str], int]:
     """Hostile-regression shared STATE contract (hostile sweep P1): the
     engine's state_contract_errors mirrors state.schema.json (required set,
@@ -13491,6 +14199,14 @@ if os.environ.get("SAIPEN_HR_PROBES_ONLY") == "1":
                            or hr_convergence_failures or hr_state_failures)
                      else 0)
 
+if os.environ.get("SAIPEN_HR_AUTHORITY_PROBES_ONLY") == "1":
+    hr_authority_failures, hr_authority_checked = run_hostile_authority_probes()
+    for problem in hr_authority_failures:
+        print(f"FAILED: {problem}")
+    print(f"{hr_authority_checked} hostile-regression authority behavior(s) "
+          f"executed")
+    raise SystemExit(1 if hr_authority_failures else 0)
+
 if os.environ.get("SAIPEN_NITRO_INTEGRITY_PROBES_ONLY") == "1":
     nitro_failures, nitro_checked = run_nitro_integrity_probes()
     for problem in nitro_failures:
@@ -13514,7 +14230,13 @@ export_failures, export_checked, export_skipped = run_export_probes()
 failures.extend(export_failures)
 crew_failures, crew_checked, crew_skipped = run_crew_probes()
 failures.extend(crew_failures)
-saicrew_failures, saicrew_checked = run_saicrew_probes()
+try:
+    saicrew_failures, saicrew_checked = run_saicrew_probes()
+except Exception as _saicrew_exc:  # harness robustness: a probe assumption
+    # bug must never abort the whole suite and hide every later group's
+    # result; record it and continue.
+    saicrew_failures = [f"saicrew harness crashed: {type(_saicrew_exc).__name__}: {_saicrew_exc}"]
+    saicrew_checked = 0
 failures.extend(saicrew_failures)
 last_event_failures, last_event_checked = run_last_event_probes()
 failures.extend(last_event_failures)
@@ -13578,6 +14300,11 @@ hr_convergence_failures, hr_convergence_checked = \
 failures.extend(hr_convergence_failures)
 hr_state_failures, hr_state_checked = run_hostile_state_probes()
 failures.extend(hr_state_failures)
+hr_authority_failures, hr_authority_checked = \
+    run_hostile_authority_probes()
+failures.extend(hr_authority_failures)
+hr_wait_failures, hr_wait_checked = run_hostile_wait_probes()
+failures.extend(hr_wait_failures)
 
 
 digest_failures, digest_checked = run_digest_stale_probes()
@@ -13619,6 +14346,8 @@ print(f"{sub_clean_checked} sub-clean safety behavior(s) executed, "
       f"{sub_clean_skipped} skipped for missing host capability")
 print(f"{hardening_checked} hardening red control(s) resolved")
 print(f"{hr_state_checked} hostile-regression state-contract behavior(s) "
+      "executed")
+print(f"{hr_wait_checked} hostile-regression WAIT-grammar behavior(s) "
       "executed")
 print(f"{userperson_checked} userperson behavior(s) executed")
 print(f"{improve_checked} improve behavior(s) executed")

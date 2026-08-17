@@ -74,6 +74,49 @@ def _pending_state(project_root: Path) -> tuple[list[str], list[str]]:
             [op["op_id"] for op in conflicts])
 
 
+def _corrupt_evidence(project_root: Path) -> list[dict]:
+    """The STRUCTURED corrupt recovery records, record shape preserved.
+
+    `_pending_state` flattens the scan into bare op_ids for routing, which
+    silently drops `corrupt`/`detail` -- the only evidence that distinguishes a
+    malformed journal from an ordinary pending op (hostile-regression, P1#6).
+    Every public projection (status / next / recover / preflight) reads THIS so
+    they all agree on CORRUPT_JOURNAL instead of one reporting a healthy
+    surface."""
+    from saipen_engine.journal import scan_pending
+    pending, _conflicts = scan_pending(project_root)
+    return [op for op in pending if op.get("corrupt")]
+
+
+def _corrupt_refusal(corrupt: list[dict]) -> dict:
+    """The ONE shared CORRUPT_JOURNAL refusal payload (P1#6)."""
+    return {"ok": False, "code": "CORRUPT_JOURNAL",
+            "op_ids": [op["op_id"] for op in corrupt],
+            "recovery_required": True,
+            "corrupt": [{"op_id": op["op_id"],
+                         "status": op.get("status"),
+                         "detail": op.get("detail", "")} for op in corrupt],
+            "detail": f"corrupt recovery evidence {corrupt[0]['op_id']} "
+                      f"({corrupt[0].get('detail', '')}) -- resolve it "
+                      f"explicitly before any further canonical write"}
+
+
+def _negotiate_capability(project_root: Path) -> str:
+    """Negotiate the CURRENT-SESSION capability at the public command boundary
+    (hostile-regression, P0#4).
+
+    The persisted STATE.mode is ONLY the LAST handshake outcome and MUST NOT
+    prove current write authority -- a stale read-only must not suppress a
+    newly writable session, nor a stale full publish into a newly read-only
+    one. The live session negotiates a fresh capability through the ONE shared
+    negotiator and injects it into routing/release/crew; the persisted mode
+    stays historical. `project_root` is accepted so the signature stays stable
+    for callers, and deliberately UNUSED: reading the project's own STATE here
+    is exactly the fail-open this closes."""
+    from saipen_engine.capability import negotiate_capability
+    return negotiate_capability()
+
+
 def _status(project_root: Path, as_json: bool) -> int:
     state_path = _state_path(project_root)
     if not state_path.is_file():
@@ -102,8 +145,20 @@ def _status(project_root: Path, as_json: bool) -> int:
                 top_workable = ticket["id"]
                 break
     pending, conflicts = _pending_state(project_root)
+    # P1#6: corrupt recovery evidence is not a healthy surface. status agrees
+    # with next/preflight/recover on CORRUPT_JOURNAL and carries the STRUCTURED
+    # record (op_id + detail), never a bare id that reads like a normal op.
+    _corrupt = _corrupt_evidence(project_root)
+    if _corrupt:
+        _emit(_corrupt_refusal(_corrupt), as_json)
+        return 1
     from saipen_engine.router import (route_next, routing_failure_code)
-    routed = route_next(codec.read_doc(state_path), codec.read_doc(board_path) if board_path.is_file() else "", pending, conflicts)
+    # P0#4: the freshly negotiated current-session capability gates routing --
+    # a read-only session routes RESTATE_AND_STOP, never a mutating action.
+    routed = route_next(codec.read_doc(state_path),
+                        codec.read_doc(board_path) if board_path.is_file() else "",
+                        pending, conflicts,
+                        current_capability=_negotiate_capability(project_root))
     if not routed.get("ok") and routing_failure_code(routed) == "VALIDATION_FAILED":
         # A malformed/binding failure must NOT project a healthy surface from
         # corrupt input (T-1003): status fails closed with the router's
@@ -227,10 +282,17 @@ def _next_action(project_root: Path, as_json: bool) -> int:
         return 1
     subject = state.get("task")
     pending, conflicts = _pending_state(project_root)
+    # P1#6: same structured CORRUPT_JOURNAL verdict as status/preflight/recover.
+    _corrupt = _corrupt_evidence(project_root)
+    if _corrupt:
+        _emit(_corrupt_refusal(_corrupt), as_json)
+        return 1
     board_text = codec.read_doc(project_root / ".saipen" / "BOARD.md")
     from saipen_engine.router import (load_for_action, route_next,
                                       routing_failure_code)
-    routed = route_next(state_text, board_text, pending, conflicts)
+    # P0#4: the freshly negotiated current-session capability gates routing.
+    routed = route_next(state_text, board_text, pending, conflicts,
+                        current_capability=_negotiate_capability(project_root))
     if not routed.get("ok"):
         # The router owns the stable failure code: recovery conflicts/pending
         # are RECOVERY_*; malformed/binding failures are VALIDATION_FAILED
@@ -264,10 +326,11 @@ def _next_action(project_root: Path, as_json: bool) -> int:
 
 def _recover(project_root: Path, args: list[str], as_json: bool) -> int:
     # `saipen recover inspect <op_id>` -- read-only conflict inspection.
+    # Closed grammar: exactly one positional <op_id> (hostile-regression, P0#1).
     if args and args[0] == "inspect":
-        if len(args) < 2:
+        if len(args) != 2:
             _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "recover inspect needs <op_id>"}, as_json)
+                   "detail": "recover inspect requires exactly <op_id>"}, as_json)
             return 2
         from saipen_engine.journal import inspect_op
         result = inspect_op(project_root, args[1])
@@ -275,19 +338,40 @@ def _recover(project_root: Path, args: list[str], as_json: bool) -> int:
         return 0 if result.get("ok") else 1
     # `saipen recover resolve <op_id> [--resolution accept_live|replan]` --
     # the explicit conflict-resolution lifecycle (NITRO dogfood III, T-594).
+    # Closed grammar (hostile-regression, P0#1): exactly `<op_id>` OR
+    # `<op_id> --resolution <accept_live|replan>`. Unknown/surplus tokens and a
+    # missing/unknown --resolution value are refused here; resolve_conflict is
+    # NEVER called with a defaulted accept_live from malformed input.
     if args and args[0] == "resolve":
-        if len(args) < 2:
+        rest = args[1:]
+        if len(rest) == 0:
             _emit({"ok": False, "code": "VALIDATION_FAILED",
                    "detail": "recover resolve needs <op_id>"}, as_json)
             return 2
+        op_id = rest[0]
+        extra = rest[1:]
         resolution = "accept_live"
-        rest = args[2:]
-        if "--resolution" in rest:
-            idx = rest.index("--resolution")
-            if idx + 1 < len(rest):
-                resolution = rest[idx + 1]
+        if extra:
+            if extra[0] == "--resolution":
+                if len(extra) != 2:
+                    _emit({"ok": False, "code": "VALIDATION_FAILED",
+                           "detail": "usage: recover resolve <op_id> "
+                                     "--resolution <accept_live|replan>"}, as_json)
+                    return 2
+                if extra[1] not in ("accept_live", "replan"):
+                    _emit({"ok": False, "code": "VALIDATION_FAILED",
+                           "detail": f"unknown resolution {extra[1]!r}; use "
+                                     "accept_live|replan"}, as_json)
+                    return 2
+                resolution = extra[1]
+            else:
+                _emit({"ok": False, "code": "VALIDATION_FAILED",
+                       "detail": f"unexpected token {extra[0]!r}; usage: "
+                                 "recover resolve <op_id> "
+                                 "[--resolution <accept_live|replan>]"}, as_json)
+                return 2
         from saipen_engine.journal import resolve_conflict
-        result = resolve_conflict(project_root, args[1], resolution,
+        result = resolve_conflict(project_root, op_id, resolution,
                                   agent=_agent_for(project_root))
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
@@ -305,6 +389,16 @@ def _recover(project_root: Path, args: list[str], as_json: bool) -> int:
     if not pending:
         _emit({"ok": True, "code": "CLEAN", "pending_ops": []}, as_json)
         return 0
+    # Refuse corrupt recovery evidence as CORRUPT_JOURNAL BEFORE any replay
+    # (hostile-regression, P1#6): a scan_pending record marked corrupt:true --
+    # e.g. a symlinked OPS_DIR or an unreadable entry -- must never be replayed
+    # as a normal op_id (which surfaced a generic VALIDATION_FAILED). The
+    # STRUCTURED record survives to the refusal via the ONE shared payload every
+    # projection uses.
+    _corrupt = _corrupt_evidence(project_root)
+    if _corrupt:
+        _emit(_corrupt_refusal(_corrupt), as_json)
+        return 1
     result = auto_recover_pending(project_root)
     _emit(result, as_json)
     return 0 if result.get("ok") else 1
@@ -424,8 +518,11 @@ def _crew(project_root: Path, args: list[str], as_json: bool,
                           + " ".join(args)}, as_json)
         return 2
     from saipen_engine.crew import crew_apply, crew_plan
+    # P0#4: inject the freshly negotiated current-session capability so a
+    # read-only session cannot close a crew release.
+    capability = _negotiate_capability(project_root)
     if dry_run:
-        plan = crew_plan(project_root)
+        plan = crew_plan(project_root, current_capability=capability)
         _emit({"ok": plan.get("ok"), "code": "CREW_PLAN",
                "crew_complete": plan.get("crew_complete"),
                "action_required": plan.get("action_required"),
@@ -434,7 +531,7 @@ def _crew(project_root: Path, args: list[str], as_json: bool,
         # failure -- ok:true / exit 0. Nonzero exit is reserved for a
         # structurally invalid or refused derivation.
         return 0 if plan.get("ok") else 1
-    result = crew_apply(project_root)
+    result = crew_apply(project_root, current_capability=capability)
     _emit(result.to_dict(), as_json)
     return 0 if result.ok else 1
 
@@ -1434,7 +1531,11 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
         from saipen_engine.release import (ReleaseRefusal,
                                            execute_release, plan_release)
         try:
-            plan = plan_release(project_root, command, dry_run=dry_run)
+            # P0#4: inject the freshly negotiated current-session capability so
+            # a read-only session cannot PLAN a release.
+            plan = plan_release(project_root, command, dry_run=dry_run,
+                                current_capability=_negotiate_capability(
+                                    project_root))
         except ReleaseRefusal as exc:
             _emit({"ok": False, "code": exc.code, "detail": exc.detail},
                   as_json)

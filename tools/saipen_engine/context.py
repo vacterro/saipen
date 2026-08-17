@@ -146,7 +146,15 @@ def _next_ticket_section(board: dict, ticket_id: str | None) -> str:
 def _log_tail(log_text: str, count: int = _TAIL_EVENTS) -> str:
     events = [line for line in log_text.splitlines()
               if parse_log_line(line) is not None]
-    return "\n".join(events[-count:]) if events else "(no events)"
+    if not events:
+        return "(no events)"
+    # `events[-0:]` is the ENTIRE list (Python: -0 == 0), so a `count` of 0 must
+    # be branched explicitly to emit ZERO events -- never the full history. A
+    # shrinking budget reaching count=0 collapses to the empty surface, so LOG
+    # bytes never increase as the limit descends (hostile-regression, P1#6).
+    if count <= 0:
+        return ""
+    return "\n".join(events[-count:])
 
 
 def _load_context_inputs(root: Path) -> dict:
@@ -244,7 +252,12 @@ def context_cold(project_root: Path | str, limit: int = 4000,
     pending = inputs["pending"]
     conflicts = inputs["conflicts"]
     from .router import (load_for_action, route_next, routing_failure_code)
-    routed = route_next(state_text, board_text, pending, conflicts)
+    # P0#4: the cold-start projection routes under the CURRENT-SESSION
+    # capability, never the persisted STATE.mode -- a read-only session is
+    # handed an inspect-only action even when the last handshake was full.
+    from .capability import negotiate_capability
+    routed = route_next(state_text, board_text, pending, conflicts,
+                        current_capability=negotiate_capability())
     if not routed.get("ok") and routing_failure_code(routed) \
             == "VALIDATION_FAILED":
         # A malformed surface must not project a healthy cold start: the
@@ -335,7 +348,11 @@ def context_hot(project_root: Path | str, limit: int = 3000,
     pending = inputs["pending"]
     conflicts = inputs["conflicts"]
     from .router import route_next, routing_failure_code
-    routed = route_next(state_text, board_text, pending, conflicts)
+    # P0#4: same current-session capability authority as the cold-start
+    # projection above.
+    from .capability import negotiate_capability
+    routed = route_next(state_text, board_text, pending, conflicts,
+                        current_capability=negotiate_capability())
     if not routed.get("ok") and routing_failure_code(routed) \
             == "VALIDATION_FAILED":
         return Result(ok=False, code="VALIDATION_FAILED", op_id="",

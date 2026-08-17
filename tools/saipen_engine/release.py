@@ -44,7 +44,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from . import codec
-from .board import strict_iso_utc
+from .board import strict_iso_utc, iso_utc_sort_key
 from .errors import CODES
 from .journal import _drop_settled_staged
 from .operations import RELEASE_SCOPE_DIR, _plan_finish_ticket
@@ -534,16 +534,31 @@ def _release_failure(stage: str, detail: str, **extra) -> dict:
 def plan_release(
     root: Path, invocation: str, *, dry_run: bool = False,
     crew_carrier: dict | None = None,
+    current_capability: str | None = None,
 ) -> "ReleasePlan":
     """Build the immutable release decision.  WRITES NOTHING."""
     root = Path(root).resolve()
+    # P0#4: the CURRENT-SESSION capability is the ONLY authority for whether a
+    # release may be PLANNED. A persisted STATE.mode is the LAST handshake
+    # outcome and MUST NOT prove current write authority (a stale read-only
+    # must not suppress a newly writable session, nor a stale full publish into
+    # a newly read-only one). The public command boundary negotiates it fresh
+    # and injects it here; a read-only session cannot plan a release.
+    if current_capability == "read-only":
+        raise ReleaseRefusal(
+            "VALIDATION_FAILED",
+            "current session capability is read-only; no release may be "
+            "planned in a read-only session (capability injected at the "
+            "command boundary)")
     _recovery_preflight(root)
 
     version = _installed_version(root)
     state_text, state = _read_state(root)
     board_text, board = _read_board(root)
     log_hash = _log_hash(root)
-    mode = _read_mode(state)
+    # P0#4: the negotiated current-session capability -- not the persisted
+    # STATE.mode -- decides whether this release may publish.
+    mode = _read_mode(state, current_capability)
 
     from .paths import (project_identity as _project_identity,
                         project_lineage_identity)
@@ -607,7 +622,8 @@ def plan_release(
         return _plan_crew_release(
             root, invocation, version, state_text, state, board_text, board,
             log_hash, project_identity, source_head, fingerprint, source_model,
-            tag, crew_carrier, dry_run)
+            tag, crew_carrier, dry_run,
+            current_capability=current_capability)
 
     # ---- no-publish needs NO git facts at all (T-994 / § 10) --------------
     if mode == "no-publish":
@@ -806,6 +822,7 @@ def _plan_crew_release(
     board_text: str, board: dict, log_hash: str, project_identity: str,
     source_head: str, fingerprint: str, source_model: str, tag: str,
     crew_carrier: dict, dry_run: bool,
+    current_capability: str | None = None,
 ) -> "ReleasePlan":
     """Plan the terminal crew release from a derived crew carrier.
 
@@ -823,7 +840,9 @@ def _plan_crew_release(
             "no valid portable project lineage (.saipen/IDENTITY.md is "
             "missing or malformed); every new release requires the canonical "
             "tracked carrier")
-    mode = _read_mode(state)
+    # P0#4: same authority as an ordinary release -- the negotiated
+    # current-session capability, never the persisted STATE.mode.
+    mode = _read_mode(state, current_capability)
     crew_epoch = crew_carrier.get("crew_epoch") or ""
     scope = crew_carrier.get("scope") or {}
     ticket_id = crew_carrier.get("ticket_id") or ""
@@ -2836,16 +2855,29 @@ def _check_parity(root: Path, version: str) -> None:
 # ---------------------------------------------------------------------------
 
 
-def _read_mode(state: dict) -> str:
-    mode = state.get("mode")
+def _read_mode(state: dict, current_capability: str | None = None) -> str:
+    """The PUBLISH policy of this release.
+
+    P0#4: when the command boundary negotiated a CURRENT-SESSION capability it
+    is the ONLY authority -- a persisted `STATE.mode` is the last handshake
+    outcome and must never grant current publish authority (a stale `full` may
+    not publish from a newly `no-publish` session, and a stale `no-publish` may
+    not suppress a session that really is `full`). Only an internal/legacy call
+    with no negotiated capability falls back to the persisted policy, and that
+    fallback still fails closed on anything outside full/no-publish.
+    """
+    mode = state.get("mode") if current_capability is None else current_capability
     if mode == "full":
         return "full"
     if mode == "no-publish":
         return "no-publish"
+    source = ("persisted STATE.mode" if current_capability is None
+              else "current session capability")
     raise ReleaseRefusal(
         "VALIDATION_FAILED",
-        f"unknown release mode {mode!r} -- an invalid policy must never "
-        "become permission to publish; set mode: full or mode: no-publish")
+        f"unknown release mode {mode!r} from {source} -- an invalid policy "
+        "must never become permission to publish; a release needs full or "
+        "no-publish")
 
 
 # ---------------------------------------------------------------------------
@@ -3433,9 +3465,13 @@ def _select_terminal_receipt(candidates: list[dict]) -> dict:
             "ambiguous",
             "competing terminal release receipts for the same crew epoch "
             "differ on closure/tag/mode")
+    # Order by the REAL UTC instant (never the spelling); op_id is the
+    # equal-instant tiebreak. Admissible same-instant receipts tie by op_id; a
+    # sub-second spelling difference never reverses chronology (P1#3).
+    _earliest = datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
     return max(candidates,
-               key=lambda c: (strict_iso_utc(c.get("created_at", "")),
-                              c.get("op_id", "")))
+               key=lambda c: (iso_utc_sort_key(c.get("created_at", ""))
+                              or _earliest, c.get("op_id", "")))
 
 
 def _receipt_evidence(record: dict) -> dict:

@@ -34,7 +34,7 @@ import sys
 import datetime
 from pathlib import Path
 
-from .board import strict_iso_utc
+from .board import strict_iso_utc, iso_utc_sort_key
 
 STATUS = ("PREPARED", "APPLYING", "VERIFIED", "COMMITTED", "ABORTED",
           "CONFLICT", "RESOLVED")
@@ -581,51 +581,93 @@ def scan_pending(project_root: Path | str) -> tuple[list[dict], list[dict]]:
     """
     root = Path(project_root).resolve()
     ops_dir = root / OPS_DIR
+    recovery_dir = ops_dir.parent   # .saipen/recovery
     found: list[dict] = []
 
-    if not ops_dir.exists():
-        return found, []   # genuinely absent -> CLEAN, no evidence to surface
-
-    # An unreadable / non-directory / reparse ops location is NOT "no evidence":
-    # it is CORRUPT evidence that must surface, never be laundered into CLEAN
-    # (hostile-regression corrupt-evidence partition, P1#4). Only a truly absent
-    # or empty ops directory stays CLEAN.
+    # ONE probe decides absence vs corruption, and it is `os.lstat` -- NOT
+    # `.exists()` and NOT `os.path.lexists()` (hostile-regression, P1#6):
+    #
+    #   * `.exists()` FOLLOWS a broken symlink and reports it as absent, which
+    #     launders a corrupt-evidence pointer into CLEAN;
+    #   * `os.path.lexists()` swallows EVERY OSError into False, so an ops path
+    #     whose PARENT is a file (NotADirectoryError) also reads as absent;
+    #   * `os.lstat` does not follow the final symlink and raises a TYPED error,
+    #     so exactly `FileNotFoundError` means "genuinely absent" and every
+    #     other failure is malformed evidence that must surface.
+    #
+    # The RECOVERY container is probed FIRST because on some platforms (Windows)
+    # `lstat` of an ops path whose PARENT is a file raises `FileNotFoundError`
+    # too, which would otherwise be mistaken for "genuinely absent" -- a file
+    # standing in for the recovery directory is corrupt evidence, never CLEAN.
+    try:
+        rec_info = os.lstat(recovery_dir)
+    except FileNotFoundError:
+        # No recovery container at all -> no ops dir either. Genuinely absent
+        # -> CLEAN, no evidence to surface.
+        return found, []
+    except OSError as exc:
+        found.append({"op_id": "OPS_DIR", "status": "CORRUPT_JOURNAL", "corrupt": True,
+                      "detail": f"RECOVERY is unreadable ({type(exc).__name__}): {exc}"})
+        return found, []
+    if os.path.islink(recovery_dir) or getattr(rec_info, "st_file_attributes", 0) & 0x400:
+        found.append({"op_id": "OPS_DIR", "status": "CORRUPT_JOURNAL", "corrupt": True,
+                      "detail": "RECOVERY is a symlink or reparse point"})
+        return found, []
+    if not recovery_dir.is_dir():
+        # The recovery container exists but is a FILE (or other non-dir): the
+        # ops directory cannot live underneath it, so any pending op is
+        # unrecoverable evidence.
+        found.append({"op_id": "OPS_DIR", "status": "CORRUPT_JOURNAL", "corrupt": True,
+                      "detail": "RECOVERY exists but is not a directory"})
+        return found, []
+    # The recovery container is a real directory; now probe the ops dir exactly
+    # as before -- only FileNotFoundError here means a genuinely absent ops dir.
     try:
         ops_info = os.lstat(ops_dir)
+    except FileNotFoundError:
+        return found, []   # genuinely absent -> CLEAN, no evidence to surface
     except OSError as exc:
-        if isinstance(exc, (FileNotFoundError, NotADirectoryError)):
-            return found, []
-        found.append({"op_id": "OPS_DIR", "status": "CORRUPT", "corrupt": True,
-                      "detail": f"OPS_DIR is unreadable: {exc}"})
+        # Includes NotADirectoryError (a parent component is a file) and
+        # PermissionError: corrupt evidence, never "nothing pending".
+        found.append({"op_id": "OPS_DIR", "status": "CORRUPT_JOURNAL", "corrupt": True,
+                      "detail": f"OPS_DIR is unreadable ({type(exc).__name__}): {exc}"})
         return found, []
     if os.path.islink(ops_dir) or getattr(ops_info, "st_file_attributes", 0) & 0x400:
-        found.append({"op_id": "OPS_DIR", "status": "CORRUPT", "corrupt": True,
+        found.append({"op_id": "OPS_DIR", "status": "CORRUPT_JOURNAL", "corrupt": True,
                       "detail": "OPS_DIR is a symlink or reparse point"})
         return found, []
     if not ops_dir.is_dir():
-        found.append({"op_id": "OPS_DIR", "status": "CORRUPT", "corrupt": True,
+        found.append({"op_id": "OPS_DIR", "status": "CORRUPT_JOURNAL", "corrupt": True,
                       "detail": "OPS_DIR exists but is not a directory"})
         return found, []
 
     try:
-        entries = ops_dir.iterdir()
+        # Materialize the listing INSIDE the guarded operation: iterdir() is lazy,
+        # so a deferred iteration-time PermissionError would otherwise escape as a
+        # traceback instead of surfacing as CORRUPT evidence (hostile-regression,
+        # P1#5 corrupt-evidence partition).
+        entries = list(ops_dir.iterdir())
     except OSError as exc:
-        found.append({"op_id": "OPS_DIR", "status": "CORRUPT", "corrupt": True,
+        found.append({"op_id": "OPS_DIR", "status": "CORRUPT_JOURNAL", "corrupt": True,
                       "detail": f"OPS_DIR entry listing failed: {exc}"})
         return found, []
 
     for entry in entries:
         try:
             info = os.lstat(entry)
+        except FileNotFoundError:
+            # A raced deletion between listing and stat is genuine absence.
+            continue
         except OSError as exc:
-            if isinstance(exc, (FileNotFoundError, NotADirectoryError)):
-                continue
-            found.append({"op_id": entry.name, "status": "CORRUPT",
+            # Everything else -- including NotADirectoryError, i.e. a malformed
+            # parent component -- is CORRUPT_JOURNAL evidence (P1#6).
+            found.append({"op_id": entry.name, "status": "CORRUPT_JOURNAL",
                           "corrupt": True,
-                          "detail": f"op_dir stat failed: {exc}"})
+                          "detail": f"op_dir stat failed "
+                                    f"({type(exc).__name__}): {exc}"})
             continue
         if os.path.islink(entry) or getattr(info, "st_file_attributes", 0) & 0x400:
-            found.append({"op_id": entry.name, "status": "CORRUPT",
+            found.append({"op_id": entry.name, "status": "CORRUPT_JOURNAL",
                           "corrupt": True,
                           "detail": "op_dir is a symlink or reparse point"})
             continue
@@ -639,13 +681,13 @@ def scan_pending(project_root: Path | str) -> tuple[list[dict], list[dict]]:
             # Defense-in-depth: the decoder is the strict gate, but a receipt it
             # cannot even name must surface as CORRUPT evidence, never a
             # traceback that takes the whole project down.
-            found.append({"op_id": entry.name, "status": "CORRUPT",
+            found.append({"op_id": entry.name, "status": "CORRUPT_JOURNAL",
                           "corrupt": True,
                           "detail": f"operation record refused "
                                     f"({type(exc).__name__}): {exc}"})
             continue
         if not decoded["ok"]:
-            found.append({"op_id": entry.name, "status": "CORRUPT",
+            found.append({"op_id": entry.name, "status": "CORRUPT_JOURNAL",
                           "corrupt": True, "detail": decoded["detail"]})
             continue
         record = decoded["record"]
@@ -653,7 +695,13 @@ def scan_pending(project_root: Path | str) -> tuple[list[dict], list[dict]]:
             found.append({"op_id": record["op_id"],
                           "status": record.get("status"),
                           "created_at": record.get("created_at", "")})
-    found.sort(key=lambda op: (op.get("created_at", ""), op["op_id"]))
+    # Order by the REAL UTC instant (never the original spelling); op_id is only
+    # the equal-instant tiebreak. A spelling-only lexical sort reverses chronology
+    # inside one second (e.g. `00Z` > `00.900000Z`), so the sort key is the
+    # parsed datetime (P1#3).
+    _earliest = datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
+    found.sort(key=lambda op: (iso_utc_sort_key(op.get("created_at", ""))
+                               or _earliest, op["op_id"]))
     conflicts = [op for op in found if op.get("status") == "CONFLICT"]
     return found, conflicts
 
@@ -2382,6 +2430,21 @@ def auto_recover_pending(project_root: Path | str) -> dict:
                 return {"ok": True, "code": "CLEAN", "recovered": []}
             recovered = []
             for op in pending:
+                # Refuse corrupt evidence BEFORE any replay (hostile-regression
+                # corrupt-evidence partition, P1#6): a receipt the strict
+                # decoder already refused -- or an op directory that failed its
+                # containment probe -- is evidence that cannot be trusted, and
+                # auto-recovery must never attempt to roll it forward. The
+                # structured corrupt record (op_id + detail) is preserved and
+                # surfaced; resolving it is an explicit human action.
+                if op.get("corrupt"):
+                    return {"ok": False, "code": "CORRUPT_JOURNAL",
+                            "op_ids": [op["op_id"]], "recovery_required": True,
+                            "detail": (f"corrupt journal evidence "
+                                       f"{op['op_id']} blocks auto-recovery: "
+                                       f"{op.get('detail', '')} -- resolve the "
+                                       f"corrupt receipt explicitly before "
+                                       f"replay")}
                 result = _recover_locked(root, op["op_id"])
                 if not result["ok"]:
                     # ONE fresh scan for the stale receipt list: the failed

@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 from pathlib import Path
 
 from . import phases
+from .board import strict_iso_utc
 
 
 def _decode_quoted(raw: str) -> str | None:
@@ -157,6 +159,167 @@ STATE_INTEGER_FIELDS = {
 WAIT_CATEGORIES = ("manual-verify", "destructive-op", "first-publish",
                    "user brake", "blocked", "safety valve", "init")
 
+# ---------------------------------------------------------------------------
+# The ONE structured WAIT parser (hostile-regression, P1#5).
+#
+# CORE § 1.2 states the shape exactly: `WAIT: <category> -- <one sentence>`.
+# Three properties of that sentence are load-bearing and were each violated by
+# the previous prefix/substring classifier:
+#
+#   * the DELIMITER is mandatory. A bare `WAIT: blocked` names a category and
+#     asks nothing, which is the vague stop § 1.2 exists to forbid.
+#   * the BODY IS ONE SENTENCE. § 1.2: "a stop instruction carrying notes is a
+#     stop instruction the next agent reads as a queue". This repository's own
+#     live state proved it, so the bound belongs in the shared parser rather
+#     than only in the release gate.
+#   * the THREE DONE brakes have FIXED wordings. An arbitrary body under a
+#     legal category is NOT one of them, and a substring match on the MARKHUNT
+#     phrase made any string carrying it legal -- including a non-WAIT one.
+#
+# Every consumer (STATE contract, router, validator, `saipen stop`) reads THIS
+# parser, so a WAIT legal in one half can never be rejected by another.
+# ---------------------------------------------------------------------------
+
+# The engine's own safety-valve pause. `N waves / M tickets` is the exact
+# § 2.4 wording -- unit order is fixed, so `(3 tickets / 20 tickets)` is
+# nonsense and refuses. The resume key is INTENT-SPECIFIC (T-539): `saipen
+# goal` continues a goal run, bare `cc` continues a converge run.
+_SAFETY_VALVE_RE = re.compile(
+    r"^safety valve reached \((\d+) waves / (\d+) tickets\) -- "
+    r"run '(saipen goal|cc)' to continue$")
+
+# The untriaged-MARKHUNT brake, verbatim from CORE § 1.2 / phases/done.md.
+# Anchored: the phrase alone never makes a string legal.
+MARKHUNT_BRAKE = ("WAIT: blocked -- untriaged MARKHUNT findings in "
+                  "## BLOCKED; triage into ## TODO or dismiss")
+
+# The § 1.2 progress tag: a single trailing bracketed suffix, informational
+# only, never part of the sentence.
+_PROGRESS_TAG_RE = re.compile(r"\s*\[[^\]]*\]\s*$")
+
+# A second sentence begins at a period followed by whitespace and then a
+# capital or a backtick, so `v7.176.0` and a lowercase "e.g." do not trip it
+# while genuine handoff prose does. Identical to the release gate's rule --
+# that is the point of sharing it.
+_SECOND_SENTENCE_RE = re.compile(r"\.\s+(?=[A-Z`])")
+
+
+def _wait_body(na: str) -> str:
+    """The § 1.2 sentence of a `WAIT:` string, progress tag stripped."""
+    return _PROGRESS_TAG_RE.sub("", na.strip()[len("WAIT:"):].strip())
+
+
+def wait_grammar_error(na: object) -> str | None:
+    """Why `na` is NOT a legal WAIT, or None when it is legal.
+
+    The single authority for the closed grammar. Callers that only need the
+    verdict use `parse_wait` / `is_legal_wait`; the STATE contract uses this
+    so its refusal names the exact rule that was broken.
+    """
+    if not isinstance(na, str):
+        return "next_action is not a string"
+    text = na.strip()
+    if not text.startswith("WAIT:"):
+        return "not a WAIT: action"
+    body = _wait_body(text)
+    if not body:
+        return ("carries no category and no question -- CORE § 1.2 requires "
+                "'WAIT: <category> -- <one sentence>'")
+    if "\n" in body:
+        return "spans more than one line"
+    if _SAFETY_VALVE_RE.match(body):
+        return None
+    head, sep, tail = body.partition(" -- ")
+    if not sep:
+        return (f"has no ' -- ' delimiter: a bare category names the KIND of "
+                f"stop and asks nothing, which CORE § 1.2 forbids "
+                f"(got {body!r})")
+    if head.strip().lower() not in WAIT_CATEGORIES:
+        return (f"opens with {head.strip()!r}, which is not one of the closed "
+                f"§ 1.2 categories {'/'.join(WAIT_CATEGORIES)}")
+    sentence = tail.strip()
+    if not sentence:
+        return "has an empty question after ' -- '"
+    second = _SECOND_SENTENCE_RE.search(sentence)
+    if second:
+        return (f"body starts a second sentence at offset {second.start()} -- "
+                f"CORE § 1.2 bounds it to one; session status belongs in "
+                f".saipen/kitchen/digest.md and queued work on BOARD.md")
+    return None
+
+
+def parse_wait(na: object) -> str | None:
+    """The lowercased § 1.2 category of a legal WAIT, else None.
+
+    Legal forms, and ONLY these:
+      * `WAIT: <category> -- <one sentence>`, category one of the closed seven;
+      * the exact intent-aware safety-valve pause the engine itself emits.
+    """
+    if wait_grammar_error(na) is not None:
+        return None
+    body = _wait_body(str(na).strip())
+    if _SAFETY_VALVE_RE.match(body):
+        return "safety valve"
+    return body.partition(" -- ")[0].strip().lower()
+
+
+def is_legal_wait(na: object) -> bool:
+    """True when `na` is a legal WAIT under the closed § 1.2 grammar."""
+    return parse_wait(na) is not None
+
+
+def safety_valve_resume_key(na: object) -> str | None:
+    """The resume command an exact safety-valve pause names, else None."""
+    if not isinstance(na, str) or not na.strip().startswith("WAIT:"):
+        return None
+    match = _SAFETY_VALVE_RE.match(_wait_body(na.strip()))
+    return match.group(3) if match else None
+
+
+# The exactly THREE brakes CORE § 1.2 permits at `phase: DONE` with an empty
+# `## TODO`. Every other category there names a question about work in flight,
+# and there is none -- § 1.11's UNBLOCK exception orders an auto-transition
+# instead of a stop.
+DONE_EMPTY_BRAKES = ("safety valve", "user brake", "markhunt")
+
+
+def binding_wait(na: object, *, phase: object = None,
+                 empty_todo: bool = False,
+                 intent: object = None) -> str | None:
+    """Does this WAIT actually BIND in this context? The brake name, or None.
+
+    CONTEXTUAL by construction (hostile-regression, P1#5): the router, the
+    release gate and `saipen stop` must agree on when a persisted WAIT is a
+    real stop, and CORE narrows the answer by context rather than by wording
+    alone.
+
+      * anywhere else: every legal WAIT binds -- a user brake is a stop with
+        one hundred workable tickets.
+      * `phase: DONE` + empty `## TODO`: exactly the three fixed forms bind
+        (`safety valve`, `user brake`, the untriaged-MARKHUNT brake). The
+        safety valve must additionally name the resume key its own intent
+        owns, since a converge pause telling the user to run `saipen goal`
+        sends them to a NEW objective instead of continuing this one (T-539).
+
+    Returns the brake name from `DONE_EMPTY_BRAKES` in the narrowed context,
+    the § 1.2 category elsewhere, and None when the WAIT does not bind.
+    """
+    category = parse_wait(na)
+    if category is None:
+        return None
+    if not (phase == "DONE" and empty_todo):
+        return category
+    text = str(na).strip()
+    if category == "safety valve":
+        key = safety_valve_resume_key(text)
+        expected = "cc" if intent == "converge" else "saipen goal"
+        return "safety valve" if key == expected else None
+    if _PROGRESS_TAG_RE.sub("", text) == MARKHUNT_BRAKE:
+        return "markhunt"
+    if category == "user brake":
+        return "user brake"
+    return None
+
 _STYLE_TOKEN_RE = re.compile(r"`style_contract:\s*(ded-[0-9a-f]{8})`")
 
 
@@ -169,20 +332,78 @@ def style_contract_token(text: str) -> str:
     return "ded-" + hashlib.sha256(body.encode("utf-8")).hexdigest()[:8]
 
 
-def installed_style_token(saipen_home: object) -> str | None:
-    """The STYLE.md marker of the SAIPEN home the state was written against, or
-    None when unreachable (legacy/explicitly absent home: skip the check)."""
-    if not saipen_home or not str(saipen_home).strip():
+# ---------------------------------------------------------------------------
+# THE RUNNING INSTALLATION IS AUTHORITATIVE (hostile-regression, P0#3).
+#
+# VERSION, the STATE schema revision and the STYLE.md voice marker are
+# properties of the SAIPEN install that is EXECUTING, not of whatever path a
+# previous agent happened to persist in `STATE.saipen_home`. Reading them
+# through that pointer made every one of them fail OPEN: a stale or dead home
+# returned None, and `None` meant "skip the check" -- so deleting
+# `style_contract` or `last_event` from a schema-v3 state passed validation
+# because the pointer no longer resolved.
+#
+# The persisted pointer is still validated -- separately, as the bootloader
+# binding it is (see `persisted_home_error`) -- but it never decides what the
+# contract SAYS.
+# ---------------------------------------------------------------------------
+
+def running_home() -> Path:
+    """The SAIPEN home of the RUNNING installation (this module's own tree)."""
+    return Path(__file__).resolve().parents[2]
+
+
+def _read_running(*parts: str) -> str | None:
+    path = running_home().joinpath(*parts)
+    try:
+        return path.read_text(encoding="utf-8-sig")
+    except OSError:
         return None
-    base = Path(str(saipen_home))
-    for candidate in (base / "saipen" / "STYLE.md", base / "STYLE.md"):
-        if candidate.is_file():
-            try:
-                return style_contract_token(
-                    candidate.read_text(encoding="utf-8-sig"))
-            except OSError:
-                return None
-    return None
+
+
+def running_protocol_major() -> int | None:
+    """The MAJOR component of the running install's own `VERSION` (§ 1.2)."""
+    text = _read_running("VERSION")
+    if text is None:
+        return None
+    match = re.match(r"v?(\d+)\.", text.strip())
+    return int(match.group(1)) if match else None
+
+
+def running_schema_version() -> int | None:
+    """The running install's `x-current-schema-version` (§ 1.2).
+
+    The STATE schema file is authoritative for the STATE file-format revision;
+    the protocol major (`saipen_version`) is a different axis and must not
+    decide it.
+    """
+    text = _read_running("extensions", "schemas", "state.schema.json")
+    if text is None:
+        return None
+    try:
+        value = json.loads(text).get("x-current-schema-version")
+    except ValueError:
+        return None
+    return int(value) if isinstance(value, int) else None
+
+
+def running_style_token() -> str | None:
+    """The running install's STYLE.md voice marker (§ 1.2)."""
+    text = _read_running("saipen", "STYLE.md")
+    if text is None:
+        text = _read_running("STYLE.md")
+    return style_contract_token(text) if text is not None else None
+
+
+def installed_style_token(saipen_home: object = None) -> str | None:
+    """The STYLE.md marker every STATE is judged against.
+
+    `saipen_home` is accepted and IGNORED: the running installation owns the
+    voice contract. A state written against a home that no longer resolves is
+    still judged, because the check exists to prove the writing agent read the
+    CURRENT contract -- and "the pointer is stale" is not evidence that it did.
+    """
+    return running_style_token()
 
 
 def state_contract_errors(fields: dict, *, style_token: str | None = None,
@@ -314,21 +535,44 @@ def state_contract_errors(fields: dict, *, style_token: str | None = None,
                             f"Allowed from {tf}: {', '.join(allowed)}")
     updated = fields.get("updated")
     if isinstance(updated, str):
-        if not re.fullmatch(
-                r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|\+00:00)",
-                updated):
+        # ONE shared strict-UTC parser (hostile-regression, P1#7). The regex
+        # copy this replaced proved only the SHAPE, so the impossible
+        # `2026-99-99T25:61:61Z` passed and Recovery's staleness comparison
+        # silently lost its clock evidence. `board.strict_iso_utc` proves the
+        # instant: real date, real time, T separator, zero offset.
+        if not strict_iso_utc(updated):
             errors.append(
-                f"updated must be ISO-8601 UTC (Z or +00:00), got {updated!r} -- "
-                f"Recovery miscompares staleness across timezones otherwise "
-                f"(RFC § 1.2)")
+                f"updated must be ISO-8601 UTC (Z or +00:00) naming a REAL "
+                f"instant, got {updated!r} -- Recovery miscompares staleness "
+                f"across timezones otherwise (RFC § 1.2)")
     na = fields.get("next_action")
-    if isinstance(na, str) and na.startswith("WAIT:"):
-        body = na[len("WAIT:"):].strip().lower()
-        if not any(body.startswith(c) for c in WAIT_CATEGORIES):
+    if isinstance(na, str) and na.strip().startswith("WAIT:"):
+        # THE structured § 1.2 grammar via the ONE shared parser
+        # (hostile-regression, P1#5): `WAIT: <category> -- <one sentence>`.
+        # The delimiter, the closed category and the one-sentence bound are all
+        # mandatory, and the parser names which one was broken.
+        problem = wait_grammar_error(na)
+        if problem is not None:
             errors.append(
-                f"next_action is a WAIT with no category token -- RFC § 1.2 "
-                f"requires 'WAIT: <category> -- <question>' where category is "
-                f"one of {'/'.join(WAIT_CATEGORIES)}; got {na!r}")
+                f"next_action is a malformed WAIT (a WAIT with no category "
+                f"token, no ' -- ' delimiter or more than one sentence is "
+                f"never legal) -- CORE § 1.2 requires 'WAIT: <category> -- "
+                f"<one sentence>' where category is one of "
+                f"{'/'.join(WAIT_CATEGORIES)} (or the exact safety-valve "
+                f"pause); it {problem}")
+    # § 1.2 VERSION GUARD: a state written by a NEWER protocol than the one
+    # running cannot be interpreted by it -- the running install does not know
+    # the rules that state was written under. The guard is one-directional:
+    # older states are readable legacy, newer ones refuse.
+    running_major = running_protocol_major()
+    project_major = fields.get("saipen_version")
+    if (running_major is not None and isinstance(project_major, int)
+            and not isinstance(project_major, bool)
+            and project_major > running_major):
+        errors.append(
+            f"saipen_version {project_major} is newer than the running SAIPEN "
+            f"protocol major {running_major} -- this install cannot interpret "
+            f"a state written by a later protocol (RFC § 1.2 version guard)")
     if style_token is not None:
         sc = fields.get("style_contract")
         if sc is not None and sc != style_token:
@@ -345,17 +589,71 @@ def state_contract_errors(fields: dict, *, style_token: str | None = None,
     return errors
 
 
-def _current_schema_version(home: object) -> int | None:
-    """The installed protocol's major version from `<home>/VERSION`, or None."""
-    if not home or not str(home).strip():
+def _current_schema_version(home: object = None) -> int | None:
+    """The ONE schema-revision source: the RUNNING install's
+    `x-current-schema-version` (hostile-regression, P0#3).
+
+    `home` is accepted and IGNORED for call-site compatibility. Reading the
+    revision through the persisted pointer let a dead home return None, and a
+    None revision switched off the schema-v3 `style_contract` and `last_event`
+    requirements entirely -- the checks failed open exactly where the state was
+    least trustworthy.
+    """
+    return running_schema_version()
+
+
+# ---------------------------------------------------------------------------
+# The persisted bootloader pointer, validated as a POINTER (P0#3).
+# ---------------------------------------------------------------------------
+
+# The layout that makes a directory a LOADABLE SAIPEN home: the cold-start
+# kernel plus the sub protocol the bootloader needs. Identical to the contract
+# `crew._home_problem_for` proves for sync availability -- one liveness
+# definition, two entry points.
+#
+# VERSION is deliberately NOT required here: the RUNNING install owns
+# VERSION/schema/STYLE (P0#3), so demanding it from the persisted pointer would
+# re-introduce the same fail-open coupling from the other side. `rebind-home`
+# does demand a readable, major-compatible VERSION from its explicit candidate,
+# because that candidate is being adopted as the install to load FROM.
+HOME_LAYOUT_MARKERS = (
+    ("extensions", "subs", "PROTOCOL.md"),
+)
+
+
+def persisted_home_error(home: object) -> str | None:
+    """Why `STATE.saipen_home` is DEAD, or None when it is usable/unverifiable.
+
+    A pointer is judged only when it is ABSOLUTE: that is the form CORE § 1.2
+    defines ("the absolute path to the SAIPEN home on the machine that last
+    checkpointed"), and it is the only form a later agent can resolve. An
+    absent, empty or relative value carries no machine-local binding at all, so
+    it is legacy/unverifiable -- reported as usable here and left to the
+    release gate, exactly like a pre-v7.25.0 state with no pointer.
+
+    A DEAD absolute pointer is not a warning: the bootloader cannot load the
+    protocol it names, so ordinary mutation must refuse and `saipen
+    rebind-home` is the one operation allowed to repair it.
+    """
+    if home is None or not str(home).strip():
         return None
-    path = Path(str(home)) / "VERSION"
-    if not path.is_file():
+    text = str(home).strip()
+    path = Path(text)
+    if not path.is_absolute():
         return None
-    try:
-        return int(path.read_text(encoding="utf-8-sig").strip().split(".")[0])
-    except (OSError, ValueError):
-        return None
+    if not path.is_dir():
+        return (f"STATE.saipen_home {text!r} does not resolve to a directory "
+                f"on this machine")
+    if not ((path / "saipen" / "BOOT.md").is_file()
+            or (path / "BOOT.md").is_file()):
+        return (f"STATE.saipen_home {text!r} has no saipen/BOOT.md -- the "
+                f"cold-start kernel is not there")
+    missing = [Path(*parts).as_posix() for parts in HOME_LAYOUT_MARKERS
+               if not path.joinpath(*parts).is_file()]
+    if missing:
+        return (f"STATE.saipen_home {text!r} is missing "
+                f"{', '.join(missing)} -- not a usable SAIPEN install")
+    return None
 
 
 def parse_state_or_error(text: str):
@@ -374,11 +672,26 @@ def parse_state_or_error(text: str):
     fields, error = parse_frontmatter(text)
     if fields is None:
         return None, error
+    # The RUNNING install answers the schema/version questions
+    # (hostile-regression, P0#3): the schema revision and the protocol major
+    # are properties of the executing install, never the persisted pointer.
+    # The STYLE.md voice contract is authoritative too, but ONLY for this
+    # install's OWN project state -- a state whose `saipen_home` resolves to
+    # the running install. Foreign-home and empty/relative (legacy/sub) states
+    # keep their bootloader pointer as their own contract concern: enforcing
+    # the running install's voice on a sub-instance or another project would
+    # reject legitimate foreign-style states and break sub collection, while
+    # the dead-pointer case is caught separately by the persisted-home gate.
+    # Deleting `style_contract` from a state that THIS install owns still fails.
     home = fields.get("saipen_home")
+    style_token = None
+    if (home and str(home).strip() and Path(str(home)).is_absolute()
+            and Path(str(home)).resolve() == running_home()):
+        style_token = running_style_token()
     contract_errors = state_contract_errors(
         fields,
-        style_token=installed_style_token(home),
-        current_schema_version=_current_schema_version(home))
+        style_token=style_token,
+        current_schema_version=running_schema_version())
     if contract_errors:
         return None, "; ".join(contract_errors)
     return fields, None

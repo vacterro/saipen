@@ -1342,6 +1342,7 @@ def validate_sub_state(state: dict) -> list[str]:
     sub_instance_health, the crew snapshot/gate, lifecycle verifiers and the
     validator (which layers per-file detail over these errors)."""
     from . import phases
+    from .board import strict_iso_utc
     errors: list[str] = []
     required = ("phase", "task", "next_action", "blocker", "agent",
                 "saipen_version", "mode", "updated")
@@ -1367,10 +1368,9 @@ def validate_sub_state(state: dict) -> list[str]:
     if mode not in ("full", "read-only", "no-publish", "manual-verify"):
         errors.append(f"mode {mode!r} outside the closed capability set")
     updated = state.get("updated")
-    if isinstance(updated, str) and not re.fullmatch(
-            r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|\+00:00)",
-            updated):
-        errors.append("updated must be ISO-8601 UTC (Z or +00:00)")
+    if isinstance(updated, str) and not strict_iso_utc(updated):
+        errors.append("updated must be a real ISO-8601 UTC instant "
+                      "(Z or +00:00)")
     na = state.get("next_action")
     if isinstance(na, str):
         if na.startswith("PHASE "):

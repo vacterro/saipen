@@ -8,57 +8,60 @@ import re
 REQUIRED_HEADINGS = ["## DOING", "## TODO", "## DONE", "## BLOCKED"]
 TICKET_RE = re.compile(r"^- \[([ x/])\] (T-\d+)\s+(.*)$")
 
-# ONE canonical strict-UTC timestamp parser (hostile-regression, P1#5). The
-# three duplicated "_strict_iso_utc" copies in operations/journal/release only
-# tested ``tzinfo`` and thereby accepted any timezone-aware offset; a +03:00
-# stamp is NOT UTC. This requires ``utcoffset() == 0`` (true UTC), canonicalizes
-# to a single Z representation, and returns a comparable sort key. Garbage,
-# naive (no zone), and non-zero-offset stamps all refuse.
+# ONE canonical strict-UTC timestamp parser (hostile-regression, P1#5 / wave 3).
+# The contract admits EXACTLY ``YYYY-MM-DDTHH:MM:SS[.fraction](Z|+00:00)``:
+# a ``T`` separator (never a space), seconds mandatory, and a UTC suffix of
+# ``Z`` or ``+00:00`` only. Forbidden spellings -- space separator, ``+0000``,
+# ``+00``, or missing seconds -- are refused before any parse, so a 10:00+03:00
+# (07:00Z) stamp can never enter chronological ordering (P1#3).
+_STRICT_UTC_RE = re.compile(
+    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$"
+    r"|^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?\+00:00$")
 _UTC_ZERO = datetime.timedelta(0)
+
+
+def _strict_utc_stamp(text: str) -> datetime.datetime | None:
+    """Parse a canonical strict-UTC string into a UTC-aware datetime, or None."""
+    if not _STRICT_UTC_RE.match(text):
+        return None
+    try:
+        stamp = datetime.datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if stamp.tzinfo is None or stamp.utcoffset() != _UTC_ZERO:
+        return None
+    return stamp.astimezone(datetime.timezone.utc)
 
 
 def strict_iso_utc(value: object) -> str:
     """Strict ISO-8601 UTC (Z or +00:00, ``utcoffset() == 0``) -> canonical Z.
 
-    Returns the canonical ``YYYY-MM-DDTHH:MM[:SS[.fff]]Z`` form, or ``""`` for
-    any non-string, unparseable, naive, or non-zero-offset stamp."""
+    Returns the canonical ``YYYY-MM-DDTHH:MM:SS[.fff]Z`` form, or ``""`` for any
+    non-string, noncanonical-spelling, naive, or non-zero-offset stamp."""
     if not isinstance(value, str):
         return ""
     text = value.strip()
     if not text:
         return ""
-    try:
-        stamp = datetime.datetime.fromisoformat(text.replace("Z", "+00:00"))
-    except ValueError:
+    stamp = _strict_utc_stamp(text)
+    if stamp is None:
         return ""
-    if stamp.tzinfo is None:
-        return ""
-    if stamp.utcoffset() != _UTC_ZERO:
-        return ""
-    canonical = stamp.astimezone(datetime.timezone.utc).replace(tzinfo=None)
-    return canonical.isoformat() + "Z"
+    return stamp.replace(tzinfo=None).isoformat() + "Z"
 
 
 def iso_utc_sort_key(value: object) -> datetime.datetime | None:
     """The actual UTC instant of ``value``, or None when not strict-UTC.
 
     Use as the sort key for pending-op and terminal-receipt ordering so two
-    admissible but differently-formatted instants tie by the real clock and
-    never by their spelling."""
+    admissible instants tie by the real clock (op_id is only the equal-instant
+    tiebreak) and never by their spelling -- ``00Z`` and ``00.900000Z`` order
+    correctly regardless of lexical form (P1#3)."""
     if not isinstance(value, str):
         return None
     text = value.strip()
     if not text:
         return None
-    try:
-        stamp = datetime.datetime.fromisoformat(text.replace("Z", "+00:00"))
-    except ValueError:
-        return None
-    if stamp.tzinfo is None:
-        return None
-    if stamp.utcoffset() != _UTC_ZERO:
-        return None
-    return stamp.astimezone(datetime.timezone.utc)
+    return _strict_utc_stamp(text)
 # A second canonical ticket-record opener anywhere AFTER the first on the same
 # physical line. ONE PHYSICAL BOARD RECORD == ONE TICKET IDENTITY (T-1003): a
 # merged record silently deletes the second ticket's identity (T-473/T-576 and
@@ -204,6 +207,51 @@ def ticket_has_blocker(ticket: dict) -> bool:
     return "blocker" in ticket.get("fields", {})
 
 
+def board_graph_errors(tickets: dict) -> list[str]:
+    """Dangling `needs:` references and `needs:` cycles -- ONE shared primitive
+    (hostile-regression, 4th-wave P1#4) used by fast_check, validate.py and the
+    router before Pick Rule evaluation. A cyclic all-TODO graph is corrupt work
+    state, never merely 'no workable ticket' (which would otherwise route to
+    maintenance / `saipen continue`).
+
+    Self-edges (`T-1 needs T-1`) and two-node cycles are both caught.
+    """
+    errors: list[str] = []
+    ids = set(tickets.keys())
+    for tid, ticket in tickets.items():
+        for need in ticket.get("needs", []):
+            if need not in ids:
+                errors.append(
+                    f"{tid} needs nonexistent {need} "
+                    f"(line {ticket.get('line_no')})")
+    # Cycle detection over the needs: dependency DAG (DFS, three-color).
+    WHITE, GRAY, BLACK = 0, 1, 2
+    color = {tid: WHITE for tid in tickets}
+    seen_cycles: set[tuple[str, ...]] = set()
+
+    def dfs(node: str, stack: list[str]) -> None:
+        color[node] = GRAY
+        stack.append(node)
+        for need in tickets[node].get("needs", []):
+            if need not in tickets:
+                continue
+            if color.get(need) == GRAY:
+                idx = stack.index(need)
+                cycle = tuple(stack[idx:] + [need])
+                if cycle not in seen_cycles:
+                    seen_cycles.add(cycle)
+                    errors.append("cyclic needs: " + " -> ".join(cycle))
+            elif color.get(need) == WHITE:
+                dfs(need, stack)
+        stack.pop()
+        color[node] = BLACK
+
+    for tid in tickets:
+        if color[tid] == WHITE:
+            dfs(tid, [])
+    return errors
+
+
 def ticket_status_error(ticket: dict) -> str | None:
     """Enforce blocker presence iff ticket status is BLOCKED."""
     fields = ticket.get("fields", {})
@@ -289,11 +337,20 @@ def ticket_is_workable(ticket: dict, tickets: dict, agent: str | None = None,
     (CORE's both-or-neither rule, P0).
     """
     fields = ticket.get("fields", {})
+    # A syntactically VALID claim (owner + claim_time) on a non-DOING ticket is
+    # INACTIVE history -- CORE's claim truth lives in DOING, so a stale pair
+    # left by a block/unblock cycle must not make a TODO non-workable
+    # (hostile-regression, P1#5). A half/bad (INVALID) pair still fails closed,
+    # and a live foreign claim on an ACTIVE DOING ticket still blocks.
+    _cs = claim_status(ticket, agent, now)
+    _claim_blocks = (
+        _cs == "INVALID"
+        or (ticket.get("section") == "## DOING" and _cs == "FOREIGN_LIVE"))
     return (
         ticket.get("section") == "## TODO"
         and ticket.get("checkbox") in (" ", "")
         and not ticket_has_blocker(ticket)
-        and claim_status(ticket, agent, now) not in ("FOREIGN_LIVE", "INVALID")
+        and not _claim_blocks
         and all(
             need in tickets and tickets[need].get("section") == "## DONE"
             for need in ticket.get("needs", [])

@@ -75,7 +75,7 @@ from improve import validate_report as _validate_improve_report
 from saipen_engine.board import (KNOWN_FIELDS, REQUIRED_HEADINGS,
                                  board_semantic_errors, parse_board,
                                  ticket_has_blocker, ticket_is_workable,
-                                 claim_status)
+                                 claim_status, board_graph_errors)
 from saipen_engine.paths import (parse_identity_content,
                                  resolve_project_root)
 from saipen_engine.log import LOG_RE, history_paths, parse_log_line
@@ -83,7 +83,7 @@ from saipen_engine.log import LOG_RE, history_paths, parse_log_line
 # and the release executor import the SAME functions so they can never drift.
 from saipen_engine.release_contract import (
     locale_readme_paths, release_metadata_paths, version_badges)
-from saipen_engine.state import parse_frontmatter
+from saipen_engine.state import parse_frontmatter, is_legal_wait, binding_wait
 from saipen_engine.state import state_contract_errors
 # SAICREW: the validator consumes the SAME strict parsers and crew gate the
 # engine CLI uses -- a malformed MANIFEST, an incoherent sub BOARD and a
@@ -947,10 +947,15 @@ if state.get("phase") == "DONE" and state.get("task") not in ("none", "", None):
 # out of one check and not the other, so a doc-following agent produced a
 # state one half of the tool called drift.
 def _done_wait_whitelisted(value):
-    low = value.lower()
-    return ("safety valve" in low
-            or low.startswith("wait: user brake")
-            or "untriaged markhunt findings" in low)
+    # Delegated to the ONE contextual brake classifier (hostile-regression,
+    # P1#5): both call sites are exactly DONE + empty ## TODO, where CORE § 1.2
+    # permits only the three brakes (safety valve / user brake / the
+    # untriaged-MARKHUNT brake) and the UNBLOCK exception routes everything
+    # else to HUNT. `binding_wait` returns the brake name there and None
+    # otherwise, so whitelisting == "this is one of the three brakes". The
+    # substring whitelist this used to be could match `safety valvexyz` and
+    # miss the engine's own valve form.
+    return binding_wait(value, phase="DONE", empty_todo=True) is not None
 
 
 _na_done = state.get("next_action", "") if isinstance(
@@ -1884,29 +1889,26 @@ for heading in REQUIRED_HEADINGS:
 if not any(f.startswith("BOARD.md") and "duplicate" in f for f in failures):
     ok("BOARD.md no duplicate tickets")
 
-dangling = []
-for tid, t in tickets.items():
-    for ref in t["needs"]:
-        if ref not in tickets:
-            dangling.append(f"{tid} needs nonexistent {ref} (line {t['line_no']})")
-if dangling:
-    fail("BOARD.md dangling needs: reference(s): " + "; ".join(dangling) +
+# ONE shared DAG primitive (hostile-regression, 4th-wave P1#4): dangling
+# needs: references AND cycles, identical to fast_check and the router. A cyclic
+# all-TODO graph is corrupt work state, not 'no workable ticket'.
+_graph_errors = board_graph_errors(tickets)
+_cycle_errors = [e for e in _graph_errors if e.startswith("cyclic needs:")]
+_dangling = [e for e in _graph_errors if e not in _cycle_errors]
+if _dangling:
+    fail("BOARD.md dangling needs: reference(s): " + "; ".join(_dangling) +
          " -- leaves the Pick Rule permanently unsatisfiable with zero signal")
 else:
     ok("BOARD.md no dangling needs: references")
 
-# Kahn's algorithm; whatever can't be removed forms a cycle.
-remaining = dict(tickets)
-progress = True
-while remaining and progress:
-    progress = False
-    for tid in list(remaining):
-        if not any(ref in remaining for ref in remaining[tid]["needs"]):
-            del remaining[tid]
-            progress = True
-if remaining:
+if _cycle_errors:
+    # Same wording the portable floor (`tests/validate.sh` / `validate.ps1`)
+    # emits, so a human comparing platforms reads one sentence, not two
+    # (CONFORMANCE row 88).
+    _cycle_nodes = sorted({node for err in _cycle_errors
+                           for node in re.findall(r"T-\d+", err)})
     fail("BOARD.md contains cyclic needs: dependencies involving: "
-         + ", ".join(sorted(remaining)))
+         + ", ".join(_cycle_nodes))
 else:
     ok("BOARD.md acyclic")
 
@@ -5874,6 +5876,27 @@ else:
                               capture_output=True, text=True)
     if _ignored.returncode in (0, 1):
         _root_files -= set(_ignored.stdout.split())
+    # Fallback for the gitless audit layout (the export copies the tree WITHOUT
+    # `.git/`, so `git check-ignore` cannot answer). A root file excluded by
+    # `.gitignore` is intentional scratch, never a real stray -- subtracting it
+    # from disk directly keeps [root-file-set] green in the same archive layout
+    # the export produces (hostile-regression, P2#2). Git remains authoritative
+    # whenever it is present; this only covers its absence.
+    _gi = _tools_parent / ".gitignore"
+    if _gi.is_file():
+        def _gitignored_root(name: str) -> bool:
+            for _pat in _gi.read_text(encoding="utf-8-sig").splitlines():
+                _pat = _pat.strip()
+                if not _pat or _pat.startswith("#"):
+                    continue
+                if _pat.startswith("/"):
+                    _pat = _pat[1:]
+                if _pat == name:
+                    return True
+                if _pat.startswith("*") and name.endswith(_pat[1:]):
+                    return True
+            return False
+        _root_files = {n for n in _root_files if not _gitignored_root(n)}
     _stray = sorted(_root_files - ROOT_ALLOWED)
     if _stray:
         fail("cross-doc drift [root-file-set] -- file(s) at the repository "

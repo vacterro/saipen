@@ -62,15 +62,21 @@ class HistorySnapshot:
     """ONE non-persistent pass over the complete LOG history.
 
     Holds the exact raw-byte hash, the combined LF-normalised text, the
-    global max E-ID and the parsed events -- all derived from a single
+    global max E-ID, the parsed events and the `file:line` of every line that
+    is NEITHER blank, a heading, nor a legal event -- all derived from a single
     read of every numeric sealed segment + active LOG. Consumers request
     one snapshot per command and reuse it; nothing is cached across
     commands, so append/seal changes are immediately visible.
+
+    `illegal_lines` exists because a snapshot that only collects what PARSES
+    cannot tell "no events here" from "a forged line the parser refused": the
+    immutable-ledger contract (P0#2) needs both halves out of the same pass.
     """
     hash: str
     text: str
     tail: int | None
     events: tuple[dict, ...]
+    illegal_lines: tuple[str, ...] = ()
 
 
 def _normalised_doc_text(raw: bytes) -> str:
@@ -92,6 +98,7 @@ def read_history_snapshot(project_root: Path | str) -> HistorySnapshot:
     h = hashlib.sha256()
     chunks: list[str] = []
     events: list[dict] = []
+    illegal: list[str] = []
     for p in history_paths(root):
         if not p.is_file():
             continue
@@ -99,10 +106,16 @@ def read_history_snapshot(project_root: Path | str) -> HistorySnapshot:
         h.update(raw)
         text = _normalised_doc_text(raw)
         chunks.append(text)
-        for line in text.splitlines():
+        for idx, line in enumerate(text.splitlines()):
             parsed = parse_log_line(line)
             if parsed is not None:
                 events.append(parsed)
+                continue
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
+            illegal.append(f"{p.name}:{idx + 1}: not a legal LOG event: "
+                           f"{stripped[:80]!r}")
     tail = None
     for ev in events:
         if tail is None or ev["event"] > tail:
@@ -112,6 +125,7 @@ def read_history_snapshot(project_root: Path | str) -> HistorySnapshot:
         text="\n".join(chunks),
         tail=tail,
         events=tuple(events),
+        illegal_lines=tuple(illegal),
     )
 
 
@@ -123,6 +137,82 @@ def read_history(project_root: Path | str) -> str:
 def read_history_events(project_root: Path | str) -> list[dict]:
     """All parsed events across the complete LOG history."""
     return list(read_history_snapshot(project_root).events)
+
+
+def snapshot_contract_errors(snapshot: "HistorySnapshot") -> list[str]:
+    """The immutable-ledger contract, proved from an EXISTING snapshot.
+
+    THE immutable-ledger contract (P0#2). A planner takes ONE snapshot and
+    derives the ledger verdict, the syntax report and the E-ID tail from it, so
+    the evidence a mutation is planned against and the evidence it was validated
+    against are literally the same bytes -- never a second, possibly different
+    read.
+
+    Proves, over the complete sealed + active history:
+      * legal syntax -- no forged/broken line masquerading as an event;
+      * uniqueness -- each E-ID appears exactly once in the whole ledger;
+      * order -- E-IDs strictly increase (a replayed event is caught);
+      * parentage -- every parent E-ID exists and is strictly older.
+    """
+    errors: list[str] = list(snapshot.illegal_lines[:4])
+    seen: dict[int, int] = {}
+    for ev in snapshot.events:
+        seen[ev["event"]] = seen.get(ev["event"], 0) + 1
+    dupes = sorted(e for e, count in seen.items() if count > 1)
+    if dupes:
+        errors.append("duplicate E-ID(s) in complete history: "
+                      + ", ".join(f"E-{e}" for e in dupes[:10]))
+    prev: int | None = None
+    for ev in snapshot.events:
+        eid = ev["event"]
+        parent = ev["parent"]
+        if parent is not None:
+            if parent not in seen:
+                errors.append(f"E-{eid} parent E-{parent} does not exist in "
+                              f"the ledger")
+            elif parent >= eid:
+                errors.append(f"E-{eid} parent E-{parent} is not older than "
+                              f"E-{eid}")
+        if prev is not None and eid <= prev:
+            errors.append(f"E-{eid} is not greater than preceding E-{prev} "
+                          f"(out of order)")
+        prev = eid
+    return errors
+
+
+def history_contract_errors(project_root: Path | str) -> list[str]:
+    """Validate the COMPLETE LOG history as one immutable ledger, before any
+    planning (hostile-regression, P0#2).
+
+    Every event across the sealed segments + active LOG.md is checked for:
+      * legal syntax -- it parses under the shared LOG_RE (no forged/broken
+        line masquerading as an event);
+      * uniqueness -- each E-ID appears exactly once across the whole ledger;
+      * order -- the ledger is strictly monotonically increasing (a replayed
+        or mis-ordered event is caught);
+      * parent existence + ordering -- every parent E-ID resolves inside the
+        ledger and is strictly older than its child (a broken or fabricated
+        parent edge is caught).
+
+    A void ledger would otherwise let a mutation PLAN against a trusted record
+    that does not exist, so the planner must refuse before any canonical
+    write. Syntax errors are reported with their file:line so the corruption is
+    exactly located.
+
+    ONE implementation: this is `snapshot_contract_errors` over a fresh
+    snapshot, which is the same call the planner makes -- the validator and the
+    planner can never disagree about what a valid ledger is."""
+    return snapshot_contract_errors(read_history_snapshot(project_root))
+
+
+def read_history_snapshot_strict(project_root: Path | str) \
+        -> tuple[HistorySnapshot, list[str]]:
+    """One snapshot pass plus the full ledger contract, from that ONE pass.
+
+    Consumers that PLAN call this once and reuse the snapshot for tail/evidence
+    instead of re-reading the history piecemeal (hostile-regression, P0#2)."""
+    snapshot = read_history_snapshot(project_root)
+    return snapshot, snapshot_contract_errors(snapshot)
 
 
 def history_hash(project_root: Path | str) -> str:

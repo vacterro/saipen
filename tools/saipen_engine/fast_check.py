@@ -15,9 +15,10 @@ from __future__ import annotations
 import re
 
 from . import phases
-from .board import board_semantic_errors, parse_board, claim_status
+from .board import (board_semantic_errors, parse_board, claim_status,
+                     board_graph_errors)
 from .log import parse_log_line, log_tail_event
-from .state import parse_state
+from .state import parse_state, _current_schema_version
 
 
 def _log_errors(log_text: str) -> list[str]:
@@ -126,6 +127,12 @@ def validate_texts(state_text: str, board_text: str, log_text: str) -> list[str]
     board = parse_board(board_text)
     errors.extend(f"BOARD: {e}" for e in board["errors"])
     tickets = board["tickets"]
+    # ONE shared DAG primitive (hostile-regression, 4th-wave P1#4): dangling
+    # needs: references AND needs: cycles, used here, in validate.py and in the
+    # router before Pick Rule evaluation. A cyclic all-TODO graph is corrupt work
+    # state, never merely 'no workable ticket'.
+    for ge in board_graph_errors(tickets):
+        errors.append(f"BOARD: {ge}")
     doing = [t for t in tickets.values() if t["section"] == "## DOING"]
     if len(doing) > 1:
         errors.append("BOARD proposed has more than one ## DOING ticket")
@@ -137,10 +144,7 @@ def validate_texts(state_text: str, board_text: str, log_text: str) -> list[str]
         for semantic in board_semantic_errors(ticket):
             errors.append(f"BOARD proposed {semantic}")
         for need in ticket["needs"]:
-            if need not in tickets:
-                errors.append(f"BOARD proposed {ticket['id']} needs "
-                              f"nonexistent {need}")
-            elif (ticket["section"] == "## DOING"
+            if (ticket["section"] == "## DOING"
                   and tickets[need]["section"] != "## DONE"):
                 errors.append(f"BOARD proposed {ticket['id']} needs {need} "
                               f"which is not DONE")
@@ -149,9 +153,21 @@ def validate_texts(state_text: str, board_text: str, log_text: str) -> list[str]
 
     tail = log_tail_event(log_text)
     last_event = state.get("last_event")
-    if last_event is not None and tail is not None and last_event != tail:
-        errors.append(f"STATE proposed last_event {last_event} != LOG tail "
-                      f"{tail}")
+    # Current-schema states (schema_version == the installed schema's
+    # x-current-schema-version) MUST carry a last_event that matches the LOG tail
+    # when the LOG has events (hostile-regression, P0#2): the cross-file fast gate
+    # enforces the same marker the release gate requires, so the two never disagree.
+    # Legacy schemas keep their looser handling below.
+    _csv = _current_schema_version(state.get("saipen_home"))
+    if _csv is not None and state.get("schema_version") == _csv and tail is not None:
+        if last_event is None:
+            errors.append("current-schema STATE requires last_event matching the "
+                          "LOG tail; last_event is absent")
+        elif not isinstance(last_event, int) or last_event != tail:
+            errors.append(f"STATE proposed last_event {last_event} != LOG tail "
+                          f"{tail}")
+    elif last_event is not None and tail is not None and last_event != tail:
+        errors.append(f"STATE proposed last_event {last_event} != LOG tail {tail}")
 
     # Active-ticket binding (NITRO dogfood III, T-591): the one-way check
     # "BOARD has DOING and STATE has task and they differ" is not a proof of
@@ -233,4 +249,11 @@ def validate_project(root) -> list[str]:
     board = codec.read_doc(root / ".saipen" / "BOARD.md")
     log = codec.read_doc(root / ".saipen" / "LOG.md")
     errors.extend(validate_texts(state, board, log))
+    # The COMPLETE sealed+active ledger must be internally valid (legal syntax,
+    # unique E-IDs, contiguous parent chain, parent existence, order) -- not
+    # just the active segment (hostile-regression, P0#2). A void sealed log is
+    # what once let a mutation PLAN against a record that did not exist, so the
+    # live verification must FAIL it too.
+    from .log import history_contract_errors
+    errors.extend(f"LOG: {e}" for e in history_contract_errors(root))
     return errors

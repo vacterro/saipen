@@ -90,21 +90,11 @@ class ConvergenceVerdict:
 
 
 def _strict_created_at(value: object) -> str:
-    """Strict ISO-8601 UTC timestamp (Z or +00:00), or '' when invalid.
-
-    A timestamp that cannot parse structurally is NO evidence: a receipt
-    claiming a time is meaningless when the time itself does not parse.
-    """
-    if not isinstance(value, str):
-        return ""
-    value = value.strip()
-    try:
-        stamp = datetime.datetime.fromisoformat(value.replace("Z", "+00:00"))
-    except ValueError:
-        return ""
-    if stamp.tzinfo is None:
-        return ""
-    return value
+    """Strict ISO-8601 UTC timestamp (Z or +00:00, utcoffset == 0), or '' when
+    invalid. Delegated to the ONE shared strict-UTC parser (hostile-regression,
+    P2#1): a non-zero offset stamp is NOT UTC and must refuse, never pass."""
+    from .board import strict_iso_utc
+    return strict_iso_utc(value)
 
 
 def _iter_operation_records(root: Path):

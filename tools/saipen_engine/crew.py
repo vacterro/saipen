@@ -104,6 +104,11 @@ class CrewSnapshot:
     # cached across crew_snapshot calls, and a stability failure means
     # consumers must fail closed rather than trust this data.
     op_records: tuple[dict, ...] = ()
+    # P0#4: the CURRENT-SESSION capability negotiated at the public command
+    # boundary. Persisted STATE.mode is historical; this is the live authority
+    # the crew gate/closure consult. None means "not injected" (legacy
+    # internal call) and the persisted mode governs.
+    current_capability: str | None = None
 
 
 def _refuse(code: str, detail: str = "", **extra) -> Result:
@@ -173,35 +178,21 @@ def _unsafe_dependency(digest: str) -> bool:
 
 
 def _full_log(root: Path) -> str:
-    def number(path: Path) -> int:
-        try:
-            return int(path.stem.split("-")[1])
-        except (IndexError, ValueError):
-            return -1
-
-    text = ""
-    for path in sorted((root / ".saipen/logs").glob("LOG-*.md"), key=number):
-        text += _read_maybe(path) + "\n"
-    return text + _read_maybe(root / ".saipen/LOG.md")
+    """The complete canonical LOG history (sealed numeric segments + active
+    LOG.md), via the ONE shared primitive. The private glob ``LOG-*.md`` also
+    matched ``LOG-backup.md`` and polluted crew evidence with non-canonical
+    bytes (hostile-regression, P2#1) -- delegating to ``log.read_history``
+    excludes it by construction (only numeric sealed segments + active)."""
+    from . import log as _log
+    return _log.read_history(root)
 
 
 def _strict_created_at(value: object) -> str:
-    """Strict ISO-8601 UTC timestamp (Z or +00:00), or '' when invalid.
-
-    A timestamp that cannot parse structurally is NO evidence (T-1003 hostile
-    finding 8/15): a receipt claiming a time is meaningless when the time
-    itself does not parse. Truthy-but-garbage is not a timestamp.
-    """
-    if not isinstance(value, str):
-        return ""
-    value = value.strip()
-    try:
-        stamp = datetime.datetime.fromisoformat(value.replace("Z", "+00:00"))
-    except ValueError:
-        return ""
-    if stamp.tzinfo is None:
-        return ""
-    return value
+    """Strict ISO-8601 UTC timestamp (Z or +00:00, utcoffset == 0), or '' when
+    invalid. Delegated to the ONE shared strict-UTC parser (hostile-regression,
+    P2#1): a non-zero offset stamp is NOT UTC and must refuse, never pass."""
+    from .board import strict_iso_utc
+    return strict_iso_utc(value)
 
 
 def _iter_operation_records(root: Path,
@@ -399,7 +390,8 @@ def _specialized_health(snapshot_source, root: Path, role, saipen_home: str) -> 
             "errors": errors, "package_ids": current_ids}
 
 
-def crew_snapshot(project_root: Path | str) -> CrewSnapshot:
+def crew_snapshot(project_root: Path | str,
+                  current_capability: str | None = None) -> CrewSnapshot:
     root = Path(project_root)
     state_path = root / ".saipen/STATE.md"
     board_path = root / ".saipen/BOARD.md"
@@ -467,7 +459,8 @@ def crew_snapshot(project_root: Path | str) -> CrewSnapshot:
             root, source_id, source_error, state_text, state, board_text,
             board, log_text, log_tail_event(log_text), home, home_problem,
             status, tuple(entries), tuple(manifest_errors), pending, roles,
-            packages, epoch, release, {}, False)
+            packages, epoch, release, {}, False,
+            current_capability=current_capability)
 
     receipt_paths = set()
     try:
@@ -538,7 +531,7 @@ def crew_snapshot(project_root: Path | str) -> CrewSnapshot:
         log_text, log_tail_event(log_text), home, home_problem, status,
         tuple(entries), tuple(manifest_errors), pending, roles, packages,
         epoch, release, hashes, source_stable and dependencies_stable,
-        records)
+        records, current_capability=current_capability)
 
 
 def _source_dict(snapshot: CrewSnapshot) -> dict:
@@ -670,7 +663,19 @@ def _worktree_matches_head(root: Path, require_git: bool = False) -> bool:
     return not deltas
 
 
-def _release_current(snapshot: CrewSnapshot) -> tuple[bool, str]:
+def _release_current(snapshot: CrewSnapshot,
+                      current_capability: str | None = None) -> tuple[bool, str]:
+    # P0#4: the CURRENT-SESSION capability authorizes crew release closure. A
+    # persisted STATE.mode is historical; a read-only session cannot close a
+    # crew release. When no capability was injected (legacy internal call) the
+    # persisted mode governs, but the public `saipen crew` command always
+    # negotiates and injects one.
+    if current_capability is None:
+        current_capability = getattr(snapshot, "current_capability", None)
+    if current_capability == "read-only":
+        return False, ("current session capability is read-only; crew "
+                       "release closure is refused in a read-only session "
+                       "(capability injected at the command boundary)")
     release = snapshot.release
     if release is None or not release.verdict:
         return False, "no canonical release receipt binds this crew epoch"
@@ -1487,8 +1492,10 @@ def _first_action(stages: list[dict]) -> CrewAction | None:
     return None
 
 
-def crew_plan(project_root: Path | str) -> dict:
-    snapshot = crew_snapshot(project_root)
+def crew_plan(project_root: Path | str,
+              current_capability: str | None = None) -> dict:
+    snapshot = crew_snapshot(project_root,
+                             current_capability=current_capability)
     stages, action = _evaluate(snapshot)
     substantive_ok = all(stage["state"] == SATISFIED
                          for stage in stages if stage["stage"] != "SC-13")
@@ -1618,16 +1625,29 @@ def finalize_crew(project_root: Path | str, dry_run: bool = False) -> Result:
         extra_targets=[evidence_target] if evidence_target else None)
 
 
-def crew_apply(project_root: Path | str) -> Result:
-    """Execute exactly one bounded mechanical crew action."""
+def crew_apply(project_root: Path | str,
+               current_capability: str | None = None) -> Result:
+    """Execute exactly one bounded mechanical crew action.
+
+    P0#4: `current_capability` is the freshly negotiated CURRENT-SESSION
+    capability. A read-only session may not execute ANY crew action -- the
+    persisted STATE.mode is historical and never grants current authority.
+    """
     root = Path(project_root)
+    if current_capability == "read-only":
+        return _refuse(
+            "VALIDATION_FAILED",
+            "current session capability is read-only; no crew action may be "
+            "executed in a read-only session (capability negotiated at the "
+            "command boundary)",
+            next_action="saipen crew --dry-run")
     if pending_ops(root):
         return _refuse("RECOVERY_REQUIRED", "unresolved operation; recover first")
     from .fast_check import validate_project
     base_errors = validate_project(root)
     if base_errors:
         return _refuse("VALIDATION_FAILED", "; ".join(base_errors[:5]))
-    snapshot = crew_snapshot(root)
+    snapshot = crew_snapshot(root, current_capability=current_capability)
     home_problem = _home_problem(snapshot)
     if home_problem:
         return _refuse(
@@ -1641,12 +1661,12 @@ def crew_apply(project_root: Path | str) -> Result:
             root, snapshot.state.get("agent") or "saipen-cli", "crew")
         if not intent.ok:
             return intent
-        plan = crew_plan(root)
+        plan = crew_plan(root, current_capability=current_capability)
         return Result(ok=True, code="CREW_INTENT_SET", op_id=intent.op_id,
                       changed_files=intent.changed_files,
                       data={"plan": plan, "action": plan.get("action")})
 
-    plan = crew_plan(root)
+    plan = crew_plan(root, current_capability=current_capability)
     action = plan.get("action") or {}
     kind = action.get("action")
     role = action.get("role")

@@ -37,7 +37,8 @@ from .journal import hash_bytes
 from .log import build_event
 from .plan import OperationPlan, TargetPlan, apply_plan, build_plan
 from .result import Result
-from .state import parse_state, patch_state, transition_execution_intent
+from .state import (parse_state, patch_state, transition_execution_intent,
+                     is_legal_wait)
 
 _TAXONOMIES = {"DEC", "RUN"}
 
@@ -76,13 +77,26 @@ class CheckpointError(ValueError):
     """
 
 
+class HomeDeadError(ValueError):
+    """`STATE.saipen_home` names an absolute path that is not a SAIPEN install.
+
+    The bootloader cannot load the protocol the checkpoint was written against
+    (CORE § 1.2), so an ORDINARY mutation must refuse with HOME_REQUIRED and
+    zero canonical writes. `saipen rebind-home` is the ONE operation allowed to
+    repair the dead pointer, and it does so only after proving an explicitly
+    named candidate (hostile-regression, P0#3).
+    """
+
+
 def _state_guard(fn):
     """Convert a checkpoint/STATE raise into the operation's structured refusal.
 
     Every PUBLIC mutator must surface VALIDATION_FAILED with zero canonical
     writes when the checkpoint is missing/non-canonical (CheckpointError) or
     STATE.md is present but unparseable (StateMalformedError). One decorator,
-    one refusal shape.
+    one refusal shape. A DEAD persisted `saipen_home` is a different failure
+    with a different repair, so it carries its own code (HOME_REQUIRED) and
+    names `saipen rebind-home` (hostile-regression, P0#3).
     """
     import functools
 
@@ -90,12 +104,17 @@ def _state_guard(fn):
     def wrapper(*args, **kwargs):
         try:
             return fn(*args, **kwargs)
+        except HomeDeadError as exc:
+            return _refuse(
+                "HOME_REQUIRED", str(exc),
+                next_action="saipen rebind-home <candidate-home-path>")
         except (StateMalformedError, CheckpointError) as exc:
             return _refuse("VALIDATION_FAILED", str(exc))
     return wrapper
 
 
-def _read(root: Path) -> tuple[dict, dict, dict, dict]:
+def _read(root: Path, *,
+          allow_dead_home: bool = False) -> tuple[dict, dict, dict, dict]:
     """Read STATE/BOARD/LOG docs + their parsed forms (normalised view).
 
     The canonical checkpoint loader: every canonical file MUST exist and be
@@ -119,22 +138,80 @@ def _read(root: Path) -> tuple[dict, dict, dict, dict]:
     if state_error:
         raise StateMalformedError(f"state-malformed: {state_error}")
     board = parse_board(board_doc.text_norm)
-    from .log import history_log_tail
-    log_tail = history_log_tail(root)
-    return ({"state": state_doc, "board": board_doc, "log": log_doc},
+    from .log import read_history_snapshot, snapshot_contract_errors
+    from .state import persisted_home_error, running_home
+    # The PERSISTED bootloader pointer is validated as a POINTER, separately
+    # from the running install that owns VERSION/schema/STYLE
+    # (hostile-regression, P0#3). A dead absolute `saipen_home` means the
+    # protocol this checkpoint was written against cannot be loaded here, so
+    # every ORDINARY mutation refuses BEFORE journaling; `rebind-home` passes
+    # allow_dead_home=True because repairing that pointer is its whole job.
+    if not allow_dead_home:
+        home_problem = persisted_home_error(state.get("saipen_home"))
+        if home_problem is not None:
+            raise HomeDeadError(
+                f"home-dead: {home_problem} -- the bootloader cannot load the "
+                f"protocol this checkpoint names, so ordinary mutation is "
+                f"refused; repair it with `saipen rebind-home "
+                f"<candidate-home-path>`")
+    # ONE strict complete-history snapshot before any planning
+    # (hostile-regression, P0#2). The SAME pass supplies the immutable-ledger
+    # verdict and the E-ID tail, so a mutation is planned against exactly the
+    # evidence that was validated -- never a second, possibly different read.
+    #
+    # A void/forged sealed+active LOG (duplicate E-IDs, a dangling or
+    # non-decreasing parent edge, out-of-order events, an illegal line) would
+    # otherwise let a mutation PLAN against a trusted record that does not
+    # exist. Refuse before journaling, zero canonical writes; `fast_check`
+    # applies the same contract so live verification FAILs it too.
+    #
+    # Scoped to THIS install's OWN project (its `saipen_home` resolves to the
+    # running install): that is the immutable ledger the audit defends
+    # (LOG-001..013). Sub-instance and foreign-home projects carry their own
+    # histories validated by the sub contract (subs.py), and rejecting theirs
+    # here would abort legitimate sub collection -- the running install is the
+    # only home whose ledger it is the authority for.
+    snapshot = read_history_snapshot(root)
+    _home = state.get("saipen_home")
+    if (_home and str(_home).strip() and Path(str(_home)).is_absolute()
+            and Path(str(_home)).resolve() == running_home()):
+        history_problems = snapshot_contract_errors(snapshot)
+        if history_problems:
+            raise CheckpointError(
+                "history-void: complete LOG history fails the immutable-ledger "
+                "contract -- " + "; ".join(history_problems[:4]))
+    log_tail = snapshot.tail
+    # ALWAYS bind the complete sealed history (`.saipen/logs` numeric segments)
+    # as a read precondition so APPLY rechecks it under the lock and refuses
+    # STALE_STATE the moment a sealed segment is altered between PLAN and APPLY
+    # (hostile-regression, P0#2). `hash_tree_dependency` pins the miss case to
+    # the `tree-missing-v1` sentinel (never a conditional hash_tree()/None skip,
+    # which is exactly how a fabricated sealed log was once admitted).
+    _logs_dir = root / ".saipen" / "logs"
+    from .journal import hash_tree_dependency
+    _logs_digest = hash_tree_dependency(_logs_dir)
+    return ({"state": state_doc, "board": board_doc, "log": log_doc,
+             "_logs_digest": _logs_digest},
             state, board, log_tail)
 
 
 def _target(doc, path: str, role: str, new_text: str) -> TargetPlan:
     """One planned write target: exact bytes + before/after hashes computed
     from the read document and the planned content."""
-    from .journal import hash_bytes
     return TargetPlan(path, role, doc.encode(new_text), doc.raw_hash,
                       hash_bytes(doc.encode(new_text)))
 
 
 def _docs_preconditions(docs: dict, *keys: str) -> dict:
-    return {f".saipen/{key.upper()}.md": docs[key].raw_hash for key in keys}
+    pc = {f".saipen/{key.upper()}.md": docs[key].raw_hash for key in keys}
+    # The complete sealed LOG history (hostile-regression, P0#2): bound as a
+    # read precondition so APPLY rechecks it under the lock. Never a write
+    # target, so it stays a read-only dependency and is rechecked even when no
+    # canonical file is written.
+    _ld = docs.get("_logs_digest")
+    if _ld:
+        pc[".saipen/logs"] = _ld
+    return pc
 
 
 def _event_line(docs: dict, log_tail: int | None, taxonomy: str,
@@ -315,9 +392,21 @@ def _plan_claim(root: Path, ticket_id: str, agent: str, now: str, utc: str,
                  "detail": "lease refreshed (claim_time advanced)"},
                 op_id=op_id)
         # UNCLAIMED or FOREIGN_STALE -> adopt / take over in place.
+        # FOREIGN_STALE is a TAKEOVER of another agent's lapsed claim, so the
+        # DEC payload must record who it was taken from and the staleness that
+        # authorized the takeover (hostile-regression, P1#8) -- an ordinary
+        # UNCLAIMED adoption records only the new owner. Splitting the payload
+        # keeps the ledger's takeover audit distinct from fresh adoption.
+        if cs == "FOREIGN_STALE":
+            _old_owner = (ticket["fields"].get("owner") or "").strip()
+            _prior_claim = (ticket["fields"].get("claim_time") or "").strip()
+            _msg = (f"claimed via SAIOPS -- took over STALE claim from "
+                    f"{_old_owner} (prior claim_time {_prior_claim}); owner "
+                    f"{agent}")
+        else:
+            _msg = f"claimed via SAIOPS -- owner {agent}"
         event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent,
-                                   f"claimed via SAIOPS -- owner {agent}", now,
-                                   op_id)
+                                    _msg, now, op_id)
         new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
         new_board = _claim_fields_in_place(
             docs["board"].text_norm, ticket_id,
@@ -358,20 +447,20 @@ def _plan_claim(root: Path, ticket_id: str, agent: str, now: str, utc: str,
                        f"{ticket_id} is under {section}", ticket=ticket_id)
     if ticket["checkbox"] not in (" ", ""):
         return _refuse("TICKET_NOT_WORKABLE",
-                       f"{ticket_id} is [{ticket['checkbox']}] but sits under "
-                       f"## TODO -- checkbox/section disagreement is malformed "
-                       f"input and cannot be claimed",
-                       ticket=ticket_id)
-    if cs == "FOREIGN_LIVE":
-        return _refuse("TICKET_NOT_WORKABLE",
-                       f"{ticket_id} carries a live foreign claim by "
-                       f"{ticket['fields'].get('owner', '')}",
-                       ticket=ticket_id)
+                        f"{ticket_id} is [{ticket['checkbox']}] but sits under "
+                        f"## TODO -- checkbox/section disagreement is malformed "
+                        f"input and cannot be claimed",
+                        ticket=ticket_id)
+    # A claim (owner/claim_time) on a TODO is INACTIVE history: CORE's claim
+    # truth lives in DOING, so a stale pair left by a block/unblock cycle must
+    # not make the ticket non-workable (hostile-regression, P1#5). A half/bad
+    # (INVALID) pair still fails closed -- only a syntactically VALID foreign
+    # claim is treated as inactive outside DOING.
     if cs == "INVALID":
         return _refuse("VALIDATION_FAILED",
-                       f"{ticket_id} carries an INVALID claim (half "
-                       f"owner/claim_time pair or non-UTC stamp)",
-                       ticket=ticket_id)
+                        f"{ticket_id} carries an INVALID claim (half "
+                        f"owner/claim_time pair or non-UTC stamp)",
+                        ticket=ticket_id)
     for need in ticket["needs"]:
         if need not in tickets or tickets[need]["section"] != "## DONE":
             return _refuse("TICKET_NOT_WORKABLE",
@@ -449,8 +538,13 @@ def _claim_move(board_text: str, ticket_id: str, agent: str, utc: str) -> str:
         out.append(line)
     if ticket_line is None or doing_idx is None:
         raise ValueError("cannot locate ticket or DOING section")
-    marked = ticket_line.replace("- [ ] ", "- [/] ", 1).rstrip() + \
-        f" | owner: {agent} | claim_time: {utc}"
+    # A claimed-then-blocked/unblocked TODO may still carry a previous
+    # owner/claim_time pair (claim truth lives in DOING). Move must STRUCTURALLY
+    # REPLACE the existing pair, never append a second one -- a duplicate field
+    # is a parse error that rejects the whole board (hostile-regression, P1#5).
+    marked = ticket_line.replace("- [ ] ", "- [/] ", 1).rstrip()
+    marked = set_ticket_field(marked, "owner", agent)
+    marked = set_ticket_field(marked, "claim_time", utc)
     out.insert(doing_idx + 1, marked + "\n")
     return "".join(out)
 
@@ -658,12 +752,25 @@ def transition_phase(project_root: Path | str, destination: str,
 # ------------------------------------------------------------- checkpoint
 
 def _plan_checkpoint(root: Path, agent: str, taxonomy: str,
-                     ticket_id: str | None, description: str, now: str,
-                     utc: str) -> OperationPlan | Result:
+                      ticket_id: str | None, description: str,
+                      now: str, utc: str) -> OperationPlan | Result:
     op_id = "checkpoint-" + uuid4_hex()
     docs, _state, _board, log_tail = _read(root)
+    # A ticket-bearing checkpoint names a real ticket. The event is durable
+    # LOG identity, so a non-existent / malformed ref would mint a [T-###]
+    # that next_ticket_id later reissues and sweep linkage can never resolve
+    # (hostile-regression, P1#3). Ticket-LESS session checkpoints stay legal.
+    if ticket_id is not None:
+        if not re.fullmatch(r"T-\d+", str(ticket_id)):
+            return _refuse("VALIDATION_FAILED",
+                           f"checkpoint ticket_id {ticket_id!r} is not a valid "
+                           f"T-### ref (expected T-<digits>)", ticket=ticket_id)
+        if ticket_id not in _board["tickets"]:
+            return _refuse("TICKET_NOT_FOUND",
+                           f"{ticket_id} is not on the board; a checkpoint may "
+                           f"only name an existing ticket", ticket=ticket_id)
     event, line = _event_line(docs, log_tail, taxonomy.upper(), ticket_id,
-                               agent, description, now, op_id)
+                                agent, description, now, op_id)
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     owned = {
         "last_event": event,
@@ -1256,10 +1363,12 @@ def _state_only_plan(root: Path, operation: str, agent: str, mutate,
                       evidence_preconditions: dict[str, str] | None = None,
                       receipt_metadata: dict | None = None,
                       extra_targets: list[TargetPlan] | None = None,
-                      op_id: str | None = None) \
+                      op_id: str | None = None,
+                      allow_dead_home: bool = False) \
         -> OperationPlan | Result:
     op_id = op_id or (operation + "-" + uuid4_hex())
-    docs, _state, _board, log_tail = _read(root)
+    docs, _state, _board, log_tail = _read(root,
+                                          allow_dead_home=allow_dead_home)
     event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent,
                               event_message, now, op_id)
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
@@ -1521,7 +1630,10 @@ def rebind_saipen_home(project_root: Path | str, agent: str,
     """
     root = Path(project_root)
     now, utc = _now(), _utc_iso()
-    _docs, state, _board, _tail = _read(root)
+    # The ONE reader allowed to load a checkpoint whose persisted pointer is
+    # already dead (P0#3): repairing exactly that pointer is this operation's
+    # purpose, and the replacement is proved by `_candidate_home_errors` below.
+    _docs, state, _board, _tail = _read(root, allow_dead_home=True)
     errors = _candidate_home_errors(root, state, candidate_home)
     if errors:
         return _refuse("HOME_REQUIRED",
@@ -1548,7 +1660,8 @@ def rebind_saipen_home(project_root: Path | str, agent: str,
         {"ok": True, "code": "HOME_REBOUND",
          "saipen_home": candidate_home},
         now, utc, {"saipen_home", "last_event", "updated", "agent"},
-        ticket_id=task if task not in (None, "", "none") else None)
+        ticket_id=task if task not in (None, "", "none") else None,
+        allow_dead_home=True)
     if isinstance(plan, Result):
         return plan
     if dry_run:
@@ -1612,8 +1725,16 @@ def stop_checkpoint(project_root: Path | str, agent: str, reason: str = "",
     docs, state, _board, log_tail = _read(root)
     task = state.get("task")
     phase = state.get("phase")
-    na = (f"PHASE {phase} {task}" if task and task != "none"
-          else "saipen continue")
+    # Preserve an already-legal hard WAIT byte-for-byte (hostile-regression,
+    # P1#2): `saipen stop` must never erase a legitimate WAIT (safety valve,
+    # user brake, markhunt brake, ...) -- only synthesize a resumable action
+    # when no legal WAIT is currently set.
+    _current_na = state.get("next_action")
+    if is_legal_wait(_current_na):
+        na = _current_na
+    else:
+        na = (f"PHASE {phase} {task}" if task and task != "none"
+              else "saipen continue")
 
     op_id = "stop-" + uuid4_hex()
     event, line = _event_line(docs, log_tail, "DEC", None, agent,
