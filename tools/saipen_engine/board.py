@@ -215,6 +215,14 @@ def board_graph_errors(tickets: dict) -> list[str]:
     maintenance / `saipen continue`).
 
     Self-edges (`T-1 needs T-1`) and two-node cycles are both caught.
+
+    Cycle detection is EXPLICIT-STACK iterative three-color DFS (second-wave
+    P1): recursive DFS over a valid acyclic chain deeper than Python's
+    recursion limit would raise RecursionError, taking fast validation, routing
+    and full validation down instead of returning a deterministic result. The
+    explicit stack preserves the exact insertion-order traversal and the
+    cycle-path diagnostic (`cyclic needs: T-a -> T-b -> T-a`) of the old
+    recursion.
     """
     errors: list[str] = []
     ids = set(tickets.keys())
@@ -224,31 +232,48 @@ def board_graph_errors(tickets: dict) -> list[str]:
                 errors.append(
                     f"{tid} needs nonexistent {need} "
                     f"(line {ticket.get('line_no')})")
-    # Cycle detection over the needs: dependency DAG (DFS, three-color).
+    # Cycle detection over the needs: dependency DAG (iterative three-color).
     WHITE, GRAY, BLACK = 0, 1, 2
     color = {tid: WHITE for tid in tickets}
     seen_cycles: set[tuple[str, ...]] = set()
 
-    def dfs(node: str, stack: list[str]) -> None:
-        color[node] = GRAY
-        stack.append(node)
-        for need in tickets[node].get("needs", []):
-            if need not in tickets:
+    for start in tickets:
+        if color[start] != WHITE:
+            continue
+        # Explicit DFS stack of [node, next-need-index] frames -- mirrors the
+        # recursion exactly (push on WHITE descent, pop on node completion)
+        # without consuming the Python call stack.
+        stack: list[str] = [start]
+        color[start] = GRAY
+        frames: list[list] = [[start, 0]]
+        while frames:
+            node, idx = frames[-1]
+            needs = tickets[node].get("needs", [])
+            descended = False
+            while idx < len(needs):
+                need = needs[idx]
+                frames[-1][1] = idx + 1
+                if need not in tickets:
+                    idx += 1
+                    continue
+                if color.get(need) == GRAY:
+                    cycle_start = stack.index(need)
+                    cycle = tuple(stack[cycle_start:] + [need])
+                    if cycle not in seen_cycles:
+                        seen_cycles.add(cycle)
+                        errors.append("cyclic needs: " + " -> ".join(cycle))
+                elif color.get(need) == WHITE:
+                    color[need] = GRAY
+                    stack.append(need)
+                    frames.append([need, 0])
+                    descended = True
+                    break
+                idx += 1
+            if descended:
                 continue
-            if color.get(need) == GRAY:
-                idx = stack.index(need)
-                cycle = tuple(stack[idx:] + [need])
-                if cycle not in seen_cycles:
-                    seen_cycles.add(cycle)
-                    errors.append("cyclic needs: " + " -> ".join(cycle))
-            elif color.get(need) == WHITE:
-                dfs(need, stack)
-        stack.pop()
-        color[node] = BLACK
-
-    for tid in tickets:
-        if color[tid] == WHITE:
-            dfs(tid, [])
+            stack.pop()
+            color[node] = BLACK
+            frames.pop()
     return errors
 
 

@@ -35,7 +35,8 @@ def route_next(state_text: str, board_text: str,
                 pending_ops: list | None = None,
                 conflict_ops: list | None = None,
                 now: datetime.datetime | None = None,
-                current_capability: str | None = None) -> dict:
+                current_capability: str | None = None,
+                current_agent: str | None = None) -> dict:
     """Compute the exact next executable action.
 
     Returns a dict with `action` (an executable mechanical action), `reason`
@@ -49,6 +50,15 @@ def route_next(state_text: str, board_text: str,
     `STATE.mode` is only the LAST handshake outcome and MUST NOT prove current
     authority, so routing never infers write authority from STATE.mode -- it
     gates only on an explicit current-capability value when one is supplied.
+
+    `current_agent` is the CURRENT-SESSION actor (second-wave P0). Claim truth
+    and workability are judged relative to THIS identity, NEVER relative to
+    persisted `STATE.agent` -- that field is historical last-writer evidence.
+    A new agent B entering state last written by A must see A's live claim as
+    FOREIGN_LIVE and refuse takeover, not impersonate A. When `current_agent`
+    is None (a caller that does not know its own identity), routing falls back
+    to the historical value for backward compatibility of pure-semantic
+    callers, but the CLI/adapters always supply the session identity.
     """
     pending = list(pending_ops or [])
     conflicts = list(conflict_ops or [])
@@ -77,6 +87,12 @@ def route_next(state_text: str, board_text: str,
     phase = state.get("phase")
     task = state.get("task")
     na = state.get("next_action") or ""
+
+    # Second-wave P0: the CURRENT-SESSION actor, never STATE.agent. STATE.agent
+    # is historical last-writer evidence; claim truth and workability are judged
+    # relative to the identity the caller actually IS.
+    session_agent = current_agent if current_agent is not None \
+        else state.get("agent")
 
     # CURRENT-SESSION CAPABILITY gate (CORE § 1.3): only an explicitly supplied,
     # freshly negotiated capability may grant/revoke write authority. A persisted
@@ -142,7 +158,7 @@ def route_next(state_text: str, board_text: str,
     #   - UNCLAIMED / FOREIGN_STALE: adoptable orphan/stale DOING; task:none is
     #     fine and routes to ADOPT it.
     if active:
-        cs = claim_status(board["tickets"][active], state.get("agent"), now)
+        cs = claim_status(board["tickets"][active], session_agent, now)
         if cs == "INVALID":
             return {"ok": False, "action": "saipen status",
                     "reason": "binding-mismatch",
@@ -244,7 +260,7 @@ def route_next(state_text: str, board_text: str,
 
     # START: no DOING + a workable TODO -> Pick Rule claims the top ticket.
     if not active:
-        top = _top_workable(board, agent=state.get("agent"))
+        top = _top_workable(board, agent=session_agent)
         if top is not None:
             return {"ok": True, "action": f"PHASE SCOUT {top}",
                     "reason": "start", "ticket": top,

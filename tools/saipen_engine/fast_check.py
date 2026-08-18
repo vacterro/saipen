@@ -51,8 +51,19 @@ def _log_errors(log_text: str) -> list[str]:
     return errors
 
 
-def validate_texts(state_text: str, board_text: str, log_text: str) -> list[str]:
-    """Validate the proposed STATE/BOARD/LOG texts. Returns every error."""
+def validate_texts(state_text: str, board_text: str, log_text: str,
+                   current_agent: str | None = None) -> list[str]:
+    """Validate the proposed STATE/BOARD/LOG texts. Returns every error.
+
+    `current_agent` is the CURRENT-SESSION actor (second-wave P0). Claim
+    classification and the active-DOING structural check are judged relative
+    to THIS identity, never to persisted STATE.agent -- that field is
+    historical last-writer evidence. A session B viewing an A-owned DOING
+    under a non-ticket-bearing phase is valid multi-agent state (FOREIGN),
+    not the SELF-corruption the check exists to catch. When None (a caller
+    that does not know its own identity), the historical value is used for
+    backward compatibility; the CLI/adapters always supply the session
+    identity."""
     errors: list[str] = []
 
     from .floor import raw_floor
@@ -207,7 +218,7 @@ def validate_texts(state_text: str, board_text: str, log_text: str) -> list[str]
             # must NOT be rejected here (P0 claim-ownership truth: one classifier
             # decides). Only a SELF or INVALID DOING under a non-ticket-bearing
             # phase is structural corruption.
-            _cs = claim_status(doing[0], state.get("agent"))
+            _cs = claim_status(doing[0], current_agent or state.get("agent"))
             if _cs in ("SELF", "INVALID"):
                 errors.append(
                     f"STATE proposed phase {phase} is not ticket-bearing "
@@ -222,7 +233,7 @@ def validate_texts(state_text: str, board_text: str, log_text: str) -> list[str]
     return errors
 
 
-def validate_project(root) -> list[str]:
+def validate_project(root, current_agent: str | None = None) -> list[str]:
     """Validate the live canonical files (post-write / recovery verification)."""
     errors: list[str] = []
     from pathlib import Path
@@ -248,7 +259,7 @@ def validate_project(root) -> list[str]:
     state = codec.read_doc(root / ".saipen" / "STATE.md")
     board = codec.read_doc(root / ".saipen" / "BOARD.md")
     log = codec.read_doc(root / ".saipen" / "LOG.md")
-    errors.extend(validate_texts(state, board, log))
+    errors.extend(validate_texts(state, board, log, current_agent=current_agent))
     # The COMPLETE sealed+active ledger must be internally valid (legal syntax,
     # unique E-IDs, contiguous parent chain, parent existence, order) -- not
     # just the active segment (hostile-regression, P0#2). A void sealed log is

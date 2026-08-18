@@ -489,6 +489,12 @@ class ReleasePlan:
     crew_epoch: str = ""
     crew_closure: bool = False
     crew_scope: tuple[str, str] = ()  # (path, expected_hash) pairs
+    # CURRENT-SESSION actor (second-wave P0): every LOG/closure/WAIT event
+    # this release writes names THIS identity, never persisted STATE.agent
+    # (historical last-writer evidence). Captured at plan time so the plan is
+    # an immutable decision bound to the actor that decided it. NOT part of
+    # `canonical()`: the actor is event provenance, not release identity.
+    current_agent: str = ""
 
     def canonical(self) -> tuple:
         """The plan's identity, INVOCATION-NAME NORMALIZED -- `ship` and
@@ -535,6 +541,7 @@ def plan_release(
     root: Path, invocation: str, *, dry_run: bool = False,
     crew_carrier: dict | None = None,
     current_capability: str | None = None,
+    current_agent: str | None = None,
 ) -> "ReleasePlan":
     """Build the immutable release decision.  WRITES NOTHING."""
     root = Path(root).resolve()
@@ -554,6 +561,12 @@ def plan_release(
 
     version = _installed_version(root)
     state_text, state = _read_state(root)
+    # Second-wave P0: the acting identity is the CURRENT-SESSION agent. The
+    # bare CLI defaults to `saipen-cli`; an explicit `--agent <id>` overrides
+    # it for the whole invocation. Persisted STATE.agent is historical
+    # last-writer evidence and is NEVER the acting identity for a fresh
+    # session -- only the legacy default when a caller does not supply one.
+    release_actor = current_agent or state.get("agent") or "saipen-cli"
     board_text, board = _read_board(root)
     log_hash = _log_hash(root)
     # P0#4: the negotiated current-session capability -- not the persisted
@@ -623,7 +636,8 @@ def plan_release(
             root, invocation, version, state_text, state, board_text, board,
             log_hash, project_identity, source_head, fingerprint, source_model,
             tag, crew_carrier, dry_run,
-            current_capability=current_capability)
+            current_capability=current_capability,
+            current_agent=release_actor)
 
     # ---- no-publish needs NO git facts at all (T-994 / § 10) --------------
     if mode == "no-publish":
@@ -663,6 +677,7 @@ def plan_release(
             start_stage=START_PREPARED, content_already_committed=False,
             already_applied=False, first_publish_wait=False, confirmation="",
             pre_plan_index=index,
+            current_agent=release_actor,
         )
 
     # ---- mode full: remote + continuation classification ------------------
@@ -814,6 +829,7 @@ def plan_release(
         first_publish_wait=classification["first_publish_wait"],
         confirmation=confirmation,
         pre_plan_index=index,
+        current_agent=release_actor,
     )
 
 
@@ -823,6 +839,7 @@ def _plan_crew_release(
     source_head: str, fingerprint: str, source_model: str, tag: str,
     crew_carrier: dict, dry_run: bool,
     current_capability: str | None = None,
+    current_agent: str | None = None,
 ) -> "ReleasePlan":
     """Plan the terminal crew release from a derived crew carrier.
 
@@ -881,6 +898,10 @@ def _plan_crew_release(
             f"none; live {phase}/{task}")
     _check_parity(root, version)
 
+    # Second-wave P0: the acting identity is the CURRENT-SESSION agent, never
+    # persisted STATE.agent (historical last-writer evidence).
+    release_actor = current_agent or state.get("agent") or "saipen-cli"
+
     if mode == "no-publish":
         index = IndexSnapshot((), (), hashlib.sha256(
             b"no-publish-no-git").hexdigest()[:16])
@@ -904,7 +925,8 @@ def _plan_crew_release(
             already_applied=False, first_publish_wait=False,
             confirmation="", pre_plan_index=index,
             crew_epoch=crew_epoch, crew_closure=True,
-            crew_scope=tuple(sorted(scope.items())))
+            crew_scope=tuple(sorted(scope.items())),
+            current_agent=release_actor)
 
     if not _branch_exists(root, _branch(root)):
         raise ReleaseRefusal(
@@ -997,7 +1019,8 @@ def _plan_crew_release(
         confirmation=_read_confirmation(state),
         pre_plan_index=index,
         crew_epoch=crew_epoch, crew_closure=True,
-        crew_scope=tuple(sorted(scope.items())))
+        crew_scope=tuple(sorted(scope.items())),
+        current_agent=release_actor)
 
 
 def execute_release(root: Path, plan: ReleasePlan) -> dict:
@@ -1729,7 +1752,7 @@ def _apply_first_publish_wait(root: Path, plan: ReleasePlan) -> dict:
     # record_first_publish_wait is itself a journaled SAIOPS op and acquires
     # the writer lock; never nest a lock around it (WRITER_BUSY).
     result = record_first_publish_wait(
-        root, _agent(root), _remote_name(plan.remote_push_url))
+        root, plan.current_agent or "saipen-cli", _remote_name(plan.remote_push_url))
     if not result.ok:
         return _release_failure(
             "FIRST_PUBLISH_WAIT",
@@ -1748,6 +1771,11 @@ def _apply_first_publish_wait(root: Path, plan: ReleasePlan) -> dict:
 
 
 def _agent(root: Path) -> str:
+    """DEPRECATED (second-wave P0): reading the acting identity from persisted
+    STATE.agent is the impersonation this wave closes. Every release event now
+    names `plan.current_agent`, captured at plan time from the CURRENT-SESSION
+    identity. Kept only as a fail-safe default for callers that predate the
+    field; the release executor never uses it."""
     try:
         _, state = _read_state(root)
         return state.get("agent") or "saipen-cli"
@@ -1812,7 +1840,7 @@ def _apply_no_publish_locked(root: Path, plan: ReleasePlan) -> dict:
                 "CREW_NOT_READY",
                 (crew_context or {}).get("detail", "") or
                 "crew is not ready for terminal no-publish closure")
-    _try_journal(journal, "start", "release", _agent(root),
+    _try_journal(journal, "start", "release", plan.current_agent or "saipen-cli",
                  plan.project_identity,
                  hashlib.sha256(str(plan.canonical()).encode()).hexdigest()[:16],
                  [], {},
@@ -1917,7 +1945,7 @@ def _apply_release_locked(root: Path, plan: ReleasePlan) -> dict:
         except OSError as exc:
             return _release_failure("CREW_NOT_READY",
                                     f"cannot read crew release context: {exc}")
-        _try_journal(journal, "start", "release", _agent(root),
+        _try_journal(journal, "start", "release", plan.current_agent or "saipen-cli",
                      plan.project_identity,
                      hashlib.sha256(
                          str(plan.canonical()).encode()).hexdigest()[:16],
@@ -2318,10 +2346,11 @@ def _finish_targets(root: Path, plan: ReleasePlan, digest: str,
     from .operations import _plan_crew_closure
     if crew:
         finish = _plan_crew_closure(
-            root, _agent(root), now, utc, digest_text=digest,
-            prefix_run=run_msg)
+            root, plan.current_agent or "saipen-cli", now, utc,
+            digest_text=digest, prefix_run=run_msg)
     else:
-        finish = _plan_finish_ticket(root, plan.ticket_id, _agent(root), now,
+        finish = _plan_finish_ticket(root, plan.ticket_id,
+                                     plan.current_agent or "saipen-cli", now,
                                      utc, digest_text=digest, prefix_run=run_msg)
     if not hasattr(finish, "targets"):
         raise ReleaseRefusal(

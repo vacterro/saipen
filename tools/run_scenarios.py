@@ -652,20 +652,17 @@ def run_injector_probe(label: str, command: list[str],
     env = env.copy()
     env["PATH"] = str(shim_dir) + os.pathsep + env.get("PATH", "")
     seed_stale_install(destination)
-    source_cache = HOME / "tools" / "__pycache__" / (
+    # Hermetic: sentinels live inside the disposable home, never in HOME
+    source_cache = home / "tools" / "__pycache__" / (
         f"saipen_distribution_probe_{os.getpid()}.pyc")
-    source_loose_bytecode = HOME / "tools" / (
+    source_loose_bytecode = home / "tools" / (
         f"saipen_distribution_probe_{os.getpid()}.pyc")
-    source_cache.parent.mkdir(exist_ok=True)
+    source_cache.parent.mkdir(parents=True, exist_ok=True)
     source_cache.write_bytes(b"not real bytecode; distribution sentinel\n")
     source_loose_bytecode.write_bytes(
         b"not real bytecode; loose distribution sentinel\n")
-    try:
-        result = subprocess.run(command, cwd=HOME, env=env, capture_output=True,
-                                text=True, errors="replace")
-    finally:
-        source_cache.unlink(missing_ok=True)
-        source_loose_bytecode.unlink(missing_ok=True)
+    result = subprocess.run(command, cwd=home, env=env, capture_output=True,
+                            text=True, errors="replace")
     problems = installed_layout_problems(destination)
     if result.returncode:
         problems.insert(0, f"exited {result.returncode}")
@@ -12418,500 +12415,6 @@ def run_log_tail_probes() -> tuple[list[str], int]:
     return problems, checked
 
 
-if not SCENARIOS.is_dir():
-    print(f"FAIL: no {SCENARIOS} -- run this from the SAIPEN home")
-    sys.exit(1)
-
-failures = []
-checked = skipped = 0
-
-for d in sorted(p for p in SCENARIOS.iterdir() if p.is_dir()):
-    readme = d / "README.md"
-    has_state = (d / ".saipen").is_dir()
-    declared = None
-    reason = None
-    warn_reason = None
-    if readme.is_file():
-        _rtext = readme.read_text(encoding="utf-8-sig")
-        m = EXPECT_RE.search(_rtext)
-        declared = m.group(1) if m else None
-        _rm = REASON_RE.search(_rtext)
-        reason = _rm.group(1) if _rm else None
-        _wm = WARN_RE.search(_rtext)
-        warn_reason = _wm.group(1) if _wm else None
-
-    if not has_state:
-        # Behavioral fixture. It must NOT declare an expectation -- there is
-        # nothing to run, so a declaration here would be a promise no one keeps.
-        if declared:
-            failures.append(f"{d.name}: declares 'expect: {declared}' but ships "
-                            f"no .saipen/ -- nothing to run")
-        else:
-            skipped += 1
-        continue
-
-    if declared is None:
-        failures.append(f"{d.name}: ships a .saipen/ but declares no "
-                        f"'expect: pass|fail' line -- cannot be checked")
-        continue
-
-    if declared == "fail" and not reason:
-        failures.append(f"{d.name}: declares 'expect: fail' with no "
-                        f"'expect_fail_contains:' line -- an unpinned "
-                        f"fail-fixture asserts only that something went "
-                        f"wrong, and any unrelated FAIL then scores it green")
-        continue
-
-    r = subprocess.run([sys.executable, str(VALIDATOR), "--project-root", str(d)], cwd=d,
-                       capture_output=True, text=True)
-    actual = "pass" if r.returncode == 0 else "fail"
-    checked += 1
-    if actual != declared:
-        detail = ""
-        for line in (r.stdout + r.stderr).splitlines():
-            if line.startswith("FAIL"):
-                detail = f" | first FAIL: {line[:120]}"
-                break
-        failures.append(f"{d.name}: declared '{declared}', got '{actual}' "
-                        f"(validator exit {r.returncode}){detail}")
-    elif declared == "fail" and reason:
-        blob = r.stdout + r.stderr
-        if "Traceback (most recent call last)" in blob:
-            # A CRASH is not "failed for the wrong reason". Both exit non-zero,
-            # and the softer wording pointed at the fixture when the defect was
-            # in the validator: a NameError on a constant declared after its
-            # first use, in a branch this repo's own STATE never enters. Name
-            # the crash so the next reader looks at the tool, not the data.
-            last = next((ln for ln in reversed(blob.splitlines())
-                         if ln.strip() and not ln.startswith(" ")),
-                        "<no exception line>")
-            failures.append(f"{d.name}: the validator CRASHED instead of "
-                            f"reporting -- {last.strip()[:110]!r}. A traceback "
-                            f"exits non-zero and can be mistaken for the "
-                            f"declared failure; it is a defect in the tool")
-        elif reason not in blob:
-            first = next((ln for ln in blob.splitlines()
-                          if ln.startswith("FAIL")), "<no FAIL line>")
-            failures.append(f"{d.name}: failed as declared, but for the wrong "
-                            f"reason -- expected {reason!r}, first FAIL was "
-                            f"{first[:110]!r}")
-        else:
-            print(f"PASS: {d.name} -- failed on {reason!r}, as declared")
-    elif declared == "pass" and warn_reason:
-        blob = r.stdout + r.stderr
-        if warn_reason not in blob:
-            failures.append(f"{d.name}: passed as declared, but missing expected warning -- "
-                            f"expected {warn_reason!r}")
-        else:
-            print(f"PASS: {d.name} -- passed and warned on {warn_reason!r}, as declared")
-    else:
-        if declared == "fail":
-            print(f"WARN: {d.name} -- fails as declared, but pins no reason; "
-                  f"add `expect_fail_contains:` so it cannot pass by failing "
-                  f"at something unrelated")
-        print(f"PASS: {d.name} -- expected {declared}, got {actual}")
-
-
-
-
-def run_digest_stale_probes() -> tuple[list[str], int]:
-    problems = []
-    checked = 0
-    git = shutil.which("git")
-    if not git:
-        return ["digest-stale probes require git"], checked
-
-    def git_run(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
-        return subprocess.run([git, *args], cwd=cwd, capture_output=True,
-                              text=True, errors="replace")
-
-    with tempfile.TemporaryDirectory(prefix="saipen-digest-") as raw:
-        sandbox = Path(raw).resolve()
-        project = sandbox / "project"
-        project.mkdir()
-
-        shutil.copytree(SCENARIOS / "resume-after-crash" / ".saipen", project / ".saipen")
-
-        # Setup basic IS_SAIPEN_HOME
-        (project / "VERSION").write_text("1.0.0\n", encoding="utf-8-sig")
-        (project / "README.md").write_text("# SAIPEN\n", encoding="utf-8-sig")
-        (project / ".saipen" / "kitchen").mkdir(exist_ok=True, parents=True)
-        (project / ".saipen" / "kitchen" / "digest.md").write_text(
-            "done: v0.9.0\nremaining: 0\nawaiting: none\n", encoding="utf-8-sig")
-        (project / "saipen").mkdir(exist_ok=True)
-        (project / "saipen" / "RFC.md").write_text("", encoding="utf-8-sig")
-        (project / "bootstrap").mkdir(exist_ok=True)
-        (project / "CHANGELOG.md").write_text("## [1.0.0]\n", encoding="utf-8-sig")
-
-        git_run(project, "init", "-q")
-        git_run(project, "config", "user.name", "SAIPEN")
-        git_run(project, "config", "user.email", "test@test")
-        git_run(project, "add", ".")
-        git_run(project, "commit", "-q", "-m", "Initial")
-        git_run(project, "tag", "v0.9.0")
-
-        # Test 1: pre-tag (tag for 1.0.0 does not exist yet)
-        checked += 1
-        res1 = subprocess.run(
-            [sys.executable, str(VALIDATOR), "--project-root", str(project)],
-            cwd=project, capture_output=True, text=True)
-        if "[digest-stale]" in res1.stdout or "[digest-stale]" in res1.stderr:
-            problems.append("digest-stale warned incorrectly on pre-tag "
-                            "state: " + res1.stdout + res1.stderr)
-        else:
-            print("PASS: digest-stale -- no warning before tag is created")
-
-        # Test 2: post-tag (tag for 1.0.0 exists, but digest names 0.9.0)
-        git_run(project, "tag", "v1.0.0")
-        checked += 1
-        res2 = subprocess.run(
-            [sys.executable, str(VALIDATOR), "--project-root", str(project)],
-            cwd=project, capture_output=True, text=True)
-        if "[digest-stale]" not in res2.stdout and "[digest-stale]" not in res2.stderr:
-            problems.append("digest-stale failed to warn after tag was "
-                            "created: " + res2.stdout + res2.stderr)
-        else:
-            print("PASS: digest-stale -- warned correctly after tag exists")
-    return problems, checked
-
-
-def run_orphan_tag_probes() -> tuple[list[str], int]:
-    """A tag pushed while its branch did not land must FAIL validation.
-
-    Reproduces the E-1787/E-1882 sequence: the branch push is rejected
-    (never lands on the remote branch), the tag push runs anyway and
-    succeeds, so the remote carries a tag whose commit is on no remote
-    branch. Needs a real repository with a real remote -- the orphan check
-    reads refs/remotes and ls-remote, so it cannot live in
-    `tools/audit_checks.py`, whose snapshot excludes `.git`.
-    """
-    problems: list[str] = []
-    checked = 0
-    with tempfile.TemporaryDirectory(prefix="saipen-orphan-") as raw:
-        home = Path(raw) / "home"
-        origin = Path(raw) / "origin.git"
-        shutil.copytree(HOME, home, ignore=shutil.ignore_patterns(
-            ".git", ".venv", "__pycache__", "node_modules", "nul", ".freebuff"))
-        env = {**os.environ, "GIT_AUTHOR_NAME": "probe",
-               "GIT_AUTHOR_EMAIL": "probe@example.invalid",
-               "GIT_COMMITTER_NAME": "probe",
-               "GIT_COMMITTER_EMAIL": "probe@example.invalid"}
-
-        def git(*args: str) -> subprocess.CompletedProcess[str]:
-            return subprocess.run(["git", *args], cwd=home, env=env,
-                                  capture_output=True, text=True, check=False)
-
-        def validate() -> str:
-            r = subprocess.run(
-                [sys.executable, str(home / "tools" / "validate.py"),
-                 "--project-root", str(home)],
-                cwd=home, capture_output=True, text=True, errors="replace")
-            return r.stdout + r.stderr
-
-        def expect(label: str, output: str, contains: str,
-                   absent: str = "") -> None:
-            nonlocal checked
-            checked += 1
-            details = []
-            if contains and contains not in output:
-                details.append(f"missing {contains!r}")
-            if absent and absent in output:
-                details.append(f"unexpected {absent!r}")
-            if details:
-                problems.append(f"{label}: {'; '.join(details)}")
-            else:
-                print(f"PASS: orphan tag -- {label}")
-
-        if git("init", "-q").returncode != 0:
-            print("SKIP: orphan tag probes -- git unavailable")
-            return problems, checked
-        git("add", "-A")
-        git("commit", "-q", "-m", "probe")
-        if git("init", "-q", "--bare", str(origin)).returncode != 0:
-            print("SKIP: orphan tag probes -- cannot create bare remote")
-            return problems, checked
-        git("remote", "add", "origin", str(origin))
-        if git("push", "-q", "-u", "origin", "HEAD:main").returncode != 0:
-            print("SKIP: orphan tag probes -- cannot push initial main")
-            return problems, checked
-
-        # The rejected-branch-then-tag sequence: a release commit is made but
-        # its branch push never lands (here: simply not pushed), while the tag
-        # push succeeds -- the remote now carries a tag whose commit is on no
-        # remote branch.
-        (home / "orphan-release.txt").write_text("orphan\n", encoding="utf-8")
-        git("add", "orphan-release.txt")
-        git("commit", "-q", "-m", "release commit, branch push rejected")
-        git("tag", "v7.176.0")
-        if git("push", "-q", "origin", "refs/tags/v7.176.0").returncode != 0:
-            print("SKIP: orphan tag probes -- cannot push the orphan tag")
-            return problems, checked
-        expect("a published tag whose commit rides no remote branch fails",
-               validate(), "FAIL: orphaned release tag")
-
-        # Repair: the branch push finally lands, the tag's commit becomes
-        # reachable from origin/main, and the same tag now passes.
-        if git("push", "-q", "origin", "HEAD:main").returncode != 0:
-            print("SKIP: orphan tag probes -- cannot land the branch")
-            return problems, checked
-        expect("the same tag passes once its branch has landed",
-               validate(), "", absent="FAIL: orphaned release tag")
-
-    return problems, checked
-
-
-def run_ship_pick_probes() -> tuple[list[str], int]:
-    """The ticket that passes REVIEW stays in `## DOING` through SHIP.
-
-    `PHASE SHIP T-###` is RFC § 1.2's prescribed `next_action` for the one
-    state SHIP is ever entered from, and the Pick Rule accepts it exactly
-    while the ticket sits in `## DOING` -- a claimed `## DOING` ticket IS
-    the pick. This repository's habit of closing the ticket at REVIEW
-    (E-1879, T-466) moved it to `## DONE` before anything was pushed, so
-    the same string named a finished ticket and failed the pick check
-    twice over. Lives here rather than in `tools/audit_checks.py` because
-    the condition spans two files -- STATE's `next_action` and the
-    ticket's board section -- and that harness mutates one file per case
-    (the compound-fixture route T-457 asks for).
-    """
-    problems: list[str] = []
-    checked = 0
-    with tempfile.TemporaryDirectory(prefix="saipen-ship-pick-") as raw:
-        home = Path(raw) / "home"
-        shutil.copytree(HOME, home, ignore=shutil.ignore_patterns(
-            ".git", ".venv", "__pycache__", "node_modules", "nul",
-            ".freebuff"))
-
-        style_path = home / "saipen" / "STYLE.md"
-        style_text = (style_path.read_text(encoding="utf-8-sig",
-                                           errors="replace")
-                      if style_path.is_file() else "")
-        _sm = re.search(r"`style_contract:\s*(ded-[0-9a-f]{8})`", style_text)
-        style_token = _sm.group(1) if _sm else "ded-00000000"
-
-        state_path = home / ".saipen" / "STATE.md"
-        board_path = home / ".saipen" / "BOARD.md"
-        log_path = home / ".saipen" / "LOG.md"
-
-        def validate() -> str:
-            r = subprocess.run(
-                [sys.executable, str(home / "tools" / "validate.py"),
-                 "--project-root", str(home)],
-                cwd=home, capture_output=True, text=True, errors="replace")
-            return r.stdout + r.stderr
-
-        def expect(label: str, output: str, contains: str,
-                   absent: str = "") -> None:
-            nonlocal checked
-            checked += 1
-            details = []
-            if contains and contains not in output:
-                details.append(f"missing {contains!r}")
-            if absent and absent in output:
-                details.append(f"unexpected {absent!r}")
-            if details:
-                problems.append(f"{label}: {'; '.join(details)}")
-            else:
-                print(f"PASS: ship pick -- {label}")
-
-        def write_fixture(in_doing: bool) -> None:
-            # A self-contained fixture: minimal LOG (one event) so
-            # last_event: 1 matches, and a board where the shipped ticket
-            # lives in either ## DOING or ## DONE.
-            log_path.write_text(
-                "- 03.08.26 00:00 [E-001] [T-901] RUN: probe\n",
-                encoding="utf-8", newline="\n")
-            state_path.write_text(
-                "---\n"
-                "phase: SHIP\n"
-                "task: T-901\n"
-                "next_action: \"PHASE SHIP T-901\"\n"
-                "blocker: none\n"
-                "transition_from: REVIEW\n"
-                "saipen_version: 7\n"
-                "schema_version: 3\n"
-                "last_event: 1\n"
-                f"style_contract: {style_token}\n"
-                "agent: probe\n"
-                "mode: full\n"
-                "updated: 2026-01-01T00:00:00Z\n"
-                "---\n",
-                encoding="utf-8", newline="\n")
-            section = "## DOING\n- [/] T-901 ship | owner: probe | " \
-                "claim_time: 2026-01-01T00:00:00Z | verify: probe\n" \
-                if in_doing else \
-                "## DONE\n- [x] T-901 ship | verify: probe\n"
-            board_path.write_text(
-                "# Board\n" + section +
-                "## TODO\n" + ("## DONE\n" if in_doing else "## DOING\n") +
-                "## BLOCKED\n",
-                encoding="utf-8", newline="\n")
-
-        write_fixture(in_doing=True)
-        expect("a ticket kept in ## DOING through SHIP validates",
-               validate(), "", absent="finished and blocked tickets are "
-               "not executable")
-
-        write_fixture(in_doing=False)
-        expect("the same ticket closed at REVIEW fails the pick rule",
-               validate(), "finished and blocked tickets are not "
-               "executable")
-
-    return problems, checked
-
-
-def run_active_task_recovery_probes() -> tuple[list[str], int]:
-    """T-573: the crash pair is rejected, then RFC § 1.5 Recovery rebuilds it.
-
-    The v7.215.0 crash checkpoint made STATE claim a ticket the board never
-    put in ## DOING, and the validator called it conformant. The new check
-    rejects both interruption directions (STATE ahead of BOARD, BOARD ahead
-    of STATE). This probe performs § 1.5's Recovery on each and proves the
-    result validates and that a repeated Recovery is a byte-level no-op. The
-    project carries only a minimal `.saipen/` so no full-repo baggage (sealed
-    LOG segments, sub boards, board barriers) can mask what is being tested.
-    """
-    problems: list[str] = []
-    checked = 0
-    with tempfile.TemporaryDirectory(prefix="saipen-active-task-") as raw:
-        project = Path(raw) / "project"
-        shutil.copytree(SCENARIOS / "stale-state-reconciliation" / ".saipen",
-                        project / ".saipen")
-        state_path = project / ".saipen" / "STATE.md"
-        board_path = project / ".saipen" / "BOARD.md"
-        log_path = project / ".saipen" / "LOG.md"
-        style_token = live_style_marker()
-
-        def validate() -> str:
-            r = subprocess.run(
-                [sys.executable, str(VALIDATOR), "--project-root",
-                 str(project)],
-                cwd=project, capture_output=True, text=True, errors="replace")
-            return r.stdout + r.stderr
-
-        def expect(label: str, output: str, contains: str = "",
-                   absent: str = "") -> None:
-            nonlocal checked
-            checked += 1
-            details = []
-            if contains and contains not in output:
-                details.append(f"missing {contains!r}")
-            if absent and absent in output:
-                details.append(f"unexpected {absent!r}")
-            if details:
-                problems.append(f"{label}: {'; '.join(details)}")
-            else:
-                print(f"PASS: active-task recovery -- {label}")
-
-        def write_state(task: str, na: str, last_event: int) -> None:
-            state_path.write_text(
-                "---\nphase: SCOUT\n"
-                f"task: {task}\n"
-                f"next_action: \"{na}\"\n"
-                "blocker: none\n"
-                "transition_from: DONE\n"
-                "saipen_version: 7\n"
-                "schema_version: 3\n"
-                f"last_event: {last_event}\n"
-                f"style_contract: {style_token}\n"
-                "agent: probe\n"
-                "mode: full\n"
-                "updated: 2026-01-01T00:00:00Z\n"
-                "---\n",
-                encoding="utf-8", newline="\n")
-
-        def write_log(ticket: str) -> None:
-            log_path.write_text(
-                f"- 08.08.26 00:00 [E-001] [{ticket}] RUN: probe\n",
-                encoding="utf-8", newline="\n")
-
-        def recover(ticket: str, claim_board: bool, label: str) -> None:
-            # No-op when the previous recovery already produced this state:
-            # RFC § 1.5's idempotency, proven byte-for-byte by the caller.
-            board = board_path.read_text(encoding="utf-8-sig")
-            state = state_path.read_text(encoding="utf-8-sig")
-            already = (f"task: {ticket}" in state
-                       and re.search(r"^## DOING\n- \[/\] " + ticket + r"\b",
-                                     board, re.MULTILINE))
-            if already:
-                return
-            recovery_dir = project / ".saipen" / "recovery"
-            recovery_dir.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(state_path, recovery_dir / f"{label}-STATE.md")
-            log = log_path.read_text(encoding="utf-8-sig").rstrip()
-            log += (f"\n- 08.08.26 00:01 [E-002] [{ticket}] "
-                    f"DEC: RECOVER -- {label}\n")
-            log_path.write_text(log, encoding="utf-8", newline="\n")
-            if claim_board:
-                board_path.write_text(
-                    "# Board\n## DOING\n"
-                    f"- [/] {ticket} [P0] crash | owner: probe | "
-                    "claim_time: 2026-01-01T00:00:00Z | verify: probe\n"
-                    "## TODO\n## DONE\n## BLOCKED\n",
-                    encoding="utf-8", newline="\n")
-            write_state(ticket, f"PHASE SCOUT {ticket}", 2)
-
-        # Case A: STATE ahead of BOARD -- task claimed, no ## DOING ticket.
-        write_state("T-999", "PHASE SCOUT T-999", 1)
-        write_log("T-999")
-        board_path.write_text(
-            "# Board\n## DOING\n## TODO\n"
-            "- [ ] T-999 [P0] crash | verify: probe\n"
-            "## DONE\n## BLOCKED\n",
-            encoding="utf-8", newline="\n")
-        expect("STATE ahead of BOARD is rejected",
-               validate(), "is not the claimed ## DOING ticket")
-        recover("T-999", claim_board=True, label="crash-A")
-        expect("Recovery of case A validates",
-               validate(), "Agent is conformant")
-        snap = (state_path.read_bytes(), board_path.read_bytes(),
-                log_path.read_bytes())
-        recover("T-999", claim_board=True, label="crash-A")
-        again = (state_path.read_bytes(), board_path.read_bytes(),
-                 log_path.read_bytes())
-        expect("repeated Recovery of case A is byte-idempotent",
-               "same" if snap == again else "differed", contains="same")
-
-        # Case B: BOARD ahead of STATE -- self-claimed ## DOING, task: none.
-        write_state("none", "saipen continue", 1)
-        write_log("T-100")
-        board_path.write_text(
-            "# Board\n## DOING\n"
-            "- [/] T-100 [P0] claimed | owner: probe | "
-            "claim_time: 2026-01-01T00:00:00Z | verify: probe\n"
-            "## TODO\n## DONE\n## BLOCKED\n",
-            encoding="utf-8", newline="\n")
-        expect("BOARD ahead of STATE is rejected",
-               validate(), "STATE is behind BOARD")
-        recover("T-100", claim_board=False, label="crash-B")
-        expect("Recovery of case B validates",
-               validate(), "Agent is conformant")
-        snap = (state_path.read_bytes(), board_path.read_bytes(),
-                log_path.read_bytes())
-        recover("T-100", claim_board=False, label="crash-B")
-        again = (state_path.read_bytes(), board_path.read_bytes(),
-                 log_path.read_bytes())
-        expect("repeated Recovery of case B is byte-idempotent",
-               "same" if snap == again else "differed", contains="same")
-
-    return problems, checked
-
-
-if os.environ.get("SAIPEN_PRODUCER_GATE_PROBES_ONLY") == "1":
-    producer_failures, producer_checked = run_producer_gate_probes()
-    for problem in producer_failures:
-        print(f"FAILED: {problem}")
-    print(f"{producer_checked} producer-gate behavior(s) executed")
-    raise SystemExit(1 if producer_failures else 0)
-
-if os.environ.get("SAIPEN_ROLE_FRESHNESS_PROBES_ONLY") == "1":
-    role_failures, role_checked, role_skipped = run_role_freshness_probes()
-    for problem in role_failures:
-        print(f"FAILED: {problem}")
-    print(f"{role_checked} role-freshness behavior(s) executed, "
-          f"{role_skipped} skipped")
-    raise SystemExit(1 if role_failures else 0)
-
 def run_hostile_journal_probes() -> tuple[list[str], int]:
     """Hostile-regression journal controls (hostile sweep P0): relative
     root mutation, the pure validation gate (zero Journal construction on
@@ -14167,216 +13670,806 @@ def run_hostile_state_probes() -> tuple[list[str], int]:
     return problems, checked
 
 
-if os.environ.get("SAIPEN_NITRO_M2_PROBES_ONLY") == "1":
+def run_t1012_strict_grammar_probes() -> tuple[list[str], int]:
+    """T-1012 strict declaration grammar: CONVERGE.md converge_targets:
+    must be parsed as an ordered token sequence before set conversion.
+    Duplicates, empty tokens, leading/trailing delimiters, invalid syntax,
+    and multiple declarations must all cause hard FAIL."""
+    problems: list[str] = []
+    checked = 0
+
+    import subprocess as _sp
+
+    def expect(label: str, ok: bool, detail: str = "") -> None:
+        nonlocal checked
+        checked += 1
+        if ok:
+            print(f"PASS: t1012-strict -- {label}")
+        else:
+            problems.append(f"{label}: {detail}")
+            print(f"FAIL: t1012-strict -- {label} -- {detail}")
+
+    def _run_validator() -> tuple[int, str]:
+        pr = _sp.run(
+            [sys.executable, str(HOME / "tools" / "validate.py")],
+            cwd=str(HOME), capture_output=True, text=True, timeout=400)
+        return pr.returncode, pr.stdout + pr.stderr
+
+    _conv_p = HOME / "saipen" / "CONVERGE.md"
+    _orig = _conv_p.read_text(encoding="utf-8-sig")
+
+    def _red_control(old: str, new: str, label: str, substr: str) -> None:
+        """Mutate CONVERGE.md, run validator, assert FAIL, restore."""
+        _conv_p.write_text(_orig.replace(old, new), encoding="utf-8")
+        try:
+            _rc, _out = _run_validator()
+            expect(f"converge: red-control {label} makes validator FAIL",
+                   _rc != 0 and substr in _out,
+                   f"rc={_rc} substr={substr!r} missing")
+        finally:
+            _conv_p.write_text(_orig, encoding="utf-8")
+        _rc2, _out2 = _run_validator()
+        expect(f"converge: red-control {label} restored -> converge-target gone",
+               "converge-target" not in _out2,
+               f"converge-target still present after restore: rc={_rc2}")
+
+    VALID_DECL = "converge_targets: done | ship | crew"
+
+    # Duplicate token: crew appears twice
+    _red_control(VALID_DECL,
+                 "converge_targets: done | ship | crew | crew",
+                 "duplicate converge target",
+                 "converge-target-converge")
+
+    # Empty middle token: double pipe
+    _red_control(VALID_DECL,
+                 "converge_targets: done || ship | crew",
+                 "empty middle token",
+                 "converge-target-converge")
+
+    # Leading delimiter
+    _red_control(VALID_DECL,
+                 "converge_targets: | done | ship | crew",
+                 "leading delimiter",
+                 "converge-target-converge")
+
+    # Trailing delimiter
+    _red_control(VALID_DECL,
+                 "converge_targets: done | ship | crew |",
+                 "trailing delimiter",
+                 "converge-target-converge")
+
+    # Invalid token syntax (space in token)
+    _red_control(VALID_DECL,
+                 "converge_targets: done | ship | cr ew",
+                 "invalid token syntax (space)",
+                 "converge-target-converge")
+
+    # Invalid token syntax (@ prefix)
+    _red_control(VALID_DECL,
+                 "converge_targets: done | ship | @crew",
+                 "invalid token syntax (@)",
+                 "converge-target-converge")
+
+    # Extra empty between tokens
+    _red_control(VALID_DECL,
+                 "converge_targets: done | ship |  | crew",
+                 "extra empty between tokens",
+                 "converge-target-converge")
+
+    return problems, checked
+
+
+def main():
+    """Run targeted probe groups or the full suite.
+
+    When any SAIPEN_*_PROBES_ONLY=1 selector is active, run ONLY the
+    requested group (minimal bootstrap first) and exit immediately.
+    Multiple conflicting selectors cause a hard error.
+    No selector runs the full suite exactly as before.
+    """
+
+    # ---- PROBES_ONLY targeted dispatch -------------------------------------
+    _PROBE_SELECTORS = {
+        "SAIPEN_PRODUCER_GATE_PROBES_ONLY": "producer_gate",
+        "SAIPEN_ROLE_FRESHNESS_PROBES_ONLY": "role_freshness",
+        "SAIPEN_NITRO_M2_PROBES_ONLY": "nitro_m2",
+        "SAIPEN_SAICREW_PROBES_ONLY": "saicrew",
+        "SAIPEN_HR_PROBES_ONLY": "hostile_regression",
+        "SAIPEN_HR_AUTHORITY_PROBES_ONLY": "hostile_authority",
+        "SAIPEN_NITRO_INTEGRITY_PROBES_ONLY": "nitro_integrity",
+        "SAIPEN_SCHEDULER_PROBES_ONLY": "scheduler",
+    }
+    _active = [k for k, v in _PROBE_SELECTORS.items()
+               if os.environ.get(k) == "1"]
+    if len(_active) > 1:
+        _names = ", ".join(_PROBE_SELECTORS[k] for k in _active)
+        print(f"FAILED: conflicting PROBES_ONLY selectors: {_names}")
+        sys.exit(1)
+
+    if _active:
+        # Minimal bootstrap: only SCENARIOS existence check
+        if not SCENARIOS.is_dir():
+            print(f"FAIL: no {SCENARIOS} -- run this from the SAIPEN home")
+            sys.exit(1)
+
+        _sel = _PROBE_SELECTORS[_active[0]]
+        _probe_funcs = {
+            "producer_gate": lambda: run_producer_gate_probes(),
+            "role_freshness": lambda: run_role_freshness_probes(),
+            "nitro_m2": lambda: run_nitro_m2_probes(),
+            "saicrew": lambda: run_saicrew_probes(),
+            "hostile_regression": lambda: (
+                run_hostile_journal_probes(),
+                run_hostile_release_probes(),
+                run_hostile_convergence_probes(),
+                run_hostile_state_probes()),
+            "hostile_authority": lambda: run_hostile_authority_probes(),
+            "nitro_integrity": lambda: run_nitro_integrity_probes(),
+            "scheduler": lambda: run_scheduler_probes(),
+        }
+
+        _result = _probe_funcs[_sel]()
+        if _sel == "hostile_regression":
+            (_j_f, _j_c), (_r_f, _r_c), (_cv_f, _cv_c), (_s_f, _s_c) = _result
+            _all_f = _j_f + _r_f + _cv_f + _s_f
+            _all_c = _j_c + _r_c + _cv_c + _s_c
+            for p in _all_f:
+                print(f"FAILED: {p}")
+            print(f"{_all_c} hostile-regression behavior(s) executed")
+            raise SystemExit(1 if _all_f else 0)
+        else:
+            _f, _c = _result[:2]
+            for p in _f:
+                print(f"FAILED: {p}")
+            print(f"{_c} {_sel} behavior(s) executed")
+            raise SystemExit(1 if _f else 0)
+
+    # ---- Full suite --------------------------------------------------------
+
+    if not SCENARIOS.is_dir():
+        print(f"FAIL: no {SCENARIOS} -- run this from the SAIPEN home")
+        sys.exit(1)
+    
+    failures = []
+    checked = skipped = 0
+    
+    for d in sorted(p for p in SCENARIOS.iterdir() if p.is_dir()):
+        readme = d / "README.md"
+        has_state = (d / ".saipen").is_dir()
+        declared = None
+        reason = None
+        warn_reason = None
+        if readme.is_file():
+            _rtext = readme.read_text(encoding="utf-8-sig")
+            m = EXPECT_RE.search(_rtext)
+            declared = m.group(1) if m else None
+            _rm = REASON_RE.search(_rtext)
+            reason = _rm.group(1) if _rm else None
+            _wm = WARN_RE.search(_rtext)
+            warn_reason = _wm.group(1) if _wm else None
+    
+        if not has_state:
+            # Behavioral fixture. It must NOT declare an expectation -- there is
+            # nothing to run, so a declaration here would be a promise no one keeps.
+            if declared:
+                failures.append(f"{d.name}: declares 'expect: {declared}' but ships "
+                                f"no .saipen/ -- nothing to run")
+            else:
+                skipped += 1
+            continue
+    
+        if declared is None:
+            failures.append(f"{d.name}: ships a .saipen/ but declares no "
+                            f"'expect: pass|fail' line -- cannot be checked")
+            continue
+    
+        if declared == "fail" and not reason:
+            failures.append(f"{d.name}: declares 'expect: fail' with no "
+                            f"'expect_fail_contains:' line -- an unpinned "
+                            f"fail-fixture asserts only that something went "
+                            f"wrong, and any unrelated FAIL then scores it green")
+            continue
+    
+        r = subprocess.run([sys.executable, str(VALIDATOR), "--project-root", str(d)], cwd=d,
+                           capture_output=True, text=True)
+        actual = "pass" if r.returncode == 0 else "fail"
+        checked += 1
+        if actual != declared:
+            detail = ""
+            for line in (r.stdout + r.stderr).splitlines():
+                if line.startswith("FAIL"):
+                    detail = f" | first FAIL: {line[:120]}"
+                    break
+            failures.append(f"{d.name}: declared '{declared}', got '{actual}' "
+                            f"(validator exit {r.returncode}){detail}")
+        elif declared == "fail" and reason:
+            blob = r.stdout + r.stderr
+            if "Traceback (most recent call last)" in blob:
+                # A CRASH is not "failed for the wrong reason". Both exit non-zero,
+                # and the softer wording pointed at the fixture when the defect was
+                # in the validator: a NameError on a constant declared after its
+                # first use, in a branch this repo's own STATE never enters. Name
+                # the crash so the next reader looks at the tool, not the data.
+                last = next((ln for ln in reversed(blob.splitlines())
+                             if ln.strip() and not ln.startswith(" ")),
+                            "<no exception line>")
+                failures.append(f"{d.name}: the validator CRASHED instead of "
+                                f"reporting -- {last.strip()[:110]!r}. A traceback "
+                                f"exits non-zero and can be mistaken for the "
+                                f"declared failure; it is a defect in the tool")
+            elif reason not in blob:
+                first = next((ln for ln in blob.splitlines()
+                              if ln.startswith("FAIL")), "<no FAIL line>")
+                failures.append(f"{d.name}: failed as declared, but for the wrong "
+                                f"reason -- expected {reason!r}, first FAIL was "
+                                f"{first[:110]!r}")
+            else:
+                print(f"PASS: {d.name} -- failed on {reason!r}, as declared")
+        elif declared == "pass" and warn_reason:
+            blob = r.stdout + r.stderr
+            if warn_reason not in blob:
+                failures.append(f"{d.name}: passed as declared, but missing expected warning -- "
+                                f"expected {warn_reason!r}")
+            else:
+                print(f"PASS: {d.name} -- passed and warned on {warn_reason!r}, as declared")
+        else:
+            if declared == "fail":
+                print(f"WARN: {d.name} -- fails as declared, but pins no reason; "
+                      f"add `expect_fail_contains:` so it cannot pass by failing "
+                      f"at something unrelated")
+            print(f"PASS: {d.name} -- expected {declared}, got {actual}")
+    
+    
+    
+    
+    def run_digest_stale_probes() -> tuple[list[str], int]:
+        problems = []
+        checked = 0
+        git = shutil.which("git")
+        if not git:
+            return ["digest-stale probes require git"], checked
+    
+        def git_run(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
+            return subprocess.run([git, *args], cwd=cwd, capture_output=True,
+                                  text=True, errors="replace")
+    
+        with tempfile.TemporaryDirectory(prefix="saipen-digest-") as raw:
+            sandbox = Path(raw).resolve()
+            project = sandbox / "project"
+            project.mkdir()
+    
+            shutil.copytree(SCENARIOS / "resume-after-crash" / ".saipen", project / ".saipen")
+    
+            # Setup basic IS_SAIPEN_HOME
+            (project / "VERSION").write_text("1.0.0\n", encoding="utf-8-sig")
+            (project / "README.md").write_text("# SAIPEN\n", encoding="utf-8-sig")
+            (project / ".saipen" / "kitchen").mkdir(exist_ok=True, parents=True)
+            (project / ".saipen" / "kitchen" / "digest.md").write_text(
+                "done: v0.9.0\nremaining: 0\nawaiting: none\n", encoding="utf-8-sig")
+            (project / "saipen").mkdir(exist_ok=True)
+            (project / "saipen" / "RFC.md").write_text("", encoding="utf-8-sig")
+            (project / "bootstrap").mkdir(exist_ok=True)
+            (project / "CHANGELOG.md").write_text("## [1.0.0]\n", encoding="utf-8-sig")
+    
+            git_run(project, "init", "-q")
+            git_run(project, "config", "user.name", "SAIPEN")
+            git_run(project, "config", "user.email", "test@test")
+            git_run(project, "add", ".")
+            git_run(project, "commit", "-q", "-m", "Initial")
+            git_run(project, "tag", "v0.9.0")
+    
+            # Test 1: pre-tag (tag for 1.0.0 does not exist yet)
+            checked += 1
+            res1 = subprocess.run(
+                [sys.executable, str(VALIDATOR), "--project-root", str(project)],
+                cwd=project, capture_output=True, text=True)
+            if "[digest-stale]" in res1.stdout or "[digest-stale]" in res1.stderr:
+                problems.append("digest-stale warned incorrectly on pre-tag "
+                                "state: " + res1.stdout + res1.stderr)
+            else:
+                print("PASS: digest-stale -- no warning before tag is created")
+    
+            # Test 2: post-tag (tag for 1.0.0 exists, but digest names 0.9.0)
+            git_run(project, "tag", "v1.0.0")
+            checked += 1
+            res2 = subprocess.run(
+                [sys.executable, str(VALIDATOR), "--project-root", str(project)],
+                cwd=project, capture_output=True, text=True)
+            if "[digest-stale]" not in res2.stdout and "[digest-stale]" not in res2.stderr:
+                problems.append("digest-stale failed to warn after tag was "
+                                "created: " + res2.stdout + res2.stderr)
+            else:
+                print("PASS: digest-stale -- warned correctly after tag exists")
+        return problems, checked
+    
+    
+    def run_orphan_tag_probes() -> tuple[list[str], int]:
+        """A tag pushed while its branch did not land must FAIL validation.
+    
+        Reproduces the E-1787/E-1882 sequence: the branch push is rejected
+        (never lands on the remote branch), the tag push runs anyway and
+        succeeds, so the remote carries a tag whose commit is on no remote
+        branch. Needs a real repository with a real remote -- the orphan check
+        reads refs/remotes and ls-remote, so it cannot live in
+        `tools/audit_checks.py`, whose snapshot excludes `.git`.
+        """
+        problems: list[str] = []
+        checked = 0
+        with tempfile.TemporaryDirectory(prefix="saipen-orphan-") as raw:
+            home = Path(raw) / "home"
+            origin = Path(raw) / "origin.git"
+            shutil.copytree(HOME, home, ignore=shutil.ignore_patterns(
+                ".git", ".venv", "__pycache__", "node_modules", "nul", ".freebuff"))
+            env = {**os.environ, "GIT_AUTHOR_NAME": "probe",
+                   "GIT_AUTHOR_EMAIL": "probe@example.invalid",
+                   "GIT_COMMITTER_NAME": "probe",
+                   "GIT_COMMITTER_EMAIL": "probe@example.invalid"}
+    
+            def git(*args: str) -> subprocess.CompletedProcess[str]:
+                return subprocess.run(["git", *args], cwd=home, env=env,
+                                      capture_output=True, text=True, check=False)
+    
+            def validate() -> str:
+                r = subprocess.run(
+                    [sys.executable, str(home / "tools" / "validate.py"),
+                     "--project-root", str(home)],
+                    cwd=home, capture_output=True, text=True, errors="replace")
+                return r.stdout + r.stderr
+    
+            def expect(label: str, output: str, contains: str,
+                       absent: str = "") -> None:
+                nonlocal checked
+                checked += 1
+                details = []
+                if contains and contains not in output:
+                    details.append(f"missing {contains!r}")
+                if absent and absent in output:
+                    details.append(f"unexpected {absent!r}")
+                if details:
+                    problems.append(f"{label}: {'; '.join(details)}")
+                else:
+                    print(f"PASS: orphan tag -- {label}")
+    
+            if git("init", "-q").returncode != 0:
+                print("SKIP: orphan tag probes -- git unavailable")
+                return problems, checked
+            git("add", "-A")
+            git("commit", "-q", "-m", "probe")
+            if git("init", "-q", "--bare", str(origin)).returncode != 0:
+                print("SKIP: orphan tag probes -- cannot create bare remote")
+                return problems, checked
+            git("remote", "add", "origin", str(origin))
+            if git("push", "-q", "-u", "origin", "HEAD:main").returncode != 0:
+                print("SKIP: orphan tag probes -- cannot push initial main")
+                return problems, checked
+    
+            # The rejected-branch-then-tag sequence: a release commit is made but
+            # its branch push never lands (here: simply not pushed), while the tag
+            # push succeeds -- the remote now carries a tag whose commit is on no
+            # remote branch.
+            (home / "orphan-release.txt").write_text("orphan\n", encoding="utf-8")
+            git("add", "orphan-release.txt")
+            git("commit", "-q", "-m", "release commit, branch push rejected")
+            git("tag", "v7.176.0")
+            if git("push", "-q", "origin", "refs/tags/v7.176.0").returncode != 0:
+                print("SKIP: orphan tag probes -- cannot push the orphan tag")
+                return problems, checked
+            expect("a published tag whose commit rides no remote branch fails",
+                   validate(), "FAIL: orphaned release tag")
+    
+            # Repair: the branch push finally lands, the tag's commit becomes
+            # reachable from origin/main, and the same tag now passes.
+            if git("push", "-q", "origin", "HEAD:main").returncode != 0:
+                print("SKIP: orphan tag probes -- cannot land the branch")
+                return problems, checked
+            expect("the same tag passes once its branch has landed",
+                   validate(), "", absent="FAIL: orphaned release tag")
+    
+        return problems, checked
+    
+    
+    def run_ship_pick_probes() -> tuple[list[str], int]:
+        """The ticket that passes REVIEW stays in `## DOING` through SHIP.
+    
+        `PHASE SHIP T-###` is RFC § 1.2's prescribed `next_action` for the one
+        state SHIP is ever entered from, and the Pick Rule accepts it exactly
+        while the ticket sits in `## DOING` -- a claimed `## DOING` ticket IS
+        the pick. This repository's habit of closing the ticket at REVIEW
+        (E-1879, T-466) moved it to `## DONE` before anything was pushed, so
+        the same string named a finished ticket and failed the pick check
+        twice over. Lives here rather than in `tools/audit_checks.py` because
+        the condition spans two files -- STATE's `next_action` and the
+        ticket's board section -- and that harness mutates one file per case
+        (the compound-fixture route T-457 asks for).
+        """
+        problems: list[str] = []
+        checked = 0
+        with tempfile.TemporaryDirectory(prefix="saipen-ship-pick-") as raw:
+            home = Path(raw) / "home"
+            shutil.copytree(HOME, home, ignore=shutil.ignore_patterns(
+                ".git", ".venv", "__pycache__", "node_modules", "nul",
+                ".freebuff"))
+    
+            style_path = home / "saipen" / "STYLE.md"
+            style_text = (style_path.read_text(encoding="utf-8-sig",
+                                               errors="replace")
+                          if style_path.is_file() else "")
+            _sm = re.search(r"`style_contract:\s*(ded-[0-9a-f]{8})`", style_text)
+            style_token = _sm.group(1) if _sm else "ded-00000000"
+    
+            state_path = home / ".saipen" / "STATE.md"
+            board_path = home / ".saipen" / "BOARD.md"
+            log_path = home / ".saipen" / "LOG.md"
+    
+            def validate() -> str:
+                r = subprocess.run(
+                    [sys.executable, str(home / "tools" / "validate.py"),
+                     "--project-root", str(home)],
+                    cwd=home, capture_output=True, text=True, errors="replace")
+                return r.stdout + r.stderr
+    
+            def expect(label: str, output: str, contains: str,
+                       absent: str = "") -> None:
+                nonlocal checked
+                checked += 1
+                details = []
+                if contains and contains not in output:
+                    details.append(f"missing {contains!r}")
+                if absent and absent in output:
+                    details.append(f"unexpected {absent!r}")
+                if details:
+                    problems.append(f"{label}: {'; '.join(details)}")
+                else:
+                    print(f"PASS: ship pick -- {label}")
+    
+            def write_fixture(in_doing: bool) -> None:
+                # A self-contained fixture: minimal LOG (one event) so
+                # last_event: 1 matches, and a board where the shipped ticket
+                # lives in either ## DOING or ## DONE.
+                log_path.write_text(
+                    "- 03.08.26 00:00 [E-001] [T-901] RUN: probe\n",
+                    encoding="utf-8", newline="\n")
+                state_path.write_text(
+                    "---\n"
+                    "phase: SHIP\n"
+                    "task: T-901\n"
+                    "next_action: \"PHASE SHIP T-901\"\n"
+                    "blocker: none\n"
+                    "transition_from: REVIEW\n"
+                    "saipen_version: 7\n"
+                    "schema_version: 3\n"
+                    "last_event: 1\n"
+                    f"style_contract: {style_token}\n"
+                    "agent: probe\n"
+                    "mode: full\n"
+                    "updated: 2026-01-01T00:00:00Z\n"
+                    "---\n",
+                    encoding="utf-8", newline="\n")
+                section = "## DOING\n- [/] T-901 ship | owner: probe | " \
+                    "claim_time: 2026-01-01T00:00:00Z | verify: probe\n" \
+                    if in_doing else \
+                    "## DONE\n- [x] T-901 ship | verify: probe\n"
+                board_path.write_text(
+                    "# Board\n" + section +
+                    "## TODO\n" + ("## DONE\n" if in_doing else "## DOING\n") +
+                    "## BLOCKED\n",
+                    encoding="utf-8", newline="\n")
+    
+            write_fixture(in_doing=True)
+            expect("a ticket kept in ## DOING through SHIP validates",
+                   validate(), "", absent="finished and blocked tickets are "
+                   "not executable")
+    
+            write_fixture(in_doing=False)
+            expect("the same ticket closed at REVIEW fails the pick rule",
+                   validate(), "finished and blocked tickets are not "
+                   "executable")
+    
+        return problems, checked
+    
+    
+    def run_active_task_recovery_probes() -> tuple[list[str], int]:
+        """T-573: the crash pair is rejected, then RFC § 1.5 Recovery rebuilds it.
+    
+        The v7.215.0 crash checkpoint made STATE claim a ticket the board never
+        put in ## DOING, and the validator called it conformant. The new check
+        rejects both interruption directions (STATE ahead of BOARD, BOARD ahead
+        of STATE). This probe performs § 1.5's Recovery on each and proves the
+        result validates and that a repeated Recovery is a byte-level no-op. The
+        project carries only a minimal `.saipen/` so no full-repo baggage (sealed
+        LOG segments, sub boards, board barriers) can mask what is being tested.
+        """
+        problems: list[str] = []
+        checked = 0
+        with tempfile.TemporaryDirectory(prefix="saipen-active-task-") as raw:
+            project = Path(raw) / "project"
+            shutil.copytree(SCENARIOS / "stale-state-reconciliation" / ".saipen",
+                            project / ".saipen")
+            state_path = project / ".saipen" / "STATE.md"
+            board_path = project / ".saipen" / "BOARD.md"
+            log_path = project / ".saipen" / "LOG.md"
+            style_token = live_style_marker()
+    
+            def validate() -> str:
+                r = subprocess.run(
+                    [sys.executable, str(VALIDATOR), "--project-root",
+                     str(project)],
+                    cwd=project, capture_output=True, text=True, errors="replace")
+                return r.stdout + r.stderr
+    
+            def expect(label: str, output: str, contains: str = "",
+                       absent: str = "") -> None:
+                nonlocal checked
+                checked += 1
+                details = []
+                if contains and contains not in output:
+                    details.append(f"missing {contains!r}")
+                if absent and absent in output:
+                    details.append(f"unexpected {absent!r}")
+                if details:
+                    problems.append(f"{label}: {'; '.join(details)}")
+                else:
+                    print(f"PASS: active-task recovery -- {label}")
+    
+            def write_state(task: str, na: str, last_event: int) -> None:
+                state_path.write_text(
+                    "---\nphase: SCOUT\n"
+                    f"task: {task}\n"
+                    f"next_action: \"{na}\"\n"
+                    "blocker: none\n"
+                    "transition_from: DONE\n"
+                    "saipen_version: 7\n"
+                    "schema_version: 3\n"
+                    f"last_event: {last_event}\n"
+                    f"style_contract: {style_token}\n"
+                    "agent: probe\n"
+                    "mode: full\n"
+                    "updated: 2026-01-01T00:00:00Z\n"
+                    "---\n",
+                    encoding="utf-8", newline="\n")
+    
+            def write_log(ticket: str) -> None:
+                log_path.write_text(
+                    f"- 08.08.26 00:00 [E-001] [{ticket}] RUN: probe\n",
+                    encoding="utf-8", newline="\n")
+    
+            def recover(ticket: str, claim_board: bool, label: str) -> None:
+                # No-op when the previous recovery already produced this state:
+                # RFC § 1.5's idempotency, proven byte-for-byte by the caller.
+                board = board_path.read_text(encoding="utf-8-sig")
+                state = state_path.read_text(encoding="utf-8-sig")
+                already = (f"task: {ticket}" in state
+                           and re.search(r"^## DOING\n- \[/\] " + ticket + r"\b",
+                                         board, re.MULTILINE))
+                if already:
+                    return
+                recovery_dir = project / ".saipen" / "recovery"
+                recovery_dir.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(state_path, recovery_dir / f"{label}-STATE.md")
+                log = log_path.read_text(encoding="utf-8-sig").rstrip()
+                log += (f"\n- 08.08.26 00:01 [E-002] [{ticket}] "
+                        f"DEC: RECOVER -- {label}\n")
+                log_path.write_text(log, encoding="utf-8", newline="\n")
+                if claim_board:
+                    board_path.write_text(
+                        "# Board\n## DOING\n"
+                        f"- [/] {ticket} [P0] crash | owner: probe | "
+                        "claim_time: 2026-01-01T00:00:00Z | verify: probe\n"
+                        "## TODO\n## DONE\n## BLOCKED\n",
+                        encoding="utf-8", newline="\n")
+                write_state(ticket, f"PHASE SCOUT {ticket}", 2)
+    
+            # Case A: STATE ahead of BOARD -- task claimed, no ## DOING ticket.
+            write_state("T-999", "PHASE SCOUT T-999", 1)
+            write_log("T-999")
+            board_path.write_text(
+                "# Board\n## DOING\n## TODO\n"
+                "- [ ] T-999 [P0] crash | verify: probe\n"
+                "## DONE\n## BLOCKED\n",
+                encoding="utf-8", newline="\n")
+            expect("STATE ahead of BOARD is rejected",
+                   validate(), "is not the claimed ## DOING ticket")
+            recover("T-999", claim_board=True, label="crash-A")
+            expect("Recovery of case A validates",
+                   validate(), "Agent is conformant")
+            snap = (state_path.read_bytes(), board_path.read_bytes(),
+                    log_path.read_bytes())
+            recover("T-999", claim_board=True, label="crash-A")
+            again = (state_path.read_bytes(), board_path.read_bytes(),
+                     log_path.read_bytes())
+            expect("repeated Recovery of case A is byte-idempotent",
+                   "same" if snap == again else "differed", contains="same")
+    
+            # Case B: BOARD ahead of STATE -- self-claimed ## DOING, task: none.
+            write_state("none", "saipen continue", 1)
+            write_log("T-100")
+            board_path.write_text(
+                "# Board\n## DOING\n"
+                "- [/] T-100 [P0] claimed | owner: probe | "
+                "claim_time: 2026-01-01T00:00:00Z | verify: probe\n"
+                "## TODO\n## DONE\n## BLOCKED\n",
+                encoding="utf-8", newline="\n")
+            expect("BOARD ahead of STATE is rejected",
+                   validate(), "STATE is behind BOARD")
+            recover("T-100", claim_board=False, label="crash-B")
+            expect("Recovery of case B validates",
+                   validate(), "Agent is conformant")
+            snap = (state_path.read_bytes(), board_path.read_bytes(),
+                    log_path.read_bytes())
+            recover("T-100", claim_board=False, label="crash-B")
+            again = (state_path.read_bytes(), board_path.read_bytes(),
+                     log_path.read_bytes())
+            expect("repeated Recovery of case B is byte-idempotent",
+                   "same" if snap == again else "differed", contains="same")
+    
+        return problems, checked
+    
+    
+
+    injector_failures, injector_checked, injector_skipped = run_injector_probes()
+    failures.extend(injector_failures)
+    scheduler_failures, scheduler_checked, scheduler_skipped = run_scheduler_probes()
+    failures.extend(scheduler_failures)
+    root_failures, root_checked = run_project_root_probes()
+    failures.extend(root_failures)
+    export_failures, export_checked, export_skipped = run_export_probes()
+    failures.extend(export_failures)
+    crew_failures, crew_checked, crew_skipped = run_crew_probes()
+    failures.extend(crew_failures)
+    try:
+        saicrew_failures, saicrew_checked = run_saicrew_probes()
+    except Exception as _saicrew_exc:  # harness robustness: a probe assumption
+        # bug must never abort the whole suite and hide every later group's
+        # result; record it and continue.
+        saicrew_failures = [f"saicrew harness crashed: {type(_saicrew_exc).__name__}: {_saicrew_exc}"]
+        saicrew_checked = 0
+    failures.extend(saicrew_failures)
+    last_event_failures, last_event_checked = run_last_event_probes()
+    failures.extend(last_event_failures)
+    log_tail_failures, log_tail_checked = run_log_tail_probes()
+    failures.extend(log_tail_failures)
+    hunt_mark_failures, hunt_mark_checked = run_hunt_mark_probes()
+    failures.extend(hunt_mark_failures)
+    converge_failures, converge_checked = run_converge_routing_probes()
+    failures.extend(converge_failures)
+    ccc_identity_failures, ccc_identity_checked = run_ccc_identity_probes()
+    failures.extend(ccc_identity_failures)
+    producer_gate_failures, producer_gate_checked = run_producer_gate_probes()
+    failures.extend(producer_gate_failures)
+    ship_staging_failures, ship_staging_checked = run_ship_staging_probes()
+    failures.extend(ship_staging_failures)
+    release_freshness_failures, release_freshness_checked = \
+        run_release_freshness_probes()
+    failures.extend(release_freshness_failures)
+    release_executor_failures, release_executor_checked = \
+        run_release_executor_probes()
+    failures.extend(release_executor_failures)
+    rolefresh_failures, rolefresh_checked, rolefresh_skipped = \
+        run_role_freshness_probes()
+    failures.extend(rolefresh_failures)
+    sub_clean_failures, sub_clean_checked, sub_clean_skipped = \
+        run_sub_clean_probes()
+    failures.extend(sub_clean_failures)
+    hardening_failures, hardening_checked = run_hardening_control_inventory()
+    failures.extend(hardening_failures)
+    userperson_failures, userperson_checked = run_userperson_probes()
+    failures.extend(userperson_failures)
+    improve_failures, improve_checked = run_improve_probes()
+    failures.extend(improve_failures)
+    nitro_failures, nitro_checked = run_nitro_probes()
+    failures.extend(nitro_failures)
     nitro_m2_failures, nitro_m2_checked = run_nitro_m2_probes()
-    for problem in nitro_m2_failures:
-        print(f"FAILED: {problem}")
-    print(f"{nitro_m2_checked} nitro-m2 behavior(s) executed")
-    raise SystemExit(1 if nitro_m2_failures else 0)
-
-if os.environ.get("SAIPEN_SAICREW_PROBES_ONLY") == "1":
-    saicrew_failures, saicrew_checked = run_saicrew_probes()
-    for problem in saicrew_failures:
-        print(f"FAILED: {problem}")
-    print(f"{saicrew_checked} saicrew behavior(s) executed")
-    raise SystemExit(1 if saicrew_failures else 0)
-
-if os.environ.get("SAIPEN_HR_PROBES_ONLY") == "1":
+    failures.extend(nitro_m2_failures)
+    nitro_m3_failures, nitro_m3_checked = run_nitro_m3_probes()
+    failures.extend(nitro_m3_failures)
+    nitro_integrity_failures, nitro_integrity_checked = \
+        run_nitro_integrity_probes()
+    failures.extend(nitro_integrity_failures)
+    manifest_failures, manifest_checked = run_manifest_tracking_probes()
+    failures.extend(manifest_failures)
+    lint_parity_failures, lint_parity_checked = run_lint_parity_probes()
+    failures.extend(lint_parity_failures)
+    autoinject_failures, autoinject_checked = run_autoinject_manifest_probes()
+    failures.extend(autoinject_failures)
+    hook_failures, hook_checked, hook_skipped = run_hook_probes()
+    ci_failures, ci_checked = run_ci_status_probes()
+    failures.extend(ci_failures)
+    failures.extend(hook_failures)
+    purity_failures, purity_checked, purity_skipped = run_precommit_purity_probe()
+    failures.extend(purity_failures)
     hr_journal_failures, hr_journal_checked = run_hostile_journal_probes()
+    failures.extend(hr_journal_failures)
     hr_release_failures, hr_release_checked = run_hostile_release_probes()
+    failures.extend(hr_release_failures)
     hr_convergence_failures, hr_convergence_checked = \
         run_hostile_convergence_probes()
+    failures.extend(hr_convergence_failures)
     hr_state_failures, hr_state_checked = run_hostile_state_probes()
-    for problem in (hr_journal_failures + hr_release_failures
-                    + hr_convergence_failures + hr_state_failures):
-        print(f"FAILED: {problem}")
-    print(f"{hr_journal_checked} hostile-regression journal behavior(s) "
-          f"executed, {hr_release_checked} hostile-regression release "
-          f"behavior(s) executed, {hr_convergence_checked} hostile-regression "
-          f"convergence behavior(s) executed, {hr_state_checked} "
-          "hostile-regression state-contract behavior(s) executed")
-    raise SystemExit(1 if (hr_journal_failures or hr_release_failures
-                           or hr_convergence_failures or hr_state_failures)
-                     else 0)
-
-if os.environ.get("SAIPEN_HR_AUTHORITY_PROBES_ONLY") == "1":
-    hr_authority_failures, hr_authority_checked = run_hostile_authority_probes()
-    for problem in hr_authority_failures:
-        print(f"FAILED: {problem}")
-    print(f"{hr_authority_checked} hostile-regression authority behavior(s) "
-          f"executed")
-    raise SystemExit(1 if hr_authority_failures else 0)
-
-if os.environ.get("SAIPEN_NITRO_INTEGRITY_PROBES_ONLY") == "1":
-    nitro_failures, nitro_checked = run_nitro_integrity_probes()
-    for problem in nitro_failures:
-        print(f"FAILED: {problem}")
-    print(f"{nitro_checked} nitro-integrity behavior(s) executed")
-    raise SystemExit(1 if nitro_failures else 0)
-
-if os.environ.get("SAIPEN_SCHEDULER_PROBES_ONLY") == "1":
-    scheduler_failures, scheduler_checked, scheduler_skipped = run_scheduler_probes()
-    for problem in scheduler_failures:
-        print(f"FAILED: {problem}")
-    raise SystemExit(1 if scheduler_failures else 0)
-
-injector_failures, injector_checked, injector_skipped = run_injector_probes()
-failures.extend(injector_failures)
-scheduler_failures, scheduler_checked, scheduler_skipped = run_scheduler_probes()
-failures.extend(scheduler_failures)
-root_failures, root_checked = run_project_root_probes()
-failures.extend(root_failures)
-export_failures, export_checked, export_skipped = run_export_probes()
-failures.extend(export_failures)
-crew_failures, crew_checked, crew_skipped = run_crew_probes()
-failures.extend(crew_failures)
-try:
-    saicrew_failures, saicrew_checked = run_saicrew_probes()
-except Exception as _saicrew_exc:  # harness robustness: a probe assumption
-    # bug must never abort the whole suite and hide every later group's
-    # result; record it and continue.
-    saicrew_failures = [f"saicrew harness crashed: {type(_saicrew_exc).__name__}: {_saicrew_exc}"]
-    saicrew_checked = 0
-failures.extend(saicrew_failures)
-last_event_failures, last_event_checked = run_last_event_probes()
-failures.extend(last_event_failures)
-log_tail_failures, log_tail_checked = run_log_tail_probes()
-failures.extend(log_tail_failures)
-hunt_mark_failures, hunt_mark_checked = run_hunt_mark_probes()
-failures.extend(hunt_mark_failures)
-converge_failures, converge_checked = run_converge_routing_probes()
-failures.extend(converge_failures)
-ccc_identity_failures, ccc_identity_checked = run_ccc_identity_probes()
-failures.extend(ccc_identity_failures)
-producer_gate_failures, producer_gate_checked = run_producer_gate_probes()
-failures.extend(producer_gate_failures)
-ship_staging_failures, ship_staging_checked = run_ship_staging_probes()
-failures.extend(ship_staging_failures)
-release_freshness_failures, release_freshness_checked = \
-    run_release_freshness_probes()
-failures.extend(release_freshness_failures)
-release_executor_failures, release_executor_checked = \
-    run_release_executor_probes()
-failures.extend(release_executor_failures)
-rolefresh_failures, rolefresh_checked, rolefresh_skipped = \
-    run_role_freshness_probes()
-failures.extend(rolefresh_failures)
-sub_clean_failures, sub_clean_checked, sub_clean_skipped = \
-    run_sub_clean_probes()
-failures.extend(sub_clean_failures)
-hardening_failures, hardening_checked = run_hardening_control_inventory()
-failures.extend(hardening_failures)
-userperson_failures, userperson_checked = run_userperson_probes()
-failures.extend(userperson_failures)
-improve_failures, improve_checked = run_improve_probes()
-failures.extend(improve_failures)
-nitro_failures, nitro_checked = run_nitro_probes()
-failures.extend(nitro_failures)
-nitro_m2_failures, nitro_m2_checked = run_nitro_m2_probes()
-failures.extend(nitro_m2_failures)
-nitro_m3_failures, nitro_m3_checked = run_nitro_m3_probes()
-failures.extend(nitro_m3_failures)
-nitro_integrity_failures, nitro_integrity_checked = \
-    run_nitro_integrity_probes()
-failures.extend(nitro_integrity_failures)
-manifest_failures, manifest_checked = run_manifest_tracking_probes()
-failures.extend(manifest_failures)
-lint_parity_failures, lint_parity_checked = run_lint_parity_probes()
-failures.extend(lint_parity_failures)
-autoinject_failures, autoinject_checked = run_autoinject_manifest_probes()
-failures.extend(autoinject_failures)
-hook_failures, hook_checked, hook_skipped = run_hook_probes()
-ci_failures, ci_checked = run_ci_status_probes()
-failures.extend(ci_failures)
-failures.extend(hook_failures)
-purity_failures, purity_checked, purity_skipped = run_precommit_purity_probe()
-failures.extend(purity_failures)
-hr_journal_failures, hr_journal_checked = run_hostile_journal_probes()
-failures.extend(hr_journal_failures)
-hr_release_failures, hr_release_checked = run_hostile_release_probes()
-failures.extend(hr_release_failures)
-hr_convergence_failures, hr_convergence_checked = \
-    run_hostile_convergence_probes()
-failures.extend(hr_convergence_failures)
-hr_state_failures, hr_state_checked = run_hostile_state_probes()
-failures.extend(hr_state_failures)
-hr_authority_failures, hr_authority_checked = \
-    run_hostile_authority_probes()
-failures.extend(hr_authority_failures)
-hr_wait_failures, hr_wait_checked = run_hostile_wait_probes()
-failures.extend(hr_wait_failures)
+    failures.extend(hr_state_failures)
+    hr_authority_failures, hr_authority_checked = \
+        run_hostile_authority_probes()
+    failures.extend(hr_authority_failures)
+    hr_wait_failures, hr_wait_checked = run_hostile_wait_probes()
+    failures.extend(hr_wait_failures)
+    
+    
+    digest_failures, digest_checked = run_digest_stale_probes()
+    failures.extend(digest_failures)
+    orphan_failures, orphan_checked = run_orphan_tag_probes()
+    failures.extend(orphan_failures)
+    ship_pick_failures, ship_pick_checked = run_ship_pick_probes()
+    active_task_failures, active_task_checked = run_active_task_recovery_probes()
+    failures.extend(ship_pick_failures)
+    failures.extend(active_task_failures)
+    t1012_failures, t1012_checked = run_t1012_strict_grammar_probes()
+    failures.extend(t1012_failures)
+    print(f"\n{checked} executable fixture(s) checked, "
+          f"{skipped} behavioral fixture(s) skipped (README-only by design)")
+    print(f"{injector_checked} injector(s) executed, "
+          f"{injector_skipped} skipped for missing interpreters")
+    print(f"{scheduler_checked} scheduler behavior(s) executed, "
+          f"{scheduler_skipped} skipped for missing interpreters")
+    print(f"{root_checked} project-root behavior(s) executed")
+    print(f"{export_checked} export ownership behavior(s) executed, "
+          f"{export_skipped} skipped for missing interpreters")
+    print(f"{crew_checked} crew-launch behavior(s) executed, "
+          f"{crew_skipped} skipped for missing interpreters")
+    print(f"{saicrew_checked} saicrew hostile-control behavior(s) executed")
+    print(f"{digest_checked} digest-stale behavior(s) executed")
+    print(f"{orphan_checked} orphan-tag behavior(s) executed")
+    print(f"{ship_pick_checked} ship-pick behavior(s) executed")
+    print(f"{active_task_checked} active-task recovery behavior(s) executed")
+    print(f"{last_event_checked} last_event migration behavior(s) executed")
+    print(f"{log_tail_checked} log-tail behavior(s) executed")
+    print(f"{hunt_mark_checked} hunt-mark behavior(s) executed")
+    print(f"{converge_checked} converge-routing behavior(s) executed")
+    print(f"{ccc_identity_checked} ccc commit-identity behavior(s) executed")
+    print(f"{producer_gate_checked} producer-gate behavior(s) executed")
+    print(f"{ship_staging_checked} ship-staging behavior(s) executed")
+    print(f"{release_freshness_checked} release-freshness behavior(s) executed")
+    print(f"{release_executor_checked} release-executor behavior(s) executed")
+    print(f"{rolefresh_checked} role-freshness behavior(s) executed, "
+          f"{rolefresh_skipped} skipped for missing host capability")
+    print(f"{sub_clean_checked} sub-clean safety behavior(s) executed, "
+          f"{sub_clean_skipped} skipped for missing host capability")
+    print(f"{hardening_checked} hardening red control(s) resolved")
+    print(f"{hr_state_checked} hostile-regression state-contract behavior(s) "
+          "executed")
+    print(f"{hr_wait_checked} hostile-regression WAIT-grammar behavior(s) "
+          "executed")
+    print(f"{userperson_checked} userperson behavior(s) executed")
+    print(f"{improve_checked} improve behavior(s) executed")
+    print(f"{nitro_checked} nitro behavior(s) executed")
+    print(f"{nitro_m2_checked} nitro-m2 behavior(s) executed")
+    print(f"{nitro_m3_checked} nitro-m3 behavior(s) executed")
+    print(f"{nitro_integrity_checked} nitro-integrity behavior(s) executed")
+    print(f"{purity_checked} pre-commit-purity behavior(s) executed, "
+          f"{purity_skipped} skipped for missing interpreters")
+    print(f"{manifest_checked} manifest-tracking behavior(s) executed")
+    print(f"{lint_parity_checked} lint-parity behavior(s) executed")
+    print(f"{autoinject_checked} autoinject-manifest behavior(s) executed")
+    print(f"{hook_checked} installed-hook behavior(s) executed, "
+          f"{hook_skipped} skipped for missing interpreters")
+    print(f"{ci_checked} ci-status behavior(s) executed")
+    print(f"{hr_journal_checked} hostile-regression journal behavior(s) executed")
+    print(f"{hr_release_checked} hostile-regression release behavior(s) executed")
+    print(f"{hr_convergence_checked} hostile-regression convergence behavior(s) executed")
+    
+    if failures:
+        print(f"\nFAILED: {len(failures)} executable check(s) failed")
+        for f in failures:
+            print(f"  - {f}")
+        sys.exit(1)
+    
+    if checked == 0:
+        # A run that checked nothing is not a pass (phases/verify.md: a gate that
+        # cannot fail is not a gate).
+        print("FAILED: no executable fixtures found -- this suite collected 0 tests")
+        sys.exit(1)
+    
+    print("All executable scenarios and injector probes passed.")
 
 
-digest_failures, digest_checked = run_digest_stale_probes()
-failures.extend(digest_failures)
-orphan_failures, orphan_checked = run_orphan_tag_probes()
-failures.extend(orphan_failures)
-ship_pick_failures, ship_pick_checked = run_ship_pick_probes()
-active_task_failures, active_task_checked = run_active_task_recovery_probes()
-failures.extend(ship_pick_failures)
-failures.extend(active_task_failures)
-print(f"\n{checked} executable fixture(s) checked, "
-      f"{skipped} behavioral fixture(s) skipped (README-only by design)")
-print(f"{injector_checked} injector(s) executed, "
-      f"{injector_skipped} skipped for missing interpreters")
-print(f"{scheduler_checked} scheduler behavior(s) executed, "
-      f"{scheduler_skipped} skipped for missing interpreters")
-print(f"{root_checked} project-root behavior(s) executed")
-print(f"{export_checked} export ownership behavior(s) executed, "
-      f"{export_skipped} skipped for missing interpreters")
-print(f"{crew_checked} crew-launch behavior(s) executed, "
-      f"{crew_skipped} skipped for missing interpreters")
-print(f"{saicrew_checked} saicrew hostile-control behavior(s) executed")
-print(f"{digest_checked} digest-stale behavior(s) executed")
-print(f"{orphan_checked} orphan-tag behavior(s) executed")
-print(f"{ship_pick_checked} ship-pick behavior(s) executed")
-print(f"{active_task_checked} active-task recovery behavior(s) executed")
-print(f"{last_event_checked} last_event migration behavior(s) executed")
-print(f"{log_tail_checked} log-tail behavior(s) executed")
-print(f"{hunt_mark_checked} hunt-mark behavior(s) executed")
-print(f"{converge_checked} converge-routing behavior(s) executed")
-print(f"{ccc_identity_checked} ccc commit-identity behavior(s) executed")
-print(f"{producer_gate_checked} producer-gate behavior(s) executed")
-print(f"{ship_staging_checked} ship-staging behavior(s) executed")
-print(f"{release_freshness_checked} release-freshness behavior(s) executed")
-print(f"{release_executor_checked} release-executor behavior(s) executed")
-print(f"{rolefresh_checked} role-freshness behavior(s) executed, "
-      f"{rolefresh_skipped} skipped for missing host capability")
-print(f"{sub_clean_checked} sub-clean safety behavior(s) executed, "
-      f"{sub_clean_skipped} skipped for missing host capability")
-print(f"{hardening_checked} hardening red control(s) resolved")
-print(f"{hr_state_checked} hostile-regression state-contract behavior(s) "
-      "executed")
-print(f"{hr_wait_checked} hostile-regression WAIT-grammar behavior(s) "
-      "executed")
-print(f"{userperson_checked} userperson behavior(s) executed")
-print(f"{improve_checked} improve behavior(s) executed")
-print(f"{nitro_checked} nitro behavior(s) executed")
-print(f"{nitro_m2_checked} nitro-m2 behavior(s) executed")
-print(f"{nitro_m3_checked} nitro-m3 behavior(s) executed")
-print(f"{nitro_integrity_checked} nitro-integrity behavior(s) executed")
-print(f"{purity_checked} pre-commit-purity behavior(s) executed, "
-      f"{purity_skipped} skipped for missing interpreters")
-print(f"{manifest_checked} manifest-tracking behavior(s) executed")
-print(f"{lint_parity_checked} lint-parity behavior(s) executed")
-print(f"{autoinject_checked} autoinject-manifest behavior(s) executed")
-print(f"{hook_checked} installed-hook behavior(s) executed, "
-      f"{hook_skipped} skipped for missing interpreters")
-print(f"{ci_checked} ci-status behavior(s) executed")
-print(f"{hr_journal_checked} hostile-regression journal behavior(s) executed")
-print(f"{hr_release_checked} hostile-regression release behavior(s) executed")
-print(f"{hr_convergence_checked} hostile-regression convergence behavior(s) executed")
-
-if failures:
-    print(f"\nFAILED: {len(failures)} executable check(s) failed")
-    for f in failures:
-        print(f"  - {f}")
-    sys.exit(1)
-
-if checked == 0:
-    # A run that checked nothing is not a pass (phases/verify.md: a gate that
-    # cannot fail is not a gate).
-    print("FAILED: no executable fixtures found -- this suite collected 0 tests")
-    sys.exit(1)
-
-print("All executable scenarios and injector probes passed.")
+if __name__ == "__main__":
+    main()

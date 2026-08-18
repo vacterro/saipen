@@ -971,7 +971,7 @@ CASES: list[tuple[str, str, object, str]] = [
      drop_line("style_contract"), "requires style_contract"),
     ("style_contract names a different voice contract", STATE,
      sub_line("style_contract", "ded-deadbeef"),
-     "did not read the current STYLE.md"),
+     "did not read the current voice contract"),
     # T-573: STATE.task and ## DOING are one binding. The v7.215.0 crash
     # checkpoint claimed task T-572 while no ## DOING ticket existed and
     # T-572 sat in ## TODO -- validator-conformant until this rule. Both

@@ -34,15 +34,40 @@ AGENT = "saipen-cli"
 HOME = Path(__file__).resolve().parent.parent
 VERSION_FILE = HOME / "VERSION"
 
+# The CURRENT-SESSION acting identity (hostile-regression, second-wave P0).
+# Persisted STATE.agent is HISTORICAL last-writer evidence and must NEVER
+# become the current actor: a new agent B entering state last written by A
+# would otherwise impersonate A, see A's live claim as SELF, and write
+# LOG/STATE/BOARD evidence naming the wrong actor. The bare CLI defaults to
+# `saipen-cli`; an explicit `--agent <id>` overrides it for the whole session.
+_SESSION_AGENT: str = AGENT
+
 
 def _agent_for(project_root: Path) -> str:
-    """The acting seat, inherited from STATE (never invented by the CLI)."""
-    state_path = _state_path(project_root)
-    if state_path.is_file():
-        state, _ = parse_state_or_error(codec.read_doc(state_path))
-        if state and state.get("agent"):
-            return state["agent"]
-    return AGENT
+    """The CURRENT-SESSION acting identity (hostile-regression, second-wave P0).
+
+    NEVER derived from persisted STATE.agent -- that field is historical
+    last-writer evidence only. `project_root` is accepted so the signature
+    stays stable for callers, and deliberately UNUSED: reading STATE here is
+    exactly the impersonation this closes."""
+    return _SESSION_AGENT
+
+
+_TERMINAL_RESULT_RE = re.compile(r"->\s*(PASS|FAIL)\s*$")
+
+
+def _validator_terminal_result(txt: str) -> str:
+    """The canonical terminal result of a validator RUN event, or UNKNOWN
+    (second-wave P2).
+
+    Only an EXACT `-> PASS` / `-> FAIL` terminal token counts as a result.
+    Anything else -- `NOT PASS`, `BYPASS`, `PASSING`, mixed failure prose, or a
+    missing terminal token -- is UNKNOWN and is never promoted to a conformance
+    PASS."""
+    m = _TERMINAL_RESULT_RE.search(txt)
+    if not m:
+        return "UNKNOWN"
+    return "PASS" if m.group(1) == "PASS" else "FAIL"
 
 
 def _protocol_version() -> str:
@@ -128,7 +153,12 @@ def _status(project_root: Path, as_json: bool) -> int:
         _emit({"ok": False, "code": "VALIDATION_FAILED",
                "detail": f"state-malformed: {state_error}"}, as_json)
         return 1
-    snap = snapshot.ProjectSnapshot.capture(project_root)
+    try:
+        snap = snapshot.ProjectSnapshot.capture(project_root)
+    except (OSError, ValueError) as exc:
+        _emit({"ok": False, "code": "VALIDATION_FAILED",
+               "detail": f"history-ownership: {exc}"}, as_json)
+        return 1
     board_path = project_root / ".saipen" / "BOARD.md"
     board = parse_board(codec.read_doc(board_path)) if board_path.is_file() else {"tickets": {}, "errors": []}
     doing = [t for t in board["tickets"].values()
@@ -141,7 +171,7 @@ def _status(project_root: Path, as_json: bool) -> int:
     if not board["errors"]:
         for ticket in todo:
             if ticket_is_workable(ticket, board["tickets"],
-                                  agent=state.get("agent")):
+                                  agent=_SESSION_AGENT):
                 top_workable = ticket["id"]
                 break
     pending, conflicts = _pending_state(project_root)
@@ -155,10 +185,12 @@ def _status(project_root: Path, as_json: bool) -> int:
     from saipen_engine.router import (route_next, routing_failure_code)
     # P0#4: the freshly negotiated current-session capability gates routing --
     # a read-only session routes RESTATE_AND_STOP, never a mutating action.
+    # Second-wave P0: current identity is the SESSION agent, never STATE.agent.
     routed = route_next(codec.read_doc(state_path),
                         codec.read_doc(board_path) if board_path.is_file() else "",
                         pending, conflicts,
-                        current_capability=_negotiate_capability(project_root))
+                        current_capability=_negotiate_capability(project_root),
+                        current_agent=_SESSION_AGENT)
     if not routed.get("ok") and routing_failure_code(routed) == "VALIDATION_FAILED":
         # A malformed/binding failure must NOT project a healthy surface from
         # corrupt input (T-1003): status fails closed with the router's
@@ -207,7 +239,13 @@ def _status(project_root: Path, as_json: bool) -> int:
         tax = ev.get("taxonomy", "")
         if tax == "RUN" and ("validate.py" in txt or "validate.sh" in txt or "validate.ps1" in txt):
             m_date = ev.get("date") or ""
-            res = "PASS" if "PASS" in txt else ("FAIL" if "FAIL" in txt else txt)
+            # Second-wave P2: parse ONLY the canonical terminal result of the
+            # validator RUN (`-> PASS` / `-> FAIL` as an exact result token).
+            # A substring test would promote free event text like `NOT PASS`,
+            # `BYPASS`, `PASSING` or mixed failure prose to a conformance PASS
+            # although no exact successful result was recorded. Noncanonical
+            # text stays UNKNOWN/raw and is never promoted to PASS.
+            res = _validator_terminal_result(txt)
             if m_date:
                 conformance = f"{res} ({m_date})"
             else:
@@ -291,8 +329,10 @@ def _next_action(project_root: Path, as_json: bool) -> int:
     from saipen_engine.router import (load_for_action, route_next,
                                       routing_failure_code)
     # P0#4: the freshly negotiated current-session capability gates routing.
+    # Second-wave P0: current identity is the SESSION agent, never STATE.agent.
     routed = route_next(state_text, board_text, pending, conflicts,
-                        current_capability=_negotiate_capability(project_root))
+                        current_capability=_negotiate_capability(project_root),
+                        current_agent=_SESSION_AGENT)
     if not routed.get("ok"):
         # The router owns the stable failure code: recovery conflicts/pending
         # are RECOVERY_*; malformed/binding failures are VALIDATION_FAILED
@@ -519,10 +559,12 @@ def _crew(project_root: Path, args: list[str], as_json: bool,
         return 2
     from saipen_engine.crew import crew_apply, crew_plan
     # P0#4: inject the freshly negotiated current-session capability so a
-    # read-only session cannot close a crew release.
+    # read-only session cannot close a crew release. Second-wave P0: the
+    # acting identity is the SESSION agent, never persisted STATE.agent.
     capability = _negotiate_capability(project_root)
     if dry_run:
-        plan = crew_plan(project_root, current_capability=capability)
+        plan = crew_plan(project_root, current_capability=capability,
+                         current_agent=_agent_for(project_root))
         _emit({"ok": plan.get("ok"), "code": "CREW_PLAN",
                "crew_complete": plan.get("crew_complete"),
                "action_required": plan.get("action_required"),
@@ -531,7 +573,8 @@ def _crew(project_root: Path, args: list[str], as_json: bool,
         # failure -- ok:true / exit 0. Nonzero exit is reserved for a
         # structurally invalid or refused derivation.
         return 0 if plan.get("ok") else 1
-    result = crew_apply(project_root, current_capability=capability)
+    result = crew_apply(project_root, current_capability=capability,
+                        current_agent=_agent_for(project_root))
     _emit(result.to_dict(), as_json)
     return 0 if result.ok else 1
 
@@ -548,6 +591,7 @@ def _context(project_root: Path, args: list[str], as_json: bool,
                "detail": f"context accepts exactly one mode; surplus: {' '.join(args[1:])}"}, as_json)
         return 2
     from saipen_engine.context import context_audit, context_cold, context_hot
+    from saipen_engine.log import HistoryOwnershipError
 
     mode = args[0]
     fn = {"cold": context_cold, "hot": context_hot,
@@ -557,7 +601,22 @@ def _context(project_root: Path, args: list[str], as_json: bool,
                "detail": f"unknown context mode {mode!r}; use cold|hot|audit"},
               as_json)
         return 2
-    result = fn(project_root)
+    try:
+        # Second-wave P0: the projection routes as the SESSION agent, so
+        # `context hot --agent B` reports A's live claim as FOREIGN instead of
+        # impersonating A. audit has no routing surface and takes no agent.
+        if mode == "audit":
+            result = fn(project_root)
+        else:
+            result = fn(project_root, current_agent=_agent_for(project_root))
+    except (HistoryOwnershipError, OSError) as exc:
+        # Deterministic read-only failure contract (second-wave P1): a
+        # symlinked/unreadable history node or canonical file must surface as
+        # structured VALIDATION_FAILED with the reason, never a traceback.
+        _emit({"ok": False, "code": "VALIDATION_FAILED",
+               "detail": f"history-ownership: {type(exc).__name__}: {exc}"},
+              as_json)
+        return 1
     if as_json:
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
@@ -1277,9 +1336,16 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
 
     clean_before: list[str] = []
     i = 0
+    agent_opt: str | None = None
     while i < len(before_dashdash):
         arg = before_dashdash[i]
         if arg in ("--json", "--dry-run"):
+            i += 1
+        elif arg == "--agent" and i + 1 < len(before_dashdash):
+            agent_opt = before_dashdash[i + 1]
+            i += 2
+        elif arg.startswith("--agent="):
+            agent_opt = arg.split("=", 1)[1]
             i += 1
         elif arg == "--project-root" and i + 1 < len(before_dashdash):
             project_root_opt = before_dashdash[i + 1]
@@ -1292,6 +1358,13 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
             i += 1
 
     args = clean_before + (["--"] + after_dashdash if "--" in raw_args else [])
+
+    # Second-wave P0: the current actor is SESSION-OWNED. An explicit
+    # `--agent <id>` names the actor for this whole invocation; the bare CLI
+    # defaults to `saipen-cli`. STATE.agent is NEVER consulted for identity.
+    global _SESSION_AGENT
+    _SESSION_AGENT = (agent_opt.strip() if agent_opt and agent_opt.strip()
+                      else AGENT)
 
     if not args or args[0] in ("-h", "--help"):
         usage_msg = (
@@ -1308,7 +1381,7 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
             "ship|push|scope <T-###> <path>...|first-publish-confirm "
             "<name> <public|private>|userperson|sub|rebind-home "
             "<candidate-home>|context) [--dry-run] "
-            "[--json] [--project-root PATH]"
+            "[--json] [--project-root PATH] [--agent ID]"
         )
         if as_json:
             _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": usage_msg}, as_json)
@@ -1532,10 +1605,12 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
                                            execute_release, plan_release)
         try:
             # P0#4: inject the freshly negotiated current-session capability so
-            # a read-only session cannot PLAN a release.
+            # a read-only session cannot PLAN a release. Second-wave P0: the
+            # acting identity is the SESSION agent, never persisted STATE.agent.
             plan = plan_release(project_root, command, dry_run=dry_run,
                                 current_capability=_negotiate_capability(
-                                    project_root))
+                                    project_root),
+                                current_agent=_agent_for(project_root))
         except ReleaseRefusal as exc:
             _emit({"ok": False, "code": exc.code, "detail": exc.detail},
                   as_json)

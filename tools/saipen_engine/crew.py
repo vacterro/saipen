@@ -592,7 +592,8 @@ def _home_problem(snapshot: CrewSnapshot) -> str | None:
     return snapshot.home_problem
 
 
-def _core_fixed_point(snapshot: CrewSnapshot) -> tuple[bool, str]:
+def _core_fixed_point(snapshot: CrewSnapshot,
+                      session_agent: str | None = None) -> tuple[bool, str]:
     """SC-7 fixed point (Wave 2 items 1/14): ONE shared convergence verdict
     plus attribution. DONE + task none + an empty workable board is NOT
     convergence proof -- the canonical E-I sequence (TEST, forced HUNT, CLEAN,
@@ -600,9 +601,16 @@ def _core_fixed_point(snapshot: CrewSnapshot) -> tuple[bool, str]:
     identity by structured receipts, and the working tree must be fully
     attributed. Missing/stale proof => UNSATISFIED => CONVERGE_CORE, never
     "phase DONE => tests probably happened".
-    """
+
+    `session_agent` is the CURRENT-SESSION actor (second-wave P0): closure
+    workability is judged relative to THIS identity, never to persisted
+    STATE.agent (historical last-writer evidence). When None (a caller that
+    does not know its own identity) the historical value is used for
+    backward compatibility; the CLI/adapters always supply the session
+    identity."""
+    actor = session_agent or snapshot.state.get("agent") or "saipen-cli"
     errors = convergence_closure_problems(
-        snapshot.board, snapshot.state.get("agent"),
+        snapshot.board, actor,
         wait_role_roles=frozenset(role.name for role in CREW_ROLES))
     if snapshot.state.get("phase") != "DONE":
         errors.append(f"Core phase is {snapshot.state.get('phase')!r}, not DONE")
@@ -1174,7 +1182,9 @@ def _wait_role_dispositions(snapshot: CrewSnapshot) -> list[str]:
 
 
 def _evaluate(snapshot: CrewSnapshot,
-              ignore_active_task: bool = False) -> tuple[list[dict], CrewAction | None]:
+              ignore_active_task: bool = False,
+              session_agent: str | None = None) \
+        -> tuple[list[dict], CrewAction | None]:
     evaluations: list[tuple[str, str, str, str, CrewAction | None]] = []
     home_problem = _home_problem(snapshot)
     contract = snapshot.contract_status
@@ -1338,7 +1348,7 @@ def _evaluate(snapshot: CrewSnapshot,
                         SATISFIED if not (ready or dispositions)
                         else UNSATISFIED, sc6_reason, sc6_action))
 
-    core_ok, core_reason = _core_fixed_point(snapshot)
+    core_ok, core_reason = _core_fixed_point(snapshot, session_agent)
     evaluations.append(("SC-7", _STAGE_NAMES["SC-7"],
                         SATISFIED if core_ok else UNSATISFIED, core_reason,
                         None if core_ok else _action(
@@ -1493,10 +1503,11 @@ def _first_action(stages: list[dict]) -> CrewAction | None:
 
 
 def crew_plan(project_root: Path | str,
-              current_capability: str | None = None) -> dict:
+              current_capability: str | None = None,
+              current_agent: str | None = None) -> dict:
     snapshot = crew_snapshot(project_root,
                              current_capability=current_capability)
-    stages, action = _evaluate(snapshot)
+    stages, action = _evaluate(snapshot, session_agent=current_agent)
     substantive_ok = all(stage["state"] == SATISFIED
                          for stage in stages if stage["stage"] != "SC-13")
     state = snapshot.state
@@ -1539,8 +1550,9 @@ def crew_plan(project_root: Path | str,
             "finalized": finalized}
 
 
-def _finalize_problems(snapshot: CrewSnapshot) -> list[str]:
-    stages, _action_value = _evaluate(snapshot)
+def _finalize_problems(snapshot: CrewSnapshot,
+                       session_agent: str | None = None) -> list[str]:
+    stages, _action_value = _evaluate(snapshot, session_agent=session_agent)
     problems = [f"{stage['stage']}: {stage['reason']}" for stage in stages
                 if stage["stage"] != "SC-13" and stage["state"] != SATISFIED]
     if snapshot.state.get("execution_intent") != "converge" \
@@ -1555,13 +1567,14 @@ def crew_ready_to_finalize(project_root: Path | str) -> tuple[bool, list[str]]:
     return not problems, problems
 
 
-def finalize_crew(project_root: Path | str, dry_run: bool = False) -> Result:
+def finalize_crew(project_root: Path | str, dry_run: bool = False,
+                  current_agent: str | None = None) -> Result:
     root = Path(project_root)
     # ONE coherent snapshot owns both the verdict and the CAS tokens handed to
     # the canonical finalizer. A second independent snapshot would open a gap
     # where role evidence could change after the green verdict.
     snapshot = crew_snapshot(root)
-    problems = _finalize_problems(snapshot)
+    problems = _finalize_problems(snapshot, session_agent=current_agent)
     if problems:
         return _refuse("VALIDATION_FAILED",
                        "crew not ready to finalize: " + "; ".join(problems[:4]))
@@ -1570,6 +1583,7 @@ def finalize_crew(project_root: Path | str, dry_run: bool = False) -> Result:
     if release is None or epoch is None:
         return _refuse("VALIDATION_FAILED", "crew release/epoch evidence missing")
     from .operations import finalize_converge_intent
+    actor = current_agent or snapshot.state.get("agent") or "saipen-cli"
     message = (f"crew finalized {epoch.op_id} release {release.tag} "
                f"@{release.closure_commit}")
     # T-1003 finding 9: the finalizer receipt carries STRUCTURED semantics
@@ -1609,7 +1623,7 @@ def finalize_crew(project_root: Path | str, dry_run: bool = False) -> Result:
     except OSError:
         pass
     return finalize_converge_intent(
-        root, snapshot.state.get("agent") or "saipen-cli", "crew", message,
+        root, actor, "crew", message,
         ticket_id=epoch.ticket, dry_run=dry_run,
         evidence_preconditions=snapshot.input_hashes,
         receipt_metadata={
@@ -1626,12 +1640,17 @@ def finalize_crew(project_root: Path | str, dry_run: bool = False) -> Result:
 
 
 def crew_apply(project_root: Path | str,
-               current_capability: str | None = None) -> Result:
+               current_capability: str | None = None,
+               current_agent: str | None = None) -> Result:
     """Execute exactly one bounded mechanical crew action.
 
     P0#4: `current_capability` is the freshly negotiated CURRENT-SESSION
     capability. A read-only session may not execute ANY crew action -- the
     persisted STATE.mode is historical and never grants current authority.
+    `current_agent` is the CURRENT-SESSION actor: every crew RUN/receipt/
+    closure names THIS identity, never persisted STATE.agent (second-wave
+    P0). None falls back to the historical value for legacy callers; the
+    CLI always supplies the session identity.
     """
     root = Path(project_root)
     if current_capability == "read-only":
@@ -1644,7 +1663,8 @@ def crew_apply(project_root: Path | str,
     if pending_ops(root):
         return _refuse("RECOVERY_REQUIRED", "unresolved operation; recover first")
     from .fast_check import validate_project
-    base_errors = validate_project(root)
+    actor = current_agent or "saipen-cli"
+    base_errors = validate_project(root, current_agent=actor)
     if base_errors:
         return _refuse("VALIDATION_FAILED", "; ".join(base_errors[:5]))
     snapshot = crew_snapshot(root, current_capability=current_capability)
@@ -1657,16 +1677,17 @@ def crew_apply(project_root: Path | str,
     if snapshot.state.get("execution_intent") != "converge" \
             or snapshot.state.get("converge_target") != "crew":
         from .operations import set_converge_intent
-        intent = set_converge_intent(
-            root, snapshot.state.get("agent") or "saipen-cli", "crew")
+        intent = set_converge_intent(root, actor, "crew")
         if not intent.ok:
             return intent
-        plan = crew_plan(root, current_capability=current_capability)
+        plan = crew_plan(root, current_capability=current_capability,
+                         current_agent=actor)
         return Result(ok=True, code="CREW_INTENT_SET", op_id=intent.op_id,
                       changed_files=intent.changed_files,
                       data={"plan": plan, "action": plan.get("action")})
 
-    plan = crew_plan(root, current_capability=current_capability)
+    plan = crew_plan(root, current_capability=current_capability,
+                     current_agent=actor)
     action = plan.get("action") or {}
     kind = action.get("action")
     role = action.get("role")
@@ -1677,7 +1698,7 @@ def crew_apply(project_root: Path | str,
     if kind == "ADOPT_ROLE":
         return sub_adopt(root, role, snapshot.saipen_home)
     if kind == "FINALIZE":
-        return finalize_crew(root)
+        return finalize_crew(root, current_agent=actor)
     if kind == "DEFER_FOR_CREW":
         # Item 4: an ordinary SHIP ticket under active crew closes LOCALLY as
         # deferred -- zero publication -- and Core returns to the planner.
@@ -1690,9 +1711,7 @@ def crew_apply(project_root: Path | str,
         if snapshot.epoch is None:
             return _refuse("VALIDATION_FAILED",
                            "DEFER_FOR_CREW requires an active crew epoch")
-        return defer_for_crew(root, ticket,
-                              snapshot.state.get("agent") or "saipen-cli",
-                              snapshot.epoch.op_id)
+        return defer_for_crew(root, ticket, actor, snapshot.epoch.op_id)
     if kind == "CLEAR_WAIT_ROLE":
         # Item 10: the owning role's evidence has arrived; the WAIT_ROLE
         # blocker is mechanically disposed (unblocked to DONE), never a
@@ -1702,8 +1721,7 @@ def crew_apply(project_root: Path | str,
         if not ticket.startswith("T-"):
             return _refuse("VALIDATION_FAILED",
                            "CLEAR_WAIT_ROLE carries no Core ticket identity")
-        return _clear_wait_role(root, ticket,
-                                snapshot.state.get("agent") or "saipen-cli")
+        return _clear_wait_role(root, ticket, actor)
     if kind == "DONE":
         return Result(ok=True, code="CREW_DONE",
                       data={"plan": plan, "crew_complete": True,

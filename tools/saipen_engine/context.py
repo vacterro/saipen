@@ -42,7 +42,7 @@ from pathlib import Path
 
 from . import codec
 from .board import parse_board
-from .log import parse_log_line
+from .log import HistoryOwnershipError, parse_log_line
 from .result import Result
 
 _TAIL_EVENTS = 12
@@ -188,6 +188,27 @@ def _load_context_inputs(root: Path) -> dict:
     }
 
 
+def _load_inputs_checked(root: Path) -> Result | dict:
+    """ONE call-scoped capture, converted to the deterministic read-only
+    failure contract (second-wave P1).
+
+    A symlinked/junction/reparse or non-regular history node raises
+    `HistoryOwnershipError` (external bytes must never enter the digest or the
+    ledger); an unreadable canonical file raises OSError. Both MUST surface as
+    the same structured `VALIDATION_FAILED` result other read-only commands
+    return -- never a raw traceback, and never a partial surface built from
+    what could be read before the refusal."""
+    try:
+        return _load_context_inputs(root)
+    except HistoryOwnershipError as exc:
+        return Result(ok=False, code="VALIDATION_FAILED", op_id="",
+                      message=f"history-ownership: {exc}", data={})
+    except OSError as exc:
+        return Result(ok=False, code="VALIDATION_FAILED", op_id="",
+                      message=f"history-ownership: {type(exc).__name__}: "
+                              f"{exc}", data={})
+
+
 def _fit(fixed: str, limit: int, board_fn, log_fn,
          board_header: str = "## BOARD MAP",
          log_header: str = "## LOG TAIL") -> tuple[str, str]:
@@ -229,7 +250,8 @@ def _fit(fixed: str, limit: int, board_fn, log_fn,
 
 
 def context_cold(project_root: Path | str, limit: int = 4000,
-                 _inputs: dict | None = None) -> Result:
+                 _inputs: dict | None = None,
+                 current_agent: str | None = None) -> Result:
     """Minimal cold-start surface with STRUCTURAL budgeting.
 
     Uses the SHARED router (NITRO dogfood II), so it cannot echo a stale
@@ -239,7 +261,9 @@ def context_cold(project_root: Path | str, limit: int = 4000,
     `_load_context_inputs` (audit reuses one world); when None the public
     API loads a fresh world itself."""
     root = Path(project_root)
-    inputs = _inputs if _inputs is not None else _load_context_inputs(root)
+    inputs = _inputs if _inputs is not None else _load_inputs_checked(root)
+    if isinstance(inputs, Result):
+        return inputs
     state_text = inputs["state_text"]
     board_text = inputs["board_text"]
     log_text = inputs["log_text"]
@@ -255,9 +279,12 @@ def context_cold(project_root: Path | str, limit: int = 4000,
     # P0#4: the cold-start projection routes under the CURRENT-SESSION
     # capability, never the persisted STATE.mode -- a read-only session is
     # handed an inspect-only action even when the last handshake was full.
+    # Second-wave P0: claim truth is judged relative to the SESSION identity,
+    # never to persisted STATE.agent.
     from .capability import negotiate_capability
     routed = route_next(state_text, board_text, pending, conflicts,
-                        current_capability=negotiate_capability())
+                        current_capability=negotiate_capability(),
+                        current_agent=current_agent)
     if not routed.get("ok") and routing_failure_code(routed) \
             == "VALIDATION_FAILED":
         # A malformed surface must not project a healthy cold start: the
@@ -326,14 +353,17 @@ def context_cold(project_root: Path | str, limit: int = 4000,
 
 
 def context_hot(project_root: Path | str, limit: int = 3000,
-                _inputs: dict | None = None) -> Result:
+                _inputs: dict | None = None,
+                current_agent: str | None = None) -> Result:
     """Current-work surface: STATE + computed next + active ticket + recent
     LOG + recovery state. Shares the router (NITRO dogfood II); metrics
     describe the emitted surface (NITRO dogfood IV, T-600). `_inputs` is the
     call-scoped capture from `_load_context_inputs` (audit reuses one world);
     when None the public API loads a fresh world itself."""
     root = Path(project_root)
-    inputs = _inputs if _inputs is not None else _load_context_inputs(root)
+    inputs = _inputs if _inputs is not None else _load_inputs_checked(root)
+    if isinstance(inputs, Result):
+        return inputs
     state_text = inputs["state_text"]
     board_text = inputs["board_text"]
     log_text = inputs["log_text"]
@@ -349,10 +379,11 @@ def context_hot(project_root: Path | str, limit: int = 3000,
     conflicts = inputs["conflicts"]
     from .router import route_next, routing_failure_code
     # P0#4: same current-session capability authority as the cold-start
-    # projection above.
+    # projection above. Second-wave P0: same session-agent claim truth.
     from .capability import negotiate_capability
     routed = route_next(state_text, board_text, pending, conflicts,
-                        current_capability=negotiate_capability())
+                        current_capability=negotiate_capability(),
+                        current_agent=current_agent)
     if not routed.get("ok") and routing_failure_code(routed) \
             == "VALIDATION_FAILED":
         return Result(ok=False, code="VALIDATION_FAILED", op_id="",
@@ -416,7 +447,9 @@ def context_audit(project_root: Path | str) -> Result:
     # perf pass). LOG evidence covers the SAME complete sealed+active history
     # the snapshot measures: an empty active LOG with sealed events must never
     # read as "(no events)" next to a non-empty log_tail.
-    inputs = _load_context_inputs(root)
+    inputs = _load_inputs_checked(root)
+    if isinstance(inputs, Result):
+        return inputs
     sources = {
         "STATE.md": inputs["state_text"],
         "BOARD.md": inputs["board_text"],

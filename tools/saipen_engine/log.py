@@ -5,6 +5,8 @@ from __future__ import annotations
 import re
 
 import hashlib
+import os
+import stat
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -43,6 +45,22 @@ def _segment_number(path: Path | str) -> int:
     return int(m.group(1)) if m else -1
 
 
+def _is_reparse(info) -> bool:
+    """Windows reparse point (junction/symlink/symlinked-dir) probe."""
+    return bool(getattr(info, "st_file_attributes", 0) & 0x400)
+
+
+class HistoryOwnershipError(ValueError):
+    """A canonical history node is a symlink/junction/reparse or a non-regular
+    file, or its container is (second-wave P1).
+
+    History identity is ownership-safe: `is_dir()/is_file()/read_bytes()` all
+    FOLLOW symlink/reparse nodes, which would let a history consume evidence
+    outside the project. Refusing before reading keeps external bytes out of
+    the digest and the ledger."""
+    pass
+
+
 def history_paths(project_root: Path | str) -> list[Path]:
     """All canonical LOG paths in strict numeric order: sealed LOG-N + active LOG.md."""
     root = Path(project_root)
@@ -55,6 +73,56 @@ def history_paths(project_root: Path | str) -> list[Path]:
         sealed.sort(key=_segment_number)
     active = root / ".saipen" / "LOG.md"
     return [*sealed, active]
+
+
+def _validate_history_ownership(root: Path, logs_dir: Path) -> None:
+    """lstat every canonical history node and reject symlink/junction/reparse
+    or non-regular files BEFORE any bytes are read (second-wave P1).
+
+    The `.saipen/logs` container itself and each numeric sealed segment + the
+    active LOG.md must be plain regular files under the project. A symlinked
+    or reparse container/file would otherwise let `read_bytes()` consume
+    evidence outside the project; refusing here (before reading) keeps those
+    external bytes out of both the digest and the ledger contract. Missing
+    nodes are fine (a sealed segment may legitimately be absent); a node that
+    exists but is not a plain regular file is corrupt ownership evidence.
+
+    A missing `.saipen/logs` skips ONLY the sealed-container half of this
+    check -- the ACTIVE LOG.md is canonical history regardless of whether a
+    sealed directory exists, so it is always lstat-validated even when no
+    sealed segments are present. Skipping it would let a symlinked active
+    LOG.md feed external bytes into the digest and the ledger contract."""
+    try:
+        logs_info = logs_dir.lstat()
+    except FileNotFoundError:
+        logs_info = None  # genuinely absent logs dir -> no sealed container
+    except OSError as exc:
+        raise HistoryOwnershipError(
+            f"logs container .saipen/logs unreadable "
+            f"({type(exc).__name__}): {exc}")
+    if logs_info is not None:
+        if os.path.islink(logs_dir) or _is_reparse(logs_info):
+            raise HistoryOwnershipError(
+                "logs container .saipen/logs is a symlink/junction/reparse "
+                "point; refusing to read history from outside the project")
+        if not stat.S_ISDIR(logs_info.st_mode):
+            raise HistoryOwnershipError(
+                ".saipen/logs exists but is not a directory; refusing to read "
+                "history through it")
+    for p in history_paths(root):
+        try:
+            info = p.lstat()
+        except FileNotFoundError:
+            continue  # raced deletion / genuinely absent -> not owned evidence
+        except OSError as exc:
+            raise HistoryOwnershipError(
+                f"history node {p.name} unreadable "
+                f"({type(exc).__name__}): {exc}")
+        if os.path.islink(p) or _is_reparse(info) \
+                or not stat.S_ISREG(info.st_mode):
+            raise HistoryOwnershipError(
+                f"history node {p.name} is a symlink/junction/reparse or "
+                f"non-regular file; refusing to read external bytes")
 
 
 @dataclass(frozen=True)
@@ -93,16 +161,38 @@ def read_history_snapshot(project_root: Path | str) -> HistorySnapshot:
     hash and the decoded text feeds parsing and the combined text. Event
     ordering and parser semantics are identical to the historical
     per-consumer readers.
+
+    Second-wave P1 ownership: every canonical history node is lstat-checked
+    first and symlink/junction/reparse/non-regular nodes are refused before
+    any bytes are read (HistoryOwnershipError), so history can never consume
+    evidence from outside the project. The digest is FRAMED per node --
+    canonical relative path + raw length + raw bytes -- so different segment
+    layouts with identical concatenation, a resegment, or an added empty
+    numeric segment all change the hash.
     """
     root = Path(project_root)
+    logs_dir = root / ".saipen" / "logs"
+    _validate_history_ownership(root, logs_dir)
     h = hashlib.sha256()
     chunks: list[str] = []
     events: list[dict] = []
     illegal: list[str] = []
     for p in history_paths(root):
-        if not p.is_file():
+        try:
+            raw = p.read_bytes()
+        except FileNotFoundError:
             continue
-        raw = p.read_bytes()
+        except OSError as exc:
+            raise HistoryOwnershipError(
+                f"history node {p.name} unreadable "
+                f"({type(exc).__name__}): {exc}")
+        rel = p.relative_to(root).as_posix()
+        # FRAMED digest identity (second-wave P1): canonical relative path,
+        # then raw length, then raw bytes -- so resegmenting, renaming, or
+        # adding an empty numeric segment all change the hash, and two
+        # different segment layouts cannot collide on concatenation alone.
+        h.update(rel.encode("utf-8"))
+        h.update(str(len(raw)).encode("ascii"))
         h.update(raw)
         text = _normalised_doc_text(raw)
         chunks.append(text)

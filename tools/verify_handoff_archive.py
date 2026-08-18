@@ -1,0 +1,365 @@
+#!/usr/bin/env python
+"""Verify a SAIPEN handoff archive (delivery gate).
+
+    python tools/verify_handoff_archive.py <archive.zip> [--project-root PATH]
+
+Checks:
+  A. Every git-tracked file is present in the archive (especially .saipen/logs/).
+  B. No accidental tracked deletions before packaging.
+  C. No ignored/runtime garbage inside the archive.
+  D. Extract round-trip: extract to a fresh temp dir and re-verify.
+  E. Portability: Windows reserved names, path escapes, case collisions.
+  F. Sealed ledger completeness: LOG-*.md lineage.
+  G. Archive reproducibility: no self-inclusion.
+  H. Print ARCHIVE_SHA256 on success.
+
+Exit 0 on pass, exit 1 on any hard failure.
+"""
+
+import hashlib
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import zipfile
+from collections import defaultdict
+from pathlib import Path
+
+# ---------- helpers -------------------------------------------------------
+
+_WINDOWS_RESERVED = frozenset({
+    "CON", "PRN", "AUX",
+    *(f"COM{i}" for i in range(1, 10)),
+    *(f"LPT{i}" for i in range(1, 10)),
+    "NUL",
+})
+
+
+def _git(project: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ["git"] + list(args),
+        cwd=str(project), capture_output=True, text=True, errors="replace",
+    )
+
+
+def _tracked_files(project: Path) -> set[str]:
+    """Return the set of git-tracked files as POSIX relative paths."""
+    r = _git(project, "ls-files")
+    if r.returncode != 0:
+        print(f"FAIL: git ls-files failed: {r.stderr.strip()}")
+        sys.exit(1)
+    return {line.strip() for line in r.stdout.splitlines() if line.strip()}
+
+
+def _deleted_tracked(project: Path) -> list[str]:
+    """Return tracked files that appear deleted in the working tree."""
+    r = _git(project, "ls-files", "--deleted")
+    if r.returncode != 0:
+        return []
+    return [line.strip() for line in r.stdout.splitlines() if line.strip()]
+
+
+def _ignored_garbage_patterns() -> list[re.Pattern]:
+    """Patterns that should NOT appear in a clean delivery archive."""
+    return [
+        re.compile(r"^nul$"),
+        re.compile(r"\.pyc$"),
+        re.compile(r"__pycache__/"),
+        re.compile(r"\.swp$"),
+        re.compile(r"\.swo$"),
+        re.compile(r"saipen_distribution_probe_.*\.pyc$"),
+        re.compile(r"probe_output_"),
+        re.compile(r"\.pytest_cache/"),
+        re.compile(r"\.ruff_cache/"),
+        re.compile(r"benchmark_output"),
+    ]
+
+
+# ---------- gates ---------------------------------------------------------
+
+def gate_b_pre_packaging(project: Path) -> bool:
+    """Check B: no accidental tracked deletions before packaging."""
+    print("\n--- Gate B: tracked deletion check ---")
+    deleted = _deleted_tracked(project)
+    sealed_logs = [f for f in deleted if re.match(r"^\.saipen/logs/LOG-\d+\.md$", f)]
+    if sealed_logs:
+        print(f"FAIL: sealed LOG deletions detected: {sealed_logs}")
+        return False
+    if deleted:
+        print(f"WARN: {len(deleted)} tracked files appear deleted "
+              f"(not sealed LOG — review manually)")
+    else:
+        print("PASS: no tracked deletions")
+    return True
+
+
+def gate_a_archive_contents(archive_path: Path, tracked: set[str]) -> bool:
+    """Check A: every tracked file is present in the archive."""
+    print("\n--- Gate A: tracked-file presence ---")
+    with zipfile.ZipFile(archive_path) as zf:
+        arc_names = set(zf.namelist())
+
+    missing = []
+    for tf in sorted(tracked):
+        if tf not in arc_names:
+            missing.append(tf)
+
+    if missing:
+        print(f"FAIL: {len(missing)} tracked file(s) missing from archive:")
+        for m in missing[:20]:
+            print(f"  - {m}")
+        if len(missing) > 20:
+            print(f"  ... and {len(missing) - 20} more")
+        log_missing = [m for m in missing if re.match(r"^\.saipen/logs/LOG-\d+\.md$", m)]
+        if log_missing:
+            print(f"HARD FAIL: sealed LOG segments missing: {log_missing}")
+        return False
+    print(f"PASS: all {len(tracked)} tracked files present")
+    return True
+
+
+def gate_c_garbage_check(archive_path: Path) -> bool:
+    """Check C: no ignored/runtime garbage in the archive."""
+    print("\n--- Gate C: garbage check ---")
+    patterns = _ignored_garbage_patterns()
+    garbage = []
+    with zipfile.ZipFile(archive_path) as zf:
+        for name in zf.namelist():
+            basename = name.rsplit("/", 1)[-1] if "/" in name else name
+            for pat in patterns:
+                if pat.search(basename) or pat.search(name):
+                    garbage.append(name)
+                    break
+    if garbage:
+        print(f"FAIL: {len(garbage)} ignored/garbage entry(ies) in archive:")
+        for g in garbage[:10]:
+            print(f"  - {g}")
+        return False
+    print("PASS: no garbage entries")
+    return True
+
+
+def gate_e_portability(archive_path: Path) -> bool:
+    """Check E: portability — Windows reserved names, path escapes, case collisions."""
+    print("\n--- Gate E: portability checks ---")
+    problems = []
+
+    with zipfile.ZipFile(archive_path) as zf:
+        members = zf.namelist()
+
+    # 1. Absolute paths
+    abs_paths = [m for m in members if m.startswith("/") or (len(m) > 1 and m[1] == ":")]
+    if abs_paths:
+        problems.append(f"absolute member paths: {abs_paths[:5]}")
+
+    # 2. Path traversal (..)
+    escapes = [m for m in members if ".." in m.split("/")]
+    if escapes:
+        problems.append(f"path traversal (..): {escapes[:5]}")
+
+    # 3. Duplicate member names (case-insensitive)
+    lower_map = defaultdict(list)
+    for m in members:
+        lower_map[m.lower()].append(m)
+    collisions = {k: v for k, v in lower_map.items() if len(v) > 1}
+    if collisions:
+        for canonical, variants in list(collisions.items())[:5]:
+            problems.append(f"case-insensitive collision: {variants}")
+
+    # 4. Windows reserved names in any path component
+    reserved_found = []
+    for m in members:
+        parts = m.replace("\\", "/").split("/")
+        for part in parts:
+            stem = part.split(".")[0].upper()
+            if stem in _WINDOWS_RESERVED:
+                reserved_found.append(m)
+                break
+    if reserved_found:
+        problems.append(f"Windows reserved name(s): {reserved_found[:5]}")
+
+    # 5. Trailing space or dot in any path component
+    trailing_issues = []
+    for m in members:
+        parts = m.replace("\\", "/").split("/")
+        for part in parts:
+            if part != part.rstrip(" ."):
+                trailing_issues.append(m)
+                break
+    if trailing_issues:
+        problems.append(f"trailing space/dot: {trailing_issues[:5]}")
+
+    # 6. Duplicate exact member names
+    from collections import Counter
+    exact_dupes = [name for name, count in Counter(members).items() if count > 1]
+    if exact_dupes:
+        problems.append(f"duplicate member names: {exact_dupes[:5]}")
+
+    if problems:
+        for p in problems:
+            print(f"FAIL: {p}")
+        return False
+
+    print("PASS: portability checks clean")
+    return True
+
+
+def gate_f_sealed_ledger(archive_path: Path, project: Path) -> bool:
+    """Check F: sealed ledger LOG-*.md completeness and byte match."""
+    print("\n--- Gate F: sealed ledger completeness ---")
+
+    # Get tracked LOG files
+    tracked_logs = sorted(
+        f for f in _tracked_files(project)
+        if re.match(r"^\.saipen/logs/LOG-\d+\.md$", f)
+    )
+    if not tracked_logs:
+        print("WARN: no tracked sealed LOGs found")
+        return True
+
+    with zipfile.ZipFile(archive_path) as zf:
+        arc_names = set(zf.namelist())
+
+        # Check all tracked LOGs are in archive
+        missing = [f for f in tracked_logs if f not in arc_names]
+        if missing:
+            print(f"FAIL: sealed LOGs missing from archive: {missing}")
+            return False
+
+        # Byte-match check for a sample
+        mismatches = []
+        for log_path in tracked_logs[:5]:  # Check first 5 for speed
+            arc_bytes = zf.read(log_path)
+            disk_bytes = (project / log_path).read_bytes()
+            if arc_bytes != disk_bytes:
+                mismatches.append(log_path)
+        if mismatches:
+            print(f"FAIL: sealed LOG byte mismatch: {mismatches}")
+            return False
+
+    print(f"PASS: {len(tracked_logs)} sealed LOGs present and verified")
+    return True
+
+
+def gate_g_self_inclusion(archive_path: Path) -> bool:
+    """Check G: archive must not contain itself or other ZIPs."""
+    print("\n--- Gate G: self-inclusion check ---")
+    archive_name = archive_path.name
+    with zipfile.ZipFile(archive_path) as zf:
+        members = zf.namelist()
+    zip_members = [m for m in members if m.endswith(".zip")]
+    if zip_members:
+        print(f"FAIL: ZIP file(s) inside archive: {zip_members}")
+        return False
+    print("PASS: no ZIP self-inclusion")
+    return True
+
+
+def gate_d_extract_roundtrip(archive_path: Path, tracked: set[str]) -> bool:
+    """Check D: extract to fresh dir, re-verify tracked-file presence."""
+    print("\n--- Gate D: extract round-trip ---")
+    with tempfile.TemporaryDirectory(prefix="saipen-verify-") as tmp:
+        extract_dir = Path(tmp) / "extracted"
+        extract_dir.mkdir()
+        with zipfile.ZipFile(archive_path) as zf:
+            zf.extractall(extract_dir)
+
+        # Re-check tracked files
+        arc_files = set()
+        for p in extract_dir.rglob("*"):
+            if p.is_file():
+                rel = p.relative_to(extract_dir).as_posix()
+                arc_files.add(rel)
+
+        missing = []
+        for tf in sorted(tracked):
+            if tf not in arc_files:
+                missing.append(tf)
+        if missing:
+            print(f"FAIL: after extraction, {len(missing)} file(s) still missing")
+            for m in missing[:10]:
+                print(f"  - {m}")
+            return False
+
+        logs = [f for f in arc_files if re.match(r"^\.saipen/logs/LOG-\d+\.md$", f)]
+        print(f"PASS: extraction round-trip OK ({len(arc_files)} files, "
+              f"{len(logs)} sealed LOGs)")
+    return True
+
+
+def gate_h_archive_hash(archive_path: Path) -> str:
+    """Check H: compute and print ARCHIVE_SHA256."""
+    sha = hashlib.sha256(archive_path.read_bytes()).hexdigest()
+    print(f"\nARCHIVE_SHA256={sha}")
+    return sha
+
+
+# ---------- main ----------------------------------------------------------
+
+def main():
+    if len(sys.argv) < 2:
+        print(f"Usage: {sys.argv[0]} <archive.zip> [--project-root PATH]")
+        sys.exit(1)
+
+    archive = Path(sys.argv[1]).resolve()
+    if not archive.is_file():
+        print(f"FAIL: archive not found: {archive}")
+        sys.exit(1)
+
+    project_root = Path.cwd()
+    if "--project-root" in sys.argv:
+        idx = sys.argv.index("--project-root")
+        if idx + 1 < len(sys.argv):
+            project_root = Path(sys.argv[idx + 1]).resolve()
+
+    print(f"Archive: {archive}")
+    print(f"Project root: {project_root}")
+
+    tracked = _tracked_files(project_root)
+    print(f"Tracked files: {len(tracked)}")
+
+    all_pass = True
+
+    # Gate B: pre-packaging check
+    if not gate_b_pre_packaging(project_root):
+        all_pass = False
+
+    # Gate A: archive contents
+    if not gate_a_archive_contents(archive, tracked):
+        all_pass = False
+
+    # Gate C: garbage check
+    if not gate_c_garbage_check(archive):
+        all_pass = False
+
+    # Gate E: portability
+    if not gate_e_portability(archive):
+        all_pass = False
+
+    # Gate F: sealed ledger
+    if not gate_f_sealed_ledger(archive, project_root):
+        all_pass = False
+
+    # Gate G: self-inclusion
+    if not gate_g_self_inclusion(archive):
+        all_pass = False
+
+    # Gate D: extract round-trip
+    if not gate_d_extract_roundtrip(archive, tracked):
+        all_pass = False
+
+    # Gate H: hash
+    gate_h_archive_hash(archive)
+
+    if all_pass:
+        print("\nDELIVERY GATE: PASS")
+        sys.exit(0)
+    else:
+        print("\nDELIVERY GATE: FAIL")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

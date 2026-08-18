@@ -38,7 +38,8 @@ from .log import build_event
 from .plan import OperationPlan, TargetPlan, apply_plan, build_plan
 from .result import Result
 from .state import (parse_state, patch_state, transition_execution_intent,
-                     is_legal_wait)
+                     is_legal_wait, running_schema_version,
+                     running_style_token)
 
 _TAXONOMIES = {"DEC", "RUN"}
 
@@ -171,7 +172,16 @@ def _read(root: Path, *,
     # histories validated by the sub contract (subs.py), and rejecting theirs
     # here would abort legitimate sub collection -- the running install is the
     # only home whose ledger it is the authority for.
-    snapshot = read_history_snapshot(root)
+    from .log import read_history_snapshot, snapshot_contract_errors, \
+        HistoryOwnershipError
+    # Second-wave P1 ownership: a symlinked/junction/reparse/non-regular
+    # history node is refused BEFORE reading external bytes. It surfaces as
+    # the same structured CheckpointError (VALIDATION_FAILED, zero writes) as
+    # any other corrupt checkpoint, never a raw traceback.
+    try:
+        snapshot = read_history_snapshot(root)
+    except HistoryOwnershipError as exc:
+        raise CheckpointError(f"history-ownership: {exc}")
     _home = state.get("saipen_home")
     if (_home and str(_home).strip() and Path(str(_home)).is_absolute()
             and Path(str(_home)).resolve() == running_home()):
@@ -307,6 +317,52 @@ def _claim_fields_in_place(board_text: str, ticket_id: str,
     return "".join(lines)
 
 
+def _active_claim_refusal(state: dict, board_text: str, agent: str,
+                          ticket_id: str | None = None) -> Result | None:
+    """The SELF-ownership gate every ACTIVE-ticket mutation must pass
+    (second-wave P0). Returns a refusal Result (zero canonical writes) or None.
+
+    Persisted STATE.agent is HISTORICAL last-writer evidence -- the acting
+    identity is the SESSION agent the CLI threaded down. A session B that
+    mutates a project A is actively claiming would overwrite STATE.agent=B
+    while BOARD keeps A's live claim, which is exactly the binding-mismatch
+    impersonation this closes. Rules:
+      * SELF claim -> mutation allowed;
+      * FOREIGN_LIVE claim -> refuse, zero writes;
+      * INVALID claim -> refuse for repair;
+      * UNCLAIMED / FOREIGN_STALE -> refuse: explicit `claim T-###`
+        (adoption/takeover) must come first.
+    """
+    active = state.get("task")
+    if not active or active == "none":
+        return None
+    tickets = parse_board(board_text)["tickets"]
+    ticket = tickets.get(active)
+    if ticket is None or ticket.get("section") != "## DOING":
+        return None
+    cs = claim_status(ticket, agent)
+    if cs == "SELF":
+        return None
+    owner = ticket["fields"].get("owner", "")
+    if cs == "FOREIGN_LIVE":
+        return _refuse(
+            "TICKET_NOT_WORKABLE",
+            f"{active} is actively claimed by another agent ({owner}); a live "
+            f"foreign claim cannot be mutated by session {agent}",
+            ticket=active)
+    if cs == "INVALID":
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"{active} carries an INVALID claim (half owner/claim_time pair "
+            f"or non-UTC stamp); repair before mutating", ticket=active)
+    return _refuse(
+        "TICKET_NOT_WORKABLE",
+        f"{active} is unclaimed or carries a stale claim (owner {owner or 'none'!r}); "
+        f"explicit 'claim {active}' adoption is required before any "
+        f"active-ticket mutation by session {agent}",
+        ticket=active)
+
+
 def _refresh_active_claim(board_text: str, state: dict, agent: str,
                           utc: str) -> tuple[str | None, str | None]:
     """If the active ticket is this agent's own SELF claim, advance its
@@ -374,7 +430,8 @@ def _plan_claim(root: Path, ticket_id: str, agent: str, now: str, utc: str,
             new_board = _claim_fields_in_place(
                 docs["board"].text_norm, ticket_id, {"claim_time": utc})
             errors = validate_texts(docs["state"].text_norm, new_board,
-                                    docs["log"].text_norm)
+                                    docs["log"].text_norm,
+                                    current_agent=agent)
             if errors:
                 return _refuse("VALIDATION_FAILED",
                                "proposed state fails fast validation: "
@@ -421,7 +478,8 @@ def _plan_claim(root: Path, ticket_id: str, agent: str, now: str, utc: str,
             "agent": agent,
         }
         new_state = patch_state(docs["state"].text_norm, owned)
-        errors = validate_texts(new_state, new_board, new_log)
+        errors = validate_texts(new_state, new_board, new_log,
+                                current_agent=agent)
         if errors:
             return _refuse("VALIDATION_FAILED",
                            "proposed state fails fast validation: "
@@ -499,7 +557,7 @@ def _plan_claim(root: Path, ticket_id: str, agent: str, now: str, utc: str,
     }
     new_state = patch_state(docs["state"].text_norm, owned)
 
-    errors = validate_texts(new_state, new_board, new_log)
+    errors = validate_texts(new_state, new_board, new_log, current_agent=agent)
     if errors:
         return _refuse("VALIDATION_FAILED",
                        "proposed state fails fast validation: "
@@ -579,6 +637,12 @@ def _plan_transition(root: Path, destination: str, agent: str,
     destination = destination.upper()
     op_id = "transition-" + uuid4_hex()
     docs, state, board, log_tail = _read(root)
+    # SELF-ownership gate (second-wave P0): a transition writes STATE.agent
+    # and may mutate the active ticket, so a session may only run it over a
+    # claim that is its own (or over a project with no active claim).
+    _guard = _active_claim_refusal(state, docs["board"].text_norm, agent)
+    if _guard is not None:
+        return _guard
     current = state.get("phase")
     if destination not in phases.VALID_TRANSITIONS and \
             destination not in phases.ANY_FROM:
@@ -706,7 +770,7 @@ def _plan_transition(root: Path, destination: str, agent: str,
     new_board = refreshed_board if refreshed_board is not None \
         else docs["board"].text_norm
 
-    errors = validate_texts(new_state, new_board, new_log)
+    errors = validate_texts(new_state, new_board, new_log, current_agent=agent)
     if errors:
         return _refuse("VALIDATION_FAILED",
                        "proposed state fails fast validation: "
@@ -751,11 +815,45 @@ def transition_phase(project_root: Path | str, destination: str,
 
 # ------------------------------------------------------------- checkpoint
 
+def _schema_upgrade_owned(state: dict) -> dict:
+    """The schema/style keys a checkpoint must own to bring a legacy or
+    missing-revision STATE up to the running current schema (second-wave P1).
+
+    Protocol requires a readable legacy STATE (missing or lower
+    `schema_version`) to upgrade at its next checkpoint. Uses the SAME
+    authoritative current-schema/style providers as the Core fix
+    (`running_schema_version` / `running_style_token`). Returns {} when the
+    persisted revision is already current or FUTURE -- a future or invalid
+    revision is never downgraded or reforged.
+    """
+    current = running_schema_version()
+    if current is None:
+        return {}
+    have = state.get("schema_version")
+    try:
+        have_int = int(have) if have is not None else None
+    except (TypeError, ValueError):
+        have_int = None
+    if have_int is not None and have_int >= current:
+        return {}
+    owned = {"schema_version": current}
+    style = running_style_token()
+    if style:
+        owned["style_contract"] = style
+    return owned
+
+
 def _plan_checkpoint(root: Path, agent: str, taxonomy: str,
                       ticket_id: str | None, description: str,
                       now: str, utc: str) -> OperationPlan | Result:
     op_id = "checkpoint-" + uuid4_hex()
     docs, _state, _board, log_tail = _read(root)
+    # SELF-ownership gate (second-wave P0): a checkpoint writes STATE.agent
+    # and refreshes the active claim, so it may only run as the SESSION agent
+    # on a project whose active DOING claim is its own (or absent).
+    _guard = _active_claim_refusal(_state, docs["board"].text_norm, agent)
+    if _guard is not None:
+        return _guard
     # A ticket-bearing checkpoint names a real ticket. The event is durable
     # LOG identity, so a non-existent / malformed ref would mint a [T-###]
     # that next_ticket_id later reissues and sweep linkage can never resolve
@@ -777,6 +875,15 @@ def _plan_checkpoint(root: Path, agent: str, taxonomy: str,
         "updated": utc,
         "agent": agent,
     }
+    # Second-wave P1: a legacy or missing-revision STATE must upgrade to the
+    # running current schema at its next checkpoint -- protocol REQUIRES a
+    # readable legacy STATE to upgrade here, and it never does while the
+    # checkpoint owns only last_event/updated/agent. Using the same
+    # authoritative current-schema/style providers as the Core fix, atomically
+    # add the running `schema_version` and the actual `style_contract` when the
+    # persisted revision is absent or strictly lower. A future or otherwise
+    # invalid revision is NEVER downgraded or reforged.
+    owned.update(_schema_upgrade_owned(_state))
     new_state = patch_state(docs["state"].text_norm, owned)
 
     # SELF-owned active ticket: refresh its claim lease in place (CORE § 1.4)
@@ -787,7 +894,7 @@ def _plan_checkpoint(root: Path, agent: str, taxonomy: str,
     new_board = refreshed_board if refreshed_board is not None \
         else docs["board"].text_norm
 
-    errors = validate_texts(new_state, new_board, new_log)
+    errors = validate_texts(new_state, new_board, new_log, current_agent=agent)
     if errors:
         return _refuse("VALIDATION_FAILED",
                        "proposed state fails fast validation: "
@@ -878,6 +985,12 @@ def _ticket_targets(root: Path, action: str, ticket_id: str, agent: str,
                     payload: str, now: str, utc: str) -> OperationPlan | Result:
     op_id = "ticket-" + uuid4_hex()
     docs, state, board, log_tail = _read(root)
+    # SELF-ownership gate (second-wave P0): blocking the active DOING ticket
+    # parks A's live claim; a session may only do that over its own claim.
+    _guard = _active_claim_refusal(state, docs["board"].text_norm, agent,
+                                   ticket_id=ticket_id)
+    if _guard is not None:
+        return _guard
     if board["errors"]:
         return _refuse("VALIDATION_FAILED",
                        "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
@@ -982,12 +1095,12 @@ def _ticket_targets(root: Path, action: str, ticket_id: str, agent: str,
                     and not any(t["section"] == "## DOING"
                                 for t in parse_board(new_board)["tickets"].values()))
         if _neutral or is_active_block:
-            routed = route_next(new_state, new_board)
+            routed = route_next(new_state, new_board, current_agent=agent)
             if routed.get("ok"):
                 new_state = patch_state(new_state,
                                         {"next_action": routed["action"]})
 
-    errors = validate_texts(new_state, new_board, new_log)
+    errors = validate_texts(new_state, new_board, new_log, current_agent=agent)
     if errors:
         return _refuse("VALIDATION_FAILED",
                        "proposed state fails fast validation: "
@@ -1044,6 +1157,12 @@ def _plan_finish_ticket(root: Path, ticket_id: str, agent: str, now: str,
     """
     op_id = "finish-" + uuid4_hex()
     docs, state, board, log_tail = _read(root)
+    # SELF-ownership gate (second-wave P0): finishing a ticket is THE active
+    # mutation -- it closes the DOING claim and rewrites STATE.agent.
+    _guard = _active_claim_refusal(state, docs["board"].text_norm, agent,
+                                   ticket_id=ticket_id)
+    if _guard is not None:
+        return _guard
     if board["errors"]:
         return _refuse("VALIDATION_FAILED",
                        "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
@@ -1068,12 +1187,6 @@ def _plan_finish_ticket(root: Path, ticket_id: str, agent: str, now: str,
                        f"STATE.task={state.get('task')} != finished ticket "
                        f"{ticket_id}", ticket=ticket_id)
     
-    from .log import read_history_events, verification_evidence
-    history_events = read_history_events(root)
-    ok, reason = verification_evidence(ticket_id, history_events)
-    if not ok:
-        return _refuse("INCOMPLETE_TICKET", f"finish requires explicit verification evidence for ticket {ticket_id} (got: {reason})", ticket=ticket_id)
-
     prev_phase = state.get("phase") or "DONE"
 
     # GATE: the canonical closure is SHIP -> DONE (CORE section 1.6). A
@@ -1082,7 +1195,10 @@ def _plan_finish_ticket(root: Path, ticket_id: str, agent: str, now: str,
     # only from REVIEW, and every transition is journaled, so requiring
     # phase == SHIP here IS the gate proof. Refusing from any earlier phase
     # with zero canonical bytes written is what makes skipped gates
-    # mechanically impossible (NITRO dogfood IV, T-602).
+    # mechanically impossible (NITRO dogfood IV, T-602). This gate runs
+    # BEFORE the verification-evidence check: an unfinished phase chain is
+    # the primary violation, so ILLEGAL_PHASE wins over INCOMPLETE_TICKET
+    # from any phase before SHIP.
     if prev_phase != "SHIP":
         return _refuse(
             "ILLEGAL_PHASE",
@@ -1093,6 +1209,15 @@ def _plan_finish_ticket(root: Path, ticket_id: str, agent: str, now: str,
             "laundering the phase history",
             ticket=ticket_id, phase=prev_phase)
     closure_from = prev_phase  # the ACTUAL phase: SHIP.
+
+    # Verification-evidence gate (T-602, closure-evidence): with the phase
+    # chain complete, the ticket still needs explicit verification evidence
+    # in the LOG for the current cycle (a VERIFY boundary plus a PASS).
+    from .log import read_history_events, verification_evidence
+    history_events = read_history_events(root)
+    ok, reason = verification_evidence(ticket_id, history_events)
+    if not ok:
+        return _refuse("INCOMPLETE_TICKET", f"finish requires explicit verification evidence for ticket {ticket_id} (got: {reason})", ticket=ticket_id)
 
     # One LOG completion event naming the ACTUAL closure phase -- the event
     # is the provenance that the gate chain actually ended at SHIP.
@@ -1135,11 +1260,11 @@ def _plan_finish_ticket(root: Path, ticket_id: str, agent: str, now: str,
     }
     new_state = patch_state(docs["state"].text_norm, owned)
     from .router import route_next
-    routed = route_next(new_state, new_board)
+    routed = route_next(new_state, new_board, current_agent=agent)
     if routed.get("ok") and routed.get("action") != "saipen continue":
         new_state = patch_state(new_state, {"next_action": routed["action"]})
 
-    errors = validate_texts(new_state, new_board, new_log)
+    errors = validate_texts(new_state, new_board, new_log, current_agent=agent)
     if errors:
         return _refuse("VALIDATION_FAILED",
                        "proposed finish state fails fast validation: "
@@ -1306,7 +1431,7 @@ def ticket_add(project_root: Path | str, agent: str, priority: str,
     }
     new_state = patch_state(docs["state"].text_norm, owned)
 
-    errors = validate_texts(new_state, new_board, new_log)
+    errors = validate_texts(new_state, new_board, new_log, current_agent=agent)
     if errors:
         return _refuse("VALIDATION_FAILED",
                        "proposed state fails fast validation: "
@@ -1364,16 +1489,28 @@ def _state_only_plan(root: Path, operation: str, agent: str, mutate,
                       receipt_metadata: dict | None = None,
                       extra_targets: list[TargetPlan] | None = None,
                       op_id: str | None = None,
-                      allow_dead_home: bool = False) \
+                      allow_dead_home: bool = False,
+                      read_once: tuple | None = None) \
         -> OperationPlan | Result:
     op_id = op_id or (operation + "-" + uuid4_hex())
-    docs, _state, _board, log_tail = _read(root,
-                                          allow_dead_home=allow_dead_home)
+    # ONE frozen read (second-wave P0): an operation that already read the
+    # project for its authorization/derivation decision MUST hand that exact
+    # snapshot here, never a second independent `_read`. State can change
+    # between reads; two reads would let an authorization proven on snapshot A
+    # mutate snapshot B. When no snapshot is supplied this reads once itself --
+    # still exactly ONE `_read` per plan. APPLY remains the only later live
+    # reread/CAS check.
+    if read_once is not None:
+        docs, _state, _board, log_tail = read_once
+    else:
+        docs, _state, _board, log_tail = _read(root,
+                                               allow_dead_home=allow_dead_home)
     event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent,
                               event_message, now, op_id)
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     new_state = mutate(docs["state"].text_norm, event)
-    errors = validate_texts(new_state, docs["board"].text_norm, new_log)
+    errors = validate_texts(new_state, docs["board"].text_norm, new_log,
+                            current_agent=agent)
     if errors:
         return _refuse("VALIDATION_FAILED",
                        "proposed state fails fast validation: "
@@ -1445,6 +1582,9 @@ def set_converge_intent(project_root: Path | str, agent: str,
     root = Path(project_root)
     now, utc = _now(), _utc_iso()
 
+    # ONE frozen snapshot for the whole converge_intent operation (second-wave
+    # P0): the authorization/derivation decision and the plan must consume the
+    # exact same STATE/BOARD/LOG bytes. No second independent `_read`.
     _docs, before_state, _board, _tail = _read(root)
     entry_ticket = before_state.get("task")
     if entry_ticket in (None, "", "none"):
@@ -1508,7 +1648,8 @@ def set_converge_intent(project_root: Path | str, agent: str,
             "project_identity": _identity(root),
             "ticket_id": entry_ticket,
         },
-        extra_targets=extra_targets, op_id=epoch_op_id)
+        extra_targets=extra_targets, op_id=epoch_op_id,
+        read_once=(_docs, before_state, _board, _tail))
     if isinstance(plan, Result):
         return plan
     if dry_run:
@@ -1528,6 +1669,7 @@ def finalize_converge_intent(project_root: Path | str, agent: str,
     """Close one proven converge target through canonical LOG+STATE mutation."""
     root = Path(project_root)
     now, utc = _now(), _utc_iso()
+    # ONE frozen snapshot for the whole finalize operation (second-wave P0).
     _docs, state, _board, _tail = _read(root)
     if state.get("execution_intent") != "converge" \
             or state.get("converge_target") != target:
@@ -1565,7 +1707,7 @@ def finalize_converge_intent(project_root: Path | str, agent: str,
             "project_identity": _identity(root),
             "ticket_id": ticket_id,
         },
-        extra_targets=extra_targets)
+        extra_targets=extra_targets, read_once=(_docs, state, _board, _tail))
     if isinstance(plan, Result):
         return plan
     if dry_run:
@@ -1633,6 +1775,7 @@ def rebind_saipen_home(project_root: Path | str, agent: str,
     # The ONE reader allowed to load a checkpoint whose persisted pointer is
     # already dead (P0#3): repairing exactly that pointer is this operation's
     # purpose, and the replacement is proved by `_candidate_home_errors` below.
+    # ONE frozen snapshot for the whole rebind operation (second-wave P0).
     _docs, state, _board, _tail = _read(root, allow_dead_home=True)
     errors = _candidate_home_errors(root, state, candidate_home)
     if errors:
@@ -1661,7 +1804,8 @@ def rebind_saipen_home(project_root: Path | str, agent: str,
          "saipen_home": candidate_home},
         now, utc, {"saipen_home", "last_event", "updated", "agent"},
         ticket_id=task if task not in (None, "", "none") else None,
-        allow_dead_home=True)
+        allow_dead_home=True,
+        read_once=(_docs, state, _board, _tail))
     if isinstance(plan, Result):
         return plan
     if dry_run:
@@ -1681,6 +1825,7 @@ def reauthorize_valve(project_root: Path | str, agent: str,
     that did not trip the valve."""
     root = Path(project_root)
     now, utc = _now(), _utc_iso()
+    # ONE frozen snapshot for the whole valve operation (second-wave P0).
     _docs, state, _board, _log_tail = _read(root)
     waves = state.get("goal_waves") or 0
     tickets = state.get("goal_tickets") or 0
@@ -1704,7 +1849,8 @@ def reauthorize_valve(project_root: Path | str, agent: str,
                             f"goal_tickets {tickets}->0",
                             {"ok": True, "code": "VALVE_REAUTHORIZED"},
                             now, utc,
-                            {"goal_waves", "goal_tickets"})
+                            {"goal_waves", "goal_tickets"},
+                            read_once=(_docs, state, _board, _log_tail))
     if isinstance(plan, Result):
         return plan
     if dry_run:
@@ -1747,7 +1893,8 @@ def stop_checkpoint(project_root: Path | str, agent: str, reason: str = "",
         "updated": utc,
         "agent": agent,
     })
-    errors = validate_texts(new_state, docs["board"].text_norm, new_log)
+    errors = validate_texts(new_state, docs["board"].text_norm, new_log,
+                            current_agent=agent)
     if errors:
         return _refuse("VALIDATION_FAILED",
                        "proposed state fails fast validation: "
@@ -1890,7 +2037,8 @@ def _plan_record_scope(root: Path, ticket_id: str, agent: str, paths: list[str],
     owned = {"last_event": event, "updated": utc, "agent": agent}
     new_state = patch_state(docs["state"].text_norm, owned)
 
-    errors = validate_texts(new_state, docs["board"].text_norm, new_log)
+    errors = validate_texts(new_state, docs["board"].text_norm, new_log,
+                            current_agent=agent)
     if errors:
         return _refuse("VALIDATION_FAILED",
                        "proposed scope state fails fast validation: "
@@ -1965,7 +2113,8 @@ def _plan_first_publish_wait(root: Path, agent: str, remote_name: str,
     owned = {"next_action": na, "last_event": event, "updated": utc,
              "agent": agent}
     new_state = patch_state(docs["state"].text_norm, owned)
-    errors = validate_texts(new_state, docs["board"].text_norm, new_log)
+    errors = validate_texts(new_state, docs["board"].text_norm, new_log,
+                            current_agent=agent)
     if errors:
         return _refuse("VALIDATION_FAILED",
                        "proposed first-publish WAIT state fails fast "
@@ -2035,7 +2184,8 @@ def _plan_first_publish_confirm(root: Path, agent: str, remote_name: str,
         "agent": agent,
     }
     new_state = patch_state(docs["state"].text_norm, owned)
-    errors = validate_texts(new_state, docs["board"].text_norm, new_log)
+    errors = validate_texts(new_state, docs["board"].text_norm, new_log,
+                            current_agent=agent)
     if errors:
         return _refuse("VALIDATION_FAILED",
                        "proposed first-publish confirmation state fails fast "
@@ -2121,10 +2271,11 @@ def _plan_crew_closure(root: Path, agent: str, now: str, utc: str,
     }
     new_state = patch_state(docs["state"].text_norm, owned)
     from .router import route_next
-    routed = route_next(new_state, docs["board"].text_norm)
+    routed = route_next(new_state, new_board, current_agent=agent)
     if routed.get("ok") and routed.get("action") != "saipen continue":
         new_state = patch_state(new_state, {"next_action": routed["action"]})
-    errors = validate_texts(new_state, docs["board"].text_norm, new_log)
+    errors = validate_texts(new_state, docs["board"].text_norm, new_log,
+                            current_agent=agent)
     if errors:
         return _refuse("VALIDATION_FAILED",
                        "proposed crew closure state fails fast validation: "
@@ -2175,6 +2326,12 @@ def _plan_defer_for_crew(root: Path, ticket_id: str, agent: str,
     import json as _json
     op_id = "crew-defer-" + uuid4_hex()
     docs, state, board, log_tail = _read(root)
+    # SELF-ownership gate (second-wave P0): a crew defer closes the active
+    # DOING ticket locally, so it may only run over the session's own claim.
+    _guard = _active_claim_refusal(state, docs["board"].text_norm, agent,
+                                   ticket_id=ticket_id)
+    if _guard is not None:
+        return _guard
     if board["errors"]:
         return _refuse("VALIDATION_FAILED",
                        "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
@@ -2281,11 +2438,11 @@ def _plan_defer_for_crew(root: Path, ticket_id: str, agent: str,
     }
     new_state = patch_state(docs["state"].text_norm, owned)
     from .router import route_next
-    routed = route_next(new_state, new_board)
+    routed = route_next(new_state, new_board, current_agent=agent)
     if routed.get("ok") and routed.get("action") != "saipen continue":
         new_state = patch_state(new_state, {"next_action": routed["action"]})
 
-    errors = validate_texts(new_state, new_board, new_log)
+    errors = validate_texts(new_state, new_board, new_log, current_agent=agent)
     if errors:
         return _refuse("VALIDATION_FAILED",
                        "proposed defer state fails fast validation: "
@@ -2384,7 +2541,7 @@ def _plan_clear_wait_role(root: Path, ticket_id: str, agent: str,
         "updated": utc,
         "agent": agent,
     })
-    errors = validate_texts(new_state, new_board, new_log)
+    errors = validate_texts(new_state, new_board, new_log, current_agent=agent)
     if errors:
         return _refuse("VALIDATION_FAILED",
                        "proposed clear-wait-role state fails fast validation: "
@@ -2439,7 +2596,8 @@ def _plan_crew_run(root: Path, agent: str, *, crew_epoch: str, role: str,
         "updated": utc,
         "agent": agent,
     })
-    errors = validate_texts(new_state, docs["board"].text_norm, new_log)
+    errors = validate_texts(new_state, docs["board"].text_norm, new_log,
+                            current_agent=agent)
     if errors:
         return _refuse("VALIDATION_FAILED",
                        "proposed crew-run state fails fast validation: "
@@ -2518,7 +2676,8 @@ def _plan_producer_integration(
         "updated": utc,
         "agent": agent,
     })
-    errors = validate_texts(new_state, docs["board"].text_norm, new_log)
+    errors = validate_texts(new_state, docs["board"].text_norm, new_log,
+                            current_agent=agent)
     if errors:
         return _refuse("VALIDATION_FAILED",
                        "proposed integration state fails fast validation: "
@@ -2660,7 +2819,8 @@ def _plan_convergence_stage(
         "updated": utc,
         "agent": agent,
     })
-    errors = validate_texts(new_state, docs["board"].text_norm, new_log)
+    errors = validate_texts(new_state, docs["board"].text_norm, new_log,
+                            current_agent=agent)
     if errors:
         return _refuse("VALIDATION_FAILED",
                        "proposed convergence state fails fast validation: "

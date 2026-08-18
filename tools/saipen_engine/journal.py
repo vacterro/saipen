@@ -672,8 +672,29 @@ def scan_pending(project_root: Path | str) -> tuple[list[dict], list[dict]]:
                           "detail": "op_dir is a symlink or reparse point"})
             continue
         if not entry.is_dir():
+            # An unexpected NON-directory entry under recovery/ops (e.g. a
+            # stray regular file) is corrupt evidence, never a launder into
+            # CLEAN (second-wave P1): every entry under ops must be a valid
+            # manifest-bearing op directory.
+            found.append({"op_id": entry.name, "status": "CORRUPT_JOURNAL",
+                          "corrupt": True,
+                          "detail": "unexpected non-directory entry under "
+                                    "recovery/ops"})
             continue
         if not (entry / "operation.json").is_file():
+            # A directory with NO manifest is an interrupted pre-manifest
+            # staging: staged target bytes were written but operation.json was
+            # never published (second-wave P1). It must NOT be laundered into
+            # CLEAN by `continue` -- that would let a later mutation proceed
+            # over orphaned recovery evidence. Do not delete or guess the
+            # staged bytes automatically; surface CORRUPT_JOURNAL and force an
+            # explicit resolve.
+            found.append({"op_id": entry.name, "status": "CORRUPT_JOURNAL",
+                          "corrupt": True,
+                          "detail": "op directory has no operation.json "
+                                    "manifest (interrupted pre-manifest "
+                                    "staging?); orphan staged evidence must "
+                                    "be resolved explicitly"})
             continue
         try:
             decoded = decode_operation_record(root, entry)

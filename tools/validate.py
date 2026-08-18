@@ -6220,6 +6220,110 @@ else:
         drift_ok &= _compare("wait-categories", set(_ticks(s)),
                              set(WAIT_CATEGORIES), "validate.py WAIT_CATEGORIES")
 
+    # 6a. converge_target enum: CORE's CCC discriminator is THE single
+    #     definition (T-1012). CORE.md once declared `done | ship` while the
+    #     schema and engine implemented `done | ship | crew`; this validator
+    #     compared schema to engine and reported cross-doc agreement over a
+    #     real normative contradiction. Every surface is now checked against
+    #     CORE's backticked list: the engine constant, the schema enum, and
+    #     CONVERGE.md (each target must be backtick-named there) -- so
+    #     deleting `crew` from ANY one surface FAILs.
+    s = _rfc_sentence(
+        "converge-target",
+        r"`converge_target: ([a-z| ]+)` MAY", rfc)
+    if s is not None:
+        core_targets = {t.strip() for t in s.split("|") if t.strip()}
+        drift_ok &= _compare(
+            "converge-target", core_targets,
+            set(_eng_state_contract.STATE_CONVERGE_TARGETS),
+            "saipen_engine/state.py STATE_CONVERGE_TARGETS")
+        _schema_ct = set(schema["properties"]["converge_target"]["enum"])
+        if core_targets != _schema_ct:
+            fail("cross-doc drift [converge-target-schema] -- CORE.md "
+                 f"declares {sorted(core_targets)} but state.schema.json "
+                 f"enumerates {sorted(_schema_ct)}. CORE.md is normative "
+                 f"(§ 1.1); bring the schema to it, or change both "
+                 f"deliberately")
+            drift_ok = False
+        _conv_p = rfc_path.parent / "CONVERGE.md"
+        if _conv_p.is_file():
+            _conv_t = _conv_p.read_text(encoding="utf-8-sig")
+            # T-1012 (finish): CONVERGE.md must own ONE mechanically
+            # identifiable exact-set declaration of the converge_target set.
+            # Mere substring-presence is insufficient: an extra contradictory
+            # target (e.g. `banana`) entered CONVERGE.md without mechanical
+            # detection. Enforce exact SET equality against CORE's targets.
+            _conv_decl_re = re.compile(
+                r"(?m)^converge_targets:\s*(.+?)\s*$")
+            _conv_decls = _conv_decl_re.findall(_conv_t)
+            if len(_conv_decls) == 0:
+                fail("cross-doc drift [converge-target-converge] -- "
+                     "CONVERGE.md declares no `converge_targets:` set; CORE.md "
+                     "is the single definition and CONVERGE.md must restate it "
+                     "exactly once (T-1012 exact-set)")
+                drift_ok = False
+            elif len(_conv_decls) > 1:
+                fail("cross-doc drift [converge-target-converge] -- "
+                     f"CONVERGE.md declares {len(_conv_decls)} "
+                     "`converge_targets:` sets; exactly one mechanically "
+                     "identifiable declaration is required (T-1012)")
+                drift_ok = False
+            else:
+                # T-1012 strict: parse as ORDERED token sequence before
+                # converting to a set so that duplicates, empty tokens,
+                # malformed syntax, and leading/trailing delimiters are
+                # caught mechanically.
+                _ct_token_re = re.compile(r"^[a-z][a-z0-9_-]*$")
+                _ct_raw_tokens = _conv_decls[0].split("|")
+                _ct_ordered = []
+                _ct_seen = set()
+                _ct_strict_ok = True
+                for _ct_raw in _ct_raw_tokens:
+                    _ct_tok = _ct_raw.strip().strip("`")
+                    if not _ct_tok:
+                        fail("cross-doc drift [converge-target-converge] -- "
+                             "CONVERGE.md `converge_targets:` contains an "
+                             "empty token (T-1012 strict grammar: empty "
+                             "token after split on `|`)")
+                        drift_ok = False
+                        _ct_strict_ok = False
+                        break
+                    if not _ct_token_re.match(_ct_tok):
+                        fail("cross-doc drift [converge-target-converge] -- "
+                             f"CONVERGE.md `converge_targets:` token "
+                             f"{_ct_tok!r} fails identifier grammar "
+                             f"{_ct_token_re.pattern} (T-1012 strict "
+                             "grammar)")
+                        drift_ok = False
+                        _ct_strict_ok = False
+                        break
+                    if _ct_tok in _ct_seen:
+                        fail("cross-doc drift [converge-target-converge] -- "
+                             f"CONVERGE.md `converge_targets:` duplicate "
+                             f"token {_ct_tok!r} (T-1012 strict grammar: "
+                             "each target must appear exactly once)")
+                        drift_ok = False
+                        _ct_strict_ok = False
+                        break
+                    _ct_seen.add(_ct_tok)
+                    _ct_ordered.append(_ct_tok)
+                if _ct_strict_ok:
+                    _conv_targets = set(_ct_ordered)
+                    if _conv_targets != core_targets:
+                        _extra = sorted(_conv_targets - core_targets)
+                        _missing_conv = sorted(core_targets - _conv_targets)
+                        _parts = []
+                        if _extra:
+                            _parts.append(f"extra {_extra}")
+                        if _missing_conv:
+                            _parts.append(f"missing {_missing_conv}")
+                        fail("cross-doc drift [converge-target-converge] -- "
+                             "CONVERGE.md `converge_targets:` set differs "
+                             "from CORE.md by " + ", ".join(_parts)
+                             + " (T-1012 exact SET equality; an extra "
+                             "target or a missing target is a hard FAIL)")
+                        drift_ok = False
+
     # 7. BOOT.md and CONFORMANCE.md MUST NOT re-list the required field set --
     #    that is exactly how v7.92.0's five disagreeing copies happened. They
     #    are allowed to name it and point at § 1.2, never to enumerate it.
