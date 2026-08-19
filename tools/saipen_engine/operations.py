@@ -39,7 +39,7 @@ from .plan import OperationPlan, TargetPlan, apply_plan, build_plan
 from .result import Result
 from .state import (parse_state, patch_state, transition_execution_intent,
                      is_legal_wait, running_schema_version,
-                     running_style_token)
+                     running_style_token, is_absolute_home)
 
 _TAXONOMIES = {"DEC", "RUN"}
 
@@ -183,7 +183,10 @@ def _read(root: Path, *,
     except HistoryOwnershipError as exc:
         raise CheckpointError(f"history-ownership: {exc}")
     _home = state.get("saipen_home")
-    if (_home and str(_home).strip() and Path(str(_home)).is_absolute()
+    # T-1010: the cross-platform absolute classifier -- a foreign-OS absolute
+    # home must not read as legacy-relative on this host and skip the
+    # running-install history ownership gate.
+    if (_home and str(_home).strip() and is_absolute_home(_home)
             and Path(str(_home)).resolve() == running_home()):
         history_problems = snapshot_contract_errors(snapshot)
         if history_problems:
@@ -200,9 +203,14 @@ def _read(root: Path, *,
     _logs_dir = root / ".saipen" / "logs"
     from .journal import hash_tree_dependency
     _logs_digest = hash_tree_dependency(_logs_dir)
-    return ({"state": state_doc, "board": board_doc, "log": log_doc,
-             "_logs_digest": _logs_digest},
-            state, board, log_tail)
+    # PERFORMANCE (T-1014): the ONE call-scoped HistorySnapshot is exposed so
+    # same-command consumers (transition/finish/ticket_add PLAN paths) reuse
+    # the captured events/combined text instead of re-opening the complete
+    # LOG history a second time. Nothing is cached across commands, and
+    # APPLY/recovery still revalidate LIVE evidence under the lock.
+    docs = {"state": state_doc, "board": board_doc, "log": log_doc,
+            "_logs_digest": _logs_digest, "_history": snapshot}
+    return docs, state, board, log_tail
 
 
 def _target(doc, path: str, role: str, new_text: str) -> TargetPlan:
@@ -682,8 +690,11 @@ def _plan_transition(root: Path, destination: str, agent: str,
                            "missing from the board", ticket=subject)
 
     if destination == "REVIEW" and current == "VERIFY":
-        from .log import read_history_events, verification_evidence
-        history_events = read_history_events(root)
+        from .log import verification_evidence
+        # T-1014: reuse the snapshot `_read` already captured -- the VERIFY
+        # boundary search sees exactly the evidence this plan was validated
+        # against, never a second re-read of the complete history.
+        history_events = docs["_history"].events
         ok, reason = verification_evidence(subject, history_events)
         if not ok:
             return _refuse("INCOMPLETE_TICKET", f"VERIFY -> REVIEW requires explicit verification evidence for ticket {subject} (got: {reason})", phase=destination, ticket=subject)
@@ -1213,8 +1224,10 @@ def _plan_finish_ticket(root: Path, ticket_id: str, agent: str, now: str,
     # Verification-evidence gate (T-602, closure-evidence): with the phase
     # chain complete, the ticket still needs explicit verification evidence
     # in the LOG for the current cycle (a VERIFY boundary plus a PASS).
-    from .log import read_history_events, verification_evidence
-    history_events = read_history_events(root)
+    # T-1014: reuse the snapshot `_read` already captured for the SAME
+    # evidence the plan was validated against.
+    from .log import verification_evidence
+    history_events = docs["_history"].events
     ok, reason = verification_evidence(ticket_id, history_events)
     if not ok:
         return _refuse("INCOMPLETE_TICKET", f"finish requires explicit verification evidence for ticket {ticket_id} (got: {reason})", ticket=ticket_id)
@@ -1410,8 +1423,9 @@ def ticket_add(project_root: Path | str, agent: str, priority: str,
     # Ticket IDs derive from the SAME canonical complete history (sealed
     # segments + active LOG.md) already used for E-ID allocation -- a sealed
     # segment's [T-###] is ticket identity, never reissuable (T-1003).
-    from .log import read_history
-    tid = next_ticket_id(docs["board"].text_norm, read_history(root))
+    # T-1014: the combined text is the snapshot `_read` already captured;
+    # re-opening the complete history here would be a second full pass.
+    tid = next_ticket_id(docs["board"].text_norm, docs["_history"].text)
     for need in needs:
         if need not in board["tickets"]:
             return _refuse("TICKET_NOT_FOUND", f"dangling needs: {need}")
@@ -1805,6 +1819,57 @@ def rebind_saipen_home(project_root: Path | str, agent: str,
         now, utc, {"saipen_home", "last_event", "updated", "agent"},
         ticket_id=task if task not in (None, "", "none") else None,
         allow_dead_home=True,
+        read_once=(_docs, state, _board, _tail))
+    if isinstance(plan, Result):
+        return plan
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
+
+
+@_state_guard
+def handover_agent(project_root: Path | str, new_agent: str,
+                   dry_run: bool = False) -> Result:
+    """The ONE explicit agent-handover operation (T-1006).
+
+    CORE.md section 1.4 and BOOT.md: the seat is inherited from STATE.agent,
+    and it changes only for a genuinely different actor -- and when it does,
+    the agent MUST log a DEC naming the old value and the new one so the
+    graph shows a handover rather than an unexplained stranger. This operation
+    journals exactly that single DEC plus the STATE.agent owned-field patch
+    (LOG first, STATE last), so an explicit `--agent <id>` override can never
+    overwrite STATE.agent silently before the handover is recorded.
+
+    A no-op refusal (VALIDATION_FAILED) is returned when the requested agent
+    already IS the persisted seat -- nothing to record, no write. `dry_run`
+    renders the same plan with ZERO writes.
+    """
+    root = Path(project_root)
+    now, utc = _now(), _utc_iso()
+    # ONE frozen snapshot for the whole handover (second-wave P0 discipline).
+    _docs, state, _board, _tail = _read(root)
+    old = state.get("agent")
+    if old == new_agent:
+        # A handover to the CURRENT seat is a no-op, not a write: refuse with
+        # the closed OPS.md validation code rather than inventing a new one.
+        return _refuse("VALIDATION_FAILED",
+                       f"agent is already {new_agent!r}; nothing to hand over",
+                       agent=new_agent)
+    old_label = old or "(none)"
+
+    def mutate(text: str, event: int) -> str:
+        return patch_state(text, {
+            "agent": new_agent,
+            "last_event": event,
+            "updated": utc,
+        })
+
+    plan = _state_only_plan(
+        root, "handover", new_agent, mutate,
+        f"agent handover {old_label} -> {new_agent}",
+        {"ok": True, "code": "HANDOVERED", "agent": new_agent,
+         "previous_agent": old_label},
+        now, utc, {"agent", "last_event", "updated"},
         read_once=(_docs, state, _board, _tail))
     if isinstance(plan, Result):
         return plan
@@ -2413,7 +2478,13 @@ def _plan_defer_for_crew(root: Path, ticket_id: str, agent: str,
             f"re-record the scope before deferring {ticket_id}")
 
     # Closure targets (same cross-file transaction as a real ship closure).
-    from .journal import hash_source_identity
+    # T-1015: the PLAN CAS token is derived from the ALREADY-SAMPLED
+    # SourceIdentity (`ident`) -- the semantic sample and the CAS token
+    # describe exactly one PLAN snapshot, never two Git discoveries that
+    # could disagree. APPLY still revalidates the live tree independently
+    # (run_mutation recomputes hash_source_identity under the lock), so any
+    # post-PLAN change still fails STALE_STATE with zero writes.
+    from .journal import source_identity_dependency
     run_event, run_line = build_event(
         log_tail, "RUN",
         f"deferred {ticket_id} to crew epoch {crew_epoch} "
@@ -2455,7 +2526,7 @@ def _plan_defer_for_crew(root: Path, ticket_id: str, agent: str,
     ]
     preconditions = _docs_preconditions(docs, "state", "board", "log")
     preconditions[scope_rel] = scope_doc.raw_hash
-    preconditions["."] = hash_source_identity(root)
+    preconditions["."] = source_identity_dependency(ident)
     receipt_metadata = {
         "operation": "crew_defer",
         "status": "COMMITTED",

@@ -52,6 +52,11 @@ class ProjectSnapshot:
     log_hash: str = ""
     log_tail: int | None = None
     head: str = ""
+    # T-1014: the parsed events from the SAME one-pass snapshot that fed
+    # log_hash/log_tail -- a command that captures the snapshot once can
+    # derive the ledger verdict, the hash, the tail AND the events from that
+    # single read instead of reopening the complete LOG history per consumer.
+    history_events: tuple = ()
 
     @staticmethod
     def capture(project_root: Path | str) -> "ProjectSnapshot":
@@ -68,6 +73,7 @@ class ProjectSnapshot:
             log_hash=history.hash,
             log_tail=history.tail,
             head=git_head(root),
+            history_events=history.events,
         )
 
     def stale(self, project_root: Path | str) -> bool:

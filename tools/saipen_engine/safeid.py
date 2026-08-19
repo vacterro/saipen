@@ -26,6 +26,17 @@ _CONTROL_RE = re.compile(r"[\x00-\x1f\x7f-\x9f]")
 # Drive qualification: C: or C:/ on any platform.
 _DRIVE_RE = re.compile(r"^[A-Za-z]:[/\\]?")
 
+# The deterministic portable component budget (T-1013): every owned
+# identifier that becomes a path component must fit on ANY host. POSIX
+# NAME_MAX is 255 bytes and NTFS allows 255 UTF-16 units, but a component
+# that large leaves no room for the wrappers callers add (prefixes,
+# suffixes, owner-root prefixes) without blowing the full-path budget on a
+# classic 260-char Windows MAX_PATH. 128 bytes is the SHARED contract
+# limit; a caller that wraps an ID into a longer composed filename enforces
+# its own smaller derived budget on top of this one.
+MAX_ID_BYTES = 128
+
+
 # Reserved device names on Windows (case-insensitive, optional extension).
 _WIN_DEVICES = {
     "con", "prn", "aux", "nul",
@@ -61,6 +72,11 @@ def validate_safe_id(value: str, *, kind: str = "id") -> str:
     if not _SAFE_ID_RE.match(value):
         raise InvalidIdError(
             f"{kind} is not path-safe ([A-Za-z0-9][A-Za-z0-9_.-]*)")
+    _byte_len = len(value.encode("utf-8"))
+    if _byte_len > MAX_ID_BYTES:
+        raise InvalidIdError(
+            f"{kind} is {_byte_len} bytes; the portable path-component "
+            f"budget is {MAX_ID_BYTES}")
     # Reject traversal via dotted components inside the id: "a..b" is a plain
     # single component (safe as one path segment), but "a/.." is impossible
     # (separators rejected). A leading-dot form other than "."/".." like

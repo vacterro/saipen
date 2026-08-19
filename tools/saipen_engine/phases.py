@@ -36,6 +36,14 @@ VALID_TRANSITIONS: dict[str, list[str]] = {
     "BLOCKED": ["PLAN", "SCOUT", "DONE"],
 }
 
+# The COMPLETE canonical phase enum: every source node of the DFA (T-1008).
+# The Nitro frontmatter probe and every other phase-whitelist consumer derive
+# accepted phases from THIS set -- never a hand-kept local tuple that drifts
+# when the DFA grows (MARKHUNT/VALIDATE/HUNT/CLEAN/TRANSLATE/PREPARE were
+# once excluded by exactly such a copy).
+ALL_PHASES = frozenset(VALID_TRANSITIONS)
+
+
 # These seven phases are entered by explicit user command from ANY phase
 # (CORE section 1.6/1.10) -- the transition table's FROM row doesn't restrict
 # them. PLAN joined in v7.92.0: section 2.4's goal-mode Entry mandates a PLAN

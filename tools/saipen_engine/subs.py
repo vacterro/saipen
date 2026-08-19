@@ -1738,7 +1738,7 @@ def _sync_plan_problem(plan: dict, *, for_spawn: bool = False) -> Result | None:
 
 
 def sub_sync(project_root: Path | str, saipen_home: str,
-             dry_run: bool = False) -> Result:
+             agent: str | None = None, dry_run: bool = False) -> Result:
     """Refresh the inherited shared contract surface -- never a sub's history.
 
     Copies PROTOCOL.md/README.md/crew.md/TEMPLATE/** and every built-in
@@ -1782,13 +1782,14 @@ def sub_sync(project_root: Path | str, saipen_home: str,
                           for item in delete_files})
     semantic = json.dumps(plan["receipt_metadata"], sort_keys=True,
                           separators=(",", ":")).encode("utf-8")
+    actor = agent or "saipen-cli"
     with project_writer_lock(root):
         if not _sources_unchanged(changed):
             return _refuse(
                 "STALE_STATE",
                 "shared-contract source changed after sync planning; replan")
         commit = run_mutation(
-            root, op_id, "sub_sync", "saipen-cli", project_identity(root),
+            root, op_id, "sub_sync", actor, project_identity(root),
             hash_bytes(b"sub_sync:" + semantic), mutation_targets,
             preconditions=preconditions,
             read_preconditions={
@@ -1834,12 +1835,31 @@ def sub_spawn(project_root: Path | str, name: str, saipen_home: str,
         target = _sub_dir(root, name)
     except ValueError as exc:
         return _refuse("INVALID_ID", str(exc), name=name)
-    if target.exists():
+    except OSError as exc:
+        # T-1013: a valid-looking but over-long ID (or an owner root already
+        # near the host path budget) can still fail the FILESYSTEM probe,
+        # even after the shared length budget -- a dry-run/JSON boundary must
+        # refuse structurally with zero writes, never traceback.
+        return _refuse("VALIDATION_FAILED",
+                       f"cannot probe subSaipen path for {name!r}: {exc}",
+                       name=name)
+    try:
+        target_exists = target.exists()
+    except OSError as exc:
+        return _refuse("VALIDATION_FAILED",
+                       f"cannot probe subSaipen path for {name!r}: {exc}",
+                       name=name)
+    if target_exists:
         return _refuse("ALREADY_CLAIMED",
                        f"subSaipen {name!r} already exists; run "
                        f"`saipen sub clean {name}` first if replacement is "
                        "intended", name=name)
-    instance_tree_hash = hash_tree(target)
+    try:
+        instance_tree_hash = hash_tree(target)
+    except OSError as exc:
+        return _refuse("VALIDATION_FAILED",
+                       f"cannot hash subSaipen path for {name!r}: {exc}",
+                       name=name)
 
     # 1. Strict MANIFEST grammar FIRST -- a malformed registry is a KNOWN
     # invalid base; refusing it must not follow any write (item 6).
@@ -1944,7 +1964,10 @@ def sub_spawn(project_root: Path | str, name: str, saipen_home: str,
     sync_result = None
     sync_changed = []
     if not dry_run and sync_plan["drift"]:
-        sync_result = sub_sync(root, saipen_home)
+        # T-1006: the bootstrap sync is part of the SAME invocation, so it
+        # journals under the SAME canonical acting seat -- never a hardcoded
+        # CLI identity that disagrees with the spawn receipt that follows.
+        sync_result = sub_sync(root, saipen_home, agent=agent)
         if not sync_result.ok:
             return _refuse(sync_result.code,
                            "shared-contract bootstrap refused: "
@@ -2076,7 +2099,7 @@ def _lifecycle_read_preconditions(root: Path, name: str,
 # adopt
 # ---------------------------------------------------------------------------
 def sub_adopt(project_root: Path | str, name: str, saipen_home: str,
-              dry_run: bool = False) -> Result:
+              agent: str | None = None, dry_run: bool = False) -> Result:
     """Re-anchor a sub under the CURRENT project-local charter (PROTOCOL § 6).
 
     The local charter is the only authority: a built-in charter present in
@@ -2132,6 +2155,7 @@ def sub_adopt(project_root: Path | str, name: str, saipen_home: str,
     })
     lifecycle_reads = _lifecycle_read_preconditions(
         root, name, manifest_raw, saipen_home)
+    actor = agent or "saipen-cli"
     if dry_run:
         return Result(ok=True, code="SUB_ADOPT_PLAN",
                       data={"name": name, "role_revision": role_revision,
@@ -2141,7 +2165,7 @@ def sub_adopt(project_root: Path | str, name: str, saipen_home: str,
     op_id = "sub-adopt-" + __import__("uuid").uuid4().hex[:8]
     with project_writer_lock(root):
         commit = run_mutation(
-            root, op_id, "sub_adopt", "saipen-cli", project_identity(root),
+            root, op_id, "sub_adopt", actor, project_identity(root),
             hash_bytes(("sub_adopt:" + name).encode("utf-8")),
             [{"path": rel, "role": "state", "content": doc.encode(new_text),
               "before_hash": doc.raw_hash,
@@ -2161,7 +2185,7 @@ def sub_adopt(project_root: Path | str, name: str, saipen_home: str,
 # pause / resume
 # ---------------------------------------------------------------------------
 def sub_pause(project_root: Path | str, name: str,
-              dry_run: bool = False) -> Result:
+              agent: str | None = None, dry_run: bool = False) -> Result:
     """Pause a subSaipen: record prior phase/next_action, then BLOCKED.
 
     The prior execution state is stored conditionally on the sub's STATE as
@@ -2205,9 +2229,11 @@ def sub_pause(project_root: Path | str, name: str,
                 "after_hash": hash_bytes(doc.encode(new_text))}]
     log_rel = f"{SUBS_REL}/{name}/LOG.md"
     log_raw = _read_bytes_maybe(root / log_rel)
+    actor = agent or "saipen-cli"
     targets.extend(_sub_trace_targets(name, "pause",
                                       f"paused by main agent "
-                                      f"(from {st.get('phase')})", log_raw))
+                                      f"(from {st.get('phase')})", log_raw,
+                                      agent=actor))
     lifecycle_reads = _lifecycle_read_preconditions(
         root, name, manifest_raw, st.get("saipen_home") or "")
     if dry_run:
@@ -2220,7 +2246,7 @@ def sub_pause(project_root: Path | str, name: str,
     op_id = "sub-pause-" + __import__("uuid").uuid4().hex[:8]
     with project_writer_lock(root):
         commit = run_mutation(
-            root, op_id, "sub_pause", "saipen-cli", project_identity(root),
+            root, op_id, "sub_pause", actor, project_identity(root),
             hash_bytes(("sub_pause:" + name).encode("utf-8")),
             targets,
             preconditions={rel: doc.raw_hash,
@@ -2237,7 +2263,7 @@ def sub_pause(project_root: Path | str, name: str,
 
 
 def sub_resume(project_root: Path | str, name: str,
-               dry_run: bool = False) -> Result:
+               agent: str | None = None, dry_run: bool = False) -> Result:
     """Resume a subSaipen: prove it was paused by us, restore exact prior
     phase + next_action, clear blocker and pause metadata, append trace.
 
@@ -2290,8 +2316,10 @@ def sub_resume(project_root: Path | str, name: str,
                 "after_hash": hash_bytes(doc.encode(new_text))}]
     log_rel = f"{SUBS_REL}/{name}/LOG.md"
     log_raw = _read_bytes_maybe(root / log_rel)
+    actor = agent or "saipen-cli"
     targets.extend(_sub_trace_targets(name, "resume",
-                                      f"resumed to {prior_phase}", log_raw))
+                                      f"resumed to {prior_phase}", log_raw,
+                                      agent=actor))
     lifecycle_reads = _lifecycle_read_preconditions(
         root, name, manifest_raw, st.get("saipen_home") or "")
     if dry_run:
@@ -2304,7 +2332,7 @@ def sub_resume(project_root: Path | str, name: str,
     op_id = "sub-resume-" + __import__("uuid").uuid4().hex[:8]
     with project_writer_lock(root):
         commit = run_mutation(
-            root, op_id, "sub_resume", "saipen-cli", project_identity(root),
+            root, op_id, "sub_resume", actor, project_identity(root),
             hash_bytes(("sub_resume:" + name).encode("utf-8")),
             targets,
             preconditions={rel: doc.raw_hash,
@@ -2321,7 +2349,8 @@ def sub_resume(project_root: Path | str, name: str,
 
 
 def _sub_trace_targets(name: str, action: str, message: str,
-                       log_raw: bytes | None) -> list[dict]:
+                       log_raw: bytes | None,
+                       agent: str = "saipen-cli") -> list[dict]:
     """One trace line appended to the sub's own LOG (PROTOCOL traceability)."""
     log_rel = f"{SUBS_REL}/{name}/LOG.md"
     text = _decode_captured(log_raw, log_rel)
@@ -2330,7 +2359,7 @@ def _sub_trace_targets(name: str, action: str, message: str,
     from .log import build_event
     _event, line = build_event(tail, "DEC",
                                f"main agent {action}: {message}",
-                               ticket=None, agent="saipen-cli", now=_now())
+                               ticket=None, agent=agent, now=_now())
     new_log = (text.rstrip("\n") + "\n" + line + "\n") if text else \
         ("# Log\n\n" + line + "\n")
     return [{"path": log_rel, "role": "log", "content": new_log.encode("utf-8"),
@@ -2458,7 +2487,7 @@ def _capture_clean_instance(instance: Path) -> dict:
 
 
 def sub_clean(project_root: Path | str, name: str,
-              dry_run: bool = False) -> Result:
+              agent: str | None = None, dry_run: bool = False) -> Result:
     """Archive, unregister, and remove one SubSaipen transactionally."""
     root = Path(project_root)
     try:
@@ -2578,7 +2607,8 @@ def sub_clean(project_root: Path | str, name: str,
                                f"archive destination already exists: {archive_rel}",
                                name=name)
             commit = run_mutation(
-                root, op_id, "sub_clean", "saipen-cli", project_identity(root),
+                root, op_id, "sub_clean", agent or "saipen-cli",
+                project_identity(root),
                 hash_bytes(("sub_clean:" + name + ":"
                             + snapshot["tree_hash"]).encode("utf-8")),
                 targets,
@@ -2866,7 +2896,7 @@ def _collect_review_state(root: Path, name: str, model: OutboxModel,
 
 
 def sub_collect(project_root: Path | str, name: str | None = None,
-                dry_run: bool = False) -> Result:
+                agent: str | None = None, dry_run: bool = False) -> Result:
     """INTAKE: journal ready SubSaipen hypotheses as ordinary Core review
     tickets (items 4/5/13). INTAKE != REVIEW.
 
@@ -2926,9 +2956,15 @@ def sub_collect(project_root: Path | str, name: str | None = None,
     eligible = [producer for producer in candidates
                 if policies[producer] in ("automatic", "core-review")]
     from freshness import compute_source_identity
+    # T-1015: ONE PLAN source sample. The semantic decisions (current/stale
+    # packages) and the CAS token come from the SAME SourceIdentity -- the
+    # token is derived, never recomputed. APPLY revalidates the LIVE tree
+    # independently through run_mutation's read-precondition pass, so any
+    # post-PLAN mutation still refuses STALE_STATE with zero writes.
+    from .journal import source_identity_dependency
     try:
         current = compute_source_identity(root)
-        source_dependency = hash_source_identity(root)
+        source_dependency = source_identity_dependency(current)
     except Exception as exc:
         return _refuse("VALIDATION_FAILED", f"source identity UNKNOWN: {exc}")
 
@@ -3098,15 +3134,17 @@ def sub_collect(project_root: Path | str, name: str | None = None,
                           if value.startswith("## DONE"))
         board_lines.insert(done_index, line + "\n")
         new_board = "".join(board_lines)
-        # T-1003 Wave 2 item 5: the Core mutation event agent is the ACTUAL
-        # Core writer (saipen-cli executes this operation), never the evidence
-        # producer. The producer identity is structured provenance in the
-        # ticket/receipt, not the LOG writer's identity.
+        # T-1003 Wave 2 item 5 + T-1006: the Core mutation event agent is the
+        # ACTUAL Core writer -- the CANONICAL acting seat threaded from the
+        # invocation (inherited STATE.agent or explicit --agent), never a
+        # hardcoded CLI identity and never the evidence producer. The producer
+        # identity is structured provenance in the ticket/receipt, not the LOG
+        # writer's identity.
         event, log_line = build_event(
             tail, "RUN",
             f"collect {producer}/{package.package_id} -> {ticket}; "
             f"{provenance}; queued as Core review hypothesis",
-            ticket=ticket, agent="saipen-cli", now=now_log,
+            ticket=ticket, agent=agent or "saipen-cli", now=now_log,
             op_id=op_id)
         tail = event
         new_log = new_log.rstrip("\n") + "\n" + log_line + "\n"
@@ -3121,7 +3159,10 @@ def sub_collect(project_root: Path | str, name: str | None = None,
     })
     new_manifest = _manifest_with_collects(manifest_doc.text_norm,
                                            manifest_updates)
-    proposed_errors = validate_texts(new_state, new_board, new_log)
+    # T-1006: the sub mutation validates under the SAME canonical actor it
+    # writes, so claim/liveness checks can never disagree with LOG/STATE.
+    proposed_errors = validate_texts(new_state, new_board, new_log,
+                                     current_agent=agent or "saipen-cli")
     _parsed_manifest, manifest_errors = parse_manifest(new_manifest)
     if proposed_errors or manifest_errors:
         return _refuse("VALIDATION_FAILED",
@@ -3161,7 +3202,8 @@ def sub_collect(project_root: Path | str, name: str | None = None,
                             "would_write": changed})
     with project_writer_lock(root):
         commit = run_mutation(
-            root, op_id, "sub_collect", "saipen-cli", project_identity(root),
+            root, op_id, "sub_collect", agent or "saipen-cli",
+            project_identity(root),
             hash_bytes(("sub_collect:" + ",".join(
                 item["identity"] for item in planned)).encode("utf-8")),
             targets, preconditions=preconditions,
@@ -3186,6 +3228,7 @@ def sub_collect(project_root: Path | str, name: str | None = None,
 
 def sub_disposition(project_root: Path | str, name: str,
                     package_id: str | None = None,
+                    agent: str | None = None,
                     dry_run: bool = False) -> Result:
     """CORE DISPOSITION: mark a collected core-review package `reviewed` ONLY
     after its linked Core review ticket is terminal (items 4/13/16).
@@ -3221,9 +3264,12 @@ def sub_disposition(project_root: Path | str, name: str,
                        f"{name}: " + "; ".join(model.errors[:5]),
                        name=name, errors=list(model.errors))
     from freshness import compute_source_identity
+    # T-1015: ONE PLAN source sample (see sub_collect): semantic currentness
+    # and the CAS token share the same SourceIdentity; APPLY revalidates live.
+    from .journal import source_identity_dependency
     try:
         current = compute_source_identity(root)
-        source_dependency = hash_source_identity(root)
+        source_dependency = source_identity_dependency(current)
     except Exception as exc:
         return _refuse("VALIDATION_FAILED", f"source identity UNKNOWN: {exc}")
     try:
@@ -3291,17 +3337,20 @@ def sub_disposition(project_root: Path | str, name: str,
     now_iso = _utc_iso()
     now_log = _now()
     op_id = "sub-disposition-" + __import__("uuid").uuid4().hex[:8]
+    # T-1006: the Core disposition event names the canonical acting seat
+    # (inherited STATE.agent or explicit --agent), never a hardcoded identity.
     event, log_line = build_event(
         tail, "DEC",
         f"disposition {name}/{package.package_id} reviewed after Core "
         f"review {ticket} terminal; package_identity={identity}",
-        ticket=None, agent="saipen-cli", now=now_log, op_id=op_id)
+        ticket=None, agent=agent or "saipen-cli", now=now_log, op_id=op_id)
     new_log = log_doc.text_norm.rstrip("\n") + "\n" + log_line + "\n"
     new_state = patch_state(state_doc.text_norm, {
         "last_event": event,
         "updated": now_iso,
     })
-    errors = validate_texts(new_state, board_doc.text_norm, new_log)
+    errors = validate_texts(new_state, board_doc.text_norm, new_log,
+                            current_agent=agent or "saipen-cli")
     if errors:
         return _refuse("VALIDATION_FAILED",
                        "proposed disposition fails fast validation: "
@@ -3332,7 +3381,7 @@ def sub_disposition(project_root: Path | str, name: str,
                             "would_write": changed})
     with project_writer_lock(root):
         commit = run_mutation(
-            root, op_id, "sub_disposition", "saipen-cli",
+            root, op_id, "sub_disposition", agent or "saipen-cli",
             project_identity(root),
             hash_bytes(("sub_disposition:" + identity).encode("utf-8")),
             targets, preconditions=preconditions,

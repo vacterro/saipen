@@ -561,11 +561,12 @@ def plan_release(
 
     version = _installed_version(root)
     state_text, state = _read_state(root)
-    # Second-wave P0: the acting identity is the CURRENT-SESSION agent. The
-    # bare CLI defaults to `saipen-cli`; an explicit `--agent <id>` overrides
-    # it for the whole invocation. Persisted STATE.agent is historical
-    # last-writer evidence and is NEVER the acting identity for a fresh
-    # session -- only the legacy default when a caller does not supply one.
+    # T-1006: the acting identity is the ONE canonical seat -- the CLI
+    # threads `_agent_for(project_root)` (inherited STATE.agent, or an
+    # explicit --agent handover) as `current_agent`. The persisted
+    # STATE.agent fallback here serves only direct API callers that predate
+    # the field; the release executor is always called with the resolved
+    # actor.
     release_actor = current_agent or state.get("agent") or "saipen-cli"
     board_text, board = _read_board(root)
     log_hash = _log_hash(root)
@@ -758,8 +759,15 @@ def plan_release(
             f"with phase DONE); actual phase {phase}")
 
     # ---- ticket identity ---------------------------------------------------
+    # T-1014: ONE call-scoped release evidence capture for this PLAN. The same
+    # immutable receipts + parsed history feed both ticket discovery and the
+    # continuation classification below, instead of re-scanning/re-parsing the
+    # same evidence twice. APPLY-time freshness rechecks (execute_release) do
+    # NOT reuse this capture and stay fresh.
+    _release_receipts, _release_events = _release_evidence(root)
     if phase == "DONE":
-        ticket_id = _find_release_ticket(root, version)
+        ticket_id = _find_release_ticket(
+            root, version, receipts=_release_receipts, events=_release_events)
         if ticket_id is None:
             raise ReleaseRefusal(
                 "RELEASE_FAILED",
@@ -801,7 +809,8 @@ def plan_release(
         root, state, phase, ticket_id, version, tag, branch, head, cls,
         remote_tip, tag_local, tag_local_c, tag_remote_exists,
         tag_remote_c,
-        [*scope_paths, scope_record_rel])
+        [*scope_paths, scope_record_rel],
+        receipts=_release_receipts, events=_release_events)
 
     confirmation = _read_confirmation(state)
 
@@ -1122,6 +1131,8 @@ def _classify_continuation(
     tag_local: bool, tag_local_c: str, tag_remote_exists: bool,
     tag_remote_c: str,
     scope_paths: list[str],
+    receipts: list[dict] | None = None,
+    events: tuple[dict, ...] | None = None,
 ) -> dict:
     """Classify the release as FRESH / NEEDS_CLOSURE / NEEDS_TAG /
     ALREADY_APPLIED / FIRST_PUBLISH. Never rounds a partial state up."""
@@ -1130,14 +1141,16 @@ def _classify_continuation(
             and tag_remote_exists and tag_remote_c == head
             and remote_tip == head
             and _ticket_done(root, ticket_id)
-            and _log_has_ship(root, version, ticket_id)):
+            and _log_has_ship(root, version, ticket_id,
+                              receipts=receipts, events=events)):
         return {"start_stage": START_TAG, "content_already_committed": True,
                 "already_applied": True, "first_publish_wait": False}
     if (phase == "DONE"
             and remote_tip == head
             and not tag_remote_exists
             and _ticket_done(root, ticket_id)
-            and _log_has_ship(root, version, ticket_id)):
+            and _log_has_ship(root, version, ticket_id,
+                              receipts=receipts, events=events)):
         return {"start_stage": START_TAG, "content_already_committed": True,
                 "already_applied": False, "first_publish_wait": False}
     if (phase == "SHIP"
@@ -1204,17 +1217,38 @@ def _committed_release_receipts(root: Path) -> list[dict]:
     return out
 
 
-def _log_has_ship(root: Path, version: str, ticket_id: str) -> bool:
+def _release_evidence(root: Path, receipts: list[dict] | None = None,
+                      events: tuple[dict, ...] | None = None):
+    """ONE call-scoped capture of the immutable release evidence (T-1014).
+
+    Committed release receipts and the complete parsed LOG history are read
+    once per PLAN and threaded into discovery / ship-proof / continuation
+    classification so the same immutable-on-this-PLAN evidence is never
+    re-scanned or re-parsed. Callers that do not pass a capture (e.g. the
+    APPLY-time freshness recheck at line ~1492) still read FRESH evidence --
+    this capture never crosses the PLAN/APPLY correctness boundary."""
+    if receipts is None:
+        receipts = _committed_release_receipts(root)
+    if events is None:
+        from .log import read_history_snapshot
+        events = read_history_snapshot(root).events
+    return receipts, events
+
+
+def _log_has_ship(root: Path, version: str, ticket_id: str,
+                  receipts: list[dict] | None = None,
+                  events: tuple[dict, ...] | None = None) -> bool:
     """Committed STRUCTURED release evidence: a COMMITTED release receipt
     naming this version + ticket, or a committed release RUN line in the
-    complete LOG history."""
+    complete LOG history. Accepts a call-scoped evidence capture (T-1014);
+    without one it reads fresh."""
+    receipts, events = _release_evidence(root, receipts, events)
     if any(
         record.get("version") == version
         and record.get("ticket_id") == ticket_id
-        for record in _committed_release_receipts(root)):
+        for record in receipts):
         return True
-    from .log import read_history_events
-    for ev in read_history_events(root):
+    for ev in events:
         if ev.get("ticket") == ticket_id:
             txt = ev.get("text", "")
             tax = ev.get("taxonomy", "")
@@ -1225,15 +1259,18 @@ def _log_has_ship(root: Path, version: str, ticket_id: str) -> bool:
     return False
 
 
-def _find_release_ticket(root: Path, version: str) -> str | None:
+def _find_release_ticket(root: Path, version: str,
+                         receipts: list[dict] | None = None,
+                         events: tuple[dict, ...] | None = None) -> str | None:
     """The ticket that shipped this version, from COMMITTED release receipts
-    or complete LOG history."""
-    for record in _committed_release_receipts(root):
+    or complete LOG history. Accepts a call-scoped evidence capture (T-1014);
+    without one it reads fresh."""
+    receipts, events = _release_evidence(root, receipts, events)
+    for record in receipts:
         ticket = record.get("ticket_id") or ""
         if record.get("version") == version and ticket.startswith("T-"):
             return ticket
-    from .log import read_history_events
-    for ev in reversed(read_history_events(root)):
+    for ev in reversed(events):
         ticket = ev.get("ticket") or ""
         if ticket.startswith("T-"):
             txt = ev.get("text", "")
@@ -1771,11 +1808,12 @@ def _apply_first_publish_wait(root: Path, plan: ReleasePlan) -> dict:
 
 
 def _agent(root: Path) -> str:
-    """DEPRECATED (second-wave P0): reading the acting identity from persisted
-    STATE.agent is the impersonation this wave closes. Every release event now
-    names `plan.current_agent`, captured at plan time from the CURRENT-SESSION
-    identity. Kept only as a fail-safe default for callers that predate the
-    field; the release executor never uses it."""
+    """DEPRECATED (T-1006): reading the acting identity from persisted
+    STATE.agent directly bypasses the ONE canonical resolver (`_agent_for` in
+    tools/saipen.py, which INHERITS STATE.agent and journals an explicit
+    handover). Every release event now names `plan.current_agent`, captured
+    at plan time from that resolved actor. Kept only as a fail-safe default
+    for callers that predate the field; the release executor never uses it."""
     try:
         _, state = _read_state(root)
         return state.get("agent") or "saipen-cli"
@@ -2012,7 +2050,19 @@ def _apply_release_locked(root: Path, plan: ReleasePlan) -> dict:
                             owned_post_stage_sha=_journal_owned_index_sha(
                                 journal))
                     except ValueError as exc:
-                        return _release_failure("INDEX_RESTORE", str(exc))
+                        # T-1007: an aborted `git commit` (e.g. a rejected
+                        # pre-commit hook) rewrites the index file -- git
+                        # stat-refreshes during the aborted attempt -- so the
+                        # byte-exact ownership proof cannot match and the
+                        # rollback refuses. The REAL reason the release
+                        # stopped is the commit failure (the hook's stderr),
+                        # which must stay visible in the refusal, never be
+                        # masked by the index note.
+                        detail = str(exc)
+                        if commit_result.get("detail"):
+                            detail = (f"{commit_result['detail']} -- "
+                                      + detail)
+                        return _release_failure("INDEX_RESTORE", detail)
                     return _release_failure(
                         commit_result.get("stage", "CONTENT_COMMIT"),
                         commit_result.get("detail", ""))

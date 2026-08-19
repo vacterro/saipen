@@ -42,7 +42,7 @@ from pathlib import Path
 
 from . import codec
 from .board import parse_board
-from .log import HistoryOwnershipError, parse_log_line
+from .log import HistoryOwnershipError
 from .result import Result
 
 _TAIL_EVENTS = 12
@@ -143,18 +143,22 @@ def _next_ticket_section(board: dict, ticket_id: str | None) -> str:
     return board["tickets"][ticket_id]["raw"].strip()
 
 
-def _log_tail(log_text: str, count: int = _TAIL_EVENTS) -> str:
-    events = [line for line in log_text.splitlines()
-              if parse_log_line(line) is not None]
-    if not events:
+def _log_tail(event_lines, count: int = _TAIL_EVENTS) -> str:
+    """Project the bounded LOG tail from ONE pre-parsed pass (T-1014).
+
+    `event_lines` is the call-scoped tuple of raw event lines, filtered once
+    by the caller; slicing per budget costs zero re-parsing, so the complete
+    LOG is parsed exactly once per command instead of once per budget probe.
+    `event_lines[-0:]` is the ENTIRE list (Python: -0 == 0), so a `count` of
+    0 must be branched explicitly to emit ZERO events -- never the full
+    history. A shrinking budget reaching count=0 collapses to the empty
+    surface, so LOG bytes never increase as the limit descends
+    (hostile-regression, P1#6)."""
+    if not event_lines:
         return "(no events)"
-    # `events[-0:]` is the ENTIRE list (Python: -0 == 0), so a `count` of 0 must
-    # be branched explicitly to emit ZERO events -- never the full history. A
-    # shrinking budget reaching count=0 collapses to the empty surface, so LOG
-    # bytes never increase as the limit descends (hostile-regression, P1#6).
     if count <= 0:
         return ""
-    return "\n".join(events[-count:])
+    return "\n".join(event_lines[-count:])
 
 
 def _load_context_inputs(root: Path) -> dict:
@@ -174,12 +178,19 @@ def _load_context_inputs(root: Path) -> dict:
     state, state_error = parse_state_or_error(state_text)
     board = parse_board(board_text)
     _pending, _conflicts = scan_pending(root)
+    # T-1014: the raw event lines are captured EXACTLY ONCE by
+    # `read_history_snapshot` (in the same pass that builds `events`) and
+    # reused verbatim here -- cold/hot/audit projections and every `_fit`
+    # budget probe slice this same tuple instead of re-parsing the complete
+    # LOG text a second time. Nothing is retained globally or across calls.
+    log_event_lines = log_snap.event_lines
     return {
         "root": root,
         "state_text": state_text,
         "board_text": board_text,
         "log_text": log_snap.text,
         "log_tail": log_snap.tail,
+        "log_event_lines": log_event_lines,
         "state": state,
         "state_error": state_error,
         "board": board,
@@ -266,7 +277,7 @@ def context_cold(project_root: Path | str, limit: int = 4000,
         return inputs
     state_text = inputs["state_text"]
     board_text = inputs["board_text"]
-    log_text = inputs["log_text"]
+    log_event_lines = inputs["log_event_lines"]
     state = inputs["state"]
     state_error = inputs["state_error"]
     if state_error:
@@ -329,14 +340,14 @@ def context_cold(project_root: Path | str, limit: int = 4000,
 
     # FULL unbounded body, for the honest pre-bound economics.
     full_body = fixed + "\n" + (
-        "## LOG TAIL\n" + _log_tail(log_text) + "\n"
+        "## LOG TAIL\n" + _log_tail(log_event_lines) + "\n"
         "## BOARD MAP\n" + _board_map(board, full_ticket=next_ticket) + "\n")
 
     # STRUCTURAL fit: BOARD orientation shrinks before LOG evidence.
     board_part, log_part = _fit(
         fixed, limit,
         lambda cap: _board_map(board, full_ticket=next_ticket, cap=cap),
-        lambda count: _log_tail(log_text, count))
+        lambda count: _log_tail(log_event_lines, count))
     body = fixed + "\n" + (
         "## LOG TAIL\n" + log_part + "\n"
         "## BOARD MAP\n" + board_part + "\n")
@@ -366,7 +377,7 @@ def context_hot(project_root: Path | str, limit: int = 3000,
         return inputs
     state_text = inputs["state_text"]
     board_text = inputs["board_text"]
-    log_text = inputs["log_text"]
+    log_event_lines = inputs["log_event_lines"]
     state = inputs["state"]
     state_error = inputs["state_error"]
     if state_error:
@@ -409,14 +420,14 @@ def context_hot(project_root: Path | str, limit: int = 3000,
         f"pending_ops: {', '.join(pending) or 'none'}",
         f"log_tail_event: {inputs['log_tail']}",
     ]) + "\n"
-    full_body = fixed + "\n## RECENT LOG\n" + _log_tail(log_text) + "\n"
-    log_part = _log_tail(log_text)
+    full_body = fixed + "\n## RECENT LOG\n" + _log_tail(log_event_lines) + "\n"
+    log_part = _log_tail(log_event_lines)
     # STRUCTURAL fit: RECENT LOG is the only optional section in hot. The
     # decision is made on the EXACT final surface (wrapper header + joining
     # newline included) in REAL UTF-8 bytes -- character counts would let a
     # multilingual surface exceed its declared budget (T-1003).
     for count in (12, 10, 8, 6, 4, 2, 0):
-        log_part = _log_tail(log_text, count)
+        log_part = _log_tail(log_event_lines, count)
         candidate = fixed + "\n## RECENT LOG\n" + log_part + "\n"
         if _bytes(candidate) <= limit:
             break

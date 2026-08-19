@@ -145,6 +145,11 @@ class HistorySnapshot:
     tail: int | None
     events: tuple[dict, ...]
     illegal_lines: tuple[str, ...] = ()
+    # The EXACT raw event lines, retained from the SAME single parse pass
+    # (T-1014): every line `parse_log_line` accepted, in file order. Context
+    # projections reuse these verbatim instead of re-parsing `text` a second
+    # time, so the complete history is parsed exactly once per capture.
+    event_lines: tuple[str, ...] = ()
 
 
 def _normalised_doc_text(raw: bytes) -> str:
@@ -176,6 +181,7 @@ def read_history_snapshot(project_root: Path | str) -> HistorySnapshot:
     h = hashlib.sha256()
     chunks: list[str] = []
     events: list[dict] = []
+    event_lines: list[str] = []
     illegal: list[str] = []
     for p in history_paths(root):
         try:
@@ -200,6 +206,9 @@ def read_history_snapshot(project_root: Path | str) -> HistorySnapshot:
             parsed = parse_log_line(line)
             if parsed is not None:
                 events.append(parsed)
+                # Retain the ORIGINAL legal raw line in the same pass (T-1014)
+                # so context projections reuse it verbatim -- no second parse.
+                event_lines.append(line)
                 continue
             stripped = line.strip()
             if not stripped or stripped.startswith("#"):
@@ -216,6 +225,7 @@ def read_history_snapshot(project_root: Path | str) -> HistorySnapshot:
         tail=tail,
         events=tuple(events),
         illegal_lines=tuple(illegal),
+        event_lines=tuple(event_lines),
     )
 
 

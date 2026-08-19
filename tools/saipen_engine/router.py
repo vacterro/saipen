@@ -51,14 +51,16 @@ def route_next(state_text: str, board_text: str,
     authority, so routing never infers write authority from STATE.mode -- it
     gates only on an explicit current-capability value when one is supplied.
 
-    `current_agent` is the CURRENT-SESSION actor (second-wave P0). Claim truth
-    and workability are judged relative to THIS identity, NEVER relative to
-    persisted `STATE.agent` -- that field is historical last-writer evidence.
-    A new agent B entering state last written by A must see A's live claim as
-    FOREIGN_LIVE and refuse takeover, not impersonate A. When `current_agent`
-    is None (a caller that does not know its own identity), routing falls back
-    to the historical value for backward compatibility of pure-semantic
-    callers, but the CLI/adapters always supply the session identity.
+    `current_agent` is the canonical acting identity (T-1006): the ONE
+    resolver in tools/saipen.py INHERITS persisted STATE.agent for a bare CLI
+    and journals an explicit old -> new DEC for a genuine `--agent` handover.
+    Claim truth and workability are judged relative to THAT value, never by
+    reading STATE.agent a second time here -- a genuinely different actor B
+    entering state last written by A must see A's live claim as FOREIGN_LIVE
+    and refuse takeover, not impersonate A. When `current_agent` is None (a
+    caller that does not know its own identity), routing falls back to the
+    historical value for backward compatibility of pure-semantic callers,
+    but the CLI/adapters always supply the resolved identity.
     """
     pending = list(pending_ops or [])
     conflicts = list(conflict_ops or [])
@@ -248,6 +250,20 @@ def route_next(state_text: str, board_text: str,
         return {"ok": True, "action": f"PHASE {phase} {active}",
                 "reason": "finish", "ticket": active,
                 "load": load_for_action(f"PHASE {phase} {active}")}
+
+    # Phase-owned partial continuation (T-1011): an UNFINISHED MARKHUNT pass
+    # owns the next action even under an outer converge/crew target.
+    # `phases/markhunt.md` makes `next_action: "saipen markhunt"` the resume
+    # marker of a partial pass (manifest cursor: partial) -- routing must
+    # continue THAT sweep until its manifest closes, never exit the audit
+    # campaign to crew while findings are still being recorded. The persisted
+    # crew intent is left untouched and resumes after MARKHUNT legitimately
+    # closes (the crew branch below then owns continuation again).
+    if phase == "MARKHUNT" and na.startswith("saipen markhunt"):
+        return {"ok": True, "action": na, "reason": "markhunt-continue",
+                "load": load_for_action(na),
+                "detail": "partial MARKHUNT pass owns continuation until "
+                          "its manifest closes"}
 
     # Crew is an outer convergence target. Once local ticket execution has no
     # immediate continuation, ordinary `cc` returns to crew orchestration from

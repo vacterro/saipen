@@ -34,23 +34,96 @@ AGENT = "saipen-cli"
 HOME = Path(__file__).resolve().parent.parent
 VERSION_FILE = HOME / "VERSION"
 
-# The CURRENT-SESSION acting identity (hostile-regression, second-wave P0).
-# Persisted STATE.agent is HISTORICAL last-writer evidence and must NEVER
-# become the current actor: a new agent B entering state last written by A
-# would otherwise impersonate A, see A's live claim as SELF, and write
-# LOG/STATE/BOARD evidence naming the wrong actor. The bare CLI defaults to
-# `saipen-cli`; an explicit `--agent <id>` overrides it for the whole session.
-_SESSION_AGENT: str = AGENT
+# The ONE canonical actor resolver (T-1006): bare CLI INHERITS STATE.agent
+# -- the seat CORE.md section 1.4 defines -- and an explicit `--agent <id>`
+# is a genuine-handover request that MUST log a DEC naming old -> new before
+# any mutation. STATE.agent is never invented by the CLI; only an explicit
+# override replaces the inherited seat.
+_AGENT_OVERRIDE: str | None = None
 
 
 def _agent_for(project_root: Path) -> str:
-    """The CURRENT-SESSION acting identity (hostile-regression, second-wave P0).
+    """The canonical acting seat (T-1006).
 
-    NEVER derived from persisted STATE.agent -- that field is historical
-    last-writer evidence only. `project_root` is accepted so the signature
-    stays stable for callers, and deliberately UNUSED: reading STATE here is
-    exactly the impersonation this closes."""
-    return _SESSION_AGENT
+    An explicit `--agent <id>` override wins (the handover is logged by
+    `handover_agent` before any mutation); otherwise the seat is INHERITED
+    from persisted STATE.agent -- a returning agent keeps the seat, and only a
+    genuinely different actor changes it (CORE.md section 1.4, BOOT.md).
+    `AGENT` is the fallback only for a project with no persisted agent."""
+    if _AGENT_OVERRIDE is not None:
+        return _AGENT_OVERRIDE
+    state_path = _state_path(project_root)
+    if state_path.is_file():
+        state, _ = parse_state_or_error(codec.read_doc(state_path))
+        if state and state.get("agent"):
+            return state["agent"]
+    return AGENT
+
+
+# T-1006: ONE canonical, subcommand-aware mutation classifier. This table is
+# the SINGLE authority the handover gate consults to decide whether a command
+# may write canonical state (and therefore must perform the A -> B handover
+# before its dependent writes). The dispatcher below still routes each command
+# through its own branch -- the classifier is NOT a second dispatcher, it is
+# the gate the dispatcher defers to for the handover decision. Keep the two in
+# agreement: the table-driven regression in run_scenarios.py proves every
+# public command's classification matches the dispatcher's read-only vs
+# mutating behavior, so a drift between them fails loudly.
+#
+# Authoritative public-surface semantics (verified against the dispatcher):
+#   status / next / context / recover inspect ......... READ_ONLY
+#   claim / transition / checkpoint / ticket * ........ MUTATING
+#   userperson show ................................... READ_ONLY
+#   userperson add|remove|reset ....................... MUTATING
+#   sub list|status .................................. READ_ONLY
+#   sub sync|spawn|adopt|pause|resume|clean|
+#      collect|dispose ............................... MUTATING
+#   recover resolve / bare recover (replay) .......... MUTATING
+#   rebind-home / crew / scope / fpc / ship / push ... MUTATING
+#   improve (bare prepare) / submit / complete / sweep /
+#      cycle-complete / abort / clean ................ MUTATING
+#   improve status / sweep-queue / verify ............ READ_ONLY
+_MUTATING_TOPLEVEL = frozenset({
+    "claim", "transition", "checkpoint", "ticket", "rebind-home", "crew",
+    "scope", "first-publish-confirm", "fpc", "ship", "push",
+})
+_MUTATING_USERPERSON = frozenset({"add", "remove", "reset"})
+_MUTATING_SUB = frozenset({"sync", "spawn", "adopt", "pause", "resume",
+                            "clean", "collect", "dispose"})
+_MUTATING_IMPROVE = frozenset({"submit", "complete", "sweep", "cycle-complete",
+                                "abort", "clean"})
+_READ_ONLY_RECOVER = frozenset({"inspect"})
+
+
+def _command_mutates(command: str, rest: list[str]) -> bool:
+    """Does this invocation write canonical state? (T-1006 handover gate.)
+
+    Subcommand-aware and authoritative: the dispatcher routes AFTER this
+    verdict, so a read-only projection under `--agent B` never hands over
+    persistent ownership, never appends LOG, never updates STATE, and never
+    creates recovery operations. Mutating invocations perform the canonical
+    A -> B handover BEFORE their dependent writes.
+    """
+    sub = rest[0] if rest and not rest[0].startswith("-") else None
+    if command in _MUTATING_TOPLEVEL:
+        return True
+    if command == "userperson":
+        # `show` is a read-only projection; add/remove/reset mutate.
+        return sub in _MUTATING_USERPERSON
+    if command == "sub":
+        # list/status are read-only; the rest mutate the sub roster.
+        return sub in _MUTATING_SUB
+    if command == "recover":
+        # inspect is read-only; `resolve` mutates recovery state, and a bare
+        # `recover` may replay pending operations and therefore mutate.
+        return sub not in _READ_ONLY_RECOVER
+    if command == "improve":
+        if sub is None:
+            # Bare `improve` PREPARES the audit seat/cycle/report -- mutating.
+            return True
+        # verify/status/sweep-queue are read-only; the rest mutate.
+        return sub in _MUTATING_IMPROVE
+    return False
 
 
 _TERMINAL_RESULT_RE = re.compile(r"->\s*(PASS|FAIL)\s*$")
@@ -99,6 +172,19 @@ def _pending_state(project_root: Path) -> tuple[list[str], list[str]]:
             [op["op_id"] for op in conflicts])
 
 
+def _scan_full(project_root: Path) -> tuple[list[str], list[str], list[dict]]:
+    """ONE recovery-manifest traversal for pending ids, conflicts AND the
+    structured corrupt records (T-1014). status/next/recover previously ran
+    `_pending_state` followed by `_corrupt_evidence`, traversing the
+    recovery tree twice per command; one scan serves all three projections,
+    so every command sees exactly one manifest snapshot."""
+    from saipen_engine.journal import scan_pending
+    pending, conflicts = scan_pending(project_root)
+    return ([op["op_id"] for op in pending],
+            [op["op_id"] for op in conflicts],
+            [op for op in pending if op.get("corrupt")])
+
+
 def _corrupt_evidence(project_root: Path) -> list[dict]:
     """The STRUCTURED corrupt recovery records, record shape preserved.
 
@@ -108,9 +194,7 @@ def _corrupt_evidence(project_root: Path) -> list[dict]:
     Every public projection (status / next / recover / preflight) reads THIS so
     they all agree on CORRUPT_JOURNAL instead of one reporting a healthy
     surface."""
-    from saipen_engine.journal import scan_pending
-    pending, _conflicts = scan_pending(project_root)
-    return [op for op in pending if op.get("corrupt")]
+    return _scan_full(project_root)[2]
 
 
 def _corrupt_refusal(corrupt: list[dict]) -> dict:
@@ -160,7 +244,8 @@ def _status(project_root: Path, as_json: bool) -> int:
                "detail": f"history-ownership: {exc}"}, as_json)
         return 1
     board_path = project_root / ".saipen" / "BOARD.md"
-    board = parse_board(codec.read_doc(board_path)) if board_path.is_file() else {"tickets": {}, "errors": []}
+    board_text = codec.read_doc(board_path) if board_path.is_file() else ""
+    board = parse_board(board_text) if board_path.is_file() else {"tickets": {}, "errors": []}
     doing = [t for t in board["tickets"].values()
              if t["section"] == "## DOING"]
     todo = [t for t in board["tickets"].values() if t["section"] == "## TODO"]
@@ -171,26 +256,24 @@ def _status(project_root: Path, as_json: bool) -> int:
     if not board["errors"]:
         for ticket in todo:
             if ticket_is_workable(ticket, board["tickets"],
-                                  agent=_SESSION_AGENT):
+                                  agent=_agent_for(project_root)):
                 top_workable = ticket["id"]
                 break
-    pending, conflicts = _pending_state(project_root)
-    # P1#6: corrupt recovery evidence is not a healthy surface. status agrees
-    # with next/preflight/recover on CORRUPT_JOURNAL and carries the STRUCTURED
-    # record (op_id + detail), never a bare id that reads like a normal op.
-    _corrupt = _corrupt_evidence(project_root)
+    # T-1014: ONE recovery-manifest traversal serves pending/conflicts and
+    # the structured corrupt records; P1#6 still refuses CORRUPT_JOURNAL with
+    # the STRUCTURED record (op_id + detail) before any projection.
+    pending, conflicts, _corrupt = _scan_full(project_root)
     if _corrupt:
         _emit(_corrupt_refusal(_corrupt), as_json)
         return 1
     from saipen_engine.router import (route_next, routing_failure_code)
     # P0#4: the freshly negotiated current-session capability gates routing --
     # a read-only session routes RESTATE_AND_STOP, never a mutating action.
-    # Second-wave P0: current identity is the SESSION agent, never STATE.agent.
-    routed = route_next(codec.read_doc(state_path),
-                        codec.read_doc(board_path) if board_path.is_file() else "",
+    # T-1006: routing judges claim truth against the canonical acting seat.
+    routed = route_next(state_text, board_text,
                         pending, conflicts,
                         current_capability=_negotiate_capability(project_root),
-                        current_agent=_SESSION_AGENT)
+                        current_agent=_agent_for(project_root))
     if not routed.get("ok") and routing_failure_code(routed) == "VALIDATION_FAILED":
         # A malformed/binding failure must NOT project a healthy surface from
         # corrupt input (T-1003): status fails closed with the router's
@@ -223,8 +306,11 @@ def _status(project_root: Path, as_json: bool) -> int:
         if b_cls in ("WAIT_USER_CONFIRMATION", "WAIT_USER_DECISION") or b_text.startswith("WAIT_USER"):
             waiting_on_you.append(f"{bt['id']}: {b_text}")
 
-    from saipen_engine.log import read_history_events, verification_evidence
-    history_events = read_history_events(project_root)
+    # T-1014: the parsed events come from the SAME one-pass ProjectSnapshot
+    # that supplied log_hash/log_tail/head -- status never reopens the complete
+    # LOG history for evidence after capturing the snapshot once.
+    from saipen_engine.log import verification_evidence
+    history_events = snap.history_events
     # DONE proof: a successful RUN event ASSOCIATED WITH THE TICKET.
     claimed_but_unproven: list[str] = []
     for dt in done_tickets:
@@ -319,9 +405,8 @@ def _next_action(project_root: Path, as_json: bool) -> int:
                "detail": f"state-malformed: {state_error}"}, as_json)
         return 1
     subject = state.get("task")
-    pending, conflicts = _pending_state(project_root)
-    # P1#6: same structured CORRUPT_JOURNAL verdict as status/preflight/recover.
-    _corrupt = _corrupt_evidence(project_root)
+    # T-1014: ONE recovery-manifest traversal (pending + conflicts + corrupt).
+    pending, conflicts, _corrupt = _scan_full(project_root)
     if _corrupt:
         _emit(_corrupt_refusal(_corrupt), as_json)
         return 1
@@ -329,10 +414,10 @@ def _next_action(project_root: Path, as_json: bool) -> int:
     from saipen_engine.router import (load_for_action, route_next,
                                       routing_failure_code)
     # P0#4: the freshly negotiated current-session capability gates routing.
-    # Second-wave P0: current identity is the SESSION agent, never STATE.agent.
+    # T-1006: routing judges claim truth against the canonical acting seat.
     routed = route_next(state_text, board_text, pending, conflicts,
                         current_capability=_negotiate_capability(project_root),
-                        current_agent=_SESSION_AGENT)
+                        current_agent=_agent_for(project_root))
     if not routed.get("ok"):
         # The router owns the stable failure code: recovery conflicts/pending
         # are RECOVERY_*; malformed/binding failures are VALIDATION_FAILED
@@ -415,7 +500,7 @@ def _recover(project_root: Path, args: list[str], as_json: bool) -> int:
                                   agent=_agent_for(project_root))
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
-    pending, conflicts = _pending_state(project_root)
+    pending, conflicts, _corrupt = _scan_full(project_root)
     if conflicts:
         _emit({"ok": False, "code": "CONFLICT",
                "op_ids": conflicts,
@@ -434,8 +519,7 @@ def _recover(project_root: Path, args: list[str], as_json: bool) -> int:
     # e.g. a symlinked OPS_DIR or an unreadable entry -- must never be replayed
     # as a normal op_id (which surfaced a generic VALIDATION_FAILED). The
     # STRUCTURED record survives to the refusal via the ONE shared payload every
-    # projection uses.
-    _corrupt = _corrupt_evidence(project_root)
+    # projection uses (already scanned above by `_scan_full`, T-1014).
     if _corrupt:
         _emit(_corrupt_refusal(_corrupt), as_json)
         return 1
@@ -497,46 +581,55 @@ def _sub(project_root: Path, args: list[str], as_json: bool,
                "detail": "STATE.saipen_home is required; project root is "
                          "not installation provenance"}, as_json)
         return 1
+    # T-1006: sub mutators persist the CANONICAL acting seat (inherited
+    # STATE.agent or explicit --agent), never a hardcoded CLI identity.
+    actor = _agent_for(project_root)
+
+    def _run(thunk):
+        """One sub-action execution with the structured CLI boundary
+        (T-1013): a residual path-length/host filesystem failure (an ID that
+        passes every safe-ID check yet still breaks the host path budget) is
+        a zero-write VALIDATION_FAILED refusal, never a traceback."""
+        try:
+            result = thunk()
+        except OSError as exc:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": f"sub {action} failed on the filesystem: "
+                              f"{type(exc).__name__}: {exc}"},
+                  as_json)
+            return 1
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
+
     if action == "list":
-        result = sub_list(project_root)
-        _emit(result.to_dict(), as_json)
-        return 0 if result.ok else 1
+        return _run(lambda: sub_list(project_root))
     if action == "sync":
-        result = sub_sync(project_root, saipen_home, dry_run=dry_run)
-        _emit(result.to_dict(), as_json)
-        return 0 if result.ok else 1
+        return _run(lambda: sub_sync(project_root, saipen_home, agent=actor,
+                                     dry_run=dry_run))
     if action == "status":
-        result = sub_status(project_root, rest[0])
-        _emit(result.to_dict(), as_json)
-        return 0 if result.ok else 1
+        return _run(lambda: sub_status(project_root, rest[0]))
     if action == "spawn":
-        result = sub_spawn(project_root, rest[0], saipen_home, dry_run=dry_run)
-        _emit(result.to_dict(), as_json)
-        return 0 if result.ok else 1
+        return _run(lambda: sub_spawn(project_root, rest[0], saipen_home,
+                                      agent=actor, dry_run=dry_run))
     if action == "adopt":
-        result = sub_adopt(project_root, rest[0], saipen_home, dry_run=dry_run)
-        _emit(result.to_dict(), as_json)
-        return 0 if result.ok else 1
+        return _run(lambda: sub_adopt(project_root, rest[0], saipen_home,
+                                      agent=actor, dry_run=dry_run))
     if action in ("pause", "resume"):
         fn = sub_pause if action == "pause" else sub_resume
-        result = fn(project_root, rest[0], dry_run=dry_run)
-        _emit(result.to_dict(), as_json)
-        return 0 if result.ok else 1
+        return _run(lambda: fn(project_root, rest[0], agent=actor,
+                               dry_run=dry_run))
     if action == "clean":
-        result = sub_clean(project_root, rest[0], dry_run=dry_run)
-        _emit(result.to_dict(), as_json)
-        return 0 if result.ok else 1
+        return _run(lambda: sub_clean(project_root, rest[0], agent=actor,
+                                      dry_run=dry_run))
     if action == "collect":
         name = rest[0] if rest else None
-        result = sub_collect(project_root, name, dry_run=dry_run)
-        _emit(result.to_dict(), as_json)
-        return 0 if result.ok else 1
+        return _run(lambda: sub_collect(project_root, name, agent=actor,
+                                        dry_run=dry_run))
     if action == "dispose":
         package_id = rest[1] if len(rest) > 1 else None
-        result = sub_disposition(project_root, rest[0], package_id,
-                                 dry_run=dry_run)
-        _emit(result.to_dict(), as_json)
-        return 0 if result.ok else 1
+        return _run(lambda: sub_disposition(project_root, rest[0],
+                                            package_id, agent=actor,
+                                            dry_run=dry_run))
     return 2
 
 
@@ -991,7 +1084,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
                 project_name="SAIPEN", model_or_runtime=runtime,
                 protocol_fingerprint=fingerprint,
                 context_scope=f"SAIPEN audit, phase {state.get('phase') or '?'}",
-                context_available="partial")
+                context_available="partial", dry_run=dry_run)
         except ImproveError as exc:
             _emit({"ok": False, "code": "VALIDATION_FAILED",
                    "detail": str(exc)}, as_json)
@@ -1011,6 +1104,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
             "report_path": report_path.relative_to(project_root).as_posix(),
             "report_created": prepared["report_created"],
             "resumed": prepared["resumed"],
+            "dry_run": bool(prepared.get("dry_run")),
             "source": {"source_head": prepared["source_head"],
                        "source_tree_fingerprint": prepared[
                            "source_tree_fingerprint"],
@@ -1359,12 +1453,13 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
 
     args = clean_before + (["--"] + after_dashdash if "--" in raw_args else [])
 
-    # Second-wave P0: the current actor is SESSION-OWNED. An explicit
-    # `--agent <id>` names the actor for this whole invocation; the bare CLI
-    # defaults to `saipen-cli`. STATE.agent is NEVER consulted for identity.
-    global _SESSION_AGENT
-    _SESSION_AGENT = (agent_opt.strip() if agent_opt and agent_opt.strip()
-                      else AGENT)
+    # T-1006: an explicit `--agent <id>` is a GENUINE-HANDOVER request; the
+    # bare CLI (override None) inherits the persisted STATE.agent seat. The
+    # mandatory old -> new DEC is written by handover_agent before the first
+    # mutating command below dispatches.
+    global _AGENT_OVERRIDE
+    _AGENT_OVERRIDE = (agent_opt.strip() if agent_opt and agent_opt.strip()
+                       else None)
 
     if not args or args[0] in ("-h", "--help"):
         usage_msg = (
@@ -1397,6 +1492,23 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
         return 3
 
     command = args[0]
+
+    # T-1006: an explicit --agent override is a genuine handover. Before any
+    # MUTATING command writes, record the mandatory DEC naming old -> new so a
+    # seat change is never silent; read-only projections route under the
+    # resolved actor without touching disk.
+    if _AGENT_OVERRIDE is not None and _command_mutates(command, args[1:]):
+        state_path = _state_path(project_root)
+        if state_path.is_file():
+            state, _state_err = parse_state_or_error(codec.read_doc(state_path))
+            if state and state.get("agent") != _AGENT_OVERRIDE:
+                from saipen_engine.operations import handover_agent
+                ho = handover_agent(project_root, _AGENT_OVERRIDE,
+                                    dry_run=dry_run)
+                if not ho.ok:
+                    _emit(ho.to_dict(), as_json)
+                    return 1
+
     if command == "status":
         if len(args) > 1:
             _emit({"ok": False, "code": "VALIDATION_FAILED",

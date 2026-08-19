@@ -620,6 +620,41 @@ HOME_LAYOUT_MARKERS = (
     ("extensions", "subs", "PROTOCOL.md"),
 )
 
+# Windows drive qualification with a separator: `C:\...` or `C:/...`.
+_DRIVE_ABS_RE = re.compile(r"^[A-Za-z]:[/\\]")
+# UNC share: `\\server\share...` (or the forward-slash twin `//server/...`).
+# T-1010: also match the decoded form `\server\share` where the frontmatter
+# parser has reduced `\\` to `\` -- a single leading backslash followed by
+# non-separator characters is a decoded UNC pointer on POSIX.
+_UNC_ABS_RE = re.compile(r"^(?:\\\\|//|\\)[^/\\]+")
+
+
+def is_absolute_home(value: object) -> bool:
+    """One cross-platform absolute-path classifier for `STATE.saipen_home`
+    (T-1010).
+
+    `Path.is_absolute()` is HOST-NATIVE: on POSIX a Windows drive or UNC
+    pointer (`C:\\saipen`, `\\\\server\\share`) reads as a RELATIVE path, so
+    a foreign-OS absolute home is misclassified as legacy -- and a dead
+    protocol home then passes the liveness gate plus ordinary mutation
+    instead of forcing `saipen rebind-home`. This classifier recognizes all
+    three portable absolute syntaxes on every host:
+      - POSIX absolute: leading `/`;
+      - Windows drive-absolute: `C:` followed by a separator;
+      - UNC share: `\\\\host\\share` or `//host/share`.
+    It is a pure string classification, deliberately -- the same verdict on
+    every host, so a foreign-OS pointer is dead in exactly the same way
+    wherever the checkpoint is read.
+    """
+    if value is None:
+        return False
+    text = str(value).strip()
+    if not text:
+        return False
+    return (text.startswith("/")
+            or bool(_DRIVE_ABS_RE.match(text))
+            or bool(_UNC_ABS_RE.match(text)))
+
 
 def persisted_home_error(home: object) -> str | None:
     """Why `STATE.saipen_home` is DEAD, or None when it is usable/unverifiable.
@@ -639,7 +674,7 @@ def persisted_home_error(home: object) -> str | None:
         return None
     text = str(home).strip()
     path = Path(text)
-    if not path.is_absolute():
+    if not is_absolute_home(text):
         return None
     if not path.is_dir():
         return (f"STATE.saipen_home {text!r} does not resolve to a directory "
@@ -685,7 +720,10 @@ def parse_state_or_error(text: str):
     # Deleting `style_contract` from a state that THIS install owns still fails.
     home = fields.get("saipen_home")
     style_token = None
-    if (home and str(home).strip() and Path(str(home)).is_absolute()
+    # T-1010: the same cross-platform absolute classifier the liveness gate
+    # uses -- a foreign-OS absolute pointer must never read as legacy-relative
+    # here and silently skip the running-install ownership check.
+    if (home and str(home).strip() and is_absolute_home(home)
             and Path(str(home)).resolve() == running_home()):
         style_token = running_style_token()
     contract_errors = state_contract_errors(
