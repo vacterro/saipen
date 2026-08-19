@@ -86,6 +86,38 @@ def _is_delivery_source(project: Path, rel: str) -> bool:
     return True
 
 
+def _scan_unresolved_recovery(project: Path) -> list[tuple[str, str]]:
+    """Scan .saipen/recovery/ops/ for unresolved PREPARED/CONFLICT operations.
+
+    Returns a list of (op_id, status) for any operation that has not reached
+    a terminal state (COMMITTED, RESOLVED).  An empty list means the recovery
+    journal is clean.
+
+    T-1010: A handoff with unresolved recovery operations would silently
+    launder pending recovery out of the continuation — the recipient would
+    never know about the interrupted mutation.
+    """
+    import json
+    unresolved = []
+    ops_dir = project / ".saipen" / "recovery" / "ops"
+    if not ops_dir.is_dir():
+        return unresolved
+    terminal = {"COMMITTED", "RESOLVED", "SKIPPED"}
+    for entry in sorted(ops_dir.iterdir()):
+        op_file = entry / "operation.json"
+        if not op_file.is_file():
+            continue
+        try:
+            with open(op_file, encoding="utf-8-sig") as f:
+                op = json.load(f)
+            status = op.get("status", "UNKNOWN")
+            if status not in terminal:
+                unresolved.append((entry.name, status))
+        except (json.JSONDecodeError, OSError):
+            unresolved.append((entry.name, "UNREADABLE"))
+    return unresolved
+
+
 def build_archive(output: Path, project: Path) -> None:
     verifier = project / "tools" / "verify_handoff_archive.py"
     if not verifier.is_file():
@@ -104,11 +136,44 @@ def build_archive(output: Path, project: Path) -> None:
         print(f"WARN: {len(deleted)} tracked files appear deleted "
               f"(not sealed LOGs — review manually)")
 
-    # --- Collect inventory ---
+    # T-1010: Scan canonical recovery state.  Unresolved PREPARED/CONFLICT
+    # operations mean the continuation truth is incomplete — shipping would
+    # silently launder pending recovery out of the handoff.
+    unresolved = _scan_unresolved_recovery(project)
+    if unresolved:
+        print(f"FAIL: {len(unresolved)} unresolved recovery operation(s) detected:")
+        for op_id, status in unresolved:
+            print(f"  - {op_id} ({status})")
+        print("Cannot build handoff archive while recovery is pending.")
+        print("Resolve with: saipen recover resolve <op_id> --resolution <accept_live|replan>")
+        sys.exit(1)
+
+    # --- Collect inventory + source snapshot ---
     print("\n=== Collecting delivery inventory ===")
     tracked = _tracked_files(project)
     members = sorted(rel for rel in tracked if _is_delivery_source(project, rel))
     print(f"  {len(members)} tracked files selected for archive")
+
+    # T-1011: Capture a canonical path -> content-hash inventory BEFORE
+    # building the archive.  Every archive member will be verified against
+    # this snapshot after construction, so tree movement/tampering between
+    # capture and packaging fails closed.
+    print("\n=== Capturing source snapshot ===")
+    source_snapshot: dict[str, str] = {}  # rel_path -> sha256 hex
+    snapshot_errors = []
+    for rel in members:
+        src = project / rel
+        if src.is_file():
+            h = hashlib.sha256(src.read_bytes()).hexdigest()
+            source_snapshot[rel] = h
+        else:
+            snapshot_errors.append(rel)
+    if snapshot_errors:
+        print(f"FAIL: {len(snapshot_errors)} member(s) vanished during snapshot:")
+        for e in snapshot_errors[:10]:
+            print(f"  {e}")
+        sys.exit(1)
+    print(f"  Captured {len(source_snapshot)} file hashes from source tree")
 
     # --- Build temporary archive ---
     print("\n=== Building temporary archive ===")
@@ -124,6 +189,42 @@ def build_archive(output: Path, project: Path) -> None:
 
         print(f"  {tmpzip}  ({tmpzip.stat().st_size} bytes, "
               f"{len(members)} members)")
+
+        # T-1011: Verify every archive member against the captured snapshot.
+        # This catches tree mutation between snapshot and packaging.
+        print("\n=== Verifying archive against source snapshot ===")
+        snapshot_mismatches = []
+        with zipfile.ZipFile(str(tmpzip), "r") as zf:
+            for info in zf.infolist():
+                arc_name = info.filename
+                if arc_name.endswith("/"):
+                    continue  # directory entry
+                arc_hash = hashlib.sha256(zf.read(arc_name)).hexdigest()
+                expected = source_snapshot.get(arc_name)
+                if expected is None:
+                    snapshot_mismatches.append(
+                        (arc_name, "extra member not in source snapshot"))
+                elif arc_hash != expected:
+                    snapshot_mismatches.append(
+                        (arc_name, f"hash mismatch: arc={arc_hash[:16]} src={expected[:16]}"))
+        if snapshot_mismatches:
+            print(f"FAIL: {len(snapshot_mismatches)} member(s) differ from source snapshot:")
+            for name, reason in snapshot_mismatches[:10]:
+                print(f"  {name}: {reason}")
+            tmpzip.unlink(missing_ok=True)
+            sys.exit(1)
+        # Also verify no source members were missed
+        arc_members = set()
+        with zipfile.ZipFile(str(tmpzip), "r") as zf:
+            arc_members = {i.filename for i in zf.infolist() if not i.filename.endswith("/")}
+        missing_from_archive = [m for m in source_snapshot if m not in arc_members]
+        if missing_from_archive:
+            print(f"FAIL: {len(missing_from_archive)} source file(s) missing from archive:")
+            for m in missing_from_archive[:10]:
+                print(f"  {m}")
+            tmpzip.unlink(missing_ok=True)
+            sys.exit(1)
+        print(f"PASS: all {len(source_snapshot)} archive members match source snapshot")
 
         # --- Structural + portability gate ---
         print("\n=== Structural verification ===")

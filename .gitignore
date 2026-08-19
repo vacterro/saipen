@@ -34,3 +34,4 @@ thoughts/
 # one machine's allowlist as everyone's.
 .claude/settings.local.json
 .saipen/extensions/subs/*/kitchen/_gen_*.py
+saipen-delivery.zip

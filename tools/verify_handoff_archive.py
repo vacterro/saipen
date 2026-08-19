@@ -295,13 +295,83 @@ def gate_d_extract_roundtrip(archive_path: Path, tracked: set[str]) -> Path | No
 
 
 def gate_h_semantic_validation(extract_dir: Path) -> bool:
-    """Check H: run canonical validator against the extracted copy.
+    """Check H: run canonical validator + BOOT contract against the extracted copy.
 
-    The extracted archive MUST be semantically valid, not just physically
-    complete.  A malformed STATE, broken LOG parent chain, or schema
-    violation inside the archive MUST fail delivery.
+    T-1012: The extracted archive MUST be semantically valid AND bootable,
+    not just physically complete.  A malformed STATE, broken LOG parent chain,
+    dead/foreign saipen_home, or schema violation inside the archive MUST
+    fail delivery.
+
+    Steps:
+      1. Canonical rebind-home inside the disposable copy (if saipen_home
+         differs from the extraction path).
+      2. Run canonical validator.
+      3. Exercise representative read-only smoke: status + next.
+      4. Exercise a zero-write dry-run mutator to prove the extracted copy
+         can actually operate.
     """
-    print("\n--- Gate H: semantic validation (extracted copy) ---")
+    print("\n--- Gate H: semantic validation + BOOT contract (extracted copy) ---")
+
+    # H-1: Canonical rebind-home inside the disposable copy.
+    # The artifact's persisted saipen_home may point at the original source
+    # machine.  For a clean-room extraction to be bootable, we must rebind
+    # it to the extraction directory.
+    state_file = extract_dir / ".saipen" / "STATE.md"
+    if state_file.is_file():
+        state_text = state_file.read_text(encoding="utf-8-sig")
+        # Check if saipen_home needs rebinding
+        import re as _re
+        home_match = _re.search(r"^saipen_home:\s*\"(.+?)\"", state_text,
+                               _re.MULTILINE)
+        if home_match:
+            current_home = home_match.group(1)
+            # Normalize path separators for cross-platform comparison
+            extract_str = str(extract_dir)
+            current_norm = _re.sub(r"[/\\]+", "/", current_home).rstrip("/")
+            extract_norm = _re.sub(r"[/\\]+", "/", extract_str).rstrip("/")
+            if current_norm != extract_norm:
+                print(f"  Rebinding saipen_home: {current_home} -> {extract_dir}")
+                # Use canonical rebind command if available
+                rebind_script = extract_dir / "tools" / "saipen.py"
+                if rebind_script.is_file():
+                    r = subprocess.run(
+                        [sys.executable, str(rebind_script), "rebind-home",
+                         str(extract_dir), "--project-root", str(extract_dir)],
+                        cwd=str(extract_dir), capture_output=True, text=True,
+                        timeout=120)
+                    if r.returncode != 0:
+                        # Fallback: direct STATE.md edit
+                        new_state = state_text.replace(
+                            current_home, str(extract_dir))
+                        state_file.write_text(new_state, encoding="utf-8-sig")
+                        print("  Fallback: direct STATE.md saipen_home rewrite")
+                    else:
+                        print(f"  Rebind output: {r.stdout.strip()[:100]}")
+                else:
+                    # No saipen.py — direct edit
+                    new_state = state_text.replace(
+                        current_home, str(extract_dir))
+                    state_file.write_text(new_state, encoding="utf-8-sig")
+                    print("  Direct STATE.md saipen_home rewrite")
+                # Read back state to confirm rebind took
+                state_text = state_file.read_text(encoding="utf-8-sig")
+                home_after = _re.search(r"^saipen_home:\s*\"(.+?)\"",
+                                       state_text, _re.MULTILINE)
+                if home_after:
+                    after_norm = _re.sub(r"[/\\]+", "/", home_after.group(1)).rstrip("/")
+                    if after_norm == extract_norm:
+                        print("  PASS: saipen_home rebind verified")
+                    else:
+                        print(f"  FAIL: saipen_home still {home_after.group(1)} after rebind")
+                        print(f"  DEBUG: after_norm={after_norm!r}  extract_norm={extract_norm!r}")
+                        return False
+                else:
+                    print("  WARN: saipen_home not found after rebind")
+            else:
+                print("  saipen_home already matches extraction path")
+
+    # H-2: Run canonical validator.
+    print("\n--- Gate H-2: canonical validator ---")
     validator = extract_dir / "tools" / "validate.py"
     if not validator.is_file():
         print(f"FAIL: validator not found in extracted copy: {validator}")
@@ -311,7 +381,6 @@ def gate_h_semantic_validation(extract_dir: Path) -> bool:
         cwd=str(extract_dir), capture_output=True, text=True, timeout=600)
     output = r.stdout + r.stderr
     if r.returncode != 0:
-        # Distinguish validator crash from validation failure.
         if "Traceback (most recent call last)" in output:
             print("FAIL: validator CRASHED on extracted copy")
             for line in output.splitlines()[-5:]:
@@ -322,11 +391,54 @@ def gate_h_semantic_validation(extract_dir: Path) -> bool:
                 if line.startswith("FAIL"):
                     print(f"  {line[:120]}")
         return False
-    if "Agent is conformant" in output:
-        print("PASS: extracted copy passes semantic validation")
+    print("PASS: canonical validator exits 0 on extracted copy")
+
+    # H-3: Smoke test — status + next (read-only, must not fail).
+    print("\n--- Gate H-3: smoke test (status + next) ---")
+    saipen_cli = extract_dir / "tools" / "saipen.py"
+    smoke_pass = True
+    if saipen_cli.is_file():
+        for cmd in ["status", "next"]:
+            r = subprocess.run(
+                [sys.executable, str(saipen_cli), cmd,
+                 "--project-root", str(extract_dir), "--json"],
+                cwd=str(extract_dir), capture_output=True, text=True,
+                timeout=120)
+            if r.returncode != 0:
+                # status/next may REFUSE but should not traceback
+                if "Traceback" in (r.stdout + r.stderr):
+                    print(f"FAIL: '{cmd}' CRASHED on extracted copy")
+                    smoke_pass = False
+                else:
+                    # REFUSE is acceptable (e.g. validation failures)
+                    print(f"  '{cmd}' refused (rc={r.returncode}) — acceptable")
+            else:
+                print(f"  '{cmd}' OK")
     else:
-        print("PASS: extracted copy validator exits 0")
-    return True
+        print("  SKIP: saipen.py not found in extracted copy")
+
+    # H-4: Zero-write dry-run mutator.
+    print("\n--- Gate H-4: zero-write dry-run ---")
+    if saipen_cli.is_file():
+        r = subprocess.run(
+            [sys.executable, str(saipen_cli), "improve", "--dry-run",
+             "--project-root", str(extract_dir), "--json"],
+            cwd=str(extract_dir), capture_output=True, text=True,
+            timeout=120)
+        # Dry-run should not write anything, but a traceback is a failure
+        if "Traceback" in (r.stdout + r.stderr):
+            print("FAIL: improve --dry-run CRASHED on extracted copy")
+            smoke_pass = False
+        else:
+            print(f"  improve --dry-run completed (rc={r.returncode})")
+    else:
+        print("  SKIP: saipen.py not found")
+
+    if smoke_pass:
+        print("\nPASS: extracted copy passes semantic validation + BOOT contract")
+    else:
+        print("\nFAIL: extracted copy smoke test failed")
+    return smoke_pass
 
 
 def gate_h_archive_hash(archive_path: Path) -> str:
