@@ -136,16 +136,7 @@ def _path_from_git(root: Path, raw_path: bytes) -> Path:
     return candidate
 
 
-def _read_regular_info(path: Path) -> tuple[bytes, tuple]:
-    """Race-safe read returning (content, post-read stat fingerprint).
-
-    The descriptor is opened with O_NOFOLLOW and stat'd before, during and
-    after the read; any identity/size/mtime/mode drift raises FreshnessError
-    (the file was replaced or mutated while its bytes were being consumed).
-    The fingerprint -- (dev, ino, size, mtime_ns, mode) from the fstat of the
-    EXACT descriptor whose bytes were consumed -- is returned so callers can
-    re-stat or re-read the path and prove stability.
-    """
+def _read_regular(path: Path) -> bytes:
     flags = os.O_RDONLY | getattr(os, "O_BINARY", 0)
     if hasattr(os, "O_NOFOLLOW"):
         flags |= os.O_NOFOLLOW
@@ -170,9 +161,7 @@ def _read_regular_info(path: Path) -> tuple[bytes, tuple]:
         if (opened.st_size, opened.st_mtime_ns, opened.st_mode) != (
                 after.st_size, after.st_mtime_ns, after.st_mode):
             raise FreshnessError(f"fingerprint input changed while reading: {path}")
-        fingerprint = (after.st_dev, after.st_ino, after.st_size,
-                       after.st_mtime_ns, after.st_mode)
-        return b"".join(chunks), fingerprint
+        return b"".join(chunks)
     except OSError as exc:
         raise FreshnessError(f"cannot read fingerprint input {path}: {exc}") from exc
     finally:
@@ -196,15 +185,7 @@ def _read_symlink(path: Path) -> bytes:
     return os.fsencode(target)
 
 
-def _record_current(root: Path, raw_path: bytes,
-                    declared_mode: int | None) -> _Record:
-    """Record one changed/untracked path with one race-safe content read.
-
-    The capture re-parses the delta after the second listing and requires
-    the records to be byte-identical, so every content-bearing path is read
-    a second time and compared -- never trusted on stat metadata alone
-    (same-size, mtime-restored replacement must fail closed, T-1007).
-    """
+def _record_current(root: Path, raw_path: bytes, declared_mode: int | None) -> _Record:
     path = _path_from_git(root, raw_path)
     try:
         info = path.lstat()
@@ -220,7 +201,7 @@ def _record_current(root: Path, raw_path: bytes,
         if declared_mode in (0o100644, 0o100755):
             mode = declared_mode
         kind = b"F"
-        content, _ = _read_regular_info(path)
+        content = _read_regular(path)
     else:
         raise FreshnessError(
             f"unsupported fingerprint input type at {path}; only regular files "
@@ -243,8 +224,7 @@ def _git_delta_listing(root: Path) -> tuple[bytes, bytes]:
     return raw, untracked
 
 
-def _parse_git_delta(root: Path, raw: bytes,
-                     untracked: bytes) -> list[_Record]:
+def _parse_git_delta(root: Path, raw: bytes, untracked: bytes) -> list[_Record]:
     records: dict[bytes, _Record] = {}
     fields = raw.split(b"\0")
     index = 0
@@ -291,64 +271,25 @@ def _parse_git_delta(root: Path, raw: bytes,
 
 
 def _git_identity(root: Path) -> SourceIdentity:
-    """Bounded race-safe capture: HEAD, listing, content parse, listing,
-    content parse, listing, HEAD, ONE content confirmation parse (perf wave
-    T-1019: was 12 Git subprocesses / four listings / three reads per path;
-    now 10 subprocesses / three listings / three reads per path).
-
-    Stability proof -- no check ever trusts stat metadata ALONE (a
-    same-size, mtime-restored replacement must fail closed, T-1007):
-    - HEAD before and after must be identical;
-    - the three delta listings must be byte-identical. A tracked in-place
-      content change between them changes the new blob SHA inside
-      `git diff --raw`, so listing inequality detects it -- including a
-      tracked file that becomes dirty AFTER the second content parse;
-    - every content-bearing path is read a second and third time and the
-      three record frames (kind/path/mode/content) must be byte-identical.
-      Untracked paths carry no SHA in the listing, so only these bounded
-      content re-reads can prove they did not move; a replacement that
-      preserves size and mtime still changes the bytes.
-
-    The digest is framed from the CONFIRMED records (third parse), so a
-    stable fixture yields the exact same `git-delta-v1` identity as the
-    pre-wave capture.
-    """
-    head_before = _run_git(root, "rev-parse", "--verify", "HEAD").decode(
-        "ascii").strip()
-    listing_before = _git_delta_listing(root)
-    first_records = _parse_git_delta(root, *listing_before)
-    listing_middle = _git_delta_listing(root)
-    second_records = _parse_git_delta(root, *listing_middle)
-    listing_after = _git_delta_listing(root)
-    head_after = _run_git(root, "rev-parse", "--verify", "HEAD").decode(
-        "ascii").strip()
-    if head_before != head_after or not (
-            listing_before == listing_middle == listing_after):
+    head = _run_git(root, "rev-parse", "--verify", "HEAD").decode("ascii").strip()
+    before = _git_delta_listing(root)
+    first_records = _parse_git_delta(root, *before)
+    middle = _git_delta_listing(root)
+    second_records = _parse_git_delta(root, *middle)
+    after = _git_delta_listing(root)
+    third_records = _parse_git_delta(root, *after)
+    final = _git_delta_listing(root)
+    final_head = _run_git(root, "rev-parse", "--verify", "HEAD").decode("ascii").strip()
+    if (head != final_head or not (before == middle == after == final)
+            or not (first_records == second_records == third_records)):
         raise FreshnessError(
             "source tree or HEAD changed while fingerprint inputs were being read"
         )
-    confirmed_records = _parse_git_delta(root, *listing_after)
-    if (first_records != second_records
-            or second_records != confirmed_records):
-        raise FreshnessError(
-            "source content changed while fingerprint inputs were being read"
-        )
     model = "git-delta-v1"
-    return SourceIdentity(head_before, _digest(model, confirmed_records), model)
+    return SourceIdentity(head, _digest(model, third_records), model)
 
 
 def _walk_no_git(root: Path) -> list[_Record]:
-    """One deterministic no-Git walk reading every content-bearing path once
-    with the race-safe reader (perf wave T-1019).
-
-    The identity capture walks the tree TWICE and requires the two record
-    lists to be byte-identical: content is compared directly (kind/path/
-    mode/content frames), never stat metadata alone, so a same-size,
-    mtime-restored replacement between the walks still changes the bytes
-    and fails closed (T-1007). Symlink targets are read twice inside
-    `_read_symlink` and compared, because a retarget can preserve stat
-    fields.
-    """
     records: list[_Record] = []
 
     def visit(directory: Path, rel_parts: tuple[str, ...]) -> None:
@@ -373,14 +314,12 @@ def _walk_no_git(root: Path) -> list[_Record]:
             if not rel_parts and entry.name in _NO_GIT_EXCLUDED_ROOT_FILES:
                 continue
             if stat.S_ISLNK(info.st_mode) or _is_reparse_point(path):
-                records.append(_Record(b"L", raw_path, 0o120000,
-                                       _read_symlink(path)))
+                records.append(_Record(b"L", raw_path, 0o120000, _read_symlink(path)))
             elif stat.S_ISDIR(info.st_mode):
                 visit(path, next_parts)
             elif stat.S_ISREG(info.st_mode):
                 mode = 0o100755 if info.st_mode & 0o111 else 0o100644
-                content, _ = _read_regular_info(path)
-                records.append(_Record(b"F", raw_path, mode, content))
+                records.append(_Record(b"F", raw_path, mode, _read_regular(path)))
             else:
                 raise FreshnessError(
                     f"unsupported fingerprint input type at {path}; only regular "

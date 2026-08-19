@@ -77,7 +77,7 @@ while (Test-Path -LiteralPath $zipPath) {
 $tmpPath = Join-Path -Path $ownerRoot -ChildPath ".${baseName}.tmp.$PID.zip"
 Remove-Item -LiteralPath $tmpPath -Force -ErrorAction SilentlyContinue
 
-Write-Host "saipen state exporter"
+Write-Host "saipen STATE-ONLY exporter (NO implementation files)"
 Write-Host "------------------------------------------------------------"
 Write-Host "Archiving: $saipenDir"
 try {

@@ -38,6 +38,7 @@
     {"src": "tools/install_hook.py", "required": true},
     {"src": "tools/uninstall_hook.py", "required": true},
     {"src": "tools/run_scenarios.py", "required": true},
+    {"src": "tools/perf_wave_regressions.py", "required": true},
     {"src": "tools/audit_floor.py", "required": true},
     {"src": "tools/ci_status.py", "required": true},
     {"src": "tools/release_ledger_baseline.json", "required": true},

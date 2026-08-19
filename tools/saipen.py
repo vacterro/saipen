@@ -338,15 +338,17 @@ def _status(project_root: Path, as_json: bool) -> int:
     # T-1014: the parsed events come from the SAME one-pass ProjectSnapshot
     # that supplied log_hash/log_tail/head -- status never reopens the complete
     # LOG history for evidence after capturing the snapshot once.
-    from saipen_engine.log import verification_evidence
+    # T-1021: ONE backward pass over the shared history computes the verdict
+    # for every DONE ticket (was one independent reverse scan per ticket).
+    from saipen_engine.log import bulk_verification_evidence
     history_events = snap.history_events
     # DONE proof: a successful RUN event ASSOCIATED WITH THE TICKET.
     claimed_but_unproven: list[str] = []
+    verdicts = bulk_verification_evidence(
+        history_events, [dt["id"] for dt in done_tickets])
     for dt in done_tickets:
-        dt_id = dt["id"]
-        ok, _ = verification_evidence(dt_id, history_events)
-        if not ok:
-            claimed_but_unproven.append(dt_id)
+        if not verdicts[dt["id"]][0]:
+            claimed_but_unproven.append(dt["id"])
 
     conformance: str | None = None
     for ev in reversed(history_events):
@@ -858,6 +860,8 @@ def _userperson(project_root: Path, args: list[str], as_json: bool,
                 clean_args.append(args[idx])
                 idx += 1
         text = " ".join(clean_args[1:])
+        from userperson import _redact_credentials
+        text = _redact_credentials(text)
         if not text.strip():
             _emit({"ok": False, "code": "VALIDATION_FAILED",
                    "detail": f"userperson {action} needs non-empty text"}, as_json)

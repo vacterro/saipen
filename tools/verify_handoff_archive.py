@@ -54,11 +54,13 @@ def _tracked_files(project: Path) -> set[str]:
     """
     r = _git(project, "ls-files")
     if r.returncode != 0:
-        print("FAIL: this handoff path requires a Git repository.")
-        print("No-Git projects: use the canonical state exporter instead --")
+        print("FAIL: this whole-project handoff path requires a Git repository.")
+        print("UNSUPPORTED: whole-project handoff is not supported without Git.")
+        print("If you only need to export SAIPEN state (NO implementation files),")
+        print("use the canonical STATE-ONLY exporter instead --")
         print("  bootstrap/export.sh        (macOS/Linux)")
         print("  bootstrap/export.ps1       (Windows)")
-        print("which archive .saipen without needing a repository.")
+        print("which archives ONLY the .saipen directory.")
         sys.exit(1)
     return {line.strip() for line in r.stdout.splitlines() if line.strip()}
 
@@ -207,6 +209,21 @@ def gate_e_portability(archive_path: Path) -> bool:
     if exact_dupes:
         problems.append(f"duplicate member names: {exact_dupes[:5]}")
 
+    # 7. Portable byte limits (T-1018)
+    byte_issues = []
+    for m in members:
+        encoded = m.encode("utf-8")
+        if len(encoded) > 4096:
+            byte_issues.append(f"path exceeds 4096 bytes: {len(encoded)} bytes")
+            continue
+        parts = m.replace("\\", "/").split("/")
+        for part in parts:
+            if len(part.encode("utf-8")) > 255:
+                byte_issues.append(f"component exceeds 255 bytes: {len(part.encode('utf-8'))} bytes in {part[:20]}...")
+                break
+    if byte_issues:
+        problems.append(f"portable byte limit exceeded: {byte_issues[:5]}")
+
     if problems:
         for p in problems:
             print(f"FAIL: {p}")
@@ -216,40 +233,43 @@ def gate_e_portability(archive_path: Path) -> bool:
     return True
 
 
-def gate_f_sealed_ledger(archive_path: Path, project: Path) -> bool:
-    """Check F: sealed ledger LOG-*.md completeness and byte match."""
-    print("\n--- Gate F: sealed ledger completeness ---")
+def gate_f_tracked_integrity(archive_path: Path, project: Path, tracked: set[str]) -> bool:
+    """Check F (T-1019): tracked file integrity + sealed ledger verification.
 
-    # Get tracked LOG files
-    tracked_logs = sorted(
-        f for f in _tracked_files(project)
-        if re.match(r"^\.saipen/logs/LOG-\d+\.md$", f)
-    )
-    if not tracked_logs:
-        print("WARN: no tracked sealed LOGs found")
-        return True
+    Binds verification to one immutable expected `path -> sha256` source
+    inventory and verifies every tracked member (including ALL sealed LOGs)
+    against it.
+    """
+    print("\n--- Gate F: tracked integrity + sealed ledger ---")
+
+    # Build immutable expected source inventory
+    expected = {}
+    for tf in tracked:
+        try:
+            expected[tf] = hashlib.sha256((project / tf).read_bytes()).hexdigest()
+        except OSError as e:
+            print(f"FAIL: could not read source file {tf}: {e}")
+            return False
 
     with zipfile.ZipFile(archive_path) as zf:
         arc_names = set(zf.namelist())
-
-        # Check all tracked LOGs are in archive
-        missing = [f for f in tracked_logs if f not in arc_names]
-        if missing:
-            print(f"FAIL: sealed LOGs missing from archive: {missing}")
-            return False
-
-        # Byte-match check for a sample
         mismatches = []
-        for log_path in tracked_logs[:5]:  # Check first 5 for speed
-            arc_bytes = zf.read(log_path)
-            disk_bytes = (project / log_path).read_bytes()
-            if arc_bytes != disk_bytes:
-                mismatches.append(log_path)
+        for tf, expected_hash in expected.items():
+            if tf not in arc_names:
+                # Missing files are caught by Gate A, but handle gracefully here
+                mismatches.append(f"{tf} (missing)")
+                continue
+            arc_hash = hashlib.sha256(zf.read(tf)).hexdigest()
+            if arc_hash != expected_hash:
+                mismatches.append(tf)
+
         if mismatches:
-            print(f"FAIL: sealed LOG byte mismatch: {mismatches}")
+            print(f"FAIL: content byte/hash mismatch for {len(mismatches)} tracked file(s):")
+            for m in mismatches[:10]:
+                print(f"  - {m}")
             return False
 
-    print(f"PASS: {len(tracked_logs)} sealed LOGs present and verified")
+    print(f"PASS: all {len(expected)} tracked files (including all LOGs) exactly match source bytes")
     return True
 
 
@@ -307,78 +327,30 @@ def gate_d_extract_roundtrip(archive_path: Path, tracked: set[str]) -> Path | No
 def gate_h_semantic_validation(extract_dir: Path) -> bool:
     """Check H: run canonical validator + BOOT contract against the extracted copy.
 
-    T-1012: The extracted archive MUST be semantically valid AND bootable,
-    not just physically complete.  A malformed STATE, broken LOG parent chain,
-    dead/foreign saipen_home, or schema violation inside the archive MUST
-    fail delivery.
-
-    Steps:
-      1. Canonical rebind-home inside the disposable copy (if saipen_home
-         differs from the extraction path).
-      2. Run canonical validator.
-      3. Exercise representative read-only smoke: status + next.
-      4. Exercise a zero-write dry-run mutator to prove the extracted copy
-         can actually operate.
+    T-1014: use canonical extracted-copy BOOT/rebind only, require successful
+    structured status/next, fingerprint all state around representative dry-run,
+    and fail on any boot/rebind/smoke error.
     """
     print("\n--- Gate H: semantic validation + BOOT contract (extracted copy) ---")
 
+    saipen_cli = extract_dir / "tools" / "saipen.py"
+    if not saipen_cli.is_file():
+        print("FAIL: saipen.py not found in extracted copy. Cannot verify BOOT contract.")
+        return False
+
     # H-1: Canonical rebind-home inside the disposable copy.
-    # The artifact's persisted saipen_home may point at the original source
-    # machine.  For a clean-room extraction to be bootable, we must rebind
-    # it to the extraction directory.
-    state_file = extract_dir / ".saipen" / "STATE.md"
-    if state_file.is_file():
-        state_text = state_file.read_text(encoding="utf-8-sig")
-        # Check if saipen_home needs rebinding
-        import re as _re
-        home_match = _re.search(r"^saipen_home:\s*\"(.+?)\"", state_text,
-                               _re.MULTILINE)
-        if home_match:
-            current_home = home_match.group(1)
-            # Normalize path separators for cross-platform comparison
-            extract_str = str(extract_dir)
-            current_norm = _re.sub(r"[/\\]+", "/", current_home).rstrip("/")
-            extract_norm = _re.sub(r"[/\\]+", "/", extract_str).rstrip("/")
-            if current_norm != extract_norm:
-                print(f"  Rebinding saipen_home: {current_home} -> {extract_dir}")
-                # Use canonical rebind command if available
-                rebind_script = extract_dir / "tools" / "saipen.py"
-                if rebind_script.is_file():
-                    r = subprocess.run(
-                        [sys.executable, str(rebind_script), "rebind-home",
-                         str(extract_dir), "--project-root", str(extract_dir)],
-                        cwd=str(extract_dir), capture_output=True, text=True,
-                        timeout=120)
-                    if r.returncode != 0:
-                        # Fallback: direct STATE.md edit
-                        new_state = state_text.replace(
-                            current_home, str(extract_dir))
-                        state_file.write_text(new_state, encoding="utf-8-sig")
-                        print("  Fallback: direct STATE.md saipen_home rewrite")
-                    else:
-                        print(f"  Rebind output: {r.stdout.strip()[:100]}")
-                else:
-                    # No saipen.py — direct edit
-                    new_state = state_text.replace(
-                        current_home, str(extract_dir))
-                    state_file.write_text(new_state, encoding="utf-8-sig")
-                    print("  Direct STATE.md saipen_home rewrite")
-                # Read back state to confirm rebind took
-                state_text = state_file.read_text(encoding="utf-8-sig")
-                home_after = _re.search(r"^saipen_home:\s*\"(.+?)\"",
-                                       state_text, _re.MULTILINE)
-                if home_after:
-                    after_norm = _re.sub(r"[/\\]+", "/", home_after.group(1)).rstrip("/")
-                    if after_norm == extract_norm:
-                        print("  PASS: saipen_home rebind verified")
-                    else:
-                        print(f"  FAIL: saipen_home still {home_after.group(1)} after rebind")
-                        print(f"  DEBUG: after_norm={after_norm!r}  extract_norm={extract_norm!r}")
-                        return False
-                else:
-                    print("  WARN: saipen_home not found after rebind")
-            else:
-                print("  saipen_home already matches extraction path")
+    # Unconditionally invoke canonical rebind to align the copy with its temp path.
+    print(f"  Rebinding saipen_home to {extract_dir} (via canonical rebind)")
+    r = subprocess.run(
+        [sys.executable, str(saipen_cli), "rebind-home",
+         str(extract_dir), "--project-root", str(extract_dir)],
+        cwd=str(extract_dir), capture_output=True, text=True,
+        timeout=120)
+    if r.returncode != 0:
+        print("FAIL: canonical rebind-home failed on extracted copy")
+        print(f"  {r.stderr.strip() or r.stdout.strip()}")
+        return False
+    print("  PASS: canonical rebind-home OK")
 
     # H-2: Run canonical validator.
     print("\n--- Gate H-2: canonical validator ---")
@@ -405,50 +377,59 @@ def gate_h_semantic_validation(extract_dir: Path) -> bool:
 
     # H-3: Smoke test — status + next (read-only, must not fail).
     print("\n--- Gate H-3: smoke test (status + next) ---")
-    saipen_cli = extract_dir / "tools" / "saipen.py"
     smoke_pass = True
-    if saipen_cli.is_file():
-        for cmd in ["status", "next"]:
-            r = subprocess.run(
-                [sys.executable, str(saipen_cli), cmd,
-                 "--project-root", str(extract_dir), "--json"],
-                cwd=str(extract_dir), capture_output=True, text=True,
-                timeout=120)
-            if r.returncode != 0:
-                # status/next may REFUSE but should not traceback
-                if "Traceback" in (r.stdout + r.stderr):
-                    print(f"FAIL: '{cmd}' CRASHED on extracted copy")
-                    smoke_pass = False
-                else:
-                    # REFUSE is acceptable (e.g. validation failures)
-                    print(f"  '{cmd}' refused (rc={r.returncode}) — acceptable")
-            else:
-                print(f"  '{cmd}' OK")
-    else:
-        print("  SKIP: saipen.py not found in extracted copy")
-
-    # H-4: Zero-write dry-run mutator.
-    print("\n--- Gate H-4: zero-write dry-run ---")
-    if saipen_cli.is_file():
+    for cmd in ["status", "next"]:
         r = subprocess.run(
-            [sys.executable, str(saipen_cli), "improve", "--dry-run",
+            [sys.executable, str(saipen_cli), cmd,
              "--project-root", str(extract_dir), "--json"],
             cwd=str(extract_dir), capture_output=True, text=True,
             timeout=120)
-        # Dry-run should not write anything, but a traceback is a failure
-        if "Traceback" in (r.stdout + r.stderr):
-            print("FAIL: improve --dry-run CRASHED on extracted copy")
+        if r.returncode != 0:
+            print(f"FAIL: '{cmd}' failed (rc={r.returncode}) on extracted copy")
+            if "Traceback" in (r.stdout + r.stderr):
+                print("  CRASHED")
             smoke_pass = False
         else:
-            print(f"  improve --dry-run completed (rc={r.returncode})")
-    else:
-        print("  SKIP: saipen.py not found")
+            print(f"  '{cmd}' OK")
+            
+    if not smoke_pass:
+        return False
 
-    if smoke_pass:
-        print("\nPASS: extracted copy passes semantic validation + BOOT contract")
-    else:
-        print("\nFAIL: extracted copy smoke test failed")
-    return smoke_pass
+    # H-4: Zero-write dry-run mutator.
+    # T-1014: fingerprint all state around representative dry-run.
+    print("\n--- Gate H-4: zero-write dry-run ---")
+    import hashlib
+    def get_state_fingerprint(d: Path) -> str:
+        h = hashlib.sha256()
+        for p in sorted(d.rglob("*")):
+            if p.is_file():
+                h.update(p.as_posix().encode())
+                h.update(p.read_bytes())
+        return h.hexdigest()
+
+    fp_before = get_state_fingerprint(extract_dir / ".saipen")
+    r = subprocess.run(
+        [sys.executable, str(saipen_cli), "improve", "--dry-run",
+         "--project-root", str(extract_dir), "--json"],
+        cwd=str(extract_dir), capture_output=True, text=True,
+        timeout=120)
+    
+    if r.returncode != 0:
+        print(f"FAIL: improve --dry-run failed (rc={r.returncode}) on extracted copy")
+        return False
+        
+    fp_after = get_state_fingerprint(extract_dir / ".saipen")
+    if fp_before != fp_after:
+        print("FAIL: improve --dry-run mutated .saipen state (T-1014 violation)")
+        return False
+        
+    print(f"  PASS: improve --dry-run completed without mutating state")
+
+    if not smoke_pass:
+        return False
+    
+    print("\nPASS: extracted copy passes semantic validation + BOOT contract")
+    return True
 
 
 def gate_h_archive_hash(archive_path: Path) -> str:
@@ -495,7 +476,7 @@ def main():
         structural_pass = False
     if not gate_e_portability(archive):
         structural_pass = False
-    if not gate_f_sealed_ledger(archive, project_root):
+    if not gate_f_tracked_integrity(archive, project_root, tracked):
         structural_pass = False
     if not gate_g_self_inclusion(archive):
         structural_pass = False

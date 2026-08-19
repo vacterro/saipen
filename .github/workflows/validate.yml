@@ -147,3 +147,12 @@ jobs:
 
       - name: Conformance fixtures (tools/run_scenarios.py)
         run: python tools/run_scenarios.py
+
+      # The perf-wave regression gate (T-1019..T-1022: bounded SourceIdentity
+      # capture, settled-receipt scan scaling, bulk DONE evidence, hermetic
+      # third-wave controls) also runs inside the conformance fixtures step
+      # above; this explicit step gives CI a scoped PASS/FAIL summary of its
+      # own, so the gate cannot silently disappear from the canonical runner
+      # (T-1006).
+      - name: Perf wave regressions (tools/perf_wave_regressions.py)
+        run: python tools/perf_wave_regressions.py

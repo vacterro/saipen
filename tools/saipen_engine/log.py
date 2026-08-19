@@ -9,6 +9,7 @@ import os
 import stat
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Iterable
 
 LOG_RE = re.compile(
     r"^- (\d{2}[./]\d{2}[./]\d{2} \d{2}:\d{2} )?"
@@ -457,3 +458,75 @@ def verification_evidence(ticket_id: str, events: list[dict]) -> tuple[bool, str
                 return True, txt
 
     return False, "unproven/failed"
+
+
+def bulk_verification_evidence(events: list[dict],
+                               ticket_ids: Iterable[str]
+                               ) -> dict[str, tuple[bool, str]]:
+    """ONE backward pass computing the verdict for EVERY requested ticket
+    (perf wave T-1021).
+
+    `verification_evidence` reverse-scans the full shared history once per
+    ticket, so a status with many DONE tickets costs O(tickets * events).
+    This helper walks the SAME event list backward exactly once and applies
+    the IDENTICAL grammar per ticket:
+
+    - the boundary for a ticket is its latest exact VERIFY marker; events
+      older than it are out of the current cycle;
+    - while walking newest-first, the first decisive RUN event after the
+      boundary decides (negative evidence wins, then MANUAL-VERIFY, then
+      PASS with exact `conf: high`);
+    - the boundary event itself is scanned for decisive tokens exactly as
+      the single-ticket helper does (its scan is inclusive of the boundary);
+    - no boundary or no decisive evidence after it -> unproven/failed with
+      the same reason strings.
+
+    Returns {ticket_id: (ok, reason)} for every requested id, byte-for-byte
+    the same (ok, reason) the single-ticket helper would return.
+
+    The pass is single-sweep: while walking newest-first, the first decisive
+    RUN event per ticket is tentatively stored as pending evidence; the
+    verdict is finalized when the ticket's NEWEST VERIFY boundary is reached
+    (evidence older than the boundary is out of cycle, and a ticket with no
+    boundary is unproven regardless of pending evidence -- exactly the
+    single-ticket early return).
+    """
+    wanted = set(ticket_ids)
+    verdicts: dict[str, tuple[bool, str]] = {}
+    boundary_seen: set[str] = set()
+    pending: dict[str, tuple[bool, str]] = {}
+    for ev in reversed(events):
+        if ev.get("taxonomy") != "RUN":
+            continue
+        tid = ev.get("ticket")
+        if tid not in wanted or tid in verdicts:
+            continue
+        if tid in boundary_seen:
+            continue  # older than the newest VERIFY boundary: out of cycle
+        txt = ev.get("text", "")
+        decisive = None
+        if "FAIL" in txt or _NEGATION_RE.search(txt):
+            decisive = (False, txt)
+        elif _MANUAL_TOKEN_RE.search(txt):
+            decisive = (True, txt)
+        elif _PASS_TOKEN_RE.search(txt):
+            if "conf: low" in txt or "conf: med" in txt:
+                decisive = (False, txt)
+            elif "conf: high" in txt:
+                decisive = (True, txt)
+        if _is_verify_boundary(ev):
+            # The NEWEST boundary closes the cycle; the boundary event itself
+            # is inside the scan (single-ticket scans it inclusively), so it
+            # may still be the decisive evidence when nothing newer is.
+            boundary_seen.add(tid)
+            if decisive is not None and tid not in pending:
+                pending[tid] = decisive
+            verdicts[tid] = pending.get(tid) or (False, "unproven/failed")
+            continue
+        if decisive is not None and tid not in pending:
+            pending[tid] = decisive
+    for tid in wanted:
+        if tid not in verdicts:
+            verdicts[tid] = (False, "no current-cycle VERIFY boundary"
+                             if tid not in boundary_seen else "unproven/failed")
+    return verdicts

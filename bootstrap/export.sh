@@ -87,7 +87,7 @@ done
 TMP_PATH="$PROJECT_ROOT/.${BASE_NAME}.tmp.$$.tar.gz"
 rm -f "$TMP_PATH"
 
-echo "saipen state exporter"
+echo "saipen STATE-ONLY exporter (NO implementation files)"
 echo "------------------------------------------------------------"
 echo "Archiving: $SAIPEN_DIR"
 if ! tar -czf "$TMP_PATH" -C "$PROJECT_ROOT" .saipen; then

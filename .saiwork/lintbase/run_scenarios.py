@@ -5786,7 +5786,7 @@ def run_producer_gate_probes() -> tuple[list[str], int]:
             "- **coverage:** complete\n"
             "- **payload:** probe\n"
             "- **instructions:** apply\n"
-            "- **verified:** PASS -- probe suite green\n"
+            "- **verified:** probe suite green\n"
             f"- **source_head:** {identity_head}\n"
             f"- **source_tree_fingerprint:** {fingerprint}\n"
             f"- **role_revision:** {role_revision}\n")
@@ -7797,9 +7797,8 @@ def run_improve_probes() -> tuple[list[str], int]:
                    "# IMPROVE CYCLE ROSTER\ncycle_status: active\n")
     sweep_path = ".saipen/improve/imp-rec/SWEEP.md"
     garbage = "arbitrary malformed garbage\n"
-    from saipen_engine.paths import runtime_lock_identity as _rec_identity
     jrec = _RecJournal(rec_root, "op-rec")
-    jrec.start("sweep", "probe", _rec_identity(rec_root), "h",
+    jrec.start("sweep", "probe", "id", "h",
                [{"path": sweep_path, "role": "sweep",
                  "content": garbage.encode("utf-8"),
                  "before_hash": _rec_hb(b""),
@@ -9736,9 +9735,8 @@ def run_improve_probes() -> tuple[list[str], int]:
     state_r = (saipen_r / "STATE.md").read_bytes()
     new_log_r = log_r + b"\n- 09.08.26 00:01 [E-901] RUN: op\n"
     new_state_r = state_r.replace(b"phase: DONE", b"phase: BUILD")
-    from saipen_engine.paths import runtime_lock_identity as _race_identity
     jr = _RaceJournal(race_root, "op-race")
-    jr.start("checkpoint", "probe", _race_identity(race_root), "h", [
+    jr.start("checkpoint", "probe", "id", "h", [
         {"path": ".saipen/LOG.md", "role": "log", "content": new_log_r,
          "before_hash": _race_hb(log_r), "after_hash": _race_hb(new_log_r)},
         {"path": ".saipen/STATE.md", "role": "state", "content": new_state_r,
@@ -9780,12 +9778,6 @@ def run_nitro_probes() -> tuple[list[str], int]:
     The parsers are the SAME implementation validate.py imports; these probes
     prove the engine consumes them correctly and that the snapshot detects a
     stale precondition.
-
-    Hermetic (perf wave T-1022): every check -- including the stale-snapshot
-    control that writes BOARD.md -- runs against a DISPOSABLE copy of the
-    SAIPEN home, never the live checkout. The phase whitelist derives from
-    the canonical ALL_PHASES enum (a hand-kept six-phase tuple drifted from
-    the DFA once: MARKHUNT/VALIDATE/HUNT/CLEAN/TRANSLATE/PREPARE).
     """
     problems: list[str] = []
     checked = 0
@@ -9798,35 +9790,18 @@ def run_nitro_probes() -> tuple[list[str], int]:
         else:
             print(f"PASS: nitro -- {label}")
 
-    root = Path(tempfile.mkdtemp(prefix="saipen-nitro-"))
-    home = root / "home"
-    shutil.copytree(HOME, home, ignore=shutil.ignore_patterns(
-        ".git", ".freebuff", ".claude", "__pycache__", "*.pyc",
-        ".pytest_cache", ".ruff_cache", "nul"))
-    env = {**os.environ, "GIT_AUTHOR_NAME": "probe",
-           "GIT_AUTHOR_EMAIL": "probe@example.invalid",
-           "GIT_COMMITTER_NAME": "probe",
-           "GIT_COMMITTER_EMAIL": "probe@example.invalid"}
-    subprocess.run(["git", "init", "-q"], cwd=home, env=env,
-                   capture_output=True, text=True)
-    subprocess.run(["git", "add", "-A"], cwd=home, env=env,
-                   capture_output=True, text=True)
-    subprocess.run(["git", "commit", "-q", "-m", "probe"], cwd=home,
-                   env=env, capture_output=True, text=True)
-
-    from saipen_engine.phases import ALL_PHASES
-
-    state_text = (home / ".saipen" / "STATE.md").read_text(
+    state_text = (HOME / ".saipen" / "STATE.md").read_text(
         encoding="utf-8-sig")
     fields, err = parse_frontmatter(state_text)
-    expect("frontmatter parses the canonical STATE",
-           err is None and fields.get("phase") in ALL_PHASES,
+    expect("frontmatter parses the live STATE",
+           err is None and fields.get("phase") in (
+               "SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP", "DONE"),
            repr((err, fields and fields.get("phase"))))
 
-    board_text = (home / ".saipen" / "BOARD.md").read_text(
+    board_text = (HOME / ".saipen" / "BOARD.md").read_text(
         encoding="utf-8-sig")
     board = parse_board(board_text)
-    expect("board parser finds every canonical section",
+    expect("board parser finds every live section",
            board["headings"] == ["## DOING", "## TODO", "## DONE",
                                  "## BLOCKED"], repr(board["headings"]))
     doing = [t for t in board["tickets"].values()
@@ -9844,36 +9819,37 @@ def run_nitro_probes() -> tuple[list[str], int]:
     expect("log parser rejects a non-event line",
            parse_log_line("just prose") is None)
 
-    snap = ProjectSnapshot.capture(home)
+    snap = ProjectSnapshot.capture(HOME)
     expect("snapshot carries hashes, log tail and head",
            snap.state_hash and snap.board_hash and snap.log_hash
            and snap.log_tail is not None and snap.head,
            repr((snap.log_tail, snap.head)))
     expect("snapshot is not stale against the unchanged project",
-           not snap.stale(home))
-    board_path = home / ".saipen" / "BOARD.md"
+           not snap.stale(HOME))
+    board_path = HOME / ".saipen" / "BOARD.md"
     original = board_path.read_bytes()
-    board_path.write_bytes(original + b"\n")
-    expect("snapshot detects a changed board precondition",
-           snap.stale(home))
-    board_path.write_bytes(original)
+    try:
+        board_path.write_bytes(original + b"\n")
+        expect("snapshot detects a changed board precondition",
+               snap.stale(HOME))
+    finally:
+        board_path.write_bytes(original)
     expect("snapshot is fresh again after restoring the board",
-           not snap.stale(home))
+           not snap.stale(HOME))
 
     status = subprocess.run(
-        [sys.executable, str(home / "tools" / "saipen.py"), "status"],
-        cwd=home, capture_output=True, text=True)
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "status"],
+        cwd=HOME, capture_output=True, text=True)
     expect("saipen status is read-only and reports the phase",
            status.returncode == 0 and f"phase: {fields.get('phase')}"
            in status.stdout, repr(status.stdout[:120]))
     nxt = subprocess.run(
-        [sys.executable, str(home / "tools" / "saipen.py"), "next", "--json"],
-        cwd=home, capture_output=True, text=True)
+        [sys.executable, str(HOME / "tools" / "saipen.py"), "next", "--json"],
+        cwd=HOME, capture_output=True, text=True)
     expect("saipen next --json returns the action deterministically",
            nxt.returncode == 0 and '"action":' in nxt.stdout
            and '"load":' in nxt.stdout, repr(nxt.stdout[:120]))
 
-    shutil.rmtree(root, ignore_errors=True)
     return problems, checked
 
 
@@ -9986,18 +9962,12 @@ def run_nitro_m2_probes() -> tuple[list[str], int]:
            log.read_text(encoding="utf-8").count("E-901") == 1)
 
     # A committed op's retry returns ALREADY_APPLIED without a second event.
-    # The retry request must reproduce the record's semantic fingerprint
-    # (operation, semantic_payload_hash, policy, per-target role + after_hash),
-    # so it is built from the record's OWN targets and the live committed
-    # bytes (which equal the planned after-state) -- a stale role/content
-    # fixture would be an op_id collision, not a retry (perf wave T-1022).
     journal = Journal(root, "op-log")
     record = journal.read()
-    retry_targets = [{"path": t["path"], "role": t["role"],
-                      "content": (root / t["path"]).read_bytes()}
-                     for t in record["targets"]]
+    targets = [t["path"] for t in record["targets"]]
     result = run_mutation(
-        root, "op-log", "op", "probe", "id", "hash", retry_targets,
+        root, "op-log", "op", "probe", "id", "hash",
+        [{"path": p, "role": "generic", "content": b""} for p in targets],
         preconditions={"STATE.md": "x"},  # stale, must not matter when committed
         skip_preflight=True)
     expect("a committed op's retry returns ALREADY_APPLIED",
@@ -10011,13 +9981,9 @@ def run_nitro_m2_probes() -> tuple[list[str], int]:
     board.write_bytes(board_before)
     state.write_bytes(state_before)
     from saipen_engine.journal import hash_bytes
-    from saipen_engine.paths import runtime_lock_identity
     op = "op-conflict"
     journal = Journal(root, op)
-    # The receipt must be bound to THIS project's runtime identity, or the
-    # strict legacy binding refuses with PROJECT_MISMATCH before recovery even
-    # reaches the conflict (perf wave T-1022).
-    journal.start("op", "probe", runtime_lock_identity(root), "hash", [
+    journal.start("op", "probe", "id", "hash", [
         {"path": ".saipen/LOG.md", "role": "log",
          "content": log_before + b"\n- 09.08.26 00:01 [E-902] RUN: op\n",
          "before_hash": hash_bytes(log_before), "after_hash": "x"},
@@ -10131,15 +10097,9 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
            and "DEC:" in log_text, repr(log_text[-120:]))
 
     again = apply_claim(root, "T-777", "probe")
-    expect("a same-agent re-claim refreshes the lease in place (no duplicate)",
-           again.get("ok") and again.get("code") == "CLAIMED"
-           and again.get("refresh") is True
-           and again.get("changed_files") == [".saipen/BOARD.md"],
+    expect("a second claim on the claimed ticket is refused",
+           not again.get("ok") and again.get("code") == "ALREADY_CLAIMED",
            repr(again))
-    foreign = apply_claim(root, "T-777", "other")
-    expect("a live foreign claim cannot be taken over (TICKET_NOT_WORKABLE)",
-           not foreign.get("ok")
-           and foreign.get("code") == "TICKET_NOT_WORKABLE", repr(foreign))
 
     # Transition: SCOUT -> BUILD legal and journalled; illegal refused; dry-run
     # writes nothing.
@@ -10211,11 +10171,6 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
     # have reached SHIP; it closes LOG+BOARD+STATE in one plan and reports
     # FINISHED.
     transition_phase(root, "VERIFY", "probe", "T-777", "verify")
-    # VERIFY -> REVIEW requires current-cycle verification evidence: a RUN
-    # PASS after the machine-owned VERIFY marker (T-1014). Without it REVIEW
-    # refuses INCOMPLETE_TICKET and the whole chain stalls at VERIFY.
-    checkpoint(root, "probe", "RUN", "T-777",
-               "probe suite T-777 -> PASS conf: high")
     transition_phase(root, "REVIEW", "probe", "T-777", "review")
     transition_phase(root, "SHIP", "probe", "T-777", "ship")
     done = ticket_move(root, "done", "T-777", "probe")
@@ -10233,8 +10188,6 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
            repr(claimed2))
     transition_phase(root, "BUILD", "probe", "T-778", "b")
     transition_phase(root, "VERIFY", "probe", "T-778", "v")
-    checkpoint(root, "probe", "RUN", "T-778",
-               "probe suite T-778 -> PASS conf: high")
     transition_phase(root, "REVIEW", "probe", "T-778", "r")
     transition_phase(root, "SHIP", "probe", "T-778", "s")
     done2 = ticket_move(root, "done", "T-778", "probe")
@@ -10618,9 +10571,8 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     log_b4 = (saipen4 / "LOG.md").read_bytes()
     state_b4 = (saipen4 / "STATE.md").read_bytes()
     from saipen_engine.journal import hash_bytes
-    from saipen_engine.paths import runtime_lock_identity
     j = Journal(root4, "op-int")
-    j.start("op", "probe", runtime_lock_identity(root4), "hash", [
+    j.start("op", "probe", "id", "hash", [
         {"path": ".saipen/LOG.md", "role": "log",
          "content": log_b4 + b"\n- 09.08.26 00:01 [E-901] RUN: x\n",
          "before_hash": hash_bytes(log_b4), "after_hash": "a"},
@@ -10648,7 +10600,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     new_log_b4b = log_b4b + b"\n- 09.08.26 00:01 [E-901] RUN: y\n"
     new_state_b4b = state_b4b.replace(b"phase: DONE", b"phase: BUILD")
     j4b = Journal(root4b, "op-staged")
-    j4b.start("op", "probe", runtime_lock_identity(root4b), "hash", [
+    j4b.start("op", "probe", "id", "hash", [
         {"path": ".saipen/LOG.md", "role": "log", "content": new_log_b4b,
          "before_hash": hash_bytes(log_b4b),
          "after_hash": hash_bytes(new_log_b4b)},
@@ -10678,7 +10630,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     j9 = Journal(root9, "op-pending")
     new_log9 = log9 + b"\n- 09.08.26 00:01 [E-901] RUN: x\n"
     new_state9 = state9.replace(b"phase: DONE", b"phase: BUILD")
-    j9.start("op", "probe", runtime_lock_identity(root9), "hash", [
+    j9.start("op", "probe", "id", "hash", [
         {"path": ".saipen/LOG.md", "role": "log", "content": new_log9,
          "before_hash": hash_bytes(log9), "after_hash": hash_bytes(new_log9)},
         {"path": ".saipen/STATE.md", "role": "state", "content": new_state9,
@@ -10778,17 +10730,17 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            cp_p.get("ok") and f"[parent: E-{int(cp_p.get('event_id')[2:]) - 1}]"
            in log_p, repr(log_p[-140:]))
 
-    # ---- §69#04: checkpoint preserves unrelated STATE fields. The fixture
-    # builds a LEGAL claimed/BUILD state first (a hand-set BUILD with no DOING
-    # ticket is now refused by fast validation), then injects the unrelated
-    # goal fields the checkpoint must carry through unchanged.
+    # ---- §69#04: checkpoint preserves unrelated STATE fields.
     rootu = make_project()
-    apply_claim(rootu, "T-1", "probe")
-    transition_phase(rootu, "BUILD", "probe", "T-1", "setup")
     state_u = (rootu / ".saipen" / "STATE.md").read_text(encoding="utf-8")
     (rootu / ".saipen" / "STATE.md").write_text(
-        state_u.replace("updated:", "execution_intent: goal\ngoal_waves: 1\n"
-                        "goal_tickets: 2\nupdated:"), encoding="utf-8")
+        state_u.replace("phase: DONE", "phase: BUILD").replace(
+            "next_action: \"saipen continue\"",
+            "next_action: \"PHASE BUILD T-1\"").replace(
+            "updated:", "execution_intent: goal\ngoal_waves: 1\n"
+            "goal_tickets: 2\nupdated:"), encoding="utf-8")
+    apply_claim(rootu, "T-1", "probe")
+    transition_phase(rootu, "BUILD", "probe", "T-1", "setup")
     _before_u = codec.read_doc(rootu / ".saipen" / "STATE.md")
     cp_u = checkpoint(rootu, "probe", "RUN", "T-1", "unrelated preserve")
     after_u = codec.read_doc(rootu / ".saipen" / "STATE.md")
@@ -10896,7 +10848,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     rootone = make_project()
     j_one = Journal(rootone, "op-single")
     content_one = (rootone / ".saipen" / "STATE.md").read_bytes()
-    j_one.start("op", "probe", runtime_lock_identity(rootone), "h", [
+    j_one.start("op", "probe", "id", "h", [
         {"path": ".saipen/STATE.md", "role": "state",
          "content": content_one.replace(b"phase: DONE", b"phase: BUILD"),
          "before_hash": hash_bytes(content_one),
@@ -10989,19 +10941,12 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
           "content": new_state_r, "before_hash": hash_bytes(state_r),
           "after_hash": hash_bytes(new_state_r)}],
         skip_preflight=True)
-    # The retry must reproduce the record's semantic fingerprint exactly
-    # (operation, semantic_payload_hash, policy, per-target role + after_hash)
-    # or it is an op_id collision, not a retry (perf wave T-1022).
-    _j_retry = Journal(root_retry, "op-retry")
-    _retry_rec = _j_retry.read()
     retry_result = _run_mutation(
-        root_retry, "op-retry", _retry_rec.get("operation"), "probe", "id",
-        _retry_rec.get("semantic_payload_hash"),
-        [{"path": t["path"], "role": t["role"],
-          "content": (root_retry / t["path"]).read_bytes()}
-         for t in _retry_rec["targets"]],
-        skip_preflight=True,
-        verification_policy=_retry_rec.get("verification_policy", "none"))
+        root_retry, "op-retry", "op", "probe", "id", "hash",
+        [{"path": ".saipen/LOG.md", "role": "log", "content": new_log_r,
+          "before_hash": hash_bytes(log_r),
+          "after_hash": hash_bytes(new_log_r)}],
+        skip_preflight=True)
     expect("a committed op retried returns ALREADY_APPLIED, no second write",
            commit_retry.get("code") == "COMMITTED"
            and retry_result.get("code") == "ALREADY_APPLIED",
@@ -11372,7 +11317,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     new_log_c = log_c + b"\n- 09.08.26 00:01 [E-901] RUN: op\n"
     new_state_c = state_c.replace(b"phase: DONE", b"phase: BUILD")
     j_c = Journal(root_c, "op-conf")
-    j_c.start("checkpoint", "probe", runtime_lock_identity(root_c), "h", [
+    j_c.start("checkpoint", "probe", "id", "h", [
         {"path": ".saipen/LOG.md", "role": "log", "content": new_log_c,
          "before_hash": hash_bytes(log_c),
          "after_hash": hash_bytes(new_log_c)},
@@ -11413,7 +11358,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     new_log_b = log_b + b"\n- 09.08.26 00:01 [E-901] RUN: op\n"
     new_state_b = state_b.replace(b"phase: DONE", b"phase: BUILD")
     j_b = Journal(root_b, "op-rdep")
-    j_b.start("checkpoint", "probe", runtime_lock_identity(root_b), "h", [
+    j_b.start("checkpoint", "probe", "id", "h", [
         {"path": ".saipen/LOG.md", "role": "log", "content": new_log_b,
          "before_hash": hash_bytes(log_b),
          "after_hash": hash_bytes(new_log_b)},
@@ -11457,7 +11402,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
                    b"agent: probe\nmode: full\n"
                    b"updated: 2026-08-09T00:00:00Z\n---\n")
     j_s = Journal(root_s, "op-sem")
-    j_s.start("checkpoint", "probe", runtime_lock_identity(root_s), "h", [
+    j_s.start("checkpoint", "probe", "id", "h", [
         {"path": ".saipen/LOG.md", "role": "log", "content": new_log_s,
          "before_hash": hash_bytes(log_s),
          "after_hash": hash_bytes(new_log_s)},
@@ -11633,23 +11578,15 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     c_res = apply_claim(comp_root, "T-1", "probe")
     op_dir = comp_root / ".saipen" / "recovery" / "ops" / c_res.get("op_id")
     staged_before = [p for p in op_dir.glob("*.staged")]
-    expect("a committed claim carries no staged bytes (auto-dropped at COMMIT)",
-           len(staged_before) == 0, repr(staged_before))
+    expect("a committed claim has staged bytes before compaction",
+           len(staged_before) > 0, repr(staged_before))
     compact_committed(comp_root)
     staged_after = [p for p in op_dir.glob("*.staged")]
-    expect("compaction leaves committed ops staged-free (idempotent)",
+    expect("compaction removes committed staged bytes",
            len(staged_after) == 0, repr(staged_after))
-    # The retry must reproduce the claim record's semantic fingerprint.
-    _j_comp = Journal(comp_root, c_res.get("op_id"))
-    _rec_comp = _j_comp.read()
-    rec_comp = _rm(comp_root, c_res.get("op_id"), _rec_comp.get("operation"),
-                   "probe", "id", _rec_comp.get("semantic_payload_hash"),
-                   [{"path": t["path"], "role": t["role"],
-                     "content": (comp_root / t["path"]).read_bytes()}
-                    for t in _rec_comp["targets"]],
-                   skip_preflight=True,
-                   verification_policy=_rec_comp.get(
-                       "verification_policy", "none"))
+    rec_comp = _rm(comp_root, c_res.get("op_id"), "claim", "probe", "id",
+                   "hash", [{"path": ".saipen/STATE.md", "role": "state",
+                             "content": b""}], skip_preflight=True)
     expect("compacted op retried still returns ALREADY_APPLIED",
            rec_comp.get("code") == "ALREADY_APPLIED", repr(rec_comp))
     # A conflict journal is never compacted.
@@ -11658,7 +11595,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     log_cf = (saipen_conf / "LOG.md").read_bytes()
     state_cf = (saipen_conf / "STATE.md").read_bytes()
     j_cf = Journal(conf_root, "op-cf")
-    j_cf.start("checkpoint", "probe", runtime_lock_identity(conf_root), "h", [
+    j_cf.start("checkpoint", "probe", "id", "h", [
         {"path": ".saipen/LOG.md", "role": "log",
          "content": log_cf + b"\n- 09.08.26 00:01 [E-901] RUN: x\n",
          "before_hash": hash_bytes(log_cf),
@@ -11689,7 +11626,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     log_rs = (saipen_res / "LOG.md").read_bytes()
     state_rs = (saipen_res / "STATE.md").read_bytes()
     j_rs = Journal(res_root, "op-rs")
-    j_rs.start("checkpoint", "probe", runtime_lock_identity(res_root), "h", [
+    j_rs.start("checkpoint", "probe", "id", "h", [
         {"path": ".saipen/LOG.md", "role": "log",
          "content": log_rs + b"\n- 09.08.26 00:01 [E-901] RUN: x\n",
          "before_hash": hash_bytes(log_rs),
@@ -11730,7 +11667,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
            repr(rs_record2))
     pre_root = make_project()
     j_pre = Journal(pre_root, "op-pre")
-    j_pre.start("checkpoint", "probe", runtime_lock_identity(pre_root), "h", [
+    j_pre.start("checkpoint", "probe", "id", "h", [
         {"path": ".saipen/LOG.md", "role": "log",
          "content": b"x", "before_hash": "a", "after_hash": "b"}])
     compact_committed(pre_root)
@@ -12222,7 +12159,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     new_log_cf = log_cf + b"\n- 09.08.26 00:01 [E-901] RUN: op\n"
     new_state_cf = state_cf.replace(b"phase: DONE", b"phase: BUILD")
     j_cf = Journal(conf_root, "op-t592")
-    j_cf.start("checkpoint", "probe", runtime_lock_identity(conf_root), "h", [
+    j_cf.start("checkpoint", "probe", "id", "h", [
         {"path": ".saipen/LOG.md", "role": "log", "content": new_log_cf,
          "before_hash": hash_bytes(log_cf),
          "after_hash": hash_bytes(new_log_cf)},
@@ -12247,7 +12184,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     # op blocks.
     second_log = (saipen_cf / "LOG.md").read_bytes()
     j2 = Journal(conf_root, "op-other")
-    j2.start("checkpoint", "probe", runtime_lock_identity(conf_root), "h", [
+    j2.start("checkpoint", "probe", "id", "h", [
         {"path": ".saipen/LOG.md", "role": "log", "content": second_log,
          "before_hash": hash_bytes(second_log),
          "after_hash": hash_bytes(second_log)},
@@ -12282,7 +12219,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     new_log2 = log2 + b"\n- 09.08.26 00:01 [E-901] RUN: op\n"
     new_state2 = state2.replace(b"phase: DONE", b"phase: BUILD")
     j3 = Journal(conf2, "op-replan")
-    j3.start("checkpoint", "probe", runtime_lock_identity(conf2), "h", [
+    j3.start("checkpoint", "probe", "id", "h", [
         {"path": ".saipen/LOG.md", "role": "log", "content": new_log2,
          "before_hash": hash_bytes(log2),
          "after_hash": hash_bytes(new_log2)},
@@ -13842,36 +13779,6 @@ def run_t1012_strict_grammar_probes() -> tuple[list[str], int]:
     return problems, checked
 
 
-def run_perf_wave_probes() -> tuple[list[str], int]:
-    """Execute the standalone perf-wave regression gate (T-1019..T-1022).
-
-    The perf wave owns a separate hermetic runner: it times medians and
-    monkeypatches module internals (subprocess.run, freshness internals), so
-    it must run in its own process to keep the rest of the suite honest.
-    Invoking it here makes the T-1019..T-1022 regressions part of the
-    canonical full gate -- a fresh clone executes them every time the full
-    suite runs, and the standalone file is also wired as an explicit CI
-    step (T-1006).
-    """
-    problems: list[str] = []
-    script = HOME / "tools" / "perf_wave_regressions.py"
-    if not script.is_file():
-        return [f"perf wave runner missing: {script}"], 1
-    try:
-        r = subprocess.run([sys.executable, str(script)], cwd=HOME,
-                           capture_output=True, text=True, errors="replace",
-                           timeout=1800)
-    except subprocess.TimeoutExpired:
-        return ["perf wave regressions TIMEOUT after 1800s"], 1
-    blob = (r.stdout or "") + (r.stderr or "")
-    if r.returncode != 0:
-        problems.append(f"perf wave regressions exited {r.returncode}: "
-                        f"{blob[-600:]}")
-    else:
-        print("PASS: perf wave regressions (T-1019..T-1022)")
-    return problems, 1
-
-
 def main():
     """Run targeted probe groups or the full suite.
 
@@ -13896,7 +13803,6 @@ def main():
         "SAIPEN_SW_PROBES_ONLY": "second_wave",
         "SAIPEN_THIRD_WAVE_PROBES_ONLY": "third_wave",
         "SAIPEN_T1012_STRICT_PROBES_ONLY": "t1012_strict",
-        "SAIPEN_PERF_WAVE_PROBES_ONLY": "perf_wave",
     }
     _active = [k for k, v in _PROBE_SELECTORS.items()
                if os.environ.get(k) == "1"]
@@ -14431,7 +14337,6 @@ def main():
                 run_producer_gate_probes, run_ccc_identity_probes,
                 run_converge_routing_probes],
             "t1012_strict": [run_t1012_strict_grammar_probes],
-            "perf_wave": [run_perf_wave_probes],
         }
         if _selected_group not in _GROUPS:
             print(f"FAILED: no probe group for {_selected_group!r}")
@@ -14443,12 +14348,7 @@ def main():
             _all_c += _res[1]
         for p in _all_f:
             print(f"FAILED: {p}")
-        # Real scoped summary (perf wave T-1022): the targeted runner must
-        # terminate with explicit PASS/FAIL counts for the group it ran, not
-        # just a raw behavior count, so a green exit is auditable.
-        _passed = _all_c - len(_all_f)
-        print(f"{_selected_group}: {_passed}/{_all_c} checks passed, "
-              f"{len(_all_f)} failed")
+        print(f"{_all_c} {_selected_group} behavior(s) executed")
         raise SystemExit(1 if _all_f else 0)
 
     # ---- Full suite probe execution ----------------------------------------
@@ -14549,8 +14449,6 @@ def main():
     failures.extend(active_task_failures)
     t1012_failures, t1012_checked = run_t1012_strict_grammar_probes()
     failures.extend(t1012_failures)
-    perf_failures, perf_checked = run_perf_wave_probes()
-    failures.extend(perf_failures)
     print(f"\n{checked} executable fixture(s) checked, "
           f"{skipped} behavioral fixture(s) skipped (README-only by design)")
     print(f"{injector_checked} injector(s) executed, "
@@ -14588,8 +14486,6 @@ def main():
     print(f"{userperson_checked} userperson behavior(s) executed")
     print(f"{improve_checked} improve behavior(s) executed")
     print(f"{nitro_checked} nitro behavior(s) executed")
-    print(f"{perf_checked} perf-wave regression gate(s) executed "
-          f"(T-1019..T-1022)")
     print(f"{nitro_m2_checked} nitro-m2 behavior(s) executed")
     print(f"{nitro_m3_checked} nitro-m3 behavior(s) executed")
     print(f"{nitro_integrity_checked} nitro-integrity behavior(s) executed")

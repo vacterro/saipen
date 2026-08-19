@@ -1,0 +1,1497 @@
+PASS: active-task-not-claimed -- failed on 'is not the claimed ## DOING ticket', as declared
+PASS: append-target-mid-line -- failed on 'end mid-line', as declared
+PASS: block-park-done-green -- expected pass, got pass
+PASS: block-park-done-red -- failed on 'invalid phase transition', as declared
+PASS: blocked-ticket -- expected pass, got pass
+PASS: checkpoint-missing-required-field -- failed on 'missing required field: blocker', as declared
+PASS: dangling-needs-reference -- failed on 'dangling needs: reference', as declared
+PASS: dependency-cycle -- failed on 'cyclic needs: dependencies', as declared
+PASS: done-wait-deadlock -- failed on 'auto-transition HUNT', as declared
+PASS: done-wait-deadlock-goal-mode -- failed on 'auto-transition HUNT', as declared
+PASS: goal-counter-recovery -- expected pass, got pass
+PASS: goal-counter-untraced -- passed and warned on 'goal-counter-untraced', as declared
+PASS: goal-reauthorization-trace -- expected pass, got pass
+PASS: goal-reauthorization-untraced -- failed on 'newest goal marker rebuilds', as declared
+PASS: hr-bad-updated -- failed on 'updated must be ISO-8601 UTC', as declared
+PASS: hr-claim-foreign-doing -- expected pass, got pass
+PASS: hr-claim-half-pair -- failed on 'INVALID claim', as declared
+PASS: hr-illegal-transition-pair -- failed on 'invalid phase transition', as declared
+PASS: hr-malformed-wait -- failed on 'WAIT with no category token', as declared
+PASS: hr-missing-style_contract -- failed on 'style_contract', as declared
+PASS: hr-missing-transition_from -- failed on 'missing transition_from', as declared
+PASS: hr-wait-grammar -- failed on 'malformed WAIT', as declared
+PASS: hr-wrong-style_contract -- failed on 'style_contract', as declared
+PASS: invalid-mode-phase-combination -- expected pass, got pass
+PASS: multi-agent-claim-conflict -- expected pass, got pass
+PASS: next-action-not-executable -- failed on 'STATE.md next_action does not start with', as declared
+PASS: proposal-mode-halt -- expected pass, got pass
+PASS: read-only-restriction -- failed on 'read-only MUST NOT enter BUILD', as declared
+PASS: resume-after-crash -- expected pass, got pass
+PASS: saiui-adoption -- expected pass, got pass
+PASS: ship-preflight-build-return -- expected pass, got pass
+PASS: stale-state-reconciliation -- expected pass, got pass
+PASS: state-behind-board-self-claim -- failed on 'STATE is behind BOARD', as declared
+PASS: tripped-valve-without-wait -- failed on 'tripped safety valve', as declared
+PASS: two-doing-tickets -- failed on 'tickets in ## DOING', as declared
+PASS: userperson-malformed -- failed on 'USERPERSON file must open with the exact heading', as declared
+PASS: userperson-valid -- expected pass, got pass
+PASS: bootstrap/inject.sh -- manifest-complete install replaced stale dirs, ran validate.py, and uninstalled config + Aider byte-exact
+PASS: bootstrap/inject.sh grep failure -- exits nonzero without completion text
+PASS: bootstrap/inject.sh grep failure -- exits nonzero without Done
+PASS: bootstrap/inject.sh write failure -- exits nonzero without completion text
+PASS: bootstrap/uninstall.sh transform failure -- exits nonzero without completion text
+PASS: bootstrap/uninstall.sh grep failure -- exits nonzero without completion text
+PASS: bootstrap/uninstall.sh grep failure -- exits nonzero without Done
+PASS: bootstrap/uninstall.sh regular-file skill -- removed
+PASS: bootstrap/inject.sh late missing source -- old install preserved, no staging debris
+PASS: bootstrap/inject.sh manifest traversal -- old install preserved, no staging debris
+PASS: bootstrap/inject.ps1 -- manifest-complete install replaced stale dirs, ran validate.py, and uninstalled config + Aider byte-exact
+PASS: bootstrap/inject.ps1 copy failure -- exits nonzero without completion text
+PASS: bootstrap/uninstall.ps1 read failure -- exits nonzero without completion text
+PASS: bootstrap/inject.ps1 late missing source -- old install preserved, no staging debris
+PASS: bootstrap/inject.ps1 manifest traversal -- old install preserved, no staging debris
+PASS: injector probe red-control -- deleted tests/ goes red
+PASS: injector probe red-control -- installed bytecode goes red
+PASS: scheduler -- one manager and no generated repository wrapper
+PASS: scheduler -- wrapper publication is atomic and outside the repository
+PASS: scheduler -- external-wrapper contract red control
+PASS: scheduler -- all removers own current task, legacy task, and runtime wrapper
+PASS: scheduler -- background runner never updates the development clone
+PASS: scheduler -- background Git disables optional index mutation
+PASS: scheduler -- status distinguishes NOT_INSTALLED
+PASS: scheduler -- unknown command is nonzero with concise usage
+PASS: scheduler -- install migrates legacy task and publishes external wrapper
+PASS: scheduler -- atomic install leaves no temporary wrapper
+PASS: scheduler -- wrapper preserves a Unicode runner path
+PASS: scheduler -- status distinguishes HEALTHY
+PASS: scheduler -- wrong scheduled action is DEGRADED
+PASS: scheduler -- quoted wrapper path is DEGRADED
+PASS: scheduler -- wrong task principal is DEGRADED
+PASS: scheduler -- disabled scheduled task is DEGRADED
+PASS: scheduler -- wrong task trigger type is DEGRADED
+PASS: scheduler -- finite repetition duration is DEGRADED
+PASS: scheduler -- wrong task trigger or runtime policy is DEGRADED
+PASS: scheduler -- run-now triggers only a healthy installation
+PASS: scheduler -- wrapper with canonical path hidden in dead text is DEGRADED
+PASS: scheduler -- run-now refuses a noncanonical wrapper body
+PASS: scheduler -- generated wrapper waits and returns runner status
+PASS: scheduler -- duplicate current and legacy tasks are DEGRADED
+PASS: scheduler -- run-now refuses a DEGRADED duplicate installation
+PASS: scheduler -- missing VBS wrapper is DEGRADED
+PASS: scheduler -- run-now refuses a task with missing wrapper
+PASS: scheduler -- wrapper referencing a missing runner is DEGRADED
+PASS: scheduler -- remove cleans both task names and scheduler runtime
+PASS: scheduler -- remove sweeps killed-run temp files but keeps the canonical log
+PASS: scheduler -- install and remove leave repository status unchanged
+PASS: scheduler -- failed reinstall restores previous task and wrapper
+PASS: scheduler -- fresh settings failure removes new task and wrapper
+PASS: scheduler -- query failure is nonzero and preserves task and wrapper
+PASS: scheduler -- delete failure is nonzero and preserves runnable wrapper
+PASS: scheduler -- PowerShell global uninstall removes both tasks and wrapper
+PASS: scheduler -- PowerShell uninstall sweeps killed-run temp files but keeps the canonical log
+PASS: scheduler -- PowerShell global uninstall fails closed on query error
+PASS: scheduler -- PowerShell uninstall falls back when ScheduledTasks cmdlets are absent
+PASS: scheduler -- PowerShell fallback uninstall sweeps temp files, keeps canonical log
+PASS: scheduler -- PowerShell schtasks fallback fails closed on query error
+PASS: scheduler -- shell global uninstall removes both tasks and wrapper
+PASS: scheduler -- shell uninstall sweeps killed-run temp files but keeps the canonical log
+PASS: scheduler -- shell global uninstall fails closed on query error
+PASS: scheduler -- shell uninstall without schtasks still cleans runtime source
+PASS: scheduler -- shell uninstall without schtasks sweeps temp files, keeps canonical log
+PASS: scheduler -- clean committed source injects exact HEAD without network access
+PASS: scheduler -- successful injection keeps its advertised source path alive
+PASS: scheduler -- background run never changes HEAD or working-tree bytes
+PASS: scheduler -- dirty tracked source skips and preserves installed snapshot
+PASS: scheduler -- dirty untracked project source skips and preserves installed snapshot
+PASS: scheduler -- source operation failure never falls through into injection
+PASS: scheduler -- source change during preflight refuses mixed-source injection
+PASS: scheduler -- every refusal preserves previous installed snapshot and HEAD
+PASS: scheduler -- stale snapshot backup from a killed run is refused
+PASS: scheduler -- failed injector restores previous persistent source snapshot
+PASS: project root -- correct root
+PASS: project root -- nested cwd
+PASS: project root -- wrong cwd rejected
+PASS: project root -- explicit root overrides cwd
+PASS: project root -- non-Git nested cwd
+PASS: project root -- linked worktree uses main owner
+PASS: project root -- linked worktree with its own .saipen/ is validated as itself
+PASS: export.sh -- nested cwd
+PASS: export.sh -- foreign cwd rejected
+PASS: export.sh -- explicit root overrides cwd
+PASS: export.sh -- empty explicit root rejected
+PASS: export.sh -- linked worktree uses main owner
+PASS: export.sh -- external git-dir parent rejected
+PASS: bootstrap/saipen_crew.sh broken launcher -- exits nonzero without Done
+PASS: bootstrap/saipen_crew.sh working launcher -- three accepted calls
+PASS: bootstrap/saipen_crew.bat failed start 1 -- exits nonzero without success
+PASS: bootstrap/saipen_crew.bat failed start 2 -- exits nonzero without success
+PASS: bootstrap/saipen_crew.bat failed start 3 -- exits nonzero without success
+PASS: bootstrap/saipen_crew.bat working start -- three accepted calls
+PASS: saicrew -- duplicate instance name FAILs
+PASS: saicrew -- duplicate canonical path FAILs
+PASS: saicrew -- malformed entry FAILs
+PASS: saicrew -- traversal path FAILs
+PASS: saicrew -- non-entry line FAILs (never skip+continue)
+PASS: saicrew -- exact header required
+PASS: saicrew -- valid canonical manifest passes
+PASS: saicrew -- identity-bound last_collect passes strict manifest
+PASS: saicrew -- legacy current path FAILs
+PASS: saicrew -- unknown metadata FAILs
+PASS: saicrew -- duplicate metadata FAILs
+PASS: saicrew -- absolute path FAILs
+PASS: saicrew -- sub list refuses INVALID_MANIFEST
+PASS: saicrew -- spawn succeeds in probe project
+PASS: saicrew -- pause/resume/spawn/sync --dry-run write nothing
+PASS: saicrew -- dry-run pause reports the same proposed outcome
+PASS: saicrew -- dry-run adopt reports proposed outcome without writes
+PASS: saicrew -- dry-run spawn does not create an instance
+PASS: saicrew -- sync-probe spawn ok
+PASS: saicrew -- partial bootstrap reported not current
+PASS: saicrew -- missing file named exactly
+PASS: saicrew -- sync --dry-run reports the exact diff
+PASS: saicrew -- sync --dry-run did not repair
+PASS: saicrew -- sync succeeds
+PASS: saicrew -- sync repaired the missing file
+PASS: saicrew -- live instance history untouched by sync
+PASS: saicrew -- shared inbox preserved byte-identically
+PASS: saicrew -- second sync -> no drift
+PASS: saicrew -- byte-current contract without receipt is not falsely terminal
+PASS: saicrew -- metadata-only sync establishes ownership receipt
+PASS: saicrew -- durable successor wins over inverted receipt mtime
+PASS: saicrew -- obsolete reconciliation follows the durable successor
+PASS: saicrew -- ambiguous receipt lineage fails closed
+PASS: saicrew -- broken-lineage fixture receipt
+PASS: saicrew -- broken receipt lineage fails closed
+PASS: saicrew -- broken lineage self-heals with a fresh valid receipt
+PASS: saicrew -- broken receipt never wins selection
+PASS: saicrew -- equally-close same-second lineages fail closed
+PASS: saicrew -- obsolete-sync fixture spawn ok
+PASS: saicrew -- sync admits new inherited nested file with receipt
+PASS: saicrew -- sync deletes receipt-owned obsolete file and empty directory
+PASS: saicrew -- sync refuses modified obsolete inherited file with zero writes
+PASS: saicrew -- obsolete sync crash resumes to receipt-bound current state
+PASS: saicrew -- role-probe spawn ok
+PASS: saicrew -- spawned built-in worker has a real role_revision
+PASS: saicrew -- local charter is the authority
+PASS: saicrew -- role freshness CURRENT with local charter
+PASS: saicrew -- local missing -> UNAVAILABLE, never home fallback
+PASS: saicrew -- generic spawn succeeds
+PASS: saicrew -- generic worker revision never blank
+PASS: saicrew -- generic revision derives from local PROTOCOL
+PASS: saicrew -- duplicate heading FAILs
+PASS: saicrew -- valid board passes
+PASS: saicrew -- checkbox/section mismatch FAILs
+PASS: saicrew -- two DOING FAILs
+PASS: saicrew -- Core T-### namespace FAILs on a sub board
+PASS: saicrew -- saihunt canonical HUNT- board prefix passes
+PASS: saicrew -- saitest canonical TEST- board prefix passes
+PASS: saicrew -- saipython canonical PY- board prefix passes
+PASS: saicrew -- saiui canonical UI- board prefix passes
+PASS: saicrew -- saiwiki canonical W- board prefix passes
+PASS: saicrew -- wrong role ticket prefix FAILs
+PASS: saicrew -- unknown board heading FAILs
+PASS: saicrew -- status-probe spawn ok
+PASS: saicrew -- DONE + unresolved BLOCKED board is INVALID, not DONE
+PASS: saicrew -- empty OUTBOX never implies CURRENT
+PASS: saicrew -- phase BLOCKED reports BLOCKED
+PASS: saicrew -- collect-probe spawn ok
+PASS: saicrew -- ready package without source triple refused
+PASS: saicrew -- malformed OUTBOX refused
+PASS: saicrew -- header-only OUTBOX template is a valid empty queue
+PASS: saicrew -- complete current READY OUTBOX -> READY_FOR_REVIEW
+PASS: saicrew -- collect dry-run computes ticket and writes zero bytes/journal
+PASS: saicrew -- complete current collection creates one Core TODO hypothesis
+PASS: saicrew -- collection marks MANIFEST last_collect and binds identity
+PASS: saicrew -- collect retry deduplicates without second Core ticket
+PASS: saicrew -- collected READY package with open review ticket -> REVIEW_PENDING
+PASS: saicrew -- disposition marks OUTBOX reviewed and binds immutable identity
+PASS: saicrew -- collection preserves Core LOG/STATE binding
+PASS: saicrew -- complete current reviewed OUTBOX -> CURRENT
+PASS: saicrew -- duplicate OUTBOX field FAILs
+PASS: saicrew -- unknown OUTBOX field FAILs
+PASS: saicrew -- wrong OUTBOX producer FAILs
+PASS: saicrew -- duplicate OUTBOX package ID FAILs
+PASS: saicrew -- invalid OUTBOX source_head FAILs
+PASS: saicrew -- invalid OUTBOX tree fingerprint FAILs
+PASS: saicrew -- invalid OUTBOX role revision FAILs
+PASS: saicrew -- two current READY packages refuse as ambiguous
+PASS: saicrew -- explicit-probe spawn core role
+PASS: saicrew -- explicit-probe spawn saiwiki
+PASS: saicrew -- explicit-probe spawn saitranslate
+PASS: saicrew -- targeted explicit producer refuses with EXPLICIT_POLICY
+PASS: saicrew -- aggregate skips explicit saiwiki/saitranslate
+PASS: saicrew -- CAS-probe spawn ok
+PASS: saicrew -- adopt stale STATE CAS refuses
+PASS: saicrew -- adopt stale charter CAS refuses
+PASS: saicrew -- pause stale LOG CAS refuses
+PASS: saicrew -- pause stale MANIFEST CAS refuses
+PASS: saicrew -- CAS-probe pause setup ok
+PASS: saicrew -- resume stale LOG CAS refuses
+PASS: saicrew -- CAS-probe resume setup ok
+PASS: saicrew -- spawn target-absence CAS refuses
+PASS: saicrew -- sync stale source CAS refuses
+PASS: saicrew -- collect-CAS spawn ok
+PASS: saicrew -- collect stale OUTBOX CAS refuses with zero Core writes
+PASS: saicrew -- clean fixture spawn succeeds
+PASS: saicrew -- clean sibling spawn succeeds
+PASS: saicrew -- safe terminal worker is archived, removed, and unregistered
+PASS: saicrew -- clean archive preserves every source file byte-exactly
+PASS: saicrew -- clean leaves sibling worker and shared files untouched
+PASS: saicrew -- clean retry after COMMITTED is idempotent ALREADY_CLEAN
+PASS: saicrew -- clean dry-run reports exact writes/deletes and changes zero bytes
+PASS: saicrew -- clean refuses open board work with zero writes
+PASS: saicrew -- clean refuses READY OUTBOX with zero writes
+PASS: saicrew -- clean stale MANIFEST CAS refuses before journal/archive writes
+PASS: saicrew -- clean stale instance-tree CAS refuses before cleanup writes
+PASS: saicrew -- clean crash after MANIFEST recovers to same final state
+PASS: saicrew -- clean crash after first deletion recovers to same final state
+PASS: saicrew -- clean rejects manifest path escape with zero writes
+PASS: saicrew -- crew-probe spawn saihunt
+PASS: saicrew -- crew-probe spawn saitest
+PASS: saicrew -- crew-probe spawn saipython
+PASS: saicrew -- crew-probe spawn saiui
+PASS: saicrew -- crew-probe spawn saiwiki
+PASS: saicrew -- crew plan derives the circuit
+PASS: saicrew -- crew plan names the first unsatisfied stage
+PASS: saicrew -- --gate crew FAILs with unresolved role work
+PASS: saicrew -- blocked role keeps --gate crew red
+PASS: saicrew -- positive fixture spawn saihunt
+PASS: saicrew -- positive fixture spawn saitest
+PASS: saicrew -- positive fixture spawn saipython
+PASS: saicrew -- positive fixture spawn saiui
+PASS: saicrew -- positive fixture spawn saiwiki
+PASS: saicrew -- positive fixture crew intent entered canonically
+PASS: saicrew -- A perfect pre-ship fixed point routes exactly to SHIP
+PASS: saicrew -- B post-ship except EE routes PREPARE_TRANSLATE_FINAL
+PASS: saicrew -- C EE current and QQ stale routes PREPARE_WIKI_FINAL
+PASS: saicrew -- D all-green active crew plan is reachable
+PASS: saicrew -- moving role evidence makes the crew snapshot STALE_PLAN
+PASS: saicrew -- pending-op movement before the closing hash is STALE_PLAN
+FAIL: saicrew -- finalizer CAS refuses missing sub-sync ownership receipt -- {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "op_id": "finalize_crew-dc7cccccb21844ef8640ca8a42905e25",
+  "changed_files": [],
+  "recovery_required": true,
+  "message": "corrupt journal evidence sub-sync-51335249 blocks new mutation: op directory has no operation.json manifest (interrupted pre-manifest staging?); orphan staged evidence must be resolved explicitly -- resolve the corrupt receipt explicitly before any further canonical write",
+  "op_ids": [
+    "sub-sync-51335249"
+  ]
+}
+PASS: saicrew -- finalizer CAS refuses mutated sub-sync ownership receipt
+PASS: saicrew -- finalizer CAS refuses evidence drift with zero Core writes
+PASS: saicrew -- E finalizer clears target and returns normal DONE
+PASS: saicrew -- E finalized all-green crew gate passes
+PASS: saicrew -- F cold re-read derives same terminal answer
+PASS: saicrew -- goal -> converge/crew drops both goal counters
+PASS: saicrew -- crew -> normal terminal drops converge target
+PASS: saicrew -- active ticket keeps exact continuation under crew target
+PASS: saicrew -- cold idle continuation resumes crew from intent semantics
+PASS: last_event -- legacy absence warns but remains readable
+PASS: last_event -- current schema missing marker fails
+PASS: last_event -- current schema missing style marker fails
+PASS: last_event -- exact recovered tail passes
+PASS: last_event -- advanced LOG makes old marker stale
+PASS: last_event -- recovered exact tail passes
+PASS: last_event -- marker above LOG fails as corrupt
+PASS: log-tail -- E-100 then E-9 returns 100 (not the final parsed 9)
+PASS: log-tail -- reordered (E-9 first) still returns 100
+PASS: log-tail -- empty text returns None
+PASS: log-tail -- 999 vs 1000: max wins regardless of order
+PASS: log-tail -- engine tail across sealed segments + empty active = global max
+PASS: log-tail -- LOG-1000 sorts after LOG-999 numerically; tail still 100
+PASS: log-tail -- next checkpoint allocates max(E)+1 = 101 exactly once
+PASS: hunt mark -- a mark no commit backs fails
+PASS: hunt mark -- the exact HEAD mark passes
+PASS: hunt mark -- a local-only commit fails (never reached a remote)
+PASS: hunt mark -- a remote-backed mark still passes after the stray
+PASS: converge routing -- converge clean-HUNT naming ADD fails
+PASS: converge routing -- converge clean-HUNT routing to CLEAN passes
+PASS: converge routing -- normal intent may still name ADD
+PASS: converge routing -- converge valve pause naming saipen goal fails
+PASS: converge routing -- converge valve pause naming cc passes
+PASS: converge routing -- scenario 25 ccc preparation before SHIP fails
+PASS: converge routing -- scenario 25 ccc SHIP-before-prepare passes
+PASS: ccc identity -- one commit at two widths is caught as unchanged
+PASS: ccc identity -- the same pair with the widths swapped is still unchanged
+PASS: ccc identity -- distinct commits are a real revision change
+PASS: ccc identity -- distinct commits match the current HEAD
+PASS: ccc identity -- evidence naming a commit the repository lacks fails
+PASS: ccc identity -- shipped evidence behind the current HEAD fails
+PASS: ccc identity -- a no-Git project warns instead of failing the proof
+PASS: ccc identity -- a 64-hex OID abbreviated is still one commit
+PASS: ccc identity -- distinct 64-hex OIDs are a real revision change
+PASS: ccc identity -- the full 64-hex OID resolves rather than truncating
+PASS: producer gate -- 1. stale QQ does not fail the default gate
+PASS: producer gate -- 1b. stale QQ does not fail the ship gate
+PASS: producer gate -- 1c. the stale package is still visible as a WARN
+PASS: producer gate -- 2. the same stale QQ FAILs collect:saiwiki
+PASS: producer gate -- 3. the same stale QQ FAILs the converge gate
+PASS: producer gate -- 2b. collecting saitranslate leaves saiwiki soft
+PASS: producer gate -- 4. malformed EE does not block an ordinary Core ship
+PASS: producer gate -- 5. the same malformed EE FAILs collect:saitranslate
+PASS: producer gate -- 6. fresh exact EE and QQ pass the converge gate
+PASS: producer gate -- 6b. no producer finding survives on fresh packages
+PASS: producer gate -- 7. a producer with no ready package cannot be collected
+PASS: producer gate -- 8. converge names the missing closure package
+PASS: producer gate -- 9. a misspelled producer gate still hard-checks (no fallback)
+PASS: producer gate -- 10. an unknown gate exits 2, never falls back to soft
+PASS: ship staging -- baseline home has no untracked runtime file
+PASS: ship staging -- a required runtime file merely present untracked FAILs
+PASS: ship staging -- the same file staged for THIS ship satisfies the gate
+PASS: ship staging -- committing does not change the answer staging gave
+PASS: ship staging -- removing it from the index brings the FAIL back
+PASS: release freshness -- post-metadata binding gate rejects stale locale badges
+PASS: release freshness -- failed post-metadata gate creates no commit or tag
+PASS: release freshness -- rollback removes only staging introduced by this ship
+PASS: release freshness -- duplicate locale badge fails the ship gate
+PASS: release freshness -- missing locale badge fails the ship gate
+PASS: release freshness -- stale staged badge cannot hide behind clean working bytes
+PASS: release freshness -- final binding scope and cached diff are exact
+PASS: release freshness -- version-only mirror update leaves source digests unchanged
+PASS: release executor -- 1. ship and push dry-run plans are structurally identical
+PASS: release executor -- 2a. dry-run reports writes=none
+PASS: release executor -- 2b. dry-run does not change index/staged set
+PASS: release executor -- 2c. dry-run creates no new commits
+PASS: release executor -- 2d. dry-run creates no tags
+PASS: release executor -- 2e. dry-run creates no git objects
+PASS: release executor -- 2f. dry-run does not change refs
+PASS: release executor -- 3a. first publish refuses with FIRST_PUBLISH_WAIT
+PASS: release executor -- 3a-code
+PASS: release executor -- 3b. first-publish does not create commits
+PASS: release executor -- 3c. first-publish does not create tags
+PASS: release executor -- 3d. canonical WAIT persisted in STATE
+PASS: release executor -- 3e. phase stays SHIP during the WAIT
+PASS: release executor -- 3f. confirmation is canonical evidence
+PASS: release executor -- 3g. confirmation recorded in STATE
+PASS: release executor -- 4b. no-publish does not create a local commit
+PASS: release executor -- 4c. no-publish does not stage anything
+PASS: release executor -- 4d. no-publish creates no tags
+PASS: release executor -- 4e. no-publish remote refs unchanged
+PASS: release executor -- 4i. digest updated
+PASS: release executor -- 5a. foreign pre-existing staging is refused
+PASS: release executor -- 5b. foreign staging is preserved after refusal
+PASS: release executor -- 6. release from an unproven DONE state is refused
+PASS: release executor -- 6-code. refusal names the phase/evidence problem
+PASS: release executor -- 7a. commit rejection is a closed refusal
+warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/improve/imp-sweep/MANIFEST.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/improve/imp-sweep/MANIFEST.md', LF will be replaced by CRLF the next time Git touches it
+PASS: release executor -- 7b. failure detail is non-empty (stderr captured)
+PASS: release executor -- 7c. no push happened on commit failure
+PASS: release executor -- 8h. fresh clone succeeded
+PASS: release executor -- 8n. foreign file did not enter the release commits
+PASS: release executor -- 8n. foreign file did not enter the release commits
+PASS: release executor -- 8o. foreign file still in the worktree
+PASS: release executor -- 8s. retry writes nothing
+PASS: release executor -- 9. A after content push: recovery settles
+PASS: release executor -- 9. A after content push: no duplicate commits on recovery
+PASS: release executor -- 9. A after content push: pending ops cleared
+PASS: release executor -- 9. B after closure push: recovery settles
+PASS: release executor -- 9. B after closure push: no duplicate commits on recovery
+PASS: release executor -- 9. B after closure push: pending ops cleared
+PASS: release executor -- 9. C after tag push: recovery settles
+PASS: release executor -- 9. C after tag push: no duplicate commits on recovery
+PASS: release executor -- 9. C after tag push: pending ops cleared
+PASS: release executor -- 9b. closure B pushed, tag absent
+PASS: release executor -- 9b. fresh clone succeeded
+PASS: release executor -- 10a. journal write failure is a public closed refusal
+PASS: release executor -- 10b. no remote stage ran after the receipt failure
+PASS: release executor -- 10c. no tag pushed after the receipt failure
+PASS: release executor -- 11a. index snapshot records the staged deletion
+PASS: release executor -- 11b. staged deletion is restored exactly
+PASS: release executor -- 11c. scope accepts a tracked deletion path
+PASS: release executor -- 12. loose object creation changes the detector
+PASS: release executor -- 13. errors.CODES is non-empty and closed
+PASS: release executor -- 14. scope records a brand-new untracked file
+PASS: release executor -- 14. trap precondition: HEAD == remote tip (clean surface)
+PASS: release executor -- 15. fresh clone LOG graph validates (no dangling E-###)
+PASS: role/source freshness -- matching derived charter+package passes
+PASS: role/source freshness -- charter behavior change without revision edit makes package stale
+PASS: role/source freshness -- role revision is stable across LF and CRLF checkouts
+PASS: role/source freshness -- instance on old derived revision is detected
+PASS: role/source freshness -- tracked dirty source changes fingerprint
+PASS: role/source freshness -- untracked non-ignored source changes fingerprint
+PASS: role/source freshness -- framing separates trees that collide under raw concatenation
+SKIP: role freshness -- this host cannot represent a tracked executable-bit transition in the HEAD-vs-working-tree delta
+PASS: role/source freshness -- symlink hashes target text and never outside-root bytes
+PASS: role/source freshness -- symlink target-text change changes fingerprint
+PASS: role/source freshness -- filename with spaces is fingerprinted
+PASS: role/source freshness -- Unicode filename is fingerprinted
+SKIP: role freshness -- host filesystem cannot hold two case-distinct filenames simultaneously
+PASS: role/source freshness -- nested project inside another git repository uses the no-Git discovery model
+PASS: role/source freshness -- ignored runtime mutation does not change fingerprint
+PASS: role/source freshness -- HEAD movement during computation fails
+PASS: role/source freshness -- tracked .saipen bookkeeping mutation does not change fingerprint
+PASS: role/source freshness -- content race after second sample fails
+PASS: role/source freshness -- tracked source deletion changes fingerprint
+PASS: role/source freshness -- source rename changes fingerprint
+PASS: role/source freshness -- unreadable required input fails computation
+PASS: role/source freshness -- package bound to current source passes
+PASS: role/source freshness -- generic role binds to its governing PROTOCOL digest
+PASS: role/source freshness -- generic role contract change makes package stale
+PASS: role/source freshness -- package produced before final source mutation is stale
+PASS: role/source freshness -- producer noise after package creation stays fresh
+PASS: role/source freshness -- package with old source_head is stale even when delta matches
+PASS: role/source freshness -- Git discovery failure cannot degrade to no-Git
+PASS: role/source freshness -- no-Git runtime names exclude directories, not files
+PASS: role/source freshness -- no-Git fallback uses its explicit runtime exclusions
+SKIP: role freshness -- FIFO probe needs a POSIX host (os.mkfifo unavailable)
+SKIP: role freshness -- host cannot express an executable bit in the no-Git discovery model
+PASS: role/source freshness -- no-Git walk hashes a junction as link identity and never recurses outside the root
+PASS: sub-clean safety -- reviewed history alone permits cleanup
+PASS: sub-clean safety -- bare sub name resolves from project root
+PASS: sub-clean safety -- missing BOARD fails closed
+PASS: sub-clean safety -- malformed BOARD fails closed
+PASS: sub-clean safety -- section-checkbox mismatch fails closed
+PASS: sub-clean safety -- indented BOARD ticket fails closed
+PASS: sub-clean safety -- missing OUTBOX fails closed
+PASS: sub-clean safety -- nonempty unparseable OUTBOX fails closed
+PASS: sub-clean safety -- OUTBOX entry without status fails closed
+PASS: sub-clean safety -- commented or fenced status cannot authorize cleanup
+PASS: sub-clean safety -- indented-code status cannot authorize cleanup
+PASS: sub-clean safety -- malformed mixed-case entry heading fails closed
+PASS: sub-clean safety -- unclosed OUTBOX comment fails closed
+PASS: sub-clean safety -- unclosed long OUTBOX fence fails closed
+PASS: sub-clean safety -- scenario 22 ready-unreviewed OUTBOX blocks cleanup
+PASS: sub-clean safety -- scenario 23 elapsed time alone cannot delete or block
+PASS: sub-clean safety -- scenario 24 repeated collects do not make history stale
+PASS: sub-clean safety -- open TODO blocks cleanup
+PASS: sub-clean safety -- nested OUTBOX is an artifact, not the root exemption
+PASS: sub-clean safety -- unacknowledged patch blocks cleanup
+PASS: sub-clean safety -- unpreserved recovery evidence blocks cleanup
+PASS: sub-clean safety -- byte-preserved recovery evidence permits cleanup
+PASS: sub-clean safety -- symlink recovery evidence is rejected even when its target content matches preserved bytes
+PASS: sub-clean safety -- directory symlink under recovery is never recursed
+PASS: sub-clean safety -- a recovery dir that is itself a symlink is rejected
+PASS: sub-clean safety -- directory junction is never recursed and is rejected
+PASS: hardening control 01 -- bare-cc-starts-converge -> tools/audit_checks.py
+PASS: hardening control 02 -- cc-resumes-goal -> tools/audit_checks.py
+PASS: hardening control 03 -- cc-never-creates-goal-text -> tools/audit_checks.py
+PASS: hardening control 04 -- cc-with-text-not-goal -> tools/audit_checks.py
+PASS: hardening control 05 -- gg-creates-goal -> tools/audit_checks.py
+PASS: hardening control 06 -- bare-gg-not-continuation -> tools/audit_checks.py
+PASS: hardening control 07 -- converge-clean-HUNT-not-ADD -> tools/run_scenarios.py
+PASS: hardening control 08 -- normal-may-ADD -> tools/run_scenarios.py
+PASS: hardening control 09 -- cc-cannot-reach-factories-with-TODO -> tools/validate.py
+PASS: hardening control 10 -- failing-tests-block-factories -> tools/validate.py
+PASS: hardening control 11 -- HUNT-finding-blocks-factories -> tools/validate.py
+PASS: hardening control 12 -- CLEAN-mutation-forces-tests-HUNT -> tools/validate.py
+PASS: hardening control 13 -- final-HUNT-finding-returns-to-core -> tools/validate.py
+PASS: hardening control 14 -- EE-before-QQ -> tools/audit_checks.py
+PASS: hardening control 15 -- package-before-final-mutation-stale -> tools/run_scenarios.py
+PASS: hardening control 16 -- same-HEAD-dirty-tree-stale -> tools/run_scenarios.py
+PASS: hardening control 17 -- role-charter-change-stale -> tools/run_scenarios.py
+PASS: hardening control 18 -- sync-never-overwrites-live-state -> tools/audit_checks.py
+PASS: hardening control 19 -- old-role-revision-detected -> tools/run_scenarios.py
+PASS: hardening control 20 -- producer-not-auto-collected -> tools/audit_checks.py
+PASS: hardening control 21 -- fixer-scout-needs-Core-review -> tools/audit_checks.py
+PASS: hardening control 22 -- ready-OUTBOX-blocks-clean -> tools/run_scenarios.py
+PASS: hardening control 23 -- time-alone-cannot-delete -> tools/run_scenarios.py
+PASS: hardening control 24 -- repeated-collects-not-stale -> tools/run_scenarios.py
+PASS: hardening control 25 -- ccc-ships-first -> tools/run_scenarios.py
+PASS: hardening control 26 -- ccc-binds-shipped-HEAD -> tools/run_scenarios.py
+PASS: hardening control 27 -- cc-cold-restart-persists-intent -> tools/validate.py
+PASS: hardening control 28 -- valve-resume-preserves-objective -> tools/run_scenarios.py
+PASS: hardening control 29 -- hh-forces-real-HUNT -> tools/validate.py
+PASS: hardening control 30 -- old-cc-goal-fails -> tools/audit_checks.py
+hardening_controls.json is platform-independent data: every owner is a repository-relative file path and every anchor is plain text with no platform branch
+PASS: userperson -- distinct preferences sharing a leading phrase are both kept
+PASS: userperson -- helper never fabricates semantic equivalence between wordings
+PASS: userperson -- exact duplicate (same category, same text) is deduplicated
+PASS: userperson -- render/parse round-trips
+PASS: userperson -- validate accepts a well-formed profile
+PASS: userperson -- validate flags a non-bullet line
+PASS: userperson -- validate flags exact duplicate history
+PASS: userperson -- onboarding asks at most three broad questions
+PASS: userperson -- saiui projection selects UI/workflow preferences only
+PASS: userperson -- saitranslate projection selects localization/language only
+PASS: userperson -- saihunt projection excludes UI baggage unless relevant
+PASS: userperson -- projection never dumps the whole profile
+PASS: userperson -- projection handoff carries the source fingerprint
+PASS: userperson -- CORE.md 1.10 documents both report traces
+PASS: userperson -- CORE.md 1.10 documents the precedence chain
+PASS: improve -- report path lives under project .saipen/improve, never saipen_home
+PASS: improve -- two distinct seats resolve to different report paths
+PASS: improve -- same seat in a different cycle resolves to a different path
+PASS: improve -- requested basename is preserved exactly
+PASS: improve -- a well-formed report validates
+PASS: improve -- a finding without evidence is rejected
+PASS: improve -- a class outside the closed set is rejected
+PASS: improve -- context_available complete over an empty scope is refused
+PASS: improve -- derived status: roster-only is expected
+PASS: improve -- derived status: report draft is draft
+PASS: improve -- derived status: complete without sweep is complete
+PASS: improve -- derived status: partial disposition coverage is never swept
+PASS: improve -- derived status: swept after FULL disposition coverage
+PASS: improve -- derived status: unavailable roster wins
+PASS: improve -- derived status: per-seat availability, not the first field
+PASS: improve -- same IMP-001 in two reports stays independent
+PASS: improve -- SWEEP ledger write never mutates the seat report
+PASS: improve -- SWEEP ledger exists with the disposition
+PASS: improve -- a second cycle with the same id is refused, not duplicated
+PASS: improve -- cycle creation writes the roster atomically
+PASS: improve -- duplicate seat registration fails
+PASS: improve -- a roster availability outside the closed set is rejected
+PASS: improve -- a second run appends an immutable RUN section, never overwriting
+PASS: improve -- multiple RUNs accumulate without overwriting earlier ones
+PASS: improve -- a complete report refuses further RUN sections
+PASS: improve -- register_cycle crash after PREPARE leaves no admitted cycle
+PASS: improve -- recovery after the PREPARE crash leaves no roster-less cycle
+PASS: improve -- a fresh cycle can be admitted after clean recovery
+PASS: improve -- stale Improve plan refuses STALE_STATE (base-hash binding)
+PASS: improve -- retry after stale refusal keeps both seats (A + B)
+PASS: improve -- a second ACTIVE cycle is refused while one is active
+PASS: improve -- complete_report refuses a report with no RUN evidence (DOGFOOD V)
+PASS: improve -- a completed cycle allows the next cycle (no evidence deleted)
+PASS: improve -- historical cycle evidence is not deleted to admit the next
+PASS: improve -- complete_cycle refuses a draft report (completion means something)
+PASS: improve -- register_seat refuses a completed cycle (immutable)
+PASS: improve -- append_run refuses a completed cycle (immutable)
+PASS: improve -- write_sweep_entry refuses a completed cycle (immutable)
+PASS: improve -- sweep writer emits exactly one IMP-001 (never IMP-IMP-001)
+PASS: improve -- writer->parser->derive_status: A swept, B not (same local IMP-001)
+PASS: improve -- cycle-id allocator is deterministic and collision-safe
+PASS: improve -- lifecycle: partial sweep REFUSEs complete_cycle (unswept IMP-002)
+PASS: improve -- lifecycle: full sweep coverage permits complete_cycle
+PASS: improve -- lifecycle: register_seat REFUSEs a completed cycle (immutable)
+PASS: improve -- lifecycle: write_sweep_entry REFUSEs a completed cycle (immutable)
+PASS: improve -- lifecycle: the next cycle is admitted after completion
+PASS: improve -- verifier: malformed SWEEP FAILs the semantic verifier
+PASS: improve -- verifier: the writer's own SWEEP output passes (same grammar)
+PASS: improve -- recovery runs the same target-aware verifier: malformed SWEEP CONFLICTs on recovery, never COMMITTED
+PASS: improve -- improve routing: manifest+sweep edits flip the derived status (complete->swept) with zero STATE writes
+PASS: improve -- improve report: NO_FINDINGS with a stated scope validates
+PASS: improve -- improve report: report_status complete over an unmet completion bar is rejected
+PASS: improve -- improve report: a partial scope cannot claim complete context
+PASS: improve -- sweep: three reports' root cause deduplicates into ONE ticket (red control 11, validator green)
+PASS: improve -- sweep: an unverified finding cannot produce a ticket (red control 10, validator red)
+PASS: improve -- sweep: an INVALID finding must never produce a ticket (red control 12, validator red)
+PASS: improve -- sweep: an unresolvable source_reports ref fails (red control 20, validator red)
+PASS: improve -- sweep: an edited-away original finding loses its disposition (red control 19, validator red)
+PASS: improve -- sweep: a report treated as canonical BOARD state is rejected (red control 22, validator red)
+PASS: improve -- sweep: a PROTOCOL_VIOLATION ticket without recurrence/weak_model fails (red controls 15/16, validator red)
+PASS: improve -- sweep: a PROTOCOL_VIOLATION ticket with both reasoning gates passes
+PASS: improve -- sweep: an ACCIDENTAL_SUCCESS result recorded as PASS fails (red control 5, validator red)
+PASS: improve -- sweep: deleting SWEEP.md breaks archived-report ticket provenance (red control 24, validator red)
+PASS: improve -- sweep: partial/timed-out evidence cannot mark an IMP fixed (red control 25, validator red)
+PASS: improve -- improve roster: same basename in distinct seat homes is valid
+PASS: improve -- sweep: confidence: proven does not override Core's verification requirement (red control 14, validator red)
+PASS: improve -- sweep: a report auditing a stale head fails (reload-before-audit, red controls 1/2, validator red)
+PASS: improve -- sweep: a report audited against the current head passes the reload check (no false positive)
+PASS: improve -- saipen improve status executes and derives per-seat status
+PASS: improve -- saipen improve status is read-only (zero STATE writes)
+PASS: improve -- saipen improve clean refuses an ACTIVE cycle (archive needs complete)
+PASS: improve -- saipen improve sweep writes a disposition through the journal
+PASS: improve -- saipen improve verify executes the delta-only verifier on a fully-swept cycle
+PASS: improve -- bare saipen improve prepares the audit assignment (not status)
+PASS: improve -- bare Improve assignment emits SAICRITIC's exact ordered proof set
+PASS: improve -- CLI-prepared report derives its protocol fingerprint from owned protocol evidence
+PASS: improve -- CLI-prepared report never carries a guessed model constant
+PASS: improve -- CLI-prepared report begins context as partial, not complete
+PASS: improve -- editing a protocol document changes the derived fingerprint
+PASS: improve -- strict provenance refuses fabricated protocol fingerprint
+PASS: improve -- strict provenance refuses blank required scalar
+PASS: improve -- strict provenance refuses agent != seat
+PASS: improve -- strict provenance refuses unknown header field
+PASS: improve -- strict provenance refuses control injection in runtime
+PASS: improve -- foreign project VERSION can never become saipen_version
+PASS: improve -- installed flattened layout exposes canonical SAICRITIC proof set
+PASS: improve -- missing installed SAICRITIC proof owner refuses before assignment
+PASS: improve -- explicit improve prepare is not a hidden public action
+PASS: improve -- bare saipen improve never changes phase/task (audit prep is read-only for STATE)
+PASS: improve -- Improve admission journals roster and report as one operation
+PASS: improve -- admission crash between roster/report rolls forward both targets
+PASS: improve -- bare/new-seat allocates an independent seat in the active cycle
+PASS: improve -- explicit session retry resumes idempotently without rewriting
+PASS: improve -- explicit session retry refuses role drift
+PASS: improve -- Improve role vocabulary is closed to core and critic
+PASS: improve -- status derives independent same-basename seats by seat identity
+PASS: improve -- status rejects roster/report role mismatch
+PASS: improve -- missing report under a registered seat REFUSEs SEAT_EVIDENCE_MISSING
+PASS: improve -- missing report causes zero writes and no new provenance
+PASS: improve -- COMPLETE report cannot resume (SEAT_COMPLETE, resumed false)
+PASS: improve -- COMPLETE report yields an executable stable instruction
+PASS: improve -- unavailable roster seat cannot revive (SEAT_UNAVAILABLE, zero writes)
+PASS: improve -- malformed registered report refuses INVALID_REPORT, never replaced by prepare
+PASS: improve -- an unexpected report_status (bogus) refuses INVALID_REPORT -- only an exact draft resumes
+PASS: improve -- a draft missing required provenance refuses INVALID_REPORT (validate_report gates the resume)
+PASS: improve -- an undecodable report refuses INVALID_REPORT without a traceback
+PASS: improve -- a runless complete skeleton refuses INVALID_REPORT, never SEAT_COMPLETE
+PASS: improve -- a report repeating a required header field refuses INVALID_REPORT
+PASS: improve -- a prose line mentioning report_status does not false-reject a draft resume (header-anchored count)
+PASS: improve -- same-basename disposition is isolated by exact seat/report key
+PASS: improve -- status derivation refuses ambiguous basename without seat_id
+PASS: improve -- ambiguous legacy report basename refuses disposition
+PASS: improve -- sweep queue keeps unswept same-basename seat addressable
+PASS: improve -- late duplicate-basename admission preserves legacy provenance
+PASS: improve -- A1: stale DRAFT resume refuses STALE_REPORT with zero writes
+PASS: improve -- A1: restoring the source restores the DRAFT resume
+PASS: improve -- A2: admission on an invalid active manifest refuses INVALID_MANIFEST with zero new mutation
+PASS: improve -- A2: register_seat refuses an invalid active manifest
+PASS: improve -- A3: a duplicated strict seat role field refuses INVALID_MANIFEST (exactly-once, no first/last-value ambiguity)
+PASS: improve -- A3: availability bogus can never resume as ALREADY_ASSIGNED
+PASS: improve -- A4: a strict report with unique contiguous RUNs validates
+PASS: improve -- A4: duplicate RUN 1 rejects (repeated section number)
+PASS: improve -- A4: RUN 1 then RUN 3 rejects (not contiguous 1..N)
+PASS: improve -- A4: RUN 2 as the first run rejects (not contiguous 1..N)
+PASS: improve -- A4: swapped/decreasing RUN numbers reject (not ascending)
+PASS: improve -- A4: duplicate IMP-001 inside one RUN rejects before any dedup
+PASS: improve -- A4: malformed IMP width (IMP-1) rejects canonical IMP-NNN
+PASS: improve -- A4: the same IMP-001 in two DIFFERENT RUNs stays distinct
+PASS: improve -- A4 + T-638/�2: a duplicate composite identity is refused at append with ZERO writes (never enters a report that could be swept)
+PASS: improve -- A5: a strict report missing discovery_model refuses INVALID_REPORT (writer/spec/validator field parity)
+PASS: improve -- A5: a legacy (non-strict) report may omit discovery_model (deliberate legacy boundary only where history needs it)
+PASS: improve -- A5: a duplicated discovery_model in a strict report rejects
+PASS: improve -- A4: a SWEEP ledger repeating one composite identity rejects (one disposition per composite finding identity)
+PASS: improve -- A2: create_report refuses an invalid active manifest (no first-value roster interpretation)
+PASS: improve -- simultaneous admissions lose no seat and allocate no duplicate
+PASS: improve -- live Improve contention returns structured WRITER_BUSY
+PASS: improve -- public Improve boundary never normalizes programming errors
+PASS: improve -- saipen improve verify validates the complete cycle output and does not recurse into a new cycle
+PASS: improve -- improve verify rejects a report containing only report_status: complete (false PASS closed)
+PASS: improve -- submit with a valid string run_text appends a RUN
+PASS: improve -- submit refuses a array findings payload without traceback
+PASS: improve -- submit refuses a scalar findings payload without traceback
+PASS: improve -- submit refuses a null findings payload without traceback
+PASS: improve -- submit refuses a string findings payload without traceback
+PASS: improve -- submit refuses a run_text non-string findings payload without traceback
+PASS: improve -- submit refuses a empty run_text findings payload without traceback
+PASS: improve -- submit refuses a whitespace run_text findings payload without traceback
+PASS: improve -- submit refuses a missing run_text findings payload without traceback
+PASS: improve -- submit rejects an unsupported surplus argument
+PASS: improve -- RUN-1/IMP-001 disposition never covers RUN-2/IMP-001 (composite identity)
+PASS: improve -- high-level sweep enumerates the exact unswept composite finding
+PASS: improve -- strict manifest carries cycle_id/created_at/project_identity exactly once and round-trips the validator
+PASS: improve -- a fabricated friendly fingerprint fails the strict-cycle validator (DOGFOOD V)
+PASS: improve -- sweep authorization: nonexistent run refuses
+PASS: improve -- sweep authorization: nonexistent finding refuses
+PASS: improve -- sweep authorization: CONFIRMED nonexistent ticket cannot COMMIT
+PASS: improve -- sweep authorization: INVALID never authorizes a ticket
+PASS: improve -- source_reports resolves an EXACT composite ref (validator green)
+PASS: improve -- an unrelated cycle's IMP-001 cannot satisfy ticket provenance (validator red)
+PASS: improve -- a bare IMP ref can never launder a strict-cycle finding (validator red)
+PASS: improve -- SweepRecord writer/parser round-trip preserves exact identity
+PASS: improve -- append after completion refuses via the PARSER, not substring (an evidence mention of the phrase does not freeze a draft)
+PASS: improve -- an empty strict run without NO_FINDINGS cannot complete
+PASS: improve -- an explicit NO_FINDINGS run completes as intentional evidence
+PASS: improve -- NO_FINDINGS report passes strict report validation
+PASS: improve -- source freshness: verify refuses a fully-swept but STALE strict cycle (SAICRITIC #4)
+PASS: improve -- source freshness: write_sweep_entry refuses CONFIRMED on stale evidence (SAICRITIC #4)
+PASS: improve -- status depth: a fabricated fingerprint is INVALID_REPORT, never swept (SAICRITIC #4)
+PASS: improve -- abort: an incomplete report is genuinely stuck (cannot complete)
+PASS: improve -- abort: the stuck cycle aborts mechanically, reports byte-preserved at the same path, no .discarded split state
+PASS: improve -- abort: a new cycle is admitted after the abort
+PASS: improve -- IMPROVE.md documents same-path abort preservation, never .discarded
+PASS: improve -- invalid-manifest abort refuses with ZERO writes
+PASS: improve -- invalid-manifest complete refuses with ZERO writes
+PASS: improve -- invalid-manifest archive refuses with ZERO writes
+PASS: improve -- append_run on a malformed strict report refuses with ZERO writes
+PASS: improve -- restored valid manifest + report still validate
+PASS: improve -- create_cycle invalid created_at refuses with ZERO writes (no manifest, no directory)
+PASS: improve -- create_cycle non-portable project_identity refuses with ZERO writes
+PASS: improve -- write_sweep_entry on a malformed SWEEP ledger refuses with ZERO writes
+PASS: improve -- write_sweep_entry on a malformed COMPLETE report refuses with ZERO writes
+PASS: improve -- archive of a corrupted COMPLETE cycle refuses with ZERO writes
+PASS: improve -- abort failure before first target: no split state -- manifest still active, report byte-identical, no .discarded
+PASS: improve -- abort crash after manifest write leaves one pending op
+PASS: improve -- abort crash recovery rolls forward: manifest archived, report byte-identical at same path, no split state
+PASS: improve -- abort retry after recovery refuses (cycle no longer active) with evidence untouched
+PASS: improve -- abort recovery over an external conflicting manifest edit refuses CONFLICT and never touches report bytes
+PASS: nitro -- frontmatter parses the canonical STATE
+PASS: nitro -- board parser finds every canonical section
+PASS: nitro -- board parser enforces at-most-one claimed ticket with / checkbox
+PASS: nitro -- log parser reads event, parent, ticket, taxonomy
+PASS: nitro -- log parser rejects a non-event line
+PASS: nitro -- snapshot carries hashes, log tail and head
+PASS: nitro -- snapshot is not stale against the unchanged project
+PASS: nitro -- snapshot detects a changed board precondition
+PASS: nitro -- snapshot is fresh again after restoring the board
+PASS: nitro -- saipen status is read-only and reports the phase
+PASS: nitro -- saipen next --json returns the action deterministically
+PASS: nitro-m2 -- crash before LOG leaves canonical state unchanged
+PASS: nitro-m2 -- PREPARED recovery aborts safely
+PASS: nitro-m2 -- crash after LOG leaves the LOG event and nothing else
+PASS: nitro-m2 -- recovery rolls BOARD+STATE forward after LOG
+PASS: nitro-m2 -- repeated recovery is idempotent (ALREADY_APPLIED)
+PASS: nitro-m2 -- the LOG event was not duplicated by recovery
+PASS: nitro-m2 -- crash after BOARD leaves STATE unbuilt
+PASS: nitro-m2 -- recovery rolls STATE forward after BOARD
+PASS: nitro-m2 -- crash after STATE leaves the full mutation written
+PASS: nitro-m2 -- recovery after STATE validates and commits
+PASS: nitro-m2 -- the crash-after-STATE op was not double-written by recovery
+PASS: nitro-m2 -- a committed op's retry returns ALREADY_APPLIED
+PASS: nitro-m2 -- no duplicate LOG event from a retried committed op
+PASS: nitro-m2 -- recovery CONFLICTs on externally modified pending target
+PASS: nitro-m2 -- conflict preserves the journal for evidence
+PASS: nitro-m2 -- a second live writer is refused (WRITER_BUSY)
+PASS: nitro-m2 -- the lock releases and re-acquires cleanly
+PASS: nitro-m3 -- plan_claim returns a dry-run plan with no refusal
+PASS: nitro-m3 -- plan writes zero canonical bytes
+PASS: nitro-m3 -- apply_claim commits the claim
+PASS: nitro-m3 -- claim moves exactly one ticket to DOING with / checkbox
+PASS: nitro-m3 -- claim sets STATE to SCOUT/T-777 with a new event
+PASS: nitro-m3 -- claim appends exactly one LOG event with a real taxonomy
+PASS: nitro-m3 -- a same-agent re-claim refreshes the lease in place (no duplicate)
+PASS: nitro-m3 -- a live foreign claim cannot be taken over (TICKET_NOT_WORKABLE)
+PASS: nitro-m3 -- an illegal transition is refused with ILLEGAL_TRANSITION
+PASS: nitro-m3 -- transition dry-run writes zero canonical bytes
+PASS: nitro-m3 -- SCOUT->BUILD transition commits with a new event
+PASS: nitro-m3 -- checkpoint appends exactly one event with an allocated E-ID
+PASS: nitro-m3 -- checkpoint bumps STATE last_event to the new event
+PASS: nitro-m3 -- next_ticket_id ignores prose T-NNN mentions (structured-only)
+PASS: nitro-m3 -- next_ticket_id ignores LOG prose T-NNN mentions
+PASS: nitro-m3 -- ticket_add creates a canonical ticket
+PASS: nitro-m3 -- done on a TODO ticket is refused (IL_LEGAL_TICKET_LIFECYCLE)
+PASS: nitro-m3 -- refused done writes zero canonical bytes
+PASS: nitro-m3 -- done on the active DOING ticket succeeds and moves it to DONE
+PASS: nitro-m3 -- claim of the topmost workable ticket succeeds
+PASS: nitro-m3 -- legal DOING->DONE lifecycle succeeds
+PASS: nitro-m3 -- reauthorize_valve refuses a valve that has not tripped
+PASS: nitro-m3 -- set_goal_intent pivots to goal with counters from 0
+PASS: nitro-m3 -- set_goal_intent preserves phase/task (not a claim)
+PASS: nitro-m3 -- stop_checkpoint writes a resumable next_action
+PASS: nitro-integrity -- every shipped saipen_engine module imports in isolation
+PASS: nitro-integrity -- checkpoint preserves phase (no SCOUT rewrite)
+PASS: nitro-integrity -- checkpoint preserves task
+PASS: nitro-integrity -- checkpoint preserves next_action
+PASS: nitro-integrity -- ticket_add preserves execution phase
+PASS: nitro-integrity -- plan_claim dry-run writes zero canonical bytes
+PASS: nitro-integrity -- checkpoint dry-run writes zero bytes
+PASS: nitro-integrity -- normal claim of a non-top workable ticket refuses (NOT_TOP_WORKABLE)
+PASS: nitro-integrity -- claim of the topmost workable ticket succeeds
+PASS: nitro-integrity -- normal claim refuses a TODO ticket carrying blocker
+PASS: nitro-integrity -- explicit claim cannot override blocker authorization
+PASS: nitro-integrity -- refused normal and explicit blocker claims write zero bytes
+PASS: nitro-integrity -- router skips malformed TODO+blocker and never emits SCOUT for it
+PASS: nitro-integrity -- public status excludes TODO+blocker from top_workable
+PASS: nitro-integrity -- public next never emits SCOUT for TODO+blocker
+PASS: nitro-integrity -- satisfied prerequisites never activate a human-decision blocker
+PASS: nitro-integrity -- mutation ignoring blocker makes Pick Rule route forbidden ticket
+PASS: nitro-integrity -- transition with a nonexistent ticket refuses
+PASS: nitro-integrity -- transition with a non-active ticket refuses (ACTIVE_TICKET_MISMATCH)
+PASS: nitro-integrity -- transition binds the exact active DOING ticket
+PASS: nitro-integrity -- block of an active DOING ticket succeeds
+PASS: nitro-integrity -- block of the active ticket never parks the session in a session-level BLOCKED state
+PASS: nitro-integrity -- block routes the next_action to the remaining workable TODO
+PASS: nitro-integrity -- unblock without the lifting decision/evidence refuses
+PASS: nitro-integrity -- unblock atomically creates TODO without active blocker/history
+PASS: nitro-integrity -- claim refuses a board the parser cannot read whole
+PASS: nitro-integrity -- router routes malformed board to inspection, never a ticket
+PASS: nitro-integrity -- ticket add escapes description pipes instead of injecting fields
+PASS: nitro-integrity -- verify text with pipe delimiters cannot inject claim fields
+PASS: nitro-integrity -- blocker payload with pipe delimiters cannot inject a verify field
+PASS: nitro-integrity -- WRITER_BUSY is a structured refusal
+PASS: nitro-integrity -- plan op_id == journal op_id (apply consumed the plan)
+PASS: nitro-integrity -- applied journal is COMMITTED
+PASS: nitro-integrity -- recovery on an externally modified pending target CONFLICTs
+PASS: nitro-integrity -- recovery refuses corrupt staged bytes (CONFLICT, not COMMIT)
+PASS: nitro-integrity -- status derives recovery_pending from real journals
+PASS: nitro-integrity -- recovery preflight recovers the single pending op first
+PASS: nitro-integrity -- a new mutation over no pending op succeeds
+PASS: nitro-integrity -- UTF-8 LF representation preserved
+PASS: nitro-integrity -- UTF-8 CRLF representation preserved by a real operation
+PASS: nitro-integrity -- UTF-8 BOM board refused before any write (zero canonical writes)
+PASS: nitro-integrity -- improve cycle_id traversal is refused
+PASS: nitro-integrity -- only one active Improve cycle is admitted
+PASS: nitro-integrity -- SWEEP disposition enum is enforced at the writer
+PASS: nitro-integrity -- checkpoint event carries [parent: E-<prev>]
+PASS: nitro-integrity -- checkpoint preserves unrelated fields (intent/counters/mode)
+PASS: nitro-integrity -- goal intent from DONE/none does not create SCOUT/none
+PASS: nitro-integrity -- checkpoint after a seal continues from the newest sealed event (E-903, not the oldest segment's E-901)
+PASS: nitro-integrity -- stale apply returns failure, never semantic success
+PASS: nitro-integrity -- every journal target carries before_hash and after_hash
+PASS: nitro-integrity -- proposed-state invalidity refuses before any journal PREPARED
+PASS: nitro-integrity -- UTF-16LE BOM board refused before any write (zero canonical writes)
+PASS: nitro-integrity -- one-file journal uses generic truthful stage, never LOG_WRITTEN
+PASS: nitro-integrity -- seat_id newline injection is refused
+PASS: nitro-integrity -- report_path traversal is refused
+PASS: nitro-integrity -- append_run returns a committed transaction result
+PASS: nitro-integrity -- Improve writer refuses a complete report and propagates
+PASS: nitro-integrity -- SAIOPS structural event carries [op: ...] provenance
+PASS: nitro-integrity -- manual structural event lacks provenance (detectable)
+PASS: nitro-integrity -- a committed op retried returns ALREADY_APPLIED, no second write
+PASS: nitro-integrity -- saipen recover --json returns structured JSON
+PASS: nitro-integrity -- saipen userperson add writes through the journal (COMMITTED)
+PASS: nitro-integrity -- userperson add keeps distinct preferences sharing a leading phrase
+PASS: nitro-integrity -- userperson reset without confirmation REFUSEs
+PASS: nitro-integrity -- userperson reset with confirmation DELETES the profile
+PASS: nitro-integrity -- sub spawn creates a journaled instance (SPAWNED)
+PASS: nitro-integrity -- spawned sub has its own agent + real updated timestamp
+PASS: nitro-integrity -- sub spawn refuses an existing instance, never overwrites
+PASS: nitro-integrity -- sub list reports the spawned instance
+PASS: nitro-integrity -- sub pause is a journaled owned-field BLOCKED patch
+PASS: nitro-integrity -- sub pause leaves a trace in the sub LOG
+PASS: nitro-integrity -- sub resume restores the prior phase and next_action
+PASS: nitro-integrity -- sub resume leaves a trace in the sub LOG
+PASS: nitro-integrity -- resume of a non-paused sub refuses (no fake success)
+PASS: nitro-integrity -- sub clean preflight refuses a fresh instance with evidence
+PASS: nitro-integrity -- sub clean preflight refuses a nonexistent instance
+PASS: nitro-integrity -- sub clean preflight never mutates the instance
+PASS: nitro-integrity -- sub collect reports an empty eligible OUTBOX without writes
+PASS: nitro-integrity -- sub name '..' is refused (no path escape)
+PASS: nitro-integrity -- sub name '.' is refused (no path escape)
+PASS: nitro-integrity -- sub name '../x' is refused (no path escape)
+PASS: nitro-integrity -- sub name 'x/../y' is refused (no path escape)
+PASS: nitro-integrity -- sub name '..\\x' is refused (no path escape)
+PASS: nitro-integrity -- sub name 'V:\\abs' is refused (no path escape)
+PASS: nitro-integrity -- sub name 'a\nb' is refused (no path escape)
+PASS: nitro-integrity -- sub name 'a\x00b' is refused (no path escape)
+PASS: nitro-integrity -- path-escape attempts write zero bytes outside the owner root
+PASS: nitro-integrity -- first spawn installs PROTOCOL.md
+PASS: nitro-integrity -- first spawn installs TEMPLATE/
+PASS: nitro-integrity -- first spawn installs built-in sai*.md charters
+PASS: nitro-integrity -- first spawn does NOT bootstrap on a second instance
+PASS: nitro-integrity -- complete ready OUTBOX package with a verifiable role passes collect
+PASS: nitro-integrity -- ready OUTBOX missing source_head refuses (MALFORMED_PACKAGE)
+PASS: nitro-integrity -- ready OUTBOX missing source_tree_fingerprint refuses (MALFORMED_PACKAGE)
+PASS: nitro-integrity -- ready OUTBOX missing role_revision refuses (MALFORMED_PACKAGE)
+PASS: nitro-integrity -- ready OUTBOX with a superseded role revision refuses (MALFORMED_PACKAGE, STALE)
+PASS: nitro-integrity -- ready OUTBOX with an unverifiable role revision refuses (PACKAGE_INCOMPLETE)
+PASS: nitro-integrity -- malformed nonempty OUTBOX refuses (MALFORMED_PACKAGE)
+PASS: nitro-integrity -- sub collect with no name aggregates all active subs
+PASS: nitro-integrity -- context cold is read-only (zero bytes written)
+PASS: nitro-integrity -- context hot is read-only and names the claimed ticket
+PASS: nitro-integrity -- context audit accounts bytes/tokens per source
+PASS: nitro-integrity -- cold surface bytes are measured as real UTF-8 bytes
+PASS: nitro-integrity -- cold surface token count is modest (token optimization target)
+PASS: nitro-integrity -- context: with a small budget the exact routed ticket (the top workable below the orientation limit) survives in full (description + verify intact)
+PASS: nitro-integrity -- context: routed action + phase doc + recovery state survive a small budget
+PASS: nitro-integrity -- context: the board map is present and truthfully capped
+PASS: nitro-integrity -- context: _board_map omits exactly the right count (+9 more from 12 TODO tickets with cap 2 + protected full T-4)
+PASS: nitro-integrity -- context: bytes == len(surface.encode('utf-8')) and characters == len(surface) exactly (Cyrillic + Japanese)
+PASS: nitro-integrity -- context: multibyte content makes real bytes > characters
+PASS: nitro-integrity -- crash control A: changed unfinished write target CONFLICTs
+PASS: nitro-integrity -- unresolved CONFLICT is listed by pending_ops
+PASS: nitro-integrity -- unresolved CONFLICT is listed by pending_conflicts
+PASS: nitro-integrity -- new mutation over unresolved CONFLICT refuses (RECOVERY_CONFLICT)
+PASS: nitro-integrity -- recovery preflight over a conflict refuses RECOVERY_CONFLICT
+PASS: nitro-integrity -- crash control B: changed read-only dependency CONFLICTs
+PASS: nitro-integrity -- recovered state never COMMITTED over a drifted read dependency
+PASS: nitro-integrity -- new mutation refuses after read-dependency conflict
+PASS: nitro-integrity -- recovered invalid state cannot become COMMITTED (CONFLICT)
+PASS: nitro-integrity -- saipen recover --json refuses a conflict and names the op
+PASS: nitro-integrity -- subprocess crash after LOG leaves an unresolved op
+PASS: nitro-integrity -- crash-then-drifted-read-dep recover CONFLICTs in a real op
+PASS: nitro-integrity -- new mutation refuses after the subprocess-crash conflict
+PASS: nitro-integrity -- route_next on DONE + workable TODO routes to the ticket
+PASS: nitro-integrity -- route_next puts recovery ahead of normal work
+PASS: nitro-integrity -- route_next puts unresolved conflict ahead of everything
+PASS: nitro-integrity -- ticket add with TBD verify REFUSEs INCOMPLETE_TICKET
+PASS: nitro-integrity -- ticket add with a real verify succeeds and never emits TBD
+PASS: nitro-integrity -- userperson add with distilled category projects to saiui
+PASS: nitro-integrity -- cold context names the exact next ticket via the router
+PASS: nitro-integrity -- VERIFY->REVIEW under goal mechanically bumps goal_tickets
+PASS: nitro-integrity -- goal_tickets bump emits the DEC line mechanically
+PASS: nitro-integrity -- HUNT->ADD under goal mechanically bumps goal_waves
+PASS: nitro-integrity -- goal_waves bump emits the DEC line mechanically
+PASS: nitro-integrity -- a committed claim carries no staged bytes (auto-dropped at COMMIT)
+PASS: nitro-integrity -- compaction leaves committed ops staged-free (idempotent)
+PASS: nitro-integrity -- compacted op retried still returns ALREADY_APPLIED
+PASS: nitro-integrity -- a conflict journal is never compacted
+PASS: nitro-integrity -- compaction compacts a RESOLVED journal (settled maintenance op)
+PASS: nitro-integrity -- compaction keeps the full tombstone for a resolved op
+PASS: nitro-integrity -- a PREPARED journal is never compacted (evidence still required)
+PASS: nitro-integrity -- validator FAILs a new TODO ticket with placeholder verify
+PASS: nitro-integrity -- cold context includes the exact next ticket below the 8-ticket truncation boundary
+PASS: nitro-integrity -- public `saipen next` routes DONE+workable to the ticket
+PASS: nitro-integrity -- public `saipen status` exposes computed_next_action
+PASS: nitro-integrity -- public `saipen context hot` includes the computed next
+PASS: nitro-integrity -- public `saipen sub spawn` works through the adapter
+PASS: nitro-integrity -- public sub pause/resume work through the adapter
+PASS: nitro-integrity -- public closure: claim->BUILD->ticket done REFUSEs ILLEGAL_PHASE
+PASS: nitro-integrity -- public closure: the refused done writes zero bytes (ticket stays DOING, phase stays BUILD)
+PASS: nitro-integrity -- public closure: the state stays validator-green after the refusal
+PASS: nitro-integrity -- public `saipen next` pairs action with the routed phase doc
+PASS: nitro-integrity -- closure control A: SHIP->FINISH ends DONE/task none
+PASS: nitro-integrity -- closure control B: no DOING + ticket DONE[x] after finish
+PASS: nitro-integrity -- closure control C: crash during finish leaves an unresolved op
+PASS: nitro-integrity -- closure control C: recovery finishes exactly one ticket
+PASS: nitro-integrity -- closure control E: repeat finish returns ALREADY_APPLIED
+PASS: nitro-integrity -- closure control E: no second completion event
+PASS: nitro-integrity -- closure control F: raw done split is refused (no REVIEW/T-X + BOARD DONE)
+PASS: nitro-integrity -- gate control: finish from SCOUT REFUSEs ILLEGAL_PHASE
+PASS: nitro-integrity -- gate control: finish from SCOUT writes zero canonical bytes
+PASS: nitro-integrity -- gate control: finish from SCOUT leaves phase/task untouched
+PASS: nitro-integrity -- gate control: finish from BUILD REFUSEs ILLEGAL_PHASE
+PASS: nitro-integrity -- gate control: finish from BUILD writes zero canonical bytes
+PASS: nitro-integrity -- gate control: finish from BUILD leaves phase/task untouched
+PASS: nitro-integrity -- gate control: finish from VERIFY REFUSEs ILLEGAL_PHASE
+PASS: nitro-integrity -- gate control: finish from VERIFY writes zero canonical bytes
+PASS: nitro-integrity -- gate control: finish from VERIFY leaves phase/task untouched
+PASS: nitro-integrity -- gate control: finish from REVIEW REFUSEs ILLEGAL_PHASE
+PASS: nitro-integrity -- gate control: finish from REVIEW writes zero canonical bytes
+PASS: nitro-integrity -- gate control: finish from REVIEW leaves phase/task untouched
+PASS: nitro-integrity -- gate control D: full chain SHIP->finish ends FINISHED
+PASS: nitro-integrity -- gate control D: full chain ends validator-green
+PASS: nitro-integrity -- gate-closure red control: pre-boundary history passes, post-boundary non-SHIP finish FAILs the validator
+PASS: nitro-integrity -- mutation red-control: removing the SHIP gate makes the BUILD closure succeed (the refuse controls are NOT vacuous)
+PASS: nitro-integrity -- gate control E: VERIFY->REVIEW bumps goal_tickets (0->1), never at finish
+PASS: nitro-integrity -- valve control: VERIFY->REVIEW trips at the 20-ticket cap
+PASS: nitro-integrity -- valve control: next_action is the exact safety-valve WAIT
+PASS: nitro-integrity -- valve control: the ticket stays DOING behind the valve
+PASS: nitro-integrity -- valve control: finish behind the valve REFUSEs ILLEGAL_PHASE
+PASS: nitro-integrity -- valve control: explicit reauthorization resets the counters
+PASS: nitro-integrity -- valve control: after reauthorization REVIEW->SHIP->FINISH completes
+PASS: nitro-integrity -- router: user brake outranks START (RESTATE_AND_STOP)
+PASS: nitro-integrity -- conflict inspect reports the conflicting location read-only
+PASS: nitro-integrity -- resolution refuses when another unrelated op is unresolved
+PASS: nitro-integrity -- accept_live settles the conflict (RESOLVED)
+PASS: nitro-integrity -- pending_ops clears after resolution
+PASS: nitro-integrity -- a new mutation succeeds after the conflict is resolved
+PASS: nitro-integrity -- replan retires the conflict op (RESOLVED)
+PASS: nitro-integrity -- replan does not touch live canonical bytes
+PASS: manifest tracking -- an untracked manifest file fails
+PASS: manifest tracking -- the same file tracked again passes
+PASS: lint parity -- surface divergence fails the validator
+PASS: lint parity -- ruff version drift fails the validator
+PASS: lint parity -- unpinned CI ruff fails the validator
+PASS: autoinject manifest -- INDEX.md invalidates digest
+PASS: autoinject manifest -- CORE.md invalidates digest
+PASS: autoinject manifest -- traversal source fails closed
+PASS: installed hook under dash -- Bash floor executed
+PASS: installed hook without Bash -- focused nonzero failure
+PASS: installed hook with no ci_status.py present -- skipped silently, commit path unaffected
+PASS: installed hook reports a RED CI status and still exits 0 -- warn-only, as the docs now say
+PASS: installed hook is silent on the healthy path -- no false NOT-VALIDATED line after a passing validator
+PASS: installed hook with no validator reachable -- says NOT VALIDATED out loud and still exits 0
+PASS: ci_status queries completed runs only; in-progress is not a verdict and a completed failure is
+PASS: ci_status --hook fails open and stays silent when the API is unreachable
+PASS: ci_status cache path resolves through git and is writable inside a linked worktree
+PASS: pre-commit gate leaves git status byte-identical (read-only validation)
+PASS: gen-5 guard FAILs a validator that mutates the tree
+PASS: hr-journal -- relative root commits
+PASS: hr-journal -- receipt decodes
+PASS: hr-journal -- malformed op bad refuses VALIDATION_FAILED
+PASS: hr-journal -- malformed agent None refuses VALIDATION_FAILED
+PASS: hr-journal -- malformed opid hostile refuses VALIDATION_FAILED
+PASS: hr-journal -- targets=None refuses
+PASS: hr-journal -- no journal left after refusals
+PASS: hr-journal -- non-JSON metadata refuses VALIDATION_FAILED
+PASS: hr-journal -- no orphan op dir after failed PREPARED
+PASS: hr-journal -- int precondition value refuses
+PASS: hr-journal -- alias targets refuse
+PASS: hr-journal -- target+read same file zero-write refusal
+PASS: hr-journal -- file unchanged
+PASS: hr-journal -- external absolute read legal
+PASS: hr-journal -- decoder rejects alias pair
+PASS: hr-journal -- scan flags CORRUPT
+PASS: hr-journal -- preflight refuses CORRUPT_JOURNAL zero Journal
+PASS: hr-journal -- mutation refused while corrupt evidence present
+PASS: hr-journal -- healthy op commits
+PASS: hr-journal -- first op commits
+PASS: hr-journal -- IDENTITY minted
+PASS: hr-journal -- healthy retry ALREADY_APPLIED
+PASS: hr-journal -- retry with deleted carrier refuses (no ALREADY_APPLIED)
+PASS: hr-journal -- carrier not recreated
+PASS: hr-journal -- file unchanged by refused retry
+PASS: hr-journal -- append base op commits
+PASS: hr-journal -- append uses bounded staged_name
+PASS: hr-release -- owned post-stage sha differs from pre
+PASS: hr-release -- restored byte-identical pre-index
+PASS: hr-release -- no staging left
+PASS: hr-release -- foreign staging refuses
+PASS: hr-release -- foreign y still staged
+PASS: hr-release -- release x still staged too
+PASS: hr-release -- already-pre no-op
+PASS: hr-release -- unowned index refuses
+PASS: hr-release -- lock refusal
+PASS: hr-release -- lock survives byte-for-byte
+PASS: hr-release -- staging intact
+PASS: hr-release -- record restore byte-exact
+PASS: hr-release -- record foreign staging refuses
+PASS: hr-release -- foreign y still staged after record refusal
+PASS: hr-release -- bytes primary even with tree_sha
+PASS: hr-convergence -- valid E-I chain passes
+PASS: hr-convergence -- G without input side fails closed
+PASS: hr-convergence -- non-G resulting-only receipt fails closed
+PASS: hr-convergence -- G resulting mismatch fails
+PASS: hr-state -- contract accepts a fully valid state
+PASS: hr-state -- unknown field refused (additionalProperties false)
+PASS: hr-state -- phase outside the 16-phase enum refused
+PASS: hr-state -- transition_from outside the enum refused
+PASS: hr-state -- mode outside enum refused
+PASS: hr-state -- goal intent without counters refused
+PASS: hr-state -- converge intent without target refused
+PASS: hr-state -- converge intent with goal counters refused
+PASS: hr-state -- non-goal intent with goal counters refused
+PASS: hr-state -- string schema_version refused
+PASS: hr-state -- future schema_version is not an engine error (gate WARNS, bump stays alive)
+PASS: hr-state -- negative goal_waves refused (schema minimum)
+PASS: hr-state -- required field missing refused
+PASS: hr-state -- empty STATE routes bootstrap-only, never an ordinary action
+PASS: hr-state -- plain-UTF-8 project passes post-write verification
+PASS: hr-state -- BOM-carrying STATE refused byte-wise at post-write verification
+PASS: hr-state -- codec reports the BOM file as non-canonical
+PASS: hr-authority -- dangling parent in the ledger refuses even a dry-run PLAN
+PASS: hr-authority -- refused history PLAN wrote nothing
+PASS: hr-authority -- duplicate E-ID refuses with zero writes
+PASS: hr-authority -- a forged non-event line refuses with its file:line
+PASS: hr-authority -- a VALID ledger still checkpoints normally
+PASS: hr-authority -- PLAN built before creating the sealed logs tree
+PASS: hr-authority -- creating the sealed logs tree between PLAN and APPLY is STALE_STATE
+PASS: hr-authority -- creating the sealed logs tree left STATE/BOARD/LOG untouched
+PASS: hr-authority -- PLAN built before adding a second sealed segment
+PASS: hr-authority -- adding a second sealed segment between PLAN and APPLY is STALE_STATE
+PASS: hr-authority -- adding a second sealed segment left STATE/BOARD/LOG untouched
+PASS: hr-authority -- PLAN built before changing sealed segment bytes
+PASS: hr-authority -- changing sealed segment bytes between PLAN and APPLY is STALE_STATE
+PASS: hr-authority -- changing sealed segment bytes left STATE/BOARD/LOG untouched
+PASS: hr-authority -- PLAN built before removing the sealed logs tree
+PASS: hr-authority -- removing the sealed logs tree between PLAN and APPLY is STALE_STATE
+PASS: hr-authority -- removing the sealed logs tree left STATE/BOARD/LOG untouched
+PASS: hr-authority -- the running install answers the schema/protocol questions
+PASS: hr-authority -- a dead absolute pointer is reported dead
+PASS: hr-authority -- an empty/relative pointer stays unverifiable, not dead
+PASS: hr-authority -- the running home is a live pointer
+PASS: hr-authority -- dead home refuses an ordinary checkpoint with HOME_REQUIRED
+PASS: hr-authority -- dead-home refusal wrote nothing
+PASS: hr-authority -- dead home refuses a claim too
+PASS: hr-authority -- rebind-home is the ONE repair and it succeeds
+PASS: hr-authority -- the repaired pointer names the candidate
+PASS: hr-authority -- ordinary mutation resumes after the rebind
+PASS: hr-authority -- a schema-v3 state with the running style token passes
+PASS: hr-authority -- a wrong style_contract fails against the RUNNING install EVEN with a dead pointer (the running install owns STYLE)
+PASS: hr-authority -- a project protocol major newer than the running one refuses
+PASS: hr-authority -- an older/equal protocol major stays readable
+PASS: hr-authority -- stale disk `full` + current read-only routes inspect-only
+PASS: hr-authority -- current full routes real work
+PASS: hr-authority -- an unknown capability fails closed, never as `full`
+PASS: hr-authority -- stale disk `read-only` does NOT suppress a writable session
+PASS: hr-authority -- release publish policy follows the CURRENT capability
+PASS: hr-authority -- current capability 'read-only' cannot authorize a release
+PASS: hr-authority -- current capability 'manual-verify' cannot authorize a release
+PASS: hr-authority -- current capability 'bogus' cannot authorize a release
+PASS: hr-authority -- a read-only session cannot execute a crew action
+PASS: hr-authority -- refused crew action wrote nothing
+PASS: hr-authority -- capability negotiation reads the session, never STATE
+PASS: hr-authority -- capability predicates are closed
+PASS: hr-authority -- an absent ops dir is CLEAN
+PASS: hr-authority -- an EMPTY ops dir is CLEAN
+PASS: hr-authority -- preflight is clean over an empty ops dir
+PASS: hr-authority -- an ops PARENT that is a file is CORRUPT_JOURNAL, never CLEAN
+PASS: hr-authority -- preflight refuses that artifact as CORRUPT_JOURNAL
+PASS: hr-authority -- auto recovery REFUSES corrupt evidence before any replay
+PASS: hr-authority -- a mutation over corrupt evidence refuses
+PASS: hr-authority -- corrupt-evidence refusal wrote nothing
+PASS: hr-authority -- `saipen status` reports CORRUPT_JOURNAL with its detail
+PASS: hr-authority -- `saipen next` reports CORRUPT_JOURNAL with its detail
+PASS: hr-authority -- an undecodable receipt is CORRUPT_JOURNAL with a detail
+PASS: hr-authority -- auto recovery names the corrupt op instead of replaying it
+PASS: hr-authority -- an EXISTING symlinked op dir is CORRUPT_JOURNAL
+PASS: hr-authority -- a DANGLING symlinked op dir is CORRUPT_JOURNAL too
+PASS: hr-authority -- a stale foreign claim can be taken over
+PASS: hr-authority -- the takeover DEC names the predecessor and its stale claim_time
+PASS: hr-authority -- the takeover claim landed on the ticket
+PASS: hr-authority -- an unclaimed adoption succeeds
+PASS: hr-authority -- ordinary adoption invents no predecessor
+PASS: hr-authority -- a LIVE foreign claim still refuses
+PASS: hr-authority -- impossible/noncanonical `updated` '2026-99-99T25:61:61Z' fails Core AND sub
+PASS: hr-authority -- impossible/noncanonical `updated` '2026-08-16 00:00:00Z' fails Core AND sub
+PASS: hr-authority -- impossible/noncanonical `updated` '2026-08-16T00:00:00+03:00' fails Core AND sub
+PASS: hr-authority -- impossible/noncanonical `updated` '2026-08-16T00:00:00+0000' fails Core AND sub
+PASS: hr-authority -- impossible/noncanonical `updated` '2026-08-16T00:00Z' fails Core AND sub
+PASS: hr-authority -- canonical `updated` '2026-08-16T00:00:00Z' is accepted identically
+PASS: hr-authority -- canonical `updated` '2026-08-16T00:00:00+00:00' is accepted identically
+PASS: hr-authority -- canonical `updated` '2026-08-16T00:00:00.250000Z' is accepted identically
+PASS: hr-wait -- REJECTS bare category, no delimiter
+PASS: hr-wait -- REJECTS bare category with trailing spaces
+PASS: hr-wait -- REJECTS no delimiter, prose glued on
+PASS: hr-wait -- REJECTS empty body after the delimiter
+PASS: hr-wait -- REJECTS prefix collision on a real category
+PASS: hr-wait -- REJECTS reversed label/sentence order
+PASS: hr-wait -- REJECTS second sentence in the body
+PASS: hr-wait -- REJECTS second sentence introduced by a backtick
+PASS: hr-wait -- REJECTS category outside the closed seven
+PASS: hr-wait -- REJECTS empty WAIT
+PASS: hr-wait -- REJECTS safety valve with reversed units
+PASS: hr-wait -- REJECTS safety valve with an arbitrary suffix
+PASS: hr-wait -- REJECTS safety valve with an unknown resume command
+PASS: hr-wait -- a MARKHUNT substring inside another category stays that category
+PASS: hr-wait -- REJECTS plain prose carrying the MARKHUNT phrase (not a WAIT)
+PASS: hr-wait -- REJECTS PHASE action carrying 'safety valve' (not a WAIT)
+PASS: hr-wait -- ACCEPTS category 'manual-verify' in a normal context
+PASS: hr-wait -- ACCEPTS category 'destructive-op' in a normal context
+PASS: hr-wait -- ACCEPTS category 'first-publish' in a normal context
+PASS: hr-wait -- ACCEPTS category 'user brake' in a normal context
+PASS: hr-wait -- ACCEPTS category 'blocked' in a normal context
+PASS: hr-wait -- ACCEPTS category 'safety valve' in a normal context
+PASS: hr-wait -- ACCEPTS category 'init' in a normal context
+PASS: hr-wait -- ACCEPTS a mixed-case category
+PASS: hr-wait -- ACCEPTS the � 1.2 progress tag as a trailing suffix
+PASS: hr-wait -- ACCEPTS a body containing a version number (not a sentence break)
+PASS: hr-wait -- ACCEPTS the exact MARKHUNT brake
+PASS: hr-wait -- ACCEPTS the exact safety-valve pause
+PASS: hr-wait -- safety-valve resume key is read from the pause itself
+PASS: hr-wait -- STATE contract refuses a bare WAIT
+PASS: hr-wait -- STATE contract refuses a two-sentence WAIT
+PASS: hr-wait -- STATE contract accepts a legal WAIT
+PASS: hr-wait -- STATE contract accepts the exact safety-valve pause
+PASS: hr-wait -- exactly three DONE-empty brakes are declared
+PASS: hr-wait -- DONE+empty binds the user brake
+PASS: hr-wait -- DONE+empty binds the exact MARKHUNT brake
+PASS: hr-wait -- DONE+empty binds a goal-intent safety valve naming `saipen goal`
+PASS: hr-wait -- DONE+empty binds a converge-intent valve naming `cc`
+PASS: hr-wait -- DONE+empty REFUSES a valve naming the other intent's resume key
+PASS: hr-wait -- DONE+empty does NOT bind 'blocked' (routes to repair)
+PASS: hr-wait -- DONE+empty does NOT bind 'manual-verify' (routes to repair)
+PASS: hr-wait -- DONE+empty does NOT bind 'destructive-op' (routes to repair)
+PASS: hr-wait -- DONE+empty does NOT bind 'first-publish' (routes to repair)
+PASS: hr-wait -- DONE+empty does NOT bind 'init' (routes to repair)
+PASS: hr-wait -- every legal WAIT binds OUTSIDE the DONE+empty context
+PASS: hr-wait -- router restates a DONE+empty user brake
+PASS: hr-wait -- router routes PAST a non-brake WAIT at DONE+empty
+PASS: hr-wait -- router holds a legal WAIT with workable tickets present
+PASS: digest-stale -- no warning before tag is created
+PASS: digest-stale -- warned correctly after tag exists
+PASS: orphan tag -- a published tag whose commit rides no remote branch fails
+PASS: orphan tag -- the same tag passes once its branch has landed
+PASS: ship pick -- a ticket kept in ## DOING through SHIP validates
+PASS: ship pick -- the same ticket closed at REVIEW fails the pick rule
+PASS: active-task recovery -- STATE ahead of BOARD is rejected
+PASS: active-task recovery -- Recovery of case A validates
+PASS: active-task recovery -- repeated Recovery of case A is byte-idempotent
+PASS: active-task recovery -- BOARD ahead of STATE is rejected
+PASS: active-task recovery -- Recovery of case B validates
+PASS: active-task recovery -- repeated Recovery of case B is byte-idempotent
+PASS: t1012-strict -- converge: red-control duplicate converge target makes validator FAIL
+PASS: t1012-strict -- converge: red-control duplicate converge target restored -> converge-target gone
+PASS: t1012-strict -- converge: red-control empty middle token makes validator FAIL
+PASS: t1012-strict -- converge: red-control empty middle token restored -> converge-target gone
+PASS: t1012-strict -- converge: red-control leading delimiter makes validator FAIL
+PASS: t1012-strict -- converge: red-control leading delimiter restored -> converge-target gone
+PASS: t1012-strict -- converge: red-control trailing delimiter makes validator FAIL
+PASS: t1012-strict -- converge: red-control trailing delimiter restored -> converge-target gone
+PASS: t1012-strict -- converge: red-control invalid token syntax (space) makes validator FAIL
+PASS: t1012-strict -- converge: red-control invalid token syntax (space) restored -> converge-target gone
+PASS: t1012-strict -- converge: red-control invalid token syntax (@) makes validator FAIL
+PASS: t1012-strict -- converge: red-control invalid token syntax (@) restored -> converge-target gone
+PASS: t1012-strict -- converge: red-control extra empty between tokens makes validator FAIL
+PASS: t1012-strict -- converge: red-control extra empty between tokens restored -> converge-target gone
+PASS: perf wave regressions (T-1019..T-1022)
+
+37 executable fixture(s) checked, 34 behavioral fixture(s) skipped (README-only by design)
+6 injector(s) executed, 0 skipped for missing interpreters
+56 scheduler behavior(s) executed, 0 skipped for missing interpreters
+7 project-root behavior(s) executed
+12 export ownership behavior(s) executed, 0 skipped for missing interpreters
+6 crew-launch behavior(s) executed, 0 skipped for missing interpreters
+150 saicrew hostile-control behavior(s) executed
+2 digest-stale behavior(s) executed
+2 orphan-tag behavior(s) executed
+2 ship-pick behavior(s) executed
+6 active-task recovery behavior(s) executed
+7 last_event migration behavior(s) executed
+7 log-tail behavior(s) executed
+4 hunt-mark behavior(s) executed
+7 converge-routing behavior(s) executed
+10 ccc commit-identity behavior(s) executed
+14 producer-gate behavior(s) executed
+5 ship-staging behavior(s) executed
+11 release-freshness behavior(s) executed
+96 release-executor behavior(s) executed
+29 role-freshness behavior(s) executed, 5 skipped for missing host capability
+26 sub-clean safety behavior(s) executed, 0 skipped for missing host capability
+30 hardening red control(s) resolved
+17 hostile-regression state-contract behavior(s) executed
+48 hostile-regression WAIT-grammar behavior(s) executed
+16 userperson behavior(s) executed
+188 improve behavior(s) executed
+11 nitro behavior(s) executed
+1 perf-wave regression gate(s) executed (T-1019..T-1022)
+17 nitro-m2 behavior(s) executed
+25 nitro-m3 behavior(s) executed
+190 nitro-integrity behavior(s) executed
+2 pre-commit-purity behavior(s) executed, 0 skipped for missing interpreters
+2 manifest-tracking behavior(s) executed
+3 lint-parity behavior(s) executed
+3 autoinject-manifest behavior(s) executed
+6 installed-hook behavior(s) executed, 0 skipped for missing interpreters
+3 ci-status behavior(s) executed
+27 hostile-regression journal behavior(s) executed
+15 hostile-regression release behavior(s) executed
+4 hostile-regression convergence behavior(s) executed
+
+FAILED: 54 executable check(s) failed
+  - export.ps1 nested cwd: exit 1 without success path: At V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\bootstrap\export.ps1:98 char:64
++ ... ost "FAILED: could not promote temporary archive to $zipPath: $_" -Fo ..
+  - export.ps1 foreign cwd rejected: expected focused failure containing 'owns no .saipen' with no archive
+  - export.ps1 explicit root overrides cwd: exit 1 without success path: At V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\bootstrap\export.ps1:98 char:64
++ ... ost "FAILED: could not promote temporary archive to $zipPath: $_" -Fo ..
+  - export.ps1 empty explicit root rejected: expected focused failure containing 'requires a non-empty path' with no archive
+  - export.ps1 linked worktree uses main owner: exit 1 without success path: At V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\bootstrap\export.ps1:98 char:64
++ ... ost "FAILED: could not promote temporary archive to $zipPath: $_" -Fo ..
+  - export.ps1 external git-dir parent rejected: expected focused failure containing 'owns no .saipen' with no archive
+  - finalizer CAS refuses missing sub-sync ownership receipt: {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "op_id": "finalize_crew-dc7cccccb21844ef8640ca8a42905e25",
+  "changed_files": [],
+  "recovery_required": true,
+  "message": "corrupt journal evidence sub-sync-51335249 blocks new mutation: op directory has no operation.json manifest (interrupted pre-manifest staging?); orphan staged evidence must be resolved explicitly -- resolve the corrupt receipt explicitly before any further canonical write",
+  "op_ids": [
+    "sub-sync-51335249"
+  ]
+}
+  - release freshness pre-metadata core signal is green: saipen conformance validation starting (tools/validate.py)...
+Project root: V:\_TEMP_\saipen-release-freshness-4c_2lofx\home (explicit)
+PASS: state.schema.json and the engine STATE contract constants agree
+PASS: state.schema.json states nothing the validator ignores (4 keywords enforced natively, 5 delegated, 4 types interpreted)
+PASS: STATE.md schema valid (checked against state.schema.json)
+PASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-b512942bac884a8691f6c98afcd6ddb9)
+PASS: subSaipen STATE.md shape valid (7 checked, live + shipped library)
+PASS: .saipen/extensions/subs/MANIFEST.md parses strictly (5 entries)
+PASS: extensions/subs/MANIFEST.md parses strictly (4 entries)
+PASS: BOARD.md has all required section headings
+PASS: BOARD.md no duplicate tickets
+PASS: BOARD.md no dangling needs: references
+PASS: BOARD.md acyclic
+PASS: BOARD.md claimed tickets have their needs: satisfied
+PASS: BOARD.md at most one ## DOING ticket (0 claimed)
+PASS: converge clean-HUNT marker present, next_action avoids ADD
+PASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 14 segment(s))
+FAIL: closure-evidence -- ticket T-1000 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-1001 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-1002 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-1003 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-1004 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-1005 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-549 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-996 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-997 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-998 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-999 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+PASS: improve seat report schema valid (6 report(s) scanned)
+PASS: core sweep linkage valid: every disposition resolves to a real finding/ticket, no unverified or INVALID/ALREADY_FIXED finding produced a ticket, source_reports resolve exactly
+PASS: subsaipen write boundary continuous: no sub artifact targets a main-project canonical file (red control 7)
+PASS: saiui charter integrity verified (references UI.md, no second palette, write ban enforced, fixer contract present, UI- prefix documented, bootstrap includes charters)
+PASS: 6 shipped sai*.md charter(s) declare the full metadata block (8 keys, closed enums)
+PASS: freshness hardening command/cleanup/worker contracts intact
+PASS: T-549 hard barrier blocks the T-551..T-561 improve wave
+PASS: convergence contract intact (13 stages in order, closure bar and post-K ordering rule present)
+PASS: SAIUI SAISENT mission labels findings as hypotheses to verify
+PASS: KNOWLEDGE/ clean
+PASS: README.md badge matches VERSION
+PASS: CONFORMANCE.md row IDs unique + monotonic (255 rows)
+PASS: no stray control characters in shipped text (98 files swept)
+PASS: core docs text lint clean (no U+FFFD/split keywords/fence drift)
+PASS: phase enum <-> phases/ docs in sync (16 phases)
+PASS: INDEX.md phase list matches enum + files (16 phases)
+PASS: CORE / IMPROVE / CLI Improve action sets match exactly
+PASS: runtime manifest complete (153 files, all tracked)
+PASS: adapter cross-references valid (checking saipen/ paths in all 9 adapters)
+PASS: no adapter or injector treats RFC.md as normative (12 checked, RFC stub is redirect-only)
+PASS: 32 locale README badge(s) match VERSION (7.224.4)
+PASS: shortcut callouts aligned across 32 locale sources, 3 mirrors, 33 locale guides, and both root entry docs
+PASS: append targets end on a line boundary (35 checked)
+PASS: lint parity [T-628] -- harness.md and validate.yml agree on `python -m ruff check tools/ tests/` with ruff==0.16.0
+PASS: doc coverage accounted for (326 shipped documents, 18 checked patterns, 22 exempt)
+PASS: warn slug ownership verified for 4 tracked slug(s)
+PASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)
+WARN [no-conformance-record]: no LOG line records a conformance run in § 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so § 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists
+WARN [hunt-mark-unresolvable]: 18 sealed hunt mark(s) name commits this repository does not have or that never reached the remote (earliest .saipen/logs/LOG-001.md:114 @ab71e87). Immutable by append-only; new marks are FAILed instead
+WARN [log-missing-date]: 125 sealed LOG entr(y/ies) predate the mandatory DATE (earliest .saipen/logs/LOG-001.md:3). Immutable by append-only; new entries are FAILed instead
+WARN [producer-package-stale]: .saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md [W-031] carries source_head '7d2bd0eed5676645c2352cbefecb2ff98dbee79f' but current source_head is '4536a585e5ebaa753c86055fe38dfe385044b009' -- package is stale and MUST NOT be collected -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saiwiki` and blocks nothing else
+WARN [producer-package-stale]: .saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md [W-031] carries source_tree_fingerprint 'git-delta-v1:d0daa244b97507286381e4a28e72611e8f2ad68e700fd7da6b81a253e368cdff' but the current tree computes 'git-delta-v1:c66baf69a8306f3b95dfc7badb5f72b088f8de8408e933efadc4d149721a1195' -- the tree changed since the package was produced (same HEAD or not), so it is stale and MUST NOT be collected (PROTOCOL.md § 6, T-543) -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saiwiki` and blocks nothing else
+WARN [producer-package-stale]: ... and 1 more like the above
+WARN [subsaipen-never-ran]: subSaipen spawned but never run: saipython (5 open, 0 done, empty OUTBOX) -- indistinguishable from a working one in MANIFEST.md until someone opens its board
+WARN [subsaipen-uncollected]: 1 subSaipen OUTBOX entr(y/ies) sit at `status: ready` -- that is a finding waiting on `saipen sub collect`, visible only when someone runs it (extensions/subs/PROTOCOL.md § 4)
+WARN [wiki-mirror-stale]: the saiwiki Scenarios page mirrors CONFORMANCE rows 1-254 at digest 687cb0c426e91d58, and those canonical rows now digest to 6d92bc6244aee9be -- a mirrored row's title moved and the page did not follow
+WARN [wiki-mirror-behind]: CONFORMANCE carries 1 row(s) above the page's highest mirrored ID 254 (up to 255), so the wiki is behind by that many invariants. The digest above covers only what the page claims to mirror, which is why this is counted separately instead of hidden inside it
+WARN [changelog-unarchived]: CHANGELOG.md carries 33 version entries while it states it keeps the most recent ~10 -- the overflow belongs in CHANGELOG_ARCHIVE.md, moved verbatim the way LOG segments are sealed, so the top of the file stays the part anyone actually reads
+WARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this
+WARN [release-ledger]: git tag list unavailable or empty -- the release ledger has only its CHANGELOG half, so the phantom-version check is skipped rather than run against incomplete data
+Validation FAILED: 11 problem(s), 13 warning(s)
+  - release freshness binding gate rejects an empty release index: saipen conformance validation starting (tools/validate.py)...
+Project root: V:\_TEMP_\saipen-release-freshness-4c_2lofx\home (explicit)
+PASS: state.schema.json and the engine STATE contract constants agree
+PASS: state.schema.json states nothing the validator ignores (4 keywords enforced natively, 5 delegated, 4 types interpreted)
+PASS: STATE.md schema valid (checked against state.schema.json)
+PASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-b512942bac884a8691f6c98afcd6ddb9)
+PASS: subSaipen STATE.md shape valid (7 checked, live + shipped library)
+PASS: .saipen/extensions/subs/MANIFEST.md parses strictly (5 entries)
+PASS: extensions/subs/MANIFEST.md parses strictly (4 entries)
+PASS: BOARD.md has all required section headings
+PASS: BOARD.md no duplicate tickets
+PASS: BOARD.md no dangling needs: references
+PASS: BOARD.md acyclic
+PASS: BOARD.md claimed tickets have their needs: satisfied
+PASS: BOARD.md at most one ## DOING ticket (0 claimed)
+PASS: converge clean-HUNT marker present, next_action avoids ADD
+PASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 14 segment(s))
+FAIL: closure-evidence -- ticket T-1000 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-1001 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-1002 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-1003 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-1004 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-1005 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-549 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-996 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-997 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-998 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-999 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+PASS: improve seat report schema valid (6 report(s) scanned)
+PASS: core sweep linkage valid: every disposition resolves to a real finding/ticket, no unverified or INVALID/ALREADY_FIXED finding produced a ticket, source_reports resolve exactly
+PASS: subsaipen write boundary continuous: no sub artifact targets a main-project canonical file (red control 7)
+PASS: saiui charter integrity verified (references UI.md, no second palette, write ban enforced, fixer contract present, UI- prefix documented, bootstrap includes charters)
+PASS: 6 shipped sai*.md charter(s) declare the full metadata block (8 keys, closed enums)
+PASS: freshness hardening command/cleanup/worker contracts intact
+PASS: T-549 hard barrier blocks the T-551..T-561 improve wave
+PASS: convergence contract intact (13 stages in order, closure bar and post-K ordering rule present)
+PASS: SAIUI SAISENT mission labels findings as hypotheses to verify
+PASS: KNOWLEDGE/ clean
+PASS: README.md badge matches VERSION
+PASS: CONFORMANCE.md row IDs unique + monotonic (255 rows)
+PASS: no stray control characters in shipped text (98 files swept)
+PASS: core docs text lint clean (no U+FFFD/split keywords/fence drift)
+PASS: phase enum <-> phases/ docs in sync (16 phases)
+PASS: INDEX.md phase list matches enum + files (16 phases)
+PASS: CORE / IMPROVE / CLI Improve action sets match exactly
+PASS: runtime manifest complete (153 files, all tracked)
+PASS: adapter cross-references valid (checking saipen/ paths in all 9 adapters)
+PASS: no adapter or injector treats RFC.md as normative (12 checked, RFC stub is redirect-only)
+PASS: 32 locale README badge(s) match VERSION (7.224.4)
+PASS: shortcut callouts aligned across 32 locale sources, 3 mirrors, 33 locale guides, and both root entry docs
+PASS: append targets end on a line boundary (35 checked)
+PASS: lint parity [T-628] -- harness.md and validate.yml agree on `python -m ruff check tools/ tests/` with ruff==0.16.0
+PASS: doc coverage accounted for (326 shipped documents, 18 checked patterns, 22 exempt)
+PASS: warn slug ownership verified for 4 tracked slug(s)
+PASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)
+WARN [no-conformance-record]: no LOG line records a conformance run in § 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so § 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists
+WARN [hunt-mark-unresolvable]: 18 sealed hunt mark(s) name commits this repository does not have or that never reached the remote (earliest .saipen/logs/LOG-001.md:114 @ab71e87). Immutable by append-only; new marks are FAILed instead
+WARN [log-missing-date]: 125 sealed LOG entr(y/ies) predate the mandatory DATE (earliest .saipen/logs/LOG-001.md:3). Immutable by append-only; new entries are FAILed instead
+WARN [producer-package-stale]: .saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md [W-031] carries source_head '7d2bd0eed5676645c2352cbefecb2ff98dbee79f' but current source_head is '4536a585e5ebaa753c86055fe38dfe385044b009' -- package is stale and MUST NOT be collected -- reported under `--gate ship`, where this producer is not being consumed; it FAILs under `--gate collect:saiwiki` and blocks nothing else
+WARN [producer-package-stale]: .saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md [W-031] carries source_tree_fingerprint 'git-delta-v1:d0daa244b97507286381e4a28e72611e8f2ad68e700fd7da6b81a253e368cdff' but the current tree computes 'git-delta-v1:c66baf69a8306f3b95dfc7badb5f72b088f8de8408e933efadc4d149721a1195' -- the tree changed since the package was produced (same HEAD or not), so it is stale and MUST NOT be collected (PROTOCOL.md § 6, T-543) -- reported under `--gate ship`, where this producer is not being consumed; it FAILs under `--gate collect:saiwiki` and blocks nothing else
+WARN [producer-package-stale]: ... and 1 more like the above
+WARN [subsaipen-never-ran]: subSaipen spawned but never run: saipython (5 open, 0 done, empty OUTBOX) -- indistinguishable from a working one in MANIFEST.md until someone opens its board
+WARN [subsaipen-uncollected]: 1 subSaipen OUTBOX entr(y/ies) sit at `status: ready` -- that is a finding waiting on `saipen sub collect`, visible only when someone runs it (extensions/subs/PROTOCOL.md § 4)
+WARN [wiki-mirror-stale]: the saiwiki Scenarios page mirrors CONFORMANCE rows 1-254 at digest 687cb0c426e91d58, and those canonical rows now digest to 6d92bc6244aee9be -- a mirrored row's title moved and the page did not follow
+WARN [wiki-mirror-behind]: CONFORMANCE carries 1 row(s) above the page's highest mirrored ID 254 (up to 255), so the wiki is behind by that many invariants. The digest above covers only what the page claims to mirror, which is why this is counted separately instead of hidden inside it
+WARN [changelog-unarchived]: CHANGELOG.md carries 33 version entries while it states it keeps the most recent ~10 -- the overflow belongs in CHANGELOG_ARCHIVE.md, moved verbatim the way LOG segments are sealed, so the top of the file stays the part anyone actually reads
+WARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this
+WARN [release-ledger]: git tag list unavailable or empty -- the release ledger has only its CHANGELOG half, so the phantom-version check is skipped rather than run against incomplete data
+Validation FAILED: 11 problem(s), 13 warning(s)
+  - release freshness all mechanically discovered locale mirrors pass: saipen conformance validation starting (tools/validate.py)...
+Project root: V:\_TEMP_\saipen-release-freshness-4c_2lofx\home (explicit)
+PASS: state.schema.json and the engine STATE contract constants agree
+PASS: state.schema.json states nothing the validator ignores (4 keywords enforced natively, 5 delegated, 4 types interpreted)
+PASS: STATE.md schema valid (checked against state.schema.json)
+PASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-b512942bac884a8691f6c98afcd6ddb9)
+PASS: subSaipen STATE.md shape valid (7 checked, live + shipped library)
+PASS: .saipen/extensions/subs/MANIFEST.md parses strictly (5 entries)
+PASS: extensions/subs/MANIFEST.md parses strictly (4 entries)
+PASS: BOARD.md has all required section headings
+PASS: BOARD.md no duplicate tickets
+PASS: BOARD.md no dangling needs: references
+PASS: BOARD.md acyclic
+PASS: BOARD.md claimed tickets have their needs: satisfied
+PASS: BOARD.md at most one ## DOING ticket (0 claimed)
+PASS: converge clean-HUNT marker present, next_action avoids ADD
+PASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 14 segment(s))
+FAIL: closure-evidence -- ticket T-1000 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-1001 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-1002 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-1003 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-1004 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-1005 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-549 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-996 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-997 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-998 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+FAIL: closure-evidence -- ticket T-999 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+PASS: improve seat report schema valid (6 report(s) scanned)
+PASS: core sweep linkage valid: every disposition resolves to a real finding/ticket, no unverified or INVALID/ALREADY_FIXED finding produced a ticket, source_reports resolve exactly
+PASS: subsaipen write boundary continuous: no sub artifact targets a main-project canonical file (red control 7)
+PASS: saiui charter integrity verified (references UI.md, no second palette, write ban enforced, fixer contract present, UI- prefix documented, bootstrap includes charters)
+PASS: 6 shipped sai*.md charter(s) declare the full metadata block (8 keys, closed enums)
+PASS: freshness hardening command/cleanup/worker contracts intact
+PASS: T-549 hard barrier blocks the T-551..T-561 improve wave
+PASS: convergence contract intact (13 stages in order, closure bar and post-K ordering rule present)
+PASS: SAIUI SAISENT mission labels findings as hypotheses to verify
+PASS: KNOWLEDGE/ clean
+PASS: README.md badge matches VERSION
+PASS: CONFORMANCE.md row IDs unique + monotonic (255 rows)
+PASS: no stray control characters in shipped text (98 files swept)
+PASS: core docs text lint clean (no U+FFFD/split keywords/fence drift)
+PASS: phase enum <-> phases/ docs in sync (16 phases)
+PASS: INDEX.md phase list matches enum + files (16 phases)
+PASS: CORE / IMPROVE / CLI Improve action sets match exactly
+PASS: runtime manifest complete (153 files, all tracked)
+PASS: adapter cross-references valid (checking saipen/ paths in all 9 adapters)
+PASS: no adapter or injector treats RFC.md as normative (12 checked, RFC stub is redirect-only)
+PASS: 32 locale README badge(s) match VERSION (7.224.5)
+PASS: shortcut callouts aligned across 32 locale sources, 3 mirrors, 33 locale guides, and both root entry docs
+PASS: append targets end on a line boundary (35 checked)
+PASS: lint parity [T-628] -- harness.md and validate.yml agree on `python -m ruff check tools/ tests/` with ruff==0.16.0
+PASS: doc coverage accounted for (326 shipped documents, 18 checked patterns, 22 exempt)
+PASS: warn slug ownership verified for 4 tracked slug(s)
+PASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)
+WARN [no-conformance-record]: no LOG line records a conformance run in § 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so § 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists
+WARN [hunt-mark-unresolvable]: 18 sealed hunt mark(s) name commits this repository does not have or that never reached the remote (earliest .saipen/logs/LOG-001.md:114 @ab71e87). Immutable by append-only; new marks are FAILed instead
+WARN [log-missing-date]: 125 sealed LOG entr(y/ies) predate the mandatory DATE (earliest .saipen/logs/LOG-001.md:3). Immutable by append-only; new entries are FAILed instead
+WARN [producer-package-stale]: .saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md [W-031] carries source_head '7d2bd0eed5676645c2352cbefecb2ff98dbee79f' but current source_head is '4536a585e5ebaa753c86055fe38dfe385044b009' -- package is stale and MUST NOT be collected -- reported under `--gate ship`, where this producer is not being consumed; it FAILs under `--gate collect:saiwiki` and blocks nothing else
+WARN [producer-package-stale]: .saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md [W-031] carries source_tree_fingerprint 'git-delta-v1:d0daa244b97507286381e4a28e72611e8f2ad68e700fd7da6b81a253e368cdff' but the current tree computes 'git-delta-v1:f1d891bbf5b76d5ecf0c9689409c614ace1fc584ca9dd26760032fab9f708f92' -- the tree changed since the package was produced (same HEAD or not), so it is stale and MUST NOT be collected (PROTOCOL.md § 6, T-543) -- reported under `--gate ship`, where this producer is not being consumed; it FAILs under `--gate collect:saiwiki` and blocks nothing else
+WARN [producer-package-stale]: ... and 2 more like the above
+WARN [subsaipen-never-ran]: subSaipen spawned but never run: saipython (5 open, 0 done, empty OUTBOX) -- indistinguishable from a working one in MANIFEST.md until someone opens its board
+WARN [subsaipen-uncollected]: 1 subSaipen OUTBOX entr(y/ies) sit at `status: ready` -- that is a finding waiting on `saipen sub collect`, visible only when someone runs it (extensions/subs/PROTOCOL.md § 4)
+WARN [wiki-mirror-stale]: the saiwiki Scenarios page mirrors CONFORMANCE rows 1-254 at digest 687cb0c426e91d58, and those canonical rows now digest to 6d92bc6244aee9be -- a mirrored row's title moved and the page did not follow
+WARN [wiki-mirror-behind]: CONFORMANCE carries 1 row(s) above the page's highest mirrored ID 254 (up to 255), so the wiki is behind by that many invariants. The digest above covers only what the page claims to mirror, which is why this is counted separately instead of hidden inside it
+WARN [changelog-unarchived]: CHANGELOG.md carries 33 version entries while it states it keeps the most recent ~10 -- the overflow belongs in CHANGELOG_ARCHIVE.md, moved verbatim the way LOG segments are sealed, so the top of the file stays the part anyone actually reads
+WARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this
+WARN [release-ledger]: git tag list unavailable or empty -- the release ledger has only its CHANGELOG half, so the phantom-version check is skipped rather than run against incomplete data
+Validation FAILED: 11 problem(s), 14 warning(s)
+  - release executor 3h. confirmed first publish proceeds to RELEASED: code=RELEASE_FAILED detail=FAIL: closure-evidence -- ticket T-1000 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-
+  - release executor 3i. tag published after confirmation: tag= tip=
+  - release executor 4a. no-publish returns a truthful success: code=RELEASE_FAILED detail=FAIL: closure-evidence -- ticket T-1000 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE | FAIL: closure-evidence -- ticket T-1001 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE | FAIL: closure-evidence -- ticket T-1002 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-verify with real evidence before DONE
+  - release executor 4f. canonical STATE becomes DONE: ---
+phase: SHIP
+task: T-9000
+next_action: PHASE SHIP T-9000
+blocker: ""
+transition_from: REVIEW
+saipen_version: 7
+schema_version: 3
+last_event: 3354
+style_contr
+  - release executor 4g. ticket becomes DONE: 
+  - release executor 4h. truthful skipped-publish LOG event: []
+  - release executor 4j. git-less no-publish succeeds: code=STALE_PLAN detail=cannot determine the current branch
+  - release executor 4k. git-less no-publish records the true reason: []
+  - release executor 4l. git-less no-publish closes SHIP -> DONE: 
+  - release executor 8a. full release returns RELEASED: ok=False code=RELEASE_FAILED detail=FAIL: closure-evidence -- ticket T-1000 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-
+  - release executor 8b. closure B is a separate non-empty commit after A: A= B=
+  - release executor 8c. remote branch tip == closure commit (non-empty): remote=32d3912f2a3c closure=
+  - release executor 8d. remote tag^{commit} == closure commit (non-empty): remote tag=(none)
+  - release executor 8e. local tag^{commit} == closure commit (non-empty): local tag=v7.224.5^{co closure=
+  - release executor 8f. tag is created AFTER the closure is published: stages=[]
+  - release executor 8g. B.parent == A: B^=^ A=
+  - release executor 8i. fresh clone carries the exact reviewed source change: source change missing in fresh clone
+  - release executor 8j. fresh clone sees STATE DONE / task none: 
+  - release executor 8k. fresh clone sees ticket DONE: 
+  - release executor 8l. fresh clone LOG carries truthful release evidence: release evidence missing in cloned LOG
+  - release executor 8m. scope record reaches the fresh clone: scope record missing in clone
+  - release executor 8p. no owned work remains dirty (only the foreign untracked): status=' M .saipen/LOG.md\n M .saipen/STATE.md\n M .saipen/saitranslate/kitchen/ar/README_AR.md\n M .saipen/saitranslate/kitchen/bg/README_BG.md\n M .saipen/saitranslate/kitchen/cs/README_CS.md\n M .saipen/saitranslate/kitchen/da/README_DA.md\n M .saipen/saitranslate/kitchen/de/README_DE.md\n M .saipen/saitranslate/kitchen/ded/README_DED.md\n M .saipen/saitranslate/kitchen/el/README_EL.md\n M .saipen/saitranslate/kitchen/es/README_ES.md\n M .saipen/saitranslate/kitchen/et/README_ET.md\n M .saipen/saitranslate/kitchen/fi/README_FI.md\n M .saipen/saitranslate/kitchen/fr/README_FR.md\n M .saipen/saitranslate/kitchen/he/README_HE.md\n M .saipen/saitranslate/kitchen/hi/README_HI.md\n M .saipen/saitranslate/kitchen/hr/README_HR.md\n M .saipen/saitranslate/kitchen/hu/README_HU.md\n M .saipen/saitranslate/kitchen/id/README_ID.md\n M .saipen/saitranslate/kitchen/it/README_IT.md\n M .saipen/saitranslate/kitchen/ja/README_JA.md\n M .saipen/saitranslate/kitchen/ko/README_KO.md\n M .saipen/saitranslate/kitchen/nl/README_NL.md\n M .saipen/saitranslate/kitchen/no/README_NO.md\n M .saipen/saitranslate/kitchen/pl/README_PL.md\n M .saipen/saitranslate/kitchen/pt/README_PT.md\n M .saipen/saitranslate/kitchen/ro/README_RO.md\n M .saipen/saitranslate/kitchen/ru/README_RU.md\n M .saipen/saitranslate/kitchen/sk/README_SK.md\n M .saipen/saitranslate/kitchen/sv/README_SV.md\n M .saipen/saitranslate/kitchen/th/README_TH.md\n M .saipen/saitranslate/kitchen/tr/README_TR.md\n M .saipen/saitranslate/kitchen/uk/README_UK.md\n M .saipen/saitranslate/kitchen/vi/README_VI.md\n M .saipen/saitranslate/kitchen/zh/README_ZH.md\n M CHANGELOG.md\n M README.md\n M VERSION\n M tools/saipen_engine/release_contract.py\n?? .saipen/kitchen/release_scope/T-9000.json\n?? tools/foreign_file.py\n'
+  - release executor 8q. scope record is committed (no tracked dirt): scope record untracked
+  - release executor 8r. retry recognizes ALREADY_APPLIED from full evidence: code=RECOVERY_REQUIRED already_applied=None
+  - release executor 9. A after content push: crash injected at the edge: rc=1
+  - release executor 9. A after content push: remote branch reaches closure: tip=79abfac9fd34 tag=(none)
+  - release executor 9. B after closure push: crash injected at the edge: rc=1
+  - release executor 9. B after closure push: remote branch reaches closure: tip=035f6a3c213d tag=(none)
+  - release executor 9. C after tag push: crash injected at the edge: rc=1
+  - release executor 9. C after tag push: remote branch reaches closure: tip=aaa36526fa42 tag=(none)
+  - release executor 9b. crash injected after closure publish: rc=1
+  - release executor 9b. fresh-clone continuation publishes only the missing tag: code=SOURCE_SCOPE_MISSING detail=no release scope recorded for T-9000 -- record the exact reviewed files (`saipen scope T-9000 <path...>`) before shipping
+  - release executor 9b. tag now matches the closure tip (non-empty): tag=(none) tip=dfeaa09b4a59
+  - release executor 11c. deletion-scope release succeeds: code=RELEASE_FAILED detail=FAIL: closure-evidence -- ticket T-1000 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-
+  - release executor 11c. fresh clone lacks the reviewed deletion: clone rc=0 exists=True
+  - release executor 11c. fresh clone still carries the reviewed source change: source change missing
+  - release executor 14. untracked-only release returns RELEASED: code=RELEASE_FAILED detail=FAIL: closure-evidence -- ticket T-1000 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-
+  - release executor 14. a content commit A was created (not skipped): A= parent=148b646946e7
+  - release executor 14. closure B is a child of the content commit: B= A=
+  - release executor 14. fresh clone carries the untracked scope file: clone rc=0
+  - release executor 15. seal-with-release succeeds: code=RELEASE_FAILED detail=FAIL: closure-evidence -- ticket T-1000 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary); an unproven closure is never protocol-green -- re-
+  - release executor 15. fresh clone carries the sealed segment: clone rc=0 seg=False
+  - remove drops the matching preference: ([{'category': 'UI', 'text': 'Vintage Golden', 'id': '95b112968b31'}], None)
+  - resolver race: exactly one process settles the conflict, the loser refuses (WRITER_BUSY or settled-journal refusal): (0, 'CONFLICT', ["{'ok': False, 'code': 'NEEDS_REPAIR', 'detail': 'resolving to current live leaves an invalid repository: STATE proposed malformed: missing transition_from -- required on all non-INIT states to validate phase transitions (RFC � 1.6)', 'conflict_op_id': 'op-race', 'repair_evidence': ['STATE proposed malformed: missing transition_from -- required on all non-INIT states to validate phase transitions (RFC � 1.6)']}\n", "{'ok': False, 'code': 'WRITER_BUSY', 'op_id': 'op-race', 'detail': 'another live writer holds the project lock; retry after it releases'}\n"])
+EXIT=1

@@ -30,10 +30,6 @@ import tempfile
 import zipfile
 from pathlib import Path
 
-# saipen_engine lives beside this tool in the canonical layout; make the
-# import work regardless of the invocation working directory.
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-
 
 def _git(project: Path, *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
@@ -43,23 +39,21 @@ def _git(project: Path, *args: str) -> subprocess.CompletedProcess[str]:
 
 
 def _tracked_files(project: Path) -> set[str]:
-    """Git-tracked inventory (T-1018, T-1016).
+    """Git-tracked inventory (T-1018).
 
     The canonical whole-project handoff is a GIT-project tool. A project
-    without a repository gets an explicit structured refusal. T-1016 requires
-    explicitly marking whole-project handoff unsupported in no-Git and
-    documenting the fallback as a STATE-ONLY exporter, so users don't think
-    they are getting a whole-project archive.
+    without a repository gets an explicit structured refusal naming the
+    documented canonical alternative (bootstrap/export.sh / export.ps1)
+    instead of a raw `fatal: not a git repository` from git itself -- an
+    incidental Git failure must never define the delivery contract.
     """
     r = _git(project, "ls-files")
     if r.returncode != 0:
-        print("FAIL: this whole-project handoff path requires a Git repository.")
-        print("UNSUPPORTED: whole-project handoff is not supported without Git.")
-        print("If you only need to export SAIPEN state (NO implementation files),")
-        print("use the canonical STATE-ONLY exporter instead --")
+        print("FAIL: this handoff path requires a Git repository.")
+        print("No-Git projects: use the canonical state exporter instead --")
         print("  bootstrap/export.sh        (macOS/Linux)")
         print("  bootstrap/export.ps1       (Windows)")
-        print("which archives ONLY the .saipen directory.")
+        print("which archive .saipen without needing a repository.")
         sys.exit(1)
     return {line.strip() for line in r.stdout.splitlines() if line.strip()}
 
@@ -138,43 +132,38 @@ def _reject_protected_destination(output: Path, project: Path) -> None:
 
 
 def _scan_unresolved_recovery(project: Path) -> list[tuple[str, str]]:
-    """Scan the canonical recovery journal with the ONE shared classifier.
+    """Scan .saipen/recovery/ops/ for unresolved PREPARED/CONFLICT operations.
 
-    Returns a list of (op_id, status) for every operation the engine's own
-    pending scan reports: PREPARED / APPLYING / VERIFIED / CONFLICT ops plus
-    CORRUPT_JOURNAL evidence (unknown statuses such as SKIPPED, unreadable
-    or structurally invalid manifests). An empty list means the recovery
+    Returns a list of (op_id, status) for any operation that has not reached
+    a terminal state (COMMITTED, RESOLVED).  An empty list means the recovery
     journal is clean.
 
-    A handoff with unresolved recovery operations would silently launder
-    pending recovery out of the continuation — the recipient would never
-    know about the interrupted mutation. The lifecycle vocabulary is the
-    journal's canonical SETTLED/UNRESOLVED/STATUS sets, never a local
-    handoff guess: ABORTED is settled exactly as the engine treats it, every
-    unresolved state blocks, and unknown/SKIPPED corrupt evidence fails
-    closed (T-1009).
+    T-1010: A handoff with unresolved recovery operations would silently
+    launder pending recovery out of the continuation — the recipient would
+    never know about the interrupted mutation.
     """
-    from saipen_engine.journal import scan_pending
-    try:
-        pending, _ = scan_pending(project)
-    except Exception as exc:
-        # The canonical scan is designed never to raise, but an unclassifiable
-        # recovery container is corrupt evidence that must block the handoff.
-        return [("OPS_DIR", f"CORRUPT_JOURNAL: {type(exc).__name__}: {exc}")]
-    return [(op["op_id"], op.get("status", "CORRUPT_JOURNAL"))
-            for op in pending]
+    import json
+    unresolved = []
+    ops_dir = project / ".saipen" / "recovery" / "ops"
+    if not ops_dir.is_dir():
+        return unresolved
+    terminal = {"COMMITTED", "RESOLVED", "SKIPPED"}
+    for entry in sorted(ops_dir.iterdir()):
+        op_file = entry / "operation.json"
+        if not op_file.is_file():
+            continue
+        try:
+            with open(op_file, encoding="utf-8-sig") as f:
+                op = json.load(f)
+            status = op.get("status", "UNKNOWN")
+            if status not in terminal:
+                unresolved.append((entry.name, status))
+        except (json.JSONDecodeError, OSError):
+            unresolved.append((entry.name, "UNREADABLE"))
+    return unresolved
 
 
 def build_archive(output: Path, project: Path) -> None:
-    # T-1017: Reject protected destinations before ANY side effects (temp files/dirs).
-    # This ensures a refusal leaves the filesystem fingerprint completely unchanged.
-    _reject_protected_destination(output, project)
-    if output.exists() and not _OVERWRITE_ALLOWED:
-        print(f"FAIL: destination already exists: {output}")
-        print("Refusing to overwrite without explicit authorization. "
-              "Pass --force to allow destructive overwrite.")
-        sys.exit(1)
-
     verifier = project / "tools" / "verify_handoff_archive.py"
     if not verifier.is_file():
         print(f"FAIL: verifier not found at {verifier}")
@@ -192,9 +181,9 @@ def build_archive(output: Path, project: Path) -> None:
         print(f"WARN: {len(deleted)} tracked files appear deleted "
               f"(not sealed LOGs — review manually)")
 
-    # Scan canonical recovery state.  Unresolved PREPARED/CONFLICT operations
-    # and corrupt journal evidence mean the continuation truth is incomplete
-    # — shipping would silently launder pending recovery out of the handoff.
+    # T-1010: Scan canonical recovery state.  Unresolved PREPARED/CONFLICT
+    # operations mean the continuation truth is incomplete — shipping would
+    # silently launder pending recovery out of the handoff.
     unresolved = _scan_unresolved_recovery(project)
     if unresolved:
         print(f"FAIL: {len(unresolved)} unresolved recovery operation(s) detected:")
@@ -213,11 +202,8 @@ def build_archive(output: Path, project: Path) -> None:
     # T-1015: lstat every selected member and prove it is a regular file with
     # NO symlink/reparse ancestor. `is_file()` follows links, so a tracked
     # in-project path could silently package bytes from outside project_root.
-    # T-1013: capture the st_dev/st_ino here so the later content capture
-    # can prove it opened the exact same inode, closing the TOCTOU window.
     print("\n=== Checking member filesystem types ===")
     link_escapes = []
-    member_lstats = {}
     for rel in members:
         src = project / rel
         # Walk each path component from the project root down; any symlink/
@@ -240,8 +226,6 @@ def build_archive(output: Path, project: Path) -> None:
             import stat as _stat
             if not _stat.S_ISREG(st.st_mode):
                 link_escapes.append(f"{rel} (not a regular file)")
-            else:
-                member_lstats[rel] = (st.st_dev, st.st_ino, st.st_mode, st.st_mtime)
     if link_escapes:
         print(f"FAIL: {len(link_escapes)} member(s) are symlinks or non-regular "
               f"files -- refusing to package bytes through an escaped object:")
@@ -252,53 +236,45 @@ def build_archive(output: Path, project: Path) -> None:
         sys.exit(1)
     print(f"  PASS: all {len(members)} members are regular contained files")
 
+    # T-1011: Capture a canonical path -> content-hash inventory BEFORE
+    # building the archive.  Every archive member will be verified against
+    # this snapshot after construction, so tree movement/tampering between
+    # capture and packaging fails closed.
+    print("\n=== Capturing source snapshot ===")
+    source_snapshot: dict[str, str] = {}  # rel_path -> sha256 hex
+    snapshot_errors = []
+    for rel in members:
+        src = project / rel
+        if src.is_file():
+            h = hashlib.sha256(src.read_bytes()).hexdigest()
+            source_snapshot[rel] = h
+        else:
+            snapshot_errors.append(rel)
+    if snapshot_errors:
+        print(f"FAIL: {len(snapshot_errors)} member(s) vanished during snapshot:")
+        for e in snapshot_errors[:10]:
+            print(f"  {e}")
+        sys.exit(1)
+    print(f"  Captured {len(source_snapshot)} file hashes from source tree")
+
     # --- Build temporary archive (T-1016: in the destination directory) ---
     # The temp artifact lives beside the requested output so the final rename
     # is same-filesystem and atomic. A temp artifact on a different
     # filesystem (e.g. system temp on /dev/shm) would crash with a raw
     # cross-device OSError at promotion.
-    print("\n=== Capturing snapshot and building temporary archive ===")
+    print("\n=== Building temporary archive ===")
     output.parent.mkdir(parents=True, exist_ok=True)
     tmpzip = output.parent / f".{output.name}.tmp-{os.getpid()}"
     tmpzip.unlink(missing_ok=True)
-
-    source_snapshot: dict[str, str] = {}  # rel_path -> sha256 hex
-    snapshot_errors = []
 
     try:
         with zipfile.ZipFile(str(tmpzip), "w", zipfile.ZIP_DEFLATED) as zf:
             for rel in members:
                 src = project / rel
-                try:
-                    with open(src, "rb") as f:
-                        fst = os.fstat(f.fileno())
-                        expected_dev, expected_ino, expected_mode, expected_mtime = member_lstats[rel]
-                        
-                        # T-1013: fail closed if the inode/device changed between lstat and open.
-                        # This prevents a TOCTOU race where a tracked regular file is swapped to an outside symlink.
-                        if (fst.st_dev, fst.st_ino) != (expected_dev, expected_ino):
-                            snapshot_errors.append(f"{rel} (inode/device changed - possible symlink race)")
-                            continue
-                        
-                        data = f.read()
-                        source_snapshot[rel] = hashlib.sha256(data).hexdigest()
-                        
-                        import time
-                        zinfo = zipfile.ZipInfo(rel)
-                        dt = time.localtime(expected_mtime)
-                        zinfo.date_time = (dt.tm_year, dt.tm_mon, dt.tm_mday, dt.tm_hour, dt.tm_min, dt.tm_sec)
-                        zinfo.external_attr = (expected_mode & 0xFFFF) << 16
-                        zinfo.compress_type = zipfile.ZIP_DEFLATED
-                        zf.writestr(zinfo, data)
-                except OSError as exc:
-                    snapshot_errors.append(f"{rel} ({exc})")
+                if src.is_file():
+                    zf.write(str(src), rel)
+                # Directories are implicit in ZIP; skip non-files.
 
-        if snapshot_errors:
-            print(f"FAIL: {len(snapshot_errors)} member(s) vanished or changed during packaging (TOCTOU protection):")
-            for e in snapshot_errors[:10]:
-                print(f"  {e}")
-            sys.exit(1)
-        print(f"  Captured {len(source_snapshot)} file hashes from source tree")
         print(f"  {tmpzip}  ({tmpzip.stat().st_size} bytes, "
               f"{len(members)} members)")
 
@@ -379,8 +355,15 @@ def build_archive(output: Path, project: Path) -> None:
         digest = sha.hexdigest()
         print(f"\nARCHIVE_SHA256={digest}")
 
-        # --- Atomic promote ---
-        # Destination validations are now executed at the very start (T-1017).
+        # --- Atomic promote (T-1016) ---
+        # Reject tracked/protected/canonical destinations categorically.
+        _reject_protected_destination(output, project)
+        # Refuse an existing destination unless explicit overwrite.
+        if output.exists() and not _OVERWRITE_ALLOWED:
+            print(f"FAIL: destination already exists: {output}")
+            print("Refusing to overwrite without explicit authorization. "
+                  "Pass --force to allow destructive overwrite.")
+            sys.exit(1)
         try:
             # os.replace is atomic and replaces an existing destination on
             # both POSIX and Windows (Path.rename does not overwrite on

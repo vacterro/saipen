@@ -62,12 +62,34 @@ _ONBOARDING_QUESTIONS = [
 _CATEGORY_RE = re.compile(r"^\[([^\]]+)\]\s*(.*)$", re.DOTALL)
 
 
+def _redact_credentials(text: str) -> str:
+    """T-1015: existing credential containment/redaction policy.
+    
+    A high-confidence credential-like value must be redacted before USERPERSON
+    persistence and projection, without recording the secret in LOG/recovery.
+    """
+    import re as _re
+    # ghp_ token
+    text = _re.sub(r'ghp_[a-zA-Z0-9]{36}', 'ghp_***', text)
+    # AKIA token
+    text = _re.sub(r'AKIA[0-9A-Z]{16}', 'AKIA***', text)
+    # sk- token
+    text = _re.sub(r'sk-[a-zA-Z0-9]{32,}', 'sk-***', text)
+    # postgres/postgresql uri
+    text = _re.sub(r'(postgres(?:ql)?://[^:]+):[^@]+(@)', r'\1:***\2', text)
+    # basic bearer token shape if very explicitly labeled
+    text = _re.sub(r'(?i)(bearer\s+)[a-zA-Z0-9_\-\.]{30,}', r'\1***', text)
+    return text
+
+
 def _canonical(text: str) -> str:
     return re.sub(r"\s+", " ", text.strip()).lower()
 
 
 def _entry(category: str, text: str) -> dict:
-    entry = {"category": category.strip(), "text": text.strip()}
+    # T-1015: redact before any processing, persistence, or logging
+    safe_text = _redact_credentials(text.strip())
+    entry = {"category": category.strip(), "text": safe_text}
     identity = _canonical(f"{entry['category']}: {entry['text']}")
     entry["id"] = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:12]
     return entry

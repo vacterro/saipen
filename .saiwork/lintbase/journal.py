@@ -30,7 +30,6 @@ import hashlib
 import json
 import os
 import re
-import stat
 import sys
 import datetime
 from pathlib import Path
@@ -52,15 +51,6 @@ UNRESOLVED = ("PREPARED", "APPLYING", "VERIFIED", "CONFLICT")
 ROLES = ("log", "board", "state", "manifest", "report", "sweep", "generic")
 OPS_DIR = ".saipen/recovery/ops"
 LINEAGE_MIGRATION_OP = "op-migrate-lineage"
-# Engine-written settled receipt marker (perf wave T-1020): a tiny summary
-# published next to operation.json when an op reaches a terminal status, so
-# hot pending scans enumerate settled receipts without deep-decoding every
-# historical manifest. The marker is a fast path ONLY (T-1008): it certifies
-# the EXACT operation.json bytes it was written over (manifest_hash), and
-# scan_pending trusts it only while those bytes are unchanged -- a missing,
-# corrupt or stale marker falls back to the strict manifest decode (correct,
-# legacy), never launders unresolved/corrupt evidence.
-SETTLED_MARKER = "SETTLED.json"
 
 # Closed verification-policy registry. Recovery must run the SAME semantic
 # postcondition class as the original APPLY; a policy names the verifier
@@ -389,41 +379,6 @@ def _atomic_write(path: Path, content: bytes) -> None:
     tmp.replace(path)
 
 
-def _write_settled_marker(journal: "Journal", record: dict) -> None:
-    """Publish the tiny settled receipt marker (perf wave T-1020).
-
-    Called ONLY after the terminal manifest write is already durable, so a
-    marker failure can never rewrite semantic status. Publication is
-    deliberately NON-FATAL (T-1008): the manifest is the authoritative
-    receipt, and if the marker cannot be written (disk full, unwritable
-    dir) the caller still returns truthful committed semantics -- the next
-    pending scan simply falls back to the strict manifest decode for this
-    op.
-
-    The marker certifies the EXACT operation.json bytes it was written
-    over (manifest_hash). scan_pending trusts the marker only while those
-    bytes are unchanged; any manifest mutation (corruption, a replaced
-    PREPARED record, a release-facts update) invalidates the certification
-    and resolves through the authoritative strict decode, so a stale or
-    mismatched marker can never launder unresolved or corrupt evidence.
-    """
-    try:
-        manifest_bytes = journal.manifest.read_bytes()
-    except OSError:
-        return  # manifest unreadable -> no certification; strict decode owns truth
-    summary = {
-        "op_id": journal.op_id,
-        "status": record["status"],
-        "created_at": record.get("created_at", ""),
-        "operation": record.get("operation", ""),
-        "semantic_payload_hash": record.get("semantic_payload_hash", ""),
-        "manifest_hash": hashlib.sha256(manifest_bytes).hexdigest(),
-    }
-    with contextlib.suppress(OSError):
-        # Non-fatal: the manifest is the authoritative receipt.
-        _atomic_json(journal.dir / SETTLED_MARKER, summary)
-
-
 def _crash_after(key: str) -> None:
     env = _CRASH_MAP.get(key)
     if env and env in os.environ:
@@ -711,13 +666,12 @@ def scan_pending(project_root: Path | str) -> tuple[list[dict], list[dict]]:
                           "detail": f"op_dir stat failed "
                                     f"({type(exc).__name__}): {exc}"})
             continue
-        if stat.S_ISLNK(info.st_mode) or getattr(
-                info, "st_file_attributes", 0) & 0x400:
+        if os.path.islink(entry) or getattr(info, "st_file_attributes", 0) & 0x400:
             found.append({"op_id": entry.name, "status": "CORRUPT_JOURNAL",
                           "corrupt": True,
                           "detail": "op_dir is a symlink or reparse point"})
             continue
-        if not stat.S_ISDIR(info.st_mode):
+        if not entry.is_dir():
             # An unexpected NON-directory entry under recovery/ops (e.g. a
             # stray regular file) is corrupt evidence, never a launder into
             # CLEAN (second-wave P1): every entry under ops must be a valid
@@ -742,86 +696,6 @@ def scan_pending(project_root: Path | str) -> tuple[list[dict], list[dict]]:
                                     "staging?); orphan staged evidence must "
                                     "be resolved explicitly"})
             continue
-        # Perf wave T-1020 + T-1008: a valid engine-written SETTLED marker
-        # means this op is a settled idempotence receipt -- history, never
-        # pending truth -- PROVIDED the manifest bytes it certifies are
-        # unchanged. Hot pending scans therefore read the tiny marker plus
-        # one manifest hash instead of deep-decoding every historical
-        # manifest (staged-evidence checks, owned-path resolution,
-        # precondition validation), so scan cost stops scaling with settled
-        # history. The MANIFEST remains the single authoritative receipt:
-        #
-        # - a missing marker falls back to the strict full decode below;
-        # - a corrupt marker (unreadable, symlink, non-JSON, wrong op_id,
-        #   non-settled status, no certification) is CORRUPT_JOURNAL, never
-        #   laundered into CLEAN;
-        # - a marker whose certified manifest hash no longer matches the
-        #   live operation.json is STALE evidence: the strict decode below
-        #   is the only authority, so a surviving COMMITTED marker can
-        #   never hide a corrupt or PREPARED manifest and a new writer
-        #   stays blocked (fail closed).
-        marker = entry / SETTLED_MARKER
-        try:
-            marker_info = os.lstat(marker)
-        except FileNotFoundError:
-            marker = None
-        except OSError as exc:
-            found.append({"op_id": entry.name, "status": "CORRUPT_JOURNAL",
-                          "corrupt": True,
-                          "detail": f"settled marker unreadable "
-                                    f"({type(exc).__name__}): {exc}"})
-            continue
-        if marker is not None:
-            if stat.S_ISLNK(marker_info.st_mode) or getattr(
-                    marker_info, "st_file_attributes", 0) & 0x400:
-                found.append({"op_id": entry.name, "status": "CORRUPT_JOURNAL",
-                              "corrupt": True,
-                              "detail": "settled marker is a symlink or "
-                                        "reparse point"})
-                continue
-            try:
-                summary = json.loads(marker.read_bytes().decode("utf-8"))
-            except (UnicodeDecodeError, json.JSONDecodeError, OSError) as exc:
-                found.append({"op_id": entry.name, "status": "CORRUPT_JOURNAL",
-                              "corrupt": True,
-                              "detail": f"settled marker is not valid JSON "
-                                        f"({type(exc).__name__}): {exc}"})
-                continue
-            if (not isinstance(summary, dict)
-                    or summary.get("op_id") != entry.name
-                    or summary.get("status") not in SETTLED):
-                found.append({"op_id": entry.name, "status": "CORRUPT_JOURNAL",
-                              "corrupt": True,
-                              "detail": "settled marker does not match the "
-                                        "op directory or names a non-settled "
-                                        "status"})
-                continue
-            certified = summary.get("manifest_hash")
-            if not isinstance(certified, str) or not certified:
-                # No certification -> the marker proves nothing; the strict
-                # manifest decode below is the only authority.
-                marker = None
-            else:
-                try:
-                    manifest_bytes = (entry / "operation.json").read_bytes()
-                except OSError as exc:
-                    found.append({
-                        "op_id": entry.name, "status": "CORRUPT_JOURNAL",
-                        "corrupt": True,
-                        "detail": f"operation.json unreadable despite a "
-                                  f"settled marker ({type(exc).__name__}): "
-                                  f"{exc}"})
-                    continue
-                if hashlib.sha256(manifest_bytes).hexdigest() != certified:
-                    # Stale/mismatched marker: the manifest changed after
-                    # settling (corruption, tampering, a replaced record).
-                    # Resolve through the authoritative strict decode below
-                    # -- it surfaces PREPARED/CONFLICT as pending and
-                    # unreadable/invalid bytes as CORRUPT_JOURNAL, so the
-                    # marker can never launder unresolved/corrupt evidence.
-                    marker = None
-                else:
-                    continue  # certified settled receipt: history, never pending truth
         try:
             decoded = decode_operation_record(root, entry)
         except Exception as exc:
@@ -1044,8 +918,6 @@ class Journal:
                 record["targets"]):
             record["targets"][target_index]["applied"] = True
         _atomic_json(self.manifest, record)
-        if status in SETTLED:
-            _write_settled_marker(self, record)
 
     def append_targets(self, targets: list[dict]) -> None:
         """Append write targets to an existing operation (T-994 release).
@@ -2555,7 +2427,6 @@ def _resolve_conflict_locked(root: Path, op_id: str, resolution: str,
     record["resolution_evidence"] = "live accepted" if resolution \
         == "accept_live" else "operation retired; fresh plan required"
     _atomic_json(journal.manifest, record)
-    _write_settled_marker(journal, record)
     return {"ok": True, "code": "RESOLVED", "op_id": op_id,
             "resolution": resolution, "applied_targets": applied,
             "skipped_targets": skipped,

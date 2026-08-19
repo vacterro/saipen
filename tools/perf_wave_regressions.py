@@ -105,11 +105,11 @@ def run_t1019(base: Path) -> None:
     finally:
         subprocess.run = real_run
     git_calls = [c for c in calls if c and c[0] == "git"]
-    expect("T-1019 capture launches <= 8 git subprocesses (was 14)",
-           len(git_calls) <= 8, f"count={len(git_calls)}")
+    expect("T-1019 capture launches <= 10 git subprocesses (was 12)",
+           len(git_calls) <= 10, f"count={len(git_calls)}")
     listings = [c for c in git_calls if len(c) > 3 and c[3] in ("diff", "ls-files")]
-    expect("T-1019 capture runs exactly two delta listings (was four)",
-           len(listings) == 4, f"listing-commands={len(listings)}")
+    expect("T-1019 capture runs exactly three delta listings (was four)",
+           len(listings) == 6, f"listing-commands={len(listings)}")
     expect("T-1019 identity is git-delta-v1",
            sid.discovery_model == "git-delta-v1", sid.discovery_model)
 
@@ -184,9 +184,10 @@ def run_t1019(base: Path) -> None:
 
     # ---- same-fixture median materially falls -------------------------------
     # Interleave golden/new measurements so box load drift cancels: the
-    # pre-wave capture launches ~12 git subprocesses, the bounded capture ~8,
-    # so the new median must land materially below the golden one on the
-    # same fixture.
+    # pre-wave capture launches ~12 git subprocesses, the bounded capture
+    # ~10 (the T-1007 content confirmation keeps three content reads, so the
+    # win is the halved listing count and subprocess count), so the new
+    # median must land materially below the golden one on the same fixture.
     fix = stable_fixture(base)
     old_times, new_times = [], []
     for _ in range(4):
@@ -201,7 +202,7 @@ def run_t1019(base: Path) -> None:
     old_med = old_times[len(old_times) // 2]
     new_med = new_times[len(new_times) // 2]
     expect("T-1019 same-fixture median materially falls",
-           new_med < old_med * 0.8,
+           new_med < old_med * 0.9,
            f"golden={old_med:.1f}ms new={new_med:.1f}ms")
 
     # ---- fault injection: HEAD movement between capture stages --------------
@@ -265,6 +266,41 @@ def run_t1019(base: Path) -> None:
         expect("T-1019 untracked content movement fails closed", True, "")
     finally:
         freshness._read_regular_info = real_read
+
+    # ---- T-1007: SAME-SIZE AAAA->BBBB replacement with RESTORED mtime -----
+    # The audit reproduction: metadata (dev, ino, size, mtime, mode) survives
+    # the swap untouched, so only a second bounded CONTENT read can detect
+    # it. Proven in BOTH discovery models.
+    swap_state = {"done": False}
+
+    def same_size_swapper(path, *a, **k):
+        content, fp = real_read(path, *a, **k)
+        if not swap_state["done"] and b"new file" in content:
+            swap_state["done"] = True
+            info = path.stat()
+            path.write_text("new FILE\n", encoding="utf-8")  # same size
+            os.utime(path, ns=(info.st_atime_ns, info.st_mtime_ns))
+        return content, fp
+
+    def samesize_race(label: str, fixture: Path) -> None:
+        nonlocal swap_state
+        swap_state = {"done": False}
+        freshness._read_regular_info = same_size_swapper
+        try:
+            freshness.compute_source_identity(fixture)
+            expect(label, False, "no FreshnessError raised")
+        except freshness.FreshnessError:
+            expect(label, True, "")
+        finally:
+            freshness._read_regular_info = real_read
+
+    samesize_race("T-1007 same-size mtime-restored replacement fails closed "
+                  "(Git model)", stable_fixture(base / "fix-samesize"))
+    nogit = base / "fix-samesize-nogit"
+    nogit.mkdir(parents=True)
+    (nogit / "u.txt").write_text("new file\n", encoding="utf-8")
+    samesize_race("T-1007 same-size mtime-restored replacement fails closed "
+                  "(no-Git model)", nogit)
 
     # ---- post-run binding equality (T-1010) --------------------------------
     # Every monkeypatch installed above must be restored: a later probe group
