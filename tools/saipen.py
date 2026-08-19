@@ -102,7 +102,9 @@ def _command_mutates(command: str, rest: list[str]) -> bool:
     verdict, so a read-only projection under `--agent B` never hands over
     persistent ownership, never appends LOG, never updates STATE, and never
     creates recovery operations. Mutating invocations perform the canonical
-    A -> B handover BEFORE their dependent writes.
+    A -> B handover immediately before their dependent writes (T-1014: only
+    after the concrete action's syntax/arity validation has passed, so a
+    malformed invocation stays zero-write).
     """
     sub = rest[0] if rest and not rest[0].startswith("-") else None
     if command in _MUTATING_TOPLEVEL:
@@ -124,6 +126,33 @@ def _command_mutates(command: str, rest: list[str]) -> bool:
         # verify/status/sweep-queue are read-only; the rest mutate.
         return sub in _MUTATING_IMPROVE
     return False
+
+
+def _ensure_handover(project_root: Path, as_json: bool, dry_run: bool) -> int | None:
+    """T-1014: perform the A -> B seat handover ONLY immediately before an
+    admissible mutation executes -- never before the concrete action's
+    syntax/arity validation has passed.
+
+    Returns None when the seat is settled (no override, override equals the
+    persisted seat, or the handover itself succeeded); returns an exit code
+    after emitting a structured refusal when the handover fails. Callers
+    short-circuit with that code. A malformed/unknown invocation never
+    reaches this helper, so it stays ownership-zero-write.
+    """
+    if _AGENT_OVERRIDE is None:
+        return None
+    state_path = _state_path(project_root)
+    if not state_path.is_file():
+        return None
+    state, _state_err = parse_state_or_error(codec.read_doc(state_path))
+    if state and state.get("agent") == _AGENT_OVERRIDE:
+        return None
+    from saipen_engine.operations import handover_agent
+    ho = handover_agent(project_root, _AGENT_OVERRIDE, dry_run=dry_run)
+    if not ho.ok:
+        _emit(ho.to_dict(), as_json)
+        return 1
+    return None
 
 
 _TERMINAL_RESULT_RE = re.compile(r"->\s*(PASS|FAIL)\s*$")
@@ -449,7 +478,8 @@ def _next_action(project_root: Path, as_json: bool) -> int:
     return 0
 
 
-def _recover(project_root: Path, args: list[str], as_json: bool) -> int:
+def _recover(project_root: Path, args: list[str], as_json: bool,
+             dry_run: bool = False) -> int:
     # `saipen recover inspect <op_id>` -- read-only conflict inspection.
     # Closed grammar: exactly one positional <op_id> (hostile-regression, P0#1).
     if args and args[0] == "inspect":
@@ -496,6 +526,9 @@ def _recover(project_root: Path, args: list[str], as_json: bool) -> int:
                                  "[--resolution <accept_live|replan>]"}, as_json)
                 return 2
         from saipen_engine.journal import resolve_conflict
+        _rc = _ensure_handover(project_root, as_json, dry_run)
+        if _rc is not None:
+            return _rc
         result = resolve_conflict(project_root, op_id, resolution,
                                   agent=_agent_for(project_root))
         _emit(result, as_json)
@@ -589,7 +622,15 @@ def _sub(project_root: Path, args: list[str], as_json: bool,
         """One sub-action execution with the structured CLI boundary
         (T-1013): a residual path-length/host filesystem failure (an ID that
         passes every safe-ID check yet still breaks the host path budget) is
-        a zero-write VALIDATION_FAILED refusal, never a traceback."""
+        a zero-write VALIDATION_FAILED refusal, never a traceback.
+
+        T-1014: mutating sub actions perform the seat handover ONLY here --
+        after grammar validation has passed, immediately before the mutation.
+        list/status are read-only and never hand over."""
+        if action not in ("list", "status"):
+            _rc = _ensure_handover(project_root, as_json, dry_run)
+            if _rc is not None:
+                return _rc
         try:
             result = thunk()
         except OSError as exc:
@@ -666,6 +707,9 @@ def _crew(project_root: Path, args: list[str], as_json: bool,
         # failure -- ok:true / exit 0. Nonzero exit is reserved for a
         # structurally invalid or refused derivation.
         return 0 if plan.get("ok") else 1
+    _rc = _ensure_handover(project_root, as_json, dry_run)
+    if _rc is not None:
+        return _rc
     result = crew_apply(project_root, current_capability=capability,
                         current_agent=_agent_for(project_root))
     _emit(result.to_dict(), as_json)
@@ -783,6 +827,9 @@ def _userperson(project_root: Path, args: list[str], as_json: bool,
         if dry_run:
             _emit({"ok": True, "code": "RESET", "dry_run": True}, as_json)
             return 0
+        _rc = _ensure_handover(project_root, as_json, dry_run)
+        if _rc is not None:
+            return _rc
         # CORE says reset DELETES the profile; absence is the canonical OFF
         # state. One journaled delete_file target (real before_hash, empty
         # after_hash) -- NO post-commit unlink, so a crash between COMMIT and
@@ -849,6 +896,9 @@ def _userperson(project_root: Path, args: list[str], as_json: bool,
                    "category": category if action == "add" else None,
                    "dry_run": True}, as_json)
             return 0
+        _rc = _ensure_handover(project_root, as_json, dry_run)
+        if _rc is not None:
+            return _rc
         result = write_profile(project_root, new_text, _agent_for(project_root))
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
@@ -1075,6 +1125,9 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
             return 2
         from improve import ImproveError, prepare_audit_seat
         from improve import installed_protocol_fingerprint as _proto_fp
+        _rc = _ensure_handover(project_root, as_json, dry_run)
+        if _rc is not None:
+            return _rc
         try:
             runtime = _runtime_identity()
             fingerprint = _proto_fp(HOME)
@@ -1169,6 +1222,9 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
             return 2
         report = _resolve_report_path(project_root, args[1], args[2],
                                       args[3])
+        _rc = _ensure_handover(project_root, as_json, dry_run)
+        if _rc is not None:
+            return _rc
         try:
             result = _append_run(report, run_text)
             _emit(result, as_json)
@@ -1188,6 +1244,9 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
         from improve import complete_report as _complete_report
         from improve import resolve_report_path as _resolve_report_path
         report = _resolve_report_path(project_root, args[1], args[2], args[3])
+        _rc = _ensure_handover(project_root, as_json, dry_run)
+        if _rc is not None:
+            return _rc
         try:
             result = _complete_report(report)
             _emit(result, as_json)
@@ -1321,6 +1380,9 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
                    "cycle": args[1], "finding_ref": finding_ref,
                    "disposition": disposition}, as_json)
             return 0
+        _rc = _ensure_handover(project_root, as_json, dry_run)
+        if _rc is not None:
+            return _rc
         try:
             entry = {"imp_id": imp_id, "disposition": disposition,
                      "ticket": ticket, "report": report,
@@ -1344,6 +1406,9 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
                   as_json)
             return 2
         cycle = cycle_dir(project_root, args[1])
+        _rc = _ensure_handover(project_root, as_json, dry_run)
+        if _rc is not None:
+            return _rc
         try:
             result = complete_cycle(cycle)
             _emit(result, as_json)
@@ -1361,6 +1426,9 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
             return 2
         from improve import abort_cycle as _abort_cycle
         cycle = cycle_dir(project_root, args[1])
+        _rc = _ensure_handover(project_root, as_json, dry_run)
+        if _rc is not None:
+            return _rc
         try:
             result = _abort_cycle(cycle)
             _emit(result, as_json)
@@ -1381,6 +1449,9 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
             _emit({"ok": True, "code": "IMPROVE_CLEAN_PLAN",
                    "cycle": args[1], "archive_only": True}, as_json)
             return 0
+        _rc = _ensure_handover(project_root, as_json, dry_run)
+        if _rc is not None:
+            return _rc
         try:
             result = archive_cycle(cycle)
             _emit({"ok": result.get("ok", False),
@@ -1493,21 +1564,12 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
 
     command = args[0]
 
-    # T-1006: an explicit --agent override is a genuine handover. Before any
-    # MUTATING command writes, record the mandatory DEC naming old -> new so a
-    # seat change is never silent; read-only projections route under the
-    # resolved actor without touching disk.
-    if _AGENT_OVERRIDE is not None and _command_mutates(command, args[1:]):
-        state_path = _state_path(project_root)
-        if state_path.is_file():
-            state, _state_err = parse_state_or_error(codec.read_doc(state_path))
-            if state and state.get("agent") != _AGENT_OVERRIDE:
-                from saipen_engine.operations import handover_agent
-                ho = handover_agent(project_root, _AGENT_OVERRIDE,
-                                    dry_run=dry_run)
-                if not ho.ok:
-                    _emit(ho.to_dict(), as_json)
-                    return 1
+    # T-1006/T-1014: an explicit --agent override is a genuine handover, but
+    # it is deferred -- `_ensure_handover` runs only immediately before an
+    # admissible mutation, after the concrete action's syntax/arity
+    # validation has passed. A malformed/unknown invocation therefore stays
+    # ownership-zero-write; read-only projections route under the resolved
+    # actor without touching disk.
 
     if command == "status":
         if len(args) > 1:
@@ -1522,7 +1584,7 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
             return 2
         return _next_action(project_root, as_json)
     if command == "recover":
-        return _recover(project_root, args[1:], as_json)
+        return _recover(project_root, args[1:], as_json, dry_run)
     if command == "claim":
         if len(args) < 2:
             _emit({"ok": False, "code": "VALIDATION_FAILED",
@@ -1532,6 +1594,9 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
             _emit({"ok": False, "code": "VALIDATION_FAILED",
                    "detail": f"claim takes <T-###>; surplus: {' '.join(args[2:])}"}, as_json)
             return 2
+        _rc = _ensure_handover(project_root, as_json, dry_run)
+        if _rc is not None:
+            return _rc
         result = plan_claim(project_root, args[1], _agent_for(project_root)) if dry_run \
             else apply_claim(project_root, args[1], _agent_for(project_root))
         _emit(result.to_dict(), as_json)
@@ -1544,6 +1609,9 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
         ticket = args[2] if len(args) > 2 and args[2].upper().startswith(
             "T-") else None
         text = " ".join(args[3:] if ticket else args[2:])
+        _rc = _ensure_handover(project_root, as_json, dry_run)
+        if _rc is not None:
+            return _rc
         result = transition_phase(project_root, args[1], _agent_for(project_root), ticket, text,
                                   dry_run=dry_run)
         _emit(result.to_dict(), as_json)
@@ -1556,6 +1624,9 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
         ticket = args[2] if len(args) > 2 and args[2].upper().startswith(
             "T-") else None
         text = " ".join(args[3:] if ticket else args[2:])
+        _rc = _ensure_handover(project_root, as_json, dry_run)
+        if _rc is not None:
+            return _rc
         result = checkpoint(project_root, _agent_for(project_root), args[1], ticket, text,
                             dry_run=dry_run)
         _emit(result.to_dict(), as_json)
@@ -1624,6 +1695,9 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
                        "detail": "ticket add needs <PRIORITY> <description>"},
                       as_json)
                 return 2
+            _rc = _ensure_handover(project_root, as_json, dry_run)
+            if _rc is not None:
+                return _rc
             result = ticket_add(project_root, _agent_for(project_root),
                                 clean_rest[0], " ".join(clean_rest[1:]),
                                 needs_arg, verify_arg, dry_run=dry_run)
@@ -1638,6 +1712,9 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
                 _emit({"ok": False, "code": "VALIDATION_FAILED",
                        "detail": f"ticket done takes <T-###>; surplus: {' '.join(rest[1:])}"}, as_json)
                 return 2
+            _rc = _ensure_handover(project_root, as_json, dry_run)
+            if _rc is not None:
+                return _rc
             result = finish_ticket(project_root, rest[0],
                                    _agent_for(project_root),
                                    dry_run=dry_run)
@@ -1648,6 +1725,9 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
                 _emit({"ok": False, "code": "VALIDATION_FAILED",
                        "detail": f"ticket {action} needs <T-###> [reason/decision]"}, as_json)
                 return 2
+            _rc = _ensure_handover(project_root, as_json, dry_run)
+            if _rc is not None:
+                return _rc
             result = ticket_move(project_root, action, rest[0], _agent_for(project_root),
                                  " ".join(rest[1:]), dry_run=dry_run)
             _emit(result.to_dict(), as_json)
@@ -1671,6 +1751,9 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
                   as_json)
             return 2
         from saipen_engine.operations import rebind_saipen_home
+        _rc = _ensure_handover(project_root, as_json, dry_run)
+        if _rc is not None:
+            return _rc
         result = rebind_saipen_home(project_root, _agent_for(project_root),
                                     args[1], dry_run=dry_run)
         _emit(result.to_dict(), as_json)
@@ -1687,6 +1770,9 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
                    "detail": "scope needs <T-###> <path> [path ...]"}, as_json)
             return 2
         from saipen_engine.operations import record_scope
+        _rc = _ensure_handover(project_root, as_json, dry_run)
+        if _rc is not None:
+            return _rc
         result = record_scope(project_root, args[1],
                               _agent_for(project_root), args[2:],
                               dry_run=dry_run)
@@ -1699,6 +1785,9 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
                              "<public|private>"}, as_json)
             return 2
         from saipen_engine.operations import confirm_first_publish
+        _rc = _ensure_handover(project_root, as_json, dry_run)
+        if _rc is not None:
+            return _rc
         result = confirm_first_publish(project_root,
                                        _agent_for(project_root), args[1],
                                        args[2], dry_run=dry_run)
@@ -1731,6 +1820,9 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
             _emit({"ok": False, "code": "VALIDATION_FAILED",
                    "detail": str(exc)}, as_json)
             return 1
+        _rc = _ensure_handover(project_root, as_json, dry_run)
+        if _rc is not None:
+            return _rc
         result = execute_release(project_root, plan)
         _emit(result, as_json)
         return 0 if result.get("ok") else 1

@@ -39,9 +39,21 @@ def _git(project: Path, *args: str) -> subprocess.CompletedProcess[str]:
 
 
 def _tracked_files(project: Path) -> set[str]:
+    """Git-tracked inventory (T-1018).
+
+    The canonical whole-project handoff is a GIT-project tool. A project
+    without a repository gets an explicit structured refusal naming the
+    documented canonical alternative (bootstrap/export.sh / export.ps1)
+    instead of a raw `fatal: not a git repository` from git itself -- an
+    incidental Git failure must never define the delivery contract.
+    """
     r = _git(project, "ls-files")
     if r.returncode != 0:
-        print(f"FAIL: git ls-files failed: {r.stderr.strip()}")
+        print("FAIL: this handoff path requires a Git repository.")
+        print("No-Git projects: use the canonical state exporter instead --")
+        print("  bootstrap/export.sh        (macOS/Linux)")
+        print("  bootstrap/export.ps1       (Windows)")
+        print("which archive .saipen without needing a repository.")
         sys.exit(1)
     return {line.strip() for line in r.stdout.splitlines() if line.strip()}
 
@@ -84,6 +96,39 @@ def _is_delivery_source(project: Path, rel: str) -> bool:
     if _is_garbage(rel):
         return False
     return True
+
+
+# T-1016: explicit destructive-overwrite authorization. Default False.
+_OVERWRITE_ALLOWED = False
+
+
+def _reject_protected_destination(output: Path, project: Path) -> None:
+    """T-1016: reject tracked/protected/canonical destinations categorically.
+
+    An output path that names a tracked project file, a protected canonical
+    file (e.g. .saipen/STATE.md), or a source tree member must never be
+    replaced by ZIP bytes -- promotion to such a path is a hard refusal
+    regardless of --force.
+    """
+    try:
+        rel = output.resolve().relative_to(project.resolve())
+    except ValueError:
+        # Outside the project tree: not a tracked source destination.
+        return
+    rel_str = rel.as_posix()
+    # Any tracked file is protected: replacing it would destroy source.
+    tracked = _tracked_files(project)
+    if rel_str in tracked:
+        print(f"FAIL: destination is a tracked project file: {rel_str}")
+        print("Refusing to replace tracked source with archive bytes (T-1016).")
+        sys.exit(1)
+    # Canonical protected locations even if untracked.
+    protected_prefixes = (".saipen/", "saipen/", "extensions/schemas/")
+    for prefix in protected_prefixes:
+        if rel_str.startswith(prefix):
+            print(f"FAIL: destination is a canonical protected path: {rel_str}")
+            print("Refusing to replace canonical state with archive bytes (T-1016).")
+            sys.exit(1)
 
 
 def _scan_unresolved_recovery(project: Path) -> list[tuple[str, str]]:
@@ -154,6 +199,43 @@ def build_archive(output: Path, project: Path) -> None:
     members = sorted(rel for rel in tracked if _is_delivery_source(project, rel))
     print(f"  {len(members)} tracked files selected for archive")
 
+    # T-1015: lstat every selected member and prove it is a regular file with
+    # NO symlink/reparse ancestor. `is_file()` follows links, so a tracked
+    # in-project path could silently package bytes from outside project_root.
+    print("\n=== Checking member filesystem types ===")
+    link_escapes = []
+    for rel in members:
+        src = project / rel
+        # Walk each path component from the project root down; any symlink/
+        # reparse-link component means the member escapes containment.
+        current = project
+        for part in Path(rel).parts:
+            current = current / part
+            try:
+                st = current.lstat()
+            except OSError:
+                link_escapes.append(rel)
+                break
+            import stat as _stat
+            if _stat.S_ISLNK(st.st_mode):
+                link_escapes.append(rel)
+                break
+        else:
+            # No symlink component; now confirm the leaf is a regular file.
+            st = src.lstat()
+            import stat as _stat
+            if not _stat.S_ISREG(st.st_mode):
+                link_escapes.append(f"{rel} (not a regular file)")
+    if link_escapes:
+        print(f"FAIL: {len(link_escapes)} member(s) are symlinks or non-regular "
+              f"files -- refusing to package bytes through an escaped object:")
+        for e in link_escapes[:10]:
+            print(f"  {e}")
+        print("A tracked member must be a regular contained file with no "
+              "symlink/reparse ancestor (T-1015).")
+        sys.exit(1)
+    print(f"  PASS: all {len(members)} members are regular contained files")
+
     # T-1011: Capture a canonical path -> content-hash inventory BEFORE
     # building the archive.  Every archive member will be verified against
     # this snapshot after construction, so tree movement/tampering between
@@ -175,11 +257,17 @@ def build_archive(output: Path, project: Path) -> None:
         sys.exit(1)
     print(f"  Captured {len(source_snapshot)} file hashes from source tree")
 
-    # --- Build temporary archive ---
+    # --- Build temporary archive (T-1016: in the destination directory) ---
+    # The temp artifact lives beside the requested output so the final rename
+    # is same-filesystem and atomic. A temp artifact on a different
+    # filesystem (e.g. system temp on /dev/shm) would crash with a raw
+    # cross-device OSError at promotion.
     print("\n=== Building temporary archive ===")
-    with tempfile.TemporaryDirectory(prefix="saipen-build-") as tmpdir:
-        tmpzip = Path(tmpdir) / "archive.zip"
+    output.parent.mkdir(parents=True, exist_ok=True)
+    tmpzip = output.parent / f".{output.name}.tmp-{os.getpid()}"
+    tmpzip.unlink(missing_ok=True)
 
+    try:
         with zipfile.ZipFile(str(tmpzip), "w", zipfile.ZIP_DEFLATED) as zf:
             for rel in members:
                 src = project / rel
@@ -211,7 +299,6 @@ def build_archive(output: Path, project: Path) -> None:
             print(f"FAIL: {len(snapshot_mismatches)} member(s) differ from source snapshot:")
             for name, reason in snapshot_mismatches[:10]:
                 print(f"  {name}: {reason}")
-            tmpzip.unlink(missing_ok=True)
             sys.exit(1)
         # Also verify no source members were missed
         arc_members = set()
@@ -222,7 +309,6 @@ def build_archive(output: Path, project: Path) -> None:
             print(f"FAIL: {len(missing_from_archive)} source file(s) missing from archive:")
             for m in missing_from_archive[:10]:
                 print(f"  {m}")
-            tmpzip.unlink(missing_ok=True)
             sys.exit(1)
         print(f"PASS: all {len(source_snapshot)} archive members match source snapshot")
 
@@ -237,8 +323,6 @@ def build_archive(output: Path, project: Path) -> None:
             print("STDERR:", r.stderr[-500:] if len(r.stderr) > 500 else r.stderr)
         if r.returncode != 0:
             print(f"FAIL: delivery gate failed (exit {r.returncode})")
-            # Remove the temp archive so a bad one is never promoted.
-            tmpzip.unlink(missing_ok=True)
             sys.exit(1)
 
         # --- Extract into fresh dir for semantic validation ---
@@ -271,12 +355,29 @@ def build_archive(output: Path, project: Path) -> None:
         digest = sha.hexdigest()
         print(f"\nARCHIVE_SHA256={digest}")
 
-        # --- Atomic promote ---
-        output.parent.mkdir(parents=True, exist_ok=True)
-        tmpzip.rename(str(output))
+        # --- Atomic promote (T-1016) ---
+        # Reject tracked/protected/canonical destinations categorically.
+        _reject_protected_destination(output, project)
+        # Refuse an existing destination unless explicit overwrite.
+        if output.exists() and not _OVERWRITE_ALLOWED:
+            print(f"FAIL: destination already exists: {output}")
+            print("Refusing to overwrite without explicit authorization. "
+                  "Pass --force to allow destructive overwrite.")
+            sys.exit(1)
+        try:
+            # os.replace is atomic and replaces an existing destination on
+            # both POSIX and Windows (Path.rename does not overwrite on
+            # Windows). Same-directory source guarantees same-filesystem.
+            os.replace(str(tmpzip), str(output))
+        except OSError as exc:
+            print(f"FAIL: promotion failed: {type(exc).__name__}: {exc}")
+            tmpzip.unlink(missing_ok=True)
+            sys.exit(1)
         print(f"\n=== Archive promoted to {output} ===")
         print(f"  {len(members)} members, SHA-256 {digest}")
         print("DELIVERY BUILD: PASS")
+    finally:
+        tmpzip.unlink(missing_ok=True)
 
 
 def main() -> None:
@@ -286,7 +387,13 @@ def main() -> None:
     parser.add_argument("output", help="Output archive path (e.g. saipen-delivery.zip)")
     parser.add_argument("--project-root", default=".",
                         help="Project root (default: cwd)")
+    parser.add_argument("--force", action="store_true",
+                        help="Allow destructive overwrite of an existing "
+                             "ordinary destination (never tracked/canonical)")
     args = parser.parse_args()
+
+    global _OVERWRITE_ALLOWED
+    _OVERWRITE_ALLOWED = args.force
 
     project = Path(args.project_root).resolve()
     output = Path(args.output).resolve()

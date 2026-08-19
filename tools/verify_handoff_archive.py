@@ -45,10 +45,20 @@ def _git(project: Path, *args: str) -> subprocess.CompletedProcess[str]:
 
 
 def _tracked_files(project: Path) -> set[str]:
-    """Return the set of git-tracked files as POSIX relative paths."""
+    """Return the set of git-tracked files as POSIX relative paths.
+
+    T-1018: this verifier verifies GIT-project handoff archives. A project
+    without a repository gets an explicit structured refusal naming the
+    documented canonical alternative (bootstrap/export.sh / export.ps1),
+    never a raw `fatal: not a git repository` from git itself.
+    """
     r = _git(project, "ls-files")
     if r.returncode != 0:
-        print(f"FAIL: git ls-files failed: {r.stderr.strip()}")
+        print("FAIL: this handoff path requires a Git repository.")
+        print("No-Git projects: use the canonical state exporter instead --")
+        print("  bootstrap/export.sh        (macOS/Linux)")
+        print("  bootstrap/export.ps1       (Windows)")
+        print("which archive .saipen without needing a repository.")
         sys.exit(1)
     return {line.strip() for line in r.stdout.splitlines() if line.strip()}
 

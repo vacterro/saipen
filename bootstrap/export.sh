@@ -70,19 +70,39 @@ resolve_project_root() {
 PROJECT_ROOT=$(resolve_project_root) || exit 1
 SAIPEN_DIR="$PROJECT_ROOT/.saipen"
 
+# T-1017: collision-safe export naming. Two exports within one second MUST
+# both survive -- never silently overwrite a prior backup, so pick the next
+# free name with a monotonic suffix instead of clobbering.
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-TAR_NAME="saipen_export_${TIMESTAMP}.tar.gz"
-TAR_PATH="$PROJECT_ROOT/$TAR_NAME"
+BASE_NAME="saipen_export_${TIMESTAMP}"
+TAR_PATH="$PROJECT_ROOT/${BASE_NAME}.tar.gz"
+SUFFIX=1
+while [ -e "$TAR_PATH" ]; do
+    TAR_PATH="$PROJECT_ROOT/${BASE_NAME}_${SUFFIX}.tar.gz"
+    SUFFIX=$((SUFFIX + 1))
+done
+
+# Build through a temporary artifact in the same directory, then atomically
+# promote -- a failed export never leaves a partial-looking backup.
+TMP_PATH="$PROJECT_ROOT/.${BASE_NAME}.tmp.$$.tar.gz"
+rm -f "$TMP_PATH"
 
 echo "saipen state exporter"
 echo "------------------------------------------------------------"
 echo "Archiving: $SAIPEN_DIR"
-if ! tar -czf "$TAR_PATH" -C "$PROJECT_ROOT" .saipen; then
+if ! tar -czf "$TMP_PATH" -C "$PROJECT_ROOT" .saipen; then
     echo "FAILED: tar exited non-zero"
+    rm -f "$TMP_PATH"
     exit 1
 fi
-if [ ! -s "$TAR_PATH" ]; then
-    echo "FAILED: archive missing or empty at $TAR_PATH after tar reported success"
+if [ ! -s "$TMP_PATH" ]; then
+    echo "FAILED: archive missing or empty at $TMP_PATH after tar reported success"
+    rm -f "$TMP_PATH"
+    exit 1
+fi
+if ! mv "$TMP_PATH" "$TAR_PATH"; then
+    echo "FAILED: could not promote temporary archive to $TAR_PATH"
+    rm -f "$TMP_PATH"
     exit 1
 fi
 echo "Done. Export saved to: $TAR_PATH"

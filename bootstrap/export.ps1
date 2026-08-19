@@ -58,20 +58,45 @@ try {
 $saipenDir = Join-Path -Path $ownerRoot -ChildPath ".saipen"
 
 $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
-$zipName = "saipen_export_$timestamp.zip"
+$baseName = "saipen_export_$timestamp"
+$zipName = "$baseName.zip"
 $zipPath = Join-Path -Path $ownerRoot -ChildPath $zipName
+
+# T-1017: collision-safe export naming. Two exports within one second MUST
+# both survive -- never silently overwrite a prior backup, so pick the next
+# free name with a monotonic suffix instead of clobbering.
+$suffix = 1
+while (Test-Path -LiteralPath $zipPath) {
+    $zipName = "${baseName}_${suffix}.zip"
+    $zipPath = Join-Path -Path $ownerRoot -ChildPath $zipName
+    $suffix++
+}
+
+# Build through a temporary artifact in the same directory, then atomically
+# promote -- a failed export never leaves a partial-looking backup.
+$tmpPath = Join-Path -Path $ownerRoot -ChildPath ".${baseName}.tmp.$PID.zip"
+Remove-Item -LiteralPath $tmpPath -Force -ErrorAction SilentlyContinue
 
 Write-Host "saipen state exporter"
 Write-Host "------------------------------------------------------------"
 Write-Host "Archiving: $saipenDir"
 try {
-    Compress-Archive -Path $saipenDir -DestinationPath $zipPath -Force -ErrorAction Stop
+    Compress-Archive -Path $saipenDir -DestinationPath $tmpPath -ErrorAction Stop
 } catch {
     Write-Host "FAILED: $_" -ForegroundColor Red
+    Remove-Item -LiteralPath $tmpPath -Force -ErrorAction SilentlyContinue
     exit 1
 }
-if (-not (Test-Path $zipPath)) {
-    Write-Host "FAILED: archive not found at $zipPath after Compress-Archive reported success" -ForegroundColor Red
+if (-not (Test-Path $tmpPath)) {
+    Write-Host "FAILED: archive not found at $tmpPath after Compress-Archive reported success" -ForegroundColor Red
+    Remove-Item -LiteralPath $tmpPath -Force -ErrorAction SilentlyContinue
+    exit 1
+}
+try {
+    Move-Item -LiteralPath $tmpPath -Destination $zipPath -Force -ErrorAction Stop
+} catch {
+    Write-Host "FAILED: could not promote temporary archive to $zipPath: $_" -ForegroundColor Red
+    Remove-Item -LiteralPath $tmpPath -Force -ErrorAction SilentlyContinue
     exit 1
 }
 Write-Host "Done. Export saved to: $zipPath"
