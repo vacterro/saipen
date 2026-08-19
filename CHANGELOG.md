@@ -1,6 +1,13 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.225.0 -- 2026-08-19 -- Performance Wave
+
+- T-1008: pending recovery cost is governed by unresolved work rather than settled-history length.
+- T-1020: crew history capture is one-pass.
+- T-1021: roster projection is linear.
+
+
 ## 7.224.4 -- 2026-08-14 -- hostile integrity sweep: prose is never mechanical evidence (T-1003)
 
 - T-1003: every expected crew blocker is now a structured closed-code REFUSE (HOME_REQUIRED, CREW_BLOCKED) -- never a traceback; the blocked circuit names stage/role/reason and an inspect-required next action.

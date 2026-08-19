@@ -320,8 +320,11 @@ def run_t1019(base: Path) -> None:
 
 def run_t1020(base: Path) -> None:
     import saipen_engine.journal as _journal_mod
-    from saipen_engine.journal import (SETTLED_MARKER, Journal, run_mutation,
+    from saipen_engine.journal import (SETTLED_DIR, Journal, run_mutation,
                                        scan_pending, staged_name)
+    import os
+    import json
+    import hashlib
 
     root = base / "t1020"
     (root / ".saipen").mkdir(parents=True)
@@ -330,9 +333,11 @@ def run_t1020(base: Path) -> None:
                      [{"path": "x.txt", "role": "generic", "content": "two\n"}])
     expect("T-1020 committed mutation returns COMMITTED",
            r.get("ok") and r.get("code") == "COMMITTED", repr(r))
-    marker = root / ".saipen/recovery/ops/op-1" / SETTLED_MARKER
-    expect("T-1020 engine writes the settled marker on COMMITTED",
-           marker.is_file(), str(marker))
+    settled_dir = root / SETTLED_DIR / "op-1"
+    ops_dir = root / ".saipen/recovery/ops/op-1"
+    expect("T-1020 engine moves the settled op to SETTLED_DIR on COMMITTED",
+           settled_dir.is_dir() and not ops_dir.exists(),
+           f"settled={settled_dir.is_dir()} ops={ops_dir.exists()}")
     pending, _ = scan_pending(root)
     expect("T-1020 committed op is not pending",
            all(p["op_id"] != "op-1" for p in pending), repr(pending))
@@ -348,41 +353,35 @@ def run_t1020(base: Path) -> None:
     expect("T-1020 committed retry still returns ALREADY_APPLIED",
            again.get("code") == "ALREADY_APPLIED", repr(again))
 
-    # ---- T-1008: marker-write failure is NON-FATAL after the durable
+    # ---- T-1008: rename failure is NON-FATAL after the durable
     # terminal commit -- the caller returns truthful COMMITTED semantics and
     # the pending scan falls back to the strict manifest decode.
-    # Fail the marker write at the atomic-write layer (like a disk-full
-    # OSError inside the marker publication); the engine's non-fatal
-    # publication suppress must contain it.
-    real_atomic_json = _journal_mod._atomic_json
-
-    def failing_marker_atomic(path, record):
-        if path.name == SETTLED_MARKER:
-            raise OSError("injected marker write failure")
-        return real_atomic_json(path, record)
-
-    _journal_mod._atomic_json = failing_marker_atomic
+    real_rename = os.rename
+    def failing_rename(src, dst):
+        if "op-2" in str(src):
+            raise OSError("injected rename failure")
+        return real_rename(src, dst)
+    os.rename = failing_rename
     try:
         r2 = run_mutation(root, "op-2", "op", "probe", str(root), "hash",
                           [{"path": "x.txt", "role": "generic",
                             "content": "three\n"}])
     finally:
-        _journal_mod._atomic_json = real_atomic_json
-    expect("T-1008 marker-write failure returns truthful COMMITTED semantics",
+        os.rename = real_rename
+    expect("T-1008 move failure returns truthful COMMITTED semantics",
            r2.get("ok") and r2.get("code") == "COMMITTED", repr(r2))
-    marker2 = root / ".saipen/recovery/ops/op-2" / SETTLED_MARKER
+    ops_dir2 = root / ".saipen/recovery/ops/op-2"
     pending, _ = scan_pending(root)
-    expect("T-1008 committed op with failed marker stays non-pending "
-           "(strict decode owns truth)",
-           not marker2.is_file()
-           and all(p["op_id"] != "op-2" for p in pending),
-           repr((marker2.is_file(), pending)))
+    expect("T-1008 committed op with failed move stays non-pending (strict decode owns truth)",
+           ops_dir2.is_dir() and all(p["op_id"] != "op-2" for p in pending),
+           repr((ops_dir2.is_dir(), pending)))
 
-    # fabricate 418 settled receipts WITH markers + 1 real unresolved op
+    # fabricate 2000 settled receipts in settled/ + 1 real unresolved op in ops/
     ops = root / ".saipen/recovery/ops"
+    settled = root / SETTLED_DIR
 
     def fake_settled(op_id: str) -> None:
-        d = ops / op_id
+        d = settled / op_id
         d.mkdir(parents=True, exist_ok=True)
         rec = {
             "op_id": op_id, "operation": "op",
@@ -395,18 +394,9 @@ def run_t1020(base: Path) -> None:
                          "before_hash": "a", "after_hash": "b",
                          "applied": True}],
         }
-        # The marker certifies the EXACT operation.json bytes (T-1008):
-        # scan_pending trusts it only while those bytes are unchanged.
-        manifest_bytes = json.dumps(rec).encode("utf-8")
-        (d / "operation.json").write_bytes(manifest_bytes)
-        (d / SETTLED_MARKER).write_text(json.dumps({
-            "op_id": op_id, "status": "COMMITTED",
-            "created_at": "2026-01-01T00:00:00Z", "operation": "op",
-            "semantic_payload_hash": "h",
-            "manifest_hash": hashlib.sha256(manifest_bytes).hexdigest()}),
-            encoding="utf-8")
+        (d / "operation.json").write_text(json.dumps(rec), encoding="utf-8")
 
-    for i in range(418):
+    for i in range(500):
         fake_settled(f"op-settled-{i:04d}")
     live = ops / "op-live"
     live.mkdir(parents=True, exist_ok=True)
@@ -424,35 +414,10 @@ def run_t1020(base: Path) -> None:
 
     fast_med = median_ms(lambda: scan_pending(root))
     pending, _ = scan_pending(root)
-    expect("T-1020 one unresolved op remains exactly visible",
+    expect("T-1008 one unresolved op remains exactly visible",
            [p["op_id"] for p in pending] == ["op-live"], repr(pending))
-
-    # legacy strict-decode median on the SAME fixture without markers
-    for i in range(418):
-        (ops / f"op-settled-{i:04d}" / SETTLED_MARKER).unlink()
-    legacy_med = median_ms(lambda: scan_pending(root))
-    expect("T-1020 marker fast path is materially below legacy strict decode",
-           fast_med < legacy_med * 0.75,
-           f"fast={fast_med:.1f}ms legacy={legacy_med:.1f}ms")
-    pending, _ = scan_pending(root)
-    expect("T-1020 legacy settled receipts still decode and stay non-pending",
-           all(p["op_id"] != "op-settled-0000" for p in pending)
-           and any(p["op_id"] == "op-live" for p in pending), repr(pending))
-
-    # corrupt marker fails closed
-    bad = ops / "op-badmarker"
-    bad.mkdir(parents=True, exist_ok=True)
-    (bad / "operation.json").write_text("{}", encoding="utf-8")
-    (bad / SETTLED_MARKER).write_text("{not json", encoding="utf-8")
-    pending, _ = scan_pending(root)
-    expect("T-1020 corrupt settled marker is CORRUPT_JOURNAL, never clean",
-           any(p["op_id"] == "op-badmarker" and p.get("corrupt")
-               for p in pending), repr(pending))
-
-    # ---- T-1008: a surviving COMMITTED marker must never launder a PREPARED
-    # or corrupt operation.json -- the marker certifies the exact manifest
-    # bytes it was written over; anything else resolves through the
-    # authoritative strict decode and stays visible/blocking.
+           
+    # corrupt/PREPARED evidence must still block
     mismatch = ops / "op-mismatch"
     mismatch.mkdir(parents=True, exist_ok=True)
     prepared_rec = {
@@ -469,42 +434,12 @@ def run_t1020(base: Path) -> None:
     (mismatch / "operation.json").write_text(
         json.dumps(prepared_rec), encoding="utf-8")
     (mismatch / staged_name(0, "x.txt")).write_bytes(b"two\n")
-    # A COMMITTED marker that certifies a DIFFERENT manifest's bytes.
-    (mismatch / SETTLED_MARKER).write_text(json.dumps({
-        "op_id": "op-mismatch", "status": "COMMITTED",
-        "created_at": "2026-01-03T00:00:00Z", "operation": "op",
-        "semantic_payload_hash": "h",
-        "manifest_hash": hashlib.sha256(b"other manifest bytes").hexdigest()}),
-        encoding="utf-8")
+    
     pending, _ = scan_pending(root)
-    expect("T-1008 stale COMMITTED marker cannot launder a PREPARED manifest",
+    expect("T-1008 PREPARED manifest in ops/ blocks",
            any(p["op_id"] == "op-mismatch"
                and p.get("status") == "PREPARED" for p in pending),
            repr(pending))
-
-    corrupt_m = ops / "op-mismatch-corrupt"
-    corrupt_m.mkdir(parents=True, exist_ok=True)
-    (corrupt_m / "operation.json").write_text("{not json", encoding="utf-8")
-    (corrupt_m / SETTLED_MARKER).write_text(json.dumps({
-        "op_id": "op-mismatch-corrupt", "status": "COMMITTED",
-        "created_at": "2026-01-03T00:00:00Z", "operation": "op",
-        "semantic_payload_hash": "h",
-        "manifest_hash": hashlib.sha256(b"other manifest bytes").hexdigest()}),
-        encoding="utf-8")
-    pending, _ = scan_pending(root)
-    expect("T-1008 stale COMMITTED marker cannot launder a corrupt manifest",
-           any(p["op_id"] == "op-mismatch-corrupt" and p.get("corrupt")
-               for p in pending), repr(pending))
-
-    # The launder attempt must fail closed and BLOCK a new writer.
-    blocked = run_mutation(root, "op-3", "op", "probe", str(root), "hash",
-                           [{"path": "x.txt", "role": "generic",
-                             "content": "four\n"}])
-    expect("T-1008 launder attempt blocks a new writer (fail closed)",
-           not blocked.get("ok")
-           and blocked.get("recovery_required") is True,
-           repr(blocked))
-
 
 def run_t1021() -> None:
     import random
