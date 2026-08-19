@@ -19,6 +19,7 @@ Exit 0 when every tag agrees, 1 otherwise. The initial tag discovery skips
 observed Git process failure and every later batch-process or protocol failure
 fail closed: the audit must not turn losing its evidence into a green result.
 """
+
 from __future__ import annotations
 
 import io
@@ -43,24 +44,23 @@ else:
 # are printed every run so they never go quiet, which is the whole difference
 # between a documented limit and a swept one.
 KNOWN_MISMATCHES = {
-    "v3.1.1a": "commit is the 3.1.1a work but its VERSION was never bumped "
-               "past 3.1.1",
+    "v3.1.1a": "commit is the 3.1.1a work but its VERSION was never bumped past 3.1.1",
     "v7.61.0": "tag landed one release behind -- the commit is v7.60.0",
     "v7.74.0": "tag landed one release ahead -- the commit is v7.75.0",
     "v7.81.0": "commit is the v7.81.0 work but its VERSION still says 7.80.0",
     "v7.99.0": "the incident that produced the guard: `git tag` ran after a "
-               "failed commit and labelled the previous one. Its published "
-               "release carries v7.98.0's notes",
+    "failed commit and labelled the previous one. Its published "
+    "release carries v7.98.0's notes",
     "v7.199.0": "its true release commit eae5b72 (VERSION 7.199.0) is not on "
-                "origin/main -- orphaned by a later history rewrite -- so a "
-                "tag pointing there would dangle on every fresh clone; the "
-                "tag currently names 594a1da, which carries VERSION 7.201.0. "
-                "Re-pointing would push the orphaned commit and re-run the "
-                "v7.199.0 release",
+    "origin/main -- orphaned by a later history rewrite -- so a "
+    "tag pointing there would dangle on every fresh clone; the "
+    "tag currently names 594a1da, which carries VERSION 7.201.0. "
+    "Re-pointing would push the orphaned commit and re-run the "
+    "v7.199.0 release",
     "v7.200.0": "same shape as v7.199.0: its true release commit ea8eef3 "
-                "(VERSION 7.200.0) is not on origin/main; the tag names "
-                "594a1da (VERSION 7.201.0). Re-pointing would push the "
-                "orphaned commit and re-run the v7.200.0 release",
+    "(VERSION 7.200.0) is not on origin/main; the tag names "
+    "594a1da (VERSION 7.201.0). Re-pointing would push the "
+    "orphaned commit and re-run the v7.200.0 release",
 }
 
 GIT_SHIM_ENV = "SAIPEN_AUDIT_TAGS_GIT_SHIM"
@@ -91,8 +91,7 @@ def _decode_version(raw: bytes) -> str:
 
 
 def git(*args: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run([*_git_command(), *args], capture_output=True, text=True,
-                          check=False)
+    return subprocess.run([*_git_command(), *args], capture_output=True, text=True, check=False)
 
 
 def _git_command() -> list[str]:
@@ -101,8 +100,7 @@ def _git_command() -> list[str]:
     return [sys.executable, shim] if shim else ["git"]
 
 
-def _parse_batch_versions(
-        tags: list[str], buf: bytes) -> tuple[dict[str, str | None], str | None]:
+def _parse_batch_versions(tags: list[str], buf: bytes) -> tuple[dict[str, str | None], str | None]:
     """Parse one exact `cat-file --batch` record per requested VERSION."""
     versions: dict[str, str | None] = {}
     pos = 0
@@ -118,16 +116,19 @@ def _parse_batch_versions(
             continue
 
         parts = header.rsplit(" ", 2)
-        if (len(parts) != 3 or parts[1] != "blob"
-                or len(parts[0]) not in {40, 64}
-                or not all(c in "0123456789abcdef" for c in parts[0].lower())):
+        if (
+            len(parts) != 3
+            or parts[1] != "blob"
+            or len(parts[0]) not in {40, 64}
+            or not all(c in "0123456789abcdef" for c in parts[0].lower())
+        ):
             return versions, f"response for {tag} has malformed header {header!r}"
         try:
             size = int(parts[2])
         except ValueError:
             return versions, f"response for {tag} has invalid size {parts[2]!r}"
         end = pos + size
-        if end >= len(buf) or buf[end:end + 1] != b"\n":
+        if end >= len(buf) or buf[end : end + 1] != b"\n":
             return versions, f"response for {tag} is truncated"
         versions[tag] = _decode_version(buf[pos:end])
         pos = end + 1
@@ -154,9 +155,11 @@ def main() -> int:
     out = tag_result.stdout
     tags = [t.strip() for t in out.splitlines() if t.strip()]
     if not tags:
-        print("SKIP: no tags in this checkout -- nothing to audit. "
-              "A shallow clone fetches none; use fetch-depth: 0 if this was "
-              "meant to run for real")
+        print(
+            "SKIP: no tags in this checkout -- nothing to audit. "
+            "A shallow clone fetches none; use fetch-depth: 0 if this was "
+            "meant to run for real"
+        )
         return 0
 
     # One batch call rather than one `git show` per tag: fifty subprocesses is
@@ -167,7 +170,9 @@ def main() -> int:
         proc = subprocess.run(
             [*_git_command(), "cat-file", "--batch"],
             input=spec.encode("utf-8"),
-            capture_output=True, check=False)
+            capture_output=True,
+            check=False,
+        )
     except (OSError, subprocess.SubprocessError) as e:
         print(f"FAIL: git cat-file failed to start ({e})")
         return 1
@@ -198,8 +203,10 @@ def main() -> int:
             bad.append((tag, ver))
 
     for tag in missing:
-        print(f"WARN: {tag} has no VERSION file at its commit -- predates the "
-              f"file, nothing to compare")
+        print(
+            f"WARN: {tag} has no VERSION file at its commit -- predates the "
+            f"file, nothing to compare"
+        )
     known = [(t, v) for t, v in bad if t in KNOWN_MISMATCHES]
     fresh = [(t, v) for t, v in bad if t not in KNOWN_MISMATCHES]
 
@@ -210,25 +217,33 @@ def main() -> int:
     # exemption is how a check quietly stops covering what it claims to.
     stale = sorted(set(KNOWN_MISMATCHES) - {t for t, _ in bad} & set(tags))
     for tag in stale:
-        print(f"FAIL: {tag} is listed as a known mismatch but now agrees with "
-              f"its VERSION -- drop it from KNOWN_MISMATCHES, an exemption "
-              f"nobody rechecks is how coverage rots")
+        print(
+            f"FAIL: {tag} is listed as a known mismatch but now agrees with "
+            f"its VERSION -- drop it from KNOWN_MISMATCHES, an exemption "
+            f"nobody rechecks is how coverage rots"
+        )
 
     if fresh:
         for tag, ver in sorted(fresh):
-            print(f"FAIL: {tag} points at a commit whose VERSION says {ver}. "
-                  f"The release published from it carries the wrong notes and "
-                  f"a VERSION asset that disagrees with its own tag name")
+            print(
+                f"FAIL: {tag} points at a commit whose VERSION says {ver}. "
+                f"The release published from it carries the wrong notes and "
+                f"a VERSION asset that disagrees with its own tag name"
+            )
         print(f"\n{len(fresh)} NEW mismatch(es) out of {len(tags)} tag(s).")
-        print("Fix forward: a corrected tag re-runs release.yml from the "
-              "TAG's commit, so the workflow file there is whatever it was "
-              "then -- re-check what that publishes before pushing.")
+        print(
+            "Fix forward: a corrected tag re-runs release.yml from the "
+            "TAG's commit, so the workflow file there is whatever it was "
+            "then -- re-check what that publishes before pushing."
+        )
 
     if fresh or stale:
         return 1
 
-    print(f"PASS: {len(tags) - len(missing)} comparable tag(s) checked, "
-          f"{len(known)} known historical mismatch(es), no new ones")
+    print(
+        f"PASS: {len(tags) - len(missing)} comparable tag(s) checked, "
+        f"{len(known)} known historical mismatch(es), no new ones"
+    )
     return 0
 
 

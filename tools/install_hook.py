@@ -42,9 +42,11 @@ git_path = Path(".git")
 if git_path.is_file():
     # Linked worktree: .git is a pointer file and hooks live in the MAIN repo, shared by every
     # worktree -- installing from here is neither possible nor needed.
-    print("FAIL: this is a linked git worktree (.git is a file) -- run "
-          "from the main checkout instead; worktrees share its hooks "
-          "automatically")
+    print(
+        "FAIL: this is a linked git worktree (.git is a file) -- run "
+        "from the main checkout instead; worktrees share its hooks "
+        "automatically"
+    )
     sys.exit(1)
 if not git_path.is_dir():
     print("FAIL: no .git here -- run from the project root of a git repo")

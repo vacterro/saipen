@@ -55,8 +55,7 @@ _PROJECTION_POLICIES = {
 _ONBOARDING_QUESTIONS = [
     "How do you prefer decisions between equivalent options to be made, "
     "for example safer and slower versus bolder and faster?",
-    "What should the default presentation and tone be for the work this "
-    "project produces?",
+    "What should the default presentation and tone be for the work this project produces?",
 ]
 
 _CATEGORY_RE = re.compile(r"^\[([^\]]+)\]\s*(.*)$", re.DOTALL)
@@ -64,21 +63,22 @@ _CATEGORY_RE = re.compile(r"^\[([^\]]+)\]\s*(.*)$", re.DOTALL)
 
 def _redact_credentials(text: str) -> str:
     """T-1015: existing credential containment/redaction policy.
-    
+
     A high-confidence credential-like value must be redacted before USERPERSON
     persistence and projection, without recording the secret in LOG/recovery.
     """
     import re as _re
+
     # ghp_ token
-    text = _re.sub(r'ghp_[a-zA-Z0-9]{36}', 'ghp_***', text)
+    text = _re.sub(r"ghp_[a-zA-Z0-9]{36}", "ghp_***", text)
     # AKIA token
-    text = _re.sub(r'AKIA[0-9A-Z]{16}', 'AKIA***', text)
+    text = _re.sub(r"AKIA[0-9A-Z]{16}", "AKIA***", text)
     # sk- token
-    text = _re.sub(r'sk-[a-zA-Z0-9]{32,}', 'sk-***', text)
+    text = _re.sub(r"sk-[a-zA-Z0-9]{32,}", "sk-***", text)
     # postgres/postgresql uri
-    text = _re.sub(r'(postgres(?:ql)?://[^:]+):[^@]+(@)', r'\1:***\2', text)
+    text = _re.sub(r"(postgres(?:ql)?://[^:]+):[^@]+(@)", r"\1:***\2", text)
     # basic bearer token shape if very explicitly labeled
-    text = _re.sub(r'(?i)(bearer\s+)[a-zA-Z0-9_\-\.]{30,}', r'\1***', text)
+    text = _re.sub(r"(?i)(bearer\s+)[a-zA-Z0-9_\-\.]{30,}", r"\1***", text)
     return text
 
 
@@ -126,8 +126,7 @@ def render_profile(preferences: list[dict] | list[str]) -> str:
     body_lines = []
     for preference in preferences:
         if isinstance(preference, dict):
-            body_lines.append(
-                f"- [{preference['category']}] {preference['text']}")
+            body_lines.append(f"- [{preference['category']}] {preference['text']}")
         elif preference.strip().startswith("- "):
             body_lines.append(preference.strip())
         else:
@@ -136,8 +135,7 @@ def render_profile(preferences: list[dict] | list[str]) -> str:
     return f"{_HEADER}\n\n{body}\n" if body else f"{_HEADER}\n\n"
 
 
-def merge_profile(current: list[dict] | list[str],
-                  additions: list[dict] | list[str]) -> list[dict]:
+def merge_profile(current: list[dict] | list[str], additions: list[dict] | list[str]) -> list[dict]:
     """Deterministic lexical merge on structured preference identity.
 
     Two preferences are the same when category AND normalized full text are
@@ -169,8 +167,7 @@ def merge_profile(current: list[dict] | list[str],
     return result
 
 
-def remove_preference(current: list[dict], text: str,
-                      category: str | None = None) -> list[dict]:
+def remove_preference(current: list[dict], text: str, category: str | None = None) -> list[dict]:
     """Remove one preference by its identity `(category, text)`.
 
     The preference identity is the pair, so removal must be category-aware:
@@ -189,16 +186,25 @@ def remove_preference(current: list[dict], text: str,
         return current, None
     if category is not None:
         wanted = _canonical(category)
-        return ([p for p in current
-                 if not (_canonical(p.get("text", "")) == target
-                         and _canonical(p.get("category", "")) == wanted)],
-                None)
+        return (
+            [
+                p
+                for p in current
+                if not (
+                    _canonical(p.get("text", "")) == target
+                    and _canonical(p.get("category", "")) == wanted
+                )
+            ],
+            None,
+        )
     if len(matches) > 1:
         cats = sorted({_canonical(p.get("category", "")) for p in matches})
-        return (current,
-                f"remove is ambiguous: {len(matches)} entries share text "
-                f"{text!r} across categories {cats}; pass "
-                "--category <name> to scope the removal")
+        return (
+            current,
+            f"remove is ambiguous: {len(matches)} entries share text "
+            f"{text!r} across categories {cats}; pass "
+            "--category <name> to scope the removal",
+        )
     return ([p for p in current if p not in matches], None)
 
 
@@ -207,23 +213,23 @@ def validate_profile(text: str) -> list[str]:
     errors = []
     lines = text.splitlines()
     if not lines or lines[0] != _HEADER:
-        errors.append("USERPERSON file must open with the exact heading "
-                      "'# USERPERSON'")
+        errors.append("USERPERSON file must open with the exact heading '# USERPERSON'")
         return errors
     for index, line in enumerate(lines[1:], 2):
         if not line.strip():
             continue
         if not line.lstrip().startswith("- "):
-            errors.append(f"line {index}: every preference must be a markdown "
-                          f"bullet starting '- '")
+            errors.append(f"line {index}: every preference must be a markdown bullet starting '- '")
     preferences = parse_profile(text)["preferences"]
     seen = set()
     for entry in preferences:
         key = _canonical(f"{entry['category']}: {entry['text']}")
         if key in seen:
-            errors.append("duplicate preference -- `saipen userperson add` "
-                          "merges deterministically on category and exact "
-                          "text, never by guessing meaning")
+            errors.append(
+                "duplicate preference -- `saipen userperson add` "
+                "merges deterministically on category and exact "
+                "text, never by guessing meaning"
+            )
             break
         seen.add(key)
     return errors
@@ -234,8 +240,7 @@ def projection_policy(role: str) -> frozenset[str]:
     return frozenset(_PROJECTION_POLICIES.get(role, set()))
 
 
-def project_profile(preferences: list[dict], role: str,
-                    source_fingerprint: str = "") -> dict:
+def project_profile(preferences: list[dict], role: str, source_fingerprint: str = "") -> dict:
     """Produce the actual bounded projection for a role.
 
     Returns a structured handoff: the role, the allowed categories, the source
@@ -244,8 +249,7 @@ def project_profile(preferences: list[dict], role: str,
     (saipen/IMPROVE.md section 8).
     """
     policy = projection_policy(role)
-    selected = [entry for entry in preferences
-                if entry["category"].strip().lower() in policy]
+    selected = [entry for entry in preferences if entry["category"].strip().lower() in policy]
     return {
         "role": role,
         "projection_policy": sorted(policy),
@@ -267,8 +271,7 @@ def profile_path(project_root: Path | str) -> Path:
     return Path(project_root) / PROFILE_PATH
 
 
-def write_profile(project_root: Path | str, text: str,
-                  agent: str = "saipen") -> dict:
+def write_profile(project_root: Path | str, text: str, agent: str = "saipen") -> dict:
     """Write the profile through the common lock + journal + roll-forward
     machinery (NITRO M7). One ATOMIC_FILE target, exact bytes via the codec,
     before/after hashes, post-write byte verification. Returns the transaction
@@ -288,13 +291,24 @@ def write_profile(project_root: Path | str, text: str,
     before = _hash_file(path) if path.is_file() else ""
     with project_writer_lock(root):
         return run_mutation(
-            root, op_id, "userperson", agent, project_identity(root),
+            root,
+            op_id,
+            "userperson",
+            agent,
+            project_identity(root),
             hash_bytes(rel.encode("utf-8")),
-            [{"path": rel, "role": "generic", "content": content_bytes,
-              "before_hash": before,
-              "after_hash": hash_bytes(content_bytes)}],
+            [
+                {
+                    "path": rel,
+                    "role": "generic",
+                    "content": content_bytes,
+                    "before_hash": before,
+                    "after_hash": hash_bytes(content_bytes),
+                }
+            ],
             preconditions={rel: before},
-            verification_policy="userperson")
+            verification_policy="userperson",
+        )
 
 
 def reset_profile(project_root: Path | str, agent: str = "saipen") -> dict:
@@ -316,15 +330,31 @@ def reset_profile(project_root: Path | str, agent: str = "saipen") -> dict:
     rel = PROFILE_PATH.replace("\\", "/")
     op_id = f"userperson-reset-{uuid.uuid4().hex}"
     if not path.is_file():
-        return {"ok": False, "code": "TICKET_NOT_FOUND", "op_id": op_id,
-                "recovery_required": False,
-                "detail": "no profile to reset"}
+        return {
+            "ok": False,
+            "code": "TICKET_NOT_FOUND",
+            "op_id": op_id,
+            "recovery_required": False,
+            "detail": "no profile to reset",
+        }
     before = _hash_file(path)
     with project_writer_lock(root):
         return run_mutation(
-            root, op_id, "userperson_reset", agent, project_identity(root),
+            root,
+            op_id,
+            "userperson_reset",
+            agent,
+            project_identity(root),
             hash_bytes(rel.encode("utf-8")),
-            [{"path": rel, "role": "generic", "action": "delete_file",
-              "before_hash": before, "after_hash": ""}],
+            [
+                {
+                    "path": rel,
+                    "role": "generic",
+                    "action": "delete_file",
+                    "before_hash": before,
+                    "after_hash": "",
+                }
+            ],
             preconditions={rel: before},
-            verification_policy="userperson")
+            verification_policy="userperson",
+        )

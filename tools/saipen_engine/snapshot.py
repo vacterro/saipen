@@ -30,6 +30,7 @@ def canonical_identity(project_root: Path) -> str:
     snapshot consume.
     """
     from .paths import project_identity
+
     return project_identity(project_root)
 
 
@@ -37,7 +38,11 @@ def git_head(project_root: Path) -> str:
     try:
         result = subprocess.run(
             ["git", "-C", str(project_root), "rev-parse", "--short", "HEAD"],
-            capture_output=True, text=True, timeout=5, check=False)
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
         return result.stdout.strip() if result.returncode == 0 else ""
     except (OSError, subprocess.SubprocessError):
         return ""
@@ -64,6 +69,7 @@ class ProjectSnapshot:
         state = root / ".saipen" / "STATE.md"
         board = root / ".saipen" / "BOARD.md"
         from .log import read_history_snapshot
+
         history = read_history_snapshot(root)
         return ProjectSnapshot(
             project_root=root,
@@ -79,6 +85,8 @@ class ProjectSnapshot:
     def stale(self, project_root: Path | str) -> bool:
         """True if any canonical precondition hash differs from the snapshot."""
         fresh = ProjectSnapshot.capture(project_root)
-        return (fresh.state_hash != self.state_hash
-                or fresh.board_hash != self.board_hash
-                or fresh.log_hash != self.log_hash)
+        return (
+            fresh.state_hash != self.state_hash
+            or fresh.board_hash != self.board_hash
+            or fresh.log_hash != self.log_hash
+        )

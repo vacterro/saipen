@@ -24,6 +24,7 @@ every ordinary forward reference.
 
 Exit 0 when clean, 1 otherwise.
 """
+
 from __future__ import annotations
 
 import ast
@@ -38,7 +39,11 @@ else:
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 _BUILTINS = frozenset(dir(builtins)) | {
-    "__file__", "__name__", "__doc__", "__spec__", "__package__",
+    "__file__",
+    "__name__",
+    "__doc__",
+    "__spec__",
+    "__package__",
 }
 
 
@@ -50,9 +55,22 @@ def _bound_by(node: ast.AST) -> set[str]:
     elif isinstance(node, (ast.Import, ast.ImportFrom)):
         for a in node.names:
             out.add(a.asname or a.name.split(".")[0])
-    elif isinstance(node, (ast.Assign, ast.AnnAssign, ast.AugAssign,
-                           ast.For, ast.AsyncFor, ast.With, ast.AsyncWith,
-                           ast.If, ast.While, ast.Try, ast.Match)):
+    elif isinstance(
+        node,
+        (
+            ast.Assign,
+            ast.AnnAssign,
+            ast.AugAssign,
+            ast.For,
+            ast.AsyncFor,
+            ast.With,
+            ast.AsyncWith,
+            ast.If,
+            ast.While,
+            ast.Try,
+            ast.Match,
+        ),
+    ):
         for sub in ast.walk(node):
             if isinstance(sub, ast.Name) and isinstance(sub.ctx, ast.Store):
                 out.add(sub.id)
@@ -61,8 +79,7 @@ def _bound_by(node: ast.AST) -> set[str]:
             # combined with `or`, and its own autofix then produces a line
             # E501 rejects. Two names satisfy both rules instead of trading
             # one lint for the other.
-            defines = isinstance(sub, (ast.FunctionDef, ast.AsyncFunctionDef,
-                                       ast.ClassDef))
+            defines = isinstance(sub, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
             catches = isinstance(sub, ast.ExceptHandler) and sub.name
             if defines or catches:
                 out.add(sub.name)
@@ -112,8 +129,7 @@ def _reads_outside_functions(node: ast.AST):
                 stack.extend(d for d in child.args.defaults if d)
                 stack.extend(d for d in child.args.kw_defaults if d)
                 continue
-            if isinstance(child, (ast.ListComp, ast.SetComp, ast.DictComp,
-                                  ast.GeneratorExp)):
+            if isinstance(child, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
                 # A comprehension binds its own targets in its own scope.
                 for _g in child.generators:
                     stack.append(_g.iter)
@@ -145,14 +161,15 @@ def audit(path: Path) -> list[str]:
     per_stmt = [_bound_by(s) for s in tree.body]
     problems = []
     for i, stmt in enumerate(tree.body):
-        available = set().union(*per_stmt[:i + 1]) if per_stmt else set()
+        available = set().union(*per_stmt[: i + 1]) if per_stmt else set()
         for name in _reads_outside_functions(stmt):
             if name.id in available or name.id in _BUILTINS:
                 continue
             if name.id in all_bound:
                 problems.append(
                     f"{path.as_posix()}:{name.lineno} reads {name.id!r}, which "
-                    f"nothing binds until a later top-level statement")
+                    f"nothing binds until a later top-level statement"
+                )
     return problems
 
 
@@ -172,12 +189,13 @@ def main() -> int:
     if problems:
         for p in problems:
             print(f"FAIL: {p}")
-        print(f"\n{len(problems)} module-level ordering problem(s). These are "
-              f"NameErrors that only fire on the input reaching that branch, "
-              f"which is why three of them survived a full local run.")
+        print(
+            f"\n{len(problems)} module-level ordering problem(s). These are "
+            f"NameErrors that only fire on the input reaching that branch, "
+            f"which is why three of them survived a full local run."
+        )
         return 1
-    print(f"PASS: {len(targets)} tool(s) read no module-level name before "
-          f"assigning it")
+    print(f"PASS: {len(targets)} tool(s) read no module-level name before assigning it")
     return 0
 
 

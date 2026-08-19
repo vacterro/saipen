@@ -16,7 +16,8 @@ TICKET_RE = re.compile(r"^- \[([ x/])\] (T-\d+)\s+(.*)$")
 # (07:00Z) stamp can never enter chronological ordering (P1#3).
 _STRICT_UTC_RE = re.compile(
     r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$"
-    r"|^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?\+00:00$")
+    r"|^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?\+00:00$"
+)
 _UTC_ZERO = datetime.timedelta(0)
 
 
@@ -62,6 +63,8 @@ def iso_utc_sort_key(value: object) -> datetime.datetime | None:
     if not text:
         return None
     return _strict_utc_stamp(text)
+
+
 # A second canonical ticket-record opener anywhere AFTER the first on the same
 # physical line. ONE PHYSICAL BOARD RECORD == ONE TICKET IDENTITY (T-1003): a
 # merged record silently deletes the second ticket's identity (T-473/T-576 and
@@ -70,9 +73,20 @@ def iso_utc_sort_key(value: object) -> datetime.datetime | None:
 # prose -- it is a second identity and a parse error.
 EMBEDDED_TICKET_RE = re.compile(r"\[[ x/]\]\s+T-\d+")
 PIPE_SENTINEL = "\x00"
-KNOWN_FIELDS = frozenset({"needs", "owner", "claim_time", "blocker", "verify",
-                          "review_passes", "verify_attempts",
-                          "source_reports", "recurrence", "weak_model"})
+KNOWN_FIELDS = frozenset(
+    {
+        "needs",
+        "owner",
+        "claim_time",
+        "blocker",
+        "verify",
+        "review_passes",
+        "verify_attempts",
+        "source_reports",
+        "recurrence",
+        "weak_model",
+    }
+)
 
 
 def parse_board(text: str) -> dict:
@@ -98,7 +112,8 @@ def parse_board(text: str) -> dict:
             if not m:
                 errors.append(
                     f"BOARD.md:{line_no} ticket-ish line doesn't match "
-                    f"RFC section 1.2 shape `- [ ] T-### description`")
+                    f"RFC section 1.2 shape `- [ ] T-### description`"
+                )
                 continue
             checkbox, tid, rest = m.groups()
             if EMBEDDED_TICKET_RE.search(rest):
@@ -107,30 +122,32 @@ def parse_board(text: str) -> dict:
                     f"ticket-record opener -- ONE PHYSICAL BOARD RECORD == "
                     f"ONE TICKET IDENTITY; split the records onto separate "
                     f"lines or the embedded ticket silently loses its "
-                    f"identity")
+                    f"identity"
+                )
                 continue
             if section not in REQUIRED_HEADINGS:
                 errors.append(
                     f"BOARD.md:{line_no} ticket {tid} sits under "
                     f"{section or 'no heading'} -- not one of the four RFC "
                     f"sections, so no operation may mutate a board built "
-                    f"around it")
+                    f"around it"
+                )
                 continue
-            parts = [unescape_ticket_part(p.strip())
-                     for p in rest.split(" | ")]
+            parts = [unescape_ticket_part(p.strip()) for p in rest.split(" | ")]
             needs, fields = [], {}
             for part in parts[1:]:
                 fm = re.match(r"^([a-z_]+):\s*(.*)$", part)
                 if not fm or fm.group(1) not in KNOWN_FIELDS:
                     errors.append(
-                        f"BOARD.md:{line_no} ticket {tid} has unrecognized "
-                        f"field {part!r}")
+                        f"BOARD.md:{line_no} ticket {tid} has unrecognized field {part!r}"
+                    )
                     continue
                 if fm.group(1) in fields:
                     errors.append(
                         f"BOARD.md:{line_no} ticket {tid} duplicates the "
                         f"known field {fm.group(1)!r} -- a weak model must "
-                        f"never read one value while Python uses another")
+                        f"never read one value while Python uses another"
+                    )
                     continue
                 fields[fm.group(1)] = fm.group(2)
                 if fm.group(1) == "needs":
@@ -154,7 +171,8 @@ def parse_board(text: str) -> dict:
                 f"BOARD.md required heading {heading} appears "
                 f"{headings.count(heading)} time(s) -- the shared parser "
                 f"refuses a board whose work surface is split or missing, so "
-                f"no operation can mutate it into a crash")
+                f"no operation can mutate it into a crash"
+            )
     return {"tickets": tickets, "headings": headings, "errors": errors}
 
 
@@ -183,19 +201,27 @@ def board_semantic_errors(ticket: dict) -> list[str]:
     fields = ticket.get("fields", {})
     tid = ticket.get("id", "?")
     if checkbox == "x" and section != "## DONE":
-        errors.append(f"{tid} is checked [x] but sits under {section} -- "
-                      "checkbox and section disagree; [x] belongs only "
-                      "under ## DONE")
+        errors.append(
+            f"{tid} is checked [x] but sits under {section} -- "
+            "checkbox and section disagree; [x] belongs only "
+            "under ## DONE"
+        )
     if checkbox == "/" and section != "## DOING":
-        errors.append(f"{tid} is [/] in-progress but sits under {section} -- "
-                      "in-progress work belongs only under ## DOING")
+        errors.append(
+            f"{tid} is [/] in-progress but sits under {section} -- "
+            "in-progress work belongs only under ## DOING"
+        )
     if checkbox in (" ", "") and section in ("## DONE", "## DOING"):
-        errors.append(f"{tid} has an open [ ] checkbox under {section} -- "
-                      "open boxes belong under ## TODO or ## BLOCKED")
+        errors.append(
+            f"{tid} has an open [ ] checkbox under {section} -- "
+            "open boxes belong under ## TODO or ## BLOCKED"
+        )
     if section == "## DONE" and not str(fields.get("verify", "")).strip():
-        errors.append(f"{tid} sits under ## DONE with no | verify: evidence "
-                      "-- ## DONE is a claim that the ticket's own verify "
-                      "condition was met")
+        errors.append(
+            f"{tid} sits under ## DONE with no | verify: evidence "
+            "-- ## DONE is a claim that the ticket's own verify "
+            "condition was met"
+        )
     status_error = ticket_status_error(ticket)
     if status_error:
         errors.append(f"{tid} {status_error}")
@@ -229,9 +255,7 @@ def board_graph_errors(tickets: dict) -> list[str]:
     for tid, ticket in tickets.items():
         for need in ticket.get("needs", []):
             if need not in ids:
-                errors.append(
-                    f"{tid} needs nonexistent {need} "
-                    f"(line {ticket.get('line_no')})")
+                errors.append(f"{tid} needs nonexistent {need} (line {ticket.get('line_no')})")
     # Cycle detection over the needs: dependency DAG (iterative three-color).
     WHITE, GRAY, BLACK = 0, 1, 2
     color = {tid: WHITE for tid in tickets}
@@ -258,7 +282,7 @@ def board_graph_errors(tickets: dict) -> list[str]:
                     continue
                 if color.get(need) == GRAY:
                     cycle_start = stack.index(need)
-                    cycle = tuple(stack[cycle_start:] + [need])
+                    cycle = tuple([*stack[cycle_start:], need])
                     if cycle not in seen_cycles:
                         seen_cycles.add(cycle)
                         errors.append("cyclic needs: " + " -> ".join(cycle))
@@ -298,8 +322,9 @@ CLAIM_LIVENESS_WINDOW = datetime.timedelta(minutes=15)
 CLAIM_STATUS = ("UNCLAIMED", "SELF", "FOREIGN_LIVE", "FOREIGN_STALE", "INVALID")
 
 
-def claim_status(ticket: dict, agent: str | None = None,
-                 now: datetime.datetime | None = None) -> str:
+def claim_status(
+    ticket: dict, agent: str | None = None, now: datetime.datetime | None = None
+) -> str:
     """Classify a ticket's § 1.4 claim relative to ``agent`` at ``now``.
 
     Returns one of UNCLAIMED | SELF | FOREIGN_LIVE | FOREIGN_STALE | INVALID.
@@ -334,8 +359,9 @@ def claim_status(ticket: dict, agent: str | None = None,
     return "FOREIGN_STALE" if expired else "FOREIGN_LIVE"
 
 
-def _claim_is_live(owner: str, claim_time: str, agent: str | None,
-                   now: datetime.datetime | None) -> bool:
+def _claim_is_live(
+    owner: str, claim_time: str, agent: str | None, now: datetime.datetime | None
+) -> bool:
     """Backward-compatible live-foreign-claim probe (delegates to claim_status).
 
     True only for a present, well-formed, foreign-owned claim still inside the
@@ -348,12 +374,15 @@ def _claim_is_live(owner: str, claim_time: str, agent: str | None,
         return False
     if agent and owner == agent:
         return False
-    return claim_status({"fields": {"owner": owner, "claim_time": claim_time}},
-                        agent, now) == "FOREIGN_LIVE"
+    return (
+        claim_status({"fields": {"owner": owner, "claim_time": claim_time}}, agent, now)
+        == "FOREIGN_LIVE"
+    )
 
 
-def ticket_is_workable(ticket: dict, tickets: dict, agent: str | None = None,
-                        now: datetime.datetime | None = None) -> bool:
+def ticket_is_workable(
+    ticket: dict, tickets: dict, agent: str | None = None, now: datetime.datetime | None = None
+) -> bool:
     """Defense-in-depth Pick Rule for possibly malformed BOARD input.
 
     Workable means: open ## TODO, no blocker (even malformed), every needs:
@@ -361,16 +390,16 @@ def ticket_is_workable(ticket: dict, tickets: dict, agent: str | None = None,
     non-UTC claim_time is INVALID and fails closed -- it can never be picked
     (CORE's both-or-neither rule, P0).
     """
-    fields = ticket.get("fields", {})
+    ticket.get("fields", {})
     # A syntactically VALID claim (owner + claim_time) on a non-DOING ticket is
     # INACTIVE history -- CORE's claim truth lives in DOING, so a stale pair
     # left by a block/unblock cycle must not make a TODO non-workable
     # (hostile-regression, P1#5). A half/bad (INVALID) pair still fails closed,
     # and a live foreign claim on an ACTIVE DOING ticket still blocks.
     _cs = claim_status(ticket, agent, now)
-    _claim_blocks = (
-        _cs == "INVALID"
-        or (ticket.get("section") == "## DOING" and _cs == "FOREIGN_LIVE"))
+    _claim_blocks = _cs == "INVALID" or (
+        ticket.get("section") == "## DOING" and _cs == "FOREIGN_LIVE"
+    )
     return (
         ticket.get("section") == "## TODO"
         and ticket.get("checkbox") in (" ", "")
@@ -389,14 +418,26 @@ def ticket_is_workable(ticket: dict, tickets: dict, agent: str | None = None,
 # WAIT_USER_CONFIRMATION are exempt by design; ACTIVE is a recognized class
 # that genuinely blocks closure. Any other blocker text fails closed and
 # blocks closure (T-1003 sweep: prose never decides control flow).
-_NON_CLOSURE_BLOCKER_TOKENS = frozenset({
-    "HELD", "FUTURE_GATE", "PERMANENT_WARNING_OWNER",
-    "WAIT_USER_CONFIRMATION", "WAIT_USER_DECISION", "ACTIVE", "WAIT_ROLE",
-})
-_CLOSURE_EXEMPT_BLOCKER_CLASSES = frozenset({
-    "HELD", "FUTURE_GATE", "PERMANENT_WARNING_OWNER",
-    "WAIT_USER_CONFIRMATION", "WAIT_USER_DECISION",
-})
+_NON_CLOSURE_BLOCKER_TOKENS = frozenset(
+    {
+        "HELD",
+        "FUTURE_GATE",
+        "PERMANENT_WARNING_OWNER",
+        "WAIT_USER_CONFIRMATION",
+        "WAIT_USER_DECISION",
+        "ACTIVE",
+        "WAIT_ROLE",
+    }
+)
+_CLOSURE_EXEMPT_BLOCKER_CLASSES = frozenset(
+    {
+        "HELD",
+        "FUTURE_GATE",
+        "PERMANENT_WARNING_OWNER",
+        "WAIT_USER_CONFIRMATION",
+        "WAIT_USER_DECISION",
+    }
+)
 
 
 def blocker_class(blocker: str) -> str | None:
@@ -409,22 +450,21 @@ def blocker_class(blocker: str) -> str | None:
     head = blocker.strip().split(" -- ", 1)[0].strip().upper()
     if head in _NON_CLOSURE_BLOCKER_TOKENS:
         return head
-    wait_role = re.match(r"^WAIT_ROLE:([A-Za-z0-9_-]+)$",
-                         blocker.strip().split(" -- ", 1)[0].strip())
+    wait_role = re.match(
+        r"^WAIT_ROLE:([A-Za-z0-9_-]+)$", blocker.strip().split(" -- ", 1)[0].strip()
+    )
     return "WAIT_ROLE" if wait_role else None
 
 
 def wait_role_target(blocker: str) -> str | None:
     """The role name a WAIT_ROLE:<role> blocker names, or None."""
-    m = re.match(r"^WAIT_ROLE:([A-Za-z0-9_-]+)",
-                 blocker.strip().split(" -- ", 1)[0].strip())
+    m = re.match(r"^WAIT_ROLE:([A-Za-z0-9_-]+)", blocker.strip().split(" -- ", 1)[0].strip())
     return m.group(1) if m else None
 
 
-def convergence_closure_problems(board: dict,
-                                 agent: str | None = None,
-                                 wait_role_roles: frozenset = frozenset()) \
-        -> list[str]:
+def convergence_closure_problems(
+    board: dict, agent: str | None = None, wait_role_roles: frozenset = frozenset()
+) -> list[str]:
     """Canonical mechanically-decidable Core work-closure predicate.
 
     Closure means no active work, no currently workable TODO, and no blocker
@@ -442,12 +482,14 @@ def convergence_closure_problems(board: dict,
     """
     errors = list(board.get("errors", []))
     tickets = board.get("tickets", {})
-    doing = [ticket["id"] for ticket in tickets.values()
-             if ticket.get("section") == "## DOING"]
+    doing = [ticket["id"] for ticket in tickets.values() if ticket.get("section") == "## DOING"]
     if doing:
         errors.append("active DOING: " + ", ".join(doing[:3]))
-    workable = [ticket["id"] for ticket in tickets.values()
-                if ticket_is_workable(ticket, tickets, agent=agent)]
+    workable = [
+        ticket["id"]
+        for ticket in tickets.values()
+        if ticket_is_workable(ticket, tickets, agent=agent)
+    ]
     if workable:
         errors.append("workable TODO: " + ", ".join(workable[:3]))
     blocking = []
@@ -475,12 +517,12 @@ def escape_ticket_description(description: str) -> str:
     literal pipe becomes `\\|`, so a value that itself contains `\\|` cannot
     lose its backslash on the parse round-trip.
     """
-    return (description.replace("\\", "\\\\").replace("|", "\\|"))
+    return description.replace("\\", "\\\\").replace("|", "\\|")
 
 
 def unescape_ticket_part(part: str) -> str:
     """Reverse escape_ticket_description for one pipe-delimited part."""
-    return (part.replace("\\\\", "\\").replace(PIPE_SENTINEL, "|"))
+    return part.replace("\\\\", "\\").replace(PIPE_SENTINEL, "|")
 
 
 def _fields_split(raw: str) -> list[str]:
@@ -510,7 +552,8 @@ def _reject_duplicate_fields(raw: str) -> None:
         if fm.group(1) in seen:
             raise ValueError(
                 f"ticket line repeats field {fm.group(1)!r}; parse the board "
-                "before mutating -- refusing to edit a malformed record")
+                "before mutating -- refusing to edit a malformed record"
+            )
         seen.add(fm.group(1))
 
 

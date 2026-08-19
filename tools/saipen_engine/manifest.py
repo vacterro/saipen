@@ -11,6 +11,7 @@ home, so every copy_trees directory silently failed its `is_dir()` guard).
 This module is the ONE expansion. Missing or unsafe entries raise RuntimeError
 with a stable message; they are never silently skipped.
 """
+
 from __future__ import annotations
 
 import os
@@ -33,9 +34,7 @@ def manifest_source(root: Path, raw: object) -> Path:
     try:
         source.relative_to(root.resolve())
     except ValueError as exc:
-        raise RuntimeError(
-            f"runtime manifest source escapes repository root: {raw!r}"
-        ) from exc
+        raise RuntimeError(f"runtime manifest source escapes repository root: {raw!r}") from exc
     return source
 
 
@@ -58,7 +57,8 @@ def copy_tree_members(root: Path, raw: object) -> tuple[Path, list[Path]]:
             if _d_path.is_symlink():
                 raise RuntimeError(
                     "runtime manifest tree contains symlink: "
-                    f"{_d_path.relative_to(root.resolve()).as_posix()}")
+                    f"{_d_path.relative_to(root.resolve()).as_posix()}"
+                )
             if _d == "__pycache__":
                 _dirs.remove(_d)
         for _file in _files:
@@ -68,6 +68,7 @@ def copy_tree_members(root: Path, raw: object) -> tuple[Path, list[Path]]:
             if _f_path.is_symlink():
                 raise RuntimeError(
                     "runtime manifest tree contains symlink: "
-                    f"{_f_path.relative_to(root.resolve()).as_posix()}")
+                    f"{_f_path.relative_to(root.resolve()).as_posix()}"
+                )
             members.append(_f_path)
     return source, sorted(members)

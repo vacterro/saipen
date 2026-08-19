@@ -35,12 +35,11 @@ instead of an empty-board inference.
 
 from __future__ import annotations
 
-import datetime
 import json
 import os
 import re
 import subprocess
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 # The closed stage set CONVERGE.md defines. The letters are the document's own
@@ -49,11 +48,11 @@ CONVERGENCE_STAGES = ("E", "F", "G", "H", "I")
 
 # Closed per-stage outcomes. Anything else is not a verdict, it is prose.
 STAGE_VERDICTS = {
-    "E": ("PASS",),                                  # canonical test gate PASS
-    "F": ("CLEAN",),                                 # forced HUNT, no findings
-    "G": ("COMPLETED", "NOTHING_SAFE_REMAINED"),     # CLEAN outcome
-    "H": ("PASS",),                                  # post-clean test gate PASS
-    "I": ("CLEAN",),                                 # final forced HUNT clean
+    "E": ("PASS",),  # canonical test gate PASS
+    "F": ("CLEAN",),  # forced HUNT, no findings
+    "G": ("COMPLETED", "NOTHING_SAFE_REMAINED"),  # CLEAN outcome
+    "H": ("PASS",),  # post-clean test gate PASS
+    "I": ("CLEAN",),  # final forced HUNT clean
 }
 
 STAGE_NAMES = {
@@ -77,13 +76,15 @@ class ConvergenceVerdict:
         return {
             "ok": self.ok,
             "reasons": list(self.reasons),
-            "stages": [{
-                "stage": item.get("stage", ""),
-                "verdict": (item.get("receipt_metadata") or {}).get(
-                    "verdict", ""),
-                "op_id": item.get("op_id", ""),
-                "created_at": item.get("created_at", ""),
-            } for item in self.stages],
+            "stages": [
+                {
+                    "stage": item.get("stage", ""),
+                    "verdict": (item.get("receipt_metadata") or {}).get("verdict", ""),
+                    "op_id": item.get("op_id", ""),
+                    "created_at": item.get("created_at", ""),
+                }
+                for item in self.stages
+            ],
             "source": self.source,
             "attribution_problems": list(self.attribution_problems),
         }
@@ -94,6 +95,7 @@ def _strict_created_at(value: object) -> str:
     invalid. Delegated to the ONE shared strict-UTC parser (hostile-regression,
     P2#1): a non-zero offset stamp is NOT UTC and must refuse, never pass."""
     from .board import strict_iso_utc
+
     return strict_iso_utc(value)
 
 
@@ -134,8 +136,7 @@ def _stage_receipts(root: Path) -> list[dict]:
         if not created:
             continue
         meta = record.get("receipt_metadata") or {}
-        if meta.get("operation") != "convergence_stage" \
-                or meta.get("status") != "COMMITTED":
+        if meta.get("operation") != "convergence_stage" or meta.get("status") != "COMMITTED":
             continue
         if _event_number(record) < 0:
             continue
@@ -144,18 +145,24 @@ def _stage_receipts(root: Path) -> list[dict]:
     return out
 
 
-def _pick_latest(receipts: list[dict], wanted_stage: str, before_event: int,
-                 reasons: list[str]) -> dict | None:
+def _pick_latest(
+    receipts: list[dict], wanted_stage: str, before_event: int, reasons: list[str]
+) -> dict | None:
     """The latest receipt of `wanted_stage` committed strictly before
     `before_event`, or None. Receipts recorded in the same wall-clock second
     still order by their monotonic LOG event, never by timestamp ties."""
-    candidates = [item for item in receipts
-                  if (item.get("receipt_metadata") or {}).get("stage")
-                  == wanted_stage and _event_number(item) < before_event]
+    candidates = [
+        item
+        for item in receipts
+        if (item.get("receipt_metadata") or {}).get("stage") == wanted_stage
+        and _event_number(item) < before_event
+    ]
     if not candidates:
-        reasons.append(f"missing convergence stage {wanted_stage} "
-                       f"({STAGE_NAMES[wanted_stage]}) before event "
-                       f"E-{before_event}")
+        reasons.append(
+            f"missing convergence stage {wanted_stage} "
+            f"({STAGE_NAMES[wanted_stage]}) before event "
+            f"E-{before_event}"
+        )
         return None
     return max(candidates, key=_event_number)
 
@@ -198,8 +205,7 @@ def _attribution_claims(root: Path) -> dict[str, str | None]:
                 claims[rel] = expected
     for record in _iter_operation_records(root):
         meta = record.get("receipt_metadata") or {}
-        if record.get("operation") != "crew_defer" \
-                or record.get("status") != "COMMITTED":
+        if record.get("operation") != "crew_defer" or record.get("status") != "COMMITTED":
             continue
         for rel, expected in (meta.get("paths") or {}).items():
             claims[rel] = expected
@@ -219,10 +225,21 @@ def source_worktree_deltas(root: Path) -> list[str] | None:
     """
     try:
         status = subprocess.run(
-            ["git", "-C", os.fspath(root), "status", "--porcelain=v1",
-             "-z", "--untracked-files=all", "--", ".",
-             ":(exclude).saipen"],
-            capture_output=True, check=False)
+            [
+                "git",
+                "-C",
+                os.fspath(root),
+                "status",
+                "--porcelain=v1",
+                "-z",
+                "--untracked-files=all",
+                "--",
+                ".",
+                ":(exclude).saipen",
+            ],
+            capture_output=True,
+            check=False,
+        )
     except (OSError, subprocess.SubprocessError):
         return None
     if status.returncode != 0:
@@ -283,46 +300,48 @@ def attribution_problems(root: Path) -> list[str]:
                 if rel in claims:
                     problems.append(
                         f"main-source delta {rel} is a reviewed deletion but "
-                        "exists again -- stale attribution, refuse")
+                        "exists again -- stale attribution, refuse"
+                    )
                 else:
                     problems.append(
                         f"unattributed main-source delta: {rel} -- every "
-                        "change must belong to a reviewed scope")
+                        "change must belong to a reviewed scope"
+                    )
                 continue
             fp = root / rel
             if not fp.is_file():
-                problems.append(
-                    f"attributed path {rel} is missing -- reviewed scope "
-                    "stale, refuse")
+                problems.append(f"attributed path {rel} is missing -- reviewed scope stale, refuse")
                 continue
             live = _quick_hash(fp.read_bytes())
             if live != expected:
                 problems.append(
                     f"attributed path {rel} changed after its reviewed "
                     f"scope (expected {expected}, live {live}) -- stale, "
-                    "re-review before claiming a fixed point")
+                    "re-review before claiming a fixed point"
+                )
         return problems
     if not claims:
         problems.append(
             "no attribution claims recorded and no Git baseline exists -- "
             "a no-git tree cannot prove 'fully attributed' from an empty "
-            "board alone")
+            "board alone"
+        )
         return problems
     for rel, expected in claims.items():
         fp = root / rel
         if expected is None:
             if fp.exists() or fp.is_symlink():
                 problems.append(
-                    f"reviewed deletion {rel} exists again -- stale "
-                    "attribution, refuse")
+                    f"reviewed deletion {rel} exists again -- stale attribution, refuse"
+                )
             continue
         if not fp.is_file():
             problems.append(f"attributed path {rel} is missing -- stale")
             continue
         if _quick_hash(fp.read_bytes()) != expected:
             problems.append(
-                f"attributed path {rel} changed after its reviewed scope -- "
-                "stale, refuse")
+                f"attributed path {rel} changed after its reviewed scope -- stale, refuse"
+            )
     return problems
 
 
@@ -330,11 +349,11 @@ def _quick_hash(raw: bytes) -> str:
     # Scope/defer records store the journal's hash_bytes token (16 hex chars);
     # attribution must compare the SAME token or every claim looks stale.
     import hashlib
+
     return hashlib.sha256(raw).hexdigest()[:16]
 
 
-def convergence_verdict(project_root: Path | str,
-                        source_id=None) -> ConvergenceVerdict:
+def convergence_verdict(project_root: Path | str, source_id=None) -> ConvergenceVerdict:
     """The ONE mechanical Core convergence verdict (items 1/14).
 
     Returns ok=False with reasons whenever any of E-I evidence is missing,
@@ -348,94 +367,116 @@ def convergence_verdict(project_root: Path | str,
     if source_id is None:
         try:
             from freshness import compute_source_identity
+
             source_id = compute_source_identity(root)
         except Exception as exc:
-            return ConvergenceVerdict(False, (
-                "source identity UNKNOWN: " + str(exc),), source={
-                    "error": str(exc)})
+            return ConvergenceVerdict(
+                False, ("source identity UNKNOWN: " + str(exc),), source={"error": str(exc)}
+            )
     live = (source_id.source_head, source_id.source_tree_fingerprint)
 
     receipts = _stage_receipts(root)
     if not receipts:
         return ConvergenceVerdict(
-            False, ("no canonical convergence stage evidence -- E-I "
-                    "(test/HUNT/CLEAN/post-clean test/final HUNT) must be "
-                    "recorded against the current source identity; DONE + "
-                    "empty board is not convergence proof",),
-            source={"source_head": live[0],
-                    "source_tree_fingerprint": live[1]})
+            False,
+            (
+                "no canonical convergence stage evidence -- E-I "
+                "(test/HUNT/CLEAN/post-clean test/final HUNT) must be "
+                "recorded against the current source identity; DONE + "
+                "empty board is not convergence proof",
+            ),
+            source={"source_head": live[0], "source_tree_fingerprint": live[1]},
+        )
 
     # The terminal chain: walk backwards from the latest I.
-    i_receipts = [item for item in receipts
-                  if (item.get("receipt_metadata") or {}).get("stage") == "I"]
+    i_receipts = [
+        item for item in receipts if (item.get("receipt_metadata") or {}).get("stage") == "I"
+    ]
     if not i_receipts:
-        reasons.append("missing final forced HUNT (I) -- the closure sweep "
-                       "must run after CLEAN and post-clean tests")
-        return ConvergenceVerdict(False, tuple(reasons), source={
-            "source_head": live[0], "source_tree_fingerprint": live[1]})
+        reasons.append(
+            "missing final forced HUNT (I) -- the closure sweep "
+            "must run after CLEAN and post-clean tests"
+        )
+        return ConvergenceVerdict(
+            False,
+            tuple(reasons),
+            source={"source_head": live[0], "source_tree_fingerprint": live[1]},
+        )
     latest_i = i_receipts[-1]
     i_event = _event_number(latest_i)
     i_identity = _identity_of(latest_i)
     if i_identity is None:
-        reasons.append("final forced HUNT receipt lacks a bound source "
-                       "identity")
-        return ConvergenceVerdict(False, tuple(reasons), source={
-            "source_head": live[0], "source_tree_fingerprint": live[1]})
+        reasons.append("final forced HUNT receipt lacks a bound source identity")
+        return ConvergenceVerdict(
+            False,
+            tuple(reasons),
+            source={"source_head": live[0], "source_tree_fingerprint": live[1]},
+        )
     if i_identity != live:
         reasons.append(
             "final forced HUNT binds source "
             f"{i_identity[0][:12]}/{i_identity[1][:16]} but the CURRENT "
             f"source is {live[0][:12]}/{live[1][:16]} -- a main-source "
-            "mutation after the final HUNT invalidates the fixed point")
-        return ConvergenceVerdict(False, tuple(reasons), source={
-            "source_head": live[0], "source_tree_fingerprint": live[1]})
+            "mutation after the final HUNT invalidates the fixed point"
+        )
+        return ConvergenceVerdict(
+            False,
+            tuple(reasons),
+            source={"source_head": live[0], "source_tree_fingerprint": live[1]},
+        )
 
     h = _pick_latest(receipts, "H", i_event, reasons)
-    g = _pick_latest(receipts, "G", _event_number(h) if h else i_event,
-                     reasons)
-    f = _pick_latest(receipts, "F", _event_number(g) if g else i_event,
-                     reasons)
-    e = _pick_latest(receipts, "E", _event_number(f) if f else i_event,
-                     reasons)
+    g = _pick_latest(receipts, "G", _event_number(h) if h else i_event, reasons)
+    f = _pick_latest(receipts, "F", _event_number(g) if g else i_event, reasons)
+    e = _pick_latest(receipts, "E", _event_number(f) if f else i_event, reasons)
     if None in (e, f, g, h):
-        return ConvergenceVerdict(False, tuple(reasons), source={
-            "source_head": live[0], "source_tree_fingerprint": live[1]})
+        return ConvergenceVerdict(
+            False,
+            tuple(reasons),
+            source={"source_head": live[0], "source_tree_fingerprint": live[1]},
+        )
 
     chain = [e, f, g, h, latest_i]
     ef = _identity_of(e)
     gh = _identity_of(g)
     hi = _identity_of(h)
     if ef is None or gh is None or hi is None:
-        reasons.append("convergence stage receipt lacks a bound source "
-                       "identity")
-        return ConvergenceVerdict(False, tuple(reasons), source={
-            "source_head": live[0], "source_tree_fingerprint": live[1]})
+        reasons.append("convergence stage receipt lacks a bound source identity")
+        return ConvergenceVerdict(
+            False,
+            tuple(reasons),
+            source={"source_head": live[0], "source_tree_fingerprint": live[1]},
+        )
     s0 = ef
     s1 = hi
     if f is not None and _identity_of(f) != s0:
         reasons.append(
             "forced HUNT binds a different source identity than the "
             "canonical test gate -- a main-source mutation between E and F "
-            "breaks the chain")
+            "breaks the chain"
+        )
     if gh[0] != s0[0] or gh[1] != s0[1]:
         reasons.append(
             "CLEAN input identity differs from the E/F identity -- CLEAN "
-            "must run on the source the test gate and forced HUNT proved")
-    g_result = ((g.get("receipt_metadata") or {}).get(
-        "resulting_source_head", ""),
-        (g.get("receipt_metadata") or {}).get(
-            "resulting_source_tree_fingerprint", ""))
+            "must run on the source the test gate and forced HUNT proved"
+        )
+    g_result = (
+        (g.get("receipt_metadata") or {}).get("resulting_source_head", ""),
+        (g.get("receipt_metadata") or {}).get("resulting_source_tree_fingerprint", ""),
+    )
     if not g_result[0] or not g_result[1]:
         reasons.append("CLEAN receipt lacks its resulting source identity")
     elif g_result != s1:
         reasons.append(
             "CLEAN resulting identity differs from the H/I identity -- "
-            "post-clean evidence must bind the post-CLEAN tree")
+            "post-clean evidence must bind the post-CLEAN tree"
+        )
     if _identity_of(h) != s1:
         reasons.append(
             "post-clean test gate binds a different source identity than "
             "the final forced HUNT -- a mutation between H and I breaks the "
-            "chain")
+            "chain"
+        )
 
     for record in chain:
         meta = record.get("receipt_metadata") or {}
@@ -445,14 +486,17 @@ def convergence_verdict(project_root: Path | str,
         if verdict not in allowed:
             reasons.append(
                 f"stage {stage} verdict {verdict!r} is not a closed "
-                f"{STAGE_NAMES.get(stage, stage)} outcome ({', '.join(allowed)})")
+                f"{STAGE_NAMES.get(stage, stage)} outcome ({', '.join(allowed)})"
+            )
 
     attribution = tuple(attribution_problems(root))
     if attribution:
         reasons.extend(attribution)
 
     return ConvergenceVerdict(
-        not reasons, tuple(reasons), tuple(chain),
-        source={"source_head": live[0],
-                "source_tree_fingerprint": live[1]},
-        attribution_problems=attribution)
+        not reasons,
+        tuple(reasons),
+        tuple(chain),
+        source={"source_head": live[0], "source_tree_fingerprint": live[1]},
+        attribution_problems=attribution,
+    )

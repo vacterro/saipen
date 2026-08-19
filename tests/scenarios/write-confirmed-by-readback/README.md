@@ -12,8 +12,8 @@ An agent pivoted into goal mode and wrote fourteen tickets onto `BOARD.md`
 with a pattern substitution:
 
 ```python
-t = re.sub(r'## TODO\n\n', '## TODO\n' + todo, t, count=1)
-io.open(board, 'w').write(t)
+t = re.sub(r"## TODO\n\n", "## TODO\n" + todo, t, count=1)
+io.open(board, "w").write(t)
 print("board: 14 tickets, goal wave 1")
 ```
 

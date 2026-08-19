@@ -31,17 +31,30 @@ from pathlib import Path
 # reports predate the field, so the strict/legacy boundary lives where history
 # needs it and never leaks into strict evidence (A5).
 REQUIRED_HEADER = {
-    "agent", "role", "model_or_runtime", "project",
-    "saipen_version", "protocol_fingerprint",
-    "source_head", "source_tree_fingerprint", "discovery_model",
-    "context_scope", "context_available", "report_status",
+    "agent",
+    "role",
+    "model_or_runtime",
+    "project",
+    "saipen_version",
+    "protocol_fingerprint",
+    "source_head",
+    "source_tree_fingerprint",
+    "discovery_model",
+    "context_scope",
+    "context_available",
+    "report_status",
 }
 _LEGACY_OPTIONAL_HEADER = frozenset({"discovery_model"})
 
 SEVERITY = {"P0", "P1", "P2", "P3"}
 FINDING_CLASS = {
-    "PROTOCOL_VIOLATION", "PROJECT_VIOLATION", "LOGIC_ERROR",
-    "ACCIDENTAL_SUCCESS", "USERPERSON_MISS", "VAGUE", "OTHER",
+    "PROTOCOL_VIOLATION",
+    "PROJECT_VIOLATION",
+    "LOGIC_ERROR",
+    "ACCIDENTAL_SUCCESS",
+    "USERPERSON_MISS",
+    "VAGUE",
+    "OTHER",
 }
 CONFIDENCE = {"observed", "reproduced", "proven", "suspected"}
 ACTION = {"fix", "ticket", "note", "reject"}
@@ -49,8 +62,14 @@ REPORT_STATUS = {"draft", "complete"}
 AVAILABILITY = {"expected", "unavailable"}
 ROLES = {"core", "critic"}
 DISPOSITION = {
-    "CONFIRMED", "DUPLICATE", "ALREADY_FIXED", "SUPERSEDED", "LATER_RULE",
-    "NOT_REPRODUCED", "INVALID", "NEEDS_EXTERNAL_EVIDENCE",
+    "CONFIRMED",
+    "DUPLICATE",
+    "ALREADY_FIXED",
+    "SUPERSEDED",
+    "LATER_RULE",
+    "NOT_REPRODUCED",
+    "INVALID",
+    "NEEDS_EXTERNAL_EVIDENCE",
 }
 
 _MISSING = object()
@@ -68,7 +87,8 @@ _NO_FINDINGS_RE = re.compile(r"^NO_FINDINGS\b", re.MULTILINE)
 _SWEEP_LINE_RE = re.compile(
     r"^- (IMP-\d+|RUN-\d+/IMP-\d+)\s+\[([A-Z_]+)\]\s+(\S+)\s+"
     r"report=([^\s]+)\s+reproduced=(\S+)"
-    r"(?:\s+fixed_by=(\S+))?(?:\s+verification=(\S+))?\s*$")
+    r"(?:\s+fixed_by=(\S+))?(?:\s+verification=(\S+))?\s*$"
+)
 
 _IMP_DIR = ".saipen/improve"
 
@@ -81,6 +101,7 @@ class Finding:
     (pre-boundary) report with no RUN sections. Two findings with the same
     IMP number in different RUNs are DIFFERENT findings.
     """
+
     run: int | None
     imp: str
     start: int
@@ -102,6 +123,7 @@ class Finding:
 @dataclass(frozen=True)
 class ReportRuns:
     """The structural parse of a seat report: header + explicit RUN sections."""
+
     header: dict[str, str]
     findings: list[Finding]
     has_runs: bool
@@ -114,6 +136,7 @@ class ReportRuns:
 class SweepRecord:
     """ONE structured sweep record shared by writer, parser, validator and
     status (DOGFOOD V, T-615). Never reconstructed from unrelated regexes."""
+
     finding_ref: str
     disposition: str
     ticket: str
@@ -134,8 +157,10 @@ class SweepRecord:
         return self.finding_ref.split("/")[-1]
 
     def render(self) -> str:
-        line = (f"- {self.finding_ref} [{self.disposition}] {self.ticket} "
-                f"report={self.report} reproduced={self.reproduced}")
+        line = (
+            f"- {self.finding_ref} [{self.disposition}] {self.ticket} "
+            f"report={self.report} reproduced={self.reproduced}"
+        )
         if self.fixed_by and self.fixed_by != "-":
             line += f" fixed_by={self.fixed_by}"
         if self.verification and self.verification != "-":
@@ -152,6 +177,7 @@ def _validate_safe_id(value: str, kind: str) -> str:
     field/newline. ONE shared primitive owns this: saipen_engine.safeid.
     (NITRO dogfood II -- no third sanitizer.)"""
     from saipen_engine.safeid import validate_safe_id as _shared
+
     try:
         return _shared(value or "", kind=kind)
     except ValueError as exc:
@@ -187,8 +213,7 @@ def cycle_id(project_key: str, now: str) -> str:
     return f"imp-{safe}-{now}"
 
 
-def allocate_cycle_id(project_root: Path, project_key: str,
-                      now: str | None = None) -> str:
+def allocate_cycle_id(project_root: Path, project_key: str, now: str | None = None) -> str:
     """The real deterministic cycle-id allocator.
 
     Returns imp-<safe-project>-<YYYYMMDD>-<NN> where NN is one past the
@@ -197,11 +222,12 @@ def allocate_cycle_id(project_root: Path, project_key: str,
     first committed MANIFEST is visible to the second scan. (NITRO dogfood II
     fixes the old contract that delegated uniqueness to the caller's `now`.)"""
     import datetime
+
     safe = re.sub(r"[^A-Za-z0-9_-]", "-", project_key).lower()
     if now is None:
         now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d")
     prefix = f"imp-{safe}-{now}"
-    owner = (Path(project_root) / _IMP_DIR)
+    owner = Path(project_root) / _IMP_DIR
     highest = 0
     if owner.is_dir():
         for entry in owner.iterdir():
@@ -213,14 +239,12 @@ def allocate_cycle_id(project_root: Path, project_key: str,
     return f"{prefix}-{highest + 1}"
 
 
-def resolve_report_path(project_root: Path, cycle_id: str, seat_id: str,
-                        project_name: str) -> Path:
+def resolve_report_path(project_root: Path, cycle_id: str, seat_id: str, project_name: str) -> Path:
     """Canonical report path for a Core seat, proven inside the owner root."""
     seat = _validate_safe_id(seat_id, "seat_id")
     cycle = _validate_safe_id(cycle_id, "cycle_id")
     name = _validate_safe_id(project_name, "project_name")
-    path = Path(project_root) / _IMP_DIR / cycle / seat \
-        / f"saipen_improve_{name}.md"
+    path = Path(project_root) / _IMP_DIR / cycle / seat / f"saipen_improve_{name}.md"
     _prove_inside(project_root, path)
     return path
 
@@ -243,6 +267,7 @@ def _prove_inside(project_root: Path, path: Path) -> None:
     proof -- realpath + normcase, an escape raises rather than writes
     (NITRO dogfood II)."""
     from saipen_engine.safeid import prove_inside as _shared
+
     try:
         _shared(path, _owner_root(project_root), kind="Improve path")
     except ValueError as exc:
@@ -262,6 +287,7 @@ def _base_hash(path: Path) -> str:
     file no longer matches the base the caller read -- stale content can
     never overwrite an intervening update (NITRO dogfood II)."""
     from saipen_engine.journal import hash_bytes
+
     try:
         return hash_bytes(path.read_bytes())
     except OSError:
@@ -290,23 +316,25 @@ def _seat_block(text: str, seat_id: str) -> str | None:
     if start is None:
         return None
     block = [lines[start]]
-    for line in lines[start + 1:]:
+    for line in lines[start + 1 :]:
         if re.match(r"^seat_id:\s*", line):
             break
         block.append(line)
     return "\n".join(block)
 
 
-def _block_for_report(roster_text: str, report_ident: str,
-                      seat_id: str | None = None) -> str | None:
+def _block_for_report(
+    roster_text: str, report_ident: str, seat_id: str | None = None
+) -> str | None:
     """Locate the roster block whose report_path names `report_ident`.
 
     A seat is found by its registered report path -- never by deriving the
     seat from the report file name, which would break multi-seat rosters.
     """
     for block in _seat_blocks(roster_text):
-        if (_field(block, "report_path") == report_ident
-                and (seat_id is None or _field(block, "seat_id") == seat_id)):
+        if _field(block, "report_path") == report_ident and (
+            seat_id is None or _field(block, "seat_id") == seat_id
+        ):
             return block
     return None
 
@@ -331,8 +359,9 @@ def report_fingerprint(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
 
 
-def composite_finding_ref(cycle_id: str, seat_id: str, report_ident: str,
-                          run: int | None, imp: str) -> str:
+def composite_finding_ref(
+    cycle_id: str, seat_id: str, report_ident: str, run: int | None, imp: str
+) -> str:
     """The ONE canonical composite finding reference (DOGFOOD V, T-615):
     <cycle_id>/<seat_id>/<report_ident>#<RUN-N|legacy>/<IMP-NNN>.
 
@@ -348,13 +377,15 @@ def _parse_finding_ref(ref: str) -> tuple[int | None, str]:
     if "/" in ref:
         m = re.fullmatch(r"RUN-(\d+)/IMP-(\d+)", ref)
         if not m:
-            raise ImproveError(f"malformed finding reference {ref!r}: "
-                               "expected RUN-N/IMP-NNN or IMP-NNN")
+            raise ImproveError(
+                f"malformed finding reference {ref!r}: expected RUN-N/IMP-NNN or IMP-NNN"
+            )
         return int(m.group(1)), f"IMP-{m.group(2)}"
     m = re.fullmatch(r"IMP-(\d+)", ref)
     if not m:
-        raise ImproveError(f"malformed finding reference {ref!r}: "
-                           "expected RUN-N/IMP-NNN or IMP-NNN")
+        raise ImproveError(
+            f"malformed finding reference {ref!r}: expected RUN-N/IMP-NNN or IMP-NNN"
+        )
     return None, f"IMP-{m.group(1)}"
 
 
@@ -407,9 +438,12 @@ def parse_report(text: str) -> ReportRuns:
             if fm:
                 if current is not None:
                     findings.append(_finalize(current))
-                current = {"start": index, "run": run,
-                           "imp": f"IMP-{fm.group(1)}",
-                           "brackets": _finding_brackets(line)}
+                current = {
+                    "start": index,
+                    "run": run,
+                    "imp": f"IMP-{fm.group(1)}",
+                    "brackets": _finding_brackets(line),
+                }
                 continue
             if current is not None:
                 for fname in ("expected", "actual", "evidence"):
@@ -430,7 +464,8 @@ def parse_report(text: str) -> ReportRuns:
             action=brackets[3] if len(brackets) > 3 else "",
             expected=raw.get("expected", ""),
             actual=raw.get("actual", ""),
-            evidence=raw.get("evidence", ""))
+            evidence=raw.get("evidence", ""),
+        )
 
     if not has_runs:
         _scan(0, len(text), None)
@@ -440,8 +475,13 @@ def parse_report(text: str) -> ReportRuns:
             end = bounds[idx + 1] if idx + 1 < len(bounds) else len(text)
             run_number = int(run_headers[idx].group(1))
             _scan(start, end, run_number)
-    return ReportRuns(header=header, findings=findings, has_runs=has_runs,
-                      runs=runs, no_findings_runs=frozenset(no_findings_runs))
+    return ReportRuns(
+        header=header,
+        findings=findings,
+        has_runs=has_runs,
+        runs=runs,
+        no_findings_runs=frozenset(no_findings_runs),
+    )
 
 
 def _sweep_records(sweep_text: str) -> list[SweepRecord]:
@@ -455,15 +495,21 @@ def _sweep_records(sweep_text: str) -> list[SweepRecord]:
         if not m:
             continue
         finding_ref, disp, ticket, report, reproduced = m.group(1, 2, 3, 4, 5)
-        records.append(SweepRecord(
-            finding_ref=finding_ref, disposition=disp, ticket=ticket,
-            report=report, reproduced=reproduced,
-            fixed_by=m.group(6) or "-", verification=m.group(7) or "-"))
+        records.append(
+            SweepRecord(
+                finding_ref=finding_ref,
+                disposition=disp,
+                ticket=ticket,
+                report=report,
+                reproduced=reproduced,
+                fixed_by=m.group(6) or "-",
+                verification=m.group(7) or "-",
+            )
+        )
     return records
 
 
-def _disposed_ids(sweep_text: str, report_ident: str | None = None
-                  ) -> list[str]:
+def _disposed_ids(sweep_text: str, report_ident: str | None = None) -> list[str]:
     """Every IMP-### with a disposition in the Core sweep ledger, optionally
     filtered to one report identity.
 
@@ -480,8 +526,13 @@ def _disposed_ids(sweep_text: str, report_ident: str | None = None
     return disposed
 
 
-def derive_status(report_ident: str, roster_text: str, report_text: str,
-                   sweep_text: str, seat_id: str | None = None) -> dict:
+def derive_status(
+    report_ident: str,
+    roster_text: str,
+    report_text: str,
+    sweep_text: str,
+    seat_id: str | None = None,
+) -> dict:
     """The visible status, DERIVED per seat.
 
     - roster entry for THIS seat (exact seat_id block) owns availability;
@@ -496,13 +547,16 @@ def derive_status(report_ident: str, roster_text: str, report_text: str,
     _seat = re.sub(r"^saipen_improve_", "", Path(report_ident).stem)
     availability = "expected"
     if seat_id is None:
-        owners = [_field(candidate, "seat_id")
-                  for candidate in _seat_blocks(roster_text)
-                  if _field(candidate, "report_path") == report_ident]
+        owners = [
+            _field(candidate, "seat_id")
+            for candidate in _seat_blocks(roster_text)
+            if _field(candidate, "report_path") == report_ident
+        ]
         if len(owners) > 1:
             raise ImproveError(
                 f"derive_status refuses ambiguous report basename "
-                f"{report_ident!r}; pass exact seat_id")
+                f"{report_ident!r}; pass exact seat_id"
+            )
         if owners:
             seat_id = owners[0]
     block = _block_for_report(roster_text, report_ident, seat_id)
@@ -512,11 +566,12 @@ def derive_status(report_ident: str, roster_text: str, report_text: str,
     parsed = parse_report(report_text)
     expected = {(f.run, f.imp) for f in parsed.findings}
     ledger_keys = _report_ledger_keys(roster_text, seat_id, report_ident)
-    disposed = {(r.run(), r.imp()) for r in _sweep_records(sweep_text)
-                if r.report in ledger_keys}
-    missing = sorted(f"{'' if f.run is None else f'RUN-{f.run}/'}{f.imp}"
-                     for f in parsed.findings
-                     if (f.run, f.imp) not in disposed)
+    disposed = {(r.run(), r.imp()) for r in _sweep_records(sweep_text) if r.report in ledger_keys}
+    missing = sorted(
+        f"{'' if f.run is None else f'RUN-{f.run}/'}{f.imp}"
+        for f in parsed.findings
+        if (f.run, f.imp) not in disposed
+    )
     fully_swept = bool(expected) and not missing
     if availability == "unavailable":
         visible = "unavailable"
@@ -528,11 +583,14 @@ def derive_status(report_ident: str, roster_text: str, report_text: str,
         visible = "swept"
     else:
         visible = "complete"
-    return {"availability": availability, "report_status": status,
-            "visible": visible, "swept": fully_swept,
-            "disposed": sorted({f"RUN-{r}/{i}" if r is not None else i
-                                for r, i in disposed}),
-            "missing": missing}
+    return {
+        "availability": availability,
+        "report_status": status,
+        "visible": visible,
+        "swept": fully_swept,
+        "disposed": sorted({f"RUN-{r}/{i}" if r is not None else i for r, i in disposed}),
+        "missing": missing,
+    }
 
 
 def _project_root_of(path: Path) -> Path:
@@ -545,9 +603,9 @@ def _project_root_of(path: Path) -> Path:
     raise ImproveError(f"cannot resolve a project root for {path}")
 
 
-def _freshness_errors(project_root: Path, report_text: str,
-                      strict: bool, cycle_active: bool, *,
-                      current_source=None) -> list[str]:
+def _freshness_errors(
+    project_root: Path, report_text: str, strict: bool, cycle_active: bool, *, current_source=None
+) -> list[str]:
     """Source-evidence freshness for a report (DOGFOOD V, T-619).
 
     A strict cycle's report is only fresh when its mechanically captured
@@ -566,36 +624,46 @@ def _freshness_errors(project_root: Path, report_text: str,
     head = _field(report_text, "source_head")
     tree = _field(report_text, "source_tree_fingerprint")
     if not head or not tree:
-        errors.append("report carries no mechanically captured source "
-                      "identity (source_head/source_tree_fingerprint)")
+        errors.append(
+            "report carries no mechanically captured source "
+            "identity (source_head/source_tree_fingerprint)"
+        )
         return errors
     if not re.match(r"^(git-delta-v1|no-git-tree-v1):", tree):
-        errors.append(f"source_tree_fingerprint {tree!r} is not a mechanical "
-                      "fingerprint; a fabricated label cannot authorize fresh "
-                      "work")
+        errors.append(
+            f"source_tree_fingerprint {tree!r} is not a mechanical "
+            "fingerprint; a fabricated label cannot authorize fresh "
+            "work"
+        )
         return errors
     if current_source is not None:
         current = current_source
     else:
         try:
             from freshness import FreshnessError, compute_source_identity
+
             current = compute_source_identity(project_root)
         except FreshnessError as exc:
             errors.append(f"cannot compute the current source identity: {exc}")
             return errors
     if current.source_head not in (head, head[:7]):
-        errors.append(f"source_head {head[:12]}... != current HEAD "
-                      f"{current.source_head[:12]}...; the audit did not "
-                      "reload the current tree")
+        errors.append(
+            f"source_head {head[:12]}... != current HEAD "
+            f"{current.source_head[:12]}...; the audit did not "
+            "reload the current tree"
+        )
     elif current.source_tree_fingerprint != tree:
-        errors.append(f"source_tree_fingerprint {tree[:24]}... != current "
-                      f"tree {current.source_tree_fingerprint[:24]}... at the "
-                      "same HEAD; the audited tree differs from the live one")
+        errors.append(
+            f"source_tree_fingerprint {tree[:24]}... != current "
+            f"tree {current.source_tree_fingerprint[:24]}... at the "
+            "same HEAD; the audited tree differs from the live one"
+        )
     return errors
 
 
-def _report_fresh(project_root: Path, cycle_dir: Path, report_ident: str,
-                  report_text: str, strict: bool) -> list[str]:
+def _report_fresh(
+    project_root: Path, cycle_dir: Path, report_ident: str, report_text: str, strict: bool
+) -> list[str]:
     """Freshness errors for the report owning `report_ident` in this cycle."""
     if not strict:
         return []
@@ -619,11 +687,7 @@ def _ticket_exists(project_root: Path, ticket: str) -> bool:
         paths.append(log)
     if logs.is_dir():
         paths.extend(sorted(logs.glob("LOG-*.md")))
-    return any(
-        path.is_file()
-        and ticket in path.read_text(encoding="utf-8-sig")
-        for path in paths
-    )
+    return any(path.is_file() and ticket in path.read_text(encoding="utf-8-sig") for path in paths)
 
 
 def _cycle_schema(manifest: Path) -> str:
@@ -643,38 +707,41 @@ def _report_roster_block(cycle_dir: Path, report_ident: str) -> str | None:
     return _block_for_report(_read_maybe(manifest), report_ident)
 
 
-def _report_ledger_keys(roster_text: str, seat_id: str | None,
-                        report_ident: str) -> set[str]:
+def _report_ledger_keys(roster_text: str, seat_id: str | None, report_ident: str) -> set[str]:
     """Ledger identities resolving to one seat/report without basename bleed."""
     if not seat_id:
         return {report_ident}
     keys = {f"{seat_id}/{report_ident}"}
-    owners = [_field(block, "seat_id") for block in _seat_blocks(roster_text)
-              if _field(block, "report_path") == report_ident]
+    owners = [
+        _field(block, "seat_id")
+        for block in _seat_blocks(roster_text)
+        if _field(block, "report_path") == report_ident
+    ]
     if owners == [seat_id]:
         keys.add(report_ident)  # Unique-owner compatibility for old ledgers.
     return keys
 
 
-def _refuse_duplicate_owner_over_bare_sweep(cycle_dir: Path,
-                                             roster_text: str,
-                                             report_ident: str,
-                                             new_seat: str) -> None:
+def _refuse_duplicate_owner_over_bare_sweep(
+    cycle_dir: Path, roster_text: str, report_ident: str, new_seat: str
+) -> None:
     """Preserve persisted legacy provenance when owner cardinality changes."""
-    owners = [_field(block, "seat_id") for block in _seat_blocks(roster_text)
-              if _field(block, "report_path") == report_ident]
+    owners = [
+        _field(block, "seat_id")
+        for block in _seat_blocks(roster_text)
+        if _field(block, "report_path") == report_ident
+    ]
     sweep_text = _read_maybe(cycle_dir / "SWEEP.md")
-    if (owners and any(record.report == report_ident
-                       for record in _sweep_records(sweep_text))):
+    if owners and any(record.report == report_ident for record in _sweep_records(sweep_text)):
         raise ImproveError(
             f"cannot admit seat {new_seat}: report basename {report_ident!r} "
             "already has an existing bare SWEEP identity; adding a second "
             "owner would reinterpret Core provenance -- start independent "
-            "seats before sweep or use a distinct report identity")
+            "seats before sweep or use a distinct report identity"
+        )
 
 
-def _resolve_report_owner(cycle_dir: Path, report_identity: str
-                          ) -> tuple[str, str, str]:
+def _resolve_report_owner(cycle_dir: Path, report_identity: str) -> tuple[str, str, str]:
     """Resolve `seat/report` exactly; permit basename only when unambiguous."""
     raw = report_identity.strip()
     parts = raw.split("/")
@@ -685,8 +752,9 @@ def _resolve_report_owner(cycle_dir: Path, report_identity: str
         wanted_seat = ""
         wanted_report = _validate_report_path(parts[0], "")
     else:
-        raise ImproveError(f"report identity {raw!r} must be <seat>/<report> "
-                           "or one unambiguous legacy basename")
+        raise ImproveError(
+            f"report identity {raw!r} must be <seat>/<report> or one unambiguous legacy basename"
+        )
     matches = []
     manifest_text = _read_maybe(cycle_dir / "MANIFEST.md")
     for block in _seat_blocks(manifest_text):
@@ -697,11 +765,13 @@ def _resolve_report_owner(cycle_dir: Path, report_identity: str
     if not matches:
         raise ImproveError(
             f"write_sweep_entry refuses: report {raw!r} is not a registered "
-            "seat report in this cycle")
+            "seat report in this cycle"
+        )
     if len(matches) != 1:
         raise ImproveError(
             f"write_sweep_entry refuses: report basename {raw!r} has multiple "
-            "seat owners; use exact <seat>/<report> identity")
+            "seat owners; use exact <seat>/<report> identity"
+        )
     seat, report = matches[0]
     # All NEW writes are seat-qualified. Bare report names remain read-only
     # compatibility for persisted pre-T-623 ledgers.
@@ -709,59 +779,62 @@ def _resolve_report_owner(cycle_dir: Path, report_identity: str
     return seat, report, ledger_key
 
 
-def _require_finding(cycle_dir: Path, seat_dir: str, report_ident: str,
-                     run: int | None,
-                     imp: str, strict: bool) -> None:
+def _require_finding(
+    cycle_dir: Path, seat_dir: str, report_ident: str, run: int | None, imp: str, strict: bool
+) -> None:
     """A Core sweep mutation must name a finding that ACTUALLY exists in the
     named run of the named report (DOGFOOD V, T-615). A nonexistent
     finding/run/report is a refusal, not a ledger append."""
     report = cycle_dir / seat_dir / report_ident
     if not report.is_file():
         raise ImproveError(
-            f"write_sweep_entry refuses: report {report_ident!r} does not "
-            "exist on disk")
+            f"write_sweep_entry refuses: report {report_ident!r} does not exist on disk"
+        )
     text = _read_maybe(report)
     if _field(text, "report_status") != "complete":
         raise ImproveError(
             f"write_sweep_entry refuses: report {report_ident!r} is not "
-            "complete; only a complete report's findings may be disposed")
+            "complete; only a complete report's findings may be disposed"
+        )
     # T-638/§3: a sweep may only consume a FULLY VALID strict report -- a
     # malformed-but-parseable report with a real IMP must never authorize a
     # disposition (ZERO sweep writes on malformed evidence).
     if strict:
         _report_errors = validate_bound_report(
-            cycle_dir, seat_dir, text,
-            require_runs=True, require_fresh=False, cycle_active=True)
+            cycle_dir, seat_dir, text, require_runs=True, require_fresh=False, cycle_active=True
+        )
         if _report_errors:
             raise ImproveError(
                 "write_sweep_entry refuses: report "
-                f"{report_ident!r} fails the bound bar: "
-                + "; ".join(_report_errors[:3]))
+                f"{report_ident!r} fails the bound bar: " + "; ".join(_report_errors[:3])
+            )
     parsed = parse_report(text)
     if strict:
         if not parsed.has_runs:
             raise ImproveError(
                 f"write_sweep_entry refuses: report {report_ident!r} in a "
                 "strict cycle carries no explicit ## RUN sections; a sweep "
-                "must name the exact RUN")
+                "must name the exact RUN"
+            )
         if run is None:
             raise ImproveError(
                 "write_sweep_entry refuses: a strict cycle sweep must name "
-                "the exact RUN (RUN-N/IMP-NNN)")
-    matching = [f for f in parsed.findings if f.imp == imp
-                and (run is None or f.run == run)]
+                "the exact RUN (RUN-N/IMP-NNN)"
+            )
+    matching = [f for f in parsed.findings if f.imp == imp and (run is None or f.run == run)]
     if not matching:
         target = f"RUN-{run}/{imp}" if run is not None else imp
         raise ImproveError(
-            f"write_sweep_entry refuses: finding {target} does not exist in "
-            f"report {report_ident!r}")
+            f"write_sweep_entry refuses: finding {target} does not exist in report {report_ident!r}"
+        )
     if len(matching) > 1:
         target = f"RUN-{run}/{imp}" if run is not None else imp
         raise ImproveError(
             f"write_sweep_entry refuses: report {report_ident!r} carries "
             f"{len(matching)} findings with the ambiguous composite identity "
             f"{target}; one disposition can never satisfy duplicates -- "
-            "repair or regenerate the report (A4)")
+            "repair or regenerate the report (A4)"
+        )
 
 
 def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
@@ -780,19 +853,18 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
     disposition = entry.get("disposition")
     if disposition not in DISPOSITION:
         raise ImproveError(
-            f"disposition {disposition!r} outside the closed set "
-            f"{sorted(DISPOSITION)}")
+            f"disposition {disposition!r} outside the closed set {sorted(DISPOSITION)}"
+        )
     report_ident = str(entry.get("report", ""))
     if not report_ident or report_ident in ("-", ""):
         raise ImproveError(
             "write_sweep_entry refuses: report identity is required -- a "
-            "sweep disposition must name its exact report")
+            "sweep disposition must name its exact report"
+        )
     strict = _cycle_schema(cycle_dir / "MANIFEST.md") == "strict"
-    seat_dir, report_path, report_key = _resolve_report_owner(
-        cycle_dir, report_ident)
+    seat_dir, report_path, report_key = _resolve_report_owner(cycle_dir, report_ident)
     roster_text = _read_maybe(cycle_dir / "MANIFEST.md")
-    equivalent_report_keys = _report_ledger_keys(
-        roster_text, seat_dir, report_path)
+    equivalent_report_keys = _report_ledger_keys(roster_text, seat_dir, report_path)
     # DOGFOOD V (T-619): a CONFIRMED disposition on STALE evidence cannot
     # authorize fresh canonical work. The report's source identity must match
     # the current tree (same HEAD + dirty tree is stale); a stale report
@@ -801,14 +873,14 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
         project_root = _project_root_of(cycle_dir)
         _rep = cycle_dir / seat_dir / report_path
         report_text = _read_maybe(_rep)
-        fresh_errors = _freshness_errors(project_root, report_text, strict,
-                                         True)
+        fresh_errors = _freshness_errors(project_root, report_text, strict, True)
         if fresh_errors:
             raise ImproveError(
                 "write_sweep_entry refuses CONFIRMED on stale evidence: "
                 + "; ".join(fresh_errors)
                 + " -- re-audit against the current tree (a new RUN) or use "
-                "a non-CONFIRMED disposition")
+                "a non-CONFIRMED disposition"
+            )
     run_raw = entry.get("run")
     imp_raw = str(entry.get("imp_id", ""))
     if re.fullmatch(r"\d+", imp_raw):
@@ -827,8 +899,8 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
     elif strict:
         # A strict cycle's sweep must always carry the exact run.
         raise ImproveError(
-            "write_sweep_entry refuses: a strict cycle sweep must name the "
-            "exact RUN (run='RUN-1')")
+            "write_sweep_entry refuses: a strict cycle sweep must name the exact RUN (run='RUN-1')"
+        )
     finding_ref = f"RUN-{run}/{imp_id}" if run is not None else imp_id
 
     ledger = cycle_dir / "SWEEP.md"
@@ -839,30 +911,31 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
     reproduced = str(entry.get("reproduced", "-"))
     if reproduced not in {"y", "n"}:
         raise ImproveError(
-            f"write_sweep_entry refuses: reproduced {reproduced!r} outside "
-            "the closed set y|n")
+            f"write_sweep_entry refuses: reproduced {reproduced!r} outside the closed set y|n"
+        )
     ticket = str(entry.get("ticket", "-") or "-")
     if disposition == "CONFIRMED":
         if ticket == "-":
             raise ImproveError(
                 "write_sweep_entry refuses: a CONFIRMED finding must name a "
                 "canonical ticket; the ledger may not claim a ticket that "
-                "does not exist")
+                "does not exist"
+            )
         if not _ticket_exists(_project_root_of(ledger), ticket):
             raise ImproveError(
                 f"write_sweep_entry refuses: CONFIRMED names ticket "
                 f"{ticket} which does not exist on the board or in any LOG "
                 "segment -- a fictional ticket cannot authorize canonical "
-                "work")
+                "work"
+            )
     elif disposition in ("INVALID", "ALREADY_FIXED", "NOT_REPRODUCED"):
         if ticket != "-":
-            raise ImproveError(
-                f"write_sweep_entry refuses: {disposition} may not carry a "
-                "ticket")
+            raise ImproveError(f"write_sweep_entry refuses: {disposition} may not carry a ticket")
     elif ticket != "-" and not _ticket_exists(_project_root_of(ledger), ticket):
         raise ImproveError(
             f"write_sweep_entry refuses: ticket {ticket} does not exist on "
-            "the board or in any LOG segment")
+            "the board or in any LOG segment"
+        )
 
     text = _read_maybe(ledger)
     if not text.startswith("# SWEEP"):
@@ -876,19 +949,26 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
         raise ImproveError(
             "write_sweep_entry refuses to extend a malformed SWEEP ledger: "
             + "; ".join(_base_sweep_errors[:3])
-            + " -- a known-INVALID base is never mutated (T-638)")
-    if any(r.finding_ref == finding_ref
-           and r.report in equivalent_report_keys
-           for r in _sweep_records(text)):
+            + " -- a known-INVALID base is never mutated (T-638)"
+        )
+    if any(
+        r.finding_ref == finding_ref and r.report in equivalent_report_keys
+        for r in _sweep_records(text)
+    ):
         raise ImproveError(
             f"write_sweep_entry refuses: a disposition for "
-            f"{finding_ref} in {report_key} already exists in the ledger")
+            f"{finding_ref} in {report_key} already exists in the ledger"
+        )
 
     record = SweepRecord(
-        finding_ref=finding_ref, disposition=disposition, ticket=ticket,
-        report=report_key, reproduced=reproduced,
+        finding_ref=finding_ref,
+        disposition=disposition,
+        ticket=ticket,
+        report=report_key,
+        reproduced=reproduced,
         fixed_by=str(entry.get("fixed_by", "-") or "-"),
-        verification=str(entry.get("verification", "-") or "-"))
+        verification=str(entry.get("verification", "-") or "-"),
+    )
     proposed = text.rstrip() + "\n" + record.render() + "\n"
     # T-638/§2+§3: the PROPOSED sweep ledger must validate before journal.
     _proposed_sweep_errors = validate_sweep(proposed)
@@ -896,18 +976,18 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
         raise ImproveError(
             "write_sweep_entry refuses its own proposed SWEEP ledger: "
             + "; ".join(_proposed_sweep_errors[:3])
-            + " -- a known-INVALID proposed state is never written (T-638)")
-    result = _journaled_write(ledger, proposed, "sweep",
-                              base_hash=_base_hash(ledger))
+            + " -- a known-INVALID proposed state is never written (T-638)"
+        )
+    result = _journaled_write(ledger, proposed, "sweep", base_hash=_base_hash(ledger))
     if not result.get("ok"):
         raise ImproveError(
             f"sweep entry for {finding_ref} not committed: "
-            f"{result.get('code')} {result.get('message', '')}")
+            f"{result.get('code')} {result.get('message', '')}"
+        )
     return result
 
 
-def _journaled_write(path: Path, content: str, kind: str,
-                     base_hash: str | None = None) -> dict:
+def _journaled_write(path: Path, content: str, kind: str, base_hash: str | None = None) -> dict:
     """Write one file through the common lock + journal + roll-forward
     machinery. Returns the transaction result; callers inspect and propagate.
 
@@ -944,21 +1024,34 @@ def _journaled_write(path: Path, content: str, kind: str,
     # so the target-aware semantic verifier validates the ACTUAL changed file
     # with the correct grammar -- a malformed SWEEP can never hide behind a
     # manifest-only scan, and APPLY + Recovery use one verifier.
-    role = {"cycle": "manifest", "seat": "manifest", "sweep": "sweep",
-            "run": "report"}.get(kind, "generic")
+    role = {"cycle": "manifest", "seat": "manifest", "sweep": "sweep", "run": "report"}.get(
+        kind, "generic"
+    )
     with project_writer_lock(root):
         return run_mutation(
-            root, op_id, kind, "saipen", _identity(root),
+            root,
+            op_id,
+            kind,
+            "saipen",
+            _identity(root),
             hash_bytes(rel.encode("utf-8")),
-            [{"path": rel, "role": role, "content": content_bytes,
-              "before_hash": before,
-              "after_hash": hash_bytes(content_bytes)}],
+            [
+                {
+                    "path": rel,
+                    "role": role,
+                    "content": content_bytes,
+                    "before_hash": before,
+                    "after_hash": hash_bytes(content_bytes),
+                }
+            ],
             preconditions={rel: before},
-            verification_policy="improve_atomic_file")
+            verification_policy="improve_atomic_file",
+        )
 
 
 def _identity(root: Path) -> str:
     from saipen_engine.paths import project_identity
+
     return project_identity(root)
 
 
@@ -974,6 +1067,7 @@ class _ValidManifest:
     """One validated manifest snapshot (T-638/§1): text, its derived status,
     and its derived strictness all come from the SAME bytes that were
     validated -- no mutator may validate one read then decide on another."""
+
     __slots__ = ("path", "status", "strict", "text")
 
     def __init__(self, path: Path, text: str, status: str, strict: bool):
@@ -983,9 +1077,9 @@ class _ValidManifest:
         self.strict = strict
 
 
-def load_valid_manifest(cycle_dir: Path, mutator: str,
-                        allowed_statuses: tuple[str, ...] = ("active",)) \
-        -> _ValidManifest:
+def load_valid_manifest(
+    cycle_dir: Path, mutator: str, allowed_statuses: tuple[str, ...] = ("active",)
+) -> _ValidManifest:
     """Read, validate, and snapshot a cycle manifest in ONE consistent pass
     (T-638/§1). The manifest is read once, validated against the directory
     identity, its status and strictness derived FROM THAT SAME TEXT, and an
@@ -1002,12 +1096,14 @@ def load_valid_manifest(cycle_dir: Path, mutator: str,
         raise ImproveError(
             f"{mutator} refuses an invalid active manifest: "
             + "; ".join(_manifest_errors[:3])
-            + " -- a known-INVALID base is never mutated (T-638)")
+            + " -- a known-INVALID base is never mutated (T-638)"
+        )
     status = _status_of(text)
     if status not in allowed_statuses:
         raise ImproveError(
             f"{mutator} refuses: cycle {cycle_dir.name} is {status}, not one "
-            f"of {', '.join(allowed_statuses)}")
+            f"of {', '.join(allowed_statuses)}"
+        )
     strict = _schema_of(text) == "strict"
     return _ValidManifest(manifest, text, status, strict)
 
@@ -1020,8 +1116,7 @@ def _status_of(text: str) -> str:
 
 def _schema_of(text: str) -> str:
     """Schema derived from an already-loaded manifest TEXT."""
-    return "strict" if re.search(
-        r"(?m)^manifest_schema:\s*strict\s*$", text) else "legacy"
+    return "strict" if re.search(r"(?m)^manifest_schema:\s*strict\s*$", text) else "legacy"
 
 
 def _require_cycle_active(cycle_dir: Path, mutator: str) -> Path:
@@ -1060,47 +1155,50 @@ def installed_protocol_fingerprint(protocol_root: Path) -> str:
     """
     import hashlib
     import json as _json
+
     root = Path(protocol_root)
-    proto = next((p for p in (root / "saipen", root)
-                  if (p / "CORE.md").is_file()), None)
+    proto = next((p for p in (root / "saipen", root) if (p / "CORE.md").is_file()), None)
     if proto is None:
         raise ImproveError(
-            "cannot derive the installed protocol fingerprint: no CORE.md "
-            f"under {root}")
+            f"cannot derive the installed protocol fingerprint: no CORE.md under {root}"
+        )
     manifest = proto / "MANIFEST.json"
     if not manifest.is_file():
         raise ImproveError(
             "cannot derive the installed protocol fingerprint: "
             f"{manifest} is missing -- the manifest is the canonical "
-            "protocol-evidence inventory")
+            "protocol-evidence inventory"
+        )
     try:
         inventory = _json.loads(manifest.read_text(encoding="utf-8-sig"))
     except ValueError as exc:
         raise ImproveError(
             "cannot derive the installed protocol fingerprint: "
-            f"{manifest} is not valid JSON ({exc})") from exc
+            f"{manifest} is not valid JSON ({exc})"
+        ) from exc
     rels = []
     for entry in inventory.get("files", []):
         src = entry.get("src", "")
-        if (src.startswith("saipen/") or src.startswith("saipen\\")) \
-                and entry.get("required", False):
+        if (src.startswith("saipen/") or src.startswith("saipen\\")) and entry.get(
+            "required", False
+        ):
             rels.append(src.replace("\\", "/"))
     for phase in inventory.get("phase_docs", {}).get("files", []):
         rels.append(f"saipen/phases/{phase}")
     if not rels:
         raise ImproveError(
             "cannot derive the installed protocol fingerprint: "
-            f"{manifest} declares no required saipen/ owned documents")
-    missing = [rel for rel in rels
-               if not (proto / rel[len("saipen/"):]).is_file()]
+            f"{manifest} declares no required saipen/ owned documents"
+        )
+    missing = [rel for rel in rels if not (proto / rel[len("saipen/") :]).is_file()]
     if missing:
         raise ImproveError(
             "cannot derive the installed protocol fingerprint: REQUIRED "
-            "owned document(s) missing from the install: "
-            + ", ".join(sorted(missing)))
+            "owned document(s) missing from the install: " + ", ".join(sorted(missing))
+        )
     digest = hashlib.sha256()
     for rel in sorted(set(rels)):
-        path = proto / rel[len("saipen/"):]
+        path = proto / rel[len("saipen/") :]
         raw = path.read_bytes()
         digest.update(rel.encode("utf-8"))
         digest.update(b"\n")
@@ -1115,24 +1213,28 @@ def _saipen_install_version() -> str:
     project (T-992/§3). The project's own VERSION is a different fact with a
     different owner and must never be written into `saipen_version`.
     """
-    candidates = (Path(__file__).resolve().parent.parent / "VERSION",
-                  Path(__file__).resolve().parent.parent
-                  / "saipen" / "VERSION")
+    candidates = (
+        Path(__file__).resolve().parent.parent / "VERSION",
+        Path(__file__).resolve().parent.parent / "saipen" / "VERSION",
+    )
     for candidate in candidates:
         if candidate.is_file():
             value = candidate.read_text(encoding="utf-8").strip()
             return value.split("\n")[0]
     raise ImproveError(
-        "cannot derive the installed SAIPEN version: VERSION is missing "
-        "from the SAIPEN install")
+        "cannot derive the installed SAIPEN version: VERSION is missing from the SAIPEN install"
+    )
 
 
 def validate_strict_provenance(
-        text: str, *, roster: str | None = None,
-        manifest_project_identity: str | None = None,
-        seat_id: str | None = None,
-        installed_saipen_version: str | None = None,
-        installed_protocol_fp: str | None = None) -> list[str]:
+    text: str,
+    *,
+    roster: str | None = None,
+    manifest_project_identity: str | None = None,
+    seat_id: str | None = None,
+    installed_saipen_version: str | None = None,
+    installed_protocol_fp: str | None = None,
+) -> list[str]:
     """Validate a STRICT report's provenance identity (T-992/§2).
 
     Extends `validate_report(strict=True)` (which checks shape) with value
@@ -1158,12 +1260,10 @@ def validate_strict_provenance(
         if not value or not value.strip():
             errors.append(f"report header field {key} must be non-empty")
         elif any(ch in value for ch in ("\r", "\n", "\x00", "\x1b")):
-            errors.append(f"report header field {key} carries CR/LF/control "
-                          "characters")
+            errors.append(f"report header field {key} carries CR/LF/control characters")
     _unknown = sorted(set(_field_keys(_hblock)) - required)
     if _unknown:
-        errors.append("report header carries unknown field(s): "
-                      + ", ".join(_unknown))
+        errors.append("report header carries unknown field(s): " + ", ".join(_unknown))
     if seat_id is not None:
         agent = header.get("agent", "")
         if agent != seat_id:
@@ -1173,33 +1273,46 @@ def validate_strict_provenance(
         if project != manifest_project_identity:
             errors.append(
                 f"report project {project!r} != manifest project_identity "
-                f"{manifest_project_identity!r}")
+                f"{manifest_project_identity!r}"
+            )
     if installed_saipen_version is not None:
         reported = header.get("saipen_version", "")
         if reported != installed_saipen_version:
             errors.append(
                 f"report saipen_version {reported!r} != installed SAIPEN "
-                f"version {installed_saipen_version!r}")
+                f"version {installed_saipen_version!r}"
+            )
     if installed_protocol_fp is not None:
         reported = header.get("protocol_fingerprint", "")
         if reported != installed_protocol_fp:
             errors.append(
                 f"report protocol_fingerprint {reported!r} != installed "
-                f"protocol fingerprint {installed_protocol_fp!r}")
+                f"protocol fingerprint {installed_protocol_fp!r}"
+            )
     return errors
 
 
 def _field_keys(header_block: str) -> list[str]:
     """The distinct header keys present in a report's top block."""
-    return sorted({ln.split(":", 1)[0].strip()
-                   for ln in header_block.splitlines()
-                   if ":" in ln and not ln.startswith("#")})
+    return sorted(
+        {
+            ln.split(":", 1)[0].strip()
+            for ln in header_block.splitlines()
+            if ":" in ln and not ln.startswith("#")
+        }
+    )
 
 
 def validate_bound_report(
-        cycle_dir: Path, seat_id: str, report_text: str, *,
-        require_runs: bool = False, require_fresh: bool = False,
-        cycle_active: bool = True, current_source=None) -> list[str]:
+    cycle_dir: Path,
+    seat_id: str,
+    report_text: str,
+    *,
+    require_runs: bool = False,
+    require_fresh: bool = False,
+    cycle_active: bool = True,
+    current_source=None,
+) -> list[str]:
     """The ONE shared bound proof bar for a strict seat report (T-638/§6).
 
     Resolves ground truth itself from the validated cycle manifest (roster
@@ -1230,11 +1343,9 @@ def validate_bound_report(
         errors.append(f"cycle manifest missing: {manifest}")
         return errors
     roster_text = _read_maybe(manifest)
-    _manifest_errors = validate_manifest(
-        roster_text, expected_cycle_id=cycle_dir.name)
+    _manifest_errors = validate_manifest(roster_text, expected_cycle_id=cycle_dir.name)
     if _manifest_errors:
-        errors.append("invalid cycle manifest: "
-                      + "; ".join(_manifest_errors[:3]))
+        errors.append("invalid cycle manifest: " + "; ".join(_manifest_errors[:3]))
         return errors
     strict = _schema_of(roster_text) == "strict"
     block = _seat_block(roster_text, seat_id)
@@ -1243,11 +1354,9 @@ def validate_bound_report(
         return errors
     roster_role = _field(block, "role")
     project_identity = _field(roster_text, "project_identity")
-    errors += validate_report(report_text, require_runs=require_runs,
-                              strict=strict)
+    errors += validate_report(report_text, require_runs=require_runs, strict=strict)
     try:
-        installed_fp = installed_protocol_fingerprint(
-            _protocol_root_for())
+        installed_fp = installed_protocol_fingerprint(_protocol_root_for())
         installed_version = _saipen_install_version()
     except ImproveError as exc:
         errors.append(f"cannot derive installed provenance truth: {exc}")
@@ -1255,20 +1364,25 @@ def validate_bound_report(
         installed_version = None
     if installed_fp is not None and installed_version is not None:
         errors += validate_strict_provenance(
-            report_text, roster=roster_text,
+            report_text,
+            roster=roster_text,
             manifest_project_identity=project_identity,
             seat_id=seat_id,
             installed_saipen_version=installed_version,
-            installed_protocol_fp=installed_fp)
+            installed_protocol_fp=installed_fp,
+        )
         # role must match the roster binding, not just be closed.
         _r_role = _field(report_text, "role")
         if roster_role and _r_role != roster_role:
-            errors.append(
-                f"report role {_r_role!r} != roster role {roster_role!r}")
+            errors.append(f"report role {_r_role!r} != roster role {roster_role!r}")
     if strict and require_fresh:
-        errors += _freshness_errors(_project_root_of(cycle_dir),
-                                    report_text, True, cycle_active,
-                                    current_source=current_source)
+        errors += _freshness_errors(
+            _project_root_of(cycle_dir),
+            report_text,
+            True,
+            cycle_active,
+            current_source=current_source,
+        )
     return errors
 
 
@@ -1295,12 +1409,16 @@ def portable_project_key(project_root: Path) -> str:
     `.saipen/IDENTITY.md` lineage that survives moves, clones and forks.
     """
     import subprocess
+
     root = Path(project_root)
     remote = ""
     try:
         result = subprocess.run(
             ["git", "-C", str(root), "remote", "get-url", "origin"],
-            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, check=False)
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        )
         if result.returncode == 0:
             remote = result.stdout.decode("utf-8", "replace").strip()
     except (OSError, subprocess.SubprocessError):
@@ -1317,12 +1435,19 @@ def portable_project_key(project_root: Path) -> str:
     return safe.strip("-.").lower() or "project"
 
 
-def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
-                       session_id: str | None, project_name: str,
-                       model_or_runtime: str, context_scope: str,
-                       protocol_fingerprint: str | None = None,
-                       context_available: str = "complete",
-                       dry_run: bool = False) -> dict:
+def prepare_audit_seat(
+    project_root: Path,
+    *,
+    agent_family: str,
+    role: str,
+    session_id: str | None,
+    project_name: str,
+    model_or_runtime: str,
+    context_scope: str,
+    protocol_fingerprint: str | None = None,
+    context_available: str = "complete",
+    dry_run: bool = False,
+) -> dict:
     """Atomically admit or resume one concrete Improve seat.
 
     Active-cycle selection, seat allocation, roster registration and report
@@ -1337,8 +1462,13 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
     import datetime
     import uuid
     from freshness import FreshnessError, compute_source_identity
-    from saipen_engine.journal import (_hash_file, hash_bytes, scan_pending,
-                                       recovery_preflight, run_mutation)
+    from saipen_engine.journal import (
+        _hash_file,
+        hash_bytes,
+        scan_pending,
+        recovery_preflight,
+        run_mutation,
+    )
     from saipen_engine.lock import project_writer_lock
 
     def _rv(payload: dict) -> dict:
@@ -1362,7 +1492,8 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
     if len(_report_name.encode("utf-8")) > 255:
         raise ImproveError(
             f"project_name {_name!r} is too long for the composed report "
-            f"filename saipen_improve_<name>.md")
+            f"filename saipen_improve_<name>.md"
+        )
     report_ident = _report_name
     project_key = portable_project_key(root)
 
@@ -1393,32 +1524,44 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
             _rp_corrupt = [op for op in _rp_pending if op.get("corrupt")]
             _rp_pending = [op for op in _rp_pending if not op.get("corrupt")]
             if _rp_conflicts:
-                return _rv({
-                    "ok": False, "code": "RECOVERY_CONFLICT",
-                    "op_ids": [op["op_id"] for op in _rp_conflicts],
-                    "recovery_required": True,
-                    "detail": f"unresolved conflict "
-                              f"{_rp_conflicts[0]['op_id']} blocks admission; "
-                              f"resolve it explicitly (saipen recover) before "
-                              f"any further canonical write"})
+                return _rv(
+                    {
+                        "ok": False,
+                        "code": "RECOVERY_CONFLICT",
+                        "op_ids": [op["op_id"] for op in _rp_conflicts],
+                        "recovery_required": True,
+                        "detail": f"unresolved conflict "
+                        f"{_rp_conflicts[0]['op_id']} blocks admission; "
+                        f"resolve it explicitly (saipen recover) before "
+                        f"any further canonical write",
+                    }
+                )
             if _rp_corrupt:
-                return _rv({
-                    "ok": False, "code": "CORRUPT_JOURNAL",
-                    "op_ids": [op["op_id"] for op in _rp_corrupt],
-                    "recovery_required": True,
-                    "detail": f"corrupt journal evidence "
-                              f"{_rp_corrupt[0]['op_id']} blocks admission: "
-                              f"{_rp_corrupt[0].get('detail', '')} -- resolve "
-                              f"the corrupt receipt explicitly before any "
-                              f"further canonical write"})
+                return _rv(
+                    {
+                        "ok": False,
+                        "code": "CORRUPT_JOURNAL",
+                        "op_ids": [op["op_id"] for op in _rp_corrupt],
+                        "recovery_required": True,
+                        "detail": f"corrupt journal evidence "
+                        f"{_rp_corrupt[0]['op_id']} blocks admission: "
+                        f"{_rp_corrupt[0].get('detail', '')} -- resolve "
+                        f"the corrupt receipt explicitly before any "
+                        f"further canonical write",
+                    }
+                )
             if _rp_pending:
-                return _rv({
-                    "ok": False, "code": "RECOVERY_REQUIRED",
-                    "op_ids": [op["op_id"] for op in _rp_pending],
-                    "recovery_required": True,
-                    "detail": "pending recovery operation(s) must be applied "
-                              "before admission; dry-run does not roll them "
-                              "forward"})
+                return _rv(
+                    {
+                        "ok": False,
+                        "code": "RECOVERY_REQUIRED",
+                        "op_ids": [op["op_id"] for op in _rp_pending],
+                        "recovery_required": True,
+                        "detail": "pending recovery operation(s) must be applied "
+                        "before admission; dry-run does not roll them "
+                        "forward",
+                    }
+                )
             preflight = {"ok": True}
         else:
             preflight = recovery_preflight(root)
@@ -1428,14 +1571,15 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
         owner = _owner_root(root)
         active = []
         if owner.is_dir():
-            active = sorted(manifest for manifest in owner.glob("*/MANIFEST.md")
-                            if _cycle_status(manifest) == "active")
+            active = sorted(
+                manifest
+                for manifest in owner.glob("*/MANIFEST.md")
+                if _cycle_status(manifest) == "active"
+            )
         if len(active) > 1:
-            raise ImproveError("multiple ACTIVE Improve cycles exist; refuse "
-                               "ambiguous admission")
+            raise ImproveError("multiple ACTIVE Improve cycles exist; refuse ambiguous admission")
 
-        created_at = datetime.datetime.now(
-            datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        created_at = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         if active:
             manifest = active[0]
             active_cycle = manifest.parent.name
@@ -1449,22 +1593,25 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
                 f"cycle_id: {active_cycle}\n"
                 f"created_at: {created_at}\n"
                 f"project_identity: {project_key}\n"
-                "cycle_status: active\n")
+                "cycle_status: active\n"
+            )
 
         # A2: before ANY seat allocation, admission, unavailable handling or
         # resume, the active manifest MUST validate against its own directory
         # identity. An invalid active manifest is never consumed or mutated --
         # zero new mutation, evidence byte-identically preserved.
-        _manifest_errors = validate_manifest(
-            manifest_text, expected_cycle_id=active_cycle)
+        _manifest_errors = validate_manifest(manifest_text, expected_cycle_id=active_cycle)
         if _manifest_errors:
-            return _rv({"ok": False, "code": "INVALID_MANIFEST",
+            return _rv(
+                {
+                    "ok": False,
+                    "code": "INVALID_MANIFEST",
                     "cycle_id": active_cycle,
                     "detail": "active Improve manifest is invalid; refuse "
-                              "any admission/admission/resume against it: "
-                              + "; ".join(_manifest_errors[:3])})
-        _strict_manifest = bool(re.search(
-            r"(?m)^manifest_schema:\s*strict\s*$", manifest_text))
+                    "any admission/admission/resume against it: " + "; ".join(_manifest_errors[:3]),
+                }
+            )
+        _strict_manifest = bool(re.search(r"(?m)^manifest_schema:\s*strict\s*$", manifest_text))
 
         if session_id is not None:
             seat = _validate_safe_id(session_id, "session_id")
@@ -1490,106 +1637,142 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
             # Unavailable is a roster decision prepare does not override,
             # whatever the rest of the block says.
             if availability == "unavailable":
-                return _rv({"ok": False, "code": "SEAT_UNAVAILABLE",
-                        "cycle_id": active_cycle, "seat_id": seat,
+                return _rv(
+                    {
+                        "ok": False,
+                        "code": "SEAT_UNAVAILABLE",
+                        "cycle_id": active_cycle,
+                        "seat_id": seat,
                         "role": selected_role,
                         "report_path": report.relative_to(root).as_posix(),
                         "detail": f"session {seat} is unavailable on the "
-                                  "roster; prepare does not override it"})
+                        "roster; prepare does not override it",
+                    }
+                )
             if roster_role != selected_role:
                 raise ImproveError(
-                    f"session {seat} is registered as role {roster_role!r}, "
-                    f"not {selected_role!r}")
+                    f"session {seat} is registered as role {roster_role!r}, not {selected_role!r}"
+                )
             if roster_report != report_ident:
                 raise ImproveError(
-                    f"session {seat} owns report {roster_report!r}, not "
-                    f"{report_ident!r}")
+                    f"session {seat} owns report {roster_report!r}, not {report_ident!r}"
+                )
             if not report.is_file():
-                return _rv({"ok": False, "code": "SEAT_EVIDENCE_MISSING",
-                        "cycle_id": active_cycle, "seat_id": seat,
+                return _rv(
+                    {
+                        "ok": False,
+                        "code": "SEAT_EVIDENCE_MISSING",
+                        "cycle_id": active_cycle,
+                        "seat_id": seat,
                         "role": selected_role,
                         "report_path": report.relative_to(root).as_posix(),
                         "detail": f"session {seat} is registered but its "
-                                  "report is missing; an existing seat's "
-                                  "evidence cannot be recreated by prepare -- "
-                                  "recover any pending journaled admission or "
-                                  "use the abort/discard/recovery lifecycle if "
-                                  "replacement is intentional"})
+                        "report is missing; an existing seat's "
+                        "evidence cannot be recreated by prepare -- "
+                        "recover any pending journaled admission or "
+                        "use the abort/discard/recovery lifecycle if "
+                        "replacement is intentional",
+                    }
+                )
             try:
                 report_text = _read_maybe(report)
             except (UnicodeDecodeError, OSError) as _rd_exc:
-                return {"ok": False, "code": "INVALID_REPORT",
-                        "cycle_id": active_cycle, "seat_id": seat,
-                        "role": selected_role,
-                        "report_path": report.relative_to(root).as_posix(),
-                        "detail": f"session {seat} report cannot be decoded "
-                                  f"({type(_rd_exc).__name__}); cannot resume"}
+                return {
+                    "ok": False,
+                    "code": "INVALID_REPORT",
+                    "cycle_id": active_cycle,
+                    "seat_id": seat,
+                    "role": selected_role,
+                    "report_path": report.relative_to(root).as_posix(),
+                    "detail": f"session {seat} report cannot be decoded "
+                    f"({type(_rd_exc).__name__}); cannot resume",
+                }
             _header_block = report_text.split("\n## ", 1)[0]
-            _status_lines = [ln for ln in _header_block.splitlines()
-                             if ln.startswith("report_status:")]
+            _status_lines = [
+                ln for ln in _header_block.splitlines() if ln.startswith("report_status:")
+            ]
             if len(_status_lines) != 1:
-                return {"ok": False, "code": "INVALID_REPORT",
-                        "cycle_id": active_cycle, "seat_id": seat,
-                        "role": selected_role,
-                        "report_path": report.relative_to(root).as_posix(),
-                        "detail": f"session {seat} report carries "
-                                  f"{len(_status_lines)} report_status "
-                                  "fields; cannot resume"}
-            _report_violations = validate_report(report_text,
-                                                 strict=_strict_manifest)
+                return {
+                    "ok": False,
+                    "code": "INVALID_REPORT",
+                    "cycle_id": active_cycle,
+                    "seat_id": seat,
+                    "role": selected_role,
+                    "report_path": report.relative_to(root).as_posix(),
+                    "detail": f"session {seat} report carries "
+                    f"{len(_status_lines)} report_status "
+                    "fields; cannot resume",
+                }
+            _report_violations = validate_report(report_text, strict=_strict_manifest)
             if _report_violations:
-                return {"ok": False, "code": "INVALID_REPORT",
-                        "cycle_id": active_cycle, "seat_id": seat,
-                        "role": selected_role,
-                        "report_path": report.relative_to(root).as_posix(),
-                        "detail": f"session {seat} report is invalid and not "
-                                  "resumable: " + "; ".join(
-                                      _report_violations[:3])}
+                return {
+                    "ok": False,
+                    "code": "INVALID_REPORT",
+                    "cycle_id": active_cycle,
+                    "seat_id": seat,
+                    "role": selected_role,
+                    "report_path": report.relative_to(root).as_posix(),
+                    "detail": f"session {seat} report is invalid and not "
+                    "resumable: " + "; ".join(_report_violations[:3]),
+                }
             report_role = _field(report_text, "role")
             if report_role != roster_role:
                 raise ImproveError(
                     f"session {seat} roster/report role mismatch: "
-                    f"{roster_role!r} != {report_role!r}")
+                    f"{roster_role!r} != {report_role!r}"
+                )
             report_status = _field(report_text, "report_status")
             if report_status == "complete":
                 # A complete report is immutable only when it is REALLY
                 # complete: the strict schema requires explicit RUN evidence,
                 # so a runless skeleton cannot be classified SEAT_COMPLETE.
-                _strict_violations = validate_report(report_text,
-                                                     require_runs=True,
-                                                     strict=_strict_manifest)
+                _strict_violations = validate_report(
+                    report_text, require_runs=True, strict=_strict_manifest
+                )
                 if _strict_violations:
-                    return {"ok": False, "code": "INVALID_REPORT",
-                            "cycle_id": active_cycle, "seat_id": seat,
-                            "role": selected_role,
-                            "report_path": report.relative_to(root).as_posix(),
-                            "detail": f"session {seat} report declares "
-                                      "complete without run evidence: "
-                                      + "; ".join(_strict_violations[:3])}
-                return _rv({"ok": False, "code": "SEAT_COMPLETE",
-                        "cycle_id": active_cycle, "seat_id": seat,
+                    return {
+                        "ok": False,
+                        "code": "INVALID_REPORT",
+                        "cycle_id": active_cycle,
+                        "seat_id": seat,
+                        "role": selected_role,
+                        "report_path": report.relative_to(root).as_posix(),
+                        "detail": f"session {seat} report declares "
+                        "complete without run evidence: " + "; ".join(_strict_violations[:3]),
+                    }
+                return _rv(
+                    {
+                        "ok": False,
+                        "code": "SEAT_COMPLETE",
+                        "cycle_id": active_cycle,
+                        "seat_id": seat,
                         "role": selected_role,
                         "report_path": report.relative_to(root).as_posix(),
                         "resumed": False,
-                        "detail": "report is complete and immutable; this "
-                                  "audit is not resumable",
+                        "detail": "report is complete and immutable; this audit is not resumable",
                         "next": f"list unswept findings with `saipen improve "
-                                f"sweep-queue {active_cycle}`, dispose each "
-                                f"with `saipen improve sweep {active_cycle} "
-                                f"<RUN-N/IMP-NNN> <DISPOSITION>`, then "
-                                f"`saipen improve verify {active_cycle}` and "
-                                f"`saipen improve cycle-complete "
-                                f"{active_cycle}`; a new audit requires a new "
-                                "session"})
+                        f"sweep-queue {active_cycle}`, dispose each "
+                        f"with `saipen improve sweep {active_cycle} "
+                        f"<RUN-N/IMP-NNN> <DISPOSITION>`, then "
+                        f"`saipen improve verify {active_cycle}` and "
+                        f"`saipen improve cycle-complete "
+                        f"{active_cycle}`; a new audit requires a new "
+                        "session",
+                    }
+                )
             if report_status != "draft":
-                return {"ok": False, "code": "INVALID_REPORT",
-                        "cycle_id": active_cycle, "seat_id": seat,
-                        "role": selected_role,
-                        "report_path": report.relative_to(root).as_posix(),
-                        "detail": f"session {seat} report carries unexpected "
-                                  f"report_status {report_status!r}; only a "
-                                  "single exact `report_status: draft` is "
-                                  "resumable, and nothing replaces it"}
+                return {
+                    "ok": False,
+                    "code": "INVALID_REPORT",
+                    "cycle_id": active_cycle,
+                    "seat_id": seat,
+                    "role": selected_role,
+                    "report_path": report.relative_to(root).as_posix(),
+                    "detail": f"session {seat} report carries unexpected "
+                    f"report_status {report_status!r}; only a "
+                    "single exact `report_status: draft` is "
+                    "resumable, and nothing replaces it",
+                }
             # A1: a DRAFT seat may resume only while its mechanical source
             # identity still matches the CURRENT source identity. A tracked
             # source change between prepare and retry makes the old report
@@ -1601,34 +1784,44 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
             try:
                 _current_src = compute_source_identity(root)
             except FreshnessError as exc:
-                return {"ok": False, "code": "STALE_REPORT",
-                        "cycle_id": active_cycle, "seat_id": seat,
-                        "role": selected_role,
-                        "report_path": report.relative_to(root).as_posix(),
-                        "resumed": False,
-                        "detail": f"cannot verify source freshness before "
-                                  f"resume: {exc}; refuse to bind a DRAFT to "
-                                  "an unverifiable source"}
+                return {
+                    "ok": False,
+                    "code": "STALE_REPORT",
+                    "cycle_id": active_cycle,
+                    "seat_id": seat,
+                    "role": selected_role,
+                    "report_path": report.relative_to(root).as_posix(),
+                    "resumed": False,
+                    "detail": f"cannot verify source freshness before "
+                    f"resume: {exc}; refuse to bind a DRAFT to "
+                    "an unverifiable source",
+                }
             _r_model = _field(report_text, "discovery_model")
             _r_head = _field(report_text, "source_head")
             _r_tree = _field(report_text, "source_tree_fingerprint")
-            if (re.match(r"^(git-delta-v1|no-git-tree-v1):", _r_tree) is None
-                    or (_r_model and _current_src.discovery_model != _r_model)
-                    or _current_src.source_head not in (_r_head, _r_head[:7])
-                    or _current_src.source_tree_fingerprint != _r_tree):
-                return {"ok": False, "code": "STALE_REPORT",
-                        "cycle_id": active_cycle, "seat_id": seat,
-                        "role": selected_role,
-                        "report_path": report.relative_to(root).as_posix(),
-                        "resumed": False,
-                        "detail": "the project source identity changed since "
-                                  "this DRAFT report was captured; resuming "
-                                  "under the old identity would bind stale "
-                                  "evidence to fresh work -- capture a new "
-                                  "seat/cycle against the current tree (or "
-                                  "regenerate the draft) instead of resuming",
-                        "current_source_head": _current_src.source_head,
-                        "current_discovery_model": _current_src.discovery_model}
+            if (
+                re.match(r"^(git-delta-v1|no-git-tree-v1):", _r_tree) is None
+                or (_r_model and _current_src.discovery_model != _r_model)
+                or _current_src.source_head not in (_r_head, _r_head[:7])
+                or _current_src.source_tree_fingerprint != _r_tree
+            ):
+                return {
+                    "ok": False,
+                    "code": "STALE_REPORT",
+                    "cycle_id": active_cycle,
+                    "seat_id": seat,
+                    "role": selected_role,
+                    "report_path": report.relative_to(root).as_posix(),
+                    "resumed": False,
+                    "detail": "the project source identity changed since "
+                    "this DRAFT report was captured; resuming "
+                    "under the old identity would bind stale "
+                    "evidence to fresh work -- capture a new "
+                    "seat/cycle against the current tree (or "
+                    "regenerate the draft) instead of resuming",
+                    "current_source_head": _current_src.source_head,
+                    "current_discovery_model": _current_src.discovery_model,
+                }
             # T-638/§5: forged provenance must never round up to a resumable
             # seat -- before ANY ALREADY_ASSIGNED result, the report must
             # satisfy the FULL bound bar: structural + roster-bound provenance
@@ -1636,41 +1829,56 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
             # fingerprint == installed) + source freshness. All three or no
             # resume.
             _bound_errors = validate_bound_report(
-                manifest.parent, seat, report_text,
-                require_runs=False, require_fresh=True, cycle_active=True,
-                current_source=_current_src)
+                manifest.parent,
+                seat,
+                report_text,
+                require_runs=False,
+                require_fresh=True,
+                cycle_active=True,
+                current_source=_current_src,
+            )
             if _bound_errors:
-                return {"ok": False, "code": "INVALID_REPORT",
-                        "cycle_id": active_cycle, "seat_id": seat,
-                        "role": selected_role,
-                        "report_path": report.relative_to(root).as_posix(),
-                        "resumed": False,
-                        "detail": f"session {seat} report fails the bound "
-                                  f"provenance bar: "
-                                  + "; ".join(_bound_errors[:3])}
-            return _rv({
-                "ok": True, "code": "ALREADY_ASSIGNED",
-                "cycle_id": active_cycle, "seat_id": seat,
-                "role": selected_role, "report_path": report,
-                "report_created": False, "resumed": True,
-                "source_head": _field(report_text, "source_head"),
-                "source_tree_fingerprint": _field(
-                    report_text, "source_tree_fingerprint"),
-                "discovery_model": _field(report_text, "discovery_model"),
-            })
+                return {
+                    "ok": False,
+                    "code": "INVALID_REPORT",
+                    "cycle_id": active_cycle,
+                    "seat_id": seat,
+                    "role": selected_role,
+                    "report_path": report.relative_to(root).as_posix(),
+                    "resumed": False,
+                    "detail": f"session {seat} report fails the bound "
+                    f"provenance bar: " + "; ".join(_bound_errors[:3]),
+                }
+            return _rv(
+                {
+                    "ok": True,
+                    "code": "ALREADY_ASSIGNED",
+                    "cycle_id": active_cycle,
+                    "seat_id": seat,
+                    "role": selected_role,
+                    "report_path": report,
+                    "report_created": False,
+                    "resumed": True,
+                    "source_head": _field(report_text, "source_head"),
+                    "source_tree_fingerprint": _field(report_text, "source_tree_fingerprint"),
+                    "discovery_model": _field(report_text, "discovery_model"),
+                }
+            )
         else:
             _refuse_duplicate_owner_over_bare_sweep(
-                manifest.parent, manifest_text, report_ident, seat)
-            seat_line = (f"seat_id: {seat}\nrole: {selected_role}\n"
-                         f"report_path: {report_ident}\n"
-                         "availability: expected\n")
+                manifest.parent, manifest_text, report_ident, seat
+            )
+            seat_line = (
+                f"seat_id: {seat}\nrole: {selected_role}\n"
+                f"report_path: {report_ident}\n"
+                "availability: expected\n"
+            )
             new_manifest = manifest_text.rstrip() + "\n" + seat_line
 
         try:
             source = compute_source_identity(root)
         except FreshnessError as exc:
-            raise ImproveError(
-                f"cannot capture mechanical source identity: {exc}") from exc
+            raise ImproveError(f"cannot capture mechanical source identity: {exc}") from exc
         saipen_version = _saipen_install_version()
         # T-638/§4: the writer DERIVES the protocol fingerprint from the
         # installed protocol -- a caller-supplied digest is never accepted as
@@ -1682,7 +1890,8 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
                 "prepare_audit_seat refuses: the supplied protocol "
                 "fingerprint does not match the installed protocol -- "
                 "mechanical identity is derived, never caller-supplied "
-                "(T-638/§4)")
+                "(T-638/§4)"
+            )
         protocol_fingerprint = _installed_fp
         report_text = (
             f"agent: {seat}\n"
@@ -1696,7 +1905,8 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
             f"discovery_model: {source.discovery_model}\n"
             f"context_scope: {context_scope}\n"
             f"context_available: {context_available}\n"
-            "report_status: draft\n")
+            "report_status: draft\n"
+        )
 
         # A5: the writer's own output must satisfy the strict report contract
         # before it is committed -- a writer that can emit a report the
@@ -1707,76 +1917,105 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
         # agent/version/fingerprint are mechanically knowable, and the writer
         # proves its own output against them, never trusting the caller.
         _writer_violations += validate_strict_provenance(
-            report_text, roster=manifest_text,
-            manifest_project_identity=project_key, seat_id=seat,
+            report_text,
+            roster=manifest_text,
+            manifest_project_identity=project_key,
+            seat_id=seat,
             installed_saipen_version=saipen_version,
-            installed_protocol_fp=protocol_fingerprint)
+            installed_protocol_fp=protocol_fingerprint,
+        )
         if _writer_violations:
-            return _rv({"ok": False, "code": "VALIDATION_FAILED",
-                    "cycle_id": active_cycle, "seat_id": seat,
+            return _rv(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "cycle_id": active_cycle,
+                    "seat_id": seat,
                     "role": selected_role,
                     "report_path": report.relative_to(root).as_posix(),
                     "detail": "prepared report fails its own strict contract: "
-                              + "; ".join(_writer_violations[:3])})
+                    + "; ".join(_writer_violations[:3]),
+                }
+            )
 
         if dry_run:
             # Plan-only: every deterministic validation above already ran;
             # answer what WOULD happen without materializing any path.
-            return _rv({
-                "ok": True, "code": "IMPROVE_AUDIT_ASSIGNMENT",
-                "cycle_id": active_cycle, "seat_id": seat,
-                "role": selected_role,
-                "report_path": report,
-                "report_created": False, "resumed": False,
-                "source_head": source.source_head,
-                "source_tree_fingerprint": source.source_tree_fingerprint,
-                "discovery_model": source.discovery_model,
-                "plan": {
-                    "cycle": active_cycle,
-                    "seat": seat,
+            return _rv(
+                {
+                    "ok": True,
+                    "code": "IMPROVE_AUDIT_ASSIGNMENT",
+                    "cycle_id": active_cycle,
+                    "seat_id": seat,
                     "role": selected_role,
-                    "report_path": report.relative_to(root).as_posix(),
-                    "would_create_cycle": block is None
-                    and not (owner.is_dir() and active),
-                    "would_create_manifest": block is None,
-                    "would_create_report": True,
-                    "would_resume_existing_seat": False,
-                    "source_identity": source.source_head,
-                },
-            })
+                    "report_path": report,
+                    "report_created": False,
+                    "resumed": False,
+                    "source_head": source.source_head,
+                    "source_tree_fingerprint": source.source_tree_fingerprint,
+                    "discovery_model": source.discovery_model,
+                    "plan": {
+                        "cycle": active_cycle,
+                        "seat": seat,
+                        "role": selected_role,
+                        "report_path": report.relative_to(root).as_posix(),
+                        "would_create_cycle": block is None and not (owner.is_dir() and active),
+                        "would_create_manifest": block is None,
+                        "would_create_report": True,
+                        "would_resume_existing_seat": False,
+                        "source_identity": source.source_head,
+                    },
+                }
+            )
         manifest_rel = manifest.relative_to(root).as_posix()
         report_rel = report.relative_to(root).as_posix()
         targets = []
         preconditions = {}
         if block is None:
-            targets.append({"path": manifest_rel, "role": "manifest",
-                            "content": new_manifest})
+            targets.append({"path": manifest_rel, "role": "manifest", "content": new_manifest})
             preconditions[manifest_rel] = _hash_file(manifest)
-        targets.append({"path": report_rel, "role": "report",
-                        "content": report_text})
+        targets.append({"path": report_rel, "role": "report", "content": report_text})
         preconditions[report_rel] = _hash_file(report)
         op_id = "improve-admit-" + uuid.uuid4().hex
         committed = run_mutation(
-            root, op_id, "improve_admit", seat, _identity(root),
+            root,
+            op_id,
+            "improve_admit",
+            seat,
+            _identity(root),
             hash_bytes(f"{active_cycle}:{seat}:{selected_role}".encode("utf-8")),
-            targets, preconditions=preconditions, skip_preflight=True,
-            verification_policy="improve_atomic_file")
+            targets,
+            preconditions=preconditions,
+            skip_preflight=True,
+            verification_policy="improve_atomic_file",
+        )
         if not committed.get("ok"):
             return _rv(committed)
-        return _rv({
-            "ok": True, "code": committed.get("code", "COMMITTED"),
-            "op_id": committed.get("op_id"), "cycle_id": active_cycle,
-            "seat_id": seat, "role": selected_role, "report_path": report,
-            "report_created": True, "resumed": False,
-            "source_head": source.source_head,
-            "source_tree_fingerprint": source.source_tree_fingerprint,
-            "discovery_model": source.discovery_model,
-        })
+        return _rv(
+            {
+                "ok": True,
+                "code": committed.get("code", "COMMITTED"),
+                "op_id": committed.get("op_id"),
+                "cycle_id": active_cycle,
+                "seat_id": seat,
+                "role": selected_role,
+                "report_path": report,
+                "report_created": True,
+                "resumed": False,
+                "source_head": source.source_head,
+                "source_tree_fingerprint": source.source_tree_fingerprint,
+                "discovery_model": source.discovery_model,
+            }
+        )
 
 
-def create_cycle(project_root: Path, cycle_id: str, *,
-                 created_at: str | None = None,
-                 project_identity: str | None = None) -> Path:
+def create_cycle(
+    project_root: Path,
+    cycle_id: str,
+    *,
+    created_at: str | None = None,
+    project_identity: str | None = None,
+) -> Path:
     """Create a STRICT-schema cycle directory journaled (DOGFOOD V, T-618).
 
     Python owns the manifest formatting: no caller supplies preformatted
@@ -1786,9 +2025,9 @@ def create_cycle(project_root: Path, cycle_id: str, *,
     requires and the three historical cycles lack. Refuses while another
     ACTIVE cycle exists, exactly like register_cycle."""
     import datetime
+
     if created_at is None:
-        created_at = datetime.datetime.now(
-            datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        created_at = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     if project_identity is None:
         project_identity = portable_project_key(project_root)
     root = Path(project_root)
@@ -1801,17 +2040,21 @@ def create_cycle(project_root: Path, cycle_id: str, *,
                 raise ImproveError(
                     f"improve cycle {manifest.parent.name} is ACTIVE -- a "
                     f"project has at most one active Improve cycle; complete "
-                    "it first to admit the next")
+                    "it first to admit the next"
+                )
     if (cdir / "MANIFEST.md").exists():
         raise ImproveError(
             f"improve cycle {cycle_id} already exists -- a project has at "
-            f"most one active Improve cycle")
-    content = ("# IMPROVE CYCLE ROSTER\n\n"
-               "manifest_schema: strict\n"
-               f"cycle_id: {cycle_id}\n"
-               f"created_at: {created_at}\n"
-               f"project_identity: {project_identity}\n"
-               "cycle_status: active\n")
+            f"most one active Improve cycle"
+        )
+    content = (
+        "# IMPROVE CYCLE ROSTER\n\n"
+        "manifest_schema: strict\n"
+        f"cycle_id: {cycle_id}\n"
+        f"created_at: {created_at}\n"
+        f"project_identity: {project_identity}\n"
+        "cycle_status: active\n"
+    )
     # T-638/§2: the PROPOSED manifest must validate before ANY byte is
     # written -- an invalid created_at/project_identity/lifecycle must never
     # leave a cycle directory or manifest behind (ZERO writes on known-invalid
@@ -1821,17 +2064,17 @@ def create_cycle(project_root: Path, cycle_id: str, *,
         raise ImproveError(
             "create_cycle refuses its own proposed manifest: "
             + "; ".join(_proposed_errors[:3])
-            + " -- a known-INVALID proposed state is never written (T-638)")
+            + " -- a known-INVALID proposed state is never written (T-638)"
+        )
     result = _journaled_write(cdir / "MANIFEST.md", content, "cycle")
     if not result.get("ok"):
         raise ImproveError(
-            f"cycle {cycle_id} not committed: {result.get('code')} "
-            f"{result.get('message', '')}")
+            f"cycle {cycle_id} not committed: {result.get('code')} {result.get('message', '')}"
+        )
     return cdir
 
 
-def register_cycle(project_root: Path, cycle_id: str,
-                   roster_lines: str) -> Path:
+def register_cycle(project_root: Path, cycle_id: str, roster_lines: str) -> Path:
     """LEGACY roster-cycle writer, kept for pre-boundary callers and tests.
 
     Creates a cycle whose manifest carries no `manifest_schema: strict`, so it
@@ -1850,20 +2093,21 @@ def register_cycle(project_root: Path, cycle_id: str,
                 raise ImproveError(
                     f"improve cycle {manifest.parent.name} is ACTIVE -- a "
                     f"project has at most one active Improve cycle; complete "
-                    "it first to admit the next")
+                    "it first to admit the next"
+                )
     if (cdir / "MANIFEST.md").exists():
         raise ImproveError(
             f"improve cycle {cycle_id} already exists -- a project has at "
-            f"most one active Improve cycle")
-    content = ("# IMPROVE CYCLE ROSTER\n\ncycle_status: active\n\n"
-               + roster_lines)
+            f"most one active Improve cycle"
+        )
+    content = "# IMPROVE CYCLE ROSTER\n\ncycle_status: active\n\n" + roster_lines
     if re.search(r"(?m)^cycle_status:\s*active\s*$", roster_lines):
-        content = ("# IMPROVE CYCLE ROSTER\n\n" + roster_lines)
+        content = "# IMPROVE CYCLE ROSTER\n\n" + roster_lines
     result = _journaled_write(cdir / "MANIFEST.md", content, "cycle")
     if not result.get("ok"):
         raise ImproveError(
-            f"cycle {cycle_id} not committed: {result.get('code')} "
-            f"{result.get('message', '')}")
+            f"cycle {cycle_id} not committed: {result.get('code')} {result.get('message', '')}"
+        )
     return cdir
 
 
@@ -1895,31 +2139,36 @@ def verify_cycle(cycle_dir: Path) -> list[str]:
             continue
         report = cycle_dir / seat_id / report_path
         if not report.is_file():
-            errors.append(f"seat {seat_id}: expected report {report_path} "
-                          "does not exist")
+            errors.append(f"seat {seat_id}: expected report {report_path} does not exist")
             continue
         report_text = _read_maybe(report)
         roster_role = _field(seat, "role")
         report_role = _field(report_text, "role")
         if report_role != roster_role:
-            errors.append(f"seat {seat_id}: roster/report role mismatch: "
-                          f"{roster_role!r} != {report_role!r}")
+            errors.append(
+                f"seat {seat_id}: roster/report role mismatch: {roster_role!r} != {report_role!r}"
+            )
             continue
         if _field(report_text, "report_status") != "complete":
-            errors.append(f"seat {seat_id}: report {report_path} is not "
-                          "complete")
+            errors.append(f"seat {seat_id}: report {report_path} is not complete")
             continue
         report_errors = validate_bound_report(
-            cycle_dir, seat_id, report_text,
-            require_runs=strict, require_fresh=strict, cycle_active=True)
+            cycle_dir,
+            seat_id,
+            report_text,
+            require_runs=strict,
+            require_fresh=strict,
+            cycle_active=True,
+        )
         for err in report_errors:
             errors.append(f"seat {seat_id} report: {err}")
-        derived = derive_status(report_path, text, report_text, sweep_text,
-                                seat_id=seat_id)
+        derived = derive_status(report_path, text, report_text, sweep_text, seat_id=seat_id)
         for missing_ref in derived.get("missing", []):
-            errors.append(f"seat {seat_id}: finding {missing_ref} has no "
-                          "final Core disposition for its exact composite "
-                          "identity")
+            errors.append(
+                f"seat {seat_id}: finding {missing_ref} has no "
+                "final Core disposition for its exact composite "
+                "identity"
+            )
     return errors
 
 
@@ -1956,31 +2205,30 @@ def abort_cycle(cycle_dir: Path) -> dict:
         raise ImproveError(
             "abort refuses: the sweep ledger already carries dispositions; a "
             "cycle whose Core sweep started is not abortable -- finish or "
-            "dispose it properly")
+            "dispose it properly"
+        )
     # The manifest write is the ONLY filesystem effect, and it is the single
     # journaled transaction. A crash at any stage leaves either the active
     # manifest unchanged (retry re-aborts idempotently) or an archived +
     # cycle_aborted manifest whose draft reports stay byte-identical -- there
     # is no intermediate state where a report moved but the manifest did not.
-    new_text = re.sub(r"(?m)^cycle_status:\s*[A-Za-z]+",
-                      "cycle_status: archived", text, count=1)
+    new_text = re.sub(r"(?m)^cycle_status:\s*[A-Za-z]+", "cycle_status: archived", text, count=1)
     new_text = new_text.rstrip() + "\ncycle_aborted: draft-preserved\n"
     # T-638/§2: the PROPOSED manifest (archived + cycle_aborted) must validate
     # before it is written -- a known-invalid proposed state never enters
     # PREPARED/APPLY.
-    _proposed_errors = validate_manifest(
-        new_text, expected_cycle_id=cycle_dir.name)
+    _proposed_errors = validate_manifest(new_text, expected_cycle_id=cycle_dir.name)
     if _proposed_errors:
         raise ImproveError(
             "abort refuses its own proposed manifest: "
             + "; ".join(_proposed_errors[:3])
-            + " -- a known-INVALID proposed state is never written (T-638)")
-    result = _journaled_write(manifest, new_text, "cycle",
-                              base_hash=_base_hash(manifest))
+            + " -- a known-INVALID proposed state is never written (T-638)"
+        )
+    result = _journaled_write(manifest, new_text, "cycle", base_hash=_base_hash(manifest))
     if not result.get("ok"):
         raise ImproveError(
-            f"cycle {cycle_dir.name} not aborted: {result.get('code')} "
-            f"{result.get('message', '')}")
+            f"cycle {cycle_dir.name} not aborted: {result.get('code')} {result.get('message', '')}"
+        )
     preserved = []
     for block in _seat_blocks(text):
         seat_id = _field(block, "seat_id")
@@ -2005,8 +2253,7 @@ def complete_cycle(cycle_dir: Path) -> dict:
     (a report containing only `report_status: complete` refuses), every
     finding carrying a final Core SWEEP disposition for its EXACT composite
     identity. complete_cycle is never a glorified report_status counter."""
-    snapshot = load_valid_manifest(cycle_dir, "complete_cycle",
-                                   ("active", "complete"))
+    snapshot = load_valid_manifest(cycle_dir, "complete_cycle", ("active", "complete"))
     text = snapshot.text
     manifest = snapshot.path
     if snapshot.status == "complete":
@@ -2014,34 +2261,40 @@ def complete_cycle(cycle_dir: Path) -> dict:
     errors = verify_cycle(cycle_dir)
     if errors:
         raise ImproveError(
-            "complete_cycle refused -- the cycle bar is unmet:\n- "
-            + "\n- ".join(errors[:20]))
-    new_text = re.sub(r"(?m)^cycle_status:\s*[A-Za-z]+",
-                      "cycle_status: complete", text, count=1)
+            "complete_cycle refused -- the cycle bar is unmet:\n- " + "\n- ".join(errors[:20])
+        )
+    new_text = re.sub(r"(?m)^cycle_status:\s*[A-Za-z]+", "cycle_status: complete", text, count=1)
     if new_text == text:
         new_text = text.rstrip() + "\ncycle_status: complete\n"
     # T-638/§2: the PROPOSED manifest must validate before it is written.
-    _proposed_errors = validate_manifest(
-        new_text, expected_cycle_id=cycle_dir.name)
+    _proposed_errors = validate_manifest(new_text, expected_cycle_id=cycle_dir.name)
     if _proposed_errors:
         raise ImproveError(
             "complete_cycle refuses its own proposed manifest: "
             + "; ".join(_proposed_errors[:3])
-            + " -- a known-INVALID proposed state is never written (T-638)")
-    result = _journaled_write(manifest, new_text, "cycle",
-                              base_hash=_base_hash(manifest))
+            + " -- a known-INVALID proposed state is never written (T-638)"
+        )
+    result = _journaled_write(manifest, new_text, "cycle", base_hash=_base_hash(manifest))
     if not result.get("ok"):
         raise ImproveError(
             f"cycle {cycle_dir.name} not completed: {result.get('code')} "
-            f"{result.get('message', '')}")
+            f"{result.get('message', '')}"
+        )
     return result
 
 
-def create_report(project_root: Path, cycle_id: str, seat_id: str,
-                  project_name: str, *, agent: str, role: str,
-                  model_or_runtime: str,
-                  context_scope: str,
-                  context_available: str = "complete") -> Path:
+def create_report(
+    project_root: Path,
+    cycle_id: str,
+    seat_id: str,
+    project_name: str,
+    *,
+    agent: str,
+    role: str,
+    model_or_runtime: str,
+    context_scope: str,
+    context_available: str = "complete",
+) -> Path:
     """Create a DRAFT seat report mechanically and journaled (DOGFOOD V,
     T-616/T-618). No raw report construction by Core/agent after the
     migration boundary.
@@ -2054,6 +2307,7 @@ def create_report(project_root: Path, cycle_id: str, seat_id: str,
     `protocol_fingerprint` is DERIVED from the installed protocol -- a caller
     never supplies a digest Python can derive itself (T-992/§3, T-638/§4)."""
     from freshness import FreshnessError, compute_source_identity
+
     root = Path(project_root)
     cdir = cycle_dir(root, cycle_id)
     _prove_inside(root, cdir)
@@ -2066,44 +2320,48 @@ def create_report(project_root: Path, cycle_id: str, seat_id: str,
     # -- an invalid active manifest is never interpreted for a write.
     _manifest_errors = validate_manifest(roster_text, expected_cycle_id=cdir.name)
     if _manifest_errors:
-        raise ImproveError("create_report refuses an invalid active manifest: "
-                           + "; ".join(_manifest_errors[:3]))
+        raise ImproveError(
+            "create_report refuses an invalid active manifest: " + "; ".join(_manifest_errors[:3])
+        )
     roster_block = _seat_block(roster_text, seat)
-    if (roster_block is None
-            or _field(roster_block, "report_path")
-            != f"saipen_improve_{project_name}.md"):
+    if (
+        roster_block is None
+        or _field(roster_block, "report_path") != f"saipen_improve_{project_name}.md"
+    ):
         raise ImproveError(
             f"create_report refuses: seat {seat} has no roster entry owning "
-            f"saipen_improve_{project_name}.md -- register the seat first")
+            f"saipen_improve_{project_name}.md -- register the seat first"
+        )
     if _field(roster_block, "role") != selected_role:
         raise ImproveError(
             f"create_report refuses: seat {seat} roster role "
             f"{_field(roster_block, 'role')!r} does not match report role "
-            f"{selected_role!r}")
+            f"{selected_role!r}"
+        )
     try:
         ident = compute_source_identity(root)
     except FreshnessError as exc:
         raise ImproveError(
-            f"create_report refuses: cannot capture mechanical source "
-            f"identity: {exc}") from exc
+            f"create_report refuses: cannot capture mechanical source identity: {exc}"
+        ) from exc
     # T-992/§4: the report's agent IS the seat -- the seat identity is the
     # mechanically knowable fact, a caller may not attach a conflicting label.
     if agent != seat:
         raise ImproveError(
             f"create_report refuses: agent {agent!r} conflicts with seat "
             f"{seat!r}; the report agent is derived from the seat identity, "
-            "a caller cannot choose a different identity label")
+            "a caller cannot choose a different identity label"
+        )
     saipen_version = _saipen_install_version()
-    protocol_fingerprint = installed_protocol_fingerprint(
-        _protocol_root_for())
+    protocol_fingerprint = installed_protocol_fingerprint(_protocol_root_for())
     # T-992/§4: project identity comes from the OWNING MANIFEST's
     # project_identity -- the report and the cycle it belongs to must agree on
     # one project identity, and the caller cannot recompute a divergent one.
     _manifest_project = _field(roster_text, "project_identity")
     if not _manifest_project:
         raise ImproveError(
-            f"create_report refuses: cycle {cdir.name} manifest carries no "
-            "project_identity")
+            f"create_report refuses: cycle {cdir.name} manifest carries no project_identity"
+        )
     header = (
         f"agent: {seat}\n"
         f"role: {selected_role}\n"
@@ -2116,7 +2374,8 @@ def create_report(project_root: Path, cycle_id: str, seat_id: str,
         f"discovery_model: {ident.discovery_model}\n"
         f"context_scope: {context_scope}\n"
         f"context_available: {context_available}\n"
-        "report_status: draft\n")
+        "report_status: draft\n"
+    )
     # T-992/§4: the writer never mints evidence its own consumer would
     # refuse -- every required scalar non-empty, no control injection, no
     # unknown header fields. The agent==seat conflict was already refused
@@ -2124,19 +2383,18 @@ def create_report(project_root: Path, cycle_id: str, seat_id: str,
     _writer_provenance = validate_strict_provenance(header)
     if _writer_provenance:
         raise ImproveError(
-            "create_report refuses its own output: "
-            + "; ".join(_writer_provenance[:3]))
+            "create_report refuses its own output: " + "; ".join(_writer_provenance[:3])
+        )
     report = resolve_report_path(root, cycle_id, seat, project_name)
     if report.is_file():
-        raise ImproveError(
-            f"create_report refuses: report already exists at {report}")
+        raise ImproveError(f"create_report refuses: report already exists at {report}")
     report.parent.mkdir(parents=True, exist_ok=True)
-    result = _journaled_write(report, header, "report",
-                              base_hash=_base_hash(report))
+    result = _journaled_write(report, header, "report", base_hash=_base_hash(report))
     if not result.get("ok"):
         raise ImproveError(
             f"report for seat {seat} not committed: {result.get('code')} "
-            f"{result.get('message', '')}")
+            f"{result.get('message', '')}"
+        )
     return report
 
 
@@ -2145,41 +2403,44 @@ def complete_report(report_path: Path) -> dict:
     (DOGFOOD V, T-616). The FULL report validation must pass first -- a report
     with only `report_status: complete` and nothing else REFUSES."""
     if not report_path.is_file():
-        raise ImproveError(f"complete_report refuses: no report at "
-                           f"{report_path}")
+        raise ImproveError(f"complete_report refuses: no report at {report_path}")
     text = _read_maybe(report_path)
     if _field(text, "report_status") == "complete":
-        raise ImproveError("complete_report refuses: report is already "
-                           "complete and immutable")
+        raise ImproveError("complete_report refuses: report is already complete and immutable")
     cycle_dir_of_report = report_path.parent.parent
     _require_cycle_active(cycle_dir_of_report, "complete_report")
     strict = _cycle_schema(cycle_dir_of_report / "MANIFEST.md") == "strict"
     # Validate against the completion bar as if the report WERE complete: a
     # draft whose stored status is still draft must not dodge the completion
     # schema, and a report with only report_status: complete refuses.
-    completion_text = re.sub(r"(?m)^report_status:[ \t]*[A-Za-z]+",
-                             "report_status: complete", text, count=1)
+    completion_text = re.sub(
+        r"(?m)^report_status:[ \t]*[A-Za-z]+", "report_status: complete", text, count=1
+    )
     # T-638/§6: complete_report applies the ONE bound bar to the PROPOSED
     # completion -- structural + roster-bound provenance + source freshness
     # for strict active cycles. A fabricated provenance report can never be
     # completed into sealed evidence.
     errors = validate_bound_report(
-        cycle_dir_of_report, report_path.parent.name, completion_text,
-        require_runs=strict, require_fresh=strict, cycle_active=True)
+        cycle_dir_of_report,
+        report_path.parent.name,
+        completion_text,
+        require_runs=strict,
+        require_fresh=strict,
+        cycle_active=True,
+    )
     if errors:
         raise ImproveError(
             "complete_report refused -- the bound completion bar is unmet:\n- "
-            + "\n- ".join(errors[:12]))
-    new_text = re.sub(r"(?m)^report_status:\s*[A-Za-z]+",
-                      "report_status: complete", text, count=1)
+            + "\n- ".join(errors[:12])
+        )
+    new_text = re.sub(r"(?m)^report_status:\s*[A-Za-z]+", "report_status: complete", text, count=1)
     if new_text == text:
         new_text = text.rstrip() + "\nreport_status: complete\n"
-    result = _journaled_write(report_path, new_text, "report",
-                              base_hash=_base_hash(report_path))
+    result = _journaled_write(report_path, new_text, "report", base_hash=_base_hash(report_path))
     if not result.get("ok"):
         raise ImproveError(
-            f"report not completed: {result.get('code')} "
-            f"{result.get('message', '')}")
+            f"report not completed: {result.get('code')} {result.get('message', '')}"
+        )
     return result
 
 
@@ -2203,31 +2464,32 @@ def archive_cycle(cycle_dir: Path) -> dict:
     if _sealed_errors:
         raise ImproveError(
             "archive refused: the completed cycle no longer passes its own "
-            "verification bar:\n- " + "\n- ".join(_sealed_errors[:20])
-            + " -- corrupted history is never accepted as archived (T-638)")
-    new_text = re.sub(r"(?m)^cycle_status:\s*[A-Za-z]+",
-                      "cycle_status: archived", text, count=1)
+            "verification bar:\n- "
+            + "\n- ".join(_sealed_errors[:20])
+            + " -- corrupted history is never accepted as archived (T-638)"
+        )
+    new_text = re.sub(r"(?m)^cycle_status:\s*[A-Za-z]+", "cycle_status: archived", text, count=1)
     if new_text == text:
         new_text = text.rstrip() + "\ncycle_status: archived\n"
     # T-638/§2: the PROPOSED manifest must validate before it is written.
-    _proposed_errors = validate_manifest(
-        new_text, expected_cycle_id=cycle_dir.name)
+    _proposed_errors = validate_manifest(new_text, expected_cycle_id=cycle_dir.name)
     if _proposed_errors:
         raise ImproveError(
             "archive refuses its own proposed manifest: "
             + "; ".join(_proposed_errors[:3])
-            + " -- a known-INVALID proposed state is never written (T-638)")
-    result = _journaled_write(manifest, new_text, "cycle",
-                              base_hash=_base_hash(manifest))
+            + " -- a known-INVALID proposed state is never written (T-638)"
+        )
+    result = _journaled_write(manifest, new_text, "cycle", base_hash=_base_hash(manifest))
     if not result.get("ok"):
         raise ImproveError(
-            f"cycle {cycle_dir.name} not archived: {result.get('code')} "
-            f"{result.get('message', '')}")
+            f"cycle {cycle_dir.name} not archived: {result.get('code')} {result.get('message', '')}"
+        )
     return result
 
 
-def register_seat(cycle_dir: Path, seat_id: str, role: str,
-                  report_path: str, availability: str = "expected") -> dict:
+def register_seat(
+    cycle_dir: Path, seat_id: str, role: str, report_path: str, availability: str = "expected"
+) -> dict:
     """Add a seat to the roster; a duplicate seat_id registration fails.
 
     seat_id is one concrete audit seat/session, never a model family. Inputs
@@ -2238,8 +2500,7 @@ def register_seat(cycle_dir: Path, seat_id: str, role: str,
     selected_role = _validate_role(role)
     _validate_report_path(report_path, seat)
     if availability not in AVAILABILITY:
-        raise ImproveError(f"availability {availability!r} outside "
-                           f"expected|unavailable")
+        raise ImproveError(f"availability {availability!r} outside expected|unavailable")
     manifest = _require_cycle_active(cycle_dir, "register_seat")
     text = _read_maybe(manifest)
     if not text.startswith("# IMPROVE CYCLE ROSTER"):
@@ -2249,20 +2510,23 @@ def register_seat(cycle_dir: Path, seat_id: str, role: str,
     # would then reject as INVALID_MANIFEST.
     _manifest_errors = validate_manifest(text, expected_cycle_id=cycle_dir.name)
     if _manifest_errors:
-        raise ImproveError("register_seat refuses an invalid active manifest: "
-                           + "; ".join(_manifest_errors[:3]))
+        raise ImproveError(
+            "register_seat refuses an invalid active manifest: " + "; ".join(_manifest_errors[:3])
+        )
     if _seat_block(text, seat) is not None:
         raise ImproveError(f"duplicate seat registration: {seat}")
-    _refuse_duplicate_owner_over_bare_sweep(
-        cycle_dir, text, report_path, seat)
-    line = (f"seat_id: {seat}\nrole: {selected_role}\nreport_path: {report_path}\n"
-            f"availability: {availability}\n")
-    result = _journaled_write(manifest, text.rstrip() + "\n" + line, "seat",
-                              base_hash=_base_hash(manifest))
+    _refuse_duplicate_owner_over_bare_sweep(cycle_dir, text, report_path, seat)
+    line = (
+        f"seat_id: {seat}\nrole: {selected_role}\nreport_path: {report_path}\n"
+        f"availability: {availability}\n"
+    )
+    result = _journaled_write(
+        manifest, text.rstrip() + "\n" + line, "seat", base_hash=_base_hash(manifest)
+    )
     if not result.get("ok"):
         raise ImproveError(
-            f"seat {seat} not committed: {result.get('code')} "
-            f"{result.get('message', '')}")
+            f"seat {seat} not committed: {result.get('code')} {result.get('message', '')}"
+        )
     return result
 
 
@@ -2279,8 +2543,9 @@ def append_run(report_path: Path, run_text: str) -> dict:
     """
     text = _read_maybe(report_path)
     if _field(text, "report_status") == "complete":
-        raise ImproveError("seat report is complete and immutable; no "
-                           "further RUN sections may be appended")
+        raise ImproveError(
+            "seat report is complete and immutable; no further RUN sections may be appended"
+        )
     # The report lives under .saipen/improve/<cycle>/<seat>/; the cycle must
     # still be ACTIVE for its report to be appended (completed-cycle
     # immutability, NITRO dogfood III, T-595).
@@ -2294,20 +2559,27 @@ def append_run(report_path: Path, run_text: str) -> dict:
         raise ImproveError(
             "append_run refuses: a strict-cycle report must be created "
             "through create_report (it needs the mechanical header) before "
-            "any RUN is appended")
+            "any RUN is appended"
+        )
     # T-638/§7: appending to a report whose EXISTING structure is invalid
     # would compound malformed evidence -- validate the base before extending
     # it (ZERO writes on a known-INVALID base). The bound bar also catches
     # forged provenance in the base draft.
     if strict:
         _base_errors = validate_bound_report(
-            cycle_dir_of_report, report_path.parent.name, text,
-            require_runs=False, require_fresh=False, cycle_active=True)
+            cycle_dir_of_report,
+            report_path.parent.name,
+            text,
+            require_runs=False,
+            require_fresh=False,
+            cycle_active=True,
+        )
         if _base_errors:
             raise ImproveError(
                 "append_run refuses to extend a malformed strict report: "
                 + "; ".join(_base_errors[:3])
-                + " -- a known-INVALID base is never mutated (T-638)")
+                + " -- a known-INVALID base is never mutated (T-638)"
+            )
     run_count = len(re.findall(r"(?m)^## RUN \d+\s*$", text))
     run = f"## RUN {run_count + 1}\n\n{run_text.rstrip()}\n"
     proposed = text.rstrip() + "\n\n" + run
@@ -2315,25 +2587,27 @@ def append_run(report_path: Path, run_text: str) -> dict:
     # it is journaled.
     if strict:
         _proposed_errors = validate_bound_report(
-            cycle_dir_of_report, report_path.parent.name, proposed,
-            require_runs=False, require_fresh=False, cycle_active=True)
+            cycle_dir_of_report,
+            report_path.parent.name,
+            proposed,
+            require_runs=False,
+            require_fresh=False,
+            cycle_active=True,
+        )
         if _proposed_errors:
             raise ImproveError(
                 "append_run refuses its own proposed report: "
                 + "; ".join(_proposed_errors[:3])
                 + " -- a known-INVALID proposed state is never written "
-                "(T-638)")
-    result = _journaled_write(report_path, proposed, "run",
-                              base_hash=_base_hash(report_path))
+                "(T-638)"
+            )
+    result = _journaled_write(report_path, proposed, "run", base_hash=_base_hash(report_path))
     if not result.get("ok"):
-        raise ImproveError(
-            f"RUN not committed: {result.get('code')} "
-            f"{result.get('message', '')}")
+        raise ImproveError(f"RUN not committed: {result.get('code')} {result.get('message', '')}")
     return result
 
 
-def validate_report(text: str, require_runs: bool = False,
-                    strict: bool = False) -> list[str]:
+def validate_report(text: str, require_runs: bool = False, strict: bool = False) -> list[str]:
     """Return every report violation; empty means valid.
 
     `require_runs=True` applies the DOGFOOD V strict completion schema: a
@@ -2350,52 +2624,50 @@ def validate_report(text: str, require_runs: bool = False,
     errors = []
     parsed = parse_report(text)
     header = parsed.header
-    required = REQUIRED_HEADER if strict \
-        else REQUIRED_HEADER - _LEGACY_OPTIONAL_HEADER
+    required = REQUIRED_HEADER if strict else REQUIRED_HEADER - _LEGACY_OPTIONAL_HEADER
     missing = sorted(required - set(header))
     if missing:
-        errors.append("report header missing required fields: "
-                      + ", ".join(sorted(missing)))
+        errors.append("report header missing required fields: " + ", ".join(sorted(missing)))
     # Header fields are unique, and they come only from the top block: a
     # repeated required header is corruption every consumer must refuse, not
     # just the admission path -- `_field` reads the first while the strict
     # RUN check would read the last (T-630).
     _hblock = text.split("\n## ", 1)[0]
     _dup_header = sorted(
-        k for k in required
-        if sum(1 for ln in _hblock.splitlines() if ln.startswith(k + ":")) > 1)
+        k for k in required if sum(1 for ln in _hblock.splitlines() if ln.startswith(k + ":")) > 1
+    )
     if _dup_header:
-        errors.append("report repeats required header field(s): "
-                      + ", ".join(_dup_header))
+        errors.append("report repeats required header field(s): " + ", ".join(_dup_header))
 
     if header.get("report_status") and header["report_status"] not in REPORT_STATUS:
-        errors.append(f"report_status {header['report_status']!r} outside "
-                      "draft|complete")
+        errors.append(f"report_status {header['report_status']!r} outside draft|complete")
     if header.get("role") and header["role"] not in ROLES:
-        errors.append(f"role {header['role']!r} outside "
-                      f"{'|'.join(sorted(ROLES))}")
+        errors.append(f"role {header['role']!r} outside {'|'.join(sorted(ROLES))}")
     avail = header.get("context_available")
     if avail and avail not in ("complete", "partial", "none"):
-        errors.append(f"context_available {avail!r} outside "
-                      "complete|partial|none")
+        errors.append(f"context_available {avail!r} outside complete|partial|none")
 
     scope = header.get("context_scope") or ""
     if avail == "complete" and not scope:
-        errors.append("context_available: complete refused over an empty "
-                      "context_scope")
+        errors.append("context_available: complete refused over an empty context_scope")
     if avail == "complete" and "partial" in scope.lower():
-        errors.append("context_available: complete refused over a partial "
-                      "context_scope -- a partial scope can never claim a "
-                      "full-context result (red control 3, T-555)")
+        errors.append(
+            "context_available: complete refused over a partial "
+            "context_scope -- a partial scope can never claim a "
+            "full-context result (red control 3, T-555)"
+        )
     if header.get("report_status") == "complete" and not scope:
-        errors.append("report_status: complete without a context_scope -- "
-                      "the completion bar is unmet (T-555)")
+        errors.append(
+            "report_status: complete without a context_scope -- the completion bar is unmet (T-555)"
+        )
 
     if require_runs and header.get("report_status") == "complete":
         if not parsed.has_runs:
-            errors.append("report_status: complete with no explicit ## RUN "
-                          "section -- a completed audit needs intentional RUN "
-                          "evidence (DOGFOOD V, T-616)")
+            errors.append(
+                "report_status: complete with no explicit ## RUN "
+                "section -- a completed audit needs intentional RUN "
+                "evidence (DOGFOOD V, T-616)"
+            )
         else:
             # A4: RUN identity is INJECTIVE -- numbers unique, ascending and
             # contiguous 1..N. A duplicate or out-of-order RUN section is
@@ -2405,32 +2677,39 @@ def validate_report(text: str, require_runs: bool = False,
             runs = list(parsed.runs)
             if len(runs) != len(set(runs)):
                 dup = sorted({n for n in runs if runs.count(n) > 1})
-                errors.append("strict report repeats RUN section number(s): "
-                              + ", ".join(f"RUN {n}" for n in dup))
+                errors.append(
+                    "strict report repeats RUN section number(s): "
+                    + ", ".join(f"RUN {n}" for n in dup)
+                )
             if runs != sorted(runs):
-                errors.append("strict report RUN numbers are not ascending: "
-                              + ", ".join(f"RUN {n}" for n in runs))
+                errors.append(
+                    "strict report RUN numbers are not ascending: "
+                    + ", ".join(f"RUN {n}" for n in runs)
+                )
             if runs and sorted(runs) != list(range(1, max(runs) + 1)):
-                errors.append("strict report RUN numbers are not contiguous "
-                              "1..N: " + ", ".join(f"RUN {n}" for n in sorted(runs)))
+                errors.append(
+                    "strict report RUN numbers are not contiguous "
+                    "1..N: " + ", ".join(f"RUN {n}" for n in sorted(runs))
+                )
             # A run with NO_FINDINGS must actually have zero findings.
             for run_number in sorted(parsed.no_findings_runs):
                 if any(f.run == run_number for f in parsed.findings):
                     errors.append(
                         f"RUN {run_number} declares NO_FINDINGS but carries "
                         f"findings -- an intentional empty run must stay "
-                        f"empty (DOGFOOD V, T-616)")
+                        f"empty (DOGFOOD V, T-616)"
+                    )
             # Every run must carry findings OR an explicit NO_FINDINGS marker:
             # an empty run without the marker is indistinguishable from an
             # interrupted audit (DOGFOOD V, T-616).
             run_numbers = {f.run for f in parsed.findings if f.run is not None}
             for run_number in parsed.runs:
-                if (run_number not in run_numbers
-                        and run_number not in parsed.no_findings_runs):
+                if run_number not in run_numbers and run_number not in parsed.no_findings_runs:
                     errors.append(
                         f"RUN {run_number} carries no findings and no "
                         "NO_FINDINGS marker -- an empty audit run is not "
-                        "intentional evidence (DOGFOOD V, T-616)")
+                        "intentional evidence (DOGFOOD V, T-616)"
+                    )
 
     if strict:
         # A4: strict finding identity is INJECTIVE. Canonical IMP-NNN grammar
@@ -2442,45 +2721,57 @@ def validate_report(text: str, require_runs: bool = False,
         seen_identities: set[tuple[int | None, str]] = set()
         for finding in parsed.findings:
             if not re.fullmatch(r"IMP-\d{3}", finding.imp):
-                errors.append(f"finding at line {finding.start}: IMP id "
-                              f"{finding.imp!r} is not canonical IMP-NNN "
-                              "(three-digit); strict reports use the "
-                              "mechanical finding grammar")
+                errors.append(
+                    f"finding at line {finding.start}: IMP id "
+                    f"{finding.imp!r} is not canonical IMP-NNN "
+                    "(three-digit); strict reports use the "
+                    "mechanical finding grammar"
+                )
             identity = (finding.run, finding.imp)
             if identity in seen_identities:
                 errors.append(
                     f"strict report repeats composite finding identity "
                     f"{finding.ref()} -- one sweep disposition can never "
-                    "satisfy two findings with the same identity")
+                    "satisfy two findings with the same identity"
+                )
             seen_identities.add(identity)
 
     for finding in parsed.findings:
         for fname in ("expected", "actual", "evidence"):
             if not getattr(finding, fname):
-                errors.append(f"finding {finding.ref()} at line "
-                              f"{finding.start} lacks required {fname} -- a "
-                              "finding without an observable "
-                              "expected/actual/evidence triple is rejected, "
-                              "not softened")
+                errors.append(
+                    f"finding {finding.ref()} at line "
+                    f"{finding.start} lacks required {fname} -- a "
+                    "finding without an observable "
+                    "expected/actual/evidence triple is rejected, "
+                    "not softened"
+                )
         if finding.severity not in SEVERITY:
-            errors.append(f"finding {finding.ref()} at line {finding.start}: "
-                          f"severity {finding.severity!r} outside the closed "
-                          "set")
+            errors.append(
+                f"finding {finding.ref()} at line {finding.start}: "
+                f"severity {finding.severity!r} outside the closed "
+                "set"
+            )
         if finding.cls not in FINDING_CLASS:
-            errors.append(f"finding {finding.ref()} at line {finding.start}: "
-                          f"class {finding.cls!r} outside the closed set")
+            errors.append(
+                f"finding {finding.ref()} at line {finding.start}: "
+                f"class {finding.cls!r} outside the closed set"
+            )
         if finding.confidence not in CONFIDENCE:
-            errors.append(f"finding {finding.ref()} at line {finding.start}: "
-                          f"confidence {finding.confidence!r} outside the "
-                          "closed set")
+            errors.append(
+                f"finding {finding.ref()} at line {finding.start}: "
+                f"confidence {finding.confidence!r} outside the "
+                "closed set"
+            )
         if finding.action not in ACTION:
-            errors.append(f"finding {finding.ref()} at line {finding.start}: "
-                          f"action {finding.action!r} outside the closed set")
+            errors.append(
+                f"finding {finding.ref()} at line {finding.start}: "
+                f"action {finding.action!r} outside the closed set"
+            )
     return errors
 
 
-def validate_manifest(text: str,
-                      expected_cycle_id: str | None = None) -> list[str]:
+def validate_manifest(text: str, expected_cycle_id: str | None = None) -> list[str]:
     """Roster manifest grammar (NITRO dogfood IV, T-601 + DOGFOOD V, T-618).
 
     Parsed with the SAME primitives the manifest's consumers read
@@ -2498,56 +2789,63 @@ def validate_manifest(text: str,
     strict = bool(re.search(r"(?m)^manifest_schema:\s*strict\s*$", text))
     if strict:
         # Exactly one roster header.
-        header_count = len(re.findall(
-            r"(?m)^# IMPROVE CYCLE ROSTER\s*$", text))
+        header_count = len(re.findall(r"(?m)^# IMPROVE CYCLE ROSTER\s*$", text))
         if header_count != 1:
-            errors.append(f"strict manifest must carry exactly one "
-                          f"'# IMPROVE CYCLE ROSTER' header, found "
-                          f"{header_count}")
+            errors.append(
+                f"strict manifest must carry exactly one "
+                f"'# IMPROVE CYCLE ROSTER' header, found "
+                f"{header_count}"
+            )
         # Exactly one manifest_schema field.
         if len(re.findall(r"(?m)^manifest_schema:\s*strict\s*$", text)) != 1:
-            errors.append("strict manifest must carry manifest_schema: "
-                          "strict exactly once")
+            errors.append("strict manifest must carry manifest_schema: strict exactly once")
         # Exactly one cycle_id, matching the directory identity when known.
         cycle_ids = re.findall(r"(?m)^cycle_id:\s*(\S+)\s*$", text)
         if len(cycle_ids) != 1:
-            errors.append(f"strict manifest must carry exactly one cycle_id, "
-                          f"found {len(cycle_ids)}")
+            errors.append(
+                f"strict manifest must carry exactly one cycle_id, found {len(cycle_ids)}"
+            )
         elif expected_cycle_id is not None and cycle_ids[0] != expected_cycle_id:
-            errors.append(f"strict manifest cycle_id {cycle_ids[0]!r} does "
-                          f"not match the directory identity "
-                          f"{expected_cycle_id!r}")
+            errors.append(
+                f"strict manifest cycle_id {cycle_ids[0]!r} does "
+                f"not match the directory identity "
+                f"{expected_cycle_id!r}"
+            )
         # Exactly one created_at, valid UTC.
         created = re.findall(r"(?m)^created_at:\s*(\S+)\s*$", text)
         if len(created) != 1:
-            errors.append(f"strict manifest must carry exactly one "
-                          f"created_at, found {len(created)}")
+            errors.append(
+                f"strict manifest must carry exactly one created_at, found {len(created)}"
+            )
         else:
-            if not re.fullmatch(
-                    r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", created[0]):
-                errors.append(f"strict manifest created_at {created[0]!r} is "
-                              "not a valid UTC timestamp (YYYY-MM-DDTHH:MM:SSZ)")
+            if not re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", created[0]):
+                errors.append(
+                    f"strict manifest created_at {created[0]!r} is "
+                    "not a valid UTC timestamp (YYYY-MM-DDTHH:MM:SSZ)"
+                )
         # Exactly one portable project identity.
         if len(re.findall(r"(?m)^project_identity:\s*(\S+)\s*$", text)) != 1:
-            errors.append("strict manifest must carry exactly one "
-                          "project_identity")
+            errors.append("strict manifest must carry exactly one project_identity")
         # No machine-local absolute path may leak into portable identity.
-        if re.search(r"^project_identity:\s*[A-Za-z]:[\\/]|"
-                     r"^project_identity:\s*/",
-                     text, re.MULTILINE):
-            errors.append("strict manifest project_identity must be portable "
-                          "-- an absolute machine-local path leaks into "
-                          "portable evidence (DOGFOOD V, T-618)")
+        if re.search(
+            r"^project_identity:\s*[A-Za-z]:[\\/]|"
+            r"^project_identity:\s*/",
+            text,
+            re.MULTILINE,
+        ):
+            errors.append(
+                "strict manifest project_identity must be portable "
+                "-- an absolute machine-local path leaks into "
+                "portable evidence (DOGFOOD V, T-618)"
+            )
         # Exactly one lifecycle status.
         if len(re.findall(r"(?m)^cycle_status:\s*[A-Za-z]+\s*$", text)) != 1:
-            errors.append("strict manifest must carry exactly one "
-                          "cycle_status")
+            errors.append("strict manifest must carry exactly one cycle_status")
     if not text.startswith("# IMPROVE CYCLE ROSTER"):
         errors.append("manifest must open with '# IMPROVE CYCLE ROSTER'")
     status = re.search(r"(?m)^cycle_status:\s*([A-Za-z]+)", text)
     if status and status.group(1) not in ("active", "complete", "archived"):
-        errors.append(f"cycle_status {status.group(1)!r} outside "
-                      "active|complete|archived")
+        errors.append(f"cycle_status {status.group(1)!r} outside active|complete|archived")
     # T-638/§7: `cycle_aborted` is ONE legal lifecycle meaning -- it marks an
     # ARCHIVED cycle whose drafts are non-authoritative. ACTIVE or COMPLETE
     # with the marker is a contradictory state; a duplicate or non-canonical
@@ -2556,13 +2854,14 @@ def validate_manifest(text: str,
     abort_markers = re.findall(r"(?m)^cycle_aborted:\s*(.*)$", text)
     if abort_markers:
         if status is None or status.group(1) != "archived":
-            errors.append("cycle_aborted is legal ONLY with "
-                          "cycle_status: archived")
+            errors.append("cycle_aborted is legal ONLY with cycle_status: archived")
         if len(abort_markers) != 1:
             errors.append("cycle_aborted must appear exactly once")
         elif abort_markers[0].strip() != "draft-preserved":
-            errors.append(f"cycle_aborted value {abort_markers[0].strip()!r} "
-                          "is not the canonical 'draft-preserved'")
+            errors.append(
+                f"cycle_aborted value {abort_markers[0].strip()!r} "
+                "is not the canonical 'draft-preserved'"
+            )
     seen: set[str] = set()
     for block in _seat_blocks(text):
         seat_id = _field(block, "seat_id")
@@ -2579,18 +2878,17 @@ def validate_manifest(text: str,
         # instead of resolving first-vs-last ambiguity.
         if strict:
             for key in ("seat_id", "role", "report_path", "availability"):
-                count = len(re.findall(
-                    rf"(?m)^{key}:[ \t]*\S", block))
+                count = len(re.findall(rf"(?m)^{key}:[ \t]*\S", block))
                 if count != 1:
                     errors.append(
                         f"seat {seat_id}: strict field {key} must appear "
-                        f"exactly once, found {count}")
+                        f"exactly once, found {count}"
+                    )
         role = _field(block, "role")
         if not role:
             errors.append(f"seat {seat_id}: missing role")
         elif role not in ROLES:
-            errors.append(f"seat {seat_id}: role {role!r} outside "
-                          f"{'|'.join(sorted(ROLES))}")
+            errors.append(f"seat {seat_id}: role {role!r} outside {'|'.join(sorted(ROLES))}")
         report_path = _field(block, "report_path")
         if not report_path:
             errors.append(f"seat {seat_id}: missing report_path")
@@ -2601,8 +2899,9 @@ def validate_manifest(text: str,
                 errors.append(f"seat {seat_id}: {exc}")
         availability = _field(block, "availability")
         if availability and availability not in AVAILABILITY:
-            errors.append(f"seat {seat_id}: availability {availability!r} "
-                          "outside expected|unavailable")
+            errors.append(
+                f"seat {seat_id}: availability {availability!r} outside expected|unavailable"
+            )
     return errors
 
 
@@ -2636,26 +2935,28 @@ def validate_sweep(text: str) -> list[str]:
                 f"SWEEP.md line {index}: {stripped!r} does not match the "
                 "ledger grammar '- RUN-N/IMP-NNN [DISPOSITION] <ticket> "
                 "report=<report_ident> reproduced=<y|n> [fixed_by=<ref>] "
-                "[verification=<ref>]'")
+                "[verification=<ref>]'"
+            )
             continue
-        finding_ref, disposition, ticket, report, reproduced = match.group(
-            1, 2, 3, 4, 5)
+        finding_ref, disposition, ticket, report, reproduced = match.group(1, 2, 3, 4, 5)
         if disposition not in DISPOSITION:
-            errors.append(f"SWEEP.md line {index}: disposition "
-                          f"{disposition!r} outside the closed set "
-                          f"{sorted(DISPOSITION)}")
+            errors.append(
+                f"SWEEP.md line {index}: disposition "
+                f"{disposition!r} outside the closed set "
+                f"{sorted(DISPOSITION)}"
+            )
         if not report:
-            errors.append(f"SWEEP.md line {index}: missing report identity -- "
-                          "the composite finding identity is cycle + "
-                          "seat/report + run + IMP id")
+            errors.append(
+                f"SWEEP.md line {index}: missing report identity -- "
+                "the composite finding identity is cycle + "
+                "seat/report + run + IMP id"
+            )
         if not ticket:
-            errors.append(f"SWEEP.md line {index}: missing canonical ticket "
-                          "reference")
+            errors.append(f"SWEEP.md line {index}: missing canonical ticket reference")
         if not reproduced:
             errors.append(f"SWEEP.md line {index}: missing reproduced value")
         if finding_ref.count("/") > 1:
-            errors.append(f"SWEEP.md line {index}: malformed finding "
-                          f"reference {finding_ref!r}")
+            errors.append(f"SWEEP.md line {index}: malformed finding reference {finding_ref!r}")
     # A4 ledger side: one composite identity, one disposition. A duplicated
     # ledger line for the same <finding_ref, report> pair is ambiguous
     # evidence -- a set/map consumer would silently deduplicate it, so the
@@ -2667,7 +2968,8 @@ def validate_sweep(text: str) -> list[str]:
             errors.append(
                 f"SWEEP.md repeats composite identity {record.finding_ref} "
                 f"report={record.report}; one disposition per composite "
-                "finding identity")
+                "finding identity"
+            )
         seen_composite.add(identity)
     return errors
 
@@ -2684,9 +2986,7 @@ def validate_report_target(text: str) -> list[str]:
         errors.append(f"report_status {status!r} outside draft|complete")
     avail = _field(text, "context_available")
     if avail and avail not in ("complete", "partial", "none"):
-        errors.append(f"context_available {avail!r} outside "
-                      "complete|partial|none")
+        errors.append(f"context_available {avail!r} outside complete|partial|none")
     if avail == "complete" and not _field(text, "context_scope"):
-        errors.append("context_available: complete refused over an empty "
-                      "context_scope")
+        errors.append("context_available: complete refused over an empty context_scope")
     return errors

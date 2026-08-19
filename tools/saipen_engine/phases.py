@@ -54,15 +54,12 @@ ALL_PHASES = frozenset(VALID_TRANSITIONS)
 # as a COMMAND (CORE section 1.10), but `phase: SHIP` is reachable only from
 # REVIEW -- section 1.10 says so in as many words while this set said otherwise
 # from v7.83.0 to v7.94.0. A command is not a transition.
-ANY_FROM = frozenset({"VALIDATE", "MARKHUNT", "CLEAN", "TRANSLATE", "PREPARE",
-                      "PLAN", "HUNT"})
+ANY_FROM = frozenset({"VALIDATE", "MARKHUNT", "CLEAN", "TRANSLATE", "PREPARE", "PLAN", "HUNT"})
 
 # The five phases whose `next_action` MUST name a ticket.
-TICKET_BEARING_PHASES = frozenset({"SCOUT", "BUILD", "VERIFY", "REVIEW",
-                                   "SHIP"})
+TICKET_BEARING_PHASES = frozenset({"SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP"})
 
-PHASE_NA_RE = re.compile(
-    r"^PHASE\s+([A-Za-z_-]+)(?:\s+(T-\d+))?(?:\s+\[[^\]]*\])?\s*$")
+PHASE_NA_RE = re.compile(r"^PHASE\s+([A-Za-z_-]+)(?:\s+(T-\d+))?(?:\s+\[[^\]]*\])?\s*$")
 
 
 def phase_next_action_error(value: str) -> str | None:
@@ -73,24 +70,32 @@ def phase_next_action_error(value: str) -> str | None:
     """
     m = PHASE_NA_RE.match(value.strip())
     if not m:
-        return (f"{value!r} is not a legal `PHASE <phase-enum> [T-###]` -- "
-                f"the argument is one uppercase phase plus at most a ticket "
-                f"ref, and nothing but the optional [...] progress tag may "
-                f"follow it")
+        return (
+            f"{value!r} is not a legal `PHASE <phase-enum> [T-###]` -- "
+            f"the argument is one uppercase phase plus at most a ticket "
+            f"ref, and nothing but the optional [...] progress tag may "
+            f"follow it"
+        )
     ph, ref = m.group(1), m.group(2)
     if ph != ph.upper():
-        return (f"{value!r} writes the phase in lower case -- RFC § 1.2 takes "
-                f"the uppercase § 1.6 enum value, and the phase doc is loaded "
-                f"from its lowercased name, not from what the state says")
+        return (
+            f"{value!r} writes the phase in lower case -- RFC § 1.2 takes "
+            f"the uppercase § 1.6 enum value, and the phase doc is loaded "
+            f"from its lowercased name, not from what the state says"
+        )
     _five = "/".join(sorted(TICKET_BEARING_PHASES))
     if ph in TICKET_BEARING_PHASES and not ref:
-        return (f"{value!r} enters ticket-bearing phase {ph} with no T-### -- "
-                f"RFC § 1.2 REQUIRES the ref for {_five}, and a cold agent "
-                f"cannot act on a phase with no subject")
+        return (
+            f"{value!r} enters ticket-bearing phase {ph} with no T-### -- "
+            f"RFC § 1.2 REQUIRES the ref for {_five}, and a cold agent "
+            f"cannot act on a phase with no subject"
+        )
     if ph not in TICKET_BEARING_PHASES and ref:
-        return (f"{value!r} attaches {ref} to {ph}, which is not one of the "
-                f"five ticket-bearing phases ({_five}) -- RFC § 1.2 omits the "
-                f"ref for every other phase; name the ticket in `task:`")
+        return (
+            f"{value!r} attaches {ref} to {ph}, which is not one of the "
+            f"five ticket-bearing phases ({_five}) -- RFC § 1.2 omits the "
+            f"ref for every other phase; name the ticket in `task:`"
+        )
     return None
 
 

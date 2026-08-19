@@ -24,9 +24,11 @@ def locale_readme_paths(kitchen_dir: Path) -> list[Path]:
     kitchen_dir = Path(kitchen_dir)
     if not kitchen_dir.is_dir():
         return []
-    return [directory / f"README_{directory.name.upper()}.md"
-            for directory in sorted(kitchen_dir.iterdir())
-            if directory.is_dir()]
+    return [
+        directory / f"README_{directory.name.upper()}.md"
+        for directory in sorted(kitchen_dir.iterdir())
+        if directory.is_dir()
+    ]
 
 
 def release_metadata_paths(root: Path) -> list[Path]:
@@ -44,8 +46,7 @@ def release_metadata_paths(root: Path) -> list[Path]:
     """
     root = Path(root)
     kitchen = root / ".saipen" / "saitranslate" / "kitchen"
-    paths = [Path("VERSION"), Path("README.md"), Path("CHANGELOG.md"),
-             Path(".saipen/IDENTITY.md")]
+    paths = [Path("VERSION"), Path("README.md"), Path("CHANGELOG.md"), Path(".saipen/IDENTITY.md")]
     for readme in locale_readme_paths(kitchen):
         try:
             paths.append(readme.relative_to(root))

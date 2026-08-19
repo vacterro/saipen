@@ -70,10 +70,23 @@ def _state_fields(state: dict) -> str:
     by its mechanically-derived decision (`saipen_home_present`).
     """
     lines = []
-    for key in ("phase", "task", "next_action", "blocker", "agent",
-                "mode", "saipen_version", "saipen_home",
-                "execution_intent", "converge_target", "requires",
-                "goal_waves", "goal_tickets", "last_event", "updated"):
+    for key in (
+        "phase",
+        "task",
+        "next_action",
+        "blocker",
+        "agent",
+        "mode",
+        "saipen_version",
+        "saipen_home",
+        "execution_intent",
+        "converge_target",
+        "requires",
+        "goal_waves",
+        "goal_tickets",
+        "last_event",
+        "updated",
+    ):
         if key in state:
             value = state[key]
             if isinstance(value, (list, tuple)):
@@ -96,8 +109,7 @@ def _home_present(state: dict) -> str:
         return "false"
 
 
-def _board_map(board: dict, full_ticket: str | None = None,
-               cap: int = _BOARD_CAP) -> str:
+def _board_map(board: dict, full_ticket: str | None = None, cap: int = _BOARD_CAP) -> str:
     """Board ORIENTATION projection, TRUTHFULLY bounded (NITRO dogfood IV,
     T-600).
 
@@ -110,8 +122,7 @@ def _board_map(board: dict, full_ticket: str | None = None,
     """
     lines = []
     for section in ("## DOING", "## TODO", "## BLOCKED", "## DONE"):
-        tickets = [t for t in board["tickets"].values()
-                   if t["section"] == section]
+        tickets = [t for t in board["tickets"].values() if t["section"] == section]
         lines.append(f"{section} ({len(tickets)})")
         emitted = 0
         skipped = 0
@@ -123,8 +134,7 @@ def _board_map(board: dict, full_ticket: str | None = None,
                 skipped += 1
                 continue
             desc = (ticket["description"] or "").replace(" | ", " / ")
-            lines.append(f"  - {ticket['id']} [{ticket['checkbox']}] "
-                         f"{desc[:80]}")
+            lines.append(f"  - {ticket['id']} [{ticket['checkbox']}] {desc[:80]}")
             emitted += 1
         if skipped:
             lines.append(f"  ... +{skipped} more")
@@ -172,6 +182,7 @@ def _load_context_inputs(root: Path) -> dict:
     from .log import read_history_snapshot
     from .state import parse_state_or_error
     from .journal import scan_pending
+
     state_text = codec.read_doc(root / ".saipen" / "STATE.md")
     board_text = codec.read_doc(root / ".saipen" / "BOARD.md")
     log_snap = read_history_snapshot(root)
@@ -212,17 +223,31 @@ def _load_inputs_checked(root: Path) -> Result | dict:
     try:
         return _load_context_inputs(root)
     except HistoryOwnershipError as exc:
-        return Result(ok=False, code="VALIDATION_FAILED", op_id="",
-                      message=f"history-ownership: {exc}", data={})
+        return Result(
+            ok=False,
+            code="VALIDATION_FAILED",
+            op_id="",
+            message=f"history-ownership: {exc}",
+            data={},
+        )
     except OSError as exc:
-        return Result(ok=False, code="VALIDATION_FAILED", op_id="",
-                      message=f"history-ownership: {type(exc).__name__}: "
-                              f"{exc}", data={})
+        return Result(
+            ok=False,
+            code="VALIDATION_FAILED",
+            op_id="",
+            message=f"history-ownership: {type(exc).__name__}: {exc}",
+            data={},
+        )
 
 
-def _fit(fixed: str, limit: int, board_fn, log_fn,
-         board_header: str = "## BOARD MAP",
-         log_header: str = "## LOG TAIL") -> tuple[str, str]:
+def _fit(
+    fixed: str,
+    limit: int,
+    board_fn,
+    log_fn,
+    board_header: str = "## BOARD MAP",
+    log_header: str = "## LOG TAIL",
+) -> tuple[str, str]:
     """STRUCTURAL budgeting (NITRO dogfood IV, T-600).
 
     `fixed` is the concatenated mandatory prefix -- recovery/conflict, computed
@@ -244,8 +269,18 @@ def _fit(fixed: str, limit: int, board_fn, log_fn,
     """
 
     def surface_bytes(board_text: str, log_text: str) -> int:
-        body = (fixed + "\n" + log_header + "\n" + log_text + "\n"
-                + board_header + "\n" + board_text + "\n")
+        body = (
+            fixed
+            + "\n"
+            + log_header
+            + "\n"
+            + log_text
+            + "\n"
+            + board_header
+            + "\n"
+            + board_text
+            + "\n"
+        )
         return _bytes(body)
 
     for board_cap in (8, 6, 4, 2, 0):
@@ -260,9 +295,12 @@ def _fit(fixed: str, limit: int, board_fn, log_fn,
     return board_fn(0), log_fn(0)
 
 
-def context_cold(project_root: Path | str, limit: int = 4000,
-                 _inputs: dict | None = None,
-                 current_agent: str | None = None) -> Result:
+def context_cold(
+    project_root: Path | str,
+    limit: int = 4000,
+    _inputs: dict | None = None,
+    current_agent: str | None = None,
+) -> Result:
     """Minimal cold-start surface with STRUCTURAL budgeting.
 
     Uses the SHARED router (NITRO dogfood II), so it cannot echo a stale
@@ -281,32 +319,49 @@ def context_cold(project_root: Path | str, limit: int = 4000,
     state = inputs["state"]
     state_error = inputs["state_error"]
     if state_error:
-        return Result(ok=False, code="VALIDATION_FAILED", op_id="",
-                      message=f"state-malformed: {state_error}", data={})
+        return Result(
+            ok=False,
+            code="VALIDATION_FAILED",
+            op_id="",
+            message=f"state-malformed: {state_error}",
+            data={},
+        )
     board = inputs["board"]
     pending = inputs["pending"]
     conflicts = inputs["conflicts"]
-    from .router import (load_for_action, route_next, routing_failure_code)
+    from .router import load_for_action, route_next, routing_failure_code
+
     # P0#4: the cold-start projection routes under the CURRENT-SESSION
     # capability, never the persisted STATE.mode -- a read-only session is
     # handed an inspect-only action even when the last handshake was full.
     # Second-wave P0: claim truth is judged relative to the SESSION identity,
     # never to persisted STATE.agent.
     from .capability import negotiate_capability
-    routed = route_next(state_text, board_text, pending, conflicts,
-                        current_capability=negotiate_capability(),
-                        current_agent=current_agent)
-    if not routed.get("ok") and routing_failure_code(routed) \
-            == "VALIDATION_FAILED":
+
+    routed = route_next(
+        state_text,
+        board_text,
+        pending,
+        conflicts,
+        current_capability=negotiate_capability(),
+        current_agent=current_agent,
+    )
+    if not routed.get("ok") and routing_failure_code(routed) == "VALIDATION_FAILED":
         # A malformed surface must not project a healthy cold start: the
         # router's diagnostics propagate instead, recovery flags stay
         # truthful (T-1003 hostile findings).
-        return Result(ok=False, code="VALIDATION_FAILED", op_id="",
-                      message=f"{routed.get('reason')}: "
-                              + str(routed.get("detail", "")),
-                      data={"recovery_pending": bool(pending),
-                            "recovery_conflict": bool(conflicts),
-                            "conflict_ops": conflicts, "pending_ops": pending})
+        return Result(
+            ok=False,
+            code="VALIDATION_FAILED",
+            op_id="",
+            message=f"{routed.get('reason')}: " + str(routed.get("detail", "")),
+            data={
+                "recovery_pending": bool(pending),
+                "recovery_conflict": bool(conflicts),
+                "conflict_ops": conflicts,
+                "pending_ops": pending,
+            },
+        )
     next_ticket = routed.get("ticket")
     # phase_doc derives from the ROUTED action, never from the persisted
     # STATE.phase -- action and instructions can never disagree.
@@ -339,33 +394,45 @@ def context_cold(project_root: Path | str, limit: int = 4000,
     fixed = "\n".join(mandatory) + "\n"
 
     # FULL unbounded body, for the honest pre-bound economics.
-    full_body = fixed + "\n" + (
-        "## LOG TAIL\n" + _log_tail(log_event_lines) + "\n"
-        "## BOARD MAP\n" + _board_map(board, full_ticket=next_ticket) + "\n")
+    full_body = (
+        fixed
+        + "\n"
+        + (
+            "## LOG TAIL\n" + _log_tail(log_event_lines) + "\n"
+            "## BOARD MAP\n" + _board_map(board, full_ticket=next_ticket) + "\n"
+        )
+    )
 
     # STRUCTURAL fit: BOARD orientation shrinks before LOG evidence.
     board_part, log_part = _fit(
-        fixed, limit,
+        fixed,
+        limit,
         lambda cap: _board_map(board, full_ticket=next_ticket, cap=cap),
-        lambda count: _log_tail(log_event_lines, count))
-    body = fixed + "\n" + (
-        "## LOG TAIL\n" + log_part + "\n"
-        "## BOARD MAP\n" + board_part + "\n")
+        lambda count: _log_tail(log_event_lines, count),
+    )
+    body = fixed + "\n" + ("## LOG TAIL\n" + log_part + "\n## BOARD MAP\n" + board_part + "\n")
     pre_bound = len(full_body.encode("utf-8"))
     emitted = len(body.encode("utf-8"))
-    return Result(ok=True, code="CONTEXT_COLD", data={
-        "surface": body,
-        "bytes": emitted,
-        "characters": len(body),
-        "tokens": _tokens(body),
-        "pre_bound_bytes": pre_bound,
-        "truncation_bytes": max(0, pre_bound - emitted),
-    })
+    return Result(
+        ok=True,
+        code="CONTEXT_COLD",
+        data={
+            "surface": body,
+            "bytes": emitted,
+            "characters": len(body),
+            "tokens": _tokens(body),
+            "pre_bound_bytes": pre_bound,
+            "truncation_bytes": max(0, pre_bound - emitted),
+        },
+    )
 
 
-def context_hot(project_root: Path | str, limit: int = 3000,
-                _inputs: dict | None = None,
-                current_agent: str | None = None) -> Result:
+def context_hot(
+    project_root: Path | str,
+    limit: int = 3000,
+    _inputs: dict | None = None,
+    current_agent: str | None = None,
+) -> Result:
     """Current-work surface: STATE + computed next + active ticket + recent
     LOG + recovery state. Shares the router (NITRO dogfood II); metrics
     describe the emitted surface (NITRO dogfood IV, T-600). `_inputs` is the
@@ -381,45 +448,66 @@ def context_hot(project_root: Path | str, limit: int = 3000,
     state = inputs["state"]
     state_error = inputs["state_error"]
     if state_error:
-        return Result(ok=False, code="VALIDATION_FAILED", op_id="",
-                      message=f"state-malformed: {state_error}", data={})
+        return Result(
+            ok=False,
+            code="VALIDATION_FAILED",
+            op_id="",
+            message=f"state-malformed: {state_error}",
+            data={},
+        )
     board = inputs["board"]
-    doing = [t for t in board["tickets"].values()
-             if t["section"] == "## DOING"]
+    doing = [t for t in board["tickets"].values() if t["section"] == "## DOING"]
     pending = inputs["pending"]
     conflicts = inputs["conflicts"]
     from .router import route_next, routing_failure_code
+
     # P0#4: same current-session capability authority as the cold-start
     # projection above. Second-wave P0: same session-agent claim truth.
     from .capability import negotiate_capability
-    routed = route_next(state_text, board_text, pending, conflicts,
-                        current_capability=negotiate_capability(),
-                        current_agent=current_agent)
-    if not routed.get("ok") and routing_failure_code(routed) \
-            == "VALIDATION_FAILED":
-        return Result(ok=False, code="VALIDATION_FAILED", op_id="",
-                      message=f"{routed.get('reason')}: "
-                              + str(routed.get("detail", "")),
-                      data={"recovery_pending": bool(pending),
-                            "recovery_conflict": bool(conflicts),
-                            "conflict_ops": conflicts, "pending_ops": pending})
 
-    fixed = "\n".join([
-        "## NOW",
-        _state_fields(state),
-        f"claimed_ticket: {doing[0]['id'] if doing else None}",
-        "",
-        "## COMPUTED NEXT",
-        f"action: {routed.get('action')}",
-        f"reason: {routed.get('reason')}",
-        f"ticket: {routed.get('ticket') or 'none'}",
-        "",
-        "## MACHINE",
-        f"recovery_pending: {bool(pending)}",
-        f"recovery_conflict: {bool(conflicts)}",
-        f"pending_ops: {', '.join(pending) or 'none'}",
-        f"log_tail_event: {inputs['log_tail']}",
-    ]) + "\n"
+    routed = route_next(
+        state_text,
+        board_text,
+        pending,
+        conflicts,
+        current_capability=negotiate_capability(),
+        current_agent=current_agent,
+    )
+    if not routed.get("ok") and routing_failure_code(routed) == "VALIDATION_FAILED":
+        return Result(
+            ok=False,
+            code="VALIDATION_FAILED",
+            op_id="",
+            message=f"{routed.get('reason')}: " + str(routed.get("detail", "")),
+            data={
+                "recovery_pending": bool(pending),
+                "recovery_conflict": bool(conflicts),
+                "conflict_ops": conflicts,
+                "pending_ops": pending,
+            },
+        )
+
+    fixed = (
+        "\n".join(
+            [
+                "## NOW",
+                _state_fields(state),
+                f"claimed_ticket: {doing[0]['id'] if doing else None}",
+                "",
+                "## COMPUTED NEXT",
+                f"action: {routed.get('action')}",
+                f"reason: {routed.get('reason')}",
+                f"ticket: {routed.get('ticket') or 'none'}",
+                "",
+                "## MACHINE",
+                f"recovery_pending: {bool(pending)}",
+                f"recovery_conflict: {bool(conflicts)}",
+                f"pending_ops: {', '.join(pending) or 'none'}",
+                f"log_tail_event: {inputs['log_tail']}",
+            ]
+        )
+        + "\n"
+    )
     full_body = fixed + "\n## RECENT LOG\n" + _log_tail(log_event_lines) + "\n"
     log_part = _log_tail(log_event_lines)
     # STRUCTURAL fit: RECENT LOG is the only optional section in hot. The
@@ -434,14 +522,18 @@ def context_hot(project_root: Path | str, limit: int = 3000,
     body = fixed + "\n## RECENT LOG\n" + log_part + "\n"
     pre_bound = len(full_body.encode("utf-8"))
     emitted = len(body.encode("utf-8"))
-    return Result(ok=True, code="CONTEXT_HOT", data={
-        "surface": body,
-        "bytes": emitted,
-        "characters": len(body),
-        "tokens": _tokens(body),
-        "pre_bound_bytes": pre_bound,
-        "truncation_bytes": max(0, pre_bound - emitted),
-    })
+    return Result(
+        ok=True,
+        code="CONTEXT_HOT",
+        data={
+            "surface": body,
+            "bytes": emitted,
+            "characters": len(body),
+            "tokens": _tokens(body),
+            "pre_bound_bytes": pre_bound,
+            "truncation_bytes": max(0, pre_bound - emitted),
+        },
+    )
 
 
 def context_audit(project_root: Path | str) -> Result:
@@ -469,26 +561,29 @@ def context_audit(project_root: Path | str) -> Result:
     pending = len(inputs["pending"])
     rows = []
     for name, text in sources.items():
-        rows.append({
-            "source": name,
-            "bytes": _bytes(text),
-            "characters": len(text),
-            "tokens": _tokens(text),
-        })
+        rows.append(
+            {
+                "source": name,
+                "bytes": _bytes(text),
+                "characters": len(text),
+                "tokens": _tokens(text),
+            }
+        )
     total_bytes = sum(r["bytes"] for r in rows)
     cold = context_cold(root, _inputs=inputs)
     hot = context_hot(root, _inputs=inputs)
     audit = {
         "sources": rows,
         "total_bytes": total_bytes,
-        "cold_surface": {"bytes": cold.get("bytes"), "tokens": cold.get(
-            "tokens")},
+        "cold_surface": {"bytes": cold.get("bytes"), "tokens": cold.get("tokens")},
         "hot_surface": {"bytes": hot.get("bytes"), "tokens": hot.get("tokens")},
         "projection_reduction_bytes": total_bytes - cold.get("bytes", 0),
-        "note": ("projection_reduction_bytes = raw canonical bytes minus "
-                 "cold-surface bytes; it measures what the projection omits, "
-                 "never 'unchanged across revisions' (no historical comparison "
-                 "is made)"),
+        "note": (
+            "projection_reduction_bytes = raw canonical bytes minus "
+            "cold-surface bytes; it measures what the projection omits, "
+            "never 'unchanged across revisions' (no historical comparison "
+            "is made)"
+        ),
         "log_tail_event": inputs["log_tail"],
         "recovery_pending": pending,
     }

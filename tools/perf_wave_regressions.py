@@ -53,10 +53,13 @@ def expect(label: str, ok: bool, detail: str = "") -> None:
 
 
 def git_env() -> dict:
-    return {**os.environ, "GIT_AUTHOR_NAME": "probe",
-            "GIT_AUTHOR_EMAIL": "probe@example.invalid",
-            "GIT_COMMITTER_NAME": "probe",
-            "GIT_COMMITTER_EMAIL": "probe@example.invalid"}
+    return {
+        **os.environ,
+        "GIT_AUTHOR_NAME": "probe",
+        "GIT_AUTHOR_EMAIL": "probe@example.invalid",
+        "GIT_COMMITTER_NAME": "probe",
+        "GIT_COMMITTER_EMAIL": "probe@example.invalid",
+    }
 
 
 def stable_fixture(base: Path) -> Path:
@@ -66,8 +69,9 @@ def stable_fixture(base: Path) -> Path:
     (fix / "tracked.txt").write_text("hello\n", encoding="utf-8")
     subprocess.run(["git", "init", "-q"], cwd=fix, capture_output=True)
     subprocess.run(["git", "add", "-A"], cwd=fix, capture_output=True)
-    subprocess.run(["git", "commit", "-q", "-m", "base"], cwd=fix,
-                   env=git_env(), capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-q", "-m", "base"], cwd=fix, env=git_env(), capture_output=True
+    )
     (fix / "tracked.txt").write_text("hello changed\n", encoding="utf-8")
     (fix / "untracked.txt").write_text("new file\n", encoding="utf-8")
     (fix / "dir").mkdir()
@@ -105,13 +109,22 @@ def run_t1019(base: Path) -> None:
     finally:
         subprocess.run = real_run
     git_calls = [c for c in calls if c and c[0] == "git"]
-    expect("T-1019 capture launches <= 10 git subprocesses (was 12)",
-           len(git_calls) <= 10, f"count={len(git_calls)}")
+    expect(
+        "T-1019 capture launches <= 10 git subprocesses (was 12)",
+        len(git_calls) <= 10,
+        f"count={len(git_calls)}",
+    )
     listings = [c for c in git_calls if len(c) > 3 and c[3] in ("diff", "ls-files")]
-    expect("T-1019 capture runs exactly three delta listings (was four)",
-           len(listings) == 6, f"listing-commands={len(listings)}")
-    expect("T-1019 identity is git-delta-v1",
-           sid.discovery_model == "git-delta-v1", sid.discovery_model)
+    expect(
+        "T-1019 capture runs exactly three delta listings (was four)",
+        len(listings) == 6,
+        f"listing-commands={len(listings)}",
+    )
+    expect(
+        "T-1019 identity is git-delta-v1",
+        sid.discovery_model == "git-delta-v1",
+        sid.discovery_model,
+    )
 
     # ---- exact identity parity with the DURABLE golden oracle (T-1010) -----
     # The oracle is the FROZEN tracked pre-wave implementation
@@ -119,11 +132,9 @@ def run_t1019(base: Path) -> None:
     # optimization is committed, HEAD IS the implementation under test and a
     # HEAD-derived oracle degenerates into self-comparison.
     golden_path = HOME / "tools" / "freshness_golden_v1.py"
-    golden_spec = importlib.util.spec_from_file_location(
-        "freshness_golden_v1", golden_path)
+    golden_spec = importlib.util.spec_from_file_location("freshness_golden_v1", golden_path)
     if golden_spec is None or golden_spec.loader is None:
-        expect("T-1019 golden oracle is loadable", False,
-               f"cannot load {golden_path}")
+        expect("T-1019 golden oracle is loadable", False, f"cannot load {golden_path}")
         return
     golden = importlib.util.module_from_spec(golden_spec)
     sys.modules["freshness_golden_v1"] = golden
@@ -131,18 +142,18 @@ def run_t1019(base: Path) -> None:
     fix_par = stable_fixture(base / "fix-parity")
     o = golden.compute_source_identity(fix_par)
     n = freshness.compute_source_identity(fix_par)
-    expect("T-1019 stable fixture preserves exact git-delta-v1 identity",
-           o.source_head == n.source_head
-           and o.source_tree_fingerprint == n.source_tree_fingerprint,
-           f"golden={o.source_tree_fingerprint} new={n.source_tree_fingerprint}")
+    expect(
+        "T-1019 stable fixture preserves exact git-delta-v1 identity",
+        o.source_head == n.source_head and o.source_tree_fingerprint == n.source_tree_fingerprint,
+        f"golden={o.source_tree_fingerprint} new={n.source_tree_fingerprint}",
+    )
 
     # ---- durable-oracle self-proof (T-1010) --------------------------------
     # Simulate the post-commit world: commit the CURRENT implementation into
     # a disposable repo. A HEAD-derived oracle would then BE the
     # implementation under test; the frozen golden must still differ from it,
     # and a deliberate fingerprint semantic drift must still turn parity red.
-    current_src = (HOME / "tools" / "freshness.py").read_text(
-        encoding="utf-8")
+    current_src = (HOME / "tools" / "freshness.py").read_text(encoding="utf-8")
     golden_src = golden_path.read_text(encoding="utf-8")
 
     def norm(src: str) -> str:
@@ -153,18 +164,22 @@ def run_t1019(base: Path) -> None:
     (disp / "tools" / "freshness.py").write_text(current_src, encoding="utf-8")
     subprocess.run(["git", "init", "-q"], cwd=disp, capture_output=True)
     subprocess.run(["git", "add", "-A"], cwd=disp, capture_output=True)
-    subprocess.run(["git", "commit", "-q", "-m", "current impl"], cwd=disp,
-                   env=git_env(), capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-q", "-m", "current impl"], cwd=disp, env=git_env(), capture_output=True
+    )
     committed_src = subprocess.run(
-        ["git", "-C", str(disp), "show", "HEAD:tools/freshness.py"],
-        capture_output=True, text=True).stdout
-    expect("T-1019 oracle durability: committed impl reproduces the live impl",
-           norm(committed_src) == norm(current_src),
-           f"committed != live ({len(committed_src)} vs {len(current_src)} bytes)")
-    expect("T-1019 oracle independence: golden differs from the committed impl",
-           norm(golden_src) != norm(committed_src),
-           "golden equals the implementation under test -- parity would be "
-           "a self-comparison")
+        ["git", "-C", str(disp), "show", "HEAD:tools/freshness.py"], capture_output=True, text=True
+    ).stdout
+    expect(
+        "T-1019 oracle durability: committed impl reproduces the live impl",
+        norm(committed_src) == norm(current_src),
+        f"committed != live ({len(committed_src)} vs {len(current_src)} bytes)",
+    )
+    expect(
+        "T-1019 oracle independence: golden differs from the committed impl",
+        norm(golden_src) != norm(committed_src),
+        "golden equals the implementation under test -- parity would be a self-comparison",
+    )
     # Deliberate semantic drift in the LIVE implementation must break parity
     # with the golden (the whole point of a durable oracle).
     real_digest = freshness._digest
@@ -172,15 +187,16 @@ def run_t1019(base: Path) -> None:
     golden_id = golden.compute_source_identity(fix_drift)
     try:
         freshness._digest = lambda model, records: (
-            f"{model}:{hashlib.sha256(b'DELIBERATE-DRIFT').hexdigest()}")
+            f"{model}:{hashlib.sha256(b'DELIBERATE-DRIFT').hexdigest()}"
+        )
         drifted_id = freshness.compute_source_identity(fix_drift)
     finally:
         freshness._digest = real_digest
-    expect("T-1019 deliberate fingerprint drift still makes parity red",
-           drifted_id.source_tree_fingerprint
-           != golden_id.source_tree_fingerprint,
-           f"golden={golden_id.source_tree_fingerprint} "
-           f"drifted={drifted_id.source_tree_fingerprint}")
+    expect(
+        "T-1019 deliberate fingerprint drift still makes parity red",
+        drifted_id.source_tree_fingerprint != golden_id.source_tree_fingerprint,
+        f"golden={golden_id.source_tree_fingerprint} drifted={drifted_id.source_tree_fingerprint}",
+    )
 
     # ---- same-fixture median materially falls -------------------------------
     # Interleave golden/new measurements so box load drift cancels: the
@@ -201,9 +217,11 @@ def run_t1019(base: Path) -> None:
     new_times.sort()
     old_med = old_times[len(old_times) // 2]
     new_med = new_times[len(new_times) // 2]
-    expect("T-1019 same-fixture median materially falls",
-           new_med < old_med * 0.9,
-           f"golden={old_med:.1f}ms new={new_med:.1f}ms")
+    expect(
+        "T-1019 same-fixture median materially falls",
+        new_med < old_med * 0.9,
+        f"golden={old_med:.1f}ms new={new_med:.1f}ms",
+    )
 
     # ---- fault injection: HEAD movement between capture stages --------------
     real_head = freshness._run_git
@@ -219,11 +237,13 @@ def run_t1019(base: Path) -> None:
     freshness._run_git = head_mover
     try:
         freshness.compute_source_identity(stable_fixture(base / "fix-head"))
-        expect("T-1019 HEAD movement between capture stages fails closed",
-               False, "no FreshnessError raised")
+        expect(
+            "T-1019 HEAD movement between capture stages fails closed",
+            False,
+            "no FreshnessError raised",
+        )
     except freshness.FreshnessError:
-        expect("T-1019 HEAD movement between capture stages fails closed",
-               True, "")
+        expect("T-1019 HEAD movement between capture stages fails closed", True, "")
 
     # ---- fault injection: listing movement between capture stages -----------
     real_listing = freshness._git_delta_listing
@@ -239,11 +259,13 @@ def run_t1019(base: Path) -> None:
     freshness._git_delta_listing = listing_mover
     try:
         freshness.compute_source_identity(stable_fixture(base / "fix-listing"))
-        expect("T-1019 listing movement between capture stages fails closed",
-               False, "no FreshnessError raised")
+        expect(
+            "T-1019 listing movement between capture stages fails closed",
+            False,
+            "no FreshnessError raised",
+        )
     except freshness.FreshnessError:
-        expect("T-1019 listing movement between capture stages fails closed",
-               True, "")
+        expect("T-1019 listing movement between capture stages fails closed", True, "")
     finally:
         freshness._git_delta_listing = real_listing
         freshness._run_git = real_head
@@ -260,8 +282,7 @@ def run_t1019(base: Path) -> None:
     freshness._read_regular_info = content_mover
     try:
         freshness.compute_source_identity(stable_fixture(base / "fix-content"))
-        expect("T-1019 untracked content movement fails closed",
-               False, "no FreshnessError raised")
+        expect("T-1019 untracked content movement fails closed", False, "no FreshnessError raised")
     except freshness.FreshnessError:
         expect("T-1019 untracked content movement fails closed", True, "")
     finally:
@@ -294,87 +315,119 @@ def run_t1019(base: Path) -> None:
         finally:
             freshness._read_regular_info = real_read
 
-    samesize_race("T-1007 same-size mtime-restored replacement fails closed "
-                  "(Git model)", stable_fixture(base / "fix-samesize"))
+    samesize_race(
+        "T-1007 same-size mtime-restored replacement fails closed (Git model)",
+        stable_fixture(base / "fix-samesize"),
+    )
     nogit = base / "fix-samesize-nogit"
     nogit.mkdir(parents=True)
     (nogit / "u.txt").write_text("new file\n", encoding="utf-8")
-    samesize_race("T-1007 same-size mtime-restored replacement fails closed "
-                  "(no-Git model)", nogit)
+    samesize_race("T-1007 same-size mtime-restored replacement fails closed (no-Git model)", nogit)
 
     # ---- post-run binding equality (T-1010) --------------------------------
     # Every monkeypatch installed above must be restored: a later probe group
     # (or a second run of this harness) must see the original bindings.
-    expect("T-1019 all monkeypatches restored (post-run bindings == originals)",
-           subprocess.run is real_run
-           and freshness._run_git is real_head
-           and freshness._git_delta_listing is real_listing
-           and freshness._read_regular_info is real_read
-           and freshness._digest is real_digest,
-           f"run={subprocess.run is real_run} "
-           f"git={freshness._run_git is real_head} "
-           f"listing={freshness._git_delta_listing is real_listing} "
-           f"read={freshness._read_regular_info is real_read} "
-           f"digest={freshness._digest is real_digest}")
+    expect(
+        "T-1019 all monkeypatches restored (post-run bindings == originals)",
+        subprocess.run is real_run
+        and freshness._run_git is real_head
+        and freshness._git_delta_listing is real_listing
+        and freshness._read_regular_info is real_read
+        and freshness._digest is real_digest,
+        f"run={subprocess.run is real_run} "
+        f"git={freshness._run_git is real_head} "
+        f"listing={freshness._git_delta_listing is real_listing} "
+        f"read={freshness._read_regular_info is real_read} "
+        f"digest={freshness._digest is real_digest}",
+    )
 
 
 def run_t1020(base: Path) -> None:
-    import saipen_engine.journal as _journal_mod
-    from saipen_engine.journal import (SETTLED_DIR, Journal, run_mutation,
-                                       scan_pending, staged_name)
+    from saipen_engine.journal import SETTLED_DIR, Journal, run_mutation, scan_pending, staged_name
     import os
-    import json
-    import hashlib
 
     root = base / "t1020"
     (root / ".saipen").mkdir(parents=True)
     (root / "x.txt").write_text("one\n", encoding="utf-8")
-    r = run_mutation(root, "op-1", "op", "probe", str(root), "hash",
-                     [{"path": "x.txt", "role": "generic", "content": "two\n"}])
-    expect("T-1020 committed mutation returns COMMITTED",
-           r.get("ok") and r.get("code") == "COMMITTED", repr(r))
+    r = run_mutation(
+        root,
+        "op-1",
+        "op",
+        "probe",
+        str(root),
+        "hash",
+        [{"path": "x.txt", "role": "generic", "content": "two\n"}],
+    )
+    expect(
+        "T-1020 committed mutation returns COMMITTED",
+        r.get("ok") and r.get("code") == "COMMITTED",
+        repr(r),
+    )
     settled_dir = root / SETTLED_DIR / "op-1"
     ops_dir = root / ".saipen/recovery/ops/op-1"
-    expect("T-1020 engine moves the settled op to SETTLED_DIR on COMMITTED",
-           settled_dir.is_dir() and not ops_dir.exists(),
-           f"settled={settled_dir.is_dir()} ops={ops_dir.exists()}")
+    expect(
+        "T-1020 engine moves the settled op to SETTLED_DIR on COMMITTED",
+        settled_dir.is_dir() and not ops_dir.exists(),
+        f"settled={settled_dir.is_dir()} ops={ops_dir.exists()}",
+    )
     pending, _ = scan_pending(root)
-    expect("T-1020 committed op is not pending",
-           all(p["op_id"] != "op-1" for p in pending), repr(pending))
+    expect(
+        "T-1020 committed op is not pending",
+        all(p["op_id"] != "op-1" for p in pending),
+        repr(pending),
+    )
 
     # committed retry still returns ALREADY_APPLIED (semantics preserved)
     journal = Journal(root, "op-1")
     record = journal.read()
-    retry_targets = [{"path": t["path"], "role": t["role"],
-                      "content": (root / t["path"]).read_bytes()}
-                     for t in record["targets"]]
-    again = run_mutation(root, "op-1", "op", "probe", str(root), "hash",
-                         retry_targets, skip_preflight=True)
-    expect("T-1020 committed retry still returns ALREADY_APPLIED",
-           again.get("code") == "ALREADY_APPLIED", repr(again))
+    retry_targets = [
+        {"path": t["path"], "role": t["role"], "content": (root / t["path"]).read_bytes()}
+        for t in record["targets"]
+    ]
+    again = run_mutation(
+        root, "op-1", "op", "probe", str(root), "hash", retry_targets, skip_preflight=True
+    )
+    expect(
+        "T-1020 committed retry still returns ALREADY_APPLIED",
+        again.get("code") == "ALREADY_APPLIED",
+        repr(again),
+    )
 
     # ---- T-1008: rename failure is NON-FATAL after the durable
     # terminal commit -- the caller returns truthful COMMITTED semantics and
     # the pending scan falls back to the strict manifest decode.
     real_rename = os.rename
+
     def failing_rename(src, dst):
         if "op-2" in str(src):
             raise OSError("injected rename failure")
         return real_rename(src, dst)
+
     os.rename = failing_rename
     try:
-        r2 = run_mutation(root, "op-2", "op", "probe", str(root), "hash",
-                          [{"path": "x.txt", "role": "generic",
-                            "content": "three\n"}])
+        r2 = run_mutation(
+            root,
+            "op-2",
+            "op",
+            "probe",
+            str(root),
+            "hash",
+            [{"path": "x.txt", "role": "generic", "content": "three\n"}],
+        )
     finally:
         os.rename = real_rename
-    expect("T-1008 move failure returns truthful COMMITTED semantics",
-           r2.get("ok") and r2.get("code") == "COMMITTED", repr(r2))
+    expect(
+        "T-1008 move failure returns truthful COMMITTED semantics",
+        r2.get("ok") and r2.get("code") == "COMMITTED",
+        repr(r2),
+    )
     ops_dir2 = root / ".saipen/recovery/ops/op-2"
     pending, _ = scan_pending(root)
-    expect("T-1008 committed op with failed move stays non-pending (strict decode owns truth)",
-           ops_dir2.is_dir() and all(p["op_id"] != "op-2" for p in pending),
-           repr((ops_dir2.is_dir(), pending)))
+    expect(
+        "T-1008 committed op with failed move stays non-pending (strict decode owns truth)",
+        ops_dir2.is_dir() and all(p["op_id"] != "op-2" for p in pending),
+        repr((ops_dir2.is_dir(), pending)),
+    )
 
     # fabricate 2000 settled receipts in settled/ + 1 real unresolved op in ops/
     ops = root / ".saipen/recovery/ops"
@@ -384,15 +437,28 @@ def run_t1020(base: Path) -> None:
         d = settled / op_id
         d.mkdir(parents=True, exist_ok=True)
         rec = {
-            "op_id": op_id, "operation": "op",
-            "created_at": "2026-01-01T00:00:00Z", "agent": "probe",
-            "project_identity": str(root), "project_lineage": None,
-            "semantic_payload_hash": "h", "preconditions": {},
-            "read_preconditions": {}, "verification_policy": "none",
-            "status": "COMMITTED", "progress_index": 1,
-            "targets": [{"path": "x.txt", "role": "generic", "action": "write",
-                         "before_hash": "a", "after_hash": "b",
-                         "applied": True}],
+            "op_id": op_id,
+            "operation": "op",
+            "created_at": "2026-01-01T00:00:00Z",
+            "agent": "probe",
+            "project_identity": str(root),
+            "project_lineage": None,
+            "semantic_payload_hash": "h",
+            "preconditions": {},
+            "read_preconditions": {},
+            "verification_policy": "none",
+            "status": "COMMITTED",
+            "progress_index": 1,
+            "targets": [
+                {
+                    "path": "x.txt",
+                    "role": "generic",
+                    "action": "write",
+                    "before_hash": "a",
+                    "after_hash": "b",
+                    "applied": True,
+                }
+            ],
         }
         (d / "operation.json").write_text(json.dumps(rec), encoding="utf-8")
 
@@ -401,58 +467,98 @@ def run_t1020(base: Path) -> None:
     live = ops / "op-live"
     live.mkdir(parents=True, exist_ok=True)
     rec = {
-        "op_id": "op-live", "operation": "op", "created_at": "2026-01-02T00:00:00Z",
-        "agent": "probe", "project_identity": str(root), "project_lineage": None,
-        "semantic_payload_hash": "h", "preconditions": {},
-        "read_preconditions": {}, "verification_policy": "none",
-        "status": "PREPARED", "progress_index": 0,
-        "targets": [{"path": "x.txt", "role": "generic", "action": "write",
-                     "before_hash": "a", "after_hash": "b", "applied": False}],
+        "op_id": "op-live",
+        "operation": "op",
+        "created_at": "2026-01-02T00:00:00Z",
+        "agent": "probe",
+        "project_identity": str(root),
+        "project_lineage": None,
+        "semantic_payload_hash": "h",
+        "preconditions": {},
+        "read_preconditions": {},
+        "verification_policy": "none",
+        "status": "PREPARED",
+        "progress_index": 0,
+        "targets": [
+            {
+                "path": "x.txt",
+                "role": "generic",
+                "action": "write",
+                "before_hash": "a",
+                "after_hash": "b",
+                "applied": False,
+            }
+        ],
     }
     (live / "operation.json").write_text(json.dumps(rec), encoding="utf-8")
     (live / staged_name(0, "x.txt")).write_bytes(b"two\n")
 
-    fast_med = median_ms(lambda: scan_pending(root))
+    median_ms(lambda: scan_pending(root))
     pending, _ = scan_pending(root)
-    expect("T-1008 one unresolved op remains exactly visible",
-           [p["op_id"] for p in pending] == ["op-live"], repr(pending))
-           
+    expect(
+        "T-1008 one unresolved op remains exactly visible",
+        [p["op_id"] for p in pending] == ["op-live"],
+        repr(pending),
+    )
+
     # corrupt/PREPARED evidence must still block
     mismatch = ops / "op-mismatch"
     mismatch.mkdir(parents=True, exist_ok=True)
     prepared_rec = {
-        "op_id": "op-mismatch", "operation": "op",
-        "created_at": "2026-01-03T00:00:00Z", "agent": "probe",
-        "project_identity": str(root), "project_lineage": None,
-        "semantic_payload_hash": "h", "preconditions": {},
-        "read_preconditions": {}, "verification_policy": "none",
-        "status": "PREPARED", "progress_index": 0,
-        "targets": [{"path": "x.txt", "role": "generic", "action": "write",
-                     "before_hash": "a", "after_hash": "b",
-                     "applied": False}],
+        "op_id": "op-mismatch",
+        "operation": "op",
+        "created_at": "2026-01-03T00:00:00Z",
+        "agent": "probe",
+        "project_identity": str(root),
+        "project_lineage": None,
+        "semantic_payload_hash": "h",
+        "preconditions": {},
+        "read_preconditions": {},
+        "verification_policy": "none",
+        "status": "PREPARED",
+        "progress_index": 0,
+        "targets": [
+            {
+                "path": "x.txt",
+                "role": "generic",
+                "action": "write",
+                "before_hash": "a",
+                "after_hash": "b",
+                "applied": False,
+            }
+        ],
     }
-    (mismatch / "operation.json").write_text(
-        json.dumps(prepared_rec), encoding="utf-8")
+    (mismatch / "operation.json").write_text(json.dumps(prepared_rec), encoding="utf-8")
     (mismatch / staged_name(0, "x.txt")).write_bytes(b"two\n")
-    
+
     pending, _ = scan_pending(root)
-    expect("T-1008 PREPARED manifest in ops/ blocks",
-           any(p["op_id"] == "op-mismatch"
-               and p.get("status") == "PREPARED" for p in pending),
-           repr(pending))
+    expect(
+        "T-1008 PREPARED manifest in ops/ blocks",
+        any(p["op_id"] == "op-mismatch" and p.get("status") == "PREPARED" for p in pending),
+        repr(pending),
+    )
+
 
 def run_t1021() -> None:
     import random
 
-    from saipen_engine.log import (bulk_verification_evidence,
-                                   verification_evidence)
+    from saipen_engine.log import bulk_verification_evidence, verification_evidence
+
     random.seed(7)
     tickets = ["T-1", "T-2", "T-3", "T-4"]
-    texts = ["probe -> PASS conf: high", "probe -> PASS conf: low",
-             "probe FAILED", "probe -> PASS conf: med",
-             "manual check MANUAL-VERIFY", "transition to VERIFY",
-             "transition to VERIFY -- rerun", "plain run", "NOT PASS",
-             "NOT MANUAL-VERIFY", "transition to VERIFY -- after FAIL check"]
+    texts = [
+        "probe -> PASS conf: high",
+        "probe -> PASS conf: low",
+        "probe FAILED",
+        "probe -> PASS conf: med",
+        "manual check MANUAL-VERIFY",
+        "transition to VERIFY",
+        "transition to VERIFY -- rerun",
+        "plain run",
+        "NOT PASS",
+        "NOT MANUAL-VERIFY",
+        "transition to VERIFY -- after FAIL check",
+    ]
     mismatches = 0
     trials = 400
     for _ in range(trials):
@@ -463,14 +569,16 @@ def run_t1021() -> None:
             if tax != "RUN":
                 events.append({"ticket": tid, "taxonomy": tax, "text": "x"})
                 continue
-            events.append({"ticket": tid, "taxonomy": "RUN",
-                           "text": random.choice(texts)})
+            events.append({"ticket": tid, "taxonomy": "RUN", "text": random.choice(texts)})
         bulk = bulk_verification_evidence(events, tickets)
         for t in tickets:
             if verification_evidence(t, events) != bulk[t]:
                 mismatches += 1
-    expect("T-1021 bulk verdict == single-ticket verdict on mixed histories",
-           mismatches == 0, f"{mismatches}/{trials * len(tickets)} mismatched")
+    expect(
+        "T-1021 bulk verdict == single-ticket verdict on mixed histories",
+        mismatches == 0,
+        f"{mismatches}/{trials * len(tickets)} mismatched",
+    )
 
     # scaling: bulk stays linear (a few ms) where per-ticket reverse scans
     # were hundreds of ms at the same size.
@@ -478,14 +586,19 @@ def run_t1021() -> None:
     ev = []
     for i in range(n_ev):
         tid = f"T-{random.randrange(n_t)}"
-        ev.append({"ticket": tid, "taxonomy": "RUN",
-                   "text": random.choice(
-                       ["probe -> PASS conf: high", "transition to VERIFY",
-                        "run"])})
-    bulk_ms = median_ms(lambda: bulk_verification_evidence(
-        ev, [f"T-{j}" for j in range(n_t)]))
-    expect("T-1021 bulk evidence is one-pass linear (sub-50ms at 1000/6000)",
-           bulk_ms < 50.0, f"{bulk_ms:.2f}ms")
+        ev.append(
+            {
+                "ticket": tid,
+                "taxonomy": "RUN",
+                "text": random.choice(["probe -> PASS conf: high", "transition to VERIFY", "run"]),
+            }
+        )
+    bulk_ms = median_ms(lambda: bulk_verification_evidence(ev, [f"T-{j}" for j in range(n_t)]))
+    expect(
+        "T-1021 bulk evidence is one-pass linear (sub-50ms at 1000/6000)",
+        bulk_ms < 50.0,
+        f"{bulk_ms:.2f}ms",
+    )
 
 
 def run_t1022() -> None:
@@ -504,23 +617,29 @@ def run_t1022() -> None:
     before = tree_hash(HOME / ".saipen")
     run_scenarios.run_nitro_probes()
     after = tree_hash(HOME / ".saipen")
-    expect("T-1022 nitro probes leave the live HOME tree byte-identical",
-           before == after,
-           "" if before == after else "live .saipen tree changed")
+    expect(
+        "T-1022 nitro probes leave the live HOME tree byte-identical",
+        before == after,
+        "" if before == after else "live .saipen tree changed",
+    )
 
     # ---- third-wave ONLY runner terminates with a scoped summary ------------
     env = {**os.environ, "SAIPEN_THIRD_WAVE_PROBES_ONLY": "1"}
-    proc = subprocess.run([sys.executable, "tools/run_scenarios.py"],
-                          cwd=HOME, env=env, capture_output=True, text=True,
-                          timeout=900)
+    proc = subprocess.run(
+        [sys.executable, "tools/run_scenarios.py"],
+        cwd=HOME,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=900,
+    )
     out = proc.stdout + proc.stderr
     summary_ok = "checks passed" in out and "failed" in out
-    expect("T-1022 third-wave ONLY runner exits 0",
-           proc.returncode == 0, f"rc={proc.returncode}")
-    expect("T-1022 third-wave ONLY runner prints a scoped PASS/FAIL summary",
-           summary_ok, out[-400:])
-    expect("T-1022 third-wave ONLY runner reports zero failures",
-           "0 failed" in out, out[-400:])
+    expect("T-1022 third-wave ONLY runner exits 0", proc.returncode == 0, f"rc={proc.returncode}")
+    expect(
+        "T-1022 third-wave ONLY runner prints a scoped PASS/FAIL summary", summary_ok, out[-400:]
+    )
+    expect("T-1022 third-wave ONLY runner reports zero failures", "0 failed" in out, out[-400:])
 
 
 def main() -> int:
@@ -532,8 +651,7 @@ def main() -> int:
         run_t1022()
     finally:
         shutil.rmtree(base, ignore_errors=True)
-    print(f"perf wave: {checked - len(problems)}/{checked} checks passed, "
-          f"{len(problems)} failed")
+    print(f"perf wave: {checked - len(problems)}/{checked} checks passed, {len(problems)} failed")
     return 1 if problems else 0
 
 

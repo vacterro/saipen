@@ -50,8 +50,9 @@ def _git_from(cwd: str | Path, *args: str) -> tuple[int, str]:
     """Run git in `cwd`. Never raises: this runs from pre-commit hooks and in
     directories that are not repositories at all."""
     try:
-        result = subprocess.run(["git", *args], cwd=str(cwd),
-                                capture_output=True, text=True, check=False)
+        result = subprocess.run(
+            ["git", *args], cwd=str(cwd), capture_output=True, text=True, check=False
+        )
     except (OSError, subprocess.SubprocessError):
         return 1, ""
     return result.returncode, result.stdout.strip()
@@ -64,9 +65,9 @@ def _nearest_checkpoint_root(start: Path) -> Path | None:
     return None
 
 
-def resolve_project_root(start: Path | None = None,
-                         explicit: str | Path | None = None
-                         ) -> tuple[Path | None, str]:
+def resolve_project_root(
+    start: Path | None = None, explicit: str | Path | None = None
+) -> tuple[Path | None, str]:
     """Resolve the one root whose checkpoint files this run may touch.
 
     Returns `(root, source)` on success and `(None, reason)` on refusal. It
@@ -89,8 +90,7 @@ def resolve_project_root(start: Path | None = None,
     rc, top_text = _git_from(start, "rev-parse", "--show-toplevel")
     if rc == 0 and top_text:
         worktree_root = Path(top_text).resolve()
-        common_rc, common_text = _git_from(start, "rev-parse",
-                                           "--git-common-dir")
+        common_rc, common_text = _git_from(start, "rev-parse", "--git-common-dir")
         candidates: list[tuple[Path, str]] = [(worktree_root, "git-worktree")]
         if common_rc == 0 and common_text:
             common_dir = Path(common_text)
@@ -107,17 +107,21 @@ def resolve_project_root(start: Path | None = None,
             seen.add(key)
             if (root / SAIPEN_DIR).is_dir():
                 return root, source
-        return None, (f"cwd belongs to Git worktree {worktree_root} but its "
-                      f"owning repository has no .saipen/; refusing to guess "
-                      f"or create a second .saipen/. Run from the intended "
-                      f"project or pass --project-root PATH")
+        return None, (
+            f"cwd belongs to Git worktree {worktree_root} but its "
+            f"owning repository has no .saipen/; refusing to guess "
+            f"or create a second .saipen/. Run from the intended "
+            f"project or pass --project-root PATH"
+        )
 
     root = _nearest_checkpoint_root(start)
     if root is not None:
         return root, "ancestor"
-    return None, ("cwd has no owning .saipen/; refusing to guess or create "
-                  "one. Run from the intended project or pass "
-                  "--project-root PATH")
+    return None, (
+        "cwd has no owning .saipen/; refusing to guess or create "
+        "one. Run from the intended project or pass "
+        "--project-root PATH"
+    )
 
 
 def project_identity(root: Path) -> str:
@@ -153,7 +157,7 @@ def new_project_lineage() -> str:
 
 def identity_file_content(lineage: str) -> str:
     """Canonical tracked content of `.saipen/IDENTITY.md`."""
-    return (f"---\n{LINEAGE_FIELD}: {lineage}\n---\n")
+    return f"---\n{LINEAGE_FIELD}: {lineage}\n---\n"
 
 
 def parse_identity_content(text: str) -> tuple[str | None, str | None]:
@@ -183,9 +187,11 @@ def parse_identity_content(text: str) -> tuple[str | None, str | None]:
     body = lines[1:-1]
     body_lines = [line for line in body if line.strip()]
     if len(body_lines) != 1:
-        return None, ("canonical IDENTITY.md holds exactly one lineage field "
-                      "inside the fence; found "
-                      f"{len(body_lines)} non-empty line(s)")
+        return None, (
+            "canonical IDENTITY.md holds exactly one lineage field "
+            "inside the fence; found "
+            f"{len(body_lines)} non-empty line(s)"
+        )
     line = body_lines[0]
     match = re.fullmatch(rf"{re.escape(LINEAGE_FIELD)}:\s*(\S+)\s*", line)
     if not match:
@@ -241,6 +247,7 @@ class ProjectPaths:
     @property
     def sealed_logs(self) -> list[Path]:
         from .log import history_paths
+
         return [p for p in history_paths(self.root) if p.name != "LOG.md"]
 
     @property

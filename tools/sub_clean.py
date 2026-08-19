@@ -52,8 +52,7 @@ def _file_digest(path: Path) -> str:
             raise RuntimeError(f"cannot read cleanup evidence link {path}: {exc}") from exc
         return hashlib.sha256(b"link:" + os.fsencode(target)).hexdigest()
     if not stat.S_ISREG(info.st_mode):
-        raise RuntimeError(
-            f"unsupported cleanup evidence object at {path}")
+        raise RuntimeError(f"unsupported cleanup evidence object at {path}")
     digest = hashlib.sha256()
     try:
         flags = os.O_RDONLY | getattr(os, "O_BINARY", 0)
@@ -79,8 +78,7 @@ def _open_board_items(board: Path) -> list[str]:
     if not board.is_file():
         return [f"missing lifecycle evidence: {board.name}"]
     if board.is_symlink() or _is_reparse_point(board):
-        return [f"non-regular lifecycle evidence: {board.name} is a "
-                f"symlink or reparse point"]
+        return [f"non-regular lifecycle evidence: {board.name} is a symlink or reparse point"]
     try:
         lines = board.read_text(encoding="utf-8-sig").splitlines()
     except (OSError, UnicodeError) as exc:
@@ -90,7 +88,8 @@ def _open_board_items(board: Path) -> list[str]:
     if headings != required:
         return [f"malformed BOARD sections: expected {required!r}, got {headings!r}"]
     malformed_headings = [
-        line for line in lines
+        line
+        for line in lines
         if line.startswith("##") and line not in {f"## {name}" for name in required}
     ]
     if malformed_headings:
@@ -109,10 +108,8 @@ def _open_board_items(board: Path) -> list[str]:
         if line.startswith("- [") and not ticket:
             blockers.append(f"malformed BOARD item: {line}")
             continue
-        if ticket and (section not in checkbox_for
-                       or ticket.group(1) != checkbox_for[section]):
-            blockers.append(
-                f"malformed {section or 'unsectioned'} item state: {line}")
+        if ticket and (section not in checkbox_for or ticket.group(1) != checkbox_for[section]):
+            blockers.append(f"malformed {section or 'unsectioned'} item state: {line}")
             continue
         if ticket and section == "TODO":
             blockers.append("TODO: " + line[6:].strip())
@@ -133,7 +130,7 @@ def _visible_markdown(text: str) -> tuple[str, str | None]:
         end = text.find("-->", start + 4)
         if end < 0:
             return "", "unclosed HTML comment"
-        comment = text[start:end + 3]
+        comment = text[start : end + 3]
         without_comments.append("\n" * comment.count("\n"))
         cursor = end + 3
     text = "".join(without_comments)
@@ -149,7 +146,8 @@ def _visible_markdown(text: str) -> tuple[str, str | None]:
         elif fence_char is not None:
             closing = re.match(
                 rf"^[ ]{{0,3}}{re.escape(fence_char)}{{{fence_length},}}[ \t]*$",
-                line.rstrip("\r\n"))
+                line.rstrip("\r\n"),
+            )
             if closing:
                 fence_char = None
                 fence_length = 0
@@ -165,8 +163,9 @@ def _outbox_blockers(outbox: Path) -> list[str]:
     if not outbox.is_file():
         return [f"missing lifecycle evidence: kitchen/{outbox.name}"]
     if outbox.is_symlink() or _is_reparse_point(outbox):
-        return [f"non-regular lifecycle evidence: kitchen/{outbox.name} is a "
-                f"symlink or reparse point"]
+        return [
+            f"non-regular lifecycle evidence: kitchen/{outbox.name} is a symlink or reparse point"
+        ]
     try:
         text = outbox.read_text(encoding="utf-8-sig")
     except (OSError, UnicodeError) as exc:
@@ -177,25 +176,24 @@ def _outbox_blockers(outbox: Path) -> list[str]:
     if structure_error:
         return [f"malformed OUTBOX: {structure_error}"]
 
-    headings = list(re.finditer(
-        r"^## [A-Z]+-\d+:\s*\S.*$", visible, flags=re.MULTILINE))
-    entry_like = re.findall(
-        r"^#{2,}\s*[A-Za-z][A-Za-z0-9_-]*-\S+.*$",
-        visible, flags=re.MULTILINE)
+    headings = list(re.finditer(r"^## [A-Z]+-\d+:\s*\S.*$", visible, flags=re.MULTILINE))
+    entry_like = re.findall(r"^#{2,}\s*[A-Za-z][A-Za-z0-9_-]*-\S+.*$", visible, flags=re.MULTILINE)
     if len(headings) != len(entry_like):
         return ["malformed OUTBOX entry heading"]
     entries: list[str]
     if headings:
-        if visible[:headings[0].start()].strip() != "# OUTBOX":
+        if visible[: headings[0].start()].strip() != "# OUTBOX":
             return ["malformed OUTBOX preamble or entry heading"]
         entries = [
-            visible[match.start():headings[index + 1].start()
-                    if index + 1 < len(headings) else len(visible)]
+            visible[
+                match.start() : headings[index + 1].start()
+                if index + 1 < len(headings)
+                else len(visible)
+            ]
             for index, match in enumerate(headings)
         ]
     else:
-        frontmatter = re.fullmatch(
-            r"---\s*\n(.*?)\n---\s*", visible, flags=re.DOTALL)
+        frontmatter = re.fullmatch(r"---\s*\n(.*?)\n---\s*", visible, flags=re.DOTALL)
         if not frontmatter:
             return ["nonempty OUTBOX has no valid package entry"]
         entries = [frontmatter.group(1)]
@@ -205,14 +203,12 @@ def _outbox_blockers(outbox: Path) -> list[str]:
     for index, entry in enumerate(entries, 1):
         if headings:
             statuses = re.findall(
-                r"^-[ \t]+\*\*status:\*\*[ \t]*([^\s]+)[ \t]*$",
-                entry, flags=re.MULTILINE)
+                r"^-[ \t]+\*\*status:\*\*[ \t]*([^\s]+)[ \t]*$", entry, flags=re.MULTILINE
+            )
         else:
-            statuses = re.findall(
-                r"^status:[ \t]*([^\s]+)[ \t]*$", entry, flags=re.MULTILINE)
+            statuses = re.findall(r"^status:[ \t]*([^\s]+)[ \t]*$", entry, flags=re.MULTILINE)
         if len(statuses) != 1:
-            blockers.append(
-                f"OUTBOX entry {index} has {len(statuses)} status fields; expected 1")
+            blockers.append(f"OUTBOX entry {index} has {len(statuses)} status fields; expected 1")
             continue
         status = statuses[0]
         if status not in allowed:
@@ -257,38 +253,40 @@ def _package_artifacts(kitchen: Path) -> list[str]:
     outbox = kitchen / "OUTBOX.md"
     for path in _walk_files(kitchen):
         if path != outbox:
-            blockers.append(
-                f"unacknowledged artifact: {path.relative_to(kitchen).as_posix()}"
-            )
+            blockers.append(f"unacknowledged artifact: {path.relative_to(kitchen).as_posix()}")
     return blockers
 
 
-def _unpreserved_recovery(instance: Path,
-                           preserved_root: Path | None) -> list[str]:
+def _unpreserved_recovery(instance: Path, preserved_root: Path | None) -> list[str]:
     walked = _walk_files(instance)
-    link_evidence = [path for path in walked
-                     if (path.is_symlink() or _is_reparse_point(path))
-                     and "recovery" in path.relative_to(instance).parts]
+    link_evidence = [
+        path
+        for path in walked
+        if (path.is_symlink() or _is_reparse_point(path))
+        and "recovery" in path.relative_to(instance).parts
+    ]
     if link_evidence:
         return [
             "non-preserved recovery evidence: "
             + link_evidence[0].relative_to(instance).as_posix()
             + " (symlink or reparse point owns no content)"
         ]
-    evidence = [path for path in walked
-                if "recovery" in path.relative_to(instance).parts[:-1]]
+    evidence = [path for path in walked if "recovery" in path.relative_to(instance).parts[:-1]]
     if not evidence:
         return []
     preserved = set()
     if preserved_root is not None and preserved_root.is_dir():
         preserved = {_file_digest(path) for path in _walk_files(preserved_root)}
-    return [f"unpreserved recovery evidence: "
-            f"{path.relative_to(instance).as_posix()}"
-            for path in evidence if _file_digest(path) not in preserved]
+    return [
+        f"unpreserved recovery evidence: {path.relative_to(instance).as_posix()}"
+        for path in evidence
+        if _file_digest(path) not in preserved
+    ]
 
 
-def sub_clean_blockers(instance_root: Path | str,
-                       preserved_root: Path | str | None = None) -> tuple[str, ...]:
+def sub_clean_blockers(
+    instance_root: Path | str, preserved_root: Path | str | None = None
+) -> tuple[str, ...]:
     """Return deterministic reasons why an instance cannot be removed."""
     instance = Path(instance_root)
     if not instance.is_dir():

@@ -39,9 +39,28 @@ MAX_ID_BYTES = 128
 
 # Reserved device names on Windows (case-insensitive, optional extension).
 _WIN_DEVICES = {
-    "con", "prn", "aux", "nul",
-    "com1", "com2", "com3", "com4", "com5", "com6", "com7", "com8", "com9",
-    "lpt1", "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9",
+    "con",
+    "prn",
+    "aux",
+    "nul",
+    "com1",
+    "com2",
+    "com3",
+    "com4",
+    "com5",
+    "com6",
+    "com7",
+    "com8",
+    "com9",
+    "lpt1",
+    "lpt2",
+    "lpt3",
+    "lpt4",
+    "lpt5",
+    "lpt6",
+    "lpt7",
+    "lpt8",
+    "lpt9",
 }
 
 
@@ -70,13 +89,12 @@ def validate_safe_id(value: str, *, kind: str = "id") -> str:
     if Path(value).is_absolute():
         raise InvalidIdError(f"{kind} is an absolute path")
     if not _SAFE_ID_RE.match(value):
-        raise InvalidIdError(
-            f"{kind} is not path-safe ([A-Za-z0-9][A-Za-z0-9_.-]*)")
+        raise InvalidIdError(f"{kind} is not path-safe ([A-Za-z0-9][A-Za-z0-9_.-]*)")
     _byte_len = len(value.encode("utf-8"))
     if _byte_len > MAX_ID_BYTES:
         raise InvalidIdError(
-            f"{kind} is {_byte_len} bytes; the portable path-component "
-            f"budget is {MAX_ID_BYTES}")
+            f"{kind} is {_byte_len} bytes; the portable path-component budget is {MAX_ID_BYTES}"
+        )
     # Reject traversal via dotted components inside the id: "a..b" is a plain
     # single component (safe as one path segment), but "a/.." is impossible
     # (separators rejected). A leading-dot form other than "."/".." like
@@ -84,8 +102,7 @@ def validate_safe_id(value: str, *, kind: str = "id") -> str:
     if value.startswith("..") and not value.startswith("..."):
         # "..x" is a legal single component; only "." and ".." are dot paths.
         pass
-    if _WIN_DEVICES.intersection(
-            {part.lower() for part in re.split(r"[.]", value)}):
+    if _WIN_DEVICES.intersection({part.lower() for part in re.split(r"[.]", value)}):
         raise InvalidIdError(f"{kind} is a Windows-reserved device name")
     return value
 
@@ -100,12 +117,12 @@ def prove_inside(path: Path, owner_root: Path, *, kind: str = "path") -> Path:
     owner = _realpath(owner_root)
     resolved = _realpath(path)
     if resolved != owner and not resolved.is_relative_to(owner):
-        raise InvalidIdError(
-            f"{kind} {path} escapes the owner root {owner}")
+        raise InvalidIdError(f"{kind} {path} escapes the owner root {owner}")
     return resolved
 
 
 def _realpath(path: Path) -> Path:
     import os
+
     text = os.path.realpath(str(path))
     return Path(text)

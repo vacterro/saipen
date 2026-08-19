@@ -15,10 +15,9 @@ from __future__ import annotations
 from pathlib import Path
 
 from . import phases
-from .board import (parse_board, ticket_is_workable, claim_status,
-                     board_graph_errors)
+from .board import parse_board, ticket_is_workable, claim_status, board_graph_errors
 from .result import Result
-from .state import parse_state, is_legal_wait, binding_wait
+from .state import binding_wait
 
 
 def _top_workable(board: dict, agent: str | None = None) -> str | None:
@@ -31,12 +30,15 @@ def _top_workable(board: dict, agent: str | None = None) -> str | None:
     return None
 
 
-def route_next(state_text: str, board_text: str,
-                pending_ops: list | None = None,
-                conflict_ops: list | None = None,
-                now: datetime.datetime | None = None,
-                current_capability: str | None = None,
-                current_agent: str | None = None) -> dict:
+def route_next(
+    state_text: str,
+    board_text: str,
+    pending_ops: list | None = None,
+    conflict_ops: list | None = None,
+    now: datetime.datetime | None = None, # noqa: F821
+    current_capability: str | None = None,
+    current_agent: str | None = None,
+) -> dict:
     """Compute the exact next executable action.
 
     Returns a dict with `action` (an executable mechanical action), `reason`
@@ -68,11 +70,15 @@ def route_next(state_text: str, board_text: str,
     # duplicate keys or a broken fence must never project an executable next
     # action from a partial parse (T-1003 hostile findings). Fail closed.
     from .state import parse_state_or_error
+
     state, state_error = parse_state_or_error(state_text)
     if state_error:
-        return {"ok": False, "action": "saipen status",
-                "reason": "state-malformed",
-                "detail": f"STATE parse error: {state_error}"}
+        return {
+            "ok": False,
+            "action": "saipen status",
+            "reason": "state-malformed",
+            "detail": f"STATE parse error: {state_error}",
+        }
     # Empty STATE is bootstrap-only (hostile-regression, P1): a file with no
     # frontmatter reads as {} for status display, but it is NOT a routing
     # surface -- there is no phase, no agent, no continuation to project.
@@ -80,11 +86,14 @@ def route_next(state_text: str, board_text: str,
     # bootstrap is the INIT entry, never an ordinary maintenance/start
     # projection.
     if not state:
-        return {"ok": True, "action": "saipen status",
-                "reason": "bootstrap",
-                "executable_behavior": "RESTATE_AND_STOP",
-                "detail": "empty STATE is bootstrap-only; no continuation "
-                          "exists yet -- bootstrap via INIT before routing"}
+        return {
+            "ok": True,
+            "action": "saipen status",
+            "reason": "bootstrap",
+            "executable_behavior": "RESTATE_AND_STOP",
+            "detail": "empty STATE is bootstrap-only; no continuation "
+            "exists yet -- bootstrap via INIT before routing",
+        }
     board = parse_board(board_text)
     phase = state.get("phase")
     task = state.get("task")
@@ -93,8 +102,7 @@ def route_next(state_text: str, board_text: str,
     # Second-wave P0: the CURRENT-SESSION actor, never STATE.agent. STATE.agent
     # is historical last-writer evidence; claim truth and workability are judged
     # relative to the identity the caller actually IS.
-    session_agent = current_agent if current_agent is not None \
-        else state.get("agent")
+    session_agent = current_agent if current_agent is not None else state.get("agent")
 
     # CURRENT-SESSION CAPABILITY gate (CORE § 1.3): only an explicitly supplied,
     # freshly negotiated capability may grant/revoke write authority. A persisted
@@ -108,28 +116,41 @@ def route_next(state_text: str, board_text: str,
     # the session were writable.
     if current_capability is not None:
         from .capability import capability_error
+
         _cap_problem = capability_error(current_capability)
         if _cap_problem is not None:
-            return {"ok": False, "action": "saipen status",
-                    "reason": "capability-invalid",
-                    "detail": _cap_problem}
+            return {
+                "ok": False,
+                "action": "saipen status",
+                "reason": "capability-invalid",
+                "detail": _cap_problem,
+            }
     if current_capability == "read-only":
-        return {"ok": True, "action": "saipen status",
-                "reason": "read-only-mode",
-                "executable_behavior": "RESTATE_AND_STOP",
-                "detail": "current session capability is read-only; no mutating "
-                          "next action may be routed -- inspect only"}
+        return {
+            "ok": True,
+            "action": "saipen status",
+            "reason": "read-only-mode",
+            "executable_behavior": "RESTATE_AND_STOP",
+            "detail": "current session capability is read-only; no mutating "
+            "next action may be routed -- inspect only",
+        }
 
     # RECOVER outranks everything (after the read-only brake): an unresolved
     # op or conflict must be resolved before any canonical work.
     if conflicts:
-        return {"ok": False, "action": "saipen recover",
-                "reason": "recovery-conflict",
-                "detail": f"unresolved conflict: {', '.join(conflicts)}"}
+        return {
+            "ok": False,
+            "action": "saipen recover",
+            "reason": "recovery-conflict",
+            "detail": f"unresolved conflict: {', '.join(conflicts)}",
+        }
     if pending:
-        return {"ok": False, "action": "saipen recover",
-                "reason": "recovery-pending",
-                "detail": f"unresolved operation: {', '.join(pending)}"}
+        return {
+            "ok": False,
+            "action": "saipen recover",
+            "reason": "recovery-pending",
+            "detail": f"unresolved operation: {', '.join(pending)}",
+        }
 
     # A board the shared parser cannot read whole (an unrecognized ticket
     # field, a malformed ticket line, a missing heading) is not a work
@@ -139,13 +160,14 @@ def route_next(state_text: str, board_text: str,
     # corrupt input. status/next/context propagate the failure; the parser
     # diagnostics stay in `detail` and recovery flags stay truthful.
     if board["errors"]:
-        return {"ok": False, "action": "saipen status",
-                "reason": "board-malformed",
-                "detail": "BOARD parse error(s): "
-                          + "; ".join(board["errors"][:3])}
+        return {
+            "ok": False,
+            "action": "saipen status",
+            "reason": "board-malformed",
+            "detail": "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+        }
 
-    doing = [t for t in board["tickets"].values()
-             if t["section"] == "## DOING"]
+    doing = [t for t in board["tickets"].values() if t["section"] == "## DOING"]
     active = doing[0]["id"] if doing else None
 
     # BINDING (hostile-regression, P0): STATE.task binds BOARD.DOING only where
@@ -162,43 +184,65 @@ def route_next(state_text: str, board_text: str,
     if active:
         cs = claim_status(board["tickets"][active], session_agent, now)
         if cs == "INVALID":
-            return {"ok": False, "action": "saipen status",
-                    "reason": "binding-mismatch",
-                    "detail": f"BOARD.DOING {active} carries an INVALID claim "
-                              f"(half owner/claim_time pair or non-UTC stamp); "
-                              f"repair the claim before routing"}
+            return {
+                "ok": False,
+                "action": "saipen status",
+                "reason": "binding-mismatch",
+                "detail": f"BOARD.DOING {active} carries an INVALID claim "
+                f"(half owner/claim_time pair or non-UTC stamp); "
+                f"repair the claim before routing",
+            }
         if cs == "FOREIGN_LIVE":
             if task and task != "none":
-                return {"ok": False, "action": "saipen status",
-                        "reason": "binding-mismatch",
-                        "detail": f"STATE.task={task} but BOARD.DOING={active} "
-                                  f"is FOREIGN_LIVE (owned by another agent)"}
-            return {"ok": True, "action": "saipen status",
-                    "reason": "foreign-live",
-                    "executable_behavior": "RESTATE_AND_STOP",
-                    "detail": f"BOARD.DOING {active} is actively owned by "
-                              f"another agent; observe, do not take over"}
+                return {
+                    "ok": False,
+                    "action": "saipen status",
+                    "reason": "binding-mismatch",
+                    "detail": f"STATE.task={task} but BOARD.DOING={active} "
+                    f"is FOREIGN_LIVE (owned by another agent)",
+                }
+            return {
+                "ok": True,
+                "action": "saipen status",
+                "reason": "foreign-live",
+                "executable_behavior": "RESTATE_AND_STOP",
+                "detail": f"BOARD.DOING {active} is actively owned by "
+                f"another agent; observe, do not take over",
+            }
         if task and task != "none" and task != active:
-            return {"ok": False, "action": "saipen status",
-                    "reason": "binding-mismatch",
-                    "detail": f"STATE.task={task} but BOARD.DOING={active}; "
-                              "repair the split before routing"}
+            return {
+                "ok": False,
+                "action": "saipen status",
+                "reason": "binding-mismatch",
+                "detail": f"STATE.task={task} but BOARD.DOING={active}; "
+                "repair the split before routing",
+            }
         if cs == "SELF" and (not task or task == "none"):
-            return {"ok": False, "action": "saipen status",
-                    "reason": "binding-mismatch",
-                    "detail": f"STATE.task is none but BOARD.DOING={active} is "
-                              f"this agent's own SELF claim; bind STATE.task"}
+            return {
+                "ok": False,
+                "action": "saipen status",
+                "reason": "binding-mismatch",
+                "detail": f"STATE.task is none but BOARD.DOING={active} is "
+                f"this agent's own SELF claim; bind STATE.task",
+            }
         if cs in ("UNCLAIMED", "FOREIGN_STALE") and (not task or task == "none"):
             # Adoptable orphan/stale DOING: route to claim it in place.
-            return {"ok": True, "action": f"PHASE SCOUT {active}",
-                    "reason": "adopt", "ticket": active,
-                    "detail": "DOING ticket carries no live own claim; adopt it",
-                    "load": load_for_action(f"PHASE SCOUT {active}")}
+            return {
+                "ok": True,
+                "action": f"PHASE SCOUT {active}",
+                "reason": "adopt",
+                "ticket": active,
+                "detail": "DOING ticket carries no live own claim; adopt it",
+                "load": load_for_action(f"PHASE SCOUT {active}"),
+            }
     elif task and task != "none":
-        return {"ok": False, "action": "saipen status",
-                "reason": "binding-mismatch",
-                "detail": f"STATE.task={task} but no BOARD.DOING ticket; "
-                          "repair the split before routing"}
+        return {
+            "ok": False,
+            "action": "saipen status",
+            "reason": "binding-mismatch",
+            "detail": f"STATE.task={task} but no BOARD.DOING ticket; "
+            "repair the split before routing",
+        }
 
     # WAIT: a legitimate persisted WAIT is a HARD STOP (CORE 1.11 OBEY/UNBLOCK
     # priority). It must never be walked through merely because TODO has
@@ -216,25 +260,31 @@ def route_next(state_text: str, board_text: str,
         # about work in flight that does not exist, so CORE's UNBLOCK exception
         # routes it to documented repair rather than a stop. A malformed WAIT
         # never reaches here: parse_state_or_error already refused it.
-        _empty_todo = not any(t["section"] == "## TODO"
-                              for t in board["tickets"].values())
-        _brake = binding_wait(na, phase=phase, empty_todo=_empty_todo,
-                              intent=state.get("execution_intent"))
+        _empty_todo = not any(t["section"] == "## TODO" for t in board["tickets"].values())
+        _brake = binding_wait(
+            na, phase=phase, empty_todo=_empty_todo, intent=state.get("execution_intent")
+        )
         if _brake:
-            return {"ok": True, "action": na, "reason": "wait",
-                    "executable_behavior": "RESTATE_AND_STOP",
-                    "detail": "persisted WAIT is a hard stop; do not route "
-                              "past it"}
+            return {
+                "ok": True,
+                "action": na,
+                "reason": "wait",
+                "executable_behavior": "RESTATE_AND_STOP",
+                "detail": "persisted WAIT is a hard stop; do not route past it",
+            }
 
     # BLOCKED phase: a hard stop, whatever the board holds. UNBLOCK is a
     # routing-priority NAME (CORE 1.11), not necessarily a `ticket unblock`
     # command -- the router must not emit a mutation the executor refuses.
     if phase == "BLOCKED":
-        return {"ok": True, "action": "saipen status",
-                "reason": "unblock",
-                "executable_behavior": "RESTATE_AND_STOP",
-                "detail": "phase BLOCKED; resolve the blocker before any "
-                          "further work (saipen sub list / status to inspect)"}
+        return {
+            "ok": True,
+            "action": "saipen status",
+            "reason": "unblock",
+            "executable_behavior": "RESTATE_AND_STOP",
+            "detail": "phase BLOCKED; resolve the blocker before any "
+            "further work (saipen sub list / status to inspect)",
+        }
 
     # FINISH: phase in a ticket-bearing phase with an active ticket -> the
     # persisted next_action names the exact phase work; fall back to the
@@ -242,14 +292,28 @@ def route_next(state_text: str, board_text: str,
     # active ticket.
     if active and phase in phases.TICKET_BEARING_PHASES:
         if na.startswith("PHASE ") and task and task == active:
-            return {"ok": True, "action": na, "reason": "finish",
-                    "ticket": active, "load": load_for_action(na)}
+            return {
+                "ok": True,
+                "action": na,
+                "reason": "finish",
+                "ticket": active,
+                "load": load_for_action(na),
+            }
         if na.startswith(("RUN:", "RESUME:")) and task == active:
-            return {"ok": True, "action": na, "reason": "finish",
-                    "ticket": active, "load": load_for_action(na)}
-        return {"ok": True, "action": f"PHASE {phase} {active}",
-                "reason": "finish", "ticket": active,
-                "load": load_for_action(f"PHASE {phase} {active}")}
+            return {
+                "ok": True,
+                "action": na,
+                "reason": "finish",
+                "ticket": active,
+                "load": load_for_action(na),
+            }
+        return {
+            "ok": True,
+            "action": f"PHASE {phase} {active}",
+            "reason": "finish",
+            "ticket": active,
+            "load": load_for_action(f"PHASE {phase} {active}"),
+        }
 
     # Phase-owned partial continuation (T-1011): an UNFINISHED MARKHUNT pass
     # owns the next action even under an outer converge/crew target.
@@ -260,28 +324,37 @@ def route_next(state_text: str, board_text: str,
     # crew intent is left untouched and resumes after MARKHUNT legitimately
     # closes (the crew branch below then owns continuation again).
     if phase == "MARKHUNT" and na.startswith("saipen markhunt"):
-        return {"ok": True, "action": na, "reason": "markhunt-continue",
-                "load": load_for_action(na),
-                "detail": "partial MARKHUNT pass owns continuation until "
-                          "its manifest closes"}
+        return {
+            "ok": True,
+            "action": na,
+            "reason": "markhunt-continue",
+            "load": load_for_action(na),
+            "detail": "partial MARKHUNT pass owns continuation until its manifest closes",
+        }
 
     # Crew is an outer convergence target. Once local ticket execution has no
     # immediate continuation, ordinary `cc` returns to crew orchestration from
     # persisted semantics rather than relying on a lucky next_action string.
-    if (state.get("execution_intent") == "converge"
-            and state.get("converge_target") == "crew"):
-        return {"ok": True, "action": "saipen crew",
-                "reason": "crew-converge",
-                "detail": "active crew target owns continuation"}
+    if state.get("execution_intent") == "converge" and state.get("converge_target") == "crew":
+        return {
+            "ok": True,
+            "action": "saipen crew",
+            "reason": "crew-converge",
+            "detail": "active crew target owns continuation",
+        }
 
     # START: no DOING + a workable TODO -> Pick Rule claims the top ticket.
     if not active:
         top = _top_workable(board, agent=session_agent)
         if top is not None:
-            return {"ok": True, "action": f"PHASE SCOUT {top}",
-                    "reason": "start", "ticket": top,
-                    "detail": "topmost workable ticket",
-                    "load": load_for_action(f"PHASE SCOUT {top}")}
+            return {
+                "ok": True,
+                "action": f"PHASE SCOUT {top}",
+                "reason": "start",
+                "ticket": top,
+                "detail": "topmost workable ticket",
+                "load": load_for_action(f"PHASE SCOUT {top}"),
+            }
         # A cyclic or dangling `needs:` graph with NOTHING workable is corrupt
         # work state, not "no work left" (4th-wave P1#4): routing to
         # maintenance / `saipen continue` there hides the damage behind a
@@ -291,10 +364,13 @@ def route_next(state_text: str, board_text: str,
         # must never suppress a genuinely workable one.
         _graph_errors = board_graph_errors(board["tickets"])
         if _graph_errors:
-            return {"ok": False, "action": "saipen status",
-                    "reason": "board-graph-invalid",
-                    "detail": "BOARD needs: graph invalid with no workable "
-                              "ticket: " + "; ".join(_graph_errors[:3])}
+            return {
+                "ok": False,
+                "action": "saipen status",
+                "reason": "board-graph-invalid",
+                "detail": "BOARD needs: graph invalid with no workable "
+                "ticket: " + "; ".join(_graph_errors[:3]),
+            }
 
     # MAINTAIN: fall through to the persisted next_action only when it is a
     # legal non-ticket action (saipen continue / saipen <verb>), never a stale
@@ -303,9 +379,13 @@ def route_next(state_text: str, board_text: str,
     # stale WAIT to route past, not a brake to restate.
     if na.startswith("saipen ") or na.startswith("RUN:"):
         return {"ok": True, "action": na, "reason": "maintain"}
-    return {"ok": True, "action": "saipen continue", "reason": "maintain",
-            "detail": "no pending recovery, no active ticket, no workable "
-                      "TODO; continue ordinary maintenance"}
+    return {
+        "ok": True,
+        "action": "saipen continue",
+        "reason": "maintain",
+        "detail": "no pending recovery, no active ticket, no workable "
+        "TODO; continue ordinary maintenance",
+    }
 
 
 ROUTING_FAILURE_CODES = {
@@ -327,16 +407,18 @@ ROUTING_FAILURE_CODES = {
 
 def routing_failure_code(out: dict) -> str:
     """The stable failure code for one route_next result."""
-    return ROUTING_FAILURE_CODES.get(
-        out.get("reason"), "VALIDATION_FAILED")
+    return ROUTING_FAILURE_CODES.get(out.get("reason"), "VALIDATION_FAILED")
 
 
-def route_next_result(project_root, state_text: str, board_text: str,
-                      pending_ops_list: list | None = None,
-                      conflict_ops_list: list | None = None) -> Result:
+def route_next_result(
+    project_root,
+    state_text: str,
+    board_text: str,
+    pending_ops_list: list | None = None,
+    conflict_ops_list: list | None = None,
+) -> Result:
     """route_next wrapped in the stable Result shape for status/next/context."""
-    out = route_next(state_text, board_text, pending_ops_list,
-                      conflict_ops_list)
+    out = route_next(state_text, board_text, pending_ops_list, conflict_ops_list)
     data = {k: v for k, v in out.items() if k != "ok"}
     # Capability surface (hostile-regression, P0#5): a PHASE action names the
     # phase doc it will load (saipen/phases/<phase>.md). A missing or empty
@@ -349,14 +431,20 @@ def route_next_result(project_root, state_text: str, board_text: str,
             load_path = Path(project_root) / load
             if not load_path.is_file() or load_path.stat().st_size == 0:
                 return Result(
-                    ok=False, code="VALIDATION_FAILED",
-                    data={"action": action, "load": load,
-                          "reason": "phase-doc-missing",
-                          "detail": f"phase doc {load} is missing or empty"})
-    return Result(ok=bool(out.get("ok")),
-                  code=("ROUTED" if out.get("ok")
-                        else routing_failure_code(out)),
-                  data=data)
+                    ok=False,
+                    code="VALIDATION_FAILED",
+                    data={
+                        "action": action,
+                        "load": load,
+                        "reason": "phase-doc-missing",
+                        "detail": f"phase doc {load} is missing or empty",
+                    },
+                )
+    return Result(
+        ok=bool(out.get("ok")),
+        code=("ROUTED" if out.get("ok") else routing_failure_code(out)),
+        data=data,
+    )
 
 
 def load_for_action(action: str) -> str | None:

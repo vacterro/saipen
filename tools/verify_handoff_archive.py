@@ -17,7 +17,6 @@ Exit 0 on pass, exit 1 on any hard failure.
 """
 
 import hashlib
-import os
 import re
 import shutil
 import subprocess
@@ -29,18 +28,25 @@ from pathlib import Path
 
 # ---------- helpers -------------------------------------------------------
 
-_WINDOWS_RESERVED = frozenset({
-    "CON", "PRN", "AUX",
-    *(f"COM{i}" for i in range(1, 10)),
-    *(f"LPT{i}" for i in range(1, 10)),
-    "NUL",
-})
+_WINDOWS_RESERVED = frozenset(
+    {
+        "CON",
+        "PRN",
+        "AUX",
+        *(f"COM{i}" for i in range(1, 10)),
+        *(f"LPT{i}" for i in range(1, 10)),
+        "NUL",
+    }
+)
 
 
 def _git(project: Path, *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        ["git"] + list(args),
-        cwd=str(project), capture_output=True, text=True, errors="replace",
+        ["git", *list(args)],
+        cwd=str(project),
+        capture_output=True,
+        text=True,
+        errors="replace",
     )
 
 
@@ -91,6 +97,7 @@ def _ignored_garbage_patterns() -> list[re.Pattern]:
 
 # ---------- gates ---------------------------------------------------------
 
+
 def gate_b_pre_packaging(project: Path) -> bool:
     """Check B: no accidental tracked deletions before packaging."""
     print("\n--- Gate B: tracked deletion check ---")
@@ -100,8 +107,9 @@ def gate_b_pre_packaging(project: Path) -> bool:
         print(f"FAIL: sealed LOG deletions detected: {sealed_logs}")
         return False
     if deleted:
-        print(f"WARN: {len(deleted)} tracked files appear deleted "
-              f"(not sealed LOG — review manually)")
+        print(
+            f"WARN: {len(deleted)} tracked files appear deleted (not sealed LOG — review manually)"
+        )
     else:
         print("PASS: no tracked deletions")
     return True
@@ -205,6 +213,7 @@ def gate_e_portability(archive_path: Path) -> bool:
 
     # 6. Duplicate exact member names
     from collections import Counter
+
     exact_dupes = [name for name, count in Counter(members).items() if count > 1]
     if exact_dupes:
         problems.append(f"duplicate member names: {exact_dupes[:5]}")
@@ -219,7 +228,9 @@ def gate_e_portability(archive_path: Path) -> bool:
         parts = m.replace("\\", "/").split("/")
         for part in parts:
             if len(part.encode("utf-8")) > 255:
-                byte_issues.append(f"component exceeds 255 bytes: {len(part.encode('utf-8'))} bytes in {part[:20]}...")
+                byte_issues.append(
+                    f"component exceeds 255 bytes: {len(part.encode('utf-8'))} bytes in {part[:20]}..." # noqa: E501
+                )
                 break
     if byte_issues:
         problems.append(f"portable byte limit exceeded: {byte_issues[:5]}")
@@ -269,14 +280,15 @@ def gate_f_tracked_integrity(archive_path: Path, project: Path, tracked: set[str
                 print(f"  - {m}")
             return False
 
-    print(f"PASS: all {len(expected)} tracked files (including all LOGs) exactly match source bytes")
+    print(
+        f"PASS: all {len(expected)} tracked files (including all LOGs) exactly match source bytes"
+    )
     return True
 
 
 def gate_g_self_inclusion(archive_path: Path) -> bool:
     """Check G: archive must not contain itself or other ZIPs."""
     print("\n--- Gate G: self-inclusion check ---")
-    archive_name = archive_path.name
     with zipfile.ZipFile(archive_path) as zf:
         members = zf.namelist()
     zip_members = [m for m in members if m.endswith(".zip")]
@@ -319,8 +331,7 @@ def gate_d_extract_roundtrip(archive_path: Path, tracked: set[str]) -> Path | No
         return None
 
     logs = [f for f in arc_files if re.match(r"^\.saipen/logs/LOG-\d+\.md$", f)]
-    print(f"PASS: extraction round-trip OK ({len(arc_files)} files, "
-          f"{len(logs)} sealed LOGs)")
+    print(f"PASS: extraction round-trip OK ({len(arc_files)} files, {len(logs)} sealed LOGs)")
     return extract_dir
 
 
@@ -342,10 +353,19 @@ def gate_h_semantic_validation(extract_dir: Path) -> bool:
     # Unconditionally invoke canonical rebind to align the copy with its temp path.
     print(f"  Rebinding saipen_home to {extract_dir} (via canonical rebind)")
     r = subprocess.run(
-        [sys.executable, str(saipen_cli), "rebind-home",
-         str(extract_dir), "--project-root", str(extract_dir)],
-        cwd=str(extract_dir), capture_output=True, text=True,
-        timeout=120)
+        [
+            sys.executable,
+            str(saipen_cli),
+            "rebind-home",
+            str(extract_dir),
+            "--project-root",
+            str(extract_dir),
+        ],
+        cwd=str(extract_dir),
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
     if r.returncode != 0:
         print("FAIL: canonical rebind-home failed on extracted copy")
         print(f"  {r.stderr.strip() or r.stdout.strip()}")
@@ -360,7 +380,11 @@ def gate_h_semantic_validation(extract_dir: Path) -> bool:
         return False
     r = subprocess.run(
         [sys.executable, str(validator), "--project-root", str(extract_dir)],
-        cwd=str(extract_dir), capture_output=True, text=True, timeout=600)
+        cwd=str(extract_dir),
+        capture_output=True,
+        text=True,
+        timeout=600,
+    )
     output = r.stdout + r.stderr
     if r.returncode != 0:
         if "Traceback (most recent call last)" in output:
@@ -380,10 +404,12 @@ def gate_h_semantic_validation(extract_dir: Path) -> bool:
     smoke_pass = True
     for cmd in ["status", "next"]:
         r = subprocess.run(
-            [sys.executable, str(saipen_cli), cmd,
-             "--project-root", str(extract_dir), "--json"],
-            cwd=str(extract_dir), capture_output=True, text=True,
-            timeout=120)
+            [sys.executable, str(saipen_cli), cmd, "--project-root", str(extract_dir), "--json"],
+            cwd=str(extract_dir),
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
         if r.returncode != 0:
             print(f"FAIL: '{cmd}' failed (rc={r.returncode}) on extracted copy")
             if "Traceback" in (r.stdout + r.stderr):
@@ -391,7 +417,7 @@ def gate_h_semantic_validation(extract_dir: Path) -> bool:
             smoke_pass = False
         else:
             print(f"  '{cmd}' OK")
-            
+
     if not smoke_pass:
         return False
 
@@ -399,6 +425,7 @@ def gate_h_semantic_validation(extract_dir: Path) -> bool:
     # T-1014: fingerprint all state around representative dry-run.
     print("\n--- Gate H-4: zero-write dry-run ---")
     import hashlib
+
     def get_state_fingerprint(d: Path) -> str:
         h = hashlib.sha256()
         for p in sorted(d.rglob("*")):
@@ -409,25 +436,35 @@ def gate_h_semantic_validation(extract_dir: Path) -> bool:
 
     fp_before = get_state_fingerprint(extract_dir / ".saipen")
     r = subprocess.run(
-        [sys.executable, str(saipen_cli), "improve", "--dry-run",
-         "--project-root", str(extract_dir), "--json"],
-        cwd=str(extract_dir), capture_output=True, text=True,
-        timeout=120)
-    
+        [
+            sys.executable,
+            str(saipen_cli),
+            "improve",
+            "--dry-run",
+            "--project-root",
+            str(extract_dir),
+            "--json",
+        ],
+        cwd=str(extract_dir),
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+
     if r.returncode != 0:
         print(f"FAIL: improve --dry-run failed (rc={r.returncode}) on extracted copy")
         return False
-        
+
     fp_after = get_state_fingerprint(extract_dir / ".saipen")
     if fp_before != fp_after:
         print("FAIL: improve --dry-run mutated .saipen state (T-1014 violation)")
         return False
-        
-    print(f"  PASS: improve --dry-run completed without mutating state")
+
+    print("  PASS: improve --dry-run completed without mutating state")
 
     if not smoke_pass:
         return False
-    
+
     print("\nPASS: extracted copy passes semantic validation + BOOT contract")
     return True
 
@@ -440,6 +477,7 @@ def gate_h_archive_hash(archive_path: Path) -> str:
 
 
 # ---------- main ----------------------------------------------------------
+
 
 def main():
     if len(sys.argv) < 2:

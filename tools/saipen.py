@@ -21,11 +21,16 @@ from pathlib import Path
 
 from saipen_engine import codec, snapshot
 from saipen_engine.board import parse_board, ticket_is_workable
-from saipen_engine.journal import (auto_recover_pending, pending_conflicts,
-                                   pending_ops)
-from saipen_engine.operations import (apply_claim, checkpoint, finish_ticket,
-                                       plan_claim, ticket_add, ticket_move,
-                                       transition_phase)
+from saipen_engine.journal import auto_recover_pending, pending_conflicts, pending_ops
+from saipen_engine.operations import (
+    apply_claim,
+    checkpoint,
+    finish_ticket,
+    plan_claim,
+    ticket_add,
+    ticket_move,
+    transition_phase,
+)
 from saipen_engine.paths import resolve_project_root
 from saipen_engine.state import parse_state, parse_state_or_error
 
@@ -83,15 +88,26 @@ def _agent_for(project_root: Path) -> str:
 #   improve (bare prepare) / submit / complete / sweep /
 #      cycle-complete / abort / clean ................ MUTATING
 #   improve status / sweep-queue / verify ............ READ_ONLY
-_MUTATING_TOPLEVEL = frozenset({
-    "claim", "transition", "checkpoint", "ticket", "rebind-home", "crew",
-    "scope", "first-publish-confirm", "fpc", "ship", "push",
-})
+_MUTATING_TOPLEVEL = frozenset(
+    {
+        "claim",
+        "transition",
+        "checkpoint",
+        "ticket",
+        "rebind-home",
+        "crew",
+        "scope",
+        "first-publish-confirm",
+        "fpc",
+        "ship",
+        "push",
+    }
+)
 _MUTATING_USERPERSON = frozenset({"add", "remove", "reset"})
-_MUTATING_SUB = frozenset({"sync", "spawn", "adopt", "pause", "resume",
-                            "clean", "collect", "dispose"})
-_MUTATING_IMPROVE = frozenset({"submit", "complete", "sweep", "cycle-complete",
-                                "abort", "clean"})
+_MUTATING_SUB = frozenset(
+    {"sync", "spawn", "adopt", "pause", "resume", "clean", "collect", "dispose"}
+)
+_MUTATING_IMPROVE = frozenset({"submit", "complete", "sweep", "cycle-complete", "abort", "clean"})
 _READ_ONLY_RECOVER = frozenset({"inspect"})
 
 
@@ -148,6 +164,7 @@ def _ensure_handover(project_root: Path, as_json: bool, dry_run: bool) -> int | 
     if state and state.get("agent") == _AGENT_OVERRIDE:
         return None
     from saipen_engine.operations import handover_agent
+
     ho = handover_agent(project_root, _AGENT_OVERRIDE, dry_run=dry_run)
     if not ho.ok:
         _emit(ho.to_dict(), as_json)
@@ -196,9 +213,9 @@ def _pending_state(project_root: Path) -> tuple[list[str], list[str]]:
     every public command obtains a single scan and passes both lists
     downstream instead of rescanning per projection."""
     from saipen_engine.journal import scan_pending
+
     pending, conflicts = scan_pending(project_root)
-    return ([op["op_id"] for op in pending],
-            [op["op_id"] for op in conflicts])
+    return ([op["op_id"] for op in pending], [op["op_id"] for op in conflicts])
 
 
 def _scan_full(project_root: Path) -> tuple[list[str], list[str], list[dict]]:
@@ -208,10 +225,13 @@ def _scan_full(project_root: Path) -> tuple[list[str], list[str], list[dict]]:
     recovery tree twice per command; one scan serves all three projections,
     so every command sees exactly one manifest snapshot."""
     from saipen_engine.journal import scan_pending
+
     pending, conflicts = scan_pending(project_root)
-    return ([op["op_id"] for op in pending],
-            [op["op_id"] for op in conflicts],
-            [op for op in pending if op.get("corrupt")])
+    return (
+        [op["op_id"] for op in pending],
+        [op["op_id"] for op in conflicts],
+        [op for op in pending if op.get("corrupt")],
+    )
 
 
 def _corrupt_evidence(project_root: Path) -> list[dict]:
@@ -228,15 +248,19 @@ def _corrupt_evidence(project_root: Path) -> list[dict]:
 
 def _corrupt_refusal(corrupt: list[dict]) -> dict:
     """The ONE shared CORRUPT_JOURNAL refusal payload (P1#6)."""
-    return {"ok": False, "code": "CORRUPT_JOURNAL",
-            "op_ids": [op["op_id"] for op in corrupt],
-            "recovery_required": True,
-            "corrupt": [{"op_id": op["op_id"],
-                         "status": op.get("status"),
-                         "detail": op.get("detail", "")} for op in corrupt],
-            "detail": f"corrupt recovery evidence {corrupt[0]['op_id']} "
-                      f"({corrupt[0].get('detail', '')}) -- resolve it "
-                      f"explicitly before any further canonical write"}
+    return {
+        "ok": False,
+        "code": "CORRUPT_JOURNAL",
+        "op_ids": [op["op_id"] for op in corrupt],
+        "recovery_required": True,
+        "corrupt": [
+            {"op_id": op["op_id"], "status": op.get("status"), "detail": op.get("detail", "")}
+            for op in corrupt
+        ],
+        "detail": f"corrupt recovery evidence {corrupt[0]['op_id']} "
+        f"({corrupt[0].get('detail', '')}) -- resolve it "
+        f"explicitly before any further canonical write",
+    }
 
 
 def _negotiate_capability(project_root: Path) -> str:
@@ -252,6 +276,7 @@ def _negotiate_capability(project_root: Path) -> str:
     for callers, and deliberately UNUSED: reading the project's own STATE here
     is exactly the fail-open this closes."""
     from saipen_engine.capability import negotiate_capability
+
     return negotiate_capability()
 
 
@@ -263,20 +288,23 @@ def _status(project_root: Path, as_json: bool) -> int:
     state_text = codec.read_doc(state_path)
     state, state_error = parse_state_or_error(state_text)
     if state_error:
-        _emit({"ok": False, "code": "VALIDATION_FAILED",
-               "detail": f"state-malformed: {state_error}"}, as_json)
+        _emit(
+            {"ok": False, "code": "VALIDATION_FAILED", "detail": f"state-malformed: {state_error}"},
+            as_json,
+        )
         return 1
     try:
         snap = snapshot.ProjectSnapshot.capture(project_root)
     except (OSError, ValueError) as exc:
-        _emit({"ok": False, "code": "VALIDATION_FAILED",
-               "detail": f"history-ownership: {exc}"}, as_json)
+        _emit(
+            {"ok": False, "code": "VALIDATION_FAILED", "detail": f"history-ownership: {exc}"},
+            as_json,
+        )
         return 1
     board_path = project_root / ".saipen" / "BOARD.md"
     board_text = codec.read_doc(board_path) if board_path.is_file() else ""
     board = parse_board(board_text) if board_path.is_file() else {"tickets": {}, "errors": []}
-    doing = [t for t in board["tickets"].values()
-             if t["section"] == "## DOING"]
+    doing = [t for t in board["tickets"].values() if t["section"] == "## DOING"]
     todo = [t for t in board["tickets"].values() if t["section"] == "## TODO"]
     done_tickets = [t for t in board["tickets"].values() if t["section"] == "## DONE"]
     blocked_tickets = [t for t in board["tickets"].values() if t["section"] == "## BLOCKED"]
@@ -284,8 +312,7 @@ def _status(project_root: Path, as_json: bool) -> int:
     top_workable = None
     if not board["errors"]:
         for ticket in todo:
-            if ticket_is_workable(ticket, board["tickets"],
-                                  agent=_agent_for(project_root)):
+            if ticket_is_workable(ticket, board["tickets"], agent=_agent_for(project_root)):
                 top_workable = ticket["id"]
                 break
     # T-1014: ONE recovery-manifest traversal serves pending/conflicts and
@@ -295,33 +322,42 @@ def _status(project_root: Path, as_json: bool) -> int:
     if _corrupt:
         _emit(_corrupt_refusal(_corrupt), as_json)
         return 1
-    from saipen_engine.router import (route_next, routing_failure_code)
+    from saipen_engine.router import route_next, routing_failure_code
+
     # P0#4: the freshly negotiated current-session capability gates routing --
     # a read-only session routes RESTATE_AND_STOP, never a mutating action.
     # T-1006: routing judges claim truth against the canonical acting seat.
-    routed = route_next(state_text, board_text,
-                        pending, conflicts,
-                        current_capability=_negotiate_capability(project_root),
-                        current_agent=_agent_for(project_root))
+    routed = route_next(
+        state_text,
+        board_text,
+        pending,
+        conflicts,
+        current_capability=_negotiate_capability(project_root),
+        current_agent=_agent_for(project_root),
+    )
     if not routed.get("ok") and routing_failure_code(routed) == "VALIDATION_FAILED":
         # A malformed/binding failure must NOT project a healthy surface from
         # corrupt input (T-1003): status fails closed with the router's
         # diagnostics while the recovery flags stay truthful.
-        _emit({
-            "ok": False,
-            "code": "VALIDATION_FAILED",
-            "action": routed.get("action"),
-            "reason": routed.get("reason"),
-            "detail": routed.get("detail", ""),
-            "board_errors": board["errors"],
-            "recovery_pending": bool(pending),
-            "recovery_conflict": bool(conflicts),
-            "conflict_ops": conflicts,
-            "pending_ops": pending,
-        }, as_json)
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "action": routed.get("action"),
+                "reason": routed.get("reason"),
+                "detail": routed.get("detail", ""),
+                "board_errors": board["errors"],
+                "recovery_pending": bool(pending),
+                "recovery_conflict": bool(conflicts),
+                "conflict_ops": conflicts,
+                "pending_ops": pending,
+            },
+            as_json,
+        )
         return 1
 
     from saipen_engine.board import blocker_class
+
     waiting_on_you: list[str] = []
     next_act = state.get("next_action") or ""
     if next_act.startswith("WAIT:"):
@@ -332,7 +368,9 @@ def _status(project_root: Path, as_json: bool) -> int:
         # canonical home of `| blocker:` (T-1003 hostile findings).
         b_text = bt.get("fields", {}).get("blocker") or ""
         b_cls = blocker_class(b_text)
-        if b_cls in ("WAIT_USER_CONFIRMATION", "WAIT_USER_DECISION") or b_text.startswith("WAIT_USER"):
+        if b_cls in ("WAIT_USER_CONFIRMATION", "WAIT_USER_DECISION") or b_text.startswith(
+            "WAIT_USER"
+        ):
             waiting_on_you.append(f"{bt['id']}: {b_text}")
 
     # T-1014: the parsed events come from the SAME one-pass ProjectSnapshot
@@ -341,11 +379,11 @@ def _status(project_root: Path, as_json: bool) -> int:
     # T-1021: ONE backward pass over the shared history computes the verdict
     # for every DONE ticket (was one independent reverse scan per ticket).
     from saipen_engine.log import bulk_verification_evidence
+
     history_events = snap.history_events
     # DONE proof: a successful RUN event ASSOCIATED WITH THE TICKET.
     claimed_but_unproven: list[str] = []
-    verdicts = bulk_verification_evidence(
-        history_events, [dt["id"] for dt in done_tickets])
+    verdicts = bulk_verification_evidence(history_events, [dt["id"] for dt in done_tickets])
     for dt in done_tickets:
         if not verdicts[dt["id"]][0]:
             claimed_but_unproven.append(dt["id"])
@@ -363,16 +401,14 @@ def _status(project_root: Path, as_json: bool) -> int:
             # although no exact successful result was recorded. Noncanonical
             # text stays UNKNOWN/raw and is never promoted to PASS.
             res = _validator_terminal_result(txt)
-            if m_date:
-                conformance = f"{res} ({m_date})"
-            else:
-                conformance = res
+            conformance = f"{res} ({m_date})" if m_date else res
             break
 
     staleness: str | None = None
     updated_str = state.get("updated")
     if updated_str:
         import datetime
+
         try:
             clean_ts = updated_str.replace("Z", "+00:00")
             dt_updated = datetime.datetime.fromisoformat(clean_ts)
@@ -382,10 +418,7 @@ def _status(project_root: Path, as_json: bool) -> int:
             if total_seconds >= 3600:
                 hours = total_seconds // 3600
                 days = hours // 24
-                if days > 0:
-                    staleness = f"{days}d ago"
-                else:
-                    staleness = f"{hours}h ago"
+                staleness = f"{days}d ago" if days > 0 else f"{hours}h ago"
         except (ValueError, TypeError):
             pass
 
@@ -430,10 +463,13 @@ def _next_action(project_root: Path, as_json: bool) -> int:
         return 3
     state_text = codec.read_doc(state_path)
     from saipen_engine.state import parse_state_or_error
+
     state, state_error = parse_state_or_error(state_text)
     if state_error:
-        _emit({"ok": False, "code": "VALIDATION_FAILED",
-               "detail": f"state-malformed: {state_error}"}, as_json)
+        _emit(
+            {"ok": False, "code": "VALIDATION_FAILED", "detail": f"state-malformed: {state_error}"},
+            as_json,
+        )
         return 1
     subject = state.get("task")
     # T-1014: ONE recovery-manifest traversal (pending + conflicts + corrupt).
@@ -442,54 +478,71 @@ def _next_action(project_root: Path, as_json: bool) -> int:
         _emit(_corrupt_refusal(_corrupt), as_json)
         return 1
     board_text = codec.read_doc(project_root / ".saipen" / "BOARD.md")
-    from saipen_engine.router import (load_for_action, route_next,
-                                      routing_failure_code)
+    from saipen_engine.router import load_for_action, route_next, routing_failure_code
+
     # P0#4: the freshly negotiated current-session capability gates routing.
     # T-1006: routing judges claim truth against the canonical acting seat.
-    routed = route_next(state_text, board_text, pending, conflicts,
-                        current_capability=_negotiate_capability(project_root),
-                        current_agent=_agent_for(project_root))
+    routed = route_next(
+        state_text,
+        board_text,
+        pending,
+        conflicts,
+        current_capability=_negotiate_capability(project_root),
+        current_agent=_agent_for(project_root),
+    )
     if not routed.get("ok"):
         # The router owns the stable failure code: recovery conflicts/pending
         # are RECOVERY_*; malformed/binding failures are VALIDATION_FAILED
         # with recovery_pending strictly false (there is no journal to
         # recover -- T-1003 hostile findings).
-        _emit({
-            "ok": False,
-            "code": routing_failure_code(routed),
-            "action": routed.get("action"),
-            "reason": routed.get("reason"),
-            "detail": routed.get("detail", ""),
-            "recovery_pending": bool(pending),
-            "recovery_conflict": bool(conflicts),
-            "conflict_ops": conflicts,
-            "pending_ops": pending,
-        }, as_json)
+        _emit(
+            {
+                "ok": False,
+                "code": routing_failure_code(routed),
+                "action": routed.get("action"),
+                "reason": routed.get("reason"),
+                "detail": routed.get("detail", ""),
+                "recovery_pending": bool(pending),
+                "recovery_conflict": bool(conflicts),
+                "conflict_ops": conflicts,
+                "pending_ops": pending,
+            },
+            as_json,
+        )
         return 1
     load = load_for_action(routed.get("action"))
-    _emit({
-        "ok": True,
-        "action": routed.get("action"),
-        "ticket": routed.get("ticket") or subject,
-        "reason": routed.get("reason"),
-        "load": load,
-        "recovery_pending": bool(pending),
-        "recovery_conflict": False,
-        "pending_ops": pending,
-    }, as_json)
+    _emit(
+        {
+            "ok": True,
+            "action": routed.get("action"),
+            "ticket": routed.get("ticket") or subject,
+            "reason": routed.get("reason"),
+            "load": load,
+            "recovery_pending": bool(pending),
+            "recovery_conflict": False,
+            "pending_ops": pending,
+        },
+        as_json,
+    )
     return 0
 
 
-def _recover(project_root: Path, args: list[str], as_json: bool,
-             dry_run: bool = False) -> int:
+def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool = False) -> int:
     # `saipen recover inspect <op_id>` -- read-only conflict inspection.
     # Closed grammar: exactly one positional <op_id> (hostile-regression, P0#1).
     if args and args[0] == "inspect":
         if len(args) != 2:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "recover inspect requires exactly <op_id>"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "recover inspect requires exactly <op_id>",
+                },
+                as_json,
+            )
             return 2
         from saipen_engine.journal import inspect_op
+
         result = inspect_op(project_root, args[1])
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
@@ -502,8 +555,14 @@ def _recover(project_root: Path, args: list[str], as_json: bool,
     if args and args[0] == "resolve":
         rest = args[1:]
         if len(rest) == 0:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "recover resolve needs <op_id>"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "recover resolve needs <op_id>",
+                },
+                as_json,
+            )
             return 2
         op_id = rest[0]
         extra = rest[1:]
@@ -511,40 +570,64 @@ def _recover(project_root: Path, args: list[str], as_json: bool,
         if extra:
             if extra[0] == "--resolution":
                 if len(extra) != 2:
-                    _emit({"ok": False, "code": "VALIDATION_FAILED",
-                           "detail": "usage: recover resolve <op_id> "
-                                     "--resolution <accept_live|replan>"}, as_json)
+                    _emit(
+                        {
+                            "ok": False,
+                            "code": "VALIDATION_FAILED",
+                            "detail": "usage: recover resolve <op_id> "
+                            "--resolution <accept_live|replan>",
+                        },
+                        as_json,
+                    )
                     return 2
                 if extra[1] not in ("accept_live", "replan"):
-                    _emit({"ok": False, "code": "VALIDATION_FAILED",
-                           "detail": f"unknown resolution {extra[1]!r}; use "
-                                     "accept_live|replan"}, as_json)
+                    _emit(
+                        {
+                            "ok": False,
+                            "code": "VALIDATION_FAILED",
+                            "detail": f"unknown resolution {extra[1]!r}; use accept_live|replan",
+                        },
+                        as_json,
+                    )
                     return 2
                 resolution = extra[1]
             else:
-                _emit({"ok": False, "code": "VALIDATION_FAILED",
-                       "detail": f"unexpected token {extra[0]!r}; usage: "
-                                 "recover resolve <op_id> "
-                                 "[--resolution <accept_live|replan>]"}, as_json)
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": f"unexpected token {extra[0]!r}; usage: "
+                        "recover resolve <op_id> "
+                        "[--resolution <accept_live|replan>]",
+                    },
+                    as_json,
+                )
                 return 2
         from saipen_engine.journal import resolve_conflict
+
         _rc = _ensure_handover(project_root, as_json, dry_run)
         if _rc is not None:
             return _rc
-        result = resolve_conflict(project_root, op_id, resolution,
-                                  agent=_agent_for(project_root))
+        result = resolve_conflict(project_root, op_id, resolution, agent=_agent_for(project_root))
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
     pending, conflicts, _corrupt = _scan_full(project_root)
     if conflicts:
-        _emit({"ok": False, "code": "CONFLICT",
-               "op_ids": conflicts,
-               "recovery_required": True,
-               "detail": "unresolved conflict(s): " + ", ".join(conflicts)
-                         + "; evidence preserved, resolve explicitly (saipen "
-                         "recover inspect <op_id> / resolve <op_id> "
-                         "--resolution accept_live|replan) before further "
-                         "mutation"}, as_json)
+        _emit(
+            {
+                "ok": False,
+                "code": "CONFLICT",
+                "op_ids": conflicts,
+                "recovery_required": True,
+                "detail": "unresolved conflict(s): "
+                + ", ".join(conflicts)
+                + "; evidence preserved, resolve explicitly (saipen "
+                "recover inspect <op_id> / resolve <op_id> "
+                "--resolution accept_live|replan) before further "
+                "mutation",
+            },
+            as_json,
+        )
         return 1
     if not pending:
         _emit({"ok": True, "code": "CLEAN", "pending_ops": []}, as_json)
@@ -563,8 +646,7 @@ def _recover(project_root: Path, args: list[str], as_json: bool,
     return 0 if result.get("ok") else 1
 
 
-def _sub(project_root: Path, args: list[str], as_json: bool,
-         dry_run: bool) -> int:
+def _sub(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
     """saipen sub list|status|spawn|adopt|pause|resume|sync|clean|collect|
     dispose.
 
@@ -576,45 +658,81 @@ def _sub(project_root: Path, args: list[str], as_json: bool,
     as implied semantics. Every mutator honors --dry-run (same validation,
     same proposed outcome, ZERO writes/LOG/STATE/MANIFEST/journal).
     """
-    from saipen_engine.subs import (sub_adopt, sub_clean, sub_collect,
-                                    sub_disposition, sub_list, sub_pause,
-                                    sub_resume, sub_spawn, sub_status,
-                                    sub_sync)
+    from saipen_engine.subs import (
+        sub_adopt,
+        sub_clean,
+        sub_collect,
+        sub_disposition,
+        sub_list,
+        sub_pause,
+        sub_resume,
+        sub_spawn,
+        sub_status,
+        sub_sync,
+    )
 
     if not args:
-        _emit({"ok": False, "code": "VALIDATION_FAILED",
-               "detail": "sub needs an action: list|sync|status|spawn|adopt|"
-                          "pause|resume|clean|collect|dispose"}, as_json)
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "sub needs an action: list|sync|status|spawn|adopt|"
+                "pause|resume|clean|collect|dispose",
+            },
+            as_json,
+        )
         return 2
     action = args[0]
     rest = args[1:]
     grammar = {
-        "list": (0, 0), "sync": (0, 0),
-        "status": (1, 1), "spawn": (1, 1), "adopt": (1, 1),
-        "pause": (1, 1), "resume": (1, 1), "clean": (1, 1),
-        "collect": (0, 1), "dispose": (1, 2),
+        "list": (0, 0),
+        "sync": (0, 0),
+        "status": (1, 1),
+        "spawn": (1, 1),
+        "adopt": (1, 1),
+        "pause": (1, 1),
+        "resume": (1, 1),
+        "clean": (1, 1),
+        "collect": (0, 1),
+        "dispose": (1, 2),
     }
     if action not in grammar:
-        _emit({"ok": False, "code": "VALIDATION_FAILED",
-               "detail": f"unknown sub action {action!r}; use "
-                          "list|sync|status|spawn|adopt|pause|resume|clean|"
-                          "collect|dispose"}, as_json)
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"unknown sub action {action!r}; use "
+                "list|sync|status|spawn|adopt|pause|resume|clean|"
+                "collect|dispose",
+            },
+            as_json,
+        )
         return 2
     minimum, maximum = grammar[action]
     if len(rest) < minimum or len(rest) > maximum:
-        wanted = f"exactly {minimum}" if minimum == maximum else \
-            f"at most {maximum}"
-        _emit({"ok": False, "code": "VALIDATION_FAILED",
-               "detail": f"sub {action} takes {wanted} positional "
-                          f"argument(s); surplus: {' '.join(rest[maximum:])}"},
-              as_json)
+        wanted = f"exactly {minimum}" if minimum == maximum else f"at most {maximum}"
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"sub {action} takes {wanted} positional "
+                f"argument(s); surplus: {' '.join(rest[maximum:])}",
+            },
+            as_json,
+        )
         return 2
     state = parse_state(codec.read_doc(_state_path(project_root)))
     saipen_home = state.get("saipen_home") or ""
     if action in ("sync", "spawn", "adopt") and not saipen_home:
-        _emit({"ok": False, "code": "HOME_REQUIRED",
-               "detail": "STATE.saipen_home is required; project root is "
-                         "not installation provenance"}, as_json)
+        _emit(
+            {
+                "ok": False,
+                "code": "HOME_REQUIRED",
+                "detail": "STATE.saipen_home is required; project root is "
+                "not installation provenance",
+            },
+            as_json,
+        )
         return 1
     # T-1006: sub mutators persist the CANONICAL acting seat (inherited
     # STATE.agent or explicit --agent), never a hardcoded CLI identity.
@@ -636,10 +754,14 @@ def _sub(project_root: Path, args: list[str], as_json: bool,
         try:
             result = thunk()
         except OSError as exc:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": f"sub {action} failed on the filesystem: "
-                              f"{type(exc).__name__}: {exc}"},
-                  as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"sub {action} failed on the filesystem: {type(exc).__name__}: {exc}",
+                },
+                as_json,
+            )
             return 1
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
@@ -647,37 +769,34 @@ def _sub(project_root: Path, args: list[str], as_json: bool,
     if action == "list":
         return _run(lambda: sub_list(project_root))
     if action == "sync":
-        return _run(lambda: sub_sync(project_root, saipen_home, agent=actor,
-                                     dry_run=dry_run))
+        return _run(lambda: sub_sync(project_root, saipen_home, agent=actor, dry_run=dry_run))
     if action == "status":
         return _run(lambda: sub_status(project_root, rest[0]))
     if action == "spawn":
-        return _run(lambda: sub_spawn(project_root, rest[0], saipen_home,
-                                      agent=actor, dry_run=dry_run))
+        return _run(
+            lambda: sub_spawn(project_root, rest[0], saipen_home, agent=actor, dry_run=dry_run)
+        )
     if action == "adopt":
-        return _run(lambda: sub_adopt(project_root, rest[0], saipen_home,
-                                      agent=actor, dry_run=dry_run))
+        return _run(
+            lambda: sub_adopt(project_root, rest[0], saipen_home, agent=actor, dry_run=dry_run)
+        )
     if action in ("pause", "resume"):
         fn = sub_pause if action == "pause" else sub_resume
-        return _run(lambda: fn(project_root, rest[0], agent=actor,
-                               dry_run=dry_run))
+        return _run(lambda: fn(project_root, rest[0], agent=actor, dry_run=dry_run))
     if action == "clean":
-        return _run(lambda: sub_clean(project_root, rest[0], agent=actor,
-                                      dry_run=dry_run))
+        return _run(lambda: sub_clean(project_root, rest[0], agent=actor, dry_run=dry_run))
     if action == "collect":
         name = rest[0] if rest else None
-        return _run(lambda: sub_collect(project_root, name, agent=actor,
-                                        dry_run=dry_run))
+        return _run(lambda: sub_collect(project_root, name, agent=actor, dry_run=dry_run))
     if action == "dispose":
         package_id = rest[1] if len(rest) > 1 else None
-        return _run(lambda: sub_disposition(project_root, rest[0],
-                                            package_id, agent=actor,
-                                            dry_run=dry_run))
+        return _run(
+            lambda: sub_disposition(project_root, rest[0], package_id, agent=actor, dry_run=dry_run)
+        )
     return 2
 
 
-def _crew(project_root: Path, args: list[str], as_json: bool,
-          dry_run: bool) -> int:
+def _crew(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
     """saipen crew -- the serial full-platoon convergence circuit (SAICREW).
 
     `--dry-run` derives the full circuit, shows per-role health and the first
@@ -689,22 +808,36 @@ def _crew(project_root: Path, args: list[str], as_json: bool,
     helper -- never `saipen crew` semantics.
     """
     if args:
-        _emit({"ok": False, "code": "VALIDATION_FAILED",
-               "detail": "crew accepts no positional arguments; surplus: "
-                          + " ".join(args)}, as_json)
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "crew accepts no positional arguments; surplus: " + " ".join(args),
+            },
+            as_json,
+        )
         return 2
     from saipen_engine.crew import crew_apply, crew_plan
+
     # P0#4: inject the freshly negotiated current-session capability so a
     # read-only session cannot close a crew release. Second-wave P0: the
     # acting identity is the SESSION agent, never persisted STATE.agent.
     capability = _negotiate_capability(project_root)
     if dry_run:
-        plan = crew_plan(project_root, current_capability=capability,
-                         current_agent=_agent_for(project_root))
-        _emit({"ok": plan.get("ok"), "code": "CREW_PLAN",
-               "crew_complete": plan.get("crew_complete"),
-               "action_required": plan.get("action_required"),
-               "dry_run": True, **plan}, as_json)
+        plan = crew_plan(
+            project_root, current_capability=capability, current_agent=_agent_for(project_root)
+        )
+        _emit(
+            {
+                "ok": plan.get("ok"),
+                "code": "CREW_PLAN",
+                "crew_complete": plan.get("crew_complete"),
+                "action_required": plan.get("action_required"),
+                "dry_run": True,
+                **plan,
+            },
+            as_json,
+        )
         # Item 21: a valid nonterminal plan (work remains) is NOT a command
         # failure -- ok:true / exit 0. Nonzero exit is reserved for a
         # structurally invalid or refused derivation.
@@ -712,33 +845,49 @@ def _crew(project_root: Path, args: list[str], as_json: bool,
     _rc = _ensure_handover(project_root, as_json, dry_run)
     if _rc is not None:
         return _rc
-    result = crew_apply(project_root, current_capability=capability,
-                        current_agent=_agent_for(project_root))
+    result = crew_apply(
+        project_root, current_capability=capability, current_agent=_agent_for(project_root)
+    )
     _emit(result.to_dict(), as_json)
     return 0 if result.ok else 1
 
 
-def _context(project_root: Path, args: list[str], as_json: bool,
-             dry_run: bool) -> int:
+def _context(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
     """saipen context cold|hot|audit (NITRO M9, read-only)."""
     if not args:
-        _emit({"ok": False, "code": "VALIDATION_FAILED",
-               "detail": "context needs a mode: cold|hot|audit"}, as_json)
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "context needs a mode: cold|hot|audit",
+            },
+            as_json,
+        )
         return 2
     if len(args) > 1:
-        _emit({"ok": False, "code": "VALIDATION_FAILED",
-               "detail": f"context accepts exactly one mode; surplus: {' '.join(args[1:])}"}, as_json)
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"context accepts exactly one mode; surplus: {' '.join(args[1:])}",
+            },
+            as_json,
+        )
         return 2
     from saipen_engine.context import context_audit, context_cold, context_hot
     from saipen_engine.log import HistoryOwnershipError
 
     mode = args[0]
-    fn = {"cold": context_cold, "hot": context_hot,
-          "audit": context_audit}.get(mode)
+    fn = {"cold": context_cold, "hot": context_hot, "audit": context_audit}.get(mode)
     if fn is None:
-        _emit({"ok": False, "code": "VALIDATION_FAILED",
-               "detail": f"unknown context mode {mode!r}; use cold|hot|audit"},
-              as_json)
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"unknown context mode {mode!r}; use cold|hot|audit",
+            },
+            as_json,
+        )
         return 2
     try:
         # Second-wave P0: the projection routes as the SESSION agent, so
@@ -752,9 +901,14 @@ def _context(project_root: Path, args: list[str], as_json: bool,
         # Deterministic read-only failure contract (second-wave P1): a
         # symlinked/unreadable history node or canonical file must surface as
         # structured VALIDATION_FAILED with the reason, never a traceback.
-        _emit({"ok": False, "code": "VALIDATION_FAILED",
-               "detail": f"history-ownership: {type(exc).__name__}: {exc}"},
-              as_json)
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"history-ownership: {type(exc).__name__}: {exc}",
+            },
+            as_json,
+        )
         return 1
     if as_json:
         _emit(result.to_dict(), as_json)
@@ -764,6 +918,7 @@ def _context(project_root: Path, args: list[str], as_json: bool,
         return 1
     if mode == "audit":
         import json
+
         payload = result.to_dict()
         payload.pop("ok", None)
         payload.pop("code", None)
@@ -773,24 +928,42 @@ def _context(project_root: Path, args: list[str], as_json: bool,
     return 0
 
 
-def _userperson(project_root: Path, args: list[str], as_json: bool,
-                dry_run: bool) -> int:
+def _userperson(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
     """saipen userperson show/add/remove/reset (NITRO M7, journaled)."""
     if not args:
-        _emit({"ok": False, "code": "VALIDATION_FAILED",
-               "detail": "userperson needs an action: show|add|remove|reset"}, as_json)
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "userperson needs an action: show|add|remove|reset",
+            },
+            as_json,
+        )
         return 2
-    from userperson import (merge_profile, parse_profile, profile_path,
-                            remove_preference, render_profile,
-                            reset_profile, validate_profile, write_profile)
+    from userperson import (
+        merge_profile,
+        parse_profile,
+        profile_path,
+        remove_preference,
+        render_profile,
+        reset_profile,
+        validate_profile,
+        write_profile,
+    )
 
     path = profile_path(project_root)
     action = args[0]
     current_text = path.read_text(encoding="utf-8-sig") if path.is_file() else ""
     if action == "show":
         if len(args) > 1:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": f"userperson show accepts no arguments; surplus: {' '.join(args[1:])}"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"userperson show accepts no arguments; surplus: {' '.join(args[1:])}", # noqa: E501
+                },
+                as_json,
+            )
             return 2
         if not current_text:
             _emit({"ok": True, "code": "EMPTY", "preferences": []}, as_json)
@@ -801,30 +974,53 @@ def _userperson(project_root: Path, args: list[str], as_json: bool,
             # hides the lines the lenient parser dropped (T-1003).
             profile_errors = validate_profile(current_text)
             if profile_errors:
-                _emit({"ok": False, "code": "VALIDATION_FAILED",
-                       "detail": "USERPERSON profile is malformed: "
-                                 + "; ".join(profile_errors[:5])}, as_json)
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": "USERPERSON profile is malformed: "
+                        + "; ".join(profile_errors[:5]),
+                    },
+                    as_json,
+                )
                 return 1
-            _emit({"ok": True, "code": "SHOW",
-                   "preferences": parse_profile(current_text)["preferences"]},
-                  as_json)
+            _emit(
+                {
+                    "ok": True,
+                    "code": "SHOW",
+                    "preferences": parse_profile(current_text)["preferences"],
+                },
+                as_json,
+            )
         else:
             print(current_text, end="")
         return 0
     if action == "reset":
         surplus = [a for a in args[1:] if a != "--confirm"]
         if surplus:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": f"userperson reset accepts only --confirm; surplus: {' '.join(surplus)}"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"userperson reset accepts only --confirm; surplus: {' '.join(surplus)}", # noqa: E501
+                },
+                as_json,
+            )
             return 2
         if not path.is_file():
-            _emit({"ok": False, "code": "TICKET_NOT_FOUND",
-                   "detail": "no profile to reset"}, as_json)
+            _emit(
+                {"ok": False, "code": "TICKET_NOT_FOUND", "detail": "no profile to reset"}, as_json
+            )
             return 1
         if "--confirm" not in args:
-            _emit({"ok": False, "code": "DESTRUCTIVE_CONFIRMATION_REQUIRED",
-                   "detail": "userperson reset deletes the profile; pass "
-                             "--confirm to authorize"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "DESTRUCTIVE_CONFIRMATION_REQUIRED",
+                    "detail": "userperson reset deletes the profile; pass --confirm to authorize",
+                },
+                as_json,
+            )
             return 1
         if dry_run:
             _emit({"ok": True, "code": "RESET", "dry_run": True}, as_json)
@@ -844,8 +1040,14 @@ def _userperson(project_root: Path, args: list[str], as_json: bool,
         return 0 if result.get("ok") else 1
     if action in ("add", "remove"):
         if len(args) < 2:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": f"userperson {action} needs <text>"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"userperson {action} needs <text>",
+                },
+                as_json,
+            )
             return 2
         category = "general"
         category_supplied = False
@@ -861,10 +1063,17 @@ def _userperson(project_root: Path, args: list[str], as_json: bool,
                 idx += 1
         text = " ".join(clean_args[1:])
         from userperson import _redact_credentials
+
         text = _redact_credentials(text)
         if not text.strip():
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": f"userperson {action} needs non-empty text"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"userperson {action} needs non-empty text",
+                },
+                as_json,
+            )
             return 2
         # Validate ANY existing profile BEFORE semantic parsing: a malformed
         # source must refuse with ZERO journal/write -- add/remove must never
@@ -873,32 +1082,42 @@ def _userperson(project_root: Path, args: list[str], as_json: bool,
         if current_text:
             profile_errors = validate_profile(current_text)
             if profile_errors:
-                _emit({"ok": False, "code": "VALIDATION_FAILED",
-                       "detail": "existing USERPERSON profile is malformed; "
-                                 "refusing to mutate it: "
-                                 + "; ".join(profile_errors[:5])}, as_json)
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": "existing USERPERSON profile is malformed; "
+                        "refusing to mutate it: " + "; ".join(profile_errors[:5]),
+                    },
+                    as_json,
+                )
                 return 1
-        current = parse_profile(current_text)["preferences"] \
-            if current_text else []
+        current = parse_profile(current_text)["preferences"] if current_text else []
         if action == "add":
             updated = merge_profile(current, [f"- [{category}] {text}"])
         else:
             updated, refusal = remove_preference(
-                current, text,
-                category if category_supplied else None)
+                current, text, category if category_supplied else None
+            )
             if refusal:
-                _emit({"ok": False, "code": "VALIDATION_FAILED",
-                       "detail": refusal}, as_json)
+                _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": refusal}, as_json)
                 return 1
         new_text = render_profile(updated)
         if new_text == current_text:
             _emit({"ok": True, "code": "UNCHANGED"}, as_json)
             return 0
         if dry_run:
-            _emit({"ok": True, "code": "PREFERENCE_PLAN",
-                   "action": action, "text": text,
-                   "category": category if action == "add" else None,
-                   "dry_run": True}, as_json)
+            _emit(
+                {
+                    "ok": True,
+                    "code": "PREFERENCE_PLAN",
+                    "action": action,
+                    "text": text,
+                    "category": category if action == "add" else None,
+                    "dry_run": True,
+                },
+                as_json,
+            )
             return 0
         _rc = _ensure_handover(project_root, as_json, dry_run)
         if _rc is not None:
@@ -906,8 +1125,14 @@ def _userperson(project_root: Path, args: list[str], as_json: bool,
         result = write_profile(project_root, new_text, _agent_for(project_root))
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
-    _emit({"ok": False, "code": "VALIDATION_FAILED",
-           "detail": f"unknown userperson action {action!r}"}, as_json)
+    _emit(
+        {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "detail": f"unknown userperson action {action!r}",
+        },
+        as_json,
+    )
     return 2
 
 
@@ -920,9 +1145,20 @@ def _emit(payload: dict, as_json: bool) -> None:
         return
     if payload.get("code") == "NOT_SAIPEN_PROJECT":
         return
-    for key in ("action", "ticket", "load", "phase", "task", "next_action",
-                "claimed_ticket", "top_workable_ticket", "log_tail_event",
-                "head", "pending_ops", "code"):
+    for key in (
+        "action",
+        "ticket",
+        "load",
+        "phase",
+        "task",
+        "next_action",
+        "claimed_ticket",
+        "top_workable_ticket",
+        "log_tail_event",
+        "head",
+        "pending_ops",
+        "code",
+    ):
         value = payload.get(key)
         if value is not None and value != []:
             print(f"{key}: {value}")
@@ -945,7 +1181,7 @@ def _canonical_proof_levels() -> list[str]:
     text = critic.read_text(encoding="utf-8-sig")
     start = text.find("## What it does")
     end = text.find("\n## ", start + 3)
-    section = text[start:end if end >= 0 else None]
+    section = text[start : end if end >= 0 else None]
     levels = re.findall(r"(?m)^\| ([A-Z]+) \|", section)
     if not levels or len(levels) != len(set(levels)):
         raise ValueError("SAICRITIC proof vocabulary is missing or duplicated")
@@ -958,6 +1194,7 @@ def _runtime_identity() -> str:
     identity: it is stripped, bounded, and control-free before use, and a
     value that cannot be made safe becomes the truthful neutral 'unknown'."""
     import re as _re
+
     value = os.environ.get("SAIPEN_RUNTIME", "") or ""
     value = value.strip()
     if not value or len(value) > 128:
@@ -967,8 +1204,7 @@ def _runtime_identity() -> str:
     return value
 
 
-def _improve(project_root: Path, args: list[str], as_json: bool,
-             dry_run: bool) -> int:
+def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
     """saipen improve -- the meta-control command family (T-554, T-606,
     DOGFOOD V T-615..T-618).
 
@@ -990,12 +1226,13 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
         return 3
     state, state_error = parse_state_or_error(codec.read_doc(state_path))
     if state_error:
-        _emit({"ok": False, "code": "VALIDATION_FAILED",
-               "detail": f"state-malformed: {state_error}"}, as_json)
+        _emit(
+            {"ok": False, "code": "VALIDATION_FAILED", "detail": f"state-malformed: {state_error}"},
+            as_json,
+        )
         return 1
 
-    from improve import (archive_cycle, complete_cycle, cycle_dir,
-                         derive_status, write_sweep_entry)
+    from improve import archive_cycle, complete_cycle, cycle_dir, derive_status, write_sweep_entry
 
     from improve import _sweep_records
     import re as _re
@@ -1012,13 +1249,17 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
         from improve import _report_fresh as _rf
         from improve import _cycle_schema as _cs
         from improve import _field as _imp_field
+
         for cycle in sorted(imp_root.iterdir()):
             manifest = cycle / "MANIFEST.md"
             if not manifest.is_file():
                 continue
             roster = manifest.read_text(encoding="utf-8-sig")
-            sweep = (cycle / "SWEEP.md").read_text(encoding="utf-8-sig") \
-                if (cycle / "SWEEP.md").is_file() else ""
+            sweep = (
+                (cycle / "SWEEP.md").read_text(encoding="utf-8-sig")
+                if (cycle / "SWEEP.md").is_file()
+                else ""
+            )
             status = "active"
             m = _re.search(r"(?m)^cycle_status:\s*([A-Za-z]+)", roster)
             if m:
@@ -1049,15 +1290,12 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
                     if in_block and line.startswith("role:"):
                         roster_role = line.split(":", 1)[1].strip()
                 if not report_path:
-                    seats.append({"seat": seat, "role": roster_role,
-                                  "visible": "missing"})
+                    seats.append({"seat": seat, "role": roster_role, "visible": "missing"})
                     continue
                 report = cycle / seat / report_path
-                report_text = report.read_text(encoding="utf-8-sig") \
-                    if report.is_file() else ""
+                report_text = report.read_text(encoding="utf-8-sig") if report.is_file() else ""
                 if not report_text:
-                    seats.append({"seat": seat, "role": roster_role,
-                                  "visible": "expected"})
+                    seats.append({"seat": seat, "role": roster_role, "visible": "expected"})
                     continue
                 # DOGFOOD V (T-620): status applies the SAME report-validation
                 # depth the validator applies -- schema AND mechanical source
@@ -1066,28 +1304,33 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
                 report_errors = _vr(report_text, strict=strict)
                 if report_role != roster_role:
                     report_errors.append(
-                        f"roster/report role mismatch: {roster_role!r} != "
-                        f"{report_role!r}")
-                report_errors.extend(_rf(project_root, cycle, report_path,
-                                         report_text, strict))
+                        f"roster/report role mismatch: {roster_role!r} != {report_role!r}"
+                    )
+                report_errors.extend(_rf(project_root, cycle, report_path, report_text, strict))
                 if report_errors:
-                    status_m = _re.search(r"(?m)^report_status:\s*(\S+)",
-                                          report_text)
-                    seats.append({"seat": seat, "role": roster_role,
-                                  "visible": "INVALID_REPORT",
-                                  "report_status": status_m.group(1)
-                                  if status_m else "",
-                                  "errors": report_errors[:3]})
+                    status_m = _re.search(r"(?m)^report_status:\s*(\S+)", report_text)
+                    seats.append(
+                        {
+                            "seat": seat,
+                            "role": roster_role,
+                            "visible": "INVALID_REPORT",
+                            "report_status": status_m.group(1) if status_m else "",
+                            "errors": report_errors[:3],
+                        }
+                    )
                 else:
-                    derived = derive_status(report_path, roster, report_text,
-                                            sweep, seat_id=seat)
-                    seats.append({"seat": seat, "role": roster_role,
-                                  **derived})
-            rows.append({"cycle": cycle.name, "cycle_status": status,
-                         "seats": seats,
-                         "invalid": invalid,
-                         "manifest_errors": manifest_errors[:3],
-                         "sweep_errors": sweep_errors[:3]})
+                    derived = derive_status(report_path, roster, report_text, sweep, seat_id=seat)
+                    seats.append({"seat": seat, "role": roster_role, **derived})
+            rows.append(
+                {
+                    "cycle": cycle.name,
+                    "cycle_status": status,
+                    "seats": seats,
+                    "invalid": invalid,
+                    "manifest_errors": manifest_errors[:3],
+                    "sweep_errors": sweep_errors[:3],
+                }
+            )
         return rows
 
     action = args[0] if args and not args[0].startswith("--") else None
@@ -1102,9 +1345,14 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
         try:
             proof_levels = _canonical_proof_levels()
         except (OSError, ValueError) as exc:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": f"cannot load canonical SAICRITIC proof "
-                             f"vocabulary: {exc}"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"cannot load canonical SAICRITIC proof vocabulary: {exc}",
+                },
+                as_json,
+            )
             return 1
         role = "core"
         session_id = None
@@ -1118,17 +1366,28 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
             elif rest[0] == "--new-seat":
                 explicit_new, rest = True, rest[1:]
             else:
-                _emit({"ok": False, "code": "VALIDATION_FAILED",
-                       "detail": f"unknown or incomplete Improve prepare "
-                                 f"option {rest[0]!r}"}, as_json)
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": f"unknown or incomplete Improve prepare option {rest[0]!r}",
+                    },
+                    as_json,
+                )
                 return 2
         if session_id is not None and explicit_new:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "--session and --new-seat are mutually "
-                             "exclusive"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "--session and --new-seat are mutually exclusive",
+                },
+                as_json,
+            )
             return 2
         from improve import ImproveError, prepare_audit_seat
         from improve import installed_protocol_fingerprint as _proto_fp
+
         _rc = _ensure_handover(project_root, as_json, dry_run)
         if _rc is not None:
             return _rc
@@ -1136,15 +1395,19 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
             runtime = _runtime_identity()
             fingerprint = _proto_fp(HOME)
             prepared = prepare_audit_seat(
-                project_root, agent_family=state.get("agent")
-                or "agent", role=role, session_id=session_id,
-                project_name="SAIPEN", model_or_runtime=runtime,
+                project_root,
+                agent_family=state.get("agent") or "agent",
+                role=role,
+                session_id=session_id,
+                project_name="SAIPEN",
+                model_or_runtime=runtime,
                 protocol_fingerprint=fingerprint,
                 context_scope=f"SAIPEN audit, phase {state.get('phase') or '?'}",
-                context_available="partial", dry_run=dry_run)
+                context_available="partial",
+                dry_run=dry_run,
+            )
         except ImproveError as exc:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": str(exc)}, as_json)
+            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}, as_json)
             return 1
         if not prepared.get("ok"):
             _emit(prepared, as_json)
@@ -1152,80 +1415,117 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
         active_cycle = prepared["cycle_id"]
         seat_id = prepared["seat_id"]
         report_path = Path(prepared["report_path"])
-        _emit({
-            "ok": True, "code": "IMPROVE_AUDIT_ASSIGNMENT",
-            "op_id": prepared.get("op_id"),
-            "cycle_id": active_cycle,
-            "seat_id": seat_id,
-            "role": prepared["role"],
-            "report_path": report_path.relative_to(project_root).as_posix(),
-            "report_created": prepared["report_created"],
-            "resumed": prepared["resumed"],
-            "dry_run": bool(prepared.get("dry_run")),
-            "source": {"source_head": prepared["source_head"],
-                       "source_tree_fingerprint": prepared[
-                           "source_tree_fingerprint"],
-                       "discovery_model": prepared["discovery_model"]},
-            "scope": {"phase": state.get("phase") or "?",
-                      "task": state.get("task") or ""},
-            "proof_levels": proof_levels,
-            "schema": "cycle + seat/report + RUN-N/IMP-NNN composite finding "
-                      "ref; dispositions go to SWEEP.md via saipen improve "
-                      "sweep; report completion via saipen improve complete",
-            "write_boundary": "RUNs append via saipen improve submit; report "
-                              "completion via saipen improve complete; no raw "
-                              "report/MANIFEST/SWEEP editing",
-            "next": f"perform the semantic audit, then: saipen improve submit "
-                    f"{active_cycle} {seat_id} SAIPEN <findings.json>",
-        }, as_json)
+        _emit(
+            {
+                "ok": True,
+                "code": "IMPROVE_AUDIT_ASSIGNMENT",
+                "op_id": prepared.get("op_id"),
+                "cycle_id": active_cycle,
+                "seat_id": seat_id,
+                "role": prepared["role"],
+                "report_path": report_path.relative_to(project_root).as_posix(),
+                "report_created": prepared["report_created"],
+                "resumed": prepared["resumed"],
+                "dry_run": bool(prepared.get("dry_run")),
+                "source": {
+                    "source_head": prepared["source_head"],
+                    "source_tree_fingerprint": prepared["source_tree_fingerprint"],
+                    "discovery_model": prepared["discovery_model"],
+                },
+                "scope": {"phase": state.get("phase") or "?", "task": state.get("task") or ""},
+                "proof_levels": proof_levels,
+                "schema": "cycle + seat/report + RUN-N/IMP-NNN composite finding "
+                "ref; dispositions go to SWEEP.md via saipen improve "
+                "sweep; report completion via saipen improve complete",
+                "write_boundary": "RUNs append via saipen improve submit; report "
+                "completion via saipen improve complete; no raw "
+                "report/MANIFEST/SWEEP editing",
+                "next": f"perform the semantic audit, then: saipen improve submit "
+                f"{active_cycle} {seat_id} SAIPEN <findings.json>",
+            },
+            as_json,
+        )
         return 0
     if action == "submit":
         # DOGFOOD V (T-617): structured report submission -- the current agent
         # supplies the semantic RUN text in a JSON file, Python appends the
         # RUN mechanically through append_run (validated, journaled).
         if len(args) < 5:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "improve submit needs <cycle> <seat> <project> "
-                             "<findings.json>"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "improve submit needs <cycle> <seat> <project> <findings.json>",
+                },
+                as_json,
+            )
             return 2
         if len(args) > 5:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": f"improve submit takes <cycle> <seat> <project> "
-                             f"<findings.json>; unsupported surplus argument "
-                             f"{args[5]!r}"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"improve submit takes <cycle> <seat> <project> "
+                    f"<findings.json>; unsupported surplus argument "
+                    f"{args[5]!r}",
+                },
+                as_json,
+            )
             return 2
         from improve import append_run as _append_run
         from improve import resolve_report_path as _resolve_report_path
+
         cycle = cycle_dir(project_root, args[1])
         payload = Path(args[4])
         if not payload.is_file():
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": f"findings file not found: {args[4]}"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"findings file not found: {args[4]}",
+                },
+                as_json,
+            )
             return 2
         import json as _json
+
         try:
             data = _json.loads(payload.read_text(encoding="utf-8-sig"))
         except ValueError as exc:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": f"findings file is not valid JSON: {exc}"},
-                  as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"findings file is not valid JSON: {exc}",
+                },
+                as_json,
+            )
             return 2
         # Shape-check before any .get(): array/scalar/null payloads would
         # otherwise crash with a raw AttributeError instead of a structured
         # refusal, and a non-string run_text must never reach .strip().
         if not isinstance(data, dict):
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "findings payload must be a JSON object with a "
-                             "run_text field"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "findings payload must be a JSON object with a run_text field",
+                },
+                as_json,
+            )
             return 2
         run_text = data.get("run_text")
         if not isinstance(run_text, str) or not run_text.strip():
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "findings payload needs a non-empty string "
-                             "run_text field"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "findings payload needs a non-empty string run_text field",
+                },
+                as_json,
+            )
             return 2
-        report = _resolve_report_path(project_root, args[1], args[2],
-                                      args[3])
+        report = _resolve_report_path(project_root, args[1], args[2], args[3])
         _rc = _ensure_handover(project_root, as_json, dry_run)
         if _rc is not None:
             return _rc
@@ -1234,19 +1534,24 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
             _emit(result, as_json)
             return 0 if result.get("ok") else 1
         except ValueError as exc:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": str(exc)}, as_json)
+            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}, as_json)
             return 1
     if action == "complete":
         # DOGFOOD V (T-616): mechanical report completion -- full validation,
         # then draft -> complete, journaled and immutable.
         if len(args) < 4:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "improve complete needs <cycle> <seat> <project>"},
-                  as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "improve complete needs <cycle> <seat> <project>",
+                },
+                as_json,
+            )
             return 2
         from improve import complete_report as _complete_report
         from improve import resolve_report_path as _resolve_report_path
+
         report = _resolve_report_path(project_root, args[1], args[2], args[3])
         _rc = _ensure_handover(project_root, as_json, dry_run)
         if _rc is not None:
@@ -1256,24 +1561,38 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
             _emit(result, as_json)
             return 0 if result.get("ok") else 1
         except ValueError as exc:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": str(exc)}, as_json)
+            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}, as_json)
             return 1
     if action == "sweep-queue":
         # DOGFOOD V (T-617): deterministic enumeration of the unswept finding
         # queue -- read-only; the semantic adjudication stays Core-owned.
         if len(args) < 2:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "improve sweep-queue needs <cycle_id>"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "improve sweep-queue needs <cycle_id>",
+                },
+                as_json,
+            )
             return 2
-        from improve import (composite_finding_ref, parse_report, verify_cycle,
-                             _report_ledger_keys, _seat_blocks,
-                             _field as _imp_field)
+        from improve import (
+            composite_finding_ref,
+            parse_report,
+            verify_cycle,
+            _report_ledger_keys,
+            _seat_blocks,
+            _field as _imp_field,
+        )
+
         cycle = cycle_dir(project_root, args[1])
         precheck = verify_cycle(cycle)
         roster = (cycle / "MANIFEST.md").read_text(encoding="utf-8-sig")
-        sweep = (cycle / "SWEEP.md").read_text(encoding="utf-8-sig") \
-            if (cycle / "SWEEP.md").is_file() else ""
+        sweep = (
+            (cycle / "SWEEP.md").read_text(encoding="utf-8-sig")
+            if (cycle / "SWEEP.md").is_file()
+            else ""
+        )
         disposed = list(_sweep_records(sweep))
         queue = []
         for block in _seat_blocks(roster):
@@ -1285,50 +1604,71 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
             report = cycle / seat_id / report_ident
             if not report.is_file():
                 continue
-            for finding in parse_report(
-                    report.read_text(encoding="utf-8-sig")).findings:
-                if any(record.report in report_keys
-                       and record.run() == finding.run
-                       and record.imp() == finding.imp
-                       for record in disposed):
+            for finding in parse_report(report.read_text(encoding="utf-8-sig")).findings:
+                if any(
+                    record.report in report_keys
+                    and record.run() == finding.run
+                    and record.imp() == finding.imp
+                    for record in disposed
+                ):
                     continue
-                queue.append({
-                    "finding_ref": composite_finding_ref(
-                        cycle.name, seat_id, report_ident, finding.run,
-                        finding.imp),
-                    "run": finding.run, "imp": finding.imp,
-                    "report": f"{seat_id}/{report_ident}",
-                    "severity": finding.severity, "class": finding.cls,
-                    "expected": finding.expected, "actual": finding.actual,
-                    "evidence": finding.evidence,
-                })
-        _emit({"ok": True, "code": "IMPROVE_SWEEP_QUEUE",
-               "cycle": args[1], "queue": queue,
-               "precheck_errors": precheck[:5],
-               "note": "semantic adjudication (reproduce/classify/dedupe/"
-                       "decide) is Core-owned; commit each decision via "
-                       "saipen improve sweep"}, as_json)
+                queue.append(
+                    {
+                        "finding_ref": composite_finding_ref(
+                            cycle.name, seat_id, report_ident, finding.run, finding.imp
+                        ),
+                        "run": finding.run,
+                        "imp": finding.imp,
+                        "report": f"{seat_id}/{report_ident}",
+                        "severity": finding.severity,
+                        "class": finding.cls,
+                        "expected": finding.expected,
+                        "actual": finding.actual,
+                        "evidence": finding.evidence,
+                    }
+                )
+        _emit(
+            {
+                "ok": True,
+                "code": "IMPROVE_SWEEP_QUEUE",
+                "cycle": args[1],
+                "queue": queue,
+                "precheck_errors": precheck[:5],
+                "note": "semantic adjudication (reproduce/classify/dedupe/"
+                "decide) is Core-owned; commit each decision via "
+                "saipen improve sweep",
+            },
+            as_json,
+        )
         return 0
     if action == "status":
         rows = _cycle_statuses()
         if as_json:
-            _emit({"ok": True, "code": "IMPROVE_STATUS",
-                   "cycles": rows}, as_json)
+            _emit({"ok": True, "code": "IMPROVE_STATUS", "cycles": rows}, as_json)
         else:
             for row in rows:
                 print(f"{row['cycle']} ({row['cycle_status']})")
                 for seat in row["seats"]:
-                    print(f"  {seat['seat']}: {seat.get('visible', '?')}"
-                          + (f" (report_status "
-                             f"{seat.get('report_status')})"
-                             if seat.get("report_status") else "")
-                          + (f" missing={seat.get('missing')}"
-                             if seat.get("missing") else ""))
+                    print(
+                        f"  {seat['seat']}: {seat.get('visible', '?')}"
+                        + (
+                            f" (report_status {seat.get('report_status')})"
+                            if seat.get("report_status")
+                            else ""
+                        )
+                        + (f" missing={seat.get('missing')}" if seat.get("missing") else "")
+                    )
         return 0
     if action == "verify":
         if len(args) < 2:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "improve verify needs <cycle_id>"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "improve verify needs <cycle_id>",
+                },
+                as_json,
+            )
             return 2
         cycle = cycle_dir(project_root, args[1])
         # DOGFOOD V (T-616): verify validates the COMPLETE cycle output --
@@ -1337,33 +1677,53 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
         # writable intermediate targets. A report that only says
         # `report_status: complete` can never PASS this.
         from improve import verify_cycle
+
         errors = verify_cycle(cycle)
         if errors:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "; ".join(errors[:5]),
-                   "delta_only": True}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "; ".join(errors[:5]),
+                    "delta_only": True,
+                },
+                as_json,
+            )
             return 1
-        _emit({"ok": True, "code": "IMPROVE_VERIFY_PASS",
-               "delta_only": True, "cycle": args[1]}, as_json)
+        _emit(
+            {"ok": True, "code": "IMPROVE_VERIFY_PASS", "delta_only": True, "cycle": args[1]},
+            as_json,
+        )
         return 0
     if action == "sweep":
         if len(args) < 4:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "improve sweep needs <cycle> <finding_ref> "
-                             "<disposition> [--ticket T-###] [--report "
-                             "<ident>] [--reproduced y|n] where finding_ref "
-                             "is RUN-N/IMP-NNN (strict) or IMP-NNN (legacy)"},
-                  as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "improve sweep needs <cycle> <finding_ref> "
+                    "<disposition> [--ticket T-###] [--report "
+                    "<ident>] [--reproduced y|n] where finding_ref "
+                    "is RUN-N/IMP-NNN (strict) or IMP-NNN (legacy)",
+                },
+                as_json,
+            )
             return 2
         cycle = cycle_dir(project_root, args[1])
         finding_ref, disposition = args[2], args[3]
         _run = None
         import re as _re
+
         _fm = _re.fullmatch(r"(?:RUN-(\d+)/)?IMP-(\d+)", finding_ref)
         if not _fm:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": f"finding_ref {finding_ref!r} is not "
-                             "RUN-N/IMP-NNN or IMP-NNN"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"finding_ref {finding_ref!r} is not RUN-N/IMP-NNN or IMP-NNN",
+                },
+                as_json,
+            )
             return 2
         run_raw, imp_id = _fm.group(1), _fm.group(2)
         ticket = "-"
@@ -1380,34 +1740,49 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
             else:
                 rest = rest[1:]
         if dry_run:
-            _emit({"ok": True, "code": "IMPROVE_SWEEP_PLAN",
-                   "cycle": args[1], "finding_ref": finding_ref,
-                   "disposition": disposition}, as_json)
+            _emit(
+                {
+                    "ok": True,
+                    "code": "IMPROVE_SWEEP_PLAN",
+                    "cycle": args[1],
+                    "finding_ref": finding_ref,
+                    "disposition": disposition,
+                },
+                as_json,
+            )
             return 0
         _rc = _ensure_handover(project_root, as_json, dry_run)
         if _rc is not None:
             return _rc
         try:
-            entry = {"imp_id": imp_id, "disposition": disposition,
-                     "ticket": ticket, "report": report,
-                     "reproduced": reproduced}
+            entry = {
+                "imp_id": imp_id,
+                "disposition": disposition,
+                "ticket": ticket,
+                "report": report,
+                "reproduced": reproduced,
+            }
             if run_raw is not None:
                 entry["run"] = f"RUN-{run_raw}"
             result = write_sweep_entry(cycle, entry)
             _emit(result, as_json)
             return 0 if result.get("ok") else 1
         except ValueError as exc:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": str(exc)}, as_json)
+            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}, as_json)
             return 1
     if action == "cycle-complete":
         # DOGFOOD V (T-616): mechanical cycle completion through the public
         # path -- full cycle bar (strict manifest, every report full-valid,
         # exact composite sweep coverage), then ACTIVE -> COMPLETE.
         if len(args) < 2:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "improve cycle-complete needs <cycle_id>"},
-                  as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "improve cycle-complete needs <cycle_id>",
+                },
+                as_json,
+            )
             return 2
         cycle = cycle_dir(project_root, args[1])
         _rc = _ensure_handover(project_root, as_json, dry_run)
@@ -1418,17 +1793,23 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
             _emit(result, as_json)
             return 0 if result.get("ok") else 1
         except ValueError as exc:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": str(exc)}, as_json)
+            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}, as_json)
             return 1
     if action == "abort":
         # DOGFOOD V (T-621): mechanical abort for a stuck draft cycle -- the
         # journaled exit for an active cycle whose report cannot complete.
         if len(args) < 2:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "improve abort needs <cycle_id>"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "improve abort needs <cycle_id>",
+                },
+                as_json,
+            )
             return 2
         from improve import abort_cycle as _abort_cycle
+
         cycle = cycle_dir(project_root, args[1])
         _rc = _ensure_handover(project_root, as_json, dry_run)
         if _rc is not None:
@@ -1438,63 +1819,92 @@ def _improve(project_root: Path, args: list[str], as_json: bool,
             _emit(result, as_json)
             return 0 if result.get("ok") else 1
         except ValueError as exc:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": str(exc)}, as_json)
+            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}, as_json)
             return 1
     if action == "clean":
         if len(args) < 2:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "improve clean needs <cycle_id>"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "improve clean needs <cycle_id>",
+                },
+                as_json,
+            )
             return 2
         cycle = cycle_dir(project_root, args[1])
         # archive-with-provenance: only a COMPLETE (fully swept) cycle may be
         # archived; the sweep ledger + reports are preserved verbatim.
         if dry_run:
-            _emit({"ok": True, "code": "IMPROVE_CLEAN_PLAN",
-                   "cycle": args[1], "archive_only": True}, as_json)
+            _emit(
+                {"ok": True, "code": "IMPROVE_CLEAN_PLAN", "cycle": args[1], "archive_only": True},
+                as_json,
+            )
             return 0
         _rc = _ensure_handover(project_root, as_json, dry_run)
         if _rc is not None:
             return _rc
         try:
             result = archive_cycle(cycle)
-            _emit({"ok": result.get("ok", False),
-                   "code": "IMPROVE_CLEAN" if result.get("ok")
-                   else "VALIDATION_FAILED",
-                   "cycle": args[1],
-                   "archive_only": True,
-                   "detail": result.get("message", "")}, as_json)
+            _emit(
+                {
+                    "ok": result.get("ok", False),
+                    "code": "IMPROVE_CLEAN" if result.get("ok") else "VALIDATION_FAILED",
+                    "cycle": args[1],
+                    "archive_only": True,
+                    "detail": result.get("message", ""),
+                },
+                as_json,
+            )
             return 0 if result.get("ok") else 1
         except ValueError as exc:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": str(exc), "archive_only": True}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": str(exc),
+                    "archive_only": True,
+                },
+                as_json,
+            )
             return 1
-    _emit({"ok": False, "code": "UNKNOWN_ACTION",
-           "detail": f"unknown saipen improve action {action!r}; use "
-                      "status|submit|complete|sweep|sweep-queue|"
-                      "verify|cycle-complete|abort|clean"}, as_json)
+    _emit(
+        {
+            "ok": False,
+            "code": "UNKNOWN_ACTION",
+            "detail": f"unknown saipen improve action {action!r}; use "
+            "status|submit|complete|sweep|sweep-queue|"
+            "verify|cycle-complete|abort|clean",
+        },
+        as_json,
+    )
     return 2
 
 
-def _public_improve(project_root: Path, args: list[str], as_json: bool,
-                    dry_run: bool) -> int:
+def _public_improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
     """Normalize expected Improve writer contention at the public boundary."""
     try:
         return _improve(project_root, args, as_json, dry_run)
     except PermissionError as exc:
         if str(exc) == "WRITER_BUSY":
-            _emit({"ok": False, "code": "WRITER_BUSY",
-                   "detail": "another live writer holds the project lock"},
-                  as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "WRITER_BUSY",
+                    "detail": "another live writer holds the project lock",
+                },
+                as_json,
+            )
             return 1
         raise
 
-def main(argv: list[str] | None = None) -> int:
+
+def main(argv: list[str] | None = None) -> int:
     raw_args = list(argv if argv is not None else sys.argv[1:])
     if "--" in raw_args:
         dd_idx = raw_args.index("--")
         before_dashdash = raw_args[:dd_idx]
-        after_dashdash = raw_args[dd_idx + 1:]
+        after_dashdash = raw_args[dd_idx + 1 :]
     else:
         before_dashdash = raw_args
         after_dashdash = []
@@ -1526,15 +1936,14 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
             clean_before.append(arg)
             i += 1
 
-    args = clean_before + (["--"] + after_dashdash if "--" in raw_args else [])
+    args = clean_before + (["--", *after_dashdash] if "--" in raw_args else [])
 
     # T-1006: an explicit `--agent <id>` is a GENUINE-HANDOVER request; the
     # bare CLI (override None) inherits the persisted STATE.agent seat. The
     # mandatory old -> new DEC is written by handover_agent before the first
     # mutating command below dispatches.
-    global _AGENT_OVERRIDE
-    _AGENT_OVERRIDE = (agent_opt.strip() if agent_opt and agent_opt.strip()
-                       else None)
+    global _AGENT_OVERRIDE # noqa: PLW0603
+    _AGENT_OVERRIDE = agent_opt.strip() if agent_opt and agent_opt.strip() else None
 
     if not args or args[0] in ("-h", "--help"):
         usage_msg = (
@@ -1560,10 +1969,10 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
         return 2
 
     project_root, root_reason = resolve_project_root(
-        Path.cwd().resolve(), explicit=project_root_opt)
+        Path.cwd().resolve(), explicit=project_root_opt
+    )
     if project_root is None:
-        _emit({"ok": False, "code": "NOT_SAIPEN_PROJECT",
-               "detail": root_reason}, as_json)
+        _emit({"ok": False, "code": "NOT_SAIPEN_PROJECT", "detail": root_reason}, as_json)
         return 3
 
     command = args[0]
@@ -1577,167 +1986,286 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
 
     if command == "status":
         if len(args) > 1:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": f"status accepts no arguments; surplus: {' '.join(args[1:])}"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"status accepts no arguments; surplus: {' '.join(args[1:])}",
+                },
+                as_json,
+            )
             return 2
         return _status(project_root, as_json)
     if command == "next":
         if len(args) > 1:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": f"next accepts no arguments; surplus: {' '.join(args[1:])}"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"next accepts no arguments; surplus: {' '.join(args[1:])}",
+                },
+                as_json,
+            )
             return 2
         return _next_action(project_root, as_json)
     if command == "recover":
         return _recover(project_root, args[1:], as_json, dry_run)
     if command == "claim":
         if len(args) < 2:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "claim needs <T-###>"}, as_json)
+            _emit(
+                {"ok": False, "code": "VALIDATION_FAILED", "detail": "claim needs <T-###>"}, as_json
+            )
             return 2
         if len(args) > 2:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": f"claim takes <T-###>; surplus: {' '.join(args[2:])}"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"claim takes <T-###>; surplus: {' '.join(args[2:])}",
+                },
+                as_json,
+            )
             return 2
         _rc = _ensure_handover(project_root, as_json, dry_run)
         if _rc is not None:
             return _rc
-        result = plan_claim(project_root, args[1], _agent_for(project_root)) if dry_run \
+        result = (
+            plan_claim(project_root, args[1], _agent_for(project_root))
+            if dry_run
             else apply_claim(project_root, args[1], _agent_for(project_root))
+        )
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
     if command == "transition":
         if len(args) < 2:
-            _emit({"ok": False, "code": "ILLEGAL_TRANSITION",
-                   "detail": "transition needs <PHASE> [T-###] [text]"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "ILLEGAL_TRANSITION",
+                    "detail": "transition needs <PHASE> [T-###] [text]",
+                },
+                as_json,
+            )
             return 2
-        ticket = args[2] if len(args) > 2 and args[2].upper().startswith(
-            "T-") else None
+        ticket = args[2] if len(args) > 2 and args[2].upper().startswith("T-") else None
         text = " ".join(args[3:] if ticket else args[2:])
         _rc = _ensure_handover(project_root, as_json, dry_run)
         if _rc is not None:
             return _rc
-        result = transition_phase(project_root, args[1], _agent_for(project_root), ticket, text,
-                                  dry_run=dry_run)
+        result = transition_phase(
+            project_root, args[1], _agent_for(project_root), ticket, text, dry_run=dry_run
+        )
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
     if command == "checkpoint":
         if len(args) < 2:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "checkpoint needs <TAXONOMY> [T-###] [text]"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "checkpoint needs <TAXONOMY> [T-###] [text]",
+                },
+                as_json,
+            )
             return 2
-        ticket = args[2] if len(args) > 2 and args[2].upper().startswith(
-            "T-") else None
+        ticket = args[2] if len(args) > 2 and args[2].upper().startswith("T-") else None
         text = " ".join(args[3:] if ticket else args[2:])
         _rc = _ensure_handover(project_root, as_json, dry_run)
         if _rc is not None:
             return _rc
-        result = checkpoint(project_root, _agent_for(project_root), args[1], ticket, text,
-                            dry_run=dry_run)
+        result = checkpoint(
+            project_root, _agent_for(project_root), args[1], ticket, text, dry_run=dry_run
+        )
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
     if command == "ticket":
         if len(args) < 2:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "ticket needs an action: add|done|block|unblock"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "ticket needs an action: add|done|block|unblock",
+                },
+                as_json,
+            )
             return 2
         action = args[1]
         rest = args[2:]
         if action == "add":
             if len(rest) < 2:
-                _emit({"ok": False, "code": "VALIDATION_FAILED",
-                       "detail": "ticket add <PRIORITY> <description> "
-                                 "[--verify <text>] [--needs T-X,T-Y]"},
-                      as_json)
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": "ticket add <PRIORITY> <description> "
+                        "[--verify <text>] [--needs T-X,T-Y]",
+                    },
+                    as_json,
+                )
                 return 2
             verify_arg = ""
             needs_arg = []
             has_verify = False
             has_needs = False
-            
+
             if "--" in rest:
                 dd_idx = rest.index("--")
                 pre_dd = rest[:dd_idx]
-                post_dd = rest[dd_idx + 1:]
+                post_dd = rest[dd_idx + 1 :]
             else:
                 pre_dd = rest
                 post_dd = []
-                
+
             clean_rest = []
             idx = 0
             while idx < len(pre_dd):
                 if pre_dd[idx] == "--verify":
                     if has_verify:
-                        _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "duplicate --verify option"}, as_json)
+                        _emit(
+                            {
+                                "ok": False,
+                                "code": "VALIDATION_FAILED",
+                                "detail": "duplicate --verify option",
+                            },
+                            as_json,
+                        )
                         return 2
                     if idx + 1 >= len(pre_dd):
-                        _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "dangling --verify option"}, as_json)
+                        _emit(
+                            {
+                                "ok": False,
+                                "code": "VALIDATION_FAILED",
+                                "detail": "dangling --verify option",
+                            },
+                            as_json,
+                        )
                         return 2
                     verify_arg = pre_dd[idx + 1]
                     has_verify = True
                     idx += 2
                 elif pre_dd[idx] == "--needs":
                     if has_needs:
-                        _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "duplicate --needs option"}, as_json)
+                        _emit(
+                            {
+                                "ok": False,
+                                "code": "VALIDATION_FAILED",
+                                "detail": "duplicate --needs option",
+                            },
+                            as_json,
+                        )
                         return 2
                     if idx + 1 >= len(pre_dd):
-                        _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "dangling --needs option"}, as_json)
+                        _emit(
+                            {
+                                "ok": False,
+                                "code": "VALIDATION_FAILED",
+                                "detail": "dangling --needs option",
+                            },
+                            as_json,
+                        )
                         return 2
                     needs_arg = [n.strip() for n in pre_dd[idx + 1].split(",") if n.strip()]
                     has_needs = True
                     idx += 2
                 elif pre_dd[idx].startswith("--"):
-                    _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": f"unknown option {pre_dd[idx]}"}, as_json)
+                    _emit(
+                        {
+                            "ok": False,
+                            "code": "VALIDATION_FAILED",
+                            "detail": f"unknown option {pre_dd[idx]}",
+                        },
+                        as_json,
+                    )
                     return 2
                 else:
                     clean_rest.append(pre_dd[idx])
                     idx += 1
-            
+
             clean_rest.extend(post_dd)
-            
+
             if len(clean_rest) < 2:
-                _emit({"ok": False, "code": "VALIDATION_FAILED",
-                       "detail": "ticket add needs <PRIORITY> <description>"},
-                      as_json)
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": "ticket add needs <PRIORITY> <description>",
+                    },
+                    as_json,
+                )
                 return 2
             _rc = _ensure_handover(project_root, as_json, dry_run)
             if _rc is not None:
                 return _rc
-            result = ticket_add(project_root, _agent_for(project_root),
-                                clean_rest[0], " ".join(clean_rest[1:]),
-                                needs_arg, verify_arg, dry_run=dry_run)
+            result = ticket_add(
+                project_root,
+                _agent_for(project_root),
+                clean_rest[0],
+                " ".join(clean_rest[1:]),
+                needs_arg,
+                verify_arg,
+                dry_run=dry_run,
+            )
             _emit(result.to_dict(), as_json)
             return 0 if result.ok else 1
         if action == "done":
             if not rest:
-                _emit({"ok": False, "code": "VALIDATION_FAILED",
-                       "detail": "ticket done needs <T-###>"}, as_json)
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": "ticket done needs <T-###>",
+                    },
+                    as_json,
+                )
                 return 2
             if len(rest) > 1:
-                _emit({"ok": False, "code": "VALIDATION_FAILED",
-                       "detail": f"ticket done takes <T-###>; surplus: {' '.join(rest[1:])}"}, as_json)
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": f"ticket done takes <T-###>; surplus: {' '.join(rest[1:])}",
+                    },
+                    as_json,
+                )
                 return 2
             _rc = _ensure_handover(project_root, as_json, dry_run)
             if _rc is not None:
                 return _rc
-            result = finish_ticket(project_root, rest[0],
-                                   _agent_for(project_root),
-                                   dry_run=dry_run)
+            result = finish_ticket(project_root, rest[0], _agent_for(project_root), dry_run=dry_run)
             _emit(result.to_dict(), as_json)
             return 0 if result.ok else 1
         if action in ("block", "unblock"):
             if not rest:
-                _emit({"ok": False, "code": "VALIDATION_FAILED",
-                       "detail": f"ticket {action} needs <T-###> [reason/decision]"}, as_json)
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": f"ticket {action} needs <T-###> [reason/decision]",
+                    },
+                    as_json,
+                )
                 return 2
             _rc = _ensure_handover(project_root, as_json, dry_run)
             if _rc is not None:
                 return _rc
-            result = ticket_move(project_root, action, rest[0], _agent_for(project_root),
-                                 " ".join(rest[1:]), dry_run=dry_run)
+            result = ticket_move(
+                project_root,
+                action,
+                rest[0],
+                _agent_for(project_root),
+                " ".join(rest[1:]),
+                dry_run=dry_run,
+            )
             _emit(result.to_dict(), as_json)
             return 0 if result.ok else 1
-        _emit({"ok": False, "code": "VALIDATION_FAILED",
-               "detail": f"unknown ticket action {action!r}"}, as_json)
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"unknown ticket action {action!r}",
+            },
+            as_json,
+        )
         return 2
     if command == "userperson":
         return _userperson(project_root, args[1:], as_json, dry_run)
@@ -1745,21 +2273,33 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
         return _sub(project_root, args[1:], as_json, dry_run)
     if command == "rebind-home":
         if len(args) < 2:
-            _emit({"ok": False, "code": "HOME_REQUIRED",
-                   "detail": "rebind-home needs <candidate-home-path>"},
-                  as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "HOME_REQUIRED",
+                    "detail": "rebind-home needs <candidate-home-path>",
+                },
+                as_json,
+            )
             return 2
         if len(args) > 2:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": f"rebind-home takes <candidate-home-path>; surplus: {' '.join(args[2:])}"},
-                  as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"rebind-home takes <candidate-home-path>; surplus: {' '.join(args[2:])}", # noqa: E501
+                },
+                as_json,
+            )
             return 2
         from saipen_engine.operations import rebind_saipen_home
+
         _rc = _ensure_handover(project_root, as_json, dry_run)
         if _rc is not None:
             return _rc
-        result = rebind_saipen_home(project_root, _agent_for(project_root),
-                                    args[1], dry_run=dry_run)
+        result = rebind_saipen_home(
+            project_root, _agent_for(project_root), args[1], dry_run=dry_run
+        )
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
     if command == "crew":
@@ -1770,59 +2310,80 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
         return _public_improve(project_root, args[1:], as_json, dry_run)
     if command == "scope":
         if len(args) < 3:
-            _emit({"ok": False, "code": "SOURCE_SCOPE_MISSING",
-                   "detail": "scope needs <T-###> <path> [path ...]"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "SOURCE_SCOPE_MISSING",
+                    "detail": "scope needs <T-###> <path> [path ...]",
+                },
+                as_json,
+            )
             return 2
         from saipen_engine.operations import record_scope
+
         _rc = _ensure_handover(project_root, as_json, dry_run)
         if _rc is not None:
             return _rc
-        result = record_scope(project_root, args[1],
-                              _agent_for(project_root), args[2:],
-                              dry_run=dry_run)
+        result = record_scope(
+            project_root, args[1], _agent_for(project_root), args[2:], dry_run=dry_run
+        )
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
     if command in ("first-publish-confirm", "fpc"):
         if len(args) != 3:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": "first-publish-confirm needs <name> "
-                             "<public|private>"}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "first-publish-confirm needs <name> <public|private>",
+                },
+                as_json,
+            )
             return 2
         from saipen_engine.operations import confirm_first_publish
+
         _rc = _ensure_handover(project_root, as_json, dry_run)
         if _rc is not None:
             return _rc
-        result = confirm_first_publish(project_root,
-                                       _agent_for(project_root), args[1],
-                                       args[2], dry_run=dry_run)
+        result = confirm_first_publish(
+            project_root, _agent_for(project_root), args[1], args[2], dry_run=dry_run
+        )
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
     if command in ("ship", "push"):
         surplus = [a for a in args[1:] if not a.startswith("--")]
         unknown_flags = [a for a in args[1:] if a.startswith("--")]
         if surplus or unknown_flags:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": (
-                       f"{command} accepts no arguments; surplus: "
-                       f"{' '.join(surplus + unknown_flags)}")}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": (
+                        f"{command} accepts no arguments; surplus: "
+                        f"{' '.join(surplus + unknown_flags)}"
+                    ),
+                },
+                as_json,
+            )
             return 2
-        from saipen_engine.release import (ReleaseRefusal,
-                                           execute_release, plan_release)
+        from saipen_engine.release import ReleaseRefusal, execute_release, plan_release
+
         try:
             # P0#4: inject the freshly negotiated current-session capability so
             # a read-only session cannot PLAN a release. Second-wave P0: the
             # acting identity is the SESSION agent, never persisted STATE.agent.
-            plan = plan_release(project_root, command, dry_run=dry_run,
-                                current_capability=_negotiate_capability(
-                                    project_root),
-                                current_agent=_agent_for(project_root))
+            plan = plan_release(
+                project_root,
+                command,
+                dry_run=dry_run,
+                current_capability=_negotiate_capability(project_root),
+                current_agent=_agent_for(project_root),
+            )
         except ReleaseRefusal as exc:
-            _emit({"ok": False, "code": exc.code, "detail": exc.detail},
-                  as_json)
+            _emit({"ok": False, "code": exc.code, "detail": exc.detail}, as_json)
             return 1
         except ValueError as exc:
-            _emit({"ok": False, "code": "VALIDATION_FAILED",
-                   "detail": str(exc)}, as_json)
+            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}, as_json)
             return 1
         _rc = _ensure_handover(project_root, as_json, dry_run)
         if _rc is not None:
@@ -1831,8 +2392,10 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool,
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
     if as_json:
-        _emit({"ok": False, "code": "VALIDATION_FAILED",
-               "detail": f"unknown command: {command}"}, as_json)
+        _emit(
+            {"ok": False, "code": "VALIDATION_FAILED", "detail": f"unknown command: {command}"},
+            as_json,
+        )
     else:
         print(f"unknown command: {command}")
     return 2

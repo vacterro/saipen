@@ -39,7 +39,8 @@ def board_floor(board_text: str) -> list[str]:
         if len(openers) > 1:
             errors.append(
                 f"BOARD.md:{index}: one physical line carries "
-                f"{len(openers)} ticket openers: {line.strip()!r}")
+                f"{len(openers)} ticket openers: {line.strip()!r}"
+            )
     return errors
 
 
@@ -60,8 +61,8 @@ def log_floor(log_text: str) -> list[str]:
             errors.append(f"LOG.md:{index}: duplicate event id {event_id}")
         elif number <= last:
             errors.append(
-                f"LOG.md:{index}: event id {event_id} is not strictly "
-                f"increasing after E-{last}")
+                f"LOG.md:{index}: event id {event_id} is not strictly increasing after E-{last}"
+            )
         seen.add(event_id)
         last = number
     return errors
@@ -77,41 +78,32 @@ def state_board_floor(state_text: str, board_text: str) -> list[str]:
     task = task_match.group(1)
     if not re.fullmatch(_TICKET_ID, task):
         return errors
-    doing_match = re.search(
-        r"(?m)^## DOING\s*\n(.*?)(?=^## )", board_text, re.S)
+    doing_match = re.search(r"(?m)^## DOING\s*\n(.*?)(?=^## )", board_text, re.DOTALL)
     if not doing_match:
-        errors.append(
-            f"STATE.task={task} but BOARD has no DOING section at the raw "
-            "floor")
+        errors.append(f"STATE.task={task} but BOARD has no DOING section at the raw floor")
         return errors
     openers = re.findall(r"(?m)^- \[[ xX/]\]\s+([A-Z]+-\d+)", doing_match.group(1))
     if not openers:
-        errors.append(f"STATE.task={task} but BOARD DOING is empty at the "
-                      "raw floor")
+        errors.append(f"STATE.task={task} but BOARD DOING is empty at the raw floor")
     elif len(openers) > 1:
-        errors.append(f"STATE.task={task} but BOARD DOING has multiple openers "
-                      "at the raw floor")
+        errors.append(f"STATE.task={task} but BOARD DOING has multiple openers at the raw floor")
     elif openers[0] != task:
-        errors.append(f"STATE.task={task} disagrees with the single DOING "
-                      f"identity {openers[0]} at the raw floor")
+        errors.append(
+            f"STATE.task={task} disagrees with the single DOING "
+            f"identity {openers[0]} at the raw floor"
+        )
     return errors
 
 
-def raw_floor(state_text: str, board_text: str,
-              log_text: str) -> list[str]:
+def raw_floor(state_text: str, board_text: str, log_text: str) -> list[str]:
     """The combined tiny independent falsifier surface."""
-    return (board_floor(board_text)
-            + log_floor(log_text)
-            + state_board_floor(state_text, board_text))
+    return board_floor(board_text) + log_floor(log_text) + state_board_floor(state_text, board_text)
 
 
 def raw_floor_for_root(root: Path | str) -> list[str]:
     """raw_floor over the canonical files of a project root."""
     root = Path(root)
-    state = (root / ".saipen" / "STATE.md").read_text(
-        encoding="utf-8", errors="replace")
-    board = (root / ".saipen" / "BOARD.md").read_text(
-        encoding="utf-8", errors="replace")
-    log = (root / ".saipen" / "LOG.md").read_text(
-        encoding="utf-8", errors="replace")
+    state = (root / ".saipen" / "STATE.md").read_text(encoding="utf-8", errors="replace")
+    board = (root / ".saipen" / "BOARD.md").read_text(encoding="utf-8", errors="replace")
+    log = (root / ".saipen" / "LOG.md").read_text(encoding="utf-8", errors="replace")
     return raw_floor(state, board, log)

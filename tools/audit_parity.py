@@ -17,6 +17,7 @@ is the failure worth guarding, not the gap itself.
 Exit 0 when the floor still catches at least BASELINE cases, 1 otherwise.
 Skips (exit 0, loudly) where no POSIX shell is available.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -57,11 +58,12 @@ def find_bash() -> str | None:
     Explicit Git-for-Windows paths first, then `bash` from PATH. `sh` is never
     acceptable.
     """
-    for candidate in (r"C:\Program Files\Git\bin\bash.exe",
-                      r"C:\Program Files (x86)\Git\bin\bash.exe",
-                      shutil.which("bash")):
-        if (candidate and os.path.exists(candidate)
-                and "system32" not in candidate.lower()):
+    for candidate in (
+        r"C:\Program Files\Git\bin\bash.exe",
+        r"C:\Program Files (x86)\Git\bin\bash.exe",
+        shutil.which("bash"),
+    ):
+        if candidate and os.path.exists(candidate) and "system32" not in candidate.lower():
             return candidate
     return None
 
@@ -73,8 +75,7 @@ def bash_env(bash: str) -> dict[str, str]:
         return env
     bindir = Path(bash).resolve().parent
     for tools_dir in (bindir, bindir.parent / "usr" / "bin"):
-        if all((tools_dir / f"{name}.exe").is_file()
-               for name in ("grep", "sed", "sort")):
+        if all((tools_dir / f"{name}.exe").is_file() for name in ("grep", "sed", "sort")):
             env["PATH"] = str(tools_dir) + os.pathsep + env.get("PATH", "")
             break
     return env
@@ -88,7 +89,8 @@ def main() -> int:
     floor_env = bash_env(bash)
 
     spec = importlib.util.spec_from_file_location(
-        "audit_checks", HOME / "tools" / "audit_checks.py")
+        "audit_checks", HOME / "tools" / "audit_checks.py"
+    )
     ac = importlib.util.module_from_spec(spec)
     sys.modules["audit_checks"] = ac
     spec.loader.exec_module(ac)
@@ -104,8 +106,12 @@ def main() -> int:
         # Hashing audit_checks.py instead is deterministic AND stricter: it
         # invalidates on any change to a case, its mutation or its expected
         # substring, which `repr` of a tuple of functions never could.
-        for script in ("tests/validate.sh", "tests/validate.ps1",
-                       "tools/validate.py", "tools/audit_checks.py"):
+        for script in (
+            "tests/validate.sh",
+            "tests/validate.ps1",
+            "tools/validate.py",
+            "tools/audit_checks.py",
+        ):
             p = HOME / script
             if p.exists():
                 h.update(p.read_bytes())
@@ -139,16 +145,27 @@ def main() -> int:
     def run_validate(root):
         try:
             return subprocess.run(
-                [sys.executable, str(root / "tools" / "validate.py")], cwd=root,
-                capture_output=True, text=True, errors="replace", timeout=15)
+                [sys.executable, str(root / "tools" / "validate.py")],
+                cwd=root,
+                capture_output=True,
+                text=True,
+                errors="replace",
+                timeout=15,
+            )
         except subprocess.TimeoutExpired:
             return _Result(124, "", "timeout")
 
     def run_floor(root):
         if sys.platform == "nt":
             p = subprocess.Popen(
-                [bash, "tests/validate.sh"], cwd=root, env=floor_env,
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, errors="replace")
+                [bash, "tests/validate.sh"],
+                cwd=root,
+                env=floor_env,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                errors="replace",
+            )
             try:
                 out, err = p.communicate(timeout=15)
                 return _Result(p.returncode, out, err)
@@ -159,8 +176,14 @@ def main() -> int:
         else:
             try:
                 return subprocess.run(
-                    [bash, "tests/validate.sh"], cwd=root,
-                    env=floor_env, capture_output=True, text=True, errors="replace", timeout=15)
+                    [bash, "tests/validate.sh"],
+                    cwd=root,
+                    env=floor_env,
+                    capture_output=True,
+                    text=True,
+                    errors="replace",
+                    timeout=15,
+                )
             except subprocess.TimeoutExpired:
                 return _Result(124, "", "timeout")
 
@@ -179,9 +202,11 @@ def main() -> int:
     if ctl_v.returncode != 0 or ctl_f.returncode != 0:
         who = "tools/validate.py" if ctl_v.returncode != 0 else "tests/validate.sh"
         bad = ctl_v if ctl_v.returncode != 0 else ctl_f
-        print(f"FAIL: {who} rejects an UNMODIFIED copy (exit "
-              f"{bad.returncode}) -- every number below would be measuring "
-              f"that instead of the floor's coverage. What it said:")
+        print(
+            f"FAIL: {who} rejects an UNMODIFIED copy (exit "
+            f"{bad.returncode}) -- every number below would be measuring "
+            f"that instead of the floor's coverage. What it said:"
+        )
         for ln in (bad.stdout + bad.stderr).splitlines():
             if ln.startswith(("FAIL", "Traceback")) or "Error" in ln:
                 print("    " + ln.strip()[:160])
@@ -189,13 +214,15 @@ def main() -> int:
         return 1
 
     cases = [ac.case_parts(case) for case in ac.CASES]
-    unavailable = [label for label, rel, mutation, _expected, _gate in cases
-                   if not ac.case_available(pristine, rel, mutation)]
+    unavailable = [
+        label
+        for label, rel, mutation, _expected, _gate in cases
+        if not ac.case_available(pristine, rel, mutation)
+    ]
     if unavailable:
         for label in unavailable:
             print(f"FAIL: skipped canonical mutation: {label}")
-        print("FAIL: parity denominator would change because a canonical "
-              "mutation cannot be set up")
+        print("FAIL: parity denominator would change because a canonical mutation cannot be set up")
         shutil.rmtree(tmp, ignore_errors=True)
         return 1
 
@@ -227,9 +254,11 @@ def main() -> int:
                     f.write_bytes(data)
 
     if validate(pristine) != 0 or floor(pristine) != 0:
-        print("\nFAIL: the copy did not survive the run -- restoring between "
-              "cases left a mutation behind, so the counts above are measuring "
-              "a drifting tree")
+        print(
+            "\nFAIL: the copy did not survive the run -- restoring between "
+            "cases left a mutation behind, so the counts above are measuring "
+            "a drifting tree"
+        )
         shutil.rmtree(tmp, ignore_errors=True)
         return 1
     shutil.rmtree(tmp, ignore_errors=True)
@@ -246,23 +275,26 @@ def main() -> int:
     if skipped:
         for label in skipped:
             print(f"FAIL: skipped canonical mutation: {label}")
-        print("\nFAIL: parity denominator changed because a canonical mutation "
-              "could not be set up")
+        print("\nFAIL: parity denominator changed because a canonical mutation could not be set up")
         return 1
 
     if len(both) < BASELINE:
-        print(f"\nFAIL: the floor catches {len(both)} of {applied}, below the "
-              f"recorded baseline of {BASELINE}. It has LOST coverage -- that "
-              f"is the failure this tool exists for, not the gap itself")
+        print(
+            f"\nFAIL: the floor catches {len(both)} of {applied}, below the "
+            f"recorded baseline of {BASELINE}. It has LOST coverage -- that "
+            f"is the failure this tool exists for, not the gap itself"
+        )
         return 1
 
     cache_file.parent.mkdir(parents=True, exist_ok=True)
     cache_file.write_text(json.dumps({"key": cache_key, "caught": len(both)}), "utf-8")
 
-    print(f"\nPASS: the floor catches {len(both)} of {applied} "
-          f"(baseline {BASELINE}). The other {len(only_canonical)} need "
-          f"Python, which is why the floor no longer claims conformance in the "
-          f"canonical validator's words")
+    print(
+        f"\nPASS: the floor catches {len(both)} of {applied} "
+        f"(baseline {BASELINE}). The other {len(only_canonical)} need "
+        f"Python, which is why the floor no longer claims conformance in the "
+        f"canonical validator's words"
+    )
     return 0
 
 

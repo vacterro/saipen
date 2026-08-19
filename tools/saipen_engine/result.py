@@ -33,8 +33,7 @@ class Result:
 
     def __post_init__(self) -> None:
         if not self.ok and self.code not in CODES:
-            raise ValueError(
-                f"refusal code {self.code!r} is not in OPS.md's closed set")
+            raise ValueError(f"refusal code {self.code!r} is not in OPS.md's closed set")
 
     def to_dict(self) -> dict[str, Any]:
         out: dict[str, Any] = {
@@ -62,11 +61,9 @@ class Result:
         return self.ok
 
     def to_json(self) -> str:
-        return json.dumps(self.to_dict(), indent=2, sort_keys=False,
-                          ensure_ascii=False)
+        return json.dumps(self.to_dict(), indent=2, sort_keys=False, ensure_ascii=False)
 
     @classmethod
-    def refuse(cls, code: str, message: str,
-               next_action: str | None = None) -> "Result":
+    def refuse(cls, code: str, message: str, next_action: str | None = None) -> "Result":
         data = {"next_action_hint": next_action} if next_action else {}
         return cls(ok=False, code=code, message=message, data=data)

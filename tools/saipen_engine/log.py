@@ -18,7 +18,8 @@ LOG_RE = re.compile(
     r"(?: \[(T-[^\]]*)\])?"
     r"(?: \[agent: ([^\]]+)\])?"
     r"(?: \[op: ([^\]]+)\])?"
-    r" ([A-Z]+): (.*)$")
+    r" ([A-Z]+): (.*)$"
+)
 
 
 def parse_log_line(line: str) -> dict | None:
@@ -59,6 +60,7 @@ class HistoryOwnershipError(ValueError):
     FOLLOW symlink/reparse nodes, which would let a history consume evidence
     outside the project. Refusing before reading keeps external bytes out of
     the digest and the ledger."""
+
     pass
 
 
@@ -99,17 +101,18 @@ def _validate_history_ownership(root: Path, logs_dir: Path) -> None:
         logs_info = None  # genuinely absent logs dir -> no sealed container
     except OSError as exc:
         raise HistoryOwnershipError(
-            f"logs container .saipen/logs unreadable "
-            f"({type(exc).__name__}): {exc}")
+            f"logs container .saipen/logs unreadable ({type(exc).__name__}): {exc}"
+        )
     if logs_info is not None:
         if os.path.islink(logs_dir) or _is_reparse(logs_info):
             raise HistoryOwnershipError(
                 "logs container .saipen/logs is a symlink/junction/reparse "
-                "point; refusing to read history from outside the project")
+                "point; refusing to read history from outside the project"
+            )
         if not stat.S_ISDIR(logs_info.st_mode):
             raise HistoryOwnershipError(
-                ".saipen/logs exists but is not a directory; refusing to read "
-                "history through it")
+                ".saipen/logs exists but is not a directory; refusing to read history through it"
+            )
     for p in history_paths(root):
         try:
             info = p.lstat()
@@ -117,13 +120,13 @@ def _validate_history_ownership(root: Path, logs_dir: Path) -> None:
             continue  # raced deletion / genuinely absent -> not owned evidence
         except OSError as exc:
             raise HistoryOwnershipError(
-                f"history node {p.name} unreadable "
-                f"({type(exc).__name__}): {exc}")
-        if os.path.islink(p) or _is_reparse(info) \
-                or not stat.S_ISREG(info.st_mode):
+                f"history node {p.name} unreadable ({type(exc).__name__}): {exc}"
+            )
+        if os.path.islink(p) or _is_reparse(info) or not stat.S_ISREG(info.st_mode):
             raise HistoryOwnershipError(
                 f"history node {p.name} is a symlink/junction/reparse or "
-                f"non-regular file; refusing to read external bytes")
+                f"non-regular file; refusing to read external bytes"
+            )
 
 
 @dataclass(frozen=True)
@@ -141,6 +144,7 @@ class HistorySnapshot:
     cannot tell "no events here" from "a forged line the parser refused": the
     immutable-ledger contract (P0#2) needs both halves out of the same pass.
     """
+
     hash: str
     text: str
     tail: int | None
@@ -156,6 +160,7 @@ class HistorySnapshot:
 def _normalised_doc_text(raw: bytes) -> str:
     """Decode exactly as `codec.read_doc` would (LF-normalised text)."""
     from . import codec
+
     text, _encoding, _bom = codec._decode(raw)
     return text.replace("\r\n", "\n").replace("\r", "\n")
 
@@ -191,8 +196,8 @@ def read_history_snapshot(project_root: Path | str) -> HistorySnapshot:
             continue
         except OSError as exc:
             raise HistoryOwnershipError(
-                f"history node {p.name} unreadable "
-                f"({type(exc).__name__}): {exc}")
+                f"history node {p.name} unreadable ({type(exc).__name__}): {exc}"
+            )
         rel = p.relative_to(root).as_posix()
         # FRAMED digest identity (second-wave P1): canonical relative path,
         # then raw length, then raw bytes -- so resegmenting, renaming, or
@@ -214,8 +219,7 @@ def read_history_snapshot(project_root: Path | str) -> HistorySnapshot:
             stripped = line.strip()
             if not stripped or stripped.startswith("#"):
                 continue
-            illegal.append(f"{p.name}:{idx + 1}: not a legal LOG event: "
-                           f"{stripped[:80]!r}")
+            illegal.append(f"{p.name}:{idx + 1}: not a legal LOG event: {stripped[:80]!r}")
     tail = None
     for ev in events:
         if tail is None or ev["event"] > tail:
@@ -261,22 +265,20 @@ def snapshot_contract_errors(snapshot: "HistorySnapshot") -> list[str]:
         seen[ev["event"]] = seen.get(ev["event"], 0) + 1
     dupes = sorted(e for e, count in seen.items() if count > 1)
     if dupes:
-        errors.append("duplicate E-ID(s) in complete history: "
-                      + ", ".join(f"E-{e}" for e in dupes[:10]))
+        errors.append(
+            "duplicate E-ID(s) in complete history: " + ", ".join(f"E-{e}" for e in dupes[:10])
+        )
     prev: int | None = None
     for ev in snapshot.events:
         eid = ev["event"]
         parent = ev["parent"]
         if parent is not None:
             if parent not in seen:
-                errors.append(f"E-{eid} parent E-{parent} does not exist in "
-                              f"the ledger")
+                errors.append(f"E-{eid} parent E-{parent} does not exist in the ledger")
             elif parent >= eid:
-                errors.append(f"E-{eid} parent E-{parent} is not older than "
-                              f"E-{eid}")
+                errors.append(f"E-{eid} parent E-{parent} is not older than E-{eid}")
         if prev is not None and eid <= prev:
-            errors.append(f"E-{eid} is not greater than preceding E-{prev} "
-                          f"(out of order)")
+            errors.append(f"E-{eid} is not greater than preceding E-{prev} (out of order)")
         prev = eid
     return errors
 
@@ -306,8 +308,7 @@ def history_contract_errors(project_root: Path | str) -> list[str]:
     return snapshot_contract_errors(read_history_snapshot(project_root))
 
 
-def read_history_snapshot_strict(project_root: Path | str) \
-        -> tuple[HistorySnapshot, list[str]]:
+def read_history_snapshot_strict(project_root: Path | str) -> tuple[HistorySnapshot, list[str]]:
     """One snapshot pass plus the full ledger contract, from that ONE pass.
 
     Consumers that PLAN call this once and reuse the snapshot for tail/evidence
@@ -342,16 +343,27 @@ def log_tail_event(text: str) -> int | None:
     return highest
 
 
-VALID_TAXONOMIES = frozenset({
-    "DEC", "RUN", "WAIT", "REVERT", "NOTE", "OPS",
-})
+VALID_TAXONOMIES = frozenset(
+    {
+        "DEC",
+        "RUN",
+        "WAIT",
+        "REVERT",
+        "NOTE",
+        "OPS",
+    }
+)
 
 
-def build_event(tail: int | None, taxonomy: str, message: str,
-                ticket: str | None = None,
-                agent: str | None = None,
-                now: str | None = None,
-                op_id: str | None = None) -> tuple[int, str]:
+def build_event(
+    tail: int | None,
+    taxonomy: str,
+    message: str,
+    ticket: str | None = None,
+    agent: str | None = None,
+    now: str | None = None,
+    op_id: str | None = None,
+) -> tuple[int, str]:
     """The ONE mechanical LOG event builder (NITRO integrity).
 
     Given the current LOG tail E-N, allocates E-(N+1) with parent E-N, renders
@@ -368,12 +380,11 @@ def build_event(tail: int | None, taxonomy: str, message: str,
     APPLY of one operation share one frozen clock.
     """
     if taxonomy not in VALID_TAXONOMIES:
-        raise ValueError(
-            f"taxonomy {taxonomy!r} outside {sorted(VALID_TAXONOMIES)}")
+        raise ValueError(f"taxonomy {taxonomy!r} outside {sorted(VALID_TAXONOMIES)}")
     if now is None:
         import datetime
-        now = datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%d.%m.%y %H:%M")
+
+        now = datetime.datetime.now(datetime.timezone.utc).strftime("%d.%m.%y %H:%M")
     event = (tail or 0) + 1
     parts = [f"- {now} [E-{event}]"]
     if tail:
@@ -390,8 +401,7 @@ def build_event(tail: int | None, taxonomy: str, message: str,
 
 _VERIFY_BOUNDARY_RE = re.compile(r"^transition to VERIFY(?: -- .*)?$")
 _VERIFY_BOUNDARY_PREFIX = "transition to VERIFY -- "
-_NEGATION_RE = re.compile(r"\bNOT\s+(?:PASS|MANUAL-VERIFY)\b",
-                          re.IGNORECASE)
+_NEGATION_RE = re.compile(r"\bNOT\s+(?:PASS|MANUAL-VERIFY)\b", re.IGNORECASE)
 _PASS_TOKEN_RE = re.compile(r"\bPASS\b")
 _MANUAL_TOKEN_RE = re.compile(r"\bMANUAL-VERIFY\b")
 
@@ -406,8 +416,7 @@ def _is_verify_boundary(ev: dict) -> bool:
     so the ticket is unproven (hostile-regression, machine-owned grammar).
     """
     txt = ev.get("text", "")
-    return txt == "transition to VERIFY" or txt.startswith(
-        _VERIFY_BOUNDARY_PREFIX)
+    return txt == "transition to VERIFY" or txt.startswith(_VERIFY_BOUNDARY_PREFIX)
 
 
 def verification_evidence(ticket_id: str, events: list[dict]) -> tuple[bool, str]:
@@ -460,9 +469,9 @@ def verification_evidence(ticket_id: str, events: list[dict]) -> tuple[bool, str
     return False, "unproven/failed"
 
 
-def bulk_verification_evidence(events: list[dict],
-                               ticket_ids: Iterable[str]
-                               ) -> dict[str, tuple[bool, str]]:
+def bulk_verification_evidence(
+    events: list[dict], ticket_ids: Iterable[str]
+) -> dict[str, tuple[bool, str]]:
     """ONE backward pass computing the verdict for EVERY requested ticket
     (perf wave T-1021).
 
@@ -527,6 +536,10 @@ def bulk_verification_evidence(events: list[dict],
             pending[tid] = decisive
     for tid in wanted:
         if tid not in verdicts:
-            verdicts[tid] = (False, "no current-cycle VERIFY boundary"
-                             if tid not in boundary_seen else "unproven/failed")
+            verdicts[tid] = (
+                False,
+                "no current-cycle VERIFY boundary"
+                if tid not in boundary_seen
+                else "unproven/failed",
+            )
     return verdicts

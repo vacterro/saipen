@@ -17,7 +17,6 @@ The identity it computes (git-delta-v1 / no-git-tree-v1 framing, record
 bytes, digest) is the semantic contract the live implementation must keep.
 """
 
-
 from __future__ import annotations
 
 import hashlib
@@ -53,10 +52,17 @@ _ROLE_FIELD = b"role_revision:"
 _SOURCE_MAGIC = b"saipen-source-fingerprint-v1\0"
 _ROLE_MAGIC = b"saipen-role-revision-v1\0"
 _GENERIC_ROLE_MAGIC = b"saipen-generic-role-revision-v1\0"
-_NO_GIT_EXCLUDED_DIRS = frozenset({
-    ".git", ".freebuff", ".claude", ".pytest_cache", ".ruff_cache",
-    "__pycache__", "node_modules",
-})
+_NO_GIT_EXCLUDED_DIRS = frozenset(
+    {
+        ".git",
+        ".freebuff",
+        ".claude",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules",
+    }
+)
 _NO_GIT_EXCLUDED_ROOT_FILES = frozenset({"nul"})
 
 
@@ -104,14 +110,16 @@ def _is_reparse_point(path: Path) -> bool:
 def _frame(record: _Record) -> bytes:
     if len(record.kind) != 1:
         raise FreshnessError("fingerprint record type must be exactly one byte")
-    return b"".join((
-        record.kind,
-        struct.pack(">Q", len(record.path)),
-        record.path,
-        struct.pack(">I", record.mode),
-        struct.pack(">Q", len(record.content)),
-        record.content,
-    ))
+    return b"".join(
+        (
+            record.kind,
+            struct.pack(">Q", len(record.path)),
+            record.path,
+            struct.pack(">I", record.mode),
+            struct.pack(">Q", len(record.content)),
+            record.content,
+        )
+    )
 
 
 def _digest(model: str, records: Iterable[_Record]) -> str:
@@ -162,7 +170,10 @@ def _read_regular(path: Path) -> bytes:
             chunks.append(chunk)
         after = os.fstat(fd)
         if (opened.st_size, opened.st_mtime_ns, opened.st_mode) != (
-                after.st_size, after.st_mtime_ns, after.st_mode):
+            after.st_size,
+            after.st_mtime_ns,
+            after.st_mode,
+        ):
             raise FreshnessError(f"fingerprint input changed while reading: {path}")
         return b"".join(chunks)
     except OSError as exc:
@@ -179,10 +190,11 @@ def _read_symlink(path: Path) -> bytes:
         after = path.lstat()
     except OSError as exc:
         raise FreshnessError(f"cannot read fingerprint symlink {path}: {exc}") from exc
-    if target != repeated or (
-            before.st_dev, before.st_ino, before.st_mode, before.st_mtime_ns
-    ) != (
-            after.st_dev, after.st_ino, after.st_mode, after.st_mtime_ns
+    if target != repeated or (before.st_dev, before.st_ino, before.st_mode, before.st_mtime_ns) != (
+        after.st_dev,
+        after.st_ino,
+        after.st_mode,
+        after.st_mtime_ns,
     ):
         raise FreshnessError(f"fingerprint symlink changed while reading: {path}")
     return os.fsencode(target)
@@ -212,16 +224,21 @@ def _record_current(root: Path, raw_path: bytes, declared_mode: int | None) -> _
         )
 
     if declared_mode is not None and declared_mode not in (mode, 0):
-        raise FreshnessError(
-            f"Git mode {declared_mode:o} disagrees with filesystem type at {path}"
-        )
+        raise FreshnessError(f"Git mode {declared_mode:o} disagrees with filesystem type at {path}")
     return _Record(kind, raw_path, mode, content)
 
 
 def _git_delta_listing(root: Path) -> tuple[bytes, bytes]:
     raw = _run_git(
-        root, "diff", "--raw", "-z", "--no-renames", "--no-ext-diff",
-        "--ignore-submodules=none", "HEAD", "--",
+        root,
+        "diff",
+        "--raw",
+        "-z",
+        "--no-renames",
+        "--no-ext-diff",
+        "--ignore-submodules=none",
+        "HEAD",
+        "--",
     )
     untracked = _run_git(root, "ls-files", "-z", "--others", "--exclude-standard", "--")
     return raw, untracked
@@ -251,13 +268,11 @@ def _parse_git_delta(root: Path, raw: bytes, untracked: bytes) -> list[_Record]:
         status_code = parts[4][:1]
         if status_code == b"U":
             raise FreshnessError(
-                "unmerged fingerprint input cannot become ready: "
-                + os.fsdecode(raw_path)
+                "unmerged fingerprint input cannot become ready: " + os.fsdecode(raw_path)
             )
         if status_code not in (b"A", b"D", b"M", b"T"):
             raise FreshnessError(
-                f"unsupported Git delta status {parts[4]!r}: "
-                f"{os.fsdecode(raw_path)}"
+                f"unsupported Git delta status {parts[4]!r}: {os.fsdecode(raw_path)}"
             )
         if status_code == b"D" or new_mode == 0:
             records[raw_path] = _Record(b"D", raw_path, old_mode, b"")
@@ -283,11 +298,12 @@ def _git_identity(root: Path) -> SourceIdentity:
     third_records = _parse_git_delta(root, *after)
     final = _git_delta_listing(root)
     final_head = _run_git(root, "rev-parse", "--verify", "HEAD").decode("ascii").strip()
-    if (head != final_head or not (before == middle == after == final)
-            or not (first_records == second_records == third_records)):
-        raise FreshnessError(
-            "source tree or HEAD changed while fingerprint inputs were being read"
-        )
+    if (
+        head != final_head
+        or not (before == middle == after == final)
+        or not (first_records == second_records == third_records)
+    ):
+        raise FreshnessError("source tree or HEAD changed while fingerprint inputs were being read")
     model = "git-delta-v1"
     return SourceIdentity(head, _digest(model, third_records), model)
 
@@ -310,9 +326,9 @@ def _walk_no_git(root: Path) -> list[_Record]:
                 info = entry.stat(follow_symlinks=False)
             except OSError as exc:
                 raise FreshnessError(f"cannot stat fingerprint input {path}: {exc}") from exc
-            if (stat.S_ISDIR(info.st_mode)
-                    and ((not rel_parts and entry.name == ".saipen")
-                         or entry.name in _NO_GIT_EXCLUDED_DIRS)):
+            if stat.S_ISDIR(info.st_mode) and (
+                (not rel_parts and entry.name == ".saipen") or entry.name in _NO_GIT_EXCLUDED_DIRS
+            ):
                 continue
             if not rel_parts and entry.name in _NO_GIT_EXCLUDED_ROOT_FILES:
                 continue
@@ -366,16 +382,13 @@ def compute_source_identity(project_root: Path | str) -> SourceIdentity:
         if probe is not None:
             detail = probe.stderr.decode("utf-8", "replace").strip()
         raise FreshnessError(
-            "Git metadata exists but work-tree discovery failed"
-            + (f": {detail}" if detail else "")
+            "Git metadata exists but work-tree discovery failed" + (f": {detail}" if detail else "")
         )
     model = "no-git-tree-v1"
     first_records = _walk_no_git(root)
     second_records = _walk_no_git(root)
     if first_records != second_records:
-        raise FreshnessError(
-            "no-Git source tree changed while fingerprint inputs were being read"
-        )
+        raise FreshnessError("no-Git source tree changed while fingerprint inputs were being read")
     return SourceIdentity("no-git", _digest(model, second_records), model)
 
 

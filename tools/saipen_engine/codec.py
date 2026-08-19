@@ -35,7 +35,7 @@ def _bomless_utf16(raw: bytes):
     if len(raw) < 4 or b"\x00" not in raw:
         return None
     head = raw[:4096]
-    head = head[:len(head) - len(head) % 2]
+    head = head[: len(head) - len(head) % 2]
     half = len(head) // 2
     if not half:
         return None
@@ -79,7 +79,7 @@ def _decode(raw: bytes) -> tuple[str, str, bytes]:
     """Return (text, clean_codec_name, bom)."""
     for bom, _dec, clean in _BOMS:
         if raw.startswith(bom):
-            return raw[len(bom):].decode(clean, errors="replace"), clean, bom
+            return raw[len(bom) :].decode(clean, errors="replace"), clean, bom
     bomless = _bomless_utf16(raw)
     if bomless:
         return raw.decode(bomless, errors="replace"), bomless, b""
@@ -111,8 +111,7 @@ def is_canonical_encoding(raw: bytes) -> bool:
 def checkpoint_paths(root: Path | str) -> list[Path]:
     """The three canonical checkpoint files, in load order."""
     root = Path(root)
-    return [root / ".saipen" / name
-            for name in ("STATE.md", "BOARD.md", "LOG.md")]
+    return [root / ".saipen" / name for name in ("STATE.md", "BOARD.md", "LOG.md")]
 
 
 def checkpoint_preflight(root: Path | str) -> str | None:
@@ -124,15 +123,19 @@ def checkpoint_preflight(root: Path | str) -> str | None:
     zero canonical writes, never transcoded implicitly (T-1003 / P1#3, P1#4)."""
     for path in checkpoint_paths(root):
         if not path.is_file():
-            return (f"{path.name} is missing -- a SAIPEN checkpoint requires "
-                     f"STATE.md, BOARD.md and LOG.md to all be present")
+            return (
+                f"{path.name} is missing -- a SAIPEN checkpoint requires "
+                f"STATE.md, BOARD.md and LOG.md to all be present"
+            )
         raw = path.read_bytes()
         if not is_canonical_encoding(raw):
             enc = encoding_of(path)
-            return (f"{path.name} is {enc}, not canonical UTF-8 without a BOM "
-                     f"-- every SAIPEN tool reads it byte-wise and will fail "
-                     f"differently; rewrite as UTF-8 without a BOM "
-                     f"(KNOWLEDGE/traps.md)")
+            return (
+                f"{path.name} is {enc}, not canonical UTF-8 without a BOM "
+                f"-- every SAIPEN tool reads it byte-wise and will fail "
+                f"differently; rewrite as UTF-8 without a BOM "
+                f"(KNOWLEDGE/traps.md)"
+            )
     return None
 
 
@@ -172,7 +175,7 @@ class Document:
             body = body.replace("\n", self.newline)
         if not self.final_newline:
             while body.endswith(self.newline):
-                body = body[:-len(self.newline)]
+                body = body[: -len(self.newline)]
         elif not body.endswith(self.newline):
             body += self.newline
         if self.bom:
@@ -184,7 +187,7 @@ def read_document(path: Path | str) -> Document:
     """Read a file and record its encoding/BOM/newline/final-newline facts."""
     path = Path(path)
     raw = path.read_bytes() if path.is_file() else b""
-    
+
     if path.name in ("STATE.md", "BOARD.md", "LOG.md"):
         if not is_canonical_encoding(raw):
             return Document(
@@ -195,7 +198,7 @@ def read_document(path: Path | str) -> Document:
                 final_newline=True,
                 raw_hash=hashlib.sha256(raw).hexdigest()[:16],
             )
-            
+
     text, encoding, bom = _decode(raw)
     newline = "\n"
     for candidate in ("\r\n", "\r", "\n"):

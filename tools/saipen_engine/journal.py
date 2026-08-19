@@ -37,8 +37,7 @@ from pathlib import Path
 
 from .board import strict_iso_utc, iso_utc_sort_key
 
-STATUS = ("PREPARED", "APPLYING", "VERIFIED", "COMMITTED", "ABORTED",
-          "CONFLICT", "RESOLVED")
+STATUS = ("PREPARED", "APPLYING", "VERIFIED", "COMMITTED", "ABORTED", "CONFLICT", "RESOLVED")
 # SETTLED: no further mutation work needed; recovery may not act. RESOLVED is
 # a conflict that was explicitly settled (accept-live or replan) with its
 # partial-application evidence preserved -- distinct from ABORTED, which would
@@ -60,22 +59,24 @@ LINEAGE_MIGRATION_OP = "op-migrate-lineage"
 # scan_pending trusts it only while those bytes are unchanged -- a missing,
 # corrupt or stale marker falls back to the strict manifest decode (correct,
 # legacy), never launders unresolved/corrupt evidence.
-SETTLED_MARKER = "SETTLED.json"
+SETTLED_DIR = ".saipen/recovery/settled"
 
 # Closed verification-policy registry. Recovery must run the SAME semantic
 # postcondition class as the original APPLY; a policy names the verifier
 # WITHOUT serializing Python callables (NITRO dogfood II, T-587).
-VERIFICATION_POLICIES = frozenset({
-    "core_fast",
-    "improve_atomic_file",
-    "userperson",
-    "sub_collect",
-    "sub_disposition",
-    "sub_lifecycle",
-    "sub_clean",
-    "sub_sync",
-    "none",
-})
+VERIFICATION_POLICIES = frozenset(
+    {
+        "core_fast",
+        "improve_atomic_file",
+        "userperson",
+        "sub_collect",
+        "sub_disposition",
+        "sub_lifecycle",
+        "sub_clean",
+        "sub_sync",
+        "none",
+    }
+)
 
 SOURCE_IDENTITY_PREFIX = "source-identity-v1:"
 MISSING_TREE_DEPENDENCY = "tree-missing-v1"
@@ -95,8 +96,7 @@ TARGET_ACTIONS = ("write", "delete_file", "delete_dir")
 
 
 def _now() -> str:
-    return datetime.datetime.now(datetime.timezone.utc).strftime(
-        "%Y-%m-%dT%H:%M:%SZ")
+    return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def hash_bytes(content: bytes) -> str:
@@ -134,8 +134,7 @@ def _hash_tree(path: Path) -> str:
         return ""
     digest = hashlib.sha256()
     try:
-        files = sorted(candidate for candidate in path.rglob("*")
-                       if candidate.is_file())
+        files = sorted(candidate for candidate in path.rglob("*") if candidate.is_file())
         for candidate in files:
             rel = candidate.relative_to(path).as_posix().encode("utf-8")
             raw = candidate.read_bytes()
@@ -183,8 +182,7 @@ def _hash_delete_tree(path: Path) -> str:
                 candidate = current_path / name
                 info = candidate.lstat()
                 attrs = getattr(info, "st_file_attributes", 0)
-                if candidate.is_symlink() or attrs & 0x400 \
-                        or not candidate.is_file():
+                if candidate.is_symlink() or attrs & 0x400 or not candidate.is_file():
                     rel = candidate.relative_to(path).as_posix()
                     return f"object-unsupported:{rel}"
                 rel = candidate.relative_to(path).as_posix().encode("utf-8")
@@ -234,17 +232,18 @@ def owned_target_path(root: Path, rel: str, *, kind: str = "target") -> Path:
     users get the raise (fail closed).
     """
     from .safeid import InvalidIdError, prove_inside
+
     if not isinstance(rel, str) or not rel:
         raise InvalidIdError(f"{kind} path {rel!r} is empty or not a string")
     if os.path.isabs(rel) or re.match(r"^[A-Za-z]:[\\/]", rel):
         raise InvalidIdError(
             f"{kind} {rel!r} is absolute or drive-qualified; only relative "
-            "project-owned paths are allowed")
+            "project-owned paths are allowed"
+        )
     return prove_inside(root / rel, root, kind=kind)
 
 
-def read_dependency_path(root: Path, rel: str, *,
-                         kind: str = "read-dependency") -> Path:
+def read_dependency_path(root: Path, rel: str, *, kind: str = "read-dependency") -> Path:
     """Resolve a READ-ONLY dependency path.
 
     Absolute paths are allowed here because read-only dependencies may
@@ -259,41 +258,50 @@ def read_dependency_path(root: Path, rel: str, *,
     return owned_target_path(root, rel, kind=kind)
 
 
-def safe_op_dir(root: Path, op_id: str) -> Path:
-    """Safely resolve and contain the op directory, refusing symlinks/junctions."""
-    from .safeid import prove_inside, InvalidIdError
+def validate_op_id(op_id: str) -> str:
+    from .safeid import InvalidIdError
+
     if not op_id or not isinstance(op_id, str):
         raise InvalidIdError("invalid op_id")
     if "/" in op_id or "\\" in op_id or op_id == "." or op_id == "..":
         raise InvalidIdError("op_id contains path separators")
-    
-    ops_dir = root / OPS_DIR
-    if ops_dir.exists():
-        info = os.lstat(ops_dir)
-        if ops_dir.is_symlink() or getattr(info, "st_file_attributes", 0) & 0x400:
-            raise InvalidIdError(f"OPS_DIR {OPS_DIR!r} is a symlink or reparse point")
-            
-    op_dir = ops_dir / op_id
+    return op_id
+
+
+def safe_op_dir(root: Path, op_id: str, base_dir: str = OPS_DIR) -> Path:
+    """Safely resolve and contain the op directory, refusing symlinks/junctions."""
+    from .safeid import prove_inside, InvalidIdError
+
+    if not op_id or not isinstance(op_id, str):
+        raise InvalidIdError("invalid op_id")
+    if "/" in op_id or "\\" in op_id or op_id == "." or op_id == "..":
+        raise InvalidIdError("op_id contains path separators")
+
+    b_dir = root / base_dir
+    if b_dir.exists():
+        info = os.lstat(b_dir)
+        if b_dir.is_symlink() or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise InvalidIdError(f"base_dir {base_dir!r} is a symlink or reparse point")
+
+    op_dir = b_dir / op_id
     prove_inside(op_dir, root, kind="op_dir")
-    
+
     if op_dir.exists():
         info = os.lstat(op_dir)
         if op_dir.is_symlink() or getattr(info, "st_file_attributes", 0) & 0x400:
             raise InvalidIdError(f"op_dir {op_id!r} is a symlink or reparse point")
-            
+
     return op_dir
 
-
-def validate_op_id(op_id: str) -> str:
     """Validate an operation id against the shared safe-id grammar before it
     becomes a filesystem path under .saipen/recovery/ops (T-1003 operational
     integrity). Raises InvalidIdError on any hostile id."""
     from .safeid import InvalidIdError, validate_safe_id
+
     if not isinstance(op_id, str) or not op_id:
         raise InvalidIdError("op_id is empty or not a string")
     if op_id.startswith("..") or "/" in op_id or "\\" in op_id:
-        raise InvalidIdError(f"op_id {op_id!r} is not a single safe path "
-                             "component")
+        raise InvalidIdError(f"op_id {op_id!r} is not a single safe path component")
     return validate_safe_id(op_id, kind="op_id")
 
 
@@ -330,14 +338,13 @@ def _target_live_hash(root: Path, target: dict) -> str:
 def hash_source_identity(project_root: Path | str) -> str:
     """Stable read-dependency token for canonical source identity."""
     from freshness import compute_source_identity
-    return source_identity_dependency(compute_source_identity(
-        Path(project_root)))
+
+    return source_identity_dependency(compute_source_identity(Path(project_root)))
 
 
 def source_identity_dependency(source) -> str:
     """Frame an already-sampled SourceIdentity as a journal CAS token."""
-    framed = (source.source_head + "\0" +
-              source.source_tree_fingerprint).encode("utf-8")
+    framed = (source.source_head + "\0" + source.source_tree_fingerprint).encode("utf-8")
     return SOURCE_IDENTITY_PREFIX + hashlib.sha256(framed).hexdigest()
 
 
@@ -389,39 +396,26 @@ def _atomic_write(path: Path, content: bytes) -> None:
     tmp.replace(path)
 
 
-def _write_settled_marker(journal: "Journal", record: dict) -> None:
-    """Publish the tiny settled receipt marker (perf wave T-1020).
+def _settle_journal(journal: "Journal") -> None:
+    """Move a settled receipt out of the unresolved ops namespace (T-1008).
 
     Called ONLY after the terminal manifest write is already durable, so a
-    marker failure can never rewrite semantic status. Publication is
-    deliberately NON-FATAL (T-1008): the manifest is the authoritative
-    receipt, and if the marker cannot be written (disk full, unwritable
-    dir) the caller still returns truthful committed semantics -- the next
-    pending scan simply falls back to the strict manifest decode for this
-    op.
-
-    The marker certifies the EXACT operation.json bytes it was written
-    over (manifest_hash). scan_pending trusts the marker only while those
-    bytes are unchanged; any manifest mutation (corruption, a replaced
-    PREPARED record, a release-facts update) invalidates the certification
-    and resolves through the authoritative strict decode, so a stale or
-    mismatched marker can never launder unresolved or corrupt evidence.
+    move failure can never rewrite semantic status. The move is deliberately
+    NON-FATAL: the manifest in ops/ is still the authoritative receipt. If the
+    rename fails (e.g. permission error, disk full), the caller returns
+    truthful COMMITTED semantics, and the next pending scan simply falls back
+    to the strict manifest decode for this op (it reads status=COMMITTED and
+    ignores it natively).
     """
+    settled_base = journal.project_root / SETTLED_DIR
     try:
-        manifest_bytes = journal.manifest.read_bytes()
+        settled_base.mkdir(parents=True, exist_ok=True)
+        settled_dir = safe_op_dir(journal.project_root, journal.op_id, SETTLED_DIR)
+        os.rename(journal.dir, settled_dir)
+        journal.dir = settled_dir
+        journal.manifest = settled_dir / "operation.json"
     except OSError:
-        return  # manifest unreadable -> no certification; strict decode owns truth
-    summary = {
-        "op_id": journal.op_id,
-        "status": record["status"],
-        "created_at": record.get("created_at", ""),
-        "operation": record.get("operation", ""),
-        "semantic_payload_hash": record.get("semantic_payload_hash", ""),
-        "manifest_hash": hashlib.sha256(manifest_bytes).hexdigest(),
-    }
-    with contextlib.suppress(OSError):
-        # Non-fatal: the manifest is the authoritative receipt.
-        _atomic_json(journal.dir / SETTLED_MARKER, summary)
+        pass
 
 
 def _crash_after(key: str) -> None:
@@ -465,24 +459,37 @@ def decode_operation_record(root: Path | str, op_dir: Path) -> dict:
     # (hostile-regression canonical-identity rule).
     root = Path(root).resolve()
     from .safeid import InvalidIdError
+
     manifest = op_dir / "operation.json"
     try:
         raw = manifest.read_bytes()
     except OSError as exc:
-        return {"ok": False, "code": "RECOVERY_CONFLICT",
-                "detail": f"operation.json is unreadable: {exc}"}
+        return {
+            "ok": False,
+            "code": "RECOVERY_CONFLICT",
+            "detail": f"operation.json is unreadable: {exc}",
+        }
     try:
         record = json.loads(raw.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        return {"ok": False, "code": "RECOVERY_CONFLICT",
-                "detail": f"operation.json is not valid JSON: {exc}"}
+        return {
+            "ok": False,
+            "code": "RECOVERY_CONFLICT",
+            "detail": f"operation.json is not valid JSON: {exc}",
+        }
     if not isinstance(record, dict):
-        return {"ok": False, "code": "RECOVERY_CONFLICT",
-                "detail": "operation record is not a JSON object"}
+        return {
+            "ok": False,
+            "code": "RECOVERY_CONFLICT",
+            "detail": "operation record is not a JSON object",
+        }
 
     def _bad(field: str, expected: str) -> dict:
-        return {"ok": False, "code": "VALIDATION_FAILED",
-                "detail": f"operation record field {field!r} {expected}"}
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "detail": f"operation record field {field!r} {expected}",
+        }
 
     def _strict_iso_utc(value: object) -> str:
         # Delegated to the ONE shared strict-UTC parser (P1#5): requires
@@ -501,8 +508,7 @@ def decode_operation_record(root: Path | str, op_dir: Path) -> dict:
     status = record.get("status")
     if status not in STATUS:
         return _bad("status", f"{status!r} is outside the closed status set")
-    if not isinstance(record.get("operation"), str) \
-            or not record.get("operation"):
+    if not isinstance(record.get("operation"), str) or not record.get("operation"):
         return _bad("operation", "must be a non-empty string")
     for key in ("semantic_payload_hash", "created_at"):
         value = record.get(key)
@@ -523,28 +529,28 @@ def decode_operation_record(root: Path | str, op_dir: Path) -> dict:
     created_at = record.get("created_at") or ""
     parsed_stamp = _strict_iso_utc(created_at)
     if status in UNRESOLVED and not parsed_stamp:
-        return _bad("created_at",
-                    "must be a strict ISO-8601 UTC timestamp (Z or +00:00, "
-                    f"aware); got {created_at!r}")
+        return _bad(
+            "created_at",
+            f"must be a strict ISO-8601 UTC timestamp (Z or +00:00, aware); got {created_at!r}",
+        )
     record["created_at"] = parsed_stamp or created_at
     if not isinstance(record.get("agent"), str):
         return _bad("agent", "must be a string")
     if not isinstance(record.get("project_identity"), str):
         return _bad("project_identity", "must be a string")
-    if record.get("project_lineage") is not None \
-            and not isinstance(record.get("project_lineage"), str):
+    if record.get("project_lineage") is not None and not isinstance(
+        record.get("project_lineage"), str
+    ):
         return _bad("project_lineage", "must be a string or absent")
     policy = record.get("verification_policy", "none")
     if not isinstance(policy, str) or policy not in VERIFICATION_POLICIES:
-        return _bad("verification_policy",
-                    f"{policy!r} is outside the closed policy set")
+        return _bad("verification_policy", f"{policy!r} is outside the closed policy set")
     for key in ("preconditions", "read_preconditions"):
         value = record.get(key, {})
         if not isinstance(value, dict):
             return _bad(key, "must be a JSON object")
         for path, expected in value.items():
-            if not isinstance(path, str) or not path \
-                    or not isinstance(expected, str):
+            if not isinstance(path, str) or not path or not isinstance(expected, str):
                 return _bad(key, "must map string paths to string hashes")
     if not isinstance(record.get("progress_index"), int):
         return _bad("progress_index", "must be an integer")
@@ -570,25 +576,25 @@ def decode_operation_record(root: Path | str, op_dir: Path) -> dict:
         # (absolute, drive-qualified, traversal) is VALIDATION_FAILED, never a
         # crash: safe-path exceptions translate to structured refusals.
         try:
-            canonical = owned_target_path(
-                root, target["path"]).relative_to(root).as_posix()
+            canonical = owned_target_path(root, target["path"]).relative_to(root).as_posix()
         except InvalidIdError as exc:
-            return _bad(f"targets[{index}].path",
-                        f"is not an owned project path: {exc}")
+            return _bad(f"targets[{index}].path", f"is not an owned project path: {exc}")
         if canonical in seen_paths:
-            return _bad(f"targets[{index}].path",
-                        f"resolves to owned object {canonical!r} which is "
-                        "already a target -- one owned object may appear at "
-                        "most once per operation")
+            return _bad(
+                f"targets[{index}].path",
+                f"resolves to owned object {canonical!r} which is "
+                "already a target -- one owned object may appear at "
+                "most once per operation",
+            )
         seen_paths.add(canonical)
         role = target.get("role")
         if role not in ROLES:
-            return _bad(f"targets[{index}].role",
-                        f"{role!r} is outside the closed role set")
+            return _bad(f"targets[{index}].role", f"{role!r} is outside the closed role set")
         action = target.get("action", "write")
         if not isinstance(action, str) or action not in TARGET_ACTIONS:
-            return _bad(f"targets[{index}].action",
-                        f"{action!r} is outside {sorted(TARGET_ACTIONS)}")
+            return _bad(
+                f"targets[{index}].action", f"{action!r} is outside {sorted(TARGET_ACTIONS)}"
+            )
         if not isinstance(target.get("applied"), bool):
             return _bad(f"targets[{index}].applied", "must be a boolean")
         if "content" in target and not isinstance(target["content"], str):
@@ -603,7 +609,8 @@ def decode_operation_record(root: Path | str, op_dir: Path) -> dict:
                     f"targets[{index}].path",
                     f"{target['path']!r} is a write target of an unresolved "
                     "op but its staged-write evidence "
-                    f"{name!r} is missing; journal evidence is corrupt")
+                    f"{name!r} is missing; journal evidence is corrupt",
+                )
     return {"ok": True, "record": record}
 
 
@@ -626,7 +633,7 @@ def scan_pending(project_root: Path | str) -> tuple[list[dict], list[dict]]:
     """
     root = Path(project_root).resolve()
     ops_dir = root / OPS_DIR
-    recovery_dir = ops_dir.parent   # .saipen/recovery
+    recovery_dir = ops_dir.parent  # .saipen/recovery
     found: list[dict] = []
 
     # ONE probe decides absence vs corruption, and it is `os.lstat` -- NOT
@@ -651,39 +658,75 @@ def scan_pending(project_root: Path | str) -> tuple[list[dict], list[dict]]:
         # -> CLEAN, no evidence to surface.
         return found, []
     except OSError as exc:
-        found.append({"op_id": "OPS_DIR", "status": "CORRUPT_JOURNAL", "corrupt": True,
-                      "detail": f"RECOVERY is unreadable ({type(exc).__name__}): {exc}"})
+        found.append(
+            {
+                "op_id": "OPS_DIR",
+                "status": "CORRUPT_JOURNAL",
+                "corrupt": True,
+                "detail": f"RECOVERY is unreadable ({type(exc).__name__}): {exc}",
+            }
+        )
         return found, []
     if os.path.islink(recovery_dir) or getattr(rec_info, "st_file_attributes", 0) & 0x400:
-        found.append({"op_id": "OPS_DIR", "status": "CORRUPT_JOURNAL", "corrupt": True,
-                      "detail": "RECOVERY is a symlink or reparse point"})
+        found.append(
+            {
+                "op_id": "OPS_DIR",
+                "status": "CORRUPT_JOURNAL",
+                "corrupt": True,
+                "detail": "RECOVERY is a symlink or reparse point",
+            }
+        )
         return found, []
     if not recovery_dir.is_dir():
         # The recovery container exists but is a FILE (or other non-dir): the
         # ops directory cannot live underneath it, so any pending op is
         # unrecoverable evidence.
-        found.append({"op_id": "OPS_DIR", "status": "CORRUPT_JOURNAL", "corrupt": True,
-                      "detail": "RECOVERY exists but is not a directory"})
+        found.append(
+            {
+                "op_id": "OPS_DIR",
+                "status": "CORRUPT_JOURNAL",
+                "corrupt": True,
+                "detail": "RECOVERY exists but is not a directory",
+            }
+        )
         return found, []
     # The recovery container is a real directory; now probe the ops dir exactly
     # as before -- only FileNotFoundError here means a genuinely absent ops dir.
     try:
         ops_info = os.lstat(ops_dir)
     except FileNotFoundError:
-        return found, []   # genuinely absent -> CLEAN, no evidence to surface
+        return found, []  # genuinely absent -> CLEAN, no evidence to surface
     except OSError as exc:
         # Includes NotADirectoryError (a parent component is a file) and
         # PermissionError: corrupt evidence, never "nothing pending".
-        found.append({"op_id": "OPS_DIR", "status": "CORRUPT_JOURNAL", "corrupt": True,
-                      "detail": f"OPS_DIR is unreadable ({type(exc).__name__}): {exc}"})
+        found.append(
+            {
+                "op_id": "OPS_DIR",
+                "status": "CORRUPT_JOURNAL",
+                "corrupt": True,
+                "detail": f"OPS_DIR is unreadable ({type(exc).__name__}): {exc}",
+            }
+        )
         return found, []
     if os.path.islink(ops_dir) or getattr(ops_info, "st_file_attributes", 0) & 0x400:
-        found.append({"op_id": "OPS_DIR", "status": "CORRUPT_JOURNAL", "corrupt": True,
-                      "detail": "OPS_DIR is a symlink or reparse point"})
+        found.append(
+            {
+                "op_id": "OPS_DIR",
+                "status": "CORRUPT_JOURNAL",
+                "corrupt": True,
+                "detail": "OPS_DIR is a symlink or reparse point",
+            }
+        )
         return found, []
     if not ops_dir.is_dir():
-        found.append({"op_id": "OPS_DIR", "status": "CORRUPT_JOURNAL", "corrupt": True,
-                      "detail": "OPS_DIR exists but is not a directory"})
+        found.append(
+            {
+                "op_id": "OPS_DIR",
+                "status": "CORRUPT_JOURNAL",
+                "corrupt": True,
+                "detail": "OPS_DIR exists but is not a directory",
+            }
+        )
         return found, []
 
     try:
@@ -693,8 +736,14 @@ def scan_pending(project_root: Path | str) -> tuple[list[dict], list[dict]]:
         # P1#5 corrupt-evidence partition).
         entries = list(ops_dir.iterdir())
     except OSError as exc:
-        found.append({"op_id": "OPS_DIR", "status": "CORRUPT_JOURNAL", "corrupt": True,
-                      "detail": f"OPS_DIR entry listing failed: {exc}"})
+        found.append(
+            {
+                "op_id": "OPS_DIR",
+                "status": "CORRUPT_JOURNAL",
+                "corrupt": True,
+                "detail": f"OPS_DIR entry listing failed: {exc}",
+            }
+        )
         return found, []
 
     for entry in entries:
@@ -706,26 +755,38 @@ def scan_pending(project_root: Path | str) -> tuple[list[dict], list[dict]]:
         except OSError as exc:
             # Everything else -- including NotADirectoryError, i.e. a malformed
             # parent component -- is CORRUPT_JOURNAL evidence (P1#6).
-            found.append({"op_id": entry.name, "status": "CORRUPT_JOURNAL",
-                          "corrupt": True,
-                          "detail": f"op_dir stat failed "
-                                    f"({type(exc).__name__}): {exc}"})
+            found.append(
+                {
+                    "op_id": entry.name,
+                    "status": "CORRUPT_JOURNAL",
+                    "corrupt": True,
+                    "detail": f"op_dir stat failed ({type(exc).__name__}): {exc}",
+                }
+            )
             continue
-        if stat.S_ISLNK(info.st_mode) or getattr(
-                info, "st_file_attributes", 0) & 0x400:
-            found.append({"op_id": entry.name, "status": "CORRUPT_JOURNAL",
-                          "corrupt": True,
-                          "detail": "op_dir is a symlink or reparse point"})
+        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+            found.append(
+                {
+                    "op_id": entry.name,
+                    "status": "CORRUPT_JOURNAL",
+                    "corrupt": True,
+                    "detail": "op_dir is a symlink or reparse point",
+                }
+            )
             continue
         if not stat.S_ISDIR(info.st_mode):
             # An unexpected NON-directory entry under recovery/ops (e.g. a
             # stray regular file) is corrupt evidence, never a launder into
             # CLEAN (second-wave P1): every entry under ops must be a valid
             # manifest-bearing op directory.
-            found.append({"op_id": entry.name, "status": "CORRUPT_JOURNAL",
-                          "corrupt": True,
-                          "detail": "unexpected non-directory entry under "
-                                    "recovery/ops"})
+            found.append(
+                {
+                    "op_id": entry.name,
+                    "status": "CORRUPT_JOURNAL",
+                    "corrupt": True,
+                    "detail": "unexpected non-directory entry under recovery/ops",
+                }
+            )
             continue
         if not (entry / "operation.json").is_file():
             # A directory with NO manifest is an interrupted pre-manifest
@@ -735,120 +796,61 @@ def scan_pending(project_root: Path | str) -> tuple[list[dict], list[dict]]:
             # over orphaned recovery evidence. Do not delete or guess the
             # staged bytes automatically; surface CORRUPT_JOURNAL and force an
             # explicit resolve.
-            found.append({"op_id": entry.name, "status": "CORRUPT_JOURNAL",
-                          "corrupt": True,
-                          "detail": "op directory has no operation.json "
-                                    "manifest (interrupted pre-manifest "
-                                    "staging?); orphan staged evidence must "
-                                    "be resolved explicitly"})
+            found.append(
+                {
+                    "op_id": entry.name,
+                    "status": "CORRUPT_JOURNAL",
+                    "corrupt": True,
+                    "detail": "op directory has no operation.json "
+                    "manifest (interrupted pre-manifest "
+                    "staging?); orphan staged evidence must "
+                    "be resolved explicitly",
+                }
+            )
             continue
         # Perf wave T-1020 + T-1008: a valid engine-written SETTLED marker
-        # means this op is a settled idempotence receipt -- history, never
-        # pending truth -- PROVIDED the manifest bytes it certifies are
-        # unchanged. Hot pending scans therefore read the tiny marker plus
-        # one manifest hash instead of deep-decoding every historical
-        # manifest (staged-evidence checks, owned-path resolution,
-        # precondition validation), so scan cost stops scaling with settled
-        # history. The MANIFEST remains the single authoritative receipt:
-        #
-        # - a missing marker falls back to the strict full decode below;
-        # - a corrupt marker (unreadable, symlink, non-JSON, wrong op_id,
-        #   non-settled status, no certification) is CORRUPT_JOURNAL, never
-        #   laundered into CLEAN;
-        # - a marker whose certified manifest hash no longer matches the
-        #   live operation.json is STALE evidence: the strict decode below
-        #   is the only authority, so a surviving COMMITTED marker can
-        #   never hide a corrupt or PREPARED manifest and a new writer
-        #   stays blocked (fail closed).
-        marker = entry / SETTLED_MARKER
-        try:
-            marker_info = os.lstat(marker)
-        except FileNotFoundError:
-            marker = None
-        except OSError as exc:
-            found.append({"op_id": entry.name, "status": "CORRUPT_JOURNAL",
-                          "corrupt": True,
-                          "detail": f"settled marker unreadable "
-                                    f"({type(exc).__name__}): {exc}"})
-            continue
-        if marker is not None:
-            if stat.S_ISLNK(marker_info.st_mode) or getattr(
-                    marker_info, "st_file_attributes", 0) & 0x400:
-                found.append({"op_id": entry.name, "status": "CORRUPT_JOURNAL",
-                              "corrupt": True,
-                              "detail": "settled marker is a symlink or "
-                                        "reparse point"})
-                continue
-            try:
-                summary = json.loads(marker.read_bytes().decode("utf-8"))
-            except (UnicodeDecodeError, json.JSONDecodeError, OSError) as exc:
-                found.append({"op_id": entry.name, "status": "CORRUPT_JOURNAL",
-                              "corrupt": True,
-                              "detail": f"settled marker is not valid JSON "
-                                        f"({type(exc).__name__}): {exc}"})
-                continue
-            if (not isinstance(summary, dict)
-                    or summary.get("op_id") != entry.name
-                    or summary.get("status") not in SETTLED):
-                found.append({"op_id": entry.name, "status": "CORRUPT_JOURNAL",
-                              "corrupt": True,
-                              "detail": "settled marker does not match the "
-                                        "op directory or names a non-settled "
-                                        "status"})
-                continue
-            certified = summary.get("manifest_hash")
-            if not isinstance(certified, str) or not certified:
-                # No certification -> the marker proves nothing; the strict
-                # manifest decode below is the only authority.
-                marker = None
-            else:
-                try:
-                    manifest_bytes = (entry / "operation.json").read_bytes()
-                except OSError as exc:
-                    found.append({
-                        "op_id": entry.name, "status": "CORRUPT_JOURNAL",
-                        "corrupt": True,
-                        "detail": f"operation.json unreadable despite a "
-                                  f"settled marker ({type(exc).__name__}): "
-                                  f"{exc}"})
-                    continue
-                if hashlib.sha256(manifest_bytes).hexdigest() != certified:
-                    # Stale/mismatched marker: the manifest changed after
-                    # settling (corruption, tampering, a replaced record).
-                    # Resolve through the authoritative strict decode below
-                    # -- it surfaces PREPARED/CONFLICT as pending and
-                    # unreadable/invalid bytes as CORRUPT_JOURNAL, so the
-                    # marker can never launder unresolved/corrupt evidence.
-                    marker = None
-                else:
-                    continue  # certified settled receipt: history, never pending truth
         try:
             decoded = decode_operation_record(root, entry)
         except Exception as exc:
             # Defense-in-depth: the decoder is the strict gate, but a receipt it
             # cannot even name must surface as CORRUPT evidence, never a
             # traceback that takes the whole project down.
-            found.append({"op_id": entry.name, "status": "CORRUPT_JOURNAL",
-                          "corrupt": True,
-                          "detail": f"operation record refused "
-                                    f"({type(exc).__name__}): {exc}"})
+            found.append(
+                {
+                    "op_id": entry.name,
+                    "status": "CORRUPT_JOURNAL",
+                    "corrupt": True,
+                    "detail": f"operation record refused ({type(exc).__name__}): {exc}",
+                }
+            )
             continue
         if not decoded["ok"]:
-            found.append({"op_id": entry.name, "status": "CORRUPT_JOURNAL",
-                          "corrupt": True, "detail": decoded["detail"]})
+            found.append(
+                {
+                    "op_id": entry.name,
+                    "status": "CORRUPT_JOURNAL",
+                    "corrupt": True,
+                    "detail": decoded["detail"],
+                }
+            )
             continue
         record = decoded["record"]
         if record.get("status") not in SETTLED:
-            found.append({"op_id": record["op_id"],
-                          "status": record.get("status"),
-                          "created_at": record.get("created_at", "")})
+            found.append(
+                {
+                    "op_id": record["op_id"],
+                    "status": record.get("status"),
+                    "created_at": record.get("created_at", ""),
+                }
+            )
     # Order by the REAL UTC instant (never the original spelling); op_id is only
     # the equal-instant tiebreak. A spelling-only lexical sort reverses chronology
     # inside one second (e.g. `00Z` > `00.900000Z`), so the sort key is the
     # parsed datetime (P1#3).
     _earliest = datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
-    found.sort(key=lambda op: (iso_utc_sort_key(op.get("created_at", ""))
-                               or _earliest, op["op_id"]))
+    found.sort(
+        key=lambda op: (iso_utc_sort_key(op.get("created_at", "")) or _earliest, op["op_id"])
+    )
     conflicts = [op for op in found if op.get("status") == "CONFLICT"]
     return found, conflicts
 
@@ -875,8 +877,7 @@ def pending_conflicts(project_root: Path | str) -> list[dict]:
     return scan_pending(project_root)[1]
 
 
-def recovery_preflight(project_root: Path | str,
-                       exclude_op_id: str | None = None) -> dict:
+def recovery_preflight(project_root: Path | str, exclude_op_id: str | None = None) -> dict:
     """Mandatory scan before any new mutation.
 
     - an unresolved CONFLICT exists -> REFUSE RECOVERY_CONFLICT, evidence
@@ -898,30 +899,40 @@ def recovery_preflight(project_root: Path | str,
     pending, conflicts = scan_pending(root)
     conflicts = [op for op in conflicts if op["op_id"] != exclude_op_id]
     if conflicts:
-        return {"ok": False, "code": "RECOVERY_CONFLICT",
-                "op_ids": [op["op_id"] for op in conflicts],
-                "recovery_required": True,
-                "detail": f"unresolved conflict {conflicts[0]['op_id']} "
-                          "blocks new mutation; resolve it explicitly (saipen "
-                          "recover) before any further canonical write"}
-    corrupt = [op for op in pending
-               if op.get("corrupt") and op["op_id"] != exclude_op_id]
+        return {
+            "ok": False,
+            "code": "RECOVERY_CONFLICT",
+            "op_ids": [op["op_id"] for op in conflicts],
+            "recovery_required": True,
+            "detail": f"unresolved conflict {conflicts[0]['op_id']} "
+            "blocks new mutation; resolve it explicitly (saipen "
+            "recover) before any further canonical write",
+        }
+    corrupt = [op for op in pending if op.get("corrupt") and op["op_id"] != exclude_op_id]
     if corrupt:
-        return {"ok": False, "code": "CORRUPT_JOURNAL",
-                "op_ids": [op["op_id"] for op in corrupt],
-                "recovery_required": True,
-                "detail": (f"corrupt journal evidence {corrupt[0]['op_id']} "
-                           "blocks new mutation: "
-                           f"{corrupt[0].get('detail', '')} -- resolve the "
-                           "corrupt receipt explicitly before any further "
-                           "canonical write")}
+        return {
+            "ok": False,
+            "code": "CORRUPT_JOURNAL",
+            "op_ids": [op["op_id"] for op in corrupt],
+            "recovery_required": True,
+            "detail": (
+                f"corrupt journal evidence {corrupt[0]['op_id']} "
+                "blocks new mutation: "
+                f"{corrupt[0].get('detail', '')} -- resolve the "
+                "corrupt receipt explicitly before any further "
+                "canonical write"
+            ),
+        }
     pending = [op for op in pending if op["op_id"] != exclude_op_id]
     if not pending:
         return {"ok": True, "recovered": []}
     if len(pending) > 1:
-        return {"ok": False, "code": "RECOVERY_REQUIRED",
-                "op_ids": [op["op_id"] for op in pending],
-                "recovery_required": True}
+        return {
+            "ok": False,
+            "code": "RECOVERY_REQUIRED",
+            "op_ids": [op["op_id"] for op in pending],
+            "recovery_required": True,
+        }
     result = _recover_locked(root, pending[0]["op_id"])
     if not result["ok"]:
         return result
@@ -941,22 +952,34 @@ class Journal:
         # ids (../../x, absolute, drive-qualified) must never escape (T-1003
         # operational integrity).
         self.op_id = validate_op_id(op_id)
-        
+
         # Prevent symlink/junction escape
-        self.dir = safe_op_dir(self.project_root, self.op_id)
-        
+        ops_op_dir = safe_op_dir(self.project_root, self.op_id, OPS_DIR)
+        settled_op_dir = safe_op_dir(self.project_root, self.op_id, SETTLED_DIR)
+
+        if settled_op_dir.is_dir() and not ops_op_dir.is_dir():
+            self.dir = settled_op_dir
+        else:
+            self.dir = ops_op_dir
+
         self.manifest = self.dir / "operation.json"
 
     def exists(self) -> bool:
         return self.manifest.is_file()
 
-    def start(self, operation: str, agent: str, project_identity: str,
-              semantic_payload_hash: str, targets: list[dict],
-              preconditions: dict | None = None,
-              verification_policy: str = "none",
-              read_preconditions: dict | None = None,
-              receipt_metadata: dict | None = None,
-              project_lineage: str | None = None) -> None:
+    def start(
+        self,
+        operation: str,
+        agent: str,
+        project_identity: str,
+        semantic_payload_hash: str,
+        targets: list[dict],
+        preconditions: dict | None = None,
+        verification_policy: str = "none",
+        read_preconditions: dict | None = None,
+        receipt_metadata: dict | None = None,
+        project_lineage: str | None = None,
+    ) -> None:
         """Write PREPARED: op metadata, per-target before/after hashes, and
         the exact staged final bytes of every target.
 
@@ -981,7 +1004,8 @@ class Journal:
         if verification_policy not in VERIFICATION_POLICIES:
             raise ValueError(
                 f"verification_policy {verification_policy!r} outside "
-                f"{sorted(VERIFICATION_POLICIES)}")
+                f"{sorted(VERIFICATION_POLICIES)}"
+            )
         self.dir.mkdir(parents=True, exist_ok=True)
         try:
             # Re-check after mkdir (T-1004 journal integrity)
@@ -999,14 +1023,16 @@ class Journal:
                         content = content.encode("utf-8")
                     name = staged_name(index, canonical.relative_to(self.project_root).as_posix())
                     (self.dir / name).write_bytes(content)
-                record_targets.append({
-                    "path": target["path"],
-                    "role": target["role"],
-                    "action": action,
-                    "before_hash": target["before_hash"],
-                    "after_hash": target["after_hash"],
-                    "applied": False,
-                })
+                record_targets.append(
+                    {
+                        "path": target["path"],
+                        "role": target["role"],
+                        "action": action,
+                        "before_hash": target["before_hash"],
+                        "after_hash": target["after_hash"],
+                        "applied": False,
+                    }
+                )
             record = {
                 "op_id": self.op_id,
                 "operation": operation,
@@ -1031,21 +1057,22 @@ class Journal:
             _atomic_json(self.manifest, record)
         except Exception:
             import shutil
+
             shutil.rmtree(self.dir, ignore_errors=True)
             raise
 
-    def mark(self, status: str, progress_index: int | None = None,
-             target_index: int | None = None) -> None:
+    def mark(
+        self, status: str, progress_index: int | None = None, target_index: int | None = None
+    ) -> None:
         record = self.read()
         record["status"] = status
         if progress_index is not None:
             record["progress_index"] = progress_index
-        if target_index is not None and 0 <= target_index < len(
-                record["targets"]):
+        if target_index is not None and 0 <= target_index < len(record["targets"]):
             record["targets"][target_index]["applied"] = True
         _atomic_json(self.manifest, record)
         if status in SETTLED:
-            _write_settled_marker(self, record)
+            _settle_journal(self)
 
     def append_targets(self, targets: list[dict]) -> None:
         """Append write targets to an existing operation (T-994 release).
@@ -1067,8 +1094,7 @@ class Journal:
             # initial staging uses, so recovery finds appended evidence by the
             # same rule and a deep path can never overflow a filesystem name
             # (OSError Errno 36). The slug-based name is read-compatible only.
-            canonical = owned_target_path(
-                self.project_root, target["path"])
+            canonical = owned_target_path(self.project_root, target["path"])
             rel = canonical.relative_to(self.project_root).as_posix()
             if action == "write":
                 content = target["content"]
@@ -1077,14 +1103,16 @@ class Journal:
                 (self.dir / staged_name(index, rel)).write_bytes(content)
             new_target = dict(target)
             new_target["path"] = rel
-            record_targets.append({
-                "path": new_target["path"],
-                "role": new_target.get("role", "generic"),
-                "action": action,
-                "before_hash": new_target.get("before_hash", ""),
-                "after_hash": new_target.get("after_hash", ""),
-                "applied": False,
-            })
+            record_targets.append(
+                {
+                    "path": new_target["path"],
+                    "role": new_target.get("role", "generic"),
+                    "action": action,
+                    "before_hash": new_target.get("before_hash", ""),
+                    "after_hash": new_target.get("after_hash", ""),
+                    "applied": False,
+                }
+            )
         _atomic_json(self.manifest, record)
 
     def update(self, **fields) -> None:
@@ -1104,7 +1132,11 @@ class Journal:
     def staged_content(self, index: int) -> bytes:
         record = self.read()
         target_path = record["targets"][index]["path"]
-        canonical = owned_target_path(self.project_root, target_path).relative_to(self.project_root).as_posix()
+        canonical = (
+            owned_target_path(self.project_root, target_path)
+            .relative_to(self.project_root)
+            .as_posix()
+        )
         name = staged_name(index, canonical)
         f = self.dir / name
         if not f.exists():
@@ -1134,8 +1166,9 @@ def _verify_target_bytes(root: Path, targets: list[dict]) -> str | None:
     for target in targets:
         live = _target_live_hash(root, target)
         if live != target["after_hash"]:
-            return (f"target {target['path']}: live {live!r} != planned "
-                    f"after {target['after_hash']!r}")
+            return (
+                f"target {target['path']}: live {live!r} != planned after {target['after_hash']!r}"
+            )
     return None
 
 
@@ -1154,34 +1187,47 @@ def _recovery_identity_binding(root: Path, record: dict) -> dict:
     (explicit compatibility boundary). A moved ambiguous legacy receipt
     refuses: without lineage there is no way to prove it belongs here.
     """
-    from .paths import (project_lineage_identity,
-                        runtime_lock_identity)
+    from .paths import project_lineage_identity, runtime_lock_identity
+
     record_lineage = record.get("project_lineage")
     if record_lineage:
         live_lineage = project_lineage_identity(root)
         if not live_lineage or live_lineage != record_lineage:
-            return {"ok": False, "code": "PROJECT_MISMATCH",
-                    "recovery_required": True,
-                    "detail": (f"receipt lineage {record_lineage!r} does not "
-                               f"match this project's lineage "
-                               f"{live_lineage!r}; refuse cross-project "
-                               "recovery with zero writes")}
+            return {
+                "ok": False,
+                "code": "PROJECT_MISMATCH",
+                "recovery_required": True,
+                "detail": (
+                    f"receipt lineage {record_lineage!r} does not "
+                    f"match this project's lineage "
+                    f"{live_lineage!r}; refuse cross-project "
+                    "recovery with zero writes"
+                ),
+            }
         return {"ok": True}
     # Legacy receipt without a durable lineage.
     record_runtime = record.get("project_identity")
     live_runtime = runtime_lock_identity(root)
     if not record_runtime:
-        return {"ok": False, "code": "PROJECT_MISMATCH",
-                "recovery_required": True,
-                "detail": "receipt has no project lineage and no runtime "
-                          "identity; refuse to guess which project owns it"}
+        return {
+            "ok": False,
+            "code": "PROJECT_MISMATCH",
+            "recovery_required": True,
+            "detail": "receipt has no project lineage and no runtime "
+            "identity; refuse to guess which project owns it",
+        }
     if record_runtime != live_runtime:
-        return {"ok": False, "code": "PROJECT_MISMATCH",
-                "recovery_required": True,
-                "detail": ("legacy receipt (no lineage) was created at "
-                           f"{record_runtime!r}, not the current project "
-                           f"{live_runtime!r}; a moved ambiguous legacy "
-                           "receipt must refuse")}
+        return {
+            "ok": False,
+            "code": "PROJECT_MISMATCH",
+            "recovery_required": True,
+            "detail": (
+                "legacy receipt (no lineage) was created at "
+                f"{record_runtime!r}, not the current project "
+                f"{live_runtime!r}; a moved ambiguous legacy "
+                "receipt must refuse"
+            ),
+        }
     return {"ok": True}
 
 
@@ -1204,6 +1250,7 @@ def _read_lineage_strict(root: Path) -> tuple[str | None, str | None]:
     fail-closed material -- distinct from absent so the bootstrap never
     overwrites a present carrier)."""
     from .paths import parse_identity_content
+
     path = root / ".saipen" / "IDENTITY.md"
     if not path.is_file():
         return None, None
@@ -1238,9 +1285,9 @@ def ensure_project_lineage(root: Path | str) -> str:
     Caller must hold the project writer lock (this never acquires it).
     Raises LineageRefusal on any fail-closed condition.
     """
-    from .paths import (identity_file_content, new_project_lineage,
-                        runtime_lock_identity)
+    from .paths import identity_file_content, new_project_lineage, runtime_lock_identity
     import shutil
+
     root = Path(root)
     lineage, error = _read_lineage_strict(root)
     if lineage:
@@ -1250,7 +1297,8 @@ def ensure_project_lineage(root: Path | str) -> str:
             "RECOVERY_REQUIRED",
             f".saipen/IDENTITY.md is present but malformed ({error}); refuse "
             "to mint or overwrite a lineage -- restore the canonical carrier "
-            "or resolve explicitly")
+            "or resolve explicitly",
+        )
     journal = Journal(root, LINEAGE_MIGRATION_OP)
     if journal.exists():
         # Crash-left migration: finish it first, then re-read. Callers of
@@ -1268,8 +1316,8 @@ def ensure_project_lineage(root: Path | str) -> str:
         elif not result["ok"]:
             raise LineageRefusal(
                 result.get("code", "RECOVERY_REQUIRED"),
-                f"lineage migration recovery failed: "
-                f"{result.get('detail', '')}")
+                f"lineage migration recovery failed: {result.get('detail', '')}",
+            )
         else:
             lineage, error = _read_lineage_strict(root)
             if lineage:
@@ -1280,18 +1328,32 @@ def ensure_project_lineage(root: Path | str) -> str:
                 f"({result.get('code')}) but .saipen/IDENTITY.md is "
                 f"{'missing' if not error else f'malformed ({error})'}; "
                 "refuse to mint a new lineage -- restore the carrier or "
-                "resolve explicitly")
+                "resolve explicitly",
+            )
     lineage = new_project_lineage()
     result = run_mutation(
-        root, LINEAGE_MIGRATION_OP, "migrate_lineage", "saipen",
-        runtime_lock_identity(root), "lineage-migration",
-        [{"path": ".saipen/IDENTITY.md", "role": "manifest",
-          "action": "write", "content": identity_file_content(lineage)}],
-        verification_policy="none", _ensure_lineage=False)
+        root,
+        LINEAGE_MIGRATION_OP,
+        "migrate_lineage",
+        "saipen",
+        runtime_lock_identity(root),
+        "lineage-migration",
+        [
+            {
+                "path": ".saipen/IDENTITY.md",
+                "role": "manifest",
+                "action": "write",
+                "content": identity_file_content(lineage),
+            }
+        ],
+        verification_policy="none",
+        _ensure_lineage=False,
+    )
     if not result["ok"]:
         raise LineageRefusal(
             result.get("code", "RECOVERY_REQUIRED"),
-            f"lineage migration failed: {result.get('detail', '')}")
+            f"lineage migration failed: {result.get('detail', '')}",
+        )
     # Migration COMMITTED: return ONLY the exact persisted value -- never the
     # minted one, so a write that silently did not land cannot hand out a
     # phantom lineage.
@@ -1302,19 +1364,23 @@ def ensure_project_lineage(root: Path | str) -> str:
         "RECOVERY_REQUIRED",
         f"lineage migration COMMITTED but .saipen/IDENTITY.md is "
         f"{'missing' if not error else f'malformed ({error})'}; refuse to "
-        "return an unpinned lineage")
-
-
-
+        "return an unpinned lineage",
+    )
 
 
 def validate_mutation_request(
-        project_root: Path | str, op_id: str, operation: str, agent: str,
-        project_identity: str, semantic_payload_hash: str,
-        targets: list[dict], preconditions: dict | None = None,
-        verification_policy: str = "none",
-        read_preconditions: dict | None = None,
-        receipt_metadata: dict | None = None) -> dict:
+    project_root: Path | str,
+    op_id: str,
+    operation: str,
+    agent: str,
+    project_identity: str,
+    semantic_payload_hash: str,
+    targets: list[dict],
+    preconditions: dict | None = None,
+    verification_policy: str = "none",
+    read_preconditions: dict | None = None,
+    receipt_metadata: dict | None = None,
+) -> dict:
     """ONE pure validation gate for mutation requests (hostile-regression).
 
     Runs BEFORE any Journal construction or disk write, so a malformed probe
@@ -1331,8 +1397,13 @@ def validate_mutation_request(
     from .safeid import InvalidIdError
 
     def refuse(detail: str) -> dict:
-        return {"ok": False, "code": "VALIDATION_FAILED", "op_id": op_id,
-                "recovery_required": False, "detail": detail}
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "op_id": op_id,
+            "recovery_required": False,
+            "detail": detail,
+        }
 
     # Canonical absolute root ONCE: owned identities are "resolved path
     # relative to resolved root", so relative and resolved forms can never
@@ -1342,14 +1413,18 @@ def validate_mutation_request(
         validate_op_id(op_id)
     except InvalidIdError as exc:
         return refuse(f"op_id is not a safe path component: {exc}")
-    for name, value in (("operation", operation), ("agent", agent),
-                        ("project_identity", project_identity),
-                        ("semantic_payload_hash", semantic_payload_hash)):
+    for name, value in (
+        ("operation", operation),
+        ("agent", agent),
+        ("project_identity", project_identity),
+        ("semantic_payload_hash", semantic_payload_hash),
+    ):
         if not isinstance(value, str) or not value:
             return refuse(f"{name} must be a non-empty string")
     if verification_policy not in VERIFICATION_POLICIES:
-        return refuse(f"verification_policy {verification_policy!r} outside "
-                      f"{sorted(VERIFICATION_POLICIES)}")
+        return refuse(
+            f"verification_policy {verification_policy!r} outside {sorted(VERIFICATION_POLICIES)}"
+        )
     if not isinstance(preconditions, (dict, type(None))):
         return refuse("preconditions must be a path->hash map")
     if not isinstance(read_preconditions, (dict, type(None))):
@@ -1373,29 +1448,27 @@ def validate_mutation_request(
             path = target.get("path")
             if not isinstance(path, str) or not path:
                 return refuse("target path must be a non-empty string")
-            canonical = owned_target_path(root, path) \
-                .relative_to(root).as_posix()
+            canonical = owned_target_path(root, path).relative_to(root).as_posix()
             if canonical in seen_target_paths:
                 return refuse(
                     f"duplicate target path {canonical!r}: one path may "
-                    "be planned at most once per operation")
+                    "be planned at most once per operation"
+                )
             seen_target_paths.add(canonical)
             role = target.get("role", "generic")
             if role not in ROLES:
-                return refuse(f"target {path}: role {role!r} outside "
-                              f"{'/'.join(ROLES)}")
+                return refuse(f"target {path}: role {role!r} outside {'/'.join(ROLES)}")
             action = target.get("action", "write")
             if action not in TARGET_ACTIONS:
-                return refuse(f"target {path}: action {action!r} outside "
-                              f"{'/'.join(TARGET_ACTIONS)}")
+                return refuse(
+                    f"target {path}: action {action!r} outside {'/'.join(TARGET_ACTIONS)}"
+                )
             if action == "write":
                 content = target.get("content")
                 if content is None:
-                    return refuse(f"target {path}: write action requires "
-                                  "content")
+                    return refuse(f"target {path}: write action requires content")
                 if not isinstance(content, (str, bytes)):
-                    return refuse(f"target {path}: write content must be "
-                                  "str or bytes")
+                    return refuse(f"target {path}: write content must be str or bytes")
             # Keep mutated target with canonical path
             new_target = dict(target)
             new_target["path"] = canonical
@@ -1413,22 +1486,24 @@ def validate_mutation_request(
                 # STALE_STATE pass compares like forms (hostile sweep fix:
                 # an over-strict non-empty rule rejected every legitimate
                 # first-write plan, e.g. sub_sync seeding a fresh project).
-                return refuse(f"precondition {path}: value must be a "
-                              "string hash token (or \"\" for an expected-"
-                              "absent file)")
-            can = owned_target_path(root, path, kind="precondition") \
-                .relative_to(root).as_posix()
+                return refuse(
+                    f"precondition {path}: value must be a "
+                    'string hash token (or "" for an expected-'
+                    "absent file)"
+                )
+            can = owned_target_path(root, path, kind="precondition").relative_to(root).as_posix()
             canonical_preconditions[can] = hash_val
 
         canonical_read_preconditions = {}
         for path, hash_val in (read_preconditions or {}).items():
             if not isinstance(path, str) or not path:
-                return refuse("read_preconditions keys must be non-empty "
-                              "strings")
+                return refuse("read_preconditions keys must be non-empty strings")
             if not isinstance(hash_val, str):
-                return refuse(f"read_preconditions {path}: value must be a "
-                              "string hash token (or \"\" for an expected-"
-                              "absent file)")
+                return refuse(
+                    f"read_preconditions {path}: value must be a "
+                    'string hash token (or "" for an expected-'
+                    "absent file)"
+                )
             # ONE read identity (hostile-regression): only an EXPLICITLY
             # absolute read stays absolute (external dependencies like the
             # SAIPEN home); a relative read resolves through the same owned
@@ -1440,35 +1515,45 @@ def validate_mutation_request(
             if Path(path).is_absolute():
                 can_str = read_dependency_path(root, path).as_posix()
             else:
-                can_str = read_dependency_path(root, path) \
-                    .relative_to(root).as_posix()
+                can_str = read_dependency_path(root, path).relative_to(root).as_posix()
             canonical_read_preconditions[can_str] = hash_val
     except InvalidIdError as exc:
         return refuse(f"target/precondition path escapes the project: {exc}")
 
     owned_vs_read = seen_target_paths & set(canonical_read_preconditions)
     if owned_vs_read:
-        return refuse("target path(s) also declared as read-only "
-                      "dependencies: " + ", ".join(sorted(owned_vs_read))
-                      + " -- one path cannot be both owned and a "
-                      "read-only dependency in one operation")
+        return refuse(
+            "target path(s) also declared as read-only "
+            "dependencies: "
+            + ", ".join(sorted(owned_vs_read))
+            + " -- one path cannot be both owned and a "
+            "read-only dependency in one operation"
+        )
 
-    return {"ok": True, "targets": canonical_targets,
-            "preconditions": canonical_preconditions,
-            "read_preconditions": canonical_read_preconditions}
+    return {
+        "ok": True,
+        "targets": canonical_targets,
+        "preconditions": canonical_preconditions,
+        "read_preconditions": canonical_read_preconditions,
+    }
 
 
-def run_mutation(project_root: Path | str, op_id: str, operation: str,
-                 agent: str, project_identity: str,
-                 semantic_payload_hash: str,
-                 targets: list[dict],
-                 preconditions: dict | None = None,
-                 verify: object | None = None,
-                  skip_preflight: bool = False,
-                  verification_policy: str = "none",
-                  read_preconditions: dict | None = None,
-                  receipt_metadata: dict | None = None,
-                  _ensure_lineage: bool = True) -> dict:
+def run_mutation(
+    project_root: Path | str,
+    op_id: str,
+    operation: str,
+    agent: str,
+    project_identity: str,
+    semantic_payload_hash: str,
+    targets: list[dict],
+    preconditions: dict | None = None,
+    verify: object | None = None,
+    skip_preflight: bool = False,
+    verification_policy: str = "none",
+    read_preconditions: dict | None = None,
+    receipt_metadata: dict | None = None,
+    _ensure_lineage: bool = True,
+) -> dict:
     """Commit an ordered, journaled mutation with conflict-safe recovery.
 
     Targets are ordered `write`, `delete_file`, or `delete_dir` actions.
@@ -1488,9 +1573,18 @@ def run_mutation(project_root: Path | str, op_id: str, operation: str,
     # any Journal construction or disk write, so a malformed probe fails
     # with VALIDATION_FAILED and zero changes (hostile-regression).
     validated = validate_mutation_request(
-        root, op_id, operation, agent, project_identity,
-        semantic_payload_hash, targets, preconditions,
-        verification_policy, read_preconditions, receipt_metadata)
+        root,
+        op_id,
+        operation,
+        agent,
+        project_identity,
+        semantic_payload_hash,
+        targets,
+        preconditions,
+        verification_policy,
+        read_preconditions,
+        receipt_metadata,
+    )
     if not validated["ok"]:
         return validated
     targets = validated["targets"]
@@ -1501,16 +1595,21 @@ def run_mutation(project_root: Path | str, op_id: str, operation: str,
 
     def dependency_path(path: str) -> Path:
         return read_dependency_path(root, path, kind="dependency")
-        
+
     if journal.exists():
         # The existing journal is disk evidence: decode it strictly -- a
         # hostile/malformed record refuses cleanly instead of crashing.
         decoded = decode_operation_record(root, journal.dir)
         if not decoded["ok"]:
-            return {"ok": False, "code": decoded["code"], "op_id": op_id,
-                    "recovery_required": True, "detail": decoded["detail"]}
+            return {
+                "ok": False,
+                "code": decoded["code"],
+                "op_id": op_id,
+                "recovery_required": True,
+                "detail": decoded["detail"],
+            }
         record = decoded["record"]
-        
+
         # Verify semantic idempotence: the request must exactly match the record
         # (T-1003 idempotence collision wave).
         expected_lineage = record.get("project_lineage")
@@ -1523,62 +1622,103 @@ def run_mutation(project_root: Path | str, op_id: str, operation: str,
         # so the retry path and the recovery path cannot diverge.
         binding = _recovery_identity_binding(root, record)
         if not binding["ok"]:
-            return {"ok": False, "code": binding["code"], "op_id": op_id,
-                    "recovery_required": True, "detail": binding["detail"]}
+            return {
+                "ok": False,
+                "code": binding["code"],
+                "op_id": op_id,
+                "recovery_required": True,
+                "detail": binding["detail"],
+            }
         if _ensure_lineage and expected_lineage:
             try:
                 live_lineage = ensure_project_lineage(root)
                 if live_lineage != expected_lineage:
-                    return {"ok": False, "code": "PROJECT_MISMATCH", "op_id": op_id,
-                            "recovery_required": False,
-                            "detail": "lineage changed since receipt was created"}
+                    return {
+                        "ok": False,
+                        "code": "PROJECT_MISMATCH",
+                        "op_id": op_id,
+                        "recovery_required": False,
+                        "detail": "lineage changed since receipt was created",
+                    }
             except LineageRefusal as exc:
-                return {"ok": False, "code": exc.code, "op_id": op_id,
-                        "recovery_required": True, "detail": exc.detail}
-                
+                return {
+                    "ok": False,
+                    "code": exc.code,
+                    "op_id": op_id,
+                    "recovery_required": True,
+                    "detail": exc.detail,
+                }
+
         request_targets = []
         for index, target in enumerate(targets):
             action = target.get("action", "write")
             if action == "write":
                 content = target["content"]
-                after_hash = hash_bytes(content.encode("utf-8") if isinstance(content, str) else content)
+                after_hash = hash_bytes(
+                    content.encode("utf-8") if isinstance(content, str) else content
+                )
             else:
                 after_hash = ""
-            request_targets.append({
-                "path": target["path"],
-                "role": target.get("role", "generic"),
-                "action": action,
-                "after_hash": after_hash
-            })
-            
+            request_targets.append(
+                {
+                    "path": target["path"],
+                    "role": target.get("role", "generic"),
+                    "action": action,
+                    "after_hash": after_hash,
+                }
+            )
+
         fingerprint = {
             "operation": operation,
             "semantic_payload_hash": semantic_payload_hash,
             "verification_policy": verification_policy,
-            "targets": request_targets
+            "targets": request_targets,
         }
-        computed_semantic = hashlib.sha256(json.dumps(fingerprint, sort_keys=True).encode("utf-8")).hexdigest()
-        
+        computed_semantic = hashlib.sha256(
+            json.dumps(fingerprint, sort_keys=True).encode("utf-8")
+        ).hexdigest()
+
         record_fingerprint = {
             "operation": record.get("operation"),
             "semantic_payload_hash": record.get("semantic_payload_hash"),
             "verification_policy": record.get("verification_policy"),
-            "targets": [{"path": t["path"], "role": t.get("role", "generic"), "action": t.get("action", "write"), "after_hash": t.get("after_hash", "")} for t in record.get("targets", [])]
+            "targets": [
+                {
+                    "path": t["path"],
+                    "role": t.get("role", "generic"),
+                    "action": t.get("action", "write"),
+                    "after_hash": t.get("after_hash", ""),
+                }
+                for t in record.get("targets", [])
+            ],
         }
-        record_semantic = hashlib.sha256(json.dumps(record_fingerprint, sort_keys=True).encode("utf-8")).hexdigest()
-        
+        record_semantic = hashlib.sha256(
+            json.dumps(record_fingerprint, sort_keys=True).encode("utf-8")
+        ).hexdigest()
+
         if computed_semantic != record_semantic:
-            return {"ok": False, "code": "VALIDATION_FAILED", "op_id": op_id,
-                    "recovery_required": False,
-                    "detail": "op_id collision: semantic payload does not match existing receipt"}
+            return {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "op_id": op_id,
+                "recovery_required": False,
+                "detail": "op_id collision: semantic payload does not match existing receipt",
+            }
 
         if record["status"] == "COMMITTED":
-            return {"ok": True, "code": "ALREADY_APPLIED", "op_id": op_id,
-                    "recovery_required": False}
-        return {"ok": False, "code": "RECOVERY_REQUIRED", "op_id": op_id,
-                "recovery_required": True,
-                "detail": f"op {op_id} is already {record['status']}; "
-                          "recover it first"}
+            return {
+                "ok": True,
+                "code": "ALREADY_APPLIED",
+                "op_id": op_id,
+                "recovery_required": False,
+            }
+        return {
+            "ok": False,
+            "code": "RECOVERY_REQUIRED",
+            "op_id": op_id,
+            "recovery_required": True,
+            "detail": f"op {op_id} is already {record['status']}; recover it first",
+        }
 
     # Preflight BEFORE lineage migration: an unresolved CONFLICT or pending
     # op must refuse cleanly (RECOVERY_CONFLICT / RECOVERY_REQUIRED), not
@@ -1588,13 +1728,17 @@ def run_mutation(project_root: Path | str, op_id: str, operation: str,
         if not preflight["ok"]:
             return preflight
 
-
     if _ensure_lineage:
         try:
             lineage = ensure_project_lineage(root)
         except LineageRefusal as exc:
-            return {"ok": False, "code": exc.code, "op_id": op_id,
-                    "recovery_required": True, "detail": exc.detail}
+            return {
+                "ok": False,
+                "code": exc.code,
+                "op_id": op_id,
+                "recovery_required": True,
+                "detail": exc.detail,
+            }
     else:
         lineage = None
 
@@ -1609,16 +1753,31 @@ def run_mutation(project_root: Path | str, op_id: str, operation: str,
             content = target["content"]
             if isinstance(content, str):
                 content = content.encode("utf-8")
-            prepared.append({"path": path, "role": role, "action": action,
-                             "content": content,
-                             "before_hash": _target_live_hash(root, probe),
-                             "after_hash": hash_bytes(content)})
+            prepared.append(
+                {
+                    "path": path,
+                    "role": role,
+                    "action": action,
+                    "content": content,
+                    "before_hash": _target_live_hash(root, probe),
+                    "after_hash": hash_bytes(content),
+                }
+            )
         else:
-            before = (target.get("planned_before_hash")
-                      if action == "delete_dir"
-                      else _target_live_hash(root, probe))
-            prepared.append({"path": path, "role": role, "action": action,
-                             "before_hash": before, "after_hash": ""})
+            before = (
+                target.get("planned_before_hash")
+                if action == "delete_dir"
+                else _target_live_hash(root, probe)
+            )
+            prepared.append(
+                {
+                    "path": path,
+                    "role": role,
+                    "action": action,
+                    "before_hash": before,
+                    "after_hash": "",
+                }
+            )
 
     # Every WRITE target and every read-only dependency must match the
     # hashes captured at plan time.
@@ -1629,25 +1788,41 @@ def run_mutation(project_root: Path | str, op_id: str, operation: str,
         # precondition map. Non-targets may be file, tree, or source-identity
         # tokens; treating every one as a write/file makes valid tree CAS
         # fail as an empty file hash before the read-only pass can check it.
-        actual = (_target_live_hash(root, target) if target is not None else
-                  _hash_dependency(dependency_path(path), expected))
+        actual = (
+            _target_live_hash(root, target)
+            if target is not None
+            else _hash_dependency(dependency_path(path), expected)
+        )
         if actual != expected:
-            return {"ok": False, "code": "STALE_STATE", "op_id": op_id,
-                    "detail": f"precondition {path} changed (live {actual!r}, "
-                              f"expected {expected!r})"}
+            return {
+                "ok": False,
+                "code": "STALE_STATE",
+                "op_id": op_id,
+                "detail": f"precondition {path} changed (live {actual!r}, expected {expected!r})",
+            }
     for path, expected in (read_preconditions or {}).items():
         actual = _hash_dependency(dependency_path(path), expected)
         if actual != expected:
-            return {"ok": False, "code": "STALE_STATE", "op_id": op_id,
-                    "detail": f"read dependency {path} changed (live "
-                              f"{actual!r}, expected {expected!r})"}
+            return {
+                "ok": False,
+                "code": "STALE_STATE",
+                "op_id": op_id,
+                "detail": f"read dependency {path} changed (live "
+                f"{actual!r}, expected {expected!r})",
+            }
 
-    journal.start(operation, agent, project_identity, semantic_payload_hash,
-                   prepared, preconditions,
-                   verification_policy=verification_policy,
-                   read_preconditions=read_preconditions,
-                   receipt_metadata=receipt_metadata,
-                   project_lineage=lineage)
+    journal.start(
+        operation,
+        agent,
+        project_identity,
+        semantic_payload_hash,
+        prepared,
+        preconditions,
+        verification_policy=verification_policy,
+        read_preconditions=read_preconditions,
+        receipt_metadata=receipt_metadata,
+        project_lineage=lineage,
+    )
     _crash_after("PREPARED")
 
     journal.mark("APPLYING")
@@ -1655,8 +1830,7 @@ def run_mutation(project_root: Path | str, op_id: str, operation: str,
         live = _target_live_hash(root, target)
         action = _target_action(target)
         if live == target["after_hash"]:
-            journal.mark("APPLYING", progress_index=index + 1,
-                         target_index=index)
+            journal.mark("APPLYING", progress_index=index + 1, target_index=index)
             # A semantic commit boundary still exists when this target was
             # already at its planned value. Crash probes model interruption
             # after roles (LOG/BOARD/STATE), not only after changed bytes.
@@ -1664,11 +1838,15 @@ def run_mutation(project_root: Path | str, op_id: str, operation: str,
             continue
         if live != target["before_hash"]:
             journal.mark("CONFLICT")
-            return {"ok": False, "code": "CONFLICT", "op_id": op_id,
-                    "recovery_required": True,
-                    "detail": f"target {target['path']} has third state "
-                              f"{live!r}; before {target['before_hash']!r}, "
-                              f"after {target['after_hash']!r}"}
+            return {
+                "ok": False,
+                "code": "CONFLICT",
+                "op_id": op_id,
+                "recovery_required": True,
+                "detail": f"target {target['path']} has third state "
+                f"{live!r}; before {target['before_hash']!r}, "
+                f"after {target['after_hash']!r}",
+            }
         try:
             if action == "write":
                 _atomic_write(root / target["path"], target["content"])
@@ -1677,32 +1855,48 @@ def run_mutation(project_root: Path | str, op_id: str, operation: str,
             elif action == "delete_dir":
                 (root / target["path"]).rmdir()
             else:  # unreachable after request validation; refuse, never fall
-                return {"ok": False, "code": "VALIDATION_FAILED",
-                        "op_id": op_id, "recovery_required": False,
-                        "detail": f"target {target['path']} carries an "
-                                  f"unknown action {action!r}; refusing to "
-                                  "dispatch a destructive fallback"}
+                return {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "op_id": op_id,
+                    "recovery_required": False,
+                    "detail": f"target {target['path']} carries an "
+                    f"unknown action {action!r}; refusing to "
+                    "dispatch a destructive fallback",
+                }
         except OSError as exc:
             journal.mark("CONFLICT")
-            return {"ok": False, "code": "CONFLICT", "op_id": op_id,
-                    "recovery_required": True,
-                    "detail": f"target {target['path']} action failed: {exc}"}
+            return {
+                "ok": False,
+                "code": "CONFLICT",
+                "op_id": op_id,
+                "recovery_required": True,
+                "detail": f"target {target['path']} action failed: {exc}",
+            }
         after = _target_live_hash(root, target)
         if after != target["after_hash"]:
             journal.mark("CONFLICT")
-            return {"ok": False, "code": "CONFLICT", "op_id": op_id,
-                    "recovery_required": True,
-                    "detail": f"target {target['path']} action left {after!r}, "
-                              f"expected {target['after_hash']!r}"}
+            return {
+                "ok": False,
+                "code": "CONFLICT",
+                "op_id": op_id,
+                "recovery_required": True,
+                "detail": f"target {target['path']} action left {after!r}, "
+                f"expected {target['after_hash']!r}",
+            }
         journal.mark("APPLYING", progress_index=index + 1, target_index=index)
         _crash_after(target["role"] if action == "write" else action)
 
     byte_error = _verify_target_bytes(root, prepared)
     if byte_error:
         journal.mark("CONFLICT")
-        return {"ok": False, "code": "CONFLICT", "op_id": op_id,
-                "recovery_required": True,
-                "detail": f"post-write byte verification failed: {byte_error}"}
+        return {
+            "ok": False,
+            "code": "CONFLICT",
+            "op_id": op_id,
+            "recovery_required": True,
+            "detail": f"post-write byte verification failed: {byte_error}",
+        }
 
     # Semantic verification runs BEFORE VERIFIED -- and it is the SAME
     # postcondition class the recovery path runs from the journaled policy
@@ -1711,31 +1905,40 @@ def run_mutation(project_root: Path | str, op_id: str, operation: str,
     # disagree about what a verified result means. The legacy caller-supplied
     # `verify` callable remains the fallback for a "none" policy.
     if verification_policy != "none":
-        errors = _run_verifier(root, prepared, verification_policy,
-                              receipt_metadata)
+        errors = _run_verifier(root, prepared, verification_policy, receipt_metadata)
         if errors:
             journal.mark("CONFLICT")
-            return {"ok": False, "code": "CONFLICT", "op_id": op_id,
-                    "recovery_required": True,
-                    "detail": "post-write semantic verification (policy "
-                              f"{verification_policy}) failed: "
-                              + "; ".join(errors[:5])}
+            return {
+                "ok": False,
+                "code": "CONFLICT",
+                "op_id": op_id,
+                "recovery_required": True,
+                "detail": "post-write semantic verification (policy "
+                f"{verification_policy}) failed: " + "; ".join(errors[:5]),
+            }
     elif verify is not None:
         errors = verify(root)
         if errors:
             journal.mark("CONFLICT")
-            return {"ok": False, "code": "CONFLICT", "op_id": op_id,
-                    "recovery_required": True,
-                    "detail": "post-write cross-file validation failed: "
-                              + "; ".join(errors[:5])}
+            return {
+                "ok": False,
+                "code": "CONFLICT",
+                "op_id": op_id,
+                "recovery_required": True,
+                "detail": "post-write cross-file validation failed: " + "; ".join(errors[:5]),
+            }
     _crash_after("VERIFIED")
 
     journal.mark("VERIFIED")
     journal.mark("COMMITTED")
     _drop_settled_staged(journal)
-    return {"ok": True, "code": "COMMITTED", "op_id": op_id,
-            "changed_files": [t["path"] for t in prepared],
-            "recovery_required": False}
+    return {
+        "ok": True,
+        "code": "COMMITTED",
+        "op_id": op_id,
+        "changed_files": [t["path"] for t in prepared],
+        "recovery_required": False,
+    }
 
 
 def recover(project_root: Path | str, op_id: str) -> dict:
@@ -1751,13 +1954,17 @@ def recover(project_root: Path | str, op_id: str) -> dict:
     lock call `_recover_locked` directly and never re-acquire."""
     root = Path(project_root)
     from .lock import project_writer_lock as _recover_lock
+
     try:
         with _recover_lock(root):
             return _recover_locked(root, op_id)
     except PermissionError:
-        return {"ok": False, "code": "WRITER_BUSY", "op_id": op_id,
-                "detail": "another live writer holds the project lock; "
-                          "retry after it releases"}
+        return {
+            "ok": False,
+            "code": "WRITER_BUSY",
+            "op_id": op_id,
+            "detail": "another live writer holds the project lock; retry after it releases",
+        }
 
 
 def _recover_locked(root: Path, op_id: str) -> dict:
@@ -1786,12 +1993,17 @@ def _recover_locked(root: Path, op_id: str) -> dict:
     """
     root = Path(root).resolve()
     from .safeid import InvalidIdError
+
     try:
         journal = Journal(root, op_id)
     except InvalidIdError as exc:
-        return {"ok": False, "code": "VALIDATION_FAILED", "op_id": op_id,
-                "recovery_required": True,
-                "detail": f"op_id is not a safe path component: {exc}"}
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "op_id": op_id,
+            "recovery_required": True,
+            "detail": f"op_id is not a safe path component: {exc}",
+        }
     if not journal.exists():
         return {"ok": False, "code": "TICKET_NOT_FOUND", "op_id": op_id}
     # ONE strict decoder gate before ANY status/byte/dispatch decision: a
@@ -1800,8 +2012,13 @@ def _recover_locked(root: Path, op_id: str) -> dict:
     # ZERO target changes -- never an `else` destructive fallback.
     decoded = decode_operation_record(root, journal.dir)
     if not decoded["ok"]:
-        return {"ok": False, "code": decoded["code"], "op_id": op_id,
-                "recovery_required": True, "detail": decoded["detail"]}
+        return {
+            "ok": False,
+            "code": decoded["code"],
+            "op_id": op_id,
+            "recovery_required": True,
+            "detail": decoded["detail"],
+        }
     record = decoded["record"]
 
     # Owned-target guard BEFORE any dispatch: a crafted journal whose target
@@ -1810,16 +2027,20 @@ def _recover_locked(root: Path, op_id: str) -> dict:
     # integrity). op_id itself was validated by Journal.__init__. READ-ONLY
     # dependencies may be absolute (home), so they use the lenient resolver.
     from .safeid import InvalidIdError
+
     try:
         for target in record.get("targets", []):
             owned_target_path(root, target["path"])
-        for path in (record.get("read_preconditions") or {}):
+        for path in record.get("read_preconditions") or {}:
             read_dependency_path(root, path)
     except InvalidIdError as exc:
-        return {"ok": False, "code": "VALIDATION_FAILED", "op_id": op_id,
-                "recovery_required": True,
-                "detail": f"journal target/precondition path escapes the "
-                          f"project: {exc}"}
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "op_id": op_id,
+            "recovery_required": True,
+            "detail": f"journal target/precondition path escapes the project: {exc}",
+        }
 
     # Identity binding BEFORE any dispatch, status or byte decision: a receipt
     # that does not belong to this project may never be recovered here, even
@@ -1827,24 +2048,35 @@ def _recover_locked(root: Path, op_id: str) -> dict:
     # confusion, not of completion) -- T-1003 carrier-loss wave.
     binding = _recovery_identity_binding(root, record)
     if not binding["ok"]:
-        return {"ok": False, "code": binding["code"], "op_id": op_id,
-                "recovery_required": True,
-                "detail": binding["detail"]}
+        return {
+            "ok": False,
+            "code": binding["code"],
+            "op_id": op_id,
+            "recovery_required": True,
+            "detail": binding["detail"],
+        }
 
     status = record["status"]
     if status == "COMMITTED":
         return {"ok": True, "code": "ALREADY_APPLIED", "op_id": op_id}
     if status in SETTLED:
-        return {"ok": False, "code": status, "op_id": op_id,
-                "recovery_required": True,
-                "detail": f"op is {status}; resolve explicitly before "
-                          "further mutation"}
+        return {
+            "ok": False,
+            "code": status,
+            "op_id": op_id,
+            "recovery_required": True,
+            "detail": f"op is {status}; resolve explicitly before further mutation",
+        }
     if status == "CONFLICT":
-        return {"ok": False, "code": "CONFLICT", "op_id": op_id,
-                "recovery_required": True,
-                "detail": "op is CONFLICT; resolve explicitly before "
-                          "further mutation (saipen recover, evidence "
-                          "preserved)"}
+        return {
+            "ok": False,
+            "code": "CONFLICT",
+            "op_id": op_id,
+            "recovery_required": True,
+            "detail": "op is CONFLICT; resolve explicitly before "
+            "further mutation (saipen recover, evidence "
+            "preserved)",
+        }
 
     # Release operations own git side effects (commits/pushes/tags) that the
     # byte-replay path below cannot redo. Dispatch to the release recovery,
@@ -1852,6 +2084,7 @@ def _recover_locked(root: Path, op_id: str) -> dict:
     # expectations and never blindly repeats a side effect (T-994).
     if record.get("operation") == "release":
         from .release import _recover_release_op_locked
+
         return _recover_release_op_locked(root, op_id)
 
     targets = record["targets"]
@@ -1871,23 +2104,31 @@ def _recover_locked(root: Path, op_id: str) -> dict:
         live = _hash_dependency(dependency, expected)
         if live != expected:
             journal.mark("CONFLICT")
-            return {"ok": False, "code": "CONFLICT", "op_id": op_id,
-                    "recovery_required": True,
-                    "detail": f"read-only dependency {path} changed (live "
-                              f"{live!r}, planned {expected!r}); the plan is "
-                              "no longer the authorized decision, refuse to "
-                              "roll forward"}
+            return {
+                "ok": False,
+                "code": "CONFLICT",
+                "op_id": op_id,
+                "recovery_required": True,
+                "detail": f"read-only dependency {path} changed (live "
+                f"{live!r}, planned {expected!r}); the plan is "
+                "no longer the authorized decision, refuse to "
+                "roll forward",
+            }
 
     for index, target in enumerate(targets):
         live = _target_live_hash(root, target)
         if target["applied"]:
             if live != target["after_hash"]:
                 journal.mark("CONFLICT")
-                return {"ok": False, "code": "CONFLICT", "op_id": op_id,
-                        "recovery_required": True,
-                        "detail": f"applied target {target['path']} was "
-                                  f"overwritten: live {live!r} != planned "
-                                  f"after {target['after_hash']!r}"}
+                return {
+                    "ok": False,
+                    "code": "CONFLICT",
+                    "op_id": op_id,
+                    "recovery_required": True,
+                    "detail": f"applied target {target['path']} was "
+                    f"overwritten: live {live!r} != planned "
+                    f"after {target['after_hash']!r}",
+                }
             continue
         if live == target["before_hash"]:
             action = _target_action(target)
@@ -1896,12 +2137,16 @@ def _recover_locked(root: Path, op_id: str) -> dict:
                     staged = journal.staged_content(index)
                     if hash_bytes(staged) != target["after_hash"]:
                         journal.mark("CONFLICT")
-                        return {"ok": False, "code": "CONFLICT", "op_id": op_id,
-                                "recovery_required": True,
-                                "detail": f"staged bytes for {target['path']} "
-                                          f"hash to {hash_bytes(staged)!r}, not "
-                                          f"planned {target['after_hash']!r}; "
-                                          "journal evidence is corrupt"}
+                        return {
+                            "ok": False,
+                            "code": "CONFLICT",
+                            "op_id": op_id,
+                            "recovery_required": True,
+                            "detail": f"staged bytes for {target['path']} "
+                            f"hash to {hash_bytes(staged)!r}, not "
+                            f"planned {target['after_hash']!r}; "
+                            "journal evidence is corrupt",
+                        }
                     _atomic_write(root / target["path"], staged)
                 elif action == "delete_file":
                     (root / target["path"]).unlink()
@@ -1909,39 +2154,52 @@ def _recover_locked(root: Path, op_id: str) -> dict:
                     (root / target["path"]).rmdir()
                 else:  # unreachable after the strict decoder; refuse anyway
                     journal.mark("CONFLICT")
-                    return {"ok": False, "code": "CONFLICT", "op_id": op_id,
-                            "recovery_required": True,
-                            "detail": f"target {target['path']} carries an "
-                                      f"unknown action {action!r}; recovery "
-                                      "refuses to dispatch a destructive "
-                                      "fallback"}
+                    return {
+                        "ok": False,
+                        "code": "CONFLICT",
+                        "op_id": op_id,
+                        "recovery_required": True,
+                        "detail": f"target {target['path']} carries an "
+                        f"unknown action {action!r}; recovery "
+                        "refuses to dispatch a destructive "
+                        "fallback",
+                    }
             except OSError as exc:
                 journal.mark("CONFLICT")
-                return {"ok": False, "code": "CONFLICT", "op_id": op_id,
-                        "recovery_required": True,
-                        "detail": f"target {target['path']} recovery action "
-                                  f"failed: {exc}"}
-            journal.mark("APPLYING", progress_index=index + 1,
-                         target_index=index)
+                return {
+                    "ok": False,
+                    "code": "CONFLICT",
+                    "op_id": op_id,
+                    "recovery_required": True,
+                    "detail": f"target {target['path']} recovery action failed: {exc}",
+                }
+            journal.mark("APPLYING", progress_index=index + 1, target_index=index)
         elif live == target["after_hash"]:
-            journal.mark("APPLYING", progress_index=index + 1,
-                         target_index=index)
+            journal.mark("APPLYING", progress_index=index + 1, target_index=index)
         else:
             journal.mark("CONFLICT")
-            return {"ok": False, "code": "CONFLICT", "op_id": op_id,
-                    "recovery_required": True,
-                    "detail": f"unfinished target {target['path']} has "
-                              f"unexpected bytes (live {live!r}; before "
-                              f"{target['before_hash']!r}, after "
-                              f"{target['after_hash']!r}); refuse to guess"}
+            return {
+                "ok": False,
+                "code": "CONFLICT",
+                "op_id": op_id,
+                "recovery_required": True,
+                "detail": f"unfinished target {target['path']} has "
+                f"unexpected bytes (live {live!r}; before "
+                f"{target['before_hash']!r}, after "
+                f"{target['after_hash']!r}); refuse to guess",
+            }
 
     # Byte-level verification of every written target.
     byte_error = _verify_target_bytes(root, targets)
     if byte_error:
         journal.mark("CONFLICT")
-        return {"ok": False, "code": "CONFLICT", "op_id": op_id,
-                "recovery_required": True,
-                "detail": f"recovered byte verification failed: {byte_error}"}
+        return {
+            "ok": False,
+            "code": "CONFLICT",
+            "op_id": op_id,
+            "recovery_required": True,
+            "detail": f"recovered byte verification failed: {byte_error}",
+        }
 
     # Semantic verification per the operation's registered policy. This is the
     # same postcondition class the original APPLY ran -- the verifier receives
@@ -1950,21 +2208,28 @@ def _recover_locked(root: Path, op_id: str) -> dict:
     # would be a false stage name on the recovery path.
     policy = record.get("verification_policy", "none")
     if policy != "none":
-        errors = _run_verifier(root, targets, policy,
-                               record.get("receipt_metadata"))
+        errors = _run_verifier(root, targets, policy, record.get("receipt_metadata"))
         if errors:
             journal.mark("CONFLICT")
-            return {"ok": False, "code": "CONFLICT", "op_id": op_id,
-                    "recovery_required": True,
-                    "detail": "recovered state fails the registered semantic "
-                              "verifier: " + "; ".join(errors[:5])}
+            return {
+                "ok": False,
+                "code": "CONFLICT",
+                "op_id": op_id,
+                "recovery_required": True,
+                "detail": "recovered state fails the registered semantic "
+                "verifier: " + "; ".join(errors[:5]),
+            }
 
     journal.mark("VERIFIED")
     journal.mark("COMMITTED")
     _drop_settled_staged(journal)
-    return {"ok": True, "code": "COMMITTED", "op_id": op_id,
-            "changed_files": [t["path"] for t in targets],
-            "recovery_required": True}
+    return {
+        "ok": True,
+        "code": "COMMITTED",
+        "op_id": op_id,
+        "changed_files": [t["path"] for t in targets],
+        "recovery_required": True,
+    }
 
 
 def _verifier_for(policy: str):
@@ -1981,13 +2246,14 @@ def _verifier_for(policy: str):
     (NITRO dogfood IV, T-601; P1#3 verifier normalization)."""
     if policy == "core_fast":
         from . import fast_check
-        return lambda root, targets, receipt_metadata=None: \
-            fast_check.validate_project(root)
+
+        return lambda root, targets, receipt_metadata=None: fast_check.validate_project(root)
     if policy == "improve_atomic_file":
         return verify_improve
     if policy == "userperson":
-        return lambda root, targets, receipt_metadata=None: \
-            _verify_userperson(root, receipt_metadata)
+        return lambda root, targets, receipt_metadata=None: _verify_userperson(
+            root, receipt_metadata
+        )
     if policy == "sub_collect":
         return verify_sub_collect
     if policy == "sub_disposition":
@@ -2029,13 +2295,13 @@ def verify_improve(root, targets, receipt_metadata=None) -> list[str]:
     errors = []
     try:
         import improve
+
         for target in targets or []:
             rel = target.get("path", "")
             role = target.get("role", "generic")
             path = root / rel
             if not path.is_file():
-                errors.append(f"{rel}: written Improve target missing after "
-                              "apply")
+                errors.append(f"{rel}: written Improve target missing after apply")
                 continue
             text = path.read_text(encoding="utf-8-sig")
             if role in ("manifest", "cycle", "seat"):
@@ -2060,6 +2326,7 @@ def _verify_userperson(root, receipt_metadata=None) -> list[str]:
         return errors  # absence is the canonical OFF state
     try:
         from userperson import validate_profile
+
         errors.extend(validate_profile(profile.read_text(encoding="utf-8-sig")))
     except Exception as exc:
         errors.append(f"userperson verification failed: {exc}")
@@ -2075,24 +2342,28 @@ def verify_sub_collect(root, targets, receipt_metadata=None) -> list[str]:
     package was NOT flipped to reviewed by intake.
     """
     from . import fast_check
+
     errors = list(fast_check.validate_project(root))
     try:
-        from .subs import (LAST_COLLECT_RE, MANIFEST_REL, SUBS_REL,
-                           package_identity, parse_manifest_file,
-                           parse_outbox)
+        from .subs import (
+            LAST_COLLECT_RE,
+            MANIFEST_REL,
+            SUBS_REL,
+            package_identity,
+            parse_manifest_file,
+            parse_outbox,
+        )
+
         target_paths = {target.get("path", "") for target in targets or []}
         if MANIFEST_REL not in target_paths:
             errors.append("sub_collect did not own live MANIFEST")
-        if ".saipen/LOG.md" not in target_paths \
-                or ".saipen/BOARD.md" not in target_paths:
+        if ".saipen/LOG.md" not in target_paths or ".saipen/BOARD.md" not in target_paths:
             errors.append("sub_collect did not own Core LOG/BOARD provenance")
         entries, manifest_errors = parse_manifest_file(root)
         errors.extend(manifest_errors)
-        board_text = (root / ".saipen" / "BOARD.md").read_text(
-            encoding="utf-8-sig")
-        log_text = (root / ".saipen" / "LOG.md").read_text(
-            encoding="utf-8-sig")
-        prefix = SUBS_REL + "/"
+        board_text = (root / ".saipen" / "BOARD.md").read_text(encoding="utf-8-sig")
+        log_text = (root / ".saipen" / "LOG.md").read_text(encoding="utf-8-sig")
+        SUBS_REL + "/"
         # A package may legitimately read 'reviewed' only when a COMMITTED
         # sub_disposition receipt binds its identity -- intake itself must
         # never have flipped it (INTAKE != REVIEW, Wave 2 item 4).
@@ -2104,8 +2375,7 @@ def verify_sub_collect(root, targets, receipt_metadata=None) -> list[str]:
                 if not op_manifest.is_file():
                     continue
                 try:
-                    record = json.loads(op_manifest.read_text(
-                        encoding="utf-8"))
+                    record = json.loads(op_manifest.read_text(encoding="utf-8"))
                 except (OSError, json.JSONDecodeError):
                     continue
                 meta = record.get("receipt_metadata") or {}
@@ -2130,31 +2400,31 @@ def verify_sub_collect(root, targets, receipt_metadata=None) -> list[str]:
                 continue
             expected_identity = last_collect.split("@", 1)[0]
             if expected_identity not in board_text:
-                errors.append(f"{entry.name}: package identity absent from "
-                              "Core BOARD provenance")
+                errors.append(f"{entry.name}: package identity absent from Core BOARD provenance")
             if expected_identity not in log_text:
-                errors.append(f"{entry.name}: package identity absent from "
-                              "Core LOG provenance")
-            outbox_path = (root / SUBS_REL / entry.name / "kitchen" /
-                           "OUTBOX.md")
+                errors.append(f"{entry.name}: package identity absent from Core LOG provenance")
+            outbox_path = root / SUBS_REL / entry.name / "kitchen" / "OUTBOX.md"
             if not outbox_path.is_file():
                 errors.append(f"{entry.name}: collected OUTBOX missing")
                 continue
-            model = parse_outbox(outbox_path.read_text(encoding="utf-8-sig"),
-                                 entry.name)
+            model = parse_outbox(outbox_path.read_text(encoding="utf-8-sig"), entry.name)
             errors.extend(f"{entry.name}: {error}" for error in model.errors)
-            matches = [package for package in model.packages
-                       if package_identity(package) == expected_identity]
+            matches = [
+                package
+                for package in model.packages
+                if package_identity(package) == expected_identity
+            ]
             if len(matches) != 1:
-                errors.append(f"{entry.name}: last_collect identity matches "
-                              f"{len(matches)} OUTBOX packages")
-            elif matches[0].status == "reviewed" \
-                    and expected_identity not in disposed:
+                errors.append(
+                    f"{entry.name}: last_collect identity matches {len(matches)} OUTBOX packages"
+                )
+            elif matches[0].status == "reviewed" and expected_identity not in disposed:
                 errors.append(
                     f"{entry.name}/{matches[0].package_id}: intake must NOT "
                     "mark the package reviewed (INTAKE != REVIEW); a "
                     "reviewed claim is a Core disposition, applied only by "
-                    "sub_disposition after the linked ticket is terminal")
+                    "sub_disposition after the linked ticket is terminal"
+                )
     except Exception as exc:
         errors.append(f"sub collect verification failed: {exc}")
     return errors
@@ -2165,30 +2435,29 @@ def verify_sub_disposition(root, targets, receipt_metadata=None) -> list[str]:
     4/13): the target OUTBOX package must actually be 'reviewed' now, and the
     Core LOG/STATE provenance must exist."""
     from . import fast_check
+
     errors = list(fast_check.validate_project(root))
     try:
         from .subs import SUBS_REL, parse_outbox
+
         target_paths = {target.get("path", "") for target in targets or []}
-        if ".saipen/LOG.md" not in target_paths \
-                or ".saipen/STATE.md" not in target_paths:
-            errors.append("sub_disposition did not own Core LOG/STATE "
-                          "provenance")
+        if ".saipen/LOG.md" not in target_paths or ".saipen/STATE.md" not in target_paths:
+            errors.append("sub_disposition did not own Core LOG/STATE provenance")
         prefix = SUBS_REL + "/"
-        for rel in sorted(path for path in target_paths
-                          if path.startswith(prefix)
-                          and path.endswith("/kitchen/OUTBOX.md")):
-            producer = rel[len(prefix):].split("/", 1)[0]
+        for rel in sorted(
+            path
+            for path in target_paths
+            if path.startswith(prefix) and path.endswith("/kitchen/OUTBOX.md")
+        ):
+            producer = rel[len(prefix) :].split("/", 1)[0]
             path = root / rel
             if not path.is_file():
                 errors.append(f"{rel}: disposition OUTBOX missing")
                 continue
-            model = parse_outbox(path.read_text(encoding="utf-8-sig"),
-                                 producer)
+            model = parse_outbox(path.read_text(encoding="utf-8-sig"), producer)
             errors.extend(f"{rel}: {error}" for error in model.errors)
-            if not any(package.status == "reviewed" for package in
-                       model.packages):
-                errors.append(f"{producer}: disposition did not mark any "
-                              "package reviewed")
+            if not any(package.status == "reviewed" for package in model.packages):
+                errors.append(f"{producer}: disposition did not mark any package reviewed")
     except Exception as exc:
         errors.append(f"sub disposition verification failed: {exc}")
     return errors
@@ -2199,30 +2468,41 @@ def verify_sub_lifecycle(root, targets, receipt_metadata=None) -> list[str]:
     errors = []
     try:
         from .state import parse_frontmatter
-        from .subs import (MANIFEST_REL, SUBS_REL, _entry_dir,
-                           parse_manifest_file, parse_outbox, parse_sub_board,
-                           role_freshness, validate_sub_lifecycle)
+        from .subs import (
+            MANIFEST_REL,
+            SUBS_REL,
+            _entry_dir,
+            parse_manifest_file,
+            parse_outbox,
+            parse_sub_board,
+            role_freshness,
+            validate_sub_lifecycle,
+        )
+
         target_paths = {target.get("path", "") for target in targets or []}
-        owns_outbox = {path for path in target_paths
-                       if path.endswith("/kitchen/OUTBOX.md")}
-        owns_lifecycle = (MANIFEST_REL in target_paths
-                          or any(path.startswith(SUBS_REL + "/")
-                                 and (path.endswith("/STATE.md")
-                                      or path.endswith("/BOARD.md")
-                                      or path.endswith("/LOG.md")
-                                      or path.endswith("/kitchen/OUTBOX.md"))
-                                 for path in target_paths))
+        owns_outbox = {path for path in target_paths if path.endswith("/kitchen/OUTBOX.md")}
+        owns_lifecycle = MANIFEST_REL in target_paths or any(
+            path.startswith(SUBS_REL + "/")
+            and (
+                path.endswith("/STATE.md")
+                or path.endswith("/BOARD.md")
+                or path.endswith("/LOG.md")
+                or path.endswith("/kitchen/OUTBOX.md")
+            )
+            for path in target_paths
+        )
         if not owns_lifecycle:
             return errors
-        if not any(path == MANIFEST_REL or path.startswith(SUBS_REL + "/")
-                   for path in target_paths):
+        if not any(
+            path == MANIFEST_REL or path.startswith(SUBS_REL + "/") for path in target_paths
+        ):
             return errors
         names = set()
         prefix = SUBS_REL + "/"
         for path in target_paths:
             if not path.startswith(prefix):
                 continue
-            remainder = path[len(prefix):]
+            remainder = path[len(prefix) :]
             if remainder.count("/") >= 2:
                 candidate = remainder.split("/", 1)[0]
                 if candidate not in {"TEMPLATE", "_shared"}:
@@ -2253,31 +2533,30 @@ def verify_sub_lifecycle(root, targets, receipt_metadata=None) -> list[str]:
             for field in ("agent", "role_revision"):
                 count = len(re.findall(rf"(?m)^{field}:\s*", state_text))
                 if count != 1:
-                    errors.append(
-                        f"{name}: STATE field {field} appears {count} time(s)")
+                    errors.append(f"{name}: STATE field {field} appears {count} time(s)")
             if st.get("agent") != name:
                 errors.append(f"{name}: STATE agent {st.get('agent')!r} mismatches role")
             role_revision = st.get("role_revision") or ""
-            role_state = role_freshness(root, name, role_revision,
-                                        st.get("saipen_home") or "")
+            role_state = role_freshness(root, name, role_revision, st.get("saipen_home") or "")
             if role_state != "current":
                 errors.append(f"{name}: role identity is {role_state}")
             board = parse_sub_board(
-                board_file.read_text(encoding="utf-8-sig")
-                if board_file.is_file() else "", expected_role=name)
+                board_file.read_text(encoding="utf-8-sig") if board_file.is_file() else "",
+                expected_role=name,
+            )
             errors.extend(f"{name}: {error}" for error in board["errors"])
-            errors.extend(f"{name}: {error}" for error in validate_sub_lifecycle(
-                st, board, name))
-            paused = (st.get("phase") == "BLOCKED"
-                      and st.get("blocker") == "paused by main agent")
-            if paused != bool(st.get("paused_from_phase")
-                              and st.get("paused_from_na")):
+            errors.extend(f"{name}: {error}" for error in validate_sub_lifecycle(st, board, name))
+            paused = st.get("phase") == "BLOCKED" and st.get("blocker") == "paused by main agent"
+            if paused != bool(st.get("paused_from_phase") and st.get("paused_from_na")):
                 errors.append(f"{name}: pause metadata/phase mismatch")
         for rel in owns_outbox:
-            owner = rel[len(prefix):].split("/", 1)[0]
+            owner = rel[len(prefix) :].split("/", 1)[0]
             path = root / rel
-            model = parse_outbox(path.read_text(encoding="utf-8-sig"), owner) \
-                if path.is_file() else None
+            model = (
+                parse_outbox(path.read_text(encoding="utf-8-sig"), owner)
+                if path.is_file()
+                else None
+            )
             if model is None:
                 errors.append(f"{rel}: owned OUTBOX missing")
             else:
@@ -2292,11 +2571,14 @@ def verify_sub_clean(root, targets, receipt_metadata=None) -> list[str]:
     errors = []
     try:
         from .subs import MANIFEST_REL, SUBS_REL, parse_manifest_file
-        receipts = [target for target in targets or []
-                    if target.get("action", "write") == "write"
-                    and target.get("path", "").startswith(
-                        ".saipen/recovery/subs/")
-                    and target.get("path", "").endswith("/receipt.json")]
+
+        receipts = [
+            target
+            for target in targets or []
+            if target.get("action", "write") == "write"
+            and target.get("path", "").startswith(".saipen/recovery/subs/")
+            and target.get("path", "").endswith("/receipt.json")
+        ]
         if len(receipts) != 1:
             return [f"sub_clean owns {len(receipts)} receipt targets, expected 1"]
         receipt_path = root / receipts[0]["path"]
@@ -2311,19 +2593,28 @@ def verify_sub_clean(root, targets, receipt_metadata=None) -> list[str]:
         source = root / source_prefix.rstrip("/")
         if os.path.lexists(source):
             errors.append(f"{name}: source instance still exists")
-        deleted = {target["path"][len(source_prefix):]: target["before_hash"]
-                   for target in targets or []
-                   if target.get("action") == "delete_file"
-                   and target.get("path", "").startswith(source_prefix)}
-        archived = {target["path"][len(archive_prefix):]: target["after_hash"]
-                    for target in targets or []
-                    if target.get("action", "write") == "write"
-                    and target.get("path", "").startswith(archive_prefix)}
+        deleted = {
+            target["path"][len(source_prefix) :]: target["before_hash"]
+            for target in targets or []
+            if target.get("action") == "delete_file"
+            and target.get("path", "").startswith(source_prefix)
+        }
+        archived = {
+            target["path"][len(archive_prefix) :]: target["after_hash"]
+            for target in targets or []
+            if target.get("action", "write") == "write"
+            and target.get("path", "").startswith(archive_prefix)
+        }
         archive_root = root / archive_prefix.rstrip("/")
-        actual_archived = {
-            path.relative_to(archive_root).as_posix()
-            for path in archive_root.rglob("*") if path.is_file()
-        } if archive_root.is_dir() else set()
+        actual_archived = (
+            {
+                path.relative_to(archive_root).as_posix()
+                for path in archive_root.rglob("*")
+                if path.is_file()
+            }
+            if archive_root.is_dir()
+            else set()
+        )
         if receipt.get("files") != deleted:
             errors.append("receipt file/hash map does not match deletion targets")
         if set(archived) != set(deleted) or actual_archived != set(deleted):
@@ -2334,8 +2625,7 @@ def verify_sub_clean(root, targets, receipt_metadata=None) -> list[str]:
                 errors.append(f"archive/{rel}: hash {live!r} != source {expected!r}")
         if MANIFEST_REL not in {target.get("path") for target in targets or []}:
             errors.append("sub_clean did not own strict MANIFEST")
-        if not receipt.get("instance_tree_hash", "").startswith(
-                "delete-tree-sha256:"):
+        if not receipt.get("instance_tree_hash", "").startswith("delete-tree-sha256:"):
             errors.append("receipt lacks exact source tree hash")
     except Exception as exc:
         errors.append(f"sub clean verification failed: {exc}")
@@ -2346,6 +2636,7 @@ def verify_sub_sync(root, targets, receipt_metadata=None) -> list[str]:
     """Verify shared-contract postconditions from journaled provenance."""
     try:
         from .subs import verify_sub_sync_receipt
+
         return verify_sub_sync_receipt(root, receipt_metadata)
     except Exception as exc:
         return [f"sub sync verification failed: {exc}"]
@@ -2361,6 +2652,7 @@ def inspect_op(project_root: Path | str, op_id: str) -> dict:
     """
     root = Path(project_root)
     from .safeid import InvalidIdError
+
     try:
         journal = Journal(root, op_id)
         if not journal.exists():
@@ -2369,17 +2661,25 @@ def inspect_op(project_root: Path | str, op_id: str) -> dict:
         # inspects as a structured refusal, never a partial healthy surface.
         decoded = decode_operation_record(root, journal.dir)
         if not decoded["ok"]:
-            return {"ok": False, "code": decoded["code"], "op_id": op_id,
-                    "recovery_required": True, "detail": decoded["detail"]}
+            return {
+                "ok": False,
+                "code": decoded["code"],
+                "op_id": op_id,
+                "recovery_required": True,
+                "detail": decoded["detail"],
+            }
         record = decoded["record"]
         for target in record.get("targets", []):
             owned_target_path(root, target["path"])
         targets = []
         conflicts = []
     except InvalidIdError as exc:
-        return {"ok": False, "code": "VALIDATION_FAILED", "op_id": op_id,
-                "detail": f"journal target path or op_id escapes the "
-                          f"project: {exc}"}
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "op_id": op_id,
+            "detail": f"journal target path or op_id escapes the project: {exc}",
+        }
     for target in record.get("targets", []):
         live = _target_live_hash(root, target)
         entry = {
@@ -2391,8 +2691,7 @@ def inspect_op(project_root: Path | str, op_id: str) -> dict:
             "planned_after": target.get("after_hash", ""),
             "current": live,
         }
-        expected = target.get("after_hash") if target.get("applied") \
-            else target.get("before_hash")
+        expected = target.get("after_hash") if target.get("applied") else target.get("before_hash")
         if live != expected:
             entry["conflicts"] = True
             conflicts.append(target["path"])
@@ -2412,16 +2711,15 @@ def inspect_op(project_root: Path | str, op_id: str) -> dict:
         "conflicting_locations": conflicts,
         "staged_identity": record.get("semantic_payload_hash"),
         "safe_resolution_classes": (
-            ["accept_live", "replan"]
-            if record.get("status") == "CONFLICT" else []),
-        "code": "CONFLICT_INSPECT" if record.get("status") == "CONFLICT"
-        else "OP_INSPECT",
+            ["accept_live", "replan"] if record.get("status") == "CONFLICT" else []
+        ),
+        "code": "CONFLICT_INSPECT" if record.get("status") == "CONFLICT" else "OP_INSPECT",
     }
 
 
-def resolve_conflict(project_root: Path | str, op_id: str,
-                     resolution: str = "accept_live",
-                     agent: str = "saipen") -> dict:
+def resolve_conflict(
+    project_root: Path | str, op_id: str, resolution: str = "accept_live", agent: str = "saipen"
+) -> dict:
     """Settle ONE unresolved CONFLICT through an explicit bounded lifecycle
     (NITRO dogfood III, T-594). No --force exists: a conflict means live
     evidence diverged from the authorized plan, and the resolver never writes
@@ -2449,55 +2747,75 @@ def resolve_conflict(project_root: Path | str, op_id: str,
     """
     root = Path(project_root)
     from .lock import project_writer_lock as _resolver_lock
+
     try:
         with _resolver_lock(root):
             return _resolve_conflict_locked(root, op_id, resolution, agent)
     except PermissionError:
-        return {"ok": False, "code": "WRITER_BUSY", "op_id": op_id,
-                "detail": "another live writer holds the project lock; "
-                          "retry after it releases"}
+        return {
+            "ok": False,
+            "code": "WRITER_BUSY",
+            "op_id": op_id,
+            "detail": "another live writer holds the project lock; retry after it releases",
+        }
 
 
-def _resolve_conflict_locked(root: Path, op_id: str, resolution: str,
-                             agent: str) -> dict:
+def _resolve_conflict_locked(root: Path, op_id: str, resolution: str, agent: str) -> dict:
     """The locked body of resolve_conflict (T-601). Called only under the
     project writer lock, so the journal read, the pending-op scan and the
     live-hash snapshot all observe one consistent world."""
     from .safeid import InvalidIdError
+
     try:
         journal = Journal(root, op_id)
         if not journal.exists():
             return {"ok": False, "code": "TICKET_NOT_FOUND", "op_id": op_id}
         decoded = decode_operation_record(root, journal.dir)
         if not decoded["ok"]:
-            return {"ok": False, "code": decoded["code"], "op_id": op_id,
-                    "recovery_required": True, "detail": decoded["detail"]}
+            return {
+                "ok": False,
+                "code": decoded["code"],
+                "op_id": op_id,
+                "recovery_required": True,
+                "detail": decoded["detail"],
+            }
         record = decoded["record"]
         for target in record.get("targets", []):
             owned_target_path(root, target["path"])
     except InvalidIdError as exc:
-        return {"ok": False, "code": "VALIDATION_FAILED", "op_id": op_id,
-                "detail": f"journal target path or op_id escapes the "
-                          f"project: {exc}"}
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "op_id": op_id,
+            "detail": f"journal target path or op_id escapes the project: {exc}",
+        }
     if record.get("status") != "CONFLICT":
-        return {"ok": False, "code": "VALIDATION_FAILED",
-                "detail": f"op {op_id} is {record.get('status')}, not "
-                          "CONFLICT; only an unresolved conflict is "
-                          "resolvable"}
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "detail": f"op {op_id} is {record.get('status')}, not "
+            "CONFLICT; only an unresolved conflict is "
+            "resolvable",
+        }
     if resolution not in ("accept_live", "replan"):
-        return {"ok": False, "code": "VALIDATION_FAILED",
-                "detail": f"resolution {resolution!r} outside "
-                          "accept_live|replan"}
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "detail": f"resolution {resolution!r} outside accept_live|replan",
+        }
 
     # Only the selected conflict may be settled: any OTHER unresolved op or
     # conflict blocks this resolution (no global bypass).
     for other in scan_pending(root)[0]:
         if other["op_id"] != op_id:
-            return {"ok": False, "code": "RECOVERY_REQUIRED",
-                    "op_ids": [other["op_id"]],
-                    "detail": f"unrelated unresolved op {other['op_id']} "
-                              "blocks resolving this conflict; resolve it "
-                              "first"}
+            return {
+                "ok": False,
+                "code": "RECOVERY_REQUIRED",
+                "op_ids": [other["op_id"]],
+                "detail": f"unrelated unresolved op {other['op_id']} "
+                "blocks resolving this conflict; resolve it "
+                "first",
+            }
 
     # Re-read the live state before settling: if hashes changed again during
     # the decision, refuse (the evidence moved under us). ACCEPT_LIVE and
@@ -2513,54 +2831,67 @@ def _resolve_conflict_locked(root: Path, op_id: str, resolution: str,
         live_snapshot[target["path"]] = live
         if target.get("applied"):
             if live != target.get("after_hash"):
-                return {"ok": False, "code": "CONFLICT",
-                        "detail": f"applied target {target['path']} changed "
-                                  f"again during resolution; evidence moved, "
-                                  "re-inspect"}
+                return {
+                    "ok": False,
+                    "code": "CONFLICT",
+                    "detail": f"applied target {target['path']} changed "
+                    f"again during resolution; evidence moved, "
+                    "re-inspect",
+                }
             applied.append(target["path"])
         else:
             skipped.append(target["path"])
     # Stability guard: the live bytes must not move between the pre-resolution
     # read and the settle.
     for path, expected in live_snapshot.items():
-        target = next(item for item in record.get("targets", [])
-                      if item["path"] == path)
+        target = next(item for item in record.get("targets", []) if item["path"] == path)
         if _target_live_hash(root, target) != expected:
-            return {"ok": False, "code": "CONFLICT",
-                    "detail": f"target {path} changed during resolution; "
-                              "evidence moved, re-inspect"}
+            return {
+                "ok": False,
+                "code": "CONFLICT",
+                "detail": f"target {path} changed during resolution; evidence moved, re-inspect",
+            }
 
     # ACCEPT_LIVE: the current live bytes are the new truth. Verify the
     # resulting canonical repository before settling.
     policy = record.get("verification_policy", "none")
-    errors = _run_verifier(root, record.get("targets", []), policy,
-                          record.get("receipt_metadata"))
+    errors = _run_verifier(root, record.get("targets", []), policy, record.get("receipt_metadata"))
     if errors:
-        return {"ok": False, "code": "NEEDS_REPAIR",
-                "detail": "resolving to current live leaves an invalid "
-                          "repository: " + "; ".join(errors[:5]),
-                "conflict_op_id": op_id, "repair_evidence": errors}
+        return {
+            "ok": False,
+            "code": "NEEDS_REPAIR",
+            "detail": "resolving to current live leaves an invalid "
+            "repository: " + "; ".join(errors[:5]),
+            "conflict_op_id": op_id,
+            "repair_evidence": errors,
+        }
 
     # Settle: mark RESOLVED with the resolution record. Never touch the live
     # canonical files -- the resolution IS the decision to keep them.
     import datetime
-    now = datetime.datetime.now(datetime.timezone.utc).strftime(
-        "%Y-%m-%dT%H:%M:%SZ")
+
+    now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     record["status"] = "RESOLVED"
     record["resolution"] = resolution
     record["resolved_at"] = now
     record["resolver_agent"] = agent
     record["resolution_applied_targets"] = applied
     record["resolution_skipped_targets"] = skipped
-    record["resolution_evidence"] = "live accepted" if resolution \
-        == "accept_live" else "operation retired; fresh plan required"
+    record["resolution_evidence"] = (
+        "live accepted" if resolution == "accept_live" else "operation retired; fresh plan required"
+    )
     _atomic_json(journal.manifest, record)
-    _write_settled_marker(journal, record)
-    return {"ok": True, "code": "RESOLVED", "op_id": op_id,
-            "resolution": resolution, "applied_targets": applied,
-            "skipped_targets": skipped,
-            "detail": "conflict settled; live bytes accepted as truth, "
-                      "unapplied plan effects abandoned"}
+    _write_settled_marker(journal, record) # noqa: F821
+    return {
+        "ok": True,
+        "code": "RESOLVED",
+        "op_id": op_id,
+        "resolution": resolution,
+        "applied_targets": applied,
+        "skipped_targets": skipped,
+        "detail": "conflict settled; live bytes accepted as truth, "
+        "unapplied plan effects abandoned",
+    }
 
 
 def auto_recover_pending(project_root: Path | str) -> dict:
@@ -2573,6 +2904,7 @@ def auto_recover_pending(project_root: Path | str) -> dict:
     so a parallel recover/mutation cannot interleave between ops."""
     root = Path(project_root)
     from .lock import project_writer_lock as _recover_lock
+
     try:
         with _recover_lock(root):
             pending, _conflicts = scan_pending(root)
@@ -2588,27 +2920,38 @@ def auto_recover_pending(project_root: Path | str) -> dict:
                 # structured corrupt record (op_id + detail) is preserved and
                 # surfaced; resolving it is an explicit human action.
                 if op.get("corrupt"):
-                    return {"ok": False, "code": "CORRUPT_JOURNAL",
-                            "op_ids": [op["op_id"]], "recovery_required": True,
-                            "detail": (f"corrupt journal evidence "
-                                       f"{op['op_id']} blocks auto-recovery: "
-                                       f"{op.get('detail', '')} -- resolve the "
-                                       f"corrupt receipt explicitly before "
-                                       f"replay")}
+                    return {
+                        "ok": False,
+                        "code": "CORRUPT_JOURNAL",
+                        "op_ids": [op["op_id"]],
+                        "recovery_required": True,
+                        "detail": (
+                            f"corrupt journal evidence "
+                            f"{op['op_id']} blocks auto-recovery: "
+                            f"{op.get('detail', '')} -- resolve the "
+                            f"corrupt receipt explicitly before "
+                            f"replay"
+                        ),
+                    }
                 result = _recover_locked(root, op["op_id"])
                 if not result["ok"]:
                     # ONE fresh scan for the stale receipt list: the failed
                     # op may have been settled mid-loop.
-                    result["pending_op_ids"] = [
-                        p["op_id"] for p in scan_pending(root)[0]]
+                    result["pending_op_ids"] = [p["op_id"] for p in scan_pending(root)[0]]
                     return result
                 recovered.append(op["op_id"])
-            return {"ok": True, "code": "RECOVERED",
-                    "recovered": recovered, "recovery_required": False}
+            return {
+                "ok": True,
+                "code": "RECOVERED",
+                "recovered": recovered,
+                "recovery_required": False,
+            }
     except PermissionError:
-        return {"ok": False, "code": "WRITER_BUSY",
-                "detail": "another live writer holds the project lock; "
-                          "retry after it releases"}
+        return {
+            "ok": False,
+            "code": "WRITER_BUSY",
+            "detail": "another live writer holds the project lock; retry after it releases",
+        }
 
 
 def compact_committed(project_root: Path | str) -> dict:
@@ -2633,7 +2976,7 @@ def compact_committed(project_root: Path | str) -> dict:
     ops_dir = root / OPS_DIR
     if not ops_dir.is_dir():
         return {"ok": True, "compacted": [], "skipped": []}
-    
+
     try:
         info = os.lstat(ops_dir)
         if ops_dir.is_symlink() or getattr(info, "st_file_attributes", 0) & 0x400:
@@ -2650,7 +2993,7 @@ def compact_committed(project_root: Path | str) -> dict:
                 continue
         except OSError:
             continue
-            
+
         if not entry.is_dir():
             continue
         manifest = entry / "operation.json"

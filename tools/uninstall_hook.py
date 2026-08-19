@@ -22,9 +22,11 @@ if git_path.is_file():
     # Linked worktree: .git is a pointer file, hooks live in the MAIN repo,
     # shared -- the naive relative path below would silently look in the
     # wrong place and report "clean" even if the shared hook is still active.
-    print("note: this is a linked git worktree (.git is a file) -- the "
-          "shared hook lives in the main checkout; run this from there "
-          "instead if you need to remove it")
+    print(
+        "note: this is a linked git worktree (.git is a file) -- the "
+        "shared hook lives in the main checkout; run this from there "
+        "instead if you need to remove it"
+    )
     sys.exit(0)
 if not git_path.is_dir():
     print("clean: no .git here -- nothing to uninstall")

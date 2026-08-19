@@ -23,7 +23,6 @@ Stdlib only.
 
 import hashlib
 import os
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -37,8 +36,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 def _git(project: Path, *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        ["git"] + list(args),
-        cwd=str(project), capture_output=True, text=True, errors="replace",
+        ["git", *list(args)],
+        cwd=str(project),
+        capture_output=True,
+        text=True,
+        errors="replace",
     )
 
 
@@ -88,10 +90,7 @@ _GARBAGE_PATTERNS = [
 
 def _is_garbage(name: str) -> bool:
     base = os.path.basename(name)
-    for pat in _GARBAGE_PATTERNS:
-        if pat in base or pat in name:
-            return True
-    return False
+    return any(pat in base or pat in name for pat in _GARBAGE_PATTERNS)
 
 
 def _is_delivery_source(project: Path, rel: str) -> bool:
@@ -99,9 +98,7 @@ def _is_delivery_source(project: Path, rel: str) -> bool:
 
     Includes all tracked files that aren't transient garbage.
     """
-    if _is_garbage(rel):
-        return False
-    return True
+    return not _is_garbage(rel)
 
 
 # T-1016: explicit destructive-overwrite authorization. Default False.
@@ -155,14 +152,14 @@ def _scan_unresolved_recovery(project: Path) -> list[tuple[str, str]]:
     closed (T-1009).
     """
     from saipen_engine.journal import scan_pending
+
     try:
         pending, _ = scan_pending(project)
     except Exception as exc:
         # The canonical scan is designed never to raise, but an unclassifiable
         # recovery container is corrupt evidence that must block the handoff.
         return [("OPS_DIR", f"CORRUPT_JOURNAL: {type(exc).__name__}: {exc}")]
-    return [(op["op_id"], op.get("status", "CORRUPT_JOURNAL"))
-            for op in pending]
+    return [(op["op_id"], op.get("status", "CORRUPT_JOURNAL")) for op in pending]
 
 
 def build_archive(output: Path, project: Path) -> None:
@@ -171,8 +168,10 @@ def build_archive(output: Path, project: Path) -> None:
     _reject_protected_destination(output, project)
     if output.exists() and not _OVERWRITE_ALLOWED:
         print(f"FAIL: destination already exists: {output}")
-        print("Refusing to overwrite without explicit authorization. "
-              "Pass --force to allow destructive overwrite.")
+        print(
+            "Refusing to overwrite without explicit authorization. "
+            "Pass --force to allow destructive overwrite."
+        )
         sys.exit(1)
 
     verifier = project / "tools" / "verify_handoff_archive.py"
@@ -183,14 +182,14 @@ def build_archive(output: Path, project: Path) -> None:
     # --- Pre-packaging checks ---
     print("=== Pre-packaging checks ===")
     deleted = _deleted_tracked(project)
-    sealed = [f for f in deleted
-              if __import__("re").match(r"^\.saipen/logs/LOG-\d+\.md$", f)]
+    sealed = [f for f in deleted if __import__("re").match(r"^\.saipen/logs/LOG-\d+\.md$", f)]
     if sealed:
         print(f"FAIL: sealed LOG deletions detected: {sealed}")
         sys.exit(1)
     if deleted:
-        print(f"WARN: {len(deleted)} tracked files appear deleted "
-              f"(not sealed LOGs — review manually)")
+        print(
+            f"WARN: {len(deleted)} tracked files appear deleted (not sealed LOGs — review manually)"
+        )
 
     # Scan canonical recovery state.  Unresolved PREPARED/CONFLICT operations
     # and corrupt journal evidence mean the continuation truth is incomplete
@@ -231,6 +230,7 @@ def build_archive(output: Path, project: Path) -> None:
                 link_escapes.append(rel)
                 break
             import stat as _stat
+
             if _stat.S_ISLNK(st.st_mode):
                 link_escapes.append(rel)
                 break
@@ -238,17 +238,22 @@ def build_archive(output: Path, project: Path) -> None:
             # No symlink component; now confirm the leaf is a regular file.
             st = src.lstat()
             import stat as _stat
+
             if not _stat.S_ISREG(st.st_mode):
                 link_escapes.append(f"{rel} (not a regular file)")
             else:
                 member_lstats[rel] = (st.st_dev, st.st_ino, st.st_mode, st.st_mtime)
     if link_escapes:
-        print(f"FAIL: {len(link_escapes)} member(s) are symlinks or non-regular "
-              f"files -- refusing to package bytes through an escaped object:")
+        print(
+            f"FAIL: {len(link_escapes)} member(s) are symlinks or non-regular "
+            f"files -- refusing to package bytes through an escaped object:"
+        )
         for e in link_escapes[:10]:
             print(f"  {e}")
-        print("A tracked member must be a regular contained file with no "
-              "symlink/reparse ancestor (T-1015).")
+        print(
+            "A tracked member must be a regular contained file with no "
+            "symlink/reparse ancestor (T-1015)."
+        )
         sys.exit(1)
     print(f"  PASS: all {len(members)} members are regular contained files")
 
@@ -272,21 +277,33 @@ def build_archive(output: Path, project: Path) -> None:
                 try:
                     with open(src, "rb") as f:
                         fst = os.fstat(f.fileno())
-                        expected_dev, expected_ino, expected_mode, expected_mtime = member_lstats[rel]
-                        
+                        expected_dev, expected_ino, expected_mode, expected_mtime = member_lstats[
+                            rel
+                        ]
+
                         # T-1013: fail closed if the inode/device changed between lstat and open.
-                        # This prevents a TOCTOU race where a tracked regular file is swapped to an outside symlink.
+                        # This prevents a TOCTOU race where a tracked regular file is swapped to an outside symlink. # noqa: E501
                         if (fst.st_dev, fst.st_ino) != (expected_dev, expected_ino):
-                            snapshot_errors.append(f"{rel} (inode/device changed - possible symlink race)")
+                            snapshot_errors.append(
+                                f"{rel} (inode/device changed - possible symlink race)"
+                            )
                             continue
-                        
+
                         data = f.read()
                         source_snapshot[rel] = hashlib.sha256(data).hexdigest()
-                        
+
                         import time
+
                         zinfo = zipfile.ZipInfo(rel)
                         dt = time.localtime(expected_mtime)
-                        zinfo.date_time = (dt.tm_year, dt.tm_mon, dt.tm_mday, dt.tm_hour, dt.tm_min, dt.tm_sec)
+                        zinfo.date_time = (
+                            dt.tm_year,
+                            dt.tm_mon,
+                            dt.tm_mday,
+                            dt.tm_hour,
+                            dt.tm_min,
+                            dt.tm_sec,
+                        )
                         zinfo.external_attr = (expected_mode & 0xFFFF) << 16
                         zinfo.compress_type = zipfile.ZIP_DEFLATED
                         zf.writestr(zinfo, data)
@@ -294,13 +311,14 @@ def build_archive(output: Path, project: Path) -> None:
                     snapshot_errors.append(f"{rel} ({exc})")
 
         if snapshot_errors:
-            print(f"FAIL: {len(snapshot_errors)} member(s) vanished or changed during packaging (TOCTOU protection):")
+            print(
+                f"FAIL: {len(snapshot_errors)} member(s) vanished or changed during packaging (TOCTOU protection):" # noqa: E501
+            )
             for e in snapshot_errors[:10]:
                 print(f"  {e}")
             sys.exit(1)
         print(f"  Captured {len(source_snapshot)} file hashes from source tree")
-        print(f"  {tmpzip}  ({tmpzip.stat().st_size} bytes, "
-              f"{len(members)} members)")
+        print(f"  {tmpzip}  ({tmpzip.stat().st_size} bytes, {len(members)} members)")
 
         # T-1011: Verify every archive member against the captured snapshot.
         # This catches tree mutation between snapshot and packaging.
@@ -314,11 +332,11 @@ def build_archive(output: Path, project: Path) -> None:
                 arc_hash = hashlib.sha256(zf.read(arc_name)).hexdigest()
                 expected = source_snapshot.get(arc_name)
                 if expected is None:
-                    snapshot_mismatches.append(
-                        (arc_name, "extra member not in source snapshot"))
+                    snapshot_mismatches.append((arc_name, "extra member not in source snapshot"))
                 elif arc_hash != expected:
                     snapshot_mismatches.append(
-                        (arc_name, f"hash mismatch: arc={arc_hash[:16]} src={expected[:16]}"))
+                        (arc_name, f"hash mismatch: arc={arc_hash[:16]} src={expected[:16]}")
+                    )
         if snapshot_mismatches:
             print(f"FAIL: {len(snapshot_mismatches)} member(s) differ from source snapshot:")
             for name, reason in snapshot_mismatches[:10]:
@@ -339,9 +357,12 @@ def build_archive(output: Path, project: Path) -> None:
         # --- Structural + portability gate ---
         print("\n=== Structural verification ===")
         r = subprocess.run(
-            [sys.executable, str(verifier), str(tmpzip),
-             "--project-root", str(project)],
-            cwd=str(project), capture_output=True, text=True, timeout=600)
+            [sys.executable, str(verifier), str(tmpzip), "--project-root", str(project)],
+            cwd=str(project),
+            capture_output=True,
+            text=True,
+            timeout=600,
+        )
         print(r.stdout[-2000:] if len(r.stdout) > 2000 else r.stdout)
         if r.stderr:
             print("STDERR:", r.stderr[-500:] if len(r.stderr) > 500 else r.stderr)
@@ -399,17 +420,19 @@ def build_archive(output: Path, project: Path) -> None:
 
 def main() -> None:
     import argparse
-    parser = argparse.ArgumentParser(
-        description="Build a verified SAIPEN handoff archive.")
+
+    parser = argparse.ArgumentParser(description="Build a verified SAIPEN handoff archive.")
     parser.add_argument("output", help="Output archive path (e.g. saipen-delivery.zip)")
-    parser.add_argument("--project-root", default=".",
-                        help="Project root (default: cwd)")
-    parser.add_argument("--force", action="store_true",
-                        help="Allow destructive overwrite of an existing "
-                             "ordinary destination (never tracked/canonical)")
+    parser.add_argument("--project-root", default=".", help="Project root (default: cwd)")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Allow destructive overwrite of an existing "
+        "ordinary destination (never tracked/canonical)",
+    )
     args = parser.parse_args()
 
-    global _OVERWRITE_ALLOWED
+    global _OVERWRITE_ALLOWED # noqa: PLW0603
     _OVERWRITE_ALLOWED = args.force
 
     project = Path(args.project_root).resolve()

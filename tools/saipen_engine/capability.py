@@ -52,11 +52,15 @@ def capability_error(capability: object) -> str | None:
     of silently behaving like `full`.
     """
     if capability is None:
-        return ("no current-session capability was negotiated; the public "
-                "command boundary must inject one (CORE § 1.3)")
+        return (
+            "no current-session capability was negotiated; the public "
+            "command boundary must inject one (CORE § 1.3)"
+        )
     if not isinstance(capability, str) or capability not in CAPABILITIES:
-        return (f"current-session capability {capability!r} is outside the "
-                f"closed set {'/'.join(CAPABILITIES)}")
+        return (
+            f"current-session capability {capability!r} is outside the "
+            f"closed set {'/'.join(CAPABILITIES)}"
+        )
     return None
 
 

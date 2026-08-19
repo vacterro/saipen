@@ -24,6 +24,7 @@ the same picture for a session that has not started yet.
 
 Never blocks. Exit 0 unless `--check` is asked for and the copies are stale.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -128,9 +129,7 @@ def _digest() -> str:
             elif member.is_file():
                 frame(b"F", member, member.read_bytes())
             else:
-                raise RuntimeError(
-                    f"runtime manifest surface contains unsupported entry: {member}"
-                )
+                raise RuntimeError(f"runtime manifest surface contains unsupported entry: {member}")
     return h.hexdigest()[:16]
 
 
@@ -142,8 +141,7 @@ def _installed(target: Path) -> str | None:
 
 
 def _run(cmd: list[str], cwd: Path = HOME) -> tuple[int, str]:
-    kwargs = dict(capture_output=True, text=True, errors="replace",
-                  timeout=300)
+    kwargs = dict(capture_output=True, text=True, errors="replace", timeout=300)
     if os.name == "nt":
         kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW
     try:
@@ -156,8 +154,13 @@ def _run(cmd: list[str], cwd: Path = HOME) -> tuple[int, str]:
 def inject() -> tuple[bool, str]:
     """Run the platform injector. Returns (ok, output tail)."""
     if os.name == "nt":
-        cmd = ["powershell", "-NoProfile", "-NonInteractive", "-File",
-               str(HOME / "bootstrap" / "inject.ps1")]
+        cmd = [
+            "powershell",
+            "-NoProfile",
+            "-NonInteractive",
+            "-File",
+            str(HOME / "bootstrap" / "inject.ps1"),
+        ]
     else:
         cmd = ["bash", str(HOME / "bootstrap" / "inject.sh")]
     rc, out = _run(cmd)
@@ -176,21 +179,22 @@ def stamp_targets(digest: str) -> list[str]:
             (t / STAMP).write_text(digest + "\n", encoding="utf-8")
             # Every target's leaf is `saipen`, so the leaf names nothing.
             # The agent home is what distinguishes them.
-            done.append(next((p for p in t.parts
-                              if p.startswith(".")), str(t)))
+            done.append(next((p for p in t.parts if p.startswith(".")), str(t)))
     return done
 
 
 def state_report() -> list[str]:
     """The picture an agent needs before it acts. Facts only, no verdict."""
     lines = []
-    version = (HOME / "VERSION").read_text(encoding="utf-8").strip() \
-        if (HOME / "VERSION").is_file() else "?"
+    version = (
+        (HOME / "VERSION").read_text(encoding="utf-8").strip()
+        if (HOME / "VERSION").is_file()
+        else "?"
+    )
 
     rc, head = _run(["git", "rev-parse", "--short", "HEAD"])
     head = head if rc == 0 else "no git"
-    rc, counts = _run(["git", "rev-list", "--left-right", "--count",
-                       "origin/main...HEAD"])
+    rc, counts = _run(["git", "rev-list", "--left-right", "--count", "origin/main...HEAD"])
     drift = ""
     if rc == 0 and counts:
         behind, ahead = [*counts.split(), "0", "0"][:2]
@@ -212,7 +216,8 @@ def state_report() -> list[str]:
         lines.append(
             f"state: phase {fields.get('phase', '?')}, "
             f"task {fields.get('task', '?')}, "
-            f"next_action {fields.get('next_action', '?')[:90]}")
+            f"next_action {fields.get('next_action', '?')[:90]}"
+        )
 
     board = HOME / ".saipen" / "BOARD.md"
     if board.is_file():
@@ -222,24 +227,27 @@ def state_report() -> list[str]:
                 section = ln[3:].strip()
             elif ln.startswith("- [") and section:
                 counts[section] = counts.get(section, 0) + 1
-        lines.append("board: " + ", ".join(
-            f"{k} {v}" for k, v in counts.items()) or "board: empty")
+        lines.append("board: " + ", ".join(f"{k} {v}" for k, v in counts.items()) or "board: empty")
 
     rc, out = _run([sys.executable, str(HOME / "tools" / "validate.py")])
-    tail = [ln for ln in out.splitlines()
-            if ln.startswith(("Validation", "FAIL"))]
+    tail = [ln for ln in out.splitlines() if ln.startswith(("Validation", "FAIL"))]
     lines.append("validator: " + (tail[-1] if tail else f"exit {rc}"))
     return lines
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--check", action="store_true",
-                    help="report staleness and exit 1 if stale; inject nothing")
-    ap.add_argument("--force", action="store_true",
-                    help="re-inject even when the digest already matches")
-    ap.add_argument("--quiet-when-fresh", action="store_true",
-                    help="print nothing when nothing was stale (for timers)")
+    ap.add_argument(
+        "--check", action="store_true", help="report staleness and exit 1 if stale; inject nothing"
+    )
+    ap.add_argument(
+        "--force", action="store_true", help="re-inject even when the digest already matches"
+    )
+    ap.add_argument(
+        "--quiet-when-fresh",
+        action="store_true",
+        help="print nothing when nothing was stale (for timers)",
+    )
     args = ap.parse_args(argv)
 
     try:
@@ -256,16 +264,18 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.check:
         for t in stale:
-            print(f"STALE: {t} (installed {_installed(t) or 'unstamped'}, "
-                  f"source {digest})")
+            print(f"STALE: {t} (installed {_installed(t) or 'unstamped'}, source {digest})")
         if not stale:
             print(f"fresh: {len(present)} agent home(s) at {digest}")
         return 1 if stale else 0
 
     if args.quiet_when_fresh:
         if stale or args.force:
-            why = "forced" if args.force and not stale else \
-                f"{len(stale)} of {len(present)} home(s) stale"
+            why = (
+                "forced"
+                if args.force and not stale
+                else f"{len(stale)} of {len(present)} home(s) stale"
+            )
             ok, tail = inject()
             if ok:
                 stamp_targets(digest)
@@ -274,12 +284,15 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if stale or args.force:
-        why = "forced" if args.force and not stale else \
-            f"{len(stale)} of {len(present)} home(s) stale"
+        why = (
+            "forced"
+            if args.force and not stale
+            else f"{len(stale)} of {len(present)} home(s) stale"
+        )
         ok, tail = inject()
         if not ok:
             print(f"INJECT FAILED ({why}):\n{tail}")
-            return 0          # never block a timer on a failed inject
+            return 0  # never block a timer on a failed inject
         stamped = stamp_targets(digest)
         print(f"injected ({why}) -> {digest}; stamped: {', '.join(stamped)}")
     elif not args.quiet_when_fresh:

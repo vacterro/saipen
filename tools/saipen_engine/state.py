@@ -80,15 +80,17 @@ def parse_frontmatter(text: str):
             fields[current_list_key].append(coerce(item.group(1).strip()))
             continue
         if item:
-            return None, (f"line {lineno}: list item {line.strip()!r} appears "
-                          "outside any keyed list block")
+            return None, (
+                f"line {lineno}: list item {line.strip()!r} appears outside any keyed list block"
+            )
         kv = re.match(r"^([A-Za-z_][A-Za-z0-9_]*):\s*(.*)$", line)
         if not kv:
             return None, f"unparseable frontmatter line: {line!r}"
         key, raw = kv.group(1), kv.group(2).strip()
         if key in seen:
-            return None, (f"line {lineno}: duplicate STATE field "
-                          f"{key!r} (each field may appear once)")
+            return None, (
+                f"line {lineno}: duplicate STATE field {key!r} (each field may appear once)"
+            )
         seen.add(key)
         if raw == "":
             fields[key] = []
@@ -111,26 +113,65 @@ def parse_frontmatter(text: str):
 # ---------------------------------------------------------------------------
 
 STATE_REQUIRED_FIELDS = (
-    "phase", "task", "next_action", "blocker", "agent",
-    "saipen_version", "mode", "updated",
+    "phase",
+    "task",
+    "next_action",
+    "blocker",
+    "agent",
+    "saipen_version",
+    "mode",
+    "updated",
 )
 
 # Every property state.schema.json defines. `additionalProperties: false`
 # in the schema, so an engine-read key outside this set is unknown and
 # refuses -- the same FAIL the release gate raises.
-STATE_KNOWN_FIELDS = frozenset({
-    "phase", "task", "next_action", "blocker", "agent", "saipen_version",
-    "schema_version", "saipen_home", "requires", "mode", "execution_intent",
-    "converge_target", "goal_mode", "goal_waves", "goal_tickets",
-    "last_event", "style_contract", "updated", "human_note",
-    "first_publish_confirmation", "role_revision", "paused_from_phase",
-    "paused_from_na", "transition_from",
-})
+STATE_KNOWN_FIELDS = frozenset(
+    {
+        "phase",
+        "task",
+        "next_action",
+        "blocker",
+        "agent",
+        "saipen_version",
+        "schema_version",
+        "saipen_home",
+        "requires",
+        "mode",
+        "execution_intent",
+        "converge_target",
+        "goal_mode",
+        "goal_waves",
+        "goal_tickets",
+        "last_event",
+        "style_contract",
+        "updated",
+        "human_note",
+        "first_publish_confirmation",
+        "role_revision",
+        "paused_from_phase",
+        "paused_from_na",
+        "transition_from",
+    }
+)
 
 STATE_PHASE_ENUM = (
-    "INIT", "PLAN", "SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP", "DONE",
-    "BLOCKED", "VALIDATE", "HUNT", "MARKHUNT", "ADD", "CLEAN",
-    "TRANSLATE", "PREPARE",
+    "INIT",
+    "PLAN",
+    "SCOUT",
+    "BUILD",
+    "VERIFY",
+    "REVIEW",
+    "SHIP",
+    "DONE",
+    "BLOCKED",
+    "VALIDATE",
+    "HUNT",
+    "MARKHUNT",
+    "ADD",
+    "CLEAN",
+    "TRANSLATE",
+    "PREPARE",
 )
 
 STATE_MODE_ENUM = ("full", "read-only", "no-publish", "manual-verify")
@@ -139,11 +180,22 @@ STATE_INTENT_ENUM = ("normal", "goal", "converge")
 
 STATE_CONVERGE_TARGETS = ("done", "ship", "crew")
 
-STATE_STRING_FIELDS = frozenset({
-    "task", "next_action", "blocker", "agent", "saipen_home",
-    "style_contract", "updated", "human_note", "first_publish_confirmation",
-    "role_revision", "paused_from_phase", "paused_from_na",
-})
+STATE_STRING_FIELDS = frozenset(
+    {
+        "task",
+        "next_action",
+        "blocker",
+        "agent",
+        "saipen_home",
+        "style_contract",
+        "updated",
+        "human_note",
+        "first_publish_confirmation",
+        "role_revision",
+        "paused_from_phase",
+        "paused_from_na",
+    }
+)
 
 STATE_INTEGER_FIELDS = {
     "saipen_version": None,
@@ -156,8 +208,15 @@ STATE_INTEGER_FIELDS = {
 # RFC § 1.2's closed WAIT category set -- the seven tokens a `WAIT:` next_action
 # must carry so a stop instruction is mechanically distinguishable from a real
 # gate (hostile-regression, P0#1). Mirrored from tools/validate.py's WAIT_CATEGORIES.
-WAIT_CATEGORIES = ("manual-verify", "destructive-op", "first-publish",
-                   "user brake", "blocked", "safety valve", "init")
+WAIT_CATEGORIES = (
+    "manual-verify",
+    "destructive-op",
+    "first-publish",
+    "user brake",
+    "blocked",
+    "safety valve",
+    "init",
+)
 
 # ---------------------------------------------------------------------------
 # The ONE structured WAIT parser (hostile-regression, P1#5).
@@ -186,12 +245,14 @@ WAIT_CATEGORIES = ("manual-verify", "destructive-op", "first-publish",
 # goal` continues a goal run, bare `cc` continues a converge run.
 _SAFETY_VALVE_RE = re.compile(
     r"^safety valve reached \((\d+) waves / (\d+) tickets\) -- "
-    r"run '(saipen goal|cc)' to continue$")
+    r"run '(saipen goal|cc)' to continue$"
+)
 
 # The untriaged-MARKHUNT brake, verbatim from CORE § 1.2 / phases/done.md.
 # Anchored: the phrase alone never makes a string legal.
-MARKHUNT_BRAKE = ("WAIT: blocked -- untriaged MARKHUNT findings in "
-                  "## BLOCKED; triage into ## TODO or dismiss")
+MARKHUNT_BRAKE = (
+    "WAIT: blocked -- untriaged MARKHUNT findings in ## BLOCKED; triage into ## TODO or dismiss"
+)
 
 # The § 1.2 progress tag: a single trailing bracketed suffix, informational
 # only, never part of the sentence.
@@ -206,7 +267,7 @@ _SECOND_SENTENCE_RE = re.compile(r"\.\s+(?=[A-Z`])")
 
 def _wait_body(na: str) -> str:
     """The § 1.2 sentence of a `WAIT:` string, progress tag stripped."""
-    return _PROGRESS_TAG_RE.sub("", na.strip()[len("WAIT:"):].strip())
+    return _PROGRESS_TAG_RE.sub("", na.strip()[len("WAIT:") :].strip())
 
 
 def wait_grammar_error(na: object) -> str | None:
@@ -223,28 +284,36 @@ def wait_grammar_error(na: object) -> str | None:
         return "not a WAIT: action"
     body = _wait_body(text)
     if not body:
-        return ("carries no category and no question -- CORE § 1.2 requires "
-                "'WAIT: <category> -- <one sentence>'")
+        return (
+            "carries no category and no question -- CORE § 1.2 requires "
+            "'WAIT: <category> -- <one sentence>'"
+        )
     if "\n" in body:
         return "spans more than one line"
     if _SAFETY_VALVE_RE.match(body):
         return None
     head, sep, tail = body.partition(" -- ")
     if not sep:
-        return (f"has no ' -- ' delimiter: a bare category names the KIND of "
-                f"stop and asks nothing, which CORE § 1.2 forbids "
-                f"(got {body!r})")
+        return (
+            f"has no ' -- ' delimiter: a bare category names the KIND of "
+            f"stop and asks nothing, which CORE § 1.2 forbids "
+            f"(got {body!r})"
+        )
     if head.strip().lower() not in WAIT_CATEGORIES:
-        return (f"opens with {head.strip()!r}, which is not one of the closed "
-                f"§ 1.2 categories {'/'.join(WAIT_CATEGORIES)}")
+        return (
+            f"opens with {head.strip()!r}, which is not one of the closed "
+            f"§ 1.2 categories {'/'.join(WAIT_CATEGORIES)}"
+        )
     sentence = tail.strip()
     if not sentence:
         return "has an empty question after ' -- '"
     second = _SECOND_SENTENCE_RE.search(sentence)
     if second:
-        return (f"body starts a second sentence at offset {second.start()} -- "
-                f"CORE § 1.2 bounds it to one; session status belongs in "
-                f".saipen/kitchen/digest.md and queued work on BOARD.md")
+        return (
+            f"body starts a second sentence at offset {second.start()} -- "
+            f"CORE § 1.2 bounds it to one; session status belongs in "
+            f".saipen/kitchen/digest.md and queued work on BOARD.md"
+        )
     return None
 
 
@@ -283,9 +352,9 @@ def safety_valve_resume_key(na: object) -> str | None:
 DONE_EMPTY_BRAKES = ("safety valve", "user brake", "markhunt")
 
 
-def binding_wait(na: object, *, phase: object = None,
-                 empty_todo: bool = False,
-                 intent: object = None) -> str | None:
+def binding_wait(
+    na: object, *, phase: object = None, empty_todo: bool = False, intent: object = None
+) -> str | None:
     """Does this WAIT actually BIND in this context? The brake name, or None.
 
     CONTEXTUAL by construction (hostile-regression, P1#5): the router, the
@@ -320,6 +389,7 @@ def binding_wait(na: object, *, phase: object = None,
         return "user brake"
     return None
 
+
 _STYLE_TOKEN_RE = re.compile(r"`style_contract:\s*(ded-[0-9a-f]{8})`")
 
 
@@ -327,8 +397,8 @@ def style_contract_token(text: str) -> str:
     """The installed STYLE.md voice marker, computed from the file minus its own
     declaration line (RFC § 1.2)."""
     body = "\n".join(
-        ln for ln in text.replace("\r\n", "\n").split("\n")
-        if "style_contract:" not in ln).strip()
+        ln for ln in text.replace("\r\n", "\n").split("\n") if "style_contract:" not in ln
+    ).strip()
     return "ded-" + hashlib.sha256(body.encode("utf-8")).hexdigest()[:8]
 
 
@@ -347,6 +417,7 @@ def style_contract_token(text: str) -> str:
 # binding it is (see `persisted_home_error`) -- but it never decides what the
 # contract SAYS.
 # ---------------------------------------------------------------------------
+
 
 def running_home() -> Path:
     """The SAIPEN home of the RUNNING installation (this module's own tree)."""
@@ -406,8 +477,9 @@ def installed_style_token(saipen_home: object = None) -> str | None:
     return running_style_token()
 
 
-def state_contract_errors(fields: dict, *, style_token: str | None = None,
-                          current_schema_version: int | None = None) -> list[str]:
+def state_contract_errors(
+    fields: dict, *, style_token: str | None = None, current_schema_version: int | None = None
+) -> list[str]:
     """Verify exact presence/type/shape of core STATE schema against the
     protocol -- the SHARED implementation the release gate mirrors.
 
@@ -439,35 +511,28 @@ def state_contract_errors(fields: dict, *, style_token: str | None = None,
             errors.append(f"missing required field {key}")
     for key in fields:
         if key not in STATE_KNOWN_FIELDS:
-            errors.append(f"unknown STATE field {key!r} -- state.schema.json "
-                          "does not define it (retired or misspelled?)")
+            errors.append(
+                f"unknown STATE field {key!r} -- state.schema.json "
+                "does not define it (retired or misspelled?)"
+            )
             continue
         if key in STATE_STRING_FIELDS and not isinstance(fields[key], str):
             errors.append(f"{key} must be a string")
     phase = fields.get("phase")
-    if phase is not None and (not isinstance(phase, str)
-                              or phase not in STATE_PHASE_ENUM):
-        errors.append(f"phase {phase!r} not one of "
-                      f"{'|'.join(STATE_PHASE_ENUM)}")
+    if phase is not None and (not isinstance(phase, str) or phase not in STATE_PHASE_ENUM):
+        errors.append(f"phase {phase!r} not one of {'|'.join(STATE_PHASE_ENUM)}")
     tf = fields.get("transition_from")
-    if tf is not None and (not isinstance(tf, str)
-                           or tf not in STATE_PHASE_ENUM):
-        errors.append(f"transition_from {tf!r} not one of "
-                      f"{'|'.join(STATE_PHASE_ENUM)}")
+    if tf is not None and (not isinstance(tf, str) or tf not in STATE_PHASE_ENUM):
+        errors.append(f"transition_from {tf!r} not one of {'|'.join(STATE_PHASE_ENUM)}")
     mode = fields.get("mode")
-    if mode is not None and (not isinstance(mode, str)
-                             or mode not in STATE_MODE_ENUM):
+    if mode is not None and (not isinstance(mode, str) or mode not in STATE_MODE_ENUM):
         errors.append(f"mode {mode!r} not one of {'|'.join(STATE_MODE_ENUM)}")
     intent = fields.get("execution_intent")
-    if intent is not None and (not isinstance(intent, str)
-                               or intent not in STATE_INTENT_ENUM):
-        errors.append(f"execution_intent {intent!r} not one of "
-                      f"{'|'.join(STATE_INTENT_ENUM)}")
+    if intent is not None and (not isinstance(intent, str) or intent not in STATE_INTENT_ENUM):
+        errors.append(f"execution_intent {intent!r} not one of {'|'.join(STATE_INTENT_ENUM)}")
     target = fields.get("converge_target")
-    if target is not None and (not isinstance(target, str)
-                               or target not in STATE_CONVERGE_TARGETS):
-        errors.append(f"converge_target {target!r} not one of "
-                      f"{'|'.join(STATE_CONVERGE_TARGETS)}")
+    if target is not None and (not isinstance(target, str) or target not in STATE_CONVERGE_TARGETS):
+        errors.append(f"converge_target {target!r} not one of {'|'.join(STATE_CONVERGE_TARGETS)}")
     for key, minimum in STATE_INTEGER_FIELDS.items():
         value = fields.get(key)
         if value is None:
@@ -475,8 +540,7 @@ def state_contract_errors(fields: dict, *, style_token: str | None = None,
         if not isinstance(value, int) or isinstance(value, bool):
             errors.append(f"{key} must be an integer")
         elif minimum is not None and value < minimum:
-            errors.append(f"{key} {value!r} is below the schema minimum "
-                          f"{minimum}")
+            errors.append(f"{key} {value!r} is below the schema minimum {minimum}")
     requires = fields.get("requires")
     if requires is not None:
         if not isinstance(requires, list):
@@ -514,25 +578,27 @@ def state_contract_errors(fields: dict, *, style_token: str | None = None,
     ph = fields.get("phase")
     if ph is not None and ph != "INIT":
         if tf is None:
-            errors.append("missing transition_from -- required on all non-INIT "
-                           "states to validate phase transitions (RFC § 1.6)")
+            errors.append(
+                "missing transition_from -- required on all non-INIT "
+                "states to validate phase transitions (RFC § 1.6)"
+            )
         elif isinstance(tf, str):
             if tf not in phases.VALID_TRANSITIONS and tf not in phases.ANY_FROM:
                 errors.append(
-                    f"transition_from {tf!r} not one of the 16 phase enum values "
-                    f"(RFC § 1.6)")
+                    f"transition_from {tf!r} not one of the 16 phase enum values (RFC § 1.6)"
+                )
             elif ph != tf and ph not in phases.ANY_FROM:
                 allowed = list(phases.VALID_TRANSITIONS.get(tf, []))
                 # Block-parked transitional shape: an active-ticket `ticket
                 # block` parks execution at DONE with transition_from set to the
                 # mid-flight phase (RFC § 1.6 narrow exception). The engine
                 # accepts the shape; the validator adds the LOG-evidence proof.
-                if not (ph == "DONE" and tf in ("SCOUT", "BUILD", "VERIFY",
-                                                 "REVIEW", "SHIP")):
+                if not (ph == "DONE" and tf in ("SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP")):
                     if ph not in allowed:
                         errors.append(
                             f"invalid phase transition: {tf} -> {ph} (RFC § 1.6). "
-                            f"Allowed from {tf}: {', '.join(allowed)}")
+                            f"Allowed from {tf}: {', '.join(allowed)}"
+                        )
     updated = fields.get("updated")
     if isinstance(updated, str):
         # ONE shared strict-UTC parser (hostile-regression, P1#7). The regex
@@ -544,7 +610,8 @@ def state_contract_errors(fields: dict, *, style_token: str | None = None,
             errors.append(
                 f"updated must be ISO-8601 UTC (Z or +00:00) naming a REAL "
                 f"instant, got {updated!r} -- Recovery miscompares staleness "
-                f"across timezones otherwise (RFC § 1.2)")
+                f"across timezones otherwise (RFC § 1.2)"
+            )
     na = fields.get("next_action")
     if isinstance(na, str) and na.strip().startswith("WAIT:"):
         # THE structured § 1.2 grammar via the ONE shared parser
@@ -559,33 +626,42 @@ def state_contract_errors(fields: dict, *, style_token: str | None = None,
                 f"never legal) -- CORE § 1.2 requires 'WAIT: <category> -- "
                 f"<one sentence>' where category is one of "
                 f"{'/'.join(WAIT_CATEGORIES)} (or the exact safety-valve "
-                f"pause); it {problem}")
+                f"pause); it {problem}"
+            )
     # § 1.2 VERSION GUARD: a state written by a NEWER protocol than the one
     # running cannot be interpreted by it -- the running install does not know
     # the rules that state was written under. The guard is one-directional:
     # older states are readable legacy, newer ones refuse.
     running_major = running_protocol_major()
     project_major = fields.get("saipen_version")
-    if (running_major is not None and isinstance(project_major, int)
-            and not isinstance(project_major, bool)
-            and project_major > running_major):
+    if (
+        running_major is not None
+        and isinstance(project_major, int)
+        and not isinstance(project_major, bool)
+        and project_major > running_major
+    ):
         errors.append(
             f"saipen_version {project_major} is newer than the running SAIPEN "
             f"protocol major {running_major} -- this install cannot interpret "
-            f"a state written by a later protocol (RFC § 1.2 version guard)")
+            f"a state written by a later protocol (RFC § 1.2 version guard)"
+        )
     if style_token is not None:
         sc = fields.get("style_contract")
         if sc is not None and sc != style_token:
             errors.append(
                 f"style_contract {sc!r} does not match the installed STYLE.md "
                 f"marker {style_token!r} -- the agent that wrote this checkpoint "
-                f"did not read the current voice contract (RFC § 1.2)")
-        elif (current_schema_version is not None
-              and fields.get("schema_version") == current_schema_version
-              and sc is None):
+                f"did not read the current voice contract (RFC § 1.2)"
+            )
+        elif (
+            current_schema_version is not None
+            and fields.get("schema_version") == current_schema_version
+            and sc is None
+        ):
             errors.append(
                 f"schema_version {current_schema_version} requires "
-                f"style_contract: {style_token} (RFC § 1.2)")
+                f"style_contract: {style_token} (RFC § 1.2)"
+            )
     return errors
 
 
@@ -616,9 +692,7 @@ def _current_schema_version(home: object = None) -> int | None:
 # re-introduce the same fail-open coupling from the other side. `rebind-home`
 # does demand a readable, major-compatible VERSION from its explicit candidate,
 # because that candidate is being adopted as the install to load FROM.
-HOME_LAYOUT_MARKERS = (
-    ("extensions", "subs", "PROTOCOL.md"),
-)
+HOME_LAYOUT_MARKERS = (("extensions", "subs", "PROTOCOL.md"),)
 
 # Windows drive qualification with a separator: `C:\...` or `C:/...`.
 _DRIVE_ABS_RE = re.compile(r"^[A-Za-z]:[/\\]")
@@ -651,9 +725,7 @@ def is_absolute_home(value: object) -> bool:
     text = str(value).strip()
     if not text:
         return False
-    return (text.startswith("/")
-            or bool(_DRIVE_ABS_RE.match(text))
-            or bool(_UNC_ABS_RE.match(text)))
+    return text.startswith("/") or bool(_DRIVE_ABS_RE.match(text)) or bool(_UNC_ABS_RE.match(text))
 
 
 def persisted_home_error(home: object) -> str | None:
@@ -677,17 +749,22 @@ def persisted_home_error(home: object) -> str | None:
     if not is_absolute_home(text):
         return None
     if not path.is_dir():
-        return (f"STATE.saipen_home {text!r} does not resolve to a directory "
-                f"on this machine")
-    if not ((path / "saipen" / "BOOT.md").is_file()
-            or (path / "BOOT.md").is_file()):
-        return (f"STATE.saipen_home {text!r} has no saipen/BOOT.md -- the "
-                f"cold-start kernel is not there")
-    missing = [Path(*parts).as_posix() for parts in HOME_LAYOUT_MARKERS
-               if not path.joinpath(*parts).is_file()]
+        return f"STATE.saipen_home {text!r} does not resolve to a directory on this machine"
+    if not ((path / "saipen" / "BOOT.md").is_file() or (path / "BOOT.md").is_file()):
+        return (
+            f"STATE.saipen_home {text!r} has no saipen/BOOT.md -- the "
+            f"cold-start kernel is not there"
+        )
+    missing = [
+        Path(*parts).as_posix()
+        for parts in HOME_LAYOUT_MARKERS
+        if not path.joinpath(*parts).is_file()
+    ]
     if missing:
-        return (f"STATE.saipen_home {text!r} is missing "
-                f"{', '.join(missing)} -- not a usable SAIPEN install")
+        return (
+            f"STATE.saipen_home {text!r} is missing "
+            f"{', '.join(missing)} -- not a usable SAIPEN install"
+        )
     return None
 
 
@@ -723,13 +800,16 @@ def parse_state_or_error(text: str):
     # T-1010: the same cross-platform absolute classifier the liveness gate
     # uses -- a foreign-OS absolute pointer must never read as legacy-relative
     # here and silently skip the running-install ownership check.
-    if (home and str(home).strip() and is_absolute_home(home)
-            and Path(str(home)).resolve() == running_home()):
+    if (
+        home
+        and str(home).strip()
+        and is_absolute_home(home)
+        and Path(str(home)).resolve() == running_home()
+    ):
         style_token = running_style_token()
     contract_errors = state_contract_errors(
-        fields,
-        style_token=style_token,
-        current_schema_version=running_schema_version())
+        fields, style_token=style_token, current_schema_version=running_schema_version()
+    )
     if contract_errors:
         return None, "; ".join(contract_errors)
     return fields, None
@@ -768,12 +848,13 @@ def _render_value(value) -> str:
     text = str(value)
     if text == "":
         return '""'
-    would_retype = (re.fullmatch(r"-?\d+", text) is not None
-                    or text in ("true", "false"))
-    needs_quote = (would_retype
-                   or any(c in text for c in ":,[]{}&*!|>'\"%@`")
-                   or text != text.strip()
-                   or any(c.isspace() for c in text))
+    would_retype = re.fullmatch(r"-?\d+", text) is not None or text in ("true", "false")
+    needs_quote = (
+        would_retype
+        or any(c in text for c in ":,[]{}&*!|>'\"%@`")
+        or text != text.strip()
+        or any(c.isspace() for c in text)
+    )
     if needs_quote:
         return '"' + text.replace("\\", "\\\\").replace('"', '\\"') + '"'
     return text
@@ -838,8 +919,7 @@ def patch_state(text: str, owned: dict) -> str:
             if isinstance(value, (list, tuple)):
                 emit_block(key, value)
                 index += 1
-                while index < len(body) and re.match(
-                        r"^\s+-\s+", body[index]):
+                while index < len(body) and re.match(r"^\s+-\s+", body[index]):
                     index += 1
                 continue
             out.append(f"{key}: {_render_value(value)}")
@@ -874,8 +954,7 @@ def remove_state_fields(text: str, keys) -> str:
         raise ValueError(f"state-malformed: {parse_error}")
     remove = set(keys)
     lines = text.split("\n")
-    close = next((i for i, line in enumerate(lines[1:], 1)
-                  if line.strip() == "---"), None)
+    close = next((i for i, line in enumerate(lines[1:], 1) if line.strip() == "---"), None)
     if close is None:
         raise ValueError("STATE has no closing --- frontmatter fence")
     # Preserve the post-fence body (BOUNDARY marker) exactly (T-1003 / P0#2).
@@ -883,8 +962,7 @@ def remove_state_fields(text: str, keys) -> str:
     out = []
     index = 1
     while index < close:
-        match = re.match(r"^([A-Za-z_][A-Za-z0-9_]*):\s*(.*)$",
-                         lines[index])
+        match = re.match(r"^([A-Za-z_][A-Za-z0-9_]*):\s*(.*)$", lines[index])
         if match and match.group(1) in remove:
             list_field = match.group(2).strip() == ""
             index += 1
@@ -897,10 +975,13 @@ def remove_state_fields(text: str, keys) -> str:
     return "---\n" + "\n".join(out) + "\n" + suffix
 
 
-def transition_execution_intent(text: str, intent: str,
-                                converge_target: str | None = None,
-                                goal_waves: int = 0,
-                                goal_tickets: int = 0) -> str:
+def transition_execution_intent(
+    text: str,
+    intent: str,
+    converge_target: str | None = None,
+    goal_waves: int = 0,
+    goal_tickets: int = 0,
+) -> str:
     """Apply one complete execution-intent family transition.
 
     Every transition first removes fields owned by all intent families, then
@@ -917,23 +998,25 @@ def transition_execution_intent(text: str, intent: str,
         raise ValueError("goal counters must be non-negative")
 
     clean = remove_state_fields(
-        text, ("execution_intent", "goal_mode", "goal_waves",
-               "goal_tickets", "converge_target"))
+        text, ("execution_intent", "goal_mode", "goal_waves", "goal_tickets", "converge_target")
+    )
     owned = {"execution_intent": intent}
     if intent == "goal":
-        owned.update({"goal_waves": goal_waves,
-                      "goal_tickets": goal_tickets})
+        owned.update({"goal_waves": goal_waves, "goal_tickets": goal_tickets})
     elif intent == "converge":
         owned["converge_target"] = converge_target
     result = patch_state(clean, owned)
     parsed = parse_state(result)
-    family = {key for key in ("goal_waves", "goal_tickets",
-                              "converge_target") if key in parsed}
-    expected = ({"goal_waves", "goal_tickets"} if intent == "goal"
-                else {"converge_target"} if intent == "converge" else set())
+    family = {key for key in ("goal_waves", "goal_tickets", "converge_target") if key in parsed}
+    expected = (
+        {"goal_waves", "goal_tickets"}
+        if intent == "goal"
+        else {"converge_target"}
+        if intent == "converge"
+        else set()
+    )
     if family != expected:
-        raise ValueError(f"intent transition produced fields {family}, "
-                         f"expected {expected}")
+        raise ValueError(f"intent transition produced fields {family}, expected {expected}")
     return result
 
 

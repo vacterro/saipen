@@ -51,8 +51,7 @@ from pathlib import Path
 # A fresh checkout has no API history to learn from; fail open on every
 # uncertain path. Only a completed, non-success conclusion is a hard 1.
 GREEN = {"success", "neutral", "skipped"}
-RED = {"failure", "cancelled", "timed_out", "action_required",
-       "startup_failure", "stale"}
+RED = {"failure", "cancelled", "timed_out", "action_required", "startup_failure", "stale"}
 
 # Unauthenticated API is 60 req/hr; a burst of commits must not burn it, so
 # the hook mode reuses one verdict per branch for a few minutes.
@@ -64,8 +63,7 @@ def git(*args):
     """Run git, returning stdout stripped, or \"\" on failure. Never raises:
     this file runs from a pre-commit hook and in projects without git."""
     try:
-        r = subprocess.run(["git", *args], capture_output=True, text=True,
-                           check=False)
+        r = subprocess.run(["git", *args], capture_output=True, text=True, check=False)
     except (OSError, subprocess.SubprocessError):
         return ""
     return r.stdout.strip()
@@ -124,9 +122,10 @@ def runs_url(slug, branch, workflow):
     is most likely to be re-run right when someone is committing on top of
     it.
     """
-    return ("https://api.github.com/repos/{}/actions/workflows/{}/runs"
-            "?branch={}&status=completed&per_page=1").format(
-                slug, workflow, branch)
+    return (
+        "https://api.github.com/repos/{}/actions/workflows/{}/runs"
+        "?branch={}&status=completed&per_page=1"
+    ).format(slug, workflow, branch)
 
 
 def latest_run(slug, branch, workflow):
@@ -148,11 +147,13 @@ def run_by_sha(slug, sha):
     """
     full = git("rev-parse", sha)
     if len(full) != 40:
-        return None, "cannot resolve {} to a full 40-char sha -- is the " \
-            "commit in this clone? (GitHub's head_sha filter rejects " \
-            "abbreviations)".format(sha)
-    url = ("https://api.github.com/repos/{}/actions/runs"
-           "?head_sha={}&per_page=1").format(slug, full)
+        return (
+            None,
+            "cannot resolve {} to a full 40-char sha -- is the "
+            "commit in this clone? (GitHub's head_sha filter rejects "
+            "abbreviations)".format(sha),
+        )
+    url = ("https://api.github.com/repos/{}/actions/runs?head_sha={}&per_page=1").format(slug, full)
     data = fetch_json(url)
     runs = data.get("workflow_runs") or []
     return (runs[0] if runs else None), None
@@ -174,15 +175,12 @@ def classify(run):
     sha = (run.get("head_sha") or "")[:7]
     url = run.get("html_url") or ""
     if status != "completed":
-        return 0, "run #{} {} ({}..) -- still in progress".format(
-            number, status, sha)
+        return 0, "run #{} {} ({}..) -- still in progress".format(number, status, sha)
     if conclusion in GREEN:
         return 0, "run #{} {} ({}..) -- green".format(number, conclusion, sha)
     if conclusion in RED:
-        return 1, "run #{} {} ({}..) -- RED -- {}".format(
-            number, conclusion, sha, url)
-    return 0, "run #{} conclusion {!r} -- treat as green".format(
-        number, conclusion)
+        return 1, "run #{} {} ({}..) -- RED -- {}".format(number, conclusion, sha, url)
+    return 0, "run #{} conclusion {!r} -- treat as green".format(number, conclusion)
 
 
 def main_argv(argv=None):
@@ -194,10 +192,12 @@ def main_argv(argv=None):
     untested (T-428).
     """
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--hook", action="store_true",
-                    help="hook mode: one line, cached, fail-open")
-    ap.add_argument("--workflow", default="validate.yml",
-                    help="workflow file name to query (default: validate.yml)")
+    ap.add_argument("--hook", action="store_true", help="hook mode: one line, cached, fail-open")
+    ap.add_argument(
+        "--workflow",
+        default="validate.yml",
+        help="workflow file name to query (default: validate.yml)",
+    )
     ap.add_argument("--branch", default=None, help="branch to query")
     ap.add_argument("--repo", default=None, help="owner/repo override")
     ap.add_argument("--sha", default=None, help="status for one commit")
@@ -241,8 +241,11 @@ def main_argv(argv=None):
     if args.hook and cache is not None and cache.is_file():
         with contextlib.suppress(OSError, ValueError, KeyError):
             cached = json.loads(cache.read_text(encoding="utf-8"))
-            if (cached.get("branch") == branch and cached.get("slug") == slug
-                    and now - cached.get("ts", 0) < CACHE_TTL):
+            if (
+                cached.get("branch") == branch
+                and cached.get("slug") == slug
+                and now - cached.get("ts", 0) < CACHE_TTL
+            ):
                 code = cached["exit_code"]
                 message = cached["message"]
                 if code == 1 or not args.hook:
@@ -264,11 +267,20 @@ def main_argv(argv=None):
             # A network hiccup is already fail-open; losing the cache
             # on the same hiccup costs one extra request next time.
             import tempfile
+
             _td = Path(tempfile.gettempdir()) / "saipen-ci-cache.json"
-            _td.write_text(json.dumps({
-                "branch": branch, "slug": slug, "ts": now,
-                "exit_code": code, "message": message,
-            }), encoding="utf-8")
+            _td.write_text(
+                json.dumps(
+                    {
+                        "branch": branch,
+                        "slug": slug,
+                        "ts": now,
+                        "exit_code": code,
+                        "message": message,
+                    }
+                ),
+                encoding="utf-8",
+            )
     if code == 1 or not args.hook:
         print(message)
     return code
