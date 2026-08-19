@@ -12,6 +12,8 @@ implied by five documents that each knew one hop, so no single reader could
 answer "what comes after CLEAN?" without assembling it, and two agents assembled
 it differently.
 
+converge_targets: done | ship | crew
+
 ## The sequence
 
 Stages run in order. A stage that produces work does not skip ahead — it returns
