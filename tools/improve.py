@@ -20,6 +20,7 @@ mutation never announces success unless the commit actually COMMITTED.
 
 from __future__ import annotations
 
+from contextlib import nullcontext
 import hashlib
 import re
 from dataclasses import dataclass, field
@@ -545,13 +546,20 @@ def _project_root_of(path: Path) -> Path:
 
 
 def _freshness_errors(project_root: Path, report_text: str,
-                      strict: bool, cycle_active: bool) -> list[str]:
+                      strict: bool, cycle_active: bool, *,
+                      current_source=None) -> list[str]:
     """Source-evidence freshness for a report (DOGFOOD V, T-619).
 
     A strict cycle's report is only fresh when its mechanically captured
     source_head + tree fingerprint match the CURRENT source identity. Same
     HEAD plus a changed/dirty tree is stale. Stale evidence can never
-    authorize fresh canonical work without current reproduction."""
+    authorize fresh canonical work without current reproduction.
+
+    When current_source is supplied (a SourceIdentity from the caller's
+    single snapshot), it is used directly instead of computing a fresh one.
+    This avoids duplicate compute_source_identity calls inside a single
+    semantic resume decision. When omitted, a fresh snapshot is computed.
+    """
     errors: list[str] = []
     if not strict or not cycle_active:
         return errors
@@ -566,12 +574,15 @@ def _freshness_errors(project_root: Path, report_text: str,
                       "fingerprint; a fabricated label cannot authorize fresh "
                       "work")
         return errors
-    try:
-        from freshness import FreshnessError, compute_source_identity
-        current = compute_source_identity(project_root)
-    except FreshnessError as exc:
-        errors.append(f"cannot compute the current source identity: {exc}")
-        return errors
+    if current_source is not None:
+        current = current_source
+    else:
+        try:
+            from freshness import FreshnessError, compute_source_identity
+            current = compute_source_identity(project_root)
+        except FreshnessError as exc:
+            errors.append(f"cannot compute the current source identity: {exc}")
+            return errors
     if current.source_head not in (head, head[:7]):
         errors.append(f"source_head {head[:12]}... != current HEAD "
                       f"{current.source_head[:12]}...; the audit did not "
@@ -1188,7 +1199,7 @@ def _field_keys(header_block: str) -> list[str]:
 def validate_bound_report(
         cycle_dir: Path, seat_id: str, report_text: str, *,
         require_runs: bool = False, require_fresh: bool = False,
-        cycle_active: bool = True) -> list[str]:
+        cycle_active: bool = True, current_source=None) -> list[str]:
     """The ONE shared bound proof bar for a strict seat report (T-638/§6).
 
     Resolves ground truth itself from the validated cycle manifest (roster
@@ -1256,7 +1267,8 @@ def validate_bound_report(
                 f"report role {_r_role!r} != roster role {roster_role!r}")
     if strict and require_fresh:
         errors += _freshness_errors(_project_root_of(cycle_dir),
-                                    report_text, True, cycle_active)
+                                    report_text, True, cycle_active,
+                                    current_source=current_source)
     return errors
 
 
@@ -1309,7 +1321,8 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
                        session_id: str | None, project_name: str,
                        model_or_runtime: str, context_scope: str,
                        protocol_fingerprint: str | None = None,
-                       context_available: str = "complete") -> dict:
+                       context_available: str = "complete",
+                       dry_run: bool = False) -> dict:
     """Atomically admit or resume one concrete Improve seat.
 
     Active-cycle selection, seat allocation, roster registration and report
@@ -1324,18 +1337,41 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
     import datetime
     import uuid
     from freshness import FreshnessError, compute_source_identity
-    from saipen_engine.journal import (_hash_file, hash_bytes,
+    from saipen_engine.journal import (_hash_file, hash_bytes, scan_pending,
                                        recovery_preflight, run_mutation)
     from saipen_engine.lock import project_writer_lock
+
+    def _rv(payload: dict) -> dict:
+        # In dry-run mode every returned result must carry the dry_run flag so
+        # callers can distinguish a planned result from a committed one.
+        if not dry_run:
+            return payload
+        payload = dict(payload)
+        payload["dry_run"] = True
+        return payload
 
     root = Path(project_root).resolve()
     selected_role = _validate_role(role)
     family = re.sub(r"[^A-Za-z0-9_-]", "-", agent_family).strip("-").lower()
     family = _validate_safe_id(family or "agent", "agent_family")
-    report_ident = f"saipen_improve_{_validate_safe_id(project_name, 'project_name')}.md"
+    # T-1013: the shared budget bounds a bare component; a caller that WRAPS
+    # an ID into a longer filename enforces its own smaller derived budget so
+    # the composed name stays inside every host's path-component limit.
+    _name = _validate_safe_id(project_name, "project_name")
+    _report_name = f"saipen_improve_{_name}.md"
+    if len(_report_name.encode("utf-8")) > 255:
+        raise ImproveError(
+            f"project_name {_name!r} is too long for the composed report "
+            f"filename saipen_improve_<name>.md")
+    report_ident = _report_name
     project_key = portable_project_key(root)
 
-    with project_writer_lock(root):
+    # Dry-run is a plan-only, read-only query: it must not acquire the writer
+    # lock (which materializes `.saipen/locks/core.lock`), must not roll a
+    # pending recovery forward, and must not write any seat/manifest/report.
+    # Use a no-op context so the read-only inspection below stays zero-write.
+    _lock_ctx = nullcontext() if dry_run else project_writer_lock(root)
+    with _lock_ctx:
         # Recovery runs before ANY decision: with no pending op it is a
         # zero-write no-op, and with a crash-left pending admission it is the
         # GOAL § 13 control-11 repair (roll forward), so a retry after an
@@ -1347,9 +1383,47 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
         # recovery"; recovery_preflight may FINISH a previously authorized
         # pending operation (roll-forward), and only NEW mutation is refused
         # once a manifest is found invalid.
-        preflight = recovery_preflight(root)
+        if dry_run:
+            # Plan-only mode: inspect recovery state READ-ONLY. Never roll a
+            # pending operation forward merely to answer a dry-run query -- a
+            # pending/conflict op would have to be applied before the real
+            # mutation, so report the canonical structured recovery condition
+            # with zero writes (T-1006 dry-run contract).
+            _rp_pending, _rp_conflicts = scan_pending(root)
+            _rp_corrupt = [op for op in _rp_pending if op.get("corrupt")]
+            _rp_pending = [op for op in _rp_pending if not op.get("corrupt")]
+            if _rp_conflicts:
+                return _rv({
+                    "ok": False, "code": "RECOVERY_CONFLICT",
+                    "op_ids": [op["op_id"] for op in _rp_conflicts],
+                    "recovery_required": True,
+                    "detail": f"unresolved conflict "
+                              f"{_rp_conflicts[0]['op_id']} blocks admission; "
+                              f"resolve it explicitly (saipen recover) before "
+                              f"any further canonical write"})
+            if _rp_corrupt:
+                return _rv({
+                    "ok": False, "code": "CORRUPT_JOURNAL",
+                    "op_ids": [op["op_id"] for op in _rp_corrupt],
+                    "recovery_required": True,
+                    "detail": f"corrupt journal evidence "
+                              f"{_rp_corrupt[0]['op_id']} blocks admission: "
+                              f"{_rp_corrupt[0].get('detail', '')} -- resolve "
+                              f"the corrupt receipt explicitly before any "
+                              f"further canonical write"})
+            if _rp_pending:
+                return _rv({
+                    "ok": False, "code": "RECOVERY_REQUIRED",
+                    "op_ids": [op["op_id"] for op in _rp_pending],
+                    "recovery_required": True,
+                    "detail": "pending recovery operation(s) must be applied "
+                              "before admission; dry-run does not roll them "
+                              "forward"})
+            preflight = {"ok": True}
+        else:
+            preflight = recovery_preflight(root)
         if not preflight.get("ok"):
-            return preflight
+            return _rv(preflight)
 
         owner = _owner_root(root)
         active = []
@@ -1384,11 +1458,11 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
         _manifest_errors = validate_manifest(
             manifest_text, expected_cycle_id=active_cycle)
         if _manifest_errors:
-            return {"ok": False, "code": "INVALID_MANIFEST",
+            return _rv({"ok": False, "code": "INVALID_MANIFEST",
                     "cycle_id": active_cycle,
                     "detail": "active Improve manifest is invalid; refuse "
                               "any admission/admission/resume against it: "
-                              + "; ".join(_manifest_errors[:3])}
+                              + "; ".join(_manifest_errors[:3])})
         _strict_manifest = bool(re.search(
             r"(?m)^manifest_schema:\s*strict\s*$", manifest_text))
 
@@ -1416,12 +1490,12 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
             # Unavailable is a roster decision prepare does not override,
             # whatever the rest of the block says.
             if availability == "unavailable":
-                return {"ok": False, "code": "SEAT_UNAVAILABLE",
+                return _rv({"ok": False, "code": "SEAT_UNAVAILABLE",
                         "cycle_id": active_cycle, "seat_id": seat,
                         "role": selected_role,
                         "report_path": report.relative_to(root).as_posix(),
                         "detail": f"session {seat} is unavailable on the "
-                                  "roster; prepare does not override it"}
+                                  "roster; prepare does not override it"})
             if roster_role != selected_role:
                 raise ImproveError(
                     f"session {seat} is registered as role {roster_role!r}, "
@@ -1431,7 +1505,7 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
                     f"session {seat} owns report {roster_report!r}, not "
                     f"{report_ident!r}")
             if not report.is_file():
-                return {"ok": False, "code": "SEAT_EVIDENCE_MISSING",
+                return _rv({"ok": False, "code": "SEAT_EVIDENCE_MISSING",
                         "cycle_id": active_cycle, "seat_id": seat,
                         "role": selected_role,
                         "report_path": report.relative_to(root).as_posix(),
@@ -1440,7 +1514,7 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
                                   "evidence cannot be recreated by prepare -- "
                                   "recover any pending journaled admission or "
                                   "use the abort/discard/recovery lifecycle if "
-                                  "replacement is intentional"}
+                                  "replacement is intentional"})
             try:
                 report_text = _read_maybe(report)
             except (UnicodeDecodeError, OSError) as _rd_exc:
@@ -1492,7 +1566,7 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
                             "detail": f"session {seat} report declares "
                                       "complete without run evidence: "
                                       + "; ".join(_strict_violations[:3])}
-                return {"ok": False, "code": "SEAT_COMPLETE",
+                return _rv({"ok": False, "code": "SEAT_COMPLETE",
                         "cycle_id": active_cycle, "seat_id": seat,
                         "role": selected_role,
                         "report_path": report.relative_to(root).as_posix(),
@@ -1506,7 +1580,7 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
                                 f"`saipen improve verify {active_cycle}` and "
                                 f"`saipen improve cycle-complete "
                                 f"{active_cycle}`; a new audit requires a new "
-                                "session"}
+                                "session"})
             if report_status != "draft":
                 return {"ok": False, "code": "INVALID_REPORT",
                         "cycle_id": active_cycle, "seat_id": seat,
@@ -1563,7 +1637,8 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
             # resume.
             _bound_errors = validate_bound_report(
                 manifest.parent, seat, report_text,
-                require_runs=False, require_fresh=True, cycle_active=True)
+                require_runs=False, require_fresh=True, cycle_active=True,
+                current_source=_current_src)
             if _bound_errors:
                 return {"ok": False, "code": "INVALID_REPORT",
                         "cycle_id": active_cycle, "seat_id": seat,
@@ -1573,7 +1648,7 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
                         "detail": f"session {seat} report fails the bound "
                                   f"provenance bar: "
                                   + "; ".join(_bound_errors[:3])}
-            return {
+            return _rv({
                 "ok": True, "code": "ALREADY_ASSIGNED",
                 "cycle_id": active_cycle, "seat_id": seat,
                 "role": selected_role, "report_path": report,
@@ -1582,7 +1657,7 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
                 "source_tree_fingerprint": _field(
                     report_text, "source_tree_fingerprint"),
                 "discovery_model": _field(report_text, "discovery_model"),
-            }
+            })
         else:
             _refuse_duplicate_owner_over_bare_sweep(
                 manifest.parent, manifest_text, report_ident, seat)
@@ -1637,13 +1712,38 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
             installed_saipen_version=saipen_version,
             installed_protocol_fp=protocol_fingerprint)
         if _writer_violations:
-            return {"ok": False, "code": "VALIDATION_FAILED",
+            return _rv({"ok": False, "code": "VALIDATION_FAILED",
                     "cycle_id": active_cycle, "seat_id": seat,
                     "role": selected_role,
                     "report_path": report.relative_to(root).as_posix(),
                     "detail": "prepared report fails its own strict contract: "
-                              + "; ".join(_writer_violations[:3])}
+                              + "; ".join(_writer_violations[:3])})
 
+        if dry_run:
+            # Plan-only: every deterministic validation above already ran;
+            # answer what WOULD happen without materializing any path.
+            return _rv({
+                "ok": True, "code": "IMPROVE_AUDIT_ASSIGNMENT",
+                "cycle_id": active_cycle, "seat_id": seat,
+                "role": selected_role,
+                "report_path": report,
+                "report_created": False, "resumed": False,
+                "source_head": source.source_head,
+                "source_tree_fingerprint": source.source_tree_fingerprint,
+                "discovery_model": source.discovery_model,
+                "plan": {
+                    "cycle": active_cycle,
+                    "seat": seat,
+                    "role": selected_role,
+                    "report_path": report.relative_to(root).as_posix(),
+                    "would_create_cycle": block is None
+                    and not (owner.is_dir() and active),
+                    "would_create_manifest": block is None,
+                    "would_create_report": True,
+                    "would_resume_existing_seat": False,
+                    "source_identity": source.source_head,
+                },
+            })
         manifest_rel = manifest.relative_to(root).as_posix()
         report_rel = report.relative_to(root).as_posix()
         targets = []
@@ -1662,8 +1762,8 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
             targets, preconditions=preconditions, skip_preflight=True,
             verification_policy="improve_atomic_file")
         if not committed.get("ok"):
-            return committed
-        return {
+            return _rv(committed)
+        return _rv({
             "ok": True, "code": committed.get("code", "COMMITTED"),
             "op_id": committed.get("op_id"), "cycle_id": active_cycle,
             "seat_id": seat, "role": selected_role, "report_path": report,
@@ -1671,7 +1771,7 @@ def prepare_audit_seat(project_root: Path, *, agent_family: str, role: str,
             "source_head": source.source_head,
             "source_tree_fingerprint": source.source_tree_fingerprint,
             "discovery_model": source.discovery_model,
-        }
+        })
 
 
 def create_cycle(project_root: Path, cycle_id: str, *,

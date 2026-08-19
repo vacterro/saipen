@@ -437,6 +437,14 @@ SAIPEN_COMMANDS = frozenset({
     "set", "init", "continue", "goal", "plan", "clean", "translate",
     "markhunt", "prepare", "collect", "ship", "validate", "test", "status",
     "stop", "sub", "hunt", "crew", "userperson", "improve"})
+# RFC § 1.2: the five allowed next_action prefixes. Defined at module scope
+# because both Core and subSaipen validation consume them, and a malformed
+# root STATE that skips the Core branch must not leave subSaipen validation
+# with an undefined name (NameError crash).
+EXECUTABLE_PREFIXES = ("WAIT:", "saipen ", "PHASE ", "RUN:", "RESUME:")
+# RFC § 1.2: WAIT carries exactly seven category tokens.
+WAIT_CATEGORIES = ("manual-verify", "destructive-op", "first-publish",
+                   "user brake", "blocked", "safety valve", "init")
 # RFC § 1.2: `PHASE <phase-enum> [T-###]` takes the ticket ref for exactly the
 # five ticket-bearing phases and omits it for every other one. The rule had no
 # witness, and the constitution's own worked example (§ 2.2, translating ADD's
@@ -1229,7 +1237,7 @@ if isinstance(next_action, str):
         r"\b(continue work|proceed|do next|review stuff|keep going|"
         r"maybe|if needed|ask if needed)\b",
         re.IGNORECASE)
-    executable_prefixes = ("WAIT:", "saipen ", "PHASE ", "RUN:", "RESUME:")
+    executable_prefixes = EXECUTABLE_PREFIXES
     if vague_next_action.search(next_action):
         fail(f"STATE.md next_action is vague, not executable: {next_action!r} "
              f"(RFC § 1.2)")
@@ -1251,8 +1259,6 @@ if isinstance(next_action, str):
     # every other check here, and parks the project on a question nobody can
     # answer. The token is what separates them mechanically, and it also tells
     # the human what kind of answer unblocks it.
-    WAIT_CATEGORIES = ("manual-verify", "destructive-op", "first-publish",
-                       "user brake", "blocked", "safety valve", "init")
     # The WAIT category token check now lives in the shared canonical STATE
     # validator (P0#1). The second-sentence bound (paragraph below) is a prose
     # style rule with no equivalent in the engine and stays here.
@@ -1620,7 +1626,7 @@ if sub_state_files:
             if sub_vague.search(sub_na):
                 fail(f"{sp} next_action is vague, not executable: {sub_na!r} "
                      f"(RFC § 1.2)")
-            if not sub_na.startswith(executable_prefixes):
+            if not sub_na.startswith(EXECUTABLE_PREFIXES):
                 fail(f"{sp} next_action does not start with WAIT:/saipen /PHASE "
                      f"/RUN:/RESUME:: {sub_na!r} (RFC § 1.2)")
             if sub_na.startswith("WAIT:"):
@@ -6208,7 +6214,7 @@ else:
     else:
         rfc_prefixes = {p.strip() for p in _ticks(s)}
         drift_ok &= _compare("next-action-prefixes", rfc_prefixes,
-                             {p.strip() for p in executable_prefixes},
+                             {p.strip() for p in EXECUTABLE_PREFIXES},
                              "validate.py executable_prefixes")
 
     # 6. WAIT categories: RFC § 1.2 vs the tuple here.
@@ -6423,7 +6429,7 @@ else:
                 val = m.group(1).strip()
                 if val.startswith("<") or val.startswith("..."):
                     continue          # a placeholder, not a prescription
-                if not val.startswith(executable_prefixes):
+                if not val.startswith(EXECUTABLE_PREFIXES):
                     bad_actions.append(f"{doc.as_posix()}: {val[:45]!r}")
                 elif val.startswith("WAIT:"):
                     body = val[len("WAIT:"):].strip().lower()

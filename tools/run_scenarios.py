@@ -13689,73 +13689,92 @@ def run_t1012_strict_grammar_probes() -> tuple[list[str], int]:
             problems.append(f"{label}: {detail}")
             print(f"FAIL: t1012-strict -- {label} -- {detail}")
 
-    def _run_validator() -> tuple[int, str]:
-        pr = _sp.run(
-            [sys.executable, str(HOME / "tools" / "validate.py")],
-            cwd=str(HOME), capture_output=True, text=True, timeout=400)
-        return pr.returncode, pr.stdout + pr.stderr
 
-    _conv_p = HOME / "saipen" / "CONVERGE.md"
-    _orig = _conv_p.read_text(encoding="utf-8-sig")
+    # Hermetic: build disposable copy for all red-controls.
+    # Canonical HOME is NEVER written to; mutations happen only in the
+    # disposable copy so forced-kill at any point leaves HOME unchanged.
+    with tempfile.TemporaryDirectory(prefix="saipen-t1012-") as _tmp:
+      _sandbox = Path(_tmp) / "home"
+      _sandbox.mkdir(parents=True, exist_ok=True)
+      for _sub in ["saipen", ".saipen", "tools", "extensions", "bootstrap"]:
+          _src = HOME / _sub
+          if _src.is_dir():
+              _dst = _sandbox / _sub
+              shutil.copytree(_src, _dst, dirs_exist_ok=True,
+                  ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+      for _f in ["VERSION", "README.md", "CHANGELOG.md"]:
+          _src = HOME / _f
+          if _src.is_file():
+              shutil.copy2(_src, _sandbox / _f)
+      _conv_p = _sandbox / "saipen" / "CONVERGE.md"
+      if not _conv_p.is_file():
+          problems.append("t1012-strict: could not build disposable copy")
+          return problems, checked
+      _orig = _conv_p.read_text(encoding="utf-8-sig")
+      _val = _sandbox / "tools" / "validate.py"
 
-    def _red_control(old: str, new: str, label: str, substr: str) -> None:
-        """Mutate CONVERGE.md, run validator, assert FAIL, restore."""
-        _conv_p.write_text(_orig.replace(old, new), encoding="utf-8")
-        try:
-            _rc, _out = _run_validator()
-            expect(f"converge: red-control {label} makes validator FAIL",
-                   _rc != 0 and substr in _out,
-                   f"rc={_rc} substr={substr!r} missing")
-        finally:
-            _conv_p.write_text(_orig, encoding="utf-8")
-        _rc2, _out2 = _run_validator()
-        expect(f"converge: red-control {label} restored -> converge-target gone",
-               "converge-target" not in _out2,
-               f"converge-target still present after restore: rc={_rc2}")
+      def _run_validator() -> tuple[int, str]:
+          pr = _sp.run(
+              [sys.executable, str(_val)],
+              cwd=str(_sandbox), capture_output=True, text=True, timeout=400)
+          return pr.returncode, pr.stdout + pr.stderr
 
-    VALID_DECL = "converge_targets: done | ship | crew"
+      def _red_control(old: str, new: str, label: str, substr: str) -> None:
+          """Mutate CONVERGE.md in disposable copy, run validator, assert FAIL."""
+          _conv_p.write_text(_orig.replace(old, new), encoding="utf-8")
+          _rc, _out = _run_validator()
+          expect(f"converge: red-control {label} makes validator FAIL",
+                 _rc != 0 and substr in _out,
+                 f"rc={_rc} substr={substr!r} missing")
+          _conv_p.write_text(_orig, encoding="utf-8")
+          _rc2, _out2 = _run_validator()
+          expect(f"converge: red-control {label} restored -> converge-target gone",
+                 "converge-target" not in _out2,
+                 f"converge-target still present after restore: rc={_rc2}")
 
-    # Duplicate token: crew appears twice
-    _red_control(VALID_DECL,
-                 "converge_targets: done | ship | crew | crew",
-                 "duplicate converge target",
-                 "converge-target-converge")
+      VALID_DECL = "converge_targets: done | ship | crew"
 
-    # Empty middle token: double pipe
-    _red_control(VALID_DECL,
-                 "converge_targets: done || ship | crew",
-                 "empty middle token",
-                 "converge-target-converge")
+      # Duplicate token: crew appears twice
+      _red_control(VALID_DECL,
+                   "converge_targets: done | ship | crew | crew",
+                   "duplicate converge target",
+                   "converge-target-converge")
 
-    # Leading delimiter
-    _red_control(VALID_DECL,
-                 "converge_targets: | done | ship | crew",
-                 "leading delimiter",
-                 "converge-target-converge")
+      # Empty middle token: double pipe
+      _red_control(VALID_DECL,
+                   "converge_targets: done || ship | crew",
+                   "empty middle token",
+                   "converge-target-converge")
 
-    # Trailing delimiter
-    _red_control(VALID_DECL,
-                 "converge_targets: done | ship | crew |",
-                 "trailing delimiter",
-                 "converge-target-converge")
+      # Leading delimiter
+      _red_control(VALID_DECL,
+                   "converge_targets: | done | ship | crew",
+                   "leading delimiter",
+                   "converge-target-converge")
 
-    # Invalid token syntax (space in token)
-    _red_control(VALID_DECL,
-                 "converge_targets: done | ship | cr ew",
-                 "invalid token syntax (space)",
-                 "converge-target-converge")
+      # Trailing delimiter
+      _red_control(VALID_DECL,
+                   "converge_targets: done | ship | crew |",
+                   "trailing delimiter",
+                   "converge-target-converge")
 
-    # Invalid token syntax (@ prefix)
-    _red_control(VALID_DECL,
-                 "converge_targets: done | ship | @crew",
-                 "invalid token syntax (@)",
-                 "converge-target-converge")
+      # Invalid token syntax (space in token)
+      _red_control(VALID_DECL,
+                   "converge_targets: done | ship | cr ew",
+                   "invalid token syntax (space)",
+                   "converge-target-converge")
 
-    # Extra empty between tokens
-    _red_control(VALID_DECL,
-                 "converge_targets: done | ship |  | crew",
-                 "extra empty between tokens",
-                 "converge-target-converge")
+      # Invalid token syntax (@ prefix)
+      _red_control(VALID_DECL,
+                   "converge_targets: done | ship | @crew",
+                   "invalid token syntax (@)",
+                   "converge-target-converge")
+
+      # Extra empty between tokens
+      _red_control(VALID_DECL,
+                   "converge_targets: done | ship |  | crew",
+                   "extra empty between tokens",
+                   "converge-target-converge")
 
     return problems, checked
 
@@ -13779,6 +13798,11 @@ def main():
         "SAIPEN_HR_AUTHORITY_PROBES_ONLY": "hostile_authority",
         "SAIPEN_NITRO_INTEGRITY_PROBES_ONLY": "nitro_integrity",
         "SAIPEN_SCHEDULER_PROBES_ONLY": "scheduler",
+        "SAIPEN_FINAL_STAB_PROBES_ONLY": "final_stabilization",
+        "SAIPEN_RELEASE_EXECUTOR_PROBES_ONLY": "release_executor",
+        "SAIPEN_SW_PROBES_ONLY": "second_wave",
+        "SAIPEN_THIRD_WAVE_PROBES_ONLY": "third_wave",
+        "SAIPEN_T1012_STRICT_PROBES_ONLY": "t1012_strict",
     }
     _active = [k for k, v in _PROBE_SELECTORS.items()
                if os.environ.get(k) == "1"]
@@ -13787,43 +13811,18 @@ def main():
         print(f"FAILED: conflicting PROBES_ONLY selectors: {_names}")
         sys.exit(1)
 
-    if _active:
-        # Minimal bootstrap: only SCENARIOS existence check
-        if not SCENARIOS.is_dir():
-            print(f"FAIL: no {SCENARIOS} -- run this from the SAIPEN home")
+    # Detect unknown SAIPEN_*_PROBES_ONLY selectors.
+    _known_keys = set(_PROBE_SELECTORS.keys())
+    for _k, _v in os.environ.items():
+        if (_k.startswith("SAIPEN_") and _k.endswith("_PROBES_ONLY")
+                and _v == "1" and _k not in _known_keys):
+            print(f"FAILED: unknown PROBES_ONLY selector: {_k}")
             sys.exit(1)
 
-        _sel = _PROBE_SELECTORS[_active[0]]
-        _probe_funcs = {
-            "producer_gate": lambda: run_producer_gate_probes(),
-            "role_freshness": lambda: run_role_freshness_probes(),
-            "nitro_m2": lambda: run_nitro_m2_probes(),
-            "saicrew": lambda: run_saicrew_probes(),
-            "hostile_regression": lambda: (
-                run_hostile_journal_probes(),
-                run_hostile_release_probes(),
-                run_hostile_convergence_probes(),
-                run_hostile_state_probes()),
-            "hostile_authority": lambda: run_hostile_authority_probes(),
-            "nitro_integrity": lambda: run_nitro_integrity_probes(),
-            "scheduler": lambda: run_scheduler_probes(),
-        }
-
-        _result = _probe_funcs[_sel]()
-        if _sel == "hostile_regression":
-            (_j_f, _j_c), (_r_f, _r_c), (_cv_f, _cv_c), (_s_f, _s_c) = _result
-            _all_f = _j_f + _r_f + _cv_f + _s_f
-            _all_c = _j_c + _r_c + _cv_c + _s_c
-            for p in _all_f:
-                print(f"FAILED: {p}")
-            print(f"{_all_c} hostile-regression behavior(s) executed")
-            raise SystemExit(1 if _all_f else 0)
-        else:
-            _f, _c = _result[:2]
-            for p in _f:
-                print(f"FAILED: {p}")
-            print(f"{_c} {_sel} behavior(s) executed")
-            raise SystemExit(1 if _f else 0)
+    # Capture selected group for dispatch (happens after all function defs).
+    _selected_group = None
+    if _active:
+        _selected_group = _PROBE_SELECTORS[_active[0]]
 
     # ---- Full suite --------------------------------------------------------
 
@@ -13834,7 +13833,7 @@ def main():
     failures = []
     checked = skipped = 0
     
-    for d in sorted(p for p in SCENARIOS.iterdir() if p.is_dir()):
+    for d in (sorted(p for p in SCENARIOS.iterdir() if p.is_dir()) if _selected_group is None else []):
         readme = d / "README.md"
         has_state = (d / ".saipen").is_dir()
         declared = None
@@ -14307,6 +14306,52 @@ def main():
     
     
 
+    # ---- Targeted dispatch (after all function definitions) ---------
+    if _selected_group is not None:
+        _GROUPS = {
+            "producer_gate": [run_producer_gate_probes],
+            "role_freshness": [run_role_freshness_probes],
+            "nitro_m2": [run_nitro_m2_probes],
+            "saicrew": [run_saicrew_probes],
+            "hostile_regression": [
+                run_hostile_journal_probes, run_hostile_release_probes,
+                run_hostile_convergence_probes, run_hostile_state_probes],
+            "hostile_authority": [run_hostile_authority_probes],
+            "nitro_integrity": [run_nitro_integrity_probes],
+            "scheduler": [run_scheduler_probes],
+            "final_stabilization": [
+                run_hardening_control_inventory, run_digest_stale_probes,
+                run_orphan_tag_probes, run_active_task_recovery_probes,
+                run_t1012_strict_grammar_probes, run_log_tail_probes],
+            "release_executor": [
+                run_release_executor_probes, run_hardening_control_inventory,
+                run_t1012_strict_grammar_probes],
+            "second_wave": [
+                run_injector_probes, run_project_root_probes, run_export_probes,
+                run_manifest_tracking_probes, run_lint_parity_probes,
+                run_autoinject_manifest_probes, run_ship_staging_probes,
+                run_release_freshness_probes, run_ci_status_probes,
+                run_hook_probes, run_precommit_purity_probe],
+            "third_wave": [
+                run_nitro_probes, run_nitro_m2_probes, run_nitro_m3_probes,
+                run_producer_gate_probes, run_ccc_identity_probes,
+                run_converge_routing_probes],
+            "t1012_strict": [run_t1012_strict_grammar_probes],
+        }
+        if _selected_group not in _GROUPS:
+            print(f"FAILED: no probe group for {_selected_group!r}")
+            sys.exit(1)
+        _all_f, _all_c = [], 0
+        for _func in _GROUPS[_selected_group]:
+            _res = _func()
+            _all_f.extend(_res[0])
+            _all_c += _res[1]
+        for p in _all_f:
+            print(f"FAILED: {p}")
+        print(f"{_all_c} {_selected_group} behavior(s) executed")
+        raise SystemExit(1 if _all_f else 0)
+
+    # ---- Full suite probe execution ----------------------------------------
     injector_failures, injector_checked, injector_skipped = run_injector_probes()
     failures.extend(injector_failures)
     scheduler_failures, scheduler_checked, scheduler_skipped = run_scheduler_probes()

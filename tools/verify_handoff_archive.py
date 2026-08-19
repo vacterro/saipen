@@ -257,40 +257,80 @@ def gate_g_self_inclusion(archive_path: Path) -> bool:
     return True
 
 
-def gate_d_extract_roundtrip(archive_path: Path, tracked: set[str]) -> bool:
-    """Check D: extract to fresh dir, re-verify tracked-file presence."""
+def gate_d_extract_roundtrip(archive_path: Path, tracked: set[str]) -> Path | None:
+    """Check D: extract to fresh dir, re-verify tracked-file presence.
+
+    Returns the extraction root path on success, None on failure.
+    Callers use the path for semantic validation.
+    """
     print("\n--- Gate D: extract round-trip ---")
-    with tempfile.TemporaryDirectory(prefix="saipen-verify-") as tmp:
-        extract_dir = Path(tmp) / "extracted"
-        extract_dir.mkdir()
-        with zipfile.ZipFile(archive_path) as zf:
-            zf.extractall(extract_dir)
+    tmp_dir = tempfile.mkdtemp(prefix="saipen-verify-")
+    extract_dir = Path(tmp_dir) / "extracted"
+    extract_dir.mkdir()
+    with zipfile.ZipFile(archive_path) as zf:
+        zf.extractall(extract_dir)
 
-        # Re-check tracked files
-        arc_files = set()
-        for p in extract_dir.rglob("*"):
-            if p.is_file():
-                rel = p.relative_to(extract_dir).as_posix()
-                arc_files.add(rel)
+    # Re-check tracked files
+    arc_files = set()
+    for p in extract_dir.rglob("*"):
+        if p.is_file():
+            rel = p.relative_to(extract_dir).as_posix()
+            arc_files.add(rel)
 
-        missing = []
-        for tf in sorted(tracked):
-            if tf not in arc_files:
-                missing.append(tf)
-        if missing:
-            print(f"FAIL: after extraction, {len(missing)} file(s) still missing")
-            for m in missing[:10]:
-                print(f"  - {m}")
-            return False
+    missing = []
+    for tf in sorted(tracked):
+        if tf not in arc_files:
+            missing.append(tf)
+    if missing:
+        print(f"FAIL: after extraction, {len(missing)} file(s) still missing")
+        for m in missing[:10]:
+            print(f"  - {m}")
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+        return None
 
-        logs = [f for f in arc_files if re.match(r"^\.saipen/logs/LOG-\d+\.md$", f)]
-        print(f"PASS: extraction round-trip OK ({len(arc_files)} files, "
-              f"{len(logs)} sealed LOGs)")
+    logs = [f for f in arc_files if re.match(r"^\.saipen/logs/LOG-\d+\.md$", f)]
+    print(f"PASS: extraction round-trip OK ({len(arc_files)} files, "
+          f"{len(logs)} sealed LOGs)")
+    return extract_dir
+
+
+def gate_h_semantic_validation(extract_dir: Path) -> bool:
+    """Check H: run canonical validator against the extracted copy.
+
+    The extracted archive MUST be semantically valid, not just physically
+    complete.  A malformed STATE, broken LOG parent chain, or schema
+    violation inside the archive MUST fail delivery.
+    """
+    print("\n--- Gate H: semantic validation (extracted copy) ---")
+    validator = extract_dir / "tools" / "validate.py"
+    if not validator.is_file():
+        print(f"FAIL: validator not found in extracted copy: {validator}")
+        return False
+    r = subprocess.run(
+        [sys.executable, str(validator), "--project-root", str(extract_dir)],
+        cwd=str(extract_dir), capture_output=True, text=True, timeout=600)
+    output = r.stdout + r.stderr
+    if r.returncode != 0:
+        # Distinguish validator crash from validation failure.
+        if "Traceback (most recent call last)" in output:
+            print("FAIL: validator CRASHED on extracted copy")
+            for line in output.splitlines()[-5:]:
+                print(f"  {line[:120]}")
+        else:
+            print(f"FAIL: extracted archive fails semantic validation (rc={r.returncode})")
+            for line in output.splitlines():
+                if line.startswith("FAIL"):
+                    print(f"  {line[:120]}")
+        return False
+    if "Agent is conformant" in output:
+        print("PASS: extracted copy passes semantic validation")
+    else:
+        print("PASS: extracted copy validator exits 0")
     return True
 
 
 def gate_h_archive_hash(archive_path: Path) -> str:
-    """Check H: compute and print ARCHIVE_SHA256."""
+    """Check I: compute and print ARCHIVE_SHA256."""
     sha = hashlib.sha256(archive_path.read_bytes()).hexdigest()
     print(f"\nARCHIVE_SHA256={sha}")
     return sha
@@ -320,44 +360,48 @@ def main():
     tracked = _tracked_files(project_root)
     print(f"Tracked files: {len(tracked)}")
 
-    all_pass = True
+    # Phase 1: Structural + portability checks (non-mutating, fail-fast).
+    # These run BEFORE any extraction to avoid operating on invalid input.
+    print("\n=== PHASE 1: Structural verification (fail-fast) ===")
+    structural_pass = True
 
-    # Gate B: pre-packaging check
     if not gate_b_pre_packaging(project_root):
-        all_pass = False
-
-    # Gate A: archive contents
+        structural_pass = False
     if not gate_a_archive_contents(archive, tracked):
-        all_pass = False
-
-    # Gate C: garbage check
+        structural_pass = False
     if not gate_c_garbage_check(archive):
-        all_pass = False
-
-    # Gate E: portability
+        structural_pass = False
     if not gate_e_portability(archive):
-        all_pass = False
-
-    # Gate F: sealed ledger
+        structural_pass = False
     if not gate_f_sealed_ledger(archive, project_root):
-        all_pass = False
-
-    # Gate G: self-inclusion
+        structural_pass = False
     if not gate_g_self_inclusion(archive):
-        all_pass = False
+        structural_pass = False
 
-    # Gate D: extract round-trip
-    if not gate_d_extract_roundtrip(archive, tracked):
-        all_pass = False
+    if not structural_pass:
+        print("\nDELIVERY GATE: FAIL (structural)")
+        sys.exit(1)
 
-    # Gate H: hash
+    # Phase 2: Extract + semantic validation.
+    print("\n=== PHASE 2: Extract + semantic verification ===")
+    extract_dir = gate_d_extract_roundtrip(archive, tracked)
+    if extract_dir is None:
+        print("\nDELIVERY GATE: FAIL (extraction)")
+        sys.exit(1)
+
+    semantic_pass = gate_h_semantic_validation(extract_dir)
+
+    # Clean up extracted copy.
+    shutil.rmtree(str(extract_dir.parent), ignore_errors=True)
+
+    # Phase 3: Hash.
     gate_h_archive_hash(archive)
 
-    if all_pass:
+    if semantic_pass:
         print("\nDELIVERY GATE: PASS")
         sys.exit(0)
     else:
-        print("\nDELIVERY GATE: FAIL")
+        print("\nDELIVERY GATE: FAIL (semantic)")
         sys.exit(1)
 
 
