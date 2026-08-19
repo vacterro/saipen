@@ -69,7 +69,8 @@ This file gives the execution order. No rule is *defined* here —
    That IS the instruction; `next_action` is what a bare continue would run.
    §1.11 OBEY priority: command clears a `WAIT:`; corrupt state is repaired
    first.
-   **No command?** `next_action` IS the instruction. It is the previous
+   **Actionable user objective?** If the user provides a natural-language actionable request (e.g., "fix this bug", "implement X", "continue work") rather than a bare command, treat it as a new goal-driven execution. Map the objective to `execution_intent: goal` in `STATE.md` (and reset counters per MAINTENANCE.md § 2.4), plan the work, and drive it to COMPLETE or BLOCKED per CORE.md § 1.12. No `/goal` command is required. Explicit read-only or plan-only requests must remain read-only.
+   **No command and no new objective?** `next_action` IS the instruction. It is the previous
    session's pre-computed Pick Rule result. Confirm against `BOARD.md`
    yourself: topmost workable ticket wins (§1.11, §1.6). Where the
    validator cannot re-derive the pick (the portable floor does not —

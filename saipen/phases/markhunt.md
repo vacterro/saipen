@@ -61,7 +61,7 @@ ticket rather than one-ticket-per-trivial-nit -- the board stays
 readable, not a wall of noise. Append only -- never reorder or edit
 existing tickets.
 
-**Goal Mode brake.** MARKHUNT never increments `goal_waves` or
+**Goal-Driven Execution brake.** MARKHUNT never increments `goal_waves` or
 `goal_tickets` (MAINTENANCE.md §2.4) -- its findings are unvetted, so nothing may
 treat finishing a MARKHUNT pass as a waypoint to keep running through.
 The brake itself lives in `phases/done.md`, not here: as long as any

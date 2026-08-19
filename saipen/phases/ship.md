@@ -18,7 +18,7 @@ stale generated file, a failing validator, or another fault with a known local
 fix. LOG the exact failure, transition the current ticket
 `SHIP -> BUILD`, fix it, and repeat `VERIFY -> REVIEW -> SHIP`. `BLOCKED` is
 reserved for a failure that genuinely needs user input or has no safe known
-fix; using it for ordinary repair would falsely end goal mode (MAINTENANCE.md section
+fix; using it for ordinary repair would falsely end goal execution (MAINTENANCE.md section
 2.4). This edge closes the pre-publish loop only. Once commit/tag/push begins,
 the failure-specific recovery in step 10 governs; after a successful push there
 is never a return to BUILD for that shipped ticket.
