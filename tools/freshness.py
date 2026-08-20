@@ -369,6 +369,17 @@ def _stream_digest(root: Path, model: str, evidence: list[_Evidence]) -> str:
             content = _read_regular_info(
                 root_path.joinpath(*os.fsdecode(ev.path).split("/")),
             )[0]
+            # PERF-001: the final confirmation re-read is the LAST content read
+            # and MUST stay inside the stability comparison. Without this check a
+            # same-size, mtime-restored swap that lands between the ``confirmed``
+            # parse and this read would be silently folded into the fingerprint
+            # (the audit's "no unvalidated reread" guardrail). The bounded
+            # evidence already carries the confirmed content digest, so any
+            # divergence here fails closed instead of poisoning the identity.
+            if ev.content != hashlib.sha256(content).digest():
+                raise FreshnessError(
+                    f"fingerprint input changed between confirmation and digest: {ev.path!r}"
+                )
             h.update(struct.pack(">Q", len(content)))
             h.update(content)
         else:

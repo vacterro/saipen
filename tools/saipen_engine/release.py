@@ -3001,9 +3001,14 @@ class RemoteSnapshot:
         return True, self.refs.get(f"refs/tags/{tag}", "")
 
 
+# PERF-003: bounded timeout for remote Git queries. A hung/blocking remote
+# degrades to an unavailable verdict instead of hanging the verifier.
+REMOTE_GIT_TIMEOUT = 30.0
+
+
 def _remote_snapshot(root: Path, endpoint: str) -> RemoteSnapshot:
     """ONE ls-remote against the publication endpoint."""
-    result = _git(root, "ls-remote", endpoint)
+    result = _git(root, "ls-remote", endpoint, timeout=REMOTE_GIT_TIMEOUT)
     refs: dict[str, str] = {}
     if result.ok:
         for line in result.stdout.splitlines():
@@ -3114,18 +3119,29 @@ def _head_relation(root: Path, remote_tip: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-def _git(root: Path, *args: str, literal: bool = False) -> GitResult:
+def _git(root: Path, *args: str, literal: bool = False, timeout: float | None = None) -> GitResult:
     env = None
     if literal:
         env = {**os.environ, "GIT_LITERAL_PATHSPECS": "1"}
-    result = subprocess.run(
-        ["git", "-C", str(root), *args],
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        env=env,
-    )
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), *args],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            env=env,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired:
+        # PERF-003: a hung/blocking remote Git must degrade to an unavailable
+        # verdict, never hang the verifier or fabricate a PASS. Callers map
+        # query_ok=False -> unknown.
+        return GitResult(
+            124,
+            "",
+            f"git {' '.join(args)} timed out after {timeout}s",
+        )
     return GitResult(result.returncode, result.stdout.strip(), result.stderr.strip())
 
 
@@ -4052,9 +4068,13 @@ def _verify_receipt(root: Path, record: dict) -> dict:
     branch = record.get("branch") or ""
     if not branch:
         return {"status": "unknown", "reason": "release receipt carries no branch identity"}
-    remote_ok, tip = _remote_branch_tip(
-        root, record.get("remote_push_endpoint") or _push_endpoint(root) or "origin", branch
-    )
+    endpoint = record.get("remote_push_endpoint") or _push_endpoint(root) or "origin"
+    # PERF-003: ONE fresh RemoteSnapshot for this verification event. The prior
+    # code fired two independent ls-remote calls (branch tip + tag), doubling
+    # remote load and risking branch/tag inconsistency across two queries. A
+    # single capture keeps both facts consistent against one remote state.
+    snapshot = _remote_snapshot(root, endpoint)
+    remote_ok, tip = snapshot.branch_tip(branch)
     if not remote_ok:
         return {
             "status": "unknown",
@@ -4069,9 +4089,7 @@ def _verify_receipt(root: Path, record: dict) -> dict:
     tag = record.get("tag") or ""
     if not tag:
         return {"status": "unknown", "reason": "release receipt carries no tag identity"}
-    tag_ok, tag_sha = _remote_tag_commit(
-        root, record.get("remote_push_endpoint") or _push_endpoint(root) or "origin", tag
-    )
+    tag_ok, tag_sha = snapshot.tag_commit(tag)
     if not tag_ok or not tag_sha:
         return {
             "status": "unknown",

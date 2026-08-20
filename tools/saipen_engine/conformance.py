@@ -416,7 +416,7 @@ def generate_conformance_receipt(
     fname = f"{safe_ts}_{rid}_{safe_gate}_{verdict}.json"
     _atomic_write_receipt(out_dir / fname, body)
     # PERF-003: atomically advance the per-gate latest-receipt index
-    _update_receipt_index(root, gate, rid, ts)
+    _update_receipt_index(root, gate, rid, ts, receipt_path=f"{RECEIPT_DIRNAME}/{fname}")
     return receipt
 
 
@@ -424,12 +424,16 @@ def generate_conformance_receipt(
 _INDEX_DIRNAME = ".saipen/recovery/conformance/index"
 
 
-def _update_receipt_index(root: Path, gate: str, receipt_id: str, timestamp: str) -> None:
-    """PERF-003: atomically advance the per-gate latest-receipt index.
+def _update_receipt_index(
+    root: Path, gate: str, receipt_id: str, timestamp: str, receipt_path: str = ""
+) -> None:
+    """PERF-003/04: atomically advance the per-gate latest-receipt index.
 
-    The index is a tiny JSON file containing only the receipt_id and
-    timestamp of the latest receipt for each gate. It is a LOCATOR, not
-    conformance proof -- lookup still validates the indexed receipt.
+    The index is a tiny JSON LOCATOR carrying the receipt_id, the validated
+    timestamp, and a safe RELATIVE path to the receipt file. The path turns
+    lookup into a constant-I/O direct read; lookup still validates the receipt
+    and falls back to a full scan on a missing/corrupt/relocated index -- it
+    never mutates state on a read-only upgrade.
     """
     index_dir = root / _INDEX_DIRNAME
     index_dir.mkdir(parents=True, exist_ok=True)
@@ -438,9 +442,9 @@ def _update_receipt_index(root: Path, gate: str, receipt_id: str, timestamp: str
         "gate": gate,
         "receipt_id": receipt_id,
         "timestamp_utc": timestamp,
+        "receipt_path": receipt_path,
         "version": 1,
     }
-    tmp = index_path.with_suffix(".tmp")
     _atomic_write_receipt(index_path, json.dumps(index, indent=2, sort_keys=True))
 
 
@@ -462,6 +466,36 @@ def _lookup_receipt_index(root: Path, gate: str) -> dict | None:
         return data
     except (OSError, json.JSONDecodeError):
         return None
+
+
+def _read_indexed_receipt(root: Path, index: dict) -> dict | None:
+    """PERF-004: constant-I/O direct read of the indexed receipt by its safe
+    relative path. Rejects path escapes, symlinks and reparse points; returns
+    None (never mutating state) on any failure so the caller falls back to a
+    full scan -- the index is a LOCATOR, not conformance proof."""
+    rel = index.get("receipt_path") or ""
+    if not rel or not rel.startswith(RECEIPT_DIRNAME):
+        return None
+    try:
+        base = (root / RECEIPT_DIRNAME).resolve()
+        target = (root / rel).resolve()
+    except OSError:
+        return None
+    if target != base and base not in target.parents:
+        return None
+    try:
+        info = os.lstat(target)
+    except OSError:
+        return None
+    if os.path.islink(target) or getattr(info, "st_file_attributes", 0) & 0x400:
+        return None
+    try:
+        rec = json.loads(Path(target).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if rec.get("kind") != "conformance_receipt":
+        return None
+    return rec
 
 
 def _find_receipt_by_id(project_root: Path, receipt_id: str) -> dict | None:
@@ -521,15 +555,19 @@ def latest_receipt(project_root: Path | str, gate: str | None = None) -> dict | 
     """
     root = Path(project_root)
     if gate is not None:
-        # PERF-003: try index-first lookup
+        # PERF-003/04: index-first lookup. When the index carries a safe
+        # relative receipt path, read that ONE file directly (constant I/O);
+        # otherwise fall back to a full scan. Any failure (missing path,
+        # corrupt/moved receipt, relocated index) degrades to the scan and
+        # never mutates state on a read-only upgrade.
         index = _lookup_receipt_index(root, gate)
         if index is not None:
-            rec = _find_receipt_by_id(root, index["receipt_id"])
-            if rec is not None and rec.get("gate") == gate:
-                # Validate the indexed receipt matches the expected timestamp
-                if rec.get("timestamp_utc") == index.get("timestamp_utc"):
-                    return rec
-        # Index miss/corruption: fall back to full scan
+            rec = _read_indexed_receipt(root, index)
+            if rec is not None and rec.get("gate") == gate and rec.get(
+                "timestamp_utc"
+            ) == index.get("timestamp_utc"):
+                return rec
+        # Index miss/corruption/relocation: fall back to full scan
         receipts = _iter_receipts(root)
         receipts = [r for r in receipts if r.get("gate") == gate]
     else:
@@ -860,15 +898,26 @@ def continue_entry_health(
             board = parse_board(bt)
         except Exception:
             board = {"tickets": {}, "errors": []}
+    # PERF-002: capture the source identity ONCE and reuse it for both gate
+    # checks instead of recomputing it inside each current_conformance_pass
+    # (two git-delta captures -> one).
+    try:
+        source_id = _source_identity(root)
+    except Exception:
+        source_id = None
     # DONE without any convergence/verify evidence is not closure.
-    if state.get("phase") == "DONE" and not current_conformance_pass(root, "core", now=now):
+    if state.get("phase") == "DONE" and not current_conformance_pass(
+        root, "core", now=now, source_identity=source_id
+    ):
         problems.append(
             "phase DONE without a CURRENT_PASS canonical conformance receipt -- "
             "DONE is not convergence proof"
         )
     # converge/crew intent without current conformance is not finalizable.
     if state.get("execution_intent") == "converge" and state.get("converge_target") == "crew":
-        if not current_conformance_pass(root, "crew", now=now):
+        if not current_conformance_pass(
+            root, "crew", now=now, source_identity=source_id
+        ):
             problems.append(
                 "converge/crew intent present but canonical crew conformance is "
                 "not CURRENT_PASS -- crew closure is impossible"

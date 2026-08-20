@@ -267,6 +267,38 @@ def _capture_operation_receipts(root: Path) -> tuple[tuple[dict, ...], str]:
     return tuple(records), "ops-receipt-sha256:" + digest.hexdigest()
 
 
+def _capture_receipt_digest(root: Path) -> str:
+    """PERF-005: lightweight stability digest over both receipt namespaces.
+
+    Hashes each operation.json's exact bytes WITHOUT JSON-decoding, so the
+    post-capture stability proof holds constant I/O and never re-parses the
+    lifetime receipt set. The full decode in ``_capture_operation_receipts``
+    is only needed for the records the snapshot actually consumes; the second
+    (stability) pass must not pay for it again.
+    """
+    from .journal import OPS_DIR, SETTLED_DIR
+
+    digest = hashlib.sha256(b"saipen-op-receipts-v1\0")
+    for ns_dir in (root / OPS_DIR, root / SETTLED_DIR):
+        if not ns_dir.is_dir():
+            continue
+        for op_dir in sorted(ns_dir.iterdir()):
+            if not op_dir.is_dir():
+                continue
+            manifest = op_dir / "operation.json"
+            if not manifest.is_file():
+                continue
+            try:
+                raw = manifest.read_bytes()
+            except OSError:
+                continue
+            digest.update(len(op_dir.name).to_bytes(8, "big"))
+            digest.update(op_dir.name.encode("utf-8"))
+            digest.update(len(raw).to_bytes(8, "big"))
+            digest.update(raw)
+    return "ops-receipt-sha256:" + digest.hexdigest()
+
+
 def _crew_epoch(
     root: Path, history: "HistorySnapshot", records: tuple[dict, ...] | None = None # noqa: F821
 ) -> CrewEpoch | None:
@@ -567,7 +599,7 @@ def crew_snapshot(project_root: Path | str, current_capability: str | None = Non
     # Re-scan ONLY operation.json membership + bytes for the stability proof
     # (the digest never reads *.staged payloads, which cannot change a crew
     # verdict -- T-1004 perf).
-    _records_after, stability_after = _capture_operation_receipts(root)
+    stability_after = _capture_receipt_digest(root)  # PERF-005: lightweight stability pass
     home_after = _capture_dependencies(home_specs)
     source_stable = (
         source_id is None and repeated_source is None and source_error == repeated_error
@@ -1784,7 +1816,9 @@ def _evaluate(
             post_action,
         )
     )
-    sc13_ok, sc13_reason = _sc13_conformance_check(snapshot, pre_finalization=pre_finalization)
+    sc13_ok, sc13_reason = _sc13_conformance_check(
+        snapshot, pre_finalization=pre_finalization, source_identity=snapshot.source_id
+    )
     evaluations.append(
         (
             "SC-13",
@@ -1808,7 +1842,9 @@ def _evaluate(
     return stages, _first_action(stages)
 
 
-def _sc13_conformance_check(snapshot, *, pre_finalization: bool = False) -> tuple[bool, str]:
+def _sc13_conformance_check(
+    snapshot, *, pre_finalization: bool = False, source_identity=None
+) -> tuple[bool, str]:
     """§7: SC-13 must independently prove a CURRENT_PASS canonical conformance
     receipt bound to the current checkpoint/tree. A historical green, a stale
     validator, or a FAIL must never let `WAIT: crew closed` / CREW_FINALIZED
@@ -1835,7 +1871,11 @@ def _sc13_conformance_check(snapshot, *, pre_finalization: bool = False) -> tupl
     try:
         from .conformance import conformance_status
 
-        st = conformance_status(snapshot.root, gate="crew")
+        # PERF-002: reuse the snapshot's already-captured SourceIdentity instead
+        # of recomputing it inside conformance_status (one fewer filesystem/Git
+        # capture on the crew_plan hot path).
+        ident = source_identity if source_identity is not None else snapshot.source_id
+        st = conformance_status(snapshot.root, gate="crew", source_identity=ident)
     except Exception as exc:  # pragma: no cover - defensive
         return False, f"conformance gate error: {exc}"
     if st["status"] != "CURRENT_PASS":

@@ -324,6 +324,45 @@ def run_t1019(base: Path) -> None:
     (nogit / "u.txt").write_text("new file\n", encoding="utf-8")
     samesize_race("T-1007 same-size mtime-restored replacement fails closed (no-Git model)", nogit)
 
+    # ---- PERF-001: the final confirmation re-read must stay INSIDE the
+    # stability comparison. Reads 1-3 of the untracked probe return the original
+    # bytes (so first == second == confirmed holds); ONLY the 4th read -- inside
+    # _stream_digest, after the confirmed-parse race checks -- returns a
+    # same-size, mtime-restored swap. The capture must fail closed rather than
+    # silently fold the swapped bytes into the fingerprint.
+    read_counts: dict[str, int] = {}
+
+    def final_read_swapper(path, *a, **k):
+        content, fp = real_read(path, *a, **k)
+        key = str(path)
+        read_counts[key] = read_counts.get(key, 0) + 1
+        if "untracked.txt" in key and read_counts[key] == 4:
+            # 4th read: simulate a swap that landed in the unvalidated window.
+            # Returns the mutated bytes (same size, restored mtime) so the final
+            # pass would otherwise hash the wrong content.
+            info = path.stat()
+            path.write_text("NEW FILE!\n", encoding="utf-8")  # 9 bytes, same as "new file\n"
+            os.utime(path, ns=(info.st_atime_ns, info.st_mtime_ns))
+            content, fp = real_read(path, *a, **k)
+        return content, fp
+
+    freshness._read_regular_info = final_read_swapper
+    try:
+        freshness.compute_source_identity(stable_fixture(base / "fix-finalread"))
+        expect(
+            "PERF-001 final confirmation re-read is validated against confirmed evidence",
+            False,
+            "no FreshnessError -- 4th-read swap silently accepted into fingerprint",
+        )
+    except freshness.FreshnessError:
+        expect(
+            "PERF-001 final confirmation re-read is validated against confirmed evidence",
+            True,
+            "",
+        )
+    finally:
+        freshness._read_regular_info = real_read
+
     # ---- post-run binding equality (T-1010) --------------------------------
     # Every monkeypatch installed above must be restored: a later probe group
     # (or a second run of this harness) must see the original bindings.
@@ -642,12 +681,302 @@ def run_t1022() -> None:
     expect("T-1022 third-wave ONLY runner reports zero failures", "0 failed" in out, out[-400:])
 
 
+def run_t1023(base: Path) -> None:
+    """PERF-002/003/004/005 hot-path wiring regression.
+
+    The audit stamped PERFORMANCE: COMPLETE, but the committed tree had the
+    perf INFRASTRUCTURE (the ``source_identity=`` API, the receipt index, the
+    bounded RemoteSnapshot) with the HOT-PATH WIRING left open:
+
+    - PERF-002: crew_plan's SC-13 check and continue_entry_health recomputed
+      SourceIdentity instead of reusing the one already captured.
+    - PERF-003: _verify_receipt fired TWO ls-remote calls and _git had no
+      timeout (a hung remote hung the verifier instead of returning unknown).
+    - PERF-004: the receipt index stored only receipt_id+timestamp, so
+      latest_receipt still globbed+parsed every receipt (O(N)), not constant-I/O.
+    - PERF-005: crew_snapshot's second stability pass re-decoded every receipt
+      just to compute a digest.
+    """
+    from saipen_engine import crew, conformance, release
+    from saipen_engine.conformance import CONFORMANCE_PROTOCOL_VERSION
+
+    # ---- PERF-002a: _sc13_conformance_check reuses snapshot.source_id --------
+    real_cs = conformance.conformance_status
+    passed_source: list[bool] = []
+
+    def counting_cs(root, gate="core", now=None, source_identity=None):
+        passed_source.append(source_identity is not None)
+        return {"status": "CURRENT_PASS", "gate": gate, "validator": {}}
+
+    conformance.conformance_status = counting_cs
+    try:
+        class _Snap:
+            root = base
+            source_id = object()  # truthy stand-in for a SourceIdentity
+
+        crew._sc13_conformance_check(_Snap(), pre_finalization=False)
+    finally:
+        conformance.conformance_status = real_cs
+    expect(
+        "PERF-002 _sc13_conformance_check reuses snapshot.source_id",
+        bool(passed_source) and all(passed_source),
+        f"passed_source_id={passed_source}",
+    )
+
+    # ---- PERF-002b: continue_entry_health captures SourceIdentity ONCE ------
+    saipen_dir = base / "perf2b" / ".saipen"
+    saipen_dir.mkdir(parents=True, exist_ok=True)
+    (saipen_dir / "STATE.md").write_text(
+        "---\nphase: DONE\ntask: none\nsaipen_version: 7\n"
+        "execution_intent: converge\nconverge_target: crew\n",
+        encoding="utf-8",
+    )
+    (saipen_dir / "BOARD.md").write_text("---\n", encoding="utf-8")
+    real_srcid = conformance._source_identity
+    srcid_calls: list[int] = []
+
+    def counting_srcid(root):
+        srcid_calls.append(1)
+        return real_srcid(root)
+
+    conformance._source_identity = counting_srcid
+    try:
+        conformance.continue_entry_health(base / "perf2b")
+    finally:
+        conformance._source_identity = real_srcid
+    # phase DONE + converge/crew triggers BOTH gate checks, so the wiring must
+    # pass ONE captured identity to both (not recompute per check).
+    expect(
+        "PERF-002 continue_entry_health captures SourceIdentity once for both gates",
+        len(srcid_calls) == 1,
+        f"source_identity_calls={len(srcid_calls)}",
+    )
+
+    # ---- PERF-003: one bounded remote snapshot; timeout -> unknown ----------
+    import json as _json
+    import subprocess as _sp
+
+    real_git = release._git
+    lsremote_calls: list[tuple] = []
+
+    def counting_git(root, *args, literal=False, timeout=None):
+        if args and args[0] == "ls-remote":
+            lsremote_calls.append(args)
+            stdout = (
+                "abc123\trefs/heads/main\n"
+                "abc123\trefs/tags/v1.0.0\n"
+                "abc123\trefs/tags/v1.0.0^{}\n"
+            )
+        elif args[:2] == ("rev-parse", "HEAD"):
+            stdout = "abc123"
+        else:
+            stdout = ""
+
+        class _R:
+            rc = 0
+            stderr = ""
+
+            def __init__(self):
+                self.stdout = stdout
+
+            @property
+            def ok(self):
+                return self.rc == 0
+
+        return _R()
+
+    release._git = counting_git
+    try:
+        rec = {
+            "mode": "full",
+            "closure_commit": "abc123",
+            "branch": "main",
+            "tag": "v1.0.0",
+            "version": "1.0.0",
+            "remote_push_endpoint": "origin",
+            "project_identity": "",
+            "project_lineage": "",
+            "source_head": "",
+            "source_tree_fingerprint": "",
+        }
+        v = release._verify_receipt(base, rec)
+        expect(
+            "PERF-003 _verify_receipt fires exactly ONE ls-remote",
+            len(lsremote_calls) == 1,
+            f"lsremote_calls={len(lsremote_calls)}",
+        )
+        expect(
+            "PERF-003 _verify_receipt still verifies closure==branch==tag",
+            v.get("status") == "ok",
+            repr(v),
+        )
+    finally:
+        release._git = real_git
+
+    # timeout degradation: a hung remote must become unknown, never a crash/PASS.
+    # Patch subprocess.run (the primitive real _git calls) so the REAL timeout
+    # handling in _git is exercised -- _git catches TimeoutExpired and returns a
+    # non-ok GitResult, which the verifier maps to unknown.
+    real_run = _sp.run
+
+    def raising_run(*a, **k):
+        raise _sp.TimeoutExpired(["git"], k.get("timeout") or 30)
+
+    _sp.run = raising_run
+    try:
+        v2 = release._verify_receipt(base, rec)
+        expect(
+            "PERF-003 remote timeout degrades to unknown (never PASS/crash)",
+            v2.get("status") == "unknown",
+            repr(v2),
+        )
+    finally:
+        _sp.run = real_run
+
+    # ---- PERF-004: indexed lookup is constant-I/O (no full scan) ------------
+    root4 = base / "perf4"
+    recv_dir = root4 / conformance.RECEIPT_DIRNAME
+    recv_dir.mkdir(parents=True, exist_ok=True)
+    idx_dir = root4 / conformance._INDEX_DIRNAME
+    idx_dir.mkdir(parents=True, exist_ok=True)
+    last = None
+    for i in range(500):
+        ts = f"2026-01-01T00:{i // 60:02d}:{i % 60:02d}Z"
+        rid = f"r{i:05d}"
+        recj = {
+            "schema_version": 2,
+            "kind": "conformance_receipt",
+            "receipt_id": rid,
+            "validator_protocol_version": CONFORMANCE_PROTOCOL_VERSION,
+            "gate": "core",
+            "exit_code": 0,
+            "verdict": "PASS",
+            "timestamp_utc": ts,
+            "content_hash": "x",
+            "source_head": "",
+            "source_tree_fingerprint": "",
+            "state_hash": "",
+            "board_hash": "",
+            "log_hash": "",
+        }
+        # Mirror production's filename sanitization (conformance._safe_filename_component)
+        # so the simulated receipts survive on Windows where ':' is an illegal char.
+        fname = f"{conformance._safe_filename_component(ts)}_{rid}_core_PASS.json"
+        (recv_dir / fname).write_text(_json.dumps(recj), encoding="utf-8")
+        last = (rid, ts, f"{conformance.RECEIPT_DIRNAME}/{fname}")
+    (idx_dir / "core.json").write_text(
+        _json.dumps(
+            {
+                "gate": "core",
+                "receipt_id": last[0],
+                "timestamp_utc": last[1],
+                "receipt_path": last[2],
+                "version": 1,
+            }
+        ),
+        encoding="utf-8",
+    )
+    real_iter = conformance._iter_receipts
+    real_find = conformance._find_receipt_by_id
+    scans = {"iter": 0, "find": 0}
+
+    def ci(r):
+        scans["iter"] += 1
+        return real_iter(r)
+
+    def cf(r, rid):
+        scans["find"] += 1
+        return real_find(r, rid)
+
+    conformance._iter_receipts = ci
+    conformance._find_receipt_by_id = cf
+    try:
+        got = conformance.latest_receipt(root4, "core")
+    finally:
+        conformance._iter_receipts = real_iter
+        conformance._find_receipt_by_id = real_find
+    expect(
+        "PERF-004 index lookup is constant-I/O (no full scan)",
+        scans["iter"] == 0 and scans["find"] == 0,
+        f"iter={scans['iter']} find={scans['find']}",
+    )
+    expect(
+        "PERF-004 index lookup returns the latest receipt",
+        got is not None and got.get("receipt_id") == last[0],
+        repr(got.get("receipt_id") if got else None),
+    )
+
+    # PERF-004 fallback: a corrupted index must still resolve via full scan
+    (idx_dir / "core.json").write_text("{not valid json", encoding="utf-8")
+    conformance._iter_receipts = ci
+    conformance._find_receipt_by_id = cf
+    scans["iter"] = 0
+    scans["find"] = 0
+    try:
+        got2 = conformance.latest_receipt(root4, "core")
+    finally:
+        conformance._iter_receipts = real_iter
+        conformance._find_receipt_by_id = real_find
+    expect(
+        "PERF-004 corrupted index falls back to full scan (still correct)",
+        scans["iter"] >= 1 and got2 is not None and got2.get("receipt_id") == last[0],
+        f"iter={scans['iter']} got={got2.get('receipt_id') if got2 else None}",
+    )
+
+    # ---- PERF-005: lightweight stability digest == full-decode digest ------
+    from saipen_engine.journal import OPS_DIR
+
+    root5 = base / "perf5"
+    ops_dir = root5 / OPS_DIR
+    ops_dir.mkdir(parents=True, exist_ok=True)
+    for i in range(5):
+        d = ops_dir / f"op-{i:03d}"
+        d.mkdir(parents=True)
+        (d / "operation.json").write_text(
+            _json.dumps(
+                {
+                    "op_id": f"op-{i:03d}",
+                    "operation": "op",
+                    "created_at": "2026-01-01T00:00:00Z",
+                    "agent": "probe",
+                    "project_identity": str(root5),
+                    "project_lineage": None,
+                    "semantic_payload_hash": "h",
+                    "preconditions": {},
+                    "read_preconditions": {},
+                    "verification_policy": "none",
+                    "status": "COMMITTED",
+                    "progress_index": 1,
+                    "targets": [
+                        {
+                            "path": "x.txt",
+                            "role": "generic",
+                            "action": "write",
+                            "before_hash": "a",
+                            "after_hash": "b",
+                            "applied": True,
+                        }
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+    recs, full_digest = crew._capture_operation_receipts(root5)
+    light_digest = crew._capture_receipt_digest(root5)
+    expect(
+        "PERF-005 lightweight stability digest equals full-decode digest",
+        full_digest == light_digest,
+        f"full={full_digest} light={light_digest}",
+    )
+
+
 def main() -> int:
     base = Path(tempfile.mkdtemp(prefix="saipen-perf-wave-"))
     try:
         run_t1019(base)
         run_t1020(base)
         run_t1021()
+        run_t1023(base)
         run_t1022()
     finally:
         shutil.rmtree(base, ignore_errors=True)
