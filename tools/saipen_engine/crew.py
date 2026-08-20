@@ -237,11 +237,13 @@ def _capture_operation_receipts(root: Path) -> tuple[tuple[dict, ...], str]:
     like _iter_operation_records, but their bytes still feed the digest,
     so any edit/add/remove of an operation.json still stales the capture.
     """
-    from .journal import OPS_DIR, SETTLED_DIR
+    from .journal import OPS_DIR, SETTLED_DIR, decode_operation_record
     records: list[dict] = []
     digest = hashlib.sha256(b"saipen-op-receipts-v1\0")
-    # Digest both namespaces for the stability proof
-    for ns_name, ns_dir in [(OPS_DIR, root / OPS_DIR), (SETTLED_DIR, root / SETTLED_DIR)]:
+    # W2-001: digest BOTH namespaces for the stability proof (unchanged
+    # byte-stability contract) but decode each candidate through the ONE strict
+    # decoder so a malformed receipt is never trusted as positive crew evidence.
+    for ns_dir in (root / OPS_DIR, root / SETTLED_DIR):
         if not ns_dir.is_dir():
             continue
         for op_dir in sorted(ns_dir.iterdir()):
@@ -258,11 +260,10 @@ def _capture_operation_receipts(root: Path) -> tuple[tuple[dict, ...], str]:
             digest.update(op_dir.name.encode("utf-8"))
             digest.update(len(raw).to_bytes(8, "big"))
             digest.update(raw)
-            try:
-                record = json.loads(raw.decode("utf-8"))
-            except (OSError, json.JSONDecodeError, UnicodeDecodeError):
+            decoded = decode_operation_record(root, op_dir)
+            if not decoded["ok"]:
                 continue
-            records.append(record)
+            records.append(decoded["record"])
     return tuple(records), "ops-receipt-sha256:" + digest.hexdigest()
 
 

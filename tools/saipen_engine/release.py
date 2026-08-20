@@ -1377,25 +1377,24 @@ def _ticket_done(root: Path, ticket_id: str) -> bool:
 
 
 def _committed_release_receipts(root: Path) -> list[dict]:
-    """Every COMMITTED release receipt: the recovery/ops journal records AND
-    the published `.saipen/kitchen/release_receipt.json` closure artifact
-    (T-1003 findings 20/26). The recovery/ops tree is NOT cloned, so the
-    structured published receipt is what a fresh clone sees -- release
-    continuation identity must never depend on LOG prose."""
+    """Every COMMITTED release receipt across BOTH the recovery/ops journal AND
+    the recovery/settled ledger (W2-002): terminal release receipts are moved to
+    settled by _settle_journal, so reading ops alone made a settled release
+    invisible to crew finalize. Also includes the published
+    `.saipen/kitchen/release_receipt.json` closure artifact (T-1003 findings
+    20/26) -- the recovery/ops tree is NOT cloned, so the structured published
+    receipt is what a fresh clone sees and release continuation identity must
+    never depend on LOG prose."""
     out = []
-    ops = root / ".saipen" / "recovery" / "ops"
-    if ops.is_dir():
-        for receipt in ops.glob("release-*/operation.json"):
-            try:
-                record = json.loads(receipt.read_text(encoding="utf-8"))
-            except (OSError, json.JSONDecodeError):
-                continue
-            if (
-                record.get("operation") == "release"
-                and record.get("status") == "COMMITTED"
-                and record.get("release_stage") == "COMMITTED"
-            ):
-                out.append(record)
+    from .journal import semantic_receipt_snapshot
+    records, _errors = semantic_receipt_snapshot(root)
+    for record in records:
+        if (
+            record.get("operation") == "release"
+            and record.get("status") == "COMMITTED"
+            and record.get("release_stage") == "COMMITTED"
+        ):
+            out.append(record)
     published = root / ".saipen" / "kitchen" / "release_receipt.json"
     if published.is_file():
         try:
@@ -3401,8 +3400,27 @@ def _recover_release_op_locked(root: Path, op_id: str) -> dict:
         return {"ok": False, "code": "TICKET_NOT_FOUND", "op_id": op_id}
     record = journal.read()
     status = record.get("status")
-    if status == "COMMITTED":
+    release_stage = record.get("release_stage")
+    if status == "COMMITTED" and release_stage == "COMMITTED":
+        # W2-003: ONE coherent durable transition. ALREADY_APPLIED is only
+        # admissible when BOTH the generic terminal status AND the release-
+        # specific stage are COMMITTED. A split truth (generic COMMITTED but
+        # the release stage never reached COMMITTED) is a partial/contradictory
+        # state that must be finished or resolved explicitly -- never silently
+        # treated as fully applied.
         return {"ok": True, "code": "ALREADY_APPLIED", "op_id": op_id}
+    if status == "COMMITTED":
+        # Split terminal truth: generic COMMITTED without release_stage
+        # COMMITTED is NOT admissible as ALREADY_APPLIED.
+        return {
+            "ok": False,
+            "code": "RELEASE_STAGE_INCOMPLETE",
+            "op_id": op_id,
+            "recovery_required": True,
+            "detail": f"release op status is COMMITTED but release_stage is "
+            f"{release_stage!r}; finish the release or resolve it explicitly "
+            "before retrying recovery",
+        }
     if status in ("CONFLICT", "ABORTED", "RESOLVED"):
         return {
             "ok": False,
@@ -4130,20 +4148,20 @@ def release_verdict(root: Path | str, crew_epoch: str | None = None) -> dict:
     relation independently.
     """
     root = Path(root)
+    from .journal import semantic_receipt_snapshot
     raw_records = []
-    ops = root / ".saipen" / "recovery" / "ops"
-    if ops.is_dir():
-        for receipt in ops.glob("release-*/operation.json"):
-            try:
-                raw_records.append(json.loads(receipt.read_text(encoding="utf-8")))
-            except (OSError, json.JSONDecodeError):
-                raw_records.append({"corrupt": True, "path": str(receipt)})
+    # W2-002: scan BOTH recovery/ops and recovery/settled through the ONE
+    # canonical semantic snapshot, not ops alone -- a settled release receipt
+    # (release_stage == COMMITTED) moved by _settle_journal must remain visible
+    # to crew finalize. The strict decode already excluded corrupt/unparseable
+    # receipts, so no synthetic {"corrupt": ...} stubs are needed.
+    records, _errors = semantic_receipt_snapshot(root)
+    for record in records:
+        if record.get("operation") != "release":
+            continue
+        raw_records.append(record)
     if crew_epoch is not None:
-        raw_records = [
-            item
-            for item in raw_records
-            if item.get("corrupt") or item.get("crew_epoch") == crew_epoch
-        ]
+        raw_records = [item for item in raw_records if item.get("crew_epoch") == crew_epoch]
     valid = []
     invalid = []
     for item in raw_records:

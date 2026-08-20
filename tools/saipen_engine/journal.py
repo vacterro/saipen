@@ -2530,23 +2530,18 @@ def verify_sub_collect(root, targets, receipt_metadata=None) -> list[str]:
         # sub_disposition receipt binds its identity -- intake itself must
         # never have flipped it (INTAKE != REVIEW, Wave 2 item 4).
         disposed = set()
-        ops = root / ".saipen" / "recovery" / "ops"
-        if ops.is_dir():
-            for op_dir in sorted(ops.iterdir()):
-                op_manifest = op_dir / "operation.json"
-                if not op_manifest.is_file():
-                    continue
-                try:
-                    record = json.loads(op_manifest.read_text(encoding="utf-8"))
-                except (OSError, json.JSONDecodeError):
-                    continue
-                meta = record.get("receipt_metadata") or {}
-                if record.get("operation") != "sub_disposition":
-                    continue
-                if record.get("status") != "COMMITTED":
-                    continue
-                if meta.get("package_identity"):
-                    disposed.add(meta["package_identity"])
+        # W2-002: scan BOTH recovery/ops and recovery/settled through the ONE
+        # canonical semantic snapshot, not ops alone -- a committed sub_disposition
+        # receipt moved to settled by _settle_journal must still be recognized.
+        records, _errors = semantic_receipt_snapshot(root)
+        for record in records:
+            meta = record.get("receipt_metadata") or {}
+            if record.get("operation") != "sub_disposition":
+                continue
+            if record.get("status") != "COMMITTED":
+                continue
+            if meta.get("package_identity"):
+                disposed.add(meta["package_identity"])
         for entry in entries:
             last_collect = entry.metadata.get("last_collect", "")
             if not last_collect:
@@ -3159,12 +3154,25 @@ def _compact_drop_staged(entry: Path, compacted: list, skipped: list) -> None:
     """Drop any leftover `.staged` payloads for a single settled op dir.
 
     PERF-005: invoked only for ops that carry cleanup debt (whose post-
-    settlement staged unlink failed earlier and was durably enqueued). We
-    never re-walk the whole lifetime settled history to find them.
+    settlement staged unlink failed earlier and was durably enqueued).
+
+    W2-005: explicitly tracks success vs outstanding debt. Every staged file
+    is removed; if ANY removal fails the entry is reported as skipped so the
+    durable cleanup-queue marker survives for a later CLEAN retry -- we never
+    claim success we did not achieve, and never delete the marker while debt
+    remains. Only when NO staged payload remains is the entry marked compacted.
     """
+    remaining: list[str] = []
     for staged in entry.glob("*.staged"):
-        with contextlib.suppress(OSError):
+        try:
             staged.unlink()
+        except OSError:
+            remaining.append(staged.name)
+    if remaining:
+        # Outstanding debt: keep the entry in the skip list so the caller
+        # retains its cleanup-queue marker for the next CLEAN.
+        skipped.append(entry.name)
+        return
     if entry.name not in compacted:
         compacted.append(entry.name)
 
@@ -3261,8 +3269,13 @@ def _scan_receipt_namespace(
 ) -> None:
     """Scan one receipt namespace (ops or settled) and merge into results.
 
-    Each record is decoded through the strict decoder. op_id uniqueness is
-    enforced: a duplicate non-equivalent collision is corrupt evidence.
+    W2-001: every candidate is decoded through the ONE strict decoder
+    (decode_operation_record). A decode/read/namespace failure is PRESERVED in
+    ``errors`` and never silently skipped -- corrupt evidence must surface so
+    fail-closed consumers can refuse it. op_id uniqueness is enforced: a
+    duplicate collision is corrupt evidence UNLESS both sides are demonstrably
+    equivalent terminal receipts (the same op settled under both namespaces
+    after a crash re-scan), in which case the settled (current) record wins.
     """
     if not ns_dir.is_dir():
         return
@@ -3272,27 +3285,36 @@ def _scan_receipt_namespace(
         manifest = op_dir / "operation.json"
         if not manifest.is_file():
             continue
-        try:
-            raw = manifest.read_bytes()
-        except OSError:
+        decoded = decode_operation_record(root, op_dir)
+        if not decoded["ok"]:
+            # Preserve the corruption evidence instead of discarding it.
+            errors.append(
+                f"{op_dir.name}: {decoded.get('code', 'RECOVERY_CONFLICT')}: "
+                f"{decoded.get('detail', 'unparseable operation receipt')}"
+            )
             continue
-        try:
-            record = json.loads(raw.decode("utf-8"))
-        except (UnicodeDecodeError, json.JSONDecodeError):
-            continue
-        op_id = record.get("op_id", op_dir.name)
+        record = decoded["record"]
+        op_id = record.get("op_id") or op_dir.name
         if op_id in results:
             # W2-001: duplicate op_id across namespaces is corrupt evidence
-            # unless the records are equivalent terminal receipts.
+            # UNLESS both records are equivalent terminal receipts.
             existing = results[op_id]
-            if existing.get("status") in SETTLED and record.get("status") in SETTLED:
-                # Both terminal - the newer one (from settled) wins
+            if (
+                existing.get("status") in SETTLED
+                and record.get("status") in SETTLED
+                and _terminal_receipt_equivalent(existing, record)
+            ):
+                # Both terminal + equivalent: the settled (current) one wins.
                 results[op_id] = record
             else:
                 errors.append(
                     f"duplicate op_id {op_id!r} across ops/settled "
                     "with non-equivalent records -- corrupt evidence"
                 )
+                # A non-equivalent duplicate is corrupt evidence: NEITHER side
+                # may be trusted as positive evidence, so drop the previously
+                # selected record rather than leaving it silently in play.
+                results.pop(op_id, None)
         else:
             results[op_id] = record
 
@@ -3369,8 +3391,13 @@ def compact_committed(project_root: Path | str) -> dict:
             entry = settled_dir / op_id
             if entry.is_dir() and (entry / "operation.json").is_file():
                 _compact_drop_staged(entry, compacted, skipped)
-            with contextlib.suppress(OSError):
-                marker.unlink()
+            # W2-005: only clear the marker once the staged payload is proven
+            # gone (the entry landed in compacted). If the drop is still in
+            # debt (entry in skipped, not compacted) the marker is retained so
+            # the next CLEAN retries the outstanding cleanup.
+            if op_id in compacted:
+                with contextlib.suppress(OSError):
+                    marker.unlink()
 
     return {"ok": True, "compacted": compacted, "skipped": skipped}
 

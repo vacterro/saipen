@@ -709,76 +709,63 @@ def _inventory_key(inventory: list[dict]) -> tuple:
     return tuple(sorted((i["path"], i["kind"], i["source_hash"]) for i in inventory))
 
 
+def _actual_receipt_rel(root: Path, op_id: str) -> str:
+    """W2-002: resolve the ACTUAL receipt path for an op_id across BOTH ops and
+    settled namespaces (settled wins, since a settled receipt is the canonical
+    terminal evidence). Falls back to the ops path when neither exists, so
+    callers always receive a well-formed relative path."""
+    from .journal import OPS_DIR, SETTLED_DIR
+
+    for ns in (SETTLED_DIR, OPS_DIR):
+        candidate = root / ns / str(op_id) / "operation.json"
+        if candidate.is_file():
+            return candidate.relative_to(root).as_posix()
+    return f"{OPS_DIR}/{op_id}/operation.json"
+
+
 def _latest_sub_sync_inventory(
     root: Path, records: tuple[dict, ...] | None = None
 ) -> tuple[dict | None, list[dict] | None, str]:
     """Durable canonical sub_sync receipt selection (T-1001).
 
-    The successor is the receipt whose OWN created_at is newest, never the
-    operation.json filesystem mtime -- a copy or touch can push an older
-    committed inventory's mtime forward and feed the wrong obsolete
-    reconciliation. The third element reports lineage so callers can fail
-    closed: "none" (no committed receipt), "broken" (every candidate lacks
-    a valid durable timestamp), "ambiguous" (receipts sharing the newest
-    timestamp disagree about the inventory -- the same committed second
-    cannot be durably ordered), or "ok".
+    W2-002: scans BOTH recovery/ops and recovery/settled through the ONE
+    canonical semantic snapshot, not ops alone -- a sub_sync receipt settled by
+    _settle_journal lives under recovery/settled/<op_id>, so the ops-only scan
+    destroyed sub_sync idempotence. The returned receipt path is the ACTUAL
+    on-disk location (resolved against both namespaces), never a reconstructed
+    recovery/ops/<op_id> guess. The third element reports lineage so callers
+    can fail closed: "none" (no committed receipt), "broken" (every candidate
+    lacks a valid durable timestamp), "ambiguous" (receipts sharing the newest
+    timestamp disagree about the inventory -- the same committed second cannot
+    be durably ordered), or "ok".
     """
-    ops = root / ".saipen" / "recovery" / "ops"
-    if not ops.is_dir():
-        return None, None, "none"
+    if records is None:
+        from .journal import semantic_receipt_snapshot
+
+        records, _errors = semantic_receipt_snapshot(root)
     candidates = []
-    if records is not None:
-        for record in records:
-            try:
-                inventory = _normalize_owned_inventory(
-                    (record.get("receipt_metadata") or {}).get("owned_source_inventory")
+    for record in records:
+        try:
+            inventory = _normalize_owned_inventory(
+                (record.get("receipt_metadata") or {}).get("owned_source_inventory")
+            )
+        except (AttributeError, TypeError):
+            continue
+        if (
+            record.get("operation") == "sub_sync"
+            and record.get("status") == "COMMITTED"
+            and inventory is not None
+        ):
+            op_id = record.get("op_id", "")
+            candidates.append(
+                (
+                    record.get("created_at", ""),
+                    op_id,
+                    record,
+                    inventory,
+                    _actual_receipt_rel(root, op_id),
                 )
-                if (
-                    record.get("operation") == "sub_sync"
-                    and record.get("status") == "COMMITTED"
-                    and inventory is not None
-                ):
-                    candidates.append(
-                        (
-                            record.get("created_at", ""),
-                            record.get("op_id", ""),
-                            record,
-                            inventory,
-                            "",
-                        )
-                    )
-            except (AttributeError, TypeError):
-                continue
-        # The pre-captured records carry no per-receipt path; reconstruct the
-        # receipt path from the op_id for the returned receipt when needed.
-        _rel = root / ".saipen" / "recovery" / "ops"
-        candidates = [
-            (ts, op, rec, inv, (_rel / str(op) / "operation.json").relative_to(root).as_posix())
-            for ts, op, rec, inv, _p in candidates
-        ]
-    else:
-        for manifest in ops.glob("*/operation.json"):
-            try:
-                record = json.loads(manifest.read_text(encoding="utf-8"))
-                inventory = _normalize_owned_inventory(
-                    (record.get("receipt_metadata") or {}).get("owned_source_inventory")
-                )
-                if (
-                    record.get("operation") == "sub_sync"
-                    and record.get("status") == "COMMITTED"
-                    and inventory is not None
-                ):
-                    candidates.append(
-                        (
-                            record.get("created_at", ""),
-                            record.get("op_id", ""),
-                            record,
-                            inventory,
-                            manifest.relative_to(root).as_posix(),
-                        )
-                    )
-            except (OSError, json.JSONDecodeError, AttributeError):
-                continue
+            )
     if not candidates:
         return None, None, "none"
     valid = [c for c in candidates if _valid_durable_timestamp(c[0])]
