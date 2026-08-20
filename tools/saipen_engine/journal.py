@@ -60,6 +60,11 @@ LINEAGE_MIGRATION_OP = "op-migrate-lineage"
 # corrupt or stale marker falls back to the strict manifest decode (correct,
 # legacy), never launders unresolved/corrupt evidence.
 SETTLED_DIR = ".saipen/recovery/settled"
+# PERF-005: bounded cleanup-debt namespace. When a post-settlement staged-byte
+# deletion fails, the op_id is durably enqueued here so `compact_committed`
+# processes ONLY outstanding debt instead of re-scanning the whole lifetime
+# settled history on every CLEAN.
+CLEANUP_QUEUE_DIR = SETTLED_DIR + "/.cleanup-needed"
 
 # Closed verification-policy registry. Recovery must run the SAME semantic
 # postcondition class as the original APPLY; a policy names the verifier
@@ -152,8 +157,16 @@ def hash_tree(path: Path | str) -> str:
     return _hash_tree(Path(path))
 
 
-def _hash_delete_tree(path: Path) -> str:
-    """Exact deterministic hash for a directory deletion target."""
+def _hash_delete_tree(path: Path, read_file=None) -> str:
+    """Exact deterministic hash for a directory deletion target.
+
+    PERFORMANCE (PERF-003): ``read_file`` is an optional callable ``Path -> bytes``
+    used to supply already-read content. When omitted, bytes are read from disk
+    as before. The unified mutation-PLAN capture passes a resolver backed by a
+    SINGLE read of every sealed LOG segment so the delete-tree digest is computed
+    from the same bytes the history snapshot already consumed -- identical framing,
+    identical sentinels, just no second content read."""
+    read_file = read_file if read_file is not None else (lambda p: Path(p).read_bytes())
     try:
         root_info = path.lstat()
     except FileNotFoundError:
@@ -186,7 +199,7 @@ def _hash_delete_tree(path: Path) -> str:
                     rel = candidate.relative_to(path).as_posix()
                     return f"object-unsupported:{rel}"
                 rel = candidate.relative_to(path).as_posix().encode("utf-8")
-                raw = candidate.read_bytes()
+                raw = read_file(candidate)
                 digest.update(b"F" + len(rel).to_bytes(8, "big") + rel)
                 digest.update(len(raw).to_bytes(8, "big") + raw)
     except OSError:
@@ -199,14 +212,18 @@ def hash_delete_tree(path: Path | str) -> str:
     return _hash_delete_tree(Path(path))
 
 
-def hash_tree_dependency(path: Path | str) -> str:
+def hash_tree_dependency(path: Path | str, read_file=None) -> str:
     """Safe exact directory token for read-only CAS dependencies.
 
     Unlike ``hash_tree``, this never follows a symlink/reparse point and it
     distinguishes a missing directory from an unreadable/unsupported object.
+
+    PERFORMANCE (PERF-003): ``read_file`` is forwarded to ``_hash_delete_tree`` so
+    the mutation-PLAN capture can compute the sealed-LOG dependency digest from a
+    single read of the history segments.
     """
     candidate = Path(path)
-    digest = _hash_delete_tree(candidate)
+    digest = _hash_delete_tree(candidate, read_file=read_file)
     if not digest and not os.path.lexists(candidate):
         return MISSING_TREE_DEPENDENCY
     return digest
@@ -611,7 +628,102 @@ def decode_operation_record(root: Path | str, op_dir: Path) -> dict:
                     "op but its staged-write evidence "
                     f"{name!r} is missing; journal evidence is corrupt",
                 )
+    # CORE-001: ONE strict authoritative decoder owns BOTH the immutable
+    # operation.json manifest AND the bounded-progress sidecar progress.json.
+    # Live execution writes mutable progress (status / progress_index /
+    # applied_frontier) to the sidecar so it never rewrites the whole manifest
+    # after every target; recovery/inspect/resolve/retry/scan must read the
+    # SAME effective record, or a crash after canonical bytes changed is
+    # misread as "nothing applied" and wrongly aborted (broken crash-recovery
+    # invariant). The sidecar is optional for legacy receipts; a PRESENT but
+    # unreadable/malformed/contradictory sidecar is REFUSED, never ignored.
+    merged = _merge_progress_sidecar(op_dir, record)
+    if not merged["ok"]:
+        return merged
     return {"ok": True, "record": record}
+
+
+def _decode_progress_sidecar(progress_file: Path, n: int, base_status: object) -> dict:
+    """Strict decode of the bounded-progress sidecar progress.json (CORE-001).
+
+    Returns {"ok": True, "status", "progress_index", "applied_frontier"} where
+    each field is None when absent, or a stable refusal dict
+    {"ok": False, "code": ..., "detail": ...} with ZERO writes. A PRESENT
+    sidecar that is unreadable, malformed, out-of-range or contradictory with
+    the immutable manifest is refused -- never silently ignored.
+    """
+    try:
+        raw = progress_file.read_bytes()
+    except OSError as exc:
+        return {"ok": False, "code": "RECOVERY_CONFLICT",
+                "detail": f"progress.json is unreadable: {exc}"}
+    try:
+        data = json.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        return {"ok": False, "code": "RECOVERY_CONFLICT",
+                "detail": f"progress.json is not valid JSON: {exc}"}
+    if not isinstance(data, dict):
+        return {"ok": False, "code": "RECOVERY_CONFLICT",
+                "detail": "progress.json is not a JSON object"}
+    status = data.get("status")
+    if status is not None and status not in STATUS:
+        return {"ok": False, "code": "VALIDATION_FAILED",
+                "detail": f"progress.json status {status!r} outside closed status set"}
+    progress_index = data.get("progress_index")
+    if progress_index is not None:
+        if not isinstance(progress_index, int) or isinstance(progress_index, bool):
+            return {"ok": False, "code": "VALIDATION_FAILED",
+                    "detail": "progress.json progress_index must be an integer"}
+        if progress_index < 0 or progress_index > n:
+            return {"ok": False, "code": "VALIDATION_FAILED",
+                    "detail": f"progress.json progress_index {progress_index} out of range [0, {n}]"}
+    applied_frontier = data.get("applied_frontier")
+    if applied_frontier is not None:
+        if not isinstance(applied_frontier, int) or isinstance(applied_frontier, bool):
+            return {"ok": False, "code": "VALIDATION_FAILED",
+                    "detail": "progress.json applied_frontier must be an integer"}
+        hi = max(n - 1, -1)
+        if applied_frontier < -1 or applied_frontier > hi:
+            return {"ok": False, "code": "VALIDATION_FAILED",
+                    "detail": f"progress.json applied_frontier {applied_frontier} out of range [-1, {hi}]"}
+    # Contradiction: a sidecar claiming a terminal status while the immutable
+    # manifest is still UNRESOLVED means fold_progress did not delete the
+    # sidecar on settlement -- untrustworthy evidence, refuse rather than guess.
+    if status in SETTLED and base_status not in SETTLED:
+        return {"ok": False, "code": "RECOVERY_CONFLICT",
+                "detail": f"progress.json claims terminal {status!r} but manifest "
+                          f"is {base_status!r}; settlement did not fold"}
+    return {"ok": True, "status": status, "progress_index": progress_index,
+            "applied_frontier": applied_frontier}
+
+
+def _merge_progress_sidecar(op_dir: Path, record: dict) -> dict:
+    """Merge progress.json into a decoded operation record (CORE-001).
+
+    The sidecar is optional (legacy receipts have none). When present, its
+    status / progress_index override the immutable manifest's and the applied
+    prefix is derived deterministically from applied_frontier. Returns the
+    refusal dict unchanged on sidecar failure; otherwise mutates `record` and
+    returns {"ok": True}.
+    """
+    progress_file = op_dir / "progress.json"
+    if not progress_file.is_file():
+        return {"ok": True}
+    prog = _decode_progress_sidecar(
+        progress_file, len(record.get("targets") or []), record.get("status")
+    )
+    if not prog["ok"]:
+        return prog
+    if prog["status"] is not None:
+        record["status"] = prog["status"]
+    if prog["progress_index"] is not None:
+        record["progress_index"] = prog["progress_index"]
+    frontier = prog["applied_frontier"]
+    if frontier is not None:
+        targets = record.get("targets") or []
+        for i in range(min(frontier + 1, len(targets))):
+            targets[i]["applied"] = True
+    return {"ok": True}
 
 
 def scan_pending(project_root: Path | str) -> tuple[list[dict], list[dict]]:
@@ -1064,14 +1176,22 @@ class Journal:
     def mark(
         self, status: str, progress_index: int | None = None, target_index: int | None = None
     ) -> None:
-        record = self.read()
-        record["status"] = status
+        progress_file = self.dir / "progress.json"
+        prog = {}
+        if progress_file.is_file():
+            try:
+                prog = json.loads(progress_file.read_text(encoding="utf-8"))
+            except Exception:
+                pass
+        prog["status"] = status
         if progress_index is not None:
-            record["progress_index"] = progress_index
-        if target_index is not None and 0 <= target_index < len(record["targets"]):
-            record["targets"][target_index]["applied"] = True
-        _atomic_json(self.manifest, record)
+            prog["progress_index"] = progress_index
+        if target_index is not None:
+            prog["applied_frontier"] = max(prog.get("applied_frontier", -1), target_index)
+        _atomic_json(progress_file, prog)
+        
         if status in SETTLED:
+            self.fold_progress()
             _settle_journal(self)
 
     def append_targets(self, targets: list[dict]) -> None:
@@ -1127,10 +1247,40 @@ class Journal:
         _atomic_json(self.manifest, record)
 
     def read(self) -> dict:
-        return json.loads(self.manifest.read_text(encoding="utf-8"))
+        record = json.loads(self.manifest.read_text(encoding="utf-8"))
+        progress_file = self.dir / "progress.json"
+        if progress_file.is_file():
+            try:
+                prog = json.loads(progress_file.read_text(encoding="utf-8"))
+                if "status" in prog:
+                    record["status"] = prog["status"]
+                if "progress_index" in prog:
+                    record["progress_index"] = prog["progress_index"]
+                frontier = prog.get("applied_frontier", -1)
+                targets = record.get("targets", [])
+                for i in range(min(frontier + 1, len(targets))):
+                    targets[i]["applied"] = True
+            except Exception:
+                pass
+        return record
 
-    def staged_content(self, index: int) -> bytes:
-        record = self.read()
+    def fold_progress(self) -> None:
+        progress_file = self.dir / "progress.json"
+        if progress_file.is_file():
+            try:
+                record = self.read()
+                _atomic_json(self.manifest, record)
+                progress_file.unlink()
+            except OSError:
+                pass
+
+    def staged_content(self, index: int, record: dict | None = None) -> bytes:
+        # PERF-001: when the caller already holds the strict-decoded operation
+        # record (e.g. the recovery attempt that decoded it once), pass it here
+        # so we skip the O(N) receipt re-parse per target. Without `record`,
+        # behaviour is unchanged: the receipt is decoded on demand.
+        if record is None:
+            record = self.read()
         target_path = record["targets"][index]["path"]
         canonical = (
             owned_target_path(self.project_root, target_path)
@@ -1155,10 +1305,22 @@ def _drop_settled_staged(journal: "Journal") -> None:
     operation, so every failure is suppressed. `compact_committed` remains
     as the explicit repair/legacy sweep for leftovers and interrupted
     cleanup. NEVER called for PREPARED/APPLYING/VERIFIED/CONFLICT/ABORTED.
+
+    PERF-005: if a staged unlink fails, the op_id is durably enqueued in the
+    bounded cleanup queue so the next `compact_committed` removes the leftover
+    payload without re-scanning the entire settled ledger.
     """
-    with contextlib.suppress(OSError):
-        for staged in journal.dir.glob("*.staged"):
+    queue = journal.project_root / CLEANUP_QUEUE_DIR
+    debt = False
+    for staged in journal.dir.glob("*.staged"):
+        try:
             staged.unlink()
+        except OSError:
+            debt = True
+    if debt:
+        with contextlib.suppress(OSError):
+            queue.mkdir(parents=True, exist_ok=True)
+            (queue / journal.op_id).write_text("")
 
 
 def _verify_target_bytes(root: Path, targets: list[dict]) -> str | None:
@@ -2134,7 +2296,7 @@ def _recover_locked(root: Path, op_id: str) -> dict:
             action = _target_action(target)
             try:
                 if action == "write":
-                    staged = journal.staged_content(index)
+                    staged = journal.staged_content(index, record)
                     if hash_bytes(staged) != target["after_hash"]:
                         journal.mark("CONFLICT")
                         return {
@@ -2880,8 +3042,47 @@ def _resolve_conflict_locked(root: Path, op_id: str, resolution: str, agent: str
     record["resolution_evidence"] = (
         "live accepted" if resolution == "accept_live" else "operation retired; fresh plan required"
     )
+    # W2-003 (CORE-005): ownership handover is an explicit part of the
+    # resolution lifecycle, validated and performed BEFORE the irreversible
+    # terminal write -- never a post-settlement best effort that can silently
+    # lie about success. If the required owner transition cannot complete, we
+    # refuse HERE (resolution NOT committed) so the conflict stays resolvable
+    # and the command fails truthfully instead of reporting RESOLVED with a
+    # stale owner. The previous code unpacked `parse_state()` as if it returned
+    # a (state, error) tuple (it returns ONE dict), raised inside a broad
+    # `except Exception: pass`, swallowed the failure, and returned RESOLVED
+    # while STATE.agent stayed unchanged.
+    from .state import parse_state
+    state_path = root / ".saipen" / "STATE.md"
+    if state_path.is_file():
+        state_rec = parse_state(state_path.read_text(encoding="utf-8"))
+        if state_rec.get("agent") != agent:
+            from .operations import handover_agent
+            try:
+                ho = handover_agent(root, agent, allow_dead_home=True)
+            except Exception as exc:  # injected / unexpected handover failure
+                return {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "op_id": op_id,
+                    "resolution_committed": False,
+                    "detail": f"conflict resolution blocked: required ownership "
+                    f"handover to {agent!r} raised before settlement: {exc}",
+                }
+            if not ho.ok:
+                return {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "op_id": op_id,
+                    "resolution_committed": False,
+                    "detail": f"conflict resolution blocked: required ownership "
+                    f"handover to {agent!r} failed before settlement: {ho.message}",
+                }
+
     _atomic_json(journal.manifest, record)
-    _write_settled_marker(journal, record) # noqa: F821
+
+    _settle_journal(journal)
+
     return {
         "ok": True,
         "code": "RESOLVED",
@@ -2954,38 +3155,38 @@ def auto_recover_pending(project_root: Path | str) -> dict:
         }
 
 
-def compact_committed(project_root: Path | str) -> dict:
-    """Bounded explicit maintenance compaction of SETTLED operation journals
-    (NITRO dogfood II + IV, T-596).
+def _compact_drop_staged(entry: Path, compacted: list, skipped: list) -> None:
+    """Drop any leftover `.staged` payloads for a single settled op dir.
 
-    A COMMITTED or RESOLVED op no longer needs its staged bytes for recovery:
-    idempotent retry only needs the compact tombstone. Compaction deletes the
-    large `.staged` payloads and KEEPS the full tombstone -- op_id, operation,
-    status, result identity (semantic_payload_hash), the per-target final
-    hashes (before_hash/after_hash), timestamp (created_at) -- so a repeated
-    checkpoint does not accumulate unbounded write amplification and every
-    settled op stays attributable.
-
-    NEVER compacts PREPARED / APPLYING / VERIFIED / CONFLICT / ABORTED --
-    those still require evidence. A retried compacted op still returns
-    ALREADY_APPLIED. This is the journal-compaction operation the CLEAN phase
-    runs (saipen/phases/clean.md step 4); it is a maintenance mutation, never
-    an automatic side effect of ordinary checkpointing.
+    PERF-005: invoked only for ops that carry cleanup debt (whose post-
+    settlement staged unlink failed earlier and was durably enqueued). We
+    never re-walk the whole lifetime settled history to find them.
     """
-    root = Path(project_root)
-    ops_dir = root / OPS_DIR
-    if not ops_dir.is_dir():
-        return {"ok": True, "compacted": [], "skipped": []}
+    for staged in entry.glob("*.staged"):
+        with contextlib.suppress(OSError):
+            staged.unlink()
+    if entry.name not in compacted:
+        compacted.append(entry.name)
 
+
+def _compact_migrate_ops(
+    root: Path, ops_dir: Path, settled_dir: Path, compacted: list, skipped: list
+) -> None:
+    """Collision-safe migration of terminal ops from ``ops_dir`` -> ``settled_dir``.
+
+    Bounded by ``ops_dir`` size (only pending/active/terminal ops live there),
+    NOT by the whole lifetime settled history. PERF-005: this is the only full
+    directory scan ``compact_committed`` performs, and ``ops_dir`` stays small
+    under normal CLEAN cadence -- it never re-walks the settled ledger.
+    """
+    if not ops_dir.is_dir():
+        return
     try:
         info = os.lstat(ops_dir)
         if ops_dir.is_symlink() or getattr(info, "st_file_attributes", 0) & 0x400:
-            return {"ok": True, "compacted": [], "skipped": []}
+            return
     except OSError:
-        return {"ok": True, "compacted": [], "skipped": []}
-
-    compacted = []
-    skipped = []
+        return
     for entry in sorted(ops_dir.iterdir()):
         try:
             info = os.lstat(entry)
@@ -2993,22 +3194,208 @@ def compact_committed(project_root: Path | str) -> dict:
                 continue
         except OSError:
             continue
-
         if not entry.is_dir():
             continue
         manifest = entry / "operation.json"
         if not manifest.is_file():
             continue
-        try:
-            record = json.loads(manifest.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
+        decoded = decode_operation_record(root, entry)
+        if not decoded["ok"]:
             skipped.append(entry.name)
             continue
+        record = decoded["record"]
         if record.get("status") not in ("COMMITTED", "RESOLVED"):
             skipped.append(entry.name)
             continue
+        # Drop staged payloads at migration time.
         for staged in entry.glob("*.staged"):
             with contextlib.suppress(OSError):
                 staged.unlink()
-        compacted.append(entry.name)
+        # Migrate to settled namespace. Collision-safe (CORE-008): the
+        # destination existing is NOT proof the receipt was already migrated.
+        # Decode BOTH sides; only collapse when both are terminal receipts for
+        # the SAME op whose immutable/terminal evidence is demonstrably
+        # equivalent. Any non-equivalent collision -- stale, corrupt, or a
+        # foreign same-name directory with no operation.json -- leaves the
+        # valid source untouched and is reported as skipped.
+        dest = settled_dir / entry.name
+        if dest.exists():
+            dest_dec = decode_operation_record(root, dest)
+            if (
+                dest_dec["ok"]
+                and dest_dec["record"].get("status") in SETTLED
+                and _terminal_receipt_equivalent(record, dest_dec["record"])
+            ):
+                import shutil
+
+                shutil.rmtree(entry, ignore_errors=True)
+                if entry.name not in compacted:
+                    compacted.append(entry.name)
+            else:
+                skipped.append(entry.name)
+        else:
+            try:
+                settled_dir.mkdir(parents=True, exist_ok=True)
+                # No-replace atomic rename: only move when the destination is
+                # absent; a concurrent creation between the check and the rename
+                # leaves the source intact.
+                os.rename(entry, dest)
+                if entry.name not in compacted:
+                    compacted.append(entry.name)
+            except OSError:
+                skipped.append(entry.name)
+
+
+# ---------------------------------------------------------------------------
+# W2-001: Canonical semantic-receipt snapshot.
+#
+# All semantic readers (convergence, crew, subs, operations) must consume
+# this ONE snapshot rather than reopening raw JSON from a single namespace.
+# The snapshot scans both `ops` (unresolved/current evidence) and `settled`
+# (terminal receipts moved by _settle_journal), enforces op_id uniqueness
+# across both, and returns all records through the strict decoder.
+# ---------------------------------------------------------------------------
+
+def _scan_receipt_namespace(
+    root: Path, ns_dir: Path, results: dict[str, dict], errors: list[str]
+) -> None:
+    """Scan one receipt namespace (ops or settled) and merge into results.
+
+    Each record is decoded through the strict decoder. op_id uniqueness is
+    enforced: a duplicate non-equivalent collision is corrupt evidence.
+    """
+    if not ns_dir.is_dir():
+        return
+    for op_dir in sorted(ns_dir.iterdir()):
+        if not op_dir.is_dir():
+            continue
+        manifest = op_dir / "operation.json"
+        if not manifest.is_file():
+            continue
+        try:
+            raw = manifest.read_bytes()
+        except OSError:
+            continue
+        try:
+            record = json.loads(raw.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            continue
+        op_id = record.get("op_id", op_dir.name)
+        if op_id in results:
+            # W2-001: duplicate op_id across namespaces is corrupt evidence
+            # unless the records are equivalent terminal receipts.
+            existing = results[op_id]
+            if existing.get("status") in SETTLED and record.get("status") in SETTLED:
+                # Both terminal - the newer one (from settled) wins
+                results[op_id] = record
+            else:
+                errors.append(
+                    f"duplicate op_id {op_id!r} across ops/settled "
+                    "with non-equivalent records -- corrupt evidence"
+                )
+        else:
+            results[op_id] = record
+
+
+def semantic_receipt_snapshot(
+    project_root: Path | str,
+) -> tuple[list[dict], list[str]]:
+    """W2-001: ONE canonical semantic-receipt snapshot.
+
+    Scans both `recovery/ops` (unresolved/current evidence) and
+    `recovery/settled` (terminal receipts), decodes every manifest
+    through the strict decoder, and enforces op_id uniqueness across
+    both namespaces.
+
+    Returns (records, errors) where records is a list of all decoded
+    operation records and errors is a list of corruption evidence strings.
+    Records are sorted by created_at for deterministic ordering.
+    """
+    root = Path(project_root)
+    results: dict[str, dict] = {}
+    errors: list[str] = []
+
+    # Scan ops first (unresolved/current evidence)
+    _scan_receipt_namespace(root, root / OPS_DIR, results, errors)
+    # Scan settled second (terminal receipts)
+    _scan_receipt_namespace(root, root / SETTLED_DIR, results, errors)
+
+    # Sort by created_at for deterministic ordering
+    records = sorted(
+        results.values(),
+        key=lambda r: (r.get("created_at", ""), r.get("op_id", "")),
+    )
+    return records, errors
+
+
+def semantic_receipts_for_operation(
+    project_root: Path | str, operation: str
+) -> list[dict]:
+    """W2-001: filtered semantic receipts for a specific operation type.
+
+    Convenience wrapper that returns all records matching the given
+    operation type from the canonical snapshot.
+    """
+    records, _errors = semantic_receipt_snapshot(project_root)
+    return [r for r in records if r.get("operation") == operation]
+
+
+def compact_committed(project_root: Path | str) -> dict:
+    """Bounded explicit maintenance compaction of SETTLED operation journals.
+
+    PERF-005: cost is proportional to OUTSTANDING cleanup debt, not to the
+    lifetime settled history. Two bounded steps:
+      1. Migrate terminal ops from ``ops_dir`` -> ``settled_dir`` (collision-
+         safe, CORE-008). ``ops_dir`` only holds pending/active/terminal ops,
+         so this scan stays small under normal CLEAN cadence -- it never
+         re-walks the whole settled ledger.
+      2. Process only the durable cleanup queue: op_ids whose post-settlement
+         staged-byte deletion failed earlier. Each is found directly by name;
+         its leftover staged payloads are removed and its marker cleared. An
+         empty queue makes repeated CLEAN a no-op regardless of settled count.
+    """
+    root = Path(project_root)
+    ops_dir = root / OPS_DIR
+    settled_dir = root / SETTLED_DIR
+    compacted = []
+    skipped = []
+
+    _compact_migrate_ops(root, ops_dir, settled_dir, compacted, skipped)
+
+    cleanup_queue = root / CLEANUP_QUEUE_DIR
+    if cleanup_queue.is_dir():
+        for marker in sorted(cleanup_queue.glob("*")):
+            op_id = marker.name
+            entry = settled_dir / op_id
+            if entry.is_dir() and (entry / "operation.json").is_file():
+                _compact_drop_staged(entry, compacted, skipped)
+            with contextlib.suppress(OSError):
+                marker.unlink()
+
     return {"ok": True, "compacted": compacted, "skipped": skipped}
+
+
+def _terminal_receipt_equivalent(a: dict, b: dict) -> bool:
+    """True when two terminal operation records are demonstrably the SAME
+    immutable evidence (byte-for-byte equivalent plan + verdict), so one may be
+    collapsed onto the other during compaction without losing information
+    (CORE-008). Compares only the durable, meaning-bearing fields -- never the
+    volatile progress sidecar, which terminal receipts no longer carry."""
+    if a.get("op_id") != b.get("op_id"):
+        return False
+    if a.get("status") != b.get("status"):
+        return False
+    if a.get("semantic_payload_hash") != b.get("semantic_payload_hash"):
+        return False
+    if a.get("created_at") != b.get("created_at"):
+        return False
+    ta = a.get("targets") or []
+    tb = b.get("targets") or []
+    if len(ta) != len(tb):
+        return False
+    for x, y in zip(ta, tb):
+        if (x.get("path"), x.get("before_hash"), x.get("after_hash")) != (
+            y.get("path"), y.get("before_hash"), y.get("after_hash"),
+        ):
+            return False
+    return True

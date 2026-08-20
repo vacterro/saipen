@@ -183,10 +183,27 @@ class Document:
         return body.encode(self.encoding)
 
 
-def read_document(path: Path | str) -> Document:
-    """Read a file and record its encoding/BOM/newline/final-newline facts."""
+class CheckpointLoadError(ValueError):
+    """A canonical checkpoint file is MISSING or NOT plain UTF-8 without a BOM.
+
+    The checkpoint loader raises this BEFORE any decode/parse so a corrupt
+    checkpoint is refused with zero canonical writes (T-1003 / P1#3, P1#4).
+    ``operations._read`` converts it into the operation's structured
+    ``CheckpointError`` refusal; the exception type lives in ``codec`` so the
+    loader and the caller stay decoupled."""
+
+
+def read_document(path: Path | str, raw: bytes | None = None) -> Document:
+    """Read a file and record its encoding/BOM/newline/final-newline facts.
+
+    PERFORMANCE (PERF-003): when ``raw`` is supplied (already-read bytes from a
+    single read of the file), it is reused instead of re-reading from disk, so
+    the canonical checkpoint loader can read each STATE/BOARD/LOG document once
+    and feed both the encoding preflight and the decode from the same bytes.
+    """
     path = Path(path)
-    raw = path.read_bytes() if path.is_file() else b""
+    if raw is None:
+        raw = path.read_bytes() if path.is_file() else b""
 
     if path.name in ("STATE.md", "BOARD.md", "LOG.md"):
         if not is_canonical_encoding(raw):
@@ -216,6 +233,35 @@ def read_document(path: Path | str) -> Document:
     )
 
 
+def read_checkpoint_doc(root: Path | str, name: str) -> Document:
+    """Read ONE canonical checkpoint document (STATE/BOARD/LOG) once.
+
+    Combines the old two-step ``checkpoint_preflight`` (encoding check) +
+    ``read_document`` (decode) into a SINGLE filesystem read: the bytes are
+    read once, canonical-encoding is checked against them, and the decoded
+    ``Document`` is built from the same bytes (PERF-003). Raises
+    ``CheckpointLoadError`` -- identical problem text to ``checkpoint_preflight``
+    -- when the file is missing or not plain UTF-8 without a BOM, so callers
+    refuse with ``CheckpointError`` and zero canonical writes exactly as before.
+    """
+    path = Path(root) / ".saipen" / name
+    if not path.is_file():
+        raise CheckpointLoadError(
+            f"{name} is missing -- a SAIPEN checkpoint requires "
+            f"STATE.md, BOARD.md and LOG.md to all be present"
+        )
+    raw = path.read_bytes()
+    if not is_canonical_encoding(raw):
+        enc = encoding_of(path)
+        raise CheckpointLoadError(
+            f"{name} is {enc}, not canonical UTF-8 without a BOM "
+            f"-- every SAIPEN tool reads it byte-wise and will fail "
+            f"differently; rewrite as UTF-8 without a BOM "
+            f"(KNOWLEDGE/traps.md)"
+        )
+    return read_document(path, raw)
+
+
 def write_document(path: Path | str, doc: Document, new_text: str) -> None:
     """Write a document preserving its representation facts. Atomic."""
     payload = doc.encode(new_text)
@@ -236,3 +282,36 @@ def encode_preserving(path: Path | str, new_text: str) -> bytes:
     """Encode `new_text` into the exact bytes the file at `path` would carry
     after a mutation, preserving that file's current representation."""
     return read_document(path).encode(new_text)
+
+
+# T-1101: the ONE canonical credential redaction primitive. All user-derived
+# text that reaches any persistence target (STATE/BOARD/LOG/recovery/sealed
+# segments) MUST pass through this function before bytes are constructed.
+# userperson._redact_credentials and any other isolated copies are replaced
+# by this single boundary function to make credential exclusion a persistence
+# invariant rather than a fragmentary per-path concern.
+import re as _re
+
+_CRED_PATTERNS = [
+    (_re.compile(r"ghp_[a-zA-Z0-9]{36}"), "ghp_***"),
+    (_re.compile(r"AKIA[0-9A-Z]{16}"), "AKIA***"),
+    (_re.compile(r"sk-[a-zA-Z0-9]{32,}"), "sk-***"),
+    (
+        _re.compile(r"(postgres(?:ql)?://[^:]+):[^@]+(@)"),
+        r"\1:***\2",
+    ),
+    (_re.compile(r"(?i)(bearer\s+)[a-zA-Z0-9_\-\.]{30,}"), r"\1***"),
+]
+
+
+def redact_credentials(text: str) -> str:
+    """Canonical credential redaction for the persistence boundary.
+
+    High-confidence credential shapes (ghp_, AKIA, sk-, postgres URI
+    passwords, bearer tokens) are replaced with redacted placeholders
+    before any user-derived text is written to STATE, BOARD, LOG,
+    recovery, or sealed segments (CORE § 1.1, T-1015, T-1101).
+    """
+    for pattern, repl in _CRED_PATTERNS:
+        text = pattern.sub(repl, text)
+    return text

@@ -35,6 +35,9 @@ def canonical_identity(project_root: Path) -> str:
 
 
 def git_head(project_root: Path) -> str:
+    from .paths import is_git_project_root
+    if not is_git_project_root(project_root):
+        return ""
     try:
         result = subprocess.run(
             ["git", "-C", str(project_root), "rev-parse", "--short", "HEAD"],
@@ -62,6 +65,7 @@ class ProjectSnapshot:
     # derive the ledger verdict, the hash, the tail AND the events from that
     # single read instead of reopening the complete LOG history per consumer.
     history_events: tuple = ()
+    history: "HistorySnapshot" = None
 
     @staticmethod
     def capture(project_root: Path | str) -> "ProjectSnapshot":
@@ -80,6 +84,7 @@ class ProjectSnapshot:
             log_tail=history.tail,
             head=git_head(root),
             history_events=history.events,
+            history=history,
         )
 
     def stale(self, project_root: Path | str) -> bool:

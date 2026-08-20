@@ -78,23 +78,11 @@ def history_paths(project_root: Path | str) -> list[Path]:
     return [*sealed, active]
 
 
-def _validate_history_ownership(root: Path, logs_dir: Path) -> None:
+def _validate_history_ownership(root: Path, logs_dir: Path) -> list[Path]:
     """lstat every canonical history node and reject symlink/junction/reparse
     or non-regular files BEFORE any bytes are read (second-wave P1).
-
-    The `.saipen/logs` container itself and each numeric sealed segment + the
-    active LOG.md must be plain regular files under the project. A symlinked
-    or reparse container/file would otherwise let `read_bytes()` consume
-    evidence outside the project; refusing here (before reading) keeps those
-    external bytes out of both the digest and the ledger contract. Missing
-    nodes are fine (a sealed segment may legitimately be absent); a node that
-    exists but is not a plain regular file is corrupt ownership evidence.
-
-    A missing `.saipen/logs` skips ONLY the sealed-container half of this
-    check -- the ACTIVE LOG.md is canonical history regardless of whether a
-    sealed directory exists, so it is always lstat-validated even when no
-    sealed segments are present. Skipping it would let a symlinked active
-    LOG.md feed external bytes into the digest and the ledger contract."""
+    
+    Returns the validated immutable list of paths in numeric order to avoid duplicate stat/enumeration."""
     try:
         logs_info = logs_dir.lstat()
     except FileNotFoundError:
@@ -113,11 +101,22 @@ def _validate_history_ownership(root: Path, logs_dir: Path) -> None:
             raise HistoryOwnershipError(
                 ".saipen/logs exists but is not a directory; refusing to read history through it"
             )
-    for p in history_paths(root):
+            
+    sealed = []
+    if logs_info is not None:
+        for p in logs_dir.iterdir():
+            if _segment_number(p) >= 0:
+                sealed.append(p)
+        sealed.sort(key=_segment_number)
+        
+    active = root / ".saipen" / "LOG.md"
+    paths = [*sealed, active]
+    
+    for p in paths:
         try:
             info = p.lstat()
         except FileNotFoundError:
-            continue  # raced deletion / genuinely absent -> not owned evidence
+            continue
         except OSError as exc:
             raise HistoryOwnershipError(
                 f"history node {p.name} unreadable ({type(exc).__name__}): {exc}"
@@ -127,6 +126,7 @@ def _validate_history_ownership(root: Path, logs_dir: Path) -> None:
                 f"history node {p.name} is a symlink/junction/reparse or "
                 f"non-regular file; refusing to read external bytes"
             )
+    return paths
 
 
 @dataclass(frozen=True)
@@ -183,13 +183,13 @@ def read_history_snapshot(project_root: Path | str) -> HistorySnapshot:
     """
     root = Path(project_root)
     logs_dir = root / ".saipen" / "logs"
-    _validate_history_ownership(root, logs_dir)
+    valid_paths = _validate_history_ownership(root, logs_dir)
     h = hashlib.sha256()
     chunks: list[str] = []
     events: list[dict] = []
     event_lines: list[str] = []
     illegal: list[str] = []
-    for p in history_paths(root):
+    for p in valid_paths:
         try:
             raw = p.read_bytes()
         except FileNotFoundError:
@@ -232,6 +232,96 @@ def read_history_snapshot(project_root: Path | str) -> HistorySnapshot:
         illegal_lines=tuple(illegal),
         event_lines=tuple(event_lines),
     )
+
+
+def read_history_snapshot_and_logs_digest(
+    project_root: Path | str,
+) -> tuple[HistorySnapshot, str]:
+    """ONE pass over the complete LOG history (sealed + active) that ALSO computes
+    the sealed-LOG dependency digest -- the two reads a mutation PLAN used to do
+    separately (``read_history_snapshot`` + ``hash_tree_dependency``) collapsed into
+    a single content read of every segment (PERF-003).
+
+    Each segment file is opened exactly ONCE. Its raw bytes feed BOTH:
+      * the framed history hash (identical framing to ``read_history_snapshot``), and
+      * the framed ``saipen-delete-tree-v1`` digest over ``.saipen/logs`` (identical
+        framing and sentinels to ``hash_tree_dependency``), via a ``read_file``
+        resolver so no second content read happens.
+
+    Returns ``(snapshot, logs_digest)`` where ``logs_digest`` is byte-for-byte what
+    ``hash_tree_dependency(root / ".saipen" / "logs")`` returns -- so APPLY's
+    under-lock STALE_STATE recheck still compares the same value, it is simply
+    computed once. Second-wave P1 ownership is enforced first
+    (``HistoryOwnershipError``) and the digest contract is unchanged, so no
+    Core/Second-Wave invariant weakens.
+
+    The framed history hash and the ``event_lines`` are identical to
+    ``read_history_snapshot``, so context/status projections that reuse the snapshot
+    are unaffected.
+    """
+    root = Path(project_root)
+    logs_dir = root / ".saipen" / "logs"
+    valid_paths = _validate_history_ownership(root, logs_dir)
+    contents: dict[Path, bytes] = {}
+    h = hashlib.sha256()
+    chunks: list[str] = []
+    events: list[dict] = []
+    event_lines: list[str] = []
+    illegal: list[str] = []
+    for p in valid_paths:
+        try:
+            raw = p.read_bytes()
+        except FileNotFoundError:
+            continue
+        except OSError as exc:
+            raise HistoryOwnershipError(
+                f"history node {p.name} unreadable ({type(exc).__name__}): {exc}"
+            )
+        contents[p] = raw
+        # FRAMED digest identity (second-wave P1): canonical relative path,
+        # then raw length, then raw bytes -- identical to read_history_snapshot.
+        rel = p.relative_to(root).as_posix()
+        h.update(rel.encode("utf-8"))
+        h.update(str(len(raw)).encode("ascii"))
+        h.update(raw)
+        text = _normalised_doc_text(raw)
+        chunks.append(text)
+        for idx, line in enumerate(text.splitlines()):
+            parsed = parse_log_line(line)
+            if parsed is not None:
+                events.append(parsed)
+                # Retain the ORIGINAL legal raw line in the same pass (T-1014)
+                # so context projections reuse it verbatim -- no second parse.
+                event_lines.append(line)
+                continue
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
+            illegal.append(f"{p.name}:{idx + 1}: not a legal LOG event: {stripped[:80]!r}")
+    tail = None
+    for ev in events:
+        if tail is None or ev["event"] > tail:
+            tail = ev["event"]
+    snapshot = HistorySnapshot(
+        hash=h.hexdigest()[:16],
+        text="\n".join(chunks),
+        tail=tail,
+        events=tuple(events),
+        illegal_lines=tuple(illegal),
+        event_lines=tuple(event_lines),
+    )
+    # The sealed-LOG dependency digest, computed from the SAME already-read bytes.
+    # For any path hash_tree_dependency discovers that is NOT a canonical history
+    # segment (an anomalous subdir under .saipen/logs), fall back to a real read so
+    # the framing/sentinel output stays byte-identical to the original two-read path.
+    from .journal import hash_tree_dependency
+
+    def _read_sealed(candidate: Path) -> bytes:
+        key = Path(candidate)
+        return contents[key] if key in contents else key.read_bytes()
+
+    logs_digest = hash_tree_dependency(logs_dir, read_file=_read_sealed)
+    return snapshot, logs_digest
 
 
 def read_history(project_root: Path | str) -> str:

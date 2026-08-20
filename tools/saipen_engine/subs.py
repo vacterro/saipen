@@ -3194,7 +3194,11 @@ def _core_log_context(root: Path, active_log: str) -> tuple[str, dict[str, str]]
 
 
 def _iter_operation_records(root: Path, records: tuple[dict, ...] | None = None):
-    """Yield every parseable operation.json under .saipen/recovery/ops.
+    """W2-001: Yield every parseable operation.json from both ops and settled.
+
+    Uses the canonical semantic receipt snapshot from journal.py instead
+    of scanning only recovery/ops. This ensures committed receipts that
+    have been moved to recovery/settled remain visible to subs readers.
 
     When ``records`` is given (a pre-captured crew receipt snapshot), iterate
     it instead of reopening disk (T-1004 perf): every subs evidence helper
@@ -3203,18 +3207,9 @@ def _iter_operation_records(root: Path, records: tuple[dict, ...] | None = None)
     if records is not None:
         yield from records
         return
-    ops = root / ".saipen" / "recovery" / "ops"
-    if not ops.is_dir():
-        return
-    for op_dir in sorted(ops.iterdir()):
-        manifest = op_dir / "operation.json"
-        if not manifest.is_file():
-            continue
-        try:
-            record = json.loads(manifest.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            continue
-        yield record
+    from .journal import semantic_receipt_snapshot
+    all_records, _errors = semantic_receipt_snapshot(root)
+    yield from all_records
 
 
 def _durable_collect_witness(

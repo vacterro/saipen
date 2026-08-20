@@ -17,7 +17,7 @@ import re
 from . import phases
 from .board import board_semantic_errors, parse_board, claim_status, board_graph_errors
 from .log import parse_log_line, log_tail_event
-from .state import _current_schema_version
+from .state import _current_schema_version, is_absolute_home
 
 
 def _log_errors(log_text: str) -> list[str]:
@@ -47,6 +47,189 @@ def _log_errors(log_text: str) -> list[str]:
                 errors.append(
                     f"LOG.md:{lineno} parent E-{parsed['parent']} is not older than E-{event}"
                 )
+    return errors
+
+
+
+def validate_checkpoint_surface(
+    state_text: str,
+    board_text: str,
+    snap,
+    current_agent: str | None = None,
+    *,
+    _state=None,
+    _board=None,
+    _state_error=None,
+) -> list[str]:
+    """Validate the read-only checkpoint surface using the already captured snapshot.
+    Used by status/next/context to apply the SAME transactional invariant set before routing.
+
+    PERF-004: ``_state``/``_board``/``_state_error`` let the caller reuse a single
+    parse of STATE/BOARD instead of re-parsing them here (``route_next`` now parses
+    once and passes the result). When omitted, the surface is parsed from the raw
+    text exactly as before, so every external caller keeps the raw-text entry point
+    and behavior is unchanged."""
+    errors: list[str] = []
+
+    from .floor import state_board_floor, board_floor
+    floor_errors = state_board_floor(state_text, board_text) + board_floor(board_text)
+    if floor_errors:
+        errors.extend(f"FLOOR: {e}" for e in floor_errors)
+
+    from .state import parse_state_or_error
+
+    if _state is not None or _state_error is not None:
+        state, state_error = _state, _state_error
+    else:
+        state, state_error = parse_state_or_error(state_text)
+    if state_error:
+        errors.append(f"STATE proposed malformed: {state_error}")
+        return errors
+    missing = [
+        k
+        for k in (
+            "phase",
+            "task",
+            "next_action",
+            "blocker",
+            "agent",
+            "saipen_version",
+            "mode",
+            "updated",
+        )
+        if k not in state
+    ]
+    for key in missing:
+        errors.append(f"STATE proposed missing required field {key}")
+    phase = state.get("phase")
+    if phase not in phases.VALID_TRANSITIONS and phase not in phases.ANY_FROM:
+        errors.append(f"STATE proposed phase {phase!r} outside the enum")
+    na = state.get("next_action")
+    if isinstance(na, str):
+        if na.startswith("PHASE "):
+            error = phases.phase_next_action_error(na)
+            if error:
+                errors.append(f"STATE proposed next_action invalid: {error}")
+        else:
+            prefixes = ("WAIT:", "saipen ", "RUN:", "RESUME:")
+            if not na.startswith(prefixes):
+                errors.append(
+                    f"STATE proposed next_action {na!r} does not "
+                    "start with WAIT:/saipen /PHASE /RUN:/RESUME:"
+                )
+        subject = state.get("task")
+        m = re.match(r"^PHASE\s+([A-Za-z_-]+)(?:\s+(T-\d+))?", na.strip())
+        if (
+            m
+            and m.group(2)
+            and subject
+            and m.group(2) != subject
+            and phase in phases.TICKET_BEARING_PHASES
+        ):
+            errors.append(f"STATE proposed next_action names {m.group(2)} but task is {subject}")
+    intent = state.get("execution_intent")
+    if intent == "goal":
+        if "goal_waves" not in state or "goal_tickets" not in state:
+            errors.append("STATE proposed intent=goal without goal_waves/goal_tickets")
+        if "converge_target" in state:
+            errors.append("STATE proposed intent=goal with converge_target")
+    elif intent == "converge":
+        if state.get("converge_target") not in ("done", "ship", "crew"):
+            errors.append("STATE proposed intent=converge without target done|ship|crew")
+        if "goal_waves" in state or "goal_tickets" in state:
+            errors.append("STATE proposed intent=converge with goal counters")
+    elif intent in (None, "normal"):
+        if "goal_waves" in state or "goal_tickets" in state:
+            errors.append("STATE proposed non-goal intent with goal counters")
+        if "converge_target" in state:
+            errors.append("STATE proposed non-converge intent with converge_target")
+    elif intent not in (None, "normal", "converge"):
+        errors.append(f"STATE proposed execution_intent {intent!r} outside normal|goal|converge")
+    if state.get("phase") and state.get("transition_from") and state.get("phase") != "INIT":
+        tf = state.get("transition_from")
+    if tf not in phases.VALID_TRANSITIONS and tf not in phases.ANY_FROM:
+        errors.append(f"STATE proposed transition_from {tf!r} outside the enum")
+
+    board = _board if _board is not None else parse_board(board_text)
+    errors.extend(f"BOARD: {e}" for e in board["errors"])
+    tickets = board["tickets"]
+    for ge in board_graph_errors(tickets):
+        errors.append(f"BOARD: {ge}")
+    doing = [t for t in tickets.values() if t["section"] == "## DOING"]
+    if len(doing) > 1:
+        errors.append("BOARD proposed has more than one ## DOING ticket")
+    for ticket in tickets.values():
+        for semantic in board_semantic_errors(ticket):
+            errors.append(f"BOARD proposed {semantic}")
+        for need in ticket["needs"]:
+            if ticket["section"] == "## DOING" and tickets[need]["section"] != "## DONE":
+                errors.append(f"BOARD proposed {ticket['id']} needs {need} which is not DONE")
+
+    from .log import snapshot_contract_errors
+    errors.extend(f"LOG: {e}" for e in snapshot_contract_errors(snap.history))
+
+    tail = snap.history.tail
+    last_event = state.get("last_event")
+    _csv = _current_schema_version(state.get("saipen_home"))
+    if _csv is not None and state.get("schema_version") == _csv and tail is not None:
+        if last_event is None:
+            errors.append(
+                "current-schema STATE requires last_event matching the "
+                "LOG tail; last_event is absent"
+            )
+        elif not isinstance(last_event, int) or last_event != tail:
+            errors.append(f"STATE proposed last_event {last_event} != LOG tail {tail}")
+    elif last_event is not None and tail is not None and last_event != tail:
+        errors.append(f"STATE proposed last_event {last_event} != LOG tail {tail}")
+
+    _home = state.get("saipen_home")
+    if _csv is not None and state.get("schema_version") == _csv and _home:
+        import pathlib
+        if not is_absolute_home(str(_home)):
+            errors.append(f"current-schema STATE requires absolute saipen_home, got {_home!r}")
+
+    task = state.get("task")
+    active = doing[0]["id"] if doing else None
+    phase = state.get("phase")
+    ticket_bearing = phase in phases.TICKET_BEARING_PHASES
+
+    if ticket_bearing:
+        if not active:
+            errors.append(
+                f"STATE proposed phase {phase} is ticket-bearing but BOARD has no ## DOING ticket"
+            )
+        if not task or task == "none":
+            errors.append(
+                f"STATE proposed phase {phase} is ticket-bearing but task is not a real T-###"
+            )
+        elif active and task != active:
+            errors.append(f"STATE proposed task {task} != BOARD DOING {active}")
+        na = state.get("next_action")
+        if isinstance(na, str):
+            m = re.match(r"^PHASE\s+([A-Za-z_-]+)(?:\s+(T-\d+))?", na.strip())
+            if m and m.group(2) and active and m.group(2) != active:
+                errors.append(
+                    f"STATE proposed next_action names "
+                    f"{m.group(2)} but the active DOING ticket is "
+                    f"{active}"
+                )
+    else:
+        if active:
+            _cs = claim_status(doing[0], current_agent or state.get("agent"))
+            if _cs in ("SELF", "INVALID"):
+                errors.append(
+                    f"STATE proposed phase {phase} is not ticket-bearing "
+                    "but BOARD has a ## DOING ticket; a DOING ticket "
+                    "requires a ticket-bearing phase (a completed "
+                    "ticket's execution state must be closed, not "
+                    "left in a non-ticket phase)"
+                )
+        if task and task != "none":
+            errors.append(
+                f"STATE proposed phase {phase} is not ticket-bearing "
+                f"but task is {task!r}; task must be none outside a "
+                "ticket-bearing phase"
+            )
     return errors
 
 
@@ -191,6 +374,12 @@ def validate_texts(
             errors.append(f"STATE proposed last_event {last_event} != LOG tail {tail}")
     elif last_event is not None and tail is not None and last_event != tail:
         errors.append(f"STATE proposed last_event {last_event} != LOG tail {tail}")
+
+    _home = state.get("saipen_home")
+    if _csv is not None and state.get("schema_version") == _csv and _home:
+        import pathlib
+        if not is_absolute_home(str(_home)):
+            errors.append(f"current-schema STATE requires absolute saipen_home, got {_home!r}")
 
     # Active-ticket binding (NITRO dogfood III, T-591): the one-way check
     # "BOARD has DOING and STATE has task and they differ" is not a proof of

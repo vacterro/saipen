@@ -20,6 +20,10 @@ CODES = frozenset(
         "ILLEGAL_TICKET_LIFECYCLE",
         "NOT_TOP_WORKABLE",
         "ACTIVE_TICKET_MISMATCH",
+        # ACTIVE_CLAIM_FOREIGN (second-wave W2-002): an explicit agent handover
+        # must refuse rather than strand/steal a LIVE foreign claim on the
+        # active DOING ticket -- checkpoint/demote/repair it first. Zero writes.
+        "ACTIVE_CLAIM_FOREIGN",
         "ALREADY_CLAIMED",
         "ILLEGAL_TRANSITION",
         "ILLEGAL_PHASE",
@@ -38,6 +42,10 @@ CODES = frozenset(
         "MALFORMED_PACKAGE",
         "INCOMPLETE_TICKET",
         "INVALID_MANIFEST",
+        # INVALID_GOAL (second-wave W2-004): the one shared goal-objective
+        # validator refuses a missing/whitespace/normalized-empty objective with
+        # ZERO canonical writes before any handover/LOG/counter/BOARD/journal.
+        "INVALID_GOAL",
         # Crew executor codes (T-1003 sweep): HOME_REQUIRED tells the operator the
         # configured saipen_home is unusable (missing/invalid); CREW_BLOCKED is the
         # EXPECTED structured result when the crew circuit has no executable

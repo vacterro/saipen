@@ -426,6 +426,26 @@ if PROJECT_ROOT is None:
     sys.exit(1)
 os.chdir(PROJECT_ROOT)
 
+# §2 Conformance Closure: every validator run -- PASS or FAIL -- emits ONE
+# structured conformance receipt via the canonical engine. We wrap sys.exit so
+# the verdict (0 == PASS, else FAIL) is the ONLY input to the receipt's verdict;
+# no caller can inject `verdict="PASS"`. The wrapper is best-effort: a receipt
+# write failure MUST NEVER change the validator's real exit code.
+_orig_sys_exit = sys.exit
+
+
+def _saipen_exit(code=0):
+    try:
+        from saipen_engine.conformance import generate_conformance_receipt
+
+        generate_conformance_receipt(PROJECT_ROOT, gate=GATE, exit_code=int(code or 0))
+    except Exception:
+        pass
+    _orig_sys_exit(code)
+
+
+sys.exit = _saipen_exit
+
 
 def _git(*args):
     """Run git, returning (returncode, stdout). Never raises: this file runs
@@ -7666,6 +7686,10 @@ else:
         (".github/*.md", "issue/PR templates, not agent-facing"),
         ("tests/scenarios/README.md", "scenario format documentation, not a fixture"),
         (".pytest_cache/*.md", "generated tool cache, never a shipped document"),
+        (
+            ".workbuddy-ai/**",
+            "WorkBuddy AI internal working memory (agent/project notes, generated); tooling state, not a shipped SAIPEN document",
+        ),
     ]
     if IS_SAIPEN_HOME:
         import fnmatch
@@ -9850,3 +9874,7 @@ print(
         + (f" ({warn_total} warning(s))" if warn_total else ""),
     )
 )
+
+# On the PASS path, emit the conformance receipt explicitly (an implicit exit 0
+# would skip the sys.exit wrapper installed above).
+sys.exit(0)

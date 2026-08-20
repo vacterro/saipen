@@ -62,24 +62,14 @@ _CATEGORY_RE = re.compile(r"^\[([^\]]+)\]\s*(.*)$", re.DOTALL)
 
 
 def _redact_credentials(text: str) -> str:
-    """T-1015: existing credential containment/redaction policy.
+    """T-1015/T-1101: delegate to the shared persistence-boundary primitive.
 
-    A high-confidence credential-like value must be redacted before USERPERSON
-    persistence and projection, without recording the secret in LOG/recovery.
+    The canonical implementation lives in saipen_engine.codec.redact_credentials
+    so credential exclusion is a single invariant, not a fragmentary per-module
+    concern. This wrapper preserves the existing local call-site contract.
     """
-    import re as _re
-
-    # ghp_ token
-    text = _re.sub(r"ghp_[a-zA-Z0-9]{36}", "ghp_***", text)
-    # AKIA token
-    text = _re.sub(r"AKIA[0-9A-Z]{16}", "AKIA***", text)
-    # sk- token
-    text = _re.sub(r"sk-[a-zA-Z0-9]{32,}", "sk-***", text)
-    # postgres/postgresql uri
-    text = _re.sub(r"(postgres(?:ql)?://[^:]+):[^@]+(@)", r"\1:***\2", text)
-    # basic bearer token shape if very explicitly labeled
-    text = _re.sub(r"(?i)(bearer\s+)[a-zA-Z0-9_\-\.]{30,}", r"\1***", text)
-    return text
+    from saipen_engine.codec import redact_credentials
+    return redact_credentials(text)
 
 
 def _canonical(text: str) -> str:

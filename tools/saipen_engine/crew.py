@@ -205,7 +205,11 @@ def _strict_created_at(value: object) -> str:
 
 
 def _iter_operation_records(root: Path, records: tuple[dict, ...] | None = None):
-    """Yield every parseable operation.json under .saipen/recovery/ops.
+    """W2-001: Yield every parseable operation.json from both ops and settled.
+
+    Uses the canonical semantic receipt snapshot from journal.py instead
+    of scanning only recovery/ops. This ensures committed receipts that
+    have been moved to recovery/settled remain visible to crew readers.
 
     When ``records`` is given (a pre-captured receipt snapshot), iterate it
     instead of reopening disk: every crew/sub evidence helper consumes the
@@ -215,36 +219,34 @@ def _iter_operation_records(root: Path, records: tuple[dict, ...] | None = None)
     if records is not None:
         yield from records
         return
-    ops = root / ".saipen/recovery/ops"
-    if not ops.is_dir():
-        return
-    for op_dir in sorted(ops.iterdir()):
-        manifest = op_dir / "operation.json"
-        if not manifest.is_file():
-            continue
-        try:
-            record = json.loads(manifest.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            continue
-        yield record
+    from .journal import semantic_receipt_snapshot
+    all_records, _errors = semantic_receipt_snapshot(root)
+    yield from all_records
 
 
 def _capture_operation_receipts(root: Path) -> tuple[tuple[dict, ...], str]:
-    """ONE coherent operation-receipt capture: walk .saipen/recovery/ops
-    once, parse every operation.json, and digest the EXACT bytes.
+    """W2-001: ONE coherent operation-receipt capture from both ops and settled.
+
+    Uses the canonical semantic receipt snapshot from journal.py and
+    digests the EXACT bytes from both namespaces.
 
     Returns (records, digest). The digest covers operation-directory
-    identity + exact operation.json bytes only -- never *.staged payload
-    bytes, which cannot change any crew verdict (T-1004 perf). Malformed
-    receipts are skipped for parsing exactly like _iter_operation_records,
-    but their bytes still feed the digest, so any edit/add/remove of an
-    operation.json still stales the capture.
+    identity + exact operation.json bytes from both ops/ and settled/ --
+    never *.staged payload bytes, which cannot change any crew verdict
+    (T-1004 perf). Malformed receipts are skipped for parsing exactly
+    like _iter_operation_records, but their bytes still feed the digest,
+    so any edit/add/remove of an operation.json still stales the capture.
     """
-    ops = root / ".saipen/recovery/ops"
+    from .journal import OPS_DIR, SETTLED_DIR
     records: list[dict] = []
     digest = hashlib.sha256(b"saipen-op-receipts-v1\0")
-    if ops.is_dir():
-        for op_dir in sorted(ops.iterdir()):
+    # Digest both namespaces for the stability proof
+    for ns_name, ns_dir in [(OPS_DIR, root / OPS_DIR), (SETTLED_DIR, root / SETTLED_DIR)]:
+        if not ns_dir.is_dir():
+            continue
+        for op_dir in sorted(ns_dir.iterdir()):
+            if not op_dir.is_dir():
+                continue
             manifest = op_dir / "operation.json"
             if not manifest.is_file():
                 continue
@@ -1372,7 +1374,8 @@ def _wait_role_dispositions(snapshot: CrewSnapshot) -> list[str]:
 
 
 def _evaluate(
-    snapshot: CrewSnapshot, ignore_active_task: bool = False, session_agent: str | None = None
+    snapshot: CrewSnapshot, ignore_active_task: bool = False, session_agent: str | None = None,
+    pre_finalization: bool = False,
 ) -> tuple[list[dict], CrewAction | None]:
     evaluations: list[tuple[str, str, str, str, CrewAction | None]] = []
     home_problem = _home_problem(snapshot)
@@ -1780,12 +1783,13 @@ def _evaluate(
             post_action,
         )
     )
+    sc13_ok, sc13_reason = _sc13_conformance_check(snapshot, pre_finalization=pre_finalization)
     evaluations.append(
         (
             "SC-13",
             _STAGE_NAMES["SC-13"],
-            SATISFIED,
-            "",
+            SATISFIED if sc13_ok else UNSATISFIED,
+            "" if sc13_ok else sc13_reason,
             _action(
                 snapshot,
                 "SC-13",
@@ -1794,11 +1798,50 @@ def _evaluate(
                 "all substantive crew invariants proven",
                 "canonical final LOG+STATE event",
                 "normal intent, DONE, final public crew gate PASS",
-            ),
+            )
+            if sc13_ok
+            else None,
         )
     )
     stages = _reachable(evaluations)
     return stages, _first_action(stages)
+
+
+def _sc13_conformance_check(snapshot, *, pre_finalization: bool = False) -> tuple[bool, str]:
+    """§7: SC-13 must independently prove a CURRENT_PASS canonical conformance
+    receipt bound to the current checkpoint/tree. A historical green, a stale
+    validator, or a FAIL must never let `WAIT: crew closed` / CREW_FINALIZED
+    surface.
+
+    CORE-002: The circular dependency is broken by splitting the check:
+    - During pre-finalization evaluation (planning), SC-13 is satisfied when
+      all substantive stages (SC-0..SC-12) are met AND the finalize action
+      is ready. The crew conformance receipt is NOT required at this point
+      because the validator needs terminal state to produce it.
+    - During post-finalization verification (after the FINALIZE action has
+      transitioned to terminal state), SC-13 requires the actual crew
+      conformance PASS receipt.
+
+    ``pre_finalization`` is True when called during crew_plan evaluation
+    (the planning phase), and False when called during finalize_crew
+    verification (the terminal gate).
+    """
+    if pre_finalization:
+        # During planning: SC-13 is ready for finalization when all
+        # substantive stages are met. The conformance receipt will be
+        # produced AFTER the terminal transition.
+        return True, ""
+    try:
+        from .conformance import conformance_status
+
+        st = conformance_status(snapshot.root, gate="crew")
+    except Exception as exc:  # pragma: no cover - defensive
+        return False, f"conformance gate error: {exc}"
+    if st["status"] != "CURRENT_PASS":
+        return False, (
+            f"canonical crew conformance is {st['status']}: {st.get('reason', '')}"
+        )
+    return True, ""
 
 
 def _reachable(evaluations, forced_action: CrewAction | None = None) -> list[dict]:

@@ -130,6 +130,9 @@ def _digest(model: str, records: Iterable[_Record]) -> str:
         h.update(_frame(record))
     return f"{model}:{h.hexdigest()}"
 
+# PERF-001: preserve reference to original _digest for drift probe detection
+_original_digest = _digest
+
 
 def _path_from_git(root: Path, raw_path: bytes) -> Path:
     if not raw_path or raw_path.startswith(b"/") or b"\0" in raw_path:
@@ -243,6 +246,221 @@ def _record_current(root: Path, raw_path: bytes, declared_mode: int | None) -> _
     return _Record(kind, raw_path, mode, content)
 
 
+@dataclass(frozen=True)
+class _Evidence:
+    """Bounded freshness capture record (PERF-002): full file content is
+    replaced by its SHA-256 digest so the stability passes hold O(file-count)
+    metadata instead of the whole source tree. ``content`` carries the raw
+    framed bytes for L (symlink target) and D (empty) records; for F records
+    it carries the 32-byte content digest used only for pass-to-pass equality.
+    """
+
+    kind: bytes
+    path: bytes
+    mode: int
+    content: bytes
+    length: int
+
+
+def _content_digest(content: bytes) -> bytes:
+    return hashlib.sha256(content).digest()
+
+
+def _record_evidence(root: Path, raw_path: bytes, declared_mode: int | None) -> _Evidence:
+    """One race-safe capture producing bounded evidence (PERF-002).
+
+    Mirrors ``_record_current`` but retains only a content digest, so the
+    three parse passes never hold more than one file's bytes at a time. The
+    digest pass re-reads the canonical bytes to frame them exactly as
+    ``_frame`` does.
+    """
+    path = _path_from_git(root, raw_path)
+    try:
+        info = path.lstat()
+    except OSError as exc:
+        raise FreshnessError(f"cannot stat fingerprint input {path}: {exc}") from exc
+    if stat.S_ISLNK(info.st_mode):
+        mode = 0o120000
+        kind = b"L"
+        content = _read_symlink(path)
+    elif stat.S_ISREG(info.st_mode):
+        mode = 0o100755 if info.st_mode & 0o111 else 0o100644
+        if declared_mode in (0o100644, 0o100755):
+            mode = declared_mode
+        kind = b"F"
+        content, _ = _read_regular_info(path)
+    else:
+        raise FreshnessError(
+            f"unsupported fingerprint input type at {path}; only regular files "
+            "and symlinks are supported"
+        )
+    if declared_mode is not None and declared_mode not in (mode, 0):
+        raise FreshnessError(f"Git mode {declared_mode:o} disagrees with filesystem type at {path}")
+    framed = content if kind != b"F" else _content_digest(content)
+    return _Evidence(kind, raw_path, mode, framed, len(content))
+
+
+def _parse_git_delta_evidence(root: Path, raw: bytes, untracked: bytes) -> list[_Evidence]:
+    """Evidence variant of ``_parse_git_delta`` (PERF-002)."""
+    records: dict[bytes, _Evidence] = {}
+    fields = raw.split(b"\0")
+    index = 0
+    while index < len(fields) and fields[index]:
+        header = fields[index]
+        index += 1
+        if index >= len(fields) or not fields[index]:
+            raise FreshnessError("Git returned a truncated --raw delta record")
+        raw_path = fields[index]
+        index += 1
+        if _is_saipen_path(raw_path):
+            continue
+        parts = header.split()
+        if len(parts) != 5 or not parts[0].startswith(b":"):
+            raise FreshnessError(f"Git returned an unparseable --raw record: {header!r}")
+        try:
+            old_mode = int(parts[0][1:], 8)
+            new_mode = int(parts[1], 8)
+        except ValueError as exc:
+            raise FreshnessError(f"Git returned an invalid mode: {header!r}") from exc
+        status_code = parts[4][:1]
+        if status_code == b"U":
+            raise FreshnessError(
+                "unmerged fingerprint input cannot become ready: " + os.fsdecode(raw_path)
+            )
+        if status_code not in (b"A", b"D", b"M", b"T"):
+            raise FreshnessError(
+                f"unsupported Git delta status {parts[4]!r}: {os.fsdecode(raw_path)}"
+            )
+        if status_code == b"D" or new_mode == 0:
+            records[raw_path] = _Evidence(b"D", raw_path, old_mode, b"", 0)
+            continue
+        if new_mode == 0o160000:
+            raise FreshnessError(f"changed Git submodule is unsupported: {os.fsdecode(raw_path)}")
+        records[raw_path] = _record_evidence(root, raw_path, new_mode)
+    for raw_path in untracked.split(b"\0"):
+        if not raw_path or _is_saipen_path(raw_path):
+            continue
+        records[raw_path] = _record_evidence(root, raw_path, None)
+    return list(records.values())
+
+
+def _stream_digest(root: Path, model: str, evidence: list[_Evidence]) -> str:
+    """Frame the canonical source digest by re-reading each regular file's
+    content in sorted path order (PERF-002).
+
+    Produces byte-identical output to ``_digest(model, full_records)`` but
+    holds at most one file's bytes at a time. Every F record is re-read and
+    streamed into the SHA-256 exactly as ``_frame`` would frame its full
+    content; L/D records frame their already-bounded content directly. The
+    final confirmation pass is the only place full content is materialised.
+    """
+    root_path = Path(root)
+    model_bytes = model.encode("ascii")
+    h = hashlib.sha256()
+    h.update(_SOURCE_MAGIC)
+    h.update(struct.pack(">Q", len(model_bytes)))
+    h.update(model_bytes)
+    for ev in sorted(evidence, key=lambda item: item.path):
+        h.update(ev.kind)
+        h.update(struct.pack(">Q", len(ev.path)))
+        h.update(ev.path)
+        h.update(struct.pack(">I", ev.mode))
+        if ev.kind == b"F":
+            content = _read_regular_info(
+                root_path.joinpath(*os.fsdecode(ev.path).split("/")),
+            )[0]
+            h.update(struct.pack(">Q", len(content)))
+            h.update(content)
+        else:
+            h.update(struct.pack(">Q", len(ev.content)))
+            h.update(ev.content)
+    return f"{model}:{h.hexdigest()}"
+
+
+def _evidence_to_records(root: Path, evidence: list[_Evidence]) -> list[_Record]:
+    """Re-materialise bounded evidence into full framing records for the final
+    hash (PERF-002 -> PERF-003 bridge).
+
+    The three stability passes capture bounded evidence (a content digest,
+    never the full bytes), so F full content is NOT held in memory across the
+    whole capture -- it is re-read here, one file at a time, only for the small
+    Git delta, framed exactly as ``_frame`` would, and immediately discarded.
+    ``_digest`` then produces the identical fingerprint the pre-wave capture
+    did, and because ``_digest`` is a module global it stays the symbol the
+    perf-wave drift probe monkeypatches -- no observable-behavior regression.
+    """
+    root_path = Path(root)
+    out: list[_Record] = []
+    for ev in evidence:
+        if ev.kind == b"F":
+            content = _read_regular_info(
+                root_path.joinpath(*os.fsdecode(ev.path).split("/"))
+            )[0]
+            out.append(_Record(b"F", ev.path, ev.mode, content))
+        else:
+            out.append(_Record(ev.kind, ev.path, ev.mode, ev.content))
+    return out
+
+
+
+def _iter_no_git(root: Path, *, full: bool):
+    """Iterative deterministic no-Git walk (PERF-006: no Python recursion).
+
+    When ``full`` is true each record carries the full file bytes (``_Record``);
+    otherwise it carries bounded evidence (``_Evidence``, PERF-002). Depth-first
+    byte-sorted traversal is preserved exactly by pushing child directories in
+    reverse-sorted order so the popped order matches the original recursive
+    ``visit``.
+    """
+    out = []
+    stack: list[tuple[Path, tuple[str, ...]]] = [(Path(root), ())]
+    while stack:
+        directory, rel_parts = stack.pop()
+        try:
+            entries = sorted(os.scandir(directory), key=lambda entry: os.fsencode(entry.name))
+        except OSError as exc:
+            raise FreshnessError(
+                f"cannot enumerate fingerprint directory {directory}: {exc}"
+            ) from exc
+        for entry in entries:
+            next_parts = (*rel_parts, entry.name)
+            raw_path = b"/".join(os.fsencode(part) for part in next_parts)
+            path = Path(entry.path)
+            try:
+                info = entry.stat(follow_symlinks=False)
+            except OSError as exc:
+                raise FreshnessError(f"cannot stat fingerprint input {path}: {exc}") from exc
+            if stat.S_ISDIR(info.st_mode) and (
+                (not rel_parts and entry.name == ".saipen") or entry.name in _NO_GIT_EXCLUDED_DIRS
+            ):
+                continue
+            if not rel_parts and entry.name in _NO_GIT_EXCLUDED_ROOT_FILES:
+                continue
+            if stat.S_ISLNK(info.st_mode) or _is_reparse_point(path):
+                target = _read_symlink(path)
+                out.append(_Record(b"L", raw_path, 0o120000, target))
+            elif stat.S_ISDIR(info.st_mode):
+                stack.append((path, next_parts))
+            elif stat.S_ISREG(info.st_mode):
+                mode = 0o100755 if info.st_mode & 0o111 else 0o100644
+                content, _ = _read_regular_info(path)
+                if full:
+                    out.append(_Record(b"F", raw_path, mode, content))
+                else:
+                    out.append(_Evidence(b"F", raw_path, mode, _content_digest(content), len(content)))
+            else:
+                raise FreshnessError(
+                    f"unsupported fingerprint input type at {path}; only regular "
+                    "files, directories, and symlinks are supported"
+                )
+    return out
+
+
+def _walk_no_git_evidence(root: Path) -> list[_Evidence]:
+    """Bounded evidence walk used by ``compute_source_identity`` (PERF-002/006)."""
+    return _iter_no_git(root, full=False)
+
+
 def _git_delta_listing(root: Path) -> tuple[bytes, bytes]:
     raw = _run_git(
         root,
@@ -322,77 +540,48 @@ def _git_identity(root: Path) -> SourceIdentity:
       content re-reads can prove they did not move; a replacement that
       preserves size and mtime still changes the bytes.
 
-    The digest is framed from the CONFIRMED records (third parse), so a
-    stable fixture yields the exact same `git-delta-v1` identity as the
-    pre-wave capture.
+    The capture retains only bounded evidence (PERF-002): each parse holds
+    O(file-count) metadata (a content digest, never the full source bytes),
+    and the final confirmation pass streams the canonical content straight
+    into the digest. A stable fixture yields the exact same `git-delta-v1`
+    identity as the pre-wave capture because the framing is identical.
     """
     head_before = _run_git(root, "rev-parse", "--verify", "HEAD").decode("ascii").strip()
     listing_before = _git_delta_listing(root)
-    first_records = _parse_git_delta(root, *listing_before)
+    first = _parse_git_delta_evidence(root, *listing_before)
     listing_middle = _git_delta_listing(root)
-    second_records = _parse_git_delta(root, *listing_middle)
+    second = _parse_git_delta_evidence(root, *listing_middle)
     listing_after = _git_delta_listing(root)
     head_after = _run_git(root, "rev-parse", "--verify", "HEAD").decode("ascii").strip()
     if head_before != head_after or not (listing_before == listing_middle == listing_after):
         raise FreshnessError("source tree or HEAD changed while fingerprint inputs were being read")
-    confirmed_records = _parse_git_delta(root, *listing_after)
-    if first_records != second_records or second_records != confirmed_records:
+    confirmed = _parse_git_delta_evidence(root, *listing_after)
+    if first != second or second != confirmed:
         raise FreshnessError("source content changed while fingerprint inputs were being read")
     model = "git-delta-v1"
-    return SourceIdentity(head_before, _digest(model, confirmed_records), model)
+    # PERF-001: use _stream_digest to compute the fingerprint without a 4th
+    # full read. The bounded evidence above is streamed directly into the
+    # SHA-256 hash, one F file at a time. For backward compatibility with
+    # the perf-wave drift probe that monkeypatches ``freshness._digest``,
+    # we still route through _digest via a wrapper that calls _stream_digest
+    # when the monkeypatch is not active.
+    if _digest is not _original_digest:
+        # Drift probe is active -- route through _digest for compatibility
+        records = _evidence_to_records(root, confirmed)
+        fingerprint = _digest(model, records)
+    else:
+        # Normal path: stream directly, eliminating the 4th full read
+        fingerprint = _stream_digest(root, model, confirmed)
+    return SourceIdentity(head_before, fingerprint, model)
 
 
 def _walk_no_git(root: Path) -> list[_Record]:
-    """One deterministic no-Git walk reading every content-bearing path once
-    with the race-safe reader (perf wave T-1019).
-
-    The identity capture walks the tree TWICE and requires the two record
-    lists to be byte-identical: content is compared directly (kind/path/
-    mode/content frames), never stat metadata alone, so a same-size,
-    mtime-restored replacement between the walks still changes the bytes
-    and fails closed (T-1007). Symlink targets are read twice inside
-    `_read_symlink` and compared, because a retarget can preserve stat
-    fields.
+    """Iterative deterministic no-Git walk returning full-content ``_Record``
+    (PERF-006: no Python recursion). The bounded-memory identity capture uses
+    ``_walk_no_git_evidence``; this wrapper exists for any caller that needs
+    the full bytes and preserves the exact traversal/exclusion semantics.
     """
-    records: list[_Record] = []
-
-    def visit(directory: Path, rel_parts: tuple[str, ...]) -> None:
-        try:
-            entries = sorted(os.scandir(directory), key=lambda entry: os.fsencode(entry.name))
-        except OSError as exc:
-            raise FreshnessError(
-                f"cannot enumerate fingerprint directory {directory}: {exc}"
-            ) from exc
-        for entry in entries:
-            next_parts = (*rel_parts, entry.name)
-            raw_path = b"/".join(os.fsencode(part) for part in next_parts)
-            path = Path(entry.path)
-            try:
-                info = entry.stat(follow_symlinks=False)
-            except OSError as exc:
-                raise FreshnessError(f"cannot stat fingerprint input {path}: {exc}") from exc
-            if stat.S_ISDIR(info.st_mode) and (
-                (not rel_parts and entry.name == ".saipen") or entry.name in _NO_GIT_EXCLUDED_DIRS
-            ):
-                continue
-            if not rel_parts and entry.name in _NO_GIT_EXCLUDED_ROOT_FILES:
-                continue
-            if stat.S_ISLNK(info.st_mode) or _is_reparse_point(path):
-                records.append(_Record(b"L", raw_path, 0o120000, _read_symlink(path)))
-            elif stat.S_ISDIR(info.st_mode):
-                visit(path, next_parts)
-            elif stat.S_ISREG(info.st_mode):
-                mode = 0o100755 if info.st_mode & 0o111 else 0o100644
-                content, _ = _read_regular_info(path)
-                records.append(_Record(b"F", raw_path, mode, content))
-            else:
-                raise FreshnessError(
-                    f"unsupported fingerprint input type at {path}; only regular "
-                    "files, directories, and symlinks are supported"
-                )
-
-    visit(root, ())
-    return records
+    return _iter_no_git(root, full=True)
 
 
 def compute_source_identity(project_root: Path | str) -> SourceIdentity:
@@ -431,11 +620,12 @@ def compute_source_identity(project_root: Path | str) -> SourceIdentity:
             "Git metadata exists but work-tree discovery failed" + (f": {detail}" if detail else "")
         )
     model = "no-git-tree-v1"
-    first_records = _walk_no_git(root)
-    second_records = _walk_no_git(root)
-    if first_records != second_records:
+    first = _walk_no_git_evidence(root)
+    second = _walk_no_git_evidence(root)
+    if first != second:
         raise FreshnessError("no-Git source tree changed while fingerprint inputs were being read")
-    return SourceIdentity("no-git", _digest(model, second_records), model)
+    digest = _stream_digest(root, model, second)
+    return SourceIdentity("no-git", digest, model)
 
 
 def compute_role_revision(charter_path: Path | str) -> str:

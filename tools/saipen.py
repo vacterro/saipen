@@ -94,6 +94,7 @@ _MUTATING_TOPLEVEL = frozenset(
         "transition",
         "checkpoint",
         "ticket",
+        "goal",
         "rebind-home",
         "crew",
         "scope",
@@ -144,31 +145,17 @@ def _command_mutates(command: str, rest: list[str]) -> bool:
     return False
 
 
-def _ensure_handover(project_root: Path, as_json: bool, dry_run: bool) -> int | None:
-    """T-1014: perform the A -> B seat handover ONLY immediately before an
-    admissible mutation executes -- never before the concrete action's
-    syntax/arity validation has passed.
+def _ensure_handover(project_root: Path, as_json: bool, dry_run: bool, allow_dead_home: bool = False) -> int | None:
+    """Deprecated second-wave no-op (W2-001).
 
-    Returns None when the seat is settled (no override, override equals the
-    persisted seat, or the handover itself succeeded); returns an exit code
-    after emitting a structured refusal when the handover fails. Callers
-    short-circuit with that code. A malformed/unknown invocation never
-    reaches this helper, so it stays ownership-zero-write.
+    The A -> B seat handover is no longer a standalone pre-write: the acting
+    seat (`_AGENT_OVERRIDE`) is threaded straight into every engine op via
+    `_agent_for`, so the seat change folds into the op's OWN admissible
+    transaction. A semantically rejected command therefore writes NOTHING
+    (no orphaned handover DEC, no STATE.agent churn); a valid command changes
+    the seat exactly once. This helper is retained only for import stability
+    and intentionally performs no disk write.
     """
-    if _AGENT_OVERRIDE is None:
-        return None
-    state_path = _state_path(project_root)
-    if not state_path.is_file():
-        return None
-    state, _state_err = parse_state_or_error(codec.read_doc(state_path))
-    if state and state.get("agent") == _AGENT_OVERRIDE:
-        return None
-    from saipen_engine.operations import handover_agent
-
-    ho = handover_agent(project_root, _AGENT_OVERRIDE, dry_run=dry_run)
-    if not ho.ok:
-        _emit(ho.to_dict(), as_json)
-        return 1
     return None
 
 
@@ -310,9 +297,10 @@ def _status(project_root: Path, as_json: bool) -> int:
     blocked_tickets = [t for t in board["tickets"].values() if t["section"] == "## BLOCKED"]
 
     top_workable = None
+    resolved_agent = _AGENT_OVERRIDE if _AGENT_OVERRIDE is not None else (state.get("agent") or AGENT)
     if not board["errors"]:
         for ticket in todo:
-            if ticket_is_workable(ticket, board["tickets"], agent=_agent_for(project_root)):
+            if ticket_is_workable(ticket, board["tickets"], agent=resolved_agent):
                 top_workable = ticket["id"]
                 break
     # T-1014: ONE recovery-manifest traversal serves pending/conflicts and
@@ -333,7 +321,8 @@ def _status(project_root: Path, as_json: bool) -> int:
         pending,
         conflicts,
         current_capability=_negotiate_capability(project_root),
-        current_agent=_agent_for(project_root),
+        current_agent=resolved_agent,
+        snap=snap,
     )
     if not routed.get("ok") and routing_failure_code(routed) == "VALIDATION_FAILED":
         # A malformed/binding failure must NOT project a healthy surface from
@@ -452,6 +441,17 @@ def _status(project_root: Path, as_json: bool) -> int:
     if staleness is not None:
         payload["staleness"] = staleness
 
+    # §8 Conformance Closure: the authoritative current-conformance status,
+    # derived from the canonical validator receipt, not from prose in the LOG.
+    # `conformance` (above) is the legacy history-derived hint; this is the
+    # load-bearing truth that gates terminal/crew closure.
+    try:
+        from saipen_engine.conformance import conformance_status
+
+        payload["conformance_status"] = conformance_status(project_root, gate="core")
+    except Exception:
+        pass
+
     _emit(payload, as_json)
     return 0
 
@@ -477,18 +477,28 @@ def _next_action(project_root: Path, as_json: bool) -> int:
     if _corrupt:
         _emit(_corrupt_refusal(_corrupt), as_json)
         return 1
+    try:
+        snap = snapshot.ProjectSnapshot.capture(project_root)
+    except (OSError, ValueError) as exc:
+        _emit(
+            {"ok": False, "code": "VALIDATION_FAILED", "detail": f"history-ownership: {exc}"},
+            as_json,
+        )
+        return 1
     board_text = codec.read_doc(project_root / ".saipen" / "BOARD.md")
     from saipen_engine.router import load_for_action, route_next, routing_failure_code
 
     # P0#4: the freshly negotiated current-session capability gates routing.
     # T-1006: routing judges claim truth against the canonical acting seat.
+    resolved_agent = _AGENT_OVERRIDE if _AGENT_OVERRIDE is not None else (state.get("agent") or AGENT)
     routed = route_next(
         state_text,
         board_text,
         pending,
         conflicts,
         current_capability=_negotiate_capability(project_root),
-        current_agent=_agent_for(project_root),
+        current_agent=resolved_agent,
+        snap=snap,
     )
     if not routed.get("ok"):
         # The router owns the stable failure code: recovery conflicts/pending
@@ -605,9 +615,9 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
                 return 2
         from saipen_engine.journal import resolve_conflict
 
-        _rc = _ensure_handover(project_root, as_json, dry_run)
-        if _rc is not None:
-            return _rc
+        if dry_run:
+            _emit({"ok": False, "code": "DRY_RUN_UNSUPPORTED", "detail": "dry_run not supported for recovery mutations"}, as_json)
+            return 1
         result = resolve_conflict(project_root, op_id, resolution, agent=_agent_for(project_root))
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
@@ -744,13 +754,10 @@ def _sub(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> i
         passes every safe-ID check yet still breaks the host path budget) is
         a zero-write VALIDATION_FAILED refusal, never a traceback.
 
-        T-1014: mutating sub actions perform the seat handover ONLY here --
-        after grammar validation has passed, immediately before the mutation.
+        T-1014: mutating sub actions previously performed the seat handover
+        here, but the acting seat now folds into the op's own admissible
+        transaction (W2-001) -- a rejected command writes nothing.
         list/status are read-only and never hand over."""
-        if action not in ("list", "status"):
-            _rc = _ensure_handover(project_root, as_json, dry_run)
-            if _rc is not None:
-                return _rc
         try:
             result = thunk()
         except OSError as exc:
@@ -842,9 +849,6 @@ def _crew(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> 
         # failure -- ok:true / exit 0. Nonzero exit is reserved for a
         # structurally invalid or refused derivation.
         return 0 if plan.get("ok") else 1
-    _rc = _ensure_handover(project_root, as_json, dry_run)
-    if _rc is not None:
-        return _rc
     result = crew_apply(
         project_root, current_capability=capability, current_agent=_agent_for(project_root)
     )
@@ -1025,9 +1029,6 @@ def _userperson(project_root: Path, args: list[str], as_json: bool, dry_run: boo
         if dry_run:
             _emit({"ok": True, "code": "RESET", "dry_run": True}, as_json)
             return 0
-        _rc = _ensure_handover(project_root, as_json, dry_run)
-        if _rc is not None:
-            return _rc
         # CORE says reset DELETES the profile; absence is the canonical OFF
         # state. One journaled delete_file target (real before_hash, empty
         # after_hash) -- NO post-commit unlink, so a crash between COMMIT and
@@ -1119,9 +1120,6 @@ def _userperson(project_root: Path, args: list[str], as_json: bool, dry_run: boo
                 as_json,
             )
             return 0
-        _rc = _ensure_handover(project_root, as_json, dry_run)
-        if _rc is not None:
-            return _rc
         result = write_profile(project_root, new_text, _agent_for(project_root))
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
@@ -1388,9 +1386,6 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
         from improve import ImproveError, prepare_audit_seat
         from improve import installed_protocol_fingerprint as _proto_fp
 
-        _rc = _ensure_handover(project_root, as_json, dry_run)
-        if _rc is not None:
-            return _rc
         try:
             runtime = _runtime_identity()
             fingerprint = _proto_fp(HOME)
@@ -1526,9 +1521,6 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
             )
             return 2
         report = _resolve_report_path(project_root, args[1], args[2], args[3])
-        _rc = _ensure_handover(project_root, as_json, dry_run)
-        if _rc is not None:
-            return _rc
         try:
             result = _append_run(report, run_text)
             _emit(result, as_json)
@@ -1553,9 +1545,6 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
         from improve import resolve_report_path as _resolve_report_path
 
         report = _resolve_report_path(project_root, args[1], args[2], args[3])
-        _rc = _ensure_handover(project_root, as_json, dry_run)
-        if _rc is not None:
-            return _rc
         try:
             result = _complete_report(report)
             _emit(result, as_json)
@@ -1751,9 +1740,6 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                 as_json,
             )
             return 0
-        _rc = _ensure_handover(project_root, as_json, dry_run)
-        if _rc is not None:
-            return _rc
         try:
             entry = {
                 "imp_id": imp_id,
@@ -1785,9 +1771,6 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
             )
             return 2
         cycle = cycle_dir(project_root, args[1])
-        _rc = _ensure_handover(project_root, as_json, dry_run)
-        if _rc is not None:
-            return _rc
         try:
             result = complete_cycle(cycle)
             _emit(result, as_json)
@@ -1811,9 +1794,6 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
         from improve import abort_cycle as _abort_cycle
 
         cycle = cycle_dir(project_root, args[1])
-        _rc = _ensure_handover(project_root, as_json, dry_run)
-        if _rc is not None:
-            return _rc
         try:
             result = _abort_cycle(cycle)
             _emit(result, as_json)
@@ -1841,9 +1821,6 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                 as_json,
             )
             return 0
-        _rc = _ensure_handover(project_root, as_json, dry_run)
-        if _rc is not None:
-            return _rc
         try:
             result = archive_cycle(cycle)
             _emit(
@@ -1949,7 +1926,7 @@ def main(argv: list[str] | None = None) -> int:
         usage_msg = (
             "usage: saipen (status|next|recover|claim <T-###>|"
             "transition <PHASE> [T-###] [text]|checkpoint <TAXONOMY> "
-            "[T-###] [text]|ticket add <PRIORITY> <text>|ticket "
+            "[T-###] [text]|goal <text>|ticket add <PRIORITY> <text>|ticket "
             "done <T-###>|ticket block <T-###> <reason>|ticket "
             "unblock <T-###> <decision>|improve|improve "
             "status|improve sweep <cycle> <RUN-N/IMP-NNN> <DISPOSITION> "
@@ -2026,9 +2003,6 @@ def main(argv: list[str] | None = None) -> int:
                 as_json,
             )
             return 2
-        _rc = _ensure_handover(project_root, as_json, dry_run)
-        if _rc is not None:
-            return _rc
         result = (
             plan_claim(project_root, args[1], _agent_for(project_root))
             if dry_run
@@ -2049,9 +2023,6 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         ticket = args[2] if len(args) > 2 and args[2].upper().startswith("T-") else None
         text = " ".join(args[3:] if ticket else args[2:])
-        _rc = _ensure_handover(project_root, as_json, dry_run)
-        if _rc is not None:
-            return _rc
         result = transition_phase(
             project_root, args[1], _agent_for(project_root), ticket, text, dry_run=dry_run
         )
@@ -2070,9 +2041,6 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         ticket = args[2] if len(args) > 2 and args[2].upper().startswith("T-") else None
         text = " ".join(args[3:] if ticket else args[2:])
-        _rc = _ensure_handover(project_root, as_json, dry_run)
-        if _rc is not None:
-            return _rc
         result = checkpoint(
             project_root, _agent_for(project_root), args[1], ticket, text, dry_run=dry_run
         )
@@ -2193,9 +2161,6 @@ def main(argv: list[str] | None = None) -> int:
                     as_json,
                 )
                 return 2
-            _rc = _ensure_handover(project_root, as_json, dry_run)
-            if _rc is not None:
-                return _rc
             result = ticket_add(
                 project_root,
                 _agent_for(project_root),
@@ -2228,9 +2193,6 @@ def main(argv: list[str] | None = None) -> int:
                     as_json,
                 )
                 return 2
-            _rc = _ensure_handover(project_root, as_json, dry_run)
-            if _rc is not None:
-                return _rc
             result = finish_ticket(project_root, rest[0], _agent_for(project_root), dry_run=dry_run)
             _emit(result.to_dict(), as_json)
             return 0 if result.ok else 1
@@ -2245,9 +2207,6 @@ def main(argv: list[str] | None = None) -> int:
                     as_json,
                 )
                 return 2
-            _rc = _ensure_handover(project_root, as_json, dry_run)
-            if _rc is not None:
-                return _rc
             result = ticket_move(
                 project_root,
                 action,
@@ -2267,6 +2226,24 @@ def main(argv: list[str] | None = None) -> int:
             as_json,
         )
         return 2
+    if command == "goal":
+        if len(args) < 2:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "goal needs <objective text>",
+                },
+                as_json,
+            )
+            return 2
+        from saipen_engine.operations import goal_entry
+
+        result = goal_entry(
+            project_root, _agent_for(project_root), " ".join(args[1:]), dry_run=dry_run
+        )
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
     if command == "userperson":
         return _userperson(project_root, args[1:], as_json, dry_run)
     if command == "sub":
@@ -2294,9 +2271,6 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         from saipen_engine.operations import rebind_saipen_home
 
-        _rc = _ensure_handover(project_root, as_json, dry_run)
-        if _rc is not None:
-            return _rc
         result = rebind_saipen_home(
             project_root, _agent_for(project_root), args[1], dry_run=dry_run
         )
@@ -2321,9 +2295,6 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         from saipen_engine.operations import record_scope
 
-        _rc = _ensure_handover(project_root, as_json, dry_run)
-        if _rc is not None:
-            return _rc
         result = record_scope(
             project_root, args[1], _agent_for(project_root), args[2:], dry_run=dry_run
         )
@@ -2342,9 +2313,6 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         from saipen_engine.operations import confirm_first_publish
 
-        _rc = _ensure_handover(project_root, as_json, dry_run)
-        if _rc is not None:
-            return _rc
         result = confirm_first_publish(
             project_root, _agent_for(project_root), args[1], args[2], dry_run=dry_run
         )
@@ -2368,6 +2336,7 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         from saipen_engine.release import ReleaseRefusal, execute_release, plan_release
 
+            
         try:
             # P0#4: inject the freshly negotiated current-session capability so
             # a read-only session cannot PLAN a release. Second-wave P0: the
@@ -2385,10 +2354,65 @@ def main(argv: list[str] | None = None) -> int:
         except ValueError as exc:
             _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}, as_json)
             return 1
-        _rc = _ensure_handover(project_root, as_json, dry_run)
-        if _rc is not None:
-            return _rc
         result = execute_release(project_root, plan)
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+    # ── Autonomous command closure (SAIPEN intent handlers) ────────
+    # qq/ee/qqq/eee are protocol semantic operations, not CLI aliases.
+    if command in ("qq", "prepare"):
+        role = args[1] if len(args) > 1 else "saiwiki"
+        from saipen_engine.intent import ensure_producer_ready
+
+        result = ensure_producer_ready(
+            project_root, role, dry_run=dry_run,
+            current_capability=_negotiate_capability(project_root),
+        )
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+    if command in ("ee", "prepare-translate"):
+        role = args[1] if len(args) > 1 else "saitranslate"
+        from saipen_engine.intent import ensure_producer_ready
+
+        result = ensure_producer_ready(
+            project_root, role, dry_run=dry_run,
+            current_capability=_negotiate_capability(project_root),
+        )
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+    if command in ("qqq", "ship-wiki"):
+        from saipen_engine.intent import autonomous_crew_loop
+
+        result = autonomous_crew_loop(
+            project_root, dry_run=dry_run, as_json=as_json,
+            current_capability=_negotiate_capability(project_root),
+        )
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+    if command in ("eee", "ship-translate"):
+        from saipen_engine.intent import autonomous_crew_loop
+
+        result = autonomous_crew_loop(
+            project_root, dry_run=dry_run, as_json=as_json,
+            current_capability=_negotiate_capability(project_root),
+        )
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+    if command in ("sc", "autonomous-crew"):
+        from saipen_engine.intent import autonomous_crew_loop
+
+        result = autonomous_crew_loop(
+            project_root, dry_run=dry_run, as_json=as_json,
+            current_capability=_negotiate_capability(project_root),
+        )
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+    if command in ("cc", "continue"):
+        from saipen_engine.intent import autonomous_crew_loop
+
+        result = autonomous_crew_loop(
+            project_root, dry_run=dry_run, as_json=as_json,
+            current_capability=_negotiate_capability(project_root),
+        )
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
     if as_json:

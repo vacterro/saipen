@@ -1,6 +1,44 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.226.0 -- 2026-08-20 -- V7 Producer Parallelism Hardening (T-1100)
+
+Safe parallel execution of isolated SubSaipen PRODUCER roles (saitranslate /
+saiwiki) WITHOUT Concurrent Mode and WITHOUT a second canonical Core writer.
+Core stays the sole main-tree writer; `saipen crew` stays serial.
+
+- T-1100: dependency-aware READY packages carry `base_source_head`,
+  `base_source_tree_fingerprint`, `role_revision`, `read_set` (path->hash),
+  `write_set` (target->before hash), deterministic `package_identity` and
+  whole-tree fingerprint for provenance.
+- T-1100: integration classification -- identical global source identity =
+  CURRENT fast path; changed identity revalidates read_set + write_set by
+  CONTENT HASH (never mtime) -> COMPATIBLE_DRIFT (usable) or STALE (reprepare).
+- T-1100: explicit conflict model derives `A.write ∩ B.write`,
+  `A.write ∩ B.read`, `B.write ∩ A.read` and exposes the exact reason.
+- T-1100: atomic prepare publication -- payloads/manifests/metadata land in a
+  non-READY staging generation; READY appears only via a final `os.replace`
+  switch; a crash leaves only incomplete staging, never a false READY.
+- T-1100: producer-LOCAL lock (`ProducerLock`) serializes same-producer writers
+  and grants NO authority over the canonical main tree; cross-producer
+  (saitranslate + saiwiki) runs concurrently. Core integration still requires
+  the canonical `project_writer_lock`.
+- T-1100: per-namespace producer epoch -- a stale worker whose epoch was
+  superseded by a takeover cannot publish READY.
+- T-1100: idempotent package identity -- identical prepare reuses the READY
+  package instead of duplicating OUTBOX/package records.
+- T-1100: hard capability boundary (`assert_producer_capability`,
+  `guard_core_mutation`) refuses Core STATE/BOARD/LOG mutation, integration,
+  collect/disposition, commit/tag/push, ship -- CAPABILITY_DENIED, zero writes.
+- T-1100: multi-package integration plan shows READY packages, base identities,
+  CURRENT/COMPATIBLE_DRIFT/STALE, read/write conflicts, deterministic order and
+  which package must regenerate; no auto-rebase of stale packages.
+- T-1100: conformance suite `tools/test_v7_producer_parallelism.py` exercises
+  matrix A..N (concurrent ee+qq, same-producer serialization, crash safety,
+  stale epoch, idempotency, compatible drift, STALE on read-dep change, same
+  output collision, unrelated vs declared input drift, capability denial,
+  restart recovery, serialized integration) -- 14/14 pass.
+
 ## 7.225.0 -- 2026-08-19 -- Performance Wave
 
 - T-1008: pending recovery cost is governed by unresolved work rather than settled-history length.

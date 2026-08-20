@@ -649,6 +649,10 @@ def plan_release(
                     "CREW_NOT_READY",
                     ctx.get("detail", "") or "crew is not ready for terminal publication",
                 )
+            # CORE-002: the crew conformance PASS receipt is produced AFTER
+            # the terminal state is established (post-finalization), not before.
+            # Pre-ship validates convergence evidence + SC-0..SC-10. The
+            # full crew gate runs post-ship as terminal certification.
             crew_carrier = {
                 "crew_epoch": ctx["crew_epoch"],
                 "scope": ctx.get("crew_defer_scope") or {},
@@ -2083,16 +2087,8 @@ def _apply_no_publish(root: Path, plan: ReleasePlan) -> dict:
 
 
 def _git_available(root: Path) -> bool:
-    try:
-        result = subprocess.run(
-            ["git", "-C", str(root), "rev-parse", "--is-inside-work-tree"],
-            capture_output=True,
-            text=True,
-            errors="replace",
-        )
-    except OSError:
-        return False
-    return result.returncode == 0 and result.stdout.strip() == "true"
+    from .paths import is_git_project_root
+    return is_git_project_root(root)
 
 
 def _apply_no_publish_locked(root: Path, plan: ReleasePlan) -> dict:
@@ -3583,7 +3579,7 @@ def _replay_targets(root: Path, journal, record: dict) -> str | None:
                 )
             continue
         if live == target["before_hash"]:
-            staged = journal.staged_content(index)
+            staged = journal.staged_content(index, record)
             if hashlib.sha256(staged).hexdigest()[:16] != target["after_hash"]:
                 return (
                     f"staged bytes for {target['path']} do not match the "

@@ -100,19 +100,15 @@ def _strict_created_at(value: object) -> str:
 
 
 def _iter_operation_records(root: Path):
-    """Yield every parseable operation.json under .saipen/recovery/ops."""
-    ops = root / ".saipen" / "recovery" / "ops"
-    if not ops.is_dir():
-        return
-    for op_dir in sorted(ops.iterdir()):
-        manifest = op_dir / "operation.json"
-        if not manifest.is_file():
-            continue
-        try:
-            record = json.loads(manifest.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            continue
-        yield record
+    """W2-001: Yield every parseable operation.json from both ops and settled.
+
+    Uses the canonical semantic receipt snapshot from journal.py instead
+    of scanning a single namespace. This ensures committed receipts that
+    have been moved to settled/ remain visible to convergence readers.
+    """
+    from .journal import semantic_receipt_snapshot
+    records, _errors = semantic_receipt_snapshot(root)
+    yield from records
 
 
 def _event_number(record: dict) -> int:

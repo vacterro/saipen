@@ -38,6 +38,13 @@ def route_next(
     now: datetime.datetime | None = None, # noqa: F821
     current_capability: str | None = None,
     current_agent: str | None = None,
+    snap = None,
+    # PERF-004: optional pre-parsed objects from the caller to avoid
+    # redundant STATE/BOARD parsing. When provided, these take precedence
+    # over parsing state_text/board_text.
+    _state: dict | None = None,
+    _board: dict | None = None,
+    _state_error: str | None = None,
 ) -> dict:
     """Compute the exact next executable action.
 
@@ -66,12 +73,32 @@ def route_next(
     """
     pending = list(pending_ops or [])
     conflicts = list(conflict_ops or [])
+    # PERF-004: parse STATE/BOARD ONCE and reuse the result for both the
+    # checkpoint-surface validation and the routing logic below. When the
+    # caller provides pre-parsed objects, skip parsing entirely.
+    from .state import parse_state_or_error
+    from .board import parse_board
+    if _state is not None and _board is not None and _state_error is not None:
+        state, state_error, board = _state, _state_error, _board
+    else:
+        state, state_error = parse_state_or_error(state_text)
+        board = parse_board(board_text)
+    if snap is not None:
+        from .fast_check import validate_checkpoint_surface
+        errors = validate_checkpoint_surface(
+            state_text, board_text, snap,
+            current_agent=current_agent, _state=state, _board=board, _state_error=state_error,
+        )
+        if errors:
+            return {
+                "ok": False,
+                "action": "saipen status",
+                "reason": "checkpoint-invalid",
+                "detail": "checkpoint invalid: " + "; ".join(errors[:3]),
+            }
     # A STATE the shared parser cannot read whole is not a routing surface:
     # duplicate keys or a broken fence must never project an executable next
     # action from a partial parse (T-1003 hostile findings). Fail closed.
-    from .state import parse_state_or_error
-
-    state, state_error = parse_state_or_error(state_text)
     if state_error:
         return {
             "ok": False,
@@ -94,7 +121,6 @@ def route_next(
             "detail": "empty STATE is bootstrap-only; no continuation "
             "exists yet -- bootstrap via INIT before routing",
         }
-    board = parse_board(board_text)
     phase = state.get("phase")
     task = state.get("task")
     na = state.get("next_action") or ""
@@ -265,6 +291,13 @@ def route_next(
             na, phase=phase, empty_todo=_empty_todo, intent=state.get("execution_intent")
         )
         if _brake:
+            # CORE-004: the safety valve is an AUTHORIZATION boundary, not a
+            # resumable yield. Once the 3-wave / 20-ticket budget is exhausted,
+            # the persisted WAIT is a HARD STOP (RESTATE_AND_STOP) until the
+            # documented re-authorization operation durably resets the counters.
+            # A resumed automated run MUST NOT continue merely because TODO/DOING
+            # work remains -- the prior 'valve-yield' branch let it, defeating
+            # the runaway-work protection on long-running goal loops.
             return {
                 "ok": True,
                 "action": na,
@@ -401,6 +434,7 @@ ROUTING_FAILURE_CODES = {
     "binding-mismatch": "VALIDATION_FAILED",
     "board-malformed": "VALIDATION_FAILED",
     "board-graph-invalid": "VALIDATION_FAILED",
+    "checkpoint-invalid": "VALIDATION_FAILED",
     "capability-invalid": "VALIDATION_FAILED",
 }
 
@@ -416,9 +450,10 @@ def route_next_result(
     board_text: str,
     pending_ops_list: list | None = None,
     conflict_ops_list: list | None = None,
+    snap = None,
 ) -> Result:
     """route_next wrapped in the stable Result shape for status/next/context."""
-    out = route_next(state_text, board_text, pending_ops_list, conflict_ops_list)
+    out = route_next(state_text, board_text, pending_ops_list, conflict_ops_list, snap=snap)
     data = {k: v for k, v in out.items() if k != "ok"}
     # Capability surface (hostile-regression, P0#5): a PHASE action names the
     # phase doc it will load (saipen/phases/<phase>.md). A missing or empty
@@ -440,6 +475,36 @@ def route_next_result(
                         "detail": f"phase doc {load} is missing or empty",
                     },
                 )
+    # CORE-004: conformance health gate -- when routing to crew convergence,
+    # verify that the canonical conformance evidence is healthy. Structural
+    # corruption or failing conformance must route to VALIDATE/RECOVER
+    # instead of normal crew work.
+    if (
+        out.get("ok")
+        and out.get("action") == "saipen crew"
+        and out.get("reason") == "crew-converge"
+        and project_root is not None
+    ):
+        try:
+            from .conformance import conformance_status, STATUS_CURRENT_PASS
+            _cs = conformance_status(project_root, gate="core")
+            if _cs.get("status") not in (STATUS_CURRENT_PASS, "NOT_RUN"):
+                return Result(
+                    ok=False,
+                    code="CONFORMANCE_UNHEALTHY",
+                    data={
+                        "action": "saipen status",
+                        "reason": "conformance-unhealthy",
+                        "detail": (
+                            f"crew convergence requires current conformance evidence, "
+                            f"got {_cs['status']}: {_cs.get('reason', '')} -- "
+                            "run 'saipen validate' before crew work"
+                        ),
+                        "conformance_status": _cs["status"],
+                    },
+                )
+        except Exception:
+            pass  # If conformance module is unavailable, don't block routing
     return Result(
         ok=bool(out.get("ok")),
         code=("ROUTED" if out.get("ok") else routing_failure_code(out)),

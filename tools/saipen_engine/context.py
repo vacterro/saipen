@@ -109,7 +109,7 @@ def _home_present(state: dict) -> str:
         return "false"
 
 
-def _board_map(board: dict, full_ticket: str | None = None, cap: int = _BOARD_CAP) -> str:
+def _board_map(buckets: dict[str, list[dict]], full_ticket: str | None = None, cap: int = _BOARD_CAP) -> str:
     """Board ORIENTATION projection, TRUTHFULLY bounded (NITRO dogfood IV,
     T-600).
 
@@ -122,7 +122,7 @@ def _board_map(board: dict, full_ticket: str | None = None, cap: int = _BOARD_CA
     """
     lines = []
     for section in ("## DOING", "## TODO", "## BLOCKED", "## DONE"):
-        tickets = [t for t in board["tickets"].values() if t["section"] == section]
+        tickets = buckets.get(section, [])
         lines.append(f"{section} ({len(tickets)})")
         emitted = 0
         skipped = 0
@@ -180,12 +180,14 @@ def _load_context_inputs(root: Path) -> dict:
     fresh when called alone. Nothing is retained globally or across calls.
     """
     from .log import read_history_snapshot
+    from .snapshot import ProjectSnapshot
     from .state import parse_state_or_error
     from .journal import scan_pending
 
     state_text = codec.read_doc(root / ".saipen" / "STATE.md")
     board_text = codec.read_doc(root / ".saipen" / "BOARD.md")
-    log_snap = read_history_snapshot(root)
+    snap = ProjectSnapshot.capture(root)
+    log_snap = snap.history
     state, state_error = parse_state_or_error(state_text)
     board = parse_board(board_text)
     _pending, _conflicts = scan_pending(root)
@@ -207,6 +209,7 @@ def _load_context_inputs(root: Path) -> dict:
         "board": board,
         "pending": [op["op_id"] for op in _pending],
         "conflicts": [op["op_id"] for op in _conflicts],
+        "snap": snap,
     }
 
 
@@ -283,16 +286,28 @@ def _fit(
         )
         return _bytes(body)
 
+    _b_memo = {}
+    def _b(c):
+        if c not in _b_memo:
+            _b_memo[c] = board_fn(c)
+        return _b_memo[c]
+        
+    _l_memo = {}
+    def _l(c):
+        if c not in _l_memo:
+            _l_memo[c] = log_fn(c)
+        return _l_memo[c]
+
     for board_cap in (8, 6, 4, 2, 0):
-        board_text = board_fn(board_cap)
-        log_full = log_fn(12)
+        board_text = _b(board_cap)
+        log_full = _l(12)
         if surface_bytes(board_text, log_full) <= limit:
             return board_text, log_full
     for log_count in (12, 10, 8, 6, 4, 2, 0):
-        log_text = log_fn(log_count)
-        if surface_bytes(board_fn(0), log_text) <= limit:
-            return board_fn(0), log_text
-    return board_fn(0), log_fn(0)
+        log_text = _l(log_count)
+        if surface_bytes(_b(0), log_text) <= limit:
+            return _b(0), log_text
+    return _b(0), _l(0)
 
 
 def context_cold(
@@ -300,6 +315,7 @@ def context_cold(
     limit: int = 4000,
     _inputs: dict | None = None,
     current_agent: str | None = None,
+    _routed: dict | None = None,
 ) -> Result:
     """Minimal cold-start surface with STRUCTURAL budgeting.
 
@@ -338,13 +354,14 @@ def context_cold(
     # never to persisted STATE.agent.
     from .capability import negotiate_capability
 
-    routed = route_next(
+    routed = _routed if _routed is not None else route_next(
         state_text,
         board_text,
         pending,
         conflicts,
         current_capability=negotiate_capability(),
         current_agent=current_agent,
+        snap=inputs['snap'],
     )
     if not routed.get("ok") and routing_failure_code(routed) == "VALIDATION_FAILED":
         # A malformed surface must not project a healthy cold start: the
@@ -393,13 +410,19 @@ def context_cold(
     ]
     fixed = "\n".join(mandatory) + "\n"
 
+    # Bucket tickets exactly once
+    buckets = {s: [] for s in ("## DOING", "## TODO", "## BLOCKED", "## DONE")}
+    for t in board.get("tickets", {}).values():
+        if t["section"] in buckets:
+            buckets[t["section"]].append(t)
+
     # FULL unbounded body, for the honest pre-bound economics.
     full_body = (
         fixed
         + "\n"
         + (
             "## LOG TAIL\n" + _log_tail(log_event_lines) + "\n"
-            "## BOARD MAP\n" + _board_map(board, full_ticket=next_ticket) + "\n"
+            "## BOARD MAP\n" + _board_map(buckets, full_ticket=next_ticket) + "\n"
         )
     )
 
@@ -407,7 +430,7 @@ def context_cold(
     board_part, log_part = _fit(
         fixed,
         limit,
-        lambda cap: _board_map(board, full_ticket=next_ticket, cap=cap),
+        lambda cap: _board_map(buckets, full_ticket=next_ticket, cap=cap),
         lambda count: _log_tail(log_event_lines, count),
     )
     body = fixed + "\n" + ("## LOG TAIL\n" + log_part + "\n## BOARD MAP\n" + board_part + "\n")
@@ -432,6 +455,7 @@ def context_hot(
     limit: int = 3000,
     _inputs: dict | None = None,
     current_agent: str | None = None,
+    _routed: dict | None = None,
 ) -> Result:
     """Current-work surface: STATE + computed next + active ticket + recent
     LOG + recovery state. Shares the router (NITRO dogfood II); metrics
@@ -465,13 +489,14 @@ def context_hot(
     # projection above. Second-wave P0: same session-agent claim truth.
     from .capability import negotiate_capability
 
-    routed = route_next(
+    routed = _routed if _routed is not None else route_next(
         state_text,
         board_text,
         pending,
         conflicts,
         current_capability=negotiate_capability(),
         current_agent=current_agent,
+        snap=inputs['snap'],
     )
     if not routed.get("ok") and routing_failure_code(routed) == "VALIDATION_FAILED":
         return Result(
@@ -570,8 +595,21 @@ def context_audit(project_root: Path | str) -> Result:
             }
         )
     total_bytes = sum(r["bytes"] for r in rows)
-    cold = context_cold(root, _inputs=inputs)
-    hot = context_hot(root, _inputs=inputs)
+    # PERF-004: compute the routed next action ONCE from the shared inputs and
+    # reuse it for both projections -- cold and hot previously each re-ran the
+    # full router (validation + routing) over the same world.
+    from .capability import negotiate_capability
+    from .router import route_next
+    routed = route_next(
+        inputs["state_text"], inputs["board_text"], inputs["pending"], inputs["conflicts"],
+        current_capability=negotiate_capability(), current_agent=None, snap=inputs["snap"],
+    )
+    cold = context_cold(root, _inputs=inputs, _routed=routed)
+    if not cold.ok:
+        return cold
+    hot = context_hot(root, _inputs=inputs, _routed=routed)
+    if not hot.ok:
+        return hot
     audit = {
         "sources": rows,
         "total_bytes": total_bytes,

@@ -58,9 +58,39 @@ def _git_from(cwd: str | Path, *args: str) -> tuple[int, str]:
     return result.returncode, result.stdout.strip()
 
 
+
+def is_git_project_root(root: Path) -> bool:
+    """True if this project root is its own independent Git repository.
+    A child project nested inside an unrelated parent repository is NOT a Git
+    project of its own."""
+    root = root.resolve()
+    rc, top_text = _git_from(root, "rev-parse", "--show-toplevel")
+    if rc == 0 and top_text:
+        try:
+            return Path(top_text).resolve() == root
+        except OSError:
+            return False
+    return False
+
+
+def _valid_saipen_dir(root: Path) -> bool:
+    saipen = root / SAIPEN_DIR
+    if not saipen.is_dir():
+        return False
+    try:
+        if saipen.is_symlink():
+            return False
+        # Reparse point check (Windows junctions)
+        st = saipen.lstat()
+        if getattr(st, "st_file_attributes", 0) & 0x400:
+            return False
+    except OSError:
+        return False
+    return True
+
 def _nearest_checkpoint_root(start: Path) -> Path | None:
     for candidate in (start, *start.parents):
-        if (candidate / SAIPEN_DIR).is_dir():
+        if _valid_saipen_dir(candidate):
             return candidate
     return None
 
@@ -83,7 +113,7 @@ def resolve_project_root(
         root = root.resolve()
         if not root.is_dir():
             return None, f"explicit --project-root is not a directory: {root}"
-        if not (root / SAIPEN_DIR).is_dir():
+        if not _valid_saipen_dir(root):
             return None, f"explicit --project-root has no .saipen/ directory: {root}"
         return root, "explicit"
 
@@ -105,7 +135,7 @@ def resolve_project_root(
             if key in seen:
                 continue
             seen.add(key)
-            if (root / SAIPEN_DIR).is_dir():
+            if _valid_saipen_dir(root):
                 return root, source
         return None, (
             f"cwd belongs to Git worktree {worktree_root} but its "

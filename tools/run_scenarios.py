@@ -103,6 +103,7 @@ from saipen_engine.log import parse_log_line
 from saipen_engine.operations import (
     apply_claim,
     checkpoint,
+    goal_entry,
     next_ticket_id,
     plan_claim,
     reauthorize_valve,
@@ -116,6 +117,7 @@ from saipen_engine.operations import (
     _utc_iso,
 )
 from saipen_engine.result import Result
+from saipen_engine.router import route_next
 from saipen_engine.snapshot import ProjectSnapshot
 from saipen_engine.state import parse_frontmatter
 
@@ -12640,6 +12642,36 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
         else:
             print(f"PASS: nitro-m3 -- {label}")
 
+    def make_project() -> Path:
+        """Create a fresh isolated project for testing."""
+        r = Path(tempfile.mkdtemp(prefix="saipen-m3-goal-"))
+        s = r / ".saipen"
+        s.mkdir()
+        (s / "LOG.md").write_text(
+            "- 09.08.26 00:00 [E-900] [T-none] DEC: base\n", encoding="utf-8"
+        )
+        (s / "BOARD.md").write_text(
+            "# Board\n## DOING\n## TODO\n"
+            "- [ ] T-1 [P1] top probe | verify: probe\n"
+            "- [ ] T-2 [P1] lower probe | verify: probe\n"
+            "## DONE\n## BLOCKED\n",
+            encoding="utf-8",
+        )
+        # CORE-009: current-schema STATE requires absolute saipen_home.
+        # Point to the actual SAIPEN install (HOME) which has BOOT.md and
+        # extensions/subs/PROTOCOL.md -- the temp directory alone is not a
+        # valid saipen home.
+        (s / "STATE.md").write_text(
+            '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
+            'blocker: ""\ntransition_from: SHIP\nsaipen_version: 7\n'
+            "schema_version: 3\nlast_event: 900\nstyle_contract: ded-4ae736e4\n"
+            f'saipen_home: "{str(HOME)}"\nagent: probe\nrequires:\n  - filesystem\n'
+            "  - git\n  - python\nmode: full\nupdated: 2026-08-09T00:00:00Z\n"
+            "---\n",
+            encoding="utf-8",
+        )
+        return r
+
     root = Path(tempfile.mkdtemp(prefix="saipen-m3-"))
     saipen = root / ".saipen"
     saipen.mkdir()
@@ -12883,6 +12915,112 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
         repr(stop),
     )
 
+    # ---- T-1100: goal_entry regression ----
+    # goal_entry demotes an active DOING ticket to TODO, sets goal intent,
+    # clears task, and logs the pivot.
+    ge_root = make_project()
+    ge_saipen = ge_root / ".saipen"
+    # Setup: claim T-1 and advance to BUILD so there's an active DOING ticket
+    apply_claim(ge_root, "T-1", "probe")
+    transition_phase(ge_root, "BUILD", "probe", "T-1", "b")
+    ge_state_before = parse_state(codec.read_doc(ge_saipen / "STATE.md"))
+    expect(
+        "goal_entry precondition: active DOING ticket T-1 at BUILD",
+        ge_state_before.get("task") == "T-1"
+        and ge_state_before.get("phase") == "BUILD",
+        repr(ge_state_before),
+    )
+    ge_result = goal_entry(ge_root, "probe", "T-1100 goal entry test")
+    ge_state_after = parse_state(codec.read_doc(ge_saipen / "STATE.md"))
+    ge_board = parse_board(codec.read_doc(ge_saipen / "BOARD.md"))
+    expect(
+        "goal_entry succeeds with GOAL_SET",
+        ge_result.get("ok") and ge_result.get("code") == "GOAL_SET",
+        repr(ge_result),
+    )
+    expect(
+        "goal_entry sets execution_intent to goal",
+        ge_state_after.get("execution_intent") == "goal"
+        and ge_state_after.get("goal_waves") == 1
+        and ge_state_after.get("goal_tickets") >= 1,
+        repr(ge_state_after),
+    )
+    expect(
+        "goal_entry sets task to first plan ticket",
+        ge_state_after.get("task") is not None
+        and ge_state_after.get("task") != "none"
+        and ge_state_after.get("task").startswith("T-"),
+        repr(ge_state_after.get("task")),
+    )
+    expect(
+        "goal_entry demotes active DOING ticket to TODO",
+        ge_board["tickets"]["T-1"]["section"] == "## TODO"
+        and ge_board["tickets"]["T-1"]["checkbox"] == " ",
+        repr(ge_board["tickets"]["T-1"]),
+    )
+    ge_log = codec.read_doc(ge_saipen / "LOG.md")
+    expect(
+        "goal_entry logs a pivot DEC event",
+        "goal pivot" in ge_log and "T-1100 goal entry test" in ge_log,
+        repr(ge_log[-200:]),
+    )
+
+    # ---- T-1100: goal_entry cold-start resume ----
+    # After goal_entry, routing should find the next workable ticket
+    # (cold-start into the NEW objective, not the old one).
+    ge_routed = route_next(
+        codec.read_doc(ge_saipen / "STATE.md"),
+        codec.read_doc(ge_saipen / "BOARD.md"),
+    )
+    expect(
+        "goal_entry cold-start routes to the plan ticket",
+        ge_routed.get("ok")
+        and ge_routed.get("ticket") is not None,
+        repr(ge_routed),
+    )
+
+    # ---- T-1100: goal_entry with no active ticket ----
+    # When there's no active DOING ticket, goal_entry just sets intent
+    ge_empty = make_project()
+    ge_empty_saipen = ge_empty / ".saipen"
+    # Move T-1 to DONE so board has no DOING
+    apply_claim(ge_empty, "T-1", "probe")
+    transition_phase(ge_empty, "BUILD", "probe", "T-1", "b")
+    transition_phase(ge_empty, "VERIFY", "probe", "T-1", "v")
+    # Verification evidence required for VERIFY->REVIEW
+    checkpoint(ge_empty, "probe", "RUN", "T-1", "suite T-1 -> PASS conf: high")
+    transition_phase(ge_empty, "REVIEW", "probe", "T-1", "r")
+    transition_phase(ge_empty, "SHIP", "probe", "T-1", "s")
+    ticket_move(ge_empty, "done", "T-1", "probe")
+    ge_empty_state = parse_state(codec.read_doc(ge_empty_saipen / "STATE.md"))
+    expect(
+        "no-active precondition: task is none",
+        ge_empty_state.get("task") == "none",
+        repr(ge_empty_state),
+    )
+    ge_empty_result = goal_entry(ge_empty, "probe", "empty board goal")
+    ge_empty_after = parse_state(codec.read_doc(ge_empty_saipen / "STATE.md"))
+    expect(
+        "goal_entry with no active ticket still sets goal intent",
+        ge_empty_result.get("ok")
+        and ge_empty_after.get("execution_intent") == "goal"
+        and ge_empty_after.get("goal_waves") == 1,
+        repr(ge_empty_after),
+    )
+
+    # ---- T-1100: goal_entry credential redaction ----
+    ge_cred = make_project()
+    ge_cred_result = goal_entry(
+        ge_cred, "probe",
+        "fix the ghp_abcdefghijklmnopqrstuvwxyz0123456789ab token leak",
+    )
+    ge_cred_log = codec.read_doc(ge_cred / ".saipen" / "LOG.md")
+    expect(
+        "goal_entry redacts ghp_ credentials in LOG",
+        "ghp_***" in ge_cred_log and "ghp_abcdefgh" not in ge_cred_log,
+        repr(ge_cred_log[-200:]),
+    )
+
     return problems, checked
 
 
@@ -12918,11 +13056,13 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
             "## DONE\n## BLOCKED\n",
             encoding="utf-8",
         )
+        # CORE-009: current-schema STATE requires absolute saipen_home.
+        # Point to the actual SAIPEN install (HOME) which has BOOT.md.
         (saipen / "STATE.md").write_text(
             '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
             'blocker: ""\ntransition_from: SHIP\nsaipen_version: 7\n'
             "schema_version: 3\nlast_event: 900\nstyle_contract: ded-4ae736e4\n"
-            'saipen_home: "."\nagent: probe\nrequires:\n  - filesystem\n'
+            f'saipen_home: "{str(HOME)}"\nagent: probe\nrequires:\n  - filesystem\n'
             "  - git\n  - python\nmode: full\nupdated: 2026-08-09T00:00:00Z\n"
             "---\n",
             encoding="utf-8",

@@ -42,14 +42,20 @@ def copy_tree_members(root: Path, raw: object) -> tuple[Path, list[Path]]:
     """Expand one `copy_trees` entry into (source_dir, member files).
 
     Members are enumerated exactly the way the injectors copy them:
-    __pycache__ directories are pruned, .pyc/.pyo files are skipped, and any
-    symlink anywhere in the surface is refused (a copy would follow it). A
-    missing or symlinked tree root is refused too: a declared tree that is
-    absent is a broken manifest, never a silent skip.
+    build/test caches (__pycache__, .pytest_cache) are pruned, .pyc/.pyo files
+    are skipped, and any symlink anywhere in the surface is refused (a copy
+    would follow it). A missing or symlinked tree root is refused too: a
+    declared tree that is absent is a broken manifest, never a silent skip.
     """
     source = manifest_source(root, raw)
     if not source.is_dir() or source.is_symlink():
         raise RuntimeError(f"runtime manifest tree missing or symlinked: {raw}")
+    # Regenerable build/test caches that sit inside a copy_trees source (e.g.
+    # tools/) but are NEVER part of the shipped runtime surface. Sweeping them
+    # into the manifest makes an untracked machine-local cache file fail the
+    # "every clone has this file" check, and committing a cache would ship
+    # local state (CORE-009).
+    _CACHE_DIRS = {"__pycache__", ".pytest_cache"}
     members: list[Path] = []
     for _walk_root, _dirs, _files in os.walk(source):
         for _d in list(_dirs):
@@ -59,7 +65,7 @@ def copy_tree_members(root: Path, raw: object) -> tuple[Path, list[Path]]:
                     "runtime manifest tree contains symlink: "
                     f"{_d_path.relative_to(root.resolve()).as_posix()}"
                 )
-            if _d == "__pycache__":
+            if _d in _CACHE_DIRS:
                 _dirs.remove(_d)
         for _file in _files:
             if _file.endswith((".pyc", ".pyo")):
