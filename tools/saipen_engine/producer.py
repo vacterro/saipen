@@ -38,14 +38,15 @@ from pathlib import Path
 from typing import Callable, Iterable, Mapping
 
 # --- local engine imports (no cycle: lock/capability never import producer) ---
-from .capability import CAPABILITY_DENIED, assert_producer_capability
 from .lock import ProducerLock, project_writer_lock
 
 
 def _utc_now_iso() -> str:
     """W2-004: microsecond-precision UTC timestamp for dependency binding."""
     import datetime as _dt
+
     return _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
 
 # ---------------------------------------------------------------------------
 # Constants & closed enums
@@ -55,6 +56,8 @@ PRODUCERS = ("saitranslate", "saiwiki")
 
 STAGING_DIRNAME = ".prepare-staging"
 READY_DIRNAME = "READY"
+SETTLED_DIRNAME = "SETTLED"
+SUPERSEDED_DIRNAME = "SUPERSEDED"
 EPOCH_FILENAME = "producer_epoch.json"
 
 
@@ -66,6 +69,7 @@ def _ready_filename(package_identity: str) -> str:
     identity always lives INSIDE the JSON payload.
     """
     return package_identity.replace(":", "_") + ".json"
+
 
 PACKAGE_MAGIC = b"saipen-producer-pkg-v1\0"
 DEP_MAGIC = b"saipen-producer-dep-v1\0"
@@ -137,9 +141,7 @@ def _is_windows_absolute(rel: str) -> bool:
     if re.match(r"^[A-Za-z]:[\\/]", rel):
         return True
     # UNC / POSIX-double-slash share:  \\server\share  or  //server/share
-    if re.match(r"^[\\/]{2,}", rel):
-        return True
-    return False
+    return bool(re.match(r"^[\\/]{2,}", rel))
 
 
 def _validate_producer_rel_path(rel: str, *, context: str = "") -> None:
@@ -156,34 +158,31 @@ def _validate_producer_rel_path(rel: str, *, context: str = "") -> None:
     # ALSO detect Windows drive/UNC forms by string inspection (CORE-008).
     if Path(rel).is_absolute() or _is_windows_absolute(rel):
         raise ProducerError(
-            f"{context}: absolute path {rel!r} rejected; "
-            "only producer-relative paths allowed"
+            f"{context}: absolute path {rel!r} rejected; only producer-relative paths allowed"
         )
     # Reject parent traversal
     parts = Path(rel).parts
     if any(part in ("..", ".") for part in parts):
         raise ProducerError(
-            f"{context}: path traversal {rel!r} rejected; "
-            "only simple relative paths allowed"
+            f"{context}: path traversal {rel!r} rejected; only simple relative paths allowed"
         )
     # Reject paths with null bytes or control characters
     for ch in rel:
         if ord(ch) < 0x20:
-            raise ProducerError(
-                f"{context}: control character in path rejected"
-            )
+            raise ProducerError(f"{context}: control character in path rejected")
     # Reject Windows reserved names (CON, PRN, AUX, NUL, COM1-9, LPT1-9)
     _reserved = {
-        "CON", "PRN", "AUX", "NUL",
+        "CON",
+        "PRN",
+        "AUX",
+        "NUL",
         *(f"COM{i}" for i in range(1, 10)),
         *(f"LPT{i}" for i in range(1, 10)),
     }
     for part in parts:
         stem = part.split(".")[0].upper()
         if stem in _reserved:
-            raise ProducerError(
-                f"{context}: Windows reserved name {part!r} in path rejected"
-            )
+            raise ProducerError(f"{context}: Windows reserved name {part!r} in path rejected")
 
 
 def _safe_rel_hash(root: Path | str, rel: str) -> str:
@@ -199,15 +198,11 @@ def _safe_rel_hash(root: Path | str, rel: str) -> str:
     try:
         root_res = root_path.resolve()
     except OSError as exc:
-        raise ProducerError(
-            f"dependency path {rel!r}: project root unresolvable: {exc}"
-        ) from exc
+        raise ProducerError(f"dependency path {rel!r}: project root unresolvable: {exc}") from exc
     try:
         candidate = (root_path / rel).resolve()
     except OSError as exc:
-        raise ProducerError(
-            f"dependency path {rel!r}: target unresolvable: {exc}"
-        ) from exc
+        raise ProducerError(f"dependency path {rel!r}: target unresolvable: {exc}") from exc
     if candidate != root_res and root_res not in candidate.parents:
         raise ProducerError(
             f"dependency path {rel!r} resolves outside project root "
@@ -249,7 +244,8 @@ class SourceKey:
     This class normalizes both forms so the identical-global-identity
     fast path works from any caller.
     """
-    __slots__ = ("source_head", "source_tree_fingerprint", "discovery_model")
+
+    __slots__ = ("discovery_model", "source_head", "source_tree_fingerprint")
 
     def __init__(self, source_head: str, source_tree_fingerprint: str, discovery_model: str = ""):
         self.source_head = source_head
@@ -381,6 +377,11 @@ class ProducerPackage:
     dependency_fp: str = ""
     package_identity: str = ""
     status: str = PackageStatus.STAGING.value
+    # READY-only decoded payload. Excluded from identity derivation because the
+    # published payload is independently bound by payload_hashes and the exact
+    # write-set keys.
+    payloads: dict[str, bytes] = field(default_factory=dict, repr=False, compare=False)
+    ready_path: Path | None = field(default=None, repr=False, compare=False)
 
     def __post_init__(self) -> None:
         if not self.dependency_fp:
@@ -418,28 +419,139 @@ class ProducerPackage:
         }
 
     @classmethod
-    def from_dict(cls, data: Mapping) -> "ProducerPackage":
-        # CORE-008: validate every declared dependency/integration path at
-        # deserialization time, before any caller can trust the package. A
-        # malformed package with an escaping read_set/write_set key must raise
-        # here rather than later when _live_hashes or integration reads it.
-        for rel in (data.get("read_set", {}) or {}):
-            _validate_producer_rel_path(rel, context="package read_set")
-        for rel in (data.get("write_set", {}) or {}):
-            _validate_producer_rel_path(rel, context="package write_set")
+    def from_dict(
+        cls,
+        data: Mapping,
+        *,
+        expected_producer: str | None = None,
+        expected_identity: str | None = None,
+        ready_path: Path | None = None,
+    ) -> "ProducerPackage":
+        """Strict persisted-package decoder.
+
+        Derived authority is always recomputed.  READY payload bytes/hashes,
+        namespace producer and filename identity are one closed persistence
+        schema; hostile or partial JSON raises ``ProducerError`` rather than
+        reaching autonomous planning as a forged package.
+        """
+        if not isinstance(data, Mapping):
+            raise ProducerError("READY package must be a JSON object")
+        if ready_path is not None:
+            ready_schema = {
+                "producer",
+                "role_revision",
+                "base_source_head",
+                "base_source_tree_fingerprint",
+                "base_discovery_model",
+                "scope",
+                "read_set",
+                "write_set",
+                "epoch",
+                "dependency_fp",
+                "package_identity",
+                "status",
+                "payload_hashes",
+                "payload_bytes",
+            }
+            if set(data) != ready_schema:
+                missing = sorted(ready_schema - set(data))
+                extra = sorted(set(data) - ready_schema)
+                raise ProducerError(f"READY schema mismatch (missing={missing}, extra={extra})")
+        required_strings = (
+            "producer",
+            "role_revision",
+            "base_source_head",
+            "base_source_tree_fingerprint",
+            "base_discovery_model",
+            "scope",
+            "dependency_fp",
+            "package_identity",
+            "status",
+        )
+        for key in required_strings:
+            if not isinstance(data.get(key), str):
+                raise ProducerError(f"READY field {key!r} must be a string")
+        producer = data["producer"]
+        if producer not in PRODUCERS:
+            raise ProducerError(f"READY producer {producer!r} outside {PRODUCERS}")
+        if expected_producer is not None and producer != expected_producer:
+            raise ProducerError(
+                f"READY producer {producer!r} does not match namespace {expected_producer!r}"
+            )
+        status = data["status"]
+        if status not in {item.value for item in PackageStatus}:
+            raise ProducerError(f"READY status {status!r} outside closed status set")
+        if ready_path is not None and status != PackageStatus.READY.value:
+            raise ProducerError("file in READY/SETTLED must carry status 'ready'")
+        epoch = data.get("epoch")
+        if not isinstance(epoch, int) or isinstance(epoch, bool) or epoch < 0:
+            raise ProducerError("READY epoch must be a non-negative integer")
+
+        def _hash_map(key: str) -> dict[str, str]:
+            value = data.get(key)
+            if not isinstance(value, Mapping):
+                raise ProducerError(f"READY field {key!r} must be a JSON object")
+            out: dict[str, str] = {}
+            for rel, digest in value.items():
+                _validate_producer_rel_path(rel, context=f"package {key}")
+                if not isinstance(digest, str):
+                    raise ProducerError(f"READY {key}[{rel!r}] must be a string hash")
+                out[rel] = digest
+            return out
+
+        read_set = _hash_map("read_set")
+        write_set = _hash_map("write_set")
+        derived_dep = dependency_fingerprint(read_set, write_set, data["role_revision"])
+        if data["dependency_fp"] != derived_dep:
+            raise ProducerError("READY dependency_fp does not match recomputed dependencies")
+        derived_identity = package_identity(
+            producer, data["role_revision"], derived_dep, data["scope"]
+        )
+        if data["package_identity"] != derived_identity:
+            raise ProducerError("READY package_identity does not match recomputed identity")
+        if expected_identity is not None and derived_identity != expected_identity:
+            raise ProducerError("READY filename/request identity does not match package identity")
+
+        payloads: dict[str, bytes] = {}
+        if status == PackageStatus.READY.value:
+            import base64
+
+            payload_hashes = data.get("payload_hashes")
+            payload_bytes = data.get("payload_bytes")
+            if not isinstance(payload_hashes, Mapping) or not isinstance(payload_bytes, Mapping):
+                raise ProducerError("READY payload_hashes/payload_bytes must be JSON objects")
+            if set(payload_hashes) != set(write_set) or set(payload_bytes) != set(write_set):
+                raise ProducerError("READY payload keys must exactly equal write_set keys")
+            for rel in write_set:
+                encoded = payload_bytes[rel]
+                expected_hash = payload_hashes[rel]
+                if not isinstance(encoded, str) or not isinstance(expected_hash, str):
+                    raise ProducerError(f"READY payload metadata for {rel!r} must be strings")
+                try:
+                    raw = base64.b64decode(encoded.encode("ascii"), validate=True)
+                except Exception as exc:
+                    raise ProducerError(
+                        f"READY payload {rel!r} is not valid base64: {exc}"
+                    ) from exc
+                if _sha256_bytes(raw) != expected_hash:
+                    raise ProducerError(f"READY payload hash mismatch for {rel!r}")
+                payloads[rel] = raw
+
         return cls(
-            producer=data["producer"],
+            producer=producer,
             role_revision=data["role_revision"],
             base_source_head=data["base_source_head"],
             base_source_tree_fingerprint=data["base_source_tree_fingerprint"],
-            base_discovery_model=data.get("base_discovery_model", ""),
+            base_discovery_model=data["base_discovery_model"],
             scope=data["scope"],
-            read_set=dict(data.get("read_set", {})),
-            write_set=dict(data.get("write_set", {})),
-            epoch=int(data.get("epoch", 0)),
-            dependency_fp=data.get("dependency_fp", ""),
-            package_identity=data.get("package_identity", ""),
-            status=data.get("status", PackageStatus.STAGING.value),
+            read_set=read_set,
+            write_set=write_set,
+            epoch=epoch,
+            dependency_fp=derived_dep,
+            package_identity=derived_identity,
+            status=status,
+            payloads=payloads,
+            ready_path=ready_path,
         )
 
 
@@ -502,8 +614,7 @@ def classify_integration(
         if now != expected:
             return (
                 IntegrationClass.STALE,
-                f"read dependency {rel!r} changed "
-                f"(expected {expected[:12]}.. got {now[:12]}..)",
+                f"read dependency {rel!r} changed (expected {expected[:12]}.. got {now[:12]}..)",
             )
 
     for rel, before in write_set.items():
@@ -550,13 +661,9 @@ def derive_conflicts(a: ProducerPackage, b: ProducerPackage) -> dict:
             f"{b.producer} both intend to write the same path"
         )
     if a_write_b_read:
-        reasons.append(
-            f"{a.producer} writes paths {a_write_b_read} that {b.producer} reads"
-        )
+        reasons.append(f"{a.producer} writes paths {a_write_b_read} that {b.producer} reads")
     if b_write_a_read:
-        reasons.append(
-            f"{b.producer} writes paths {b_write_a_read} that {a.producer} reads"
-        )
+        reasons.append(f"{b.producer} writes paths {b_write_a_read} that {a.producer} reads")
 
     return {
         "packages": (a.package_identity, b.package_identity),
@@ -592,6 +699,41 @@ class ProducerEpoch:
         return Path(namespace) / EPOCH_FILENAME
 
     @staticmethod
+    def _decode(namespace: Path | str) -> tuple[int, str, str]:
+        """Strictly decode persisted fencing authority once.
+
+        Numeric coercion, booleans and negative epochs would roll the fencing
+        token backwards.  A present record therefore has one closed shape;
+        only genuine absence denotes the initial epoch zero.
+        """
+        path = ProducerEpoch._path(Path(namespace))
+        if not path.is_file():
+            return 0, "", ""
+        try:
+            raw = path.read_text(encoding="utf-8")
+            data = json.loads(raw)
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise ProducerError(f"producer epoch file is corrupt/unreadable: {exc}") from exc
+        if not isinstance(data, dict):
+            raise ProducerError("producer epoch file is not a JSON object")
+        known = {"epoch", "owner", "claimed_at"}
+        unknown = set(data) - known
+        if unknown:
+            raise ProducerError(f"producer epoch file contains unrecognized fields: {unknown}")
+        epoch = data.get("epoch")
+        owner = data.get("owner")
+        claimed_at = data.get("claimed_at")
+        if not isinstance(epoch, int) or isinstance(epoch, bool) or epoch < 0:
+            raise ProducerError(
+                f"producer epoch must be a non-negative JSON integer, got {epoch!r}"
+            )
+        if not isinstance(owner, str) or not owner:
+            raise ProducerError("producer epoch owner must be a non-empty string")
+        if not isinstance(claimed_at, str) or not claimed_at:
+            raise ProducerError("producer epoch claimed_at must be a non-empty string")
+        return epoch, owner, claimed_at
+
+    @staticmethod
     def current(namespace: Path | str) -> int:
         """Read the current epoch. Returns 0 only when genuinely ABSENT.
 
@@ -599,31 +741,7 @@ class ProducerEpoch:
         to epoch 0. This prevents a crash-truncated file from letting a
         stale worker appear current.
         """
-        path = ProducerEpoch._path(Path(namespace))
-        if not path.is_file():
-            return 0
-        try:
-            raw = path.read_text(encoding="utf-8")
-            data = json.loads(raw)
-        except (OSError, json.JSONDecodeError, ValueError) as exc:
-            raise ProducerError(
-                f"producer epoch file is corrupt/unreadable: {exc}"
-            ) from exc
-        if not isinstance(data, dict):
-            raise ProducerError("producer epoch file is not a JSON object")
-        # Accept only recognized keys; unknown fields signal tampering.
-        known = {"epoch", "owner", "claimed_at"}
-        unknown = set(data.keys()) - known
-        if unknown:
-            raise ProducerError(
-                f"producer epoch file contains unrecognized fields: {unknown}"
-            )
-        try:
-            return int(data["epoch"])
-        except (KeyError, TypeError, ValueError) as exc:
-            raise ProducerError(
-                f"producer epoch file has invalid epoch value: {exc}"
-            ) from exc
+        return ProducerEpoch._decode(namespace)[0]
 
     @staticmethod
     def claim(namespace: Path | str) -> int:
@@ -634,34 +752,46 @@ class ProducerEpoch:
         or the new one, never a partial/truncated file.
         """
         ns = Path(namespace)
-        ns.mkdir(parents=True, exist_ok=True)
-        path = ProducerEpoch._path(ns)
-        new_epoch = ProducerEpoch.current(ns) + 1
-        owner = uuid.uuid4().hex
-        payload = json.dumps(
-            {
-                "epoch": new_epoch,
-                "owner": owner,
-                "claimed_at": uuid.uuid1().hex,
-            },
-            sort_keys=True,
-        ) + "\n"
-        tmp = path.with_suffix(".tmp")
-        tmp.write_text(payload, encoding="utf-8")
-        os.replace(tmp, path)
-        return new_epoch
+        try:
+            project_root = StagingGeneration._project_root_from_namespace(ns)
+        except ProducerError:
+            # A first-ever claim may precede creation of the .saipen directory;
+            # the registry layout still binds <root>/.saipen/<producer>
+            # unambiguously.
+            if ns.parent.name != ".saipen":
+                raise
+            project_root = ns.parent.parent
+        producer = ns.name
+        if producer not in PRODUCERS:
+            raise ProducerError(f"cannot claim epoch for unknown producer {producer!r}")
+        # The read/increment/replace sequence is one producer-local critical
+        # section.  Unique temp names alone prevent temp collisions but do not
+        # prevent the classic n -> n+1 lost update.
+        with ProducerLock(project_root, producer):
+            ns.mkdir(parents=True, exist_ok=True)
+            path = ProducerEpoch._path(ns)
+            new_epoch = ProducerEpoch.current(ns) + 1
+            owner = uuid.uuid4().hex
+            payload = (
+                json.dumps(
+                    {
+                        "epoch": new_epoch,
+                        "owner": owner,
+                        "claimed_at": uuid.uuid1().hex,
+                    },
+                    sort_keys=True,
+                )
+                + "\n"
+            )
+            tmp = path.with_name(path.name + "." + uuid.uuid4().hex + ".tmp")
+            tmp.write_text(payload, encoding="utf-8")
+            os.replace(tmp, path)
+            return new_epoch
 
     @staticmethod
     def current_owner(namespace: Path | str) -> str:
-        """Return the current owner token, or '' when absent/corrupt."""
-        path = ProducerEpoch._path(Path(namespace))
-        if not path.is_file():
-            return ""
-        try:
-            data = json.loads(path.read_text(encoding="utf-8"))
-            return str(data.get("owner", ""))
-        except (OSError, json.JSONDecodeError, ValueError):
-            return ""
+        """Return the current owner token; corrupt authority raises."""
+        return ProducerEpoch._decode(namespace)[1]
 
     @staticmethod
     def owns(namespace: Path | str, epoch: int, owner: str | None = None) -> bool:
@@ -712,6 +842,11 @@ class StagingGeneration:
     # -- lifecycle --------------------------------------------------------
 
     def begin(self) -> "StagingGeneration":
+        # Decode persisted authority before creating even an empty staging
+        # directory.  Corrupt fencing state must be a zero-namespace-write
+        # refusal, not a failure that leaves a misleading partial generation.
+        epoch = ProducerEpoch.current(self.namespace)
+        begin_time = _utc_now_iso()
         self.staging_dir.mkdir(parents=True, exist_ok=True)
         self.payload_dir.mkdir(parents=True, exist_ok=True)
         # marker that this generation is in flight (incomplete until published)
@@ -721,12 +856,11 @@ class StagingGeneration:
         # distinguish this generation's ownership from a newer takeover. A
         # crash here leaves a partial manifest that recovery treats as
         # orphaned, never as a READY package.
-        epoch = ProducerEpoch.current(self.namespace)
         self.manifest_path.write_text(
             json.dumps(
                 {
                     "generation_id": self.generation_id,
-                    "begin_time": _utc_now_iso(),
+                    "begin_time": begin_time,
                     "epoch": epoch,
                 },
                 sort_keys=True,
@@ -736,7 +870,7 @@ class StagingGeneration:
         )
         self._begin_manifest = {
             "generation_id": self.generation_id,
-            "begin_time": _utc_now_iso(),
+            "begin_time": begin_time,
             "epoch": epoch,
         }
         return self
@@ -761,9 +895,7 @@ class StagingGeneration:
         except ProducerError:
             raise
         except OSError as exc:
-            raise ProducerError(
-                f"add_payload: cannot resolve target path: {exc}"
-            ) from exc
+            raise ProducerError(f"add_payload: cannot resolve target path: {exc}") from exc
         target.write_bytes(data)
         self._payloads[rel_path] = data
 
@@ -828,16 +960,18 @@ class StagingGeneration:
                     f"expected {expected_hash[:16]}.. got {actual[:16]}.. "
                     "-- package is STALE, must retry"
                 )
-        # W2-004: only check write_set 'before' hashes for targets that
-        # EXIST. A new write target (sha256:absent) is valid preparation.
-        # Write targets are checked in the namespace (where they'll be written).
+        # Write preconditions bind canonical project targets exactly, including
+        # absent->present and present->absent movement.
         for rel, expected_before in self.package.write_set.items():
-            actual = file_sha256(self.staging_dir.parent / rel)
-            # Only flag drift when the file EXISTS and has changed.
-            # sha256:absent -> sha256:absent is fine (new file).
-            if actual == "sha256:absent":
+            if project_root is None:
+                errors.append("W2-004: project root unavailable for write precondition")
                 continue
-            if expected_before != "sha256:absent" and actual != expected_before:
+            try:
+                actual = _safe_rel_hash(project_root, rel)
+            except ProducerError as exc:
+                errors.append(str(exc))
+                continue
+            if actual != expected_before:
                 errors.append(
                     f"W2-004: write target {rel!r} 'before' hash drifted: "
                     f"expected {expected_before[:16]}.. got {actual[:16]}.. "
@@ -856,6 +990,26 @@ class StagingGeneration:
         return None
 
     def publish(self) -> dict:
+        """Publish under the same-role producer lock.
+
+        Claim and publication share one lock identity.  A concurrent same-role
+        publisher therefore either wins the lock or receives PRODUCER_BUSY;
+        it can never race the epoch check and publish beside the winner.
+        """
+        project_root = self._find_project_root()
+        if project_root is None:
+            return {
+                "ok": False,
+                "code": "PROJECT_ROOT_UNKNOWN",
+                "detail": "cannot locate project root for producer publication",
+            }
+        try:
+            with ProducerLock(project_root, self.producer):
+                return self._publish_under_lock()
+        except PermissionError as exc:
+            return {"ok": False, "code": "PRODUCER_BUSY", "detail": str(exc)}
+
+    def _publish_under_lock(self) -> dict:
         """Atomically promote this staging generation to READY.
 
         Returns a result dict. On any failure, no READY artifact is created.
@@ -919,6 +1073,7 @@ class StagingGeneration:
             payload_hashes[rel] = h
             # Store as base64 so the JSON is self-contained binary-safe
             import base64 as _b64
+
             payload_bytes[rel] = _b64.b64encode(raw).decode("ascii")
         data["payload_hashes"] = payload_hashes
         data["payload_bytes"] = payload_bytes
@@ -936,26 +1091,46 @@ class StagingGeneration:
         return (Path(namespace) / READY_DIRNAME / _ready_filename(package_identity)).is_file()
 
     @classmethod
-    def ready_package(
-        cls, namespace: Path | str, package_identity: str
-    ) -> ProducerPackage | None:
+    def ready_package(cls, namespace: Path | str, package_identity: str) -> ProducerPackage | None:
         path = Path(namespace) / READY_DIRNAME / _ready_filename(package_identity)
         if not path.is_file():
             return None
-        return ProducerPackage.from_dict(json.loads(path.read_text()))
+        try:
+            return ProducerPackage.from_dict(
+                json.loads(path.read_text(encoding="utf-8")),
+                expected_producer=Path(namespace).name,
+                expected_identity=package_identity,
+                ready_path=path,
+            )
+        except (ProducerError, OSError, UnicodeDecodeError, json.JSONDecodeError):
+            return None
+
+    @classmethod
+    def scan_ready(cls, namespace: Path | str) -> tuple[list[ProducerPackage], list[dict]]:
+        """Return valid READY packages plus structured invalid-record errors."""
+        ready_dir = Path(namespace) / READY_DIRNAME
+        if not ready_dir.is_dir():
+            return [], []
+        producer = Path(namespace).name
+        out: list[ProducerPackage] = []
+        errors: list[dict] = []
+        for path in sorted(ready_dir.glob("*.json")):
+            try:
+                data = json.loads(path.read_text(encoding="utf-8"))
+                candidate = ProducerPackage.from_dict(
+                    data, expected_producer=producer, ready_path=path
+                )
+                if path.name != _ready_filename(candidate.package_identity):
+                    raise ProducerError("READY filename does not match package identity")
+                out.append(candidate)
+            except (ProducerError, OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+                errors.append({"code": "INVALID_READY", "path": str(path), "detail": str(exc)})
+        return out, errors
 
     @classmethod
     def list_ready(cls, namespace: Path | str) -> list[ProducerPackage]:
-        ready_dir = Path(namespace) / READY_DIRNAME
-        if not ready_dir.is_dir():
-            return []
-        out: list[ProducerPackage] = []
-        for f in sorted(ready_dir.glob("*.json")):
-            try:
-                out.append(ProducerPackage.from_dict(json.loads(f.read_text())))
-            except (ValueError, OSError):
-                continue
-        return out
+        packages, _errors = cls.scan_ready(namespace)
+        return packages
 
     # -- recovery (spec §M) ----------------------------------------------
 
@@ -975,9 +1150,13 @@ class StagingGeneration:
             candidate = candidate.parent
         raise ProducerError(f"cannot locate project root for producer namespace {ns}")
 
-
     @classmethod
-    def recover(cls, namespace: Path | str, project_root: Path | str | None = None, producer: str | None = None) -> dict:
+    def recover(
+        cls,
+        namespace: Path | str,
+        project_root: Path | str | None = None,
+        producer: str | None = None,
+    ) -> dict:
         """W2-002: Deterministic cleanup of orphaned staging generations.
 
         Acquires the producer-local ProducerLock before classifying or
@@ -1019,7 +1198,7 @@ class StagingGeneration:
             return {"removed_staging": [], "false_ready": False, "busy": True}
         except ProducerError:
             # Epoch is corrupt -- do not delete anything
-                return {"removed_staging": [], "false_ready": False, "busy": True}
+            return {"removed_staging": [], "false_ready": False, "busy": True}
         return {"removed_staging": removed, "false_ready": False, "busy": False}
 
     @classmethod
@@ -1044,16 +1223,12 @@ class StagingGeneration:
         for gen in staging_root.iterdir():
             if not gen.is_dir():
                 continue
-            in_flight = gen / ".in-flight"
-            if not in_flight.is_file():
-                # Generation was completed (publish removed .in-flight)
-                # but staging dir still exists -- only remove if epoch
-                # has advanced past this generation
-                gen_epoch = cls._generation_epoch(gen)
-                if gen_epoch is not None and gen_epoch >= current_epoch:
-                    # This generation is still current -- do not remove
-                    continue
-            # Generation is either in-flight (never published) or stale
+            # The marker proves incompleteness, not abandonment.  Only a
+            # mechanically newer ownership epoch makes this generation stale.
+            # Unknown/future/current authority remains untouched.
+            gen_epoch = cls._generation_epoch(gen)
+            if gen_epoch is None or gen_epoch >= current_epoch:
+                continue
             shutil.rmtree(gen, ignore_errors=True)
             removed.append(gen.name)
         return removed
@@ -1066,8 +1241,13 @@ class StagingGeneration:
             return None
         try:
             data = json.loads(manifest.read_text(encoding="utf-8"))
-            return int(data.get("epoch", -1))
-        except (OSError, json.JSONDecodeError, ValueError):
+            if not isinstance(data, dict):
+                return None
+            epoch = data.get("epoch")
+            if not isinstance(epoch, int) or isinstance(epoch, bool) or epoch < 0:
+                return None
+            return epoch
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError):
             return None
 
 
@@ -1076,16 +1256,71 @@ class StagingGeneration:
 # ---------------------------------------------------------------------------
 
 
+def _resolve_namespace_ownership(
+    root: Path | str, producer: str
+) -> Path:
+    """The canonical producer-namespace ownership resolver (W2-001).
+
+    Validates that the producer namespace resolves INSIDE the canonical
+    project root and rejects symlinks, junctions/reparse points, or any
+    resolved path outside the root. Returns the owned namespace path.
+    Raises ValueError on any containment failure.
+    """
+    root = Path(root).resolve()
+    if producer == "saitranslate":
+        ns = root / ".saipen" / "saitranslate"
+    else:
+        ns = root / ".saipen" / "extensions" / "subs" / producer
+    # Prove every existing namespace component resolves inside the root.
+    # lstat each component so a symlink/junction is detected, not followed.
+    try:
+        resolved = ns.resolve(strict=False)
+    except OSError as exc:
+        raise ValueError(
+            f"producer namespace {ns} cannot be resolved: {exc}"
+        ) from exc
+    # Containment: resolved path must be the root itself or a descendant.
+    try:
+        resolved.relative_to(root)
+    except ValueError:
+        raise ValueError(
+            f"producer namespace {ns} resolves to {resolved}, "
+            f"outside project root {root}"
+        ) from None
+    # Walk each ancestor from root down to the namespace, lstat-checking
+    # each component so a symlink/junction/reparse point is rejected
+    # BEFORE it can redirect a write or delete outside the project.
+    _check = root
+    for part in ns.relative_to(root).parts:
+        _check = _check / part
+        try:
+            st = _check.lstat()
+        except FileNotFoundError:
+            break  # Non-existent is fine; we'll create it under the root.
+        except OSError as exc:
+            raise ValueError(
+                f"producer namespace component {_check} cannot be lstat'd: {exc}"
+            ) from exc
+        # On POSIX, S_ISLNK; on Windows, reparse points via S_ISLNK too.
+        import stat as _stat
+        if _stat.S_ISLNK(st.st_mode):
+            raise ValueError(
+                f"producer namespace component {_check} is a symlink; "
+                f"producer operations refuse to follow it"
+            )
+    return ns
+
+
 def producer_namespace(root: Path | str, producer: str) -> Path:
     """The conventional on-disk namespace for a producer role.
 
     Mirrors subs.py: saitranslate -> .saipen/saitranslate (special-cased);
     saiwiki -> .saipen/extensions/subs/saiwiki.
+
+    W2-001: returns the owned namespace only after proving it resolves
+    inside the canonical project root (no symlinks/junctions/reparse).
     """
-    root = Path(root)
-    if producer == "saitranslate":
-        return root / ".saipen" / "saitranslate"
-    return root / ".saipen" / "extensions" / "subs" / producer
+    return _resolve_namespace_ownership(root, producer)
 
 
 # ---------------------------------------------------------------------------
@@ -1200,6 +1435,9 @@ def integrate_packages_core(
     *,
     apply_write: Callable[[ProducerPackage, Path], None] | None = None,
     dry_run: bool = False,
+    agent: str = "saipen-core",
+    crew_epoch: str = "",
+    ticket_id: str = "",
 ) -> dict:
     """Serialized Core integration through the canonical Core writer lock.
 
@@ -1229,9 +1467,25 @@ def integrate_packages_core(
                     }
                 )
                 continue
-            # re-classify on the live tree
-            cur_id = _live_source_identity(root_path)
-            cur_hashes = _live_hashes(root_path, p)
+            # Re-classify on the live tree. Source identity is authority for
+            # the integration decision; an unreadable/unstable source must be
+            # a structured per-package refusal, never a synthetic fallback or
+            # a public traceback.
+            try:
+                cur_id = _live_source_identity(root_path)
+                cur_hashes = _live_hashes(root_path, p)
+            except (ProducerError, OSError, UnicodeError) as exc:
+                results.append(
+                    {
+                        "package_identity": p.package_identity,
+                        "producer": p.producer,
+                        "result": "REFUSED",
+                        "code": "SOURCE_IDENTITY_FAILED",
+                        "reason": str(exc),
+                        "wrote": False,
+                    }
+                )
+                continue
             cls, reason = classify_integration(
                 (
                     p.base_source_head,
@@ -1257,9 +1511,7 @@ def integrate_packages_core(
                 continue
 
             # write/write collision with an already-integrated package?
-            collision = next(
-                (q for q in applied if set(q.write_set) & set(p.write_set)), None
-            )
+            collision = next((q for q in applied if set(q.write_set) & set(p.write_set)), None)
             if collision is not None:
                 results.append(
                     {
@@ -1290,26 +1542,106 @@ def integrate_packages_core(
                 )
                 continue
 
-            if apply_write is None:
-                # CORE-006: non-dry-run without an apply_write refuses rather
-                # than claiming APPLIED_NOOP (which was a false success).
+            payloads = dict(p.payloads)
+            if set(payloads) != set(p.write_set):
+                if apply_write is None:
+                    results.append(
+                        {
+                            "package_identity": p.package_identity,
+                            "producer": p.producer,
+                            "result": "REFUSED",
+                            "code": "PAYLOAD_MISSING",
+                            "reason": "READY package has no complete authenticated payload",
+                            "wrote": False,
+                        }
+                    )
+                    continue
+                # Compatibility adapter for old in-memory callers: execute the
+                # callback only in an isolated scratch root, capture its declared
+                # outputs, then journal those bytes.  The callback never receives
+                # the canonical root and therefore cannot leave a mixed tree.
+                import tempfile
+
+                try:
+                    with tempfile.TemporaryDirectory(prefix="saipen-producer-apply-") as td:
+                        scratch = Path(td)
+                        for rel in sorted(set(p.read_set) | set(p.write_set)):
+                            source = root_path / rel
+                            if source.is_file():
+                                target = scratch / rel
+                                target.parent.mkdir(parents=True, exist_ok=True)
+                                shutil.copyfile(source, target)
+                        apply_write(p, scratch)
+                        payloads = {}
+                        for rel in p.write_set:
+                            target = scratch / rel
+                            if not target.is_file():
+                                raise ProducerError(
+                                    f"legacy apply callback did not materialize {rel!r}"
+                                )
+                            payloads[rel] = target.read_bytes()
+                except Exception as exc:
+                    results.append(
+                        {
+                            "package_identity": p.package_identity,
+                            "producer": p.producer,
+                            "result": "REFUSED",
+                            "code": "APPLY_MATERIALIZATION_FAILED",
+                            "reason": str(exc),
+                            "wrote": False,
+                        }
+                    )
+                    continue
+
+            from .journal import run_mutation
+            from .paths import project_identity
+
+            def _integration_receipt_metadata(live_root: Path, metadata: dict) -> dict:
+                resulting = _live_source_identity(live_root)
+                metadata["resulting_source"] = resulting.source_head
+                metadata["resulting_source_fingerprint"] = resulting.source_tree_fingerprint
+                return metadata
+
+            op_id = "producer-integrate-" + p.package_identity.split(":", 1)[-1][:32]
+            journal_result = run_mutation(
+                root_path,
+                op_id,
+                "producer_integration",
+                agent,
+                project_identity(root_path),
+                p.package_identity,
+                [
+                    {"path": rel, "role": "generic", "content": payloads[rel]}
+                    for rel in sorted(payloads)
+                ],
+                receipt_metadata={
+                    "operation": "producer_integration",
+                    "status": "COMMITTED",
+                    "crew_epoch": crew_epoch,
+                    "ticket_id": ticket_id,
+                    "producer": p.producer,
+                    "package_identity": p.package_identity,
+                    "input_source": p.base_source_head,
+                    "input_source_fingerprint": p.base_source_tree_fingerprint,
+                },
+                receipt_metadata_finalize=_integration_receipt_metadata,
+                _ensure_lineage=False,
+            )
+            if not journal_result.get("ok"):
                 results.append(
                     {
                         "package_identity": p.package_identity,
                         "producer": p.producer,
                         "result": "REFUSED",
-                        "code": "NO_APPLY_WRITE",
-                        "reason": (
-                            "non-dry-run integration requires an apply_write "
-                            "callback; refusing without a canonical Core write"
-                        ),
+                        "code": journal_result.get("code", "INTEGRATION_FAILED"),
+                        "reason": journal_result.get("detail", "journaled integration failed"),
                         "wrote": False,
+                        "recovery_required": journal_result.get("recovery_required", False),
                     }
                 )
                 continue
-
-            apply_write(p, root_path)
             applied.append(p)
+            _retire_ready_package(p, supersede_older=True)
             results.append(
                 {
                     "package_identity": p.package_identity,
@@ -1318,35 +1650,64 @@ def integrate_packages_core(
                     "code": cls.value,
                     "reason": reason,
                     "wrote": True,
+                    "op_id": journal_result.get("op_id"),
                 }
             )
 
         return {"serialized": True, "results": results}
 
 
+def _retire_ready_package(package: ProducerPackage, *, supersede_older: bool = False) -> None:
+    """Atomically remove terminal package evidence from the READY hot set."""
+    source = package.ready_path
+    if source is None or not source.is_file():
+        return
+    namespace = source.parent.parent
+    settled = namespace / SETTLED_DIRNAME
+    settled.mkdir(parents=True, exist_ok=True)
+    destination = settled / source.name
+    if destination.is_file():
+        source.unlink()
+    else:
+        os.replace(source, destination)
+    if not supersede_older:
+        return
+    ready_dir = namespace / READY_DIRNAME
+    superseded = namespace / SUPERSEDED_DIRNAME
+    if not ready_dir.is_dir():
+        return
+    for candidate in list(ready_dir.glob("*.json")):
+        try:
+            data = json.loads(candidate.read_text(encoding="utf-8"))
+            epoch = data.get("epoch")
+            producer = data.get("producer")
+        except (OSError, json.JSONDecodeError):
+            continue
+        if producer != package.producer or not isinstance(epoch, int) or epoch > package.epoch:
+            continue
+        superseded.mkdir(parents=True, exist_ok=True)
+        target = superseded / candidate.name
+        if target.is_file():
+            candidate.unlink()
+        else:
+            os.replace(candidate, target)
+
+
 def _live_source_identity(root: Path) -> object:
     """Resolve the live SourceIdentity (git or no-git) without hard-coupling
     to `freshness` at import time."""
     try:
-        from freshness import compute_source_identity
-
+        from freshness import FreshnessError, compute_source_identity
+    except ImportError as exc:
+        raise ProducerError(f"source identity provider unavailable: {exc}") from exc
+    try:
         return compute_source_identity(root)
-    except Exception:
-        # Fallback: a stable synthetic identity from the whole-tree digest.
-        digest = hashlib.sha256()
-        for path in sorted(Path(root).rglob("*")):
-            if path.is_file():
-                digest.update(str(path.relative_to(root)).encode("utf-8"))
-                digest.update(file_sha256(path).encode("utf-8"))
-        return type(
-            "FallbackIdentity",
-            (),
-            {
-                "source_head": "fallback",
-                "source_tree_fingerprint": "fallback:" + digest.hexdigest(),
-                "discovery_model": "fallback-v1",
-            },
-        )()
+    except (FreshnessError, OSError, UnicodeError) as exc:
+        # Authority capture is fail-closed. The retired fallback swallowed
+        # every internal error and recursively hashed the whole project,
+        # following unrelated scratch/cache trees and potentially external
+        # symlink targets into a fabricated `fallback:` identity.
+        raise ProducerError(f"cannot capture authoritative source identity: {exc}") from exc
 
 
 def _live_hashes(root: Path, package: ProducerPackage) -> dict[str, str]:

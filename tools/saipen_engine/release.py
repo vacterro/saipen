@@ -194,7 +194,7 @@ def _capture_index_state(root: Path) -> IndexSnapshot:
     raw = result.stdout
     fields = raw.split("\0")
     paths: list[str] = []
-    entries: list[tuple[str, str, str]] = []
+    changes: list[tuple[str, str, str | None]] = []
     index = 0
     while index < len(fields):
         if not fields[index]:
@@ -217,22 +217,7 @@ def _capture_index_state(root: Path) -> IndexSnapshot:
                 )
             paths.append(old_path)
             paths.append(new_path)
-            if status_char == "R":
-                entries.append((old_path, "D", ""))
-            ls = _git(root, "ls-files", "-s", "-z", "--", new_path, literal=True)
-            mode_blob = ""
-            for piece in ls.stdout.split("\0"):
-                if not piece or "\t" not in piece:
-                    continue
-                meta = piece.split("\t", 1)[0].split()
-                if len(meta) >= 2:
-                    mode_blob = f"{meta[0]},{meta[1]}"
-                    break
-            if mode_blob:
-                mode, blob = mode_blob.split(",", 1)
-                entries.append((new_path, mode, blob))
-            else:
-                entries.append((new_path, "D", ""))
+            changes.append((status_char, old_path, new_path))
         elif status_char in ("M", "A", "D", "T", "U"):
             if index >= len(fields):
                 raise ValueError(f"truncated git diff output for status {header!r}: {raw!r}")
@@ -241,25 +226,51 @@ def _capture_index_state(root: Path) -> IndexSnapshot:
             if not path:
                 raise ValueError(f"empty path in git diff {header!r}")
             paths.append(path)
-            if status_char == "D":
-                entries.append((path, "D", ""))
-            else:
-                ls = _git(root, "ls-files", "-s", "-z", "--", path, literal=True)
-                mode_blob = ""
-                for piece in ls.stdout.split("\0"):
-                    if not piece or "\t" not in piece:
-                        continue
-                    meta = piece.split("\t", 1)[0].split()
-                    if len(meta) >= 2:
-                        mode_blob = f"{meta[0]},{meta[1]}"
-                        break
-                if mode_blob:
-                    mode, blob = mode_blob.split(",", 1)
-                    entries.append((path, mode, blob))
-                else:
-                    entries.append((path, "D", ""))
+            changes.append((status_char, path, None))
         else:
             raise ValueError(f"unknown git diff status {header!r} in {raw!r}")
+
+    # One bounded index query for every non-deleted destination.  Parse stage
+    # explicitly: an unmerged path has multiple stage entries and is refused,
+    # never silently reduced to whichever per-path subprocess answered first.
+    query_paths = sorted(
+        {
+            new_path if status in ("R", "C") else old_path
+            for status, old_path, new_path in changes
+            if status != "D"
+        }
+    )
+    index_entries: dict[str, tuple[str, str]] = {}
+    if query_paths:
+        ls = _git(root, "ls-files", "-s", "-z", "--", *query_paths, literal=True)
+        if not ls.ok:
+            raise ValueError(f"cannot batch-read index entries: {ls.stderr or ls.stdout}")
+        for piece in ls.stdout.split("\0"):
+            if not piece or "\t" not in piece:
+                continue
+            meta_text, path = piece.split("\t", 1)
+            meta = meta_text.split()
+            if len(meta) < 3:
+                raise ValueError(f"malformed git ls-files -s entry: {piece!r}")
+            mode, blob, stage = meta[:3]
+            if stage != "0" or path in index_entries:
+                raise ValueError(f"unmerged/multi-stage index entry for {path!r}")
+            index_entries[path] = (mode, blob)
+
+    entries: list[tuple[str, str, str]] = []
+    for status, old_path, new_path in changes:
+        if status == "R":
+            entries.append((old_path, "D", ""))
+        target = new_path if status in ("R", "C") else old_path
+        if status == "D":
+            entries.append((target, "D", ""))
+        else:
+            mode_blob = index_entries.get(target)
+            entries.append(
+                (target, mode_blob[0], mode_blob[1])
+                if mode_blob is not None
+                else (target, "D", "")
+            )
 
     ordered = sorted(set(paths))
     unique_entries = sorted(set(entries))
@@ -492,6 +503,10 @@ class ReleasePlan:
     crew_epoch: str = ""
     crew_closure: bool = False
     crew_scope: tuple[str, str] = ()  # (path, expected_hash) pairs
+    # A targeted producer shortcut owns one reviewed Core ticket. Persisted
+    # crew intent must not replace that route between PLAN and APPLY.
+    targeted_ticket: bool = False
+    targeted_integration_op: str = ""
     # CURRENT-SESSION actor (second-wave P0): every LOG/closure/WAIT event
     # this release writes names THIS identity, never persisted STATE.agent
     # (historical last-writer evidence). Captured at plan time so the plan is
@@ -537,6 +552,8 @@ class ReleasePlan:
             self.crew_epoch,
             self.crew_closure,
             self.crew_scope,
+            self.targeted_ticket,
+            self.targeted_integration_op,
         )
 
     @property
@@ -560,12 +577,37 @@ def _release_failure(stage: str, detail: str, **extra) -> dict:
 # ---------------------------------------------------------------------------
 
 
+_TARGETED_PRODUCER_INVOCATIONS = {
+    "ship-saiwiki": "saiwiki",
+    "ship-saitranslate": "saitranslate",
+}
+
+
+def _targeted_integration_op(root: Path, invocation: str, ticket_id: str) -> str:
+    """Committed producer intake binding for one targeted release ticket."""
+    from .journal import semantic_receipts_for_operation
+
+    role = _TARGETED_PRODUCER_INVOCATIONS.get(invocation)
+    if role is None:
+        return ""
+    matches = []
+    for receipt in semantic_receipts_for_operation(root, "producer_integration"):
+        metadata = receipt.get("receipt_metadata") or {}
+        if receipt.get("status") != "COMMITTED":
+            continue
+        if metadata.get("producer") != role or metadata.get("ticket_id") != ticket_id:
+            continue
+        matches.append((receipt.get("created_at", ""), receipt.get("op_id", "")))
+    return max(matches)[1] if matches else ""
+
+
 def plan_release(
     root: Path,
     invocation: str,
     *,
     dry_run: bool = False,
     crew_carrier: dict | None = None,
+    targeted_ticket: bool = False,
     current_capability: str | None = None,
     current_agent: str | None = None,
 ) -> "ReleasePlan":
@@ -588,6 +630,27 @@ def plan_release(
 
     version = _installed_version(root)
     state_text, state = _read_state(root)
+    targeted_integration_op = ""
+    if targeted_ticket:
+        if invocation not in _TARGETED_PRODUCER_INVOCATIONS:
+            raise ReleaseRefusal(
+                "VALIDATION_FAILED",
+                f"targeted ticket route is not valid for invocation {invocation!r}",
+            )
+        if state.get("phase") != "SHIP" or not str(state.get("task", "")).startswith("T-"):
+            raise ReleaseRefusal(
+                "ILLEGAL_PHASE",
+                "targeted producer release requires its active Core ticket in SHIP",
+            )
+        targeted_integration_op = _targeted_integration_op(
+            root, invocation, str(state["task"])
+        )
+        if not targeted_integration_op:
+            raise ReleaseRefusal(
+                "SOURCE_SCOPE_MISSING",
+                "targeted producer release has no committed integration receipt "
+                f"bound to {state['task']}",
+            )
     # T-1006: the acting identity is the ONE canonical seat -- the CLI
     # threads `_agent_for(project_root)` (inherited STATE.agent, or an
     # explicit --agent handover) as `current_agent`. The persisted
@@ -639,7 +702,7 @@ def plan_release(
     # receipts (never a manual list). The carrier is the mechanically-owned
     # decision surface; the executor still owns commit/publish/closure/tag/
     # verification/recovery.
-    if crew_carrier is None:
+    if crew_carrier is None and not targeted_ticket:
         if state.get("execution_intent") == "converge" and state.get("converge_target") == "crew":
             from .crew import crew_release_context
 
@@ -737,6 +800,8 @@ def plan_release(
             first_publish_wait=False,
             confirmation="",
             pre_plan_index=index,
+            targeted_ticket=targeted_ticket,
+            targeted_integration_op=targeted_integration_op,
             current_agent=release_actor,
         )
 
@@ -933,6 +998,8 @@ def plan_release(
         first_publish_wait=classification["first_publish_wait"],
         confirmation=confirmation,
         pre_plan_index=index,
+        targeted_ticket=targeted_ticket,
+        targeted_integration_op=targeted_integration_op,
         current_agent=release_actor,
     )
 
@@ -1221,12 +1288,21 @@ def execute_release(root: Path, plan: ReleasePlan) -> dict:
 
 def _recovery_preflight(root: Path) -> None:
     """Read-only journal scan: unresolved operations block a new release."""
-    from .journal import pending_ops
+    from .journal import scan_pending
 
-    pending = pending_ops(root)
+    pending, conflicts = scan_pending(root)
     if not pending:
         return
-    conflicts = [op for op in pending if op.get("status") == "CONFLICT"]
+    corrupt = [op for op in pending if op.get("corrupt")]
+    if corrupt:
+        raise ReleaseRefusal(
+            "CORRUPT_JOURNAL",
+            "corrupt recovery evidence: "
+            + ", ".join(
+                f"{op.get('op_id', '?')} ({op.get('detail', '')})" for op in corrupt
+            )
+            + " -- resolve explicitly before releasing",
+        )
     if conflicts:
         raise ReleaseRefusal(
             "RECOVERY_CONFLICT",
@@ -1376,7 +1452,7 @@ def _ticket_done(root: Path, ticket_id: str) -> bool:
     return bool(ticket and ticket["section"] == "## DONE" and ticket["checkbox"] == "x")
 
 
-def _committed_release_receipts(root: Path) -> list[dict]:
+def _committed_release_receipts(root: Path, receipt_snapshot=None) -> list[dict]:
     """Every COMMITTED release receipt across BOTH the recovery/ops journal AND
     the recovery/settled ledger (W2-002): terminal release receipts are moved to
     settled by _settle_journal, so reading ops alone made a settled release
@@ -1387,8 +1463,10 @@ def _committed_release_receipts(root: Path) -> list[dict]:
     never depend on LOG prose."""
     out = []
     from .journal import semantic_receipt_snapshot
-    records, _errors = semantic_receipt_snapshot(root)
-    for record in records:
+    snapshot = receipt_snapshot or semantic_receipt_snapshot(root)
+    if snapshot.errors:
+        return []
+    for record in snapshot.records:
         if (
             record.get("operation") == "release"
             and record.get("status") == "COMMITTED"
@@ -1664,6 +1742,15 @@ def _preflight_plan(root: Path, plan: ReleasePlan) -> dict:
         return _release_failure(
             "PREFLIGHT", "LOG.md changed since the plan was built; rebuild the plan"
         )
+
+    if plan.targeted_ticket:
+        live_op = _targeted_integration_op(root, plan.invocation, plan.ticket_id)
+        if not live_op or live_op != plan.targeted_integration_op:
+            return _release_failure(
+                "PREFLIGHT",
+                "targeted producer integration receipt changed or disappeared "
+                "since the plan was built",
+            )
 
     # First-publish confirmation must name THIS endpoint (T-994 / § 11).
     if plan.first_publish_wait and plan.confirmation:
@@ -2234,7 +2321,8 @@ def _apply_release_locked(root: Path, plan: ReleasePlan) -> dict:
 
             active_state = parse_state(codec.read_doc(root / ".saipen" / "STATE.md"))
             if (
-                active_state.get("execution_intent") == "converge"
+                not plan.targeted_ticket
+                and active_state.get("execution_intent") == "converge"
                 and active_state.get("converge_target") == "crew"
             ):
                 from .crew import crew_release_context
@@ -2530,19 +2618,34 @@ def _verify_index_after_gate(root: Path, plan: ReleasePlan) -> dict:
     the gate must not have pulled in any path this release does not own."""
     index = _capture_index_state(root)
 
-    def _clean_tracked(path: str) -> bool:
-        """Already part of the committed tree in exactly the bytes releasing:
-        no unstaged, no staged, and tracked. Such a path is in the index
-        without ever appearing in `git diff --cached`, so it can neither be
-        missing nor drift (T-1003 -- IDENTITY.md joined the release surface)."""
-        return (
-            not _git(root, "diff", "--name-only", "--", path).stdout.strip()
-            and not _git(root, "diff", "--cached", "--name-only", "--", path).stdout.strip()
-            and bool(_git(root, "ls-files", "--", path).stdout.strip())
-        )
-
     pre_plan = set(plan.pre_plan_index.paths)
     release = set(plan.release_paths)
+    release_paths = sorted(release)
+    if release_paths:
+        unstaged_result = _git(
+            root, "diff", "--name-only", "-z", "--", *release_paths, literal=True
+        )
+        staged_result = _git(
+            root, "diff", "--cached", "--name-only", "-z", "--", *release_paths,
+            literal=True,
+        )
+        tracked_result = _git(
+            root, "ls-files", "-z", "--", *release_paths, literal=True
+        )
+        if not (unstaged_result.ok and staged_result.ok and tracked_result.ok):
+            return {
+                "ok": False,
+                "stage": "INDEX_DRIFT",
+                "detail": "cannot batch-verify release index scope",
+            }
+        unstaged = {p for p in unstaged_result.stdout.split("\0") if p}
+        staged = {p for p in staged_result.stdout.split("\0") if p}
+        tracked = {p for p in tracked_result.stdout.split("\0") if p}
+    else:
+        unstaged, staged, tracked = set(), set(), set()
+
+    def _clean_tracked(path: str) -> bool:
+        return path not in unstaged and path not in staged and path in tracked
     # Foreign pre-plan staged paths must survive untouched; release-owned
     # paths must be in the index -- as staged changes, or already committed
     # clean. A release path that was staged at PLAN time and got normalized
@@ -2732,23 +2835,39 @@ def _apply_finish_targets(
     root: Path, journal, plan: ReleasePlan, digest: str, run_msg: str
 ) -> None:
     targets = _finish_targets(root, plan, digest, run_msg, crew=plan.crew_closure)
+    # W2-005: the release receipt is MANDATORY, not optional. Any failure
+    # to construct it raises ReleaseRefusal before closure targets are applied.
     receipt_target = _release_receipt_target(root, plan)
-    if receipt_target is not None:
-        targets.append(receipt_target)
+    targets.append(receipt_target)
     _apply_closure_targets(root, journal, targets)
 
 
-def _release_receipt_target(root: Path, plan: ReleasePlan) -> dict | None:
+def _release_receipt_target(root: Path, plan: ReleasePlan) -> dict:
     """The PUBLISHED structured release receipt target (items 20/26): a
     clone-visible closure artifact naming version, tag, ticket, source and
     mode so release continuation identity survives a fresh clone without ever
-    reading LOG prose."""
+    reading LOG prose.
+
+    W2-005: fail closed. Any inability to read/decode/preserve the receipt
+    must raise a release refusal before closure targets are applied. Genuine
+    file absence is the normal empty-document case; only actual I/O/error
+    conditions block.
+    """
     import datetime
 
     try:
         doc = codec.read_document(root / ".saipen" / "kitchen" / "release_receipt.json")
-    except OSError:
-        return None
+    except FileNotFoundError:
+        # Genuine absence: codec.read_document already returns an empty
+        # Document for a missing file, but guard anyway.
+        from .codec import Document
+        doc = Document(text="", encoding="utf-8", bom=b"", newline="\n",
+                       final_newline=False, raw_hash="")
+    except OSError as exc:
+        raise ReleaseRefusal(
+            "RECEIPT_IO_FAILURE",
+            f"cannot read release_receipt.json: {type(exc).__name__}: {exc}",
+        ) from exc
     now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     from .paths import project_lineage_identity
 
@@ -4031,36 +4150,62 @@ def _verify_receipt(root: Path, record: dict) -> dict:
     against it. Remote unavailability is UNKNOWN. No-publish receipts are
     verified for LOCAL closure truth with zero Git requirements.
     """
-    try:
-        from .paths import project_identity as _project_identity, project_lineage_identity
+    # W2-006: read and validate runtime project identity and portable
+    # project lineage INDEPENDENTLY. Failure of one source must not suppress
+    # the other. Any missing/unreadable required local authority is unknown.
+    from .paths import project_identity as _project_identity, project_lineage_identity
 
+    try:
         live_proj = _project_identity(root)
-        live_lineage = project_lineage_identity(root)
     except Exception:
         live_proj = ""
+    try:
+        live_lineage = project_lineage_identity(root)
+    except Exception:
         live_lineage = ""
     record_lineage = record.get("project_lineage")
     if record_lineage:
-        if not live_lineage or live_lineage != record_lineage:
+        # W2-006: require a SUCCESSFUL live-lineage read and exact equality.
+        # Failure to obtain lineage is unknown, not absence of contradiction.
+        if not live_lineage:
+            return {
+                "status": "unknown",
+                "reason": "could not establish live project lineage for receipt verification",
+            }
+        if live_lineage != record_lineage:
             return {
                 "status": "unknown",
                 "reason": "release receipt belongs to a different project lineage",
             }
-    elif (
-        record.get("project_identity") and live_proj and record.get("project_identity") != live_proj
-    ):
-        return {"status": "unknown", "reason": "release receipt names a different project"}
+    elif record.get("project_identity"):
+        # Legacy receipt: require successful live project-identity read.
+        if not live_proj:
+            return {
+                "status": "unknown",
+                "reason": "could not establish live project identity for receipt verification",
+            }
+        if record.get("project_identity") != live_proj:
+            return {"status": "unknown", "reason": "release receipt names a different project"}
     mode = record.get("mode") or "full"
     if mode == "no-publish":
         return _verify_no_publish_receipt(root, record)
     closure = record.get("closure_commit") or ""
     if not closure:
         return {"status": "unknown", "reason": "full-mode release receipt has no closure commit"}
+    # W2-006: require git rev-parse HEAD itself to SUCCEED and yield a
+    # valid non-empty commit. A failed/empty result is unknown, not a
+    # non-contradiction that lets remote evidence finish the verdict.
     try:
-        head = _git(root, "rev-parse", "HEAD").stdout
+        gr = _git(root, "rev-parse", "HEAD")
+        head = gr.stdout.strip() if gr.ok else ""
     except Exception:
         head = ""
-    if head and head != closure:
+    if not head:
+        return {
+            "status": "unknown",
+            "reason": "could not establish local HEAD for receipt verification",
+        }
+    if head != closure:
         return {
             "status": "unknown",
             "reason": f"release closure {closure[:12]} != current HEAD {head[:12]}",
@@ -4149,7 +4294,9 @@ def _verify_no_publish_receipt(root: Path, record: dict) -> dict:
     return {"status": "ok", "evidence": _receipt_evidence(record)}
 
 
-def release_verdict(root: Path | str, crew_epoch: str | None = None) -> dict:
+def release_verdict(
+    root: Path | str, crew_epoch: str | None = None, receipt_snapshot=None
+) -> dict:
     """Read-only canonical release receipt verdict (T-1003 sweep).
 
     Crew consumes THIS verdict, never a self-attesting JSON scan. Returns:
@@ -4173,8 +4320,13 @@ def release_verdict(root: Path | str, crew_epoch: str | None = None) -> dict:
     # (release_stage == COMMITTED) moved by _settle_journal must remain visible
     # to crew finalize. The strict decode already excluded corrupt/unparseable
     # receipts, so no synthetic {"corrupt": ...} stubs are needed.
-    records, _errors = semantic_receipt_snapshot(root)
-    for record in records:
+    snapshot = receipt_snapshot or semantic_receipt_snapshot(root)
+    if snapshot.errors:
+        return {
+            "status": "unknown",
+            "reason": "operation receipt corruption: " + "; ".join(snapshot.errors[:3]),
+        }
+    for record in snapshot.records:
         if record.get("operation") != "release":
             continue
         raw_records.append(record)

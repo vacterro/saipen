@@ -116,6 +116,15 @@ try {
 $blockCore = @"
 <!-- SAIPEN:BEGIN -->
 ## saipen protocol (global)
+FIRST-OUTPUT LANGUAGE GATE: when project root contains .saipen/, SAIPEN is
+active for the entire session including ordinary Q&A. BEFORE composing ANY
+assistant response (acknowledgement, explanation, or tool preamble), read
+STYLE.md and resolve its single reply_language: value. A pinned value (et,
+en, or ru) is the absolute chat language for EVERY response including the
+first, and incoming user language MUST NOT override it. Language detection
+precedence applies ONLY when reply_language is auto. Missing, duplicated,
+invalid, or unreadable STYLE language authority is a deterministic
+bootstrap/style failure -- never guess a language and emit substantive output.
 On "saipen set" / "saipen ..." commands, or when project root contains
 .saipen/: read $SkillHome\BOOT.md (cold-start kernel) + $SkillHome\STYLE.md
 and follow them. BOOT.md routes on to INDEX.md, and to CORE.md when a rule

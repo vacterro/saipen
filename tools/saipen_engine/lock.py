@@ -29,8 +29,16 @@ LOCK_DIR = ".saipen/locks"
 # (notably Windows msvcrt.locking), so we ALSO track the live holder here to
 # make same-process conflict detection deterministic (CORE-005 / V7). The key
 # is the resolved lock-file path; the value is the holding ProducerLock instance.
+# In-process ownership registries for same-process single-writer defense.
+# OS file locks are reentrant across distinct handles within one process
+# on some platforms (notably Windows msvcrt.locking), so we ALSO track live
+# holders here to make same-process conflict detection deterministic.
+# W2-002: the registry is a RESERVATION layer -- the key is reserved BEFORE
+# the OS lock attempt and cleared on failure, closing the check-then-publish
+# TOCTOU race.
+_WRITER_HOLDERS: dict[str, "WriterLock"] = {}
 _PRODUCER_HOLDERS: dict[str, "ProducerLock"] = {}
-_PRODUCER_HOLDERS_GUARD = threading.Lock()
+_HOLDERS_GUARD = threading.Lock()
 
 
 class WriterLock:
@@ -84,10 +92,25 @@ class WriterLock:
         self._acquired = False
 
     def acquire(self) -> bool:
-        """Blocking exclusive lock. Returns True (or raises WRITER_BUSY)."""
+        """Blocking exclusive lock. Returns True (or raises WRITER_BUSY).
+
+        W2-002: uses an atomic process-local reservation BEFORE the OS lock
+        so two same-process threads cannot both enter the critical section
+        on Windows-like reentrant OS locking.
+        """
         if self._acquired:
             return True
-        self._handle = open(self.path, "a+b")  # noqa: SIM115 -- held across the lock lifecycle, not a scoped with
+        key = str(self.path.resolve())
+        # RESERVE under the guard: reject an existing holder, then publish
+        # ourselves BEFORE attempting the OS lock. This closes the
+        # check-then-publish TOCTOU race.
+        with _HOLDERS_GUARD:
+            holder = _WRITER_HOLDERS.get(key)
+            if holder is not None and holder is not self and holder._acquired:
+                raise PermissionError("WRITER_BUSY")
+            _WRITER_HOLDERS[key] = self
+        # Attempt the OS lock; on failure, atomically clear our reservation.
+        self._handle = open(self.path, "a+b")  # noqa: SIM115
         try:
             if _MSVCRT is not None:
                 _MSVCRT.locking(self._handle.fileno(), _MSVCRT.LK_NBLCK, 1)
@@ -96,6 +119,9 @@ class WriterLock:
         except OSError:
             self._handle.close()
             self._handle = None
+            with _HOLDERS_GUARD:
+                if _WRITER_HOLDERS.get(key) is self:
+                    del _WRITER_HOLDERS[key]
             raise PermissionError("WRITER_BUSY")
         self._acquired = True
         return True
@@ -103,6 +129,7 @@ class WriterLock:
     def release(self) -> None:
         if not self._acquired or self._handle is None:
             return
+        key = str(self.path.resolve())
         try:
             if _MSVCRT is not None:
                 self._handle.seek(0)
@@ -113,6 +140,9 @@ class WriterLock:
             self._handle.close()
             self._handle = None
             self._acquired = False
+            with _HOLDERS_GUARD:
+                if _WRITER_HOLDERS.get(key) is self:
+                    del _WRITER_HOLDERS[key]
 
     def __enter__(self) -> "WriterLock":
         self.acquire()
@@ -176,19 +206,24 @@ class ProducerLock:
         self._acquired = False
 
     def acquire(self) -> bool:
-        """Blocking-exclusive, non-blocking acquire. Raises WRITER_BUSY on conflict."""
+        """Blocking-exclusive, non-blocking acquire. Raises WRITER_BUSY on conflict.
+
+        W2-002: uses an atomic process-local reservation BEFORE the OS lock
+        so two same-process threads cannot both enter the critical section
+        on Windows-like reentrant OS locking.
+        """
         if self._acquired:
             return True
         key = str(self.path.resolve())
-        # In-process guard (CORE-005 / V7): a second ProducerLock for the same
-        # producer MUST conflict even when the OS lock is reentrant across
-        # distinct handles within one process (Windows msvcrt.locking). This is
-        # what lets recovery detect a live writer and return busy instead of
-        # deleting an in-flight generation.
-        with _PRODUCER_HOLDERS_GUARD:
+        # RESERVE under the guard: reject an existing holder, then publish
+        # ourselves BEFORE attempting the OS lock. This closes the
+        # check-then-publish TOCTOU race.
+        with _HOLDERS_GUARD:
             holder = _PRODUCER_HOLDERS.get(key)
             if holder is not None and holder is not self and holder._acquired:
                 raise PermissionError(f"PRODUCER_BUSY: {self.producer} is already writing")
+            _PRODUCER_HOLDERS[key] = self
+        # Attempt the OS lock; on failure, atomically clear our reservation.
         self._handle = open(self.path, "a+b")  # noqa: SIM115 -- held across the lock lifecycle
         try:
             if _MSVCRT is not None:
@@ -198,9 +233,10 @@ class ProducerLock:
         except OSError:
             self._handle.close()
             self._handle = None
+            with _HOLDERS_GUARD:
+                if _PRODUCER_HOLDERS.get(key) is self:
+                    del _PRODUCER_HOLDERS[key]
             raise PermissionError(f"PRODUCER_BUSY: {self.producer} is already writing")
-        with _PRODUCER_HOLDERS_GUARD:
-            _PRODUCER_HOLDERS[key] = self
         self._acquired = True
         return True
 
@@ -218,7 +254,7 @@ class ProducerLock:
             self._handle.close()
             self._handle = None
             self._acquired = False
-        with _PRODUCER_HOLDERS_GUARD:
+        with _HOLDERS_GUARD:
             if _PRODUCER_HOLDERS.get(key) is self:
                 del _PRODUCER_HOLDERS[key]
 

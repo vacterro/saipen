@@ -39,8 +39,8 @@ from .board import (
     ticket_is_workable,
 )
 from .codec import redact_credentials
-from .fast_check import validate_texts
-from .journal import hash_bytes
+from .fast_check import block_parked_evidence_error, validate_texts
+from .journal import MISSING_FILE_DEPENDENCY, hash_bytes
 from .log import build_event
 from .plan import OperationPlan, TargetPlan, apply_plan, build_plan
 from .result import Result
@@ -202,6 +202,9 @@ def _read(root: Path, *, allow_dead_home: bool = False) -> tuple[dict, dict, dic
         snapshot, _logs_digest = read_history_snapshot_and_logs_digest(root)
     except HistoryOwnershipError as exc:
         raise CheckpointError(f"history-ownership: {exc}")
+    parked_error = block_parked_evidence_error(state, board, snapshot.events)
+    if parked_error is not None:
+        raise CheckpointError(f"state-history-binding: {parked_error}")
     _home = state.get("saipen_home")
     # T-1010: the cross-platform absolute classifier -- a foreign-OS absolute
     # home must not read as legacy-relative on this host and skip the
@@ -264,6 +267,19 @@ def _docs_preconditions(docs: dict, *keys: str) -> dict:
     return pc
 
 
+def _fold_handover(state: dict, agent: str, message: str) -> str:
+    """Fold the old -> new ownership edge into the mutation's own DEC message
+    (CORE-003). When the acting agent differs from persisted STATE.agent,
+    prepend `agent handover old -> new` to the operation's DEC so the Event
+    Graph shows the ownership edge in the SAME transaction as the dependent
+    mutation -- no separate pre-write, no orphaned handover DEC on rejection.
+    """
+    old = state.get("agent")
+    if old and old != agent:
+        return f"agent handover {old} -> {agent}; {message}"
+    return message
+
+
 def _event_line(
     docs: dict,
     log_tail: int | None,
@@ -304,8 +320,11 @@ def _iter_operation_records(root: Path):
     have been moved to recovery/settled remain visible.
     """
     from .journal import semantic_receipt_snapshot
-    records, _errors = semantic_receipt_snapshot(root)
-    yield from records
+
+    snapshot = semantic_receipt_snapshot(root)
+    if snapshot.errors:
+        return
+    yield from snapshot.records
 
 
 def _strict_created_at(value: object) -> str:
@@ -545,6 +564,7 @@ def _plan_claim(
             )
         else:
             _msg = f"claimed via SAIOPS -- owner {agent}"
+        _msg = _fold_handover(state, agent, _msg)
         event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent, _msg, now, op_id)
         new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
         new_board = _claim_fields_in_place(
@@ -818,7 +838,7 @@ def _plan_transition(
         if not ok:
             return _refuse(
                 "INCOMPLETE_TICKET",
-                f"VERIFY -> REVIEW requires explicit verification evidence for ticket {subject} (got: {reason})", # noqa: E501
+                f"VERIFY -> REVIEW requires explicit verification evidence for ticket {subject} (got: {reason})",  # noqa: E501
                 phase=destination,
                 ticket=subject,
             )
@@ -1271,6 +1291,16 @@ def _ticket_targets(
         else:
             owned["next_action"] = "saipen continue"
         owned["transition_from"] = state.get("phase")
+    elif (
+        state.get("phase") == "DONE"
+        and state.get("transition_from")
+        in ("SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP")
+    ):
+        # This ticket move is a later canonical state event. If it follows an
+        # active-ticket block, record the actual DONE -> DONE self-transition
+        # so an unblock cannot leave STATE claiming the narrow block-parked
+        # exception after the ticket has left BOARD.BLOCKED.
+        owned["transition_from"] = "DONE"
     new_state = patch_state(docs["state"].text_norm, owned)
     # Routing after a structural move must not walk over a hard stop: a
     # safety-valve or user WAIT is preserved, never replaced by a fresh pick.
@@ -1428,7 +1458,7 @@ def _plan_finish_ticket(
     if not ok:
         return _refuse(
             "INCOMPLETE_TICKET",
-            f"finish requires explicit verification evidence for ticket {ticket_id} (got: {reason})", # noqa: E501
+            f"finish requires explicit verification evidence for ticket {ticket_id} (got: {reason})",  # noqa: E501
             ticket=ticket_id,
         )
 
@@ -1688,7 +1718,8 @@ def ticket_add(
     )
     new_board = _insert_todo(docs["board"].text_norm, desc)
     event, line = _event_line(
-        docs, log_tail, "DEC", f"T-{tid}", agent, "ticket added via SAIOPS", now, op_id
+        docs, log_tail, "DEC", f"T-{tid}", agent,
+        _fold_handover(_state, agent, "ticket added via SAIOPS"), now, op_id
     )
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     owned = {
@@ -1791,7 +1822,7 @@ def _state_only_plan(
         docs, _state, _board, log_tail = read_once
     else:
         docs, _state, _board, log_tail = _read(root, allow_dead_home=allow_dead_home)
-    event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent, event_message, now, op_id)
+    event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent, _fold_handover(_state, agent, event_message), now, op_id)
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     new_state = mutate(docs["state"].text_norm, event)
     errors = validate_texts(new_state, docs["board"].text_norm, new_log, current_agent=agent)
@@ -1815,7 +1846,23 @@ def _state_only_plan(
         # codec.read_document of a missing file hashes empty BYTES. The plan
         # precondition must use the live convention or a first-time write of
         # an extra target would refuse itself as STALE_STATE.
-        preconditions[target.path] = target.before_hash if (root / target.path).exists() else ""
+        # A domain snapshot may already bind this target to older bytes.  Keep
+        # that earlier authority so a change between planning and extra-target
+        # construction becomes STALE_STATE instead of being laundered into the
+        # new plan as its own precondition.
+        target_before = target.before_hash if (root / target.path).exists() else ""
+        if (
+            preconditions.get(target.path) == MISSING_FILE_DEPENDENCY
+            and target_before == ""
+        ):
+            # The domain snapshot represented an absent READ dependency with
+            # the safe file token; once that same path becomes a WRITE target,
+            # journal CAS represents absence as "". Normalize only this exact
+            # equivalent state. If another writer creates the file before
+            # APPLY, its nonempty live hash still differs from "" and refuses.
+            preconditions[target.path] = ""
+        else:
+            preconditions.setdefault(target.path, target_before)
     return build_plan(
         operation,
         agent,
@@ -1912,6 +1959,14 @@ def _goal_plan_steps(objective: str) -> list[str]:
     return steps[:GOAL_TICKET_CAP]
 
 
+def _goal_plan_ticket_ids(board_text: str, history_text: str, count: int) -> list[str]:
+    """Allocate one collision-free monotonic ID block from a frozen snapshot."""
+    if count < 0 or count > GOAL_TICKET_CAP:
+        raise ValueError(f"goal plan ticket count {count} outside 0..{GOAL_TICKET_CAP}")
+    first = next_ticket_id(board_text, history_text)
+    return [f"T-{first + offset}" for offset in range(count)]
+
+
 @_state_guard
 def goal_entry(
     project_root: Path | str, agent: str, objective: str, dry_run: bool = False
@@ -1921,12 +1976,14 @@ def goal_entry(
     The ONE canonical pivot that durably captures a NEW objective and plans it
     into the board. Cross-file transaction owns:
 
-    LOG:   pivot DEC event (redacted objective)
+    LOG:   pivot DEC event (redacted objective) plus the countable Entry PLAN
+           wave bump required by MAINTENANCE.md section 2.4;
     BOARD: checkpoint active DOING ticket -> TODO (demote, clear claim fields);
            generate the new objective's PLAN tickets ABOVE the existing TODO
            (no deletion); promote the first plan ticket to DOING (SCOUT claim).
     STATE: execution_intent -> goal, goal_waves -> 1 (Entry PLAN, exactly once),
-           goal_tickets -> <plan count>, next_action -> first plan ticket.
+           goal_tickets -> 0 (tickets count only after VERIFY), next_action ->
+           first plan ticket.
 
     W2-004: a missing/whitespace/normalized-empty objective is refused with
     ZERO writes before any handover/LOG/counter/BOARD/journal touch.
@@ -1967,7 +2024,10 @@ def goal_entry(
     pivot_event, pivot_line = _event_line(
         docs, log_tail, "DEC", active_ticket, agent, pivot_msg, now, op_id
     )
-    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + pivot_line + "\n"
+    wave_event, wave_line = _event_line(
+        docs, pivot_event, "DEC", active_ticket, agent, "goal_waves 0->1", now, op_id
+    )
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + pivot_line + "\n" + wave_line + "\n"
 
     # --- BOARD: demote active DOING, then plan the new objective above TODO ---
     new_board_text = docs["board"].text_norm
@@ -2000,17 +2060,26 @@ def goal_entry(
     # the existing backlog.
     steps = _goal_plan_steps(safe_objective)
     plan_lines = []
-    plan_ids = []
-    for step in steps:
-        tid = next_ticket_id(new_board_text, docs["_history"].text)
+    plan_ids = _goal_plan_ticket_ids(new_board_text, docs["_history"].text, len(steps))
+    if (
+        len(plan_ids) != len(steps)
+        or len(set(plan_ids)) != len(plan_ids)
+        or any(re.fullmatch(r"T-[1-9]\d*", ticket_id) is None for ticket_id in plan_ids)
+    ):
+        return _refuse(
+            "VALIDATION_FAILED",
+            "goal plan ticket allocator returned duplicate, malformed, or incomplete IDs",
+            plan_tickets=plan_ids,
+        )
+    for step, ticket_id in zip(steps, plan_ids, strict=True):
         desc = escape_ticket_description(step)
-        plan_ids.append(f"T-{tid}")
-        plan_lines.append(f"- [ ] T-{tid} [P1] {desc}")
+        verify = escape_ticket_description(
+            f"{step} is complete and the repository-declared verification harness passes"
+        )
+        plan_lines.append(f"- [ ] {ticket_id} [P1] {desc} | verify: {verify}")
     if plan_lines:
         blines = new_board_text.splitlines(keepends=True)
-        todo_idx = next(
-            i for i, ln in enumerate(blines) if ln.rstrip("\n").startswith("## TODO")
-        )
+        todo_idx = next(i for i, ln in enumerate(blines) if ln.rstrip("\n").startswith("## TODO"))
         # Insert the plan block ABOVE existing TODO; plan_lines order preserved
         # (first step on top) so the new objective outranks the old backlog.
         blines.insert(todo_idx + 1, "".join(line + "\n" for line in plan_lines))
@@ -2037,11 +2106,9 @@ def goal_entry(
         new_phase = cur_phase
     if active_ticket and first_id is None:
         new_phase = "DONE"
-    next_action = (
-        f"PHASE SCOUT {first_id}" if first_id is not None else "saipen continue"
-    )
+    next_action = f"PHASE SCOUT {first_id}" if first_id is not None else "saipen continue"
     transitioned = transition_execution_intent(
-        docs["state"].text_norm, "goal", goal_waves=1, goal_tickets=len(plan_ids)
+        docs["state"].text_norm, "goal", goal_waves=1, goal_tickets=0
     )
     new_state = patch_state(
         transitioned,
@@ -2050,8 +2117,12 @@ def goal_entry(
             "task": first_id if first_id is not None else "none",
             "next_action": next_action,
             # CORE-009: only set transition_from when the phase actually changes
-            "transition_from": (state.get("phase") or "DONE") if new_phase != (state.get("phase") or "DONE") else new_phase,
-            "last_event": pivot_event,
+            "transition_from": (
+                (state.get("phase") or "DONE")
+                if new_phase != (state.get("phase") or "DONE")
+                else new_phase
+            ),
+            "last_event": wave_event,
             "updated": utc,
             "agent": agent,
         },
@@ -2061,8 +2132,7 @@ def goal_entry(
     if errors:
         return _refuse(
             "VALIDATION_FAILED",
-            "proposed goal-entry state fails fast validation: "
-            + "; ".join(errors[:5]),
+            "proposed goal-entry state fails fast validation: " + "; ".join(errors[:5]),
         )
 
     targets = [
@@ -2073,12 +2143,12 @@ def goal_entry(
     expected = {
         "ok": True,
         "code": "GOAL_SET",
-        "event_id": f"E-{pivot_event}",
+        "event_id": f"E-{wave_event}",
         "objective": safe_objective,
         "demoted": active_ticket,
         "plan_tickets": plan_ids,
         "goal_waves": 1,
-        "goal_tickets": len(plan_ids),
+        "goal_tickets": 0,
     }
     plan = build_plan(
         "goal_entry",
@@ -2104,7 +2174,12 @@ def goal_entry(
 
 @_state_guard
 def set_converge_intent(
-    project_root: Path | str, agent: str, target: str = "done", dry_run: bool = False
+    project_root: Path | str,
+    agent: str,
+    target: str = "done",
+    dry_run: bool = False,
+    *,
+    required_source_intent: str | None = None,
 ) -> Result:
     """Persist a complete converge-family transition without losing work.
 
@@ -2119,6 +2194,14 @@ def set_converge_intent(
     # P0): the authorization/derivation decision and the plan must consume the
     # exact same STATE/BOARD/LOG bytes. No second independent `_read`.
     _docs, before_state, _board, _tail = _read(root)
+    source_intent = before_state.get("execution_intent") or "normal"
+    if required_source_intent is not None and source_intent != required_source_intent:
+        return _refuse(
+            "STALE_STATE",
+            "execution intent changed before converge entry: "
+            f"expected {required_source_intent}, found {source_intent}",
+            execution_intent=source_intent,
+        )
     entry_ticket = before_state.get("task")
     if entry_ticket in (None, "", "none"):
         entry_ticket = None
@@ -2160,27 +2243,30 @@ def set_converge_intent(
             epoch_doc = codec.read_document(root / ".saipen" / "kitchen" / "crew_epoch.json")
         except OSError:
             epoch_doc = None
-        epoch_content = (
-            json.dumps(
-                {
-                    "schema_version": 1,
-                    "operation": "crew_epoch",
-                    "op_id": epoch_op_id,
-                    "target": "crew",
-                    "status": "COMMITTED",
-                    "ticket_id": entry_ticket,
-                    "created_at": utc,
-                    "project_lineage": project_lineage_identity(root),
-                },
-                indent=2,
-                sort_keys=True,
-            )
-            + "\n"
-        )
+        epoch_record = {
+            "schema_version": 1,
+            "operation": "crew_epoch",
+            "op_id": epoch_op_id,
+            "target": "crew",
+            "status": "COMMITTED",
+            "created_at": utc,
+            "project_lineage": project_lineage_identity(root),
+        }
+        if entry_ticket is not None:
+            epoch_record["ticket_id"] = entry_ticket
+        epoch_content = json.dumps(epoch_record, indent=2, sort_keys=True) + "\n"
         epoch_target = _target(
             epoch_doc, ".saipen/kitchen/crew_epoch.json", "report", epoch_content
         )
         extra_targets = [epoch_target]
+    converge_metadata = {
+        "operation": "converge_intent",
+        "target": target,
+        "status": "COMMITTED",
+        "project_identity": _identity(root),
+    }
+    if entry_ticket is not None:
+        converge_metadata["ticket_id"] = entry_ticket
     plan = _state_only_plan(
         root,
         "converge_intent",
@@ -2197,13 +2283,7 @@ def set_converge_intent(
         utc,
         {"execution_intent", "converge_target", "goal_waves", "goal_tickets", "next_action"},
         ticket_id=entry_ticket,
-        receipt_metadata={
-            "operation": "converge_intent",
-            "target": target,
-            "status": "COMMITTED",
-            "project_identity": _identity(root),
-            "ticket_id": entry_ticket,
-        },
+        receipt_metadata=converge_metadata,
         extra_targets=extra_targets,
         op_id=epoch_op_id,
         read_once=(_docs, before_state, _board, _tail),
@@ -2255,6 +2335,16 @@ def finalize_converge_intent(
             },
         )
 
+    finalize_metadata = receipt_metadata
+    if not finalize_metadata:
+        finalize_metadata = {
+            "operation": f"finalize_{target}",
+            "target": target,
+            "status": "COMMITTED",
+            "project_identity": _identity(root),
+        }
+        if ticket_id is not None:
+            finalize_metadata["ticket_id"] = ticket_id
     plan = _state_only_plan(
         root,
         f"finalize_{target}",
@@ -2276,14 +2366,7 @@ def finalize_converge_intent(
         },
         ticket_id=ticket_id,
         evidence_preconditions=evidence_preconditions,
-        receipt_metadata=receipt_metadata
-        or {
-            "operation": f"finalize_{target}",
-            "target": target,
-            "status": "COMMITTED",
-            "project_identity": _identity(root),
-            "ticket_id": ticket_id,
-        },
+        receipt_metadata=finalize_metadata,
         extra_targets=extra_targets,
         read_once=(_docs, state, _board, _tail),
     )
@@ -2409,7 +2492,9 @@ def rebind_saipen_home(
 
 
 @_state_guard
-def handover_agent(project_root: Path | str, new_agent: str, dry_run: bool = False, allow_dead_home: bool = False) -> Result:
+def handover_agent(
+    project_root: Path | str, new_agent: str, dry_run: bool = False, allow_dead_home: bool = False
+) -> Result:
     """The ONE explicit agent-handover operation (T-1006).
 
     CORE.md section 1.4 and BOOT.md: the seat is inherited from STATE.agent,
@@ -2582,6 +2667,11 @@ def reauthorize_valve(project_root: Path | str, agent: str, dry_run: bool = Fals
             {
                 "goal_waves": 0,
                 "goal_tickets": 0,
+                # The persisted safety-valve WAIT describes the pre-reset
+                # authorization state. Keeping it after reauthorization
+                # would make route_next bind the stale brake and deadlock the
+                # command that just cleared the valve.
+                "next_action": "saipen continue",
                 "last_event": event,
                 "updated": utc,
                 "agent": agent,
@@ -2597,7 +2687,7 @@ def reauthorize_valve(project_root: Path | str, agent: str, dry_run: bool = Fals
         {"ok": True, "code": "VALVE_REAUTHORIZED"},
         now,
         utc,
-        {"goal_waves", "goal_tickets"},
+        {"goal_waves", "goal_tickets", "next_action"},
         read_once=(_docs, state, _board, _log_tail),
     )
     if isinstance(plan, Result):
@@ -3103,7 +3193,7 @@ def _plan_crew_closure(
     }
     new_state = patch_state(docs["state"].text_norm, owned)
     from .router import route_next
-    
+
     new_board = docs["board"].text_norm
     routed = route_next(new_state, new_board, current_agent=agent)
     if routed.get("ok") and routed.get("action") != "saipen continue":
@@ -3148,6 +3238,13 @@ def _plan_crew_closure(
         targets,
         expected,
         op_id=op_id,
+    )
+
+
+def _is_converge_intent_epoch(value: object) -> bool:
+    """True only for the exact op-id shape minted by set_converge_intent."""
+    return (
+        isinstance(value, str) and re.fullmatch(r"converge_intent-[0-9a-f]{32}", value) is not None
     )
 
 
@@ -3220,7 +3317,11 @@ def _plan_defer_for_crew(
             ticket=ticket_id,
             phase=prev_phase,
         )
-    if not crew_epoch or not re.fullmatch(r"[a-z0-9_-]+-[0-9a-f]{8}", crew_epoch):
+    # ``set_converge_intent`` is the sole epoch producer and persists
+    # ``converge_intent-`` plus ``uuid4().hex`` (32 lowercase hex chars).
+    # Accept that exact identity instead of the old generic uuid8 shape,
+    # which rejected every real crew epoch while accepting unrelated op IDs.
+    if not _is_converge_intent_epoch(crew_epoch):
         return _refuse(
             "VALIDATION_FAILED",
             f"crew_epoch {crew_epoch!r} is not a structured converge_intent op identity",
@@ -3400,7 +3501,7 @@ def _plan_clear_wait_role(
     IS the role's evidence, never prose, never a human courier. Core state
     stays DONE/task none; a crew-owned blocker is work for SC, not a
     terminal human stop."""
-    docs, _state, board, log_tail = _read(root)
+    docs, state, board, log_tail = _read(root)
     if board["errors"]:
         return _refuse(
             "VALIDATION_FAILED", "BOARD parse error(s): " + "; ".join(board["errors"][:3])
@@ -3437,14 +3538,14 @@ def _plan_clear_wait_role(
     )
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     new_board = _move_ticket(docs["board"].text_norm, ticket_id, "## DONE", "[x]", "done", "")
-    new_state = patch_state(
-        docs["state"].text_norm,
-        {
-            "last_event": event,
-            "updated": utc,
-            "agent": agent,
-        },
-    )
+    owned = {"last_event": event, "updated": utc, "agent": agent}
+    if (
+        state.get("phase") == "DONE"
+        and state.get("transition_from")
+        in ("SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP")
+    ):
+        owned["transition_from"] = "DONE"
+    new_state = patch_state(docs["state"].text_norm, owned)
     errors = validate_texts(new_state, new_board, new_log, current_agent=agent)
     if errors:
         return _refuse(

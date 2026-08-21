@@ -35,10 +35,10 @@ def route_next(
     board_text: str,
     pending_ops: list | None = None,
     conflict_ops: list | None = None,
-    now: datetime.datetime | None = None, # noqa: F821
+    now: datetime.datetime | None = None,  # noqa: F821
     current_capability: str | None = None,
     current_agent: str | None = None,
-    snap = None,
+    snap=None,
     # PERF-004: optional pre-parsed objects from the caller to avoid
     # redundant STATE/BOARD parsing. When provided, these take precedence
     # over parsing state_text/board_text.
@@ -77,7 +77,7 @@ def route_next(
     # checkpoint-surface validation and the routing logic below. When the
     # caller provides pre-parsed objects, skip parsing entirely.
     from .state import parse_state_or_error
-    from .board import parse_board
+
     if _state is not None and _board is not None and _state_error is not None:
         state, state_error, board = _state, _state_error, _board
     else:
@@ -85,9 +85,15 @@ def route_next(
         board = parse_board(board_text)
     if snap is not None:
         from .fast_check import validate_checkpoint_surface
+
         errors = validate_checkpoint_surface(
-            state_text, board_text, snap,
-            current_agent=current_agent, _state=state, _board=board, _state_error=state_error,
+            state_text,
+            board_text,
+            snap,
+            current_agent=current_agent,
+            _state=state,
+            _board=board,
+            _state_error=state_error,
         )
         if errors:
             return {
@@ -450,7 +456,7 @@ def route_next_result(
     board_text: str,
     pending_ops_list: list | None = None,
     conflict_ops_list: list | None = None,
-    snap = None,
+    snap=None,
 ) -> Result:
     """route_next wrapped in the stable Result shape for status/next/context."""
     out = route_next(state_text, board_text, pending_ops_list, conflict_ops_list, snap=snap)
@@ -487,6 +493,7 @@ def route_next_result(
     ):
         try:
             from .conformance import conformance_status, STATUS_CURRENT_PASS
+
             _cs = conformance_status(project_root, gate="core")
             if _cs.get("status") not in (STATUS_CURRENT_PASS, "NOT_RUN"):
                 return Result(
@@ -503,8 +510,25 @@ def route_next_result(
                         "conformance_status": _cs["status"],
                     },
                 )
-        except Exception:
-            pass  # If conformance module is unavailable, don't block routing
+        except Exception as exc:
+            # W2-007: fail closed when conformance cannot be positively
+            # established. An import/read/decode or unexpected runtime
+            # failure at the gate disables the gate and masks its root cause
+            # if it falls through to ROUTED. Route toward validate/recover
+            # instead of crew execution.
+            return Result(
+                ok=False,
+                code="CONFORMANCE_UNKNOWN",
+                data={
+                    "action": "saipen status",
+                    "reason": "conformance-unknown",
+                    "detail": (
+                        f"crew convergence could not establish conformance "
+                        f"evidence ({type(exc).__name__}: {exc}); "
+                        "run 'saipen validate' before crew work"
+                    ),
+                },
+            )
     return Result(
         ok=bool(out.get("ok")),
         code=("ROUTED" if out.get("ok") else routing_failure_code(out)),

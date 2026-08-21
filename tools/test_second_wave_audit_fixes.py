@@ -16,12 +16,14 @@ import sys
 import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from unittest import mock
 
 TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
 import saipen as cli  # noqa: E402  (the CLI module under test)
+from saipen_engine import operations as OPS  # noqa: E402
 from saipen_engine.operations import (  # noqa: E402
     goal_entry,
     handover_agent,
@@ -146,7 +148,11 @@ def test_w2001() -> None:
     rc = _run_cli(root2, "--agent", "boundary-new", "claim", "T-1")
     st = _state(root2)
     check("W2-001 valid different-agent claim succeeds", rc == 0, f"rc={rc}")
-    check("W2-001 valid claim changes seat exactly once", st.get("agent") == "boundary-new", f"agent={st.get('agent')}")
+    check(
+        "W2-001 valid claim changes seat exactly once",
+        st.get("agent") == "boundary-new",
+        f"agent={st.get('agent')}",
+    )
     # Exactly one new DEC was appended (the claim DEC), no separate handover DEC.
     new_dec = _log_text(root2).count("DEC")  # legacy-free count: each DEC line has 'DEC'
     check(
@@ -202,14 +208,20 @@ def test_w2002() -> None:
     _write_project(root, "oldagent")
     res = handover_agent(root, "newseat")
     check("W2-002 no-active-ticket handover succeeds", res.ok, str(res))
-    check("W2-002 no-active-ticket: seat changed, board untouched", _state(root).get("agent") == "newseat" and _board_text(root).count("owner:") == 0, str(res))
+    check(
+        "W2-002 no-active-ticket: seat changed, board untouched",
+        _state(root).get("agent") == "newseat" and _board_text(root).count("owner:") == 0,
+        str(res),
+    )
 
     # --- (b) active SELF claim -> atomically transferred -------------------
     root2 = Path(tempfile.mkdtemp())
     _write_project(
         root2,
         "oldagent",
-        doing_lines=("- [/] T-1 [P1] active work | owner: oldagent | claim_time: 2026-08-19T16:00:00Z\n",),
+        doing_lines=(
+            "- [/] T-1 [P1] active work | owner: oldagent | claim_time: 2026-08-19T16:00:00Z\n",
+        ),
         phase="SCOUT",
         task="T-1",
     )
@@ -217,9 +229,16 @@ def test_w2002() -> None:
     check("W2-002 active SELF claim handover succeeds", res.ok, str(res))
     bt = _board_text(root2)
     doing = bt.split("## DOING")[1].split("## DONE")[0]
-    check("W2-002 active SELF claim transferred to new seat", "owner: newseat" in doing, doing[:160])
+    check(
+        "W2-002 active SELF claim transferred to new seat", "owner: newseat" in doing, doing[:160]
+    )
     check("W2-002 active SELF: seat + claim stay bound", _state(root2).get("agent") == "newseat")
-    errs = validate_texts(_state(root2).get("phase") and _read_state_text(root2), bt, _log_text(root2), current_agent="newseat")
+    errs = validate_texts(
+        _state(root2).get("phase") and _read_state_text(root2),
+        bt,
+        _log_text(root2),
+        current_agent="newseat",
+    )
     check("W2-002 active SELF: post-handover state validates clean", not errs, str(errs))
 
     # --- (c) active FOREIGN_LIVE -> refuse (zero write) --------------------
@@ -236,7 +255,11 @@ def test_w2002() -> None:
     )
     b3 = _snap(root3)
     res = handover_agent(root3, "newseat")
-    check("W2-002 active FOREIGN_LIVE refused", (not res.ok) and res.code == "ACTIVE_CLAIM_FOREIGN", str(res))
+    check(
+        "W2-002 active FOREIGN_LIVE refused",
+        (not res.ok) and res.code == "ACTIVE_CLAIM_FOREIGN",
+        str(res),
+    )
     check("W2-002 active FOREIGN_LIVE is zero-write", _files_unchanged(root3, b3), str(res))
 
     # --- (d) active INVALID claim (half pair) -> refuse --------------------
@@ -250,7 +273,11 @@ def test_w2002() -> None:
     )
     b4 = _snap(root4)
     res = handover_agent(root4, "newseat")
-    check("W2-002 active INVALID claim refused", (not res.ok) and res.code == "VALIDATION_FAILED", str(res))
+    check(
+        "W2-002 active INVALID claim refused",
+        (not res.ok) and res.code == "VALIDATION_FAILED",
+        str(res),
+    )
     check("W2-002 active INVALID is zero-write", _files_unchanged(root4, b4), str(res))
 
     # --- (e) active FOREIGN_STALE -> transferred (lapsed claim) ------------
@@ -258,14 +285,18 @@ def test_w2002() -> None:
     _write_project(
         root5,
         "oldagent",
-        doing_lines=("- [/] T-1 [P1] active work | owner: other | claim_time: 2020-01-01T00:00:00Z\n",),
+        doing_lines=(
+            "- [/] T-1 [P1] active work | owner: other | claim_time: 2020-01-01T00:00:00Z\n",
+        ),
         phase="SCOUT",
         task="T-1",
     )
     res = handover_agent(root5, "newseat")
     check("W2-002 active FOREIGN_STALE handed over (claim adopted by new seat)", res.ok, str(res))
     doing5 = _board_text(root5).split("## DOING")[1].split("## DONE")[0]
-    check("W2-002 FOREIGN_STALE claim now owned by new seat", "owner: newseat" in doing5, doing5[:160])
+    check(
+        "W2-002 FOREIGN_STALE claim now owned by new seat", "owner: newseat" in doing5, doing5[:160]
+    )
 
 
 def _read_state_text(root: Path) -> str:
@@ -283,9 +314,27 @@ def test_w2003() -> None:
     res = goal_entry(root, "oldagent", "Ship the v8 release to production")
     check("W2-003 empty board goal entry succeeds", res.ok, str(res))
     st = _state(root)
-    check("W2-003 Entry PLAN recorded exactly once (goal_waves==1)", st.get("goal_waves") == 1, f"goal_waves={st.get('goal_waves')}")
-    check("W2-003 goal_tickets reflects plan count", int(st.get("goal_tickets") or 0) >= 1, f"goal_tickets={st.get('goal_tickets')}")
-    check("W2-003 next_action targets the new objective", str(st.get("next_action", "")).startswith("PHASE SCOUT"), f"na={st.get('next_action')}")
+    check(
+        "W2-003 Entry PLAN recorded exactly once (goal_waves==1)",
+        st.get("goal_waves") == 1,
+        f"goal_waves={st.get('goal_waves')}",
+    )
+    check(
+        "W2-003 goal_tickets counts VERIFY passes only",
+        st.get("goal_tickets") == 0,
+        f"goal_tickets={st.get('goal_tickets')}",
+    )
+    log = (root / ".saipen" / "LOG.md").read_text(encoding="utf-8")
+    check(
+        "W2-003 Entry PLAN wave bump is recoverable from LOG",
+        "DEC: goal_waves 0->1" in log,
+        log[-300:],
+    )
+    check(
+        "W2-003 next_action targets the new objective",
+        str(st.get("next_action", "")).startswith("PHASE SCOUT"),
+        f"na={st.get('next_action')}",
+    )
 
     # --- (b) old TODO backlog -> new plan tickets outrank old -------------
     root2 = Path(tempfile.mkdtemp())
@@ -304,8 +353,17 @@ def test_w2003() -> None:
         "owner: oldagent" in doing,
         doing[:200],
     )
+    check(
+        "W2-003 generated goal ticket carries durable verify evidence",
+        "| verify:" in doing,
+        doing[:240],
+    )
     check("W2-003 old backlog preserved in TODO (no deletion)", "T-1" in todo, todo[:200])
-    check("W2-003 goal_waves==1 with backlog", _state(root2).get("goal_waves") == 1, f"goal_waves={_state(root2).get('goal_waves')}")
+    check(
+        "W2-003 goal_waves==1 with backlog",
+        _state(root2).get("goal_waves") == 1,
+        f"goal_waves={_state(root2).get('goal_waves')}",
+    )
 
     # --- (c) active DOING + old TODO -> checkpointed, planned, bound -------
     root3 = Path(tempfile.mkdtemp())
@@ -313,7 +371,9 @@ def test_w2003() -> None:
         root3,
         "oldagent",
         todo_lines=("- [ ] T-2 [P1] old backlog item\n",),
-        doing_lines=("- [/] T-1 [P1] in-progress | owner: oldagent | claim_time: 2026-08-19T16:00:00Z\n",),
+        doing_lines=(
+            "- [/] T-1 [P1] in-progress | owner: oldagent | claim_time: 2026-08-19T16:00:00Z\n",
+        ),
         phase="SCOUT",
         task="T-1",
     )
@@ -322,12 +382,26 @@ def test_w2003() -> None:
     bt3 = _board_text(root3)
     doing3 = bt3.split("## DOING")[1].split("## DONE")[0]
     todo3 = bt3.split("## TODO")[1].split("## DOING")[0]
-    check("W2-003 active DOING checkpointed (no longer in DOING)", "T-1" not in doing3, doing3[:160])
-    check("W2-003 checkpointed ticket demoted without owner loss of claim fields", "T-1" in todo3 and "owner: oldagent" not in todo3, todo3[:200])
+    check(
+        "W2-003 active DOING checkpointed (no longer in DOING)", "T-1" not in doing3, doing3[:160]
+    )
+    check(
+        "W2-003 checkpointed ticket demoted without owner loss of claim fields",
+        "T-1" in todo3 and "owner: oldagent" not in todo3,
+        todo3[:200],
+    )
     st3 = _state(root3)
-    check("W2-003 goal_waves==1 (active DOING case)", st3.get("goal_waves") == 1, f"goal_waves={st3.get('goal_waves')}")
+    check(
+        "W2-003 goal_waves==1 (active DOING case)",
+        st3.get("goal_waves") == 1,
+        f"goal_waves={st3.get('goal_waves')}",
+    )
     # first plan ticket promoted to DOING, owned by the acting agent
-    check("W2-003 first plan ticket promoted to DOING bound to agent", "owner: oldagent" in doing3, doing3[:200])
+    check(
+        "W2-003 first plan ticket promoted to DOING bound to agent",
+        "owner: oldagent" in doing3,
+        doing3[:200],
+    )
 
     # --- (d) crash/restart safety: re-run from the SAME checkpoint -> identical
     # (a crash BEFORE commit leaves the pre-goal files byte-identical, so a
@@ -356,6 +430,55 @@ def test_w2003() -> None:
         f"count={_board_text(root4).count('- [ ] T-')}",
     )
 
+    # --- (e) multi-clause plans reserve one unique monotonic ID block -----
+    root5 = Path(tempfile.mkdtemp())
+    _write_project(root5, "oldagent", todo_lines=("- [ ] T-7 [P1] old backlog\n",))
+    before5 = _snap(root5)
+    dry = goal_entry(root5, "oldagent", "First step; Second step; Third step", dry_run=True)
+    check(
+        "W2-003 multi-clause dry-run allocates distinct ordered ticket IDs",
+        dry.ok and dry.get("plan_tickets") == ["T-8", "T-9", "T-10"],
+        str(dry),
+    )
+    check(
+        "W2-003 multi-clause dry-run is zero-write",
+        _files_unchanged(root5, before5),
+        str(dry),
+    )
+    applied = goal_entry(root5, "oldagent", "First step; Second step; Third step")
+    board5 = _board_text(root5)
+    check(
+        "W2-003 multi-clause apply persists three unique ticket IDs",
+        applied.ok
+        and applied.get("plan_tickets") == ["T-8", "T-9", "T-10"]
+        and all(board5.count(ticket_id) == 1 for ticket_id in ("T-8", "T-9", "T-10")),
+        str(applied),
+    )
+    check(
+        "W2-003 multi-clause apply preserves plan order and claims the first",
+        board5.index("T-9") < board5.index("T-10")
+        and _state(root5).get("task") == "T-8"
+        and "T-8" in board5.split("## DOING", 1)[1].split("## DONE", 1)[0],
+        board5[:500],
+    )
+
+    # --- (f) defensive duplicate allocator output refuses before writes ---
+    root6 = Path(tempfile.mkdtemp())
+    _write_project(root6, "oldagent", todo_lines=("- [ ] T-1 [P1] backlog\n",))
+    before6 = _snap(root6)
+    with mock.patch.object(OPS, "_goal_plan_ticket_ids", return_value=["T-2", "T-2"]):
+        duplicate = goal_entry(root6, "oldagent", "First step; Second step")
+    check(
+        "W2-003 duplicate goal plan IDs are rejected",
+        (not duplicate.ok) and duplicate.code == "VALIDATION_FAILED",
+        str(duplicate),
+    )
+    check(
+        "W2-003 duplicate goal plan rejection is zero-write",
+        _files_unchanged(root6, before6),
+        str(duplicate),
+    )
+
 
 # ---------------------------------------------------------------------------
 # W2-004 [P2]: one shared objective validator -- blank/whitespace/normalized
@@ -373,7 +496,11 @@ def test_w2004() -> None:
         _write_project(root, "oldagent", todo_lines=("- [ ] T-1 [P1] backlog\n",))
         b = _snap(root)
         res = goal_entry(root, "oldagent", obj)
-        check(f"W2-004 {label} objective refused", (not res.ok) and res.code == "INVALID_GOAL", str(res))
+        check(
+            f"W2-004 {label} objective refused",
+            (not res.ok) and res.code == "INVALID_GOAL",
+            str(res),
+        )
         check(f"W2-004 {label} objective is zero-write", _files_unchanged(root, b), str(res))
 
     # set_goal_intent primitive also refuses blank.
@@ -381,7 +508,11 @@ def test_w2004() -> None:
     _write_project(root_p, "oldagent")
     b_p = _snap(root_p)
     res_p = set_goal_intent(root_p, "oldagent", "   ")
-    check("W2-004 set_goal_intent blank refused", (not res_p.ok) and res_p.code == "INVALID_GOAL", str(res_p))
+    check(
+        "W2-004 set_goal_intent blank refused",
+        (not res_p.ok) and res_p.code == "INVALID_GOAL",
+        str(res_p),
+    )
     check("W2-004 set_goal_intent blank zero-write", _files_unchanged(root_p, b_p), str(res_p))
 
     # Different --agent + blank goal -> W2-001 fix prevents ownership side effect.
@@ -391,7 +522,7 @@ def test_w2004() -> None:
     rc_a = _run_cli(root_a, "--agent", "boundary-new", "goal", "   ")
     check(
         "W2-004 different-agent blank goal is zero-write (no handover)",
-        rc_a == 1 and _files_unchanged(root_a, b_a) and _state(root_a).get("agent") == "oldagent",
+        rc_a == 2 and _files_unchanged(root_a, b_a) and _state(root_a).get("agent") == "oldagent",
         f"rc={rc_a} agent={_state(root_a).get('agent')}",
     )
 
@@ -399,7 +530,11 @@ def test_w2004() -> None:
     root_v = Path(tempfile.mkdtemp())
     _write_project(root_v, "oldagent")
     res_v = goal_entry(root_v, "oldagent", "Deploy v8 to prod \U0001f680")
-    check("W2-004 valid objective accepted + planned", res_v.ok and _state(root_v).get("goal_waves") == 1, str(res_v))
+    check(
+        "W2-004 valid objective accepted + planned",
+        res_v.ok and _state(root_v).get("goal_waves") == 1,
+        str(res_v),
+    )
 
 
 def main() -> int:
