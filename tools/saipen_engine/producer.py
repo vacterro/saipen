@@ -1514,12 +1514,17 @@ def integrate_packages_core(
                 )
                 continue
             # W2-003: a COMMITTED producer_integration receipt for this exact
-            # package is idempotence authority. If a prior run committed the
-            # integration but crashed before READY retirement, retrying must
-            # NOT reclassify the package against the committed result (which
-            # would be STALE against the package's original before-hashes and
-            # permanently poison the retry). Detect the committed receipt
-            # FIRST, retire the READY package, and report idempotent success.
+            # package is idempotence authority ONLY when its resulting edge is
+            # still CURRENT. The receipt's resulting_source/fingerprint bind
+            # the source the integration produced; if that HEAD has since moved
+            # (even with identical content -- a commit is a new source
+            # identity), the committed edge no longer certifies the current
+            # tree and the package must be re-integrated to record a fresh
+            # resulting edge. Without this, a content-identical commit leaves
+            # the producer permanently ALREADY_APPLIED against a stale
+            # resulting_source and crew SC-8/SC-9 never advances (reproduced
+            # live: saitranslate READY at 4451d073 short-circuited on a
+            # receipt whose resulting_source was e98bcb03).
             from .journal import SemanticReceiptCorruptionError, semantic_receipts_for_operation
 
             try:
@@ -1537,12 +1542,23 @@ def integrate_packages_core(
                     }
                 )
                 continue
-            if any(
+            try:
+                from freshness import compute_source_identity as _csi
+
+                _live = _csi(root_path)
+            except Exception:
+                _live = None
+            _current_edge = any(
                 rec.get("status") == "COMMITTED"
                 and (rec.get("receipt_metadata") or {}).get("package_identity")
                 == p.package_identity
+                and _live is not None
+                and (rec.get("receipt_metadata") or {}).get("resulting_source") == _live.source_head
+                and (rec.get("receipt_metadata") or {}).get("resulting_source_fingerprint")
+                == _live.source_tree_fingerprint
                 for rec in _committed
-            ):
+            )
+            if _current_edge:
                 # Retirement failure is non-fatal cleanup debt; the source is
                 # already integrated and must not be reapplied.
                 with contextlib.suppress(OSError):

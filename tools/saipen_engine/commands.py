@@ -56,9 +56,12 @@ def load_shortcut_table(protocol_dir: Path | str | None = None) -> dict[str, str
         if candidate.is_file():
             core = candidate
     if core is None:
-        # Best-effort discovery beside this module (the repo layout) so the
-        # engine itself is cold-readable without a bound home.
-        candidate = Path(__file__).resolve().parent.parent / "saipen" / "CORE.md"
+        # Best-effort discovery beside this module (the repo layout): the
+        # protocol home is the repo root's sibling `saipen/`, i.e. three
+        # parents up from tools/saipen_engine/commands.py. W2-006 (audit
+        # fdc73e06): `.parent.parent` resolved to tools/ and produced an empty
+        # table, silently turning every declared shortcut into VALIDATION_FAILED.
+        candidate = Path(__file__).resolve().parent.parent.parent / "saipen" / "CORE.md"
         if candidate.is_file():
             core = candidate
     if core is None:

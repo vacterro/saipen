@@ -2823,6 +2823,15 @@ def verify_sub_collect(root, targets, receipt_metadata=None) -> list[str]:
         # canonical semantic snapshot, not ops alone -- a committed sub_disposition
         # receipt moved to settled by _settle_journal must still be recognized.
         records, _errors = semantic_receipt_snapshot(root)
+        if _errors:
+            # CORE-002 (audit fdc73e06): a collect committed while the receipt
+            # snapshot was corrupt is itself corrupt -- the op cannot be
+            # verified clean against broken authority. Fail the verifier so
+            # the mutation stays CONFLICT until the corruption is resolved.
+            errors.append(
+                "semantic receipt corruption during collect verification: "
+                + "; ".join(_errors[:3])
+            )
         for record in records:
             meta = record.get("receipt_metadata") or {}
             if record.get("operation") != "sub_disposition":

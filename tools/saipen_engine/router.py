@@ -78,7 +78,10 @@ def route_next(
     # caller provides pre-parsed objects, skip parsing entirely.
     from .state import parse_state_or_error
 
-    if _state is not None and _board is not None and _state_error is not None:
+    if _state is not None and _board is not None:
+        # PERF-004: the pre-parsed seam. `_state_error` may be None -- the
+        # NORMAL "no parse error" case -- so it is NOT part of the guard; a
+        # clean pre-parsed call must not silently fall through to re-parsing.
         state, state_error, board = _state, _state_error, _board
     else:
         state, state_error = parse_state_or_error(state_text)

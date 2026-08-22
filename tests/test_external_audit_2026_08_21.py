@@ -705,6 +705,38 @@ class ExternalAudit20260821(unittest.TestCase):
             subs._durable_collect_witness(root, identity_a + "@2026-01-01T00:00:00Z", identity_a)
         )
 
+    def test_collect_refuses_semantic_receipt_corruption_zero_write(self):
+        # CORE-002 (audit fdc73e06): a malformed unrelated settled receipt must
+        # NOT collapse a valid committed collection witness into "no evidence"
+        # and silently permit a duplicate Core review ticket. sub_collect must
+        # refuse CORRUPT_JOURNAL with zero writes when the semantic receipt
+        # snapshot is corrupt.
+        root, _ = self._collect_fixture()
+        identity_a = "sha256:" + "a" * 64
+        op_dir = root / journal.SETTLED_DIR / "sub-collect-corrupt"
+        op_dir.mkdir(parents=True)
+        record = _operation_record("sub-collect-corrupt")
+        record["operation"] = "sub_collect"
+        record["status"] = "COMMITTED"
+        record["receipt_metadata"] = {
+            "operation": "sub_collect",
+            "status": "COMMITTED",
+            "package_identities": [identity_a],
+            "producers": ["target"],
+            "tickets": ["T-1"],
+        }
+        (op_dir / "operation.json").write_text(json.dumps(record), encoding="utf-8")
+        # Add an unrelated malformed settled receipt in the same namespace.
+        bad_dir = root / journal.SETTLED_DIR / "unrelated-corrupt"
+        bad_dir.mkdir(parents=True)
+        (bad_dir / "operation.json").write_text("{broken", encoding="utf-8")
+        board_before = (root / ".saipen" / "BOARD.md").read_text(encoding="utf-8")
+        before = _tree_hash(root)
+        result = subs.sub_collect(root, "target", dry_run=False)
+        self.assertEqual(result.code, "CORRUPT_JOURNAL", result)
+        self.assertEqual(_tree_hash(root), before, "corrupt refusal wrote bytes")
+        self.assertEqual((root / ".saipen" / "BOARD.md").read_text(encoding="utf-8"), board_before)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

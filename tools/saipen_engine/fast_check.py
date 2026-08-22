@@ -244,8 +244,8 @@ def validate_checkpoint_surface(
         errors.append(f"STATE proposed execution_intent {intent!r} outside normal|goal|converge")
     if state.get("phase") and state.get("transition_from") and state.get("phase") != "INIT":
         tf = state.get("transition_from")
-    if tf not in phases.VALID_TRANSITIONS and tf not in phases.ANY_FROM:
-        errors.append(f"STATE proposed transition_from {tf!r} outside the enum")
+        if tf not in phases.VALID_TRANSITIONS and tf not in phases.ANY_FROM:
+            errors.append(f"STATE proposed transition_from {tf!r} outside the enum")
 
     board = _board if _board is not None else parse_board(board_text)
     errors.extend(f"BOARD: {e}" for e in board["errors"])

@@ -8,7 +8,7 @@
 - **critical:** false
 - **severity:** P3
 - **producer:** saipython
-- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
+- **source_head:** 4451d07340163642c9a6203b33bf7a80585fb3ac
 - **source_tree_fingerprint:** git-delta-v1:a5dd07bf4c846840c46fd542a758184c06d6a0a5f8cf459e8209ff1b3a0354ba
 - **role_revision:** sha256:3069120b1a83291867c000dd5d7edb141d5fedf7895e5dc8f07d06624d05d9ff
 - **coverage:** None.
@@ -24,7 +24,7 @@
 - **critical:** false
 - **severity:** P3
 - **producer:** saipython
-- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
+- **source_head:** 4451d07340163642c9a6203b33bf7a80585fb3ac
 - **source_tree_fingerprint:** git-delta-v1:ccb6e0f9a721e7c2129e14998c54f1d2cd703605adb61d9e70311bd126857d43
 - **role_revision:** sha256:3069120b1a83291867c000dd5d7edb141d5fedf7895e5dc8f07d06624d05d9ff
 - **coverage:** Test suite regression, import hygiene, public API surface.
@@ -40,7 +40,7 @@
 - **critical:** false
 - **severity:** P3
 - **producer:** saipython
-- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
+- **source_head:** 4451d07340163642c9a6203b33bf7a80585fb3ac
 - **source_tree_fingerprint:** git-delta-v1:f91c6d2e1abf19c297f58e798ea002d1418f477b9abb7399c625f454810e18e0
 - **role_revision:** sha256:3069120b1a83291867c000dd5d7edb141d5fedf7895e5dc8f07d06624d05d9ff
 - **coverage:** Autonomous preparation.
@@ -56,7 +56,7 @@
 - **critical:** false
 - **severity:** P3
 - **producer:** saipython
-- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
+- **source_head:** 4451d07340163642c9a6203b33bf7a80585fb3ac
 - **source_tree_fingerprint:** git-delta-v1:1f0d71818c866058858b0b0a5c9e245ba04925ed02597d3d9843b8a3d0c2f7e9
 - **role_revision:** sha256:3069120b1a83291867c000dd5d7edb141d5fedf7895e5dc8f07d06624d05d9ff
 - **coverage:** Autonomous preparation.
@@ -72,7 +72,7 @@
 - **critical:** false
 - **severity:** P3
 - **producer:** saipython
-- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
+- **source_head:** 4451d07340163642c9a6203b33bf7a80585fb3ac
 - **source_tree_fingerprint:** git-delta-v1:85393eb352407d6600458d397fae3dc4c070e7941e2788d880fc130e828a581f
 - **role_revision:** sha256:3069120b1a83291867c000dd5d7edb141d5fedf7895e5dc8f07d06624d05d9ff
 - **coverage:** Autonomous preparation.
@@ -88,7 +88,7 @@
 - **critical:** false
 - **severity:** P2
 - **producer:** saipython
-- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
+- **source_head:** 4451d07340163642c9a6203b33bf7a80585fb3ac
 - **source_tree_fingerprint:** git-delta-v1:9964e4c9d5e4335b64c3d6faa7c25942e7dd71b4995646e7c5e5229f20ef1f25
 - **role_revision:** sha256:3069120b1a83291867c000dd5d7edb141d5fedf7895e5dc8f07d06624d05d9ff
 - **coverage:** Exact current Ruff failure surface: 22 Python files and 89 diagnostics.
@@ -106,7 +106,7 @@
 - **critical:** false
 - **severity:** P2
 - **producer:** saipython
-- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
+- **source_head:** 4451d07340163642c9a6203b33bf7a80585fb3ac
 - **source_tree_fingerprint:** git-delta-v1:0e4e6d78f40ffa3cd8fa5ea9c0d5ca1e64307f1c1f98d8803c75e224100a0440
 - **role_revision:** sha256:3069120b1a83291867c000dd5d7edb141d5fedf7895e5dc8f07d06624d05d9ff
 - **coverage:** Exact post-T-1115 Ruff surface: 22 Python files, 89 diagnostics, plus focused recovery/receipt and performance regression families.
@@ -124,7 +124,7 @@
 - **critical:** true
 - **severity:** P1
 - **producer:** saipython
-- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
+- **source_head:** 4451d07340163642c9a6203b33bf7a80585fb3ac
 - **source_tree_fingerprint:** git-delta-v1:188e314f78fa94f6e953b760887e106af6910f2a2cc35af91b4f97f081e63b47
 - **role_revision:** sha256:3069120b1a83291867c000dd5d7edb141d5fedf7895e5dc8f07d06624d05d9ff
 - **coverage:** HUNT-12 improve-admission-contract failure introduced when PY-7 reformatted `run_mutation` across lines.
@@ -142,7 +142,7 @@
 - **critical:** false
 - **severity:** P3
 - **producer:** saipython
-- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
+- **source_head:** 4451d07340163642c9a6203b33bf7a80585fb3ac
 - **source_tree_fingerprint:** git-delta-v1:4ec002cc5f2d23a8858d6c959ec2704e25be28f555a0396e5502685a0a4f3eb6
 - **role_revision:** sha256:3069120b1a83291867c000dd5d7edb141d5fedf7895e5dc8f07d06624d05d9ff
 - **coverage:** Current Python lint, compile, and improve admission validator surface.
@@ -158,7 +158,7 @@
 - **critical:** false
 - **severity:** P3
 - **producer:** saipython
-- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
+- **source_head:** 4451d07340163642c9a6203b33bf7a80585fb3ac
 - **source_tree_fingerprint:** git-delta-v1:55f536106504e1e87a44617c149d6c741e6227860e93ddfb56bdd0cb08576776
 - **role_revision:** sha256:3069120b1a83291867c000dd5d7edb141d5fedf7895e5dc8f07d06624d05d9ff
 - **coverage:** Python lint, bytecode compile, canonical validation, and focused audit regression surface on the current tree.

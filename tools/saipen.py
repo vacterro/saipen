@@ -702,6 +702,23 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
         result = resolve_conflict(project_root, op_id, resolution, agent=_agent_for(project_root))
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
+    # W2-001/W2-002 (audit fdc73e06): bare recovery is a MUTATION with a
+    # closed grammar. Any non-empty argument list that is not exactly
+    # `inspect <op_id>` / `resolve <op_id> ...` is VALIDATION_FAILED with
+    # zero writes -- a stray token must never silently authorize replay.
+    if args and args[0] not in ("inspect", "resolve"):
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "recover takes no arguments (bare recover), or "
+                "`inspect <op_id>` / `resolve <op_id> [--resolution "
+                "accept_live|replan]`; unexpected: "
+                + " ".join(args),
+            },
+            as_json,
+        )
+        return 2
     pending, conflicts, _corrupt = _scan_full(project_root)
     if conflicts:
         _emit(
@@ -732,6 +749,27 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
     if _corrupt:
         _emit(_corrupt_refusal(_corrupt), as_json)
         return 1
+    # W2-001 (audit fdc73e06): automatic replay is a mutating writer and must
+    # carry the same session mutation boundary as `recover resolve` -- dry-run
+    # is zero-write, a read-only session refuses, and the acting seat is the
+    # canonical resolver. A bare `recover --dry-run` previously replayed the
+    # operation and wrote canonical bytes.
+    if dry_run:
+        _emit(
+            {
+                "ok": False,
+                "code": "DRY_RUN_UNSUPPORTED",
+                "detail": "dry_run not supported for recovery mutations",
+                "pending_ops": pending,
+            },
+            as_json,
+        )
+        return 1
+    if _negotiate_capability(project_root) == "read-only":
+        return _capability_refusal(as_json)
+    _ho = _ensure_handover(project_root, as_json, dry_run=False)
+    if _ho is not None:
+        return _ho
     result = auto_recover_pending(project_root)
     _emit(result, as_json)
     return 0 if result.get("ok") else 1
@@ -1161,7 +1199,18 @@ def _userperson(project_root: Path, args: list[str], as_json: bool, dry_run: boo
 
     path = profile_path(project_root)
     action = args[0]
-    current_text = path.read_text(encoding="utf-8-sig") if path.is_file() else ""
+    try:
+        current_text = path.read_text(encoding="utf-8-sig") if path.is_file() else ""
+    except (UnicodeDecodeError, LookupError, OSError):
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"USERPERSON profile is not valid UTF-8: {path.name}",
+            },
+            as_json,
+        )
+        return 1
     if action == "show":
         if len(args) > 1:
             _emit(
@@ -1466,12 +1515,25 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
             manifest = cycle / "MANIFEST.md"
             if not manifest.is_file():
                 continue
-            roster = manifest.read_text(encoding="utf-8-sig")
-            sweep = (
-                (cycle / "SWEEP.md").read_text(encoding="utf-8-sig")
-                if (cycle / "SWEEP.md").is_file()
-                else ""
-            )
+            try:
+                roster = manifest.read_text(encoding="utf-8-sig")
+                sweep = (
+                    (cycle / "SWEEP.md").read_text(encoding="utf-8-sig")
+                    if (cycle / "SWEEP.md").is_file()
+                    else ""
+                )
+            except (UnicodeDecodeError, LookupError, OSError):
+                rows.append(
+                    {
+                        "cycle": cycle.name,
+                        "cycle_status": "INVALID_CYCLE",
+                        "seats": [],
+                        "invalid": True,
+                        "manifest_errors": ["MANIFEST/SWEEP not valid UTF-8"],
+                        "sweep_errors": [],
+                    }
+                )
+                continue
             status = "active"
             m = _re.search(r"(?m)^cycle_status:\s*([A-Za-z]+)", roster)
             if m:
@@ -1505,7 +1567,14 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                     seats.append({"seat": seat, "role": roster_role, "visible": "missing"})
                     continue
                 report = cycle / seat / report_path
-                report_text = report.read_text(encoding="utf-8-sig") if report.is_file() else ""
+                try:
+                    report_text = report.read_text(encoding="utf-8-sig") if report.is_file() else ""
+                except (UnicodeDecodeError, LookupError, OSError):
+                    seats.append(
+                        {"seat": seat, "role": roster_role, "visible": "INVALID_REPORT",
+                         "report_status": "", "errors": ["report not valid UTF-8"]}
+                    )
+                    continue
                 if not report_text:
                     seats.append({"seat": seat, "role": roster_role, "visible": "expected"})
                     continue
@@ -1546,6 +1615,24 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
         return rows
 
     action = args[0] if args and not args[0].startswith("--") else None
+    # W2-003 (audit fdc73e06): the improve MUTATORS (submit/complete/
+    # cycle-complete/abort) previously ran to completion under `--dry-run`,
+    # writing RUN appends, report completion and cycle transitions despite a
+    # dry-run session. Only `prepare` and `clean` support dry-run; every other
+    # mutation refuses with zero writes. The check runs BEFORE any mutation
+    # planning, so the session boundary holds even when a later branch would
+    # have failed on its own (fail-first is still zero-write).
+    if dry_run and action in ("submit", "complete", "cycle-complete", "abort"):
+        _emit(
+            {
+                "ok": False,
+                "code": "DRY_RUN_UNSUPPORTED",
+                "detail": f"dry_run not supported for improve mutator {action!r}; "
+                "prepare and clean are the only dry-run-capable improve actions",
+            },
+            as_json,
+        )
+        return 1
     if action is None:
         # DOGFOOD V (T-617): bare `saipen improve` is the documented
         # meta-control -- it PREPARES the current seat's bounded audit
@@ -1745,12 +1832,26 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
     if action == "complete":
         # DOGFOOD V (T-616): mechanical report completion -- full validation,
         # then draft -> complete, journaled and immutable.
+        # W2-004 (audit fdc73e06): closed grammar -- exactly
+        # `<cycle> <seat> <project>`; surplus tokens are refused, never
+        # silently ignored.
         if len(args) < 4:
             _emit(
                 {
                     "ok": False,
                     "code": "VALIDATION_FAILED",
                     "detail": "improve complete needs <cycle> <seat> <project>",
+                },
+                as_json,
+            )
+            return 2
+        if len(args) > 4:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"improve complete takes <cycle> <seat> <project>; "
+                    f"unsupported surplus argument {args[4]!r}",
                 },
                 as_json,
             )
@@ -1984,6 +2085,17 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                 as_json,
             )
             return 2
+        if len(args) > 2:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"improve cycle-complete takes <cycle_id>; unsupported "
+                    f"surplus argument {args[2]!r}",
+                },
+                as_json,
+            )
+            return 2
         cycle = cycle_dir(project_root, args[1])
         try:
             result = complete_cycle(cycle)
@@ -2001,6 +2113,17 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                     "ok": False,
                     "code": "VALIDATION_FAILED",
                     "detail": "improve abort needs <cycle_id>",
+                },
+                as_json,
+            )
+            return 2
+        if len(args) > 2:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"improve abort takes <cycle_id>; unsupported "
+                    f"surplus argument {args[2]!r}",
                 },
                 as_json,
             )

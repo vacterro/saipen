@@ -8,7 +8,7 @@
 - **critical:** false
 - **severity:** P3
 - **producer:** saitest
-- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
+- **source_head:** 4451d07340163642c9a6203b33bf7a80585fb3ac
 - **source_tree_fingerprint:** git-delta-v1:a5dd07bf4c846840c46fd542a758184c06d6a0a5f8cf459e8209ff1b3a0354ba
 - **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
 - **coverage:** None.
@@ -24,7 +24,7 @@
 - **critical:** false
 - **severity:** P3
 - **producer:** saitest
-- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
+- **source_head:** 4451d07340163642c9a6203b33bf7a80585fb3ac
 - **source_tree_fingerprint:** git-delta-v1:ccb6e0f9a721e7c2129e14998c54f1d2cd703605adb61d9e70311bd126857d43
 - **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
 - **coverage:** Full test suite regression.
@@ -40,7 +40,7 @@
 - **critical:** false
 - **severity:** P3
 - **producer:** saitest
-- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
+- **source_head:** 4451d07340163642c9a6203b33bf7a80585fb3ac
 - **source_tree_fingerprint:** git-delta-v1:f91c6d2e1abf19c297f58e798ea002d1418f477b9abb7399c625f454810e18e0
 - **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
 - **coverage:** Autonomous preparation.
@@ -56,7 +56,7 @@
 - **critical:** false
 - **severity:** P3
 - **producer:** saitest
-- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
+- **source_head:** 4451d07340163642c9a6203b33bf7a80585fb3ac
 - **source_tree_fingerprint:** git-delta-v1:1f0d71818c866058858b0b0a5c9e245ba04925ed02597d3d9843b8a3d0c2f7e9
 - **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
 - **coverage:** Autonomous preparation.
@@ -72,7 +72,7 @@
 - **critical:** false
 - **severity:** P3
 - **producer:** saitest
-- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
+- **source_head:** 4451d07340163642c9a6203b33bf7a80585fb3ac
 - **source_tree_fingerprint:** git-delta-v1:85393eb352407d6600458d397fae3dc4c070e7941e2788d880fc130e828a581f
 - **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
 - **coverage:** Autonomous preparation.
@@ -88,7 +88,7 @@
 - **critical:** true
 - **severity:** P1
 - **producer:** saitest
-- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
+- **source_head:** 4451d07340163642c9a6203b33bf7a80585fb3ac
 - **source_tree_fingerprint:** git-delta-v1:9964e4c9d5e4335b64c3d6faa7c25942e7dd71b4995646e7c5e5229f20ef1f25
 - **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
 - **coverage:** HUNT-10 Finding 1 lint gate and Finding 2 release-executor scenario; exact run record in kitchen/TEST-3.md.
@@ -106,7 +106,7 @@
 - **critical:** true
 - **severity:** P1
 - **producer:** saitest
-- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
+- **source_head:** 4451d07340163642c9a6203b33bf7a80585fb3ac
 - **source_tree_fingerprint:** git-delta-v1:0e4e6d78f40ffa3cd8fa5ea9c0d5ca1e64307f1c1f98d8803c75e224100a0440
 - **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
 - **coverage:** HUNT-11 Finding 1 lint gate, Finding 2 release-executor parity, and separation from the green T-1115 recovery regression.
@@ -122,7 +122,7 @@
 - **critical:** true
 - **severity:** P1
 - **producer:** saitest
-- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
+- **source_head:** 4451d07340163642c9a6203b33bf7a80585fb3ac
 - **source_tree_fingerprint:** git-delta-v1:188e314f78fa94f6e953b760887e106af6910f2a2cc35af91b4f97f081e63b47
 - **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
 - **coverage:** HUNT-12 findings 1-4 and the repaired Ruff gate; exact run record in kitchen/TEST-5.md.
@@ -138,7 +138,7 @@
 - **critical:** true
 - **severity:** P1
 - **producer:** saitest
-- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
+- **source_head:** 4451d07340163642c9a6203b33bf7a80585fb3ac
 - **source_tree_fingerprint:** git-delta-v1:4ec002cc5f2d23a8858d6c959ec2704e25be28f555a0396e5502685a0a4f3eb6
 - **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
 - **coverage:** HUNT-13 locale parity finding and negative controls for T-1100, admission drift, warning ownership, and Ruff.
@@ -154,7 +154,7 @@
 - **critical:** false
 - **severity:** P3
 - **producer:** saitest
-- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
+- **source_head:** 4451d07340163642c9a6203b33bf7a80585fb3ac
 - **source_tree_fingerprint:** git-delta-v1:55f536106504e1e87a44617c149d6c741e6227860e93ddfb56bdd0cb08576776
 - **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
 - **coverage:** Scenario families 1-7 regression against the current tree: core/intent/autonomy/conformance/producer/second-wave/external-audit suites + canonical validator + compileall

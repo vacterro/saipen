@@ -3275,10 +3275,17 @@ def _iter_operation_records(root: Path, records: tuple[dict, ...] | None = None)
     if records is not None:
         yield from records
         return
-    from .journal import semantic_receipt_snapshot
+    from .journal import SemanticReceiptCorruptionError, semantic_receipt_snapshot
     snapshot = semantic_receipt_snapshot(root)
     if snapshot.errors:
-        return
+        # CORE-002 (audit fdc73e06): silent-empty here collapsed CORRUPT into
+        # CLEAN_EMPTY, so a malformed unrelated settled receipt made a valid
+        # committed sub_collect receipt invisible, destroying dedup idempotence
+        # and permitting duplicate Core tickets. Corruption is authority
+        # failure, never "no evidence"; callers that can handle it (mutation
+        # planners) catch and refuse zero-write, read-only health surfaces
+        # surface it as INVALID.
+        raise SemanticReceiptCorruptionError(snapshot.errors, snapshot)
     yield from snapshot.records
 
 
@@ -3475,6 +3482,28 @@ def sub_collect(
     from .operations import next_ticket_id
 
     root = Path(project_root)
+    # CORE-002 (audit fdc73e06): one canonical semantic snapshot at mutation
+    # start. Any corruption is a hard zero-write CORRUPT_JOURNAL refusal
+    # BEFORE any planning/dedup, so a malformed unrelated settled receipt can
+    # never launder valid committed collection evidence into "no evidence"
+    # and produce a duplicate Core review ticket.
+    from .journal import SemanticReceiptCorruptionError, semantic_receipt_snapshot
+
+    try:
+        _collect_snapshot = semantic_receipt_snapshot(root)
+    except Exception:
+        return _refuse(
+            "CORRUPT_JOURNAL",
+            "cannot capture semantic receipt authority; refuse intake with zero writes",
+        )
+    if _collect_snapshot.errors:
+        return _refuse(
+            "CORRUPT_JOURNAL",
+            "semantic receipt corruption blocks intake: "
+            + "; ".join(_collect_snapshot.errors[:3])
+            + " -- resolve the corrupt receipt before collecting; zero writes",
+        )
+    _collect_records = _collect_snapshot.records
     manifest_path = root / MANIFEST_REL
     manifest_doc = codec.read_document(manifest_path)
     entries, errors = parse_manifest(manifest_doc.text_norm)
@@ -3610,7 +3639,7 @@ def sub_collect(
                 {identity for _package, identity, _info in current_ready}
                 | {identity for _package, identity in reviewed}
             )
-            if _durable_collect_witness(root, last_collect, identity)
+            if _durable_collect_witness(root, last_collect, identity, records=_collect_records)
         }
         fresh_ready = [
             (package, identity, info)
@@ -3964,7 +3993,21 @@ def sub_disposition(
         )
     package = candidates[0]
     identity = package_identity(package)
-    collected, links = _collect_linkage(root)
+    try:
+        collected, links = _collect_linkage(root)
+    except Exception as exc:
+        from .journal import SemanticReceiptCorruptionError
+
+        if isinstance(exc, SemanticReceiptCorruptionError):
+            return _refuse(
+                "CORRUPT_JOURNAL",
+                "semantic receipt corruption blocks disposition: "
+                + "; ".join(exc.errors[:3])
+                + " -- resolve the corrupt receipt before disposing; zero writes",
+                name=name,
+                package=package.package_id,
+            )
+        raise
     ticket = links.get(identity)
     if identity not in collected or not ticket:
         return _refuse(
