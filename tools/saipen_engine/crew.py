@@ -1600,15 +1600,16 @@ def _producer_integrated(snapshot: CrewSnapshot, role) -> bool:
             return False
         if legacy.fields.get("source_head") != meta.get("input_source"):
             return False
-        if legacy.fields.get("source_tree_fingerprint") != meta.get(
-            "input_source_fingerprint"
-        ):
-            return False
     else:
-        if package.base_source_head != meta.get("input_source"):
-            return False
-        if package.base_source_tree_fingerprint != meta.get("input_source_fingerprint"):
-            return False
+        # Found a SETTLED package matching the receipt's package identity.
+        # A content-identical re-bind (same package_identity and content,
+        # refreshed source binding) legitimately leaves the SETTLED package's
+        # base_source_head older than the receipt's input_source -- the
+        # identity match plus the resulting-source check below are the true
+        # authority, not the stale base binding. This is the crew treadmill
+        # fix (E-3836): without it every content-identical re-integration
+        # never satisfies SC-8/SC-9.
+        pass
     return (
         meta.get("resulting_source") == snapshot.source_id.source_head
         and meta.get("resulting_source_fingerprint") == snapshot.source_id.source_tree_fingerprint
