@@ -320,7 +320,24 @@ def source_worktree_deltas(root: Path) -> list[str] | None:
             index += 1
         elif path:
             paths.append(path)
-    return sorted(set(paths))
+    # MAIN-SOURCE attribution only. A delta under ANY `.saipen` component
+    # (the root one, or a nested project memory inside a test scenario
+    # fixture) is project runtime, never main source. Agent scratch
+    # directories (`.workbuddy-ai/`) are tool memory, not project content.
+    # The git pathspec above excludes the root `.saipen`; nested `.saipen`
+    # trees and scratch dirs need an explicit component filter because the
+    # attribution gate must not block convergence on regenerable fixture
+    # evidence (reproduced live: tests/scenarios/*/.saipen/recovery receipts
+    # and .workbuddy-ai/memory/* blocked SC-7).
+    _scratch_prefixes = (".workbuddy-ai/", ".saiwork/", "_tmp_dbg/")
+
+    def _is_main_source(path: str) -> bool:
+        parts = path.replace("\\", "/").split("/")
+        if ".saipen" in parts:
+            return False
+        return not any(path.startswith(prefix) for prefix in _scratch_prefixes)
+
+    return sorted({path for path in paths if _is_main_source(path)})
 
 
 def _main_source_deltas(root: Path) -> list[str] | None:
