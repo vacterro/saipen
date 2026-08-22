@@ -579,7 +579,7 @@ def _next_action(project_root: Path, as_json: bool) -> int:
                 "recovery_conflict": bool(conflicts),
                 "conflict_ops": conflicts,
                 "pending_ops": pending,
-                "parked_work": parked if parked else None,
+                "parked_work": parked or None,
             },
             as_json,
         )
@@ -599,7 +599,7 @@ def _next_action(project_root: Path, as_json: bool) -> int:
             "recovery_pending": bool(pending),
             "recovery_conflict": False,
             "pending_ops": pending,
-            "parked_work": parked if parked else None,
+            "parked_work": parked or None,
         },
         as_json,
     )
@@ -2622,7 +2622,11 @@ def main(argv: list[str] | None = None) -> int:
             # `Use: gg <objective text>` (CORE § 1.10).
             if as_json:
                 _emit(
-                    {"ok": False, "code": "VALIDATION_FAILED", "detail": "Use: gg <objective text>"},
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": "Use: gg <objective text>",
+                    },
                     as_json,
                 )
             else:

@@ -1856,7 +1856,16 @@ def _state_only_plan(
         docs, _state, _board, log_tail = read_once
     else:
         docs, _state, _board, log_tail = _read(root, allow_dead_home=allow_dead_home)
-    event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent, _fold_handover(_state, agent, event_message), now, op_id)
+    event, line = _event_line(
+        docs,
+        log_tail,
+        "DEC",
+        ticket_id,
+        agent,
+        _fold_handover(_state, agent, event_message),
+        now,
+        op_id,
+    )
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     new_state = mutate(docs["state"].text_norm, event)
     errors = validate_texts(

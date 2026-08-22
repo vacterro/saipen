@@ -3487,7 +3487,7 @@ def sub_collect(
     # BEFORE any planning/dedup, so a malformed unrelated settled receipt can
     # never launder valid committed collection evidence into "no evidence"
     # and produce a duplicate Core review ticket.
-    from .journal import SemanticReceiptCorruptionError, semantic_receipt_snapshot
+    from .journal import semantic_receipt_snapshot
 
     try:
         _collect_snapshot = semantic_receipt_snapshot(root)

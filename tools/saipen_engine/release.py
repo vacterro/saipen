@@ -608,7 +608,8 @@ def _targeted_integration_op(root: Path, invocation: str, ticket_id: str) -> str
     except SemanticReceiptCorruptionError as exc:
         raise ReleaseRefusal(
             "CORRUPT_JOURNAL",
-            f"semantic receipt snapshot is corrupt: {'; '.join(exc.errors[:2])} -- resolve explicitly",
+            f"semantic receipt snapshot is corrupt: "
+            f"{'; '.join(exc.errors[:2])} -- resolve explicitly",
         )
     for receipt in receipts:
         metadata = receipt.get("receipt_metadata") or {}
@@ -3081,8 +3082,11 @@ def _create_tag(root: Path, plan: ReleasePlan, target: str) -> None:
 
 
 def _push_tag(root: Path, plan: ReleasePlan, target: str) -> RemoteSnapshot:
-    """Push the tag and verify from a FRESH post-push snapshot."""
-    result = _git(root, "push", plan.remote_push_endpoint or "origin", f"refs/tags/{plan.tag}:refs/tags/{plan.tag}")
+    """Push the tag and verify from a fresh post-push snapshot."""
+    result = _git(
+        root, "push", plan.remote_push_endpoint or "origin",
+        f"refs/tags/{plan.tag}:refs/tags/{plan.tag}",
+    )
     if not result.ok:
         raise ReleaseRefusal("RELEASE_FAILED", f"tag push failed: {result.stderr or result.stdout}")
     post_snapshot = _remote_snapshot(root, plan.remote_push_endpoint or "origin")
@@ -4382,7 +4386,10 @@ def _verify_no_publish_receipt(root: Path, record: dict) -> dict:
     if not recorded_fp:
         return {
             "status": "unknown",
-            "reason": "no-publish receipt lacks source_tree_fingerprint -- cannot prove unchanged source",
+            "reason": (
+                "no-publish receipt lacks source_tree_fingerprint -- "
+                "cannot prove unchanged source"
+            ),
         }
     if recorded_head and live.source_head != recorded_head:
         return {

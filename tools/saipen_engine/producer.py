@@ -1536,7 +1536,10 @@ def integrate_packages_core(
                         "producer": p.producer,
                         "result": "REFUSED",
                         "code": "CORRUPT_JOURNAL",
-                        "reason": f"semantic receipt snapshot is corrupt: {'; '.join(exc.errors[:2])}",
+                        "reason": (
+                            f"semantic receipt snapshot is corrupt: "
+                            f"{'; '.join(exc.errors[:2])}"
+                        ),
                         "wrote": False,
                         "recovery_required": True,
                     }

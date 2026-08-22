@@ -519,7 +519,10 @@ def collect_and_ship_producer(
                     "ok": False,
                     "code": "CORRUPT_JOURNAL",
                     "recovery_required": True,
-                    "message": f"ambiguous targeted carrier for {role} {package.package_identity}: multiple matching tickets -- fail closed",
+                    "message": (
+                        f"ambiguous targeted carrier for {role} "
+                        f"{package.package_identity}: multiple matching tickets -- fail closed"
+                    ),
                     "role": role,
                     "package_identity": package.package_identity,
                 }
@@ -544,7 +547,9 @@ def collect_and_ship_producer(
                     "role": role,
                     "ticket": interrupted["ticket"],
                 }
-            return _resume_targeted_producer(root, role, interrupted, capability, current_agent=current_agent)
+            return _resume_targeted_producer(
+                root, role, interrupted, capability, current_agent=current_agent
+            )
         return {
             "ok": False,
             "code": "ALREADY_CLAIMED",
@@ -571,7 +576,10 @@ def collect_and_ship_producer(
                 "ok": False,
                 "code": "CORRUPT_JOURNAL",
                 "recovery_required": True,
-                "message": f"ambiguous targeted carrier for {role} {package.package_identity}: multiple matching tickets -- fail closed",
+                "message": (
+                    f"ambiguous targeted carrier for {role} "
+                    f"{package.package_identity}: multiple matching tickets -- fail closed"
+                ),
                 "role": role,
                 "package_identity": package.package_identity,
             }
@@ -579,7 +587,9 @@ def collect_and_ship_producer(
             return {
                 "ok": True,
                 "code": "PRODUCER_RESUME_PLAN",
-                "message": f"would resume interrupted {role} targeted flow for {existing['ticket']}",
+                "message": (
+                    f"would resume interrupted {role} targeted flow for {existing['ticket']}"
+                ),
                 "role": role,
                 "ticket": existing["ticket"],
                 "package_identity": package.package_identity,
@@ -593,7 +603,9 @@ def collect_and_ship_producer(
                 "role": role,
                 "ticket": existing["ticket"],
             }
-        return _resume_targeted_producer(root, role, existing, capability, current_agent=current_agent)
+        return _resume_targeted_producer(
+            root, role, existing, capability, current_agent=current_agent
+        )
     if dry_run:
         return {
             "ok": True,
@@ -803,7 +815,14 @@ def _find_targeted_carriers(root: Path, role: str, package_identity: str) -> lis
         desc = str(ticket.get("description") or "")
         if marker not in desc:
             continue
-        out.append({"ticket": tid, "section": ticket.get("section"), "raw": ticket.get("raw"), "description": desc})
+        out.append(
+            {
+                "ticket": tid,
+                "section": ticket.get("section"),
+                "raw": ticket.get("raw"),
+                "description": desc,
+            }
+        )
     return out
 
 
@@ -823,7 +842,13 @@ def _targeted_producer_active_ticket(root: Path, role: str, package_identity: st
     carriers = _find_targeted_carriers(root, role, package_identity)
     if len(carriers) > 1:
         # Ambiguous: more than one matching carrier
-        return {"ticket": carriers[0]["ticket"], "ambiguous": True, "carriers": carriers, "role": role, "package_identity": package_identity}
+        return {
+            "ticket": carriers[0]["ticket"],
+            "ambiguous": True,
+            "carriers": carriers,
+            "role": role,
+            "package_identity": package_identity,
+        }
     if len(carriers) == 1:
         carrier = carriers[0]
         # If exactly one carrier exists, expose it regardless of its section.
@@ -834,10 +859,22 @@ def _targeted_producer_active_ticket(root: Path, role: str, package_identity: st
             task = state.get("task", "")
             # If the single carrier is the active ticket, phase is meaningful
             if task == carrier["ticket"]:
-                return {"ticket": carrier["ticket"], "phase": phase, "section": carrier["section"], "package_identity": package_identity, "role": role}
+                return {
+                    "ticket": carrier["ticket"],
+                    "phase": phase,
+                    "section": carrier["section"],
+                    "package_identity": package_identity,
+                    "role": role,
+                }
         except Exception:
             pass
-        return {"ticket": carrier["ticket"], "phase": None, "section": carrier["section"], "package_identity": package_identity, "role": role}
+        return {
+            "ticket": carrier["ticket"],
+            "phase": None,
+            "section": carrier["section"],
+            "package_identity": package_identity,
+            "role": role,
+        }
     # No board match: fall back to legacy STATE-only check for BUILD/VERIFY
     # (covers case where BOARD read failed but STATE indicates active ticket)
     try:
@@ -860,10 +897,18 @@ def _targeted_producer_active_ticket(root: Path, role: str, package_identity: st
     marker = f"Integrate and release {role} package {package_identity}"
     if marker not in desc:
         return None
-    return {"ticket": ticket_id, "phase": phase, "section": ticket.get("section"), "package_identity": package_identity, "role": role}
+    return {
+        "ticket": ticket_id,
+        "phase": phase,
+        "section": ticket.get("section"),
+        "package_identity": package_identity,
+        "role": role,
+    }
 
 
-def _resume_targeted_producer(root: Path, role: str, context: dict, capability: object, current_agent: str | None = None) -> dict:
+def _resume_targeted_producer(
+    root: Path, role: str, context: dict, capability: object, current_agent: str | None = None
+) -> dict:
     """W2-003: resume an interrupted targeted producer flow at its next safe boundary.
 
     A committed producer-integration receipt is the idempotence authority: if
@@ -911,13 +956,33 @@ def _resume_targeted_producer(root: Path, role: str, context: dict, capability: 
         if section == "## TODO":
             claimed = apply_claim(root, ticket_id, agent)
             if not claimed.ok:
-                return {"ok": False, "code": claimed.code, "message": claimed.message, "role": role, "ticket": ticket_id, "package_identity": package_identity}
+                return {
+                    "ok": False,
+                    "code": claimed.code,
+                    "message": claimed.message,
+                    "role": role,
+                    "ticket": ticket_id,
+                    "package_identity": package_identity,
+                }
             phase = "SCOUT"
             section = "## DOING"
         if phase == "SCOUT":
-            built = transition_phase(root, "BUILD", agent, ticket_id, f"Apply authenticated {role} package {package_identity}")
+            built = transition_phase(
+                root,
+                "BUILD",
+                agent,
+                ticket_id,
+                f"Apply authenticated {role} package {package_identity}",
+            )
             if not built.ok:
-                return {"ok": False, "code": built.code, "message": built.message, "role": role, "ticket": ticket_id, "package_identity": package_identity}
+                return {
+                    "ok": False,
+                    "code": built.code,
+                    "message": built.message,
+                    "role": role,
+                    "ticket": ticket_id,
+                    "package_identity": package_identity,
+                }
             phase = "BUILD"
         if phase == "BUILD":
             verifying = transition_phase(root, "VERIFY", agent, ticket_id,
@@ -1055,7 +1120,11 @@ def _resume_targeted_producer(root: Path, role: str, context: dict, capability: 
         # Also handle SCOUT -> BUILD
         if phase == "SCOUT" or section == "## DOING":
             built = transition_phase(
-                root, "BUILD", agent, ticket_id, f"Apply authenticated {role} package {package_identity}"
+                root,
+                "BUILD",
+                agent,
+                ticket_id,
+                f"Apply authenticated {role} package {package_identity}",
             )
             if not built.ok:
                 return {

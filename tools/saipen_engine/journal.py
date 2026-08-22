@@ -3950,7 +3950,9 @@ class SemanticReceiptCorruptionError(ValueError):
     """
 
     def __init__(self, errors: tuple[str, ...], snapshot) -> None:
-        super().__init__("; ".join(errors[:3]) if errors else "semantic receipt snapshot is corrupt")
+        super().__init__(
+            "; ".join(errors[:3]) if errors else "semantic receipt snapshot is corrupt"
+        )
         self.errors = errors
         self.snapshot = snapshot
 

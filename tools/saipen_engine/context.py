@@ -40,7 +40,6 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from . import codec
 from .board import parse_board
 from .log import HistoryOwnershipError
 from .result import Result
