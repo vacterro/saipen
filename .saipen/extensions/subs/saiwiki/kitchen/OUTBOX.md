@@ -1,4 +1,4 @@
-# OUTBOX
+﻿# OUTBOX
 
 ## W-028: wiki refresh v7.157.0-era -> v7.170.0, 195 scenarios, T-400 closed
 - **legacy:** true
@@ -228,3 +228,37 @@
 - **verified:** PASS -- saiwiki package integrated CURRENT
 - **instructions:** Core records the integrated saiwiki disposition.
 - **details:** saiwiki integration bound to e98bcb03/git-delta-v1:55f5361.
+
+
+## W-036: saiwiki re-bind to 6cbed249
+- **status:** stale
+- **summary:** superseded by W-037 (HEAD moved to e75367f7)
+- **main_project_refs:** []
+- **critical:** false
+- **severity:** P3
+- **producer:** saiwiki
+- **source_head:** 6cbed2492abee837962583c14566d60487337511
+- **source_tree_fingerprint:** git-delta-v1:81eef5d668f4b6b15df8ddb0a5ad304d475a97f25b78a9ac43f7f27da94d9210
+- **role_revision:** sha256:54a42475a124ab0f27e83d600a284a9cc54d9668029c4828cfc48512b031df13
+- **coverage:** 8 maintained wiki pages + _Sidebar; content-identical to W-035 (only freshness binding refreshed)
+- **payload:** [.saipen/extensions/subs/saiwiki/kitchen/wiki/Home.md, Phases.md, Getting-Started.md, SubSaipen.md, Tutorials.md, Use-Cases.md, Scenarios.md, _Footer.md, _Sidebar.md]
+- **verified:** PASS -- strict READY sha256:0c9bb0d46a5394d17b401f453... at producer epoch 6; 9 payload targets; content-identical to W-035; charter role revision matches; no integration, commit, tag, push, or remote write performed.
+- **instructions:** Core integrates the 9 declared payload pages through the canonical saiwiki collect path; leave wiki remote untouched until the authorized SHIP path.
+- **details:** W-035 (e98bcb03) went stale by freshness triple (HEAD moved to 6cbed249 after PY-11 ruff commit). Re-read source identity, rebuilt the package with the current binding, re-published strict READY with identical payload content. Main tree and wiki remote untouched.
+
+
+## W-037: saiwiki re-bind to e75367f7
+- **status:** ready
+- **summary:** current saiwiki package re-bound to committed source e75367f7
+- **main_project_refs:** []
+- **critical:** false
+- **severity:** P3
+- **producer:** saiwiki
+- **source_head:** e75367f79c68c5386f73cd76a0fcb89cdc6223bb
+- **source_tree_fingerprint:** git-delta-v1:55f536106504e1e87a44617c149d6c741e6227860e93ddfb56bdd0cb08576776
+- **role_revision:** sha256:54a42475a124ab0f27e83d600a284a9cc54d9668029c4828cfc48512b031df13
+- **coverage:** 8 maintained wiki pages + _Sidebar; content-identical to W-035/W-036
+- **payload:** []
+- **verified:** PASS -- integrated CURRENT against e75367f7; identity 4414fe51acb8...
+- **instructions:** Core records the integrated saiwiki disposition.
+- **details:** content-identical re-bind to e75367f7/55f5361 after crew fix commits.

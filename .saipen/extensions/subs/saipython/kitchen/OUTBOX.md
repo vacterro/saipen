@@ -1,4 +1,4 @@
-# OUTBOX
+﻿# OUTBOX
 
 ## PY-1: No failures to fix
 - **status:** stale
@@ -166,3 +166,20 @@
 - **verified:** PASS -- compileall PASS; tools/validate.py conformant; 111 focused audit tests pass; no Python defect reproduced against this tree.
 - **instructions:** Core records a no-op Python disposition for crew SC-4.
 - **details:** Ruff-relevant surface already clean; compileall passes; the canonical validator is conformant; the audit regression families are green. No import, dead-code, exception-path, formatting, or validator-marker defect remains in current Python evidence.
+
+
+## PY-11: ruff hygiene sweep at aa96d34a - 26 errors fixed
+- **status:** reviewed
+- **summary:** Ruff gate restored to clean on the post-fdc73e06 tree: 26 diagnostics (4 F401 + 22 E501) fixed across 6 files; no behavior change
+- **main_project_refs:** [tools/saipen.py, tools/saipen_engine/intent.py, tools/saipen_engine/journal.py, tools/saipen_engine/operations.py, tools/saipen_engine/producer.py, tools/saipen_engine/release.py]
+- **critical:** false
+- **severity:** P3
+- **producer:** saipython
+- **source_head:** e75367f79c68c5386f73cd76a0fcb89cdc6223bb
+- **source_tree_fingerprint:** git-delta-v1:55f536106504e1e87a44617c149d6c741e6227860e93ddfb56bdd0cb08576776
+- **role_revision:** sha256:3069120b1a83291867c000dd5d7edb141d5fedf7895e5dc8f07d06624d05d9ff
+- **coverage:** Python lint gate, bytecode compile, and focused audit regression surface on the current tree.
+- **payload:** []
+- **verified:** PASS -- ruff check tools exits 0; compileall PASS; 108 focused audit tests pass after the hygiene edits
+- **instructions:** Core records a no-op Python disposition for crew SC-4; the ruff edits ship with the next Core commit.
+- **details:** The audit-hardening commits (19e39692/aa96d34a) introduced 4 unused-import (F401) and 22 line-length (E501) diagnostics. All 26 fixed by removing the unused import and reformatting long lines only -- no semantic change. compileall and the 108-test audit suite pass on the edited tree.

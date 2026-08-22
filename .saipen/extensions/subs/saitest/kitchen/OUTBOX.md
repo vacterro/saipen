@@ -1,4 +1,4 @@
-# OUTBOX
+﻿# OUTBOX
 
 ## TEST-1: No findings to reproduce
 - **status:** stale
@@ -162,3 +162,20 @@
 - **verified:** PASS -- 111 pytest tests, tools/validate.py conformant, compileall PASS; no scenario reproduced a failure against this tree
 - **instructions:** Core records a no-op saitest disposition for the crew SC-3 stage.
 - **details:** NOT_REPRODUCED across all seven scenario families: the audit regression suites (core 10, intent 40, autonomy 13, conformance 29, second-wave 36, v7-producer 17, external 20) pass, the canonical validator reports conformant, and bytecode compiles clean. No new defect was triggered against the current tree.
+
+
+## TEST-8: regression sweep at aa96d34a - no failure reproduced
+- **status:** reviewed
+- **summary:** Independent regression sweep over the post-fdc73e06 tree; all assigned scenario families NOT_REPRODUCED
+- **main_project_refs:** []
+- **critical:** false
+- **severity:** P3
+- **producer:** saitest
+- **source_head:** e75367f79c68c5386f73cd76a0fcb89cdc6223bb
+- **source_tree_fingerprint:** git-delta-v1:55f536106504e1e87a44617c149d6c741e6227860e93ddfb56bdd0cb08576776
+- **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
+- **coverage:** Scenario families 1-7 regression against the current tree: core/intent/autonomy/conformance/producer/second-wave/external-audit suites + canonical validator + compileall
+- **payload:** []
+- **verified:** PASS -- 108 pytest tests, tools/validate.py conformant, compileall PASS; no scenario reproduced a failure against this tree
+- **instructions:** Core records a no-op saitest disposition for the crew SC-3 stage.
+- **details:** NOT_REPRODUCED across all seven scenario families: the audit regression suites (core 10, intent 40, v7-producer 17, second-wave 7, external 21, autonomy 13) pass, the canonical validator reports conformant, and bytecode compiles clean. No new defect was triggered against the current tree.

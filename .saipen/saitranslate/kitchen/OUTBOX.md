@@ -1,4 +1,4 @@
-# OUTBOX
+﻿# OUTBOX
 
 ## SAIT-008: translated fast-keys callout roll-out -- superseded by SAIT-011
 - **legacy:** true
@@ -121,3 +121,42 @@
   2. Run `python -B tools/validate.py --gate collect:saitranslate`; refuse on any producer or payload mismatch.
   3. Integrate only READY package `sha256:dbcddc71fee86ac29e705b1e7be25d2d5f8b808006cdded1c449b551faa2367a` through the canonical Core writer.
   4. Re-run the independent 32-file quality audit, mirror byte equality, Core gate, and REVIEW before SHIP.
+
+
+## SAIT-015: FORCE-FRESH re-bind + re-package to 6cbed249 (v7.226.0)
+- **status:** ready
+- **summary:** SAIT-014 went stale by freshness triple (HEAD e045ad07 -> 6cbed249 from the ruff-hygiene commit PY-11). FORCE-FRESH re-ran the producer pipeline: recomputed source identity (HEAD 6cbed249, tree git-delta-v1:55f5361), rebuilt the package, and re-published a fresh strict READY. README.md and all 32 locale sources are content-unchanged by the ruff commit (tools/*.py only), so package identity is preserved; only the source binding moved.
+- **critical:** false
+- **producer:** saitranslate
+- **source_head:** 6cbed2492abee837962583c14566d60487337511
+- **source_tree_fingerprint:** git-delta-v1:55f536106504e1e87a44617c149d6c741e6227860e93ddfb56bdd0cb08576776
+- **role_revision:** sha256:f241e6b83c39e9b46bfa586638efb0374bbb39889646f723b9189bbb4912c0c5
+- **coverage:**
+  - README.md: 32/32 locale candidates (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh), all bound to normalized source digest 2a33e364c3c12e8b1b9b2caf41b05db3ee27f17161336579ae85ee59da34fe56
+  - Root README mirrors: README.ee.md, README.ja.md, README.ded.md candidates from ET/JA/DED kitchen outputs
+  - In-app UI: none -- no tracked i18n/locale bundle or app-view surface exists
+- **payload:**
+  - .saipen/saitranslate/kitchen/{ar,bg,cs,da,de,ded,el,es,et,fi,fr,he,hi,hr,hu,id,it,ja,ko,nl,no,pl,pt,ro,ru,sk,sv,th,tr,uk,vi,zh}/README_*.md -- exact 32 paths
+  - README.ee.md from .saipen/saitranslate/kitchen/et/README_ET.md
+  - README.ja.md from .saipen/saitranslate/kitchen/ja/README_JA.md
+  - README.ded.md from .saipen/saitranslate/kitchen/ded/README_DED.md
+- **verified:** PASS -- strict READY sha256:dbcddc71fee86ac29e705b1e7be25d2d5f8b808006cdded1c449b551faa2367a at producer epoch 14 with 44 read dependencies and 35 authenticated payload entries; source identity 6cbed249 / git-delta-v1:55f5361 / role_revision sha256:f241e6b8...; content-identical to SAIT-014 (README.md unchanged); no integration, commit, tag, push, or remote write performed.
+- **instructions:**
+  1. Recompute and require the exact source triple above.
+  2. Run python -B tools/validate.py --gate collect:saitranslate; refuse on any mismatch.
+  3. Integrate only READY package sha256:dbcddc71fee86ac29e705b1e7be25d2d5f8b808006cdded1c449b551faa2367a through the canonical Core writer.
+  4. Re-run the independent 32-file quality audit, mirror byte equality, Core gate, and REVIEW before SHIP.
+
+
+## SAIT-017: FORCE-FRESH re-bind + re-package to e75367f7 (v7.226.0)
+- **status:** ready
+- **summary:** FORCE-FRESH re-bind to e75367f7 after crew fix commits; content-identical (README.md unchanged), package identity dbcddc71fee86ac29e705b1e7be25d2d5f8b808006cdded1c449b551faa2367a preserved
+- **critical:** false
+- **producer:** saitranslate
+- **source_head:** e75367f79c68c5386f73cd76a0fcb89cdc6223bb
+- **source_tree_fingerprint:** git-delta-v1:55f536106504e1e87a44617c149d6c741e6227860e93ddfb56bdd0cb08576776
+- **role_revision:** sha256:f241e6b83c39e9b46bfa586638efb0374bbb39889646f723b9189bbb4912c0c5
+- **coverage:** 32/32 locale README_*.md payloads + 3 root mirrors = 35 payload entries; 44 read dependencies
+- **payload:** []
+- **verified:** PASS -- integrated CURRENT against e75367f7
+- **instructions:** Core records the integrated saitranslate disposition.
