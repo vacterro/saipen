@@ -1716,7 +1716,24 @@ def integrate_packages_core(
                 metadata["resulting_source_fingerprint"] = resulting.source_tree_fingerprint
                 return metadata
 
-            op_id = "producer-integrate-" + p.package_identity.split(":", 1)[-1][:32]
+            # op_id MUST vary with the input source binding, not just the
+            # content-stable package identity. The identity digest alone is
+            # unchanged by a content-identical commit, so a deterministic
+            # `producer-integrate-<identity>` collides when the SAME package is
+            # re-integrated against a moved HEAD: the existing receipt's
+            # semantic payload (input_source, after_hashes vs preconditions)
+            # no longer matches, and the second integration is REFUSED
+            # `op_id collision` even though `_current_edge` proved the old
+            # resulting edge is stale and a fresh receipt is exactly what the
+            # crew needs. Binding the input source into the op_id gives every
+            # source-edge its own idempotence identity (treadmill root cause,
+            # E-3836).
+            op_id = (
+                "producer-integrate-"
+                + p.package_identity.split(":", 1)[-1][:32]
+                + "-"
+                + p.base_source_head[:12]
+            )
             journal_result = run_mutation(
                 root_path,
                 op_id,
