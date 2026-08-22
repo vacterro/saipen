@@ -1900,6 +1900,20 @@ def _preflight_plan(root: Path, plan: ReleasePlan) -> dict:
             return _release_failure(
                 "PREFLIGHT", "no committed release RUN event binds this continuation to the ticket"
             )
+    elif plan.crew_closure:
+        # Crew closure is planned at phase DONE / task none (all ordinary
+        # tickets were crew-deferred), so the full-mode preflight must accept
+        # that same surface instead of demanding phase SHIP + an active DOING
+        # ticket. The deferred crew scope check below is the real authority
+        # (T-1003 item 6): an active DOING ticket cannot exist after
+        # DEFER_FOR_CREW, so requiring one here made every terminal crew
+        # release impossible (reproduced twice: E-3836, this run).
+        if state.get("phase") != "DONE" or state.get("task") not in (None, "none"):
+            return _release_failure(
+                "PREFLIGHT",
+                "crew closure needs phase DONE / task none; live "
+                f"{state.get('phase')}/{state.get('task')}",
+            )
     else:
         if state.get("phase") != "SHIP":
             return _release_failure(
