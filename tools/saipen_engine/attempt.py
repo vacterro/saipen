@@ -81,6 +81,15 @@ def parse_attempt_text(text: str):
     stripped = (text or "").strip()
     if not stripped.startswith("attempt "):
         return None
+    # Only a payload whose SECOND token is an A-### id claims the attempt
+    # grammar. Ordinary English DEC prose may begin with the word "attempt"
+    # ("attempt to fix flaky harness -> gave up") -- that is not an attempt
+    # event and must parse as None, never as a corruption error (hostile
+    # hunt H21). A real A-### id (any digit width) with a broken tail IS
+    # corruption and fails loudly.
+    second = stripped.split(None, 2)[1] if len(stripped.split(None, 2)) > 1 else ""
+    if not re.fullmatch(r"A-\d+", second):
+        return None
 
     m = OPEN_RE.match(stripped)
     if m:

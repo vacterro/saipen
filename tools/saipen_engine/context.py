@@ -714,7 +714,23 @@ def brief_projection(project_root: Path | str) -> Result:
         if open_here:
             current = open_here[-1]
     pointer = state.get("attempt")
-    if pointer is not None and pointer in records and records[pointer]["close_event"] is None:
+    if pointer is not None and (
+        pointer not in records or records[pointer]["close_event"] is not None
+    ):
+        # A torn attempt pointer means the checkpoint does not describe a
+        # real episode; projecting a healthy handoff from it would launder
+        # the corruption into the next agent's context (hostile hunt H28).
+        return Result(
+            ok=False,
+            code="VALIDATION_FAILED",
+            op_id="",
+            message=(
+                f"STATE.attempt {pointer} names no open episode in the LOG -- "
+                "torn attempt state; run tools/validate.py"
+            ),
+            data={},
+        )
+    if pointer is not None and records[pointer]["close_event"] is None:
         current = records[pointer]
 
     previous = None

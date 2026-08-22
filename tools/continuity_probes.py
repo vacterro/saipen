@@ -133,13 +133,20 @@ def set_state_field(project: Path, field: str, value: str | None) -> None:
     raw = state_path.read_bytes().decode("utf-8")
     lines = raw.splitlines(keepends=True)
     out = []
+    found = False
     for line in lines:
         if line.startswith(field + ":"):
+            found = True
             if value is None:
                 continue
             out.append(f"{field}: {value}\n")
         else:
             out.append(line)
+    if not found and value is not None:
+        # Insert before the closing fence so a missing optional field
+        # (goal counters on a fixture without them) still lands.
+        close = next(i for i, ln in enumerate(out) if ln.strip() == "---" and i > 0)
+        out.insert(close, f"{field}: {value}\n")
     state_path.write_bytes("".join(out).encode("utf-8"))
 
 
@@ -683,6 +690,188 @@ def run_continuity_probes() -> tuple[list[str], int]:
         and conflict_close.get("ok") is False
         and tail_after_close == tail_final,
         json.dumps({"replay": replay_close, "conflict": conflict_close})[:300],
+    )
+
+    # ------------------------------------------------------------------
+    # Second hostile wave (self-audit hunt): parser prose safety, vocab
+    # casing, dangling evidence, bounded unknown, cross-seat replay,
+    # close-ticket coherence, torn-pointer projection, goal counters,
+    # sealed-segment lineage.
+    # ------------------------------------------------------------------
+
+    # H21: ordinary DEC prose beginning with the word "attempt" is NOT an
+    # attempt event -- the validator must stay green, and mutations through
+    # the engine must not be blocked by the attempt fast gate.
+    p = fresh_project()
+    append_log(p, "T-001", "a1", "DEC: attempt to fix flaky harness -> gave up")
+    rc, out = validate(p)
+    expect(
+        "H21: English DEC prose starting with 'attempt' is not corruption",
+        rc == 0,
+        out[-300:],
+    )
+    cli(p, "a1", "claim", "T-001")
+    r = cli(p, "a1", "attempt", "open")
+    expect(
+        "H21b: engine mutation unblocked after prose line",
+        r.get("code") == "ATTEMPT_OPENED",
+        json.dumps(r)[:200],
+    )
+    # ...but a REAL A-### id with a broken tail is still corruption.
+    p2 = fresh_project()
+    append_log(p2, "T-001", "a1", "DEC: attempt A-001 opens the gate")
+    rc, out = validate(p2)
+    expect(
+        "H21c: A-### id with malformed tail FAILs closed",
+        rc != 0 and "malformed attempt event" in out,
+        out[-260:],
+    )
+
+    # H22: uppercase vocabulary is outside the closed sets.
+    from saipen_engine import attempt as att_mod
+
+    _recs, _verr = att_mod.build_attempts(
+        [
+            {"event": 5, "taxonomy": "DEC", "ticket": "T-001", "text": "attempt A-001 open"},
+            {
+                "event": 6,
+                "taxonomy": "DEC",
+                "ticket": "T-001",
+                "text": "attempt A-001 close result CANDIDATE stop COMPLETED_EXECUTION",
+            },
+        ]
+    )
+    expect(
+        "H22: uppercase result/stop refused by the closed vocabularies",
+        any(("not one of" in e or "malformed attempt event" in e) for e in _verr),
+        str(_verr[:2]),
+    )
+
+    # H24: evidence citing a nonexistent (future) event FAILs.
+    p = fresh_project()
+    append_log(p, "T-001", "a1", "DEC: attempt A-001 open")
+    append_log(
+        p,
+        "T-001",
+        "a1",
+        "DEC: attempt A-001 close result candidate stop completed_execution "
+        "-- evidence E-99999",
+    )
+    rc, out = validate(p)
+    expect(
+        "H24: dangling future evidence reference FAILs",
+        rc != 0 and "does not exist in the LOG" in out,
+        out[-260:],
+    )
+
+    # H25: overlong unknown clause refuses at the engine with zero writes.
+    p = fresh_project()
+    cli(p, "a1", "claim", "T-001")
+    cli(p, "a1", "attempt", "open")
+    tail_before = max(
+        int(m.group(1))
+        for m in re.finditer(r"\[E-(\d+)\]", (p / ".saipen" / "LOG.md").read_text(encoding="utf-8"))
+    )
+    r = cli(
+        p,
+        "a1",
+        "attempt",
+        "close",
+        "candidate",
+        "completed_execution",
+        "--unknown",
+        "x" * 201,
+    )
+    tail_after = max(
+        int(m.group(1))
+        for m in re.finditer(r"\[E-(\d+)\]", (p / ".saipen" / "LOG.md").read_text(encoding="utf-8"))
+    )
+    expect(
+        "H25: >200-char unknown clause refuses with zero writes",
+        r.get("ok") is False
+        and "at most" in str(r.get("message", ""))
+        and tail_before == tail_after,
+        json.dumps(r)[:220],
+    )
+
+    # H26: a DIFFERENT seat cannot replay someone else's live episode open.
+    p = fresh_project()
+    cli(p, "a1", "claim", "T-001")
+    cli(p, "a1", "attempt", "open")
+    backdate_claim(p)
+    r = cli(p, "a2", "attempt", "close", "interrupted", "unknown")
+    expect("H26a: foreign-stale seat may close the dangling episode", r.get("code") == "ATTEMPT_CLOSED", json.dumps(r)[:160])
+    cli(p, "a2", "claim", "T-001")
+    cli(p, "a2", "attempt", "open")
+    r = cli(p, "a1", "attempt", "open")
+    expect(
+        "H26b: second open while an episode is live refuses deterministically",
+        r.get("ok") is False
+        and ("still open" in str(r.get("message", "")) or "live foreign claim" in str(r.get("message", ""))),
+        json.dumps(r)[:220],
+    )
+
+    # H27: a hand-forged close naming a DIFFERENT ticket than its open FAILs.
+    p = fresh_project()
+    append_log(p, "T-001", "a1", "DEC: attempt A-001 open")
+    append_log(
+        p, "T-none", "a1", "DEC: attempt A-001 close result failed stop validation_failure"
+    )
+    rc, out = validate(p)
+    expect(
+        "H27: close ticket != open ticket FAILs coherence",
+        rc != 0 and "belongs to exactly one Work" in out,
+        out[-280:],
+    )
+
+    # H28: brief refuses to project from a torn attempt pointer.
+    p = fresh_project()
+    cli(p, "a1", "claim", "T-001")
+    cli(p, "a1", "attempt", "open")
+    set_state_field(p, "attempt", "A-042")
+    b = cli(p, "a2", "brief", "--json")
+    expect(
+        "H28: torn pointer makes brief refuse instead of projecting",
+        b.get("ok") is False and "torn attempt state" in str(b.get("message", "")),
+        json.dumps(b)[:240],
+    )
+
+    # H29: attempt lifecycle leaves goal counters untouched.
+    p = fresh_project()
+    set_state_field(p, "execution_intent", "goal")
+    set_state_field(p, "goal_waves", "2")
+    set_state_field(p, "goal_tickets", "7")
+    cli(p, "a1", "claim", "T-001")
+    cli(p, "a1", "attempt", "open")
+    cli(p, "a1", "attempt", "close", "interrupted", "context_limit")
+    st_text = (p / ".saipen" / "STATE.md").read_text(encoding="utf-8")
+    counters_ok = "goal_waves: 2" in st_text.replace('"', "") and (
+        "goal_tickets: 7" in st_text
+    )
+    expect("H29: lifecycle ops do not disturb goal counters", counters_ok, st_text[:200])
+
+    # H30: lineage across the seal boundary -- open sealed, close active.
+    p = fresh_project()
+    logs_dir = p / ".saipen" / "logs"
+    logs_dir.mkdir()
+    sealed = (
+        "# Log\n\n"
+        "- 01.01.26 00:00 [E-001] [T-001] [agent: bootstrap] DEC: bootstrapped\n"
+        "- 01.01.26 00:01 [E-002] [parent: E-001] [T-001] [agent: old] "
+        "DEC: attempt A-001 open\n"
+    )
+    (logs_dir / "LOG-001.md").write_text(sealed, encoding="utf-8", newline="\n")
+    active_head = (
+        "# Log\n\n"
+        "- 01.01.26 00:02 [E-003] [parent: E-002] [T-001] [agent: new] "
+        "DEC: attempt A-001 close result interrupted stop process_crash\n"
+    )
+    (p / ".saipen" / "LOG.md").write_text(active_head, encoding="utf-8", newline="\n")
+    rc, out = validate(p)
+    expect(
+        "H30: sealed-open + active-close reads as one coherent lineage",
+        rc == 0,
+        out[-300:],
     )
 
     print(f"\ncontinuity probes: {checked} checked")
