@@ -171,7 +171,7 @@
 - **critical:** false
 - **severity:** P3
 - **producer:** saitest
-- **source_head:** e75367f79c68c5386f73cd76a0fcb89cdc6223bb
+- **source_head:** 078f5cd6d12e36d24677fc79b86f0457dd70f4ea
 - **source_tree_fingerprint:** git-delta-v1:55f536106504e1e87a44617c149d6c741e6227860e93ddfb56bdd0cb08576776
 - **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
 - **coverage:** Scenario families 1-7 regression against the current tree: core/intent/autonomy/conformance/producer/second-wave/external-audit suites + canonical validator + compileall

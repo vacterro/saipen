@@ -248,8 +248,8 @@
 
 
 ## W-037: saiwiki re-bind to e75367f7
-- **status:** ready
-- **summary:** current saiwiki package re-bound to committed source e75367f7
+- **status:** stale
+- **summary:** superseded by W-038 (HEAD 078f5cd6)
 - **main_project_refs:** []
 - **critical:** false
 - **severity:** P3
@@ -262,3 +262,20 @@
 - **verified:** PASS -- integrated CURRENT against e75367f7; identity 4414fe51acb8...
 - **instructions:** Core records the integrated saiwiki disposition.
 - **details:** content-identical re-bind to e75367f7/55f5361 after crew fix commits.
+
+
+## W-038: saiwiki re-bind to 078f5cd6
+- **status:** ready
+- **summary:** current saiwiki package re-bound to committed source 078f5cd6
+- **main_project_refs:** []
+- **critical:** false
+- **severity:** P3
+- **producer:** saiwiki
+- **source_head:** 078f5cd6d12e36d24677fc79b86f0457dd70f4ea
+- **source_tree_fingerprint:** git-delta-v1:55f536106504e1e87a44617c149d6c741e6227860e93ddfb56bdd0cb08576776
+- **role_revision:** sha256:54a42475a124ab0f27e83d600a284a9cc54d9668029c4828cfc48512b031df13
+- **coverage:** 8 maintained wiki pages + _Sidebar; content-identical to W-035/036/037
+- **payload:** []
+- **verified:** PASS -- integrated CURRENT against 078f5cd6
+- **instructions:** Core records the integrated saiwiki disposition.
+- **details:** content-identical re-bind to 078f5cd6/55f5361.

@@ -160,3 +160,17 @@
 - **payload:** []
 - **verified:** PASS -- integrated CURRENT against e75367f7
 - **instructions:** Core records the integrated saitranslate disposition.
+
+
+## SAIT-018: FORCE-FRESH re-bind to 078f5cd6
+- **status:** ready
+- **summary:** FORCE-FRESH re-bind to 078f5cd6; content-identical (README.md unchanged), package identity dbcddc71fee86ac29e705b1e7be25d2d5f8b808006cdded1c449b551faa2367a preserved
+- **critical:** false
+- **producer:** saitranslate
+- **source_head:** 078f5cd6d12e36d24677fc79b86f0457dd70f4ea
+- **source_tree_fingerprint:** git-delta-v1:55f536106504e1e87a44617c149d6c741e6227860e93ddfb56bdd0cb08576776
+- **role_revision:** sha256:f241e6b83c39e9b46bfa586638efb0374bbb39889646f723b9189bbb4912c0c5
+- **coverage:** 32/32 locale README_*.md payloads + 3 root mirrors = 35 payload entries; 44 read dependencies
+- **payload:** []
+- **verified:** PASS -- integrated CURRENT against 078f5cd6
+- **instructions:** Core records the integrated saitranslate disposition.

@@ -152,7 +152,7 @@
 - **critical:** false
 - **severity:** P3
 - **producer:** saiui
-- **source_head:** e75367f79c68c5386f73cd76a0fcb89cdc6223bb
+- **source_head:** 078f5cd6d12e36d24677fc79b86f0457dd70f4ea
 - **source_tree_fingerprint:** git-delta-v1:55f536106504e1e87a44617c149d6c741e6227860e93ddfb56bdd0cb08576776
 - **role_revision:** sha256:f2e3685b908a3b9837917f12c5414628d847c35fb72567f0306e2c8b19a8dab8
 - **coverage:** Current visual-file scan, CLI action surface, Golden Default palette integrity, and SubSaipen write boundary.
