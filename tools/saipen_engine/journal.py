@@ -3913,7 +3913,13 @@ def semantic_receipt_snapshot(
             f"{'...' if len(foreign) > 5 else ''}"
         )
     # Sort by created_at for deterministic ordering (W2-005: canonical UTC).
-    _earliest = iso_utc_sort_key("0000-01-01T00:00:00Z")
+    # Year 0000 does not exist in datetime (MINYEAR is 1), so the fallback
+    # must be a REAL instant -- parsing "0000-01-01" returned None and made
+    # the sort key itself None, which crashed every consumer comparing it
+    # against a real timestamp (saicrew harness, TypeError NoneType < datetime).
+    _earliest = iso_utc_sort_key("0001-01-01T00:00:00Z") or datetime.datetime.min.replace(
+        tzinfo=datetime.timezone.utc
+    )
     records = sorted(
         results.values(),
         key=lambda r: (iso_utc_sort_key(r.get("created_at", "")) or _earliest, r.get("op_id", "")),

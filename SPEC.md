@@ -107,6 +107,35 @@ Logs in SAIPEN are not linear strings. They form an acyclic graph of decisions u
 ## Architecture Decision Records (ADR)
 Transient event logs do not house permanent knowledge. SAIPEN mandates that structural architectural decisions are persisted as ADRs (e.g., `KNOWLEDGE/ADR-001-use-sqlite.md`).
 
+## Work, Attempts, and Completion Authority
+The BOARD ticket is the durable **Work**. An **Attempt** (`A-###`) is one bounded execution episode of one agent working that Work, recorded as machine-owned `DEC` events in the existing append-only `LOG.md` plus a single optional `STATE.attempt` pointer. The Attempt is deliberately not a storage subsystem: no database, no daemon, no second writer.
+
+- An Attempt may end `candidate | failed | interrupted | yielded | superseded` with an independent stop reason (`context_limit`, `process_crash`, `deliberate_handoff`, ...). **Attempt failure never touches Work identity** -- the successor closes the dangling episode honestly and re-claims the same ticket.
+- Completion authority is not transferable to the producer: a candidate episode, its RUN lines and its own assertions are *claims*. Only verification evidence recorded after the claim (the VERIFY boundary + PASS/MANUAL-VERIFY grammar) plus the independent VERIFY -> REVIEW -> SHIP gates admit a transition to DONE. A producer cannot close its own Work, and retroactive self-admission fails validation.
+- `saipen brief` synthesizes a cold-handoff projection (Work, objective, current/last attempt, why it stopped, blockers, known unknowns, exact next action). It is a derived view: it writes nothing, runs nothing, and can always be rebuilt from canonical state.
+- Information honesty is structural: `unknown:` clauses record what is genuinely unknown; missing information is never promoted to fact, and uncertainty never substitutes for verification evidence.
+- Canonical project files are the only authority. CLI output, projections, caches or external consumers that disagree with `.saipen/` are stale by definition and must be rebuildable from it.
+
+## Guarantees, Bounds, and Non-Claims
+Stated plainly, at the strength the implementation actually supports.
+
+GUARANTEED (implemented + validated):
+- Project-local persistent state: cold reconstruction of Work, objective, last attempt, stop reason, known evidence and next action from `.saipen/` alone.
+- Validated state transitions: every canonical mutation passes the transactional fast gate; the release validator re-checks the full contract fail-closed.
+- Bounded single-writer semantics on a shared filesystem (claim serialization, one open attempt, OPS transaction ordering LOG -> BOARD -> STATE).
+
+BOUNDED (designed for, environment-dependent):
+- Local/shared-filesystem assumptions: atomicity is temp-file-plus-rename ordering, not fsync-durability guarantees.
+- Explicitly supported protocol/schema versions: older states read as legacy with upgrade-at-next-checkpoint; newer-than-running states refuse fail-closed.
+
+NOT GUARANTEED:
+- Distributed consensus across disconnected machines (see Concurrency below).
+- Correctness of arbitrary LLM output -- only that fabricated completions cannot reach the board green unchallenged.
+- External provider availability, model quality, or uninterrupted execution -- the protocol assumes every agent may vanish mid-word and makes that survivable rather than preventing it.
+- Durability beyond what the host filesystem itself promises.
+
+Maturity vocabulary used throughout the docs and release notes: DESIGNED -> IMPLEMENTED -> TESTED -> VERIFIED -> RELEASED. A claim is written at the strongest level it has actually reached, never higher.
+
 ## Concurrency & Distribution Boundaries
 SAIPEN ensures state integrity via file-based claims (`owner`, `claim_time`) and sequential graphs (`LOG.md`). However, **SAIPEN is a state protocol, not a distributed consensus algorithm.**
 - **Local/Shared Filesystem**: Conflict resolution relies on atomic filesystem writes ("first commit wins").

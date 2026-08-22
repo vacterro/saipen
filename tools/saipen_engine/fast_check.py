@@ -575,6 +575,39 @@ def validate_texts(
                 f"but task is {task!r}; task must be none outside a "
                 "ticket-bearing phase"
             )
+
+    # Attempt contract on the PROPOSED world (T-1148). The transactional
+    # write path refuses the same attempt corruption the release gate
+    # fails: a malformed/mis-paired attempt event, more than one open
+    # episode, or an attempt pointer disagreeing with the proposed LOG.
+    # Evaluated over sealed+proposed events so a close of an attempt opened
+    # in a sealed segment never reads as orphaned.
+    from . import attempt as _attempt_mod
+
+    for ev in active_events:
+        if ev.get("taxonomy") != "DEC":
+            continue
+        _rec, err = _attempt_mod.parse_attempt_event(ev)
+        if err is not None:
+            errors.append(f"LOG proposed attempt event: {err}")
+    _att_records, _att_errs = _attempt_mod.build_attempts(active_events)
+    for _att_e in _att_errs:
+        errors.append(f"LOG: {_att_e}")
+    _att_pointer = state.get("attempt")
+    if _att_pointer is not None:
+        if _att_pointer not in _att_records or (
+            _att_records[_att_pointer]["close_event"] is not None
+        ):
+            errors.append(
+                f"STATE proposed attempt {_att_pointer} has no open event in "
+                "the proposed history -- torn attempt state"
+            )
+        elif state.get("task") != _att_records[_att_pointer].get("ticket"):
+            errors.append(
+                f"STATE proposed attempt {_att_pointer} belongs to "
+                f"{_att_records[_att_pointer].get('ticket')} but task is "
+                f"{state.get('task')}"
+            )
     return errors
 
 

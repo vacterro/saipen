@@ -130,6 +130,7 @@ STATE_KNOWN_FIELDS = frozenset(
     {
         "phase",
         "task",
+        "attempt",
         "next_action",
         "blocker",
         "agent",
@@ -183,6 +184,7 @@ STATE_CONVERGE_TARGETS = ("done", "ship", "crew")
 STATE_STRING_FIELDS = frozenset(
     {
         "task",
+        "attempt",
         "next_action",
         "blocker",
         "agent",
@@ -521,6 +523,13 @@ def state_contract_errors(
     phase = fields.get("phase")
     if phase is not None and (not isinstance(phase, str) or phase not in STATE_PHASE_ENUM):
         errors.append(f"phase {phase!r} not one of {'|'.join(STATE_PHASE_ENUM)}")
+    att = fields.get("attempt")
+    if att is not None:
+        if not isinstance(att, str) or not re.fullmatch(r"A-\d{3,}", att):
+            errors.append(
+                f"attempt {att!r} is not an A-### id -- the STATE attempt "
+                "pointer names one open Attempt episode"
+            )
     tf = fields.get("transition_from")
     if tf is not None and (not isinstance(tf, str) or tf not in STATE_PHASE_ENUM):
         errors.append(f"transition_from {tf!r} not one of {'|'.join(STATE_PHASE_ENUM)}")

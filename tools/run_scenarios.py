@@ -4772,6 +4772,7 @@ def run_saicrew_probes() -> tuple[list[str], int]:
                     "ticket_id": "T-900",
                     "tag": "v9.9.9",
                     "source_head": pre_source.source_head,
+                    "source_tree_fingerprint": pre_source.source_tree_fingerprint,
                     "closure_commit": pre_source.source_head,
                     "stages": [
                         "CONTENT_COMMIT_CREATED",
@@ -5709,6 +5710,36 @@ def run_release_freshness_probes() -> tuple[list[str], int]:
         # cannot back, and reconcile STATE (last_event + § 1.5 goal replay)
         # to the cut so the fixture is internally valid.
         saipen_dir = project / ".saipen"
+        # ONE SYNTHETIC work surface (same reasoning as the release executor
+        # fixture): the copied repository's DONE tickets carry their verify
+        # evidence in LOG history this cut removes, so a copied real board
+        # fails closure-evidence on tickets this probe never touched. DONE is
+        # emptied and DOING dropped (STATE below is neutralized to a
+        # ticket-less DONE shape), while TODO/BLOCKED survive verbatim -- the
+        # release-history WARN-ownership rule demands live owners for aged
+        # warning slugs, and those live in exactly those two sections.
+        _board_src = (saipen_dir / "BOARD.md").read_text(encoding="utf-8-sig")
+        _board_out = []
+        _skip_section = None
+        for _ln in _board_src.splitlines():
+            _head = re.match(r"^## (\w+)\s*$", _ln)
+            if _head:
+                _skip_section = {"DONE": "drop", "DOING": "drop"}.get(_head.group(1))
+                _board_out.append(_ln)
+                continue
+            if _skip_section == "drop":
+                continue
+            _board_out.append(_ln)
+        (saipen_dir / "BOARD.md").write_text("\n".join(_board_out) + "\n", encoding="utf-8")
+        st = (saipen_dir / "STATE.md").read_text(encoding="utf-8-sig")
+        for key, val in (
+            ("phase", "DONE"),
+            ("task", "none"),
+            ("next_action", "saipen continue"),
+            ("transition_from", "DONE"),
+        ):
+            st = re.sub(rf"(?m)^({key}:\s*).*$", rf"\g<1>{val}", st)
+        (saipen_dir / "STATE.md").write_text(st, encoding="utf-8")
         sealed_max = 0
         logs_dir = saipen_dir / "logs"
         if logs_dir.is_dir():
@@ -6208,15 +6239,23 @@ def run_release_executor_probes() -> tuple[list[str], int]:
             out.append(new_ln)
         (saipen_dir / "STATE.md").write_text("\n".join(out) + "\n", encoding="utf-8")
 
-        board_text = (saipen_dir / "BOARD.md").read_text(encoding="utf-8-sig")
-        board_text = re.sub(
-            r"(?ms)^## DOING\n.*?(?=^## )",
-            "## DOING\n- [/] T-9000 synthetic fixture ticket "
+        # ONE SYNTHETIC work surface (T-994 / § 21): the copied repository's
+        # own DONE tickets carry evidence in LOG history the _cut_log trim
+        # below removes, so a copied real board would fail the ship gate's
+        # closure-evidence check on tickets this fixture never touched. The
+        # fixture's board is exactly its own synthetic ticket -- repo-state
+        # independent by construction.
+        (saipen_dir / "BOARD.md").write_text(
+            "# Board\n"
+            "## DOING\n"
+            "- [/] T-9000 synthetic fixture ticket "
             "| verify: canonical release executor matrix passes "
-            "| owner: probe | claim_time: 2026-01-01T00:00:00Z\n",
-            board_text,
+            "| owner: probe | claim_time: 2026-01-01T00:00:00Z\n"
+            "## TODO\n"
+            "## DONE\n"
+            "## BLOCKED\n",
+            encoding="utf-8",
         )
-        (saipen_dir / "BOARD.md").write_text(board_text, encoding="utf-8")
 
         _cut_log(saipen_dir)
         _append_fixture_verification(saipen_dir)
@@ -6246,6 +6285,18 @@ def run_release_executor_probes() -> tuple[list[str], int]:
         (project / "README.md").write_text(
             readme.replace(f"**v{old_ver}**", f"**v{new_ver}**"), encoding="utf-8"
         )
+        # The three ROOT locale mirrors are part of the release surface
+        # (release_contract.release_metadata_paths); a fixture that bumps
+        # VERSION must bump their badges too, or every probe that plans a
+        # release dies in _check_parity before it tests what it came for.
+        for mirror in ("README.ee.md", "README.ded.md", "README.ja.md"):
+            mirror_path = project / mirror
+            if mirror_path.is_file():
+                mirror_text = mirror_path.read_text(encoding="utf-8-sig")
+                mirror_path.write_text(
+                    mirror_text.replace(f"**v{old_ver}**", f"**v{new_ver}**"),
+                    encoding="utf-8",
+                )
         changelog = (project / "CHANGELOG.md").read_text(encoding="utf-8-sig")
         (project / "CHANGELOG.md").write_text(
             f"## {new_ver}\n\nTest release.\n\n" + changelog, encoding="utf-8"
@@ -8094,9 +8145,11 @@ def run_role_freshness_probes() -> tuple[list[str], int, int]:
         original_parse_delta = freshness._parse_git_delta_evidence
         parse_reads = 0
 
-        def mutate_after_second_read(root: Path, raw_delta: bytes, raw_untracked: bytes):
+        def mutate_after_second_read(
+            root: Path, raw_delta: bytes, raw_untracked: bytes, path_map=None
+        ):
             nonlocal parse_reads
-            records = original_parse_delta(root, raw_delta, raw_untracked)
+            records = original_parse_delta(root, raw_delta, raw_untracked, path_map)
             parse_reads += 1
             if parse_reads == 2:
                 source.write_text("raced after second read\n", encoding="utf-8")
@@ -17988,6 +18041,40 @@ def run_perf_wave_probes() -> tuple[list[str], int]:
     return problems, 1
 
 
+def run_continuity_probes() -> tuple[list[str], int]:
+    """Execute the Work/Attempt continuity gate (T-1148) in its own process.
+
+    SC-CONTINUITY-001 (the canonical cold-handoff scenario: agent A dies,
+    cold agent B resumes the SAME Work from repository state alone, agent C
+    independently verifies) plus the hostile matrix H1..H20 live in
+    ``tools/continuity_probes.py``. Hermetic subprocess, same reasoning as
+    the perf wave: the runner copies fixtures into temp projects and drives
+    the real engine CLI with mock agent identities, so it must not share
+    process state with this suite.
+    """
+    problems: list[str] = []
+    script = HOME / "tools" / "continuity_probes.py"
+    if not script.is_file():
+        return [f"continuity runner missing: {script}"], 1
+    try:
+        r = subprocess.run(
+            [sys.executable, str(script)],
+            cwd=HOME,
+            capture_output=True,
+            text=True,
+            errors="replace",
+            timeout=1800,
+        )
+    except subprocess.TimeoutExpired:
+        return ["continuity probes TIMEOUT after 1800s"], 1
+    blob = (r.stdout or "") + (r.stderr or "")
+    if r.returncode != 0:
+        problems.append(f"continuity probes exited {r.returncode}: {blob[-600:]}")
+    else:
+        print("PASS: continuity probes (SC-CONTINUITY-001 + H1..H20, T-1148)")
+    return problems, 1
+
+
 def main():
     """Run targeted probe groups or the full suite.
 
@@ -18775,6 +18862,8 @@ def main():
     failures.extend(t1012_failures)
     perf_failures, perf_checked = run_perf_wave_probes()
     failures.extend(perf_failures)
+    continuity_failures, continuity_checked = run_continuity_probes()
+    failures.extend(continuity_failures)
     print(
         f"\n{checked} executable fixture(s) checked, "
         f"{skipped} behavioral fixture(s) skipped (README-only by design)"
@@ -18825,6 +18914,7 @@ def main():
     print(f"{improve_checked} improve behavior(s) executed")
     print(f"{nitro_checked} nitro behavior(s) executed")
     print(f"{perf_checked} perf-wave regression gate(s) executed (T-1019..T-1022)")
+    print(f"{continuity_checked} continuity gate(s) executed (SC-CONTINUITY-001 + H1..H20)")
     print(f"{nitro_m2_checked} nitro-m2 behavior(s) executed")
     print(f"{nitro_m3_checked} nitro-m3 behavior(s) executed")
     print(f"{nitro_integrity_checked} nitro-integrity behavior(s) executed")

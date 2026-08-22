@@ -3113,6 +3113,71 @@ if log_files:
                     "before DONE"
                 )
 
+    # [attempt-contract] (T-1148): Work vs Attempt separation. An Attempt is
+    # one bounded execution episode of one agent on one ticket; its failure
+    # must never rename, fail, or destroy the Work. The whole contract lives
+    # in saipen_engine.attempt so the engine ops, this gate and any future
+    # consumer share ONE grammar:
+    #   * legal machine-owned event grammar (open/close payloads);
+    #   * unique attempt IDs, coherent open/close pairing and ticket refs;
+    #   * at most ONE open attempt project-wide (single-writer semantics);
+    #   * closed result/stop vocabularies + the result->stop matrix;
+    #   * resolvable evidence references and acyclic predecessor chains;
+    #   * STATE.attempt pointer agreement (no torn attempt state);
+    #   * an attempt may only attach to Work that canonically exists.
+    if _canonical_history_snapshot is not None and log_ok:
+        from saipen_engine import attempt as _attempt_mod
+
+        _att_events = list(_canonical_history_snapshot.events)
+        # Canonical Work universe: board tickets plus every NON-attempt
+        # history ticket ref. An attempt event's own [T-###] slot is NOT
+        # admitted as existence proof -- otherwise a fabricated attempt could
+        # vouch for Work that never existed (hostile H4).
+        _attempt_event_ids = {
+            rec["event"]
+            for ev in _att_events
+            for rec in [_attempt_mod.parse_attempt_event(ev)[0]]
+            if rec is not None
+        }
+        _known_tids = (
+            set(tickets.keys())
+            | {
+                ev.get("ticket")
+                for ev in _att_events
+                if (
+                    ev.get("ticket")
+                    and re.match(r"^T-\d+$", ev["ticket"])
+                    and ev["event"] not in _attempt_event_ids
+                )
+            }
+        )
+        for _aerr in _attempt_mod.contract_errors(_att_events, state, _known_tids):
+            fail(f"attempt-contract -- {_aerr}")
+
+        # [attempt-admission] (T-1148): producer self-approval guard. A DONE
+        # ticket whose producing attempt closed `candidate` must have a VERIFY
+        # boundary AFTER that close -- the admission verdict comes from
+        # independent verification that postdates the claim, never from the
+        # claim itself.
+        _att_records, _att_fold2 = _attempt_mod.build_attempts(_att_events)
+        for _done_t in sorted(
+            (t for t in tickets.values() if t.get("section") == "## DONE"),
+            key=lambda t: t["id"],
+        ):
+            _recs_here = [
+                rec
+                for rec in _att_records.values()
+                if rec["ticket"] == _done_t["id"]
+            ]
+            if not _recs_here:
+                continue
+            _latest_here = max(_recs_here, key=lambda rec: rec["open_event"])
+            _adm_err = _attempt_mod.admission_error(
+                _latest_here, _done_t["id"], _att_events
+            )
+            if _adm_err:
+                fail(f"attempt-admission -- {_adm_err}")
+
     # T-555: Improve seat reports are MECHANICALLY checkable. Every report
     # under .saipen/improve/ is scanned with improve.py's own validate_report
     # (the same grammar the report consumer reads): a finding without an
@@ -4383,15 +4448,22 @@ if IS_SAIPEN_HOME:
     # T-549 is the single hard barrier for the improve wave. The generic DAG
     # makes T-551 unworkable while T-549 is unresolved; every later improve
     # ticket already depends transitively on T-551. Visual order is irrelevant.
+    # The check binds only while the wave is LIVE: an open T-551 with no
+    # barrier fails, but boards that pruned/closed the wave away are green --
+    # a release fixture or a cleaned board never carried those tickets, and
+    # hardcoding their existence would fail every project state after CLEAN.
     _board_body = Path(".saipen/BOARD.md").read_text(encoding="utf-8-sig", errors="replace")
     _t549_done = bool(re.search(r"(?ms)^## DONE\s.*?^- \[x\] T-549\b", _board_body))
     _t551 = re.search(r"(?m)^- \[[ /x]\] T-551\b([^\n]*)", _board_body)
+    _t551_open = bool(_t551 and not _t551.group(0).startswith("- [x]"))
     _t551_needs = (
         set(re.findall(r"T-\d+", re.search(r"\| needs:\s*([^|]+)", _t551.group(1)).group(1)))
         if _t551 and re.search(r"\| needs:\s*([^|]+)", _t551.group(1))
         else set()
     )
-    if not _t549_done and "T-549" not in _t551_needs:
+    if not _t551_open:
+        ok("T-549 hard barrier blocks the T-551..T-561 improve wave")
+    elif not _t549_done and "T-549" not in _t551_needs:
         fail(
             "hardening wave barrier missing -- unresolved T-549 must make "
             "T-551 unworkable via `needs: T-549`; BOARD order cannot block "
@@ -7765,8 +7837,16 @@ else:
         ("BROCHURE_JA.md", "non-normative presentation brochure"),
         ("KNOWLEDGE/HABITS-browser-hang.md", "cross-agent habit note, not a rule source"),
         (
+            "KNOWLEDGE/HABITS-long-jobs.md",
+            "cross-agent habit note, not a rule source",
+        ),
+        (
             "KNOWLEDGE/ADR-0001-v7-producer-parallelism.md",
             "architecture decision rationale; executable producer invariants are enforced by CORE.md and tools/test_v7_producer_parallelism.py",
+        ),
+        (
+            "KNOWLEDGE/ADR-0002-work-attempt-continuity.md",
+            "architecture decision rationale; executable attempt invariants are enforced by CORE.md, saipen_engine/attempt.py and tools/continuity_probes.py",
         ),
         (
             "KNOWLEDGE/HABITS-vs-buildtools-install-fix.md",

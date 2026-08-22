@@ -1,0 +1,17 @@
+{
+  "board_hash": "1904d921363c9dcc",
+  "content_hash": "f3801a34c7f18e85",
+  "exit_code": 0,
+  "gate": "core",
+  "kind": "conformance_receipt",
+  "log_hash": "fae3dbd0b97833c9",
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen\\tests\\scenarios\\cold-handoff-continuity",
+  "receipt_id": "receipt-748c63ca33ad",
+  "schema_version": 2,
+  "source_head": "no-git",
+  "source_tree_fingerprint": "no-git-tree-v1:a39c5b7fa7d93c63b2004cad5e220989194c426568d28b6138cd4303ceeae8c7",
+  "state_hash": "8de436c6ce76af98",
+  "timestamp_utc": "2026-08-22T15:51:08.051710Z",
+  "validator_protocol_version": "1",
+  "verdict": "PASS"
+}

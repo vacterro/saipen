@@ -789,3 +789,15 @@
 - 22.08.26 13:42 [E-4141] [parent: E-4140] [agent: saipen-cli] [op: convergence-0c3e20dbff774aafb5e820ff32462a0d] DEC: convergence stage H (post-clean test/validate gate) -- PASS: post-clean PASS
 - 22.08.26 13:42 [E-4142] [parent: E-4141] [agent: saipen-cli] [op: convergence-14c10ea1da2348b0be07aa17984c0e5f] DEC: convergence stage I (final forced HUNT) -- CLEAN: final HUNT clean @078f5cd6
 - 22.08.26 14:14 [E-4143] [parent: E-4142] [agent: saipen-cli] [op: checkpoint-3b66e3047de3427da7c48ddc8d44f98e] DEC: Crew SC-0..SC-10 green on 0aee0b64, SC-11 ship blocked: release gate requires staged metadata (VERSION/CHANGELOG/badges) but all v7.226.0 metadata is already committed in HEAD. Executor wants content commit with scope=tools/validate.py (wrong scope — real changes are .saipen/ state). Fix: crew_defer scope must cover real .saipen/* changes, and/or release classify should accept content_already_committed for crew closure with unchanged metadata. Same blocker as E-3836.
+- 22.08.26 14:39 [E-4144] [parent: E-4143] [agent: saipen-cli] [op: goal-entry-5f0e1411fb354d6ea4834842aafeb540] DEC: goal pivot -- Kungfu-inspired core hardening: Work/Attempt distinction, completion authority, claim-evidence-verdict contract, cold-handoff continuity scenario, brief projection, known-unknown semantics, hostile tests H1-H20
+- 22.08.26 14:39 [E-4145] [parent: E-4144] [agent: saipen-cli] [op: goal-entry-5f0e1411fb354d6ea4834842aafeb540] DEC: goal_waves 0->1
+- 22.08.26 14:40 [E-4146] [parent: E-4145] [T-1148] [agent: saipen-cli] [op: transition-5deedd866fd747cfafb9067e08321322] RUN: transition to BUILD
+- 22.08.26 20:52 [E-4147] [parent: E-4146] [T-1148] [agent: saipen-cli] RUN: validate.py -> PASS conf: high -- full suite + floor + order + tags + perf green
+- 22.08.26 20:52 [E-4148] [parent: E-4147] [T-1148] [agent: saipen-cli] [op: transition-2154d31c04994679890ec206257e3aff] RUN: transition to VERIFY
+- 22.08.26 20:53 [E-4149] [parent: E-4148] [T-1148] [agent: saipen-cli] RUN: validate.py -> PASS conf: high -- current-cycle evidence after VERIFY boundary
+- 22.08.26 20:53 [E-4150] [parent: E-4149] [T-1148] [agent: saipen-cli] [op: transition-081e17f8ab1a49d4ab01092f92de090e] RUN: transition to REVIEW
+- 22.08.26 20:53 [E-4151] [parent: E-4150] [op: transition-081e17f8ab1a49d4ab01092f92de090e] DEC: goal_tickets 0->1
+- 22.08.26 20:53 [E-4152] [parent: E-4151] [T-1148] [agent: saipen-cli] [op: transition-d9eb360e90b44f999a0dd42f34bb216f] RUN: transition to SHIP
+- 22.08.26 20:53 [E-4153] [parent: E-4152] [T-1148] [agent: saipen-cli] [op: finish-32308edfde9a4a25835065f108d8ff25] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 22.08.26 20:55 [E-4154] [parent: E-4153] [T-1148] [agent: saipen-cli] DEC: goal complete -- hardening delivered, T-1148 finished through SHIP gates; clearing execution_intent
+- 22.08.26 20:55 [E-4155] [parent: E-4154] [agent: saipen-cli] [op: checkpoint-dc7ff94487e74be19c2d09ec33f23b4e] DEC: goal T-1148 complete -- Work/Attempt hardening shipped to working tree

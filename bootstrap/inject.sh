@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env bash
+#!/usr/bin/env bash
 # saipen injector (macOS/Linux) -- installs saipen as default on every agentic system found.
 # Run from clone dir:  bash inject.sh
 # Idempotent: re-run safe.
@@ -111,7 +111,7 @@ shortcut (sc, cc, ccc, gg, hh, ss, sss, dd, aa, qq, qqq, ee, eee, pp, tt, or
 a Cyrillic twin) is a COMMAND, never a greeting and never a style token. It
 MUST activate SAIPEN and resolve through CORE.md 1.10's shortcut table BEFORE
 any conversational acknowledgement, style-mode interpretation, or remembered
-expansion. \`sc\` is \`saipen crew\`, never "stop caveman". A shortcut inside a
+expansion. \`sc\` is \`saipen crew\`, never \"stop caveman\". A shortcut inside a
 compound instruction (\`saipen push + build ccc\`) resolves identically as one
 ordered segment. Style commands (\`stop caveman\`/\`normal mode\`) stay legal, but
 a full-token shortcut match ALWAYS wins over style interpretation.

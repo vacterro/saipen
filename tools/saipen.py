@@ -1174,6 +1174,169 @@ def _context(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
     return 0
 
 
+def _attempt(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
+    """saipen attempt open|close (T-1148, journaled Work/Attempt lifecycle)."""
+    from saipen_engine.attempt import RESULTS, RESULT_STOP_MATRIX, STOP_REASONS
+
+    if not args or args[0] not in ("open", "close"):
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "attempt needs an action: open | close <RESULT> <STOP> "
+                "[--evidence E-1,E-2] [--unknown 'text']",
+            },
+            as_json,
+        )
+        return 2
+    action = args[0]
+    rest = args[1:]
+    result = stop = None
+    evidence: list[str] = []
+    unknown: str | None = None
+    if action == "close":
+        positional: list[str] = []
+        i = 0
+        while i < len(rest):
+            arg = rest[i]
+            if arg == "--evidence":
+                if i + 1 >= len(rest):
+                    _emit(
+                        {"ok": False, "code": "VALIDATION_FAILED",
+                         "detail": "dangling --evidence option"}, as_json)
+                    return 2
+                evidence = [e.strip() for e in rest[i + 1].split(",") if e.strip()]
+                i += 2
+            elif arg == "--unknown":
+                if i + 1 >= len(rest):
+                    _emit(
+                        {"ok": False, "code": "VALIDATION_FAILED",
+                         "detail": "dangling --unknown option"}, as_json)
+                    return 2
+                unknown = rest[i + 1]
+                i += 2
+            elif arg.startswith("--"):
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": f"unknown option {arg}",
+                    },
+                    as_json,
+                )
+                return 2
+            else:
+                positional.append(arg)
+                i += 1
+        if len(positional) != 2:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "attempt close takes exactly <RESULT> <STOP> "
+                    f"(surplus/missing: {' '.join(positional)})",
+                },
+                as_json,
+            )
+            return 2
+        result, stop = positional
+    elif rest:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"attempt open accepts no arguments; surplus: {' '.join(rest)}",
+            },
+            as_json,
+        )
+        return 2
+
+    # Fail fast on the closed vocabularies BEFORE any capability/handover work,
+    # so a typo'd result never burns an op_id or a handover DEC.
+    if action == "close":
+        if result not in RESULTS:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"result {result!r} outside the closed vocabulary "
+                    f"{'|'.join(RESULTS)}",
+                },
+                as_json,
+            )
+            return 2
+        if stop not in STOP_REASONS:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"stop reason {stop!r} outside the closed vocabulary "
+                    f"{'|'.join(STOP_REASONS)}",
+                },
+                as_json,
+            )
+            return 2
+        if stop not in RESULT_STOP_MATRIX[result]:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"result {result} cannot pair with stop {stop}; "
+                    f"allowed stops: {'|'.join(RESULT_STOP_MATRIX[result])}",
+                },
+                as_json,
+            )
+            return 2
+
+    if not dry_run and _negotiate_capability(project_root) == "read-only":
+        return _capability_refusal(as_json)
+    _ho = _ensure_handover(project_root, as_json, dry_run)
+    if _ho is not None:
+        return _ho
+    from saipen_engine.operations import attempt_lifecycle
+
+    out = attempt_lifecycle(
+        project_root,
+        _agent_for(project_root),
+        action,
+        result=result,
+        stop=stop,
+        evidence=evidence or None,
+        unknown=unknown,
+        dry_run=dry_run,
+    )
+    payload = out.to_dict() if hasattr(out, "to_dict") else dict(out)
+    _emit(payload, as_json)
+    return 0 if payload.get("ok") else 1
+
+
+def _brief(project_root: Path, as_json: bool) -> int:
+    """saipen brief (T-1148): derived cold-handoff projection. Read-only."""
+    from saipen_engine.context import brief_projection
+    from saipen_engine.log import HistoryOwnershipError
+
+    try:
+        result = brief_projection(project_root)
+    except (HistoryOwnershipError, OSError) as exc:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"history-ownership: {type(exc).__name__}: {exc}",
+            },
+            as_json,
+        )
+        return 1
+    if not result.ok:
+        _emit(result.to_dict(), as_json)
+        return 1
+    if as_json:
+        _emit(result.get("json"), as_json)
+    else:
+        print(result.get("surface", ""), end="")
+    return 0
+
+
 def _userperson(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
     """saipen userperson show/add/remove/reset (NITRO M7, journaled)."""
     if not args:
@@ -2285,7 +2448,8 @@ def main(argv: list[str] | None = None) -> int:
             "<cycle>|improve abort <cycle>|improve clean <cycle>|"
             "ship|push|scope <T-###> <path>...|first-publish-confirm "
             "<name> <public|private>|userperson|sub|rebind-home "
-            "<candidate-home>|context) [--dry-run] "
+            "<candidate-home>|context|attempt open|attempt close <RESULT> "
+            "<STOP>|brief) [--dry-run] "
             "[--json] [--project-root PATH] [--agent ID]"
         )
         if as_json:
@@ -2685,6 +2849,21 @@ def main(argv: list[str] | None = None) -> int:
         return _crew(project_root, args[1:], as_json, dry_run)
     if command == "context":
         return _context(project_root, args[1:], as_json, dry_run)
+    if command == "attempt":
+        return _attempt(project_root, args[1:], as_json, dry_run)
+    if command == "brief":
+        surplus = [a for a in args[1:] if a != "--json"]
+        if surplus:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"brief accepts no arguments; surplus: {' '.join(surplus)}",
+                },
+                as_json,
+            )
+            return 2
+        return _brief(project_root, as_json)
     if command == "improve":
         return _public_improve(project_root, args[1:], as_json, dry_run)
     if command == "scope":

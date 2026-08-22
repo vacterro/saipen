@@ -29,6 +29,10 @@
     "task": {
       "type": "string"
     },
+    "attempt": {
+      "type": "string",
+      "description": "Optional pointer to the OPEN Attempt (A-###) executing the claimed Work in `task`. Present only while an attempt episode is live; written and cleared by the engine's attempt open/close operations, never by hand. An Attempt is one bounded execution episode of one agent on one ticket: it may fail, be interrupted, or yield WITHOUT touching the ticket's identity, description, or history. Legal only when task names a real T-### and the named attempt has an unclosed `attempt A-### open` DEC event in the LOG whose ticket matches task; any other combination is torn state that tools/validate.py FAILs. The A-### shape is enforced in tools/validate.py's STATE contract (this file does not use `pattern`, which the gate does not interpret)."
+    },
     "next_action": {
       "type": "string"
     },

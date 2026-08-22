@@ -661,3 +661,162 @@ def context_audit(project_root: Path | str) -> Result:
         "recovery_pending": pending,
     }
     return Result(ok=True, code="CONTEXT_AUDIT", data=audit)
+
+
+def brief_projection(project_root: Path | str) -> Result:
+    """The cold-handoff projection (T-1148): Work, attempt, stop reason,
+    evidence, unknowns, next action -- synthesized from canonical state.
+
+    A DERIVED projection and nothing more: it writes NOTHING, so deleting
+    its output loses no information, and it can always be rebuilt from the
+    authoritative files. It never executes `next_action`; printing a command
+    is not running it.
+    """
+    root = Path(project_root)
+    inputs = _load_inputs_checked(root)
+    if isinstance(inputs, Result):
+        return inputs
+    state = inputs["state"]
+    board = inputs["board"]
+    if board.get("errors"):
+        return Result(
+            ok=False,
+            code="VALIDATION_FAILED",
+            op_id="",
+            message="BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+            data={},
+        )
+
+    from . import attempt as attempt_mod
+
+    records, fold_errors = attempt_mod.build_attempts(inputs["snap"].history.events)
+    if fold_errors:
+        return Result(
+            ok=False,
+            code="VALIDATION_FAILED",
+            op_id="",
+            message="LOG carries malformed attempt history: " + "; ".join(fold_errors[:3]),
+            data={},
+        )
+
+    task = state.get("task")
+    work_id = task if task and task != "none" else None
+    objective = None
+    if work_id and work_id in board["tickets"]:
+        objective = board["tickets"][work_id].get("description") or None
+
+    ordered = sorted(records.values(), key=lambda rec: rec["open_event"])
+    current = None
+    if work_id:
+        open_here = [
+            rec for rec in ordered if rec["close_event"] is None and rec["ticket"] == work_id
+        ]
+        if open_here:
+            current = open_here[-1]
+    pointer = state.get("attempt")
+    if pointer is not None and pointer in records and records[pointer]["close_event"] is None:
+        current = records[pointer]
+
+    previous = None
+    closed = [rec for rec in ordered if rec["close_event"] is not None]
+    if closed:
+        prev_candidates = (
+            [rec for rec in closed if rec["ticket"] == work_id] if work_id else []
+        )
+        previous = (prev_candidates or closed)[-1]
+
+    def _attempt_view(rec):
+        if rec is None:
+            return None
+        view = {"id": rec["id"], "result": rec["result"] or "active"}
+        if rec["close_event"] is not None:
+            view["stop_reason"] = rec["stop"]
+        else:
+            view["stop_reason"] = None
+        return view
+
+    blockers: list[str] = []
+    state_blocker = str(state.get("blocker") or "").strip()
+    if state_blocker and state_blocker.lower() not in ("none", ""):
+        blockers.append(f"STATE: {state_blocker}")
+    for ticket in board["tickets"].values():
+        if ticket["section"] == "## BLOCKED":
+            b = ticket["fields"].get("blocker") or ""
+            blockers.append(f"{ticket['id']}: {b}".strip())
+
+    unknowns: list[str] = []
+    for rec in reversed(ordered):
+        if work_id and rec["ticket"] != work_id:
+            continue
+        if rec.get("unknown"):
+            unknowns.append(f"{rec['id']}: {rec['unknown']}")
+
+    tail = inputs["log_tail"]
+    context_refs = [".saipen/STATE.md", ".saipen/BOARD.md"]
+    if work_id:
+        context_refs.append(f"BOARD:{work_id}")
+    context_refs.append(f"LOG tail E-{tail}" if tail is not None else "LOG tail (empty)")
+
+    payload = {
+        "project": root.name,
+        "phase": state.get("phase"),
+        "work_id": work_id or "none",
+        "objective": objective,
+        "attempt": _attempt_view(current),
+        "previous_attempt": _attempt_view(previous),
+        "previous_stop": previous["stop"] if previous else None,
+        "blockers": blockers,
+        "context": context_refs,
+        "unknowns": unknowns,
+        "next_action": state.get("next_action"),
+        "provenance": {
+            "state_updated": state.get("updated"),
+            "last_event": state.get("last_event"),
+        },
+    }
+
+    def _or_none(value):
+        return value if value not in (None, "", "none") else "none"
+
+    lines = [
+        f"PROJECT: {payload['project']}",
+        f"PHASE: {_or_none(payload['phase'])}",
+        f"WORK: {payload['work_id']}",
+        f"OBJECTIVE: {_or_none(payload['objective'])}",
+    ]
+    if current is not None:
+        lines.append(
+            f"ATTEMPT: {current['id']} "
+            f"{current['result'] or 'active'}"
+            + (f" (stop: {current['stop']})" if current["stop"] else "")
+        )
+    elif previous is not None:
+        lines.append(
+            f"ATTEMPT: {previous['id']} {previous['result']} (stop: {previous['stop']})"
+        )
+    else:
+        lines.append("ATTEMPT: none recorded")
+    lines.append(
+        f"PREVIOUS_STOP: {payload['previous_stop'] or 'none'}"
+    )
+    lines.append(f"BLOCKERS: {'; '.join(blockers) if blockers else 'none'}")
+    lines.append("")
+    lines.append("RELEVANT CONTEXT:")
+    for ref in context_refs:
+        lines.append(f"- {ref}")
+    lines.append("")
+    lines.append("KNOWN UNCERTAINTY:")
+    if unknowns:
+        for item in unknowns:
+            lines.append(f"- {item}")
+    else:
+        lines.append("- none recorded")
+    lines.append("")
+    lines.append("NEXT ACTION:")
+    lines.append(str(payload["next_action"]))
+    surface = "\n".join(lines) + "\n"
+    return Result(
+        ok=True,
+        code="BRIEF",
+        data={"surface": surface, "json": payload},
+    )

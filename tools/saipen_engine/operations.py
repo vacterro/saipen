@@ -47,6 +47,7 @@ from .result import Result
 from .state import (
     parse_state,
     patch_state,
+    remove_state_fields,
     transition_execution_intent,
     is_legal_wait,
     running_schema_version,
@@ -558,6 +559,20 @@ def _plan_claim(
         # authorized the takeover (hostile-regression, P1#8) -- an ordinary
         # UNCLAIMED adoption records only the new owner. Splitting the payload
         # keeps the ledger's takeover audit distinct from fresh adoption.
+        # Attempt/claim interaction (T-1148): adopting or taking over Work
+        # while an attempt episode is still open would leave the episode's
+        # STATE pointer attached to a ticket changing hands -- torn state.
+        # The successor closes the predecessor's dangling attempt FIRST
+        # (interrupted / unknown), then claims. The owner's own SELF lease
+        # refresh stays legal mid-episode.
+        if cs != "SELF" and state.get("attempt"):
+            return _refuse(
+                "VALIDATION_FAILED",
+                f"attempt {state.get('attempt')} is still open on this "
+                "Work -- close it (result interrupted, stop unknown after a "
+                "crashed predecessor) before claiming",
+                ticket=ticket_id,
+            )
         if cs == "FOREIGN_STALE":
             _old_owner = (ticket["fields"].get("owner") or "").strip()
             _prior_claim = (ticket["fields"].get("claim_time") or "").strip()
@@ -641,6 +656,15 @@ def _plan_claim(
         return _refuse(
             "VALIDATION_FAILED",
             f"{ticket_id} carries an INVALID claim (half owner/claim_time pair or non-UTC stamp)",
+            ticket=ticket_id,
+        )
+    # Attempt/claim interaction (T-1148): a fresh claim while an episode is
+    # open would orphan that episode's pointer on a ticket it does not name.
+    if state.get("attempt"):
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"attempt {state.get('attempt')} is still open -- close it "
+            "before claiming different Work",
             ticket=ticket_id,
         )
     for need in ticket["needs"]:
@@ -761,6 +785,343 @@ def apply_claim(
     if isinstance(plan, Result):
         return plan
     return apply_plan(Path(project_root), plan)
+
+
+# ------------------------------------------------------------ attempt (T-1148)
+
+
+def _plan_attempt(
+    root: Path,
+    agent: str,
+    action: str,
+    result: str | None,
+    stop: str | None,
+    evidence: list[str] | None,
+    unknown: str | None,
+    now: str,
+    utc: str,
+) -> OperationPlan | Result | dict:
+    """PLAN one Attempt lifecycle step (open|close) over the ACTIVE Work.
+
+    An Attempt is one bounded execution episode of one agent on the claimed
+    ticket. The op writes TWO targets in ONE transaction: the machine-owned
+    DEC event in LOG.md and the STATE.attempt pointer (set on open, removed
+    on close) -- so a crash can never leave Work claiming an episode the LOG
+    does not know about, nor an episode the Work disowned.
+    """
+    from . import attempt as attempt_mod
+
+    op_id = ("attempt-" + action + "-") + uuid4_hex()
+    docs, state, board, log_tail = _read(root)
+    if action == "open":
+        _guard = _active_claim_refusal(state, docs["board"].text_norm, agent)
+        if _guard is not None:
+            return _guard
+    else:
+        # Closing an episode uses a RELAXED ownership guard: closing a crashed
+        # predecessor's dangling attempt is THE recovery step that unblocks
+        # adoption (claim refuses while an episode is open), so it must stay
+        # reachable for any session when the predecessor's claim is stale or
+        # gone. Only a LIVE foreign claim or an INVALID claim still refuses.
+        _tickets = parse_board(docs["board"].text_norm)["tickets"]
+        _task = state.get("task")
+        _ticket = _tickets.get(_task) if _task else None
+        if (
+            _ticket is not None
+            and _ticket.get("section") == "## DOING"
+        ):
+            _cs = claim_status(_ticket, agent)
+            if _cs in ("FOREIGN_LIVE", "INVALID"):
+                return _refuse(
+                    "TICKET_NOT_WORKABLE"
+                    if _cs == "FOREIGN_LIVE"
+                    else "VALIDATION_FAILED",
+                    f"{_task} carries a {_cs} claim; that claim's holder "
+                    "closes its own attempt",
+                    ticket=_task,
+                )
+
+    records, fold_errors = attempt_mod.build_attempts(docs["_history"].events)
+    if fold_errors:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "LOG carries malformed attempt history; run tools/validate.py: "
+            + "; ".join(fold_errors[:3]),
+        )
+    open_ids = attempt_mod.active_attempts(records)
+
+    task = state.get("task")
+
+    if action == "open":
+        # Replay safety (T-1148): the same session re-running a committed
+        # open gets its own live attempt back, never a duplicate episode.
+        pointer = state.get("attempt")
+        if pointer and pointer in records and records[pointer]["close_event"] is None:
+            same_work = records[pointer].get("ticket") == task
+            same_seat = (state.get("agent") or "") == agent or records[pointer].get(
+                "agent"
+            ) == agent
+            if same_work and same_seat:
+                return {
+                    "ok": True,
+                    "code": "ATTEMPT_ACTIVE",
+                    "idempotent": True,
+                    "attempt": pointer,
+                    "ticket": task,
+                    "detail": f"attempt {pointer} already open for {task}; "
+                    "no second episode created",
+                }
+        if open_ids:
+            return _refuse(
+                "VALIDATION_FAILED",
+                f"attempt {open_ids[0]} is still open -- close it before "
+                "opening another; single-writer semantics allow exactly one "
+                "active attempt",
+            )
+        if not task or task == "none":
+            return _refuse(
+                "ACTIVE_TICKET_MISMATCH",
+                "attempt open needs claimed Work -- STATE.task is none",
+            )
+        tickets = board["tickets"]
+        if task not in tickets:
+            return _refuse("TICKET_NOT_FOUND", f"{task} is not on the board", ticket=task)
+        if tickets[task]["section"] != "## DOING":
+            return _refuse(
+                "ACTIVE_TICKET_MISMATCH",
+                f"{task} is {tickets[task]['section']}, not ## DOING -- "
+                "an attempt executes claimed Work",
+                ticket=task,
+            )
+
+        new_id = attempt_mod.next_attempt_id(docs["_history"].events)
+        latest = max(
+            records.values(), key=lambda rec: rec["open_event"], default=None
+        )
+        text = f"attempt {new_id} open"
+        if latest is not None:
+            text += f"; supersedes {latest['id']}"
+        event, line = _event_line(docs, log_tail, "DEC", task, agent, text, now, op_id)
+        new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+        owned = {"attempt": new_id, "last_event": event, "updated": utc, "agent": agent}
+        new_state = patch_state(docs["state"].text_norm, owned)
+        errors = validate_texts(
+            new_state,
+            docs["board"].text_norm,
+            new_log,
+            current_agent=agent,
+            sealed_events=docs["_history"],
+        )
+        if errors:
+            return _refuse(
+                "VALIDATION_FAILED",
+                "proposed state fails fast validation: " + "; ".join(errors[:5]),
+            )
+        targets = [
+            _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+            _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+        ]
+        return build_plan(
+            "attempt-open",
+            agent,
+            _identity(root),
+            {
+                "operation": "attempt-open",
+                "attempt": new_id,
+                "ticket": task,
+                "agent": agent,
+            },
+            _docs_preconditions(docs, "state", "log"),
+            targets,
+            {
+                "ok": True,
+                "code": "ATTEMPT_OPENED",
+                "attempt": new_id,
+                "ticket": task,
+                "supersedes": latest["id"] if latest is not None else None,
+                "event_id": f"E-{event}",
+            },
+            op_id=op_id,
+        )
+
+    # ---- close ----
+    pointer = state.get("attempt")
+    if not pointer:
+        # Replay safety: a committed close re-run finds no pointer. Match the
+        # most recently CLOSED attempt against the SAME request and answer
+        # idempotent-ok instead of manufacturing a duplicate close event.
+        closed = [
+            rec
+            for rec in records.values()
+            if rec["close_event"] is not None
+            and rec.get("result") == result
+            and rec.get("stop") == stop
+            and rec.get("agent") == agent
+        ]
+        if closed:
+            latest_closed = max(closed, key=lambda rec: rec["close_event"])
+            return {
+                "ok": True,
+                "code": "ATTEMPT_CLOSED",
+                "idempotent": True,
+                "attempt": latest_closed["id"],
+                "result": result,
+                "stop": stop,
+                "detail": f"attempt {latest_closed['id']} already closed with "
+                "this exact verdict; no duplicate close event written",
+            }
+        return _refuse(
+            "VALIDATION_FAILED",
+            "no active attempt to close -- STATE carries no attempt pointer",
+        )
+    if pointer not in records:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"STATE.attempt {pointer} has no open event in the LOG -- torn "
+            "state; run tools/validate.py",
+        )
+    rec = records[pointer]
+    if rec["close_event"] is not None:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"attempt {pointer} is already closed (E-{rec['close_event']}) "
+            "but the STATE pointer survived -- torn state; run tools/validate.py",
+        )
+    if result not in attempt_mod.RESULTS:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"attempt result {result!r} outside the closed vocabulary "
+            f"{'|'.join(attempt_mod.RESULTS)}",
+        )
+    allowed_stops = attempt_mod.RESULT_STOP_MATRIX[result]
+    if stop not in attempt_mod.STOP_REASONS:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"attempt stop reason {stop!r} outside the closed vocabulary "
+            f"{'|'.join(attempt_mod.STOP_REASONS)}",
+        )
+    if stop not in allowed_stops:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"result {result} cannot pair with stop {stop}; allowed stops "
+            f"for that result: {'|'.join(allowed_stops)}",
+        )
+    evidence = [e.strip() for e in (evidence or []) if e and e.strip()]
+    if len(evidence) > attempt_mod.MAX_EVIDENCE_REFS:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"evidence carries {len(evidence)} refs; bound is "
+            f"{attempt_mod.MAX_EVIDENCE_REFS}",
+        )
+    event_ids = {ev["event"] for ev in docs["_history"].events}
+    for ref in evidence:
+        if not re.fullmatch(r"E-\d+", ref):
+            return _refuse(
+                "VALIDATION_FAILED", f"evidence ref {ref!r} is not an E-### id"
+            )
+        if int(ref[2:]) not in event_ids:
+            return _refuse(
+                "VALIDATION_FAILED",
+                f"evidence {ref} does not exist in the LOG -- dangling "
+                "evidence can never prove anything",
+            )
+    if unknown is not None:
+        unknown = unknown.strip() or None
+        if unknown and ("\n" in unknown or len(unknown) > attempt_mod.MAX_UNKNOWN_CHARS):
+            return _refuse(
+                "VALIDATION_FAILED",
+                f"unknown clause must be one line of at most "
+                f"{attempt_mod.MAX_UNKNOWN_CHARS} chars",
+            )
+
+    text = f"attempt {pointer} close result {result} stop {stop}"
+    if evidence:
+        text += " -- evidence " + ",".join(evidence)
+    if unknown:
+        text += f"; unknown: {unknown}"
+    event, line = _event_line(
+        docs, log_tail, "DEC", rec.get("ticket"), agent, text, now, op_id
+    )
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    cleaned = remove_state_fields(docs["state"].text_norm, ("attempt",))
+    new_state = patch_state(cleaned, {"last_event": event, "updated": utc, "agent": agent})
+    errors = validate_texts(
+        new_state,
+        docs["board"].text_norm,
+        new_log,
+        current_agent=agent,
+        sealed_events=docs["_history"],
+    )
+    if errors:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "proposed state fails fast validation: " + "; ".join(errors[:5]),
+        )
+    targets = [
+        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+    ]
+    return build_plan(
+        "attempt-close",
+        agent,
+        _identity(root),
+        {
+            "operation": "attempt-close",
+            "attempt": pointer,
+            "result": result,
+            "stop": stop,
+            "agent": agent,
+        },
+        _docs_preconditions(docs, "state", "log"),
+        targets,
+        {
+            "ok": True,
+            "code": "ATTEMPT_CLOSED",
+            "attempt": pointer,
+            "ticket": rec.get("ticket"),
+            "result": result,
+            "stop": stop,
+            "event_id": f"E-{event}",
+        },
+        op_id=op_id,
+    )
+
+
+@_state_guard
+def attempt_lifecycle(
+    project_root: Path | str,
+    agent: str,
+    action: str,
+    result: str | None = None,
+    stop: str | None = None,
+    evidence: list[str] | None = None,
+    unknown: str | None = None,
+    dry_run: bool = False,
+):
+    """Public Attempt lifecycle entry (`saipen attempt open|close`)."""
+    if action not in ("open", "close"):
+        return _refuse(
+            "VALIDATION_FAILED", f"attempt action {action!r} outside open|close"
+        )
+    if action == "close":
+        if not result or not stop:
+            return _refuse(
+                "VALIDATION_FAILED",
+                "attempt close needs <RESULT> <STOP> from the closed vocabularies",
+            )
+    else:
+        result = stop = None
+    now, utc = _now(), _utc_iso()
+    planned = _plan_attempt(
+        Path(project_root), agent, action, result, stop, evidence, unknown, now, utc
+    )
+    if isinstance(planned, Result):
+        return planned
+    if isinstance(planned, dict):
+        return planned
+    if dry_run:
+        return _render_plan(planned)
+    return apply_plan(Path(project_root), planned)
 
 
 # ------------------------------------------------------------ transition
@@ -1471,6 +1832,20 @@ def _plan_finish_ticket(
             phase=prev_phase,
         )
     closure_from = prev_phase  # the ACTUAL phase: SHIP.
+
+    # Attempt gate (T-1148): completion authority belongs to the Work's
+    # verification chain, not to a live episode. An open attempt must be
+    # closed (normally `candidate`) BEFORE the ticket can finish, so the
+    # producing episode's claim and the Work's admission stay two separate,
+    # ordered facts.
+    if state.get("attempt"):
+        return _refuse(
+            "INCOMPLETE_TICKET",
+            f"attempt {state.get('attempt')} is still open on {ticket_id} -- "
+            "close it (result candidate, stop completed_execution) before "
+            "completion; the producer's live episode must not close the Work",
+            ticket=ticket_id,
+        )
 
     # Verification-evidence gate (T-602, closure-evidence): with the phase
     # chain complete, the ticket still needs explicit verification evidence
