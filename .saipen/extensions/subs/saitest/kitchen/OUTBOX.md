@@ -8,7 +8,7 @@
 - **critical:** false
 - **severity:** P3
 - **producer:** saitest
-- **source_head:** 2d82902a22d2ea4dbbd55746ee0cf179a4ec9c0f
+- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
 - **source_tree_fingerprint:** git-delta-v1:a5dd07bf4c846840c46fd542a758184c06d6a0a5f8cf459e8209ff1b3a0354ba
 - **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
 - **coverage:** None.
@@ -24,7 +24,7 @@
 - **critical:** false
 - **severity:** P3
 - **producer:** saitest
-- **source_head:** 2d82902a22d2ea4dbbd55746ee0cf179a4ec9c0f
+- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
 - **source_tree_fingerprint:** git-delta-v1:ccb6e0f9a721e7c2129e14998c54f1d2cd703605adb61d9e70311bd126857d43
 - **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
 - **coverage:** Full test suite regression.
@@ -40,7 +40,7 @@
 - **critical:** false
 - **severity:** P3
 - **producer:** saitest
-- **source_head:** 2d82902a22d2ea4dbbd55746ee0cf179a4ec9c0f
+- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
 - **source_tree_fingerprint:** git-delta-v1:f91c6d2e1abf19c297f58e798ea002d1418f477b9abb7399c625f454810e18e0
 - **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
 - **coverage:** Autonomous preparation.
@@ -56,7 +56,7 @@
 - **critical:** false
 - **severity:** P3
 - **producer:** saitest
-- **source_head:** 2d82902a22d2ea4dbbd55746ee0cf179a4ec9c0f
+- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
 - **source_tree_fingerprint:** git-delta-v1:1f0d71818c866058858b0b0a5c9e245ba04925ed02597d3d9843b8a3d0c2f7e9
 - **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
 - **coverage:** Autonomous preparation.
@@ -72,7 +72,7 @@
 - **critical:** false
 - **severity:** P3
 - **producer:** saitest
-- **source_head:** 2d82902a22d2ea4dbbd55746ee0cf179a4ec9c0f
+- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
 - **source_tree_fingerprint:** git-delta-v1:85393eb352407d6600458d397fae3dc4c070e7941e2788d880fc130e828a581f
 - **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
 - **coverage:** Autonomous preparation.
@@ -88,7 +88,7 @@
 - **critical:** true
 - **severity:** P1
 - **producer:** saitest
-- **source_head:** 2d82902a22d2ea4dbbd55746ee0cf179a4ec9c0f
+- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
 - **source_tree_fingerprint:** git-delta-v1:9964e4c9d5e4335b64c3d6faa7c25942e7dd71b4995646e7c5e5229f20ef1f25
 - **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
 - **coverage:** HUNT-10 Finding 1 lint gate and Finding 2 release-executor scenario; exact run record in kitchen/TEST-3.md.
@@ -100,13 +100,13 @@
   Scenario B REPRODUCED: minimal input is the release-executor probe family reading the current source and mutating only its temporary fixture clones. Exact command `python -c "import sys; sys.path.insert(0,'tools'); import run_scenarios as r; r.run_release_executor_probes()"`. Observed: exit 1 at tools/run_scenarios.py:6683; tools/saipen_engine/release.py:3303 raises `ReleaseRefusal` because copied locale badges remain old while the fixture increments VERSION to 7.226.1.
 
 ## TEST-4: HUNT-11 failures independently reproduced after T-1115
-- **status:** reviewed
+- **status:** stale
 - **summary:** Independent current-source reruns still reproduce exactly Ruff's 89 diagnostics and the 32-locale release parity refusal.
 - **main_project_refs:** [tools/freshness.py, tools/test_second_wave_receipt_fixes.py, tools/run_scenarios.py, tools/saipen_engine/journal.py, tools/saipen_engine/subs.py, tools/saipen_engine/release.py]
 - **critical:** true
 - **severity:** P1
 - **producer:** saitest
-- **source_head:** 2d82902a22d2ea4dbbd55746ee0cf179a4ec9c0f
+- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
 - **source_tree_fingerprint:** git-delta-v1:0e4e6d78f40ffa3cd8fa5ea9c0d5ca1e64307f1c1f98d8803c75e224100a0440
 - **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
 - **coverage:** HUNT-11 Finding 1 lint gate, Finding 2 release-executor parity, and separation from the green T-1115 recovery regression.
@@ -116,13 +116,13 @@
 - **details:** Scenario A: `python -m ruff check tools/ tests/ --output-format concise` exits 1 with exactly 89 diagnostics. Scenario B: `run_release_executor_probes()` exits 1 at tools/run_scenarios.py:6683 and release.py:3303 because 32 locale fixture badges lack v7.226.1. T-1115 remains independently green (receipt 26/26, CORE 17/17, conformance 29/29), so neither failure is recovery-fix noise.
 
 ## TEST-5: HUNT-12 validator failures independently reproduced
-- **status:** reviewed
+- **status:** stale
 - **summary:** A fresh canonical validator run independently reproduces all four post-PY-7 failures while Ruff stays clean.
 - **main_project_refs:** [tools/improve.py, tools/validate.py, README_AR.md, README_ZH.md]
 - **critical:** true
 - **severity:** P1
 - **producer:** saitest
-- **source_head:** 2d82902a22d2ea4dbbd55746ee0cf179a4ec9c0f
+- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
 - **source_tree_fingerprint:** git-delta-v1:188e314f78fa94f6e953b760887e106af6910f2a2cc35af91b4f97f081e63b47
 - **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
 - **coverage:** HUNT-12 findings 1-4 and the repaired Ruff gate; exact run record in kitchen/TEST-5.md.
@@ -132,13 +132,13 @@
 - **details:** `python tools/validate.py` exits 1 with exactly four failures: T-1100 lacks a current-cycle VERIFY boundary; improve admission contract tokens drifted; 32 locale README badges are stale; and warning slug `log-soft-cap` lacks a live owner. `python -m ruff check tools` exits 0.
 
 ## TEST-6: HUNT-13 sole locale failure independently reproduced
-- **status:** reviewed
+- **status:** stale
 - **summary:** A fresh canonical validator run reports exactly one failure and names the same 32 stale locale README badges.
 - **main_project_refs:** [tools/validate.py, README_AR.md, README_ZH.md]
 - **critical:** true
 - **severity:** P1
 - **producer:** saitest
-- **source_head:** 2d82902a22d2ea4dbbd55746ee0cf179a4ec9c0f
+- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
 - **source_tree_fingerprint:** git-delta-v1:4ec002cc5f2d23a8858d6c959ec2704e25be28f555a0396e5502685a0a4f3eb6
 - **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
 - **coverage:** HUNT-13 locale parity finding and negative controls for T-1100, admission drift, warning ownership, and Ruff.
@@ -148,13 +148,13 @@
 - **details:** REPRODUCED: translation README badge drift affects ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, and zh. All three previous non-translation failures are absent.
 
 ## TEST-7: regression sweep at 49e66f45 — no failure reproduced
-- **status:** ready
+- **status:** reviewed
 - **summary:** Independent regression sweep over the post-audit tree; all assigned scenario families NOT_REPRODUCED
 - **main_project_refs:** []
 - **critical:** false
 - **severity:** P3
 - **producer:** saitest
-- **source_head:** 2d82902a22d2ea4dbbd55746ee0cf179a4ec9c0f
+- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
 - **source_tree_fingerprint:** git-delta-v1:55f536106504e1e87a44617c149d6c741e6227860e93ddfb56bdd0cb08576776
 - **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
 - **coverage:** Scenario families 1-7 regression against the current tree: core/intent/autonomy/conformance/producer/second-wave/external-audit suites + canonical validator + compileall

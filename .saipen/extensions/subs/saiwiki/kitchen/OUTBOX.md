@@ -187,7 +187,7 @@
 - **details:** W-032 was structurally fresh when produced at 00aa12db but became stale after three implementation commits and the current audit delta. FORCE-FRESH inspection found user-visible drift beyond the source triple: two pages still routed readers to the RFC redirect, Tutorials and Use-Cases still assigned `cc` to goal, the shortcut tutorial claimed 13 instead of 15 keys, SubSaipen described pre-disposition collect behavior and a never-run Python worker, and the committed producer-parallelism ADR had no wiki explanation. W-033 supersedes it without touching the main tree or wiki remote.
 
 ## W-034: FORCE-FRESH re-bind to e045ad07, 8 pages (content unchanged from W-033)
-- **status:** ready
+- **status:** stale
 - **summary:** W-033 was structurally fresh when produced at 3a343e8d but became stale after CORE-002..007 + W2-004..008 landed (11 files, +3090/-627, touching producer.py/journal.py/operations.py but NOT CONFORMANCE.md or saipen/ docs -- canonical scenario IDs and wiki-facing prose unchanged). FORCE-FRESH regenerated and re-published the identical 8-page payload bound to the new source triple (head e045ad07, tree git-delta-v1:a9b068ed). No page content changed; only the producer freshness binding was refreshed. 8 pages are ready for explicit integration.
 - **main_project_refs:** [VERSION, README.md, CHANGELOG.md, KNOWLEDGE/ADR-0001-v7-producer-parallelism.md, saipen/BOOT.md, saipen/CORE.md, saipen/STYLE.md, saipen/CONFORMANCE.md, saipen/CONVERGE.md, saipen/OPS.md, saipen/phases/*.md, extensions/subs/PROTOCOL.md, extensions/subs/crew.md, extensions/subs/sai*.md, tools/freshness.py, tools/validate.py, tools/saipen_engine/producer.py, tools/saipen_engine/intent.py, tools/saipen_engine/journal.py, tools/saipen_engine/crew.py, tools/saipen_engine/release.py, tools/saipen_engine/subs.py]
 - **critical:** false
@@ -213,3 +213,18 @@
   4. Run the collect:saiwiki gate plus the normal VERIFY and REVIEW gates.
   5. Commit the wiki clone with a message such as `docs: refresh v7.226 producer and audit truth (re-bound to e045ad07)`, push only through the authorized SHIP path, then verify Home, Tutorials, Scenarios, and SubSaipen live.
 - **details:** W-033 (3a343e8d) went stale without content drift: CORE-002..007 + W2-004..008 touched producer.py/journal.py/operations.py only -- no CONFORMANCE.md or saipen/ doc edits, so canonical IDs and wiki-facing prose are unchanged. FORCE-FRESH re-read the 8 kitchen pages, recomputed the write_set from page bytes and the read_set from the live tree (42 deps, none absent), rebuilt the package with the current identity, and published a fresh strict READY. W-034 supersedes W-033 with identical payload content, refreshed binding only. Main tree and wiki remote untouched.
+## W-035: saiwiki package bound to e98bcb03
+- **status:** ready
+- **summary:** current saiwiki package bound to committed source
+- **main_project_refs:** []
+- **critical:** false
+- **severity:** P3
+- **producer:** saiwiki
+- **source_head:** e98bcb0363deb76963ee54897da8b3599e346acc
+- **source_tree_fingerprint:** git-delta-v1:55f536106504e1e87a44617c149d6c741e6227860e93ddfb56bdd0cb08576776
+- **role_revision:** sha256:54a42475a124ab0f27e83d600a284a9cc54d9668029c4828cfc48512b031df13
+- **coverage:** current saiwiki package
+- **payload:** []
+- **verified:** PASS -- saiwiki package integrated CURRENT
+- **instructions:** Core records the integrated saiwiki disposition.
+- **details:** saiwiki integration bound to e98bcb03/git-delta-v1:55f5361.
