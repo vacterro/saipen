@@ -1048,10 +1048,27 @@ class StagingGeneration:
         target = ready_dir / _ready_filename(rid)
 
         # Idempotent: an identical READY package already exists -> reuse.
+        # BUT a matching package_identity only proves identical CONTENT; the
+        # artifact's recorded base-source binding must still be CURRENT.
+        # package_identity is derived from producer/role/dependencies/scope,
+        # NOT from the source binding, so a package produced against an older
+        # HEAD can share the identity while carrying a stale source_head/
+        # source_tree_fingerprint. Reusing that artifact leaves producer
+        # health NOT_RUN/STALE against the current tree forever (reproduced
+        # live: saitranslate READY carried e045ad07/da948ff while the tree was
+        # a5bbda6f/55f, so `saipen crew` kept demanding PREPARE_TRANSLATE).
+        # Only reuse when the existing binding equals the new one; otherwise
+        # fall through and re-publish the current binding.
         if target.is_file():
             try:
                 existing = ProducerPackage.from_dict(json.loads(target.read_text()))
-                if existing.package_identity == rid:
+                if (
+                    existing.package_identity == rid
+                    and existing.base_source_head == self.package.base_source_head
+                    and existing.base_source_tree_fingerprint
+                    == self.package.base_source_tree_fingerprint
+                    and existing.base_discovery_model == self.package.base_discovery_model
+                ):
                     shutil.rmtree(self.staging_dir, ignore_errors=True)
                     return {
                         "ok": True,
