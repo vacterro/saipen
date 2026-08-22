@@ -99,7 +99,7 @@ def _strict_created_at(value: object) -> str:
     return strict_iso_utc(value)
 
 
-def _iter_operation_records(root: Path):
+def _iter_operation_records(root: Path, receipt_snapshot=None):
     """W2-001: Yield every parseable operation.json from both ops and settled.
 
     Uses the canonical semantic receipt snapshot from journal.py instead
@@ -107,23 +107,45 @@ def _iter_operation_records(root: Path):
     have been moved to settled/ remain visible to convergence readers.
     """
     from .journal import semantic_receipt_snapshot
-    records, _errors = semantic_receipt_snapshot(root)
-    yield from records
+    snapshot = receipt_snapshot or semantic_receipt_snapshot(root)
+    if snapshot.errors:
+        return
+    yield from snapshot.records
 
 
 def _event_number(record: dict) -> int:
-    """The monotonic LOG event id a receipt committed under. Ops recorded in
-    the same wall-clock second must still order deterministically; the LOG
-    event counter is the engine's own monotonic sequence."""
+    """The LOG event id a receipt committed under (secondary chronology key).
+
+    The LOG event counter is NOT globally monotonic with real time in every
+    supplied tree: a torn/replaced sealed history can carry E-3865 for a
+    receipt recorded (2026-08-20) before a fresh E-3547 receipt (2026-08-22).
+    Chronology therefore keys on the receipt's own created_at instant, with
+    the event id only as an equal-instant tie-break -- the same canonical
+    UTC ordering W2-005 established everywhere else.
+    """
     meta = record.get("receipt_metadata") or {}
     match = re.match(r"E-(\d+)", str(meta.get("event_id") or ""))
     return int(match.group(1)) if match else -1
 
 
-def _stage_receipts(root: Path) -> list[dict]:
-    """Every COMMITTED convergence_stage receipt, oldest event first."""
+def _chrono_key(record: dict):
+    """(parsed UTC instant, event id, op_id) -- canonical receipt chronology.
+    Real UTC wins; the LOG event id and op_id are deterministic equal-instant
+    tie-breaks only."""
+    from .board import iso_utc_sort_key
+
+    _earliest = iso_utc_sort_key("0000-01-01T00:00:00Z")
+    return (
+        iso_utc_sort_key(record.get("created_at", "")) or _earliest,
+        _event_number(record),
+        record.get("op_id", ""),
+    )
+
+
+def _stage_receipts(root: Path, receipt_snapshot=None) -> list[dict]:
+    """Every COMMITTED convergence_stage receipt, oldest first by real UTC."""
     out = []
-    for record in _iter_operation_records(root):
+    for record in _iter_operation_records(root, receipt_snapshot):
         if record.get("operation") != "convergence_stage":
             continue
         if record.get("status") != "COMMITTED":
@@ -137,7 +159,7 @@ def _stage_receipts(root: Path) -> list[dict]:
         if _event_number(record) < 0:
             continue
         out.append(record)
-    out.sort(key=lambda item: (_event_number(item), item.get("op_id", "")))
+    out.sort(key=_chrono_key)
     return out
 
 
@@ -145,8 +167,12 @@ def _pick_latest(
     receipts: list[dict], wanted_stage: str, before_event: int, reasons: list[str]
 ) -> dict | None:
     """The latest receipt of `wanted_stage` committed strictly before
-    `before_event`, or None. Receipts recorded in the same wall-clock second
-    still order by their monotonic LOG event, never by timestamp ties."""
+    `before_event`, or None. Chronology is the receipt's REAL UTC instant
+    (iso_utc_sort_key); the LOG event id is only an equal-instant tie-break.
+    Ordering by the event counter alone breaks when the global LOG is torn
+    (an older receipt can carry a higher E-### than a newer one), which lets
+    a stale chain supersede a fresh one -- reproduced on the live tree where
+    E-3865/3a343e8d (2026-08-20) outranked E-3547/e045ad07 (2026-08-22)."""
     candidates = [
         item
         for item in receipts
@@ -160,7 +186,7 @@ def _pick_latest(
             f"E-{before_event}"
         )
         return None
-    return max(candidates, key=_event_number)
+    return max(candidates, key=_chrono_key)
 
 
 def _identity_of(record: dict) -> tuple[str, str] | None:
@@ -181,7 +207,7 @@ def _identity_of(record: dict) -> tuple[str, str] | None:
     return head, tree
 
 
-def _attribution_claims(root: Path) -> dict[str, str | None]:
+def _attribution_claims(root: Path, receipt_snapshot=None) -> dict[str, str | None]:
     """Owner claims over main-source paths, from the release-scope records
     and committed crew-defer receipts (item 14: reuse existing
     attribution/release-scope machinery, never git status inference).
@@ -191,20 +217,51 @@ def _attribution_claims(root: Path) -> dict[str, str | None]:
     """
     claims: dict[str, str | None] = {}
     scope_dir = root / ".saipen" / "kitchen" / "release_scope"
+    # W2-004: convergence must consume only canonical claims, not raw JSON.
+    # A claim path that escapes the project, is absolute/drive-qualified, or
+    # carries a malformed hash is corrupt/transplanted evidence and is never
+    # positive attribution. schema_version/ticket/lineage are not required for
+    # attribution because legacy crew_defer receipts predate them; path/hash
+    # ownership IS required for every source.
+    root_resolved = root.resolve()
+
+    def _canonical_claim(rel, expected):
+        if not isinstance(rel, str) or not rel:
+            return False
+        if rel.startswith("/") or (len(rel) > 1 and rel[1] == ":"):
+            return False
+        parts = rel.split("/")
+        if any(part in ("", ".", "..") for part in parts):
+            return False
+        if expected is not None:
+            if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{16}", expected):
+                return False
+        try:
+            (root / rel).resolve().relative_to(root_resolved)
+        except ValueError:
+            return False
+        return True
+
     if scope_dir.is_dir():
         for scope in sorted(scope_dir.glob("T-*.json")):
             try:
                 record = json.loads(scope.read_text(encoding="utf-8"))
             except (OSError, json.JSONDecodeError):
                 continue
-            for rel, expected in (record.get("paths") or {}).items():
-                claims[rel] = expected
-    for record in _iter_operation_records(root):
+            paths = record.get("paths")
+            if not isinstance(paths, dict):
+                continue
+            for rel, expected in paths.items():
+                if _canonical_claim(rel, expected):
+                    claims[rel] = expected
+    for record in _iter_operation_records(root, receipt_snapshot):
         meta = record.get("receipt_metadata") or {}
         if record.get("operation") != "crew_defer" or record.get("status") != "COMMITTED":
             continue
-        for rel, expected in (meta.get("paths") or {}).items():
-            claims[rel] = expected
+        paths = meta.get("paths") or {}
+        for rel, expected in paths.items():
+            if _canonical_claim(rel, expected):
+                claims[rel] = expected
     return claims
 
 
@@ -276,7 +333,7 @@ def _main_source_deltas(root: Path) -> list[str] | None:
     return source_worktree_deltas(root)
 
 
-def attribution_problems(root: Path) -> list[str]:
+def attribution_problems(root: Path, receipt_snapshot=None) -> list[str]:
     """Attribution problems for the current tree (item 14).
 
     Every main-source delta (Git baseline present) must be claimed by an
@@ -287,7 +344,7 @@ def attribution_problems(root: Path) -> list[str]:
     exists to refuse.
     """
     problems: list[str] = []
-    claims = _attribution_claims(root)
+    claims = _attribution_claims(root, receipt_snapshot)
     deltas = _main_source_deltas(root)
     if deltas is not None:
         for rel in deltas:
@@ -349,7 +406,9 @@ def _quick_hash(raw: bytes) -> str:
     return hashlib.sha256(raw).hexdigest()[:16]
 
 
-def convergence_verdict(project_root: Path | str, source_id=None) -> ConvergenceVerdict:
+def convergence_verdict(
+    project_root: Path | str, source_id=None, receipt_snapshot=None
+) -> ConvergenceVerdict:
     """The ONE mechanical Core convergence verdict (items 1/14).
 
     Returns ok=False with reasons whenever any of E-I evidence is missing,
@@ -360,6 +419,15 @@ def convergence_verdict(project_root: Path | str, source_id=None) -> Convergence
     """
     root = Path(project_root)
     reasons: list[str] = []
+    if receipt_snapshot is None:
+        from .journal import semantic_receipt_snapshot
+
+        receipt_snapshot = semantic_receipt_snapshot(root)
+    if receipt_snapshot.errors:
+        return ConvergenceVerdict(
+            False,
+            ("operation receipt corruption: " + "; ".join(receipt_snapshot.errors[:3]),),
+        )
     if source_id is None:
         try:
             from freshness import compute_source_identity
@@ -371,7 +439,7 @@ def convergence_verdict(project_root: Path | str, source_id=None) -> Convergence
             )
     live = (source_id.source_head, source_id.source_tree_fingerprint)
 
-    receipts = _stage_receipts(root)
+    receipts = _stage_receipts(root, receipt_snapshot)
     if not receipts:
         return ConvergenceVerdict(
             False,
@@ -485,7 +553,7 @@ def convergence_verdict(project_root: Path | str, source_id=None) -> Convergence
                 f"{STAGE_NAMES.get(stage, stage)} outcome ({', '.join(allowed)})"
             )
 
-    attribution = tuple(attribution_problems(root))
+    attribution = tuple(attribution_problems(root, receipt_snapshot))
     if attribution:
         reasons.extend(attribution)
 

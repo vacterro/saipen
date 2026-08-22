@@ -157,7 +157,9 @@ def merge_profile(current: list[dict] | list[str], additions: list[dict] | list[
     return result
 
 
-def remove_preference(current: list[dict], text: str, category: str | None = None) -> list[dict]:
+def remove_preference(
+    current: list[dict], text: str, category: str | None = None
+) -> tuple[list[dict], str | None]:
     """Remove one preference by its identity `(category, text)`.
 
     The preference identity is the pair, so removal must be category-aware:

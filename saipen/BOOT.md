@@ -61,6 +61,12 @@ This file gives the execution order. No rule is *defined* here —
    or `DEC: human_note -> T-###`. One-shot, not standing law.
 
 7. **Execute the instruction. The user's own message outranks `next_action` and defers to § 1.11's OBEY priority: the user's own message outranks the file.**
+   **Compound input first.** If the message carries several commands (`+`-separated
+   or multiple `saipen ...` verbs), split it into the ordered segment list BEFORE
+   interpreting any segment, then resolve and execute each segment in order
+   (CORE.md §1.10's compound-command contract; chain policy STOP_ON_FAILURE).
+   Every recognized segment gets an explicit terminal disposition; none may
+   disappear because the model considers it unnecessary.
    Message names a command (§1.10 verb, shortcut table row, Cyillic twin,
    or active extension word)? **Open CORE.md §1.10 and read the row.**
    Memory is never a source for it — a confabulated table has reached users

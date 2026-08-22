@@ -518,7 +518,11 @@ def _plan_claim(
                 docs["board"].text_norm, ticket_id, {"claim_time": utc}
             )
             errors = validate_texts(
-                docs["state"].text_norm, new_board, docs["log"].text_norm, current_agent=agent
+                docs["state"].text_norm,
+                new_board,
+                docs["log"].text_norm,
+                current_agent=agent,
+                sealed_events=docs["_history"],
             )
             if errors:
                 return _refuse(
@@ -580,7 +584,9 @@ def _plan_claim(
             "agent": agent,
         }
         new_state = patch_state(docs["state"].text_norm, owned)
-        errors = validate_texts(new_state, new_board, new_log, current_agent=agent)
+        errors = validate_texts(
+        new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
+    )
         if errors:
             return _refuse(
                 "VALIDATION_FAILED",
@@ -676,7 +682,9 @@ def _plan_claim(
     }
     new_state = patch_state(docs["state"].text_norm, owned)
 
-    errors = validate_texts(new_state, new_board, new_log, current_agent=agent)
+    errors = validate_texts(
+        new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
+    )
     if errors:
         return _refuse(
             "VALIDATION_FAILED", "proposed state fails fast validation: " + "; ".join(errors[:5])
@@ -923,7 +931,9 @@ def _plan_transition(
     refreshed_board, _active = _refresh_active_claim(docs["board"].text_norm, state, agent, utc)
     new_board = refreshed_board if refreshed_board is not None else docs["board"].text_norm
 
-    errors = validate_texts(new_state, new_board, new_log, current_agent=agent)
+    errors = validate_texts(
+        new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
+    )
     if errors:
         return _refuse(
             "VALIDATION_FAILED", "proposed state fails fast validation: " + "; ".join(errors[:5])
@@ -1067,7 +1077,9 @@ def _plan_checkpoint(
     refreshed_board, _active = _refresh_active_claim(docs["board"].text_norm, _state, agent, utc)
     new_board = refreshed_board if refreshed_board is not None else docs["board"].text_norm
 
-    errors = validate_texts(new_state, new_board, new_log, current_agent=agent)
+    errors = validate_texts(
+        new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
+    )
     if errors:
         return _refuse(
             "VALIDATION_FAILED", "proposed state fails fast validation: " + "; ".join(errors[:5])
@@ -1125,7 +1137,9 @@ def checkpoint(
 _BOARD_TICKET_LINE_RE = re.compile(r"^-\s*\[[ x/]\]\s*T-(\d+)\b")
 
 
-def next_ticket_id(board_text: str, log_text: str) -> int:
+def next_ticket_id(
+    board_text: str, log_text: str, history_max_ticket_id: int | None = None
+) -> int:
     """The next canonical production ticket ID, from STRUCTURED records only
     (T-639/§9): canonical BOARD ticket lines (`- [ ] T-###`) and the LOG's
     structured `[T-###]` event field. Prose that merely mentions a T-NNN --
@@ -1137,12 +1151,22 @@ def next_ticket_id(board_text: str, log_text: str) -> int:
     `log_text` MUST be the canonical COMPLETE history (sealed segments +
     active LOG.md, `log.read_history`), the same source E-IDs allocate from:
     a sealed segment's [T-###] is durable ticket identity and must never be
-    reissued (T-1003)."""
+    reissued (T-1003).
+
+    PERF-004: when the caller already computed the history-wide max ticket
+    ID during its authoritative parse (``HistorySnapshot.max_ticket_id``),
+    pass it in and skip the redundant O(history) re-parse. ``log_text`` then
+    only needs to be truthy for the historical API shape; the structured
+    history IDs come from ``history_max_ticket_id``."""
     ids: set[int] = set()
     for line in board_text.splitlines():
         match = _BOARD_TICKET_LINE_RE.match(line.strip())
         if match:
             ids.add(int(match.group(1)))
+    if history_max_ticket_id is not None:
+        if history_max_ticket_id > 0:
+            ids.add(int(history_max_ticket_id))
+        return (max(ids, default=0) + 1) if ids else 1
     from .log import parse_log_line
 
     for line in log_text.splitlines():
@@ -1319,7 +1343,9 @@ def _ticket_targets(
             if routed.get("ok"):
                 new_state = patch_state(new_state, {"next_action": routed["action"]})
 
-    errors = validate_texts(new_state, new_board, new_log, current_agent=agent)
+    errors = validate_texts(
+        new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
+    )
     if errors:
         return _refuse(
             "VALIDATION_FAILED", "proposed state fails fast validation: " + "; ".join(errors[:5])
@@ -1518,7 +1544,9 @@ def _plan_finish_ticket(
     if routed.get("ok") and routed.get("action") != "saipen continue":
         new_state = patch_state(new_state, {"next_action": routed["action"]})
 
-    errors = validate_texts(new_state, new_board, new_log, current_agent=agent)
+    errors = validate_texts(
+        new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
+    )
     if errors:
         return _refuse(
             "VALIDATION_FAILED",
@@ -1705,7 +1733,11 @@ def ticket_add(
     # segment's [T-###] is ticket identity, never reissuable (T-1003).
     # T-1014: the combined text is the snapshot `_read` already captured;
     # re-opening the complete history here would be a second full pass.
-    tid = next_ticket_id(docs["board"].text_norm, docs["_history"].text)
+    tid = next_ticket_id(
+        docs["board"].text_norm,
+        docs["_history"].text,
+        history_max_ticket_id=getattr(docs["_history"], "max_ticket_id", None),
+    )
     for need in needs:
         if need not in board["tickets"]:
             return _refuse("TICKET_NOT_FOUND", f"dangling needs: {need}")
@@ -1729,7 +1761,9 @@ def ticket_add(
     }
     new_state = patch_state(docs["state"].text_norm, owned)
 
-    errors = validate_texts(new_state, new_board, new_log, current_agent=agent)
+    errors = validate_texts(
+        new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
+    )
     if errors:
         return _refuse(
             "VALIDATION_FAILED", "proposed state fails fast validation: " + "; ".join(errors[:5])
@@ -1825,7 +1859,13 @@ def _state_only_plan(
     event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent, _fold_handover(_state, agent, event_message), now, op_id)
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     new_state = mutate(docs["state"].text_norm, event)
-    errors = validate_texts(new_state, docs["board"].text_norm, new_log, current_agent=agent)
+    errors = validate_texts(
+        new_state,
+        docs["board"].text_norm,
+        new_log,
+        current_agent=agent,
+        sealed_events=docs["_history"],
+    )
     if errors:
         return _refuse(
             "VALIDATION_FAILED", "proposed state fails fast validation: " + "; ".join(errors[:5])
@@ -1959,11 +1999,13 @@ def _goal_plan_steps(objective: str) -> list[str]:
     return steps[:GOAL_TICKET_CAP]
 
 
-def _goal_plan_ticket_ids(board_text: str, history_text: str, count: int) -> list[str]:
+def _goal_plan_ticket_ids(
+    board_text: str, history_text: str, count: int, history_max_ticket_id: int | None = None
+) -> list[str]:
     """Allocate one collision-free monotonic ID block from a frozen snapshot."""
     if count < 0 or count > GOAL_TICKET_CAP:
         raise ValueError(f"goal plan ticket count {count} outside 0..{GOAL_TICKET_CAP}")
-    first = next_ticket_id(board_text, history_text)
+    first = next_ticket_id(board_text, history_text, history_max_ticket_id=history_max_ticket_id)
     return [f"T-{first + offset}" for offset in range(count)]
 
 
@@ -2060,7 +2102,12 @@ def goal_entry(
     # the existing backlog.
     steps = _goal_plan_steps(safe_objective)
     plan_lines = []
-    plan_ids = _goal_plan_ticket_ids(new_board_text, docs["_history"].text, len(steps))
+    plan_ids = _goal_plan_ticket_ids(
+        new_board_text,
+        docs["_history"].text,
+        len(steps),
+        history_max_ticket_id=getattr(docs["_history"], "max_ticket_id", None),
+    )
     if (
         len(plan_ids) != len(steps)
         or len(set(plan_ids)) != len(plan_ids)
@@ -2128,7 +2175,9 @@ def goal_entry(
         },
     )
 
-    errors = validate_texts(new_state, new_board_text, new_log, current_agent=agent)
+    errors = validate_texts(
+        new_state, new_board_text, new_log, current_agent=agent, sealed_events=docs["_history"]
+    )
     if errors:
         return _refuse(
             "VALIDATION_FAILED",
@@ -2238,11 +2287,27 @@ def set_converge_intent(
         # erase the epoch (RECOVERY SCRATCH != DURABLE PROJECT MEMORY).
         from .paths import project_lineage_identity
 
+        # CORE-004: establish lineage BEFORE planning the epoch record so the
+        # durable carrier carries the same lineage APPLY will create. A dry-run
+        # must not touch IDENTITY.md; a real mutation finalizes lineage first.
+        if not dry_run:
+            from .journal import ensure_project_lineage, LineageRefusal
+            from .lock import project_writer_lock
+
+            try:
+                with project_writer_lock(root):
+                    ensure_project_lineage(root)
+            except LineageRefusal as exc:
+                return _refuse(
+                    exc.code if hasattr(exc, "code") else "VALIDATION_FAILED",
+                    f"cannot establish project lineage for crew epoch: {exc}",
+                )
         epoch_op_id = "converge_intent-" + uuid4_hex()
         try:
             epoch_doc = codec.read_document(root / ".saipen" / "kitchen" / "crew_epoch.json")
         except OSError:
             epoch_doc = None
+        lineage = project_lineage_identity(root) or ""
         epoch_record = {
             "schema_version": 1,
             "operation": "crew_epoch",
@@ -2250,7 +2315,7 @@ def set_converge_intent(
             "target": "crew",
             "status": "COMMITTED",
             "created_at": utc,
-            "project_lineage": project_lineage_identity(root),
+            "project_lineage": lineage,
         }
         if entry_ticket is not None:
             epoch_record["ticket_id"] = entry_ticket
@@ -2596,7 +2661,9 @@ def handover_agent(
     # Validate against the NEW board text so the claim transfer is checked,
     # not the stale pre-handover board (a pre-write would otherwise flag a
     # spurious binding-mismatch and refuse a valid handover).
-    errors = validate_texts(new_state, new_board_text, new_log, current_agent=new_agent)
+    errors = validate_texts(
+        new_state, new_board_text, new_log, current_agent=new_agent, sealed_events=docs["_history"]
+    )
     if errors:
         return _refuse(
             "VALIDATION_FAILED",
@@ -2742,7 +2809,13 @@ def stop_checkpoint(
             "agent": agent,
         },
     )
-    errors = validate_texts(new_state, docs["board"].text_norm, new_log, current_agent=agent)
+    errors = validate_texts(
+        new_state,
+        docs["board"].text_norm,
+        new_log,
+        current_agent=agent,
+        sealed_events=docs["_history"],
+    )
     if errors:
         return _refuse(
             "VALIDATION_FAILED", "proposed state fails fast validation: " + "; ".join(errors[:5])
@@ -2919,7 +2992,13 @@ def _plan_record_scope(
     owned = {"last_event": event, "updated": utc, "agent": agent}
     new_state = patch_state(docs["state"].text_norm, owned)
 
-    errors = validate_texts(new_state, docs["board"].text_norm, new_log, current_agent=agent)
+    errors = validate_texts(
+        new_state,
+        docs["board"].text_norm,
+        new_log,
+        current_agent=agent,
+        sealed_events=docs["_history"],
+    )
     if errors:
         return _refuse(
             "VALIDATION_FAILED",
@@ -2964,6 +3043,22 @@ def record_scope(
 ) -> Result:
     """Journal the exact reviewed release scope for a ticket (T-994 / § 2)."""
     root = Path(project_root)
+    # CORE-004: a real mutation finalizes lineage BEFORE planning so the
+    # persisted scope binds the same lineage APPLY will use -- a first-ever
+    # scope on an unmigrated project must stay portable after a move. Dry-run
+    # stays zero-write and models the planned lineage through the empty string.
+    if not dry_run:
+        from .journal import ensure_project_lineage, LineageRefusal
+        from .lock import project_writer_lock
+
+        try:
+            with project_writer_lock(root):
+                ensure_project_lineage(root)
+        except LineageRefusal as exc:
+            return _refuse(
+                exc.code if hasattr(exc, "code") else "VALIDATION_FAILED",
+                f"cannot establish project lineage for release scope: {exc}",
+            )
     now, utc = _now(), _utc_iso()
     plan = _plan_record_scope(root, ticket_id, agent, paths, now, utc)
     if isinstance(plan, Result):
@@ -3010,7 +3105,13 @@ def _plan_first_publish_wait(
     na = f"WAIT: {message}"
     owned = {"next_action": na, "last_event": event, "updated": utc, "agent": agent}
     new_state = patch_state(docs["state"].text_norm, owned)
-    errors = validate_texts(new_state, docs["board"].text_norm, new_log, current_agent=agent)
+    errors = validate_texts(
+        new_state,
+        docs["board"].text_norm,
+        new_log,
+        current_agent=agent,
+        sealed_events=docs["_history"],
+    )
     if errors:
         return _refuse(
             "VALIDATION_FAILED",
@@ -3090,7 +3191,13 @@ def _plan_first_publish_confirm(
         "agent": agent,
     }
     new_state = patch_state(docs["state"].text_norm, owned)
-    errors = validate_texts(new_state, docs["board"].text_norm, new_log, current_agent=agent)
+    errors = validate_texts(
+        new_state,
+        docs["board"].text_norm,
+        new_log,
+        current_agent=agent,
+        sealed_events=docs["_history"],
+    )
     if errors:
         return _refuse(
             "VALIDATION_FAILED",
@@ -3198,7 +3305,9 @@ def _plan_crew_closure(
     routed = route_next(new_state, new_board, current_agent=agent)
     if routed.get("ok") and routed.get("action") != "saipen continue":
         new_state = patch_state(new_state, {"next_action": routed["action"]})
-    errors = validate_texts(new_state, new_board, new_log, current_agent=agent)
+    errors = validate_texts(
+        new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
+    )
     if errors:
         return _refuse(
             "VALIDATION_FAILED",
@@ -3421,7 +3530,9 @@ def _plan_defer_for_crew(
     if routed.get("ok") and routed.get("action") != "saipen continue":
         new_state = patch_state(new_state, {"next_action": routed["action"]})
 
-    errors = validate_texts(new_state, new_board, new_log, current_agent=agent)
+    errors = validate_texts(
+        new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
+    )
     if errors:
         return _refuse(
             "VALIDATION_FAILED",
@@ -3546,7 +3657,9 @@ def _plan_clear_wait_role(
     ):
         owned["transition_from"] = "DONE"
     new_state = patch_state(docs["state"].text_norm, owned)
-    errors = validate_texts(new_state, new_board, new_log, current_agent=agent)
+    errors = validate_texts(
+        new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
+    )
     if errors:
         return _refuse(
             "VALIDATION_FAILED",
@@ -3623,7 +3736,13 @@ def _plan_crew_run(
             "agent": agent,
         },
     )
-    errors = validate_texts(new_state, docs["board"].text_norm, new_log, current_agent=agent)
+    errors = validate_texts(
+        new_state,
+        docs["board"].text_norm,
+        new_log,
+        current_agent=agent,
+        sealed_events=docs["_history"],
+    )
     if errors:
         return _refuse(
             "VALIDATION_FAILED",
@@ -3743,7 +3862,13 @@ def _plan_producer_integration(
             "agent": agent,
         },
     )
-    errors = validate_texts(new_state, docs["board"].text_norm, new_log, current_agent=agent)
+    errors = validate_texts(
+        new_state,
+        docs["board"].text_norm,
+        new_log,
+        current_agent=agent,
+        sealed_events=docs["_history"],
+    )
     if errors:
         return _refuse(
             "VALIDATION_FAILED",
@@ -3948,7 +4073,13 @@ def _plan_convergence_stage(
             "agent": agent,
         },
     )
-    errors = validate_texts(new_state, docs["board"].text_norm, new_log, current_agent=agent)
+    errors = validate_texts(
+        new_state,
+        docs["board"].text_norm,
+        new_log,
+        current_agent=agent,
+        sealed_events=docs["_history"],
+    )
     if errors:
         return _refuse(
             "VALIDATION_FAILED",

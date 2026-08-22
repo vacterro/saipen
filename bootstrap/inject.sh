@@ -106,6 +106,15 @@ backup_file() {
 BLOCK="
 <!-- SAIPEN:BEGIN -->
 ## saipen protocol (global)
+SHORTCUT ACTIVATION GATE: a whole-message token that is a declared SAIPEN
+shortcut (sc, cc, ccc, gg, hh, ss, sss, dd, aa, qq, qqq, ee, eee, pp, tt, or
+a Cyrillic twin) is a COMMAND, never a greeting and never a style token. It
+MUST activate SAIPEN and resolve through CORE.md 1.10's shortcut table BEFORE
+any conversational acknowledgement, style-mode interpretation, or remembered
+expansion. \`sc\` is \`saipen crew\`, never "stop caveman". A shortcut inside a
+compound instruction (\`saipen push + build ccc\`) resolves identically as one
+ordered segment. Style commands (\`stop caveman\`/\`normal mode\`) stay legal, but
+a full-token shortcut match ALWAYS wins over style interpretation.
 FIRST-OUTPUT LANGUAGE GATE: when project root contains .saipen/, SAIPEN is
 active for the entire session including ordinary Q&A. BEFORE composing ANY
 assistant response (acknowledgement, explanation, or tool preamble), read

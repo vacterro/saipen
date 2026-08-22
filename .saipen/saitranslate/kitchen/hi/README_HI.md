@@ -1,73 +1,77 @@
 <p align="center">
   <img src="assets/SAIPEN_TEXT1.png" alt="SAIPEN Logo"/>
-  <br>
-  <img src="assets/__SAIPEN_Alpha.png" alt="SAIPEN Sticker" width="200"/>
 </p>
+
+<div align="center">
+  <h3><a href="README.ee.md">🇪🇪 LOE SEDA EESTI KEELES / ESTONIAN 🇪🇪</a></h3>
+  <a href="README.md">🇬🇧 English</a> &nbsp;|&nbsp;
+  <a href="README.ded.md">👴 Дед-Версия (Russian)</a> &nbsp;|&nbsp;
+  <a href="README.ja.md">🇯🇵 日本語 (Japanese)</a>
+</div>
 
 # SAIPEN
 
-**AI कोडिंग एजेंट्स के लिए कंटीन्यूएशन प्रोटोकॉल (Continuation protocol)।** सादे मार्कडाउन में स्थायी प्रोजेक्ट मेमोरी, जिससे चैट हिस्ट्री के बिना कोई भी कोल्ड एजेंट `/saipen continue` चलाकर एक मिनट से भी कम समय में काम फिर से शुरू कर सकता है -- कोई रीब्रीफिंग (rebriefing) नहीं, किसी भी वेंडर, किसी भी दिन।
+**कृत्रिम बुद्धिमत्ता कोडिंग एजेंटों के लिए जारी रखने के प्रोटोकॉल।**प्रोजेक्ट मेमोरी सामान्य फ़ाइलों में रहती है
+प्रोजेक्ट के अंदर मार्कडाउन फ़ाइलों के अंदर(`.saipen/`), इसलिए कोई भी संगत ठंडा एजेंट —
+कोई चैट इतिहास, कोई सेशन मेमोरी — चला सकता है`/saipen continue`, पढ़े
+संग्रहित`next_action`, और काम जारी रख सकता है बिना उपयोगकर्ता को फिर से समझाने की आवश्यकता के
+कोई भी चीज़। स्थिति प्रोजेक्ट के लिए है, न कि किसी एक मॉडल विक्रेता के मेमोरी के लिए।
 
-**एक कमांड। शून्य भूल (Zero amnesia)।**
+**एक कमांड जारी रखने के लिए। सामान्य फ़ाइल स्थिति। मशीन द्वारा जांचा गया संधि।**
+
+रिपॉजिटरी हर पुश पर अपने आप की जांच करता है; इंस्टॉल, स्थिति, जांच, और
+हटाएं सभी स्थानीय हैं — कोई बादल सेवा, कोई डैमोन, कोई डेटाबेस नहीं।
+
+[![Validation](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
+[![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
+[![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
+
+**v7.226.0** | [विनिर्देश](SPEC.md) | [गाइड](GUIDE.md) | [कोर](saipen/CORE.md) | [रखरखाव](saipen/MAINTENANCE.md) | [शैली](saipen/STYLE.md) | [UI](saipen/UI.md) | [अनुरूपता](saipen/CONFORMANCE.md) |MIT
 
 **त्वरित कुंजियाँ:** `cc` परियोजना संदर्भ को अभिसरण तक जारी रखता है (यदि कोई लक्ष्य निर्धारित है तो उसे फिर से शुरू करता है), `sss` कोड छुए बिना स्थिति दिखाता है और `ss` चेकपॉइंट सहेज कर रुक जाता है. [पूरा 15-कुंजी नक्शा देखें](saipen/RFC.md#110-command-surface). सिरिलिक जुड़वाँ भी काम करती हैं: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**उत्तर की भाषा।** एजेंट डिफ़ॉल्ट रूप से **एस्टोनियाई** में उत्तर देता है — यह एक सेटिंग है, सनक नहीं, और SAIPEN में और कुछ भी एस्टोनियाई नहीं है। इसे एक ही जगह बदलें: [`saipen/STYLE.md`](saipen/STYLE.md) के शीर्ष पर `reply_language:` पंक्ति। `et` एस्टोनियाई, `en` अंग्रेज़ी, `ru` रूसी, `auto` आपके संदेश की भाषा से चुनता है। प्रोटोकॉल, कोड, कमिट और सभी दस्तावेज़ हर मान पर अंग्रेज़ी में रहते हैं।
-
-**v7.225.0** | [विशिष्टता (Spec)](SPEC_HI.md) | [गाइड (Guide)](GUIDE.md) | [RFC](RFC_HI.md) | [शैली (Style)](STYLE_HI.md) | [UI](saipen/UI.md) | [अनुरूपता (Conformance)](saipen/CONFORMANCE.md) | सादा मार्कडाउन | शून्य निर्भरता | MIT
-
 ```text
+Project
+  |
+  +-- .saipen/STATE.md ------ what is happening right now (phase, ticket, mode, next_action)
+  +-- .saipen/BOARD.md ------ what work exists (DOING / TODO / DONE / BLOCKED)
+  +-- .saipen/LOG.md -------- why the project reached this state (event history)
+  +-- .saipen/KNOWLEDGE/ ---- what durable facts must survive sessions
+          |
+          v
+   /saipen continue
+          |
+          v
+      cold agent
+          |
+          v
+     next_action -> work -> checkpoint -> next ticket
+```
 
-### Project State > Model Memory
+## जो बना रहता है
 
-**Project state is stronger than model memory.** Memory lives in the project, not the model's head. `Project -> Memory -> LLM` becomes `Project -> SAIPEN state -> LLM`.
+लाइव प्रोजेक्ट मेमोरी रहती है`.saipen/`— सामान्य फ़ाइलें जिन्हें आप पढ़ सकते हैं, डिफ़ कर सकते हैं और
+कोड के बगल में कमिट कर सकते हैं। एक ठंडा एजेंट फ़ाइलों से पांच प्रश्नों के उत्तर देता है
+अकेले:
 
-- **Core state machine** — `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`
-- **Autonomy without prompting** — board stalled (no workable `TODO`, `DOING` empty) **and not `BLOCKED`**? Auto-transition to `HUNT` (bug scanning) → `ADD` (feature development) → `HUNT`, no questions asked. A `BLOCKED` session never launches autonomous hunting — it waits for a human to resolve the block (RFC § 2.1).
-- **Strict reliability** — batch input parsing (surgical 1-at-a-time tickets), dirty tree adoption (never wipes uncommitted work), secret redaction (`sk-***`).
-
-## Commands
-
-The full surface is 16 commands; complete details in [RFC § 1.10](saipen/RFC.md#110-command-surface).
-
-| Command | What it does |
+|फ़ाइल / क्षेत्र|उत्तर|
 |---|---|
-| `/saipen set` | Adopt a project |
-| `/saipen continue` | Resume exactly where you left off |
-| `/saipen plan` | Turn a request or raw queue into tickets |
-| `/saipen goal <text>` | Autonomous wave assault on a new objective |
-| `/saipen hunt` | Force an immediate defect/improvement scan |
-| `/saipen ship` | Version bump, changelog, tag, push |
-| `/saipen clean` | Repository cleanup |
-| `/saipen validate` | Conformance check |
-| `/saipen markhunt` | Dry uncapped audit, record only |
-| `/saipen translate` | Isolated translation factory |
-| `/saipen prepare` | Package work for handoff |
-| `/saipen collect` | Integrate a ready package |
-| `/saipen status` | Read-only report |
-| `/saipen stop` | Checkpoint and halt |
+| `STATE.md` |अब क्या हो रहा है?(चरण, सक्रिय टिकट, संचालन मोड, ब्लॉकर) |
+| `BOARD.md` |कौन सा काम मौजूद है / कौन सा सक्रिय है?(टिकट ग्राफः DOING, TODO, DONE, BLOCKED) |
+| `LOG.md` |परियोजना इस अवस्था तक क्यों पहुँची?(एपेंड-केवल इवेंट ग्राफः) |
+| `KNOWLEDGE/` |कौन से स्थायी परियोजना तथ्य सेशनों के बाद भी जीवित रहने चाहिए?|
+| `next_action` (में`STATE.md`) |अगले एजेंट द्वारा कौन सी ठीक-ठीक कार्रवाई करनी चाहिए?|
 
-<sub>`saipen init` and `saipen sub` complete the sixteen; both are called by the protocol, not typed daily.</sub>
+यह एक चेकपॉइंट कॉन्ट्रैक्ट है, डिज़ाइन सुझाव नहीं है:`saipen stop`और प्रत्येक
+टिकट स्थानांतरण फ़ाइलों को एक निश्चित क्रम में लिखें, और परिणाम के द्वारा जांच करें
+एक वैधकर्ता। कोई भी होस्टेड डेटाबेस में संग्रहीत नहीं है, और कोई भी खो नहीं जाता है जब
+सत्र समाप्त हो जाता है।
 
-**Package keys.** `ee`/`qq` prepare a complete translation or wiki package without integrating; `eee`/`qqq` accept only a ready package, then integrate, verify, review, and push.
+## त्वरित शुरुआत
 
-**Experimental: saicrew.** Optional bonus layer (`extensions/subs/`, zero Core changes) for running a multi-agent crew — one Core writer plus read-only `saihunt`/`saipython` workers reporting through their own `OUTBOX.md`. Under active live testing, not finalised — see `extensions/subs/crew.md`.
+**1. प्रति मशीन एक बार स्थापित करें**— क्लॉड कोड, कोडेक्स, जेमिनी, ओपेनकोड को पढ़ाता है,
+एइडर, एंटीग्रेविटी, और कोई भी सामान्य`~/.agents/skills`पाठक(फ्रीबफ, आदि।):
 
-## Two layers
-
-| Layer | Required | Purpose |
-|---|---|---|
-| **Core** | ✅ | Resume work safely |
-| **Maintenance** | On top of Core | Evolve software without task direction |
-
-**Automated evolution.** No open tasks remain, type `/saipen`: `HUNT` audits for bugs, dead code, and failing tests. Clean? `ADD` builds the next obvious missing capability, verifies it, and hunts again. Product mature -> stops gracefully.
-
-**GOAL Mode.** `/saipen goal <what you want>` pivots the board (deprioritises old tickets, never deletes them) and drives the new objective forward — no "should I continue?" between tickets, VERIFY/REVIEW never skipped. SHIP auto-pushes to the existing remote; a brand-new repository still asks once. Shipping a goal is not the end point either — it transitions straight into autonomous HUNT/ADD maintenance until the product is mature, blocked, or the run hits its cap (3 waves / 20 tickets, then checkpoints and reports).
-
-## Quick Start
-
-
-**1. प्रति मशीन एक बार इंस्टॉल करें** -- Claude Code, Gemini, OpenCode, Aider, Antigravity को सिखाता है:
 ```bash
 git clone https://github.com/vacterro/saipen
 cd saipen
@@ -75,52 +79,230 @@ powershell -ExecutionPolicy Bypass -File .\bootstrap\inject.ps1     # Windows
 bash bootstrap/inject.sh                                            # macOS / Linux
 ```
 
-**2. एक प्रोजेक्ट शुरू करें** -- अपने फ़ोल्डर में एक एजेंट खोलें, टाइप करें:
+<sub>What that touches, so nothing is a surprise: it appends a marked
+`<!-- SAIPEN:BEGIN -->...<!-- SAIPEN:END -->`एजेंट के निर्देश में ब्लॉक करें
+आपके पास पहले से ही फ़ाइलें हैं(`~/.claude/CLAUDE.md`, `~/.config/opencode/AGENTS.md`,
+`~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`)— प्रत्येक को बैकअप करके`.bak`पहले —
+और प्रोटोकॉल को संगत कौशल फ़ोल्डर में कॉपी कर देता है। उनके बाहर कुछ भी नहीं
+पथ, कोई डैमोन, कोई नेटवर्क कॉल।</sub>
+
+**2. एक प्रोजेक्ट शुरू करें**— अपने फ़ोल्डर में एजेंट खोलें, टाइप करें:
+
 > `saipen set`
 
-<p align="center">
-  <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
-</p>
+**इंस्टॉल की आवश्यकता नहीं?**किसी भी एजेंट में एक पंक्ति पेस्ट करें:
 
+> पढ़ें&lt;क्लोन&gt;/saipen/BOOT.md पहले(ठंडा-शुरुआत कर्नल), फिर&lt;क्लोन&gt;/saipen/INDEX.md +&lt;क्लोन&gt;/saipen/STYLE.md के अनुसार और उनका पालन करें।
 
-## Documentation
+**अपना मन बदल गए?**एक कमांड इसे वापस रखता है:
 
-| Document | What it is |
+```bash
+powershell -ExecutionPolicy Bypass -File .\bootstrap\uninstall.ps1  # Windows
+bash bootstrap/uninstall.sh                                         # macOS / Linux
+```
+
+यह केवल चिह्नित ब्लॉक को हटा देता है(बाकी फ़ाइल को अकेला छोड़ देता है), सहेजता है
+a `.uninstalled.bak`पहले कॉपी करें, और कौशल फ़ोल्डर हटा दें।
+
+## क्यों नहीं केवल चैट इतिहास?
+
+SAIPEN एक विशिष्ट विफलता के लिए लक्षित है: एक एआई कोडिंग एजेंट जो कोई भी याद नहीं करता
+एक सत्र समाप्त होने के बाद। अन्य उपकरण और आदतें उस समस्या के कुछ हिस्से को कवर करते हैं:
+
+|दृष्टिकोण|क्या यह करता है|क्या यह नहीं ले जाता है|
+|---|---|---|
+|चैट इतिहास / मॉडल की याददाश्त|सुविधाजनक, शून्य सेटअप|सेशन और वेंडर निर्भर; परियोजना के साथ संग्रहीत नहीं किया गया है, इसलिए एक ठंडा एजेंट कभी इसे नहीं देखता है|
+|स्थायी`AGENTS.md`/ निर्देश फ़ाइल|टिकाऊ खड़े नियम और परंपराएं|स्वयं जीवित कार्य अवस्था का प्रतिनिधित्व नहीं करता है`next_action`, या पुनर्प्राप्ति इतिहास|
+|मुद्दा / TODO ट्रैकर|कार्य और बैकलॉग प्रबंधन|स्वयं एजेंट के अगले कदम के अर्थ को परिभाषित नहीं करता है — एक ठंडा एजेंट को जब फिर से शुरू किया जाता है तो वह क्या पढ़े और कार्यान्वित करे|
+| **SAIPEN** |लाइव कार्य कर रहा हालत, कार्य कतार, घटना इतिहास, टिकाऊ ज्ञान, और मशीन द्वारा जांच किए गए अगले कदम के नियम — कोड के बराबर सामान्य फ़ाइलों में सामान्य फ़ाइलों में|कुछ नहीं; वह संयोजन अनुबंध है|
+
+अंतर कोई एक फ़ाइल नहीं है। यह यह है कि SAIPEN फिर से शुरू करने के कदम को बनाता है
+मशीन द्वारा जांच करने योग्य: एक ठंडा एजेंट के पहला कार्य जब`/saipen continue`है
+द्वारा निर्धारित किया जाता है`next_action`प्रस्तुत किए गए
+और एक वैधकर्ता द्वारा सत्यापित किया जाता है, नहीं
+
+## मन के अनुसार पुनर्निर्मित किया जाता है।
+
+इंजीनियरिंग साक्ष्य डेटा बिंदुओं के साथ एक नॉर्मेटिव सामान्य फ़ाइल प्रोटोकॉल के साथ जोड़ा गया है और निष्पादन करने वाला, विफलता-उन्मुख
+चेक्स। ए रिपॉजिटरी प्रोटोकॉल/स्टेट-मशीन डिज़ाइन, पायथन
+टूलिंग, स्कीमा-चालित स्टेट, रिकवरी रीज़निंग, रिग्रेशन टेस्टिंग,
+मल्टी-एजेंट वर्कफ़्लो सीमा, और स्पेसिफिकेशन डिसिप्लिन।
+
+- **डिज़ाइन किया गया कॉन्ट्रैक्ट।** [SPEC.md](SPEC.md)फ़ाइल-बैक्ड
+कंटिन्यूएशन मॉडल और स्थायी ऑन-डिस्क कॉन्ट्रैक्ट को परिभाषित करता है;[CORE.md](saipen/CORE.md)
+और[MAINTENANCE.md](saipen/MAINTENANCE.md)वर्तमान नॉरमेटिव व्यवहार को अपनाता है।
+- **मशीन-चेक किया गया स्टेट।**The stdlib-only canonical
+  [वैधक](tools/validate.py)लाइव
+  [स्टेट स्कीमा](extensions/schemas/state.schema.json)और चेक करता है चरण
+परिवर्तन, टिकट निर्भरता, इवेंट-ग्राफ लिंक, क्रॉस-दस्तावेज
+अपरिवर्तनीयता, क्षमताएं, और पुनर्प्राप्ति अवस्था।
+- **असफलता कवरेज।** [CONFORMANCE.md](saipen/CONFORMANCE.md)मैप करता है
+आवश्यकताओं को[सीनारियो फिक्सचर्स](tests/scenarios/); तhe
+  [सीनारियो रनर](tools/run_scenarios.py)संरचनात्मक पास/फेल केस को निष्पादित करता है
+जिसमें करप्ट रिकवरी स्टेट, अमान्य स्थानांतरण, निर्भरता चक्र, और
+केवल पढ़ने योग्य प्रतिबंध शामिल हैं।
+- **रिग्रेशन कंट्रोल्स।** [एडिट_चेक्स.पाइथन](tools/audit_checks.py)बदलता है
+ज्ञात-अच्छा कॉपी और सिद्ध करता है कि वैलिडेटर की जांच अभी भी लाल हो सकती है, बजाय
+एक अपरिवर्तित हरा चेक को साक्ष्य के रूप में लेने के।
+- **एग्जिक्यूटेबल लेयर।** [सैपेन.पाइथन](tools/saipen.py)जर्नल किया गया स्टेट प्रदान करता है
+संचालन;[बूटस्ट्रैप/](bootstrap/)इंस्टॉल, अनइंस्टॉल और एक्सपोर्ट को रखता है
+सहायक, एक वैकल्पिक[प्री-कमिट हूक इंस्टॉलर](tools/install_hook.py).
+- **स्पष्ट व्यवहार**मुख्य प्रोटोकॉल स्टेट सामान्य फ़ाइलें हैं जिनमें कोई रनटाइम नहीं है
+निर्भरता। कैनोनिकल वैधता और CLI टूलिंग के लिए पायथन की आवश्यकता होती है, लेकिन केवल उपयोग करते हैं
+इसकी मानक पुस्तकालय और कोई आवश्यकता नहीं है`pip`इंस्टॉल।
+
+## आर्किटेक्चर
+
+तीन परतें, सख्त एक दिशा में निर्भरता:
+
+```text
+CORE            continuation / state / checkpoint / validation       required
+  └─ MAINTENANCE   autonomous HUNT / ADD / CLEAN evolution           optional, on top of Core
+       └─ GOAL MODE / SUBAGENTS   opt-in throughput/execution        optional
+```
+
+कोर मेंटेनेंस पर निर्भर नहीं होता: स्वायत्त विकास अक्षम करने पर, SAIPEN
+अभी भी एक पूर्ण जारी रखने के प्रोटोकॉल है — एक ठंडा एजेंट अभी भी जारी रखता है।
+
+- **कोर स्टेट मशीन** — `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`.
+- **स्वायत्त मेंटेनेंस**— बोर्ड रोक दिया गया(कुछ भी कार्यक्षम नहीं है`## TODO`,
+कुछ भी नहीं है`## DOING`)और नहीं`BLOCKED`? स्वतः परिवर्तन`HUNT` (त्रुटियों की स्कैन करें)
+  → `ADD` (विशेषताओं का विकास करें) → `HUNT`, कोई प्रश्न नहीं पूछा गया। एक सत्र बैठे हुए
+  `BLOCKED`कभी ऑटो-हंट नहीं करता
+  ([रखरखाव § 2.1](saipen/MAINTENANCE.md#21-autonomous-transitions)).
+- **लक्ष्य मोड** — `/saipen goal <objective>`बोर्ड को घुमाता है और चलाता है
+लक्ष्य को VERIFY/REVIEW के माध्यम से आगे बढ़ाता है, स्वचालित रखरखाव में गिर जाता है
+तब तक जब तक पूर्णता नियम नहीं लागू होता है या चलाने की सीमा नहीं छू जाती है(3 लहरें / 20 टिकट,
+फिर चेकपॉइंट और रिपोर्ट करता है) ([रखरखाव § 2.4](saipen/MAINTENANCE.md#24-goal-mode-autonomous-execution)).
+- **कठोरता**— बैच इनपुट को शल्य एक-एक टिकट में पार्स किया जाता है
+  (कोर § 1.8); गंदा-वृक्ष जारी रखता है अप्रस्तुत कार्य(कोर § 1.5);
+रहस्य-जैसे मान लॉग से हटा दिए जाते हैं(`sk-***`) (कोर § 1.2).
+
+## सामान्य कमांड
+
+रोजमर्रा के प्रवेश बिंदु; पूर्ण वर्तमान सतह यहां रहती है
+[कोर § 1.10](saipen/CORE.md#110-command-surface).
+
+|कमांड|करता है|
 |---|---|
-| [SPEC.md](SPEC.md) | Formal architecture, design goals, litmus test |
-| [RFC.md](saipen/RFC.md) | Normative specification agents execute |
-| [GUIDE.md](GUIDE.md) | Human tutor and ELI5 guides |
-| [STYLE.md](saipen/STYLE.md) | Agent communication style and voice definition |
-| [UI.md](saipen/UI.md) | Vintage Golden UI design guidelines |
-| [CONFORMANCE.md](saipen/CONFORMANCE.md) | Behavioural test scenarios and validator rules |
+| `/saipen set` |परियोजना अपनाएं: बनाएं`.saipen/`अवस्था|
+| `/saipen continue` |पूर्व बचाए गए परियोजना अवस्था से जारी रखें — कोई पुनः ब्रिफिंग नहीं|
+| `/saipen plan` |एक अनुरोध या कच्चे बैकलॉग को टिकट में परिवर्तित करें|
+| `/saipen goal <text>` |एक नए लक्ष्य के खिलाफ स्वायत्त तरंग के कार्यान्वयन|
+| `/saipen validate` |सम्मिलन जांच चलाएं|
+| `/saipen status` |केवल पढ़ें: चरण, टिकट, ब्लॉकर, स्टैलनेस|
+| `/saipen stop` |चेकपॉइंट और रोकें|
+
+<details>
+<summary><b>More commands</b></summary>
+
+|कमांड|करता है|
+|---|---|
+| `/saipen hunt` |अब तत्काल दोष/सुधार स्कैन करें|
+| `/saipen markhunt` |सूखा, असीमित अनुमान — पाया गया लेकिन कुछ भी ठीक नहीं करता|
+| `/saipen ship` |रिलीज गेट; जब अनुमति दी जाती है तो कमिट, टैग और पुश करें|
+| `/saipen clean` |बोर्ड और अवस्था स्क्रब|
+| `/saipen translate` |अलग अनुवाद कारखाना|
+| `/saipen prepare` / `/saipen collect` |हाथ से सौंपे जाने के लिए पैकेज काम करें / तैयार पैकेज को एकीकृत करें|
+| `/saipen test` |दावा किए गए परीक्षण सूट को चलाएं, केवल रिपोर्ट करें|
+| `/saipen crew` |स्थिर क्रम के टीम सर्किट(हंट → पुनर्प्रस्तुति → इंटेक → बनाएं → अनुवाद → दस्तावेज → भेजें) |
+| `/saipen improve` |प्रोटोकॉल सुधारों के लिए मेटा-नियंत्रण अनुमान|
+| `/saipen sub ...` |सब-एजेंट्स को जन्म दें/अपनाएं, केवल पढ़ें|
+
+**पैकेज की कुंजियाँ।** `ee`/`qq`बिना एकीकरण के पूर्ण अनुवाद/विकि पैकेज तैयार करें
+एकीकरण करते हुए;`eee`/`qqq`केवल तैयार पैकेज स्वीकार करें, फिर एकीकृत करें, सत्यापित करें,
+समीक्षा करें और धकेलें।
+
+**saicrew।** `sc` / `saipen crew` (`extensions/subs/crew.md`)पूरा चलता है
+एक निश्चित क्रम में बने-हुए क्रू — सेंसर(saihunt, saitest, saipython, saiui),
+उत्पादक(saitranslate, saiwiki)और कोर केवल मुख्य-वृक्ष लेखक के रूप में —
+जब तक एक अन्य ताजा पास में कुछ वास्तविक बदलाव नहीं बचा होता। यह केवल एक ही जोड़ता है
+अपना एक तंत्र: टिकाऊ संगठन लक्ष्य(``execution_intent:
+संगठित हो` with `converge_target: क्रू`)जो सर्किट को पुनः शुरू करने योग्य बनाता है और
+साक्ष्य से क्रैश-डेरिवेबल है।`saipen crew --dry-run --json`निकालता है
+सर्किट केवल पढ़ने योग्य है;`bootstrap/saipen_crew.*`एक अनिवार्य मानव द्वारा
+बहु-खिड़की सहायता है, कभी भी नहीं`saipen crew`का अर्थ है। देखें
+[extensions/subs/crew.md](extensions/subs/crew.md).
+</details>
+
+## SAIPEN क्या नहीं है
+
+- **एक एलएलएम या मॉडल**— यह एजेंटों द्वारा अनुसरित एक प्रोटोकॉल है, न कि एक बुद्धि।
+- **एक आईडीई या एक मेमोरी डेटाबेस होस्ट करता है**— स्थिति आपके प्रोजेक्ट में सामान्य फ़ाइलें हैं;
+कुछ भी होस्ट नहीं किया गया है।
+- **Git के एक विकल्प**— Git अभी भी संस्करण इतिहास के मालिक है; अपने
+  `.saipen/`जैसे कोई अन्य कोड।
+- **वितरित सहमति**— नीचे एक समानांतरता सीमा देखें।
+- **एक गारंटी कि एक LLM सही इंजीनियरिंग निर्णय लेगा**— यह
+संदर्भ की हानि और व्यवहार के विचलन को कम करता है; यह स्टोकेस्टिक एजेंटों को अक्षम नहीं बनाता है
+अविच्छिन्न।
+
+SAIPEN का काम एक जारी रखने/अवस्था करार और वैधता और उपकरणों के साथ है —
+अगले एजेंट को मशीन द्वारा जांचा गया शुरुआती बिंदु देना, जादू नहीं।
+
+**समानांतरता सीमा।**जर्नल किया गया अवस्था परिवर्तन(SAIOPS)का उपयोग करें
+प्रोजेक्ट-सीमित OS लॉक और एक पुनर्प्राप्ति जर्नल([OPS § 5](saipen/OPS.md#5-locks)).
+सामान्य प्रोजेक्ट संपादन और असंबद्ध लेखक उस लॉक के बाहर हैं। SAIPEN
+वितरित समीकरण नहीं है, इसलिए असंबद्ध लेखकों के लिए बाहरी
+समन्वयन([SPEC](SPEC.md#concurrency--distribution-boundaries)).
+
+## एकोसिस्टम
+
+|प्रोजेक्ट|SAIPEN से संबंध|
+|---|---|
+| [SAIPENVIEW](https://github.com/vacterro/saipenview) |स्थानीय विंडोज़ कंट्रोल सेंटर SAIPEN प्रोजेक्ट के लिए — स्वचालित रूप से खोजता है`.saipen/`कार्यक्षेत्र, लाइव स्थिति और पालन-पड़ताल के निर्णयों का दृश्यीकरण करता है, टिकटों का प्रबंधन करता है, और AI CLIs को लॉन्च करता है। एक साथी, नियंत्रक नहीं।|
+| [SAIWORK](https://github.com/vacterro/saiwork) |डाउनस्ट्रीम कोडनोमैड फॉर्क जो SAIPEN के साथ समाकलित करता है: ओपेनकोड लॉन्च में इंजेक्ट करता है`BOOT.md`/`STYLE.md`SAIPEN शॉर्टकट और प्रोजेक्ट-स्थिति दृश्यों को प्रकट करता है, और एक स्थायी प्रॉम्प्ट कतार जोड़ता है।|
+| [FastPrompter](https://github.com/vacterro/fastprompter) |ले-आउट विंडोज़ स्क्रैचपैड और अंचल प्रबंधक जो स्वचालित रूप से पहचानता है`.saipen/`फ़ोल्डर और एक केवल पढ़ें STATE/BOARD/LOG दृश्यकरण जोड़ता है।|
+
+## दस्तावेजीकरण
+
+|दस्तावेज|यह क्या है|
+|---|---|
+| [SPEC.md](SPEC.md) |औपचारिक विन्यास, डिज़ाइन लक्ष्य, लिटमस परीक्षण|
+| [CORE.md](saipen/CORE.md) |आचरणात्मक विस्तार, अवस्था मशीन, और कमांड कॉन्ट्रैक्ट|
+| [MAINTENANCE.md](saipen/MAINTENANCE.md) |स्वायत्त रखरखाव और गोल तरीका|
+| [CONFORMANCE.md](saipen/CONFORMANCE.md) |निष्पादन/व्यवहार सम्बंधी आवश्यकताएं और वैधकर्ता नियम|
+| [GUIDE.md](GUIDE.md) |मानव ट्यूटोरियल|
+| [RFC.md](saipen/RFC.md) |संगतता के लिए विभाजित आधिकारिक दस्तावेजों की ओर दिशा|
+| [STYLE.md](saipen/STYLE.md) |एजेंट संचार शैली और आवाज|
+| [UI.md](saipen/UI.md) |विंटेज गोल्डन UI डिज़ाइन निर्देश|
+|ब्रोशर|प्रस्तुति ब्रोशर —[EN](BROCHURE_EN.md) / [RU](BROCHURE_RU.md) / [ET](BROCHURE_ET.md) / [DED](BROCHURE_DED.md) / [जे.ए](BROCHURE_JA.md) |
 
 <details>
 <summary><b>All 33 translated guides</b></summary>
 
-🇷🇺 [Русский](guides/GUIDE_RU.md) · 🇺🇸 [English](guides/GUIDE_EN.md) · 🇪🇪 [Eesti](guides/GUIDE_EE.md) · 🇯🇵 [日本語](guides/GUIDE_JA.md) · 👴 [Версия Деда](guides/GUIDE_DED.md)
+🇷🇺 [Русский](guides/GUIDE_RU.md) · 🇺🇸 [अंग्रेजी](guides/GUIDE_EN.md) · 🇪🇪 [एस्टोनियाई](guides/GUIDE_EE.md) · 🇯🇵 [日本語](guides/GUIDE_JA.md) · 👴 [Версия Деда](guides/GUIDE_DED.md)
 
-🇺🇦 [Українська](guides/GUIDE_UK.md) · 🇩🇪 [Deutsch](guides/GUIDE_DE.md) · 🇫🇷 [Français](guides/GUIDE_FR.md) · 🇪🇸 [Español](guides/GUIDE_ES.md) · 🇮🇹 [Italiano](guides/GUIDE_IT.md)
+🇺🇦 [Українська](guides/GUIDE_UK.md) · 🇩🇪 [जर्मन](guides/GUIDE_DE.md) · 🇫🇷 [फ्रेंच](guides/GUIDE_FR.md) · 🇪🇸 [स्पेनिश](guides/GUIDE_ES.md) · 🇮🇹 [इतालवी](guides/GUIDE_IT.md)
 
-🇵🇹 [Português](guides/GUIDE_PT.md) · 🇳🇱 [Nederlands](guides/GUIDE_NL.md) · 🇵🇱 [Polski](guides/GUIDE_PL.md) · 🇸🇪 [Svenska](guides/GUIDE_SV.md) · 🇩🇰 [Dansk](guides/GUIDE_DA.md)
+🇵🇹 [पुर्तगाली](guides/GUIDE_PT.md) · 🇳🇱 [नीदरलैंडी](guides/GUIDE_NL.md) · 🇵🇱 [पोलिश](guides/GUIDE_PL.md) · 🇸🇪 [स्वीडिश](guides/GUIDE_SV.md) · 🇩🇰 [डैनिश](guides/GUIDE_DA.md)
 
-🇫🇮 [Suomi](guides/GUIDE_FI.md) · 🇳🇴 [Norsk](guides/GUIDE_NO.md) · 🇨🇳 [中文](guides/GUIDE_ZH.md) · 🇰🇷 [한국어](guides/GUIDE_KO.md) · 🇹🇭 [ไทย](guides/GUIDE_TH.md)
+🇫🇮 [फिन](guides/GUIDE_FI.md) · 🇳🇴 [नॉर्वेजियन](guides/GUIDE_NO.md) · 🇨🇳 [中文](guides/GUIDE_ZH.md) · 🇰🇷 [한국어](guides/GUIDE_KO.md) · 🇹🇭 [ไทย](guides/GUIDE_TH.md)
 
-🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) · 🇸🇦 [العربية](guides/GUIDE_AR.md) · 🇮🇱 [עברית](guides/GUIDE_HE.md) · 🇹🇷 [Türkçe](guides/GUIDE_TR.md) · 🇮🇳 [हिन्दी](guides/GUIDE_HI.md)
+🇻🇳 [वियतनामी](guides/GUIDE_VI.md) · 🇸🇦 [العربية](guides/GUIDE_AR.md) · 🇮🇱 [עברית](guides/GUIDE_HE.md) · 🇹🇷 [तुर्की](guides/GUIDE_TR.md) · 🇮🇳 [हिन्दी](guides/GUIDE_HI.md)
 
-🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) · 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) · 🇨🇿 [Čeština](guides/GUIDE_CS.md) · 🇷🇴 [Română](guides/GUIDE_RO.md) · 🇭🇺 [Magyar](guides/GUIDE_HU.md)
+🇮🇩 [इंडोनेशियाई](guides/GUIDE_ID.md) · 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) · 🇨🇿 [चेक](guides/GUIDE_CS.md) · 🇷🇴 [रोमानियाई](guides/GUIDE_RO.md) · 🇭🇺 [माग्यार](guides/GUIDE_HU.md)
 
-🇧🇬 [Български](guides/GUIDE_BG.md) · 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) · 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
+🇧🇬 [Български](guides/GUIDE_BG.md) · 🇸🇰 [स्लोवाक](guides/GUIDE_SK.md) · 🇭🇷 [क्रोएशियाई](guides/GUIDE_HR.md)
 
 </details>
 
-## Built with SAIPEN
+## सेटिंग्स नोट्स
 
-- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — High-performance prompt management tool built natively around the SAIPEN memory protocol.
+**जवाब की भाषा।**एजेंट के उत्तर देने के लिए**एस्टोनियाई**के डिफ़ॉल्ट रूप से — यह एक
+सेटिंग है, न कि प्रोटोकॉल की आवश्यकता, और SAIPEN के बारे में कुछ भी एस्टोनियाई नहीं है।
+प्रोटोकॉल, कोड, कमिट्स और हर दस्तावेज़ हर
+मान पर अंग्रेजी रहते हैं। इसे बदलें एक स्थान पर:`reply_language:`शीर्ष पर के लाइन
+[`saipen/STYLE.md`](saipen/STYLE.md). `et`एस्टोनियाई,`en`अंग्रेजी,`ru`रूसी,
+`auto`आपके द्वारा भेजे गए संदेश से चुनता है।
 
-## Screenshots
+**एडेप्टर।**प्लेटफॉर्म इंजेक्टर द्वारा कवर नहीं किया गया(डीपसीक, क्वेन, स्टैंडअलोन
+ओपनएआई, आदि)? प्लेटफॉर्म-विशिष्ट नोट्स लाइव हैं`extensions/adapters/`.
+
+## स्क्रीनशॉट्स
 
 <details>
-<summary>Click to expand</summary>
+<summary><b>Click to expand</b></summary>
 
 <img src="assets/screenshot-freebuff.png" alt="FreeBuff agent instructions" width="600"/>
 
@@ -134,6 +316,5 @@ bash bootstrap/inject.sh                                            # macOS / Li
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-<!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
-
-
+<!-- translation-model: qwen3:14b contract:structured-markdown-v2 -->
+<!-- source-digest: README.md sha256:2a33e364c3c12e8b1b9b2caf41b05db3ee27f17161336579ae85ee59da34fe56 -->

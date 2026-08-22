@@ -31,6 +31,10 @@ CODES = frozenset(
         "VALIDATION_FAILED",
         "RECOVERY_REQUIRED",
         "RECOVERY_CONFLICT",
+        # Recovery evidence that cannot be decoded or safely traversed is not
+        # an ordinary semantic conflict and must never enter replay.  Every
+        # public projection uses this one fail-closed classification.
+        "CORRUPT_JOURNAL",
         "NEEDS_REPAIR",
         "DESTRUCTIVE_CONFIRMATION_REQUIRED",
         "CONFLICT",

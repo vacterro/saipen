@@ -16,15 +16,39 @@ import re
 
 from . import phases
 from .board import board_semantic_errors, parse_board, claim_status, board_graph_errors
-from .log import parse_log_line, log_tail_event
 from .state import _current_schema_version, is_absolute_home
 
 
 def _log_errors(log_text: str) -> list[str]:
-    errors = []
+    """Structural LOG errors in exactly the current diagnostic order.
+
+    PERF-007: kept as a thin wrapper over the single-pass ``_analyze_log`` so
+    every consumer shares ONE parse_log_line call per line instead of each
+    re-walking the whole active LOG.
+    """
+    return _analyze_log(log_text).errors
+
+
+def _analyze_log(log_text: str) -> "LogAnalysis":
+    """PERF-007: one single-pass semantic analysis of active LOG text.
+
+    Walks ``log_text.splitlines()`` once, invoking ``parse_log_line`` exactly
+    once per non-trivial line, and returns the parsed events, the
+    ``_log_errors``-equivalent ordered structural errors and the maximum/tail
+    event in the same pass. Consumers that previously parsed the LOG three
+    times (active-events comprehension + _log_errors + log_tail_event) now
+    share this one pass. ``raw_floor``/``log_floor`` remain a deliberately
+    independent implementation, so a parser bug is still caught by the second
+    invariant layer.
+    """
+    from .log import parse_log_line
+
+    events: list[dict] = []
+    errors: list[str] = []
     seen: set[int] = set()
     parents: set[int] = set()
     prev = None
+    highest = None
     for lineno, line in enumerate(log_text.splitlines(), 1):
         if not line.strip():
             continue
@@ -34,6 +58,7 @@ def _log_errors(log_text: str) -> list[str]:
         if parsed is None:
             errors.append(f"LOG.md:{lineno} not a legal event line")
             continue
+        events.append(parsed)
         event = parsed["event"]
         if event in seen:
             errors.append(f"LOG.md:{lineno} duplicate event E-{event}")
@@ -47,8 +72,79 @@ def _log_errors(log_text: str) -> list[str]:
                 errors.append(
                     f"LOG.md:{lineno} parent E-{parsed['parent']} is not older than E-{event}"
                 )
-    return errors
+        if highest is None or event > highest:
+            highest = event
+    return LogAnalysis(tuple(events), errors, highest)
 
+
+class LogAnalysis:
+    __slots__ = ("errors", "events", "tail")
+
+    def __init__(self, events, errors, tail):
+        self.events = events
+        self.errors = errors
+        self.tail = tail
+
+
+def block_parked_evidence_error(state: dict, board: dict, events) -> str | None:
+    """Bind the narrow mid-flight ``phase -> DONE`` exception to its event.
+
+    ``state_contract_errors`` can validate the transition shape, but the one
+    deliberate DFA exception needs cross-file proof. The most recent
+    phase-changing event at or before ``STATE.last_event`` must be a canonical
+    active-ticket block whose exact ticket remains in ``BOARD.BLOCKED``.
+    Neutral checkpoints after the block are legal; a later claim, transition,
+    finish, goal entry, or active block supersedes the old phase evidence.
+    """
+    source = state.get("transition_from")
+    destination = state.get("phase")
+    if not (
+        destination == "DONE"
+        and source in ("SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP")
+        and not phases.transition_legal(source, destination)
+    ):
+        return None
+
+    last_event = state.get("last_event")
+    if not isinstance(last_event, int) or isinstance(last_event, bool):
+        relevant = []
+    else:
+        relevant = [
+            event
+            for event in events
+            if isinstance(event.get("event"), int) and event["event"] <= last_event
+        ]
+
+    def is_active_block(event: dict) -> bool:
+        ticket_id = event.get("ticket")
+        ticket = board.get("tickets", {}).get(ticket_id) if ticket_id else None
+        return bool(
+            ticket is not None
+            and ticket.get("section") == "## BLOCKED"
+            and event.get("taxonomy") == "DEC"
+            and str(event.get("op_id") or "").startswith("ticket-")
+            and str(event.get("text") or "").startswith(
+                "ticket block via SAIOPS (active)"
+            )
+        )
+
+    phase_events = [
+        event
+        for event in relevant
+        if str(event.get("op_id") or "").startswith(
+            ("claim-", "transition-", "finish-", "goal-entry-")
+        )
+        or str(event.get("text") or "").startswith("ticket block via SAIOPS (active)")
+    ]
+    latest_phase_event = max(phase_events, key=lambda event: event["event"], default=None)
+    if latest_phase_event is None or not is_active_block(latest_phase_event):
+        return (
+            f"invalid phase transition: {source} -> {destination} (RFC § 1.6). "
+            "The block-parked shape requires the latest phase-changing event "
+            "through STATE.last_event to be the canonical active-block DEC "
+            "for the exact ticket still in BOARD.BLOCKED"
+        )
+    return None
 
 
 def validate_checkpoint_surface(
@@ -72,6 +168,7 @@ def validate_checkpoint_surface(
     errors: list[str] = []
 
     from .floor import state_board_floor, board_floor
+
     floor_errors = state_board_floor(state_text, board_text) + board_floor(board_text)
     if floor_errors:
         errors.extend(f"FLOOR: {e}" for e in floor_errors)
@@ -165,7 +262,12 @@ def validate_checkpoint_surface(
             if ticket["section"] == "## DOING" and tickets[need]["section"] != "## DONE":
                 errors.append(f"BOARD proposed {ticket['id']} needs {need} which is not DONE")
 
+    parked_error = block_parked_evidence_error(state, board, snap.history.events)
+    if parked_error is not None:
+        errors.append(f"STATE proposed {parked_error}")
+
     from .log import snapshot_contract_errors
+
     errors.extend(f"LOG: {e}" for e in snapshot_contract_errors(snap.history))
 
     tail = snap.history.tail
@@ -184,7 +286,6 @@ def validate_checkpoint_surface(
 
     _home = state.get("saipen_home")
     if _csv is not None and state.get("schema_version") == _csv and _home:
-        import pathlib
         if not is_absolute_home(str(_home)):
             errors.append(f"current-schema STATE requires absolute saipen_home, got {_home!r}")
 
@@ -234,7 +335,11 @@ def validate_checkpoint_surface(
 
 
 def validate_texts(
-    state_text: str, board_text: str, log_text: str, current_agent: str | None = None
+    state_text: str,
+    board_text: str,
+    log_text: str,
+    current_agent: str | None = None,
+    sealed_events=None,
 ) -> list[str]:
     """Validate the proposed STATE/BOARD/LOG texts. Returns every error.
 
@@ -246,7 +351,16 @@ def validate_texts(
     not the SELF-corruption the check exists to catch. When None (a caller
     that does not know its own identity), the historical value is used for
     backward compatibility; the CLI/adapters always supply the session
-    identity."""
+    identity.
+
+    CORE-005: `sealed_events` is the already-captured canonical sealed+active
+    HistorySnapshot (or its parsed event tuple). When supplied, the
+    block-park evidence check consumes the COMPLETE historical truth (sealed
+    segments + proposed active LOG) instead of redefining project history
+    from the proposed active LOG.md alone. This keeps the transactional
+    write-path validator consistent with the canonical read-path validator
+    once decisive evidence rotates into a sealed LOG segment.
+    """
     errors: list[str] = []
 
     from .floor import raw_floor
@@ -354,9 +468,35 @@ def validate_texts(
             if ticket["section"] == "## DOING" and tickets[need]["section"] != "## DONE":
                 errors.append(f"BOARD proposed {ticket['id']} needs {need} which is not DONE")
 
-    errors.extend(f"LOG: {e}" for e in _log_errors(log_text))
+    # PERF-007: ONE single-pass LOG analysis replaces three separate parsings
+    # (active-events comprehension + _log_errors + log_tail_event). The
+    # independent raw_floor/log_floor still runs as a separate implementation.
+    log_analysis = _analyze_log(log_text)
+    active_events = log_analysis.events
+    # CORE-005: the block-park evidence check must see the COMPLETE canonical
+    # history. When the caller supplies the frozen HistorySnapshot (sealed +
+    # active), prepend its sealed/prior events to the proposed active events so
+    # decisive evidence that rotated into a sealed segment is not lost. The
+    # history snapshot's OWN parsed events already include the current active
+    # LOG; we append the proposed active tail to keep the proposed mutation
+    # visible while the snapshot supplies the authoritative prior history.
+    if sealed_events is not None:
+        if hasattr(sealed_events, "events"):
+            prior = list(sealed_events.events)
+        else:
+            prior = list(sealed_events)
+        prior_ids = {ev.get("event") for ev in prior}
+        active_events = tuple(
+            prior
+            + [ev for ev in active_events if ev.get("event") not in prior_ids]
+        )
+    parked_error = block_parked_evidence_error(state, board, active_events)
+    if parked_error is not None:
+        errors.append(f"STATE proposed {parked_error}")
 
-    tail = log_tail_event(log_text)
+    errors.extend(f"LOG: {e}" for e in log_analysis.errors)
+
+    tail = log_analysis.tail
     last_event = state.get("last_event")
     # Current-schema states (schema_version == the installed schema's
     # x-current-schema-version) MUST carry a last_event that matches the LOG tail
@@ -377,7 +517,6 @@ def validate_texts(
 
     _home = state.get("saipen_home")
     if _csv is not None and state.get("schema_version") == _csv and _home:
-        import pathlib
         if not is_absolute_home(str(_home)):
             errors.append(f"current-schema STATE requires absolute saipen_home, got {_home!r}")
 
@@ -468,7 +607,18 @@ def validate_project(root, current_agent: str | None = None) -> list[str]:
     state = codec.read_doc(root / ".saipen" / "STATE.md")
     board = codec.read_doc(root / ".saipen" / "BOARD.md")
     log = codec.read_doc(root / ".saipen" / "LOG.md")
-    errors.extend(validate_texts(state, board, log, current_agent=current_agent))
+    # CORE-006: evaluate block-park semantics against the complete sealed+active
+    # history, not just the active LOG. Reuse the frozen HistorySnapshot that
+    # _read already captures; here we capture it fresh for post-write verification.
+    try:
+        from .log import read_history_snapshot
+
+        _history = read_history_snapshot(root)
+    except Exception:
+        _history = None
+    errors.extend(
+        validate_texts(state, board, log, current_agent=current_agent, sealed_events=_history)
+    )
     # The COMPLETE sealed+active ledger must be internally valid (legal syntax,
     # unique E-IDs, contiguous parent chain, parent existence, order) -- not
     # just the active segment (hostile-regression, P0#2). A void sealed log is

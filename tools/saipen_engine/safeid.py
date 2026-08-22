@@ -107,14 +107,23 @@ def validate_safe_id(value: str, *, kind: str = "id") -> str:
     return value
 
 
-def prove_inside(path: Path, owner_root: Path, *, kind: str = "path") -> Path:
+def prove_inside(
+    path: Path, owner_root: Path, *, kind: str = "path", owner_canonical: Path | None = None
+) -> Path:
     """Canonicalize `path` and prove it stays under `owner_root`.
 
     Uses os.path.realpath to collapse symlinks/junctions and case-normalizes
     on Windows so an alternate spelling cannot escape. Raises InvalidIdError on
     escape; returns the resolved path on success.
+
+    PERF-004: `owner_canonical` may carry an already-canonicalized owner root
+    so callers that resolve the same owner across many candidate paths (a
+    receipt decoder) do not re-run realpath on the identical owner every time.
+    The candidate path is ALWAYS live-canonicalized; only the owner half of
+    the comparison may be reused. Do not use this across commands or unrelated
+    roots.
     """
-    owner = _realpath(owner_root)
+    owner = _realpath(owner_root) if owner_canonical is None else owner_canonical
     resolved = _realpath(path)
     if resolved != owner and not resolved.is_relative_to(owner):
         raise InvalidIdError(f"{kind} {path} escapes the owner root {owner}")

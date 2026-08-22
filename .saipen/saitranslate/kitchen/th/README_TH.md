@@ -1,69 +1,77 @@
 <p align="center">
   <img src="assets/SAIPEN_TEXT1.png" alt="SAIPEN Logo"/>
-  <br>
-  <img src="assets/__SAIPEN_Alpha.png" alt="SAIPEN Sticker" width="200"/>
 </p>
+
+<div align="center">
+  <h3><a href="README.ee.md">🇪🇪 LOE SEDA EESTI KEELES / ESTONIAN 🇪🇪</a></h3>
+  <a href="README.md">🇬🇧 English</a> &nbsp;|&nbsp;
+  <a href="README.ded.md">👴 Дед-Версия (Russian)</a> &nbsp;|&nbsp;
+  <a href="README.ja.md">🇯🇵 日本語 (Japanese)</a>
+</div>
 
 # SAIPEN
 
-**โพรโทคอลความต่อเนื่องสำหรับ AI coding agent** หน่วยความจำโปรเจกต์ถาวรในรูปแบบมาร์กดาวน์ธรรมดา เพื่อให้ agent ตัวใหม่ที่ไม่มีประวัติการแชตสามารถรัน `/saipen continue` แล้วกลับมาทำงานต่อได้ภายในเวลาไม่ถึงหนึ่งนาที -- ไม่ต้องบรีฟงานใหม่ ใช้ได้กับทุกค่าย ทุกวัน
+**โปรโตคอลการดำเนินการต่อสำหรับตัวแทนเขียนโค้ด AI**ความจำของโครงการอยู่ในไฟล์ธรรมดา
+ไฟล์ Markdown ภายในโครงการ(`.saipen/`), ดังนั้นตัวแทนที่เย็นใด ๆ ที่เข้ากันได้ —
+ไม่มีประวัติการพูดคุย, ไม่มีความจำของเซสชัน — สามารถทำงานได้`/saipen continue`, อ่าน
+ที่ถูกเก็บไว้แล้ว`next_action`, และสามารถดำเนินการต่อโดยไม่ต้องให้ผู้ใช้อธิบายใหม่
+ทุกอย่าง สถานะเป็นของโครงการ ไม่ใช่ของความจำของผู้ให้บริการโมเดลใด ๆ
 
-**คำสั่งเดียว ศูนย์การสูญเสียความจำ**
+**คำสั่งเดียวเพื่อดำเนินการต่อ สถานะในไฟล์ธรรมดา สัญญาที่ตรวจสอบโดยเครื่อง**
+
+ที่เก็บข้อมูลตรวจสอบตนเองทุกครั้งที่มีการส่งข้อมูล; ติดตั้ง, สถานะ, การตรวจสอบ, และ
+การติดตั้งไม่ได้ใช้บริการคลาวด์ ไม่มี daemon ไม่มีฐานข้อมูล
+
+[![Validation](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
+[![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
+[![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
+
+**v7.226.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) |MIT
 
 **คีย์ลัด:** `cc` ให้ดำเนินการต่อบริบทของโปรเจกต์จนถึงจุดบรรจบ (ดำเนินเป้าหมายที่กำลังทำงานต่อไปหากมีการตั้งไว้), `sss` แสดงสถานะโดยไม่แตะโค้ด และ `ss` บันทึกจุดตรวจสอบแล้วหยุด [ดูแผนที่ปุ่มลัดทั้ง 15 รายการ](saipen/RFC.md#110-command-surface) ปุ่มอักษรซีริลลิกที่มีรูปเหมือนกันก็ใช้ได้: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`
 
-**ภาษาที่ตอบ** เอเจนต์ตอบเป็น**ภาษาเอสโตเนีย** โดยค่าเริ่มต้น — นี่คือการตั้งค่า ไม่ใช่ความแปลก และไม่มีสิ่งอื่นใดใน SAIPEN เป็นภาษาเอสโตเนีย เปลี่ยนได้ที่จุดเดียว: บรรทัด `reply_language:` ที่ด้านบนของ [`saipen/STYLE.md`](saipen/STYLE.md) `et` เอสโตเนีย `en` อังกฤษ `ru` รัสเซีย `auto` เลือกตามภาษาของข้อความที่คุณส่ง โปรโตคอล โค้ด คอมมิต และเอกสารทั้งหมดยังคงเป็นภาษาอังกฤษไม่ว่าค่าใด
-
-**v7.225.0** | [ข้อกำหนด](SPEC.md) | [คู่มือ](GUIDE.md) | [RFC](saipen/RFC.md) | [สไตล์](saipen/STYLE.md) | [UI](saipen/UI.md) | [การปฏิบัติตามมาตรฐาน](saipen/CONFORMANCE.md) | plain markdown | zero deps | MIT
-
 ```text
+Project
+  |
+  +-- .saipen/STATE.md ------ what is happening right now (phase, ticket, mode, next_action)
+  +-- .saipen/BOARD.md ------ what work exists (DOING / TODO / DONE / BLOCKED)
+  +-- .saipen/LOG.md -------- why the project reached this state (event history)
+  +-- .saipen/KNOWLEDGE/ ---- what durable facts must survive sessions
+          |
+          v
+   /saipen continue
+          |
+          v
+      cold agent
+          |
+          v
+     next_action -> work -> checkpoint -> next ticket
+```
 
-### สถานะโปรเจกต์ > หน่วยความจำของโมเดล
+## สิ่งที่ยังคงอยู่
 
-หน่วยความจำเก็บอยู่ในโปรเจกต์ ไม่ใช่ในหัวของโมเดล `Project -> Memory -> LLM` เปลี่ยนเป็น `Project -> SAIPEN State -> LLM`
+ความจำของโครงการที่กำลังดำเนินอยู่อยู่ใน`.saipen/`— ไฟล์ธรรมดาที่คุณสามารถอ่าน ดูความแตกต่าง และ
+ส่งการเปลี่ยนแปลงไปพร้อมกับโค้ด ตัวแทนเย็นตอบคำถาม 5 ข้อจากไฟล์
+เพียงลำพัง:
 
-
-## Commands
-
-The full surface is 16 commands; complete details in [RFC § 1.10](saipen/RFC.md#110-command-surface).
-
-| Command | What it does |
+|ไฟล์ / ฟิลด์|คำตอบ|
 |---|---|
-| `/saipen set` | Adopt a project |
-| `/saipen continue` | Resume exactly where you left off |
-| `/saipen plan` | Turn a request or raw queue into tickets |
-| `/saipen goal <text>` | Autonomous wave assault on a new objective |
-| `/saipen hunt` | Force an immediate defect/improvement scan |
-| `/saipen ship` | Version bump, changelog, tag, push |
-| `/saipen clean` | Repository cleanup |
-| `/saipen validate` | Conformance check |
-| `/saipen markhunt` | Dry uncapped audit, record only |
-| `/saipen translate` | Isolated translation factory |
-| `/saipen prepare` | Package work for handoff |
-| `/saipen collect` | Integrate a ready package |
-| `/saipen status` | Read-only report |
-| `/saipen stop` | Checkpoint and halt |
+| `STATE.md` |สิ่งที่กำลังเกิดขึ้นในตอนนี้?(ขั้นตอน, ตั๋วที่เปิดอยู่, โหมดการดำเนินงาน, ปัญหาที่ขัดขวาง) |
+| `BOARD.md` |งานใดที่มีอยู่ / งานใดที่กำลังดำเนินอยู่?(กราฟตั๋ว: กำลังดำเนินอยู่, ยังไม่ได้ทำ, ทำเสร็จแล้ว, ถูกขัดขวาง) |
+| `LOG.md` |ทำไมโครงการจึงมาถึงสถานะนี้?(กราฟเหตุการณ์แบบเพิ่มข้อมูลเท่านั้น) |
+| `KNOWLEDGE/` |ข้อเท็จจริงของโครงการใดที่ต้องคงอยู่แม้จะผ่านเซสชันต่าง ๆ?|
+| `next_action` (ใน`STATE.md`) |การกระทำที่แน่ชัดต่อไปที่ตัวแทนต่อไปควรดำเนินการคืออะไร?|
 
-<sub>`saipen init` and `saipen sub` complete the sixteen; both are called by the protocol, not typed daily.</sub>
+นี่คือสัญญาเช็กพอยต์ ไม่ใช่ข้อเสนอแนะในการออกแบบ:`saipen stop`และทุก
+การเปลี่ยนสถานะของตั๋วจะเขียนไฟล์ในลำดับที่กำหนดไว้ และผลลัพธ์จะถูกตรวจสอบโดย
+ผู้ตรวจสอบความถูกต้อง ไม่มีข้อมูลใดถูกเก็บไว้ในฐานข้อมูลที่โฮสต์ และไม่มีข้อมูลใดสูญหายเมื่อ
+เซสชันสิ้นสุด
 
-**Package keys.** `ee`/`qq` prepare a complete translation or wiki package without integrating; `eee`/`qqq` accept only a ready package, then integrate, verify, review, and push.
+## เริ่มต้นอย่างรวดเร็ว
 
-**Experimental: saicrew.** Optional bonus layer (`extensions/subs/`, zero Core changes) for running a multi-agent crew — one Core writer plus read-only `saihunt`/`saipython` workers reporting through their own `OUTBOX.md`. Under active live testing, not finalised — see `extensions/subs/crew.md`.
+**1. ติดตั้งครั้งเดียวต่อเครื่อง**— สอน Claude Code, Codex, Gemini, OpenCode,
+Aider, Antigravity, และอื่น ๆ ทั่วไป`~/.agents/skills`reader(FreeBuff, ฯลฯ):
 
-## Two layers
-
-| Layer | Required | Purpose |
-|---|---|---|
-| **Core** | ✅ | Resume work safely |
-| **Maintenance** | On top of Core | Evolve software without task direction |
-
-**Automated evolution.** No open tasks remain, type `/saipen`: `HUNT` audits for bugs, dead code, and failing tests. Clean? `ADD` builds the next obvious missing capability, verifies it, and hunts again. Product mature -> stops gracefully.
-
-**GOAL Mode.** `/saipen goal <what you want>` pivots the board (deprioritises old tickets, never deletes them) and drives the new objective forward — no "should I continue?" between tickets, VERIFY/REVIEW never skipped. SHIP auto-pushes to the existing remote; a brand-new repository still asks once. Shipping a goal is not the end point either — it transitions straight into autonomous HUNT/ADD maintenance until the product is mature, blocked, or the run hits its cap (3 waves / 20 tickets, then checkpoints and reports).
-
-## Quick Start
-
-**1. Install once per machine** — teaches Claude Code, Codex, Gemini, OpenCode, Aider, Antigravity and any generic `~/.agents/skills` reader (FreeBuff, etc.):
 ```bash
 git clone https://github.com/vacterro/saipen
 cd saipen
@@ -71,62 +79,230 @@ powershell -ExecutionPolicy Bypass -File .\bootstrap\inject.ps1     # Windows
 bash bootstrap/inject.sh                                            # macOS / Linux
 ```
 
-<sub>What this touches, so there are no surprises: the script adds a tagged block `<!-- SAIPEN:BEGIN -->...<!-- SAIPEN:END -->` to your agent instruction files (`~/.claude/CLAUDE.md`, `~/.config/opencode/AGENTS.md`, `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`) — backing up first as `.bak` — and copies the protocol into the relevant skill folders. Nothing outside those paths, no daemon, no network calls.</sub>
+<sub>What that touches, so nothing is a surprise: it appends a marked
+`<!-- SAIPEN:BEGIN -->...<!-- SAIPEN:END -->`บล็อกไปยังคำสั่งของตัวแทน
+ไฟล์ที่คุณมีอยู่แล้ว(`~/.claude/CLAUDE.md`, `~/.config/opencode/AGENTS.md`,
+`~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`)— สำรองข้อมูลแต่ละไฟล์ไปยัง`.bak`ก่อนอื่น —
+และคัดลอกโปรโตคอลเข้าไปในโฟลเดอร์ทักษะที่ตรงกัน ไม่มีสิ่งใดอยู่นอกเหนือจากนั้น
+เส้นทาง ไม่มี daemon ไม่มีการเรียกใช้งานเครือข่าย</sub>
 
-**Regret it?** One command takes it back:
+**2. เริ่มโครงการ**— เปิดตัวแทนในโฟลเดอร์ของคุณ ใส่:
+
+> `saipen set`
+
+**ไม่ต้องติดตั้ง?**วางบรรทัดเดียวในตัวแทนใด ๆ:
+
+> อ่าน&lt;clone&gt;/saipen/BOOT.md ก่อน(kernel แบบ cold-start)จากนั้น&lt;clone&gt;/saipen/INDEX.md +&lt;คัดลอก&gt;/saipen/STYLE.md และปฏิบัติตามข้อกำหนดเหล่านั้น
+
+**เปลี่ยนใจแล้วหรือยัง?**คำสั่งเดียวสามารถคืนมันกลับมาได้:
+
 ```bash
 powershell -ExecutionPolicy Bypass -File .\bootstrap\uninstall.ps1  # Windows
 bash bootstrap/uninstall.sh                                         # macOS / Linux
 ```
-This removes exactly the tagged block (leaving the rest of the file untouched), saves a pre-removal `.uninstalled.bak` copy, and removes the skill folders.
 
-**2. Start a project** — open an agent in your folder and type:
-> `saipen set`
+มันจะลบเฉพาะบล็อกที่ถูกทำเครื่องหมายไว้(ทิ้งส่วนอื่นของไฟล์ไว้ตามเดิม), บันทึก
+a `.uninstalled.bak`สร้างสำเนาไว้ก่อน แล้วลบโฟลเดอร์ทักษะ
 
-Not installed? Paste one line into any agent:
-> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md and follow them.
+## ทำไมไม่ใช่แค่ประวัติการพูดคุย?
 
-Platform not in the list above (DeepSeek, Qwen, standalone OpenAI, etc.)?
-Platform-specific notes live in `extensions/adapters/`.
+SAIPEN มีเป้าหมายที่เฉพาะเจาะจง: ตัวแทนเขียนโปรแกรม AI ที่ไม่จำอะไรเลย
+เมื่อเซสชันสิ้นสุดลง วิธีการอื่น ๆ และนิสัยการใช้งานช่วยแก้ปัญหานี้บางส่วน:
 
-## Documentation
+|วิธีการ|สิ่งที่มันดีสำหรับ|สิ่งที่มันไม่สามารถถือไว้ได้|
+|---|---|---|
+|ประวัติการพูดคุย / ความทรงจำของโมเดล|สะดวก ไม่ต้องตั้งค่า|ขึ้นอยู่กับเซสชันและผู้ให้บริการ; ไม่ถูกเก็บรักษาพร้อมกับโครงการ ดังนั้นตัวแทนที่ไม่เคยเห็นมันจะไม่เห็นมัน|
+|คงที่`AGENTS.md`ไฟล์คำสั่ง / instruction file|กฎและข้อตกลงที่ยั่งยืน|ไม่แสดงถึงสถานะงานจริงโดยตัวมันเอง`next_action`, หรือประวัติการฟื้นฟู|
+|ตัวติดตามปัญหา / TODO|การจัดการงานและงานค้าง|ไม่ได้กำหนดความหมายของการดำเนินต่อไปของตัวแทนโดยลำพัง — สิ่งที่ตัวแทนที่เย็นต้องอ่านและดำเนินการเมื่อเริ่มต้นใหม่|
+| **SAIPEN** |สถานะการดำเนินการแบบสด, คิวงาน, ประวัติเหตุการณ์, ความรู้ที่ทนทาน, และกฎการดำเนินต่อไปที่ถูกตรวจสอบโดยเครื่อง — อยู่ในไฟล์ธรรมดาที่อยู่เคียงข้างโค้ด|ไม่มีอะไรเลย; ความรวมตัวนั้นคือสัญญา|
 
-| Document | What it is |
+ความแตกต่างไม่ได้อยู่ที่ไฟล์ใดไฟล์หนึ่ง แต่คือ SAIPEN ที่ทำขั้นตอนการเริ่มต้นใหม่
+สามารถตรวจสอบได้โดยเครื่อง: การกระทำแรกของตัวแทนที่เย็นหลังจาก`/saipen continue`คือ
+ถูกกำหนดโดยข้อมูลที่ถูกบันทึกไว้`next_action`และได้รับการตรวจสอบโดยผู้ตรวจสอบ ไม่ใช่
+ถูกสร้างขึ้นจากความทรงจำ
+
+## หลักฐานด้านวิศวกรรม
+
+SAIPEN คู่กับโปรโตคอลธรรมดาในไฟล์ธรรมดา พร้อมกับการดำเนินการที่มีความผิดพลาด
+การตรวจสอบ ที่เก็บข้อมูลแสดงให้เห็นถึงการออกแบบโปรโตคอล/เครื่องจักรสถานะ, Python
+เครื่องมือ, สถานะที่ขับเคลื่อนด้วยสกีมา, การคิดวิเคราะห์การฟื้นตัว, การทดสอบความถดถอย,
+ขอบเขตการทำงานแบบหลายเอเจนต์, และวินัยในการกำหนดคุณสมบัติ
+
+- **สัญญาที่ออกแบบไว้** [SPEC.md](SPEC.md)กำหนดให้เป็นโมเดลการดำเนินต่อไปที่รองรับไฟล์
+โมเดลการดำเนินต่อไปที่มั่นคงบนดิสก์และสัญญาที่เสถียร;[CORE.md](saipen/CORE.md)
+และ[MAINTENANCE.md](saipen/MAINTENANCE.md)กำหนดพฤติกรรมที่เป็นมาตรฐานในปัจจุบัน
+- **สถานะที่ตรวจสอบโดยเครื่องจักร**ตัวตรวจสอบมาตรฐานที่ใช้เฉพาะไลบรารี stdlib
+  [ตัวตรวจสอบ](tools/validate.py)อ่านรูปแบบสถานะที่กำลังดำเนินอยู่
+  [รูปแบบสถานะ](extensions/schemas/state.schema.json)และตรวจสอบการเปลี่ยนสถานะ
+การเปลี่ยนผ่านของเฟส, ความพึ่งพาของตั๋ว, การเชื่อมโยงกราฟเหตุการณ์, คุณสมบัติข้ามเอกสาร
+การรักษาความสมบูรณ์, ความสามารถ, และสถานะการฟื้นตัว
+- **การครอบคลุมความล้มเหลว** [CONFORMANCE.md](saipen/CONFORMANCE.md)แสดง
+ข้อกำหนดให้[สถานการณ์ตัวอย่าง](tests/scenarios/); ถึง
+  [เครื่องมือรันสถานการณ์](tools/run_scenarios.py)ดำเนินการทดสอบกรณีผ่าน/ไม่ผ่านในระดับโครงสร้าง
+รวมถึงสถานะการฟื้นฟูที่เสียหาย, การเปลี่ยนสถานะที่ไม่ถูกต้อง, วงจรการพึ่งพาซึ่งกันและกัน, และ
+ข้อจำกัดในการอ่านเพียงอย่างเดียว
+- **การควบคุมการถอย** [audit_checks.py](tools/audit_checks.py)ทำให้เกิดการเปลี่ยนแปลง
+สำเนาที่รู้จักว่าดีและแสดงให้เห็นว่าการตรวจสอบของ Validator ยังสามารถล้มเหลวได้ แทนที่จะ
+ถือว่าการตรวจสอบที่มีสีเขียวตลอดเวลาเป็นหลักฐาน
+- **ชั้นที่สามารถดำเนินการได้** [saipen.py](tools/saipen.py)ให้สถานะที่บันทึกไว้
+การดำเนินการ;[bootstrap/](bootstrap/)จัดเก็บการติดตั้ง การถอนการติดตั้ง และการส่งออก
+ช่วยเหลือ พร้อมทั้งตัวเลือก[ติดตั้ง hook ก่อนการส่งการเปลี่ยนแปลง](tools/install_hook.py).
+- **การตัดสินใจที่ชัดเจน.**สถานะของโปรโตคอลหลักเป็นไฟล์ธรรมดาโดยไม่มีการพึ่งพาการดำเนินการ
+ที่กำลังทำงาน ความถูกต้องตามมาตรฐานและเครื่องมือ CLI ต้องการ Python แต่ใช้เพียง
+ไลบรารีมาตรฐานของมันและไม่จำเป็นต้อง`pip`ติดตั้ง.
+
+## สถาปัตยกรรม
+
+สามชั้น ขึ้นอยู่กันแบบเดียวทางอย่างเคร่งครัด:
+
+```text
+CORE            continuation / state / checkpoint / validation       required
+  └─ MAINTENANCE   autonomous HUNT / ADD / CLEAN evolution           optional, on top of Core
+       └─ GOAL MODE / SUBAGENTS   opt-in throughput/execution        optional
+```
+
+แกนหลักไม่ขึ้นอยู่กับการบำรุงรักษา: ด้วยการวิวัฒนาการอัตโนมัติถูกปิดใช้งาน SAIPEN
+ยังคงเป็นโปรโตคอลการดำเนินต่อเนื่องที่สมบูรณ์ — ตัวแทนเย็นยังสามารถดำเนินต่อได้
+
+- **สถานะเครื่องจักรแกนหลัก** — `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`.
+- **การบำรุงรักษาอัตโนมัติ**— บอร์ดหยุดทำงาน(ไม่มีสิ่งใดที่ใช้งานได้ใน`## TODO`,
+ไม่มีอะไรใน`## DOING`)และไม่`BLOCKED`? การเปลี่ยนสถานะอัตโนมัติ`HUNT` (สแกนข้อผิดพลาด)
+  → `ADD` (พัฒนารูปแบบคุณสมบัติ) → `HUNT`, ไม่มีคำถามใดถูกถาม ช่วงเวลาหนึ่งที่นั่งอยู่
+  `BLOCKED`ไม่สามารถล่าอัตโนมัติได้
+  ([การบำรุงรักษา § 2.1](saipen/MAINTENANCE.md#21-autonomous-transitions)).
+- **โหมดเป้าหมาย** — `/saipen goal <objective>`หมุนกระดานและดำเนินการ
+วัตถุประสงค์ไปข้างหน้าผ่าน VERIFY/REVIEW และเข้าสู่การบำรุงรักษาอัตโนมัติ
+จนกว่ากฎการสิ้นสุดจะถูกกระตุ้นหรือการดำเนินการจะถึงขีดจำกัด(3 คลื่น / 20 ตั๋ว,
+แล้วจุดตรวจสอบและรายงาน) ([การบำรุงรักษา § 2.4](saipen/MAINTENANCE.md#24-goal-mode-autonomous-execution)).
+- **การเสริมความแข็งแกร่ง**— ข้อมูลรูปแบบแบตช์จะถูกวิเคราะห์และแปลงเป็นตั๋วทีละใบอย่างแม่นยำ
+  (CORE § 1.8); การดำเนินการต่อเนื่องของต้นไม้ที่สกปรกจะรักษาการทำงานที่ยังไม่ได้ยืนยันไว้(CORE § 1.5);
+ค่าที่คล้ายกับลับจะถูกตัดออกจากรายงาน(`sk-***`) (CORE § 1.2).
+
+## คำสั่งที่ใช้บ่อย
+
+จุดเริ่มต้นทั่วไป; ผิวหน้าทั้งหมดในปัจจุบันอยู่ใน
+[Core § 1.10](saipen/CORE.md#110-command-surface).
+
+|คำสั่ง|ทำ|
 |---|---|
-| [SPEC.md](SPEC.md) | Formal architecture, design goals, litmus test |
-| [RFC.md](saipen/RFC.md) | Normative specification agents execute |
-| [GUIDE.md](GUIDE.md) | Human tutor and ELI5 guides |
-| [STYLE.md](saipen/STYLE.md) | Agent communication style and voice definition |
-| [UI.md](saipen/UI.md) | Vintage Golden UI design guidelines |
-| [CONFORMANCE.md](saipen/CONFORMANCE.md) | Behavioural test scenarios and validator rules |
+| `/saipen set` |รับโครงการ: สร้าง`.saipen/`สถานะ|
+| `/saipen continue` |ฟื้นตัวจากสถานะโครงการที่ถูกบันทึกไว้ — ไม่มีการแจ้งเตือนใหม่|
+| `/saipen plan` |แปลงคำขอหรือรายการงานที่ยังไม่ได้จัดการเป็นตั๋วงาน|
+| `/saipen goal <text>` |การดำเนินการคลื่นอัตโนมัติเพื่อเป้าหมายใหม่|
+| `/saipen validate` |ดำเนินการตรวจสอบความสอดคล้อง|
+| `/saipen status` |รายงานแบบอ่านได้แต่ไม่สามารถแก้ไขได้: ขั้นตอน, ตั๋วงาน, ปัญหา, ความล้าสมัย|
+| `/saipen stop` |จุดตรวจสอบและหยุดการดำเนินการ|
+
+<details>
+<summary><b>More commands</b></summary>
+
+|คำสั่ง|ทำได้|
+|---|---|
+| `/saipen hunt` |บังคับให้ดำเนินการตรวจสอบข้อบกพร่อง/การปรับปรุงทันที|
+| `/saipen markhunt` |การตรวจสอบแบบแห้งและไม่มีข้อจำกัด — บันทึกผลการตรวจสอบ แต่ไม่แก้ไขอะไรเลย|
+| `/saipen ship` |ช่องทางการปล่อย; ยืนยัน, ติดป้าย, และส่งขึ้นเมื่อได้รับอนุญาต|
+| `/saipen clean` |การทำความสะอาดกระดานและสถานะ|
+| `/saipen translate` |โรงงานแปลภาษาแบบแยกส่วน|
+| `/saipen prepare` / `/saipen collect` |ทำงานแพ็กเกจเพื่อส่งต่อ/รวมแพ็กเกจที่พร้อมใช้งาน|
+| `/saipen test` |รันชุดทดสอบที่ระบุไว้ รายงานเพียงอย่างเดียว|
+| `/saipen crew` |วงจรลูกเรือที่มีลำดับการจัดเรียงตายตัว(ล่า → ทำซ้ำ → รับข้อมูล → สร้าง → แปล → เอกสาร → ส่งมอบ) |
+| `/saipen improve` |การตรวจสอบการปรับปรุงโปรโตคอลโดยผู้ควบคุมระดับสูง|
+| `/saipen sub ...` |สร้าง/รับตัวแทนย่อยที่อ่านได้แต่ไม่สามารถแก้ไขได้|
+
+**แพ็กเกจคีย์** `ee`/`qq`เตรียมแพ็กเกจการแปล/วิกิที่สมบูรณ์โดยไม่
+รวม;`eee`/`qqq`ยอมรับเฉพาะแพ็กเกจที่พร้อมใช้งานเท่านั้น จากนั้นรวม ตรวจสอบ
+ตรวจสอบ และส่งขึ้น
+
+**saicrew.** `sc` / `saipen crew` (`extensions/subs/crew.md`)เดินทางทั่วทั้ง
+ทีมงานที่ติดตั้งไว้ในลำดับที่กำหนดตายตัว — ตัวตรวจจับ(saihunt, saitest, saipython, saiui),
+ผู้ผลิต(saitranslate, saiwiki)และ Core เป็นผู้เขียนต้นไม้หลักเพียงผู้เดียว —
+จนกว่าจะมีการผ่านอีกครั้งที่ไม่มีสิ่งใดที่แท้จริงเหลืออยู่ที่จะเปลี่ยนแปลง นี่เพิ่มเพียงหนึ่งเดียว
+กลไกของตัวเอง: จุดหมายการจัดการที่ทนทาน(`execution_intent:
+รวมตัว` with `converge_target: crew`)ที่ทำให้วงจรสามารถเริ่มต้นใหม่ได้และ
+สามารถดึงข้อมูลจากการพิสูจน์ได้แม้เกิดข้อผิดพลาด`saipen crew --dry-run --json`สามารถดึงข้อมูลได้จาก
+วงจรที่อ่านได้แต่ไม่สามารถเขียนทับได้;`bootstrap/saipen_crew.*`เป็นตัวช่วยแบบมือถือที่เป็นตัวเลือก (OPTIONAL) ไม่ใช่สิ่งที่
+หมายถึง ดูที่`saipen crew`extensions/subs/crew.md
+[สิ่งที่ SAIPEN ไม่ใช่](extensions/subs/crew.md).
+</details>
+
+## โมเดล LLM หรือโมเดล
+
+- **— มันคือโปรโตคอลที่ตัวแทนต้องปฏิบัติตาม ไม่ใช่ความฉลาด**IDE หรือฐานข้อมูลความจำที่โฮสต์ไว้ในเครื่องอื่นๆ
+- ****— สถานะคือไฟล์ธรรมดาในโครงการของคุณ;
+ไม่มีสิ่งใดถูกโฮสต์
+- **ตัวแทนของ Git**— Git ยังคงเป็นเจ้าของประวัติเวอร์ชัน; ให้คุณส่งการเปลี่ยนแปลง
+  `.saipen/`เช่นเดียวกับโค้ดอื่น ๆ
+- **ความเห็นพ้องกันแบบกระจาย**— ดูขอบเขตการดำเนินการพร้อมกันด้านล่าง
+- **การรับประกันว่า LLM จะตัดสินใจทางวิศวกรรมได้อย่างถูกต้อง**— มัน
+ลดการสูญเสียบริบทและการเบี่ยงเบนพฤติกรรม; มันไม่ทำให้ตัวแทนสุ่มเป็นผู้ไม่มีข้อผิดพลาด
+หน้าที่ของ SAIPEN คือการดำเนินการต่อ/สัญญาสถานะ รวมถึงการตรวจสอบและเครื่องมือ —
+
+
+การให้ตัวแทนถัดไปมีจุดเริ่มต้นที่ถูกตรวจสอบโดยเครื่องจักร ไม่ใช่ความมหัศจรรย์
+
+**ขอบเขตการดำเนินการพร้อมกัน**การเปลี่ยนแปลงสถานะที่บันทึกไว้(SAIOPS)ใช้
+ล็อกระบบปฏิบัติการที่จำกัดขอบเขตโครงการและบันทึกกู้คืน([OPS § 5](saipen/OPS.md#5-locks)).
+การแก้ไขโครงการทั่วไปและผู้เขียนที่ไม่เชื่อมต่ออยู่นอกเหนือล็อกนั้น SAIPEN
+ไม่ใช่การสรุปความเห็นพ้องแบบกระจายศูนย์ ดังนั้นผู้เขียนที่ไม่เชื่อมต่อจึงต้องการการประสานงานภายนอก
+การประสานงาน([SPEC](SPEC.md#concurrency--distribution-boundaries)).
+
+## ระบบนิเวศ
+
+|โครงการ|ความสัมพันธ์กับ SAIPEN|
+|---|---|
+| [SAIPENVIEW](https://github.com/vacterro/saipenview) |ศูนย์ควบคุม Windows ท้องถิ่นสำหรับโครงการ SAIPEN — ค้นพบอัตโนมัติ`.saipen/`ช่องทำงาน แสดงสถานะแบบเรียลไทม์และผลการตรวจสอบความสอดคล้อง จัดการตั๋ว และเปิดใช้งาน AI CLIs คู่ค้า ไม่ใช่ผู้มีอำนาจ|
+| [SAIWORK](https://github.com/vacterro/saiwork) |สาขา CodeNomad ที่อยู่ด้านล่างที่รวม SAIPEN: แทรก`BOOT.md`/`STYLE.md`ลงใน OpenCode launches แสดง快捷键ของ SAIPEN และมุมมองสถานะโครงการ และเพิ่มคิวคำขอที่ยังคงอยู่|
+| [FastPrompter](https://github.com/vacterro/fastprompter) |บันทึกและจัดการส่วนตัด Windows ที่พกพาได้ที่ตรวจจับอัตโนมัติ`.saipen/`โฟลเดอร์และเพิ่มผู้ชม STATE/BOARD/LOG แบบอ่านอย่างเดียว|
+
+## เอกสาร
+
+|เอกสาร|คืออะไร|
+|---|---|
+| [SPEC.md](SPEC.md) |สถาปัตยกรรมทางการ, วัตถุประสงค์การออกแบบ, ข้อทดสอบ|
+| [CORE.md](saipen/CORE.md) |การดำเนินต่อไปตามหลักเกณฑ์, สถานะเครื่องจักร, และสัญญาคำสั่ง|
+| [MAINTENANCE.md](saipen/MAINTENANCE.md) |การบำรุงรักษาอัตโนมัติและโหมดเป้าหมาย|
+| [CONFORMANCE.md](saipen/CONFORMANCE.md) |ข้อกำหนดที่สามารถดำเนินการได้/พฤติกรรม และกฎของเครื่องตรวจสอบความถูกต้อง|
+| [GUIDE.md](GUIDE.md) |คู่มือสำหรับมนุษย์|
+| [RFC.md](saipen/RFC.md) |เปลี่ยนเส้นทางความเข้ากันได้ไปยังเอกสารที่กำหนดมาตรฐานแยกกัน|
+| [STYLE.md](saipen/STYLE.md) |สไตล์และเสียงของการสื่อสารของตัวแทน|
+| [UI.md](saipen/UI.md) |แนวทางการออกแบบ UI แบบวินเทจโกลเดน|
+|Brochure|โบรชัวร์นำเสนอ —[EN](BROCHURE_EN.md) / [RU](BROCHURE_RU.md) / [ET](BROCHURE_ET.md) / [DED](BROCHURE_DED.md) / [JA](BROCHURE_JA.md) |
 
 <details>
 <summary><b>All 33 translated guides</b></summary>
 
-🇷🇺 [Русский](guides/GUIDE_RU.md) · 🇺🇸 [English](guides/GUIDE_EN.md) · 🇪🇪 [Eesti](guides/GUIDE_EE.md) · 🇯🇵 [日本語](guides/GUIDE_JA.md) · 👴 [Версия Деда](guides/GUIDE_DED.md)
+🇷🇺 [Русский](guides/GUIDE_RU.md) · 🇺🇸 [ภาษาอังกฤษ](guides/GUIDE_EN.md) · 🇪🇪 [ภาษาเอสโตเนีย](guides/GUIDE_EE.md) · 🇯🇵 [日本語](guides/GUIDE_JA.md) · 👴 [Версия Деда](guides/GUIDE_DED.md)
 
-🇺🇦 [Українська](guides/GUIDE_UK.md) · 🇩🇪 [Deutsch](guides/GUIDE_DE.md) · 🇫🇷 [Français](guides/GUIDE_FR.md) · 🇪🇸 [Español](guides/GUIDE_ES.md) · 🇮🇹 [Italiano](guides/GUIDE_IT.md)
+🇺🇦 [Українська](guides/GUIDE_UK.md) · 🇩🇪 [ภาษาเยอรมัน](guides/GUIDE_DE.md) · 🇫🇷 [ภาษาฝรั่งเศส](guides/GUIDE_FR.md) · 🇪🇸 [ภาษาสเปน](guides/GUIDE_ES.md) · 🇮🇹 [ภาษาอิตาลี](guides/GUIDE_IT.md)
 
-🇵🇹 [Português](guides/GUIDE_PT.md) · 🇳🇱 [Nederlands](guides/GUIDE_NL.md) · 🇵🇱 [Polski](guides/GUIDE_PL.md) · 🇸🇪 [Svenska](guides/GUIDE_SV.md) · 🇩🇰 [Dansk](guides/GUIDE_DA.md)
+🇵🇹 [ภาษาโปรตุเกส](guides/GUIDE_PT.md) · 🇳🇱 [ภาษาดัตช์](guides/GUIDE_NL.md) · 🇵🇱 [ภาษาโปแลนด์](guides/GUIDE_PL.md) · 🇸🇪 [ภาษาสวีเดน](guides/GUIDE_SV.md) · 🇩🇰 [ภาษาเดนมาร์ก](guides/GUIDE_DA.md)
 
-🇫🇮 [Suomi](guides/GUIDE_FI.md) · 🇳🇴 [Norsk](guides/GUIDE_NO.md) · 🇨🇳 [中文](guides/GUIDE_ZH.md) · 🇰🇷 [한국어](guides/GUIDE_KO.md) · 🇹🇭 [ไทย](guides/GUIDE_TH.md)
+🇫🇮 [ภาษาฟินนิช](guides/GUIDE_FI.md) · 🇳🇴 [ภาษานอร์เวจิอัน](guides/GUIDE_NO.md) · 🇨🇳 [中文](guides/GUIDE_ZH.md) · 🇰🇷 [한국어](guides/GUIDE_KO.md) · 🇹🇭 [ไทย](guides/GUIDE_TH.md)
 
-🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) · 🇸🇦 [العربية](guides/GUIDE_AR.md) · 🇮🇱 [עברית](guides/GUIDE_HE.md) · 🇹🇷 [Türkçe](guides/GUIDE_TR.md) · 🇮🇳 [हिन्दी](guides/GUIDE_HI.md)
+🇻🇳 [ภาษาเวียดนาม](guides/GUIDE_VI.md) · 🇸🇦 [العربية](guides/GUIDE_AR.md) · 🇮🇱 [עברית](guides/GUIDE_HE.md) · 🇹🇷 [ภาษาตุรกี](guides/GUIDE_TR.md) · 🇮🇳 [हिन्दी](guides/GUIDE_HI.md)
 
-🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) · 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) · 🇨🇿 [Čeština](guides/GUIDE_CS.md) · 🇷🇴 [Română](guides/GUIDE_RO.md) · 🇭🇺 [Magyar](guides/GUIDE_HU.md)
+🇮🇩 [ภาษาอินโดนีเซีย](guides/GUIDE_ID.md) · 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) · 🇨🇿 [ภาษาเช็ก](guides/GUIDE_CS.md) · 🇷🇴 [ภาษาโรมาเนีย](guides/GUIDE_RO.md) · 🇭🇺 [ภาษาฮังการี](guides/GUIDE_HU.md)
 
-🇧🇬 [Български](guides/GUIDE_BG.md) · 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) · 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
+🇧🇬 [Български](guides/GUIDE_BG.md) · 🇸🇰 [ภาษาสโลวัก](guides/GUIDE_SK.md) · 🇭🇷 [ภาษาโครเอเชีย](guides/GUIDE_HR.md)
 
 </details>
 
-## Built with SAIPEN
+## หมายเหตุการตั้งค่า
 
-- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — High-performance prompt management tool built natively around the SAIPEN memory protocol.
+**ภาษาตอบกลับ.**ตัวแทนตอบกลับใน**ภาษาเอสโตเนีย**ตามค่าเริ่มต้น — นั่นคือ
+การตั้งค่า ไม่ใช่ข้อกำหนดของโปรโตคอล และสิ่งอื่น ๆ เกี่ยวกับ SAIPEN ไม่ใช่ภาษาเอสโตเนีย
+โปรโตคอล โค้ด การส่งข้อความ และเอกสารทุกฉบับจะอยู่ในภาษาอังกฤษทุก
+ค่า คุณสามารถเปลี่ยนได้ในที่เดียว: บรรทัด`reply_language:`ที่อยู่ด้านบนของ
+[`saipen/STYLE.md`](saipen/STYLE.md). `et`ภาษาเอสโตเนีย,`en`ภาษาอังกฤษ,`ru`ภาษารัสเซีย,
+`auto`จะเลือกจากข้อความที่คุณส่ง
 
-## Screenshots
+**ตัวปรับตัว**แพลตฟอร์มที่ไม่ได้รับการสนับสนุนจากอินเจกเตอร์(DeepSeek, Qwen, standalone
+OpenAI, ฯลฯ)? หมายเหตุเฉพาะแพลตฟอร์มอยู่ใน`extensions/adapters/`.
+
+## หน้าจอ
 
 <details>
-<summary>Click to expand</summary>
+<summary><b>Click to expand</b></summary>
 
 <img src="assets/screenshot-freebuff.png" alt="FreeBuff agent instructions" width="600"/>
 
@@ -140,6 +316,5 @@ Platform-specific notes live in `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-<!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
-
-
+<!-- translation-model: qwen3:14b contract:structured-markdown-v2 -->
+<!-- source-digest: README.md sha256:2a33e364c3c12e8b1b9b2caf41b05db3ee27f17161336579ae85ee59da34fe56 -->

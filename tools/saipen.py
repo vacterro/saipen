@@ -114,6 +114,16 @@ _MUTATING_TOPLEVEL = frozenset(
         "fpc",
         "ship",
         "push",
+        # AUTO-003: CORE section 1.10 phase-trigger verbs mutate STATE (phase
+        # transition). They are recognized canonical commands -- never rejected
+        # as unknown, which previously tempted a weak model to improvise a
+        # destructive substitute (`saipen clean` -> `sub clean saihunt`).
+        "clean",
+        "hunt",
+        "markhunt",
+        "translate",
+        "validate",
+        "plan",
     }
 )
 _MUTATING_USERPERSON = frozenset({"add", "remove", "reset"})
@@ -2636,6 +2646,50 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if result.get("ok") else 1
     # ── Autonomous command closure (SAIPEN intent handlers) ────────
     # qq/ee/qqq/eee are protocol semantic operations, not CLI aliases.
+
+    # AUTO-003: CORE section 1.10 phase-trigger verbs. These MUST be
+    # recognized as canonical commands, never rejected as "unknown command"
+    # which would cause a weak model to improvise a destructive substitute
+    # (e.g. `saipen clean` -> `sub clean saihunt`). Each verb routes to the
+    # canonical phase trigger (transition_phase / dedicated semantic).
+    _PHASE_VERBS = frozenset({"clean", "hunt", "markhunt", "translate", "validate"})
+    if command in _PHASE_VERBS:
+        phase = command.upper()
+        surplus = args[1:]
+        if surplus:
+            _emit(
+                {"ok": False, "code": "VALIDATION_FAILED",
+                 "detail": f"{command} accepts no arguments; surplus: {' '.join(surplus)}"},
+                as_json,
+            )
+            return 2
+        if not dry_run and _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        _ho = _ensure_handover(project_root, as_json, dry_run)
+        if _ho is not None:
+            return _ho
+        result = transition_phase(
+            project_root, phase, _agent_for(project_root),
+            ticket_id=None, event_text="", dry_run=dry_run,
+        )
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
+
+    if command == "plan":
+        # CORE section 1.10: explicit PLAN trigger; accepts optional free text.
+        if not dry_run and _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        _ho = _ensure_handover(project_root, as_json, dry_run)
+        if _ho is not None:
+            return _ho
+        text = " ".join(args[1:]) if len(args) > 1 else ""
+        result = transition_phase(
+            project_root, "PLAN", _agent_for(project_root),
+            ticket_id=None, event_text=text, dry_run=dry_run,
+        )
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
+
     if command == "qq":
         refused = _exact_no_args(command, args[1:], as_json)
         if refused is not None:
@@ -2647,6 +2701,7 @@ def main(argv: list[str] | None = None) -> int:
             "saiwiki",
             dry_run=dry_run,
             current_capability=_negotiate_capability(project_root),
+            current_agent=_agent_for(project_root),
         )
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
@@ -2673,6 +2728,7 @@ def main(argv: list[str] | None = None) -> int:
             args[1] if len(args) == 2 else "saiwiki",
             dry_run=dry_run,
             current_capability=_negotiate_capability(project_root),
+            current_agent=_agent_for(project_root),
         )
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
@@ -2687,6 +2743,7 @@ def main(argv: list[str] | None = None) -> int:
             "saitranslate",
             dry_run=dry_run,
             current_capability=_negotiate_capability(project_root),
+            current_agent=_agent_for(project_root),
         )
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
@@ -2701,6 +2758,7 @@ def main(argv: list[str] | None = None) -> int:
             "saiwiki",
             dry_run=dry_run,
             current_capability=_negotiate_capability(project_root),
+            current_agent=_agent_for(project_root),
         )
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
@@ -2715,6 +2773,7 @@ def main(argv: list[str] | None = None) -> int:
             "saitranslate",
             dry_run=dry_run,
             current_capability=_negotiate_capability(project_root),
+            current_agent=_agent_for(project_root),
         )
         _emit(result, as_json)
         return 0 if result.get("ok") else 1

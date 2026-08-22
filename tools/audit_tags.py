@@ -61,6 +61,12 @@ KNOWN_MISMATCHES = {
     "(VERSION 7.200.0) is not on origin/main; the tag names "
     "594a1da (VERSION 7.201.0). Re-pointing would push the "
     "orphaned commit and re-run the v7.200.0 release",
+    "v7.223.15": "the release executor's untracked-only scope bug created "
+    "closure commit 88ddbbaa without a v7.223.15 metadata/content commit, "
+    "so it retained VERSION 7.223.14. v7.223.16 explicitly shipped the "
+    "omitted T-996 content and the executor fix; no truthful v7.223.15 "
+    "commit exists to re-point to, and moving the published tag would "
+    "re-run the defective historical release workflow",
 }
 
 GIT_SHIM_ENV = "SAIPEN_AUDIT_TAGS_GIT_SHIM"

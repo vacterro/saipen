@@ -1,70 +1,77 @@
 <p align="center">
-  <img src="assets/SAIPEN_TEXT1.png" alt="לוגו SAIPEN"/>
-  <br>
-  <img src="assets/__SAIPEN_Alpha.png" alt="סטיקר SAIPEN" width="200"/>
+  <img src="assets/SAIPEN_TEXT1.png" alt="SAIPEN Logo"/>
 </p>
+
+<div align="center">
+  <h3><a href="README.ee.md">🇪🇪 LOE SEDA EESTI KEELES / ESTONIAN 🇪🇪</a></h3>
+  <a href="README.md">🇬🇧 English</a> &nbsp;|&nbsp;
+  <a href="README.ded.md">👴 Дед-Версия (Russian)</a> &nbsp;|&nbsp;
+  <a href="README.ja.md">🇯🇵 日本語 (Japanese)</a>
+</div>
 
 # SAIPEN
 
-**פרוטוקול המשכיות עבור סוכני קידוד AI.** זיכרון פרויקט מבוסס Markdown פשוט, כך שסוכן "קר" ללא היסטוריית צ'אט מריץ `/saipen continue` וממשיך בעבודה תוך פחות מדקה -- ללא תדרוך מחדש, כל ספק, כל יום.
+**פרוטוקול המשך עבור אגנטים של קוד א.י.**זיכרון פרויקט מחייה ב파ין
+파ין קבצי markdown בתוך הפרויקט(`.saipen/`), לכן כל אגנט קריר תואם —
+ללא היסטוריית שיח, ללא זיכרון של סשן — יכול לרוץ`/saipen continue`, לקרוא את
+הנקייה`next_action`, ולcontinuation את העבודה ללא צורך לבקש מהמשתמש להסביר מחדש
+כלום. מצב שייך לפרויקט, לא לזכרון של ספק מודל אחד.
 
-**פקודה אחת. אפס אמנזיה.**
+**명령 אחד כדי להמשיך. מצב קובץ פלן. חוזרים על בדיקה של מכונה.**
+
+הרепוזיטורי מאשש את עצמו בכל push; התקנה, מצב, בדיקות, ו
+הסרה כוללת רק קבצים מקומיים — אין שירות ענן, אין ד몬, אין מסד נתונים.
+
+[![Validation](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
+[![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
+[![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
+
+**v7.226.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) |MIT
 
 **מקשים מהירים:** `cc` ממשיך את ההקשר של הפרויקט עד להתכנסות (מחדש יעד פעיל אם הוגדר), `sss` מציג סטטוס ללא נגיעה בקוד ו-`ss` שומר נקודת ביקורת ועוצר. [ראה את מפת 15 המקשים המלאה](saipen/RFC.md#110-command-surface). גם התאומים הקיריליים עובדים: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**שפת התשובה.** הסוכן עונה כברירת מחדל **באסטונית** — זו הגדרה, לא גחמה, ושום דבר אחר ב-SAIPEN אינו אסטוני. משנים זאת במקום אחד: השורה `reply_language:` בראש [`saipen/STYLE.md`](saipen/STYLE.md). `et` אסטונית, `en` אנגלית, `ru` רוסית, `auto` בוחר לפי שפת ההודעה שלך. הפרוטוקול, הקוד, הקומיטים וכל המסמכים נשארים באנגלית בכל ערך.
-
-**v7.225.0** | [מפרט](SPEC.md) | [מדריך](GUIDE.md) | [RFC](saipen/RFC.md) | [סגנון](saipen/STYLE.md) | [ממשק משתמש](saipen/UI.md) | [תאימות](saipen/CONFORMANCE.md) | markdown פשוט | אפס תלויות | MIT
-
 ```text
+Project
+  |
+  +-- .saipen/STATE.md ------ what is happening right now (phase, ticket, mode, next_action)
+  +-- .saipen/BOARD.md ------ what work exists (DOING / TODO / DONE / BLOCKED)
+  +-- .saipen/LOG.md -------- why the project reached this state (event history)
+  +-- .saipen/KNOWLEDGE/ ---- what durable facts must survive sessions
+          |
+          v
+   /saipen continue
+          |
+          v
+      cold agent
+          |
+          v
+     next_action -> work -> checkpoint -> next ticket
+```
 
-### מצב פרויקט > זיכרון מודל
+## מה נשאר
 
-הזיכרון שוכן בפרויקט, לא בראש של המודל. `פרויקט -> זיכרון -> LLM` הופך ל-`פרויקט -> מצב SAIPEN -> LLM`.
+זיכרון פרויקט חי נמצא ב-`.saipen/`— קבצים פשוטים שתוכלו לקרוא, להבדיל ולהשוות, ו
+לעשות commit לציד הקוד. אגנט קר יענה לשאלות חמש מהקבצים
+בשלב זה:
 
-
-## Commands
-
-The full surface is 16 commands; complete details in [RFC § 1.10](saipen/RFC.md#110-command-surface).
-
-| Command | What it does |
+|קובץ / שדה|תשובות|
 |---|---|
-| `/saipen set` | Adopt a project |
-| `/saipen continue` | Resume exactly where you left off |
-| `/saipen plan` | Turn a request or raw queue into tickets |
-| `/saipen goal <text>` | Autonomous wave assault on a new objective |
-| `/saipen hunt` | Force an immediate defect/improvement scan |
-| `/saipen ship` | Version bump, changelog, tag, push |
-| `/saipen clean` | Repository cleanup |
-| `/saipen validate` | Conformance check |
-| `/saipen markhunt` | Dry uncapped audit, record only |
-| `/saipen translate` | Isolated translation factory |
-| `/saipen prepare` | Package work for handoff |
-| `/saipen collect` | Integrate a ready package |
-| `/saipen status` | Read-only report |
-| `/saipen stop` | Checkpoint and halt |
+| `STATE.md` |מה קורה כרגע?(שלב, כרטיס פעיל, מצב הפעלה, חסימה) |
+| `BOARD.md` |מה עבודה קיימת / מה פעילה?(גרף כרטיסים: DOING, TODO, DONE, BLOCKED) |
+| `LOG.md` |למה הפרויקט הגיע למצב זה?(גרף sự kiện שרק מוסיפים לו) |
+| `KNOWLEDGE/` |מה עובדות הפרויקט הנצברות חייבות לשרוד בין סשנים?|
+| `next_action` (ב-`STATE.md`) |מה פעולה מדויקת צריך האגנט הבא לבצע?|
 
-<sub>`saipen init` and `saipen sub` complete the sixteen; both are called by the protocol, not typed daily.</sub>
+זה חוזה נקודת בדיקה, לא הצעת תכנון:`saipen stop`וגם כל
+מעבר כרטיס – כתבו את הקבצים בترتيب קבוע, והผล נבדק על ידי
+валиדטור. noting is stored in a hosted database, and nothing is lost when a
+השגרה נגמרת.
 
-**Package keys.** `ee`/`qq` prepare a complete translation or wiki package without integrating; `eee`/`qqq` accept only a ready package, then integrate, verify, review, and push.
+## התחלה מהירה
 
-**Experimental: saicrew.** Optional bonus layer (`extensions/subs/`, zero Core changes) for running a multi-agent crew — one Core writer plus read-only `saihunt`/`saipython` workers reporting through their own `OUTBOX.md`. Under active live testing, not finalised — see `extensions/subs/crew.md`.
+**1. התקן פעם אחת למחשב**— מלמד את קלוד קוד, קדקס, ג'מייני, אופנקוד,
+איידר, אנטי גרביטי, וכל קריאה כללית`~/.agents/skills`.reader(פריבופ, וכו'"):
 
-## Two layers
-
-| Layer | Required | Purpose |
-|---|---|---|
-| **Core** | ✅ | Resume work safely |
-| **Maintenance** | On top of Core | Evolve software without task direction |
-
-**Automated evolution.** No open tasks remain, type `/saipen`: `HUNT` audits for bugs, dead code, and failing tests. Clean? `ADD` builds the next obvious missing capability, verifies it, and hunts again. Product mature -> stops gracefully.
-
-**GOAL Mode.** `/saipen goal <what you want>` pivots the board (deprioritises old tickets, never deletes them) and drives the new objective forward — no "should I continue?" between tickets, VERIFY/REVIEW never skipped. SHIP auto-pushes to the existing remote; a brand-new repository still asks once. Shipping a goal is not the end point either — it transitions straight into autonomous HUNT/ADD maintenance until the product is mature, blocked, or the run hits its cap (3 waves / 20 tickets, then checkpoints and reports).
-
-## Quick Start
-
-
-**1. התקנה חד-פעמית למחשב** -- מלמד את Claude Code, Gemini, OpenCode, Aider, Antigravity, Codex ??? ???? ???? ?? ~/.agents/skills (FreeBuff ???'):
 ```bash
 git clone https://github.com/vacterro/saipen
 cd saipen
@@ -72,54 +79,230 @@ powershell -ExecutionPolicy Bypass -File .\bootstrap\inject.ps1     # Windows
 bash bootstrap/inject.sh                                            # macOS / Linux
 ```
 
-**2. התחלת פרויקט** -- פתח סוכן בתיקייה שלך, הקלד:
+<sub>What that touches, so nothing is a surprise: it appends a marked
+`<!-- SAIPEN:BEGIN -->...<!-- SAIPEN:END -->`בלוק לפקודה של האגנט
+파일들 שברשותคุณ(`~/.claude/CLAUDE.md`, `~/.config/opencode/AGENTS.md`,
+`~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`)— גיבוי כל אחד מהם ל-`.bak`ראשון —
+ומעתיק את הפרוטוקול לflders של היכולות המתאימות. כלום מחוץ לאותם flders
+مسارات, ללא ד몬, ללא קריאות רשת.</sub>
+
+**2. התחילה פרויקט**— פתח אגנט בתיקייה שלך, הקלד:
+
 > `saipen set`
 
-אין התקנה? הדבק שורה אחת לכל סוכן:
-> Read <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md and follow them.
+**ללא התקנה?**הדבק שורה אחת לאגנט כלשהו:
 
-הפלטפורמה שלך אינה ברשימה לעיל (DeepSeek, Qwen, OpenAI עצמאי וכו')?
-הערות עבור כל פלטפורמה נמצאות ב-`extensions/adapters/`.
+> קרא&lt;клон&gt;/saipen/BOOT.md ראשית(גרעין התחלה קרירה), ואז&lt;клон&gt;/saipen/INDEX.md +&lt;клон&gt;/saipen/STYLE.md ותתאם לעדכון.
 
+**измינה את דעתך?**פקודה אחת מחזירה אותו:
 
-## Documentation
+```bash
+powershell -ExecutionPolicy Bypass -File .\bootstrap\uninstall.ps1  # Windows
+bash bootstrap/uninstall.sh                                         # macOS / Linux
+```
 
-| Document | What it is |
+היא מסירה בדיוק את בלוק המבוקש(ותставה את שארית הקובץ ללא שינוי), שומרת
+a `.uninstalled.bak`עושה עתק ראשוני, ומוחקת את תיקיות היכולות.
+
+## למה לא רק היסטוריית השיחה?
+
+SAIPEN מכוון לתקלה ספציפית: אגנט תיכנות אינטלייגנטית שמשחזרת כלום
+לאחר שהсеанс נגמר. כלים וعادة אחרים מכסים חלק מהבעיה הזו:
+
+|גישה|למה הוא טוב|מה שהוא לא נושא|
+|---|---|---|
+|تاريخ השיחה / זיכרון המודל|נוח, ללא התקנה|תלוי ב세션 ובמוכר; לא מאוחסן עם הפרויקט, כך שסוכן קר לעולם לא יראה אותו|
+|tĩnh`AGENTS.md`קובץ / פקודה|חוקים ומוסדות נאמנים|לא מייצג בעצמו את מצב המשימה האקטיבי`next_action`, או היסטוריה של שחזור|
+|מעקב אחר בעיה / TODO|ניהול משימות ורשימת ציפיות|אינו מגדיר בעצמו את סמנטיקת המשך הפעולה של האגנט — מה שהагент הקרה חייב לקרוא ולהתבצע עליו בעת המשכה|
+| **SAIPEN** |מצב ביצוע חי, קבוצת עבודה, היסטוריית אירועים, ידע נצחי, וחוקי המשך מותרים שנבדקים על ידי מכונה — בקבצים פשוטים לצידם של הקוד|א ничего; sự kết hợp đó là hợp đồng|
+
+ההבדל אינו קובץ אחד. הוא בכך ש-SAIPEN מבצע את שלב המשכה
+ניתן לבדוק על ידי מכונה: הפעולה הראשונה של אגנט קריר לאחר`/saipen continue`היא
+מכתوبة על ידי`next_action`ומאושרט על ידי וריפיקטור, לא
+מבוססת על זיכרון.
+
+## הוכחות הנדסיות
+
+SAIPEN משלב פרוטוקול פשוט-파일 נורמטיבי עם ביצוע, מכוון לفشل
+בדיקות. הרепозיטורי ממחיש תכנון פרוטוקול/מchine-מchine, פיתון
+أدوات, מצב מונחה-סכמה, חשיבה לשיקום, בדיקות רגרסיה,
+גבולות זרימה רב-agenta, ותכלית תיאורית.
+
+- **תת-הסכמה שנבנה.** [SPEC.md](SPEC.md)מגדיר את המודל המשותף-
+המודל המשותף והתת-הסכמה היציבה על-הדיסק;[CORE.md](saipen/CORE.md)
+ו-[MAINTENANCE.md](saipen/MAINTENANCE.md)מגדירים את ההתנהגות הנורמטיבית הנוכחית.
+- **מצב שהודגם על-ידי מכונה.**התקן ה-stdlib בלבד
+  [валиדטור](tools/validate.py)מקריא את הסכמת המצב האמיתית
+  [מבחין במעבר של שלבים](extensions/schemas/state.schema.json)תלויות של כרטיסי תקציב
+קישורים בגרף של אירועים
+לאינvariants, יכולויות, וحالة השיקום
+- **תغطية כשלונות** [CONFORMANCE.md](saipen/CONFORMANCE.md)מפת
+דרישות ל[מצבים של סценריוס](tests/scenarios/); the
+  [מפעיל סценריוס](tools/run_scenarios.py)מבצע מקרי בדיקה של הצלחה/실패 מבנית
+הכוללים מצב שיקום פגום, מעבר לא חוקי, מעגלי תלות, ו
+הגבלות קריאה בלבד.
+- **kiểm soát רגרסיה.** [audit_checks.py](tools/audit_checks.py)משנה
+עותקים ידועים-טובים ומדגים שבדיקות הווידאטור עדיין יכולות להראות אדומות, במקום
+להתייחס לבדיקה תמיד אדומה כהוכחה.
+- **שכבת ביצוע.** [saipen.py](tools/saipen.py)ממשיכת מצב יומני
+פעולות;[bootstrap/](bootstrap/)מאחסן התקנה, הסרת התקנה, ויצוא
+עזרות, עם אפשרות[ติดตั้ง hook של pre-commit](tools/install_hook.py).
+- **הערכות מפורשות.**מצב פרוטוקול 핵심 הוא קבצים רגילים ללא תלויה ריצה
+תלויה. אימות канוני וเครื่องมือ CLI דורשים פיתון, אך משתמשים רק
+ב ספרייה הסטנדרטית שלו ואינם דורשים`pip`התקנה.
+
+## 架構
+
+שלש שכבות, תלויות אحادיות строго:
+
+```text
+CORE            continuation / state / checkpoint / validation       required
+  └─ MAINTENANCE   autonomous HUNT / ADD / CLEAN evolution           optional, on top of Core
+       └─ GOAL MODE / SUBAGENTS   opt-in throughput/execution        optional
+```
+
+הגרעין לא תלוי בתחזוקה: עם תחזוקה עצמית מוגבלת, SAIPEN
+עדיין פרוטוקול המשך שלם — אגנט קר עדיין ממשיך.
+
+- **מchine מצב גרעין** — `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`.
+- **תחזוקה עצמית**— לוח מושבת(ללא כל מה ניתן לעבוד ב-`## TODO`,
+ללא כל شيء ב-`## DOING`)ולא`BLOCKED`? מעבר אוטומטי`HUNT` (סריקת באגים)
+  → `ADD` (развитие תכונות) → `HUNT`, שאלות אפס wurden. ישוש מושב ב
+  `BLOCKED`לעולם לא מתחזק אוטומטית
+  ([תחזוקה § 2.1](saipen/MAINTENANCE.md#21-autonomous-transitions)).
+- **מצב מטרה** — `/saipen goal <objective>`מחלף את הלוח ורץ את
+המטרה קדימה דרך VERIFY/REVIEW, נופל לתחזוקה אוטומטית
+עד שהחוק להשלמת תהליך יתבצע או שהריצה תגיע לקיבולת שלה(3 גלגלים / 20 כרטיסים,
+ואז נקודות בדיקה ומדווח) ([תחזוקה § 2.4](saipen/MAINTENANCE.md#24-goal-mode-autonomous-execution)).
+- **חיזוק**— קלט ב大批 הוא מפורס לכניסות כרטיסים אינדיבידואליים
+  (CORE § 1.8); המשך העץ הלא נקי שומר על עבודה לא מmitted(CORE § 1.5);
+ערכים דומים לسر נמחקים מהיומן(`sk-***`) (CORE § 1.2).
+
+## פקודות נפוצות
+
+כניסות נפוצות ליום; פנייה נוכחית מלאה נמצאת ב
+[CORE § 1.10](saipen/CORE.md#110-command-surface).
+
+|פקודה|מבצע|
 |---|---|
-| [SPEC.md](SPEC.md) | Formal architecture, design goals, litmus test |
-| [RFC.md](saipen/RFC.md) | Normative specification agents execute |
-| [GUIDE.md](GUIDE.md) | Human tutor and ELI5 guides |
-| [STYLE.md](saipen/STYLE.md) | Agent communication style and voice definition |
-| [UI.md](saipen/UI.md) | Vintage Golden UI design guidelines |
-| [CONFORMANCE.md](saipen/CONFORMANCE.md) | Behavioural test scenarios and validator rules |
+| `/saipen set` |קבלת פרויקט: יוצר`.saipen/`מצב|
+| `/saipen continue` |استمر מהحالة המותאמת של הפרויקט — ללא שיקום מחדש|
+| `/saipen plan` |המר תביעה או רשימת מטלות ראשונית למסמכים|
+| `/saipen goal <text>` |ביצוע גל אוטונומי נגד מטרה חדשה|
+| `/saipen validate` |הרץ בדיקות התאמה|
+| `/saipen status` |תقرיר לקריאה בלבד: שלב, מסמכים, מכשולים, קירירות|
+| `/saipen stop` |จุด ביקורת ועצירה|
+
+<details>
+<summary><b>More commands</b></summary>
+
+|명령|합니다|
+|---|---|
+| `/saipen hunt` |החל את סריקת הפגמים/ה향יקות כעת בכוח|
+| `/saipen markhunt` |תчетה יבש ללא הגבלת גובה — מקליטה תוצאות, לא מתקן כלום|
+| `/saipen ship` |שערי פלט; בצע התחייבות, תג ושלח כאשר מותר|
+| `/saipen clean` |לוח וניקיון מצב|
+| `/saipen translate` |מפעל תרגום מבודד|
+| `/saipen prepare` / `/saipen collect` |עבודת חבילות למסירה / אינטגרציה של חבילת מוכנה|
+| `/saipen test` |הרץ את סדרת הבדיקות המוצהרת, דיווח רק|
+| `/saipen crew` |מעגל צוות בקביעות(הunted → תרבות → קבלה → בנייה → תרגום → מסמך → שילוח) |
+| `/saipen improve` |תיעוד של ביקורת מטת של שיפורים בפרוטוקול|
+| `/saipen sub ...` |יצירת/אימוץ של סוב-agenta לקריאה בלבד|
+
+**מפתחות חבילות.** `ee`/`qq`הכנה של חבילות תרגום/ויקי שלמות ללא
+אינטגרציה;`eee`/`qqq`קבלת רק חבילות מוכנות, ואז אינטגרציה, בדיקה,
+תיעוד, והעלאה.
+
+**saicrew.** `sc` / `saipen crew` (`extensions/subs/crew.md`)מתקדם בכל
+הצוות הפנימי בترتيب קבוע — חיישנים(saihunt, saitest, saipython, saiui),
+מפיקים(saitranslate, saiwiki)ו-Core ככותב העץ הראשי היחיד —
+עד שמעבר נוסף לא ימצא שום דבר אמיתי להשתנות. הוא מוסיף בדיוק אחד
+กลไก שלו собственный: המטרה האורגניזציה המחזיקה(`execution_intent:
+сходиться` with `converge_target: crew`)שעושה את המעגל ניתן להחזרה ו
+ניתן להסיק ממנו מתוך ראיות.`saipen crew --dry-run --json`מפיק את
+המעגל לקריאה בלבד;`bootstrap/saipen_crew.*`הוא עזרה ידנית חובה
+לחלון מרובה חלונות, לעולם לא מה`saipen crew`озן. ראה
+[extensions/subs/crew.md](extensions/subs/crew.md).
+</details>
+
+## מה שאינן SAIPEN
+
+- **LLM או מודל**— זהו פרוטוקול שסוכנים עוקבים אחריו, לא חוכמה.
+- **IDE או מסד נתונים מארח**— המצב הוא קבצים רגילים בפרויקט שלך;
+ללא hosting.
+- **החלופה של Git**— Git עדיין מנהל את היסטוריית הגרסאות; בצע
+  `.saipen/`כמו קוד רגיל.
+- **קונסנסוס מפוזר**— ראה את גבול התאמה במקביל למטה.
+- **הבטחה שהLLM יעשה החלטות הנדסיות נכונות**— הוא
+למשל, מפחית את אובדן ההקשר והזזה התנהגותית; הוא לא גורם לagenta סטוכסטיים
+ללא שגיאות.
+
+המשימה של SAIPEN היא הוספת תקן/תנאי מצב ועוד אימות וเครื่י
+handing the next agent a machine-checked starting point, not magic.
+
+**גבול התאמה**עדכוני מצב מוערכים(SAIOPS)להשתמש ב
+מנעול מערכת עם היקף פרויקט וเจอירלי לاسترجاع([OPS § 5](saipen/OPS.md#5-locks)).
+chỉnh sửa פרויקט רגיל וכותבים מנותקים נמצאים מחוץ למנעול זה. SAIPEN
+אינו הסכמה מפוזרת, לכן כותבים מנותקים דורשים
+קואורדינציה חיצונית([SPEC](SPEC.md#concurrency--distribution-boundaries)).
+
+## אקוסיסטם
+
+|פרויקט|קשר ל-SAIPEN|
+|---|---|
+| [SAIPENVIEW](https://github.com/vacterro/saipenview) |מרכז בקרה מקומי ל-Windows עבור פרויקטים SAIPEN — מגלם אוטומטית`.saipen/`חלונות עבודה, מציג מצב חי ותקנות התאמה, מנהל כרטיסי תקלה, ומביא forth CLIs חכמים. מלווה, לא הרשאה.|
+| [SAIWORK](https://github.com/vacterro/saiwork) |שורש CodeNomad מורד שמתאמה SAIPEN: מזרימה`BOOT.md`/`STYLE.md`ל-Launches OpenCode, חושפת קיצורים SAIPEN ומציגות תצוגות מצב פרויקט, ומוסיפה קולת פקודות נצמד.|
+| [FastPrompter](https://github.com/vacterro/fastprompter) |סקetchpad נייד ל-Windows ומנהל קטעים שמתאים אוטומטית`.saipen/`תיקיות ומוסיף תצוגה לקריאה בלבד של STATE/BOARD/LOG.|
+
+## מסמכים
+
+|מסמך|מה זה|
+|---|---|
+| [SPEC.md](SPEC.md) |ארכיטקטורה רשמית, מטרות תכנון, בדיקת ליטמוס|
+| [CORE.md](saipen/CORE.md) |המשך רשמי, מכונה מצבים, ותנאי פקודה|
+| [MAINTENANCE.md](saipen/MAINTENANCE.md) |תחזוקה עצמית וوضع מטרה|
+| [CONFORMANCE.md](saipen/CONFORMANCE.md) |דרישות ביצוע/התנהגות וחוקי וריפר|
+| [GUIDE.md](GUIDE.md) |מדריך אנושי|
+| [RFC.md](saipen/RFC.md) |הפניה לتوافق עם מסמכים נורמטיביים מפורקים|
+| [STYLE.md](saipen/STYLE.md) |סגנון וקול של תקשורת האגנט|
+| [UI.md](saipen/UI.md) |הנחיות לتصميم UI מודרני מבריק|
+|броشور|броشور להצגת תוכן —[EN](BROCHURE_EN.md) / [RU](BROCHURE_RU.md) / [ET](BROCHURE_ET.md) / [DED](BROCHURE_DED.md) / [JA](BROCHURE_JA.md) |
 
 <details>
 <summary><b>All 33 translated guides</b></summary>
 
-🇷🇺 [Русский](guides/GUIDE_RU.md) · 🇺🇸 [English](guides/GUIDE_EN.md) · 🇪🇪 [Eesti](guides/GUIDE_EE.md) · 🇯🇵 [日本語](guides/GUIDE_JA.md) · 👴 [Версия Деда](guides/GUIDE_DED.md)
+🇷🇺 [Русский](guides/GUIDE_RU.md) · 🇺🇸 [אנגלית](guides/GUIDE_EN.md) · 🇪🇪 [אסטונית](guides/GUIDE_EE.md) · 🇯🇵 [日本語](guides/GUIDE_JA.md) · 👴 [Версия Деда](guides/GUIDE_DED.md)
 
-🇺🇦 [Українська](guides/GUIDE_UK.md) · 🇩🇪 [Deutsch](guides/GUIDE_DE.md) · 🇫🇷 [Français](guides/GUIDE_FR.md) · 🇪🇸 [Español](guides/GUIDE_ES.md) · 🇮🇹 [Italiano](guides/GUIDE_IT.md)
+🇺🇦 [Українська](guides/GUIDE_UK.md) · 🇩🇪 [ألماني](guides/GUIDE_DE.md) · 🇫🇷 [فرنسي](guides/GUIDE_FR.md) · 🇪🇸 [إسباني](guides/GUIDE_ES.md) · 🇮🇹 [איטלקי](guides/GUIDE_IT.md)
 
-🇵🇹 [Português](guides/GUIDE_PT.md) · 🇳🇱 [Nederlands](guides/GUIDE_NL.md) · 🇵🇱 [Polski](guides/GUIDE_PL.md) · 🇸🇪 [Svenska](guides/GUIDE_SV.md) · 🇩🇰 [Dansk](guides/GUIDE_DA.md)
+🇵🇹 [פורטוגלי](guides/GUIDE_PT.md) · 🇳🇱 [הולנדי](guides/GUIDE_NL.md) · 🇵🇱 [פולני](guides/GUIDE_PL.md) · 🇸🇪 [שוודי](guides/GUIDE_SV.md) · 🇩🇰 [דני](guides/GUIDE_DA.md)
 
-🇫🇮 [Suomi](guides/GUIDE_FI.md) · 🇳🇴 [Norsk](guides/GUIDE_NO.md) · 🇨🇳 [中文](guides/GUIDE_ZH.md) · 🇰🇷 [한국어](guides/GUIDE_KO.md) · 🇹🇭 [ไทย](guides/GUIDE_TH.md)
+🇫🇮 [סובי](guides/GUIDE_FI.md) · 🇳🇴 [נורווגית](guides/GUIDE_NO.md) · 🇨🇳 [中文](guides/GUIDE_ZH.md) · 🇰🇷 [한국어](guides/GUIDE_KO.md) · 🇹🇭 [ไทย](guides/GUIDE_TH.md)
 
-🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) · 🇸🇦 [العربية](guides/GUIDE_AR.md) · 🇮🇱 [עברית](guides/GUIDE_HE.md) · 🇹🇷 [Türkçe](guides/GUIDE_TR.md) · 🇮🇳 [हिन्दी](guides/GUIDE_HI.md)
+🇻🇳 [ויệt נמי](guides/GUIDE_VI.md) · 🇸🇦 [العربية](guides/GUIDE_AR.md) · 🇮🇱 [עברית](guides/GUIDE_HE.md) · 🇹🇷 [טורקית](guides/GUIDE_TR.md) · 🇮🇳 [हिन्दी](guides/GUIDE_HI.md)
 
-🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) · 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) · 🇨🇿 [Čeština](guides/GUIDE_CS.md) · 🇷🇴 [Română](guides/GUIDE_RO.md) · 🇭🇺 [Magyar](guides/GUIDE_HU.md)
+🇮🇩 [אינדונזית](guides/GUIDE_ID.md) · 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) · 🇨🇿 [צ'כית](guides/GUIDE_CS.md) · 🇷🇴 [רומנית](guides/GUIDE_RO.md) · 🇭🇺 [הונגרית](guides/GUIDE_HU.md)
 
-🇧🇬 [Български](guides/GUIDE_BG.md) · 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) · 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
+🇧🇬 [Български](guides/GUIDE_BG.md) · 🇸🇰 [סלובקית](guides/GUIDE_SK.md) · 🇭🇷 [קרואטית](guides/GUIDE_HR.md)
 
 </details>
 
-## Built with SAIPEN
+## הערות על תצורה
 
-- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — High-performance prompt management tool built natively around the SAIPEN memory protocol.
+**שפת תשובה.**הagenta עונה ב-**אסטוני**כברירת מחדל — זהו
+הגדרה, לא דרישה פרוטוקול, וכל שאר הדברים ב-SAIPEN לא אסטוניים.
+הפרוטוקול, הקוד, ה커מיטים וכל מסמך נשארים באנגלית בכל
+ערך. תغيיר אותו במקום אחד: השורה`reply_language:`בחלק העליון של
+[`saipen/STYLE.md`](saipen/STYLE.md). `et`אסטוני,`en`אנגלי,`ru`רוסי,
+`auto`בוחר מתוך ההודעה ששלחת.
 
-## Screenshots
+**אדרטרים.**פלטפורמה שאינה מכסה על ידי האינ젝טור(DeepSeek, Qwen, עצמאי
+OpenAI, וכו')? הערות לפי פלטפורמה חיים ב-`extensions/adapters/`.
+
+## 快照
 
 <details>
-<summary>Click to expand</summary>
+<summary><b>Click to expand</b></summary>
 
 <img src="assets/screenshot-freebuff.png" alt="FreeBuff agent instructions" width="600"/>
 
@@ -133,6 +316,5 @@ bash bootstrap/inject.sh                                            # macOS / Li
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-<!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
-
-
+<!-- translation-model: qwen3:14b contract:structured-markdown-v2 -->
+<!-- source-digest: README.md sha256:2a33e364c3c12e8b1b9b2caf41b05db3ee27f17161336579ae85ee59da34fe56 -->

@@ -62,6 +62,7 @@ IGNORE = shutil.ignore_patterns(".git", ".venv", "__pycache__", ".freebuff", "no
 STATE = ".saipen/STATE.md"
 BOARD = ".saipen/BOARD.md"
 LOG = ".saipen/LOG.md"
+IDENTITY = ".saipen/IDENTITY.md"
 DIGEST = ".saipen/kitchen/digest.md"
 MANIFEST = ".saipen/kitchen/markhunt_progress.md"
 SUB = ".saipen/extensions/subs/saiwiki/STATE.md"
@@ -155,6 +156,29 @@ def root_device_ignore_probe(tmp: Path) -> str | None:
             os.unlink(native)
         shutil.rmtree(source, ignore_errors=True)
         shutil.rmtree(destination, ignore_errors=True)
+    return None
+
+
+def symlink_restore_probe(tmp: Path) -> str | None:
+    """Prove mutation restoration removes the link, not its target bytes."""
+    probe = tmp / "symlink-restore-probe"
+    probe.mkdir()
+    path = probe / "IDENTITY.md"
+    external = probe / "external.md"
+    original = b"original authority\n"
+    path.write_bytes(original)
+    external.write_bytes(b"external authority\n")
+    saved = [(path, path.read_bytes())]
+    path.unlink()
+    try:
+        os.symlink(external, path)
+    except (OSError, NotImplementedError) as exc:
+        return f"cannot construct symlink red control: {exc}"
+    restore_case_files(saved)
+    if path.is_symlink() or path.read_bytes() != original:
+        return "restoration followed or retained the mutated symlink"
+    if external.read_bytes() != b"external authority\n":
+        return "restoration overwrote the external symlink target"
     return None
 
 
@@ -717,6 +741,7 @@ def leak_style_marker(text: str) -> str:
 
 UTF16 = "<rewrite as utf-16>"  # sentinel, not a mutation function
 DELETE = "<delete the file>"
+SYMLINK_EXTERNAL = "<replace with an external symlink>"
 
 
 def strip_done_verify(text: str) -> str:
@@ -761,15 +786,17 @@ def cite_open_ticket(text: str) -> str:
 
 
 def stamp_log_ahead(text: str) -> str:
-    """T-432: restamp the newest LOG entry 6 minutes ahead of the real clock.
+    """T-432: restamp the newest LOG entry 7 minutes ahead of the real clock.
 
     Computed at mutation time, never hardcoded: a pinned date drifts into the
     past and the control silently stops proving anything -- the same no-op
-    trap leak_style_marker was written to avoid. 6 minutes is one past the
-    validator's 5-minute slack, so the control tests the BOUND rather than
+    trap leak_style_marker was written to avoid. The persisted stamp has only
+    minute precision: +6 minutes can become less than the validator's +5m
+    bound while the validator runs near a minute rollover. +7 guarantees one
+    full minute of execution margin while still testing the bound rather than
     some obviously-absurd year.
     """
-    ahead = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=6)
+    ahead = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=7)
     lines = text.splitlines()
     for i in range(len(lines) - 1, -1, -1):
         if re.match(r"^- \d{2}\.\d{2}\.\d{2} \d{2}:\d{2} \[E-\d+\]", lines[i]):
@@ -960,6 +987,24 @@ def mutation_files(root: Path, rel: str, mutation) -> list[Path]:
     return [case_target(root, rel, mutation)]
 
 
+def restore_case_files(saved: list[tuple[Path, bytes | None]]) -> None:
+    """Restore mutation targets without following a special node.
+
+    Ordinary byte rewrites can overwrite in place.  A symlink mutation must
+    first remove the link itself; writing through it would restore the
+    external target and leave the mutated authority node in the pristine
+    audit copy.
+    """
+    for path, data in saved:
+        if path.is_symlink():
+            path.unlink()
+        if data is None:
+            if os.path.lexists(path):
+                path.unlink()
+        else:
+            path.write_bytes(data)
+
+
 def case_available(root: Path, rel: str, mutation) -> bool:
     if mutation == CREATE or (isinstance(mutation, tuple) and mutation[0] == "WRITE"):
         return True
@@ -979,6 +1024,21 @@ CASES: list[tuple[str, str, object, str]] = [
     # --- STATE shape -----------------------------------------------------
     ("STATE.md deleted", STATE, DELETE, "STATE.md missing"),
     ("STATE.md is UTF-16", STATE, UTF16, "not plain UTF-8"),
+    (
+        "portable project identity becomes an external symlink",
+        IDENTITY,
+        SYMLINK_EXTERNAL,
+        "IDENTITY.md is a symlink, reparse point, or non-regular file",
+    ),
+    (
+        "portable project identity exceeds the bounded authority read",
+        IDENTITY,
+        (
+            "WRITE",
+            "---\nproject_lineage: lineage-" + "a" * 32 + "\n" + "\n" * 4096 + "---\n",
+        ),
+        "descriptor-bound no-follow reader",
+    ),
     ("phase not in the enum", STATE, sub_line("phase", "REFACTOR"), "not one of"),
     ("mode not in the enum", STATE, sub_line("mode", "yolo"), "field mode"),
     ("transition_from dropped", STATE, drop_line("transition_from"), "missing transition_from"),
@@ -1285,8 +1345,8 @@ CASES: list[tuple[str, str, object, str]] = [
         "Improve admission journals only the report target",
         "tools/improve.py",
         lambda t: t.replace(
-            "targets, preconditions=preconditions, skip_preflight=True",
-            "targets[-1:], preconditions=preconditions, skip_preflight=True",
+            "            targets,\n            preconditions=preconditions,",
+            "            targets[-1:],\n            preconditions=preconditions,",
         ),
         "improve-admission-contract",
     ),
@@ -2690,7 +2750,7 @@ CASES: list[tuple[str, str, object, str]] = [
     (
         "an entry README stops naming the reply-language setting",
         "README.ee.md",
-        replace("rida `reply_language:`", "rida stiilifailis"),
+        replace("`reply_language:`", "`reply-keel:`"),
         "never mentions `reply_language:`",
     ),
     # T-419: the guard used to stop at the three Core-owned entry documents,
@@ -2816,7 +2876,7 @@ CASES: list[tuple[str, str, object, str]] = [
     ),
     # T-432: the newest LOG entry restamped just past the clock slack. The
     # old 3h bound made this control impossible to write honestly -- a stamp
-    # 3h out is absurd on sight, while 6 minutes out is exactly what an agent
+    # 3h out is absurd on sight, while 7 minutes out is exactly what an agent
     # that estimated instead of reading produces.
     (
         "a LOG entry is stamped ahead of the real clock",
@@ -3136,6 +3196,17 @@ CASES: list[tuple[str, str, object, str]] = [
 def apply_case(root: Path, rel: str, mutation) -> bool:
     """Returns False when the case cannot be set up (skip it loudly)."""
     p = case_target(root, rel, mutation)
+    if mutation == SYMLINK_EXTERNAL:
+        if not p.is_file() or p.is_symlink():
+            return False
+        external = root.parent / "audit-external-identity.md"
+        external.write_bytes(p.read_bytes())
+        p.unlink()
+        try:
+            os.symlink(external, p)
+        except (OSError, NotImplementedError):
+            return False
+        return True
     if mutation == DELETE:
         if not p.exists():
             return False
@@ -3232,6 +3303,13 @@ def main() -> int:
         shutil.rmtree(tmp, ignore_errors=True)
         return 1
     print("PASS: a real root `nul` entry is excluded from audit snapshots")
+
+    restore_error = symlink_restore_probe(tmp)
+    if restore_error:
+        print(f"FAIL: symlink mutation restoration control -- {restore_error}")
+        shutil.rmtree(tmp, ignore_errors=True)
+        return 1
+    print("PASS: mutation restoration unlinks symlinks before restoring owned bytes")
 
     pristine = tmp / "pristine"
     shutil.copytree(HOME, pristine, ignore=IGNORE)
@@ -3431,12 +3509,7 @@ def main() -> int:
             if not matched(validator_output(pristine, gate), expected, gate):
                 dead.append((label, expected))
         finally:
-            for f, data in saved:
-                if data is None:
-                    if f.exists():
-                        f.unlink()
-                else:
-                    f.write_bytes(data)
+            restore_case_files(saved)
     # The copy must be back to its starting state, or every case after the
     # first was run against a tree carrying the previous mutation.
     if validator_output(pristine) != control:

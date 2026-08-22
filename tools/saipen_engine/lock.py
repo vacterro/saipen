@@ -106,7 +106,7 @@ class WriterLock:
         # check-then-publish TOCTOU race.
         with _HOLDERS_GUARD:
             holder = _WRITER_HOLDERS.get(key)
-            if holder is not None and holder is not self and holder._acquired:
+            if holder is not None and holder is not self:
                 raise PermissionError("WRITER_BUSY")
             _WRITER_HOLDERS[key] = self
         # Attempt the OS lock; on failure, atomically clear our reservation.
@@ -220,7 +220,7 @@ class ProducerLock:
         # check-then-publish TOCTOU race.
         with _HOLDERS_GUARD:
             holder = _PRODUCER_HOLDERS.get(key)
-            if holder is not None and holder is not self and holder._acquired:
+            if holder is not None and holder is not self:
                 raise PermissionError(f"PRODUCER_BUSY: {self.producer} is already writing")
             _PRODUCER_HOLDERS[key] = self
         # Attempt the OS lock; on failure, atomically clear our reservation.

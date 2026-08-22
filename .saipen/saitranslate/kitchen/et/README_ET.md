@@ -1,82 +1,77 @@
 <p align="center">
   <img src="assets/SAIPEN_TEXT1.png" alt="SAIPEN Logo"/>
-  <br>
-  <img src="assets/__SAIPEN_Alpha.png" alt="SAIPEN Sticker" width="200"/>
 </p>
+
+<div align="center">
+  <h3><a href="README.ee.md">🇪🇪 LOE SEDA EESTI KEELES / ESTONIAN 🇪🇪</a></h3>
+  <a href="README.md">🇬🇧 English</a> &nbsp;|&nbsp;
+  <a href="README.ded.md">👴 Дед-Версия (Russian)</a> &nbsp;|&nbsp;
+  <a href="README.ja.md">🇯🇵 日本語 (Japanese)</a>
+</div>
 
 # SAIPEN
 
-**Jätkuvusprotokoll AI koodimisagentidele.** SAIPEN hoiab projekti mälu tavalises markdown-vormingus, nii et külm agent ilma vestlusajaloota käivitab `/saipen continue`, loeb `STATE.md` -> `BOARD.md` -> aktiivse `LOG.md` lõpu -> `human_note` (kui on määratud), käivitab `next_action` ja jätkab tööd alla minutiga — ilma uuesti juhendamata, mis tahes tarnija, mis tahes päeval.
+**AI koodiagentide jätkumise protokoll.**Projekti mälestus asub lihtsas
+Markdown failides projekti sees(`.saipen/`), seega iga ühilduv külma agent —
+ei vaja vestluse ajalugu, ei vaja seansimälestust — saab tööd teha`/saipen continue`, lugeda
+salvestatud`next_action`, ja jätkata tööd ilma, et kasutajalt peaks taas selgitama
+midagi. Olek kuulub projektil, mitte ühe mudeli tootjate mälestusele.
 
-**Üks käsk. Null sõltuvust. Null amneesiat.**
+**Üks käsk jätkamiseks. Lihtfaili olek. Masina kontrollitud lepingud.**
+
+Repo valideerib ise iga pushiga; install, olek, kontrollid ja
+eemaldamine on kohaline — ei ole ühtegi pilveteenust, ei daemoni, ei andmebaasi.
+
+[![Validation](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
+[![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
+[![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
+
+**v7.226.0** | [Spetsifikatsioon](SPEC.md) | [Juhend](GUIDE.md) | [Tuumik](saipen/CORE.md) | [Hooldus](saipen/MAINTENANCE.md) | [Stiil](saipen/STYLE.md) | [Kasutajaliides](saipen/UI.md) | [Kohasus](saipen/CONFORMANCE.md) |MIT
 
 **Kiirklahvid:** `cc` viib projekti konvergentsini (jätkab käimasolevat eesmärki, kui see on seatud), `sss` näitab olekut koodi puudutamata ja `ss` salvestab kontrollpunkti ning peatub. [Vaata täielikku 15 kiirklahvi kaarti](saipen/RFC.md#110-command-surface). Kirillitsa kaksikud töötavad ka: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**Vastuste keel.** Agent vastab vaikimisi **eesti keeles** — see on säte, mitte veidrus, ja miski muu SAIPEN-is ei ole eestikeelne. Muuda seda ühes kohas: rida `reply_language:` [`saipen/STYLE.md`](saipen/STYLE.md) alguses. `et` eesti, `en` inglise, `ru` vene, `auto` valib selle järgi, mis keeles sa kirjutasid. Protokoll, kood, commitid ja kõik dokumendid jäävad igal väärtusel inglise keelde.
-
-**v7.225.0** | [Spetsifikatsioon](SPEC.md) | [Juhend](GUIDE.md) | [RFC](saipen/RFC.md) | [Stiil](saipen/STYLE.md) | [Kasutajaliides](saipen/UI.md) | [Vastavus](saipen/CONFORMANCE.md) | tavaline markdown | null sõltuvust | MIT
-| [BROŠÜÜR](BROCHURE_DED.md) | PEAB TÕLKIMA saitranslate |
-
 ```text
-Kasutaja ->  /saipen continue
-Agent    ->  loeb STATE.md (faas, ülesanne, next_action, režiim, human_note)
-Agent    ->  loeb BOARD.md (DOING / TODO / DONE / BLOCKED piletid)
-Agent    ->  loeb aktiivse LOG.md lõpu (hiljutised sündmused)
-Agent    ->  loeb human_note (kui on määratud, ühekordne juhis)
-Agent    ->  käivitab koheselt next_action (käsk)
-Agent    ->  laeb faasi dokumendi ainult siis, kui reegleid on vaja
-Agent    ->  Töötab.
+Project
+  |
+  +-- .saipen/STATE.md ------ what is happening right now (phase, ticket, mode, next_action)
+  +-- .saipen/BOARD.md ------ what work exists (DOING / TODO / DONE / BLOCKED)
+  +-- .saipen/LOG.md -------- why the project reached this state (event history)
+  +-- .saipen/KNOWLEDGE/ ---- what durable facts must survive sessions
+          |
+          v
+   /saipen continue
+          |
+          v
+      cold agent
+          |
+          v
+     next_action -> work -> checkpoint -> next ticket
 ```
 
-## Kuidas see töötab
+## Mis jääb alles
 
-**Projekti olek on tugevam kui mudeli mälu.** Mälu elab projektis, mitte mudeli peas. `Projekt -> Mälu -> LLM` muutub vormi `Projekt -> SAIPENi olek -> LLM`.
+Elus projektimälestus asub`.saipen/`— lihtsad failid, mida saab lugeda, erinevus ja
+komiteerida koodi kõrval. Külma agent vastab viiele küsimusele failidest
+üksinda:
 
-- **Olekumasina tuum** — `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`
-- **Autonoomia ilma viipadeta** — tahvel peatatud (ühtegi teostatavat `TODO`-d pole, `DOING` on tühi) **ja ei ole `BLOCKED`**? Automaatne üleminek `HUNT` (otsib vigu) → `ADD` (arendab funktsioone) → `HUNT`, ühtegi küsimust esitamata. `BLOCKED` olekus olev sessioon ei käivita kunagi automaatset jahti -- ta ootab, kuni inimene lahendab blokaadi (RFC § 2.1).
-- **Range töökindlus** — partii sisendi parsimine (kirurgilised 1-haaval piletid), määrdunud puu omaksvõtt (ei kustuta kunagi salvestamata tööd), saladuste redigeerimine (`sk-***`).
-
-## Käsud
-
-Kogu pind on 16 käsku; täielik üksikasjalik kirjeldus [RFC § 1.10](saipen/RFC.md#110-command-surface).
-
-| Käsk | Mida teeb |
+|Fail / väli|Vastused|
 |---|---|
-| `/saipen set` | Võta projekt omaks |
-| `/saipen continue` | Jätka täpselt sealt, kus peatuti |
-| `/saipen plan` | Muuda päring või toores tööjärg piletiteks |
-| `/saipen goal <text>` | Autonoomne lainerünnak uue eesmärgi vastu |
-| `/saipen hunt` | Sunni defektide/paranduste otsing kohe |
-| `/saipen ship` | Versioonitõstmine, muudatuste logi, märgis, tõuge |
-| `/saipen clean` | Hoidla puhastus |
-| `/saipen validate` | Vastavuskontroll |
-| `/saipen markhunt` | Kuiv piiramatu audit, ainult kirjed |
-| `/saipen translate` | Isoleeritud tõlkevabrik |
-| `/saipen prepare` | Paki töö üleandmiseks kokku |
-| `/saipen collect` | Integreeri valmis pakett |
-| `/saipen status` | Kirjutuskaitstud aruanne |
-| `/saipen stop` | Kontrollpunkt ja peatus |
+| `STATE.md` |Mis juhtub praegu?(faasis, aktiivne pilet, töörežiim, takistaja) |
+| `BOARD.md` |Millist tööd on olemas / milline on aktiivne?(pileti graaf: DOING, TODO, DONE, BLOCKED) |
+| `LOG.md` |Miks projekt on jõudnud sellele seisundile?(ainult lisamiseks suunatud sündmuse graaf) |
+| `KNOWLEDGE/` |Millised jätkusuvaldavad projektiga seotud faktilised andmed peavad säilma seansside vahel?|
+| `next_action` (sisse`STATE.md`) |Milline täpsustatud toiming peab järgmise agenti tegelema?|
 
-<sub>`saipen init` ja `saipen sub` lõpetavad kuueteistkümne; mõlemat kutsub protokoll, mitte igapäevaselt trükitud.</sub>
-
-**Paketiklahvid.** `ee`/`qq` valmistavad täieliku tõlke- või vikipaketi ette ilma seda lõimimata; `eee`/`qqq` võtavad vastu ainult valmis paketi, seejärel lõimivad, kontrollivad, vaatavad üle ja lükkavad üles.
-
-**Eksperimentaalne: saicrew.** Valikuline boonuskiht (`extensions/subs/`, Core'i muudatusteta) mitme agendiga meeskonna käivitamiseks — üks Core'i kirjutaja pluss kirjutuskaitstud `saihunt`/`saipython` töötajad, kes aruandlevad oma `OUTBOX.md` kaudu. Aktiivse reaalajas testimise all, lõpuni kinnitamata — vaata `extensions/subs/crew.md`.
-
-## Kaks kihti
-
-| Kiht | Nõutav | Eesmärk |
-|---|---|---|
-| **Tuum** | ✅ | Jätka tööd turvaliselt |
-| **Hooldus** | Tuuma peal | Arenda tarkvara edasi ilma ülesanneteta |
-
-**Automatiseeritud evolutsioon.** Avatud ülesandeid ei ole järel, trüki `/saipen`: `HUNT` auditeerib vigade, surnud koodi ja ebaõnnestunud testide suhtes. Puhas? `ADD` ehitab järgmise ilmse puuduva võimekuse, kontrollib seda ja jahib uuesti. Toode on valmis -> peatub sujuvalt.
-
-**GOAL-režiim.** `/saipen goal <mida soovid>` pöörab tahvlit (vanad piletid viiakse madalamale prioriteedile, aga ei kustutata kunagi) ja viib uue eesmärgi edasi — ilma piletite vahel "kas ma peaksin jätkama?" küsimata, VERIFY/REVIEW ei jäeta kunagi vahele. SHIP teeb automaatse push-i olemasolevasse kaughoidlasse; täiesti uus hoidla küsib siiski ühe korra. Eesmärgi tarnimine pole samuti lõpp-punkt — see läheb otse autonoomse HUNT/ADD hoolduse alla, kuni toode on küps, blokeeritud või käivitus jõuab oma piirini (3 lainet / 20 piletit, seejärel teeb kontrollpunkti ja aruande).
+See on kontrollpunkti leping, mitte disaini soovitus:`saipen stop`ja iga
+pileti üleminemisel kirjutage failid kindlas järjekorras ja tulemus kontrollitakse
+validatori poolt. Midagi ei salvestata hosandatud andmebaasi ja midagi ei kadaku, kui
+süsession lõpeb.
 
 ## Kiire alustus
 
-**1. Paigalda üks kord masina kohta** — õpetab Claude Code'i, Codex'i, Geminit, OpenCode'i, Aiderit, Antigravityt ja iga üldine `~/.agents/skills`-lugeja (FreeBuff, jne.):
+**1. Install once per machine**— õpetab Claude Code, Codex, Gemini, OpenCode,
+Aider, Antigravity ja igasugune`~/.agents/skills`loetja(FreeBuff jne.):
+
 ```bash
 git clone https://github.com/vacterro/saipen
 cd saipen
@@ -84,43 +79,203 @@ powershell -ExecutionPolicy Bypass -File .\bootstrap\inject.ps1     # Windows
 bash bootstrap/inject.sh                                            # macOS / Linux
 ```
 
-<sub>Mida see puudutab, et üllatusi poleks: skript lisab märgistatud ploki `<!-- SAIPEN:BEGIN -->...<!-- SAIPEN:END -->` teie agendi juhendfailidesse (`~/.claude/CLAUDE.md`, `~/.config/opencode/AGENTS.md`, `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`) — tehes enne varukoopia `.bak` — ja kopeerib protokolli vastavatesse oskuste kaustadesse. Mitte midagi väljaspool neid teid, ei deemonit, ei võrgukutseid.</sub>
+<sub>What that touches, so nothing is a surprise: it appends a marked
+`<!-- SAIPEN:BEGIN -->...<!-- SAIPEN:END -->`blokkimine agenti juhendisse
+failid, mida sul juba on(`~/.claude/CLAUDE.md`, `~/.config/opencode/AGENTS.md`,
+`~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`)— kopeerimine igaühele`.bak`esimese —
+ja kopeerib protokollide failid vastavate oskustega kataloogidesse. Midagi väljaspool neid
+teed, ei deemoni, ei võrguühendusi.</sub>
 
-**Kahetsed otsust?** Üks käsk võtab tagasi:
+**2. Alusta projektiga**— avage oma kataloogis agent, sisestage:
+
+> `saipen set`
+
+**Installimine?**Kleebige üks rida mõnele agentile:
+
+> Lugeda&lt;kloon&gt;/saipen/BOOT.md esmalt(külma käivituse tuumik), seejärel&lt;kloon&gt;/saipen/INDEX.md +&lt;kloon&gt;/saipen/STYLE.md ja järgi neid.
+
+**Muutid mõtet?**Üks käsk pannab selle tagasi:
+
 ```bash
 powershell -ExecutionPolicy Bypass -File .\bootstrap\uninstall.ps1  # Windows
 bash bootstrap/uninstall.sh                                         # macOS / Linux
 ```
-See eemaldab täpselt märgistatud ploki (jättes ülejäänud faili puutumata), salvestab enne koopia `.uninstalled.bak` ja eemaldab oskuste kaustad.
 
-**2. Alusta projekti** — ava agent oma kaustas ja trüki:
-> `saipen set`
+See eemaldab täpselt märgistatud bloki(jätmata ülejäänud faili muutmata), salvestab
+a `.uninstalled.bak`teha kopeerimist enne ja eemaldab oskushoidlad.
 
-Pole paigaldatud? Kleebi üks rida mis tahes agendile:
-> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md and follow them.
+## Miks mitte lihtsalt vestluse ajalugu?
 
-Platvormi pole ülaltoodud loendis (DeepSeek, Qwen, eraldiseisev OpenAI jne)?
-Platvormipõhised märkused asuvad kaustas `extensions/adapters/`.
+SAIPEN sihitanud täpselt ühe ebaõnnestusega: AI koodimääratud agent, mis unustab kõike
+kui seanss lõpeb. Teised tööriistad ja harjumused katta osa sellest probleemist:
+
+|Viis|Mida see on hea|Mida see ei kanda|
+|---|---|---|
+|Kõne ajalugu / mudeli mälestus|Tõhus, nulli seadistus|Sessiooni- ja tarnija sõltuv; ei salvestata projektiga, seega külma agent ei näe seda|
+|Statiline`AGENTS.md`/ juhendfail|Püsivad seadused ja traditsioonid|Ei ise esinda elulise ülesandetõhususe staat,`next_action`, või taastusajalugu|
+|Probleem / TODO jälgija|Ülesannete ja tagamise jälgimine|Ei määrake ise agenti jätkumise semantikat — mis on külma agentil vajalik lugeda ja täita jätkamisel|
+| **SAIPEN** |Eluline töökoormus, sündmuse ajalugu, kestlik teadus, masinvalvitud jätkumise reeglid — lihtsates failides koodi kõrval|Midagi; see kombinatsioon on leping|
+
+Erinevus ei ole üksik fail. See on see, et SAIPEN teeb jätkamise samm
+masinvalvitud: külma agenti esimene toiming pärast`/saipen continue`on
+määratud salvestatud`next_action`ja kontrollitakse validatorega, mitte
+mälestusest taastatud.
+
+## Inženöri tõendid
+
+SAIPEN paireb normatiivse lihtfaili protokolli tähtsusega, tähtsusega, vigaorienteeritud
+kontrollid. Repo tegevusviis näitab protokolli/olekumasinade kujundamist, Python
+tööriistad, skeemipõhine olek, taastusloogika, regressioonitestid,
+mitmekohaline töövoogide piirid ja spetsifikatsiooni korraldus.
+
+- **Kujundatud leping.** [SPEC.md](SPEC.md)määrab failipõhise
+jätkumismodeli ja stabiilse kettale kantud lepingu;[CORE.md](saipen/CORE.md)
+ja[MAINTENANCE.md](saipen/MAINTENANCE.md)omavad praegust normatiivset käitumist.
+- **Masina kontrollitud olek.**stdlib-only kanoniline
+  [kinnitaja](tools/validate.py)loeb sisse reaalajas
+  [STATE skeem](extensions/schemas/state.schema.json)ja kontrollib faasi
+üleminekuid, piletide sõltuvusi, sündmusegraafi lingisid, üle dokumendi
+invariantide, võimaluste ja taastusoleku.
+- **Vigastuskaal.** [CONFORMANCE.md](saipen/CONFORMANCE.md)kuvab
+nõuetest[sündmuse fikseerimiste](tests/scenarios/); the
+  [sценарий runner](tools/run_scenarios.py)tehakse struktuurilisi pass/fail testi
+sealhulgas vigastatud taastamise staat, kehtetu üleminemised, sõltuvuse tsüklid ja
+ainusloetav piirangud.
+- **Regressioonikontrollid.** [audit_checks.py](tools/audit_checks.py)muudab
+teadaolevate heade kopeerimised ja tõestab, et valideerija kontrollid saavad ikkagi olla punased, mitte
+püsivalt rohelise kontrolli kui tõendust.
+- **Käivitatav kiht.** [saipen.py](tools/saipen.py)annab journaliseeritud staat
+tegevused;[bootstrap/](bootstrap/)hoiab paigalduse, eemalduse ja eksporti
+abivahendid, valikuline[pre-commit hook installeerija](tools/install_hook.py).
+- **Selged vahetused.**Põhiosakond protokolli staat on lihtsad failid ilma tööaja
+sõltuvusega. Kanoniline kinnitamine ja CLI tööriistad nõuavad Pythoni, kuid kasutavad ainult
+tema standardi kirjastusi ja ei vaja`pip`paigaldust.
+
+## Arhitektuur
+
+Kolm kihti, tugevalt ühesuunaline sõltuvus:
+
+```text
+CORE            continuation / state / checkpoint / validation       required
+  └─ MAINTENANCE   autonomous HUNT / ADD / CLEAN evolution           optional, on top of Core
+       └─ GOAL MODE / SUBAGENTS   opt-in throughput/execution        optional
+```
+
+Core ei sõltu Maintenance-st: autonoomse evolutsiooni keelatud, SAIPEN
+on ikkagi täielik jätkuval protokoll — külma agent jätkab ikkagi tööd.
+
+- **Core state machine** — `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`.
+- **Autonoomne hooldus**— plaat peatatud(ei ole töödeldav`## TODO`,
+midagi`## DOING`)ja mitte`BLOCKED`? Auto-transitsioonid`HUNT` (skänni vigadeid)
+  → `ADD` (arendada funktsioone) → `HUNT`, ei küsi ühtegi küsimust. Seanss, mis istub
+  `BLOCKED`ei auto-hunti
+  ([Hooldus § 2.1](saipen/MAINTENANCE.md#21-autonomous-transitions)).
+- **Sihtmoodus** — `/saipen goal <objective>`keeratab taeva ja juhivad
+eesmärki edasi kaudu VERIFY/REVIEW, jäädes sõltumatu hoolduse alla
+kuni lõpetamise reegel põleb või käigu jõuab oma kappe(3 laine / 20 piletit,
+seejärel kontrollpunktid ja aruanded) ([Hooldus § 2.4](saipen/MAINTENANCE.md#24-goal-mode-autonomous-execution)).
+- **Tugevdamine**— pakkumise sisend parsitakse kirurgiliselt ükshaaval piletiteks
+  (TUGI § 1.8); kõvakestuse jätkamine säilitab tehtud, kuid veel kinnitamata tööd(TUGI § 1.5);
+salajastega sarnased väärtused on logidest eemaldatud(`sk-***`) (TUGI § 1.2).
+
+## Tavalised käsklused
+
+Päevapärase sisendi punktid; täna olev tervet pind asub
+[TUGI § 1.10](saipen/CORE.md#110-command-surface).
+
+|Käsk|Teostab|
+|---|---|
+| `/saipen set` |Projekti võtmine kasutusele: loo`.saipen/`olek|
+| `/saipen continue` |Jäta järgi juba salvestatud projektistatusest — ei kordata koolitust|
+| `/saipen plan` |Teisenda palve või algne tagasijuhendus ülesanneteks|
+| `/saipen goal <text>` |Autonoomne lainevõrrand uue eesmärgi suhtes|
+| `/saipen validate` |Käivita vastuvõtuvõimluse kontrollid|
+| `/saipen status` |Vaidlusviisne aruanne: faas, ülesanded, takistused, vananemine|
+| `/saipen stop` |Kontrollpunkti ja peatus|
+
+<details>
+<summary><b>More commands</b></summary>
+
+|Käsk|Tegevus|
+|---|---|
+| `/saipen hunt` |Võta kohe vastu puuduse/paranduse üle kontrolli|
+| `/saipen markhunt` |Kuiv, piiratud audit — kirjeldab leidmisvõtteid, ei tegele parandustega|
+| `/saipen ship` |Väljastusväravad; kui lubatud, siis kinnita, märgista ja pushi|
+| `/saipen clean` |Tahvel ja staatuse puhastus|
+| `/saipen translate` |Isolatsioonifaktorisatsioon|
+| `/saipen prepare` / `/saipen collect` |Paketi töö üleandmiseks/integreerimiseks valmis paketi|
+| `/saipen test` |Käivita deklareeritud testide komplekt, aruanne ainult|
+| `/saipen crew` |Fikseeritud järjekorra meeskondliku tõrge(hunted → kordamine → võtmine → ehitus → tõlge → dokumentatsioon → saada) |
+| `/saipen improve` |Metajuhtimise audit protokolli paranduste kohta|
+| `/saipen sub ...` |Loo/otse käsitsi loomata ainult loetavalt alamagentide|
+
+**Paketi võtmed.** `ee`/`qq`Valmistage täielik tõlge/wiki paketid ilma
+integreerimine;`eee`/`qqq`Võta vastu ainult valmis paketid, seejärel integreeri, kontrolli,
+kinnita ja pushi.
+
+**saicrew.** `sc` / `saipen crew` (`extensions/subs/crew.md`)käivitab tervet
+sisseehitatud meeskonda kindlas järjekorras — sensorid(saihunt, saitest, saipython, saiui),
+tootjad(saitranslate, saiwiki)ja Core ainuke peapuu kirjutaja —
+kuni teine täielik läbikäigu ei jää midagi tõelist muuta. See lisab täpselt ühe
+mehhanismi oma enda jaoks: kestliku orkestratsiooni sihtriigi(``execution_intent:
+koondu` with `converge_target: crew`)mis teeb sirkliit võimaliku taastamiseks ja
+tõestuslikest andmetest tuletatavalt kriisist.`saipen crew --dry-run --json`tuletab
+sirkliidi ainult loetavaks;`bootstrap/saipen_crew.*`on VALIKULINE käsitsi
+mitmeaknane abivahend, mitte mis`saipen crew`tähendab. Vaata
+[extensions/subs/crew.md](extensions/subs/crew.md).
+</details>
+
+## Mis SAIPEN ei ole
+
+- **LLM või mudel**— see on protokoll, mida agentid järgivad, mitte tarkus.
+- **IDE või kohandatud mälubaasi**— staat on lihtsad failid oma projektis;
+midagi ei ole hostitud.
+- **Git asendaja**— Git hoiab endiselt kontrolli versioonihistoriga; salvesta oma
+  `.saipen/`nagu iga teine kood.
+- **Distribueeritud konsensus**— vaata konkurentsirajooni allpool.
+- **Tagasiside, et LLM teeb õigused tehnilised otsused**— see
+vähendab konteksti kaotust ja käitumiskõrvalekalle; see ei tee stohhastilisi agente
+viga vaba.
+
+SAIPENi ülesanne on jätkusuutlikkus/olekukohustus plus valideerimine ja tööriistad —
+käesolev agentile andes masinvaldusega alguspunkti, mitte magia.
+
+**Konkurentsipiir.**Journalitud staatilised muudatused(SAIOPS)kasuta
+projektiga seotud OS lukku ja taastusjournali([OPS § 5](saipen/OPS.md#5-locks)).
+Tavalised projektimuudatused ja ühendamata kirjutajad asuvad selle lukku väljas. SAIPEN
+ei ole jaotatud konsensust, seega ühendamata kirjutajad nõuavad välist
+koordineerimist([SPEC](SPEC.md#concurrency--distribution-boundaries)).
+
+## Ekosüsteem
+
+|Projekt|Suhe SAIPENiga|
+|---|---|
+| [SAIPENVIEW](https://github.com/vacterro/saipenview) |Kohalik Windowsi juhtpaneel SAIPENi projektidele — avastab automaatselt`.saipen/`tööruume, visualiseerib reaalajas olukorda ja vastavusmärge, haldab pakkumisi ja käivitab AI CLI-sid. Kohane, mitte autoriteet.|
+| [SAIWORK](https://github.com/vacterro/saiwork) |Allpool olev CodeNomad-i viisakas haru, mis integreerib SAIPENi: sisestab`BOOT.md`/`STYLE.md`avalehtedele, avaldab SAIPENi otseteed ja projekt-olukorra vaateid ning lisab jätkuva pakkumise järjekorra.|
+| [FastPrompter](https://github.com/vacterro/fastprompter) |Kanditav Windowsi klahv- ja lõigetehaldur, mis avastab automaatselt`.saipen/`katalooge ja lisab loetamatu STATE/BOARD/LOG vaateid.|
 
 ## Dokumentatsioon
 
-| Dokument | Mis see on |
+|Dokument|Mis see on|
 |---|---|
-| [SPEC.md](SPEC.md) | Ametlik arhitektuur, disainieesmärgid, lakmustest |
-| [RFC.md](saipen/RFC.md) | Normatiivne spetsifikatsioon, mida agendid täidavad |
-| [GUIDE.md](GUIDE.md) | Inimetuutor ja ELI5 juhendid |
-| [STYLE.md](saipen/STYLE.md) | Agendi suhtlusstiil ja hääle määratlus |
-| [UI.md](saipen/UI.md) | Vintage Golden UI disainijuhised |
-| [CONFORMANCE.md](saipen/CONFORMANCE.md) | Käitumuslikud testistsenaariumid ja validaatori reeglid |
+| [SPEC.md](SPEC.md) |Formaalne arhitektuur, disaini eesmärgid, litmus testimine|
+| [CORE.md](saipen/CORE.md) |Normatiivne jätk, olekumachine ja käskude leping|
+| [MAINTENANCE.md](saipen/MAINTENANCE.md) |Autonoomne hooldus ja Eesmärkimoode|
+| [CONFORMANCE.md](saipen/CONFORMANCE.md) |Võimaldavad/tegevuslikud nõuded ja valideerimise reeglid|
+| [GUIDE.md](GUIDE.md) |Inimene juhend|
+| [RFC.md](saipen/RFC.md) |Kohandamine suunatud jagatud normatiivsete dokumentidele|
+| [STYLE.md](saipen/STYLE.md) |Agenti kommunikatsioonistüli ja hääl|
+| [UI.md](saipen/UI.md) |Vana kuldne UI disaini juhendid|
+|Kaat|Esitluskaat —[EN](BROCHURE_EN.md) / [RU](BROCHURE_RU.md) / [ET](BROCHURE_ET.md) / [DED](BROCHURE_DED.md) / [JA](BROCHURE_JA.md) |
 
 <details>
-<summary><b>Kõik 33 tõlgitud juhendit</b></summary>
+<summary><b>All 33 translated guides</b></summary>
 
-🇷🇺 [Русский](guides/GUIDE_RU.md) · 🇺🇸 [English](guides/GUIDE_EN.md) · 🇪🇪 [Eesti](guides/GUIDE_EE.md) · 🇯🇵 [日本語](guides/GUIDE_JA.md) · 👴 [Версия Деда](guides/GUIDE_DED.md)
+🇷🇺 [Русский](guides/GUIDE_RU.md) · 🇺🇸 [Inglise](guides/GUIDE_EN.md) · 🇪🇪 [Eesti](guides/GUIDE_EE.md) · 🇯🇵 [日本語](guides/GUIDE_JA.md) · 👴 [Версия Деда](guides/GUIDE_DED.md)
 
-🇺🇦 [Українська](guides/GUIDE_UK.md) · 🇩🇪 [Deutsch](guides/GUIDE_DE.md) · 🇫🇷 [Français](guides/GUIDE_FR.md) · 🇪🇸 [Español](guides/GUIDE_ES.md) · 🇮🇹 [Italiano](guides/GUIDE_IT.md)
+🇺🇦 [Українська](guides/GUIDE_UK.md) · 🇩🇪 [Saksa](guides/GUIDE_DE.md) · 🇫🇷 [Prantsuse](guides/GUIDE_FR.md) · 🇪🇸 [Hispaania](guides/GUIDE_ES.md) · 🇮🇹 [Itaalia](guides/GUIDE_IT.md)
 
-🇵🇹 [Português](guides/GUIDE_PT.md) · 🇳🇱 [Nederlands](guides/GUIDE_NL.md) · 🇵🇱 [Polski](guides/GUIDE_PL.md) · 🇸🇪 [Svenska](guides/GUIDE_SV.md) · 🇩🇰 [Dansk](guides/GUIDE_DA.md)
+🇵🇹 [Portugali](guides/GUIDE_PT.md) · 🇳🇱 [Hollandi](guides/GUIDE_NL.md) · 🇵🇱 [Poola](guides/GUIDE_PL.md) · 🇸🇪 [Soome](guides/GUIDE_SV.md) · 🇩🇰 [Tšehhi](guides/GUIDE_DA.md)
 
 🇫🇮 [Suomi](guides/GUIDE_FI.md) · 🇳🇴 [Norsk](guides/GUIDE_NO.md) · 🇨🇳 [中文](guides/GUIDE_ZH.md) · 🇰🇷 [한국어](guides/GUIDE_KO.md) · 🇹🇭 [ไทย](guides/GUIDE_TH.md)
 
@@ -132,14 +287,22 @@ Platvormipõhised märkused asuvad kaustas `extensions/adapters/`.
 
 </details>
 
-## Ehitatud SAIPEN-iga
+## Konfiguratsiooni märkmed
 
-- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — Kõrge jõudlusega viipade haldamise tööriist, mis on ehitatud SAIPENi mäluprotokolli ümber.
+**Vastuse keel.**Agent vastab**eesti keeles**vaikimisi — see on
+seadistus, mitte protokolli nõue, ja midagi muud SAIPENist ei ole eesti keeles.
+Protokoll, kood, commit-id ja iga dokumendid jäävad inglise keeleks iga
+väärtuse korral. Muuda seda ühes kohas:`reply_language:`readme faili
+[`saipen/STYLE.md`](saipen/STYLE.md). `et`eesti keeles,`en`inglise keeles,`ru`vene keeles,
+`auto`valib sõnumist, mida sa silti saatsid.
 
-## Ekraanitõmmised
+**Adapterid.**Platformi ei kaeta injektoriga(DeepSeek, Qwen, standalone
+OpenAI jne.)? Platformispetsiifilised märkused asuvad`extensions/adapters/`.
+
+## Pildid
 
 <details>
-<summary>Vajuta avamiseks</summary>
+<summary><b>Click to expand</b></summary>
 
 <img src="assets/screenshot-freebuff.png" alt="FreeBuff agent instructions" width="600"/>
 
@@ -153,7 +316,5 @@ Platvormipõhised märkused asuvad kaustas `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-<!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
-
-
-
+<!-- translation-model: qwen3:14b contract:structured-markdown-v2 -->
+<!-- source-digest: README.md sha256:2a33e364c3c12e8b1b9b2caf41b05db3ee27f17161336579ae85ee59da34fe56 -->

@@ -139,8 +139,11 @@ echo -e "${GREEN}PASS: BOARD.md no dangling needs: references${NC}"
 # 2d. Check BOARD.md has all four required section headings (RFC § 1.2) --
 # the ticket-shape/dangling/cycle checks above never verified the headings
 # they scan under actually exist.
+# CORE-009: normalize CRLF to LF before exact-line checks so a valid CRLF
+# checkout (Windows `* text=auto`) is not falsely rejected. The file on disk
+# is never rewritten; the stream is normalized only for the check.
 for heading in "## DOING" "## TODO" "## DONE" "## BLOCKED"; do
-    grep -qxF "$heading" .saipen/BOARD.md || { echo -e "${RED}FAIL: BOARD.md missing required section heading: $heading${NC}"; exit 1; }
+    tr -d '\r' < .saipen/BOARD.md | grep -qxF "$heading" || { echo -e "${RED}FAIL: BOARD.md missing required section heading: $heading${NC}"; exit 1; }
 done
 echo -e "${GREEN}PASS: BOARD.md has all required section headings${NC}"
 

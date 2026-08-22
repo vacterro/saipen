@@ -12,6 +12,10 @@ import hashlib
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .log import HistorySnapshot
 
 
 def _sha256(path: Path) -> str:
@@ -36,6 +40,7 @@ def canonical_identity(project_root: Path) -> str:
 
 def git_head(project_root: Path) -> str:
     from .paths import is_git_project_root
+
     if not is_git_project_root(project_root):
         return ""
     try:
@@ -60,29 +65,60 @@ class ProjectSnapshot:
     log_hash: str = ""
     log_tail: int | None = None
     head: str = ""
+    # W2-005: the exact STATE/BOARD bytes that produced state_hash/board_hash.
+    # Context and other projections must render/route from these bytes, not from
+    # a second independent read that may race a commit.
+    state_text: str = ""
+    board_text: str = ""
     # T-1014: the parsed events from the SAME one-pass snapshot that fed
     # log_hash/log_tail -- a command that captures the snapshot once can
     # derive the ledger verdict, the hash, the tail AND the events from that
     # single read instead of reopening the complete LOG history per consumer.
     history_events: tuple = ()
-    history: "HistorySnapshot" = None
+    history: HistorySnapshot | None = None
 
     @staticmethod
     def capture(project_root: Path | str) -> "ProjectSnapshot":
         root = Path(project_root)
-        state = root / ".saipen" / "STATE.md"
-        board = root / ".saipen" / "BOARD.md"
+        from .codec import read_checkpoint_doc, CheckpointLoadError
         from .log import read_history_snapshot
 
+        # PERF-008: ONE read per canonical file. read_checkpoint_doc reads
+        # STATE/BOARD bytes once and yields both raw_hash and decoded text;
+        # read_history_snapshot captures LOG bytes+hash+tail+events in one
+        # read. The previous code preflighted STATE/BOARD/LOG, then reopened
+        # STATE/BOARD through _sha256 and LOG through a second history read,
+        # so each canonical file was opened twice per capture.
+        try:
+            state_doc = read_checkpoint_doc(root, "STATE.md")
+            board_doc = read_checkpoint_doc(root, "BOARD.md")
+        except CheckpointLoadError:
+            # Preserve the exact error surface of checkpoint_preflight.
+            from .codec import checkpoint_preflight
+
+            problem = checkpoint_preflight(root)
+            if problem is not None:
+                raise CheckpointLoadError(problem)
+            raise
+        # checkpoint_preflight also required LOG.md to exist; keep that error
+        # surface when the active LOG is absent (read_history_snapshot tolerates
+        # a missing active segment by design).
+        if not (root / ".saipen" / "LOG.md").is_file():
+            raise CheckpointLoadError(
+                "LOG.md is missing -- a SAIPEN checkpoint requires "
+                "STATE.md, BOARD.md and LOG.md to all be present"
+            )
         history = read_history_snapshot(root)
         return ProjectSnapshot(
             project_root=root,
             project_identity=canonical_identity(root),
-            state_hash=_sha256(state),
-            board_hash=_sha256(board),
+            state_hash=state_doc.raw_hash,
+            board_hash=board_doc.raw_hash,
             log_hash=history.hash,
             log_tail=history.tail,
             head=git_head(root),
+            state_text=state_doc.text_norm,
+            board_text=board_doc.text_norm,
             history_events=history.events,
             history=history,
         )

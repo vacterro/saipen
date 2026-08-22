@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import os
 import re
+import stat
 import subprocess
 import uuid
 from dataclasses import dataclass
@@ -44,6 +45,57 @@ RECOVERY_OPS_DIR = "recovery/ops"
 IDENTITY_NAME = "IDENTITY.md"
 LINEAGE_FIELD = "project_lineage"
 LINEAGE_RE = re.compile(r"^lineage-[0-9a-f]{32}$")
+
+
+def read_bound_regular_bytes(
+    path: Path, expected: os.stat_result, *, max_bytes: int
+) -> bytes:
+    """Read the exact regular node witnessed by an earlier ``lstat``.
+
+    The descriptor, not the pathname, owns the read. Comparing ``fstat``
+    before and after the bounded read with the caller's no-follow ``lstat``
+    closes the lstat/open race even on hosts without ``O_NOFOLLOW``: a path
+    pivot may open another node, but that descriptor cannot impersonate the
+    node the caller inspected.
+
+    Raises ``OSError`` for an unreadable path and ``ValueError`` when the path
+    pivoted, the descriptor is not stable/regular, or the authority exceeds
+    its explicit size bound.
+    """
+
+    def identity(info: os.stat_result) -> tuple[int, int, int, int]:
+        return (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns)
+
+    flags = os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0)
+    descriptor = os.open(path, flags)
+    try:
+        opened_before = os.fstat(descriptor)
+        if (
+            not stat.S_ISREG(opened_before.st_mode)
+            or identity(opened_before) != identity(expected)
+            or opened_before.st_size > max_bytes
+        ):
+            raise ValueError(f"authority node changed before open: {path}")
+        remaining = max_bytes + 1
+        chunks: list[bytes] = []
+        while remaining:
+            chunk = os.read(descriptor, min(64 * 1024, remaining))
+            if not chunk:
+                break
+            chunks.append(chunk)
+            remaining -= len(chunk)
+        raw = b"".join(chunks)
+        opened_after = os.fstat(descriptor)
+        if (
+            not stat.S_ISREG(opened_after.st_mode)
+            or identity(opened_before) != identity(opened_after)
+            or len(raw) != opened_before.st_size
+            or len(raw) > max_bytes
+        ):
+            raise ValueError(f"authority node changed while reading: {path}")
+        return raw
+    finally:
+        os.close(descriptor)
 
 
 def _git_from(cwd: str | Path, *args: str) -> tuple[int, str]:
@@ -241,12 +293,50 @@ def project_lineage_identity(root: Path | str) -> str | None:
     missing/malformed lineage is fail-closed material for NEW strict receipts
     -- it must never silently become "same project".
     """
-    path = Path(root) / SAIPEN_DIR / IDENTITY_NAME
-    if not path.is_file():
+    root = Path(root)
+    saipen = root / SAIPEN_DIR
+    path = saipen / IDENTITY_NAME
+    reparse_flag = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
+
+    def identity(info) -> tuple[int, int, int, int]:
+        return (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns)
+
+    try:
+        saipen_before = saipen.lstat()
+        path_before = path.lstat()
+    except (FileNotFoundError, OSError):
+        return None
+    if (
+        os.path.islink(saipen)
+        or bool(getattr(saipen_before, "st_file_attributes", 0) & reparse_flag)
+        or not stat.S_ISDIR(saipen_before.st_mode)
+        or os.path.islink(path)
+        or bool(getattr(path_before, "st_file_attributes", 0) & reparse_flag)
+        or not stat.S_ISREG(path_before.st_mode)
+        or path_before.st_size > 4096
+    ):
         return None
     try:
-        text = path.read_text(encoding="utf-8", errors="replace")
-    except OSError:
+        raw = read_bound_regular_bytes(path, path_before, max_bytes=4096)
+        path_after = path.lstat()
+        saipen_after = saipen.lstat()
+    except (OSError, ValueError):
+        return None
+    if (
+        os.path.islink(saipen)
+        or bool(getattr(saipen_after, "st_file_attributes", 0) & reparse_flag)
+        or not stat.S_ISDIR(saipen_after.st_mode)
+        or os.path.islink(path)
+        or bool(getattr(path_after, "st_file_attributes", 0) & reparse_flag)
+        or not stat.S_ISREG(path_after.st_mode)
+        or identity(saipen_before) != identity(saipen_after)
+        or identity(path_before) != identity(path_after)
+        or raw.startswith(b"\xef\xbb\xbf")
+    ):
+        return None
+    try:
+        text = raw.decode("utf-8", errors="strict")
+    except UnicodeDecodeError:
         return None
     lineage, _error = parse_identity_content(text)
     return lineage

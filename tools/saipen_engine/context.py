@@ -109,7 +109,9 @@ def _home_present(state: dict) -> str:
         return "false"
 
 
-def _board_map(buckets: dict[str, list[dict]], full_ticket: str | None = None, cap: int = _BOARD_CAP) -> str:
+def _board_map(
+    buckets: dict[str, list[dict]], full_ticket: str | None = None, cap: int = _BOARD_CAP
+) -> str:
     """Board ORIENTATION projection, TRUTHFULLY bounded (NITRO dogfood IV,
     T-600).
 
@@ -178,15 +180,18 @@ def _load_context_inputs(root: Path) -> dict:
     exactly once per call. cold/hot/audit renderers reuse this single
     captured world when called through audit; the public APIs still load
     fresh when called alone. Nothing is retained globally or across calls.
+
+    W2-005: the snapshot's exact STATE/BOARD bytes are the coherent generation
+    for rendering/routing/validation; no second independent read of those files
+    is performed, so a commit between reads cannot mix generations.
     """
-    from .log import read_history_snapshot
     from .snapshot import ProjectSnapshot
     from .state import parse_state_or_error
     from .journal import scan_pending
 
-    state_text = codec.read_doc(root / ".saipen" / "STATE.md")
-    board_text = codec.read_doc(root / ".saipen" / "BOARD.md")
     snap = ProjectSnapshot.capture(root)
+    state_text = snap.state_text
+    board_text = snap.board_text
     log_snap = snap.history
     state, state_error = parse_state_or_error(state_text)
     board = parse_board(board_text)
@@ -209,6 +214,7 @@ def _load_context_inputs(root: Path) -> dict:
         "board": board,
         "pending": [op["op_id"] for op in _pending],
         "conflicts": [op["op_id"] for op in _conflicts],
+        "corrupt": [op for op in _pending if op.get("corrupt")],
         "snap": snap,
     }
 
@@ -224,7 +230,21 @@ def _load_inputs_checked(root: Path) -> Result | dict:
     return -- never a raw traceback, and never a partial surface built from
     what could be read before the refusal."""
     try:
-        return _load_context_inputs(root)
+        inputs = _load_context_inputs(root)
+        corrupt = inputs["corrupt"]
+        if corrupt:
+            first = corrupt[0]
+            return Result(
+                ok=False,
+                code="CORRUPT_JOURNAL",
+                op_id=str(first.get("op_id", "")),
+                message=(
+                    f"corrupt recovery evidence {first.get('op_id', '?')}: "
+                    f"{first.get('detail', '')}"
+                ),
+                data={"corrupt": corrupt, "recovery_required": True},
+            )
+        return inputs
     except HistoryOwnershipError as exc:
         return Result(
             ok=False,
@@ -233,7 +253,7 @@ def _load_inputs_checked(root: Path) -> Result | dict:
             message=f"history-ownership: {exc}",
             data={},
         )
-    except OSError as exc:
+    except (OSError, ValueError) as exc:
         return Result(
             ok=False,
             code="VALIDATION_FAILED",
@@ -287,12 +307,14 @@ def _fit(
         return _bytes(body)
 
     _b_memo = {}
+
     def _b(c):
         if c not in _b_memo:
             _b_memo[c] = board_fn(c)
         return _b_memo[c]
-        
+
     _l_memo = {}
+
     def _l(c):
         if c not in _l_memo:
             _l_memo[c] = log_fn(c)
@@ -354,14 +376,18 @@ def context_cold(
     # never to persisted STATE.agent.
     from .capability import negotiate_capability
 
-    routed = _routed if _routed is not None else route_next(
-        state_text,
-        board_text,
-        pending,
-        conflicts,
-        current_capability=negotiate_capability(),
-        current_agent=current_agent,
-        snap=inputs['snap'],
+    routed = (
+        _routed
+        if _routed is not None
+        else route_next(
+            state_text,
+            board_text,
+            pending,
+            conflicts,
+            current_capability=negotiate_capability(),
+            current_agent=current_agent,
+            snap=inputs["snap"],
+        )
     )
     if not routed.get("ok") and routing_failure_code(routed) == "VALIDATION_FAILED":
         # A malformed surface must not project a healthy cold start: the
@@ -489,14 +515,18 @@ def context_hot(
     # projection above. Second-wave P0: same session-agent claim truth.
     from .capability import negotiate_capability
 
-    routed = _routed if _routed is not None else route_next(
-        state_text,
-        board_text,
-        pending,
-        conflicts,
-        current_capability=negotiate_capability(),
-        current_agent=current_agent,
-        snap=inputs['snap'],
+    routed = (
+        _routed
+        if _routed is not None
+        else route_next(
+            state_text,
+            board_text,
+            pending,
+            conflicts,
+            current_capability=negotiate_capability(),
+            current_agent=current_agent,
+            snap=inputs["snap"],
+        )
     )
     if not routed.get("ok") and routing_failure_code(routed) == "VALIDATION_FAILED":
         return Result(
@@ -600,9 +630,15 @@ def context_audit(project_root: Path | str) -> Result:
     # full router (validation + routing) over the same world.
     from .capability import negotiate_capability
     from .router import route_next
+
     routed = route_next(
-        inputs["state_text"], inputs["board_text"], inputs["pending"], inputs["conflicts"],
-        current_capability=negotiate_capability(), current_agent=None, snap=inputs["snap"],
+        inputs["state_text"],
+        inputs["board_text"],
+        inputs["pending"],
+        inputs["conflicts"],
+        current_capability=negotiate_capability(),
+        current_agent=None,
+        snap=inputs["snap"],
     )
     cold = context_cold(root, _inputs=inputs, _routed=routed)
     if not cold.ok:

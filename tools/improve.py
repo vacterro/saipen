@@ -1977,12 +1977,17 @@ def prepare_audit_seat(
         targets.append({"path": report_rel, "role": "report", "content": report_text})
         preconditions[report_rel] = _hash_file(report)
         op_id = "improve-admit-" + uuid.uuid4().hex
-        # fmt: off
-        committed = run_mutation(root, op_id, "improve_admit", seat, _identity(root),
-                                 hash_bytes(f"{active_cycle}:{seat}:{selected_role}".encode("utf-8")),
-                                 targets, preconditions=preconditions, skip_preflight=True,
-                                 verification_policy="improve_atomic_file",
-        # fmt: on
+        committed = run_mutation(
+            root,
+            op_id,
+            "improve_admit",
+            seat,
+            _identity(root),
+            hash_bytes(f"{active_cycle}:{seat}:{selected_role}".encode("utf-8")),
+            targets,
+            preconditions=preconditions,
+            skip_preflight=True,
+            verification_policy="improve_atomic_file",
         )
         if not committed.get("ok"):
             return _rv(committed)

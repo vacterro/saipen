@@ -1,4 +1,4 @@
-"""V7 Producer Parallelism Hardening -- conformance matrix (A..N).
+"""V7 Producer Parallelism Hardening -- conformance matrix (A..Q).
 
 Run from the `tools/` directory:
 
@@ -19,11 +19,14 @@ Covers every DONE/matrix case from the spec:
   L  producer attempts Core mutation / ship -> CAPABILITY_DENIED, zero writes
   M  restart between staging and READY -> deterministic recovery, no false READY
   N  all integration serialized through the canonical Core writer lock
+  O  persisted READY reopen is strict and payload-bound
+  P  integration is journaled before READY leaves the hot set
+  Q  completed producer history is settled/superseded outside hot READY
 """
 
 from __future__ import annotations
 
-import os
+import json
 import shutil
 import sys
 import tempfile
@@ -33,13 +36,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from saipen_engine import producer as P  # noqa: E402
-from saipen_engine.capability import (  # noqa: E402
+from saipen_engine import producer as P
+from saipen_engine.capability import (
     CAPABILITY_DENIED,
     assert_producer_capability,
     guard_core_mutation,
 )
-from saipen_engine.lock import ProducerLock, project_writer_lock  # noqa: E402
+from saipen_engine.lock import ProducerLock, project_writer_lock
 
 
 def wf(root: Path, rel: str, content: str) -> None:
@@ -99,7 +102,9 @@ class V7Test(unittest.TestCase):
 
     # ------------------------------------------------------------------ A
     def test_A_concurrent_ee_qq_allowed(self):
-        with ProducerLock(self.root, "saitranslate") as le, ProducerLock(self.root, "saiwiki") as lq:
+        with ProducerLock(self.root, "saitranslate") as le, ProducerLock(
+            self.root, "saiwiki"
+        ) as lq:
             self.assertIsNotNone(le)
             self.assertIsNotNone(lq)
         # lock files are independent and never touch the canonical main tree
@@ -139,7 +144,9 @@ class V7Test(unittest.TestCase):
     def test_E_stale_epoch_cannot_publish(self):
         ns = self.root / ".saipen/saitranslate"
         epoch1 = P.ProducerEpoch.claim(ns)
-        pkg = self._make_pkg("saitranslate", ["src/core.py"], ["translations/ru.md"], "ru", epoch=epoch1)
+        pkg = self._make_pkg(
+            "saitranslate", ["src/core.py"], ["translations/ru.md"], "ru", epoch=epoch1
+        )
         gen = P.StagingGeneration(ns, "saitranslate").begin()
         gen.add_payload("translations/ru.md", "complete content")
         gen.set_package(pkg)
@@ -155,7 +162,9 @@ class V7Test(unittest.TestCase):
     def test_F_idempotent_duplicate_prepare(self):
         ns = self.root / ".saipen/saitranslate"
         epoch = P.ProducerEpoch.claim(ns)
-        pkg = self._make_pkg("saitranslate", ["src/core.py"], ["translations/ru.md"], "ru", epoch=epoch)
+        pkg = self._make_pkg(
+            "saitranslate", ["src/core.py"], ["translations/ru.md"], "ru", epoch=epoch
+        )
         g1 = P.StagingGeneration(ns, "saitranslate").begin()
         g1.add_payload("translations/ru.md", "content")
         g1.set_package(pkg)
@@ -189,8 +198,7 @@ class V7Test(unittest.TestCase):
             fake_identity("tree:base"),
             current_identity_provider=lambda: fake_identity("tree:after-ru"),
             current_hashes_provider=lambda p: {
-                k: P.file_sha256(self.root / k)
-                for k in (set(p.read_set) | set(p.write_set))
+                k: P.file_sha256(self.root / k) for k in (set(p.read_set) | set(p.write_set))
             },
         )
         wiki_entry = next(e for e in plan["packages"] if e["producer"] == "saiwiki")
@@ -199,7 +207,7 @@ class V7Test(unittest.TestCase):
 
     # ------------------------------------------------------------------ H
     def test_H_translate_changes_wiki_read_dep_stale(self):
-        translate = self._make_pkg(
+        self._make_pkg(
             "saitranslate",
             ["shared/glossary.md"],
             ["translations/ru.md", "shared/glossary.md"],
@@ -270,7 +278,7 @@ class V7Test(unittest.TestCase):
         self.assertTrue(ok)
 
         # guard refuses any producer write that would touch Core canonical truth
-        blocked, why = guard_core_mutation(self.root / ".saipen/STATE.md")
+        blocked, _why = guard_core_mutation(self.root / ".saipen/STATE.md")
         self.assertTrue(blocked)
         # and a denied action performs ZERO canonical writes
         state_path = self.root / ".saipen/STATE.md"
@@ -294,8 +302,17 @@ class V7Test(unittest.TestCase):
         # now a crashed staging generation appears (incomplete, never published)
         crashed = P.StagingGeneration(ns, "saiwiki").begin()
         crashed.add_payload("wiki/index.md", "partial")  # never published
-        crashed.set_package(self._make_pkg("saiwiki", ["src/wiki.md"], ["wiki/index.md"], "crashed", epoch=epoch))
-        # restart -> deterministic recovery
+        crashed.set_package(
+            self._make_pkg("saiwiki", ["src/wiki.md"], ["wiki/index.md"], "crashed", epoch=epoch)
+        )
+        # A restart/takeover must advance ownership before cleanup. Merely
+        # observing an in-flight marker at the current epoch cannot prove the
+        # producer is dead; concurrent recovery must preserve it.
+        preserved = P.StagingGeneration.recover(ns)
+        self.assertEqual(preserved["removed_staging"], [])
+        self.assertTrue(crashed.staging_dir.is_dir())
+        P.ProducerEpoch.claim(ns)
+        # takeover -> deterministic stale-generation recovery
         report = P.StagingGeneration.recover(ns)
         self.assertTrue(report["removed_staging"])
         self.assertFalse(report["false_ready"])
@@ -311,7 +328,7 @@ class V7Test(unittest.TestCase):
 
         def apply(pkg, root):
             written.append(pkg.package_identity)
-            wf(root, list(pkg.write_set)[0], "payload")
+            wf(root, next(iter(pkg.write_set)), "payload")
 
         res = P.integrate_packages_core([a, b], self.root, apply_write=apply)
         for r in res["results"]:
@@ -337,6 +354,75 @@ class V7Test(unittest.TestCase):
             t.start()
             t.join(timeout=10)
         self.assertIn("raised", exc)
+
+    def test_O_ready_reopen_is_strict_and_payload_bound(self):
+        ns = self.root / ".saipen/saitranslate"
+        epoch = P.ProducerEpoch.claim(ns)
+        pkg = self._make_pkg(
+            "saitranslate", ["src/core.py"], ["translations/ru.md"], "strict", epoch
+        )
+        gen = P.StagingGeneration(ns, "saitranslate").begin()
+        gen.set_package(pkg)
+        gen.add_payload("translations/ru.md", "strict payload\n")
+        published = gen.publish()
+        self.assertTrue(published["ok"], published)
+        reopened, errors = P.StagingGeneration.scan_ready(ns)
+        self.assertEqual(errors, [])
+        self.assertEqual(reopened[0].payloads["translations/ru.md"], b"strict payload\n")
+
+        ready_file = next((ns / P.READY_DIRNAME).glob("*.json"))
+        forged = json.loads(ready_file.read_text(encoding="utf-8"))
+        forged["payload_hashes"]["translations/ru.md"] = "sha256:forged"
+        ready_file.write_text(json.dumps(forged), encoding="utf-8")
+        candidates, errors = P.StagingGeneration.scan_ready(ns)
+        self.assertEqual(candidates, [])
+        self.assertEqual(errors[0]["code"], "INVALID_READY")
+
+    def test_P_integration_is_journaled_then_leaves_hot_ready(self):
+        from saipen_engine.journal import semantic_receipts_for_operation
+
+        ns = self.root / ".saipen/saiwiki"
+        epoch = P.ProducerEpoch.claim(ns)
+        pkg = self._make_pkg("saiwiki", ["src/wiki.md"], ["wiki/index.md"], "journaled", epoch)
+        gen = P.StagingGeneration(ns, "saiwiki").begin()
+        gen.set_package(pkg)
+        gen.add_payload("wiki/index.md", "# Integrated\n")
+        self.assertTrue(gen.publish()["ok"])
+        ready, errors = P.StagingGeneration.scan_ready(ns)
+        self.assertEqual(errors, [])
+        result = P.integrate_packages_core(ready, self.root, agent="producer-test")
+        self.assertEqual(result["results"][0]["result"], "INTEGRATED")
+        self.assertEqual((self.root / "wiki/index.md").read_text(), "# Integrated\n")
+        self.assertEqual(P.StagingGeneration.list_ready(ns), [])
+        self.assertEqual(len(list((ns / P.SETTLED_DIRNAME).glob("*.json"))), 1)
+        receipts = semantic_receipts_for_operation(self.root, "producer_integration")
+        self.assertEqual(len(receipts), 1)
+        meta = receipts[0]["receipt_metadata"]
+        self.assertEqual(meta["package_identity"], pkg.package_identity)
+        self.assertIn("resulting_source_fingerprint", meta)
+
+    def test_Q_completed_history_does_not_grow_hot_ready_set(self):
+        ns = self.root / ".saipen/saiwiki"
+        packages = []
+        for index in range(25):
+            epoch = P.ProducerEpoch.claim(ns)
+            rel = f"wiki/history-{index:03d}.md"
+            pkg = self._make_pkg("saiwiki", ["src/wiki.md"], [rel], f"history-{index}", epoch)
+            gen = P.StagingGeneration(ns, "saiwiki").begin()
+            gen.set_package(pkg)
+            gen.add_payload(rel, f"# Revision {index}\n")
+            self.assertTrue(gen.publish()["ok"])
+            packages.append(pkg)
+
+        ready, errors = P.StagingGeneration.scan_ready(ns)
+        self.assertEqual(errors, [])
+        self.assertEqual(len(ready), 25)
+        newest = max(ready, key=lambda package: package.epoch)
+        result = P.integrate_packages_core([newest], self.root, agent="producer-test")
+        self.assertEqual(result["results"][0]["result"], "INTEGRATED")
+        self.assertEqual(P.StagingGeneration.list_ready(ns), [])
+        self.assertEqual(len(list((ns / P.SETTLED_DIRNAME).glob("*.json"))), 1)
+        self.assertEqual(len(list((ns / P.SUPERSEDED_DIRNAME).glob("*.json"))), 24)
 
 
 if __name__ == "__main__":

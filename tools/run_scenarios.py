@@ -99,7 +99,7 @@ from saipen_engine.board import parse_board
 from saipen_engine.state import parse_state
 from saipen_engine.journal import Journal, pending_ops, recover, recovery_preflight, run_mutation
 from saipen_engine.lock import WriterLock
-from saipen_engine.log import parse_log_line
+from saipen_engine.log import build_event, parse_log_line
 from saipen_engine.operations import (
     apply_claim,
     checkpoint,
@@ -3354,6 +3354,14 @@ def run_saicrew_probes() -> tuple[list[str], int]:
                         "operation": "sub_sync",
                         "status": "COMMITTED",
                         "created_at": created_at,
+                        "semantic_payload_hash": "fixture-sub-sync",
+                        "agent": "scenario",
+                        "project_identity": str(root.resolve()),
+                        "verification_policy": "none",
+                        "preconditions": {},
+                        "read_preconditions": {},
+                        "progress_index": 0,
+                        "targets": [],
                         "receipt_metadata": {
                             "owned_source_inventory": inventory,
                             "obsolete_reconciliation": [],
@@ -3400,11 +3408,18 @@ def run_saicrew_probes() -> tuple[list[str], int]:
 
         amb_root = Path(raw) / "sync-lineage-ambiguous"
         seed_project(amb_root)
-        write_receipt(amb_root, "sub-sync-amb-a", "sub-sync-amb", "2026-08-14T00:00:00Z", "", early)
+        write_receipt(
+            amb_root,
+            "sub-sync-amb-a",
+            "sub-sync-amb-a",
+            "2026-08-14T00:00:00Z",
+            "",
+            early,
+        )
         write_receipt(
             amb_root,
             "sub-sync-amb-b",
-            "sub-sync-amb",
+            "sub-sync-amb-b",
             "2026-08-14T00:00:00Z",
             "TEMPLATE/sync-lineage-amb-extra.txt",
             early,
@@ -3436,8 +3451,12 @@ def run_saicrew_probes() -> tuple[list[str], int]:
             broken_first.to_json(),
         )
         broken_op = (
-            broken_root / ".saipen" / "recovery" / "ops" / broken_first.op_id / "operation.json"
+            broken_root / ".saipen" / "recovery" / "settled" / broken_first.op_id / "operation.json"
         )
+        if not broken_op.is_file():
+            broken_op = (
+                broken_root / ".saipen" / "recovery" / "ops" / broken_first.op_id / "operation.json"
+            )
         broken_record = json.loads(broken_op.read_text(encoding="utf-8"))
         broken_record["created_at"] = "not-a-timestamp"
         broken_op.write_text(
@@ -3517,7 +3536,9 @@ def run_saicrew_probes() -> tuple[list[str], int]:
             selection (T-1001), exactly as spaced-out real syncs are."""
             if not op_id:
                 return
-            op_file = root / ".saipen" / "recovery" / "ops" / op_id / "operation.json"
+            op_file = root / ".saipen" / "recovery" / "settled" / op_id / "operation.json"
+            if not op_file.is_file():
+                op_file = root / ".saipen" / "recovery" / "ops" / op_id / "operation.json"
             if not op_file.is_file():
                 return
             record = json.loads(op_file.read_text(encoding="utf-8"))
@@ -5015,6 +5036,44 @@ def run_saicrew_probes() -> tuple[list[str], int]:
             refused_finalize.to_json(),
         )
 
+        # The finalizer intentionally promotes one snapshot dependency from
+        # READ-missing (file-missing-v1) to WRITE-missing (""). That token
+        # normalization must not authorize a file another writer creates
+        # between PLAN and APPLY.
+        target_race = Path(raw) / "crew-positive-finalize-target-race"
+        shutil.copytree(post, target_race)
+        _rebind_release_identity(target_race)
+        future_evidence = target_race / ".saipen/kitchen/crew_release_evidence.json"
+        target_core_before = (
+            (target_race / ".saipen/LOG.md").read_bytes(),
+            (target_race / ".saipen/STATE.md").read_bytes(),
+        )
+
+        @contextlib.contextmanager
+        def create_future_target_before_apply(lock_root):
+            future_evidence.write_text("foreign writer\n", encoding="utf-8")
+            with real_writer_lock(lock_root):
+                yield
+
+        with mock.patch.object(
+            plan_engine,
+            "project_writer_lock",
+            create_future_target_before_apply,
+        ):
+            refused_target_race = finalize_crew(target_race)
+        target_core_after = (
+            (target_race / ".saipen/LOG.md").read_bytes(),
+            (target_race / ".saipen/STATE.md").read_bytes(),
+        )
+        expect(
+            "finalizer CAS refuses concurrent creation of promoted evidence target",
+            not refused_target_race.ok
+            and refused_target_race.code == "STALE_STATE"
+            and target_core_before == target_core_after
+            and future_evidence.read_text(encoding="utf-8") == "foreign writer\n",
+            refused_target_race.to_json(),
+        )
+
         finalized = finalize_crew(post)
         final_state = parse_state(codec.read_doc(post / ".saipen" / "STATE.md"))
         expect(
@@ -5158,6 +5217,18 @@ def run_manifest_tracking_probes() -> tuple[list[str], int]:
                 problems.append(f"{label}: missing {contains!r}")
             else:
                 print(f"PASS: manifest tracking -- {label}")
+
+        # Copy-tree noise is ignored only by the binding SHIP gate, which
+        # validates the exact release index. The ordinary/core validator must
+        # still expose it because direct injectors copy the complete live tree.
+        foreign_tree_file = home / "tools" / "foreign_untracked_runtime.py"
+        foreign_tree_file.write_text("# foreign probe\n", encoding="utf-8", newline="\n")
+        expect(
+            "an untracked copy-tree member stays visible outside SHIP",
+            validate(),
+            "names a file git does not track: tools/foreign_untracked_runtime.py",
+        )
+        foreign_tree_file.unlink()
 
         git("rm", "-q", "--cached", victim)
         git("commit", "-q", "-m", "drop from index, keep on disk")
@@ -5971,6 +6042,89 @@ def run_release_executor_probes() -> tuple[list[str], int]:
             st = re.sub(rf"(?m)^({counter}:\s*)\d+$", f"\\g<1>{rebuilt}", st)
         (saipen_dir / "STATE.md").write_text(st, encoding="utf-8")
 
+    def _append_fixture_verification(saipen_dir: Path) -> None:
+        """Give synthetic T-9000 real current-cycle VERIFY evidence.
+
+        The release fixture used to patch STATE straight to SHIP while
+        omitting the VERIFY boundary and PASS that production closure
+        requires.  That made the harness itself invalid and collapsed most
+        release assertions into the same INCOMPLETE_TICKET refusal. Build the
+        complete VERIFY/PASS/REVIEW/SHIP chain with the canonical event
+        renderer and bind STATE.last_event to the resulting tail.
+        """
+        log_path = saipen_dir / "LOG.md"
+        log_text = log_path.read_text(encoding="utf-8-sig")
+        events = [
+            parsed["event"]
+            for line in log_text.splitlines()
+            if (parsed := parse_log_line(line)) is not None
+        ]
+        logs_dir = saipen_dir / "logs"
+        if logs_dir.is_dir():
+            for segment in sorted(logs_dir.glob("LOG-*.md")):
+                events.extend(
+                    parsed["event"]
+                    for line in segment.read_text(encoding="utf-8-sig").splitlines()
+                    if (parsed := parse_log_line(line)) is not None
+                )
+        tail = max(events, default=0)
+        now_dt = datetime.datetime.now(datetime.timezone.utc)
+        now = now_dt.strftime("%d.%m.%y %H:%M")
+        boundary, boundary_line = build_event(
+            tail,
+            "RUN",
+            "transition to VERIFY -- release fixture verification boundary",
+            ticket="T-9000",
+            agent="probe",
+            now=now,
+            op_id="transition-release-fixture-verify",
+        )
+        verdict, verdict_line = build_event(
+            boundary,
+            "RUN",
+            "verify -> PASS: release fixture invariants proven conf: high",
+            ticket="T-9000",
+            agent="probe",
+            now=now,
+            op_id="checkpoint-release-fixture-verify",
+        )
+        review, review_line = build_event(
+            verdict,
+            "RUN",
+            "transition to REVIEW -- release fixture verification accepted",
+            ticket="T-9000",
+            agent="probe",
+            now=now,
+            op_id="transition-release-fixture-review",
+        )
+        ship, ship_line = build_event(
+            review,
+            "RUN",
+            "transition to SHIP -- release fixture review accepted",
+            ticket="T-9000",
+            agent="probe",
+            now=now,
+            op_id="transition-release-fixture-ship",
+        )
+        log_path.write_text(
+            log_text.rstrip("\n")
+            + "\n"
+            + "\n".join((boundary_line, verdict_line, review_line, ship_line))
+            + "\n",
+            encoding="utf-8",
+        )
+        state_path = saipen_dir / "STATE.md"
+        state_text = state_path.read_text(encoding="utf-8-sig")
+        state_text = re.sub(
+            r"(?m)^(\s*last_event:\s*)\d+$", f"\\g<1>{ship}", state_text
+        )
+        state_text = re.sub(
+            r"(?m)^(\s*updated:\s*).*$",
+            f"\\g<1>{now_dt.strftime('%Y-%m-%dT%H:%M:%SZ')}",
+            state_text,
+        )
+        state_path.write_text(state_text, encoding="utf-8")
+
     def build_fixture(tmp: Path, *, mode: str = "full", gitless: bool = False) -> tuple:
         """ONE valid SHIP-phase fixture builder (T-994 / § 21): the copied
         project's real STATE keeps every required field (blocker,
@@ -5999,7 +6153,7 @@ def run_release_executor_probes() -> tuple[list[str], int]:
             return subprocess.run(
                 [sys.executable, str(project / "tools" / "saipen.py"), *args],
                 cwd=str(project),
-                env=env,
+                env={**env, "SAIPEN_CAPABILITY": mode},
                 capture_output=True,
                 text=True,
                 errors="replace",
@@ -6058,12 +6212,14 @@ def run_release_executor_probes() -> tuple[list[str], int]:
         board_text = re.sub(
             r"(?ms)^## DOING\n.*?(?=^## )",
             "## DOING\n- [/] T-9000 synthetic fixture ticket "
+            "| verify: canonical release executor matrix passes "
             "| owner: probe | claim_time: 2026-01-01T00:00:00Z\n",
             board_text,
         )
         (saipen_dir / "BOARD.md").write_text(board_text, encoding="utf-8")
 
         _cut_log(saipen_dir)
+        _append_fixture_verification(saipen_dir)
         if not gitless:
             git("add", "-A")
             git("commit", "-q", "-m", "probe: fixture ship")
@@ -7935,7 +8091,7 @@ def run_role_freshness_probes() -> tuple[list[str], int, int]:
             contains=before.source_tree_fingerprint,
         )
 
-        original_parse_delta = freshness._parse_git_delta
+        original_parse_delta = freshness._parse_git_delta_evidence
         parse_reads = 0
 
         def mutate_after_second_read(root: Path, raw_delta: bytes, raw_untracked: bytes):
@@ -7948,7 +8104,9 @@ def run_role_freshness_probes() -> tuple[list[str], int, int]:
 
         try:
             with mock.patch.object(
-                freshness, "_parse_git_delta", side_effect=mutate_after_second_read
+                freshness,
+                "_parse_git_delta_evidence",
+                side_effect=mutate_after_second_read,
             ):
                 compute_source_identity(project)
         except FreshnessError:
@@ -8639,11 +8797,13 @@ def run_userperson_probes() -> tuple[list[str], int]:
         "exact duplicate (same category, same text) is deduplicated", len(dedup) == 1, repr(dedup)
     )
 
-    removed = remove_preference(merged, "Material Design")
+    removed, remove_refusal = remove_preference(merged, "Material Design")
     expect(
         "remove drops the matching preference",
-        len(removed) == 1 and removed[0]["text"] == "Vintage Golden",
-        repr(removed),
+        remove_refusal is None
+        and len(removed) == 1
+        and removed[0]["text"] == "Vintage Golden",
+        repr((removed, remove_refusal)),
     )
 
     rendered = render_profile(merged)
@@ -10242,11 +10402,11 @@ def run_improve_probes() -> tuple[list[str], int]:
         "bare saipen improve never changes phase/task (audit prep is read-only for STATE)",
         (meta_root / ".saipen" / "STATE.md").read_bytes() == state_before_meta,
     )
-    _admit_journal = json.loads(
-        (
-            meta_root / ".saipen" / "recovery" / "ops" / _bare_data["op_id"] / "operation.json"
-        ).read_text(encoding="utf-8")
-    )
+    # Terminal receipts normally move from ops/ to settled/. Resolve through
+    # the same Journal authority as production instead of pinning a stale
+    # physical namespace in the fixture (a truthful COMMITTED receipt may
+    # remain in ops only when the best-effort settlement move fails).
+    _admit_journal = Journal(meta_root, _bare_data["op_id"]).read()
     expect(
         "Improve admission journals roster and report as one operation",
         _admit_journal.get("operation") == "improve_admit"
@@ -12163,8 +12323,10 @@ def run_improve_probes() -> tuple[list[str], int]:
     # a DONE-state root so the external phase HUNT modification is real
     (saipen_r / "STATE.md").write_text(
         '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
-        'blocker: ""\nsaipen_version: 7\nschema_version: 3\nlast_event: 900\n'
-        'style_contract: ded-4ae736e4\nsaipen_home: "."\nagent: probe\nmode: full\n'
+        'blocker: ""\ntransition_from: SHIP\nsaipen_version: 7\n'
+        'schema_version: 3\nlast_event: 900\n'
+        'style_contract: ded-4ae736e4\n'
+        f'saipen_home: "{HOME.resolve().as_posix()}"\nagent: probe\nmode: full\n'
         "updated: 2026-08-09T00:00:00Z\n---\n",
         encoding="utf-8",
     )
@@ -12647,9 +12809,7 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
         r = Path(tempfile.mkdtemp(prefix="saipen-m3-goal-"))
         s = r / ".saipen"
         s.mkdir()
-        (s / "LOG.md").write_text(
-            "- 09.08.26 00:00 [E-900] [T-none] DEC: base\n", encoding="utf-8"
-        )
+        (s / "LOG.md").write_text("- 09.08.26 00:00 [E-900] [T-none] DEC: base\n", encoding="utf-8")
         (s / "BOARD.md").write_text(
             "# Board\n## DOING\n## TODO\n"
             "- [ ] T-1 [P1] top probe | verify: probe\n"
@@ -12665,7 +12825,7 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
             '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
             'blocker: ""\ntransition_from: SHIP\nsaipen_version: 7\n'
             "schema_version: 3\nlast_event: 900\nstyle_contract: ded-4ae736e4\n"
-            f'saipen_home: "{str(HOME)}"\nagent: probe\nrequires:\n  - filesystem\n'
+            f'saipen_home: "{HOME.as_posix()}"\nagent: probe\nrequires:\n  - filesystem\n'
             "  - git\n  - python\nmode: full\nupdated: 2026-08-09T00:00:00Z\n"
             "---\n",
             encoding="utf-8",
@@ -12926,8 +13086,7 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
     ge_state_before = parse_state(codec.read_doc(ge_saipen / "STATE.md"))
     expect(
         "goal_entry precondition: active DOING ticket T-1 at BUILD",
-        ge_state_before.get("task") == "T-1"
-        and ge_state_before.get("phase") == "BUILD",
+        ge_state_before.get("task") == "T-1" and ge_state_before.get("phase") == "BUILD",
         repr(ge_state_before),
     )
     ge_result = goal_entry(ge_root, "probe", "T-1100 goal entry test")
@@ -12942,7 +13101,7 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
         "goal_entry sets execution_intent to goal",
         ge_state_after.get("execution_intent") == "goal"
         and ge_state_after.get("goal_waves") == 1
-        and ge_state_after.get("goal_tickets") >= 1,
+        and ge_state_after.get("goal_tickets") == 0,
         repr(ge_state_after),
     )
     expect(
@@ -12964,6 +13123,11 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
         "goal pivot" in ge_log and "T-1100 goal entry test" in ge_log,
         repr(ge_log[-200:]),
     )
+    expect(
+        "goal_entry logs the recoverable Entry PLAN wave bump",
+        "DEC: goal_waves 0->1" in ge_log,
+        repr(ge_log[-300:]),
+    )
 
     # ---- T-1100: goal_entry cold-start resume ----
     # After goal_entry, routing should find the next workable ticket
@@ -12974,8 +13138,7 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
     )
     expect(
         "goal_entry cold-start routes to the plan ticket",
-        ge_routed.get("ok")
-        and ge_routed.get("ticket") is not None,
+        ge_routed.get("ok") and ge_routed.get("ticket") is not None,
         repr(ge_routed),
     )
 
@@ -13010,8 +13173,9 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
 
     # ---- T-1100: goal_entry credential redaction ----
     ge_cred = make_project()
-    ge_cred_result = goal_entry(
-        ge_cred, "probe",
+    goal_entry(
+        ge_cred,
+        "probe",
         "fix the ghp_abcdefghijklmnopqrstuvwxyz0123456789ab token leak",
     )
     ge_cred_log = codec.read_doc(ge_cred / ".saipen" / "LOG.md")
@@ -13062,7 +13226,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
             '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
             'blocker: ""\ntransition_from: SHIP\nsaipen_version: 7\n'
             "schema_version: 3\nlast_event: 900\nstyle_contract: ded-4ae736e4\n"
-            f'saipen_home: "{str(HOME)}"\nagent: probe\nrequires:\n  - filesystem\n'
+            f'saipen_home: "{HOME.as_posix()}"\nagent: probe\nrequires:\n  - filesystem\n'
             "  - git\n  - python\nmode: full\nupdated: 2026-08-09T00:00:00Z\n"
             "---\n",
             encoding="utf-8",
@@ -13214,9 +13378,9 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     )
     blocker_status_data = json.loads(blocker_status.stdout)
     expect(
-        "public status excludes TODO+blocker from top_workable",
-        blocker_status_data.get("top_workable_ticket") == "T-2"
-        and blocker_status_data.get("computed_next_action") == "PHASE SCOUT T-2",
+        "public status refuses structurally invalid TODO+blocker state",
+        blocker_status_data.get("ok") is False
+        and blocker_status_data.get("code") == "VALIDATION_FAILED",
         repr(blocker_status_data),
     )
     blocker_next = subprocess.run(
@@ -13228,8 +13392,10 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     )
     blocker_next_data = json.loads(blocker_next.stdout)
     expect(
-        "public next never emits SCOUT for TODO+blocker",
-        blocker_next_data.get("action") == "PHASE SCOUT T-2",
+        "public next refuses structurally invalid TODO+blocker state",
+        blocker_next_data.get("ok") is False
+        and blocker_next_data.get("code") == "VALIDATION_FAILED"
+        and blocker_next_data.get("action") != "PHASE SCOUT T-1",
         repr(blocker_next_data),
     )
 
@@ -14437,7 +14603,12 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         "## BOARD MAP" in surf and bool(re.search(r"\+ ?\d+ more", surf)),
         repr(surf[-300:]),
     )
-    bm = _ctx_board_map(parse_board(codec.read_doc(sf / "BOARD.md")), full_ticket="T-4", cap=2)
+    _shape_tickets = parse_board(codec.read_doc(sf / "BOARD.md"))["tickets"].values()
+    _shape_buckets = {
+        section: [ticket for ticket in _shape_tickets if ticket["section"] == section]
+        for section in ("## DOING", "## TODO", "## BLOCKED", "## DONE")
+    }
+    bm = _ctx_board_map(_shape_buckets, full_ticket="T-4", cap=2)
     expect(
         "context: _board_map omits exactly the right count (+9 more from "
         "12 TODO tickets with cap 2 + protected full T-4)",
@@ -15007,7 +15178,10 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     from saipen_engine.journal import resolve_conflict as _rs_resolve
 
     _rs_resolve(res_root, "op-rs", "accept_live", agent="probe")
-    rs_dir = res_root / ".saipen" / "recovery" / "ops" / "op-rs"
+    # Terminal receipts move out of the active ops namespace immediately.
+    # Resolve through Journal again so the test follows the canonical
+    # active-or-settled locator instead of pinning the pre-T-1008 path.
+    rs_dir = Journal(res_root, "op-rs").dir
     _rs_record = json.loads((rs_dir / "operation.json").read_text(encoding="utf-8"))
     compact_committed(res_root)
     rs_staged = list(rs_dir.glob("*.staged"))
@@ -15081,9 +15255,13 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     ctx9_root = make_project()
     lines = ["# Board", "## DOING", "## TODO"]
     for i in range(8):
-        lines.append(f"- [ ] T-{i + 1} [P1] unworkable {i + 1} | needs: T-999 | verify: probe")
+        lines.append(f"- [ ] T-{i + 1} [P1] unworkable {i + 1} | needs: T-10 | verify: probe")
     lines.append("- [ ] T-9 [P1] the workable one | verify: probe")
-    lines += ["## DONE", "## BLOCKED"]
+    lines += [
+        "## DONE",
+        "## BLOCKED",
+        "- [ ] T-10 [P1] external prerequisite | blocker: WAIT_EXTERNAL -- probe | verify: probe",
+    ]
     (ctx9_root / ".saipen" / "BOARD.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     cold9 = ctx.context_cold(ctx9_root)
     expect(
@@ -16054,9 +16232,7 @@ def run_hostile_journal_probes() -> tuple[list[str], int]:
         return hashlib.sha256(b).hexdigest()[:16]
 
     def base_targets(content_bytes):
-        return [
-            {"path": "x.txt", "role": "generic", "action": "write", "content": content_bytes}
-        ]
+        return [{"path": "x.txt", "role": "generic", "action": "write", "content": content_bytes}]
 
     # 1. relative root works (was a crash)
     r = mkrepo()
@@ -16067,9 +16243,20 @@ def run_hostile_journal_probes() -> tuple[list[str], int]:
     finally:
         os.chdir(old_cwd)
     expect("relative root commits", res["ok"], repr(res))
+    relative_journal = Journal(r.resolve(), "op-relroot")
     expect(
         "receipt decodes",
-        decode_operation_record(r.resolve(), r / ".saipen/recovery/ops/op-relroot")["ok"],
+        decode_operation_record(r.resolve(), relative_journal.dir)["ok"],
+    )
+    try:
+        relative_journal.append_targets(base_targets(b"forbidden\n"))
+        terminal_append_refused = False
+    except ValueError:
+        terminal_append_refused = True
+    expect(
+        "terminal receipt refuses appended targets",
+        terminal_append_refused
+        and not list(relative_journal.dir.glob("1_*.staged")),
     )
     shutil.rmtree(r, ignore_errors=True)
 
@@ -16261,11 +16448,14 @@ def run_hostile_journal_probes() -> tuple[list[str], int]:
     expect("file unchanged by refused retry", (r / "x.txt").read_text() == "l1\n")
     shutil.rmtree(r, ignore_errors=True)
 
-    # 8. append_targets bounded staged names + deep path
+    # 8. append_targets bounded staged names + deep path. Build an ACTIVE
+    # receipt: terminal receipts are immutable and normally live in settled/.
     r = mkrepo()
-    res = run_mutation(r, "op-append", "p", "a", "i", "s", base_targets(b"a1\n"))
-    expect("append base op commits", res["ok"], repr(res))
     j = Journal(r, "op-append")
+    base = base_targets(b"a1\n")[0]
+    base["before_hash"] = hash_of((r / "x.txt").read_bytes())
+    base["after_hash"] = hash_of(b"a1\n")
+    j.start("p", "a", "i", "s", [base], verification_policy="none")
     deep = "/".join(["d%d" % i for i in range(40)]) + "/deep.txt"
     j.append_targets(
         [
@@ -16279,8 +16469,7 @@ def run_hostile_journal_probes() -> tuple[list[str], int]:
             }
         ]
     )
-    opd = r / ".saipen" / "recovery" / "ops" / "op-append"
-    staged = list(opd.glob("1_*.staged"))
+    staged = list(j.dir.glob("1_*.staged"))
     expect(
         "append uses bounded staged_name",
         len(staged) == 1 and len(staged[0].stem) == 1 + 1 + 16,
@@ -17031,7 +17220,7 @@ def run_hostile_authority_probes() -> tuple[list[str], int]:
     res = checkpoint(parent_file, "probe", "RUN", None, "probe")
     expect(
         "a mutation over corrupt evidence refuses",
-        not res.ok and res.code in ("CORRUPT_JOURNAL", "VALIDATION_FAILED"),
+        not res.ok and res.code == "CORRUPT_JOURNAL",
         res.to_json(),
     )
     expect("corrupt-evidence refusal wrote nothing", canon(parent_file) == before)
@@ -18658,7 +18847,7 @@ def main():
     if failures:
         print(f"\nFAILED: {len(failures)} executable check(s) failed")
         for f in failures:
-            print(f"  - {f}")
+            print(f"FAILED: {f}")
         sys.exit(1)
 
     if checked == 0:

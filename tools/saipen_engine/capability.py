@@ -112,7 +112,9 @@ def may_publish(capability: object) -> bool:
     return capability_error(capability) is None and capability == "full"
 
 
-def assert_producer_capability(action: str, *, producer: str | None = None) -> tuple[bool, str, str]:
+def assert_producer_capability(
+    action: str, *, producer: str | None = None
+) -> tuple[bool, str, str]:
     """The hard producer capability boundary (spec §7).
 
     Returns ``(allowed, code, detail)``. A forbidden action returns
@@ -176,7 +178,6 @@ def guard_core_mutation(path: str | Path) -> tuple[bool, str]:
                 )
             if next_part == "knowledge":
                 return True, (
-                    f"path {str(p)!r} resolves to Core KNOWLEDGE tree; "
-                    "producers may not mutate it"
+                    f"path {str(p)!r} resolves to Core KNOWLEDGE tree; producers may not mutate it"
                 )
     return False, ""

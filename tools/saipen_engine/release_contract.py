@@ -32,7 +32,8 @@ def locale_readme_paths(kitchen_dir: Path) -> list[Path]:
 
 
 def release_metadata_paths(root: Path) -> list[Path]:
-    """The release surface: VERSION, README.md, CHANGELOG.md, the portable
+    """The release surface: VERSION, README.md, CHANGELOG.md, the three root
+    README mirrors (README.ee.md, README.ded.md, README.ja.md), the portable
     project-identity carrier (`.saipen/IDENTITY.md`) and every mechanically
     mirrored locale README under the translation kitchen.
 
@@ -46,7 +47,15 @@ def release_metadata_paths(root: Path) -> list[Path]:
     """
     root = Path(root)
     kitchen = root / ".saipen" / "saitranslate" / "kitchen"
-    paths = [Path("VERSION"), Path("README.md"), Path("CHANGELOG.md"), Path(".saipen/IDENTITY.md")]
+    paths = [
+        Path("VERSION"),
+        Path("README.md"),
+        Path("README.ee.md"),
+        Path("README.ded.md"),
+        Path("README.ja.md"),
+        Path("CHANGELOG.md"),
+        Path(".saipen/IDENTITY.md"),
+    ]
     for readme in locale_readme_paths(kitchen):
         try:
             paths.append(readme.relative_to(root))

@@ -246,12 +246,7 @@ def main() -> int:
             else:
                 neither.append(label)
         finally:
-            for f, data in saved:
-                if data is None:
-                    if f.exists():
-                        f.unlink()
-                else:
-                    f.write_bytes(data)
+            ac.restore_case_files(saved)
 
     if validate(pristine) != 0 or floor(pristine) != 0:
         print(

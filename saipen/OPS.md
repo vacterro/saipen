@@ -109,6 +109,12 @@ over a conflict. `saipen status` / `saipen next` surface recovery_pending and
 recovery_conflict; `saipen recover` on a conflict REFUSEs with the op named
 and evidence preserved.
 
+Evidence that cannot be decoded or safely traversed is `CORRUPT_JOURNAL`,
+not CONFLICT: preflight, mutation, recovery, release, status, next, and
+read-only context all refuse with that exact code and preserve the structured
+detail. Corrupt evidence is never constructed as a Journal and never replayed
+automatically.
+
 ### Recovery
 
 Recovery is ROLL-FORWARD and CONFLICT-SAFE. LOG is append-only evidence; once
@@ -143,6 +149,7 @@ READ-ONLY preconditions the original plan read but did not write. Recovery:
 Before ANY new mutation, `pending_ops` journals are scanned (Recovery
 preflight):
 
+- corrupt recovery evidence exists -> refuse CORRUPT_JOURNAL before replay;
 - an unresolved CONFLICT exists -> refuse RECOVERY_CONFLICT naming the op;
 - none pending -> proceed;
 - exactly one recoverable -> recover/complete it first;
@@ -212,7 +219,7 @@ error codes: STALE_STATE, TICKET_NOT_FOUND, TICKET_NOT_WORKABLE,
 TICKET_ALREADY_DONE, ILLEGAL_TICKET_LIFECYCLE, NOT_TOP_WORKABLE,
 ACTIVE_TICKET_MISMATCH, ALREADY_CLAIMED, ACTIVE_CLAIM_FOREIGN, ILLEGAL_TRANSITION,
 ILLEGAL_PHASE, WRITER_BUSY, VALIDATION_FAILED, RECOVERY_REQUIRED,
-RECOVERY_CONFLICT, DESTRUCTIVE_CONFIRMATION_REQUIRED, CONFLICT,
+RECOVERY_CONFLICT, CORRUPT_JOURNAL, DESTRUCTIVE_CONFIRMATION_REQUIRED, CONFLICT,
 NEEDS_REPAIR, PATH_ESCAPE, INVALID_ID, ACTIVE_IMPROVE_CYCLE,
 INVALID_DISPOSITION, PACKAGE_INCOMPLETE, MALFORMED_PACKAGE,
 INCOMPLETE_TICKET, INVALID_MANIFEST, INVALID_GOAL, STALE_PLAN, RELEASE_CLOSURE_PENDING,

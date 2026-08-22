@@ -23,4 +23,9 @@
 
 ## DONE
 
+- [x] TEST-006 independently reproduce HUNT-13 sole locale failure | verify: validator reports exactly one failing gate and 32 locale files
+- [x] TEST-005 independently reproduce HUNT-12 validator failures | verify: 4/4 scenarios REPRODUCED with exact command and output in kitchen/TEST-5.md
+- [x] TEST-004 independently reproduce HUNT-11 after T-1115 | verify: both scenarios REPRODUCED with exact commands in kitchen/TEST-4.md
+- [x] TEST-003 independently reproduce HUNT-10 Ruff and release-scenario failures | verify: both scenarios carry minimal input, exact command, observed output, and REPRODUCED verdict in kitchen/TEST-3.md
+
 ## BLOCKED

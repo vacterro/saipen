@@ -23,4 +23,9 @@
 
 ## DONE
 
+- [x] UI-005 final pre-translation interface sweep -- no visual delta or palette drift
+- [x] UI-004 post-PY-7 interface sweep -- no visual delta; Golden Default unchanged
+- [x] UI-002 current interface contract sweep -- no visual surface or Golden Default drift; CLI shortcut semantics verified
+- [x] UI-003 post-T-1115 interface sweep -- no visual surface; Golden Default and write-boundary validators pass
+
 ## BLOCKED

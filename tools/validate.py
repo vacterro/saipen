@@ -61,6 +61,7 @@ import io
 import json
 import os
 import re
+import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -81,8 +82,19 @@ from saipen_engine.board import (
     claim_status,
     board_graph_errors,
 )
-from saipen_engine.paths import parse_identity_content, resolve_project_root
-from saipen_engine.log import LOG_RE, history_paths, parse_log_line
+from saipen_engine.paths import (
+    parse_identity_content,
+    project_lineage_identity,
+    read_bound_regular_bytes,
+    resolve_project_root,
+)
+from saipen_engine.log import (
+    LOG_RE,
+    HistoryOwnershipError,
+    history_paths,
+    read_history_snapshot,
+)
+from saipen_engine.fast_check import block_parked_evidence_error
 
 # T-994: release metadata inventory is owned by one shared module. validate.py
 # and the release executor import the SAME functions so they can never drift.
@@ -512,6 +524,7 @@ SAIPEN_COMMANDS = frozenset(
         "prepare",
         "collect",
         "ship",
+        "push",
         "validate",
         "test",
         "status",
@@ -1235,18 +1248,76 @@ if len(failures) == before:
 # (release_metadata_paths owns the exact set; see the translation-drift
 # section below).
 _identity_path = Path(".saipen/IDENTITY.md")
-if _identity_path.is_file():
-    _id_lineage, _id_error = parse_identity_content(read_doc(_identity_path))
-    if _id_error:
-        fail(
-            f".saipen/IDENTITY.md is malformed: {_id_error} -- the portable "
-            "lineage carrier must hold exactly one fenced `project_lineage: "
-            "lineage-<hex32>` field and nothing else; a malformed carrier is "
-            "fail-closed material for every strict receipt and every new "
-            "release"
+if os.path.lexists(_identity_path):
+    try:
+        _identity_info = _identity_path.lstat()
+    except OSError as _identity_exc:
+        fail(f".saipen/IDENTITY.md cannot be inspected: {_identity_exc}")
+        _identity_info = None
+    _identity_reparse = bool(
+        _identity_info
+        and getattr(_identity_info, "st_file_attributes", 0)
+        & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
+    )
+    _identity_unsafe = bool(
+        _identity_info
+        and (
+            _identity_path.is_symlink()
+            or _identity_reparse
+            or not stat.S_ISREG(_identity_info.st_mode)
         )
-    else:
-        ok(f".saipen/IDENTITY.md is a canonical portable lineage carrier ({_id_lineage})")
+    )
+    if _identity_unsafe:
+        fail(
+            ".saipen/IDENTITY.md is a symlink, reparse point, or non-regular "
+            "file -- portable project authority must be repository-owned "
+            "regular bytes, never an external target"
+        )
+    elif _identity_info is not None:
+        # Authority first: the diagnostic reader must never consume unbounded
+        # or path-raced bytes before the fail-closed decision. The shared
+        # lineage reader owns acceptance; a second bounded descriptor read is
+        # used only to preserve an actionable parse error after refusal.
+        _id_lineage = project_lineage_identity(Path("."))
+        if _id_lineage is not None:
+            ok(
+                ".saipen/IDENTITY.md is a canonical portable lineage carrier "
+                f"({_id_lineage})"
+            )
+        else:
+            _id_error = None
+            try:
+                _identity_raw = read_bound_regular_bytes(
+                    _identity_path, _identity_info, max_bytes=4096
+                )
+                if _identity_raw.startswith(b"\xef\xbb\xbf"):
+                    _id_error = "identity file carries a forbidden UTF-8 BOM"
+                else:
+                    try:
+                        _identity_text = _identity_raw.decode("utf-8", errors="strict")
+                    except UnicodeDecodeError:
+                        _id_error = "identity file is not strict UTF-8"
+                    else:
+                        _diagnostic_lineage, _id_error = parse_identity_content(
+                            _identity_text
+                        )
+            except (OSError, ValueError):
+                _diagnostic_lineage = None
+            if _id_error:
+                fail(
+                    f".saipen/IDENTITY.md is malformed: {_id_error} -- the portable "
+                    "lineage carrier must hold exactly one fenced `project_lineage: "
+                    "lineage-<hex32>` field and nothing else; a malformed carrier is "
+                    "fail-closed material for every strict receipt and every new "
+                    "release"
+                )
+            else:
+                fail(
+                    ".saipen/IDENTITY.md changed while it was being read, exceeds "
+                    "the 4096-byte authority limit, or is reachable only through "
+                    "an unsafe path -- portable project authority must pass the "
+                    "shared descriptor-bound no-follow reader"
+                )
     # A carrier that exists on disk but is not tracked by git will not
     # survive a clone -- the exact defect the carrier contract exists to
     # prevent (release metadata cannot publish what Git does not track).
@@ -1356,7 +1427,20 @@ if state.get("transition_from") is None and state.get("phase") == "INIT":
         "to make it explicit",
     )
 
-_block_parked = False
+try:
+    _canonical_history_snapshot = read_history_snapshot(Path("."))
+except HistoryOwnershipError as _history_exc:
+    # Evidence corruption is a validator finding, never an uncaught traceback
+    # whose nonzero exit can be mistaken for the scenario's expected FAIL.
+    fail(f"LOG history is not canonical owned evidence: {_history_exc}")
+    _canonical_history_snapshot = None
+
+_parked_error = block_parked_evidence_error(
+    state,
+    parse_board(read_doc(Path(".saipen/BOARD.md"))),
+    _canonical_history_snapshot.events if _canonical_history_snapshot else [],
+)
+_block_parked = _parked_error is None
 _t_from = state.get("transition_from")
 _t_current = state.get("phase")
 # The block-parked transitional shape (DONE from a mid-flight phase) is the only
@@ -1370,32 +1454,6 @@ if (
     and _t_from in ("SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP")
     and _t_current not in VALID_TRANSITIONS.get(_t_from, [])
 ):
-    _log_files = history_paths(Path("."))
-    _bd = parse_board(read_doc(Path(".saipen/BOARD.md")))
-    _blocked_tids = [
-        tid for tid, t in _bd.get("tickets", {}).items() if t["section"] == "## BLOCKED"
-    ]
-    for _tid in _blocked_tids:
-        _last_for_ticket = ""
-        for _p in reversed(_log_files):
-            if not _p.is_file():
-                continue
-            for _ln in reversed(read_doc(_p).splitlines()):
-                _cand = parse_log_line(_ln)
-                if _cand and _cand.get("ticket") == _tid:
-                    _last_for_ticket = _ln
-                    break
-            if _last_for_ticket:
-                break
-        _be = parse_log_line(_last_for_ticket) if _last_for_ticket else None
-        if (
-            _be
-            and _be.get("taxonomy") == "DEC"
-            and (_be.get("op_id") or "").startswith("ticket-")
-            and _be.get("text", "").startswith("ticket block via SAIOPS (active)")
-        ):
-            _block_parked = True
-            break
     if not _block_parked:
         fail(
             f"STATE.md invalid phase transition: {_t_from} -> {_t_current} "
@@ -3020,11 +3078,14 @@ if log_files:
     if log_ok:
         from saipen_engine.log import (
             _is_verify_boundary,
-            read_history_events,
             verification_evidence as _closure_evidence,
         )
 
-        _closure_events = read_history_events(Path("."))
+        _closure_events = (
+            list(_canonical_history_snapshot.events)
+            if _canonical_history_snapshot is not None
+            else []
+        )
         _ev_boundary = None
         _last_ticket_event: dict[str, int] = {}
         for _cev in _closure_events:
@@ -4969,6 +5030,7 @@ if (
         _improve_core_t = (
             _improve_core_p.read_text(encoding="utf-8-sig") if _improve_core_p.is_file() else ""
         )
+        _improve_core_contract_t = " ".join(_improve_core_t.split())
         _admission_markers = (
             (
                 "CORE",
@@ -5006,7 +5068,7 @@ if (
             ),
             (
                 "mechanical core",
-                _improve_core_t,
+                _improve_core_contract_t,
                 (
                     'ROLES = {"core", "critic"}',
                     "with project_writer_lock(root):",
@@ -5149,9 +5211,24 @@ if (
         # Canonical source is saipen/MANIFEST.json; the hardcoded list below
         # is the fallback for homes that predate the manifest (v7.190.0+).
         _manifest_json = _tools_parent / "saipen" / "MANIFEST.json"
+        _runtime_tracked_set = None
         if _manifest_json.is_file():
             try:
                 _mj = json.loads(_manifest_json.read_text("utf-8"))
+                # At the binding SHIP gate, a copy-tree declares the release
+                # index surface, not unrelated bytes currently lying below the
+                # directory. Use one index snapshot so foreign untracked files
+                # cannot be forced into an otherwise scoped release. New files
+                # staged for this ship are in the index and remain valid
+                # members. At every non-SHIP gate (and in Git-less installed
+                # homes), inspect the complete on-disk tree: direct injectors
+                # copy that tree, so foreign runtime bytes must stay visible.
+                if _git("rev-parse", "--git-dir")[0] == 0:
+                    _runtime_rc, _runtime_out = _git("ls-files", "-z")
+                    if _runtime_rc == 0:
+                        _runtime_tracked_set = {
+                            path for path in _runtime_out.split("\x00") if path
+                        }
                 _mj_files = [f["src"] for f in _mj.get("files", [])]
                 _phase_dir = _mj.get("phase_docs", {}).get("src_dir", "")
                 for _pf in _mj.get("phase_docs", {}).get("files", []):
@@ -5163,7 +5240,13 @@ if (
                         fail(f"runtime manifest copy tree broken: {exc}")
                         continue
                     for _member in _tree_members:
-                        _mj_files.append(_member.relative_to(_tools_parent).as_posix())
+                        _member_rel = _member.relative_to(_tools_parent).as_posix()
+                        if (
+                            _runtime_tracked_set is None
+                            or GATE != "ship"
+                            or _member_rel in _runtime_tracked_set
+                        ):
+                            _mj_files.append(_member_rel)
                 manifest = _mj_files
             except (json.JSONDecodeError, KeyError, ValueError):
                 fail(
@@ -5212,15 +5295,11 @@ if (
         # for an uncommitted tool went green locally on every commit and red
         # on every CI run, and no local gate could see the difference.
         manifest_untracked = []
-        if not manifest_missing and _git("rev-parse", "--git-dir")[0] == 0:
-            # ONE tracked-set query for the whole manifest instead of one
-            # `git ls-files -- <file>` per entry: untracked paths simply do
-            # not appear in the -z output, so membership is exact and the
-            # fork count does not scale with manifest size (T-1004 perf).
-            _tr_rc, _tr_out = _git("ls-files", "-z", "--", *manifest)
-            if _tr_rc == 0:
-                _tracked_set = {p for p in _tr_out.split("\x00") if p}
-                manifest_untracked = [f for f in manifest if f not in _tracked_set]
+        if not manifest_missing and _runtime_tracked_set is not None:
+            # Reuse the one index snapshot captured above. Explicit `files`
+            # entries still fail when merely present/untracked, while copy-tree
+            # noise was excluded before it could enter the manifest.
+            manifest_untracked = [f for f in manifest if f not in _runtime_tracked_set]
         for f in manifest_untracked:
             fail(
                 f"runtime manifest names a file git does not track: {f} -- it "
@@ -5379,10 +5458,24 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
             if _git("diff", "--name-only", "--", p)[1]
             or (Path(p).exists() and not _git("ls-files", "--", p)[1])
         ]
-        if REQUIRE_RELEASE_INDEX and _need_staging:
-            _staged_rc, _staged_text = _git("diff", "--cached", "--name-only", "--", *_need_staging)
+        if REQUIRE_RELEASE_INDEX:
+            # A binding SHIP gate authorizes the exact index that the release
+            # executor is about to commit.  An empty release-metadata slice is
+            # therefore not a harmless clean-tree pass: it binds no release
+            # bytes at all, and used to let a pre-metadata validation result be
+            # mistaken for post-staging authority.  Read the full metadata
+            # slice even when `_need_staging` is empty (properly staged paths
+            # match the index and are deliberately absent from that list).
+            _staged_rc, _staged_text = _git(
+                "diff", "--cached", "--name-only", "--", *_release_paths
+            )
             if _staged_rc != 0:
                 fail("binding ship gate cannot read staged release metadata")
+            elif not _staged_text.strip():
+                fail(
+                    "binding ship gate requires every release metadata path "
+                    "staged: release index is empty"
+                )
             else:
                 # A path is bound only when its CONTENT is in the index. A
                 # cached D entry does not bind an untracked-but-present file
@@ -7672,6 +7765,10 @@ else:
         ("BROCHURE_JA.md", "non-normative presentation brochure"),
         ("KNOWLEDGE/HABITS-browser-hang.md", "cross-agent habit note, not a rule source"),
         (
+            "KNOWLEDGE/ADR-0001-v7-producer-parallelism.md",
+            "architecture decision rationale; executable producer invariants are enforced by CORE.md and tools/test_v7_producer_parallelism.py",
+        ),
+        (
             "KNOWLEDGE/HABITS-vs-buildtools-install-fix.md",
             "cross-agent habit note, not a rule source",
         ),
@@ -7686,6 +7783,7 @@ else:
         (".github/*.md", "issue/PR templates, not agent-facing"),
         ("tests/scenarios/README.md", "scenario format documentation, not a fixture"),
         (".pytest_cache/*.md", "generated tool cache, never a shipped document"),
+        ("**/.pytest_cache/*.md", "generated tool cache, never a shipped document"),
         (
             ".workbuddy-ai/**",
             "WorkBuddy AI internal working memory (agent/project notes, generated); tooling state, not a shipped SAIPEN document",

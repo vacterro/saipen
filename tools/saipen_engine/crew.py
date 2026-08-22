@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
+import os
+import re
+import stat
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -68,6 +70,16 @@ class CrewAction:
     role_paths: tuple[str, ...] = ()
     write_boundary: str = ""
     then_action: str = "REPLAN_CREW"
+    # AUTO-002/AUTO-007: autonomy/terminality carriers. A crew action is an
+    # EXECUTABLE next step for the CURRENT agent, never an advisory or a
+    # terminal stop: `terminal` is false unless the action itself is a
+    # protocol-defined done/blocked state, `requires_human` is false unless a
+    # genuine human-only decision is needed, and `resume_after` names the
+    # continuation to return to after the action's evidence is produced.
+    terminal: bool = False
+    requires_human: bool = False
+    next_action: str = "RUN_ROLE"
+    resume_after: str = "REPLAN_CREW"
 
 
 @dataclass(frozen=True)
@@ -76,6 +88,10 @@ class CrewEpoch:
     op_id: str
     ticket: str | None
     created_at: str
+
+
+class CrewEpochCarrierError(ValueError):
+    """A present durable crew-epoch carrier is not canonical authority."""
 
 
 @dataclass(frozen=True)
@@ -122,6 +138,8 @@ class CrewSnapshot:
     # cached across crew_snapshot calls, and a stability failure means
     # consumers must fail closed rather than trust this data.
     op_records: tuple[dict, ...] = ()
+    receipt_errors: tuple[str, ...] = ()
+    receipt_snapshot: object | None = None
     # P0#4: the CURRENT-SESSION capability negotiated at the public command
     # boundary. Persisted STATE.mode is historical; this is the live authority
     # the crew gate/closure consult. None means "not injected" (legacy
@@ -148,6 +166,15 @@ def _source_identity(root: Path):
         return None, str(exc)
 
 
+def _revalidate_source_identity(root: Path, source_id: object) -> tuple[bool, str | None]:
+    try:
+        from freshness import revalidate_source_identity
+
+        return revalidate_source_identity(root, source_id)
+    except Exception as exc:
+        return False, str(exc)
+
+
 def _read_maybe(path: Path) -> str:
     try:
         return path.read_text(encoding="utf-8-sig")
@@ -156,39 +183,87 @@ def _read_maybe(path: Path) -> str:
 
 
 def _root_dependency_specs(root: Path) -> dict[str, tuple[Path, bool]]:
-    """Every mutable artifact family a crew decision reads.
+    """Exact decision surface read by one crew snapshot.
 
-    Directory dependencies bind both membership and bytes, so a package,
-    charter, receipt, or sealed LOG cannot appear/disappear between the
-    planner's first read and its decision without making the snapshot stale.
+    Large instance/scratch trees are not planner inputs.  The CAS binds exact
+    checkpoint, charter, role-state, OUTBOX, READY and durable release files,
+    small inherited TEMPLATE/READY trees, plus shallow membership tokens where
+    appearance/disappearance changes routing.  Producer `kitchen/pen`, caches,
+    staging and archives are intentionally outside this surface.
     """
-    return {
-        ".saipen/STATE.md": (root / ".saipen/STATE.md", False),
-        ".saipen/BOARD.md": (root / ".saipen/BOARD.md", False),
-        ".saipen/LOG.md": (root / ".saipen/LOG.md", False),
-        ".saipen/extensions/subs": (root / ".saipen/extensions/subs", True),
-        ".saipen/saitranslate": (root / ".saipen/saitranslate", True),
-        ".saipen/logs": (root / ".saipen/logs", True),
-    }
+    specs: dict[str, tuple[Path, str]] = {}
 
+    def add(rel: str, mode: str = "file") -> None:
+        specs[rel] = (root / rel, mode)
 
-def _home_dependency_specs(home: str) -> dict[str, tuple[Path, bool]]:
-    if not home:
-        return {}
-    root = Path(home)
-    specs = {
-        str((root / "extensions/subs").resolve()): (root / "extensions/subs", True),
-    }
-    for candidate in (root / "saipen/BOOT.md", root / "BOOT.md"):
-        specs[str(candidate.resolve())] = (candidate, False)
+    for rel in (".saipen/STATE.md", ".saipen/BOARD.md", ".saipen/LOG.md"):
+        add(rel)
+    add(".saipen/logs", "listing")
+    logs = root / ".saipen" / "logs"
+    if logs.is_dir():
+        for segment in sorted(logs.glob("LOG-*.md")):
+            add(segment.relative_to(root).as_posix())
+
+    shared = ".saipen/extensions/subs"
+    add(shared, "listing")
+    for name in ("MANIFEST.md", "PROTOCOL.md", "README.md", "crew.md"):
+        add(f"{shared}/{name}")
+    add(f"{shared}/TEMPLATE", "tree")
+    local_shared = root / shared
+    if local_shared.is_dir():
+        for charter in sorted(local_shared.glob("sai*.md")):
+            add(charter.relative_to(root).as_posix())
+    for role in CREW_ROLES:
+        add(f"{shared}/{role.name}.md")
+        if role.name != "saitranslate":
+            base = f"{shared}/{role.name}"
+            add(base, "listing")
+            for name in ("STATE.md", "BOARD.md", "LOG.md", "kitchen/OUTBOX.md"):
+                add(f"{base}/{name}")
+
+    for base in (f"{shared}/saiwiki", ".saipen/saitranslate"):
+        add(base, "listing")
+        add(f"{base}/READY", "tree")
+    for rel in (
+        ".saipen/saitranslate/kitchen/OUTBOX.md",
+        ".saipen/kitchen/crew_epoch.json",
+        ".saipen/kitchen/release_receipt.json",
+        ".saipen/kitchen/crew_release_evidence.json",
+    ):
+        add(rel)
+    add(".saipen/recovery/conformance", "tree")
     return specs
 
 
-def _capture_dependencies(specs: dict[str, tuple[Path, bool]]) -> dict[str, str]:
-    return {
-        name: (hash_tree_dependency(path) if is_tree else hash_file_dependency(path))
-        for name, (path, is_tree) in specs.items()
+def _home_dependency_specs(home: str) -> dict[str, tuple[Path, str]]:
+    if not home:
+        return {}
+    root = Path(home)
+    shared = root / "extensions" / "subs"
+    specs: dict[str, tuple[Path, str]] = {
+        str(shared.resolve()): (shared, "listing"),
+        str((shared / "TEMPLATE").resolve()): (shared / "TEMPLATE", "tree"),
     }
+    for name in ("PROTOCOL.md", "README.md", "crew.md", *(f"{r.name}.md" for r in CREW_ROLES)):
+        path = shared / name
+        specs[str(path.resolve())] = (path, "file")
+    if shared.is_dir():
+        for charter in sorted(shared.glob("sai*.md")):
+            specs[str(charter.resolve())] = (charter, "file")
+    for candidate in (root / "saipen/BOOT.md", root / "BOOT.md"):
+        specs[str(candidate.resolve())] = (candidate, "file")
+    return specs
+
+
+def _capture_dependencies(specs: dict[str, tuple[Path, str]]) -> dict[str, str]:
+    from .journal import hash_directory_listing_dependency
+
+    hashers = {
+        "file": hash_file_dependency,
+        "tree": hash_tree_dependency,
+        "listing": hash_directory_listing_dependency,
+    }
+    return {name: hashers[mode](path) for name, (path, mode) in specs.items()}
 
 
 def _unsafe_dependency(digest: str) -> bool:
@@ -202,6 +277,173 @@ def _strict_created_at(value: object) -> str:
     from .board import strict_iso_utc
 
     return strict_iso_utc(value)
+
+
+def read_durable_crew_epoch(root: Path | str) -> dict | None:
+    """Read the tracked crew-epoch carrier as strict durable authority.
+
+    Absence is the sole legacy-fallback condition.  Once the carrier exists,
+    malformed JSON, a non-regular/reparse node, schema drift, hostile IDs, or
+    foreign project lineage is corruption rather than permission to fall back
+    to weaker recovery receipts.
+    """
+    from .codec import is_canonical_encoding
+    from .paths import project_lineage_identity, read_bound_regular_bytes
+    from .safeid import InvalidIdError, validate_safe_id
+
+    root = Path(root)
+    path = root / ".saipen" / "kitchen" / "crew_epoch.json"
+    reparse_flag = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
+
+    def node_identity(info) -> tuple[int, int, int, int]:
+        return (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns)
+
+    def unsafe_node(candidate: Path, info, *, directory: bool) -> bool:
+        expected_type = stat.S_ISDIR(info.st_mode) if directory else stat.S_ISREG(info.st_mode)
+        return (
+            os.path.islink(candidate)
+            or bool(getattr(info, "st_file_attributes", 0) & reparse_flag)
+            or not expected_type
+        )
+
+    ancestor_before: list[tuple[Path, tuple[int, int, int, int]]] = []
+    for ancestor in (root / ".saipen", root / ".saipen" / "kitchen"):
+        try:
+            ancestor_info = ancestor.lstat()
+        except FileNotFoundError:
+            return None
+        except OSError as exc:
+            raise CrewEpochCarrierError(f"cannot inspect {ancestor}: {exc}") from exc
+        if unsafe_node(ancestor, ancestor_info, directory=True):
+            raise CrewEpochCarrierError(
+                f"crew_epoch.json ancestor {ancestor} is a symlink, "
+                "reparse point, or non-directory"
+            )
+        ancestor_before.append((ancestor, node_identity(ancestor_info)))
+
+    try:
+        before = path.lstat()
+    except FileNotFoundError:
+        return None
+    except OSError as exc:
+        raise CrewEpochCarrierError(f"cannot inspect {path}: {exc}") from exc
+
+    if unsafe_node(path, before, directory=False):
+        raise CrewEpochCarrierError(
+            "crew_epoch.json is a symlink, reparse point, or non-regular file"
+        )
+    if before.st_size > 16 * 1024:
+        raise CrewEpochCarrierError("crew_epoch.json exceeds the 16 KiB authority limit")
+    try:
+        raw = read_bound_regular_bytes(path, before, max_bytes=16 * 1024)
+        after = path.lstat()
+    except (OSError, ValueError) as exc:
+        raise CrewEpochCarrierError(f"cannot read crew_epoch.json: {exc}") from exc
+    before_identity = node_identity(before)
+    after_identity = node_identity(after)
+    if unsafe_node(path, after, directory=False):
+        raise CrewEpochCarrierError(
+            "crew_epoch.json became a symlink, reparse point, or non-regular file"
+        )
+    if before_identity != after_identity:
+        raise CrewEpochCarrierError("crew_epoch.json changed while it was being read")
+    if not is_canonical_encoding(raw):
+        raise CrewEpochCarrierError("crew_epoch.json is not canonical UTF-8 without a BOM")
+    def reject_duplicate_keys(pairs):
+        decoded = {}
+        for key, value in pairs:
+            if key in decoded:
+                raise CrewEpochCarrierError(
+                    f"crew_epoch.json repeats field {key!r}"
+                )
+            decoded[key] = value
+        return decoded
+
+    try:
+        data = json.loads(raw.decode("utf-8"), object_pairs_hook=reject_duplicate_keys)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise CrewEpochCarrierError(f"crew_epoch.json is not canonical JSON: {exc}") from exc
+    if not isinstance(data, dict):
+        raise CrewEpochCarrierError("crew_epoch.json root must be an object")
+
+    required = {
+        "schema_version",
+        "operation",
+        "op_id",
+        "target",
+        "status",
+        "created_at",
+        "project_lineage",
+    }
+    allowed = required | {"ticket_id"}
+    missing = sorted(required - set(data))
+    unknown = sorted(set(data) - allowed)
+    if missing or unknown:
+        detail = []
+        if missing:
+            detail.append("missing " + ", ".join(missing))
+        if unknown:
+            detail.append("unknown " + ", ".join(unknown))
+        raise CrewEpochCarrierError(
+            "crew_epoch.json fields are not canonical: " + "; ".join(detail)
+        )
+    if type(data["schema_version"]) is not int or data["schema_version"] != 1:
+        raise CrewEpochCarrierError("crew_epoch.json schema_version must be integer 1")
+    for key, expected in (
+        ("operation", "crew_epoch"),
+        ("target", "crew"),
+        ("status", "COMMITTED"),
+    ):
+        if data[key] != expected:
+            raise CrewEpochCarrierError(
+                f"crew_epoch.json {key} must be {expected!r}, got {data[key]!r}"
+            )
+    op_id = data["op_id"]
+    try:
+        validate_safe_id(op_id, kind="crew epoch op_id")
+    except InvalidIdError as exc:
+        raise CrewEpochCarrierError(str(exc)) from exc
+    if not re.fullmatch(r"converge_intent-[0-9a-f]{32}", op_id):
+        raise CrewEpochCarrierError(
+            "crew_epoch.json op_id must match converge_intent-<32 lowercase hex>"
+        )
+    if not _strict_created_at(data["created_at"]):
+        raise CrewEpochCarrierError("crew_epoch.json created_at must be strict UTC")
+    # CORE-004: current-schema crew epoch authority requires a canonical
+    # NON-NULL lineage matching the live carrier. None==None must never count
+    # as valid current-schema authority when IDENTITY.md is absent.
+    lineage = data["project_lineage"]
+    if not isinstance(lineage, str) or not re.fullmatch(r"lineage-[0-9a-f]{32}", lineage):
+        raise CrewEpochCarrierError(
+            "crew_epoch.json project_lineage must be a canonical non-null "
+            "lineage-[0-9a-f]{32} value"
+        )
+    expected_lineage = project_lineage_identity(root)
+    if lineage != expected_lineage:
+        raise CrewEpochCarrierError(
+            "crew_epoch.json project_lineage does not match .saipen/IDENTITY.md"
+        )
+    if "ticket_id" in data and (
+        not isinstance(data["ticket_id"], str)
+        or not re.fullmatch(r"T-[1-9][0-9]*", data["ticket_id"])
+    ):
+        raise CrewEpochCarrierError("crew_epoch.json ticket_id must match T-<positive integer>")
+    for ancestor, expected_identity in ancestor_before:
+        try:
+            ancestor_after = ancestor.lstat()
+        except OSError as exc:
+            raise CrewEpochCarrierError(
+                f"crew_epoch.json ancestor changed while reading: {ancestor}: {exc}"
+            ) from exc
+        if unsafe_node(ancestor, ancestor_after, directory=True):
+            raise CrewEpochCarrierError(
+                f"crew_epoch.json ancestor became a symlink or reparse point: {ancestor}"
+            )
+        if node_identity(ancestor_after) != expected_identity:
+            raise CrewEpochCarrierError(
+                f"crew_epoch.json ancestor changed while reading: {ancestor}"
+            )
+    return data
 
 
 def _iter_operation_records(root: Path, records: tuple[dict, ...] | None = None):
@@ -220,83 +462,43 @@ def _iter_operation_records(root: Path, records: tuple[dict, ...] | None = None)
         yield from records
         return
     from .journal import semantic_receipt_snapshot
-    all_records, _errors = semantic_receipt_snapshot(root)
-    yield from all_records
+    snapshot = semantic_receipt_snapshot(root)
+    if snapshot.errors:
+        return
+    yield from snapshot.records
 
 
-def _capture_operation_receipts(root: Path) -> tuple[tuple[dict, ...], str]:
+def _capture_operation_receipts(root: Path):
     """W2-001: ONE coherent operation-receipt capture from both ops and settled.
 
     Uses the canonical semantic receipt snapshot from journal.py and
     digests the EXACT bytes from both namespaces.
 
-    Returns (records, digest). The digest covers operation-directory
-    identity + exact operation.json bytes from both ops/ and settled/ --
-    never *.staged payload bytes, which cannot change any crew verdict
-    (T-1004 perf). Malformed receipts are skipped for parsing exactly
-    like _iter_operation_records, but their bytes still feed the digest,
-    so any edit/add/remove of an operation.json still stales the capture.
+    The digest covers operation-directory identity plus exact operation.json
+    and progress.json authority from both ops/ and settled/ -- never *.staged
+    payload bytes, which cannot change a crew verdict (T-1004 perf). Invalid
+    structural entries feed deterministic sentinels, so adding/removing or
+    replacing either authority always stales the capture.
     """
-    from .journal import OPS_DIR, SETTLED_DIR, decode_operation_record
-    records: list[dict] = []
-    digest = hashlib.sha256(b"saipen-op-receipts-v1\0")
-    # W2-001: digest BOTH namespaces for the stability proof (unchanged
-    # byte-stability contract) but decode each candidate through the ONE strict
-    # decoder so a malformed receipt is never trusted as positive crew evidence.
-    for ns_dir in (root / OPS_DIR, root / SETTLED_DIR):
-        if not ns_dir.is_dir():
-            continue
-        for op_dir in sorted(ns_dir.iterdir()):
-            if not op_dir.is_dir():
-                continue
-            manifest = op_dir / "operation.json"
-            if not manifest.is_file():
-                continue
-            try:
-                raw = manifest.read_bytes()
-            except OSError:
-                continue
-            digest.update(len(op_dir.name).to_bytes(8, "big"))
-            digest.update(op_dir.name.encode("utf-8"))
-            digest.update(len(raw).to_bytes(8, "big"))
-            digest.update(raw)
-            decoded = decode_operation_record(root, op_dir)
-            if not decoded["ok"]:
-                continue
-            records.append(decoded["record"])
-    return tuple(records), "ops-receipt-sha256:" + digest.hexdigest()
+    from .journal import semantic_receipt_snapshot
+
+    # Authority selection, strict decoding, duplicate handling, corruption and
+    # the byte-stability token all come from one canonical traversal.
+    return semantic_receipt_snapshot(root)
 
 
 def _capture_receipt_digest(root: Path) -> str:
     """PERF-005: lightweight stability digest over both receipt namespaces.
 
-    Hashes each operation.json's exact bytes WITHOUT JSON-decoding, so the
-    post-capture stability proof holds constant I/O and never re-parses the
-    lifetime receipt set. The full decode in ``_capture_operation_receipts``
-    is only needed for the records the snapshot actually consumes; the second
-    (stability) pass must not pay for it again.
+    Hashes each operation.json and progress.json authority WITHOUT JSON
+    decoding, so the post-capture stability proof never re-parses the lifetime
+    receipt set. The full decode in ``_capture_operation_receipts`` is only
+    needed for records the snapshot consumes; the closing pass pays one exact
+    byte read per present authority and never touches staged payload bulk.
     """
-    from .journal import OPS_DIR, SETTLED_DIR
+    from .journal import semantic_receipt_digest
 
-    digest = hashlib.sha256(b"saipen-op-receipts-v1\0")
-    for ns_dir in (root / OPS_DIR, root / SETTLED_DIR):
-        if not ns_dir.is_dir():
-            continue
-        for op_dir in sorted(ns_dir.iterdir()):
-            if not op_dir.is_dir():
-                continue
-            manifest = op_dir / "operation.json"
-            if not manifest.is_file():
-                continue
-            try:
-                raw = manifest.read_bytes()
-            except OSError:
-                continue
-            digest.update(len(op_dir.name).to_bytes(8, "big"))
-            digest.update(op_dir.name.encode("utf-8"))
-            digest.update(len(raw).to_bytes(8, "big"))
-            digest.update(raw)
-    return "ops-receipt-sha256:" + digest.hexdigest()
+    return semantic_receipt_digest(root)
 
 
 def _crew_epoch(
@@ -316,25 +518,17 @@ def _crew_epoch(
     is neither sufficient (item 8's hostile fact: unrelated receipt + matching
     prose) nor required.
     """
-    tracked = root / ".saipen" / "kitchen" / "crew_epoch.json"
     found: list[tuple[str, str, str | None]] = []
-    if tracked.is_file():
-        try:
-            data = json.loads(tracked.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            data = None
-        if (
-            isinstance(data, dict)
-            and data.get("schema_version") == 1
-            and data.get("operation") == "crew_epoch"
-            and data.get("target") == "crew"
-            and data.get("status") == "COMMITTED"
-        ):
-            created = _strict_created_at(data.get("created_at"))
-            op_id = data.get("op_id")
-            if created and op_id:
-                found.append((created, str(op_id), data.get("ticket_id")))
-    if not found:
+    try:
+        data = read_durable_crew_epoch(root)
+    except CrewEpochCarrierError:
+        # Present-but-corrupt durable authority may never downgrade to the
+        # legacy recovery-receipt scan.  None makes every crew completion gate
+        # non-green until the carrier is repaired from reviewed evidence.
+        return None
+    if data is not None:
+        found.append((data["created_at"], data["op_id"], data.get("ticket_id")))
+    else:
         for record in _iter_operation_records(root, records):
             meta = record.get("receipt_metadata") or {}
             if record.get("operation") != "converge_intent":
@@ -374,7 +568,9 @@ def _crew_epoch(
     return CrewEpoch(event if event is not None else 0, op_id, ticket, newest_time)
 
 
-def _release_evidence(root: Path, epoch: CrewEpoch | None) -> ReleaseEvidence | None:
+def _release_evidence(
+    root: Path, epoch: CrewEpoch | None, receipt_snapshot=None
+) -> ReleaseEvidence | None:
     """Canonical release truth from the release engine's read-only verdict
     (T-1003 sweep): crew consumes the release-engine verdict, never a second
     self-attesting JSON scan. UNKNOWN/AMBIGUOUS are carried on the evidence so
@@ -383,7 +579,9 @@ def _release_evidence(root: Path, epoch: CrewEpoch | None) -> ReleaseEvidence | 
         return None
     from .release import release_verdict
 
-    verdict = release_verdict(root, crew_epoch=epoch.op_id)
+    verdict = release_verdict(
+        root, crew_epoch=epoch.op_id, receipt_snapshot=receipt_snapshot
+    )
     if verdict["status"] == "ok":
         ev = verdict["evidence"]
         return ReleaseEvidence(
@@ -460,6 +658,46 @@ def _specialized_health(snapshot_source, root: Path, role, saipen_home: str) -> 
     }
 
 
+def _producer_ready_health(
+    snapshot_source, root: Path, role, saipen_home: str
+) -> dict | None:
+    """Strict READY-layer health shared by both producer roles."""
+    from .producer import SETTLED_DIRNAME, StagingGeneration, producer_namespace
+
+    namespace = producer_namespace(root, role.name)
+    if not (namespace / "READY").exists() and not (namespace / SETTLED_DIRNAME).exists():
+        return None
+    packages, scan_errors = StagingGeneration.scan_ready(namespace)
+    current_role = current_local_role_revision(root, role.name, saipen_home)
+    current = [
+        package
+        for package in packages
+        if snapshot_source is not None
+        and current_role
+        and package.base_source_head == snapshot_source.source_head
+        and package.base_source_tree_fingerprint == snapshot_source.source_tree_fingerprint
+        and package.role_revision == current_role
+    ]
+    errors = [item.get("detail", "invalid READY") for item in scan_errors]
+    status = (
+        HEALTH_INVALID
+        if errors
+        else HEALTH_READY_FOR_REVIEW
+        if current
+        else HEALTH_NOT_RUN
+    )
+    health = {
+        "health": status,
+        "ready_current": bool(current),
+        "reviewed_current": False,
+        "errors": errors,
+        "package_ids": [package.package_identity for package in current],
+    }
+    # Legacy caller shape for generic-sub saiwiki.
+    health["outbox"] = dict(health)
+    return health
+
+
 def crew_snapshot(project_root: Path | str, current_capability: str | None = None) -> CrewSnapshot:
     root = Path(project_root)
     state_path = root / ".saipen/STATE.md"
@@ -469,8 +707,10 @@ def crew_snapshot(project_root: Path | str, current_capability: str | None = Non
     # ONE coherent operation-receipt capture: every crew/sub evidence helper
     # below consumes the same parsed records, and the digest is the stability
     # token (operation.json identity+bytes only -- never *.staged payloads).
-    records, receipt_digest = _capture_operation_receipts(root)
-    stability_before = receipt_digest
+    semantic_snapshot = _capture_operation_receipts(root)
+    records = semantic_snapshot.records
+    receipt_errors = semantic_snapshot.errors
+    stability_before = semantic_snapshot.digest
     state_text = _read_maybe(state_path)
     state = parse_state(state_text)
     state.get("phase", "")
@@ -494,12 +734,20 @@ def crew_snapshot(project_root: Path | str, current_capability: str | None = Non
     entry_by_name = {entry.name: entry for entry in entries}
     roles = {}
     for role in CREW_ROLES:
-        if role.runtime_kind == "generic-sub":
+        if role.role_class == "producer":
+            from .producer import producer_namespace
+
+            health = _producer_ready_health(source_id, root, role, home)
+            if health is not None:
+                health["instance_present"] = producer_namespace(root, role.name).is_dir()
+        else:
+            health = None
+        if health is None and role.runtime_kind == "generic-sub":
             health = sub_instance_health(
                 root, role.name, source_id, entry_by_name.get(role.name), records=records
             )
             health["instance_present"] = (root / SUBS_REL / role.name / "STATE.md").is_file()
-        else:
+        elif health is None:
             health = _specialized_health(source_id, root, role, home)
             health["instance_present"] = (root / role.outbox_path).is_file()
         roles[role.name] = health
@@ -511,7 +759,7 @@ def crew_snapshot(project_root: Path | str, current_capability: str | None = Non
         )
         for role in CREW_ROLES
     }
-    release = _release_evidence(root, epoch)
+    release = _release_evidence(root, epoch, semantic_snapshot)
     pending = tuple(pending_ops(root))
     from .journal import validate_op_id
     from .safeid import InvalidIdError
@@ -548,6 +796,9 @@ def crew_snapshot(project_root: Path | str, current_capability: str | None = Non
             release,
             {},
             False,
+            records,
+            receipt_errors,
+            semantic_snapshot,
             current_capability=current_capability,
         )
 
@@ -591,31 +842,25 @@ def crew_snapshot(project_root: Path | str, current_capability: str | None = Non
     receipt_hashes = {}
     for receipt_path in sorted(receipt_paths):
         receipt_hashes[receipt_path] = hash_file_dependency(root / receipt_path)
-    repeated_source, repeated_error = _source_identity(root)
-    repeated_token = (
-        source_identity_dependency(repeated_source) if repeated_source is not None else ""
-    )
+    if source_id is None:
+        source_stable = False
+    else:
+        source_stable, _repeated_error = _revalidate_source_identity(root, source_id)
     root_after = _capture_dependencies(root_specs)
     # Re-scan ONLY operation.json membership + bytes for the stability proof
     # (the digest never reads *.staged payloads, which cannot change a crew
     # verdict -- T-1004 perf).
     stability_after = _capture_receipt_digest(root)  # PERF-005: lightweight stability pass
     home_after = _capture_dependencies(home_specs)
-    source_stable = (
-        source_id is None and repeated_source is None and source_error == repeated_error
-    ) or (
-        source_id is not None
-        and repeated_source is not None
-        and source_id == repeated_source
-        and source_token == repeated_token
-    )
     hashes = {**root_before, **home_before, **receipt_hashes}
+    hashes[".saipen/recovery"] = stability_before
     if source_token:
         hashes["."] = source_token
     dependencies_stable = (
         root_before == root_after
         and home_before == home_after
         and stability_before == stability_after
+        and not receipt_errors
         and not any(_unsafe_dependency(value) for value in hashes.values())
     )
     return CrewSnapshot(
@@ -642,6 +887,8 @@ def crew_snapshot(project_root: Path | str, current_capability: str | None = Non
         hashes,
         source_stable and dependencies_stable,
         records,
+        receipt_errors,
+        semantic_snapshot,
         current_capability=current_capability,
     )
 
@@ -687,6 +934,14 @@ def _action(
         role_paths=role_paths,
         write_boundary=write_boundary,
         then_action="REPLAN_CREW",
+        # AUTO-002: every crew action is an EXECUTABLE instruction for the
+        # current agent, never a terminal stop and never a human task. The
+        # carrier is machine-readable so a weak model cannot misread a routing
+        # action as a stop or as a request to bounce the work elsewhere.
+        terminal=False,
+        requires_human=False,
+        next_action=action,
+        resume_after="REPLAN_CREW",
     )
 
 
@@ -757,7 +1012,9 @@ def _core_fixed_point(snapshot: CrewSnapshot, session_agent: str | None = None) 
         errors.append(f"Core phase is {snapshot.state.get('phase')!r}, not DONE")
     if snapshot.state.get("task") not in (None, "", "none"):
         errors.append(f"Core task is {snapshot.state.get('task')!r}, not none")
-    verdict = convergence_verdict(snapshot.root, snapshot.source_id)
+    verdict = convergence_verdict(
+        snapshot.root, snapshot.source_id, receipt_snapshot=snapshot.receipt_snapshot
+    )
     if not verdict.ok:
         errors.append("canonical convergence proof missing: " + "; ".join(verdict.reasons[:3]))
     return not errors, "; ".join(errors[:3])
@@ -1226,20 +1483,10 @@ def _post_ship(snapshot: CrewSnapshot) -> tuple[bool, str, CrewAction | None]:
                     False,
                     (
                         f"{role.name}: collected, Core review "
-                        f"{ticket or 'ticket'} open -- review/disposition is "
-                        "the missing action"
+                        f"{ticket or 'ticket'} open -- terminal human/agent "
+                        "review blocker"
                     ),
-                    _action(
-                        snapshot,
-                        "SC-12",
-                        "REVIEW_CORE",
-                        role.name,
-                        "independent Core review of the collected hypothesis",
-                        "linked review ticket terminal with disposition",
-                        f"{role.name} health CURRENT",
-                        role.outbox_path,
-                        ticket or "",
-                    ),
+                    None,
                 )
             _ok, role_reason = _sensor_executed(snapshot, role)
             return (
@@ -1310,20 +1557,58 @@ def _producer_integrated(snapshot: CrewSnapshot, role) -> bool:
     ]
     if not matching:
         return False
+    from .board import iso_utc_sort_key
+
+    _earliest = iso_utc_sort_key("0000-01-01T00:00:00Z")
     latest = max(
-        matching, key=lambda record: (record.get("created_at", ""), record.get("op_id", ""))
+        matching,
+        key=lambda record: (
+            iso_utc_sort_key(record.get("created_at", "")) or _earliest,
+            record.get("op_id", ""),
+        ),
     )
     meta = latest.get("receipt_metadata") or {}
-    model = parse_outbox(_read_maybe(snapshot.root / role.outbox_path), role.name)
-    package = next(
-        (p for p in model.packages if package_identity(p) == meta.get("package_identity")), None
-    )
+    from .producer import ProducerPackage, SETTLED_DIRNAME, producer_namespace
+
+    package = None
+    settled = producer_namespace(snapshot.root, role.name) / SETTLED_DIRNAME
+    if settled.is_dir():
+        for path in sorted(settled.glob("*.json")):
+            try:
+                candidate = ProducerPackage.from_dict(
+                    json.loads(path.read_text(encoding="utf-8")),
+                    expected_producer=role.name,
+                    ready_path=path,
+                )
+            except Exception:
+                return False
+            if candidate.package_identity == meta.get("package_identity"):
+                package = candidate
+                break
     if package is None:
-        return False
-    if package.fields.get("source_head") != meta.get("input_source"):
-        return False
-    if package.fields.get("source_tree_fingerprint") != meta.get("input_source_fingerprint"):
-        return False
+        # Compatibility for pre-READY-layer crew receipts.
+        model = parse_outbox(_read_maybe(snapshot.root / role.outbox_path), role.name)
+        legacy = next(
+            (
+                item
+                for item in model.packages
+                if package_identity(item) == meta.get("package_identity")
+            ),
+            None,
+        )
+        if legacy is None:
+            return False
+        if legacy.fields.get("source_head") != meta.get("input_source"):
+            return False
+        if legacy.fields.get("source_tree_fingerprint") != meta.get(
+            "input_source_fingerprint"
+        ):
+            return False
+    else:
+        if package.base_source_head != meta.get("input_source"):
+            return False
+        if package.base_source_tree_fingerprint != meta.get("input_source_fingerprint"):
+            return False
     return (
         meta.get("resulting_source") == snapshot.source_id.source_head
         and meta.get("resulting_source_fingerprint") == snapshot.source_id.source_tree_fingerprint
@@ -1356,10 +1641,25 @@ def _producer_oscillation(snapshot: CrewSnapshot) -> str | None:
         if ready:
             heads[name] = ready[-1].fields.get("source_head", "")
     names = [name for name in by_role if name in heads]
+    from .board import iso_utc_sort_key
+
+    _earliest = iso_utc_sort_key("0000-01-01T00:00:00Z")
     for index, a in enumerate(names):
         for b in names[index + 1 :]:
-            la = max(by_role[a], key=lambda r: (r.get("created_at", ""), r.get("op_id", "")))
-            lb = max(by_role[b], key=lambda r: (r.get("created_at", ""), r.get("op_id", "")))
+            la = max(
+                by_role[a],
+                key=lambda r: (
+                    iso_utc_sort_key(r.get("created_at", "")) or _earliest,
+                    r.get("op_id", ""),
+                ),
+            )
+            lb = max(
+                by_role[b],
+                key=lambda r: (
+                    iso_utc_sort_key(r.get("created_at", "")) or _earliest,
+                    r.get("op_id", ""),
+                ),
+            )
             ra = (la.get("receipt_metadata") or {}).get("resulting_source")
             rb = (lb.get("receipt_metadata") or {}).get("resulting_source")
             if heads.get(b) != ra and heads.get(a) != rb:
@@ -1509,23 +1809,13 @@ def _evaluate(
             )
             stages = _reachable(evaluations)
             return stages, _first_action(stages)
-        action = _action(
-            snapshot,
-            "CORE-TASK",
-            "CONTINUE_CORE",
-            None,
-            "crew target is outer to active Core ticket",
-            "normal phase/ticket completion evidence",
-            "Core task reaches local terminal point",
-            snapshot.state.get("next_action", ""),
-        )
         evaluations.append(
             (
                 "CORE-TASK",
                 "active-core-task",
                 UNSATISFIED,
                 "finish active Core task before crew roles",
-                action,
+                None,
             )
         )
         stages = _reachable(evaluations)
@@ -1658,21 +1948,7 @@ def _evaluate(
             _STAGE_NAMES["SC-7"],
             SATISFIED if core_ok else UNSATISFIED,
             core_reason,
-            None
-            if core_ok
-            else _action(
-                snapshot,
-                "SC-7",
-                "CONVERGE_CORE",
-                None,
-                "canonical Core convergence verdict current "
-                "against one source identity + attributed tree",
-                "structured E-I receipts (test/HUNT/CLEAN/"
-                "post-clean test/final HUNT) + attribution",
-                "convergence_verdict ok and closure problems empty",
-                ".saipen/BOARD.md",
-                ".saipen/STATE.md",
-            ),
+            None,
         )
     )
 
@@ -1767,17 +2043,7 @@ def _evaluate(
             _STAGE_NAMES["SC-10"],
             SATISFIED if final_fixed else UNSATISFIED,
             "" if final_fixed else "Core/sensor evidence changed after producer integration",
-            None
-            if final_fixed
-            else _action(
-                snapshot,
-                "SC-10",
-                "REVERIFY_FIXED_POINT",
-                None,
-                "all sensor/Core evidence current after integration",
-                "fresh Core and worker proof",
-                "Core fixed point and all sensors CURRENT",
-            ),
+            None,
         )
     )
 
@@ -1937,12 +2203,10 @@ def _first_action(stages: list[dict]) -> CrewAction | None:
     return None
 
 
-def crew_plan(
-    project_root: Path | str,
-    current_capability: str | None = None,
-    current_agent: str | None = None,
+def _crew_plan_from_snapshot(
+    snapshot: CrewSnapshot, current_agent: str | None = None
 ) -> dict:
-    snapshot = crew_snapshot(project_root, current_capability=current_capability)
+    """Evaluate one already coherent world-view without recapturing it."""
     stages, action = _evaluate(snapshot, session_agent=current_agent)
     substantive_ok = all(
         stage["state"] == SATISFIED for stage in stages if stage["stage"] != "SC-13"
@@ -2000,6 +2264,23 @@ def crew_plan(
     }
 
 
+def _capture_crew_plan(
+    project_root: Path | str,
+    current_capability: str | None = None,
+    current_agent: str | None = None,
+) -> tuple[CrewSnapshot, dict]:
+    snapshot = crew_snapshot(project_root, current_capability=current_capability)
+    return snapshot, _crew_plan_from_snapshot(snapshot, current_agent=current_agent)
+
+
+def crew_plan(
+    project_root: Path | str,
+    current_capability: str | None = None,
+    current_agent: str | None = None,
+) -> dict:
+    return _capture_crew_plan(project_root, current_capability, current_agent)[1]
+
+
 def _finalize_problems(snapshot: CrewSnapshot, session_agent: str | None = None) -> list[str]:
     stages, _action_value = _evaluate(snapshot, session_agent=session_agent)
     problems = [
@@ -2029,6 +2310,14 @@ def finalize_crew(
     # the canonical finalizer. A second independent snapshot would open a gap
     # where role evidence could change after the green verdict.
     snapshot = crew_snapshot(root)
+    return _finalize_crew_from_snapshot(snapshot, dry_run=dry_run, current_agent=current_agent)
+
+
+def _finalize_crew_from_snapshot(
+    snapshot: CrewSnapshot, dry_run: bool = False, current_agent: str | None = None
+) -> Result:
+    """Finalize against the planner snapshot; canonical APPLY rechecks its CAS."""
+    root = snapshot.root
     problems = _finalize_problems(snapshot, session_agent=current_agent)
     if problems:
         return _refuse(
@@ -2060,25 +2349,21 @@ def finalize_crew(
 
         ev_path = root / ".saipen" / "kitchen" / "crew_release_evidence.json"
         ev_doc = _codec.read_document(ev_path)
-        ev_content = (
-            json.dumps(
-                {
-                    "schema_version": 1,
-                    "operation": "crew_finalize_evidence",
-                    "crew_epoch": epoch.op_id,
-                    "release_op_id": release.op_id,
-                    "release_tag": release.tag,
-                    "closure_commit": release.closure_commit,
-                    "ticket_id": epoch.ticket,
-                    "final_state": "normal/DONE",
-                    "recorded_at": _dt.datetime.now(_dt.timezone.utc).strftime(
-                        "%Y-%m-%dT%H:%M:%SZ"
-                    ),
-                },
-                indent=2,
-            )
-            + "\n"
-        )
+        evidence_record = {
+            "schema_version": 1,
+            "operation": "crew_finalize_evidence",
+            "crew_epoch": epoch.op_id,
+            "release_op_id": release.op_id,
+            "release_tag": release.tag,
+            "closure_commit": release.closure_commit,
+            "final_state": "normal/DONE",
+            "recorded_at": _dt.datetime.now(_dt.timezone.utc).strftime(
+                "%Y-%m-%dT%H:%M:%SZ"
+            ),
+        }
+        if epoch.ticket is not None:
+            evidence_record["ticket_id"] = epoch.ticket
+        ev_content = json.dumps(evidence_record, indent=2) + "\n"
         before_hash = ev_doc.raw_hash if ev_path.is_file() else ""
         evidence_target = TargetPlan(
             ".saipen/kitchen/crew_release_evidence.json",
@@ -2089,6 +2374,17 @@ def finalize_crew(
         )
     except OSError:
         pass
+    finalizer_metadata = {
+        "operation": "finalize_crew",
+        "target": "crew",
+        "status": "COMMITTED",
+        "crew_epoch": epoch.op_id,
+        "release_op_id": release.op_id,
+        "release_tag": release.tag,
+        "release_closure_commit": release.closure_commit,
+    }
+    if epoch.ticket is not None:
+        finalizer_metadata["ticket_id"] = epoch.ticket
     return finalize_converge_intent(
         root,
         actor,
@@ -2097,16 +2393,7 @@ def finalize_crew(
         ticket_id=epoch.ticket,
         dry_run=dry_run,
         evidence_preconditions=snapshot.input_hashes,
-        receipt_metadata={
-            "operation": "finalize_crew",
-            "target": "crew",
-            "status": "COMMITTED",
-            "crew_epoch": epoch.op_id,
-            "release_op_id": release.op_id,
-            "release_tag": release.tag,
-            "release_closure_commit": release.closure_commit,
-            "ticket_id": epoch.ticket,
-        },
+        receipt_metadata=finalizer_metadata,
         extra_targets=[evidence_target] if evidence_target else None,
     )
 
@@ -2143,8 +2430,16 @@ def crew_apply(
     base_errors = validate_project(root, current_agent=actor)
     if base_errors:
         return _refuse("VALIDATION_FAILED", "; ".join(base_errors[:5]))
-    snapshot = crew_snapshot(root, current_capability=current_capability)
-    home_problem = _home_problem(snapshot)
+    # PERF-006: only the minimum stable pre-intent state is needed to decide
+    # whether to set the crew intent. Reading the full crew_snapshot here would
+    # be thrown away the moment set_converge_intent mutates STATE (it must never
+    # be reused across that mutation). Parse STATE directly for the intent
+    # check and the saipen_home validity check.
+    from .state import parse_state as _parse_state
+
+    _state_text = (root / ".saipen" / "STATE.md").read_text(encoding="utf-8-sig")
+    pre_state = _parse_state(_state_text)
+    home_problem = _home_problem_for(pre_state.get("saipen_home") or "")
     if home_problem:
         return _refuse(
             "HOME_REQUIRED",
@@ -2152,8 +2447,8 @@ def crew_apply(
             next_action="set a valid saipen_home in STATE.md pointing at a real SAIPEN install",
         )
     if (
-        snapshot.state.get("execution_intent") != "converge"
-        or snapshot.state.get("converge_target") != "crew"
+        pre_state.get("execution_intent") != "converge"
+        or pre_state.get("converge_target") != "crew"
     ):
         from .operations import set_converge_intent
 
@@ -2169,7 +2464,8 @@ def crew_apply(
             data={"plan": plan, "action": plan.get("action")},
         )
 
-    plan = crew_plan(root, current_capability=current_capability, current_agent=actor)
+    snapshot = crew_snapshot(root, current_capability=current_capability)
+    plan = _crew_plan_from_snapshot(snapshot, current_agent=actor)
     action = plan.get("action") or {}
     kind = action.get("action")
     role = action.get("role")
@@ -2180,7 +2476,7 @@ def crew_apply(
     if kind == "ADOPT_ROLE":
         return sub_adopt(root, role, snapshot.saipen_home)
     if kind == "FINALIZE":
-        return finalize_crew(root, current_agent=actor)
+        return _finalize_crew_from_snapshot(snapshot, current_agent=actor)
     if kind == "DEFER_FOR_CREW":
         # Item 4: an ordinary SHIP ticket under active crew closes LOCALLY as
         # deferred -- zero publication -- and Core returns to the planner.
@@ -2220,6 +2516,11 @@ def crew_apply(
             if invalid_roles
             else (stage_action.get("role") if isinstance(stage_action, dict) else None)
         )
+        # AUTO-002: CREW_BLOCKED is a ROUTING carrier. A blocked stage whose
+        # resolution is locally satisfiable carries `execute_in_current_agent`
+        # + the canonical action; only a genuine stage that needs real Core
+        # implementation work or a human decision is terminal. A weak model
+        # must be able to distinguish "inspect and I act" from "stop".
         return Result(
             ok=False,
             code="CREW_BLOCKED",
@@ -2229,6 +2530,13 @@ def crew_apply(
                 "stage": first_unsat,
                 "role": role,
                 "reason": (stage or {}).get("reason", ""),
+                "terminal": False,
+                "requires_human": False,
+                "execute_in_current_agent": True,
+                "next_action": (
+                    stage_action.get("action") if isinstance(stage_action, dict) else None
+                ),
+                "resume_after": "saipen crew",
                 "next": "inspect the unsatisfied stage and resolve its "
                 "evidence; never invent an action when inspection is "
                 "required",
@@ -2245,6 +2553,10 @@ def crew_apply(
             "crew_complete": plan.get("crew_complete"),
             "action_required": plan.get("action_required"),
             "execute_in_current_agent": action.get("execute_in_current_agent"),
+            "terminal": action.get("terminal", False),
+            "requires_human": action.get("requires_human", False),
+            "next_action": action.get("next_action", action.get("action")),
+            "resume_after": action.get("resume_after", "saipen crew"),
         },
     )
 

@@ -742,7 +742,10 @@ def _latest_sub_sync_inventory(
     if records is None:
         from .journal import semantic_receipt_snapshot
 
-        records, _errors = semantic_receipt_snapshot(root)
+        snapshot = semantic_receipt_snapshot(root)
+        if snapshot.errors:
+            return None, None, "corrupt"
+        records = snapshot.records
     candidates = []
     for record in records:
         try:
@@ -774,6 +777,39 @@ def _latest_sub_sync_inventory(
     newest = max(c[0] for c in valid)
     top = [c for c in valid if c[0] == newest]
     if len({_inventory_key(c[3]) for c in top}) > 1:
+        # W2-003: check if same-second divergent inventories are actually a
+        # serial chain via previous_sub_sync_op_id. Serial A->B with same
+        # timestamp and B.previous == A.op_id is ordered, not ambiguous.
+        # Legacy receipts without predecessor remain ambiguous.
+        top_by_id = {c[1]: c for c in top}
+        # Build predecessor map: for each top candidate, its previous op_id
+        pred_to_succ: dict[str, str] = {}
+        has_legacy = False
+        for _ts, _op, rec, _inv, _path in top:
+            prev = (rec.get("receipt_metadata") or {}).get("previous_sub_sync_op_id")
+            if not prev:
+                has_legacy = True
+            elif prev in top_by_id:
+                pred_to_succ[prev] = _op
+        # If any legacy among divergent top, keep ambiguous (cannot prove chain)
+        if has_legacy:
+            return None, None, "ambiguous"
+        # If the divergent top forms a single predecessor chain, resolve to head
+        # Head is the op that is not a predecessor of any other top candidate
+        # and whose predecessors are within top. For serial A->B, pred_to_succ = {A: B}, head = B.
+        # For chain A->B->C, pred_to_succ = {A: B, B: C}, head = C.
+        # If multiple heads or disconnected, it's a true fork -> ambiguous.
+        successors = set(pred_to_succ.values())
+        predecessors = set(pred_to_succ.keys())
+        # Heads are successors that are never predecessors in this top set
+        heads = [op for op in successors if op not in predecessors]
+        # If exactly one head and the chain covers all divergent inventories
+        # (i.e., all top nodes are connected via predecessor links), not ambiguous.
+        if len(heads) == 1 and len(pred_to_succ) == len(top) - 1:
+            head_op = heads[0]
+            head = top_by_id[head_op]
+            _ts, _op, record, inventory, receipt_path = head
+            return {**record, "_receipt_path": receipt_path}, inventory, "ok"
         return None, None, "ambiguous"
     _ts, _op, record, inventory, receipt_path = max(top, key=lambda item: item[1])
     return {**record, "_receipt_path": receipt_path}, inventory, "ok"
@@ -1764,10 +1800,23 @@ def sub_list(project_root: Path | str) -> Result:
         source_id = compute_source_identity(root)
     except Exception:
         source_id = None
+    # PERF-005: ONE command-scoped semantic receipt snapshot serves every role.
+    # Per-role health is not an independent receipt universe -- all roles in
+    # one sub list belong to the same read-only command snapshot. Feeding the
+    # same records to every helper removes N-role lifetime-receipt re-scans.
+    try:
+        from .journal import semantic_receipt_snapshot
+
+        _receipt_snapshot = semantic_receipt_snapshot(root)
+        _records = _receipt_snapshot.records
+        if _receipt_snapshot.errors:
+            _records = ()
+    except Exception:
+        _records = None
     lines = []
     blocked = []
     for entry in entries:
-        info = sub_instance_health(root, entry.name, source_id, entry)
+        info = sub_instance_health(root, entry.name, source_id, entry, records=_records)
         lines.append(info)
         if info["health"] == HEALTH_BLOCKED or info.get("board", {}).get("counts", {}).get(
             "BLOCKED"
@@ -1878,9 +1927,12 @@ def plan_sub_sync(project_root: Path | str, saipen_home: str) -> dict:
             )
     delete_files.sort(key=lambda item: (-len(Path(item["path"]).parts), item["path"]))
     delete_dirs.sort(key=lambda item: (-len(Path(item["path"]).parts), item["path"]))
+    # W2-003: durable predecessor for same-second ordering
+    prior_op_id = receipt.get("op_id", "") if receipt else ""
     receipt_metadata = {
         "owned_source_inventory": source_inventory,
         "obsolete_reconciliation": obsolete,
+        "previous_sub_sync_op_id": prior_op_id,
     }
     inventory_changed = prior_inventory != source_inventory
     drift = bool(changed or delete_files or delete_dirs or receipt is None or inventory_changed)
@@ -2076,6 +2128,15 @@ def sub_spawn(
     writes and reports would_result -- the mutation did not happen.
     """
     root = Path(project_root)
+    # W2-004: pending-recovery admission BEFORE any post-apply state-derived
+    # idempotence check. A target that appears to exist may be the partial
+    # effect of a crash-left PREPARED op; recovery must settle it first.
+    if not dry_run:
+        from .journal import recovery_preflight
+
+        pre = recovery_preflight(root)
+        if not pre["ok"]:
+            return _refuse(pre.get("code", "RECOVERY_REQUIRED"), pre.get("detail", ""), name=name)
     try:
         target = _sub_dir(root, name)
     except ValueError as exc:
@@ -2532,6 +2593,12 @@ def sub_pause(
     the same patch with ZERO writes/LOG/STATE/journal.
     """
     root = Path(project_root)
+    if not dry_run:
+        from .journal import recovery_preflight
+
+        pre = recovery_preflight(root)
+        if not pre["ok"]:
+            return _refuse(pre.get("code", "RECOVERY_REQUIRED"), pre.get("detail", ""), name=name)
     try:
         _sub_dir(root, name)
     except ValueError as exc:
@@ -2633,6 +2700,12 @@ def sub_resume(
     patch with ZERO writes.
     """
     root = Path(project_root)
+    if not dry_run:
+        from .journal import recovery_preflight
+
+        pre = recovery_preflight(root)
+        if not pre["ok"]:
+            return _refuse(pre.get("code", "RECOVERY_REQUIRED"), pre.get("detail", ""), name=name)
     try:
         _sub_dir(root, name)
     except ValueError as exc:
@@ -2894,6 +2967,14 @@ def sub_clean(
 ) -> Result:
     """Archive, unregister, and remove one SubSaipen transactionally."""
     root = Path(project_root)
+    # W2-004: pending-recovery admission BEFORE any post-apply state-derived
+    # ALREADY_CLEAN/ALREADY_CLAIMED check.
+    if not dry_run:
+        from .journal import recovery_preflight
+
+        pre = recovery_preflight(root)
+        if not pre["ok"]:
+            return _refuse(pre.get("code", "RECOVERY_REQUIRED"), pre.get("detail", ""), name=name)
     try:
         instance = _sub_dir(root, name)
     except ValueError as exc:
@@ -3195,8 +3276,10 @@ def _iter_operation_records(root: Path, records: tuple[dict, ...] | None = None)
         yield from records
         return
     from .journal import semantic_receipt_snapshot
-    all_records, _errors = semantic_receipt_snapshot(root)
-    yield from all_records
+    snapshot = semantic_receipt_snapshot(root)
+    if snapshot.errors:
+        return
+    yield from snapshot.records
 
 
 def _durable_collect_witness(
@@ -3206,22 +3289,56 @@ def _durable_collect_witness(
 
     Free prose is never mechanical evidence: a package_identity SHA mentioned
     inside an arbitrary BOARD description or LOG message is NOT proof an
-    intake happened. The only witnesses are (1) the MANIFEST's structured
-    `last_collect` identity and (2) a COMMITTED `sub_collect` operation
+    intake happened. The ONLY witness is a COMMITTED `sub_collect` operation
     receipt whose structured receipt_metadata carries the exact
-    `package_identity` -- the LOG line is display, the receipt is identity.
+    `package_identity`.
+
+    The MANIFEST `last_collect` marker is an INDEX, never authority: it is a
+    journal target of the very collect op that also writes it, so a collect
+    that CONFLICTs during post-write verification leaves the marker on disk
+    while no COMMITTED receipt exists. Treating the marker as a witness turns
+    one failed collect into a permanent `ALREADY_COLLECTED` dedup that blocks
+    the retry from ever creating its review ticket (reproduced live on
+    saihunt/HUNT-008 at HEAD e045ad07). A marker with no backing receipt is
+    poisoned evidence and MUST NOT dedup.
     """
-    if last_collect.startswith(identity + "@"):
-        return True
     for record in _iter_operation_records(root, records):
-        if record.get("operation") != "sub_collect":
-            continue
-        if record.get("status") != "COMMITTED":
+        if not _durable_collect_receipt(record):
             continue
         meta = record.get("receipt_metadata") or {}
         if identity in (meta.get("package_identities") or ()):
             return True
     return False
+
+
+def _durable_collect_receipt(record: dict) -> bool:
+    """Whether a settled receipt durably proves one completed intake.
+
+    Ordinary intake ends COMMITTED. Recovery may instead settle an operation
+    as RESOLVED/accept_live after every planned target reached its exact
+    post-write bytes and the normal ``sub_collect`` verifier passed. That
+    terminal record is equally durable; ignoring it splits MANIFEST dedup
+    truth from collect linkage and leaves the package impossible to review.
+
+    A partial or replanned resolution is never positive evidence.
+    """
+    if record.get("operation") != "sub_collect":
+        return False
+    if record.get("status") == "COMMITTED":
+        return True
+    if record.get("status") != "RESOLVED" or record.get("resolution") != "accept_live":
+        return False
+    meta = record.get("receipt_metadata") or {}
+    if meta.get("operation") != "sub_collect" or meta.get("status") != "COMMITTED":
+        return False
+    targets = record.get("targets") or []
+    applied = record.get("resolution_applied_targets") or []
+    skipped = record.get("resolution_skipped_targets") or []
+    target_paths = [target.get("path") for target in targets]
+    return bool(target_paths) and not skipped and all(
+        target.get("applied") is True and target.get("path") in applied
+        for target in targets
+    )
 
 
 def _collect_linkage(
@@ -3239,9 +3356,7 @@ def _collect_linkage(
     links: dict[str, str] = {}
     for record in _iter_operation_records(root, records):
         meta = record.get("receipt_metadata") or {}
-        if record.get("operation") != "sub_collect":
-            continue
-        if record.get("status") != "COMMITTED":
+        if not _durable_collect_receipt(record):
             continue
         identities = meta.get("package_identities") or []
         tickets = meta.get("tickets") or []
@@ -3597,7 +3712,7 @@ def sub_collect(
         package = item["package"]
         identity = item["identity"]
         ticket = f"T-{next_id + offset}"
-        provenance = (
+        provenance = codec.redact_credentials(
             f"package_identity={identity}; producer={producer}; "
             f"package={package.package_id}; source_head="
             f"{package.fields['source_head']}; source_tree_fingerprint="
@@ -3607,7 +3722,7 @@ def sub_collect(
         )
         description = escape_ticket_description(
             f"Review SubSaipen hypothesis {producer}/{package.package_id}: "
-            f"{package.description}; not accepted fact; {provenance}"
+            f"{codec.redact_credentials(package.description)}; not accepted fact; {provenance}"
         )
         verify = escape_ticket_description(
             "Independently reproduce or reject hypothesis, record Core "

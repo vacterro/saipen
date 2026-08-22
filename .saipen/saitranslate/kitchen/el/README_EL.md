@@ -1,74 +1,77 @@
 <p align="center">
   <img src="assets/SAIPEN_TEXT1.png" alt="SAIPEN Logo"/>
-  <br>
-  <img src="assets/__SAIPEN_Alpha.png" alt="SAIPEN Sticker" width="200"/>
 </p>
+
+<div align="center">
+  <h3><a href="README.ee.md">🇪🇪 LOE SEDA EESTI KEELES / ESTONIAN 🇪🇪</a></h3>
+  <a href="README.md">🇬🇧 English</a> &nbsp;|&nbsp;
+  <a href="README.ded.md">👴 Дед-Версия (Russian)</a> &nbsp;|&nbsp;
+  <a href="README.ja.md">🇯🇵 日本語 (Japanese)</a>
+</div>
 
 # SAIPEN
 
-**Πρωτόκολλο συνέχειας για πράκτορες κώδικα AI.** Μόνιμη μνήμη έργου σε
-απλό markdown, ώστε ένας νέος πράκτορας χωρίς ιστορικό συνομιλίας να εκτελεί `/saipen continue`
-και να συνεχίζει την εργασία σε λιγότερο από ένα λεπτό -- χωρίς νέα ενημέρωση, από οποιονδήποτε πάροχο, οποιαδήποτε ημέρα.
+**Πρωτόκολλο συνέχισης για αγόρι αντιπροσωπευτικούς πράκτορες AI.**Η μνήμη του προγράμματος βρίσκεται σε απλό
+αρχεία Markdown μέσα στο πρόγραμμα(`.saipen/`), έτσι ώστε οποιοσδήποτε συμβατός ψυχρός πράκτορας —
+χωρίς ιστορικό συνομιλίας, χωρίς μνήμη συνεδρίας — μπορεί να τρέξει`/saipen continue`, να διαβάσει το
+διατηρημένο`next_action`, και να συνεχίσει την εργασία χωρίς να ζητά από τον χρήστη να εξηγήσει ξανά
+τίποτα. Το κατάσταση ανήκει στο πρόγραμμα, όχι στη μνήμη ενός προμηθευτή μοντέλου.
 
-**Μία εντολή. Μηδενική αμνησία.**
+**Μια εντολή για να συνεχιστεί. Κατάσταση απλού αρχείου. Συμβατικά συμβόλαια που ελέγχονται από μηχανή.**
+
+Το αποθετήριο επιβεβαιώνεται αυτόματα κάθε φορά που γίνεται push; εγκατάσταση, κατάσταση, ελέγχοι και
+Η απεγκατάσταση είναι πάντα τοπική — δεν υπάρχει υπηρεσία σύννεφος, δεν υπάρχει δαίμονας, δεν υπάρχει βάση δεδομένων.
+
+[![Validation](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
+[![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
+[![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
+
+**v7.226.0** | [Συμβολισμός](SPEC.md) | [Οδηγός](GUIDE.md) | [Πυρήνας](saipen/CORE.md) | [Συντήρηση](saipen/MAINTENANCE.md) | [Στυλ](saipen/STYLE.md) | [Διεπαφή Χρήστη](saipen/UI.md) | [Συμμόρφωση](saipen/CONFORMANCE.md) |MIT
 
 **Συντομεύσεις:** το `cc` συνεχίζει το πλαίσιο του έργου μέχρι τη σύγκλιση (συνεχίζει έναν ενεργό στόχο, αν έχει οριστεί), το `sss` εμφανίζει την κατάσταση χωρίς να αγγίζει κώδικα και το `ss` αποθηκεύει σημείο ελέγχου και σταματάει. [Δες τον πλήρη χάρτη 15 πλήκτρων](saipen/RFC.md#110-command-surface). Λειτουργούν και τα κυριλλικά δίδυμα: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
-**Γλώσσα απαντήσεων.** Ο πράκτορας απαντά από προεπιλογή **στα εσθονικά** — είναι ρύθμιση, όχι ιδιοτροπία, και τίποτα άλλο στο SAIPEN δεν είναι εσθονικό. Αλλάζει σε ένα σημείο: η γραμμή `reply_language:` στην αρχή του [`saipen/STYLE.md`](saipen/STYLE.md). `et` εσθονικά, `en` αγγλικά, `ru` ρωσικά, `auto` επιλέγει από τη γλώσσα του μηνύματός σου. Το πρωτόκολλο, ο κώδικας, τα commits και όλα τα έγγραφα παραμένουν στα αγγλικά σε κάθε τιμή.
-
-**v7.225.0** | [Προδιαγραφή](SPEC.md) | [Οδηγός](GUIDE.md) | [RFC](saipen/RFC.md) | [Στυλ](saipen/STYLE.md) | [UI](saipen/UI.md) | [Συμμόρφωση](saipen/CONFORMANCE.md) | απλό markdown | μηδενικές εξαρτήσεις | MIT
-
 ```text
+Project
+  |
+  +-- .saipen/STATE.md ------ what is happening right now (phase, ticket, mode, next_action)
+  +-- .saipen/BOARD.md ------ what work exists (DOING / TODO / DONE / BLOCKED)
+  +-- .saipen/LOG.md -------- why the project reached this state (event history)
+  +-- .saipen/KNOWLEDGE/ ---- what durable facts must survive sessions
+          |
+          v
+   /saipen continue
+          |
+          v
+      cold agent
+          |
+          v
+     next_action -> work -> checkpoint -> next ticket
+```
 
-### Project State > Model Memory
+## Τι παραμένει
 
-**Project state is stronger than model memory.** Memory lives in the project, not the model's head. `Project -> Memory -> LLM` becomes `Project -> SAIPEN state -> LLM`.
+Η ζωντανή μνήμη του προγράμματος υπάρχει στο`.saipen/`— απλά αρχεία που μπορείτε να διαβάσετε, να διαφοροποιήσετε και
+να κάνετε commit δίπλα στον κώδικα. Ένας ψυχρός πράκτορας απαντά πέντε ερωτήσεις από τα αρχεία
+μόνος του:
 
-- **Core state machine** — `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`
-- **Autonomy without prompting** — board stalled (no workable `TODO`, `DOING` empty) **and not `BLOCKED`**? Auto-transition to `HUNT` (bug scanning) → `ADD` (feature development) → `HUNT`, no questions asked. A `BLOCKED` session never launches autonomous hunting — it waits for a human to resolve the block (RFC § 2.1).
-- **Strict reliability** — batch input parsing (surgical 1-at-a-time tickets), dirty tree adoption (never wipes uncommitted work), secret redaction (`sk-***`).
-
-## Commands
-
-The full surface is 16 commands; complete details in [RFC § 1.10](saipen/RFC.md#110-command-surface).
-
-| Command | What it does |
+|Αρχείο / πεδίο|Απαντήσεις|
 |---|---|
-| `/saipen set` | Adopt a project |
-| `/saipen continue` | Resume exactly where you left off |
-| `/saipen plan` | Turn a request or raw queue into tickets |
-| `/saipen goal <text>` | Autonomous wave assault on a new objective |
-| `/saipen hunt` | Force an immediate defect/improvement scan |
-| `/saipen ship` | Version bump, changelog, tag, push |
-| `/saipen clean` | Repository cleanup |
-| `/saipen validate` | Conformance check |
-| `/saipen markhunt` | Dry uncapped audit, record only |
-| `/saipen translate` | Isolated translation factory |
-| `/saipen prepare` | Package work for handoff |
-| `/saipen collect` | Integrate a ready package |
-| `/saipen status` | Read-only report |
-| `/saipen stop` | Checkpoint and halt |
+| `STATE.md` |Τι συμβαίνει τώρα?(φάση, ενεργό τικετ, λειτουργικός τρόπος, εμπόδιο) |
+| `BOARD.md` |Ποια εργασία υπάρχει / ποια είναι ενεργή;(γράφημα τικετών: ΕΝΕΡΓΟ, ΠΡΟΣ ΕΠΕΞΕΡΓΑΣΙΑ, ΟΛΟΚΛΗΡΩΜΕΝΟ, ΠΑΡΑΛΟΓΙΣΜΕΝΟ) |
+| `LOG.md` |Γιατί το πρόγραμμα έφτασε σε αυτή την κατάσταση;(γράφημα γεγονότων με μόνο προσθήκη) |
+| `KNOWLEDGE/` |Ποια αναπόσπαστα γεγονότα του προγράμματος πρέπει να επιβιώσουν τις συνεδρίες;|
+| `next_action` (σε`STATE.md`) |Ποια ακριβώς ενέργεια πρέπει να εκτελέσει το επόμενο πράκτορας;|
 
-<sub>`saipen init` and `saipen sub` complete the sixteen; both are called by the protocol, not typed daily.</sub>
+Αυτό είναι ένα συμβόλαιο ελέγχου, όχι μια πρόταση σχεδιασμού:`saipen stop`και κάθε
+μεταβολή τικετών γράφει τα αρχεία σε σταθερή σειρά, και το αποτέλεσμα ελέγχεται από
+έναν επαληθευτή. Τίποτα δεν αποθηκεύεται σε μια φιλοξενούμενη βάση δεδομένων, και τίποτα δεν χάνεται όταν ένα
+το σύντομο πρόγραμμα.
 
-**Package keys.** `ee`/`qq` prepare a complete translation or wiki package without integrating; `eee`/`qqq` accept only a ready package, then integrate, verify, review, and push.
+## Γρήγορη έναρξη
 
-**Experimental: saicrew.** Optional bonus layer (`extensions/subs/`, zero Core changes) for running a multi-agent crew — one Core writer plus read-only `saihunt`/`saipython` workers reporting through their own `OUTBOX.md`. Under active live testing, not finalised — see `extensions/subs/crew.md`.
+**1. Εγκατάσταση μία φορά ανά μηχανή**— διδάσκει το Claude Code, Codex, Gemini, OpenCode,
+Aider, Antigravity, και οποιοδήποτε γενικό`~/.agents/skills`αναγνωστή(FreeBuff, κλπ.):
 
-## Two layers
-
-| Layer | Required | Purpose |
-|---|---|---|
-| **Core** | ✅ | Resume work safely |
-| **Maintenance** | On top of Core | Evolve software without task direction |
-
-**Automated evolution.** No open tasks remain, type `/saipen`: `HUNT` audits for bugs, dead code, and failing tests. Clean? `ADD` builds the next obvious missing capability, verifies it, and hunts again. Product mature -> stops gracefully.
-
-**GOAL Mode.** `/saipen goal <what you want>` pivots the board (deprioritises old tickets, never deletes them) and drives the new objective forward — no "should I continue?" between tickets, VERIFY/REVIEW never skipped. SHIP auto-pushes to the existing remote; a brand-new repository still asks once. Shipping a goal is not the end point either — it transitions straight into autonomous HUNT/ADD maintenance until the product is mature, blocked, or the run hits its cap (3 waves / 20 tickets, then checkpoints and reports).
-
-## Quick Start
-
-**1. Install once per machine** — teaches Claude Code, Codex, Gemini, OpenCode, Aider, Antigravity and any generic `~/.agents/skills` reader (FreeBuff, etc.):
 ```bash
 git clone https://github.com/vacterro/saipen
 cd saipen
@@ -76,62 +79,230 @@ powershell -ExecutionPolicy Bypass -File .\bootstrap\inject.ps1     # Windows
 bash bootstrap/inject.sh                                            # macOS / Linux
 ```
 
-<sub>What this touches, so there are no surprises: the script adds a tagged block `<!-- SAIPEN:BEGIN -->...<!-- SAIPEN:END -->` to your agent instruction files (`~/.claude/CLAUDE.md`, `~/.config/opencode/AGENTS.md`, `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`) — backing up first as `.bak` — and copies the protocol into the relevant skill folders. Nothing outside those paths, no daemon, no network calls.</sub>
+<sub>What that touches, so nothing is a surprise: it appends a marked
+`<!-- SAIPEN:BEGIN -->...<!-- SAIPEN:END -->`τμήμα στην οδηγία του πράκτορα
+αρχεία που έχετε ήδη(`~/.claude/CLAUDE.md`, `~/.config/opencode/AGENTS.md`,
+`~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`)— αποθηκεύοντας το καθένα σε`.bak`πρώτα —
+και αντιγράφει το πρωτόκολλο στα αντίστοιχα φακέλους δεξιοτήτων. Τίποτα εκτός από αυτά
+οδηγοί, χωρίς δαίμονα, χωρίς κλήσεις δικτύου.</sub>
 
-**Regret it?** One command takes it back:
+**2. Ξεκινήστε ένα έργο**— ανοίξτε έναν πράκτορα στο φάκελό σας, πληκτρολογήστε:
+
+> `saipen set`
+
+**Χωρίς εγκατάσταση?**Επικόλληση μιας γραμμής σε οποιονδήποτε πράκτορα:
+
+> Διαβάστε&lt;clone&gt;/saipen/BOOT.md πρώτα(πυρήνα ψυχρής εκκίνησης), στη συνέχεια&lt;clone&gt;/saipen/INDEX.md +&lt;αντιγραφή&gt;/saipen/STYLE.md και ακολουθήστε τα.
+
+**Αλλάξατε γνώμη;**Μια εντολή το επαναφέρει:
+
 ```bash
 powershell -ExecutionPolicy Bypass -File .\bootstrap\uninstall.ps1  # Windows
 bash bootstrap/uninstall.sh                                         # macOS / Linux
 ```
-This removes exactly the tagged block (leaving the rest of the file untouched), saves a pre-removal `.uninstalled.bak` copy, and removes the skill folders.
 
-**2. Start a project** — open an agent in your folder and type:
-> `saipen set`
+Αφαιρεί ακριβώς το συμβολισμένο κομμάτι(αφήνοντας το υπόλοιπο αρχείο σας ανέπαφο), αποθηκεύει
+a `.uninstalled.bak`αντιγράφετε πρώτα και αφαιρείτε τα φακέλους δεξιοτήτων.
 
-Not installed? Paste one line into any agent:
-> Read <clone>/saipen/BOOT.md first (cold-start kernel), then <clone>/saipen/INDEX.md + <clone>/saipen/STYLE.md and follow them.
+## Γιατί όχι απλώς ιστορικό συνομιλίας;
 
-Platform not in the list above (DeepSeek, Qwen, standalone OpenAI, etc.)?
-Platform-specific notes live in `extensions/adapters/`.
+Το SAIPEN στοχεύει σε μια συγκεκριμένη αποτυχία: έναν πράκτορα κωδικοποίησης AI που δεν θυμάται τίποτα
+μετά τη λήξη της συνεδρίας. Άλλα εργαλεία και συνήθειες καλύπτουν μέρος αυτού του προβλήματος:
 
-## Documentation
+|Προσέγγιση|Τι είναι καλό για|Τι δεν μεταφέρει|
+|---|---|---|
+|Ιστορικό συνομιλίας / μνήμη μοντέλου|Εύκολο, χωρίς ρυθμίσεις|Εξαρτάται από συνεδρία και παρόχο; δεν αποθηκεύεται με το πρόγραμμα, οπότε ένας ψυχρός πράκτορας το δείχνει ποτέ|
+|Στατικό`AGENTS.md`αρχείο / οδηγίες|Διαρκείς σταθερές κανόνες και παραδόσεις|Δεν αντιπροσωπεύει από μόνο του την ζωντανή κατάσταση της εργασίας`next_action`, ή ιστορικό ανάκτησης|
+|Διαχειριστής ζητημάτων / καταγραφή TODO|Διαχείριση εργασιών και αποθηκευμένων εργασιών|Δεν ορίζει από μόνο του τη σημασιολογία συνέχισης του πράκτορα — τι πρέπει να διαβάσει και να εκτελέσει ένας ψυχρός πράκτορας όταν αναστείλει|
+| **SAIPEN** |Ζωντανή κατάσταση εκτέλεσης, ουρά εργασιών, ιστορικό γεγονότων, ανθεκτική γνώση και κανόνες συνέχισης ελεγχόμενα από μηχανή — σε απλά αρχεία δίπλα στον κώδικα|Τίποτα; αυτός ο συνδυασμός είναι το συμβόλαιο|
 
-| Document | What it is |
+Η διαφορά δεν είναι κανένα αρχείο. Είναι ότι το SAIPEN εκτελεί το βήμα αναστολής
+ελεγχόμενο από μηχανή: η πρώτη δράση ενός ψυχρού πράκτορα μετά από`/saipen continue`είναι
+καθορισμένη από το αποθηκευμένο`next_action`και επαληθεύεται από έναν επαληθευτή, όχι
+ανασυσταθεί από τη μνήμη.
+
+## Ποιοτική απόδειξη
+
+Το SAIPEN συνδυάζει ένα κανονικό πρωτόκολλο απλών αρχείων με εκτελέσιμο, αποτυχία-προσανατολισμένο
+ελέγχων. Το αποθετήριο δείχνει σχεδιασμό πρωτοκόλλου/μηχανής καταστάσεων, Python
+εργαλείων, σχήμα-προσαυξημένης κατάστασης, λογική ανάκτησης, δοκιμασίες παλινδρόμησης,
+ορίους ροής εργασιών πολλαπλών πράκτορων και δισκρινισμό προδιαγραφής.
+
+- **Σχεδιασμένος συμβολικός συμβόλαιος.** [SPEC.md](SPEC.md)ορίζει το αρχειοκεντρικό
+μοντέλο συνέχειας και το σταθερό συμβόλαιο στο δίσκο;[CORE.md](saipen/CORE.md)
+και[MAINTENANCE.md](saipen/MAINTENANCE.md)έχουν την τρέχουσα κανονική συμπεριφορά.
+- **Ελεγχόμενη μηχανή κατάστασης.**Η μόνο stdlib κανονική
+  [επαληθευτής](tools/validate.py)διαβάζει τη ζωντανή
+  [σχήμα κατάστασης](extensions/schemas/state.schema.json)και ελέγχει τη φάση
+μεταβάσεις, εξαρτήσεις εισιτηρίων, συνδέσεις γραφήματος γεγονότων, διασυμβολικές
+αναλλοίωτες, δυνατότητες και κατάσταση ανάκτησης.
+- **Κάλυψη αποτυχίας.** [CONFORMANCE.md](saipen/CONFORMANCE.md)χαρτογραφεί
+απαιτήσεις σε[σενάρια προσαρμογής](tests/scenarios/); το
+  [εκτελεστής σεναρίων](tools/run_scenarios.py)εκτελεί περιπτώσεις δοκιμής δομικής επιτυχίας/αποτυχίας
+περιλαμβανομένων της ανακατασκευής από κατεστραμμένο κατάσταση, ανύποπτων μεταβάσεων, κύκλων εξαρτήσεων και
+περιορισμών μόνο για ανάγνωση.
+- **Έλεγχοι παλινδρόμησης.** [audit_checks.py](tools/audit_checks.py)τροποποιεί
+γνωστές καλές αντιγραφές και αποδεικνύει ότι οι ελέγχοι του επαληθευτή μπορούν ακόμα να αποτύχουν, αντί
+να θεωρεί ένα πάντα επιτυχημένο έλεγχο ως απόδειξη.
+- **Εκτελέσιμο στρώμα.** [saipen.py](tools/saipen.py)παρέχει καταγραμμένη κατάσταση
+λειτουργίες;[bootstrap/](bootstrap/)διατηρεί εγκατάσταση, απεγκατάσταση και εξαγωγή
+βοηθητικά εργαλεία με προαιρετικό[εγκαταστάτη προ-συμβολαιογραφίας](tools/install_hook.py).
+- **Επιλεγμένες συμβιβαστικές λύσεις.**Η βασική πρωτόκολλο κατάσταση είναι απλά αρχεία χωρίς ροή εκτέλεσης
+εξαρτηματικότητα. Αναφορική επικύρωση και εργαλεία γραμμής εντολών απαιτούν Python, αλλά χρησιμοποιούν μόνο
+τη βιβλιοθήκη του προτύπου του και δεν χρειάζεται`pip`εγκατάσταση.
+
+## Δομή
+
+Τρία επίπεδα, αυστηρά μονοδιευθετικές εξαρτήσεις:
+
+```text
+CORE            continuation / state / checkpoint / validation       required
+  └─ MAINTENANCE   autonomous HUNT / ADD / CLEAN evolution           optional, on top of Core
+       └─ GOAL MODE / SUBAGENTS   opt-in throughput/execution        optional
+```
+
+Ο πυρήνας δεν εξαρτάται από την ουδετεροποίηση: με την αυτόνομη εξέλιξη απενεργοποιημένη, SAIPEN
+παραμένει ένος πλήρης πρωτόκολλο συνέχισης — ένας ψυχρός πράκτορας ακόμα αναστενάγει.
+
+- **Η μηχανή καταστάσεων πυρήνα** — `INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE | BLOCKED`.
+- **Αυτόνομη ουδετεροποίηση**— πινακίδα σταματημένη(τίποτα εφικτό στο`## TODO`,
+τίποτα στο`## DOING`)και όχι`BLOCKED`? Αυτόματες μεταβάσεις`HUNT` (ελέγχουν σφάλματα)
+  → `ADD` (εξελίσσουν χαρακτηριστικά) → `HUNT`, δεν τίθενται ερωτήματα. Μια συνεδρία που είναι σε εξέλιξη
+  `BLOCKED`δεν αυτόματα αναζητά
+  ([Συντήρηση § 2.1](saipen/MAINTENANCE.md#21-autonomous-transitions)).
+- **Λειτουργικός Τρόπος** — `/saipen goal <objective>`περιστρέφει τον πίνακα και εκτελεί τον
+στόχο προς τα εμπρός μέσω VERIFY/REVIEW, εισέρχοντας στην αυτόνομη συντήρηση
+μέχρι να ενεργοποιηθεί ο κανόνας ολοκλήρωσης ή να φτάσει η εκτέλεση της στο όριό της(3 κύματα / 20 τιμολόγια,
+μετά ελέγχει σημεία και αναφέρει) ([Συντήρηση § 2.4](saipen/MAINTENANCE.md#24-goal-mode-autonomous-execution)).
+- **Ενίσχυση**— η συμπληρωματική είσοδος αναλύεται σε επιχειρήματα ενός-προς-ένα
+  (Πυρήνας § 1.8); η συνέχιση του διαβρωμένου δέντρου διατηρεί την ανεπεξεργασμένη δουλειά(Πυρήνας § 1.5);
+τιμές που μοιάζουν με μυστικά αφαιρούνται από τα αρχεία καταγραφής(`sk-***`) (Πυρήνας § 1.2).
+
+## Συνηθισμένες εντολές
+
+Συνηθισμένες εισόδους; η πλήρης τρέχουσα επιφάνεια βρίσκεται στο
+[Πυρήνας § 1.10](saipen/CORE.md#110-command-surface).
+
+|Εντολή|Κάνει|
 |---|---|
-| [SPEC.md](SPEC.md) | Formal architecture, design goals, litmus test |
-| [RFC.md](saipen/RFC.md) | Normative specification agents execute |
-| [GUIDE.md](GUIDE.md) | Human tutor and ELI5 guides |
-| [STYLE.md](saipen/STYLE.md) | Agent communication style and voice definition |
-| [UI.md](saipen/UI.md) | Vintage Golden UI design guidelines |
-| [CONFORMANCE.md](saipen/CONFORMANCE.md) | Behavioural test scenarios and validator rules |
+| `/saipen set` |Αποδοχή ενός έργου: δημιουργία`.saipen/`κατάσταση|
+| `/saipen continue` |Αναστέλλετε από την αποθηκευμένη κατάσταση του έργου — χωρίς νέα επανεκπαίδευση|
+| `/saipen plan` |Μετατροπή αιτήματος ή αρχικού υπολογιστικού αποθεματικού σε εργασίες|
+| `/saipen goal <text>` |Αυτόνομη εκτέλεση κύματος εναντίον νέου στόχου|
+| `/saipen validate` |Εκτέλεση ελέγχων συμμόρφωσης|
+| `/saipen status` |Αναφορά μόνο για ανάγνωση: φάση, εργασίες, εμπόδια, παλαιότητα|
+| `/saipen stop` |Σημείο καταγραφής και διακοπή|
+
+<details>
+<summary><b>More commands</b></summary>
+
+|Εντολή|Εκτελεί|
+|---|---|
+| `/saipen hunt` |Υποχρεωτική εκτέλεση ελέγχου ελαττωμάτων/βελτιώσεων τώρα|
+| `/saipen markhunt` |Συντονισμένος, απεριόριστος έλεγχος — καταγράφει τα αποτελέσματα, δεν διορθώνει τίποτα|
+| `/saipen ship` |Πύλες προέλευσης; υποβάλλετε, ετικέτα και αποστολή όταν επιτρέπεται|
+| `/saipen clean` |Καθαρισμός πινακίδων και κατάστασης|
+| `/saipen translate` |Απομονωμένος μεταφραστικός εργοστάσιος|
+| `/saipen prepare` / `/saipen collect` |Εργασία πακέτου για παραχώρηση / ολοκλήρωση έτοιμου πακέτου|
+| `/saipen test` |Εκτέλεση του δηλωμένου συνόλου δοκιμών, αναφορά μόνο|
+| `/saipen crew` |Κύκλος πληρωμής με σταθερή σειρά(ψάχνω → αναπαράγω → εισαγωγή → κατασκευή → μετάφραση → καταγραφή → παράδοση) |
+| `/saipen improve` |Επιτροπή μετα-έλεγχος αναβάθμισης πρωτοκόλλου|
+| `/saipen sub ...` |Δημιουργία/υιοθέτηση αναγνωστικών υποπράκτορων|
+
+**Πακέτα κλειδιών.** `ee`/`qq`προετοιμασία πλήρων πακέτων μετάφρασης/βικι χωρίς
+ολοκλήρωσης;`eee`/`qqq`δέχομαι μόνο έτοιμα πακέτα, μετά ολοκλήρωση, επαλήθευση,
+επισκόπηση και διακίνηση.
+
+**saicrew.** `sc` / `saipen crew` (`extensions/subs/crew.md`)διασχίζει το συνολικό
+εσωτερική ομάδα σε σταθερή σειρά — αισθητήρες(saihunt, saitest, saipython, saiui),
+παραγωγοί(saitranslate, saiwiki)και Core ως το μόνο κύριος παραγωγός —
+μέχρι να γίνει μια άλλη νέα διαδικασία χωρίς να υπάρχει τίποτα πραγματικό να αλλάξει. Προσθέτει ακριβώς ένα
+μηχανισμό του δικού του: το ανθεκτικό στόχο συντονισμού(«execution_intent:
+συγκλίνει` with `converge_target: crew`)που κάνει το κύκλωμα αναστεναγματοποιήσιμο και
+δυνατό να προκύπτει από αποδείξεις μετά από καταρρή.`saipen crew --dry-run --json`παράγει το
+κύκλωμα αναγνωστικό μόνο;`bootstrap/saipen_crew.*`είναι μια ΠΡΟΑΙΡΕΤΙΚΗ χειροκίνητη
+βοήθεια πολλαπλών παραθυριών, ποτέ όχι αυτό που`saipen crew`σημαίνει. Δείτε
+[extensions/subs/crew.md](extensions/subs/crew.md).
+</details>
+
+## Τι δεν είναι το SAIPEN
+
+- **Ένα LLM ή ένα μοντέλο**— δεν είναι ένα πρωτόκολλο που ακολουθούν οι πράκτορες, αλλά μια νοημοσύνη.
+- **Ένα IDE ή μια βάση δεδομένων υποδοχής μνήμης**— το κατάσταση είναι απλά αρχεία στο πρόγραμμα σας;
+δεν υπάρχει τίποτα που φιλοξενείται.
+- **Ένας αντικαταστάτης του Git**— το Git εξακολουθεί να κατέχει την ιστορία των εκδοχών; κάνετε commit το
+  `.saipen/`όπως οποιοδήποτε άλλο κώδικα.
+- **Διακριτική συμφωνία**— δείτε την παραπάνω συνοριακή γραμμή της παράλληλης επεξεργασίας.
+- **Μια εγγύηση ότι ένα LLM θα πραγματοποιεί σωστές αποφάσεις μηχανικής σχεδίασης**— αυτό
+μειώνει την απώλεια περιβάλλοντος και την περιπλοκότητα συμπεριφοράς; δεν κάνει τους στοχαστικούς πράκτορες
+αμετάβλητους.
+
+Η δουλειά του SAIPEN είναι μια συνεχιστική σύμβαση/συμφωνία κατάστασης πλην επαλήθευσης και εργαλειών —
+παραχωρώντας στο επόμενο αγγελιοφόρο ένα σημείο εκκίνησης που έχει ελεγχθεί από μηχανή, όχι μαγικό.
+
+**Οριοθέτης παράλληλης εκτέλεσης.**Μεταβολές καταγεγραμμένης κατάστασης(SAIOPS)χρήση ενός
+λογισμικού κλειδιού περιοχής προγραμματισμού και ενός διαγραμματικού αρχείου ανάκτησης([OPS § 5](saipen/OPS.md#5-locks)).
+Συνηθισμένες επεξεργασίες προγραμματισμού και αποσυνδεδεμένοι γραπτοί είναι εκτός αυτού του κλειδιού. SAIPEN
+δεν είναι κατανεμημένη συμφωνία, οπότε οι αποσυνδεδεμένοι γραπτοί απαιτούν εξωτερική
+συνεργασία([SPEC](SPEC.md#concurrency--distribution-boundaries)).
+
+## Οικοσύστημα
+
+|Έργο|Σχέση με το SAIPEN|
+|---|---|
+| [SAIPENVIEW](https://github.com/vacterro/saipenview) |Τοπικό κέντρο ελέγχου Windows για έργα SAIPEN — αυτόματη ανακάλυψη`.saipen/`χώρων εργασίας, οπτικοποιεί την ζωντανή κατάσταση και τα αποτελέσματα συμμόρφωσης, διαχειρίζεται εργασίες και εκκινεί AI CLIs. Ένας συνοδευτικός, όχι η αρχή.|
+| [SAIWORK](https://github.com/vacterro/saiwork) |Αναπτυξιακή κλάδωση CodeNomad που συμπεριλαμβάνει το SAIPEN: εισάγει`BOOT.md`/`STYLE.md`σε εκκινήσεις OpenCode, εκτίθεται συντομεύσεις SAIPEN και προβολές κατάστασης έργου, και προσθέτει μια διαρκή ουρά ερωτημάτων.|
+| [FastPrompter](https://github.com/vacterro/fastprompter) |Μεταφερόμενο Windows scratchpad και διαχειριστής συχνών χρήσεων που αυτόματα ανιχνεύει`.saipen/`φακέλους και προσθέτει έναν αναγνώσιμο προβολέα STATE/BOARD/LOG.|
+
+## Έγγραφα
+
+|Έγγραφο|Τι είναι|
+|---|---|
+| [SPEC.md](SPEC.md) |Επίσημη αρχιτεκτονική, στόχοι σχεδιασμού, δοκιμαστικό τεστ|
+| [CORE.md](saipen/CORE.md) |Νορματική συνέχεια, μηχανή καταστάσεων και συμβόλαιο εντολών|
+| [MAINTENANCE.md](saipen/MAINTENANCE.md) |Αυτόνομη συντήρηση και Λειτουργικός Τρόπος|
+| [CONFORMANCE.md](saipen/CONFORMANCE.md) |Εκτελέσιμες/συμπεριφορικές απαιτήσεις και κανόνες επαληθευτή|
+| [GUIDE.md](GUIDE.md) |Ανθρωποκεντρικός οδηγός|
+| [RFC.md](saipen/RFC.md) |Αναχωρητική συμβατότητα προς τα διαχωρισμένα κανονικά έγγραφα|
+| [STYLE.md](saipen/STYLE.md) |Στυλ και φωνή επικοινωνίας του Αποστολέα|
+| [UI.md](saipen/UI.md) |Παλαιοστυλιστικές οδηγίες σχεδιασμού της Golden UI|
+|Brochure|Παρουσιαστικό φυλλάδιο —[EN](BROCHURE_EN.md) / [RU](BROCHURE_RU.md) / [ET](BROCHURE_ET.md) / [DED](BROCHURE_DED.md) / [JA](BROCHURE_JA.md) |
 
 <details>
 <summary><b>All 33 translated guides</b></summary>
 
-🇷🇺 [Русский](guides/GUIDE_RU.md) · 🇺🇸 [English](guides/GUIDE_EN.md) · 🇪🇪 [Eesti](guides/GUIDE_EE.md) · 🇯🇵 [日本語](guides/GUIDE_JA.md) · 👴 [Версия Деда](guides/GUIDE_DED.md)
+🇷🇺 [Русский](guides/GUIDE_RU.md) · 🇺🇸 [Αγγλικά](guides/GUIDE_EN.md) · 🇪🇪 [Εστονικά](guides/GUIDE_EE.md) · 🇯🇵 [日本語](guides/GUIDE_JA.md) · 👴 [Версия Деда](guides/GUIDE_DED.md)
 
-🇺🇦 [Українська](guides/GUIDE_UK.md) · 🇩🇪 [Deutsch](guides/GUIDE_DE.md) · 🇫🇷 [Français](guides/GUIDE_FR.md) · 🇪🇸 [Español](guides/GUIDE_ES.md) · 🇮🇹 [Italiano](guides/GUIDE_IT.md)
+🇺🇦 [Українська](guides/GUIDE_UK.md) · 🇩🇪 [Γερμανικά](guides/GUIDE_DE.md) · 🇫🇷 [Γαλλικά](guides/GUIDE_FR.md) · 🇪🇸 [Ισπανικά](guides/GUIDE_ES.md) · 🇮🇹 [Ιταλικά](guides/GUIDE_IT.md)
 
-🇵🇹 [Português](guides/GUIDE_PT.md) · 🇳🇱 [Nederlands](guides/GUIDE_NL.md) · 🇵🇱 [Polski](guides/GUIDE_PL.md) · 🇸🇪 [Svenska](guides/GUIDE_SV.md) · 🇩🇰 [Dansk](guides/GUIDE_DA.md)
+🇵🇹 [Πορτογαλικά](guides/GUIDE_PT.md) · 🇳🇱 [Ολλανδικά](guides/GUIDE_NL.md) · 🇵🇱 [Πολωνικά](guides/GUIDE_PL.md) · 🇸🇪 [Σουηδικά](guides/GUIDE_SV.md) · 🇩🇰 [Δανικά](guides/GUIDE_DA.md)
 
-🇫🇮 [Suomi](guides/GUIDE_FI.md) · 🇳🇴 [Norsk](guides/GUIDE_NO.md) · 🇨🇳 [中文](guides/GUIDE_ZH.md) · 🇰🇷 [한국어](guides/GUIDE_KO.md) · 🇹🇭 [ไทย](guides/GUIDE_TH.md)
+🇫🇮 [Σουηδικά](guides/GUIDE_FI.md) · 🇳🇴 [Νορβηγικά](guides/GUIDE_NO.md) · 🇨🇳 [中文](guides/GUIDE_ZH.md) · 🇰🇷 [한국어](guides/GUIDE_KO.md) · 🇹🇭 [ไทย](guides/GUIDE_TH.md)
 
-🇻🇳 [Tiếng Việt](guides/GUIDE_VI.md) · 🇸🇦 [العربية](guides/GUIDE_AR.md) · 🇮🇱 [עברית](guides/GUIDE_HE.md) · 🇹🇷 [Türkçe](guides/GUIDE_TR.md) · 🇮🇳 [हिन्दी](guides/GUIDE_HI.md)
+🇻🇳 [Τιγκατσίνα](guides/GUIDE_VI.md) · 🇸🇦 [العربية](guides/GUIDE_AR.md) · 🇮🇱 [עברית](guides/GUIDE_HE.md) · 🇹🇷 [Τούρκικα](guides/GUIDE_TR.md) · 🇮🇳 [हिन्दी](guides/GUIDE_HI.md)
 
-🇮🇩 [Bahasa Indonesia](guides/GUIDE_ID.md) · 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) · 🇨🇿 [Čeština](guides/GUIDE_CS.md) · 🇷🇴 [Română](guides/GUIDE_RO.md) · 🇭🇺 [Magyar](guides/GUIDE_HU.md)
+🇮🇩 [Ινδονησιακά](guides/GUIDE_ID.md) · 🇬🇷 [Ελληνικά](guides/GUIDE_EL.md) · 🇨🇿 [Τσέχοι](guides/GUIDE_CS.md) · 🇷🇴 [Ρουμανικά](guides/GUIDE_RO.md) · 🇭🇺 [Ουγγρικά](guides/GUIDE_HU.md)
 
-🇧🇬 [Български](guides/GUIDE_BG.md) · 🇸🇰 [Slovenčina](guides/GUIDE_SK.md) · 🇭🇷 [Hrvatski](guides/GUIDE_HR.md)
+🇧🇬 [Български](guides/GUIDE_BG.md) · 🇸🇰 [Σλοβακικά](guides/GUIDE_SK.md) · 🇭🇷 [Χορβατικά](guides/GUIDE_HR.md)
 
 </details>
 
-## Built with SAIPEN
+## Σημειώσεις ρύθμισης
 
-- ⚡ **[FastPrompter](https://github.com/vacterro/fastprompter)** — High-performance prompt management tool built natively around the SAIPEN memory protocol.
+**Γλώσσα απάντησης.**Ο πράκτορας απαντά σε**Εστονικά**κατά προτιμήση — δηλαδή είναι μια
+ρύθμιση, όχι μια απαίτηση πρωτοκόλλου, και τίποτα άλλο σχετικά με το SAIPEN είναι στα Εστονικά.
+Το πρωτόκολλο, το κώδικας, τα κομμάτια και κάθε έγγραφο παραμένουν στα Αγγλικά σε κάθε
+τιμή. Αλλάξτε το σε ένα μόνο σημείο: τη γραμμή`reply_language:`στην κορυφή του
+[`saipen/STYLE.md`](saipen/STYLE.md). `et`Εστονικά,`en`Αγγλικά,`ru`Ρωσικά,
+`auto`επιλέγει από το μήνυμα που στέλνετε.
 
-## Screenshots
+**Προσαρμογείς.**Η πλατφόρμα δεν καλύπτεται από τον εισαγωγέα(DeepSeek, Qwen, standalone
+OpenAI, κλπ.)? Τα σημειώματα ανά πλατφόρμα εμφανίζονται στο`extensions/adapters/`.
+
+## Συλλήψεις
 
 <details>
-<summary>Click to expand</summary>
+<summary><b>Click to expand</b></summary>
 
 <img src="assets/screenshot-freebuff.png" alt="FreeBuff agent instructions" width="600"/>
 
@@ -145,6 +316,5 @@ Platform-specific notes live in `extensions/adapters/`.
   <img src="assets/SAIPEN_design2_alpha.png" alt="SAIPEN Stamp" width="120"/>
 </p>
 
-<!-- source-digest: README.md sha256:7550073ecb7103b2b34a8a8214fb35b3daddfc5bddb641691f1355e40cf8cc7f -->
-
-
+<!-- translation-model: qwen3:14b contract:structured-markdown-v2 -->
+<!-- source-digest: README.md sha256:2a33e364c3c12e8b1b9b2caf41b05db3ee27f17161336579ae85ee59da34fe56 -->

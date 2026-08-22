@@ -40,3 +40,8 @@ floor — a deliberate SUBSET of `validate.py`, for hosts without Python.
 - `saipen/MANIFEST.json`'s `files` list is checked two ways: the file must
   exist AND `git ls-files` must track it. An uncommitted runtime file passes
   locally forever and fails every CI run.
+- Copy-tree membership is context-sensitive by design: ordinary/core checks
+  inspect the complete live tree because direct injectors copy it; the binding
+  SHIP gate inspects the Git index tree because only the scoped release index
+  may enter the commit. Thus foreign untracked copy-tree noise is visible to
+  installation audits but cannot hijack an otherwise exact release scope.

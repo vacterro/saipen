@@ -95,7 +95,7 @@ if (-not (Test-Path $tmpPath)) {
 try {
     Move-Item -LiteralPath $tmpPath -Destination $zipPath -Force -ErrorAction Stop
 } catch {
-    Write-Host "FAILED: could not promote temporary archive to $zipPath: $_" -ForegroundColor Red
+    Write-Host "FAILED: could not promote temporary archive to ${zipPath}: $_" -ForegroundColor Red
     Remove-Item -LiteralPath $tmpPath -Force -ErrorAction SilentlyContinue
     exit 1
 }

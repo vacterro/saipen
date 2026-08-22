@@ -299,7 +299,9 @@ def empty_delete_tree_hash() -> str:
     return "delete-tree-sha256:" + digest.hexdigest()
 
 
-def owned_target_path(root: Path, rel: str, *, kind: str = "target") -> Path:
+def owned_target_path(
+    root: Path, rel: str, *, kind: str = "target", owner_canonical: Path | None = None
+) -> Path:
     """ONE canonical owned-target resolver (T-1003 operational integrity).
 
     Every mutation/recovery target path -- and every op_id-derived path --
@@ -310,6 +312,10 @@ def owned_target_path(root: Path, rel: str, *, kind: str = "target") -> Path:
 
     Callers convert the raise into their own refusal shape; direct Journal
     users get the raise (fail closed).
+
+    PERF-004: `owner_canonical` is the once-canonicalized project root for a
+    single decoder invocation, avoiding repeated realpath on the identical
+    owner per candidate target.
     """
     from .safeid import InvalidIdError, prove_inside
 
@@ -320,7 +326,7 @@ def owned_target_path(root: Path, rel: str, *, kind: str = "target") -> Path:
             f"{kind} {rel!r} is absolute or drive-qualified; only relative "
             "project-owned paths are allowed"
         )
-    return prove_inside(root / rel, root, kind=kind)
+    return prove_inside(root / rel, root, kind=kind, owner_canonical=owner_canonical)
 
 
 def read_dependency_path(root: Path, rel: str, *, kind: str = "read-dependency") -> Path:
@@ -719,7 +725,11 @@ def decode_operation_record(
         # (absolute, drive-qualified, traversal) is VALIDATION_FAILED, never a
         # crash: safe-path exceptions translate to structured refusals.
         try:
-            canonical = owned_target_path(root, target["path"]).relative_to(root).as_posix()
+            canonical = (
+                owned_target_path(root, target["path"], owner_canonical=root)
+                .relative_to(root)
+                .as_posix()
+            )
         except InvalidIdError as exc:
             return _bad(f"targets[{index}].path", f"is not an owned project path: {exc}")
         if canonical in seen_paths:
@@ -2821,7 +2831,24 @@ def verify_sub_collect(root, targets, receipt_metadata=None) -> list[str]:
                 continue
             if meta.get("package_identity"):
                 disposed.add(meta["package_identity"])
+        # TARGETED SCOPE (audit, live repro): a targeted `sub collect <name>`
+        # must verify only the producers THIS op actually collected. The
+        # manifest's OTHER entries may legitimately carry stale
+        # `last_collect` markers (their own collect receipts vanished with a
+        # failed/rolled-back op, or their packages predate the current source)
+        # -- failing a targeted collect over an unrelated producer's stale
+        # evidence is exactly the deadlock that made a saihunt/HUNT-008 intake
+        # uncollectable at HEAD e045ad07 while the whole crew circuit waited on
+        # SC-2. Legacy receipts without producer metadata fall back to the
+        # full-manifest scope.
+        targeted = set()
+        if isinstance(receipt_metadata, dict):
+            producers = receipt_metadata.get("producers")
+            if isinstance(producers, list) and producers:
+                targeted = {str(p) for p in producers if isinstance(p, str)}
         for entry in entries:
+            if targeted and entry.name not in targeted:
+                continue
             last_collect = entry.metadata.get("last_collect", "")
             if not last_collect:
                 continue
@@ -3829,6 +3856,14 @@ def semantic_receipt_snapshot(
     through the strict decoder, and enforces op_id uniqueness across
     both namespaces.
 
+    W2-001: enforces LIVE project-lineage binding on every current
+    (lineage-bearing) receipt before records are exposed to consumers.
+    A receipt carrying project_lineage that does not match the live
+    canonical lineage is surfaced as foreign/corrupt evidence and
+    excluded from positive semantic results. This keeps convergence,
+    crew, intent, and targeted-release consumers on one canonical
+    filtered snapshot instead of each independently checking lineage.
+
     Returns (records, errors) where records is a list of all decoded
     operation records and errors is a list of corruption evidence strings.
     Records are sorted by created_at for deterministic ordering.
@@ -3844,10 +3879,35 @@ def semantic_receipt_snapshot(
     # Scan settled second (terminal receipts)
     _scan_receipt_namespace(root, root / SETTLED_DIR, results, errors, corrupt_op_ids, digest)
 
-    # Sort by created_at for deterministic ordering
+    # W2-001 / CORE-003: enforce live project binding on every receipt before
+    # consumers see it. A lineage-bearing receipt must match the live lineage;
+    # a legacy no-lineage UNRESOLVED receipt is usable only at the exact runtime
+    # identity that created it (the SAME rule recovery uses). Settled legacy
+    # receipts (COMMITTED/ABORTED/RESOLVED) are immutable history: they are
+    # compatible without runtime binding and must not poison unrelated valid
+    # receipts after a legitimate directory move / archive extraction.
+    # Explicit foreign lineage (record carries a lineage that mismatches live)
+    # remains rejected.
+    foreign: list[str] = []
+    for op_id, rec in list(results.items()):
+        # CORE-003: settled legacy receipts are history, not recovery authority
+        if rec.get("project_lineage") is None and rec.get("status") in SETTLED:
+            continue
+        binding = _recovery_identity_binding(root, rec)
+        if not binding["ok"]:
+            foreign.append(op_id)
+            del results[op_id]
+    if foreign:
+        errors.append(
+            f"foreign-lineage/identity receipt(s) excluded: "
+            f"{', '.join(sorted(foreign)[:5])}"
+            f"{'...' if len(foreign) > 5 else ''}"
+        )
+    # Sort by created_at for deterministic ordering (W2-005: canonical UTC).
+    _earliest = iso_utc_sort_key("0000-01-01T00:00:00Z")
     records = sorted(
         results.values(),
-        key=lambda r: (r.get("created_at", ""), r.get("op_id", "")),
+        key=lambda r: (iso_utc_sort_key(r.get("created_at", "")) or _earliest, r.get("op_id", "")),
     )
     return SemanticReceiptSnapshot(
         tuple(records),
@@ -3872,16 +3932,49 @@ def semantic_receipt_digest(project_root: Path | str) -> str:
     return "ops-receipt-sha256:" + digest.hexdigest()
 
 
-def semantic_receipts_for_operation(project_root: Path | str, operation: str) -> list[dict]:
-    """W2-001: filtered semantic receipts for a specific operation type.
+class SemanticReceiptCorruptionError(ValueError):
+    """Typed corruption refusal for semantic receipt authority (CORE-004).
 
-    Convenience wrapper that returns all records matching the given
-    operation type from the canonical snapshot.
+    Raised by semantic_receipts_for_operation when the canonical snapshot
+    contains errors. Callers must distinguish CORRUPT authority (fail-closed)
+    from CLEAN_EMPTY (no matching operation).
+    """
+
+    def __init__(self, errors: tuple[str, ...], snapshot) -> None:
+        super().__init__("; ".join(errors[:3]) if errors else "semantic receipt snapshot is corrupt")
+        self.errors = errors
+        self.snapshot = snapshot
+
+
+def semantic_receipts_for_operation(project_root: Path | str, operation: str) -> list[dict]:
+    """W2-001 / CORE-004: filtered semantic receipts for a specific operation.
+
+    Returns all records matching the operation from the canonical snapshot.
+    If the snapshot contains errors, raises SemanticReceiptCorruptionError
+    instead of collapsing CORRUPT authority into CLEAN_EMPTY negative evidence.
+    Callers that need to distinguish must catch this exception and return a
+    CORRUPT_JOURNAL refusal; plain list filtering is safe only after the
+    snapshot has been proven clean.
     """
     snapshot = semantic_receipt_snapshot(project_root)
     if snapshot.errors:
-        return []
+        raise SemanticReceiptCorruptionError(snapshot.errors, snapshot)
     return [r for r in snapshot.records if r.get("operation") == operation]
+
+
+def semantic_receipts_for_operation_safe(
+    project_root: Path | str, operation: str
+) -> tuple[list[dict], tuple[str, ...]]:
+    """Safe variant that returns (records, errors) without raising.
+
+    Useful for read-only projections that want to surface corrupción as data
+    rather than exception. Mutation paths should use the raising variant and
+    fail closed on corruption.
+    """
+    snapshot = semantic_receipt_snapshot(project_root)
+    if snapshot.errors:
+        return [], snapshot.errors
+    return [r for r in snapshot.records if r.get("operation") == operation], ()
 
 
 def _compaction_queue_preflight(root: Path, cleanup_queue: Path) -> tuple[list[Path], str | None]:

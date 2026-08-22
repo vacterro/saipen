@@ -48,22 +48,48 @@ def scaffold() -> Path:
     saipen = root / ".saipen"
     saipen.mkdir(parents=True, exist_ok=True)
     (saipen / "STATE.md").write_text(
-        "phase: BOOT\n"
-        "execution_intent: explore\n"
-        "saipen_version: 7.0.0\n"
-        "next_action: saipen hunt\n",
+        "phase: BOOT\nexecution_intent: explore\nsaipen_version: 7.0.0\nnext_action: saipen hunt\n",
         encoding="utf-8",
     )
     (saipen / "BOARD.md").write_text("# BOARD\n\n## TODO\n\n", encoding="utf-8")
     (saipen / "LOG.md").write_text("# LOG\n", encoding="utf-8")
+    # CORE-002: a tracked file guarantees git commit succeeds so source
+    # identity (source_head / source_tree_fingerprint) is non-empty, exactly
+    # as a normal validator invocation would see it. Without a commit the
+    # scaffold produced empty identity and the PASS-receipt guard rightly
+    # refuses to mint evidence from missing proof.
+    (root / "tracked.txt").write_text("conformance fixture\n", encoding="utf-8")
     try:
-        subprocess.run(["git", "init", "-q"], cwd=str(root), check=False,
-                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(
+            ["git", "init", "-q"],
+            cwd=str(root),
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        subprocess.run(
+            ["git", "add", "-A"],
+            cwd=str(root),
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
         # Commit with inline identity so we don't depend on global git config.
         subprocess.run(
-            ["git", "-c", "user.email=test@saipen.local",
-             "-c", "user.name=saipen-test", "commit", "-q", "-m", "init"],
-            cwd=str(root), check=False, stdout=subprocess.DEVNULL,
+            [
+                "git",
+                "-c",
+                "user.email=test@saipen.local",
+                "-c",
+                "user.name=saipen-test",
+                "commit",
+                "-q",
+                "-m",
+                "init",
+            ],
+            cwd=str(root),
+            check=False,
+            stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
     except Exception:
@@ -104,6 +130,7 @@ class Src:
 def _quick_hash(text) -> str:
     """Mirror C._quick_hash for content_hash computation."""
     import hashlib
+
     data = text.encode("utf-8") if isinstance(text, str) else text
     return hashlib.sha256(data).hexdigest()[:16]
 
@@ -127,6 +154,16 @@ def write_receipt(
     if ts is None:
         ts = _utc_iso(datetime.datetime.now(datetime.timezone.utc))
     exit_code = 0 if verdict == "PASS" else 1
+    # CORE-002: default to REAL checkpoint hashes so a crafted "current" PASS
+    # receipt carries complete binding; a caller that wants to test missing
+    # evidence passes explicit empty/overridden hash fields.
+    if not source_head or not source_tree_fingerprint:
+        h, f = source_pair(root)
+        source_head = source_head or h
+        source_tree_fingerprint = source_tree_fingerprint or f
+    state_hash = C._hash_file(root / ".saipen" / "STATE.md")
+    board_hash = C._hash_file(root / ".saipen" / "BOARD.md")
+    log_hash = C._log_hash(root)
     receipt = {
         "schema_version": 1,
         "kind": "conformance_receipt",
@@ -138,9 +175,9 @@ def write_receipt(
         "project_identity": "",
         "source_head": source_head,
         "source_tree_fingerprint": source_tree_fingerprint,
-        "state_hash": "",
-        "board_hash": "",
-        "log_hash": "",
+        "state_hash": state_hash,
+        "board_hash": board_hash,
+        "log_hash": log_hash,
         "content_hash": "",
     }
     # CORE-001: compute content_hash from the body so strict validation passes
@@ -156,13 +193,12 @@ def write_receipt(
 
 def current_ts(offset_hours: float = 0.0) -> str:
     return _utc_iso(
-        datetime.datetime.now(datetime.timezone.utc)
-        + datetime.timedelta(hours=offset_hours)
+        datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=offset_hours)
     )
 
 
 # --------------------------------------------------------------------------- runner
-_RESULTS: list[tuple[bool, str, str]] = []  # noqa: C0103 (test accumulator)
+_RESULTS: list[tuple[bool, str, str]] = []
 
 
 def check(name: str, cond: bool, detail: str = "") -> None:
@@ -174,78 +210,122 @@ def check(name: str, cond: bool, detail: str = "") -> None:
 # --------------------------------------------------------------------------- cases
 def case_a_validator_ownership(root: Path) -> None:
     info = C.validator_version_info(root, gate="core")
-    check("A1 validator path is the canonical tools/validate.py",
-          info.validator_path.endswith("validate.py") and Path(info.validator_path).exists(),
-          info.validator_path)
-    check("A2 stale_validator flags a mismatched version only",
-          C.stale_validator(root, "9") is True
-          and C.stale_validator(root, CONST) is False
-          and C.stale_validator(root) is False)
-    check("A3 info carries the canonical protocol version",
-          info.validator_protocol_version == CONST, info.validator_protocol_version)
+    check(
+        "A1 validator path is the canonical tools/validate.py",
+        info.validator_path.endswith("validate.py") and Path(info.validator_path).exists(),
+        info.validator_path,
+    )
+    check(
+        "A2 stale_validator flags a mismatched version only",
+        C.stale_validator(root, "9") is True
+        and C.stale_validator(root, CONST) is False
+        and C.stale_validator(root) is False,
+    )
+    check(
+        "A3 info carries the canonical protocol version",
+        info.validator_protocol_version == CONST,
+        info.validator_protocol_version,
+    )
 
 
 def case_b_receipt_derivation(root: Path) -> None:
     rec = C.generate_conformance_receipt(root, gate="core", exit_code=0)
-    check("B1 exit_code 0 -> PASS receipt written",
-          rec["verdict"] == "PASS"
-          and list((root / C.RECEIPT_DIRNAME).glob("*_core_PASS.json")))
+    check(
+        "B1 exit_code 0 -> PASS receipt written",
+        rec["verdict"] == "PASS" and list((root / C.RECEIPT_DIRNAME).glob("*_core_PASS.json")),
+    )
     rec = C.generate_conformance_receipt(root, gate="core", exit_code=5)
-    check("B2 exit_code != 0 -> FAIL receipt",
-          rec["verdict"] == "FAIL" and rec["exit_code"] == 5)
+    check("B2 exit_code != 0 -> FAIL receipt", rec["verdict"] == "FAIL" and rec["exit_code"] == 5)
     sample = C.latest_receipt(root, "core") or {}
-    need = ["schema_version", "kind", "exit_code", "verdict",
-            "timestamp_utc", "content_hash", "source_head",
-            "source_tree_fingerprint"]
-    check("B3 receipt carries the required structured fields",
-          all(k in sample for k in need), str([k for k in need if k not in sample]))
+    need = [
+        "schema_version",
+        "kind",
+        "exit_code",
+        "verdict",
+        "timestamp_utc",
+        "content_hash",
+        "source_head",
+        "source_tree_fingerprint",
+    ]
+    check(
+        "B3 receipt carries the required structured fields",
+        all(k in sample for k in need),
+        str([k for k in need if k not in sample]),
+    )
 
 
 def case_c_status(root: Path) -> None:
-    check("C1 no receipt -> NOT_RUN",
-          C.conformance_status(root, "core")["status"] == C.STATUS_NOT_RUN)
+    check(
+        "C1 no receipt -> NOT_RUN", C.conformance_status(root, "core")["status"] == C.STATUS_NOT_RUN
+    )
     r = scaffold()
     h, f = source_pair(r)
     write_receipt(r, "core", "PASS", ts=current_ts(), source_head=h, source_tree_fingerprint=f)
-    check("C2 current PASS -> CURRENT_PASS",
-          C.conformance_status(r, "core")["status"] == C.STATUS_CURRENT_PASS)
+    check(
+        "C2 current PASS -> CURRENT_PASS",
+        C.conformance_status(r, "core")["status"] == C.STATUS_CURRENT_PASS,
+    )
     r = scaffold()
     h, f = source_pair(r)
     write_receipt(r, "core", "FAIL", ts=current_ts(), source_head=h, source_tree_fingerprint=f)
-    check("C3 current FAIL -> CURRENT_FAIL",
-          C.conformance_status(r, "core")["status"] == C.STATUS_CURRENT_FAIL)
+    check(
+        "C3 current FAIL -> CURRENT_FAIL",
+        C.conformance_status(r, "core")["status"] == C.STATUS_CURRENT_FAIL,
+    )
     r = scaffold()
     h, f = source_pair(r)
     write_receipt(r, "core", "PASS", ts=current_ts(-48), source_head=h, source_tree_fingerprint=f)
-    check("C4 48h-old PASS -> STALE_PASS",
-          C.conformance_status(r, "core")["status"] == C.STATUS_STALE_PASS)
+    check(
+        "C4 48h-old PASS -> STALE_PASS",
+        C.conformance_status(r, "core")["status"] == C.STATUS_STALE_PASS,
+    )
     r = scaffold()
     h, f = source_pair(r)
     write_receipt(r, "core", "FAIL", ts=current_ts(-48), source_head=h, source_tree_fingerprint=f)
-    check("C5 48h-old FAIL -> STALE_FAIL",
-          C.conformance_status(r, "core")["status"] == C.STATUS_STALE_FAIL)
+    check(
+        "C5 48h-old FAIL -> STALE_FAIL",
+        C.conformance_status(r, "core")["status"] == C.STATUS_STALE_FAIL,
+    )
     r = scaffold()
     h, f = source_pair(r)
-    write_receipt(r, "core", "PASS", ts=current_ts(), source_head=h,
-                  source_tree_fingerprint=f, validator_version="0")
-    check("C6 wrong validator version -> VALIDATOR_VERSION_MISMATCH",
-          C.conformance_status(r, "core")["status"] == C.STATUS_VERSION_MISMATCH)
+    write_receipt(
+        r,
+        "core",
+        "PASS",
+        ts=current_ts(),
+        source_head=h,
+        source_tree_fingerprint=f,
+        validator_version="0",
+    )
+    check(
+        "C6 wrong validator version -> VALIDATOR_VERSION_MISMATCH",
+        C.conformance_status(r, "core")["status"] == C.STATUS_VERSION_MISMATCH,
+    )
     r = scaffold()
-    write_receipt(r, "core", "PASS", ts=current_ts(),
-                  source_head="OTHER_HEAD", source_tree_fingerprint="OTHER_FP")
-    check("C7 PASS bound to a different source identity -> STALE_PASS",
-          C.conformance_status(r, "core")["status"] == C.STATUS_STALE_PASS)
+    write_receipt(
+        r,
+        "core",
+        "PASS",
+        ts=current_ts(),
+        source_head="OTHER_HEAD",
+        source_tree_fingerprint="OTHER_FP",
+    )
+    check(
+        "C7 PASS bound to a different source identity -> STALE_PASS",
+        C.conformance_status(r, "core")["status"] == C.STATUS_STALE_PASS,
+    )
 
 
 def case_d_terminal_closure(root: Path) -> None:
     r = scaffold()
-    check("D1 closure impossible on NOT_RUN",
-          C.current_conformance_pass(r, "core") is False)
+    check("D1 closure impossible on NOT_RUN", C.current_conformance_pass(r, "core") is False)
     r = scaffold()
     h, f = source_pair(r)
     write_receipt(r, "core", "PASS", ts=current_ts(-48), source_head=h, source_tree_fingerprint=f)
-    check("D2 only CURRENT_PASS permits closure (STALE_PASS -> False)",
-          C.current_conformance_pass(r, "core") is False)
+    check(
+        "D2 only CURRENT_PASS permits closure (STALE_PASS -> False)",
+        C.current_conformance_pass(r, "core") is False,
+    )
 
 
 def case_e_convergence(root: Path) -> None:
@@ -261,8 +341,11 @@ def case_e_convergence(root: Path) -> None:
     h, f = source_pair(r)
     write_receipt(r, "core", "PASS", ts=current_ts(), source_head=h, source_tree_fingerprint=f)
     ok, why = C.convergence_stage_satisfied(r, "H", Src("OTHER_HEAD", "OTHER_FP"))
-    check("E4 stage H PASS but source identity mismatch -> UNSATISFIED",
-          ok is False and "does not match" in why, why)
+    check(
+        "E4 stage H PASS but source identity mismatch -> UNSATISFIED",
+        ok is False and "does not match" in why,
+        why,
+    )
 
 
 def case_f_clean_exit(root: Path) -> None:
@@ -293,26 +376,36 @@ def case_g_entry_health(root: Path) -> None:
     )
     board = {"tickets": {"T-1": {"id": "T-1", "section": "## DONE", "fields": {}}}, "errors": []}
     probs = C.continue_entry_health(r, state={"phase": "DONE"}, board=board)
-    check("G2 entry health flags the unverified DONE",
-          any("DONE" in p and "verify" in p for p in probs), str(probs))
+    check(
+        "G2 entry health flags the unverified DONE",
+        any("DONE" in p and "verify" in p for p in probs),
+        str(probs),
+    )
     # G3: converge/crew intent without current crew conformance.
     r = scaffold()
     state = {"phase": "CONVERGE", "execution_intent": "converge", "converge_target": "crew"}
     probs = C.continue_entry_health(r, state=state, board={"tickets": {}, "errors": []})
-    check("G3 entry health flags converge/crew without crew conformance",
-          any("crew" in p for p in probs), str(probs))
+    check(
+        "G3 entry health flags converge/crew without crew conformance",
+        any("crew" in p for p in probs),
+        str(probs),
+    )
 
 
 def case_h_crew_gate(root: Path) -> None:
     r = scaffold()
-    check("H1 crew closure impossible when crew not run (NOT_RUN)",
-          C.current_conformance_pass(r, "crew") is False)
+    check(
+        "H1 crew closure impossible when crew not run (NOT_RUN)",
+        C.current_conformance_pass(r, "crew") is False,
+    )
     r = scaffold()
     h, f = source_pair(r)
     write_receipt(r, "crew", "PASS", ts=current_ts(), source_head=h, source_tree_fingerprint=f)
-    check("H2 crew CURRENT_PASS satisfies the SC-13 final gate",
-          C.conformance_status(r, "crew")["status"] == C.STATUS_CURRENT_PASS
-          and C.current_conformance_pass(r, "crew") is True)
+    check(
+        "H2 crew CURRENT_PASS satisfies the SC-13 final gate",
+        C.conformance_status(r, "crew")["status"] == C.STATUS_CURRENT_PASS
+        and C.current_conformance_pass(r, "crew") is True,
+    )
 
 
 def case_i_timestamps(root: Path) -> None:
@@ -320,15 +413,17 @@ def case_i_timestamps(root: Path) -> None:
     r = scaffold()
     write_receipt(r, "core", "PASS", ts=current_ts(+10))
     st = C.conformance_status(r, "core")
-    check("I1 future-timestamped receipt -> STALE_FAIL (read-time §9)",
-          st["status"] == C.STATUS_STALE_FAIL, st.get("reason", ""))
+    check(
+        "I1 future-timestamped receipt -> STALE_FAIL (read-time §9)",
+        st["status"] == C.STATUS_STALE_FAIL,
+        st.get("reason", ""),
+    )
     # I5: SC-13 satisfied on a current crew PASS (the §7 wire).
     r = scaffold()
     h, f = source_pair(r)
     write_receipt(r, "crew", "PASS", ts=current_ts(), source_head=h, source_tree_fingerprint=f)
     st = C.conformance_status(r, "crew")
-    check("I5 current crew PASS -> SC-13 may finalize",
-          st["status"] == C.STATUS_CURRENT_PASS)
+    check("I5 current crew PASS -> SC-13 may finalize", st["status"] == C.STATUS_CURRENT_PASS)
     # I6: write-time guard refuses a fabricated-future stamp.
     future = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=10)
     raised = False

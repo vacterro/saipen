@@ -100,7 +100,8 @@
   5. No main-project files touched by this package.
 
 ## W-031: wiki refresh v7.176.0 -> v7.219.0, 254 scenarios
-- **status:** ready
+- **status:** stale
+- **superseded_by:** W-032 -- project HEAD moved 7d2bd0e -> 00aa12db (v7.226.0, rows 255-256 landed); collect skips this entry rather than ticketing a ghost
 - **summary:** 6 wiki pages refreshed to v7.219.0 truth (main HEAD 7d2bd0e): Scenarios 216→254 rows (38 new: 217-254 mirroring CONFORMANCE IDs 217-254 -- typed-command-outranks-next_action, ROUTE-derived Notes, WAIT one-sentence, Proposal-Mode halt, multi-file fixtures, HUNT recovery proof, PREPARE names producer, multi-command message, derived seat, MARKHUNT countable, no-git readable, closed root, no-publish permission, unmeetable-ticket BLOCKED, stale-translation signal, BLOCKED holds foreign work, defect-class section, wiki-mirror-by-ID, red controls that could not go red, future-stamp repair, circuit evidence, move-is-destructive, habit counter, CHANGELOG order, installed/repo validator agreement, session BLOCKED, intent-aware clean-HUNT, intent-aware valve resume, CLEAN owns mutations, machine-readable charters, role freshness, Golden Default, nonempty-OUTBOX, gate context, SHIP stages-before-gates, schema keyword FAIL, full-OID identity, RFC-not-a-destination), Home badge/features v7.219.0 + 18-command table + 15-key shortcuts (gg/hh/cc/ccc/ss/sss/dd/aa/qq/qqq/ee/eee/pp/tt/sc), _Footer v7.219.0, Phases range header to v7.219.0 + 13 phase-level checks, Getting-Started audit_checks 104→231 + gen-7 hook, SubSaipen status row W-031 + machine-readable charters + saiui. 0 stale era badges left.
 - **main_project_refs:** [saipen/CONFORMANCE.md, saipen/CORE.md, saipen/phases/*.md, saipen/BOOT.md, saipen/STYLE.md, tools/validate.py, tools/audit_checks.py, VERSION]
 - **critical:** false
@@ -124,6 +125,91 @@
 - **instructions:**
   1. Review the uncommitted diff: `git -C .saipen/extensions/subs/saiwiki/kitchen/wiki diff`.
   2. Commit with message style `saiwiki: refresh wiki to v7.219.0 -- 254 scenarios, 6 pages` and push to origin (github.com/vacterro/saipen.wiki).
-  3. Verify live: Home badge shows v7.219.0, Scenarios shows 254 rows, _Footer v7.219.0.
+   3. Verify live: Home badge shows v7.219.0, Scenarios shows 254 rows, _Footer v7.219.0.
+   4. No main-board ticket to close for this package.
+   5. No main-project files touched by this package.
+
+## W-032: wiki refresh v7.219.0 -> v7.226.0, 256 scenarios
+- **status:** stale
+- **superseded_by:** W-033 -- project HEAD moved 00aa12db -> 3a343e8d and the current audit delta changed producer/crew behavior; FORCE-FRESH also found stale RFC/shortcut/collect prose in maintained pages
+- **summary:** 6 wiki pages refreshed to v7.226.0 truth (main HEAD 00aa12db): Scenarios 254->256 rows (2 new: 255-256 mirroring CONFORMANCE IDs 255-256 -- blocker-is-ticket-status, default-goal-driven-execution), mirrors: marker stamped with current canonical digest; Home/_Footer badges v7.219.0->v7.226.0, Phases range header v7.219.0->v7.226.0, SubSaipen saiwiki status row. 0 stale era badges left.
+- **main_project_refs:** [saipen/CONFORMANCE.md, saipen/CORE.md, saipen/phases/*.md, tools/validate.py, tools/freshness.py, VERSION]
+- **critical:** false
+- **producer:** saiwiki
+- **source_head:** 00aa12db9f01c55cb76c3e2a6e6ba35c33a4135c
+- **source_tree_fingerprint:** git-delta-v1:dbf4dbd65033040a35f23dd831020659be6cf8d0e33bdb31a973b8a6a153ec6b
+- **role_revision:** sha256:54a42475a124ab0f27e83d600a284a9cc54d9668029c4828cfc48512b031df13
+- **coverage:**
+  - Scenarios.md: 254->256 rows (2 new: 255-256), IDs mirror CONFORMANCE 1-256 exactly; headline updated to 256; mirrors: marker stamped `sha256:9babcb02e659febc` (matches canonical CONFORMANCE 1-256 digest computed via tools/validate.py's exact payload rule).
+  - Home.md: badge v7.219.0 -> **v7.226.0**, "Key features" header v7.226.0, NITRO bullet (v7.226.0).
+  - _Footer.md: version v7.219.0 -> v7.226.0.
+  - Phases.md: range header v7.104.0-v7.219.0 -> v7.104.0-v7.226.0; Session BLOCKED bullet (v7.226.0).
+  - SubSaipen.md: saiwiki status row -- W-032 prepared (v7.226.0, 256 scenarios).
+  - Tutorials.md, Use-Cases.md, _Sidebar.md: no drift (unchanged).
+- **payload:** 6 modified pages in the wiki clone `kitchen/wiki/` (local, uncommitted):
+  - `Home.md`, `Scenarios.md`, `Phases.md`, `SubSaipen.md`, `_Footer.md` (Getting-Started.md unchanged)
+  - To integrate: `git -C .saipen/extensions/subs/saiwiki/kitchen/wiki diff` review, commit, push to github.com/vacterro/saipen.wiki.
+- **verified:** PASS -- Scenarios 256 rows == CONFORMANCE 256; markers sha256:9babcb02e659febc; Home/_Footer badges v7.226.0; freshness triple via tools/freshness.py (git-delta-v1); charter role_revision matches; no stale era badges
+- **instructions:**
+  1. Review the uncommitted diff: `git -C .saipen/extensions/subs/saiwiki/kitchen/wiki diff`.
+  2. Commit with message style `saiwiki: refresh wiki to v7.226.0 -- 256 scenarios, 6 pages` and push to origin (github.com/vacterro/saipen.wiki).
+  3. Verify live: Home badge shows v7.226.0, Scenarios shows 256 rows, _Footer v7.226.0.
   4. No main-board ticket to close for this package.
   5. No main-project files touched by this package.
+
+## W-033: FORCE-FRESH current v7.226.0 wiki, producer hardening and audit closure
+- **status:** stale
+- **superseded_by:** W-034 -- project HEAD moved 3a343e8d -> e045ad07 and the tree fingerprint changed (git-delta-v1:4ec002cc -> git-delta-v1:a9b068ed) from CORE-002..007 + W2-004..008; FORCE-FRESH re-bound the same 8 verified pages to the new source triple without content change; collect skips this entry rather than ticketing a ghost
+- **summary:** All 9 maintained wiki pages re-read against the current source triple. Six pages gained current producer-parallelism/audit truth or stale-rule corrections; Scenarios remains a verified 256-row canonical ID mirror; 8 pages differ from the wiki remote and are ready for explicit integration.
+- **main_project_refs:** [VERSION, README.md, CHANGELOG.md, KNOWLEDGE/ADR-0001-v7-producer-parallelism.md, saipen/BOOT.md, saipen/CORE.md, saipen/STYLE.md, saipen/CONFORMANCE.md, saipen/CONVERGE.md, saipen/OPS.md, saipen/phases/*.md, extensions/subs/PROTOCOL.md, extensions/subs/crew.md, extensions/subs/sai*.md, tools/freshness.py, tools/validate.py, tools/saipen_engine/producer.py, tools/saipen_engine/intent.py, tools/saipen_engine/journal.py, tools/saipen_engine/crew.py, tools/saipen_engine/release.py, tools/saipen_engine/subs.py]
+- **critical:** false
+- **producer:** saiwiki
+- **source_head:** 3a343e8d0e5a04e2cb43b671c9072996e810c65a
+- **source_tree_fingerprint:** git-delta-v1:4ec002cc5f2d23a8858d6c959ec2704e25be28f555a0396e5502685a0a4f3eb6
+- **role_revision:** sha256:54a42475a124ab0f27e83d600a284a9cc54d9668029c4828cfc48512b031df13
+- **coverage:**
+  - `Home.md`: v7.226 producer-local lock/epoch/staging, dependency-aware CURRENT/COMPATIBLE_DRIFT/STALE model, ADR link, current audit closure, and stale 13-key count corrected to 15.
+  - `Phases.md`: PREPARE now states real FORCE-FRESH execution, complete verification, exact dependency sets, atomic READY publication, `ROLE_NOT_RUN`, and no Core mutation; stale RFC rule destinations corrected to CORE.
+  - `Getting-Started.md`: no-install rule path corrected from RFC redirect to CORE; mutation-count copy made drift-safe; dependency-aware producer package section added.
+  - `SubSaipen.md`: all six crew roles described from current evidence; stale “saipython never run” and v7.157 translation claims removed; intake/disposition semantics corrected; producer parallelism documented.
+  - `Tutorials.md`: BOOT/CORE/STYLE path corrected; shortcut tutorial rebuilt to all 15 exact assignments (`gg` goal, `cc` continue); concurrent producer-prepare tutorial added.
+  - `Use-Cases.md`: stale `cc = goal` removed; isolated concurrent `ee` + `qq` use case added.
+  - `Scenarios.md`: complete IDs 1-256, unique and contiguous; mirror marker `sha256:9babcb02e659febc` freshly recomputed from the canonical CONFORMANCE ID-to-title map and matched exactly.
+  - `_Footer.md`: v7.226.0 current; `_Sidebar.md`: all maintained pages linked and unchanged.
+- **payload:** 8 modified pages in `kitchen/wiki/`: `Home.md`, `Phases.md`, `Getting-Started.md`, `SubSaipen.md`, `Tutorials.md`, `Use-Cases.md`, `Scenarios.md`, `_Footer.md`. `_Sidebar.md` was regenerated/verified content-equivalent and needs no write.
+- **verified:** PASS -- strict READY `sha256:7889cd32216030b9182006f61a7b79f20067549028333d968825b87d930766fa` published at producer epoch 1 with 42 exact read dependencies and 8 payload/write targets; `tools/validate.py --gate collect:saiwiki` exit 0; strict READY decode has zero errors and payload bytes equal the kitchen pages; source identity capture + bounded revalidation PASS; charter role revision matches; 256 unique contiguous scenario IDs; canonical mirror digest matches; wiki diff whitespace check PASS; 9/9 page inventory complete; no stale RFC rule destinations outside canonical scenario-history rows; no integration, commit, tag, push, or remote write performed.
+- **instructions:**
+  1. Recompute and require this exact freshness triple before collection; any mismatch means run `qq` again.
+  2. Review `git -C .saipen/extensions/subs/saiwiki/kitchen/wiki diff --check` and `git -C .saipen/extensions/subs/saiwiki/kitchen/wiki diff`.
+  3. Integrate only the 8 declared payload pages through Core's named saiwiki collect path; leave `_Sidebar.md` unchanged.
+  4. Run the collect:saiwiki gate plus the normal VERIFY and REVIEW gates.
+  5. Commit the wiki clone with a message such as `docs: refresh v7.226 producer and audit truth`, push only through the authorized SHIP path, then verify Home, Tutorials, Scenarios, and SubSaipen live.
+- **details:** W-032 was structurally fresh when produced at 00aa12db but became stale after three implementation commits and the current audit delta. FORCE-FRESH inspection found user-visible drift beyond the source triple: two pages still routed readers to the RFC redirect, Tutorials and Use-Cases still assigned `cc` to goal, the shortcut tutorial claimed 13 instead of 15 keys, SubSaipen described pre-disposition collect behavior and a never-run Python worker, and the committed producer-parallelism ADR had no wiki explanation. W-033 supersedes it without touching the main tree or wiki remote.
+
+## W-034: FORCE-FRESH re-bind to e045ad07, 8 pages (content unchanged from W-033)
+- **status:** ready
+- **summary:** W-033 was structurally fresh when produced at 3a343e8d but became stale after CORE-002..007 + W2-004..008 landed (11 files, +3090/-627, touching producer.py/journal.py/operations.py but NOT CONFORMANCE.md or saipen/ docs -- canonical scenario IDs and wiki-facing prose unchanged). FORCE-FRESH regenerated and re-published the identical 8-page payload bound to the new source triple (head e045ad07, tree git-delta-v1:a9b068ed). No page content changed; only the producer freshness binding was refreshed. 8 pages are ready for explicit integration.
+- **main_project_refs:** [VERSION, README.md, CHANGELOG.md, KNOWLEDGE/ADR-0001-v7-producer-parallelism.md, saipen/BOOT.md, saipen/CORE.md, saipen/STYLE.md, saipen/CONFORMANCE.md, saipen/CONVERGE.md, saipen/OPS.md, saipen/phases/*.md, extensions/subs/PROTOCOL.md, extensions/subs/crew.md, extensions/subs/sai*.md, tools/freshness.py, tools/validate.py, tools/saipen_engine/producer.py, tools/saipen_engine/intent.py, tools/saipen_engine/journal.py, tools/saipen_engine/crew.py, tools/saipen_engine/release.py, tools/saipen_engine/subs.py]
+- **critical:** false
+- **producer:** saiwiki
+- **source_head:** e045ad07d21aac78cce073caa732a5780652882b
+- **source_tree_fingerprint:** git-delta-v1:a9b068edabfdf9861f2aad20cd4502d29357e552166c3ac426eb6fbb21e7fea6
+- **role_revision:** sha256:54a42475a124ab0f27e83d600a284a9cc54d9668029c4828cfc48512b031df13
+- **coverage:**
+  - `Home.md`: identical content to W-033 (v7.226 producer-local lock/epoch/staging, dependency-aware CURRENT/COMPATIBLE_DRIFT/STALE model, ADR link, current audit closure, 15-key correct count); re-bound to e045ad07.
+  - `Phases.md`: identical content to W-033 (PREPARE FORCE-FRESH execution, ROLE_NOT_RUN, no Core mutation); re-bound.
+  - `Getting-Started.md`: identical content to W-033 (no-install path via CORE, dependency-aware producer package section); re-bound.
+  - `SubSaipen.md`: identical content to W-033 (six crew roles, producer parallelism); re-bound.
+  - `Tutorials.md`: identical content to W-033 (15 exact shortcut assignments, concurrent prepare tutorial); re-bound.
+  - `Use-Cases.md`: identical content to W-033 (isolated concurrent ee + qq use case); re-bound.
+  - `Scenarios.md`: complete IDs 1-256, unique and contiguous; mirror marker sha256:9babcb02e659febc unchanged; re-bound to e045ad07.
+  - `_Footer.md`: v7.226.0 current; `_Sidebar.md`: maintained pages linked and unchanged.
+- **payload:** 8 modified pages in `kitchen/wiki/`: `Home.md`, `Phases.md`, `Getting-Started.md`, `SubSaipen.md`, `Tutorials.md`, `Use-Cases.md`, `Scenarios.md`, `_Footer.md`. `_Sidebar.md` regenerated/verified content-equivalent, no write needed.
+- **verified:** PASS -- strict READY `sha256:4481cb57bd31c46e5bebdf5180f26eeae583cb258b40a0b7cfeb5dfbc9063fea` published at producer epoch 1 with 42 exact read dependencies and 8 payload/write targets; source identity capture + bounded revalidation after the e045ad07 landing PASS; charter role revision matches; 256 unique contiguous scenario IDs; canonical mirror digest sha256:9babcb02e659febc matches; zero page-content delta vs W-033 (only freshness binding refreshed); no integration, commit, tag, push, or remote write performed.
+- **instructions:**
+  1. Recompute and require this exact freshness triple (head e045ad07 / tree git-delta-v1:a9b068ed / role_revision sha256:54a42...) before collection; any mismatch means run `qq` again.
+  2. Review `git -C .saipen/extensions/subs/saiwiki/kitchen/wiki diff --check` and `git -C .saipen/extensions/subs/saiwiki/kitchen/wiki diff` (diff vs W-033 should be empty except the binding metadata).
+  3. Integrate only the 8 declared payload pages through Core's named saiwiki collect path; leave `_Sidebar.md` unchanged.
+  4. Run the collect:saiwiki gate plus the normal VERIFY and REVIEW gates.
+  5. Commit the wiki clone with a message such as `docs: refresh v7.226 producer and audit truth (re-bound to e045ad07)`, push only through the authorized SHIP path, then verify Home, Tutorials, Scenarios, and SubSaipen live.
+- **details:** W-033 (3a343e8d) went stale without content drift: CORE-002..007 + W2-004..008 touched producer.py/journal.py/operations.py only -- no CONFORMANCE.md or saipen/ doc edits, so canonical IDs and wiki-facing prose are unchanged. FORCE-FRESH re-read the 8 kitchen pages, recomputed the write_set from page bytes and the read_set from the live tree (42 deps, none absent), rebuilt the package with the current identity, and published a fresh strict READY. W-034 supersedes W-033 with identical payload content, refreshed binding only. Main tree and wiki remote untouched.

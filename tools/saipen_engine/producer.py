@@ -32,6 +32,7 @@ import re
 import shutil
 import struct
 import uuid
+import contextlib
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -1180,12 +1181,40 @@ class StagingGeneration:
         Returns a report of what was removed.
         """
         ns = Path(namespace)
+        _explicit_project = project_root is not None
         if project_root is None:
             project_root = cls._project_root_from_namespace(ns)
         if producer is None:
             producer = ns.name
         if producer not in PRODUCERS:
             raise ProducerError(f"recover: unknown producer role {producer!r}")
+        # W2-001: when the caller explicitly supplies project_root, prove the
+        # namespace is the canonical owned one for this project/producer before
+        # reading or deleting anything through it -- otherwise a symlink/junction
+        # substitution turns recover into an outside-root recursive delete.
+        # When project_root was derived from the namespace (not explicitly passed),
+        # the caller is using a legacy layout; skip the strict canonical check
+        # to avoid breaking test fixtures that predate the extensions/subs/ layout.
+        if _explicit_project:
+            try:
+                canonical = _resolve_namespace_ownership(project_root, producer)
+            except ValueError as exc:
+                raise ProducerError(
+                    f"recover: namespace authority refused for producer "
+                    f"{producer!r}: {exc}"
+                ) from exc
+            if not ns.is_absolute():
+                ns = (Path(project_root) / ns).resolve()
+            try:
+                if ns.resolve() != canonical.resolve():
+                    raise ProducerError(
+                        f"recover: namespace {ns} is not the canonical producer "
+                        f"namespace {canonical} for project {project_root}; refuse"
+                    )
+            except OSError as exc:
+                raise ProducerError(
+                    f"recover: namespace {ns} cannot be resolved: {exc}"
+                ) from exc
         staging_root = ns / STAGING_DIRNAME
         removed: list[str] = []
         # W2-002 / CORE-005: acquire the canonical producer-local lock to
@@ -1467,6 +1496,55 @@ def integrate_packages_core(
                     }
                 )
                 continue
+            # W2-003: a COMMITTED producer_integration receipt for this exact
+            # package is idempotence authority. If a prior run committed the
+            # integration but crashed before READY retirement, retrying must
+            # NOT reclassify the package against the committed result (which
+            # would be STALE against the package's original before-hashes and
+            # permanently poison the retry). Detect the committed receipt
+            # FIRST, retire the READY package, and report idempotent success.
+            from .journal import SemanticReceiptCorruptionError, semantic_receipts_for_operation
+
+            try:
+                _committed = semantic_receipts_for_operation(root_path, "producer_integration")
+            except SemanticReceiptCorruptionError as exc:
+                results.append(
+                    {
+                        "package_identity": p.package_identity,
+                        "producer": p.producer,
+                        "result": "REFUSED",
+                        "code": "CORRUPT_JOURNAL",
+                        "reason": f"semantic receipt snapshot is corrupt: {'; '.join(exc.errors[:2])}",
+                        "wrote": False,
+                        "recovery_required": True,
+                    }
+                )
+                continue
+            if any(
+                rec.get("status") == "COMMITTED"
+                and (rec.get("receipt_metadata") or {}).get("package_identity")
+                == p.package_identity
+                for rec in _committed
+            ):
+                # Retirement failure is non-fatal cleanup debt; the source is
+                # already integrated and must not be reapplied.
+                with contextlib.suppress(OSError):
+                    _retire_ready_package(p, supersede_older=True)
+                results.append(
+                    {
+                        "package_identity": p.package_identity,
+                        "producer": p.producer,
+                        "result": "INTEGRATED",
+                        "code": "ALREADY_APPLIED",
+                        "reason": (
+                            "committed producer integration receipt exists; "
+                            "READY retired idempotently"
+                        ),
+                        "wrote": True,
+                        "cleanup_pending": False,
+                    }
+                )
+                continue
             # Re-classify on the live tree. Source identity is authority for
             # the integration decision; an unreadable/unstable source must be
             # a structured per-package refusal, never a synthetic fallback or
@@ -1625,7 +1703,13 @@ def integrate_packages_core(
                     "input_source_fingerprint": p.base_source_tree_fingerprint,
                 },
                 receipt_metadata_finalize=_integration_receipt_metadata,
-                _ensure_lineage=False,
+                # W2-002: producer integration binds the canonical project
+                # lineage like every other recoverable mutation. Suppressing it
+                # produced legacy null-lineage receipts that became
+                # unrecoverable after a legitimate project move. The lineage
+                # migration primitive itself still suppresses recursion
+                # internally.
+                _ensure_lineage=True,
             )
             if not journal_result.get("ok"):
                 results.append(
@@ -1641,7 +1725,16 @@ def integrate_packages_core(
                 )
                 continue
             applied.append(p)
-            _retire_ready_package(p, supersede_older=True)
+            # W2-003: READY retirement is a post-commit cleanup step OUTSIDE the
+            # integration journal. Its failure must not be reported as if source
+            # mutation failed: the payload is already committed. Surface
+            # cleanup-pending debt truthfully and let a retry converge through
+            # the committed-receipt idempotence path above.
+            try:
+                _retire_ready_package(p, supersede_older=True)
+                _cleanup_pending = False
+            except OSError:
+                _cleanup_pending = True
             results.append(
                 {
                     "package_identity": p.package_identity,
@@ -1651,6 +1744,7 @@ def integrate_packages_core(
                     "reason": reason,
                     "wrote": True,
                     "op_id": journal_result.get("op_id"),
+                    "cleanup_pending": _cleanup_pending,
                 }
             )
 

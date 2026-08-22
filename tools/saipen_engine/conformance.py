@@ -27,6 +27,7 @@ Sections implemented here:
 from __future__ import annotations
 
 import datetime
+import contextlib
 import hashlib
 import json
 import os
@@ -48,7 +49,16 @@ RECEIPT_DIRNAME = ".saipen/recovery/conformance"
 
 # CORE-003: the three nested path components that must be inside the project
 # root and must NOT be symlinks/junctions/reparse points.
-_CONTAINMENT_COMPONENTS = (".saipen", ".saipen/recovery", ".saipen/recovery/conformance")
+_CONTAINMENT_COMPONENTS = (
+    ".saipen",
+    ".saipen/recovery",
+    ".saipen/recovery/conformance",
+    # CORE-001: the O(1) receipt index lives BELOW conformance/ and must obey
+    # the same no-follow containment invariant. A stale/hostile symlink or
+    # reparse point at this level must never redirect a canonical write
+    # outside the project root.
+    ".saipen/recovery/conformance/index",
+)
 
 
 # --------------------------------------------------------------------------- CORE-003 containment
@@ -115,8 +125,7 @@ def _validate_conformance_containment(root: Path) -> None:
                 continue
             if os.path.islink(p):
                 raise ValueError(
-                    f"conformance receipt {p.name} is a symlink; "
-                    "symlinked receipts are forbidden"
+                    f"conformance receipt {p.name} is a symlink; symlinked receipts are forbidden"
                 )
             if getattr(info, "st_file_attributes", 0) & 0x400:
                 raise ValueError(
@@ -133,20 +142,17 @@ def _atomic_write_receipt(path: Path, body: str) -> None:
     never a partial file.
     """
     parent = path.parent
-    fd, tmp_path = tempfile.mkstemp(
-        suffix=".tmp", prefix=path.stem + "-", dir=parent
-    )
+    fd, tmp_path = tempfile.mkstemp(suffix=".tmp", prefix=path.stem + "-", dir=parent)
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(body)
             f.write("\n")
         os.replace(tmp_path, path)
     except BaseException:
-        try:
+        with contextlib.suppress(OSError):
             os.unlink(tmp_path)
-        except OSError:
-            pass
         raise
+
 
 # §9: max allowed clock skew (seconds). A receipt timestamp further in the
 # future than this is treated as fabricated and refused.
@@ -165,6 +171,15 @@ STATUS_INVALID = "INVALID_RECEIPT"
 # project that has not validated in a day cannot claim terminal closure on a
 # week-old green stamp.
 FRESHNESS_WINDOW_SECONDS = 24 * 3600
+
+
+class ReceiptDiscoveryError(ValueError):
+    """A canonical receipt candidate exists but cannot be trusted.
+
+    Discovery is part of the conformance proof.  Silently dropping a broken
+    candidate would let an older PASS become authoritative after newer red
+    evidence was damaged.
+    """
 
 
 # --------------------------------------------------------------------------- utils
@@ -196,14 +211,14 @@ def _safe_filename_component(value: str) -> str:
     # Characters forbidden on Windows (and problematic on POSIX in filenames)
     _unsafe = set('/<>:"|?*\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f')
     # Also forbid colon which is NTFS alternate-data-stream syntax
-    _unsafe.add(':')
+    _unsafe.add(":")
     result = []
     for ch in value:
         if ch in _unsafe or ord(ch) < 0x20:
-            result.append('_')
+            result.append("_")
         else:
             result.append(ch)
-    return ''.join(result)
+    return "".join(result)
 
 
 def _strict_iso_utc(value) -> str:
@@ -293,7 +308,8 @@ class ValidatorVersionInfo:
 
 
 def validator_version_info(
-    project_root: Path | str, gate: str = "core",
+    project_root: Path | str,
+    gate: str = "core",
     # PERF-002: optional pre-computed SourceIdentity to avoid redundant
     # filesystem/Git subprocess calls. When provided, skips _source_identity.
     source_identity=None,
@@ -323,10 +339,7 @@ def validator_version_info(
     except OSError:
         pass
     # PERF-002: use pre-computed identity if available
-    if source_identity is not None:
-        ident = source_identity
-    else:
-        ident = _source_identity(root)
+    ident = source_identity if source_identity is not None else _source_identity(root)
     return ValidatorVersionInfo(
         validator_path=validator_path,
         validator_protocol_version=CONFORMANCE_PROTOCOL_VERSION,
@@ -337,14 +350,13 @@ def validator_version_info(
     )
 
 
-def stale_validator(
-    project_root: Path | str, tool_validator_version: str | None = None
-) -> bool:
+def stale_validator(project_root: Path | str, tool_validator_version: str | None = None) -> bool:
     """§1: report STALE_VALIDATOR when a viewer/tool uses a different validator
     version than the canonical one on disk."""
-    if tool_validator_version is not None and tool_validator_version != CONFORMANCE_PROTOCOL_VERSION:
-        return True
-    return False
+    return bool(
+        tool_validator_version is not None
+        and tool_validator_version != CONFORMANCE_PROTOCOL_VERSION
+    )
 
 
 # --------------------------------------------------------------------------- §2
@@ -355,6 +367,7 @@ def generate_conformance_receipt(
     exit_code: int,
     validator_version: str | None = None,
     now: datetime.datetime | None = None,
+    source_identity=None,
 ) -> dict:
     """§2: mechanically produce ONE structured conformance receipt.
 
@@ -380,7 +393,44 @@ def generate_conformance_receipt(
     state_hash = _hash_file(root / ".saipen" / "STATE.md")
     board_hash = _hash_file(root / ".saipen" / "BOARD.md")
     log_hash = _log_hash(root)
-    ident = _source_identity(root)
+    # PERF-002: carry the call-scoped SourceIdentity forward when the caller
+    # already captured one (the validator establishes source identity before
+    # receipt generation). Bounded-revalidate it so the receipt still binds
+    # proof valid at receipt time; fall back to a fresh full capture only when
+    # unavailable or changed.
+    if source_identity is not None:
+        try:
+            from freshness import revalidate_source_identity
+
+            ok, _err = revalidate_source_identity(root, source_identity)
+            ident = source_identity if ok else _source_identity(root)
+        except Exception:
+            ident = _source_identity(root)
+    else:
+        ident = _source_identity(root)
+    # CORE-002: missing proof is NOT proof. A PASS receipt must carry positive
+    # source identity and complete checkpoint bindings; refusing to mint one
+    # from empty evidence stops "empty==empty" from ever becoming CURRENT_PASS.
+    source_head = getattr(ident, "source_head", "") or ""
+    source_fp = getattr(ident, "source_tree_fingerprint", "") or ""
+    if verdict == "PASS":
+        if not source_head or not source_fp:
+            raise ValueError(
+                "conformance PASS receipt requires positive source identity; "
+                "source_head/source_tree_fingerprint are empty"
+            )
+        missing = []
+        if not state_hash:
+            missing.append("state_hash")
+        if not board_hash:
+            missing.append("board_hash")
+        if not log_hash:
+            missing.append("log_hash")
+        if missing:
+            raise ValueError(
+                "conformance PASS receipt requires complete checkpoint binding; "
+                "missing: " + ", ".join(missing)
+            )
     project_identity = _project_identity(root)
     # W2-005: unique receipt id and microsecond-precision timestamp for
     # total ordering. Never overwrites an earlier receipt.
@@ -435,15 +485,37 @@ def _update_receipt_index(
     and falls back to a full scan on a missing/corrupt/relocated index -- it
     never mutates state on a read-only upgrade.
     """
+    # Never advance a green locator over a corrupt sibling already present in
+    # the append-only lineage.  Leaving the index stale forces the read path to
+    # perform its strict scan and classify INVALID.
+    try:
+        _iter_receipts(root)
+    except ReceiptDiscoveryError:
+        return
+    # CORE-001: the index directory participates in the conformance
+    # write-containment boundary. Prove .saipen/recovery/conformance/index
+    # has no symlink/junction/reparse ancestry and resolves inside the project
+    # BEFORE mkdir / temp-file / os.replace. Zero index writes before this proof.
+    _validate_conformance_containment(root)
     index_dir = root / _INDEX_DIRNAME
     index_dir.mkdir(parents=True, exist_ok=True)
     index_path = index_dir / f"{gate}.json"
+    receipt_dir = root / RECEIPT_DIRNAME
+    try:
+        receipt_dir_mtime_ns = receipt_dir.stat().st_mtime_ns
+    except OSError:
+        receipt_dir_mtime_ns = -1
     index = {
         "gate": gate,
         "receipt_id": receipt_id,
         "timestamp_utc": timestamp,
         "receipt_path": receipt_path,
         "version": 1,
+        # Crash-staleness token: creation of any newer immutable receipt
+        # changes the receipt directory mtime before index replacement.  A
+        # reader can therefore prove the locator is still latest with one stat;
+        # mismatch falls back to the canonical ordered scan.
+        "receipt_dir_mtime_ns": receipt_dir_mtime_ns,
     }
     _atomic_write_receipt(index_path, json.dumps(index, indent=2, sort_keys=True))
 
@@ -530,18 +602,24 @@ def _iter_receipts(project_root: Path) -> list[dict]:
         # externally located receipt must never be imported as project evidence.
         try:
             info = os.lstat(p)
-        except OSError:
-            continue
-        if os.path.islink(p):
-            continue
-        if getattr(info, "st_file_attributes", 0) & 0x400:
-            continue
+        except OSError as exc:
+            raise ReceiptDiscoveryError(f"receipt {p.name} is unreadable: {exc}") from exc
+        if (
+            os.path.islink(p)
+            or getattr(info, "st_file_attributes", 0) & 0x400
+            or not p.is_file()
+        ):
+            raise ReceiptDiscoveryError(f"receipt {p.name} is not an owned regular file")
         try:
             rec = json.loads(p.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            continue
-        if rec.get("kind") != "conformance_receipt":
-            continue
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise ReceiptDiscoveryError(
+                f"receipt {p.name} is not readable canonical JSON: {exc}"
+            ) from exc
+        if not isinstance(rec, dict) or rec.get("kind") != "conformance_receipt":
+            raise ReceiptDiscoveryError(
+                f"receipt {p.name} is not a conformance_receipt object"
+            )
         out.append(rec)
     return out
 
@@ -562,10 +640,18 @@ def latest_receipt(project_root: Path | str, gate: str | None = None) -> dict | 
         # never mutates state on a read-only upgrade.
         index = _lookup_receipt_index(root, gate)
         if index is not None:
+            try:
+                live_dir_mtime = (root / RECEIPT_DIRNAME).stat().st_mtime_ns
+            except OSError:
+                live_dir_mtime = -2
             rec = _read_indexed_receipt(root, index)
-            if rec is not None and rec.get("gate") == gate and rec.get(
-                "timestamp_utc"
-            ) == index.get("timestamp_utc"):
+            if (
+                rec is not None
+                and index.get("receipt_dir_mtime_ns") == live_dir_mtime
+                and rec.get("gate") == gate
+                and rec.get("receipt_id") == index.get("receipt_id")
+                and rec.get("timestamp_utc") == index.get("timestamp_utc")
+            ):
                 return rec
         # Index miss/corruption/relocation: fall back to full scan
         receipts = _iter_receipts(root)
@@ -574,27 +660,44 @@ def latest_receipt(project_root: Path | str, gate: str | None = None) -> dict | 
         receipts = _iter_receipts(root)
     if not receipts:
         return None
-    # W2-005: order by timestamp (primary) then receipt_id (secondary)
-    # for deterministic total ordering across same-second executions.
-    return max(receipts, key=lambda r: (r.get("timestamp_utc", ""), r.get("receipt_id", "")))
+    # CORE-001: order by parsed canonical UTC instant, not lexical string.
+    # `Z` sorts after `.` lexically, reversing chronology inside one second
+    # when legacy whole-second and current fractional spellings coexist.
+    # Malformed timestamps are fail-closed: they sort as earliest, never as
+    # permissive lexical latest.
+    from .board import iso_utc_sort_key
+
+    _earliest = iso_utc_sort_key("0000-01-01T00:00:00Z")
+
+    def _receipt_sort_key(r: dict):
+        ts = iso_utc_sort_key(r.get("timestamp_utc", ""))
+        return (ts or _earliest, r.get("receipt_id", ""))
+
+    return max(receipts, key=_receipt_sort_key)
 
 
-# --------------------------------------------------------------------------- CORE-001 strict receipt validation
+# ---------------------------------------------------------------------------
+# CORE-001 strict receipt validation
 # Required fields for a receipt to be considered structurally valid.
 # schema_version 2+ requires receipt_id for W2-005 total ordering.
-_RECEIPT_REQUIRED_FIELDS_V1 = frozenset({
-    "schema_version", "kind", "validator_protocol_version",
-    "gate", "exit_code", "verdict", "timestamp_utc",
-})
+_RECEIPT_REQUIRED_FIELDS_V1 = frozenset(
+    {
+        "schema_version",
+        "kind",
+        "validator_protocol_version",
+        "gate",
+        "exit_code",
+        "verdict",
+        "timestamp_utc",
+    }
+)
 _RECEIPT_REQUIRED_FIELDS_V2 = _RECEIPT_REQUIRED_FIELDS_V1 | {"receipt_id"}
 
 # Allowed gate values.
 _ALLOWED_GATES = ("core", "crew")
 
 
-def _strict_validate_receipt(
-    receipt: dict, gate: str, project_root: Path
-) -> str | None:
+def _strict_validate_receipt(receipt: dict, gate: str, project_root: Path) -> str | None:
     """CORE-001: one strict conformance-receipt decoder.
 
     Returns None when the receipt is structurally and cryptographically
@@ -612,38 +715,38 @@ def _strict_validate_receipt(
     - (For CURRENT status) STATE/BOARD/LOG hashes match current files
     """
     # 1. Schema: required fields present (version-aware)
-    schema_version = receipt.get("schema_version", 1)
+    if not isinstance(receipt, dict):
+        return "receipt is not a JSON object"
+    schema_version = receipt.get("schema_version")
+    if (
+        not isinstance(schema_version, int)
+        or isinstance(schema_version, bool)
+        or schema_version not in (1, 2)
+    ):
+        return f"receipt schema_version must be integer 1 or 2: {schema_version!r}"
     required = _RECEIPT_REQUIRED_FIELDS_V2 if schema_version >= 2 else _RECEIPT_REQUIRED_FIELDS_V1
     missing = required - set(receipt.keys())
     if missing:
         return f"receipt is missing required fields: {sorted(missing)}"
 
-    # 2. Protocol version
-    if receipt.get("validator_protocol_version") != CONFORMANCE_PROTOCOL_VERSION:
-        return (
-            f"validator protocol version mismatch: "
-            f"{receipt.get('validator_protocol_version')} != "
-            f"{CONFORMANCE_PROTOCOL_VERSION}"
-        )
-
-    # 3. Gate is in the allowed set
+    # 2. Gate is in the allowed set. Protocol-version classification is a
+    # separate authoritative status after the shape is proven total.
     if receipt.get("gate") not in _ALLOWED_GATES:
         return f"receipt gate {receipt.get('gate')!r} is not in {_ALLOWED_GATES}"
+    if receipt.get("gate") != gate:
+        return f"receipt gate {receipt.get('gate')!r} does not match requested gate {gate!r}"
 
-    # 4. exit_code / verdict consistency: exit_code == 0 <=> verdict == PASS
+    # 3. exit_code / verdict consistency: exit_code == 0 <=> verdict == PASS
     exit_code = receipt.get("exit_code")
     verdict = receipt.get("verdict")
-    if not isinstance(exit_code, int):
+    if not isinstance(exit_code, int) or isinstance(exit_code, bool):
         return f"receipt exit_code is not an integer: {exit_code!r}"
     if verdict not in ("PASS", "FAIL"):
         return f"receipt verdict is not PASS/FAIL: {verdict!r}"
     if (exit_code == 0) != (verdict == "PASS"):
-        return (
-            f"exit_code/verdict inconsistency: exit_code={exit_code} "
-            f"but verdict={verdict}"
-        )
+        return f"exit_code/verdict inconsistency: exit_code={exit_code} but verdict={verdict}"
 
-    # 5. content_hash revalidation: recompute from the receipt body
+    # 4. content_hash revalidation: recompute from the receipt body
     #    (every field except content_hash itself)
     stored_hash = receipt.get("content_hash", "")
     if not stored_hash:
@@ -656,7 +759,7 @@ def _strict_validate_receipt(
             f"recomputed={recomputed[:16]}.. (receipt body was tampered)"
         )
 
-    # 6. Real timestamp parsing
+    # 5. Real timestamp parsing
     ts = receipt.get("timestamp_utc", "")
     if not _strict_iso_utc(ts):
         return f"receipt timestamp is not valid ISO-8601 UTC: {ts!r}"
@@ -670,35 +773,36 @@ def _checkpoint_hash_mismatch(receipt: dict, root: Path) -> str | None:
     Returns None when all hashes match, or a reason string describing the
     first mismatch. This catches tampered receipts that have valid structure
     but were written for a different checkpoint state.
+
+    CORE-002: empty evidence is NOT matching evidence. A missing stored hash
+    (a receipt minted without binding) or an unreadable current file must
+    classify as a mismatch so CURRENT_PASS never rests on empty==empty.
     """
-    # Only check hashes that the receipt claims to carry
     current_state = _hash_file(root / ".saipen" / "STATE.md")
     current_board = _hash_file(root / ".saipen" / "BOARD.md")
     current_log = _log_hash(root)
     stored_state = receipt.get("state_hash", "")
     stored_board = receipt.get("board_hash", "")
     stored_log = receipt.get("log_hash", "")
-    # Only mismatch when stored hash is non-empty AND differs from current
-    # (empty stored hash means the receipt was minted without checkpoint
-    # binding, which is a structural weakness but not a mismatch per se)
-    if stored_state and current_state and stored_state != current_state:
-        return (
-            f"STATE hash mismatch: receipt={stored_state} current={current_state}"
-        )
-    if stored_board and current_board and stored_board != current_board:
-        return (
-            f"BOARD hash mismatch: receipt={stored_board} current={current_board}"
-        )
-    if stored_log and current_log and stored_log != current_log:
-        return (
-            f"LOG hash mismatch: receipt={stored_log} current={current_log}"
-        )
+    for label, stored, current in (
+        ("STATE", stored_state, current_state),
+        ("BOARD", stored_board, current_board),
+        ("LOG", stored_log, current_log),
+    ):
+        if not stored:
+            return f"{label} receipt hash is empty -- receipt was not bound to a checkpoint"
+        if not current:
+            return f"{label} current hash unavailable -- cannot prove checkpoint currentness"
+        if stored != current:
+            return f"{label} hash mismatch: receipt={stored} current={current}"
     return None
 
 
 # --------------------------------------------------------------------------- §8
 def conformance_status(
-    project_root: Path | str, gate: str = "core", now: datetime.datetime | None = None,
+    project_root: Path | str,
+    gate: str = "core",
+    now: datetime.datetime | None = None,
     # PERF-002: optional pre-computed SourceIdentity to avoid redundant
     # filesystem/Git subprocess calls.
     source_identity=None,
@@ -720,14 +824,34 @@ def conformance_status(
     viewer."""
     ref = now or datetime.datetime.now(datetime.timezone.utc)
     info = validator_version_info(project_root, gate=gate, source_identity=source_identity)
-    receipt = latest_receipt(project_root, gate)
     root = Path(project_root)
+    try:
+        receipt = latest_receipt(project_root, gate)
+    except ReceiptDiscoveryError as exc:
+        return {
+            "status": STATUS_INVALID,
+            "gate": gate,
+            "reason": f"canonical receipt discovery failed closed: {exc}",
+            "validator": info.as_dict(),
+        }
     if receipt is None:
         return {
             "status": STATUS_NOT_RUN,
             "gate": gate,
             "reason": "no canonical validator receipt on record -- conformance is "
             "UNKNOWN, never assumed PASS",
+            "validator": info.as_dict(),
+        }
+    # Validate the complete shape before comparing any typed/versioned field.
+    # A hostile schema_version must classify INVALID, never raise TypeError or
+    # masquerade as an ordinary validator-version mismatch.
+    strict_err = _strict_validate_receipt(receipt, gate, root)
+    if strict_err:
+        return {
+            "status": STATUS_INVALID,
+            "gate": gate,
+            "reason": f"receipt is invalid: {strict_err}",
+            "receipt": receipt,
             "validator": info.as_dict(),
         }
     if receipt.get("validator_protocol_version") != CONFORMANCE_PROTOCOL_VERSION:
@@ -749,18 +873,23 @@ def conformance_status(
             "receipt": receipt,
             "validator": info.as_dict(),
         }
-    # CORE-001: strict structural + cryptographic validation
-    strict_err = _strict_validate_receipt(receipt, gate, root)
-    if strict_err:
+    current_head = info.source_head
+    current_fp = info.source_tree_fingerprint
+    # CORE-002: empty current source identity is unavailable evidence, never a
+    # matching identity. Empty==empty must NOT bind as current -- the receipt
+    # cannot be proven bound to THIS project/tree when neither side has a value.
+    if not current_head or not current_fp:
         return {
-            "status": STATUS_INVALID,
+            "status": STATUS_STALE_FAIL,
             "gate": gate,
-            "reason": f"receipt is invalid: {strict_err}",
+            "reason": (
+                "current source identity is unavailable (empty source_head/"
+                "source_tree_fingerprint) -- the receipt cannot be proven bound "
+                "to the current tree"
+            ),
             "receipt": receipt,
             "validator": info.as_dict(),
         }
-    current_head = info.source_head
-    current_fp = info.source_tree_fingerprint
     bound = (
         receipt.get("source_head") == current_head
         and receipt.get("source_tree_fingerprint") == current_fp
@@ -774,7 +903,10 @@ def conformance_status(
         pass
     if not bound:
         status = STATUS_STALE_PASS if is_pass else STATUS_STALE_FAIL
-        reason = "conformance receipt is bound to a different source identity " "than the current checkpoint"
+        reason = (
+            "conformance receipt is bound to a different source identity "
+            "than the current checkpoint"
+        )
     elif age_seconds > FRESHNESS_WINDOW_SECONDS:
         status = STATUS_STALE_PASS if is_pass else STATUS_STALE_FAIL
         reason = (
@@ -805,8 +937,11 @@ def conformance_status(
         "validator": info.as_dict(),
     }
 
+
 def current_conformance_pass(
-    project_root: Path | str, gate: str = "core", now: datetime.datetime | None = None,
+    project_root: Path | str,
+    gate: str = "core",
+    now: datetime.datetime | None = None,
     # PERF-002: optional pre-computed SourceIdentity to avoid redundant
     # filesystem/Git subprocess calls.
     source_identity=None,
@@ -814,8 +949,10 @@ def current_conformance_pass(
     """§4/§7: terminal/crew closure is allowed ONLY on a CURRENT_PASS receipt
     bound to the current checkpoint. Everything else forbids closure."""
     return (
-        conformance_status(project_root, gate=gate, now=now, source_identity=source_identity)
-        .get("status") == STATUS_CURRENT_PASS
+        conformance_status(project_root, gate=gate, now=now, source_identity=source_identity).get(
+            "status"
+        )
+        == STATUS_CURRENT_PASS
     )
 
 
@@ -829,6 +966,11 @@ def convergence_stage_satisfied(
     convergence planner must refuse with CONVERGENCE_GATE_UNSATISFIED."""
     if stage not in ("E", "H"):
         return True, ""
+    # The current-source identity used for the CURRENT_PASS comparison is the
+    # project's REAL live identity, never the stage's own expected Src stand-in.
+    # Passing the stage's Src here would compare the receipt against an
+    # arbitrary OTHER value and misclassify a genuinely bound receipt as stale
+    # (E4 regression). The stage's own binding is checked separately below.
     status = conformance_status(project_root, gate="core", now=now)
     if status["status"] != STATUS_CURRENT_PASS:
         return False, (
@@ -853,12 +995,12 @@ def convergence_stage_satisfied(
 
 # --------------------------------------------------------------------------- §5
 def clean_exit_allowed(
-    project_root: Path | str, now: datetime.datetime | None = None
+    project_root: Path | str, now: datetime.datetime | None = None, source_identity=None
 ) -> tuple[bool, str]:
     """§5: after CLEAN mutations, the canonical Core validator must PASS for the
     CURRENT checkpoint. If it FAILs, CLEAN MUST NOT claim closure. Missing
     verify evidence is NOT invented -- absence of a PASS receipt forbids."""
-    status = conformance_status(project_root, gate="core", now=now)
+    status = conformance_status(project_root, gate="core", now=now, source_identity=source_identity)
     if status["status"] != STATUS_CURRENT_PASS:
         return False, (
             f"CLEAN exit requires a CURRENT_PASS canonical conformance receipt "
@@ -915,9 +1057,7 @@ def continue_entry_health(
         )
     # converge/crew intent without current conformance is not finalizable.
     if state.get("execution_intent") == "converge" and state.get("converge_target") == "crew":
-        if not current_conformance_pass(
-            root, "crew", now=now, source_identity=source_id
-        ):
+        if not current_conformance_pass(root, "crew", now=now, source_identity=source_id):
             problems.append(
                 "converge/crew intent present but canonical crew conformance is "
                 "not CURRENT_PASS -- crew closure is impossible"

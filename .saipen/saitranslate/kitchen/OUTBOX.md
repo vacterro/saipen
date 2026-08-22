@@ -18,7 +18,8 @@
   1. Superseded -- collect SAIT-011 instead.
 
 ## SAIT-011: FORCE-FRESH translation to v7.219.0 truth (cc continue semantics + INDEX.md)
-- **status:** ready
+- **status:** stale
+- **superseded_by:** SAIT-012 -- README.md was substantially rewritten; the old 32-locale bundle no longer represented the source
 - **summary:** FORCE-FRESH re-translation of the 28 non-Core kitchen locales + their guides to the current README.md truth (HEAD 2720d5d1, v7.219.0): cc callout moved from "Goal Mode" to continue/convergence semantics (CORE.md § 1.10 T-537), no-install line reads saipen/INDEX.md instead of saipen/RFC.md. All 32 kitchen locale READMEs restamped to the new normalized source digest.
 - **critical:** false
 - **producer:** saitranslate
@@ -39,3 +40,84 @@
   2. Validate: `python tools/validate.py` -- expect no FAILs; translation-stale must not list any locale.
   3. Review the 28 guide callouts for translation quality.
   4. Commit: `git add guides/GUIDE_{AR,BG,CS,DA,DE,EL,ES,FI,FR,HE,HI,HR,HU,ID,IT,KO,NL,NO,PL,PT,RO,SK,SV,TH,TR,UK,VI,ZH}.md` and commit with message style `saitranslate: SAIT-011 retranslate cc callout + INDEX.md to v7.219.0 truth`.
+
+## SAIT-012: FORCE-FRESH complete translation package for current README truth
+- **status:** stale
+- **superseded_by:** SAIT-013 -- Core VERIFY rejected widespread trailing whitespace and 1.7B model commentary/JSON leakage; the package was settled but never shipped
+- **summary:** Rebuilt all 32 locale README surfaces from the current 316-line README.md, preserved the maintained shortcut callouts, verified the five unchanged translated policy/spec surfaces across every locale, and prepared current ET/JA/DED root-mirror candidates. No tracked in-app UI/i18n surface exists.
+- **critical:** false
+- **producer:** saitranslate
+- **source_head:** 3a343e8d0e5a04e2cb43b671c9072996e810c65a
+- **source_tree_fingerprint:** git-delta-v1:4ec002cc5f2d23a8858d6c959ec2704e25be28f555a0396e5502685a0a4f3eb6
+- **role_revision:** sha256:f241e6b83c39e9b46bfa586638efb0374bbb39889646f723b9189bbb4912c0c5
+- **coverage:**
+  - README.md: 32/32 locale candidates (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh), all bound to normalized source digest `2a33e364c3c12e8b1b9b2caf41b05db3ee27f17161336579ae85ee59da34fe56`
+  - SPEC.md, CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md: 32/32 existing locale files per source, all non-empty and structurally checked; canonical sources are unchanged since those translations were produced
+  - GUIDE.md/guides/: 33 hand-maintained locale siblings retained under the carve-out; the 28 non-Core shortcut callouts remain the exact link-adjusted source for their locale README callouts
+  - Root README mirrors: README.ee.md, README.ja.md, README.ded.md complete candidates derived from the current README structure, with maintained language switcher and shortcut callout preserved
+  - In-app UI: none -- tracked-source scan found no i18n/locale bundle or app-view source (`tsx`, `jsx`, `vue`, `svelte`, `html`, `qml`); no fictional UI bundle was created
+- **payload:**
+  - `.saipen/saitranslate/kitchen/ar/README_AR.md`, `.saipen/saitranslate/kitchen/bg/README_BG.md`, `.saipen/saitranslate/kitchen/cs/README_CS.md`, `.saipen/saitranslate/kitchen/da/README_DA.md`, `.saipen/saitranslate/kitchen/de/README_DE.md`, `.saipen/saitranslate/kitchen/ded/README_DED.md`, `.saipen/saitranslate/kitchen/el/README_EL.md`, `.saipen/saitranslate/kitchen/es/README_ES.md`, `.saipen/saitranslate/kitchen/et/README_ET.md`, `.saipen/saitranslate/kitchen/fi/README_FI.md`, `.saipen/saitranslate/kitchen/fr/README_FR.md`, `.saipen/saitranslate/kitchen/he/README_HE.md`, `.saipen/saitranslate/kitchen/hi/README_HI.md`, `.saipen/saitranslate/kitchen/hr/README_HR.md`, `.saipen/saitranslate/kitchen/hu/README_HU.md`, `.saipen/saitranslate/kitchen/id/README_ID.md`, `.saipen/saitranslate/kitchen/it/README_IT.md`, `.saipen/saitranslate/kitchen/ja/README_JA.md`, `.saipen/saitranslate/kitchen/ko/README_KO.md`, `.saipen/saitranslate/kitchen/nl/README_NL.md`, `.saipen/saitranslate/kitchen/no/README_NO.md`, `.saipen/saitranslate/kitchen/pl/README_PL.md`, `.saipen/saitranslate/kitchen/pt/README_PT.md`, `.saipen/saitranslate/kitchen/ro/README_RO.md`, `.saipen/saitranslate/kitchen/ru/README_RU.md`, `.saipen/saitranslate/kitchen/sk/README_SK.md`, `.saipen/saitranslate/kitchen/sv/README_SV.md`, `.saipen/saitranslate/kitchen/th/README_TH.md`, `.saipen/saitranslate/kitchen/tr/README_TR.md`, `.saipen/saitranslate/kitchen/uk/README_UK.md`, `.saipen/saitranslate/kitchen/vi/README_VI.md`, `.saipen/saitranslate/kitchen/zh/README_ZH.md`
+  - README.ee.md from `.saipen/saitranslate/kitchen/et/README_ET.md`
+  - README.ja.md from `.saipen/saitranslate/kitchen/ja/README_JA.md`
+  - README.ded.md from `.saipen/saitranslate/kitchen/ded/README_DED.md`
+- **verified:** PASS -- 32 locales; normalized digest 32/32; version badge 32/32; heading/fence/table-row parity 32/32; no leaked placeholders; required `reply_language`, `/saipen continue`, `/saipen crew`, and 15-key shortcut surface present 32/32; `python -B tools/validate.py --gate core` PASS; strict v7 package published at epoch 3 with 44 read dependencies and 35 payload entries
+- **instructions:**
+  1. Recompute source identity and require exact `source_head`, `source_tree_fingerprint`, and `role_revision` matches above.
+  2. Run `python -B tools/validate.py --gate collect:saitranslate`; refuse on any producer or payload mismatch.
+  3. Open strict READY package `sha256:f03d49dd90998c9b3aa84e14f120d02bdd572f1d6f0310192ca381d0c9132fc9` and integrate only its 35 declared payload entries through the canonical Core writer.
+  4. Verify the three root mirrors, 32 source digests, shortcut-callout parity, UTF-8 validity, and full repository gate before REVIEW/SHIP.
+
+## SAIT-013: verified 14B regeneration of the complete translation package
+- **status:** stale
+- **superseded_by:** SAIT-014 -- HEAD 3a343e8d -> e045ad07 (v7.226.0 audit commit CORE-002..007 + W2-004..008), tree git-delta-v1:d3538d0b -> git-delta-v1:da948fff; kitchen READMEs were rewritten 21.08 23:41 (after SAIT-013's 06:47 publish), so content as well as the freshness triple moved; FORCE-FRESH re-bind + re-package
+- **summary:** Regenerated all 32 current README translations with qwen3:14b after Core rejected SAIT-012's 1.7B output. Cache identity now binds the model and prompt contract; publish rejects model commentary, replacement characters, structural drift, and trailing whitespace.
+- **critical:** false
+- **producer:** saitranslate
+- **source_head:** 3a343e8d0e5a04e2cb43b671c9072996e810c65a
+- **source_tree_fingerprint:** git-delta-v1:d3538d0b049e9f36c9bb009fd2e4ca1944be44c48b823ad36a115010e93e74c4
+- **role_revision:** sha256:f241e6b83c39e9b46bfa586638efb0374bbb39889646f723b9189bbb4912c0c5
+- **coverage:**
+  - README.md: 32/32 locale candidates (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh), all bound to normalized source digest `2a33e364c3c12e8b1b9b2caf41b05db3ee27f17161336579ae85ee59da34fe56`
+  - Model/cache contract: qwen3:14b + `structured-markdown-v2` marker on 32/32 outputs; old qwen3:1.7b cache entries cannot satisfy the new cache key
+  - Structure: heading/fence/table parity 32/32; maintained shortcut callout synced from each canonical guide/mirror source
+  - Quality: zero `</think>`, `*Note:`, JSON-explanation leakage, U+FFFD replacement characters, leaked placeholders, or trailing whitespace across all 32 outputs
+  - Root README mirrors: README.ee.md, README.ja.md, README.ded.md payloads derive byte-for-byte from ET, JA, and DED kitchen outputs
+  - In-app UI: none -- no tracked i18n/locale bundle or app-view surface exists
+- **payload:**
+  - `.saipen/saitranslate/kitchen/{ar,bg,cs,da,de,ded,el,es,et,fi,fr,he,hi,hr,hu,id,it,ja,ko,nl,no,pl,pt,ro,ru,sk,sv,th,tr,uk,vi,zh}/README_*.md` -- exact 32 paths authenticated in READY
+  - README.ee.md from `.saipen/saitranslate/kitchen/et/README_ET.md`
+  - README.ja.md from `.saipen/saitranslate/kitchen/ja/README_JA.md`
+  - README.ded.md from `.saipen/saitranslate/kitchen/ded/README_DED.md`
+- **verified:** PASS -- independent audit found 32 files, structural_bad=[], leaks=[], replacement_chars=[], normalized digest 32/32; `git diff --check` PASS; Ruff 0.16.0 PASS; strict READY epoch 4 has 44 read dependencies and 35 authenticated payload entries
+- **instructions:**
+  1. Recompute and require the exact source triple above.
+  2. Run `python -B tools/validate.py --gate collect:saitranslate`; refuse on any mismatch.
+  3. Integrate only READY package `sha256:401234f6adbd111251822a708243911acf48118466b7c3a4feb3e746926e73ff` through the canonical Core writer.
+  4. Re-run the independent 32-file quality audit, mirror byte equality, Core gate, and REVIEW before SHIP.
+
+## SAIT-014: FORCE-FRESH re-bind + re-package to e045ad07 (v7.226.0)
+- **status:** ready
+- **summary:** SAIT-013 went stale by freshness triple (HEAD 3a343e8d -> e045ad07 from the v7.226.0 audit commit CORE-002..007 + W2-004..008) and by content (the 32 kitchen READMEs were rewritten 21.08 23:41, after SAIT-013's 06:47 publish). FORCE-FRESH re-ran the producer pipeline: recomputed source identity (HEAD e045ad07, tree git-delta-v1:da948fff), rebuilt the package, and re-published a fresh strict READY. 32 locale README_*.md payloads + 3 root mirrors (README.ee/ja/ded) = 35 payload entries; 44 read dependencies (README/VERSION/SPEC/CONTRIBUTING/SECURITY/CODE_OF_CONDUCT/GUIDE.md/saipen/phases/translate.md + 33 guides + 3 mirrors). All 32 locales remain bound to normalized source digest 2a33e364c3c12e8b1b9b2caf41b05db3ee27f17161336579ae85ee59da34fe56 -- README.md itself was unchanged by the audit commit, so the translations still represent current source.
+- **critical:** false
+- **producer:** saitranslate
+- **source_head:** e045ad07d21aac78cce073caa732a5780652882b
+- **source_tree_fingerprint:** git-delta-v1:da948fff473f55fd9259f33606e1d19f4db8141bf037cc76c367c4737a0b8e8b
+- **role_revision:** sha256:f241e6b83c39e9b46bfa586638efb0374bbb39889646f723b9189bbb4912c0c5
+- **coverage:**
+  - README.md: 32/32 locale candidates (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh), all bound to normalized source digest `2a33e364c3c12e8b1b9b2caf41b05db3ee27f17161336579ae85ee59da34fe56`
+  - SPEC.md, CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md: 32/32 existing locale files per source, structurally checked; canonical sources unchanged
+  - GUIDE.md/guides/: 33 hand-maintained locale siblings retained under the carve-out; 28 non-Core shortcut callouts link-adjusted from their locale source
+  - Root README mirrors: README.ee.md, README.ja.md, README.ded.md complete candidates, language switcher + shortcut callout preserved
+  - In-app UI: none -- tracked-source scan found no i18n/locale bundle or app-view surface; no fictional UI bundle created
+- **payload:**
+  - `.saipen/saitranslate/kitchen/{ar,bg,cs,da,de,ded,el,es,et,fi,fr,he,hi,hr,hu,id,it,ja,ko,nl,no,pl,pt,ro,ru,sk,sv,th,tr,uk,vi,zh}/README_*.md` -- exact 32 paths authenticated in READY
+  - README.ee.md from `.saipen/saitranslate/kitchen/et/README_ET.md`
+  - README.ja.md from `.saipen/saitranslate/kitchen/ja/README_JA.md`
+  - README.ded.md from `.saipen/saitranslate/kitchen/ded/README_DED.md`
+- **verified:** PASS -- strict READY `sha256:dbcddc71fee86ac29e705b1e7be25d2d5f8b808006cdded1c449b551faa2367a` published at producer epoch 5 with 44 exact read dependencies and 35 authenticated payload entries (32 locale README_*.md + 3 root mirrors); source identity capture + bounded revalidation PASS (HEAD e045ad07, tree git-delta-v1:da948fff, role_revision sha256:f241e6b8...); 32/32 normalized digest `2a33e364...`; 32/32 version badge v7.226.0; heading/fence/table parity 32/32; no leaked placeholders; charter role revision matches; no integration, commit, tag, push, or remote write performed.
+- **instructions:**
+  1. Recompute and require the exact source triple above (HEAD e045ad07 / tree git-delta-v1:da948fff / role_revision sha256:f241e6b8...).
+  2. Run `python -B tools/validate.py --gate collect:saitranslate`; refuse on any producer or payload mismatch.
+  3. Integrate only READY package `sha256:dbcddc71fee86ac29e705b1e7be25d2d5f8b808006cdded1c449b551faa2367a` through the canonical Core writer.
+  4. Re-run the independent 32-file quality audit, mirror byte equality, Core gate, and REVIEW before SHIP.

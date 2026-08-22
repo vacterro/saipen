@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import re as _re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -290,8 +291,6 @@ def encode_preserving(path: Path | str, new_text: str) -> bytes:
 # userperson._redact_credentials and any other isolated copies are replaced
 # by this single boundary function to make credential exclusion a persistence
 # invariant rather than a fragmentary per-path concern.
-import re as _re
-
 _CRED_PATTERNS = [
     (_re.compile(r"ghp_[a-zA-Z0-9]{36}"), "ghp_***"),
     (_re.compile(r"AKIA[0-9A-Z]{16}"), "AKIA***"),

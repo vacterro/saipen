@@ -513,6 +513,18 @@ class ReleasePlan:
     # an immutable decision bound to the actor that decided it. NOT part of
     # `canonical()`: the actor is event provenance, not release identity.
     current_agent: str = ""
+    # PERF-002: non-persistent private execution metadata. When set, it is the
+    # SourceIdentity captured during planning; execute_release revalidates it
+    # (bounded, cheaper) instead of recomputing a full source identity. It is
+    # deliberately NOT in `canonical()`: it is execution metadata, not release
+    # decision identity, and a serialized/reconstructed plan without it must
+    # take the full-capture fallback.
+    _source_identity: object = None
+
+    @property
+    def source_revalidation_token(self):
+        """The SourceIdentity captured at plan time, or None."""
+        return self._source_identity
 
     def canonical(self) -> tuple:
         """The plan's identity, INVOCATION-NAME NORMALIZED -- `ship` and
@@ -585,20 +597,34 @@ _TARGETED_PRODUCER_INVOCATIONS = {
 
 def _targeted_integration_op(root: Path, invocation: str, ticket_id: str) -> str:
     """Committed producer intake binding for one targeted release ticket."""
-    from .journal import semantic_receipts_for_operation
+    from .journal import SemanticReceiptCorruptionError, semantic_receipts_for_operation
 
     role = _TARGETED_PRODUCER_INVOCATIONS.get(invocation)
     if role is None:
         return ""
     matches = []
-    for receipt in semantic_receipts_for_operation(root, "producer_integration"):
+    try:
+        receipts = semantic_receipts_for_operation(root, "producer_integration")
+    except SemanticReceiptCorruptionError as exc:
+        raise ReleaseRefusal(
+            "CORRUPT_JOURNAL",
+            f"semantic receipt snapshot is corrupt: {'; '.join(exc.errors[:2])} -- resolve explicitly",
+        )
+    for receipt in receipts:
         metadata = receipt.get("receipt_metadata") or {}
         if receipt.get("status") != "COMMITTED":
             continue
         if metadata.get("producer") != role or metadata.get("ticket_id") != ticket_id:
             continue
         matches.append((receipt.get("created_at", ""), receipt.get("op_id", "")))
-    return max(matches)[1] if matches else ""
+    if not matches:
+        return ""
+    # W2-005: canonical UTC ordering. Raw-string comparison misorders
+    # `...00Z` versus `...00.900000Z` (the plain Z sorts above the fractional
+    # form), so a chronologically older receipt could win. iso_utc_sort_key
+    # parses both spellings; op_id is the deterministic tie-break.
+    _earliest = iso_utc_sort_key("0000-01-01T00:00:00Z")
+    return max(matches, key=lambda m: (iso_utc_sort_key(m[0]) or _earliest, m[1]))[1]
 
 
 def plan_release(
@@ -1001,6 +1027,9 @@ def plan_release(
         targeted_ticket=targeted_ticket,
         targeted_integration_op=targeted_integration_op,
         current_agent=release_actor,
+        # PERF-002: carry the planning SourceIdentity for bounded revalidation
+        # in execute_release instead of a second full capture.
+        _source_identity=ident,
     )
 
 
@@ -1663,7 +1692,42 @@ def _load_scope(
         raise ReleaseRefusal(
             "SOURCE_SCOPE_MISSING", f"release scope record {path} carries no paths"
         )
+    if not isinstance(paths, dict):
+        raise ReleaseRefusal(
+            "RECOVERY_CONFLICT", f"release scope record {path} has non-object paths"
+        )
+    # W2-004: the persisted read side must re-establish the writer-side path
+    # ownership invariant. Every recorded path must be a canonical project-
+    # relative path with no absolute/drive/parent traversal, and every live
+    # path must be proven inside the project BEFORE stat/read/hash. The
+    # canonical writer would never emit such a path, so bytes that carry one
+    # are corrupt/transplanted/manual and must refuse -- never an outside read.
+    root_resolved = root.resolve()
+    for rel in paths:
+        if not isinstance(rel, str) or not rel:
+            raise ReleaseRefusal(
+                "RECOVERY_CONFLICT", f"release scope record {path} has an invalid path key"
+            )
+        if rel.startswith("/") or (len(rel) > 1 and rel[1] == ":"):
+            raise ReleaseRefusal(
+                "RECOVERY_CONFLICT",
+                f"release scope record {path} carries an absolute path {rel!r}",
+            )
+        parts = rel.split("/")
+        if any(part in ("", ".", "..") for part in parts):
+            raise ReleaseRefusal(
+                "RECOVERY_CONFLICT",
+                f"release scope record {path} carries a non-canonical path {rel!r}",
+            )
     for rel, expected in paths.items():
+        try:
+            candidate = (root / rel).resolve()
+            candidate.relative_to(root_resolved)
+        except ValueError:
+            raise ReleaseRefusal(
+                "RECOVERY_CONFLICT",
+                f"release scope path {rel!r} escapes the project root",
+            )
         fp = root / rel
         if expected is None:
             # Deletion scope entry: the reviewed file must STILL be absent at
@@ -1676,6 +1740,11 @@ def _load_scope(
                     "the deletion",
                 )
             continue
+        if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{16}", expected):
+            raise ReleaseRefusal(
+                "RECOVERY_CONFLICT",
+                f"release scope path {rel!r} carries a malformed hash",
+            )
         if not fp.is_file():
             raise ReleaseRefusal(
                 "SOURCE_SCOPE_MISSING", f"scope path {rel} is missing from the worktree"
@@ -1846,12 +1915,28 @@ def _preflight_plan(root: Path, plan: ReleasePlan) -> dict:
             )
 
     # Source identity must still match the plan.
-    try:
-        from freshness import compute_source_identity
+    # PERF-002: reuse the planning SourceIdentity via bounded revalidation when
+    # it is present and bound to this root/model. This turns the second full
+    # capture into a cheaper revalidation. Absent/invalid/stale tokens fall
+    # back to the full capture.
+    plan_token = plan.source_revalidation_token
+    live = None
+    if plan_token is not None:
+        try:
+            from freshness import revalidate_source_identity
 
-        live = compute_source_identity(root)
-    except Exception as exc:
-        return _release_failure("PREFLIGHT", f"cannot recompute source identity: {exc}")
+            ok, _err = revalidate_source_identity(root, plan_token)
+            if ok:
+                live = plan_token
+        except Exception:
+            live = None
+    if live is None:
+        try:
+            from freshness import compute_source_identity
+
+            live = compute_source_identity(root)
+        except Exception as exc:
+            return _release_failure("PREFLIGHT", f"cannot recompute source identity: {exc}")
     if live.source_head != plan.source_head:
         return _release_failure(
             "PREFLIGHT",
@@ -2225,6 +2310,7 @@ def _apply_no_publish_locked(root: Path, plan: ReleasePlan) -> dict:
         scope_paths=list(plan.scope_paths),
         metadata_paths=list(plan.metadata_paths),
         source_head=plan.source_head,
+        source_tree_fingerprint=plan.source_tree_fingerprint,
         remote_push_url="",
         remote_old_tip="",
         content_commit="",
@@ -2756,7 +2842,9 @@ def _publish_branch(
     Verification uses a FRESH snapshot captured strictly after the push -- a
     pre-push snapshot can never certify a post-push state (T-1004 remote).
     The returned snapshot is the post-branch-push observation."""
-    result = _git(root, "push", "origin", plan.branch)
+    # W2-001: publish to the captured raw push endpoint, not the symbolic
+    # `origin` alias which may have drifted after planning.
+    result = _git(root, "push", plan.remote_push_endpoint or "origin", plan.branch)
     if not result.ok:
         raise ReleaseRefusal(
             "RELEASE_FAILED", f"branch push failed: {result.stderr or result.stdout}"
@@ -2881,6 +2969,7 @@ def _release_receipt_target(root: Path, plan: ReleasePlan) -> dict:
                 "tag": plan.tag,
                 "ticket_id": plan.ticket_id,
                 "source_head": plan.source_head,
+                "source_tree_fingerprint": plan.source_tree_fingerprint,
                 "mode": plan.mode,
                 "crew_epoch": plan.crew_epoch,
                 "project_lineage": project_lineage_identity(root),
@@ -2993,7 +3082,7 @@ def _create_tag(root: Path, plan: ReleasePlan, target: str) -> None:
 
 def _push_tag(root: Path, plan: ReleasePlan, target: str) -> RemoteSnapshot:
     """Push the tag and verify from a FRESH post-push snapshot."""
-    result = _git(root, "push", "origin", f"refs/tags/{plan.tag}:refs/tags/{plan.tag}")
+    result = _git(root, "push", plan.remote_push_endpoint or "origin", f"refs/tags/{plan.tag}:refs/tags/{plan.tag}")
     if not result.ok:
         raise ReleaseRefusal("RELEASE_FAILED", f"tag push failed: {result.stderr or result.stdout}")
     post_snapshot = _remote_snapshot(root, plan.remote_push_endpoint or "origin")
@@ -3934,7 +4023,7 @@ def _recover_release_git(root: Path, journal, record: dict) -> dict:
     if tip == closure_commit:
         pass  # already published
     elif tip in (content_commit, old_tip, ""):
-        push = _git(root, "push", "origin", branch)
+        push = _git(root, "push", endpoint, branch)
         if not push.ok:
             return _conflict(
                 journal, op_id, f"branch push failed during recovery: {push.stderr or push.stdout}"
@@ -4286,10 +4375,24 @@ def _verify_no_publish_receipt(root: Path, record: dict) -> dict:
     except Exception as exc:
         return {"status": "unknown", "reason": f"source identity unreadable: {exc}"}
     recorded_head = record.get("source_head") or ""
+    recorded_fp = record.get("source_tree_fingerprint") or ""
+    # W2-002: no-publish receipt must bind the complete source identity.
+    # Legacy receipts lacking a fingerprint cannot prove unchanged source and
+    # must yield UNKNOWN rather than a positive ok.
+    if not recorded_fp:
+        return {
+            "status": "unknown",
+            "reason": "no-publish receipt lacks source_tree_fingerprint -- cannot prove unchanged source",
+        }
     if recorded_head and live.source_head != recorded_head:
         return {
             "status": "unknown",
             "reason": "source moved after the no-publish closure receipt was recorded",
+        }
+    if live.source_tree_fingerprint != recorded_fp:
+        return {
+            "status": "unknown",
+            "reason": "source tree changed after the no-publish closure receipt was recorded",
         }
     return {"status": "ok", "evidence": _receipt_evidence(record)}
 

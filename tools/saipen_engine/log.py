@@ -81,8 +81,10 @@ def history_paths(project_root: Path | str) -> list[Path]:
 def _validate_history_ownership(root: Path, logs_dir: Path) -> list[Path]:
     """lstat every canonical history node and reject symlink/junction/reparse
     or non-regular files BEFORE any bytes are read (second-wave P1).
-    
-    Returns the validated immutable list of paths in numeric order to avoid duplicate stat/enumeration."""
+
+    Returns the validated immutable list of paths in numeric order to avoid
+    duplicate stat/enumeration.
+    """
     try:
         logs_info = logs_dir.lstat()
     except FileNotFoundError:
@@ -101,17 +103,17 @@ def _validate_history_ownership(root: Path, logs_dir: Path) -> list[Path]:
             raise HistoryOwnershipError(
                 ".saipen/logs exists but is not a directory; refusing to read history through it"
             )
-            
+
     sealed = []
     if logs_info is not None:
         for p in logs_dir.iterdir():
             if _segment_number(p) >= 0:
                 sealed.append(p)
         sealed.sort(key=_segment_number)
-        
+
     active = root / ".saipen" / "LOG.md"
     paths = [*sealed, active]
-    
+
     for p in paths:
         try:
             info = p.lstat()
@@ -127,6 +129,16 @@ def _validate_history_ownership(root: Path, logs_dir: Path) -> list[Path]:
                 f"non-regular file; refusing to read external bytes"
             )
     return paths
+
+
+def _require_canonical_active_log(path: Path, raw: bytes) -> None:
+    """Apply checkpoint encoding law only to the active LOG segment."""
+    if path.name != "LOG.md":
+        return
+    from . import codec
+
+    if not codec.is_canonical_encoding(raw):
+        raise HistoryOwnershipError("active LOG.md is not canonical UTF-8 without a BOM")
 
 
 @dataclass(frozen=True)
@@ -155,6 +167,11 @@ class HistorySnapshot:
     # projections reuse these verbatim instead of re-parsing `text` a second
     # time, so the complete history is parsed exactly once per capture.
     event_lines: tuple[str, ...] = ()
+    # PERF-004: the highest ticket ID referenced anywhere in the complete
+    # history (sealed + active), computed during the same single parse pass.
+    # Ticket IDs that exist ONLY in sealed history remain permanently
+    # reserved, so allocation must never consult only the active LOG/BOARD.
+    max_ticket_id: int = 0
 
 
 def _normalised_doc_text(raw: bytes) -> str:
@@ -189,6 +206,7 @@ def read_history_snapshot(project_root: Path | str) -> HistorySnapshot:
     events: list[dict] = []
     event_lines: list[str] = []
     illegal: list[str] = []
+    max_ticket_id = 0
     for p in valid_paths:
         try:
             raw = p.read_bytes()
@@ -198,6 +216,7 @@ def read_history_snapshot(project_root: Path | str) -> HistorySnapshot:
             raise HistoryOwnershipError(
                 f"history node {p.name} unreadable ({type(exc).__name__}): {exc}"
             )
+        _require_canonical_active_log(p, raw)
         rel = p.relative_to(root).as_posix()
         # FRAMED digest identity (second-wave P1): canonical relative path,
         # then raw length, then raw bytes -- so resegmenting, renaming, or
@@ -215,6 +234,16 @@ def read_history_snapshot(project_root: Path | str) -> HistorySnapshot:
                 # Retain the ORIGINAL legal raw line in the same pass (T-1014)
                 # so context projections reuse it verbatim -- no second parse.
                 event_lines.append(line)
+                # PERF-004: derive the history-wide max ticket ID during the
+                # authoritative parse. A ticket ref in old sealed history keeps
+                # its ID reserved forever.
+                t = parsed.get("ticket")
+                if t:
+                    m = re.match(r"T-(\d+)$", t)
+                    if m:
+                        tid = int(m.group(1))
+                        if tid > max_ticket_id:
+                            max_ticket_id = tid
                 continue
             stripped = line.strip()
             if not stripped or stripped.startswith("#"):
@@ -231,6 +260,7 @@ def read_history_snapshot(project_root: Path | str) -> HistorySnapshot:
         events=tuple(events),
         illegal_lines=tuple(illegal),
         event_lines=tuple(event_lines),
+        max_ticket_id=max_ticket_id,
     )
 
 
@@ -277,6 +307,7 @@ def read_history_snapshot_and_logs_digest(
             raise HistoryOwnershipError(
                 f"history node {p.name} unreadable ({type(exc).__name__}): {exc}"
             )
+        _require_canonical_active_log(p, raw)
         contents[p] = raw
         # FRAMED digest identity (second-wave P1): canonical relative path,
         # then raw length, then raw bytes -- identical to read_history_snapshot.

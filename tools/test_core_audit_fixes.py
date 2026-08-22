@@ -16,6 +16,7 @@ import ast
 import json
 import sys
 import tempfile
+import zipfile
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
@@ -27,10 +28,13 @@ from saipen_engine.journal import (  # noqa: E402
     decode_operation_record,
     resolve_conflict,
     compact_committed,
+    validate_op_id,
 )
+from saipen_engine.safeid import InvalidIdError  # noqa: E402
 from saipen_engine.operations import _event_line  # noqa: E402
 from saipen_engine.router import route_next  # noqa: E402
 from saipen_engine.lock import WriterLock  # noqa: E402
+from verify_handoff_archive import gate_a_archive_contents  # noqa: E402
 
 RESULTS: list[tuple[str, bool, str]] = []
 
@@ -94,9 +98,7 @@ def test_core001() -> None:
 
     # Valid sidecar is merged into the effective record.
     (op / "progress.json").write_text(
-        json.dumps(
-            {"status": "VERIFIED", "progress_index": 1, "applied_frontier": 0}
-        )
+        json.dumps({"status": "VERIFIED", "progress_index": 1, "applied_frontier": 0})
     )
     d = decode_operation_record(root, op)
     check(
@@ -146,6 +148,33 @@ def test_core001() -> None:
         str(d),
     )
 
+    # A PRESENT non-file is corrupt evidence, not legacy absence.
+    (op / "progress.json").unlink()
+    (op / "progress.json").mkdir()
+    d = decode_operation_record(root, op)
+    check(
+        "CORE-001 non-file sidecar refused (RECOVERY_CONFLICT)",
+        (not d["ok"])
+        and d["code"] == "RECOVERY_CONFLICT"
+        and "not a regular file" in d["detail"],
+        str(d),
+    )
+
+
+def test_op_id_shared_grammar() -> None:
+    hostile = ("has space", "bad:name", "CON", "line\nbreak", "x" * 129)
+    rejected = []
+    for value in hostile:
+        try:
+            validate_op_id(value)
+        except InvalidIdError:
+            rejected.append(value)
+    check(
+        "QUALITY op_id uses the shared portable safe-id grammar",
+        rejected == list(hostile) and validate_op_id("op-safe_1.2") == "op-safe_1.2",
+        f"rejected={rejected!r}",
+    )
+
 
 # ---------------------------------------------------------------------------
 # CORE-002 [P0]: stray unbound candidate_home removed from 16 functions
@@ -159,9 +188,7 @@ def test_core002() -> None:
         if not isinstance(node, ast.FunctionDef):
             continue
         uses = any(
-            isinstance(n, ast.Name)
-            and n.id == "candidate_home"
-            and isinstance(n.ctx, ast.Load)
+            isinstance(n, ast.Name) and n.id == "candidate_home" and isinstance(n.ctx, ast.Load)
             for n in ast.walk(node)
         )
         if uses and node.name not in owners:
@@ -189,10 +216,14 @@ def test_core003() -> None:
     ops_mod.build_event = _fake_build
     try:
         secret = (
-            "deploy ghp_" + "a" * 36
-            + " and AKIA" + "B" * 16
-            + " and sk-" + "c" * 40
-            + " and Bearer " + "d" * 32
+            "deploy ghp_"
+            + "a" * 36
+            + " and AKIA"
+            + "B" * 16
+            + " and sk-"
+            + "c" * 40
+            + " and Bearer "
+            + "d" * 32
         )
         _event_line({}, None, "DEC", "T-1", "aleks", secret, "2026-08-19T16:00:00Z")
     finally:
@@ -200,10 +231,7 @@ def test_core003() -> None:
 
     msg = captured.get("message", "")
     redacted = (
-        "ghp_a" not in msg
-        and "AKIAB" not in msg
-        and "sk-c" not in msg
-        and "Bearer d" not in msg
+        "ghp_a" not in msg and "AKIAB" not in msg and "sk-c" not in msg and "Bearer d" not in msg
     )
     check(
         "CORE-003 secrets redacted before LOG bytes are built",
@@ -223,7 +251,8 @@ def test_core004() -> None:
         "---\n"
         "phase: VERIFY\n"
         "task: none\n"
-        "next_action: WAIT: safety valve reached (3 waves / 20 tickets) -- run 'saipen goal' to continue\n"
+        "next_action: WAIT: safety valve reached (3 waves / 20 tickets) -- "
+        "run 'saipen goal' to continue\n"
         "blocker: none\n"
         "agent: aleks\n"
         "saipen_version: 7\n"
@@ -236,9 +265,7 @@ def test_core004() -> None:
         "---\n"
     )
     board_text = (
-        "# BOARD\n\n"
-        "## TODO\n- [ ] T-2 more workable ticket\n\n"
-        "## DOING\n\n## DONE\n\n## BLOCKED\n"
+        "# BOARD\n\n## TODO\n- [ ] T-2 more workable ticket\n\n## DOING\n\n## DONE\n\n## BLOCKED\n"
     )
     out = route_next(
         state_text,
@@ -458,8 +485,36 @@ def test_core008() -> None:
     )
 
 
+# ---------------------------------------------------------------------------
+# 2026-08-21 CORE-001: a handoff cannot omit referenced sealed LOG history
+# ---------------------------------------------------------------------------
+def test_sealed_event_graph_handoff() -> None:
+    root = Path(tempfile.mkdtemp())
+    archive = root / "handoff.zip"
+    tracked = {".saipen/LOG.md", ".saipen/logs/LOG-001.md"}
+
+    # Reproduce the supplied broken checkpoint: the active tail survives but
+    # the sealed parent history does not. Gate A must fail closed.
+    with zipfile.ZipFile(archive, "w") as zf:
+        zf.writestr(".saipen/LOG.md", "# Log\n")
+    check(
+        "2026-08-21 CORE-001 archive missing sealed Event Graph history fails",
+        gate_a_archive_contents(archive, tracked) is False,
+    )
+
+    # Positive control: the same inventory with its sealed segment is valid.
+    with zipfile.ZipFile(archive, "w") as zf:
+        zf.writestr(".saipen/LOG.md", "# Log\n")
+        zf.writestr(".saipen/logs/LOG-001.md", "# Log\n")
+    check(
+        "2026-08-21 CORE-001 complete sealed Event Graph archive passes",
+        gate_a_archive_contents(archive, tracked) is True,
+    )
+
+
 def main() -> int:
     test_core001()
+    test_op_id_shared_grammar()
     test_core002()
     test_core003()
     test_core004()
@@ -467,6 +522,7 @@ def main() -> int:
     test_core006()
     test_core007()
     test_core008()
+    test_sealed_event_graph_handoff()
 
     passed = sum(1 for _, ok, _ in RESULTS if ok)
     total = len(RESULTS)
