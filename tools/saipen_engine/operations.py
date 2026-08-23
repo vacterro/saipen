@@ -200,7 +200,14 @@ def _read(root: Path, *, allow_dead_home: bool = False) -> tuple[dict, dict, dic
     # the same structured CheckpointError (VALIDATION_FAILED, zero writes) as
     # any other corrupt checkpoint, never a raw traceback.
     try:
-        snapshot, _logs_digest = read_history_snapshot_and_logs_digest(root)
+        # PERF-003 (audit ed1f86e8): the mutation reader consumes only the
+        # structured events + derived max_ticket_id, never the combined
+        # whole-history text (a 1 MB+ string on every mutation load). Skip
+        # materializing it; any caller that genuinely needs the raw history
+        # text uses retain_text=True explicitly.
+        snapshot, _logs_digest = read_history_snapshot_and_logs_digest(
+            root, retain_text=False
+        )
     except HistoryOwnershipError as exc:
         raise CheckpointError(f"history-ownership: {exc}")
     parked_error = block_parked_evidence_error(state, board, snapshot.events)
@@ -895,8 +902,18 @@ def _plan_attempt(
             )
 
         new_id = attempt_mod.next_attempt_id(docs["_history"].events)
+        # CORE-003 (audit ed1f86e8): the `supersedes` predecessor MUST be the
+        # previous episode on THIS Work, never the globally latest attempt on
+        # any ticket. A closed attempt on T-001 must not become the
+        # predecessor of the first attempt on T-002 -- that would cross-link
+        # unrelated tickets and corrupt recovery/history lineage while staying
+        # validator-green (the old contract checked existence/acyclicity but
+        # not predecessor ticket identity).
+        same_work = [
+            rec for rec in records.values() if rec.get("ticket") == task
+        ]
         latest = max(
-            records.values(), key=lambda rec: rec["open_event"], default=None
+            same_work, key=lambda rec: rec["open_event"], default=None
         )
         text = f"attempt {new_id} open"
         if latest is not None:
@@ -950,13 +967,21 @@ def _plan_attempt(
         # Replay safety: a committed close re-run finds no pointer. Match the
         # most recently CLOSED attempt against the SAME request and answer
         # idempotent-ok instead of manufacturing a duplicate close event.
+        # CORE-005 (audit ed1f86e8): the full close payload must match --
+        # result, stop, evidence, unknown, AND close_agent (the actor who
+        # actually closed, not the opener). A successor's stale recovery close
+        # must be replayable by that same successor. Different evidence/unknown
+        # with the same result/stop is NOT an exact replay.
         closed = [
             rec
             for rec in records.values()
             if rec["close_event"] is not None
             and rec.get("result") == result
             and rec.get("stop") == stop
-            and rec.get("agent") == agent
+            and rec.get("close_agent") == agent
+            and rec.get("evidence")
+            == [e.strip() for e in (evidence or []) if e and e.strip()]
+            and rec.get("unknown") == ((unknown or "").strip() or None)
         ]
         if closed:
             latest_closed = max(closed, key=lambda rec: rec["close_event"])
@@ -987,6 +1012,42 @@ def _plan_attempt(
             f"attempt {pointer} is already closed (E-{rec['close_event']}) "
             "but the STATE pointer survived -- torn state; run tools/validate.py",
         )
+
+    # W2-002 (audit ed1f86e8): cross-agent stale-attempt recovery is a
+    # DIFFERENT operation from an owner closing its own episode. When this
+    # close runs over a FOREIGN_STALE claim (a successor recovering a crashed
+    # predecessor's dangling attempt before adopting the Work), the successor
+    # may only record the recovery verdict (`result interrupted`, `stop
+    # unknown` unless a real attributable interruption reason exists), never
+    # fabricate terminal meanings like `candidate/completed_execution` for
+    # another agent's episode. The close must also end in a validator-green
+    # checkpoint and record the explicit ownership handover, so the next step
+    # is the canonical claim/adoption -- never PHASE execution under the
+    # predecessor's stale BOARD owner.
+    _close_is_recovery = False
+    _ticket_fields = {}
+    if task and task in parse_board(docs["board"].text_norm)["tickets"]:
+        _ticket_fields = parse_board(docs["board"].text_norm)["tickets"][task]
+    _cs = claim_status(_ticket_fields, agent)
+    if _cs in ("FOREIGN_STALE", "UNCLAIMED") and rec.get("agent") != agent:
+        _close_is_recovery = True
+        if result != "interrupted":
+            return _refuse(
+                "VALIDATION_FAILED",
+                f"attempt {pointer} belongs to {rec.get('agent')} whose "
+                f"claim is {_cs}; a successor recovers a stale predecessor "
+                "episode as `result interrupted`, never a terminal result "
+                f"like {result!r}",
+                ticket=task,
+            )
+        if stop not in ("unknown", "agent-crash"):
+            return _refuse(
+                "VALIDATION_FAILED",
+                f"successor recovery of {pointer} may only stop with "
+                "'unknown' (or an attributable interruption reason), not "
+                f"{stop!r}",
+                ticket=task,
+            )
     if result not in attempt_mod.RESULTS:
         return _refuse(
             "VALIDATION_FAILED",
@@ -1061,6 +1122,20 @@ def _plan_attempt(
         _target(docs["log"], ".saipen/LOG.md", "log", new_log),
         _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
+    if _close_is_recovery and task and task in parse_board(docs["board"].text_norm)["tickets"]:
+        # W2-002: a successor recovering a stale predecessor attempt must end
+        # at a validator-GREEN checkpoint. STATE.agent moves to the successor,
+        # so the stale predecessor owner/claim_time on BOARD must be released
+        # in the SAME transaction -- otherwise STATE says agent a2 while BOARD
+        # still claims owner a1, which the validator rejects as a concurrency
+        # collision. Releasing the stale claim here routes the next step to
+        # the canonical claim/adoption, never PHASE work under a1's owner.
+        _board_text = docs["board"].text_norm
+        _tick_raw = parse_board(_board_text)["tickets"][task]["raw"]
+        _released = remove_ticket_field(_tick_raw, "owner")
+        _released = remove_ticket_field(_released, "claim_time")
+        _board_target = _board_text.replace(_tick_raw, _released, 1)
+        targets.append(_target(docs["board"], ".saipen/BOARD.md", "board", _board_target))
     return build_plan(
         "attempt-close",
         agent,
@@ -1844,6 +1919,44 @@ def _plan_finish_ticket(
             f"attempt {state.get('attempt')} is still open on {ticket_id} -- "
             "close it (result candidate, stop completed_execution) before "
             "completion; the producer's live episode must not close the Work",
+            ticket=ticket_id,
+        )
+
+    # CORE-002 (audit ed1f86e8): writer-side finish must apply the SAME
+    # ticket-level admission rule full validation applies. The producing
+    # candidate attempt needs a VERIFY boundary AFTER its close; a later
+    # non-candidate attempt must not erase that obligation. Without this, the
+    # CLI can commit a DONE the validator then rejects, or a later interrupted
+    # attempt can make an invalid completion appear conformant.
+    try:
+        from . import attempt as _attempt_mod
+
+        _hist_events = docs.get("_history").events if docs.get("_history") else ()
+        _att_records, _att_errors = _attempt_mod.build_attempts(_hist_events)
+        if _att_errors:
+            return _refuse(
+                "VALIDATION_FAILED",
+                "LOG carries malformed attempt history; run tools/validate.py: "
+                + "; ".join(_att_errors[:3]),
+                ticket=ticket_id,
+            )
+        _adm_err = _attempt_mod.ticket_admission_error(
+            ticket_id, _att_records, _hist_events
+        )
+        if _adm_err:
+            return _refuse(
+                "INCOMPLETE_TICKET",
+                _adm_err,
+                ticket=ticket_id,
+            )
+    except Exception:
+        # Attempt admission is a gate, not a substitute for the rest of the
+        # closure; a failure to derive it must refuse rather than silently
+        # bypass admission authority.
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"cannot derive attempt admission for {ticket_id}; run "
+            "tools/validate.py before completing",
             ticket=ticket_id,
         )
 

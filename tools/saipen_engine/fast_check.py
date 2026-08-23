@@ -608,6 +608,31 @@ def validate_texts(
                 f"{_att_records[_att_pointer].get('ticket')} but task is "
                 f"{state.get('task')}"
             )
+    # CORE-004 (audit ed1f86e8): bidirectional pointer invariant in the fast
+    # checker too -- an open attempt on the proposed Work with no matching
+    # STATE.attempt pointer is torn state, not conformant.
+    _open = _attempt_mod.active_attempts(_att_records)
+    _work_open = [
+        aid for aid in _open if _att_records[aid].get("ticket") == state.get("task")
+    ]
+    if _work_open:
+        if len(_work_open) > 1:
+            errors.append(
+                f"LOG proposed {len(_work_open)} open attempts for "
+                f"{state.get('task')} but STATE.attempt is a single pointer "
+                "-- impossible, refuse"
+            )
+        elif _att_pointer is None:
+            errors.append(
+                f"attempt {_work_open[0]} is open in the proposed LOG but "
+                "STATE carries no attempt pointer -- torn attempt state"
+            )
+        elif _att_pointer != _work_open[0]:
+            errors.append(
+                f"STATE proposed attempt {_att_pointer} does not match the "
+                f"open attempt {_work_open[0]} on this Work -- attempt "
+                "pointer ownership is inconsistent"
+            )
     return errors
 
 

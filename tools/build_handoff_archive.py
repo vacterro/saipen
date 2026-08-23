@@ -44,14 +44,24 @@ def _git(project: Path, *args: str) -> subprocess.CompletedProcess[str]:
     )
 
 
-def _tracked_files(project: Path) -> set[str]:
-    """Git-tracked inventory (T-1018, T-1016).
+def _delivery_inventory(project: Path) -> set[str]:
+    """Whole-project delivery inventory (W2-001 audit ed1f86e8).
 
     The canonical whole-project handoff is a GIT-project tool. A project
     without a repository gets an explicit structured refusal. T-1016 requires
     explicitly marking whole-project handoff unsupported in no-Git and
     documenting the fallback as a STATE-ONLY exporter, so users don't think
     they are getting a whole-project archive.
+
+    W2-001: the delivery inventory MUST be the actual working tree, not the
+    Git-tracked subset. `git ls-files` alone silently drops newly created
+    untracked implementation/config/test/docs and durable project-state files
+    while every delivery gate still reports success -- the receiving agent
+    gets a verified archive of an older/incomplete project. The inventory is
+    therefore the semantic equivalent of
+    `git ls-files --cached --others --exclude-standard`: tracked files plus
+    untracked, non-ignored working-tree files. Ignored build/cache material
+    stays excluded by Git's own exclude rules.
     """
     r = _git(project, "ls-files")
     if r.returncode != 0:
@@ -63,7 +73,21 @@ def _tracked_files(project: Path) -> set[str]:
         print("  bootstrap/export.ps1       (Windows)")
         print("which archives ONLY the .saipen directory.")
         sys.exit(1)
-    return {line.strip() for line in r.stdout.splitlines() if line.strip()}
+    tracked = {line.strip() for line in r.stdout.splitlines() if line.strip()}
+    # W2-001: untracked + non-ignored working-tree files. `--others` lists
+    # untracked files; `--exclude-standard` applies .gitignore/.git/info/exclude
+    # so ignored build/cache/runtime garbage never enters the archive. Using
+    # `-z` and a stable sort keeps the union deterministic.
+    u = _git(project, "ls-files", "--others", "--exclude-standard", "-z")
+    if u.returncode != 0:
+        print("FAIL: cannot enumerate untracked working-tree files for delivery.")
+        sys.exit(1)
+    untracked = {
+        line.strip()
+        for line in u.stdout.split("\0")
+        if line.strip()
+    }
+    return tracked | untracked
 
 
 def _deleted_tracked(project: Path) -> list[str]:
@@ -120,7 +144,7 @@ def _reject_protected_destination(output: Path, project: Path) -> None:
         return
     rel_str = rel.as_posix()
     # Any tracked file is protected: replacing it would destroy source.
-    tracked = _tracked_files(project)
+    tracked = _delivery_inventory(project)
     if rel_str in tracked:
         print(f"FAIL: destination is a tracked project file: {rel_str}")
         print("Refusing to replace tracked source with archive bytes (T-1016).")
@@ -205,7 +229,7 @@ def build_archive(output: Path, project: Path) -> None:
 
     # --- Collect inventory + source snapshot ---
     print("\n=== Collecting delivery inventory ===")
-    tracked = _tracked_files(project)
+    tracked = _delivery_inventory(project)
     members = sorted(rel for rel in tracked if _is_delivery_source(project, rel))
     print(f"  {len(members)} tracked files selected for archive")
 

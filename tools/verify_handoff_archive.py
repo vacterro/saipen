@@ -50,13 +50,13 @@ def _git(project: Path, *args: str) -> subprocess.CompletedProcess[str]:
     )
 
 
-def _tracked_files(project: Path) -> set[str]:
-    """Return the set of git-tracked files as POSIX relative paths.
+def _delivery_inventory(project: Path) -> set[str]:
+    """Whole-project delivery inventory (W2-001 audit ed1f86e8).
 
-    T-1018: this verifier verifies GIT-project handoff archives. A project
-    without a repository gets an explicit structured refusal naming the
-    documented canonical alternative (bootstrap/export.sh / export.ps1),
-    never a raw `fatal: not a git repository` from git itself.
+    Matches build_handoff_archive.py's inventory: tracked files plus
+    untracked, non-ignored working-tree files. The verifier MUST check the
+    same set the builder captured, or a tracked-only Gate A/F would certify
+    an archive that silently dropped untracked source files.
     """
     r = _git(project, "ls-files")
     if r.returncode != 0:
@@ -68,7 +68,13 @@ def _tracked_files(project: Path) -> set[str]:
         print("  bootstrap/export.ps1       (Windows)")
         print("which archives ONLY the .saipen directory.")
         sys.exit(1)
-    return {line.strip() for line in r.stdout.splitlines() if line.strip()}
+    tracked = {line.strip() for line in r.stdout.splitlines() if line.strip()}
+    u = _git(project, "ls-files", "--others", "--exclude-standard", "-z")
+    if u.returncode != 0:
+        print("FAIL: cannot enumerate untracked working-tree files for verification.")
+        sys.exit(1)
+    untracked = {line.strip() for line in u.stdout.split("\0") if line.strip()}
+    return tracked | untracked
 
 
 def _deleted_tracked(project: Path) -> list[str]:
@@ -498,7 +504,7 @@ def main():
     print(f"Archive: {archive}")
     print(f"Project root: {project_root}")
 
-    tracked = _tracked_files(project_root)
+    tracked = _delivery_inventory(project_root)
     print(f"Tracked files: {len(tracked)}")
 
     # Phase 1: Structural + portability checks (non-mutating, fail-fast).

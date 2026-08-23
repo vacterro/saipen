@@ -676,6 +676,21 @@ def brief_projection(project_root: Path | str) -> Result:
     inputs = _load_inputs_checked(root)
     if isinstance(inputs, Result):
         return inputs
+    # CORE-006 (audit ed1f86e8): fail closed before projection when STATE is
+    # unparseable. brief_projection previously dereferenced state.get(...)
+    # without checking state_error, so a torn STATE fence produced a raw
+    # AttributeError instead of a controlled failure, and a malformed
+    # STATE.task/attempt cross-link laundered into apparently healthy
+    # machine-readable handoff JSON the validator rejects.
+    state_error = inputs["state_error"]
+    if state_error:
+        return Result(
+            ok=False,
+            code="VALIDATION_FAILED",
+            op_id="",
+            message=f"state-malformed: {state_error}",
+            data={},
+        )
     state = inputs["state"]
     board = inputs["board"]
     if board.get("errors"):
@@ -731,7 +746,61 @@ def brief_projection(project_root: Path | str) -> Result:
             data={},
         )
     if pointer is not None and records[pointer]["close_event"] is None:
+        # CORE-006 (audit ed1f86e8): an open attempt pointer that belongs to a
+        # DIFFERENT Work than STATE.task is incoherent and must be refused --
+        # the checkpoint cannot project a handoff whose active episode is for
+        # another ticket (the full validator rejects this STATE/attempt split).
+        if work_id is not None and records[pointer].get("ticket") != work_id:
+            return Result(
+                ok=False,
+                code="VALIDATION_FAILED",
+                op_id="",
+                message=(
+                    f"STATE.attempt {pointer} belongs to "
+                    f"{records[pointer].get('ticket')} but STATE.task is "
+                    f"{work_id} -- attempt/Work split; run tools/validate.py"
+                ),
+                data={},
+            )
         current = records[pointer]
+
+    # CORE-004/CORE-006 (audit ed1f86e8): the pointer invariant is
+    # bidirectional in the cold-handoff projection too. An open attempt on the
+    # active Work with no matching STATE.attempt pointer is torn state: brief
+    # must refuse it rather than project a healthy handoff that the full
+    # validator rejects (close would say 'no active attempt', open would say
+    # 'still open').
+    if work_id is not None:
+        open_work = [
+            rec
+            for rec in ordered
+            if rec["close_event"] is None and rec["ticket"] == work_id
+        ]
+        if open_work:
+            if len(open_work) > 1:
+                return Result(
+                    ok=False,
+                    code="VALIDATION_FAILED",
+                    op_id="",
+                    message=(
+                        f"{len(open_work)} open attempts exist for {work_id} "
+                        "but STATE.attempt is a single pointer -- impossible, "
+                        "run tools/validate.py"
+                    ),
+                    data={},
+                )
+            if pointer is None or pointer != open_work[0]["id"]:
+                return Result(
+                    ok=False,
+                    code="VALIDATION_FAILED",
+                    op_id="",
+                    message=(
+                        f"attempt {open_work[0]['id']} is open in the LOG for "
+                        f"{work_id} but STATE carries no matching attempt "
+                        "pointer -- torn attempt state; run tools/validate.py"
+                    ),
+                    data={},
+                )
 
     previous = None
     closed = [rec for rec in ordered if rec["close_event"] is not None]

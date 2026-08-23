@@ -266,6 +266,7 @@ def read_history_snapshot(project_root: Path | str) -> HistorySnapshot:
 
 def read_history_snapshot_and_logs_digest(
     project_root: Path | str,
+    retain_text: bool = True,
 ) -> tuple[HistorySnapshot, str]:
     """ONE pass over the complete LOG history (sealed + active) that ALSO computes
     the sealed-LOG dependency digest -- the two reads a mutation PLAN used to do
@@ -298,6 +299,7 @@ def read_history_snapshot_and_logs_digest(
     events: list[dict] = []
     event_lines: list[str] = []
     illegal: list[str] = []
+    max_ticket_id = 0
     for p in valid_paths:
         try:
             raw = p.read_bytes()
@@ -321,6 +323,16 @@ def read_history_snapshot_and_logs_digest(
             parsed = parse_log_line(line)
             if parsed is not None:
                 events.append(parsed)
+                # PERF-001 (audit ed1f86e8): track max_ticket_id during the
+                # SAME pass so the fused reader and the plain reader cannot
+                # disagree on historical ticket maxima. Without this, the
+                # fused mutation path reports max_ticket_id=0, letting
+                # ticket/goal allocation reuse historical IDs after CLEAN/BOARD
+                # pruning.
+                for candidate in re.findall(r"\[T-(\d+)\]", line):
+                    tid = int(candidate)
+                    if tid > max_ticket_id:
+                        max_ticket_id = tid
                 # Retain the ORIGINAL legal raw line in the same pass (T-1014)
                 # so context projections reuse it verbatim -- no second parse.
                 event_lines.append(line)
@@ -335,11 +347,12 @@ def read_history_snapshot_and_logs_digest(
             tail = ev["event"]
     snapshot = HistorySnapshot(
         hash=h.hexdigest()[:16],
-        text="\n".join(chunks),
+        text="\n".join(chunks) if retain_text else "",
         tail=tail,
         events=tuple(events),
         illegal_lines=tuple(illegal),
         event_lines=tuple(event_lines),
+        max_ticket_id=max_ticket_id,
     )
     # The sealed-LOG dependency digest, computed from the SAME already-read bytes.
     # For any path hash_tree_dependency discovers that is NOT a canonical history

@@ -450,7 +450,17 @@ def _saipen_exit(code=0):
     try:
         from saipen_engine.conformance import generate_conformance_receipt
 
-        generate_conformance_receipt(PROJECT_ROOT, gate=GATE, exit_code=int(code or 0))
+        # PERF-004 (audit ed1f86e8): reuse the source identity already
+        # captured during validation instead of a second full Git-query
+        # capture. generate_conformance_receipt revalidates the supplied
+        # identity race-safely and falls back to a fresh capture when the
+        # source moved, so reuse can never bind a receipt to stale source.
+        generate_conformance_receipt(
+            PROJECT_ROOT,
+            gate=GATE,
+            exit_code=int(code or 0),
+            source_identity=_source_identity,
+        )
     except Exception:
         pass
     _orig_sys_exit(code)
@@ -3159,21 +3169,17 @@ if log_files:
         # boundary AFTER that close -- the admission verdict comes from
         # independent verification that postdates the claim, never from the
         # claim itself.
+        # CORE-002 (audit ed1f86e8): use the centralized
+        # ticket_admission_error helper which resolves the producing candidate
+        # from the ticket's OWN lineage (not global max open_event), so a
+        # later non-candidate attempt cannot hide the admission obligation.
         _att_records, _att_fold2 = _attempt_mod.build_attempts(_att_events)
         for _done_t in sorted(
             (t for t in tickets.values() if t.get("section") == "## DONE"),
             key=lambda t: t["id"],
         ):
-            _recs_here = [
-                rec
-                for rec in _att_records.values()
-                if rec["ticket"] == _done_t["id"]
-            ]
-            if not _recs_here:
-                continue
-            _latest_here = max(_recs_here, key=lambda rec: rec["open_event"])
-            _adm_err = _attempt_mod.admission_error(
-                _latest_here, _done_t["id"], _att_events
+            _adm_err = _attempt_mod.ticket_admission_error(
+                _done_t["id"], _att_records, _att_events
             )
             if _adm_err:
                 fail(f"attempt-admission -- {_adm_err}")
@@ -5524,11 +5530,29 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
         # is untracked: an unchanged tracked carrier is already in the tree
         # in exactly the bytes being released, and `git diff --cached` can
         # never list it (T-1003 -- IDENTITY.md joined the metadata surface).
+        # PERF-002 (audit ed1f86e8): compute `_need_staging` with TWO batched
+        # Git queries over the full release pathspec instead of two subprocess
+        # launches per metadata path. Both answers are set-valued, so the
+        # batched `git diff --name-only -- <all paths>` plus
+        # `git ls-files -z -- <all paths>` produce identical semantics at
+        # O(1) process count with respect to release-path count.
+        _unstaged_rc_batch, _unstaged_text_batch = _git(
+            "diff", "--name-only", "--", *_release_paths
+        )
+        _unstaged_set = {
+            line for line in _unstaged_text_batch.splitlines() if line.strip()
+        } if _unstaged_rc_batch == 0 else set()
+        _tracked_rc_batch, _tracked_text_batch = _git(
+            "ls-files", "-z", "--", *_release_paths
+        )
+        _tracked_set = {
+            line for line in _tracked_text_batch.split("\0") if line.strip()
+        } if _tracked_rc_batch == 0 else set()
         _need_staging = [
             p
             for p in _release_paths
-            if _git("diff", "--name-only", "--", p)[1]
-            or (Path(p).exists() and not _git("ls-files", "--", p)[1])
+            if p in _unstaged_set
+            or (Path(p).exists() and p not in _tracked_set)
         ]
         if REQUIRE_RELEASE_INDEX:
             # A binding SHIP gate authorizes the exact index that the release

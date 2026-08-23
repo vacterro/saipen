@@ -202,6 +202,11 @@ def build_attempts(events) -> tuple[dict, list[str]]:
                 "evidence": [],
                 "unknown": None,
                 "supersedes": record.get("supersedes"),
+                # CORE-005 (audit ed1f86e8): the CLOSE actor is distinct from
+                # the OPEN owner. A successor a2 recovering a stale predecessor
+                # episode closes under its own seat; replay identity must match
+                # the close actor, not the opener.
+                "close_agent": None,
             }
             order.append(aid)
             continue
@@ -254,6 +259,9 @@ def build_attempts(events) -> tuple[dict, list[str]]:
         existing["unknown"] = record["unknown"]
         if record.get("agent") and not existing["agent"]:
             existing["agent"] = record.get("agent")
+        # CORE-005: preserve the CLOSE actor separately from open ownership so
+        # replay identity (and successor recovery replay) match the right seat.
+        existing["close_agent"] = record.get("agent") or existing["close_agent"]
 
     # Predecessor links must walk backwards in time and must not cycle. A
     # cycle needs a forward reference, which the earlier-existence rule above
@@ -326,7 +334,19 @@ def contract_errors(
     if known_ticket_ids is not None:
         for aid, rec in records.items():
             tid = rec.get("ticket")
-            if tid and tid != "T-none" and tid not in known_ticket_ids:
+            # W2-003 (audit ed1f86e8): `T-none` is a legal general LOG
+            # no-ticket marker, but an ATTEMPT is an execution episode on real
+            # Work. An attempt attached to `T-none` bypasses ticket coherence
+            # entirely and would let hand-forged/imported history create
+            # validator-green execution episodes on "no Work". Reject it
+            # explicitly in the narrower Attempt domain.
+            if tid == "T-none":
+                errors.append(
+                    f"attempt {aid} is attached to 'T-none' -- an attempt "
+                    "executes claimed Work and must carry a real T-### "
+                    "ticket id"
+                )
+            elif tid and tid not in known_ticket_ids:
                 errors.append(
                     f"attempt {aid} references {tid}, which is neither on "
                     "the board nor anywhere in canonical history -- an "
@@ -369,6 +389,43 @@ def contract_errors(
                 f"{state_fields.get('task')}"
             )
 
+    # CORE-004 (audit ed1f86e8): the attempt pointer invariant is
+    # BIDIRECTIONAL. The block above validates pointer -> open record; this
+    # block enforces open record -> pointer: exactly one open attempt on the
+    # Work requires STATE.attempt to equal that exact attempt, and zero open
+    # attempts requires no active pointer. Without this, an open DEC with a
+    # missing pointer is validator-green while the CLI is wedged (close fails
+    # 'no active attempt', open fails 'still open').
+    open_list = active_attempts(records)
+    work_opens = [
+        aid
+        for aid in open_list
+        if records[aid].get("ticket") == state_fields.get("task")
+    ]
+    if work_opens:
+        if len(work_opens) > 1:
+            errors.append(
+                f"{len(work_opens)} open attempts exist for "
+                f"{state_fields.get('task')} but STATE.attempt is a single "
+                "pointer -- impossible, refuse"
+            )
+        elif pointer is None:
+            errors.append(
+                f"attempt {work_opens[0]} is open in the LOG but STATE carries "
+                "no attempt pointer -- torn attempt state; close it or restore "
+                "the pointer"
+            )
+        elif pointer != work_opens[0]:
+            errors.append(
+                f"STATE.attempt {pointer} does not match the open attempt "
+                f"{work_opens[0]} on this Work -- attempt pointer ownership "
+                "is inconsistent"
+            )
+    elif pointer is not None:
+        # pointer already validated above against records; this branch covers
+        # an open-less pointer that somehow has no record -- already reported.
+        pass
+
     # Producer self-approval guard: an attempt closed as `candidate` may be
     # admitted only by verification evidence that comes AFTER the candidate
     # close. The closure-evidence check proves a VERIFY boundary + PASS exist
@@ -399,5 +456,56 @@ def admission_error(rec: dict, done_ticket_id: str, events) -> str | None:
             f"{rec['id']} closed candidate at E-{close_eid} with no VERIFY "
             "boundary after that close -- a producer claim admitted without "
             "independent verification"
+        )
+    return None
+
+
+def ticket_admission_error(
+    ticket_id: str,
+    records: dict,
+    events,
+) -> str | None:
+    """Centralized ticket-level admission check (CORE-002 audit ed1f86e8).
+
+    Resolves the ONE producing candidate attempt for the Work from its
+    ticket-coherent lineage, then requires a valid VERIFY boundary after that
+    candidate close. A later non-candidate attempt (interrupted/failed) must
+    NOT erase the producer's admission obligation: the producing candidate is
+    the earliest candidate close on THIS ticket, never the globally latest
+    attempt by open_event.
+
+    Both writer-side finish and full validation share this helper, so a DONE
+    the CLI commits is exactly the DONE the validator certifies.
+    """
+    candidate = None
+    for rec in records.values():
+        if rec.get("ticket") != ticket_id:
+            continue
+        if rec.get("result") != "candidate":
+            continue
+        if rec.get("close_event") is None:
+            continue
+        # The producing episode is the FIRST candidate close on the Work;
+        # later candidate records are replay of the same result.
+        if candidate is None or rec["open_event"] < candidate["open_event"]:
+            candidate = rec
+    if candidate is None:
+        return None
+    from .log import _is_verify_boundary
+
+    close_eid = candidate["close_event"]
+    boundary_after = any(
+        ev.get("ticket") == ticket_id
+        and ev.get("taxonomy") == "RUN"
+        and _is_verify_boundary(ev)
+        and ev["event"] > close_eid
+        for ev in events
+    )
+    if not boundary_after:
+        return (
+            f"ticket {ticket_id} is DONE but its producing attempt "
+            f"{candidate['id']} closed candidate at E-{close_eid} with no "
+            f"VERIFY boundary after that close -- a producer claim admitted "
+            "without independent verification"
         )
     return None
