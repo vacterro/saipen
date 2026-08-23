@@ -5562,12 +5562,21 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
             # mistaken for post-staging authority.  Read the full metadata
             # slice even when `_need_staging` is empty (properly staged paths
             # match the index and are deliberately absent from that list).
+            #
+            # Tag-only releases are the legitimate exception: when EVERY
+            # release metadata path is already tracked in HEAD in exactly the
+            # bytes being released (nothing differs from the index, nothing is
+            # untracked), there is deliberately nothing to stage -- the release
+            # pins the existing committed metadata with a tag. Refusing an
+            # empty staged index here would make every already-prepared
+            # release (metadata committed in an earlier commit, tag never cut)
+            # impossible to ship.
             _staged_rc, _staged_text = _git(
                 "diff", "--cached", "--name-only", "--", *_release_paths
             )
             if _staged_rc != 0:
                 fail("binding ship gate cannot read staged release metadata")
-            elif not _staged_text.strip():
+            elif not _staged_text.strip() and _need_staging:
                 fail(
                     "binding ship gate requires every release metadata path "
                     "staged: release index is empty"
