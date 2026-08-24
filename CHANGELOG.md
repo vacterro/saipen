@@ -1,6 +1,19 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.228.0 -- 2026-08-25 -- Crew Liveness + Runtime Drift (T-1159)
+
+- T-1159: every actionable crew carrier (CREW_BLOCKED routing carrier,
+  RUN_ROLE-style CREW_ACTION) now carries a deterministic
+  `action_fingerprint`; the SAME fingerprint twice in a row is surfaced as
+  `CREW_STALLED` -- an execution/conformance failure -- instead of silent
+  polling. Engine progress clears it; `--dry-run`/read-only never write.
+- T-1159: unknown commands in a project whose `saipen_home` names a different
+  install than the executing runtime are diagnosed as `RUNTIME_DRIFT` with
+  both versions and the safe rebind action, never a bare `unknown command`.
+- T-1159: normative CORE §1.10 "No Silent Polling, No Silent Drift" rule;
+  stale evidence with a refresh path stays ACTIONABLE.
+
 ## 7.227.2 -- 2026-08-24 -- Portable Undo Ownership (T-1158)
 
 - T-1158: binds post-milestone release-scope ownership to the existing

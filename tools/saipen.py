@@ -258,6 +258,74 @@ def _protocol_version() -> str:
         return "unknown"
 
 
+def _same_install_path(a: Path, b: Path) -> bool:
+    """Path identity that tolerates Windows case and separator drift."""
+    left, right = str(a), str(b)
+    if os.name == "nt":
+        left, right = left.lower().replace("/", "\\"), right.lower().replace("/", "\\")
+    return left == right
+
+
+def _runtime_drift_payload(project_root: Path, command: str) -> dict | None:
+    """T-1159: diagnose stale-installed-runtime drift on an unknown command.
+
+    The observed incident: a project booted against SAIPEN home A was driven
+    with an OLDER install B whose adapter lacked `continue`, producing a bare
+    ``unknown command`` that invited improvisation. When the project's own
+    `saipen_home` names an install other than the executing runtime, the
+    unknown command is reported as RUNTIME_DRIFT with both versions and the
+    exact safe action -- never silently reinterpreted, never auto-migrated.
+    """
+    state_path = _state_path(project_root)
+    if not state_path.is_file():
+        return None
+    try:
+        head = state_path.read_text(encoding="utf-8-sig", errors="replace")[:4096]
+    except OSError:
+        return None
+    match = re.search(
+        r"^saipen_home:\s*\"?([^\"\r\n]+?)\"?\s*$", head, re.MULTILINE | re.IGNORECASE
+    )
+    if not match:
+        return None
+    other_raw = match.group(1).strip()
+    if not other_raw:
+        return None
+    mine = HOME.resolve()
+    other = Path(other_raw)
+    with suppress(OSError):
+        other = other.resolve()
+    if _same_install_path(other, mine):
+        return None
+
+    def _version_at(path: Path) -> str:
+        try:
+            return (path / "VERSION").read_text(encoding="utf-8-sig").strip()
+        except OSError:
+            return "unavailable"
+
+    runner = other / "tools" / "saipen.py"
+    return {
+        "ok": False,
+        "code": "RUNTIME_DRIFT",
+        "command": command,
+        "runtime": {"home": str(mine), "version": _version_at(mine)},
+        "project_protocol": {"home": str(other), "version": _version_at(other)},
+        "detail": (
+            f"command {command!r} is not implemented by this runtime, and this "
+            "project's saipen_home points at a DIFFERENT SAIPEN install; this "
+            "is runtime drift between the installed skill/runtime and the "
+            "project protocol, not a project error (CORE § 1.10)"
+        ),
+        "action": (
+            f"drive this project through {runner} if it exists (the project's "
+            f"own protocol home), or from a trusted install run "
+            f"`saipen rebind-home {other}`; no silent fallback to different "
+            "semantics is performed"
+        ),
+    }
+
+
 def _state_path(project_root: Path) -> Path:
     return project_root / ".saipen" / "STATE.md"
 
@@ -1038,8 +1106,54 @@ def _crew(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> 
     result = crew_apply(
         project_root, current_capability=capability, current_agent=_agent_for(project_root)
     )
-    _emit(result.to_dict(), as_json)
+    payload = result.to_dict()
+    payload.update(
+        _crew_liveness(project_root, result, capability=capability, dry_run=dry_run)
+    )
+    _emit(payload, as_json)
     return 0 if result.ok else 1
+
+
+def _crew_liveness(
+    project_root: Path, result: object, *, capability: str | None, dry_run: bool
+) -> dict:
+    """T-1159: cross-invocation liveness for actionable crew carriers.
+
+    An actionable carrier (one that carries `action_fingerprint`: the
+    CREW_BLOCKED routing carrier and the RUN_ROLE-style `CREW_ACTION` handback)
+    is recorded in a rebuildable `.saipen/cache/` projection. The SAME
+    fingerprint twice in a row means the previous actionable answer produced
+    NO qualifying state change -- reported as CREW_STALLED instead of being
+    silently re-printed forever. Any carrier without a fingerprint is engine
+    progress (a mechanical stage executed, or the circuit finished) and clears
+    the projection. Read-only sessions and --dry-run never write it.
+    """
+    if dry_run or capability == "read-only":
+        return {}
+    from saipen_engine.liveness import clear as liveness_clear
+    from saipen_engine.liveness import record_actionable
+
+    data = getattr(result, "data", None) or {}
+    fingerprint = data.get("action_fingerprint")
+    if not fingerprint:
+        liveness_clear(project_root)
+        return {}
+    verdict = record_actionable(project_root, str(fingerprint))
+    if verdict["stalled"]:
+        return {
+            "liveness": {
+                "stalled": True,
+                "stall_repeats": verdict["stall_repeats"],
+                "verdict": "CREW_STALLED",
+                "detail": (
+                    "the same actionable crew state was returned again with no "
+                    "qualifying state change since the previous identical "
+                    "carrier; this is an execution/conformance failure, not a "
+                    "user-action requirement -- do not poll"
+                ),
+            }
+        }
+    return {}
 
 
 def _exact_no_args(command: str, args: list[str], as_json: bool) -> int | None:
@@ -3415,6 +3529,22 @@ def main(argv: list[str] | None = None) -> int:
             as_json,
         )
         return 1
+    # T-1159: an unknown command in a project whose `saipen_home` names a
+    # DIFFERENT SAIPEN install than the one executing is runtime drift (the
+    # observed stale-installed-skill incident), never a bare project error.
+    drift = _runtime_drift_payload(project_root, command)
+    if drift is not None:
+        _emit(drift, as_json)
+        if not as_json:
+            print("SAIPEN RUNTIME DRIFT")
+            print(f"Project protocol: {drift['project_protocol']['home']} "
+                  f"(v{drift['project_protocol']['version']})")
+            print(f"Runtime protocol: {drift['runtime']['home']} "
+                  f"(v{drift['runtime']['version']})")
+            print(f"Command required by project: {command}")
+            print("Runtime cannot execute it safely.")
+            print(f"Action: {drift['action']}")
+        return 2
     if as_json:
         _emit(
             {"ok": False, "code": "VALIDATION_FAILED", "detail": f"unknown command: {command}"},

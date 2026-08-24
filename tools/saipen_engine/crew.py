@@ -2543,6 +2543,7 @@ def crew_apply(
                 "required",
                 "plan": plan,
                 "action": action,
+                "action_fingerprint": _carrier_fingerprint(plan, role=role),
             },
         )
     return Result(
@@ -2558,7 +2559,37 @@ def crew_apply(
             "requires_human": action.get("requires_human", False),
             "next_action": action.get("next_action", action.get("action")),
             "resume_after": action.get("resume_after", "saipen crew"),
+            "action_fingerprint": _carrier_fingerprint(
+                plan, role=action.get("role"), action=action
+            ),
         },
+    )
+
+
+def _carrier_fingerprint(plan: dict, *, role: object = None, action: object = None) -> str:
+    """Deterministic identity of an actionable carrier (T-1159 liveness).
+
+    Same fingerprint twice in a row means the previous actionable answer did
+    not produce a qualifying state change -- a stall, never progress. Any
+    real role work (fresh evidence, replan, source change) moves at least one
+    hashed input: first unsatisfied stage, per-stage unsatisfied reasons,
+    action kind, role, or source-tree fingerprint.
+    """
+    from .liveness import action_fingerprint
+
+    unsatisfied = [
+        {"stage": stage.get("stage"), "reason": stage.get("reason")}
+        for stage in plan.get("stages", [])
+        if isinstance(stage, dict) and stage.get("state") != SATISFIED
+    ]
+    source = plan.get("source") or {}
+    action_kind = action.get("action") if isinstance(action, dict) else None
+    return action_fingerprint(
+        stage=plan.get("first_unsatisfied"),
+        role=role,
+        action=action_kind,
+        reason=unsatisfied,
+        source=source.get("source_tree_fingerprint"),
     )
 
 
