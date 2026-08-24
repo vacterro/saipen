@@ -149,3 +149,18 @@
 - 24.08.26 20:41 [E-4332] [parent: E-4331] [T-1157] [agent: codex] [op: transition-d8de1f38029b43759a80e94df2ad3fe1] RUN: transition to SHIP -- review complete; publish v7.227.1
 - 24.08.26 20:41 [E-4333] [parent: E-4332] [T-1157] [agent: codex] [op: finish-c2ed561be6874e69ab3d2f8e81e2faa7] RUN: ship v7.227.1 -> content commit f9fabd488dd3 pushed
 - 24.08.26 20:41 [E-4334] [parent: E-4333] [T-1157] [agent: codex] [op: finish-c2ed561be6874e69ab3d2f8e81e2faa7] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 24.08.26 20:45 [E-4335] [parent: E-4334] [T-1158] [agent: codex] [op: build-intake-dffaf856b50e6a9a] DEC: build directive accepted -- make zz release-scope ownership portable across fresh clones
+- 24.08.26 20:45 [E-4336] [parent: E-4335] [T-1158] [agent: codex] [op: build-intake-dffaf856b50e6a9a] DEC: attempt A-005 open
+- 24.08.26 20:45 [E-4337] [parent: E-4336] [T-1158] [agent: codex] [op: transition-b73ececddf1b4a4c8599923e993c0729] RUN: transition to BUILD -- reuse existing project_lineage scope authority; keep legacy identity fallback
+- 24.08.26 20:46 [E-4338] [parent: E-4337] [T-1158] [agent: codex] [op: attempt-close-b7777025f7d74bceb34ec83bd798049b] DEC: attempt A-005 close result candidate stop completed_execution
+- 24.08.26 20:46 [E-4339] [parent: E-4338] [T-1158] [agent: codex] [op: checkpoint-45e10b9e9fcf4917bb639357b2f1690d] RUN: unit 155/155; controls+routing 84/84; Ruff; core validator -> PASS conf: high
+- 24.08.26 20:46 [E-4340] [parent: E-4339] [T-1158] [agent: codex] [op: transition-26bc8fe7d85f465a8574e6248f4b9741] RUN: transition to VERIFY -- portable lineage ownership implemented and targeted relocation proven
+- 24.08.26 23:14 [E-4341] [parent: E-4340] [T-1158] [agent: opencode] [op: claim-4fbeef60d9104d2f9ccda86e07a9ecc4] DEC: agent handover codex -> opencode; claimed via SAIOPS -- took over STALE claim from codex (prior claim_time 2026-08-24T20:46:41Z); owner opencode
+- 24.08.26 23:16 [E-4342] [parent: E-4341] [T-1158] [agent: opencode] [op: checkpoint-d2d2bc8d3abe45a0ad599d0e3663c3d4] RUN: verification: unittest discover tools 155/155 PASS; controls+routing 84/84 PASS included; core validator PASS (10 pre-existing WARNs); ruff changed-surface PASS; conf: high
+- 24.08.26 23:17 [E-4343] [parent: E-4342] [T-1158] [agent: opencode] [op: transition-432d00bbd1614730a3743ce39e9182a5] RUN: transition to REVIEW -- verification evidence recorded E-4342
+- 24.08.26 23:17 [E-4344] [parent: E-4343] [op: transition-432d00bbd1614730a3743ce39e9182a5] DEC: goal_tickets 3->4
+- 24.08.26 23:18 [E-4345] [parent: E-4344] [T-1158] [agent: opencode] [op: checkpoint-1ef0b01adcf04330bda38a6bce8e4135] RUN: review: controls.py lineage-ownership diff reviewed; minimal reuse of project_lineage authority, legacy fallback bounded, malformed lineage records refuse; relocation regression test adequate; README/CHANGELOG/VERSION consistent 7.227.2; conf: high
+- 24.08.26 23:18 [E-4346] [parent: E-4345] [T-1158] [agent: opencode] [op: transition-4762865883664582b3f9a56d205a1ce5] RUN: transition to SHIP -- review pass E-4345
+- 24.08.26 23:19 [E-4347] [parent: E-4346] [T-1158] [agent: opencode] [op: scope-3097dd4335aa41d88ba1b1f991b6e8de] DEC: release scope recorded -- 8 path(s) bound to b96bdcb9e1b9
+- 24.08.26 23:19 [E-4348] [parent: E-4347] [T-1158] [agent: opencode] [op: finish-d99d18f9493c4c4ea9870bd394375916] RUN: ship v7.227.2 -> content commit e91c65f1c7ae pushed
+- 24.08.26 23:19 [E-4349] [parent: E-4348] [T-1158] [agent: opencode] [op: finish-d99d18f9493c4c4ea9870bd394375916] DEC: ticket finished via SAIOPS -- completion (from SHIP)
