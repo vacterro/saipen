@@ -33,4 +33,4 @@ already counted at ADD's own RETURN, so elaborating the single ticket ADD
 just created and counted is the *same* wave, not a new one -- do NOT
 increment again, or the valve double-counts one cycle (MAINTENANCE.md §2.4). Hits the 3-`goal_waves`/20-`goal_tickets` cap? STOP here
 instead of continuing -- full BOARD/STATE checkpoint, report progress, wait
-for the user to re-invoke `saipen goal`.
+for the user to re-invoke `cc` to re-authorize and continue.

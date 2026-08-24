@@ -7604,7 +7604,7 @@ def run_converge_routing_probes() -> tuple[list[str], int]:
             print(f"PASS: converge routing -- {label}")
 
     add_fail = "converge clean-HUNT marker present but next_action names ADD"
-    valve_fail = "converge safety-valve pause names the goal resume key"
+    valve_fail = "safety-valve pause names the goal-create key"
 
     def write_state(
         project: Path, intent: str, next_action: str, converge_target: str | None = None
@@ -15833,7 +15833,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     expect(
         "valve control: next_action is the exact safety-valve WAIT",
         _stV.get("next_action").startswith("WAIT: safety valve reached")
-        and "run 'saipen goal' to continue" in _stV.get("next_action"),
+        and "run 'cc' to continue" in _stV.get("next_action"),
         repr(_stV.get("next_action")),
     )
     _bdV = parse_board(codec.read_doc(gE / ".saipen" / "BOARD.md"))
@@ -17485,7 +17485,10 @@ def run_hostile_wait_probes() -> tuple[list[str], int]:
     )
     from saipen_engine.router import route_next
 
-    VALVE = "WAIT: safety valve reached (3 waves / 20 tickets) -- run 'saipen goal' to continue"
+    VALVE = "WAIT: safety valve reached (3 waves / 20 tickets) -- run 'cc' to continue"
+    VALVE_GOAL_OLD = (
+        "WAIT: safety valve reached (3 waves / 20 tickets) -- run 'saipen goal' to continue"
+    )
     VALVE_CC = "WAIT: safety valve reached (1 waves / 4 tickets) -- run 'cc' to continue"
 
     # ---- rejected shapes -------------------------------------------------
@@ -17578,9 +17581,9 @@ def run_hostile_wait_probes() -> tuple[list[str], int]:
     )
     expect("ACCEPTS the exact safety-valve pause", parse_wait(VALVE) == "safety valve", VALVE)
     expect(
-        "safety-valve resume key is read from the pause itself",
-        safety_valve_resume_key(VALVE) == "saipen goal"
-        and safety_valve_resume_key(VALVE_CC) == "cc"
+        "safety-valve resume key is the uniform `cc`, read from the pause itself",
+        safety_valve_resume_key(VALVE) == "cc"
+        and safety_valve_resume_key(VALVE_GOAL_OLD) is None
         and safety_valve_resume_key("WAIT: blocked -- x?") is None,
     )
 
@@ -17638,7 +17641,7 @@ def run_hostile_wait_probes() -> tuple[list[str], int]:
         binding_wait(MARKHUNT_BRAKE, phase="DONE", empty_todo=True) == "markhunt",
     )
     expect(
-        "DONE+empty binds a goal-intent safety valve naming `saipen goal`",
+        "DONE+empty binds a goal-intent safety valve naming `cc`",
         binding_wait(VALVE, phase="DONE", empty_todo=True, intent="goal") == "safety valve",
     )
     expect(
@@ -17646,8 +17649,9 @@ def run_hostile_wait_probes() -> tuple[list[str], int]:
         binding_wait(VALVE_CC, phase="DONE", empty_todo=True, intent="converge") == "safety valve",
     )
     expect(
-        "DONE+empty REFUSES a valve naming the other intent's resume key",
-        binding_wait(VALVE, phase="DONE", empty_todo=True, intent="converge") is None,
+        "DONE+empty REFUSES a valve naming the create/pivot key `saipen goal`",
+        binding_wait(VALVE_GOAL_OLD, phase="DONE", empty_todo=True, intent="goal") is None
+        and binding_wait(VALVE_GOAL_OLD, phase="DONE", empty_todo=True, intent="converge") is None,
     )
     for category in ("blocked", "manual-verify", "destructive-op", "first-publish", "init"):
         value = f"WAIT: {category} -- is this answerable?"

@@ -157,4 +157,4 @@ the taxonomy -- and checkpoint STATE (MAINTENANCE.md §2.4). The line is what ma
 recorded only in `STATE.md` is invisible to it if `STATE.md` is what was
 lost. That hits the 3-`goal_waves`/20-`goal_tickets` cap? STOP here
 instead of continuing -- full BOARD/STATE checkpoint, report progress, wait
-for the user to re-invoke `saipen goal`.
+for the user to re-invoke `cc` to re-authorize and continue.

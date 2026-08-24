@@ -252,7 +252,7 @@ def test_core004() -> None:
         "phase: VERIFY\n"
         "task: none\n"
         "next_action: WAIT: safety valve reached (3 waves / 20 tickets) -- "
-        "run 'saipen goal' to continue\n"
+        "run 'cc' to continue\n"
         "blocker: none\n"
         "agent: aleks\n"
         "saipen_version: 7\n"

@@ -1333,8 +1333,7 @@ def _plan_transition(
         if cap_reached:
             owned["next_action"] = (
                 f"WAIT: safety valve reached ({state.get('goal_waves') or 0} "
-                f"waves / {new_tickets} tickets) -- run 'saipen goal' to "
-                "continue"
+                f"waves / {new_tickets} tickets) -- run 'cc' to continue"
             )
         new_state = patch_state(docs["state"].text_norm, owned)
 
@@ -1357,8 +1356,8 @@ def _plan_transition(
         if cap_reached:
             owned["next_action"] = (
                 f"WAIT: safety valve reached ({new_waves} waves / "
-                f"{state.get('goal_tickets') or 0} tickets) -- run 'saipen "
-                "goal' to continue"
+                f"{state.get('goal_tickets') or 0} tickets) -- run 'cc' to "
+                "continue"
             )
         new_state = patch_state(docs["state"].text_norm, owned)
 

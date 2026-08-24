@@ -88,7 +88,7 @@ A section of prose is an addition like any other, so § 1.1's gate applies befor
      `HUNT`->`ADD`->`PLAN` chain double-counts. Hits the
      3-`goal_waves`/20-`goal_tickets` cap? STOP here instead of
      continuing -- full BOARD/STATE checkpoint, report progress, wait for
-     the user to re-invoke `saipen goal`.
+     the user to re-invoke `cc` to re-authorize and continue.
 
 4. **The Industrial Completion Rule:**
    - When the user requests one step of a well-known user workflow, you SHOULD evaluate what else is needed to make the feature industrially complete -- a judgment call, not mechanical (MAINTENANCE.md §2.3).

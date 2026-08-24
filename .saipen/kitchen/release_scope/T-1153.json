@@ -1,0 +1,29 @@
+{
+  "op_id": "scope-ffe28e15e238499396cb59188e2f2f6a",
+  "paths": {
+    "saipen/BOOT.md": "0635ec2e20f3f5da",
+    "saipen/CONFORMANCE.md": "b1fb90ce3594d47e",
+    "saipen/CORE.md": "5a754a0accdb84f0",
+    "saipen/MAINTENANCE.md": "7cc21afad80a4fc1",
+    "saipen/phases/add.md": "177e79b7cc41b0bc",
+    "saipen/phases/plan.md": "63e349bc73cf8a1a",
+    "saipen/phases/verify.md": "f3b2aa9a303001d2",
+    "tools/audit_checks.py": "c86416ea41a45a53",
+    "tools/run_scenarios.py": "9187d83656d21daf",
+    "tools/saipen.py": "b4db709224ef7665",
+    "tools/saipen_engine/commands.py": "41e1c73daf2cbad8",
+    "tools/saipen_engine/operations.py": "6232e5d8bd28c8c9",
+    "tools/saipen_engine/state.py": "93dd117d8c2063ce",
+    "tools/test_command_routing.py": "59bdf8970251d354",
+    "tools/test_core_audit_fixes.py": "958322ac69b111da",
+    "tools/test_intent_audit_fixes.py": "3198f21f3831463a",
+    "tools/validate.py": "1f24cdc174cf4bd9"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-08-24T16:01:30Z",
+  "schema_version": 1,
+  "source_head": "0491e6eba69383b243e24291b24da5a1beb59c95",
+  "source_tree_fingerprint": "git-delta-v1:61d8f976e3160a7b6d6b2f4c8c2bf81e28bb44ab03b281c84bf20b3d589d5fb0",
+  "ticket": "T-1153"
+}

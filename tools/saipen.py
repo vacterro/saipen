@@ -21,6 +21,7 @@ from pathlib import Path
 
 from saipen_engine import codec, snapshot
 from saipen_engine.board import parse_board, ticket_is_workable
+from saipen_engine.commands import load_shortcut_table, resolve_shortcut
 from saipen_engine.journal import auto_recover_pending
 from saipen_engine.operations import (
     apply_claim,
@@ -38,6 +39,11 @@ AGENT = "saipen-cli"
 
 HOME = Path(__file__).resolve().parent.parent
 VERSION_FILE = HOME / "VERSION"
+# The canonical protocol home this adapter ships from: the shortcut table and
+# its Cyrillic-twin normalization are read from here through the ONE shared
+# engine resolver -- never re-declared in this file (no Cyrillic literal, no
+# second confusable map, no hardcoded twin dictionary may live below).
+PROTOCOL_DIR = HOME / "saipen"
 
 # The ONE canonical actor resolver (T-1006): bare CLI INHERITS STATE.agent
 # -- the seat CORE.md section 1.4 defines -- and an explicit `--agent <id>`
@@ -45,6 +51,15 @@ VERSION_FILE = HOME / "VERSION"
 # any mutation. STATE.agent is never invented by the CLI; only an explicit
 # override replaces the inherited seat.
 _AGENT_OVERRIDE: str | None = None
+
+# CORE § 1.10 (Cyrillic-twin incident): when the invoked command resolved
+# through the shared shortcut resolver, EVERY payload this adapter emits
+# carries `route` -- the canonical Latin key the raw token landed on. The
+# agreement property is then mechanical: whatever the resolver declares,
+# every branch's output (success or refusal) names its route, so output can
+# never silently disagree with resolution. Set once in main(); None when the
+# invocation was not a declared shortcut (direct verbs stay untagged).
+_ROUTE_ECHO: str | None = None
 
 
 def _agent_for(project_root: Path) -> str:
@@ -95,6 +110,14 @@ _MUTATING_TOPLEVEL = frozenset(
         "checkpoint",
         "ticket",
         "goal",
+        # CORE § 1.10 shortcut rows with mutating destinations: gg -> goal,
+        # hh -> hunt, aa -> markhunt, pp -> sub spawn saipython. `sss` is
+        # read-only (status) and deliberately absent; ss/dd/tt/ccc have no
+        # deterministic CLI executor and refuse before any write.
+        "gg",
+        "hh",
+        "aa",
+        "pp",
         "continue",
         "cc",
         "rebind-home",
@@ -1561,6 +1584,11 @@ def _userperson(project_root: Path, args: list[str], as_json: bool, dry_run: boo
 
 
 def _emit(payload: dict, as_json: bool) -> None:
+    if _ROUTE_ECHO is not None:
+        # Route echo: the invocation resolved through the shared shortcut
+        # resolver, so every emitted payload names its canonical route. This
+        # is presentation metadata only -- routing itself already happened.
+        payload = {**payload, "route": _ROUTE_ECHO}
     if as_json:
         print(json.dumps(payload, ensure_ascii=False, indent=2))
         return
@@ -1572,6 +1600,7 @@ def _emit(payload: dict, as_json: bool) -> None:
     for key in (
         "action",
         "ticket",
+        "route",
         "load",
         "phase",
         "task",
@@ -2386,6 +2415,11 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool, dry_run:
 
 
 def main(argv: list[str] | None = None) -> int:
+    global _ROUTE_ECHO  # noqa: PLW0603
+    # ``main`` is normally one process/one invocation, but tests and embedded
+    # callers may invoke it repeatedly. Route evidence belongs to THIS raw
+    # command only; never let a previous shortcut label a later direct verb.
+    _ROUTE_ECHO = None
     raw_args = list(argv if argv is not None else sys.argv[1:])
     if "--" in raw_args:
         dd_idx = raw_args.index("--")
@@ -2478,6 +2512,28 @@ def main(argv: list[str] | None = None) -> int:
 
     command = args[0]
 
+    # CORE § 1.10 (Cyrillic-twin incident): whole-message shortcut resolution
+    # is MECHANICAL and happens FIRST -- before any dispatch branch, before
+    # any conversational interpretation. The raw token is normalized through
+    # the ONE shared engine resolver: Unicode-CODEPOINT substitution, never
+    # keyboard-position substitution. Cyrillic double-es normalizes to Latin
+    # "cc" (CONTINUE); it can never become Latin "ss" (STOP), because "s" is
+    # not a fold target and no Cyrillic character maps to it, which is also
+    # why the ss/sss rows have no Cyrillic twins at all. Dispatch then
+    # proceeds exactly as if the Latin row had been typed, and this file
+    # deliberately holds no Cyrillic literal, no confusable map and no twin
+    # dictionary for the resolver to drift from. A resolver that cannot load
+    # CORE.md returns None for everything: every token then fails closed at
+    # its own branch or at the unknown-command refusal -- a failed lookup is
+    # NEVER guessed into a command.
+    _canonical_shortcut = resolve_shortcut(
+        command, table=load_shortcut_table(PROTOCOL_DIR)
+    )
+    if _canonical_shortcut is not None:
+        args = [_canonical_shortcut, *args[1:]]
+        command = _canonical_shortcut
+        _ROUTE_ECHO = _canonical_shortcut
+
     # T-1006/T-1014: an explicit --agent override is a genuine handover, but
     # it is deferred -- `_ensure_handover` runs only immediately before an
     # admissible mutation, after the concrete action's syntax/arity
@@ -2492,6 +2548,21 @@ def main(argv: list[str] | None = None) -> int:
                     "ok": False,
                     "code": "VALIDATION_FAILED",
                     "detail": f"status accepts no arguments; surplus: {' '.join(args[1:])}",
+                },
+                as_json,
+            )
+            return 2
+        return _status(project_root, as_json)
+    if command == "sss":
+        # CORE § 1.10: `sss` routes to read-only status -- the exact same
+        # surface as `status`, reached through the shared normalization above
+        # for its Cyrillic twin. Never a write, never a phase change.
+        if len(args) > 1:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"sss accepts no arguments; surplus: {' '.join(args[1:])}",
                 },
                 as_json,
             )
@@ -2959,8 +3030,12 @@ def main(argv: list[str] | None = None) -> int:
     # (e.g. `saipen clean` -> `sub clean saihunt`). Each verb routes to the
     # canonical phase trigger (transition_phase / dedicated semantic).
     _PHASE_VERBS = frozenset({"clean", "hunt", "markhunt", "translate", "validate"})
-    if command in _PHASE_VERBS:
-        phase = command.upper()
+    # CORE § 1.10 repeated-letter rows routing to phase triggers. They are
+    # the SAME transitions as the spelled-out verbs -- identical gates,
+    # identical writes -- reached through the shared shortcut normalization.
+    _SHORTCUT_PHASE_TRIGGERS = {"hh": "HUNT", "aa": "MARKHUNT"}
+    if command in _PHASE_VERBS or command in _SHORTCUT_PHASE_TRIGGERS:
+        phase = _SHORTCUT_PHASE_TRIGGERS.get(command) or command.upper()
         surplus = args[1:]
         if surplus:
             _emit(
@@ -3083,6 +3158,13 @@ def main(argv: list[str] | None = None) -> int:
         )
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
+    if command == "pp":
+        # CORE § 1.10: `pp` routes to exactly `saipen sub spawn saipython`.
+        # No extra arguments -- the row is a closed route, not a family.
+        refused = _exact_no_args(command, args[1:], as_json)
+        if refused is not None:
+            return refused
+        return _sub(project_root, ["spawn", "saipython"], as_json, dry_run)
     if command in ("sc", "autonomous-crew"):
         return _crew(project_root, args[1:], as_json, dry_run)
     if command in ("cc", "continue"):
@@ -3093,6 +3175,26 @@ def main(argv: list[str] | None = None) -> int:
             dry_run,
             shortcut=command == "cc",
         )
+    # CORE § 1.10 fail-closed floor: a token that IS a declared shortcut but
+    # has no deterministic executor in this adapter is REFUSED with its exact
+    # canonical route named -- never "unknown command" (which invites a weak
+    # model to improvise a substitute, the AUTO-003 defect), and never a
+    # guessed partial execution. Cyrillic twins are already folded above, so
+    # this refusal is identical for a row and its twin by construction.
+    _shortcut_table = load_shortcut_table(PROTOCOL_DIR)
+    if command in _shortcut_table:
+        _emit(
+            {
+                "ok": False,
+                "code": "SHORTCUT_NOT_EXECUTABLE",
+                "detail": f"{command} resolves to `{_shortcut_table[command]}` "
+                "(CORE § 1.10); this deterministic adapter implements no "
+                "executor for that row -- execute the exact row's semantics "
+                "at the agent layer, never a guessed substitute",
+            },
+            as_json,
+        )
+        return 1
     if as_json:
         _emit(
             {"ok": False, "code": "VALIDATION_FAILED", "detail": f"unknown command: {command}"},

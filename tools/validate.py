@@ -56,6 +56,10 @@ source-text assertions (e.g. naive string inclusion) to verify runtime logic.
 import ast
 import datetime
 from saipen_engine.phases import ANY_FROM, TICKET_BEARING_PHASES, VALID_TRANSITIONS
+from saipen_engine.commands import (
+    CYRILLIC_CONFUSABLE_MAP,
+    derive_cyrillic_twins as _derive_cyrillic_twins,
+)
 import hashlib
 import io
 import json
@@ -1738,7 +1742,16 @@ if intent == "goal":
                     f"(caps {GOAL_WAVE_CAP}/{GOAL_TICKET_CAP}), but "
                     f"next_action={na!r} -- RFC § 2.4 requires "
                     f"next_action: WAIT: safety valve reached (N waves / "
-                    f"M tickets) -- run 'saipen goal' to continue"
+                    f"M tickets) -- run 'cc' to continue"
+                )
+            if "run 'cc'" not in na.lower():
+                fail(
+                    "tripped goal safety valve must name the canonical "
+                    "resume key -- the § 1.2 safety-valve form under "
+                    "execution_intent: goal ends `-- run 'cc' to continue`; "
+                    "`saipen goal` is the create/pivot command, never a "
+                    "resume (it would substitute the objective, not "
+                    "continue it)"
                 )
             # phase: BLOCKED here would satisfy § 2.4's Exit list and flip the
             # intent back to normal, making the bare `cc` that the WAIT line
@@ -1752,37 +1765,35 @@ if intent == "goal":
                     "continue) illegal under § 1.10. Leave phase as-is"
                 )
 
-# RFC § 1.2 + § 2.4 (intent-aware valve wording, T-539): the safety-valve
-# pause's resume key must match the intent that owns it. Under
-# `execution_intent: goal` the fixed § 1.2 form (`run 'saipen goal' to
-# continue`) applies. Under `execution_intent: converge` it MUST read
-# `run 'cc' to continue` and MUST NOT read `run 'saipen goal'` -- there
-# `saipen goal` is a NEW objective, a substitution not a continuation,
-# while bare `cc` is the only legal resume. The two wordings once lived in
-# different documents and a weak agent copied the goal wording into a
-# converge pause; this makes the pairing enforced rather than prose.
+# RFC § 1.2 + § 2.4 (UNIFORM valve resume key): the safety-valve pause is
+# reauthorized by `cc` (continue / bare saipen) for BOTH `execution_intent:
+# goal` (where it resets a tripped valve's counters and resumes the same
+# objective) and `execution_intent: converge`. `saipen goal` is never a
+# resume key -- it is the create/pivot command, so a pause that names it
+# would substitute the objective instead of continuing it. The old
+# intent-aware split (goal -> `saipen goal`, converge -> `cc`) told the user
+# to recreate the objective to resume it; `cc` is the single unambiguous
+# resume across every intent.
 if (
-    intent == "converge"
-    and isinstance(next_action, str)
+    isinstance(next_action, str)
     and next_action.startswith("WAIT:")
     and "safety valve" in next_action.lower()
 ):
     if "run 'saipen goal'" in next_action.lower():
         fail(
-            "converge safety-valve pause names the goal resume key -- "
-            "under execution_intent: converge the pause MUST read "
-            "`-- run 'cc' to continue`, never `run 'saipen goal'`, "
-            "which there is a NEW objective, not a continuation "
+            "safety-valve pause names the goal-create key -- the pause "
+            "MUST read `-- run 'cc' to continue`, never `run 'saipen "
+            "goal'`, which is the create/pivot command and would "
+            "substitute the objective instead of continuing it "
             "(RFC § 1.2, § 2.4)"
         )
     elif "run 'cc'" not in next_action.lower():
         fail(
-            "converge safety-valve pause carries no resume key -- the "
-            "§ 1.2 form under execution_intent: converge ends "
-            "`-- run 'cc' to continue`, never `run 'saipen goal'`"
+            "safety-valve pause carries no resume key -- the § 1.2 form "
+            "ends `-- run 'cc' to continue`"
         )
     else:
-        ok("converge safety-valve pause names the cc resume key")
+        ok("safety-valve pause names the cc resume key")
 
 # ------------------------------------------------------------------ SUBSAIPEN
 
@@ -9480,6 +9491,167 @@ else:
                 )
                 drift_ok = False
 
+            # The Cyrillic-twin surface is DERIVED, never hand-counted: the
+            # confusable map folds only declared codepoints (`с -> c`, and
+            # `s` is not a fold target), so the twins of the table follow
+            # mechanically from table x map. Both maintained sources once
+            # shipped wrong counts ("the other eight" in § 1.10, "seven have
+            # none" in CONFORMANCE row 177) against a true count of nine,
+            # and nothing could see the lie -- an agent then routed from the
+            # prose instead of the derivation and executed STOP for a token
+            # whose codepoints mean CONTINUE. These checks pin the counts,
+            # the enumerated rows, and the no-STOP-twin invariant to the
+            # derivation itself.
+            _twin_failures = []
+
+            def _check_twin_prose(doc_name: str, text: str) -> None:
+                para = None
+                para_m = re.search(
+                    r"\*\*A shortcut typed in Cyrillic.*?(?=\n\n|\Z)", text, re.DOTALL
+                )
+                if para_m:
+                    para = para_m.group(0)
+                else:
+                    # Prose form (e.g. a CONFORMANCE row): locate the
+                    # sentence, then take up to the next blank line or the
+                    # next numbered row.
+                    idx = text.find("typed in Cyrillic")
+                    if idx < 0:
+                        _twin_failures.append(
+                            f"{doc_name} carries no 'shortcut typed in "
+                            "Cyrillic' statement for the twin-count check"
+                        )
+                        return
+                    start = text.rfind("\n", 0, idx) + 1
+                    rest = text[start:]
+                    end_m = re.search(r"\n\s*\n|\n\| \d+ \|", rest)
+                    para = rest[: end_m.start()] if end_m else rest
+                enumerated = set(re.findall(r"`([\u0400-\u04FF]{2,3})`", para))
+                numword = {
+                    "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
+                    "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
+                    "eleven": 11, "twelve": 12,
+                }
+                derived_twins = _derive_cyrillic_twins(dict(_actual_routes))
+                stated_twins_m = re.search(r"(?i)\b([a-z]+)\s+rows?\s+have\s+twins", para)
+                stated_none_m = re.search(r"(?i)(?:other\s+)?([a-z]+)\s+have\s+none", para)
+                if enumerated != set(derived_twins):
+                    _twin_failures.append(
+                        f"{doc_name} enumerates {sorted(enumerated)} as Cyrillic "
+                        f"twins but the table x map derives "
+                        f"{sorted(derived_twins)}"
+                    )
+                if not stated_twins_m or stated_twins_m.group(1).lower() not in numword:
+                    _twin_failures.append(
+                        f"{doc_name} states no parsable twin count ('N rows "
+                        "have twins')"
+                    )
+                elif numword[stated_twins_m.group(1).lower()] != len(derived_twins):
+                    _twin_failures.append(
+                        f"{doc_name} says {stated_twins_m.group(1)} rows have "
+                        f"twins; the derivation says {len(derived_twins)}"
+                    )
+                if not stated_none_m or stated_none_m.group(1).lower() not in numword:
+                    _twin_failures.append(
+                        f"{doc_name} states no parsable twin-less count "
+                        "('N have none')"
+                    )
+                elif (
+                    numword[stated_none_m.group(1).lower()]
+                    != len(_actual_routes) - len(derived_twins)
+                ):
+                    _twin_failures.append(
+                        f"{doc_name} says {stated_none_m.group(1)} rows have "
+                        f"no twin; the derivation says "
+                        f"{len(_actual_routes) - len(derived_twins)}"
+                    )
+
+            if len(_actual_routes) != len(_shortcut_rows):
+                # Duplicate keys already FAIL above; skip the count math so
+                # the message stays about twins, not table shape.
+                pass
+            else:
+                _check_twin_prose("RFC § 1.10", _rfc_t[_i:_j])
+                _conf_path = _tools_parent / "saipen" / "CONFORMANCE.md"
+                if _conf_path.is_file():
+                    _conf_t = _conf_path.read_text(encoding="utf-8-sig")
+                    if "typed in Cyrillic resolves to the same shortcut" in _conf_t:
+                        _check_twin_prose("CONFORMANCE.md row 177", _conf_t)
+                # The load-bearing shape of the map: `s` must never become a
+                # fold target. If it ever does, Latin ss/sss suddenly gain
+                # Cyrillic twins and every guarantee above inverts.
+                if "s" in CYRILLIC_CONFUSABLE_MAP.values():
+                    _twin_failures.append(
+                        "CYRILLIC_CONFUSABLE_MAP folds some character to "
+                        "'s', which would declare Cyrillic twins for "
+                        "ss/sss (STOP/STATUS) -- forbidden by CORE § 1.10"
+                    )
+                if any(
+                    not ch.isascii() for key in _actual_routes for ch in key
+                ):
+                    _twin_failures.append(
+                        "the canonical shortcut table acquired a non-Latin "
+                        "key; CORE § 1.10 keeps the table Latin and twins "
+                        "derived"
+                    )
+            if _twin_failures:
+                fail(
+                    "cross-doc drift [shortcut-twin-count] -- the declared "
+                    "Cyrillic-twin surface disagrees with its mechanical "
+                    "derivation: " + "; ".join(_twin_failures)
+                )
+                drift_ok = False
+
+            # The public adapter must route shortcuts through the ONE shared
+            # resolver -- normalization before dispatch, no private copy of
+            # the map, no Cyrillic special case. The incident's CLI probe
+            # answered `unknown command` for a token its own helper resolved,
+            # because dispatch bypassed the normalizer; this static contract
+            # keeps that bypass unshippable.
+            _saipen_py = _tools_parent / "tools" / "saipen.py"
+            if not _saipen_py.is_file():
+                fail(
+                    "cross-doc drift [cli-resolver-authority] -- "
+                    "tools/saipen.py is missing from the home; shortcut "
+                    "dispatch cannot be checked"
+                )
+                drift_ok = False
+            else:
+                _adapter_src = _saipen_py.read_text(encoding="utf-8-sig")
+                _first_resolve = _adapter_src.find("resolve_shortcut(")
+                _first_dispatch = _adapter_src.find('command == "status"')
+                if _first_resolve < 0:
+                    fail(
+                        "cross-doc drift [cli-resolver-authority] -- "
+                        "tools/saipen.py never calls resolve_shortcut(); "
+                        "CLI dispatch has bypassed the shared normalizer"
+                    )
+                    drift_ok = False
+                elif _first_dispatch >= 0 and _first_resolve > _first_dispatch:
+                    fail(
+                        "cross-doc drift [cli-resolver-authority] -- "
+                        "tools/saipen.py calls resolve_shortcut() after its "
+                        "first dispatch branch; shortcut normalization must "
+                        "precede ALL dispatch"
+                    )
+                    drift_ok = False
+                if "maketrans" in _adapter_src:
+                    fail(
+                        "cross-doc drift [cli-resolver-authority] -- "
+                        "tools/saipen.py declares its own translation table; "
+                        "the confusable map lives only in "
+                        "saipen_engine/commands.py"
+                    )
+                    drift_ok = False
+                if re.search(r"[\u0400-\u04FF]", _adapter_src):
+                    fail(
+                        "cross-doc drift [cli-resolver-authority] -- "
+                        "tools/saipen.py contains a Cyrillic literal; the "
+                        "adapter must hold no per-token Cyrillic special case"
+                    )
+                    drift_ok = False
+
+
             _shortcut_section = _rfc_t[_i:_j]
             if (
                 "**Length has no global meaning.**" not in _shortcut_section
@@ -9617,14 +9789,18 @@ else:
                 drift_ok = False
 
             # § 1.10's `saipen stop` paragraph and § 2.4 Entry both describe
-            # what a bare `saipen goal` does to the safety-valve counters, and
-            # they gave opposite answers: § 1.10 said the reset is
+            # what the resume command does to the safety-valve counters, and
+            # they once gave opposite answers: § 1.10 said the reset is
             # unconditional -- while citing § 2.4 Entry, which makes it
             # conditional on the valve having tripped. Either branch is a real
             # failure. Unconditional hands a fresh 3-wave/20-ticket budget to
             # anyone who types the most convenient key mid-run (E-1468);
             # reading it the other way round would leave a tripped valve with
-            # no way to clear. § 2.4 owns the rule and § 1.10 defers to it.
+            # no way to clear. § 2.4 owns the rule and § 1.10 defers to it. The
+            # reset belongs to the RESUME command (`cc` / `saipen continue` /
+            # bare `saipen` via `reauthorize_valve`), never to bare `saipen
+            # goal`, which is the create/pivot usage line and must not touch a
+            # counter.
             if (
                 "only when they are at or over the caps" not in _rfc_t[_i:_j]
                 or "deliberately does NOT preserve the counters" in _rfc_t[_i:_j]
@@ -9632,8 +9808,9 @@ else:
                 fail(
                     "cross-doc drift [goal-counter-reset] -- RFC § 1.10's "
                     "`saipen stop` paragraph must defer to § 2.4 Entry and "
-                    "say bare `saipen goal` resets goal_waves/goal_tickets "
-                    "ONLY when they are at or over the caps. Asserting an "
+                    "say the resume command resets goal_waves/goal_tickets "
+                    "ONLY when they are at or over the caps (and that bare "
+                    "`saipen goal` never resets a counter). Asserting an "
                     "unconditional reset re-grants a full safety-valve "
                     "budget to a run nobody re-authorized (§ 2.4 Entry, "
                     "E-1468)"
@@ -9747,15 +9924,11 @@ else:
                         re.findall(r"(?<!\w)(\w{2,3})(?!\w)", _trigger_m.group(1), re.IGNORECASE)
                     )
                     _latin = {shortcut for shortcut, _ in _shortcut_rows}
-                    _to_cyr = {
-                        "a": "\u0430",
-                        "e": "\u0435",
-                        "o": "\u043e",
-                        "p": "\u0440",
-                        "c": "\u0441",
-                        "y": "\u0443",
-                        "x": "\u0445",
-                    }
+                    # ONE authority: the fold targets come from the shared
+                    # engine confusable map (saipen_engine/commands.py), never
+                    # a second copy here -- a duplicated map is exactly how
+                    # the twin surface drifted once already.
+                    _to_cyr = {v: k for k, v in CYRILLIC_CONFUSABLE_MAP.items()}
                     _twins = {
                         "".join(_to_cyr[ch] for ch in shortcut)
                         for shortcut in _latin

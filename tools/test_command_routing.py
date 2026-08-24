@@ -5,7 +5,15 @@ natural-language reasoning before deterministic SAIPEN resolution:
 
 - "sc" answered as a style-mode greeting instead of `saipen crew`;
 - "saipen push + build ccc" executing only one segment while the other was
-  narrated away as unnecessary.
+  narrated away as unnecessary;
+- a whole-message Cyrillic `сс` routed from model memory as Latin `ss`
+  (`saipen stop`) although codepoint substitution makes it `cc`
+  (`saipen continue`) -- and the public CLI refusing the very token its own
+  helper resolved, because dispatch bypassed the shared normalizer.
+
+The CLI-boundary tests below invoke the REAL public adapter
+(`tools/saipen.py`) as a subprocess against a throwaway project, so a
+resolver that drifts from dispatch fails here and not in production.
 
 Run standalone:
     python tools/test_command_routing.py
@@ -15,8 +23,15 @@ Exit code 0 when every test passes; 1 on the first failure batch.
 
 from __future__ import annotations
 
+import io
+import json
+import os
+import re
+import subprocess
 import sys
+import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
@@ -26,6 +41,40 @@ if str(TOOLS) not in sys.path:
 from saipen_engine import commands as CM  # noqa: E402
 
 PROTOCOL_DIR = TOOLS.parent / "saipen"
+SAIPEN_PY = TOOLS / "saipen.py"
+
+# The six Cyrillic-confusable twins, pinned as an explicit expectation so a
+# silent change to either the table or the map cannot recreate drift without
+# this test going red. DERIVED twins are cross-checked against this dict in
+# test_derived_twins_match_declared_twins.
+DECLARED_CYRILLIC_TWINS = {
+    "сс": "cc",
+    "ссс": "ccc",
+    "аа": "aa",
+    "ее": "ee",
+    "еее": "eee",
+    "рр": "pp",
+}
+
+# Canonical route prefixes per shortcut row (CORE.md § 1.10), used for
+# twin-resolution assertions.
+EXPECTED_ROUTES = {
+    "cc": "saipen continue",
+    "ccc": "saipen continue",
+    "ss": "saipen stop",
+    "sss": "saipen status",
+    "aa": "saipen markhunt",
+    "ee": "saipen prepare saitranslate",
+    "eee": "saipen collect saitranslate",
+    "pp": "saipen sub spawn saipython",
+    "gg": "saipen goal",
+    "hh": "saipen hunt",
+    "dd": "saipen plan",
+    "qq": "saipen prepare saiwiki",
+    "qqq": "saipen collect saiwiki",
+    "tt": "saipen test",
+    "sc": "saipen crew",
+}
 
 
 def table():
@@ -181,6 +230,11 @@ class CommandRoutingTests(unittest.TestCase):
         ps = (TOOLS.parent / "bootstrap" / "inject.ps1").read_text(encoding="utf-8")
         sh = (TOOLS.parent / "bootstrap" / "inject.sh").read_text(encoding="utf-8")
         for text in (ps, sh):
+            # inject.sh embeds the block in a double-quoted shell string, so
+            # its double quotes and backticks carry literal backslashes.
+            # Unescape both forms so the marker assertions compare wording,
+            # not each platform's quoting mechanics.
+            text = text.replace('\\"', '"').replace("\\`", "`")
             self.assertIn("SHORTCUT ACTIVATION GATE", text)
             self.assertIn("sc", text)
             self.assertIn("never \"stop caveman\"", text)
@@ -190,6 +244,566 @@ class CommandRoutingTests(unittest.TestCase):
         boot = (PROTOCOL_DIR / "BOOT.md").read_text(encoding="utf-8")
         self.assertIn("Compound input first", boot)
         self.assertIn("STOP_ON_FAILURE", boot)
+
+
+# ── 9. Public CLI boundary (real subprocess dispatch) ────────────────────
+
+def _stable_json(payload):
+    """Project a payload onto its STABLE routing evidence.
+
+    Dry-run plans carry per-invocation op ids, hashes and timestamps; those
+    are transaction identity, not routing semantics. The `route` echo is
+    presentation metadata a shortcut invocation adds to every payload; it is
+    scrubbed too, so two invocations of the SAME code path compare equal
+    whether reached by Latin row or Cyrillic twin while two different code
+    paths still differ.
+    """
+    if isinstance(payload, dict):
+        return {
+            k: _stable_json(v)
+            for k, v in sorted(payload.items())
+            if k not in ("op_id", "changed_files", "route")
+        }
+    if isinstance(payload, list):
+        return [_stable_json(v) for v in payload]
+    if isinstance(payload, str):
+        payload = re.sub(r"[0-9a-f]{32}", "<hex32>", payload)
+        payload = re.sub(
+            r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:Z|[+-]\d{2}:\d{2})",
+            "<ts>",
+            payload,
+        )
+        payload = re.sub(r"\d{2}\.\d{2}\.\d{2} \d{2}:\d{2}", "<ts>", payload)
+    return payload
+
+
+class CliShortcutRoutingTests(unittest.TestCase):
+    """Shortcut routing at the REAL executable boundary (`tools/saipen.py`).
+
+    The helper tests above prove the resolver; these prove the adapter USES
+    it -- the incident shipped precisely because that link was missing.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls._tmp = tempfile.TemporaryDirectory(prefix="saipen-cli-routing-")
+        cls.addClassCleanup(cls._tmp.cleanup)
+        cls.project = Path(cls._tmp.name) / "proj"
+        (cls.project / ".saipen").mkdir(parents=True)
+        import datetime
+
+        now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        cls._write(
+            ".saipen/STATE.md",
+            "---\n"
+            "phase: BUILD\n"
+            "task: T-010\n"
+            'next_action: "PHASE BUILD T-010"\n'
+            "blocker: none\n"
+            "transition_from: SCOUT\n"
+            "saipen_version: 7\n"
+            "agent: crashed-agent\n"
+            "mode: full\n"
+            f"updated: {now}\n"
+            "---\n",
+        )
+        cls._write(
+            ".saipen/BOARD.md",
+            "# Board\n"
+            "## DOING\n"
+            "- [/] T-010 feature under construction | owner: crashed-agent "
+            "| claim_time: 2020-01-01T00:00:00Z\n"
+            "## TODO\n## DONE\n## BLOCKED\n",
+        )
+        cls._write(
+            ".saipen/LOG.md",
+            "# Log\n\n"
+            "- 01.01.20 00:00 [E-001] [T-010] [agent: crashed-agent] "
+            "RUN: build -> edits in flight\n",
+        )
+
+    @classmethod
+    def _write(cls, rel, text):
+        path = cls.project / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
+
+    def _cli(self, *args):
+        """Run the public adapter against the throwaway project.
+
+        Every mutating shortcut runs under --dry-run: routing is exercised,
+        nothing is ever published. Output decoding is pinned to UTF-8 on both
+        sides so Cyrillic tokens survive the pipe.
+        """
+        proc = subprocess.run(
+            [
+                sys.executable,
+                str(SAIPEN_PY),
+                "--project-root",
+                str(self.project),
+                "--json",
+                "--dry-run",
+                *args,
+            ],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            env={**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"},
+            timeout=120,
+        )
+        try:
+            payload = json.loads(proc.stdout) if proc.stdout.strip() else {}
+        except ValueError:
+            payload = {"_unparseable_stdout": proc.stdout}
+        return proc.returncode, _stable_json(payload), proc.stdout, proc.stderr
+
+    # ── twin resolution ──────────────────────────────────────────────
+    def test_derived_twins_match_declared_twins(self):
+        # The engine derives twins from the canonical table + confusable map;
+        # this suite pins the exact expected set. If either side changes
+        # without the other, this goes red instead of production drifting.
+        derived = CM.derive_cyrillic_twins(table())
+        self.assertEqual(derived, DECLARED_CYRILLIC_TWINS)
+
+    def test_all_six_twins_resolve_to_canonical_latin_rows(self):
+        # The canonical table stays LATIN (CORE § 1.10); a twin resolves by
+        # codepoint folding onto its Latin row, never as its own row.
+        t = table()
+        for twin, latin in DECLARED_CYRILLIC_TWINS.items():
+            self.assertNotIn(twin, t, twin)
+            self.assertEqual(CM.resolve_shortcut(twin, table=t), latin, twin)
+            self.assertEqual(t[latin], EXPECTED_ROUTES[latin], twin)
+
+    def test_helper_cc_is_continue_never_stop(self):
+        t = table()
+        self.assertEqual(CM.normalize_shortcut_token("сс"), "cc")  # noqa: RUF001
+        self.assertEqual(CM.resolve_shortcut("сс", table=t), "cc")  # noqa: RUF001
+        self.assertNotEqual(CM.resolve_shortcut("сс", table=t), "ss")  # noqa: RUF001
+        self.assertNotIn("s", CM.CYRILLIC_CONFUSABLE_MAP.values())
+
+    def test_no_cyrillic_input_can_ever_fold_to_ss_or_sss(self):
+        # The mechanical truth behind "there is no Cyrillic twin for ss":
+        # no declared fold target is "s", hence no Cyrillic token normalizes
+        # to anything containing it.
+        targets = set(CM.CYRILLIC_CONFUSABLE_MAP.values())
+        self.assertNotIn("s", targets)
+        for cyr_char in CM.CYRILLIC_CONFUSABLE_MAP:
+            self.assertNotEqual(CM.normalize_shortcut_token(cyr_char), "s")
+
+    def test_ccc_resolves_to_ccc_never_sss(self):
+        t = table()
+        self.assertEqual(CM.normalize_shortcut_token("ссс"), "ccc")  # noqa: RUF001
+        self.assertEqual(CM.resolve_shortcut("ссс", table=t), "ccc")  # noqa: RUF001
+        self.assertEqual(t["sss"], "saipen status")
+        self.assertEqual(t["ss"], "saipen stop")
+
+    def test_undeclared_lookalikes_fail_closed_in_resolver(self):
+        t = table()
+        # п and н have no declared folds; хх would fold to xx which declares
+        # no row. None of these may resolve to anything.
+        for token in ("нн", "пп", "хх", "ссs"):
+            self.assertIsNone(CM.resolve_shortcut(token, table=t), token)
+            resolved = CM.resolve_compound_command(token, table=t)
+            self.assertEqual(resolved[0]["kind"], "unknown", token)
+
+    def test_twin_inside_compound_command_resolves(self):
+        resolved = CM.resolve_compound_command("saipen push + build ссс", table=table())  # noqa: RUF001
+        self.assertEqual(resolved[-1]["kind"], "shortcut")
+        self.assertEqual(resolved[-1]["command"], "saipen continue")
+        mixed = CM.resolve_compound_command("сс + qq", table=table())  # noqa: RUF001
+        self.assertEqual([seg["command"] for seg in mixed], ["saipen continue", "saipen prepare saiwiki"])
+
+    # ── public CLI boundary ──────────────────────────────────────────
+    def test_cli_twin_pairs_enter_identical_code_paths(self):
+        """Every Cyrillic twin dispatches byte-identically to its Latin row."""
+        for twin, latin in DECLARED_CYRILLIC_TWINS.items():
+            with self.subTest(twin=twin, latin=latin):
+                rc_latin, stable_latin, _, err_latin = self._cli(latin)
+                rc_twin, stable_twin, _, err_twin = self._cli(twin)
+                self.assertEqual(rc_latin, rc_twin)
+                self.assertEqual(stable_latin, stable_twin)
+                self.assertEqual(err_latin, err_twin)
+
+    def test_cli_cc_dispatches_as_continue_dry_run(self):
+        rc, stable, _raw, _err = self._cli("cc")
+        rc2, stable2, _raw2, _err2 = self._cli("сс")  # noqa: RUF001
+        self.assertEqual(rc, 0)
+        self.assertEqual(rc, rc2)
+        self.assertEqual(stable["code"], "CONVERGE_SET")
+        self.assertEqual(stable["execution_intent"], "converge")
+        self.assertEqual(stable["converge_target"], "done")
+        self.assertTrue(stable["dry_run"])
+        self.assertEqual(stable, stable2)
+
+    def test_cli_ccc_refuses_closed_and_never_becomes_status_or_stop(self):
+        rc_ccc, stable_ccc, _, _ = self._cli("ccc")
+        rc_twin, stable_twin, _, _ = self._cli("ссс")  # noqa: RUF001
+        rc_sss, stable_sss, _, _ = self._cli("sss")
+        self.assertEqual(rc_ccc, rc_twin)
+        self.assertEqual(stable_ccc, stable_twin)
+        self.assertEqual(stable_ccc["code"], "SHORTCUT_NOT_EXECUTABLE")
+        self.assertIn("`saipen continue`", str(stable_ccc.get("detail")))
+        # sss executes real status; ccc must be a DIFFERENT outcome.
+        self.assertNotEqual((rc_ccc, stable_ccc), (rc_sss, stable_sss))
+        self.assertNotIn("SHORTCUT_NOT_EXECUTABLE", str(stable_sss))
+
+    def test_cli_ss_refuses_naming_stop_and_differs_from_cc(self):
+        rc_ss, stable_ss, _, _ = self._cli("ss")
+        rc_cc, stable_cc, _, _ = self._cli("cc")
+        self.assertEqual(stable_ss["code"], "SHORTCUT_NOT_EXECUTABLE")
+        self.assertIn("`saipen stop`", str(stable_ss.get("detail")))
+        # The incident invariant at the boundary: сс (continue path) can
+        # never collapse into ss's refusal.
+        self.assertNotEqual((rc_ss, stable_ss), (rc_cc, stable_cc))
+        self.assertNotEqual(stable_ss.get("code"), stable_cc.get("code"))
+
+    def test_cli_sss_is_real_status_surface(self):
+        rc_sss, stable_sss, _, err_sss = self._cli("sss")
+        rc_status, stable_status, _, err_status = self._cli("status")
+        self.assertEqual(rc_sss, rc_status)
+        self.assertEqual(stable_sss, stable_status)
+        self.assertEqual(err_sss, err_status)
+
+    def test_cli_declared_shortcut_never_answers_unknown_command(self):
+        tokens = list(EXPECTED_ROUTES) + list(DECLARED_CYRILLIC_TWINS)
+        for token in tokens:
+            with self.subTest(token=token):
+                _rc, _stable, raw, _err = self._cli(token)
+                self.assertNotIn("unknown command", raw, token)
+
+    def test_cli_and_resolver_cannot_disagree(self):
+        """Agreement property: whatever the resolver declares, the CLI routes
+        or refuses-with-route; whatever it declines, the CLI calls unknown."""
+        t = table()
+        declared = list(t) + list(DECLARED_CYRILLIC_TWINS)
+        for token in declared:
+            route_key = CM.resolve_shortcut(token, table=t)
+            self.assertIsNotNone(route_key, token)
+            with self.subTest(token=token):
+                _rc, _stable, raw, _err = self._cli(token)
+                self.assertNotIn("unknown command", raw, token)
+                self.assertIn(route_key, raw, token)
+        for token in ("нн", "пп"):
+            self.assertIsNone(CM.resolve_shortcut(token, table=t), token)
+            _rc, _stable, raw, _err = self._cli(token)
+            self.assertIn("unknown command", raw, token)
+
+    def test_cli_holds_no_private_confusable_map_or_twin_table(self):
+        source = SAIPEN_PY.read_text(encoding="utf-8")
+        # One normalization authority: the adapter consumes the shared engine
+        # resolver and never re-declares the map, a twin dictionary, or any
+        # Cyrillic special case.
+        self.assertIn("resolve_shortcut(", source)
+        self.assertNotIn("maketrans", source)
+        self.assertFalse(re.search(r"[\u0400-\u04FF]", source))
+
+    def test_route_echo_is_scoped_to_one_in_process_invocation(self):
+        import saipen as cli
+
+        first = io.StringIO()
+        with redirect_stdout(first):
+            first_rc = cli.main(
+                [
+                    "--project-root",
+                    str(self.project),
+                    "--json",
+                    "--dry-run",
+                    "cc",
+                ]
+            )
+        self.assertEqual(first_rc, 0)
+        self.assertEqual(json.loads(first.getvalue())["route"], "cc")
+
+        second = io.StringIO()
+        with redirect_stdout(second):
+            second_rc = cli.main(
+                ["--project-root", str(self.project), "--json", "status"]
+            )
+        self.assertEqual(second_rc, 0)
+        self.assertNotIn("route", json.loads(second.getvalue()))
+
+
+class CommandSemanticsTests(unittest.TestCase):
+    """Command-semantics invariants at the REAL executable boundary.
+
+    The whole user message (bare `saipen`, `saipen continue`, `cc`, `gg
+    <goal>`, `sc`) must resolve to ONE deterministic canonical command with no
+    contextual reinterpretation. Each test builds a throwaway project with a
+    controlled STATE so the actual state transition is asserted, not just the
+    parsed command name.
+
+    Covered invariants (the fixed-point contract):
+      * saipen == saipen continue == cc (canonical continue handler + transition)
+      * normal intent -> converge (done target), never implicit ADD
+      * empty BOARD behaves identically under bare saipen and cc
+      * execution_intent: goal -> cc resumes THAT goal (objective unchanged)
+      * tripped goal safety valve -> cc reauthorizes (counters 0), objective
+        unchanged, intent stays goal
+      * gg <new goal> == create/pivot, semantically distinct from cc
+      * execution_intent: converge + converge_target: crew -> cc resumes crew
+    """
+
+    def _make(self, name, intent="normal", state_extra="", board_todo=""):
+        td = tempfile.mkdtemp(prefix="saipen-cmd-")
+        self.addCleanup(lambda: __import__("shutil").rmtree(td, ignore_errors=True))
+        proj = Path(td) / name
+        (proj / ".saipen").mkdir(parents=True)
+        import datetime
+
+        now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        (proj / ".saipen" / "STATE.md").write_text(
+            "---\n"
+            "phase: BUILD\n"
+            "task: T-010\n"
+            'next_action: "PHASE BUILD T-010"\n'
+            "blocker: none\n"
+            "transition_from: SCOUT\n"
+            "saipen_version: 7\n"
+            "agent: aleks\n"
+            "mode: full\n"
+            f"updated: {now}\n"
+            f"execution_intent: {intent}\n"
+            f"{state_extra}"
+            "---\n",
+            encoding="utf-8",
+        )
+        (proj / ".saipen" / "BOARD.md").write_text(
+            "# Board\n"
+            "## DOING\n"
+            "- [/] T-010 feature | owner: aleks | claim_time: 2020-01-01T00:00:00Z\n"
+            "## TODO\n"
+            f"{board_todo}"
+            "## DONE\n"
+            "## BLOCKED\n",
+            encoding="utf-8",
+        )
+        (proj / ".saipen" / "LOG.md").write_text(
+            "# Log\n\n"
+            "- 01.01.20 00:00 [E-001] [T-010] [agent: aleks] RUN: build\n",
+            encoding="utf-8",
+        )
+        return proj
+
+    def _cli(self, proj, *args, dry_run=True):
+        cmd = [
+            sys.executable,
+            str(SAIPEN_PY),
+            "--project-root",
+            str(proj),
+            "--json",
+        ]
+        if dry_run:
+            cmd.append("--dry-run")
+        cmd += list(args)
+        proc = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            env={**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"},
+            timeout=120,
+        )
+        payload = {}
+        if proc.stdout.strip():
+            try:
+                payload = json.loads(proc.stdout)
+            except ValueError:
+                payload = {"_unparseable_stdout": proc.stdout}
+        return proc.returncode, payload, proc.stdout
+
+    def _state(self, proj):
+        import saipen_engine.state as ST
+
+        return ST.parse_state((proj / ".saipen" / "STATE.md").read_text(encoding="utf-8"))
+
+    def _semantic(self, payload):
+        """The canonical continue outcome minus the per-run op_id UUID."""
+        return {
+            k: payload[k]
+            for k in (
+                "ok",
+                "code",
+                "execution_intent",
+                "converge_target",
+                "goal_waves",
+                "goal_tickets",
+            )
+            if k in payload
+        }
+
+    # ---- bare / continue / cc equivalence ---------------------------
+    def test_bare_continue_cc_are_identical_canonical_path(self):
+        """The three forms hit the SAME deterministic continue handler and the
+        SAME state transition -- asserted by identical structured outcome
+        (modulo the per-run op_id), not by command-name parsing."""
+        proj = self._make("equiv")
+        results = {}
+        for label, args in (
+            ("bare", []),
+            ("continue", ["continue"]),
+            ("cc", ["cc"]),
+        ):
+            rc, payload, _raw = self._cli(proj, *args)
+            results[label] = (rc, self._semantic(payload))
+        for label in ("bare", "continue", "cc"):
+            rc, sem = results[label]
+            self.assertEqual(rc, 0, label)
+            self.assertEqual(sem["execution_intent"], "converge", label)
+            self.assertEqual(sem["converge_target"], "done", label)
+        # All three are the one canonical continue handler.
+        self.assertEqual(results["bare"], results["continue"])
+        self.assertEqual(results["continue"], results["cc"])
+
+    def test_bare_continue_cc_identical_on_tripped_goal_valve(self):
+        """Even under a tripped goal valve the three forms route to the same
+        reauthorize-valve transition (they are one handler)."""
+        proj = self._make(
+            "equiv-valve", intent="goal", state_extra="goal_waves: 3\ngoal_tickets: 20\n"
+        )
+        results = {}
+        for label, args in (
+            ("bare", []),
+            ("continue", ["continue"]),
+            ("cc", ["cc"]),
+        ):
+            rc, payload, _raw = self._cli(proj, *args)
+            results[label] = (rc, self._semantic(payload))
+        for label in ("bare", "continue", "cc"):
+            rc, sem = results[label]
+            self.assertEqual(rc, 0, label)
+            self.assertEqual(sem["code"], "VALVE_REAUTHORIZED", label)
+        self.assertEqual(results["bare"], results["continue"])
+        self.assertEqual(results["continue"], results["cc"])
+
+    # ---- normal execution: no implicit ADD --------------------------
+    def test_normal_cc_enters_converge_never_implicit_add(self):
+        proj = self._make("normal")
+        rc, payload, _raw = self._cli(proj, "cc")
+        self.assertEqual(rc, 0)
+        self.assertEqual(payload["execution_intent"], "converge")
+        self.assertEqual(payload["converge_target"], "done")
+        # Normal convergence is CONVERGE_SET -- never ADD, never HUNT-for-ADD.
+        self.assertNotEqual(payload.get("code"), "ADD")
+
+    # ---- empty BOARD: bare and cc identical -------------------------
+    def test_empty_board_bare_and_cc_behave_identically(self):
+        proj = self._make("empty-board", board_todo="")
+        # A truly empty board means no DOING either; rebuild state for empty.
+        (proj / ".saipen" / "BOARD.md").write_text(
+            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+            encoding="utf-8",
+        )
+        res_bare = self._cli(proj)
+        res_cc = self._cli(proj, "cc")
+        # Same canonical handler, identical structured outcome, no implicit
+        # HUNT->ADD branch.
+        self.assertEqual(res_bare[0], res_cc[0])
+        self.assertEqual(self._semantic(res_bare[1]), self._semantic(res_cc[1]))
+        self.assertNotIn("HUNT", str(res_bare[1]))
+        self.assertNotIn("ADD", str(res_bare[1]))
+
+    # ---- active goal: cc resumes THAT goal --------------------------
+    def test_cc_resumes_existing_goal_preserving_objective(self):
+        proj = self._make(
+            "goal-resume", intent="goal", state_extra="goal_waves: 1\ngoal_tickets: 2\n"
+        )
+        log_before = (proj / ".saipen" / "LOG.md").read_text(encoding="utf-8")
+        rc, payload, _raw = self._cli(proj, "cc", dry_run=False)
+        self.assertEqual(rc, 0)
+        self.assertEqual(payload["execution_intent"], "goal")
+        # Counters preserved (valve not tripped -> no reset).
+        self.assertEqual(payload["goal_waves"], 1)
+        self.assertEqual(payload["goal_tickets"], 2)
+        # cc is a resume: it must NOT create a new objective or pivot.
+        self.assertNotIn("objective", payload)
+        log_after = (proj / ".saipen" / "LOG.md").read_text(encoding="utf-8")
+        self.assertEqual(
+            log_before.count("goal pivot --"), log_after.count("goal pivot --")
+        )
+        # The persisted intent stays goal on disk after the real resume.
+        self.assertEqual(self._state(proj)["execution_intent"], "goal")
+
+    # ---- tripped goal valve: cc reauthorizes, objective unchanged ---
+    def test_tripped_goal_valve_cc_reauthorizes_keeps_objective(self):
+        proj = self._make(
+            "goal-valve", intent="goal", state_extra="goal_waves: 3\ngoal_tickets: 20\n"
+        )
+        log_before = (proj / ".saipen" / "LOG.md").read_text(encoding="utf-8")
+        # dry-run captures the VALVE_REAUTHORIZED outcome code.
+        rc, payload, _raw = self._cli(proj, "cc")
+        self.assertEqual(rc, 0)
+        self.assertEqual(payload["code"], "VALVE_REAUTHORIZED")
+        self.assertEqual(payload["goal_waves"], 0)
+        self.assertEqual(payload["goal_tickets"], 0)
+        self.assertEqual(payload["execution_intent"], "goal")
+        # Reauthorization is RESUME semantics: no new objective, no pivot.
+        self.assertNotIn("objective", payload)
+        # A real run persists the reauthorization (counters 0, WAIT cleared).
+        rc2, _payload2, _raw2 = self._cli(proj, "cc", dry_run=False)
+        self.assertEqual(rc2, 0)
+        st = self._state(proj)
+        self.assertEqual((st["goal_waves"], st["goal_tickets"]), (0, 0))
+        self.assertFalse(st["next_action"].startswith("WAIT:"))
+        self.assertEqual(st["execution_intent"], "goal")
+        log_after = (proj / ".saipen" / "LOG.md").read_text(encoding="utf-8")
+        self.assertEqual(
+            log_before.count("goal pivot --"), log_after.count("goal pivot --")
+        )
+
+    def test_gg_new_goal_is_create_pivot_not_resume(self):
+        proj = self._make(
+            "gg-pivot", intent="goal", state_extra="goal_waves: 1\ngoal_tickets: 2\n"
+        )
+        rc, payload, _raw = self._cli(proj, "gg", "Build feature X")
+        self.assertEqual(rc, 0)
+        self.assertEqual(payload["code"], "GOAL_SET")
+        self.assertEqual(payload["objective"], "Build feature X")
+        # A create/pivot resets to wave 1 / ticket 0 -- distinct from cc's
+        # counter-preserving resume.
+        self.assertEqual(payload["goal_waves"], 1)
+        self.assertEqual(payload["goal_tickets"], 0)
+        self.assertNotEqual(payload.get("code"), "VALVE_REAUTHORIZED")
+
+    def test_gg_bare_is_usage_line_never_resume(self):
+        proj = self._make(
+            "gg-bare", intent="goal", state_extra="goal_waves: 3\ngoal_tickets: 20\n"
+        )
+        rc, payload, _raw = self._cli(proj, "gg", dry_run=False)
+        self.assertEqual(rc, 2)
+        self.assertEqual(payload["code"], "VALIDATION_FAILED")
+        self.assertEqual(payload["detail"], "Use: gg <objective text>")
+        # Zero-write: a tripped valve must NOT be cleared by bare gg.
+        self.assertEqual(self._state(proj)["goal_waves"], 3)
+
+    # ---- no accidental goal mutation on cc --------------------------
+    def test_cc_never_creates_or_pivots_a_goal(self):
+        proj = self._make(
+            "no-mutate", intent="goal", state_extra="goal_waves: 1\ngoal_tickets: 1\n"
+        )
+        _rc, payload, _raw = self._cli(proj, "cc")
+        # cc is a resume -- it carries no objective and never fires goal_entry.
+        self.assertNotIn("objective", payload)
+        self.assertNotEqual(payload.get("code"), "GOAL_SET")
+
+    # ---- crew resume ------------------------------------------------
+    def test_cc_resumes_crew_target_not_normal_convergence(self):
+        proj = self._make("crew-resume", intent="converge", state_extra="converge_target: crew\n")
+        rc, payload, _raw = self._cli(proj, "cc", dry_run=False)
+        self.assertEqual(rc, 0)
+        self.assertEqual(payload["execution_intent"], "converge")
+        # The resume honours the persisted crew target rather than collapsing
+        # to a plain done convergence.
+        self.assertEqual(self._state(proj)["converge_target"], "crew")
+
+    def test_sc_is_crew_workflow_distinct_from_cc(self):
+        proj = self._make("crew-sc", intent="converge", state_extra="converge_target: crew\n")
+        _rc_cc, payload_cc, _ = self._cli(proj, "cc")
+        _rc_sc, payload_sc, _ = self._cli(proj, "sc")
+        # cc is the continue path; sc is the full crew circuit. They are
+        # different commands and must never collapse into one another.
+        self.assertNotEqual(payload_cc.get("code"), payload_sc.get("code"))
+        self.assertNotIn("CREW_PLAN", str(payload_cc.get("code")))
+        self.assertIn("CREW_PLAN", str(payload_sc.get("code")))
 
 
 if __name__ == "__main__":

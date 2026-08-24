@@ -1,6 +1,18 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.226.2 -- 2026-08-24 -- Cyrillic Shortcut Routing (T-1153)
+
+- T-1153: routes whole-message shortcuts through one shared Unicode
+  codepoint resolver before CLI dispatch; the six Cyrillic twins now enter
+  byte-identical canonical Latin paths.
+- T-1153: pins `сс` to `cc` (continue), never Latin `ss` (stop), and derives
+  the six-twin/nine-without count mechanically from the canonical table.
+- T-1153: makes `cc` the uniform safety-valve continuation key for goal and
+  converge intent; bare `saipen goal` remains create/pivot only.
+- T-1153: adds route-echo boundary coverage, 46 routing tests and validator
+  red controls; 116 unit tests, all routing probes and 271 audit mutations pass.
+
 ## 7.226.1 -- 2026-08-24 -- Producer Translation and Wiki Rebind (T-1152)
 
 - T-1152: force-refreshed and independently audited all 32 locale READMEs

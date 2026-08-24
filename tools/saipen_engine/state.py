@@ -243,11 +243,14 @@ WAIT_CATEGORIES = (
 
 # The engine's own safety-valve pause. `N waves / M tickets` is the exact
 # § 2.4 wording -- unit order is fixed, so `(3 tickets / 20 tickets)` is
-# nonsense and refuses. The resume key is INTENT-SPECIFIC (T-539): `saipen
-# goal` continues a goal run, bare `cc` continues a converge run.
+# nonsense and refuses. The resume key is UNIFORM (T-###): `cc` (continue /
+# bare saipen) resumes BOTH a goal run (reauthorizing a tripped valve by
+# resetting both counters) and a converge run. `saipen goal` is never a
+# resume key -- it is the create/pivot command, so a pause that named it
+# would substitute the objective instead of continuing it.
 _SAFETY_VALVE_RE = re.compile(
     r"^safety valve reached \((\d+) waves / (\d+) tickets\) -- "
-    r"run '(saipen goal|cc)' to continue$"
+    r"run 'cc' to continue$"
 )
 
 # The untriaged-MARKHUNT brake, verbatim from CORE § 1.2 / phases/done.md.
@@ -340,11 +343,18 @@ def is_legal_wait(na: object) -> bool:
 
 
 def safety_valve_resume_key(na: object) -> str | None:
-    """The resume command an exact safety-valve pause names, else None."""
+    """The resume command an exact safety-valve pause names, else None.
+
+    The resume key is UNIFORM: every safety-valve pause names `cc` (continue /
+    bare `saipen`), which reauthorizes a tripped valve and resumes the run for
+    BOTH goal and converge intents. `saipen goal` is the create/pivot command,
+    never a resume key, so a pause naming it is not a legal safety-valve pause
+    here.
+    """
     if not isinstance(na, str) or not na.strip().startswith("WAIT:"):
         return None
     match = _SAFETY_VALVE_RE.match(_wait_body(na.strip()))
-    return match.group(3) if match else None
+    return "cc" if match else None
 
 
 # The exactly THREE brakes CORE § 1.2 permits at `phase: DONE` with an empty
@@ -368,9 +378,9 @@ def binding_wait(
         one hundred workable tickets.
       * `phase: DONE` + empty `## TODO`: exactly the three fixed forms bind
         (`safety valve`, `user brake`, the untriaged-MARKHUNT brake). The
-        safety valve must additionally name the resume key its own intent
-        owns, since a converge pause telling the user to run `saipen goal`
-        sends them to a NEW objective instead of continuing this one (T-539).
+        safety valve must name the uniform resume key `cc`, since a pause
+        telling the user to run `saipen goal` sends them to a NEW objective
+        instead of continuing this one (T-###).
 
     Returns the brake name from `DONE_EMPTY_BRAKES` in the narrowed context,
     the § 1.2 category elsewhere, and None when the WAIT does not bind.
@@ -383,8 +393,7 @@ def binding_wait(
     text = str(na).strip()
     if category == "safety valve":
         key = safety_valve_resume_key(text)
-        expected = "cc" if intent == "converge" else "saipen goal"
-        return "safety valve" if key == expected else None
+        return "safety valve" if key == "cc" else None
     if _PROGRESS_TAG_RE.sub("", text) == MARKHUNT_BRAKE:
         return "markhunt"
     if category == "user brake":

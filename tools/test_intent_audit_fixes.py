@@ -381,7 +381,12 @@ class IntentAuditTests(unittest.TestCase):
         continue_rc, continued = self._invoke_cli(root, "continue", "--dry-run")
         self.assertEqual(_hash_tree(root), before)
         self.assertEqual((cc_rc, continue_rc), (0, 0))
-        self.assertEqual(cc, continued)
+        self.assertEqual(cc["route"], "cc")
+        self.assertNotIn("route", continued)
+        self.assertEqual(
+            {key: value for key, value in cc.items() if key != "route"},
+            continued,
+        )
         self.assertEqual(cc["execution_intent"], "goal")
         self.assertNotEqual(cc.get("code"), "CREW_DRY_PLAN")
 
@@ -440,7 +445,7 @@ class IntentAuditTests(unittest.TestCase):
                 "goal_tickets": 4,
                 "next_action": (
                     "WAIT: safety valve reached (3 waves / 4 tickets) -- "
-                    "run 'saipen goal' to continue"
+                    "run 'cc' to continue"
                 ),
             },
         )

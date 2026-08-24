@@ -392,22 +392,36 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
     # The identical aged slug with a live naming ticket must pass.
     board = tree / ".saipen" / "BOARD.md"
     board_text = board.read_text(encoding="utf-8-sig")
-    if "## TODO" not in board_text:
-        return "BOARD copy has no ## TODO section to host the owning ticket"
+    if "## BLOCKED" not in board_text:
+        return "BOARD copy has no ## BLOCKED section to host the owning ticket"
+    # The owning ticket lives under ## BLOCKED, not ## TODO. Ownership reads
+    # any live line (DOING/TODO/BLOCKED), but workability is TODO-only -- so
+    # a BLOCKED fixture can never become the Pick Rule's topmost workable
+    # ticket, which on a real `phase: BLOCKED` session state would trip the
+    # DONE-wait deadlock FAIL and mask the behavior under test.
     ticket = (
         "- [ ] T-990 [P2] Own the persistent `log-missing-date` warning: "
         "125 sealed pre-DATE entries are immutable by append-only, so it "
         "warns forever; keep this ticket live while it emits. | "
-        "verify: warn ownership probe passes with this ticket live\n"
+        "verify: warn ownership probe passes with this ticket live | "
+        "blocker: warn-ownership-probe fixture -- permanently held\n"
     )
-    # Appended at the END of ## TODO, not the front: board order is priority
+    # Appended at the END of its section: board order is priority
     # (RFC section 1.11) and STATE's next_action names the topmost workable
     # ticket, so a probe that files its own ticket first invalidates that pick
     # and then fails for a reason it does not test.
-    todo_at = board_text.index("## TODO\n") + len("## TODO\n")
-    next_heading = board_text.find("\n## ", todo_at)
-    cut = len(board_text) if next_heading == -1 else next_heading + 1
-    board_text = board_text[:cut] + ticket + board_text[cut:]
+    # Heading-aware insertion: an EMPTY ## TODO directly abutting ## DONE
+    # made a raw `find("\n## ")` from inside the section line skip the very
+    # next heading, dropping the owning ticket into ## DONE -- where its open
+    # box and missing closure evidence failed the green leg for reasons
+    # unrelated to warn ownership.
+    _lines = board_text.splitlines(keepends=True)
+    _sec_i = next(i for i, ln in enumerate(_lines) if ln.strip() == "## BLOCKED")
+    _next_h = next(
+        (j for j in range(_sec_i + 1, len(_lines)) if _lines[j].startswith("## ")),
+        len(_lines),
+    )
+    board_text = "".join(_lines[:_next_h]) + ticket + "".join(_lines[_next_h:])
     board.write_text(board_text, encoding="utf-8", newline="\n")
     green = validate()
     green_text = green.stdout + green.stderr
@@ -1019,6 +1033,31 @@ def case_available(root: Path, rel: str, mutation) -> bool:
     return sum(line.startswith("- ") for line in lines) >= 2
 
 
+def _t551_bypass(t: str) -> str:
+    """Reconstruct BOTH halves of the T-549/T-551 liveness condition.
+
+    The barrier binds only while the improve wave is live; CLEAN prunes its
+    tickets, so stripping T-551's `needs:` alone no-ops on a cleaned board
+    and the control silently stopped being evidence. Strip what exists, and
+    when T-551 is absent entirely, reinsert an OPEN, dependency-free T-551
+    under `## TODO` so the reopened-T-549 condition is testable again.
+    """
+    t = t.replace(" | needs: T-549 | verify:", " | verify:", 1)
+    t = t.replace("- [x] T-549 [P1]", "- [ ] T-549 [P1]", 1)
+    if re.search(r"(?m)^- \[[ /x]\] T-551\b", t):
+        return t
+    lines = t.splitlines(keepends=True)
+    todo_i = next((i for i, ln in enumerate(lines) if ln.strip() == "## TODO"), None)
+    if todo_i is None:
+        return t
+    next_h = next(
+        (j for j in range(todo_i + 1, len(lines)) if lines[j].startswith("## ")),
+        len(lines),
+    )
+    stub = "- [ ] T-551 [P2] Real Improve cycle #1 (IMP-002) integration\n"
+    return "".join(lines[:next_h]) + stub + "".join(lines[next_h:])
+
+
 # (label, file, mutation, expected substring in the validator's output)
 CASES: list[tuple[str, str, object, str]] = [
     # --- STATE shape -----------------------------------------------------
@@ -1222,7 +1261,12 @@ CASES: list[tuple[str, str, object, str]] = [
     (
         "STATE carries an independent improve_ routing field",
         STATE,
-        lambda t: t.replace('blocker: ""', 'blocker: ""\nimprove_cycle: imp-x'),
+        lambda t: re.sub(
+            r"(?m)^(blocker:.*)$",
+            r"\1\nimprove_cycle: imp-x",
+            t,
+            count=1,
+        ),
         "improve-state-purity",
     ),
     (
@@ -1693,17 +1737,18 @@ CASES: list[tuple[str, str, object, str]] = [
         lambda s: force_converge(s, '"PHASE ADD"'),
         "converge clean-HUNT marker present but next_action names ADD",
     ),
-    # T-539 valve-wording half: under converge the safety-valve pause's resume
-    # key is bare `cc`, never `saipen goal` -- there `saipen goal` is a NEW
-    # objective, a substitution. The goal wording in a converge pause FAILs.
+    # T-### valve-wording: ANY safety-valve pause's resume key is `cc`, never
+    # `saipen goal` -- `saipen goal` is the create/pivot command, a
+    # substitution. A pause naming `saipen goal` FAILs for both goal and
+    # converge intents.
     (
-        "converge safety-valve pause names the goal resume key",
+        "safety-valve pause names the goal-create key",
         STATE,
         lambda s: force_converge(
             s,
             "\"WAIT: safety valve reached (N waves / M tickets) -- run 'saipen goal' to continue\"",
         ),
-        "converge safety-valve pause names the goal resume key",
+        "safety-valve pause names the goal-create key",
     ),
     # Strip the final newline and the file stops mid-line. Nothing else in this
     # list reads a last byte, which is how the real one survived: every
@@ -3136,9 +3181,7 @@ CASES: list[tuple[str, str, object, str]] = [
     (
         "T-551 cannot bypass unresolved T-549",
         ".saipen/BOARD.md",
-        lambda t: t.replace(" | needs: T-549 | verify:", " | verify:", 1).replace(
-            "- [x] T-549 [P1]", "- [ ] T-549 [P1]", 1
-        ),
+        _t551_bypass,
         "hardening wave barrier missing",
     ),
     (

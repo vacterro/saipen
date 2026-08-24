@@ -69,6 +69,14 @@ This file gives the execution order. No rule is *defined* here —
    disappear because the model considers it unnecessary.
    Message names a command (§1.10 verb, shortcut table row, Cyillic twin,
    or active extension word)? **Open CORE.md §1.10 and read the row.**
+   A whole-message shortcut candidate resolves FIRST -- before any
+   acknowledgement, conversational interpretation, style reading, memory
+   expansion, or executing `next_action`. Where the deterministic runtime is
+   available, resolve it MECHANICALLY (`tools/saipen.py <token>` or the
+   engine's shared shortcut resolver), never by model recognition.
+   Normalization is Unicode-codepoint substitution, NOT keyboard-position
+   substitution: Cyrillic `сс` folds to Latin `cc` (continue); Latin `ss`/
+   `sss` have NO Cyrillic twin, so a Cyrillic token can never mean STOP.
    Memory is never a source for it — a confabulated table has reached users
    three times (E-1801, E-1913). Do not copy the table here: a second copy drifts
    and defeats the read-the-source rule. (§1.1's gate rejects a restatement.)

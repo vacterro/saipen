@@ -13,6 +13,14 @@ Rules enforced here:
 - A bare whole-message token that matches a declared SAIPEN shortcut (CORE.md
   section 1.10's table) activates SAIPEN and resolves to its row. The table
   is read from CORE.md -- this module holds NO copy, so it cannot drift.
+- Shortcut normalization is UNICODE-CODEPOINT SUBSTITUTION, never
+  keyboard-position substitution (CORE.md section 1.10): each character is
+  lowercased and folded through the one declared Cyrillic-confusable map, then
+  looked up EXACTLY in the canonical table. Cyrillic сс therefore normalizes
+  to Latin cc -- never to Latin ss, which has no Cyrillic twin because no
+  Cyrillic character folds to "s". There is no keyboard-layout guessing, no
+  visual-similarity guessing, no Levenshtein matching, and no model
+  interpretation anywhere in this path: an unresolved token fails closed.
 - Style commands (``stop caveman`` / ``normal mode``) are recognized as
   style tokens ONLY when the token is not a declared shortcut. ``sc`` is
   never "stop caveman".
@@ -32,14 +40,81 @@ from pathlib import Path
 # regex mirrors the table's canonical row shape: `| sc | saipen crew | ... |`.
 _SHORTCUT_ROW_RE = re.compile(r"^\|\s*`([a-z]{2,3})`\s*\|\s*`(saipen [^`]+)`", re.MULTILINE)
 
-# A shortcut may be typed on a Cyrillic layout with visually identical
-# letters (CORE.md section 1.10). Latin confusables are folded to Latin
-# before matching, exactly as the protocol recognizes them.
-_CYRILLIC_CONFUSABLES = str.maketrans("аеорсух", "aeopcyx")  # noqa: RUF001 - deliberate confusable map
+# The ONE declared Cyrillic-confusable map (CORE.md section 1.10):
+# `а→a е→e о→o р→p с→c у→y х→x`. This is the single authority for twin
+# normalization -- the CLI adapter, the validator and the tests consume it
+# from here, so no second copy can drift. Note the shape of the map: its
+# targets are a/e/o/p/c/y/x only. Latin "s" is not a target and no Cyrillic
+# character folds to it, which is what makes `сс -> cc` and simultaneously
+# makes a Cyrillic twin for `ss`/`sss` UNDECLARABLE.
+CYRILLIC_CONFUSABLE_MAP = {  # noqa: RUF001 - deliberate confusable map
+    "а": "a",
+    "е": "e",
+    "о": "o",
+    "р": "p",
+    "с": "c",
+    "у": "y",
+    "х": "x",
+}
+CYRILLIC_CONFUSABLES = str.maketrans(CYRILLIC_CONFUSABLE_MAP)
+# The inverse direction: used to DERIVE the Cyrillic twins of the canonical
+# table (a shortcut has a twin exactly when every one of its letters is in
+# this map). Derived, never hand-maintained.
+LATIN_TO_CYRILLIC_CONFUSABLE = {v: k for k, v in CYRILLIC_CONFUSABLE_MAP.items()}
 
 
-def _normalize_shortcut_token(token: str) -> str:
-    return token.strip().translate(_CYRILLIC_CONFUSABLES)
+def normalize_shortcut_token(token: str) -> str:
+    """The ONE deterministic shortcut normalizer (CORE.md section 1.10).
+
+    Lowercase (plain ``lower()`` -- never ``casefold()``, whose undeclared
+    expansions would smuggle non-protocol characters into the alphabet), then
+    translate ONLY the declared Unicode confusable characters. This is
+    codepoint substitution, not keyboard-position substitution: Cyrillic
+    ``сс`` normalizes to Latin ``cc``, and because ``s`` is not a fold target,
+    no Cyrillic input can ever normalize to ``ss`` or ``sss``.
+    """
+    return token.strip().lower().translate(CYRILLIC_CONFUSABLES)
+
+
+def resolve_shortcut(token: str, *, table: dict[str, str] | None = None) -> str | None:
+    """Resolve a raw whole-message token to its canonical LATIN shortcut key.
+
+    The algorithm is fixed: take the raw token, normalize it through
+    :func:`normalize_shortcut_token` (codepoint substitution only), then look
+    the result up EXACTLY in the canonical table derived from CORE.md. Return
+    the canonical Latin key, or ``None`` when nothing declares it -- an
+    unresolved token fails closed and is never guessed into a shortcut. The
+    raw token is preserved by the caller for evidence/reporting; this function
+    never mutates protocol state.
+    """
+    if table is None:
+        table = load_shortcut_table()
+    key = normalize_shortcut_token(token)
+    return key if key in table else None
+
+
+def derive_cyrillic_twins(
+    latin_keys: list[str] | set[str] | dict[str, str] | None = None,
+) -> dict[str, str]:
+    """Mechanically derive the Cyrillic twins of the given Latin shortcuts.
+
+    A shortcut has a twin exactly when EVERY letter folds (is present in the
+    declared confusable map); the twin is the character-by-character inverse
+    mapping. Returns {cyrillic_twin: latin_key}. There is deliberately no
+    second hand-maintained twin list anywhere: callers derive from here.
+    """
+    keys = (
+        set(latin_keys)
+        if isinstance(latin_keys, (set, frozenset))
+        else list(latin_keys)
+        if latin_keys is not None
+        else list(load_shortcut_table())
+    )
+    return {
+        "".join(LATIN_TO_CYRILLIC_CONFUSABLE[ch] for ch in key): key
+        for key in keys
+        if key and all(ch in LATIN_TO_CYRILLIC_CONFUSABLE for ch in key)
+    }
 
 
 def load_shortcut_table(protocol_dir: Path | str | None = None) -> dict[str, str]:
@@ -80,13 +155,13 @@ def is_declared_shortcut(token: str, table: dict[str, str] | None = None) -> boo
     """True when the whole token is a declared SAIPEN shortcut.
 
     An unknown two/three-letter token must NOT become a shortcut; only an
-    exact table match counts. Cyrillic twins are matched first by their own
-    row (CORE.md declares them explicitly), then by Latin confusable folding.
+    exact table match counts. Canonical Latin rows match directly; Cyrillic
+    twins reach those same rows only through the declared confusable fold.
     """
     if table is not None:
-        return token.strip() in table or _normalize_shortcut_token(token) in table
+        return token.strip() in table or normalize_shortcut_token(token) in table
     full = load_shortcut_table()
-    return token.strip() in full or _normalize_shortcut_token(token) in full
+    return token.strip() in full or normalize_shortcut_token(token) in full
 
 
 def parse_compound_command(message: str) -> list[str]:
@@ -147,9 +222,9 @@ def resolve_compound_command(
             # context.
             words = segment.split()
             trailing = words[-1]
-            # Exact table row first (Cyrillic twins are declared rows), then
-            # Latin-confusable folding for layouts typed without switching.
-            target = table.get(trailing) or table.get(_normalize_shortcut_token(trailing))
+            # Exact canonical Latin row first, then the declared confusable
+            # fold that maps a Cyrillic twin onto that same Latin row.
+            target = table.get(trailing) or table.get(normalize_shortcut_token(trailing))
             if target is not None:
                 resolved.append(
                     {
@@ -166,7 +241,7 @@ def resolve_compound_command(
                 {"index": index, "segment": segment, "command": "", "kind": "unknown"}
             )
             continue
-        target = table.get(segment) or table.get(_normalize_shortcut_token(segment))
+        target = table.get(segment) or table.get(normalize_shortcut_token(segment))
         if target is not None:
             resolved.append(
                 {"index": index, "segment": segment, "command": target, "kind": "shortcut"}
