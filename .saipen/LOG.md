@@ -134,3 +134,18 @@
 - 24.08.26 20:17 [E-4317] [parent: E-4316] [T-1156] [agent: codex] [op: transition-59f782bdce9a40ca8a9cd5effc5a5962] RUN: transition to SHIP -- post-fix review complete; exact 258-path release scope rebound; ship v7.227.0
 - 24.08.26 20:18 [E-4318] [parent: E-4317] [T-1156] [agent: codex] [op: finish-8bc3cdb4e2ef4e96b9f1fdcee8ebfac8] RUN: ship v7.227.0 -> content commit 5880f4a398e0 pushed
 - 24.08.26 20:18 [E-4319] [parent: E-4318] [T-1156] [agent: codex] [op: finish-8bc3cdb4e2ef4e96b9f1fdcee8ebfac8] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 24.08.26 20:21 [E-4320] [parent: E-4319] [T-1157] [agent: codex] [op: build-intake-8e8f7de4a38ba666] DEC: build directive accepted -- make zz treat remote-published post-milestone Work as forward revert evidence
+- 24.08.26 20:21 [E-4321] [parent: E-4320] [T-1157] [agent: codex] [op: build-intake-8e8f7de4a38ba666] DEC: attempt A-004 open
+- 24.08.26 20:21 [E-4322] [parent: E-4321] [T-1157] [agent: codex] [op: transition-d951e5c9826a4bf7b263a47c0e129557] RUN: transition to BUILD -- extend existing undo publication proof; no new state or task engine
+- 24.08.26 20:24 [E-4323] [parent: E-4322] [T-1157] [agent: codex] [op: attempt-close-ddcf132bb199422d91c040abf424bee0] DEC: attempt A-004 close result candidate stop completed_execution
+- 24.08.26 20:24 [E-4324] [parent: E-4323] [T-1157] [agent: codex] [op: checkpoint-b42ff079796e47378fd57d8ad475bc32] RUN: unit 155/155; controls+routing 84/84; Ruff changed surface -> PASS conf: high
+- 24.08.26 20:24 [E-4325] [parent: E-4324] [T-1157] [agent: codex] [op: transition-3cbe20b75d7543b99fc03c753369c183] RUN: transition to VERIFY -- published Work proof regression implemented
+- 24.08.26 20:40 [E-4326] [parent: E-4325] [T-1157] [agent: codex] [op: checkpoint-67d203725de14316a6c0286f2d23060c] RUN: full scenarios including 96 release executor and H1..H20 continuity -> PASS conf: high
+- 24.08.26 20:40 [E-4327] [parent: E-4326] [T-1157] [agent: codex] [op: checkpoint-119d74dacc244b59889995d5a099181e] RUN: core validator and milestone/routing authority -> PASS conf: high
+- 24.08.26 20:40 [E-4328] [parent: E-4327] [T-1157] [agent: codex] [op: transition-89723ecfd2d74c68ab3fd885e612de83] RUN: transition to REVIEW -- verification green; review published undo boundary
+- 24.08.26 20:40 [E-4329] [parent: E-4328] [op: transition-89723ecfd2d74c68ab3fd885e612de83] DEC: goal_tickets 2->3
+- 24.08.26 20:40 [E-4330] [parent: E-4329] [T-1157] [agent: codex] [op: scope-f9116c3c2e1140a7a6452d5e462e4680] DEC: release scope recorded -- 40 path(s) bound to 8421131998e6
+- 24.08.26 20:41 [E-4331] [parent: E-4330] [T-1157] [agent: codex] [op: checkpoint-ce54db34a7fe419b8f2092e7b31bc238] RUN: second-wave safety audit: zero-write preview, exact ownership, fail-closed publication proof -> PASS conf: high
+- 24.08.26 20:41 [E-4332] [parent: E-4331] [T-1157] [agent: codex] [op: transition-d8de1f38029b43759a80e94df2ad3fe1] RUN: transition to SHIP -- review complete; publish v7.227.1
+- 24.08.26 20:41 [E-4333] [parent: E-4332] [T-1157] [agent: codex] [op: finish-c2ed561be6874e69ab3d2f8e81e2faa7] RUN: ship v7.227.1 -> content commit f9fabd488dd3 pushed
+- 24.08.26 20:41 [E-4334] [parent: E-4333] [T-1157] [agent: codex] [op: finish-c2ed561be6874e69ab3d2f8e81e2faa7] DEC: ticket finished via SAIOPS -- completion (from SHIP)
