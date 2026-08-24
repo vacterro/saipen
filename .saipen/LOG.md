@@ -66,3 +66,22 @@
 - 24.08.26 15:29 [E-4249] [parent: E-4248] [T-1152] [agent: saipen-cli] [op: scope-3afd38f482a64ffa83696abc85ad5ff8] DEC: release scope recorded -- 7 path(s) bound to b666b77ff3ad
 - 24.08.26 15:30 [E-4250] [parent: E-4249] [T-1152] [agent: saipen-cli] [op: finish-8816bfd710e64d0ca3421ebe36b004eb] RUN: ship v7.226.1 -> content commit 9203e83feece pushed
 - 24.08.26 15:30 [E-4251] [parent: E-4250] [T-1152] [agent: saipen-cli] [op: finish-8816bfd710e64d0ca3421ebe36b004eb] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 24.08.26 15:31 [E-4252] [parent: E-4251] [T-1153] [agent: saipen-cli] [op: ticket-7526d08cf6874f738effa2443946b9d0] DEC: ticket unblock via SAIOPS -- T-1152 released as v7.226.1; locale release surfaces are reviewed, committed and clean
+- 24.08.26 15:31 [E-4253] [parent: E-4252] [T-1154] [agent: saipen-cli] [op: ticket-e76e8663b10641ba82d1a482081bba0e] DEC: ticket unblock via SAIOPS -- T-1152 released as v7.226.1; locale release surfaces are reviewed, committed and clean
+- 24.08.26 15:31 [E-4254] [parent: E-4253] [T-1154] [agent: saipen-cli] [op: claim-bce5859fc93144788a80ab4a2d47a09d] DEC: claimed via SAIOPS -- owner saipen-cli
+- 24.08.26 15:31 [E-4255] [parent: E-4254] [T-1154] [agent: saipen-cli] [op: transition-76bf1d76e79a4dc88484c7f5e2ac054c] RUN: transition to BUILD -- existing reviewed implementation; refresh proof after blocker removal
+- 24.08.26 15:33 [E-4256] [parent: E-4255] [T-1154] [agent: saipen-cli] [op: ticket-4d4ea20254ab4522ae8acc82886f48dd] DEC: ticket block via SAIOPS (active) -- SCOPE_OVERLAP -- its single test method shares tools/test_intent_audit_fixes.py with T-1153; exact hunk parked at .saipen/recovery/T-1154-dryrun-regression.patch until T-1153 ships
+- 24.08.26 15:33 [E-4257] [parent: E-4256] [T-1153] [agent: saipen-cli] [op: claim-20066902fadb4c4d991ee38d813217d9] DEC: claimed via SAIOPS -- owner saipen-cli
+- 24.08.26 15:33 [E-4258] [parent: E-4257] [T-1153] [agent: saipen-cli] [op: transition-1f35a645bbbf44699952f8cc6a4185c0] RUN: transition to BUILD -- existing reviewed Cyrillic routing implementation; refresh full proof after blocker removal
+- 24.08.26 15:59 [E-4259] [parent: E-4258] [T-1153] [agent: saipen-cli] [op: checkpoint-e9005fe0dcb44a0681935928914940b8] RUN: build -> existing Cyrillic routing implementation isolated from parked T-1154 hunk; diff scope intact
+- 24.08.26 15:59 [E-4260] [parent: E-4259] [T-1153] [agent: saipen-cli] [op: transition-dd6aea1a40404d90ac37dbddf9e9d365] RUN: transition to VERIFY -- run canonical routing, unittest, audit and core proof
+- 24.08.26 15:59 [E-4261] [parent: E-4260] [T-1153] [agent: saipen-cli] [op: checkpoint-7f3a43c3ddb342bfa323fe109cdbc941] RUN: validate.py --gate core -> PASS
+- 24.08.26 15:59 [E-4262] [parent: E-4261] [T-1153] [agent: saipen-cli] [op: checkpoint-46b24fe50400467cb275c1b42df3c920] RUN: verify -> PASS conf: high -- unittest 116/116; routing 46/46; audit_checks 271/271; core PASS; T-1154 hunk absent
+- 24.08.26 15:59 [E-4263] [parent: E-4262] [T-1153] [agent: saipen-cli] [op: transition-e83cb46d1d9648f8aac2d7d0790f9078] RUN: transition to REVIEW -- independent exact ticket verify and diff review
+- 24.08.26 16:00 [E-4264] [parent: E-4263] [T-1153] [agent: saipen-cli] [op: checkpoint-e35beef7b7614ea89909b2a21f65df03] RUN: validate.py --gate core review rerun -> PASS
+- 24.08.26 16:00 [E-4265] [parent: E-4264] [T-1153] [agent: saipen-cli] [op: checkpoint-1a6c4e4c76f14dd6b1f69070bd076a7c] DEC: REVIEW pass 3 -> SHIP -- isolated scope; unittest 116/116, routing 46/46 and core PASS; diff-check clean; no P0/P1
+- 24.08.26 16:00 [E-4266] [parent: E-4265] [T-1153] [agent: saipen-cli] [op: transition-f3d4c2e394c94e5581a70bb3c9e0647d] RUN: transition to SHIP -- Cyrillic routing and uniform cc valve contract independently reverified
+- 24.08.26 16:01 [E-4267] [parent: E-4266] [T-1153] [agent: saipen-cli] [op: checkpoint-e731a3b6e9c8463ea5ea763523922940] RUN: v7.226.2 release metadata final; validate.py --gate core -> PASS
+- 24.08.26 16:01 [E-4268] [parent: E-4267] [T-1153] [agent: saipen-cli] [op: scope-ffe28e15e238499396cb59188e2f2f6a] DEC: release scope recorded -- 17 path(s) bound to 0491e6eba693
+- 24.08.26 16:02 [E-4269] [parent: E-4268] [T-1153] [agent: saipen-cli] [op: finish-8fa7d89bd6a64038ae0774847a1a8d67] RUN: ship v7.226.2 -> content commit ca4598939670 pushed
+- 24.08.26 16:02 [E-4270] [parent: E-4269] [T-1153] [agent: saipen-cli] [op: finish-8fa7d89bd6a64038ae0774847a1a8d67] DEC: ticket finished via SAIOPS -- completion (from SHIP)
