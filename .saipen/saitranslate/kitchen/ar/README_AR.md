@@ -26,7 +26,7 @@ Markdown داخل المشروع(`.saipen/`), لذا أي agent بارد متو�
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.227.0** | [المواصفات](SPEC.md) | [الدليل](GUIDE.md) | [النواة](saipen/CORE.md) | [الصيانة](saipen/MAINTENANCE.md) | [النمط](saipen/STYLE.md) | [واجهة المستخدم](saipen/UI.md) | [الامتثال](saipen/CONFORMANCE.md) |MIT
+**v7.227.1** | [المواصفات](SPEC.md) | [الدليل](GUIDE.md) | [النواة](saipen/CORE.md) | [الصيانة](saipen/MAINTENANCE.md) | [النمط](saipen/STYLE.md) | [واجهة المستخدم](saipen/UI.md) | [الامتثال](saipen/CONFORMANCE.md) |MIT
 
 **مفاتيح سريعة:** `cc` يواصل سياق المشروع إلى التقارب (يستأنف الهدف النشط إذا كان مضبوطًا)، `sss` يعرض الحالة دون لمس الكود، و`ss` يحفظ نقطة تحقق ويتوقف. [انظر خريطة المفاتيح الكاملة 19](saipen/RFC.md#110-command-surface). التوائم السيريلية تعمل أيضًا: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 

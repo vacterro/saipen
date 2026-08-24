@@ -514,6 +514,53 @@ class MilestoneUndoTests(ControlFixture):
         self.assertTrue(restored.ok, restored.to_dict())
         self.assertEqual(path.read_text(encoding="utf-8"), "indicator = False\n")
 
+    def test_published_dirty_work_creates_forward_revert(self):
+        project = self.make_project()
+        path = project / "topbar.py"
+        path.write_text("indicator = False\n", encoding="utf-8")
+        self.assertTrue(create_milestone(project, "tester", "Baseline", ["topbar.py"]).ok)
+
+        started = directive_entry(project, "tester", "queue timer indicator", kind="build")
+        self.assertTrue(started.ok, started.to_dict())
+        ticket = started.data["ticket"]
+        self.assertTrue(transition_phase(project, "BUILD", "tester", ticket, "native fit").ok)
+        path.write_text("indicator = True\n", encoding="utf-8")
+        self.assertTrue(
+            attempt_lifecycle(
+                project,
+                "tester",
+                "close",
+                result="candidate",
+                stop="completed_execution",
+            ).ok
+        )
+        self.assertTrue(transition_phase(project, "VERIFY", "tester", ticket, "verify").ok)
+        self.assertTrue(
+            checkpoint(project, "tester", "RUN", ticket, "controls -> PASS conf: high").ok
+        )
+        self.assertTrue(transition_phase(project, "REVIEW", "tester", ticket, "review").ok)
+        self.assertTrue(record_scope(project, ticket, "tester", ["topbar.py"]).ok)
+        self.assertTrue(transition_phase(project, "SHIP", "tester", ticket, "ship").ok)
+        self.assertTrue(
+            checkpoint(
+                project,
+                "tester",
+                "RUN",
+                ticket,
+                "ship v7.227.0 -> content commit abcdef123456 pushed",
+            ).ok
+        )
+        self.assertTrue(finish_ticket(project, ticket, "tester").ok)
+
+        preview = undo_preview(project)
+        self.assertTrue(preview.ok, preview.to_dict())
+        self.assertTrue(preview.data["dirty_since"])
+        self.assertTrue(preview.data["published"])
+        reverted = undo_confirm(project, "tester", "CP-001", "Published design rejected")
+        self.assertTrue(reverted.ok, reverted.to_dict())
+        self.assertEqual(reverted.code, "FORWARD_REVERT_WORK_STARTED")
+        self.assertEqual(path.read_text(encoding="utf-8"), "indicator = True\n")
+
     def test_exact_binary_restore_append_only_and_branch_sequence(self):
         project = self.make_project()
         payload = project / "data with space.bin"

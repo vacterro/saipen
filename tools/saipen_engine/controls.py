@@ -34,6 +34,7 @@ from .journal import (
     run_mutation,
 )
 from .lock import project_writer_lock
+from .log import read_history_events
 from .operations import (
     _claim_move,
     _docs_preconditions,
@@ -63,6 +64,9 @@ MAX_REASON = 240
 _CP_RE = re.compile(r"^CP-(\d+)$")
 _TICKET_RE = re.compile(r"^T-[1-9]\d*$")
 _ATTEMPT_RE = re.compile(r"^A-\d{3,}$")
+_PUBLISHED_RELEASE_RE = re.compile(
+    r"^ship v\S+ -> content commit [0-9a-f]{12,64} pushed$"
+)
 
 
 def _json_bytes(value: Any) -> bytes:
@@ -1381,6 +1385,31 @@ def _reviewed_dirty_ownership(
     return proven == set(dirty), sorted(evidence)
 
 
+def _work_release_is_published(root: Path, work_ids: list[str]) -> bool:
+    """Prove every Work owning a post-milestone delta was pushed.
+
+    The release engine appends this machine-owned RUN evidence only after the
+    content commit is successfully published.  Unlike local remote-tracking
+    refs, the append-only LOG evidence survives a fresh clone and does not
+    require a network query during undo preview.
+    """
+    wanted = set(work_ids)
+    if not wanted:
+        return False
+    try:
+        events = read_history_events(root)
+    except (OSError, UnicodeError, ValueError):
+        return False
+    published = {
+        str(event.get("ticket"))
+        for event in events
+        if event.get("taxonomy") == "RUN"
+        and event.get("ticket") in wanted
+        and _PUBLISHED_RELEASE_RE.fullmatch(str(event.get("text", "")))
+    }
+    return published == wanted
+
+
 def undo_preview(project_root: Path | str) -> Result:
     """Select exactly one lineage step and prove the restore scope read-only."""
     root = Path(project_root).resolve()
@@ -1472,7 +1501,11 @@ def undo_preview(project_root: Path | str) -> Result:
             "will_preserve": "paths outside the exact milestone scope",
             "foreign_changes": [],
             "external_effects": current.get("external_effects", []),
-            "published": bool(current.get("published")) and not dirty_since,
+            "published": (
+                _work_release_is_published(root, ownership_work)
+                if dirty_since
+                else bool(current.get("published"))
+            ),
             "dirty_since": dirty_since,
             "ownership_work": ownership_work,
             "restore_plan_hash": restore_plan_hash,

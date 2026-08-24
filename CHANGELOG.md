@@ -1,6 +1,14 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.227.1 -- 2026-08-24 -- Published Undo Proof Hardening (T-1157)
+
+- T-1157: proves remote-published post-milestone Work from append-only
+  machine-owned release evidence, so `zz` creates forward Revert Work instead
+  of restoring published content directly.
+- T-1157: adds a hostile regression covering a dirty-since-milestone release,
+  fresh-clone-safe publication evidence and preservation of published bytes.
+
 ## 7.227.0 -- 2026-08-24 -- Focus, Build, Cut and Undo Controls (T-1156)
 
 - T-1156: adds `ff` read-only semantic focus, `vv` native foreground Work
