@@ -164,3 +164,17 @@
 - 24.08.26 23:19 [E-4347] [parent: E-4346] [T-1158] [agent: opencode] [op: scope-3097dd4335aa41d88ba1b1f991b6e8de] DEC: release scope recorded -- 8 path(s) bound to b96bdcb9e1b9
 - 24.08.26 23:19 [E-4348] [parent: E-4347] [T-1158] [agent: opencode] [op: finish-d99d18f9493c4c4ea9870bd394375916] RUN: ship v7.227.2 -> content commit e91c65f1c7ae pushed
 - 24.08.26 23:19 [E-4349] [parent: E-4348] [T-1158] [agent: opencode] [op: finish-d99d18f9493c4c4ea9870bd394375916] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 24.08.26 23:21 [E-4350] [parent: E-4349] [T-1159] [agent: opencode] [op: ticket-a48b0be547e54ff88822c18eda3dd57a] DEC: ticket added via SAIOPS
+- 24.08.26 23:21 [E-4351] [parent: E-4350] [T-1159] [agent: opencode] [op: claim-c7600548cfe74e8d9bdc4af81415bd12] DEC: claimed via SAIOPS -- owner opencode
+- 24.08.26 23:21 [E-4352] [parent: E-4351] [T-1159] [agent: opencode] [op: transition-d233d4562cfd4a54bf480ddd5f85931d] RUN: transition to SCOUT
+- 24.08.26 23:21 [E-4353] [parent: E-4352] [T-1159] [agent: opencode] [op: transition-fa53163939384bfb8e1d692927a7b132] RUN: transition to BUILD -- scout: carriers truthful but no cross-invocation liveness memory; no drift diagnosis on unknown command; plan: cache-projection liveness + fingerprint in crew carriers + RUNTIME_DRIFT fallthrough
+- 24.08.26 23:31 [E-4354] [parent: E-4353] [T-1159] [agent: opencode] [op: checkpoint-2d994c65a65e4eebbb559a349872cdc4] RUN: verification: tools/test_crew_liveness_drift 14/14 PASS; unittest discover tools 169/169 PASS; ruff changed surfaces PASS; conf: high
+- 24.08.26 23:32 [E-4355] [parent: E-4354] [T-1159] [agent: opencode] [op: transition-0d419f84aec94f5d8d16b77b1e3159dd] RUN: transition to VERIFY
+- 24.08.26 23:32 [E-4356] [parent: E-4355] [T-1159] [agent: opencode] [op: checkpoint-a35578f197534763afb138702a2d4d03] RUN: verification: tools/test_crew_liveness_drift 14/14 PASS; unittest discover tools 169/169 PASS; ruff changed surfaces PASS; conf: high
+- 24.08.26 23:32 [E-4357] [parent: E-4356] [T-1159] [agent: opencode] [op: transition-0488e80918b84919b6976ed6b8f7b97b] RUN: transition to REVIEW -- verification evidence
+- 24.08.26 23:32 [E-4358] [parent: E-4357] [op: transition-0488e80918b84919b6976ed6b8f7b97b] DEC: goal_tickets 4->5
+- 24.08.26 23:33 [E-4359] [parent: E-4358] [T-1159] [agent: opencode] [op: checkpoint-08b9a842345d460fadcd0d97e577946d] RUN: review: diff audited; liveness is cache-projection not authority; dry-run/read-only write nothing; drift scoped to unknown tokens only; no role special cases; aliases one route; conf: high
+- 24.08.26 23:33 [E-4360] [parent: E-4359] [T-1159] [agent: opencode] [op: transition-8af90f4f6ed844e886c06013027bfad9] RUN: transition to SHIP
+- 24.08.26 23:33 [E-4361] [parent: E-4360] [T-1159] [agent: opencode] [op: scope-2bb03e6ebb59476da2a283669ffc8d8b] DEC: release scope recorded -- 11 path(s) bound to 427fa8acea4d
+- 24.08.26 23:34 [E-4362] [parent: E-4361] [T-1159] [agent: opencode] [op: finish-7581714132a04753a55f15344d865b9b] RUN: ship v7.228.0 -> content commit db70ff2108b8 pushed
+- 24.08.26 23:34 [E-4363] [parent: E-4362] [T-1159] [agent: opencode] [op: finish-7581714132a04753a55f15344d865b9b] DEC: ticket finished via SAIOPS -- completion (from SHIP)

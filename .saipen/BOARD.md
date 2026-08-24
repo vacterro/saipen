@@ -1,6 +1,7 @@
 ## DOING
 ## TODO
 ## DONE
+- [x] T-1159 [P0] cc/sc crew continuation must execute actionable RUN_ROLE actions in current agent instead of passive polling; liveness stall guard; runtime drift diagnosis | verify: unittest tools.test_crew_liveness_drift PASS conf: high + full suite green + validator green | owner: opencode | claim_time: 2026-08-24T23:33:21Z
 - [x] T-1158 [P0] BUILD user directive: make zz release-scope ownership portable across fresh clones | verify: agent FIT/impact pass recorded; normal SCOUT, BUILD, VERIFY, REVIEW and SHIP/DONE gates pass | owner: opencode | claim_time: 2026-08-24T23:18:33Z
 - [x] T-1157 [P0] BUILD user directive: make zz treat remote-published post-milestone Work as forward revert evidence | verify: agent FIT/impact pass recorded; normal SCOUT, BUILD, VERIFY, REVIEW and SHIP/DONE gates pass | owner: codex | claim_time: 2026-08-24T20:41:07Z
 - [x] T-1156 [P1] Implement native FF/XX/VV/ZZ control primitives: read-only focus, bounded build intake, two-stage cut, sparse milestone-backed undo, status/validator/tests/docs, preserving Core DFA and SAIOPS safety | verify: Implement native FF/XX/VV/ZZ control primitives: read-only focus, bounded build intake, two-stage cut, sparse milestone-backed undo, status/validator/tests/docs, preserving Core DFA and SAIOPS safety is complete and the repository-declared verification harness passes | owner: codex | claim_time: 2026-08-24T20:17:07Z
