@@ -214,7 +214,8 @@
   5. Commit the wiki clone with a message such as `docs: refresh v7.226 producer and audit truth (re-bound to e045ad07)`, push only through the authorized SHIP path, then verify Home, Tutorials, Scenarios, and SubSaipen live.
 - **details:** W-033 (3a343e8d) went stale without content drift: CORE-002..007 + W2-004..008 touched producer.py/journal.py/operations.py only -- no CONFORMANCE.md or saipen/ doc edits, so canonical IDs and wiki-facing prose are unchanged. FORCE-FRESH re-read the 8 kitchen pages, recomputed the write_set from page bytes and the read_set from the live tree (42 deps, none absent), rebuilt the package with the current identity, and published a fresh strict READY. W-034 supersedes W-033 with identical payload content, refreshed binding only. Main tree and wiki remote untouched.
 ## W-035: saiwiki package bound to e98bcb03
-- **status:** ready
+- **status:** stale
+- **superseded_by:** W-039
 - **summary:** current saiwiki package bound to committed source
 - **main_project_refs:** []
 - **critical:** false
@@ -265,7 +266,8 @@
 
 
 ## W-038: saiwiki re-bind to 078f5cd6
-- **status:** ready
+- **status:** stale
+- **superseded_by:** W-039
 - **summary:** current saiwiki package re-bound to committed source 078f5cd6
 - **main_project_refs:** []
 - **critical:** false
@@ -279,3 +281,40 @@
 - **verified:** PASS -- integrated CURRENT against 078f5cd6
 - **instructions:** Core records the integrated saiwiki disposition.
 - **details:** content-identical re-bind to 078f5cd6/55f5361.
+
+## W-039: FORCE-FRESH command-routing and safety-valve truth
+- **status:** stale
+- **superseded_by:** W-040
+- **summary:** Rebuilt the maintained wiki against current command-routing and safety-valve semantics: six changed canonical scenario titles, mechanical Cyrillic folding (six twins/nine without; `сс` is continue), uniform `cc` valve resume, 15 exact routes, and the fixed WAIT shape.
+- **main_project_refs:** [VERSION, README.md, CHANGELOG.md, KNOWLEDGE/ADR-0001-v7-producer-parallelism.md, saipen/BOOT.md, saipen/CORE.md, saipen/STYLE.md, saipen/CONFORMANCE.md, saipen/CONVERGE.md, saipen/OPS.md, saipen/phases/*.md, extensions/subs/PROTOCOL.md, extensions/subs/crew.md, extensions/subs/sai*.md, tools/freshness.py, tools/validate.py, tools/saipen_engine/producer.py, tools/saipen_engine/intent.py, tools/saipen_engine/journal.py, tools/saipen_engine/crew.py, tools/saipen_engine/release.py, tools/saipen_engine/subs.py]
+- **critical:** false
+- **severity:** P2
+- **producer:** saiwiki
+- **source_head:** b666b77ff3ad8e5066de4d3ec3ad3fc03c63f1c8
+- **source_tree_fingerprint:** git-delta-v1:ffafd93a02dc3fecb0dea8e1c92dd53685d6813c5bb6c1d50160e71d7c0b12b6
+- **role_revision:** sha256:54a42475a124ab0f27e83d600a284a9cc54d9668029c4828cfc48512b031df13
+- **coverage:** 9/9 maintained wiki pages re-read; Home, Phases, Tutorials, Use-Cases and Scenarios corrected; Getting-Started, SubSaipen, _Footer and _Sidebar verified content-current
+- **payload:** [.saipen/extensions/subs/saiwiki/kitchen/wiki/Home.md, Phases.md, Getting-Started.md, SubSaipen.md, Tutorials.md, Use-Cases.md, Scenarios.md, _Footer.md, _Sidebar.md]
+- **verified:** PASS -- 9-page inventory; Scenarios IDs 1-256 unique/contiguous; canonical mirror `sha256:b5e98946da9926b6`; stale valve/twin prose scan clean; wiki diff whitespace check PASS; strict READY `sha256:7ee12026e17ee890111247a5b9a3aa6aa49bb3c8ef5d7c374084f590d08a58e9` at epoch 1 with 42 exact read dependencies and 9 authenticated payload entries
+- **instructions:**
+  1. Recompute and require the exact source triple above; any mismatch means run `qq` again.
+  2. Run `python -B tools/validate.py --gate collect:saiwiki`; refuse on any mismatch.
+  3. Integrate only the 9 declared payload pages through Core's named saiwiki collect path.
+  4. Re-run the scenario mirror, wiki whitespace, Core VERIFY and REVIEW gates before SHIP; leave the wiki remote untouched until authorized SHIP.
+- **details:** W-035/W-038 were stale bindings and carried no payload. W-039 is a fresh complete package. It also corrects the old scenario footer count from 254 to 256 and replaces historical current-state prose that assigned valve reauthorization to bare `saipen goal`.
+
+## W-040: v7.226.1 final wiki rebind
+- **status:** ready
+- **summary:** Rebound all nine reviewed wiki pages after final v7.226.1 metadata; current-version badges, footer, phase range and producer-status rows now name the release packages SAIT-023/W-040.
+- **main_project_refs:** [VERSION, README.md, CHANGELOG.md, KNOWLEDGE/ADR-0001-v7-producer-parallelism.md, saipen/BOOT.md, saipen/CORE.md, saipen/STYLE.md, saipen/CONFORMANCE.md, saipen/CONVERGE.md, saipen/OPS.md, saipen/phases/*.md, extensions/subs/PROTOCOL.md, extensions/subs/crew.md, extensions/subs/sai*.md, tools/freshness.py, tools/validate.py, tools/saipen_engine/producer.py, tools/saipen_engine/intent.py, tools/saipen_engine/journal.py, tools/saipen_engine/crew.py, tools/saipen_engine/release.py, tools/saipen_engine/subs.py]
+- **critical:** false
+- **severity:** P2
+- **producer:** saiwiki
+- **source_head:** b666b77ff3ad8e5066de4d3ec3ad3fc03c63f1c8
+- **source_tree_fingerprint:** git-delta-v1:53d374c6c00ca7d3e9c9ef7d3ae90cb523f7740b0f41913c6b809fd982141b95
+- **role_revision:** sha256:54a42475a124ab0f27e83d600a284a9cc54d9668029c4828cfc48512b031df13
+- **coverage:** 9/9 maintained pages; 256 scenario IDs unique/contiguous; v7.226.1 current-version surfaces refreshed
+- **payload:** [.saipen/extensions/subs/saiwiki/kitchen/wiki/Home.md, Phases.md, Getting-Started.md, SubSaipen.md, Tutorials.md, Use-Cases.md, Scenarios.md, _Footer.md, _Sidebar.md]
+- **verified:** PASS -- strict READY `sha256:86bd88bf46b7b4281edf2b0653bbeb827578a18c921e1f286f1ebcb18d7763d7` at epoch 3 with 42 exact read dependencies and 9 authenticated payload entries; canonical mirror `sha256:b5e98946da9926b6`
+- **instructions:** Run `python -B tools/validate.py --gate collect:saiwiki`; integrate only the named READY package through Core; publish the wiki only through an authorized SHIP path.
+- **details:** W-039 content fixes are preserved. W-040 adds only final release-version truth and a current producer-status rebind before the main v7.226.1 ship.

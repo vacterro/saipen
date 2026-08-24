@@ -1,0 +1,19 @@
+{
+  "op_id": "scope-3afd38f482a64ffa83696abc85ad5ff8",
+  "paths": {
+    ".saipen/extensions/subs/saiwiki/BOARD.md": "c7f2000d03af89fb",
+    ".saipen/extensions/subs/saiwiki/LOG.md": "712014bfe6e623c4",
+    ".saipen/extensions/subs/saiwiki/STATE.md": "c30a368d0fa7a1a5",
+    ".saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md": "5005e251b3573c79",
+    ".saipen/saitranslate/kitchen/OUTBOX.md": "0ecbd78a200850df",
+    ".saipen/saitranslate/kitchen/ded/README_DED.md": "ed900684acbf418d",
+    ".saipen/saitranslate/kitchen/tr/README_TR.md": "b2b1e9a1b994447c"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-08-24T15:29:57Z",
+  "schema_version": 1,
+  "source_head": "b666b77ff3ad8e5066de4d3ec3ad3fc03c63f1c8",
+  "source_tree_fingerprint": "git-delta-v1:53d374c6c00ca7d3e9c9ef7d3ae90cb523f7740b0f41913c6b809fd982141b95",
+  "ticket": "T-1152"
+}

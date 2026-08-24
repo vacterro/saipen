@@ -1,6 +1,19 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.226.1 -- 2026-08-24 -- Producer Translation and Wiki Rebind (T-1152)
+
+- T-1152: force-refreshed and independently audited all 32 locale READMEs
+  against the current normalized English source; the canonical digest remains
+  `2a33e364c3c12e8b1b9b2caf41b05db3ee27f17161336579ae85ee59da34fe56`.
+- T-1152: repaired the Turkish scenario-fixture Markdown link and removed its
+  leaked English fragment; refreshed the DED rendering.
+- T-1152: rebound the nine-page saiwiki package to current Core truth, including
+  256 contiguous conformance rows, 15 shortcut routes and the exact `cc`
+  safety-valve continuation contract.
+- T-1152: published strict current producer packages SAIT-022 and W-039; both
+  producer collection gates and the converge gate pass.
+
 ## 7.226.0 -- 2026-08-20 -- V7 Producer Parallelism Hardening (T-1100)
 
 Safe parallel execution of isolated SubSaipen PRODUCER roles (saitranslate /

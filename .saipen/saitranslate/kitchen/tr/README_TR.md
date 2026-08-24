@@ -26,7 +26,7 @@ kaldırma işlemi tümüyle yereldir — bulut hizmeti, arka plan programı, ver
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.226.0** | [Spesifikasyon](SPEC.md) | [Kılavuz](GUIDE.md) | [Çekirdek](saipen/CORE.md) | [Bakım](saipen/MAINTENANCE.md) | [Stil](saipen/STYLE.md) | [Kullanıcı Arayüzü](saipen/UI.md) | [Uygunluk](saipen/CONFORMANCE.md) |MIT
+**v7.226.1** | [Spesifikasyon](SPEC.md) | [Kılavuz](GUIDE.md) | [Çekirdek](saipen/CORE.md) | [Bakım](saipen/MAINTENANCE.md) | [Stil](saipen/STYLE.md) | [Kullanıcı Arayüzü](saipen/UI.md) | [Uygunluk](saipen/CONFORMANCE.md) |MIT
 
 **Kısayol tuşları:** `cc` proje bağlamını yakınsamaya kadar sürdürür (ayarlanmışsa çalışan hedefi sürdürür), `sss` koda dokunmadan durumu bildirir ve `ss` kontrol noktası kaydedip durur. [15 tuşluk tam haritaya bakın](saipen/RFC.md#110-command-surface). Kiril ikizleri de çalışır: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
 
@@ -134,11 +134,11 @@ ve[MAINTENANCE.md](saipen/MAINTENANCE.md)mevcut normatif davranışları tanıml
 - **Makine kontrolü durumu.**Stdlib-only canonical
   [doğrulayıcı](tools/validate.py)canlı
   [Durum şeması](extensions/schemas/state.schema.json)ve faz geçişlerini
-bilet bağımlılıklarını, olay grafik bağlantılarını, çok belge
-değişmezler, yetenekler ve kurtarma durumu.
-- **Hata kapsama alanı.** [CONFORMANCE.md](saipen/CONFORMANCE.md)haritalar
-gereksinimleri[senaryo sabitleri](tests/scenarios/); the
-  [senaryo çalıştırıcısı](tools/run_scenarios.py)yapısal geçiş/kalma durumlarını çalıştırır
+bilet bağımlılıklarını, olay-grafiği bağlantılarını, çok belge
+invariant'larını, yetenekleri ve kurtarma durumunu kontrol eder.
+- **Hata kapsamı.** [CONFORMANCE.md](saipen/CONFORMANCE.md) gereksinimleri
+  [senaryo sabitlerine](tests/scenarios/) eşler;
+  [senaryo çalıştırıcısı](tools/run_scenarios.py) yapısal geçiş/kalma durumlarını çalıştırır
 bozuk geri kazanım durumu, geçersiz geçişler, bağımlılık döngüleri ve
 salt okunur kısıtlamaları içerir.
 - **Regresyon kontrolleri.** [audit_checks.py](tools/audit_checks.py)değiştirir
