@@ -1,6 +1,14 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.226.3 -- 2026-08-24 -- Producer Dry-Run Regression (T-1154)
+
+- T-1154: adds a real public-CLI regression proving `qq --dry-run` and
+  `ee --dry-run` leave existing producer namespaces byte-identical.
+- T-1154: the control covers staging, settled/superseded directories,
+  producer epochs and existing kitchen bytes; the focused test and all 117
+  unit tests pass.
+
 ## 7.226.2 -- 2026-08-24 -- Cyrillic Shortcut Routing (T-1153)
 
 - T-1153: routes whole-message shortcuts through one shared Unicode

@@ -288,6 +288,31 @@ class IntentAuditTests(unittest.TestCase):
         self.assertEqual(result["code"], "PREPARE_PLAN")
         self.assertEqual(_hash_tree(root), before)
 
+    def test_cli_prepare_dry_run_keeps_existing_producer_trees_byte_identical(self):
+        forbidden = (".prepare-staging", "SETTLED", "SUPERSEDED", "producer_epoch.json")
+        for command, role in (("qq", "saiwiki"), ("ee", "saitranslate")):
+            with self.subTest(command=command, role=role):
+                temporary = tempfile.TemporaryDirectory(
+                    prefix=f"saipen-{role}-dryrun-zero-write-"
+                )
+                self.addCleanup(temporary.cleanup)
+                root = Path(temporary.name) / "project"
+                self._scaffold_prepare_project(root)
+                namespace = P.producer_namespace(root, role)
+                sentinel = namespace / "kitchen" / "sentinel.txt"
+                sentinel.parent.mkdir(parents=True, exist_ok=True)
+                sentinel.write_text("owned producer bytes\n", encoding="utf-8")
+
+                before = _hash_tree(root)
+                rc, result = self._invoke_cli(root, command, "--dry-run")
+
+                self.assertEqual(rc, 0, result)
+                self.assertEqual(result["code"], "PREPARE_PLAN")
+                self.assertEqual(result["route"], command)
+                self.assertEqual(_hash_tree(root), before)
+                for name in forbidden:
+                    self.assertFalse((namespace / name).exists(), name)
+
     def test_audit_core005_malformed_producer_commands_are_zero_write(self):
         cases = (
             ("qq", "ensure_producer_ready"),

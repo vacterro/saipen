@@ -1,0 +1,13 @@
+{
+  "op_id": "scope-ff20b475f75045d9a49d8355cf68f076",
+  "paths": {
+    "tools/test_intent_audit_fixes.py": "245fefe3b274e07a"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-08-24T16:05:21Z",
+  "schema_version": 1,
+  "source_head": "126b2575d40347639a316ec37a95e1d0369db408",
+  "source_tree_fingerprint": "git-delta-v1:23b1eaf4e98e639f22a676616b17a884ebf6acbd4fc7f22929cd3e59b396a24d",
+  "ticket": "T-1154"
+}
