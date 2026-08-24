@@ -85,3 +85,18 @@
 - 24.08.26 16:01 [E-4268] [parent: E-4267] [T-1153] [agent: saipen-cli] [op: scope-ffe28e15e238499396cb59188e2f2f6a] DEC: release scope recorded -- 17 path(s) bound to 0491e6eba693
 - 24.08.26 16:02 [E-4269] [parent: E-4268] [T-1153] [agent: saipen-cli] [op: finish-8fa7d89bd6a64038ae0774847a1a8d67] RUN: ship v7.226.2 -> content commit ca4598939670 pushed
 - 24.08.26 16:02 [E-4270] [parent: E-4269] [T-1153] [agent: saipen-cli] [op: finish-8fa7d89bd6a64038ae0774847a1a8d67] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 24.08.26 16:03 [E-4271] [parent: E-4270] [T-1154] [agent: saipen-cli] [op: ticket-648f83d4d6734ab1a9ceb938e6b1854a] DEC: ticket unblock via SAIOPS -- T-1153 released as v7.226.2; shared-file conflict removed and exact dry-run test hunk restored
+- 24.08.26 16:03 [E-4272] [parent: E-4271] [T-1154] [agent: saipen-cli] [op: claim-138095dc93bd4e6c859078d0793ebef6] DEC: claimed via SAIOPS -- owner saipen-cli
+- 24.08.26 16:03 [E-4273] [parent: E-4272] [T-1154] [agent: saipen-cli] [op: transition-ad1f85d246e5485195067796498a79d3] RUN: transition to BUILD -- restored isolated regression hunk after T-1153 release
+- 24.08.26 16:03 [E-4274] [parent: E-4273] [T-1154] [agent: saipen-cli] [op: checkpoint-9e319d82e7a243b59300163eba70688a] RUN: build -> isolated qq/ee dry-run zero-write regression restored after T-1153 ship
+- 24.08.26 16:03 [E-4275] [parent: E-4274] [T-1154] [agent: saipen-cli] [op: transition-87ba6504cd1641a29bb5ae5795b431dc] RUN: transition to VERIFY -- run focused byte-identity test, full unittest and core gate
+- 24.08.26 16:04 [E-4276] [parent: E-4275] [T-1154] [agent: saipen-cli] [op: checkpoint-592302a484c845e7bdb7b087e62dfa97] RUN: validate.py --gate core -> PASS
+- 24.08.26 16:04 [E-4277] [parent: E-4276] [T-1154] [agent: saipen-cli] [op: checkpoint-936780cc40f84e31ad5278e8508c912f] RUN: verify -> PASS conf: high -- focused qq/ee tree byte-identity test PASS; full unittest 117/117; core PASS
+- 24.08.26 16:04 [E-4278] [parent: E-4277] [T-1154] [agent: saipen-cli] [op: transition-e22cb55ae13642379ceebf246d5c105c] RUN: transition to REVIEW -- independent exact test and one-file diff review
+- 24.08.26 16:04 [E-4279] [parent: E-4278] [T-1154] [agent: saipen-cli] [op: checkpoint-74c32d1f938a45e8a1f64fa77512d6f7] RUN: validate.py --gate core review rerun -> PASS
+- 24.08.26 16:04 [E-4280] [parent: E-4279] [T-1154] [agent: saipen-cli] [op: checkpoint-476d811f241d42bea9472a8244a0bc73] DEC: REVIEW pass 2 -> SHIP -- focused qq/ee byte-identity PASS; full unittest 117/117; core PASS; one-file diff clean; no P0/P1
+- 24.08.26 16:04 [E-4281] [parent: E-4280] [T-1154] [agent: saipen-cli] [op: transition-72566c1e77d64147941a51809844006b] RUN: transition to SHIP -- isolated producer dry-run regression independently reverified
+- 24.08.26 16:05 [E-4282] [parent: E-4281] [T-1154] [agent: saipen-cli] [op: checkpoint-0414d0ed61044dcf9872bcb32d76c9cb] RUN: v7.226.3 release metadata final; validate.py --gate core -> PASS
+- 24.08.26 16:05 [E-4283] [parent: E-4282] [T-1154] [agent: saipen-cli] [op: scope-ff20b475f75045d9a49d8355cf68f076] DEC: release scope recorded -- 1 path(s) bound to 126b2575d403
+- 24.08.26 16:06 [E-4284] [parent: E-4283] [T-1154] [agent: saipen-cli] [op: finish-06009671f8a347bf935944887aff2c72] RUN: ship v7.226.3 -> content commit 8acd8437889b pushed
+- 24.08.26 16:06 [E-4285] [parent: E-4284] [T-1154] [agent: saipen-cli] [op: finish-06009671f8a347bf935944887aff2c72] DEC: ticket finished via SAIOPS -- completion (from SHIP)
