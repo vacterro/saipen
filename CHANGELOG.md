@@ -1,6 +1,14 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.227.2 -- 2026-08-24 -- Portable Undo Ownership (T-1158)
+
+- T-1158: binds post-milestone release-scope ownership to the existing
+  portable project lineage, so a cold agent in a fresh clone can preview
+  published undo without weakening exact-path/hash or foreign-edit checks.
+- T-1158: keeps runtime-path identity only for genuinely legacy scope records
+  and refuses malformed lineage-bearing records instead of falling back.
+
 ## 7.227.1 -- 2026-08-24 -- Published Undo Proof Hardening (T-1157)
 
 - T-1157: proves remote-published post-milestone Work from append-only

@@ -552,14 +552,19 @@ class MilestoneUndoTests(ControlFixture):
         )
         self.assertTrue(finish_ticket(project, ticket, "tester").ok)
 
-        preview = undo_preview(project)
+        relocated = project.parent / "fresh-clone-like-relocation"
+        shutil.copytree(project, relocated)
+        relocated_path = relocated / "topbar.py"
+
+        preview = undo_preview(relocated)
         self.assertTrue(preview.ok, preview.to_dict())
         self.assertTrue(preview.data["dirty_since"])
         self.assertTrue(preview.data["published"])
-        reverted = undo_confirm(project, "tester", "CP-001", "Published design rejected")
+        self.assertEqual(preview.data["ownership_work"], [ticket])
+        reverted = undo_confirm(relocated, "tester", "CP-001", "Published design rejected")
         self.assertTrue(reverted.ok, reverted.to_dict())
         self.assertEqual(reverted.code, "FORWARD_REVERT_WORK_STARTED")
-        self.assertEqual(path.read_text(encoding="utf-8"), "indicator = True\n")
+        self.assertEqual(relocated_path.read_text(encoding="utf-8"), "indicator = True\n")
 
     def test_exact_binary_restore_append_only_and_branch_sequence(self):
         project = self.make_project()

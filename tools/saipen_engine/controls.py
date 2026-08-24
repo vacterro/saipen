@@ -1356,6 +1356,7 @@ def _reviewed_dirty_ownership(
     except (OSError, ValueError):
         return False, []
     tickets = board.get("tickets", {})
+    live_lineage = project_lineage_identity(root)
     live_tokens: dict[str, str | None] = {}
     for rel in dirty:
         path = owned_target_path(root, rel, kind="undo ownership")
@@ -1369,9 +1370,21 @@ def _reviewed_dirty_ownership(
             continue
         ticket = record.get("ticket")
         paths = record.get("paths")
+        if "project_lineage" in record:
+            project_matches = (
+                isinstance(record.get("project_lineage"), str)
+                and bool(live_lineage)
+                and record.get("project_lineage") == live_lineage
+            )
+        else:
+            # Explicit compatibility boundary for old scope records: before
+            # the durable lineage carrier existed, runtime path identity was
+            # the only project binding available.  Never let a malformed new
+            # lineage-bearing record fall back to that weaker rule.
+            project_matches = record.get("project_identity") == canonical_identity(root)
         if (
             record.get("schema_version") != 1
-            or record.get("project_identity") != canonical_identity(root)
+            or not project_matches
             or not isinstance(ticket, str)
             or ticket not in tickets
             or not isinstance(paths, dict)
