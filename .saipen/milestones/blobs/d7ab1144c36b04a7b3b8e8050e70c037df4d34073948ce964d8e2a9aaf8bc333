@@ -1,0 +1,52 @@
+<p align="center">
+  <img src="assets/SAIPEN_design1.png" alt="SAIPEN Guide Title" width="800"/>
+</p>
+
+# SAIPEN गाइड (हिन्दी)
+
+सुनो, नौसिखिए। समस्या सरल है: आपके AI एजेंटों की याददाश्त गोल्डफिश जैसी है।
+
+**SAIPEN** आपके प्रोजेक्ट में `.saipen/` फ़ोल्डर के अंदर एक नोटबुक है।
+
+**त्वरित कुंजियाँ:** `cc` परियोजना संदर्भ को अभिसरण तक जारी रखता है (यदि कोई लक्ष्य निर्धारित है तो उसे फिर से शुरू करता है), `sss` कोड छुए बिना स्थिति दिखाता है और `ss` चेकपॉइंट सहेज कर रुक जाता है. [पूरा 15-कुंजी नक्शा देखें](../saipen/RFC.md#110-command-surface). सिरिलिक जुड़वाँ भी काम करती हैं: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+
+## त्वरित शुरुआत
+
+1. **प्रति मशीन एक बार इंस्टॉल करें:**
+```bash
+git clone https://github.com/vacterro/saipen
+cd saipen
+powershell -ExecutionPolicy Bypass -File .\bootstrap\inject.ps1     # Windows
+bash bootstrap/inject.sh                                            # macOS / Linux
+```
+
+2. **प्रोजेक्ट शुरू करें:**
+> `saipen set`
+
+3. **काम:**
+> `saipen`
+
+## कमांड
+
+| कमांड | कार्रवाई |
+|---|---|
+| `saipen set` | मेमोरी फ़ोल्डर प्रारंभ करें |
+| `saipen continue` | नोट्स से काम फिर से शुरू करें |
+| `saipen stop` | प्रगति सहेजें और रुकें |
+| `saipen status` | बोर्ड पढ़ें |
+| `saipen goal <text>` | नए लक्ष्य की ओर बढ़ें |
+| `saipen clean` | रिपॉजिटरी साफ़ करें |
+| `saipen translate` | 32 भाषाओं में पृथक अनुवाद निर्माण |
+| `saipen markhunt` | गहन, असीमित ऑडिट -- केवल निष्कर्ष दर्ज करता है, ठीक नहीं करता |
+| `saipen prepare` | अगले एजेंट को सौंपने के लिए कार्य पैक करें |
+| `saipen ship` | रिलीज़ प्रवाह ट्रिगर करें |
+
+## जानना अच्छा है
+- प्रोजेक्ट में वापस आने पर अनकमिटेड बदलाव मिले? सामान्य बात है -- SAIPEN केवल `ship` पर कमिट करता है, हर कदम पर नहीं। एजेंट कुछ भी छूने से पहले जांचता है कि ये बदलाव किसके हैं।
+- चाहते हैं कि यह किसी वास्तविक आर्किटेक्चर निर्णय को याद रखे? इसे `.saipen/KNOWLEDGE/` में डालें, या तो एक `decisions.md` फ़ाइल के रूप में या क्रमांकित `ADR-001.md` फ़ाइलों के रूप में।
+- इस मशीन पर git या shell नहीं है? एजेंट अनुमान लगाने के बजाय साफ़ बता देता है (`mode`, `WAIT: <category> -- <प्रश्न>`) (श्रेणी सात में से एक है: `manual-verify, destructive-op, first-publish, user brake, blocked, safety valve, init`; यह बताती है कि किस तरह का उत्तर इसे अनब्लॉक करता है)।
+- सुरक्षा जाल चाहिए? `python <saipen-clone>/tools/install_hook.py` एक प्री-कमिट जांच स्थापित करता है।
+
+---
+
+**Full command list / complete command reference:** [RFC § 1.10](../saipen/RFC.md#110-command-surface) — the authoritative list of every `saipen` command.

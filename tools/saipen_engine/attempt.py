@@ -467,45 +467,44 @@ def ticket_admission_error(
 ) -> str | None:
     """Centralized ticket-level admission check (CORE-002 audit ed1f86e8).
 
-    Resolves the ONE producing candidate attempt for the Work from its
-    ticket-coherent lineage, then requires a valid VERIFY boundary after that
-    candidate close. A later non-candidate attempt (interrupted/failed) must
-    NOT erase the producer's admission obligation: the producing candidate is
-    the earliest candidate close on THIS ticket, never the globally latest
-    attempt by open_event.
+    Resolves every candidate attempt for the Work from its ticket-coherent
+    lineage, then requires a valid VERIFY boundary after each candidate close.
+    The first candidate remains the producing episode; a later candidate is a
+    new producer claim and cannot be appended after admission to stamp fresh
+    producer authority onto already-DONE Work. A later non-candidate attempt
+    (interrupted/failed) does not erase the original admission obligation.
 
     Both writer-side finish and full validation share this helper, so a DONE
     the CLI commits is exactly the DONE the validator certifies.
     """
-    candidate = None
-    for rec in records.values():
-        if rec.get("ticket") != ticket_id:
-            continue
-        if rec.get("result") != "candidate":
-            continue
-        if rec.get("close_event") is None:
-            continue
-        # The producing episode is the FIRST candidate close on the Work;
-        # later candidate records are replay of the same result.
-        if candidate is None or rec["open_event"] < candidate["open_event"]:
-            candidate = rec
-    if candidate is None:
+    candidates = sorted(
+        (
+            rec
+            for rec in records.values()
+            if rec.get("ticket") == ticket_id
+            and rec.get("result") == "candidate"
+            and rec.get("close_event") is not None
+        ),
+        key=lambda rec: rec["open_event"],
+    )
+    if not candidates:
         return None
     from .log import _is_verify_boundary
 
-    close_eid = candidate["close_event"]
-    boundary_after = any(
-        ev.get("ticket") == ticket_id
-        and ev.get("taxonomy") == "RUN"
-        and _is_verify_boundary(ev)
-        and ev["event"] > close_eid
-        for ev in events
-    )
-    if not boundary_after:
-        return (
-            f"ticket {ticket_id} is DONE but its producing attempt "
-            f"{candidate['id']} closed candidate at E-{close_eid} with no "
-            f"VERIFY boundary after that close -- a producer claim admitted "
-            "without independent verification"
+    for candidate in candidates:
+        close_eid = candidate["close_event"]
+        boundary_after = any(
+            ev.get("ticket") == ticket_id
+            and ev.get("taxonomy") == "RUN"
+            and _is_verify_boundary(ev)
+            and ev["event"] > close_eid
+            for ev in events
         )
+        if not boundary_after:
+            return (
+                f"ticket {ticket_id} is DONE but its candidate attempt "
+                f"{candidate['id']} closed at E-{close_eid} with no VERIFY "
+                "boundary after that close -- a producer claim admitted "
+                "without independent verification"
+            )
     return None

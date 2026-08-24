@@ -17,6 +17,7 @@ import json
 import os
 import re
 import sys
+from contextlib import suppress
 from pathlib import Path
 
 from saipen_engine import codec, snapshot
@@ -103,6 +104,12 @@ def _agent_for(project_root: Path) -> str:
 #   improve (bare prepare) / submit / complete / sweep /
 #      cycle-complete / abort / clean ................ MUTATING
 #   improve status / sweep-queue / verify ............ READ_ONLY
+#   focus / ff ........................................ READ_ONLY
+#   cut / xx target ................................... READ_ONLY preview
+#   cut / xx confirm .................................. MUTATING
+#   build / vv ........................................ MUTATING
+#   undo / zz ......................................... READ_ONLY preview
+#   undo / zz confirm ................................. MUTATING
 _MUTATING_TOPLEVEL = frozenset(
     {
         "claim",
@@ -147,6 +154,8 @@ _MUTATING_TOPLEVEL = frozenset(
         "translate",
         "validate",
         "plan",
+        "build",
+        "vv",
     }
 )
 _MUTATING_USERPERSON = frozenset({"add", "remove", "reset"})
@@ -169,6 +178,25 @@ def _command_mutates(command: str, rest: list[str]) -> bool:
     malformed invocation stays zero-write).
     """
     sub = rest[0] if rest and not rest[0].startswith("-") else None
+    if command in ("focus", "ff"):
+        return False
+    if command in ("cut", "xx"):
+        return (
+            sub == "confirm"
+            and len(rest) == 4
+            and bool(rest[1].strip())
+            and rest[2] == "--"
+            and bool(rest[3].strip())
+        )
+    if command in ("undo", "zz"):
+        return (
+            sub == "confirm"
+            and len(rest) >= 4
+            and rest[2] == "--reason"
+            and bool(" ".join(rest[3:]).strip())
+        )
+    if command in ("build", "vv"):
+        return bool(" ".join(rest).strip())
     if command in _MUTATING_TOPLEVEL:
         return True
     if command == "userperson":
@@ -246,6 +274,8 @@ def _scan_full(project_root: Path) -> tuple[list[str], list[str], list[dict]]:
         [op["op_id"] for op in conflicts],
         [op for op in pending if op.get("corrupt")],
     )
+
+
 def _corrupt_refusal(corrupt: list[dict]) -> dict:
     """The ONE shared CORRUPT_JOURNAL refusal payload (P1#6)."""
     return {
@@ -500,6 +530,12 @@ def _status(project_root: Path, as_json: bool) -> int:
         "pending_ops": pending,
         "conflict_ops": conflicts,
     }
+    # Restore Milestones are a separate, optional authority domain.  Status
+    # reads bounded metadata only; full payload integrity belongs to create,
+    # undo and validate, never the common `sss` hot path.
+    from saipen_engine.controls import milestone_status
+
+    payload["milestone"] = milestone_status(project_root)
     parked = _parked_work(board["tickets"], state)
     if parked:
         payload["parked_work"] = parked
@@ -736,8 +772,7 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
                 "code": "VALIDATION_FAILED",
                 "detail": "recover takes no arguments (bare recover), or "
                 "`inspect <op_id>` / `resolve <op_id> [--resolution "
-                "accept_live|replan]`; unexpected: "
-                + " ".join(args),
+                "accept_live|replan]`; unexpected: " + " ".join(args),
             },
             as_json,
         )
@@ -1225,16 +1260,26 @@ def _attempt(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
             if arg == "--evidence":
                 if i + 1 >= len(rest):
                     _emit(
-                        {"ok": False, "code": "VALIDATION_FAILED",
-                         "detail": "dangling --evidence option"}, as_json)
+                        {
+                            "ok": False,
+                            "code": "VALIDATION_FAILED",
+                            "detail": "dangling --evidence option",
+                        },
+                        as_json,
+                    )
                     return 2
                 evidence = [e.strip() for e in rest[i + 1].split(",") if e.strip()]
                 i += 2
             elif arg == "--unknown":
                 if i + 1 >= len(rest):
                     _emit(
-                        {"ok": False, "code": "VALIDATION_FAILED",
-                         "detail": "dangling --unknown option"}, as_json)
+                        {
+                            "ok": False,
+                            "code": "VALIDATION_FAILED",
+                            "detail": "dangling --unknown option",
+                        },
+                        as_json,
+                    )
                     return 2
                 unknown = rest[i + 1]
                 i += 2
@@ -1615,6 +1660,12 @@ def _emit(payload: dict, as_json: bool) -> None:
         value = payload.get(key)
         if value is not None and value != []:
             print(f"{key}: {value}")
+    milestone = payload.get("milestone")
+    if isinstance(milestone, dict) and milestone.get("current"):
+        print(f"CHECKPOINT: {milestone['current']}  {milestone.get('label') or ''}".rstrip())
+        if milestone.get("parent"):
+            parent_label = milestone.get("parent_label") or ""
+            print(f"PARENT: {milestone['parent']}  {parent_label}".rstrip())
     if payload.get("waiting_on_you"):
         print(f"Waiting on you: {'; '.join(payload['waiting_on_you'])}")
     if payload.get("claimed_but_unproven"):
@@ -1763,8 +1814,13 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                     report_text = report.read_text(encoding="utf-8-sig") if report.is_file() else ""
                 except (UnicodeDecodeError, LookupError, OSError):
                     seats.append(
-                        {"seat": seat, "role": roster_role, "visible": "INVALID_REPORT",
-                         "report_status": "", "errors": ["report not valid UTF-8"]}
+                        {
+                            "seat": seat,
+                            "role": roster_role,
+                            "visible": "INVALID_REPORT",
+                            "report_status": "",
+                            "errors": ["report not valid UTF-8"],
+                        }
                     )
                     continue
                 if not report_text:
@@ -2430,6 +2486,12 @@ def main(argv: list[str] | None = None) -> int:
         after_dashdash = []
 
     as_json = "--json" in before_dashdash
+    if as_json and hasattr(sys.stdout, "reconfigure"):
+        # Windows shells frequently inherit an ANSI code page. JSON is UTF-8;
+        # a read-only focus result containing a Unicode filename must not die
+        # while printing after all reasoning already succeeded.
+        with suppress(OSError, ValueError):
+            sys.stdout.reconfigure(encoding="utf-8")
     dry_run = "--dry-run" in before_dashdash
     project_root_opt: str | None = None
 
@@ -2483,7 +2545,9 @@ def main(argv: list[str] | None = None) -> int:
             "ship|push|scope <T-###> <path>...|first-publish-confirm "
             "<name> <public|private>|userperson|sub|rebind-home "
             "<candidate-home>|context|attempt open|attempt close <RESULT> "
-            "<STOP>|brief) [--dry-run] "
+            "<STOP>|brief|focus [text]|build <directive>|cut <target>|"
+            "cut confirm <CUT-ID>|undo|undo confirm <CP-ID> --reason <text>) "
+            "[--dry-run] "
             "[--json] [--project-root PATH] [--agent ID]"
         )
         if as_json:
@@ -2526,9 +2590,7 @@ def main(argv: list[str] | None = None) -> int:
     # CORE.md returns None for everything: every token then fails closed at
     # its own branch or at the unknown-command refusal -- a failed lookup is
     # NEVER guessed into a command.
-    _canonical_shortcut = resolve_shortcut(
-        command, table=load_shortcut_table(PROTOCOL_DIR)
-    )
+    _canonical_shortcut = resolve_shortcut(command, table=load_shortcut_table(PROTOCOL_DIR))
     if _canonical_shortcut is not None:
         args = [_canonical_shortcut, *args[1:]]
         command = _canonical_shortcut
@@ -2580,6 +2642,155 @@ def main(argv: list[str] | None = None) -> int:
             )
             return 2
         return _next_action(project_root, as_json)
+    if command in ("focus", "ff"):
+        from saipen_engine.controls import focus_projection
+
+        result = focus_projection(project_root, " ".join(args[1:]))
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
+    if command in ("build", "vv"):
+        if len(args) < 2 or not " ".join(args[1:]).strip():
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "Use: vv <build directive>",
+                },
+                as_json,
+            )
+            return 2
+        if not dry_run and _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        from saipen_engine.controls import directive_entry
+
+        result = directive_entry(
+            project_root,
+            _agent_for(project_root),
+            " ".join(args[1:]),
+            kind="build",
+            dry_run=dry_run,
+        )
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
+    if command in ("cut", "xx"):
+        from saipen_engine.controls import confirm_cut, cut_preview, decode_agent_plan
+
+        rest = args[1:]
+        if not rest:
+            _emit(
+                {"ok": False, "code": "VALIDATION_FAILED", "detail": "Use: xx <cut target>"},
+                as_json,
+            )
+            return 2
+        if rest[0] != "confirm":
+            result = cut_preview(project_root, " ".join(rest))
+            _emit(result.to_dict(), as_json)
+            return 0 if result.ok else 1
+        if len(rest) < 2 or not rest[1].startswith("CUT-"):
+            _emit(
+                {
+                    "ok": False,
+                    "code": "DESTRUCTIVE_CONFIRMATION_REQUIRED",
+                    "detail": "Use: xx confirm <CUT-ID>",
+                },
+                as_json,
+            )
+            return 2
+        # The user-facing form stays `xx confirm CUT-ID`.  Fuzzy impact
+        # analysis belongs to the agent, which transports its exact resolved
+        # plan after `--`; preview itself wrote nothing and held no lock.
+        if "--" not in rest:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "DESTRUCTIVE_CONFIRMATION_REQUIRED",
+                    "detail": (
+                        "CUT-ID recognized; agent-resolved impact plan is not "
+                        "present in this session"
+                    ),
+                    "cut_id": rest[1],
+                },
+                as_json,
+            )
+            return 1
+        marker = rest.index("--")
+        if marker != 2 or len(rest) != 4 or len(after_dashdash) != 1:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "mechanical cut confirmation needs one encoded plan after --",
+                },
+                as_json,
+            )
+            return 2
+        try:
+            plan = decode_agent_plan(rest[3])
+        except ValueError as exc:
+            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}, as_json)
+            return 2
+        if not dry_run and _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        result = confirm_cut(
+            project_root,
+            _agent_for(project_root),
+            rest[1],
+            plan,
+            dry_run=dry_run,
+        )
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
+    if command in ("undo", "zz"):
+        from saipen_engine.controls import undo_confirm, undo_preview
+
+        rest = args[1:]
+        if not rest:
+            result = undo_preview(project_root)
+            _emit(result.to_dict(), as_json)
+            return 0 if result.ok else 1
+        if rest[0] != "confirm" or len(rest) < 2:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "DESTRUCTIVE_CONFIRMATION_REQUIRED",
+                    "detail": "Use: zz confirm <CP-ID> --reason <one sentence>",
+                },
+                as_json,
+            )
+            return 2
+        if "--reason" not in rest[2:]:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "DESTRUCTIVE_CONFIRMATION_REQUIRED",
+                    "detail": "undo confirmation requires --reason <one sentence>",
+                },
+                as_json,
+            )
+            return 2
+        reason_at = rest.index("--reason")
+        reason = " ".join(rest[reason_at + 1 :]).strip()
+        if reason_at != 2 or not reason:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "DESTRUCTIVE_CONFIRMATION_REQUIRED",
+                    "detail": "undo confirmation requires one bounded reason after --reason",
+                },
+                as_json,
+            )
+            return 2
+        if not dry_run and _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        result = undo_confirm(
+            project_root,
+            _agent_for(project_root),
+            rest[1],
+            reason,
+            dry_run=dry_run,
+        )
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
     if command == "recover":
         return _recover(project_root, args[1:], as_json, dry_run)
     if command == "claim":
@@ -3039,8 +3250,11 @@ def main(argv: list[str] | None = None) -> int:
         surplus = args[1:]
         if surplus:
             _emit(
-                {"ok": False, "code": "VALIDATION_FAILED",
-                 "detail": f"{command} accepts no arguments; surplus: {' '.join(surplus)}"},
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"{command} accepts no arguments; surplus: {' '.join(surplus)}",
+                },
                 as_json,
             )
             return 2
@@ -3050,8 +3264,12 @@ def main(argv: list[str] | None = None) -> int:
         if _ho is not None:
             return _ho
         result = transition_phase(
-            project_root, phase, _agent_for(project_root),
-            ticket_id=None, event_text="", dry_run=dry_run,
+            project_root,
+            phase,
+            _agent_for(project_root),
+            ticket_id=None,
+            event_text="",
+            dry_run=dry_run,
         )
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
@@ -3065,8 +3283,12 @@ def main(argv: list[str] | None = None) -> int:
             return _ho
         text = " ".join(args[1:]) if len(args) > 1 else ""
         result = transition_phase(
-            project_root, "PLAN", _agent_for(project_root),
-            ticket_id=None, event_text=text, dry_run=dry_run,
+            project_root,
+            "PLAN",
+            _agent_for(project_root),
+            ticket_id=None,
+            event_text=text,
+            dry_run=dry_run,
         )
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
@@ -3087,9 +3309,7 @@ def main(argv: list[str] | None = None) -> int:
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
     if command == "prepare":
-        invalid_producer = (
-            len(args) == 2 and (not args[1].strip() or args[1].startswith("-"))
-        )
+        invalid_producer = len(args) == 2 and (not args[1].strip() or args[1].startswith("-"))
         if len(args) > 2 or invalid_producer:
             surplus = args[2:] if len(args) > 2 else args[1:]
             _emit(

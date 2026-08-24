@@ -2,8 +2,9 @@
 name: saipen
 description: >
   SAIPEN (v7). Trigger on "saipen set", "saipen",
-  subcommands, and shortcuts (gg, hh, cc, ccc, ss, sss, dd, aa, qq, qqq, ee,
-  eee, pp, tt, sc; Cyrillic twins: сс, ссс, аа, ее, еее, рр).
+  subcommands, and shortcuts (gg, hh, ff, xx, vv, zz, cc, ccc, ss, sss, dd,
+  aa, qq, qqq, ee, eee, pp, tt, sc; Cyrillic twins: сс, ссс, аа, ее, еее,
+  рр, хх).
   cold-start kernel loads first; phases/ modules load
   on demand per STATE. CORE.md is the constitution (successor to RFC.md),
   which was split in v7.190.0; MAINTENANCE.md covers autonomous evolution.

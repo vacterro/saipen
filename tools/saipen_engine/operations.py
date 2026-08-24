@@ -596,15 +596,24 @@ def _plan_claim(
         new_board = _claim_fields_in_place(
             docs["board"].text_norm, ticket_id, {"owner": agent, "claim_time": utc}
         )
+        resume_in_place = (
+            state.get("task") == ticket_id
+            and state.get("phase") in phases.TICKET_BEARING_PHASES
+        )
         owned = {
-            "phase": "SCOUT",
             "task": ticket_id,
-            "next_action": f"PHASE SCOUT {ticket_id}",
-            "transition_from": state.get("phase") or "DONE",
             "last_event": event,
             "updated": utc,
             "agent": agent,
         }
+        if not resume_in_place:
+            owned.update(
+                {
+                    "phase": "SCOUT",
+                    "next_action": f"PHASE SCOUT {ticket_id}",
+                    "transition_from": state.get("phase") or "DONE",
+                }
+            )
         new_state = patch_state(docs["state"].text_norm, owned)
         errors = validate_texts(
         new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
@@ -637,9 +646,14 @@ def _plan_claim(
                 "code": "CLAIMED",
                 "ticket": ticket_id,
                 "event_id": f"E-{event}",
-                "phase": "SCOUT",
-                "next_action": f"PHASE SCOUT {ticket_id}",
+                "phase": state.get("phase") if resume_in_place else "SCOUT",
+                "next_action": (
+                    state.get("next_action")
+                    if resume_in_place
+                    else f"PHASE SCOUT {ticket_id}"
+                ),
                 "adopted": True,
+                "resumed_in_place": resume_in_place,
             },
             op_id=op_id,
         )

@@ -39,6 +39,7 @@ from __future__ import annotations
 import ast
 import contextlib
 import datetime
+import hashlib
 import io
 import json
 import os
@@ -50,6 +51,7 @@ import tempfile
 from pathlib import Path
 
 from freshness import compute_role_revision, compute_source_identity
+from saipen_engine.paths import project_lineage_identity
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -182,6 +184,27 @@ def symlink_restore_probe(tmp: Path) -> str | None:
     return None
 
 
+def rebind_synthetic_milestones(tree: Path) -> None:
+    """Upgrade an in-flight legacy runtime binding in copied test evidence."""
+    for manifest_path in tree.glob(".saipen/milestones/CP-*/manifest.json"):
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if "project_identity" not in manifest or "project_lineage" in manifest:
+            continue
+        manifest.pop("project_identity", None)
+        manifest["project_lineage"] = project_lineage_identity(tree)
+        manifest["schema_version"] = 2
+        body = {key: value for key, value in manifest.items() if key != "integrity_hash"}
+        encoded = (
+            json.dumps(body, sort_keys=True, ensure_ascii=False, indent=2) + "\n"
+        ).encode("utf-8")
+        manifest["integrity_hash"] = hashlib.sha256(encoded).hexdigest()
+        manifest_path.write_text(
+            json.dumps(manifest, sort_keys=True, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+
+
 def release_ledger_probe(source: Path, destination: Path) -> str | None:
     """Execute clean, new-divergence, and stale-baseline ledger controls."""
     tree = destination / "release-ledger"
@@ -200,6 +223,13 @@ def release_ledger_probe(source: Path, destination: Path) -> str | None:
         text = text.replace("**status:** ready", "**status:** stale")
         text = re.sub(r"(?m)^status:\s*ready\s*$", "status: stale", text)
         outbox.write_text(text, encoding="utf-8", newline="\n")
+
+    # Restore milestones are deliberately bound to a canonical project
+    # identity.  This probe copies a real project to a different root, so make
+    # that copied evidence belong to the synthetic project before its initial
+    # commit.  Otherwise the milestone validator correctly rejects the fixture
+    # before the release-ledger controls this probe exists to exercise.
+    rebind_synthetic_milestones(tree)
 
     def git(*args: str) -> subprocess.CompletedProcess[str]:
         return subprocess.run(
@@ -330,9 +360,66 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
     wording."""
     tree = destination / "warn-ownership"
     shutil.copytree(source, tree)
+    rebind_synthetic_milestones(tree)
 
     baseline_path = tree / "tools" / "release_ledger_baseline.json"
     baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
+
+    def git(*args: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            ["git", *args], cwd=tree, capture_output=True, text=True, errors="replace"
+        )
+
+    # A copied pre-release worktree has no `.git/`, while VERSION/CHANGELOG
+    # intentionally lead the last shipped digest.  Give this unrelated WARN
+    # ownership fixture a complete synthetic release ledger so that the
+    # release validator does not mask its actual red control.
+    version = (tree / "VERSION").read_text(encoding="utf-8").strip()
+    (tree / DIGEST).write_text(
+        f"done: ship v{version} (synthetic warn-ownership fixture)\n"
+        "remaining: nothing\n"
+        "awaiting: nothing\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    for args in (
+        ("init", "-q"),
+        ("config", "user.name", "SAIPEN warn probe"),
+        ("config", "user.email", "warn-probe@example.invalid"),
+        ("add", "-A"),
+        ("commit", "--allow-empty", "-m", "warn ownership probe"),
+    ):
+        result = git(*args)
+        if result.returncode:
+            return f"git {' '.join(args)} failed: {(result.stderr or result.stdout).strip()}"
+
+    active_log = tree / LOG
+    short = git("rev-parse", "--short", "HEAD").stdout.strip()
+    text = active_log.read_text(encoding="utf-8-sig")
+    sanitized = re.sub(r"hunt -> clean @[0-9a-f]{7,40}\b", f"hunt -> clean @{short}", text)
+    if sanitized != text:
+        active_log.write_text(sanitized, encoding="utf-8", newline="\n")
+        for args in (("add", LOG), ("commit", "-q", "-m", "re-point synthetic hunt marks")):
+            result = git(*args)
+            if result.returncode:
+                return f"git {' '.join(args)} failed: {(result.stderr or result.stdout).strip()}"
+
+    changelog_only = set(baseline["changelog_only"])
+    changelog_versions: set[str] = set()
+    for name in ("CHANGELOG.md", "CHANGELOG_ARCHIVE.md"):
+        path = tree / name
+        if path.is_file():
+            changelog_versions |= set(
+                re.findall(
+                    r"^## (\d+\.\d+\.\d+)",
+                    path.read_text(encoding="utf-8-sig"),
+                    re.MULTILINE,
+                )
+            )
+    for release in sorted(changelog_versions - changelog_only):
+        result = git("tag", f"v{release}")
+        if result.returncode:
+            return f"could not seed warn-probe tag v{release}: {result.stderr.strip()}"
 
     def validate() -> subprocess.CompletedProcess[str]:
         return subprocess.run(
@@ -452,9 +539,16 @@ def phase_rename_probe(source: Path, destination: Path) -> str | None:
     """
     tree = destination / "phase-rename"
     shutil.copytree(source, tree)
+    rebind_synthetic_milestones(tree)
+    milestone_root = tree / ".saipen" / "milestones"
     changed = 0
     for path in tree.rglob("*"):
         if not path.is_file():
+            continue
+        # Restore evidence is historical, content-addressed exact bytes.  A
+        # semantic rename of the live protocol must not rewrite its archived
+        # payloads or their immutable manifests.
+        if path.is_relative_to(milestone_root):
             continue
         try:
             text = path.read_text(encoding="utf-8-sig")
@@ -2525,7 +2619,7 @@ CASES: list[tuple[str, str, object, str]] = [
     (
         "SKILL metadata keeps a stale shortcut trigger",
         "saipen/SKILL.md",
-        replace("qq, qqq, ee,", "qq, qqq, zz, ee,"),
+        replace("qq, qqq, ee,", "qq, qqq, yy, ee,"),
         "metadata has non-RFC shortcut trigger",
     ),
     # Drop a phase-named command from the checkpoint duty. This is how
@@ -3356,6 +3450,7 @@ def main() -> int:
 
     pristine = tmp / "pristine"
     shutil.copytree(HOME, pristine, ignore=IGNORE)
+    rebind_synthetic_milestones(pristine)
     freshen_synthetic_outboxes(pristine)
     synthetic_outboxes = list(pristine.glob(".saipen/extensions/subs/*/kitchen/OUTBOX.md"))
     synthetic_translate = pristine / ".saipen" / "saitranslate" / "kitchen" / "OUTBOX.md"

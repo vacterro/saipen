@@ -1,0 +1,52 @@
+<p align="center">
+  <img src="assets/SAIPEN_design1.png" alt="SAIPEN Guide Title" width="800"/>
+</p>
+
+# SAIPEN Útmutató (Magyar)
+
+Ide figyelj, újonc. A probléma egyszerű: az AI ügynökeidnek aranyhal memóriája van.
+
+A **SAIPEN** egy jegyzetfüzet a projekted `.saipen/` mappájában.
+
+**Gyorsbillentyűk:** a `cc` a projekt kontextusát konvergenciáig folytatja (folytat egy futó célt, ha be van állítva), az `sss` kód érintése nélkül jelzi az állapotot, az `ss` pedig menti az ellenőrzőpontot és megáll. [Lásd a teljes 15 billentyűs térképet](../saipen/RFC.md#110-command-surface). A cirill ikrek is működnek: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+
+## Gyors indulás
+
+1. **Telepítse gépenként egyszer:**
+```bash
+git clone https://github.com/vacterro/saipen
+cd saipen
+powershell -ExecutionPolicy Bypass -File .\bootstrap\inject.ps1     # Windows
+bash bootstrap/inject.sh                                            # macOS / Linux
+```
+
+2. **Projekt indítása:**
+> `saipen set`
+
+3. **Munka:**
+> `saipen`
+
+## Parancsok
+
+| Parancs | Művelet |
+|---|---|
+| `saipen set` | Memóriamappa inicializálása |
+| `saipen continue` | Munka folytatása jegyzetekből |
+| `saipen stop` | Folyamat mentése és leállítás |
+| `saipen status` | Tábla olvasása |
+| `saipen goal <text>` | Váltás új célra |
+| `saipen clean` | Adattár tisztítása |
+| `saipen translate` | Elszigetelt fordítás készítése 32 nyelven |
+| `saipen markhunt` | Mély, korlátlan audit -- csak rögzíti a hibákat, nem javítja |
+| `saipen prepare` | Csomagolja a munkát a következő ágensnek való átadásra |
+| `saipen ship` | Kiadási folyamat elindítása |
+
+## Jó tudni
+- Nem commitolt változtatások, amikor visszatérsz a projekthez? Normális -- a SAIPEN csak `ship`-nél commitol, nem minden lépésnél. Az ágens előbb ellenőrzi, kié ezek a változtatások, mielőtt bármihez hozzáérne.
+- Szeretnéd, hogy emlékezzen egy valódi architektúra döntésre? Tedd a `.saipen/KNOWLEDGE/` mappába, egyetlen `decisions.md` fájlként vagy számozott `ADR-001.md` fájlokként.
+- Nincs git vagy shell ezen a gépen? Az ágens ezt nyíltan megmondja (`mode`, `WAIT: <category> -- <kérdés>`), ahelyett hogy találgatna (a kategória a hét egyike: `manual-verify, destructive-op, first-publish, user brake, blocked, safety valve, init`; megmondja, milyen válasz oldja fel a blokkot)
+- Szeretnél biztonsági hálót? A `python <saipen-klón>/tools/install_hook.py` telepít egy commit előtti ellenőrzést.
+
+---
+
+**Full command list / complete command reference:** [RFC § 1.10](../saipen/RFC.md#110-command-surface) — the authoritative list of every `saipen` command.

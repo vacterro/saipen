@@ -1,6 +1,18 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.227.0 -- 2026-08-24 -- Focus, Build, Cut and Undo Controls (T-1156)
+
+- T-1156: adds `ff` read-only semantic focus, `vv` native foreground Work
+  intake, two-stage content-bound `xx`, and one-step reasoned `zz` without
+  adding phases or bypassing Work/Attempt and Core gates.
+- T-1156: adds sparse exact-byte Restore Milestones with explicit lineage,
+  crash-safe journals, content deduplication, Git/non-Git baselines, foreign
+  edit protection, append-only rollback history and compact status projection.
+- T-1156: adds hostile routing, stale-plan, path, binary, crash, published
+  history, cold-agent and integrated acceptance coverage; full verification
+  evidence is recorded in the ticket closure.
+
 ## 7.226.3 -- 2026-08-24 -- Producer Dry-Run Regression (T-1154)
 
 - T-1154: adds a real public-CLI regression proving `qq --dry-run` and

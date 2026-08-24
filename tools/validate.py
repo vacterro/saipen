@@ -532,6 +532,10 @@ SAIPEN_COMMANDS = frozenset(
         "continue",
         "goal",
         "plan",
+        "focus",
+        "build",
+        "cut",
+        "undo",
         "clean",
         "translate",
         "markhunt",
@@ -616,6 +620,10 @@ def _phase_next_action_error(value):
 EXPECTED_SHORTCUT_ROUTES = {
     "gg": "`saipen goal`",
     "hh": "`saipen hunt`",
+    "ff": "`saipen focus`",
+    "xx": "`saipen cut`",
+    "vv": "`saipen build`",
+    "zz": "`saipen undo`",
     "cc": "`saipen continue`",
     "ccc": "`saipen continue` with `converge_target: ship`, then `saipen ship`, then stages J-M",
     "ss": "`saipen stop`",
@@ -956,7 +964,7 @@ if not isinstance(CURRENT_SCHEMA_VERSION, int) or CURRENT_SCHEMA_VERSION < 1:
 # is the gate's mirror; if the two drift, an engine-committed state can be
 # green in one and corrupt in the other. The constants are compared here so
 # the drift FAILs at the gate instead of silently diverging.
-from saipen_engine import state as _eng_state_contract # noqa: E402
+from saipen_engine import state as _eng_state_contract  # noqa: E402
 
 _engine_schema_mismatch = []
 _schema_props = set(schema.get("properties", {}))
@@ -1038,7 +1046,7 @@ if Path("saipen").is_dir():
             "root VERSION is canonical"
         )
 
-from saipen_engine.floor import raw_floor # noqa: E402
+from saipen_engine.floor import raw_floor  # noqa: E402
 
 board_path = Path(".saipen/BOARD.md")
 log_path = Path(".saipen/LOG.md")
@@ -1294,10 +1302,7 @@ if os.path.lexists(_identity_path):
         # used only to preserve an actionable parse error after refusal.
         _id_lineage = project_lineage_identity(Path("."))
         if _id_lineage is not None:
-            ok(
-                ".saipen/IDENTITY.md is a canonical portable lineage carrier "
-                f"({_id_lineage})"
-            )
+            ok(f".saipen/IDENTITY.md is a canonical portable lineage carrier ({_id_lineage})")
         else:
             _id_error = None
             try:
@@ -1312,9 +1317,7 @@ if os.path.lexists(_identity_path):
                     except UnicodeDecodeError:
                         _id_error = "identity file is not strict UTF-8"
                     else:
-                        _diagnostic_lineage, _id_error = parse_identity_content(
-                            _identity_text
-                        )
+                        _diagnostic_lineage, _id_error = parse_identity_content(_identity_text)
             except (OSError, ValueError):
                 _diagnostic_lineage = None
             if _id_error:
@@ -3160,18 +3163,15 @@ if log_files:
             for rec in [_attempt_mod.parse_attempt_event(ev)[0]]
             if rec is not None
         }
-        _known_tids = (
-            set(tickets.keys())
-            | {
+        _known_tids = set(tickets.keys()) | {
+            ev.get("ticket")
+            for ev in _att_events
+            if (
                 ev.get("ticket")
-                for ev in _att_events
-                if (
-                    ev.get("ticket")
-                    and re.match(r"^T-\d+$", ev["ticket"])
-                    and ev["event"] not in _attempt_event_ids
-                )
-            }
-        )
+                and re.match(r"^T-\d+$", ev["ticket"])
+                and ev["event"] not in _attempt_event_ids
+            )
+        }
         for _aerr in _attempt_mod.contract_errors(_att_events, state, _known_tids):
             fail(f"attempt-contract -- {_aerr}")
 
@@ -3189,9 +3189,7 @@ if log_files:
             (t for t in tickets.values() if t.get("section") == "## DONE"),
             key=lambda t: t["id"],
         ):
-            _adm_err = _attempt_mod.ticket_admission_error(
-                _done_t["id"], _att_records, _att_events
-            )
+            _adm_err = _attempt_mod.ticket_admission_error(_done_t["id"], _att_records, _att_events)
             if _adm_err:
                 fail(f"attempt-admission -- {_adm_err}")
 
@@ -5315,9 +5313,7 @@ if (
                 if _git("rev-parse", "--git-dir")[0] == 0:
                     _runtime_rc, _runtime_out = _git("ls-files", "-z")
                     if _runtime_rc == 0:
-                        _runtime_tracked_set = {
-                            path for path in _runtime_out.split("\x00") if path
-                        }
+                        _runtime_tracked_set = {path for path in _runtime_out.split("\x00") if path}
                 _mj_files = [f["src"] for f in _mj.get("files", [])]
                 _phase_dir = _mj.get("phase_docs", {}).get("src_dir", "")
                 for _pf in _mj.get("phase_docs", {}).get("files", []):
@@ -5550,20 +5546,21 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
         _unstaged_rc_batch, _unstaged_text_batch = _git(
             "diff", "--name-only", "--", *_release_paths
         )
-        _unstaged_set = {
-            line for line in _unstaged_text_batch.splitlines() if line.strip()
-        } if _unstaged_rc_batch == 0 else set()
-        _tracked_rc_batch, _tracked_text_batch = _git(
-            "ls-files", "-z", "--", *_release_paths
+        _unstaged_set = (
+            {line for line in _unstaged_text_batch.splitlines() if line.strip()}
+            if _unstaged_rc_batch == 0
+            else set()
         )
-        _tracked_set = {
-            line for line in _tracked_text_batch.split("\0") if line.strip()
-        } if _tracked_rc_batch == 0 else set()
+        _tracked_rc_batch, _tracked_text_batch = _git("ls-files", "-z", "--", *_release_paths)
+        _tracked_set = (
+            {line for line in _tracked_text_batch.split("\0") if line.strip()}
+            if _tracked_rc_batch == 0
+            else set()
+        )
         _need_staging = [
             p
             for p in _release_paths
-            if p in _unstaged_set
-            or (Path(p).exists() and p not in _tracked_set)
+            if p in _unstaged_set or (Path(p).exists() and p not in _tracked_set)
         ]
         if REQUIRE_RELEASE_INDEX:
             # A binding SHIP gate authorizes the exact index that the release
@@ -5574,20 +5571,12 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
             # slice even when `_need_staging` is empty (properly staged paths
             # match the index and are deliberately absent from that list).
             #
-            # Tag-only releases are the legitimate exception: when EVERY
-            # release metadata path is already tracked in HEAD in exactly the
-            # bytes being released (nothing differs from the index, nothing is
-            # untracked), there is deliberately nothing to stage -- the release
-            # pins the existing committed metadata with a tag. Refusing an
-            # empty staged index here would make every already-prepared
-            # release (metadata committed in an earlier commit, tag never cut)
-            # impossible to ship.
             _staged_rc, _staged_text = _git(
                 "diff", "--cached", "--name-only", "--", *_release_paths
             )
             if _staged_rc != 0:
                 fail("binding ship gate cannot read staged release metadata")
-            elif not _staged_text.strip() and _need_staging:
+            elif not _staged_text.strip():
                 fail(
                     "binding ship gate requires every release metadata path "
                     "staged: release index is empty"
@@ -5665,6 +5654,10 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
         "`cc`",
         "`sss`",
         "`ss`",
+        "`ff`",
+        "`xx`",
+        "`vv`",
+        "`zz`",
         "`\u0441\u0441`",
         "`\u0441\u0441\u0441`",
         "`\u0430\u0430`",
@@ -7826,6 +7819,10 @@ else:
         ("saipen/HABITS.md", "habit citation + counter-mechanism checks"),
         ("saipen/RFC.md", "stub for backward compat"),
         ("saipen/CORE.md", "source of truth for core cross-doc sets"),
+        (
+            "saipen/CONTROLS.md",
+            "focus/build/cut/undo authority markers checked with the command surface",
+        ),
         ("saipen/MAINTENANCE.md", "source of truth for maintenance cross-doc sets"),
         ("saipen/BOOT.md", "re-enumeration + required-field-count checks"),
         ("saipen/CONFORMANCE.md", "re-enumeration + count + row-ID checks"),
@@ -9263,6 +9260,36 @@ else:
                 )
                 drift_ok = False
 
+            # The four short controls have one semantic owner. CORE owns the
+            # names/routes; CONTROLS owns their authority boundaries. Reading
+            # only the table proved that a route existed, not that `focus`
+            # stayed read-only or that the command named `build` did NOT jump
+            # to the BUILD phase.
+            _controls_path = _tools_parent / "saipen" / "CONTROLS.md"
+            _controls_t = (
+                _controls_path.read_text(encoding="utf-8-sig") if _controls_path.is_file() else ""
+            )
+            _control_markers = (
+                "ff = attention without mutation",
+                "vv = contextual creation without architectural surprise",
+                "xx = contextual removal without collateral damage",
+                "zz = reversible progress without historical amnesia",
+                "not a jump to BUILD",
+                "Always two-stage.",
+                "Bare undo validates integrity and previews one lineage step without writes.",
+                "A Core Checkpoint remains frequent",
+                "A Restore Milestone is a sparse",
+            )
+            _missing_control_markers = [
+                marker for marker in _control_markers if marker not in _controls_t
+            ]
+            if _missing_control_markers:
+                fail(
+                    "cross-doc drift [controls] -- CONTROLS.md is missing "
+                    "authority marker(s): " + "; ".join(_missing_control_markers)
+                )
+                drift_ok = False
+
             # T-571: `saipen crew` carries exactly one execution meaning. The
             # future concurrent design has a distinct command name and must
             # never reuse `saipen crew`; the sequential row must state that it
@@ -9374,7 +9401,11 @@ else:
                 # empty there and failed four conformant fixtures.
                 _phases_dir = _tools_parent / "saipen" / "phases"
                 _expected = {c for c in SAIPEN_COMMANDS if (_phases_dir / f"{c}.md").is_file()} - {
-                    "init"
+                    "init",
+                    # § 1.10 and CONTROLS § 3 make this collision explicit:
+                    # user-facing `saipen build <directive>` creates Work at
+                    # SCOUT; it never enters the existing BUILD phase.
+                    "build",
                 }
                 if _listed != _expected:
                     fail(
@@ -9492,7 +9523,7 @@ else:
                 drift_ok = False
 
             # The Cyrillic-twin surface is DERIVED, never hand-counted: the
-            # confusable map folds only declared codepoints (`с -> c`, and
+            # confusable map folds only declared codepoints (Cyrillic es -> c, and
             # `s` is not a fold target), so the twins of the table follow
             # mechanically from table x map. Both maintained sources once
             # shipped wrong counts ("the other eight" in § 1.10, "seven have
@@ -9528,9 +9559,18 @@ else:
                     para = rest[: end_m.start()] if end_m else rest
                 enumerated = set(re.findall(r"`([\u0400-\u04FF]{2,3})`", para))
                 numword = {
-                    "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
-                    "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
-                    "eleven": 11, "twelve": 12,
+                    "one": 1,
+                    "two": 2,
+                    "three": 3,
+                    "four": 4,
+                    "five": 5,
+                    "six": 6,
+                    "seven": 7,
+                    "eight": 8,
+                    "nine": 9,
+                    "ten": 10,
+                    "eleven": 11,
+                    "twelve": 12,
                 }
                 derived_twins = _derive_cyrillic_twins(dict(_actual_routes))
                 stated_twins_m = re.search(r"(?i)\b([a-z]+)\s+rows?\s+have\s+twins", para)
@@ -9543,8 +9583,7 @@ else:
                     )
                 if not stated_twins_m or stated_twins_m.group(1).lower() not in numword:
                     _twin_failures.append(
-                        f"{doc_name} states no parsable twin count ('N rows "
-                        "have twins')"
+                        f"{doc_name} states no parsable twin count ('N rows have twins')"
                     )
                 elif numword[stated_twins_m.group(1).lower()] != len(derived_twins):
                     _twin_failures.append(
@@ -9553,12 +9592,10 @@ else:
                     )
                 if not stated_none_m or stated_none_m.group(1).lower() not in numword:
                     _twin_failures.append(
-                        f"{doc_name} states no parsable twin-less count "
-                        "('N have none')"
+                        f"{doc_name} states no parsable twin-less count ('N have none')"
                     )
-                elif (
-                    numword[stated_none_m.group(1).lower()]
-                    != len(_actual_routes) - len(derived_twins)
+                elif numword[stated_none_m.group(1).lower()] != len(_actual_routes) - len(
+                    derived_twins
                 ):
                     _twin_failures.append(
                         f"{doc_name} says {stated_none_m.group(1)} rows have "
@@ -9586,9 +9623,7 @@ else:
                         "'s', which would declare Cyrillic twins for "
                         "ss/sss (STOP/STATUS) -- forbidden by CORE § 1.10"
                     )
-                if any(
-                    not ch.isascii() for key in _actual_routes for ch in key
-                ):
+                if any(not ch.isascii() for key in _actual_routes for ch in key):
                     _twin_failures.append(
                         "the canonical shortcut table acquired a non-Latin "
                         "key; CORE § 1.10 keeps the table Latin and twins "
@@ -9650,7 +9685,6 @@ else:
                         "adapter must hold no per-token Cyrillic special case"
                     )
                     drift_ok = False
-
 
             _shortcut_section = _rfc_t[_i:_j]
             if (
@@ -10218,6 +10252,21 @@ else:
             "read-only bans, next_action prefixes, WAIT categories, command "
             "surface, ticket fields; no stale re-listing in shipped docs)"
         )
+
+
+# 15. Restore Milestones are optional for legacy projects. When present they
+#     are full authority, not decorative checkpoint labels: validate lineage,
+#     containment and exact payload integrity before any `zz` may trust them.
+try:
+    from saipen_engine.controls import validate_milestones
+
+    _milestone_errors = validate_milestones(PROJECT_ROOT, verify_payload=True)
+except Exception as _milestone_exc:
+    _milestone_errors = [
+        f"milestone validator crashed: {type(_milestone_exc).__name__}: {_milestone_exc}"
+    ]
+for _milestone_error in _milestone_errors:
+    fail(f"Restore Milestone: {_milestone_error}")
 
 
 # ------------------------------------------------------------------- summary
