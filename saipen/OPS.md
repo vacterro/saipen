@@ -267,3 +267,51 @@ genuinely unavailable, use the documented manual protocol as compatibility
 fallback, state that mechanical enforcement was unavailable, and run available
 validation afterwards. A repository must remain readable without an executable
 environment: canonical files are the cold truth, never a cache or engine state.
+
+## 9. Effect-based authorization (T-1160, INC-PERMISSION-EFFECT-BYPASS-001)
+
+AUTHORIZATION FOLLOWS EFFECT, NOT TOOL IDENTITY. The law lives in CORE § 1.10's
+host-agent rules; this section owns the deterministic vocabulary and mechanics.
+
+**Closed effect vocabulary** (`tools/saipen_engine/effects.py`): `fs.read`,
+`fs.write`, `fs.delete`, `repo.read`, `repo.mutate`, `process.execute`,
+`network.read`, `network.write`, `external.mutate`. Mutating effects:
+`fs.write`, `fs.delete`, `repo.mutate`, `network.write`, `external.mutate`.
+Extending the set is a protocol change, not a code edit.
+
+**Three separated concepts.** POLICY = what is authorized (derived from the
+negotiated session capability by default; a project may tighten it through an
+optional bounded `.saipen/policy.json` mapping effect -> ALLOW|MANUAL|DENY --
+tightening never loosens). ENFORCEMENT = what the host prevents: UNAVAILABLE
+unless declared via `SAIPEN_HOST_ENFORCEMENT` (`none`, `tool-conventions`,
+`sandbox-readonly`); SAIPEN never claims a sandbox it cannot see, and a
+MANUAL/DENY policy over a non-STRONG host surfaces as ENFORCEMENT_GAP.
+AUDIT = what SAIPEN observes: cheap read-only Git worktree deltas
+(`tree_snapshot`/`tree_delta`, porcelain only -- index/stash/HEAD untouched;
+no Git means status UNAVAILABLE, never a fabricated clean bill).
+
+**Tool contracts.** POSSIBLE != REQUESTED != OBSERVED. A dedicated edit tool
+guarantees `fs.write`; a shell/interpreter POSSIBLY exercises anything and is
+therefore never "read-only because the command looked harmless". Possible
+effects are capability metadata for humans and diagnostics -- never proof.
+
+**Coverage evaluation** (`evaluate_coverage`) answers one question
+mechanically: WHAT AUTHORIZATION COVERS THIS OBSERVED EFFECT? DENY fails
+closed; MANUAL requires a scope-bound Approval naming the exact EFFECT
+(optionally paths, Work, Attempt; one-shot unless reusable); an
+`fs.write` approval implies `repo.mutate` of the same paths and NOTHING else
+-- a `process.execute` approval never promotes to `fs.write`. Declared-but-
+absent or observed-but-undeclared effects are EFFECT_DRIFT (review trigger,
+never silently absorbed). Verdicts are mechanical facts:
+AUTHORIZED / AUTHORIZATION_MISSING / SCOPE_MISMATCH / EFFECT_DRIFT -- they
+say nothing about intent.
+
+**Provenance** uses KNOWN/UNKNOWN/UNAVAILABLE literally: paths from observed
+delta are KNOWN; originating process UNKNOWN without durable evidence;
+pre-existing dirt and concurrent external edits are never attributed to the
+active Attempt. Mutation evidence remains separate from validation, review,
+and completion evidence.
+
+**Diagnostic**: `saipen permissions` (READ_ONLY, `--json` capable) prints
+policy + source + overrides, host enforcement truth, gaps, tool contracts,
+and the current worktree delta.

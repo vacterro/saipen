@@ -110,6 +110,7 @@ def _agent_for(project_root: Path) -> str:
 #   build / vv ........................................ MUTATING
 #   undo / zz ......................................... READ_ONLY preview
 #   undo / zz confirm ................................. MUTATING
+#   permissions ....................................... READ_ONLY
 _MUTATING_TOPLEVEL = frozenset(
     {
         "claim",
@@ -429,6 +430,70 @@ def _parked_work(board_tickets: dict, state: dict) -> list[str]:
             parked.append(f"{tid} untriaged [MARKHUNT]")
             seen.add(tid)
     return parked
+
+
+def _permissions(project_root: Path, as_json: bool) -> int:
+    """T-1160: read-only effect-authorization diagnostic (P2).
+
+    Explains, per effect: the POLICY in force and where it came from, what
+    the HOST enforcement actually is (UNAVAILABLE unless declared), whether
+    the combination leaves an ENFORCEMENT_GAP, and the tool/adapter effect
+    contracts. Also reports the current dirty worktree through the cheap
+    read-only Git delta. It NEVER claims a sandbox it cannot see.
+    """
+    from saipen_engine.capability import negotiate_capability
+    from saipen_engine.effects import (
+        TOOL_GUARANTEED_EFFECTS,
+        TOOL_POSSIBLE_EFFECTS,
+        assess_enforcement_gap,
+        load_policy,
+        tree_snapshot,
+    )
+
+    capability = negotiate_capability()
+    loaded = load_policy(project_root, capability=capability)
+    gap = assess_enforcement_gap(loaded["policy"])
+    tree = tree_snapshot(project_root)
+    payload = {
+        "ok": True,
+        "code": "PERMISSIONS",
+        "capability": capability,
+        "policy_source": loaded["source"],
+        "policy_overrides": loaded["overrides"],
+        "policy": loaded["policy"],
+        "host_enforcement": gap["host"],
+        "strict_effects": gap["policy_strict_effects"],
+        "enforcement_gap": gap["gap"],
+        "enforcement_verdict": gap["verdict"],
+        "tool_contracts": {
+            "guaranteed": {k: list(v) for k, v in TOOL_GUARANTEED_EFFECTS.items()},
+            "possible": {k: list(v) for k, v in TOOL_POSSIBLE_EFFECTS.items()},
+            "note": "possible effects are capability, not observation",
+        },
+        "worktree_delta": {"status": tree["status"], "paths": list(tree["paths"])},
+    }
+    if as_json:
+        _emit(payload, True)
+        return 0
+    print(f"session capability : {capability}")
+    print(f"policy source      : {payload['policy_source']}")
+    if payload["policy_overrides"]:
+        for override in payload["policy_overrides"]:
+            print(f"  override         : {override}")
+    for effect in sorted(payload["policy"]):
+        marker = " *" if payload["policy"][effect] != "ALLOW" else ""
+        print(f"  {effect:<18} {payload['policy'][effect]}{marker}")
+    print(f"host enforcement   : {gap['host']['strength']} ({gap['host']['note']})")
+    if gap["gap"]:
+        strict = ", ".join(gap["policy_strict_effects"])
+        print("ENFORCEMENT_GAP    : policy is stricter than enforced reality")
+        print(f"  strict effects   : {strict}")
+        print("  indirect execution paths may bypass tool-specific approval")
+    print(
+        f"worktree delta     : {tree['status']}"
+        + (f" ({len(tree['paths'])} changed)" if tree["paths"] else "")
+    )
+    return 0
 
 
 def _status(project_root: Path, as_json: bool) -> int:
@@ -2729,6 +2794,19 @@ def main(argv: list[str] | None = None) -> int:
             )
             return 2
         return _status(project_root, as_json)
+    if command == "permissions":
+        if len(args) > 1:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "permissions accepts no arguments; surplus: "
+                    + " ".join(args[1:]),
+                },
+                as_json,
+            )
+            return 2
+        return _permissions(project_root, as_json)
     if command == "sss":
         # CORE § 1.10: `sss` routes to read-only status -- the exact same
         # surface as `status`, reached through the shared normalization above

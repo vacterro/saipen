@@ -1,6 +1,30 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.229.0 -- 2026-08-25 -- Effect-Based Authorization (T-1160)
+
+- T-1160: INC-PERMISSION-EFFECT-BYPASS-001 hardened permanently --
+  authorization now follows the EFFECT exercised (fs.write, repo.mutate,
+  process.execute, ...), never the tool name that reached it; indirect
+  mutation through shell/interpreter/generator/git is still mutation.
+- T-1160: closed effect vocabulary + coverage evaluator
+  (`saipen_engine/effects.py`): DENY fails closed, MANUAL needs a scope-bound
+  Approval naming the exact effect (paths/Work/Attempt), fs.write implies
+  only same-path repo.mutate, process.execute promotes to nothing;
+  expected-vs-observed divergence is EFFECT_DRIFT.
+- T-1160: policy != enforcement != audit. Enforcement is UNAVAILABLE unless
+  the host declares it (`SAIPEN_HOST_ENFORCEMENT`); a MANUAL/DENY policy over
+  a non-sandboxed host surfaces as an explicit ENFORCEMENT_GAP, and negative
+  safety claims ("no files modified") require evidence -- tool name alone is
+  never evidence.
+- T-1160: cheap read-only Git worktree delta audit (`tree_snapshot`/
+  `tree_delta`, porcelain only); provenance uses KNOWN/UNKNOWN/UNAVAILABLE,
+  never inference or intent labels; optional project `.saipen/policy.json`
+  may tighten (never loosen) the derived capability policy.
+- T-1160: `saipen permissions` READ_ONLY diagnostic (policy, enforcement
+  truth, gaps, tool contracts, worktree delta); CORE §1.10 carries the law,
+  OPS §9 owns the mechanics.
+
 ## 7.228.0 -- 2026-08-25 -- Crew Liveness + Runtime Drift (T-1159)
 
 - T-1159: every actionable crew carrier (CREW_BLOCKED routing carrier,
