@@ -191,3 +191,16 @@
 - 25.08.26 06:34 [E-4374] [parent: E-4373] [T-1160] [agent: opencode] [op: scope-85ec63aab5034f249dd8baf0a8ddaf53] DEC: release scope recorded -- 11 path(s) bound to d8becff89721
 - 25.08.26 06:34 [E-4375] [parent: E-4374] [T-1160] [agent: opencode] [op: finish-f2a9b9ec351d41a389f9c7e87cccd78d] RUN: ship v7.229.0 -> content commit b0754a16aed5 pushed
 - 25.08.26 06:34 [E-4376] [parent: E-4375] [T-1160] [agent: opencode] [op: finish-f2a9b9ec351d41a389f9c7e87cccd78d] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 25.08.26 12:10 [E-4377] [parent: E-4376] [T-1161] [agent: opencode] [op: ticket-90417fec2e00410e847c7809856b129b] DEC: ticket added via SAIOPS
+- 25.08.26 12:10 [E-4378] [parent: E-4377] [T-1161] [agent: opencode] [op: claim-702e9adff5d440c6bdcb2c44d60cc7f1] DEC: claimed via SAIOPS -- owner opencode
+- 25.08.26 12:10 [E-4379] [parent: E-4378] [T-1161] [agent: opencode] [op: transition-0a5968137e1d41d38651adac4ac6e0db] RUN: transition to SCOUT
+- 25.08.26 12:11 [E-4380] [parent: E-4379] [T-1161] [agent: opencode] [op: transition-a56e05ddf12a4714bfd3c97f4278393f] RUN: transition to BUILD -- scout: WAIT grammar + carrier fields + collect refusals + liveness already express truth; missing: disposition classifier, user-wait proof checker, traceability mapper, explain-next; no schema expansion needed
+- 25.08.26 12:16 [E-4381] [parent: E-4380] [T-1161] [agent: opencode] [op: transition-8f2ab48b9b6c4b1e8cf602edc5b6efb7] RUN: transition to VERIFY
+- 25.08.26 12:16 [E-4382] [parent: E-4381] [T-1161] [agent: opencode] [op: checkpoint-706977e91f424e998ddf197a59dd3629] RUN: verification: test_self_resolving_gates 17/17 PASS; unittest discover 220/220 PASS; ruff changed surfaces PASS; explain-next smoke PASS (EXECUTE_SELF owner agent); conf: high
+- 25.08.26 12:16 [E-4383] [parent: E-4382] [T-1161] [agent: opencode] [op: transition-a0e3d459aa66462a908f25b902ebafe8] RUN: transition to REVIEW
+- 25.08.26 12:16 [E-4384] [parent: E-4383] [op: transition-a0e3d459aa66462a908f25b902ebafe8] DEC: goal_tickets 6->7
+- 25.08.26 12:16 [E-4385] [parent: E-4384] [T-1161] [agent: opencode] [op: checkpoint-4833c2c862304e6c9b49ce63c25cb408] RUN: review: diff audited; CORE additions clean (zero removed lines); disposition classifier derives from existing carrier fields only; proof gate mechanical completeness; no schema expansion; conf: high
+- 25.08.26 12:16 [E-4386] [parent: E-4385] [T-1161] [agent: opencode] [op: transition-827742e8e4234a25901ed76c27a6be64] RUN: transition to SHIP
+- 25.08.26 12:16 [E-4387] [parent: E-4386] [T-1161] [agent: opencode] [op: scope-3e6d047f54b6400a9086353ee1ef8a9c] DEC: release scope recorded -- 11 path(s) bound to 06d9a1a2aaed
+- 25.08.26 12:17 [E-4388] [parent: E-4387] [T-1161] [agent: opencode] [op: finish-332c025ff05943d89e50e5e993d2cfbc] RUN: ship v7.230.0 -> content commit 0b0f91ebd229 pushed
+- 25.08.26 12:17 [E-4389] [parent: E-4388] [T-1161] [agent: opencode] [op: finish-332c025ff05943d89e50e5e993d2cfbc] DEC: ticket finished via SAIOPS -- completion (from SHIP)
