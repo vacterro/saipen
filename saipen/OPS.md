@@ -315,3 +315,41 @@ and completion evidence.
 **Diagnostic**: `saipen permissions` (READ_ONLY, `--json` capable) prints
 policy + source + overrides, host enforcement truth, gaps, tool contracts,
 and the current worktree delta.
+
+## 10. Self-resolving gates (T-1161)
+
+The law lives in CORE § 1.10's host-agent rules (No Human Courier; Validator
+Is a Sensor; Ship Means Converge; Traceability Is Not Optional). This section
+owns the deterministic mechanics in `tools/saipen_engine/disposition.py`.
+
+**Closed disposition vocabulary**: `EXECUTE_SELF`, `RECONCILE_SELF`,
+`WAIT_USER`, `WAIT_EXTERNAL`, `BLOCKED`, `COMPLETE`, `INVALID`.
+`classify_carrier()` maps the fields SAIPEN carriers ALREADY emit
+(`execute_in_current_agent`, `requires_human`, `terminal`, `crew_complete`,
+`next_action`, stable refusal codes) onto exactly one disposition. It never
+derives WAIT_USER from optionality: only an explicit `requires_human: true`
+or a human-boundary WAIT category (`user brake`/`manual-verify`/
+`destructive-op`/`first-publish`) yields it. `blocked`/`safety valve` WAIT
+categories classify as BLOCKED -- they are not user questions. STALE +
+refreshable classifies EXECUTE_SELF, never BLOCKED.
+
+**User-wait proof obligation**: `user_wait_proof()` fails any WAIT_USER whose
+proof is incomplete -- `missing_authority`, `evidence_insufficient`,
+`consequence`, each a substantive sentence fragment. "Need user decision" is
+not a proof.
+
+**Traceability reconstruction**: `reconstruct_traceability()` passes an
+umbrella ticket ONLY when every source finding carries its own disposition,
+evidence, and explicit verification (`verified` / `rejected-with-evidence` /
+`duplicate-of`) and the ticket durably references every finding ID.
+FINDING_VALIDITY != EVIDENCE_FRESHNESS.
+
+**Diagnostic**: `saipen explain-next` (READ_ONLY, `--json`) routes the same
+next action as `next`/`cc` WITHOUT executing and reports the disposition,
+the owner (agent/user), the selected action, and why the human is or is not
+required. Decision-trace output for debugging autonomy; writes nothing.
+
+**Meaningful automatic reconciliations** (state repaired against authority,
+stale evidence regenerated, traceability reconstructed) are recorded through
+the existing LOG DEC convention so a cold agent can answer "why did STATE
+change from X to Y?" without chat history. Trivial formatting is not logged.

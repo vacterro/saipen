@@ -1,6 +1,27 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.230.0 -- 2026-08-25 -- Self-Resolving Gates (T-1161)
+
+- T-1161: INC-MUSE-SHIP-INTERNAL-CHOICE-001 hardened -- MULTIPLE POSSIBLE
+  INTERNAL ACTIONS DO NOT CREATE A HUMAN DECISION; no-human-courier law,
+  operational-vs-product choice separation, and the user-wait proof
+  obligation (missing_authority / evidence_insufficient / consequence) are
+  normative in CORE §1.10.
+- T-1161: closed disposition vocabulary + classifier
+  (`saipen_engine/disposition.py`): EXECUTE_SELF / RECONCILE_SELF /
+  WAIT_USER / WAIT_EXTERNAL / BLOCKED / COMPLETE / INVALID, derived from
+  carrier fields SAIPEN already emits; stale+refreshable is EXECUTE_SELF,
+  never BLOCKED; `blocked`/`safety valve` WAIT categories are not user
+  questions.
+- T-1161: validator-is-a-sensor law with failure classification and repair
+  precedence; semantic laundering (relabeling actionable state as blocked to
+  pass syntax) named as a regression class; traceability reconstruction with
+  per-finding disposition/evidence/verification mapping -- umbrella tickets
+  without durable mapping fail.
+- T-1161: `saipen explain-next` READ_ONLY decision-trace diagnostic;
+  OPS §10 owns the mechanics.
+
 ## 7.229.0 -- 2026-08-25 -- Effect-Based Authorization (T-1160)
 
 - T-1160: INC-PERMISSION-EFFECT-BYPASS-001 hardened permanently --

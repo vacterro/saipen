@@ -111,6 +111,7 @@ def _agent_for(project_root: Path) -> str:
 #   undo / zz ......................................... READ_ONLY preview
 #   undo / zz confirm ................................. MUTATING
 #   permissions ....................................... READ_ONLY
+#   explain-next ...................................... READ_ONLY
 _MUTATING_TOPLEVEL = frozenset(
     {
         "claim",
@@ -795,6 +796,98 @@ def _next_action(project_root: Path, as_json: bool) -> int:
         },
         as_json,
     )
+    return 0
+
+
+def _explain_next(project_root: Path, as_json: bool) -> int:
+    """T-1161: read-only decision-trace diagnostic (P2).
+
+    Routes the same next action `next`/`cc` would take, then classifies WHO
+    owns it via the closed disposition vocabulary. Makes the no-human-courier
+    law inspectable: candidates, selected action, authority, and exactly why
+    the human is or is not required. Writes nothing.
+    """
+    from saipen_engine.disposition import classify_carrier
+
+    state_path = _state_path(project_root)
+    if not state_path.is_file():
+        _emit({"ok": False, "code": "NOT_SAIPEN_PROJECT"}, as_json)
+        return 3
+    state_text = codec.read_doc(state_path)
+    from saipen_engine.state import parse_state_or_error
+
+    state, state_error = parse_state_or_error(state_text)
+    if state_error:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"state-malformed: {state_error}",
+            },
+            as_json,
+        )
+        return 1
+    pending, conflicts, _corrupt = _scan_full(project_root)
+    if _corrupt:
+        _emit(_corrupt_refusal(_corrupt), as_json)
+        return 1
+    board_text = codec.read_doc(project_root / ".saipen" / "BOARD.md")
+    parked = _parked_work(parse_board(board_text)["tickets"], state)
+    from saipen_engine.router import route_next, routing_failure_code
+
+    resolved_agent = (
+        _AGENT_OVERRIDE if _AGENT_OVERRIDE is not None else (state.get("agent") or AGENT)
+    )
+    routed = route_next(
+        state_text,
+        board_text,
+        pending,
+        conflicts,
+        current_capability=_negotiate_capability(project_root),
+        current_agent=resolved_agent,
+    )
+    if not routed.get("ok"):
+        carrier = {
+            "code": routing_failure_code(routed),
+            "action": routed.get("action"),
+            "reason": routed.get("reason"),
+            "next_action": routed.get("action"),
+            "recovery_pending": bool(pending),
+        }
+    else:
+        carrier = {
+            "ok": True,
+            "code": "ROUTED",
+            "action": routed.get("action"),
+            "reason": routed.get("reason"),
+            "next_action": routed.get("action"),
+            "terminal": False,
+            "requires_human": bool(routed.get("requires_human")),
+            "execute_in_current_agent": True,
+        }
+    verdict = classify_carrier(carrier)
+    payload = {
+        "ok": True,
+        "code": "EXPLAIN_NEXT",
+        "state": {
+            "phase": state.get("phase"),
+            "task": state.get("task"),
+            "execution_intent": state.get("execution_intent") or "normal",
+            "converge_target": state.get("converge_target"),
+        },
+        "carrier": {k: v for k, v in carrier.items() if v is not None},
+        "disposition": verdict["disposition"],
+        "owner": "user" if verdict["requires_human"] else "agent",
+        "human_required": verdict["requires_human"],
+        "why": verdict["reason"],
+        "selected_action": verdict["action"],
+        "parked_work": parked or None,
+        "note": (
+            "internal sequencing alternatives never create a human decision; "
+            "WAIT_USER requires human-owned information or authority"
+        ),
+    }
+    _emit(payload, as_json)
     return 0
 
 
@@ -2807,6 +2900,19 @@ def main(argv: list[str] | None = None) -> int:
             )
             return 2
         return _permissions(project_root, as_json)
+    if command == "explain-next":
+        if len(args) > 1:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "explain-next accepts no arguments; surplus: "
+                    + " ".join(args[1:]),
+                },
+                as_json,
+            )
+            return 2
+        return _explain_next(project_root, as_json)
     if command == "sss":
         # CORE § 1.10: `sss` routes to read-only status -- the exact same
         # surface as `status`, reached through the shared normalization above
