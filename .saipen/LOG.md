@@ -178,3 +178,16 @@
 - 24.08.26 23:33 [E-4361] [parent: E-4360] [T-1159] [agent: opencode] [op: scope-2bb03e6ebb59476da2a283669ffc8d8b] DEC: release scope recorded -- 11 path(s) bound to 427fa8acea4d
 - 24.08.26 23:34 [E-4362] [parent: E-4361] [T-1159] [agent: opencode] [op: finish-7581714132a04753a55f15344d865b9b] RUN: ship v7.228.0 -> content commit db70ff2108b8 pushed
 - 24.08.26 23:34 [E-4363] [parent: E-4362] [T-1159] [agent: opencode] [op: finish-7581714132a04753a55f15344d865b9b] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 24.08.26 23:46 [E-4364] [parent: E-4363] [T-1160] [agent: opencode] [op: ticket-1c4a32014f4341dd9160b3fbb32f361a] DEC: ticket added via SAIOPS
+- 24.08.26 23:46 [E-4365] [parent: E-4364] [T-1160] [agent: opencode] [op: claim-6aebd1a8844c40febea4b93d86bf1360] DEC: claimed via SAIOPS -- owner opencode
+- 24.08.26 23:46 [E-4366] [parent: E-4365] [T-1160] [agent: opencode] [op: transition-812abe83f29b45b7975bf15936459608] RUN: transition to SCOUT
+- 24.08.26 23:46 [E-4367] [parent: E-4366] [T-1160] [agent: opencode] [op: transition-6631d1488cb749e2a6ab77341e751bee] RUN: transition to BUILD -- scout: session-capability layer exists; effect layer absent; plan: effects.py model+evaluator+git tree delta, permissions diagnostic, CORE law + OPS vocabulary section, AUTH-01..20 tests + incident fixture
+- 25.08.26 06:32 [E-4368] [parent: E-4367] [T-1160] [agent: opencode] [op: transition-be402df4dc7946cb92c6c69677d0c1df] RUN: transition to VERIFY
+- 25.08.26 06:32 [E-4369] [parent: E-4368] [T-1160] [agent: opencode] [op: checkpoint-01c2ff3ec7434114872e2664e2c471eb] RUN: verification: test_effect_authorization 34/34 PASS (AUTH-01..20 + INC-PERMISSION-EFFECT-BYPASS-001 fixture); unittest discover 203/203 PASS; ruff changed surfaces PASS; validator green; conf: high
+- 25.08.26 06:32 [E-4370] [parent: E-4369] [T-1160] [agent: opencode] [op: transition-91e6fc711a014cc98f529669ae40f6d2] RUN: transition to REVIEW
+- 25.08.26 06:32 [E-4371] [parent: E-4370] [op: transition-91e6fc711a014cc98f529669ae40f6d2] DEC: goal_tickets 5->6
+- 25.08.26 06:34 [E-4372] [parent: E-4371] [T-1160] [agent: opencode] [op: checkpoint-976aba6d50f04447940a75e6e420c6e4] RUN: review: diff audited; CORE T-1159 bullet restored intact after edit mishap; evaluator fail-closed; no shell parsing; enforcement honesty preserved; OPS single-authority mechanics; conf: high
+- 25.08.26 06:34 [E-4373] [parent: E-4372] [T-1160] [agent: opencode] [op: transition-ded3b8507db2440d9b3056a1ea952593] RUN: transition to SHIP
+- 25.08.26 06:34 [E-4374] [parent: E-4373] [T-1160] [agent: opencode] [op: scope-85ec63aab5034f249dd8baf0a8ddaf53] DEC: release scope recorded -- 11 path(s) bound to d8becff89721
+- 25.08.26 06:34 [E-4375] [parent: E-4374] [T-1160] [agent: opencode] [op: finish-f2a9b9ec351d41a389f9c7e87cccd78d] RUN: ship v7.229.0 -> content commit b0754a16aed5 pushed
+- 25.08.26 06:34 [E-4376] [parent: E-4375] [T-1160] [agent: opencode] [op: finish-f2a9b9ec351d41a389f9c7e87cccd78d] DEC: ticket finished via SAIOPS -- completion (from SHIP)
