@@ -580,8 +580,10 @@ class ExternalAudit20260821(unittest.TestCase):
         identity_b = "sha256:" + "b" * 64
         (subs / "MANIFEST.md").write_text(
             "# SubSaipen Manifest\n\n"
-            f"- target -- .saipen/extensions/subs/target/ | last_collect: {identity_a}@2026-01-01T00:00:00Z\n"
-            f"- other -- .saipen/extensions/subs/other/ | last_collect: {identity_b}@2026-01-01T00:00:00Z\n",
+            "- target -- .saipen/extensions/subs/target/ | last_collect: "
+            f"{identity_a}@2026-01-01T00:00:00Z\n"
+            "- other -- .saipen/extensions/subs/other/ | last_collect: "
+            f"{identity_b}@2026-01-01T00:00:00Z\n",
             encoding="utf-8",
         )
         target_outbox = target_dir / "kitchen" / "OUTBOX.md"
@@ -595,8 +597,10 @@ class ExternalAudit20260821(unittest.TestCase):
             "- **severity:** P3\n"
             "- **producer:** target\n"
             "- **source_head:** 00aa12db9f01c55cb76c3e2a6e6ba35c33a4135c\n"
-            "- **source_tree_fingerprint:** git-delta-v1:ccb6e0f9a721e7c2129e14998c54f1d2cd703605adb61d9e70311bd126857d43\n"
-            "- **role_revision:** sha256:4edb04181cb07e0946afd06fbe711166fa9dcc403e56b52e9be3844f0a71b0a5\n"
+            "- **source_tree_fingerprint:** git-delta-v1:"
+            "ccb6e0f9a721e7c2129e14998c54f1d2cd703605adb61d9e70311bd126857d43\n"
+            "- **role_revision:** sha256:"
+            "4edb04181cb07e0946afd06fbe711166fa9dcc403e56b52e9be3844f0a71b0a5\n"
             "- **coverage:** probe\n"
             "- **payload:** []\n"
             "- **verified:** PASS -- probe\n"
@@ -615,8 +619,10 @@ class ExternalAudit20260821(unittest.TestCase):
             "- **severity:** P3\n"
             "- **producer:** other\n"
             "- **source_head:** 00aa12db9f01c55cb76c3e2a6e6ba35c33a4135c\n"
-            "- **source_tree_fingerprint:** git-delta-v1:ccb6e0f9a721e7c2129e14998c54f1d2cd703605adb61d9e70311bd126857d43\n"
-            "- **role_revision:** sha256:4edb04181cb07e0946afd06fbe711166fa9dcc403e56b52e9be3844f0a71b0a5\n"
+            "- **source_tree_fingerprint:** git-delta-v1:"
+            "ccb6e0f9a721e7c2129e14998c54f1d2cd703605adb61d9e70311bd126857d43\n"
+            "- **role_revision:** sha256:"
+            "4edb04181cb07e0946afd06fbe711166fa9dcc403e56b52e9be3844f0a71b0a5\n"
             "- **coverage:** probe\n"
             "- **payload:** []\n"
             "- **verified:** PASS -- probe\n"

@@ -800,14 +800,21 @@ def run_continuity_probes() -> tuple[list[str], int]:
     cli(p, "a1", "attempt", "open")
     backdate_claim(p)
     r = cli(p, "a2", "attempt", "close", "interrupted", "unknown")
-    expect("H26a: foreign-stale seat may close the dangling episode", r.get("code") == "ATTEMPT_CLOSED", json.dumps(r)[:160])
+    expect(
+        "H26a: foreign-stale seat may close the dangling episode",
+        r.get("code") == "ATTEMPT_CLOSED",
+        json.dumps(r)[:160],
+    )
     cli(p, "a2", "claim", "T-001")
     cli(p, "a2", "attempt", "open")
     r = cli(p, "a1", "attempt", "open")
     expect(
         "H26b: second open while an episode is live refuses deterministically",
         r.get("ok") is False
-        and ("still open" in str(r.get("message", "")) or "live foreign claim" in str(r.get("message", ""))),
+        and (
+            "still open" in str(r.get("message", ""))
+            or "live foreign claim" in str(r.get("message", ""))
+        ),
         json.dumps(r)[:220],
     )
 

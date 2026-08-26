@@ -26,7 +26,7 @@
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.231.1** | [仕様](SPEC.md) | [ガイド](GUIDE.md) | [コア](saipen/CORE.md) | [メンテナンス](saipen/MAINTENANCE.md) | [スタイル](saipen/STYLE.md) | [UI](saipen/UI.md) | [適合性](saipen/CONFORMANCE.md) |MIT
+**v7.231.2** | [仕様](SPEC.md) | [ガイド](GUIDE.md) | [コア](saipen/CORE.md) | [メンテナンス](saipen/MAINTENANCE.md) | [スタイル](saipen/STYLE.md) | [UI](saipen/UI.md) | [適合性](saipen/CONFORMANCE.md) |MIT
 
 **ショートカット:** `cc` はコンテキストを収束まで継続し（実行中の目標があればそれを再開）、`sss` はコードを変更せず状況を表示し、`ss` はチェックポイントを保存して停止する。[全19キーの一覧](saipen/RFC.md#110-command-surface)。キリル文字の同形キーも使える: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`。 `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 

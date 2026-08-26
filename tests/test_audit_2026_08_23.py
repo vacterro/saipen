@@ -7,7 +7,6 @@ the audit described, so a fix cannot be undone by prose or a fixture tweak.
 
 from __future__ import annotations
 
-import json
 import shutil
 import tempfile
 import unittest
@@ -20,7 +19,6 @@ if str(TOOLS) not in __import__("sys").path:
 
 from saipen_engine import attempt as A  # noqa: E402
 from saipen_engine import log as LOG  # noqa: E402
-from saipen_engine import operations as OPS  # noqa: E402
 from saipen_engine import state as S  # noqa: E402
 
 
@@ -134,7 +132,13 @@ class Core005ExactCloseReplay(unittest.TestCase):
     def test_close_agent_preserved(self):
         events = [
             _ev(1, "T-001", "DEC", "attempt A-001 open", agent="a1"),
-            _ev(2, "T-001", "DEC", "attempt A-001 close result interrupted stop unknown", agent="a2"),
+            _ev(
+                2,
+                "T-001",
+                "DEC",
+                "attempt A-001 close result interrupted stop unknown",
+                agent="a2",
+            ),
         ]
         records, errors = A.build_attempts(events)
         self.assertEqual(errors, [])

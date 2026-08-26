@@ -1,6 +1,12 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.231.2 -- 2026-08-26 -- Canonical Ruff Gate Repair (T-1164)
+
+- T-1164: remove two unused audit-test imports and wrap nine overlong audit/
+  continuity lines; behavior is unchanged, canonical Ruff is clean, 307 tests
+  pass, 271/271 validator controls go red, and all executable scenarios pass.
+
 ## 7.231.1 -- 2026-08-26 -- USERPERSON Legacy Markdown Compatibility (T-1163)
 
 - T-1163: global and project USERPERSON readers accept established Markdown
