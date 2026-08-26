@@ -1,6 +1,14 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.231.1 -- 2026-08-26 -- USERPERSON Legacy Markdown Compatibility (T-1163)
+
+- T-1163: global and project USERPERSON readers accept established Markdown
+  `* [Category] preference` bullets alongside the canonical `- ` form.
+  Validation remains strict for headers, categories and preference text; the
+  next explicit mutation rewrites legacy input to the single canonical `- `
+  representation. The real 241-entry global profile now loads byte-unchanged.
+
 ## 7.231.0 -- 2026-08-26 -- Lossless Intake, Global USERPERSON, Runtime Identity (T-1162)
 
 - T-1162: immutable source receipts now preserve substantial source input

@@ -1,0 +1,20 @@
+{
+  "op_id": "scope-8c25411527824fd7a7915129b981a4f6",
+  "paths": {
+    "CHANGELOG.md": "221cd30fd58ad643",
+    "README.ded.md": "ff15c100cbd042a9",
+    "README.ee.md": "4a6ef902a7f4c67d",
+    "README.ja.md": "7086805d2b137039",
+    "README.md": "64a3be78d201d4d3",
+    "VERSION": "030a58766c138009",
+    "tools/test_userperson_global.py": "2abe4a70c1ec3ce8",
+    "tools/userperson.py": "be74a79a54594728"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-08-26T13:41:42Z",
+  "schema_version": 1,
+  "source_head": "7d355321b36a17192ec5ce8ef16c5704efd5c7a6",
+  "source_tree_fingerprint": "git-delta-v1:c3928cafa4309b2e751de1b2900b610c61b8c5974acf7c01cda0a45c511bb781",
+  "ticket": "T-1163"
+}

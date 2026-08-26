@@ -49,6 +49,7 @@ GLOBAL_CONFIG_ENV = "SAIPEN_USER_CONFIG_HOME"
 _MAX_PROFILE_BYTES = 8 * 1024 * 1024
 _HEADER = "# USERPERSON"
 _LEGACY_CATEGORY = "general"
+_BULLET_PREFIXES = ("- ", "* ")
 
 # Category policies per SubSaipen role. A projection selects only preferences
 # whose category is in the role's policy -- never the whole profile. saihunt
@@ -97,7 +98,7 @@ def _entry(category: str, text: str) -> dict:
 
 def _split_line(line: str) -> dict | None:
     stripped = line.strip()
-    if not stripped.startswith("- "):
+    if not stripped.startswith(_BULLET_PREFIXES):
         return None
     body = stripped[2:].strip()
     match = _CATEGORY_RE.match(body)
@@ -129,6 +130,10 @@ def render_profile(preferences: list[dict] | list[str]) -> str:
             body_lines.append(f"- [{preference['category']}] {preference['text']}")
         elif preference.strip().startswith("- "):
             body_lines.append(preference.strip())
+        elif preference.strip().startswith("* "):
+            entry = _split_line(preference)
+            if entry is not None:
+                body_lines.append(f"- [{entry['category']}] {entry['text']}")
         else:
             body_lines.append(f"- [{_LEGACY_CATEGORY}] {preference}")
     body = "\n".join(body_lines)
@@ -148,7 +153,7 @@ def merge_profile(current: list[dict] | list[str], additions: list[dict] | list[
         if isinstance(value, dict):
             return _entry(value["category"], value["text"])
         stripped = value.strip()
-        if stripped.startswith("- "):
+        if stripped.startswith(_BULLET_PREFIXES):
             return _split_line(stripped)
         return _entry(_LEGACY_CATEGORY, stripped)
 
@@ -220,8 +225,11 @@ def validate_profile(text: str) -> list[str]:
     for index, line in enumerate(lines[1:], 2):
         if not line.strip():
             continue
-        if not line.lstrip().startswith("- "):
-            errors.append(f"line {index}: every preference must be a markdown bullet starting '- '")
+        if not line.lstrip().startswith(_BULLET_PREFIXES):
+            errors.append(
+                f"line {index}: every preference must be a markdown bullet "
+                "starting '- ' or legacy '* '"
+            )
             continue
         entry = _split_line(line)
         if entry is None or not entry["text"]:

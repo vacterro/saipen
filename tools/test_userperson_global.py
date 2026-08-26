@@ -84,6 +84,28 @@ class GlobalUserpersonTests(unittest.TestCase):
         self.assertFalse(effective["project"]["present"])
         self.assertEqual("global", effective["preferences"][0]["source"])
 
+    def test_legacy_star_bullets_load_and_next_write_is_canonical(self) -> None:
+        self.config.mkdir(parents=True)
+        path = userperson.global_profile_path(self.config)
+        path.write_text(
+            "# USERPERSON\n\n"
+            "* [UI] Golden\n\n"
+            "* [Workflow] Small diffs\n",
+            encoding="utf-8",
+        )
+
+        loaded = userperson.load_global_profile(self.config)
+        self.assertEqual(["Golden", "Small diffs"], [p["text"] for p in loaded["preferences"]])
+
+        result = userperson.mutate_global_profile(
+            "add", text="Preserve data", category="Safety", user_config_home=self.config
+        )
+        self.assertTrue(result["ok"], result)
+        rewritten = path.read_text(encoding="utf-8")
+        self.assertNotIn("* [", rewritten)
+        self.assertIn("- [UI] Golden", rewritten)
+        self.assertIn("- [Safety] Preserve data", rewritten)
+
     def test_platform_path_resolution_is_deterministic_and_never_dot_saipen(self) -> None:
         windows = userperson.user_config_home(
             environ={"APPDATA": str(self.base / "roaming")},
