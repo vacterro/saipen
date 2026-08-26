@@ -277,3 +277,17 @@
 - 26.08.26 14:33 [E-4460] [parent: E-4459] [T-1164] [agent: opencode] [op: transition-fc2372992b124d97afd97ce38cbd8613] RUN: transition to SHIP -- Final review verdict SHIP; v7.231.2 exact scope bound
 - 26.08.26 14:34 [E-4461] [parent: E-4460] [T-1164] [agent: opencode] [op: finish-6a65a11f98ea4bf7973926a95cd99b91] RUN: ship v7.231.2 -> content commit 5b79327677ab pushed
 - 26.08.26 14:34 [E-4462] [parent: E-4461] [T-1164] [agent: opencode] [op: finish-6a65a11f98ea4bf7973926a95cd99b91] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 26.08.26 14:35 [E-4463] [parent: E-4462] [agent: opencode] [op: convergence-b954127ffed14013bf76f753784e7185] DEC: convergence stage E (canonical test/validate gate) -- PASS: fresh ruff PASS; unittest 307/307; core validator PASS; 271/271 controls and full scenario suite passed on identical released bytes
+- 26.08.26 14:35 [E-4464] [parent: E-4463] [agent: opencode] [op: transition-adab99e3d4dc49509086a42abf8d97cb] RUN: transition to HUNT
+- 26.08.26 14:36 [E-4465] [parent: E-4464] [T-1165] [agent: opencode] [op: ticket-541d1532f70f43468db3a44a2c0b5e5d] DEC: ticket added via SAIOPS
+- 26.08.26 14:36 [E-4466] [parent: E-4465] [T-1165] [agent: opencode] [op: claim-146f87be9d874cd1bc740b39642551aa] DEC: claimed via SAIOPS -- owner opencode
+- 26.08.26 14:36 [E-4467] [parent: E-4466] [T-1165] [agent: opencode] [op: transition-a23484844f3147769f279e891f53236d] RUN: transition to SCOUT -- Map changelog section boundary and archive ordering contract
+- 26.08.26 14:37 [E-4468] [parent: E-4467] [T-1165] [agent: opencode] [op: transition-d289d6f6e8bb4cd787422b7bc79c2497] RUN: transition to BUILD -- Move CHANGELOG sections from 7.226.3 downward verbatim to newest-top archive
+- 26.08.26 14:39 [E-4469] [parent: E-4468] [T-1165] [agent: opencode] [op: transition-eecdb4c686dc4846ade1d9768d29e2ad] RUN: transition to VERIFY -- Verbatim archive move complete; active changelog has 10 entries
+- 26.08.26 14:39 [E-4470] [parent: E-4469] [T-1165] [agent: opencode] [op: checkpoint-61ae58604b244e16bb602c0e44cb3a6a] RUN: verification PASS conf: high -- moved archive block sha256 6b87708d2886cc8f222f254de6f44bc1a8768b9bc5b4e6ab00c1cbdc30eaeac round-tripped; active count 10; ruff clean; unittest 307/307; validator PASS without changelog-unarchived
+- 26.08.26 14:39 [E-4471] [parent: E-4470] [T-1165] [agent: opencode] [op: transition-2949e07fa93b4a75aad24695ea5d7f9d] RUN: transition to REVIEW -- Review verbatim archive boundary and v7.231.3 metadata
+- 26.08.26 14:39 [E-4472] [parent: E-4471] [T-1165] [agent: opencode] [op: scope-1422f47c3a88493fa66c8869b71be579] DEC: release scope recorded -- 39 path(s) bound to 30be52fc0daf
+- 26.08.26 14:39 [E-4473] [parent: E-4472] [T-1165] [agent: opencode] [op: checkpoint-e8a808f582b84fcc8f62201fc79197d9] DEC: SHIP -- review PASS: verbatim newest-top archive move plus mechanical v7.231.3 metadata; foreign SPEC and runtime artifacts excluded
+- 26.08.26 14:39 [E-4474] [parent: E-4473] [T-1165] [agent: opencode] [op: transition-48d2b6c17e394abc89002037c0db552e] RUN: transition to SHIP -- Final review verdict SHIP; v7.231.3 exact scope bound
+- 26.08.26 14:40 [E-4475] [parent: E-4474] [T-1165] [agent: opencode] [op: finish-68ab02ae144a41ec91f00f2405269cb1] RUN: ship v7.231.3 -> content commit c2e0ed82b353 pushed
+- 26.08.26 14:40 [E-4476] [parent: E-4475] [T-1165] [agent: opencode] [op: finish-68ab02ae144a41ec91f00f2405269cb1] DEC: ticket finished via SAIOPS -- completion (from SHIP)

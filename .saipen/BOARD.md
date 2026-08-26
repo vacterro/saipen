@@ -1,6 +1,7 @@
 ## DOING
 ## TODO
 ## DONE
+- [x] T-1165 [P2] Archive excess CHANGELOG entries verbatim so active changelog keeps the documented recent set | verify: CHANGELOG.md retains 10 newest entries; older entries moved verbatim to CHANGELOG_ARCHIVE.md; validator has no changelog-unarchived warning | owner: opencode | claim_time: 2026-08-26T14:39:23Z
 - [x] T-1164 [P1] Canonical Ruff gate fails on 11 diagnostics in audit tests and continuity probes | verify: python -m ruff check tools/ tests/ PASS; full unittest, audit checks, scenarios, validator green | owner: opencode | claim_time: 2026-08-26T14:33:33Z
 - [x] T-1163 [P0] Global USERPERSON legacy Markdown star bullets are rejected by strict loader, blocking boot/context/crew after v7.231.0 | verify: tools/test_userperson_global PASS; actual global 241-entry profile loads; full unittest and validator green | owner: opencode | claim_time: 2026-08-26T13:41:46Z
 - [x] T-1162 [P0] Combined release wave authorized by user option 2: lossless source receipts (INC-LOSSY-WORK-SUMMARY-001), deterministic global/effective USERPERSON profiles, and Wave 1 adaptive runtime identity/capabilities | verify: tools/test_source_receipts + tools/test_userperson_global + tools/test_adaptive_runtime PASS conf: high; combined-scope ruff, full suite, scenarios, validator green | owner: opencode | claim_time: 2026-08-26T10:01:13Z
