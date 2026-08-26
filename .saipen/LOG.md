@@ -264,3 +264,16 @@
 - 26.08.26 13:41 [E-4447] [parent: E-4446] [T-1163] [agent: opencode] [op: transition-9cb7eecbba39455db2a66d987059e96e] RUN: transition to SHIP -- final review verdict SHIP; v7.231.1 scope bound
 - 26.08.26 13:43 [E-4448] [parent: E-4447] [T-1163] [agent: opencode] [op: finish-638edb218f6e4c25aa6c757c4513fc4d] RUN: ship v7.231.1 -> content commit c32008d9adb8 pushed
 - 26.08.26 13:43 [E-4449] [parent: E-4448] [T-1163] [agent: opencode] [op: finish-638edb218f6e4c25aa6c757c4513fc4d] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 26.08.26 13:46 [E-4450] [parent: E-4449] [T-1164] [agent: opencode] [op: ticket-1bc546c17ab34a6ab5b0db5ff2bc195a] DEC: ticket added via SAIOPS
+- 26.08.26 13:46 [E-4451] [parent: E-4450] [T-1164] [agent: opencode] [op: claim-cc2c5672beb1493fb7244a3715f7bc9d] DEC: claimed via SAIOPS -- owner opencode
+- 26.08.26 13:46 [E-4452] [parent: E-4451] [T-1164] [agent: opencode] [op: transition-ce5a237e617e492993bc722930403cd9] RUN: transition to SCOUT -- Reproduce canonical Ruff failures and bound mechanical lint-only repair
+- 26.08.26 13:46 [E-4453] [parent: E-4452] [T-1164] [agent: opencode] [op: transition-132954680bed452fb96d3feb415ebca9] RUN: transition to BUILD -- Apply formatter-safe import removal and line wrapping
+- 26.08.26 14:30 [E-4454] [parent: E-4453] [T-1164] [agent: opencode] [op: transition-000494ef54f3403692f315426cb0db5a] RUN: transition to VERIFY -- Canonical Ruff lint-only repair complete
+- 26.08.26 14:30 [E-4455] [parent: E-4454] [T-1164] [agent: opencode] [op: checkpoint-9c890529b1434d12a5a43f252e854d17] RUN: verification PASS -- ruff clean; 307/307 unittest; audit_checks 271/271; all executable scenarios and injector probes passed
+- 26.08.26 14:30 [E-4456] [parent: E-4455] [T-1164] [agent: opencode] [op: checkpoint-5ae85b25af1c4e49864a914a6b0a7a4d] RUN: verification PASS conf: high -- ruff clean; 307/307 unittest; audit_checks 271/271; all executable scenarios and injector probes passed
+- 26.08.26 14:30 [E-4457] [parent: E-4456] [T-1164] [agent: opencode] [op: transition-8799cd073a2e4ffb98184cf02c32df0a] RUN: transition to REVIEW -- Review lint-only diff and full regression evidence
+- 26.08.26 14:33 [E-4458] [parent: E-4457] [T-1164] [agent: opencode] [op: scope-1eeb496ea658429ebf312c2659c57ce4] DEC: release scope recorded -- 41 path(s) bound to 3aaf63c73ee7
+- 26.08.26 14:33 [E-4459] [parent: E-4458] [T-1164] [agent: opencode] [op: checkpoint-f01ccb143a26434ca0569bd24548eaec] DEC: SHIP -- review PASS: 3 lint-only source paths plus 38 mechanical release metadata paths; full gates green; foreign SPEC and recovery artifacts excluded
+- 26.08.26 14:33 [E-4460] [parent: E-4459] [T-1164] [agent: opencode] [op: transition-fc2372992b124d97afd97ce38cbd8613] RUN: transition to SHIP -- Final review verdict SHIP; v7.231.2 exact scope bound
+- 26.08.26 14:34 [E-4461] [parent: E-4460] [T-1164] [agent: opencode] [op: finish-6a65a11f98ea4bf7973926a95cd99b91] RUN: ship v7.231.2 -> content commit 5b79327677ab pushed
+- 26.08.26 14:34 [E-4462] [parent: E-4461] [T-1164] [agent: opencode] [op: finish-6a65a11f98ea4bf7973926a95cd99b91] DEC: ticket finished via SAIOPS -- completion (from SHIP)
