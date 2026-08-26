@@ -1,6 +1,7 @@
 ## DOING
 ## TODO
 ## DONE
+- [x] T-1163 [P0] Global USERPERSON legacy Markdown star bullets are rejected by strict loader, blocking boot/context/crew after v7.231.0 | verify: tools/test_userperson_global PASS; actual global 241-entry profile loads; full unittest and validator green | owner: opencode | claim_time: 2026-08-26T13:41:46Z
 - [x] T-1162 [P0] Combined release wave authorized by user option 2: lossless source receipts (INC-LOSSY-WORK-SUMMARY-001), deterministic global/effective USERPERSON profiles, and Wave 1 adaptive runtime identity/capabilities | verify: tools/test_source_receipts + tools/test_userperson_global + tools/test_adaptive_runtime PASS conf: high; combined-scope ruff, full suite, scenarios, validator green | owner: opencode | claim_time: 2026-08-26T10:01:13Z
 - [x] T-1161 [P0] Self-resolving gates: no-human-courier law, decision ownership dispositions, user-wait proof obligation, truth-preserving repair, traceability reconstruction; INC-MUSE-SHIP-INTERNAL-CHOICE-001 + laundering regressions | verify: tools/test_self_resolving_gates PASS conf: high + full suite + validator green | owner: opencode | claim_time: 2026-08-25T12:16:33Z
 - [x] T-1160 [P0] Effect-based authorization: capability vocabulary, policy-vs-enforcement distinction, indirect mutation rule, mutation provenance, negative-claim gate, permissions diagnostic, INC-PERMISSION-EFFECT-BYPASS-001 regression | verify: tools/test_effect_authorization PASS conf: high + full suite + validator green | owner: opencode | claim_time: 2026-08-25T06:34:05Z
