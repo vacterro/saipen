@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 """Optional USERPERSON preference profile mechanics (T-574, T-577).
 
-USERPERSON is a meta-control, OFF by default. With no `.saipen/USERPERSON.md`
-the protocol is silent: no warning, no boot failure, no placeholder, no
-onboarding, no cold-start cost. The file is created only after explicit user
-activation.
+USERPERSON is a meta-control, OFF by default. Its only sources are the
+deterministic global user-configuration ``USERPERSON.md`` and the bound
+project's ``.saipen/USERPERSON.md``. With neither present the protocol is
+silent: no warning, boot failure, placeholder, onboarding, directory, file,
+or cold-start surface. A source is created only after explicit user mutation.
 
-This module is the mechanical core: parse / render / merge / remove /
-validate / projection. It NEVER claims to understand natural-language
+This module is the mechanical core: resolve / safely load / parse / render /
+merge / remove / validate / effective composition / projection / global
+atomic persistence. It NEVER claims to understand natural-language
 semantics. Preference identity is STRUCTURED (a category key plus the exact
 preference text); the merge is deterministic lexical dedup on that identity,
 and semantic distillation (recognizing that two differently-worded preferences
@@ -32,11 +34,19 @@ preferences that differ in either are distinct and BOTH are kept.
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
+import json
+import os
 import re
+import stat
+import tempfile
 from pathlib import Path
 
 PROFILE_PATH = ".saipen/USERPERSON.md"
+GLOBAL_PROFILE_NAME = "USERPERSON.md"
+GLOBAL_CONFIG_ENV = "SAIPEN_USER_CONFIG_HOME"
+_MAX_PROFILE_BYTES = 8 * 1024 * 1024
 _HEADER = "# USERPERSON"
 _LEGACY_CATEGORY = "general"
 
@@ -212,6 +222,13 @@ def validate_profile(text: str) -> list[str]:
             continue
         if not line.lstrip().startswith("- "):
             errors.append(f"line {index}: every preference must be a markdown bullet starting '- '")
+            continue
+        entry = _split_line(line)
+        if entry is None or not entry["text"]:
+            errors.append(f"line {index}: preference text must not be empty")
+            continue
+        if not entry["category"].strip():
+            errors.append(f"line {index}: preference category must not be empty")
     preferences = parse_profile(text)["preferences"]
     seen = set()
     for entry in preferences:
@@ -261,6 +278,369 @@ def onboarding_questions() -> list[str]:
 
 def profile_path(project_root: Path | str) -> Path:
     return Path(project_root) / PROFILE_PATH
+
+
+class UserpersonError(ValueError):
+    """Controlled profile/path failure safe for direct CLI projection."""
+
+    def __init__(self, code: str, detail: str, *, scope: str) -> None:
+        super().__init__(detail)
+        self.code = code
+        self.detail = detail
+        self.scope = scope
+
+
+def user_config_home(
+    override: Path | str | None = None,
+    *,
+    environ: dict[str, str] | None = None,
+    platform: str | None = None,
+    home: Path | str | None = None,
+) -> Path:
+    """Resolve the one global SAIPEN user-configuration directory.
+
+    No directory is created. The resolver never searches disks and never uses
+    ``.saipen`` or ``saipen_home``. Dependency-injection arguments keep tests
+    hermetic without consulting a developer's real profile.
+    """
+    try:
+        env = os.environ if environ is None else environ
+        selected = override if override is not None else env.get(GLOBAL_CONFIG_ENV)
+        if selected is not None:
+            raw = str(selected).strip()
+            if not raw:
+                raise UserpersonError(
+                    "USER_CONFIG_INVALID",
+                    f"{GLOBAL_CONFIG_ENV} is empty",
+                    scope="global",
+                )
+            return Path(raw).expanduser().resolve()
+
+        system = os.name if platform is None else platform
+        actual_home = Path(home).expanduser() if home is not None else Path.home()
+        if system == "nt":
+            appdata = str(env.get("APPDATA", "")).strip()
+            base = (
+                Path(appdata).expanduser()
+                if appdata
+                else actual_home / "AppData" / "Roaming"
+            )
+            return (base / "SAIPEN").resolve()
+        xdg = str(env.get("XDG_CONFIG_HOME", "")).strip()
+        base = Path(xdg).expanduser() if xdg else actual_home / ".config"
+        return (base / "saipen").resolve()
+    except UserpersonError:
+        raise
+    except (OSError, RuntimeError) as exc:
+        raise UserpersonError(
+            "USER_CONFIG_INVALID",
+            f"cannot resolve global USERPERSON configuration: {exc}",
+            scope="global",
+        ) from exc
+
+
+def global_profile_path(user_config_home: Path | str | None = None) -> Path:
+    return user_config_home_resolved(user_config_home) / GLOBAL_PROFILE_NAME
+
+
+def user_config_home_resolved(value: Path | str | None = None) -> Path:
+    """Resolve an injected home or the canonical environment/platform home."""
+    return user_config_home(value) if value is not None else user_config_home()
+
+
+def _profile_node_bytes(path: Path, *, scope: str) -> bytes | None:
+    """Read one stable, regular, in-scope profile node without following links."""
+    from saipen_engine.paths import read_bound_regular_bytes
+
+    try:
+        info = path.lstat()
+    except FileNotFoundError:
+        return None
+    except OSError as exc:
+        raise UserpersonError(
+            "USERPERSON_PATH_INVALID", f"cannot inspect {scope} USERPERSON: {exc}", scope=scope
+        ) from exc
+    reparse = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
+    if (
+        not stat.S_ISREG(info.st_mode)
+        or path.is_symlink()
+        or bool(getattr(info, "st_file_attributes", 0) & reparse)
+    ):
+        raise UserpersonError(
+            "USERPERSON_PATH_INVALID",
+            f"{scope} USERPERSON must be a regular non-link file",
+            scope=scope,
+        )
+    try:
+        return read_bound_regular_bytes(path, info, max_bytes=_MAX_PROFILE_BYTES)
+    except (OSError, ValueError) as exc:
+        raise UserpersonError(
+            "USERPERSON_PATH_INVALID", f"cannot safely read {scope} USERPERSON: {exc}", scope=scope
+        ) from exc
+
+
+def load_profile(path: Path, *, scope: str) -> dict:
+    """Load and strictly validate one optional profile without side effects."""
+    raw = _profile_node_bytes(path, scope=scope)
+    if raw is None:
+        return {
+            "scope": scope,
+            "present": False,
+            "fingerprint": "",
+            "preferences": [],
+            "bytes": 0,
+            "text": "",
+        }
+    try:
+        text = raw.decode("utf-8-sig", errors="strict")
+    except UnicodeDecodeError as exc:
+        raise UserpersonError(
+            "USERPERSON_MALFORMED",
+            f"{scope} USERPERSON is not valid UTF-8",
+            scope=scope,
+        ) from exc
+    errors = validate_profile(text)
+    if errors:
+        raise UserpersonError(
+            "USERPERSON_MALFORMED",
+            f"{scope} USERPERSON is malformed: {'; '.join(errors[:5])}"
+            + (f"; +{len(errors) - 5} more" if len(errors) > 5 else ""),
+            scope=scope,
+        )
+    return {
+        "scope": scope,
+        "present": True,
+        "fingerprint": profile_fingerprint(text),
+        "preferences": parse_profile(text)["preferences"],
+        "bytes": len(raw),
+        "text": text,
+    }
+
+
+def load_project_profile(project_root: Path | str) -> dict:
+    return load_profile(profile_path(project_root), scope="project")
+
+
+def load_global_profile(user_config_home: Path | str | None = None) -> dict:
+    return load_profile(global_profile_path(user_config_home), scope="global")
+
+
+def effective_profile(
+    project_root: Path | str, user_config_home: Path | str | None = None
+) -> dict:
+    """Compose global + project profiles mechanically, project-first.
+
+    Exact structured duplicates collapse to the project copy. Lexically
+    different entries survive even when a human might consider them in
+    conflict; Python does not invent semantic authority.
+    """
+    global_source = load_global_profile(user_config_home)
+    project_source = load_project_profile(project_root)
+    preferences: list[dict] = []
+    seen: set[str] = set()
+    for source in (project_source, global_source):
+        for item in source["preferences"]:
+            key = _canonical(f"{item['category']}: {item['text']}")
+            if key in seen:
+                continue
+            seen.add(key)
+            preferences.append({**item, "source": source["scope"]})
+    identity = {
+        "global": {
+            "present": global_source["present"],
+            "fingerprint": global_source["fingerprint"],
+        },
+        "project": {
+            "present": project_source["present"],
+            "fingerprint": project_source["fingerprint"],
+        },
+        "preferences": preferences,
+    }
+    effective_fingerprint = hashlib.sha256(
+        json.dumps(identity, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode(
+            "utf-8"
+        )
+    ).hexdigest()[:16]
+    return {
+        "active": bool(global_source["present"] or project_source["present"]),
+        "global": identity["global"],
+        "project": identity["project"],
+        "effective_fingerprint": effective_fingerprint,
+        "preferences": preferences,
+        "sources": {"global": global_source, "project": project_source},
+    }
+
+
+def effective_projection(
+    project_root: Path | str, role: str, user_config_home: Path | str | None = None
+) -> dict:
+    """Bounded role projection from the effective two-layer profile."""
+    effective = effective_profile(project_root, user_config_home)
+    projection = project_profile(
+        effective["preferences"], role, source_fingerprint=effective["effective_fingerprint"]
+    )
+    projection["active"] = effective["active"]
+    return projection
+
+
+def _sync_parent(path: Path) -> None:
+    """Persist a directory-entry mutation where directory fsync is available."""
+    if os.name == "nt":
+        return
+    descriptor = os.open(path.parent, os.O_RDONLY)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def _atomic_replace(path: Path, text: str) -> None:
+    """UTF-8 same-directory atomic replacement with a durable file flush."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, raw_temp = tempfile.mkstemp(prefix=".USERPERSON.", suffix=".tmp", dir=path.parent)
+    temp_path = Path(raw_temp)
+    try:
+        with os.fdopen(descriptor, "wb") as handle:
+            handle.write(text.encode("utf-8"))
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temp_path, path)
+        _sync_parent(path)
+    finally:
+        with contextlib.suppress(FileNotFoundError):
+            temp_path.unlink()
+
+
+def _global_lock(home: Path):
+    from saipen_engine.lock import file_writer_lock
+
+    return file_writer_lock(home / "locks" / "userperson.lock", home)
+
+
+def mutate_global_profile(
+    action: str,
+    *,
+    text: str = "",
+    category: str | None = None,
+    user_config_home: Path | str | None = None,
+) -> dict:
+    """Apply one validated global add/remove/reset outside project state."""
+    home = user_config_home_resolved(user_config_home)
+    path = home / GLOBAL_PROFILE_NAME
+    before = load_profile(path, scope="global")
+    if action == "reset" and not before["present"]:
+        return {
+            "ok": False,
+            "code": "TICKET_NOT_FOUND",
+            "scope": "global",
+            "detail": "no profile to reset",
+        }
+    if action not in {"add", "remove", "reset"}:
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "scope": "global",
+            "detail": f"unknown global USERPERSON mutation {action!r}",
+        }
+    if action in {"add", "remove"} and not text.strip():
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "scope": "global",
+            "detail": f"userperson {action} needs non-empty text",
+        }
+    if action == "remove" and not before["present"]:
+        return {
+            "ok": True,
+            "code": "UNCHANGED",
+            "scope": "global",
+            "present": False,
+            "changed": False,
+            "preferences": [],
+        }
+
+    from saipen_engine.lock import FileLockBusy
+
+    try:
+        with _global_lock(home):
+            current = load_profile(path, scope="global")
+            preferences = current["preferences"]
+            if action == "reset":
+                try:
+                    path.unlink()
+                except FileNotFoundError:
+                    return {
+                        "ok": False,
+                        "code": "TICKET_NOT_FOUND",
+                        "scope": "global",
+                        "detail": "no profile to reset",
+                    }
+                _sync_parent(path)
+                return {
+                    "ok": True,
+                    "code": "RESET",
+                    "scope": "global",
+                    "present": False,
+                    "preferences": [],
+                }
+            if action == "add":
+                updated = merge_profile(
+                    preferences,
+                    [{"category": category or _LEGACY_CATEGORY, "text": text}],
+                )
+            else:
+                updated, refusal = remove_preference(preferences, text, category)
+                if refusal:
+                    return {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "scope": "global",
+                        "detail": refusal,
+                    }
+            rendered = render_profile(updated)
+            errors = validate_profile(rendered)
+            if errors:
+                return {
+                    "ok": False,
+                    "code": "USERPERSON_MALFORMED",
+                    "scope": "global",
+                    "detail": "; ".join(errors),
+                }
+            changed = rendered != current["text"]
+            if changed:
+                _atomic_replace(path, rendered)
+            return {
+                "ok": True,
+                "code": "ADDED" if action == "add" else "REMOVED",
+                "scope": "global",
+                "present": True,
+                "changed": changed,
+                "fingerprint": profile_fingerprint(rendered),
+                "preferences": updated,
+            }
+    except FileLockBusy as exc:
+        return {"ok": False, "code": "WRITER_BUSY", "scope": "global", "detail": str(exc)}
+    except PermissionError as exc:
+        return {
+            "ok": False,
+            "code": "USER_CONFIG_INVALID",
+            "scope": "global",
+            "detail": f"global USERPERSON path is not writable: {exc}",
+        }
+    except UserpersonError as exc:
+        return {
+            "ok": False,
+            "code": exc.code,
+            "scope": exc.scope,
+            "detail": exc.detail,
+        }
+    except OSError as exc:
+        return {
+            "ok": False,
+            "code": "USERPERSON_WRITE_FAILED",
+            "scope": "global",
+            "detail": f"global USERPERSON write failed: {exc}",
+        }
 
 
 def write_profile(project_root: Path | str, text: str, agent: str = "saipen") -> dict:

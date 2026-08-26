@@ -1285,6 +1285,18 @@ def _plan_transition(
                 ticket=subject,
             )
 
+    if subject and destination in {"BUILD", "REVIEW", "SHIP"}:
+        from .intake import boundary_gate
+
+        source_boundary = boundary_gate(root, subject, destination)
+        if not source_boundary.get("ok"):
+            return _refuse(
+                source_boundary.get("code", "SOURCE_CORRUPTION"),
+                f"source reread gate at {destination}: {source_boundary}",
+                ticket=subject,
+                receipt=source_boundary.get("receipt"),
+            )
+
     if destination == "REVIEW" and current == "VERIFY":
         from .log import verification_evidence
 
@@ -1859,6 +1871,19 @@ def _plan_finish_ticket(
     """
     op_id = "finish-" + uuid4_hex()
     docs, state, board, log_tail = _read(root)
+    # T-1162: a short BOARD title cannot close Work whose authoritative
+    # source still has missing, corrupt, or uncovered clauses. This gate
+    # rereads the original body and verifies its digest; model memory and a
+    # green umbrella ticket are not closure evidence.
+    from .intake import work_closure_gate
+
+    source_gate = work_closure_gate(root, ticket_id)
+    if not source_gate.get("ok"):
+        return _refuse(
+            source_gate.get("code", "SOURCE_UNRESOLVED"),
+            f"source coverage gate for {ticket_id}: {source_gate}",
+            receipt=source_gate.get("receipt"),
+        )
     # SELF-ownership gate (second-wave P0): finishing a ticket is THE active
     # mutation -- it closes the DOING claim and rewrites STATE.agent.
     _guard = _active_claim_refusal(state, docs["board"].text_norm, agent, ticket_id=ticket_id)

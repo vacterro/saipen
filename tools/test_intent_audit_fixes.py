@@ -52,6 +52,16 @@ def _hash_tree(root: Path) -> str:
 
 
 class IntentAuditTests(unittest.TestCase):
+    def setUp(self) -> None:
+        """Every runtime test gets an isolated optional global profile home."""
+        config = tempfile.TemporaryDirectory(prefix="saipen-test-user-config-")
+        self.addCleanup(config.cleanup)
+        patcher = mock.patch.dict(
+            os.environ, {"SAIPEN_USER_CONFIG_HOME": config.name}, clear=False
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
     @staticmethod
     def _scaffold_prepare_project(root: Path) -> None:
         fixture = TOOLS.parent / "tests/scenarios/done-wait-deadlock-goal-mode/.saipen"

@@ -34,6 +34,7 @@ import tempfile
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
+from unittest import mock
 
 TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
@@ -43,6 +44,15 @@ from saipen_engine import commands as CM  # noqa: E402
 
 PROTOCOL_DIR = TOOLS.parent / "saipen"
 SAIPEN_PY = TOOLS / "saipen.py"
+
+
+def _sandbox_user_config(testcase: unittest.TestCase) -> None:
+    """Keep runtime routing probes independent of the developer profile."""
+    tmp = tempfile.TemporaryDirectory(prefix="saipen-user-config-")
+    testcase.addCleanup(tmp.cleanup)
+    patcher = mock.patch.dict(os.environ, {"SAIPEN_USER_CONFIG_HOME": tmp.name})
+    patcher.start()
+    testcase.addCleanup(patcher.stop)
 
 # The seven Cyrillic-confusable twins, pinned as an explicit expectation so a
 # silent change to either the table or the map cannot recreate drift without
@@ -327,6 +337,9 @@ class CliShortcutRoutingTests(unittest.TestCase):
     it -- the incident shipped precisely because that link was missing.
     """
 
+    def setUp(self):
+        _sandbox_user_config(self)
+
     @classmethod
     def setUpClass(cls):
         cls._tmp = tempfile.TemporaryDirectory(prefix="saipen-cli-routing-")
@@ -585,6 +598,9 @@ class CommandSemanticsTests(unittest.TestCase):
       * gg <new goal> == create/pivot, semantically distinct from cc
       * execution_intent: converge + converge_target: crew -> cc resumes crew
     """
+
+    def setUp(self):
+        _sandbox_user_config(self)
 
     def _make(self, name, intent="normal", state_extra="", board_todo=""):
         td = tempfile.mkdtemp(prefix="saipen-cmd-")

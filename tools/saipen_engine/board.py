@@ -83,6 +83,7 @@ KNOWN_FIELDS = frozenset(
         "review_passes",
         "verify_attempts",
         "source_reports",
+        "source_receipts",
         "recurrence",
         "weak_model",
     }

@@ -1813,6 +1813,18 @@ def _preflight_plan(root: Path, plan: ReleasePlan) -> dict:
             "PREFLIGHT", "LOG.md changed since the plan was built; rebuild the plan"
         )
 
+    # T-1162: release cannot outrun authoritative source coverage. This is a
+    # targeted metadata/contract/coverage check plus digest reread of active
+    # bodies; cold archives are deliberately excluded from ordinary ship.
+    from .intake import release_gate
+
+    source_gate = release_gate(root, plan.ticket_id)
+    if not source_gate.get("ok"):
+        return _release_failure(
+            "SOURCE_COVERAGE",
+            f"active source receipt blocks ship: {source_gate}",
+        )
+
     if plan.targeted_ticket:
         live_op = _targeted_integration_op(root, plan.invocation, plan.ticket_id)
         if not live_op or live_op != plan.targeted_integration_op:

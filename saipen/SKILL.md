@@ -48,5 +48,9 @@ Thin entry for skill-reading platforms. The system lives elsewhere:
 
 Platform notes:
 - Native task lists mirror `.saipen/BOARD.md`, never replace it.
+- `<project_root>/.saipen/` remains the only project memory/checkpoint area.
+  Global USERPERSON lives in the deterministic user-configuration directory
+  (`SAIPEN_USER_CONFIG_HOME` override or platform default), never in `.saipen/`
+  or `saipen_home`; it cannot bootstrap or become an ancestor project root.
 - Prefer file tools over shell redirects -- UTF-8 no BOM.
 - CORE.md decides. No rule here overrides it.

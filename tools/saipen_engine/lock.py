@@ -38,7 +38,117 @@ LOCK_DIR = ".saipen/locks"
 # TOCTOU race.
 _WRITER_HOLDERS: dict[str, "WriterLock"] = {}
 _PRODUCER_HOLDERS: dict[str, "ProducerLock"] = {}
+_FILE_HOLDERS: dict[str, "FileWriterLock"] = {}
 _HOLDERS_GUARD = threading.Lock()
+
+
+class FileLockBusy(PermissionError):
+    """The non-project lock exists but another writer currently owns it."""
+
+
+class FileWriterLock:
+    """Exclusive lock for one non-project-owned file namespace.
+
+    This is deliberately separate from :class:`WriterLock`: callers provide
+    an exact lock path and an ownership root, so user configuration can use
+    the same OS-lock discipline without fabricating a project or touching its
+    ``.saipen`` journal/lock tree. Construction is mutating because it creates
+    the lock directory; read-only callers must never instantiate it.
+    """
+
+    def __init__(self, lock_path: Path | str, ownership_root: Path | str) -> None:
+        self.path = Path(lock_path)
+        root = Path(ownership_root)
+        try:
+            resolved_root = root.resolve()
+            resolved_parent = self.path.parent.resolve()
+        except OSError as exc:
+            raise PermissionError(f"lock path is unresolvable: {exc}") from exc
+        if not resolved_parent.is_relative_to(resolved_root):
+            raise PermissionError("lock path escapes ownership root")
+        for component in (root, self.path.parent):
+            try:
+                info = os.lstat(component)
+            except OSError:
+                continue
+            if os.path.islink(component) or getattr(info, "st_file_attributes", 0) & 0x400:
+                try:
+                    resolved = component.resolve()
+                except OSError as exc:
+                    raise PermissionError("lock component is unresolvable") from exc
+                if not resolved.is_relative_to(resolved_root):
+                    raise PermissionError("lock path escapes ownership root")
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self._handle = None
+        self._acquired = False
+
+    def acquire(self) -> bool:
+        if self._acquired:
+            return True
+        key = str(self.path.resolve())
+        with _HOLDERS_GUARD:
+            holder = _FILE_HOLDERS.get(key)
+            if holder is not None and holder is not self:
+                raise FileLockBusy("WRITER_BUSY")
+            _FILE_HOLDERS[key] = self
+        try:
+            self._handle = open(self.path, "a+b")  # noqa: SIM115
+        except OSError:
+            with _HOLDERS_GUARD:
+                if _FILE_HOLDERS.get(key) is self:
+                    del _FILE_HOLDERS[key]
+            raise
+        try:
+            if _MSVCRT is not None:
+                _MSVCRT.locking(self._handle.fileno(), _MSVCRT.LK_NBLCK, 1)
+            else:
+                _FCNTL.flock(self._handle.fileno(), _FCNTL.LOCK_EX | _FCNTL.LOCK_NB)
+        except OSError:
+            if self._handle is not None:
+                self._handle.close()
+            self._handle = None
+            with _HOLDERS_GUARD:
+                if _FILE_HOLDERS.get(key) is self:
+                    del _FILE_HOLDERS[key]
+            raise FileLockBusy("WRITER_BUSY")
+        self._acquired = True
+        return True
+
+    def release(self) -> None:
+        if not self._acquired or self._handle is None:
+            return
+        key = str(self.path.resolve())
+        try:
+            if _MSVCRT is not None:
+                self._handle.seek(0)
+                _MSVCRT.locking(self._handle.fileno(), _MSVCRT.LK_UNLCK, 1)
+            else:
+                _FCNTL.flock(self._handle.fileno(), _FCNTL.LOCK_UN)
+        finally:
+            self._handle.close()
+            self._handle = None
+            self._acquired = False
+            with _HOLDERS_GUARD:
+                if _FILE_HOLDERS.get(key) is self:
+                    del _FILE_HOLDERS[key]
+
+    def __enter__(self) -> "FileWriterLock":
+        self.acquire()
+        return self
+
+    def __exit__(self, *exc) -> None:
+        self.release()
+
+
+@contextlib.contextmanager
+def file_writer_lock(lock_path: Path | str, ownership_root: Path | str):
+    """Acquire a non-project writer lock with containment enforcement."""
+    lock = FileWriterLock(lock_path, ownership_root)
+    lock.acquire()
+    try:
+        yield lock
+    finally:
+        lock.release()
 
 
 class WriterLock:

@@ -55,6 +55,10 @@
         "type": "string",
         "description": "RFC 1.2 recognized optional ticket field (T-556): sweep provenance, the composite IMP-### identities a canonical ticket was generated from. Resolved by the [sweep-ticket-link] validator check against SWEEP.md; a reference that resolves to no disposition, or a ticket produced by an unverified or INVALID/ALREADY_FIXED finding, FAILs."
       },
+      "source_receipts": {
+        "type": "string",
+        "description": "Comma-separated immutable SRC-NNN authority links. Full source bodies stay under .saipen/intake and are never copied onto BOARD."
+      },
       "recurrence": {
         "type": "string",
         "description": "RFC 1.2 recognized optional ticket field (T-558): the META-IMPROVEMENT reasoning a protocol-level improve ticket MUST record -- the cross-project recurrence analysis (a protocol-level fix records whether the defect recurs across projects; a local bug stays local). Required by the [sweep-ticket-link] check for a PROTOCOL_VIOLATION finding that produced a ticket."

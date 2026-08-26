@@ -22,6 +22,8 @@
     {"src": "saipen/IMPROVE.md", "required": true},
     {"src": "saipen/SAICRITIC.md", "required": true},
     {"src": "saipen/OPS.md", "required": true},
+    {"src": "saipen/RUNTIME.md", "required": true},
+    {"src": "saipen/SOURCES.md", "required": true},
     {"src": "saipen/RFC.md", "required": true},
     {"src": "saipen/SKILL.md", "required": true},
     {"src": "saipen/UI.md", "required": true},

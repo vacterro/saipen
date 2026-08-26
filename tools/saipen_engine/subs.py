@@ -1789,6 +1789,17 @@ def sub_list(project_root: Path | str) -> Result:
     can never hide an open block.
     """
     root = Path(project_root)
+    try:
+        from userperson import UserpersonError, effective_profile, project_profile
+
+        effective = effective_profile(root)
+    except UserpersonError as exc:
+        return _refuse(
+            "VALIDATION_FAILED",
+            exc.detail,
+            scope=exc.scope,
+            userperson_code=exc.code,
+        )
     entries, errors = parse_manifest_file(root)
     if errors:
         return _refuse(
@@ -1817,6 +1828,12 @@ def sub_list(project_root: Path | str) -> Result:
     blocked = []
     for entry in entries:
         info = sub_instance_health(root, entry.name, source_id, entry, records=_records)
+        if effective["active"]:
+            info["userperson_projection"] = project_profile(
+                effective["preferences"],
+                entry.name,
+                source_fingerprint=effective["effective_fingerprint"],
+            )
         lines.append(info)
         if info["health"] == HEALTH_BLOCKED or info.get("board", {}).get("counts", {}).get(
             "BLOCKED"
@@ -1828,6 +1845,17 @@ def sub_list(project_root: Path | str) -> Result:
 def sub_status(project_root: Path | str, name: str) -> Result:
     """Read-only peek with mechanically-derived health (SAICREW I)."""
     root = Path(project_root)
+    try:
+        from userperson import UserpersonError, effective_projection
+
+        userperson_projection = effective_projection(root, name)
+    except UserpersonError as exc:
+        return _refuse(
+            "VALIDATION_FAILED",
+            exc.detail,
+            scope=exc.scope,
+            userperson_code=exc.code,
+        )
     try:
         _sub_dir(root, name)
     except ValueError as exc:
@@ -1849,6 +1877,8 @@ def sub_status(project_root: Path | str, name: str) -> Result:
     except Exception:
         source_id = None
     health = sub_instance_health(root, name, source_id, entry)
+    if userperson_projection["active"]:
+        health["userperson_projection"] = userperson_projection
     return Result(ok=True, code="SUB_STATUS", data=health)
 
 
@@ -2128,6 +2158,18 @@ def sub_spawn(
     writes and reports would_result -- the mutation did not happen.
     """
     root = Path(project_root)
+    try:
+        from userperson import UserpersonError, effective_projection
+
+        userperson_projection = effective_projection(root, name)
+    except UserpersonError as exc:
+        return _refuse(
+            "VALIDATION_FAILED",
+            exc.detail,
+            scope=exc.scope,
+            userperson_code=exc.code,
+            name=name,
+        )
     # W2-004: pending-recovery admission BEFORE any post-apply state-derived
     # idempotence check. A target that appears to exist may be the partial
     # effect of a crash-left PREPARED op; recovery must settle it first.
@@ -2407,6 +2449,11 @@ def sub_spawn(
                 "dry_run": True,
                 "would_result": "SPAWNED",
                 "would_write": proposed,
+                **(
+                    {"userperson_projection": userperson_projection}
+                    if userperson_projection["active"]
+                    else {}
+                ),
             },
         )
     op_id = "sub-spawn-" + __import__("uuid").uuid4().hex[:8]
@@ -2440,6 +2487,11 @@ def sub_spawn(
             "bootstrap": bool(sync_changed),
             "sync_op_id": sync_result.op_id if sync_result else None,
             "role_revision": role_revision,
+            **(
+                {"userperson_projection": userperson_projection}
+                if userperson_projection["active"]
+                else {}
+            ),
         },
     )
 
@@ -2479,6 +2531,18 @@ def sub_adopt(
     patch with ZERO writes.
     """
     root = Path(project_root)
+    try:
+        from userperson import UserpersonError, effective_projection
+
+        userperson_projection = effective_projection(root, name)
+    except UserpersonError as exc:
+        return _refuse(
+            "VALIDATION_FAILED",
+            exc.detail,
+            scope=exc.scope,
+            userperson_code=exc.code,
+            name=name,
+        )
     try:
         _sub_dir(root, name)
     except ValueError as exc:
@@ -2543,6 +2607,11 @@ def sub_adopt(
                 "dry_run": True,
                 "would_result": "SUB_ADOPTED",
                 "would_write": [rel],
+                **(
+                    {"userperson_projection": userperson_projection}
+                    if userperson_projection["active"]
+                    else {}
+                ),
             },
         )
     op_id = "sub-adopt-" + __import__("uuid").uuid4().hex[:8]
@@ -2574,7 +2643,15 @@ def sub_adopt(
         code="SUB_ADOPTED",
         op_id=op_id,
         changed_files=[rel],
-        data={"name": name, "role_revision": role_revision},
+        data={
+            "name": name,
+            "role_revision": role_revision,
+            **(
+                {"userperson_projection": userperson_projection}
+                if userperson_projection["active"]
+                else {}
+            ),
+        },
     )
 
 

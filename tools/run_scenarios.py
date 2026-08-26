@@ -8938,8 +8938,21 @@ def run_userperson_probes() -> tuple[list[str], int]:
     )
     expect(
         "CORE.md 1.10 documents the precedence chain",
-        "current explicit request > project/task requirements > SAIPEN > "
-        "verified evidence > USERPERSON" in core,
+        "current explicit request > project/task requirements > SAIPEN normative rules > "
+        "verified evidence > project USERPERSON > global USERPERSON" in core,
+    )
+
+    focused = subprocess.run(
+        [sys.executable, "-m", "unittest", "tools.test_userperson_global"],
+        cwd=str(HOME),
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+    expect(
+        "global/effective autoload regression matrix passes",
+        focused.returncode == 0,
+        (focused.stdout + focused.stderr)[-1000:],
     )
 
     return problems, checked
@@ -14294,6 +14307,14 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         '"code": "DESTRUCTIVE_CONFIRMATION_REQUIRED"' in up_reset_refuse.stdout,
         repr(up_reset_refuse.stdout[:120]),
     )
+    up_global_config = up_root / "global-user-config"
+    up_global_config.mkdir()
+    up_global_path = up_global_config / "USERPERSON.md"
+    up_global_path.write_text(
+        "# USERPERSON\n\n- [UI] Preserve global preference\n", encoding="utf-8"
+    )
+    up_reset_env = os.environ.copy()
+    up_reset_env["SAIPEN_USER_CONFIG_HOME"] = str(up_global_config)
     up_reset = subprocess.run(
         [
             sys.executable,
@@ -14304,13 +14325,14 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
             "--json",
         ],
         cwd=str(up_root),
+        env=up_reset_env,
         capture_output=True,
         text=True,
         timeout=60,
     )
     expect(
-        "userperson reset with confirmation DELETES the profile",
-        up_reset.returncode == 0 and not up_path.is_file(),
+        "project userperson reset deletes only the project profile",
+        up_reset.returncode == 0 and not up_path.is_file() and up_global_path.is_file(),
         repr(up_reset.stdout[:120]),
     )
 
@@ -18079,7 +18101,24 @@ def run_continuity_probes() -> tuple[list[str], int]:
     return problems, 1
 
 
-def main():
+def run_source_receipt_probes() -> tuple[list[str], int]:
+    """Run the T-1162 hostile/incident matrix inside the canonical scenario gate."""
+    import unittest
+
+    stream = io.StringIO()
+    suite = unittest.defaultTestLoader.loadTestsFromName("test_source_receipts")
+    result = unittest.TextTestRunner(stream=stream, verbosity=0).run(suite)
+    problems = []
+    for test, detail in result.failures + result.errors:
+        problems.append(f"source receipts {test.id()}: {detail.splitlines()[-1]}")
+    if problems:
+        print(f"FAIL: source receipts -- {len(problems)}/{result.testsRun} failed")
+    else:
+        print(f"PASS: source receipts -- {result.testsRun}/{result.testsRun}")
+    return problems, result.testsRun
+
+
+def _main_impl():
     """Run targeted probe groups or the full suite.
 
     When any SAIPEN_*_PROBES_ONLY=1 selector is active, run ONLY the
@@ -18104,6 +18143,7 @@ def main():
         "SAIPEN_THIRD_WAVE_PROBES_ONLY": "third_wave",
         "SAIPEN_T1012_STRICT_PROBES_ONLY": "t1012_strict",
         "SAIPEN_PERF_WAVE_PROBES_ONLY": "perf_wave",
+        "SAIPEN_SOURCE_RECEIPT_PROBES_ONLY": "source_receipts",
     }
     _active = [k for k, v in _PROBE_SELECTORS.items() if os.environ.get(k) == "1"]
     if len(_active) > 1:
@@ -18754,6 +18794,7 @@ def main():
             ],
             "t1012_strict": [run_t1012_strict_grammar_probes],
             "perf_wave": [run_perf_wave_probes],
+            "source_receipts": [run_source_receipt_probes],
         }
         if _selected_group not in _GROUPS:
             print(f"FAILED: no probe group for {_selected_group!r}")
@@ -18819,6 +18860,8 @@ def main():
     failures.extend(hardening_failures)
     userperson_failures, userperson_checked = run_userperson_probes()
     failures.extend(userperson_failures)
+    source_receipt_failures, source_receipt_checked = run_source_receipt_probes()
+    failures.extend(source_receipt_failures)
     improve_failures, improve_checked = run_improve_probes()
     failures.extend(improve_failures)
     nitro_failures, nitro_checked = run_nitro_probes()
@@ -18915,6 +18958,7 @@ def main():
     print(f"{hr_state_checked} hostile-regression state-contract behavior(s) executed")
     print(f"{hr_wait_checked} hostile-regression WAIT-grammar behavior(s) executed")
     print(f"{userperson_checked} userperson behavior(s) executed")
+    print(f"{source_receipt_checked} source-receipt behavior(s) executed")
     print(f"{improve_checked} improve behavior(s) executed")
     print(f"{nitro_checked} nitro behavior(s) executed")
     print(f"{perf_checked} perf-wave regression gate(s) executed (T-1019..T-1022)")
@@ -18951,6 +18995,16 @@ def main():
         sys.exit(1)
 
     print("All executable scenarios and injector probes passed.")
+
+
+def main():
+    """Run hermetically: developer USERPERSON must never influence CI."""
+    with tempfile.TemporaryDirectory(
+        prefix="saipen-scenarios-user-config-"
+    ) as config, mock.patch.dict(
+        os.environ, {"SAIPEN_USER_CONFIG_HOME": config}, clear=False
+    ):
+        return _main_impl()
 
 
 if __name__ == "__main__":

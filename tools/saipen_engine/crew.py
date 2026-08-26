@@ -80,6 +80,7 @@ class CrewAction:
     requires_human: bool = False
     next_action: str = "RUN_ROLE"
     resume_after: str = "REPLAN_CREW"
+    userperson_projection: dict | None = None
 
 
 @dataclass(frozen=True)
@@ -145,6 +146,7 @@ class CrewSnapshot:
     # the crew gate/closure consult. None means "not injected" (legacy
     # internal call) and the persisted mode governs.
     current_capability: str | None = None
+    userperson: dict | None = None
 
 
 def _refuse(code: str, detail: str = "", **extra) -> Result:
@@ -698,8 +700,19 @@ def _producer_ready_health(
     return health
 
 
-def crew_snapshot(project_root: Path | str, current_capability: str | None = None) -> CrewSnapshot:
+def crew_snapshot(
+    project_root: Path | str,
+    current_capability: str | None = None,
+    userperson_profile: dict | None = None,
+) -> CrewSnapshot:
     root = Path(project_root)
+    from userperson import effective_profile
+
+    userperson = (
+        userperson_profile
+        if userperson_profile is not None
+        else effective_profile(root)
+    )
     state_path = root / ".saipen/STATE.md"
     board_path = root / ".saipen/BOARD.md"
     root_specs = _root_dependency_specs(root)
@@ -800,6 +813,7 @@ def crew_snapshot(project_root: Path | str, current_capability: str | None = Non
             receipt_errors,
             semantic_snapshot,
             current_capability=current_capability,
+            userperson=userperson,
         )
 
     receipt_paths = set()
@@ -890,6 +904,7 @@ def crew_snapshot(project_root: Path | str, current_capability: str | None = Non
         receipt_errors,
         semantic_snapshot,
         current_capability=current_capability,
+        userperson=userperson,
     )
 
 
@@ -921,6 +936,15 @@ def _action(
             if role != "saitranslate"
             else snapshot.root / ".saipen" / "saitranslate"
         )
+    userperson_projection = None
+    if role is not None and snapshot.userperson and snapshot.userperson.get("active"):
+        from userperson import project_profile
+
+        userperson_projection = project_profile(
+            snapshot.userperson["preferences"],
+            role,
+            source_fingerprint=snapshot.userperson["effective_fingerprint"],
+        )
     return CrewAction(
         stage,
         role,
@@ -942,6 +966,7 @@ def _action(
         requires_human=False,
         next_action=action,
         resume_after="REPLAN_CREW",
+        userperson_projection=userperson_projection,
     )
 
 
@@ -2269,8 +2294,13 @@ def _capture_crew_plan(
     project_root: Path | str,
     current_capability: str | None = None,
     current_agent: str | None = None,
+    userperson_profile: dict | None = None,
 ) -> tuple[CrewSnapshot, dict]:
-    snapshot = crew_snapshot(project_root, current_capability=current_capability)
+    snapshot = crew_snapshot(
+        project_root,
+        current_capability=current_capability,
+        userperson_profile=userperson_profile,
+    )
     return snapshot, _crew_plan_from_snapshot(snapshot, current_agent=current_agent)
 
 
@@ -2278,8 +2308,15 @@ def crew_plan(
     project_root: Path | str,
     current_capability: str | None = None,
     current_agent: str | None = None,
+    *,
+    userperson_profile: dict | None = None,
 ) -> dict:
-    return _capture_crew_plan(project_root, current_capability, current_agent)[1]
+    return _capture_crew_plan(
+        project_root,
+        current_capability,
+        current_agent,
+        userperson_profile,
+    )[1]
 
 
 def _finalize_problems(snapshot: CrewSnapshot, session_agent: str | None = None) -> list[str]:
@@ -2431,6 +2468,17 @@ def crew_apply(
     base_errors = validate_project(root, current_agent=actor)
     if base_errors:
         return _refuse("VALIDATION_FAILED", "; ".join(base_errors[:5]))
+    from userperson import UserpersonError, effective_profile
+
+    try:
+        userperson = effective_profile(root)
+    except UserpersonError as exc:
+        return _refuse(
+            "VALIDATION_FAILED",
+            exc.detail,
+            scope=exc.scope,
+            userperson_code=exc.code,
+        )
     # PERF-006: only the minimum stable pre-intent state is needed to decide
     # whether to set the crew intent. Reading the full crew_snapshot here would
     # be thrown away the moment set_converge_intent mutates STATE (it must never
@@ -2456,7 +2504,12 @@ def crew_apply(
         intent = set_converge_intent(root, actor, "crew")
         if not intent.ok:
             return intent
-        plan = crew_plan(root, current_capability=current_capability, current_agent=actor)
+        plan = crew_plan(
+            root,
+            current_capability=current_capability,
+            current_agent=actor,
+            userperson_profile=userperson,
+        )
         return Result(
             ok=True,
             code="CREW_INTENT_SET",
@@ -2465,7 +2518,11 @@ def crew_apply(
             data={"plan": plan, "action": plan.get("action")},
         )
 
-    snapshot = crew_snapshot(root, current_capability=current_capability)
+    snapshot = crew_snapshot(
+        root,
+        current_capability=current_capability,
+        userperson_profile=userperson,
+    )
     plan = _crew_plan_from_snapshot(snapshot, current_agent=actor)
     action = plan.get("action") or {}
     kind = action.get("action")
@@ -2584,12 +2641,18 @@ def _carrier_fingerprint(plan: dict, *, role: object = None, action: object = No
     ]
     source = plan.get("source") or {}
     action_kind = action.get("action") if isinstance(action, dict) else None
+    projection = action.get("userperson_projection") if isinstance(action, dict) else None
+    source_fingerprint = source.get("source_tree_fingerprint")
+    if isinstance(projection, dict) and projection.get("source_fingerprint"):
+        source_fingerprint = (
+            f"{source_fingerprint}:{projection['source_fingerprint']}"
+        )
     return action_fingerprint(
         stage=plan.get("first_unsatisfied"),
         role=role,
         action=action_kind,
         reason=unsatisfied,
-        source=source.get("source_tree_fingerprint"),
+        source=source_fingerprint,
     )
 
 

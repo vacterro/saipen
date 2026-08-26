@@ -383,10 +383,12 @@ profile, and record what was projected so Core can audit it:
 
 ```
 projection_policy(role) -> allowed preference categories
-project_profile(profile, role) -> the bounded projection
+effective_profile(project_root) -> global + project preferences with provenance
+effective_projection(project_root, role) -> the bounded projection
 ```
 
-A projection handoff includes: the source profile fingerprint, which
+A projection handoff includes: the effective source fingerprint, provenance,
+which
 preference IDs/categories were selected, and the scope statement. If the
 semantic category selection is performed by the model rather than Python, that
 is stated explicitly and the mechanical layer only validates/writes the

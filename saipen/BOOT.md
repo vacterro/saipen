@@ -50,6 +50,34 @@ This file gives the execution order. No rule is *defined* here —
     Detect problem class, match smallest skill from platform registry,
     inject context. Eject on class shift. Base protocol outranks.
 
+3b. **Source-receipt activation.** If active Work has a source receipt, load
+    and integrity-check its original body, derived Work Contract and coverage
+    before implementation/review decisions. The compact cold/hot/brief signal
+    names receipt IDs and `saipen source show`; it never substitutes for the
+    required original reread. Archived bodies are cold and MUST NOT be scanned
+    unless explicitly requested for history/forensics. `SOURCES.md` owns the
+    lifecycle and meaningful reread boundaries.
+
+3c. **USERPERSON activation.** Resolve the optional global user-configuration
+    `USERPERSON.md` and `<project_root>/.saipen/USERPERSON.md`. If neither
+    exists, do nothing: create nothing, warn/ask nothing, and preserve the
+    ordinary cold path. If either exists, strictly load the effective profile
+    before any discretionary implementation choice; malformed input is a
+    controlled USERPERSON validation failure, never a partial/lenient profile.
+    Apply CORE.md §1.10's USERPERSON precedence, use only materially relevant
+    preferences, and give a SubSaipen only its bounded role projection -- never
+    the whole profile. `saipen context cold|hot` exposes the compact activation
+    fingerprint and exact `show --effective` load command; that metadata is a
+    load obligation, not a substitute for reading the effective profile.
+
+3d. **Runtime identity.** Resolve the current acting seat and optional runtime
+    metadata as separate facts before choosing an adaptive execution strategy.
+    `--agent` remains the ownership/handover seat; it never proves provider,
+    model, variant, tool support, or reasoning support. Prefer explicit
+    `--runtime-info`/`SAIPEN_RUNTIME_INFO` metadata; absent fields remain
+    UNKNOWN. `saipen runtime --json` is the read-only mechanical projection.
+    `RUNTIME.md` owns the format and staged adapter/strategy contract.
+
 4. **Read `.saipen/BOARD.md`, then tail of `.saipen/LOG.md`.**
    Sealed history in `.saipen/logs/LOG-NNN.md`; load only for `parent:`
    chain walks. Use the active LOG tail for `last_event` freshness.
@@ -61,6 +89,14 @@ This file gives the execution order. No rule is *defined* here —
    or `DEC: human_note -> T-###`. One-shot, not standing law.
 
 7. **Execute the instruction. The user's own message outranks `next_action` and defers to § 1.11's OBEY priority: the user's own message outranks the file.**
+   **Preserve substantial source before interpretation.** A recognized audit,
+   implementation mission, review handoff, imported authoritative spec, or
+   large multi-condition correction is captured verbatim with `saipen source
+   capture` and verified BEFORE summarizing, planning, creating/linking Work,
+   or routing command-looking text inside it. Exact duplicate intake resumes
+   the existing receipt/Work; a changed source or amendment never overwrites
+   the original. Short ordinary commands and conversation are not captured.
+   `SOURCES.md` owns the bounded criteria and lifecycle.
    **Compound input first.** If the message carries several commands (`+`-separated
    or multiple `saipen ...` verbs), split it into the ordered segment list BEFORE
    interpreting any segment, then resolve and execute each segment in order

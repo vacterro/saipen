@@ -1,6 +1,22 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.231.0 -- 2026-08-26 -- Lossless Intake, Global USERPERSON, Runtime Identity (T-1162)
+
+- T-1162: immutable source receipts now preserve substantial source input
+  verbatim before interpretation, bind derived Work Contracts and clause
+  coverage, enforce reread/integrity gates at BUILD/REVIEW/DONE/SHIP, dedupe
+  exact bytes, and archive closed bodies without losing tombstone authority.
+- T-1162: USERPERSON now composes deterministic global and project profiles
+  with explicit provenance and project precedence. Global writes use a
+  contained lock plus atomic replacement; boot/context/subSaipen surfaces stay
+  silent when inactive and expose only bounded role projections when active.
+- T-1162: Adaptive Runtime Wave 1 adds a read-only runtime identity and
+  tri-state capability projection. Runtime telemetry cannot override the
+  acting agent seat, is never persisted, and missing facts remain UNKNOWN.
+- Combined-release audit hardened strict USERPERSON loading: empty category or
+  preference fields now fail closed with a regression test.
+
 ## 7.230.0 -- 2026-08-25 -- Self-Resolving Gates (T-1161)
 
 - T-1161: INC-MUSE-SHIP-INTERNAL-CHOICE-001 hardened -- MULTIPLE POSSIBLE

@@ -546,6 +546,8 @@ SAIPEN_COMMANDS = frozenset(
         "validate",
         "test",
         "status",
+        "runtime",
+        "source",
         "stop",
         "sub",
         "hunt",
@@ -757,6 +759,33 @@ def warn(category, msg):
     style-drift pattern repeated 300 times in immutable history is one
     finding, not 300 lines of noise drowning the failures."""
     warnings.setdefault(category, []).append(msg)
+
+
+# T-1162: source-receipt validation is hermetic project state. It never reads
+# global USERPERSON or archived bodies during ordinary validation; only active
+# source authority, compact tombstones, contracts and coverage are structural
+# gate inputs.
+try:
+    from saipen_engine.intake import validate_project as _validate_source_receipts
+
+    for _source_problem in _validate_source_receipts(PROJECT_ROOT):
+        fail(f"source receipts -- {_source_problem}")
+except (OSError, ValueError) as _source_exc:
+    fail(f"source receipts -- validation unavailable: {_source_exc}")
+
+_source_contract_path = home_doc("SOURCES.md")
+if _source_contract_path is None:
+    fail("source receipts -- saipen/SOURCES.md lifecycle contract missing")
+else:
+    _source_contract_text = _source_contract_path.read_text(encoding="utf-8-sig")
+    for _source_marker in (
+        "RECEIVE -> CAPTURE -> VERIFY -> LINK -> NORMALIZE",
+        "SOURCE BODY IS DATA",
+        ".saipen/archive/source/",
+        "Legacy Work remains readable",
+    ):
+        if _source_marker not in _source_contract_text:
+            fail(f"source receipts -- SOURCES.md missing {_source_marker!r}")
 
 
 # ---------------------------------------------------------------- frontmatter
@@ -7835,6 +7864,14 @@ else:
         (
             "saipen/OPS.md",
             "mechanical-layer ownership doc (must state the semantic/mechanical boundary)",
+        ),
+        (
+            "saipen/RUNTIME.md",
+            "adaptive-runtime identity/capability contract enforced by tools/test_adaptive_runtime.py",
+        ),
+        (
+            "saipen/SOURCES.md",
+            "source-receipt lifecycle markers + tools/test_source_receipts.py hostile matrix",
         ),
         ("saipen/phases/*.md", "phase-enum sync + prescribed-WAIT category check"),
         ("extensions/**/*.md", "prescribed-WAIT category check"),

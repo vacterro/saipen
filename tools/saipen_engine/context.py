@@ -108,6 +108,40 @@ def _home_present(state: dict) -> str:
         return "false"
 
 
+def _userperson_section(effective: dict) -> str:
+    """Compact mandatory activation signal; never embeds preference text."""
+    if not effective.get("active"):
+        return ""
+    return "\n".join(
+        [
+            "## USERPERSON",
+            "active: true",
+            f"global_present: {str(effective['global']['present']).lower()}",
+            f"project_present: {str(effective['project']['present']).lower()}",
+            f"effective_fingerprint: {effective['effective_fingerprint']}",
+            "load: saipen userperson show --effective --json",
+        ]
+    )
+
+
+def _source_receipts_section(receipts: list[dict]) -> str:
+    """Compact activation signal; original bodies remain targeted/JIT."""
+    if not receipts:
+        return ""
+    shown = receipts[:8]
+    lines = ["## SOURCE RECEIPTS", f"active: {len(receipts)}"]
+    for item in shown:
+        lines.append(
+            f"- {item['receipt']} work={item.get('linked_work') or 'none'} "
+            f"coverage={item.get('terminal', 0)}/{item.get('requirements', 0)} "
+            f"unresolved={item.get('unresolved', 0)}"
+        )
+    if len(receipts) > len(shown):
+        lines.append(f"... +{len(receipts) - len(shown)} more")
+    lines.append("load: saipen source show <SRC-ID> --json")
+    return "\n".join(lines)
+
+
 def _board_map(
     buckets: dict[str, list[dict]], full_ticket: str | None = None, cap: int = _BOARD_CAP
 ) -> str:
@@ -187,6 +221,8 @@ def _load_context_inputs(root: Path) -> dict:
     from .snapshot import ProjectSnapshot
     from .state import parse_state_or_error
     from .journal import scan_pending
+    from .intake import active_receipts
+    from userperson import effective_profile
 
     snap = ProjectSnapshot.capture(root)
     state_text = snap.state_text
@@ -201,6 +237,8 @@ def _load_context_inputs(root: Path) -> dict:
     # budget probe slice this same tuple instead of re-parsing the complete
     # LOG text a second time. Nothing is retained globally or across calls.
     log_event_lines = log_snap.event_lines
+    userperson = effective_profile(root)
+    source_receipts = active_receipts(root)
     return {
         "root": root,
         "state_text": state_text,
@@ -215,6 +253,8 @@ def _load_context_inputs(root: Path) -> dict:
         "conflicts": [op["op_id"] for op in _conflicts],
         "corrupt": [op for op in _pending if op.get("corrupt")],
         "snap": snap,
+        "userperson": userperson,
+        "source_receipts": source_receipts,
     }
 
 
@@ -253,6 +293,16 @@ def _load_inputs_checked(root: Path) -> Result | dict:
             data={},
         )
     except (OSError, ValueError) as exc:
+        from userperson import UserpersonError
+
+        if isinstance(exc, UserpersonError):
+            return Result(
+                ok=False,
+                code="VALIDATION_FAILED",
+                op_id="",
+                message=exc.detail,
+                data={"scope": exc.scope, "userperson_code": exc.code},
+            )
         return Result(
             ok=False,
             code="VALIDATION_FAILED",
@@ -429,10 +479,14 @@ def context_cold(
         "## STATE",
         _state_fields(state),
         f"saipen_home_present: {_home_present(state)}",
-        "",
-        "## ROUTING",
-        f"phase_doc: {phase_doc}",
     ]
+    userperson_section = _userperson_section(inputs["userperson"])
+    if userperson_section:
+        mandatory.extend(["", userperson_section])
+    source_section = _source_receipts_section(inputs["source_receipts"])
+    if source_section:
+        mandatory.extend(["", source_section])
+    mandatory.extend(["", "## ROUTING", f"phase_doc: {phase_doc}"])
     fixed = "\n".join(mandatory) + "\n"
 
     # Bucket tickets exactly once
@@ -541,9 +595,7 @@ def context_hot(
             },
         )
 
-    fixed = (
-        "\n".join(
-            [
+    fixed_lines = [
                 "## NOW",
                 _state_fields(state),
                 f"claimed_ticket: {doing[0]['id'] if doing else None}",
@@ -558,10 +610,14 @@ def context_hot(
                 f"recovery_conflict: {bool(conflicts)}",
                 f"pending_ops: {', '.join(pending) or 'none'}",
                 f"log_tail_event: {inputs['log_tail']}",
-            ]
-        )
-        + "\n"
-    )
+    ]
+    userperson_section = _userperson_section(inputs["userperson"])
+    if userperson_section:
+        fixed_lines.extend(["", userperson_section])
+    source_section = _source_receipts_section(inputs["source_receipts"])
+    if source_section:
+        fixed_lines.extend(["", source_section])
+    fixed = "\n".join(fixed_lines) + "\n"
     full_body = fixed + "\n## RECENT LOG\n" + _log_tail(log_event_lines) + "\n"
     log_part = _log_tail(log_event_lines)
     # STRUCTURAL fit: RECENT LOG is the only optional section in hot. The
@@ -612,13 +668,31 @@ def context_audit(project_root: Path | str) -> Result:
         "BOARD.md": inputs["board_text"],
         "LOG history (sealed + active)": inputs["log_text"],
     }
+    source_byte_counts: dict[str, int] = {}
+    effective = inputs["userperson"]
+    for scope, label in (("global", "global USERPERSON"), ("project", "project USERPERSON")):
+        source = effective["sources"][scope]
+        if source["present"]:
+            sources[label] = source["text"]
+            source_byte_counts[label] = source["bytes"]
+    # Active source bodies are authoritative current-task context economics,
+    # but are captured only for audit accounting and never embedded in the
+    # cold/hot surface. Archived bodies are intentionally not scanned.
+    from .intake import _active_dir
+
+    for item in inputs["source_receipts"]:
+        label = f"source receipt {item['receipt']}"
+        raw = (_active_dir(root) / f"{item['receipt']}.md").read_bytes()
+        text = raw.decode("utf-8")
+        sources[label] = text
+        source_byte_counts[label] = len(raw)
     pending = len(inputs["pending"])
     rows = []
     for name, text in sources.items():
         rows.append(
             {
                 "source": name,
-                "bytes": _bytes(text),
+                "bytes": source_byte_counts.get(name, _bytes(text)),
                 "characters": len(text),
                 "tokens": _tokens(text),
             }
@@ -841,6 +915,26 @@ def brief_projection(project_root: Path | str) -> Result:
     if work_id:
         context_refs.append(f"BOARD:{work_id}")
     context_refs.append(f"LOG tail E-{tail}" if tail is not None else "LOG tail (empty)")
+    effective = inputs["userperson"]
+    userperson_meta = None
+    if effective["active"]:
+        userperson_meta = {
+            "active": True,
+            "global_present": effective["global"]["present"],
+            "project_present": effective["project"]["present"],
+            "effective_fingerprint": effective["effective_fingerprint"],
+            "load": "saipen userperson show --effective --json",
+        }
+        context_refs.append("USERPERSON effective profile (explicit load required)")
+    source_receipts = inputs["source_receipts"]
+    source_meta = None
+    if source_receipts:
+        source_meta = {
+            "active": len(source_receipts),
+            "receipts": source_receipts,
+            "load": "saipen source show <SRC-ID> --json",
+        }
+        context_refs.append("active SOURCE RECEIPTS (original reread required)")
 
     payload = {
         "project": root.name,
@@ -854,6 +948,8 @@ def brief_projection(project_root: Path | str) -> Result:
         "context": context_refs,
         "unknowns": unknowns,
         "next_action": state.get("next_action"),
+        "userperson": userperson_meta,
+        "source_receipts": source_meta,
         "provenance": {
             "state_updated": state.get("updated"),
             "last_event": state.get("last_event"),
@@ -885,6 +981,18 @@ def brief_projection(project_root: Path | str) -> Result:
         f"PREVIOUS_STOP: {payload['previous_stop'] or 'none'}"
     )
     lines.append(f"BLOCKERS: {'; '.join(blockers) if blockers else 'none'}")
+    if userperson_meta is not None:
+        lines.append(
+            "USERPERSON: active "
+            f"({userperson_meta['effective_fingerprint']}; "
+            "load: saipen userperson show --effective --json)"
+        )
+    if source_meta is not None:
+        lines.append(
+            "SOURCE_RECEIPTS: active "
+            + ", ".join(item["receipt"] for item in source_receipts)
+            + " (load: saipen source show <SRC-ID> --json)"
+        )
     lines.append("")
     lines.append("RELEVANT CONTEXT:")
     for ref in context_refs:

@@ -53,6 +53,12 @@ PROTOCOL_DIR = HOME / "saipen"
 # override replaces the inherited seat.
 _AGENT_OVERRIDE: str | None = None
 
+# Adaptive Runtime Wave 1: optional runtime metadata is telemetry for this
+# invocation.  It is deliberately separate from `_AGENT_OVERRIDE`, which owns
+# the acting seat/handover identity.  The projection is read-only and never
+# persists this value into project state.
+_RUNTIME_INFO_OVERRIDE: str | None = None
+
 # CORE § 1.10 (Cyrillic-twin incident): when the invoked command resolved
 # through the shared shortcut resolver, EVERY payload this adapter emits
 # carries `route` -- the canonical Latin key the raw token landed on. The
@@ -92,7 +98,7 @@ def _agent_for(project_root: Path) -> str:
 # mutating behavior, so a drift between them fails loudly.
 #
 # Authoritative public-surface semantics (verified against the dispatcher):
-#   status / next / context / recover inspect ......... READ_ONLY
+#   status / next / context / runtime / recover inspect  READ_ONLY
 #   claim / transition / checkpoint / ticket * ........ MUTATING
 #   userperson show ................................... READ_ONLY
 #   userperson add|remove|reset ....................... MUTATING
@@ -112,6 +118,8 @@ def _agent_for(project_root: Path) -> str:
 #   undo / zz confirm ................................. MUTATING
 #   permissions ....................................... READ_ONLY
 #   explain-next ...................................... READ_ONLY
+#   source status|show ................................ READ_ONLY
+#   source capture|req|disp|close|archive|purge ....... MUTATING
 _MUTATING_TOPLEVEL = frozenset(
     {
         "claim",
@@ -494,6 +502,41 @@ def _permissions(project_root: Path, as_json: bool) -> int:
         f"worktree delta     : {tree['status']}"
         + (f" ({len(tree['paths'])} changed)" if tree["paths"] else "")
     )
+    return 0
+
+
+def _runtime(project_root: Path, as_json: bool) -> int:
+    """Adaptive Runtime Wave-1 read-only identity/capability projection."""
+    from saipen_engine.runtime import RuntimeInfoError, runtime_projection
+
+    try:
+        projection = runtime_projection(
+            _agent_for(project_root), explicit_path=_RUNTIME_INFO_OVERRIDE
+        )
+    except RuntimeInfoError as exc:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": str(exc),
+            },
+            as_json,
+        )
+        return 1
+
+    payload = {"ok": True, "code": "RUNTIME", **projection}
+    if as_json:
+        _emit(payload, True)
+        return 0
+    print("SAIPEN runtime (read-only)")
+    print(f"agent seat : {projection['agent']}")
+    print(f"metadata   : {projection['runtime_info_source']}")
+    for field in ("harness", "provider", "model", "variant"):
+        print(f"{field:<10} : {projection[field] or 'UNKNOWN'}")
+    print("capabilities:")
+    for name, value in projection["capabilities"].items():
+        rendered = "UNKNOWN" if value is None else str(value).lower()
+        print(f"  {name:<28} {rendered}")
     return 0
 
 
@@ -1242,28 +1285,48 @@ def _crew(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> 
     # read-only session cannot close a crew release. Second-wave P0: the
     # acting identity is the SESSION agent, never persisted STATE.agent.
     capability = _negotiate_capability(project_root)
-    if dry_run:
-        plan = crew_plan(
-            project_root, current_capability=capability, current_agent=_agent_for(project_root)
+    try:
+        if dry_run:
+            plan = crew_plan(
+                project_root,
+                current_capability=capability,
+                current_agent=_agent_for(project_root),
+            )
+            _emit(
+                {
+                    "ok": plan.get("ok"),
+                    "code": "CREW_PLAN",
+                    "crew_complete": plan.get("crew_complete"),
+                    "action_required": plan.get("action_required"),
+                    "dry_run": True,
+                    **plan,
+                },
+                as_json,
+            )
+            # Item 21: a valid nonterminal plan (work remains) is NOT a command
+            # failure -- ok:true / exit 0. Nonzero exit is reserved for a
+            # structurally invalid or refused derivation.
+            return 0 if plan.get("ok") else 1
+        result = crew_apply(
+            project_root,
+            current_capability=capability,
+            current_agent=_agent_for(project_root),
         )
-        _emit(
-            {
-                "ok": plan.get("ok"),
-                "code": "CREW_PLAN",
-                "crew_complete": plan.get("crew_complete"),
-                "action_required": plan.get("action_required"),
-                "dry_run": True,
-                **plan,
-            },
-            as_json,
-        )
-        # Item 21: a valid nonterminal plan (work remains) is NOT a command
-        # failure -- ok:true / exit 0. Nonzero exit is reserved for a
-        # structurally invalid or refused derivation.
-        return 0 if plan.get("ok") else 1
-    result = crew_apply(
-        project_root, current_capability=capability, current_agent=_agent_for(project_root)
-    )
+    except ValueError as exc:
+        from userperson import UserpersonError
+
+        if isinstance(exc, UserpersonError):
+            _emit(
+                {
+                    "ok": False,
+                    "code": exc.code,
+                    "scope": exc.scope,
+                    "detail": exc.detail,
+                },
+                as_json,
+            )
+            return 1
+        raise
     payload = result.to_dict()
     payload.update(
         _crew_liveness(project_root, result, capability=capability, dry_run=dry_run)
@@ -1426,6 +1489,353 @@ def _continue(
     # Goal (untripped or freshly reauthorized) and converge both derive the
     # next action from the same STATE/BOARD/complete-LOG snapshot as `next`.
     return _next_action(project_root, as_json)
+
+
+def _source(
+    project_root: Path, args: list[str], as_json: bool, dry_run: bool
+) -> int:
+    """T-1162: lossless source receipts.
+
+    Subcommands:
+      capture           capture a large audit/instruction verbatim (mutating)
+      status <SRC>      read-only projection (identity, work, coverage)
+      show <SRC>        forensic body retrieval (active or archived)
+      recover           read-only orphan-receipt crash diagnostic
+      req <SRC> <RID> <class> <text...>   add a normalized requirement
+      disp <SRC> <RID> <DISPOSITION> [--work T-x] [--evidence E-y]
+      close <SRC>       close ONLY when coverage is terminal (mutating)
+      archive <SRC>     move a CLOSED receipt to cold storage (mutating)
+      purge <SRC>       hard purge, tombstone retained (mutating, explicit)
+
+    SOURCE BODY IS DATA: captured text is never routed as a command.
+    """
+    from saipen_engine import intake
+
+    if not args:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "source needs a subcommand: capture|status|show|req|"
+                "disp|close|archive|purge|recover",
+            },
+            as_json,
+        )
+        return 2
+    action = args[0]
+    rest = args[1:]
+    if action in ("capture", "close", "archive", "purge", "req", "disp"):
+        if dry_run:
+            _emit(
+                {
+                    "ok": True,
+                    "code": "SOURCE_DRY_RUN",
+                    "action": action,
+                    "detail": "no writes performed",
+                },
+                as_json,
+            )
+            return 0
+        if _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+
+    if action == "capture":
+        # Body from --file, stdin (piped), or positional args. Recognized
+        # flags are removed wherever they appear; `--` makes all following
+        # tokens opaque body data.
+        transport_transform = "none"
+        kind = "user_instruction"
+        work = None
+        amends = None
+        file_path = None
+        body_tokens = []
+        opaque = False
+        i = 0
+        while i < len(rest):
+            token = rest[i]
+            if opaque:
+                body_tokens.append(token)
+                i += 1
+                continue
+            if token == "--":
+                opaque = True
+                i += 1
+                continue
+            if token in ("--file", "--kind", "--work", "--amends"):
+                if i + 1 >= len(rest):
+                    _emit(
+                        {
+                            "ok": False,
+                            "code": "VALIDATION_FAILED",
+                            "detail": f"{token} needs a value",
+                        },
+                        as_json,
+                    )
+                    return 2
+                value = rest[i + 1]
+                if token == "--file":
+                    file_path = value
+                elif token == "--kind":
+                    kind = value
+                elif token == "--work":
+                    work = value
+                else:
+                    amends = value
+                i += 2
+                continue
+            if token.startswith("--"):
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": f"unknown flag {token!r}",
+                    },
+                    as_json,
+                )
+                return 2
+            body_tokens.append(token)
+            i += 1
+        if file_path and body_tokens:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": (
+                        "source capture accepts either --file or body text, not both"
+                    ),
+                },
+                as_json,
+            )
+            return 2
+        if file_path:
+            try:
+                body = Path(file_path).read_bytes().decode("utf-8")
+            except (OSError, UnicodeDecodeError) as exc:
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": f"cannot read file: {exc}",
+                    },
+                    as_json,
+                )
+                return 1
+        else:
+            if not body_tokens and not sys.stdin.isatty():
+                try:
+                    body = sys.stdin.buffer.read().decode("utf-8")
+                except UnicodeDecodeError as exc:
+                    _emit(
+                        {
+                            "ok": False,
+                            "code": "VALIDATION_FAILED",
+                            "detail": f"stdin is not UTF-8: {exc}",
+                        },
+                        as_json,
+                    )
+                    return 1
+            elif body_tokens:
+                body = " ".join(body_tokens)
+                transport_transform = "argv_join_spaces"
+            else:
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": (
+                            "source capture needs a body (args, --file, or piped stdin)"
+                        ),
+                    },
+                    as_json,
+                )
+                return 2
+        result = intake.capture(
+            project_root,
+            body,
+            source_kind=kind,
+            work=work,
+            amends=amends,
+            transport_transform=transport_transform,
+        )
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+
+    if action == "status":
+        if len(rest) != 1:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "source status needs <SRC-ID>",
+                },
+                as_json,
+            )
+            return 2
+        result = intake.status(project_root, rest[0])
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+
+    if action == "recover":
+        if rest:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "source recover accepts no arguments",
+                },
+                as_json,
+            )
+            return 2
+        _emit(intake.recover_orphans(project_root), as_json)
+        return 0
+
+    if action == "show":
+        if len(rest) != 1:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "source show needs <SRC-ID>",
+                },
+                as_json,
+            )
+            return 2
+        result = intake.read_body(project_root, rest[0])
+        if as_json:
+            _emit(result, True)
+            return 0 if result.get("ok") else 1
+        if not result.get("ok"):
+            _emit(result, as_json)
+            return 1
+        print(result["body"])
+        return 0
+
+    if action == "req":
+        if len(rest) < 4:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "source req needs <SRC> <RID> <class> <text...>",
+                },
+                as_json,
+            )
+            return 2
+        receipt_id, rid, clause_class = rest[0], rest[1], rest[2]
+        text = " ".join(rest[3:])
+        result = intake.add_requirement(
+            project_root,
+            receipt_id,
+            rid=rid,
+            text=text,
+            clause_class=clause_class,
+        )
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+
+    if action == "disp":
+        if len(rest) < 3:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": (
+                        "source disp needs <SRC> <RID> <DISPOSITION> "
+                        "[--work T-x] [--evidence E-y]"
+                    ),
+                },
+                as_json,
+            )
+            return 2
+        receipt_id, rid, disposition = rest[0], rest[1], rest[2]
+        work = evidence = verification = None
+        i = 3
+        while i < len(rest):
+            if rest[i] == "--work" and i + 1 < len(rest):
+                work = rest[i + 1]
+                i += 2
+            elif rest[i] == "--evidence" and i + 1 < len(rest):
+                evidence = rest[i + 1]
+                i += 2
+            elif rest[i] == "--verification" and i + 1 < len(rest):
+                verification = rest[i + 1]
+                i += 2
+            else:
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": f"unknown flag {rest[i]!r}",
+                    },
+                    as_json,
+                )
+                return 2
+        result = intake.set_disposition(
+            project_root,
+            receipt_id,
+            rid,
+            disposition,
+            work=work,
+            evidence=evidence,
+            verification=verification,
+        )
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+
+    if action == "close":
+        if len(rest) != 1:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "source close needs <SRC-ID>",
+                },
+                as_json,
+            )
+            return 2
+        result = intake.close_receipt(project_root, rest[0])
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+
+    if action == "archive":
+        if len(rest) != 1:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "source archive needs <SRC-ID>",
+                },
+                as_json,
+            )
+            return 2
+        result = intake.archive_receipt(project_root, rest[0])
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+
+    if action == "purge":
+        if len(rest) != 2 or rest[1] != "--confirm":
+            _emit(
+                {
+                    "ok": False,
+                    "code": "CONFIRMATION_REQUIRED",
+                    "detail": "source purge needs <SRC-ID> --confirm",
+                },
+                as_json,
+            )
+            return 2
+        result = intake.purge_receipt(project_root, rest[0])
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+
+    _emit(
+        {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "detail": f"unknown source subcommand {action!r}",
+        },
+        as_json,
+    )
+    return 2
 
 
 def _context(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
@@ -1677,8 +2087,20 @@ def _brief(project_root: Path, as_json: bool) -> int:
     return 0
 
 
-def _userperson(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
-    """saipen userperson show/add/remove/reset (NITRO M7, journaled)."""
+def _userperson_scope(args: list[str]) -> tuple[str, list[str], str | None]:
+    """Extract one USERPERSON scope regardless of flag position."""
+    flags = [item for item in args if item in ("--project", "--global", "--effective")]
+    unique = set(flags)
+    if len(flags) != len(unique) or len(unique) > 1:
+        return "", args, "choose exactly one of --project, --global, or --effective"
+    scope = flags[0][2:] if flags else "project"
+    return scope, [item for item in args if item not in unique], None
+
+
+def _userperson(
+    project_root: Path | None, args: list[str], as_json: bool, dry_run: bool
+) -> int:
+    """USERPERSON project/global/effective management."""
     if not args:
         _emit(
             {
@@ -1690,30 +2112,101 @@ def _userperson(project_root: Path, args: list[str], as_json: bool, dry_run: boo
         )
         return 2
     from userperson import (
+        UserpersonError,
+        effective_profile,
+        load_global_profile,
+        load_project_profile,
         merge_profile,
-        parse_profile,
-        profile_path,
+        mutate_global_profile,
+        profile_fingerprint,
         remove_preference,
         render_profile,
         reset_profile,
-        validate_profile,
         write_profile,
     )
 
-    path = profile_path(project_root)
     action = args[0]
-    try:
-        current_text = path.read_text(encoding="utf-8-sig") if path.is_file() else ""
-    except (UnicodeDecodeError, LookupError, OSError):
+    scope, clean_args, scope_error = _userperson_scope(args[1:])
+    if scope_error:
+        _emit(
+            {"ok": False, "code": "VALIDATION_FAILED", "detail": scope_error}, as_json
+        )
+        return 2
+    args = [action, *clean_args]
+    if scope == "effective" and action != "show":
         _emit(
             {
                 "ok": False,
                 "code": "VALIDATION_FAILED",
-                "detail": f"USERPERSON profile is not valid UTF-8: {path.name}",
+                "detail": "--effective is read-only and valid only with userperson show",
+            },
+            as_json,
+        )
+        return 2
+    if scope in ("project", "effective") and project_root is None:
+        _emit(
+            {
+                "ok": False,
+                "code": "NOT_SAIPEN_PROJECT",
+                "detail": f"userperson --{scope} requires a bound SAIPEN project",
+            },
+            as_json,
+        )
+        return 3
+
+    try:
+        if scope == "effective":
+            if len(args) != 1:
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": "userperson show --effective accepts no other arguments",
+                    },
+                    as_json,
+                )
+                return 2
+            effective = effective_profile(project_root)
+            payload = {
+                "ok": True,
+                "code": "SHOW",
+                "scope": "effective",
+                "active": effective["active"],
+                "global": effective["global"],
+                "project": effective["project"],
+                "effective_fingerprint": effective["effective_fingerprint"],
+                "preferences": effective["preferences"],
+            }
+            if as_json:
+                _emit(payload, True)
+            else:
+                print("USERPERSON scope: effective")
+                print(f"active: {str(effective['active']).lower()}")
+                print(f"effective_fingerprint: {effective['effective_fingerprint']}")
+                for preference in effective["preferences"]:
+                    print(
+                        f"- [{preference['category']}] {preference['text']} "
+                        f"(source: {preference['source']})"
+                    )
+            return 0
+        source = (
+            load_global_profile()
+            if scope == "global"
+            else load_project_profile(project_root)
+        )
+    except UserpersonError as exc:
+        _emit(
+            {
+                "ok": False,
+                "code": exc.code,
+                "scope": exc.scope,
+                "detail": exc.detail,
             },
             as_json,
         )
         return 1
+    current_text = source["text"]
+
     if action == "show":
         if len(args) > 1:
             _emit(
@@ -1725,36 +2218,26 @@ def _userperson(project_root: Path, args: list[str], as_json: bool, dry_run: boo
                 as_json,
             )
             return 2
-        if not current_text:
-            _emit({"ok": True, "code": "EMPTY", "preferences": []}, as_json)
-            return 0
         if as_json:
-            # Validate BEFORE semantic parsing: a malformed source must
-            # surface as invalid, never as a partial preference list that
-            # hides the lines the lenient parser dropped (T-1003).
-            profile_errors = validate_profile(current_text)
-            if profile_errors:
-                _emit(
-                    {
-                        "ok": False,
-                        "code": "VALIDATION_FAILED",
-                        "detail": "USERPERSON profile is malformed: "
-                        + "; ".join(profile_errors[:5]),
-                    },
-                    as_json,
-                )
-                return 1
             _emit(
                 {
                     "ok": True,
-                    "code": "SHOW",
-                    "preferences": parse_profile(current_text)["preferences"],
+                    "code": "SHOW" if source["present"] else "EMPTY",
+                    "scope": scope,
+                    "present": source["present"],
+                    "fingerprint": source["fingerprint"],
+                    "preferences": source["preferences"],
                 },
                 as_json,
             )
         else:
-            print(current_text, end="")
+            print(f"USERPERSON scope: {scope}")
+            if current_text:
+                from userperson import _redact_credentials
+
+                print(_redact_credentials(current_text), end="")
         return 0
+
     if action == "reset":
         surplus = [a for a in args[1:] if a != "--confirm"]
         if surplus:
@@ -1767,7 +2250,7 @@ def _userperson(project_root: Path, args: list[str], as_json: bool, dry_run: boo
                 as_json,
             )
             return 2
-        if not path.is_file():
+        if not source["present"]:
             _emit(
                 {"ok": False, "code": "TICKET_NOT_FOUND", "detail": "no profile to reset"}, as_json
             )
@@ -1783,8 +2266,15 @@ def _userperson(project_root: Path, args: list[str], as_json: bool, dry_run: boo
             )
             return 1
         if dry_run:
-            _emit({"ok": True, "code": "RESET", "dry_run": True}, as_json)
+            _emit(
+                {"ok": True, "code": "RESET", "scope": scope, "dry_run": True},
+                as_json,
+            )
             return 0
+        if scope == "global":
+            result = mutate_global_profile("reset")
+            _emit(result, as_json)
+            return 0 if result.get("ok") else 1
         if _negotiate_capability(project_root) == "read-only":
             return _capability_refusal(as_json)
         _ho = _ensure_handover(project_root, as_json, dry_run)
@@ -1798,6 +2288,7 @@ def _userperson(project_root: Path, args: list[str], as_json: bool, dry_run: boo
         result = reset_profile(project_root, _agent_for(project_root))
         if result.get("ok"):
             result["code"] = "RESET"
+            result["scope"] = "project"
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
     if action in ("add", "remove"):
@@ -1816,10 +2307,30 @@ def _userperson(project_root: Path, args: list[str], as_json: bool, dry_run: boo
         clean_args = []
         idx = 0
         while idx < len(args):
-            if args[idx] == "--category" and idx + 1 < len(args):
+            if args[idx] == "--category":
+                if idx + 1 >= len(args) or args[idx + 1].startswith("--"):
+                    _emit(
+                        {
+                            "ok": False,
+                            "code": "VALIDATION_FAILED",
+                            "detail": "--category needs a non-option value",
+                        },
+                        as_json,
+                    )
+                    return 2
                 category = args[idx + 1]
                 category_supplied = True
                 idx += 2
+            elif args[idx].startswith("--"):
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": f"unknown userperson option {args[idx]!r}",
+                    },
+                    as_json,
+                )
+                return 2
             else:
                 clean_args.append(args[idx])
                 idx += 1
@@ -1837,24 +2348,13 @@ def _userperson(project_root: Path, args: list[str], as_json: bool, dry_run: boo
                 as_json,
             )
             return 2
-        # Validate ANY existing profile BEFORE semantic parsing: a malformed
-        # source must refuse with ZERO journal/write -- add/remove must never
-        # silently rewrite the file without the lines the lenient parser
-        # dropped (T-1003 source corruption -> data loss).
-        if current_text:
-            profile_errors = validate_profile(current_text)
-            if profile_errors:
-                _emit(
-                    {
-                        "ok": False,
-                        "code": "VALIDATION_FAILED",
-                        "detail": "existing USERPERSON profile is malformed; "
-                        "refusing to mutate it: " + "; ".join(profile_errors[:5]),
-                    },
-                    as_json,
-                )
-                return 1
-        current = parse_profile(current_text)["preferences"] if current_text else []
+        current = source["preferences"]
+        if scope == "global" and action == "remove" and not source["present"]:
+            _emit(
+                {"ok": True, "code": "UNCHANGED", "scope": "global"},
+                as_json,
+            )
+            return 0
         if action == "add":
             updated = merge_profile(current, [f"- [{category}] {text}"])
         else:
@@ -1866,7 +2366,7 @@ def _userperson(project_root: Path, args: list[str], as_json: bool, dry_run: boo
                 return 1
         new_text = render_profile(updated)
         if new_text == current_text:
-            _emit({"ok": True, "code": "UNCHANGED"}, as_json)
+            _emit({"ok": True, "code": "UNCHANGED", "scope": scope}, as_json)
             return 0
         if dry_run:
             _emit(
@@ -1876,17 +2376,29 @@ def _userperson(project_root: Path, args: list[str], as_json: bool, dry_run: boo
                     "action": action,
                     "text": text,
                     "category": category if action == "add" else None,
+                    "scope": scope,
                     "dry_run": True,
                 },
                 as_json,
             )
             return 0
+        if scope == "global":
+            result = mutate_global_profile(
+                action,
+                text=text,
+                category=category if action == "add" or category_supplied else None,
+            )
+            _emit(result, as_json)
+            return 0 if result.get("ok") else 1
         if _negotiate_capability(project_root) == "read-only":
             return _capability_refusal(as_json)
         _ho = _ensure_handover(project_root, as_json, dry_run)
         if _ho is not None:
             return _ho
         result = write_profile(project_root, new_text, _agent_for(project_root))
+        result["scope"] = "project"
+        if result.get("ok"):
+            result["fingerprint"] = profile_fingerprint(new_text)
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
     _emit(
@@ -2766,6 +3278,8 @@ def main(argv: list[str] | None = None) -> int:
             sys.stdout.reconfigure(encoding="utf-8")
     dry_run = "--dry-run" in before_dashdash
     project_root_opt: str | None = None
+    runtime_info_opt: str | None = None
+    option_error: str | None = None
 
     clean_before: list[str] = []
     i = 0
@@ -2786,6 +3300,24 @@ def main(argv: list[str] | None = None) -> int:
         elif arg.startswith("--project-root="):
             project_root_opt = arg.split("=", 1)[1]
             i += 1
+        elif arg == "--runtime-info":
+            if i + 1 >= len(before_dashdash) or before_dashdash[i + 1].startswith("--"):
+                option_error = "--runtime-info requires a JSON file path"
+                i += 1
+            elif runtime_info_opt is not None:
+                option_error = "--runtime-info may be supplied only once"
+                i += 2
+            else:
+                runtime_info_opt = before_dashdash[i + 1]
+                i += 2
+        elif arg.startswith("--runtime-info="):
+            if runtime_info_opt is not None:
+                option_error = "--runtime-info may be supplied only once"
+            else:
+                runtime_info_opt = arg.split("=", 1)[1]
+                if not runtime_info_opt.strip():
+                    option_error = "--runtime-info requires a JSON file path"
+            i += 1
         else:
             clean_before.append(arg)
             i += 1
@@ -2796,15 +3328,20 @@ def main(argv: list[str] | None = None) -> int:
     # bare CLI (override None) inherits the persisted STATE.agent seat. The
     # mandatory old -> new DEC is written by handover_agent before the first
     # mutating command below dispatches.
-    global _AGENT_OVERRIDE  # noqa: PLW0603
+    global _AGENT_OVERRIDE, _RUNTIME_INFO_OVERRIDE  # noqa: PLW0603
     _AGENT_OVERRIDE = agent_opt.strip() if agent_opt and agent_opt.strip() else None
+    _RUNTIME_INFO_OVERRIDE = runtime_info_opt
+
+    if option_error:
+        _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": option_error}, as_json)
+        return 2
 
     # CORE-004: bare `saipen` (only global options, no command) is the
     # canonical resume family -- equivalent to `continue`/`cc` (CORE § 1.10).
     # Explicit `-h`/`--help` stays a usage/exit-2 path and does NOT resume.
     if args and args[0] in ("-h", "--help"):
         usage_msg = (
-            "usage: saipen (status|next|recover|claim <T-###>|"
+            "usage: saipen (status|next|runtime|recover|claim <T-###>|"
             "transition <PHASE> [T-###] [text]|checkpoint <TAXONOMY> "
             "[T-###] [text]|goal <text>|ticket add <PRIORITY> <text>|ticket "
             "done <T-###>|ticket block <T-###> <reason>|ticket "
@@ -2815,18 +3352,29 @@ def main(argv: list[str] | None = None) -> int:
             "<project>|improve verify <cycle>|improve cycle-complete "
             "<cycle>|improve abort <cycle>|improve clean <cycle>|"
             "ship|push|scope <T-###> <path>...|first-publish-confirm "
-            "<name> <public|private>|userperson|sub|rebind-home "
+            "<name> <public|private>|userperson show "
+            "[--project|--global|--effective]|userperson add|remove <text> "
+            "[--category NAME] [--project|--global]|userperson reset "
+            "[--project|--global] --confirm|sub|rebind-home "
             "<candidate-home>|context|attempt open|attempt close <RESULT> "
             "<STOP>|brief|focus [text]|build <directive>|cut <target>|"
             "cut confirm <CUT-ID>|undo|undo confirm <CP-ID> --reason <text>) "
             "[--dry-run] "
-            "[--json] [--project-root PATH] [--agent ID]"
+            "[--json] [--project-root PATH] [--agent ID] [--runtime-info JSON-FILE]"
         )
         if as_json:
             _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": usage_msg}, as_json)
         else:
             print(usage_msg)
         return 2
+
+    # Global USERPERSON belongs to user configuration, not project memory.
+    # Dispatch it before project-root resolution so it works from an ordinary
+    # directory and never invents/loads STATE, BOARD, LOG, or a project lock.
+    if args and args[0] == "userperson" and len(args) >= 2:
+        _scope, _clean, _scope_error = _userperson_scope(args[2:])
+        if _scope == "global" or _scope_error:
+            return _userperson(None, args[1:], as_json, dry_run)
 
     project_root, root_reason = resolve_project_root(
         Path.cwd().resolve(), explicit=project_root_opt
@@ -2838,6 +3386,16 @@ def main(argv: list[str] | None = None) -> int:
     # CORE-004: a genuinely bare invocation (no command after global option
     # parsing) resumes through the same `_continue` path as `continue`/`cc`.
     if not args:
+        if _RUNTIME_INFO_OVERRIDE is not None:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "--runtime-info requires the read-only runtime command in Wave 1",
+                },
+                as_json,
+            )
+            return 2
         return _continue(
             project_root,
             [],
@@ -2847,6 +3405,17 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     command = args[0]
+
+    if _RUNTIME_INFO_OVERRIDE is not None and command != "runtime":
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "Wave-1 --runtime-info is valid only with the read-only runtime command",
+            },
+            as_json,
+        )
+        return 2
 
     # CORE § 1.10 (Cyrillic-twin incident): whole-message shortcut resolution
     # is MECHANICAL and happens FIRST -- before any dispatch branch, before
@@ -2887,6 +3456,19 @@ def main(argv: list[str] | None = None) -> int:
             )
             return 2
         return _status(project_root, as_json)
+    if command == "runtime":
+        if len(args) > 1:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "runtime accepts no command arguments; surplus: "
+                    + " ".join(args[1:]),
+                },
+                as_json,
+            )
+            return 2
+        return _runtime(project_root, as_json)
     if command == "permissions":
         if len(args) > 1:
             _emit(
@@ -3431,6 +4013,19 @@ def main(argv: list[str] | None = None) -> int:
         return _context(project_root, args[1:], as_json, dry_run)
     if command == "attempt":
         return _attempt(project_root, args[1:], as_json, dry_run)
+    if command == "source":
+        try:
+            return _source(project_root, args[1:], as_json, dry_run)
+        except (OSError, PermissionError, ValueError) as exc:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"source receipt validation: {exc}",
+                },
+                as_json,
+            )
+            return 1
     if command == "brief":
         surplus = [a for a in args[1:] if a != "--json"]
         if surplus:
