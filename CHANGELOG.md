@@ -1,6 +1,10 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.231.7 -- 2026-08-27 -- CCC Ship Control + FF Analytic Lens (T-1169)
+
+- T-1169: CCC vs SC distinct targets, CONTROLS in runtime, FF performance zero-match analytic brief
+
 ## 7.231.6 -- 2026-08-27 -- Runtime Manifest Completeness (T-1168)
 
 - T-1168: add CONTROLS.md to runtime MANIFEST (188 files), install via inject.ps1/sh, autoinject stale detection, CCC vs SC distinct targets

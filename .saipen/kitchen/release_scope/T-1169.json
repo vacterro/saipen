@@ -1,0 +1,13 @@
+{
+  "op_id": "scope-f4f455df1c0e4c44bd5c16a8ade77b07",
+  "paths": {
+    "tools/test_ccc_ff_control.py": "a691731c6fd20526"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-08-27T01:44:51Z",
+  "schema_version": 1,
+  "source_head": "2b84fa5f693777c13ba5f16650b5b761583c7af5",
+  "source_tree_fingerprint": "git-delta-v1:2bbc43b47e78ced7849ed47d007956a7dc79d75fe0c234457c891c8958905278",
+  "ticket": "T-1169"
+}
