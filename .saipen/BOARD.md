@@ -1,6 +1,7 @@
 ## DOING
 ## TODO
 ## DONE
+- [x] T-1168 [P1] 5 | verify: 5 is complete and the repository-declared verification harness passes | owner: codex | claim_time: 2026-08-27T01:41:51Z
 - [x] T-1167 [P1] 4 | verify: 4 is complete and the repository-declared verification harness passes | owner: codex | claim_time: 2026-08-27T01:37:28Z
 - [x] T-1166 [P1] Repair changelog-order red control after active-set compaction | verify: python tools/audit_checks.py reports 271/271 evidence cases with no SKIP; focused changelog-order mutation fails on slug changelog-order | owner: codex | claim_time: 2026-08-26T20:57:01Z
 - [x] T-1165 [P2] Archive excess CHANGELOG entries verbatim so active changelog keeps the documented recent set | verify: CHANGELOG.md retains 10 newest entries; older entries moved verbatim to CHANGELOG_ARCHIVE.md; validator has no changelog-unarchived warning | owner: opencode | claim_time: 2026-08-26T14:39:23Z
