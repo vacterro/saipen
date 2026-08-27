@@ -1,6 +1,10 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.231.8 -- 2026-08-27 -- Repeated CC False-Loop Hardening (T-1170)
+
+- T-1170: repeated cc remains command, same next_action not same state, RUN_ROLE executed, validator not continue, exact no-op only by command
+
 ## 7.231.7 -- 2026-08-27 -- CCC Ship Control + FF Analytic Lens (T-1169)
 
 - T-1169: CCC vs SC distinct targets, CONTROLS in runtime, FF performance zero-match analytic brief
