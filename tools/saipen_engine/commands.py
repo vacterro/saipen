@@ -59,10 +59,9 @@ CYRILLIC_CONFUSABLE_MAP = {
     "х": "x",
 }
 
-# Grammar class, not a route registry: routes still come only from CORE.md's
-# canonical table. These four verbs alone accept opaque text after a leading
-# shortcut token; every older shortcut keeps its whole-message contract.
-_OPAQUE_PAYLOAD_VERBS = frozenset({"focus", "cut", "build", "undo"})
+# Lexical routing: every declared shortcut owns its input.
+# Destination validates arguments; resolver never decides payload validity.
+_OPAQUE_PAYLOAD_VERBS = frozenset({"focus", "cut", "build", "undo"})  # legacy
 CYRILLIC_CONFUSABLES = str.maketrans(CYRILLIC_CONFUSABLE_MAP)
 # The inverse direction: used to DERIVE the Cyrillic twins of the canonical
 # table (a shortcut has a twin exactly when every one of its letters is in
@@ -226,22 +225,28 @@ def resolve_compound_command(
             words = segment.split()
             leading = words[0]
             leading_target = table.get(leading) or table.get(normalize_shortcut_token(leading))
-            leading_verb = (
-                leading_target.removeprefix("saipen ").split(maxsplit=1)[0]
-                if leading_target is not None
-                else ""
-            )
-            if leading_target is not None and leading_verb in _OPAQUE_PAYLOAD_VERBS:
+            if leading_target is not None:
                 payload = segment[len(leading) :].lstrip()
-                resolved.append(
-                    {
-                        "index": index,
-                        "segment": segment,
-                        "command": f"{leading_target} {payload}",
-                        "kind": "shortcut",
-                        "payload": payload,
-                    }
-                )
+                # Every leading declared shortcut owns its payload; destination validates.
+                if payload:
+                    resolved.append(
+                        {
+                            "index": index,
+                            "segment": segment,
+                            "command": f"{leading_target} {payload}",
+                            "kind": "shortcut",
+                            "payload": payload,
+                        }
+                    )
+                else:
+                    resolved.append(
+                        {
+                            "index": index,
+                            "segment": segment,
+                            "command": leading_target,
+                            "kind": "shortcut",
+                        }
+                    )
                 continue
             # Multi-word segment: check for a TRAILING declared shortcut. A
             # compound like ``build ccc`` means "apply the build action, where

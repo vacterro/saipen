@@ -185,10 +185,18 @@ class CommandRoutingTests(unittest.TestCase):
                 "unknown",
             )
 
-    def test_legacy_shortcuts_do_not_gain_opaque_payloads(self):
-        for text in ("cc extra", "gg accidental prose", "sss verbose"):
+    def test_leading_shortcut_payload_routing(self):
+        # Every leading declared shortcut owns its payload; destination validates.
+        cases = {
+            "cc extra": "saipen continue extra",
+            "gg accidental prose": "saipen goal accidental prose",
+            "sss verbose": "saipen status verbose",
+            "gg починить открытие": "saipen goal починить открытие",
+        }
+        for text, expected in cases.items():
             resolved = CM.resolve_compound_command(text, table=table())
-            self.assertEqual(resolved[0]["kind"], "unknown", text)
+            self.assertEqual(resolved[0]["kind"], "shortcut", text)
+            self.assertEqual(resolved[0]["command"], expected, text)
 
     # ── 3. First segment refusal -> chain policy ────────────────────────
     def test_chain_stop_on_failure_default(self):

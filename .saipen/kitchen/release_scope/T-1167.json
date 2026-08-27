@@ -1,0 +1,14 @@
+{
+  "op_id": "scope-e19e99020d564880b6c8469dfcc7ade5",
+  "paths": {
+    "tools/saipen_engine/commands.py": "76fcf50582d9819b",
+    "tools/test_command_routing.py": "f58e05209ab9b79e"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-08-27T01:37:50Z",
+  "schema_version": 1,
+  "source_head": "de85e64ae145d16c94dae6d76335f30171746faa",
+  "source_tree_fingerprint": "git-delta-v1:5a778d818d8429ed3b7a4a2aa22838905c68d6f0e18b18e926b141e0ce1dfe8c",
+  "ticket": "T-1167"
+}

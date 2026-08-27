@@ -1,6 +1,10 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.231.5 -- 2026-08-27 -- Shortcut Payload Routing (T-1167)
+
+- T-1167: `gg <payload>` now routes mechanically via shared resolver; leading shortcut owns payload, destination validates; bare `gg` usage preserved; `cc`/`sss` surplus recognized then refused; unknown tokens still fail closed.
+
 ## 7.231.4 -- 2026-08-27 -- Bootstrap Activation Parity + Crew Bootstrap Liveness (T-1166 wave)
 
 - T-1166 + 3-wave hardening: bootstrap shortcut activation now advertises full 19-key canonical set (ff,xx,vv,zz) via `bootstrap/inject.*`, generic `~/.agents/skills` positive detection, Gemini/CodeBuddy skills, FreeBuff always-on knowledge gate; crew SC-0 distinguishes missing MANIFEST bootstrap from malformed corruption (SYNC_SHARED → SPAWN_ROLE); OBEY>UNBLOCK cc over WAIT verified with 11 hostile regressions.
