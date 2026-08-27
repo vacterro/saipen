@@ -35,3 +35,7 @@ thoughts/
 .claude/settings.local.json
 .saipen/extensions/subs/*/kitchen/_gen_*.py
 saipen-delivery.zip
+
+# Wave 15 handoff artifact: large roadmap file, not shipped runtime. Keep out of
+# root-file-set and coverage checks; validator honours .gitignore.
+impl1.md

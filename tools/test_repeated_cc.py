@@ -1,8 +1,9 @@
-# ruff: noqa: E501
+# ruff: noqa: E402, E501
 """Hostile: repeated cc remains command, same next_action not same state."""
+import sys
 import unittest
 from pathlib import Path
-import sys
+
 TOOLS = Path(__file__).resolve().parent
 sys.path.insert(0, str(TOOLS))
 from saipen_engine import commands as CM

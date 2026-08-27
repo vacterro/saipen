@@ -522,26 +522,29 @@ class CliShortcutRoutingTests(unittest.TestCase):
         self.assertEqual(stable, stable2)
 
     def test_cli_ccc_refuses_closed_and_never_becomes_status_or_stop(self):
+        # Wave1 closure: ccc is now deterministic CONVERGE_SET with ship target, not NOT_EXECUTABLE.
         rc_ccc, stable_ccc, _, _ = self._cli("ccc")
         rc_twin, stable_twin, _, _ = self._cli("ссс")
         rc_sss, stable_sss, _, _ = self._cli("sss")
         self.assertEqual(rc_ccc, rc_twin)
         self.assertEqual(stable_ccc, stable_twin)
-        self.assertEqual(stable_ccc["code"], "SHORTCUT_NOT_EXECUTABLE")
-        self.assertIn("`saipen continue`", str(stable_ccc.get("detail")))
+        self.assertEqual(stable_ccc["code"], "CONVERGE_SET")
+        self.assertEqual(stable_ccc.get("converge_target"), "ship")
+        self.assertEqual(stable_ccc.get("execution_intent"), "converge")
         # sss executes real status; ccc must be a DIFFERENT outcome.
         self.assertNotEqual((rc_ccc, stable_ccc), (rc_sss, stable_sss))
-        self.assertNotIn("SHORTCUT_NOT_EXECUTABLE", str(stable_sss))
+        self.assertNotIn("CONVERGE_SET", str(stable_sss))
 
     def test_cli_ss_refuses_naming_stop_and_differs_from_cc(self):
+        # Wave1 closure: ss is now deterministic STOP, not NOT_EXECUTABLE.
         rc_ss, stable_ss, _, _ = self._cli("ss")
         rc_cc, stable_cc, _, _ = self._cli("cc")
-        self.assertEqual(stable_ss["code"], "SHORTCUT_NOT_EXECUTABLE")
-        self.assertIn("`saipen stop`", str(stable_ss.get("detail")))
+        self.assertEqual(stable_ss["code"], "STOP")
         # The incident invariant at the boundary: сс (continue path) can
-        # never collapse into ss's refusal.
+        # never collapse into ss's STOP.
         self.assertNotEqual((rc_ss, stable_ss), (rc_cc, stable_cc))
         self.assertNotEqual(stable_ss.get("code"), stable_cc.get("code"))
+        self.assertEqual(stable_cc.get("code"), "CONVERGE_SET")
 
     def test_cli_sss_is_real_status_surface(self):
         rc_sss, stable_sss, _, err_sss = self._cli("sss")

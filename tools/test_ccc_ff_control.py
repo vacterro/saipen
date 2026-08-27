@@ -1,13 +1,12 @@
-# ruff: noqa: E501
+# ruff: noqa: E402, E501
 """Hostile: CCC vs SC distinct targets, CONTROLS runtime, FF analytic lens."""
-import tempfile
+import sys
 import unittest
 from pathlib import Path
-import sys
+
 TOOLS = Path(__file__).resolve().parent
 sys.path.insert(0, str(TOOLS))
 from saipen_engine import commands as CM
-from saipen_engine.manifest import load_manifest  # dummy
 
 class CccVsScTests(unittest.TestCase):
     def test_ccc_is_ship_not_crew(self):

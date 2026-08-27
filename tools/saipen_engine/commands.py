@@ -61,7 +61,6 @@ CYRILLIC_CONFUSABLE_MAP = {
 
 # Lexical routing: every declared shortcut owns its input.
 # Destination validates arguments; resolver never decides payload validity.
-_OPAQUE_PAYLOAD_VERBS = frozenset({"focus", "cut", "build", "undo"})  # legacy
 CYRILLIC_CONFUSABLES = str.maketrans(CYRILLIC_CONFUSABLE_MAP)
 # The inverse direction: used to DERIVE the Cyrillic twins of the canonical
 # table (a shortcut has a twin exactly when every one of its letters is in
@@ -173,14 +172,45 @@ def is_declared_shortcut(token: str, table: dict[str, str] | None = None) -> boo
 def parse_compound_command(message: str) -> list[str]:
     """Split a possibly-compound command message into ordered segments.
 
-    Segments are separated by ``+`` or by newlines. Empty/whitespace-only
-    segments are dropped; the surviving ORDERED list is returned. A single
-    bare command yields a one-element list. This is pure lexical splitting:
-    semantic resolution happens per segment afterwards.
+    Segments are separated by `` + `` (space-plus-space) or by newlines.
+    A plus inside a token such as ``C++`` or ``A+B`` remains literal payload.
+    Quoted payload (double quotes) is treated as opaque and never split.
+    This is pure lexical splitting: semantic resolution happens per segment
+    afterwards.
     """
     if not message or not message.strip():
         return []
-    parts = re.split(r"\s*\+\s*|\n+", message.strip())
+    raw = message.strip()
+    parts: list[str] = []
+    current: list[str] = []
+    in_quote = False
+    i = 0
+    while i < len(raw):
+        ch = raw[i]
+        if ch == '"':
+            in_quote = not in_quote
+            current.append(ch)
+            i += 1
+            continue
+        if not in_quote and ch == "\n":
+            parts.append("".join(current))
+            current = []
+            i += 1
+            while i < len(raw) and raw[i] == "\n":
+                i += 1
+            continue
+        if not in_quote and ch == "+" and i > 0 and i + 1 < len(raw):
+            if raw[i - 1].isspace() and raw[i + 1].isspace():
+                parts.append("".join(current))
+                current = []
+                i += 1
+                # skip one following space (delimiter consumes it; segment strip will handle rest)
+                if i < len(raw) and raw[i].isspace():
+                    i += 1
+                continue
+        current.append(ch)
+        i += 1
+    parts.append("".join(current))
     segments = []
     for part in parts:
         stripped = part.strip()
@@ -248,16 +278,15 @@ def resolve_compound_command(
                         }
                     )
                 continue
-            # Multi-word segment: check for a TRAILING declared shortcut. A
-            # compound like ``build ccc`` means "apply the build action, where
-            # ccc is the declared shortcut ccc". The trailing shortcut resolves
-            # to its canonical command; the leading word stays as the action
-            # context.
+            # Multi-word segment: check for a TRAILING declared shortcut.
+            # Narrowed to the single normative idiom `build ccc` (CORE §1.10) --
+            # arbitrary trailing shortcuts are NOT commands (Wave 4 payload safety).
             trailing = words[-1]
-            # Exact canonical Latin row first, then the declared confusable
-            # fold that maps a Cyrillic twin onto that same Latin row.
-            target = table.get(trailing) or table.get(normalize_shortcut_token(trailing))
-            if target is not None:
+            target = table.get(trailing) or table.get(
+                normalize_shortcut_token(trailing)
+            )
+            if target is not None and segment == "build ccc":
+                # Only `build ccc` is authorized trailing; twin `build ссс` same.
                 resolved.append(
                     {
                         "index": index,
@@ -265,6 +294,22 @@ def resolve_compound_command(
                         "command": target,
                         "kind": "shortcut",
                         "context": " ".join(words[:-1]),
+                    }
+                )
+                continue
+            if (
+                target is not None
+                and normalize_shortcut_token(trailing) == "ccc"
+                and " ".join(words[:-1]) == "build"
+            ):
+                # Cyrillic twin path: `build ссс` after normalization
+                resolved.append(
+                    {
+                        "index": index,
+                        "segment": segment,
+                        "command": target,
+                        "kind": "shortcut",
+                        "context": "build",
                     }
                 )
                 continue

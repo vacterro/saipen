@@ -37,6 +37,44 @@ jobs:
         with:
           python-version: '3.x'
 
+      # Wave 0 FAST UNIT: deterministic import + unittest discover gate.
+      # Must run BEFORE validator so a broken import never ships green.
+      - name: Fast unit gate (import + unittest discover)
+        run: |
+          python -c "import py_compile, pathlib, sys; [py_compile.compile(str(p), doraise=True) for p in pathlib.Path('tools').rglob('*.py')]; print('py_compile PASS')"
+          python -m unittest discover -s tools -p "test_*.py" -v
+
+      # Import-closure smoke: every shipped module + declared unittest must import cleanly.
+      - name: Import closure smoke
+        run: |
+          python -c "
+          import pathlib, importlib.util, sys
+          root=pathlib.Path('tools')
+          mods=list(root.glob('test_*.py')) + list((root/'saipen_engine').glob('*.py')) + [root/'validate.py', root/'saipen.py']
+          bad=[]
+          for p in mods:
+              name=p.stem
+              spec=importlib.util.spec_from_file_location(name, p)
+              try:
+                  m=importlib.util.module_from_spec(spec)
+                  spec.loader.exec_module(m)
+              except Exception as e:
+                  # platform-gated skips allowed only with explicit marker
+                  text=p.read_text(encoding='utf-8', errors='ignore')
+                  if 'platform-gated' not in text.lower():
+                      bad.append(f'{p}: {e}')
+          if bad:
+              print('\n'.join(bad)); sys.exit(1)
+          print(f'import closure PASS: {len(mods)} modules')
+          "
+
+      # TEST TREE CLEAN: capture git status before/after canonical test families.
+      - name: TEST TREE CLEAN gate (pre-check)
+        run: |
+          git status --porcelain > /tmp/pre_status.txt || git status --porcelain > pre_status.txt
+          cat /tmp/pre_status.txt 2>/dev/null || cat pre_status.txt
+          echo "pre_status captured"
+
       # Canonical validator: schema check, LOG event-graph walk across sealed
       # segments, runtime manifest, injector wiring, README badge vs VERSION.
       # Stdlib only -- no install step needed, by design (CONFORMANCE.md § 1).
@@ -156,3 +194,15 @@ jobs:
       # (T-1006).
       - name: Perf wave regressions (tools/perf_wave_regressions.py)
         run: python tools/perf_wave_regressions.py
+
+      # Wave0 F: TEST TREE CLEAN final gate -- no stray .saipen/recovery, cache, READY etc remain.
+      - name: TEST TREE CLEAN final gate
+        run: |
+          git status --porcelain > /tmp/post_status.txt || git status --porcelain > post_status.txt
+          echo "=== pre ==="; cat /tmp/pre_status.txt 2>/dev/null || cat pre_status.txt
+          echo "=== post ==="; cat /tmp/post_status.txt 2>/dev/null || cat post_status.txt
+          # Allow expected untracked: impl1.md is user's handoff artifact, removed after full SHIP
+          # Filter allowed stray patterns: .saipen/recovery is forbidden unless explicitly transactional
+          if grep -qE '^\?\? .saipen/(recovery|kitchen)/' /tmp/post_status.txt 2>/dev/null; then echo "::error::stray recovery/kitchen debris remains"; exit 1; fi
+          if grep -qE '^\?\? (READY|nul|_AUDAPACK)' /tmp/post_status.txt 2>/dev/null; then echo "::error::stray root artifact remains"; exit 1; fi
+          echo "TEST TREE CLEAN PASS"

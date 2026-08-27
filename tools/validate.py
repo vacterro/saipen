@@ -7942,11 +7942,12 @@ else:
         ("tests/scenarios/README.md", "scenario format documentation, not a fixture"),
         (".pytest_cache/*.md", "generated tool cache, never a shipped document"),
         ("**/.pytest_cache/*.md", "generated tool cache, never a shipped document"),
-        (
+          (
             ".workbuddy-ai/**",
             "WorkBuddy AI internal working memory (agent/project notes, generated); tooling state, not a shipped SAIPEN document",
         ),
-    ]
+          ("impl1.md", "large roadmap handoff artifact, not normative; gitignored, lifecycle ends with deletion after full execution"),
+      ]
     if IS_SAIPEN_HOME:
         import fnmatch
 

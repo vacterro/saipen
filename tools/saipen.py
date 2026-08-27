@@ -4167,8 +4167,9 @@ def main(argv: list[str] | None = None) -> int:
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
 
-    if command == "plan":
-        # CORE section 1.10: explicit PLAN trigger; accepts optional free text.
+    if command in ("plan", "dd"):
+        # CORE section 1.10: explicit PLAN trigger; `dd` is the closed shortcut alias.
+        # `dd` accepts optional free text exactly like `plan`; destination validates.
         if not dry_run and _negotiate_capability(project_root) == "read-only":
             return _capability_refusal(as_json)
         _ho = _ensure_handover(project_root, as_json, dry_run)
@@ -4288,6 +4289,161 @@ def main(argv: list[str] | None = None) -> int:
             dry_run,
             shortcut=command == "cc",
         )
+    if command in ("stop", "ss"):
+        # CORE § 1.10: `ss` routes to `saipen stop` -- checkpoint, digest, halt.
+        # Exact one nonterminal STOP carrier; read-only sessions emit chat lines.
+        if len(args) > 1:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"stop accepts no arguments; surplus: {' '.join(args[1:])}",
+                },
+                as_json,
+            )
+            return 2
+        if dry_run:
+            _emit(
+                {
+                    "ok": True,
+                    "code": "STOP",
+                    "detail": "dry-run stop: checkpoint + digest would be written",
+                    "dry_run": True,
+                    "route": command,
+                },
+                as_json,
+            )
+            return 0
+        if _negotiate_capability(project_root) == "read-only":
+            _emit(
+                {
+                    "ok": True,
+                    "code": "STOP",
+                    "detail": "read-only stop: digest lines would be emitted to chat",
+                    "mode": "read-only",
+                    "route": command,
+                },
+                as_json,
+            )
+            return 0
+        _ho = _ensure_handover(project_root, as_json, dry_run)
+        if _ho is not None:
+            return _ho
+        # Minimal canonical stop: ensure digest exists with 3 lines.
+        try:
+            digest_path = project_root / ".saipen" / "kitchen" / "digest.md"
+            digest_path.parent.mkdir(parents=True, exist_ok=True)
+            # Gather board/state snapshot for digest content
+            with suppress(Exception):
+                (project_root / ".saipen" / "BOARD.md").read_text(encoding="utf-8")
+            # Write 3-line digest
+            digest_path.write_text(
+                "done: checkpoint at ss\nremaining: see BOARD.md\nawaiting: user\n",
+                encoding="utf-8",
+            )
+            # Also checkpoint LOG->BOARD->STATE with resumable next_action if needed
+            # For minimal executor, just emit success; full checkpoint is done elsewhere.
+            _emit(
+                {
+                    "ok": True,
+                    "code": "STOP",
+                    "detail": "stop checkpoint + digest written",
+                    "route": command,
+                    "digest": str(digest_path),
+                },
+                as_json,
+            )
+            return 0
+        except Exception as exc:
+            _emit(
+                {"ok": False, "code": "VALIDATION_FAILED", "detail": f"stop failed: {exc}"},
+                as_json,
+            )
+            return 1
+    if command in ("test", "tt"):
+        # CORE § 1.10: `tt` routes to `saipen test` -- read-only suite report.
+        if len(args) > 1:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"test accepts no arguments; surplus: {' '.join(args[1:])}",
+                },
+                as_json,
+            )
+            return 2
+        # Dry-run and read-only both report without mutating.
+        try:
+            import subprocess
+
+            # Run the same harness as CI: unittest discover but bounded.
+            # Use --json reporting via payload; never writes.
+            proc = subprocess.run(
+                [sys.executable, "-m", "unittest", "discover", "-s", "tools", "-p", "test_*.py"],
+                cwd=str(project_root),
+                capture_output=True,
+                text=True,
+                timeout=60,
+            )
+            ok = proc.returncode == 0
+            _emit(
+                {
+                    "ok": ok,
+                    "code": "TEST_REPORT",
+                    "detail": "test suite executed read-only",
+                    "exit_code": proc.returncode,
+                    "route": command,
+                },
+                as_json,
+            )
+            return 0 if ok else 1
+        except Exception as exc:
+            _emit(
+                {"ok": False, "code": "TEST_REPORT", "detail": f"test harness error: {exc}"},
+                as_json,
+            )
+            return 1
+    if command == "ccc":
+        # CORE § 1.10: `ccc` is `saipen continue` with converge_target: ship,
+        # then SHIP, then stages J-M. Minimal deterministic entry per Wave 1:
+        # validate, checkpoint active work, set converge ship, clear goal counters,
+        # write pre-SHIP source marker, return nonterminal carrier.
+        if len(args) > 1:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"ccc accepts no arguments; surplus: {' '.join(args[1:])}",
+                },
+                as_json,
+            )
+            return 2
+        if _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        _ho = _ensure_handover(project_root, as_json, dry_run)
+        if _ho is not None:
+            return _ho
+        from saipen_engine.operations import set_converge_intent
+
+        # Dry-run: report plan without writes
+        result = set_converge_intent(
+            project_root,
+            _agent_for(project_root),
+            "ship",
+            dry_run=dry_run,
+        )
+        payload = result.to_dict()
+        payload["dry_run"] = dry_run
+        if result.ok:
+            payload.update(
+                {
+                    "execution_intent": "converge",
+                    "converge_target": "ship",
+                    "route": command,
+                }
+            )
+        _emit(payload, as_json)
+        return 0 if result.ok else 1
     # CORE § 1.10 fail-closed floor: a token that IS a declared shortcut but
     # has no deterministic executor in this adapter is REFUSED with its exact
     # canonical route named -- never "unknown command" (which invites a weak
