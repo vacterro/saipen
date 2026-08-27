@@ -281,6 +281,7 @@ class CommandRoutingTests(unittest.TestCase):
     def test_injectors_declare_shortcut_gate(self):
         ps = (TOOLS.parent / "bootstrap" / "inject.ps1").read_text(encoding="utf-8")
         sh = (TOOLS.parent / "bootstrap" / "inject.sh").read_text(encoding="utf-8")
+        canonical = set(table().keys())
         for text in (ps, sh):
             # inject.sh embeds the block in a double-quoted shell string, so
             # its double quotes and backticks carry literal backslashes.
@@ -291,6 +292,25 @@ class CommandRoutingTests(unittest.TestCase):
             self.assertIn("sc", normalized_text)
             self.assertIn('never "stop caveman"', normalized_text)
             self.assertIn("a full-token shortcut match ALWAYS wins", normalized_text)
+            # Exact-set conformance: the activation gate must advertise
+            # every canonical shortcut and no stale one. The block phrases
+            # the list as `shortcut (gg, hh, ... , sc, or ...)` -- extract
+            # tokens inside the parentheses and compare to the live table.
+            m = re.search(r"shortcut\s*\(([^)]*)\)", normalized_text, re.IGNORECASE | re.DOTALL)
+            self.assertIsNotNone(m, "SHORTCUT ACTIVATION GATE lacks token list parentheses")
+            advertised_raw = m.group(1)
+            # The list is `<tokens>, or a Cyrillic twin` -- isolate the token
+            # segment before the generic phrase so locale words do not pollute.
+            token_segment = advertised_raw.split(" or")[0]
+            tokens = set(re.findall(r"[a-z]{2,3}", token_segment.lower()))
+            # The gate covers twins generically via "Cyrillic twin" phrase,
+            # not by enumerating them -- ensure phrase present and not double-counted.
+            self.assertIn("cyrillic twin", normalized_text.lower())
+            self.assertEqual(
+                tokens,
+                canonical,
+                f"injector gate drift: {sorted(tokens)} vs {sorted(canonical)}",
+            )
 
     def test_boot_declares_compound_first(self):
         boot = (PROTOCOL_DIR / "BOOT.md").read_text(encoding="utf-8")

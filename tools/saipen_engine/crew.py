@@ -1762,7 +1762,44 @@ def _evaluate(
     elif snapshot.source_error:
         sc0_reason = "source identity UNKNOWN: " + snapshot.source_error
     elif snapshot.manifest_errors:
-        sc0_reason = "MANIFEST malformed: " + "; ".join(snapshot.manifest_errors[:2])
+        # Wave 3: distinguish absence vs corruption. A missing MANIFEST on a
+        # fresh consuming project is first-run bootstrap, not integrity damage.
+        # Malformed existing registry remains fail-closed.
+        if len(snapshot.manifest_errors) == 1 and "no MANIFEST.md" in snapshot.manifest_errors[0]:
+            # Missing is not SC-0 blocker -- fall through to shared-contract
+            # evaluation: SC-0 owns recovery/home/source/shared-contract,
+            # SC-1 owns roster assurance. If contract drift exists, SC-0 will
+            # produce SYNC_SHARED; otherwise SC-0 passes and SC-1 spawns.
+            if not contract.get("current"):
+                drift = (
+                    contract.get("missing_files", [])
+                    + contract.get("missing_dirs", [])
+                    + contract.get("stale_files", [])
+                    + contract.get("obsolete_files", [])
+                    + contract.get("obsolete_dirs", [])
+                    + contract.get("unexpected_files", [])
+                    + contract.get("unexpected_dirs", [])
+                )
+                if contract.get("inventory_lineage") == "ambiguous":
+                    drift.append("sub-sync receipt lineage ambiguous")
+                elif contract.get("inventory_establishment"):
+                    drift.append("shared-contract ownership receipt missing")
+                elif contract.get("inventory_changed") and not drift:
+                    drift.append("shared-contract source inventory changed")
+                drift = drift or ["shared-contract status is not current"]
+                sc0_reason = "shared contract drift: " + "; ".join(drift[:3])
+                sc0_action = _action(
+                    snapshot,
+                    "SC-0",
+                    "SYNC_SHARED",
+                    None,
+                    "project-local inherited contract current",
+                    "journaled exact-byte sync receipt",
+                    "shared_contract_status.current",
+                    *drift[:3],
+                )
+        else:
+            sc0_reason = "MANIFEST malformed: " + "; ".join(snapshot.manifest_errors[:2])
     elif not contract.get("current"):
         drift = (
             contract.get("missing_files", [])

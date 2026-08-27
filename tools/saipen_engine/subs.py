@@ -514,7 +514,8 @@ def parse_manifest_file(project_root: Path | str) -> tuple[list[ManifestEntry], 
     manifest = root / MANIFEST_REL
     if not manifest.is_file():
         return [], [
-            "no MANIFEST.md; run `saipen sub sync` or `saipen sub spawn <name>` to bootstrap"
+            "no MANIFEST.md; crew first-run bootstrap requires current shared contract "
+            "followed by first durable role spawn (`saipen sub spawn <name>` creates the registry)"
         ]
     return parse_manifest(_read_maybe(manifest))
 

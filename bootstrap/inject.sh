@@ -107,7 +107,7 @@ BLOCK="
 <!-- SAIPEN:BEGIN -->
 ## saipen protocol (global)
 SHORTCUT ACTIVATION GATE: a whole-message token that is a declared SAIPEN
-shortcut (sc, cc, ccc, gg, hh, ss, sss, dd, aa, qq, qqq, ee, eee, pp, tt, or
+shortcut (gg, hh, ff, xx, vv, zz, cc, ccc, ss, sss, dd, aa, qq, qqq, ee, eee, pp, tt, sc, or
 a Cyrillic twin) is a COMMAND, never a greeting and never a style token. It
 MUST activate SAIPEN and resolve through CORE.md 1.10's shortcut table BEFORE
 any conversational acknowledgement, style-mode interpretation, or remembered
@@ -334,12 +334,41 @@ echo "------------------------------------------------------------"
 [ -d "$HOME/.codex" ]           && { report "Codex skill" copy_skill "$HOME/.codex/skills/saipen";
                                      report "Codex AGENTS.md" add_block "$HOME/.codex/AGENTS.md"; } \
                                 || printf '%-28s %s\n' "Codex" "not installed - skip"
-[ -d "$HOME/.gemini" ]          && report "Gemini GEMINI.md" add_block "$HOME/.gemini/GEMINI.md" \
-                                || printf '%-28s %s\n' "Gemini" "not installed - skip"
+[ -d "$HOME/.gemini" ]          && { report "Gemini skill" copy_skill "$HOME/.gemini/skills/saipen";
+                                     report "Gemini GEMINI.md" add_block "$HOME/.gemini/GEMINI.md"; } \
+                                 || printf '%-28s %s\n' "Gemini" "not installed - skip"
 
-if [ -d "$HOME/.agents/skills" ]; then # copy, lowercase: these readers skip links/uppercase
+[ -d "$HOME/.codebuddy" ]        && report "CodeBuddy skill" copy_skill "$HOME/.codebuddy/skills/saipen" \
+                                 || printf '%-28s %s\n' "CodeBuddy" "not installed - skip"
+
+# Generic ~/.agents/skills - positive host detection (not directory-exists-only)
+_agents_supported=0
+[ -d "$HOME/.config/opencode" ] && _agents_supported=1
+[ -d "$HOME/.codex" ] && _agents_supported=1
+[ -d "$HOME/.gemini" ] && _agents_supported=1
+[ -d "$HOME/.codebuddy" ] && _agents_supported=1
+[ -d "$HOME/.claude" ] && _agents_supported=1
+[ -d "$HOME/.agents" ] && _agents_supported=1
+command -v freebuff >/dev/null 2>&1 && _agents_supported=1
+command -v codebuddy >/dev/null 2>&1 && _agents_supported=1
+if [ -d "$HOME/.agents/skills" ]; then
+  report "~/.agents skills" copy_skill "$HOME/.agents/skills/saipen"
+elif [ "$_agents_supported" -eq 1 ]; then
   report "~/.agents skills" copy_skill "$HOME/.agents/skills/saipen"
 else printf '%-28s %s\n' "~/.agents" "not installed - skip"; fi
+
+# FreeBuff always-on activation backstop
+_freebuff_detected=0
+[ -d "$HOME/.agents" ] && _freebuff_detected=1
+command -v freebuff >/dev/null 2>&1 && _freebuff_detected=1
+[ -d "$HOME/.agents/skills" ] && _freebuff_detected=1
+if [ "$_freebuff_detected" -eq 1 ]; then
+  if [ -f "$HOME/.knowledge.md" ] || [ ! -f "$HOME/.AGENTS.md" ]; then
+    report "FreeBuff knowledge" add_block "$HOME/.knowledge.md"
+  else
+    report "FreeBuff AGENTS.md" add_block "$HOME/.AGENTS.md"
+  fi
+else printf '%-28s %s\n' "FreeBuff" "not installed - skip"; fi
 
 # --- Antigravity plugins (copy: IDE locks dirs, junction impossible while open) ---
 PLUG_ROOT="$HOME/.gemini/config/plugins"

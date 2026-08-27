@@ -117,7 +117,7 @@ $blockCore = @"
 <!-- SAIPEN:BEGIN -->
 ## saipen protocol (global)
 SHORTCUT ACTIVATION GATE: a whole-message token that is a declared SAIPEN
-shortcut (sc, cc, ccc, gg, hh, ss, sss, dd, aa, qq, qqq, ee, eee, pp, tt, or
+shortcut (gg, hh, ff, xx, vv, zz, cc, ccc, ss, sss, dd, aa, qq, qqq, ee, eee, pp, tt, sc, or
 a Cyrillic twin) is a COMMAND, never a greeting and never a style token. It
 MUST activate SAIPEN and resolve through CORE.md 1.10's shortcut table BEFORE
 any conversational acknowledgement, style-mode interpretation, or remembered
@@ -293,14 +293,43 @@ if (Test-Path "$h\.codex") {
 
 # --- Gemini CLI ---
 if (Test-Path "$h\.gemini") {
-  [void]$report.Add(@("Gemini GEMINI.md", (Add-Block "$h\.gemini\GEMINI.md")))
+  [void]$report.Add(@("Gemini skill",     (Copy-Skill "$h\.gemini\skills\saipen")))
+  [void]$report.Add(@("Gemini GEMINI.md", (Add-Block  "$h\.gemini\GEMINI.md")))
 } else { [void]$report.Add(@("Gemini", "not installed - skip")) }
+
+# --- CodeBuddy Code ---
+if (Test-Path "$h\.codebuddy") {
+  [void]$report.Add(@("CodeBuddy skill",  (Copy-Skill "$h\.codebuddy\skills\saipen")))
+} else { [void]$report.Add(@("CodeBuddy", "not installed - skip")) }
 
 # --- Generic ~/.agents/skills (FreeBuff etc.) ---
 # Copy, lowercase: these readers skip junctions and uppercase dirs.
+# Positive host detection (not directory-exists-only): create parent when a supported host is present.
+$agentsSupported = (Test-Path "$h\.config\opencode") -or (Test-Path "$h\.codex") -or (Test-Path "$h\.gemini") -or (Test-Path "$h\.codebuddy") -or (Test-Path "$h\.claude") -or (Test-Path "$h\.agents") -or (Get-Command freebuff -ErrorAction SilentlyContinue) -or (Get-Command codebuddy -ErrorAction SilentlyContinue)
 if (Test-Path "$h\.agents\skills") {
   [void]$report.Add(@("~/.agents skills", (Copy-Skill "$h\.agents\skills\saipen")))
+} elseif ($agentsSupported) {
+  # Host supports generic skill root but hasn't created the directory yet -- create it.
+  [void]$report.Add(@("~/.agents skills", (Copy-Skill "$h\.agents\skills\saipen")))
 } else { [void]$report.Add(@("~/.agents", "not installed - skip")) }
+
+# --- FreeBuff always-on activation backstop ---
+# FreeBuff loads generic ~/.agents/skills on demand; weak models need a small always-on gate.
+# Use supported user-level knowledge surface when FreeBuff is positively detected.
+$freebuffDetected = (Test-Path "$h\.agents") -or (Get-Command freebuff -ErrorAction SilentlyContinue) -or (Test-Path "$h\.agents\skills")
+if ($freebuffDetected) {
+  # Prefer ~/.knowledge.md where supported, fallback to ~/.AGENTS.md -- both are documented FreeBuff user-knowledge surfaces.
+  $fbKnowledge = "$h\.knowledge.md"
+  $fbAgents = "$h\.AGENTS.md"
+  # Create at least one always-on surface if neither exists yet, preferring knowledge.md
+  if (-not (Test-Path $fbKnowledge) -and -not (Test-Path $fbAgents)) {
+    [void]$report.Add(@("FreeBuff knowledge", (Add-Block $fbKnowledge)))
+  } elseif (Test-Path $fbKnowledge) {
+    [void]$report.Add(@("FreeBuff knowledge", (Add-Block $fbKnowledge)))
+  } elseif (Test-Path $fbAgents) {
+    [void]$report.Add(@("FreeBuff AGENTS.md", (Add-Block $fbAgents)))
+  }
+} else { [void]$report.Add(@("FreeBuff", "not installed - skip")) }
 
 # --- Antigravity plugins (copy: IDE locks dirs, junction impossible while open) ---
 $plugRoot = "$h\.gemini\config\plugins"
