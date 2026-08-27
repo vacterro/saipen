@@ -36,12 +36,17 @@ import json
 import os
 import re
 import stat
-from contextlib import suppress
 from datetime import datetime, timezone
 from pathlib import Path
 
 from .journal import _atomic_write, owned_target_path
 from .lock import project_writer_lock
+from .paths import (
+    prove_owned_dir_chain,
+    prove_owned_regular,
+    read_bound_regular_bytes,
+    safe_unlink_owned,
+)
 
 ACTIVE_STATUS = "ACTIVE"
 CLOSED_STATUS = "CLOSED"
@@ -97,9 +102,7 @@ SCHEMA_VERSION = 1
 INDEX_FIELDS = ("schema_version", "next_id", "active", "tombstones")
 
 
-def capture_worthy(
-    body: str, *, source_kind: str | None = None, explicit: bool = False
-) -> dict:
+def capture_worthy(body: str, *, source_kind: str | None = None, explicit: bool = False) -> dict:
     """Bounded intake classification; length alone can never force capture."""
     if explicit:
         return {"capture_required": True, "reason": "explicit"}
@@ -175,6 +178,40 @@ def _safe_path(root: Path, rel: str, *, expect_file: bool = False) -> Path:
     return path
 
 
+# Bounded ownership-safe read caps for every intake authority file. These are
+# generous safety ceilings (far above any legitimate receipt) so a hostile or
+# corrupted authority can never force an unbounded descriptor read.
+_INDEX_MAX = 4 * 1024 * 1024
+_META_MAX = 1024 * 1024
+_LEDGER_MAX = 8 * 1024 * 1024
+_BODY_MAX = 64 * 1024 * 1024
+_BOARD_MAX = 8 * 1024 * 1024
+
+
+def _read_owned_file(
+    root: Path, rel: str, *, kind: str = "source authority", max_bytes: int
+) -> bytes:
+    """Bounded ownership-safe read of ONE project-owned authority file.
+
+    This is the single reader every intake READ path routes through (CORE-002):
+    index, active metadata/body, Contract, coverage, tombstones, archive
+    metadata/body, and the BOARD state consulted by intake.
+
+    ``_safe_path`` proves every existing ancestor AND the final node with
+    no-follow lstat (refuses symlink/junction/reparse/non-regular topology and
+    any escape from the project root); ``prove_owned_regular`` re-witnesses the
+    exact final node; ``read_bound_regular_bytes`` reads through a descriptor
+    bound to that exact node, closing the lstat/open race and refusing any
+    pivot or oversized authority.
+
+    Raises ``FileNotFoundError`` when absent and ``ValueError`` (or its
+    ``InvalidIdError`` subclass) on any unsafe/racing/oversized topology.
+    """
+    path = _safe_path(root, rel, expect_file=True)
+    expected = prove_owned_regular(path, kind=kind)
+    return read_bound_regular_bytes(path, expected, max_bytes=max_bytes)
+
+
 def _valid_receipt_id(receipt_id: str) -> bool:
     return bool(INTENT_RE.fullmatch(receipt_id))
 
@@ -208,13 +245,14 @@ def _contract_dir(root: Path) -> Path:
 
 
 def _read_index(root: Path) -> dict:
-    path = _index_path(root)
-    if not path.exists():
-        return {"active": {}, "tombstones": {}, "next_id": 1}
-    if path.exists() and (_is_link_or_reparse(path) or not path.is_file()):
-        raise ValueError(f"unsafe source intake index: {path}")
     try:
-        doc = json.loads(path.read_text(encoding="utf-8-sig"))
+        raw = _read_owned_file(
+            root, ".saipen/intake/index.json", kind="source intake index", max_bytes=_INDEX_MAX
+        )
+    except FileNotFoundError:
+        return {"active": {}, "tombstones": {}, "next_id": 1}
+    try:
+        doc = json.loads(raw.decode("utf-8-sig"))
     except (OSError, ValueError) as exc:
         raise ValueError(f"malformed source intake index: {exc}") from exc
     if not isinstance(doc, dict):
@@ -230,19 +268,19 @@ def _read_index(root: Path) -> dict:
 def _write_index(root: Path, index: dict) -> None:
     index["schema_version"] = SCHEMA_VERSION
     path = _safe_path(root, ".saipen/intake/index.json", expect_file=True)
-    _atomic_write(path, _json_bytes(index))
+    _atomic_write(path, _json_bytes(index), ownership_root=root)
 
 
 def _read_meta(root: Path, receipt_id: str) -> dict | None:
     if not _valid_receipt_id(receipt_id):
         raise ValueError(f"invalid source receipt id: {receipt_id!r}")
-    path = _active_dir(root) / f"{receipt_id}.meta.json"
-    if not path.exists():
-        return None
-    if path.exists() and (_is_link_or_reparse(path) or not path.is_file()):
-        raise ValueError(f"unsafe source receipt metadata: {path}")
+    rel = f".saipen/intake/active/{receipt_id}.meta.json"
     try:
-        doc = json.loads(path.read_text(encoding="utf-8-sig"))
+        raw = _read_owned_file(root, rel, kind="source receipt metadata", max_bytes=_META_MAX)
+    except FileNotFoundError:
+        return None
+    try:
+        doc = json.loads(raw.decode("utf-8-sig"))
     except (OSError, ValueError) as exc:
         raise ValueError(f"malformed source metadata {receipt_id}: {exc}") from exc
     if not isinstance(doc, dict):
@@ -252,14 +290,14 @@ def _read_meta(root: Path, receipt_id: str) -> dict | None:
 
 def _write_meta(root: Path, receipt_id: str, meta: dict) -> None:
     path = _safe_path(root, f".saipen/intake/active/{receipt_id}.meta.json", expect_file=True)
-    _atomic_write(path, _json_bytes(meta))
+    _atomic_write(path, _json_bytes(meta), ownership_root=root)
 
 
 def _write_body(root: Path, receipt_id: str, body: str) -> None:
     path = _safe_path(root, f".saipen/intake/active/{receipt_id}.md", expect_file=True)
     if path.exists():
         raise ValueError(f"immutable source body already exists: {receipt_id}")
-    _atomic_write(path, body.encode("utf-8"))
+    _atomic_write(path, body.encode("utf-8"), ownership_root=root)
 
 
 def _coverage_path(root: Path, receipt_id: str) -> Path:
@@ -269,13 +307,13 @@ def _coverage_path(root: Path, receipt_id: str) -> Path:
 
 
 def _read_coverage(root: Path, receipt_id: str) -> dict:
-    path = _coverage_path(root, receipt_id)
-    if not path.exists():
-        return {"requirements": {}}
-    if path.exists() and (_is_link_or_reparse(path) or not path.is_file()):
-        raise ValueError(f"unsafe source coverage ledger: {path}")
+    rel = f".saipen/intake/coverage/{receipt_id}.json"
     try:
-        doc = json.loads(path.read_text(encoding="utf-8-sig"))
+        raw = _read_owned_file(root, rel, kind="source coverage ledger", max_bytes=_LEDGER_MAX)
+    except FileNotFoundError:
+        return {"requirements": {}}
+    try:
+        doc = json.loads(raw.decode("utf-8-sig"))
     except (OSError, ValueError) as exc:
         raise ValueError(f"malformed source coverage {receipt_id}: {exc}") from exc
     if not isinstance(doc, dict) or not isinstance(doc.get("requirements"), dict):
@@ -285,7 +323,7 @@ def _read_coverage(root: Path, receipt_id: str) -> dict:
 
 def _write_coverage(root: Path, receipt_id: str, ledger: dict) -> None:
     path = _safe_path(root, f".saipen/intake/coverage/{receipt_id}.json", expect_file=True)
-    _atomic_write(path, _json_bytes(ledger))
+    _atomic_write(path, _json_bytes(ledger), ownership_root=root)
 
 
 def _contract_path(root: Path, receipt_id: str) -> Path:
@@ -295,13 +333,13 @@ def _contract_path(root: Path, receipt_id: str) -> Path:
 
 
 def _read_contract(root: Path, receipt_id: str) -> dict | None:
-    path = _contract_path(root, receipt_id)
-    if not path.exists():
-        return None
-    if path.exists() and (_is_link_or_reparse(path) or not path.is_file()):
-        raise ValueError(f"unsafe source Work Contract: {path}")
+    rel = f".saipen/intake/contracts/{receipt_id}.json"
     try:
-        value = json.loads(path.read_text(encoding="utf-8-sig"))
+        raw = _read_owned_file(root, rel, kind="source Work Contract", max_bytes=_LEDGER_MAX)
+    except FileNotFoundError:
+        return None
+    try:
+        value = json.loads(raw.decode("utf-8-sig"))
     except (OSError, ValueError) as exc:
         raise ValueError(f"malformed source Work Contract {receipt_id}: {exc}") from exc
     if not isinstance(value, dict):
@@ -311,7 +349,7 @@ def _read_contract(root: Path, receipt_id: str) -> dict | None:
 
 def _write_contract(root: Path, receipt_id: str, contract: dict) -> None:
     path = _safe_path(root, f".saipen/intake/contracts/{receipt_id}.json", expect_file=True)
-    _atomic_write(path, _json_bytes(contract))
+    _atomic_write(path, _json_bytes(contract), ownership_root=root)
 
 
 def _write_contract_revision(root: Path, receipt_id: str, contract: dict) -> None:
@@ -323,12 +361,12 @@ def _write_contract_revision(root: Path, receipt_id: str, contract: dict) -> Non
     )
     if path.exists():
         raise ValueError(f"contract revision already exists: {receipt_id} r{revision}")
-    _atomic_write(path, _json_bytes(contract))
+    _atomic_write(path, _json_bytes(contract), ownership_root=root)
 
 
 def _write_tombstone(root: Path, receipt_id: str, tombstone: dict) -> None:
     path = _safe_path(root, f".saipen/intake/tombstones/{receipt_id}.json", expect_file=True)
-    _atomic_write(path, _json_bytes(tombstone))
+    _atomic_write(path, _json_bytes(tombstone), ownership_root=root)
 
 
 def _link_board_projection(root: Path, work: str, receipt_id: str) -> dict:
@@ -338,7 +376,10 @@ def _link_board_projection(root: Path, work: str, receipt_id: str) -> dict:
 
     path = _safe_path(root, ".saipen/BOARD.md", expect_file=True)
     try:
-        document = codec.read_document(path)
+        raw = _read_owned_file(
+            root, ".saipen/BOARD.md", kind="source BOARD authority", max_bytes=_BOARD_MAX
+        )
+        document = codec.read_document(path, raw=raw)
         text = document.text_norm
     except (OSError, ValueError) as exc:
         return {"ok": False, "code": "ORPHAN_RECEIPT", "detail": str(exc)}
@@ -366,7 +407,7 @@ def _link_board_projection(root: Path, work: str, receipt_id: str) -> dict:
             "code": "ORPHAN_RECEIPT",
             "detail": f"could not project {receipt_id} onto BOARD {work}",
         }
-    _atomic_write(path, document.encode(updated))
+    _atomic_write(path, document.encode(updated), ownership_root=root)
     return {"ok": True, "code": "SOURCE_LINKED", "work": work}
 
 
@@ -375,8 +416,10 @@ def _board_source_links(root: Path) -> dict[str, set[str]]:
     from . import codec
     from .board import parse_board
 
-    path = _safe_path(root, ".saipen/BOARD.md", expect_file=True)
-    document = codec.read_document(path)
+    raw = _read_owned_file(
+        root, ".saipen/BOARD.md", kind="source BOARD authority", max_bytes=_BOARD_MAX
+    )
+    document = codec.read_document(root / ".saipen" / "BOARD.md", raw=raw)
     board = parse_board(document.text_norm)
     if board.get("errors"):
         raise ValueError("BOARD parse error: " + "; ".join(board["errors"][:3]))
@@ -390,6 +433,39 @@ def _board_source_links(root: Path) -> dict[str, set[str]]:
         if values:
             result[work] = values
     return result
+
+
+def _board_has_work(root: Path, work: str) -> bool:
+    """Canonical BOARD authority check (CORE-004): does `work` exist?
+
+    Only this canonical projection may authorize a durable Work linkage.
+    Reads through the bounded ownership-safe reader and never through a raw
+    pathname, so a hostile/racing BOARD is refused rather than consulted.
+    """
+    if not work:
+        return False
+    try:
+        from .board import parse_board
+
+        raw = _read_owned_file(
+            root, ".saipen/BOARD.md", kind="source BOARD authority", max_bytes=_BOARD_MAX
+        )
+        board = parse_board(raw.decode("utf-8-sig"))
+    except (OSError, ValueError):
+        return False
+    return work in board.get("tickets", {})
+
+
+def _amends_resolvable(root: Path, amends: str) -> bool:
+    """CORE-004: an `amends` target must name an existing receipt identity
+    across the active OR tombstone history before it is made authoritative.
+    A dangling amendment reference is never committed to durable metadata."""
+    if not _valid_receipt_id(amends):
+        return False
+    index = _read_index(root)
+    if amends in index.get("active", {}):
+        return True
+    return amends in index.get("tombstones", {})
 
 
 def _contract_integrity(root: Path, receipt_id: str, meta: dict) -> dict:
@@ -438,9 +514,15 @@ def _find_exact_duplicate(root: Path, digest: str) -> dict | None:
             if not INTENT_RE.fullmatch(receipt_id) or _is_link_or_reparse(body_path):
                 continue
             try:
-                if hashlib.sha256(body_path.read_bytes()).hexdigest() == digest:
+                raw = _read_owned_file(
+                    root,
+                    f".saipen/intake/active/{receipt_id}.md",
+                    kind="source body",
+                    max_bytes=_BODY_MAX,
+                )
+                if hashlib.sha256(raw).hexdigest() == digest:
                     return {"receipt_id": receipt_id, "orphan": True}
-            except OSError:
+            except (OSError, ValueError):
                 continue
     return None
 
@@ -524,7 +606,20 @@ def capture(
                             "linked_work": linked_work,
                             "requested_work": work,
                         }
+                    if amends and not _amends_resolvable(root, amends):
+                        return {
+                            "ok": False,
+                            "code": "VALIDATION_FAILED",
+                            "detail": f"amends references unknown receipt {amends}",
+                        }
                     if work and not linked_work:
+                        if not _board_has_work(root, work):
+                            return {
+                                "ok": False,
+                                "code": "ORPHAN_RECEIPT",
+                                "receipt": existing["receipt_id"],
+                                "detail": f"linked Work {work} is missing from BOARD",
+                            }
                         linked_work = work
                         meta["linked_work"] = work
                         _write_meta(root, existing["receipt_id"], meta)
@@ -559,13 +654,25 @@ def capture(
                 if existing and existing.get("orphan") and not force
                 else _next_receipt_id(root, index)
             )
+            if amends and not _amends_resolvable(root, amends):
+                return {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"amends references unknown receipt {amends}",
+                }
+            # CORE-004: never commit an invalid Work reference as authoritative.
+            # The canonical BOARD decides whether `work` may be linked. A
+            # missing/invalid Work leaves the captured source recoverably
+            # UNLINKED (linked_work stays None in durable metadata + index);
+            # a later exact retry with the correct Work attaches it.
+            linked_work = work if (work and _board_has_work(root, work)) else None
             meta = {
                 "receipt_id": receipt_id,
                 "received_at": _utc(),
                 "source_kind": source_kind,
                 "source_sha256": digest,
                 "status": ACTIVE_STATUS,
-                "linked_work": work,
+                "linked_work": linked_work,
                 "sensitive": _looks_sensitive(body),
                 "schema_version": SCHEMA_VERSION,
                 "transport": {
@@ -581,9 +688,16 @@ def capture(
             # contract/coverage, finally the discoverability index.
             if not (existing and existing.get("orphan") and not force):
                 _write_body(root, receipt_id, body)
-            actual = hashlib.sha256(
-                (_active_dir(root) / f"{receipt_id}.md").read_bytes()
-            ).hexdigest()
+            try:
+                raw_body = _read_owned_file(
+                    root,
+                    f".saipen/intake/active/{receipt_id}.md",
+                    kind="source body",
+                    max_bytes=_BODY_MAX,
+                )
+            except (ValueError, OSError) as exc:
+                return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
+            actual = hashlib.sha256(raw_body).hexdigest()
             if actual != digest:
                 return {
                     "ok": False,
@@ -611,11 +725,13 @@ def capture(
             )
             index["active"][receipt_id] = {
                 "source_sha256": digest,
-                "linked_work": work,
+                "linked_work": linked_work,
             }
             _write_index(root, index)
             linkage = (
-                _link_board_projection(root, work, receipt_id) if work is not None else {"ok": True}
+                _link_board_projection(root, linked_work, receipt_id)
+                if linked_work is not None
+                else {"ok": True}
             )
             return {
                 "ok": bool(linkage.get("ok")),
@@ -629,7 +745,7 @@ def capture(
                 "receipt": receipt_id,
                 "source_sha256": digest,
                 "status": ACTIVE_STATUS,
-                "linked_work": work,
+                "linked_work": linked_work,
                 "duplicate": False,
                 "requirements": 0,
                 "sensitive": meta["sensitive"],
@@ -818,11 +934,13 @@ def verify_integrity(root: Path | str, receipt_id: str) -> dict:
     meta = _read_meta(root, receipt_id)
     if not meta:
         return {"ok": False, "code": "INVALID", "detail": "receipt metadata missing"}
-    body_path = _active_dir(root) / f"{receipt_id}.md"
+    rel = f".saipen/intake/active/{receipt_id}.md"
     try:
-        body = body_path.read_bytes()
-    except OSError:
+        body = _read_owned_file(root, rel, kind="source body", max_bytes=_BODY_MAX)
+    except FileNotFoundError:
         return {"ok": False, "code": "INVALID", "detail": "receipt body missing"}
+    except (ValueError, OSError) as exc:
+        return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
     actual = hashlib.sha256(body).hexdigest()
     if actual != meta.get("source_sha256"):
         return {
@@ -840,7 +958,10 @@ def _work_is_done(root: Path, work: str | None) -> bool:
     try:
         from .board import parse_board
 
-        board = parse_board((root / ".saipen" / "BOARD.md").read_text(encoding="utf-8-sig"))
+        raw = _read_owned_file(
+            root, ".saipen/BOARD.md", kind="source BOARD authority", max_bytes=_BOARD_MAX
+        )
+        board = parse_board(raw.decode("utf-8-sig"))
     except (OSError, ValueError):
         return False
     ticket = board.get("tickets", {}).get(work)
@@ -1015,6 +1136,198 @@ def release_gate(root: Path | str, current_work: str | None = None) -> dict:
     }
 
 
+def _is_archive_commit_pending(root: Path, receipt_id: str, index: dict) -> bool:
+    """True when `receipt_id` sits in an interrupted close (CORE-003): still
+    indexed as active, the active surface is cleared, and complete archived
+    artifacts are present. This is the resumable crash state the close
+    transaction must settle before it can be retried."""
+    if not isinstance(index.get("active", {}).get(receipt_id), dict):
+        return False
+    active_present = []
+    for active_rel in (
+        f".saipen/intake/active/{receipt_id}.md",
+        f".saipen/intake/active/{receipt_id}.meta.json",
+    ):
+        try:
+            _read_owned_file(root, active_rel, kind="source receipt probe", max_bytes=_META_MAX)
+        except FileNotFoundError:
+            active_present.append(False)
+            continue
+        except (ValueError, OSError):
+            return False
+        active_present.append(True)
+    for archived_rel in (
+        f".saipen/archive/source/{receipt_id}.md",
+        f".saipen/archive/source/{receipt_id}.meta.json",
+    ):
+        try:
+            _read_owned_file(root, archived_rel, kind="source archive probe", max_bytes=_META_MAX)
+        except FileNotFoundError:
+            return False
+        except (ValueError, OSError):
+            return False
+    return not all(active_present)
+
+
+def _settle_archive_commit(root: Path, receipt_id: str, index: dict) -> dict | None:
+    """Settle an ARCHIVE_COMMIT_PENDING close transaction (CORE-003).
+
+    Never infers closure from an archive body alone: it verifies the archived
+    body digest and the archived Contract/coverage ledger against the
+    still-indexed projection, reconstructs and writes the EXACT tombstone from
+    the archived metadata (which retains the close evidence), then atomically
+    settles the index active->tombstone. Returns the ``SOURCE_CLOSED`` result
+    on success, a stable refusal on any evidence failure, or None when the
+    receipt is not in a pending-close state.
+    """
+    projection = index.get("active", {}).get(receipt_id)
+    if not isinstance(projection, dict):
+        return None
+    try:
+        archived_meta_raw = _read_owned_file(
+            root,
+            f".saipen/archive/source/{receipt_id}.meta.json",
+            kind="source archive metadata",
+            max_bytes=_META_MAX,
+        )
+        archived_meta = json.loads(archived_meta_raw.decode("utf-8-sig"))
+    except FileNotFoundError:
+        return None
+    except (ValueError, OSError) as exc:
+        return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
+    if not isinstance(archived_meta, dict):
+        return {
+            "ok": False,
+            "code": "SOURCE_CORRUPTION",
+            "detail": "archive metadata not an object",
+        }
+    try:
+        _archive_closed_locked(root, receipt_id, archived_meta)
+    except (OSError, ValueError) as exc:
+        return {
+            "ok": False,
+            "code": "ARCHIVE_COMMIT_PENDING",
+            "receipt": receipt_id,
+            "detail": str(exc),
+        }
+    expected_digest = projection.get("source_sha256")
+    if archived_meta.get("source_sha256") != expected_digest:
+        return {
+            "ok": False,
+            "code": "SOURCE_CORRUPTION",
+            "detail": f"archived metadata digest {receipt_id} drift",
+        }
+    try:
+        archived_body = _read_owned_file(
+            root,
+            f".saipen/archive/source/{receipt_id}.md",
+            kind="source body",
+            max_bytes=_BODY_MAX,
+        )
+    except (ValueError, OSError) as exc:
+        return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
+    if hashlib.sha256(archived_body).hexdigest() != expected_digest:
+        return {
+            "ok": False,
+            "code": "SOURCE_CORRUPTION",
+            "detail": f"archived body {receipt_id} digest mismatch",
+        }
+    try:
+        archived_contract_raw = _read_owned_file(
+            root,
+            f".saipen/archive/source/{receipt_id}.contract.json",
+            kind="source Work Contract",
+            max_bytes=_LEDGER_MAX,
+        )
+        archived_contract = json.loads(archived_contract_raw.decode("utf-8-sig"))
+    except (FileNotFoundError, OSError, ValueError):
+        archived_contract = None
+    if (
+        not isinstance(archived_contract, dict)
+        or archived_contract.get("source_sha256") != expected_digest
+    ):
+        return {
+            "ok": False,
+            "code": "CONTRACT_DRIFT",
+            "receipt": receipt_id,
+            "detail": "archived Contract digest drift",
+        }
+    try:
+        archived_cov_raw = _read_owned_file(
+            root,
+            f".saipen/archive/source/{receipt_id}.coverage.json",
+            kind="source coverage ledger",
+            max_bytes=_LEDGER_MAX,
+        )
+        archived_cov = json.loads(archived_cov_raw.decode("utf-8-sig"))
+    except (FileNotFoundError, OSError, ValueError):
+        archived_cov = {"requirements": {}}
+    requirements = archived_cov.get("requirements", {}) if isinstance(archived_cov, dict) else {}
+    actionable = sum(
+        bool(entry.get("actionable", entry.get("class") in ACTIONABLE_CLASSES))
+        for entry in requirements.values()
+    )
+    tombstone = {
+        "schema_version": SCHEMA_VERSION,
+        "receipt_id": receipt_id,
+        "source_sha256": expected_digest,
+        "linked_work": archived_meta.get("linked_work"),
+        "status": CLOSED_STATUS,
+        "closed_at": archived_meta.get("closed_at"),
+        "closure_event": archived_meta.get("closure_event"),
+        "archive_ref": f".saipen/archive/source/{receipt_id}.md",
+        "requirements": len(requirements),
+        "actionable": actionable,
+        "unresolved": 0,
+    }
+    _write_tombstone(root, receipt_id, tombstone)
+    index["active"].pop(receipt_id, None)
+    index["tombstones"][receipt_id] = tombstone
+    _write_index(root, index)
+    return {
+        "ok": True,
+        "code": "SOURCE_CLOSED",
+        "receipt": receipt_id,
+        "status": CLOSED_STATUS,
+        "archive_ref": tombstone["archive_ref"],
+        "recovered": True,
+    }
+
+
+def _move_archive_artifact(
+    root: Path,
+    source: Path,
+    destination: Path,
+    *,
+    label: str,
+    required: bool,
+) -> None:
+    """Idempotently complete one owned active->archive move."""
+    try:
+        source_stat = prove_owned_regular(source, kind=f"active {label}")
+    except FileNotFoundError:
+        source_stat = None
+    try:
+        destination_stat = prove_owned_regular(destination, kind=f"archived {label}")
+    except FileNotFoundError:
+        destination_stat = None
+    if source_stat is not None and destination_stat is not None:
+        source_raw = read_bound_regular_bytes(source, source_stat, max_bytes=_BODY_MAX)
+        destination_raw = read_bound_regular_bytes(
+            destination, destination_stat, max_bytes=_BODY_MAX
+        )
+        if source_raw != destination_raw:
+            raise ValueError(f"active and archived {label} disagree for {source.name}")
+        safe_unlink_owned(source, kind=f"duplicate active {label}", ownership_root=root)
+        return
+    if source_stat is None:
+        if destination_stat is not None or not required:
+            return
+        raise ValueError(f"both active and archived {label} are missing for {source.name}")
+    prove_owned_dir_chain(destination.parent, kind=f"archive {label}", ownership_root=root)
+    os.replace(source, destination)
+
+
 def _archive_closed_locked(root: Path, receipt_id: str, meta: dict) -> dict:
     archive = _archive_dir(root)
     body = _safe_path(root, f".saipen/intake/active/{receipt_id}.md", expect_file=True)
@@ -1029,27 +1342,27 @@ def _archive_closed_locked(root: Path, receipt_id: str, meta: dict) -> dict:
     meta = dict(meta)
     meta["storage_status"] = ARCHIVED_STATUS
     meta["archive_ref"] = f".saipen/archive/source/{receipt_id}.md"
-    _atomic_write(archive_meta, _json_bytes(meta))
-    os.replace(body, archive_body)
-    with suppress(FileNotFoundError):
-        active_meta.unlink()
+    _atomic_write(archive_meta, _json_bytes(meta), ownership_root=root)
+    _move_archive_artifact(root, body, archive_body, label="source body", required=True)
+    safe_unlink_owned(active_meta, kind="active source metadata", ownership_root=root)
     for label, path in (
         ("coverage", _coverage_path(root, receipt_id)),
         ("contract", _contract_path(root, receipt_id)),
     ):
-        if path.is_file() and not _is_link_or_reparse(path):
-            destination = _safe_path(
-                root,
-                f".saipen/archive/source/{receipt_id}.{label}.json",
-                expect_file=True,
-            )
-            os.replace(path, destination)
+        destination = _safe_path(
+            root,
+            f".saipen/archive/source/{receipt_id}.{label}.json",
+            expect_file=True,
+        )
+        _move_archive_artifact(root, path, destination, label=label, required=True)
     for revision in sorted(_contract_dir(root).glob(f"{receipt_id}.r*.json")):
         if revision.is_file() and not _is_link_or_reparse(revision):
             destination = _safe_path(
                 root, f".saipen/archive/source/{revision.name}", expect_file=True
             )
-            os.replace(revision, destination)
+            _move_archive_artifact(
+                root, revision, destination, label="contract revision", required=False
+            )
     return {
         "ok": True,
         "code": "SOURCE_ARCHIVED",
@@ -1065,6 +1378,11 @@ def close_receipt(root: Path | str, receipt_id: str, *, closure_event: str | Non
         return _invalid_receipt_id(receipt_id)
     try:
         with project_writer_lock(root):
+            index = _read_index(root)
+            if _is_archive_commit_pending(root, receipt_id, index):
+                settled = _settle_archive_commit(root, receipt_id, index)
+                if settled is not None:
+                    return settled
             meta = _read_meta(root, receipt_id)
             if not meta:
                 return {"ok": False, "code": "TICKET_NOT_FOUND", "detail": receipt_id}
@@ -1107,10 +1425,10 @@ def close_receipt(root: Path | str, receipt_id: str, *, closure_event: str | Non
                 "unresolved": 0,
             }
             archived = _archive_closed_locked(root, receipt_id, meta)
-            _write_tombstone(root, receipt_id, tombstone)
             index = _read_index(root)
             index["active"].pop(receipt_id, None)
             index["tombstones"][receipt_id] = tombstone
+            _write_tombstone(root, receipt_id, tombstone)
             _write_index(root, index)
             return {
                 "ok": True,
@@ -1131,6 +1449,11 @@ def archive_receipt(root: Path | str, receipt_id: str) -> dict:
         return _invalid_receipt_id(receipt_id)
     try:
         with project_writer_lock(root):
+            index = _read_index(root)
+            if _is_archive_commit_pending(root, receipt_id, index):
+                settled = _settle_archive_commit(root, receipt_id, index)
+                if settled is not None:
+                    return settled
             meta = _read_meta(root, receipt_id)
             if not meta:
                 tomb = _read_index(root).get("tombstones", {}).get(receipt_id)
@@ -1148,7 +1471,33 @@ def archive_receipt(root: Path | str, receipt_id: str) -> dict:
                     "code": "VALIDATION_FAILED",
                     "detail": "only CLOSED receipts archive",
                 }
-            return _archive_closed_locked(root, receipt_id, meta)
+            archived = _archive_closed_locked(root, receipt_id, meta)
+            index = _read_index(root)
+            index["active"].pop(receipt_id, None)
+            tomb = index.get("tombstones", {}).get(receipt_id)
+            if tomb is None:
+                tomb = {
+                    "schema_version": SCHEMA_VERSION,
+                    "receipt_id": receipt_id,
+                    "source_sha256": meta.get("source_sha256"),
+                    "linked_work": meta.get("linked_work"),
+                    "status": CLOSED_STATUS,
+                    "closed_at": meta.get("closed_at"),
+                    "closure_event": meta.get("closure_event"),
+                    "archive_ref": f".saipen/archive/source/{receipt_id}.md",
+                    "requirements": 0,
+                    "actionable": 0,
+                    "unresolved": 0,
+                }
+                index["tombstones"][receipt_id] = tomb
+                _write_tombstone(root, receipt_id, tomb)
+            _write_index(root, index)
+            return {
+                "ok": True,
+                "code": "SOURCE_ARCHIVED",
+                "receipt": receipt_id,
+                "archive_ref": archived["archive_ref"],
+            }
     except (OSError, PermissionError, ValueError) as exc:
         return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
 
@@ -1168,11 +1517,14 @@ def purge_receipt(root: Path | str, receipt_id: str) -> dict:
                 path = _safe_path(
                     root, f".saipen/archive/source/{receipt_id}{suffix}", expect_file=True
                 )
-                with suppress(FileNotFoundError):
-                    path.unlink()
+                safe_unlink_owned(path, kind="purged source archive", ownership_root=root)
             for revision in _archive_dir(root).glob(f"{receipt_id}.r*.json"):
                 if revision.is_file() and not _is_link_or_reparse(revision):
-                    revision.unlink()
+                    safe_unlink_owned(
+                        revision,
+                        kind="purged source contract revision",
+                        ownership_root=root,
+                    )
             tomb["purged"] = True
             tomb["purged_at"] = _utc()
             index["tombstones"][receipt_id] = tomb
@@ -1188,26 +1540,24 @@ def read_body(root: Path | str, receipt_id: str) -> dict:
     root = Path(root)
     if not _valid_receipt_id(receipt_id):
         return _invalid_receipt_id(receipt_id)
-    meta = _read_meta(root, receipt_id)
-    location = "active"
-    body_path = _safe_path(
-        root, f".saipen/intake/active/{receipt_id}.md", expect_file=True
-    )
-    if not meta:
-        # Tombstoned/archived: look in cold storage only on explicit request.
-        try:
-            archive_meta = _safe_path(
-                root,
-                f".saipen/archive/source/{receipt_id}.meta.json",
-                expect_file=True,
-            )
-            meta = json.loads(archive_meta.read_text(encoding="utf-8-sig"))
-            location = "archive"
-            body_path = _safe_path(
-                root, f".saipen/archive/source/{receipt_id}.md", expect_file=True
-            )
-        except (OSError, ValueError):
-            meta = None
+    try:
+        meta = _read_meta(root, receipt_id)
+        location = "active"
+        rel = f".saipen/intake/active/{receipt_id}.md"
+        if not meta:
+            # Tombstoned/archived: look in cold storage only on explicit request.
+            archive_meta_rel = f".saipen/archive/source/{receipt_id}.meta.json"
+            try:
+                raw_meta = _read_owned_file(
+                    root, archive_meta_rel, kind="source archive metadata", max_bytes=_META_MAX
+                )
+                meta = json.loads(raw_meta.decode("utf-8-sig"))
+                location = "archive"
+                rel = f".saipen/archive/source/{receipt_id}.md"
+            except (FileNotFoundError, OSError, ValueError):
+                meta = None
+    except (ValueError, OSError) as exc:
+        return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
     if not meta:
         tomb = _read_index(root).get("tombstones", {}).get(receipt_id)
         if tomb and tomb.get("purged"):
@@ -1218,16 +1568,18 @@ def read_body(root: Path | str, receipt_id: str) -> dict:
             }
         return {"ok": False, "code": "TICKET_NOT_FOUND", "detail": receipt_id}
     try:
-        raw = body_path.read_bytes()
+        raw = _read_owned_file(root, rel, kind="source body", max_bytes=_BODY_MAX)
         body = raw.decode("utf-8")
     except UnicodeDecodeError:
         return {"ok": False, "code": "INVALID", "detail": "source body is not UTF-8"}
-    except OSError:
+    except FileNotFoundError:
         return {
             "ok": False,
             "code": "SOURCE_PURGED",
             "detail": "body removed by purge; tombstone retains digest/closure",
         }
+    except (ValueError, OSError) as exc:
+        return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
     actual = hashlib.sha256(raw).hexdigest()
     if actual != meta.get("source_sha256"):
         return {
@@ -1243,18 +1595,22 @@ def status(root: Path | str, receipt_id: str) -> dict:
     root = Path(root)
     if not _valid_receipt_id(receipt_id):
         return _invalid_receipt_id(receipt_id)
-    meta = _read_meta(root, receipt_id)
+    try:
+        meta = _read_meta(root, receipt_id)
+    except (ValueError, OSError) as exc:
+        return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
     location = "active"
     if not meta:
         try:
-            archive_meta = _safe_path(
+            raw = _read_owned_file(
                 root,
                 f".saipen/archive/source/{receipt_id}.meta.json",
-                expect_file=True,
+                kind="source archive metadata",
+                max_bytes=_META_MAX,
             )
-            meta = json.loads(archive_meta.read_text(encoding="utf-8-sig"))
+            meta = json.loads(raw.decode("utf-8-sig"))
             location = "archive"
-        except (OSError, ValueError):
+        except (FileNotFoundError, OSError, ValueError):
             tomb = _read_index(root).get("tombstones", {}).get(receipt_id)
             if tomb:
                 return {
@@ -1275,13 +1631,14 @@ def status(root: Path | str, receipt_id: str) -> dict:
             return {"ok": False, "code": "TICKET_NOT_FOUND", "detail": receipt_id}
     if location == "archive":
         try:
-            archive_coverage = _safe_path(
+            raw = _read_owned_file(
                 root,
                 f".saipen/archive/source/{receipt_id}.coverage.json",
-                expect_file=True,
+                kind="source archive coverage",
+                max_bytes=_LEDGER_MAX,
             )
-            archived_ledger = json.loads(archive_coverage.read_text(encoding="utf-8-sig"))
-        except (OSError, ValueError):
+            archived_ledger = json.loads(raw.decode("utf-8-sig"))
+        except (FileNotFoundError, OSError, ValueError):
             archived_ledger = {"requirements": {}}
         requirements = archived_ledger.get("requirements", {})
         summary = {
@@ -1347,9 +1704,31 @@ def recover_orphans(root: Path | str) -> dict:
     for receipt_id in sorted(indexed):
         if not _valid_receipt_id(receipt_id):
             continue
-        active_body = _active_dir(root) / f"{receipt_id}.md"
-        archived_body = _archive_dir(root) / f"{receipt_id}.md"
-        if not active_body.is_file() and archived_body.is_file():
+        try:
+            _read_owned_file(
+                root,
+                f".saipen/intake/active/{receipt_id}.md",
+                kind="source body",
+                max_bytes=_BODY_MAX,
+            )
+            active_body = True
+        except FileNotFoundError:
+            active_body = False
+        except (ValueError, OSError):
+            active_body = True
+        try:
+            _read_owned_file(
+                root,
+                f".saipen/archive/source/{receipt_id}.md",
+                kind="source body",
+                max_bytes=_BODY_MAX,
+            )
+            archived_body = True
+        except FileNotFoundError:
+            archived_body = False
+        except (ValueError, OSError):
+            archived_body = False
+        if not active_body and archived_body:
             orphans.append(
                 {
                     "receipt": receipt_id,
@@ -1363,8 +1742,14 @@ def recover_orphans(root: Path | str) -> dict:
             receipt_id = body.stem
             if receipt_id not in indexed or not _read_meta(root, receipt_id):
                 try:
-                    digest = hashlib.sha256(body.read_bytes()).hexdigest()
-                except OSError:
+                    raw = _read_owned_file(
+                        root,
+                        f".saipen/intake/active/{receipt_id}.md",
+                        kind="source body",
+                        max_bytes=_BODY_MAX,
+                    )
+                    digest = hashlib.sha256(raw).hexdigest()
+                except (OSError, ValueError):
                     digest = None
                 orphans.append(
                     {
@@ -1390,11 +1775,12 @@ def validate_project(root: Path | str) -> list[str]:
             for work, receipts in board_links.items()
             for receipt_id in sorted(receipts)
         ]
-    if _is_link_or_reparse(index_path) or not index_path.is_file():
-        return [f"source intake index unsafe: {index_path}"]
     errors: list[str] = []
     try:
-        index = json.loads(index_path.read_text(encoding="utf-8-sig"))
+        raw = _read_owned_file(
+            root, ".saipen/intake/index.json", kind="source intake index", max_bytes=_INDEX_MAX
+        )
+        index = json.loads(raw.decode("utf-8-sig"))
         if not isinstance(index, dict):
             raise ValueError("index root is not an object")
         if not isinstance(index.get("active"), dict) or not isinstance(
@@ -1453,7 +1839,13 @@ def validate_project(root: Path | str) -> list[str]:
             try:
                 from .board import parse_board
 
-                board = parse_board((root / ".saipen" / "BOARD.md").read_text(encoding="utf-8-sig"))
+                raw_board = _read_owned_file(
+                    root,
+                    ".saipen/BOARD.md",
+                    kind="source BOARD authority",
+                    max_bytes=_BOARD_MAX,
+                )
+                board = parse_board(raw_board.decode("utf-8-sig"))
                 ticket = board.get("tickets", {}).get(linked)
             except (OSError, ValueError):
                 ticket = None
@@ -1473,6 +1865,16 @@ def validate_project(root: Path | str) -> list[str]:
                     )
                 if ticket.get("section") == "## DONE" and not coverage_complete(root, receipt_id):
                     errors.append(f"DONE Work {linked} has unresolved source receipt {receipt_id}")
+        amends = meta.get("amends")
+        if amends:
+            if not _valid_receipt_id(amends):
+                errors.append(f"active receipt {receipt_id} has invalid amends {amends!r}")
+            elif amends not in index.get("active", {}) and amends not in index.get(
+                "tombstones", {}
+            ):
+                errors.append(
+                    f"active receipt {receipt_id} references missing amended receipt {amends}"
+                )
     for receipt_id, tomb in index.get("tombstones", {}).items():
         if receipt_id in index.get("active", {}):
             errors.append(f"receipt {receipt_id} is both active and tombstoned")
@@ -1490,9 +1892,7 @@ def validate_project(root: Path | str) -> list[str]:
     for work, receipts in board_links.items():
         for receipt_id in sorted(receipts):
             if receipt_id not in known_receipts:
-                errors.append(
-                    f"BOARD Work {work} references missing source receipt {receipt_id}"
-                )
+                errors.append(f"BOARD Work {work} references missing source receipt {receipt_id}")
     for orphan in recover_orphans(root)["orphans"]:
         errors.append(f"ORPHAN_RECEIPT {orphan['receipt']}")
     return errors

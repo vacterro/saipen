@@ -32,6 +32,7 @@ import re
 import stat
 import subprocess
 import uuid
+from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -47,9 +48,7 @@ LINEAGE_FIELD = "project_lineage"
 LINEAGE_RE = re.compile(r"^lineage-[0-9a-f]{32}$")
 
 
-def read_bound_regular_bytes(
-    path: Path, expected: os.stat_result, *, max_bytes: int
-) -> bytes:
+def read_bound_regular_bytes(path: Path, expected: os.stat_result, *, max_bytes: int) -> bytes:
     """Read the exact regular node witnessed by an earlier ``lstat``.
 
     The descriptor, not the pathname, owns the read. Comparing ``fstat``
@@ -98,6 +97,207 @@ def read_bound_regular_bytes(
         os.close(descriptor)
 
 
+_REPARSE = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
+
+
+def prove_owned_regular(path: Path, *, kind: str = "path") -> os.stat_result:
+    """Prove `path` is an owned regular non-link/non-reparse final node.
+
+    Uses no-follow ``lstat`` semantics: a final symlink/junction/reparse or
+    non-regular node is refused regardless of where it points. Raises
+    ``FileNotFoundError`` when absent and ``ValueError`` on any unsafe/other
+    topology. Returns the witnessed ``lstat`` result for a bounded read.
+    """
+    try:
+        st = path.lstat()
+    except FileNotFoundError:
+        raise
+    except OSError as exc:
+        raise ValueError(f"{kind} {path} is unreadable: {exc}") from None
+    if os.path.islink(path) or bool(getattr(st, "st_file_attributes", 0) & _REPARSE):
+        raise ValueError(f"{kind} {path} is a link/reparse node")
+    if not stat.S_ISREG(st.st_mode):
+        raise ValueError(f"{kind} {path} is not a regular file")
+    return st
+
+
+def prove_owned_dir_chain(
+    dir_path: Path,
+    *,
+    kind: str = "dir",
+    ownership_root: Path | None = None,
+) -> None:
+    """Prove every existing ancestor component (and the final directory) of
+    ``dir_path`` is an owned non-link/non-reparse directory.
+
+    Raises ``ValueError`` on any symlink/junction/reparse/non-directory
+    ancestor. Absent leaf components are permitted (they are created later by
+    the caller under proven ancestors).
+    """
+    absolute = Path(os.path.abspath(dir_path))
+    if ownership_root is not None:
+        owner = Path(os.path.abspath(ownership_root))
+        if absolute != owner and not absolute.is_relative_to(owner):
+            raise ValueError(f"{kind} {absolute} escapes ownership root {owner}")
+    chain = list(reversed((absolute, *absolute.parents)))
+    for node in chain:
+        try:
+            st = node.lstat()
+        except FileNotFoundError:
+            continue
+        except OSError as exc:
+            raise ValueError(f"{kind} ancestor {node} unreadable: {exc}") from None
+        if os.path.islink(node) or bool(getattr(st, "st_file_attributes", 0) & _REPARSE):
+            raise ValueError(f"{kind} ancestor {node} is a link/reparse node")
+        if not stat.S_ISDIR(st.st_mode):
+            raise ValueError(f"{kind} ancestor {node} is not a directory")
+
+
+def _same_stat(left: os.stat_result, right: os.stat_result) -> bool:
+    return (left.st_dev, left.st_ino, left.st_mode) == (
+        right.st_dev,
+        right.st_ino,
+        right.st_mode,
+    )
+
+
+def _open_exclusive_regular(path: Path, *, kind: str) -> tuple[int, os.stat_result]:
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+    flags |= getattr(os, "O_BINARY", 0)
+    flags |= getattr(os, "O_NOINHERIT", 0)
+    flags |= getattr(os, "O_NOFOLLOW", 0)
+    try:
+        descriptor = os.open(path, flags, 0o600)
+    except FileExistsError:
+        raise ValueError(f"{kind} {path} already exists") from None
+    try:
+        witnessed = os.fstat(descriptor)
+        if not stat.S_ISREG(witnessed.st_mode):
+            raise ValueError(f"{kind} {path} is not a regular file")
+        current = path.lstat()
+        if not _same_stat(witnessed, current):
+            raise ValueError(f"{kind} {path} changed during exclusive creation")
+    except BaseException:
+        os.close(descriptor)
+        raise
+    return descriptor, witnessed
+
+
+def _write_all(descriptor: int, data: bytes) -> None:
+    view = memoryview(data)
+    while view:
+        written = os.write(descriptor, view)
+        if written <= 0:
+            raise OSError("short write to owned file descriptor")
+        view = view[written:]
+    os.fsync(descriptor)
+
+
+def safe_create_bytes_exclusive(
+    path: Path,
+    data: bytes,
+    *,
+    kind: str = "path",
+    ownership_root: Path | None = None,
+) -> None:
+    """Create one owned regular file exactly once and write through its fd."""
+    path = Path(path)
+    prove_owned_dir_chain(
+        path.parent,
+        kind=kind,
+        ownership_root=ownership_root,
+    )
+    descriptor, witnessed = _open_exclusive_regular(path, kind=kind)
+    try:
+        _write_all(descriptor, data)
+        current = path.lstat()
+        if not _same_stat(witnessed, current):
+            raise ValueError(f"{kind} {path} changed while being written")
+    except BaseException:
+        with suppress(OSError):
+            current = path.lstat()
+            if _same_stat(witnessed, current):
+                os.unlink(path)
+        raise
+    finally:
+        os.close(descriptor)
+
+
+def safe_atomic_write_bytes(
+    path: Path,
+    data: bytes,
+    *,
+    kind: str = "path",
+    ownership_root: Path | None = None,
+) -> None:
+    """Owned same-directory atomic replacement for a project file.
+
+    Proves the ancestor chain is owned directories, refuses a linked/reparse or
+    non-regular existing final node, writes to a uniquely-named temporary in the
+    SAME directory (so ``replace`` cannot cross a mount), and atomically
+    replaces the target. Raises ``ValueError`` on any unsafe topology.
+    """
+    path = Path(path)
+    parent = path.parent
+    prove_owned_dir_chain(parent, kind=kind, ownership_root=ownership_root)
+    parent.mkdir(parents=True, exist_ok=True)
+    prove_owned_dir_chain(parent, kind=kind, ownership_root=ownership_root)
+    before = None
+    with suppress(FileNotFoundError):
+        before = prove_owned_regular(path, kind=kind)
+    tmp_path = parent / f".{path.name}.{uuid.uuid4().hex}.tmp"
+    descriptor, tmp_stat = _open_exclusive_regular(tmp_path, kind=f"{kind} temporary")
+    try:
+        _write_all(descriptor, data)
+        os.close(descriptor)
+        descriptor = -1
+        prove_owned_dir_chain(parent, kind=kind, ownership_root=ownership_root)
+        try:
+            current = prove_owned_regular(path, kind=kind)
+        except FileNotFoundError:
+            current = None
+        if (before is None) != (current is None) or (
+            before is not None and current is not None and not _same_stat(before, current)
+        ):
+            raise ValueError(f"{kind} {path} changed before atomic replacement")
+        tmp_current = prove_owned_regular(tmp_path, kind=f"{kind} temporary")
+        if not _same_stat(tmp_stat, tmp_current):
+            raise ValueError(f"{kind} temporary {tmp_path} changed before replacement")
+        os.replace(tmp_path, path)
+    except BaseException:
+        if descriptor >= 0:
+            os.close(descriptor)
+        with suppress(OSError, ValueError):
+            current = prove_owned_regular(tmp_path, kind=f"{kind} temporary")
+            if _same_stat(tmp_stat, current):
+                os.unlink(tmp_path)
+        raise
+
+
+def safe_unlink_owned(
+    path: Path,
+    *,
+    kind: str = "path",
+    ownership_root: Path | None = None,
+) -> bool:
+    """Unlink an owned regular file, no-follow. Returns False (no-op) when the
+    file does not exist; raises ValueError on a linked/reparse/non-regular
+    final node or unsafe ancestor chain so an unsafe carrier is never silently
+    deleted."""
+    path = Path(path)
+    prove_owned_dir_chain(
+        path.parent,
+        kind=kind,
+        ownership_root=ownership_root,
+    )
+    try:
+        prove_owned_regular(path, kind=kind)
+    except FileNotFoundError:
+        return False
+    os.unlink(path)
+    return True
+
+
 def _git_from(cwd: str | Path, *args: str) -> tuple[int, str]:
     """Run git in `cwd`. Never raises: this runs from pre-commit hooks and in
     directories that are not repositories at all."""
@@ -108,7 +308,6 @@ def _git_from(cwd: str | Path, *args: str) -> tuple[int, str]:
     except (OSError, subprocess.SubprocessError):
         return 1, ""
     return result.returncode, result.stdout.strip()
-
 
 
 def is_git_project_root(root: Path) -> bool:
@@ -139,6 +338,7 @@ def _valid_saipen_dir(root: Path) -> bool:
     except OSError:
         return False
     return True
+
 
 def _nearest_checkpoint_root(start: Path) -> Path | None:
     for candidate in (start, *start.parents):

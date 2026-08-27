@@ -678,11 +678,19 @@ def context_audit(project_root: Path | str) -> Result:
     # Active source bodies are authoritative current-task context economics,
     # but are captured only for audit accounting and never embedded in the
     # cold/hot surface. Archived bodies are intentionally not scanned.
-    from .intake import _active_dir
+    from .intake import _read_owned_file
 
     for item in inputs["source_receipts"]:
         label = f"source receipt {item['receipt']}"
-        raw = (_active_dir(root) / f"{item['receipt']}.md").read_bytes()
+        try:
+            raw = _read_owned_file(
+                root,
+                f".saipen/intake/active/{item['receipt']}.md",
+                kind="source body",
+                max_bytes=64 * 1024 * 1024,
+            )
+        except (OSError, ValueError):
+            continue
         text = raw.decode("utf-8")
         sources[label] = text
         source_byte_counts[label] = len(raw)

@@ -123,9 +123,7 @@ def block_parked_evidence_error(state: dict, board: dict, events) -> str | None:
             and ticket.get("section") == "## BLOCKED"
             and event.get("taxonomy") == "DEC"
             and str(event.get("op_id") or "").startswith("ticket-")
-            and str(event.get("text") or "").startswith(
-                "ticket block via SAIOPS (active)"
-            )
+            and str(event.get("text") or "").startswith("ticket block via SAIOPS (active)")
         )
 
     phase_events = [
@@ -166,6 +164,13 @@ def validate_checkpoint_surface(
     text exactly as before, so every external caller keeps the raw-text entry point
     and behavior is unchanged."""
     errors: list[str] = []
+
+    if state_text != snap.state_text:
+        errors.append("STATE bytes do not belong to the supplied ProjectSnapshot")
+    if board_text != snap.board_text:
+        errors.append("BOARD bytes do not belong to the supplied ProjectSnapshot")
+    if errors:
+        return errors
 
     from .floor import state_board_floor, board_floor
 
@@ -487,8 +492,7 @@ def validate_texts(
             prior = list(sealed_events)
         prior_ids = {ev.get("event") for ev in prior}
         active_events = tuple(
-            prior
-            + [ev for ev in active_events if ev.get("event") not in prior_ids]
+            prior + [ev for ev in active_events if ev.get("event") not in prior_ids]
         )
     parked_error = block_parked_evidence_error(state, board, active_events)
     if parked_error is not None:
@@ -612,9 +616,7 @@ def validate_texts(
     # checker too -- an open attempt on the proposed Work with no matching
     # STATE.attempt pointer is torn state, not conformant.
     _open = _attempt_mod.active_attempts(_att_records)
-    _work_open = [
-        aid for aid in _open if _att_records[aid].get("ticket") == state.get("task")
-    ]
+    _work_open = [aid for aid in _open if _att_records[aid].get("ticket") == state.get("task")]
     if _work_open:
         if len(_work_open) > 1:
             errors.append(

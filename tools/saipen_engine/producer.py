@@ -32,7 +32,6 @@ import re
 import shutil
 import struct
 import uuid
-import contextlib
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -40,6 +39,14 @@ from typing import Callable, Iterable, Mapping
 
 # --- local engine imports (no cycle: lock/capability never import producer) ---
 from .lock import ProducerLock, project_writer_lock
+from .paths import (
+    prove_owned_dir_chain,
+    prove_owned_regular,
+    read_bound_regular_bytes,
+    safe_atomic_write_bytes,
+    safe_create_bytes_exclusive,
+    safe_unlink_owned,
+)
 
 
 def _utc_now_iso() -> str:
@@ -60,6 +67,121 @@ READY_DIRNAME = "READY"
 SETTLED_DIRNAME = "SETTLED"
 SUPERSEDED_DIRNAME = "SUPERSEDED"
 EPOCH_FILENAME = "producer_epoch.json"
+
+
+def _namespace_authority(namespace: Path | str) -> tuple[Path, Path]:
+    """Bind a producer namespace lexically beneath one owned `.saipen` root."""
+    lexical = Path(os.path.abspath(namespace))
+    saipen = next((node for node in (lexical, *lexical.parents) if node.name == ".saipen"), None)
+    if saipen is None:
+        raise ProducerError(f"producer namespace {lexical} is not beneath .saipen")
+    root_input = saipen.parent
+    try:
+        relative = lexical.relative_to(root_input)
+        root = root_input.resolve(strict=True)
+    except (OSError, ValueError) as exc:
+        raise ProducerError(f"producer namespace owner is invalid: {exc}") from exc
+    owned = root / relative
+    try:
+        prove_owned_dir_chain(owned, kind="producer namespace", ownership_root=root)
+    except (OSError, ValueError) as exc:
+        raise ProducerError(f"producer namespace ownership refused: {exc}") from exc
+    return owned, root
+
+
+def _owned_descendant(namespace: Path | str, relative: Path | str, *, kind: str) -> Path:
+    ns, root = _namespace_authority(namespace)
+    rel = Path(relative)
+    if rel.is_absolute() or ".." in rel.parts:
+        raise ProducerError(f"{kind} path {relative!s} escapes producer namespace")
+    path = ns / rel
+    try:
+        parent_owner = root if path == ns else ns
+        prove_owned_dir_chain(path.parent, kind=kind, ownership_root=parent_owner)
+    except (OSError, ValueError) as exc:
+        raise ProducerError(f"{kind} ownership refused: {exc}") from exc
+    return path
+
+
+def _ensure_owned_dir(namespace: Path | str, relative: Path | str, *, kind: str) -> Path:
+    ns, _root = _namespace_authority(namespace)
+    path = _owned_descendant(ns, relative, kind=kind)
+    try:
+        path.mkdir(parents=True, exist_ok=True)
+        prove_owned_dir_chain(path, kind=kind, ownership_root=ns)
+    except (OSError, ValueError) as exc:
+        raise ProducerError(f"{kind} directory refused: {exc}") from exc
+    return path
+
+
+def _read_owned_descendant(
+    namespace: Path | str,
+    relative: Path | str,
+    *,
+    kind: str,
+    max_bytes: int = 32 * 1024 * 1024,
+) -> bytes:
+    path = _owned_descendant(namespace, relative, kind=kind)
+    try:
+        witnessed = prove_owned_regular(path, kind=kind)
+        return read_bound_regular_bytes(path, witnessed, max_bytes=max_bytes)
+    except FileNotFoundError:
+        raise
+    except (OSError, ValueError) as exc:
+        raise ProducerError(f"{kind} read refused: {exc}") from exc
+
+
+def _owned_regular_exists(namespace: Path | str, relative: Path | str, *, kind: str) -> bool:
+    path = _owned_descendant(namespace, relative, kind=kind)
+    try:
+        prove_owned_regular(path, kind=kind)
+    except FileNotFoundError:
+        return False
+    except ValueError as exc:
+        raise ProducerError(f"{kind} ownership refused: {exc}") from exc
+    return True
+
+
+def _owned_dir_exists(namespace: Path | str, relative: Path | str, *, kind: str) -> bool:
+    ns, _root = _namespace_authority(namespace)
+    path = _owned_descendant(ns, relative, kind=kind)
+    try:
+        path.lstat()
+    except FileNotFoundError:
+        return False
+    try:
+        prove_owned_dir_chain(path, kind=kind, ownership_root=ns)
+    except (OSError, ValueError) as exc:
+        raise ProducerError(f"{kind} ownership refused: {exc}") from exc
+    return True
+
+
+def _remove_owned_tree(namespace: Path | str, relative: Path | str, *, kind: str) -> None:
+    """Remove only a recursively re-proven directory tree owned by namespace."""
+    ns, _root = _namespace_authority(namespace)
+    path = _owned_descendant(ns, relative, kind=kind)
+    try:
+        path.lstat()
+    except FileNotFoundError:
+        return
+    try:
+        prove_owned_dir_chain(path, kind=kind, ownership_root=ns)
+        for entry in list(path.iterdir()):
+            info = entry.lstat()
+            if entry.is_symlink() or bool(getattr(info, "st_file_attributes", 0) & 0x400):
+                raise ProducerError(f"{kind} descendant {entry} is a link/reparse node")
+            rel = entry.relative_to(ns)
+            if entry.is_dir():
+                _remove_owned_tree(ns, rel, kind=kind)
+            else:
+                prove_owned_regular(entry, kind=kind)
+                entry.unlink()
+        prove_owned_dir_chain(path, kind=kind, ownership_root=ns)
+        path.rmdir()
+    except ProducerError:
+        raise
+    except (OSError, ValueError) as exc:
+        raise ProducerError(f"{kind} cleanup refused: {exc}") from exc
 
 
 def _ready_filename(package_identity: str) -> str:
@@ -707,12 +829,14 @@ class ProducerEpoch:
         token backwards.  A present record therefore has one closed shape;
         only genuine absence denotes the initial epoch zero.
         """
-        path = ProducerEpoch._path(Path(namespace))
-        if not path.is_file():
+        ns, _root = _namespace_authority(namespace)
+        if not _owned_regular_exists(ns, EPOCH_FILENAME, kind="producer epoch"):
             return 0, "", ""
         try:
-            raw = path.read_text(encoding="utf-8")
-            data = json.loads(raw)
+            raw = _read_owned_descendant(
+                ns, EPOCH_FILENAME, kind="producer epoch", max_bytes=64 * 1024
+            )
+            data = json.loads(raw.decode("utf-8"))
         except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
             raise ProducerError(f"producer epoch file is corrupt/unreadable: {exc}") from exc
         if not isinstance(data, dict):
@@ -752,16 +876,7 @@ class ProducerEpoch:
         atomic visibility. A crash during write leaves either the old epoch
         or the new one, never a partial/truncated file.
         """
-        ns = Path(namespace)
-        try:
-            project_root = StagingGeneration._project_root_from_namespace(ns)
-        except ProducerError:
-            # A first-ever claim may precede creation of the .saipen directory;
-            # the registry layout still binds <root>/.saipen/<producer>
-            # unambiguously.
-            if ns.parent.name != ".saipen":
-                raise
-            project_root = ns.parent.parent
+        ns, project_root = _namespace_authority(namespace)
         producer = ns.name
         if producer not in PRODUCERS:
             raise ProducerError(f"cannot claim epoch for unknown producer {producer!r}")
@@ -769,7 +884,7 @@ class ProducerEpoch:
         # section.  Unique temp names alone prevent temp collisions but do not
         # prevent the classic n -> n+1 lost update.
         with ProducerLock(project_root, producer):
-            ns.mkdir(parents=True, exist_ok=True)
+            _ensure_owned_dir(ns, ".", kind="producer namespace")
             path = ProducerEpoch._path(ns)
             new_epoch = ProducerEpoch.current(ns) + 1
             owner = uuid.uuid4().hex
@@ -784,9 +899,12 @@ class ProducerEpoch:
                 )
                 + "\n"
             )
-            tmp = path.with_name(path.name + "." + uuid.uuid4().hex + ".tmp")
-            tmp.write_text(payload, encoding="utf-8")
-            os.replace(tmp, path)
+            safe_atomic_write_bytes(
+                path,
+                payload.encode("utf-8"),
+                kind="producer epoch",
+                ownership_root=ns,
+            )
             return new_epoch
 
     @staticmethod
@@ -831,9 +949,15 @@ class StagingGeneration:
         producer: str,
         generation_id: str | None = None,
     ) -> None:
-        self.namespace = Path(namespace)
+        self.namespace, self._project_root = _namespace_authority(namespace)
         self.producer = producer
         self.generation_id = generation_id or uuid.uuid4().hex
+        if (
+            not self.generation_id
+            or Path(self.generation_id).name != self.generation_id
+            or self.generation_id in {".", ".."}
+        ):
+            raise ProducerError(f"invalid producer generation id {self.generation_id!r}")
         self.staging_dir = self.namespace / STAGING_DIRNAME / self.generation_id
         self.payload_dir = self.staging_dir / "payload"
         self.manifest_path = self.staging_dir / "staging.manifest.json"
@@ -848,26 +972,40 @@ class StagingGeneration:
         # refusal, not a failure that leaves a misleading partial generation.
         epoch = ProducerEpoch.current(self.namespace)
         begin_time = _utc_now_iso()
-        self.staging_dir.mkdir(parents=True, exist_ok=True)
-        self.payload_dir.mkdir(parents=True, exist_ok=True)
+        staging_rel = Path(STAGING_DIRNAME) / self.generation_id
+        self.staging_dir = _ensure_owned_dir(
+            self.namespace, staging_rel, kind="producer staging generation"
+        )
+        self.payload_dir = _ensure_owned_dir(
+            self.namespace, staging_rel / "payload", kind="producer payload directory"
+        )
         # marker that this generation is in flight (incomplete until published)
-        self.staging_dir.joinpath(".in-flight").write_text(self.generation_id + "\n")
+        safe_create_bytes_exclusive(
+            self.staging_dir / ".in-flight",
+            (self.generation_id + "\n").encode("utf-8"),
+            kind="producer in-flight marker",
+            ownership_root=self.namespace,
+        )
         # W2-002 / CORE-005: persist generation metadata (including the epoch
         # claimed at begin time) atomically so recovery can mechanically
         # distinguish this generation's ownership from a newer takeover. A
         # crash here leaves a partial manifest that recovery treats as
         # orphaned, never as a READY package.
-        self.manifest_path.write_text(
-            json.dumps(
-                {
-                    "generation_id": self.generation_id,
-                    "begin_time": begin_time,
-                    "epoch": epoch,
-                },
-                sort_keys=True,
-            )
-            + "\n",
-            encoding="utf-8",
+        safe_create_bytes_exclusive(
+            self.manifest_path,
+            (
+                json.dumps(
+                    {
+                        "generation_id": self.generation_id,
+                        "begin_time": begin_time,
+                        "epoch": epoch,
+                    },
+                    sort_keys=True,
+                )
+                + "\n"
+            ).encode("utf-8"),
+            kind="producer staging manifest",
+            ownership_root=self.namespace,
         )
         self._begin_manifest = {
             "generation_id": self.generation_id,
@@ -882,22 +1020,15 @@ class StagingGeneration:
         # the producer namespace.
         _validate_producer_rel_path(rel_path, context="add_payload")
         data = content.encode("utf-8") if isinstance(content, str) else content
-        target = self.payload_dir / rel_path
-        target.parent.mkdir(parents=True, exist_ok=True)
-        # Containment proof: the resolved target must be under payload_dir
-        try:
-            res_target = target.resolve()
-            res_payload = self.payload_dir.resolve()
-            if not res_target.is_relative_to(res_payload):
-                raise ProducerError(
-                    f"add_payload: resolved path {res_target} escapes "
-                    f"payload directory {res_payload}"
-                )
-        except ProducerError:
-            raise
-        except OSError as exc:
-            raise ProducerError(f"add_payload: cannot resolve target path: {exc}") from exc
-        target.write_bytes(data)
+        rel = Path(STAGING_DIRNAME) / self.generation_id / "payload" / rel_path
+        target = _owned_descendant(self.namespace, rel, kind="producer payload")
+        _ensure_owned_dir(self.namespace, rel.parent, kind="producer payload parent")
+        safe_atomic_write_bytes(
+            target,
+            data,
+            kind="producer payload",
+            ownership_root=self.namespace,
+        )
         self._payloads[rel_path] = data
 
     def set_package(self, package: ProducerPackage) -> None:
@@ -914,8 +1045,13 @@ class StagingGeneration:
         # A crash before every payload is written leaves this generation in
         # flight and never reaches publish() -> no READY artifact.
         for rel in self.package.write_set:
-            payload = self.payload_dir / rel
-            if not payload.is_file():
+            payload_rel = Path(STAGING_DIRNAME) / self.generation_id / "payload" / rel
+            try:
+                exists = _owned_regular_exists(self.namespace, payload_rel, kind="producer payload")
+            except ProducerError as exc:
+                errors.append(str(exc))
+                continue
+            if not exists:
                 errors.append(f"payload missing for intended write target {rel!r}")
         # package metadata completeness
         if not self.package.package_identity:
@@ -982,13 +1118,7 @@ class StagingGeneration:
 
     def _find_project_root(self) -> Path | None:
         """W2-004: resolve the project root by finding .saipen directory."""
-        # Walk up from the namespace to find the project root
-        candidate = self.namespace
-        while candidate != candidate.parent:
-            if (candidate / ".saipen").is_dir():
-                return candidate
-            candidate = candidate.parent
-        return None
+        return self._project_root
 
     def publish(self) -> dict:
         """Publish under the same-role producer lock.
@@ -1009,6 +1139,8 @@ class StagingGeneration:
                 return self._publish_under_lock()
         except PermissionError as exc:
             return {"ok": False, "code": "PRODUCER_BUSY", "detail": str(exc)}
+        except ProducerError as exc:
+            return {"ok": False, "code": "OWNERSHIP_REFUSED", "detail": str(exc)}
 
     def _publish_under_lock(self) -> dict:
         """Atomically promote this staging generation to READY.
@@ -1042,8 +1174,9 @@ class StagingGeneration:
                 ),
             }
 
-        ready_dir = self.namespace / READY_DIRNAME
-        ready_dir.mkdir(parents=True, exist_ok=True)
+        ready_dir = _ensure_owned_dir(
+            self.namespace, READY_DIRNAME, kind="producer READY directory"
+        )
         rid = self.package.package_identity
         target = ready_dir / _ready_filename(rid)
 
@@ -1059,9 +1192,18 @@ class StagingGeneration:
         # a5bbda6f/55f, so `saipen crew` kept demanding PREPARE_TRANSLATE).
         # Only reuse when the existing binding equals the new one; otherwise
         # fall through and re-publish the current binding.
-        if target.is_file():
+        if _owned_regular_exists(
+            self.namespace,
+            Path(READY_DIRNAME) / target.name,
+            kind="producer READY package",
+        ):
             try:
-                existing = ProducerPackage.from_dict(json.loads(target.read_text()))
+                raw = _read_owned_descendant(
+                    self.namespace,
+                    Path(READY_DIRNAME) / target.name,
+                    kind="producer READY package",
+                )
+                existing = ProducerPackage.from_dict(json.loads(raw.decode("utf-8")))
                 if (
                     existing.package_identity == rid
                     and existing.base_source_head == self.package.base_source_head
@@ -1069,7 +1211,11 @@ class StagingGeneration:
                     == self.package.base_source_tree_fingerprint
                     and existing.base_discovery_model == self.package.base_discovery_model
                 ):
-                    shutil.rmtree(self.staging_dir, ignore_errors=True)
+                    _remove_owned_tree(
+                        self.namespace,
+                        self.staging_dir.relative_to(self.namespace),
+                        kind="producer staging generation",
+                    )
                     return {
                         "ok": True,
                         "code": "REUSED",
@@ -1095,28 +1241,44 @@ class StagingGeneration:
             payload_bytes[rel] = _b64.b64encode(raw).decode("ascii")
         data["payload_hashes"] = payload_hashes
         data["payload_bytes"] = payload_bytes
-        tmp = ready_dir / (_ready_filename(rid) + ".tmp")
-        tmp.write_text(json.dumps(data, sort_keys=True) + "\n")
-        # ATOMIC switch: readers see either the old state or the new READY.
-        os.replace(tmp, target)
-        shutil.rmtree(self.staging_dir, ignore_errors=True)
+        safe_atomic_write_bytes(
+            target,
+            (json.dumps(data, sort_keys=True) + "\n").encode("utf-8"),
+            kind="producer READY package",
+            ownership_root=self.namespace,
+        )
+        _remove_owned_tree(
+            self.namespace,
+            self.staging_dir.relative_to(self.namespace),
+            kind="producer staging generation",
+        )
         return {"ok": True, "code": "PUBLISHED", "package_identity": rid}
 
     # -- visibility -------------------------------------------------------
 
     @classmethod
     def is_ready(cls, namespace: Path | str, package_identity: str) -> bool:
-        return (Path(namespace) / READY_DIRNAME / _ready_filename(package_identity)).is_file()
+        try:
+            return _owned_regular_exists(
+                namespace,
+                Path(READY_DIRNAME) / _ready_filename(package_identity),
+                kind="producer READY package",
+            )
+        except ProducerError:
+            return False
 
     @classmethod
     def ready_package(cls, namespace: Path | str, package_identity: str) -> ProducerPackage | None:
-        path = Path(namespace) / READY_DIRNAME / _ready_filename(package_identity)
-        if not path.is_file():
-            return None
         try:
+            ns, _root = _namespace_authority(namespace)
+            relative = Path(READY_DIRNAME) / _ready_filename(package_identity)
+            if not _owned_regular_exists(ns, relative, kind="producer READY package"):
+                return None
+            path = ns / relative
+            raw = _read_owned_descendant(ns, relative, kind="producer READY package")
             return ProducerPackage.from_dict(
-                json.loads(path.read_text(encoding="utf-8")),
-                expected_producer=Path(namespace).name,
+                json.loads(raw.decode("utf-8")),
+                expected_producer=ns.name,
                 expected_identity=package_identity,
                 ready_path=path,
             )
@@ -1126,15 +1288,24 @@ class StagingGeneration:
     @classmethod
     def scan_ready(cls, namespace: Path | str) -> tuple[list[ProducerPackage], list[dict]]:
         """Return valid READY packages plus structured invalid-record errors."""
-        ready_dir = Path(namespace) / READY_DIRNAME
-        if not ready_dir.is_dir():
-            return [], []
-        producer = Path(namespace).name
+        try:
+            ns, _root = _namespace_authority(namespace)
+            if not _owned_dir_exists(ns, READY_DIRNAME, kind="producer READY directory"):
+                return [], []
+        except ProducerError as exc:
+            return [], [{"code": "INVALID_READY", "path": str(namespace), "detail": str(exc)}]
+        ready_dir = ns / READY_DIRNAME
+        producer = ns.name
         out: list[ProducerPackage] = []
         errors: list[dict] = []
         for path in sorted(ready_dir.glob("*.json")):
             try:
-                data = json.loads(path.read_text(encoding="utf-8"))
+                raw = _read_owned_descendant(
+                    ns,
+                    path.relative_to(ns),
+                    kind="producer READY package",
+                )
+                data = json.loads(raw.decode("utf-8"))
                 candidate = ProducerPackage.from_dict(
                     data, expected_producer=producer, ready_path=path
                 )
@@ -1161,12 +1332,8 @@ class StagingGeneration:
         locks the SAME canonical ``ProducerLock(project_root, producer)`` the live
         writer holds -- never a path derived from ``namespace.parent``.
         """
-        candidate = Path(ns)
-        while candidate != candidate.parent:
-            if (candidate / ".saipen").exists():
-                return candidate
-            candidate = candidate.parent
-        raise ProducerError(f"cannot locate project root for producer namespace {ns}")
+        _owned, root = _namespace_authority(ns)
+        return root
 
     @classmethod
     def recover(
@@ -1217,8 +1384,7 @@ class StagingGeneration:
                 canonical = _resolve_namespace_ownership(project_root, producer)
             except ValueError as exc:
                 raise ProducerError(
-                    f"recover: namespace authority refused for producer "
-                    f"{producer!r}: {exc}"
+                    f"recover: namespace authority refused for producer {producer!r}: {exc}"
                 ) from exc
             if not ns.is_absolute():
                 ns = (Path(project_root) / ns).resolve()
@@ -1229,9 +1395,7 @@ class StagingGeneration:
                         f"namespace {canonical} for project {project_root}; refuse"
                     )
             except OSError as exc:
-                raise ProducerError(
-                    f"recover: namespace {ns} cannot be resolved: {exc}"
-                ) from exc
+                raise ProducerError(f"recover: namespace {ns} cannot be resolved: {exc}") from exc
         staging_root = ns / STAGING_DIRNAME
         removed: list[str] = []
         # W2-002 / CORE-005: acquire the canonical producer-local lock to
@@ -1258,7 +1422,7 @@ class StagingGeneration:
            epoch file.
         """
         removed: list[str] = []
-        if not staging_root.is_dir():
+        if not cls._owned_staging_exists(ns):
             return removed
         # Get current epoch to determine which generations are stale
         try:
@@ -1267,26 +1431,34 @@ class StagingGeneration:
             # Epoch is corrupt -- do not remove anything under uncertainty
             return removed
         for gen in staging_root.iterdir():
-            if not gen.is_dir():
-                continue
+            relative = gen.relative_to(ns)
+            if not _owned_dir_exists(ns, relative, kind="producer staging generation"):
+                raise ProducerError(f"producer staging entry {gen} is not an owned directory")
             # The marker proves incompleteness, not abandonment.  Only a
             # mechanically newer ownership epoch makes this generation stale.
             # Unknown/future/current authority remains untouched.
-            gen_epoch = cls._generation_epoch(gen)
+            gen_epoch = cls._generation_epoch(ns, gen)
             if gen_epoch is None or gen_epoch >= current_epoch:
                 continue
-            shutil.rmtree(gen, ignore_errors=True)
+            _remove_owned_tree(ns, relative, kind="producer staging generation")
             removed.append(gen.name)
         return removed
 
     @staticmethod
-    def _generation_epoch(gen_dir: Path) -> int | None:
+    def _owned_staging_exists(ns: Path) -> bool:
+        return _owned_dir_exists(ns, STAGING_DIRNAME, kind="producer staging directory")
+
+    @staticmethod
+    def _generation_epoch(ns: Path, gen_dir: Path) -> int | None:
         """W2-002: extract the epoch from a generation's staging manifest."""
-        manifest = gen_dir / "staging.manifest.json"
-        if not manifest.is_file():
+        relative = gen_dir.relative_to(ns) / "staging.manifest.json"
+        if not _owned_regular_exists(ns, relative, kind="producer staging manifest"):
             return None
         try:
-            data = json.loads(manifest.read_text(encoding="utf-8"))
+            raw = _read_owned_descendant(
+                ns, relative, kind="producer staging manifest", max_bytes=64 * 1024
+            )
+            data = json.loads(raw.decode("utf-8"))
             if not isinstance(data, dict):
                 return None
             epoch = data.get("epoch")
@@ -1302,9 +1474,7 @@ class StagingGeneration:
 # ---------------------------------------------------------------------------
 
 
-def _resolve_namespace_ownership(
-    root: Path | str, producer: str
-) -> Path:
+def _resolve_namespace_ownership(root: Path | str, producer: str) -> Path:
     """The canonical producer-namespace ownership resolver (W2-001).
 
     Validates that the producer namespace resolves INSIDE the canonical
@@ -1322,16 +1492,13 @@ def _resolve_namespace_ownership(
     try:
         resolved = ns.resolve(strict=False)
     except OSError as exc:
-        raise ValueError(
-            f"producer namespace {ns} cannot be resolved: {exc}"
-        ) from exc
+        raise ValueError(f"producer namespace {ns} cannot be resolved: {exc}") from exc
     # Containment: resolved path must be the root itself or a descendant.
     try:
         resolved.relative_to(root)
     except ValueError:
         raise ValueError(
-            f"producer namespace {ns} resolves to {resolved}, "
-            f"outside project root {root}"
+            f"producer namespace {ns} resolves to {resolved}, outside project root {root}"
         ) from None
     # Walk each ancestor from root down to the namespace, lstat-checking
     # each component so a symlink/junction/reparse point is rejected
@@ -1349,6 +1516,7 @@ def _resolve_namespace_ownership(
             ) from exc
         # On POSIX, S_ISLNK; on Windows, reparse points via S_ISLNK too.
         import stat as _stat
+
         if _stat.S_ISLNK(st.st_mode):
             raise ValueError(
                 f"producer namespace component {_check} is a symlink; "
@@ -1537,8 +1705,7 @@ def integrate_packages_core(
                         "result": "REFUSED",
                         "code": "CORRUPT_JOURNAL",
                         "reason": (
-                            f"semantic receipt snapshot is corrupt: "
-                            f"{'; '.join(exc.errors[:2])}"
+                            f"semantic receipt snapshot is corrupt: {'; '.join(exc.errors[:2])}"
                         ),
                         "wrote": False,
                         "recovery_required": True,
@@ -1564,20 +1731,17 @@ def integrate_packages_core(
             if _current_edge:
                 # Retirement failure is non-fatal cleanup debt; the source is
                 # already integrated and must not be reapplied.
-                with contextlib.suppress(OSError):
-                    _retire_ready_package(p, supersede_older=True)
+                cleanup_pending, cleanup_reason = _retirement_result(p)
                 results.append(
                     {
                         "package_identity": p.package_identity,
                         "producer": p.producer,
                         "result": "INTEGRATED",
                         "code": "ALREADY_APPLIED",
-                        "reason": (
-                            "committed producer integration receipt exists; "
-                            "READY retired idempotently"
-                        ),
+                        "reason": "committed producer integration receipt exists; "
+                        + cleanup_reason,
                         "wrote": True,
-                        "cleanup_pending": False,
+                        "cleanup_pending": cleanup_pending,
                     }
                 )
                 continue
@@ -1783,18 +1947,14 @@ def integrate_packages_core(
             # mutation failed: the payload is already committed. Surface
             # cleanup-pending debt truthfully and let a retry converge through
             # the committed-receipt idempotence path above.
-            try:
-                _retire_ready_package(p, supersede_older=True)
-                _cleanup_pending = False
-            except OSError:
-                _cleanup_pending = True
+            _cleanup_pending, _cleanup_reason = _retirement_result(p)
             results.append(
                 {
                     "package_identity": p.package_identity,
                     "producer": p.producer,
                     "result": "INTEGRATED",
                     "code": cls.value,
-                    "reason": reason,
+                    "reason": f"{reason}; {_cleanup_reason}",
                     "wrote": True,
                     "op_id": journal_result.get("op_id"),
                     "cleanup_pending": _cleanup_pending,
@@ -1804,39 +1964,76 @@ def integrate_packages_core(
         return {"serialized": True, "results": results}
 
 
+def _retirement_result(package: ProducerPackage) -> tuple[bool, str]:
+    try:
+        _retire_ready_package(package, supersede_older=True)
+    except (OSError, ProducerError, ValueError) as exc:
+        return True, f"READY cleanup pending: {exc}"
+    return False, "READY retired idempotently"
+
+
 def _retire_ready_package(package: ProducerPackage, *, supersede_older: bool = False) -> None:
     """Atomically remove terminal package evidence from the READY hot set."""
     source = package.ready_path
-    if source is None or not source.is_file():
+    if source is None:
         return
-    namespace = source.parent.parent
-    settled = namespace / SETTLED_DIRNAME
-    settled.mkdir(parents=True, exist_ok=True)
+    namespace, _root = _namespace_authority(source.parent.parent)
+    source_relative = Path(READY_DIRNAME) / source.name
+    if source != namespace / source_relative:
+        raise ProducerError("READY package path is not owned by its producer namespace")
+    if not _owned_regular_exists(namespace, source_relative, kind="producer READY package"):
+        return
+    settled = _ensure_owned_dir(namespace, SETTLED_DIRNAME, kind="producer SETTLED directory")
     destination = settled / source.name
-    if destination.is_file():
-        source.unlink()
+    destination_relative = Path(SETTLED_DIRNAME) / source.name
+    if _owned_regular_exists(namespace, destination_relative, kind="producer SETTLED package"):
+        safe_unlink_owned(
+            source,
+            kind="producer READY package",
+            ownership_root=namespace,
+        )
     else:
+        prove_owned_regular(source, kind="producer READY package")
+        prove_owned_dir_chain(settled, kind="producer SETTLED directory", ownership_root=namespace)
         os.replace(source, destination)
     if not supersede_older:
         return
     ready_dir = namespace / READY_DIRNAME
     superseded = namespace / SUPERSEDED_DIRNAME
-    if not ready_dir.is_dir():
+    if not _owned_dir_exists(namespace, READY_DIRNAME, kind="producer READY directory"):
         return
     for candidate in list(ready_dir.glob("*.json")):
         try:
-            data = json.loads(candidate.read_text(encoding="utf-8"))
+            raw = _read_owned_descendant(
+                namespace,
+                candidate.relative_to(namespace),
+                kind="producer READY package",
+            )
+            data = json.loads(raw.decode("utf-8"))
             epoch = data.get("epoch")
             producer = data.get("producer")
-        except (OSError, json.JSONDecodeError):
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError):
             continue
         if producer != package.producer or not isinstance(epoch, int) or epoch > package.epoch:
             continue
-        superseded.mkdir(parents=True, exist_ok=True)
+        superseded = _ensure_owned_dir(
+            namespace, SUPERSEDED_DIRNAME, kind="producer SUPERSEDED directory"
+        )
         target = superseded / candidate.name
-        if target.is_file():
-            candidate.unlink()
+        target_relative = Path(SUPERSEDED_DIRNAME) / candidate.name
+        if _owned_regular_exists(namespace, target_relative, kind="producer SUPERSEDED package"):
+            safe_unlink_owned(
+                candidate,
+                kind="producer READY package",
+                ownership_root=namespace,
+            )
         else:
+            prove_owned_regular(candidate, kind="producer READY package")
+            prove_owned_dir_chain(
+                superseded,
+                kind="producer SUPERSEDED directory",
+                ownership_root=namespace,
+            )
             os.replace(candidate, target)
 
 

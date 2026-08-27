@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import contextlib
 import os
+import stat
 import threading
 from pathlib import Path
 
@@ -21,6 +22,7 @@ else:
     import fcntl as _FCNTL  # type: ignore
 
 from .snapshot import canonical_identity  # noqa: E402
+from .paths import prove_owned_dir_chain, prove_owned_regular  # noqa: E402
 
 LOCK_DIR = ".saipen/locks"
 
@@ -42,6 +44,138 @@ _FILE_HOLDERS: dict[str, "FileWriterLock"] = {}
 _HOLDERS_GUARD = threading.Lock()
 
 
+def _same_node(left: os.stat_result, right: os.stat_result) -> bool:
+    return (left.st_dev, left.st_ino, left.st_mode) == (
+        right.st_dev,
+        right.st_ino,
+        right.st_mode,
+    )
+
+
+def _owned_lock_path(lock_path: Path | str, ownership_root: Path | str) -> tuple[Path, Path]:
+    """Map one lexical owner-relative path onto the canonical owner.
+
+    A whole-owner alias is legitimate; symlink/reparse descendants are not.
+    Mapping before descendant resolution preserves that distinction.
+    """
+    root_input = Path(os.path.abspath(ownership_root))
+    path_input = Path(os.path.abspath(lock_path))
+    try:
+        relative = path_input.relative_to(root_input)
+    except ValueError as exc:
+        raise PermissionError(f"lock path escapes or has invalid owner: {exc}") from exc
+    try:
+        root = Path(ownership_root).resolve(strict=True)
+    except (OSError, ValueError):
+        # ownership root not yet on disk (e.g. global USERPERSON config dir
+        # created on first write); use abspath projection, skip chain
+        # validation until after mkdir proves the chain exists.
+        root = root_input
+    path = root / relative
+    try:
+        prove_owned_dir_chain(path.parent, kind="lock", ownership_root=root)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        prove_owned_dir_chain(path.parent, kind="lock", ownership_root=root)
+    except (OSError, ValueError) as exc:
+        raise PermissionError(f"unsafe lock directory: {exc}") from exc
+    return path, root
+
+
+def _open_owned_lock(path: Path, root: Path):
+    """Open/create the final mutex without following or trusting its name."""
+    before = None
+    try:
+        before = prove_owned_regular(path, kind="lock file")
+    except FileNotFoundError:
+        pass
+    except ValueError as exc:
+        raise PermissionError(f"unsafe lock file: {exc}") from exc
+
+    flags = os.O_RDWR | os.O_CREAT
+    flags |= getattr(os, "O_BINARY", 0)
+    flags |= getattr(os, "O_NOINHERIT", 0)
+    flags |= getattr(os, "O_NOFOLLOW", 0)
+    descriptor = -1
+    try:
+        descriptor = os.open(path, flags, 0o600)
+        opened = os.fstat(descriptor)
+        if not stat.S_ISREG(opened.st_mode):
+            raise PermissionError(f"unsafe lock file: {path} is not regular")
+        prove_owned_dir_chain(path.parent, kind="lock", ownership_root=root)
+        current = prove_owned_regular(path, kind="lock file")
+        if not _same_node(opened, current):
+            raise PermissionError(f"unsafe lock file: {path} changed during open")
+        if before is not None and not _same_node(before, opened):
+            raise PermissionError(f"unsafe lock file: {path} was replaced during open")
+        handle = os.fdopen(descriptor, "r+b", buffering=0)
+        descriptor = -1
+        inode_key = f"inode:{opened.st_dev}:{opened.st_ino}"
+        return handle, inode_key
+    except BaseException:
+        if descriptor >= 0:
+            os.close(descriptor)
+        raise
+
+
+def _reserve(
+    registry: dict,
+    key: str,
+    owner: object,
+    message: str,
+    error_type: type[PermissionError] = PermissionError,
+) -> None:
+    with _HOLDERS_GUARD:
+        holder = registry.get(key)
+        if holder is not None and holder is not owner:
+            raise error_type(message)
+        registry[key] = owner
+
+
+def _drop_reservation(registry: dict, key: str | None, owner: object) -> None:
+    if key is None:
+        return
+    with _HOLDERS_GUARD:
+        if registry.get(key) is owner:
+            del registry[key]
+
+
+def _promote_reservation(
+    registry: dict,
+    reservation_key: str,
+    inode_key: str,
+    owner: object,
+    message: str,
+    error_type: type[PermissionError] = PermissionError,
+) -> None:
+    with _HOLDERS_GUARD:
+        if registry.get(reservation_key) is owner:
+            del registry[reservation_key]
+        holder = registry.get(inode_key)
+        if holder is not None and holder is not owner:
+            raise error_type(message)
+        registry[inode_key] = owner
+
+
+def _os_lock(handle, *, blocking: bool = False) -> None:
+    handle.seek(0)
+    if _MSVCRT is not None:
+        mode = _MSVCRT.LK_LOCK if blocking else _MSVCRT.LK_NBLCK
+        _MSVCRT.locking(handle.fileno(), mode, 1)
+    else:
+        mode = _FCNTL.LOCK_EX
+        if not blocking:
+            mode |= _FCNTL.LOCK_NB
+        _FCNTL.flock(handle.fileno(), mode)
+
+
+def _os_unlock(handle) -> None:
+    handle.seek(0)
+    if _MSVCRT is not None:
+        _MSVCRT.locking(handle.fileno(), _MSVCRT.LK_UNLCK, 1)
+    else:
+        _FCNTL.flock(handle.fileno(), _FCNTL.LOCK_UN)
+
+
 class FileLockBusy(PermissionError):
     """The non-project lock exists but another writer currently owns it."""
 
@@ -56,81 +190,66 @@ class FileWriterLock:
     the lock directory; read-only callers must never instantiate it.
     """
 
-    def __init__(self, lock_path: Path | str, ownership_root: Path | str) -> None:
-        self.path = Path(lock_path)
-        root = Path(ownership_root)
-        try:
-            resolved_root = root.resolve()
-            resolved_parent = self.path.parent.resolve()
-        except OSError as exc:
-            raise PermissionError(f"lock path is unresolvable: {exc}") from exc
-        if not resolved_parent.is_relative_to(resolved_root):
-            raise PermissionError("lock path escapes ownership root")
-        for component in (root, self.path.parent):
-            try:
-                info = os.lstat(component)
-            except OSError:
-                continue
-            if os.path.islink(component) or getattr(info, "st_file_attributes", 0) & 0x400:
-                try:
-                    resolved = component.resolve()
-                except OSError as exc:
-                    raise PermissionError("lock component is unresolvable") from exc
-                if not resolved.is_relative_to(resolved_root):
-                    raise PermissionError("lock path escapes ownership root")
-        self.path.parent.mkdir(parents=True, exist_ok=True)
+    def __init__(
+        self,
+        lock_path: Path | str,
+        ownership_root: Path | str,
+        *,
+        blocking: bool = False,
+    ) -> None:
+        self.path, self._root = _owned_lock_path(lock_path, ownership_root)
         self._handle = None
         self._acquired = False
+        self._holder_key: str | None = None
+        self._blocking = blocking
 
     def acquire(self) -> bool:
         if self._acquired:
             return True
-        key = str(self.path.resolve())
-        with _HOLDERS_GUARD:
-            holder = _FILE_HOLDERS.get(key)
-            if holder is not None and holder is not self:
-                raise FileLockBusy("WRITER_BUSY")
-            _FILE_HOLDERS[key] = self
+        reservation = "path:" + os.path.normcase(str(self.path))
+        _reserve(
+            _FILE_HOLDERS,
+            reservation,
+            self,
+            "WRITER_BUSY",
+            error_type=FileLockBusy,
+        )
         try:
-            self._handle = open(self.path, "a+b")  # noqa: SIM115
-        except OSError:
-            with _HOLDERS_GUARD:
-                if _FILE_HOLDERS.get(key) is self:
-                    del _FILE_HOLDERS[key]
-            raise
-        try:
-            if _MSVCRT is not None:
-                _MSVCRT.locking(self._handle.fileno(), _MSVCRT.LK_NBLCK, 1)
-            else:
-                _FCNTL.flock(self._handle.fileno(), _FCNTL.LOCK_EX | _FCNTL.LOCK_NB)
-        except OSError:
+            self._handle, inode_key = _open_owned_lock(self.path, self._root)
+            _promote_reservation(
+                _FILE_HOLDERS,
+                reservation,
+                inode_key,
+                self,
+                "WRITER_BUSY",
+                error_type=FileLockBusy,
+            )
+            self._holder_key = inode_key
+            _os_lock(self._handle, blocking=self._blocking)
+        except BaseException as exc:
             if self._handle is not None:
                 self._handle.close()
             self._handle = None
-            with _HOLDERS_GUARD:
-                if _FILE_HOLDERS.get(key) is self:
-                    del _FILE_HOLDERS[key]
-            raise FileLockBusy("WRITER_BUSY")
+            _drop_reservation(_FILE_HOLDERS, reservation, self)
+            _drop_reservation(_FILE_HOLDERS, self._holder_key, self)
+            self._holder_key = None
+            if isinstance(exc, OSError) and not isinstance(exc, PermissionError):
+                raise FileLockBusy("WRITER_BUSY") from exc
+            raise
         self._acquired = True
         return True
 
     def release(self) -> None:
         if not self._acquired or self._handle is None:
             return
-        key = str(self.path.resolve())
         try:
-            if _MSVCRT is not None:
-                self._handle.seek(0)
-                _MSVCRT.locking(self._handle.fileno(), _MSVCRT.LK_UNLCK, 1)
-            else:
-                _FCNTL.flock(self._handle.fileno(), _FCNTL.LOCK_UN)
+            _os_unlock(self._handle)
         finally:
             self._handle.close()
             self._handle = None
             self._acquired = False
-            with _HOLDERS_GUARD:
-                if _FILE_HOLDERS.get(key) is self:
-                    del _FILE_HOLDERS[key]
+            _drop_reservation(_FILE_HOLDERS, self._holder_key, self)
+            self._holder_key = None
 
     def __enter__(self) -> "FileWriterLock":
         self.acquire()
@@ -141,9 +260,14 @@ class FileWriterLock:
 
 
 @contextlib.contextmanager
-def file_writer_lock(lock_path: Path | str, ownership_root: Path | str):
+def file_writer_lock(
+    lock_path: Path | str,
+    ownership_root: Path | str,
+    *,
+    blocking: bool = False,
+):
     """Acquire a non-project writer lock with containment enforcement."""
-    lock = FileWriterLock(lock_path, ownership_root)
+    lock = FileWriterLock(lock_path, ownership_root, blocking=blocking)
     lock.acquire()
     try:
         yield lock
@@ -157,49 +281,10 @@ class WriterLock:
     def __init__(self, project_root: Path | str) -> None:
         root = Path(project_root)
         lock_dir = root / LOCK_DIR
-        try:
-            res_root = root.resolve()
-        except OSError as exc:
-            raise PermissionError(f"project root is unresolvable: {exc}")
-        # Self-enforcing containment (CORE-007). Prove the lock directory
-        # resolves INSIDE the canonical project root BEFORE any filesystem
-        # mutation. `resolve()` follows symlinks/junctions/reparse points, so a
-        # symlinked `.saipen` that points outside the project yields an
-        # out-of-root path. The previous code only raised for an *already
-        # existing* escaped directory and then swallowed that PermissionError
-        # inside a broad `except OSError: pass`, so it still mkdir'd the
-        # escaped directory first -- a direct writer-lock call could therefore
-        # perform an outside-root write before failing closed.
-        try:
-            res_lock = lock_dir.resolve()
-        except OSError as exc:
-            raise PermissionError(f"lock directory is unresolvable: {exc}")
-        if not res_lock.is_relative_to(res_root):
-            # Containment escape (symlink/junction/reparse outside root): refuse
-            # with ZERO writes. A canonical whole-project alias that resolves to
-            # the same legitimate root is NOT an escape and falls through below.
-            raise PermissionError("lock directory escapes project root")
-        # Existing-component reparse/symlink sanity check using NON-following
-        # lstat: a reparse point that resolve() did not fully collapse must
-        # still sit under the project root, or we refuse with zero writes.
-        for comp in (root / ".saipen", lock_dir):
-            try:
-                info = os.lstat(comp)
-            except OSError:
-                continue
-            if os.path.islink(comp) or getattr(info, "st_file_attributes", 0) & 0x400:
-                try:
-                    comp_res = Path(comp).resolve()
-                except OSError:
-                    raise PermissionError("lock component is unresolvable")
-                if not comp_res.is_relative_to(res_root):
-                    raise PermissionError("lock directory escapes project root")
-        # Create only AFTER containment is proved: a missing local lock dir is
-        # created INSIDE the project, an existing in-root dir is left untouched.
-        lock_dir.mkdir(parents=True, exist_ok=True)
-        self.path = lock_dir / "core.lock"
+        self.path, self._root = _owned_lock_path(lock_dir / "core.lock", root)
         self._handle = None
         self._acquired = False
+        self._holder_key: str | None = None
 
     def acquire(self) -> bool:
         """Blocking exclusive lock. Returns True (or raises WRITER_BUSY).
@@ -210,49 +295,37 @@ class WriterLock:
         """
         if self._acquired:
             return True
-        key = str(self.path.resolve())
-        # RESERVE under the guard: reject an existing holder, then publish
-        # ourselves BEFORE attempting the OS lock. This closes the
-        # check-then-publish TOCTOU race.
-        with _HOLDERS_GUARD:
-            holder = _WRITER_HOLDERS.get(key)
-            if holder is not None and holder is not self:
-                raise PermissionError("WRITER_BUSY")
-            _WRITER_HOLDERS[key] = self
-        # Attempt the OS lock; on failure, atomically clear our reservation.
-        self._handle = open(self.path, "a+b")  # noqa: SIM115
+        reservation = "path:" + os.path.normcase(str(self.path))
+        _reserve(_WRITER_HOLDERS, reservation, self, "WRITER_BUSY")
         try:
-            if _MSVCRT is not None:
-                _MSVCRT.locking(self._handle.fileno(), _MSVCRT.LK_NBLCK, 1)
-            else:
-                _FCNTL.flock(self._handle.fileno(), _FCNTL.LOCK_EX | _FCNTL.LOCK_NB)
-        except OSError:
-            self._handle.close()
+            self._handle, inode_key = _open_owned_lock(self.path, self._root)
+            _promote_reservation(_WRITER_HOLDERS, reservation, inode_key, self, "WRITER_BUSY")
+            self._holder_key = inode_key
+            _os_lock(self._handle)
+        except BaseException as exc:
+            if self._handle is not None:
+                self._handle.close()
             self._handle = None
-            with _HOLDERS_GUARD:
-                if _WRITER_HOLDERS.get(key) is self:
-                    del _WRITER_HOLDERS[key]
-            raise PermissionError("WRITER_BUSY")
+            _drop_reservation(_WRITER_HOLDERS, reservation, self)
+            _drop_reservation(_WRITER_HOLDERS, self._holder_key, self)
+            self._holder_key = None
+            if isinstance(exc, OSError) and not isinstance(exc, PermissionError):
+                raise PermissionError("WRITER_BUSY") from exc
+            raise
         self._acquired = True
         return True
 
     def release(self) -> None:
         if not self._acquired or self._handle is None:
             return
-        key = str(self.path.resolve())
         try:
-            if _MSVCRT is not None:
-                self._handle.seek(0)
-                _MSVCRT.locking(self._handle.fileno(), _MSVCRT.LK_UNLCK, 1)
-            else:
-                _FCNTL.flock(self._handle.fileno(), _FCNTL.LOCK_UN)
+            _os_unlock(self._handle)
         finally:
             self._handle.close()
             self._handle = None
             self._acquired = False
-            with _HOLDERS_GUARD:
-                if _WRITER_HOLDERS.get(key) is self:
-                    del _WRITER_HOLDERS[key]
+            _drop_reservation(_WRITER_HOLDERS, self._holder_key, self)
+            self._holder_key = None
 
     def __enter__(self) -> "WriterLock":
         self.acquire()
@@ -299,21 +372,11 @@ class ProducerLock:
             raise ValueError(f"unknown producer role: {producer!r}")
         root = Path(project_root)
         lock_dir = root / LOCK_DIR
-        # Reuse WriterLock's containment discipline: prove the lock dir resolves
-        # INSIDE the project before any write. A producer lock is only ever a
-        # sibling of core.lock -- it can never reach outside the project.
-        try:
-            res_root = root.resolve()
-            res_lock = lock_dir.resolve()
-        except OSError as exc:
-            raise PermissionError(f"producer lock path unresolvable: {exc}")
-        if not res_lock.is_relative_to(res_root):
-            raise PermissionError("producer lock directory escapes project root")
-        lock_dir.mkdir(parents=True, exist_ok=True)
         self.producer = producer
-        self.path = lock_dir / f"producer-{producer}.lock"
+        self.path, self._root = _owned_lock_path(lock_dir / f"producer-{producer}.lock", root)
         self._handle = None
         self._acquired = False
+        self._holder_key: str | None = None
 
     def acquire(self) -> bool:
         """Blocking-exclusive, non-blocking acquire. Raises WRITER_BUSY on conflict.
@@ -324,49 +387,38 @@ class ProducerLock:
         """
         if self._acquired:
             return True
-        key = str(self.path.resolve())
-        # RESERVE under the guard: reject an existing holder, then publish
-        # ourselves BEFORE attempting the OS lock. This closes the
-        # check-then-publish TOCTOU race.
-        with _HOLDERS_GUARD:
-            holder = _PRODUCER_HOLDERS.get(key)
-            if holder is not None and holder is not self:
-                raise PermissionError(f"PRODUCER_BUSY: {self.producer} is already writing")
-            _PRODUCER_HOLDERS[key] = self
-        # Attempt the OS lock; on failure, atomically clear our reservation.
-        self._handle = open(self.path, "a+b")  # noqa: SIM115 -- held across the lock lifecycle
+        message = f"PRODUCER_BUSY: {self.producer} is already writing"
+        reservation = "path:" + os.path.normcase(str(self.path))
+        _reserve(_PRODUCER_HOLDERS, reservation, self, message)
         try:
-            if _MSVCRT is not None:
-                _MSVCRT.locking(self._handle.fileno(), _MSVCRT.LK_NBLCK, 1)
-            else:
-                _FCNTL.flock(self._handle.fileno(), _FCNTL.LOCK_EX | _FCNTL.LOCK_NB)
-        except OSError:
-            self._handle.close()
+            self._handle, inode_key = _open_owned_lock(self.path, self._root)
+            _promote_reservation(_PRODUCER_HOLDERS, reservation, inode_key, self, message)
+            self._holder_key = inode_key
+            _os_lock(self._handle)
+        except BaseException as exc:
+            if self._handle is not None:
+                self._handle.close()
             self._handle = None
-            with _HOLDERS_GUARD:
-                if _PRODUCER_HOLDERS.get(key) is self:
-                    del _PRODUCER_HOLDERS[key]
-            raise PermissionError(f"PRODUCER_BUSY: {self.producer} is already writing")
+            _drop_reservation(_PRODUCER_HOLDERS, reservation, self)
+            _drop_reservation(_PRODUCER_HOLDERS, self._holder_key, self)
+            self._holder_key = None
+            if isinstance(exc, OSError) and not isinstance(exc, PermissionError):
+                raise PermissionError(message) from exc
+            raise
         self._acquired = True
         return True
 
     def release(self) -> None:
         if not self._acquired or self._handle is None:
             return
-        key = str(self.path.resolve())
         try:
-            if _MSVCRT is not None:
-                self._handle.seek(0)
-                _MSVCRT.locking(self._handle.fileno(), _MSVCRT.LK_UNLCK, 1)
-            else:
-                _FCNTL.flock(self._handle.fileno(), _FCNTL.LOCK_UN)
+            _os_unlock(self._handle)
         finally:
             self._handle.close()
             self._handle = None
             self._acquired = False
-        with _HOLDERS_GUARD:
-            if _PRODUCER_HOLDERS.get(key) is self:
-                del _PRODUCER_HOLDERS[key]
+            _drop_reservation(_PRODUCER_HOLDERS, self._holder_key, self)
+            self._holder_key = None
 
     def __enter__(self) -> "ProducerLock":
         self.acquire()

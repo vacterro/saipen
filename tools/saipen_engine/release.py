@@ -267,9 +267,7 @@ def _capture_index_state(root: Path) -> IndexSnapshot:
         else:
             mode_blob = index_entries.get(target)
             entries.append(
-                (target, mode_blob[0], mode_blob[1])
-                if mode_blob is not None
-                else (target, "D", "")
+                (target, mode_blob[0], mode_blob[1]) if mode_blob is not None else (target, "D", "")
             )
 
     ordered = sorted(set(paths))
@@ -324,7 +322,12 @@ def _exact_index_bytes(root: Path) -> tuple[str, str]:
     return hashlib.sha256(raw).hexdigest(), base64.b64encode(raw).decode("ascii")
 
 
-def _restore_index_bytes(root: Path, index_bytes_b64: str) -> None:
+def _restore_index_bytes(
+    root: Path,
+    index_bytes_b64: str,
+    *,
+    expected_live_sha: str | None = None,
+) -> None:
     """Write the exact index bytes back to the git index file.
 
     The bytes ARE the complete index state (entries, stages, flags,
@@ -346,18 +349,47 @@ def _restore_index_bytes(root: Path, index_bytes_b64: str) -> None:
         index_path = root / index_path
     index_path = index_path.resolve()
     lock_path = index_path.with_name(index_path.name + ".lock")
-    if lock_path.exists():
-        raise ValueError(
-            "index.lock exists (concurrent writer or crashed git); refusing "
-            "to restore over a locked index -- resolve the lock explicitly "
-            "(WRITER_BUSY)"
-        )
+    from .paths import prove_owned_regular, safe_create_bytes_exclusive
+
+    owned_lock = None
     try:
-        raw = base64.b64decode(index_bytes_b64.encode("ascii"))
-        tmp = index_path.with_name(index_path.name + ".restore-tmp")
-        tmp.write_bytes(raw)
-        os.replace(tmp, index_path)
+        raw = base64.b64decode(index_bytes_b64.encode("ascii"), validate=True)
+        # Git's actual mutex is the exclusive existence of index.lock. Publish
+        # the exact replacement bytes into that owned node, then revalidate
+        # the live index while the mutex is held before the atomic rename.
+        safe_create_bytes_exclusive(
+            lock_path,
+            raw,
+            kind="Git index lock",
+            ownership_root=index_path.parent,
+        )
+        owned_lock = prove_owned_regular(lock_path, kind="Git index lock")
+        live = index_path.read_bytes()
+        live_sha = hashlib.sha256(live).hexdigest()
+        if expected_live_sha is not None and live_sha != expected_live_sha:
+            raise ValueError(
+                "live index changed before Git index mutex acquisition; "
+                "foreign staged changes are preserved (WRITER_BUSY)"
+            )
+        current_lock = prove_owned_regular(lock_path, kind="Git index lock")
+        if (owned_lock.st_dev, owned_lock.st_ino) != (
+            current_lock.st_dev,
+            current_lock.st_ino,
+        ):
+            raise ValueError("Git index lock changed before atomic restoration")
+        os.replace(lock_path, index_path)
+        owned_lock = None
     except (OSError, ValueError) as exc:
+        if owned_lock is not None:
+            try:
+                current = prove_owned_regular(lock_path, kind="Git index lock")
+                if (owned_lock.st_dev, owned_lock.st_ino) == (
+                    current.st_dev,
+                    current.st_ino,
+                ):
+                    os.unlink(lock_path)
+            except (FileNotFoundError, OSError, ValueError):
+                pass
         raise ValueError(f"exact index restoration failed for {index_path}: {exc}")
 
 
@@ -392,14 +424,6 @@ def _restore_index(
         index_path = root / index_path
     index_path = index_path.resolve()
 
-    lock_path = index_path.with_name(index_path.name + ".lock")
-    if lock_path.exists():
-        raise ValueError(
-            "index.lock exists (concurrent writer or crashed git); refusing "
-            "to restore over a locked index -- resolve the lock explicitly "
-            "(WRITER_BUSY)"
-        )
-
     try:
         live_sha, _ = _exact_index_bytes(root)
     except ValueError as exc:
@@ -415,7 +439,11 @@ def _restore_index(
         )
 
     if pre_state.index_bytes_b64:
-        _restore_index_bytes(root, pre_state.index_bytes_b64)
+        _restore_index_bytes(
+            root,
+            pre_state.index_bytes_b64,
+            expected_live_sha=owned_post_stage_sha,
+        )
         return
     # Legacy snapshot without exact bytes: per-entry reconstruction is only
     # reached AFTER the ownership proof above.
@@ -669,9 +697,7 @@ def plan_release(
                 "ILLEGAL_PHASE",
                 "targeted producer release requires its active Core ticket in SHIP",
             )
-        targeted_integration_op = _targeted_integration_op(
-            root, invocation, str(state["task"])
-        )
+        targeted_integration_op = _targeted_integration_op(root, invocation, str(state["task"]))
         if not targeted_integration_op:
             raise ReleaseRefusal(
                 "SOURCE_SCOPE_MISSING",
@@ -1328,9 +1354,7 @@ def _recovery_preflight(root: Path) -> None:
         raise ReleaseRefusal(
             "CORRUPT_JOURNAL",
             "corrupt recovery evidence: "
-            + ", ".join(
-                f"{op.get('op_id', '?')} ({op.get('detail', '')})" for op in corrupt
-            )
+            + ", ".join(f"{op.get('op_id', '?')} ({op.get('detail', '')})" for op in corrupt)
             + " -- resolve explicitly before releasing",
         )
     if conflicts:
@@ -1493,6 +1517,7 @@ def _committed_release_receipts(root: Path, receipt_snapshot=None) -> list[dict]
     never depend on LOG prose."""
     out = []
     from .journal import semantic_receipt_snapshot
+
     snapshot = receipt_snapshot or semantic_receipt_snapshot(root)
     if snapshot.errors:
         return []
@@ -2286,6 +2311,7 @@ def _apply_no_publish(root: Path, plan: ReleasePlan) -> dict:
 
 def _git_available(root: Path) -> bool:
     from .paths import is_git_project_root
+
     return is_git_project_root(root)
 
 
@@ -2739,12 +2765,16 @@ def _verify_index_after_gate(root: Path, plan: ReleasePlan) -> dict:
             root, "diff", "--name-only", "-z", "--", *release_paths, literal=True
         )
         staged_result = _git(
-            root, "diff", "--cached", "--name-only", "-z", "--", *release_paths,
+            root,
+            "diff",
+            "--cached",
+            "--name-only",
+            "-z",
+            "--",
+            *release_paths,
             literal=True,
         )
-        tracked_result = _git(
-            root, "ls-files", "-z", "--", *release_paths, literal=True
-        )
+        tracked_result = _git(root, "ls-files", "-z", "--", *release_paths, literal=True)
         if not (unstaged_result.ok and staged_result.ok and tracked_result.ok):
             return {
                 "ok": False,
@@ -2759,6 +2789,7 @@ def _verify_index_after_gate(root: Path, plan: ReleasePlan) -> dict:
 
     def _clean_tracked(path: str) -> bool:
         return path not in unstaged and path not in staged and path in tracked
+
     # Foreign pre-plan staged paths must survive untouched; release-owned
     # paths must be in the index -- as staged changes, or already committed
     # clean. A release path that was staged at PLAN time and got normalized
@@ -2976,8 +3007,10 @@ def _release_receipt_target(root: Path, plan: ReleasePlan) -> dict:
         # Genuine absence: codec.read_document already returns an empty
         # Document for a missing file, but guard anyway.
         from .codec import Document
-        doc = Document(text="", encoding="utf-8", bom=b"", newline="\n",
-                       final_newline=False, raw_hash="")
+
+        doc = Document(
+            text="", encoding="utf-8", bom=b"", newline="\n", final_newline=False, raw_hash=""
+        )
     except OSError as exc:
         raise ReleaseRefusal(
             "RECEIPT_IO_FAILURE",
@@ -3041,7 +3074,7 @@ def _apply_closure_targets(root: Path, journal, targets: list[dict]) -> None:
                 f"closure target {target['path']} has unexpected live bytes "
                 f"(live {live!r}); refuse to overwrite",
             )
-        _atomic_write(root / target["path"], target["content"])
+        _atomic_write(root / target["path"], target["content"], ownership_root=root)
         if _hash_file(root / target["path"]) != target["after_hash"]:
             raise ReleaseRefusal(
                 "RECOVERY_CONFLICT",
@@ -3110,7 +3143,9 @@ def _create_tag(root: Path, plan: ReleasePlan, target: str) -> None:
 def _push_tag(root: Path, plan: ReleasePlan, target: str) -> RemoteSnapshot:
     """Push the tag and verify from a fresh post-push snapshot."""
     result = _git(
-        root, "push", plan.remote_push_endpoint or "origin",
+        root,
+        "push",
+        plan.remote_push_endpoint or "origin",
         f"refs/tags/{plan.tag}:refs/tags/{plan.tag}",
     )
     if not result.ok:
@@ -3761,13 +3796,6 @@ def _restore_index_from_record(root: Path, record: dict) -> None:
     if not index_path.is_absolute():
         index_path = root / index_path
     index_path = index_path.resolve()
-    lock_path = index_path.with_name(index_path.name + ".lock")
-    if lock_path.exists():
-        raise ValueError(
-            "index.lock exists (concurrent writer or crashed git); refusing "
-            "to restore over a locked index -- resolve the lock explicitly "
-            "(WRITER_BUSY)"
-        )
     try:
         live_sha, _ = _exact_index_bytes(root)
     except ValueError as exc:
@@ -3776,7 +3804,7 @@ def _restore_index_from_record(root: Path, record: dict) -> None:
         return
     owned = record.get("owned_post_stage_index_sha256") or ""
     if isinstance(owned, str) and owned and live_sha == owned:
-        _restore_index_bytes(root, b64)
+        _restore_index_bytes(root, b64, expected_live_sha=owned)
         return
     raise ValueError(
         "live index is neither the pre-plan index nor the journaled owned "
@@ -3857,7 +3885,7 @@ def _replay_targets(root: Path, journal, record: dict) -> str | None:
                     f"staged bytes for {target['path']} do not match the "
                     "planned after hash; journal evidence is corrupt"
                 )
-            _atomic_write(root / target["path"], staged)
+            _atomic_write(root / target["path"], staged, ownership_root=root)
             _mark_target(journal, index)
         elif live == target["after_hash"]:
             _mark_target(journal, index)
@@ -4413,8 +4441,7 @@ def _verify_no_publish_receipt(root: Path, record: dict) -> dict:
         return {
             "status": "unknown",
             "reason": (
-                "no-publish receipt lacks source_tree_fingerprint -- "
-                "cannot prove unchanged source"
+                "no-publish receipt lacks source_tree_fingerprint -- cannot prove unchanged source"
             ),
         }
     if recorded_head and live.source_head != recorded_head:
@@ -4430,9 +4457,7 @@ def _verify_no_publish_receipt(root: Path, record: dict) -> dict:
     return {"status": "ok", "evidence": _receipt_evidence(record)}
 
 
-def release_verdict(
-    root: Path | str, crew_epoch: str | None = None, receipt_snapshot=None
-) -> dict:
+def release_verdict(root: Path | str, crew_epoch: str | None = None, receipt_snapshot=None) -> dict:
     """Read-only canonical release receipt verdict (T-1003 sweep).
 
     Crew consumes THIS verdict, never a self-attesting JSON scan. Returns:
@@ -4450,6 +4475,7 @@ def release_verdict(
     """
     root = Path(root)
     from .journal import semantic_receipt_snapshot
+
     raw_records = []
     # W2-002: scan BOTH recovery/ops and recovery/settled through the ONE
     # canonical semantic snapshot, not ops alone -- a settled release receipt

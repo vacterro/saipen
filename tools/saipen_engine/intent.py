@@ -514,6 +514,15 @@ def collect_and_ship_producer(
     if active_ticket is not None:
         interrupted = _targeted_producer_active_ticket(root, role, package.package_identity)
         if interrupted is not None:
+            if interrupted.get("invalid"):
+                return {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "recovery_required": True,
+                    "message": interrupted.get("detail", "invalid checkpoint authority"),
+                    "role": role,
+                    "package_identity": package.package_identity,
+                }
             if interrupted.get("ambiguous"):
                 return {
                     "ok": False,
@@ -531,8 +540,7 @@ def collect_and_ship_producer(
                     "ok": True,
                     "code": "PRODUCER_RESUME_PLAN",
                     "message": (
-                        f"would resume interrupted {role} targeted flow for "
-                        f"{interrupted['ticket']}"
+                        f"would resume interrupted {role} targeted flow for {interrupted['ticket']}"
                     ),
                     "role": role,
                     "ticket": interrupted["ticket"],
@@ -560,10 +568,7 @@ def collect_and_ship_producer(
             "role": role,
             "ticket": active_ticket,
             "resume_after": f"collect_and_ship_producer:{role}",
-            "message": (
-                f"active Core ticket {active_ticket} must finish before "
-                f"collecting {role}"
-            ),
+            "message": (f"active Core ticket {active_ticket} must finish before collecting {role}"),
             "package_identity": package.package_identity,
         }
     # No active ticket: check for an existing TODO/SCOUT carrier left by a crash
@@ -571,6 +576,15 @@ def collect_and_ship_producer(
     # across the first two durable boundaries.
     existing = _targeted_producer_active_ticket(root, role, package.package_identity)
     if existing is not None:
+        if existing.get("invalid"):
+            return {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "recovery_required": True,
+                "message": existing.get("detail", "invalid checkpoint authority"),
+                "role": role,
+                "package_identity": package.package_identity,
+            }
         if existing.get("ambiguous"):
             return {
                 "ok": False,
@@ -807,8 +821,10 @@ def _find_targeted_carriers(root: Path, role: str, package_identity: str) -> lis
     board_path = root / ".saipen" / "BOARD.md"
     try:
         board = parse_board(board_path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, ValueError):
-        return []
+    except (OSError, UnicodeError, ValueError) as exc:
+        raise ValueError(f"BOARD authority is unreadable: {exc}") from exc
+    if board["errors"]:
+        raise ValueError("BOARD parse error(s): " + "; ".join(board["errors"][:3]))
     marker = f"Integrate and release {role} package {package_identity}"
     out = []
     for tid, ticket in board["tickets"].items():
@@ -836,10 +852,22 @@ def _targeted_producer_active_ticket(root: Path, role: str, package_identity: st
     carrier exists, return an ambiguous sentinel that the caller converts to
     a fail-closed refusal.
     """
-    from .board import parse_board
-    from .state import parse_state
+    from .state import parse_state_or_error
 
-    carriers = _find_targeted_carriers(root, role, package_identity)
+    state_path = root / ".saipen" / "STATE.md"
+    board_path = root / ".saipen" / "BOARD.md"
+    if not state_path.exists() and not board_path.exists():
+        return None
+
+    try:
+        carriers = _find_targeted_carriers(root, role, package_identity)
+    except ValueError as exc:
+        return {
+            "invalid": True,
+            "detail": str(exc),
+            "role": role,
+            "package_identity": package_identity,
+        }
     if len(carriers) > 1:
         # Ambiguous: more than one matching carrier
         return {
@@ -849,58 +877,63 @@ def _targeted_producer_active_ticket(root: Path, role: str, package_identity: st
             "role": role,
             "package_identity": package_identity,
         }
-    if len(carriers) == 1:
-        carrier = carriers[0]
-        # If exactly one carrier exists, expose it regardless of its section.
-        # For DOING carriers, also expose STATE phase for resumption.
-        try:
-            state = parse_state((root / ".saipen" / "STATE.md").read_text(encoding="utf-8-sig"))
-            phase = state.get("phase")
-            task = state.get("task", "")
-            # If the single carrier is the active ticket, phase is meaningful
-            if task == carrier["ticket"]:
-                return {
-                    "ticket": carrier["ticket"],
-                    "phase": phase,
-                    "section": carrier["section"],
-                    "package_identity": package_identity,
-                    "role": role,
-                }
-        except Exception:
-            pass
+    # STATE is required even for the TODO crash window. A malformed checkpoint
+    # is never permission to promote BOARD prose into mutation authority.
+    try:
+        state_text = state_path.read_text(encoding="utf-8-sig")
+    except (OSError, UnicodeError) as exc:
         return {
-            "ticket": carrier["ticket"],
-            "phase": None,
-            "section": carrier["section"],
-            "package_identity": package_identity,
+            "invalid": True,
+            "detail": f"STATE authority is unreadable: {exc}",
             "role": role,
+            "package_identity": package_identity,
         }
-    # No board match: fall back to legacy STATE-only check for BUILD/VERIFY
-    # (covers case where BOARD read failed but STATE indicates active ticket)
-    try:
-        state = parse_state((root / ".saipen" / "STATE.md").read_text(encoding="utf-8-sig"))
-    except (OSError, UnicodeError, ValueError):
+    state, state_error = parse_state_or_error(state_text)
+    if state_error is not None or state is None:
+        return {
+            "invalid": True,
+            "detail": f"STATE authority is malformed: {state_error}",
+            "role": role,
+            "package_identity": package_identity,
+        }
+    if not carriers:
         return None
-    ticket_id = state.get("task", "")
+    carrier = carriers[0]
+    ticket_id = carrier["ticket"]
     phase = state.get("phase")
-    if not (str(ticket_id).startswith("T-") and phase in ("BUILD", "VERIFY", "SCOUT")):
-        return None
-    board_path = root / ".saipen" / "BOARD.md"
-    try:
-        board = parse_board(board_path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, ValueError):
-        return None
-    ticket = board["tickets"].get(ticket_id)
-    if ticket is None:
-        return None
-    desc = str(ticket.get("description") or "")
-    marker = f"Integrate and release {role} package {package_identity}"
-    if marker not in desc:
-        return None
+    task = state.get("task")
+    section = carrier.get("section")
+    if section == "## TODO":
+        if task not in (None, "", "none"):
+            return {
+                "invalid": True,
+                "detail": f"TODO carrier {ticket_id} conflicts with STATE.task={task}",
+                "role": role,
+                "package_identity": package_identity,
+            }
+        phase = None
+    elif section == "## DOING":
+        if task != ticket_id or phase not in ("SCOUT", "BUILD", "VERIFY"):
+            return {
+                "invalid": True,
+                "detail": (
+                    f"DOING carrier {ticket_id} is incoherent with "
+                    f"STATE.task={task!r}/phase={phase!r}"
+                ),
+                "role": role,
+                "package_identity": package_identity,
+            }
+    else:
+        return {
+            "invalid": True,
+            "detail": f"targeted carrier {ticket_id} is in illegal section {section!r}",
+            "role": role,
+            "package_identity": package_identity,
+        }
     return {
         "ticket": ticket_id,
         "phase": phase,
-        "section": ticket.get("section"),
+        "section": section,
         "package_identity": package_identity,
         "role": role,
     }
@@ -923,6 +956,28 @@ def _resume_targeted_producer(
     ticket_id = context["ticket"]
     phase = context["phase"]
     package_identity = context["package_identity"]
+    live_context = _targeted_producer_active_ticket(root, role, package_identity)
+    if (
+        live_context is None
+        or live_context.get("invalid")
+        or live_context.get("ambiguous")
+        or live_context.get("ticket") != ticket_id
+    ):
+        detail = (
+            live_context.get("detail", "targeted carrier is absent or ambiguous")
+            if live_context
+            else "targeted carrier is absent"
+        )
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "recovery_required": True,
+            "message": f"targeted checkpoint authority refused: {detail}",
+            "role": role,
+            "ticket": ticket_id,
+        }
+    phase = live_context.get("phase")
+    context = live_context
 
     # 1. Committed integration receipt for this ticket -> idempotence authority.
     from .journal import SemanticReceiptCorruptionError, semantic_receipts_for_operation
@@ -985,11 +1040,22 @@ def _resume_targeted_producer(
                 }
             phase = "BUILD"
         if phase == "BUILD":
-            verifying = transition_phase(root, "VERIFY", agent, ticket_id,
-                                         f"Verify {role} package payload and exact release scope")
+            verifying = transition_phase(
+                root,
+                "VERIFY",
+                agent,
+                ticket_id,
+                f"Verify {role} package payload and exact release scope",
+            )
             if not verifying.ok:
-                return {"ok": False, "code": verifying.code, "message": verifying.message,
-                        "role": role, "ticket": ticket_id, "package_identity": package_identity}
+                return {
+                    "ok": False,
+                    "code": verifying.code,
+                    "message": verifying.message,
+                    "role": role,
+                    "ticket": ticket_id,
+                    "package_identity": package_identity,
+                }
             phase = "VERIFY"
         if phase in ("VERIFY", "REVIEW"):
             # Resume through the normal ticket chain; the caller continues.
@@ -1170,8 +1236,7 @@ def _resume_targeted_producer(
         "ok": True,
         "code": "PRODUCER_REVIEW_REQUIRED",
         "message": (
-            f"{role} integrated (resumed); verify and review "
-            f"{ticket_id}, then resume shortcut"
+            f"{role} integrated (resumed); verify and review {ticket_id}, then resume shortcut"
         ),
         "role": role,
         "ticket": ticket_id,
@@ -1180,9 +1245,7 @@ def _resume_targeted_producer(
     }
 
 
-def _ship_targeted_producer(
-    root: Path, role: str, context: dict, capability: object
-) -> dict:
+def _ship_targeted_producer(root: Path, role: str, context: dict, capability: object) -> dict:
     """Publish one reviewed producer ticket without adopting a crew carrier."""
     from .release import ReleaseRefusal, execute_release, plan_release
 

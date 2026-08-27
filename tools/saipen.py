@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# ruff: noqa: E402
 """saipen -- thin adapter over the SAIPEN engine (NITRO).
 
 Read-only commands: `saipen status`, `saipen next`. Mutating commands run
@@ -19,6 +20,11 @@ import re
 import sys
 from contextlib import suppress
 from pathlib import Path
+
+# Public commands promise not to dirty the project merely by importing their
+# implementation. Set this before importing project modules so ``tt`` and all
+# other read-only routes cannot create ``__pycache__``/``.pyc`` artifacts.
+sys.dont_write_bytecode = True
 
 from saipen_engine import codec, snapshot
 from saipen_engine.board import parse_board, ticket_is_workable
@@ -545,14 +551,6 @@ def _status(project_root: Path, as_json: bool) -> int:
     if not state_path.is_file():
         _emit({"ok": False, "code": "NOT_SAIPEN_PROJECT"}, as_json)
         return 3
-    state_text = codec.read_doc(state_path)
-    state, state_error = parse_state_or_error(state_text)
-    if state_error:
-        _emit(
-            {"ok": False, "code": "VALIDATION_FAILED", "detail": f"state-malformed: {state_error}"},
-            as_json,
-        )
-        return 1
     try:
         snap = snapshot.ProjectSnapshot.capture(project_root)
     except (OSError, ValueError) as exc:
@@ -561,9 +559,16 @@ def _status(project_root: Path, as_json: bool) -> int:
             as_json,
         )
         return 1
-    board_path = project_root / ".saipen" / "BOARD.md"
-    board_text = codec.read_doc(board_path) if board_path.is_file() else ""
-    board = parse_board(board_text) if board_path.is_file() else {"tickets": {}, "errors": []}
+    state_text = snap.state_text
+    board_text = snap.board_text
+    state, state_error = parse_state_or_error(state_text)
+    if state_error:
+        _emit(
+            {"ok": False, "code": "VALIDATION_FAILED", "detail": f"state-malformed: {state_error}"},
+            as_json,
+        )
+        return 1
+    board = parse_board(board_text)
     doing = [t for t in board["tickets"].values() if t["section"] == "## DOING"]
     todo = [t for t in board["tickets"].values() if t["section"] == "## TODO"]
     done_tickets = [t for t in board["tickets"].values() if t["section"] == "## DONE"]
@@ -756,17 +761,6 @@ def _next_action(project_root: Path, as_json: bool) -> int:
     if not state_path.is_file():
         _emit({"ok": False, "code": "NOT_SAIPEN_PROJECT"}, as_json)
         return 3
-    state_text = codec.read_doc(state_path)
-    from saipen_engine.state import parse_state_or_error
-
-    state, state_error = parse_state_or_error(state_text)
-    if state_error:
-        _emit(
-            {"ok": False, "code": "VALIDATION_FAILED", "detail": f"state-malformed: {state_error}"},
-            as_json,
-        )
-        return 1
-    subject = state.get("task")
     # T-1014: ONE recovery-manifest traversal (pending + conflicts + corrupt).
     pending, conflicts, _corrupt = _scan_full(project_root)
     if _corrupt:
@@ -780,7 +774,18 @@ def _next_action(project_root: Path, as_json: bool) -> int:
             as_json,
         )
         return 1
-    board_text = codec.read_doc(project_root / ".saipen" / "BOARD.md")
+    state_text = snap.state_text
+    board_text = snap.board_text
+    from saipen_engine.state import parse_state_or_error
+
+    state, state_error = parse_state_or_error(state_text)
+    if state_error:
+        _emit(
+            {"ok": False, "code": "VALIDATION_FAILED", "detail": f"state-malformed: {state_error}"},
+            as_json,
+        )
+        return 1
+    subject = state.get("task")
     board = parse_board(board_text)
     parked = _parked_work(board["tickets"], state)
     from saipen_engine.router import load_for_action, route_next, routing_failure_code
@@ -856,7 +861,20 @@ def _explain_next(project_root: Path, as_json: bool) -> int:
     if not state_path.is_file():
         _emit({"ok": False, "code": "NOT_SAIPEN_PROJECT"}, as_json)
         return 3
-    state_text = codec.read_doc(state_path)
+    pending, conflicts, _corrupt = _scan_full(project_root)
+    if _corrupt:
+        _emit(_corrupt_refusal(_corrupt), as_json)
+        return 1
+    try:
+        snap = snapshot.ProjectSnapshot.capture(project_root)
+    except (OSError, ValueError) as exc:
+        _emit(
+            {"ok": False, "code": "VALIDATION_FAILED", "detail": f"history-ownership: {exc}"},
+            as_json,
+        )
+        return 1
+    state_text = snap.state_text
+    board_text = snap.board_text
     from saipen_engine.state import parse_state_or_error
 
     state, state_error = parse_state_or_error(state_text)
@@ -870,11 +888,6 @@ def _explain_next(project_root: Path, as_json: bool) -> int:
             as_json,
         )
         return 1
-    pending, conflicts, _corrupt = _scan_full(project_root)
-    if _corrupt:
-        _emit(_corrupt_refusal(_corrupt), as_json)
-        return 1
-    board_text = codec.read_doc(project_root / ".saipen" / "BOARD.md")
     parked = _parked_work(parse_board(board_text)["tickets"], state)
     from saipen_engine.router import route_next, routing_failure_code
 
@@ -888,6 +901,7 @@ def _explain_next(project_root: Path, as_json: bool) -> int:
         conflicts,
         current_capability=_negotiate_capability(project_root),
         current_agent=resolved_agent,
+        snap=snap,
     )
     if not routed.get("ok"):
         carrier = {
@@ -1328,9 +1342,7 @@ def _crew(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> 
             return 1
         raise
     payload = result.to_dict()
-    payload.update(
-        _crew_liveness(project_root, result, capability=capability, dry_run=dry_run)
-    )
+    payload.update(_crew_liveness(project_root, result, capability=capability, dry_run=dry_run))
     _emit(payload, as_json)
     return 0 if result.ok else 1
 
@@ -1491,9 +1503,7 @@ def _continue(
     return _next_action(project_root, as_json)
 
 
-def _source(
-    project_root: Path, args: list[str], as_json: bool, dry_run: bool
-) -> int:
+def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
     """T-1162: lossless source receipts.
 
     Subcommands:
@@ -1600,9 +1610,7 @@ def _source(
                 {
                     "ok": False,
                     "code": "VALIDATION_FAILED",
-                    "detail": (
-                        "source capture accepts either --file or body text, not both"
-                    ),
+                    "detail": ("source capture accepts either --file or body text, not both"),
                 },
                 as_json,
             )
@@ -1642,9 +1650,7 @@ def _source(
                     {
                         "ok": False,
                         "code": "VALIDATION_FAILED",
-                        "detail": (
-                            "source capture needs a body (args, --file, or piped stdin)"
-                        ),
+                        "detail": ("source capture needs a body (args, --file, or piped stdin)"),
                     },
                     as_json,
                 )
@@ -1740,8 +1746,7 @@ def _source(
                     "ok": False,
                     "code": "VALIDATION_FAILED",
                     "detail": (
-                        "source disp needs <SRC> <RID> <DISPOSITION> "
-                        "[--work T-x] [--evidence E-y]"
+                        "source disp needs <SRC> <RID> <DISPOSITION> [--work T-x] [--evidence E-y]"
                     ),
                 },
                 as_json,
@@ -2097,9 +2102,7 @@ def _userperson_scope(args: list[str]) -> tuple[str, list[str], str | None]:
     return scope, [item for item in args if item not in unique], None
 
 
-def _userperson(
-    project_root: Path | None, args: list[str], as_json: bool, dry_run: bool
-) -> int:
+def _userperson(project_root: Path | None, args: list[str], as_json: bool, dry_run: bool) -> int:
     """USERPERSON project/global/effective management."""
     if not args:
         _emit(
@@ -2128,9 +2131,7 @@ def _userperson(
     action = args[0]
     scope, clean_args, scope_error = _userperson_scope(args[1:])
     if scope_error:
-        _emit(
-            {"ok": False, "code": "VALIDATION_FAILED", "detail": scope_error}, as_json
-        )
+        _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": scope_error}, as_json)
         return 2
     args = [action, *clean_args]
     if scope == "effective" and action != "show":
@@ -2189,11 +2190,7 @@ def _userperson(
                         f"(source: {preference['source']})"
                     )
             return 0
-        source = (
-            load_global_profile()
-            if scope == "global"
-            else load_project_profile(project_root)
-        )
+        source = load_global_profile() if scope == "global" else load_project_profile(project_root)
     except UserpersonError as exc:
         _emit(
             {
@@ -3475,8 +3472,7 @@ def main(argv: list[str] | None = None) -> int:
                 {
                     "ok": False,
                     "code": "VALIDATION_FAILED",
-                    "detail": "permissions accepts no arguments; surplus: "
-                    + " ".join(args[1:]),
+                    "detail": "permissions accepts no arguments; surplus: " + " ".join(args[1:]),
                 },
                 as_json,
             )
@@ -3488,8 +3484,7 @@ def main(argv: list[str] | None = None) -> int:
                 {
                     "ok": False,
                     "code": "VALIDATION_FAILED",
-                    "detail": "explain-next accepts no arguments; surplus: "
-                    + " ".join(args[1:]),
+                    "detail": "explain-next accepts no arguments; surplus: " + " ".join(args[1:]),
                 },
                 as_json,
             )
@@ -4302,64 +4297,30 @@ def main(argv: list[str] | None = None) -> int:
                 as_json,
             )
             return 2
-        if dry_run:
-            _emit(
-                {
-                    "ok": True,
-                    "code": "STOP",
-                    "detail": "dry-run stop: checkpoint + digest would be written",
-                    "dry_run": True,
-                    "route": command,
-                },
-                as_json,
+        from saipen_engine.operations import stop_checkpoint
+
+        capability = _negotiate_capability(project_root)
+        projection_only = dry_run or capability == "read-only"
+        result = stop_checkpoint(
+            project_root,
+            _agent_for(project_root),
+            dry_run=projection_only,
+        )
+        payload = result.to_dict()
+        payload["dry_run"] = dry_run
+        payload["route"] = command
+        if capability == "read-only":
+            payload["mode"] = "read-only"
+        if result.ok:
+            payload["operation_code"] = payload.get("code")
+            payload["code"] = "STOP"
+            payload["detail"] = (
+                "read-only stop projection"
+                if capability == "read-only"
+                else ("dry-run stop projection" if dry_run else "stop checkpoint committed")
             )
-            return 0
-        if _negotiate_capability(project_root) == "read-only":
-            _emit(
-                {
-                    "ok": True,
-                    "code": "STOP",
-                    "detail": "read-only stop: digest lines would be emitted to chat",
-                    "mode": "read-only",
-                    "route": command,
-                },
-                as_json,
-            )
-            return 0
-        _ho = _ensure_handover(project_root, as_json, dry_run)
-        if _ho is not None:
-            return _ho
-        # Minimal canonical stop: ensure digest exists with 3 lines.
-        try:
-            digest_path = project_root / ".saipen" / "kitchen" / "digest.md"
-            digest_path.parent.mkdir(parents=True, exist_ok=True)
-            # Gather board/state snapshot for digest content
-            with suppress(Exception):
-                (project_root / ".saipen" / "BOARD.md").read_text(encoding="utf-8")
-            # Write 3-line digest
-            digest_path.write_text(
-                "done: checkpoint at ss\nremaining: see BOARD.md\nawaiting: user\n",
-                encoding="utf-8",
-            )
-            # Also checkpoint LOG->BOARD->STATE with resumable next_action if needed
-            # For minimal executor, just emit success; full checkpoint is done elsewhere.
-            _emit(
-                {
-                    "ok": True,
-                    "code": "STOP",
-                    "detail": "stop checkpoint + digest written",
-                    "route": command,
-                    "digest": str(digest_path),
-                },
-                as_json,
-            )
-            return 0
-        except Exception as exc:
-            _emit(
-                {"ok": False, "code": "VALIDATION_FAILED", "detail": f"stop failed: {exc}"},
-                as_json,
-            )
-            return 1
+        _emit(payload, as_json)
+        return 0 if result.ok else 1
     if command in ("test", "tt"):
         # CORE § 1.10: `tt` routes to `saipen test` -- read-only suite report.
         if len(args) > 1:
@@ -4372,26 +4333,30 @@ def main(argv: list[str] | None = None) -> int:
                 as_json,
             )
             return 2
-        # Dry-run and read-only both report without mutating.
-        try:
-            import subprocess
+        from saipen_engine.test_runner import canonical_test_plan, run_canonical_suite
 
-            # Run the same harness as CI: unittest discover but bounded.
-            # Use --json reporting via payload; never writes.
-            proc = subprocess.run(
-                [sys.executable, "-m", "unittest", "discover", "-s", "tools", "-p", "test_*.py"],
-                cwd=str(project_root),
-                capture_output=True,
-                text=True,
-                timeout=60,
+        if dry_run:
+            _emit(
+                {
+                    "ok": True,
+                    "code": "TEST_PLAN",
+                    "detail": "canonical test families planned; zero suites executed",
+                    "families": canonical_test_plan(project_root),
+                    "dry_run": True,
+                    "route": command,
+                },
+                as_json,
             )
-            ok = proc.returncode == 0
+            return 0
+        try:
+            report = run_canonical_suite(project_root)
+            ok = report["ok"]
             _emit(
                 {
                     "ok": ok,
                     "code": "TEST_REPORT",
-                    "detail": "test suite executed read-only",
-                    "exit_code": proc.returncode,
+                    "detail": "canonical test families executed in an isolated copy",
+                    "families": report["families"],
                     "route": command,
                 },
                 as_json,
@@ -4420,16 +4385,11 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         if _negotiate_capability(project_root) == "read-only":
             return _capability_refusal(as_json)
-        _ho = _ensure_handover(project_root, as_json, dry_run)
-        if _ho is not None:
-            return _ho
-        from saipen_engine.operations import set_converge_intent
+        from saipen_engine.operations import enter_ship_convergence
 
-        # Dry-run: report plan without writes
-        result = set_converge_intent(
+        result = enter_ship_convergence(
             project_root,
             _agent_for(project_root),
-            "ship",
             dry_run=dry_run,
         )
         payload = result.to_dict()
@@ -4472,10 +4432,11 @@ def main(argv: list[str] | None = None) -> int:
         _emit(drift, as_json)
         if not as_json:
             print("SAIPEN RUNTIME DRIFT")
-            print(f"Project protocol: {drift['project_protocol']['home']} "
-                  f"(v{drift['project_protocol']['version']})")
-            print(f"Runtime protocol: {drift['runtime']['home']} "
-                  f"(v{drift['runtime']['version']})")
+            print(
+                f"Project protocol: {drift['project_protocol']['home']} "
+                f"(v{drift['project_protocol']['version']})"
+            )
+            print(f"Runtime protocol: {drift['runtime']['home']} (v{drift['runtime']['version']})")
             print(f"Command required by project: {command}")
             print("Runtime cannot execute it safely.")
             print(f"Action: {drift['action']}")

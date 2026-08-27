@@ -466,19 +466,28 @@ def staged_name(index: int, canonical_path: str) -> str:
     return f"{index}_{path_hash}.staged"
 
 
-def _atomic_json(path: Path, record: dict) -> None:
-    tmp = path.with_suffix(".tmp")
-    tmp.write_text(json.dumps(record, indent=2), encoding="utf-8")
-    tmp.replace(path)
+def _atomic_json(path: Path, record: dict, *, ownership_root: Path) -> None:
+    from .paths import safe_atomic_write_bytes
+
+    safe_atomic_write_bytes(
+        path,
+        json.dumps(record, indent=2).encode("utf-8"),
+        kind="journal JSON",
+        ownership_root=ownership_root,
+    )
 
 
-def _atomic_write(path: Path, content: bytes) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(path.name + ".tmp")
+def _atomic_write(path: Path, content: bytes, *, ownership_root: Path) -> None:
+    from .paths import safe_atomic_write_bytes
+
     if isinstance(content, str):
         content = content.encode("utf-8")
-    tmp.write_bytes(content)
-    tmp.replace(path)
+    safe_atomic_write_bytes(
+        path,
+        content,
+        kind="canonical target",
+        ownership_root=ownership_root,
+    )
 
 
 def _settle_journal(journal: "Journal") -> None:
@@ -492,6 +501,8 @@ def _settle_journal(journal: "Journal") -> None:
     to the strict manifest decode for this op (it reads status=COMMITTED and
     ignores it natively).
     """
+    from .safeid import InvalidIdError
+
     settled_base = journal.project_root / SETTLED_DIR
     try:
         settled_base.mkdir(parents=True, exist_ok=True)
@@ -499,7 +510,7 @@ def _settle_journal(journal: "Journal") -> None:
         os.rename(journal.dir, settled_dir)
         journal.dir = settled_dir
         journal.manifest = settled_dir / "operation.json"
-    except OSError:
+    except (OSError, InvalidIdError):
         pass
 
 
@@ -911,9 +922,10 @@ def _merge_progress_sidecar(
                 "code": "RECOVERY_CONFLICT",
                 "detail": f"progress.json stat failed: {exc}",
             }
-        if stat.S_ISLNK(progress_info.st_mode) or getattr(
-            progress_info, "st_file_attributes", 0
-        ) & 0x400:
+        if (
+            stat.S_ISLNK(progress_info.st_mode)
+            or getattr(progress_info, "st_file_attributes", 0) & 0x400
+        ):
             return {
                 "ok": False,
                 "code": "RECOVERY_CONFLICT",
@@ -1286,12 +1298,25 @@ class Journal:
 
         # Prevent symlink/junction escape
         ops_op_dir = safe_op_dir(self.project_root, self.op_id, OPS_DIR)
-        settled_op_dir = safe_op_dir(self.project_root, self.op_id, SETTLED_DIR)
+        ops_manifest = ops_op_dir / "operation.json"
+        from .paths import prove_owned_regular
 
-        if settled_op_dir.is_dir() and not ops_op_dir.is_dir():
-            self.dir = settled_op_dir
-        else:
+        authoritative_ops = False
+        try:
+            prove_owned_regular(ops_manifest, kind="operation manifest")
+            authoritative_ops = True
+        except FileNotFoundError:
+            pass
+        except ValueError:
+            # Corrupt ops authority must remain visible to the strict decoder;
+            # never hide it behind a same-id settled receipt.
+            authoritative_ops = True
+
+        if authoritative_ops:
             self.dir = ops_op_dir
+        else:
+            settled_op_dir = safe_op_dir(self.project_root, self.op_id, SETTLED_DIR)
+            self.dir = settled_op_dir if settled_op_dir.is_dir() else ops_op_dir
 
         self.manifest = self.dir / "operation.json"
 
@@ -1353,7 +1378,14 @@ class Journal:
                     if isinstance(content, str):
                         content = content.encode("utf-8")
                     name = staged_name(index, canonical.relative_to(self.project_root).as_posix())
-                    (self.dir / name).write_bytes(content)
+                    from .paths import safe_create_bytes_exclusive
+
+                    safe_create_bytes_exclusive(
+                        self.dir / name,
+                        content,
+                        kind="journal staged evidence",
+                        ownership_root=self.project_root,
+                    )
                 record_targets.append(
                     {
                         "path": target["path"],
@@ -1388,7 +1420,7 @@ class Journal:
             # that fails after staging (unserializable metadata, disk error)
             # must not leave an orphan op dir full of staged bytes with no
             # manifest to name them (hostile-regression zero-orphan rule).
-            _atomic_json(self.manifest, record)
+            _atomic_json(self.manifest, record, ownership_root=self.project_root)
         except Exception:
             import shutil
 
@@ -1408,7 +1440,7 @@ class Journal:
             prog["progress_index"] = progress_index
         if target_index is not None:
             prog["applied_frontier"] = max(prog.get("applied_frontier", -1), target_index)
-        _atomic_json(progress_file, prog)
+        _atomic_json(progress_file, prog, ownership_root=self.project_root)
 
         if status in SETTLED:
             self.fold_progress()
@@ -1445,7 +1477,14 @@ class Journal:
                 content = target["content"]
                 if isinstance(content, str):
                     content = content.encode("utf-8")
-                (self.dir / staged_name(index, rel)).write_bytes(content)
+                from .paths import safe_create_bytes_exclusive
+
+                safe_create_bytes_exclusive(
+                    self.dir / staged_name(index, rel),
+                    content,
+                    kind="journal staged evidence",
+                    ownership_root=self.project_root,
+                )
             new_target = dict(target)
             new_target["path"] = rel
             record_targets.append(
@@ -1458,7 +1497,7 @@ class Journal:
                     "applied": False,
                 }
             )
-        _atomic_json(self.manifest, record)
+        _atomic_json(self.manifest, record, ownership_root=self.project_root)
 
     def update(self, **fields) -> None:
         """Merge extra fields into the operation record (T-994 release).
@@ -1469,7 +1508,7 @@ class Journal:
         """
         record = self.read()
         record.update(fields)
-        _atomic_json(self.manifest, record)
+        _atomic_json(self.manifest, record, ownership_root=self.project_root)
 
     def read(self) -> dict:
         record = json.loads(self.manifest.read_text(encoding="utf-8"))
@@ -1494,7 +1533,7 @@ class Journal:
         if progress_file.is_file():
             try:
                 record = self.read()
-                _atomic_json(self.manifest, record)
+                _atomic_json(self.manifest, record, ownership_root=self.project_root)
                 progress_file.unlink()
             except OSError:
                 pass
@@ -2075,9 +2114,17 @@ def run_mutation(
         # Finalizer-owned derived keys (resulting_*) are excluded because
         # they are generated only after apply.
         _REQUEST_METADATA_KEYS = (
-            "crew_epoch", "ticket_id", "producer", "package_identity",
-            "input_source", "input_source_fingerprint", "role", "stage",
-            "verdict", "source_head", "source_tree_fingerprint",
+            "crew_epoch",
+            "ticket_id",
+            "producer",
+            "package_identity",
+            "input_source",
+            "input_source_fingerprint",
+            "role",
+            "stage",
+            "verdict",
+            "source_head",
+            "source_tree_fingerprint",
         )
         _request_meta = {}
         if receipt_metadata:
@@ -2273,7 +2320,11 @@ def run_mutation(
             }
         try:
             if action == "write":
-                _atomic_write(root / target["path"], target["content"])
+                _atomic_write(
+                    root / target["path"],
+                    target["content"],
+                    ownership_root=root,
+                )
             elif action == "delete_file":
                 (root / target["path"]).unlink()
             elif action == "delete_dir":
@@ -2598,7 +2649,7 @@ def _recover_locked(root: Path, op_id: str) -> dict:
                             f"planned {target['after_hash']!r}; "
                             "journal evidence is corrupt",
                         }
-                    _atomic_write(root / target["path"], staged)
+                    _atomic_write(root / target["path"], staged, ownership_root=root)
                 elif action == "delete_file":
                     (root / target["path"]).unlink()
                 elif action == "delete_dir":
@@ -2829,8 +2880,7 @@ def verify_sub_collect(root, targets, receipt_metadata=None) -> list[str]:
             # verified clean against broken authority. Fail the verifier so
             # the mutation stays CONFLICT until the corruption is resolved.
             errors.append(
-                "semantic receipt corruption during collect verification: "
-                + "; ".join(_errors[:3])
+                "semantic receipt corruption during collect verification: " + "; ".join(_errors[:3])
             )
         for record in records:
             meta = record.get("receipt_metadata") or {}
@@ -3391,7 +3441,7 @@ def _resolve_conflict_locked(root: Path, op_id: str, resolution: str, agent: str
                     f"handover to {agent!r} failed before settlement: {ho.message}",
                 }
 
-    _atomic_json(journal.manifest, record)
+    _atomic_json(journal.manifest, record, ownership_root=journal.project_root)
     # Terminalize through Journal.mark so the bounded progress sidecar is
     # folded into operation.json and removed before settlement. Moving the
     # directory directly leaves a stale CONFLICT sidecar that the canonical
@@ -3689,9 +3739,10 @@ def _receipt_namespace_entries(
                 )
             )
             continue
-        if stat.S_ISLNK(manifest_info.st_mode) or getattr(
-            manifest_info, "st_file_attributes", 0
-        ) & 0x400:
+        if (
+            stat.S_ISLNK(manifest_info.st_mode)
+            or getattr(manifest_info, "st_file_attributes", 0) & 0x400
+        ):
             captured.append(invalid(op_dir.name, "operation.json is a symlink or reparse point"))
             continue
         if not stat.S_ISREG(manifest_info.st_mode):
@@ -3711,15 +3762,14 @@ def _receipt_namespace_entries(
             progress_raw = None
         except OSError as exc:
             detail = f"progress.json stat failed ({type(exc).__name__}): {exc}"
-            token = _RECEIPT_STRUCTURE_SENTINEL + detail.encode(
-                "utf-8", errors="replace"
-            )
+            token = _RECEIPT_STRUCTURE_SENTINEL + detail.encode("utf-8", errors="replace")
             captured.append(_ReceiptEntry(op_dir.name, None, raw, token, detail))
             continue
         else:
-            if stat.S_ISLNK(progress_info.st_mode) or getattr(
-                progress_info, "st_file_attributes", 0
-            ) & 0x400:
+            if (
+                stat.S_ISLNK(progress_info.st_mode)
+                or getattr(progress_info, "st_file_attributes", 0) & 0x400
+            ):
                 detail = "progress.json is a symlink or reparse point"
                 token = _RECEIPT_STRUCTURE_SENTINEL + detail.encode("utf-8")
                 captured.append(_ReceiptEntry(op_dir.name, None, raw, token, detail))
@@ -3733,9 +3783,7 @@ def _receipt_namespace_entries(
                 progress_raw = progress.read_bytes()
             except OSError as exc:
                 detail = f"progress.json unreadable ({type(exc).__name__}): {exc}"
-                token = _RECEIPT_STRUCTURE_SENTINEL + detail.encode(
-                    "utf-8", errors="replace"
-                )
+                token = _RECEIPT_STRUCTURE_SENTINEL + detail.encode("utf-8", errors="replace")
                 captured.append(_ReceiptEntry(op_dir.name, None, raw, token, detail))
                 continue
         captured.append(_ReceiptEntry(op_dir.name, op_dir, raw, progress_raw, None))
@@ -3743,9 +3791,7 @@ def _receipt_namespace_entries(
 
 
 def _frame_receipt(digest, namespace: str, entry: _ReceiptEntry) -> None:
-    progress_token = (
-        _PROGRESS_ABSENT_SENTINEL if entry.progress_raw is None else entry.progress_raw
-    )
+    progress_token = _PROGRESS_ABSENT_SENTINEL if entry.progress_raw is None else entry.progress_raw
     for part in (
         namespace.encode("utf-8"),
         entry.name.encode("utf-8"),
@@ -4041,9 +4087,10 @@ def _compaction_queue_preflight(root: Path, cleanup_queue: Path) -> tuple[list[P
             prove_inside(marker, cleanup_queue, kind="cleanup marker")
         except (OSError, InvalidIdError) as exc:
             return [], f"cleanup marker {marker.name!r} is unsafe: {exc}"
-        if stat.S_ISLNK(marker_info.st_mode) or getattr(
-            marker_info, "st_file_attributes", 0
-        ) & 0x400:
+        if (
+            stat.S_ISLNK(marker_info.st_mode)
+            or getattr(marker_info, "st_file_attributes", 0) & 0x400
+        ):
             return [], f"cleanup marker {marker.name!r} is a symlink or reparse point"
         if not stat.S_ISREG(marker_info.st_mode):
             return [], f"cleanup marker {marker.name!r} is not a regular file"
@@ -4105,9 +4152,10 @@ def compact_committed(project_root: Path | str) -> dict:
             if op_id in compacted:
                 try:
                     marker_info = os.lstat(marker)
-                    if stat.S_ISREG(marker_info.st_mode) and not getattr(
-                        marker_info, "st_file_attributes", 0
-                    ) & 0x400:
+                    if (
+                        stat.S_ISREG(marker_info.st_mode)
+                        and not getattr(marker_info, "st_file_attributes", 0) & 0x400
+                    ):
                         marker.unlink()
                     elif op_id not in skipped:
                         skipped.append(op_id)

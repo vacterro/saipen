@@ -205,9 +205,7 @@ def _read(root: Path, *, allow_dead_home: bool = False) -> tuple[dict, dict, dic
         # whole-history text (a 1 MB+ string on every mutation load). Skip
         # materializing it; any caller that genuinely needs the raw history
         # text uses retain_text=True explicitly.
-        snapshot, _logs_digest = read_history_snapshot_and_logs_digest(
-            root, retain_text=False
-        )
+        snapshot, _logs_digest = read_history_snapshot_and_logs_digest(root, retain_text=False)
     except HistoryOwnershipError as exc:
         raise CheckpointError(f"history-ownership: {exc}")
     parked_error = block_parked_evidence_error(state, board, snapshot.events)
@@ -597,8 +595,7 @@ def _plan_claim(
             docs["board"].text_norm, ticket_id, {"owner": agent, "claim_time": utc}
         )
         resume_in_place = (
-            state.get("task") == ticket_id
-            and state.get("phase") in phases.TICKET_BEARING_PHASES
+            state.get("task") == ticket_id and state.get("phase") in phases.TICKET_BEARING_PHASES
         )
         owned = {
             "task": ticket_id,
@@ -616,8 +613,8 @@ def _plan_claim(
             )
         new_state = patch_state(docs["state"].text_norm, owned)
         errors = validate_texts(
-        new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
-    )
+            new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
+        )
         if errors:
             return _refuse(
                 "VALIDATION_FAILED",
@@ -648,9 +645,7 @@ def _plan_claim(
                 "event_id": f"E-{event}",
                 "phase": state.get("phase") if resume_in_place else "SCOUT",
                 "next_action": (
-                    state.get("next_action")
-                    if resume_in_place
-                    else f"PHASE SCOUT {ticket_id}"
+                    state.get("next_action") if resume_in_place else f"PHASE SCOUT {ticket_id}"
                 ),
                 "adopted": True,
                 "resumed_in_place": resume_in_place,
@@ -847,18 +842,12 @@ def _plan_attempt(
         _tickets = parse_board(docs["board"].text_norm)["tickets"]
         _task = state.get("task")
         _ticket = _tickets.get(_task) if _task else None
-        if (
-            _ticket is not None
-            and _ticket.get("section") == "## DOING"
-        ):
+        if _ticket is not None and _ticket.get("section") == "## DOING":
             _cs = claim_status(_ticket, agent)
             if _cs in ("FOREIGN_LIVE", "INVALID"):
                 return _refuse(
-                    "TICKET_NOT_WORKABLE"
-                    if _cs == "FOREIGN_LIVE"
-                    else "VALIDATION_FAILED",
-                    f"{_task} carries a {_cs} claim; that claim's holder "
-                    "closes its own attempt",
+                    "TICKET_NOT_WORKABLE" if _cs == "FOREIGN_LIVE" else "VALIDATION_FAILED",
+                    f"{_task} carries a {_cs} claim; that claim's holder closes its own attempt",
                     ticket=_task,
                 )
 
@@ -923,12 +912,8 @@ def _plan_attempt(
         # unrelated tickets and corrupt recovery/history lineage while staying
         # validator-green (the old contract checked existence/acyclicity but
         # not predecessor ticket identity).
-        same_work = [
-            rec for rec in records.values() if rec.get("ticket") == task
-        ]
-        latest = max(
-            same_work, key=lambda rec: rec["open_event"], default=None
-        )
+        same_work = [rec for rec in records.values() if rec.get("ticket") == task]
+        latest = max(same_work, key=lambda rec: rec["open_event"], default=None)
         text = f"attempt {new_id} open"
         if latest is not None:
             text += f"; supersedes {latest['id']}"
@@ -993,8 +978,7 @@ def _plan_attempt(
             and rec.get("result") == result
             and rec.get("stop") == stop
             and rec.get("close_agent") == agent
-            and rec.get("evidence")
-            == [e.strip() for e in (evidence or []) if e and e.strip()]
+            and rec.get("evidence") == [e.strip() for e in (evidence or []) if e and e.strip()]
             and rec.get("unknown") == ((unknown or "").strip() or None)
         ]
         if closed:
@@ -1085,15 +1069,12 @@ def _plan_attempt(
     if len(evidence) > attempt_mod.MAX_EVIDENCE_REFS:
         return _refuse(
             "VALIDATION_FAILED",
-            f"evidence carries {len(evidence)} refs; bound is "
-            f"{attempt_mod.MAX_EVIDENCE_REFS}",
+            f"evidence carries {len(evidence)} refs; bound is {attempt_mod.MAX_EVIDENCE_REFS}",
         )
     event_ids = {ev["event"] for ev in docs["_history"].events}
     for ref in evidence:
         if not re.fullmatch(r"E-\d+", ref):
-            return _refuse(
-                "VALIDATION_FAILED", f"evidence ref {ref!r} is not an E-### id"
-            )
+            return _refuse("VALIDATION_FAILED", f"evidence ref {ref!r} is not an E-### id")
         if int(ref[2:]) not in event_ids:
             return _refuse(
                 "VALIDATION_FAILED",
@@ -1105,8 +1086,7 @@ def _plan_attempt(
         if unknown and ("\n" in unknown or len(unknown) > attempt_mod.MAX_UNKNOWN_CHARS):
             return _refuse(
                 "VALIDATION_FAILED",
-                f"unknown clause must be one line of at most "
-                f"{attempt_mod.MAX_UNKNOWN_CHARS} chars",
+                f"unknown clause must be one line of at most {attempt_mod.MAX_UNKNOWN_CHARS} chars",
             )
 
     text = f"attempt {pointer} close result {result} stop {stop}"
@@ -1114,9 +1094,7 @@ def _plan_attempt(
         text += " -- evidence " + ",".join(evidence)
     if unknown:
         text += f"; unknown: {unknown}"
-    event, line = _event_line(
-        docs, log_tail, "DEC", rec.get("ticket"), agent, text, now, op_id
-    )
+    event, line = _event_line(docs, log_tail, "DEC", rec.get("ticket"), agent, text, now, op_id)
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     cleaned = remove_state_fields(docs["state"].text_norm, ("attempt",))
     new_state = patch_state(cleaned, {"last_event": event, "updated": utc, "agent": agent})
@@ -1189,9 +1167,7 @@ def attempt_lifecycle(
 ):
     """Public Attempt lifecycle entry (`saipen attempt open|close`)."""
     if action not in ("open", "close"):
-        return _refuse(
-            "VALIDATION_FAILED", f"attempt action {action!r} outside open|close"
-        )
+        return _refuse("VALIDATION_FAILED", f"attempt action {action!r} outside open|close")
     if action == "close":
         if not result or not stop:
             return _refuse(
@@ -1598,9 +1574,7 @@ def checkpoint(
 _BOARD_TICKET_LINE_RE = re.compile(r"^-\s*\[[ x/]\]\s*T-(\d+)\b")
 
 
-def next_ticket_id(
-    board_text: str, log_text: str, history_max_ticket_id: int | None = None
-) -> int:
+def next_ticket_id(board_text: str, log_text: str, history_max_ticket_id: int | None = None) -> int:
     """The next canonical production ticket ID, from STRUCTURED records only
     (T-639/§9): canonical BOARD ticket lines (`- [ ] T-###`) and the LOG's
     structured `[T-###]` event field. Prose that merely mentions a T-NNN --
@@ -1776,10 +1750,12 @@ def _ticket_targets(
         else:
             owned["next_action"] = "saipen continue"
         owned["transition_from"] = state.get("phase")
-    elif (
-        state.get("phase") == "DONE"
-        and state.get("transition_from")
-        in ("SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP")
+    elif state.get("phase") == "DONE" and state.get("transition_from") in (
+        "SCOUT",
+        "BUILD",
+        "VERIFY",
+        "REVIEW",
+        "SHIP",
     ):
         # This ticket move is a later canonical state event. If it follows an
         # active-ticket block, record the actual DONE -> DONE self-transition
@@ -1978,9 +1954,7 @@ def _plan_finish_ticket(
                 + "; ".join(_att_errors[:3]),
                 ticket=ticket_id,
             )
-        _adm_err = _attempt_mod.ticket_admission_error(
-            ticket_id, _att_records, _hist_events
-        )
+        _adm_err = _attempt_mod.ticket_admission_error(ticket_id, _att_records, _hist_events)
         if _adm_err:
             return _refuse(
                 "INCOMPLETE_TICKET",
@@ -2276,8 +2250,14 @@ def ticket_add(
     )
     new_board = _insert_todo(docs["board"].text_norm, desc)
     event, line = _event_line(
-        docs, log_tail, "DEC", f"T-{tid}", agent,
-        _fold_handover(_state, agent, "ticket added via SAIOPS"), now, op_id
+        docs,
+        log_tail,
+        "DEC",
+        f"T-{tid}",
+        agent,
+        _fold_handover(_state, agent, "ticket added via SAIOPS"),
+        now,
+        op_id,
     )
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     owned = {
@@ -2426,10 +2406,7 @@ def _state_only_plan(
         # construction becomes STALE_STATE instead of being laundered into the
         # new plan as its own precondition.
         target_before = target.before_hash if (root / target.path).exists() else ""
-        if (
-            preconditions.get(target.path) == MISSING_FILE_DEPENDENCY
-            and target_before == ""
-        ):
+        if preconditions.get(target.path) == MISSING_FILE_DEPENDENCY and target_before == "":
             # The domain snapshot represented an absent READ dependency with
             # the safe file token; once that same path becomes a WRITE target,
             # journal CAS represents absence as "". Normalize only this exact
@@ -2896,6 +2873,134 @@ def set_converge_intent(
 
 
 @_state_guard
+def enter_ship_convergence(
+    project_root: Path | str,
+    agent: str,
+    dry_run: bool = False,
+) -> Result:
+    """Atomically enter the special ``ccc`` converge/ship route.
+
+    Unlike the generic converge-intent operation, this transition owns the
+    recovery evidence that makes the I -> SHIP -> J boundary derivable after a
+    crash: the exact pre-SHIP source revision, refreshed active ownership, and
+    the converge state are committed in one journal transaction.
+    """
+    root = Path(project_root)
+    now, utc = _now(), _utc_iso()
+    docs, state, board, log_tail = _read(root)
+    if board["errors"]:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+        )
+    guard = _active_claim_refusal(state, docs["board"].text_norm, agent)
+    if guard is not None:
+        return guard
+
+    try:
+        from freshness import compute_source_identity
+
+        identity = compute_source_identity(root)
+    except Exception as exc:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"cannot capture pre-SHIP source identity: {exc}",
+        )
+
+    op_id = "ccc-entry-" + uuid4_hex()
+    event, line = _event_line(
+        docs,
+        log_tail,
+        "DEC",
+        state.get("task") if state.get("task") not in (None, "", "none") else None,
+        agent,
+        f"ccc converge target -> ship @{identity.source_head}",
+        now,
+        op_id,
+    )
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    transitioned = transition_execution_intent(
+        docs["state"].text_norm,
+        "converge",
+        "ship",
+    )
+    new_state = patch_state(
+        transitioned,
+        {
+            "next_action": state.get("next_action") or "saipen continue",
+            "last_event": event,
+            "updated": utc,
+            "agent": agent,
+        },
+    )
+    refreshed_board, active_ticket = _refresh_active_claim(
+        docs["board"].text_norm,
+        state,
+        agent,
+        utc,
+    )
+    new_board = refreshed_board or docs["board"].text_norm
+    errors = validate_texts(
+        new_state,
+        new_board,
+        new_log,
+        current_agent=agent,
+        sealed_events=docs["_history"],
+    )
+    if errors:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "proposed ccc entry fails fast validation: " + "; ".join(errors[:5]),
+        )
+
+    targets = [_target(docs["log"], ".saipen/LOG.md", "log", new_log)]
+    if refreshed_board is not None:
+        targets.append(_target(docs["board"], ".saipen/BOARD.md", "board", new_board))
+    targets.append(_target(docs["state"], ".saipen/STATE.md", "state", new_state))
+
+    from .journal import source_identity_dependency
+
+    preconditions = _docs_preconditions(docs, "state", "board", "log")
+    preconditions["."] = source_identity_dependency(identity)
+    metadata = {
+        "operation": "ccc_entry",
+        "target": "ship",
+        "status": "COMMITTED",
+        "source_head": identity.source_head,
+        "source_tree_fingerprint": identity.source_tree_fingerprint,
+        "project_identity": _identity(root),
+        "event_id": f"E-{event}",
+    }
+    if active_ticket is not None:
+        metadata["ticket_id"] = active_ticket
+    plan = build_plan(
+        "ccc_entry",
+        agent,
+        _identity(root),
+        {
+            "operation": "ccc_entry",
+            "target": "ship",
+            "source_head": identity.source_head,
+        },
+        preconditions,
+        targets,
+        {
+            "ok": True,
+            "code": "CONVERGE_SET",
+            "execution_intent": "converge",
+            "converge_target": "ship",
+            "source_head": identity.source_head,
+            "event_id": f"E-{event}",
+        },
+        op_id=op_id,
+        receipt_metadata=metadata,
+    )
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
+
+
+@_state_guard
 def finalize_converge_intent(
     project_root: Path | str,
     agent: str,
@@ -3310,16 +3415,34 @@ def stop_checkpoint(
     STOPPED with a missing/stale digest."""
     root = Path(project_root)
     now, utc = _now(), _utc_iso()
-    docs, state, _board, log_tail = _read(root)
+    docs, state, board, log_tail = _read(root)
     task = state.get("task")
     phase = state.get("phase")
+    # CORE-002: the brake uses the same active-claim authority rules as every
+    # other transition/checkpoint. A live FOREIGN BOARD owner must not be
+    # split from STATE.agent by a stop that claims to checkpoint this session
+    # -- refuse zero writes and let adoption happen explicitly.
+    guard = _active_claim_refusal(state, docs["board"].text_norm, agent)
+    if guard is not None:
+        return guard
     # Preserve an already-legal hard WAIT byte-for-byte (hostile-regression,
     # P1#2): `saipen stop` must never erase a legitimate WAIT (safety valve,
     # user brake, markhunt brake, ...) -- only synthesize a resumable action
-    # when no legal WAIT is currently set.
+    # when no legal WAIT is currently set. When no legal WAIT exists and the
+    # goal safety valve is tripped, the resumable action IS the valve's WAIT
+    # (MAINTENANCE § 2.4): a routine continuation must never disguise an
+    # exhausted goal loop. Counters and intent stay untouched.
     _current_na = state.get("next_action")
     if is_legal_wait(_current_na):
         na = _current_na
+    elif state.get("execution_intent") == "goal" and (
+        int(state.get("goal_waves") or 0) >= GOAL_WAVE_CAP
+        or int(state.get("goal_tickets") or 0) >= GOAL_TICKET_CAP
+    ):
+        na = (
+            f"WAIT: safety valve reached ({state.get('goal_waves') or 0} waves / "
+            f"{state.get('goal_tickets') or 0} tickets) -- run 'cc' to continue"
+        )
     else:
         na = f"PHASE {phase} {task}" if task and task != "none" else "saipen continue"
 
@@ -3344,9 +3467,14 @@ def stop_checkpoint(
             "agent": agent,
         },
     )
+    # CORE-002: a SELF-owned active ticket gets its claim lease refreshed and
+    # BOARD joins the journaled mutation so ownership stays coherent with
+    # STATE.agent after the stop. Target order LOG -> BOARD -> STATE.
+    refreshed_board, _active = _refresh_active_claim(docs["board"].text_norm, state, agent, utc)
+    new_board = refreshed_board if refreshed_board is not None else docs["board"].text_norm
     errors = validate_texts(
         new_state,
-        docs["board"].text_norm,
+        new_board,
         new_log,
         current_agent=agent,
         sealed_events=docs["_history"],
@@ -3355,15 +3483,25 @@ def stop_checkpoint(
         return _refuse(
             "VALIDATION_FAILED", "proposed state fails fast validation: " + "; ".join(errors[:5])
         )
+    # CORE-002: digest remaining/awaiting derive from the parsed BOARD active
+    # ticket (its blocker) and the resumable next action, not a generic task
+    # echo that ignores the board value.
+    active_ticket = board["tickets"].get(task or "")
+    blocker = ""
+    if active_ticket is not None:
+        blocker = (active_ticket.get("fields", {}).get("blocker") or "").strip()
+    remaining = task or blocker or "see BOARD"
+    awaiting = na if is_legal_wait(na) else (reason or "nothing")
     digest_content = (
-        "done: stopped via SAIOPS checkpoint\n"
-        f"remaining: {task or 'see BOARD'}\n"
-        f"awaiting: {reason or 'nothing'}\n"
+        f"done: stopped via SAIOPS checkpoint\nremaining: {remaining}\nawaiting: {awaiting}\n"
     )
+    digest_lines = digest_content.rstrip("\n").splitlines()
     targets = [
         _target(docs["log"], ".saipen/LOG.md", "log", new_log),
-        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
+    if refreshed_board is not None:
+        targets.append(_target(docs["board"], ".saipen/BOARD.md", "board", new_board))
+    targets.append(_target(docs["state"], ".saipen/STATE.md", "state", new_state))
     digest_doc = codec.read_document(root / ".saipen" / "kitchen" / "digest.md")
     targets.append(
         TargetPlan(
@@ -3386,12 +3524,14 @@ def stop_checkpoint(
             "code": "STOPPED",
             "next_action": na,
             "digest": str(root / ".saipen" / "kitchen" / "digest.md"),
+            "digest_lines": digest_lines,
         },
         op_id=op_id,
     )
     if dry_run:
         result = _render_plan(plan)
         result.data["digest"] = str(root / ".saipen" / "kitchen" / "digest.md")
+        result.data["digest_lines"] = digest_lines
         return result
     return apply_plan(root, plan)
 
@@ -3553,12 +3693,16 @@ def _plan_record_scope(
             hash_bytes(scope_doc.encode(content)),
         ),
     ]
+    from .journal import source_identity_dependency
+
+    preconditions = _docs_preconditions(docs, "state", "board", "log")
+    preconditions["."] = source_identity_dependency(ident)
     return build_plan(
         "scope",
         agent,
         _identity(root),
         {"operation": "scope", "ticket": ticket_id, "paths": clean},
-        _docs_preconditions(docs, "state", "board", "log"),
+        preconditions,
         targets,
         {
             "ok": True,
@@ -3994,10 +4138,22 @@ def _plan_defer_for_crew(
             "RECOVERY_CONFLICT",
             f"release scope record {scope_path} does not bind ticket {ticket_id}",
         )
-    if scope_record.get("project_identity") != _identity(root):
+    record_lineage = scope_record.get("project_lineage")
+    if record_lineage:
+        from .paths import project_lineage_identity
+
+        live_lineage = project_lineage_identity(root)
+        if not live_lineage or live_lineage != record_lineage:
+            return _refuse(
+                "PATH_ESCAPE",
+                "release scope record belongs to a different project lineage; "
+                "refuse cross-project defer",
+            )
+    elif scope_record.get("project_identity") != _identity(root):
         return _refuse(
             "PATH_ESCAPE",
-            "release scope record was created for a different project; refuse cross-project defer",
+            "legacy release scope record was created for a different runtime project; "
+            "refuse cross-project defer",
         )
     paths = scope_record.get("paths") or {}
     if not paths:
@@ -4093,6 +4249,7 @@ def _plan_defer_for_crew(
         "source_head": scope_record.get("source_head"),
         "source_tree_fingerprint": scope_record.get("source_tree_fingerprint"),
         "project_identity": _identity(root),
+        "project_lineage": scope_record.get("project_lineage"),
         "event_id": f"E-{event}",
         "op_id": op_id,
     }
@@ -4185,10 +4342,12 @@ def _plan_clear_wait_role(
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     new_board = _move_ticket(docs["board"].text_norm, ticket_id, "## DONE", "[x]", "done", "")
     owned = {"last_event": event, "updated": utc, "agent": agent}
-    if (
-        state.get("phase") == "DONE"
-        and state.get("transition_from")
-        in ("SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP")
+    if state.get("phase") == "DONE" and state.get("transition_from") in (
+        "SCOUT",
+        "BUILD",
+        "VERIFY",
+        "REVIEW",
+        "SHIP",
     ):
         owned["transition_from"] = "DONE"
     new_state = patch_state(docs["state"].text_norm, owned)
@@ -4625,12 +4784,16 @@ def _plan_convergence_stage(
         _target(docs["log"], ".saipen/LOG.md", "log", new_log),
         _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
+    from .journal import source_identity_dependency
+
+    preconditions = _docs_preconditions(docs, "state", "board", "log")
+    preconditions["."] = source_identity_dependency(ident)
     return build_plan(
         "convergence_stage",
         agent,
         _identity(root),
         {"operation": "convergence_stage", "stage": stage, "verdict": verdict},
-        _docs_preconditions(docs, "state", "board", "log"),
+        preconditions,
         targets,
         {
             "ok": True,

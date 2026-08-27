@@ -107,6 +107,7 @@ def _iter_operation_records(root: Path, receipt_snapshot=None):
     have been moved to settled/ remain visible to convergence readers.
     """
     from .journal import semantic_receipt_snapshot
+
     snapshot = receipt_snapshot or semantic_receipt_snapshot(root)
     if snapshot.errors:
         return
@@ -164,26 +165,28 @@ def _stage_receipts(root: Path, receipt_snapshot=None) -> list[dict]:
 
 
 def _pick_latest(
-    receipts: list[dict], wanted_stage: str, before_event: int, reasons: list[str]
+    receipts: list[dict], wanted_stage: str, before: dict, reasons: list[str]
 ) -> dict | None:
     """The latest receipt of `wanted_stage` committed strictly before
-    `before_event`, or None. Chronology is the receipt's REAL UTC instant
+    the full canonical chronology key of `before`, or None. Chronology is the
+    receipt's REAL UTC instant
     (iso_utc_sort_key); the LOG event id is only an equal-instant tie-break.
     Ordering by the event counter alone breaks when the global LOG is torn
     (an older receipt can carry a higher E-### than a newer one), which lets
     a stale chain supersede a fresh one -- reproduced on the live tree where
     E-3865/3a343e8d (2026-08-20) outranked E-3547/e045ad07 (2026-08-22)."""
+    before_key = _chrono_key(before)
     candidates = [
         item
         for item in receipts
         if (item.get("receipt_metadata") or {}).get("stage") == wanted_stage
-        and _event_number(item) < before_event
+        and _chrono_key(item) < before_key
     ]
     if not candidates:
         reasons.append(
             f"missing convergence stage {wanted_stage} "
-            f"({STAGE_NAMES[wanted_stage]}) before event "
-            f"E-{before_event}"
+            f"({STAGE_NAMES[wanted_stage]}) before "
+            f"{before.get('op_id', '<unknown>')}"
         )
         return None
     return max(candidates, key=_chrono_key)
@@ -207,15 +210,27 @@ def _identity_of(record: dict) -> tuple[str, str] | None:
     return head, tree
 
 
-def _attribution_claims(root: Path, receipt_snapshot=None) -> dict[str, str | None]:
-    """Owner claims over main-source paths, from the release-scope records
-    and committed crew-defer receipts (item 14: reuse existing
-    attribution/release-scope machinery, never git status inference).
+@dataclass(frozen=True)
+class AttributionClaim:
+    path: str
+    state: str
+    expected_hash: str | None
+    chronology: tuple
+    source_kind: str
+    ticket_id: str
+    op_id: str
+    project_identity: str
+    project_lineage: str
 
-    A claim is {rel: expected content hash} or {rel: None} for a reviewed
-    deletion. The LATEST owning record wins per path.
-    """
-    claims: dict[str, str | None] = {}
+
+def _attribution_snapshot(
+    root: Path, receipt_snapshot=None
+) -> tuple[dict[str, AttributionClaim], list[str]]:
+    """Decode and chronologically merge bound, structured owner claims."""
+    from .paths import project_identity, project_lineage_identity
+
+    claims: dict[str, AttributionClaim] = {}
+    errors: list[str] = []
     scope_dir = root / ".saipen" / "kitchen" / "release_scope"
     # W2-004: convergence must consume only canonical claims, not raw JSON.
     # A claim path that escapes the project, is absolute/drive-qualified, or
@@ -242,27 +257,114 @@ def _attribution_claims(root: Path, receipt_snapshot=None) -> dict[str, str | No
             return False
         return True
 
+    live_identity = project_identity(root)
+    live_lineage = project_lineage_identity(root) or ""
+
+    def _binding(record: dict, label: str) -> tuple[str, str] | None:
+        record_identity = record.get("project_identity")
+        if "project_lineage" in record:
+            record_lineage = record.get("project_lineage")
+            if not isinstance(record_lineage, str) or not record_lineage:
+                errors.append(f"{label} has malformed portable project lineage")
+                return None
+            if not live_lineage or record_lineage != live_lineage:
+                errors.append(f"{label} belongs to a foreign project lineage")
+                return None
+            return str(record_identity or ""), record_lineage
+        if record_identity != live_identity:
+            errors.append(f"legacy {label} belongs to a foreign runtime project")
+            return None
+        return str(record_identity), ""
+
+    def _merge(
+        paths: dict,
+        *,
+        chronology: tuple,
+        source_kind: str,
+        ticket_id: str,
+        op_id: str,
+        binding: tuple[str, str],
+    ) -> None:
+        for rel, expected in paths.items():
+            if not _canonical_claim(rel, expected):
+                errors.append(f"{source_kind} {op_id} carries malformed claim {rel!r}")
+                continue
+            claim = AttributionClaim(
+                path=rel,
+                state="deleted" if expected is None else "present",
+                expected_hash=expected,
+                chronology=chronology,
+                source_kind=source_kind,
+                ticket_id=ticket_id,
+                op_id=op_id,
+                project_identity=binding[0],
+                project_lineage=binding[1],
+            )
+            previous = claims.get(rel)
+            if previous is None or claim.chronology > previous.chronology:
+                claims[rel] = claim
+
     if scope_dir.is_dir():
         for scope in sorted(scope_dir.glob("T-*.json")):
             try:
                 record = json.loads(scope.read_text(encoding="utf-8"))
-            except (OSError, json.JSONDecodeError):
+            except (OSError, json.JSONDecodeError) as exc:
+                errors.append(f"release scope {scope.name} is corrupt: {exc}")
+                continue
+            if record.get("schema_version") != 1 or not isinstance(record.get("ticket"), str):
+                errors.append(f"release scope {scope.name} has malformed authority fields")
+                continue
+            binding = _binding(record, f"release scope {scope.name}")
+            if binding is None:
+                continue
+            created = _strict_created_at(record.get("recorded_at"))
+            if not created:
+                errors.append(f"release scope {scope.name} has invalid recorded_at")
                 continue
             paths = record.get("paths")
             if not isinstance(paths, dict):
+                errors.append(f"release scope {scope.name} has malformed paths")
                 continue
-            for rel, expected in paths.items():
-                if _canonical_claim(rel, expected):
-                    claims[rel] = expected
+            chronology = _chrono_key(
+                {
+                    "created_at": created,
+                    "op_id": str(record.get("op_id") or scope.name),
+                    "receipt_metadata": {"event_id": record.get("event_id", "")},
+                }
+            )
+            _merge(
+                paths,
+                chronology=chronology,
+                source_kind="release_scope",
+                ticket_id=record["ticket"],
+                op_id=str(record.get("op_id") or scope.name),
+                binding=binding,
+            )
     for record in _iter_operation_records(root, receipt_snapshot):
         meta = record.get("receipt_metadata") or {}
         if record.get("operation") != "crew_defer" or record.get("status") != "COMMITTED":
             continue
+        binding = _binding(meta, f"crew defer {record.get('op_id', '<unknown>')}")
+        if binding is None:
+            continue
         paths = meta.get("paths") or {}
-        for rel, expected in paths.items():
-            if _canonical_claim(rel, expected):
-                claims[rel] = expected
-    return claims
+        if not isinstance(paths, dict):
+            errors.append(f"crew defer {record.get('op_id', '<unknown>')} has malformed paths")
+            continue
+        _merge(
+            paths,
+            chronology=_chrono_key(record),
+            source_kind="crew_defer",
+            ticket_id=str(meta.get("ticket_id") or ""),
+            op_id=str(record.get("op_id") or ""),
+            binding=binding,
+        )
+    return claims, errors
+
+
+def _attribution_claims(root: Path, receipt_snapshot=None) -> dict[str, AttributionClaim]:
+    """Latest owning record per path under canonical receipt chronology."""
+    return _attribution_snapshot(root, receipt_snapshot)[0]
 
 
 def source_worktree_deltas(root: Path) -> list[str] | None:
@@ -360,33 +462,33 @@ def attribution_problems(root: Path, receipt_snapshot=None) -> list[str]:
     prove "fully attributed" -- vacuous green is exactly what this check
     exists to refuse.
     """
-    problems: list[str] = []
-    claims = _attribution_claims(root, receipt_snapshot)
+    claims, problems = _attribution_snapshot(root, receipt_snapshot)
     deltas = _main_source_deltas(root)
     if deltas is not None:
         for rel in deltas:
-            expected = claims.get(rel)
-            if expected is None:
-                if rel in claims:
+            claim = claims.get(rel)
+            if claim is None:
+                problems.append(
+                    f"unattributed main-source delta: {rel} -- every "
+                    "change must belong to a reviewed scope"
+                )
+                continue
+            fp = root / rel
+            if claim.state == "deleted":
+                if fp.exists() or fp.is_symlink():
                     problems.append(
                         f"main-source delta {rel} is a reviewed deletion but "
                         "exists again -- stale attribution, refuse"
                     )
-                else:
-                    problems.append(
-                        f"unattributed main-source delta: {rel} -- every "
-                        "change must belong to a reviewed scope"
-                    )
                 continue
-            fp = root / rel
             if not fp.is_file():
                 problems.append(f"attributed path {rel} is missing -- reviewed scope stale, refuse")
                 continue
             live = _quick_hash(fp.read_bytes())
-            if live != expected:
+            if live != claim.expected_hash:
                 problems.append(
                     f"attributed path {rel} changed after its reviewed "
-                    f"scope (expected {expected}, live {live}) -- stale, "
+                    f"scope (expected {claim.expected_hash}, live {live}) -- stale, "
                     "re-review before claiming a fixed point"
                 )
         return problems
@@ -397,9 +499,9 @@ def attribution_problems(root: Path, receipt_snapshot=None) -> list[str]:
             "board alone"
         )
         return problems
-    for rel, expected in claims.items():
+    for rel, claim in claims.items():
         fp = root / rel
-        if expected is None:
+        if claim.state == "deleted":
             if fp.exists() or fp.is_symlink():
                 problems.append(
                     f"reviewed deletion {rel} exists again -- stale attribution, refuse"
@@ -408,7 +510,7 @@ def attribution_problems(root: Path, receipt_snapshot=None) -> list[str]:
         if not fp.is_file():
             problems.append(f"attributed path {rel} is missing -- stale")
             continue
-        if _quick_hash(fp.read_bytes()) != expected:
+        if _quick_hash(fp.read_bytes()) != claim.expected_hash:
             problems.append(
                 f"attributed path {rel} changed after its reviewed scope -- stale, refuse"
             )
@@ -484,7 +586,6 @@ def convergence_verdict(
             source={"source_head": live[0], "source_tree_fingerprint": live[1]},
         )
     latest_i = i_receipts[-1]
-    i_event = _event_number(latest_i)
     i_identity = _identity_of(latest_i)
     if i_identity is None:
         reasons.append("final forced HUNT receipt lacks a bound source identity")
@@ -506,10 +607,10 @@ def convergence_verdict(
             source={"source_head": live[0], "source_tree_fingerprint": live[1]},
         )
 
-    h = _pick_latest(receipts, "H", i_event, reasons)
-    g = _pick_latest(receipts, "G", _event_number(h) if h else i_event, reasons)
-    f = _pick_latest(receipts, "F", _event_number(g) if g else i_event, reasons)
-    e = _pick_latest(receipts, "E", _event_number(f) if f else i_event, reasons)
+    h = _pick_latest(receipts, "H", latest_i, reasons)
+    g = _pick_latest(receipts, "G", h or latest_i, reasons)
+    f = _pick_latest(receipts, "F", g or latest_i, reasons)
+    e = _pick_latest(receipts, "E", f or latest_i, reasons)
     if None in (e, f, g, h):
         return ConvergenceVerdict(
             False,
@@ -518,6 +619,14 @@ def convergence_verdict(
         )
 
     chain = [e, f, g, h, latest_i]
+    chronology = [_chrono_key(record) for record in chain]
+    if chronology != sorted(chronology) or len(set(chronology)) != len(chronology):
+        reasons.append("convergence receipts do not satisfy strict E<F<G<H<I chronology")
+        return ConvergenceVerdict(
+            False,
+            tuple(reasons),
+            source={"source_head": live[0], "source_tree_fingerprint": live[1]},
+        )
     ef = _identity_of(e)
     gh = _identity_of(g)
     hi = _identity_of(h)

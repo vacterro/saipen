@@ -15,14 +15,20 @@ from __future__ import annotations
 
 import hashlib
 import json
+import threading
 from contextlib import suppress
 from pathlib import Path
 
+from .lock import file_writer_lock
+from .paths import safe_atomic_write_bytes, safe_unlink_owned
+
 CACHE_REL = Path(".saipen") / "cache" / "continuation-liveness.json"
+LOCK_REL = Path(".saipen") / "locks" / "continuation-liveness.lock"
 
 # The second consecutive identical actionable carrier means the previous one
 # did NOT produce a qualifying state change: that is a stall, not progress.
 STALL_THRESHOLD = 2
+_LIVENESS_GUARD = threading.Lock()
 
 
 def action_fingerprint(
@@ -56,17 +62,25 @@ def action_fingerprint(
 
 
 def _cache_path(project_root: Path | str) -> Path:
-    return Path(project_root) / CACHE_REL
+    return Path(project_root).resolve() / CACHE_REL
 
 
 def _load(path: Path) -> dict:
+    from .paths import prove_owned_regular
+
     try:
-        raw = path.read_text(encoding="utf-8-sig")
-    except OSError:
+        st = prove_owned_regular(path)
+    except (FileNotFoundError, ValueError):
         return {}
     try:
-        data = json.loads(raw)
-    except ValueError:
+        from .paths import read_bound_regular_bytes
+
+        raw = read_bound_regular_bytes(path, st, max_bytes=64 * 1024)
+    except (OSError, ValueError):
+        return {}
+    try:
+        data = json.loads(raw.decode("utf-8-sig"))
+    except (ValueError, UnicodeDecodeError):
         return {}
     return data if isinstance(data, dict) else {}
 
@@ -79,24 +93,39 @@ def record_actionable(project_root: Path | str, fingerprint: str) -> dict:
     in a row. A write failure degrades to a first observation -- liveness is
     best-effort projection and must never become a new failure surface.
     """
-    path = _cache_path(project_root)
-    data = _load(path)
-    if data.get("fingerprint") == fingerprint and isinstance(data.get("repeats"), int):
-        repeats = data["repeats"] + 1
-    else:
-        repeats = 1
-    doc = {"schema_version": 1, "fingerprint": fingerprint, "repeats": repeats}
+    root = Path(project_root).resolve()
+    path = root / CACHE_REL
     try:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(
-            json.dumps(doc, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-        )
-    except OSError:
+        with _LIVENESS_GUARD, file_writer_lock(root / LOCK_REL, root, blocking=True):
+            data = _load(path)
+            if data.get("fingerprint") == fingerprint and isinstance(data.get("repeats"), int):
+                repeats = data["repeats"] + 1
+            else:
+                repeats = 1
+            doc = {
+                "schema_version": 1,
+                "fingerprint": fingerprint,
+                "repeats": repeats,
+            }
+            body = (json.dumps(doc, indent=2, sort_keys=True) + "\n").encode("utf-8")
+            safe_atomic_write_bytes(
+                path,
+                body,
+                kind="continuation liveness cache",
+                ownership_root=root,
+            )
+    except (OSError, ValueError):
         return {"stalled": False, "stall_repeats": 1}
     return {"stalled": repeats >= STALL_THRESHOLD, "stall_repeats": repeats}
 
 
 def clear(project_root: Path | str) -> None:
     """Forget the last actionable carrier (real progress happened)."""
-    with suppress(OSError):
-        _cache_path(project_root).unlink()
+    root = Path(project_root).resolve()
+    lock = file_writer_lock(root / LOCK_REL, root, blocking=True)
+    with suppress(OSError, ValueError), _LIVENESS_GUARD, lock:
+        safe_unlink_owned(
+            root / CACHE_REL,
+            kind="continuation liveness cache",
+            ownership_root=root,
+        )

@@ -253,8 +253,12 @@ arbitrary nonempty revision label.
 ## 4. Handoff
 
 **Main agent -> subSaipen**: writes tickets into `<name>/BOARD.md`'s
-`## TODO`. The subSaipen reads its own board, picks the next ticket, same
-Pick Rule as Core (CORE.md §1.6).
+`## TODO`. The public status/spawn/adopt handoff and serial crew `RUN_ROLE`
+carrier also expose the effective USERPERSON fingerprint plus only the role's
+CORE.md §1.10-allowed preference categories, preserving global/project
+provenance; absence emits no projection. The subSaipen reads its own board,
+picks the next ticket, same Pick Rule as Core (CORE.md §1.6). USERPERSON source
+files or an effective cache are never copied into the worker tree.
 
 **SubSaipen -> main agent**: finishes a ticket, and runs `saipen prepare` to package the result. `PREPARE` instructs the subSaipen to:
 1. Re-verify the findings against current HEAD (freshness).

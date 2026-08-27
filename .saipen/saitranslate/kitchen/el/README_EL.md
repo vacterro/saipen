@@ -26,7 +26,7 @@
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.231.8** | [Συμβολισμός](SPEC.md) | [Οδηγός](GUIDE.md) | [Πυρήνας](saipen/CORE.md) | [Συντήρηση](saipen/MAINTENANCE.md) | [Στυλ](saipen/STYLE.md) | [Διεπαφή Χρήστη](saipen/UI.md) | [Συμμόρφωση](saipen/CONFORMANCE.md) |MIT
+**v7.231.9** | [Συμβολισμός](SPEC.md) | [Οδηγός](GUIDE.md) | [Πυρήνας](saipen/CORE.md) | [Συντήρηση](saipen/MAINTENANCE.md) | [Στυλ](saipen/STYLE.md) | [Διεπαφή Χρήστη](saipen/UI.md) | [Συμμόρφωση](saipen/CONFORMANCE.md) |MIT
 
 **Συντομεύσεις:** το `cc` συνεχίζει το πλαίσιο του έργου μέχρι τη σύγκλιση (συνεχίζει έναν ενεργό στόχο, αν έχει οριστεί), το `sss` εμφανίζει την κατάσταση χωρίς να αγγίζει κώδικα και το `ss` αποθηκεύει σημείο ελέγχου και σταματάει. [Δες τον πλήρη χάρτη 19 πλήκτρων](saipen/RFC.md#110-command-surface). Λειτουργούν και τα κυριλλικά δίδυμα: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 

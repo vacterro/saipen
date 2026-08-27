@@ -1673,6 +1673,7 @@ def sub_instance_health(
     source_id=None,
     manifest_entry: ManifestEntry | None = None,
     records: tuple[dict, ...] | None = None,
+    authority_errors: tuple[str, ...] = (),
 ) -> dict:
     """The full mechanically-derived health record for one sub (SAICREW I).
 
@@ -1680,6 +1681,18 @@ def sub_instance_health(
     subs evidence helper iterates it instead of reopening disk (T-1004)."""
     root = Path(project_root)
     info = {"name": name}
+    if authority_errors:
+        return {
+            **info,
+            "phase": None,
+            "task": None,
+            "health": HEALTH_INVALID,
+            "authority": "CORRUPT_JOURNAL",
+            "authority_errors": list(authority_errors[:3]),
+            "board": {"valid": False, "errors": [], "counts": {}},
+            "outbox": {"present": False, "counts": {}, "errors": []},
+            "collect": {"state": "INVALID", "reason": "semantic receipt corruption"},
+        }
     if manifest_entry is None:
         _manifest_raw, manifest_entry, manifest_errors = _registered_entry(root, name)
         if manifest_errors:
@@ -1816,15 +1829,24 @@ def sub_list(project_root: Path | str) -> Result:
     # Per-role health is not an independent receipt universe -- all roles in
     # one sub list belong to the same read-only command snapshot. Feeding the
     # same records to every helper removes N-role lifetime-receipt re-scans.
-    try:
-        from .journal import semantic_receipt_snapshot
+    from .journal import semantic_receipt_snapshot
 
+    try:
         _receipt_snapshot = semantic_receipt_snapshot(root)
-        _records = _receipt_snapshot.records
-        if _receipt_snapshot.errors:
-            _records = ()
-    except Exception:
-        _records = None
+    except Exception as exc:
+        return _refuse(
+            "CORRUPT_JOURNAL",
+            f"cannot capture semantic receipt authority: {type(exc).__name__}: {exc}",
+            recovery_required=True,
+        )
+    if _receipt_snapshot.errors:
+        return _refuse(
+            "CORRUPT_JOURNAL",
+            "semantic receipt corruption: " + "; ".join(_receipt_snapshot.errors[:3]),
+            recovery_required=True,
+            errors=list(_receipt_snapshot.errors[:3]),
+        )
+    _records = _receipt_snapshot.records
     lines = []
     blocked = []
     for entry in entries:
@@ -1877,7 +1899,24 @@ def sub_status(project_root: Path | str, name: str) -> Result:
         source_id = compute_source_identity(root)
     except Exception:
         source_id = None
-    health = sub_instance_health(root, name, source_id, entry)
+    from .journal import semantic_receipt_snapshot
+
+    try:
+        receipt_snapshot = semantic_receipt_snapshot(root)
+    except Exception as exc:
+        return _refuse(
+            "CORRUPT_JOURNAL",
+            f"cannot capture semantic receipt authority: {type(exc).__name__}: {exc}",
+            recovery_required=True,
+        )
+    if receipt_snapshot.errors:
+        return _refuse(
+            "CORRUPT_JOURNAL",
+            "semantic receipt corruption: " + "; ".join(receipt_snapshot.errors[:3]),
+            recovery_required=True,
+            errors=list(receipt_snapshot.errors[:3]),
+        )
+    health = sub_instance_health(root, name, source_id, entry, records=receipt_snapshot.records)
     if userperson_projection["active"]:
         health["userperson_projection"] = userperson_projection
     return Result(ok=True, code="SUB_STATUS", data=health)
@@ -3354,6 +3393,7 @@ def _iter_operation_records(root: Path, records: tuple[dict, ...] | None = None)
         yield from records
         return
     from .journal import SemanticReceiptCorruptionError, semantic_receipt_snapshot
+
     snapshot = semantic_receipt_snapshot(root)
     if snapshot.errors:
         # CORE-002 (audit fdc73e06): silent-empty here collapsed CORRUPT into
@@ -3420,9 +3460,12 @@ def _durable_collect_receipt(record: dict) -> bool:
     applied = record.get("resolution_applied_targets") or []
     skipped = record.get("resolution_skipped_targets") or []
     target_paths = [target.get("path") for target in targets]
-    return bool(target_paths) and not skipped and all(
-        target.get("applied") is True and target.get("path") in applied
-        for target in targets
+    return (
+        bool(target_paths)
+        and not skipped
+        and all(
+            target.get("applied") is True and target.get("path") in applied for target in targets
+        )
     )
 
 

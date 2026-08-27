@@ -26,7 +26,7 @@
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.231.8** | [Спецификация](SPEC.md) | [Руководство](GUIDE.md) | [Ядро](saipen/CORE.md) | [Обслуживание](saipen/MAINTENANCE.md) | [Стиль](saipen/STYLE.md) | [Интерфейс](saipen/UI.md) | [Соответствие](saipen/CONFORMANCE.md) | MIT
+**v7.231.9** | [Спецификация](SPEC.md) | [Руководство](GUIDE.md) | [Ядро](saipen/CORE.md) | [Обслуживание](saipen/MAINTENANCE.md) | [Стиль](saipen/STYLE.md) | [Интерфейс](saipen/UI.md) | [Соответствие](saipen/CONFORMANCE.md) | MIT
 
 **Короткие кнопки, чтоб пальцы не отсохли:** `cc` ведёт проект к схождению (продолжает активную цель, если она задана), `sss` докладывает статус и код не лапает, `ss` ставит чекпоинт и жмёт тормоз. [Вся карта из 19 шорткатов](saipen/RFC.md#110-command-surface); на русской раскладке работают `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 

@@ -1,6 +1,10 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.231.9 -- 2026-08-27 -- SRC-003 Audit All-3 Repair Wave (T-1171)
+
+- T-1171: 28/28 SRC-003 audit clauses VERIFIED. Wave 1 (CORE-001..004): journaled stop/ss, claim-safe stop_checkpoint, non-recursive tt test orchestrator, atomic ccc entry marker. Wave 2 (W2-001..017): journal intermediate file ownership (no-follow/O_CREAT|O_EXCL), liveness cache ownership + concurrency-safe read-modify-write, producer descendant ownership, crash-recoverable source close/archive/purge with idempotent settle, lock acquisition failure unwind, final lock-file no-follow ownership, coherent STATE/BOARD before targeted producer integration, Git-compatible exclusive index rollback lock, canonical chronology for convergence predecessor selection, one coherent ProjectSnapshot for status/next/explain, structured chronological project-bound attribution claims, portable lineage binding for crew defer scope, non-fatal post-COMMITTED settlement, consistent structured SubSaipen receipt corruption handling, source-identity APPLY CAS, truthful producer cleanup_pending. Wave 3 (PERF-001..007): call-scoped linear intake validation, bounded indexed source duplicate lookup, disposable scenario validation, bounded semantic receipt decoding, purpose-specific LOG history retention, owned cross-platform child process-tree cancellation, suite-owned temporary directory cleanup.
+
 ## 7.231.8 -- 2026-08-27 -- Repeated CC False-Loop Hardening (T-1170)
 
 - T-1170: repeated cc remains command, same next_action not same state, RUN_ROLE executed, validator not continue, exact no-op only by command

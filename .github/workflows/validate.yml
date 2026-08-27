@@ -42,7 +42,7 @@ jobs:
       - name: Fast unit gate (import + unittest discover)
         run: |
           python -c "import py_compile, pathlib, sys; [py_compile.compile(str(p), doraise=True) for p in pathlib.Path('tools').rglob('*.py')]; print('py_compile PASS')"
-          python -m unittest discover -s tools -p "test_*.py" -v
+          python -B tools/test_runner.py --family unit
 
       # Import-closure smoke: every shipped module + declared unittest must import cleanly.
       - name: Import closure smoke
