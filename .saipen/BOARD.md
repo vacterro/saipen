@@ -1,6 +1,7 @@
 ## DOING
 ## TODO
 ## DONE
+- [x] T-1166 [P1] Repair changelog-order red control after active-set compaction | verify: python tools/audit_checks.py reports 271/271 evidence cases with no SKIP; focused changelog-order mutation fails on slug changelog-order | owner: codex | claim_time: 2026-08-26T20:57:01Z
 - [x] T-1165 [P2] Archive excess CHANGELOG entries verbatim so active changelog keeps the documented recent set | verify: CHANGELOG.md retains 10 newest entries; older entries moved verbatim to CHANGELOG_ARCHIVE.md; validator has no changelog-unarchived warning | owner: opencode | claim_time: 2026-08-26T14:39:23Z
 - [x] T-1164 [P1] Canonical Ruff gate fails on 11 diagnostics in audit tests and continuity probes | verify: python -m ruff check tools/ tests/ PASS; full unittest, audit checks, scenarios, validator green | owner: opencode | claim_time: 2026-08-26T14:33:33Z
 - [x] T-1163 [P0] Global USERPERSON legacy Markdown star bullets are rejected by strict loader, blocking boot/context/crew after v7.231.0 | verify: tools/test_userperson_global PASS; actual global 241-entry profile loads; full unittest and validator green | owner: opencode | claim_time: 2026-08-26T13:41:46Z
