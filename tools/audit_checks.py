@@ -2073,10 +2073,10 @@ CASES: list[tuple[str, str, object, str]] = [
     (
         "CHANGELOG entries fall out of descending order",
         "CHANGELOG.md",
-        # 7.206.0 was the old anchor; it has been sealed into the archive, so the
-        # mutation became a no-op. A mid-file entry is bumped above the head so
+        # Older anchors were sealed into the archive, so their mutations became
+        # no-ops. A current mid-file entry is bumped above the head so
         # only the descending-order rung fires, never the head-vs-VERSION one.
-        replace("## 7.212.0", "## 7.300.0"),
+        replace("## 7.230.0", "## 7.300.0"),
         "changelog-order",
     ),
     (

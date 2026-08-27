@@ -1,0 +1,13 @@
+{
+  "op_id": "scope-3140e491ee744155ba82b4e8f516a392",
+  "paths": {
+    "tools/audit_checks.py": "0e36dd81b15aa221"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-08-27T01:20:45Z",
+  "schema_version": 1,
+  "source_head": "0ab902086e1f10e3ea85743fe54e3de017baf6f5",
+  "source_tree_fingerprint": "git-delta-v1:869a6519cb820b9db37d01de9fa1b6a3cec8bc328dea3786eea52afe5a39f0b3",
+  "ticket": "T-1166"
+}
