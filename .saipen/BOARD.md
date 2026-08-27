@@ -1,6 +1,7 @@
 ## DOING
 ## TODO
 ## DONE
+- [x] T-1170 [P1] 7 | verify: 7 is complete and the repository-declared verification harness passes | owner: codex | claim_time: 2026-08-27T01:48:11Z
 - [x] T-1169 [P1] 6 | verify: 6 is complete and the repository-declared verification harness passes | owner: codex | claim_time: 2026-08-27T01:44:44Z
 - [x] T-1168 [P1] 5 | verify: 5 is complete and the repository-declared verification harness passes | owner: codex | claim_time: 2026-08-27T01:41:51Z
 - [x] T-1167 [P1] 4 | verify: 4 is complete and the repository-declared verification harness passes | owner: codex | claim_time: 2026-08-27T01:37:28Z
