@@ -54,3 +54,15 @@
 - 27.08.26 01:41 [E-4535] [parent: E-4534] [T-1168] [agent: codex] [op: scope-ed15e4ed9f5e4db3ac9e7e9e7dfa1ca0] DEC: release scope recorded -- 1 path(s) bound to 6be4a07eb87b
 - 27.08.26 01:43 [E-4536] [parent: E-4535] [T-1168] [agent: codex] [op: finish-2ca4a227697c4624863d85a3f7d699d9] RUN: ship v7.231.6 -> content commit ca6e6ec390ec pushed
 - 27.08.26 01:43 [E-4537] [parent: E-4536] [T-1168] [agent: codex] [op: finish-2ca4a227697c4624863d85a3f7d699d9] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 27.08.26 01:43 [E-4538] [parent: E-4537] [agent: codex] [op: goal-entry-e816fbcc890a4871862af944beb27420] DEC: goal pivot -- 6
+- 27.08.26 01:43 [E-4539] [parent: E-4538] [agent: codex] [op: goal-entry-e816fbcc890a4871862af944beb27420] DEC: goal_waves 0->1
+- 27.08.26 01:43 [E-4540] [parent: E-4539] [T-1169] [agent: codex] [op: transition-22c270481e1a4f9cb3d3dab0cfa7d56e] RUN: transition to BUILD
+- 27.08.26 01:43 [E-4541] [parent: E-4540] [T-1169] [agent: codex] [op: transition-e3916568b37a42acb7cfbbca48fe4b0a] RUN: transition to VERIFY
+- 27.08.26 01:44 [E-4542] [parent: E-4541] [T-1169] [agent: codex] [op: checkpoint-24c51feaae884704bb32010ffc54dc2c] RUN: VERIFY -- ruff PASS; unittest 318 PASS; CCC vs SC distinct; CONTROLS in manifest; conf: high
+- 27.08.26 01:44 [E-4543] [parent: E-4542] [T-1169] [agent: codex] [op: checkpoint-3e6c8ac732b94568a8524a64d4165ffb] RUN: PASS -- ccc not crew, ff performance analytic lens, manifest 188 files; conf: high
+- 27.08.26 01:44 [E-4544] [parent: E-4543] [T-1169] [agent: codex] [op: transition-cf67ad6ddd4243d08489def259ef5e37] RUN: transition to REVIEW
+- 27.08.26 01:44 [E-4545] [parent: E-4544] [op: transition-cf67ad6ddd4243d08489def259ef5e37] DEC: goal_tickets 0->1
+- 27.08.26 01:44 [E-4546] [parent: E-4545] [T-1169] [agent: codex] [op: transition-70f6ff24878e4eaaaebbd71b0288e316] RUN: transition to SHIP
+- 27.08.26 01:44 [E-4547] [parent: E-4546] [T-1169] [agent: codex] [op: scope-f4f455df1c0e4c44bd5c16a8ade77b07] DEC: release scope recorded -- 1 path(s) bound to 2b84fa5f6937
+- 27.08.26 01:45 [E-4548] [parent: E-4547] [T-1169] [agent: codex] [op: finish-f5411f8f5cc7414a8fe3d0d70cbca30e] RUN: ship v7.231.7 -> content commit 6e4f341eacf2 pushed
+- 27.08.26 01:45 [E-4549] [parent: E-4548] [T-1169] [agent: codex] [op: finish-f5411f8f5cc7414a8fe3d0d70cbca30e] DEC: ticket finished via SAIOPS -- completion (from SHIP)
