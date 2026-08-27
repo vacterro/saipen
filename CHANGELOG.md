@@ -1,6 +1,10 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.231.6 -- 2026-08-27 -- Runtime Manifest Completeness (T-1168)
+
+- T-1168: add CONTROLS.md to runtime MANIFEST (188 files), install via inject.ps1/sh, autoinject stale detection, CCC vs SC distinct targets
+
 ## 7.231.5 -- 2026-08-27 -- Shortcut Payload Routing (T-1167)
 
 - T-1167: `gg <payload>` now routes mechanically via shared resolver; leading shortcut owns payload, destination validates; bare `gg` usage preserved; `cc`/`sss` surplus recognized then refused; unknown tokens still fail closed.

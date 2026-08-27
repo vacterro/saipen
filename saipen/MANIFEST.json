@@ -27,6 +27,7 @@
     {"src": "saipen/RFC.md", "required": true},
     {"src": "saipen/SKILL.md", "required": true},
     {"src": "saipen/UI.md", "required": true},
+    {"src": "saipen/CONTROLS.md", "required": true},
     {"src": "saipen/HABITS.md", "required": true},
     {"src": "saipen/CONFORMANCE.md", "required": true},
     {"src": "saipen/MANIFEST.json", "required": true},

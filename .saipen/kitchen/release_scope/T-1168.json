@@ -1,0 +1,13 @@
+{
+  "op_id": "scope-ed15e4ed9f5e4db3ac9e7e9e7dfa1ca0",
+  "paths": {
+    "saipen/MANIFEST.json": "4db976611fa46a4b"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-08-27T01:41:57Z",
+  "schema_version": 1,
+  "source_head": "6be4a07eb87b80904d28a8a4be87e073d9ac0f9a",
+  "source_tree_fingerprint": "git-delta-v1:3be5ba0e9010cfc11f741a2b1e0e37e9e82886e0c289eff91fc3302cec7ef8da",
+  "ticket": "T-1168"
+}
