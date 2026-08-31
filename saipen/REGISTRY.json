@@ -27,7 +27,8 @@
       "EXEC-HUSH-01": {"owner": "saipen/EXECUTION.md", "test": "tools/test_continue_improve_fallthrough.py", "subject": "HUSH precedence, silence and mandatory output"},
       "PHASE-DELTA-01": {"owner": "saipen/CORE.md", "test": "tools/test_protocol_registry.py", "subject": "16 lazy phase documents and delta-only phase contracts"},
       "CONFORMANCE-CORPUS-01": {"owner": "tests/conformance_cases.jsonl", "test": "tools/test_conformance_corpus.py", "subject": "machine corpus completeness and generated human view"},
-      "CONTEXT-BUDGET-01": {"owner": "saipen/CORE.md", "test": "tools/protocol_budget.py", "subject": "routine protocol load budgets"}
+      "CONTEXT-BUDGET-01": {"owner": "saipen/CORE.md", "test": "tools/protocol_budget.py", "subject": "routine protocol load budgets"},
+      "SOURCE-AUDIT-INBOX-01": {"owner": "saipen/SOURCES.md", "test": "tools/test_audit_inbox.py", "subject": "audit inbox transport identity, routing position and delete gate"}
     }
   },
   "rule_owners": {
@@ -46,7 +47,8 @@
     "EXEC-HUSH-01": "saipen/EXECUTION.md",
     "PHASE-DELTA-01": "saipen/CORE.md",
     "CONFORMANCE-CORPUS-01": "tests/conformance_cases.jsonl",
-    "CONTEXT-BUDGET-01": "saipen/CORE.md"
+    "CONTEXT-BUDGET-01": "saipen/CORE.md",
+    "SOURCE-AUDIT-INBOX-01": "saipen/SOURCES.md"
   },
   "shortcuts": {
     "gg": "saipen goal",
@@ -227,6 +229,7 @@
       "transition",
       "checkpoint",
       "source",
+      "audit",
       "stop",
       "ticket",
       "scope",
@@ -466,6 +469,24 @@
     "marker": ".saipen/extensions/continue_fallback.json",
     "owner": "tools/saipen_engine/continue_fallback.py",
     "test": "tools/test_continue_improve_fallthrough.py"
+  },
+  "audit_inbox": {
+    "rule_id": "SOURCE-AUDIT-INBOX-01",
+    "directory": "audit",
+    "filename_regex": "^[1-9][0-9]*\\.md$",
+    "recursive": false,
+    "source_kind": "external_audit",
+    "generation_identity": "relative_path+sha256",
+    "ordering": "LOWEST_WORKABLE_LAYER",
+    "continue_position": "AFTER_ACTIVE_BEFORE_BOARD_PICK",
+    "delete_gate": "SOURCE_CLOSED_AND_CURRENT_HASH_MATCHES",
+    "delete_operation": "audit_inbox.consume",
+    "renumber_after_delete": false,
+    "binding": ".saipen/intake/audit_inbox.json",
+    "migration_binding": "legacy_transport_equivalent",
+    "generation_states": ["NEW", "ACTIVE", "BLOCKED", "CLOSED_PENDING_DELETE", "DELETED", "INVALID", "MISSING_AFTER_CAPTURE"],
+    "owner": "tools/saipen_engine/audit_inbox.py",
+    "test": "tools/test_audit_inbox.py"
   },
   "hush_precedence": {
     "order": ["user", "safety", "core", "execution_policy", "style"],

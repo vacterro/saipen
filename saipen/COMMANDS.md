@@ -49,6 +49,7 @@ global authority and deterministic priority rules.
 | `saipen status` | read-only | CMD-ROUTING-01 |
 | `saipen runtime` | read-only | CMD-ROUTING-01 |
 | `saipen source` | intake | CMD-ROUTING-01 |
+| `saipen audit [status\|inspect\|ingest]` | intake transport | CMD-CONTINUE-01 |
 | `saipen userperson` | meta | CMD-ROUTING-01 |
 | `saipen sub <verb> <name>` | sub | CMD-ROUTING-01 |
 
@@ -74,7 +75,15 @@ Cyrillic `сс` → Latin `cc` (continue), never `[ss]` (stop).
 
 <!-- RULE-OWNER: CMD-CONTINUE-01 -->
 
+`saipen continue` routes: recovery -> WAIT -> active phase-owned continuation
+-> Audit Inbox -> ordinary BOARD Pick Rule -> maintenance -> bounded Improve
+fallback. The Audit Inbox stage checks the canonical `audit/` layers
+(`SOURCE-AUDIT-INBOX-01`, SOURCES.md): a workable unconsumed audit outranks
+SELECTION of unrelated queued TODO but never preempts active Work, and a
+project holding one is never idle.
+
 `saipen continue` falls through to `saipen improve` ONCE after recovery,
-blocked, queued, and required-follow-up routing is exhausted. An already-active
-prepared cycle is resumed, never duplicated. A completed/archived cycle allows
-fresh discovery. No unbounded improve carousel.
+blocked, queued, audit-inbox and required-follow-up routing is exhausted. An
+already-active prepared cycle is resumed, never duplicated. A
+completed/archived cycle allows fresh discovery. No unbounded improve
+carousel.

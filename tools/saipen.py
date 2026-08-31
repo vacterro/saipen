@@ -590,7 +590,11 @@ def _status(project_root: Path, as_json: bool) -> int:
     if _corrupt:
         _emit(_corrupt_refusal(_corrupt), as_json)
         return 1
-    from saipen_engine.router import route_next, routing_failure_code
+    from saipen_engine.router import (
+        audit_inbox_projection,
+        route_next,
+        routing_failure_code,
+    )
 
     # P0#4: the freshly negotiated current-session capability gates routing --
     # a read-only session routes RESTATE_AND_STOP, never a mutating action.
@@ -603,6 +607,7 @@ def _status(project_root: Path, as_json: bool) -> int:
         current_capability=_negotiate_capability(project_root),
         current_agent=resolved_agent,
         snap=snap,
+        audit_inbox=audit_inbox_projection(project_root),
     )
     if not routed.get("ok") and routing_failure_code(routed) == "VALIDATION_FAILED":
         # A malformed/binding failure must NOT project a healthy surface from
@@ -935,7 +940,12 @@ def _next_action(
     subject = state.get("task")
     board = parse_board(board_text)
     parked = _parked_work(board["tickets"], state)
-    from saipen_engine.router import load_for_action, route_next, routing_failure_code
+    from saipen_engine.router import (
+        audit_inbox_projection,
+        load_for_action,
+        route_next,
+        routing_failure_code,
+    )
 
     # P0#4: the freshly negotiated current-session capability gates routing.
     # T-1006: routing judges claim truth against the canonical acting seat.
@@ -950,6 +960,7 @@ def _next_action(
         current_capability=_negotiate_capability(project_root),
         current_agent=resolved_agent,
         snap=snap,
+        audit_inbox=audit_inbox_projection(project_root),
     )
     if not routed.get("ok"):
         # The router owns the stable failure code: recovery conflicts/pending
@@ -1052,7 +1063,11 @@ def _explain_next(project_root: Path, as_json: bool) -> int:
         )
         return 1
     parked = _parked_work(parse_board(board_text)["tickets"], state)
-    from saipen_engine.router import route_next, routing_failure_code
+    from saipen_engine.router import (
+        audit_inbox_projection,
+        route_next,
+        routing_failure_code,
+    )
 
     resolved_agent = (
         _AGENT_OVERRIDE if _AGENT_OVERRIDE is not None else (state.get("agent") or AGENT)
@@ -1065,6 +1080,7 @@ def _explain_next(project_root: Path, as_json: bool) -> int:
         current_capability=_negotiate_capability(project_root),
         current_agent=resolved_agent,
         snap=snap,
+        audit_inbox=audit_inbox_projection(project_root),
     )
     if not routed.get("ok"):
         carrier = {
@@ -1869,6 +1885,216 @@ def _continue(
         fallthrough_to_improve=True,
         dry_run=dry_run,
     )
+
+
+def _audit(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
+    """Audit Inbox admin surface (SOURCE-AUDIT-INBOX-01).
+
+    Subcommands:
+      status            compact read-only projection (default)
+      inspect <N>       one layer's transport facts, read-only, no body dump
+      ingest            settle proven cleanup, then capture the lowest workable
+                        layer and derive its canonical Work (mutating)
+
+    Ordinary operation needs NONE of these: `cc` routes through the same
+    projection. They exist for inspection and for the executable action the
+    router names.
+    """
+    from saipen_engine import audit_inbox
+
+    action = args[0] if args else "status"
+    rest = args[1:]
+
+    if action == "status":
+        _emit(audit_inbox.status(project_root), as_json)
+        return 0
+
+    if action == "inspect":
+        if len(rest) != 1 or not rest[0].isdigit():
+            _emit(
+                {"ok": False, "code": "VALIDATION_FAILED", "detail": "inspect needs <N>"},
+                as_json,
+            )
+            return 2
+        rel = f"{audit_inbox.AUDIT_DIRNAME}/{int(rest[0])}.md"
+        for item in audit_inbox.classify(project_root)["layers"]:
+            if item["rel"] == rel:
+                _emit({"ok": True, "code": "AUDIT_INBOX_STATUS", "layer": item}, as_json)
+                return 0
+        _emit({"ok": False, "code": "TICKET_NOT_FOUND", "detail": rel}, as_json)
+        return 1
+
+    if action != "ingest":
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "audit needs a subcommand: status|inspect|ingest",
+            },
+            as_json,
+        )
+        return 2
+    if rest:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"audit ingest takes no arguments; surplus: {' '.join(rest)}",
+            },
+            as_json,
+        )
+        return 2
+    if not dry_run and _negotiate_capability(project_root) == "read-only":
+        return _capability_refusal(as_json)
+
+    agent = _agent_for(project_root)
+    # Bootstrap migration: layers that already own canonical Work are BOUND,
+    # never recaptured. Without this the first activation would look at a
+    # hand-converted audit and manufacture a duplicate receipt and ticket.
+    migrated = audit_inbox.reconcile_bootstrap(project_root) if not dry_run else []
+    state = audit_inbox.classify(project_root)
+    layers = state["layers"]
+
+    # CLEANUP FIRST: a completed audit must disappear on the next `cc` without
+    # a separate ritual. Every settle re-proves the closure gate and the
+    # current digest, so a layer replaced since closure is preserved, not
+    # deleted (`AUDIT_GENERATION_CHANGED`).
+    consumed: list[dict] = []
+    for item in layers:
+        if item["state"] != audit_inbox.CLOSED_PENDING_DELETE:
+            continue
+        outcome = audit_inbox.consume_layer(project_root, item["rel"], agent, dry_run=dry_run)
+        consumed.append(outcome)
+        if not outcome.get("ok"):
+            _emit(
+                {
+                    **outcome,
+                    "action": "saipen audit status",
+                    "detail": outcome.get("detail", "audit cleanup refused; the file is retained"),
+                },
+                as_json,
+            )
+            return 1
+    if consumed:
+        _emit(
+            {
+                "ok": True,
+                "code": "AUDIT_CONSUME_PLAN" if dry_run else "AUDIT_CONSUMED",
+                "dry_run": dry_run,
+                "migrated": migrated or None,
+                "consumed": consumed,
+                "next": audit_inbox.projection(project_root) if not dry_run else None,
+            },
+            as_json,
+        )
+        return 0
+
+    fresh = next((item for item in layers if item["state"] == audit_inbox.NEW), None)
+    if fresh is None:
+        _emit(
+            {
+                **audit_inbox.status(project_root),
+                "code": "AUDIT_INBOX_STATUS",
+                "migrated": migrated or None,
+                "detail": "no unconsumed audit generation and nothing to settle",
+            },
+            as_json,
+        )
+        return 0
+    if dry_run:
+        _emit(
+            {
+                "ok": True,
+                "code": "DRY_RUN_PLAN",
+                "action": "audit ingest",
+                "layer": fresh["layer"],
+                "path": fresh["rel"],
+                "sha256": fresh["sha256"],
+                "would_capture_as": "external_audit source receipt",
+                "detail": "no capture, no BOARD mutation, no journal, no deletion",
+            },
+            as_json,
+        )
+        return 0
+
+    _ho = _ensure_handover(project_root, as_json, dry_run)
+    if _ho is not None:
+        return _ho
+
+    captured = audit_inbox.capture_layer(project_root, fresh["rel"])
+    if not captured.get("ok"):
+        _emit(captured, as_json)
+        return 1
+    receipt = captured["receipt"]
+    work = captured.get("linked_work")
+    if not work:
+        from saipen_engine import intake
+
+        status_out = intake.status(project_root, receipt)
+        work = status_out.get("linked_work") if status_out.get("ok") else None
+
+    # DERIVE ORDINARY WORK. One umbrella ticket per audit source; individual
+    # requirements link through the existing coverage `work` field. Priority is
+    # P1, never P0 merely because the file came from `audit/` -- inbox
+    # precedence is a ROUTING property and must not corrupt BOARD priority.
+    if not work:
+        from saipen_engine.operations import ticket_add
+
+        added = ticket_add(
+            project_root,
+            agent,
+            "P1",
+            f"Execute external audit inbox layer {fresh['rel']} ({receipt})",
+            [],
+            (
+                f"every actionable clause of {receipt} is terminal with evidence; "
+                f"linked Work DONE; source closure succeeds; {fresh['rel']} consumed "
+                "by the journaled audit inbox cleanup"
+            ),
+        )
+        if not added.ok:
+            _emit(added.to_dict(), as_json)
+            return 1
+        work = added.data.get("ticket")
+        linked = audit_inbox.capture_layer(project_root, fresh["rel"], work=work)
+        if not linked.get("ok"):
+            _emit(linked, as_json)
+            return 1
+
+    record = audit_inbox.bind_layer(
+        project_root,
+        fresh["rel"],
+        layer=fresh["layer"],
+        generation=fresh["generation"],
+        file_sha256=captured["file_sha256"],
+        size_bytes=fresh["size_bytes"],
+        receipt_id=receipt,
+        receipt_sha256=captured.get("source_sha256") or captured["file_sha256"],
+        binding=captured.get("binding", "exact"),
+        linked_work=work,
+        state=audit_inbox.ACTIVE,
+    )
+    _emit(
+        {
+            "ok": True,
+            "code": "AUDIT_INGESTED",
+            "migrated": migrated or None,
+            "layer": fresh["layer"],
+            "path": fresh["rel"],
+            "receipt": receipt,
+            "work": work,
+            "binding": record["binding"],
+            "file_sha256": record["file_sha256"],
+            "source_sha256": record["receipt_sha256"],
+            "action": f"PHASE SCOUT {work}" if work else "saipen audit status",
+            "detail": (
+                "audit captured as durable source authority; normalize its "
+                "requirements through `saipen source req` before execution"
+            ),
+        },
+        as_json,
+    )
+    return 0
 
 
 def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
@@ -4764,6 +4990,15 @@ def main(argv: list[str] | None = None) -> int:
         return _context(project_root, args[1:], as_json, dry_run)
     if command == "attempt":
         return _attempt(project_root, args[1:], as_json, dry_run)
+    if command == "audit":
+        try:
+            return _audit(project_root, args[1:], as_json, dry_run)
+        except (OSError, PermissionError, ValueError) as exc:
+            _emit(
+                {"ok": False, "code": "VALIDATION_FAILED", "detail": f"audit inbox: {exc}"},
+                as_json,
+            )
+            return 1
     if command == "source":
         try:
             return _source(project_root, args[1:], as_json, dry_run)

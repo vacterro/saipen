@@ -1,58 +1,178 @@
 # Phase: TRANSLATE (triggered by `saipen translate`)
 
-Deep, isolated translation preparation system. This phase runs in a strictly quarantined environment and focuses exclusively on building a massive translation bundle without touching the main software.
+## Purpose
 
-1. **Isolation Rule:**
-   - "Exclusively inside `.saipen/saitranslate/`" scopes the *translation work itself* -- the software's source and assets. When the same agent already running the project transitions into this phase (the common case -- phase-switching, not parallelism), it does NOT suspend normal SAIPEN bookkeeping: `.saipen/STATE.md`/`BOARD.md`/`LOG.md` still get checkpointed exactly as every other phase requires (§ 1.5). Isolation and protocol discipline are not in tension.
-   - **Legacy root-level `.saitranslate/`** (pre-v7.35.0 projects): recognize it as equivalent, MAY migrate (`git mv .saitranslate .saipen/saitranslate`, one LOG line) at a convenient checkpoint, never maintain both at once. Both present at once is a conflict, not a merge job -- `.saipen/saitranslate/` is authoritative, the root copy is stale, ticket its removal, don't guess which is newer (MAINTENANCE.md §2.1).
-   - **Starting a parallel TRANSLATE instance requires the project's `.saipen/` to already exist** (`saipen set` already ran) -- same precondition `saipen sub spawn` requires. No `.saipen/` yet? Tell the user to run `saipen set` first; TRANSLATE is never a substitute for INIT.
-   - You MUST NOT touch, modify, or inject code into the main project files during this phase. Treat the main project strictly as a read-only reference to understand what strings need translation.
-   - `.saipen/saitranslate/` has its own `kitchen/` for scratch and half-finished work -- separate from `.saipen/kitchen/`, never shared with it. Nothing from this phase's scratch work belongs in the main project's kitchen.
-   - **Running as a separate, dedicated agent** (sent to build the translation bundle while the main agent keeps building elsewhere -- true parallelism, not a phase switch): do NOT write `phase: TRANSLATE` into the shared `.saipen/STATE.md` -- that stomps on whatever the main agent's own session actually has active (CORE.md §1.4's concurrency boundary: one agent writes `.saipen/` at any instant). Keep progress in `.saipen/saitranslate/STATE.md` instead -- same shape as Core's own `STATE.md` (`phase`/`task`/`next_action`/`agent`/`updated`), scoped to this build, nobody else's business to touch. The only contact with shared files is the completion line step 4 already requires -- append it to the *main* `.saipen/LOG.md` when done, nothing more, nothing during the run. This isn't read-only work (it writes plenty, just confined to `.saipen/saitranslate/`) -- don't confuse it with `.saipen/extensions/subs/`'s subSaipen, which is read-only toward the whole project and never writes anywhere real. TRANSLATE-in-parallel writes freely inside its own sandbox; it just never touches the *shared* bookkeeping mid-run.
-   - **This parallel instance's own cold start is not the generic `BOOT.md` path.** `BOOT.md` step 1 says "read `.saipen/STATE.md`" with no knowledge of a parallel translate run -- a crashed or restarted parallel instance that naively follows it would read the *shared* `STATE.md`, see whatever phase the main agent happens to be in (e.g. `BUILD`), and either sit confused or start acting on the main project's own work instead of resuming its translation. If you were told to run as this parallel instance (the operator's own instruction, not something `.saipen/STATE.md` will ever tell you), your actual continuation state is `.saipen/saitranslate/STATE.md`, not the shared file -- read that one first, and treat the shared `STATE.md` as read-only reference for cross-checking freshness (§ 3), never as your own bootloader. A real, previously-unhandled incident this rule closes: exactly the reverse mistake (a parallel instance writing its phase into the shared file, CORE.md §1.4) already happened once -- this is the other half of the same failure mode.
+Build and maintain the translation bundle in a quarantined workspace, without
+touching the main software.
 
-2. **Determine the real translation surface -- cover everything real, fabricate nothing:**
-   - Read the actual project before deciding what to translate. A project's real translatable surface is **both** of the following when they exist -- not an either/or choice, not "pick whichever" -- TRANSLATE's job is everything translatable in the repo, docs and software together:
-     - **(a) Documentation**: `README.md` and other top-level docs a user actually reads.
-     - **(b) Real in-app UI strings**, if the software actually has any -- grep the real source for genuine UI-string patterns (an existing i18n/locale file already in use, real button/label text) before building an `app.title`/`action.continue`-style JSON bundle. If nothing like that exists, don't invent it.
-   - Most SAIPEN-managed projects (protocols, CLIs, libraries, docs-first tools) have (a) and not (b) -- translate what's real, skip what isn't, never fabricate the missing half to make the bundle look more complete than the project actually is. (A real incident: an earlier run built exactly such a fabricated bundle for this repo -- SAIPEN has no app, no settings screen, no `action.continue` button anywhere -- 32 languages of strings that translated nothing real.)
-   - **Docs**: translate what's covered by (a) above that doesn't already have a hand-maintained per-language sibling. Never re-translate or overwrite a file the project already maintains by hand per language (check for an existing `<name>_XX.md`-style file first, e.g. this repo's own `guides/`) -- note it as already covered instead of duplicating or clobbering curated work. **This carve-out persists until re-evaluated**: § 3's drift re-scan below only watches surfaces TRANSLATE itself builds in `.saipen/saitranslate/kitchen/` -- a hand-maintained sibling was never that, so TRANSLATE never re-syncs it either, on the first run or any later one. Keeping it in step with its English source after the source changes is whoever edits that source's own job (a normal ticket, same as any other doc update) -- never assume it happens automatically just because a `saipen translate` run happened to fire afterward.
-   - **Root README Mirrors**: As an explicit exception to the hand-maintained carve-out above, the root-level mirror READMEs (`README.ee.md`, `README.ded.md`, `README.ja.md`) MUST always be kept in exact sync with the main `README.md`. `saitranslate` MUST track their drift and update them, ensuring the noticeable language switcher at the top (with Estonian highlighted) is preserved across all of them. This is a mandatory requirement.
-   - **UI strings**: where (b) applies, build the JSON-bundle-per-locale system, sourced only from strings that actually exist in the software.
-   - Same scope either way: 32 languages, same isolation rule (§ 1), same `.saipen/saitranslate/kitchen/` destination (§ 4) -- this section only changes *what* gets read to produce the bundle, never where it lives or how it gets integrated.
-   - **Six of them are the default set, always and everywhere: English, Russian, Estonian, Ukrainian, Japanese, and the Дед voice.** Дед is not a bonus or a garnish -- caveman+Дед is SAIPEN's own voice, the thing that makes it recognisable, so its guide is as mandatory as English's. These MUST exist and MUST be current on every surface; the other 27 are the wider set and may lag. Without a named default, "all 32" degrades to whichever ones a run got to, and nothing says which absence is a defect. `tools/validate.py` holds all six to the guide-opening contract, not just the ones Core writes by hand.
-   - **Who translates what -- a hard split, not a preference.** The main/Core agent handles **English, Russian, Estonian, and the `Дед` voice, and nothing else**. Every other language in the list below is subSaipen work -- a dedicated `saitranslate`/`saiwiki`-class instance, deliberately a small/cheap model, because bulk translation is high-volume and low-complexity-per-unit: real work, but not work that needs the expensive seat. A Core agent that finds 20-odd languages sitting stale MUST NOT start grinding through them "while it's here"; it tickets the remainder for a dedicated instance and moves on. This is a scope rule, not a capability claim -- Core may still *verify* any language (byte-valid UTF-8, structure, spot-checks against the real source), and MUST still repair actual corruption it finds anywhere, since that is a correctness fix rather than a translation pass.
-   - The full list is: *English, Russian, Estonian* (Core's own, with the `Дед` voice below), then *Japanese, Ukrainian, German, French, Spanish, Italian, Portuguese, Dutch, Polish, Swedish, Danish, Finnish, Norwegian, Chinese, Korean, Thai, Vietnamese, Arabic, Hebrew, Turkish, Hindi, Indonesian, Greek, Czech, Romanian, Hungarian, Bulgarian, Slovak, Croatian* -- all 29 of those are subSaipen work per the split above, Japanese included.
-   - **Flags:** For each language, associate a flag icon -- a language-picker table in a doc (this repo's own `GUIDE.md`/`README.md`) for docs-first projects, live-switching config in Settings for UI-bearing ones. Unicode regional-indicator flag emoji (🇺🇸🇷🇺🇪🇪🇯🇵...) are the universal baseline every agent can produce without an image tool; use drawn/SVG assets only if the platform supports image generation and the project's existing icons are already that style -- match the project, don't invent a new asset pipeline.
-   - **Bonus Voice:** You MUST also build a `«Дед»` (angry-grandpa) voice localization. This one is Core's own alongside EN/RU/ET -- it is a *voice*, not a language: getting it right is a STYLE.md judgment call (blunt, compressed, mocking, still factually exact), which is precisely the kind of thing a cheap model flattens into neutral Russian.
+## Entry
 
-3. **Maintenance and Update -- keep a running finger on the project's pulse:**
-   - Every `saipen translate` run, not just the first, re-scans **both** surfaces from § 2 (docs and real UI strings alike) against what's already built in `.saipen/saitranslate/kitchen/` -- a new doc added, an existing doc edited, a new real UI string introduced since the last run all count as drift the project accumulated while TRANSLATE wasn't watching.
-   - Translate and update exactly that drift across all 32 languages plus the Дед voice. Don't blindly rebuild everything from scratch on every run, and don't silently skip what changed either -- stale translations sitting next to updated source are worse than no translation at all, since nothing signals they've gone wrong. **Something signals it now, and keeping that signal honest is part of the pass.** Each locale README carries, as its last line, `<!-- source-digest: README.md sha256:<16 hex> -->` -- the digest of the English source it was translated FROM, with every `N.N.N` version string normalised to the literal `VERSION` first. After translating a locale, recompute that digest from the CURRENT `README.md` and write it into that locale's file; do it for the locales you actually translated and no others, because stamping a file you did not touch is the lie this marker exists to prevent. `tools/validate.py` WARNs on a digest that no longer matches and on a locale with no marker at all, naming the locales either way. Normalising the version out is what makes it usable: a release bumps the badge in all 65 locale files, so a digest that included it would move on every release and mean nothing -- which is the same reason commit dates cannot serve as this signal.
-   - Before calling it done, verify coverage is real, not assumed: spot-check that everything identified in § 2 actually has a matching entry in every locale. A partial pass reported as 100% is a worse outcome than an honest partial report -- if something's missing, say so in the completion LOG line, don't round up.
+`saipen translate`. A parallel dedicated instance additionally requires the
+project's `.saipen/` to already exist (`saipen set` has run) -- the same
+precondition `saipen sub spawn` has. No `.saipen/` yet? Tell the user to run
+`saipen set`; TRANSLATE is never a substitute for INIT.
 
-4. **Completion:**
-   - A translation run intended for later collection is not complete until
-     `.saipen/saitranslate/kitchen/OUTBOX.md` carries the PREPARE contract's
-     exact fields: `status`, `producer`, `source_head`, `coverage`, `payload`,
-     `verified`, and `instructions`. Use `producer: saitranslate`. Only the
-     full 32-language plus Дед-voice bundle over every real surface may say
-     `status: ready`; partial work says `draft` or `blocked` and names the gap.
-   - Once the translation bundle is fully built, validated, and up-to-date,
-     LOG one normal Event Graph line per CORE.md §1.2 -- `- DATE [E-###]
-     [parent: E-###] RUN: translate -> done @SHORT-HASH` (this exact text
-     after the taxonomy, not a free-text summary) -- then transition the
-     phase back to `DONE`.
-   - **Parallel dedicated instance (§ 1) only**: on completion, delete your
-     own `.saipen/saitranslate/STATE.md` -- it is transient run-state, not
-     the persistent bundle. The bundle in `.saipen/saitranslate/kitchen/`
-     stays (a future `ADD`/`PLAN` integrates it); the STATE cursor does not,
-     and no other phase reaps it, so leaving it strands a stale STATE the
-     next `saipen sub list`/scan trips over. A same-agent phase switch never
-     wrote a separate one (it uses the main `.saipen/STATE.md`), so this step
-     is a no-op there.
-   - TRANSLATE completion does NOT integrate the bundle into the main
-     software. The bundle sits safely in `.saipen/saitranslate/kitchen/`
-     until targeted `saipen collect saitranslate` consumes a `status: ready`
-     handoff, creates/claims the Core ticket, and routes it through the normal
-     `VERIFY`/`REVIEW`/`SHIP` gates. No ready handoff means no main write.
+## 1. Isolation
+
+- "Exclusively inside `.saipen/saitranslate/`" scopes the *translation work* --
+  source and assets. A same-agent phase switch (the common case) does NOT
+  suspend normal bookkeeping: `.saipen/STATE.md`/`BOARD.md`/`LOG.md` are
+  checkpointed as in every other phase (§ 1.5). Isolation and protocol
+  discipline are not in tension.
+- Never touch, modify or inject code into the main project files. The main
+  project is a read-only reference for finding what needs translation.
+- `.saipen/saitranslate/kitchen/` is this phase's scratch, separate from
+  `.saipen/kitchen/` and never shared with it.
+- **Legacy root-level `.saitranslate/`** (pre-v7.35.0): equivalent, MAY be
+  migrated (`git mv .saitranslate .saipen/saitranslate`, one LOG line) at a
+  convenient checkpoint. Never maintain both: `.saipen/saitranslate/` is
+  authoritative, the root copy is stale, ticket its removal rather than
+  guessing which is newer (MAINTENANCE.md § 2.1).
+- **Running as a separate dedicated agent** (true parallelism, not a phase
+  switch): do NOT write `phase: TRANSLATE` into the shared `.saipen/STATE.md`
+  -- that stomps the main agent's active session (CORE.md § 1.4: one agent
+  writes `.saipen/` at any instant). Keep progress in
+  `.saipen/saitranslate/STATE.md`, same shape as Core's
+  (`phase`/`task`/`next_action`/`agent`/`updated`), scoped to this build. The
+  only contact with shared files is § 4's completion line, appended to the main
+  `.saipen/LOG.md` when done -- nothing during the run. This is not read-only
+  work; it writes freely inside its own sandbox, unlike
+  `.saipen/extensions/subs/`'s subSaipen.
+- **A parallel instance's cold start is not `BOOT.md`'s path.** `BOOT.md` step
+  1 reads the SHARED `STATE.md`, which for a restarted parallel instance shows
+  whatever phase the main agent is in and would send it to work on the main
+  project instead of resuming its translation. If the operator told you to run
+  as the parallel instance (`.saipen/STATE.md` will never tell you that), your
+  continuation state is `.saipen/saitranslate/STATE.md`; the shared file is
+  read-only reference for the § 3 freshness cross-check. The reverse mistake --
+  a parallel instance writing its phase into the shared file -- already
+  happened once; this is the other half of that failure mode.
+
+## 2. Translation surface -- cover everything real, fabricate nothing
+
+Read the actual project first. The real surface is **both** of these when they
+exist, not an either/or:
+
+- **(a) Documentation**: `README.md` and other top-level docs a user reads.
+- **(b) Real in-app UI strings**, only if the software has any -- grep the real
+  source for a genuine i18n/locale file already in use or real button/label
+  text before building an `app.title`/`action.continue` JSON bundle.
+
+Most SAIPEN-managed projects (protocols, CLIs, libraries, docs-first tools)
+have (a) and not (b). Never fabricate the missing half to make the bundle look
+more complete than the project is. (A real incident: a run once built 32
+languages of `action.continue`-style strings for this repo, which has no app,
+no settings screen and no such button.)
+
+- **Docs**: translate what (a) covers and that has no hand-maintained
+  per-language sibling. Never re-translate or overwrite a file the project
+  maintains by hand per language (check for `<name>_XX.md`, e.g. this repo's
+  `guides/`) -- note it as already covered. **The carve-out persists**: § 3's
+  drift re-scan only watches surfaces TRANSLATE itself built in
+  `.saipen/saitranslate/kitchen/`, so a hand-maintained sibling is never
+  re-synced, first run or later. Keeping it in step with its English source is
+  the job of whoever edits that source (a normal ticket).
+- **Root README mirrors**: an explicit exception to that carve-out. The
+  root-level mirrors (`README.ee.md`, `README.ded.md`, `README.ja.md`) MUST
+  stay in exact sync with `README.md`; track their drift, update them, and
+  preserve the language switcher at the top with Estonian highlighted. This is
+  mandatory.
+- **UI strings**: where (b) applies, build the JSON-bundle-per-locale system,
+  sourced only from strings that actually exist.
+- Either way the scope is the same: 32 languages, § 1's isolation, § 4's
+  `.saipen/saitranslate/kitchen/` destination. This section changes only *what*
+  is read, never where the output lives or how it is integrated.
+
+**Six are the default set, always and everywhere: English, Russian, Estonian,
+Ukrainian, Japanese, and the Дед voice.** Дед is not a garnish -- caveman+Дед
+is SAIPEN's own voice, so its guide is as mandatory as English's. These MUST
+exist and be current on every surface; the other 27 may lag. Without a named
+default, "all 32" degrades to whichever ones a run reached, and nothing says
+which absence is a defect. `tools/validate.py` holds all six to the
+guide-opening contract.
+
+**Who translates what -- a hard split, not a preference.** The main/Core agent
+handles **English, Russian, Estonian and the `Дед` voice, and nothing else**.
+Every other language is subSaipen work -- a dedicated `saitranslate`/`saiwiki`
+instance on a deliberately small/cheap model, because bulk translation is
+high-volume and low-complexity-per-unit. A Core agent finding 20-odd stale
+languages MUST NOT grind through them "while it's here": ticket the remainder
+for a dedicated instance and move on. This is scope, not capability -- Core may
+still *verify* any language (byte-valid UTF-8, structure, spot-checks) and MUST
+repair actual corruption anywhere, which is a correctness fix rather than a
+translation pass.
+
+The full list: *English, Russian, Estonian* (Core's own, with `Дед` below),
+then *Japanese, Ukrainian, German, French, Spanish, Italian, Portuguese, Dutch,
+Polish, Swedish, Danish, Finnish, Norwegian, Chinese, Korean, Thai, Vietnamese,
+Arabic, Hebrew, Turkish, Hindi, Indonesian, Greek, Czech, Romanian, Hungarian,
+Bulgarian, Slovak, Croatian* -- all 29 of those are subSaipen work, Japanese
+included.
+
+- **Flags:** associate a flag icon per language -- a language-picker table in a
+  doc (this repo's `GUIDE.md`/`README.md`) for docs-first projects, live
+  switching in Settings for UI-bearing ones. Unicode regional-indicator emoji
+  (🇺🇸🇷🇺🇪🇪🇯🇵...) are the universal baseline; use drawn/SVG assets only
+  where the platform supports image generation AND the project's existing icons
+  are already that style. Match the project; do not invent an asset pipeline.
+- **Дед voice:** build a `«Дед»` (angry-grandpa) localization. Core's own
+  alongside EN/RU/ET: it is a *voice*, not a language, and getting it right is
+  a STYLE.md judgment call (blunt, compressed, mocking, still factually exact)
+  -- precisely what a cheap model flattens into neutral Russian.
+
+## 3. Maintenance -- a running finger on the project's pulse
+
+- EVERY run, not just the first, re-scans **both** § 2 surfaces against what is
+  already built in `.saipen/saitranslate/kitchen/`. A new doc, an edited doc,
+  or a new real UI string is drift the project accumulated while TRANSLATE was
+  not watching.
+- Translate exactly that drift across all 32 languages plus Дед. Do not blindly
+  rebuild everything, and do not silently skip what changed: a stale
+  translation beside updated source is worse than none, because nothing signals
+  it has gone wrong. **Something signals it now, and keeping that signal
+  honest is part of the pass.** Each locale README carries as its last line
+  `<!-- source-digest: README.md sha256:<16 hex> -->` -- the digest of the
+  English source it was translated FROM, with every `N.N.N` version string
+  normalised to the literal `VERSION` first. After translating a locale,
+  recompute that digest from the CURRENT `README.md` and write it into that
+  locale's file -- for the locales you actually translated and no others,
+  because stamping an untouched file is the lie this marker prevents.
+  `tools/validate.py` WARNs on a mismatched digest and on a missing marker,
+  naming the locales. Normalising the version out is what makes it usable: a
+  release bumps the badge in all 65 locale files, so a digest including it
+  would move every release and mean nothing -- the same reason commit dates
+  cannot serve as this signal.
+- Before calling it done, verify coverage is real: spot-check that everything
+  identified in § 2 has a matching entry in every locale. A partial pass
+  reported as 100% is worse than an honest partial report -- if something is
+  missing, say so in the completion LOG line.
+
+## 4. Completion / Exit
+
+- A run intended for later collection is not complete until
+  `.saipen/saitranslate/kitchen/OUTBOX.md` carries the PREPARE contract's exact
+  fields: `status`, `producer`, `source_head`, `coverage`, `payload`,
+  `verified`, `instructions`. Use `producer: saitranslate`. Only the full
+  32-language plus Дед bundle over every real surface may say `status: ready`;
+  partial work says `draft` or `blocked` and names the gap.
+- LOG one normal Event Graph line per CORE.md § 1.2 -- `- DATE [E-###]
+  [parent: E-###] RUN: translate -> done @SHORT-HASH` (this exact text after
+  the taxonomy, not a free-text summary) -- then transition back to `DONE`.
+- **Parallel dedicated instance (§ 1) only**: on completion delete your own
+  `.saipen/saitranslate/STATE.md`. It is transient run-state; the bundle in
+  `.saipen/saitranslate/kitchen/` stays (a future `ADD`/`PLAN` integrates it).
+  No other phase reaps that cursor, so leaving it strands a stale STATE the
+  next `saipen sub list`/scan trips over. A same-agent phase switch never wrote
+  one, so this is a no-op there.
+- Completion does NOT integrate the bundle. It sits in
+  `.saipen/saitranslate/kitchen/` until a targeted `saipen collect
+  saitranslate` consumes a `status: ready` handoff, creates/claims the Core
+  ticket and routes it through the normal `VERIFY`/`REVIEW`/`SHIP` gates. No
+  ready handoff means no main write.
+
+## Failure / Blocked
+
+Missing `.saipen/` -> tell the user to run `saipen set`; do not improvise INIT.
+Both `.saitranslate/` locations present -> a conflict, not a merge: ticket the
+stale root copy's removal. Coverage that cannot be completed -> `status:
+draft`/`blocked` naming the gap, never a rounded-up "done".

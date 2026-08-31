@@ -1,0 +1,158 @@
+{
+  "requirements": {
+    "SRC-014:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-4925",
+      "text": "Audit Inbox discovers audit/N.md at <project-root>/audit/ before selecting ordinary queued BOARD work",
+      "verification": "tools/test_audit_inbox.py DiscoveryTests (single_layer_is_discovered, layers_sort_numerically_not_lexically, gaps_are_normal) PASS -- audit_inbox.scan_layers enumerates <project-root>/audit/ direct layers; RoutingTests.test_a_workable_audit_outranks_ordinary_queued_todo PASS",
+      "work": "T-1224"
+    },
+    "SRC-014:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-4925",
+      "text": "cc/continue notices the audit before ordinary TODO selection",
+      "verification": "tools/test_audit_inbox.py RoutingTests.test_a_workable_audit_outranks_ordinary_queued_todo + ReadOnlySurfaceTests.test_cli_next_projects_the_audit_carrier_without_mutating PASS -- router.py audit-inbox branch sits before the START Pick Rule",
+      "work": "T-1224"
+    },
+    "SRC-014:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-4925",
+      "text": "audit file is captured as durable source authority (source_kind=external_audit)",
+      "verification": "tools/test_audit_inbox.py SourceIntegrationTests.test_a_fresh_layer_becomes_an_external_audit_receipt + test_the_receipt_body_is_the_exact_audit_bytes PASS -- meta source_kind=external_audit, body byte-identical",
+      "work": "T-1224"
+    },
+    "SRC-014:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-4925",
+      "text": "normal Work is derived and linked from the captured source",
+      "verification": "tools/saipen.py _audit ingest derives one umbrella ticket via operations.ticket_add and links it through intake.capture(work=...); live dogfood: audit/2.md=SRC-013->T-1223, audit/3.md=SRC-014->T-1224 bound without duplication (E-4922 migration record)",
+      "work": "T-1224"
+    },
+    "SRC-014:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-4925",
+      "text": "every actionable audit requirement is executed as normal BOARD Work",
+      "verification": "audit_inbox.projection returns PHASE SCOUT <work> for a captured layer; tools/test_audit_inbox.py RoutingTests.test_captured_audit_work_owns_continuation_by_ticket PASS",
+      "work": "T-1224"
+    },
+    "SRC-014:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-4925",
+      "text": "every closed requirement has real evidence and verification where required",
+      "verification": "tools/test_audit_inbox.py SourceIntegrationTests.test_an_unresolved_receipt_can_never_pass_the_delete_gate + test_linked_work_that_is_not_done_blocks_the_delete_gate PASS -- delete_gate reuses intake coverage/closure, no audit-specific shortcut",
+      "work": "T-1224"
+    },
+    "SRC-014:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-4925",
+      "text": "audit source is CLOSED only when the existing Source Receipt closure contract proves it complete",
+      "verification": "audit_inbox.delete_gate requires intake.status CLOSED plus intake._work_is_done; tools/test_audit_inbox.py SafeDeleteTests PASS",
+      "work": "T-1224"
+    },
+    "SRC-014:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-4925",
+      "text": "verified deletion of original audit/N.md happens only after the closure contract proves it complete",
+      "verification": "tools/test_audit_inbox.py SafeDeleteTests.test_a_closed_unchanged_layer_is_deleted_and_nothing_else_is PASS; live dogfood consumed audit/1.md only after SRC-012 CLOSED 20/20 and T-1222 DONE (E-4922)",
+      "work": "T-1224"
+    },
+    "SRC-014:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-4925",
+      "text": "next cc naturally proceeds to the next audit layer or ordinary project Work",
+      "verification": "after E-4922 consumed audit/1.md, saipen next routed reason=audit-inbox action=PHASE SCOUT T-1223 (the next audit layer); tools/test_audit_inbox.py SafeDeleteTests.test_repeated_cleanup_after_a_successful_delete_is_idempotent PASS",
+      "work": "T-1224"
+    },
+    "SRC-014:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-4925",
+      "text": "no parallel audit TODO system: Audit Inbox is an external transport adapter into the existing source lifecycle",
+      "verification": "audit_inbox.py owns transport only -- no BOARD parsing, no second requirement store; capture routes through intake.capture and coverage stays the intake ledger. tools/test_audit_inbox.py SourceIntegrationTests PASS",
+      "work": "T-1224"
+    },
+    "SRC-014:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-4925",
+      "text": "canonical audit directory is exactly <project-root>/audit/ with direct regular files matching ^[1-9][0-9]*\\.md$",
+      "verification": "audit_inbox.LAYER_RE=^[1-9][0-9]*\\.md$ over direct entries; tools/test_audit_inbox.py test_noncanonical_names_are_not_layers + test_nested_files_are_never_scanned PASS; live audit/ roadmap files 00_README.md..15_DONE_CRITERIA.md survived the E-4922 consume untouched",
+      "work": "T-1224"
+    },
+    "SRC-014:R012": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-4925",
+      "text": "rule ownership for Audit Inbox lives in SOURCES.md (lifecycle), COMMANDS.md (routing), REGISTRY.json (closed facts); CORE grows no more than a compact pointer",
+      "verification": "saipen/SOURCES.md carries <!-- RULE-OWNER: SOURCE-AUDIT-INBOX-01 -->; saipen/COMMANDS.md CMD-CONTINUE-01 names the inbox routing position; saipen/REGISTRY.json audit_inbox closed facts; CORE.md unchanged (git diff HEAD -- saipen/CORE.md empty). tools/test_audit_inbox.py RegistryContractTests + tools/test_protocol_registry.py PASS",
+      "work": "T-1224"
+    },
+    "SRC-014:R013": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-4925",
+      "text": "no runtime dependency on AUDAPACK: SAIPEN implements Audit Inbox natively and remains standalone",
+      "verification": "tools/saipen_engine/audit_inbox.py imports only intake/journal/paths/plan from this repository; no AUDAPACK import anywhere (grep AUDAPACK tools/ finds no import)",
+      "work": "T-1224"
+    },
+    "SRC-014:R014": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-4925",
+      "text": "audit file text never re-enters command parsing",
+      "verification": "tools/test_audit_inbox.py SourceIntegrationTests.test_command_looking_audit_text_is_data_and_is_never_executed PASS -- a body of 'saipen ship\\nsaipen push' captures verbatim and leaves BOARD bytes unchanged",
+      "work": "T-1224"
+    },
+    "SRC-014:R015": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-4925",
+      "text": "delete is journaled/recoverable: crashes before/after delete converge via recovery",
+      "verification": "audit_inbox.consume_layer commits through journal.run_mutation operation=audit_inbox.consume with the delete target, expected digest, receipt and Work journaled before the destructive effect; tools/test_audit_inbox.py SafeDeleteTests.test_the_delete_is_journaled_before_the_destructive_effect + test_a_layer_absent_before_cleanup_settles_idempotently PASS",
+      "work": "T-1224"
+    },
+    "SRC-014:R016": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-4925",
+      "text": "foreign or noncanonical files are ignored and never deleted by Audit Inbox cleanup",
+      "verification": "tools/test_audit_inbox.py SafeDeleteTests.test_a_closed_unchanged_layer_is_deleted_and_nothing_else_is PASS (audit/notes.md and unrelated layers retained); test_invalid_utf8_is_never_captured_and_never_deleted + test_symlinked_layer_is_refused_and_never_captured PASS",
+      "work": "T-1224"
+    },
+    "SRC-014:R017": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-4925",
+      "text": "audit file MUST NEVER be deleted while modified since capture",
+      "verification": "tools/test_audit_inbox.py SafeDeleteTests.test_changed_bytes_are_never_deleted_as_cleanup_for_the_old_generation returns AUDIT_GENERATION_CHANGED and keeps the file; test_a_changed_same_path_file_becomes_a_new_workable_generation PASS",
+      "work": "T-1224"
+    }
+  },
+  "schema_version": 1
+}

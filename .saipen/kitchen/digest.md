@@ -1,3 +1,3 @@
-done: ship v7.231.9 (SRC-003 audit all-3 repair wave, 28/28 clauses VERIFIED, tag v7.231.9)
-remaining: nothing
-awaiting: nothing
+done: stopped via SAIOPS checkpoint
+remaining: none
+awaiting: audit queue closed: audit/1-3 consumed by the native inbox; SRC-015 carries the remaining roadmap waves as T-1230..T-1238

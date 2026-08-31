@@ -39,6 +39,7 @@ def route_next(
     current_capability: str | None = None,
     current_agent: str | None = None,
     snap=None,
+    audit_inbox: dict | None = None,
     # PERF-004: optional pre-parsed objects from the caller to avoid
     # redundant STATE/BOARD parsing. When provided, these take precedence
     # over parsing state_text/board_text.
@@ -70,6 +71,14 @@ def route_next(
     caller that does not know its own identity), routing falls back to the
     historical value for backward compatibility of pure-semantic callers,
     but the CLI/adapters always supply the resolved identity.
+
+    `audit_inbox` is the Audit Inbox's READ-ONLY structural projection
+    (`audit_inbox.projection`), supplied by the caller because this function
+    stays pure -- it never touches the filesystem. `SOURCE-AUDIT-INBOX-01`
+    places it AFTER recovery / WAIT / active continuation and BEFORE the
+    ordinary BOARD Pick Rule: a fresh external audit usually corrects current
+    project truth and must not sit unseen behind a stale backlog, but it never
+    preempts a legitimately active ticket mid-transaction.
     """
     pending = list(pending_ops or [])
     conflicts = list(conflict_ops or [])
@@ -385,6 +394,43 @@ def route_next(
             "detail": "active crew target owns continuation",
         }
 
+    # AUDIT INBOX (SOURCE-AUDIT-INBOX-01): an unconsumed external audit layer
+    # outranks SELECTION of unrelated queued TODO. It sits here on purpose --
+    # every active-continuation branch above has already returned, so a fresh
+    # file can never steal ownership from a live BUILD/VERIFY/REVIEW
+    # transaction; it only wins the START decision that has not been made yet.
+    # `invalid_only` is NOT routed here: an unreadable layer is a diagnostic
+    # that must not outrank real workable BOARD Work (it is surfaced below,
+    # before the project can call itself idle).
+    if not active and audit_inbox and audit_inbox.get("action"):
+        # BOARD policy stays HERE, not in the inbox module: the inbox answers
+        # structurally ("this layer's Work owns continuation"), and the router
+        # is the only place that knows whether that ticket is workable. An
+        # audit whose Work is blocked or claimed elsewhere must fall through to
+        # the ordinary Pick Rule instead of routing to a ticket the executor
+        # would refuse.
+        _audit_work = audit_inbox.get("work")
+        _audit_blocked = bool(
+            _audit_work
+            and str(audit_inbox.get("action", "")).startswith("PHASE ")
+            and not ticket_is_workable(
+                board["tickets"].get(_audit_work, {}), board["tickets"], agent=session_agent
+            )
+        )
+        if not audit_inbox.get("invalid_only") and not _audit_blocked:
+            routed_audit = {
+                "ok": True,
+                "action": audit_inbox["action"],
+                "reason": "audit-inbox",
+                "detail": audit_inbox.get("detail", "audit inbox owns continuation"),
+                "audit_layer": audit_inbox.get("layer"),
+                "audit_path": audit_inbox.get("path"),
+                "load": load_for_action(audit_inbox["action"]),
+            }
+            if audit_inbox.get("work"):
+                routed_audit["ticket"] = audit_inbox["work"]
+            return routed_audit
+
     # START: no DOING + a workable TODO -> Pick Rule claims the top ticket.
     if not active:
         top = _top_workable(board, agent=session_agent)
@@ -413,6 +459,21 @@ def route_next(
                 "detail": "BOARD needs: graph invalid with no workable "
                 "ticket: " + "; ".join(_graph_errors[:3]),
             }
+
+    # A deliberately unreadable audit layer is NOT an idle project. Nothing
+    # workable remains at this point, so surfacing the invalid inbox here --
+    # before any maintenance/Improve verdict -- is the difference between
+    # "your audit file is broken" and a silent "nothing to do".
+    if audit_inbox and audit_inbox.get("invalid_only"):
+        return {
+            "ok": True,
+            "action": audit_inbox.get("action", "saipen audit status"),
+            "reason": "audit-inbox-invalid",
+            "executable_behavior": "RESTATE_AND_STOP",
+            "detail": audit_inbox.get(
+                "detail", "audit inbox holds only invalid layer(s); it is not idle"
+            ),
+        }
 
     # MAINTAIN: fall through to the persisted next_action only when it is a
     # legal non-ticket action (saipen continue / saipen <verb>), never a stale
@@ -453,6 +514,31 @@ def routing_failure_code(out: dict) -> str:
     return ROUTING_FAILURE_CODES.get(out.get("reason"), "VALIDATION_FAILED")
 
 
+def audit_inbox_projection(project_root) -> dict | None:
+    """The Audit Inbox's read-only routing projection, or None.
+
+    The ONE seam between the pure router and the filesystem-backed inbox.
+    Writes nothing. An unexpected failure does NOT fail open into "the project
+    is idle": it degrades to an `invalid_only` projection so routing surfaces
+    the inbox condition instead of letting Improve run over a live audit.
+    """
+    if project_root is None:
+        return None
+    try:
+        from .audit_inbox import projection
+
+        return projection(project_root)
+    except Exception as exc:  # transport failure is a diagnostic, never idle
+        return {
+            "action": "saipen audit status",
+            "invalid_only": True,
+            "detail": f"audit inbox could not be classified ({type(exc).__name__}: {exc})",
+            "pending": [],
+            "closed_pending_delete": [],
+            "invalid": [],
+        }
+
+
 def route_next_result(
     project_root,
     state_text: str,
@@ -462,7 +548,14 @@ def route_next_result(
     snap=None,
 ) -> Result:
     """route_next wrapped in the stable Result shape for status/next/context."""
-    out = route_next(state_text, board_text, pending_ops_list, conflict_ops_list, snap=snap)
+    out = route_next(
+        state_text,
+        board_text,
+        pending_ops_list,
+        conflict_ops_list,
+        snap=snap,
+        audit_inbox=audit_inbox_projection(project_root),
+    )
     data = {k: v for k, v in out.items() if k != "ok"}
     # Capability surface (hostile-regression, P0#5): a PHASE action names the
     # phase doc it will load (saipen/phases/<phase>.md). A missing or empty

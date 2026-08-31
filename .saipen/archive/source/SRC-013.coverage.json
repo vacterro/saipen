@@ -66,10 +66,10 @@
     "SRC-013:R008": {
       "actionable": true,
       "class": "acceptance-criterion",
-      "disposition": "DEFERRED",
-      "evidence": "E-4799",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-4946",
       "text": "phase corpus is no larger than approximately 70 KB or a justified variance is recorded",
-      "verification": null,
+      "verification": "measured phase corpus 100304 bytes (98.0 KB) after compressing the four hot-path docs: ship 17142->12811, translate 13713->10907, markhunt 10888->10160, clean 10696->9788 (-8773 bytes total). JUSTIFIED VARIANCE against the ~70 KB target, which this clause explicitly permits: reaching 70 KB from 109 KB needs 39 KB removed, and the four documents this wave names hold only 49.6 KB of behavioural contract in total, so the target is unreachable without compressing the other twelve phase docs as well. What was removed is duplicated rationale and historical archaeology whose defect classes are already held red by tools/audit_checks.py controls; no normative rule, no phase, no DFA edge and no red-control anchor was dropped. The residual corpus reduction to ~70 KB is carried as follow-up Work rather than bought with semantic precision.",
       "work": "T-1223"
     },
     "SRC-013:R009": {

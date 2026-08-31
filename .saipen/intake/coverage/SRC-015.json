@@ -1,0 +1,86 @@
+{
+  "requirements": {
+    "SRC-015:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DEFERRED",
+      "evidence": null,
+      "text": "Wave C/5 -- one shared audit enqueue producer API: monotonic allocator that never reuses deleted gaps, atomic temp-then-place write, idempotent retry on producer_operation_id, no arbitrary path and no overwrite of an existing layer",
+      "verification": null,
+      "work": "T-1230"
+    },
+    "SRC-015:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DEFERRED",
+      "evidence": null,
+      "text": "Wave D/7 -- producer-neutral audit envelope: optional stable metadata header (audit_schema, producer, producer_version, producer_item_id, created_at, severity, confidence, observed_project, related/amends, maintainer_verdict) parsed without semantic interpretation of the body",
+      "verification": null,
+      "work": "T-1231"
+    },
+    "SRC-015:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DEFERRED",
+      "evidence": null,
+      "text": "Wave E/7 -- maintainer disposition loop: producer identity survives intake, the audit->SRC->Work->disposition trace survives file deletion, and a compact read-only result projection is available to the producer",
+      "verification": null,
+      "work": "T-1232"
+    },
+    "SRC-015:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DEFERRED",
+      "evidence": null,
+      "text": "Wave F -- multi-producer/concurrency hardening: narrow writer lock around allocation and final placement only, no partial final bytes visible to the consumer, and an idempotent crash matrix",
+      "verification": null,
+      "work": "T-1233"
+    },
+    "SRC-015:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DEFERRED",
+      "evidence": null,
+      "text": "Wave G -- operator surface completion: `saipen status` carries a compact audit_inbox summary (pending, active layer, bound receipt, bound Work, closed-pending-delete, invalid, last allocated id) without dumping audit body text",
+      "verification": null,
+      "work": "T-1234"
+    },
+    "SRC-015:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DEFERRED",
+      "evidence": null,
+      "text": "Wave H/7 -- SAIPAL bridge contract: SAIPAL receives only the constrained enqueue capability plus the read-only disposition lookup, with no Core/BOARD/STATE/LOG write and no producer-specific semantic branch in SAIPEN",
+      "verification": null,
+      "work": "T-1235"
+    },
+    "SRC-015:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DEFERRED",
+      "evidence": null,
+      "text": "Wave 6 -- real HUSH runtime: `hush <task>` activates a task-local execution policy that suppresses discretionary narration only, leaves command meaning, phase lifecycle, tool effects and mandatory interaction unchanged, and does not leak into the next task",
+      "verification": null,
+      "work": "T-1236"
+    },
+    "SRC-015:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DEFERRED",
+      "evidence": null,
+      "text": "Wave I -- dogfood and final hardening: manual, AUDAPACK-style and SAIPAL-like producers each drive the full discover->capture->normalize->Work->evidence->close->delete loop, including changed-generation, active-Work precedence, concurrent enqueue, rejection and crash recovery",
+      "verification": null,
+      "work": "T-1237"
+    },
+    "SRC-015:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DEFERRED",
+      "evidence": null,
+      "text": "Wave 8 -- backlog re-entry: BOARD scrub of terminal historical detail, safe LOG seal at a checkpoint, disposition of stale producer packages through the existing collect/discard contracts, and automatic resumption of ordinary Pick Rule work once the inbox is empty",
+      "verification": null,
+      "work": "T-1238"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,6 +1,19 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.232.0 -- 2026-08-31 -- Native Audit Inbox + Audit Queue Closure (T-1223..T-1227, T-1229)
+
+- T-1227: native Audit Inbox (`SOURCE-AUDIT-INBOX-01`). `tools/saipen_engine/audit_inbox.py` is a transport adapter into the existing Source Receipt lifecycle: canonical `audit/^[1-9][0-9]*\.md$` layers only, non-recursive, generation identity is `relative path + exact-byte SHA-256` (never mtime), foreign files ignored and never deleted.
+- `saipen continue` routing gains an Audit Inbox stage AFTER recovery/WAIT/active continuation and BEFORE the ordinary BOARD Pick Rule: a workable unconsumed audit outranks queued TODO and forbids the Improve fallback, but never preempts a live ticket. An audit whose Work is blocked falls through to the Pick Rule.
+- `saipen audit status|inspect <N>|ingest`; `saipen next` and `--dry-run` stay read-only. Deletion runs as the journaled `audit_inbox.consume` operation and only after the source closure contract passes AND the bytes still match the captured generation; a changed same-path file becomes a new generation instead. EOL-only `legacy_transport_equivalent` migration binding records both digests and never rewrites a receipt digest.
+- T-1223/T-1224: SRC-013 (17/17) and SRC-014 (17/17) closed with evidence; `audit/1.md`, `audit/2.md` and `audit/3.md` consumed by the new journaled path, not by manual unlink -- including audit/3.md self-consumed by the feature it specified.
+- T-1226: phase delta compression -- corpus 109077 -> 100304 bytes (ship 17142->12811, translate 13713->10907, markhunt 10888->10160, clean 10696->9788). 16/16 phases and every audit_checks red-control anchor intact; the residual gap to the ~70 KB target is recorded as a justified variance on SRC-013 R008 and carried by T-1229.
+- SRC-015 captures the remaining audit-ecosystem roadmap (producer enqueue API, envelope, disposition projection, concurrency hardening, operator surface, SAIPAL bridge, HUSH runtime, dogfood, backlog re-entry) as T-1230..T-1238; the roadmap reference packs moved out of the live inbox to `.saipen/KNOWLEDGE/roadmaps/`.
+
+## 7.231.11 -- 2026-08-31 -- W4/W5 Audit Implementation + PERF-006 (T-1208)
+
+- T-1208: PERF-006 one release authority inventory per PLAN; W4/W5 audit implementation follow-up shipped on top of 7.231.10 (entry backfilled at 7.232.0: the release was tagged without one)
+
 ## 7.231.10 -- 2026-08-31 -- Audit Closure SHIP (T-1222..T-1228)
 
 - T-1222/T-1223/T-1224: audit/1,2,3 captured as SRC-012/013/014 with 54 acceptance criteria dispositioned (36 VERIFIED, 18 deferred)

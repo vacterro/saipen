@@ -20,20 +20,12 @@
       "linked_work": null,
       "source_sha256": "3c1655e20dc161d183b934cb45da0f68f1655e5c4b9f3b02bc9b237770230bc6"
     },
-    "SRC-012": {
-      "linked_work": "T-1222",
-      "source_sha256": "22ecac8c887ecc46ec574d31459e742aa2ad704fdf8126bf1b9db0b3b0baaccb"
-    },
-    "SRC-013": {
-      "linked_work": "T-1223",
-      "source_sha256": "4264b5489fbbe4f40338cdb868f915b97ed4eac483bf4a16b68084f060a1eeb2"
-    },
-    "SRC-014": {
-      "linked_work": "T-1224",
-      "source_sha256": "28e6b5d038cc19e3c854b3f3b0f1b35d6183ac4a959cd2f3df524365f85ce5d5"
+    "SRC-015": {
+      "linked_work": null,
+      "source_sha256": "33020883b18d9305a665ad103816ac737a785fa256cb10252749e085dc812065"
     }
   },
-  "next_id": 15,
+  "next_id": 16,
   "schema_version": 1,
   "tombstones": {
     "SRC-001": {
@@ -111,6 +103,45 @@
       "requirements": 12,
       "schema_version": 1,
       "source_sha256": "5c7169f8840c6ccd89063f3c32ed5e12f8f67dfcc80800d053ea86244f91f6f5",
+      "status": "CLOSED",
+      "unresolved": 0
+    },
+    "SRC-012": {
+      "actionable": 20,
+      "archive_ref": ".saipen/archive/source/SRC-012.md",
+      "closed_at": "2026-08-31T06:29:21Z",
+      "closure_event": null,
+      "linked_work": "T-1222",
+      "receipt_id": "SRC-012",
+      "requirements": 20,
+      "schema_version": 1,
+      "source_sha256": "22ecac8c887ecc46ec574d31459e742aa2ad704fdf8126bf1b9db0b3b0baaccb",
+      "status": "CLOSED",
+      "unresolved": 0
+    },
+    "SRC-013": {
+      "actionable": 17,
+      "archive_ref": ".saipen/archive/source/SRC-013.md",
+      "closed_at": "2026-08-31T07:35:18Z",
+      "closure_event": "E-4965",
+      "linked_work": "T-1223",
+      "receipt_id": "SRC-013",
+      "requirements": 17,
+      "schema_version": 1,
+      "source_sha256": "4264b5489fbbe4f40338cdb868f915b97ed4eac483bf4a16b68084f060a1eeb2",
+      "status": "CLOSED",
+      "unresolved": 0
+    },
+    "SRC-014": {
+      "actionable": 17,
+      "archive_ref": ".saipen/archive/source/SRC-014.md",
+      "closed_at": "2026-08-31T07:33:31Z",
+      "closure_event": "E-4942",
+      "linked_work": "T-1224",
+      "receipt_id": "SRC-014",
+      "requirements": 17,
+      "schema_version": 1,
+      "source_sha256": "28e6b5d038cc19e3c854b3f3b0f1b35d6183ac4a959cd2f3df524365f85ce5d5",
       "status": "CLOSED",
       "unresolved": 0
     }

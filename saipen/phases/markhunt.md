@@ -62,19 +62,15 @@ readable, not a wall of noise. Append only -- never reorder or edit
 existing tickets.
 
 **Goal-Driven Execution brake.** MARKHUNT never increments `goal_waves` or
-`goal_tickets` (MAINTENANCE.md §2.4) -- its findings are unvetted, so nothing may
-treat finishing a MARKHUNT pass as a waypoint to keep running through.
-The brake itself lives in `phases/done.md`, not here: as long as any
-`[MARKHUNT]`-tagged ticket sits in `## BLOCKED`, `done.md`'s own
-Goal-Mode-Empty-Board step refuses to auto-proceed to `HUNT` even under
-`execution_intent: goal`, and halts for the user instead -- in § 1.2's fixed
-wording for that state, which is the third whitelisted `WAIT:` and
-exists precisely so this brake is machine-separable from drift. MARKHUNT itself just
-transitions to `DONE` like any other phase (§ 2.1) -- it never needs to
-know or check the execution intent directly; leaving `[MARKHUNT]` tickets behind
-in `## BLOCKED` is what holds the brake. The intent itself stays
-whatever it already was, untouched, until every such ticket is triaged
-out.
+`goal_tickets` (MAINTENANCE.md §2.4) -- its findings are unvetted, so finishing
+a pass is never a waypoint to keep running through. The brake lives in
+`phases/done.md`: as long as any `[MARKHUNT]`-tagged ticket sits in
+`## BLOCKED`, its Goal-Mode-Empty-Board step refuses to auto-proceed to `HUNT`
+even under `execution_intent: goal` and halts for the user in § 1.2's fixed
+wording (the third whitelisted `WAIT:`, so the brake is machine-separable from
+drift). MARKHUNT itself just transitions to `DONE` (§ 2.1) and never checks
+the execution intent; leaving the tickets in `## BLOCKED` is what holds the
+brake. The intent stays untouched until every such ticket is triaged out.
 
 **Long-running, so checkpoint like one.** An exhaustive, uncapped pass
 can outlast a single context window. Before that happens (a context
@@ -95,9 +91,8 @@ that MUST resolve to "check doesn't apply," never "MARKHUNT can't run
 here"). Overwrite, never append -- it's a cursor, not a history
 (history is `LOG.md`, as always). Hitting a
 budget risk mid-pass: LOG a partial-completion line, leave
-`STATE.phase: MARKHUNT` (not `DONE`), `next_action: "saipen markhunt"`
--- a successor resumes from the progress file's cursor instead of
-restarting the whole surface from zero.
+`STATE.phase: MARKHUNT` (not `DONE`), `next_action: "saipen markhunt"` -- a
+successor resumes from the cursor instead of restarting the whole surface.
 
 **Completion -- the closure self-test (never declare done without it).**
 Before transitioning to `DONE`, verify the manifest actually closes:
@@ -118,49 +113,43 @@ compare, therefore fine", which is a check reporting success for the one
 host where it measured nothing -- and an exhaustive pass can legitimately
 span sessions while the files move underneath it, so this is where tree
 movement is most likely, not least. Without a commit snapshot there is no
-cheap deterministic surface to compare, so do not invent one: LOG the
-closure carrying `tree_movement=unverified` and re-run any vector whose
-covered paths you have reason to believe changed. An honest unproven
-closure is worth more than an automatic pass, because the next reader can
-see which one they are holding; and `findings:` is fully accounted for by the `[MARKHUNT]` tickets
-this pass wrote to `## BLOCKED` -- **accounted for, not numerically equal**:
-this same doc tells you to group related findings under one ticket rather
-than filing one per trivial nit, so 10 findings landing as 3 grouped tickets
-is the intended outcome, not a failure. What the check actually forbids is an
-*unaccounted* finding: something counted in `findings:` that reached no ticket
-at all. Grouping is legal, dropping is not -- so a grouped ticket MUST name
-how many findings it carries (e.g. `[MARKHUNT] doc-drift cluster x6`), which
-is what makes the sum checkable at all. Any finding that can't be traced to a
-ticket means the pass isn't done -- resolve it,
-never paper over it. This is the manifest-driven closure HUNT gets for free
-from its hash line; MARKHUNT earns it by checking its own manifest. Only
-then LOG the completion, carrying the manifest summary into that permanent
-line so coverage stays auditable after `kitchen/` is swept: `- DATE [E-###]
+cheap deterministic surface to compare, so do not invent one: LOG the closure
+carrying `tree_movement=unverified` and re-run any vector whose covered paths
+you have reason to believe changed. An honest unproven closure beats an
+automatic pass, because the next reader can see which one they hold.
+
+And `findings:` must be fully accounted for by the `[MARKHUNT]` tickets this
+pass wrote -- **accounted for, not numerically equal**: grouping related
+findings under one ticket is this doc's own instruction, so 10 findings landing
+as 3 tickets is the intended outcome. What the check forbids is an
+*unaccounted* finding: one counted in `findings:` that reached no ticket at
+all. Grouping is legal, dropping is not -- so a grouped ticket MUST name how
+many findings it carries (e.g. `[MARKHUNT] doc-drift cluster x6`), which is
+what makes the sum checkable. Any finding untraceable to a ticket means the
+pass is not done. Only then LOG the completion, carrying the manifest summary
+into that permanent line so coverage stays auditable after `kitchen/` is
+swept: `- DATE [E-###]
 [parent: E-###] RUN: markhunt -> N findings, V/5 vectors, @head_end tickets=T-###,T-###`
 (this enriched form, not a bare count). **`tickets=` is the pass's own
 accounting and it is required**, listing every `[MARKHUNT]` ticket this pass
 wrote, comma-separated, or the literal `tickets=none` when the pass found
-nothing. Without it the closure rule above is unexecutable the moment triage
-runs: a later validator or human is told to sum "this pass's `[MARKHUNT]`
-tickets", and those tickets legitimately leave `## BLOCKED` for `## TODO`
-with the `[MARKHUNT]` tag and the `unvetted audit` blocker dropped, while a
-dismissed finding leaves the board entirely. `BOARD.md` is not append-only;
-`LOG.md` is, and it is the only place this accounting can survive. Four
-passes already ran on this repository -- `findings=3`, `findings=12`,
-`findings=6`, `findings=1` -- and not one of them can be re-checked today,
-because no line says which tickets it produced.
+nothing. Without it the closure rule is unexecutable the moment triage runs:
+the tickets legitimately leave `## BLOCKED` for `## TODO` with the blocker
+dropped, and a dismissed finding leaves the board entirely. `BOARD.md` is not
+append-only; `LOG.md` is, and it is the only place this accounting survives.
+Four passes already ran here (`findings=3/12/6/1`) and none can be re-checked
+today, because no line says which tickets it produced.
 
 **The pass identity is that line's own `E-###`.** No new ID scheme, no
-registry, no ticket field: the event number is already unique, already
-monotonic and already immutable, so two passes with overlapping findings are
-separately reconstructable by construction. **Triaging or dismissing a
-`[MARKHUNT]` ticket LOGs a `DEC` naming the ticket and the `E-###` of the
-pass that filed it** -- one line, existing taxonomy -- so accepted and
-dismissed accounting stays provable after the board no longer shows either. A later `VALIDATE` or a human cross-checks
-it trivially -- the line's `N` must equal the findings accounted for across
-this pass's `[MARKHUNT]` tickets on the board (their per-ticket counts summed,
-not the ticket count itself, per the grouping rule above) and `V` must be `5`. Then transition to `DONE`. `DONE`'s own existing priority logic
-(`phases/done.md`) takes over from there for whatever's actually in
-`## TODO` -- MARKHUNT's own `## BLOCKED` findings sit untouched until a
-human triages them. MARKHUNT never decides what gets worked next; it
-only makes sure nothing stays invisible.
+registry, no ticket field: the event number is unique, monotonic and
+immutable, so two passes with overlapping findings stay separately
+reconstructable. **Triaging or dismissing a `[MARKHUNT]` ticket LOGs a `DEC`
+naming the ticket and the `E-###` of the pass that filed it** -- one line,
+existing taxonomy -- so accepted and dismissed accounting stays provable after
+the board shows neither. A later `VALIDATE` or human cross-checks it trivially:
+the line's `N` must equal the findings accounted for across this pass's
+tickets (per-ticket counts summed, not the ticket count) and `V` must be `5`.
+Then transition to `DONE`; `phases/done.md` takes over for whatever is in
+`## TODO`, while MARKHUNT's `## BLOCKED` findings sit untouched until a human
+triages them. MARKHUNT never decides what gets worked next; it only makes sure
+nothing stays invisible.

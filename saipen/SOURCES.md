@@ -93,3 +93,46 @@ only when a real receipt was committed.
 
 All support the established `--json` projection. Mutations use the project
 writer lock and atomic same-directory replacement; dry-run creates nothing.
+
+## Audit Inbox
+
+<!-- RULE-OWNER: SOURCE-AUDIT-INBOX-01 -->
+
+`<project-root>/audit/` is an external transport into the receipt lifecycle
+above, never a second requirement system. Canonical layers are DIRECT regular
+files matching `^[1-9][0-9]*\.md$`; the scan does not recurse, and any other
+file in that directory is foreign — ignored, never read, never deleted.
+
+One audit generation is `relative path + SHA-256 of the exact bytes`. Never
+mtime: extraction, copy, sync, checkout and restore all move mtime without
+changing meaning. Same path with changed bytes is a NEW generation.
+
+`saipen continue` examines the inbox AFTER recovery, WAIT and active
+phase-owned continuation, and BEFORE the ordinary BOARD Pick Rule. A workable
+unconsumed audit outranks SELECTION of unrelated queued TODO and forbids the
+Improve fallback; it never preempts a live ticket. Inbox precedence is a
+routing property — audit Work carries ordinary BOARD priority.
+
+Lifecycle: safe witnessed snapshot → exact hash → `external_audit` receipt →
+durable path/hash↔receipt binding (`.saipen/intake/audit_inbox.json`,
+operational projection only) → agent-owned normalization into Contract and
+Coverage → one umbrella Work per source → evidence → closure. Audit text is
+DATA: `saipen ship` inside a body is prose, never a command.
+
+Deletion of `audit/N.md` is permitted only when the closure contract above
+passes AND the current bytes still equal the captured generation. It runs as
+the journaled `audit_inbox.consume` operation: crash before delete replays,
+crash after delete before COMMITTED settles idempotently, changed bytes on
+recovery CONFLICT. Deletion never renumbers, never touches another layer or a
+foreign file, and an invalid or unreadable layer is retained with a truthful
+diagnostic rather than reported as an idle project.
+
+Where an audit file predates the inbox and differs from an existing active
+receipt by CR/LF ALONE, with exactly one candidate of an audit/mission source
+class, it may bind as `legacy_transport_equivalent`: both digests are recorded
+and the receipt digest is never rewritten. Any other difference is a new
+source. Byte identity stays strict.
+
+- `saipen audit status` / `inspect N` — read-only projection, no body dump
+- `saipen audit ingest` — settle proven cleanup, then capture the lowest
+  workable layer and derive its Work. `cc` routes here on its own.
