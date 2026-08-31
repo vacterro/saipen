@@ -1,6 +1,12 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.233.3 -- 2026-09-01 -- Fault Injection That Actually Injects (T-1248)
+
+- Release-executor probe 7 wrote `.git/hooks/pre-commit` with `write_text` and never set the executable bit. POSIX git runs a hook only when it is executable and skips it silently otherwise, so on Linux the injected commit rejection never happened: the ship genuinely succeeded and the probe reported that real release as a missing refusal (`ok=True code='RELEASED' not in errors.CODES`) plus a push it expected not to see. Windows ignores the bit, which is why it passed there for as long as it existed.
+- The hook is now `chmod 0755`. A probe whose fault injection is a no-op tests nothing, so the same class was swept across the suite: every other shebang write already chmods, and the symlink/junction probes measure the capability instead of assuming it from `os.name`. This was the only silent no-op.
+- Operational: the `saipen-inject` scheduled task was never installed on the maintainer's machine, so all four consumer copies (`.claude`, `.config/opencode`, `.codex`, `.agents`) were stale and unstamped -- an opencode agent stranded mid-session looking for the `gg` shortcut in CORE.md, where W4 no longer keeps it. The task is installed now (every 15 minutes, hidden wscript wrapper). Follow-ups filed: T-1249 (staleness detection must name a stale consumer copy rather than let it be used silently) and T-1250 (`schedule.ps1 status` reports DEGRADED for a correctly installed task because it expects the bare argument form this Windows build does not store).
+
 ## 7.233.2 -- 2026-08-31 -- Release Fixture Stops Inheriting the Authoring Host (T-1246)
 
 - `run_scenarios.build_fixture` copied the live `.saipen/STATE.md` and rewrote phase/task/mode but left `saipen_home` pointing at the absolute path of the machine that wrote it. That path exists on exactly one host, so every other one -- a Linux CI runner above all -- refused the fixture's first command with `REFUSE [HOME_REQUIRED]` and aborted the whole conformance run. The defect was always there; it only became reachable once v7.233.0 fixed the scheduler probe that used to crash the suite earlier.

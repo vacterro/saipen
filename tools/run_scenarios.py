@@ -6674,6 +6674,13 @@ def run_release_executor_probes() -> tuple[list[str], int]:
         project, origin, git, cli, _new_ver = built
         hook = project / ".git" / "hooks" / "pre-commit"
         hook.write_text("#!/bin/sh\necho HOOK REJECTION\nexit 1\n", encoding="utf-8")
+        # POSIX git runs a hook only when it is EXECUTABLE, and silently skips
+        # it otherwise. Windows ignores the bit, so a hook written without it
+        # rejects commits there and does nothing on Linux -- the injection this
+        # probe depends on never fires, the ship succeeds, and the probe
+        # reports the real release as a missing refusal. A probe whose
+        # fault injection is a no-op tests nothing.
+        hook.chmod(0o755)
         pre_remote_tip = remote_branch_tip(origin)
         result = cli("ship", "--json")
         rd = j(result)
