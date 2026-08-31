@@ -72,3 +72,18 @@
 - 31.08.26 21:26 [E-5048] [parent: E-5047] [T-1246] [agent: workbuddy] [op: scope-8d88c75f1fa846f09b9bab14fc7ae097] DEC: release scope recorded -- 39 path(s) bound to 21f047613521
 - 31.08.26 21:27 [E-5049] [parent: E-5048] [T-1246] [agent: workbuddy] [op: finish-51e9d577c1834a97a1402857f3ad7f19] RUN: ship v7.233.2 -> content commit c884f7106951 pushed
 - 31.08.26 21:27 [E-5050] [parent: E-5049] [T-1246] [agent: workbuddy] [op: finish-51e9d577c1834a97a1402857f3ad7f19] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 31.08.26 21:36 [E-5051] [parent: E-5050] [T-1248] [agent: workbuddy] [op: ticket-294a6dc143c94a6498e4b35abde79fb7] DEC: ticket added via SAIOPS
+- 31.08.26 21:36 [E-5052] [parent: E-5051] [T-1248] [agent: workbuddy] [op: claim-0e6edbfa5f8740d5aeef4d72666937b4] DEC: claimed via SAIOPS -- owner workbuddy
+- 31.08.26 21:36 [E-5053] [parent: E-5052] [T-1248] [agent: workbuddy] [op: transition-c95f66cc688047a4b51975c1031ef1c5] RUN: transition to BUILD
+- 31.08.26 21:45 [E-5054] [parent: E-5053] [T-1249] [agent: workbuddy] [op: ticket-98226bdcf923465eb633d1f3be071961] DEC: ticket added via SAIOPS
+- 31.08.26 21:45 [E-5055] [parent: E-5054] [T-1248] [agent: workbuddy] [op: checkpoint-e4d6a064d0484e268ded15e6a149d03b] RUN: build -- release-executor probe 7 now chmods .git/hooks/pre-commit to 0755 before injecting the commit rejection; POSIX git runs a hook only when it is executable and silently skips it otherwise, so on Linux the injection was a no-op, the ship really succeeded and the probe reported the genuine release as a missing refusal. A sweep of every shebang write in run_scenarios found this was the only one missing the bit
+- 31.08.26 21:45 [E-5056] [parent: E-5055] [T-1248] [agent: workbuddy] [op: transition-5e72b235769743a8af1eb0ed98f38dab] RUN: transition to VERIFY
+- 31.08.26 21:47 [E-5057] [parent: E-5056] [T-1250] [agent: workbuddy] [op: ticket-9599071d7eac4ac5b54cb4510836b695] DEC: ticket added via SAIOPS
+- 31.08.26 22:05 [E-5058] [parent: E-5057] [T-1248] [agent: workbuddy] [op: checkpoint-50acfc315cae4fd4b1c86760c28d7f59] RUN: PASS conf: high -- run_scenarios.py exit 0; release-executor probes 96 of 96 including probe 7 whose hook is now executable; audit_checks 227 of 227; test_runner --family unit PASS; ruff clean; validate.py --gate core 0 FAIL. Swept the same class across the suite: every other shebang write already chmods, and symlink/junction probes are capability-measured rather than assumed from os.name, so this was the only silent no-op injection
+- 31.08.26 22:05 [E-5059] [parent: E-5058] [T-1248] [agent: workbuddy] [op: transition-2a6dae62cb4d41ed8f28ae20f7bfc197] RUN: transition to REVIEW
+- 31.08.26 22:05 [E-5060] [parent: E-5059] [op: transition-2a6dae62cb4d41ed8f28ae20f7bfc197] DEC: goal_tickets 0->1
+- 31.08.26 22:14 [E-5061] [parent: E-5060] [T-1248] [agent: workbuddy] [op: checkpoint-3bd8329bd15f4feba2512ec856ffa8c3] DEC: SHIP -- REVIEW re-ran the release-executor probes itself: 96 of 96, probe 7 included. No P0 and no P1. The class sweep found no second silent no-op injection
+- 31.08.26 22:14 [E-5062] [parent: E-5061] [T-1248] [agent: workbuddy] [op: transition-2d60bd53ddb44d0fbe3fe047acc56266] RUN: transition to SHIP
+- 31.08.26 22:14 [E-5063] [parent: E-5062] [T-1248] [agent: workbuddy] [op: scope-6530a76819984f82ac974e7c7614a9da] DEC: release scope recorded -- 39 path(s) bound to fe5b0d4f7689
+- 31.08.26 22:15 [E-5064] [parent: E-5063] [T-1248] [agent: workbuddy] [op: finish-5778102980314ade9ae7b3d6d40b1dd6] RUN: ship v7.233.3 -> content commit 10e688021b64 pushed
+- 31.08.26 22:15 [E-5065] [parent: E-5064] [T-1248] [agent: workbuddy] [op: finish-5778102980314ade9ae7b3d6d40b1dd6] DEC: ticket finished via SAIOPS -- completion (from SHIP)
