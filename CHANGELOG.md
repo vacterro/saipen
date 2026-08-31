@@ -1,6 +1,13 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.234.2 -- 2026-09-01 -- A Freshness Digest That Can Actually Match (T-1253)
+
+- The stamp was finally being written (7.234.1) and still could not match. `autoinject._digest` hashed raw bytes, but the two sides of the comparison arrive through different transports: the clone holds LF and the snapshot git hands the scheduled injector holds CRLF. `saipen/BOOT.md` is 4972 bytes in the clone and 5063 bytes in the snapshot with not one character of difference, so a home refreshed seconds earlier reported STALE -- and a witness that always says stale is the same as no witness.
+- `_content_bytes` normalises CRLF and lone CR to LF for anything that decodes as UTF-8, and hashes a non-text file byte-for-byte: it has no line endings to normalise and guessing would corrupt the comparison. The docstring already claimed the digest covered file CONTENT; now it does.
+- `tools/test_inject_digest.py` pins both halves rather than observing them once: the two transports agree on an identical surface, a real edit still moves the digest, a mixed-ending file collapses cleanly, and binary content is left alone.
+- This closes the fourth and last layer of one hole. The task was never installed; then it was installed and skipped every run on a too-broad cleanliness rule; then it injected and wrote no witness; then it wrote a witness that could never match. Each layer hid the next, and only running the thing end to end on a real machine surfaced them.
+
 ## 7.234.1 -- 2026-09-01 -- The Freshness Witness Gets Written (T-1252)
 
 - `tools/autoinject.py` owns the `.saipen_injected` stamp and compares it to decide whether a consumer copy is current. `bootstrap/inject.ps1` -- the injector the 15-minute task actually invokes -- copied the protocol and wrote no stamp at all. So the design's entire staleness signal had no witness: a freshly refreshed home and a home several releases behind both read as `installed unstamped`, forever.

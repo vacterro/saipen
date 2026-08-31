@@ -95,6 +95,28 @@ def _manifest_surface() -> list[tuple[Path, bool]]:
     return surface
 
 
+def _content_bytes(path: Path) -> bytes:
+    """The file's CONTENT, with line endings normalised to LF (T-1253).
+
+    The digest is a content digest -- that is what it has always claimed to be
+    -- and a line ending is transport, not content. It has to be, because the
+    two sides of the comparison come through different transports: the clone
+    holds LF while the snapshot git produces for the scheduled injector holds
+    CRLF, so `saipen/BOOT.md` is 4972 bytes here and 5063 bytes there with not
+    one character of difference. Hashing raw bytes made a home refreshed
+    seconds ago report STALE forever, which is the same as having no witness.
+
+    A file that is not valid UTF-8 is hashed byte-for-byte: it is not text, so
+    there are no line endings to normalise and guessing would be worse.
+    """
+    raw = path.read_bytes()
+    try:
+        raw.decode("utf-8")
+    except UnicodeDecodeError:
+        return raw
+    return raw.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+
+
 def _digest() -> str:
     """Content digest of the shipped surface, path-order stable."""
     h = hashlib.sha256()
@@ -127,7 +149,7 @@ def _digest() -> str:
             if member.is_dir():
                 frame(b"D", member)
             elif member.is_file():
-                frame(b"F", member, member.read_bytes())
+                frame(b"F", member, _content_bytes(member))
             else:
                 raise RuntimeError(f"runtime manifest surface contains unsupported entry: {member}")
     return h.hexdigest()[:16]
