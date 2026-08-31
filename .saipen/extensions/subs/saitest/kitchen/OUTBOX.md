@@ -1,4 +1,4 @@
-﻿# OUTBOX
+# OUTBOX
 
 ## TEST-1: No findings to reproduce
 - **status:** stale
@@ -118,6 +118,7 @@
 ## TEST-5: HUNT-12 validator failures independently reproduced
 - **status:** stale
 - **summary:** A fresh canonical validator run independently reproduces all four post-PY-7 failures while Ruff stays clean.
+
 - **main_project_refs:** [tools/improve.py, tools/validate.py, README_AR.md, README_ZH.md]
 - **critical:** true
 - **severity:** P1
@@ -179,3 +180,19 @@
 - **verified:** PASS -- 108 pytest tests, tools/validate.py conformant, compileall PASS; no scenario reproduced a failure against this tree
 - **instructions:** Core records a no-op saitest disposition for the crew SC-3 stage.
 - **details:** NOT_REPRODUCED across all seven scenario families: the audit regression suites (core 10, intent 40, v7-producer 17, second-wave 7, external 21, autonomy 13) pass, the canonical validator reports conformant, and bytecode compiles clean. No new defect was triggered against the current tree.
+
+## TEST-9: current reconciliation regression sweep at c7ea5b1b
+- **status:** stale
+- **summary:** Bounded regression scenarios do not reproduce the former continue-validation deadlock; ambiguity remains safely blocked
+- **main_project_refs:** [tools/saipen.py, tools/saipen_engine/reconcile.py, tools/saipen_engine/paths.py, tools/validate.py, tools/test_reconciliation.py]
+- **critical:** false
+- **severity:** P2
+- **producer:** saitest
+- **source_head:** c7ea5b1bb5f8e953c07140cda4f636a382c08310
+- **source_tree_fingerprint:** git-delta-v1:cd09a9a79f60d10339408b270b06f59207d15697fa4953d175fa915f891c6249
+- **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
+- **coverage:** counter drift, BOARD checkbox drift, legacy evidence/provenance, deterministic and ambiguous receipt links, recovery contract, cc/continue routing, global tool-root resolution with Windows paths
+- **payload:** []
+- **verified:** PASS -- `tools.test_reconciliation` 4/4 and full discovered suite 377/377; ambiguous receipt scenario ends with the precise semantic blocker and never guesses
+- **instructions:** Core to collect via `saipen sub collect saitest` as SC-3 evidence; no project payload changes are required
+- **details:** Scenario 1 NOT_REPRODUCED: deterministic drift repairs and continuation proceeds. Scenario 2 NOT_REPRODUCED: legacy metadata remains truthful and does not globally block current continuation; no evidence is synthesized. Scenario 3 REPRODUCED as the intended safety behavior: ambiguous active receipt refuses with `BLOCKED_AMBIGUOUS_SOURCE_RECEIPT`. Scenario 4 NOT_REPRODUCED: repair is idempotent. Scenario 5 NOT_REPRODUCED: canonical loaded SAIPEN root is used without a project-local probe. Scenario 6 NOT_REPRODUCED: recover CLEAN/REPAIRED is not followed by validation failure for a repairable condition.

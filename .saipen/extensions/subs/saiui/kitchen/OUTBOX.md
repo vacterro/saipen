@@ -1,4 +1,4 @@
-﻿# OUTBOX
+# OUTBOX
 
 ## UI-1: UI sweep at 00aa12db
 - **status:** stale
@@ -143,6 +143,22 @@
 - **verified:** PASS -- no visual implementation files; canonical validator reports Golden Default and boundary PASS.
 - **instructions:** Core records a no-op UI disposition for crew SC-5.
 - **details:** User-facing visual behavior is unchanged. Hidden existing capabilities: none. Ambiguous actions: none. Missing state visibility: none on the non-visual surface. Golden Default violations: none. Exact UI patch boundary: empty.
+
+## UI-8: current interface contract sweep at c7ea5b1b — no patch required
+- **status:** stale
+- **summary:** No UI implementation changed; canonical Golden Default and command-surface checks remain green
+- **main_project_refs:** [saipen/UI.md, tools/saipen.py, tools/validate.py]
+- **critical:** false
+- **severity:** P3
+- **producer:** saiui
+- **source_head:** c7ea5b1bb5f8e953c07140cda4f636a382c08310
+- **source_tree_fingerprint:** git-delta-v1:cd09a9a79f60d10339408b270b06f59207d15697fa4953d175fa915f891c6249
+- **role_revision:** sha256:f2e3685b908a3b9837917f12c5414628d847c35fb72567f0306e2c8b19a8dab8
+- **coverage:** UI implementation surface, shortcut/command discoverability, Golden Default palette integrity, and UI write-boundary checks
+- **payload:** []
+- **verified:** PASS -- no visual implementation files changed; canonical validator reports Golden Default integrity and command-surface checks PASS
+- **instructions:** Core to collect via `saipen sub collect saiui` as SC-5 evidence; no UI patch application is required
+- **details:** User-facing visual behavior is unchanged. This package contains no invented visual patch and leaves protocol/backend semantics to Core.
 
 
 ## UI-7: interface contract sweep at aa96d34a - no visual regression

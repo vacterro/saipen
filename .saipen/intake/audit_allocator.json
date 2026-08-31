@@ -1,0 +1,15 @@
+{
+  "next_id": 5,
+  "operations": {
+    "manual trajectory-delta-2026-08-31": {
+      "created_at": "2026-08-31T12:32:09Z",
+      "layer": 4,
+      "producer": "manual",
+      "producer_item_id": null,
+      "producer_operation_id": "trajectory-delta-2026-08-31",
+      "sha256": "abaaa9c67753df2598894e24656a20853aad4dbeabd5d84f12889bdf57383ff1",
+      "state": "COMMITTED"
+    }
+  },
+  "schema_version": 1
+}

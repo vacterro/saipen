@@ -723,6 +723,36 @@ def _status(project_root: Path, as_json: bool) -> int:
     from saipen_engine.controls import milestone_status
 
     payload["milestone"] = milestone_status(project_root)
+
+    # T-1234: the operator surface names the inbox in counts, never in prose
+    # from an audit body. An absent `audit/` renders nothing at all -- a
+    # project with no inbox should not grow a permanent empty section.
+    try:
+        from saipen_engine.audit_inbox import status as audit_inbox_status
+
+        _inbox = audit_inbox_status(project_root)
+        _summary = {
+            "pending": len(_inbox["pending"]),
+            "active_layer": next(
+                (item["layer"] for item in _inbox["pending"] if item["state"] == "ACTIVE"), None
+            ),
+            "bound_receipt": next(
+                (item["receipt"] for item in _inbox["pending"] if item["state"] == "ACTIVE"), None
+            ),
+            "bound_work": next(
+                (item["work"] for item in _inbox["pending"] if item["state"] == "ACTIVE"), None
+            ),
+            "closed_pending_delete": len(_inbox["closed_pending_delete"]),
+            "invalid": len(_inbox["invalid"]),
+            "last_allocated_id": _inbox.get("last_allocated_id"),
+        }
+        if _summary["pending"] or _summary["last_allocated_id"] is not None:
+            payload["audit_inbox"] = _summary
+    except Exception as exc:
+        # The inbox is transport, not terminal truth: a projection failure is
+        # reported as a condition, never allowed to hide behind a green status.
+        payload["audit_inbox"] = {"error": f"{type(exc).__name__}: {exc}"}
+
     parked = _parked_work(board["tickets"], state)
     if parked:
         payload["parked_work"] = parked
@@ -1887,14 +1917,127 @@ def _continue(
     )
 
 
+def _audit_enqueue(project_root: Path, rest: list[str], as_json: bool, dry_run: bool) -> int:
+    """`saipen audit enqueue` -- the ONE constrained producer writer (T-1230).
+
+    Flags: `--producer NAME --operation-id ID [--item-id ID]` plus exactly one
+    body source, `--file PATH` or `--text ...`. The producer never names a
+    path and never picks a layer number; `--file` is read, never linked to.
+    """
+    from saipen_engine import audit_enqueue
+
+    producer = operation_id = item_id = file_path = None
+    text_tokens: list[str] = []
+    i = 0
+    while i < len(rest):
+        token = rest[i]
+        if token == "--text":
+            text_tokens = rest[i + 1 :]
+            break
+        if token in ("--producer", "--operation-id", "--item-id", "--file"):
+            if i + 1 >= len(rest):
+                _emit(
+                    {"ok": False, "code": "VALIDATION_FAILED", "detail": f"{token} needs a value"},
+                    as_json,
+                )
+                return 2
+            value = rest[i + 1]
+            if token == "--producer":
+                producer = value
+            elif token == "--operation-id":
+                operation_id = value
+            elif token == "--item-id":
+                item_id = value
+            else:
+                file_path = value
+            i += 2
+            continue
+        _emit(
+            {"ok": False, "code": "VALIDATION_FAILED", "detail": f"unknown flag {token!r}"},
+            as_json,
+        )
+        return 2
+
+    if not producer or not operation_id:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "audit enqueue needs --producer and --operation-id",
+            },
+            as_json,
+        )
+        return 2
+    if bool(file_path) == bool(text_tokens):
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "audit enqueue needs exactly one body source: --file or --text",
+            },
+            as_json,
+        )
+        return 2
+    if file_path:
+        try:
+            body = Path(file_path).read_bytes()
+        except OSError as exc:
+            _emit(
+                {"ok": False, "code": "VALIDATION_FAILED", "detail": f"cannot read file: {exc}"},
+                as_json,
+            )
+            return 1
+    else:
+        body = (" ".join(text_tokens) + "\n").encode("utf-8")
+
+    if dry_run:
+        # PLAN parity: validate exactly like the real call, name the layer the
+        # allocator would hand out, write nothing.
+        doc = audit_enqueue._reconcile(project_root, audit_enqueue.read_allocator(project_root))
+        existing = doc["operations"].get(audit_enqueue._op_key(producer, operation_id))
+        layer = existing["layer"] if isinstance(existing, dict) else doc["next_id"]
+        _emit(
+            {
+                "ok": True,
+                "code": "PLAN",
+                "operation": "audit_enqueue",
+                "producer": producer,
+                "producer_operation_id": operation_id,
+                "layer": layer,
+                "rel": f"audit/{layer}.md",
+                "sha256": audit_enqueue.layer_digest(body),
+                "idempotent": isinstance(existing, dict),
+                "writes": [],
+            },
+            as_json,
+        )
+        return 0
+    if _negotiate_capability(project_root) == "read-only":
+        return _capability_refusal(as_json)
+
+    result = audit_enqueue.enqueue(
+        project_root,
+        producer=producer,
+        body=body,
+        producer_operation_id=operation_id,
+        producer_item_id=item_id,
+    )
+    _emit(result, as_json)
+    return 0 if result.get("ok") else 1
+
+
 def _audit(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
     """Audit Inbox admin surface (SOURCE-AUDIT-INBOX-01).
 
     Subcommands:
       status            compact read-only projection (default)
       inspect <N>       one layer's transport facts, read-only, no body dump
+      trace [N]         audit -> receipt -> Work -> disposition provenance,
+                        read-only, survives the consumed file
       ingest            settle proven cleanup, then capture the lowest workable
                         layer and derive its canonical Work (mutating)
+      enqueue           place one producer audit as the next canonical layer
+                        (mutating; SOURCE-AUDIT-ENQUEUE-01)
 
     Ordinary operation needs NONE of these: `cc` routes through the same
     projection. They exist for inspection and for the executable action the
@@ -1907,6 +2050,16 @@ def _audit(project_root: Path, args: list[str], as_json: bool, dry_run: bool) ->
 
     if action == "status":
         _emit(audit_inbox.status(project_root), as_json)
+        return 0
+
+    if action == "trace":
+        if len(rest) > 1 or (rest and not rest[0].isdigit()):
+            _emit(
+                {"ok": False, "code": "VALIDATION_FAILED", "detail": "trace takes an optional <N>"},
+                as_json,
+            )
+            return 2
+        _emit(audit_inbox.provenance_trace(project_root, int(rest[0]) if rest else None), as_json)
         return 0
 
     if action == "inspect":
@@ -1924,12 +2077,15 @@ def _audit(project_root: Path, args: list[str], as_json: bool, dry_run: bool) ->
         _emit({"ok": False, "code": "TICKET_NOT_FOUND", "detail": rel}, as_json)
         return 1
 
+    if action == "enqueue":
+        return _audit_enqueue(project_root, rest, as_json, dry_run)
+
     if action != "ingest":
         _emit(
             {
                 "ok": False,
                 "code": "VALIDATION_FAILED",
-                "detail": "audit needs a subcommand: status|inspect|ingest",
+                "detail": "audit needs a subcommand: status|inspect|trace|ingest|enqueue",
             },
             as_json,
         )
@@ -2073,6 +2229,7 @@ def _audit(project_root: Path, args: list[str], as_json: bool, dry_run: bool) ->
         binding=captured.get("binding", "exact"),
         linked_work=work,
         state=audit_inbox.ACTIVE,
+        provenance=captured.get("provenance"),
     )
     _emit(
         {
@@ -5025,6 +5182,22 @@ def main(argv: list[str] | None = None) -> int:
             )
             return 2
         return _brief(project_root, as_json)
+    if command == "hush":
+        # EXEC-HUSH-01: the mechanical projection of one activation. It
+        # resolves the policy and hands back the task VERBATIM; it deliberately
+        # does not execute the task, because the whole contract is that the
+        # normal resolver -- not this modifier -- decides the route.
+        from saipen_engine import hush as hush_runtime
+
+        # The dispatcher already consumed the modifier token, so rebuild the
+        # message the runtime parses. One parser, one place, no second reading
+        # of what `hush` means.
+        activation = hush_runtime.activate(" ".join([hush_runtime.MODIFIER, *args[1:]]))
+        payload = {k: v for k, v in activation.items() if k != "policy"}
+        if not payload["ok"]:
+            payload["detail"] = "hush needs a task to modify"
+        _emit(payload, as_json)
+        return 0 if payload["ok"] else 2
     if command == "improve":
         return _public_improve(project_root, args[1:], as_json, dry_run)
     if command == "scope":

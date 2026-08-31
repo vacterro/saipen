@@ -1,0 +1,185 @@
+{
+  "requirements": {
+    "SRC-011:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4995",
+      "text": "Current tree core validation is reproducibly green",
+      "verification": "validate.py --gate core reports 0 FAIL on the live tree",
+      "work": "T-1211"
+    },
+    "SRC-011:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4995",
+      "text": "Fresh checkout core validation is green",
+      "verification": "run_scenarios release-freshness probe rebuilds a clean copy and runs its core gate; exit 0",
+      "work": "T-1211"
+    },
+    "SRC-011:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4995",
+      "text": "T-1210 implementation is durably represented, not merely dirty or staged Work",
+      "verification": "T-1210 is DONE on BOARD and its protocol compression is present at HEAD 538eb8fe",
+      "work": "T-1211"
+    },
+    "SRC-011:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4995",
+      "text": "BOOT no longer sends command resolution to CORE section 1.10",
+      "verification": "grep of saipen/BOOT.md finds zero 1.10 occurrences; step 6 routes commands to REGISTRY/COMMANDS",
+      "work": "T-1212"
+    },
+    "SRC-011:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4995",
+      "text": "BOOT defines routing only",
+      "verification": "saipen/BOOT.md states BOOT defines no protocol rule and every step names an owner document",
+      "work": "T-1212"
+    },
+    "SRC-011:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4995",
+      "text": "BOOT is at most about 7.5 KB",
+      "verification": "saipen/BOOT.md is 4972 bytes against the ~7.5 KB target",
+      "work": "T-1212"
+    },
+    "SRC-011:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4995",
+      "text": "INDEX reflects the actual ownership graph",
+      "verification": "saipen/INDEX.md names COMMANDS as command semantics owner, EXECUTION as output policy, OPS as mechanics, SOURCES as receipt authority",
+      "work": "T-1213"
+    },
+    "SRC-011:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4995",
+      "text": "INDEX is at most about 3 to 3.5 KB where practical",
+      "verification": "saipen/INDEX.md is 2350 bytes against the ~3-3.5 KB target",
+      "work": "T-1213"
+    },
+    "SRC-011:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4995",
+      "text": "Cold load profile is at most 20 KB",
+      "verification": "protocol_budget reports cold 15912 bytes against the restored 20480 target",
+      "work": "T-1214"
+    },
+    "SRC-011:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4995",
+      "text": "protocol_budget measures every budget it declares",
+      "verification": "protocol_budget emits a constructed profile with must/conditional/exclude for all six declared budgets",
+      "work": "T-1214"
+    },
+    "SRC-011:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4995",
+      "text": "Load-profile membership has one machine owner",
+      "verification": "REGISTRY.json load_profiles owns budgets and surfaces; protocol_budget consumes them rather than restating membership",
+      "work": "T-1214"
+    },
+    "SRC-011:R012": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4995",
+      "text": "CONFORMANCE corpus contains exactly 256 of 256 current scenarios",
+      "verification": "tests/conformance_cases.jsonl carries 256 rows including the previously missing 250-254",
+      "work": "T-1215"
+    },
+    "SRC-011:R013": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4995",
+      "text": "Malformed pseudo-rule IDs are separated from historical ticket references",
+      "verification": "corpus rows expose id/rule_ids/history_refs/concept; no rule_ids value starts with a parenthesis or re-",
+      "work": "T-1215"
+    },
+    "SRC-011:R014": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4995",
+      "text": "The machine corpus is the scenario-data owner",
+      "verification": "CONFORMANCE.md is a compact contract that points at tests/conformance_cases.jsonl as the scenario data owner",
+      "work": "T-1216"
+    },
+    "SRC-011:R015": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4995",
+      "text": "CONFORMANCE.md is at most 15 KB",
+      "verification": "saipen/CONFORMANCE.md is 2465 bytes against the 15 KB ceiling",
+      "work": "T-1216"
+    },
+    "SRC-011:R016": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4995",
+      "text": "Routine execution never loads CONFORMANCE",
+      "verification": "BOOT.md and INDEX.md both exclude CONFORMANCE.md from routine execution",
+      "work": "T-1216"
+    },
+    "SRC-011:R017": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4995",
+      "text": "Stale CORE section 1.10 references are classified and corrected",
+      "verification": "five surviving 1.10 references (CONTROLS, CONVERGE, OPS x2, phases/hunt) point at live CORE invariants, so they are class A and stay",
+      "work": "T-1218"
+    },
+    "SRC-011:R018": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4995",
+      "text": "Human protocol Markdown falls to approximately 300 KB or less",
+      "verification": "protocol_budget reports human_markdown_total 273332 bytes against the ~300 KB target",
+      "work": "T-1217"
+    },
+    "SRC-011:R019": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4995",
+      "text": "Phase semantics are unchanged by Wave 4",
+      "verification": "phase docs were untouched during W4; the later phase compression is T-1226 under SRC-013, not this wave",
+      "work": "T-1221"
+    },
+    "SRC-011:R020": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4995",
+      "text": "HUSH remains honestly marked planned until its real execution path exists",
+      "verification": "REGISTRY hush_precedence status is planned and EXECUTION.md owns the prepared routing boundary",
+      "work": "T-1220"
+    }
+  },
+  "schema_version": 1
+}

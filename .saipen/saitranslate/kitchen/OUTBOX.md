@@ -1,4 +1,4 @@
-﻿# OUTBOX
+# OUTBOX
 
 ## SAIT-008: translated fast-keys callout roll-out -- superseded by SAIT-011
 - **legacy:** true
@@ -257,7 +257,7 @@
   4. Re-run the 32-file quality audit, mirror byte equality, Core gate, and REVIEW before SHIP.
 
 ## SAIT-023: v7.226.1 release-metadata rebind
-- **status:** ready
+- **status:** stale
 - **summary:** Rebound the reviewed qwen3:14b translation payload after the v7.226.1 release metadata and all 32 locale badges were finalized; translation prose is unchanged from SAIT-022.
 - **critical:** false
 - **producer:** saitranslate

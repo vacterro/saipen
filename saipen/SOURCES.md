@@ -136,3 +136,43 @@ source. Byte identity stays strict.
 - `saipen audit status` / `inspect N` — read-only projection, no body dump
 - `saipen audit ingest` — settle proven cleanup, then capture the lowest
   workable layer and derive its Work. `cc` routes here on its own.
+
+## Producer enqueue
+
+<!-- RULE-OWNER: SOURCE-AUDIT-ENQUEUE-01 -->
+
+A producer — a person's script, AUDAPACK, a future SAIPAL — hands SAIPEN BYTES
+and an operation id. It never names a path and never picks a layer number.
+That removes the defect class where two producers each compute "the next free
+number" and one silently overwrites the other's audit.
+
+Layer numbers come from `.saipen/intake/audit_allocator.json` and only go up.
+A number that was consumed and deleted is never handed out again: every
+downstream provenance record keys on it. A hand-dropped `audit/99.md` raises
+the floor instead of being overwritten.
+
+Placement is reserve-then-place. The allocation and the operation record are
+durable BEFORE the bytes land, so a crash costs at most one spent id and a
+retry with the same `producer_operation_id` finishes the SAME layer instead of
+enqueueing a second copy. A retry carrying different bytes is refused, and a
+refused placement frees the operation while keeping the id spent. The lock
+covers allocation and placement only — never analysis, never Source
+processing.
+
+A layer MAY open with one optional envelope (`<!-- saipen-audit-envelope`,
+`key: value` lines, closed by `-->`). Plain Markdown without one stays valid;
+parsing is pure, so the file digest is unaffected; a malformed envelope
+degrades to "no usable metadata" and never blocks capture or authorizes
+deletion. Every field is a Source CLAIM: severity, confidence and proposed
+fixes are read as text, no routing or priority decision consults them,
+`maintainer_verdict` is PENDING on intake — a producer cannot approve its own
+finding — and no code path branches on WHICH producer sent an audit.
+
+Provenance is written once at capture into the layer binding and outlives the
+file: after the bytes are journaled away the record still names the digest,
+the producer, their item id, the receipt, the Work and its closure. Rejection
+is a valid closure.
+
+- `saipen audit enqueue --producer NAME --operation-id ID [--item-id ID]
+  (--file PATH | --text ...)` — the only producer writer
+- `saipen audit trace [N]` — read-only audit→receipt→Work→disposition

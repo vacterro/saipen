@@ -25,9 +25,20 @@ selects language and voice only after this policy decides whether text exists.
 ## HUSH
 
 `hush <task>` applies to that task and its authorized continuation chain.
-Its runtime remains planned. The prepared boundary is: parse HUSH as an
-execution-policy modifier, pass `<task>` unchanged to the normal
-command/objective resolver, then apply output suppression to that route.
+The runtime is `tools/saipen_engine/hush.py`; `saipen hush <task>` is its
+mechanical projection. HUSH is an execution-policy modifier, never a phase and
+never a command: the modifier is stripped, `<task>` reaches the normal
+command/objective resolver UNCHANGED, and only the output of that route is
+suppressed. `hush cc` therefore routes exactly where `cc` routes.
+
+Only a LEADING whole token is the modifier — `hush` inside a task is ordinary
+text, because a modifier reachable from the middle of a payload would let
+arbitrary prose change execution policy. A bare `hush` with no task modifies
+nothing and is reported, never guessed into an objective.
+
+The policy is TASK-LOCAL. It is never written to `STATE.md`, so it cannot
+leak into the next task; the next task that did not ask for HUSH gets the
+default because there is nowhere the old policy could have been stored.
 
 - Tool-first: begin work without conversational preamble.
 - Silence lock: omit progress narration, plans, and success chatter.

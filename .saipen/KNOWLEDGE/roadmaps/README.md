@@ -12,18 +12,24 @@ exists to remove.
 
 **Operational rule: roadmap packs are reference artifacts. Do not unpack them
 into the live `audit/` inbox.** If a roadmap is itself meant to be audited,
-place ONE deliberate numbered audit file (`audit/N.md`), not the whole pack.
+place ONE deliberate numbered audit file -- and the supported way to do that
+is `saipen audit enqueue`, which allocates the number for you and never reuses
+a consumed one (`SOURCE-AUDIT-ENQUEUE-01`).
 
-- `audit-ecosystem-next/` -- audit transport ecosystem, Waves A-I (producer
-  enqueue API, provenance envelope, maintainer disposition projection,
-  multi-producer hardening, operator surface, SAIPAL bridge, dogfood).
-  Waves A and B are DONE: the native Audit Inbox shipped under T-1227 and
-  consumed `audit/1.md`, `audit/2.md` and `audit/3.md` through its own
-  journaled path.
-- `current-stage-next/` -- the 31 Aug 2026 current-stage pack, Waves 0-8.
-  Waves 0-4 are DONE (truth reconciliation, audit/1-3 closure, phase delta
-  compression, native inbox, bootstrap migration + inbox hygiene, which is
-  this move). Waves 5-8 remain.
+- `next-2026-08-31/` -- the 31 Aug 2026 pack, Waves 0-10. Every wave is
+  discharged: 0-5 shipped in v7.232.0/v7.232.1, and 6-10 (shared producer
+  enqueue, provenance envelope, maintainer disposition projection,
+  multi-producer hardening, operator surface, real HUSH runtime, SAIPAL
+  bridge, transport dogfood, backlog re-entry) shipped in this release under
+  `SRC-015` R001-R009. The pack is kept as the acceptance-bar evidence behind
+  those dispositions, not as pending scope.
 
-The remaining scope is tracked as ordinary BOARD Work, bound to the source
-receipt captured for these packs. Read the receipt, not a memory of the ZIP.
+Two earlier packs (`audit-ecosystem-next/`, `current-stage-next/`) were
+deleted once their remaining scope was discharged: their bodies are preserved
+VERBATIM inside the `SRC-015` receipt, which is the authority anyway. Restore
+them from git history if a forensic need ever arises:
+
+    git checkout 538eb8fe -- .saipen/KNOWLEDGE/roadmaps/audit-ecosystem-next
+    git checkout 538eb8fe -- .saipen/KNOWLEDGE/roadmaps/current-stage-next
+
+Read the receipt, not a memory of the ZIP.

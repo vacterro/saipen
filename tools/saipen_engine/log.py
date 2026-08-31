@@ -545,6 +545,35 @@ _NEGATION_RE = re.compile(r"\bNOT\s+(?:PASS|MANUAL-VERIFY)\b", re.IGNORECASE)
 _PASS_TOKEN_RE = re.compile(r"\bPASS\b")
 _MANUAL_TOKEN_RE = re.compile(r"\bMANUAL-VERIFY\b")
 
+# T-1241: a FAILURE CLAIM, not the mere appearance of the letters. The old
+# test was `"FAIL" in txt`, so the canonical zero-failure summary every gate in
+# this repository prints -- `validate.py --gate core 0 FAIL` -- read as
+# negative evidence, and VERIFY could not reach REVIEW until someone wrote a
+# second, weaker event that avoided the word. The grammar must keep
+# negative-evidence-wins (a real failure can never be talked past) while
+# recognising that a count of zero in front of the token is the OPPOSITE of a
+# failure. Anything not provably zero stays a failure.
+_ZERO_FAIL_RE = re.compile(r"\b(?:0|no|zero)\s+FAIL(?:S|ED|URE|URES)?\b", re.IGNORECASE)
+_FAIL_TOKEN_RE = re.compile(r"\bFAIL(?:S|ED|URE|URES)?\b", re.IGNORECASE)
+
+
+def _claims_failure(text: str) -> bool:
+    """Does this event text CLAIM a failure? (T-1241)
+
+    Every `FAIL` token has to be accounted for. A text is failure-free only
+    when each occurrence is one of the zero-count forms; a single unexplained
+    token -- `1 FAIL`, `FAILED`, a bare `FAIL:` prefix -- is a failure claim.
+    An evidence grammar that must guess should guess toward failure, so the
+    comparison is a count, not a "contains a zero form somewhere" test: a line
+    reading `0 FAIL on core, 3 FAIL on ship` is a failure.
+    """
+    if _NEGATION_RE.search(text):
+        return True
+    total = len(_FAIL_TOKEN_RE.findall(text))
+    if not total:
+        return False
+    return total > len(_ZERO_FAIL_RE.findall(text))
+
 
 def _is_verify_boundary(ev: dict) -> bool:
     """True iff `ev` is the EXACT machine-owned VERIFY entry marker.
@@ -569,8 +598,9 @@ def verification_evidence(ticket_id: str, events: list[dict]) -> tuple[bool, str
       this ticket; a replaced/forged marker is not a boundary;
     - only RUN events for the ticket AFTER that boundary count (the
       current verification cycle);
-    - negative evidence wins: `FAIL`, `NOT PASS` or `NOT MANUAL-VERIFY`
-      fails immediately;
+    - negative evidence wins: a FAILURE CLAIM (`_claims_failure`), `NOT PASS`
+      or `NOT MANUAL-VERIFY` fails immediately. A zero count in front of the
+      token (`0 FAIL`, `no failures`) is not a claim (T-1241);
     - PASS evidence is the exact `PASS` token (word-boundary, so e.g.
       COMPASS never matches) with the exact `conf: high` marker; an
       explicit `conf: low`/`conf: med` disqualifies;
@@ -596,7 +626,7 @@ def verification_evidence(ticket_id: str, events: list[dict]) -> tuple[bool, str
         if ev.get("ticket") != ticket_id or ev.get("taxonomy") != "RUN":
             continue
         txt = ev.get("text", "")
-        if "FAIL" in txt or _NEGATION_RE.search(txt):
+        if _claims_failure(txt):
             return False, txt
         if _MANUAL_TOKEN_RE.search(txt):
             return True, txt
@@ -654,7 +684,7 @@ def bulk_verification_evidence(
             continue  # older than the newest VERIFY boundary: out of cycle
         txt = ev.get("text", "")
         decisive = None
-        if "FAIL" in txt or _NEGATION_RE.search(txt):
+        if _claims_failure(txt):
             decisive = (False, txt)
         elif _MANUAL_TOKEN_RE.search(txt):
             decisive = (True, txt)

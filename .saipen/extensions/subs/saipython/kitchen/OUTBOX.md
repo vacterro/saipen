@@ -1,4 +1,4 @@
-﻿# OUTBOX
+# OUTBOX
 
 ## PY-1: No failures to fix
 - **status:** stale
@@ -183,3 +183,19 @@
 - **verified:** PASS -- ruff check tools exits 0; compileall PASS; 108 focused audit tests pass after the hygiene edits
 - **instructions:** Core records a no-op Python disposition for crew SC-4; the ruff edits ship with the next Core commit.
 - **details:** The audit-hardening commits (19e39692/aa96d34a) introduced 4 unused-import (F401) and 22 line-length (E501) diagnostics. All 26 fixed by removing the unused import and reformatting long lines only -- no semantic change. compileall and the 108-test audit suite pass on the edited tree.
+
+## PY-12: current Python regression review at c7ea5b1b — no patch required
+- **status:** stale
+- **summary:** Current Python tooling passes the reconciliation regression suite and no independent Python defect remains to fix
+- **main_project_refs:** [tools/saipen.py, tools/saipen_engine/reconcile.py, tools/saipen_engine/paths.py, tools/validate.py, tools/test_reconciliation.py]
+- **critical:** false
+- **severity:** P3
+- **producer:** saipython
+- **source_head:** c7ea5b1bb5f8e953c07140cda4f636a382c08310
+- **source_tree_fingerprint:** git-delta-v1:cd09a9a79f60d10339408b270b06f59207d15697fa4953d175fa915f891c6249
+- **role_revision:** sha256:3069120b1a83291867c000dd5d7edb141d5fedf7895e5dc8f07d06624d05d9ff
+- **coverage:** Python reconciliation, transaction, recovery, alias, path-resolution, and validator surfaces
+- **payload:** []
+- **verified:** PASS -- full discovered suite 377/377; canonical core validator PASS with 7 warnings; no Python patch is justified by the current evidence
+- **instructions:** Core to collect via `saipen sub collect saipython` as SC-4 evidence; no patch application is required
+- **details:** TEST-9 is closed by the existing implementation and tests. This package deliberately contains no generated patch and no fabricated fix evidence.

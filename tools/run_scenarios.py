@@ -1360,6 +1360,18 @@ def run_scheduler_probes() -> tuple[list[str], int, int]:
     if not powershell:
         print("SKIP: scheduler lifecycle probes -- no PowerShell")
         return problems, checked, skipped + 1
+    if os.name != "nt":
+        # The lifecycle below drives WINDOWS Task Scheduler: a mocked
+        # `schtasks`, a UTF-16 `.vbs` wrapper published under %LOCALAPPDATA%,
+        # `wscript.exe` as the task action. PowerShell existing is not the same
+        # fact as the host being Windows -- the Linux CI runner ships pwsh, so
+        # the old `find_powershell()` guard let these probes run there, the
+        # mocked install could not complete, and the very next check read the
+        # task file that was never created. That FileNotFoundError aborted the
+        # ENTIRE conformance run rather than reporting one soft failure.
+        # The platform-independent text contracts above stay armed everywhere.
+        print("SKIP: scheduler lifecycle probes -- Windows Task Scheduler host only")
+        return problems, checked, skipped + 1
 
     with tempfile.TemporaryDirectory(prefix="saipen-scheduler-") as raw:
         sandbox = Path(raw)
@@ -5655,6 +5667,78 @@ def run_ship_staging_probes() -> tuple[list[str], int]:
     return problems, checked
 
 
+def neutralize_sandbox_work_surface(saipen_dir: Path) -> set[str]:
+    """Drop DONE/DOING from a COPIED board and keep intake consistent with it.
+
+    Probes that rebuild a fixture from the live project cut LOG history, so the
+    copied DONE tickets no longer carry the closure evidence their own gate
+    demands. Emptying those two sections is the established fix; TODO/BLOCKED
+    survive verbatim because the release-history WARN-ownership rule needs live
+    owners for aged warning slugs and those live there.
+
+    T-1240: the deletion is the PROBE's edit, so the copied Source intake has
+    to follow it. An ACTIVE receipt linked to a ticket this function removed
+    would otherwise make the copied project fail its own core gate with
+    `references missing Work` -- a defect the probe manufactured and then
+    reported against the live repository. Only receipts whose Work this
+    function removed are unlinked. A receipt naming Work that exists nowhere in
+    the ORIGINAL board is untouched, still dangling, and still fails; that is
+    the condition the check exists to catch.
+
+    Returns the ticket ids that were dropped.
+    """
+    board_path = saipen_dir / "BOARD.md"
+    board_out: list[str] = []
+    dropped: set[str] = set()
+    skip_section = None
+    for line in board_path.read_text(encoding="utf-8-sig").splitlines():
+        head = re.match(r"^## (\w+)\s*$", line)
+        if head:
+            skip_section = {"DONE": "drop", "DOING": "drop"}.get(head.group(1))
+            board_out.append(line)
+            continue
+        if skip_section == "drop":
+            ticket = re.search(r"\b(T-\d+)\b", line)
+            if ticket:
+                dropped.add(ticket.group(1))
+            continue
+        board_out.append(line)
+    board_path.write_text("\n".join(board_out) + "\n", encoding="utf-8")
+
+    intake_dir = saipen_dir / "intake"
+    if not dropped or not intake_dir.is_dir():
+        return dropped
+
+    for meta_path in sorted((intake_dir / "active").glob("*.meta.json")):
+        try:
+            meta = json.loads(meta_path.read_text(encoding="utf-8-sig"))
+        except (OSError, ValueError):
+            continue
+        if isinstance(meta, dict) and meta.get("linked_work") in dropped:
+            meta["linked_work"] = None
+            meta_path.write_text(
+                json.dumps(meta, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+            )
+
+    index_path = intake_dir / "index.json"
+    try:
+        index = json.loads(index_path.read_text(encoding="utf-8-sig"))
+    except (OSError, ValueError):
+        return dropped
+    if not isinstance(index, dict) or not isinstance(index.get("active"), dict):
+        return dropped
+    touched = False
+    for entry in index["active"].values():
+        if isinstance(entry, dict) and entry.get("linked_work") in dropped:
+            entry["linked_work"] = None
+            touched = True
+    if touched:
+        index_path.write_text(
+            json.dumps(index, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+    return dropped
+
+
 def run_release_freshness_probes() -> tuple[list[str], int]:
     """A pre-metadata green gate must not authorize mutated release bytes."""
     problems: list[str] = []
@@ -5729,19 +5813,7 @@ def run_release_freshness_probes() -> tuple[list[str], int]:
         # ticket-less DONE shape), while TODO/BLOCKED survive verbatim -- the
         # release-history WARN-ownership rule demands live owners for aged
         # warning slugs, and those live in exactly those two sections.
-        _board_src = (saipen_dir / "BOARD.md").read_text(encoding="utf-8-sig")
-        _board_out = []
-        _skip_section = None
-        for _ln in _board_src.splitlines():
-            _head = re.match(r"^## (\w+)\s*$", _ln)
-            if _head:
-                _skip_section = {"DONE": "drop", "DOING": "drop"}.get(_head.group(1))
-                _board_out.append(_ln)
-                continue
-            if _skip_section == "drop":
-                continue
-            _board_out.append(_ln)
-        (saipen_dir / "BOARD.md").write_text("\n".join(_board_out) + "\n", encoding="utf-8")
+        neutralize_sandbox_work_surface(saipen_dir)
         st = (saipen_dir / "STATE.md").read_text(encoding="utf-8-sig")
         for key, val in (
             ("phase", "DONE"),

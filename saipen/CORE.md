@@ -311,8 +311,11 @@ COMMANDS prose to reconstruct commands.
   short tokens remain unknown. Public command vocabulary is not renamed or
   compressed as a documentation optimization.
 - `cc`, bare `saipen`, and `saipen continue` use one recovery/reconcile/route
-  implementation. Persisted intent decides resume behavior. `ccc` binds ship
-  convergence; `sc` is the serial crew circuit, never style or parallel mode.
+  implementation. Persisted intent decides resume behavior.
+  With `execution_intent: converge`, continue resumes convergence from the
+  persisted target on a cold restart, never from a lucky `next_action` string.
+  `ccc` binds ship convergence; `sc` is the serial crew circuit, never style or
+  parallel mode.
 - Continue-to-improve fallthrough obeys `CMD-CONTINUE-01`: only after recovery,
   active/blocked/queued/follow-up Work is exhausted; resume an active cycle;
   at most one new discovery per invocation; never recurse into a carousel.
@@ -323,6 +326,15 @@ COMMANDS prose to reconstruct commands.
   `ready`; run/fix the producer and verify the package.
 - `hush <task>` changes narration through `EXEC-HUSH-01`; it changes no safety,
   lifecycle, evidence, or final-report duty.
+- `saipen userperson` is DEFAULT DIRECTION, never ORDER. Precedence is
+  current explicit request > project/task requirements > SAIPEN normative rules > verified evidence > project USERPERSON > global USERPERSON.
+  A preference never overrides a higher source or a verified fact. When one materially
+  influenced a decision the current task did NOT already specify, report it
+  once at completion as `USERPERSON alignment:`; when a relevant preference was
+  deliberately overridden by stronger evidence or requirements, report one
+  compact `USERPERSON deviation:`. Emit neither when USERPERSON had no material
+  effect, and never credit it for an explicit current instruction.
+  `OPS.md` owns the source locations, validation and write mechanics.
 
 ### 1.11 Determinism Invariants
 

@@ -1,4 +1,20 @@
-﻿# OUTBOX
+# OUTBOX
+
+## W-041: FORCE-FRESH wiki v7.231.9 -- badges, feature bullets, phase range
+- **status:** stale
+- **summary:** Rebound all 9 maintained wiki pages to current v7.231.9 source triple (HEAD c7ea5b1b, tree git-delta-v1:f6607050). Home badge/features v7.231.9 with 6 new bullets (v7.231.4-v7.231.9: bootstrap activation parity, shortcut payload routing, runtime manifest completeness, CCC ship control, repeated cc hardening, SRC-003 audit repair wave). _Footer v7.231.9. Phases range header v7.231.9. SubSaipen saiwiki/saitranslate status rows refreshed. Scenarios 256 IDs verified against CONFORMANCE; canonical mirror sha256:46f20ddd1cd655be current.
+- **main_project_refs:** [VERSION, README.md, CHANGELOG.md, KNOWLEDGE/ADR-0001-v7-producer-parallelism.md, saipen/BOOT.md, saipen/CORE.md, saipen/STYLE.md, saipen/CONFORMANCE.md, saipen/CONVERGE.md, saipen/OPS.md, saipen/phases/*.md, extensions/subs/PROTOCOL.md, extensions/subs/crew.md, extensions/subs/sai*.md, tools/freshness.py, tools/validate.py, tools/saipen_engine/producer.py, tools/saipen_engine/intent.py, tools/saipen_engine/journal.py, tools/saipen_engine/crew.py, tools/saipen_engine/release.py, tools/saipen_engine/subs.py]
+- **critical:** false
+- **severity:** P2
+- **producer:** saiwiki
+- **source_head:** c7ea5b1bb5f8e953c07140cda4f636a382c08310
+- **source_tree_fingerprint:** git-delta-v1:f66070504b62818234b56162a1daa4243b1ab7462c178b2cf251de8831e45862
+- **role_revision:** sha256:54a42475a124ab0f27e83d600a284a9cc54d9668029c4828cfc48512b031df13
+- **coverage:** 9/9 maintained pages; 256 scenario IDs unique/contiguous; v7.231.9 badges
+- **payload:** [.saipen/extensions/subs/saiwiki/kitchen/wiki/Home.md, Phases.md, Getting-Started.md, SubSaipen.md, Tutorials.md, Use-Cases.md, Scenarios.md, _Footer.md, _Sidebar.md]
+- **verified:** PASS -- strict READY sha256:5f1eb7d6ffbeb28ecb99b20c5d473837527af6d5abeaf7b4bf9c76962ef3752c at epoch 5 with 42 exact read dependencies and 9 authenticated payload entries; canonical mirror sha256:46f20ddd1cd655be; 256 unique contiguous scenario IDs; badges v7.231.9; no integration, commit, tag, push, or remote write performed
+- **instructions:** Run saipen conformance validation starting (tools/validate.py)...
+- **details:** W-040 (b666b77f) went stale after 6 releases (v7.231.4-v7.231.9). Home badge/features updated with 6 new bullets. _Footer version updated. Phases range header updated. SubSaipen saiwiki/saitranslate status rows refreshed. Scenarios 256 IDs re-verified; canonical mirror digest unchanged. No page content drift beyond version metadata.
 
 ## W-028: wiki refresh v7.157.0-era -> v7.170.0, 195 scenarios, T-400 closed
 - **legacy:** true
@@ -304,7 +320,7 @@
 - **details:** W-035/W-038 were stale bindings and carried no payload. W-039 is a fresh complete package. It also corrects the old scenario footer count from 254 to 256 and replaces historical current-state prose that assigned valve reauthorization to bare `saipen goal`.
 
 ## W-040: v7.226.1 final wiki rebind
-- **status:** ready
+- **status:** stale
 - **summary:** Rebound all nine reviewed wiki pages after final v7.226.1 metadata; current-version badges, footer, phase range and producer-status rows now name the release packages SAIT-023/W-040.
 - **main_project_refs:** [VERSION, README.md, CHANGELOG.md, KNOWLEDGE/ADR-0001-v7-producer-parallelism.md, saipen/BOOT.md, saipen/CORE.md, saipen/STYLE.md, saipen/CONFORMANCE.md, saipen/CONVERGE.md, saipen/OPS.md, saipen/phases/*.md, extensions/subs/PROTOCOL.md, extensions/subs/crew.md, extensions/subs/sai*.md, tools/freshness.py, tools/validate.py, tools/saipen_engine/producer.py, tools/saipen_engine/intent.py, tools/saipen_engine/journal.py, tools/saipen_engine/crew.py, tools/saipen_engine/release.py, tools/saipen_engine/subs.py]
 - **critical:** false

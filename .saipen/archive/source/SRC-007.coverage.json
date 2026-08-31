@@ -1,0 +1,131 @@
+{
+  "requirements": {
+    "SRC-007:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "SUPERSEDED",
+      "evidence": "E-4996",
+      "text": "CORE-001 -- source requirement Contract/current-revision/coverage must commit as one integrity-checked recoverable transaction",
+      "verification": "SRC-008 re-audits the same defect against the later tree as its own CORE-001; canonical Work is T-1196",
+      "work": "T-1196"
+    },
+    "SRC-007:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "SUPERSEDED",
+      "evidence": "E-4996",
+      "text": "CORE-002 -- every audited mutation dry-run must execute its real semantic PLAN with zero writes",
+      "verification": "SRC-008 CORE-002 carries this forward against the later tree; canonical Work is T-1197",
+      "work": "T-1197"
+    },
+    "SRC-007:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "SUPERSEDED",
+      "evidence": "E-4996",
+      "text": "CORE-003 -- corrupt recovery evidence must take canonical precedence and classification across entry points",
+      "verification": "SRC-008 CORE-003 carries this forward against the later tree; canonical Work is T-1198",
+      "work": "T-1198"
+    },
+    "SRC-007:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4996",
+      "text": "CORE-004 -- restore execution of all reconciliation regressions (missing import re in the regression module)",
+      "verification": "tools/test_audit_2026_08_29_all3_impl.py:10 imports re; Core002ReconciliationTests runs 13/13 OK with no injected globals",
+      "work": "T-1179"
+    },
+    "SRC-007:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "SUPERSEDED",
+      "evidence": "E-4996",
+      "text": "W2-001 -- orphan recovery must restore the receipt allocator invariant before persisting recovered state",
+      "verification": "SRC-008 W2-001 carries this forward against the later tree; canonical Work is T-1199",
+      "work": "T-1199"
+    },
+    "SRC-007:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "SUPERSEDED",
+      "evidence": "E-4996",
+      "text": "W2-002 -- purge_receipt must be a journaled PLAN/APPLY, not a sequence of independent deletes",
+      "verification": "SRC-008 W2-002 carries this forward against the later tree; canonical Work is T-1200",
+      "work": "T-1200"
+    },
+    "SRC-007:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "SUPERSEDED",
+      "evidence": "E-4996",
+      "text": "W2-003 -- test_runner child lifetime must be cleaned up on every abnormal exit",
+      "verification": "SRC-008 W2-003 carries this forward against the later tree; canonical Work is T-1201",
+      "work": "T-1201"
+    },
+    "SRC-007:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "SUPERSEDED",
+      "evidence": "E-4996",
+      "text": "W2-004 -- compound command parsing must use explicit quote/escape state and refuse malformed input structurally",
+      "verification": "SRC-008 W2-004 carries this forward against the later tree; canonical Work is T-1202",
+      "work": "T-1202"
+    },
+    "SRC-007:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "SUPERSEDED",
+      "evidence": "E-4996",
+      "text": "PERF-001 -- history snapshot and delete-tree digest must come from one validated traversal",
+      "verification": "SRC-008 PERF-001 carries this forward against the later tree; canonical Work is T-1203",
+      "work": "T-1203"
+    },
+    "SRC-007:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "SUPERSEDED",
+      "evidence": "E-4996",
+      "text": "PERF-002 -- producer package validation must release decoded payload bytes for non-selected packages",
+      "verification": "SRC-008 PERF-002 carries this forward against the later tree; canonical Work is T-1204",
+      "work": "T-1204"
+    },
+    "SRC-007:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "SUPERSEDED",
+      "evidence": "E-4996",
+      "text": "PERF-003 -- fast_check must capture history once and feed the same snapshot to both consumers",
+      "verification": "SRC-008 PERF-003 carries this forward against the later tree; canonical Work is T-1205",
+      "work": "T-1205"
+    },
+    "SRC-007:R012": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "SUPERSEDED",
+      "evidence": "E-4996",
+      "text": "PERF-004 -- intake validate_project must parse BOARD once and read each coverage ledger once",
+      "verification": "SRC-008 PERF-004 carries this forward against the later tree; canonical Work is T-1206",
+      "work": "T-1206"
+    },
+    "SRC-007:R013": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "SUPERSEDED",
+      "evidence": "E-4996",
+      "text": "PERF-005 -- snapshot capture and status/next/explain must offer an explicit lean mode",
+      "verification": "SRC-008 PERF-005 carries this forward against the later tree; canonical Work is T-1207",
+      "work": "T-1207"
+    },
+    "SRC-007:R014": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "SUPERSEDED",
+      "evidence": "E-4996",
+      "text": "PERF-006 -- release authority inventory must be gathered once per PLAN",
+      "verification": "SRC-008 PERF-006 carries this forward against the later tree; T-1208 is DONE and shipped in v7.231.11",
+      "work": "T-1208"
+    }
+  },
+  "schema_version": 1
+}

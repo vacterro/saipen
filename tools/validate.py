@@ -4418,6 +4418,7 @@ if IS_SAIPEN_HOME:
         "PROTOCOL.md": Path("extensions/subs/PROTOCOL.md"),
         "prepare.md": Path("saipen/phases/prepare.md"),
         "hunt.md": Path("saipen/phases/hunt.md"),
+        "CORE.md": Path("saipen/CORE.md"),
     }
     _hardening_text = {
         name: path.read_text(encoding="utf-8-sig", errors="replace")
@@ -4451,6 +4452,13 @@ if IS_SAIPEN_HOME:
             "never receive",
             "STATE/BOARD/LOG/kitchen or lifecycle state",
         ),
+        # hardening control 27 (cc-cold-restart-persists-intent). The CORE.md
+        # marker block was dropped with the § 1.10 compression while the
+        # control kept naming its anchor, so the guarantee had no checker and
+        # `run_scenarios` reported the control as no longer evidence. A cold
+        # `cc` under a persisted converge intent MUST resume that convergence
+        # rather than re-deriving one from a lucky next_action string.
+        "CORE.md": ("With `execution_intent: converge`, continue resumes convergence",),
     }
     _hardening_missing = []
     for _doc_name, _markers in _hardening_required.items():

@@ -541,6 +541,64 @@ def status(root: Path | str) -> dict:
         ],
         "orphans": state["orphans"],
         "next": routed,
+        "last_allocated_id": _last_allocated_id(root),
+    }
+
+
+def _last_allocated_id(root: Path | str) -> int | None:
+    """The highest layer number the shared enqueue allocator has handed out."""
+    try:
+        from .audit_enqueue import read_allocator
+
+        next_id = read_allocator(root)["next_id"]
+    except Exception:
+        return None
+    return next_id - 1 if next_id > 1 else None
+
+
+def provenance_trace(root: Path | str, layer: int | None = None) -> dict:
+    """Read-only audit -> receipt -> Work -> disposition trace (T-1232).
+
+    Built from the durable binding plus the Source index, so it SURVIVES the
+    consumed file: a layer whose bytes were journaled away still answers who
+    produced it, which finding id they used, which receipt carried it, which
+    Work closed it and how. Never opens an audit body, never exposes anything
+    about the project beyond those links.
+    """
+    root = Path(root)
+    index = _index(root)
+    rows: list[dict] = []
+    for rel, record in sorted((read_binding(root).get("layers") or {}).items()):
+        if not isinstance(record, dict):
+            continue
+        if layer is not None and record.get("layer") != layer:
+            continue
+        receipt_id = record.get("receipt_id")
+        entry = (index.get("active") or {}).get(receipt_id)
+        tomb = (index.get("tombstones") or {}).get(receipt_id)
+        source = entry if isinstance(entry, dict) else tomb if isinstance(tomb, dict) else {}
+        provenance = record.get("provenance") or {}
+        rows.append(
+            {
+                "layer": record.get("layer"),
+                "path": rel,
+                "sha256": record.get("file_sha256"),
+                "transport_state": record.get("state"),
+                "receipt": receipt_id,
+                "receipt_status": source.get("status"),
+                "work": record.get("linked_work") or source.get("linked_work"),
+                "closure_event": source.get("closure_event"),
+                "producer": (provenance.get("claims") or {}).get("producer"),
+                "producer_item_id": (provenance.get("claims") or {}).get("producer_item_id"),
+                "producer_claims_trusted": False,
+                "maintainer_verdict": provenance.get("maintainer_verdict"),
+            }
+        )
+    return {
+        "ok": True,
+        "code": "AUDIT_PROVENANCE_TRACE",
+        "rule_id": RULE_ID,
+        "rows": rows,
     }
 
 
@@ -568,8 +626,16 @@ def bind_layer(
     binding: str,
     linked_work: str | None,
     state: str,
+    provenance: dict | None = None,
 ) -> dict:
-    """Persist one generation binding. Never a second source of Work truth."""
+    """Persist one generation binding. Never a second source of Work truth.
+
+    T-1232: the binding record is where producer provenance lives, and it is
+    kept for the layer's whole life -- including after the file is consumed and
+    deleted, when the record's `state` becomes DELETED but its identity, digest,
+    receipt, Work and producer claims stay readable. Deleting the bytes must
+    not delete the answer to "who reported this and what came of it".
+    """
     root = Path(root)
     doc = read_binding(root)
     layers = doc.setdefault("layers", {})
@@ -587,6 +653,12 @@ def bind_layer(
         "captured_at": previous.get("captured_at") or _utc(),
         "closed_at": previous.get("closed_at"),
     }
+    # Provenance is written ONCE, at capture, and never revised by a later
+    # binding update: a producer that could rewrite its own claims after the
+    # fact would make the trace worthless.
+    carried = previous.get("provenance") or provenance
+    if carried:
+        record["provenance"] = carried
     layers[rel] = record
     write_binding(root, doc)
     return record
@@ -669,7 +741,33 @@ def capture_layer(root: Path | str, rel: str, *, work: str | None = None) -> dic
     captured["file_sha256"] = digest
     captured["binding"] = _EXACT
     captured["snapshot"] = snap
+    captured["provenance"] = layer_provenance(snap["text"])
     return captured
+
+
+def layer_provenance(text: str) -> dict | None:
+    """Producer CLAIMS carried by an optional envelope, or None (T-1231).
+
+    Reading is pure: the envelope is inside the bytes the digest already
+    covers, so this cannot move a generation identity. A malformed envelope
+    yields a record that says so instead of blocking capture -- a producer's
+    metadata bug must never make a real finding undeliverable.
+    """
+    from . import audit_envelope
+
+    parsed = audit_envelope.parse(text)
+    if not parsed["present"]:
+        return None
+    record = {
+        "envelope": "malformed" if not parsed["ok"] else "valid",
+        # Every value below is what the PRODUCER asserts. No routing,
+        # ordering, priority or deletion decision may read them.
+        "claims": parsed["fields"],
+        "maintainer_verdict": parsed["maintainer_verdict"],
+    }
+    if not parsed["ok"]:
+        record["reason"] = parsed.get("reason")
+    return record
 
 
 # --------------------------------------------------------------------------

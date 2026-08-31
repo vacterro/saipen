@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-007:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CORE-001 -- source requirement Contract/current-revision/coverage must commit as one integrity-checked recoverable transaction"
+    },
+    "SRC-007:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CORE-002 -- every audited mutation dry-run must execute its real semantic PLAN with zero writes"
+    }
+  },
+  "derived_at": "2026-08-31T11:38:24Z",
+  "derived_from": "SRC-007",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "8757463e7ec91c3660082fd64ad02dc6980ce6dcb1f71c58f3f442350335a010"
+}

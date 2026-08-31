@@ -1,0 +1,59 @@
+{
+  "clauses": {
+    "SRC-007:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CORE-001 -- source requirement Contract/current-revision/coverage must commit as one integrity-checked recoverable transaction"
+    },
+    "SRC-007:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CORE-002 -- every audited mutation dry-run must execute its real semantic PLAN with zero writes"
+    },
+    "SRC-007:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CORE-003 -- corrupt recovery evidence must take canonical precedence and classification across entry points"
+    },
+    "SRC-007:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CORE-004 -- restore execution of all reconciliation regressions (missing import re in the regression module)"
+    },
+    "SRC-007:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "W2-001 -- orphan recovery must restore the receipt allocator invariant before persisting recovered state"
+    },
+    "SRC-007:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "W2-002 -- purge_receipt must be a journaled PLAN/APPLY, not a sequence of independent deletes"
+    },
+    "SRC-007:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "W2-003 -- test_runner child lifetime must be cleaned up on every abnormal exit"
+    },
+    "SRC-007:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "W2-004 -- compound command parsing must use explicit quote/escape state and refuse malformed input structurally"
+    },
+    "SRC-007:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "PERF-001 -- history snapshot and delete-tree digest must come from one validated traversal"
+    },
+    "SRC-007:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "PERF-002 -- producer package validation must release decoded payload bytes for non-selected packages"
+    }
+  },
+  "derived_at": "2026-08-31T11:38:28Z",
+  "derived_from": "SRC-007",
+  "interpretation_revision": 10,
+  "schema_version": 1,
+  "source_sha256": "8757463e7ec91c3660082fd64ad02dc6980ce6dcb1f71c58f3f442350335a010"
+}

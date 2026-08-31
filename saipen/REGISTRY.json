@@ -12,23 +12,96 @@
       "tools/validate.py --gate core"
     ],
     "facts": {
-      "STATE-SHAPE-01": {"owner": "saipen/CORE.md", "test": "tools/test_protocol_registry.py", "subject": "STATE fields, enums and conditional shape"},
-      "STATE-DFA-01": {"owner": "saipen/CORE.md", "test": "tools/test_protocol_registry.py", "subject": "phase enum, transition graph and ticket-bearing phases"},
-      "STATE-NEXT-01": {"owner": "saipen/CORE.md", "test": "tools/test_protocol_registry.py", "subject": "next_action forms and WAIT categories"},
-      "CHECKPOINT-01": {"owner": "saipen/CORE.md", "test": "tests/scenarios/checkpoint-self-confirmation", "subject": "LOG then BOARD then STATE checkpoint order"},
-      "RECOVERY-01": {"owner": "saipen/CORE.md", "test": "tools/test_audit_2026_08_30_all3_impl.py", "subject": "recovery and routing precedence"},
-      "PICK-01": {"owner": "saipen/CORE.md", "test": "tools/test_command_routing.py", "subject": "topmost workable ticket selection"},
-      "CMD-ROUTING-01": {"owner": "saipen/COMMANDS.md", "test": "tools/test_command_routing.py", "subject": "canonical commands, shortcuts and Unicode normalization"},
-      "CMD-COMPOUND-01": {"owner": "saipen/COMMANDS.md", "test": "tools/test_command_routing.py", "subject": "compound parsing and chain disposition"},
-      "CMD-CONTINUE-01": {"owner": "saipen/COMMANDS.md", "test": "tools/test_continue_improve_fallthrough.py", "subject": "bounded continue to improve fallthrough"},
-      "SOURCE-AUTHORITY-01": {"owner": "saipen/SOURCES.md", "test": "tools/test_source_receipts.py", "subject": "exact receipt authority and coverage"},
-      "OPS-EFFECT-01": {"owner": "saipen/OPS.md", "test": "tools/test_intent_audit_fixes.py", "subject": "effect-based authorization"},
-      "GOAL-01": {"owner": "saipen/MAINTENANCE.md", "test": "tools/test_goal_driven.py", "subject": "goal execution and safety valve"},
-      "EXEC-HUSH-01": {"owner": "saipen/EXECUTION.md", "test": "tools/test_continue_improve_fallthrough.py", "subject": "HUSH precedence, silence and mandatory output"},
-      "PHASE-DELTA-01": {"owner": "saipen/CORE.md", "test": "tools/test_protocol_registry.py", "subject": "16 lazy phase documents and delta-only phase contracts"},
-      "CONFORMANCE-CORPUS-01": {"owner": "tests/conformance_cases.jsonl", "test": "tools/test_conformance_corpus.py", "subject": "machine corpus completeness and generated human view"},
-      "CONTEXT-BUDGET-01": {"owner": "saipen/CORE.md", "test": "tools/protocol_budget.py", "subject": "routine protocol load budgets"},
-      "SOURCE-AUDIT-INBOX-01": {"owner": "saipen/SOURCES.md", "test": "tools/test_audit_inbox.py", "subject": "audit inbox transport identity, routing position and delete gate"}
+      "STATE-SHAPE-01": {
+        "owner": "saipen/CORE.md",
+        "test": "tools/test_protocol_registry.py",
+        "subject": "STATE fields, enums and conditional shape"
+      },
+      "STATE-DFA-01": {
+        "owner": "saipen/CORE.md",
+        "test": "tools/test_protocol_registry.py",
+        "subject": "phase enum, transition graph and ticket-bearing phases"
+      },
+      "STATE-NEXT-01": {
+        "owner": "saipen/CORE.md",
+        "test": "tools/test_protocol_registry.py",
+        "subject": "next_action forms and WAIT categories"
+      },
+      "CHECKPOINT-01": {
+        "owner": "saipen/CORE.md",
+        "test": "tests/scenarios/checkpoint-self-confirmation",
+        "subject": "LOG then BOARD then STATE checkpoint order"
+      },
+      "RECOVERY-01": {
+        "owner": "saipen/CORE.md",
+        "test": "tools/test_audit_2026_08_30_all3_impl.py",
+        "subject": "recovery and routing precedence"
+      },
+      "PICK-01": {
+        "owner": "saipen/CORE.md",
+        "test": "tools/test_command_routing.py",
+        "subject": "topmost workable ticket selection"
+      },
+      "CMD-ROUTING-01": {
+        "owner": "saipen/COMMANDS.md",
+        "test": "tools/test_command_routing.py",
+        "subject": "canonical commands, shortcuts and Unicode normalization"
+      },
+      "CMD-COMPOUND-01": {
+        "owner": "saipen/COMMANDS.md",
+        "test": "tools/test_command_routing.py",
+        "subject": "compound parsing and chain disposition"
+      },
+      "CMD-CONTINUE-01": {
+        "owner": "saipen/COMMANDS.md",
+        "test": "tools/test_continue_improve_fallthrough.py",
+        "subject": "bounded continue to improve fallthrough"
+      },
+      "SOURCE-AUTHORITY-01": {
+        "owner": "saipen/SOURCES.md",
+        "test": "tools/test_source_receipts.py",
+        "subject": "exact receipt authority and coverage"
+      },
+      "OPS-EFFECT-01": {
+        "owner": "saipen/OPS.md",
+        "test": "tools/test_intent_audit_fixes.py",
+        "subject": "effect-based authorization"
+      },
+      "GOAL-01": {
+        "owner": "saipen/MAINTENANCE.md",
+        "test": "tools/test_goal_driven.py",
+        "subject": "goal execution and safety valve"
+      },
+      "EXEC-HUSH-01": {
+        "owner": "saipen/EXECUTION.md",
+        "test": "tools/test_continue_improve_fallthrough.py",
+        "subject": "HUSH precedence, silence and mandatory output"
+      },
+      "PHASE-DELTA-01": {
+        "owner": "saipen/CORE.md",
+        "test": "tools/test_protocol_registry.py",
+        "subject": "16 lazy phase documents and delta-only phase contracts"
+      },
+      "CONFORMANCE-CORPUS-01": {
+        "owner": "tests/conformance_cases.jsonl",
+        "test": "tools/test_conformance_corpus.py",
+        "subject": "machine corpus completeness and generated human view"
+      },
+      "CONTEXT-BUDGET-01": {
+        "owner": "saipen/CORE.md",
+        "test": "tools/protocol_budget.py",
+        "subject": "routine protocol load budgets"
+      },
+      "SOURCE-AUDIT-INBOX-01": {
+        "owner": "saipen/SOURCES.md",
+        "test": "tools/test_audit_inbox.py",
+        "subject": "audit inbox transport identity, routing position and delete gate"
+      },
+      "SOURCE-AUDIT-ENQUEUE-01": {
+        "owner": "saipen/SOURCES.md",
+        "test": "tools/test_audit_enqueue.py",
+        "subject": "shared producer enqueue: monotonic never-reused ids, atomic placement, idempotent retry, optional untrusted envelope"
+      }
     }
   },
   "rule_owners": {
@@ -48,7 +121,8 @@
     "PHASE-DELTA-01": "saipen/CORE.md",
     "CONFORMANCE-CORPUS-01": "tests/conformance_cases.jsonl",
     "CONTEXT-BUDGET-01": "saipen/CORE.md",
-    "SOURCE-AUDIT-INBOX-01": "saipen/SOURCES.md"
+    "SOURCE-AUDIT-INBOX-01": "saipen/SOURCES.md",
+    "SOURCE-AUDIT-ENQUEUE-01": "saipen/SOURCES.md"
   },
   "shortcuts": {
     "gg": "saipen goal",
@@ -242,6 +316,7 @@
       "context",
       "attempt",
       "brief",
+      "hush",
       "improve"
     ],
     "improve_actions": [
@@ -258,24 +333,122 @@
     ]
   },
   "state": {
-    "required_fields": ["phase", "task", "next_action", "blocker", "agent", "saipen_version", "mode", "updated"],
-    "known_fields": ["phase", "task", "attempt", "next_action", "blocker", "agent", "saipen_version", "schema_version", "saipen_home", "requires", "mode", "execution_intent", "converge_target", "goal_mode", "goal_waves", "goal_tickets", "last_event", "style_contract", "updated", "human_note", "first_publish_confirmation", "role_revision", "paused_from_phase", "paused_from_na", "transition_from"],
-    "string_fields": ["task", "attempt", "next_action", "blocker", "agent", "saipen_home", "style_contract", "updated", "human_note", "first_publish_confirmation", "role_revision", "paused_from_phase", "paused_from_na"],
-    "integer_fields": {"saipen_version": null, "schema_version": 1, "goal_waves": 0, "goal_tickets": 0, "last_event": 1},
-    "mode_enum": ["full", "read-only", "no-publish", "manual-verify"],
-    "intent_enum": ["normal", "goal", "converge"],
-    "converge_targets": ["done", "ship", "crew"]
+    "required_fields": [
+      "phase",
+      "task",
+      "next_action",
+      "blocker",
+      "agent",
+      "saipen_version",
+      "mode",
+      "updated"
+    ],
+    "known_fields": [
+      "phase",
+      "task",
+      "attempt",
+      "next_action",
+      "blocker",
+      "agent",
+      "saipen_version",
+      "schema_version",
+      "saipen_home",
+      "requires",
+      "mode",
+      "execution_intent",
+      "converge_target",
+      "goal_mode",
+      "goal_waves",
+      "goal_tickets",
+      "last_event",
+      "style_contract",
+      "updated",
+      "human_note",
+      "first_publish_confirmation",
+      "role_revision",
+      "paused_from_phase",
+      "paused_from_na",
+      "transition_from"
+    ],
+    "string_fields": [
+      "task",
+      "attempt",
+      "next_action",
+      "blocker",
+      "agent",
+      "saipen_home",
+      "style_contract",
+      "updated",
+      "human_note",
+      "first_publish_confirmation",
+      "role_revision",
+      "paused_from_phase",
+      "paused_from_na"
+    ],
+    "integer_fields": {
+      "saipen_version": null,
+      "schema_version": 1,
+      "goal_waves": 0,
+      "goal_tickets": 0,
+      "last_event": 1
+    },
+    "mode_enum": [
+      "full",
+      "read-only",
+      "no-publish",
+      "manual-verify"
+    ],
+    "intent_enum": [
+      "normal",
+      "goal",
+      "converge"
+    ],
+    "converge_targets": [
+      "done",
+      "ship",
+      "crew"
+    ]
   },
   "capabilities": {
-    "read_only_banned_phases": ["INIT", "PLAN", "SCOUT", "BUILD", "SHIP", "ADD", "CLEAN", "TRANSLATE", "PREPARE"]
+    "read_only_banned_phases": [
+      "INIT",
+      "PLAN",
+      "SCOUT",
+      "BUILD",
+      "SHIP",
+      "ADD",
+      "CLEAN",
+      "TRANSLATE",
+      "PREPARE"
+    ]
   },
   "ticket_states": {
-    "sections": ["TODO", "DOING", "DONE", "BLOCKED"],
-    "checkboxes": {"TODO": "[ ]", "DOING": "[/]", "DONE": "[x]", "BLOCKED": "[ ]"},
-    "required_fields": ["priority", "title", "verify"]
+    "sections": [
+      "TODO",
+      "DOING",
+      "DONE",
+      "BLOCKED"
+    ],
+    "checkboxes": {
+      "TODO": "[ ]",
+      "DOING": "[/]",
+      "DONE": "[x]",
+      "BLOCKED": "[ ]"
+    },
+    "required_fields": [
+      "priority",
+      "title",
+      "verify"
+    ]
   },
   "next_action_forms": {
-    "executable_prefixes": ["WAIT:", "saipen ", "PHASE ", "RUN:", "RESUME:"],
+    "executable_prefixes": [
+      "WAIT:",
+      "saipen ",
+      "PHASE ",
+      "RUN:",
+      "RESUME:"
+    ],
     "prefixes": [
       "WAIT:",
       "RUN:",
@@ -293,10 +466,35 @@
       "RESUME: T-### <phase>"
     ]
   },
-  "wait_categories": ["manual-verify", "destructive-op", "first-publish", "user brake", "blocked", "safety valve", "init"],
-  "checkpoint_order": ["LOG.md", "BOARD.md", "STATE.md"],
-  "routing_precedence": ["RECOVER", "OBEY", "UNBLOCK", "FINISH", "START", "MAINTAIN"],
-  "source_authority": ["original immutable receipt", "explicit later amendment", "derived Work Contract", "BOARD/STATE projection", "agent memory"],
+  "wait_categories": [
+    "manual-verify",
+    "destructive-op",
+    "first-publish",
+    "user brake",
+    "blocked",
+    "safety valve",
+    "init"
+  ],
+  "checkpoint_order": [
+    "LOG.md",
+    "BOARD.md",
+    "STATE.md"
+  ],
+  "routing_precedence": [
+    "RECOVER",
+    "OBEY",
+    "UNBLOCK",
+    "FINISH",
+    "START",
+    "MAINTAIN"
+  ],
+  "source_authority": [
+    "original immutable receipt",
+    "explicit later amendment",
+    "derived Work Contract",
+    "BOARD/STATE projection",
+    "agent memory"
+  ],
   "dispositions": {
     "closed_set": [
       "EXECUTED",
@@ -358,9 +556,17 @@
         "routes": [
           {
             "name": "cold",
-            "must": ["BOOT.md", "STYLE.md", "INDEX.md"],
+            "must": [
+              "BOOT.md",
+              "STYLE.md",
+              "INDEX.md"
+            ],
             "conditional": [],
-            "exclude": ["CONFORMANCE.md", "CHANGELOG.md", "phases/*.md"]
+            "exclude": [
+              "CONFORMANCE.md",
+              "CHANGELOG.md",
+              "phases/*.md"
+            ]
           }
         ]
       },
@@ -368,9 +574,19 @@
         "routes": [
           {
             "name": "done-to-next",
-            "must": ["CORE.md", "phases/done.md"],
-            "conditional": ["SOURCES.md", "RUNTIME.md", "@active_phase_max"],
-            "exclude": ["CONFORMANCE.md", "CHANGELOG.md"]
+            "must": [
+              "CORE.md",
+              "phases/done.md"
+            ],
+            "conditional": [
+              "SOURCES.md",
+              "RUNTIME.md",
+              "@active_phase_max"
+            ],
+            "exclude": [
+              "CONFORMANCE.md",
+              "CHANGELOG.md"
+            ]
           }
         ]
       },
@@ -378,9 +594,20 @@
         "routes": [
           {
             "name": "command-router",
-            "must": ["REGISTRY.json", "COMMANDS.md"],
-            "conditional": ["CONTROLS.md", "EXECUTION.md", "IMPROVE.md"],
-            "exclude": ["CORE.md", "CONFORMANCE.md", "phases/*.md"]
+            "must": [
+              "REGISTRY.json",
+              "COMMANDS.md"
+            ],
+            "conditional": [
+              "CONTROLS.md",
+              "EXECUTION.md",
+              "IMPROVE.md"
+            ],
+            "exclude": [
+              "CORE.md",
+              "CONFORMANCE.md",
+              "phases/*.md"
+            ]
           }
         ]
       },
@@ -388,9 +615,19 @@
         "routes": [
           {
             "name": "largest-active-phase",
-            "must": ["CORE.md", "@active_phase_max"],
-            "conditional": ["SOURCES.md", "RUNTIME.md"],
-            "exclude": ["CONFORMANCE.md", "CHANGELOG.md", "inactive phases"]
+            "must": [
+              "CORE.md",
+              "@active_phase_max"
+            ],
+            "conditional": [
+              "SOURCES.md",
+              "RUNTIME.md"
+            ],
+            "exclude": [
+              "CONFORMANCE.md",
+              "CHANGELOG.md",
+              "inactive phases"
+            ]
           }
         ]
       },
@@ -398,15 +635,32 @@
         "routes": [
           {
             "name": "ship-delta",
-            "must": ["phases/ship.md", "OPS.md"],
-            "conditional": ["SOURCES.md", "RUNTIME.md"],
-            "exclude": ["CONFORMANCE.md", "inactive phases"]
+            "must": [
+              "phases/ship.md",
+              "OPS.md"
+            ],
+            "conditional": [
+              "SOURCES.md",
+              "RUNTIME.md"
+            ],
+            "exclude": [
+              "CONFORMANCE.md",
+              "inactive phases"
+            ]
           },
           {
             "name": "improve-delta",
-            "must": ["IMPROVE.md", "SAICRITIC.md"],
-            "conditional": ["RUNTIME.md"],
-            "exclude": ["CONFORMANCE.md", "phases/*.md"]
+            "must": [
+              "IMPROVE.md",
+              "SAICRITIC.md"
+            ],
+            "conditional": [
+              "RUNTIME.md"
+            ],
+            "exclude": [
+              "CONFORMANCE.md",
+              "phases/*.md"
+            ]
           }
         ]
       },
@@ -414,9 +668,14 @@
         "routes": [
           {
             "name": "largest-routine-document",
-            "must": ["@routine_doc_max"],
+            "must": [
+              "@routine_doc_max"
+            ],
             "conditional": [],
-            "exclude": ["CONFORMANCE.md", "CHANGELOG.md"]
+            "exclude": [
+              "CONFORMANCE.md",
+              "CHANGELOG.md"
+            ]
           }
         ]
       }
@@ -484,13 +743,73 @@
     "renumber_after_delete": false,
     "binding": ".saipen/intake/audit_inbox.json",
     "migration_binding": "legacy_transport_equivalent",
-    "generation_states": ["NEW", "ACTIVE", "BLOCKED", "CLOSED_PENDING_DELETE", "DELETED", "INVALID", "MISSING_AFTER_CAPTURE"],
+    "generation_states": [
+      "NEW",
+      "ACTIVE",
+      "BLOCKED",
+      "CLOSED_PENDING_DELETE",
+      "DELETED",
+      "INVALID",
+      "MISSING_AFTER_CAPTURE"
+    ],
     "owner": "tools/saipen_engine/audit_inbox.py",
     "test": "tools/test_audit_inbox.py"
   },
   "hush_precedence": {
-    "order": ["user", "safety", "core", "execution_policy", "style"],
+    "order": [
+      "user",
+      "safety",
+      "core",
+      "execution_policy",
+      "style"
+    ],
     "owner": "saipen/EXECUTION.md",
-    "status": "planned"
+    "status": "active",
+    "runtime": "tools/saipen_engine/hush.py",
+    "test": "tools/test_hush_runtime.py",
+    "modifier": "hush",
+    "scope": "TASK_LOCAL_NEVER_PERSISTED",
+    "suppressible": [
+      "preamble",
+      "progress",
+      "plan",
+      "tool_narration",
+      "success_chatter"
+    ],
+    "mandatory": [
+      "safety_refusal",
+      "destructive_confirmation",
+      "missing_authority",
+      "terminal_failure",
+      "protocol_corruption",
+      "side_effect_acknowledgement",
+      "final_report",
+      "evidence"
+    ],
+    "final_report_max_lines": 20
+  },
+  "audit_enqueue": {
+    "rule_id": "SOURCE-AUDIT-ENQUEUE-01",
+    "allocator": ".saipen/intake/audit_allocator.json",
+    "lock": ".saipen/locks/audit-allocator.lock",
+    "allocation": "MONOTONIC_NEVER_REUSED",
+    "placement": "TEMP_THEN_ATOMIC_RENAME",
+    "idempotency_key": "producer+producer_operation_id",
+    "operation_states": [
+      "RESERVED",
+      "COMMITTED"
+    ],
+    "producer_writes": [
+      "audit/<N>.md",
+      ".saipen/intake/audit_allocator.json"
+    ],
+    "producer_claims": "UNTRUSTED",
+    "envelope_open": "<!-- saipen-audit-envelope",
+    "envelope_optional": true,
+    "maintainer_verdict_on_intake": "PENDING",
+    "owner": "tools/saipen_engine/audit_enqueue.py",
+    "envelope_owner": "tools/saipen_engine/audit_envelope.py",
+    "test": "tools/test_audit_enqueue.py",
+    "envelope_test": "tools/test_audit_envelope.py"
   }
 }
