@@ -248,6 +248,11 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="print nothing when nothing was stale (for timers)",
     )
+    ap.add_argument(
+        "--stamp-only",
+        action="store_true",
+        help="write the freshness stamp into every installed target; copy nothing",
+    )
     args = ap.parse_args(argv)
 
     try:
@@ -260,6 +265,21 @@ def main(argv: list[str] | None = None) -> int:
 
     if not present:
         print("no agent home installed on this machine -- nothing to inject")
+        return 0
+
+    if args.stamp_only:
+        # T-1252: `bootstrap/inject.ps1` is the injector the scheduled task
+        # runs, and it copies the protocol without writing the stamp this
+        # module compares against -- so every refreshed home read as
+        # "installed unstamped" forever and a genuinely drifted copy was
+        # indistinguishable from a current one. The digest has exactly ONE
+        # owner (`_digest`), so the PowerShell path calls back here rather
+        # than growing a second implementation that would drift from it.
+        stamped = stamp_targets(digest)
+        for t in stamped:
+            print(f"stamped: {t} at {digest}")
+        if not stamped:
+            print("no agent home installed on this machine -- nothing to stamp")
         return 0
 
     if args.check:

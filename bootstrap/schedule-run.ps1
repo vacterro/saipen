@@ -203,6 +203,27 @@ try {
   if ($rc -ne 0) {
     if (-not (Restore-PublishedSource)) { $rc = 1 }
   } else {
+    # T-1252: inject.ps1 copies the protocol but writes no freshness stamp, so
+    # every refreshed home read as "installed unstamped" forever and a drifted
+    # copy was indistinguishable from a current one. The digest has exactly one
+    # owner, tools/autoinject.py, so the stamp is written by calling it rather
+    # than by a second implementation here that would drift from it. A missing
+    # interpreter is logged and left visible: the COPY is good, only its
+    # witness is absent, and `autoinject.py --check` says so out loud instead
+    # of this run pretending it stamped something.
+    $stamper = Join-Path $published "tools\autoinject.py"
+    $python = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $python) { $python = Get-Command python3 -ErrorAction SilentlyContinue }
+    if (-not $python) {
+      Write-Log "stamp: SKIPPED no python on PATH -- copies are current but unstamped"
+    } elseif (-not (Test-Path -LiteralPath $stamper)) {
+      Write-Log "stamp: SKIPPED tools/autoinject.py absent from the published source"
+    } else {
+      $stampOutput = @(& $python.Source $stamper "--stamp-only" 2>&1)
+      $stampRc = $LASTEXITCODE
+      foreach ($line in $stampOutput) { Write-Log ("stamp: " + $line) }
+      if ($stampRc -ne 0) { Write-Log "stamp: FAILED rc=$stampRc" }
+    }
     try {
       if (Test-Path -LiteralPath $previous) {
         Remove-Item -LiteralPath $previous -Recurse -Force -ErrorAction Stop

@@ -2274,13 +2274,28 @@ exit 9
                 {
                     "description": "scheduler probe fixture surface",
                     "managed_dirs": ["bootstrap"],
-                    "copy_trees": [{"src": "bootstrap", "dst": "bootstrap"}],
+                    "copy_trees": [
+                        {"src": "bootstrap", "dst": "bootstrap"},
+                        {"src": "tools", "dst": "tools"},
+                    ],
                     "files": [{"src": "SOURCE_SENTINEL.txt", "required": True}],
                     "phase_docs": [],
                 },
                 indent=2,
             )
             + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        # T-1252: the injector copies but writes no freshness stamp; the
+        # runner calls tools/autoinject.py --stamp-only to do it, so the
+        # digest keeps exactly one owner. This stand-in records that the
+        # callback happened and with which flag.
+        (source_repo / "tools").mkdir(parents=True, exist_ok=True)
+        (source_repo / "tools" / "autoinject.py").write_text(
+            "import os, sys\n"
+            "open(os.environ['MOCK_SCHEDULE_STAMP_PATH'], 'w').write(' '.join(sys.argv[1:]))\n"
+            "print('stamped: probe-target')\n",
             encoding="utf-8",
             newline="\n",
         )
@@ -2311,11 +2326,13 @@ exit 0
         runner_local.mkdir()
         destination = sandbox / "installed-snapshot.txt"
         source_path_marker = sandbox / "installed-source-path.txt"
+        stamp_marker = sandbox / "installed-stamp-call.txt"
         runner_env = {
             **base_env,
             "LOCALAPPDATA": str(runner_local),
             "MOCK_SCHEDULE_DESTINATION": str(destination),
             "MOCK_SCHEDULE_SOURCE_PATH": str(source_path_marker),
+            "MOCK_SCHEDULE_STAMP_PATH": str(stamp_marker),
         }
 
         def invoke_runner(script: Path | None = None) -> subprocess.CompletedProcess[str]:
@@ -2372,6 +2389,13 @@ exit 0
             and (source_repo / "SOURCE_SENTINEL.txt").read_bytes() == source_bytes
             and (source_repo / ".git" / "index").read_bytes() == source_index_bytes,
             "clean run moved HEAD, index, or source bytes",
+        )
+        expect(
+            "a successful inject writes the freshness stamp through its one owner",
+            stamp_marker.is_file()
+            and stamp_marker.read_text(encoding="utf-8").strip() == "--stamp-only",
+            "stamp callback did not run: "
+            + (stamp_marker.read_text(encoding="utf-8") if stamp_marker.is_file() else "absent"),
         )
 
         destination.write_text("previous-install\n", encoding="utf-8", newline="\n")

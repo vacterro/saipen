@@ -26,7 +26,7 @@ deinstalacija je lokalna — nema oblak, nema servis, nema bazu podataka.
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.234.0** | [Spec](SPEC.md) | [Voditelj](GUIDE.md) | [Jezgra](saipen/CORE.md) | [Održavanje](saipen/MAINTENANCE.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Usljednost](saipen/CONFORMANCE.md) |MIT
+**v7.234.1** | [Spec](SPEC.md) | [Voditelj](GUIDE.md) | [Jezgra](saipen/CORE.md) | [Održavanje](saipen/MAINTENANCE.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Usljednost](saipen/CONFORMANCE.md) |MIT
 
 **Brzi prečaci:** `cc` nastavlja kontekst projekta do konvergencije (nastavlja aktivni cilj ako je postavljen), `sss` prikazuje status bez diranja koda, a `ss` sprema kontrolnu točku i zaustavlja se. [Pogledaj punu kartu od 19 tipki](saipen/RFC.md#110-command-surface). Ćirilični blizanci također rade: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 

@@ -1,6 +1,14 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.234.1 -- 2026-09-01 -- The Freshness Witness Gets Written (T-1252)
+
+- `tools/autoinject.py` owns the `.saipen_injected` stamp and compares it to decide whether a consumer copy is current. `bootstrap/inject.ps1` -- the injector the 15-minute task actually invokes -- copied the protocol and wrote no stamp at all. So the design's entire staleness signal had no witness: a freshly refreshed home and a home several releases behind both read as `installed unstamped`, forever.
+- Proven live, in the worst possible way: the scheduled inject at 02:02 succeeded and genuinely refreshed every consumer home (the `.claude` copy went from the pre-W4 13 KB router to the current 5063-byte one), and `autoinject.py --check` still reported all four targets stale immediately afterwards.
+- `--stamp-only` was added to `autoinject.py` -- compute the surface digest, write it into every installed target, copy nothing -- and `schedule-run.ps1` calls it after a successful inject. The digest keeps exactly ONE owner: a PowerShell reimplementation would drift from the Python one and the drift would be invisible, which is the failure this repository keeps closing everywhere else.
+- A missing interpreter or a missing `autoinject.py` is logged and left visible rather than pretending a stamp was written. The copies are current; only the witness is absent, and `--check` says so out loud.
+- Scheduler probes 60 of 60: the fixture gained a stand-in stamper and asserts the callback fires with `--stamp-only` on a clean inject.
+
 ## 7.234.0 -- 2026-09-01 -- The Scheduled Injector Actually Injects (T-1251)
 
 - The 15-minute `saipen-inject` task was healthy, fired on time, and refreshed nothing. `schedule-run.ps1` rejected the source whenever `git status --porcelain -uall` printed a single line, and a live project permanently prints thousands: 1926 translation-cache files, 1562 subSaipen kitchen files, `.prepare-staging`, improve cycles, unshipped release-scope records and the user's own `.workbuddy-ai/memory`. None of them affect a single byte the injector copies. The feature shipped inert and stayed that way: observed live at 01:01 and 01:31, both runs `SKIP: DIRTY_SOURCE`.
