@@ -1634,12 +1634,31 @@ exit 0
         )
         current.write_text(quoted_wrapper, encoding="utf-8")
         quoted_action = invoke("status")
+        # T-1250: quoting is a HOST detail, not a contract. Windows 10 Pro
+        # 19045 stores the quoted form after a correct `install`, so demanding
+        # the bare path made the installer produce a state its own status
+        # called DEGRADED. One layer of surrounding quotes around the exact
+        # canonical path is HEALTHY; the anti-laundering property is asserted
+        # by the extra-argument case below, which is the form that actually
+        # changes what runs.
         expect(
-            "quoted wrapper path is DEGRADED",
-            quoted_action.returncode != 0
-            and "STATUS: DEGRADED" in quoted_action.stdout
-            and "task action" in quoted_action.stdout,
+            "quoted wrapper path is HEALTHY (host quoting is not a contract)",
+            quoted_action.returncode == 0 and "STATUS: HEALTHY" in quoted_action.stdout,
             (quoted_action.stdout + quoted_action.stderr).strip(),
+        )
+        current.write_text(canonical_task_xml, encoding="utf-8")
+
+        smuggled = canonical_task_xml.replace(
+            "</Arguments>", " //E:vbscript C:\evil.vbs</Arguments>", 1
+        )
+        current.write_text(smuggled, encoding="utf-8")
+        smuggled_action = invoke("status")
+        expect(
+            "an extra argument after the wrapper is DEGRADED",
+            smuggled_action.returncode != 0
+            and "STATUS: DEGRADED" in smuggled_action.stdout
+            and "task action" in smuggled_action.stdout,
+            (smuggled_action.stdout + smuggled_action.stderr).strip(),
         )
         current.write_text(canonical_task_xml, encoding="utf-8")
 

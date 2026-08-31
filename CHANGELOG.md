@@ -1,6 +1,13 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.233.4 -- 2026-09-01 -- Scheduler Status Stops Failing Its Own Install (T-1250)
+
+- `bootstrap/schedule.ps1 status` reported DEGRADED for a task `install` had just created correctly. It required the stored `Arguments` to equal the bare VBS path on the reasoning that "schtasks strips the surrounding quotes"; Windows 10 Pro 19045 keeps them, so the installer produced a state its own health check called broken.
+- Quoting is a host detail, not a contract. Status now strips exactly one layer of surrounding double quotes and then demands an exact match against the canonical wrapper path. The anti-laundering property that motivated the strict form is unchanged and finally has its own case: an extra argument smuggled after the wrapper still reports DEGRADED, which is the form that actually changes what runs.
+- The scheduler probe flipped with it -- it asserted the quoted form was DEGRADED, encoding the same wrong premise -- and the smuggled-argument case was added beside it. 57 of 57.
+- The `saipen-inject` task is live on the maintainer's machine and reports HEALTHY with its 15-minute repetition. It still exits `SKIP: DIRTY_SOURCE` every run: T-1251 owns that rule, which treats any untracked file -- translation caches, subSaipen kitchens, the user's own notes -- as a reason not to refresh a protocol none of them affect.
+
 ## 7.233.3 -- 2026-09-01 -- Fault Injection That Actually Injects (T-1248)
 
 - Release-executor probe 7 wrote `.git/hooks/pre-commit` with `write_text` and never set the executable bit. POSIX git runs a hook only when it is executable and skips it silently otherwise, so on Linux the injected commit rejection never happened: the ship genuinely succeeded and the probe reported that real release as a missing refusal (`ok=True code='RELEASED' not in errors.CODES`) plus a push it expected not to see. Windows ignores the bit, which is why it passed there for as long as it existed.

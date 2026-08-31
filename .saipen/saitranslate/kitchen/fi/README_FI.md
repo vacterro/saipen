@@ -26,7 +26,7 @@ poistaminen on paikallinen — ei pilvessä, ei taustaprosessia, ei tietokantaa.
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.233.3** | [Spesifikaatio](SPEC.md) | [Ohje](GUIDE.md) | [Ydin](saipen/CORE.md) | [Hoidot](saipen/MAINTENANCE.md) | [Tyyli](saipen/STYLE.md) | [Käyttöliittymä](saipen/UI.md) | [Soveltuvuus](saipen/CONFORMANCE.md) |MIT
+**v7.233.4** | [Spesifikaatio](SPEC.md) | [Ohje](GUIDE.md) | [Ydin](saipen/CORE.md) | [Hoidot](saipen/MAINTENANCE.md) | [Tyyli](saipen/STYLE.md) | [Käyttöliittymä](saipen/UI.md) | [Soveltuvuus](saipen/CONFORMANCE.md) |MIT
 
 **Pikanäppäimet:** `cc` jatkaa projektin kontekstia konvergenssiin (jatkaa käynnissä olevaa tavoitetta, jos sellainen on asetettu), `sss` näyttää tilan koskematta koodiin ja `ss` tallentaa tarkistuspisteen ja pysähtyy. [Katso täydellinen 19 näppäimen kartta](saipen/RFC.md#110-command-surface). Kyrilliset kaksoset toimivat myös: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 

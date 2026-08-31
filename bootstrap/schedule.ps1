@@ -128,13 +128,22 @@ function Get-SchedulerHealth {
           $logonType.Count -ne 1 -or $logonType[0] -ne "InteractiveToken") {
         $reasons += "task principal is not the current interactive user"
       }
-      # Canonical stored Arguments is the bare path -- schtasks strips the
-      # surrounding quotes install passes to /TR, and accepting a quoted
-      # variant would let a task pointing at the wrapper through a
-      # non-canonical form pass HEALTHY.
+      # Whether schtasks keeps or strips the quotes install passes to /TR is a
+      # HOST detail, not a contract: Windows 10 Pro 19045 stores
+      # `"C:\...\schedule-run-hidden.vbs"` verbatim, and demanding the bare
+      # form reported a freshly and correctly installed task as DEGRADED.
+      # So exactly one layer of surrounding double quotes is removed, and the
+      # result must then equal the canonical path EXACTLY -- extra arguments,
+      # another path or another executable still fail, which is the
+      # anti-laundering property this check exists for.
+      $storedArgument = if ($arguments.Count -eq 1) { $arguments[0].Trim() } else { $null }
+      if ($storedArgument -and $storedArgument.Length -ge 2 -and
+          $storedArgument.StartsWith('"') -and $storedArgument.EndsWith('"')) {
+        $storedArgument = $storedArgument.Substring(1, $storedArgument.Length - 2)
+      }
       if ($exec.Count -ne 1 -or
           $exec[0] -ine "wscript.exe" -or $arguments.Count -ne 1 -or
-          $arguments[0] -ne $VbsPath) {
+          $storedArgument -ne $VbsPath) {
         $reasons += "task action does not execute the canonical VBS wrapper"
       }
       $triggers = @($taskXml.SelectNodes("//*[local-name()='Triggers']/*"))
