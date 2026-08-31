@@ -6319,6 +6319,14 @@ def run_release_executor_probes() -> tuple[list[str], int]:
                 ("mode:", mode),
                 ("agent:", "probe"),
                 ("execution_intent:", "normal"),
+                # The copied STATE carries the AUTHORING machine's absolute
+                # `saipen_home`. That path exists on exactly one host, so every
+                # other one -- a Linux CI runner above all -- refuses the very
+                # first fixture command with HOME_REQUIRED. The fixture is
+                # self-hosting (the copy contains `saipen/BOOT.md`), so it
+                # rebinds the pointer at its own root and stops depending on
+                # where the repository happened to be written.
+                ("saipen_home:", json.dumps(str(project))),
             ):
                 if new_ln.strip().startswith(key):
                     new_ln = new_ln.replace(new_ln.split(":", 1)[1], " " + val)

@@ -1,6 +1,12 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.233.2 -- 2026-08-31 -- Release Fixture Stops Inheriting the Authoring Host (T-1246)
+
+- `run_scenarios.build_fixture` copied the live `.saipen/STATE.md` and rewrote phase/task/mode but left `saipen_home` pointing at the absolute path of the machine that wrote it. That path exists on exactly one host, so every other one -- a Linux CI runner above all -- refused the fixture's first command with `REFUSE [HOME_REQUIRED]` and aborted the whole conformance run. The defect was always there; it only became reachable once v7.233.0 fixed the scheduler probe that used to crash the suite earlier.
+- The fixture is self-hosting, so it now rebinds `saipen_home` to its own project root. Proven by breaking it on purpose: with the live `saipen_home` pointed at a nonexistent path the release-executor probes still report 96 of 96, and the live STATE was restored byte-identical.
+- Known follow-up: T-1247, the warn-slug ownership probe reports a false break whenever BOARD.md sits within ~1 KB of the soft cap, because the ticket it adds is enough to introduce the `board-soft-cap` slug.
+
 ## 7.233.1 -- 2026-08-31 -- Red-Control Anchor Derived, Not Named (T-1245)
 
 - CI went red on main at b62e2313: the `audit_checks` red-control "CHANGELOG entries fall out of descending order" anchored on the literal `## 7.230.0`, and v7.233.0 archived that entry out of `CHANGELOG.md` in the same release. The mutation became a silent no-op and the control stopped being evidence without anyone touching it -- the second time a hardcoded CHANGELOG anchor has died exactly this way.
