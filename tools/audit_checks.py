@@ -887,6 +887,29 @@ def replace(old: str, new: str):
     return lambda t: t.replace(old, new, 1)
 
 
+def bump_second_changelog_entry(text: str) -> str:
+    """Raise the SECOND CHANGELOG entry above the head, breaking descending order.
+
+    Derived rather than anchored on a literal version: the release that
+    archives the CHANGELOG overflow carries any hardcoded anchor out of the
+    file, at which point the mutation is a silent no-op and the control stops
+    being evidence with nobody having touched it. That has happened twice.
+
+    The second entry is used, not the first, so only the descending-order rung
+    fires -- bumping the head would also break head-vs-VERSION and the case
+    would no longer isolate the rule it names. Returning the text unchanged
+    when there is no second entry is correct: the harness already rejects a
+    no-op mutation loudly.
+    """
+    headings = list(re.finditer(r"(?m)^## (\d+)\.(\d+)\.(\d+) ", text))
+    if len(headings) < 2:
+        return text
+    head = tuple(int(g) for g in headings[0].groups())
+    second = headings[1]
+    bumped = f"## {head[0] + 1}.0.0 "
+    return text[: second.start()] + bumped + text[second.end() :]
+
+
 def sub_json_route(key: str, new_route: str):
     """Point one registry shortcut row at a different destination.
 
@@ -2144,10 +2167,13 @@ CASES: list[tuple[str, str, object, str]] = [
     (
         "CHANGELOG entries fall out of descending order",
         "CHANGELOG.md",
-        # Older anchors were sealed into the archive, so their mutations became
-        # no-ops. A current mid-file entry is bumped above the head so
-        # only the descending-order rung fires, never the head-vs-VERSION one.
-        replace("## 7.230.0", "## 7.300.0"),
+        # DERIVED, never a hardcoded version. A literal anchor here has gone
+        # stale twice now for the same reason: the release that archives the
+        # CHANGELOG overflow carries the anchored entry out of the file, the
+        # mutation silently becomes a no-op, and the control stops being
+        # evidence without anyone touching it. Finding the second heading at
+        # run time makes archiving unable to break it again.
+        bump_second_changelog_entry,
         "changelog-order",
     ),
     (

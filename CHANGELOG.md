@@ -1,6 +1,12 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.233.1 -- 2026-08-31 -- Red-Control Anchor Derived, Not Named (T-1245)
+
+- CI went red on main at b62e2313: the `audit_checks` red-control "CHANGELOG entries fall out of descending order" anchored on the literal `## 7.230.0`, and v7.233.0 archived that entry out of `CHANGELOG.md` in the same release. The mutation became a silent no-op and the control stopped being evidence without anyone touching it -- the second time a hardcoded CHANGELOG anchor has died exactly this way.
+- `bump_second_changelog_entry` now derives the target at run time: it finds the second `## X.Y.Z` heading and raises it above the head. Archiving can no longer orphan it. The SECOND entry is used, not the first, so only the descending-order rung fires and the case still isolates the rule it names.
+- audit_checks reports 227 of 227 again.
+
 ## 7.233.0 -- 2026-08-31 -- Audit Ecosystem Closure: Producer API, HUSH Runtime, Backlog Re-entry (T-1229..T-1244)
 
 Folds the never-tagged 7.232.1 metadata into one release; the ledger carries no phantom version.
