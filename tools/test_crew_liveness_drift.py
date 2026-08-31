@@ -289,22 +289,33 @@ class AliasEquivalenceTests(_Fixture):
     """CC-11: cc/continue and sc/crew resolve to one canonical implementation."""
 
     def test_cc_and_continue_share_semantics(self):
-        rc_a, payload_a = self.cli("cc")
+        # T-20260830_0842: the canonical fallthrough may emit different
+        # verifiable codes for the SAME project across two invocations --
+        # the first prepares the improvement cycle, the second resumes it
+        # (CONTINUE_IMPROVE_IN_FLIGHT). The alias-equivalence contract is
+        # `rc` + the structural "ok" verdict, not byte-identical `code`,
+        # because project state mutates between the two calls. We assert
+        # both invocations on a FRESH copy of the project to keep the
+        # canonical state identical at each entry.
         other = Path(self._tmp.name) / "proj-b"
-        shutil.copytree(self.root.parent / "proj", other)
+        shutil.copytree(self.root, other)
+        rc_a, payload_a = self.cli("cc")
         buffer = io.StringIO()
         with contextlib.redirect_stdout(buffer):
             rc_b = CLI.main(["--json", "--project-root", str(other), "continue"])
         payload_b = json.loads(buffer.getvalue())
         self.assertEqual(rc_a, rc_b)
-        for key in ("ok", "code"):
-            if key in payload_a or key in payload_b:
-                self.assertEqual(payload_a.get(key), payload_b.get(key))
+        self.assertEqual(payload_a.get("ok"), payload_b.get("ok"))
+        self.assertEqual(
+            payload_a.get("code"),
+            payload_b.get("code"),
+            f"cc and continue must be the same route; got {payload_a.get('code')} vs {payload_b.get('code')}",
+        )
 
     def test_sc_and_crew_are_one_route(self):
         rc_a, payload_a = self.cli("crew", "--dry-run")
         other = Path(self._tmp.name) / "proj-c"
-        shutil.copytree(self.root.parent / "proj", other)
+        shutil.copytree(self.root, other)
         buffer = io.StringIO()
         with contextlib.redirect_stdout(buffer):
             rc_b = CLI.main(["--json", "--project-root", str(other), "sc", "--dry-run"])

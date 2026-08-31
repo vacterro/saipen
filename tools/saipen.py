@@ -39,18 +39,18 @@ from saipen_engine.operations import (
     ticket_move,
     transition_phase,
 )
-from saipen_engine.paths import resolve_project_root
+from saipen_engine.paths import resolve_project_root, resolve_protocol_dir, resolve_tool_root
 from saipen_engine.state import parse_state, parse_state_or_error
 
 AGENT = "saipen-cli"
 
-HOME = Path(__file__).resolve().parent.parent
+HOME = resolve_tool_root()
 VERSION_FILE = HOME / "VERSION"
 # The canonical protocol home this adapter ships from: the shortcut table and
 # its Cyrillic-twin normalization are read from here through the ONE shared
 # engine resolver -- never re-declared in this file (no Cyrillic literal, no
 # second confusable map, no hardcoded twin dictionary may live below).
-PROTOCOL_DIR = HOME / "saipen"
+PROTOCOL_DIR = resolve_protocol_dir(HOME)
 
 # The ONE canonical actor resolver (T-1006): bare CLI INHERITS STATE.agent
 # -- the seat CORE.md section 1.4 defines -- and an explicit `--agent <id>`
@@ -552,7 +552,7 @@ def _status(project_root: Path, as_json: bool) -> int:
         _emit({"ok": False, "code": "NOT_SAIPEN_PROJECT"}, as_json)
         return 3
     try:
-        snap = snapshot.ProjectSnapshot.capture(project_root)
+        snap = snapshot.ProjectSnapshot.capture(project_root, lean=True)
     except (OSError, ValueError) as exc:
         _emit(
             {"ok": False, "code": "VALIDATION_FAILED", "detail": f"history-ownership: {exc}"},
@@ -756,7 +756,149 @@ def _status(project_root: Path, as_json: bool) -> int:
     return 0
 
 
-def _next_action(project_root: Path, as_json: bool) -> int:
+def _is_idle_maintain_route(routed: dict, board: dict) -> bool:
+    """Is the routed action the genuine idle terminal (nothing actionable)?
+
+    The router emits `action: "saipen continue"` with `reason: "maintain"`
+    exactly when no pending recovery, no active DOING ticket, and no
+    workable TODO remains. That verdict -- not a board glance -- is the
+    required proof that recovery/queued/follow-up routing is exhausted, so
+    the improvement fallback may run. Every other routed action (a PHASE,
+    a WAIT, `saipen recover`, a crew/ship continuation, a failed route)
+    means real work or a real stop exists and must outrank discovery.
+    """
+    if not routed.get("ok"):
+        return False
+    if routed.get("action") != "saipen continue":
+        return False
+    if routed.get("reason") != "maintain":
+        return False
+    tickets = board.get("tickets") or {}
+    if any(t["section"] == "## DOING" for t in tickets.values()):
+        return False
+    return not any(
+        t["section"] in ("## DOING", "## TODO") for t in tickets.values()
+    )
+
+
+def _continue_improve_fallthrough(
+    project_root: Path,
+    as_json: bool,
+    dry_run: bool,
+    routed: dict,
+    parked: list,
+    pending: list,
+    reconciliation: dict | None,
+) -> int:
+    """T-20260830_0842: one bounded fallthrough `continue` -> `improve`.
+
+    Fires only for the idle-maintain route (nothing actionable), runs the
+    bare `saipen improve` PREPARE step once, and emits the resulting audit
+    assignment (or a clean idle verdict). The anti-loop guarantee is:
+      - ONE invocation per `continue` call (this branch runs once);
+      - NO recursion back into `continue`;
+      - a marker names the prepared cycle, and `improve` itself resumes an
+        already-active cycle instead of preparing a duplicate;
+      - read-only / dry-run sessions do not write: the fallback projects the
+        prepare plan or refuses exactly as `improve` would.
+    """
+    from saipen_engine.continue_fallback import (
+        active_cycle_status,
+        read_marker,
+        write_marker,
+    )
+
+    marker = read_marker(project_root)
+    prior_cycle = marker.get("cycle_id") or ""
+    if prior_cycle:
+        status = active_cycle_status(project_root, prior_cycle)
+        if status not in ("", "complete", "archived"):
+            # The improvement discovery is already in flight (an active cycle
+            # was prepared by a prior `continue`). Resume is `improve`'s own
+            # semantics; re-preparing here would duplicate. Emit the resume
+            # point rather than a second discovery.
+            _emit(
+                {
+                    "ok": True,
+                    "code": "CONTINUE_IMPROVE_IN_FLIGHT",
+                    "cycle_id": prior_cycle,
+                    "action": "saipen improve",
+                    "reason": "improve-in-flight",
+                    "dry_run": bool(dry_run),
+                    "detail": (
+                        "improvement discovery cycle "
+                        f"{prior_cycle} is already active; resume it "
+                        "(saipen improve) instead of preparing a duplicate"
+                    ),
+                },
+                as_json,
+            )
+            return 0
+
+    import contextlib as _ctxlib
+    import io as _io
+
+    _buf = _io.StringIO()
+    with _ctxlib.redirect_stdout(_buf):
+        rc = _public_improve(project_root, [], as_json, dry_run)
+    raw = _buf.getvalue()
+    prepared: dict = {}
+    if as_json and raw.strip():
+        try:
+            prepared = json.loads(raw.strip())
+        except ValueError:
+            prepared = {}
+    if rc == 0 and prepared and prepared.get("ok"):
+        cycle_id = prepared.get("cycle_id") or prior_cycle
+        if cycle_id:
+            write_marker(project_root, cycle_id, _agent_for(project_root))
+        # Replay the captured result unchanged -- the fallback outcome is the
+        # improve outcome.
+        if as_json and prepared:
+            _emit(prepared, as_json)
+        elif raw:
+            print(raw, end="")
+        return rc
+    # A recovery-class improve refusal is a real blocker, not an idle
+    # verdict: the fallback must never mask pending/conflict/corrupt
+    # recovery as "no worthwhile improvement" (acceptance #14).
+    _rec_code = prepared.get("code") or ""
+    if _rec_code in (
+        "RECOVERY_REQUIRED",
+        "RECOVERY_CONFLICT",
+        "CORRUPT_JOURNAL",
+        "WRITER_BUSY",
+    ):
+        if as_json and prepared:
+            _emit(prepared, as_json)
+        elif raw:
+            print(raw, end="")
+        return 1
+    # T-20260830_0842: the improvement pass returned no defensible
+    # improvement.  Terminate cleanly with a genuine idle/no-op result.
+    # The fallback never fabricates work.
+    if as_json:
+        _emit(
+            {
+                "ok": True,
+                "code": "CONTINUE_IDLE",
+                "detail": "no worthwhile improvement discovered",
+            },
+            as_json,
+        )
+    else:
+        _emit({"ok": True, "code": "CONTINUE_IDLE"}, as_json)
+    return 0
+
+
+def _next_action(
+    project_root: Path,
+    as_json: bool,
+    *,
+    reconciliation: dict | None = None,
+    fallthrough_to_improve: bool = False,
+    dry_run: bool = False,
+) -> int:
     state_path = _state_path(project_root)
     if not state_path.is_file():
         _emit({"ok": False, "code": "NOT_SAIPEN_PROJECT"}, as_json)
@@ -767,7 +909,7 @@ def _next_action(project_root: Path, as_json: bool) -> int:
         _emit(_corrupt_refusal(_corrupt), as_json)
         return 1
     try:
-        snap = snapshot.ProjectSnapshot.capture(project_root)
+        snap = snapshot.ProjectSnapshot.capture(project_root, lean=True)
     except (OSError, ValueError) as exc:
         _emit(
             {"ok": False, "code": "VALIDATION_FAILED", "detail": f"history-ownership: {exc}"},
@@ -825,6 +967,21 @@ def _next_action(project_root: Path, as_json: bool) -> int:
             as_json,
         )
         return 1
+
+    # T-20260830_0842: the `continue` fallthrough. ONLY `saipen continue`
+    # (and its aliases) may fall through to the improvement-discovery path.
+    # `saipen next` stays a pure projection and never triggers a mutation.
+    # A `--dry-run` is purely observational -- the spec forbids the
+    # fallthrough from generating work, and observers must see the
+    # same idle-maintain verdict the prior release carried.
+    if (
+        fallthrough_to_improve
+        and not dry_run
+        and _is_idle_maintain_route(routed, board)
+    ):
+        return _continue_improve_fallthrough(
+            project_root, as_json, dry_run, routed, parked, pending, reconciliation
+        )
     load = load_for_action(routed.get("action"))
     _emit(
         {
@@ -841,6 +998,7 @@ def _next_action(project_root: Path, as_json: bool) -> int:
             "recovery_conflict": False,
             "pending_ops": pending,
             "parked_work": parked or None,
+            "reconciliation": reconciliation,
         },
         as_json,
     )
@@ -866,7 +1024,7 @@ def _explain_next(project_root: Path, as_json: bool) -> int:
         _emit(_corrupt_refusal(_corrupt), as_json)
         return 1
     try:
-        snap = snapshot.ProjectSnapshot.capture(project_root)
+        snap = snapshot.ProjectSnapshot.capture(project_root, lean=True)
     except (OSError, ValueError) as exc:
         _emit(
             {"ok": False, "code": "VALIDATION_FAILED", "detail": f"history-ownership: {exc}"},
@@ -1061,6 +1219,15 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
         )
         return 2
     pending, conflicts, _corrupt = _scan_full(project_root)
+    # CORE-003: corrupt recovery evidence checked FIRST, before conflicts
+    # (hostile-regression, P1#6): a scan_pending record marked corrupt:true --
+    # e.g. a symlinked OPS_DIR or an unreadable entry -- must never be replayed
+    # as a normal op_id (which surfaced a generic VALIDATION_FAILED). The
+    # STRUCTURED record survives to the refusal via the ONE shared payload every
+    # projection uses (already scanned above by `_scan_full`, T-1014).
+    if _corrupt:
+        _emit(_corrupt_refusal(_corrupt), as_json)
+        return 1
     if conflicts:
         _emit(
             {
@@ -1079,33 +1246,59 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
         )
         return 1
     if not pending:
-        _emit({"ok": True, "code": "CLEAN", "pending_ops": []}, as_json)
-        return 0
-    # Refuse corrupt recovery evidence as CORRUPT_JOURNAL BEFORE any replay
-    # (hostile-regression, P1#6): a scan_pending record marked corrupt:true --
-    # e.g. a symlinked OPS_DIR or an unreadable entry -- must never be replayed
-    # as a normal op_id (which surfaced a generic VALIDATION_FAILED). The
-    # STRUCTURED record survives to the refusal via the ONE shared payload every
-    # projection uses (already scanned above by `_scan_full`, T-1014).
-    if _corrupt:
-        _emit(_corrupt_refusal(_corrupt), as_json)
-        return 1
-    # W2-001 (audit fdc73e06): automatic replay is a mutating writer and must
-    # carry the same session mutation boundary as `recover resolve` -- dry-run
-    # is zero-write, a read-only session refuses, and the acting seat is the
-    # canonical resolver. A bare `recover --dry-run` previously replayed the
-    # operation and wrote canonical bytes.
+        # CLEAN is a statement about the whole recovery responsibility, not
+        # merely the absence of an interrupted journal. Reconcile the
+        # machine-owned checkpoint surface before claiming it. This closes
+        # the old contract hole where `recover: CLEAN` was immediately
+        # followed by `continue: VALIDATION_FAILED`.
+        from saipen_engine.reconcile import reconcile_protocol_state
+
+        if _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        reconciliation = reconcile_protocol_state(
+            project_root, _agent_for(project_root), dry_run=dry_run
+        )
+        _emit(reconciliation, as_json)
+        return 0 if reconciliation.get("ok") else 1
+    # CORE-002 (audit fdc73e06): a bare `recover --dry-run` is a recovery
+    # PLAN, not a refusal. The pending op set has already been gathered; the
+    # dry-run path returns the planned replay targets so the caller can
+    # inspect what recovery would commit without holding the writer lock or
+    # writing canonical bytes. The old `DRY_RUN_UNSUPPORTED` early-return hid
+    # the plan and made dry-run observationally different from a real replay.
     if dry_run:
+        from saipen_engine.journal import decode_operation_record
+
+        plan_ops = []
+        for op_id in pending:
+            record, err = decode_operation_record(
+                project_root, project_root / ".saipen" / "recovery" / "ops" / op_id
+            )
+            if not err:
+                plan_ops.append(
+                    {
+                        "op_id": op_id,
+                        "operation": record.get("operation"),
+                        "stage": record.get("status"),
+                        "targets": [
+                            t.get("path")
+                            for t in record.get("targets", [])
+                            if isinstance(t, dict)
+                        ],
+                    }
+                )
         _emit(
             {
-                "ok": False,
-                "code": "DRY_RUN_UNSUPPORTED",
-                "detail": "dry_run not supported for recovery mutations",
+                "ok": True,
+                "code": "DRY_RUN_PLAN",
+                "action": "recover",
                 "pending_ops": pending,
+                "plan": plan_ops,
+                "detail": "planned replay targets; no writes",
             },
             as_json,
         )
-        return 1
+        return 0
     if _negotiate_capability(project_root) == "read-only":
         return _capability_refusal(as_json)
     _ho = _ensure_handover(project_root, as_json, dry_run=False)
@@ -1435,6 +1628,162 @@ def _continue(
             _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": detail}, as_json)
         return 2
 
+    # Read the state once at the public boundary.  This closes the same
+    # intent-race window as the later operation precondition: reconciliation
+    # must never publish a repair based on a different persisted intent than
+    # the continuation caller observed.
+    initial_state = None
+    initial_path = _state_path(project_root)
+    if initial_path.is_file():
+        initial_state, initial_error = parse_state_or_error(codec.read_doc(initial_path))
+        if initial_error:
+            initial_state = None
+        else:
+            from saipen_engine.state import parse_frontmatter
+
+            observed_state, observed_error = parse_frontmatter(codec.read_doc(initial_path))
+            if (
+                observed_error is None
+                and observed_state is not None
+                and initial_state.get("execution_intent") != observed_state.get("execution_intent")
+            ):
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "STALE_STATE",
+                        "detail": "execution_intent changed before continuation "
+                        "reconciliation; no repair committed",
+                    },
+                    as_json,
+                )
+                return 1
+
+    pending, conflicts, corrupt = _scan_full(project_root)
+    if corrupt:
+        _emit(_corrupt_refusal(corrupt), as_json)
+        return 1
+    if conflicts:
+        _emit(
+            {
+                "ok": False,
+                "code": "RECOVERY_CONFLICT",
+                "op_ids": conflicts,
+                "detail": "continuation cannot guess through unresolved recovery conflict(s): "
+                + ", ".join(conflicts),
+            },
+            as_json,
+        )
+        return 1
+    if pending:
+        if dry_run:
+            # CORE-002: `continue --dry-run` PROJECTS recovery instead of
+            # refusing. The pending op set is decoded and the planned replay
+            # targets are returned so the caller sees what continuation would
+            # commit; no journal is settled and no bytes are written. The
+            # post-recovery route cannot be truthfully routed from this
+            # process (recovery would need to settle first), so the replay
+            # plan is the projection, with zero writes.
+            from saipen_engine.journal import decode_operation_record
+
+            plan_ops = []
+            for op_id in pending:
+                record, err = decode_operation_record(
+                    project_root, project_root / ".saipen" / "recovery" / "ops" / op_id
+                )
+                if not err:
+                    plan_ops.append(
+                        {
+                            "op_id": op_id,
+                            "operation": record.get("operation"),
+                            "stage": record.get("status"),
+                            "targets": [
+                                t.get("path")
+                                for t in record.get("targets", [])
+                                if isinstance(t, dict)
+                            ],
+                        }
+                    )
+            _emit(
+                {
+                    "ok": True,
+                    "code": "DRY_RUN_PLAN",
+                    "action": "continue",
+                    "pending_ops": pending,
+                    "plan": plan_ops,
+                    "detail": "planned recovery replay before routing; no writes",
+                },
+                as_json,
+            )
+            return 0
+        if _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        recovered = auto_recover_pending(project_root)
+        if not recovered.get("ok"):
+            _emit(recovered, as_json)
+            return 1
+
+    # Continuation is the self-healing entry point. Journal recovery and
+    # deterministic checkpoint reconciliation happen before strict routing;
+    # semantic ambiguity/corruption still returns a hard classified refusal.
+    if not dry_run and _negotiate_capability(project_root) == "read-only":
+        # A read-only session may inspect, but cannot promise that it repaired
+        # the state it is about to execute.
+        from saipen_engine.reconcile import reconcile_protocol_state
+
+        preview = reconcile_protocol_state(project_root, _agent_for(project_root), dry_run=True)
+        if preview.get("code") not in ("CLEAN", "WARN"):
+            _emit(
+                {
+                    **preview,
+                    "code": "CAPABILITY_UNAVAILABLE",
+                    "detail": "continue found repairable protocol drift but mode is read-only; "
+                    "run again in a writable session",
+                },
+                as_json,
+            )
+            return 1
+        # Keep the continuation itself read-only after the preview. A clean
+        # projection is safe to route; a REPAIRED preview is not safe to claim
+        # as committed by a session that cannot write.
+        dry_run = True
+
+    from saipen_engine.reconcile import reconcile_protocol_state
+
+    reconciliation = reconcile_protocol_state(
+        project_root, _agent_for(project_root), dry_run=dry_run
+    )
+    # CORE-001 (audit-all3): a tripped safety valve is an explicit refusal
+    # with the reauthorization path as the only clearing. ``cc`` IS that
+    # reauthorization, so the refusal must not stop continuation cold --
+    # reauthorize and emit the reauth outcome (the rest of the run already
+    # sees the cleared STATE).
+    if reconciliation.get("code") == "RECONCILE_REAUTH_REQUIRED":
+        from saipen_engine.operations import reauthorize_valve
+
+        reauth = reauthorize_valve(project_root, _agent_for(project_root), dry_run=dry_run)
+        if not reauth.ok:
+            _emit(reauth.to_dict(), as_json)
+            return 1
+        # Surface the reauthorization as the canonical outcome of this
+        # ``cc`` invocation. The post-reauth reconciliation runs downstream
+        # of the reauth it just executed; the caller already saw the reason
+        # the valve tripped and that it is now cleared.
+        reauth_dict = reauth.to_dict()
+        reauth_dict["execution_intent"] = "goal"
+        reauth_dict["goal_waves"] = 0
+        reauth_dict["goal_tickets"] = 0
+        reauth_dict["reconciliation"] = reconciliation
+        _emit(reauth_dict, as_json)
+        return 0
+    if not reconciliation.get("ok"):
+        _emit(reconciliation, as_json)
+        return 1
+    # A dry-run reports the reconciliation alongside the canonical command
+    # plan.  It must not return early as ``REPAIRED``: aliases and explicit
+    # continue have one observable route, and callers still need to see what
+    # continuation would do after the proposed repair.  No bytes are written
+    # because both the reconciliation and the routed operation are dry-run.
+
     state_path = _state_path(project_root)
     if not state_path.is_file():
         _emit({"ok": False, "code": "NOT_SAIPEN_PROJECT"}, as_json)
@@ -1473,9 +1822,16 @@ def _continue(
                         "converge_target": "done",
                     }
                 )
+            payload["reconciliation"] = reconciliation
             _emit(payload, as_json)
             return 0 if result.ok else 1
-        return _next_action(project_root, as_json)
+        return _next_action(
+            project_root,
+            as_json,
+            reconciliation=reconciliation,
+            fallthrough_to_improve=True,
+            dry_run=dry_run,
+        )
 
     if execution_intent == "goal":
         waves = state.get("goal_waves") or 0
@@ -1495,12 +1851,19 @@ def _continue(
                             "goal_tickets": 0,
                         }
                     )
+                payload["reconciliation"] = reconciliation
                 _emit(payload, as_json)
                 return 0 if result.ok else 1
 
     # Goal (untripped or freshly reauthorized) and converge both derive the
     # next action from the same STATE/BOARD/complete-LOG snapshot as `next`.
-    return _next_action(project_root, as_json)
+    return _next_action(
+        project_root,
+        as_json,
+        reconciliation=reconciliation,
+        fallthrough_to_improve=True,
+        dry_run=dry_run,
+    )
 
 
 def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
@@ -1534,20 +1897,18 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
         return 2
     action = args[0]
     rest = args[1:]
+    # CORE-002 (audit fdc73e06): dry-run is one semantic PLAN path, not a
+    # short-circuit. Refusals at parsing/validation stage are returned for
+    # invalid input the same way under dry-run; valid requests are PLANned
+    # with concrete target paths, zero writes, and the canonical mutator is
+    # NOT invoked. The old `SOURCE_DRY_RUN` early-return certified invalid
+    # input as successful, which is removed here.
     if action in ("capture", "close", "archive", "purge", "req", "disp"):
-        if dry_run:
-            _emit(
-                {
-                    "ok": True,
-                    "code": "SOURCE_DRY_RUN",
-                    "action": action,
-                    "detail": "no writes performed",
-                },
-                as_json,
-            )
-            return 0
         if _negotiate_capability(project_root) == "read-only":
             return _capability_refusal(as_json)
+
+    if dry_run and action in ("capture", "close", "archive", "purge", "req", "disp"):
+        return _source_dry_run_plan(project_root, action, rest, as_json)
 
     if action == "capture":
         # Body from --file, stdin (piped), or positional args. Recognized
@@ -1832,6 +2193,261 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
 
+    _emit(
+        {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "detail": f"unknown source subcommand {action!r}",
+        },
+        as_json,
+    )
+    return 2
+
+
+def _source_dry_run_plan(
+    project_root: Path, action: str, rest: list[str], as_json: bool
+) -> int:
+    """CORE-002: semantic PLAN for a source mutation under --dry-run.
+
+    Parses and validates the request exactly like the real mutation path
+    (same refusal classes), computes the concrete planned target paths from
+    the live project state, and returns a structured plan with ZERO writes.
+    """
+    from saipen_engine import intake
+
+    if action == "req":
+        if len(rest) < 4:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "source req needs <SRC> <RID> <class> <text...>",
+                },
+                as_json,
+            )
+            return 2
+        receipt_id, rid, clause_class = rest[0], rest[1], rest[2]
+        text = " ".join(rest[3:])
+        if not re.fullmatch(r"SRC-\d+", receipt_id):
+            _emit({"ok": False, "code": "INVALID_ID", "detail": receipt_id}, as_json)
+            return 1
+        if not text.strip():
+            _emit(
+                {"ok": False, "code": "VALIDATION_FAILED", "detail": "empty clause text"},
+                as_json,
+            )
+            return 1
+        from saipen_engine.intake import CLAUSE_CLASSES
+
+        if clause_class not in CLAUSE_CLASSES:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"unknown clause class {clause_class!r}",
+                },
+                as_json,
+            )
+            return 1
+        contract = intake._read_contract(Path(project_root), receipt_id)
+        if not contract:
+            _emit(
+                {"ok": False, "code": "TICKET_NOT_FOUND", "detail": receipt_id},
+                as_json,
+            )
+            return 1
+        new_revision = int(contract.get("interpretation_revision", 0)) + 1
+        _emit(
+            {
+                "ok": True,
+                "code": "DRY_RUN_PLAN",
+                "action": "req",
+                "receipt": receipt_id,
+                "rid": f"{receipt_id}:{rid}" if re.fullmatch(r"R\d+", rid) else rid,
+                "revision": new_revision,
+                "targets": [
+                    f".saipen/intake/contracts/{receipt_id}.json",
+                    f".saipen/intake/contracts/{receipt_id}.r{new_revision:03d}.json",
+                    f".saipen/intake/coverage/{receipt_id}.json",
+                ],
+                "detail": "planned Contract + immutable revision + coverage commit; no writes",
+            },
+            as_json,
+        )
+        return 0
+    if action == "disp":
+        if len(rest) < 3:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "source disp needs <SRC> <RID> <DISPOSITION>",
+                },
+                as_json,
+            )
+            return 2
+        receipt_id, rid, disposition = rest[0], rest[1], rest[2]
+        from saipen_engine.intake import ALL_DISPOSITIONS
+
+        if disposition not in ALL_DISPOSITIONS:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"disposition {disposition!r}",
+                },
+                as_json,
+            )
+            return 1
+        _emit(
+            {
+                "ok": True,
+                "code": "DRY_RUN_PLAN",
+                "action": "disp",
+                "receipt": receipt_id,
+                "rid": rid,
+                "disposition": disposition,
+                "targets": [f".saipen/intake/coverage/{receipt_id}.json"],
+                "detail": "planned coverage ledger update; no writes",
+            },
+            as_json,
+        )
+        return 0
+    if action == "capture":
+        has_body = bool(rest) or (not sys.stdin.isatty())
+        if not has_body:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "source capture needs a body (args, --file, or piped stdin)",
+                },
+                as_json,
+            )
+            return 2
+        _emit(
+            {
+                "ok": True,
+                "code": "DRY_RUN_PLAN",
+                "action": "capture",
+                "targets": [
+                    ".saipen/intake/active/SRC-NNN.md",
+                    ".saipen/intake/active/SRC-NNN.meta.json",
+                    ".saipen/intake/index.json",
+                ],
+                "detail": "planned immutable source body + metadata + index; no writes",
+            },
+            as_json,
+        )
+        return 0
+    if action == "close":
+        if len(rest) != 1:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "source close needs <SRC-ID>",
+                },
+                as_json,
+            )
+            return 2
+        receipt_id = rest[0]
+        meta = intake._read_meta(Path(project_root), receipt_id)
+        if not meta:
+            _emit(
+                {"ok": False, "code": "TICKET_NOT_FOUND", "detail": receipt_id},
+                as_json,
+            )
+            return 1
+        _emit(
+            {
+                "ok": True,
+                "code": "DRY_RUN_PLAN",
+                "action": "close",
+                "receipt": receipt_id,
+                "targets": [
+                    f".saipen/archive/source/{receipt_id}.md",
+                    f".saipen/archive/source/{receipt_id}.meta.json",
+                    f".saipen/archive/source/{receipt_id}.coverage.json",
+                    f".saipen/archive/source/{receipt_id}.contract.json",
+                    f".saipen/intake/tombstones/{receipt_id}.json",
+                    ".saipen/intake/index.json",
+                ],
+                "detail": "planned archive bundle + tombstone + index; no writes",
+            },
+            as_json,
+        )
+        return 0
+    if action == "archive":
+        if len(rest) != 1:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "source archive needs <SRC-ID>",
+                },
+                as_json,
+            )
+            return 2
+        receipt_id = rest[0]
+        _emit(
+            {
+                "ok": True,
+                "code": "DRY_RUN_PLAN",
+                "action": "archive",
+                "receipt": receipt_id,
+                "targets": [
+                    f".saipen/archive/source/{receipt_id}.md",
+                    f".saipen/archive/source/{receipt_id}.meta.json",
+                    f".saipen/archive/source/{receipt_id}.coverage.json",
+                    f".saipen/archive/source/{receipt_id}.contract.json",
+                    f".saipen/intake/tombstones/{receipt_id}.json",
+                    ".saipen/intake/index.json",
+                ],
+                "detail": "planned archive move + tombstone + index; no writes",
+            },
+            as_json,
+        )
+        return 0
+    if action == "purge":
+        if len(rest) != 2 or rest[1] != "--confirm":
+            _emit(
+                {
+                    "ok": False,
+                    "code": "CONFIRMATION_REQUIRED",
+                    "detail": "source purge needs <SRC-ID> --confirm",
+                },
+                as_json,
+            )
+            return 2
+        receipt_id = rest[0]
+        index = intake._read_index(Path(project_root))
+        tomb = index.get("tombstones", {}).get(receipt_id)
+        if not tomb:
+            _emit(
+                {"ok": False, "code": "TICKET_NOT_FOUND", "detail": receipt_id},
+                as_json,
+            )
+            return 1
+        _emit(
+            {
+                "ok": True,
+                "code": "DRY_RUN_PLAN",
+                "action": "purge",
+                "receipt": receipt_id,
+                "targets": [
+                    f".saipen/archive/source/{receipt_id}.md",
+                    f".saipen/archive/source/{receipt_id}.meta.json",
+                    f".saipen/archive/source/{receipt_id}.coverage.json",
+                    f".saipen/archive/source/{receipt_id}.contract.json",
+                    f".saipen/intake/tombstones/{receipt_id}.json",
+                    ".saipen/intake/index.json",
+                ],
+                "detail": "planned destructive archive purge + tombstone + index; no writes",
+            },
+            as_json,
+        )
+        return 0
     _emit(
         {
             "ok": False,
@@ -2489,6 +3105,149 @@ def _runtime_identity() -> str:
     return value
 
 
+def _improve_dry_run_plan(
+    project_root: Path, action: str, rest: list[str], as_json: bool
+) -> int:
+    """CORE-002: semantic PLAN for an improve mutator under --dry-run.
+
+    Validates the closed grammar of `submit` / `complete` / `cycle-complete` /
+    `abort` and returns concrete planned journal/LOG/state targets with zero
+    writes. The pre-improve state error surface (NOT_SAIPEN_PROJECT /
+    state-malformed) is shared between dry-run and the real mutator so an
+    invalid session refuses consistently.
+    """
+    state_path = _state_path(project_root)
+    if not state_path.is_file():
+        _emit({"ok": False, "code": "NOT_SAIPEN_PROJECT"}, as_json)
+        return 3
+    _state, state_error = parse_state_or_error(codec.read_doc(state_path))
+    if state_error:
+        _emit(
+            {"ok": False, "code": "VALIDATION_FAILED", "detail": f"state-malformed: {state_error}"},
+            as_json,
+        )
+        return 1
+    if action == "submit":
+        if len(rest) < 4:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "improve submit needs <cycle> <seat> <project> <findings.json>",
+                },
+                as_json,
+            )
+            return 2
+        cycle, seat, project = rest[0], rest[1], rest[2]
+        from improve import resolve_report_path
+
+        report = resolve_report_path(project_root, cycle, seat, project)
+        _emit(
+            {
+                "ok": True,
+                "code": "DRY_RUN_PLAN",
+                "action": "submit",
+                "cycle": cycle,
+                "seat": seat,
+                "project": project,
+                "report": str(report),
+                "targets": [str(report), ".saipen/LOG.md"],
+                "detail": "planned RUN append + LOG append; no writes",
+            },
+            as_json,
+        )
+        return 0
+    if action == "complete":
+        if len(rest) < 3:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "improve complete needs <cycle> <seat> <project>",
+                },
+                as_json,
+            )
+            return 2
+        cycle, seat, project = rest[0], rest[1], rest[2]
+        from improve import resolve_report_path
+
+        report = resolve_report_path(project_root, cycle, seat, project)
+        _emit(
+            {
+                "ok": True,
+                "code": "DRY_RUN_PLAN",
+                "action": "complete",
+                "cycle": cycle,
+                "seat": seat,
+                "project": project,
+                "report": str(report),
+                "targets": [str(report), ".saipen/LOG.md"],
+                "detail": "planned report completion + LOG append; no writes",
+            },
+            as_json,
+        )
+        return 0
+    if action == "cycle-complete":
+        if len(rest) < 1:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "improve cycle-complete needs <cycle>",
+                },
+                as_json,
+            )
+            return 2
+        cycle = rest[0]
+        cycle_root = project_root / ".saipen" / "improve" / cycle
+        _emit(
+            {
+                "ok": True,
+                "code": "DRY_RUN_PLAN",
+                "action": "cycle-complete",
+                "cycle": cycle,
+                "targets": [
+                    str(cycle_root / "MANIFEST.md"),
+                    str(cycle_root / "REPORTS"),
+                    ".saipen/LOG.md",
+                ],
+                "detail": "planned cycle ACTIVE -> COMPLETE; no writes",
+            },
+            as_json,
+        )
+        return 0
+    if action == "abort":
+        if len(rest) < 1:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "improve abort needs <cycle>",
+                },
+                as_json,
+            )
+            return 2
+        cycle = rest[0]
+        cycle_root = project_root / ".saipen" / "improve" / cycle
+        _emit(
+            {
+                "ok": True,
+                "code": "DRY_RUN_PLAN",
+                "action": "abort",
+                "cycle": cycle,
+                "targets": [str(cycle_root / "MANIFEST.md"), ".saipen/LOG.md"],
+                "detail": "planned cycle ABORTED transition; no writes",
+            },
+            as_json,
+        )
+        return 0
+    _emit(
+        {"ok": False, "code": "VALIDATION_FAILED", "detail": f"unknown improve action {action!r}"},
+        as_json,
+    )
+    return 2
+
+
 def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
     """saipen improve -- the meta-control command family (T-554, T-606,
     DOGFOOD V T-615..T-618).
@@ -2644,24 +3403,16 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
         return rows
 
     action = args[0] if args and not args[0].startswith("--") else None
-    # W2-003 (audit fdc73e06): the improve MUTATORS (submit/complete/
-    # cycle-complete/abort) previously ran to completion under `--dry-run`,
-    # writing RUN appends, report completion and cycle transitions despite a
-    # dry-run session. Only `prepare` and `clean` support dry-run; every other
-    # mutation refuses with zero writes. The check runs BEFORE any mutation
-    # planning, so the session boundary holds even when a later branch would
-    # have failed on its own (fail-first is still zero-write).
+    # CORE-002 (audit fdc73e06): the improve MUTATORS (submit/complete/
+    # cycle-complete/abort) now run their semantic PLAN under --dry-run and
+    # return the planned targets with zero writes. Refusal classes are the
+    # same as non-dry; valid requests report concrete plan targets. The
+    # previous `DRY_RUN_UNSUPPORTED` short-circuit hid the plan and made
+    # dry-run observationally different from a real submission.
     if dry_run and action in ("submit", "complete", "cycle-complete", "abort"):
-        _emit(
-            {
-                "ok": False,
-                "code": "DRY_RUN_UNSUPPORTED",
-                "detail": f"dry_run not supported for improve mutator {action!r}; "
-                "prepare and clean are the only dry-run-capable improve actions",
-            },
-            as_json,
+        return _improve_dry_run_plan(
+            project_root, action, args[1:] if action else [], as_json
         )
-        return 1
     if action is None:
         # DOGFOOD V (T-617): bare `saipen improve` is the documented
         # meta-control -- it PREPARES the current seat's bounded audit
@@ -3338,7 +4089,7 @@ def main(argv: list[str] | None = None) -> int:
     # Explicit `-h`/`--help` stays a usage/exit-2 path and does NOT resume.
     if args and args[0] in ("-h", "--help"):
         usage_msg = (
-            "usage: saipen (status|next|runtime|recover|claim <T-###>|"
+            "usage: saipen (continue|status|next|runtime|recover|claim <T-###>|"
             "transition <PHASE> [T-###] [text]|checkpoint <TAXONOMY> "
             "[T-###] [text]|goal <text>|ticket add <PRIORITY> <text>|ticket "
             "done <T-###>|ticket block <T-###> <reason>|ticket "

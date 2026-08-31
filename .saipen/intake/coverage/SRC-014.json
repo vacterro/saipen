@@ -1,0 +1,158 @@
+{
+  "requirements": {
+    "SRC-014:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "DEFERRED",
+      "evidence": "E-4810",
+      "text": "Audit Inbox discovers audit/N.md at <project-root>/audit/ before selecting ordinary queued BOARD work",
+      "verification": null,
+      "work": "T-1224"
+    },
+    "SRC-014:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "DEFERRED",
+      "evidence": "E-4810",
+      "text": "cc/continue notices the audit before ordinary TODO selection",
+      "verification": null,
+      "work": "T-1224"
+    },
+    "SRC-014:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "DEFERRED",
+      "evidence": "E-4810",
+      "text": "audit file is captured as durable source authority (source_kind=external_audit)",
+      "verification": null,
+      "work": "T-1224"
+    },
+    "SRC-014:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "DEFERRED",
+      "evidence": "E-4810",
+      "text": "normal Work is derived and linked from the captured source",
+      "verification": null,
+      "work": "T-1224"
+    },
+    "SRC-014:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "DEFERRED",
+      "evidence": "E-4810",
+      "text": "every actionable audit requirement is executed as normal BOARD Work",
+      "verification": null,
+      "work": "T-1224"
+    },
+    "SRC-014:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "DEFERRED",
+      "evidence": "E-4810",
+      "text": "every closed requirement has real evidence and verification where required",
+      "verification": null,
+      "work": "T-1224"
+    },
+    "SRC-014:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "DEFERRED",
+      "evidence": "E-4810",
+      "text": "audit source is CLOSED only when the existing Source Receipt closure contract proves it complete",
+      "verification": null,
+      "work": "T-1224"
+    },
+    "SRC-014:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "DEFERRED",
+      "evidence": "E-4810",
+      "text": "verified deletion of original audit/N.md happens only after the closure contract proves it complete",
+      "verification": null,
+      "work": "T-1224"
+    },
+    "SRC-014:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "DEFERRED",
+      "evidence": "E-4810",
+      "text": "next cc naturally proceeds to the next audit layer or ordinary project Work",
+      "verification": null,
+      "work": "T-1224"
+    },
+    "SRC-014:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "DEFERRED",
+      "evidence": "E-4810",
+      "text": "no parallel audit TODO system: Audit Inbox is an external transport adapter into the existing source lifecycle",
+      "verification": null,
+      "work": "T-1224"
+    },
+    "SRC-014:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "DEFERRED",
+      "evidence": "E-4810",
+      "text": "canonical audit directory is exactly <project-root>/audit/ with direct regular files matching ^[1-9][0-9]*\\.md$",
+      "verification": null,
+      "work": "T-1224"
+    },
+    "SRC-014:R012": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "DEFERRED",
+      "evidence": "E-4810",
+      "text": "rule ownership for Audit Inbox lives in SOURCES.md (lifecycle), COMMANDS.md (routing), REGISTRY.json (closed facts); CORE grows no more than a compact pointer",
+      "verification": null,
+      "work": "T-1224"
+    },
+    "SRC-014:R013": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "DEFERRED",
+      "evidence": "E-4810",
+      "text": "no runtime dependency on AUDAPACK: SAIPEN implements Audit Inbox natively and remains standalone",
+      "verification": null,
+      "work": "T-1224"
+    },
+    "SRC-014:R014": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "DEFERRED",
+      "evidence": "E-4810",
+      "text": "audit file text never re-enters command parsing",
+      "verification": null,
+      "work": "T-1224"
+    },
+    "SRC-014:R015": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "DEFERRED",
+      "evidence": "E-4810",
+      "text": "delete is journaled/recoverable: crashes before/after delete converge via recovery",
+      "verification": null,
+      "work": "T-1224"
+    },
+    "SRC-014:R016": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "DEFERRED",
+      "evidence": "E-4810",
+      "text": "foreign or noncanonical files are ignored and never deleted by Audit Inbox cleanup",
+      "verification": null,
+      "work": "T-1224"
+    },
+    "SRC-014:R017": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "DEFERRED",
+      "evidence": "E-4810",
+      "text": "audit file MUST NEVER be deleted while modified since capture",
+      "verification": null,
+      "work": "T-1224"
+    }
+  },
+  "schema_version": 1
+}

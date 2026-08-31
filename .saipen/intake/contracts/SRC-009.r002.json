@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-009:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Freeze a protocol semantic baseline before shortening any normative prose, covering phases, transitions, commands, normalization, STATE, ticket and next-action forms, vocabularies, safety gates, checkpointing, authority, recovery, goal/autonomy, continue-to-improve fallthrough, and planned HUSH precedence, with current owner and test evidence for each fact."
+    },
+    "SRC-009:R0002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Preserve golden outputs for continue, cc, ccc, ship, improve, compound commands, recovery, and dry-run, and require the existing validator, scenarios, and tests to be green before compression."
+    }
+  },
+  "derived_at": "2026-08-30T13:55:06Z",
+  "derived_from": "SRC-009",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "7f7b8a6d5093260811df4466d068a7dfbd1aa1a6d3a965bde051686f44f85739"
+}

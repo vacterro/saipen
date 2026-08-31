@@ -1,0 +1,29 @@
+{
+  "clauses": {
+    "SRC-004:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001 \u2014 release preserves linked source authority in fresh clones"
+    },
+    "SRC-004:R0002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-002 \u2014 archive settlement verifies all evidence before destructive convergence"
+    },
+    "SRC-004:R0003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-003 \u2014 source body admission and recovery share the 64 MiB contract"
+    },
+    "SRC-004:R0004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-001 \u2014 same-op corrupt journal retry preserves pre-manifest evidence"
+    }
+  },
+  "derived_at": "2026-08-27T23:07:36Z",
+  "derived_from": "SRC-004",
+  "interpretation_revision": 4,
+  "schema_version": 1,
+  "source_sha256": "c7ee50ea0bee16c5795c64f2bf1cbca7620ec7f81985294b2f49d0165e2e1179"
+}

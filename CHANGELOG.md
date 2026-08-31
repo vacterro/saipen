@@ -1,6 +1,12 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.231.10 -- 2026-08-31 -- Audit Closure SHIP (T-1222..T-1228)
+
+- T-1222/T-1223/T-1224: audit/1,2,3 captured as SRC-012/013/014 with 54 acceptance criteria dispositioned (36 VERIFIED, 18 deferred)
+- T-1225: umbrella verification + subtickets T-1226 (W5 phase compression), T-1227 (Audit Inbox), T-1228 (SHIP pre-staging fix)
+- T-1228: SHIP blocking resolved (staged SRC-009/SRC-010 coverage + index.json refreshed to working-tree bytes; all SRC-011..SRC-014 intake files staged)
+
 ## 7.231.9 -- 2026-08-27 -- SRC-003 Audit All-3 Repair Wave (T-1171)
 
 - T-1171: 28/28 SRC-003 audit clauses VERIFIED. Wave 1 (CORE-001..004): journaled stop/ss, claim-safe stop_checkpoint, non-recursive tt test orchestrator, atomic ccc entry marker. Wave 2 (W2-001..017): journal intermediate file ownership (no-follow/O_CREAT|O_EXCL), liveness cache ownership + concurrency-safe read-modify-write, producer descendant ownership, crash-recoverable source close/archive/purge with idempotent settle, lock acquisition failure unwind, final lock-file no-follow ownership, coherent STATE/BOARD before targeted producer integration, Git-compatible exclusive index rollback lock, canonical chronology for convergence predecessor selection, one coherent ProjectSnapshot for status/next/explain, structured chronological project-bound attribution claims, portable lineage binding for crew defer scope, non-fatal post-COMMITTED settlement, consistent structured SubSaipen receipt corruption handling, source-identity APPLY CAS, truthful producer cleanup_pending. Wave 3 (PERF-001..007): call-scoped linear intake validation, bounded indexed source duplicate lookup, disposable scenario validation, bounded semantic receipt decoding, purpose-specific LOG history retention, owned cross-platform child process-tree cancellation, suite-owned temporary directory cleanup.

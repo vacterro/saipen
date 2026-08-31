@@ -1,0 +1,20 @@
+{
+  "archive_ref": ".saipen/archive/source/SRC-001.md",
+  "closed_at": "2026-08-29T03:43:02Z",
+  "closure_event": "E-4616",
+  "linked_work": null,
+  "receipt_id": "SRC-001",
+  "received_at": "2026-08-27T03:41:53Z",
+  "reread_at": "2026-08-29T03:43:02Z",
+  "schema_version": 1,
+  "sensitive": false,
+  "source_kind": "user_instruction",
+  "source_sha256": "99ad5f35d77aabc1b99613f85a91b91f7ad922a1658678a0a34babb094d4c6f2",
+  "status": "CLOSED",
+  "storage_status": "ARCHIVED",
+  "transport": {
+    "newline_normalization": "none",
+    "source_encoding": "utf-8",
+    "transport_transform": "none"
+  }
+}

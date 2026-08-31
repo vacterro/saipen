@@ -1,4 +1,4 @@
-Test: Agent without filesystem write capability sets `mode: read-only` (RFC § 1.3) and MUST NOT enter `INIT`, `PLAN`, `ADD`, `BUILD`, `SHIP`, `CLEAN`, or `TRANSLATE` -- it may only read, analyze, and report a recommended `next_action`. This fixture's `phase: BUILD` + `mode: read-only` combination is itself one violation the validator MUST catch; the fixture is a sample from the full seven-phase ban, not the whole list.
+Test: Agent without filesystem write capability sets `mode: read-only` (RFC § 1.3) and MUST NOT enter `INIT`, `PLAN`, `SCOUT`, `ADD`, `BUILD`, `SHIP`, `CLEAN`, `TRANSLATE`, or `PREPARE` -- it may only read, analyze, and report a recommended `next_action`. This fixture's `phase: BUILD` + `mode: read-only` combination is itself one violation the validator MUST catch; the fixture is a sample from the full nine-phase ban, not the whole list.
 
 expect: fail
 expect_fail_contains: read-only MUST NOT enter BUILD

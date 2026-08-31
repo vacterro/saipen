@@ -1,0 +1,44 @@
+{
+  "clauses": {
+    "SRC-009:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Freeze a protocol semantic baseline before shortening any normative prose, covering phases, transitions, commands, normalization, STATE, ticket and next-action forms, vocabularies, safety gates, checkpointing, authority, recovery, goal/autonomy, continue-to-improve fallthrough, and planned HUSH precedence, with current owner and test evidence for each fact."
+    },
+    "SRC-009:R0002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Preserve golden outputs for continue, cc, ccc, ship, improve, compound commands, recovery, and dry-run, and require the existing validator, scenarios, and tests to be green before compression."
+    },
+    "SRC-009:R0003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Continue fallback may run only after existing Work is exhausted, must resume an existing Improve cycle, and must never create an unbounded Improve carousel."
+    },
+    "SRC-009:R0004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Create saipen/REGISTRY.json as the sole machine-owned registry for closed executable facts, including phases, legal transitions, canonical commands, aliases, shortcuts, confusable normalization, next-action forms, and closed vocabularies, while excluding philosophy and narrative reasoning."
+    },
+    "SRC-009:R0005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "commands.py and validators must consume the registry or runtime structures instead of parsing English prose, and rewriting command prose must leave behavior outputs byte-identical."
+    },
+    "SRC-009:R0006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Introduce stable Rule IDs only for cross-referenced rules and enforce One Rule equals One Owner, with references replacing normative restatements and validation rejecting duplicate owners."
+    },
+    "SRC-009:R0007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Extract the command surface to saipen/COMMANDS.md as a compact input-to-action-to-special-rule-to-Rule-ID map, preserving all public command names, compound parsing, Unicode twins, STOP_ON_FAILURE, HUSH syntax, and continue-to-improve semantics."
+    }
+  },
+  "derived_at": "2026-08-30T13:55:07Z",
+  "derived_from": "SRC-009",
+  "interpretation_revision": 7,
+  "schema_version": 1,
+  "source_sha256": "7f7b8a6d5093260811df4466d068a7dfbd1aa1a6d3a965bde051686f44f85739"
+}

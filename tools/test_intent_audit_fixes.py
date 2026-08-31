@@ -449,8 +449,14 @@ class IntentAuditTests(unittest.TestCase):
         self.assertEqual(state["converge_target"], "done")
         self.assertNotIn("goal_waves", state)
         self.assertNotIn("goal_tickets", state)
-        self.assertEqual(result["execution_intent"], "converge")
-        self.assertEqual(result["converge_target"], "done")
+        # T-20260830_0842: normal cc on an empty actionable queue falls
+        # through to the improvement-discovery path (bare `saipen improve`).
+        # The result payload is the IMPROVE_AUDIT_ASSIGNMENT, not a
+        # converge/done echo.  The state on disk IS converge/done (the
+        # normal-intent convergence targets were committed before the
+        # fallthrough), and the next cc would resume that improve seat.
+        self.assertEqual(result.get("code"), "IMPROVE_AUDIT_ASSIGNMENT")
+        self.assertIn("cycle_id", result)
 
     def test_audit_core003_normal_entry_refuses_intent_race_without_writes(self):
         root = self._resume_fixture()

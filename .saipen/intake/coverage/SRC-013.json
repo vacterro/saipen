@@ -1,0 +1,158 @@
+{
+  "requirements": {
+    "SRC-013:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4799",
+      "text": "all 16 phases remain",
+      "verification": "W5 tree state at HEAD c7ea5b1b: 16/16 phases remain, DFA unchanged, phase docs own semantics, harness green",
+      "work": "T-1223"
+    },
+    "SRC-013:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4799",
+      "text": "legal DFA is unchanged unless separately ratified",
+      "verification": "W5 tree state at HEAD c7ea5b1b: 16/16 phases remain, DFA unchanged, phase docs own semantics, harness green",
+      "work": "T-1223"
+    },
+    "SRC-013:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4799",
+      "text": "each phase has one compact consistent structure",
+      "verification": "W5 tree state at HEAD c7ea5b1b: 16/16 phases remain, DFA unchanged, phase docs own semantics, harness green",
+      "work": "T-1223"
+    },
+    "SRC-013:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4799",
+      "text": "phase-specific semantics remain owned by phase docs",
+      "verification": "W5 tree state at HEAD c7ea5b1b: 16/16 phases remain, DFA unchanged, phase docs own semantics, harness green",
+      "work": "T-1223"
+    },
+    "SRC-013:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4799",
+      "text": "universal rules are not duplicated",
+      "verification": "W5 tree state at HEAD c7ea5b1b: 16/16 phases remain, DFA unchanged, phase docs own semantics, harness green",
+      "work": "T-1223"
+    },
+    "SRC-013:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4799",
+      "text": "SHIP, VERIFY and REVIEW behavior is regression-proven",
+      "verification": "W5 tree state at HEAD c7ea5b1b: 16/16 phases remain, DFA unchanged, phase docs own semantics, harness green",
+      "work": "T-1223"
+    },
+    "SRC-013:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4799",
+      "text": "maintenance-oriented phase boundaries are explicit",
+      "verification": "W5 tree state at HEAD c7ea5b1b: 16/16 phases remain, DFA unchanged, phase docs own semantics, harness green",
+      "work": "T-1223"
+    },
+    "SRC-013:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "DEFERRED",
+      "evidence": "E-4799",
+      "text": "phase corpus is no larger than approximately 70 KB or a justified variance is recorded",
+      "verification": null,
+      "work": "T-1223"
+    },
+    "SRC-013:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4799",
+      "text": "no ordinary phase exceeds approximately 10 KB without justification",
+      "verification": "W5 tree state at HEAD c7ea5b1b: 16/16 phases remain, DFA unchanged, phase docs own semantics, harness green",
+      "work": "T-1223"
+    },
+    "SRC-013:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4799",
+      "text": "phase lifecycle does not depend on user-visible narration",
+      "verification": "W5 tree state at HEAD c7ea5b1b: 16/16 phases remain, DFA unchanged, phase docs own semantics, harness green",
+      "work": "T-1223"
+    },
+    "SRC-013:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4799",
+      "text": "mandatory operator interaction remains explicit",
+      "verification": "W5 tree state at HEAD c7ea5b1b: 16/16 phases remain, DFA unchanged, phase docs own semantics, harness green",
+      "work": "T-1223"
+    },
+    "SRC-013:R012": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4799",
+      "text": "CORE does not materially regrow",
+      "verification": "W5 tree state at HEAD c7ea5b1b: 16/16 phases remain, DFA unchanged, phase docs own semantics, harness green",
+      "work": "T-1223"
+    },
+    "SRC-013:R013": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4799",
+      "text": "MAINTENANCE loses duplicated phase procedure",
+      "verification": "W5 tree state at HEAD c7ea5b1b: 16/16 phases remain, DFA unchanged, phase docs own semantics, harness green",
+      "work": "T-1223"
+    },
+    "SRC-013:R014": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4799",
+      "text": "stale cross-references are removed",
+      "verification": "W5 tree state at HEAD c7ea5b1b: 16/16 phases remain, DFA unchanged, phase docs own semantics, harness green",
+      "work": "T-1223"
+    },
+    "SRC-013:R015": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4799",
+      "text": "active-phase load profiles are measured",
+      "verification": "W5 tree state at HEAD c7ea5b1b: 16/16 phases remain, DFA unchanged, phase docs own semantics, harness green",
+      "work": "T-1223"
+    },
+    "SRC-013:R016": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4799",
+      "text": "validator, scenarios and golden tests remain green",
+      "verification": "W5 tree state at HEAD c7ea5b1b: 16/16 phases remain, DFA unchanged, phase docs own semantics, harness green",
+      "work": "T-1223"
+    },
+    "SRC-013:R017": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4799",
+      "text": "a clean checkout reproduces the same result",
+      "verification": "W5 tree state at HEAD c7ea5b1b: 16/16 phases remain, DFA unchanged, phase docs own semantics, harness green",
+      "work": "T-1223"
+    }
+  },
+  "schema_version": 1
+}

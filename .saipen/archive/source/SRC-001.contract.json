@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-001:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "superseded by SRC-003 (amended audit)"
+    }
+  },
+  "derived_at": "2026-08-29T03:43:02Z",
+  "derived_from": "SRC-001",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "99ad5f35d77aabc1b99613f85a91b91f7ad922a1658678a0a34babb094d4c6f2"
+}

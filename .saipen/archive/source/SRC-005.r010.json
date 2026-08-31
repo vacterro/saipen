@@ -1,0 +1,59 @@
+{
+  "clauses": {
+    "SRC-005:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Conformance receipt indexing must fail closed on historical same-path tamper before append or indexed lookup."
+    },
+    "SRC-005:R0002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Archive crash settlement and validation must prove strict closed metadata, body, contract, coverage parity, and zero unresolved obligations before destructive writes."
+    },
+    "SRC-005:R0003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Liveness clear must preserve a progress reset across lock contention without hanging."
+    },
+    "SRC-005:R0004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Producer publication must preserve and refuse every corrupt pre-existing READY artifact."
+    },
+    "SRC-005:R0005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Archived source status must use the strict shared coverage decoder and refuse missing or corrupt ledgers."
+    },
+    "SRC-005:R0006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Release coverage must fail closed for every indexed active receipt whose metadata is missing, malformed, or drifted."
+    },
+    "SRC-005:R0007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Timed-out canonical test families must terminate and reap their complete owned process tree."
+    },
+    "SRC-005:R0008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Timeout stdout and stderr must remain UTF-8 replacement-decoded strings and JSON serializable."
+    },
+    "SRC-005:R0009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Warm semantic receipt projection must avoid lifetime settled-record decoding while detecting historical receipt tamper."
+    },
+    "SRC-005:R0010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "retain_text false LOG history reads must bound memory by segment while preserving canonical snapshot and digest semantics."
+    }
+  },
+  "derived_at": "2026-08-28T14:37:26Z",
+  "derived_from": "SRC-005",
+  "interpretation_revision": 10,
+  "schema_version": 1,
+  "source_sha256": "478fd1afaae4b527e7f98cf06b9dfa7f51afefcd0ca763e1afdb7463ab1b077a"
+}

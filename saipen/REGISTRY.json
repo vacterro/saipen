@@ -1,0 +1,373 @@
+{
+  "schema_version": 1,
+  "kind": "saipen-machine-registry",
+  "purpose": "Sole machine authority for closed executable protocol facts. Prose explains or references these facts; it is never parsed as data (SRC-010:R0004/R0005).",
+  "semantic_baseline": {
+    "frozen_at": "2026-08-30",
+    "golden": "tests/protocol_semantic_golden.json",
+    "evidence": [
+      "tools/test_protocol_registry.py",
+      "tools/test_command_routing.py",
+      "tools/test_continue_improve_fallthrough.py",
+      "tools/validate.py --gate core"
+    ],
+    "facts": {
+      "STATE-SHAPE-01": {"owner": "saipen/CORE.md", "test": "tools/test_protocol_registry.py", "subject": "STATE fields, enums and conditional shape"},
+      "STATE-DFA-01": {"owner": "saipen/CORE.md", "test": "tools/test_protocol_registry.py", "subject": "phase enum, transition graph and ticket-bearing phases"},
+      "STATE-NEXT-01": {"owner": "saipen/CORE.md", "test": "tools/test_protocol_registry.py", "subject": "next_action forms and WAIT categories"},
+      "CHECKPOINT-01": {"owner": "saipen/CORE.md", "test": "tests/scenarios/checkpoint-self-confirmation", "subject": "LOG then BOARD then STATE checkpoint order"},
+      "RECOVERY-01": {"owner": "saipen/CORE.md", "test": "tools/test_audit_2026_08_30_all3_impl.py", "subject": "recovery and routing precedence"},
+      "PICK-01": {"owner": "saipen/CORE.md", "test": "tools/test_command_routing.py", "subject": "topmost workable ticket selection"},
+      "CMD-ROUTING-01": {"owner": "saipen/COMMANDS.md", "test": "tools/test_command_routing.py", "subject": "canonical commands, shortcuts and Unicode normalization"},
+      "CMD-COMPOUND-01": {"owner": "saipen/COMMANDS.md", "test": "tools/test_command_routing.py", "subject": "compound parsing and chain disposition"},
+      "CMD-CONTINUE-01": {"owner": "saipen/COMMANDS.md", "test": "tools/test_continue_improve_fallthrough.py", "subject": "bounded continue to improve fallthrough"},
+      "SOURCE-AUTHORITY-01": {"owner": "saipen/SOURCES.md", "test": "tools/test_source_receipts.py", "subject": "exact receipt authority and coverage"},
+      "OPS-EFFECT-01": {"owner": "saipen/OPS.md", "test": "tools/test_intent_audit_fixes.py", "subject": "effect-based authorization"},
+      "GOAL-01": {"owner": "saipen/MAINTENANCE.md", "test": "tools/test_goal_driven.py", "subject": "goal execution and safety valve"},
+      "EXEC-HUSH-01": {"owner": "saipen/EXECUTION.md", "test": "tools/test_continue_improve_fallthrough.py", "subject": "HUSH precedence, silence and mandatory output"},
+      "PHASE-DELTA-01": {"owner": "saipen/CORE.md", "test": "tools/test_protocol_registry.py", "subject": "16 lazy phase documents and delta-only phase contracts"},
+      "CONFORMANCE-CORPUS-01": {"owner": "saipen/CONFORMANCE.md", "test": "tools/test_protocol_registry.py", "subject": "machine corpus completeness"},
+      "CONTEXT-BUDGET-01": {"owner": "saipen/CORE.md", "test": "tools/protocol_budget.py", "subject": "routine protocol load budgets"}
+    }
+  },
+  "rule_owners": {
+    "STATE-SHAPE-01": "saipen/CORE.md",
+    "STATE-DFA-01": "saipen/CORE.md",
+    "STATE-NEXT-01": "saipen/CORE.md",
+    "CHECKPOINT-01": "saipen/CORE.md",
+    "RECOVERY-01": "saipen/CORE.md",
+    "PICK-01": "saipen/CORE.md",
+    "CMD-ROUTING-01": "saipen/COMMANDS.md",
+    "CMD-COMPOUND-01": "saipen/COMMANDS.md",
+    "CMD-CONTINUE-01": "saipen/COMMANDS.md",
+    "SOURCE-AUTHORITY-01": "saipen/SOURCES.md",
+    "OPS-EFFECT-01": "saipen/OPS.md",
+    "GOAL-01": "saipen/MAINTENANCE.md",
+    "EXEC-HUSH-01": "saipen/EXECUTION.md",
+    "PHASE-DELTA-01": "saipen/CORE.md",
+    "CONFORMANCE-CORPUS-01": "saipen/CONFORMANCE.md",
+    "CONTEXT-BUDGET-01": "saipen/CORE.md"
+  },
+  "shortcuts": {
+    "gg": "saipen goal",
+    "hh": "saipen hunt",
+    "ff": "saipen focus",
+    "xx": "saipen cut",
+    "vv": "saipen build",
+    "zz": "saipen undo",
+    "cc": "saipen continue",
+    "ccc": "saipen continue",
+    "ss": "saipen stop",
+    "sss": "saipen status",
+    "dd": "saipen plan",
+    "aa": "saipen markhunt",
+    "qq": "saipen prepare saiwiki",
+    "qqq": "saipen collect saiwiki",
+    "ee": "saipen prepare saitranslate",
+    "eee": "saipen collect saitranslate",
+    "pp": "saipen sub spawn saipython",
+    "tt": "saipen test",
+    "sc": "saipen crew"
+  },
+  "cyrillic_confusables": {
+    "а": "a",
+    "е": "e",
+    "о": "o",
+    "р": "p",
+    "с": "c",
+    "у": "y",
+    "х": "x"
+  },
+  "phases": {
+    "all": [
+      "INIT",
+      "PLAN",
+      "SCOUT",
+      "BUILD",
+      "VERIFY",
+      "REVIEW",
+      "SHIP",
+      "DONE",
+      "BLOCKED",
+      "VALIDATE",
+      "HUNT",
+      "MARKHUNT",
+      "ADD",
+      "CLEAN",
+      "TRANSLATE",
+      "PREPARE"
+    ],
+    "valid_transitions": {
+      "INIT": [
+        "PLAN",
+        "BLOCKED"
+      ],
+      "PLAN": [
+        "SCOUT",
+        "BUILD",
+        "DONE",
+        "BLOCKED"
+      ],
+      "SCOUT": [
+        "BUILD",
+        "BLOCKED"
+      ],
+      "BUILD": [
+        "VERIFY",
+        "BLOCKED"
+      ],
+      "VERIFY": [
+        "REVIEW",
+        "SCOUT",
+        "BUILD",
+        "BLOCKED"
+      ],
+      "REVIEW": [
+        "SHIP",
+        "BUILD",
+        "SCOUT",
+        "BLOCKED"
+      ],
+      "SHIP": [
+        "DONE",
+        "BUILD",
+        "BLOCKED"
+      ],
+      "DONE": [
+        "SCOUT",
+        "PLAN",
+        "HUNT",
+        "BLOCKED"
+      ],
+      "VALIDATE": [
+        "SCOUT",
+        "PLAN",
+        "DONE",
+        "BLOCKED"
+      ],
+      "HUNT": [
+        "ADD",
+        "PLAN",
+        "SCOUT",
+        "BLOCKED"
+      ],
+      "MARKHUNT": [
+        "DONE",
+        "BLOCKED"
+      ],
+      "ADD": [
+        "BUILD",
+        "PLAN",
+        "SCOUT",
+        "DONE",
+        "BLOCKED"
+      ],
+      "CLEAN": [
+        "DONE",
+        "BLOCKED"
+      ],
+      "TRANSLATE": [
+        "DONE",
+        "BLOCKED"
+      ],
+      "PREPARE": [
+        "DONE",
+        "BLOCKED"
+      ],
+      "BLOCKED": [
+        "PLAN",
+        "SCOUT",
+        "DONE"
+      ]
+    },
+    "any_from": [
+      "VALIDATE",
+      "MARKHUNT",
+      "CLEAN",
+      "TRANSLATE",
+      "PREPARE",
+      "PLAN",
+      "HUNT"
+    ],
+    "ticket_bearing": [
+      "SCOUT",
+      "BUILD",
+      "VERIFY",
+      "REVIEW",
+      "SHIP"
+    ]
+  },
+  "commands": {
+    "saipen": [
+      "set",
+      "init",
+      "continue",
+      "goal",
+      "plan",
+      "focus",
+      "build",
+      "cut",
+      "undo",
+      "clean",
+      "translate",
+      "markhunt",
+      "prepare",
+      "collect",
+      "ship",
+      "push",
+      "validate",
+      "test",
+      "status",
+      "next",
+      "permissions",
+      "explain-next",
+      "runtime",
+      "recover",
+      "claim",
+      "transition",
+      "checkpoint",
+      "source",
+      "stop",
+      "ticket",
+      "scope",
+      "first-publish-confirm",
+      "sub",
+      "hunt",
+      "crew",
+      "userperson",
+      "rebind-home",
+      "context",
+      "attempt",
+      "brief",
+      "improve"
+    ],
+    "improve_actions": [
+      "bare",
+      "status",
+      "submit",
+      "complete",
+      "sweep",
+      "sweep-queue",
+      "verify",
+      "cycle-complete",
+      "abort",
+      "clean"
+    ]
+  },
+  "state": {
+    "required_fields": ["phase", "task", "next_action", "blocker", "agent", "saipen_version", "mode", "updated"],
+    "known_fields": ["phase", "task", "attempt", "next_action", "blocker", "agent", "saipen_version", "schema_version", "saipen_home", "requires", "mode", "execution_intent", "converge_target", "goal_mode", "goal_waves", "goal_tickets", "last_event", "style_contract", "updated", "human_note", "first_publish_confirmation", "role_revision", "paused_from_phase", "paused_from_na", "transition_from"],
+    "string_fields": ["task", "attempt", "next_action", "blocker", "agent", "saipen_home", "style_contract", "updated", "human_note", "first_publish_confirmation", "role_revision", "paused_from_phase", "paused_from_na"],
+    "integer_fields": {"saipen_version": null, "schema_version": 1, "goal_waves": 0, "goal_tickets": 0, "last_event": 1},
+    "mode_enum": ["full", "read-only", "no-publish", "manual-verify"],
+    "intent_enum": ["normal", "goal", "converge"],
+    "converge_targets": ["done", "ship", "crew"]
+  },
+  "capabilities": {
+    "read_only_banned_phases": ["INIT", "PLAN", "SCOUT", "BUILD", "SHIP", "ADD", "CLEAN", "TRANSLATE", "PREPARE"]
+  },
+  "ticket_states": {
+    "sections": ["TODO", "DOING", "DONE", "BLOCKED"],
+    "checkboxes": {"TODO": "[ ]", "DOING": "[/]", "DONE": "[x]", "BLOCKED": "[ ]"},
+    "required_fields": ["priority", "title", "verify"]
+  },
+  "next_action_forms": {
+    "executable_prefixes": ["WAIT:", "saipen ", "PHASE ", "RUN:", "RESUME:"],
+    "prefixes": [
+      "WAIT:",
+      "RUN:",
+      "RESUME: T-"
+    ],
+    "full": [
+      "PHASE <phase> [T-###]"
+    ],
+    "grammar": "^PHASE\\s+([A-Za-z_-]+)(?:\\s+(T-\\d+))?(?:\\s+\\[[^\\]]*\\])?\\s*$",
+    "categories": [
+      "WAIT:",
+      "saipen <command>",
+      "PHASE <phase> [T-###]",
+      "RUN:",
+      "RESUME: T-### <phase>"
+    ]
+  },
+  "wait_categories": ["manual-verify", "destructive-op", "first-publish", "user brake", "blocked", "safety valve", "init"],
+  "checkpoint_order": ["LOG.md", "BOARD.md", "STATE.md"],
+  "routing_precedence": ["RECOVER", "OBEY", "UNBLOCK", "FINISH", "START", "MAINTAIN"],
+  "source_authority": ["original immutable receipt", "explicit later amendment", "derived Work Contract", "BOARD/STATE projection", "agent memory"],
+  "dispositions": {
+    "closed_set": [
+      "EXECUTED",
+      "REFUSED",
+      "BLOCKED",
+      "SKIPPED_BY_PROTOCOL",
+      "ALREADY_SATISFIED",
+      "NOT_RUN",
+      "FAILED"
+    ],
+    "failure": [
+      "REFUSED",
+      "BLOCKED",
+      "FAILED"
+    ]
+  },
+  "chain_policies": {
+    "default": "STOP_ON_FAILURE",
+    "closed_set": [
+      "STOP_ON_FAILURE",
+      "CONTINUE_WHEN_INDEPENDENT"
+    ]
+  },
+  "error_codes": [
+    "STALE_STATE",
+    "TICKET_NOT_FOUND",
+    "TICKET_NOT_WORKABLE",
+    "TICKET_ALREADY_DONE",
+    "ILLEGAL_TICKET_LIFECYCLE",
+    "NOT_TOP_WORKABLE",
+    "ACTIVE_TICKET_MISMATCH",
+    "ACTIVE_CLAIM_FOREIGN",
+    "ALREADY_CLAIMED",
+    "ILLEGAL_TRANSITION",
+    "ILLEGAL_PHASE",
+    "WRITER_BUSY",
+    "VALIDATION_FAILED",
+    "RECOVERY_REQUIRED",
+    "RECOVERY_CONFLICT",
+    "CORRUPT_JOURNAL",
+    "NEEDS_REPAIR",
+    "DESTRUCTIVE_CONFIRMATION_REQUIRED",
+    "CONFLICT",
+    "PATH_ESCAPE",
+    "INVALID_ID",
+    "ACTIVE_IMPROVE_CYCLE",
+    "INVALID_DISPOSITION",
+    "PACKAGE_INCOMPLETE",
+    "MALFORMED_PACKAGE",
+    "INCOMPLETE_TICKET",
+    "INVALID_MANIFEST",
+    "INVALID_GOAL",
+    "HOME_REQUIRED",
+    "CREW_BLOCKED",
+    "CREW_NOT_READY",
+    "INVALID_SOURCE_HOME",
+    "STALE_PLAN",
+    "RELEASE_CLOSURE_PENDING",
+    "TAG_CONFLICT",
+    "FIRST_PUBLISH_WAIT",
+    "NO_PUBLISH_MODE",
+    "SOURCE_UNRESOLVED",
+    "SOURCE_SCOPE_MISSING",
+    "RELEASE_FAILED"
+  ],
+  "continue_fallback": {
+    "invariant": "continue may fall through to improve ONLY after recovery, blocked/retryable, queued and required-follow-up routing are exhausted; it resumes an existing active Improve cycle and never creates an unbounded improve carousel",
+    "marker": ".saipen/extensions/continue_fallback.json",
+    "owner": "tools/saipen_engine/continue_fallback.py",
+    "test": "tools/test_continue_improve_fallthrough.py"
+  },
+  "hush_precedence": {
+    "order": ["user", "safety", "core", "execution_policy", "style"],
+    "owner": "saipen/EXECUTION.md",
+    "status": "active"
+  }
+}

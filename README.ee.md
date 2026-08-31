@@ -26,7 +26,7 @@ eemaldamine on kohaline — ei ole ühtegi pilveteenust, ei daemoni, ei andmebaa
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.231.8** | [Spetsifikatsioon](SPEC.md) | [Juhend](GUIDE.md) | [Tuumik](saipen/CORE.md) | [Hooldus](saipen/MAINTENANCE.md) | [Stiil](saipen/STYLE.md) | [Kasutajaliides](saipen/UI.md) | [Kohasus](saipen/CONFORMANCE.md) |MIT
+**v7.231.10** | [Spetsifikatsioon](SPEC.md) | [Juhend](GUIDE.md) | [Tuumik](saipen/CORE.md) | [Hooldus](saipen/MAINTENANCE.md) | [Stiil](saipen/STYLE.md) | [Kasutajaliides](saipen/UI.md) | [Kohasus](saipen/CONFORMANCE.md) |MIT
 
 **Kiirklahvid:** `cc` viib projekti konvergentsini (jätkab käimasolevat eesmärki, kui see on seatud), `sss` näitab olekut koodi puudutamata ja `ss` salvestab kontrollpunkti ning peatub. [Vaata täielikku 19 kiirklahvi kaarti](saipen/RFC.md#110-command-surface). Kirillitsa kaksikud töötavad ka: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
@@ -317,4 +317,4 @@ OpenAI jne.)? Platformispetsiifilised märkused asuvad`extensions/adapters/`.
 </p>
 
 <!-- translation-model: qwen3:14b contract:structured-markdown-v2 -->
-<!-- source-digest: README.md sha256:2a33e364c3c12e8b1b9b2caf41b05db3ee27f17161336579ae85ee59da34fe56 -->
+<!-- source-digest: README.md sha256:bb47f7158db4a7a4fd99298427c1e4bc6859433c36435640e129cc6dad2a63b7 -->

@@ -1,0 +1,79 @@
+{
+  "clauses": {
+    "SRC-014:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Audit Inbox discovers audit/N.md at <project-root>/audit/ before selecting ordinary queued BOARD work"
+    },
+    "SRC-014:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "cc/continue notices the audit before ordinary TODO selection"
+    },
+    "SRC-014:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "audit file is captured as durable source authority (source_kind=external_audit)"
+    },
+    "SRC-014:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "normal Work is derived and linked from the captured source"
+    },
+    "SRC-014:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "every actionable audit requirement is executed as normal BOARD Work"
+    },
+    "SRC-014:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "every closed requirement has real evidence and verification where required"
+    },
+    "SRC-014:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "audit source is CLOSED only when the existing Source Receipt closure contract proves it complete"
+    },
+    "SRC-014:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "verified deletion of original audit/N.md happens only after the closure contract proves it complete"
+    },
+    "SRC-014:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "next cc naturally proceeds to the next audit layer or ordinary project Work"
+    },
+    "SRC-014:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "no parallel audit TODO system: Audit Inbox is an external transport adapter into the existing source lifecycle"
+    },
+    "SRC-014:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "canonical audit directory is exactly <project-root>/audit/ with direct regular files matching ^[1-9][0-9]*\\.md$"
+    },
+    "SRC-014:R012": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "rule ownership for Audit Inbox lives in SOURCES.md (lifecycle), COMMANDS.md (routing), REGISTRY.json (closed facts); CORE grows no more than a compact pointer"
+    },
+    "SRC-014:R013": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "no runtime dependency on AUDAPACK: SAIPEN implements Audit Inbox natively and remains standalone"
+    },
+    "SRC-014:R014": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "audit file text never re-enters command parsing"
+    }
+  },
+  "derived_at": "2026-08-31T05:38:32Z",
+  "derived_from": "SRC-014",
+  "interpretation_revision": 14,
+  "schema_version": 1,
+  "source_sha256": "28e6b5d038cc19e3c854b3f3b0f1b35d6183ac4a959cd2f3df524365f85ce5d5"
+}

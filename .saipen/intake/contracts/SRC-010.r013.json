@@ -1,0 +1,74 @@
+{
+  "clauses": {
+    "SRC-010:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Freeze a protocol semantic baseline before shortening any normative prose, covering phases, transitions, commands, normalization, STATE, ticket and next-action forms, vocabularies, safety gates, checkpointing, authority, recovery, goal/autonomy, continue-to-improve fallthrough, and planned HUSH precedence, with current owner and test evidence for each fact."
+    },
+    "SRC-010:R0002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Preserve golden outputs for continue, cc, ccc, ship, improve, compound commands, recovery, and dry-run, and require the existing validator, scenarios, and tests to be green before compression."
+    },
+    "SRC-010:R0003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Continue fallback may run only after existing Work is exhausted, must resume an existing Improve cycle, and must never create an unbounded Improve carousel."
+    },
+    "SRC-010:R0004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Create saipen/REGISTRY.json as the sole machine-owned registry for closed executable facts, including phases, legal transitions, canonical commands, aliases, shortcuts, confusable normalization, next-action forms, and closed vocabularies, while excluding philosophy and narrative reasoning."
+    },
+    "SRC-010:R0005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "commands.py and validators must consume the registry or runtime structures instead of parsing English prose, and rewriting command prose must leave behavior outputs byte-identical."
+    },
+    "SRC-010:R0006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Introduce stable Rule IDs only for cross-referenced rules and enforce One Rule equals One Owner, with references replacing normative restatements and validation rejecting duplicate owners."
+    },
+    "SRC-010:R0007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Extract the command surface to saipen/COMMANDS.md as a compact input-to-action-to-special-rule-to-Rule-ID map, preserving all public command names, compound parsing, Unicode twins, STOP_ON_FAILURE, HUSH syntax, and continue-to-improve semantics."
+    },
+    "SRC-010:R0008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Compress CORE.md into a normative kernel containing authority, essential state and ownership models, the state machine, deterministic priority, completion truth, and high-level recovery invariants, moving narrative incident history out of normative rules without weakening MUST or MUST NOT branches."
+    },
+    "SRC-010:R0009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Compress BOOT.md into a cold-start read-and-execute order that routes detailed semantics through Rule IDs and owner documents instead of repeating command, source, reply-language, identity, and recovery contracts."
+    },
+    "SRC-010:R0010": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Keep all 16 phases and their state graph; compress each phase by the delta principle into Entry, Reads, Actions, Exit, Forbidden, Evidence, and Rule refs without restating shared protocol rules."
+    },
+    "SRC-010:R0011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Compress MAINTENANCE.md, OPS.md, and IMPROVE.md through lifecycle state, trigger, and termination tables plus Rule IDs while retaining edge cases and avoiding aggressive cuts to already-structured mechanical contracts."
+    },
+    "SRC-010:R0012": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Create saipen/EXECUTION.md as the single owner for default narration, HUSH activation, tool-first behavior, silence lock, mandatory-output exceptions, final report limits, and audit interaction, with CORE, STYLE, and COMMANDS retaining only their distinct precedence, voice, and syntax responsibilities."
+    },
+    "SRC-010:R0013": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Move every CONFORMANCE scenario row to a machine corpus such as tests/conformance_cases.jsonl with id, rule_id, setup, and expected result, retaining all scenarios while shrinking CONFORMANCE.md to a generated or corpus-checked debugging index outside production loading."
+    }
+  },
+  "derived_at": "2026-08-30T20:48:24Z",
+  "derived_from": "SRC-010",
+  "interpretation_revision": 13,
+  "schema_version": 1,
+  "source_sha256": "d9ce21767b4390a96f47e9a494fd86a9c86c33b8a26369eb2bf98e92852e2250"
+}

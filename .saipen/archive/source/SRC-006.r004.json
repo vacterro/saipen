@@ -1,0 +1,29 @@
+{
+  "clauses": {
+    "SRC-006:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001: credential containment at source-intake boundary; legacy sensitive fail-closed"
+    },
+    "SRC-006:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-002: conformance append-race membership proof; TOCTOU fixed"
+    },
+    "SRC-006:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-003: source-authority manifest bound into ReleasePlan canonical + preflight"
+    },
+    "SRC-006:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-004: strict archive close bundle proof (metadata/body/contract/coverage)"
+    }
+  },
+  "derived_at": "2026-08-29T03:41:29Z",
+  "derived_from": "SRC-006",
+  "interpretation_revision": 4,
+  "schema_version": 1,
+  "source_sha256": "5c7169f8840c6ccd89063f3c32ed5e12f8f67dfcc80800d053ea86244f91f6f5"
+}
