@@ -19,7 +19,7 @@ independent audit seats at once. Adding Improve routing fields to STATE turns
 retrospective evidence collection into project execution state — the category
 error this file exists to prevent.
 
-## 1. Command surface (routing lives in CORE.md 1.10)
+## 1. Command surface (routing lives in COMMANDS.md, CMD-ROUTING-01)
 
 This lifecycle declaration must exactly mirror CORE's routing declaration;
 the validator compares both with the CLI executor set.

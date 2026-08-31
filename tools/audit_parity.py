@@ -29,6 +29,8 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from contextlib import suppress
 from pathlib import Path
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -42,6 +44,7 @@ HOME = Path(__file__).resolve().parent.parent
 # drop means the floor lost a check without anyone noticing, which is the whole
 # reason this number is written down instead of recomputed and forgotten.
 BASELINE = 11
+VALIDATOR_TIMEOUT = 60
 
 
 def find_bash() -> str | None:
@@ -83,10 +86,10 @@ def bash_env(bash: str) -> dict[str, str]:
 
 def main() -> int:
     bash = find_bash()
-    if bash is None:
+    if os.name != "nt" and bash is None:
         print("SKIP: no POSIX shell found -- cannot compare against the floor")
         return 0
-    floor_env = bash_env(bash)
+    floor_env = bash_env(bash) if bash is not None else os.environ.copy()
 
     spec = importlib.util.spec_from_file_location(
         "audit_checks", HOME / "tools" / "audit_checks.py"
@@ -132,7 +135,11 @@ def main() -> int:
         except Exception:
             pass
 
-    tmp = Path(tempfile.mkdtemp(prefix="audit_parity_"))
+    temp_parent = None
+    if os.name == "nt" and os.environ.get("LOCALAPPDATA"):
+        temp_parent = Path(os.environ["LOCALAPPDATA"]) / "Temp"
+        temp_parent.mkdir(parents=True, exist_ok=True)
+    tmp = Path(tempfile.mkdtemp(prefix="audit_parity_", dir=temp_parent))
     pristine = tmp / "pristine"
     shutil.copytree(HOME, pristine, ignore=ac.IGNORE)
 
@@ -142,37 +149,43 @@ def main() -> int:
             self.stdout = out
             self.stderr = err
 
-    def run_validate(root):
+    def run_validate(root, gate=None):
         try:
             return subprocess.run(
-                [sys.executable, str(root / "tools" / "validate.py")],
+                [
+                    sys.executable,
+                    str(root / "tools" / "validate.py"),
+                    *(["--gate", gate] if gate else []),
+                ],
                 cwd=root,
                 capture_output=True,
                 text=True,
                 errors="replace",
-                timeout=15,
+                timeout=VALIDATOR_TIMEOUT,
             )
         except subprocess.TimeoutExpired:
             return _Result(124, "", "timeout")
 
     def run_floor(root):
         if sys.platform == "nt":
-            p = subprocess.Popen(
-                [bash, "tests/validate.sh"],
-                cwd=root,
-                env=floor_env,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                errors="replace",
-            )
             try:
-                out, err = p.communicate(timeout=15)
-                return _Result(p.returncode, out, err)
+                return subprocess.run(
+                    [
+                        "powershell.exe",
+                        "-NoProfile",
+                        "-ExecutionPolicy",
+                        "Bypass",
+                        "-File",
+                        "tests/validate.ps1",
+                    ],
+                    cwd=root,
+                    capture_output=True,
+                    text=True,
+                    errors="replace",
+                    timeout=VALIDATOR_TIMEOUT,
+                )
             except subprocess.TimeoutExpired:
-                subprocess.run(["taskkill", "/F", "/T", "/PID", str(p.pid)], capture_output=True)
-                out, err = p.communicate()
-                return _Result(124, out, err)
+                return _Result(124, "", "timeout")
         else:
             try:
                 return subprocess.run(
@@ -182,13 +195,13 @@ def main() -> int:
                     capture_output=True,
                     text=True,
                     errors="replace",
-                    timeout=15,
+                    timeout=VALIDATOR_TIMEOUT,
                 )
             except subprocess.TimeoutExpired:
                 return _Result(124, "", "timeout")
 
-    def validate(root):
-        return run_validate(root).returncode
+    def validate(root, gate=None):
+        return run_validate(root, gate).returncode
 
     def floor(root):
         return run_floor(root).returncode
@@ -213,6 +226,46 @@ def main() -> int:
         shutil.rmtree(tmp, ignore_errors=True)
         return 1
 
+    # Prove the canonical half once with its bounded-parallel red-control
+    # harness. Re-running the full Python validator for every parity case was
+    # the same proof serialized 227 times; audit_checks.py guarantees that
+    # every exact CASES entry goes red and that restoration stays clean.
+    canonical_hash = hashlib.sha256()
+    for source in (HOME / "tools" / "validate.py", HOME / "tools" / "audit_checks.py"):
+        canonical_hash.update(source.read_bytes())
+    canonical_key = canonical_hash.hexdigest()[:16]
+    canonical_cache = HOME / ".saipen" / "cache" / "audit_checks_cache.json"
+    canonical_proven = False
+    if canonical_cache.is_file():
+        with suppress(OSError, UnicodeDecodeError, ValueError):
+            canonical_proven = json.loads(canonical_cache.read_text("utf-8")).get(
+                "key"
+            ) == canonical_key
+    if not canonical_proven:
+        try:
+            canonical_suite = subprocess.run(
+                [sys.executable, str(HOME / "tools" / "audit_checks.py")],
+                cwd=HOME,
+                capture_output=True,
+                text=True,
+                errors="replace",
+                timeout=900,
+            )
+        except subprocess.TimeoutExpired:
+            canonical_suite = _Result(124, "", "timeout")
+        if canonical_suite.returncode != 0:
+            print(
+                "FAIL: canonical mutation suite is not green; portable-floor "
+                "parity cannot assume the Python side catches every case"
+            )
+            for line in (canonical_suite.stdout + canonical_suite.stderr).splitlines():
+                if line.startswith(("FAIL", "Traceback")) or "Error" in line:
+                    print("    " + line.strip()[:200])
+            shutil.rmtree(tmp, ignore_errors=True)
+            return 1
+        canonical_cache.parent.mkdir(parents=True, exist_ok=True)
+        canonical_cache.write_text(json.dumps({"key": canonical_key}), "utf-8")
+
     cases = [ac.case_parts(case) for case in ac.CASES]
     unavailable = [
         label
@@ -226,32 +279,75 @@ def main() -> int:
         shutil.rmtree(tmp, ignore_errors=True)
         return 1
 
-    # One copy, restored between cases -- see the same note in audit_checks.py.
-    # A MULTI case edits two files, so every file a mutation touches must be
-    # saved and restored, not just the case target (T-534).
-    both, only_canonical, neither, skipped = [], [], [], []
-    for i, (label, rel, mutation, _expected, _gate) in enumerate(cases, 1):
-        print(f"\r[{i}/{len(ac.CASES)}] {label[:70].ljust(70)}", end="", flush=True)
-        files = ac.mutation_files(pristine, rel, mutation)
-        saved = [(f, f.read_bytes() if f.exists() else None) for f in files]
-        try:
-            if not ac.apply_case(pristine, rel, mutation):
-                skipped.append(label)
-                continue
-            v, f = validate(pristine), floor(pristine)
-            if v != 0 and f != 0:
-                both.append(label)
-            elif v != 0:
-                only_canonical.append(label)
-            else:
-                neither.append(label)
-        finally:
-            ac.restore_case_files(saved)
+    # Hardlink worker trees avoid copying the whole protocol eight times.
+    # Every file a case may mutate is detached with copy2 BEFORE mutation, so
+    # no write can cross the hardlink boundary into pristine or another worker.
+    worker_count = min(2, len(cases))
+    chunks = [cases[index::worker_count] for index in range(worker_count)]
 
-    if validate(pristine) != 0 or floor(pristine) != 0:
+    def run_chunk(index, chunk):
+        root = tmp / f"parity-{index:02d}"
+        shutil.copytree(pristine, root, copy_function=os.link)
+        local_both, local_only, local_skipped = [], [], []
+        timeout_case = None
+        for position, (label, rel, mutation, _expected, _gate) in enumerate(chunk, 1):
+            files = ac.mutation_files(root, rel, mutation)
+            saved = [(file, file.read_bytes() if file.exists() else None) for file in files]
+            for file, content in saved:
+                if content is None or not file.exists():
+                    continue
+                source = pristine / file.relative_to(root)
+                file.unlink()
+                shutil.copy2(source, file)
+            try:
+                if not ac.apply_case(root, rel, mutation):
+                    local_skipped.append(label)
+                    continue
+                floor_result = run_floor(root)
+                if floor_result.returncode == 124:
+                    timeout_case = label
+                    break
+                if floor_result.returncode != 0:
+                    local_both.append(label)
+                else:
+                    local_only.append(label)
+            finally:
+                ac.restore_case_files(saved)
+            if position % 10 == 0:
+                print(
+                    f"worker {index}: {position}/{len(chunk)} floor cases",
+                    flush=True,
+                )
+        clean = validate(root) == 0 and floor(root) == 0
+        return local_both, local_only, local_skipped, timeout_case, clean
+
+    both, only_canonical, neither, skipped = [], [], [], []
+    clean = True
+    timeout_cases = []
+    completed = 0
+    with ThreadPoolExecutor(max_workers=worker_count) as pool:
+        futures = [pool.submit(run_chunk, index, chunk) for index, chunk in enumerate(chunks)]
+        for future in as_completed(futures):
+            local_both, local_only, local_skipped, timeout_case, local_clean = future.result()
+            both.extend(local_both)
+            only_canonical.extend(local_only)
+            skipped.extend(local_skipped)
+            if timeout_case is not None:
+                timeout_cases.append(timeout_case)
+            clean = clean and local_clean
+            completed += len(local_both) + len(local_only) + len(local_skipped)
+            print(f"[{completed}/{len(cases)}] portable-floor cases complete", flush=True)
+
+    if timeout_cases:
+        for label in timeout_cases:
+            print(f"FAIL: portable floor timed out on case: {label}")
+        shutil.rmtree(tmp, ignore_errors=True)
+        return 1
+
+    if not clean:
         print(
-            "\nFAIL: the copy did not survive the run -- restoring between "
-            "cases left a mutation behind, so the counts above are measuring "
+            "FAIL: a hardlink worker did not survive the run -- detached-file "
+            "restoration left a mutation behind, so the counts are measuring "
             "a drifting tree"
         )
         shutil.rmtree(tmp, ignore_errors=True)

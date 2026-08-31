@@ -9,6 +9,7 @@ from pathlib import Path
 
 from . import phases
 from .board import strict_iso_utc
+from .registry import load_registry, require_mapping, require_string_list
 
 
 def _decode_quoted(raw: str) -> str | None:
@@ -112,113 +113,31 @@ def parse_frontmatter(text: str):
 # commit as if it were green.
 # ---------------------------------------------------------------------------
 
-STATE_REQUIRED_FIELDS = (
-    "phase",
-    "task",
-    "next_action",
-    "blocker",
-    "agent",
-    "saipen_version",
-    "mode",
-    "updated",
-)
+_REGISTRY = load_registry()
+_STATE_REGISTRY = require_mapping(_REGISTRY, "state")
+STATE_REQUIRED_FIELDS = require_string_list(_STATE_REGISTRY, "required_fields")
 
 # Every property state.schema.json defines. `additionalProperties: false`
 # in the schema, so an engine-read key outside this set is unknown and
 # refuses -- the same FAIL the release gate raises.
-STATE_KNOWN_FIELDS = frozenset(
-    {
-        "phase",
-        "task",
-        "attempt",
-        "next_action",
-        "blocker",
-        "agent",
-        "saipen_version",
-        "schema_version",
-        "saipen_home",
-        "requires",
-        "mode",
-        "execution_intent",
-        "converge_target",
-        "goal_mode",
-        "goal_waves",
-        "goal_tickets",
-        "last_event",
-        "style_contract",
-        "updated",
-        "human_note",
-        "first_publish_confirmation",
-        "role_revision",
-        "paused_from_phase",
-        "paused_from_na",
-        "transition_from",
-    }
-)
+STATE_KNOWN_FIELDS = frozenset(require_string_list(_STATE_REGISTRY, "known_fields"))
 
-STATE_PHASE_ENUM = (
-    "INIT",
-    "PLAN",
-    "SCOUT",
-    "BUILD",
-    "VERIFY",
-    "REVIEW",
-    "SHIP",
-    "DONE",
-    "BLOCKED",
-    "VALIDATE",
-    "HUNT",
-    "MARKHUNT",
-    "ADD",
-    "CLEAN",
-    "TRANSLATE",
-    "PREPARE",
-)
+STATE_PHASE_ENUM = require_string_list(require_mapping(_REGISTRY, "phases"), "all")
 
-STATE_MODE_ENUM = ("full", "read-only", "no-publish", "manual-verify")
+STATE_MODE_ENUM = require_string_list(_STATE_REGISTRY, "mode_enum")
 
-STATE_INTENT_ENUM = ("normal", "goal", "converge")
+STATE_INTENT_ENUM = require_string_list(_STATE_REGISTRY, "intent_enum")
 
-STATE_CONVERGE_TARGETS = ("done", "ship", "crew")
+STATE_CONVERGE_TARGETS = require_string_list(_STATE_REGISTRY, "converge_targets")
 
-STATE_STRING_FIELDS = frozenset(
-    {
-        "task",
-        "attempt",
-        "next_action",
-        "blocker",
-        "agent",
-        "saipen_home",
-        "style_contract",
-        "updated",
-        "human_note",
-        "first_publish_confirmation",
-        "role_revision",
-        "paused_from_phase",
-        "paused_from_na",
-    }
-)
+STATE_STRING_FIELDS = frozenset(require_string_list(_STATE_REGISTRY, "string_fields"))
 
-STATE_INTEGER_FIELDS = {
-    "saipen_version": None,
-    "schema_version": 1,
-    "goal_waves": 0,
-    "goal_tickets": 0,
-    "last_event": 1,
-}
+STATE_INTEGER_FIELDS = dict(require_mapping(_STATE_REGISTRY, "integer_fields"))
 
 # RFC § 1.2's closed WAIT category set -- the seven tokens a `WAIT:` next_action
 # must carry so a stop instruction is mechanically distinguishable from a real
 # gate (hostile-regression, P0#1). Mirrored from tools/validate.py's WAIT_CATEGORIES.
-WAIT_CATEGORIES = (
-    "manual-verify",
-    "destructive-op",
-    "first-publish",
-    "user brake",
-    "blocked",
-    "safety valve",
-    "init",
-)
+WAIT_CATEGORIES = require_string_list(_REGISTRY, "wait_categories")
 
 # ---------------------------------------------------------------------------
 # The ONE structured WAIT parser (hostile-regression, P1#5).
@@ -611,7 +530,13 @@ def state_contract_errors(
                 # block` parks execution at DONE with transition_from set to the
                 # mid-flight phase (RFC § 1.6 narrow exception). The engine
                 # accepts the shape; the validator adds the LOG-evidence proof.
-                if not (ph == "DONE" and tf in ("SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP")):
+                if not (
+                    ph == "DONE"
+                    and (
+                        tf in ("SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP")
+                        or tf == "HUNT"
+                    )
+                ):
                     if ph not in allowed:
                         errors.append(
                             f"invalid phase transition: {tf} -> {ph} (RFC § 1.6). "

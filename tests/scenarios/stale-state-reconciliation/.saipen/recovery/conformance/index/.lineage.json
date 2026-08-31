@@ -1,0 +1,14 @@
+{
+  "content_xor": "c00d8bdd852e87ecee06d54a1df53888",
+  "inventory_xor": "5e0fc3a23b986386e873464508e0923e",
+  "lineage_hash": "43e2522711539a8514fc63a2d56800fa7bcb694cd537b97296351a95719eadea",
+  "members": [
+    [
+      "2026-08-29T23_13_05.382476Z_receipt-8ef75218ad85_core_PASS.json",
+      "c00d8bdd852e87ecee06d54a1df53888"
+    ]
+  ],
+  "receipt_count": 1,
+  "receipt_dir_mtime_ns": 1788045185386975600,
+  "version": 1
+}

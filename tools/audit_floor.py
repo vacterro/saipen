@@ -24,6 +24,7 @@ legal board and no run ever noticed.
 """
 
 import io
+import json
 import os
 import re
 import shutil
@@ -35,7 +36,7 @@ from pathlib import Path
 HOME = Path(__file__).resolve().parent.parent
 FLOOR = HOME / "tests" / "validate.sh"
 FLOOR_PS1 = HOME / "tests" / "validate.ps1"
-RFC = HOME / "saipen" / "RFC.md"
+REGISTRY = HOME / "saipen" / "REGISTRY.json"
 
 GOOD_STATE = """---
 phase: PLAN
@@ -54,30 +55,9 @@ GOOD_BOARD = "# Board\n## DOING\n\n## TODO\n- [ ] T-001 a ticket\n\n## DONE\n\n#
 GOOD_LOG = "# Log\n\n- 28.07.26 10:00 [E-001] [T-none] DEC: fixture\n"
 
 
-def constitution_text() -> str:
-    """The normative anchors live in the post-T-488 split pair (CORE.md +
-    MAINTENANCE.md); RFC.md has been a redirect stub since v7.190.0, so reading
-    it alone made every rfc_ticks anchor unresolvable while validate.py had
-    already moved on -- the same split-layout blind spot T-496 closed for
-    audit_checks.py. Fall back to the stub for homes that predate the split."""
-    core = HOME / "saipen" / "CORE.md"
-    maint = HOME / "saipen" / "MAINTENANCE.md"
-    if core.is_file() and maint.is_file():
-        return core.read_text(encoding="utf-8-sig") + "\n" + maint.read_text(encoding="utf-8-sig")
-    return RFC.read_text(encoding="utf-8-sig")
-
-
-def rfc_ticks(pattern: str) -> list[str]:
-    """Read a closed vocabulary from its normative constitution sentence."""
-    body = constitution_text()
-    match = re.search(pattern, body, re.DOTALL)
-    if not match:
-        raise RuntimeError(f"RFC contract anchor not found: {pattern}")
-    return re.findall(r"`([^`]+)`", match.group(1))
-
-
-REQUIRED_FIELDS = rfc_ticks(r"\*\*STATE\.md\*\*: MUST contain frontmatter: (.+?)\.\s")
-READ_ONLY_PHASES = rfc_ticks(r"\*\*Read-only banned phases\*\*: (.+?)\. The agent")
+_MACHINE_FACTS = json.loads(REGISTRY.read_text(encoding="utf-8-sig"))
+REQUIRED_FIELDS = _MACHINE_FACTS["state"]["required_fields"]
+READ_ONLY_PHASES = _MACHINE_FACTS["capabilities"]["read_only_banned_phases"]
 
 
 def without_state_field(field: str):

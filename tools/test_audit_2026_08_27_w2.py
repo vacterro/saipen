@@ -76,13 +76,14 @@ class JournalIntermediateOwnershipTests(ProjectCase):
         _symlink_or_skip(self, sentinel, journal.dir / "operation.tmp")
         _symlink_or_skip(self, sentinel, journal.dir / "progress.tmp")
 
-        journal.start("test", "codex", "runtime", "payload", [self._target()])
-        journal.mark("APPLYING")
+        # A pre-manifest same-op directory is now preserved as corrupt
+        # evidence.  Even obsolete deterministic temp names cannot authorize
+        # reuse or cleanup of the directory by a new invocation.
+        with self.assertRaises((OSError, ValueError)):
+            journal.start("test", "codex", "runtime", "payload", [self._target()])
 
         self.assertEqual(sentinel.read_bytes(), b"DO-NOT-TOUCH")
-        self.assertTrue(journal.manifest.is_file())
-        self.assertFalse(journal.manifest.is_symlink())
-        self.assertFalse((journal.dir / "progress.json").is_symlink())
+        self.assertFalse(journal.manifest.exists())
 
 
 class LockOwnershipTests(ProjectCase):
@@ -254,6 +255,88 @@ class ProducerDescendantOwnershipTests(ProjectCase):
         self.assertEqual(result["code"], "OWNERSHIP_REFUSED")
         self.assertEqual(sentinel.read_bytes(), b"DO-NOT-TOUCH")
         self.assertEqual(list(outside_ready.iterdir()), [sentinel])
+
+    def test_generation_authority_cannot_be_relabelled(self) -> None:
+        namespace = self._namespace()
+        epoch = producer_module.ProducerEpoch.claim(namespace)
+        generation = producer_module.StagingGeneration(namespace, "saitranslate").begin()
+        generation.add_payload("out.txt", b"payload")
+        with self.assertRaises(producer_module.ProducerError):
+            generation.set_package(self._package(epoch + 1))
+        with self.assertRaises(producer_module.ProducerError):
+            generation.set_package(
+                producer_module.build_package(
+                    producer="saiwiki",
+                    role_revision="sha256:role",
+                    base_source_head="no-git",
+                    base_source_tree_fingerprint="tree:base",
+                    base_discovery_model="no-git-tree-v1",
+                    scope="audit",
+                    read_set={},
+                    write_set={"out.txt": "sha256:absent"},
+                    epoch=epoch,
+                    status="staging",
+                )
+            )
+        generation.set_package(self._package(epoch))
+        generation.manifest_path.write_text(
+            json.dumps(
+                {"generation_id": generation.generation_id, "producer": "saitranslate",
+                 "epoch": epoch + 1}
+            ),
+            encoding="utf-8",
+        )
+        result = generation.publish()
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["code"], "STAGING_CORRUPT")
+        self.assertFalse((namespace / producer_module.READY_DIRNAME).exists())
+        self.assertTrue(generation.staging_dir.is_dir())
+
+    def test_ready_reuse_rejects_partial_existing_authority(self) -> None:
+        namespace = self._namespace()
+        epoch = producer_module.ProducerEpoch.claim(namespace)
+        package = self._package(epoch)
+        ready = namespace / producer_module.READY_DIRNAME
+        ready.mkdir(parents=True)
+        ready_file = ready / producer_module._ready_filename(package.package_identity)
+        ready_file.write_text(json.dumps(package.to_dict()), encoding="utf-8")
+        generation = producer_module.StagingGeneration(namespace, "saitranslate").begin()
+        generation.add_payload("out.txt", b"payload")
+        generation.set_package(package)
+        result = generation.publish()
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["code"], "READY_CORRUPT")
+        self.assertTrue(generation.staging_dir.is_dir())
+
+    def test_source_bound_packages_and_retirement_are_non_aliasing(self) -> None:
+        namespace = self._namespace()
+        epoch = producer_module.ProducerEpoch.claim(namespace)
+        def make(source, content):
+            package = producer_module.build_package(
+                producer="saitranslate",
+                role_revision="sha256:role",
+                base_source_head=source,
+                base_source_tree_fingerprint="tree:" + source,
+                base_discovery_model="no-git-tree-v1",
+                scope="audit",
+                read_set={},
+                write_set={"out.txt": "sha256:absent"},
+                epoch=epoch,
+                status="staging",
+            )
+            generation = producer_module.StagingGeneration(namespace, "saitranslate").begin()
+            generation.add_payload("out.txt", content)
+            generation.set_package(package)
+            self.assertTrue(generation.publish()["ok"])
+            return package
+        first = make("A", b"old")
+        first = producer_module.StagingGeneration.scan_ready(namespace)[0][0]
+        second = make("B", b"new")
+        self.assertNotEqual(first.package_identity, second.package_identity)
+        producer_module._retire_ready_package(first)
+        self.assertTrue(
+            producer_module.StagingGeneration.is_ready(namespace, second.package_identity)
+        )
 
 
 if __name__ == "__main__":

@@ -1,0 +1,297 @@
+{
+  "schema_version": 1,
+  "registry_schema": 1,
+  "command_resolution": {
+    "cc": [
+      {
+        "kind": "shortcut",
+        "command": "saipen continue"
+      }
+    ],
+    "ccc": [
+      {
+        "kind": "shortcut",
+        "command": "saipen continue"
+      }
+    ],
+    "gg": [
+      {
+        "kind": "shortcut",
+        "command": "saipen goal"
+      }
+    ],
+    "hh": [
+      {
+        "kind": "shortcut",
+        "command": "saipen hunt"
+      }
+    ],
+    "ss": [
+      {
+        "kind": "shortcut",
+        "command": "saipen stop"
+      }
+    ],
+    "sss": [
+      {
+        "kind": "shortcut",
+        "command": "saipen status"
+      }
+    ],
+    "dd": [
+      {
+        "kind": "shortcut",
+        "command": "saipen plan"
+      }
+    ],
+    "aa": [
+      {
+        "kind": "shortcut",
+        "command": "saipen markhunt"
+      }
+    ],
+    "ff": [
+      {
+        "kind": "shortcut",
+        "command": "saipen focus"
+      }
+    ],
+    "xx": [
+      {
+        "kind": "shortcut",
+        "command": "saipen cut"
+      }
+    ],
+    "vv": [
+      {
+        "kind": "shortcut",
+        "command": "saipen build"
+      }
+    ],
+    "zz": [
+      {
+        "kind": "shortcut",
+        "command": "saipen undo"
+      }
+    ],
+    "qq": [
+      {
+        "kind": "shortcut",
+        "command": "saipen prepare saiwiki"
+      }
+    ],
+    "qqq": [
+      {
+        "kind": "shortcut",
+        "command": "saipen collect saiwiki"
+      }
+    ],
+    "ee": [
+      {
+        "kind": "shortcut",
+        "command": "saipen prepare saitranslate"
+      }
+    ],
+    "eee": [
+      {
+        "kind": "shortcut",
+        "command": "saipen collect saitranslate"
+      }
+    ],
+    "pp": [
+      {
+        "kind": "shortcut",
+        "command": "saipen sub spawn saipython"
+      }
+    ],
+    "tt": [
+      {
+        "kind": "shortcut",
+        "command": "saipen test"
+      }
+    ],
+    "sc": [
+      {
+        "kind": "shortcut",
+        "command": "saipen crew"
+      }
+    ],
+    "saipen continue": [
+      {
+        "kind": "command",
+        "command": "saipen continue"
+      }
+    ],
+    "saipen goal": [
+      {
+        "kind": "command",
+        "command": "saipen goal"
+      }
+    ],
+    "saipen ship": [
+      {
+        "kind": "command",
+        "command": "saipen ship"
+      }
+    ],
+    "saipen status": [
+      {
+        "kind": "command",
+        "command": "saipen status"
+      }
+    ],
+    "cc+qq": [
+      {
+        "kind": "unknown",
+        "command": ""
+      }
+    ],
+    "saipen push + build ccc": [
+      {
+        "kind": "command",
+        "command": "saipen push"
+      },
+      {
+        "kind": "shortcut",
+        "command": "saipen continue"
+      }
+    ],
+    "сс": [
+      {
+        "kind": "shortcut",
+        "command": "saipen continue"
+      }
+    ],
+    "ссс": [
+      {
+        "kind": "shortcut",
+        "command": "saipen continue"
+      }
+    ],
+    "аа": [
+      {
+        "kind": "shortcut",
+        "command": "saipen markhunt"
+      }
+    ],
+    "ее": [
+      {
+        "kind": "shortcut",
+        "command": "saipen prepare saitranslate"
+      }
+    ],
+    "рр": [
+      {
+        "kind": "shortcut",
+        "command": "saipen sub spawn saipython"
+      }
+    ]
+  },
+  "chain_disposition": {
+    "STOP_ON_FAILURE_EXECUTED_REFUSED_EXECUTED": {
+      "input": [
+        "EXECUTED",
+        "REFUSED",
+        "EXECUTED"
+      ],
+      "policy": "STOP_ON_FAILURE",
+      "output": [
+        "EXECUTED",
+        "REFUSED",
+        "NOT_RUN"
+      ]
+    },
+    "STOP_ON_FAILURE_EXECUTED_EXECUTED_NOT_RUN": {
+      "input": [
+        "EXECUTED",
+        "EXECUTED",
+        "NOT_RUN"
+      ],
+      "policy": "STOP_ON_FAILURE",
+      "output": [
+        "EXECUTED",
+        "EXECUTED",
+        "NOT_RUN"
+      ]
+    },
+    "CONTINUE_WHEN_INDEPENDENT_EXECUTED_REFUSED_EXECUTED": {
+      "input": [
+        "EXECUTED",
+        "REFUSED",
+        "EXECUTED"
+      ],
+      "policy": "CONTINUE_WHEN_INDEPENDENT",
+      "output": [
+        "EXECUTED",
+        "REFUSED",
+        "NOT_RUN"
+      ]
+    },
+    "CONTINUE_WHEN_INDEPENDENT_EXECUTED_EXECUTED_NOT_RUN": {
+      "input": [
+        "EXECUTED",
+        "EXECUTED",
+        "NOT_RUN"
+      ],
+      "policy": "CONTINUE_WHEN_INDEPENDENT",
+      "output": [
+        "EXECUTED",
+        "EXECUTED",
+        "NOT_RUN"
+      ]
+    }
+  },
+  "phase_transitions": {
+    "BUILD->VERIFY": true,
+    "VERIFY->REVIEW": true,
+    "REVIEW->SHIP": true,
+    "SHIP->DONE": true,
+    "VERIFY->BUILD": true,
+    "REVIEW->SCOUT": true,
+    "DONE->SCOUT": true,
+    "BUILD->BLOCKED": true,
+    "BLOCKED->PLAN": true
+  },
+  "continue_fallback": {
+    "after": [
+      "recovery",
+      "active work",
+      "blocked/retryable",
+      "queued",
+      "follow-up"
+    ],
+    "active_cycle": "resume",
+    "new_cycle_per_invocation": 1,
+    "recursive_carousel": false,
+    "ambiguous_improve": "refusal_not_idle",
+    "no_worthwhile_improvement": "CONTINUE_IDLE"
+  },
+  "cyrillic_twins": {
+    "аа": "aa",
+    "ее": "ee",
+    "еее": "eee",
+    "рр": "pp",
+    "сс": "cc",
+    "ссс": "ccc",
+    "хх": "xx"
+  },
+  "no_cyrillic_to_ss": {
+    "сс": [
+      {
+        "kind": "shortcut",
+        "command": "saipen continue"
+      }
+    ],
+    "ссс": [
+      {
+        "kind": "shortcut",
+        "command": "saipen continue"
+      }
+    ]
+  },
+  "dry_run": {
+    "plan": "concrete_targets",
+    "writes": "zero_bytes",
+    "refusal_class": "same_as_apply"
+  }
+}

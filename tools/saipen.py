@@ -761,9 +761,9 @@ def _is_idle_maintain_route(routed: dict, board: dict) -> bool:
 
     The router emits `action: "saipen continue"` with `reason: "maintain"`
     exactly when no pending recovery, no active DOING ticket, and no
-    workable TODO remains. That verdict -- not a board glance -- is the
+    workable TODO remains.  That verdict -- not a board glance -- is the
     required proof that recovery/queued/follow-up routing is exhausted, so
-    the improvement fallback may run. Every other routed action (a PHASE,
+    the improvement fallback may run.  Every other routed action (a PHASE,
     a WAIT, `saipen recover`, a crew/ship continuation, a failed route)
     means real work or a real stop exists and must outrank discovery.
     """
@@ -771,14 +771,7 @@ def _is_idle_maintain_route(routed: dict, board: dict) -> bool:
         return False
     if routed.get("action") != "saipen continue":
         return False
-    if routed.get("reason") != "maintain":
-        return False
-    tickets = board.get("tickets") or {}
-    if any(t["section"] == "## DOING" for t in tickets.values()):
-        return False
-    return not any(
-        t["section"] in ("## DOING", "## TODO") for t in tickets.values()
-    )
+    return routed.get("reason") == "maintain"
 
 
 def _continue_improve_fallthrough(
@@ -874,21 +867,33 @@ def _continue_improve_fallthrough(
         elif raw:
             print(raw, end="")
         return 1
-    # T-20260830_0842: the improvement pass returned no defensible
-    # improvement.  Terminate cleanly with a genuine idle/no-op result.
-    # The fallback never fabricates work.
-    if as_json:
-        _emit(
-            {
-                "ok": True,
-                "code": "CONTINUE_IDLE",
-                "detail": "no worthwhile improvement discovered",
-            },
-            as_json,
-        )
-    else:
-        _emit({"ok": True, "code": "CONTINUE_IDLE"}, as_json)
-    return 0
+    # W3B.11: only a genuine NO_WORTHWHILE_IMPROVEMENT outcome from the
+    # improve prepare step may become CONTINUE_IDLE.  All other non-recovery
+    # failures (ambiguity, validation, manifest corruption, ImproveError,
+    # permission, corrupt state) are structured refusals that propagate
+    # as-is -- never mapped to idle.
+    _imp_code = prepared.get("code") if prepared else ""
+    if _imp_code == "NO_WORTHWHILE_IMPROVEMENT":
+        if as_json:
+            _emit(
+                {
+                    "ok": True,
+                    "code": "CONTINUE_IDLE",
+                    "detail": "no worthwhile improvement discovered",
+                },
+                as_json,
+            )
+        else:
+            _emit({"ok": True, "code": "CONTINUE_IDLE"}, as_json)
+        return 0
+    # Non-recovery structured failure: propagate the improve refusal as-is
+    # so ambiguity, validation, manifest, permission and corrupt-state
+    # failures are surfaced, never masked as idle.
+    if as_json and prepared:
+        _emit(prepared, as_json)
+    elif raw:
+        print(raw, end="")
+    return 1
 
 
 def _next_action(

@@ -684,7 +684,11 @@ def validate_project(root, current_agent: str | None = None) -> list[str]:
     # just the active segment (hostile-regression, P0#2). A void sealed log is
     # what once let a mutation PLAN against a record that did not exist, so the
     # live verification must FAIL it too.
-    from .log import history_contract_errors
+    from .log import snapshot_contract_errors
 
-    errors.extend(f"LOG: {e}" for e in history_contract_errors(root))
+    # PERF-003: reuse the HistorySnapshot captured above instead of
+    # history_contract_errors(root), which would re-read the entire ledger
+    # (sealed segments + active LOG) a second time. The contract is proved
+    # once, from the same bytes the post-write verification already saw.
+    errors.extend(f"LOG: {e}" for e in snapshot_contract_errors(_history))
     return errors

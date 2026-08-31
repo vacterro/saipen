@@ -31,7 +31,10 @@ import contextlib
 import hashlib
 import json
 import os
+import re
+import stat
 import tempfile
+
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
@@ -62,76 +65,84 @@ _CONTAINMENT_COMPONENTS = (
 
 
 # --------------------------------------------------------------------------- CORE-003 containment
-def _validate_conformance_containment(root: Path) -> None:
-    """CORE-003: prove the conformance storage chain is inside the project
-    root and contains no symlinks/junctions/reparse points.
-
-    Uses non-following lstat to detect reparse points that resolve().
-    might not collapse. A symlink pointing outside the project root is
-    rejected with zero writes. This mirrors the journal/history ownership
-    discipline.
-    """
+def _validate_conformance_write_containment(
+    root: Path, targets: tuple[Path, ...] = ()
+) -> None:
     root_resolved = root.resolve()
     for comp in _CONTAINMENT_COMPONENTS:
         comp_path = root / comp
-        if not comp_path.exists():
-            continue
-        # Non-following stat: detect symlinks and reparse points
         try:
             info = os.lstat(comp_path)
-        except OSError:
+        except FileNotFoundError:
             continue
+        except OSError as exc:
+            raise ValueError(
+                f"conformance storage component {comp!r} cannot be inspected "
+                f"({exc}); refusing with zero writes"
+            ) from exc
         if os.path.islink(comp_path):
             raise ValueError(
                 f"conformance storage component {comp!r} is a symlink; "
                 "symlinks in the conformance path are forbidden"
             )
-        # Windows reparse point (junction)
         if getattr(info, "st_file_attributes", 0) & 0x400:
             raise ValueError(
                 f"conformance storage component {comp!r} is a reparse point; "
                 "reparse points in the conformance path are forbidden"
             )
-        # Prove containment: resolved path must be under project root
         try:
             comp_resolved = comp_path.resolve()
-            if not comp_resolved.is_relative_to(root_resolved):
-                # Explicit out-of-root rejection: this MUST always propagate
-                # (fail closed). An intent handler must never synthesize a
-                # conformance receipt for an escaped path.
-                raise ValueError(
-                    f"conformance storage component {comp!r} resolves outside "
-                    f"project root ({comp_resolved} is not under {root_resolved})"
-                )
-        except ValueError:
-            # Internal containment rejection -- propagate unchanged, never swallow.
-            raise
         except OSError as exc:
-            # A resolution failure (unreadable/escaped component) cannot prove
-            # containment, so refuse deterministically with ZERO writes. The
-            # prior code referenced an unbound `exc_val` here and reported an
-            # unrelated NameError instead of the documented containment error.
             raise ValueError(
                 f"conformance storage component {comp!r} cannot be resolved "
-                f"({exc}); refusing with zero writes -- containment cannot be proven"
+                f"({exc}); refusing with zero writes"
+            ) from exc
+        if not comp_resolved.is_relative_to(root_resolved):
+            raise ValueError(
+                f"conformance storage component {comp!r} resolves outside "
+                f"project root ({comp_resolved} is not under {root_resolved})"
             )
+    for target in targets:
+        try:
+            info = os.lstat(target)
+        except FileNotFoundError:
+            continue
+        except OSError as exc:
+            raise ValueError(f"conformance write target cannot be inspected ({exc})") from exc
+        if os.path.islink(target) or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise ValueError(
+                f"conformance write target {target.name!r} is a symlink or reparse point"
+            )
+        if not stat.S_ISREG(info.st_mode):
+            raise ValueError(
+                f"conformance write target {target.name!r} is not a regular file"
+            )
+
+
+def _validate_conformance_containment(root: Path) -> None:
+    _validate_conformance_write_containment(root)
     receipt_dir = root / RECEIPT_DIRNAME
-    if receipt_dir.exists():
-        # Check each receipt file is a regular file, not a symlink
-        for p in receipt_dir.glob("*.json"):
-            try:
-                info = os.lstat(p)
-            except OSError:
-                continue
-            if os.path.islink(p):
-                raise ValueError(
-                    f"conformance receipt {p.name} is a symlink; symlinked receipts are forbidden"
-                )
-            if getattr(info, "st_file_attributes", 0) & 0x400:
-                raise ValueError(
-                    f"conformance receipt {p.name} is a reparse point; "
-                    "reparse point receipts are forbidden"
-                )
+    try:
+        candidates = sorted(receipt_dir.glob("*.json")) if receipt_dir.is_dir() else []
+    except OSError as exc:
+        raise ValueError(f"conformance receipt history cannot be listed ({exc})") from exc
+    for p in candidates:
+        try:
+            info = os.lstat(p)
+        except OSError as exc:
+            raise ValueError(f"conformance receipt {p.name} cannot be inspected ({exc})") from exc
+        if os.path.islink(p) or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise ValueError(f"conformance receipt {p.name} is a symlink or reparse point")
+        if not stat.S_ISREG(info.st_mode):
+            raise ValueError(f"conformance receipt {p.name} is not an owned regular file")
+        try:
+            rec = json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise ValueError(
+                f"conformance receipt {p.name} is not readable canonical JSON: {exc}"
+            ) from exc
+        if not isinstance(rec, dict) or rec.get("kind") != "conformance_receipt":
+            raise ValueError(f"conformance receipt {p.name} is not a conformance_receipt object")
 
 
 def _atomic_write_receipt(path: Path, body: str) -> None:
@@ -455,27 +466,247 @@ def generate_conformance_receipt(
     # BEFORE serializing for real -- otherwise the on-disk receipt would omit it.
     receipt["content_hash"] = _quick_hash(json.dumps(receipt, indent=2, sort_keys=True))
     body = json.dumps(receipt, indent=2, sort_keys=True)
-    # CORE-003: validate containment BEFORE any filesystem mutation so a
+    # CORE-003: validate WRITE containment BEFORE any filesystem mutation so a
     # symlinked .saipen/recovery/conformance never follows to an outside dir.
-    _validate_conformance_containment(root)
+    # This is the constant-size storage-chain proof; the historical-receipt
+    # validity check is separate and is invoked by readers/strict-fallback paths.
+    _validate_conformance_write_containment(root)
     out_dir = root / RECEIPT_DIRNAME
     out_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        prior_receipt_dir_mtime_ns = out_dir.stat().st_mtime_ns
+    except OSError:
+        prior_receipt_dir_mtime_ns = -1
     # W2-005/W2-006: use receipt_id + safe gate name for unique, portable filename
     safe_gate = _safe_filename_component(gate)
     safe_ts = _safe_filename_component(ts)
     fname = f"{safe_ts}_{rid}_{safe_gate}_{verdict}.json"
     _atomic_write_receipt(out_dir / fname, body)
     # PERF-003: atomically advance the per-gate latest-receipt index
-    _update_receipt_index(root, gate, rid, ts, receipt_path=f"{RECEIPT_DIRNAME}/{fname}")
+    _update_receipt_index(
+        root,
+        gate,
+        rid,
+        ts,
+        receipt_path=f"{RECEIPT_DIRNAME}/{fname}",
+        prior_receipt_dir_mtime_ns=prior_receipt_dir_mtime_ns,
+    )
     return receipt
 
 
 # PERF-003: per-gate latest-receipt index for O(1) lookup
 _INDEX_DIRNAME = ".saipen/recovery/conformance/index"
+_LINEAGE_INDEX_NAME = ".lineage.json"
+
+
+def _receipt_inventory(root: Path) -> tuple[int, int] | None:
+    """Cheap name/stat inventory used only by legacy direct index callers.
+
+    Canonical receipt generation passes the pre-append directory token and is
+    O(1).  Direct callers lack that token, so this no-content scan proves that
+    exactly the named receipt was appended before trusting the lineage cursor.
+    """
+    out_dir = root / RECEIPT_DIRNAME
+    count = 0
+    xor = 0
+    try:
+        with os.scandir(out_dir) as entries:
+            for entry in entries:
+                if not entry.name.endswith(".json"):
+                    continue
+                if entry.is_symlink() or not entry.is_file(follow_symlinks=False):
+                    return None
+                # DirEntry.stat() reports a synthetic inode on this host;
+                # use lstat so the append token matches direct callers.
+                info = os.lstat(entry.path)
+                # Metadata is only a mutation hint.  Any drift falls back to
+                # the strict content parser; it is never conformance proof.
+                token = _receipt_stat_token(entry.name, info)
+                xor ^= int.from_bytes(token[:16], "big")
+                count += 1
+    except OSError:
+        return None
+    return count, xor
+
+
+def _receipt_inventory_token(root: Path, receipt_path: str) -> int | None:
+    rel = Path(receipt_path)
+    expected_parent = Path(RECEIPT_DIRNAME)
+    if rel.parent != expected_parent or rel.name in {"", ".", ".."}:
+        return None
+    target = root / rel
+    try:
+        info = os.lstat(target)
+    except OSError:
+        return None
+    if os.path.islink(target) or not target.is_file():
+        return None
+    token = _receipt_stat_token(rel.name, info)
+    return int.from_bytes(token[:16], "big")
+
+
+def _receipt_stat_token(name: str, info: os.stat_result) -> bytes:
+    """Return a cheap mutation hint; content remains the authority."""
+    return hashlib.sha256(
+        (
+            name
+            + "\0"
+            + str(info.st_size)
+            + "\0"
+            + str(info.st_mtime_ns)
+            + "\0"
+            + str(getattr(info, "st_ctime_ns", 0))
+            + "\0"
+            + str(getattr(info, "st_ino", 0))
+        ).encode("utf-8", "surrogatepass")
+    ).digest()
+
+
+def _receipt_content_token(path: Path, name: str, witnessed: os.stat_result) -> int | None:
+    """Hash exact receipt bytes through the witnessed regular-file node."""
+    flags = os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0)
+    descriptor = -1
+    try:
+        descriptor = os.open(path, flags)
+        opened = os.fstat(descriptor)
+        if not stat.S_ISREG(opened.st_mode) or (
+            opened.st_dev,
+            opened.st_ino,
+        ) != (witnessed.st_dev, witnessed.st_ino):
+            return None
+        digest = hashlib.sha256(name.encode("utf-8", "surrogatepass") + b"\0")
+        with os.fdopen(descriptor, "rb", closefd=True) as handle:
+            descriptor = -1
+            while chunk := handle.read(1024 * 1024):
+                digest.update(chunk)
+        return int.from_bytes(digest.digest()[:16], "big")
+    except OSError:
+        return None
+    finally:
+        if descriptor >= 0:
+            os.close(descriptor)
+
+
+def _receipt_content_inventory(root: Path) -> tuple[int, int] | None:
+    """Exact-byte inventory backing the authenticated lineage cursor."""
+    out_dir = root / RECEIPT_DIRNAME
+    count = 0
+    xor = 0
+    try:
+        with os.scandir(out_dir) as entries:
+            for entry in entries:
+                if not entry.name.endswith(".json"):
+                    continue
+                if entry.is_symlink() or not entry.is_file(follow_symlinks=False):
+                    return None
+                witnessed = os.lstat(entry.path)
+                token = _receipt_content_token(Path(entry.path), entry.name, witnessed)
+                if token is None:
+                    return None
+                xor ^= token
+                count += 1
+    except OSError:
+        return None
+    return count, xor
+
+
+def _receipt_content_inventory_token(root: Path, receipt_path: str) -> int | None:
+    rel = Path(receipt_path)
+    if rel.parent != Path(RECEIPT_DIRNAME) or rel.name in {"", ".", ".."}:
+        return None
+    target = root / rel
+    try:
+        witnessed = os.lstat(target)
+    except OSError:
+        return None
+    if os.path.islink(target) or not stat.S_ISREG(witnessed.st_mode):
+        return None
+    return _receipt_content_token(target, rel.name, witnessed)
+
+
+def _receipt_member_inventory(root: Path) -> tuple[tuple[str, str], ...] | None:
+    """Return exact receipt filename/content membership, not XOR evidence."""
+    out_dir = root / RECEIPT_DIRNAME
+    members = []
+    try:
+        with os.scandir(out_dir) as entries:
+            for entry in entries:
+                if not entry.name.endswith(".json"):
+                    continue
+                if entry.is_symlink() or not entry.is_file(follow_symlinks=False):
+                    return None
+                witnessed = os.lstat(entry.path)
+                token = _receipt_content_token(Path(entry.path), entry.name, witnessed)
+                if token is None:
+                    return None
+                members.append((entry.name, f"{token:032x}"))
+    except OSError:
+        return None
+    return tuple(sorted(members))
+
+
+def _load_lineage_index(root: Path) -> dict | None:
+
+    path = root / _INDEX_DIRNAME / _LINEAGE_INDEX_NAME
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, UnicodeDecodeError):
+        return None
+    required = {
+        "version": int,
+        "receipt_count": int,
+        "inventory_xor": str,
+        "content_xor": str,
+        "receipt_dir_mtime_ns": int,
+        "lineage_hash": str,
+        "members": list,
+    }
+
+    if not isinstance(data, dict) or any(
+        not isinstance(data.get(key), kind) for key, kind in required.items()
+    ):
+        return None
+    try:
+        int(data["inventory_xor"], 16)
+        int(data["content_xor"], 16)
+    except ValueError:
+        return None
+    members = data["members"]
+    if any(
+        not isinstance(item, list)
+        or len(item) != 2
+        or not isinstance(item[0], str)
+        or not isinstance(item[1], str)
+        or not re.fullmatch(r"[0-9a-f]{32}", item[1])
+        for item in members
+    ) or len({item[0] for item in members}) != len(members):
+        return None
+    return data
+
+
+
+def _receipt_matches_append(
+    root: Path, gate: str, receipt_id: str, timestamp: str, receipt_path: str
+) -> dict | None:
+    rec = _read_indexed_receipt(root, {"receipt_path": receipt_path})
+    if (
+        rec is None
+        or rec.get("gate") != gate
+        or rec.get("receipt_id") != receipt_id
+        or rec.get("timestamp_utc") != timestamp
+    ):
+        return None
+    return rec
 
 
 def _update_receipt_index(
-    root: Path, gate: str, receipt_id: str, timestamp: str, receipt_path: str = ""
+    root: Path,
+    gate: str,
+    receipt_id: str,
+    timestamp: str,
+    receipt_path: str = "",
+    *,
+    prior_receipt_dir_mtime_ns: int | None = None,
 ) -> None:
     """PERF-003/04: atomically advance the per-gate latest-receipt index.
 
@@ -485,18 +716,70 @@ def _update_receipt_index(
     and falls back to a full scan on a missing/corrupt/relocated index -- it
     never mutates state on a read-only upgrade.
     """
-    # Never advance a green locator over a corrupt sibling already present in
-    # the append-only lineage.  Leaving the index stale forces the read path to
-    # perform its strict scan and classify INVALID.
-    try:
-        _iter_receipts(root)
-    except ReceiptDiscoveryError:
-        return
+    root = Path(root)
+    appended = _receipt_matches_append(root, gate, receipt_id, timestamp, receipt_path)
+    proof = _load_lineage_index(root)
+    incremental = False
+    next_count = 0
+    next_xor = 0
+    next_content_xor = 0
+    members: tuple[tuple[str, str], ...] | None = None
+    if proof is not None:
+        if appended is None:
+            return
+        content_token = _receipt_content_inventory_token(root, receipt_path)
+        if content_token is None:
+            return
+        previous_members = tuple(map(tuple, proof["members"]))
+        members = _receipt_member_inventory(root)
+        expected_members = tuple(
+            sorted((*previous_members, (Path(receipt_path).name, f"{content_token:032x}")))
+        )
+        incremental = members == expected_members
+        if incremental:
+            next_count = proof["receipt_count"] + 1
+            next_xor = int(proof["inventory_xor"], 16) ^ int.from_bytes(
+                _receipt_stat_token(Path(receipt_path).name, os.lstat(root / receipt_path))[:16],
+                "big",
+            )
+            next_content_xor = int(proof["content_xor"], 16) ^ content_token
+        else:
+            return
+
+
+    receipts: list[dict] | None = None
+    if not incremental:
+        # Bootstrap or unexpected out-of-band change: strict full validation.
+        # A corrupt sibling leaves both the lineage cursor and per-gate locator
+        # stale, so readers fail closed via their canonical scan.
+        try:
+            receipts = _iter_receipts(root)
+        except ReceiptDiscoveryError:
+            return
+        if not any(
+            rec.get("receipt_id") == receipt_id
+            and rec.get("gate") == gate
+            and rec.get("timestamp_utc") == timestamp
+            for rec in receipts
+        ):
+            return
+        inventory = _receipt_inventory(root)
+        content_inventory = _receipt_content_inventory(root)
+        if inventory is None or content_inventory is None or inventory[0] != content_inventory[0]:
+            return
+        next_count, next_xor = inventory
+        next_content_xor = content_inventory[1]
+        members = _receipt_member_inventory(root)
+        if members is None:
+            return
     # CORE-001: the index directory participates in the conformance
+
     # write-containment boundary. Prove .saipen/recovery/conformance/index
     # has no symlink/junction/reparse ancestry and resolves inside the project
     # BEFORE mkdir / temp-file / os.replace. Zero index writes before this proof.
-    _validate_conformance_containment(root)
+    # Constant-size write containment: the historical sibling scan is a separate
+    # evidence-validation step (PERF-003), not part of this write proof.
+    _validate_conformance_write_containment(root)
     index_dir = root / _INDEX_DIRNAME
     index_dir.mkdir(parents=True, exist_ok=True)
     index_path = index_dir / f"{gate}.json"
@@ -518,6 +801,40 @@ def _update_receipt_index(
         "receipt_dir_mtime_ns": receipt_dir_mtime_ns,
     }
     _atomic_write_receipt(index_path, json.dumps(index, indent=2, sort_keys=True))
+    if incremental and proof is not None:
+        lineage_seed = proof["lineage_hash"]
+        lineage_payload = {
+            "previous": lineage_seed,
+            "receipt_id": receipt_id,
+            "receipt_path": receipt_path,
+            "content_hash": appended.get("content_hash", ""),
+        }
+    else:
+        lineage_payload = [
+            {
+                "receipt_id": rec.get("receipt_id", ""),
+                "gate": rec.get("gate", ""),
+                "timestamp_utc": rec.get("timestamp_utc", ""),
+                "content_hash": rec.get("content_hash", ""),
+            }
+            for rec in (receipts or [])
+        ]
+    lineage = {
+        "version": 1,
+        "receipt_count": next_count,
+        "inventory_xor": f"{next_xor:032x}",
+        "content_xor": f"{next_content_xor:032x}",
+        "members": [list(item) for item in (members or ())],
+        "receipt_dir_mtime_ns": receipt_dir_mtime_ns,
+
+        "lineage_hash": hashlib.sha256(
+            json.dumps(lineage_payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest(),
+    }
+    _atomic_write_receipt(
+        index_dir / _LINEAGE_INDEX_NAME,
+        json.dumps(lineage, indent=2, sort_keys=True),
+    )
 
 
 def _lookup_receipt_index(root: Path, gate: str) -> dict | None:
@@ -640,14 +957,18 @@ def latest_receipt(project_root: Path | str, gate: str | None = None) -> dict | 
         # never mutates state on a read-only upgrade.
         index = _lookup_receipt_index(root, gate)
         if index is not None:
-            try:
-                live_dir_mtime = (root / RECEIPT_DIRNAME).stat().st_mtime_ns
-            except OSError:
-                live_dir_mtime = -2
             rec = _read_indexed_receipt(root, index)
+            proof = _load_lineage_index(root)
+            inventory = _receipt_inventory(root) if proof is not None else None
+            content_inventory = (
+                _receipt_content_inventory(root) if proof is not None else None
+            )
             if (
                 rec is not None
-                and index.get("receipt_dir_mtime_ns") == live_dir_mtime
+                and proof is not None
+                and inventory == (proof["receipt_count"], int(proof["inventory_xor"], 16))
+                and content_inventory
+                == (proof["receipt_count"], int(proof["content_xor"], 16))
                 and rec.get("gate") == gate
                 and rec.get("receipt_id") == index.get("receipt_id")
                 and rec.get("timestamp_utc") == index.get("timestamp_utc")

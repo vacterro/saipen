@@ -44,8 +44,8 @@ Write-Host "PASS: STATE.md schema valid" -ForegroundColor Green
 # the phase left a git-less project unable to close any ticket. This file is
 # frozen against NEW checks; correcting one that now contradicts the RFC is
 # a bug fix, not an extension.
-if ($stateContent -match "mode:\s+read-only" -and $stateContent -match "phase:\s+(INIT|PLAN|ADD|BUILD|SHIP|CLEAN|TRANSLATE)") {
-    Assert-Format $false "mode: read-only MUST NOT enter INIT/PLAN/ADD/BUILD/SHIP/CLEAN/TRANSLATE (RFC § 1.3)"
+if ($stateContent -match "mode:\s+read-only" -and $stateContent -match "phase:\s+(INIT|PLAN|SCOUT|BUILD|SHIP|ADD|CLEAN|TRANSLATE|PREPARE)") {
+    Assert-Format $false "mode: read-only MUST NOT enter INIT/PLAN/SCOUT/BUILD/SHIP/ADD/CLEAN/TRANSLATE/PREPARE (CORE § 1.3)"
 }
 
 # 1b. execution_intent: goal requires the persisted safety-valve counters (RFC § 2.4)

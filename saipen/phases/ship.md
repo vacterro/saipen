@@ -242,7 +242,8 @@ human so they read one small file instead of scrolling `LOG.md`:
 `done:` (what this session actually shipped), `remaining:` (the top open
 `TODO`, or `nothing`), `awaiting:` (anything parked on a `WAIT:`/decision,
 or `nothing`). Overwrite every time -- it's a snapshot, not history (history
-stays in `LOG.md`). This is the same file `saipen stop` writes (CORE.md §1.10).
+stays in `LOG.md`). This is the same file `saipen stop` writes (COMMANDS.md,
+CMD-ROUTING-01).
 
 After SHIP: the ticket is closed by the atomic `finish_ticket` operation
 (`saipen ticket done`) -- the SHIP -> DONE transition, the `## DOING` ->

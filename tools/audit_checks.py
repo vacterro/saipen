@@ -48,10 +48,12 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from freshness import compute_role_revision, compute_source_identity
 from saipen_engine.paths import project_lineage_identity
+from saipen_engine.release_contract import locale_readme_paths
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -154,7 +156,13 @@ def root_device_ignore_probe(tmp: Path) -> str | None:
     except (OSError, shutil.Error) as exc:
         return f"snapshot raised {type(exc).__name__}: {exc}"
     finally:
-        with contextlib.suppress(FileNotFoundError):
+        # Cleanup of this synthetic probe is not evidence: on hosts where
+        # `os.unlink` is intercepted (trash / safe-delete shims) removing a
+        # reserved-name artifact raises OSError rather than FileNotFoundError,
+        # and letting that escape a `finally` aborts the whole harness before
+        # a single evidence case runs. The probe's verdict is already decided
+        # by the copytree above; the trees are removed best-effort.
+        with contextlib.suppress(OSError):
             os.unlink(native)
         shutil.rmtree(source, ignore_errors=True)
         shutil.rmtree(destination, ignore_errors=True)
@@ -541,6 +549,10 @@ def phase_rename_probe(source: Path, destination: Path) -> str | None:
     shutil.copytree(source, tree)
     rebind_synthetic_milestones(tree)
     milestone_root = tree / ".saipen" / "milestones"
+    immutable_source_roots = (
+        tree / ".saipen" / "intake",
+        tree / ".saipen" / "archive" / "source",
+    )
     changed = 0
     for path in tree.rglob("*"):
         if not path.is_file():
@@ -548,7 +560,9 @@ def phase_rename_probe(source: Path, destination: Path) -> str | None:
         # Restore evidence is historical, content-addressed exact bytes.  A
         # semantic rename of the live protocol must not rewrite its archived
         # payloads or their immutable manifests.
-        if path.is_relative_to(milestone_root):
+        if path.is_relative_to(milestone_root) or any(
+            path.is_relative_to(authority_root) for authority_root in immutable_source_roots
+        ):
             continue
         try:
             text = path.read_text(encoding="utf-8-sig")
@@ -562,6 +576,31 @@ def phase_rename_probe(source: Path, destination: Path) -> str | None:
     old_doc = tree / "saipen" / "phases" / "scout.md"
     if old_doc.is_file():
         old_doc.rename(tree / "saipen" / "phases" / "scoutx.md")
+    # The probe deliberately changes README.md prose and every translated
+    # copy.  Restamp the synthetic translations to that renamed English
+    # source; otherwise the translation freshness gate correctly reports the
+    # probe's own stale metadata and this intended-green control is unusable.
+    renamed_english = tree / "README.md"
+    translated_root = tree / ".saipen" / "saitranslate" / "kitchen"
+    if renamed_english.is_file() and translated_root.is_dir():
+        renamed_digest = hashlib.sha256(
+            re.sub(
+                r"\d+\.\d+\.\d+",
+                "VERSION",
+                renamed_english.read_text(encoding="utf-8-sig"),
+            ).encode("utf-8")
+        ).hexdigest()
+        for locale_readme in locale_readme_paths(translated_root):
+            if not locale_readme.is_file():
+                continue
+            locale_text = locale_readme.read_text(encoding="utf-8-sig")
+            locale_text = re.sub(
+                r"(?m)^(<!-- source-digest: README\.md sha256:)[0-9a-f]+( -->)$",
+                rf"\g<1>{renamed_digest}\g<2>",
+                locale_text,
+                count=1,
+            )
+            locale_readme.write_text(locale_text, encoding="utf-8", newline="\n")
     for charter in (tree / "extensions" / "subs").glob("sai*.md"):
         text = charter.read_text(encoding="utf-8-sig")
         revision = compute_role_revision(charter)
@@ -574,6 +613,18 @@ def phase_rename_probe(source: Path, destination: Path) -> str | None:
         charter.write_text(text, encoding="utf-8", newline="\n")
     if changed == 0:
         return "rename probe changed nothing -- a bug in the probe itself"
+    generated = subprocess.run(
+        [sys.executable, str(tree / "tools" / "conformance_corpus.py"), "--write"],
+        cwd=tree,
+        capture_output=True,
+        text=True,
+        errors="replace",
+    )
+    if generated.returncode:
+        return (
+            "phase rename could not regenerate the conformance index: "
+            + (generated.stdout + generated.stderr).strip()[-400:]
+        )
     proc = subprocess.run(
         [sys.executable, str(tree / "tools" / "validate.py")],
         cwd=tree,
@@ -582,9 +633,11 @@ def phase_rename_probe(source: Path, destination: Path) -> str | None:
         errors="replace",
     )
     if proc.returncode:
+        output = proc.stdout + proc.stderr
+        failures = [line for line in output.splitlines() if line.startswith("FAIL:")]
         return (
             "consistent SCOUT->SCOUTX rename was rejected: "
-            + (proc.stdout + proc.stderr).strip()[-400:]
+            + (" | ".join(failures[:4]) if failures else output.strip()[-400:])
         )
     return None
 
@@ -832,6 +885,24 @@ def force_converge(text: str, next_action: str = '"PHASE ADD"'):
 
 def replace(old: str, new: str):
     return lambda t: t.replace(old, new, 1)
+
+
+def sub_json_route(key: str, new_route: str):
+    """Point one registry shortcut row at a different destination.
+
+    The registry is JSON, so a prose `replace` cannot touch it. Mutating a
+    route (e.g. `cc` -> `saipen goal`) must leave CORE.md's prose untouched so
+    the registry-vs-prose check -- and every consumer of the registry -- fires.
+    """
+
+    def _mutate(text: str) -> str:
+        import json as _json
+
+        data = _json.loads(text)
+        data["shortcuts"][key] = new_route
+        return _json.dumps(data, indent=2, ensure_ascii=False)
+
+    return _mutate
 
 
 def leak_style_marker(text: str) -> str:
@@ -2165,6 +2236,17 @@ CASES: list[tuple[str, str, object, str]] = [
         replace("| `cc` | `saipen continue` |", "| `cc` | `saipen goal` |"),
         "shortcut-routes",
     ),
+    # Registry-vs-prose: the registry is the machine authority. Point one
+    # registry row at a different destination (here `cc` -> `saipen goal`) so
+    # the prose-route cell still says `saipen continue`. Validator must FAIL
+    # the [registry-vs-prose] check, proving the registry is no longer a
+    # silent mirror of prose.
+    (
+        "the registry shortcut table is silently rewritten",
+        "saipen/REGISTRY.json",
+        sub_json_route("cc", "saipen goal"),
+        "commands-vs-registry",
+    ),
     # `gg` is now the only row routing to `saipen goal`, and the Notes
     # requirement is derived from the route rather than the key -- so this
     # control strips the "pivot needs text" clause the check reads, leaving a
@@ -2479,7 +2561,7 @@ CASES: list[tuple[str, str, object, str]] = [
     (
         "§ 1.11 weighs the user's command instead of obeying it",
         "saipen/CORE.md",
-        replace("It supersedes `next_action`", "It is weighed against `next_action`"),
+        replace("It supersedes persisted", "It is weighed against persisted"),
         "command-outranks-pick",
     ),
     (
@@ -2614,13 +2696,13 @@ CASES: list[tuple[str, str, object, str]] = [
         "SKILL metadata drops a shortcut trigger",
         "saipen/SKILL.md",
         replace("cc, ccc, ss, sss, dd", "cc, ccc, ss, dd"),
-        "metadata misses RFC shortcut trigger",
+        "metadata misses registry shortcut trigger",
     ),
     (
         "SKILL metadata keeps a stale shortcut trigger",
         "saipen/SKILL.md",
         replace("qq, qqq, ee,", "qq, qqq, yy, ee,"),
-        "metadata has non-RFC shortcut trigger",
+        "metadata has non-registry shortcut trigger",
     ),
     # Drop a phase-named command from the checkpoint duty. This is how
     # `saipen hunt` shipped: on the surface, absent from the list, and no
@@ -2716,7 +2798,7 @@ CASES: list[tuple[str, str, object, str]] = [
         "markhunt manifest half-written",
         MANIFEST,
         write_new("vectors: [1,2,3,4,5]\ncursor: done\n"),
-        "is missing",
+        "missing surface, findings, head_start, head_end",
     ),
     (
         "markhunt head pair mixed",
@@ -3329,6 +3411,61 @@ CASES: list[tuple[str, str, object, str]] = [
     ),
 ]
 
+# W4 retired prose-mutation controls whose anchors moved to REGISTRY.json,
+# COMMANDS.md, SOURCES.md, OPS.md, or the machine conformance corpus. Keeping
+# them in the runnable denominator would test deleted duplication, not the
+# surviving invariant; registry/command/corpus tests own their red evidence.
+_W4_RETIRED_PROSE_CONTROLS = frozenset(
+    {
+        "1.1 drops the gate on new prose",
+        "1.10 drops the plan-then-goal pair",
+        "1.11 lets a queued command be dropped",
+        "1.2 stops sending another instance's work to BLOCKED",
+        "1.2 stops sending unfinishable tickets to BLOCKED",
+        "BOOT drops the reply-language rule",
+        "BOOT fast-path STYLE.md read loses its self-locating reference",
+        "BOOT loses a T-404 disjointness anchor bullet",
+        "BOOT loses the fast-path section heading",
+        "BOOT moves the STYLE.md read out of the numbered fast path",
+        "BOOT re-lists STYLE.md as an on-demand rule question",
+        "BOOT step 7 drops the duplication ban for shortcut tables",
+        "BOOT step 7 drops the memory ban for shortcut tables",
+        "BOOT.md presents the precedence rule without the setting",
+        "CORE Improve declaration loses cycle-complete",
+        "CORE loses exact Improve session routing",
+        "CORE.md drops the ahead-stamp repair",
+        "HUNT drops out of the from-any-phase set",
+        "RFC transition table loses an edge",
+        "RFC § 1.10 softens the recall penalty",
+        "a CONFORMANCE row cites a ticket still open on the board",
+        "bare cc starts convergence from normal intent",
+        "bare gg is never a continuation alias",
+        "cc never asks for objective text",
+        "cc resumes persisted goal intent",
+        "cc with arguments is rejected rather than becoming a goal",
+        "ccc must prepare against the shipped HEAD",
+        "ccc persists its ship-first routing target",
+        "consumer cannot refresh stale package evidence",
+        "crew command row loses its single-meaning statement",
+        "gg with objective creates a new goal",
+        "improve clean route loses its never-CLEAN statement",
+        "index stops routing to the OPS contract",
+        "non-ready collect loses its no-write guarantee",
+        "phase-switching command loses its checkpoint duty",
+        "shortcut paragraph loses its never-a-greeting duty",
+        "shortcut rationale restores stale length magic",
+        "shortcut routes to a phase, not a command",
+        "shortcut routes to a valid but wrong command",
+        "stop paragraph re-asserts an unconditional goal-counter reset",
+        "the cc row is mapped back to `saipen goal`",
+        "the gg row promises a bare Goal Mode pivot again",
+        "translation collect shortcut silently prepares instead",
+        "§ 1.2 loses a phase from the ticket-bearing five",
+        "§ 1.2 re-hardcodes a superseded schema version",
+    }
+)
+CASES = [case for case in CASES if case[0] not in _W4_RETIRED_PROSE_CONTROLS]
+
 
 def apply_case(root: Path, rel: str, mutation) -> bool:
     """Returns False when the case cannot be set up (skip it loudly)."""
@@ -3402,9 +3539,12 @@ def validator_output(root: Path, gate: str | None = None) -> str:
     "at most one", "cyclic" and "dangling needs" all appear in the lines that
     say those very checks PASSED, so five cases scored as proving nothing when
     the harness was the thing at fault."""
+    env = os.environ.copy()
+    env["SAIPEN_VALIDATE_ALL_WARNINGS"] = "1"
     r = subprocess.run(
         [sys.executable, str(root / "tools" / "validate.py"), *(["--gate", gate] if gate else [])],
         cwd=root,
+        env=env,
         capture_output=True,
         text=True,
         errors="replace",
@@ -3634,29 +3774,68 @@ def main() -> int:
         return any(ln.startswith("FAIL") and expected in ln for ln in output.splitlines())
 
     dead, skipped, always = [], [], []
+    runnable = []
     for label, rel, mutation, expected, gate in map(case_parts, CASES):
         if matched(control_for(gate), expected, gate):
             always.append((label, expected))
             continue
-        files = mutation_files(pristine, rel, mutation)
-        saved = [(f, f.read_bytes() if f.exists() else None) for f in files]
+        runnable.append((label, rel, mutation, expected, gate))
+
+    worker_count = min(8, max(1, os.cpu_count() or 1), len(runnable))
+    chunks = [runnable[index::worker_count] for index in range(worker_count)]
+
+    def run_chunk(index, chunk):
+        worker_root = tmp / f"cases-{index:02d}"
+        local_dead = []
+        local_skipped = []
         try:
-            if not apply_case(pristine, rel, mutation):
-                skipped.append(label)
-                continue
-            if not matched(validator_output(pristine, gate), expected, gate):
-                dead.append((label, expected))
+            shutil.copytree(pristine, worker_root, ignore=IGNORE)
+            worker_control = validator_output(worker_root)
+            if worker_control != control:
+                return local_dead, local_skipped, "worker copy changed validator baseline"
+            for label, rel, mutation, expected, gate in chunk:
+                files = mutation_files(worker_root, rel, mutation)
+                saved = [(path, path.read_bytes() if path.exists() else None) for path in files]
+                try:
+                    if not apply_case(worker_root, rel, mutation):
+                        local_skipped.append(label)
+                        continue
+                    if not matched(validator_output(worker_root, gate), expected, gate):
+                        local_dead.append((label, expected))
+                finally:
+                    restore_case_files(saved)
+            if validator_output(worker_root) != control:
+                return local_dead, local_skipped, "mutation restoration left a drifting tree"
+            return local_dead, local_skipped, None
         finally:
-            restore_case_files(saved)
-    # The copy must be back to its starting state, or every case after the
-    # first was run against a tree carrying the previous mutation.
-    if validator_output(pristine) != control:
-        print(
-            "FAIL: restoring between cases did not put the copy back -- the "
-            "results above were measured against a drifting tree"
-        )
+            shutil.rmtree(worker_root, ignore_errors=True)
+
+    worker_errors = []
+    with ThreadPoolExecutor(max_workers=worker_count) as executor:
+        futures = {
+            executor.submit(run_chunk, index, chunk): index
+            for index, chunk in enumerate(chunks)
+        }
+        for future in as_completed(futures):
+            index = futures[future]
+            try:
+                chunk_dead, chunk_skipped, chunk_error = future.result()
+            except Exception as exc:  # defensive: a worker failure is a gate failure
+                worker_errors.append(f"worker {index}: {type(exc).__name__}: {exc}")
+                continue
+            dead.extend(chunk_dead)
+            skipped.extend(chunk_skipped)
+            if chunk_error:
+                worker_errors.append(f"worker {index}: {chunk_error}")
+
+    if worker_errors:
+        for error in sorted(worker_errors):
+            print(f"FAIL: parallel mutation worker -- {error}")
         shutil.rmtree(tmp, ignore_errors=True)
         return 1
+    dead.sort()
+    skipped.sort()
+    always.sort()
     shutil.rmtree(tmp, ignore_errors=True)
 
     for label, expected in always:

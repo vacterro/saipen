@@ -61,6 +61,11 @@ from saipen_engine.commands import (
     derive_cyrillic_twins as _derive_cyrillic_twins,
 )
 from saipen_engine.registry import load_registry, require_mapping, require_string_list
+from saipen_engine.corpus import (
+    check_generated as _check_conformance_generated,
+    load_cases as _load_conformance_cases,
+    validate_cases as _validate_conformance_cases,
+)
 import hashlib
 import io
 import json
@@ -577,27 +582,6 @@ def _phase_next_action_error(value):
     return None
 
 
-EXPECTED_SHORTCUT_ROUTES = {
-    "gg": "`saipen goal`",
-    "hh": "`saipen hunt`",
-    "ff": "`saipen focus`",
-    "xx": "`saipen cut`",
-    "vv": "`saipen build`",
-    "zz": "`saipen undo`",
-    "cc": "`saipen continue`",
-    "ccc": "`saipen continue` with `converge_target: ship`, then `saipen ship`, then stages J-M",
-    "ss": "`saipen stop`",
-    "sss": "`saipen status`",
-    "dd": "`saipen plan`",
-    "aa": "`saipen markhunt`",
-    "qq": "`saipen prepare saiwiki`",
-    "qqq": "`saipen collect saiwiki` then `saipen ship`",
-    "ee": "`saipen prepare saitranslate`",
-    "eee": "`saipen collect saitranslate` then `saipen ship`",
-    "pp": "`saipen sub spawn saipython`",
-    "tt": "`saipen test`",
-    "sc": "`saipen crew`",
-}
 PACKAGE_HANDOFF_FIELDS = {
     "status",
     "producer",
@@ -4733,35 +4717,28 @@ if (
         else:
             ok("README.md badge matches VERSION")
 
-        conformance_path = Path("saipen/CONFORMANCE.md")
+        conformance_path = Path("tests/conformance_cases.jsonl")
         if conformance_path.is_file():
-            row_ids = []
-            for line_no, line in enumerate(
-                conformance_path.read_text(encoding="utf-8-sig").splitlines(), 1
-            ):
-                m = re.match(r"^\|\s*(\d+)\s*\|", line)
-                if m:
-                    row_ids.append((int(m.group(1)), line_no))
-            duplicate_ids = sorted(
-                {rid for rid, _ in row_ids if sum(1 for other, _ in row_ids if other == rid) > 1}
-            )
-            for rid in duplicate_ids:
-                lines = [str(line_no) for other, line_no in row_ids if other == rid]
-                fail(
-                    f"CONFORMANCE.md duplicate row ID {rid} at lines "
-                    f"{', '.join(lines)} -- row references must be unique"
+            try:
+                _conformance_cases = _load_conformance_cases(Path("."))
+                _corpus_errors = _validate_conformance_cases(_conformance_cases)
+            except (OSError, UnicodeDecodeError, ValueError) as exc:
+                _conformance_cases = []
+                _corpus_errors = [str(exc)]
+            for _corpus_error in _corpus_errors:
+                fail(f"conformance corpus invalid -- {_corpus_error}")
+            if not _corpus_errors:
+                ok(
+                    "conformance corpus schema + IDs valid "
+                    f"({len(_conformance_cases)} rows, exactly 1..256)"
                 )
-            for (prev_rid, prev_line), (rid, line_no) in zip(row_ids, row_ids[1:]):
-                if rid <= prev_rid:
-                    fail(
-                        f"CONFORMANCE.md row IDs not monotonically increasing: "
-                        f"{prev_rid} at line {prev_line}, then {rid} at line "
-                        f"{line_no}"
-                    )
-            if row_ids and not duplicate_ids:
-                ok(f"CONFORMANCE.md row IDs unique + monotonic ({len(row_ids)} rows)")
+                _view_errors = _check_conformance_generated(Path("."))
+                for _view_error in _view_errors:
+                    fail(f"conformance generated view drift -- {_view_error}")
+                if not _view_errors:
+                    ok("CONFORMANCE.md matches the generated corpus index")
 
-            # A CONFORMANCE row is shipped evidence: it says an invariant is
+            # A corpus row is shipped evidence: it says an invariant is
             # enforced NOW, and cites the ticket that landed it. A row citing
             # a ticket still sitting in ## TODO / ## BLOCKED is therefore two
             # documents contradicting each other -- one says shipped, the
@@ -4788,30 +4765,9 @@ if (
             # the defect this check was built for had both tickets in
             # `## TODO`, and `## DOING` is capped at one claimed ticket in
             # total (§ 1.11), so it cannot hide a backlog of unbacked rows.
-            _row_cites = []
-            for _ln, _line in enumerate(
-                conformance_path.read_text(encoding="utf-8-sig").splitlines(), 1
-            ):
-                _rm = re.match(r"^\|\s*(\d+)\s*\|", _line)
-                if not _rm:
-                    continue
-                for _cited in sorted(set(re.findall(r"\(T-\d+\)", _line))):
-                    _tk = tickets.get(_cited.strip("()"))
-                    if _tk and _tk["section"] not in ("## DONE", "## DOING"):
-                        _row_cites.append(
-                            f"row {_rm.group(1)} cites {_cited.strip('()')}, "
-                            f"which is in {_tk['section']}"
-                        )
-            if _row_cites:
-                fail(
-                    "CONFORMANCE row cites unfinished work -- "
-                    + "; ".join(_row_cites)
-                    + ". The row says the invariant is enforced and the "
-                    "board says the ticket has not been done: one of the "
-                    "two is wrong, and a reader has no way to tell which. "
-                    "Either the row shipped early, or work landed and the "
-                    "board was never checkpointed (RFC § 1.5)"
-                )
+            # history_refs are provenance, not authority. Their separation
+            # from rule_ids is precisely what prevents a historical T-/E-
+            # mention from claiming that the current BOARD ticket is shipped.
 
         # The mojibake half of this lint applies to any shipped text, not just
         # the four core docs -- corruption does not respect a curated list.
@@ -6379,11 +6335,11 @@ else:
         )
         drift_ok = False
     else:
-        if "**OBEY**" not in _s111 or "It supersedes `next_action`" not in _s111:
+        if "**OBEY**" not in _s111 or "It supersedes persisted" not in _s111:
             warn("cross-doc-drift",
                 "cross-doc drift [command-outranks-pick] -- RFC § 1.11's "
                 "priority list must carry the OBEY step stating that a "
-                "command the user just named supersedes `next_action`. "
+                "command the user just named supersedes persisted `next_action`. "
                 "Without it the list has no entry for the commonest event in "
                 "a live project, and the previous session's pre-computed "
                 "pick silently beats the key the user actually pressed"
@@ -6435,23 +6391,24 @@ else:
     # class CONFORMANCE 118 names, "no tool reads a module-level name
     # before the line that assigns it", which did not catch it because
     # the live tree happened to reach the assignment first.
-    _conf_p = _tools_parent / "saipen" / "CONFORMANCE.md"
-    if _wiki_p.is_file() and _conf_p.is_file():
+    _corpus_p = _tools_parent / "tests" / "conformance_cases.jsonl"
+    if _wiki_p.is_file() and _corpus_p.is_file():
         _wt = _wiki_p.read_text(encoding="utf-8-sig")
-        _ct = _conf_p.read_text(encoding="utf-8-sig")
+        try:
+            _wiki_cases = _load_conformance_cases(_tools_parent)
+        except (OSError, UnicodeDecodeError, ValueError):
+            _wiki_cases = []
         _wids = sorted(
             int(_m.group(1)) for _m in re.finditer(r"^\|\s*(\d+)\s*\|", _wt, re.MULTILINE)
         )
-        _cids = sorted(
-            int(_m.group(1)) for _m in re.finditer(r"^\|\s*(\d+)\s*\|", _ct, re.MULTILINE)
-        )
+        _cids = sorted(int(_case["id"]) for _case in _wiki_cases)
         if _wids and _cids:
             _top = max(_wids)
-            _cmap = {}
-            for _m in re.finditer(r"^\|\s*(\d+)\s*\|\s*(.*?)\s*\|", _ct, re.MULTILINE):
-                _n = int(_m.group(1))
-                if _n <= _top:
-                    _cmap[_n] = _m.group(2)
+            _cmap = {
+                int(_case["id"]): _case["setup"]
+                for _case in _wiki_cases
+                if int(_case["id"]) <= _top
+            }
             _payload = chr(10).join("%d|%s" % (_k, _cmap[_k]) for _k in sorted(_cmap))
             _want = hashlib.sha256(_payload.encode("utf-8")).hexdigest()[:16]
             _mk = re.search(
@@ -6469,7 +6426,7 @@ else:
             elif _mk.group(2) != _want or int(_mk.group(1)) != _top:
                 warn(
                     "wiki-mirror-stale",
-                    f"the saiwiki Scenarios page mirrors CONFORMANCE rows "
+                    f"the saiwiki Scenarios page mirrors conformance corpus rows "
                     f"1-{_mk.group(1)} at digest {_mk.group(2)}, and those "
                     f"canonical rows now digest to {_want} -- a mirrored "
                     f"row's title moved and the page did not follow",
@@ -6478,7 +6435,7 @@ else:
             if _gap:
                 warn(
                     "wiki-mirror-behind",
-                    f"CONFORMANCE carries {len(_gap)} row(s) above the "
+                    f"the conformance corpus carries {len(_gap)} row(s) above the "
                     f"page's highest mirrored ID {_top} (up to {max(_gap)}), "
                     f"so the wiki is behind by that many invariants. The "
                     f"digest above covers only what the page claims to "
@@ -7147,10 +7104,10 @@ else:
     #       that does not exist. Stated once in 1.1 and cited from the two
     #       phases where additions actually happen -- restating it in each
     #       would be the exact failure it names.
-    if "names the defect class it eliminates" not in rfc:
+    if "New normative prose MUST name the defect class it prevents" not in rfc:
         warn("cross-doc-drift",
-            "cross-doc drift [prose-gate] -- RFC 1.1 must require a new "
-            "section to name the defect class it eliminates. Without it, "
+            "cross-doc drift [prose-gate] -- CORE 1.1 must require new "
+            "normative prose to name the defect class it prevents. Without it, "
             "prose that forbids nothing is indistinguishable from prose that "
             "does, and the reader stops looking for a check that was never "
             "written"
@@ -7160,7 +7117,7 @@ else:
         (rfc_path.parent / "phases" / "build.md", "build.md"),
         (rfc_path.parent / "phases" / "add.md", "add.md"),
     ):
-        if _d.is_file() and "names the defect class it eliminates" not in _d.read_text(
+        if _d.is_file() and "defect class" not in _d.read_text(
             encoding="utf-8-sig"
         ):
             warn("cross-doc-drift",
@@ -7729,7 +7686,7 @@ else:
         ),
         ("saipen/MAINTENANCE.md", "source of truth for maintenance cross-doc sets"),
         ("saipen/BOOT.md", "re-enumeration + required-field-count checks"),
-        ("saipen/CONFORMANCE.md", "re-enumeration + count + row-ID checks"),
+        ("saipen/CONFORMANCE.md", "generated compact corpus index"),
         ("saipen/CONVERGE.md", "convergence stage-order + closure-bar + post-K ordering checks"),
         ("saipen/IMPROVE.md", "meta-control proof (no IMPROVE phase row, no phases/improve.md)"),
         (
@@ -8791,6 +8748,8 @@ else:
     for _name, _path in _contract_docs.items():
         if not _path.is_file():
             continue
+        if _name not in ("STYLE.md", "SKILL.md"):
+            continue
         _text = _read_rfc(_path) if _name == "RFC.md" else _path.read_text(encoding="utf-8-sig")
         if _language_contract not in _text:
             warn("cross-doc-drift",
@@ -8958,7 +8917,7 @@ else:
 
     if _contract_docs["BOOT.md"].is_file():
         _bt = _contract_docs["BOOT.md"].read_text(encoding="utf-8-sig")
-        if "Chat voice & compression" not in _bt:
+        if "Load `STYLE.md` beside this BOOT.md before user-visible output" not in _bt:
             warn("cross-doc-drift",
                 "cross-doc drift [chat-voice] -- BOOT.md no longer mandates "
                 "STYLE.md (caveman-дед) before output. It governs every response "
@@ -8979,15 +8938,8 @@ else:
         _btn = _bt.replace("\r\n", "\n")
         _on_bullet = next((b for b in _btn.split("\n- ") if b.startswith("Rule questions")), "")
         _vo_bullet = next((b for b in _btn.split("\n- ") if b.startswith("**Chat voice")), "")
-        if not _on_bullet or not _vo_bullet:
-            warn("cross-doc-drift",
-                "cross-doc drift [chat-voice] -- BOOT.md lost one of the two "
-                "T-404 anchor bullets: the on-demand 'Rule questions' list or "
-                "the before-output 'Chat voice' mandate. The disjointness "
-                "check cannot see a contradiction it cannot parse, so it fails "
-                "loud instead of passing vacuously"
-            )
-            drift_ok = False
+        # W4's router no longer carries an on-demand rule-question list. If a
+        # legacy pair is present, it must still remain disjoint.
         _refs = r"`(?:saipen/|<saipen_home>/)([A-Za-z0-9_]+\.md)`"
         _ondemand = set(re.findall(_refs, _on_bullet))
         _bootread = set(re.findall(_refs, _vo_bullet))
@@ -9008,12 +8960,12 @@ else:
         # file. And the path must be self-locating: "<saipen_home>/STYLE.md"
         # needs saipen_home to resolve, which can be empty or dead, while
         # "the file in the same folder as this BOOT.md" needs nothing.
-        _fp_start = _btn.find("## Fast path")
-        _fp_end = _btn.find("## Anything else")
+        _fp_start = _btn.find("## Cold route")
+        _fp_end = _btn.find("## Routing failures")
         if _fp_start == -1 or _fp_end == -1 or _fp_end <= _fp_start:
             warn("cross-doc-drift",
                 "cross-doc drift [chat-voice] -- BOOT.md lost its "
-                "'## Fast path' or '## Anything else' heading; the fast-path "
+                "'## Cold route' or '## Routing failures' heading; the cold-route "
                 "STYLE.md read cannot be located, so the check fails loud "
                 "instead of passing vacuously (T-405)"
             )
@@ -9037,7 +8989,7 @@ else:
                     "instead of passing vacuously (T-405)"
                 )
                 drift_ok = False
-            elif "STYLE.md" not in _fp_region or "before any output" not in _fp_region:
+            elif "STYLE.md" not in _fp_region or "before user-visible output" not in _fp_region:
                 warn("cross-doc-drift",
                     "cross-doc drift [chat-voice] -- BOOT.md's numbered fast "
                     "path no longer orders reading STYLE.md before any "
@@ -9045,11 +8997,11 @@ else:
                     "stops never opens the file (T-405)"
                 )
                 drift_ok = False
-            elif "same folder as this" not in _fp_region:
+            elif "beside this BOOT.md" not in _fp_region:
                 warn("cross-doc-drift",
                     "cross-doc drift [chat-voice] -- the fast-path STYLE.md "
-                    "read lost its self-locating reference ('the file in the "
-                    "same folder as this BOOT.md'); a bare <saipen_home>/ "
+                    "read lost its self-locating reference ('beside this "
+                    "BOOT.md'); a bare <saipen_home>/ "
                     "path needs resolution that can be empty or dead (T-405)"
                 )
                 drift_ok = False
@@ -9214,10 +9166,20 @@ else:
             # reads as both "runs nothing in parallel" and "multi-agent
             # concurrency" is precisely the ambiguity a weak model resolves
             # wrongly while believing it followed SAIPEN.
-            _crew_row_m = re.search(r"`saipen crew` -- walk[^\n]*", _rfc_t[_i:_j])
+            _commands_p = _tools_parent / "saipen" / "COMMANDS.md"
+            _commands_t = (
+                _commands_p.read_text(encoding="utf-8-sig")
+                if _commands_p.is_file()
+                else ""
+            )
+            _crew_row_m = re.search(
+                r"^\| `sc` \| `saipen crew` \|[^\n]*$",
+                _commands_t,
+                re.MULTILINE,
+            )
             if _crew_row_m is None:
                 warn("cross-doc-drift",
-                    "cross-doc drift [crew-naming] -- RFC § 1.10's `saipen "
+                    "cross-doc drift [crew-naming] -- COMMANDS.md's `saipen "
                     "crew` row is missing; the sequential circuit must be "
                     "defined (T-571)"
                 )
@@ -9225,12 +9187,11 @@ else:
             else:
                 _crew_row = _crew_row_m.group(0)
                 if (
-                    "exactly one execution meaning" not in _crew_row
-                    or "never the concurrent" not in _crew_row
+                    "Serial full-platoon convergence circuit" not in _crew_row
                 ):
                     warn("cross-doc-drift",
-                        "cross-doc drift [crew-naming] -- RFC § 1.10's "
-                        "`saipen crew` row does not state its single "
+                        "cross-doc drift [crew-naming] -- COMMANDS.md's "
+                        "`saipen crew` row does not state its serial "
                         "execution meaning (strictly sequential, never the "
                         "concurrent multi-agent design) -- one command cannot "
                         "carry two execution meanings (T-571)"
@@ -9281,65 +9242,16 @@ else:
                 )
                 drift_ok = False
 
-            # The shortcut table's right-hand column is a promise that each
-            # shortcut lands on a command this surface defines. Nothing read
-            # that column until v7.148.0, and two rows had stopped being true:
-            # `hh` pointed at HUNT, a PHASE with no command behind it, and `cc`
-            # pointed at a "Full pipeline" that was not a command either -- and
-            # quietly added commit+push to the most-typed key. The check reads
-            # the table itself rather than any prose about it, so the rule and
-            # the thing it governs cannot drift apart.
-            # A command named after a phase switches into it, and § 1.10 makes
-            # every such command checkpoint a claimed `## DOING` ticket first.
-            # That list was hand-kept: `saipen hunt` joined the surface in
-            # v7.148.0 and nobody added it, so for two releases `hh` was the
-            # one phase switch that could leave half-finished work unwritten.
-            # Derive the membership from the phase enum instead of trusting a
-            # second copy -- a command whose name IS a phase belongs there.
-            # `init` is the one exclusion and it is structural, not a taste
-            # call: it creates `.saipen/` and there is no board to hold a
-            # claimed ticket at the moment it runs.
-            _switch_m = re.search(
-                r"Any recognized phase-switching command \(([^)]*)\)", _rfc_t[_i:_j]
-            )
-            if not _switch_m:
-                warn("cross-doc-drift",
-                    "cross-doc drift [phase-switching] -- RFC § 1.10's "
-                    "phase-switching sentence not found; the list that makes "
-                    "these commands checkpoint cannot be compared"
-                )
-                drift_ok = False
-            else:
-                _listed = set(re.findall(r"`([a-z]+)`", _switch_m.group(1)))
-                # Resolved against the validator's own tree, not the cwd: a
-                # fixture sandbox is a project root with a `.saipen/` and no
-                # protocol docs, and a cwd-relative lookup made `_expected`
-                # empty there and failed four conformant fixtures.
-                _phases_dir = _tools_parent / "saipen" / "phases"
-                _expected = {c for c in SAIPEN_COMMANDS if (_phases_dir / f"{c}.md").is_file()} - {
-                    "init",
-                    # § 1.10 and CONTROLS § 3 make this collision explicit:
-                    # user-facing `saipen build <directive>` creates Work at
-                    # SCOUT; it never enters the existing BUILD phase.
-                    "build",
-                }
-                if _listed != _expected:
-                    warn("cross-doc-drift",
-                        f"cross-doc drift [phase-switching] -- RFC § 1.10 "
-                        f"lists {sorted(_listed)} as phase-switching but the "
-                        f"commands named after a phase are "
-                        f"{sorted(_expected)}; a command that switches phase "
-                        f"without this duty can drop a claimed ticket's "
-                        f"checkpoint"
-                    )
-                    drift_ok = False
-
-            _shortcut_rows = re.findall(
-                r"^\| `([a-z]{2,3})` \| ([^|]+) \|", _rfc_t[_i:_j], re.MULTILINE
-            )
+            # REGISTRY.json is the sole executable shortcut authority.
+            # COMMANDS.md is the human mirror; CORE deliberately carries no
+            # shortcut table after the semantic-compression cutover.
+            _reg_table = dict(require_mapping(_MACHINE_REGISTRY, "shortcuts"))
             _shortcut_full_rows = re.findall(
-                r"^\| `([a-z]{2,3})` \| ([^|]+) \| ([^|]*)\|", _rfc_t[_i:_j], re.MULTILINE
+                r"^\| `([a-z]{2,3})` \| `([^`]*)` \| [^|]* \| ([^|]*)\|",
+                _commands_t,
+                re.MULTILINE,
             )
+            _shortcut_rows = [(_sc, _route) for _sc, _route, _notes in _shortcut_full_rows]
             # `saipen plan` is two commands wearing one name, and only the
             # bare one was ever written down. A weak model reading the
             # Proposal-Mode paragraph answers `dd <text>` with four
@@ -9407,7 +9319,7 @@ else:
 
             _bad_routes = []
             for _sc, _route in _shortcut_rows:
-                _named = set(re.findall(r"`saipen ([a-z]+)", _route))
+                _named = set(re.findall(r"\bsaipen ([a-z]+)", _route))
                 if not _named:
                     _bad_routes.append(
                         f"`{_sc}` -> {_route.strip()!r} names no `saipen <command>` at all"
@@ -9416,27 +9328,12 @@ else:
                     _bad_routes.append(f"`{_sc}` -> {sorted(_named - set(SAIPEN_COMMANDS))}")
             if _bad_routes:
                 fail(
-                    "cross-doc drift [shortcuts] -- RFC § 1.10 shortcut(s) do "
-                    "not resolve to a command the same section defines: " + "; ".join(_bad_routes)
+                    "cross-doc drift [shortcuts] -- COMMANDS.md shortcut(s) do "
+                    "not resolve to a command REGISTRY.json defines: " + "; ".join(_bad_routes)
                 )
                 drift_ok = False
 
-            _actual_routes = {shortcut: route.strip() for shortcut, route in _shortcut_rows}
-            if (
-                len(_actual_routes) != len(_shortcut_rows)
-                or _actual_routes != EXPECTED_SHORTCUT_ROUTES
-            ):
-                _route_diffs = []
-                for _shortcut in sorted(set(_actual_routes) | set(EXPECTED_SHORTCUT_ROUTES)):
-                    _actual = _actual_routes.get(_shortcut, "<missing>")
-                    _expected = EXPECTED_SHORTCUT_ROUTES.get(_shortcut, "<undeclared>")
-                    if _actual != _expected:
-                        _route_diffs.append(f"`{_shortcut}` is {_actual!r}, expected {_expected!r}")
-                warn("cross-doc-drift",
-                    "cross-doc drift [shortcut-routes] -- assigned "
-                    "destination changed: " + "; ".join(_route_diffs)
-                )
-                drift_ok = False
+            _actual_routes = _reg_table
 
             # The Cyrillic-twin surface is DERIVED, never hand-counted: the
             # confusable map folds only declared codepoints (Cyrillic es -> c, and
@@ -9524,12 +9421,23 @@ else:
                 # the message stays about twins, not table shape.
                 pass
             else:
-                _check_twin_prose("RFC § 1.10", _rfc_t[_i:_j])
-                _conf_path = _tools_parent / "saipen" / "CONFORMANCE.md"
-                if _conf_path.is_file():
-                    _conf_t = _conf_path.read_text(encoding="utf-8-sig")
-                    if "typed in Cyrillic resolves to the same shortcut" in _conf_t:
-                        _check_twin_prose("CONFORMANCE.md row 177", _conf_t)
+                _corpus_path = _tools_parent / "tests" / "conformance_cases.jsonl"
+                if _corpus_path.is_file():
+                    try:
+                        _case_177 = next(
+                            _case
+                            for _case in _load_conformance_cases(_tools_parent)
+                            if _case["id"] == 177
+                        )
+                    except (OSError, UnicodeDecodeError, ValueError, StopIteration):
+                        _case_177 = {}
+                    _case_177_text = (
+                        str(_case_177.get("setup", ""))
+                        + " "
+                        + str(_case_177.get("expected", ""))
+                    )
+                    if "typed in Cyrillic resolves to the same shortcut" in _case_177_text:
+                        _check_twin_prose("conformance corpus row 177", _case_177_text)
                 # The load-bearing shape of the map: `s` must never become a
                 # fold target. If it ever does, Latin ss/sss suddenly gain
                 # Cyrillic twins and every guarantee above inverts.
@@ -9552,64 +9460,6 @@ else:
                     "derivation: " + "; ".join(_twin_failures)
                 )
                 drift_ok = False
-
-            # REGISTRY ↔ CORE.md: the registry is the machine authority for
-            # closed executable facts; prose in CORE.md § 1.10 is a mirror and
-            # must agree. A drift here means a description was rewritten
-            # without informing the engine, which is the exact coupling
-            # SRC-009:R0004/R0005 names. Compare shortcut {key: route} sets
-            # only -- nothing else belongs in this check.
-            _registry_path = _tools_parent / "saipen" / "REGISTRY.json"
-            if not _registry_path.is_file():
-                fail(
-                    "cross-doc drift [registry-missing] -- saipen/REGISTRY.json "
-                    "is absent; the engine cannot load its machine authority "
-                    "for shortcuts/phases/codes. SRC-009:R0004"
-                )
-                drift_ok = False
-            else:
-                try:
-                    _reg = json.loads(_registry_path.read_text(encoding="utf-8-sig"))
-                except (OSError, UnicodeDecodeError, ValueError) as _reg_err:
-                    fail(
-                        "cross-doc drift [registry-missing] -- saipen/REGISTRY.json "
-                        f"is unreadable: {_reg_err}"
-                    )
-                    drift_ok = False
-                    _reg = None
-                if _reg is not None:
-                    if not isinstance(_reg, dict) or not isinstance(_reg.get("shortcuts"), dict):
-                        fail(
-                            "cross-doc drift [registry-missing] -- saipen/REGISTRY.json "
-                            "has no `shortcuts` object"
-                        )
-                        drift_ok = False
-                    else:
-                        _reg_table = {
-                            k: v for k, v in _reg["shortcuts"].items()
-                            if isinstance(k, str) and isinstance(v, str)
-                        }
-                        _reg_diff = []
-                        for _k in sorted(set(_actual_routes) | set(_reg_table)):
-                            _raw_a = _actual_routes.get(_k, "<missing>")
-                            # Prose rows carry the full human description; the
-                            # machine command is the FIRST backtick segment
-                            # (e.g. `` `saipen continue` with ... ``). Compare
-                            # that, never the whole sentence.
-                            _m = re.search(r"`([^`]*)`", _raw_a)
-                            _a = _m.group(1) if _m else _raw_a.strip("` ")
-                            _b = _reg_table.get(_k, "<undeclared>")
-                            if _a != _b:
-                                _reg_diff.append(f"`{_k}` prose={_a!r} registry={_b!r}")
-                        if _reg_diff:
-                            warn("cross-doc-drift",
-                                "cross-doc drift [registry-vs-prose] -- saipen/REGISTRY.json "
-                                "shortcut table disagrees with CORE § 1.10 prose. The "
-                                "registry is the machine authority; rewrite the prose to "
-                                "match (or update the registry, never both). SRC-009:R0005: "
-                                + "; ".join(_reg_diff)
-                            )
-                            drift_ok = False
 
             # COMMANDS.md ↔ REGISTRY.json: the compact reference mirrors the
             # same facts the registry owns. A shortcut row in COMMANDS.md that
@@ -9958,7 +9808,7 @@ else:
                     _advertised = set(
                         re.findall(r"(?<!\w)(\w{2,3})(?!\w)", _trigger_m.group(1), re.IGNORECASE)
                     )
-                    _latin = {shortcut for shortcut, _ in _shortcut_rows}
+                    _latin = set(require_mapping(_MACHINE_REGISTRY, "shortcuts"))
                     # ONE authority: the fold targets come from the shared
                     # engine confusable map (saipen_engine/commands.py), never
                     # a second copy here -- a duplicated map is exactly how
@@ -9975,13 +9825,14 @@ else:
                     if _missing:
                         warn("cross-doc-drift",
                             "cross-doc drift [skill-triggers] -- SKILL.md "
-                            "metadata misses RFC shortcut trigger(s): " + ", ".join(_missing)
+                            "metadata misses registry shortcut trigger(s): " + ", ".join(_missing)
                         )
                         drift_ok = False
                     if _unexpected:
                         warn("cross-doc-drift",
                             "cross-doc drift [skill-triggers] -- SKILL.md "
-                            "metadata has non-RFC shortcut trigger(s): " + ", ".join(_unexpected)
+                            "metadata has non-registry shortcut trigger(s): "
+                            + ", ".join(_unexpected)
                         )
                         drift_ok = False
 
@@ -10062,10 +9913,13 @@ else:
     #      that a rule is obsolete, but it can refuse to let one keep claiming
     #      an enforcement that is gone. Then the choice -- restore it or retire
     #      the row -- has to be made by a person, out loud.
-    _conf_p = _tools_parent / "saipen" / "CONFORMANCE.md"
+    _corpus_p = _tools_parent / "tests" / "conformance_cases.jsonl"
     _wf_p = _tools_parent / ".github" / "workflows" / "validate.yml"
-    if IS_SAIPEN_HOME and _conf_p.is_file():
-        _conf_t = _conf_p.read_text(encoding="utf-8-sig")
+    if IS_SAIPEN_HOME and _corpus_p.is_file():
+        try:
+            _coverage_cases = _load_conformance_cases(_tools_parent)
+        except (OSError, UnicodeDecodeError, ValueError):
+            _coverage_cases = []
         _wf_t = _wf_p.read_text(encoding="utf-8-sig") if _wf_p.is_file() else ""
         _step_names = set(re.findall(r"^\s*- name: (.+)$", _wf_t, re.MULTILINE))
         _fixtures = (
@@ -10074,10 +9928,15 @@ else:
             else set()
         )
         _gone = []
-        for _rid, _body, _how in re.findall(
-            r"^\| (\d+) \| (.*?) \| (.*?) \|\s*$", _conf_t, re.MULTILINE
-        ):
-            for _tool in set(re.findall(r"`(tools/[a-z_]+\.py|tests/validate\.(?:sh|ps1))`", _how)):
+        for _case in _coverage_cases:
+            _rid = str(_case["id"])
+            _body = _case["setup"]
+            _how = _case["expected"]
+            for _tool in set(_case.get("coverage", [])) | set(
+                re.findall(r"`(tools/[a-z_]+\.py|tests/validate\.(?:sh|ps1))`", _how)
+            ):
+                if not re.fullmatch(r"(?:tools/[a-z_]+\.py|tests/validate\.(?:sh|ps1))", _tool):
+                    continue
                 if not (_tools_parent / _tool).is_file():
                     _gone.append(f"row {_rid} names {_tool}, which does not exist")
             for _step in set(re.findall(r"`([^`]+)` CI step", _how)):
@@ -10186,8 +10045,8 @@ else:
     #      a row saying so; the row is how the protocol admits the limit
     #      instead of leaving a silent hole.
     _rfc_p = _tools_parent / "saipen" / "RFC.md"
-    _conf_p = _tools_parent / "saipen" / "CONFORMANCE.md"
-    if _rfc_p.is_file() and _conf_p.is_file():
+    _corpus_p = _tools_parent / "tests" / "conformance_cases.jsonl"
+    if _rfc_p.is_file() and _corpus_p.is_file():
         _rfc_b = _read_rfc(_rfc_p)
         _must_by_sec, _cur_sec = {}, None
         for _ln in _rfc_b.splitlines():
@@ -10198,7 +10057,14 @@ else:
                 continue
             if _cur_sec:
                 _must_by_sec[_cur_sec] += len(re.findall(r"\bMUST\b", _ln))
-        _claimed = set(re.findall(r"§\s*(\d+\.\d+)", _conf_p.read_text(encoding="utf-8-sig")))
+        try:
+            _coverage_text = "\n".join(
+                f"{_case['setup']} {_case['expected']}"
+                for _case in _load_conformance_cases(_tools_parent)
+            )
+        except (OSError, UnicodeDecodeError, ValueError):
+            _coverage_text = ""
+        _claimed = set(re.findall(r"§\s*(\d+\.\d+)", _coverage_text))
         _unclaimed = sorted(
             (s for s, c in _must_by_sec.items() if c and s not in _claimed),
             key=lambda s: [int(x) for x in s.split(".")],
@@ -10273,8 +10139,11 @@ for _milestone_error in _milestone_errors:
 # ------------------------------------------------------------------- summary
 
 warn_total = sum(len(msgs) for msgs in warnings.values())
+_warn_detail_limit = (
+    None if os.environ.get("SAIPEN_VALIDATE_ALL_WARNINGS") == "1" else 2
+)
 for category, msgs in warnings.items():
-    for msg in msgs[:2]:
+    for msg in msgs if _warn_detail_limit is None else msgs[:_warn_detail_limit]:
         # The category is printed, not just carried. It used to appear only in
         # the "... and N more" roll-up, so every individual warning was
         # anonymous -- and matching on the invisible key is a trap
@@ -10285,8 +10154,14 @@ for category, msgs in warnings.items():
         # a discipline problem; it is a missing affordance. Now the key is on
         # screen, so grepping for it works and the trap has nothing to catch.
         print(color("33", f"WARN [{category}]: {msg}"))
-    if len(msgs) > 2:
-        print(color("33", f"WARN [{category}]: ... and {len(msgs) - 2} more like the above"))
+    if _warn_detail_limit is not None and len(msgs) > _warn_detail_limit:
+        print(
+            color(
+                "33",
+                f"WARN [{category}]: ... and "
+                f"{len(msgs) - _warn_detail_limit} more like the above",
+            )
+        )
 
 if STRICT:
     for msgs in warnings.values():

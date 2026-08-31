@@ -449,7 +449,10 @@ def collect_and_ship_producer(
             }
         return _ship_targeted_producer(root, role, continuation, capability)
 
-    packages, errors = P.StagingGeneration.scan_ready(P.producer_namespace(root, role))
+    # PERF-002: metadata-only scan; the single winner is materialized below.
+    packages, errors = P.StagingGeneration.scan_ready(
+        P.producer_namespace(root, role), materialize_payloads=False
+    )
     if errors:
         prepare = "qq" if role == "saiwiki" else "ee"
         # AUTO-006: NOT_READY is a ROUTING carrier, not a terminal failure.
@@ -496,6 +499,18 @@ def collect_and_ship_producer(
             "message": f"Not ready: run {prepare} first.",
         }
     package = max(current, key=lambda item: (item.epoch, item.package_identity))
+    # PERF-002: re-open only the winner; retain decoded bytes for this one.
+    if not package.materialize_payload():
+        return {
+            "ok": False,
+            "code": "INVALID_READY",
+            "message": (
+                f"READY payload for {role} package {package.package_identity} "
+                "could not be re-materialized; refusing integration"
+            ),
+            "role": role,
+            "package_identity": package.package_identity,
+        }
     try:
         crew_epoch = _active_crew_epoch_id(root)
     except ValueError as exc:
@@ -1103,7 +1118,10 @@ def _resume_targeted_producer(
             "role": role,
             "ticket": ticket_id,
         }
-    packages, errors = P.StagingGeneration.scan_ready(P.producer_namespace(root, role))
+    # PERF-002: metadata-only scan; the matched package is materialized below.
+    packages, errors = P.StagingGeneration.scan_ready(
+        P.producer_namespace(root, role), materialize_payloads=False
+    )
     if errors:
         return {
             "ok": False,
@@ -1153,6 +1171,19 @@ def _resume_targeted_producer(
                 "current source; the producer must regenerate it. The CURRENT "
                 "AGENT adopts the role and regenerates it now."
             ),
+        }
+    # PERF-002: re-open only the matched winner; retain decoded bytes for it.
+    if not pkg.materialize_payload():
+        return {
+            "ok": False,
+            "code": "INVALID_READY",
+            "message": (
+                f"READY payload for {role} package {pkg.package_identity} "
+                "could not be re-materialized; refusing resume integration"
+            ),
+            "role": role,
+            "ticket": ticket_id,
+            "package_identity": pkg.package_identity,
         }
     try:
         crew_epoch = _active_crew_epoch_id(root)

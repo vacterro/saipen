@@ -52,8 +52,8 @@ echo -e "${GREEN}PASS: STATE.md schema valid${NC}"
 # the phase left a git-less project unable to close any ticket. This file is
 # frozen against NEW checks; correcting one that now contradicts the RFC is
 # a bug fix, not an extension.
-if grep -qE "mode:[[:space:]]+read-only" .saipen/STATE.md && grep -qE "phase:[[:space:]]+(INIT|PLAN|ADD|BUILD|SHIP|CLEAN|TRANSLATE)" .saipen/STATE.md; then
-    echo -e "${RED}FAIL: mode: read-only MUST NOT enter INIT/PLAN/ADD/BUILD/SHIP/CLEAN/TRANSLATE (RFC § 1.3)${NC}"
+if grep -qE "mode:[[:space:]]+read-only" .saipen/STATE.md && grep -qE "phase:[[:space:]]+(INIT|PLAN|SCOUT|BUILD|SHIP|ADD|CLEAN|TRANSLATE|PREPARE)" .saipen/STATE.md; then
+    echo -e "${RED}FAIL: mode: read-only MUST NOT enter INIT/PLAN/SCOUT/BUILD/SHIP/ADD/CLEAN/TRANSLATE/PREPARE (CORE § 1.3)${NC}"
     exit 1
 fi
 

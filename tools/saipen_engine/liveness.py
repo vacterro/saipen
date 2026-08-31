@@ -19,11 +19,12 @@ import threading
 from contextlib import suppress
 from pathlib import Path
 
-from .lock import file_writer_lock
+from .lock import FileLockBusy, file_writer_lock
 from .paths import safe_atomic_write_bytes, safe_unlink_owned
 
 CACHE_REL = Path(".saipen") / "cache" / "continuation-liveness.json"
 LOCK_REL = Path(".saipen") / "locks" / "continuation-liveness.lock"
+RESET_REL = Path(".saipen") / "cache" / "continuation-liveness.reset"
 
 # The second consecutive identical actionable carrier means the previous one
 # did NOT produce a qualifying state change: that is a stall, not progress.
@@ -96,8 +97,19 @@ def record_actionable(project_root: Path | str, fingerprint: str) -> dict:
     root = Path(project_root).resolve()
     path = root / CACHE_REL
     try:
-        with _LIVENESS_GUARD, file_writer_lock(root / LOCK_REL, root, blocking=True):
-            data = _load(path)
+        with _LIVENESS_GUARD, file_writer_lock(root / LOCK_REL, root, blocking=False):
+            reset_path = root / RESET_REL
+            reset_pending = reset_path.exists()
+            if reset_pending:
+                with suppress(OSError, ValueError):
+                    safe_unlink_owned(
+                        reset_path,
+                        kind="continuation liveness reset marker",
+                        ownership_root=root,
+                    )
+                data = {}
+            else:
+                data = _load(path)
             if data.get("fingerprint") == fingerprint and isinstance(data.get("repeats"), int):
                 repeats = data["repeats"] + 1
             else:
@@ -114,7 +126,7 @@ def record_actionable(project_root: Path | str, fingerprint: str) -> dict:
                 kind="continuation liveness cache",
                 ownership_root=root,
             )
-    except (OSError, ValueError):
+    except (FileLockBusy, OSError, ValueError):
         return {"stalled": False, "stall_repeats": 1}
     return {"stalled": repeats >= STALL_THRESHOLD, "stall_repeats": repeats}
 
@@ -122,10 +134,23 @@ def record_actionable(project_root: Path | str, fingerprint: str) -> dict:
 def clear(project_root: Path | str) -> None:
     """Forget the last actionable carrier (real progress happened)."""
     root = Path(project_root).resolve()
-    lock = file_writer_lock(root / LOCK_REL, root, blocking=True)
-    with suppress(OSError, ValueError), _LIVENESS_GUARD, lock:
-        safe_unlink_owned(
-            root / CACHE_REL,
-            kind="continuation liveness cache",
-            ownership_root=root,
-        )
+    lock = file_writer_lock(root / LOCK_REL, root, blocking=False)
+    try:
+        with _LIVENESS_GUARD, lock:
+            safe_unlink_owned(
+                root / CACHE_REL,
+                kind="continuation liveness cache",
+                ownership_root=root,
+            )
+    except FileLockBusy:
+        # Preserve the reset edge under contention.  The next successful
+        # record consumes this marker while holding the same lock.
+        with suppress(OSError, ValueError):
+            safe_atomic_write_bytes(
+                root / RESET_REL,
+                b'{"reset": true}\n',
+                kind="continuation liveness reset marker",
+                ownership_root=root,
+            )
+    except (OSError, ValueError):
+        return

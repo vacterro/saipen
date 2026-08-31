@@ -28,6 +28,8 @@ from .fast_check import validate_project, validate_texts
 from .journal import (
     MISSING_FILE_DEPENDENCY,
     Journal,
+    _target_live_hash,
+    decode_operation_record,
     hash_bytes,
     owned_target_path,
     pending_ops,
@@ -50,7 +52,12 @@ from .operations import (
     next_ticket_id,
 )
 from .plan import OperationPlan, TargetPlan, apply_plan, build_plan, semantic_payload_hash
-from .paths import project_lineage_identity
+from .paths import (
+    project_lineage_identity,
+    prove_owned_regular,
+    read_bound_regular_bytes,
+    update_digest_regular_bytes,
+)
 from .result import Result
 from .snapshot import ProjectSnapshot, canonical_identity
 from .state import parse_state, patch_state
@@ -169,14 +176,19 @@ def _project_tree_fingerprint(root: Path) -> str:
                 continue
             try:
                 rel = path.relative_to(root).as_posix().encode("utf-8")
-                raw = path.read_bytes()
-            except OSError:
+                witnessed = prove_owned_regular(path, kind="focus source file")
+            except (OSError, ValueError):
                 digest.update(b"UNREADABLE\0" + str(path).encode("utf-8", "surrogatepass"))
                 continue
             digest.update(len(rel).to_bytes(8, "big"))
             digest.update(rel)
-            digest.update(len(raw).to_bytes(8, "big"))
-            digest.update(raw)
+            digest.update(witnessed.st_size.to_bytes(8, "big"))
+            try:
+                update_digest_regular_bytes(path, witnessed, digest)
+            except (OSError, ValueError):
+                # A mid-read pivot is fail-closed and remains visibly distinct
+                # from any stable source-tree fingerprint.
+                digest.update(b"\0UNSTABLE\0")
     return "tree-sha256:" + digest.hexdigest()
 
 
@@ -187,10 +199,11 @@ def _binding_digest(kind: str, expression: str, binding: dict[str, str]) -> str:
 
 def _read_text_lossy(path: Path, limit: int = 256_000) -> str:
     try:
-        raw = path.read_bytes()
-    except OSError:
+        witnessed = prove_owned_regular(path, kind="focus text")
+        raw = read_bound_regular_bytes(path, witnessed, max_bytes=limit)
+    except (OSError, ValueError):
         return ""
-    if len(raw) > limit or b"\x00" in raw:
+    if b"\x00" in raw:
         return ""
     try:
         return raw.decode("utf-8-sig")
@@ -1529,13 +1542,65 @@ def undo_preview(project_root: Path | str) -> Result:
     )
 
 
-def _undo_op_id(root: Path, target: str, reason: str) -> str:
+def _undo_op_id(root: Path, target: str, reason: str, generation: str = "") -> str:
+    identity = canonical_identity(root) + "\0" + target + "\0" + reason
+    if generation:
+        identity += "\0" + generation
     return (
         "undo-"
-        + hashlib.sha256(
-            (canonical_identity(root) + "\0" + target + "\0" + reason).encode("utf-8")
-        ).hexdigest()[:16]
+        + hashlib.sha256(identity.encode("utf-8")).hexdigest()[:16]
     )
+
+
+def _undo_record_is_live(root: Path, record: dict) -> bool:
+    """True only when a committed restore receipt still describes live state."""
+    if record.get("operation") != "milestone_restore":
+        return False
+    if record.get("project_identity") != canonical_identity(root):
+        return False
+    expected_lineage = record.get("project_lineage")
+    if expected_lineage and project_lineage_identity(root) != expected_lineage:
+        return False
+    targets = record.get("targets")
+    if not isinstance(targets, list) or not targets:
+        return False
+    try:
+        return all(
+            _target_live_hash(root, target) == target.get("after_hash", "")
+            for target in targets
+        )
+    except (OSError, ValueError, TypeError, KeyError):
+        return False
+
+
+def _matching_live_undo_receipt(
+    root: Path, target_id: str, reason: str, *, exclude_op_id: str
+) -> str | None:
+    """Find a later generation receipt that still proves exact idempotence."""
+    for base in (
+        root / ".saipen/recovery/ops",
+        root / ".saipen/recovery/settled",
+    ):
+        if not base.is_dir():
+            continue
+        for manifest in sorted(base.glob("undo-*/operation.json")):
+            op_id = manifest.parent.name
+            if op_id == exclude_op_id:
+                continue
+            decoded = decode_operation_record(root, manifest.parent)
+            if not decoded.get("ok"):
+                continue
+            record = decoded["record"]
+            metadata = record.get("receipt_metadata")
+            if (
+                record.get("status") == "COMMITTED"
+                and isinstance(metadata, dict)
+                and metadata.get("undo_target") == target_id
+                and metadata.get("undo_reason") == reason
+                and _undo_record_is_live(root, record)
+            ):
+                return op_id
+    return None
 
 
 def undo_confirm(
@@ -1559,20 +1624,68 @@ def undo_confirm(
         )
     if not _CP_RE.fullmatch(target_id or ""):
         return _refuse("INVALID_ID", "undo target must be CP-N")
-    op_id = _undo_op_id(root, target_id, safe_reason)
-    journal = Journal(root, op_id)
+    base_op_id = _undo_op_id(root, target_id, safe_reason)
+    op_id = base_op_id
+    historical_receipt = False
+    journal = Journal(root, base_op_id)
     if journal.exists():
-        try:
-            record = journal.read()
-        except Exception as exc:
-            return _refuse("CORRUPT_JOURNAL", str(exc), recovery_required=True)
-        if record.get("status") == "COMMITTED":
-            return Result(
-                ok=True,
-                code="ALREADY_APPLIED",
-                op_id=op_id,
-                data={"target": target_id, "reason": safe_reason},
+        decoded = decode_operation_record(root, journal.dir)
+        if not decoded.get("ok"):
+            return _refuse(
+                decoded.get("code", "CORRUPT_JOURNAL"),
+                decoded.get("detail", "invalid undo receipt"),
+                recovery_required=True,
             )
+        record = decoded["record"]
+        if record.get("operation") != "milestone_restore":
+            return _refuse(
+                "VALIDATION_FAILED",
+                "undo op_id collision: committed receipt belongs to another operation",
+            )
+        if record.get("project_identity") != canonical_identity(root) or (
+            record.get("project_lineage")
+            and record.get("project_lineage") != project_lineage_identity(root)
+        ):
+            return _refuse(
+                "PROJECT_MISMATCH",
+                "undo receipt is not bound to the current project",
+                recovery_required=True,
+            )
+        metadata = record.get("receipt_metadata")
+        if not isinstance(metadata, dict) or (
+            metadata.get("undo_target") != target_id
+            or metadata.get("undo_reason") != safe_reason
+        ):
+            return _refuse(
+                "VALIDATION_FAILED",
+                "undo op_id collision: receipt semantics do not match target and reason",
+            )
+        if record.get("status") == "COMMITTED":
+            if _undo_record_is_live(root, record):
+                return Result(
+                    ok=True,
+                    code="ALREADY_APPLIED",
+                    op_id=base_op_id,
+                    data={"target": target_id, "reason": safe_reason},
+                )
+            historical_receipt = True
+        else:
+            return _refuse(
+                "RECOVERY_REQUIRED",
+                f"undo operation {base_op_id} is {record.get('status')}",
+                recovery_required=True,
+            )
+
+    replay_op_id = _matching_live_undo_receipt(
+        root, target_id, safe_reason, exclude_op_id=base_op_id
+    )
+    if replay_op_id is not None:
+        return Result(
+            ok=True,
+            code="ALREADY_APPLIED",
+            op_id=replay_op_id,
+            data={"target": target_id, "reason": safe_reason},
+        )
 
     preview = undo_preview(root)
     if not preview.ok:
@@ -1608,6 +1721,16 @@ def undo_confirm(
             result.data["target"] = target_id
             result.data["reason"] = safe_reason
         return result
+
+    if historical_receipt:
+        # The same user decision against a later milestone generation is a new
+        # restore, bound to this exact plan rather than masked by old history.
+        op_id = _undo_op_id(
+            root,
+            target_id,
+            safe_reason,
+            generation=preview.data["restore_plan_hash"],
+        )
 
     manifests = _all_manifests(root)
     current_id = preview.data["current"]["id"]
@@ -1754,6 +1877,12 @@ def undo_confirm(
                 preconditions=preconditions,
                 verification_policy="core_fast",
                 verify=validate_project,
+                receipt_metadata={
+                    "undo_target": target_id,
+                    "undo_reason": safe_reason,
+                    "undo_current": current_id,
+                    "undo_restore_plan_hash": preview.data["restore_plan_hash"],
+                },
             )
     except PermissionError as exc:
         return _refuse("WRITER_BUSY", str(exc))

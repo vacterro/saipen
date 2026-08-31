@@ -39,6 +39,7 @@ import stat
 from datetime import datetime, timezone
 from pathlib import Path
 
+from . import codec
 from .journal import _atomic_write, owned_target_path
 from .lock import project_writer_lock
 from .paths import (
@@ -141,6 +142,27 @@ def _utc() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
+def _agent_for_intake(root: Path | None = None) -> str:
+    """The acting seat recorded in the current project STATE, or the default.
+
+    Used to bind journaled source mutations (CORE-001) to the same agent the
+    rest of the protocol attributes them to. Never raises: an unreadable or
+    malformed STATE is not a reason to refuse a source transaction.
+    """
+    try:
+        from .state import parse_state
+
+        state_path = (root or Path(".")).resolve() / ".saipen" / "STATE.md"
+        if state_path.is_file():
+            state = parse_state(state_path.read_text(encoding="utf-8-sig"))
+            agent = state.get("agent")
+            if agent:
+                return agent
+    except Exception:
+        pass
+    return "saipen-autonomous"
+
+
 def _json_bytes(value: dict) -> bytes:
     return (json.dumps(value, indent=2, sort_keys=True) + "\n").encode("utf-8")
 
@@ -149,10 +171,91 @@ def _looks_sensitive(text: str) -> bool:
     """Conservative metadata signal; never redacts or echoes the source."""
     return bool(
         re.search(
-            r"(?im)\b(?:api[_-]?key|access[_-]?token|password|secret)\b\s*[:=]\s*\S+",
+            r"(?im)\b(?:api[_-]?key|access[_-]?token|token|password|secret)\b\s*[:=]\s*(?!<redacted>|\*{3})\S+",
             text,
         )
     )
+
+
+_CREDENTIAL_ASSIGNMENT_RE = re.compile(
+    r"(?im)(\b(?:api[_-]?key|access[_-]?token|token|password|secret)\b\s*[:=]\s*)\S+"
+)
+
+
+def _redact_text(text: str) -> str:
+    """Mask credential-looking assignments in a body for DISPLAY/EXPORT only.
+
+    CORE-001: this is a derived, explicitly non-authoritative view. Two
+    byte-distinct sources mask to identical text (`token = A` and `token = B`
+    both become `token = <redacted>`), so anything hashed or deduplicated over
+    this value is not source identity. Only `capture` writes canonical bytes,
+    and it never calls this function.
+    """
+    masked = codec.redact_credentials(text)
+    return _CREDENTIAL_ASSIGNMENT_RE.sub(r"\1<redacted>", masked)
+
+
+def _redacted_derivative(text: str) -> tuple[str, dict]:
+    """Build an explicitly NON-authoritative masked copy of an exact body."""
+    masked = _redact_text(text)
+    return masked, {
+        "applied": masked != text,
+        "authoritative": False,
+        "original_sha256": _sha256(text),
+        "sanitized_sha256": _sha256(masked),
+    }
+
+
+def _source_authority(meta: dict) -> dict:
+    """Project how a receipt's stored bytes relate to the original source.
+
+    A receipt captured before CORE-001 stored a redacted DERIVATIVE as its
+    body. Its `original_sha256` is then a fact about bytes that exist nowhere
+    -- a digest over a body that was discarded -- not a recoverable copy. This
+    projection states that instead of letting a caller silently treat the
+    derivative as authority.
+    """
+    digest = meta.get("source_sha256")
+    redaction = meta.get("redaction")
+    applied = isinstance(redaction, dict) and redaction.get("applied") is True
+    if applied:
+        return {
+            "mode": "redacted-derivative",
+            "original_available": False,
+            "body_sha256": digest,
+            "original_sha256": redaction.get("original_sha256"),
+            "note": (
+                "stored bytes are a redacted derivative; the original body was "
+                "not retained and cannot be reconstructed from original_sha256"
+            ),
+        }
+    return {
+        "mode": "exact",
+        "original_available": True,
+        "body_sha256": digest,
+        "original_sha256": digest,
+    }
+
+
+def _exact_authority_record(digest: str) -> tuple[dict, dict]:
+    """Redaction + authority records for a capture that stored exact bytes.
+
+    Nothing was masked, so the "sanitized" digest deliberately coincides with
+    the canonical digest: it asserts `redact(body) == body`, which the release
+    gate re-checks, rather than claiming a second body exists.
+    """
+    redaction = {
+        "applied": False,
+        "authoritative": False,
+        "original_sha256": digest,
+        "sanitized_sha256": digest,
+    }
+    authority = {
+        "mode": "exact",
+        "original_available": True,
+        "body_sha256": digest,
+    }
+    return redaction, authority
 
 
 def _is_link_or_reparse(path: Path) -> bool:
@@ -255,14 +358,82 @@ def _read_index(root: Path) -> dict:
         doc = json.loads(raw.decode("utf-8-sig"))
     except (OSError, ValueError) as exc:
         raise ValueError(f"malformed source intake index: {exc}") from exc
+    return _decode_index(doc)
+
+
+def _decode_index(doc: object) -> dict:
+    """Decode the persisted intake index once, fail-closed.
+
+    The index is discoverability authority.  A mutator must never turn a
+    damaged index into a new empty one: doing so silently strands receipts or
+    erases tombstone history.  Validation and every mutator therefore share
+    this decoder instead of each inventing a weaker shape check.
+    """
     if not isinstance(doc, dict):
-        doc = {}
+        raise ValueError("source intake index corrupt: root is not an object")
+    schema = doc.get("schema_version", SCHEMA_VERSION)
+    if not isinstance(schema, int) or isinstance(schema, bool) or schema != SCHEMA_VERSION:
+        raise ValueError(f"source intake index corrupt: invalid schema_version {schema!r}")
+    next_id = doc.get("next_id")
+    if not isinstance(next_id, int) or isinstance(next_id, bool) or next_id < 1:
+        raise ValueError("source intake index corrupt: next_id must be a positive integer")
+    decoded = dict(doc)
     for field in ("active", "tombstones"):
-        if not isinstance(doc.get(field), dict):
-            doc[field] = {}
-    if not isinstance(doc.get("next_id"), int):
-        doc["next_id"] = 1
-    return doc
+        value = doc.get(field)
+        if not isinstance(value, dict):
+            raise ValueError(f"source intake index corrupt: {field} is not an object")
+        checked: dict[str, dict] = {}
+        for receipt_id, entry in value.items():
+            if not isinstance(receipt_id, str) or not _valid_receipt_id(receipt_id):
+                raise ValueError(f"source intake index corrupt: invalid {field} id {receipt_id!r}")
+            if not isinstance(entry, dict):
+                raise ValueError(
+                    f"source intake index corrupt: {field} entry {receipt_id} is not an object"
+                )
+            if field == "active":
+                digest = entry.get("source_sha256")
+                if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+                    raise ValueError(
+                        f"source intake index corrupt: active entry {receipt_id} has invalid digest"
+                    )
+                linked = entry.get("linked_work")
+                if linked is not None and (
+                    not isinstance(linked, str) or not re.fullmatch(r"T-\d+", linked)
+                ):
+                    raise ValueError(
+                        "source intake index corrupt: active entry "
+                        f"{receipt_id} has invalid linked_work"
+                    )
+            else:
+                digest = entry.get("source_sha256")
+                if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+                    raise ValueError(
+                        f"source intake index corrupt: tombstone {receipt_id} has invalid digest"
+                    )
+                if entry.get("status") != CLOSED_STATUS:
+                    raise ValueError(
+                        f"source intake index corrupt: tombstone {receipt_id} is not CLOSED"
+                    )
+            checked[receipt_id] = entry
+        decoded[field] = checked
+    overlap = set(decoded["active"]) & set(decoded["tombstones"])
+    if overlap:
+        raise ValueError(
+            "source intake index corrupt: receipt appears active and tombstoned: "
+            + ", ".join(sorted(overlap))
+        )
+    highest = max(
+        (int(receipt_id.split("-", 1)[1]) for group in (decoded["active"], decoded["tombstones"])
+         for receipt_id in group),
+        default=0,
+    )
+    if next_id <= highest:
+        raise ValueError(
+            f"source intake index corrupt: next_id {next_id} does not follow receipt ids"
+        )
+    decoded["next_id"] = next_id
+    decoded["schema_version"] = schema
+    return decoded
 
 
 def _write_index(root: Path, index: dict) -> None:
@@ -468,29 +639,157 @@ def _amends_resolvable(root: Path, amends: str) -> bool:
     return amends in index.get("tombstones", {})
 
 
+def _contract_revision_integrity(root: Path, receipt_id: str, contract: dict) -> None:
+    """Validate the owned contiguous contract revision chain (W2-004).
+
+    Revisions may live under the active contract directory (.saipen/intake/contracts)
+    or the archive (.saipen/archive/source) when an interrupted close moved
+    some targets. The chain is valid when the union of owned regular revision
+    files exactly matches the contiguous set r001..rN and every revision
+    carries matching receipt/derived_from/source_sha256/schema_version/
+    interpretation_revision identity.
+    """
+    revision = contract.get("interpretation_revision", 0)
+    if not isinstance(revision, int) or isinstance(revision, bool) or revision < 0:
+        raise ValueError(f"source {receipt_id} has invalid interpretation revision")
+    expected = set(range(1, revision + 1))
+    active_dir = _contract_dir(root)
+    archive_dir = _archive_dir(root)
+    found: dict[int, Path] = {}
+    for directory in (active_dir, archive_dir):
+        if not directory.is_dir() or _is_link_or_reparse(directory):
+            continue
+        for path in directory.glob(f"{receipt_id}.r*.json"):
+            match = re.fullmatch(rf"{re.escape(receipt_id)}\.r(\d+)\.json", path.name)
+            if not match:
+                raise ValueError(
+                    f"source {receipt_id} has invalid contract revision file {path.name}"
+                )
+            number = int(match.group(1))
+            if not path.is_file() or _is_link_or_reparse(path):
+                raise ValueError(
+                    f"source {receipt_id} revision r{number:03d} is a symlink/reparse"
+                )
+            if number in found:
+                raise ValueError(
+                    f"source {receipt_id} has duplicate revision r{number:03d}"
+                )
+            found[number] = path
+    if set(found) != expected:
+        raise ValueError(
+            f"source {receipt_id} contract revision chain is not contiguous: "
+            f"expected {sorted(expected)}, found {sorted(found)}"
+        )
+    for number in sorted(expected):
+        path = found[number]
+        rel = path.relative_to(root).as_posix()
+        raw = _read_owned_file(
+            root,
+            rel,
+            kind="source Contract revision",
+            max_bytes=_LEDGER_MAX,
+        )
+        try:
+            historical = json.loads(raw.decode("utf-8-sig"))
+        except (UnicodeDecodeError, ValueError) as exc:
+            raise ValueError(
+                f"source {receipt_id} revision r{number:03d} is malformed: {exc}"
+            ) from exc
+        if not isinstance(historical, dict):
+            raise ValueError(f"source {receipt_id} revision r{number:03d} is not an object")
+        if (
+            historical.get("receipt_id", receipt_id) != receipt_id
+            or historical.get("derived_from", receipt_id) != receipt_id
+            or historical.get("source_sha256") != contract.get("source_sha256")
+            or historical.get("schema_version") != contract.get("schema_version")
+            or historical.get("interpretation_revision") != number
+        ):
+            raise ValueError(f"source {receipt_id} revision r{number:03d} identity drift")
+        if number == revision and historical != contract:
+            raise ValueError(
+                f"source {receipt_id} current Contract differs from revision r{number:03d}"
+            )
+
+
 def _contract_integrity(root: Path, receipt_id: str, meta: dict) -> dict:
-    """Bind the derived Contract and coverage ledger to one source digest."""
-    contract = _read_contract(root, receipt_id)
-    if not contract or contract.get("source_sha256") != meta.get("source_sha256"):
-        return {"ok": False, "code": "CONTRACT_DRIFT", "receipt": receipt_id}
-    ledger = _read_coverage(root, receipt_id)
-    clauses = contract.get("clauses")
-    requirements = ledger.get("requirements")
-    if not isinstance(clauses, dict) or not isinstance(requirements, dict):
-        return {
-            "ok": False,
-            "code": "CONTRACT_DRIFT",
-            "receipt": receipt_id,
-            "detail": "Contract clauses or coverage requirements are not objects",
-        }
-    if set(clauses) != set(requirements):
-        return {
-            "ok": False,
-            "code": "CONTRACT_DRIFT",
-            "receipt": receipt_id,
-            "detail": "Contract and coverage clause identities differ",
-        }
+    """Bind Contract, contiguous revisions and coverage to one source digest."""
+    try:
+        contract = _read_contract(root, receipt_id)
+        if not contract or contract.get("source_sha256") != meta.get("source_sha256"):
+            return {"ok": False, "code": "CONTRACT_DRIFT", "receipt": receipt_id}
+        ledger = _read_coverage(root, receipt_id)
+        clauses = contract.get("clauses")
+        requirements = ledger.get("requirements")
+        if not isinstance(clauses, dict) or not isinstance(requirements, dict):
+            return {
+                "ok": False,
+                "code": "CONTRACT_DRIFT",
+                "receipt": receipt_id,
+                "detail": "Contract clauses or coverage requirements are not objects",
+            }
+        if set(clauses) != set(requirements):
+            return {
+                "ok": False,
+                "code": "CONTRACT_DRIFT",
+                "receipt": receipt_id,
+                "detail": "Contract and coverage clause identities differ",
+            }
+        _validate_contract_coverage(receipt_id, contract, ledger)
+        _contract_revision_integrity(root, receipt_id, contract)
+    except (OSError, ValueError) as exc:
+        return {"ok": False, "code": "CONTRACT_DRIFT", "receipt": receipt_id, "detail": str(exc)}
     return {"ok": True, "code": "CONTRACT_INTEGRITY_OK", "receipt": receipt_id}
+
+
+def _validate_contract_coverage(receipt_id: str, contract: object, coverage: object) -> None:
+    """Validate the nested source ledger shared by active and archive paths."""
+    if not isinstance(contract, dict) or not isinstance(coverage, dict):
+        raise ValueError(f"source {receipt_id} Contract/coverage root is not an object")
+    clauses = contract.get("clauses")
+    requirements = coverage.get("requirements")
+    if not isinstance(clauses, dict) or not isinstance(requirements, dict):
+        raise ValueError(f"source {receipt_id} Contract/coverage containers are not objects")
+    if set(clauses) != set(requirements):
+        raise ValueError(f"source {receipt_id} Contract/coverage clause identities differ")
+    for rid, clause in clauses.items():
+        if not isinstance(rid, str) or not re.fullmatch(rf"{re.escape(receipt_id)}:R\d+", rid):
+            raise ValueError(f"source {receipt_id} has invalid clause id {rid!r}")
+        entry = requirements[rid]
+        if not isinstance(clause, dict) or not isinstance(entry, dict):
+            raise ValueError(f"source {receipt_id} clause {rid} is not an object")
+        clause_class = clause.get("class")
+        text = clause.get("text")
+        actionable = clause.get("actionable")
+        if clause_class not in CLAUSE_CLASSES or not isinstance(text, str) or not text.strip():
+            raise ValueError(f"source {receipt_id} clause {rid} has invalid structure")
+        if not isinstance(actionable, bool) or actionable != (clause_class in ACTIONABLE_CLASSES):
+            raise ValueError(f"source {receipt_id} clause {rid} has invalid actionable flag")
+        if set(clause) != {"class", "text", "actionable"}:
+            raise ValueError(
+                f"source {receipt_id} Contract clause {rid} has extra or missing fields"
+            )
+        if set(entry) != {
+            "class",
+            "text",
+            "actionable",
+            "disposition",
+            "work",
+            "evidence",
+            "verification",
+        }:
+            raise ValueError(
+                f"source {receipt_id} coverage clause {rid} has extra or missing fields"
+            )
+        if any(entry.get(field) != clause.get(field) for field in ("class", "text", "actionable")):
+            raise ValueError(f"source {receipt_id} clause {rid} drift")
+        disposition = entry.get("disposition", "UNKNOWN")
+
+        if disposition not in ALL_DISPOSITIONS:
+            raise ValueError(f"source {receipt_id} requirement {rid} has invalid disposition")
+        for field in ("evidence", "verification"):
+            value = entry.get(field)
+            if value is not None and (not isinstance(value, str) or not value.strip()):
+                raise ValueError(f"source {receipt_id} requirement {rid} has invalid {field}")
 
 
 def _find_exact_duplicate(root: Path, digest: str) -> dict | None:
@@ -569,6 +868,20 @@ def capture(
     root = Path(root)
     if not isinstance(body, str) or not body:
         return {"ok": False, "code": "INVALID_SOURCE", "detail": "empty source body"}
+    # CORE-001: the received UTF-8 body IS the authority. Credential masking is
+    # a display/export concern and must never run before the canonical digest,
+    # dedupe or persistence -- masking before identity made two byte-distinct
+    # sources collapse onto one receipt (SOURCES.md:38-44).
+    detected_sensitive = _looks_sensitive(body)
+    sensitive = detected_sensitive
+    body_bytes = body.encode("utf-8")
+
+    if len(body_bytes) > _BODY_MAX:
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "detail": f"source body exceeds {_BODY_MAX} byte limit",
+        }
     if source_kind not in SOURCE_KINDS:
         return {
             "ok": False,
@@ -580,6 +893,7 @@ def capture(
     if amends and not INTENT_RE.fullmatch(amends):
         return {"ok": False, "code": "INVALID_ID", "detail": f"amends {amends!r}"}
     digest = _sha256(body)
+    redaction, authority = _exact_authority_record(digest)
     try:
         with project_writer_lock(root):
             existing = _find_exact_duplicate(root, digest)
@@ -673,7 +987,9 @@ def capture(
                 "source_sha256": digest,
                 "status": ACTIVE_STATUS,
                 "linked_work": linked_work,
-                "sensitive": _looks_sensitive(body),
+                "sensitive": sensitive,
+                "redaction": redaction,
+                "source_authority": authority,
                 "schema_version": SCHEMA_VERSION,
                 "transport": {
                     "source_encoding": "utf-8",
@@ -727,6 +1043,18 @@ def capture(
                 "source_sha256": digest,
                 "linked_work": linked_work,
             }
+            # W2-001: the allocator invariant `next_id > max(existing ids)`
+            # must be restored whenever a receipt id is adopted. An orphan
+            # recovery reuses `existing["receipt_id"]` without advancing
+            # `next_id`, so the persisted index would later be rejected by
+            # `_decode_index` as corrupt. Raise `next_id` to one past the
+            # adopted id (and any existing higher value) BEFORE writing.
+            try:
+                adopted_numeric = int(receipt_id.split("-", 1)[1])
+            except (IndexError, ValueError):
+                adopted_numeric = 0
+            current_next = int(index.get("next_id", 0))
+            index["next_id"] = max(current_next, adopted_numeric + 1)
             _write_index(root, index)
             linkage = (
                 _link_board_projection(root, linked_work, receipt_id)
@@ -749,6 +1077,8 @@ def capture(
                 "duplicate": False,
                 "requirements": 0,
                 "sensitive": meta["sensitive"],
+                "redaction": redaction,
+                "source_authority": authority,
                 "detail": linkage.get("detail"),
             }
     except (OSError, PermissionError, ValueError) as exc:
@@ -758,6 +1088,16 @@ def capture(
 def add_requirement(
     root: Path | str, receipt_id: str, *, rid: str, text: str, clause_class: str = "requirement"
 ) -> dict:
+    """Persist one new requirement clause as ONE recoverable transaction.
+
+    CORE-001: Contract + immutable revision + coverage ledger bytes are
+    computed together, integrity-gated as a single generation, and committed
+    through one OperationPlan under the canonical writer lock. Any failure
+    before COMMIT leaves the on-disk state byte-identical to the pre-call
+    generation; a successful commit advances the immutable revision
+    monotonically. Seeded Contract/coverage drift refuses the request with
+    ZERO writes.
+    """
     root = Path(root)
     if not INTENT_RE.fullmatch(receipt_id):
         return {"ok": False, "code": "INVALID_ID", "detail": receipt_id}
@@ -774,54 +1114,144 @@ def add_requirement(
             "detail": f"unknown clause class {clause_class!r}",
         }
     try:
-        with project_writer_lock(root):
-            meta = _read_meta(root, receipt_id)
-            if not meta:
-                return {
-                    "ok": False,
-                    "code": "TICKET_NOT_FOUND",
-                    "detail": f"no active receipt {receipt_id}",
-                }
-            integrity = verify_integrity(root, receipt_id)
-            if not integrity["ok"]:
-                return integrity
-            ledger = _read_coverage(root, receipt_id)
-            if rid in ledger["requirements"]:
-                return {
-                    "ok": False,
-                    "code": "VALIDATION_FAILED",
-                    "detail": f"requirement {rid} exists",
-                }
-            clause = {
-                "class": clause_class,
-                "text": text,
-                "actionable": clause_class in ACTIONABLE_CLASSES,
-                "disposition": "UNKNOWN",
-                "work": meta.get("linked_work"),
-                "evidence": None,
-                "verification": None,
+        meta = _read_meta(root, receipt_id)
+        if not meta:
+            return {
+                "ok": False,
+                "code": "TICKET_NOT_FOUND",
+                "detail": f"no active receipt {receipt_id}",
             }
-            ledger["requirements"][rid] = clause
-            contract = _read_contract(root, receipt_id)
-            if not contract or contract.get("source_sha256") != meta.get("source_sha256"):
-                return {
-                    "ok": False,
-                    "code": "CONTRACT_DRIFT",
-                    "detail": "contract missing or source digest mismatch",
-                }
-            contract["interpretation_revision"] = (
-                int(contract.get("interpretation_revision", 0)) + 1
-            )
-            contract["derived_at"] = _utc()
-            contract.setdefault("clauses", {})[rid] = {
-                "class": clause_class,
-                "text": text,
-                "actionable": clause_class in ACTIONABLE_CLASSES,
+        # CORE-001: refuse split Contract/coverage state BEFORE any mutation
+        # planning. The same gate the verify_integrity path uses is the
+        # precondition of a permitted commit; an already-red state cannot
+        # receive REQUIREMENT_ADDED.
+        integrity = verify_integrity(root, receipt_id)
+        if not integrity["ok"]:
+            return integrity
+        contract_gate = _contract_integrity(root, receipt_id, meta)
+        if not contract_gate["ok"]:
+            return contract_gate
+        ledger = _read_coverage(root, receipt_id)
+        if rid in ledger["requirements"]:
+            return {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"requirement {rid} exists",
             }
-            _write_contract(root, receipt_id, contract)
-            _write_contract_revision(root, receipt_id, contract)
-            _write_coverage(root, receipt_id, ledger)
-            return {"ok": True, "code": "REQUIREMENT_ADDED", "receipt": receipt_id, "rid": rid}
+        clause = {
+            "class": clause_class,
+            "text": text,
+            "actionable": clause_class in ACTIONABLE_CLASSES,
+            "disposition": "UNKNOWN",
+            "work": meta.get("linked_work"),
+            "evidence": None,
+            "verification": None,
+        }
+        ledger["requirements"][rid] = clause
+        contract = _read_contract(root, receipt_id)
+        if not contract or contract.get("source_sha256") != meta.get("source_sha256"):
+            return {
+                "ok": False,
+                "code": "CONTRACT_DRIFT",
+                "detail": "contract missing or source digest mismatch",
+            }
+        new_revision = int(contract.get("interpretation_revision", 0)) + 1
+        contract["interpretation_revision"] = new_revision
+        contract["derived_at"] = _utc()
+        contract.setdefault("clauses", {})[rid] = {
+            "class": clause_class,
+            "text": text,
+            "actionable": clause_class in ACTIONABLE_CLASSES,
+        }
+        # CORE-001: build the exact future bytes for all three targets so a
+        # single OperationPlan binds them under one writer lock and one
+        # journal. Direct sequential _write_* are never called here.
+        from .journal import hash_bytes
+        from .paths import project_identity as _project_identity
+        from .plan import TargetPlan, build_plan, apply_plan
+
+        contract_rel = f".saipen/intake/contracts/{receipt_id}.json"
+        revision_rel = f".saipen/intake/contracts/{receipt_id}.r{new_revision:03d}.json"
+        coverage_rel = f".saipen/intake/coverage/{receipt_id}.json"
+        contract_bytes = _json_bytes(contract)
+        coverage_bytes = _json_bytes(ledger)
+        contract_path = _safe_path(root, contract_rel, expect_file=True)
+        revision_path = _safe_path(root, revision_rel, expect_file=True)
+        coverage_path = _safe_path(root, coverage_rel, expect_file=True)
+        if revision_path.exists():
+            return {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"contract revision already exists: {receipt_id} r{new_revision}",
+            }
+        def _before(path: Path) -> str:
+            try:
+                return hash_bytes(path.read_bytes())
+            except FileNotFoundError:
+                return ""
+
+        plan = build_plan(
+            operation="source.requirement_add",
+            agent=_agent_for_intake(root),
+            project_identity=_project_identity(root),
+            semantic_request={
+                "receipt": receipt_id,
+                "rid": rid,
+                "class": clause_class,
+                "revision": new_revision,
+            },
+            preconditions={
+                contract_rel: _before(contract_path),
+                revision_rel: "",
+                coverage_rel: _before(coverage_path),
+            },
+            targets=[
+                TargetPlan(
+                    contract_rel,
+                    "contract",
+                    contract_bytes,
+                    _before(contract_path),
+                    hash_bytes(contract_bytes),
+                ),
+                TargetPlan(
+                    revision_rel,
+                    "contract_revision",
+                    contract_bytes,
+                    "",
+                    hash_bytes(contract_bytes),
+                ),
+                TargetPlan(
+                    coverage_rel,
+                    "coverage",
+                    coverage_bytes,
+                    _before(coverage_path),
+                    hash_bytes(coverage_bytes),
+                ),
+            ],
+            expected={
+                "ok": True,
+                "code": "REQUIREMENT_ADDED",
+                "receipt": receipt_id,
+                "rid": rid,
+            },
+        )
+        committed = apply_plan(root, plan)
+        if not committed.get("ok"):
+            return {
+                "ok": False,
+                "code": committed.get("code", "VALIDATION_FAILED"),
+                "receipt": receipt_id,
+                "rid": rid,
+                "detail": committed.get("message")
+                or committed.get("detail", "plan apply failed"),
+            }
+        return {
+            "ok": True,
+            "code": "REQUIREMENT_ADDED",
+            "receipt": receipt_id,
+            "rid": rid,
+            "revision": new_revision,
+        }
     except (OSError, PermissionError, ValueError) as exc:
         return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
 
@@ -891,10 +1321,35 @@ def set_disposition(
 def coverage_summary(root: Path | str, receipt_id: str) -> dict:
     root = Path(root)
     ledger = _read_coverage(root, receipt_id)
+    return _coverage_summary_from_ledger(receipt_id, ledger)
+
+
+def _coverage_summary_from_ledger(receipt_id: str, ledger: dict) -> dict:
+    """Apply one strict coverage interpretation to active and archive data."""
+    if not isinstance(ledger, dict) or not isinstance(ledger.get("requirements"), dict):
+        raise ValueError(f"coverage {receipt_id} requirements is not an object")
     requirements = ledger["requirements"]
     counts: dict[str, int] = {}
-    for entry in requirements.values():
+    for rid, entry in requirements.items():
+        if not isinstance(entry, dict):
+            raise ValueError(f"coverage {receipt_id} requirement {rid} is not an object")
+        if not isinstance(rid, str) or not re.fullmatch(rf"{re.escape(receipt_id)}:R\d+", rid):
+            raise ValueError(f"coverage {receipt_id} has invalid requirement id {rid!r}")
+        clause_class = entry.get("class")
+        if clause_class not in CLAUSE_CLASSES or not isinstance(entry.get("text"), str):
+            raise ValueError(
+                f"coverage {receipt_id} requirement {rid} has invalid clause structure"
+            )
+        expected_actionable = clause_class in ACTIONABLE_CLASSES
+        if entry.get("actionable", expected_actionable) is not expected_actionable:
+            raise ValueError(f"coverage {receipt_id} requirement {rid} has invalid actionable flag")
         disp = entry.get("disposition", "UNKNOWN")
+        if disp not in ALL_DISPOSITIONS:
+            raise ValueError(f"coverage {receipt_id} requirement {rid} has invalid disposition")
+        for field in ("evidence", "verification"):
+            value = entry.get(field)
+            if value is not None and (not isinstance(value, str) or not value.strip()):
+                raise ValueError(f"coverage {receipt_id} requirement {rid} has invalid {field}")
         counts[disp] = counts.get(disp, 0) + 1
     actionable = {
         rid: entry
@@ -1084,9 +1539,125 @@ def boundary_gate(root: Path | str, work: str, boundary: str) -> dict:
     }
 
 
+def _legacy_sensitive_source_gate(root: Path) -> dict:
+    """Block release/export of credential-bearing or lost-original source bytes.
+
+    CORE-001 moved credential handling OUT of the capture path, so an exact
+    authoritative body may legitimately contain a credential. Publication is
+    still refused -- the difference is that the refusal no longer costs the
+    receipt its bytes: nothing here rewrites the canonical body, and a masked
+    view is never substituted for it.
+
+    Two refusal classes plus one truthful admission:
+      * a body whose bytes still match a credential pattern -> refuse, because
+        releasing it publishes the credential;
+      * an ACTIVE receipt whose stored bytes are a pre-CORE-001 redacted
+        derivative -> refuse, because active receipts drive execution and their
+        authority must be exact;
+      * an ARCHIVED derivative is recorded honestly as a lost original and does
+        not block, because its Work is closed and no execution reads it.
+    """
+    try:
+        index = _read_index(root)
+        candidates = set(index.get("active", {})) | set(index.get("tombstones", {}))
+        for directory in (_active_dir(root), _archive_dir(root)):
+            if directory.is_dir() and not _is_link_or_reparse(directory):
+                candidates.update(
+                    path.name.split(".", 1)[0]
+                    for path in directory.glob("SRC-*.meta.json")
+                    if INTENT_RE.fullmatch(path.name.split(".", 1)[0])
+                )
+        lost_originals: list[str] = []
+        for receipt_id in sorted(candidates):
+            meta = _read_meta(root, receipt_id)
+            location = "active"
+            if meta is None:
+                try:
+                    raw_meta = _read_owned_file(
+                        root,
+                        f".saipen/archive/source/{receipt_id}.meta.json",
+                        kind="source archive metadata",
+                        max_bytes=_META_MAX,
+                    )
+                    meta = json.loads(raw_meta.decode("utf-8-sig"))
+                    location = "archive"
+                except FileNotFoundError:
+                    continue
+            if not isinstance(meta, dict):
+                return {
+                    "ok": False,
+                    "code": "SOURCE_CORRUPTION",
+                    "detail": f"{location} metadata {receipt_id} is not an object",
+                }
+            authority = _source_authority(meta)
+            # Metadata written before CORE-001 carries no `source_authority`
+            # record. For those, `sensitive=True` with `applied=False` really
+            # did mean "captured in the redaction window and left unmasked";
+            # for current metadata it is the ordinary state of an exact
+            # sensitive capture, so the legacy reading must not apply.
+            legacy_metadata = "source_authority" not in meta
+            redaction = meta.get("redaction")
+            applied = isinstance(redaction, dict) and redaction.get("applied") is True
+            rel = (
+                f".saipen/intake/active/{receipt_id}.md"
+                if location == "active"
+                else f".saipen/archive/source/{receipt_id}.md"
+            )
+            try:
+                body = _read_owned_file(
+                    root, rel, kind="source body", max_bytes=_BODY_MAX
+                ).decode("utf-8")
+            except FileNotFoundError:
+                continue
+            except (UnicodeDecodeError, OSError, ValueError) as exc:
+                return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
+            if legacy_metadata and meta.get("sensitive") is True and not applied:
+                return {
+                    "ok": False,
+                    "code": "SOURCE_CORRUPTION",
+                    "detail": f"legacy sensitive unsanitized {location} source {receipt_id}",
+                }
+            if _redact_text(body) != body:
+                return {
+                    "ok": False,
+                    "code": "SOURCE_CORRUPTION" if legacy_metadata else "SOURCE_CREDENTIALS_UNSAFE",
+                    "detail": (
+                        f"unsanitized credential pattern in {location} source {receipt_id}"
+                        if legacy_metadata
+                        else (
+                            f"credential pattern in exact {location} source {receipt_id}; "
+                            "supply a user-authorized replacement or amendment before release"
+                        )
+                    ),
+                }
+            if authority["mode"] == "redacted-derivative":
+                if location == "active":
+                    return {
+                        "ok": False,
+                        "code": "SOURCE_ORIGINAL_LOST",
+                        "detail": (
+                            f"active source {receipt_id} stores a redacted derivative; "
+                            "capture the exact original or an amendment before release"
+                        ),
+                    }
+                lost_originals.append(receipt_id)
+    except (OSError, ValueError, UnicodeError) as exc:
+        return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
+    return {
+        "ok": True,
+        "code": "SOURCE_CREDENTIALS_SAFE",
+        "lost_originals": tuple(lost_originals),
+    }
+
+
+
+
 def release_gate(root: Path | str, current_work: str | None = None) -> dict:
     """Fail ship closed while authoritative active source scope is unresolved."""
     root = Path(root)
+    credential_gate = _legacy_sensitive_source_gate(root)
+    if not credential_gate["ok"]:
+        return credential_gate
     try:
         board_links = _board_source_links(root)
     except (OSError, ValueError) as exc:
@@ -1103,7 +1674,10 @@ def release_gate(root: Path | str, current_work: str | None = None) -> dict:
                 "code": "SOURCE_WORK_ACTIVE",
                 "work": work,
             }
-    receipts = active_receipts(root)
+    try:
+        receipts = active_receipts(root)
+    except (OSError, ValueError) as exc:
+        return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
     for item in receipts:
         receipt_id = item["receipt"]
         if receipt_id in checked:
@@ -1144,29 +1718,157 @@ def _is_archive_commit_pending(root: Path, receipt_id: str, index: dict) -> bool
     if not isinstance(index.get("active", {}).get(receipt_id), dict):
         return False
     active_present = []
-    for active_rel in (
-        f".saipen/intake/active/{receipt_id}.md",
-        f".saipen/intake/active/{receipt_id}.meta.json",
+    for active_rel, max_bytes in (
+        (f".saipen/intake/active/{receipt_id}.md", _BODY_MAX),
+        (f".saipen/intake/active/{receipt_id}.meta.json", _META_MAX),
     ):
         try:
-            _read_owned_file(root, active_rel, kind="source receipt probe", max_bytes=_META_MAX)
+            _read_owned_file(root, active_rel, kind="source receipt probe", max_bytes=max_bytes)
         except FileNotFoundError:
             active_present.append(False)
             continue
         except (ValueError, OSError):
             return False
         active_present.append(True)
-    for archived_rel in (
-        f".saipen/archive/source/{receipt_id}.md",
-        f".saipen/archive/source/{receipt_id}.meta.json",
+    for archived_rel, max_bytes in (
+        (f".saipen/archive/source/{receipt_id}.md", _BODY_MAX),
+        (f".saipen/archive/source/{receipt_id}.meta.json", _META_MAX),
     ):
         try:
-            _read_owned_file(root, archived_rel, kind="source archive probe", max_bytes=_META_MAX)
+            _read_owned_file(root, archived_rel, kind="source archive probe", max_bytes=max_bytes)
         except FileNotFoundError:
             return False
         except (ValueError, OSError):
             return False
     return not all(active_present)
+
+
+def _closed_archive_bundle(
+    root: Path,
+    receipt_id: str,
+    projection: dict,
+    *,
+    allow_active_fallback: bool = False,
+) -> tuple[dict, dict, dict, dict]:
+    """Read and prove every carrier required for a closed receipt."""
+    meta_raw = _read_owned_file(
+        root,
+        f".saipen/archive/source/{receipt_id}.meta.json",
+        kind="source archive metadata",
+        max_bytes=_META_MAX,
+    )
+    meta = json.loads(meta_raw.decode("utf-8-sig"))
+    if not isinstance(meta, dict):
+        raise ValueError("archive metadata is not an object")
+    expected_digest = projection.get("source_sha256")
+    expected_ref = f".saipen/archive/source/{receipt_id}.md"
+    if (
+        meta.get("receipt_id") != receipt_id
+        or meta.get("source_sha256") != expected_digest
+        or meta.get("status") != CLOSED_STATUS
+        or meta.get("storage_status") != ARCHIVED_STATUS
+        or meta.get("archive_ref") != expected_ref
+        or meta.get("linked_work") != projection.get("linked_work")
+        or meta.get("source_kind") not in SOURCE_KINDS
+        or meta.get("schema_version") != SCHEMA_VERSION
+    ):
+        raise ValueError(f"archived metadata {receipt_id} identity/status drift")
+    for field in ("received_at", "closed_at", "reread_at"):
+        value = meta.get(field)
+        if not isinstance(value, str) or not value:
+            raise ValueError(f"archived metadata {receipt_id} has invalid {field}")
+        try:
+            parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError as exc:
+            raise ValueError(f"archived metadata {receipt_id} has invalid {field}") from exc
+        if parsed.tzinfo is None or parsed.utcoffset() != timezone.utc.utcoffset(parsed):
+            raise ValueError(f"archived metadata {receipt_id} {field} is not UTC")
+    redaction = meta.get("redaction")
+    if redaction is not None:
+        if not isinstance(redaction, dict) or not isinstance(redaction.get("applied"), bool):
+            raise ValueError(f"archived metadata {receipt_id} has invalid redaction metadata")
+        sanitized_digest = redaction.get("sanitized_sha256")
+        if (
+            not isinstance(sanitized_digest, str)
+            or not re.fullmatch(r"[0-9a-f]{64}", sanitized_digest)
+        ):
+            raise ValueError(f"archived metadata {receipt_id} has invalid sanitized digest")
+
+    body = _read_owned_file(
+        root,
+        expected_ref,
+        kind="source archive body",
+        max_bytes=_BODY_MAX,
+    )
+    body_digest = hashlib.sha256(body).hexdigest()
+    if body_digest != expected_digest:
+        raise ValueError(f"archived body {receipt_id} digest mismatch")
+    if isinstance(redaction, dict) and redaction.get("sanitized_sha256") != body_digest:
+        raise ValueError(f"archived metadata {receipt_id} redaction digest drift")
+    if meta.get("sensitive") is True and not isinstance(redaction, dict):
+        raise ValueError(
+            f"archived metadata {receipt_id} sensitive source lacks redaction metadata"
+        )
+
+    def read_artifact(label: str) -> bytes:
+        archive_rel = f".saipen/archive/source/{receipt_id}.{label}.json"
+        active_dir = "contracts" if label == "contract" else "coverage"
+        active_rel = f".saipen/intake/{active_dir}/{receipt_id}.json"
+        try:
+            archived = _read_owned_file(
+                root, archive_rel, kind=f"source {label}", max_bytes=_LEDGER_MAX
+            )
+        except FileNotFoundError:
+            if not allow_active_fallback:
+                raise
+            return _read_owned_file(
+                root, active_rel, kind=f"source {label}", max_bytes=_LEDGER_MAX
+            )
+        if allow_active_fallback:
+            try:
+                active = _read_owned_file(
+                    root, active_rel, kind=f"active source {label}", max_bytes=_LEDGER_MAX
+                )
+            except FileNotFoundError:
+                return archived
+            if active != archived:
+                raise ValueError(f"active and archived {label} disagree for {receipt_id}")
+        return archived
+
+    contract = json.loads(read_artifact("contract").decode("utf-8-sig"))
+    coverage = json.loads(read_artifact("coverage").decode("utf-8-sig"))
+    if not isinstance(contract, dict) or contract.get("source_sha256") != expected_digest:
+        raise ValueError(f"archived Contract {receipt_id} digest drift")
+    _validate_contract_coverage(receipt_id, contract, coverage)
+    summary = _coverage_summary_from_ledger(receipt_id, coverage)
+    if not summary["actionable"] or summary["unresolved"]:
+        raise ValueError(
+            f"archived coverage {receipt_id} unresolved: {summary['unresolved']}"
+        )
+    # W2-004: validate the archived revision chain is contiguous r001..rN
+    _validate_archive_revisions(root, receipt_id, contract)
+    return meta, contract, coverage, summary
+
+
+def _validate_archive_revisions(root: Path, receipt_id: str, contract: dict) -> None:
+    """Validate archived contract revision chain (W2-004)."""
+    revision = contract.get("interpretation_revision", 0)
+    if not isinstance(revision, int) or isinstance(revision, bool) or revision < 0:
+        raise ValueError(
+            f"source {receipt_id} archived contract has invalid interpretation revision"
+        )
+    expected = set(range(1, revision + 1))
+    found: set[int] = set()
+    for path in sorted(root.glob(f".saipen/archive/source/{receipt_id}.r*.json")):
+        if path.is_file() and not _is_link_or_reparse(path):
+            match = re.fullmatch(rf"{re.escape(receipt_id)}\.r(\d+)\.json", path.name)
+            if match:
+                found.add(int(match.group(1)))
+    if found != expected:
+        raise ValueError(
+            f"source {receipt_id} archived contract revision chain is not contiguous: "
+            f"expected {sorted(expected)}, found {sorted(found)}"
+        )
 
 
 def _settle_archive_commit(root: Path, receipt_id: str, index: dict) -> dict | None:
@@ -1184,89 +1886,16 @@ def _settle_archive_commit(root: Path, receipt_id: str, index: dict) -> dict | N
     if not isinstance(projection, dict):
         return None
     try:
-        archived_meta_raw = _read_owned_file(
-            root,
-            f".saipen/archive/source/{receipt_id}.meta.json",
-            kind="source archive metadata",
-            max_bytes=_META_MAX,
+        archived_meta, _archived_contract, _archived_cov, summary = _closed_archive_bundle(
+            root, receipt_id, projection, allow_active_fallback=True
         )
-        archived_meta = json.loads(archived_meta_raw.decode("utf-8-sig"))
     except FileNotFoundError:
         return None
     except (ValueError, OSError) as exc:
         return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
-    if not isinstance(archived_meta, dict):
-        return {
-            "ok": False,
-            "code": "SOURCE_CORRUPTION",
-            "detail": "archive metadata not an object",
-        }
-    try:
-        _archive_closed_locked(root, receipt_id, archived_meta)
-    except (OSError, ValueError) as exc:
-        return {
-            "ok": False,
-            "code": "ARCHIVE_COMMIT_PENDING",
-            "receipt": receipt_id,
-            "detail": str(exc),
-        }
     expected_digest = projection.get("source_sha256")
-    if archived_meta.get("source_sha256") != expected_digest:
-        return {
-            "ok": False,
-            "code": "SOURCE_CORRUPTION",
-            "detail": f"archived metadata digest {receipt_id} drift",
-        }
-    try:
-        archived_body = _read_owned_file(
-            root,
-            f".saipen/archive/source/{receipt_id}.md",
-            kind="source body",
-            max_bytes=_BODY_MAX,
-        )
-    except (ValueError, OSError) as exc:
-        return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
-    if hashlib.sha256(archived_body).hexdigest() != expected_digest:
-        return {
-            "ok": False,
-            "code": "SOURCE_CORRUPTION",
-            "detail": f"archived body {receipt_id} digest mismatch",
-        }
-    try:
-        archived_contract_raw = _read_owned_file(
-            root,
-            f".saipen/archive/source/{receipt_id}.contract.json",
-            kind="source Work Contract",
-            max_bytes=_LEDGER_MAX,
-        )
-        archived_contract = json.loads(archived_contract_raw.decode("utf-8-sig"))
-    except (FileNotFoundError, OSError, ValueError):
-        archived_contract = None
-    if (
-        not isinstance(archived_contract, dict)
-        or archived_contract.get("source_sha256") != expected_digest
-    ):
-        return {
-            "ok": False,
-            "code": "CONTRACT_DRIFT",
-            "receipt": receipt_id,
-            "detail": "archived Contract digest drift",
-        }
-    try:
-        archived_cov_raw = _read_owned_file(
-            root,
-            f".saipen/archive/source/{receipt_id}.coverage.json",
-            kind="source coverage ledger",
-            max_bytes=_LEDGER_MAX,
-        )
-        archived_cov = json.loads(archived_cov_raw.decode("utf-8-sig"))
-    except (FileNotFoundError, OSError, ValueError):
-        archived_cov = {"requirements": {}}
-    requirements = archived_cov.get("requirements", {}) if isinstance(archived_cov, dict) else {}
-    actionable = sum(
-        bool(entry.get("actionable", entry.get("class") in ACTIONABLE_CLASSES))
-        for entry in requirements.values()
-    )
+    requirements = summary["requirements"]
+    actionable = summary["actionable"]
     tombstone = {
         "schema_version": SCHEMA_VERSION,
         "receipt_id": receipt_id,
@@ -1276,11 +1905,23 @@ def _settle_archive_commit(root: Path, receipt_id: str, index: dict) -> dict | N
         "closed_at": archived_meta.get("closed_at"),
         "closure_event": archived_meta.get("closure_event"),
         "archive_ref": f".saipen/archive/source/{receipt_id}.md",
-        "requirements": len(requirements),
+        "requirements": requirements,
         "actionable": actionable,
-        "unresolved": 0,
+        "unresolved": len(summary["unresolved"]),
     }
+    # Evidence is now proven. Finish only missing idempotent artifact moves;
+    # malformed evidence returned above before any write.
+    try:
+        _finish_archive_bundle_locked(root, receipt_id)
+    except (OSError, ValueError) as exc:
+        return {
+            "ok": False,
+            "code": "ARCHIVE_COMMIT_PENDING",
+            "receipt": receipt_id,
+            "detail": str(exc),
+        }
     _write_tombstone(root, receipt_id, tombstone)
+
     index["active"].pop(receipt_id, None)
     index["tombstones"][receipt_id] = tombstone
     _write_index(root, index)
@@ -1328,6 +1969,75 @@ def _move_archive_artifact(
     os.replace(source, destination)
 
 
+def _finish_archive_bundle_locked(root: Path, receipt_id: str) -> None:
+    """Complete artifact moves after a pending close bundle is validated."""
+    contract = _read_contract(root, receipt_id)
+    if contract is None:
+        # Active Contract already moved to archive during an interrupted close
+        # -- the archived Contract is the canonical authority for the
+        # remaining revision chain. Use the one that exposes a non-empty
+        # interpretation_revision without rewriting bytes.
+        archive_contract_rel = f".saipen/archive/source/{receipt_id}.contract.json"
+        try:
+            raw = _read_owned_file(
+                root, archive_contract_rel, kind="source archive Contract", max_bytes=_LEDGER_MAX
+            )
+        except FileNotFoundError as exc:
+            raise ValueError(
+                f"active Contract missing for {receipt_id} and no archive copy: {exc}"
+            ) from exc
+        contract = json.loads(raw.decode("utf-8-sig"))
+        if not isinstance(contract, dict):
+            raise ValueError(f"archived Contract {receipt_id} is not an object")
+    # W2-004: move exactly the validated contiguous revision chain r001..rN.
+    _contract_revision_integrity(root, receipt_id, contract)
+    expected_revisions = set(range(1, int(contract.get("interpretation_revision", 0)) + 1))
+    for label, path in (
+        ("coverage", _coverage_path(root, receipt_id)),
+        ("contract", _contract_path(root, receipt_id)),
+    ):
+        destination = _safe_path(
+            root,
+            f".saipen/archive/source/{receipt_id}.{label}.json",
+            expect_file=True,
+        )
+        _move_archive_artifact(root, path, destination, label=label, required=True)
+    contract_dir = _contract_dir(root)
+    archive_dir = _archive_dir(root)
+    for number in sorted(expected_revisions):
+        active_revision = (
+            contract_dir / f"{receipt_id}.r{number:03d}.json"
+            if contract_dir.is_dir() and not _is_link_or_reparse(contract_dir)
+            else None
+        )
+        archived_revision = (
+            archive_dir / f"{receipt_id}.r{number:03d}.json"
+            if archive_dir.is_dir() and not _is_link_or_reparse(archive_dir)
+            else None
+        )
+        if (active_revision and active_revision.is_file()
+                and not _is_link_or_reparse(active_revision)):
+            revision = _safe_path(
+                root,
+                f".saipen/intake/contracts/{receipt_id}.r{number:03d}.json",
+                expect_file=True,
+            )
+            destination = _safe_path(
+                root, f".saipen/archive/source/{revision.name}", expect_file=True
+            )
+            _move_archive_artifact(
+                root, revision, destination, label="contract revision", required=True
+            )
+        elif (archived_revision and archived_revision.is_file()
+              and not _is_link_or_reparse(archived_revision)):
+            # already in archive from a prior _archive_closed_locked call; fine
+            continue
+        else:
+            raise ValueError(
+                f"source {receipt_id} revision r{number:03d} missing at archive time"
+            )
+
+
 def _archive_closed_locked(root: Path, receipt_id: str, meta: dict) -> dict:
     archive = _archive_dir(root)
     body = _safe_path(root, f".saipen/intake/active/{receipt_id}.md", expect_file=True)
@@ -1361,7 +2071,7 @@ def _archive_closed_locked(root: Path, receipt_id: str, meta: dict) -> dict:
                 root, f".saipen/archive/source/{revision.name}", expect_file=True
             )
             _move_archive_artifact(
-                root, revision, destination, label="contract revision", required=False
+                root, revision, destination, label="contract revision", required=True
             )
     return {
         "ok": True,
@@ -1503,34 +2213,121 @@ def archive_receipt(root: Path | str, receipt_id: str) -> dict:
 
 
 def purge_receipt(root: Path | str, receipt_id: str) -> dict:
-    """Optional hard purge: keep the tombstone, remove the cold body."""
+    """Optional hard purge: keep the tombstone, remove the cold body.
+
+    W2-003: the entire destructive delete set is PLANNED before the first
+    irreversible delete. The journal operation binds the proven closed
+    archive bundle, the expected revision set, the post-purge tombstone and
+    the intake-index bytes, into one recoverable journal. A crash before
+    COMMITTED leaves every planned target either pre- or post-state;
+    recovery converges to the complete old set OR the complete new set,
+    never a half-purged archive. Repeating the request after success is
+    idempotent.
+    """
     root = Path(root)
     if not _valid_receipt_id(receipt_id):
         return _invalid_receipt_id(receipt_id)
     try:
-        with project_writer_lock(root):
-            index = _read_index(root)
-            tomb = index.get("tombstones", {}).get(receipt_id)
-            if not tomb:
-                return {"ok": False, "code": "TICKET_NOT_FOUND", "detail": receipt_id}
-            for suffix in (".md", ".meta.json", ".coverage.json", ".contract.json"):
-                path = _safe_path(
-                    root, f".saipen/archive/source/{receipt_id}{suffix}", expect_file=True
-                )
-                safe_unlink_owned(path, kind="purged source archive", ownership_root=root)
-            for revision in _archive_dir(root).glob(f"{receipt_id}.r*.json"):
-                if revision.is_file() and not _is_link_or_reparse(revision):
-                    safe_unlink_owned(
-                        revision,
-                        kind="purged source contract revision",
-                        ownership_root=root,
-                    )
-            tomb["purged"] = True
-            tomb["purged_at"] = _utc()
-            index["tombstones"][receipt_id] = tomb
-            _write_tombstone(root, receipt_id, tomb)
-            _write_index(root, index)
+        index = _read_index(root)
+        tomb = index.get("tombstones", {}).get(receipt_id)
+        if not tomb:
+            return {"ok": False, "code": "TICKET_NOT_FOUND", "detail": receipt_id}
+        if tomb.get("purged"):
             return {"ok": True, "code": "SOURCE_PURGED", "receipt": receipt_id}
+        archive_dir = _archive_dir(root)
+        delete_suffixes = (".md", ".meta.json", ".coverage.json", ".contract.json")
+        archive_targets: list[Path] = []
+        for suffix in delete_suffixes:
+            rel = f".saipen/archive/source/{receipt_id}{suffix}"
+            path = _safe_path(root, rel, expect_file=True)
+            if path.is_file() and not _is_link_or_reparse(path):
+                archive_targets.append(path)
+        revision_targets: list[Path] = []
+        if archive_dir.is_dir() and not _is_link_or_reparse(archive_dir):
+            for revision in sorted(archive_dir.glob(f"{receipt_id}.r*.json")):
+                if revision.is_file() and not _is_link_or_reparse(revision):
+                    revision_targets.append(revision)
+        new_tomb = dict(tomb)
+        new_tomb["purged"] = True
+        new_tomb["purged_at"] = _utc()
+        index_out = _read_index(root)
+        index_out["tombstones"][receipt_id] = new_tomb
+        from .journal import hash_bytes, run_mutation
+        from .paths import project_identity as _project_identity
+        from .plan import semantic_payload_hash
+
+        targets: list[dict] = []
+        for path in archive_targets:
+            targets.append(
+                {
+                    "path": path.relative_to(root).as_posix(),
+                    "role": "generic",
+                    "action": "delete_file",
+                    "content": b"",
+                    "before_hash": hash_bytes(path.read_bytes()),
+                    "after_hash": "",
+                }
+            )
+        for path in revision_targets:
+            targets.append(
+                {
+                    "path": path.relative_to(root).as_posix(),
+                    "role": "generic",
+                    "action": "delete_file",
+                    "content": b"",
+                    "before_hash": hash_bytes(path.read_bytes()),
+                    "after_hash": "",
+                }
+            )
+        tomb_rel = f".saipen/intake/tombstones/{receipt_id}.json"
+        index_rel = ".saipen/intake/index.json"
+        new_tomb_bytes = _json_bytes(new_tomb)
+        new_index_bytes = _json_bytes(index_out)
+        targets.append(
+            {
+                "path": tomb_rel,
+                "role": "generic",
+                "action": "write",
+                "content": new_tomb_bytes,
+                "before_hash": hash_bytes(
+                    (_tombstone_dir(root) / f"{receipt_id}.json").read_bytes()
+                ),
+                "after_hash": hash_bytes(new_tomb_bytes),
+            }
+        )
+        targets.append(
+            {
+                "path": index_rel,
+                "role": "generic",
+                "action": "write",
+                "content": new_index_bytes,
+                "before_hash": hash_bytes(_index_path(root).read_bytes()),
+                "after_hash": hash_bytes(new_index_bytes),
+            }
+        )
+        semantic_request = {
+            "receipt": receipt_id,
+            "delete_targets": [t["path"] for t in targets if t["action"] == "delete_file"],
+        }
+        committed = run_mutation(
+            root,
+            op_id=f"source.purge-{hash_bytes(tomb_rel.encode('utf-8'))[:12]}",
+            operation="source.purge",
+            agent=_agent_for_intake(root),
+            project_identity=_project_identity(root),
+            semantic_payload_hash=semantic_payload_hash(semantic_request),
+            targets=targets,
+            preconditions={t["path"]: t["before_hash"] for t in targets},
+            verification_policy="none",
+        )
+        if not committed.get("ok"):
+            return {
+                "ok": False,
+                "code": committed.get("code", "VALIDATION_FAILED"),
+                "receipt": receipt_id,
+                "detail": committed.get("detail", "plan apply failed"),
+            }
+        return {"ok": True, "code": "SOURCE_PURGED", "receipt": receipt_id}
     except (OSError, PermissionError, ValueError) as exc:
         return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
 
@@ -1588,7 +2385,14 @@ def read_body(root: Path | str, receipt_id: str) -> dict:
             "recorded": meta.get("source_sha256"),
             "actual": actual,
         }
-    return {"ok": True, "receipt": receipt_id, "location": location, "body": body, "meta": meta}
+    return {
+        "ok": True,
+        "receipt": receipt_id,
+        "location": location,
+        "body": body,
+        "meta": meta,
+        "source_authority": _source_authority(meta),
+    }
 
 
 def status(root: Path | str, receipt_id: str) -> dict:
@@ -1613,6 +2417,16 @@ def status(root: Path | str, receipt_id: str) -> dict:
         except (FileNotFoundError, OSError, ValueError):
             tomb = _read_index(root).get("tombstones", {}).get(receipt_id)
             if tomb:
+                if not tomb.get("purged"):
+                    try:
+                        _closed_archive_bundle(
+                            root,
+                            receipt_id,
+                            tomb,
+                            allow_active_fallback=False,
+                        )
+                    except (FileNotFoundError, OSError, ValueError) as exc:
+                        return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
                 return {
                     "ok": True,
                     "receipt": receipt_id,
@@ -1638,23 +2452,27 @@ def status(root: Path | str, receipt_id: str) -> dict:
                 max_bytes=_LEDGER_MAX,
             )
             archived_ledger = json.loads(raw.decode("utf-8-sig"))
-        except (FileNotFoundError, OSError, ValueError):
-            archived_ledger = {"requirements": {}}
-        requirements = archived_ledger.get("requirements", {})
-        summary = {
-            "receipt": receipt_id,
-            "requirements": len(requirements),
-            "actionable": sum(
-                bool(entry.get("actionable", entry.get("class") in ACTIONABLE_CLASSES))
-                for entry in requirements.values()
-            ),
-            "terminal": sum(
-                bool(entry.get("actionable", entry.get("class") in ACTIONABLE_CLASSES))
-                and entry.get("disposition") in TERMINAL_DISPOSITIONS
-                for entry in requirements.values()
-            ),
-            "unresolved": [],
-        }
+        except (FileNotFoundError, OSError, ValueError) as exc:
+            return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
+        try:
+            summary = _coverage_summary_from_ledger(receipt_id, archived_ledger)
+        except ValueError as exc:
+            return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
+        try:
+            index = _read_index(root)
+            projection = index.get("tombstones", {}).get(receipt_id) or index.get(
+                "active", {}
+            ).get(receipt_id)
+            if not isinstance(projection, dict):
+                raise ValueError(f"archive {receipt_id} has no index projection")
+            _closed_archive_bundle(
+                root,
+                receipt_id,
+                projection,
+                allow_active_fallback=False,
+            )
+        except (FileNotFoundError, OSError, ValueError) as exc:
+            return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
     else:
         summary = coverage_summary(root, receipt_id)
     return {
@@ -1675,11 +2493,25 @@ def active_receipts(root: Path | str, *, work: str | None = None) -> list[dict]:
     """Cheap hot projection: index + metadata only; never opens source bodies."""
     root = Path(root)
     result = []
-    for receipt_id in sorted(_read_index(root).get("active", {})):
+    index = _read_index(root)
+    active = index.get("active", {})
+    if not isinstance(active, dict):
+        raise ValueError("source intake index active projection is not an object")
+    for receipt_id in sorted(active):
         if not _valid_receipt_id(receipt_id):
             raise ValueError(f"invalid source receipt id: {receipt_id!r}")
-        meta = _read_meta(root, receipt_id)
-        if not meta or (work is not None and meta.get("linked_work") != work):
+        try:
+            meta = _read_meta(root, receipt_id)
+        except (OSError, ValueError) as exc:
+            raise ValueError(f"active receipt {receipt_id} metadata unreadable: {exc}") from exc
+        if not meta:
+            raise ValueError(f"active receipt {receipt_id} has no metadata")
+        projection = active.get(receipt_id)
+        if not isinstance(projection, dict) or projection.get("source_sha256") != meta.get(
+            "source_sha256"
+        ):
+            raise ValueError(f"active receipt {receipt_id} index metadata drift")
+        if work is not None and meta.get("linked_work") != work:
             continue
         summary = coverage_summary(root, receipt_id)
         result.append(
@@ -1780,27 +2612,44 @@ def validate_project(root: Path | str) -> list[str]:
         raw = _read_owned_file(
             root, ".saipen/intake/index.json", kind="source intake index", max_bytes=_INDEX_MAX
         )
-        index = json.loads(raw.decode("utf-8-sig"))
-        if not isinstance(index, dict):
-            raise ValueError("index root is not an object")
-        if not isinstance(index.get("active"), dict) or not isinstance(
-            index.get("tombstones"), dict
-        ):
-            raise ValueError("index active/tombstones are not objects")
+        index = _decode_index(json.loads(raw.decode("utf-8-sig")))
     except (OSError, ValueError) as exc:
         return [f"source intake index unreadable: {exc}"]
     seen_digests: dict[str, str] = {}
+    board: dict | None = None
+    board_tickets: dict = {}
+    try:
+        from .board import parse_board
+
+        raw_board = _read_owned_file(
+            root,
+            ".saipen/BOARD.md",
+            kind="source BOARD authority",
+            max_bytes=_BOARD_MAX,
+        )
+        board = parse_board(raw_board.decode("utf-8-sig"))
+        board_tickets = board.get("tickets", {})
+    except (OSError, ValueError):
+        board = None
+        board_tickets = {}
     for receipt_id, projection in index.get("active", {}).items():
         if not INTENT_RE.fullmatch(receipt_id):
             errors.append(f"invalid source receipt id {receipt_id!r}")
             continue
-        meta = _read_meta(root, receipt_id)
+        try:
+            meta = _read_meta(root, receipt_id)
+        except (OSError, ValueError) as exc:
+            errors.append(f"active receipt {receipt_id} metadata unreadable: {exc}")
+            continue
         if not meta:
             errors.append(f"active receipt {receipt_id} has no metadata")
             continue
         if meta.get("status") == CLOSED_STATUS:
             errors.append(f"closed receipt {receipt_id} remains in active surface")
-        integrity = verify_integrity(root, receipt_id)
+        try:
+            integrity = verify_integrity(root, receipt_id)
+        except (OSError, ValueError) as exc:
+            integrity = {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
         if not integrity["ok"]:
             errors.append(f"active receipt {receipt_id}: {integrity['code']}")
         digest = meta.get("source_sha256")
@@ -1812,43 +2661,58 @@ def validate_project(root: Path | str) -> list[str]:
             )
         else:
             seen_digests[digest] = receipt_id
-        if projection.get("source_sha256") != digest:
+        if not isinstance(projection, dict):
+            errors.append(f"active receipt {receipt_id} index projection is not an object")
+        elif projection.get("source_sha256") != digest:
             errors.append(f"active receipt {receipt_id} index digest drift")
-        contract = _read_contract(root, receipt_id)
+        try:
+            contract = _read_contract(root, receipt_id)
+        except (OSError, ValueError) as exc:
+            contract = None
+            errors.append(f"active receipt {receipt_id} Work Contract unreadable: {exc}")
         if not contract:
             errors.append(f"active receipt {receipt_id} has no Work Contract")
         elif contract.get("source_sha256") != digest:
             errors.append(f"active receipt {receipt_id} CONTRACT_DRIFT")
         else:
-            contract_ids = set(contract.get("clauses", {}))
-            coverage_ids = set(_read_coverage(root, receipt_id).get("requirements", {}))
+            clauses = contract.get("clauses", {})
+            try:
+                coverage = _read_coverage(root, receipt_id)
+            except (OSError, ValueError) as exc:
+                errors.append(f"active receipt {receipt_id} coverage unreadable: {exc}")
+                coverage = None
+            if not isinstance(clauses, dict):
+                errors.append(f"active receipt {receipt_id} Contract clauses are not an object")
+                clauses = {}
+            if coverage is not None:
+                try:
+                    _validate_contract_coverage(receipt_id, contract, coverage)
+                except (OSError, ValueError) as exc:
+                    errors.append(
+                        f"active receipt {receipt_id} contract/coverage invalid: {exc}"
+                    )
+            contract_ids = set(clauses)
+            coverage_ids = set() if coverage is None else set(coverage.get("requirements", {}))
             if contract_ids != coverage_ids:
                 errors.append(
                     f"active receipt {receipt_id} contract/coverage clause drift: "
                     f"contract={len(contract_ids)} coverage={len(coverage_ids)}"
                 )
-            revision = int(contract.get("interpretation_revision", 0))
+            try:
+                revision = int(contract.get("interpretation_revision", 0))
+            except (TypeError, ValueError):
+                revision = 0
+                errors.append(f"active receipt {receipt_id} has invalid contract revision")
             if revision > 0:
-                revision_path = _contract_dir(root) / f"{receipt_id}.r{revision:03d}.json"
-                if not revision_path.is_file() or _is_link_or_reparse(revision_path):
+                try:
+                    _contract_revision_integrity(root, receipt_id, contract)
+                except (ValueError, OSError) as exc:
                     errors.append(
-                        f"active receipt {receipt_id} contract revision r{revision:03d} missing"
+                        f"active receipt {receipt_id} contract revision chain: {exc}"
                     )
         linked = meta.get("linked_work")
         if linked:
-            try:
-                from .board import parse_board
-
-                raw_board = _read_owned_file(
-                    root,
-                    ".saipen/BOARD.md",
-                    kind="source BOARD authority",
-                    max_bytes=_BOARD_MAX,
-                )
-                board = parse_board(raw_board.decode("utf-8-sig"))
-                ticket = board.get("tickets", {}).get(linked)
-            except (OSError, ValueError):
-                ticket = None
+            ticket = board_tickets.get(linked)
             if ticket is None:
                 errors.append(f"active receipt {receipt_id} references missing Work {linked}")
             else:
@@ -1863,8 +2727,16 @@ def validate_project(root: Path | str) -> list[str]:
                     errors.append(
                         f"active receipt {receipt_id} linkage missing from BOARD Work {linked}"
                     )
-                if ticket.get("section") == "## DONE" and not coverage_complete(root, receipt_id):
-                    errors.append(f"DONE Work {linked} has unresolved source receipt {receipt_id}")
+                if ticket.get("section") == "## DONE":
+                    try:
+                        complete = coverage_complete(root, receipt_id)
+                    except (OSError, ValueError) as exc:
+                        complete = False
+                        errors.append(f"active receipt {receipt_id} coverage unreadable: {exc}")
+                    if not complete:
+                        errors.append(
+                            f"DONE Work {linked} has unresolved source receipt {receipt_id}"
+                        )
         amends = meta.get("amends")
         if amends:
             if not _valid_receipt_id(amends):
@@ -1878,6 +2750,9 @@ def validate_project(root: Path | str) -> list[str]:
     for receipt_id, tomb in index.get("tombstones", {}).items():
         if receipt_id in index.get("active", {}):
             errors.append(f"receipt {receipt_id} is both active and tombstoned")
+        if not isinstance(tomb, dict):
+            errors.append(f"tombstone {receipt_id} projection is not an object")
+            continue
         if tomb.get("status") != CLOSED_STATUS or tomb.get("unresolved") != 0:
             errors.append(f"tombstone {receipt_id} lacks verified closed coverage")
         expected_archive = f".saipen/archive/source/{receipt_id}.md"
@@ -1886,8 +2761,48 @@ def validate_project(root: Path | str) -> list[str]:
         tomb_path = _tombstone_dir(root) / f"{receipt_id}.json"
         if not tomb_path.is_file() or _is_link_or_reparse(tomb_path):
             errors.append(f"tombstone {receipt_id} file missing or unsafe")
-        if not tomb.get("purged") and not (_archive_dir(root) / f"{receipt_id}.md").is_file():
-            errors.append(f"tombstone {receipt_id} archive body missing")
+        else:
+            try:
+                tomb_raw = _read_owned_file(
+                    root,
+                    f".saipen/intake/tombstones/{receipt_id}.json",
+                    kind="source tombstone",
+                    max_bytes=_META_MAX,
+                )
+                if json.loads(tomb_raw.decode("utf-8-sig")) != tomb:
+                    errors.append(f"tombstone {receipt_id} differs from index projection")
+            except (OSError, ValueError) as exc:
+                errors.append(f"tombstone {receipt_id} unreadable: {exc}")
+        if not tomb.get("purged"):
+            try:
+                _meta, _contract, _coverage, archive_summary = _closed_archive_bundle(
+                    root, receipt_id, tomb
+                )
+                for field, expected in (
+                    ("requirements", archive_summary["requirements"]),
+                    ("actionable", archive_summary["actionable"]),
+                    ("unresolved", len(archive_summary["unresolved"])),
+                ):
+                    if tomb.get(field) != expected:
+                        errors.append(
+                            f"tombstone {receipt_id} {field} count drift: "
+                            f"recorded={tomb.get(field)!r} derived={expected!r}"
+                        )
+            except (FileNotFoundError, OSError, ValueError) as exc:
+                errors.append(f"closed receipt {receipt_id} archive bundle invalid: {exc}")
+    try:
+        credential_gate = _legacy_sensitive_source_gate(root)
+    except (OSError, ValueError) as exc:
+        credential_gate = {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
+    if not credential_gate.get("ok"):
+        errors.append(
+            f"source credential gate: {credential_gate.get('code', 'SOURCE_CORRUPTION')} "
+            f"{credential_gate.get('detail', '')}".rstrip()
+        )
+    # A closed, archived redacted-derivative receipt is NOT appended here: the
+    # archive is immutable, so an error line would be a permanent failure no
+    # future work could clear. The fact stays queryable through
+    # `_source_authority` / the gate's `lost_originals` field instead.
     known_receipts = set(index.get("active", {})) | set(index.get("tombstones", {}))
     for work, receipts in board_links.items():
         for receipt_id in sorted(receipts):

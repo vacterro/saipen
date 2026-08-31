@@ -179,6 +179,10 @@ def junctions_available() -> bool:
 
 EXPECT_RE = re.compile(r"^expect:\s*(pass|fail)\s*$", re.MULTILINE)
 
+_IGNORE_RUNTIME = shutil.ignore_patterns(
+    "__pycache__", "*.pyc", ".saipen/recovery", ".saipen/locks", ".saipen/cache"
+)
+
 # A fixture that declares `expect: fail` and then fails for some OTHER reason
 # asserts nothing at all, and says PASS while doing it. Three did exactly that:
 # dependency-cycle, dangling-needs-reference and read-only-restriction each
@@ -4455,7 +4459,10 @@ def run_saicrew_probes() -> tuple[list[str], int]:
         ) -> dict:
             """A strict-decoder-valid settled journal receipt carrying the
             same record shape real engine ops commit (T-1003 sweep)."""
-            from saipen_engine.paths import project_identity as _proj_identity
+            from saipen_engine.paths import (
+                project_identity as _proj_identity,
+                project_lineage_identity,
+            )
 
             receipt = {
                 "op_id": op_id,
@@ -4464,6 +4471,7 @@ def run_saicrew_probes() -> tuple[list[str], int]:
                 "created_at": created_at,
                 "agent": "probe",
                 "project_identity": _proj_identity(root),
+                "project_lineage": project_lineage_identity(root),
                 "semantic_payload_hash": "sha256:fixture",
                 "verification_policy": "none",
                 "preconditions": {},
@@ -4481,6 +4489,10 @@ def run_saicrew_probes() -> tuple[list[str], int]:
                 ],
             }
             if meta is not None:
+                meta = dict(meta)
+                if operation == "crew_defer":
+                    meta.setdefault("project_identity", receipt["project_identity"])
+                    meta.setdefault("project_lineage", receipt["project_lineage"])
                 receipt["receipt_metadata"] = meta
             receipt_dir = root / ".saipen" / "recovery" / "ops" / op_id
             receipt_dir.mkdir(parents=True, exist_ok=True)
@@ -5673,7 +5685,6 @@ def run_release_freshness_probes() -> tuple[list[str], int]:
                 ".git", ".venv", "__pycache__", ".freebuff", "node_modules", "nul"
             ),
         )
-
         def git(*args: str) -> subprocess.CompletedProcess[str]:
             return subprocess.run(
                 ["git", *args],
@@ -6170,6 +6181,10 @@ def run_release_executor_probes() -> tuple[list[str], int]:
                 ".git", ".venv", "__pycache__", ".freebuff", "node_modules", "nul"
             ),
         )
+        # Release probes build their own synthetic BOARD/STATE/LOG and source
+        # scope. Do not let an unrelated live receipt from the host project
+        # become a hidden release precondition in every copied fixture.
+        shutil.rmtree(project / ".saipen" / "intake", ignore_errors=True)
 
         def git(*args: str) -> subprocess.CompletedProcess[str]:
             return subprocess.run(
@@ -7000,19 +7015,20 @@ def run_release_executor_probes() -> tuple[list[str], int]:
             check=False,
         )
 
-        def git12(*args: str):
+        def git12(*args: str, input: str | None = None):
             return subprocess.run(
                 ["git", "-C", str(project), *args],
                 env=env,
                 capture_output=True,
                 text=True,
                 check=False,
+                input=input,
             )
 
         from saipen_engine.release import _git_object_count
 
         before = _git_object_count(project)
-        git12("hash-object", "-w", "--stdin")
+        git12("hash-object", "-w", "--stdin", input="probe\n")
         after = _git_object_count(project)
         expect(
             "12. loose object creation changes the detector", after > before, f"{before}->{after}"
@@ -11413,7 +11429,15 @@ def run_improve_probes() -> tuple[list[str], int]:
     _parallel_results = []
     for _proc in _parallel:
         _out, _err = _proc.communicate(timeout=60)
-        _parallel_results.append((_proc.returncode, json.loads(_out), _err))
+        try:
+            _payload = json.loads(_out)
+        except (json.JSONDecodeError, ValueError):
+            _payload = {
+                "code": "MALFORMED_CHILD_OUTPUT",
+                "stdout": _out[-500:],
+                "stderr": _err[-1000:],
+            }
+        _parallel_results.append((_proc.returncode, _payload, _err))
     _parallel_assignments = [
         r[1] for r in _parallel_results if r[1].get("code") == "IMPROVE_AUDIT_ASSIGNMENT"
     ]
@@ -11432,12 +11456,20 @@ def run_improve_probes() -> tuple[list[str], int]:
 
     with WriterLock(meta_root):
         _busy_proc = _prepare("--new-seat")
+    try:
+        _busy_payload = json.loads(_busy_proc.stdout)
+    except (json.JSONDecodeError, ValueError):
+        _busy_payload = {
+            "code": "MALFORMED_CHILD_OUTPUT",
+            "stdout": _busy_proc.stdout[-500:],
+            "stderr": _busy_proc.stderr[-1000:],
+        }
     expect(
         "live Improve contention returns structured WRITER_BUSY",
         _busy_proc.returncode != 0
-        and json.loads(_busy_proc.stdout).get("code") == "WRITER_BUSY"
+        and _busy_payload.get("code") == "WRITER_BUSY"
         and "Traceback" not in _busy_proc.stderr,
-        repr((_busy_proc.stdout, _busy_proc.stderr)),
+        repr((_busy_proc.returncode, _busy_payload, _busy_proc.stderr)),
     )
 
     _saipen_module.HOME = HOME
@@ -16150,7 +16182,10 @@ def run_last_event_probes() -> tuple[list[str], int]:
         log = log_path.read_text(encoding="utf-8-sig").rstrip()
         log += "\n- 26.07.17 00:01 [E-002] [parent: E-001] [T-001] RUN: checkpoint advanced\n"
         log_path.write_text(log, encoding="utf-8", newline="\n")
-        expect("advanced LOG makes old marker stale", validate(project), 1, "lower than the log")
+        # A recoverable checkpoint drift is deliberately a warning: the
+        # reconciliation command repairs it, while the validator remains
+        # usable for ordinary continuation.
+        expect("advanced LOG makes old marker stale", validate(project), 0, "lower than the log")
 
         state = state_path.read_text(encoding="utf-8")
         state_path.write_text(
@@ -16168,7 +16203,7 @@ def run_last_event_probes() -> tuple[list[str], int]:
         state_path.write_text(
             state.replace("last_event: 2\n", "last_event: 3\n", 1), encoding="utf-8", newline="\n"
         )
-        expect("marker above LOG fails as corrupt", validate(project), 1, "higher than the log")
+        expect("marker above LOG is repairable drift", validate(project), 0, "higher than the log")
 
     return problems, checked
 
@@ -18118,6 +18153,144 @@ def run_source_receipt_probes() -> tuple[list[str], int]:
     return problems, result.testsRun
 
 
+def run_scenario_fixture_probes(
+    enabled: bool = True,
+) -> tuple[list[str], int, int]:
+    """Validate every behavioral scenario fixture against a DISPOSABLE copy.
+
+    PERF-001: the canonical validator writes a conformance receipt on every
+    run, so pointing it at a repository-owned fixture manufactures nested
+    runtime evidence inside the source tree. Git source-freshness then has to
+    enumerate that debris as source on every later pass, which made the suite
+    slower each time it ran. Each fixture is therefore copied into a temporary
+    directory and only the copy is validated -- the repository stays
+    byte-identical no matter how often the suite runs.
+
+    Exposed at module level so the hermeticity proof can be exercised directly
+    instead of only as a side effect of a full suite run.
+    """
+    if not SCENARIOS.is_dir():
+        print(f"FAIL: no {SCENARIOS} -- run this from the SAIPEN home")
+        sys.exit(1)
+    if not enabled:
+        return [], 0, 0
+
+    failures: list[str] = []
+    checked = skipped = 0
+
+    for d in sorted(p for p in SCENARIOS.iterdir() if p.is_dir()):
+        readme = d / "README.md"
+        has_state = (d / ".saipen").is_dir()
+        declared = None
+        reason = None
+        warn_reason = None
+        if readme.is_file():
+            _rtext = readme.read_text(encoding="utf-8-sig")
+            m = EXPECT_RE.search(_rtext)
+            declared = m.group(1) if m else None
+            _rm = REASON_RE.search(_rtext)
+            reason = _rm.group(1) if _rm else None
+            _wm = WARN_RE.search(_rtext)
+            warn_reason = _wm.group(1) if _wm else None
+
+        if not has_state:
+            # Behavioral fixture. It must NOT declare an expectation -- there is
+            # nothing to run, so a declaration here would be a promise no one keeps.
+            if declared:
+                failures.append(
+                    f"{d.name}: declares 'expect: {declared}' but ships "
+                    f"no .saipen/ -- nothing to run"
+                )
+            else:
+                skipped += 1
+            continue
+
+        if declared is None:
+            failures.append(
+                f"{d.name}: ships a .saipen/ but declares no "
+                f"'expect: pass|fail' line -- cannot be checked"
+            )
+            continue
+
+        if declared == "fail" and not reason:
+            failures.append(
+                f"{d.name}: declares 'expect: fail' with no "
+                f"'expect_fail_contains:' line -- an unpinned "
+                f"fail-fixture asserts only that something went "
+                f"wrong, and any unrelated FAIL then scores it green"
+            )
+            continue
+
+        with tempfile.TemporaryDirectory(prefix="saipen-scenario-") as raw:
+            disposable = Path(raw) / d.name
+            shutil.copytree(d, disposable, symlinks=True, ignore=_IGNORE_RUNTIME)
+            r = subprocess.run(
+                [sys.executable, str(VALIDATOR), "--project-root", str(disposable)],
+                cwd=disposable,
+                capture_output=True,
+                text=True,
+            )
+            actual = "pass" if r.returncode == 0 else "fail"
+            checked += 1
+            if actual != declared:
+                detail = ""
+                for line in (r.stdout + r.stderr).splitlines():
+                    if line.startswith("FAIL"):
+                        detail = f" | first FAIL: {line[:120]}"
+                        break
+                failures.append(
+                    f"{d.name}: declared '{declared}', got '{actual}' "
+                    f"(validator exit {r.returncode}){detail}"
+                )
+            elif declared == "fail" and reason:
+                blob = r.stdout + r.stderr
+                if "Traceback (most recent call last)" in blob:
+                    last = next(
+                        (
+                            ln
+                            for ln in reversed(blob.splitlines())
+                            if ln.strip() and not ln.startswith(" ")
+                        ),
+                        "<no exception line>",
+                    )
+                    failures.append(
+                        f"{d.name}: the validator CRASHED instead of "
+                        f"reporting -- {last.strip()[:110]!r}. A traceback "
+                        f"exits non-zero and can be mistaken for the "
+                        f"declared failure; it is a defect in the tool"
+                    )
+                elif reason not in blob:
+                    first = next(
+                        (ln for ln in blob.splitlines() if ln.startswith("FAIL")), "<no FAIL line>"
+                    )
+                    failures.append(
+                        f"{d.name}: failed as declared, but for the wrong "
+                        f"reason -- expected {reason!r}, first FAIL was "
+                        f"{first[:110]!r}"
+                    )
+                else:
+                    print(f"PASS: {d.name} -- failed on {reason!r}, as declared")
+            elif declared == "pass" and warn_reason:
+                blob = r.stdout + r.stderr
+                if warn_reason not in blob:
+                    failures.append(
+                        f"{d.name}: passed as declared, but missing expected warning -- "
+                        f"expected {warn_reason!r}"
+                    )
+                else:
+                    print(f"PASS: {d.name} -- passed and warned on {warn_reason!r}, as declared")
+            else:
+                if declared == "fail":
+                    print(
+                        f"WARN: {d.name} -- fails as declared, but pins no reason; "
+                        f"add `expect_fail_contains:` so it cannot pass by failing "
+                        f"at something unrelated"
+                    )
+                print(f"PASS: {d.name} -- expected {declared}, got {actual}")
+
+    return failures, checked, skipped
+
+
 def _main_impl():
     """Run targeted probe groups or the full suite.
 
@@ -18170,126 +18343,17 @@ def _main_impl():
 
     # ---- Full suite --------------------------------------------------------
 
-    if not SCENARIOS.is_dir():
-        print(f"FAIL: no {SCENARIOS} -- run this from the SAIPEN home")
-        sys.exit(1)
-
-    failures = []
+    failures: list[str] = []
     checked = skipped = 0
 
-    for d in (
-        sorted(p for p in SCENARIOS.iterdir() if p.is_dir()) if _selected_group is None else []
-    ):
-        readme = d / "README.md"
-        has_state = (d / ".saipen").is_dir()
-        declared = None
-        reason = None
-        warn_reason = None
-        if readme.is_file():
-            _rtext = readme.read_text(encoding="utf-8-sig")
-            m = EXPECT_RE.search(_rtext)
-            declared = m.group(1) if m else None
-            _rm = REASON_RE.search(_rtext)
-            reason = _rm.group(1) if _rm else None
-            _wm = WARN_RE.search(_rtext)
-            warn_reason = _wm.group(1) if _wm else None
-
-        if not has_state:
-            # Behavioral fixture. It must NOT declare an expectation -- there is
-            # nothing to run, so a declaration here would be a promise no one keeps.
-            if declared:
-                failures.append(
-                    f"{d.name}: declares 'expect: {declared}' but ships "
-                    f"no .saipen/ -- nothing to run"
-                )
-            else:
-                skipped += 1
-            continue
-
-        if declared is None:
-            failures.append(
-                f"{d.name}: ships a .saipen/ but declares no "
-                f"'expect: pass|fail' line -- cannot be checked"
-            )
-            continue
-
-        if declared == "fail" and not reason:
-            failures.append(
-                f"{d.name}: declares 'expect: fail' with no "
-                f"'expect_fail_contains:' line -- an unpinned "
-                f"fail-fixture asserts only that something went "
-                f"wrong, and any unrelated FAIL then scores it green"
-            )
-            continue
-
-        r = subprocess.run(
-            [sys.executable, str(VALIDATOR), "--project-root", str(d)],
-            cwd=d,
-            capture_output=True,
-            text=True,
-        )
-        actual = "pass" if r.returncode == 0 else "fail"
-        checked += 1
-        if actual != declared:
-            detail = ""
-            for line in (r.stdout + r.stderr).splitlines():
-                if line.startswith("FAIL"):
-                    detail = f" | first FAIL: {line[:120]}"
-                    break
-            failures.append(
-                f"{d.name}: declared '{declared}', got '{actual}' "
-                f"(validator exit {r.returncode}){detail}"
-            )
-        elif declared == "fail" and reason:
-            blob = r.stdout + r.stderr
-            if "Traceback (most recent call last)" in blob:
-                # A CRASH is not "failed for the wrong reason". Both exit non-zero,
-                # and the softer wording pointed at the fixture when the defect was
-                # in the validator: a NameError on a constant declared after its
-                # first use, in a branch this repo's own STATE never enters. Name
-                # the crash so the next reader looks at the tool, not the data.
-                last = next(
-                    (
-                        ln
-                        for ln in reversed(blob.splitlines())
-                        if ln.strip() and not ln.startswith(" ")
-                    ),
-                    "<no exception line>",
-                )
-                failures.append(
-                    f"{d.name}: the validator CRASHED instead of "
-                    f"reporting -- {last.strip()[:110]!r}. A traceback "
-                    f"exits non-zero and can be mistaken for the "
-                    f"declared failure; it is a defect in the tool"
-                )
-            elif reason not in blob:
-                first = next(
-                    (ln for ln in blob.splitlines() if ln.startswith("FAIL")), "<no FAIL line>"
-                )
-                failures.append(
-                    f"{d.name}: failed as declared, but for the wrong "
-                    f"reason -- expected {reason!r}, first FAIL was "
-                    f"{first[:110]!r}"
-                )
-            else:
-                print(f"PASS: {d.name} -- failed on {reason!r}, as declared")
-        elif declared == "pass" and warn_reason:
-            blob = r.stdout + r.stderr
-            if warn_reason not in blob:
-                failures.append(
-                    f"{d.name}: passed as declared, but missing expected warning -- "
-                    f"expected {warn_reason!r}"
-                )
-            else:
-                print(f"PASS: {d.name} -- passed and warned on {warn_reason!r}, as declared")
-        else:
-            if declared == "fail":
-                print(
-                    f"WARN: {d.name} -- fails as declared, but pins no reason; "
-                    f"add `expect_fail_contains:` so it cannot pass by failing "
-                    f"at something unrelated"
-                )
-            print(f"PASS: {d.name} -- expected {declared}, got {actual}")
+    # Every behavioral fixture is validated in a disposable copy so the
+    # validator's mandatory receipt emission never lands in the source tree.
+    _fixture_failures, _fixture_checked, _fixture_skipped = run_scenario_fixture_probes(
+        enabled=_selected_group is None
+    )
+    failures.extend(_fixture_failures)
+    checked += _fixture_checked
+    skipped += _fixture_skipped
 
     def run_digest_stale_probes() -> tuple[list[str], int]:
         problems = []

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import io
 import hashlib
 import json
 import os
@@ -12,6 +13,7 @@ import sys
 import tempfile
 import time
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
@@ -675,6 +677,112 @@ class PerformanceAuditTests(ControlFixture):
         self.assertEqual(lean.illegal_lines, full.illegal_lines)
         self.assertEqual(lean.tail, full.tail)
         self.assertEqual(lean.max_ticket_id, full.max_ticket_id)
+
+    def test_lean_project_snapshot_preserves_routing_fields_and_drops_renderings(self) -> None:
+        from saipen_engine.snapshot import ProjectSnapshot
+
+        root = self.make_project()
+        full = ProjectSnapshot.capture(root, lean=False)
+        lean = ProjectSnapshot.capture(root, lean=True)
+
+        self.assertEqual(full.state_hash, lean.state_hash)
+        self.assertEqual(full.board_hash, lean.board_hash)
+        self.assertEqual(full.log_hash, lean.log_hash)
+        self.assertEqual(full.log_tail, lean.log_tail)
+        self.assertEqual(full.state_text, lean.state_text)
+        self.assertEqual(full.board_text, lean.board_text)
+        self.assertEqual(full.history_events, lean.history_events)
+        self.assertEqual(full.history.events, lean.history.events)
+        self.assertEqual(full.history.illegal_lines, lean.history.illegal_lines)
+        self.assertEqual(full.history.max_ticket_id, lean.history.max_ticket_id)
+        self.assertEqual(full.history.text != "", True)
+        self.assertEqual(lean.history.text, "")
+        self.assertTrue(full.history.event_lines)
+        self.assertEqual(lean.history.event_lines, ())
+
+    def test_lean_and_full_project_snapshot_read_each_history_segment_once(self) -> None:
+        from saipen_engine.snapshot import ProjectSnapshot
+
+        root = self.make_project()
+        logs = root / ".saipen" / "logs"
+        logs.mkdir(parents=True, exist_ok=True)
+        (logs / "LOG-001.md").write_text(
+            "# Seal\n- 24.08.26 00:01 [E-002] [agent: tester] RUN: sealed\n",
+            encoding="utf-8",
+        )
+        paths = [logs / "LOG-001.md", root / ".saipen" / "LOG.md"]
+        original_read_bytes = Path.read_bytes
+        for lean in (False, True):
+            calls: dict[str, int] = {}
+
+            def counted(path: Path) -> bytes:
+                calls[str(path)] = calls.get(str(path), 0) + 1
+                return original_read_bytes(path)
+
+            with mock.patch.object(Path, "read_bytes", autospec=True, side_effect=counted):
+                ProjectSnapshot.capture(root, lean=lean)
+            for path in paths:
+                self.assertEqual(calls.get(str(path), 0), 1, (lean, path, calls))
+
+    def _routing_output_with_capture_mode(self, root: Path, command: str, lean: bool) -> str:
+        import saipen as cli
+        from saipen_engine.snapshot import ProjectSnapshot
+
+        original_capture = ProjectSnapshot.capture
+        output = io.StringIO()
+        with mock.patch.object(ProjectSnapshot, "capture") as capture:
+            capture.side_effect = lambda path, *args, **kwargs: original_capture(
+                path, lean=lean
+            )
+            with redirect_stdout(output):
+                rc = cli.main(["--project-root", str(root), "--json", command])
+        self.assertEqual(rc, 0, (command, lean, output.getvalue()))
+        return output.getvalue()
+
+    def test_status_next_explain_are_identical_with_full_and_lean_capture(self) -> None:
+        root = self.make_project()
+        for command in ("status", "next", "explain-next"):
+            with self.subTest(command=command):
+                full = self._routing_output_with_capture_mode(root, command, False)
+                lean = self._routing_output_with_capture_mode(root, command, True)
+                self.assertEqual(full, lean)
+
+    def test_context_renderers_keep_full_history_capture(self) -> None:
+        from saipen_engine.context import context_audit, context_cold, context_hot
+
+        root = self.make_project()
+        cold = context_cold(root)
+        hot = context_hot(root)
+        audit = context_audit(root)
+        self.assertTrue(cold.ok, cold)
+        self.assertTrue(hot.ok, hot)
+        self.assertTrue(audit.ok, audit)
+        self.assertIn("E-001", cold.data["surface"])
+        self.assertIn("E-001", hot.data["surface"])
+        self.assertTrue(
+            any(
+                item["source"] == "LOG history (sealed + active)"
+                for item in audit.data["sources"]
+            )
+        )
+
+    def test_snapshot_history_ownership_refuses_symlink_and_directory(self) -> None:
+        from saipen_engine.log import HistoryOwnershipError, read_history_snapshot
+
+        root = self.make_project()
+        logs = root / ".saipen" / "logs"
+        logs.mkdir(parents=True, exist_ok=True)
+        symlink = logs / "LOG-001.md"
+        try:
+            symlink.symlink_to(root / ".saipen" / "STATE.md")
+        except (OSError, NotImplementedError):
+            self.skipTest("symlink not permitted on this host")
+        with self.assertRaises(HistoryOwnershipError):
+            read_history_snapshot(root)
+        symlink.unlink()
+        (logs / "LOG-001.md").mkdir()
+        with self.assertRaises(HistoryOwnershipError):
+            read_history_snapshot(root)
 
     def test_focus_reads_are_prebounded_and_fingerprint_streams_stably(self) -> None:
         root = self.make_project()

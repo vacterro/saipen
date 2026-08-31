@@ -1,39 +1,20 @@
 """The phase DFA and the `next_action` grammar, in one place.
 
-These were hand-kept constants inside `tools/validate.py`. They are mechanical
-facts — which phase may follow which, which phases carry a ticket, what shape a
-`next_action` takes — so under NITRO they belong to the engine and the validator
-imports them.
-
-That does NOT make this file the source of truth. CORE section 1.6 is, and the
-validator's cross-doc drift check still compares these sets against CORE's own
-sentences: the constants exist in code because a DFA cannot be executed from
-prose, and the drift check exists because a constant cannot be trusted to still
-match the prose it came from.
+All closed facts are derived from REGISTRY.json. CORE explains the state model;
+runtime and validators never reconstruct the DFA from prose.
 """
 
 from __future__ import annotations
 
 import re
 
-# CORE section 1.6's transition table.
+from .registry import load_registry, require_mapping, require_string_list
+
+_PHASES = require_mapping(load_registry(), "phases")
+_TRANSITIONS = require_mapping(_PHASES, "valid_transitions")
 VALID_TRANSITIONS: dict[str, list[str]] = {
-    "INIT": ["PLAN", "BLOCKED"],
-    "PLAN": ["SCOUT", "BUILD", "DONE", "BLOCKED"],
-    "SCOUT": ["BUILD", "BLOCKED"],
-    "BUILD": ["VERIFY", "BLOCKED"],
-    "VERIFY": ["REVIEW", "SCOUT", "BUILD", "BLOCKED"],
-    "REVIEW": ["SHIP", "BUILD", "SCOUT", "BLOCKED"],
-    "SHIP": ["DONE", "BUILD", "BLOCKED"],
-    "DONE": ["SCOUT", "PLAN", "HUNT", "BLOCKED"],
-    "VALIDATE": ["SCOUT", "PLAN", "DONE", "BLOCKED"],
-    "HUNT": ["ADD", "PLAN", "SCOUT", "BLOCKED"],
-    "MARKHUNT": ["DONE", "BLOCKED"],
-    "ADD": ["BUILD", "PLAN", "SCOUT", "DONE", "BLOCKED"],
-    "CLEAN": ["DONE", "BLOCKED"],
-    "TRANSLATE": ["DONE", "BLOCKED"],
-    "PREPARE": ["DONE", "BLOCKED"],
-    "BLOCKED": ["PLAN", "SCOUT", "DONE"],
+    str(source): list(require_string_list(_TRANSITIONS, str(source)))
+    for source in require_string_list(_PHASES, "all")
 }
 
 # The COMPLETE canonical phase enum: every source node of the DFA (T-1008).
@@ -54,12 +35,13 @@ ALL_PHASES = frozenset(VALID_TRANSITIONS)
 # as a COMMAND (CORE section 1.10), but `phase: SHIP` is reachable only from
 # REVIEW -- section 1.10 says so in as many words while this set said otherwise
 # from v7.83.0 to v7.94.0. A command is not a transition.
-ANY_FROM = frozenset({"VALIDATE", "MARKHUNT", "CLEAN", "TRANSLATE", "PREPARE", "PLAN", "HUNT"})
+ANY_FROM = frozenset(require_string_list(_PHASES, "any_from"))
 
 # The five phases whose `next_action` MUST name a ticket.
-TICKET_BEARING_PHASES = frozenset({"SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP"})
+TICKET_BEARING_PHASES = frozenset(require_string_list(_PHASES, "ticket_bearing"))
 
-PHASE_NA_RE = re.compile(r"^PHASE\s+([A-Za-z_-]+)(?:\s+(T-\d+))?(?:\s+\[[^\]]*\])?\s*$")
+_NEXT_ACTION = require_mapping(load_registry(), "next_action_forms")
+PHASE_NA_RE = re.compile(str(_NEXT_ACTION["grammar"]))
 
 
 def phase_next_action_error(value: str) -> str | None:

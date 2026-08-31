@@ -1,176 +1,91 @@
-# saipen BOOT -- cold-start kernel
+# saipen BOOT -- cold-start router
 
-You are continuing a project whose entire brain persists in `.saipen/`.
-This file gives the execution order. No rule is *defined* here —
-`CORE.md` (§1.x) and `MAINTENANCE.md` (§2.x) decide every question.
+BOOT defines no protocol rule. It decides what evidence and which single owner
+must be loaded next. Rule IDs and machine facts live in `REGISTRY.json`; the
+human ownership map lives in `INDEX.md`.
 
-## Fast path
+## Cold route
 
-1. **Read `STYLE.md` — the file in the same folder as this `BOOT.md` — before any output.**
-   Voice governs the first token (CORE.md §1.1). `protocol_dir` is
-   resolved in step 2; if not yet bound, the file beside this `BOOT.md`
-   needs no resolution and answers the same question either layout.
+1. **Load `STYLE.md` beside this BOOT.md before user-visible output.** Its
+   `reply_language:` value and style contract govern the first token. Invalid or unreadable style
+   authority is a bootstrap failure, never permission to guess.
 
-2. **Bind `project_root`, resolve `protocol_dir`, read `.saipen/STATE.md`.**
-   Explicit target wins; else Git (`git rev-parse --show-toplevel` +
-   `--git-common-dir`); else nearest ancestor with `.saipen/`. A linked
-   worktree with its own `.saipen/` IS its own root. Keep the binding:
-   every checkpoint path is `<project_root>/.saipen/...`. `saipen_home`
-   points to the protocol install (CORE.md §1.1).
+2. **Bind the project and installation.** Explicit target wins; otherwise use
+   the Git worktree root, then the nearest ancestor containing `.saipen/`.
+   Project memory is exactly `<project_root>/.saipen/`. Bind `saipen_home` from
+   the loaded skill/STATE anchor, then resolve `protocol_dir` as either
+   `<saipen_home>/saipen` or `<saipen_home>`. Do not scan for another install.
+   If neither layout contains this file, route to BLOCKED. A root without
+   `.saipen/` routes to INIT.
 
-   **Resolve `protocol_dir` from `saipen_home`:**
-   - `<saipen_home>/saipen/BOOT.md` exists → `protocol_dir = <saipen_home>/saipen`
-   - `<saipen_home>/BOOT.md` exists → `protocol_dir = <saipen_home>`
-   - Neither → `phase: BLOCKED` immediately.
+3. **Read and validate `.saipen/STATE.md`.** Check the registry-owned STATE
+   shape, phase and `last_event`/style bindings. Corrupt or contradictory state
+   routes to recovery before any ordinary work (`RECOVERY-01`, `OPS.md`). A
+   legacy readable schema is upgraded only through the next canonical
+   checkpoint. Files outrank model memory.
 
-   Normative docs load from `protocol_dir`; tools/schemas/templates/VERSION
-   from `saipen_home`. No other path derivation is conformant.
+4. **Activate only applicable context.**
 
-   **Anchors, never discovery.** `protocol_dir`/`saipen_home` come from
-   where this `BOOT.md` actually loaded (the skill path in the system
-   prompt, or a bound STATE's `saipen_home:` field) — never from scanning
-   the workspace, its parents, or its siblings; the SAIPEN home is often a
-   sibling of the workspace. Never `find`/glob for `BOOT.md` or `.saipen/`
-   outside the bound root. `.saipen/` means exactly
-   `<project_root>/.saipen/`; absent there means the project is NOT
-   bootstrapped → INIT (§1.7), never "no saipen state, skip the protocol" —
-   STYLE.md still governs the first token.
+   - Skill injection present: load its SPEC and the smallest matching skill.
+   - Active Work names a receipt: load the exact source, current Contract and
+     coverage (`SOURCE-AUTHORITY-01`, `SOURCES.md`).
+   - USERPERSON is advertised by the effective context: load that effective
+     profile before discretionary choices; otherwise create and warn nothing.
+   - Runtime identity/capabilities are needed: query the runtime projection and
+     load `RUNTIME.md`.
 
-3. **Validate STATE before executing anything.**
-   Every field CORE.md §1.2's required set names must be present
-   (read it there — this file does not copy it). `transition_from` is
-   omitted only on fresh INIT. Missing/corrupt → RECOVER per §1.5 first.
-   Confirm `STATE.phase` is in §1.6's phase enum.
-   **LOG ahead of STATE after a crash is NORMAL** (checkpoint writes LOG first).
-   `schema_version` below current is readable legacy: WARN, upgrade next
-   checkpoint. `last_event` mismatch → Recovery. `style_contract` mismatch →
-   state that skipped step 1.
+5. **Read `.saipen/BOARD.md`, then the active `LOG.md` tail.** Sealed log
+   segments stay cold unless a parent-chain check needs them. Apply a pending
+   `human_note` once through the canonical operation. If another actor wrote a
+   newer checkpoint, discard remembered state and use the files.
 
-3a. **Skill injection** (if `.saipen/extensions/skill_injection/SPEC.md` exists).
-    Detect problem class, match smallest skill from platform registry,
-    inject context. Eject on class shift. Base protocol outranks.
+6. **Resolve current input before persisted continuation.**
 
-3b. **Source-receipt activation.** If active Work has a source receipt, load
-    and integrity-check its original body, derived Work Contract and coverage
-    before implementation/review decisions. The compact cold/hot/brief signal
-    names receipt IDs and `saipen source show`; it never substitutes for the
-    required original reread. Archived bodies are cold and MUST NOT be scanned
-    unless explicitly requested for history/forensics. `SOURCES.md` owns the
-    lifecycle and meaningful reread boundaries.
+   Current input wins: the user's own message outranks the file. A persisted
+   `next_action` is the
+   previous checkpoint's pre-computed pick; where the mechanical router cannot
+   re-derive it, confirm it against BOARD. Immediate means without asking, never without looking.
 
-3c. **USERPERSON activation.** Resolve the optional global user-configuration
-    `USERPERSON.md` and `<project_root>/.saipen/USERPERSON.md`. If neither
-    exists, do nothing: create nothing, warn/ask nothing, and preserve the
-    ordinary cold path. If either exists, strictly load the effective profile
-    before any discretionary implementation choice; malformed input is a
-    controlled USERPERSON validation failure, never a partial/lenient profile.
-    Apply CORE.md §1.10's USERPERSON precedence, use only materially relevant
-    preferences, and give a SubSaipen only its bounded role projection -- never
-    the whole profile. `saipen context cold|hot` exposes the compact activation
-    fingerprint and exact `show --effective` load command; that metadata is a
-    load obligation, not a substitute for reading the effective profile.
+   - **Compound input first:** delegate lexical ordering and chain disposition
+     to the mechanical resolver and `COMMANDS.md` before interpreting a segment.
+   - A recognized command/shortcut resolves mechanically from `REGISTRY.json`.
+     Human semantics come from `COMMANDS.md` (`CMD-ROUTING-01`,
+     `CMD-COMPOUND-01`), never from CORE command prose.
+   - A substantial audit, mission, specification, review handoff or correction
+     is captured before interpretation; route details to `SOURCES.md`.
+   - An actionable objective routes to goal execution in `MAINTENANCE.md`
+     (`GOAL-01`). Read-only or plan-only requests retain that scope.
+   - With no new instruction, ask the deterministic router for the current
+     action. If the engine is unavailable, apply the registry/CORE Pick and
+     routing invariants (`PICK-01`). A persisted `WAIT:` is returned verbatim.
 
-3d. **Runtime identity.** Resolve the current acting seat and optional runtime
-    metadata as separate facts before choosing an adaptive execution strategy.
-    `--agent` remains the ownership/handover seat; it never proves provider,
-    model, variant, tool support, or reasoning support. Prefer explicit
-    `--runtime-info`/`SAIPEN_RUNTIME_INFO` metadata; absent fields remain
-    UNKNOWN. `saipen runtime --json` is the read-only mechanical projection.
-    `RUNTIME.md` owns the format and staged adapter/strategy contract.
+7. **Load one owner, not the library.** Use `INDEX.md` to select the exact rule
+   owner. For a command, load `COMMANDS.md`; for mechanics/recovery, `OPS.md`;
+   for source authority, `SOURCES.md`; for execution/output policy,
+   `EXECUTION.md`; for goal/autonomous behavior, `MAINTENANCE.md`; for a global
+   state invariant only, `CORE.md`. `CONFORMANCE.md` and `CHANGELOG.md` are
+   excluded from routine execution.
 
-4. **Read `.saipen/BOARD.md`, then tail of `.saipen/LOG.md`.**
-   Sealed history in `.saipen/logs/LOG-NNN.md`; load only for `parent:`
-   chain walks. Use the active LOG tail for `last_event` freshness.
+8. **Load exactly one phase delta.** Use the phase returned by the current
+   route and open `phases/<phase>.md`. Replace it when the phase changes. Never
+   infer a phase from stale remembered state.
 
-5. **Distrust your own memory.** `STATE.agent` not you, or `STATE.updated`
-   newer than your last write → your memory is stale. Files win (CORE.md §1.1).
+9. **Checkpoint canonically.** Mutations use the mechanical operation layer.
+   The checkpoint owner is `CHECKPOINT-01`: LOG, then BOARD, then STATE; read
+   all three back and run the validator at ticket/phase boundaries. Never edit
+   a dead `saipen_home` pointer by guesswork; route rebind through the command
+   and operation owners.
 
-6. **`human_note:` set?** Apply, clear, LOG trace: `DEC: applied human_note: <text>`
-   or `DEC: human_note -> T-###`. One-shot, not standing law.
+## Routing failures
 
-7. **Execute the instruction. The user's own message outranks `next_action` and defers to § 1.11's OBEY priority: the user's own message outranks the file.**
-   **Preserve substantial source before interpretation.** A recognized audit,
-   implementation mission, review handoff, imported authoritative spec, or
-   large multi-condition correction is captured verbatim with `saipen source
-   capture` and verified BEFORE summarizing, planning, creating/linking Work,
-   or routing command-looking text inside it. Exact duplicate intake resumes
-   the existing receipt/Work; a changed source or amendment never overwrites
-   the original. Short ordinary commands and conversation are not captured.
-   `SOURCES.md` owns the bounded criteria and lifecycle.
-   **Compound input first.** If the message carries several commands (`+`-separated
-   or multiple `saipen ...` verbs), split it into the ordered segment list BEFORE
-   interpreting any segment, then resolve and execute each segment in order
-   (CORE.md §1.10's compound-command contract; chain policy STOP_ON_FAILURE).
-   Every recognized segment gets an explicit terminal disposition; none may
-   disappear because the model considers it unnecessary.
-   Message names a command (§1.10 verb, shortcut table row, Cyillic twin,
-   or active extension word)? **Open CORE.md §1.10 and read the row.**
-   A whole-message shortcut candidate resolves FIRST -- before any
-   acknowledgement, conversational interpretation, style reading, memory
-   expansion, or executing `next_action`. Where the deterministic runtime is
-   available, resolve it MECHANICALLY (`tools/saipen.py <token>` or the
-   engine's shared shortcut resolver), never by model recognition.
-   Normalization is Unicode-codepoint substitution, NOT keyboard-position
-   substitution: Cyrillic `сс` folds to Latin `cc` (continue); Latin `ss`/
-   `sss` have NO Cyrillic twin, so a Cyrillic token can never mean STOP.
-   Memory is never a source for it — a confabulated table has reached users
-   three times (E-1801, E-1913). Do not copy the table here: a second copy drifts
-   and defeats the read-the-source rule. (§1.1's gate rejects a restatement.)
-   That IS the instruction; `next_action` is what a bare continue would run.
-   §1.11 OBEY priority: command clears a `WAIT:`; corrupt state is repaired
-   first.
-   **Actionable user objective?** If the user provides a natural-language actionable request (e.g., "fix this bug", "implement X", "continue work") rather than a bare command, treat it as a new goal-driven execution. Map the objective to `execution_intent: goal` in `STATE.md` (and reset counters per MAINTENANCE.md § 2.4), plan the work, and drive it to COMPLETE or BLOCKED per CORE.md § 1.12. No `/goal` command is required. Explicit read-only or plan-only requests must remain read-only.
-   **No command and no new objective?** `next_action` IS the instruction. It is the previous
-   session's pre-computed Pick Rule result. Confirm against `BOARD.md`
-   yourself: topmost workable ticket wins (§1.11, §1.6). Where the
-   validator cannot re-derive the pick (the portable floor does not —
-   a grep cannot walk a `needs:` graph), the confirmation is the only
-   guard. Immediate means without asking, never without looking.
-   `WAIT:` → output verbatim and stop. When choosing, §1.11's
-   priority is fixed:
-   RECOVER > OBEY > UNBLOCK > FINISH > START > MAINTAIN. Five legal
-   forms in §1.2: `WAIT:` / `saipen <command>` / `PHASE <phase> [T-###]` /
-   `RUN:` / `RESUME: T-### <phase>`. Destructive-op confirmation still
-   **SAIOPS is the preferred projection when it is available.** In
-   `mode: full` with working Python, the deterministic mechanical router is
-   TRUSTWORTHY (NITRO dogfood III, T-591): run `saipen status` then
-   `saipen next` and execute the routed action -- the persisted
-   `next_action` remains canonical recovery evidence and the fallback, but a
-   cold full-mode agent does not re-derive the Pick Rule by hand when the
-   engine already computed it (and WAIT/user-brake/BLOCKED/recovery all
-   outrank START in the router). Load the phase doc from the ROUTED action
-   (`saipen next`'s `load`), never from a stale persisted phase echo. When
-   Python/SAIOPS is unavailable, fall back to the manual path unchanged -- a
-   repository must remain cold-readable without the engine.
-   binds (§1.1).
+- Missing/unreadable owner or installation: BLOCKED with the exact path.
+- Source integrity/coverage failure: `SOURCES.md` decides; never continue from
+  a summary or memory.
+- Recovery or pending operation: `OPS.md` decides before normal routing.
+- Unknown command: resolve registered extensions, then show the mechanical
+  command list; never invent a meaning.
+- `CONFORMANCE.md` remains excluded unless the current task explicitly owns a
+  conformance-corpus/validator change.
 
-8. **Load the phase doc from `protocol_dir/phases/<phase>.md`, one at a time.**
-   Normalise the path for the host OS. `saipen_home` dead? Do NOT edit
-   `STATE.md` by hand and do not guess a home. Install/clone SAIPEN at an
-   explicit candidate path, then run the ONE mechanical rebind operation
-   `saipen rebind-home <candidate>`: it proves the candidate (readable
-   `VERSION`, compatible major, `BOOT` layout, required protocol files),
-   journals a single narrowly-owned `STATE.saipen_home` pointer update with
-   truthful LOG evidence, and preserves phase/task/board. Only if the engine
-   is unavailable (no Python/SAIOPS) does the manual path apply: clone
-   `github.com/vacterro/saipen` and update the field, with no git → `BLOCKED`.
-
-9. **Checkpoint after every ticket, phase transition, and before stop.**
-   LOG (append) → `BOARD.md` → `STATE.md`, that order (§1.5). **Read back
-   all three.** `STATE.md` must carry §1.2's required set. Run
-   `tools/validate.py` where available. Write `schema_version` from
-   `state.schema.json`'s `x-current-schema-version`, `last_event` from
-   highest `E-###`, `style_contract` from STYLE.md's boot marker.
-
-## Anything else
-
-- Unrecognized `saipen <word>` → check extensions/project (§1.9), then list commands.
-  Never guess.
-- Rule questions → `INDEX.md` first. Do NOT read `CORE.md`/`MAINTENANCE.md` blindly.
-  **STYLE.md is NOT on the rule-question list.** **CONFORMANCE.md is NEVER read**
-  unless debugging a validator failure.
-- `agent:` is inherited from STATE.md, not invented. Change it only for a
-  genuinely different actor; LOG a `DEC` naming both.
-- **Reply language, before any output**: read STYLE.md's `reply_language:` (step 1 already opened it). Closed set: `et`/`en`/`ru`/`auto`. Outside that set → FAIL. Chat only — every artifact stays English. Under `auto`: Reply-language precedence: explicit current user prose (Estonian/English/Russian) > clearly Russian primary repository for bare/ambiguous input > Estonian default; another detected language uses English. Full rule in STYLE.md and CORE.md §1.1. Repeated here because it governs the first token.
-- `CHANGELOG.md` is never part of a cold start.
-- **Chat voice & compression, before any output.** Step 1 already read STYLE.md — the file in the same folder as this BOOT.md — before any output. `caveman-дед` is one fused voice, never a menu. Voice persistence: caveman-дед applies to every response until explicit "stop caveman" or "normal mode". Full contract in `saipen/STYLE.md`.
+`CHANGELOG.md` is never part of cold start. `CONFORMANCE.md` is never routine
+context. `STYLE.md` governs every chat response; artifacts remain professional.

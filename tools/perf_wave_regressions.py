@@ -343,20 +343,18 @@ def run_t1019(base: Path) -> None:
     (nogit / "u.txt").write_text("new file\n", encoding="utf-8")
     samesize_race("T-1007 same-size mtime-restored replacement fails closed (no-Git model)", nogit)
 
-    # ---- PERF-001: the final confirmation re-read must stay INSIDE the
-    # stability comparison. Reads 1-3 of the untracked probe return the original
-    # bytes (so first == second == confirmed holds); ONLY the 4th read -- inside
-    # _stream_digest, after the confirmed-parse race checks -- returns a
-    # same-size, mtime-restored swap. The capture must fail closed rather than
-    # silently fold the swapped bytes into the fingerprint.
+    # ---- PERF-001: the final confirmation read is also the digest pass.
+    # Reads 1-2 return the original bytes; the third (final confirmation)
+    # returns a same-size, mtime-restored swap.  The capture must fail closed
+    # rather than silently fold the swapped bytes into the fingerprint.
     read_counts: dict[str, int] = {}
 
     def final_read_swapper(path, *a, **k):
         content, fp = real_read(path, *a, **k)
         key = str(path)
         read_counts[key] = read_counts.get(key, 0) + 1
-        if "untracked.txt" in key and read_counts[key] == 4:
-            # 4th read: simulate a swap that landed in the unvalidated window.
+        if "untracked.txt" in key and read_counts[key] == 3:
+            # Final read: simulate a swap during the validated digest pass.
             # Returns the mutated bytes (same size, restored mtime) so the final
             # pass would otherwise hash the wrong content.
             info = path.stat()
@@ -901,6 +899,27 @@ def run_t1023(base: Path) -> None:
                 "receipt_path": last[2],
                 "version": 1,
                 "receipt_dir_mtime_ns": recv_dir.stat().st_mtime_ns,
+            }
+        ),
+        encoding="utf-8",
+    )
+    # The authenticated lineage proof is part of the current locator
+    # contract.  Without it, a hand-built legacy index must correctly fall
+    # back to strict history scanning rather than pretending to be current.
+    inventory = conformance._receipt_inventory(root4)
+    content_inventory = conformance._receipt_content_inventory(root4)
+    members = conformance._receipt_member_inventory(root4)
+    assert inventory is not None and content_inventory is not None and members is not None
+    (idx_dir / conformance._LINEAGE_INDEX_NAME).write_text(
+        _json.dumps(
+            {
+                "version": 1,
+                "receipt_count": inventory[0],
+                "inventory_xor": f"{inventory[1]:032x}",
+                "content_xor": f"{content_inventory[1]:032x}",
+                "members": [list(item) for item in members],
+                "receipt_dir_mtime_ns": recv_dir.stat().st_mtime_ns,
+                "lineage_hash": "fixture",
             }
         ),
         encoding="utf-8",

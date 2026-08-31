@@ -6,6 +6,7 @@ receipt lifecycle; CORE owns precedence and Work completion, BOOT owns read
 order, and the engine owns mechanical validation.
 
 ## Authority and lifecycle
+<!-- RULE-OWNER: SOURCE-AUTHORITY-01 -->
 
 For external Work intent, authority is: original immutable receipt, explicit
 later amendment, derived Work Contract, BOARD/STATE projection, agent memory.

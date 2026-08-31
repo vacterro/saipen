@@ -126,7 +126,9 @@ def _state_guard(fn):
     return wrapper
 
 
-def _read(root: Path, *, allow_dead_home: bool = False) -> tuple[dict, dict, dict, dict]:
+def _read(
+    root: Path, *, allow_dead_home: bool = False, allow_malformed_state: bool = False
+) -> tuple[dict, dict, dict, dict]:
     """Read STATE/BOARD/LOG docs + their parsed forms (normalised view).
 
     The canonical checkpoint loader: every canonical file MUST exist and be
@@ -134,7 +136,21 @@ def _read(root: Path, *, allow_dead_home: bool = False) -> tuple[dict, dict, dic
     decode/parse/write. A missing or non-canonical file raises CheckpointError
     (VALIDATION_FAILED, zero canonical writes); an empty or unparseable STATE
     raises the same shape so a corrupt checkpoint can never reach patch_state
-    and leak a ValueError traceback through the public CLI (T-1003 / P1#4)."""
+    and leak a ValueError traceback through the public CLI (T-1003 / P1#4).
+
+    `allow_malformed_state=True` is the CORE-002 reconciliation escape hatch --
+    the ONLY consumer is `reconcile.reconcile_protocol_state`. A STATE whose
+    defect is a reconciliation-owned field (`last_event`, a goal counter, the
+    schema/style markers) is unparseable by the STRICT contract and would
+    otherwise be unreadable by the one operation whose entire job is to repair
+    it: the reader refuses, so the repair never happens, so the reader keeps
+    refusing. Tolerating the parse keeps every OTHER gate (dead home, history
+    ownership, parked evidence, void history) fully armed and hands the caller
+    the lenient fields plus the strict verdict in `docs["_state_error"]`. The
+    caller must then PROVE its repaired proposal against the same strict
+    validator before a single byte is written -- a proposal that cannot pass is
+    refused, never committed.
+    """
     # PERFORMANCE (PERF-003): each canonical checkpoint document is read ONCE.
     # ``read_checkpoint_doc`` folds the old two-step ``checkpoint_preflight``
     # (encoding check) + ``read_document`` (decode) into a single filesystem read,
@@ -155,8 +171,19 @@ def _read(root: Path, *, allow_dead_home: bool = False) -> tuple[dict, dict, dic
     from .state import parse_state_or_error
 
     state, state_error = parse_state_or_error(state_doc.text_norm)
-    if state_error:
+    if state_error and not allow_malformed_state:
         raise StateMalformedError(f"state-malformed: {state_error}")
+    if state_error:
+        # CORE-002 reconciliation path: fall back to the lenient frontmatter
+        # parse so the repair set can be derived at all. `state_error` is the
+        # STRICT verdict and travels with the docs -- the caller proves the
+        # repaired proposal against it rather than trusting it.
+        from .state import parse_frontmatter
+
+        lenient, parse_error = parse_frontmatter(state_doc.text_norm)
+        state = lenient if lenient is not None else {}
+        if parse_error:
+            raise StateMalformedError(f"state-malformed: {parse_error}")
     board = parse_board(board_doc.text_norm)
     from .log import read_history_snapshot_and_logs_digest, snapshot_contract_errors
     from .state import persisted_home_error, running_home
@@ -250,6 +277,10 @@ def _read(root: Path, *, allow_dead_home: bool = False) -> tuple[dict, dict, dic
         "_logs_digest": _logs_digest,
         "_history": snapshot,
     }
+    if state_error:
+        # Set only on the CORE-002 tolerant path: the STRICT verdict the
+        # lenient `state` was read in spite of. Empty means "parsed clean".
+        docs["_state_error"] = state_error
     return docs, state, board, log_tail
 
 
@@ -4722,8 +4753,10 @@ def _plan_convergence_stage(
     # out of order even by an agent that ignores the sequence. E restarts are
     # legal (CONVERGE.md's F -> E loop when HUNT finds work).
     predecessor = {"F": "E", "G": "F", "H": "G", "I": "H"}
+    predecessor_receipt = None
     if stage in predecessor:
-        if _latest_convergence_stage(root, predecessor[stage]) is None:
+        predecessor_receipt = _latest_convergence_stage(root, predecessor[stage])
+        if predecessor_receipt is None:
             return _refuse(
                 "VALIDATION_FAILED",
                 f"stage {stage} requires a committed "
@@ -4733,7 +4766,7 @@ def _plan_convergence_stage(
     if stage == "G":
         # CLEAN input identity comes from the latest committed F receipt; the
         # resulting identity is the LIVE tree after the CLEAN mutation.
-        latest_f = _latest_convergence_stage(root, "F")
+        latest_f = predecessor_receipt
         if latest_f is None:
             return _refuse(
                 "VALIDATION_FAILED",

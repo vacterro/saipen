@@ -11,10 +11,12 @@ from __future__ import annotations
 
 import json
 import os
+import signal
 import shutil
 import subprocess
 import sys
 import tempfile
+from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -119,11 +121,56 @@ def _ignore_copy(_directory: str, names: list[str]) -> set[str]:
     # surface. Everything else, including .git and canonical .saipen state, is
     # copied so the sandbox sees the same current working-tree generation.
     ignored.update(name for name in names if name in {".workbuddy-ai", ".pytest_cache"})
+    if os.name == "nt":
+        reserved = {"CON", "PRN", "AUX", "NUL"}
+        reserved.update(f"COM{index}" for index in range(1, 10))
+        reserved.update(f"LPT{index}" for index in range(1, 10))
+        ignored.update(
+            name
+            for name in names
+            if name.rstrip(" .").split(".", 1)[0].upper() in reserved
+        )
     return ignored
 
 
 def _tail(text: str, limit: int = 8000) -> str:
     return text if len(text) <= limit else text[-limit:]
+
+
+def _read_tail_from_path(path: Path, limit: int = 8000) -> str:
+    """Read the bounded suffix of a temp-file child output without retaining
+    the full file in memory."""
+    try:
+        size = path.stat().st_size
+    except OSError:
+        return ""
+    with open(path, "rb") as handle:
+        handle.seek(max(0, size - (limit * 4 + 4)))
+        data = handle.read()
+    return _tail(data.decode("utf-8", errors="replace"), limit)
+
+
+def _terminate_process_tree(process: subprocess.Popen) -> None:
+    """Terminate the owned family process and all descendants."""
+    if os.name == "nt":
+        subprocess.run(
+            ["taskkill", "/F", "/T", "/PID", str(process.pid)],
+            capture_output=True,
+            check=False,
+        )
+        return
+    try:
+        os.killpg(process.pid, signal.SIGTERM)
+    except (ProcessLookupError, OSError):
+        with suppress(ProcessLookupError, OSError):
+            process.terminate()
+    try:
+        process.wait(timeout=2)
+    except subprocess.TimeoutExpired:
+        with suppress(ProcessLookupError, OSError):
+            os.killpg(process.pid, signal.SIGKILL)
+        with suppress(ProcessLookupError, OSError):
+            process.kill()
 
 
 def _run_family(root: Path, family: TestFamily) -> dict:
@@ -137,34 +184,71 @@ def _run_family(root: Path, family: TestFamily) -> dict:
     env = os.environ.copy()
     env["PYTHONDONTWRITEBYTECODE"] = "1"
     env["SAIPEN_CANONICAL_TEST_CHILD"] = "1"
-    try:
-        completed = subprocess.run(
-            family.command,
-            cwd=root,
-            env=env,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            timeout=family.timeout,
-            check=False,
-        )
-    except subprocess.TimeoutExpired as exc:
-        return {
-            "name": family.name,
-            "status": "TIMEOUT",
-            "exit_code": None,
-            "stdout": _tail(exc.stdout or ""),
-            "stderr": _tail(exc.stderr or ""),
-        }
-    status = "PASS" if completed.returncode == 0 else "FAIL"
-    return {
-        "name": family.name,
-        "status": status,
-        "exit_code": completed.returncode,
-        "stdout": _tail(completed.stdout),
-        "stderr": _tail(completed.stderr),
+    creation = {"start_new_session": True} if os.name != "nt" else {
+        "creationflags": getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0),
     }
+    with tempfile.TemporaryDirectory(prefix="saipen-family-") as spool:
+        spool_dir = Path(spool)
+        stdout_path = spool_dir / "stdout"
+        stderr_path = spool_dir / "stderr"
+        process: subprocess.Popen | None = None
+        timed_out = False
+        try:
+            try:
+                with open(stdout_path, "wb") as out, open(stderr_path, "wb") as err:
+                    process = subprocess.Popen(
+                        family.command,
+                        cwd=root,
+                        env=env,
+                        stdout=out,
+                        stderr=err,
+                        **creation,
+                    )
+            except OSError as exc:
+                return {
+                    "name": family.name,
+                    "status": "FAIL",
+                    "exit_code": None,
+                    "stdout": "",
+                    "stderr": f"test family launch failed: {exc}",
+                }
+            try:
+                process.wait(timeout=family.timeout)
+            except subprocess.TimeoutExpired:
+                timed_out = True
+                _terminate_process_tree(process)
+                process.wait()
+            if timed_out and process.stdout is not None:
+                with suppress(OSError):
+                    process.stdout.close()
+            if timed_out and process.stderr is not None:
+                with suppress(OSError):
+                    process.stderr.close()
+            stdout_text = _read_tail_from_path(stdout_path)
+            stderr_text = _read_tail_from_path(stderr_path)
+            return {
+                "name": family.name,
+                "status": (
+                    "TIMEOUT"
+                    if timed_out
+                    else ("PASS" if process.returncode == 0 else "FAIL")
+                ),
+                "exit_code": None if timed_out else process.returncode,
+                "stdout": stdout_text,
+                "stderr": stderr_text,
+            }
+        finally:
+            # W2-003: every abnormal exit from this frame (KeyboardInterrupt,
+            # SystemExit, BaseException) must still terminate the owned
+            # process tree. The TimeoutExpired branch owns the timeout path;
+            # this finally owns the rest. Reaping is idempotent.
+            if (
+                process is not None
+                and process.poll() is None
+            ):
+                _terminate_process_tree(process)
+                with suppress(subprocess.TimeoutExpired):
+                    process.wait(timeout=5)
 
 
 def run_canonical_suite(project_root: Path | str) -> dict:

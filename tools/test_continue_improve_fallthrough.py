@@ -268,13 +268,13 @@ class ContinueImproveFallthroughTests(unittest.TestCase):
         self.assertEqual(second.get("code"), "CONTINUE_IMPROVE_IN_FLIGHT", second)
         self.assertEqual(second.get("cycle_id"), cycle, second)
 
-    # ---- 10: no worthwhile improvement -> clean idle ---------------------
-    def test_no_worthwhile_improvement_is_clean_idle(self):
-        # An improve prepare that refuses for a non-recovery reason must
-        # terminate cleanly as CONTINUE_IDLE, never fabricate work and never
-        # loop.  Two active cycles force improve's ambiguous-admission refusal
-        # (a real non-recovery ImproveError), which the fallback converts to
-        # the genuine idle terminal.
+    # ---- 10: ambiguity is a structured refusal, never idle --------------
+    def test_ambiguous_improve_is_refusal_not_idle(self):
+        # Two active Improve cycles force improve's ambiguous-admission
+        # refusal (a real non-recovery ImproveError).  W3B.11: that is a
+        # structured refusal that must propagate, never be mapped to
+        # CONTINUE_IDLE -- only a genuine NO_WORTHWHILE_IMPROVEMENT outcome
+        # may become idle.
         root = self._make("idle", board=self._board())
         imp = root / ".saipen" / "improve"
         for i in ("a", "b"):
@@ -290,8 +290,9 @@ class ContinueImproveFallthroughTests(unittest.TestCase):
                 encoding="utf-8",
             )
         rc, result = _invoke_cli(root, "cc")
-        self.assertEqual(rc, 0, result)
-        self.assertEqual(result.get("code"), "CONTINUE_IDLE", result)
+        self.assertEqual(rc, 1, result)
+        self.assertNotEqual(result.get("code"), "CONTINUE_IDLE", result)
+        self.assertNotEqual(result.get("code"), "IMPROVE_AUDIT_ASSIGNMENT", result)
 
     # ---- 11/12: anti-loop, at most one fallback per invocation -----------
     def test_anti_loop_at_most_one_fallback_per_invocation(self):
@@ -312,8 +313,8 @@ class ContinueImproveFallthroughTests(unittest.TestCase):
         cycles2 = list((root / ".saipen" / "improve").glob("imp-*"))
         self.assertEqual(len(cycles2), 1, cycles2)
 
-    # ---- 13: HUSH suppresses narration ------------------------------------
-    def test_hush_suppresses_narration(self):
+    # ---- 13: fallback payload carries no transition narration -------------
+    def test_fallback_payload_contains_no_transition_narration(self):
         root = self._make("hush", board=self._board())
         # The fallback's structured result is not narration; the HUSH
         # invariant is that the transition happens without "nothing to

@@ -26,6 +26,8 @@ exit the process at exactly that point, simulating process death mid-transaction
 from __future__ import annotations
 
 import contextlib
+import base64
+import binascii
 import hashlib
 import json
 import os
@@ -49,7 +51,18 @@ SETTLED = ("COMMITTED", "ABORTED", "RESOLVED")
 # evidence but NOT permission to continue -- a conflict must be resolved
 # explicitly before any new canonical mutation (NITRO dogfood II, T-587).
 UNRESOLVED = ("PREPARED", "APPLYING", "VERIFIED", "CONFLICT")
-ROLES = ("log", "board", "state", "manifest", "report", "sweep", "generic")
+ROLES = (
+    "log",
+    "board",
+    "state",
+    "manifest",
+    "report",
+    "sweep",
+    "contract",
+    "contract_revision",
+    "coverage",
+    "generic",
+)
 OPS_DIR = ".saipen/recovery/ops"
 LINEAGE_MIGRATION_OP = "op-migrate-lineage"
 # Engine-written settled receipt marker (perf wave T-1020): a tiny summary
@@ -61,6 +74,9 @@ LINEAGE_MIGRATION_OP = "op-migrate-lineage"
 # corrupt or stale marker falls back to the strict manifest decode (correct,
 # legacy), never launders unresolved/corrupt evidence.
 SETTLED_DIR = ".saipen/recovery/settled"
+SETTLED_INDEX_NAME = ".receipt-index.json"
+SETTLED_INDEX_REL = SETTLED_DIR + "/" + SETTLED_INDEX_NAME
+SETTLED_INDEX_SCHEMA = 2
 # PERF-005: bounded cleanup-debt namespace. When a post-settlement staged-byte
 # deletion fails, the op_id is durably enqueued here so `compact_committed`
 # processes ONLY outstanding debt instead of re-scanning the whole lifetime
@@ -466,6 +482,10 @@ def staged_name(index: int, canonical_path: str) -> str:
     return f"{index}_{path_hash}.staged"
 
 
+APPEND_INTENT_NAME = "append.intent.json"
+APPEND_INTENT_SCHEMA = 1
+
+
 def _atomic_json(path: Path, record: dict, *, ownership_root: Path) -> None:
     from .paths import safe_atomic_write_bytes
 
@@ -504,12 +524,23 @@ def _settle_journal(journal: "Journal") -> None:
     from .safeid import InvalidIdError
 
     settled_base = journal.project_root / SETTLED_DIR
+    from .paths import project_lineage_identity
+
+    prior_index = _read_settled_index(
+        journal.project_root,
+        live_lineage=project_lineage_identity(journal.project_root),
+    )
     try:
         settled_base.mkdir(parents=True, exist_ok=True)
         settled_dir = safe_op_dir(journal.project_root, journal.op_id, SETTLED_DIR)
         os.rename(journal.dir, settled_dir)
         journal.dir = settled_dir
         journal.manifest = settled_dir / "operation.json"
+        with contextlib.suppress(OSError, ValueError, TypeError):
+            if prior_index is not None:
+                _extend_settled_index(journal.project_root, prior_index)
+            elif not (journal.project_root / SETTLED_INDEX_REL).exists():
+                _bootstrap_settled_index(journal.project_root)
     except (OSError, InvalidIdError):
         pass
 
@@ -688,6 +719,10 @@ def decode_operation_record(
             "package_identity",
             "source_head",
             "source_tree_fingerprint",
+            "undo_target",
+            "undo_reason",
+            "undo_current",
+            "undo_restore_plan_hash",
             "resulting_source_head",
             "resulting_source_tree_fingerprint",
             "producer",
@@ -1240,7 +1275,9 @@ def recovery_preflight(project_root: Path | str, exclude_op_id: str | None = Non
     derives both subsets from it (T-1004 pending)."""
     root = Path(project_root).resolve()
     pending, conflicts = scan_pending(root)
-    corrupt = [op for op in pending if op.get("corrupt") and op["op_id"] != exclude_op_id]
+    # Corrupt evidence is never safe to exclude, including the requested
+    # operation id: otherwise a same-id retry can overwrite and erase it.
+    corrupt = [op for op in pending if op.get("corrupt")]
     if corrupt:
         return {
             "ok": False,
@@ -1362,8 +1399,10 @@ class Journal:
                 f"verification_policy {verification_policy!r} outside "
                 f"{sorted(VERIFICATION_POLICIES)}"
             )
-        self.dir.mkdir(parents=True, exist_ok=True)
+        created = False
         try:
+            self.dir.mkdir(parents=True, exist_ok=False)
+            created = True
             # Re-check after mkdir (T-1004 journal integrity)
             safe_op_dir(self.project_root, self.op_id)
             record_targets = []
@@ -1424,7 +1463,8 @@ class Journal:
         except Exception:
             import shutil
 
-            shutil.rmtree(self.dir, ignore_errors=True)
+            if created:
+                shutil.rmtree(self.dir, ignore_errors=True)
             raise
 
     def mark(
@@ -1462,42 +1502,212 @@ class Journal:
                 f"cannot append targets to terminal operation {self.op_id!r} "
                 f"with status {record.get('status')!r}"
             )
+        if not isinstance(targets, list):
+            raise ValueError("journal append targets must be a list")
+        if not targets:
+            return
+        intent_path = self.dir / APPEND_INTENT_NAME
+        existing_intent = self._read_append_intent()
+        if existing_intent is not None:
+            # Compare a retry against the durable intent's original frontier.
+            # The manifest may already contain the appended entries when the
+            # final intent unlink crashed; treating those entries as new
+            # duplicates would make recovery non-idempotent.
+            base = existing_intent["base_targets"]
+            prepared = self._prepare_append_intent(
+                targets,
+                base,
+                existing_paths=self._target_paths(record.get("targets", [])[:base]),
+            )
+            if prepared != existing_intent["targets"]:
+                raise ValueError("journal append intent does not match retry request")
+            self._finish_append_intent(record, existing_intent)
+            return
+
         record_targets = record.setdefault("targets", [])
-        for target in targets:
-            index = len(record_targets)
+        prepared = self._prepare_append_intent(targets, len(record_targets))
+        intent = {
+            "schema_version": APPEND_INTENT_SCHEMA,
+            "op_id": self.op_id,
+            "base_targets": len(record_targets),
+            "targets": prepared,
+        }
+        # This is the durable ownership declaration.  Any later staged file
+        # can now be adopted only if it matches this exact intent.
+        _atomic_json(intent_path, intent, ownership_root=self.project_root)
+        self._finish_append_intent(record, intent)
+
+    @staticmethod
+    def _target_paths(targets: list[dict]) -> set[str]:
+        return {
+            str(item["path"])
+            for item in targets
+            if isinstance(item, dict) and isinstance(item.get("path"), str)
+        }
+
+    def _prepare_append_intent(
+        self,
+        targets: list[dict],
+        base: int,
+        *,
+        existing_paths: set[str] | None = None,
+    ) -> list[dict]:
+        prepared: list[dict] = []
+        if existing_paths is None:
+            existing_paths = {
+                owned_target_path(self.project_root, item["path"])
+                .relative_to(self.project_root)
+                .as_posix()
+                for item in self.read().get("targets", [])
+            }
+        seen = set(existing_paths)
+        for offset, target in enumerate(targets):
+            if not isinstance(target, dict) or not isinstance(target.get("path"), str):
+                raise ValueError("journal append target must contain a path")
             action = _target_action(target)
-            # ONE canonical owned identity + ONE bounded staged-name scheme
-            # (hostile-regression): the same resolver and name builder the
-            # initial staging uses, so recovery finds appended evidence by the
-            # same rule and a deep path can never overflow a filesystem name
-            # (OSError Errno 36). The slug-based name is read-compatible only.
+            if action not in TARGET_ACTIONS:
+                raise ValueError(f"journal append target has unknown action {action!r}")
             canonical = owned_target_path(self.project_root, target["path"])
             rel = canonical.relative_to(self.project_root).as_posix()
+            if rel in seen:
+                raise ValueError(f"journal append target duplicates owned path {rel!r}")
+            seen.add(rel)
+            content_hash = None
+            content_size = None
             if action == "write":
-                content = target["content"]
+                content = target.get("content")
                 if isinstance(content, str):
                     content = content.encode("utf-8")
-                from .paths import safe_create_bytes_exclusive
-
-                safe_create_bytes_exclusive(
-                    self.dir / staged_name(index, rel),
-                    content,
-                    kind="journal staged evidence",
-                    ownership_root=self.project_root,
-                )
-            new_target = dict(target)
-            new_target["path"] = rel
-            record_targets.append(
-                {
-                    "path": new_target["path"],
-                    "role": new_target.get("role", "generic"),
+                if not isinstance(content, bytes):
+                    raise ValueError(f"journal append write target {rel!r} has no bytes")
+                content_hash = hash_bytes(content)
+                content_size = len(content)
+                if target.get("after_hash", content_hash) not in ("", content_hash):
+                    raise ValueError(f"journal append write target {rel!r} hash mismatch")
+            entry = {
+                "index": base + offset,
+                "target": {
+                    "path": rel,
+                    "role": target.get("role", "generic"),
                     "action": action,
-                    "before_hash": new_target.get("before_hash", ""),
-                    "after_hash": new_target.get("after_hash", ""),
-                    "applied": False,
-                }
-            )
+                    "before_hash": target.get("before_hash", ""),
+                    "after_hash": target.get("after_hash", content_hash or ""),
+                },
+                "staged_name": staged_name(base + offset, rel) if action == "write" else None,
+                "content_hash": content_hash,
+                "content_size": content_size,
+                "content_b64": (
+                    base64.b64encode(content).decode("ascii")
+                    if action == "write"
+                    else None
+                ),
+            }
+            prepared.append(entry)
+        return prepared
+
+    def _read_append_intent(self) -> dict | None:
+        path = self.dir / APPEND_INTENT_NAME
+        from .paths import prove_owned_regular, read_bound_regular_bytes
+
+        try:
+            witnessed = prove_owned_regular(path, kind="journal append intent")
+        except FileNotFoundError:
+            return None
+        try:
+            raw = read_bound_regular_bytes(path, witnessed, max_bytes=64 * 1024 * 1024)
+            intent = json.loads(raw.decode("utf-8"))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
+            raise ValueError(f"journal append intent is unreadable: {exc}") from exc
+        if (
+            not isinstance(intent, dict)
+            or intent.get("schema_version") != APPEND_INTENT_SCHEMA
+            or intent.get("op_id") != self.op_id
+            or not isinstance(intent.get("base_targets"), int)
+            or not isinstance(intent.get("targets"), list)
+            or intent["base_targets"] < 0
+            or not intent["targets"]
+        ):
+            raise ValueError("journal append intent is malformed")
+        return intent
+
+    def _finish_append_intent(self, record: dict, intent: dict) -> None:
+        record_targets = record.setdefault("targets", [])
+        base = intent["base_targets"]
+        if len(record_targets) < base:
+            raise ValueError("journal append intent base exceeds manifest target count")
+        for entry in intent["targets"]:
+            index = entry.get("index")
+            target = entry.get("target")
+            if not isinstance(index, int) or not isinstance(target, dict):
+                raise ValueError("journal append intent target is malformed")
+            if index < base or index > len(record_targets):
+                raise ValueError("journal append intent target index is invalid")
+            if index < len(record_targets):
+                current = record_targets[index]
+                if any(current.get(key) != target.get(key) for key in
+                       ("path", "role", "action", "before_hash", "after_hash")):
+                    raise ValueError("journal manifest disagrees with append intent")
+                continue
+            staged = entry.get("staged_name")
+            if target.get("action") == "write":
+                if not isinstance(staged, str) or not staged:
+                    raise ValueError("journal append intent has no staged filename")
+                if staged != staged_name(index, target.get("path", "")):
+                    raise ValueError("journal append intent staged filename is not canonical")
+                staged_path = self.dir / staged
+                if staged_path.exists():
+                    from .paths import prove_owned_regular, read_bound_regular_bytes
+
+                    witnessed = prove_owned_regular(staged_path, kind="journal staged evidence")
+                    content = read_bound_regular_bytes(
+                        staged_path, witnessed, max_bytes=64 * 1024 * 1024
+                    )
+                    if hash_bytes(content) != entry.get("content_hash"):
+                        raise ValueError(
+                            f"journal staged evidence {staged!r} disagrees with append intent"
+                        )
+                else:
+                    encoded = entry.get("content_b64")
+                    if not isinstance(encoded, str):
+                        raise ValueError(
+                            f"journal append evidence {staged!r} has no content authority"
+                        )
+                    try:
+                        content = base64.b64decode(encoded, validate=True)
+                    except (ValueError, binascii.Error) as exc:
+                        raise ValueError(
+                            f"journal append evidence {staged!r} is not valid base64"
+                        ) from exc
+                    if (
+                        len(content) != entry.get("content_size")
+                        or hash_bytes(content) != entry.get("content_hash")
+                    ):
+                        raise ValueError(
+                            f"journal append evidence {staged!r} disagrees with append intent"
+                        )
+                    from .paths import safe_create_bytes_exclusive
+
+                    safe_create_bytes_exclusive(
+                        staged_path,
+                        content,
+                        kind="journal staged evidence",
+                        ownership_root=self.project_root,
+                    )
+            record_targets.append({**target, "applied": False})
         _atomic_json(self.manifest, record, ownership_root=self.project_root)
+        with contextlib.suppress(FileNotFoundError):
+            self._append_intent_path().unlink()
+
+    def _append_intent_path(self) -> Path:
+        return self.dir / APPEND_INTENT_NAME
+
+    def resume_append_intent(self) -> bool:
+        """Finish a durable append intent during crash recovery."""
+        intent = self._read_append_intent()
+        if intent is None:
+            return False
+        self._finish_append_intent(self.read(), intent)
+        return True
 
     def update(self, **fields) -> None:
         """Merge extra fields into the operation record (T-994 release).
@@ -1566,35 +1776,59 @@ def _drop_settled_staged(journal: "Journal") -> None:
     that would otherwise accumulate unbounded across a long session (perf
     pass). The terminal manifest write has ALREADY succeeded and is durable;
     cleanup failure must never rewrite semantic status or fail a successful
-    operation, so every failure is suppressed. `compact_committed` remains
-    as the explicit repair/legacy sweep for leftovers and interrupted
-    cleanup. NEVER called for PREPARED/APPLYING/VERIFIED/CONFLICT/ABORTED.
+    operation, so every failure is surfaced as `cleanup_pending` truth rather
+    than silently swallowed. `compact_committed` remains as the explicit
+    repair/legacy sweep for leftovers and interrupted cleanup. NEVER called
+    for PREPARED/APPLYING/VERIFIED/CONFLICT/ABORTED.
 
-    PERF-005: if a staged unlink fails, the op_id is durably enqueued in the
-    bounded cleanup queue so the next `compact_committed` removes the leftover
-    payload without re-scanning the entire settled ledger.
+    W2-001: cleanup-debt markers are published through `safe_atomic_write_bytes`
+    so the queue node can never be redirected to an outside sentinel by a
+    check-then-symlink race, and a marker-publish failure is returned as
+    `cleanup_pending` (not silently collapsed into "cleanup succeeded"). A
+    subsequent `compact_committed` can rediscover unmarked staged leftovers
+    without following unsafe descendants.
     """
-    queue = journal.project_root / CLEANUP_QUEUE_DIR
-    debt = False
+    from .paths import safe_atomic_write_bytes
+    from .safeid import InvalidIdError
+
+    cleanup_pending: list[str] = []
+    staged_unlink_failed = False
     for staged in journal.dir.glob("*.staged"):
         try:
             staged.unlink()
         except OSError:
-            debt = True
-    if debt:
-        from .safeid import InvalidIdError
-
-        with contextlib.suppress(OSError, InvalidIdError):
-            queue.mkdir(parents=True, exist_ok=True)
-            # Re-prove containment after mkdir: an engine-owned cleanup queue
-            # may never be replaced by a symlink/junction that redirects the
-            # durable debt marker outside the project.
-            marker = safe_op_dir(
-                journal.project_root,
-                journal.op_id,
-                CLEANUP_QUEUE_DIR,
-            )
-            marker.write_text("")
+            staged_unlink_failed = True
+    if not staged_unlink_failed:
+        return []
+    queue = journal.project_root / CLEANUP_QUEUE_DIR
+    try:
+        queue.mkdir(parents=True, exist_ok=True)
+        marker = safe_op_dir(
+            journal.project_root,
+            journal.op_id,
+            CLEANUP_QUEUE_DIR,
+        )
+    except (OSError, InvalidIdError) as exc:
+        cleanup_pending.append(
+            f"cleanup-debt marker directory unsafe for {journal.op_id}: {exc}"
+        )
+        return cleanup_pending
+    try:
+        safe_atomic_write_bytes(
+            marker,
+            b"",
+            kind="cleanup-debt marker",
+            ownership_root=journal.project_root,
+        )
+    except (OSError, ValueError) as exc:
+        cleanup_pending.append(
+            f"cleanup-debt marker publish failed for {journal.op_id}: {exc}"
+        )
+        return cleanup_pending
+    cleanup_pending.append(
+        f"staged payloads unlink failed for {journal.op_id}; cleanup queued"
+    )
+    return cleanup_pending
 
 
 def _verify_target_bytes(root: Path, targets: list[dict]) -> str | None:
@@ -1608,7 +1842,9 @@ def _verify_target_bytes(root: Path, targets: list[dict]) -> str | None:
     return None
 
 
-def _recovery_identity_binding(root: Path, record: dict) -> dict:
+def _recovery_identity_binding(
+    root: Path, record: dict, *, live_lineage: str | None = None
+) -> dict:
     """Bind a recovery receipt to the project that created it (T-1003
     carrier-loss wave).
 
@@ -1627,7 +1863,8 @@ def _recovery_identity_binding(root: Path, record: dict) -> dict:
 
     record_lineage = record.get("project_lineage")
     if record_lineage:
-        live_lineage = project_lineage_identity(root)
+        if live_lineage is None:
+            live_lineage = project_lineage_identity(root)
         if not live_lineage or live_lineage != record_lineage:
             return {
                 "ok": False,
@@ -2125,17 +2362,47 @@ def run_mutation(
             "verdict",
             "source_head",
             "source_tree_fingerprint",
+            "undo_target",
+            "undo_reason",
+            "undo_current",
+            "undo_restore_plan_hash",
         )
         _request_meta = {}
         if receipt_metadata:
             for _k in _REQUEST_METADATA_KEYS:
                 if _k in receipt_metadata:
                     _request_meta[_k] = receipt_metadata[_k]
+        committed_retry = record.get("status") == "COMMITTED"
+        record_preconditions = record.get("preconditions", {})
+        record_read_preconditions = record.get("read_preconditions", {})
+        if committed_retry:
+            # Ignore newly supplied plan hints, but retain causal bindings
+            # that were part of the committed operation.  This makes a stale
+            # unrelated probe harmless without allowing a changed dependency
+            # to masquerade as the same operation.
+            preconditions = {
+                key: value
+                for key, value in preconditions.items()
+                if key in record_preconditions
+            }
+            read_preconditions = {
+                key: value
+                for key, value in read_preconditions.items()
+                if key in record_read_preconditions
+            }
         fingerprint = {
             "operation": operation,
             "semantic_payload_hash": semantic_payload_hash,
             "verification_policy": verification_policy,
             "targets": request_targets,
+            # A committed operation's live bytes are already its durable
+            # postcondition; retry callers may carry fresh/stale plan-time
+            # preconditions and must still receive ALREADY_APPLIED.  Pending
+            # operations retain the full CAS identity.
+            "preconditions": preconditions or {},
+            "read_preconditions": (
+                read_preconditions or {}
+            ),
             "receipt_metadata": _request_meta,
         }
         computed_semantic = hashlib.sha256(
@@ -2161,6 +2428,24 @@ def run_mutation(
                 }
                 for t in record.get("targets", [])
             ],
+            "preconditions": (
+                {
+                    key: value
+                    for key, value in record_preconditions.items()
+                    if key in preconditions
+                }
+                if committed_retry
+                else record_preconditions
+            ),
+            "read_preconditions": (
+                {
+                    key: value
+                    for key, value in record_read_preconditions.items()
+                    if key in read_preconditions
+                }
+                if committed_retry
+                else record_read_preconditions
+            ),
             "receipt_metadata": _record_meta,
         }
         record_semantic = hashlib.sha256(
@@ -2282,18 +2567,27 @@ def run_mutation(
                 f"{actual!r}, expected {expected!r})",
             }
 
-    journal.start(
-        operation,
-        agent,
-        project_identity,
-        semantic_payload_hash,
-        prepared,
-        preconditions,
-        verification_policy=verification_policy,
-        read_preconditions=read_preconditions,
-        receipt_metadata=receipt_metadata,
-        project_lineage=lineage,
-    )
+    try:
+        journal.start(
+            operation,
+            agent,
+            project_identity,
+            semantic_payload_hash,
+            prepared,
+            preconditions,
+            verification_policy=verification_policy,
+            read_preconditions=read_preconditions,
+            receipt_metadata=receipt_metadata,
+            project_lineage=lineage,
+        )
+    except (FileExistsError, OSError, ValueError) as exc:
+        return {
+            "ok": False,
+            "code": "CORRUPT_JOURNAL",
+            "op_id": op_id,
+            "recovery_required": True,
+            "detail": f"journal evidence already exists or cannot be owned: {exc}",
+        }
     _crash_after("PREPARED")
 
     journal.mark("APPLYING")
@@ -2433,14 +2727,17 @@ def run_mutation(
 
     journal.mark("VERIFIED")
     journal.mark("COMMITTED")
-    _drop_settled_staged(journal)
-    return {
+    cleanup_pending = _drop_settled_staged(journal)
+    result = {
         "ok": True,
         "code": "COMMITTED",
         "op_id": op_id,
         "changed_files": [t["path"] for t in prepared],
         "recovery_required": False,
     }
+    if cleanup_pending:
+        result["cleanup_pending"] = cleanup_pending
+    return result
 
 
 def recover(project_root: Path | str, op_id: str) -> dict:
@@ -2556,6 +2853,31 @@ def _recover_locked(root: Path, op_id: str) -> dict:
             "op_id": op_id,
             "recovery_required": True,
             "detail": binding["detail"],
+        }
+
+    # W2-001: an append intent is the durable bridge between staged evidence
+    # and the later manifest replacement.  Resume it before status dispatch;
+    # otherwise release recovery could see a healthy old manifest and ignore
+    # staged closure bytes that are explicitly owned by this operation.
+    try:
+        if journal.resume_append_intent():
+            decoded = decode_operation_record(root, journal.dir)
+            if not decoded["ok"]:
+                return {
+                    "ok": False,
+                    "code": decoded["code"],
+                    "op_id": op_id,
+                    "recovery_required": True,
+                    "detail": decoded["detail"],
+                }
+            record = decoded["record"]
+    except (OSError, ValueError, UnicodeError) as exc:
+        return {
+            "ok": False,
+            "code": "RECOVERY_CONFLICT",
+            "op_id": op_id,
+            "recovery_required": True,
+            "detail": f"journal append intent cannot be resumed: {exc}",
         }
 
     status = record["status"]
@@ -2724,14 +3046,17 @@ def _recover_locked(root: Path, op_id: str) -> dict:
 
     journal.mark("VERIFIED")
     journal.mark("COMMITTED")
-    _drop_settled_staged(journal)
-    return {
+    cleanup_pending = _drop_settled_staged(journal)
+    result = {
         "ok": True,
         "code": "COMMITTED",
         "op_id": op_id,
         "changed_files": [t["path"] for t in targets],
         "recovery_required": True,
     }
+    if cleanup_pending:
+        result["cleanup_pending"] = cleanup_pending
+    return result
 
 
 def _verifier_for(policy: str):
@@ -3452,9 +3777,9 @@ def _resolve_conflict_locked(root: Path, op_id: str, resolution: str, agent: str
     # longer executable authority and must be removed. The shared cleanup
     # helper records bounded retry debt if an unlink fails, so settling never
     # leaves an unbounded payload archive in the lifetime receipt namespace.
-    _drop_settled_staged(journal)
+    cleanup_pending = _drop_settled_staged(journal)
 
-    return {
+    result = {
         "ok": True,
         "code": "RESOLVED",
         "op_id": op_id,
@@ -3464,6 +3789,9 @@ def _resolve_conflict_locked(root: Path, op_id: str, resolution: str, agent: str
         "detail": "conflict settled; live bytes accepted as truth, "
         "unapplied plan effects abandoned",
     }
+    if cleanup_pending:
+        result["cleanup_pending"] = cleanup_pending
+    return result
 
 
 def auto_recover_pending(project_root: Path | str) -> dict:
@@ -3668,7 +3996,7 @@ class _ReceiptEntry:
 
 def _receipt_namespace_entries(
     ns_dir: Path,
-) -> list[_ReceiptEntry]:
+):
     """Capture one receipt namespace as exact bytes plus structural verdicts.
 
     The semantic pass and its lightweight closing CAS MUST tokenize the same
@@ -3700,60 +4028,56 @@ def _receipt_namespace_entries(
         detail = f"namespace listing failed ({type(exc).__name__}): {exc}"
         return [invalid("NAMESPACE", detail)]
 
-    captured: list[_ReceiptEntry] = []
     for op_dir in entries:
         # Engine-owned cleanup debt is not a semantic operation receipt and
         # intentionally does not stale a crew decision.
-        if ns_dir.name == Path(SETTLED_DIR).name and op_dir.name == ".cleanup-needed":
+        if ns_dir.name == Path(SETTLED_DIR).name and op_dir.name in {
+            ".cleanup-needed",
+            SETTLED_INDEX_NAME,
+        }:
             continue
         try:
             op_info = os.lstat(op_dir)
         except FileNotFoundError:
             # A deletion raced this pass. The membership changed, so frame a
             # sentinel rather than pretending the listing never contained it.
-            captured.append(invalid(op_dir.name, "op entry vanished during capture"))
+            yield invalid(op_dir.name, "op entry vanished during capture")
             continue
         except OSError as exc:
-            captured.append(
-                invalid(op_dir.name, f"op entry stat failed ({type(exc).__name__}): {exc}")
-            )
+            yield invalid(op_dir.name, f"op entry stat failed ({type(exc).__name__}): {exc}")
             continue
         if stat.S_ISLNK(op_info.st_mode) or getattr(op_info, "st_file_attributes", 0) & 0x400:
-            captured.append(invalid(op_dir.name, "op directory is a symlink or reparse point"))
+            yield invalid(op_dir.name, "op directory is a symlink or reparse point")
             continue
         if not stat.S_ISDIR(op_info.st_mode):
-            captured.append(invalid(op_dir.name, "op entry is not a directory"))
+            yield invalid(op_dir.name, "op entry is not a directory")
             continue
 
         manifest = op_dir / "operation.json"
         try:
             manifest_info = os.lstat(manifest)
         except FileNotFoundError:
-            captured.append(invalid(op_dir.name, "op directory has no operation.json"))
+            yield invalid(op_dir.name, "op directory has no operation.json")
             continue
         except OSError as exc:
-            captured.append(
-                invalid(
-                    op_dir.name,
-                    f"operation.json stat failed ({type(exc).__name__}): {exc}",
-                )
+            yield invalid(
+                op_dir.name,
+                f"operation.json stat failed ({type(exc).__name__}): {exc}",
             )
             continue
         if (
             stat.S_ISLNK(manifest_info.st_mode)
             or getattr(manifest_info, "st_file_attributes", 0) & 0x400
         ):
-            captured.append(invalid(op_dir.name, "operation.json is a symlink or reparse point"))
+            yield invalid(op_dir.name, "operation.json is a symlink or reparse point")
             continue
         if not stat.S_ISREG(manifest_info.st_mode):
-            captured.append(invalid(op_dir.name, "operation.json is not a regular file"))
+            yield invalid(op_dir.name, "operation.json is not a regular file")
             continue
         try:
             raw = manifest.read_bytes()
         except OSError as exc:
-            captured.append(
-                invalid(op_dir.name, f"operation.json unreadable ({type(exc).__name__}): {exc}")
-            )
+            yield invalid(op_dir.name, f"operation.json unreadable ({type(exc).__name__}): {exc}")
             continue
         progress = op_dir / "progress.json"
         try:
@@ -3763,7 +4087,7 @@ def _receipt_namespace_entries(
         except OSError as exc:
             detail = f"progress.json stat failed ({type(exc).__name__}): {exc}"
             token = _RECEIPT_STRUCTURE_SENTINEL + detail.encode("utf-8", errors="replace")
-            captured.append(_ReceiptEntry(op_dir.name, None, raw, token, detail))
+            yield _ReceiptEntry(op_dir.name, None, raw, token, detail)
             continue
         else:
             if (
@@ -3772,22 +4096,21 @@ def _receipt_namespace_entries(
             ):
                 detail = "progress.json is a symlink or reparse point"
                 token = _RECEIPT_STRUCTURE_SENTINEL + detail.encode("utf-8")
-                captured.append(_ReceiptEntry(op_dir.name, None, raw, token, detail))
+                yield _ReceiptEntry(op_dir.name, None, raw, token, detail)
                 continue
             if not stat.S_ISREG(progress_info.st_mode):
                 detail = "progress.json is not a regular file"
                 token = _RECEIPT_STRUCTURE_SENTINEL + detail.encode("utf-8")
-                captured.append(_ReceiptEntry(op_dir.name, None, raw, token, detail))
+                yield _ReceiptEntry(op_dir.name, None, raw, token, detail)
                 continue
             try:
                 progress_raw = progress.read_bytes()
             except OSError as exc:
                 detail = f"progress.json unreadable ({type(exc).__name__}): {exc}"
                 token = _RECEIPT_STRUCTURE_SENTINEL + detail.encode("utf-8", errors="replace")
-                captured.append(_ReceiptEntry(op_dir.name, None, raw, token, detail))
+                yield _ReceiptEntry(op_dir.name, None, raw, token, detail)
                 continue
-        captured.append(_ReceiptEntry(op_dir.name, op_dir, raw, progress_raw, None))
-    return captured
+        yield _ReceiptEntry(op_dir.name, op_dir, raw, progress_raw, None)
 
 
 def _frame_receipt(digest, namespace: str, entry: _ReceiptEntry) -> None:
@@ -3804,6 +4127,256 @@ def _frame_receipt(digest, namespace: str, entry: _ReceiptEntry) -> None:
         digest.update(part)
 
 
+def _frame_receipts(digest, namespace: str, entries) -> None:
+    """Frame a whole already-captured receipt namespace (W2-002).
+
+    The namespace name is resolved once from the constant so the framing
+    byte stream is identical to the historical per-entry calls.
+    """
+    ns = Path(namespace).name
+    for entry in entries:
+        _frame_receipt(digest, ns, entry)
+
+
+def _receipt_stat_atom(path: Path) -> list:
+    """Return a mutation hint for an authority node, never semantic proof."""
+    try:
+        info = os.lstat(path)
+    except FileNotFoundError:
+        return ["missing"]
+    except OSError as exc:
+        return ["error", type(exc).__name__]
+    return [
+        "node",
+        stat.S_IFMT(info.st_mode),
+        int(getattr(info, "st_file_attributes", 0)),
+        int(info.st_size),
+        int(info.st_mtime_ns),
+        int(info.st_ctime_ns),
+        int(getattr(info, "st_ino", 0)),
+    ]
+
+
+def _settled_stat_inventory(root: Path) -> list[dict]:
+    """Capture cheap per-authority change hints for the settled index.
+
+    The hints only decide whether the authenticated index may be consulted.
+    Any mismatch falls back to exact-byte reads and strict decoding; the
+    hints are never accepted as semantic or cryptographic proof by themselves.
+    """
+    settled = root / SETTLED_DIR
+    try:
+        entries = sorted(settled.iterdir(), key=lambda item: item.name)
+    except FileNotFoundError:
+        return []
+    except OSError:
+        return [{"name": "NAMESPACE", "stat": ["unreadable"]}]
+    inventory = []
+    for entry in entries:
+        if entry.name in {".cleanup-needed", SETTLED_INDEX_NAME}:
+            continue
+        inventory.append(
+            {
+                "name": entry.name,
+                "stat": [
+                    _receipt_stat_atom(entry),
+                    _receipt_stat_atom(entry / "operation.json"),
+                    _receipt_stat_atom(entry / "progress.json"),
+                ],
+            }
+        )
+    return inventory
+
+
+def _receipt_index_root(payload: dict) -> str:
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(b"saipen-settled-index-v1\0" + encoded).hexdigest()
+
+
+def _read_settled_index(root: Path, *, live_lineage: str | None) -> dict | None:
+    """Read the content-authenticated settled projection, or return None.
+
+    A missing, malformed, stale, or lineage-mismatched index is not positive
+    evidence. The caller then performs the canonical strict full scan.
+    """
+    try:
+        from .paths import prove_owned_regular
+
+        path = owned_target_path(root, SETTLED_INDEX_REL, kind="settled receipt index")
+        prove_owned_regular(path, kind="settled receipt index")
+        index = json.loads(path.read_bytes().decode("utf-8-sig"))
+    except (FileNotFoundError, OSError, ValueError, UnicodeDecodeError, json.JSONDecodeError):
+        return None
+    if not isinstance(index, dict) or index.get("schema_version") != SETTLED_INDEX_SCHEMA:
+        return None
+    entries = index.get("entries")
+    if not isinstance(entries, list) or not isinstance(index.get("digest"), str):
+        return None
+    payload = {
+        "schema_version": index.get("schema_version"),
+        "lineage": index.get("lineage"),
+        "entries": entries,
+        "digest": index.get("digest"),
+    }
+    if index.get("root") != _receipt_index_root(payload):
+        return None
+    if index.get("lineage") != live_lineage:
+        return None
+    names = [entry.get("name") for entry in entries if isinstance(entry, dict)]
+    if len(names) != len(entries) or names != sorted(names) or len(set(names)) != len(names):
+        return None
+    if any(
+        not isinstance(entry.get("record"), dict)
+        or not isinstance(entry.get("stat"), list)
+        for entry in entries
+    ):
+        return None
+    if [
+        {"name": entry["name"], "stat": entry["stat"]}
+        for entry in entries
+    ] != _settled_stat_inventory(root):
+        return None
+    for entry in entries:
+        op_dir = root / SETTLED_DIR / entry["name"]
+        try:
+            manifest = (op_dir / "operation.json").read_bytes()
+            progress_path = op_dir / "progress.json"
+            progress = progress_path.read_bytes() if progress_path.is_file() else None
+        except OSError:
+            return None
+        if hashlib.sha256(manifest).hexdigest() != entry.get("manifest_sha256"):
+            return None
+        expected_progress = entry.get("progress_sha256")
+        actual_progress = hashlib.sha256(progress).hexdigest() if progress is not None else None
+        if actual_progress != expected_progress:
+            return None
+    return index
+
+
+def _write_settled_index(
+    root: Path,
+    entries: list[_ReceiptEntry],
+    records: dict,
+    digest: str,
+    lineage,
+):
+    """Publish one atomic, content-authenticated settled projection."""
+    index_entries = []
+    stat_inventory = _settled_stat_inventory(root)
+    by_name = {item["name"]: item["stat"] for item in stat_inventory}
+    for entry in entries:
+        record = records.get(entry.name)
+        if entry.structural_error is not None or entry.op_dir is None or record is None:
+            raise ValueError("cannot index corrupt settled evidence")
+        index_entries.append(
+            {
+                "name": entry.name,
+                "stat": by_name.get(entry.name, []),
+                "manifest_sha256": hashlib.sha256(entry.manifest_raw).hexdigest(),
+                "progress_sha256": (
+                    hashlib.sha256(entry.progress_raw).hexdigest()
+                    if entry.progress_raw is not None
+                    else None
+                ),
+                "record": record,
+            }
+        )
+    index_entries.sort(key=lambda item: item["name"])
+    payload = {
+        "schema_version": SETTLED_INDEX_SCHEMA,
+        "lineage": lineage,
+        "entries": index_entries,
+        "digest": digest,
+    }
+    document = dict(payload)
+    document["root"] = _receipt_index_root(payload)
+    from .paths import safe_atomic_write_bytes
+
+    safe_atomic_write_bytes(
+        root / SETTLED_INDEX_REL,
+        (json.dumps(document, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8"),
+        kind="settled receipt index",
+        ownership_root=root,
+    )
+
+
+def _extend_settled_index(root: Path, prior_index: dict) -> None:
+    """Update an already-valid index after one terminal receipt move.
+
+    Existing settled records remain trusted only through their prior
+    content-authenticated entries; the newly moved receipt is decoded once.
+    The exact namespace digest is refreshed from the current authority bytes
+    before the new index is atomically published.
+    """
+    from .paths import project_lineage_identity
+
+    lineage = project_lineage_identity(root)
+    if lineage != prior_index.get("lineage"):
+        return
+    old_records = {
+        item["name"]: item["record"]
+        for item in prior_index.get("entries", [])
+        if isinstance(item, dict) and isinstance(item.get("record"), dict)
+    }
+    entries = list(_receipt_namespace_entries(root / SETTLED_DIR))
+    records = {}
+    for entry in entries:
+        if entry.structural_error is not None or entry.op_dir is None:
+            return
+        record = old_records.get(entry.name)
+        if record is None:
+            decoded = decode_operation_record(root, entry.op_dir, raw=entry.manifest_raw)
+            if not decoded["ok"]:
+                return
+            record = decoded["record"]
+        records[entry.name] = record
+    digest = hashlib.sha256(b"saipen-op-receipts-v3\0")
+    for entry in _receipt_namespace_entries(root / OPS_DIR):
+        _frame_receipt(digest, Path(OPS_DIR).name, entry)
+    for entry in entries:
+        _frame_receipt(digest, Path(SETTLED_DIR).name, entry)
+    _write_settled_index(
+        root,
+        entries,
+        records,
+        "ops-receipt-sha256:" + digest.hexdigest(),
+        lineage,
+    )
+
+
+def _bootstrap_settled_index(root: Path) -> None:
+    """Build the settled projection only from a writer-side terminal event."""
+    from .paths import project_lineage_identity
+
+    if next(_receipt_namespace_entries(root / OPS_DIR), None) is not None:
+        return
+    lineage = project_lineage_identity(root)
+    entries = list(_receipt_namespace_entries(root / SETTLED_DIR))
+    records = {}
+    for entry in entries:
+        if entry.structural_error is not None or entry.op_dir is None:
+            return
+        decoded = decode_operation_record(root, entry.op_dir, raw=entry.manifest_raw)
+        if not decoded["ok"]:
+            return
+        record = decoded["record"]
+        if record.get("project_lineage") is not None:
+            binding = _recovery_identity_binding(root, record, live_lineage=lineage)
+            if not binding["ok"]:
+                return
+        records[entry.name] = record
+    digest = hashlib.sha256(b"saipen-op-receipts-v3\0")
+    for entry in entries:
+        _frame_receipt(digest, Path(SETTLED_DIR).name, entry)
+    _write_settled_index(
+        root,
+        entries,
+        records,
+        "ops-receipt-sha256:" + digest.hexdigest(),
+        lineage,
+    )
+
+
 def _scan_receipt_namespace(
     root: Path,
     ns_dir: Path,
@@ -3811,7 +4384,7 @@ def _scan_receipt_namespace(
     errors: list[str],
     corrupt_op_ids: set[str],
     digest,
-) -> None:
+) -> bool:
     """Scan one receipt namespace (ops or settled) and merge into results.
 
     W2-001: every candidate is decoded through the ONE strict decoder
@@ -3822,7 +4395,9 @@ def _scan_receipt_namespace(
     equivalent terminal receipts (the same op settled under both namespaces
     after a crash re-scan), in which case the settled (current) record wins.
     """
+    has_entries = False
     for entry in _receipt_namespace_entries(ns_dir):
+        has_entries = True
         _frame_receipt(digest, ns_dir.name, entry)
         if entry.structural_error is not None or entry.op_dir is None:
             errors.append(
@@ -3880,6 +4455,12 @@ def _scan_receipt_namespace(
                 results.pop(op_id, None)
         else:
             results[op_id] = record
+    # Raw manifest/progress buffers are intentionally released with this
+    # function.  Semantic consumers retain only normalized records; keeping
+    # ``entries`` alive beside them doubled peak memory on large settled
+    # histories.  The optional legacy collector is still honored for callers
+    # that explicitly need capture membership.
+    return has_entries
 
 
 @dataclass(frozen=True)
@@ -3928,11 +4509,26 @@ def semantic_receipt_snapshot(
     errors: list[str] = []
     corrupt_op_ids: set[str] = set()
     digest = hashlib.sha256(b"saipen-op-receipts-v3\0")
+    from .paths import project_lineage_identity
+
+    live_lineage = project_lineage_identity(root)
 
     # Scan ops first (unresolved/current evidence)
-    _scan_receipt_namespace(root, root / OPS_DIR, results, errors, corrupt_op_ids, digest)
-    # Scan settled second (terminal receipts)
-    _scan_receipt_namespace(root, root / SETTLED_DIR, results, errors, corrupt_op_ids, digest)
+    ops_present = _scan_receipt_namespace(
+        root, root / OPS_DIR, results, errors, corrupt_op_ids, digest
+    )
+    # Clean projects have a bounded active tail (normally empty). Reuse the
+    # authenticated settled projection in that case; any active operation or
+    # any index doubt forces the strict exact-byte scan below.
+    settled_index = None
+    if not errors and not ops_present:
+        settled_index = _read_settled_index(root, live_lineage=live_lineage)
+    if settled_index is not None:
+        for item in settled_index["entries"]:
+            results[item["record"].get("op_id", item["name"])] = item["record"]
+    else:
+        # Scan settled second (terminal receipts)
+        _scan_receipt_namespace(root, root / SETTLED_DIR, results, errors, corrupt_op_ids, digest)
 
     # W2-001 / CORE-003: enforce live project binding on every receipt before
     # consumers see it. A lineage-bearing receipt must match the live lineage;
@@ -3944,11 +4540,13 @@ def semantic_receipt_snapshot(
     # Explicit foreign lineage (record carries a lineage that mismatches live)
     # remains rejected.
     foreign: list[str] = []
+    # Indexed records were filtered before publication, but still pass through
+    # the same binding gate for a command-scoped live check.
     for op_id, rec in list(results.items()):
         # CORE-003: settled legacy receipts are history, not recovery authority
         if rec.get("project_lineage") is None and rec.get("status") in SETTLED:
             continue
-        binding = _recovery_identity_binding(root, rec)
+        binding = _recovery_identity_binding(root, rec, live_lineage=live_lineage)
         if not binding["ok"]:
             foreign.append(op_id)
             del results[op_id]
@@ -3970,11 +4568,21 @@ def semantic_receipt_snapshot(
         results.values(),
         key=lambda r: (iso_utc_sort_key(r.get("created_at", "")) or _earliest, r.get("op_id", "")),
     )
+    end_lineage = project_lineage_identity(root)
+    if end_lineage != live_lineage:
+        errors.append("project lineage changed during semantic receipt capture")
+        results.clear()
+        records = []
+    digest_value = (
+        settled_index["digest"]
+        if settled_index is not None and not errors
+        else "ops-receipt-sha256:" + digest.hexdigest()
+    )
     return SemanticReceiptSnapshot(
         tuple(records),
         tuple(errors),
         frozenset(corrupt_op_ids),
-        "ops-receipt-sha256:" + digest.hexdigest(),
+        digest_value,
     )
 
 
@@ -3984,12 +4592,26 @@ def semantic_receipt_digest(project_root: Path | str) -> str:
     This is the closing snapshot proof and the mutation-time CAS tokenizer.
     It binds exact operation.json and progress.json authority, deliberately
     performs no JSON decode, and never reads staged payloads.
+
+    W2-002: capture namespace membership and per-namespace entries in ONE
+    pass per directory. The previous `next(generator)` probe plus a second
+    full traversal read each manifest/progress authority twice; the closing
+    proof now opens every file exactly once, matching the snapshot's read
+    budget.
     """
     root = Path(project_root)
+    from .paths import project_lineage_identity
+
+    live_lineage = project_lineage_identity(root)
+    ops_entries = list(_receipt_namespace_entries(root / OPS_DIR))
+    if not ops_entries:
+        index = _read_settled_index(root, live_lineage=live_lineage)
+        if index is not None:
+            return index["digest"]
     digest = hashlib.sha256(b"saipen-op-receipts-v3\0")
-    for ns_dir in (root / OPS_DIR, root / SETTLED_DIR):
-        for entry in _receipt_namespace_entries(ns_dir):
-            _frame_receipt(digest, ns_dir.name, entry)
+    _frame_receipts(digest, OPS_DIR, ops_entries)
+    settled_entries = list(_receipt_namespace_entries(root / SETTLED_DIR))
+    _frame_receipts(digest, SETTLED_DIR, settled_entries)
     return "ops-receipt-sha256:" + digest.hexdigest()
 
 

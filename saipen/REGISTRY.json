@@ -26,7 +26,7 @@
       "GOAL-01": {"owner": "saipen/MAINTENANCE.md", "test": "tools/test_goal_driven.py", "subject": "goal execution and safety valve"},
       "EXEC-HUSH-01": {"owner": "saipen/EXECUTION.md", "test": "tools/test_continue_improve_fallthrough.py", "subject": "HUSH precedence, silence and mandatory output"},
       "PHASE-DELTA-01": {"owner": "saipen/CORE.md", "test": "tools/test_protocol_registry.py", "subject": "16 lazy phase documents and delta-only phase contracts"},
-      "CONFORMANCE-CORPUS-01": {"owner": "saipen/CONFORMANCE.md", "test": "tools/test_protocol_registry.py", "subject": "machine corpus completeness"},
+      "CONFORMANCE-CORPUS-01": {"owner": "tests/conformance_cases.jsonl", "test": "tools/test_conformance_corpus.py", "subject": "machine corpus completeness and generated human view"},
       "CONTEXT-BUDGET-01": {"owner": "saipen/CORE.md", "test": "tools/protocol_budget.py", "subject": "routine protocol load budgets"}
     }
   },
@@ -45,7 +45,7 @@
     "GOAL-01": "saipen/MAINTENANCE.md",
     "EXEC-HUSH-01": "saipen/EXECUTION.md",
     "PHASE-DELTA-01": "saipen/CORE.md",
-    "CONFORMANCE-CORPUS-01": "saipen/CONFORMANCE.md",
+    "CONFORMANCE-CORPUS-01": "tests/conformance_cases.jsonl",
     "CONTEXT-BUDGET-01": "saipen/CORE.md"
   },
   "shortcuts": {
@@ -317,6 +317,108 @@
       "CONTINUE_WHEN_INDEPENDENT"
     ]
   },
+  "load_profiles": {
+    "schema_version": 1,
+    "basis": "Each budget measures the non-cumulative routed surface named by one route. Conditional documents are reported separately and become mandatory only after routing into their owning profile.",
+    "budgets": {
+      "cold": 20480,
+      "ordinary_continue": 35840,
+      "command_resolution": 30720,
+      "ordinary_phase": 40960,
+      "ship_improve": 56320,
+      "single_doc": 51200
+    },
+    "surfaces": {
+      "active_phase_max": {
+        "glob": "phases/*.md",
+        "selection": "max_one"
+      },
+      "routine_doc_max": {
+        "files": [
+          "BOOT.md",
+          "STYLE.md",
+          "INDEX.md",
+          "CORE.md",
+          "MAINTENANCE.md",
+          "OPS.md",
+          "IMPROVE.md",
+          "COMMANDS.md",
+          "EXECUTION.md",
+          "SOURCES.md",
+          "RUNTIME.md"
+        ],
+        "selection": "max_one"
+      }
+    },
+    "profiles": {
+      "cold": {
+        "routes": [
+          {
+            "name": "cold",
+            "must": ["BOOT.md", "STYLE.md", "INDEX.md"],
+            "conditional": [],
+            "exclude": ["CONFORMANCE.md", "CHANGELOG.md", "phases/*.md"]
+          }
+        ]
+      },
+      "ordinary_continue": {
+        "routes": [
+          {
+            "name": "done-to-next",
+            "must": ["CORE.md", "phases/done.md"],
+            "conditional": ["SOURCES.md", "RUNTIME.md", "@active_phase_max"],
+            "exclude": ["CONFORMANCE.md", "CHANGELOG.md"]
+          }
+        ]
+      },
+      "command_resolution": {
+        "routes": [
+          {
+            "name": "command-router",
+            "must": ["REGISTRY.json", "COMMANDS.md"],
+            "conditional": ["CONTROLS.md", "EXECUTION.md", "IMPROVE.md"],
+            "exclude": ["CORE.md", "CONFORMANCE.md", "phases/*.md"]
+          }
+        ]
+      },
+      "ordinary_phase": {
+        "routes": [
+          {
+            "name": "largest-active-phase",
+            "must": ["CORE.md", "@active_phase_max"],
+            "conditional": ["SOURCES.md", "RUNTIME.md"],
+            "exclude": ["CONFORMANCE.md", "CHANGELOG.md", "inactive phases"]
+          }
+        ]
+      },
+      "ship_improve": {
+        "routes": [
+          {
+            "name": "ship-delta",
+            "must": ["phases/ship.md", "OPS.md"],
+            "conditional": ["SOURCES.md", "RUNTIME.md"],
+            "exclude": ["CONFORMANCE.md", "inactive phases"]
+          },
+          {
+            "name": "improve-delta",
+            "must": ["IMPROVE.md", "SAICRITIC.md"],
+            "conditional": ["RUNTIME.md"],
+            "exclude": ["CONFORMANCE.md", "phases/*.md"]
+          }
+        ]
+      },
+      "single_doc": {
+        "routes": [
+          {
+            "name": "largest-routine-document",
+            "must": ["@routine_doc_max"],
+            "conditional": [],
+            "exclude": ["CONFORMANCE.md", "CHANGELOG.md"]
+          }
+        ]
+      }
+    }
+  },
   "error_codes": [
     "STALE_STATE",
     "TICKET_NOT_FOUND",
@@ -368,6 +470,6 @@
   "hush_precedence": {
     "order": ["user", "safety", "core", "execution_policy", "style"],
     "owner": "saipen/EXECUTION.md",
-    "status": "active"
+    "status": "planned"
   }
 }

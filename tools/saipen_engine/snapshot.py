@@ -78,7 +78,7 @@ class ProjectSnapshot:
     history: HistorySnapshot | None = None
 
     @staticmethod
-    def capture(project_root: Path | str) -> "ProjectSnapshot":
+    def capture(project_root: Path | str, *, lean: bool = False) -> "ProjectSnapshot":
         root = Path(project_root)
         from .codec import read_checkpoint_doc, CheckpointLoadError
         from .log import read_history_snapshot
@@ -108,7 +108,14 @@ class ProjectSnapshot:
                 "LOG.md is missing -- a SAIPEN checkpoint requires "
                 "STATE.md, BOARD.md and LOG.md to all be present"
             )
-        history = read_history_snapshot(root)
+        history = read_history_snapshot(root, lean=lean)
+        # PERF-005: in lean mode the HistorySnapshot carries hash, tail,
+        # parsed events and diagnostics, but the O(history-text) renderings
+        # (text, event_lines) are dropped at the source. status/next/explain
+        # consume state_text/board_text/history_events/history.hash/  history.tail
+        # and do not need history.text or history.event_lines; lean=True
+        # makes that contract explicit. Full capture (default) preserves
+        # verbatim text and event_lines for context/audit renderers.
         return ProjectSnapshot(
             project_root=root,
             project_identity=canonical_identity(root),

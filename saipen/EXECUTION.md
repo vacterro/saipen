@@ -25,6 +25,9 @@ selects language and voice only after this policy decides whether text exists.
 ## HUSH
 
 `hush <task>` applies to that task and its authorized continuation chain.
+Its runtime remains planned. The prepared boundary is: parse HUSH as an
+execution-policy modifier, pass `<task>` unchanged to the normal
+command/objective resolver, then apply output suppression to that route.
 
 - Tool-first: begin work without conversational preamble.
 - Silence lock: omit progress narration, plans, and success chatter.

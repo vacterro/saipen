@@ -225,7 +225,14 @@ class FileWriterLock:
                 error_type=FileLockBusy,
             )
             self._holder_key = inode_key
-            _os_lock(self._handle, blocking=self._blocking)
+            try:
+                _os_lock(self._handle, blocking=self._blocking)
+            except OSError as exc:
+                # On Windows msvcrt uses PermissionError for a held byte
+                # range.  Once the file itself was proven owned, every such
+                # error is lock contention, not an arbitrary filesystem
+                # failure; normalize it for non-blocking callers.
+                raise FileLockBusy("WRITER_BUSY") from exc
         except BaseException as exc:
             if self._handle is not None:
                 self._handle.close()
@@ -301,7 +308,14 @@ class WriterLock:
             self._handle, inode_key = _open_owned_lock(self.path, self._root)
             _promote_reservation(_WRITER_HOLDERS, reservation, inode_key, self, "WRITER_BUSY")
             self._holder_key = inode_key
-            _os_lock(self._handle)
+            try:
+                _os_lock(self._handle)
+            except OSError as exc:
+                # Once the owned lock file opened successfully, an OS-lock
+                # collision is contention. Windows msvcrt reports it as the
+                # same raw PermissionError used for unsafe filesystem paths;
+                # normalize only this post-open boundary to WRITER_BUSY.
+                raise PermissionError("WRITER_BUSY") from exc
         except BaseException as exc:
             if self._handle is not None:
                 self._handle.close()
@@ -394,7 +408,13 @@ class ProducerLock:
             self._handle, inode_key = _open_owned_lock(self.path, self._root)
             _promote_reservation(_PRODUCER_HOLDERS, reservation, inode_key, self, message)
             self._holder_key = inode_key
-            _os_lock(self._handle)
+            try:
+                _os_lock(self._handle)
+            except OSError as exc:
+                # msvcrt reports another process holding the byte range as
+                # raw PermissionError.  The open/provenance checks already
+                # passed, so expose the producer-specific stable code.
+                raise PermissionError(message) from exc
         except BaseException as exc:
             if self._handle is not None:
                 self._handle.close()

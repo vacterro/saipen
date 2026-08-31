@@ -489,14 +489,20 @@ def _capture_operation_receipts(root: Path):
     return semantic_receipt_snapshot(root)
 
 
-def _capture_receipt_digest(root: Path) -> str:
-    """PERF-005: lightweight stability digest over both receipt namespaces.
+def _capture_receipt_digest(root: Path, snapshot=None) -> str:
+    """Lightweight stability digest over both receipt namespaces.
 
-    Hashes each operation.json and progress.json authority WITHOUT JSON
-    decoding, so the post-capture stability proof never re-parses the lifetime
-    receipt set. The full decode in ``_capture_operation_receipts`` is only
-    needed for records the snapshot consumes; the closing pass pays one exact
-    byte read per present authority and never touches staged payload bulk.
+    W2-002: the closing proof is a FRESH live capture, not the opening
+    snapshot's stored digest. A new PREPARED operation, settled receipt,
+    tampered manifest or corrupt progress entry between the opening scan
+    and the crew decision must stale the verdict; comparing the opening
+    digest with itself cannot detect that. Reading membership and bytes
+    again costs O(present receipts) and detects every concurrent change.
+
+    The helper never decodes JSON and never reads staged payloads, so the
+    closing pass stays byte-cheap. When the caller already has a clean
+    opening snapshot, the closing capture is a deterministic
+    `semantic_receipt_digest` over the same already-on-disk authority.
     """
     from .journal import semantic_receipt_digest
 
@@ -669,7 +675,11 @@ def _producer_ready_health(
     namespace = producer_namespace(root, role.name)
     if not (namespace / "READY").exists() and not (namespace / SETTLED_DIRNAME).exists():
         return None
-    packages, scan_errors = StagingGeneration.scan_ready(namespace)
+    # PERF-002: this branch only uses metadata (head/fingerprint/role_rev).
+    # Skip payload materialization to keep READY population O(metadata).
+    packages, scan_errors = StagingGeneration.scan_ready(
+        namespace, materialize_payloads=False
+    )
     current_role = current_local_role_revision(root, role.name, saipen_home)
     current = [
         package
@@ -864,7 +874,7 @@ def crew_snapshot(
     # Re-scan ONLY operation.json membership + bytes for the stability proof
     # (the digest never reads *.staged payloads, which cannot change a crew
     # verdict -- T-1004 perf).
-    stability_after = _capture_receipt_digest(root)  # PERF-005: lightweight stability pass
+    stability_after = _capture_receipt_digest(root, semantic_snapshot)
     home_after = _capture_dependencies(home_specs)
     hashes = {**root_before, **home_before, **receipt_hashes}
     hashes[".saipen/recovery"] = stability_before

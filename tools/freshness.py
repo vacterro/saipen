@@ -24,7 +24,7 @@ import struct
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable
+from typing import Callable, Iterable
 
 
 class FreshnessError(RuntimeError):
@@ -288,7 +288,11 @@ def _content_digest(content: bytes) -> bytes:
 
 
 def _record_evidence(
-    root: Path, raw_path: bytes, declared_mode: int | None, path_map: dict | None = None
+    root: Path,
+    raw_path: bytes,
+    declared_mode: int | None,
+    path_map: dict | None = None,
+    record_observer: Callable[[_Record], None] | None = None,
 ) -> _Evidence:
     """One race-safe capture producing bounded evidence (PERF-002).
 
@@ -324,15 +328,21 @@ def _record_evidence(
         )
     if declared_mode is not None and declared_mode not in (mode, 0):
         raise FreshnessError(f"Git mode {declared_mode:o} disagrees with filesystem type at {path}")
+    if record_observer is not None:
+        record_observer(_Record(kind, raw_path, mode, content))
     framed = content if kind != b"F" else _content_digest(content)
     return _Evidence(kind, raw_path, mode, framed, len(content))
 
 
 def _parse_git_delta_evidence(
-    root: Path, raw: bytes, untracked: bytes, path_map: dict | None = None
+    root: Path,
+    raw: bytes,
+    untracked: bytes,
+    path_map: dict | None = None,
+    record_observer: Callable[[_Record], None] | None = None,
 ) -> list[_Evidence]:
     """Evidence variant of ``_parse_git_delta`` (PERF-002)."""
-    records: dict[bytes, _Evidence] = {}
+    records: dict[bytes, tuple[bytes, int, int]] = {}
     fields = raw.split(b"\0")
     index = 0
     while index < len(fields) and fields[index]:
@@ -362,16 +372,48 @@ def _parse_git_delta_evidence(
                 f"unsupported Git delta status {parts[4]!r}: {os.fsdecode(raw_path)}"
             )
         if status_code == b"D" or new_mode == 0:
-            records[raw_path] = _Evidence(b"D", raw_path, old_mode, b"", 0)
+            records[raw_path] = (b"D", old_mode, new_mode)
             continue
         if new_mode == 0o160000:
             raise FreshnessError(f"changed Git submodule is unsupported: {os.fsdecode(raw_path)}")
-        records[raw_path] = _record_evidence(root, raw_path, new_mode, path_map)
+        records[raw_path] = (b"F", old_mode, new_mode)
     for raw_path in untracked.split(b"\0"):
         if not raw_path or _is_saipen_path(raw_path):
             continue
-        records[raw_path] = _record_evidence(root, raw_path, None, path_map)
-    return list(records.values())
+        records[raw_path] = (b"F", 0, 0)
+    evidence: list[_Evidence] = []
+    for raw_path in sorted(records):
+        kind, _old_mode, new_mode = records[raw_path]
+        if kind == b"D":
+            if record_observer is not None:
+                # Deletions have no live file to read, but they are still
+                # source identity evidence.  Omitting this frame made a
+                # tracked deletion change Git's delta listing without
+                # changing the resulting fingerprint.
+                record_observer(_Record(b"D", raw_path, _old_mode, b""))
+            evidence.append(_Evidence(b"D", raw_path, _old_mode, b"", 0))
+        else:
+            declared_mode = new_mode or None
+            evidence.append(
+                _record_evidence(
+                    root, raw_path, declared_mode, path_map, record_observer
+                )
+            )
+    return evidence
+
+
+def _digest_capture(model: str) -> tuple[hashlib._Hash, Callable[[_Record], None]]:
+    """Create a streaming canonical digest sink for the final read pass."""
+    model_bytes = model.encode("ascii")
+    digest = hashlib.sha256()
+    digest.update(_SOURCE_MAGIC)
+    digest.update(struct.pack(">Q", len(model_bytes)))
+    digest.update(model_bytes)
+
+    def observe(record: _Record) -> None:
+        digest.update(_frame(record))
+
+    return digest, observe
 
 
 def _stream_digest(root: Path, model: str, evidence: list[_Evidence]) -> str:
@@ -441,7 +483,12 @@ def _evidence_to_records(root: Path, evidence: list[_Evidence]) -> list[_Record]
     return out
 
 
-def _iter_no_git(root: Path, *, full: bool):
+def _iter_no_git(
+    root: Path,
+    *,
+    full: bool,
+    record_observer: Callable[[_Record], None] | None = None,
+):
     """Iterative deterministic no-Git walk (PERF-006: no Python recursion).
 
     When ``full`` is true each record carries the full file bytes (``_Record``);
@@ -476,15 +523,21 @@ def _iter_no_git(root: Path, *, full: bool):
                 continue
             if stat.S_ISLNK(info.st_mode) or _is_reparse_point(path):
                 target = _read_symlink(path)
-                out.append(_Record(b"L", raw_path, 0o120000, target))
+                record = _Record(b"L", raw_path, 0o120000, target)
+                if record_observer is not None:
+                    record_observer(record)
+                out.append(record)
             elif stat.S_ISDIR(info.st_mode):
                 stack.append((path, next_parts))
             elif stat.S_ISREG(info.st_mode):
                 mode = 0o100755 if info.st_mode & 0o111 else 0o100644
                 content, _ = _read_regular_info(path)
+                record = _Record(b"F", raw_path, mode, content)
                 if full:
-                    out.append(_Record(b"F", raw_path, mode, content))
+                    out.append(record)
                 else:
+                    if record_observer is not None:
+                        record_observer(record)
                     out.append(
                         _Evidence(b"F", raw_path, mode, _content_digest(content), len(content))
                     )
@@ -496,9 +549,11 @@ def _iter_no_git(root: Path, *, full: bool):
     return out
 
 
-def _walk_no_git_evidence(root: Path) -> list[_Evidence]:
+def _walk_no_git_evidence(
+    root: Path, record_observer: Callable[[_Record], None] | None = None
+) -> list[_Evidence]:
     """Bounded evidence walk used by ``compute_source_identity`` (PERF-002/006)."""
-    return _iter_no_git(root, full=False)
+    return _iter_no_git(root, full=False, record_observer=record_observer)
 
 
 def _git_delta_listing(root: Path) -> tuple[bytes, bytes]:
@@ -601,23 +656,22 @@ def _git_identity(root: Path) -> SourceIdentity:
     head_after = _run_git(root, "rev-parse", "--verify", "HEAD").decode("ascii").strip()
     if head_before != head_after or not (listing_before == listing_middle == listing_after):
         raise FreshnessError("source tree or HEAD changed while fingerprint inputs were being read")
-    confirmed = _parse_git_delta_evidence(root, *listing_after, path_map=_path_map)
+    model = "git-delta-v1"
+    digest, observe = _digest_capture(model)
+    confirmed = _parse_git_delta_evidence(
+        root, *listing_after, path_map=_path_map, record_observer=observe
+    )
     if first != second or second != confirmed:
         raise FreshnessError("source content changed while fingerprint inputs were being read")
-    model = "git-delta-v1"
-    # PERF-001: use _stream_digest to compute the fingerprint without a 4th
-    # full read. The bounded evidence above is streamed directly into the
-    # SHA-256 hash, one F file at a time. For backward compatibility with
-    # the perf-wave drift probe that monkeypatches ``freshness._digest``,
-    # we still route through _digest via a wrapper that calls _stream_digest
-    # when the monkeypatch is not active.
+    # PERF-002: the final confirmation read also frames the canonical digest;
+    # do not throw those validated bytes away and read every file a fourth
+    # time merely for hashing.
     if _digest is not _original_digest:
         # Drift probe is active -- route through _digest for compatibility
         records = _evidence_to_records(root, confirmed)
         fingerprint = _digest(model, records)
     else:
-        # Normal path: stream directly, eliminating the 4th full read
-        fingerprint = _stream_digest(root, model, confirmed)
+        fingerprint = f"{model}:{digest.hexdigest()}"
     token = _RevalidationToken(
         os.fspath(root.resolve()), model, head_before, listing_after, tuple(confirmed)
     )
@@ -670,12 +724,13 @@ def compute_source_identity(project_root: Path | str) -> SourceIdentity:
         )
     model = "no-git-tree-v1"
     first = _walk_no_git_evidence(root)
-    second = _walk_no_git_evidence(root)
+    digest, observe = _digest_capture(model)
+    second = _walk_no_git_evidence(root, record_observer=observe)
     if first != second:
         raise FreshnessError("no-Git source tree changed while fingerprint inputs were being read")
-    digest = _stream_digest(root, model, second)
+    fingerprint = f"{model}:{digest.hexdigest()}"
     token = _RevalidationToken(os.fspath(root.resolve()), model, "no-git", None, tuple(second))
-    return SourceIdentity("no-git", digest, model, token)
+    return SourceIdentity("no-git", fingerprint, model, token)
 
 
 def revalidate_source_identity(
@@ -700,7 +755,10 @@ def revalidate_source_identity(
                 return False, "Git source revalidation token has no listing"
             head_before = _run_git(root, "rev-parse", "--verify", "HEAD").decode("ascii").strip()
             listing_before = _git_delta_listing(root)
-            evidence = _parse_git_delta_evidence(root, *listing_before)
+            digest, observe = _digest_capture(token.model)
+            evidence = _parse_git_delta_evidence(
+                root, *listing_before, record_observer=observe
+            )
             listing_after = _git_delta_listing(root)
             head_after = _run_git(root, "rev-parse", "--verify", "HEAD").decode("ascii").strip()
             if not (
@@ -709,12 +767,13 @@ def revalidate_source_identity(
                 and tuple(evidence) == token.evidence
             ):
                 return False, "source tree or HEAD changed after snapshot capture"
-            digest = _stream_digest(root, token.model, evidence)
+            digest = f"{token.model}:{digest.hexdigest()}"
         elif token.model == "no-git-tree-v1":
-            evidence = _walk_no_git_evidence(root)
+            digest, observe = _digest_capture(token.model)
+            evidence = _walk_no_git_evidence(root, record_observer=observe)
             if tuple(evidence) != token.evidence:
                 return False, "no-Git source tree changed after snapshot capture"
-            digest = _stream_digest(root, token.model, evidence)
+            digest = f"{token.model}:{digest.hexdigest()}"
         else:
             return False, f"unsupported source revalidation model: {token.model}"
     except (FreshnessError, OSError, UnicodeError) as exc:

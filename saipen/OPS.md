@@ -269,6 +269,7 @@ validation afterwards. A repository must remain readable without an executable
 environment: canonical files are the cold truth, never a cache or engine state.
 
 ## 9. Effect-based authorization (T-1160, INC-PERMISSION-EFFECT-BYPASS-001)
+<!-- RULE-OWNER: OPS-EFFECT-01 -->
 
 AUTHORIZATION FOLLOWS EFFECT, NOT TOOL IDENTITY. The law lives in CORE § 1.10's
 host-agent rules; this section owns the deterministic vocabulary and mechanics.
@@ -353,3 +354,28 @@ required. Decision-trace output for debugging autonomy; writes nothing.
 stale evidence regenerated, traceability reconstructed) are recorded through
 the existing LOG DEC convention so a cold agent can answer "why did STATE
 change from X to Y?" without chat history. Trivial formatting is not logged.
+
+### Continuation reconciliation contract (normative)
+
+Bare recover also reconciles machine-owned checkpoint drift. It recomputes
+derived STATE counters/markers and regenerates the BOARD checkbox from the
+BOARD section, then validates the proposed complete surface before committing
+one existing journaled operation. The operation computes all target bytes
+first and uses the normal multi-file CAS/atomic transaction; it never edits
+implementation files or fabricates historical evidence.
+
+The result codes are unambiguous: CLEAN means no repairable drift remains,
+REPAIRED means the reconciliation committed, WARN means only truthful legacy
+debt remains, BLOCKED means a semantic choice is needed, and CORRUPT means
+safe parsing or ownership failed. CLEAN is forbidden when continuation would
+still reject a reconciliation-owned defect. continue performs the same
+reconciliation gate before routing; it repairs, revalidates, and then follows
+the canonical next route. An active receipt with exactly one evidence-backed
+ticket may be linked automatically. Multiple candidates produce
+BLOCKED_AMBIGUOUS_SOURCE_RECEIPT with the receipt and candidate ticket IDs;
+unrelated ambiguity is reported as a warning.
+
+Legacy closure/provenance gaps are immutable historical debt. They remain
+readable and are reported as legacy/unknown or WARN according to the
+protocol-version boundary. The engine never invents filenames, commits,
+timestamps, test results, or other evidence to make old records pass.

@@ -1,46 +1,55 @@
 # SAIPEN INDEX
 
-This index describes all available SAIPEN documents. Agents MUST NOT read these documents blindly. Read only the specific document required to answer your current rule question or execute your current phase. Reading the full protocol indiscriminately is a violation (T-491: Lazy Load).
+Lazy-load map only. BOOT selects one owner; phase work loads one active phase.
+Machine-owned closed facts and Rule-ID ownership live in `REGISTRY.json`.
 
-## Core Protocol
-- `BOOT.md`: Cold-start kernel. Boot sequence, environment binding, and global constraints. You just read this.
-- `STYLE.md`: Voice, tone, and compression contract (caveman-ded). Read automatically during BOOT.
-- `CORE.md`: The main protocol rules (formerly RFC.md). Covers commands, state lifecycle, transition table, verification rules, and agent constraints. Load only if you have a specific rule question not answered by the phase document, or if BOOT.md step 7 sends you to §1.10 for command/shortcut resolution.
-- `MAINTENANCE.md`: Maintenance and recovery logic. Load only when executing `clean` or `audit`, or recovering from project corruption.
-- `CONVERGE.md`: The convergence contract — the exact stage order `cc` walks from recovery to fresh producer packages, plus the closure bar that decides when it may say DONE. Load when `execution_intent: converge` is set, or when a phase document points here. It owns that order; no other document restates it.
-- `RFC.md`: Compatibility redirect only. The constitution was split into CORE.md and MAINTENANCE.md in v7.190.0. This file is a three-line stub; never treat it as authoritative.
-- `OPS.md`: The mechanical execution layer (SAIOPS). Owns HOW protocol state is committed safely — operation lifecycle, transaction/recovery, idempotency, locks, dry-run, result shape, fallback. Load ONLY for a mechanical-operation question. It restates no phase semantics, Pick Rule, HUNT, CLEAN, Improve or SubSaipen rule: CORE says what a claim means, OPS says how a claim is committed.
-- `RUNTIME.md`: Adaptive runtime contract. Owns the separation between acting agent, harness/model telemetry, tri-state capabilities, and the staged strategy/evaluation roadmap. Load only for runtime identity, capability, adapter, strategy, or evaluation work.
-- `SOURCES.md`: Lossless source-receipt contract. Owns capture-before-interpretation, immutable source authority, Work Contract provenance, clause coverage, reread gates, dedupe, crash recovery, and hot-to-cold retention. Load when active Work references a receipt or for `saipen source` operations.
-- `CONTROLS.md`: Normative semantics for `focus`/`build`/`cut`/`undo`, including Restore Milestones and the agent-vs-mechanics boundary. Load only for FF/VV/XX/ZZ execution or a rule question about those controls.
-- `IMPROVE.md`: The meta-control that audits SAIPEN. Single canonical owner of the Improve lifecycle — cycle admission, seat/report contract, finding schema, sweep, verify, archive. NOT a phase (phase count stays 16). Load when running `saipen improve` or a rule question about improve routing/reports.
-- `SAICRITIC.md`: Canonical owner of the ordered self-critique proof vocabulary and permanent audit lenses. Load for a critic-role Improve assignment or a proof-contract question.
+## Runtime route
 
-## Phase Documents (`phases/*.md`)
-Keep exactly one phase document loaded at a time. Replace it immediately when the active phase changes.
-- `init.md`: Bootstrap `.saipen/` for a new project.
-- `plan.md`: Turn request/backlog into tickets.
-- `scout.md`: Claim ticket, explore codebase.
-- `build.md`: Execute code/prose modifications.
-- `verify.md`: Testing, validation, and checklist review.
-- `review.md`: Automated checks and formatting.
-- `ship.md`: Git commit, push, and release.
-- `done.md`: Finalize tickets, end session.
-- `add.md`: Plan new features (evolutionary, minimal delta).
-- `hunt.md`: Defect/improvement sweep (6 categories).
-- `markhunt.md`: Dry uncapped audit, records only.
-- `clean.md`: Repo scrub, board pruning.
-- `blocked.md`: Handle blocked tickets.
-- `translate.md`: Isolated 32-language translation factory.
-- `prepare.md`: Package work for handoff.
-- `validate.md`: Conformance check + repair.
+- `BOOT.md` -- cold execution router; no protocol semantics.
+- `STYLE.md` -- reply language, voice and artifact style; loaded first.
+- `REGISTRY.json` -- executable closed sets, routing facts and load profiles.
+- `COMMANDS.md` -- command, shortcut and compound-command semantics.
+- `EXECUTION.md` -- execution/output policy, including planned HUSH behavior.
+- `CORE.md` -- global state, checkpoint, priority and transition invariants.
+- `MAINTENANCE.md` -- goal-driven and autonomous maintenance semantics.
+- `OPS.md` -- journaled operations, recovery, reconciliation and rebind mechanics.
+- `SOURCES.md` -- receipt authority, Work Contract and coverage lifecycle.
+- `RUNTIME.md` -- runtime identity, capabilities and adaptive strategy.
+- `CONTROLS.md` -- focus/build/cut/undo controls and restore milestones.
+- `IMPROVE.md` -- Improve admission, seats, findings and lifecycle.
+- `CONVERGE.md` -- converge stage order and closure bar.
+- `SAICRITIC.md`: ordered self-critique proof vocabulary.
+- `RFC.md` -- compatibility redirect only; never a rule destination.
 
-## Specialized Documents
-- `UI.md`: Rules for UI/frontend work. Load ONLY when touching UI code.
-- `HABITS.md`: Known failure patterns of modern LLMs and protocol countermeasures.
-- `CONFORMANCE.md`: Excluded surface. NEVER read unless explicitly debugging a validator failure.
-- `SKILL.md`: SAIPEN loader logic (do not read).
+## Phase route
 
-## Project Data
-- `KNOWLEDGE/*.md`: Discovered architectural truths about the project. (Located in project root).
-- `CHANGELOG.md`: Release notes history. (Located in project root).
+Load only `phases/<STATE.phase>.md`; replace it on transition.
+
+- `init.md`: bootstrap.
+- `plan.md`: ticket planning.
+- `scout.md`: bounded discovery.
+- `build.md`: implementation.
+- `verify.md`: evidence.
+- `review.md`: independent review.
+- `ship.md`: release.
+- `done.md`: closure routing.
+- `blocked.md`: session blocker.
+- `hunt.md`: defect sweep.
+- `markhunt.md`: report-only sweep.
+- `add.md`: minimal next work.
+- `clean.md`: hygiene.
+- `validate.md`: protocol repair.
+- `translate.md`: translation factory.
+- `prepare.md`: handoff factory.
+
+## Conditional surfaces
+
+- `UI.md` -- only UI/frontend work.
+- `HABITS.md` -- known model failure patterns.
+- `CONFORMANCE.md` -- compact human conformance contract/index; routine agents
+  do not load it. Scenario proof data lives in `tests/conformance_cases.jsonl`.
+- `.saipen/KNOWLEDGE/*.md` -- project truths relevant to the current ticket.
+- `CHANGELOG.md` -- release history, never cold context.
+- `SKILL.md` -- platform loader entry, not runtime protocol.
+
+Use the owner named by the route. Do not read the full protocol tree.

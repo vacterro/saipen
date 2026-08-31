@@ -309,7 +309,8 @@ class AliasEquivalenceTests(_Fixture):
         self.assertEqual(
             payload_a.get("code"),
             payload_b.get("code"),
-            f"cc and continue must be the same route; got {payload_a.get('code')} vs {payload_b.get('code')}",
+            f"cc and continue must be the same route; "
+            f"got {payload_a.get('code')} vs {payload_b.get('code')}",
         )
 
     def test_sc_and_crew_are_one_route(self):

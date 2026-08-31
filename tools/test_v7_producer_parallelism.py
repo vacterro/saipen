@@ -26,6 +26,7 @@ Covers every DONE/matrix case from the spec:
 
 from __future__ import annotations
 
+import contextlib
 import json
 import shutil
 import sys
@@ -423,6 +424,648 @@ class V7Test(unittest.TestCase):
         self.assertEqual(P.StagingGeneration.list_ready(ns), [])
         self.assertEqual(len(list((ns / P.SETTLED_DIRNAME).glob("*.json"))), 1)
         self.assertEqual(len(list((ns / P.SUPERSEDED_DIRNAME).glob("*.json"))), 24)
+
+    def _publish(self, ns, producer, read_paths, write_paths, scope, content, epoch):
+        pkg = self._make_pkg(producer, read_paths, write_paths, scope, epoch=epoch)
+        gen = P.StagingGeneration(ns, producer).begin()
+        for rel in write_paths:
+            gen.add_payload(rel, content)
+        gen.set_package(pkg)
+        return gen, pkg
+
+    def test_w2_001_takeover_epoch_cannot_publish_old_generation(self):
+        ns = self.root / ".saipen/saitranslate"
+        epoch1 = P.ProducerEpoch.claim(ns)
+        gen = P.StagingGeneration(ns, "saitranslate").begin()
+        gen.add_payload("translations/ru.md", "old content")
+        gen.set_package(
+            self._make_pkg(
+                "saitranslate",
+                ["src/core.py"],
+                ["translations/ru.md"],
+                "ru",
+                epoch=epoch1,
+            )
+        )
+        epoch2 = P.ProducerEpoch.claim(ns)
+        with self.assertRaises(P.ProducerError):
+            gen.set_package(
+                self._make_pkg(
+                    "saitranslate",
+                    ["src/core.py"],
+                    ["translations/ru.md"],
+                    "ru",
+                    epoch=epoch2,
+                )
+            )
+        result = gen.publish()
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["code"], "STALE_WORKER")
+        self.assertFalse(P.StagingGeneration.is_ready(ns, gen.package.package_identity))
+        self.assertTrue(gen.staging_dir.is_dir())
+
+    def test_w2_001_cross_role_package_refused(self):
+        ns = self.root / ".saipen/saitranslate"
+        epoch = P.ProducerEpoch.claim(ns)
+        gen = P.StagingGeneration(ns, "saitranslate").begin()
+        gen.add_payload("translations/ru.md", "content")
+        with self.assertRaises(P.ProducerError):
+            gen.set_package(
+                self._make_pkg(
+                    "saiwiki",
+                    ["src/core.py"],
+                    ["translations/ru.md"],
+                    "wiki",
+                    epoch=epoch,
+                )
+            )
+        result = gen.publish()
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["code"], "NO_PACKAGE")
+        self.assertFalse((ns / P.READY_DIRNAME).exists())
+
+    def test_w2_001_tampered_manifest_refused(self):
+        ns = self.root / ".saipen/saitranslate"
+        epoch = P.ProducerEpoch.claim(ns)
+        gen = P.StagingGeneration(ns, "saitranslate").begin()
+        gen.add_payload("translations/ru.md", "content")
+        gen.set_package(
+            self._make_pkg(
+                "saitranslate",
+                ["src/core.py"],
+                ["translations/ru.md"],
+                "ru",
+                epoch=epoch,
+            )
+        )
+        marker = json.loads((gen.staging_dir / ".in-flight").read_text(encoding="utf-8"))
+        marker["epoch"] = epoch + 1
+        gen.manifest_path.write_text(json.dumps(marker), encoding="utf-8")
+        result = gen.publish()
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["code"], "STAGING_CORRUPT")
+        self.assertFalse((ns / P.READY_DIRNAME).exists())
+
+    def test_w2_001_normal_generation_publishes(self):
+        ns = self.root / ".saipen/saitranslate"
+        epoch = P.ProducerEpoch.claim(ns)
+        gen, pkg = self._publish(
+            ns,
+            "saitranslate",
+            ["src/core.py"],
+            ["translations/ru.md"],
+            "ru",
+            b"content",
+            epoch,
+        )
+        result = gen.publish()
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["code"], "PUBLISHED")
+        self.assertTrue(P.StagingGeneration.is_ready(ns, pkg.package_identity))
+
+    def test_w2_002_staging_shaped_ready_refused(self):
+        ns = self.root / ".saipen/saitranslate"
+        epoch = P.ProducerEpoch.claim(ns)
+        pkg = self._make_pkg(
+            "saitranslate", ["src/core.py"], ["translations/ru.md"], "ru", epoch=epoch
+        )
+        ready = ns / P.READY_DIRNAME
+        ready.mkdir(parents=True, exist_ok=True)
+        (ready / P._ready_filename(pkg.package_identity)).write_text(
+            json.dumps(pkg.to_dict()), encoding="utf-8"
+        )
+        gen = P.StagingGeneration(ns, "saitranslate").begin()
+        gen.add_payload("translations/ru.md", "content")
+        gen.set_package(pkg)
+        result = gen.publish()
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["code"], "READY_CORRUPT")
+        self.assertTrue(gen.staging_dir.is_dir())
+        self.assertTrue((ready / P._ready_filename(pkg.package_identity)).is_file())
+
+    def test_w2_002_valid_strict_ready_reused_once(self):
+        ns = self.root / ".saipen/saitranslate"
+        epoch = P.ProducerEpoch.claim(ns)
+        gen, _pkg = self._publish(
+            ns,
+            "saitranslate",
+            ["src/core.py"],
+            ["translations/ru.md"],
+            "ru",
+            b"content",
+            epoch,
+        )
+        self.assertTrue(gen.publish()["ok"])
+        gen2, _ = self._publish(
+            ns,
+            "saitranslate",
+            ["src/core.py"],
+            ["translations/ru.md"],
+            "ru",
+            b"content",
+            epoch,
+        )
+        result = gen2.publish()
+        self.assertEqual(result["code"], "REUSED")
+        self.assertEqual(len(list((ns / P.READY_DIRNAME).glob("*.json"))), 1)
+
+    def test_w2_002_ready_with_wrong_producer_refused(self):
+        ns = self.root / ".saipen/saitranslate"
+        epoch = P.ProducerEpoch.claim(ns)
+        gen, _ = self._publish(
+            ns,
+            "saitranslate",
+            ["src/core.py"],
+            ["translations/ru.md"],
+            "ru",
+            b"content",
+            epoch,
+        )
+        self.assertTrue(gen.publish()["ok"])
+        ready = ns / P.READY_DIRNAME
+        ready_files = list(ready.glob("*.json"))
+        self.assertEqual(len(ready_files), 1)
+        ready_file = ready_files[0]
+        data = json.loads(ready_file.read_text(encoding="utf-8"))
+        data["producer"] = "saiwiki"
+        ready_file.write_text(json.dumps(data), encoding="utf-8")
+        gen2, _ = self._publish(
+            ns,
+            "saitranslate",
+            ["src/core.py"],
+            ["translations/ru.md"],
+            "ru",
+            b"content",
+            epoch,
+        )
+        result = gen2.publish()
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["code"], "READY_CORRUPT")
+        self.assertTrue(gen2.staging_dir.is_dir())
+
+    def test_w2_003_manifest_only_staging_preserved_after_takeover(self):
+        ns = self.root / ".saipen/saiwiki"
+        P.ProducerEpoch.claim(ns)
+        gen = P.StagingGeneration(ns, "saiwiki").begin()
+        manifest = gen.manifest_path.read_text(encoding="utf-8")
+        (gen.staging_dir / ".in-flight").unlink()
+        gen.manifest_path.write_text(manifest, encoding="utf-8")
+        P.ProducerEpoch.claim(ns)
+        report = P.StagingGeneration.recover(ns)
+        self.assertEqual(report["removed_staging"], [])
+        self.assertTrue(gen.staging_dir.is_dir())
+        self.assertTrue(report["invalid_staging"])
+
+    def test_w2_003_marker_only_staging_removed_only_after_takeover(self):
+        ns = self.root / ".saipen/saiwiki"
+        P.ProducerEpoch.claim(ns)
+        gen = P.StagingGeneration(ns, "saiwiki").begin()
+        gen.manifest_path.unlink()
+        report = P.StagingGeneration.recover(ns)
+        self.assertEqual(report["removed_staging"], [])
+        self.assertTrue(gen.staging_dir.is_dir())
+        P.ProducerEpoch.claim(ns)
+        report = P.StagingGeneration.recover(ns)
+        self.assertIn(gen.generation_id, report["removed_staging"])
+        self.assertFalse(gen.staging_dir.exists())
+
+    def test_w2_004_source_distinct_packages_do_not_alias(self):
+        ns = self.root / ".saipen/saitranslate"
+        epoch = P.ProducerEpoch.claim(ns)
+
+        def publish(source, tree, content):
+            pkg = P.build_package(
+                producer="saitranslate",
+                role_revision="sha256:role",
+                base_source_head=source,
+                base_source_tree_fingerprint=tree,
+                base_discovery_model="no-git-tree-v1",
+                scope="ru",
+                read_set=P.read_set_from(self.root, ["src/core.py"]),
+                write_set=P.write_set_before(self.root, ["translations/ru.md"]),
+                epoch=epoch,
+                status="staging",
+            )
+            gen = P.StagingGeneration(ns, "saitranslate").begin()
+            gen.add_payload("translations/ru.md", content)
+            gen.set_package(pkg)
+            self.assertTrue(gen.publish()["ok"])
+            return pkg
+
+        a = publish("A", "tree:A", b"old")
+        b = publish("B", "tree:B", b"new")
+        self.assertNotEqual(a.package_identity, b.package_identity)
+        stale = P.StagingGeneration.scan_ready(ns)[0][0]
+        self.assertTrue(P.StagingGeneration.is_ready(ns, b.package_identity))
+        if stale.package_identity == a.package_identity:
+            P._retire_ready_package(stale)
+            self.assertTrue(P.StagingGeneration.is_ready(ns, b.package_identity))
+            self.assertFalse(P.StagingGeneration.is_ready(ns, a.package_identity))
+
+    def test_w2_004_retirement_cas_blocks_foreign_artifact_at_path(self):
+        ns = self.root / ".saipen/saitranslate"
+        epoch = P.ProducerEpoch.claim(ns)
+        first = self._make_pkg(
+            "saitranslate", ["src/core.py"], ["translations/ru.md"], "ru", epoch=epoch
+        )
+        gen = P.StagingGeneration(ns, "saitranslate").begin()
+        gen.add_payload("translations/ru.md", "old")
+        gen.set_package(first)
+        self.assertTrue(gen.publish()["ok"])
+        second = P.build_package(
+            producer="saitranslate",
+            role_revision="sha256:role",
+            base_source_head="B",
+            base_source_tree_fingerprint="tree:B",
+            base_discovery_model="no-git-tree-v1",
+            scope="ru",
+            read_set=first.read_set,
+            write_set=first.write_set,
+            epoch=epoch,
+            status="staging",
+        )
+        gen2 = P.StagingGeneration(ns, "saitranslate").begin()
+        gen2.add_payload("translations/ru.md", "new")
+        gen2.set_package(second)
+        self.assertTrue(gen2.publish()["ok"])
+        forged = P.build_package(
+            producer="saitranslate",
+            role_revision="sha256:role",
+            base_source_head="A",
+            base_source_tree_fingerprint="tree:A",
+            base_discovery_model="no-git-tree-v1",
+            scope="ru",
+            read_set=first.read_set,
+            write_set=first.write_set,
+            epoch=epoch,
+            status="staging",
+        )
+        forged_ready_path = (
+            ns / P.READY_DIRNAME / P._ready_filename(second.package_identity)
+        )
+        object.__setattr__(forged, "ready_path", forged_ready_path)
+        with self.assertRaises((P.ConflictError, P.ProducerError)):
+            P._retire_ready_package(forged)
+        self.assertTrue(P.StagingGeneration.is_ready(ns, second.package_identity))
+
+    # ------------------------------------------------------------------
+    # W2-002 VERIFY: every malformed/partial pre-placed READY carrier is a
+    # stable refusal, never a false REUSED success and never a staging loss.
+    # ------------------------------------------------------------------
+    def _publish_then_corrupt_ready(self, corrupt):
+        ns = self.root / ".saipen/saitranslate"
+        epoch = P.ProducerEpoch.claim(ns)
+        gen, _ = self._publish(
+            ns,
+            "saitranslate",
+            ["src/core.py"],
+            ["translations/ru.md"],
+            "ru",
+            b"content",
+            epoch,
+        )
+        self.assertTrue(gen.publish()["ok"], gen.publish())
+        ready_files = list((ns / P.READY_DIRNAME).glob("*.json"))
+        self.assertEqual(len(ready_files), 1)
+        corrupt(ready_files[0])
+        return ns, epoch
+
+    def test_w2_002_ready_missing_payload_hashes_refused(self):
+        def corrupt(ready_file: Path) -> None:
+            data = json.loads(ready_file.read_text(encoding="utf-8"))
+            data.pop("payload_hashes", None)
+            ready_file.write_text(json.dumps(data), encoding="utf-8")
+
+        ns, epoch = self._publish_then_corrupt_ready(corrupt)
+        gen2, _ = self._publish(
+            ns,
+            "saitranslate",
+            ["src/core.py"],
+            ["translations/ru.md"],
+            "ru",
+            b"content",
+            epoch,
+        )
+        result = gen2.publish()
+        self.assertFalse(result["ok"], result)
+        self.assertEqual(result["code"], "READY_CORRUPT", result)
+        self.assertTrue(gen2.staging_dir.is_dir(), "valid staging must stay recoverable")
+        self.assertEqual(len(list((ns / P.READY_DIRNAME).glob("*.json"))), 1)
+
+    def test_w2_002_ready_missing_payload_bytes_refused(self):
+        def corrupt(ready_file: Path) -> None:
+            data = json.loads(ready_file.read_text(encoding="utf-8"))
+            data.pop("payload_bytes", None)
+            ready_file.write_text(json.dumps(data), encoding="utf-8")
+
+        ns, epoch = self._publish_then_corrupt_ready(corrupt)
+        gen2, _ = self._publish(
+            ns,
+            "saitranslate",
+            ["src/core.py"],
+            ["translations/ru.md"],
+            "ru",
+            b"content",
+            epoch,
+        )
+        result = gen2.publish()
+        self.assertFalse(result["ok"], result)
+        self.assertEqual(result["code"], "READY_CORRUPT", result)
+        self.assertTrue(gen2.staging_dir.is_dir())
+
+    def test_w2_002_malformed_ready_json_refused(self):
+        def corrupt(ready_file: Path) -> None:
+            ready_file.write_text("{not json", encoding="utf-8")
+
+        ns, epoch = self._publish_then_corrupt_ready(corrupt)
+        gen2, _ = self._publish(
+            ns,
+            "saitranslate",
+            ["src/core.py"],
+            ["translations/ru.md"],
+            "ru",
+            b"content",
+            epoch,
+        )
+        result = gen2.publish()
+        self.assertFalse(result["ok"], result)
+        self.assertEqual(result["code"], "READY_CORRUPT", result)
+        self.assertTrue(gen2.staging_dir.is_dir())
+
+    def test_w2_002_ready_filename_identity_mismatch_refused(self):
+        """A strictly valid READY stored under another identity's filename is
+        not that identity's authority. The strict decoder compares the declared
+        identity against the expected one, so the mismatch refuses instead of
+        being reused as if it were the prepared package."""
+        ns = self.root / ".saipen/saitranslate"
+        epoch = P.ProducerEpoch.claim(ns)
+        gen_a, _ = self._publish(
+            ns,
+            "saitranslate",
+            ["src/core.py"],
+            ["translations/ru.md"],
+            "ru",
+            b"content",
+            epoch,
+        )
+        self.assertTrue(gen_a.publish()["ok"])
+        ready_dir = ns / P.READY_DIRNAME
+        source_file = next(iter(ready_dir.glob("*.json")))
+        other = P.build_package(
+            producer="saitranslate",
+            role_revision="sha256:role-saitranslate",
+            base_source_head="no-git",
+            base_source_tree_fingerprint="tree:other",
+            base_discovery_model="no-git-tree-v1",
+            scope="ru",
+            read_set=P.read_set_from(self.root, ["src/core.py"]),
+            write_set=P.write_set_before(self.root, ["translations/ru.md"]),
+            epoch=epoch,
+            status="staging",
+        )
+        # Relabel the published artifact under the *other* identity's filename.
+        (ready_dir / P._ready_filename(other.package_identity)).write_bytes(
+            source_file.read_bytes()
+        )
+        gen_b = P.StagingGeneration(ns, "saitranslate").begin()
+        gen_b.add_payload("translations/ru.md", "content")
+        gen_b.set_package(other)
+        result = gen_b.publish()
+        self.assertFalse(result["ok"], result)
+        self.assertEqual(result["code"], "READY_CORRUPT", result)
+        self.assertTrue(gen_b.staging_dir.is_dir())
+
+    # ------------------------------------------------------------------
+    # W2-003 VERIFY: split authority carriers that disagree, or that omit the
+    # identity the first carrier must carry, are reported -- never silently
+    # preserved forever and never deleted without abandonment proof.
+    # ------------------------------------------------------------------
+    def test_w2_003_marker_manifest_epoch_mismatch_is_invalid_not_deleted(self):
+        ns = self.root / ".saipen/saiwiki"
+        epoch1 = P.ProducerEpoch.claim(ns)
+        gen = P.StagingGeneration(ns, "saiwiki").begin()
+        marker = json.loads((gen.staging_dir / ".in-flight").read_text(encoding="utf-8"))
+        self.assertEqual(marker["epoch"], epoch1)
+        marker["epoch"] = epoch1 + 5
+        (gen.staging_dir / ".in-flight").write_text(
+            json.dumps(marker, sort_keys=True), encoding="utf-8"
+        )
+        P.ProducerEpoch.claim(ns)
+        report = P.StagingGeneration.recover(ns)
+        self.assertEqual(report["removed_staging"], [])
+        self.assertTrue(gen.staging_dir.is_dir())
+        self.assertTrue(report["invalid_staging"])
+        self.assertEqual(
+            {entry["code"] for entry in report["invalid_staging"]},
+            {"INCOMPLETE_STAGING"},
+        )
+
+    def test_w2_003_marker_manifest_generation_id_mismatch_is_invalid_not_deleted(self):
+        ns = self.root / ".saipen/saiwiki"
+        P.ProducerEpoch.claim(ns)
+        gen = P.StagingGeneration(ns, "saiwiki").begin()
+        marker = json.loads((gen.staging_dir / ".in-flight").read_text(encoding="utf-8"))
+        marker["generation_id"] = "foreign-generation-id"
+        (gen.staging_dir / ".in-flight").write_text(
+            json.dumps(marker, sort_keys=True), encoding="utf-8"
+        )
+        P.ProducerEpoch.claim(ns)
+        report = P.StagingGeneration.recover(ns)
+        self.assertEqual(report["removed_staging"], [])
+        self.assertTrue(gen.staging_dir.is_dir())
+        self.assertTrue(report["invalid_staging"])
+
+    def test_w2_003_marker_identity_shape_violation_is_invalid_not_deleted(self):
+        """W2-003 repair: the FIRST durable carrier must be sufficient by
+        itself. A marker missing generation identity is unclassifiable, so it
+        is reported as incomplete staging rather than left invisible forever."""
+        ns = self.root / ".saipen/saiwiki"
+        P.ProducerEpoch.claim(ns)
+        gen = P.StagingGeneration(ns, "saiwiki").begin()
+        (gen.staging_dir / ".in-flight").write_text(
+            json.dumps({"epoch": 0}), encoding="utf-8"
+        )
+        P.ProducerEpoch.claim(ns)
+        report = P.StagingGeneration.recover(ns)
+        self.assertEqual(report["removed_staging"], [])
+        self.assertTrue(gen.staging_dir.is_dir())
+        self.assertTrue(report["invalid_staging"])
+
+    def test_w2_003_every_begin_crash_cut_is_classifiable_after_takeover(self):
+        """Fault-inject a crash after each `begin()` filesystem step. Every
+        reachable partial state must converge deterministically: either it is
+        removed under the exact abandonment proof (marker authority at a
+        superseded epoch) or it is reported as incomplete -- never an
+        unclassifiable orphan that recovery silently ignores."""
+        ns = self.root / ".saipen/saiwiki"
+        # Step 0: generation dir only. Step 1: + payload dir.
+        # Step 2: + .in-flight (first authority carrier).
+        # Step 3: + staging.manifest.json (complete).
+        for cut in range(4):
+            with self.subTest(crash_cut=cut):
+                P.ProducerEpoch.claim(ns)
+                gen = P.StagingGeneration(ns, "saiwiki").begin()
+                if cut == 0:
+                    (gen.staging_dir / ".in-flight").unlink()
+                    gen.manifest_path.unlink()
+                    (gen.staging_dir / "payload").rmdir()
+                elif cut == 1:
+                    (gen.staging_dir / ".in-flight").unlink()
+                    gen.manifest_path.unlink()
+                elif cut == 2:
+                    gen.manifest_path.unlink()
+                # Takeover: the generation's epoch is now superseded.
+                P.ProducerEpoch.claim(ns)
+                report = P.StagingGeneration.recover(ns)
+                converged = bool(report["removed_staging"]) or bool(
+                    report.get("invalid_staging")
+                )
+                self.assertTrue(
+                    converged,
+                    f"crash cut {cut} produced an unclassifiable orphan: {report}",
+                )
+                # A second recovery must be idempotent: the same verdict, no
+                # new deletions of evidence that survived the first pass.
+                second = P.StagingGeneration.recover(ns)
+                self.assertEqual(second["removed_staging"], [])
+                if cut >= 2:
+                    # The `.in-flight` marker is the FIRST durable carrier and
+                    # now carries generation_id/producer/epoch by itself, so a
+                    # superseded marker-only or complete generation holds the
+                    # mechanical abandonment proof and is removed exactly once.
+                    self.assertIn(gen.generation_id, report["removed_staging"])
+                    self.assertFalse(gen.staging_dir.exists())
+                else:
+                    # No authority carrier at all: unclassifiable, so it is
+                    # reported for explicit recovery instead of deleted.
+                    self.assertEqual(
+                        report["removed_staging"],
+                        [],
+                        f"crash cut {cut} deleted evidence without a marker proof",
+                    )
+                    self.assertTrue(gen.staging_dir.is_dir())
+                with contextlib.suppress(OSError):
+                    shutil.rmtree(gen.staging_dir, ignore_errors=True)
+
+    # ------------------------------------------------------------------
+    # W2-004 VERIFY: stale handles and SETTLED collisions across source
+    # generations.
+    # ------------------------------------------------------------------
+    def _publish_source_bound(self, ns, epoch, head, tree, content):
+        pkg = P.build_package(
+            producer="saitranslate",
+            role_revision="sha256:role",
+            base_source_head=head,
+            base_source_tree_fingerprint=tree,
+            base_discovery_model="no-git-tree-v1",
+            scope="ru",
+            read_set=P.read_set_from(self.root, ["src/core.py"]),
+            write_set=P.write_set_before(self.root, ["translations/ru.md"]),
+            epoch=epoch,
+            status="staging",
+        )
+        gen = P.StagingGeneration(ns, "saitranslate").begin()
+        gen.add_payload("translations/ru.md", content)
+        gen.set_package(pkg)
+        self.assertTrue(gen.publish()["ok"], gen.publish())
+        return pkg
+
+    def test_w2_004_scan_a_publish_b_then_retire_stale_a_leaves_b_ready(self):
+        ns = self.root / ".saipen/saitranslate"
+        epoch = P.ProducerEpoch.claim(ns)
+        package_a = self._publish_source_bound(ns, epoch, "A", "tree:A", b"old")
+        scanned, errors = P.StagingGeneration.scan_ready(ns)
+        self.assertEqual(errors, [])
+        stale_a = next(
+            item for item in scanned if item.package_identity == package_a.package_identity
+        )
+        stale_ready_path = stale_a.ready_path
+        self.assertIsNotNone(stale_ready_path)
+
+        package_b = self._publish_source_bound(ns, epoch, "B", "tree:B", b"new")
+        self.assertNotEqual(package_a.package_identity, package_b.package_identity)
+
+        P._retire_ready_package(stale_a)
+
+        self.assertTrue(
+            P.StagingGeneration.is_ready(ns, package_b.package_identity),
+            "stale retirement must not move or delete the newer source-bound artifact",
+        )
+        self.assertFalse(P.StagingGeneration.is_ready(ns, package_a.package_identity))
+        self.assertFalse(stale_ready_path.exists())
+
+    def test_w2_004_retire_a_then_publish_and_retire_b_keeps_both_generations(self):
+        ns = self.root / ".saipen/saitranslate"
+        epoch = P.ProducerEpoch.claim(ns)
+        package_a = self._publish_source_bound(ns, epoch, "A", "tree:A", b"old")
+        scanned, errors = P.StagingGeneration.scan_ready(ns)
+        self.assertEqual(errors, [])
+        handle_a = next(
+            item for item in scanned if item.package_identity == package_a.package_identity
+        )
+        P._retire_ready_package(handle_a)
+
+        package_b = self._publish_source_bound(ns, epoch, "B", "tree:B", b"new")
+        scanned_b, errors_b = P.StagingGeneration.scan_ready(ns)
+        self.assertEqual(errors_b, [])
+        handle_b = next(
+            item for item in scanned_b if item.package_identity == package_b.package_identity
+        )
+        P._retire_ready_package(handle_b)
+
+        settled = {path.name for path in (ns / P.SETTLED_DIRNAME).glob("*.json")}
+        self.assertEqual(len(settled), 2, settled)
+        self.assertIn(P._ready_filename(package_a.package_identity), settled)
+        self.assertIn(P._ready_filename(package_b.package_identity), settled)
+        self.assertEqual(list((ns / P.READY_DIRNAME).glob("*.json")), [])
+
+    def test_w2_004_duplicate_retirement_is_idempotent_and_never_duplicates_settled(self):
+        ns = self.root / ".saipen/saitranslate"
+        epoch = P.ProducerEpoch.claim(ns)
+        self._publish_source_bound(ns, epoch, "A", "tree:A", b"old")
+        scanned, errors = P.StagingGeneration.scan_ready(ns)
+        self.assertEqual(errors, [])
+        first = scanned[0]
+        P._retire_ready_package(first)
+        # A second retirement of the very same handle is a legal retry after a
+        # crash between the move and the caller's own bookkeeping.
+        P._retire_ready_package(first)
+        settled = list((ns / P.SETTLED_DIRNAME).glob("*.json"))
+        self.assertEqual(len(settled), 1, settled)
+        self.assertEqual(P.StagingGeneration.list_ready(ns), [])
+
+    def test_w2_004_settled_collision_with_different_content_refuses(self):
+        """An existing SETTLED destination may be treated idempotently only
+        when it is content-equivalent; otherwise the newer generation's
+        terminal evidence must not be silently discarded."""
+        ns = self.root / ".saipen/saitranslate"
+        epoch = P.ProducerEpoch.claim(ns)
+        package_a = self._publish_source_bound(ns, epoch, "A", "tree:A", b"old")
+        scanned, errors = P.StagingGeneration.scan_ready(ns)
+        self.assertEqual(errors, [])
+        handle_a = next(
+            item for item in scanned if item.package_identity == package_a.package_identity
+        )
+        P._retire_ready_package(handle_a)
+        settled_path = ns / P.SETTLED_DIRNAME / P._ready_filename(package_a.package_identity)
+        self.assertTrue(settled_path.is_file())
+        settled_path.write_text(
+            json.dumps({"producer": "saitranslate", "forged": True}), encoding="utf-8"
+        )
+
+        # Re-create the same identity in READY, then attempt retirement: the
+        # destination is NOT content-equivalent, so the collision must refuse
+        # rather than unlink the current READY artifact.
+        package_a_again = self._publish_source_bound(ns, epoch, "A", "tree:A", b"old")
+        self.assertEqual(package_a.package_identity, package_a_again.package_identity)
+        scanned, errors = P.StagingGeneration.scan_ready(ns)
+        self.assertEqual(errors, [])
+        handle_again = next(
+            item for item in scanned if item.package_identity == package_a_again.package_identity
+        )
+        with self.assertRaises((P.ConflictError, P.ProducerError)):
+            P._retire_ready_package(handle_again)
+        self.assertTrue(P.StagingGeneration.is_ready(ns, package_a_again.package_identity))
 
 
 if __name__ == "__main__":

@@ -182,7 +182,9 @@ def _normalised_doc_text(raw: bytes) -> str:
     return text.replace("\r\n", "\n").replace("\r", "\n")
 
 
-def read_history_snapshot(project_root: Path | str) -> HistorySnapshot:
+def read_history_snapshot(
+    project_root: Path | str, *, lean: bool = False
+) -> HistorySnapshot:
     """One pass over the complete LOG history (sealed + active).
 
     Each segment file is opened exactly once; the exact raw bytes feed the
@@ -197,6 +199,11 @@ def read_history_snapshot(project_root: Path | str) -> HistorySnapshot:
     canonical relative path + raw length + raw bytes -- so different segment
     layouts with identical concatenation, a resegment, or an added empty
     numeric segment all change the hash.
+
+    PERF-005: `lean=True` omits the O(history-text) `text` and `event_lines`
+    renderings that read-only routing commands never consume, while keeping
+    hash, tail, parsed events, illegal-line diagnostics and max_ticket_id.
+    The hash framing, read count and parse pass are byte-identical either way.
     """
     root = Path(project_root)
     logs_dir = root / ".saipen" / "logs"
@@ -226,14 +233,16 @@ def read_history_snapshot(project_root: Path | str) -> HistorySnapshot:
         h.update(str(len(raw)).encode("ascii"))
         h.update(raw)
         text = _normalised_doc_text(raw)
-        chunks.append(text)
+        if not lean:
+            chunks.append(text)
         for idx, line in enumerate(text.splitlines()):
             parsed = parse_log_line(line)
             if parsed is not None:
                 events.append(parsed)
                 # Retain the ORIGINAL legal raw line in the same pass (T-1014)
                 # so context projections reuse it verbatim -- no second parse.
-                event_lines.append(line)
+                if not lean:
+                    event_lines.append(line)
                 # PERF-004: derive the history-wide max ticket ID during the
                 # authoritative parse. A ticket ref in old sealed history keeps
                 # its ID reserved forever.
@@ -255,11 +264,11 @@ def read_history_snapshot(project_root: Path | str) -> HistorySnapshot:
             tail = ev["event"]
     return HistorySnapshot(
         hash=h.hexdigest()[:16],
-        text="\n".join(chunks),
+        text="" if lean else "\n".join(chunks),
         tail=tail,
         events=tuple(events),
         illegal_lines=tuple(illegal),
-        event_lines=tuple(event_lines),
+        event_lines=() if lean else tuple(event_lines),
         max_ticket_id=max_ticket_id,
     )
 
@@ -293,13 +302,19 @@ def read_history_snapshot_and_logs_digest(
     root = Path(project_root)
     logs_dir = root / ".saipen" / "logs"
     valid_paths = _validate_history_ownership(root, logs_dir)
-    contents: dict[Path, bytes] = {}
     h = hashlib.sha256()
     chunks: list[str] = []
     events: list[dict] = []
     event_lines: list[str] = []
     illegal: list[str] = []
     max_ticket_id = 0
+    # PERF-001: cache raw bytes ONLY for paths inside `logs_dir` so the
+    # subsequent `hash_tree_dependency(logs_dir, ...)` call -- which walks
+    # exactly that directory -- is fed from memory instead of re-reading
+    # every sealed segment a second time. The active LOG.md lives outside
+    # `logs_dir` and is never visited by the delete-tree walker, so it is
+    # deliberately not cached (it is consumed only by the snapshot above).
+    sealed_cache: dict[Path, bytes] = {}
     for p in valid_paths:
         try:
             raw = p.read_bytes()
@@ -308,39 +323,32 @@ def read_history_snapshot_and_logs_digest(
         except OSError as exc:
             raise HistoryOwnershipError(
                 f"history node {p.name} unreadable ({type(exc).__name__}): {exc}"
-            )
+            ) from exc
         _require_canonical_active_log(p, raw)
-        contents[p] = raw
-        # FRAMED digest identity (second-wave P1): canonical relative path,
-        # then raw length, then raw bytes -- identical to read_history_snapshot.
         rel = p.relative_to(root).as_posix()
         h.update(rel.encode("utf-8"))
         h.update(str(len(raw)).encode("ascii"))
         h.update(raw)
         text = _normalised_doc_text(raw)
-        chunks.append(text)
+        if retain_text:
+            chunks.append(text)
         for idx, line in enumerate(text.splitlines()):
             parsed = parse_log_line(line)
             if parsed is not None:
                 events.append(parsed)
-                # PERF-001 (audit ed1f86e8): track max_ticket_id during the
-                # SAME pass so the fused reader and the plain reader cannot
-                # disagree on historical ticket maxima. Without this, the
-                # fused mutation path reports max_ticket_id=0, letting
-                # ticket/goal allocation reuse historical IDs after CLEAN/BOARD
-                # pruning.
                 for candidate in re.findall(r"\[T-(\d+)\]", line):
                     tid = int(candidate)
                     if tid > max_ticket_id:
                         max_ticket_id = tid
-                # Retain the ORIGINAL legal raw line in the same pass (T-1014)
-                # so context projections reuse it verbatim -- no second parse.
                 event_lines.append(line)
                 continue
             stripped = line.strip()
             if not stripped or stripped.startswith("#"):
                 continue
             illegal.append(f"{p.name}:{idx + 1}: not a legal LOG event: {stripped[:80]!r}")
+        if p.is_relative_to(logs_dir):
+            sealed_cache[p] = raw
+        del raw
     tail = None
     for ev in events:
         if tail is None or ev["event"] > tail:
@@ -354,15 +362,13 @@ def read_history_snapshot_and_logs_digest(
         event_lines=tuple(event_lines),
         max_ticket_id=max_ticket_id,
     )
-    # The sealed-LOG dependency digest, computed from the SAME already-read bytes.
-    # For any path hash_tree_dependency discovers that is NOT a canonical history
-    # segment (an anomalous subdir under .saipen/logs), fall back to a real read so
-    # the framing/sentinel output stays byte-identical to the original two-read path.
     from .journal import hash_tree_dependency
 
     def _read_sealed(candidate: Path) -> bytes:
-        key = Path(candidate)
-        return contents[key] if key in contents else key.read_bytes()
+        cached = sealed_cache.get(Path(candidate))
+        if cached is not None:
+            return cached
+        return Path(candidate).read_bytes()
 
     logs_digest = hash_tree_dependency(logs_dir, read_file=_read_sealed)
     return snapshot, logs_digest

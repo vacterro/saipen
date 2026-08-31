@@ -1,4 +1,4 @@
-# ruff: noqa: RUF001, RUF002, RUF003
+# ruff: noqa: RUF002, RUF003
 """Deterministic command parsing for SAIPEN compound inputs.
 
 Defect class this module exists to close: a protocol command or shortcut can
@@ -11,12 +11,12 @@ Rules enforced here:
 - A compound input (``saipen push + build ccc``) is split into an ORDERED
   list of command segments BEFORE any conversational interpretation. No
   segment may disappear because a model considers it unnecessary.
-- A whole first token that matches a declared SAIPEN shortcut (CORE.md section
-  1.10's table) activates SAIPEN and resolves to its row. Any remaining text
-  is opaque payload for that command. The table is read from CORE.md -- this
-  module holds NO copy, so it cannot drift.
+- A whole first token that matches a declared SAIPEN shortcut activates
+  SAIPEN and resolves to its row. Any remaining text is opaque payload
+  for that command. The table is read from REGISTRY.json (saipen/REGISTRY.json)
+  as the machine authority; COMMANDS.md explains the surface but is not parsed.
 - Shortcut normalization is UNICODE-CODEPOINT SUBSTITUTION, never
-  keyboard-position substitution (CORE.md section 1.10): each character is
+  keyboard-position substitution (CMD-ROUTING-01): each character is
   lowercased and folded through the one declared Cyrillic-confusable map, then
   looked up EXACTLY in the canonical table. Cyrillic сс therefore normalizes
   to Latin cc -- never to Latin ss, which has no Cyrillic twin because no
@@ -34,29 +34,18 @@ Rules enforced here:
 
 from __future__ import annotations
 
-import re
 from pathlib import Path
 
-# The shortcut rows are maintained ONLY in CORE.md section 1.10. We read them
-# at runtime so this list cannot drift into a second source of truth. The
-# regex mirrors the table's canonical row shape: `| sc | saipen crew | ... |`.
-_SHORTCUT_ROW_RE = re.compile(r"^\|\s*`([a-z]{2,3})`\s*\|\s*`(saipen [^`]+)`", re.MULTILINE)
+from .registry import RegistryError
+from .registry import load_registry as _load_registry
+from .registry import require_mapping, require_string_list
 
-# The ONE declared Cyrillic-confusable map (CORE.md section 1.10):
-# `а→a е→e о→o р→p с→c у→y х→x`. This is the single authority for twin
-# normalization -- the CLI adapter, the validator and the tests consume it
-# from here, so no second copy can drift. Note the shape of the map: its
-# targets are a/e/o/p/c/y/x only. Latin "s" is not a target and no Cyrillic
-# character folds to it, which is what makes `сс -> cc` and simultaneously
-# makes a Cyrillic twin for `ss`/`sss` UNDECLARABLE.
+# REGISTRY.json is the sole machine authority. Import-time consumers derive
+# immutable constants from it; no English-prose fallback exists.
+_REGISTRY = _load_registry()
 CYRILLIC_CONFUSABLE_MAP = {
-    "а": "a",
-    "е": "e",
-    "о": "o",
-    "р": "p",
-    "с": "c",
-    "у": "y",
-    "х": "x",
+    str(key): str(value)
+    for key, value in require_mapping(_REGISTRY, "cyrillic_confusables").items()
 }
 
 # Lexical routing: every declared shortcut owns its input.
@@ -69,7 +58,7 @@ LATIN_TO_CYRILLIC_CONFUSABLE = {v: k for k, v in CYRILLIC_CONFUSABLE_MAP.items()
 
 
 def normalize_shortcut_token(token: str) -> str:
-    """The ONE deterministic shortcut normalizer (CORE.md section 1.10).
+    """The deterministic shortcut normalizer (CMD-ROUTING-01).
 
     Lowercase (plain ``lower()`` -- never ``casefold()``, whose undeclared
     expansions would smuggle non-protocol characters into the alphabet), then
@@ -86,7 +75,7 @@ def resolve_shortcut(token: str, *, table: dict[str, str] | None = None) -> str 
 
     The algorithm is fixed: take the raw token, normalize it through
     :func:`normalize_shortcut_token` (codepoint substitution only), then look
-    the result up EXACTLY in the canonical table derived from CORE.md. Return
+    the result up EXACTLY in the canonical registry table. Return
     the canonical Latin key, or ``None`` when nothing declares it -- an
     unresolved token fails closed and is never guessed into a shortcut. The
     raw token is preserved by the caller for evidence/reporting; this function
@@ -122,38 +111,26 @@ def derive_cyrillic_twins(
     }
 
 
-def load_shortcut_table(protocol_dir: Path | str | None = None) -> dict[str, str]:
-    """Read the canonical shortcut table from CORE.md section 1.10.
+def load_registry(protocol_dir: Path | str | None = None) -> dict:
+    """Compatibility export for callers; reads REGISTRY.json only."""
+    return _load_registry(protocol_dir, required=False)
 
-    Returns {shortcut: canonical saipen command}. The table is derived from
-    CORE.md at runtime; there is deliberately no static copy here. When no
-    CORE.md is found, returns an empty table (callers must fail closed and
-    never guess a shortcut).
+
+def load_shortcut_table(protocol_dir: Path | str | None = None) -> dict[str, str]:
+    """Read the canonical shortcut table from REGISTRY.json.
+
+    Returns {shortcut: canonical saipen command}. Missing or malformed registry
+    yields an empty table so command dispatch fails closed. Prose is never read.
     """
-    core = None
-    if protocol_dir is not None:
-        candidate = Path(protocol_dir) / "CORE.md"
-        if candidate.is_file():
-            core = candidate
-    if core is None:
-        # Best-effort discovery beside this module (the repo layout): the
-        # protocol home is the repo root's sibling `saipen/`, i.e. three
-        # parents up from tools/saipen_engine/commands.py. W2-006 (audit
-        # fdc73e06): `.parent.parent` resolved to tools/ and produced an empty
-        # table, silently turning every declared shortcut into VALIDATION_FAILED.
-        candidate = Path(__file__).resolve().parent.parent.parent / "saipen" / "CORE.md"
-        if candidate.is_file():
-            core = candidate
-    if core is None:
+    registry = load_registry(protocol_dir)
+    shortcuts = registry.get("shortcuts") if registry else None
+    if not isinstance(shortcuts, dict):
         return {}
-    try:
-        text = core.read_text(encoding="utf-8-sig")
-    except (OSError, UnicodeDecodeError):
-        return {}
-    table: dict[str, str] = {}
-    for match in _SHORTCUT_ROW_RE.finditer(text):
-        table[match.group(1)] = match.group(2)
-    return table
+    return {
+        key: route
+        for key, route in shortcuts.items()
+        if isinstance(key, str) and isinstance(route, str)
+    }
 
 
 def is_declared_shortcut(token: str, table: dict[str, str] | None = None) -> bool:
@@ -183,33 +160,45 @@ def parse_compound_command(message: str) -> list[str]:
     raw = message.strip()
     parts: list[str] = []
     current: list[str] = []
-    in_quote = False
+    quote = False
+    escape = False
     i = 0
     while i < len(raw):
         ch = raw[i]
-        if ch == '"':
-            in_quote = not in_quote
+        if escape:
+            current.append(ch)
+            escape = False
+            i += 1
+            continue
+        if ch == "\\":
+            escape = True
             current.append(ch)
             i += 1
             continue
-        if not in_quote and ch == "\n":
+        if ch == '"':
+            quote = not quote
+            current.append(ch)
+            i += 1
+            continue
+        if not quote and ch == "\n":
             parts.append("".join(current))
             current = []
             i += 1
             while i < len(raw) and raw[i] == "\n":
                 i += 1
             continue
-        if not in_quote and ch == "+" and i > 0 and i + 1 < len(raw):
+        if not quote and ch == "+" and i > 0 and i + 1 < len(raw):
             if raw[i - 1].isspace() and raw[i + 1].isspace():
                 parts.append("".join(current))
                 current = []
                 i += 1
-                # skip one following space (delimiter consumes it; segment strip will handle rest)
                 if i < len(raw) and raw[i].isspace():
                     i += 1
                 continue
         current.append(ch)
         i += 1
+    if quote:
+        return []
     parts.append("".join(current))
     segments = []
     for part in parts:
@@ -326,24 +315,30 @@ def resolve_compound_command(
     return resolved
 
 
-# Chain policy: STOP_ON_FAILURE is the canonical default (CORE.md section
-# 1.10 compound-command contract). A later segment runs after an earlier
-# failure ONLY when the failure produced no canonical writes AND the segment
-# is provably independent (CONTINUE_WHEN_INDEPENDENT, decided by the caller
-# with evidence -- never by intuition).
-CHAIN_STOP_ON_FAILURE = "STOP_ON_FAILURE"
-CHAIN_CONTINUE_WHEN_INDEPENDENT = "CONTINUE_WHEN_INDEPENDENT"
+# REGISTRY.json is the sole authority for chain/result vocabulary. Exported
+# names remain stable for callers, but values and failure membership are
+# derived at import time rather than maintained as a second closed set here.
+_CHAIN_FACTS = require_mapping(_REGISTRY, "chain_policies")
+(
+    CHAIN_STOP_ON_FAILURE,
+    CHAIN_CONTINUE_WHEN_INDEPENDENT,
+) = require_string_list(_CHAIN_FACTS, "closed_set")
+if _CHAIN_FACTS.get("default") != CHAIN_STOP_ON_FAILURE:
+    raise RegistryError("REGISTRY chain_policies.default must be first in closed_set")
 
-# Closed disposition vocabulary for every recognized segment.
-DISPOSITION_EXECUTED = "EXECUTED"
-DISPOSITION_REFUSED = "REFUSED"
-DISPOSITION_BLOCKED = "BLOCKED"
-DISPOSITION_SKIPPED_BY_PROTOCOL = "SKIPPED_BY_PROTOCOL"
-DISPOSITION_ALREADY_SATISFIED = "ALREADY_SATISFIED"
-DISPOSITION_NOT_RUN = "NOT_RUN"
-DISPOSITION_FAILED = "FAILED"
-
-_FAILURE_DISPOSITIONS = frozenset({DISPOSITION_REFUSED, DISPOSITION_BLOCKED, DISPOSITION_FAILED})
+_DISPOSITION_FACTS = require_mapping(_REGISTRY, "dispositions")
+(
+    DISPOSITION_EXECUTED,
+    DISPOSITION_REFUSED,
+    DISPOSITION_BLOCKED,
+    DISPOSITION_SKIPPED_BY_PROTOCOL,
+    DISPOSITION_ALREADY_SATISFIED,
+    DISPOSITION_NOT_RUN,
+    DISPOSITION_FAILED,
+) = require_string_list(_DISPOSITION_FACTS, "closed_set")
+_FAILURE_DISPOSITIONS = frozenset(
+    require_string_list(_DISPOSITION_FACTS, "failure")
+)
 
 
 def chain_disposition(

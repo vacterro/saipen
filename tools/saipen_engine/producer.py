@@ -26,6 +26,7 @@ into the safety logic.
 from __future__ import annotations
 
 import hashlib
+import contextlib
 import json
 import os
 import re
@@ -67,6 +68,9 @@ READY_DIRNAME = "READY"
 SETTLED_DIRNAME = "SETTLED"
 SUPERSEDED_DIRNAME = "SUPERSEDED"
 EPOCH_FILENAME = "producer_epoch.json"
+# One shared writer/reader bound: every successfully published READY artifact
+# is therefore guaranteed to be reopenable after process restart.
+READY_MAX_BYTES = 32 * 1024 * 1024
 
 
 def _namespace_authority(namespace: Path | str) -> tuple[Path, Path]:
@@ -119,7 +123,7 @@ def _read_owned_descendant(
     relative: Path | str,
     *,
     kind: str,
-    max_bytes: int = 32 * 1024 * 1024,
+    max_bytes: int = READY_MAX_BYTES,
 ) -> bytes:
     path = _owned_descendant(namespace, relative, kind=kind)
     try:
@@ -464,17 +468,22 @@ def package_identity(
     role_revision: str,
     dependency_fp: str,
     requested_scope: str,
+    base_source_head: str = "",
+    base_source_tree_fingerprint: str = "",
+    base_discovery_model: str = "",
 ) -> str:
-    """Stable identity derived from at least:
-
-        producer + role_revision + dependency fingerprint + requested scope.
-
-    Repeated preparation of identical work yields the SAME identity, so Core
-    can reuse an already-READY package instead of duplicating it (spec §6 F).
-    """
+    """Stable identity for one producer result at one source generation."""
     digest = hashlib.sha256()
     digest.update(PACKAGE_MAGIC)
-    for part in (producer, role_revision, dependency_fp, requested_scope):
+    for part in (
+        producer,
+        role_revision,
+        dependency_fp,
+        requested_scope,
+        base_source_head,
+        base_source_tree_fingerprint,
+        base_discovery_model,
+    ):
         chunk = part.encode("utf-8")
         digest.update(struct.pack(">Q", len(chunk)))
         digest.update(chunk)
@@ -522,8 +531,48 @@ class ProducerPackage:
                     self.role_revision,
                     self.dependency_fp,
                     self.scope,
+                    self.base_source_head,
+                    self.base_source_tree_fingerprint,
+                    self.base_discovery_model,
                 ),
             )
+
+    def materialize_payload(self) -> bool:
+        """Re-open ``self.ready_path`` and populate ``self.payloads``.
+
+        Used by callers that performed a metadata-only ``scan_ready`` and
+        later need the decoded payload bytes for one selected package.
+        Strict hash verification is repeated against the on-disk artifact
+        so a tampered READY between scan and materialize cannot reach
+        integration as a forged payload. Returns ``True`` on success.
+        """
+        if self.ready_path is None:
+            return False
+        if self.payloads:
+            return True
+        if self.status != PackageStatus.READY.value:
+            return False
+        try:
+            ns = self.ready_path.parent.parent
+            relative = Path(READY_DIRNAME) / self.ready_path.name
+            raw_bytes = _read_owned_descendant(
+                ns,
+                relative,
+                kind="producer READY package",
+                max_bytes=READY_MAX_BYTES,
+            )
+            data = json.loads(raw_bytes.decode("utf-8"))
+            rehydrated = ProducerPackage.from_dict(
+                data,
+                expected_producer=self.producer,
+                expected_identity=self.package_identity,
+                ready_path=self.ready_path,
+                materialize_payloads=True,
+            )
+        except (ProducerError, OSError, UnicodeDecodeError, json.JSONDecodeError):
+            return False
+        object.__setattr__(self, "payloads", dict(rehydrated.payloads))
+        return True
 
     def to_dict(self) -> dict:
         return {
@@ -549,6 +598,7 @@ class ProducerPackage:
         expected_producer: str | None = None,
         expected_identity: str | None = None,
         ready_path: Path | None = None,
+        materialize_payloads: bool = True,
     ) -> "ProducerPackage":
         """Strict persisted-package decoder.
 
@@ -628,7 +678,13 @@ class ProducerPackage:
         if data["dependency_fp"] != derived_dep:
             raise ProducerError("READY dependency_fp does not match recomputed dependencies")
         derived_identity = package_identity(
-            producer, data["role_revision"], derived_dep, data["scope"]
+            producer,
+            data["role_revision"],
+            derived_dep,
+            data["scope"],
+            data["base_source_head"],
+            data["base_source_tree_fingerprint"],
+            data["base_discovery_model"],
         )
         if data["package_identity"] != derived_identity:
             raise ProducerError("READY package_identity does not match recomputed identity")
@@ -658,7 +714,13 @@ class ProducerPackage:
                     ) from exc
                 if _sha256_bytes(raw) != expected_hash:
                     raise ProducerError(f"READY payload hash mismatch for {rel!r}")
-                payloads[rel] = raw
+                # PERF-002: strict payload validation runs even when callers want
+                # only metadata; retained bytes are dropped unless the caller
+                # explicitly materialized the payload. Hot READY scans
+                # (crew health + targeted ship) stay metadata-only; the
+                # integrate path materializes the single winner on demand.
+                if materialize_payloads:
+                    payloads[rel] = raw
 
         return cls(
             producer=producer,
@@ -950,68 +1012,84 @@ class StagingGeneration:
         generation_id: str | None = None,
     ) -> None:
         self.namespace, self._project_root = _namespace_authority(namespace)
-        self.producer = producer
-        self.generation_id = generation_id or uuid.uuid4().hex
+        self._producer = producer
+        self._generation_id = generation_id or uuid.uuid4().hex
         if (
-            not self.generation_id
-            or Path(self.generation_id).name != self.generation_id
-            or self.generation_id in {".", ".."}
+            not self._generation_id
+            or Path(self._generation_id).name != self._generation_id
+            or self._generation_id in {".", ".."}
         ):
-            raise ProducerError(f"invalid producer generation id {self.generation_id!r}")
-        self.staging_dir = self.namespace / STAGING_DIRNAME / self.generation_id
+            raise ProducerError(f"invalid producer generation id {self._generation_id!r}")
+        self.staging_dir = self.namespace / STAGING_DIRNAME / self._generation_id
         self.payload_dir = self.staging_dir / "payload"
         self.manifest_path = self.staging_dir / "staging.manifest.json"
         self.package: ProducerPackage | None = None
-        self._payloads: dict[str, bytes] = {}
+        self._begin_manifest: dict[str, str | int] | None = None
+        self._bound_generation_id: str | None = None
+        self._bound_producer: str | None = None
+        self._bound_epoch: int | None = None
+        self._bound_authority: tuple[str, str, int] | None = None
+        self._bound_manifest: tuple[tuple[str, str | int], ...] | None = None
+
+    @property
+    def producer(self) -> str:
+        return self._producer
+
+    @property
+    def generation_id(self) -> str:
+        return self._generation_id
 
     # -- lifecycle --------------------------------------------------------
 
     def begin(self) -> "StagingGeneration":
-        # Decode persisted authority before creating even an empty staging
-        # directory.  Corrupt fencing state must be a zero-namespace-write
-        # refusal, not a failure that leaves a misleading partial generation.
         epoch = ProducerEpoch.current(self.namespace)
         begin_time = _utc_now_iso()
         staging_rel = Path(STAGING_DIRNAME) / self.generation_id
-        self.staging_dir = _ensure_owned_dir(
-            self.namespace, staging_rel, kind="producer staging generation"
-        )
-        self.payload_dir = _ensure_owned_dir(
-            self.namespace, staging_rel / "payload", kind="producer payload directory"
-        )
-        # marker that this generation is in flight (incomplete until published)
-        safe_create_bytes_exclusive(
-            self.staging_dir / ".in-flight",
-            (self.generation_id + "\n").encode("utf-8"),
-            kind="producer in-flight marker",
-            ownership_root=self.namespace,
-        )
-        # W2-002 / CORE-005: persist generation metadata (including the epoch
-        # claimed at begin time) atomically so recovery can mechanically
-        # distinguish this generation's ownership from a newer takeover. A
-        # crash here leaves a partial manifest that recovery treats as
-        # orphaned, never as a READY package.
-        safe_create_bytes_exclusive(
-            self.manifest_path,
-            (
-                json.dumps(
-                    {
-                        "generation_id": self.generation_id,
-                        "begin_time": begin_time,
-                        "epoch": epoch,
-                    },
-                    sort_keys=True,
-                )
-                + "\n"
-            ).encode("utf-8"),
-            kind="producer staging manifest",
-            ownership_root=self.namespace,
-        )
-        self._begin_manifest = {
+        was_present = self.staging_dir.exists()
+        if self.producer != self.namespace.name or self.producer not in PRODUCERS:
+            raise ProducerError(
+                f"producer {self.producer!r} does not match namespace {self.namespace.name!r}"
+            )
+        manifest = {
             "generation_id": self.generation_id,
-            "begin_time": begin_time,
+            "producer": self.producer,
             "epoch": epoch,
+            "begin_time": begin_time,
         }
+        try:
+            self.staging_dir = _ensure_owned_dir(
+                self.namespace, staging_rel, kind="producer staging generation"
+            )
+            self.payload_dir = _ensure_owned_dir(
+                self.namespace, staging_rel / "payload", kind="producer payload directory"
+            )
+            safe_create_bytes_exclusive(
+                self.staging_dir / ".in-flight",
+                (json.dumps(manifest, sort_keys=True) + "\n").encode("utf-8"),
+                kind="producer in-flight marker",
+                ownership_root=self.namespace,
+            )
+            safe_create_bytes_exclusive(
+                self.manifest_path,
+                (json.dumps(manifest, sort_keys=True) + "\n").encode("utf-8"),
+                kind="producer staging manifest",
+                ownership_root=self.namespace,
+            )
+        except Exception:
+            if not was_present:
+                with contextlib.suppress(Exception):
+                    _remove_owned_tree(
+                        self.namespace,
+                        staging_rel,
+                        kind="producer staging generation",
+                    )
+            raise
+        self._begin_manifest = dict(manifest)
+        self._bound_generation_id = self.generation_id
+        self._bound_producer = self.producer
+        self._bound_epoch = epoch
+        self._bound_authority = (self.generation_id, self.producer, epoch)
+        self._bound_manifest = tuple(sorted(manifest.items()))
         return self
 
     def add_payload(self, rel_path: str, content: bytes | str) -> None:
@@ -1029,9 +1107,14 @@ class StagingGeneration:
             kind="producer payload",
             ownership_root=self.namespace,
         )
-        self._payloads[rel_path] = data
 
     def set_package(self, package: ProducerPackage) -> None:
+        if self._bound_authority is None:
+            raise ProducerError("staging generation has not begun")
+        if package.producer != self._bound_authority[1]:
+            raise ProducerError("package producer does not match staging generation producer")
+        if package.epoch != self._bound_authority[2]:
+            raise ProducerError("package epoch does not match staging generation epoch")
         self.package = package
 
     def _verify(self) -> list[str]:
@@ -1153,11 +1236,40 @@ class StagingGeneration:
         if errors:
             return {"ok": False, "code": "INCOMPLETE", "detail": "; ".join(errors)}
 
-        # CORE-008: Stale-worker guard + corrupt-state guard. If the epoch
-        # file is corrupt/unreadable, owns() -> current() raises
-        # ProducerError -- publication is blocked rather than reset.
         try:
-            owns = ProducerEpoch.owns(self.namespace, self.package.epoch)
+            manifest_raw = _read_owned_descendant(
+                self.namespace,
+                self.manifest_path.relative_to(self.namespace),
+                kind="producer staging manifest",
+                max_bytes=64 * 1024,
+            )
+            manifest = json.loads(manifest_raw.decode("utf-8"))
+        except (FileNotFoundError, ProducerError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+            return {"ok": False, "code": "STAGING_CORRUPT", "detail": str(exc)}
+        expected_manifest = self._bound_manifest
+        if not isinstance(manifest, dict):
+            return {
+                "ok": False,
+                "code": "STAGING_CORRUPT",
+                "detail": "staging manifest is not a JSON object",
+            }
+        if expected_manifest is None or tuple(sorted(manifest.items())) != expected_manifest:
+            return {
+                "ok": False,
+                "code": "STAGING_CORRUPT",
+                "detail": "staging manifest does not match bound generation authority",
+            }
+        if (
+            self.package.producer != self._bound_authority[1]
+            or self.package.epoch != self._bound_authority[2]
+        ):
+            return {
+                "ok": False,
+                "code": "STAGING_CORRUPT",
+                "detail": "package does not match bound generation authority",
+            }
+        try:
+            owns = ProducerEpoch.owns(self.namespace, self._bound_authority[2])
         except ProducerError as exc:
             return {
                 "ok": False,
@@ -1169,7 +1281,7 @@ class StagingGeneration:
                 "ok": False,
                 "code": "STALE_WORKER",
                 "detail": (
-                    f"namespace epoch advanced past {self.package.epoch}; "
+                    f"namespace epoch advanced past {self._bound_authority[2]}; "
                     "this worker is stale and may not publish"
                 ),
             }
@@ -1202,15 +1314,40 @@ class StagingGeneration:
                     self.namespace,
                     Path(READY_DIRNAME) / target.name,
                     kind="producer READY package",
+                    max_bytes=READY_MAX_BYTES,
                 )
-                existing = ProducerPackage.from_dict(json.loads(raw.decode("utf-8")))
-                if (
-                    existing.package_identity == rid
-                    and existing.base_source_head == self.package.base_source_head
-                    and existing.base_source_tree_fingerprint
-                    == self.package.base_source_tree_fingerprint
-                    and existing.base_discovery_model == self.package.base_discovery_model
-                ):
+                existing = ProducerPackage.from_dict(
+                    json.loads(raw.decode("utf-8")),
+                    expected_producer=self.producer,
+                    expected_identity=rid,
+                    ready_path=target,
+                )
+                staged_payloads: dict[str, bytes] = {}
+                for rel in self.package.write_set:
+                    payload_rel = Path(STAGING_DIRNAME) / self.generation_id / "payload" / rel
+                    staged_payloads[rel] = _read_owned_descendant(
+                        self.namespace,
+                        payload_rel,
+                        kind="producer payload",
+                        max_bytes=READY_MAX_BYTES,
+                    )
+                metadata_match = all(
+                    getattr(existing, field_name) == getattr(self.package, field_name)
+                    for field_name in (
+                        "producer",
+                        "role_revision",
+                        "base_source_head",
+                        "base_source_tree_fingerprint",
+                        "base_discovery_model",
+                        "scope",
+                        "read_set",
+                        "write_set",
+                        "epoch",
+                        "dependency_fp",
+                        "package_identity",
+                    )
+                )
+                if metadata_match and existing.payloads == staged_payloads:
                     _remove_owned_tree(
                         self.namespace,
                         self.staging_dir.relative_to(self.namespace),
@@ -1222,8 +1359,27 @@ class StagingGeneration:
                         "package_identity": rid,
                         "detail": "identical READY package already present",
                     }
-            except (ValueError, OSError):
-                pass
+                return {
+                    "ok": False,
+                    "code": "READY_CONFLICT",
+                    "package_identity": rid,
+                    "detail": "existing READY package is valid but not identical",
+                }
+            except (
+                ProducerError,
+                ValueError,
+                OSError,
+                UnicodeDecodeError,
+                json.JSONDecodeError,
+            ) as exc:
+                # A pre-existing READY node is durable evidence.  Never hide
+                # corruption by replacing it with a newly generated package.
+                return {
+                    "ok": False,
+                    "code": "READY_CORRUPT",
+                    "package_identity": rid,
+                    "detail": f"existing READY package is unreadable: {exc}",
+                }
 
         data = self.package.to_dict()
         data["status"] = PackageStatus.READY.value
@@ -1232,7 +1388,32 @@ class StagingGeneration:
         # storage without any in-memory staging objects.
         payload_hashes: dict[str, str] = {}
         payload_bytes: dict[str, str] = {}
-        for rel, raw in self._payloads.items():
+        # Read one staged payload at a time.  The generation no longer keeps a
+        # second raw in-memory copy beside its staged file and encoded JSON.
+        for rel in self.package.write_set:
+            payload_rel = Path(STAGING_DIRNAME) / self.generation_id / "payload" / rel
+            try:
+                payload_path = _owned_descendant(
+                    self.namespace, payload_rel, kind="producer payload"
+                )
+                payload_stat = prove_owned_regular(payload_path, kind="producer payload")
+                if payload_stat.st_size > READY_MAX_BYTES:
+                    return {
+                        "ok": False,
+                        "code": "READY_TOO_LARGE",
+                        "detail": (
+                            f"payload {rel!r} is {payload_stat.st_size} bytes; "
+                            f"READY reader limit is {READY_MAX_BYTES}"
+                        ),
+                    }
+                raw = _read_owned_descendant(
+                    self.namespace,
+                    payload_rel,
+                    kind="producer payload",
+                    max_bytes=READY_MAX_BYTES,
+                )
+            except (FileNotFoundError, ProducerError) as exc:
+                return {"ok": False, "code": "INCOMPLETE", "detail": str(exc)}
             h = _sha256_bytes(raw)
             payload_hashes[rel] = h
             # Store as base64 so the JSON is self-contained binary-safe
@@ -1241,17 +1422,40 @@ class StagingGeneration:
             payload_bytes[rel] = _b64.b64encode(raw).decode("ascii")
         data["payload_hashes"] = payload_hashes
         data["payload_bytes"] = payload_bytes
+        ready_body = (json.dumps(data, sort_keys=True) + "\n").encode("utf-8")
+        if len(ready_body) > READY_MAX_BYTES:
+            return {
+                "ok": False,
+                "code": "READY_TOO_LARGE",
+                "detail": (
+                    f"serialized READY artifact is {len(ready_body)} bytes; "
+                    f"reader limit is {READY_MAX_BYTES}"
+                ),
+            }
         safe_atomic_write_bytes(
             target,
-            (json.dumps(data, sort_keys=True) + "\n").encode("utf-8"),
+            ready_body,
             kind="producer READY package",
             ownership_root=self.namespace,
         )
-        _remove_owned_tree(
-            self.namespace,
-            self.staging_dir.relative_to(self.namespace),
-            kind="producer staging generation",
-        )
+        # READY replacement is the semantic commit point.  Staging cleanup is
+        # maintenance after publication; a cleanup/topology failure must not
+        # lie to callers that no package became visible.  Leaving the owned
+        # generation is safe and lets retry/recovery remove it later.
+        try:
+            _remove_owned_tree(
+                self.namespace,
+                self.staging_dir.relative_to(self.namespace),
+                kind="producer staging generation",
+            )
+        except (ProducerError, OSError, ValueError) as exc:
+            return {
+                "ok": True,
+                "code": "PUBLISHED",
+                "package_identity": rid,
+                "cleanup_pending": True,
+                "warning": f"staging cleanup pending: {exc}",
+            }
         return {"ok": True, "code": "PUBLISHED", "package_identity": rid}
 
     # -- visibility -------------------------------------------------------
@@ -1275,7 +1479,12 @@ class StagingGeneration:
             if not _owned_regular_exists(ns, relative, kind="producer READY package"):
                 return None
             path = ns / relative
-            raw = _read_owned_descendant(ns, relative, kind="producer READY package")
+            raw = _read_owned_descendant(
+                ns,
+                relative,
+                kind="producer READY package",
+                max_bytes=READY_MAX_BYTES,
+            )
             return ProducerPackage.from_dict(
                 json.loads(raw.decode("utf-8")),
                 expected_producer=ns.name,
@@ -1286,8 +1495,16 @@ class StagingGeneration:
             return None
 
     @classmethod
-    def scan_ready(cls, namespace: Path | str) -> tuple[list[ProducerPackage], list[dict]]:
-        """Return valid READY packages plus structured invalid-record errors."""
+    def scan_ready(
+        cls, namespace: Path | str, materialize_payloads: bool = True
+    ) -> tuple[list[ProducerPackage], list[dict]]:
+        """Return valid READY packages plus structured invalid-record errors.
+
+        When *materialize_payloads* is ``False``, payload bytes are validated
+        (base64 decode + hash verify) but not retained; callers must invoke
+        :meth:`materialize_payload` on a selected package before using its
+        ``payloads`` dict.  Default ``True`` preserves the existing behaviour.
+        """
         try:
             ns, _root = _namespace_authority(namespace)
             if not _owned_dir_exists(ns, READY_DIRNAME, kind="producer READY directory"):
@@ -1304,10 +1521,14 @@ class StagingGeneration:
                     ns,
                     path.relative_to(ns),
                     kind="producer READY package",
+                    max_bytes=READY_MAX_BYTES,
                 )
                 data = json.loads(raw.decode("utf-8"))
                 candidate = ProducerPackage.from_dict(
-                    data, expected_producer=producer, ready_path=path
+                    data,
+                    expected_producer=producer,
+                    ready_path=path,
+                    materialize_payloads=materialize_payloads,
                 )
                 if path.name != _ready_filename(candidate.package_identity):
                     raise ProducerError("READY filename does not match package identity")
@@ -1398,75 +1619,95 @@ class StagingGeneration:
                 raise ProducerError(f"recover: namespace {ns} cannot be resolved: {exc}") from exc
         staging_root = ns / STAGING_DIRNAME
         removed: list[str] = []
+        invalid: list[dict] = []
         # W2-002 / CORE-005: acquire the canonical producer-local lock to
         # prevent racing a live producer that holds the SAME lock identity.
         try:
             with ProducerLock(project_root, producer):
-                removed = cls._recover_under_lock(ns, staging_root)
+                removed, invalid = cls._recover_under_lock(ns, staging_root)
         except PermissionError:
             # Another writer owns the lock -- do not delete anything
             return {"removed_staging": [], "false_ready": False, "busy": True}
         except ProducerError:
             # Epoch is corrupt -- do not delete anything
             return {"removed_staging": [], "false_ready": False, "busy": True}
-        return {"removed_staging": removed, "false_ready": False, "busy": False}
+        return {
+            "removed_staging": removed,
+            "invalid_staging": invalid,
+            "false_ready": False,
+            "busy": False,
+        }
 
     @classmethod
-    def _recover_under_lock(cls, ns: Path, staging_root: Path) -> list[str]:
-        """W2-002: delete only mechanically stale generations under the lock.
-
-        A generation is stale/abandoned when:
-        1. Its in-flight marker exists (publication never completed), AND
-        2. The current epoch has advanced past the generation's epoch
-           (ownership was taken over), OR the generation has no valid
-           epoch file.
-        """
+    def _recover_under_lock(cls, ns: Path, staging_root: Path) -> tuple[list[str], list[dict]]:
+        """Delete only generations with matching in-flight authority superseded by takeover."""
         removed: list[str] = []
+        invalid: list[dict] = []
         if not cls._owned_staging_exists(ns):
-            return removed
-        # Get current epoch to determine which generations are stale
+            return removed, invalid
         try:
             current_epoch = ProducerEpoch.current(ns)
         except ProducerError:
-            # Epoch is corrupt -- do not remove anything under uncertainty
-            return removed
+            return removed, invalid
         for gen in staging_root.iterdir():
             relative = gen.relative_to(ns)
             if not _owned_dir_exists(ns, relative, kind="producer staging generation"):
                 raise ProducerError(f"producer staging entry {gen} is not an owned directory")
-            # The marker proves incompleteness, not abandonment.  Only a
-            # mechanically newer ownership epoch makes this generation stale.
-            # Unknown/future/current authority remains untouched.
-            gen_epoch = cls._generation_epoch(ns, gen)
-            if gen_epoch is None or gen_epoch >= current_epoch:
+            authority = cls._generation_authority(ns, gen)
+            if authority is None:
+                invalid.append({"generation_id": gen.name, "code": "INCOMPLETE_STAGING"})
+                continue
+            if authority["epoch"] >= current_epoch:
                 continue
             _remove_owned_tree(ns, relative, kind="producer staging generation")
             removed.append(gen.name)
-        return removed
+        return removed, invalid
 
     @staticmethod
     def _owned_staging_exists(ns: Path) -> bool:
         return _owned_dir_exists(ns, STAGING_DIRNAME, kind="producer staging directory")
 
     @staticmethod
-    def _generation_epoch(ns: Path, gen_dir: Path) -> int | None:
-        """W2-002: extract the epoch from a generation's staging manifest."""
-        relative = gen_dir.relative_to(ns) / "staging.manifest.json"
-        if not _owned_regular_exists(ns, relative, kind="producer staging manifest"):
+    def _generation_authority(ns: Path, gen_dir: Path) -> dict | None:
+        marker_relative = gen_dir.relative_to(ns) / ".in-flight"
+        if not _owned_regular_exists(ns, marker_relative, kind="producer .in-flight"):
             return None
         try:
-            raw = _read_owned_descendant(
-                ns, relative, kind="producer staging manifest", max_bytes=64 * 1024
+            marker = json.loads(
+                _read_owned_descendant(
+                    ns, marker_relative, kind="producer .in-flight", max_bytes=64 * 1024
+                ).decode("utf-8")
             )
-            data = json.loads(raw.decode("utf-8"))
-            if not isinstance(data, dict):
-                return None
-            epoch = data.get("epoch")
-            if not isinstance(epoch, int) or isinstance(epoch, bool) or epoch < 0:
-                return None
-            return epoch
         except (OSError, UnicodeDecodeError, json.JSONDecodeError):
             return None
+        if not isinstance(marker, dict):
+            return None
+        if (
+            set(marker) != {"generation_id", "producer", "epoch", "begin_time"}
+            or marker.get("generation_id") != gen_dir.name
+            or marker.get("producer") != ns.name
+            or not isinstance(marker.get("epoch"), int)
+            or isinstance(marker.get("epoch"), bool)
+            or marker["epoch"] < 0
+            or not isinstance(marker.get("begin_time"), str)
+            or not marker["begin_time"]
+        ):
+            return None
+        manifest_relative = gen_dir.relative_to(ns) / "staging.manifest.json"
+        if not _owned_regular_exists(ns, manifest_relative, kind="producer staging.manifest.json"):
+            return marker
+        try:
+            manifest = json.loads(
+                _read_owned_descendant(
+                    ns,
+                    manifest_relative,
+                    kind="producer staging.manifest.json",
+                    max_bytes=64 * 1024,
+                ).decode("utf-8")
+            )
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+            return None
+        return marker if isinstance(manifest, dict) and manifest == marker else None
 
 
 # ---------------------------------------------------------------------------
@@ -1666,6 +1907,17 @@ def integrate_packages_core(
         pkgs = sorted(packages, key=lambda p: (p.producer, p.package_identity))
         applied: list[str] = []
         results: list[dict] = []
+        from .journal import semantic_receipt_snapshot
+
+        # PERF-001: these are command-scoped authorities.  Reopening the
+        # complete receipt lifetime and source tree for every package turns a
+        # batch into P copies of the same expensive decision.
+        receipt_snapshot = semantic_receipt_snapshot(root_path)
+        committed_receipts = list(receipt_snapshot.records)
+        try:
+            live_identity = _live_source_identity(root_path)
+        except (ProducerError, OSError, UnicodeError):
+            live_identity = None
 
         for p in pkgs:
             # CORE-006: strict pre-flight verification -- status must be ready
@@ -1693,11 +1945,7 @@ def integrate_packages_core(
             # resulting_source and crew SC-8/SC-9 never advances (reproduced
             # live: saitranslate READY at 4451d073 short-circuited on a
             # receipt whose resulting_source was e98bcb03).
-            from .journal import SemanticReceiptCorruptionError, semantic_receipts_for_operation
-
-            try:
-                _committed = semantic_receipts_for_operation(root_path, "producer_integration")
-            except SemanticReceiptCorruptionError as exc:
+            if receipt_snapshot.errors:
                 results.append(
                     {
                         "package_identity": p.package_identity,
@@ -1705,19 +1953,15 @@ def integrate_packages_core(
                         "result": "REFUSED",
                         "code": "CORRUPT_JOURNAL",
                         "reason": (
-                            f"semantic receipt snapshot is corrupt: {'; '.join(exc.errors[:2])}"
+                            "semantic receipt snapshot is corrupt: "
+                            f"{'; '.join(receipt_snapshot.errors[:2])}"
                         ),
                         "wrote": False,
                         "recovery_required": True,
                     }
                 )
                 continue
-            try:
-                from freshness import compute_source_identity as _csi
-
-                _live = _csi(root_path)
-            except Exception:
-                _live = None
+            _live = live_identity
             _current_edge = any(
                 rec.get("status") == "COMMITTED"
                 and (rec.get("receipt_metadata") or {}).get("package_identity")
@@ -1726,7 +1970,7 @@ def integrate_packages_core(
                 and (rec.get("receipt_metadata") or {}).get("resulting_source") == _live.source_head
                 and (rec.get("receipt_metadata") or {}).get("resulting_source_fingerprint")
                 == _live.source_tree_fingerprint
-                for rec in _committed
+                for rec in committed_receipts
             )
             if _current_edge:
                 # Retirement failure is non-fatal cleanup debt; the source is
@@ -1750,7 +1994,9 @@ def integrate_packages_core(
             # a structured per-package refusal, never a synthetic fallback or
             # a public traceback.
             try:
-                cur_id = _live_source_identity(root_path)
+                cur_id = live_identity
+                if cur_id is None:
+                    raise ProducerError("cannot capture authoritative source identity")
                 cur_hashes = _live_hashes(root_path, p)
             except (ProducerError, OSError, UnicodeError) as exc:
                 results.append(
@@ -1874,10 +2120,15 @@ def integrate_packages_core(
             from .journal import run_mutation
             from .paths import project_identity
 
+            resulting_identity: list[object] = []
+            resulting_metadata: list[dict] = []
+
             def _integration_receipt_metadata(live_root: Path, metadata: dict) -> dict:
                 resulting = _live_source_identity(live_root)
+                resulting_identity.append(resulting)
                 metadata["resulting_source"] = resulting.source_head
                 metadata["resulting_source_fingerprint"] = resulting.source_tree_fingerprint
+                resulting_metadata.append(dict(metadata))
                 return metadata
 
             # op_id MUST vary with the input source binding, not just the
@@ -1942,6 +2193,16 @@ def integrate_packages_core(
                 )
                 continue
             applied.append(p)
+            if resulting_identity:
+                live_identity = resulting_identity[-1]
+            if resulting_metadata:
+                committed_receipts.append(
+                    {
+                        "operation": "producer_integration",
+                        "status": "COMMITTED",
+                        "receipt_metadata": resulting_metadata[-1],
+                    }
+                )
             # W2-003: READY retirement is a post-commit cleanup step OUTSIDE the
             # integration journal. Its failure must not be reported as if source
             # mutation failed: the payload is already committed. Surface
@@ -1983,10 +2244,37 @@ def _retire_ready_package(package: ProducerPackage, *, supersede_older: bool = F
         raise ProducerError("READY package path is not owned by its producer namespace")
     if not _owned_regular_exists(namespace, source_relative, kind="producer READY package"):
         return
+    raw = _read_owned_descendant(
+        namespace, source_relative, kind="producer READY package", max_bytes=READY_MAX_BYTES
+    )
+    try:
+        current = ProducerPackage.from_dict(
+            json.loads(raw.decode("utf-8")),
+            expected_producer=package.producer,
+            expected_identity=package.package_identity,
+            ready_path=source,
+        )
+    except (ProducerError, OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ProducerError(f"READY retirement authority is invalid: {exc}") from exc
+    if (
+        current.base_source_head != package.base_source_head
+        or current.base_source_tree_fingerprint != package.base_source_tree_fingerprint
+        or current.base_discovery_model != package.base_discovery_model
+        or current.payloads != package.payloads
+    ):
+        raise ConflictError("READY artifact changed before retirement")
     settled = _ensure_owned_dir(namespace, SETTLED_DIRNAME, kind="producer SETTLED directory")
     destination = settled / source.name
     destination_relative = Path(SETTLED_DIRNAME) / source.name
     if _owned_regular_exists(namespace, destination_relative, kind="producer SETTLED package"):
+        settled_raw = _read_owned_descendant(
+            namespace,
+            destination_relative,
+            kind="producer SETTLED package",
+            max_bytes=READY_MAX_BYTES,
+        )
+        if settled_raw != raw:
+            raise ConflictError("SETTLED artifact collision for package identity")
         safe_unlink_owned(
             source,
             kind="producer READY package",

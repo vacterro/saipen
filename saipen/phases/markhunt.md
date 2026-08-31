@@ -4,7 +4,7 @@ Tax-auditor mode: find everything, including what the project's own
 maintainers have gone blind to from familiarity -- never HUNT's cheap
 6-category sample, never capped, never fixes anything itself. Triggered
 only by explicit user command (`saipen markhunt` / bare `markhunt`),
-from ANY phase, same as CLEAN/TRANSLATE/VALIDATE (CORE.md §1.10).
+from ANY phase, same as CLEAN/TRANSLATE/VALIDATE (COMMANDS.md, CMD-ROUTING-01).
 
 **Dry means dry**: MARKHUNT MUST NOT edit, delete, or fix anything it
 finds -- not even the "obvious junk, delete free" allowance HUNT has.

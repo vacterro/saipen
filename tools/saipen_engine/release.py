@@ -548,6 +548,8 @@ class ReleasePlan:
     # decision identity, and a serialized/reconstructed plan without it must
     # take the full-capture fallback.
     _source_identity: object = None
+    # Exact source-authority membership and bytes captured before APPLY.
+    source_manifest: tuple[tuple[str, str], ...] = ()
 
     @property
     def source_revalidation_token(self):
@@ -589,6 +591,7 @@ class ReleasePlan:
             self.confirmation,
             self.pre_plan_index.content_hash,
             self.pre_plan_index.paths,
+            self.source_manifest,
             self.crew_epoch,
             self.crew_closure,
             self.crew_scope,
@@ -747,6 +750,12 @@ def plan_release(
     source_model = ident.discovery_model
     head = _git(root, "rev-parse", "HEAD").stdout if mode == "full" else source_head
 
+    # PERF-006: capture source_authority_paths(root) ONCE; derive
+    # _metadata_paths and _source_authority_manifest from the same list
+    # instead of re-running the git ls-files + rglob three times.
+    from .release_contract import source_authority_paths
+    _source_paths = source_authority_paths(root)
+
     tag = f"v{version}"
 
     # ---- crew terminal carrier (T-1003 sweep) ------------------------------
@@ -797,6 +806,7 @@ def plan_release(
             tag,
             crew_carrier,
             dry_run,
+            source_paths=_source_paths,
             current_capability=current_capability,
             current_agent=release_actor,
         )
@@ -829,7 +839,7 @@ def plan_release(
             ticket_id=ticket["id"],
             commit_message=f"ship v{version}",
             scope_paths=tuple(_scope_paths(root, ticket["id"])),
-            metadata_paths=tuple(_metadata_paths(root)),
+            metadata_paths=tuple(_metadata_paths(root, _source_paths)),
             project_identity=project_identity,
             project_lineage=project_lineage,
             source_head=source_head,
@@ -853,6 +863,7 @@ def plan_release(
             first_publish_wait=False,
             confirmation="",
             pre_plan_index=index,
+            source_manifest=_source_authority_manifest(root, _source_paths),
             targeted_ticket=targeted_ticket,
             targeted_integration_op=targeted_integration_op,
             current_agent=release_actor,
@@ -984,7 +995,7 @@ def plan_release(
     # ---- foreign pre-existing staging must refuse (T-994 / § 2) ------------
     # A path this release does not own (not reviewed scope, not mechanically
     # required metadata, not the scope record) must never enter the commit.
-    allowed = set(scope_paths) | set(_metadata_paths(root)) | {scope_record_rel}
+    allowed = set(scope_paths) | set(_metadata_paths(root, _source_paths)) | {scope_record_rel}
     foreign = sorted(set(index.paths) - allowed)
     if foreign:
         raise ReleaseRefusal(
@@ -1025,33 +1036,35 @@ def plan_release(
         tag=tag,
         ticket_id=ticket_id,
         commit_message=f"ship v{version}",
-        scope_paths=tuple(scope_paths),
-        metadata_paths=tuple(_metadata_paths(root)),
-        project_identity=project_identity,
-        project_lineage=project_lineage,
-        source_head=source_head,
-        source_tree_fingerprint=fingerprint,
-        source_discovery_model=source_model,
-        state_phase=phase,
-        state_task=task,
-        state_hash=_quick_hash(state_text),
-        board_hash=_quick_hash(board_text),
-        log_hash=log_hash,
-        mode=mode,
-        dry_run=dry_run,
-        remote_classification=cls,
-        remote_branch_tip=remote_tip,
-        remote_refs=remote_refs,
-        remote_push_url=remote_push_url,
-        remote_push_endpoint=remote_push_endpoint,
-        head_relation=head_relation,
-        start_stage=classification["start_stage"],
-        content_already_committed=classification["content_already_committed"],
-        already_applied=classification["already_applied"],
-        first_publish_wait=classification["first_publish_wait"],
-        confirmation=confirmation,
-        pre_plan_index=index,
-        targeted_ticket=targeted_ticket,
+            scope_paths=tuple(scope_paths),
+            metadata_paths=tuple(_metadata_paths(root, _source_paths)),
+            project_identity=project_identity,
+            project_lineage=project_lineage,
+            source_head=source_head,
+            source_tree_fingerprint=fingerprint,
+            source_discovery_model=source_model,
+            state_phase=phase,
+            state_task=task,
+            state_hash=_quick_hash(state_text),
+            board_hash=_quick_hash(board_text),
+            log_hash=log_hash,
+            mode=mode,
+            dry_run=dry_run,
+            remote_classification=cls,
+            remote_branch_tip=remote_tip,
+            remote_refs=remote_refs,
+            remote_push_url=remote_push_url,
+            remote_push_endpoint=remote_push_endpoint,
+            head_relation=head_relation,
+            start_stage=classification["start_stage"],
+            content_already_committed=classification["content_already_committed"],
+            already_applied=classification["already_applied"],
+            first_publish_wait=classification["first_publish_wait"],
+            confirmation=confirmation,
+            pre_plan_index=index,
+            source_manifest=_source_authority_manifest(root, _source_paths),
+            targeted_ticket=targeted_ticket,
+
         targeted_integration_op=targeted_integration_op,
         current_agent=release_actor,
         # PERF-002: carry the planning SourceIdentity for bounded revalidation
@@ -1076,6 +1089,7 @@ def _plan_crew_release(
     tag: str,
     crew_carrier: dict,
     dry_run: bool,
+    source_paths: list[Path] | None = None,
     current_capability: str | None = None,
     current_agent: str | None = None,
 ) -> "ReleasePlan":
@@ -1155,7 +1169,7 @@ def _plan_crew_release(
             ticket_id=ticket_id,
             commit_message=f"ship v{version}",
             scope_paths=tuple(sorted(scope)),
-            metadata_paths=tuple(_metadata_paths(root)),
+            metadata_paths=tuple(_metadata_paths(root, source_paths)),
             project_identity=project_identity,
             project_lineage=project_lineage,
             source_head=source_head,
@@ -1182,6 +1196,7 @@ def _plan_crew_release(
             crew_epoch=crew_epoch,
             crew_closure=True,
             crew_scope=tuple(sorted(scope.items())),
+            source_manifest=_source_authority_manifest(root, source_paths),
             current_agent=release_actor,
         )
 
@@ -1249,7 +1264,7 @@ def _plan_crew_release(
         )
 
     index = _capture_index_state(root)
-    allowed = set(scope) | set(_metadata_paths(root))
+    allowed = set(scope) | set(_metadata_paths(root, source_paths))
     foreign = sorted(set(index.paths) - allowed)
     if foreign:
         raise ReleaseRefusal(
@@ -1268,7 +1283,7 @@ def _plan_crew_release(
         ticket_id=ticket_id,
         commit_message=f"ship v{version}",
         scope_paths=tuple(sorted(scope)),
-        metadata_paths=tuple(_metadata_paths(root)),
+        metadata_paths=tuple(_metadata_paths(root, source_paths)),
         project_identity=project_identity,
         project_lineage=project_lineage,
         source_head=source_head,
@@ -1293,6 +1308,7 @@ def _plan_crew_release(
         first_publish_wait=cls in (REMOTE_ABSENT, REMOTE_EMPTY),
         confirmation=_read_confirmation(state),
         pre_plan_index=index,
+        source_manifest=_source_authority_manifest(root, source_paths),
         crew_epoch=crew_epoch,
         crew_closure=True,
         crew_scope=tuple(sorted(scope.items())),
@@ -1304,6 +1320,9 @@ def execute_release(root: Path, plan: ReleasePlan) -> dict:
     """Execute the plan.  The ONE execution function."""
     root = Path(root).resolve()
     if plan.already_applied:
+        preflight = _preflight_plan(root, plan)
+        if not preflight["ok"]:
+            return preflight
         return {
             "ok": True,
             "code": "RELEASED",
@@ -1837,6 +1856,9 @@ def _preflight_plan(root: Path, plan: ReleasePlan) -> dict:
         return _release_failure(
             "PREFLIGHT", "LOG.md changed since the plan was built; rebuild the plan"
         )
+    source_manifest_error = _check_source_authority_manifest(root, plan)
+    if source_manifest_error:
+        return _release_failure("PREFLIGHT", source_manifest_error)
 
     # T-1162: release cannot outrun authoritative source coverage. This is a
     # targeted metadata/contract/coverage check plus digest reread of active
@@ -2391,8 +2413,8 @@ def _apply_no_publish_locked(root: Path, plan: ReleasePlan) -> dict:
         return _release_failure("NO_PUBLISH", exc.detail)
     _try_journal(journal, "mark", "COMMITTED")
     _try_journal(journal, "update", release_stage="COMMITTED")
-    _drop_settled_staged(journal)
-    return {
+    cleanup_pending = _drop_settled_staged(journal)
+    result = {
         "ok": True,
         "code": "NO_PUBLISH_MODE",
         "stage": "COMMITTED",
@@ -2402,6 +2424,9 @@ def _apply_no_publish_locked(root: Path, plan: ReleasePlan) -> dict:
         "detail": "no-publish: local validation passed, skipped-publish event "
         "recorded, ticket closed; zero git writes",
     }
+    if cleanup_pending:
+        result["cleanup_pending"] = cleanup_pending
+    return result
 
 
 def _no_publish_body(root: Path, plan: ReleasePlan, journal) -> None:
@@ -2453,6 +2478,7 @@ def _apply_release_locked(root: Path, plan: ReleasePlan) -> dict:
             "RECOVERY_REQUIRED", f"release op {plan.op_id} already exists; recover first"
         )
     stages = []
+    cleanup_pending: list[str] = []
     try:
         crew_context = None
         try:
@@ -2639,7 +2665,7 @@ def _apply_release_locked(root: Path, plan: ReleasePlan) -> dict:
         _try_journal(journal, "mark", "VERIFIED")
         _try_journal(journal, "mark", "COMMITTED")
         _try_journal(journal, "update", release_stage="COMMITTED")
-        _drop_settled_staged(journal)
+        cleanup_pending = _drop_settled_staged(journal)
     except ReleaseRefusal as exc:
         return _release_failure(
             _last_stage(stages), exc.detail, op_id=plan.op_id, stages_reached=stages
@@ -2657,6 +2683,7 @@ def _apply_release_locked(root: Path, plan: ReleasePlan) -> dict:
         "branch": plan.branch,
         "detail": f"released v{plan.version}: content {content_commit[:12]} "
         f"-> closure {closure_commit[:12]} -> tag {plan.tag}",
+        "cleanup_pending": cleanup_pending,
     }
 
 
@@ -3511,19 +3538,62 @@ def _format_gate_failure(stdout: str, stderr: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-def _metadata_paths(root: Path) -> list[str]:
+def _metadata_paths(
+    root: Path, source_paths: list[Path] | None = None
+) -> list[str]:
     from .release_contract import release_metadata_paths
 
-    return [p.as_posix() for p in release_metadata_paths(root)]
+    if source_paths is None:
+        return [p.as_posix() for p in release_metadata_paths(root)]
+    # PERF-006: caller already captured source_authority_paths(root) once;
+    # splice the captured list in instead of re-querying Git + rglob.
+    return [
+        p.as_posix()
+        for p in (*release_metadata_paths(root, source_paths=source_paths),)
+    ]
+
+
+def _source_authority_manifest(
+    root: Path, source_paths: list[Path] | None = None
+) -> tuple[tuple[str, str], ...]:
+    """Canonical path/content snapshot for active and archived source authority."""
+    from .release_contract import source_authority_paths
+
+    if source_paths is None:
+        source_paths = source_authority_paths(root)
+    manifest = []
+    for path in source_paths:
+        rel = path.as_posix()
+        target = root / path
+        digest = (
+            hashlib.sha256(target.read_bytes()).hexdigest()
+            if target.is_file()
+            else "<missing>"
+        )
+        manifest.append((rel, digest))
+    return tuple(manifest)
+
+
+def _check_source_authority_manifest(root: Path, plan: ReleasePlan) -> str | None:
+    expected = tuple(sorted(plan.source_manifest))
+    actual = _source_authority_manifest(root)
+    if actual != expected:
+        return (
+            "source authority manifest changed since plan: "
+            f"planned {len(expected)} entries, live {len(actual)}"
+        )
+    return None
 
 
 def _check_parity(root: Path, version: str) -> None:
+
     from .release_contract import version_badges as _version_badges
+    from .release_contract import version_metadata_paths
 
     problems: list[str] = []
     if _installed_version(root) != version:
         problems.append("VERSION does not read the release version")
-    for rel in _metadata_paths(root):
+    for rel in (path.as_posix() for path in version_metadata_paths(root)):
         if Path(rel).name == "VERSION":
             continue
         fp = root / rel
@@ -3847,14 +3917,17 @@ def _recover_no_publish(root: Path, journal, record: dict) -> dict:
     _try_recovery_journal(journal, "mark", "VERIFIED")
     _try_recovery_journal(journal, "mark", "COMMITTED")
     _try_recovery_journal(journal, "update", release_stage="COMMITTED")
-    _drop_settled_staged(journal)
-    return {
+    cleanup_pending = _drop_settled_staged(journal)
+    result = {
         "ok": True,
         "code": "COMMITTED",
         "op_id": record["op_id"],
         "changed_files": [t["path"] for t in record.get("targets", [])],
         "recovery_required": True,
     }
+    if cleanup_pending:
+        result["cleanup_pending"] = cleanup_pending
+    return result
 
 
 def _replay_targets(root: Path, journal, record: dict) -> str | None:
@@ -4156,8 +4229,8 @@ def _recover_release_git(root: Path, journal, record: dict) -> dict:
     _try_recovery_journal(journal, "mark", "VERIFIED")
     _try_recovery_journal(journal, "mark", "COMMITTED")
     _try_recovery_journal(journal, "update", release_stage="COMMITTED")
-    _drop_settled_staged(journal)
-    return {
+    cleanup_pending = _drop_settled_staged(journal)
+    result = {
         "ok": True,
         "code": "COMMITTED",
         "op_id": op_id,
@@ -4166,6 +4239,9 @@ def _recover_release_git(root: Path, journal, record: dict) -> dict:
         "closure_commit": closure_commit,
         "recovery_required": True,
     }
+    if cleanup_pending:
+        result["cleanup_pending"] = cleanup_pending
+    return result
 
 
 class _PlanShim:

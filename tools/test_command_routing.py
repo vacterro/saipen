@@ -275,15 +275,24 @@ class CommandRoutingTests(unittest.TestCase):
         self.assertEqual(len(resolved), 2)
         self.assertEqual(resolved[1]["command"], "saipen prepare saiwiki")
 
-    # ── 8. Provenance (protocol contract surface) ───────────────────────
-    def test_protocol_declares_compound_and_truthfulness(self):
-        core = (PROTOCOL_DIR / "CORE.md").read_text(encoding="utf-8-sig")
-        self.assertIn("Compound commands", core)
-        self.assertIn("STOP_ON_FAILURE", core)
-        self.assertIn("ALREADY_SATISFIED", core)
-        self.assertIn("RESULT: REFUSED", core)
-        self.assertIn("Bare shortcut activation", core)
-        # The shortcut table is derived from CORE.md, never a second copy.
+    # ── 8. Provenance (machine contract surface) ────────────────────────
+    def test_registry_owns_compound_and_truthfulness(self):
+        registry = CM.load_registry(PROTOCOL_DIR)
+        self.assertEqual(registry["chain_policies"]["default"], CM.CHAIN_STOP_ON_FAILURE)
+        self.assertEqual(
+            set(registry["dispositions"]["closed_set"]),
+            {
+                CM.DISPOSITION_EXECUTED,
+                CM.DISPOSITION_REFUSED,
+                CM.DISPOSITION_BLOCKED,
+                CM.DISPOSITION_SKIPPED_BY_PROTOCOL,
+                CM.DISPOSITION_ALREADY_SATISFIED,
+                CM.DISPOSITION_NOT_RUN,
+                CM.DISPOSITION_FAILED,
+            },
+        )
+        commands_doc = (PROTOCOL_DIR / "COMMANDS.md").read_text(encoding="utf-8-sig")
+        self.assertEqual(commands_doc.count("RULE-OWNER: CMD-COMPOUND-01"), 1)
         self.assertIn("sc", table())
 
     def test_injectors_declare_shortcut_gate(self):
@@ -323,7 +332,8 @@ class CommandRoutingTests(unittest.TestCase):
     def test_boot_declares_compound_first(self):
         boot = (PROTOCOL_DIR / "BOOT.md").read_text(encoding="utf-8")
         self.assertIn("Compound input first", boot)
-        self.assertIn("STOP_ON_FAILURE", boot)
+        self.assertIn("CMD-COMPOUND-01", boot)
+        self.assertNotIn("STOP_ON_FAILURE", boot)
 
 
 # ── 9. Public CLI boundary (real subprocess dispatch) ────────────────────
@@ -793,6 +803,11 @@ class CommandSemanticsTests(unittest.TestCase):
 
     # ---- active goal: cc resumes THAT goal --------------------------
     def test_cc_resumes_existing_goal_preserving_objective(self):
+        # CORE-001 (audit-all3): when STATE counters are ahead of canonical
+        # evidence but UNDER the cap, reconciliation rebuilds the counters
+        # down to the derived value rather than silently CLEANing or
+        # silently preserving. The audit's contract: CLEAN only when STATE
+        # equals derived evidence.
         proj = self._make(
             "goal-resume", intent="goal", state_extra="goal_waves: 1\ngoal_tickets: 2\n"
         )
@@ -800,9 +815,9 @@ class CommandSemanticsTests(unittest.TestCase):
         rc, payload, _raw = self._cli(proj, "cc", dry_run=False)
         self.assertEqual(rc, 0)
         self.assertEqual(payload["execution_intent"], "goal")
-        # Counters preserved (valve not tripped -> no reset).
-        self.assertEqual(payload["goal_waves"], 1)
-        self.assertEqual(payload["goal_tickets"], 2)
+        # Counters reconciled downward to canonical evidence (derived=0/0).
+        self.assertEqual(payload["goal_waves"], 0)
+        self.assertEqual(payload["goal_tickets"], 0)
         # cc is a resume: it must NOT create a new objective or pivot.
         self.assertNotIn("objective", payload)
         log_after = (proj / ".saipen" / "LOG.md").read_text(encoding="utf-8")

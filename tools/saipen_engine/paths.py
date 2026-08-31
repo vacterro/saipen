@@ -48,6 +48,49 @@ LINEAGE_FIELD = "project_lineage"
 LINEAGE_RE = re.compile(r"^lineage-[0-9a-f]{32}$")
 
 
+def resolve_tool_root(loaded_skill_root: Path | str | None = None) -> Path:
+    """Return the canonical SAIPEN installation that owns the engine.
+
+    The loaded skill/install anchor wins.  Otherwise the directory containing
+    this engine is used.  Deliberately no ``project_root / tools`` fallback is
+    present: a project may carry `.saipen/` without vendoring SAIPEN's
+    executable, and probing that nonexistent path creates noisy, misleading
+    bootstrap failures (especially on Windows).
+    """
+    if loaded_skill_root is not None:
+        candidate = Path(loaded_skill_root).expanduser().resolve()
+        if (candidate / "tools" / "saipen.py").is_file():
+            return candidate
+        if (candidate / "saipen.py").is_file():
+            return candidate.parent
+        raise ValueError(f"loaded SAIPEN skill has no canonical tools/saipen.py: {candidate}")
+    # tools/saipen_engine/paths.py -> installation root
+    return Path(__file__).resolve().parent.parent.parent
+
+
+def resolve_tool_path(
+    name: str = "saipen.py", loaded_skill_root: Path | str | None = None
+) -> Path:
+    """Resolve one engine tool from the loaded installation, safely."""
+    if not re.fullmatch(r"[A-Za-z0-9_.-]+\.py", name):
+        raise ValueError(f"invalid SAIPEN tool name: {name!r}")
+    path = resolve_tool_root(loaded_skill_root) / "tools" / name
+    if not path.is_file():
+        raise FileNotFoundError(f"canonical SAIPEN tool is missing: {path}")
+    return path
+
+
+def resolve_protocol_dir(saipen_home: Path | str) -> Path:
+    """Resolve normative docs for either source-tree or flattened skill layout."""
+    home = Path(saipen_home).expanduser().resolve()
+    nested = home / "saipen"
+    if (nested / "BOOT.md").is_file():
+        return nested
+    if (home / "BOOT.md").is_file():
+        return home
+    raise ValueError(f"SAIPEN installation has no BOOT.md: {home}")
+
+
 def read_bound_regular_bytes(path: Path, expected: os.stat_result, *, max_bytes: int) -> bytes:
     """Read the exact regular node witnessed by an earlier ``lstat``.
 
@@ -93,6 +136,50 @@ def read_bound_regular_bytes(path: Path, expected: os.stat_result, *, max_bytes:
         ):
             raise ValueError(f"authority node changed while reading: {path}")
         return raw
+    finally:
+        os.close(descriptor)
+
+
+def update_digest_regular_bytes(
+    path: Path,
+    expected: os.stat_result,
+    digest: object,
+    *,
+    chunk_size: int = 64 * 1024,
+) -> int:
+    """Stream one witnessed regular file into a hashlib-compatible digest.
+
+    The descriptor stability checks mirror ``read_bound_regular_bytes`` but
+    never materialize the whole file.  Returns the exact streamed byte count.
+    """
+
+    def identity(info: os.stat_result) -> tuple[int, int, int, int]:
+        return (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns)
+
+    flags = os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0)
+    descriptor = os.open(path, flags)
+    try:
+        opened_before = os.fstat(descriptor)
+        if (
+            not stat.S_ISREG(opened_before.st_mode)
+            or identity(opened_before) != identity(expected)
+        ):
+            raise ValueError(f"authority node changed before open: {path}")
+        total = 0
+        while True:
+            chunk = os.read(descriptor, chunk_size)
+            if not chunk:
+                break
+            digest.update(chunk)
+            total += len(chunk)
+        opened_after = os.fstat(descriptor)
+        if (
+            not stat.S_ISREG(opened_after.st_mode)
+            or identity(opened_before) != identity(opened_after)
+            or total != opened_before.st_size
+        ):
+            raise ValueError(f"authority node changed while reading: {path}")
+        return total
     finally:
         os.close(descriptor)
 
