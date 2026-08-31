@@ -1,6 +1,14 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.234.0 -- 2026-09-01 -- The Scheduled Injector Actually Injects (T-1251)
+
+- The 15-minute `saipen-inject` task was healthy, fired on time, and refreshed nothing. `schedule-run.ps1` rejected the source whenever `git status --porcelain -uall` printed a single line, and a live project permanently prints thousands: 1926 translation-cache files, 1562 subSaipen kitchen files, `.prepare-staging`, improve cycles, unshipped release-scope records and the user's own `.workbuddy-ai/memory`. None of them affect a single byte the injector copies. The feature shipped inert and stayed that way: observed live at 01:01 and 01:31, both runs `SKIP: DIRTY_SOURCE`.
+- The guard now asks the question it meant to ask: does anything in the INJECTED SURFACE differ from HEAD? The surface is read from `saipen/MANIFEST.json` -- the one owner of that list, so it cannot drift -- and handed to git as a pathspec. An edited `saipen/CORE.md`, a modified `tools/` file or an unreviewed script dropped into `bootstrap/` still blocks, which is the property the guard exists for. A source whose manifest is missing or unreadable refuses rather than guessing what it ships.
+- `inject.log` now records the deciding surface and, on a clean run, how many paths were checked.
+- Scheduler probes 59 of 59, with both halves pinned: an untracked file outside the surface no longer blocks, an untracked file inside it still skips, and a manifest-less source refuses.
+- Operational note for anyone whose consumer copies drifted: this is what made the drift possible. The task existed, the machinery existed, and the one rule between them was too broad to ever let it run.
+
 ## 7.233.4 -- 2026-09-01 -- Scheduler Status Stops Failing Its Own Install (T-1250)
 
 - `bootstrap/schedule.ps1 status` reported DEGRADED for a task `install` had just created correctly. It required the stored `Arguments` to equal the bare VBS path on the reasoning that "schtasks strips the surrounding quotes"; Windows 10 Pro 19045 keeps them, so the installer produced a state its own health check called broken.

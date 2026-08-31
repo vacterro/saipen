@@ -2263,6 +2263,27 @@ exit 9
         (source_repo / "SOURCE_SENTINEL.txt").write_text(
             "committed-source\n", encoding="utf-8", newline="\n"
         )
+        # T-1251: the cleanliness guard asks about the INJECTED SURFACE, and
+        # saipen/MANIFEST.json is the one owner of that list. The fixture
+        # therefore carries a manifest naming its own surface -- without one the
+        # runner refuses, which is correct: a source that cannot say what it
+        # ships must not ship anything.
+        (source_repo / "saipen").mkdir(parents=True, exist_ok=True)
+        (source_repo / "saipen" / "MANIFEST.json").write_text(
+            json.dumps(
+                {
+                    "description": "scheduler probe fixture surface",
+                    "managed_dirs": ["bootstrap"],
+                    "copy_trees": [{"src": "bootstrap", "dst": "bootstrap"}],
+                    "files": [{"src": "SOURCE_SENTINEL.txt", "required": True}],
+                    "phase_docs": [],
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
         (source_bootstrap / "inject.ps1").write_text(
             r"""
 $root = Split-Path $PSScriptRoot -Parent
@@ -2368,16 +2389,50 @@ exit 0
         )
         (source_repo / "SOURCE_SENTINEL.txt").write_bytes(source_bytes)
 
+        # T-1251: an untracked file OUTSIDE the injected surface is ordinary
+        # project life -- caches, kitchens, the user's own notes -- and must not
+        # stop the refresh. Rejecting it made the scheduled task a permanent
+        # no-op on every real working tree.
         untracked = source_repo / "UNTRACKED_PROJECT_FILE.txt"
         untracked.write_text("not committed\n", encoding="utf-8", newline="\n")
         dirty_untracked = invoke_runner()
         expect(
-            "dirty untracked project source skips and preserves installed snapshot",
-            dirty_untracked.returncode != 0
-            and destination.read_text(encoding="utf-8") == "previous-install\n",
+            "untracked file outside the injected surface does not block the refresh",
+            dirty_untracked.returncode == 0
+            and destination.read_text(encoding="utf-8") == "committed-source\n",
             (dirty_untracked.stdout + dirty_untracked.stderr).strip(),
         )
         untracked.unlink()
+
+        # ... while an untracked file INSIDE the surface still blocks: it would
+        # be copied into every consumer home without ever having been reviewed.
+        destination.write_text("previous-install\n", encoding="utf-8", newline="\n")
+        surface_untracked = source_repo / "bootstrap" / "UNREVIEWED.ps1"
+        surface_untracked.write_text("exit 0\n", encoding="utf-8", newline="\n")
+        dirty_surface = invoke_runner()
+        expect(
+            "untracked file inside the injected surface still skips",
+            dirty_surface.returncode != 0
+            and destination.read_text(encoding="utf-8") == "previous-install\n"
+            and "SKIP: DIRTY_SOURCE" in runner_log.read_text(encoding="utf-8-sig"),
+            (dirty_surface.stdout + dirty_surface.stderr).strip(),
+        )
+        surface_untracked.unlink()
+
+        # A source that cannot say what it ships must not ship anything.
+        manifest_path = source_repo / "saipen" / "MANIFEST.json"
+        manifest_bytes = manifest_path.read_bytes()
+        manifest_path.unlink()
+        no_manifest = invoke_runner()
+        expect(
+            "a source with no manifest refuses instead of guessing its surface",
+            no_manifest.returncode != 0
+            and destination.read_text(encoding="utf-8") == "previous-install\n",
+            (no_manifest.stdout + no_manifest.stderr).strip(),
+        )
+        manifest_path.write_bytes(manifest_bytes)
+        source_git("add", "-A")
+        source_git("commit", "-q", "-m", "probe: restore manifest")
 
         git_dir = source_repo / ".git"
         hidden_git = source_repo / ".git-hidden"

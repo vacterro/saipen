@@ -73,17 +73,54 @@ function Invoke-Git([string[]]$Arguments) {
   return [pscustomobject]@{ Rc = $rc; Output = @($output | ForEach-Object { "$_" }) }
 }
 
+function Get-InjectedSurface([string]$sourceRoot) {
+  # The paths the injector actually copies, read from the ONE owner of that
+  # list: saipen/MANIFEST.json. Duplicating it here would drift, and a drifted
+  # copy would either block on something harmless or -- far worse -- publish an
+  # edited protocol file this check no longer watches.
+  $manifestPath = Join-Path $sourceRoot "saipen/MANIFEST.json"
+  if (-not (Test-Path -LiteralPath $manifestPath)) {
+    Stop-Run "REFUSE: MANIFEST_MISSING $manifestPath" 1
+  }
+  try {
+    $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+  } catch {
+    Stop-Run "REFUSE: MANIFEST_UNREADABLE $($_.Exception.Message)" 1
+  }
+  $surface = New-Object System.Collections.Generic.List[string]
+  foreach ($tree in @($manifest.copy_trees)) { if ($tree.src) { $surface.Add([string]$tree.src) } }
+  foreach ($file in @($manifest.files)) { if ($file.src) { $surface.Add([string]$file.src) } }
+  # The manifest decides what ships, so an edit to it is an edit to the surface.
+  $surface.Add("saipen/MANIFEST.json")
+  if ($surface.Count -eq 0) {
+    Stop-Run "REFUSE: MANIFEST_EMPTY_SURFACE" 1
+  }
+  return ($surface | Sort-Object -Unique)
+}
+
 function Read-CleanStatus([string]$sourceRoot) {
-  $result = Invoke-Git @("-C", $sourceRoot, "status", "--porcelain=v1",
-                         "--untracked-files=all")
+  # T-1251: the guard exists so an EDITED PROTOCOL is never published to the
+  # consumer homes. It used to reject any line of `git status -uall`, which on
+  # a live project means the translation cache, the subSaipen kitchens, the
+  # improve cycles and the user's own notes -- thousands of untracked files
+  # that change nothing about what gets copied. The task was healthy, fired
+  # every 15 minutes, and skipped every single time: a feature shipped inert.
+  # Scoping the question to the injected surface keeps the property that
+  # matters (an unstaged saipen/CORE.md still blocks) and drops the one that
+  # made it useless.
+  $surface = Get-InjectedSurface $sourceRoot
+  $result = Invoke-Git (@("-C", $sourceRoot, "status", "--porcelain=v1",
+                          "--untracked-files=all", "--") + $surface)
   if ($result.Rc -ne 0) {
     foreach ($line in $result.Output) { Write-Log ("status: " + $line) }
     Stop-Run "REFUSE: SOURCE_STATUS_FAILED rc=$($result.Rc)" 1
   }
   if (($result.Output -join "").Length -gt 0) {
+    Write-Log ("surface: " + ($surface -join " "))
     foreach ($line in $result.Output) { Write-Log ("dirty: " + $line) }
     Stop-Run "SKIP: DIRTY_SOURCE" 2
   }
+  Write-Log ("clean: injected surface matches HEAD (" + $surface.Count + " path(s))")
 }
 
 Write-Log "=== saipen scheduled inject run=$runId ==="
