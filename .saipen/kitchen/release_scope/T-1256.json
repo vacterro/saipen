@@ -1,0 +1,19 @@
+{
+  "op_id": "scope-c44bd658bbee4f76becda7075fc06ab9",
+  "paths": {
+    ".saipen/KNOWLEDGE/XPATCH.md": "a64d3a28dee17eb1",
+    "saipen/CORE.md": "19ce0522e6748d8f",
+    "tools/saipen_engine/context.py": "6df22504dd64cbce",
+    "tools/saipen_engine/convergence.py": "52078242d3f9da81",
+    "tools/saipen_engine/xpatch.py": "50d32e04601618b3",
+    "tools/test_xpatch.py": "b649b65ee8f93bd9",
+    "tools/test_xpatch_controls.py": "ea80f34489c14e23"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-09-01T08:27:22Z",
+  "schema_version": 1,
+  "source_head": "ff3255ea9c1eb09ca6c1f8cafc30e54070b72afb",
+  "source_tree_fingerprint": "git-delta-v1:8d9c3f48e2d11528ac1ab90926d04c92f6a6257a1a1499cdce1b978b2652b5b2",
+  "ticket": "T-1256"
+}

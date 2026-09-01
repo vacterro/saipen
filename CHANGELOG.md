@@ -1,6 +1,15 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.236.0 -- 2026-09-01 -- A Foreign Patch Shows Its Papers (T-1256)
+
+- One SAIPEN project sometimes has to change a bounded file set in another one. Until now the target saw `working tree changed` and nothing else, so a deliberate, fully explainable foreign mutation was indistinguishable from unexplained dirt -- and the only honest answer was a generic stop, or a human escalation for something no human needed to decide.
+- XPATCH adds the missing concept: a Cross-Repo Patch Receipt. `.saipen/exchange/xpatch/XP-NNNNNN/` carries who changed it, from where, why, which exact bytes with before/after sha256, and under which Work. A change a bound receipt accounts for is `ATTRIBUTED_FOREIGN_PATCH` -- a new attribution CLASS, never a new verdict.
+- A receipt proves PROVENANCE, never correctness. The target keeps full authority to verify, repair, supersede or revert it, and its own disposition is what enters its history. Attribution order in `CORE.md` now reads: own Work, then LOG and kitchen, then receipts, then user data.
+- Fail-closed everywhere it counts. A foreign actor may never declare a path inside `.saipen/`, so target `STATE`/`BOARD`/`LOG` cannot be written by anyone wearing a receipt as a hat. A receipt binds to the target's durable lineage or it is not attribution. A pending receipt claims only the paths whose live bytes already equal its declared after-state -- which closes the crash window and stops an unapplied proposal from reporting itself stale over bytes that never moved.
+- Direct mode -- writing into the foreign worktree -- is REFUSED, by name. It is a compare-and-swap on a file another agent may hold, which is T-473, held behind the T-442 concurrent-mode gate. Landing it here would have been v8 Concurrent Mode through the back door, and the receipt would become a lie the moment the target wrote its stale copy over it. `apply_direct` returns `DIRECT_MODE_UNAVAILABLE` with zero writes and names the gate; T-1257 tracks the rest.
+- 38 hostile cases and 5 mutation controls, each proven to turn its case red when the guard it watches is removed.
+
 ## 7.235.1 -- 2026-09-01 -- The Stamp Records Which Revision (T-1255)
 
 - `autoinject._source_head` shelled out to `git rev-parse HEAD` from its own HOME. The scheduled injector runs out of a `git archive` extraction at `%LOCALAPPDATA%/saipen/scheduled-source`, which is not a repository, so the revision was silently dropped on the one path that matters. The v7.235.0 stamp on `.claude` carried a digest and an install time and no head -- while the runner had logged `head=35d2fed5b865` two lines earlier and knew it all along.

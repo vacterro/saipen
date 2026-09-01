@@ -204,9 +204,14 @@ STYLE marker, real UTC time, current phase/task, and the deterministic next
 action. A success message from the writer is not evidence; readback is.
 
 At continuation, dirty work is normal. Attribute it against DOING, LOG, and
-kitchen. Attributable changes are in-flight Work. Unattributed changes are user
-data: never commit, revert, stash, delete, or overwrite them. Stop only when an
-unattributed edit overlaps a file the authorized Work must change.
+kitchen, then against the XPATCH receipts in `.saipen/exchange/xpatch/`. A
+change is attributed foreign Work when a receipt's target lineage, exact path
+and recorded hash all match. A receipt proves provenance, never correctness:
+re-read those bytes and verify them as ordinary Work, and never stop merely
+because they exist. Attributable changes are in-flight Work.
+Unattributed changes are user data: never commit, revert, stash, delete, or
+overwrite them. Stop only when an unattributed edit overlaps a file the
+authorized Work must change.
 
 #### Recovery
 

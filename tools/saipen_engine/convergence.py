@@ -359,6 +359,38 @@ def _attribution_snapshot(
             op_id=str(record.get("op_id") or ""),
             binding=binding,
         )
+    # ATTRIBUTED_FOREIGN_PATCH (T-1256): a bounded, lineage-bound XPATCH
+    # receipt explains WHO changed which bytes, from where and why. A change
+    # a receipt accounts for is attributed, never unknown -- and the receipt
+    # proves PROVENANCE only, so the target still verifies it independently
+    # and its own later claim (release scope, disposition) supersedes this one
+    # under the same chronology every other claim source obeys.
+    from .xpatch import claim_records as _xpatch_claim_records
+
+    xpatch_records, xpatch_problems = _xpatch_claim_records(root)
+    errors.extend(xpatch_problems)
+    for record in xpatch_records:
+        binding = _binding(record, f"xpatch {record['patch_id']}")
+        if binding is None:
+            continue
+        created = _strict_created_at(record.get("created_at"))
+        if not created:
+            errors.append(f"xpatch {record['patch_id']} has an invalid claim timestamp")
+            continue
+        _merge(
+            record["paths"],
+            chronology=_chrono_key(
+                {
+                    "created_at": created,
+                    "op_id": record["op_id"],
+                    "receipt_metadata": {"event_id": ""},
+                }
+            ),
+            source_kind=record["source_kind"],
+            ticket_id=record["ticket_id"],
+            op_id=record["op_id"],
+            binding=binding,
+        )
     return claims, errors
 
 

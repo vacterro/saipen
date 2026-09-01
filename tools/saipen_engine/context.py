@@ -142,6 +142,20 @@ def _source_receipts_section(receipts: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def _xpatch_section(summary: dict) -> str:
+    """ONE line of foreign-patch reality, or nothing (T-1256).
+
+    Minimal UI, maximal proof: a cold agent needs to know that attributed
+    foreign changes exist before it reads the tree, not a dashboard. The
+    receipt itself carries who/why/which bytes, and is opened on demand.
+    """
+    if not summary:
+        return ""
+    if not (summary["unreviewed"] or summary["verified"] or summary["conflicting"]):
+        return ""
+    return summary["line"] + "\nload: .saipen/exchange/xpatch/<XP-ID>/intent.json"
+
+
 def _board_map(
     buckets: dict[str, list[dict]], full_ticket: str | None = None, cap: int = _BOARD_CAP
 ) -> str:
@@ -255,7 +269,23 @@ def _load_context_inputs(root: Path) -> dict:
         "snap": snap,
         "userperson": userperson,
         "source_receipts": source_receipts,
+        "xpatch": _xpatch_summary(root),
     }
+
+
+def _xpatch_summary(root: Path) -> dict:
+    """Foreign-patch counts for the cold surface; never fatal.
+
+    A broken exchange namespace must not take down the cold start -- the
+    receipts are ADDITIONAL evidence, and their own problems already surface
+    through convergence attribution.
+    """
+    try:
+        from .xpatch import summary as xpatch_summary
+
+        return xpatch_summary(root)
+    except Exception:
+        return {}
 
 
 def _load_inputs_checked(root: Path) -> Result | dict:
@@ -486,6 +516,9 @@ def context_cold(
     source_section = _source_receipts_section(inputs["source_receipts"])
     if source_section:
         mandatory.extend(["", source_section])
+    xpatch_section = _xpatch_section(inputs.get("xpatch") or {})
+    if xpatch_section:
+        mandatory.extend(["", xpatch_section])
     mandatory.extend(["", "## ROUTING", f"phase_doc: {phase_doc}"])
     fixed = "\n".join(mandatory) + "\n"
 
