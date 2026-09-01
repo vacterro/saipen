@@ -1,6 +1,14 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.238.1 -- 2026-09-01 -- The Probe Stopped Measuring Two Things At Once (T-1247)
+
+- `warn_ownership_probe` proves an aged WARN slug fails unless a live BOARD ticket names it. It added its owning ticket only in the GREEN leg, then asserted the WARN slug set was unchanged between RED and GREEN -- while `validate.py` derives `board-soft-cap` from `BOARD.md`'s own byte size at 16 KB.
+- So a fixture board sitting within one ticket line of that threshold gained the slug in GREEN alone, and the probe reported "adding the owning ticket changed the WARN slug set": a false ownership break, from the probe's own growth, on a condition it never tested.
+- Ownership is a substring test over live board lines. Presence and size are independent, so the probe now varies only presence: the owning line is filed before the CONTROL leg naming an ownership-neutral slug, and GREEN swaps that token for the real one. Same length, same position, byte-identical board in all three legs.
+- The probe refuses by name if the neutral and owner slugs ever stop being the same length, rather than silently going back to measuring two things.
+- `tools/test_warn_ownership_probe.py` pins it with six tests, including the boundary fixture that sits under the cap and would cross it under the old shape.
+
 ## 7.238.0 -- 2026-09-01 -- The Owners Stop Arguing With Themselves (T-1259)
 
 - T-1229 moved shared law into its canonical owners so the 16 phase deltas could cite it. This wave cleans the owners themselves: `CORE.md`, `MAINTENANCE.md`, `IMPROVE.md` and `OPS.md` go from 84375 to 79556 bytes with no rule removed.

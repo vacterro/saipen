@@ -26,7 +26,7 @@ odinštalácia sú všetky lokálne — žiadna clúdová služba, žiadny démo
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.238.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) |MIT
+**v7.238.1** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) |MIT
 
 **Rýchle klávesy:** `cc` pokračuje v konvergencii projektového kontextu (obnoví bežiaci cieľ, ak je nastavený), `sss` zobrazí stav bez dotyku kódu a `ss` uloží kontrolný bod a zastaví. [Pozri si úplnú mapu 19 kláves](saipen/RFC.md#110-command-surface). Fungujú aj cyrilské dvojníky: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 

@@ -361,6 +361,66 @@ def release_ledger_probe(source: Path, destination: Path) -> str | None:
     return None
 
 
+# T-1247: the probe's own BOARD insertion must not move the board across
+# validate.py's 16 KB `board-soft-cap` threshold between legs. Ownership is a
+# substring test over live board lines, so slug PRESENCE and board SIZE are
+# independent dimensions -- varying them together let a fixture board sitting
+# within one ticket line of the cap gain `board-soft-cap` in the green leg
+# only, and the set-delta assertion reported that as an ownership break the
+# probe never tested. The owning line is therefore present in every leg and
+# only its slug token changes, so the three boards are byte-identical in
+# length by construction.
+WARN_PROBE_OWNER_SLUG = "log-missing-date"
+WARN_PROBE_NEUTRAL_SLUG = "zzz-absent-slug0"
+
+
+def warn_probe_ticket(slug: str) -> str:
+    """The probe's owning-ticket line for `slug`.
+
+    The owning ticket lives under ## BLOCKED, not ## TODO. Ownership reads any
+    live line (DOING/TODO/BLOCKED), but workability is TODO-only -- so a
+    BLOCKED fixture can never become the Pick Rule's topmost workable ticket,
+    which on a real `phase: BLOCKED` session state would trip the DONE-wait
+    deadlock FAIL and mask the behavior under test.
+
+    Every leg gets a line of this exact shape; `WARN_PROBE_NEUTRAL_SLUG` is the
+    same length as `WARN_PROBE_OWNER_SLUG` and names no tracked slug, so
+    swapping one for the other changes ownership without changing one byte of
+    board size.
+    """
+    return (
+        f"- [ ] T-990 [P2] Own the persistent `{slug}` warning: "
+        "125 sealed pre-DATE entries are immutable by append-only, so it "
+        "warns forever; keep this ticket live while it emits. | "
+        "verify: warn ownership probe passes with this ticket live | "
+        "blocker: warn-ownership-probe fixture -- permanently held\n"
+    )
+
+
+def warn_probe_board(board_text: str, slug: str) -> str | None:
+    """Return `board_text` with the probe's owning ticket for `slug` filed at
+    the END of ## BLOCKED, or None when the board has no such section.
+
+    Appended at the END of its section: board order is priority (RFC section
+    1.11) and STATE's next_action names the topmost workable ticket, so a probe
+    that files its own ticket first invalidates that pick and then fails for a
+    reason it does not test. Heading-aware insertion: an EMPTY ## TODO directly
+    abutting ## DONE made a raw newline-anchored `find` from inside the section
+    line skip the very next heading, dropping the owning ticket into ## DONE --
+    where its open box and missing closure evidence failed the green leg for
+    reasons unrelated to warn ownership.
+    """
+    if "## BLOCKED" not in board_text:
+        return None
+    lines = board_text.splitlines(keepends=True)
+    section = next(i for i, ln in enumerate(lines) if ln.strip() == "## BLOCKED")
+    following = next(
+        (j for j in range(section + 1, len(lines)) if lines[j].startswith("## ")),
+        len(lines),
+    )
+    return "".join(lines[:following]) + warn_probe_ticket(slug) + "".join(lines[following:])
+
+
 def warn_ownership_probe(source: Path, destination: Path) -> str | None:
     """T-401: a WARN slug aged past the owner span FAILs unless a live
     BOARD ticket names it; the identical aged slug with a live naming
@@ -438,6 +498,17 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
             errors="replace",
         )
 
+    # T-1247: file the ownership-neutral line first, so CONTROL, RED and GREEN
+    # all measure a board of the same size and the only thing the green leg
+    # changes is which slug that line names.
+    board = tree / ".saipen" / "BOARD.md"
+    neutral_board = warn_probe_board(
+        board.read_text(encoding="utf-8-sig"), WARN_PROBE_NEUTRAL_SLUG
+    )
+    if neutral_board is None:
+        return "BOARD copy has no ## BLOCKED section to host the owning ticket"
+    board.write_text(neutral_board, encoding="utf-8", newline="\n")
+
     control = validate()
     if control.returncode:
         return (
@@ -459,7 +530,7 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
 
     # Age an unowned slug: log-missing-date emits in every clean copy (125
     # sealed pre-DATE entries are immutable), and no ticket names it.
-    baseline["warn_slugs"]["log-missing-date"] = {
+    baseline["warn_slugs"][WARN_PROBE_OWNER_SLUG] = {
         "first_seen": "7.1.0",
         "last_seen": "7.160.0",
         "rationale": "ownership probe: aged, unowned",
@@ -472,7 +543,7 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
     if (
         red.returncode == 0
         or "no live BOARD ticket names it" not in red_text
-        or "log-missing-date" not in red_text
+        or WARN_PROBE_OWNER_SLUG not in red_text
     ):
         return "aged unowned slug did not fail the validator: " + red_text.strip()[-300:]
     # T-639: aging the target slug must not disturb the WARN slug set beyond
@@ -484,52 +555,35 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
             f"aging the target slug changed the WARN slug set: {sorted(control_slugs ^ red_slugs)}"
         )
 
-    # The identical aged slug with a live naming ticket must pass.
-    board = tree / ".saipen" / "BOARD.md"
-    board_text = board.read_text(encoding="utf-8-sig")
-    if "## BLOCKED" not in board_text:
-        return "BOARD copy has no ## BLOCKED section to host the owning ticket"
-    # The owning ticket lives under ## BLOCKED, not ## TODO. Ownership reads
-    # any live line (DOING/TODO/BLOCKED), but workability is TODO-only -- so
-    # a BLOCKED fixture can never become the Pick Rule's topmost workable
-    # ticket, which on a real `phase: BLOCKED` session state would trip the
-    # DONE-wait deadlock FAIL and mask the behavior under test.
-    ticket = (
-        "- [ ] T-990 [P2] Own the persistent `log-missing-date` warning: "
-        "125 sealed pre-DATE entries are immutable by append-only, so it "
-        "warns forever; keep this ticket live while it emits. | "
-        "verify: warn ownership probe passes with this ticket live | "
-        "blocker: warn-ownership-probe fixture -- permanently held\n"
+    # The identical aged slug with a live naming ticket must pass. Only the
+    # slug token moves: the line, its position and the board's byte size are
+    # the ones CONTROL and RED already measured (T-1247).
+    owned_board = neutral_board.replace(
+        warn_probe_ticket(WARN_PROBE_NEUTRAL_SLUG),
+        warn_probe_ticket(WARN_PROBE_OWNER_SLUG),
     )
-    # Appended at the END of its section: board order is priority
-    # (RFC section 1.11) and STATE's next_action names the topmost workable
-    # ticket, so a probe that files its own ticket first invalidates that pick
-    # and then fails for a reason it does not test.
-    # Heading-aware insertion: an EMPTY ## TODO directly abutting ## DONE
-    # made a raw `find("\n## ")` from inside the section line skip the very
-    # next heading, dropping the owning ticket into ## DONE -- where its open
-    # box and missing closure evidence failed the green leg for reasons
-    # unrelated to warn ownership.
-    _lines = board_text.splitlines(keepends=True)
-    _sec_i = next(i for i, ln in enumerate(_lines) if ln.strip() == "## BLOCKED")
-    _next_h = next(
-        (j for j in range(_sec_i + 1, len(_lines)) if _lines[j].startswith("## ")),
-        len(_lines),
-    )
-    board_text = "".join(_lines[:_next_h]) + ticket + "".join(_lines[_next_h:])
-    board.write_text(board_text, encoding="utf-8", newline="\n")
+    if len(owned_board) != len(neutral_board):
+        return (
+            "warn-probe owning line changed the board size "
+            f"({len(neutral_board)} -> {len(owned_board)}); the neutral and "
+            "owner slugs must be the same length or the probe varies board "
+            "size together with ownership"
+        )
+    board.write_text(owned_board, encoding="utf-8", newline="\n")
     green = validate()
     green_text = green.stdout + green.stderr
     if green.returncode:
         return "aged slug with live owning ticket still fails: " + green_text.strip()[-300:]
-    # T-639: the green leg (owning ticket added) must not create a SECOND
-    # failing warn slug, and must not disturb the WARN slug set -- e.g. a
-    # board pushed over the soft cap would age board-soft-cap into an
-    # unowned failure. Assert the slug SET, not just the returncode.
+    # T-639: the green leg (the line now names the aged slug) must not create a
+    # SECOND failing warn slug, and must not disturb the WARN slug set. Assert
+    # the slug SET, not just the returncode. Since T-1247 the board is
+    # byte-identical across all three legs, so a difference here is a real
+    # ownership effect and never the probe's own board growth.
     green_slugs = _warn_slugs(green_text)
     if green_slugs != red_slugs:
         return (
-            f"adding the owning ticket changed the WARN slug set: {sorted(red_slugs ^ green_slugs)}"
+            "naming the aged slug on the live board changed the WARN slug set: "
+            f"{sorted(red_slugs ^ green_slugs)}"
         )
     green_fails = [ln for ln in green_text.splitlines() if ln.startswith("FAIL: warn ownership")]
     if green_fails:
