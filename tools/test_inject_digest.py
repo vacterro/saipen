@@ -65,6 +65,30 @@ class ContentBytes(unittest.TestCase):
         self.assertEqual(autoinject._content_bytes(blob), payload)
 
 
+class PruneRule(unittest.TestCase):
+    """The copier and the digest must prune the same things (T-1254)."""
+
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory(prefix="saipen-inject-prune-")
+        self.dir = Path(self.tmp.name)
+
+    def tearDown(self) -> None:
+        self.tmp.cleanup()
+
+    def test_the_prune_rule_has_one_owner(self) -> None:
+        from saipen_engine import manifest
+
+        self.assertIs(autoinject.CACHE_DIRS, manifest.CACHE_DIRS)
+        self.assertIs(autoinject.GENERATED_SUFFIXES, manifest.GENERATED_SUFFIXES)
+
+    def test_a_test_cache_is_pruned_like_a_bytecode_cache(self) -> None:
+        # A clone that has run pytest carries tools/.pytest_cache; the snapshot
+        # git hands the injector never does. Hashing it made the two sides
+        # disagree permanently even with line endings already normalised.
+        self.assertIn(".pytest_cache", autoinject.CACHE_DIRS)
+        self.assertIn("__pycache__", autoinject.CACHE_DIRS)
+
+
 class SurfaceDigest(unittest.TestCase):
     """The whole-surface digest, across the transport that broke it."""
 

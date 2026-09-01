@@ -35,7 +35,12 @@ import subprocess
 import sys
 from pathlib import Path
 
-from saipen_engine.manifest import copy_tree_members, manifest_source
+from saipen_engine.manifest import (
+    CACHE_DIRS,
+    GENERATED_SUFFIXES,
+    copy_tree_members,
+    manifest_source,
+)
 
 HOME = Path(__file__).resolve().parent.parent
 STAMP = ".saipen_injected"
@@ -128,8 +133,13 @@ def _digest() -> str:
             h.update(part)
 
     def generated(path: Path) -> bool:
+        # Same rule as the copier, from the same constant: a file the
+        # injector would never ship must not move the digest that decides
+        # whether what it shipped is current.
         relative = path.relative_to(HOME.resolve())
-        return "__pycache__" in relative.parts or path.suffix in {".pyc", ".pyo"}
+        return bool(CACHE_DIRS.intersection(relative.parts)) or (
+            path.suffix in GENERATED_SUFFIXES
+        )
 
     for path, is_tree in _manifest_surface():
         if is_tree:

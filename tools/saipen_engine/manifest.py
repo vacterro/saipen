@@ -18,6 +18,16 @@ import os
 from pathlib import Path, PurePosixPath
 
 
+# T-1254: the ONE cache-prune rule. It lived as a local inside
+# `copy_tree_members` while `autoinject._digest` carried its own shorter
+# version, so a clone that had run pytest hashed four `.pytest_cache` files
+# the copier would never ship and the freshness digest could not match the
+# snapshot it was compared against. Two filters over the same surface are
+# one filter and a latent disagreement.
+CACHE_DIRS = frozenset({"__pycache__", ".pytest_cache"})
+GENERATED_SUFFIXES = frozenset({".pyc", ".pyo"})
+
+
 def manifest_source(root: Path, raw: object) -> Path:
     """Resolve one manifest `src` against `root`; reject unsafe spellings.
 
@@ -55,7 +65,7 @@ def copy_tree_members(root: Path, raw: object) -> tuple[Path, list[Path]]:
     # into the manifest makes an untracked machine-local cache file fail the
     # "every clone has this file" check, and committing a cache would ship
     # local state (CORE-009).
-    _CACHE_DIRS = {"__pycache__", ".pytest_cache"}
+    _CACHE_DIRS = CACHE_DIRS
     members: list[Path] = []
     for _walk_root, _dirs, _files in os.walk(source):
         for _d in list(_dirs):

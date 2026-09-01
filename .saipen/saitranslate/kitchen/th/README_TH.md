@@ -26,7 +26,7 @@
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.234.2** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) |MIT
+**v7.234.3** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) |MIT
 
 **คีย์ลัด:** `cc` ให้ดำเนินการต่อบริบทของโปรเจกต์จนถึงจุดบรรจบ (ดำเนินเป้าหมายที่กำลังทำงานต่อไปหากมีการตั้งไว้), `sss` แสดงสถานะโดยไม่แตะโค้ด และ `ss` บันทึกจุดตรวจสอบแล้วหยุด [ดูแผนที่ปุ่มลัดทั้ง 19 รายการ](saipen/RFC.md#110-command-surface) ปุ่มอักษรซีริลลิกที่มีรูปเหมือนกันก็ใช้ได้: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр` `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 

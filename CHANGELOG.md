@@ -1,6 +1,12 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.234.3 -- 2026-09-01 -- One Prune Rule, Not Two (T-1254)
+
+- The copier and the freshness digest walked the same surface through two different filters. `manifest.copy_tree_members` pruned `__pycache__` and `.pytest_cache` -- its docstring said so -- while `autoinject._digest` carried a shorter private copy that knew only `__pycache__` and `.pyc/.pyo`. A clone that had ever run pytest therefore hashed four `tools/.pytest_cache` files the injector would never ship, and the digest could not match the snapshot it was compared against even after line endings were normalised.
+- `CACHE_DIRS` and `GENERATED_SUFFIXES` are now module constants in `manifest.py` and `autoinject` imports them. The regression asserts IDENTITY, not equality: two equal copies are exactly the state that drifted.
+- Measured across the live clone and the published snapshot with the unified rule, the surfaces differ by precisely the files under edit and nothing else. Before, they differed by four cache entries nobody ships.
+
 ## 7.234.2 -- 2026-09-01 -- A Freshness Digest That Can Actually Match (T-1253)
 
 - The stamp was finally being written (7.234.1) and still could not match. `autoinject._digest` hashed raw bytes, but the two sides of the comparison arrive through different transports: the clone holds LF and the snapshot git hands the scheduled injector holds CRLF. `saipen/BOOT.md` is 4972 bytes in the clone and 5063 bytes in the snapshot with not one character of difference, so a home refreshed seconds earlier reported STALE -- and a witness that always says stale is the same as no witness.
