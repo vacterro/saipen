@@ -551,6 +551,23 @@ class PerformanceAuditTests(ControlFixture):
             )
         self.assertEqual(ignored, {"nul", "NUL.txt", "com1.log"})
 
+    def _subprocess_cost(self, env: dict[str, str], code: str) -> float:
+        """Cheapest of three runs of `code`, as this host's per-subprocess cost.
+
+        T-1258: latency controls in this suite measure against this rather than
+        against a constant, so a concurrently running gate cannot redden a
+        behavioral assertion. Cheapest, not mean: the floor is the closest
+        estimate of the cost with no contention in it.
+        """
+        costs = []
+        for _ in range(3):
+            started = time.monotonic()
+            subprocess.run(
+                [sys.executable, "-c", code], capture_output=True, text=True, env=env, timeout=60
+            )
+            costs.append(time.monotonic() - started)
+        return min(costs)
+
     def test_liveness_cache_lock_contention_is_non_blocking(self) -> None:
         root = self.make_project()
         first = liveness.record_actionable(root, "f" * 32)
@@ -578,6 +595,22 @@ class PerformanceAuditTests(ControlFixture):
         )
         try:
             self.assertEqual(holder.stdout.readline().strip(), "ready")
+            # T-1258: the claim is "does not block on the held lock", not "runs
+            # in under 1.5 seconds". An absolute budget makes the verdict a
+            # property of the host and of whatever else is running beside the
+            # suite -- a concurrent gate turns a behavioral control into a
+            # timing race, and the resulting red says nothing about locking.
+            # Price one equivalent subprocess that touches no lock, then allow a
+            # wide multiple of that. A call that really waited would take the
+            # holder's full 5s sleep, which no sane multiple of interpreter
+            # startup reaches.
+            baseline = self._subprocess_cost(env, "from saipen_engine import liveness")
+            budget = max(1.5, baseline * 6 + 0.5)
+            if budget >= 4.0:
+                self.skipTest(
+                    f"host subprocess cost {baseline:.2f}s leaves no margin below the "
+                    "holder's 5s hold; this control cannot separate blocking from load here"
+                )
             calls = (
                 "from saipen_engine import liveness; "
                 f"print(liveness.record_actionable({str(root)!r},'g'*32))",
@@ -591,10 +624,16 @@ class PerformanceAuditTests(ControlFixture):
                     capture_output=True,
                     text=True,
                     env=env,
-                    timeout=1.5,
+                    timeout=budget,
                 )
                 self.assertEqual(proc.returncode, 0, proc.stderr)
-            self.assertLess(time.monotonic() - started, 3.0)
+            elapsed = time.monotonic() - started
+            self.assertLess(
+                elapsed,
+                budget * 2,
+                f"lock-free liveness writes took {elapsed:.2f}s against a "
+                f"{budget * 2:.2f}s budget derived from a {baseline:.2f}s baseline",
+            )
         finally:
             holder.terminate()
             holder.communicate(timeout=10)
@@ -639,12 +678,16 @@ class PerformanceAuditTests(ControlFixture):
                         "except PermissionError as exc: print(str(exc)); raise SystemExit(0)\n"
                         "raise SystemExit(2)"
                     )
+                    # T-1258: this asserts the refusal CODE, not latency. The
+                    # timeout is only a hang guard, so it is generous: a tight
+                    # one turns a stable-code control into a timing race with
+                    # whatever else runs beside the suite.
                     contender = subprocess.run(
                         [sys.executable, "-c", contender_code, str(root)],
                         capture_output=True,
                         text=True,
                         env=env,
-                        timeout=2,
+                        timeout=60,
                     )
                     self.assertEqual(contender.returncode, 0, contender.stderr)
                     self.assertEqual(contender.stdout.strip(), expected)

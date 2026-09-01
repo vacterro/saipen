@@ -664,14 +664,37 @@ def run_t1022() -> None:
     # separately here duplicated the most expensive first third-wave group for
     # no additional coverage.
 
-    def tree_hash(path: Path) -> str:
-        h = hashlib.sha256()
+    # T-1258: this control asks whether the NITRO PROBES wrote into the live
+    # tree. A bare before/after hash cannot tell that from a concurrent gate
+    # writing beside it, and reported only "live .saipen tree changed" -- a red
+    # nobody could attribute afterwards, which is worse than no red. Snapshot
+    # per path so the failure names exactly what moved, and skip the
+    # process-local runtime cache: `.gitignore` line 14 keeps `.saipen/cache/`
+    # out of the tree by design (T-994), every gate writes it, and a probe
+    # writing there is not the leak this control guards.
+    transient = ("cache/",)
+
+    def tree_snapshot(path: Path) -> dict[str, str]:
+        snapshot: dict[str, str] = {}
         for p in sorted(path.rglob("*")):
-            if p.is_file():
-                rel = p.relative_to(path).as_posix().encode("utf-8")
-                h.update(len(rel).to_bytes(8, "big") + rel)
-                h.update(p.read_bytes())
-        return h.hexdigest()
+            if not p.is_file():
+                continue
+            rel = p.relative_to(path).as_posix()
+            if rel.startswith(transient):
+                continue
+            snapshot[rel] = hashlib.sha256(p.read_bytes()).hexdigest()
+        return snapshot
+
+    def snapshot_delta(before: dict[str, str], after: dict[str, str]) -> str:
+        added = sorted(set(after) - set(before))
+        removed = sorted(set(before) - set(after))
+        changed = sorted(p for p in set(before) & set(after) if before[p] != after[p])
+        parts = [
+            f"{label} {paths[:5]}{'...' if len(paths) > 5 else ''}"
+            for label, paths in (("added", added), ("removed", removed), ("changed", changed))
+            if paths
+        ]
+        return "live .saipen tree changed: " + "; ".join(parts)
 
     # ---- third-wave ONLY runner terminates with a scoped summary ------------
     # The perf-wave runner itself is commonly selected through another
@@ -683,7 +706,7 @@ def run_t1022() -> None:
         if not (key.startswith("SAIPEN_") and key.endswith("_PROBES_ONLY"))
     }
     env["SAIPEN_THIRD_WAVE_PROBES_ONLY"] = "1"
-    before = tree_hash(HOME / ".saipen")
+    before = tree_snapshot(HOME / ".saipen")
     proc = subprocess.run(
         [sys.executable, "tools/run_scenarios.py"],
         cwd=HOME,
@@ -692,11 +715,11 @@ def run_t1022() -> None:
         text=True,
         timeout=900,
     )
-    after = tree_hash(HOME / ".saipen")
+    after = tree_snapshot(HOME / ".saipen")
     expect(
         "T-1022 nitro probes leave the live HOME tree byte-identical",
         before == after,
-        "" if before == after else "live .saipen tree changed",
+        "" if before == after else snapshot_delta(before, after),
     )
     out = proc.stdout + proc.stderr
     summary_ok = "checks passed" in out and "failed" in out

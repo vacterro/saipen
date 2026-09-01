@@ -26,7 +26,7 @@
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.238.1** | [规范](SPEC.md) | [指南](GUIDE.md) | [核心](saipen/CORE.md) | [维护](saipen/MAINTENANCE.md) | [风格](saipen/STYLE.md) | [用户界面](saipen/UI.md) | [一致性](saipen/CONFORMANCE.md) |MIT
+**v7.238.2** | [规范](SPEC.md) | [指南](GUIDE.md) | [核心](saipen/CORE.md) | [维护](saipen/MAINTENANCE.md) | [风格](saipen/STYLE.md) | [用户界面](saipen/UI.md) | [一致性](saipen/CONFORMANCE.md) |MIT
 
 **快捷键:** `cc` 继续项目上下文直至收敛（如果设置了正在运行的目标，则恢复该目标），`sss` 在不触碰代码的情况下报告状态，`ss` 保存检查点并停止。[查看完整的 19 键快捷键地图](saipen/RFC.md#110-command-surface)。西里尔字母的同型键也可用：`сс`、`ссс`、`аа`、`ее`、`еее`、`рр`。 `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 

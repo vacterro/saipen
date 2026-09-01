@@ -1,6 +1,15 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.238.2 -- 2026-09-02 -- A Gate That Names What Moved (T-1258)
+
+- A gate reddened by another gate running beside it is worse than no gate, because nobody can attribute the failure afterwards. Two live instances of that class, both closed.
+- `perf_wave_regressions.py`'s T-1022 hermeticity control hashed every file under the live `.saipen/` into one digest and reported `live .saipen tree changed`. Any concurrent writer tripped it -- including `audit_parity.py`'s own `.saipen/cache/*.json`, which `.gitignore` keeps out of the tree by design. Reproduced during this wave. It now snapshots per path, skips that process-local runtime cache, and names the added, removed and changed paths.
+- `test_liveness_cache_lock_contention_is_non_blocking` asked whether a liveness write blocks on a held lock and answered with `subprocess.run(timeout=1.5)`. That is a behavioral claim decided by a stopwatch: the verdict belongs to the host and to whatever else is running. Measured here, the subprocess it times costs 0.078-0.094s, so 1.5s is 16x headroom on this machine and much less on a two-core runner. The budget is now derived from a measured per-subprocess cost, and the control states it cannot separate blocking from load rather than guessing when the host is too slow.
+- The `2s` hang guard on the stable-busy-codes control became `60s`: it asserts a refusal code, never a latency, and a tight guard only made it a race.
+- `tools/test_concurrency_independence.py` keeps the class closed: any numeric subprocess timeout under 10 seconds in `tools/test_*.py` outside a `suppress` block now fails the suite, with its own red control proving the detector fires and spares real hang guards.
+- Evidence: three cache-cold `unittest discover` runs beside a live `audit_parity` -- 712 OK, 712 OK, 721 OK.
+
 ## 7.238.1 -- 2026-09-01 -- The Probe Stopped Measuring Two Things At Once (T-1247)
 
 - `warn_ownership_probe` proves an aged WARN slug fails unless a live BOARD ticket names it. It added its owning ticket only in the GREEN leg, then asserted the WARN slug set was unchanged between RED and GREEN -- while `validate.py` derives `board-soft-cap` from `BOARD.md`'s own byte size at 16 KB.
