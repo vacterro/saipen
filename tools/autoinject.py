@@ -33,6 +33,7 @@ import json
 import os
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 from saipen_engine.manifest import (
@@ -165,11 +166,37 @@ def _digest() -> str:
     return h.hexdigest()[:16]
 
 
-def _installed(target: Path) -> str | None:
+def read_stamp(target: Path) -> dict | None:
+    """The freshness record beside an installed protocol copy, or None.
+
+    Two shapes are accepted on purpose. The original stamp was a bare digest
+    line, and copies written by an older injector are still on disk; refusing
+    to read them would turn every pre-existing install into "no record at all",
+    which is the very blindness the stamp exists to remove.
+    """
     stamp = target / STAMP
     if not stamp.is_file():
         return None
-    return stamp.read_text(encoding="utf-8").strip() or None
+    raw = stamp.read_text(encoding="utf-8").strip()
+    if not raw:
+        return None
+    if raw.startswith("{"):
+        try:
+            record = json.loads(raw)
+        except ValueError:
+            return None
+        return record if isinstance(record, dict) and record.get("digest") else None
+    return {"digest": raw}
+
+
+def _installed(target: Path) -> str | None:
+    record = read_stamp(target)
+    return record.get("digest") if record else None
+
+
+def _source_head() -> str | None:
+    rc, out = _run(["git", "rev-parse", "HEAD"])
+    return out.strip() if rc == 0 and out.strip() else None
 
 
 def _run(cmd: list[str], cwd: Path = HOME) -> tuple[int, str]:
@@ -205,10 +232,24 @@ def stamp_targets(digest: str) -> list[str]:
     Only existing targets are stamped: creating one here would install a
     protocol into an agent home the user never set up.
     """
+    # T-1249: a digest alone cannot tell a BOOTING agent anything -- comparing
+    # it needs the clone, which a consumer machine may not have. The install
+    # time and source head can be read on their own, so an agent that loads a
+    # copy last refreshed days ago can say so instead of silently running an
+    # old protocol. That was the actual incident: an agent read a pre-W4 CORE.md
+    # looking for a shortcut table that had moved, and had no way to know.
+    record = {
+        "digest": digest,
+        "installed_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    }
+    head = _source_head()
+    if head:
+        record["source_head"] = head
+    payload = json.dumps(record, indent=2, sort_keys=True) + "\n"
     done = []
     for t in TARGETS:
         if t.is_dir():
-            (t / STAMP).write_text(digest + "\n", encoding="utf-8")
+            (t / STAMP).write_text(payload, encoding="utf-8")
             # Every target's leaf is `saipen`, so the leaf names nothing.
             # The agent home is what distinguishes them.
             done.append(next((p for p in t.parts if p.startswith(".")), str(t)))

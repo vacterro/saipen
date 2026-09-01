@@ -724,6 +724,53 @@ def _status(project_root: Path, as_json: bool) -> int:
 
     payload["milestone"] = milestone_status(project_root)
 
+    # T-1249: an agent that boots an INSTALLED copy of the protocol has no way
+    # to know how old it is -- the digest needs the clone to compare against,
+    # and a consumer machine may not have one. The install time and source head
+    # stand on their own, so a copy last refreshed days ago says so here rather
+    # than quietly answering from a protocol that has since moved. That was the
+    # real incident: an agent read a pre-W4 CORE.md hunting a shortcut table
+    # that had been relocated, and nothing told it the copy was behind.
+    try:
+        from saipen_engine.paths import resolve_protocol_dir
+
+        _home = Path(state.get("saipen_home") or "").expanduser()
+        _protocol_dir = resolve_protocol_dir(_home)
+        # Flattened skill layout stamps protocol_dir itself; a source tree
+        # stamps the repository root one level above it.
+        _stamp_path = _protocol_dir / ".saipen_injected"
+        if not _stamp_path.is_file():
+            _stamp_path = _protocol_dir.parent / ".saipen_injected"
+        if _stamp_path.is_file():
+            _raw = _stamp_path.read_text(encoding="utf-8-sig").strip()
+            _record = json.loads(_raw) if _raw.startswith("{") else {"digest": _raw}
+            if isinstance(_record, dict) and _record.get("digest"):
+                _copy = {
+                    "digest": _record.get("digest"),
+                    "installed_at": _record.get("installed_at"),
+                    "source_head": _record.get("source_head"),
+                }
+                _when = _record.get("installed_at")
+                if _when:
+                    import datetime as _dt
+
+                    try:
+                        _age = _dt.datetime.now(_dt.timezone.utc) - _dt.datetime.fromisoformat(
+                            _when.replace("Z", "+00:00")
+                        )
+                        _hours = int(_age.total_seconds() // 3600)
+                        _copy["age_hours"] = _hours
+                        # The scheduled injector runs every 15 minutes, so a
+                        # copy older than a day means it is not running here.
+                        _copy["refresh_running"] = _hours < 24
+                    except (ValueError, TypeError):
+                        _copy["age_hours"] = None
+                payload["protocol_copy"] = _copy
+    except Exception:
+        # A missing or unreadable stamp is the ordinary case on a source-tree
+        # install and must never fail a read-only projection.
+        pass
+
     # T-1234: the operator surface names the inbox in counts, never in prose
     # from an audit body. An absent `audit/` renders nothing at all -- a
     # project with no inbox should not grow a permanent empty section.

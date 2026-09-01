@@ -26,7 +26,7 @@
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.234.3** | [Специфікація](SPEC.md) | [Гід](GUIDE.md) | [Ядро](saipen/CORE.md) | [Обслуговування](saipen/MAINTENANCE.md) | [Стиль](saipen/STYLE.md) | [Інтерфейс користувача](saipen/UI.md) | [Підтримка стандартів](saipen/CONFORMANCE.md) |MIT
+**v7.235.0** | [Специфікація](SPEC.md) | [Гід](GUIDE.md) | [Ядро](saipen/CORE.md) | [Обслуговування](saipen/MAINTENANCE.md) | [Стиль](saipen/STYLE.md) | [Інтерфейс користувача](saipen/UI.md) | [Підтримка стандартів](saipen/CONFORMANCE.md) |MIT
 
 **Швидкі клавіші:** `cc` продовжує контекст проєкту до конвергенції (відновлює активну ціль, якщо вона встановлена), `sss` показує статус без правок коду, а `ss` зберігає контрольну точку і зупиняється. [Повна карта з 19 клавіш](saipen/RFC.md#110-command-surface). Кириличні двійники теж працюють: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 

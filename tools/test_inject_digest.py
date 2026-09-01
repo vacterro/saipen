@@ -65,6 +65,60 @@ class ContentBytes(unittest.TestCase):
         self.assertEqual(autoinject._content_bytes(blob), payload)
 
 
+class StampRecord(unittest.TestCase):
+    """The stamp has to say something a CONSUMER can read alone (T-1249)."""
+
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory(prefix="saipen-stamp-")
+        self.target = Path(self.tmp.name) / "skills" / "saipen"
+        self.target.mkdir(parents=True)
+
+    def tearDown(self) -> None:
+        self.tmp.cleanup()
+
+    def _write(self, text: str) -> None:
+        (self.target / autoinject.STAMP).write_text(text, encoding="utf-8")
+
+    def test_a_rich_stamp_is_parsed(self) -> None:
+        self._write(
+            '{"digest": "abc123", "installed_at": "2026-09-01T02:00:00Z",'
+            ' "source_head": "deadbeef"}'
+        )
+        record = autoinject.read_stamp(self.target)
+        self.assertEqual(record["digest"], "abc123")
+        self.assertEqual(record["source_head"], "deadbeef")
+        self.assertEqual(record["installed_at"], "2026-09-01T02:00:00Z")
+
+    def test_a_legacy_bare_digest_still_reads(self) -> None:
+        # Copies written by an older injector are on disk right now. Refusing
+        # them would turn every pre-existing install into "no record at all",
+        # which is the blindness the stamp exists to remove.
+        self._write("abc123\n")
+        self.assertEqual(autoinject.read_stamp(self.target), {"digest": "abc123"})
+        self.assertEqual(autoinject._installed(self.target), "abc123")
+
+    def test_an_absent_or_empty_or_corrupt_stamp_is_no_record(self) -> None:
+        self.assertIsNone(autoinject.read_stamp(self.target))
+        self._write("   \n")
+        self.assertIsNone(autoinject.read_stamp(self.target))
+        self._write("{not json")
+        self.assertIsNone(autoinject.read_stamp(self.target))
+        self._write('{"installed_at": "2026-09-01T02:00:00Z"}')
+        self.assertIsNone(autoinject.read_stamp(self.target))
+
+    def test_the_install_time_is_readable_without_the_clone(self) -> None:
+        # The digest needs the source to mean anything; the timestamp and head
+        # do not. A consumer machine that has no clone can still tell that its
+        # copy was last refreshed days ago.
+        self._write(
+            '{"digest": "abc123", "installed_at": "2026-08-01T00:00:00Z",'
+            ' "source_head": "deadbeef"}'
+        )
+        record = autoinject.read_stamp(self.target)
+        self.assertIsNotNone(record["installed_at"])
+        self.assertIsNotNone(record["source_head"])
+
+
 class PruneRule(unittest.TestCase):
     """The copier and the digest must prune the same things (T-1254)."""
 

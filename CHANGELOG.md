@@ -1,6 +1,14 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.235.0 -- 2026-09-01 -- A Stale Protocol Copy Says So (T-1249)
+
+- The incident that started this: an opencode agent, mid-session after a model switch, read its installed `CORE.md`, grepped for the `gg` shortcut, found nothing because W4 had moved the shortcut table to `REGISTRY.json`/`COMMANDS.md`, and answered `Use: gg <objective text>`. Its `BOOT.md` was a pre-W4 copy still routing command resolution to `CORE 1.10`. Nothing told it the copy was behind, because nothing could.
+- The freshness stamp existed but said only a digest, and a digest is meaningless without the clone to compare it against -- which a consumer machine may not have. It now carries `digest`, `installed_at` and `source_head`. The timestamp and head stand on their own: a copy last refreshed a month ago is 746 hours old and can say so with no source in sight.
+- `saipen status` gained `protocol_copy` -- digest, install time, source head, age in hours, and whether the refresh is actually running -- read from the stamp beside the RUNNING protocol, covering both the flattened skill layout and the source-tree layout. An agent now learns at boot what it used to have no way to ask.
+- Legacy bare-digest stamps still read. Refusing them would have turned every install already on disk into "no record at all", which is precisely the blindness the stamp exists to remove.
+- This closes the chain that began with the scheduled task simply not being installed. Five layers, each hiding the next: not installed; installed but skipping every run on a too-broad cleanliness rule; injecting but writing no witness; a witness that could not match across CRLF; a witness that could not match across a test cache. The machinery was all there the whole time.
+
 ## 7.234.3 -- 2026-09-01 -- One Prune Rule, Not Two (T-1254)
 
 - The copier and the freshness digest walked the same surface through two different filters. `manifest.copy_tree_members` pruned `__pycache__` and `.pytest_cache` -- its docstring said so -- while `autoinject._digest` carried a shorter private copy that knew only `__pycache__` and `.pyc/.pyo`. A clone that had ever run pytest therefore hashed four `tools/.pytest_cache` files the injector would never ship, and the digest could not match the snapshot it was compared against even after line endings were normalised.
