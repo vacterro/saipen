@@ -521,6 +521,44 @@
   "load_profiles": {
     "schema_version": 1,
     "basis": "Each budget measures the non-cumulative routed surface named by one route. Conditional documents are reported separately and become mandatory only after routing into their owning profile.",
+    "phase_preferences": {
+      "enforced": false,
+      "unit": "bytes",
+      "bands": {
+        "VERIFY": {
+          "min": 6144,
+          "max": 7168
+        },
+        "ADD": {
+          "min": 5120,
+          "max": 5632
+        },
+        "HUNT": {
+          "min": 4608,
+          "max": 5632
+        },
+        "PREPARE": {
+          "min": 3584,
+          "max": 4608
+        },
+        "SHIP": {
+          "min": 8192,
+          "max": 9216
+        },
+        "TRANSLATE": {
+          "min": 7168,
+          "max": 8192
+        },
+        "MARKHUNT": {
+          "min": 8192,
+          "max": 9216
+        },
+        "CLEAN": {
+          "min": 7680,
+          "max": 8704
+        }
+      }
+    },
     "budgets": {
       "cold": 20480,
       "ordinary_continue": 35840,

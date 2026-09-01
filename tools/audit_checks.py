@@ -2668,8 +2668,8 @@ CASES: list[tuple[str, str, object, str]] = [
     ),
     (
         "a shipped doc spells out the forbidden PHASE form",
-        "saipen/MAINTENANCE.md",
-        replace("Translate it: `PHASE PLAN` when", "Translate it: `PHASE PLAN T-###` when"),
+        "saipen/phases/add.md",
+        replace("or `PHASE PLAN`.", "or `PHASE PLAN T-###`."),
         "phase-ticket-ref",
     ),
     (

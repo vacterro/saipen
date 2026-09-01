@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-016:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "T-1229 prefers phase corpus <=72000 bytes; otherwise closure records exact size, largest phases, unique retained law, and semantic-floor harm."
+    },
+    "SRC-016:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "protocol_budget reports bytes_by_phase, count, total, median, max, largest phase, and registry-owned non-enforced preference bands with focused tests."
+    },
+    "SRC-016:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Classify all 16 phase documents by semantic owner before deleting shared or historical prose."
+    }
+  },
+  "derived_at": "2026-09-01T13:59:52Z",
+  "derived_from": "SRC-016",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "dfb1edd8ce1ab61dd40f367bb84d467ed2780fdb3a89717b27895d6036b1a82e"
+}

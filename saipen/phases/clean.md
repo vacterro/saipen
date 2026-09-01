@@ -1,116 +1,81 @@
-# Phase: CLEAN (triggered by `saipen clean`)
+# Phase: CLEAN
 
-Deep repository scrub. Execute strictly in order.
+## Purpose and safety floor
 
-**Safety floor, applies to every step below:** CLEAN MUST NOT delete user data
-(anything the user created or would recognize as their own work) without
-explicit confirmation. **Moving or renaming a file needs a reference sweep first (`phases/hunt.md`): a move passes every recovery test and still breaks whatever loads the old path.** "obviously safe to remove" (§1/§2/§4 below) means
-scaffolding, cache, and orphaned build artifacts, never something a user
-might have meant to keep. If any step turns out unsafe to complete --
-ambiguous ownership, a deletion candidate that might be load-bearing,
-anything CLEAN can't confidently reason about -- STOP that step, ticket it
-for human review same as an ambiguous orphan (§2), and if that leaves the
-repository in a state CLEAN can't safely finish auditing, transition
-`STATE.phase: BLOCKED` instead of pushing through. CLEAN returns `DONE` only
-when it actually finished safely, not by default.
+Run the repository hygiene mutations, strictly in the order below. CLEAN owns
+proven-safe deletion, move, rename, prune and relocation. HUNT detects and
+tickets; it deletes, moves and renames nothing.
 
-**CLEAN owns every proven-safe hygiene mutation** (T-540): deletion, move,
-rename, prune and relocation happen here and nowhere else. `HUNT` detects
-and tickets; it deletes, moves and renames nothing, so the two scopes cannot
-overlap. A finding HUNT cannot classify as CLEAN's is a ticket for a human,
-never a mutation by either phase.
+Never delete user data without explicit confirmation. Ambiguous ownership,
+load-bearing risk or missing recovery evidence becomes a ticket; if safe audit
+cannot continue, enter BLOCKED. CLEAN reaches DONE only after safe completion.
 
 **Files are deleted on proof of recovery, never on how obvious they look.**
-CORE.md §1.1 permits an unconfirmed destructive operation only when the
-active ticket pre-authorizes it AND the operation is reversible. "Obvious"
-is not a property of the file; it is a feeling about it, and an untracked
-generated artifact is exactly as obvious as an untracked file nothing can
-recreate. Delete without asking ONLY when recovery is provable, by one of
-exactly two proofs, named in the LOG line that records the deletion:
-- **tracked at HEAD** -- `git ls-files --error-unmatch <path>` succeeds, so
-  `git checkout HEAD -- <path>` restores the exact bytes; or
-- **mechanically regenerable** -- a command in this repository recreates it,
-  and you name that command (a build output, a lockfile, a generated table).
+Without confirmation, both CORE.md §1.1 authorization and one recovery proof
+are required:
 
-Anything else -- untracked and not regenerable, or regenerable only by a
-command you would have to invent -- is ticketed for confirmation instead,
-and never user data (anything a user created or would recognize as their
-own work). No git available? Then the first proof cannot be obtained at all
-and the second is the only route.
+- tracked at HEAD, so the exact bytes can be restored; or
+- mechanically regenerable by a named repository command.
 
-The 5-file cap per sweep still applies and is a **mass-deletion gate, not a grant of authority**: five recoverable files may go, six may not, and one unrecoverable file may not go either. A numeric cap limits quantity; it never creates authorization or reversibility.
+Name the proof in the deletion LOG event. Untracked/non-regenerable content is
+never deleted without confirmation. With no git, only regeneration can prove
+recovery. The five-file cap is a **mass-deletion gate, not a grant of authority**:
+it limits authorized recoverable deletion; it authorizes nothing.
 
-**Moving or renaming a file is destructive to whatever loads it, and a move
-passes the recovery test trivially.** The gate above asks the wrong question
-of a move: the file IS recoverable -- it is right there in the new place --
-and the program is broken anyway, because recoverability is not the property
-that matters when something loads the old path. Reproduced from a user's
-session: "put the rest in the archive" moved a GUI module the entry point
-loaded by absolute path, and the next command raised `FileNotFoundError`.
-**So before moving or renaming anything, sweep for references to it and treat
-a hit as a blocker, not a note.** Grep the basename and the path across source,
-config, scripts, manifests and docs, and either move the references in the same
-act or do not move the file. The sweep is one command; the alternative fails at
-import time, the cheapest rung of `phases/verify.md`'s ladder.
+**Moving or renaming a file needs a reference sweep first (`phases/hunt.md`).**
+Search its path and basename across source, configuration, scripts, manifests
+and docs. Update every reference atomically or treat any hit as a blocker. A
+recoverable move can still break all consumers of the old path.
 
-1. **Board Scrub:** 
-   - Remove `[x]` DONE tasks from `BOARD.md` that are older than the current active work. This prunes `BOARD.md`, not history -- every one of those tickets' real events (created, built, verified, shipped) already lives permanently in `LOG.md`'s append-only graph; nothing is lost, just no longer cluttering the active board.
-   - **A DONE ticket that any live ticket still names in `needs:` MUST NOT be pruned.** Read every `needs:` field first and keep those IDs, however old. CORE.md §1.2 answers a `needs:` pointing at a ticket that exists nowhere with `## BLOCKED` and `| blocker: needs nonexistent T-###`, so without this guard the phase that keeps the board honest mechanically blocks a workable ticket, and the block reads as a real dependency failure rather than damage CLEAN just did (E-1811: a prune dropped T-421 and T-422 dangled). The remedy is refusing the prune, never repairing the dangle afterwards.
-   - Prune stale or abandoned `TODO` tickets -- **stale by the same evidence-based standard as `kitchen/`'s below, not a clock**: board tickets carry no creation timestamp, so age is never checkable and MUST NOT be the criterion. A `TODO` is stale when verifiably superseded (a later ticket or `KNOWLEDGE/decisions.md` entry covers the same ground), or its cited files/behavior no longer exist or apply, or `LOG.md` shows the issue was already resolved by unrelated work. Cite the evidence in the same `LOG.md` line. A ticket that is merely old but still accurate is waiting, not stale.
-   - Re-check every `## BLOCKED` ticket: blocker resolved elsewhere? Move it
-     back to `## TODO`. Still stuck and genuinely abandoned? Prune it as a
-     stale `TODO`. `## BLOCKED` is not a graveyard. A ticket that is neither
-     resolvable nor prunable but has sat untouched across several passes (an
-     old `[MARKHUNT]` finding, untriaged design debt) MUST NOT rot silently:
-     surface it once by setting `STATE.next_action` to a concrete `WAIT:`
-     naming the actual yes/no it needs -- never "sort out the blocked
-     tickets", but the real question (e.g. `WAIT: blocked -- T-149:
-     goal_tickets counts verify-passes; accept as-is, or count only on
-     DONE?`; the CORE.md §1.2 category prefix is not optional). It stays
-     blocked until the human answers; the point is that they are asked a
-     two-word-answerable question, not that it auto-unblocks.
-   - **Structural repair (CORE.md §1.2)**: a ticket ID appearing more than
-     once -- duplicated in one section, or under two headings at once -- is
-     corruption from a status change that copied instead of moved.
-     Cross-check `LOG.md` for its true final state, keep exactly one line
-     under the one correct heading, delete the rest. Merge duplicate section
-     headings into one.
+## Actions
 
-2. **Orphan Hunt:**
-   - Identify and delete clearly unconnected files (orphaned assets, unused scripts) -- each deletion must satisfy the proof-of-recovery gate above, recorded in its LOG line.
-   - Ambiguous items MUST be ticketed for human review instead of deleted.
+1. **Board scrub**
 
-3. **Link & Path Audit:**
-   - Fix broken internal paths or dead links in markdown documentation.
-   - Fix incorrect imports or references in code.
+   - Prune old DONE entries only after their permanent LOG evidence exists.
+     A DONE ticket that any live ticket **still names in `needs:` MUST NOT be pruned**.
+   - Prune TODO/BLOCKED only with cited evidence that it is superseded, already
+     resolved or no longer applicable. Age alone proves nothing.
+   - Re-evaluate blockers. Resolved -> TODO. A durable undecided item remains
+     BLOCKED and surfaces one concrete `WAIT: blocked -- ...` question.
+   - Repair duplicated ticket IDs/headings structurally by consulting LOG for
+     the true state; keep one canonical ticket line. Never rewrite history.
 
-4. **Trash Removal:**
-   - Delete temporary files, caches, and scaffold leftovers (e.g., `__pycache__`, `.tmp`, outdated `.bak` files) -- regenerable by a named command (a build output, a cache), so the proof-of-recovery gate's second rung covers them; name the command in the LOG line.
-   - Clear out empty directories.
-   - **DO NOT** delete files in `.saipen/kitchen/` unless evidence proves them superseded and recoverable, or the project is fully completed. For Core kitchen, stale means the owning ticket is `DONE` and no longer on `BOARD.md` with its reasoning fully folded into `LOG.md`/`CHANGELOG.md`, or later canonical content explicitly supersedes it. For a SubSaipen kitchen, `extensions/subs/PROTOCOL.md` § 6 owns the stricter five-class STALE verdict; age and collection count never qualify. This phase is the only owner of kitchen deletion (T-540) -- `phases/hunt.md` only scans and tickets; explicit `saipen sub clean <name>` additionally enforces the live-work and recovery-evidence refusals before any instance removal.
-   - **Seal an oversized `LOG.md`** (CORE.md §1.2 segmentation): past the soft
-      cap (~300 lines / ~64 KB), move the active `.saipen/LOG.md` content
-      verbatim into the next `.saipen/logs/LOG-<NNN>.md` and start a fresh
-      active `LOG.md` continuing the same `E-###` sequence. Whole lines only,
-      never a rewrite -- history is relocated, not edited. `tools/validate.py`
-      reads sealed segments + active tail as one sequence, so no graph check
-      changes.
-   - **Journal compaction (T-596):** run the bounded maintenance compaction of
-      settled operation journals (`saipen_engine.journal.compact_committed`).
-      It deletes the `.staged` bytes of COMMITTED and RESOLVED operations only,
-      keeping the full tombstone (op_id, operation, status, semantic payload
-      hash, per-target final hashes, timestamp), and NEVER compacts PREPARED /
-      APPLYING / VERIFIED / CONFLICT / ABORTED, whose evidence is still
-      required. Ordinary checkpointing never compacts automatically.
+2. **Orphans**
 
-5. **Freshness Check:**
-   - Ensure the repository is up to date with correct paths.
-   - Confirm project dependencies are clean and aligned.
+   Delete an unconnected asset/script only through the recovery gate. Ticket
+   ambiguous ownership or use.
 
-After cleanup is complete, LOG one normal Event Graph line per CORE.md §1.2 --
-`- DATE [E-###] [parent: E-###] RUN: clean -> done @SHORT-HASH` -- never an
-ad-hoc marker like `[E-CLEAN]`. `E-###` continues the same numbered
-sequence as every other entry; CLEAN gets no special ID format. Transition
-phase back to `DONE`.
+3. **Links and paths**
 
-**Under `execution_intent: converge`, this phase is stage G of the sequence in `saipen/CONVERGE.md`** -- what runs before it, what MUST run after it because CLEAN mutates files, and what an ambiguous cleanup does to the run all live there.
+   Repair broken documentation links, imports and references. Moves still owe
+   the pre-move sweep and atomic reference update.
+
+4. **Trash and protocol storage**
+
+   - Remove cache, temporary, backup, scaffold and empty-directory residue
+     only when recovery/regeneration is named.
+   - Protect `.saipen/kitchen/`. Core scratch is stale only after its owner is
+     DONE, absent from BOARD, and its durable reasoning lives in LOG/CHANGELOG,
+     or later canonical content explicitly supersedes it. SubSaipen scratch
+     uses PROTOCOL.md §6's stricter five-class STALE verdict; age or collection
+     count never qualifies. `saipen sub clean` also enforces live-work and
+     recovery refusals.
+   - When active LOG exceeds its soft cap (~300 lines/~64 KB), move it verbatim
+     by whole lines to the next `.saipen/logs/LOG-<NNN>.md`; start a fresh
+     active tail continuing the same event sequence. Never edit sealed history.
+   - Run bounded journal compaction
+     (`saipen_engine.journal.compact_committed`). Remove staged bytes only for
+     COMMITTED/RESOLVED operations while retaining tombstone identity, status,
+     semantic payload hash, target final hashes and timestamp. Never compact
+     PREPARED/APPLYING/VERIFIED/CONFLICT/ABORTED evidence.
+
+5. **Freshness**
+
+   Confirm paths and project dependencies are current, clean and aligned.
+
+## Exit
+
+LOG exactly `- DATE [E-###] [parent: E-###] RUN: clean -> done @SHORT-HASH`,
+then transition to DONE. Under `execution_intent: converge`, CLEAN is stage G;
+CONVERGE.md owns its surrounding order, required post-mutation stages and
+ambiguous-cleanup failure route.

@@ -5,67 +5,29 @@ When the Core state machine reaches a halt, the Maintenance layer MAY take over.
 
 **"Halt" has one definition, used identically everywhere in this section: no *workable* `## TODO` ticket AND no `## DOING` ticket.** A **workable** `## TODO` ticket is one the CORE.md § 1.6 Pick Rule would allow you to claim right now -- open checkbox, every `needs:` satisfied, not under another agent's active claim. `## DONE` and `## BLOCKED` tickets never count against the halt. Neither does a `## TODO` ticket that is permanently unpickable: a cyclic or dangling `needs:` puts it in `## BLOCKED` with the reason (CORE.md § 1.2), it does not sit in `## TODO` as ballast that blocks the halt forever while looking like work.
 
-**`## DOING` counts too, and that half was missing until v7.93.0.** "No open TODO" alone is satisfied by a board whose only ticket is in flight, which would send an agent into `HUNT` while holding a half-finished ticket -- exactly the abandonment CORE.md § 1.11's FINISH priority forbids. FINISH outranks MAINTAIN; a `## DOING` ticket is finished, blocked, demoted, or (if unclaimed) adopted, and only an empty `## DOING` opens the maintenance door.
-
-Two phrasings of this test once coexisted here, and a ticket with unsatisfied `needs:` passed one and failed the other -- two conformant agents could disagree about whether the project had halted at all.
+FINISH outranks MAINTAIN: any `## DOING` ticket must be finished, blocked,
+demoted or adopted before maintenance begins.
 
 - **DEFAULT BEHAVIOR**: The bare command `saipen` is an alias for `saipen continue`. If the board has not halted (a `## DOING` ticket, or any workable `## TODO`), the agent MUST resume work -- via CORE.md § 1.11's action priority, which decides *which* of them.
-- **ZERO-PROMPT AUTO-TRANSITION**: If the user runs the protocol and the board has halted as defined above, the agent MUST NOT ask the user for instructions or permission (e.g., "Should I hunt or add?"). It MUST silently and autonomously transition to the `HUNT` phase. If `HUNT` finds nothing (clean), the agent MUST immediately transition to `ADD` -- unless `execution_intent: converge`, under which the clean-HUNT destination is intent-aware: a clean `HUNT` there is stage F or stage I of `saipen/CONVERGE.md` and MUST NOT enter `ADD` (F routes to `CLEAN`, I routes into the closure sequence -- sync, fresh factories, finalize; ADD is invention, which converge never does, CONVERGE.md stage C). The `normal`/`goal` path keeps the `ADD` destination above; the intent decides, never the cleanliness of the sweep on its own (T-539). **Two exceptions, and this list is the complete one.** **First -- a session already sitting at `STATE.phase: BLOCKED` is not eligible for this.** A board holding only `## BLOCKED` tickets satisfies "no open `TODO`" on a literal reading, which would let a session that stopped for a credential or a human decision quietly slip into autonomous `HUNT`/`ADD` and start unrelated work while the actual blocker sits unanswered -- exactly the "wait for facts, don't spin" discipline `phases/blocked.md` exists to enforce. `BLOCKED` is left only by the user resolving the blocker (`phases/blocked.md` step 5), never by this transition. **Second -- `mode: read-only` reaches `HUNT` in report-only form and MUST NOT enter `ADD` at all.** CORE.md § 1.3 bans `ADD` outright there, because its entire work product is tickets and a read-only agent cannot write one; the sweep still runs and its findings are reported in chat, and the session then stops with them stated rather than pushing into a phase it cannot perform. Naming only the `BLOCKED` case made this paragraph's exception list read as complete while a live ban sat outside it -- an agent obeying the MUST would enter a phase CORE.md § 1.3 forbids, and each rule would look followed on its own. That is the same shape already fixed twice in this document: CORE.md § 1.3's own read-only ban list once named four phases as though exhaustive, and CORE.md § 1.6's from-any-phase set once named five where CORE.md § 1.10 had seven. An exception list that does not say it is complete is the failure; this one says so.
-- **HUNT**: Transition to `HUNT` MUST occur strictly when `BOARD.md` has halted as defined above, or when explicitly signaled by a failed verification loop. Agent MUST NOT hallucinate tasks during `HUNT`. **The halt requirement governs the AUTONOMOUS transition only.** `saipen hunt` (CORE.md § 1.10) enters `HUNT` from any phase regardless of board state -- that command exists precisely to run the sweep now instead of waiting for this section to reach it, and a user who typed it has already decided the board's state is not the question. Read as a precondition on the command too, this sentence would make `saipen hunt` refuse on any board with open work, which is nearly every board; `HUNT` is in CORE.md § 1.6's from-any-phase set for the same reason. What the command does not waive is order and bookkeeping: a `## DOING` ticket still outranks it (CORE.md § 1.11's FINISH priority) and the phase switch still checkpoints (CORE.md § 1.10).
-- **CLEAN**: Transition to `CLEAN` occurs when explicitly triggered by the user via `saipen clean` (or just `clean`). The agent MUST instantly set `phase: CLEAN` in `STATE.md`, load `saipen/phases/clean.md`, and execute it. Agent MUST audit and prune stale tickets, orphaned files, and broken paths before returning to `DONE`.
-- **MARKHUNT**: Transition to `MARKHUNT` occurs when explicitly triggered by the user via `saipen markhunt` (or just `markhunt`). The agent MUST instantly set `phase: MARKHUNT` in `STATE.md`, load `saipen/phases/markhunt.md`, and execute it.
-- **TRANSLATE**: Transition to `TRANSLATE` occurs when explicitly triggered by the user via `saipen translate` (or just `translate`). The agent MUST instantly set `phase: TRANSLATE` in `STATE.md`, load `saipen/phases/translate.md`, and execute it. Agent MUST operate exclusively within a `.saipen/saitranslate/` folder to build, maintain, and update the 32-language core translation system + bonus voice Legacy projects MAY still carry it at root-level `.saitranslate/`; agents MUST recognize that as equivalent and MAY migrate it (`git mv`, one LOG line), never maintaining both. Both present at once is a conflict, not a merge job -- `.saipen/saitranslate/` is authoritative, the root copy stale, its removal ticketed; the same resolution CORE.md § 1.9 gives extensions. It MUST treat the main software strictly as a read-only reference. **Exception**: a separate, dedicated agent instance sent to run TRANSLATE in true parallel with the main agent (which keeps building elsewhere) MUST NOT set the shared `phase: TRANSLATE` -- that would stomp on the main agent's own active phase. It keeps its own progress in `.saipen/saitranslate/STATE.md` instead, per `phases/translate.md`'s parallel-instance rule. This parallel mode requires the project's `.saipen/` to already exist (`saipen set` already ran) -- the same precondition `saipen sub spawn` requires (`extensions/subs/PROTOCOL.md`); TRANSLATE, parallel or not, is never a substitute for INIT.
+- **ZERO-PROMPT AUTO-TRANSITION**: a halted board enters HUNT without asking.
+  Clean HUNT routes to ADD on normal/goal intent. Under converge it routes by
+  CONVERGE stages F/I and MUST NOT enter ADD. **Two exceptions, and this list is the complete one:** BLOCKED never auto-leaves; `mode: read-only` runs
+  HUNT report-only and **MUST NOT enter `ADD` at all**.
+- **HUNT**: Transition to `HUNT` occurs at the autonomous halt or on explicit
+  command. **The halt requirement governs the AUTONOMOUS transition only**;
+  explicit `saipen hunt` uses CORE/COMMANDS from-any-phase routing, while
+  FINISH priority and the canonical checkpoint still apply.
+- Explicit CLEAN, MARKHUNT and TRANSLATE command routing belongs to
+  CORE/COMMANDS; their local actions, isolation and exits live only in their
+  phase documents.
 
 ### 2.2 Evolutionary ADD
-- **ADD**: Agent MUST NOT invent speculative, experimental, or unrelated features. Agent MUST evaluate additions strictly using the following logic:
 
-  ```pseudocode
-  FOR priority IN [
-    "bugfix", 
-    "complementary_feature (Bold->Italic)", 
-    "workflow_step (Open->Save_As)", 
-    "ux_consistency", 
-    "platform_convention"
-  ]:
-    IF exists(priority):
-      IF priority == "bugfix":
-        TICKET(priority)
-        RETURN SCOUT
-      IF satisfies(minimal_delta) AND satisfies(existing_design_language):
-        TICKET(priority)
-        CLAIM(ticket)
-        RETURN BUILD
-      ELSE:
-        TICKET(priority)
-        RETURN PLAN_or_SCOUT
-  
-  RETURN DONE
-  ```
-  
-  **`RETURN <X>` is a decision this pseudocode makes, never a literal to
-  copy into `next_action`.** There is no `RETURN` prefix in CORE.md § 1.2's five
-  legal forms, so `next_action: RETURN PLAN_or_SCOUT` is non-conformant
-  garbage that a cold agent cannot execute -- and `PLAN_or_SCOUT` is not
-  even a phase. Translate it: `PHASE PLAN` when the ticket needs planning,
-  `PHASE SCOUT T-###` when it does not, `PHASE BUILD T-###` for the claimed
-  minimal-delta branch. **`PHASE PLAN` carries no ticket ref**, and the ticket
-  ADD just filed is named by `task:` instead -- CORE.md § 1.2 makes the ref required
-  for exactly the five ticket-bearing phases and omitted for every other one,
-  so attaching a ticket ref to `PLAN` is the non-conformant form. It stood
-  here as the worked example until the pairing was enforced -- the failure CORE.md § 1.2
-  names in its own words: an example that fails the rule is worse than no
-  example, because a weak model copies the example and never reaches the rule.
-
-  `bugfix -> TICKET; RETURN SCOUT`, not `RETURN HUNT` -- ADD does not
-  improvise a fix inline, but bouncing back to HUNT is illegal too: if
-  HUNT's own 6 mechanical signals (`phases/hunt.md`) didn't already catch
-  this bug, sending ADD back to HUNT just re-derives the same "no new
-  signal" result and loops forever. ADD tickets it and claims it itself.
-  ADD-created tickets follow the normal Core flow from there:
-  `BUILD -> VERIFY -> REVIEW -> SHIP -> DONE` (CORE.md § 1.6) -- ADD itself never
-  implements anything directly or short-circuits to `VERIFY`. `ADD` may
-  begin again only after a clean `HUNT` (§ 2.1); it does not run on a
-  fixed cadence after every ticket.
+MAINTENANCE owns only entry into ADD after a clean HUNT on normal/goal intent
+and the goal-wave lifecycle in §2.4. `phases/add.md` owns selection priority,
+minimal versus planned routing, mature-product exit, decision evidence and
+ADD-specific accounting. CORE owns ticket claims and the downstream execution
+pipeline. ADD never runs on a fixed cadence or under converge.
 
 ### 2.3 The Industrial Completion Rule
 When the user requests one step of a well-known user workflow, the agent SHOULD evaluate whether the remaining steps are expected by modern software conventions -- this evaluation is a judgment call, not mechanical. If the evaluation concludes yes, the agent MUST implement the minimal coherent set rather than the isolated feature -- once triggered, this is a discipline requirement, not optional.

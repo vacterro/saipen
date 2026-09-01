@@ -1,20 +1,24 @@
 # Phase: DONE
 
-There is no more work to do on the current ticket. The ticket is closed by
-the atomic `finish_ticket` operation (`saipen ticket done`), which requires
-the ticket to have actually reached `phase: SHIP` (NITRO dogfood IV, T-602):
-a ticket whose REVIEW/SHIP gates never ran REFUSEs `ILLEGAL_PHASE` with zero
-canonical bytes written -- a skipped gate must never be laundered into a
-legal-looking DONE. The operation performs the `## DOING` -> `## DONE` move,
-the `[x]` checkbox, the `SHIP -> DONE` transition (recording the ACTUAL
-`transition_from`) and the completion LOG event in ONE journaled plan.
+Current ticket is closed only by atomic `saipen ticket done`, which proves the
+SHIP boundary and commits LOG/BOARD/STATE through OPS. A checkbox alone is not
+closure.
 
-1. **Pending Tickets FIRST**: If there are `TODO` tickets remaining on `BOARD.md`, the agent MUST transition to `SCOUT` to begin the next workable ticket (or `PLAN` if the board explicitly calls for a new wave to be planned). Do not stop. If all remaining `TODO` tickets are unworkable (e.g. blocked by unmet `needs:` that aren't in `DONE`), transition to `BLOCKED`.
-2. **Empty Board**: If there are NO `TODO` tickets left (even if `DONE` or `BLOCKED` tickets remain), proceed immediately to `HUNT`. This does not depend on the execution intent, and it is not a judgement call: CORE.md §1.11's MAINTAIN priority and § 2.1's zero-prompt rule both say an empty board at `DONE` auto-transitions into `HUNT` with no human asked, and this line said the opposite for the normal intent until v7.148.0 -- it told the agent to park with `WAIT: user brake` instead. Same state, two mandates: whether a plain `saipen continue` kept maintaining or stopped depended on which document the agent had read. § 1.11 wins; this step defers to it rather than restating it. A `WAIT: user brake` at `DONE` remains legal to SIT at when the user actually asked for the brake (§ 1.2 whitelists it for exactly this state) -- what is gone is this step manufacturing one on its own, from nothing but an empty board.
-   **Exception -- untriaged MARKHUNT findings**: If `## BLOCKED` holds any `[MARKHUNT]`-tagged ticket, do NOT auto-proceed to `HUNT` even under `execution_intent: goal` -- halt instead, with § 1.2's fixed wording for exactly this state: `next_action: WAIT: blocked -- untriaged MARKHUNT findings in ## BLOCKED; triage into ## TODO or dismiss`. The wording is not optional prose: at `DONE` with an empty `## TODO` a free-text `WAIT:` is indistinguishable from the drift § 1.11 orders an agent to ignore, so a brake written any other way is one a cold agent will correctly walk straight past. Those tickets are unvetted by construction (`phases/markhunt.md`); autonomously grinding past them without a human ever deciding which are worth acting on is exactly the silent-overreach the goal run's own caps exist to prevent. Once every `[MARKHUNT]` ticket has been triaged out of `## BLOCKED` (moved to `## TODO` or dismissed), this exception no longer applies and step 2's normal rule resumes.
-3. **Manual Empty Board**: step 2 already covers this. It is listed separately only because the question keeps getting asked in the bare-`saipen` form: no, there is no extra command to invoke and no permission to collect -- the bare command reaches `HUNT` through step 2 and MAINTENANCE.md §2.1 exactly like every other empty board does. Kept as a pointer rather than a rule, since two steps stating the same transition is how step 2 drifted away from § 1.11 in the first place.
-4. **New Goals**: If the user wants to start a new project or big feature, run `saipen goal <text>` -- `PLAN` runs first to generate tickets, then the agent proceeds directly into `SCOUT` for the first one (MAINTENANCE.md §2.4); it does not stop at `PLAN`.
-5. **Bugs**: If the user describes a bug in plain language, that is free text for `saipen goal <text>` (a bug report is a valid objective; `COMMANDS.md`, CMD-ROUTING-01, and `MAINTENANCE.md`, GOAL-01) -- there is no separate `fix` subcommand or literal command syntax to match the symptom against.
-6. **Brainstorming**: If the user asks to add new features or brainstorm, that's free text for `saipen goal <text>` or a normal ticket via PLAN -- there is no separate `add` command; `ADD` itself is only ever reached autonomously via a clean `HUNT` (MAINTENANCE.md §2.1), and never under `execution_intent: converge` -- there a clean `HUNT` routes to `CLEAN` or the closure sequence per `saipen/CONVERGE.md` (stages F/I), never `ADD` (T-539).
+## Route
 
-7. **Under `execution_intent: converge`**, reaching this phase is not automatically closure: `saipen/CONVERGE.md` owns the stage order that leads here and the closure bar that decides whether the run may clear the intent and stop. Check it there rather than inferring it from an empty board.
+1. Workable TODO exists: enter SCOUT for the top pick, or PLAN only when the
+   board explicitly requires a new wave.
+2. TODO exists but none is workable: enter BLOCKED.
+3. No TODO exists: enter HUNT immediately. Do not synthesize a user brake;
+   CORE's MAINTAIN priority and MAINTENANCE §2.1 own this zero-prompt route.
+4. Exception: any `[MARKHUNT]` ticket remaining in BLOCKED halts with exactly
+   `WAIT: blocked -- untriaged MARKHUNT findings in ## BLOCKED; triage into ## TODO or dismiss`.
+   Normal routing resumes only after every such finding is triaged or dismissed.
+
+Explicit current input still outranks this persisted route. A new goal,
+feature, or bug report enters GOAL/PLAN through COMMANDS and MAINTENANCE §2.4;
+there is no invented `fix` or `add` command. ADD is reached only after a clean
+HUNT on normal/goal intent.
+
+Under `execution_intent: converge`, DONE is not automatic closure. CONVERGE
+owns the stage order and closure bar.

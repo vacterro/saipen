@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import statistics
 from pathlib import Path
 from typing import Any
 
@@ -20,9 +21,15 @@ def _size(path: Path) -> int:
     return path.stat().st_size if path.is_file() else 0
 
 
-def _load_graph(protocol_dir: Path) -> dict[str, Any]:
+def _load_registry(protocol_dir: Path) -> dict[str, Any]:
     path = protocol_dir / "REGISTRY.json"
     registry = json.loads(path.read_text(encoding="utf-8-sig"))
+    if not isinstance(registry, dict):
+        raise ValueError("REGISTRY.json root must be an object")
+    return registry
+
+
+def _load_graph(registry: dict[str, Any]) -> dict[str, Any]:
     graph = registry.get("load_profiles")
     if not isinstance(graph, dict) or graph.get("schema_version") != 1:
         raise ValueError("REGISTRY.json load_profiles schema is missing or unsupported")
@@ -34,6 +41,60 @@ def _load_graph(protocol_dir: Path) -> dict[str, Any]:
     if set(budgets) != set(profiles):
         raise ValueError("every declared budget must have exactly one measured profile")
     return graph
+
+
+def _phase_metrics(
+    protocol_dir: Path, registry: dict[str, Any], graph: dict[str, Any]
+) -> dict[str, Any]:
+    phase_registry = registry.get("phases")
+    phase_names = phase_registry.get("all") if isinstance(phase_registry, dict) else None
+    if (
+        not isinstance(phase_names, list)
+        or not phase_names
+        or any(not isinstance(name, str) or not name for name in phase_names)
+        or len(set(phase_names)) != len(phase_names)
+    ):
+        raise ValueError("REGISTRY.json phases.all must be a unique string array")
+
+    bytes_by_phase: dict[str, int] = {}
+    for name in phase_names:
+        path = protocol_dir / "phases" / f"{name.lower()}.md"
+        if not path.is_file():
+            raise ValueError(f"phase document does not exist: phases/{name.lower()}.md")
+        bytes_by_phase[name] = _size(path)
+
+    preferences = graph.get("phase_preferences", {})
+    if not isinstance(preferences, dict):
+        raise ValueError("load_profiles phase_preferences must be an object")
+    bands = preferences.get("bands", {})
+    if not isinstance(bands, dict):
+        raise ValueError("load_profiles phase_preferences.bands must be an object")
+    unknown = set(bands) - set(phase_names)
+    if unknown:
+        raise ValueError(
+            "phase preference names are not registry phases: " + ", ".join(sorted(unknown))
+        )
+    for name, band in bands.items():
+        if (
+            not isinstance(band, dict)
+            or not isinstance(band.get("min"), int)
+            or not isinstance(band.get("max"), int)
+            or band["min"] < 0
+            or band["min"] > band["max"]
+        ):
+            raise ValueError(f"phase preference {name} needs integer min/max bytes")
+
+    sizes = list(bytes_by_phase.values())
+    largest_phase = min(bytes_by_phase, key=lambda name: (-bytes_by_phase[name], name))
+    return {
+        "bytes_by_phase": bytes_by_phase,
+        "phases_count": len(bytes_by_phase),
+        "phases_total": sum(sizes),
+        "phases_median": statistics.median(sizes),
+        "phases_max": bytes_by_phase[largest_phase],
+        "largest_phase": largest_phase,
+        "preferred_phase_bands": bands,
+    }
 
 
 def _surface_size(protocol_dir: Path, surfaces: dict[str, Any], name: str) -> int:
@@ -89,7 +150,8 @@ def _measure_route(
 
 def load_profiles(protocol_dir: Path | None = None) -> dict[str, Any]:
     base = _protocol_dir(protocol_dir)
-    graph = _load_graph(base)
+    registry = _load_registry(base)
+    graph = _load_graph(registry)
     surfaces = graph["surfaces"]
     measured: dict[str, int] = {}
     detail: dict[str, list[dict[str, Any]]] = {}
@@ -107,7 +169,7 @@ def load_profiles(protocol_dir: Path | None = None) -> dict[str, Any]:
         "basis": graph.get("basis", ""),
         "core": _size(base / "CORE.md"),
         "boot": _size(base / "BOOT.md"),
-        "phases_total": sum(_size(path) for path in (base / "phases").glob("*.md")),
+        **_phase_metrics(base, registry, graph),
         "human_markdown_total": sum(_size(path) for path in base.rglob("*.md")),
     }
 

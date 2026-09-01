@@ -1,6 +1,14 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.237.0 -- 2026-09-01 -- Phases Carry Only Their Own Law (T-1229)
+
+- The 16-phase corpus dropped from 100304 to 42078 bytes without deleting a phase or changing the registry DFA. Shared lifecycle, authorization and maintenance law now stays with its canonical owner; phase files carry only their local behavioral delta.
+- `protocol_budget.py` now reports deterministic per-phase bytes, count, total, median, maximum and largest phase. REGISTRY owns non-enforced migration bands, so aspirational document sizes cannot masquerade as ratified CI limits.
+- VERIFY, REVIEW, HUNT, CLEAN, SHIP, TRANSLATE and MARKHUNT retain their retry, evidence, recovery, isolation, publication and audit brakes. Historical incident narrative left the routine load path; 227 independent mutation controls still turn red on their own condition.
+- MAINTENANCE no longer repeats ADD selection or explicit phase procedure. It owns autonomous routing, intent and safety valves; ADD/CLEAN/MARKHUNT/TRANSLATE own their action deltas.
+- Runtime effect: the largest ordinary phase surface is now 30574 bytes instead of 37135, while all ratified load profiles remain green. T-1259 owns the next hot-path wave across CORE, MAINTENANCE, IMPROVE and OPS.
+
 ## 7.236.0 -- 2026-09-01 -- A Foreign Patch Shows Its Papers (T-1256)
 
 - One SAIPEN project sometimes has to change a bounded file set in another one. Until now the target saw `working tree changed` and nothing else, so a deliberate, fully explainable foreign mutation was indistinguishable from unexplained dirt -- and the only honest answer was a generic stop, or a human escalation for something no human needed to decide.

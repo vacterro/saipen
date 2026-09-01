@@ -1,120 +1,66 @@
-# Phase: HUNT (no TODO tickets remaining, or `saipen hunt` invoked)
+# Phase: HUNT
 
-Clean sweep. **Entered by explicit `saipen hunt` / `hh`? The skip below
-does not apply -- run the full sweep.** § 1.10 says that command forces
-the sweep and skips nothing, and the skip exists for the autonomous
-§ 2.1 path, where re-running an identical sweep on an unchanged tree is
-pure waste. A user who typed the command has already decided otherwise,
-so honouring the skip there makes the one command for forcing a sweep a
-documented no-op.
+## Purpose and entry
 
-Reached autonomously, skip ONLY if BOTH hold. **First, the worktree is
-clean**: `git status --porcelain` prints nothing. **Second**, `.saipen/LOG.md`'s
-tail literally contains `hunt -> clean @<HASH>` where `<HASH>` is the exact
-output of `git rev-parse --short HEAD` run right now -- compute the hash first,
-then grep for that exact string. Anything else -- a dirty tree, no match, an
-older hash, no `hunt -> clean` line at all -- run the full sweep below. No
-exceptions, no substitute heuristic.
+Run a bounded defect sweep. Autonomous eligibility is owned by MAINTENANCE
+§2.1. Entered by explicit `saipen hunt` / `hh`? The cache **does not apply -- run the full sweep** regardless of BOARD or prior markers.
 
-**The clean-tree half is not decoration.** `HEAD` names a commit, not a
-working tree, so the hash alone says nothing about tracked files edited since
-that commit or untracked files added since -- which is most of a live session,
-because work commits at SHIP and not per checkpoint (CORE.md §1.5). Without it
-the skip reuses a clean result from a tree that no longer exists, and this
-document argued the point against itself: it rejects mtimes as an insufficient
-signal three paragraphs down while its own cache key ignored every uncommitted
-byte. `--porcelain` already excludes gitignored noise, so build output and
-caches do not invalidate the skip unless they are actually tracked or in
-scope. Cheaper than a fingerprint and it fails safe: when the tree's state
-cannot be established, there is no clean answer, so the sweep runs. **No git** (`mode: no-publish`, § 1.3,
-or no repo at all)? `git rev-parse` can't produce a hash, so the exact skip
-string can never be formed or matched -- which resolves the right way by
-construction: no match means never skip, always run the full sweep. That is
-the safe default, not a gap; a no-git host simply hunts every pass.
+For autonomous entry, skip only when both conditions hold:
 
-**A real incident**: a weaker model, finding the prior hunt line stale,
-independently invented its own skip condition -- "no source files
-changed since the last hunt's timestamp, call it clean" -- instead of
-the hash-match rule above. Told to re-read this doc, it caught the hash
-mismatch correctly, then made the SAME substitution a second time anyway:
-it diffed file mtimes again and declared "0 changes, all 6 categories
-the same, HUNT clean" -- without actually re-running a single one of
-the six checks below. Both moves are illegal, and the second is worse
-for being dressed up as compliance. "Nothing on disk changed recently"
-is not evidence of "nothing is wrong" -- a silent `except: pass`, a
-stale TODO, or dead code don't announce themselves via mtime, and the
-prior hunt in that incident had found 2 open tickets; if those are
-still unticketed, a fresh hunt cannot honestly call itself clean no
-matter how quiet the filesystem has been. There is no shortcut around
-actually performing the six checks below, every time this phase runs
-for real.
+1. `git status --porcelain` prints nothing; and
+2. LOG contains `hunt -> clean @<HASH>` for the exact current
+   `git rev-parse --short HEAD`.
 
-**Ephemeral workers available (CORE.md §1.3)?** Dispatch the 6 signal
-categories as one batch of bounded read-only investigations. These are
-EPHEMERAL WORKERS, not SubSaipen instances: one assigned investigation,
-one returned result, then disappear; never enter `MANIFEST.md`, never receive
-STATE/BOARD/LOG/kitchen or lifecycle state, and never become `saihunt` by
-accident. They MUST NOT touch `.saipen/` -- only the orchestrating Core agent
-writes BOARD/LOG once after merging results. No ephemeral-worker support ->
-run the same categories sequentially. Either path, cap and output are equal.
+Dirty tree, absent/stale marker, unreadable Git, or no repository means run the
+sweep. HEAD alone is not a worktree fingerprint; no mtime or substitute
+heuristic is legal.
 
-Signal order, cap 5 tickets:
-1. Failing tests
-2. Commits unverified in LOG
-3. Stale TODO/FIXME/HACK
-4. Silent failures (empty catch, ignored returns, missing IO error paths)
-5. Symmetry gaps (save/load, undo/redo, import/export, start/stop, CLI params vs internal lists/GUI)
-6. Dead code, orphan files (zero grep refs, not entry/doc/config)
+## Actions
 
-**HUNT deletes, moves and renames nothing** (T-540). Its only mutations are
-the canonical BOARD/LOG/STATE bookkeeping a claim or completion performs;
-every file-system change a sweep could justify -- dead code, orphan, junk, a
-tidy move, a stale kitchen file -- is a finding to ticket, never a mutation
-to perform on the spot. Detect, classify, ticket, report. The deletion gate
-(deletion only on proof of recovery: tracked at `HEAD`, or regenerable by a
-named command), the 5-file mass-deletion cap, and the pre-move reference
-sweep all live in `phases/clean.md`, the phase that owns every proven-safe
-hygiene mutation -- so a HUNT finding is CLEAN's ticket, and the two scopes
-cannot overlap. CORE.md §1.1's gate is part of why: an unconfirmed
-destructive operation needs an active ticket AND reversibility, and HUNT
-routinely runs with no ticket at all.
+If ephemeral read-only workers exist, dispatch the six categories as one
+bounded batch and merge results. They are **EPHEMERAL WORKERS, not SubSaipen instances**: one assigned investigation, one returned result, then disappear;
+never enter `MANIFEST.md`, never receive STATE/BOARD/LOG/kitchen or lifecycle state, and never mutate `.saipen/`. Otherwise run sequentially. Either route
+uses this order and a five-ticket cap:
 
-`.saipen/kitchen/` is in scope for this sweep, but as a detection surface
-only -- use `phases/clean.md`'s evidence-based Core kitchen definition to
-find stale files and ticket them for CLEAN. The scan extends to every
-`.saipen/extensions/subs/<name>/kitchen/` present -- a subSaipen's own
-scratch is a distinct folder, not `.saipen/kitchen/` itself, but it is
-still this project's kitchen content and does not get a free pass for
-living one level deeper. For those packages use `extensions/subs/PROTOCOL.md`
-§ 6: age and repeated collection never mean stale. Detection only; deletion
-is CLEAN's explicit evidence-gated work.
+1. failing tests;
+2. commits unverified in LOG;
+3. stale TODO/FIXME/HACK;
+4. silent failures: empty catches, ignored results, missing I/O errors;
+5. symmetry gaps: save/load, undo/redo, import/export, start/stop, public
+   parameters versus internal/UI surfaces;
+6. dead code and orphan files, proven by references plus entry/config/docs.
 
-Before ticketing any finding, check it isn't already tracked anywhere on
-`BOARD.md` -- including `## BLOCKED`, not just `## TODO`/`## DOING`. A
-known issue already sitting blocked is not a fresh discovery; re-ticketing
-it under a new ID just forks one problem into two records. Same finding,
-already tracked -> skip it, it's not new signal.
+Before filing, search every BOARD section, including BLOCKED. An existing
+finding is not new. Classify new findings by priority and ticket them; ambiguous
+findings require user confirmation. Small obvious work may route to SCOUT,
+otherwise PLAN.
 
-Ambiguous -> ticket + user confirms.
-Findings ticketed (not clean)? STATE -> `PLAN` (or straight to `SCOUT` if
-a finding is small/obvious enough to skip planning, same judgment call as
-`phases/plan.md`'s size gate) -- work them same as any other `TODO`, board
-order = priority.
-Nothing found -> LOG one normal Event Graph line per CORE.md §1.2 -- `- DATE
-[E-###] [parent: E-###] RUN: hunt -> clean @SHORT-HASH` (this exact text
-after the taxonomy, not a free-text summary) -- then transition. **The
-destination is intent-aware** (T-539): under `execution_intent: converge` this
-sweep is stage F or stage I of `saipen/CONVERGE.md` and a clean result MUST
-NOT enter `ADD` -- F routes to `CLEAN`, I routes into the closure sequence
-(sync, fresh factories, finalize), per that contract. Under `normal`/`goal`
-it immediately transitions to `ADD` (MAINTENANCE.md §2.1). A clean hunt is
-never itself a reason to stop, whichever destination the intent picks.
-Never invent busywork.
+**HUNT deletes, moves and renames nothing.** It detects, classifies, tickets,
+and reports. Its only mutations are canonical BOARD/LOG/STATE bookkeeping.
+CLEAN alone owns proven-safe hygiene mutation, deletion recovery proofs,
+mass-deletion limits, move reference sweeps, and confirmation boundaries.
+MARKHUNT owns explicit exhaustive uncapped audit and unvetted finding brakes.
 
-## Perf (user asks specifically, or a ticket calls for it)
+`.saipen/kitchen/` and every present
+`.saipen/extensions/subs/<name>/kitchen/` are detection surfaces only. Apply
+CLEAN's Core-kitchen definition and SubSaipen PROTOCOL §6's five-class stale
+verdict; age or repeated collection is not proof. Ticket candidates for CLEAN.
 
-Baseline number first (profiler/timer/EXPLAIN -> LOG).
-Fix top proven bottleneck -> re-measure same way.
-Gain under 20% and uglier -> revert + LOG why.
+## Exit and evidence
 
-**Under `execution_intent: converge`, this phase is stage F or stage I of the sequence in `saipen/CONVERGE.md`** -- that file says which, what a finding here returns to, and why an existing `hunt -> clean @HASH` marker does not satisfy either stage. It is not restated here.
+Findings: ticket them, then route to PLAN or SCOUT by the size/clarity rule.
+
+No findings: append exactly
+`RUN: hunt -> clean @SHORT-HASH` in the normal Event Graph skeleton. Under
+`normal`/`goal`, transition to ADD. Under `execution_intent: converge`, this is
+stage F or I and must route through CONVERGE to CLEAN or closure; never ADD.
+MAINTENANCE owns the autonomous routing and checkpoint law.
+
+No-git HUNT can finish after the full sweep but cannot create or reuse a hash
+cache marker; LOG truthful unavailable evidence instead of inventing a hash.
+
+## Optional performance submode
+
+Only when explicitly requested or ticketed: record a baseline, fix the top
+proven bottleneck, remeasure identically, and revert with evidence when gain is
+under 20% and complexity rises.

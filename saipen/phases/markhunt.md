@@ -1,155 +1,74 @@
-# Phase: MARKHUNT (dry, exhaustive audit -- record only, never fix)
+# Phase: MARKHUNT
 
-Tax-auditor mode: find everything, including what the project's own
-maintainers have gone blind to from familiarity -- never HUNT's cheap
-6-category sample, never capped, never fixes anything itself. Triggered
-only by explicit user command (`saipen markhunt` / bare `markhunt`),
-from ANY phase, same as CLEAN/TRANSLATE/VALIDATE (COMMANDS.md, CMD-ROUTING-01).
+## Purpose and entry
 
-**Dry means dry**: MARKHUNT MUST NOT edit, delete, or fix anything it
-finds -- not even the "obvious junk, delete free" allowance HUNT has.
-Every finding becomes a recorded ticket, full stop. If it's tempting to
-just fix something small while you're in there -- don't; that's HUNT's
-or BUILD's job, not this one's. Mixing "found" with "fixed" is exactly
-what makes a real audit untrustworthy.
+Run an explicit, exhaustive, uncapped audit and record every evidenced
+finding. `saipen markhunt` may interrupt any phase under COMMANDS routing.
+Unlike bounded HUNT, MARKHUNT continues until its declared surface is
+exhausted.
 
-**No cap, no sampling.** HUNT stops at 5 tickets on purpose -- cheap,
-frequent, bounded. MARKHUNT is the opposite: it exists specifically for
-the times HUNT's own cap or its 6 mechanical categories aren't enough,
-and the user wants an outside-auditor pass that doesn't stop just
-because it found enough to look busy. Keep going until the surface is
-actually exhausted, not until some round number feels sufficient.
+## Scope and prohibitions
 
-**Scope -- broader than HUNT's six, not a replacement for them:**
-1. Everything HUNT already checks (failing tests, unverified commits,
-   stale TODO/FIXME/HACK, silent failures, symmetry gaps, dead code) --
-   MARKHUNT re-runs these too, without the cap.
-2. Cross-file consistency: does every doc (RFC, phase docs, CONFORMANCE,
-   README, guides) still describe what the code actually does? Stale
-   claims, orphaned references, doc drift from real behavior.
-3. Security posture: secrets handling, destructive-op confirmation
-   gates, anything that quietly weakened since it was last reviewed.
-4. Architectural debt: design inconsistencies, half-finished patterns,
-   copy-pasted logic that should have been unified, abstractions that
-   never got followed through.
-5. Familiarity blindness: things so normalized to whoever's been
-   building this that they stopped registering as a problem -- "that's
-   just how it is" IS a finding, not an excuse to skip one. Over-capture
-   beats under-capture here -- this is the one category HUNT never
-   looks for at all.
+**Dry means dry:** MARKHUNT never edits, deletes, moves, renames or fixes
+project bytes. It records only. Sweep all five vectors:
 
-Still evidence-based, same as HUNT and PLAN: a real, cited fact
-(file:line, a command's actual output, a quoted contradiction between
-what a doc claims and what the code does) for every finding. No cite,
-no ticket -- "probably," "seems like," and "looks suspicious" are
-vibes, not evidence, and MARKHUNT doesn't hallucinate findings just to
-look thorough.
+1. HUNT's mechanical categories, without HUNT's cap.
+2. Cross-file behavior/documentation consistency and orphaned references.
+3. Security posture, secret handling and destructive-operation gates.
+4. Architectural debt, incomplete patterns and needless duplication.
+5. Familiarity blindness: normalized defects maintainers may overlook.
 
-**Recording -- `## BLOCKED`, never `## TODO`.** Every finding becomes a
-ticket appended to `## BLOCKED` on `BOARD.md`, tagged `[MARKHUNT]`,
-evidence cited inline (`| blocker: unvetted audit -- <file:line or
-command output>`). NEVER `## TODO` -- MARKHUNT's entire output is
-unvetted by construction (uncapped, over-capture-biased, no human has
-looked yet), and `## TODO` is exactly what the normal Pick Rule works
-from on the very next bare `continue`. Landing raw audit output there
-would let an agent start autonomously fixing things nobody asked for or
-agreed were worth fixing. Triage -- moving a specific ticket to
-`## TODO`, dropping the `unvetted audit` blocker -- is a separate,
-later, explicit human/user step, never something MARKHUNT or a
-subsequent `continue` does on its own. Group related findings under one
-ticket rather than one-ticket-per-trivial-nit -- the board stays
-readable, not a wall of noise. Append only -- never reorder or edit
-existing tickets.
+Every finding needs a cited fact (file/line, command output or exact
+contradiction). Suspicion without evidence produces no ticket.
 
-**Goal-Driven Execution brake.** MARKHUNT never increments `goal_waves` or
-`goal_tickets` (MAINTENANCE.md §2.4) -- its findings are unvetted, so finishing
-a pass is never a waypoint to keep running through. The brake lives in
-`phases/done.md`: as long as any `[MARKHUNT]`-tagged ticket sits in
-`## BLOCKED`, its Goal-Mode-Empty-Board step refuses to auto-proceed to `HUNT`
-even under `execution_intent: goal` and halts for the user in § 1.2's fixed
-wording (the third whitelisted `WAIT:`, so the brake is machine-separable from
-drift). MARKHUNT itself just transitions to `DONE` (§ 2.1) and never checks
-the execution intent; leaving the tickets in `## BLOCKED` is what holds the
-brake. The intent stays untouched until every such ticket is triaged out.
+## Recording and brake
 
-**Long-running, so checkpoint like one.** An exhaustive, uncapped pass
-can outlast a single context window. Before that happens (a context
-budget warning, or after finishing each scope category above), overwrite
-`.saipen/kitchen/markhunt_progress.md` -- and make it a **manifest**, not a
-vague note, because this file is MARKHUNT's own closure check (the thing
-HUNT gets from its exact hash-match skip and MARKHUNT historically lacked,
-leaving completeness pure self-report). It MUST carry: `vectors:` (which of
-the scope categories 1-5 above are actually done), `surface:` (the
-dirs/globs swept, so "what was in scope" is a recorded fact, not a feeling),
-`findings:` (running count), `cursor: partial | done`, and
-`head_start:`/`head_end:` (the `git rev-parse --short HEAD` at the pass's
-start and its end -- no git available (`mode: no-publish` or no repo at
-all)? Write the literal string `no-git` in both fields instead, and the
-closure self-test below skips the `head_end` equality check entirely for
-this pass -- a no-git project can't produce a hash to compare against, and
-that MUST resolve to "check doesn't apply," never "MARKHUNT can't run
-here"). Overwrite, never append -- it's a cursor, not a history
-(history is `LOG.md`, as always). Hitting a
-budget risk mid-pass: LOG a partial-completion line, leave
-`STATE.phase: MARKHUNT` (not `DONE`), `next_action: "saipen markhunt"` -- a
-successor resumes from the cursor instead of restarting the whole surface.
+Append findings as grouped `[MARKHUNT]` tickets under `## BLOCKED`, never
+`## TODO`, with `blocker: unvetted audit -- <evidence>`. A grouped ticket names
+its finding count, e.g. `cluster x6`. Never reorder or edit prior tickets.
+Only later explicit human triage may accept one into TODO or dismiss it.
 
-**Completion -- the closure self-test (never declare done without it).**
-Before transitioning to `DONE`, verify the manifest actually closes:
-`cursor: done`; every scope category 1-5 present in `vectors:` (a missing
-vector means the surface is NOT exhausted -- keep going, don't round up);
-`head_end` equals the current `git rev-parse --short HEAD` (HEAD moved
-mid-pass -> the coverage is against a stale tree, re-run the moved part) --
-both `head_start`/`head_end` are the literal string `no-git`? **`no-git`
-means git cannot be READ, and nothing else.** `mode: no-publish` is a
-publish capability, not a read one -- CORE.md 1.3 blocks commit, tag and push
-there, while `git rev-parse --short HEAD` answers exactly as it always
-did. Writing `no-git` on a repository whose HEAD is readable disables this
-check by mislabelling the host, so use the real hash whenever git answers,
-and reserve `no-git` for a genuine absence: no repository, or no git at
-all. **And when it IS genuinely absent, the closure is declared unproven
-rather than satisfied.** `no-git` on both ends used to read as "nothing to
-compare, therefore fine", which is a check reporting success for the one
-host where it measured nothing -- and an exhaustive pass can legitimately
-span sessions while the files move underneath it, so this is where tree
-movement is most likely, not least. Without a commit snapshot there is no
-cheap deterministic surface to compare, so do not invent one: LOG the closure
-carrying `tree_movement=unverified` and re-run any vector whose covered paths
-you have reason to believe changed. An honest unproven closure beats an
-automatic pass, because the next reader can see which one they hold.
+MARKHUNT never increments `goal_waves` or `goal_tickets` and never chooses the
+next work. It exits to DONE. DONE's canonical brake halts goal execution while
+any untriaged `[MARKHUNT]` ticket remains BLOCKED; MAINTENANCE owns the broader
+goal lifecycle.
 
-And `findings:` must be fully accounted for by the `[MARKHUNT]` tickets this
-pass wrote -- **accounted for, not numerically equal**: grouping related
-findings under one ticket is this doc's own instruction, so 10 findings landing
-as 3 tickets is the intended outcome. What the check forbids is an
-*unaccounted* finding: one counted in `findings:` that reached no ticket at
-all. Grouping is legal, dropping is not -- so a grouped ticket MUST name how
-many findings it carries (e.g. `[MARKHUNT] doc-drift cluster x6`), which is
-what makes the sum checkable. Any finding untraceable to a ticket means the
-pass is not done. Only then LOG the completion, carrying the manifest summary
-into that permanent line so coverage stays auditable after `kitchen/` is
-swept: `- DATE [E-###]
-[parent: E-###] RUN: markhunt -> N findings, V/5 vectors, @head_end tickets=T-###,T-###`
-(this enriched form, not a bare count). **`tickets=` is the pass's own
-accounting and it is required**, listing every `[MARKHUNT]` ticket this pass
-wrote, comma-separated, or the literal `tickets=none` when the pass found
-nothing. Without it the closure rule is unexecutable the moment triage runs:
-the tickets legitimately leave `## BLOCKED` for `## TODO` with the blocker
-dropped, and a dismissed finding leaves the board entirely. `BOARD.md` is not
-append-only; `LOG.md` is, and it is the only place this accounting survives.
-Four passes already ran here (`findings=3/12/6/1`) and none can be re-checked
-today, because no line says which tickets it produced.
+## Progress manifest
 
-**The pass identity is that line's own `E-###`.** No new ID scheme, no
-registry, no ticket field: the event number is unique, monotonic and
-immutable, so two passes with overlapping findings stay separately
-reconstructable. **Triaging or dismissing a `[MARKHUNT]` ticket LOGs a `DEC`
-naming the ticket and the `E-###` of the pass that filed it** -- one line,
-existing taxonomy -- so accepted and dismissed accounting stays provable after
-the board shows neither. A later `VALIDATE` or human cross-checks it trivially:
-the line's `N` must equal the findings accounted for across this pass's
-tickets (per-ticket counts summed, not the ticket count) and `V` must be `5`.
-Then transition to `DONE`; `phases/done.md` takes over for whatever is in
-`## TODO`, while MARKHUNT's `## BLOCKED` findings sit untouched until a human
-triages them. MARKHUNT never decides what gets worked next; it only makes sure
-nothing stays invisible.
+This pass may span contexts. After each vector or before context exhaustion,
+overwrite `.saipen/kitchen/markhunt_progress.md` with:
+
+- `vectors:` completed vector IDs 1-5;
+- `surface:` exact paths/globs audited;
+- `findings:` running finding count;
+- `cursor: partial | done`;
+- `head_start:` and `head_end:` from `git rev-parse --short HEAD`.
+
+Use literal `no-git` for both hashes only when git or a repository genuinely
+cannot be read. `mode: no-publish` does not qualify. The file is a cursor, not
+history. On a partial handoff, LOG partial completion, keep phase MARKHUNT and
+`next_action: "saipen markhunt"`; the successor resumes from the manifest.
+
+## Closure and evidence
+
+Before DONE prove:
+
+- `cursor: done`;
+- all five vectors are present;
+- declared surface was exhausted;
+- `head_end` equals current readable HEAD; if it moved, rerun affected scope;
+- every counted finding is accounted for by this pass's grouped tickets.
+
+`no-git` **means git cannot be READ, and nothing else.** When git genuinely
+cannot provide a snapshot, closure is unproven, not satisfied: LOG
+`tree_movement=unverified` and rerun any vector whose paths may have changed.
+
+LOG completion exactly:
+`- DATE [E-###] [parent: E-###] RUN: markhunt -> N findings, V/5 vectors,
+@head_end tickets=T-###,T-###`. **`tickets=` is the pass's own accounting and
+it is required**; use comma-separated ticket IDs or `tickets=none`. `N` equals
+the sum of per-ticket finding counts, not ticket count; `V` must be 5.
+
+**The pass identity is that line's own `E-###`.** Triage or dismissal LOGs a
+DEC naming both ticket and filing pass event, so accounting survives BOARD
+movement. Then transition to DONE; untriaged findings remain untouched.

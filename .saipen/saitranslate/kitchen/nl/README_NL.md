@@ -26,7 +26,7 @@ oninstall zijn allemaal lokaal — geen cloud-service, geen daemon, geen databas
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.236.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) |MIT
+**v7.237.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) |MIT
 
 **Sneltoetsen:** `cc` zet de projectcontext voort tot convergentie (hervat een actief doel als er een is ingesteld), `sss` meldt status zonder code aan te raken en `ss` slaat een checkpoint op en stopt. [Bekijk de volledige 19-toetsenkaart](saipen/RFC.md#110-command-surface). Cyrillische tweelingen werken ook: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 

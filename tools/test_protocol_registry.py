@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
+import statistics
 import sys
 import tempfile
 import unittest
@@ -190,6 +192,50 @@ class ProtocolRegistryTests(unittest.TestCase):
             self.assertLessEqual(measured[name], limit, name)
             self.assertTrue(measured["profiles"][name], name)
         self.assertLessEqual(measured["human_markdown_total"], 300 * 1024)
+
+    def test_phase_metrics_measure_all_registry_phases_and_actual_bytes(self):
+        phase_names = self.registry["phases"]["all"]
+        measured = protocol_budget.load_profiles(PROTOCOL)
+        actual = {
+            name: (PROTOCOL / "phases" / f"{name.lower()}.md").stat().st_size
+            for name in phase_names
+        }
+        self.assertEqual(len(phase_names), 16)
+        self.assertEqual(measured["phases_count"], 16)
+        self.assertEqual(measured["bytes_by_phase"], actual)
+        self.assertEqual(measured["phases_total"], sum(actual.values()))
+
+    def test_phase_max_median_and_tie_break_are_deterministic(self):
+        measured = protocol_budget.load_profiles(PROTOCOL)
+        sizes = measured["bytes_by_phase"]
+        expected_largest = min(sizes, key=lambda name: (-sizes[name], name))
+        self.assertEqual(measured["phases_median"], statistics.median(sizes.values()))
+        self.assertEqual(measured["largest_phase"], expected_largest)
+        self.assertEqual(measured["phases_max"], sizes[expected_largest])
+
+    def test_missing_registry_phase_fails_instead_of_disappearing(self):
+        with tempfile.TemporaryDirectory(prefix="saipen-phase-budget-") as td:
+            protocol = Path(td) / "saipen"
+            shutil.copytree(PROTOCOL, protocol)
+            (protocol / "phases" / "verify.md").unlink()
+            with self.assertRaisesRegex(
+                ValueError, r"phase document does not exist: phases/verify\.md"
+            ):
+                protocol_budget.load_profiles(protocol)
+
+    def test_phase_metrics_do_not_change_load_profile_measurement(self):
+        measured = protocol_budget.load_profiles(PROTOCOL)
+        for name, routes in measured["profiles"].items():
+            self.assertEqual(measured[name], max(route["bytes"] for route in routes))
+            for route in routes:
+                self.assertEqual(route["bytes"], sum(route["must"].values()))
+
+    def test_phase_preferences_are_registry_owned_and_not_hard_failures(self):
+        preferences = self.registry["load_profiles"]["phase_preferences"]
+        measured = protocol_budget.load_profiles(PROTOCOL)
+        self.assertFalse(preferences["enforced"])
+        self.assertEqual(measured["preferred_phase_bands"], preferences["bands"])
+        self.assertNotIn("preferred_phase_bands", measured["budgets"])
 
     def test_one_rule_one_owner(self):
         declared: dict[str, list[str]] = {}

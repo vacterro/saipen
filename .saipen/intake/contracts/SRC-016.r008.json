@@ -1,0 +1,49 @@
+{
+  "clauses": {
+    "SRC-016:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "T-1229 prefers phase corpus <=72000 bytes; otherwise closure records exact size, largest phases, unique retained law, and semantic-floor harm."
+    },
+    "SRC-016:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "protocol_budget reports bytes_by_phase, count, total, median, max, largest phase, and registry-owned non-enforced preference bands with focused tests."
+    },
+    "SRC-016:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Classify all 16 phase documents by semantic owner before deleting shared or historical prose."
+    },
+    "SRC-016:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "VERIFY ADD HUNT and PREPARE retain every named unique retry, safety, routing, evidence, accounting, and exit behavior."
+    },
+    "SRC-016:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Compress remaining smaller phase documents by removing historical narrative and proven duplication without uniform size pressure."
+    },
+    "SRC-016:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Revisit SHIP TRANSLATE MARKHUNT and CLEAN while preserving their release, isolation, brake, recovery, deletion, and audit red controls."
+    },
+    "SRC-016:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "After phase ownership stabilizes remove duplicated phase-local procedure from MAINTENANCE while preserving autonomous lifecycle ownership."
+    },
+    "SRC-016:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Structured semantic regressions cover VERIFY REVIEW HUNT CLEAN SHIP TRANSLATE and MARKHUNT behavior; existing red controls remain independently red."
+    }
+  },
+  "derived_at": "2026-09-01T13:59:55Z",
+  "derived_from": "SRC-016",
+  "interpretation_revision": 8,
+  "schema_version": 1,
+  "source_sha256": "dfb1edd8ce1ab61dd40f367bb84d467ed2780fdb3a89717b27895d6036b1a82e"
+}
