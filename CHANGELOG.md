@@ -1,6 +1,15 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.238.0 -- 2026-09-01 -- The Owners Stop Arguing With Themselves (T-1259)
+
+- T-1229 moved shared law into its canonical owners so the 16 phase deltas could cite it. This wave cleans the owners themselves: `CORE.md`, `MAINTENANCE.md`, `IMPROVE.md` and `OPS.md` go from 84375 to 79556 bytes with no rule removed.
+- `MAINTENANCE.md` carried the weight: 16616 -> 13886 bytes. Section 2.4 argued each valve rule, then re-derived the v7.86.0 deadlock twice and restated the counter-persistence case three times. The rules are untouched -- the exact `DEC:`/`WAIT:` forms, `phase` left alone on a trip, counters never tidied, the Exit list and its deliberate exclusion of the valve.
+- `OPS.md` sections 9 and 10 both cited "CORE 1.10's host-agent rules". CORE 1.10 is the Command Surface; no document in the protocol contains host-agent rules. An agent following either citation read the wrong section, found nothing, and invented. Section 9 now cites CORE 1.1 (`OPS-EFFECT-01`); section 10 cites CORE's protocol-state repair contract and names the four rules it carries.
+- `IMPROVE.md` stated the cycle-completion bar in three places and described the sweep record twice -- once as `SweepRecord`'s seven real fields, once as prose naming a `run_id` field `tools/improve.py` does not have. One bar, one record.
+- Load profiles: `ship_improve` 27238 -> 25920, `ordinary_continue` 25471 -> 25293, `ordinary_phase` 30574 -> 30396, `single_doc` 24324 -> 24146. `cold` and `command_resolution` are unmoved because they load none of these four.
+- The floor is measured, not asserted: a 9-gram scan across all 19 protocol documents and all 16 phase deltas finds zero shared shingles with these four, and a 7-gram scan inside each finds zero internal repeats. There is no duplicated text left to remove.
+
 ## 7.237.0 -- 2026-09-01 -- Phases Carry Only Their Own Law (T-1229)
 
 - The 16-phase corpus dropped from 100304 to 42078 bytes without deleting a phase or changing the registry DFA. Shared lifecycle, authorization and maintenance law now stays with its canonical owner; phase files carry only their local behavioral delta.

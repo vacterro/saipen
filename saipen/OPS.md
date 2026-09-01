@@ -2,7 +2,7 @@
 
 OPS owns HOW protocol state is committed safely, never WHAT it means. It is the
 contract for SAIOPS, the zero-dependency Python mechanical layer that performs
-deterministic protocol operations agents currently do by hand-editing
+deterministic protocol operations agents would otherwise do by hand-editing
 STATE.md / BOARD.md / LOG.md.
 
 The division of labour:
@@ -15,8 +15,7 @@ TESTS PROVE THE RESULT. red controls + crash injection + full gates
 ```
 
 OPS does NOT restate phase semantics, the Pick Rule, HUNT, CLEAN, Improve, or
-SubSaipen semantics. Those live where they already live. OPS owns only the
-mechanical contract below.
+SubSaipen semantics. Those live where they already live.
 
 ## 1. Semantic / mechanical boundary
 
@@ -61,9 +60,7 @@ PLAN:
 APPLY consumes THAT plan object under the writer lock:
 
 1. acquire the project writer lock (real OS lock, `.saipen/locks/core.lock`);
-2. run Recovery preflight first (unfinished op journals) -- exactly one
-   unambiguous recoverable op is recovered first; a conflict or multiple
-   pending ops REFUSE before any new mutation;
+2. run Recovery preflight first (section 3);
 3. re-read every declared precondition under the lock; compare; refuse
    STALE_STATE;
 4. compute each target's before_hash (live file) and after_hash (planned
@@ -77,12 +74,11 @@ The plan's op_id is the applied op_id; the plan's bytes are the committed
 bytes; the plan is never recomputed during APPLY. A retry of a committed op
 returns ALREADY_APPLIED.
 
-The LOG -> BOARD -> STATE order is preserved for canonical Core checkpoints
-(TransactionPolicy.CORE_CHECKPOINT): LOG ahead of STATE after a crash is
-recoverable. Single-file Improve writes use TransactionPolicy.ATOMIC_FILE:
-one ordered target. Multi-file atomicity is NOT claimed: there is no atomic
-multi-file primitive. The write-ahead journal is the truth about how far a
-crash got.
+CORE.md § 1.5's `LOG -> BOARD -> STATE` order is preserved for canonical Core
+checkpoints (TransactionPolicy.CORE_CHECKPOINT). Single-file Improve writes use
+TransactionPolicy.ATOMIC_FILE: one ordered target. Multi-file atomicity is NOT
+claimed: there is no atomic multi-file primitive. The write-ahead journal is the
+truth about how far a crash got.
 
 ## 3. Transaction / recovery behavior
 
@@ -101,21 +97,32 @@ Operation statuses split into two closed classes:
   operation still owns mutation state that must be resolved before any new
   canonical mutation.
 
-CONFLICT is stable evidence but NOT permission to continue. `pending_ops()`
-lists every UNRESOLVED journal; `pending_conflicts()` lists the CONFLICT
-subset. Before ANY mutation, an unresolved CONFLICT REFUSES
-RECOVERY_CONFLICT naming the exact op -- no new canonical mutation may start
-over a conflict. `saipen status` / `saipen next` surface recovery_pending and
-recovery_conflict; `saipen recover` on a conflict REFUSEs with the op named
-and evidence preserved.
-
-Evidence that cannot be decoded or safely traversed is `CORRUPT_JOURNAL`,
-not CONFLICT: preflight, mutation, recovery, release, status, next, and
-read-only context all refuse with that exact code and preserve the structured
-detail. Corrupt evidence is never constructed as a Journal and never replayed
+`pending_ops()` lists every UNRESOLVED journal; `pending_conflicts()` lists the
+CONFLICT subset. CONFLICT is stable evidence but NOT permission to continue.
+Evidence that cannot be decoded or safely traversed is `CORRUPT_JOURNAL`, not
+CONFLICT: preflight, mutation, recovery, release, status, next, and read-only
+context all refuse with that exact code and preserve the structured detail.
+Corrupt evidence is never constructed as a Journal and never replayed
 automatically.
 
-### Recovery
+`saipen status` / `saipen next` surface recovery_pending and recovery_conflict;
+`saipen recover` lists pending operations, recovers the mechanically safe ones,
+and REFUSEs a conflict with the op named and evidence preserved rather than
+hiding it. Repeated recovery is idempotent.
+
+### Recovery preflight
+
+Before ANY new canonical mutation the `pending_ops` journals are scanned, and
+the FIRST matching rule decides:
+
+- corrupt recovery evidence exists -> refuse CORRUPT_JOURNAL before replay;
+- an unresolved CONFLICT exists -> refuse RECOVERY_CONFLICT naming the op;
+- multiple unresolved -> refuse RECOVERY_REQUIRED naming the exact op_ids;
+- exactly one recoverable -> recover/complete it first, and refuse with the
+  evidence preserved if that recovery hits a conflict;
+- none pending -> proceed.
+
+### Recovery semantics
 
 Recovery is ROLL-FORWARD and CONFLICT-SAFE. LOG is append-only evidence; once
 the operation's LOG event exists, do not "rollback" by deleting it.
@@ -145,20 +152,6 @@ READ-ONLY preconditions the original plan read but did not write. Recovery:
    CONFLICT, never VERIFIED/COMMITTED.
 
 "VERIFIED" on the recovery path means the verifier actually ran and passed.
-
-Before ANY new mutation, `pending_ops` journals are scanned (Recovery
-preflight):
-
-- corrupt recovery evidence exists -> refuse CORRUPT_JOURNAL before replay;
-- an unresolved CONFLICT exists -> refuse RECOVERY_CONFLICT naming the op;
-- none pending -> proceed;
-- exactly one recoverable -> recover/complete it first;
-- recovery hits conflict -> refuse, evidence preserved;
-- multiple unresolved -> refuse RECOVERY_REQUIRED naming the exact op_ids.
-
-`saipen recover` lists pending operations and recovers the mechanically safe
-ones; it refuses a conflict rather than hiding it. Repeated recovery is
-idempotent.
 
 ## 4. Idempotency
 
@@ -214,8 +207,9 @@ Every operation returns a structured result:
 }
 ```
 
-CLI prints concise human text by default; `--json` emits JSON only. Stable
-error codes: STALE_STATE, TICKET_NOT_FOUND, TICKET_NOT_WORKABLE,
+CLI prints concise human text by default; `--json` emits JSON only. Every error
+message names one exact refusal and the executable next action. Stable error
+codes: STALE_STATE, TICKET_NOT_FOUND, TICKET_NOT_WORKABLE,
 TICKET_ALREADY_DONE, ILLEGAL_TICKET_LIFECYCLE, NOT_TOP_WORKABLE,
 ACTIVE_TICKET_MISMATCH, ALREADY_CLAIMED, ACTIVE_CLAIM_FOREIGN, ILLEGAL_TRANSITION,
 ILLEGAL_PHASE, WRITER_BUSY, VALIDATION_FAILED, RECOVERY_REQUIRED,
@@ -224,36 +218,39 @@ NEEDS_REPAIR, PATH_ESCAPE, INVALID_ID, ACTIVE_IMPROVE_CYCLE,
 INVALID_DISPOSITION, PACKAGE_INCOMPLETE, MALFORMED_PACKAGE,
 INCOMPLETE_TICKET, INVALID_MANIFEST, INVALID_GOAL, STALE_PLAN, RELEASE_CLOSURE_PENDING,
 TAG_CONFLICT, FIRST_PUBLISH_WAIT, NO_PUBLISH_MODE,
-SOURCE_SCOPE_MISSING, RELEASE_FAILED. `HOME_REQUIRED` is the crew refusal
-when STATE.saipen_home is missing or unusable -- the executable next action
-is `saipen rebind-home <candidate>`: the ONE mechanical rebind path that
-proves the candidate install (readable `VERSION`, compatible major, `BOOT`
-layout, required protocol files) and journals a single narrowly-owned
-`STATE.saipen_home` pointer update (T-1003 carrier-loss wave). `CREW_BLOCKED` is the EXPECTED crew
-result when the circuit has no executable semantic continuation (an
-unsatisfied stage needs inspection, not invention): the result carries the
-unsatisfied `stage`/`role`/`reason` and an inspect-required next action --
-a legitimate crew blocker is a structured result, never a traceback.
-`CREW_NOT_READY` is the release executor's refusal when the human explicitly
-asks to publish while the crew epoch is not terminal: an ordinary ticket under
-an active crew epoch is DEFERRED to the crew (never silently published), and a
-terminal publication requires SC-0..SC-10 all explicitly satisfied -- missing
-evidence is never PASS (T-1003 hostile findings 3/4/6).
-`INVALID_SOURCE_HOME` is the shared-contract refusal when the configured
-saipen_home is missing any REQUIRED source item (PROTOCOL.md/README.md/
-crew.md, the complete TEMPLATE surface, or any built-in role charter):
-zero writes, zero obsolete deletion, and the operator refreshes the install.
-Error messages name one exact
-refusal and the executable next action. `RELEASE_FAILED` is the single stable
-code every public release refusal that is not a named preflight gate
-collapses to (subprocess/staging/commit/push/tag/receipt failures): the
-diagnostic stage and the underlying error stay in the result's `detail` /
-`stage` fields, never as new global codes. `ILLEGAL_PHASE` is the gate refusal:
-`finish_ticket` (the atomic ticket-closure operation behind `ticket done`)
-accepts a ticket only from `phase: SHIP` (the canonical SHIP -> DONE closure
-edge); from SCOUT/BUILD/VERIFY/REVIEW it REFUSEs ILLEGAL_PHASE and writes
-zero canonical bytes, because a ticket whose required gates did not run must
-not be laundered into a legal-looking DONE state (NITRO dogfood IV, T-602).
+SOURCE_SCOPE_MISSING, RELEASE_FAILED.
+
+The codes whose meaning is not self-evident from the name:
+
+- `HOME_REQUIRED` -- STATE.saipen_home is missing or unusable. The executable
+  next action is `saipen rebind-home <candidate>`: the ONE mechanical rebind
+  path, which proves the candidate install (readable `VERSION`, compatible
+  major, `BOOT` layout, required protocol files) and journals a single
+  narrowly-owned `STATE.saipen_home` pointer update.
+- `CREW_BLOCKED` -- the EXPECTED crew result when the circuit has no executable
+  semantic continuation: an unsatisfied stage needs inspection, not invention.
+  The result carries the unsatisfied `stage`/`role`/`reason` and an
+  inspect-required next action. A legitimate crew blocker is a structured
+  result, never a traceback.
+- `CREW_NOT_READY` -- the release executor's refusal when the human explicitly
+  asks to publish while the crew epoch is not terminal. An ordinary ticket under
+  an active crew epoch is DEFERRED to the crew, never silently published, and a
+  terminal publication requires SC-0..SC-10 all explicitly satisfied; missing
+  evidence is never PASS.
+- `INVALID_SOURCE_HOME` -- the configured saipen_home is missing a REQUIRED
+  source item (PROTOCOL.md/README.md/crew.md, the complete TEMPLATE surface, or
+  any built-in role charter): zero writes, zero obsolete deletion, and the
+  operator refreshes the install.
+- `RELEASE_FAILED` -- the single stable code every public release refusal that
+  is not a named preflight gate collapses to (subprocess/staging/commit/push/
+  tag/receipt failures). The diagnostic stage and the underlying error stay in
+  the result's `detail`/`stage` fields, never as new global codes.
+- `ILLEGAL_PHASE` -- the gate refusal. `finish_ticket` (the atomic
+  ticket-closure operation behind `ticket done`) accepts a ticket only from
+  `phase: SHIP`, the canonical SHIP -> DONE closure edge; from
+  SCOUT/BUILD/VERIFY/REVIEW it REFUSEs and writes zero canonical bytes, because
+  a ticket whose required gates did not run must not be laundered into a
+  legal-looking DONE state.
 
 COMMIT FAILURE ALWAYS WINS: a failed commit returns its own refusal
 (STALE_STATE / RECOVERY_REQUIRED / CONFLICT / WRITER_BUSY), never the plan's
@@ -271,8 +268,8 @@ environment: canonical files are the cold truth, never a cache or engine state.
 ## 9. Effect-based authorization (T-1160, INC-PERMISSION-EFFECT-BYPASS-001)
 <!-- RULE-OWNER: OPS-EFFECT-01 -->
 
-AUTHORIZATION FOLLOWS EFFECT, NOT TOOL IDENTITY. The law lives in CORE § 1.10's
-host-agent rules; this section owns the deterministic vocabulary and mechanics.
+AUTHORIZATION FOLLOWS EFFECT, NOT TOOL IDENTITY. The law lives in CORE § 1.1
+(`OPS-EFFECT-01`); this section owns the deterministic vocabulary and mechanics.
 
 **Closed effect vocabulary** (`tools/saipen_engine/effects.py`): `fs.read`,
 `fs.write`, `fs.delete`, `repo.read`, `repo.mutate`, `process.execute`,
@@ -319,9 +316,11 @@ and the current worktree delta.
 
 ## 10. Self-resolving gates (T-1161)
 
-The law lives in CORE § 1.10's host-agent rules (No Human Courier; Validator
-Is a Sensor; Ship Means Converge; Traceability Is Not Optional). This section
-owns the deterministic mechanics in `tools/saipen_engine/disposition.py`.
+The law lives in CORE's protocol-state repair contract -- carriers the current
+agent MUST execute rather than couriering to a human, the validator as a sensor
+and never authority to falsify state, ship converging to shipped or a genuine
+terminal boundary, and traceability surviving umbrella Work. This section owns
+the deterministic mechanics in `tools/saipen_engine/disposition.py`.
 
 **Closed disposition vocabulary**: `EXECUTE_SELF`, `RECONCILE_SELF`,
 `WAIT_USER`, `WAIT_EXTERNAL`, `BLOCKED`, `COMPLETE`, `INVALID`.

@@ -26,20 +26,23 @@ the validator compares both with the CLI executor set.
 
 `IMPROVE_ACTIONS = [bare, status, submit, complete, sweep, sweep-queue, verify, cycle-complete, abort, clean]`
 
+Each action's own validation rules live in the section that owns it; this list
+is the surface, not a second copy of the law.
+
 - `saipen improve` — the meta-control entry point: binds the current project,
   finds or mechanically admits the one active cycle, registers this seat,
   creates the DRAFT report mechanically with the real captured source
   identity, and returns a bounded AUDIT ASSIGNMENT (cycle_id, seat_id, report
   path, source identity, scope, proof levels, schema, write boundary, next
-  mechanical submission action). It NEVER changes phase/task/next_action merely
-  to run an audit, and it is NEVER an alias for status. Bare invocation admits
-  a NEW independent `core` seat. `--new-seat` states that choice explicitly;
+  mechanical submission action). It is NEVER an alias for status, and section 11
+  owns its phase/task/next_action boundary.
+  Bare invocation admits a NEW independent `core` seat.
+  `--new-seat` states that choice explicitly;
   `--session <seat_id>` admits or resumes exactly one stable concrete session;
   `--role core|critic` selects the closed role, with `core` as default. A
   session retry returns the same assignment and never allocates another seat.
-- `saipen improve status` — read-only; derives each registered seat's visible
-  status from the roster, the report's `report_status`, and the sweep ledger.
-  Refuses to round malformed evidence up to a normal lifecycle state: invalid
+- `saipen improve status` — read-only derived status (section 5). Refuses to
+  round malformed evidence up to a normal lifecycle state: invalid
   manifests/reports/sweeps are reported as INVALID_CYCLE / INVALID_REPORT.
 - `saipen improve submit <cycle> <seat> <project> <findings.json>` — the
   mechanical RUN submission path: Python appends the semantic RUN text through
@@ -52,20 +55,12 @@ the validator compares both with the CLI executor set.
   deterministic order. Semantic adjudication (reproduce/classify/dedupe/decide)
   is Core-owned; each decision is committed through `saipen improve sweep`.
 - `saipen improve sweep <cycle> <RUN-N/IMP-NNN> <DISPOSITION> [--ticket T-###]
-  [--report <ident>] [--reproduced y|n]` — Core-only disposition write through
-  write_sweep_entry. It validates BEFORE write that the cycle is active, the
-  report exists and is complete, the exact RUN and finding exist, the
-  disposition/reproduced values are legal, and a CONFIRMED disposition names a
-  canonical ticket that actually exists. Fictional findings can never COMMIT.
-- `saipen improve verify <cycle>` — a bounded DELTA audit of the current
-  cycle's COMPLETE output (strict manifest, every expected report full-valid,
-  exact composite sweep coverage). It MUST NOT re-enter a full improve cycle
-  and MUST NOT recurse. It can never PASS a report that only says
-  `report_status: complete`.
-- `saipen improve cycle-complete <cycle>` — runs the full cycle bar (strict
-  manifest, every expected report full-valid, exact composite sweep coverage)
-  and flips ACTIVE -> COMPLETE through complete_cycle. A partial sweep REFUSES
-  it; complete-before-sweep is impossible.
+  [--report <ident>] [--reproduced y|n]` — the Core-only disposition write
+  through `write_sweep_entry`; section 7 owns its pre-write validation.
+- `saipen improve verify <cycle>` — the bounded DELTA audit of section 9.
+- `saipen improve cycle-complete <cycle>` — runs the full cycle bar
+  (section 2) and flips ACTIVE -> COMPLETE through `complete_cycle`. A partial
+  sweep REFUSES it; complete-before-sweep is impossible.
 - `saipen improve abort <cycle>` — the sanctioned mechanical exit for a STUCK
   DRAFT cycle whose report cannot complete (an interrupted audit, a committed
   RUN missing a required field). Refuses once any disposition exists, flips
@@ -73,10 +68,9 @@ the validator compares both with the CLI executor set.
   byte-preserves the never-completed draft reports AT THEIR SAME PATH (no
   rename, no move, no raw file deletion): the manifest's archived +
   cycle_aborted markers are the single source of truth that the cycle and
-  its drafts are non-authoritative (T-632). No raw file deletion; the next
-  cycle can be admitted.
-- `saipen improve clean <cycle>` — archive/retention meta-operation. Never
-  means phase CLEAN, never enters the CLEAN phase.
+  its drafts are non-authoritative (T-632). The next cycle can be admitted.
+- `saipen improve clean <cycle>` — archive/retention meta-operation
+  (section 10). Never means phase CLEAN, never enters the CLEAN phase.
 
 No repeated-letter shortcut is assigned; the shortcut key count stays
 byte-unchanged.
@@ -96,11 +90,9 @@ byte-unchanged.
   separate-cycle operation exists.
 - A completed cycle is immutable.
 
-Improve routing/status is DERIVED, never carried in `STATE.md` (T-553): the
-visible status per seat (expected / draft / complete / swept / unavailable)
-is computed from the cycle roster + the seat report + the SWEEP ledger, and a
-manifest/sweep edit changes it with ZERO STATE writes. No independent
-`improve_*` counter may live in STATE -- the validator's
+Improve routing/status is DERIVED, never carried in `STATE.md` (T-553). A
+manifest/sweep edit changes the visible status with ZERO STATE writes. No
+independent `improve_*` counter may live in STATE -- the validator's
 `[improve-state-purity]` check FAILs such a field and FAILs finding text in
 STATE (findings live in seat reports, judgment lives in SWEEP.md).
 
@@ -121,13 +113,18 @@ ARCHIVED
     retention state only (saipen improve clean)
 ```
 
-- COMPLETE means the cycle's mutation-producing work is over: before marking
-  complete, every expected seat's report MUST have `report_status: complete`
-  AND every finding in it MUST carry a final Core SWEEP disposition for its
-  exact composite identity (cycle + seat/report + run + IMP id). A partial
-  sweep REFUSES `complete_cycle` -- Core can never freeze the artifact before
-  its own sweep finished. One seat's disposition never satisfies another's
-  finding (composite identity).
+**The cycle bar** — one statement, cited by `cycle-complete` and by verify
+(section 9): a strict manifest, every expected report full-valid, and exact
+composite sweep coverage. "Full-valid" is a valid header, at least one explicit
+`## RUN N` (or an explicit `NO_FINDINGS` run), and every finding carrying its
+composite identity and full expected/actual/evidence triple. "Exact composite
+sweep coverage" is a final Core disposition for every finding's exact composite
+identity (cycle + seat/report + run + IMP id). One seat's disposition never
+satisfies another's finding.
+
+- COMPLETE means the cycle's mutation-producing work is over: the bar above
+  must hold before the flip. A partial sweep REFUSES `complete_cycle` -- Core
+  can never freeze the artifact before its own sweep finished.
 - After COMPLETE every ordinary mutator (register_seat, append_run,
   write_sweep_entry) refuses; only permitted archive metadata may change the
   cycle, and a new cycle may then be admitted without deleting history.
@@ -341,10 +338,8 @@ fixed_by           resolution identity or -
 verification       verification evidence/ref or -
 ```
 
-SWEEP.md records per finding: `seat_id/report_path, run_id, IMP-id,
-disposition, reproduced, canonical ticket, fixed_by, verification`. A bare
-legacy `report_path` resolves only while exactly one roster seat owns that
-basename; duplicate owners MUST use the seat-qualified identity and never
+A bare legacy `report_path` resolves only while exactly one roster seat owns
+that basename; duplicate owners MUST use the seat-qualified identity and never
 share disposition coverage.
 
 Disposition set (closed): `CONFIRMED | DUPLICATE | ALREADY_FIXED |
@@ -388,8 +383,7 @@ effective_projection(project_root, role) -> the bounded projection
 ```
 
 A projection handoff includes: the effective source fingerprint, provenance,
-which
-preference IDs/categories were selected, and the scope statement. If the
+which preference IDs/categories were selected, and the scope statement. If the
 semantic category selection is performed by the model rather than Python, that
 is stated explicitly and the mechanical layer only validates/writes the
 already-distilled representation. USERPERSON preference identity is structured
@@ -398,16 +392,11 @@ already-distilled representation. USERPERSON preference identity is structured
 ## 9. Verify (delta-only)
 
 `saipen improve verify` validates the COMPLETE cycle output of the current
-cycle: strict manifest schema, every expected report full-valid (header,
-intentional RUN evidence, well-formed findings), exact composite sweep
-coverage, and -- for strict active cycles -- source freshness against the
-current tree. It MUST NOT reopen unrelated history and MUST NOT recurse into a
-full improve cycle. It can never PASS a report that contains only
-`report_status: complete` -- the completion bar is: a valid header, at least
-one explicit `## RUN N` (or an explicit `NO_FINDINGS` run), every finding with
-its composite identity and full expected/actual/evidence triple, and a final
-Core disposition for every finding's exact identity. If it starts another
-historical self-audit, it fails.
+cycle against section 2's cycle bar, plus -- for strict active cycles -- source
+freshness against the current tree. It MUST NOT reopen unrelated history and
+MUST NOT recurse into a full improve cycle. It can never PASS a report that
+contains only `report_status: complete`: the bar, not the marker, is the test.
+If it starts another historical self-audit, it fails.
 
 ## 10. Archive / clean semantics
 

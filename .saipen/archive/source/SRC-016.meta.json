@@ -1,4 +1,7 @@
 {
+  "archive_ref": ".saipen/archive/source/SRC-016.md",
+  "closed_at": "2026-09-01T18:34:04Z",
+  "closure_event": null,
   "linked_work": "T-1229",
   "receipt_id": "SRC-016",
   "received_at": "2026-09-01T13:19:38Z",
@@ -8,6 +11,7 @@
     "original_sha256": "dfb1edd8ce1ab61dd40f367bb84d467ed2780fdb3a89717b27895d6036b1a82e",
     "sanitized_sha256": "dfb1edd8ce1ab61dd40f367bb84d467ed2780fdb3a89717b27895d6036b1a82e"
   },
+  "reread_at": "2026-09-01T18:34:04Z",
   "schema_version": 1,
   "sensitive": false,
   "source_authority": {
@@ -17,7 +21,8 @@
   },
   "source_kind": "implementation_mission",
   "source_sha256": "dfb1edd8ce1ab61dd40f367bb84d467ed2780fdb3a89717b27895d6036b1a82e",
-  "status": "ACTIVE",
+  "status": "CLOSED",
+  "storage_status": "ARCHIVED",
   "transport": {
     "newline_normalization": "none",
     "source_encoding": "utf-8",

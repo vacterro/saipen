@@ -333,13 +333,13 @@ COMMANDS prose to reconstruct commands.
   lifecycle, evidence, or final-report duty.
 - `saipen userperson` is DEFAULT DIRECTION, never ORDER. Precedence is
   current explicit request > project/task requirements > SAIPEN normative rules > verified evidence > project USERPERSON > global USERPERSON.
-  A preference never overrides a higher source or a verified fact. When one materially
-  influenced a decision the current task did NOT already specify, report it
-  once at completion as `USERPERSON alignment:`; when a relevant preference was
-  deliberately overridden by stronger evidence or requirements, report one
-  compact `USERPERSON deviation:`. Emit neither when USERPERSON had no material
-  effect, and never credit it for an explicit current instruction.
-  `OPS.md` owns the source locations, validation and write mechanics.
+  A preference never overrides a higher source or a verified fact. Report once
+  at completion: `USERPERSON alignment:` when a preference materially
+  influenced a decision the task did not already specify, or a compact
+  `USERPERSON deviation:` when a relevant one was deliberately overridden by
+  stronger evidence or requirements. Emit neither when USERPERSON had no
+  material effect, and never credit it for an explicit current instruction.
+  `OPS.md` owns source locations, validation and write mechanics.
 
 ### 1.11 Determinism Invariants
 
@@ -382,23 +382,21 @@ Action priority is `REGISTRY.json.routing_precedence`; first match wins:
   COMPLETE only when acceptance, local behavior, regressions/integration, and
   persistent state all pass; BLOCKED only for a concrete hard boundary.
 - Failed verification routes diagnose → repair → verify. It is not a blocker by
-  itself. Once acceptance passes, stop; do not add unrelated polish.
+  itself. Once acceptance passes, stop; do not add unrelated polish. Completion
+  obeys phase read-only locks, destructive confirmation, source closure, and the
+  strongest available verification; no autonomy flag bypasses them.
 - Interruption or context pressure checkpoints PARTIAL/resumable state and never
   masquerades as completion.
 
 ### Protocol-state repair contract (normative)
 
-BOARD section owns Work lifecycle; STATE owns active intent/ticket; LOG owns
-event order/replay. Checkboxes, counters, schema/style markers, and `last_event`
-are derived metadata and reconcile automatically.
-
-Canonical continuation is:
+Checkboxes, counters, schema/style markers, and `last_event` are derived
+metadata and reconcile automatically. The § 1.10 continuation pipeline is:
 
 `resolve install → resolve project → recover journal → reconcile metadata → validate → route`
 
-`cc`, bare `saipen`, and `saipen continue` call this one pipeline. Dry-run plans
-the same semantics against projected post-recovery state, writes nothing, and
-must surface the same refusal class as apply.
+Dry-run plans the same semantics against projected post-recovery state, writes
+nothing, and must surface the same refusal class as apply.
 
 - Structural corruption, dead/incompatible identity, and contradictory records
   are CORRUPT. Deterministic drift is REPAIRED/WARN. Legacy evidence stays
@@ -422,5 +420,3 @@ must surface the same refusal class as apply.
 - Authorization, enforcement, and audit are distinct. Unknown enforcement is
   reported as unavailable, never “prevented”. Mutation provenance uses KNOWN,
   UNKNOWN, and UNAVAILABLE literally; mechanical mismatch does not imply intent.
-- Goal completion obeys phase read-only locks, destructive confirmation, source
-  closure, and strongest available verification. No autonomy flag bypasses them.
