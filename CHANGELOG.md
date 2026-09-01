@@ -1,6 +1,13 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.235.1 -- 2026-09-01 -- The Stamp Records Which Revision (T-1255)
+
+- `autoinject._source_head` shelled out to `git rev-parse HEAD` from its own HOME. The scheduled injector runs out of a `git archive` extraction at `%LOCALAPPDATA%/saipen/scheduled-source`, which is not a repository, so the revision was silently dropped on the one path that matters. The v7.235.0 stamp on `.claude` carried a digest and an install time and no head -- while the runner had logged `head=35d2fed5b865` two lines earlier and knew it all along.
+- `stamp_targets` now takes the head, `autoinject` grows `--source-head`, and `schedule-run.ps1` passes the revision it already PROVED before publishing the snapshot rather than asking a tree that cannot answer. A genuinely unavailable head is omitted, never guessed.
+- The scheduler probe that asserted the stamp callback fires was widened and, in the same edit, tightened: it now pins the EXACT head the runner proved instead of the flag alone, so a wrong or stale revision fails where it previously could not be seen.
+- Found by the post-release check this repository requires rather than by the next agent to be stranded. That is the sixth and last layer of one hole; every one of them was invisible until the layer above it was fixed and the thing actually ran.
+
 ## 7.235.0 -- 2026-09-01 -- A Stale Protocol Copy Says So (T-1249)
 
 - The incident that started this: an opencode agent, mid-session after a model switch, read its installed `CORE.md`, grepped for the `gg` shortcut, found nothing because W4 had moved the shortcut table to `REGISTRY.json`/`COMMANDS.md`, and answered `Use: gg <objective text>`. Its `BOOT.md` was a pre-W4 copy still routing command resolution to `CORE 1.10`. Nothing told it the copy was behind, because nothing could.

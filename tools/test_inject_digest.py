@@ -119,6 +119,41 @@ class StampRecord(unittest.TestCase):
         self.assertIsNotNone(record["source_head"])
 
 
+class StampSourceHead(unittest.TestCase):
+    """The revision must reach the stamp on the path that has no git (T-1255)."""
+
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory(prefix="saipen-stamp-head-")
+        self.target = Path(self.tmp.name) / "skills" / "saipen"
+        self.target.mkdir(parents=True)
+        self._targets = autoinject.TARGETS
+        autoinject.TARGETS = [self.target]
+
+    def tearDown(self) -> None:
+        autoinject.TARGETS = self._targets
+        self.tmp.cleanup()
+
+    def test_a_passed_head_is_recorded(self) -> None:
+        # The scheduled injector runs from a `git archive` extraction, which is
+        # not a repository. The runner proved the head before publishing that
+        # snapshot, so it hands it over rather than letting the stamper ask a
+        # tree that cannot answer.
+        autoinject.stamp_targets("digest123", "abc123def456")
+        record = autoinject.read_stamp(self.target)
+        self.assertEqual(record["source_head"], "abc123def456")
+        self.assertEqual(record["digest"], "digest123")
+
+    def test_an_unavailable_head_is_omitted_not_guessed(self) -> None:
+        import unittest.mock as mock
+
+        with mock.patch.object(autoinject, "_source_head", return_value=None):
+            autoinject.stamp_targets("digest123", None)
+        record = autoinject.read_stamp(self.target)
+        self.assertNotIn("source_head", record)
+        self.assertEqual(record["digest"], "digest123")
+        self.assertIn("installed_at", record)
+
+
 class PruneRule(unittest.TestCase):
     """The copier and the digest must prune the same things (T-1254)."""
 

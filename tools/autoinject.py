@@ -226,7 +226,7 @@ def inject() -> tuple[bool, str]:
     return rc == 0, "\n".join(out.splitlines()[-12:])
 
 
-def stamp_targets(digest: str) -> list[str]:
+def stamp_targets(digest: str, source_head: str | None = None) -> list[str]:
     """Write the digest into every target that actually exists.
 
     Only existing targets are stamped: creating one here would install a
@@ -242,7 +242,13 @@ def stamp_targets(digest: str) -> list[str]:
         "digest": digest,
         "installed_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
-    head = _source_head()
+    # T-1255: the scheduled injector runs out of a `git archive` extraction,
+    # which is not a repository, so asking git there silently drops the head on
+    # the one path that matters. The runner already PROVED the head before it
+    # published the snapshot, so it passes that instead of having the stamper
+    # re-derive it from a tree that cannot answer. An unavailable head is
+    # omitted, never guessed.
+    head = source_head or _source_head()
     if head:
         record["source_head"] = head
     payload = json.dumps(record, indent=2, sort_keys=True) + "\n"
@@ -326,6 +332,11 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="write the freshness stamp into every installed target; copy nothing",
     )
+    ap.add_argument(
+        "--source-head",
+        default=None,
+        help="record this revision in the stamp (for a source tree with no git)",
+    )
     args = ap.parse_args(argv)
 
     try:
@@ -348,7 +359,7 @@ def main(argv: list[str] | None = None) -> int:
         # indistinguishable from a current one. The digest has exactly ONE
         # owner (`_digest`), so the PowerShell path calls back here rather
         # than growing a second implementation that would drift from it.
-        stamped = stamp_targets(digest)
+        stamped = stamp_targets(digest, args.source_head)
         for t in stamped:
             print(f"stamped: {t} at {digest}")
         if not stamped:

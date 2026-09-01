@@ -26,7 +26,7 @@ Markdown файл вътре в проекта(`.saipen/`), така че все
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.235.0** | [Спецификация](SPEC.md) | [Ръководство](GUIDE.md) | [Ядро](saipen/CORE.md) | [Поддръжка](saipen/MAINTENANCE.md) | [Стил](saipen/STYLE.md) | [Потребителски интерфейс](saipen/UI.md) | [Съответствие](saipen/CONFORMANCE.md) |MIT
+**v7.235.1** | [Спецификация](SPEC.md) | [Ръководство](GUIDE.md) | [Ядро](saipen/CORE.md) | [Поддръжка](saipen/MAINTENANCE.md) | [Стил](saipen/STYLE.md) | [Потребителски интерфейс](saipen/UI.md) | [Съответствие](saipen/CONFORMANCE.md) |MIT
 
 **Бързи клавиши:** `cc` продължава контекста на проекта до конвергенция (подновява текущата цел, ако е зададена), `sss` показва статус без допиране до кода, а `ss` запазва контролна точка и спира. [Виж пълната карта с 19 клавиша](saipen/RFC.md#110-command-surface). Кирилските близнаци също работят: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 

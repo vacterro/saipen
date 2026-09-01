@@ -2390,10 +2390,19 @@ exit 0
             and (source_repo / ".git" / "index").read_bytes() == source_index_bytes,
             "clean run moved HEAD, index, or source bytes",
         )
+        # T-1255: the callback also hands over the head the runner proved,
+        # because the published snapshot is a git archive extraction with no
+        # repository for the stamper to ask. Asserting the exact HEAD rather
+        # than merely "some head" is what makes a wrong or stale revision
+        # visible instead of merely present.
+        _stamp_args = (
+            stamp_marker.read_text(encoding="utf-8").split() if stamp_marker.is_file() else []
+        )
         expect(
             "a successful inject writes the freshness stamp through its one owner",
-            stamp_marker.is_file()
-            and stamp_marker.read_text(encoding="utf-8").strip() == "--stamp-only",
+            "--stamp-only" in _stamp_args
+            and "--source-head" in _stamp_args
+            and _stamp_args[_stamp_args.index("--source-head") + 1] == source_head,
             "stamp callback did not run: "
             + (stamp_marker.read_text(encoding="utf-8") if stamp_marker.is_file() else "absent"),
         )

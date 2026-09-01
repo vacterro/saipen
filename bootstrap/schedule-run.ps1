@@ -219,7 +219,7 @@ try {
     } elseif (-not (Test-Path -LiteralPath $stamper)) {
       Write-Log "stamp: SKIPPED tools/autoinject.py absent from the published source"
     } else {
-      $stampOutput = @(& $python.Source $stamper "--stamp-only" 2>&1)
+      $stampOutput = @(& $python.Source $stamper "--stamp-only" "--source-head" $head 2>&1)
       $stampRc = $LASTEXITCODE
       foreach ($line in $stampOutput) { Write-Log ("stamp: " + $line) }
       if ($stampRc -ne 0) { Write-Log "stamp: FAILED rc=$stampRc" }
