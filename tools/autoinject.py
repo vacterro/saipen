@@ -55,6 +55,11 @@ TARGETS = [
     Path.home() / ".agents" / "skills" / "saipen",
 ]
 
+# How many divergent files `--check` names before it stops. Enough to see the
+# shape of a drift, few enough that a never-installed home does not print two
+# hundred lines and bury the one that matters.
+DRIFT_REPORT_LIMIT = 12
+
 
 def _manifest_source(raw: object) -> Path:
     return manifest_source(HOME, raw)
@@ -164,6 +169,57 @@ def _digest() -> str:
             else:
                 raise RuntimeError(f"runtime manifest surface contains unsupported entry: {member}")
     return h.hexdigest()[:16]
+
+
+def installed_relpath(source_relative: str) -> str:
+    """Where a shipped source path lands inside an installed agent home.
+
+    The injectors strip exactly one leading `saipen/` component and keep
+    everything else: `saipen/BOOT.md` installs as `BOOT.md`, `saipen/phases/`
+    as `phases/`, while `tools/`, `bootstrap/` and `extensions/` keep theirs.
+    """
+    if source_relative.startswith("saipen/"):
+        return source_relative[len("saipen/") :]
+    return source_relative
+
+
+def surface_drift(target: Path, limit: int | None = None) -> list[tuple[str, str, str]]:
+    """Which shipped files differ in `target`, as (path, source, installed).
+
+    A digest says a home is stale. It cannot say what an agent stranded by that
+    home is actually reading, and "stale" with no file name is the same
+    diagnosis the incident in T-1249 already produced: the agent read a copy
+    that disagreed with the repository, grepped for a rule that had moved, and
+    answered from the older generation without anything naming the divergence.
+
+    Comparison runs through `_content_bytes`, the same normaliser the digest
+    uses, or every text file on the surface would read as divergent across the
+    CRLF boundary T-1253 closed -- `saipen/BOOT.md` is 4972 bytes in the clone
+    and 5063 in the snapshot with no character of difference. Byte counts are
+    reported RAW, because that is what a human comparing two files sees.
+    """
+    findings: list[tuple[str, str, str]] = []
+    root = HOME.resolve()
+    for path, is_tree in _manifest_surface():
+        members = sorted(path.rglob("*")) if is_tree else [path]
+        for member in members:
+            if not member.is_file() or member.is_symlink():
+                continue
+            relative = member.relative_to(root).as_posix()
+            if CACHE_DIRS.intersection(member.relative_to(root).parts) or (
+                member.suffix in GENERATED_SUFFIXES
+            ):
+                continue
+            landed = target / installed_relpath(relative)
+            if not landed.is_file():
+                findings.append((relative, f"{member.stat().st_size}B", "missing"))
+            elif _content_bytes(landed) != _content_bytes(member):
+                findings.append(
+                    (relative, f"{member.stat().st_size}B", f"{landed.stat().st_size}B")
+                )
+            if limit is not None and len(findings) >= limit:
+                return findings
+    return findings
 
 
 def read_stamp(target: Path) -> dict | None:
@@ -369,6 +425,17 @@ def main(argv: list[str] | None = None) -> int:
     if args.check:
         for t in stale:
             print(f"STALE: {t} (installed {_installed(t) or 'unstamped'}, source {digest})")
+            # A digest names no file. Name them: an agent stranded by a stale
+            # copy needs to know WHAT it is reading, and one path with two byte
+            # counts is the whole diagnosis. Bounded, because a home that was
+            # never installed would otherwise print the entire surface.
+            drift = surface_drift(t, limit=DRIFT_REPORT_LIMIT + 1)
+            for relative, source_size, landed in drift[:DRIFT_REPORT_LIMIT]:
+                print(f"    {relative}: source {source_size}, installed {landed}")
+            if len(drift) > DRIFT_REPORT_LIMIT:
+                print(f"    ... and more; {DRIFT_REPORT_LIMIT} shown")
+            if not drift:
+                print("    no file differs -- the stamp is stale, the content is not")
         if not stale:
             print(f"fresh: {len(present)} agent home(s) at {digest}")
         return 1 if stale else 0

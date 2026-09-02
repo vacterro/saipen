@@ -1,6 +1,15 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.240.1 -- 2026-09-02 -- Stale, And Now It Says Of What (T-1242)
+
+- The ticket's headline was already closed. The installed router at the `.claude` home is 5063 bytes -- the post-W4 4972-byte file in CRLF -- not the 13 KB pre-W4 fork the ticket describes; v7.234.x and v7.235.x did that between them.
+- What survived was the diagnosis gap, and it is the half that mattered. `autoinject.py --check` printed a home and two 16-hex digests. That announces a drift without naming one file, which is exactly the shape of the incident that started this: an agent on another harness read its installed `CORE.md`, grepped for a rule W4 had moved, found nothing, and answered from the older generation. A stranded agent needs to know WHAT it is holding.
+- `--check` now names each divergent path with source and installed byte counts, bounded at `DRIFT_REPORT_LIMIT` so a never-installed home cannot print two hundred lines and bury the one that matters. Against the real homes it produced exactly the v7.240.0 surface and nothing else: `saipen/phases/validate.md` source 1731B installed 1263B, `tools/saipen.py` source 219728B installed 222612B, `tools/test_conformance_projection.py` installed missing.
+- `surface_drift` compares through `_content_bytes`, the same normaliser the digest owns, so the CRLF boundary closed in v7.234.2 does not reopen as a hundred phantom divergences. A test asserts a copy that differs only in line endings reports clean. Byte counts are printed raw, because that is what a human comparing two files sees; only the equality decision is normalised.
+- The platform injector is deliberately not run inside a test -- it writes to the user's real agent homes, and a test that mutates a developer's machine to prove a copy happened is worse than the gap it closes. The testable substitute is membership: `BOOT.md`, `INDEX.md`, `STYLE.md` and `CORE.md` must be on the shipped manifest surface, because a document dropped from the manifest is one the injector silently stops refreshing and no digest would ever notice.
+- 9 new tests, including the bounded uninstalled-home case and all four routing documents going stale at once.
+
 ## 7.240.0 -- 2026-09-02 -- The Gate That Could Only Say It Did Not Know (T-1243)
 
 - `saipen status` reported `Conformance: UNKNOWN` on a repository whose validator had been green for weeks. Two defects sat in the same projection and the ticket had only found one.
