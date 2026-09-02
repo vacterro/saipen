@@ -278,6 +278,74 @@ def _state_counter_repairs(state: dict, events) -> list[dict]:
     return repairs
 
 
+def _tripped_valve_repairs(state: dict) -> list[dict]:
+    """The tripped valve is an invariant, not a side effect of counter drift.
+
+    `_state_counter_repairs` only notices a valve while the counter DISAGREES
+    with canonical history. The ordinary way a valve trips is by honest
+    counting -- `have == want == 20` -- and that path hits the equality
+    `continue`, emits nothing, and lets the whole reconciliation certify CLEAN
+    over a run that MAINTENANCE section 2.4 says must be paused.
+
+    Witnessed (T-1181): `validate.py` reported `execution_intent: goal with
+    goal_waves=0/goal_tickets=20 is the tripped safety valve (caps 3/20), but
+    next_action='PHASE SHIP T-1242'` while `saipen continue`'s reconciliation
+    returned CLEAN on the same STATE in the same minute. Two gates, one
+    condition, opposite answers.
+
+    So the counters are read directly against the caps, and the field checked
+    is `next_action` -- reconciliation-owned, and the one field section 2.4
+    requires the trip to be visible in. The grammar is not respelled here:
+    `state._SAFETY_VALVE_RE` already owns it, and a second spelling of a
+    verbatim protocol string is a second thing to drift.
+
+    Never repaired silently. A tripped valve is the human's to clear through
+    `cc`, so this returns a `refuse` repair -- the same shape the at-cap
+    counter case uses -- which the caller turns into RECONCILE_REAUTH_REQUIRED.
+    """
+    from .state import _SAFETY_VALVE_RE
+
+    if state.get("execution_intent") != "goal":
+        return []
+
+    caps = {"goal_waves": _GOAL_WAVES_CAP, "goal_tickets": _GOAL_TICKETS_CAP}
+    tripped = {
+        field: value
+        for field, cap in caps.items()
+        if isinstance((value := state.get(field)), int)
+        and not isinstance(value, bool)
+        and value >= cap
+    }
+    if not tripped:
+        return []
+
+    waves = state.get("goal_waves") or 0
+    tickets = state.get("goal_tickets") or 0
+    want = f"WAIT: safety valve reached ({waves} waves / {tickets} tickets) -- run 'cc' to continue"
+
+    have = state.get("next_action")
+    if isinstance(have, str) and _SAFETY_VALVE_RE.match(have.removeprefix("WAIT: ").strip()):
+        # Already stating the pause. The counters stay at the cap on purpose --
+        # they ARE the tripped condition, and tidying them walks past the valve.
+        return []
+
+    named = ", ".join(f"{field}={value}" for field, value in sorted(tripped.items()))
+    return [
+        {
+            "field": "next_action",
+            "from": have,
+            "to": want,
+            "surface": "state",
+            "reason": (
+                f"safety valve tripped ({named}) but next_action does not state the pause -- "
+                "MAINTENANCE section 2.4 requires the section 1.2 WAIT form, and `cc` is the "
+                "only re-authorization; reconciliation must not certify CLEAN over it"
+            ),
+            "refuse": True,
+        }
+    ]
+
+
 def _repair_summary(board_drifts: list[dict], state_repairs: list[dict]) -> str:
     parts: list[str] = []
     if board_drifts:
@@ -320,8 +388,10 @@ def reconcile_protocol_state(root: Path | str, agent: str, *, dry_run: bool = Fa
     strict_state_error = docs.get("_state_error", "")
 
     board_drifts = _checkbox_drifts(board_text)
-    state_repairs = _state_marker_repairs(state, log_tail) + _state_counter_repairs(
-        state, events
+    state_repairs = (
+        _state_marker_repairs(state, log_tail)
+        + _state_counter_repairs(state, events)
+        + _tripped_valve_repairs(state)
     )
     refused_repairs = [r for r in state_repairs if r.get("refuse")]
     if refused_repairs:

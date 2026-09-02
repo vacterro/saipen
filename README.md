@@ -26,7 +26,7 @@ uninstall are all local — no cloud service, no daemon, no database.
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.240.2** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | MIT
+**v7.241.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | MIT
 
 **Shortcut keys.** A shortcut is the whole message, never a prefix: `cc` continues, `sss` reports status, `ss` stops; Cyrillic twins `сс`, `ссс`, `аа`, `ее`, `еее`, `рр` work too. [Full 19-key map](saipen/CORE.md#110-command-surface). `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 

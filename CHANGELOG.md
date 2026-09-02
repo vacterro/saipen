@@ -1,6 +1,17 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.241.0 -- 2026-09-02 -- Two Gates, One Condition, Opposite Answers (T-1181)
+
+- Caught in the act rather than reasoned about. During the v7.240.1 ship, `validate.py` reported `execution_intent: goal with goal_waves=0/goal_tickets=20 is the tripped safety valve (caps 3/20), but next_action='PHASE SHIP T-1242'`, while `saipen continue`'s reconciliation returned `code: CLEAN` on the same STATE in the same minute.
+- `_state_counter_repairs` only ever noticed a tripped valve as a **side effect of counter drift**: its refuse branch needs `have >= cap` AND `want < have`. But the ordinary way a valve trips is honest counting -- the LOG really holds twenty increments and STATE really says twenty. That path hits the equality `continue`, emits no repair, and the whole reconciliation certifies CLEAN over a run `MAINTENANCE` section 2.4 says must be paused. Precisely the last clause of this ticket's own verify: no path may report CLEAN while a STATE invariant is red.
+- Every existing counter test uses a *disagreeing* counter. That is exactly why none of them caught it, and why the new tests build the agreeing case.
+- `_tripped_valve_repairs` reads the counters straight against the caps and checks `next_action` -- reconciliation-owned already, and the field section 2.4 requires the pause to be visible in. It returns a `refuse`, never a quiet repair: a tripped valve is the human's to clear through `cc`. It never touches the counters, because they ARE the tripped condition and tidying them walks a restart straight past the valve.
+- The WAIT grammar is not respelled. `state._SAFETY_VALVE_RE` owns it, and a second spelling of a verbatim protocol string is a second thing to drift.
+- No new resume path: `cc` already turns `RECONCILE_REAUTH_REQUIRED` into `reauthorize_valve`, so a tripped run clears exactly the way section 2.4 prescribes.
+- 11 new tests -- the agreeing-counter case end to end on a real tree, waves tripping independently of tickets, a state already stating the pause staying CLEAN, a run one under the cap staying CLEAN, the refusal writing zero bytes, and a malformed counter left to the counter path.
+- Scoped narrower than the ticket title on purpose: `last_event`, `schema_version`, `style_contract` and the BOARD checkboxes were already derived and committed through the one journaled transaction. The missing invariant was this one, so this is what was added rather than rewriting a working transaction.
+
 ## 7.240.2 -- 2026-09-02 -- A Duplicated Anchor Disarms A Control (T-1264)
 
 - Three shipped protocol documents showed fresh timestamps mid-session, two of them matching HEAD byte for byte. It read as a phantom writer in a tree where `T-473`'s clobber class is a known open risk. It was neither a phantom nor a gate.

@@ -26,7 +26,7 @@ A telepítés eltávolítása mind helyi – nincs felhőszolgáltatás, nincs d
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.240.2** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Stílus](saipen/STYLE.md) | [UI](saipen/UI.md) | [Konformancia](saipen/CONFORMANCE.md) |MIT
+**v7.241.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Stílus](saipen/STYLE.md) | [UI](saipen/UI.md) | [Konformancia](saipen/CONFORMANCE.md) |MIT
 
 **Gyorsbillentyűk:** a `cc` a projekt kontextusát konvergenciáig folytatja (folytat egy futó célt, ha be van állítva), az `sss` kód érintése nélkül jelzi az állapotot, az `ss` pedig menti az ellenőrzőpontot és megáll. [Lásd a teljes 19 billentyűs térképet](saipen/RFC.md#110-command-surface). A cirill ikrek is működnek: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
