@@ -42,7 +42,12 @@ The goal is not nostalgia as a costume. The goal is clarity that happens to look
 1. **Verdana, non-antialiased, everywhere, `!important`.** No subpixel smoothing. Sizes only 10/11/12/14/16px.
 2. **Zero rounded corners, zero shadow, zero gradients, zero blur, zero transparency, zero animation, zero transition.**
 3. **Depth is 2px bevel only.** Raised and sunken states are the only depth language allowed.
-4. **Compact by default.** Fit 640x480 without horizontal scroll. Prefer dense vertical rhythm over wide empty space.
+4. **Compact by default.** Fit **640x540 CSS pixels** without horizontal
+   scroll. Prefer dense vertical rhythm over wide empty space. The number is
+   the viewport the layout must survive, not the window it is designed for:
+   540 rows because a 480 target kept forcing a scrollbar the moment a title
+   bar, a status strip and one section header shared a screen. Vertical scroll
+   is allowed and normal. Horizontal scroll on the page is not, ever.
 5. **Color comes only from Golden Default tokens.** Every visible color must trace back to the palette below.
 6. **Visible states must be instant.** Hover, focus, active, disabled, selected, and error must never rely on motion.
 7. **Labels beat placeholders.** Placeholder text is never allowed to be the only explanation.
@@ -163,8 +168,21 @@ html, body {
   line-height: 1.2;
 }
 
+/* Iron law 4 forbids horizontal scroll; `overflow-x: hidden` did not enforce
+   that, it hid the evidence. A too-wide element stopped producing a scrollbar
+   and started producing unreachable content instead -- a column, a button or
+   an error message clipped off the right edge with nothing on screen saying
+   so, and a QA gate that could never fail. Overflow is prevented by layout,
+   or it is scrolled inside the one element that is genuinely wide. */
 body {
-  overflow-x: hidden;
+  overflow-x: auto;
+}
+
+/* The sanctioned escape for content that is honestly wider than the viewport:
+   a table, a diagram, a code block. It scrolls itself; the page does not. */
+.wide-scroll {
+  overflow-x: auto;
+  max-width: 100%;
 }
 
 .raised, button {
@@ -185,6 +203,15 @@ button {
   min-height: 20px;
   color: var(--textPrimary);
   cursor: pointer;
+}
+
+/* The accessibility floor asks for 24px on primary targets and the compact
+   default above is 20px. Both numbers are right and they are about different
+   controls; leaving that unsaid meant every implementation picked one and
+   silently broke the other. 20px is the dense default for secondary controls,
+   24px is mandatory for the primary action on a screen. */
+button.primary {
+  min-height: 24px;
 }
 
 button:hover {
@@ -287,7 +314,13 @@ a, a:link, a:visited {
 ### Tables and lists
 - Rows: 16-18px.
 - Headers: raised.
-- Selected row: `--selection` with sunken feel.
+- Selected row: sunken bevel **first**, `--selection` second. The bevel is what
+  carries the selection; the colour only reinforces it. `--selection` and
+  `--surfaceRaised` are declared to the same value in the palette above, so a
+  selected row drawn on a raised surface with colour alone is invisible -- the
+  user sees nothing selected and acts on the wrong row. Fix it in the rule,
+  never in the palette: the 21 values are closed, and inventing a 22nd colour
+  to resolve this is the exact drift the closed-set rule exists to stop.
 - Keep column counts low.
 - Use numeric alignment for numbers and dates.
 - Avoid icons in every cell. Repetition creates noise and fatigue.
@@ -331,8 +364,9 @@ Compactness never excuses illegibility.
 - WCAG AA contrast minimum.
 - Visible keyboard focus on every control.
 - Full keyboard reach for all important actions.
-- Primary targets should be at least 24px.
-- Secondary targets should be at least 16px.
+- Primary targets: at least 24px (`button.primary` in the base CSS). This is
+  the one place compactness yields.
+- Secondary targets: at least 16px; the 20px default `button` clears it.
 - Error text must be readable without color alone.
 - Do not rely on fine visual distinctions that disappear in screenshots.
 - Keep the selected state and focused state distinct.
@@ -355,11 +389,14 @@ Before a screen is considered finished:
 - No rounded corners.
 - No animation frame.
 - Verdana renders non-antialiased.
-- The interface fits 640x480 without horizontal scroll.
+- The interface fits 640x540 CSS pixels with no horizontal scroll on the
+  page. Checked by narrowing the viewport to 640 and looking for a bottom
+  scrollbar -- not by trusting `overflow`, which can only hide one.
 - Every hex value traces to a token.
 - Labels are visible and specific.
 - The primary action is obvious.
-- The selected, focused, and disabled states are visually distinct.
+- The selected, focused, and disabled states are visually distinct, and the
+  selected one is still identifiable with every colour removed.
 - The UI remains readable as a screenshot.
 - The UI remains understandable when stripped of color.
 - Nothing on the screen moved, changed, or vanished without the user acting.
@@ -381,6 +418,11 @@ This version tightens the original spec in four ways:
 - more explicit accessibility and state rules
 - stronger maintenance guidance for future edits
 - fewer places where a designer or code generator can invent extra noise
+
+And one rule that generates the rest: **a rule this document's own base CSS
+violates is not a rule, it is a preference.** Four such contradictions were
+found and closed at their own sites (T-1262); check for a fifth before adding
+anything here.
 
 ## Final rule
 

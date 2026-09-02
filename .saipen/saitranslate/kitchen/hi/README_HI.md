@@ -26,7 +26,7 @@
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.239.1** | [विनिर्देश](SPEC.md) | [गाइड](GUIDE.md) | [कोर](saipen/CORE.md) | [रखरखाव](saipen/MAINTENANCE.md) | [शैली](saipen/STYLE.md) | [UI](saipen/UI.md) | [अनुरूपता](saipen/CONFORMANCE.md) |MIT
+**v7.239.2** | [विनिर्देश](SPEC.md) | [गाइड](GUIDE.md) | [कोर](saipen/CORE.md) | [रखरखाव](saipen/MAINTENANCE.md) | [शैली](saipen/STYLE.md) | [UI](saipen/UI.md) | [अनुरूपता](saipen/CONFORMANCE.md) |MIT
 
 **त्वरित कुंजियाँ:** `cc` परियोजना संदर्भ को अभिसरण तक जारी रखता है (यदि कोई लक्ष्य निर्धारित है तो उसे फिर से शुरू करता है), `sss` कोड छुए बिना स्थिति दिखाता है और `ss` चेकपॉइंट सहेज कर रुक जाता है. [पूरा 19-कुंजी नक्शा देखें](saipen/RFC.md#110-command-surface). सिरिलिक जुड़वाँ भी काम करती हैं: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 

@@ -1,6 +1,16 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.239.2 -- 2026-09-02 -- Rules The Reference Implementation Broke (T-1262)
+
+- The compact-fit target is `640x540` CSS pixels, at `UI.md:45` and `UI.md:392`. The number now says what it measures: the viewport a layout must survive, not the window it is designed for. Vertical scroll is normal; horizontal page scroll never is. 480 rows kept forcing a scrollbar the moment a title bar, a status strip and one section header shared a screen.
+- Four places where `UI.md` contradicted itself, each closed at its own site rather than in a summary.
+- `body { overflow-x: hidden }` did not enforce iron law 4, it hid the evidence for it. A too-wide element stopped producing a scrollbar and started producing unreachable content -- a column or an error message clipped off the right edge with nothing on screen saying so -- and the QA item forbidding horizontal scroll could never go red. It is `auto` now, with one sanctioned `.wide-scroll` escape for content that is honestly wider than the viewport. Same shape as v7.239.1's amnesty boolean: a check that cannot report is not a check.
+- `--selection` and `--surfaceRaised` are declared to the same value, so a selected row drawn on a raised surface with colour alone was invisible and the user acted on the wrong row. The repair is in the component rule -- sunken bevel first, colour second -- never in the palette. The 21 values are a closed set, and inventing a 22nd colour to resolve this is exactly the drift the closed-set rule exists to stop.
+- The accessibility floor asked for 24px primary targets while the document's own base CSS shipped `button { min-height: 20px }`. Both numbers were right and they were about different controls; leaving that unsaid meant every implementation picked one and silently broke the other. `button.primary { min-height: 24px }` says which is which.
+- One generative rule added in place of a recap: **a rule this document's own base CSS violates is not a rule, it is a preference.** The recap paragraph that merely listed the four repairs was written and then cut, because a section that closes no error class does not belong in law.
+- `UI.md` grew 2887 bytes, which v7.239.0's surface metric counts as law growth. Accepted: an unenforceable rule costs more than the bytes that make it enforceable.
+
 ## 7.239.1 -- 2026-09-02 -- The Amnesty That Never Expired (T-1261)
 
 - `tools/validate.py` has walked every LOG timestamp pair since v7.99.0 and reported nothing since 27.07.26. The warning sat behind one boolean asking whether ANY segment anywhere contained the phrase `observed historical timestamp inversions`, and three sealed DECs from July and August 2026 -- E-813, E-1145, E-1796 -- answered yes for every line written afterwards, in every future segment. A suppressor whose scope is the file rather than the events it documents cannot expire.
