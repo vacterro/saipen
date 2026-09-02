@@ -1,3 +1,3 @@
-done: ship v7.240.2 (content -> closure, tag v7.240.2)
-remaining: T-1181
+done: ship v7.241.0 (content -> closure, tag v7.241.0)
+remaining: T-1175
 awaiting: nothing
