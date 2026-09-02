@@ -105,6 +105,7 @@ def _agent_for(project_root: Path) -> str:
 #
 # Authoritative public-surface semantics (verified against the dispatcher):
 #   status / next / context / runtime / recover inspect  READ_ONLY
+#   acceptance <T-###> ................................ READ_ONLY
 #   claim / transition / checkpoint / ticket * ........ MUTATING
 #   userperson show ................................... READ_ONLY
 #   userperson add|remove|reset ....................... MUTATING
@@ -3174,6 +3175,72 @@ def _attempt(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
     return 0 if payload.get("ok") else 1
 
 
+def _acceptance(project_root: Path, args: list[str], as_json: bool) -> int:
+    """`saipen acceptance <T-###>` -- what was promised, what proves it.
+
+    READ-ONLY by construction, not by discipline: it opens BOARD and LOG, and
+    there is no write path in this function or in the module it calls. The
+    projection rebuilds on every run, so it holds no state that could go stale
+    on its own, and it creates no authority -- a criterion reported SATISFIED
+    is a statement about the evidence found, never a gate anything passes.
+    """
+    from saipen_engine.acceptance import reconcile, render
+    from saipen_engine.board import parse_board
+    from saipen_engine.log import parse_log_line
+
+    positional = [a for a in args if a != "--json"]
+    if len(positional) != 1 or not re.fullmatch(r"T-\d+", positional[0]):
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "usage: saipen acceptance <T-###>",
+            },
+            as_json,
+        )
+        return 2
+    ticket_id = positional[0]
+
+    saipen_dir = project_root / ".saipen"
+    board_path = saipen_dir / "BOARD.md"
+    if not board_path.is_file():
+        _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "BOARD.md missing"}, as_json)
+        return 2
+
+    board = parse_board(board_path.read_text(encoding="utf-8-sig", errors="replace"))
+    ticket = board.get("tickets", {}).get(ticket_id)
+    if ticket is None:
+        _emit(
+            {
+                "ok": False,
+                "code": "TICKET_NOT_FOUND",
+                "detail": f"{ticket_id} is not on the board",
+                "ticket": ticket_id,
+            },
+            as_json,
+        )
+        return 2
+
+    events = []
+    segments = sorted((saipen_dir / "logs").glob("LOG-*.md")) if (
+        saipen_dir / "logs"
+    ).is_dir() else []
+    for path in [*segments, saipen_dir / "LOG.md"]:
+        if not path.is_file():
+            continue
+        for line in path.read_text(encoding="utf-8-sig", errors="replace").splitlines():
+            parsed = parse_log_line(line)
+            if parsed is not None:
+                events.append(parsed)
+
+    projection = reconcile(ticket_id, ticket.get("fields", {}).get("verify", ""), events)
+    if as_json:
+        _emit({"ok": True, "code": "ACCEPTANCE", **projection}, as_json)
+    else:
+        print(render(projection))
+    return 0
+
+
 def _brief(project_root: Path, as_json: bool) -> int:
     """saipen brief (T-1148): derived cold-handoff projection. Read-only."""
     from saipen_engine.context import brief_projection
@@ -4597,7 +4664,7 @@ def main(argv: list[str] | None = None) -> int:
             "[--project|--global|--effective]|userperson add|remove <text> "
             "[--category NAME] [--project|--global]|userperson reset "
             "[--project|--global] --confirm|sub|rebind-home "
-            "<candidate-home>|context|attempt open|attempt close <RESULT> "
+            "<candidate-home>|context|acceptance <T-###>|attempt open|attempt close <RESULT> "
             "<STOP>|brief|focus [text]|build <directive>|cut <target>|"
             "cut confirm <CUT-ID>|undo|undo confirm <CP-ID> --reason <text>) "
             "[--dry-run] "
@@ -5274,6 +5341,8 @@ def main(argv: list[str] | None = None) -> int:
                 as_json,
             )
             return 1
+    if command == "acceptance":
+        return _acceptance(project_root, args[1:], as_json)
     if command == "brief":
         surplus = [a for a in args[1:] if a != "--json"]
         if surplus:

@@ -47,6 +47,7 @@ global authority and deterministic priority rules.
 | `saipen push` | SHIP | CMD-ROUTING-01 |
 | `saipen improve [action]` | meta | CMD-CONTINUE-01 |
 | `saipen status` | read-only | CMD-ROUTING-01 |
+| `saipen acceptance <T-###>` | read-only | CMD-ROUTING-01 |
 | `saipen runtime` | read-only | CMD-ROUTING-01 |
 | `saipen source` | intake | CMD-ROUTING-01 |
 | `saipen audit [status\|inspect\|ingest]` | intake transport | CMD-CONTINUE-01 |

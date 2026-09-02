@@ -1,6 +1,19 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.243.0 -- 2026-09-02 -- What Was Promised, And What Proves It (T-1267)
+
+- A `verify:` clause was one prose blob, so completion evidence bound to a TICKET rather than to a CRITERION. A later reader could not tell which promise a green gate covered, and a producer sentence saying the work is done read the same as a test result.
+- `saipen acceptance <T-###>` answers per promise: **SATISFIED / FAILED / UNVERIFIED / CONTESTED**. Run on its own ticket it reports 8 criteria SATISFIED, each naming the event and the test behind it -- where the same command reported UNVERIFIED 8 before the records existed. Absence and proof do not look alike.
+- Nothing new is stored. Criteria parse out of the existing `verify:` field as `AC-01 ...; AC-02 ...`; evidence is ordinary LOG events; the projection rebuilds from BOARD and LOG on every call. A legacy clause yields zero criteria and is reported as promising nothing by id, never as an error.
+- **Prose cannot enter the model.** An evidence record must BEGIN with an anchored token, through the single owner v7.242.0 landed, so a checkpoint discussing evidence never becomes evidence. The class vocabulary is closed -- `inspection`, `static`, `behavioral`, `manual` -- so `AC-01 PASS claim` does not parse, and there is no representable form for "the agent said so". A test asserts the module's own docstring, which spells every token out, produces no records.
+- Three refusals are structural, not advisory: missing evidence stays UNVERIFIED and is never inferred to PASS; conflicting current records report CONTESTED instead of resolving to whichever sounded more confident; stale-only evidence also reports CONTESTED, because a projection that HID stale records could not report the state at all.
+- Staleness reuses the machine-owned `transition to BUILD` boundary: evidence proven before the implementation moved is marked, not dropped.
+- Named `acceptance`, not `reconcile` -- `reconcile` already means CORE-002 protocol-state repair, and one word with two meanings is the drift this wave exists to remove. Registered additively: one `REGISTRY.json` entry, one `COMMANDS.md` row, one dispatcher branch, classified READ_ONLY, proven read-only by comparing canonical bytes around a real CLI subprocess.
+- Deliberately observational. Nothing gates on it, no DONE path consults it, and a ticket's acceptance state changes no transition. Mandatory gating waits for evidence that the projection is worth its cost.
+- Evidence was NOT retrofitted onto already-shipped tickets: v7.242.0's ticket declares criteria and carries no records, which the metrics work will report as real coverage rather than hide.
+- 25 focused tests.
+
 ## 7.242.0 -- 2026-09-02 -- Narrative Authority Leakage (T-1268)
 
 - The class, named once so it stops being three separate incidents: free-form prose acquiring control authority because a validator searches text for a magic phrase. A line that merely DISCUSSES the phrase gains the power it carries -- and that line is usually written by whoever is diagnosing the defect.
