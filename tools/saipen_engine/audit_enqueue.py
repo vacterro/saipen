@@ -39,11 +39,12 @@ import json
 import os
 import re
 import threading
+import time
 from pathlib import Path
 
 from . import audit_inbox
 from .journal import _atomic_write, owned_target_path
-from .lock import FileLockBusy, file_writer_lock
+from .lock import FileLockBusy, FileWriterLock
 from .paths import prove_owned_dir_chain
 from .safeid import InvalidIdError, validate_safe_id
 
@@ -68,6 +69,76 @@ _TEMP_PREFIX = ".enqueue-"
 # pair of enqueues. This guard makes same-process callers queue instead, and
 # it is taken BEFORE the file lock so the two orders can never invert.
 _PROCESS_GUARD = threading.Lock()
+
+# T-1244: the wait is bounded. The guard used to be taken before an OS lock
+# acquired with `blocking=True`, which waits forever -- so a foreign process
+# holding the allocator lock parked the holding thread inside the OS call
+# while it owned the guard, and every other same-process producer queued
+# behind it with no diagnostic and no bound. Waiting is still correct
+# (two simultaneous producers must get N and N+1, not a refusal a correct
+# producer has to retry), so the fix is a deadline rather than a non-blocking
+# acquire: one deadline covers the guard and the file lock together, and
+# exhausting it returns the WRITER_BUSY this API already speaks.
+LOCK_TIMEOUT_ENV = "SAIPEN_AUDIT_ENQUEUE_LOCK_TIMEOUT"
+DEFAULT_LOCK_TIMEOUT = 30.0
+_LOCK_RETRY_SLEEP = 0.02
+
+
+class _AllocatorBusy(Exception):
+    """The allocator lock stayed held for the whole bounded wait."""
+
+
+def lock_timeout() -> float:
+    """Seconds to wait for the allocator before reporting WRITER_BUSY.
+
+    Overridable through the environment so a test can prove the refusal
+    without sitting through the production wait. A non-numeric or
+    non-positive value is the default, never an unbounded wait.
+    """
+    raw = os.environ.get(LOCK_TIMEOUT_ENV)
+    if raw is None:
+        return DEFAULT_LOCK_TIMEOUT
+    try:
+        value = float(raw)
+    except ValueError:
+        return DEFAULT_LOCK_TIMEOUT
+    return value if value > 0 else DEFAULT_LOCK_TIMEOUT
+
+
+@contextlib.contextmanager
+def _allocator_lock(root: Path, timeout: float):
+    """Hold the allocator across allocation and placement, or refuse in time.
+
+    The guard is never held across an unbounded wait: it is taken with the
+    same deadline the file lock gets, and both halves report which one ran out
+    so a stuck enqueue names its cause instead of hanging.
+    """
+    deadline = time.monotonic() + timeout
+    if not _PROCESS_GUARD.acquire(timeout=timeout):
+        raise _AllocatorBusy(
+            f"another thread in this process held the audit allocator guard "
+            f"for the full {timeout:g}s wait"
+        )
+    try:
+        while True:
+            candidate = FileWriterLock(root / Path(LOCK_REL), root, blocking=False)
+            try:
+                candidate.acquire()
+            except FileLockBusy:
+                if time.monotonic() >= deadline:
+                    raise _AllocatorBusy(
+                        f"another process held {LOCK_REL} for the full {timeout:g}s wait"
+                    ) from None
+                time.sleep(_LOCK_RETRY_SLEEP)
+                continue
+            lock = candidate
+            break
+        try:
+            yield lock
+        finally:
+            lock.release()
+    finally:
+        _PROCESS_GUARD.release()
 
 
 def layer_digest(body: bytes) -> str:
@@ -277,7 +348,7 @@ def enqueue(
         # producer retry a correct call, which is the failure this API exists
         # to remove. The lock covers allocation and placement only -- never
         # analysis, never Source processing.
-        with _PROCESS_GUARD, file_writer_lock(root / Path(LOCK_REL), root, blocking=True):
+        with _allocator_lock(root, lock_timeout()):
             doc = _reconcile(root, read_allocator(root))
             record = doc["operations"].get(key)
 
@@ -337,6 +408,8 @@ def enqueue(
             record["state"] = COMMITTED
             write_allocator(root, doc)
             return _result(root, record, idempotent=False)
+    except _AllocatorBusy as exc:
+        return _fail("WRITER_BUSY", str(exc))
     except FileLockBusy as exc:
         return _fail("WRITER_BUSY", f"another audit enqueue holds the allocator lock: {exc}")
     except (OSError, ValueError) as exc:

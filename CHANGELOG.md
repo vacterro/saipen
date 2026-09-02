@@ -1,6 +1,15 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.238.3 -- 2026-09-02 -- The Allocator Wait Has An End (T-1244)
+
+- `audit_enqueue` took a process-wide guard and then asked the OS for the allocator lock with `blocking=True`, which waits forever. A foreign process holding `.saipen/locks/audit-allocator.lock` therefore parked the holding thread inside the OS call while it still owned the guard, and every other same-process producer queued behind it with no diagnostic and no bound.
+- Proven rather than argued: against a real second process holding the real lock, the old shape parks (`parked=True result=None`) and the new one refuses (`parked=False result=WRITER_BUSY`).
+- Waiting was right and stays: two simultaneous producers must get N and N+1, not a refusal a correct producer has to retry. What changed is that the wait has a deadline. One deadline covers the guard and the file lock together, and exhausting it returns the `WRITER_BUSY` this API already speaks, naming which half ran out and the lock it was waiting on.
+- Default 30 seconds, overridable through `SAIPEN_AUDIT_ENQUEUE_LOCK_TIMEOUT` so a test can prove the refusal without sitting through it. A non-numeric or non-positive override falls back to the default, never to an unbounded wait.
+- Four new tests: a foreign holder refused inside the bound, three same-process callers each getting their own refusal instead of one parking the rest, six concurrent enqueues still allocating 1..6, and a broken override falling back rather than hanging.
+- `audit_enqueue` was the only `blocking=True` caller in the engine; `liveness` and `WriterLock` were already non-blocking.
+
 ## 7.238.2 -- 2026-09-02 -- A Gate That Names What Moved (T-1258)
 
 - A gate reddened by another gate running beside it is worse than no gate, because nobody can attribute the failure afterwards. Two live instances of that class, both closed.

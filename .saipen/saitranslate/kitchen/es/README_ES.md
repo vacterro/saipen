@@ -26,7 +26,7 @@ la desinstalación es local — no hay servicio en la nube, ningún demonio, nin
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.238.2** | [Especificación](SPEC.md) | [Guía](GUIDE.md) | [Núcleo](saipen/CORE.md) | [Mantenimiento](saipen/MAINTENANCE.md) | [Estilo](saipen/STYLE.md) | [Interfaz de usuario](saipen/UI.md) | [Conformidad](saipen/CONFORMANCE.md) |MIT
+**v7.238.3** | [Especificación](SPEC.md) | [Guía](GUIDE.md) | [Núcleo](saipen/CORE.md) | [Mantenimiento](saipen/MAINTENANCE.md) | [Estilo](saipen/STYLE.md) | [Interfaz de usuario](saipen/UI.md) | [Conformidad](saipen/CONFORMANCE.md) |MIT
 
 **Atajos rápidos:** `cc` continúa el contexto del proyecto hasta la convergencia (reanuda un objetivo activo si hay uno fijado), `sss` informa del estado sin tocar código y `ss` guarda un punto de control y se detiene. [Ver el mapa completo de 19 teclas](saipen/RFC.md#110-command-surface). Los gemelos cirílicos también funcionan: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
