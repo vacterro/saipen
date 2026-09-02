@@ -3831,11 +3831,34 @@ if log_files:
                         f"budget with it (RFC § 2.4)",
                     )
 
-    documented_inversions = any(
-        "observed historical timestamp inversions"
-        in p.read_text(encoding="utf-8-sig", errors="replace")
+    # A DEC documenting inversions can only account for events that already
+    # existed when it was written, so the amnesty it grants ends at its own
+    # event id. This used to be one boolean over the entire corpus -- does ANY
+    # segment anywhere contain the phrase -- and three sealed DECs from July
+    # and August 2026 (E-813, E-1145, E-1796) therefore silenced the inversion
+    # warning for every line written afterwards, in every future segment. The
+    # check read every timestamp pair and reported nothing for five weeks.
+    #
+    # It cost a real defect (T-1261): E-5171 was stamped `26.09.01`, the digits
+    # in ISO order, between E-5170 at `01.09.26 08:27` and E-5172 at
+    # `01.09.26 13:21`. It parses as 2001-09-26, and a 25-year backwards jump
+    # produced no output at all. A suppressor whose scope is "the file" rather
+    # than "the events it documents" cannot expire; one tied to an event id
+    # stops covering the next line, which is the only property that matters.
+    # The marker must sit in a DEC. Reproduced live while fixing this: the
+    # SCOUT checkpoint for T-1261 quoted the phrase in its own findings, and
+    # that RUN line -- prose ABOUT the defect -- silenced the check for every
+    # event before it, including the one it was describing. A record that
+    # merely mentions an amnesty must not grant it; only a decision does.
+    documented_inversion_ids = [
+        int(match.group(1))
         for p in log_files
-    )
+        for line in p.read_text(encoding="utf-8-sig", errors="replace").splitlines()
+        if "observed historical timestamp inversions" in line
+        and "] DEC: " in line
+        and (match := re.search(r"\[E-(\d+)\]", line))
+    ]
+    max_documented_inversion = max(documented_inversion_ids, default=0)
     # A zero harvest means both timestamp checks below iterate over nothing and
     # pass in silence -- the exact shape of the check that lay dead from
     # feae149 until v7.99.0. If there are entries but no parsed timestamps at
@@ -3872,13 +3895,16 @@ if log_files:
         prev_dt, prev_eid, _ = prev
         cur_dt, cur_eid, cur_loc = current
         if cur_dt < prev_dt and (prev_dt - cur_dt).total_seconds() > 300:
-            if not documented_inversions:
+            if cur_eid > max_documented_inversion:
                 warn(
                     "log-timestamp-inversion",
                     f"{cur_loc} timestamp moves backwards by "
                     f"{(prev_dt - cur_dt).total_seconds() / 60:.0f}m "
                     f"from E-{prev_eid:03d} to E-{cur_eid:03d}; historical "
-                    f"inversions must be documented with a DEC line (RFC § 1.2)",
+                    f"inversions must be documented with a DEC line carrying "
+                    f"`observed historical timestamp inversions` at an event "
+                    f"id at or after this one (RFC § 1.2). The newest such DEC "
+                    f"is E-{max_documented_inversion:03d}",
                 )
 
     # The forward bound was 3h and that is why nothing ever caught the real

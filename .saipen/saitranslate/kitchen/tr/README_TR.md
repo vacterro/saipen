@@ -26,7 +26,7 @@ kaldırma işlemi tümüyle yereldir — bulut hizmeti, arka plan programı, ver
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.239.0** | [Spesifikasyon](SPEC.md) | [Kılavuz](GUIDE.md) | [Çekirdek](saipen/CORE.md) | [Bakım](saipen/MAINTENANCE.md) | [Stil](saipen/STYLE.md) | [Kullanıcı Arayüzü](saipen/UI.md) | [Uygunluk](saipen/CONFORMANCE.md) |MIT
+**v7.239.1** | [Spesifikasyon](SPEC.md) | [Kılavuz](GUIDE.md) | [Çekirdek](saipen/CORE.md) | [Bakım](saipen/MAINTENANCE.md) | [Stil](saipen/STYLE.md) | [Kullanıcı Arayüzü](saipen/UI.md) | [Uygunluk](saipen/CONFORMANCE.md) |MIT
 
 **Kısayol tuşları:** `cc` proje bağlamını yakınsamaya kadar sürdürür (ayarlanmışsa çalışan hedefi sürdürür), `sss` koda dokunmadan durumu bildirir ve `ss` kontrol noktası kaydedip durur. [19 tuşluk tam haritaya bakın](saipen/RFC.md#110-command-surface). Kiril ikizleri de çalışır: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 

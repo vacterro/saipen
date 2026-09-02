@@ -2867,6 +2867,18 @@ CASES: list[tuple[str, str, object, str]] = [
     # entries instead -- ids go backwards with nothing duplicated.
     ("LOG event ids go backwards", LOG, SWAP, "increase monotonically"),
     ("LOG entry with no date", LOG, lambda t: t + "- [E-999999] RUN: undated\n", "has no DATE"),
+    # T-1261. The inversion warning read every timestamp pair from v7.99.0 and
+    # reported nothing for five weeks: it sat behind one boolean asking whether
+    # ANY segment anywhere mentioned documented inversions, and three sealed
+    # DECs from July 2026 answered yes forever. A check that cannot go red is
+    # not a check, and this control is what would have said so. The appended
+    # line stamps 2020 after a 2026 tail, so the pair inverts by years.
+    (
+        "LOG timestamp jumps backwards with no DEC covering it",
+        LOG,
+        lambda t: t + "- 01.01.20 00:00 [E-999998] RUN: inversion probe\n",
+        "timestamp moves backwards by",
+    ),
     # --- kitchen ---------------------------------------------------------
     (
         "digest is not three lines",

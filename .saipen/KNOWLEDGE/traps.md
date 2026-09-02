@@ -125,3 +125,25 @@ Use raw strings for anything containing a backslash, or write the file with
 the editor tools rather than through a Python heredoc. The failure is quiet
 when it lands inside data (`chr(1)` in a Markdown file passed review for
 weeks) and loud only when it happens to break a parser.
+
+## A global suppressor disarms a per-line check forever
+
+`tools/validate.py`'s timestamp-inversion check has read every LOG line since
+v7.99.0 and reported nothing since 27.07.26, because the warning sits behind
+`if not documented_inversions:` -- one boolean derived from whether ANY segment
+anywhere contains the phrase "observed historical timestamp inversions". Three
+sealed DEC lines from July and August 2026 carry it, so the whole check was
+switched off for every line written afterwards, in every future segment.
+
+It cost a real defect: E-5171 stamped `26.09.01` between E-5170 at
+`01.09.26 08:27` and E-5172 at `01.09.26 13:21` -- the digits in ISO order, so
+it parses as 2001-09-26 and lands 25 years behind the segment it sits in. A
+25-year backwards jump produced zero output. Found by `tools/saipen_metrics.py`
+reading dates for a report, not by 227 red controls.
+
+The shape, not the instance: a suppressor whose scope is "the file" rather than
+"the lines it documents" cannot expire. Documented history is documented; the
+next line is not, and one acknowledgement of an old problem must never grant
+amnesty to problems that have not happened yet. Whenever a check can be quieted,
+tie the quieting to the exact evidence it excuses -- an event id, a path, a hash
+-- so it stops covering anything written after it.

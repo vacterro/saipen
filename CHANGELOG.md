@@ -1,6 +1,16 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.239.1 -- 2026-09-02 -- The Amnesty That Never Expired (T-1261)
+
+- `tools/validate.py` has walked every LOG timestamp pair since v7.99.0 and reported nothing since 27.07.26. The warning sat behind one boolean asking whether ANY segment anywhere contained the phrase `observed historical timestamp inversions`, and three sealed DECs from July and August 2026 -- E-813, E-1145, E-1796 -- answered yes for every line written afterwards, in every future segment. A suppressor whose scope is the file rather than the events it documents cannot expire.
+- Armed, it found 16 inversions rather than the 1 that prompted the ticket. Fourteen are ordinary 0.0-0.3 day clock drift. Two are a distinct class: a day-first field typed in ISO order by hand -- E-2068 as `26.08.05`, landing 7649 days back, and E-5171 as `26.09.01`, landing 9106 days back.
+- The amnesty is now scoped twice. Only a `DEC` grants it, and only for event ids at or below its own. The DEC half was forced by live evidence: this ticket's own SCOUT checkpoint quoted the marker phrase while diagnosing the defect, and that `RUN` line silenced the check for the exact event it was describing. Prose about an amnesty must not grant one.
+- E-5265 documents all 16 by name and expires at its own event id, so the next bad stamp warns instead of joining a grandfathered pile. No historical line was rewritten: the diff touches no sealed segment and `LOG.md` grew by appends only.
+- `tools/_log_append.py` is the only writer that takes a caller-formed line -- every engine writer formats the stamp with `strftime("%d.%m.%y %H:%M")` and cannot get the field order wrong. It now refuses an impossible date, a stamp more than 300s ahead of real UTC, and a stamp more than 300s behind the file's last dated line. A refusal writes nothing at all: a partial append into an append-only file cannot be taken back either. `--allow-inversion` exists for the genuine late record and must be typed on purpose.
+- One new red control (228 of 228) proves the check can go red on a bare appended backwards stamp, which is what five weeks of silence lacked. 13 new tests cover the guard and both halves of the amnesty scope.
+- Recorded in `.saipen/KNOWLEDGE/traps.md` as a shape, not an instance: whenever a check can be quieted, tie the quieting to the exact evidence it excuses -- an event id, a path, a hash -- so it stops covering anything written after it.
+
 ## 7.239.0 -- 2026-09-02 -- The First Number That Is Not About Itself (T-1260)
 
 - Every gate this repository owns measures whether SAIPEN is internally correct. `validate.py`, `audit_checks.py`, `run_scenarios.py` and `protocol_budget.py` are all self-referential, so 438 commits and 113 releases in 32 days carried no number for whether any of it was worth running. The freeze-versus-grow argument could only be settled by opinion, and opinion is how a protocol talks itself into another audit wave.
