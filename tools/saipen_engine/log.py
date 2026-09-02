@@ -588,6 +588,63 @@ def _is_verify_boundary(ev: dict) -> bool:
     return txt == "transition to VERIFY" or txt.startswith(_VERIFY_BOUNDARY_PREFIX)
 
 
+def structural_marker_events(
+    events,
+    marker: str,
+    taxonomies=("RUN",),
+    *,
+    after_event: int = 0,
+) -> list[int]:
+    """Event ids where `marker` is ACTUAL AUTHORITY, not prose that mentions it.
+
+    Narrative Authority Leakage is this repository's most expensive recurring
+    defect: a validator searches free text for a magic phrase, and any line that
+    merely DISCUSSES the phrase silently acquires the power the phrase carries.
+    Two instances have cost real work.
+
+    The timestamp-inversion amnesty was one boolean over the whole corpus --
+    "does any segment anywhere contain this sentence" -- so three sealed DEC
+    lines from July 2026 disarmed the inversion check for every line written
+    afterwards, and it reported nothing for five weeks. Repairing it, the SCOUT
+    checkpoint that quoted the marker while diagnosing it disarmed the check
+    again, one level up.
+
+    The clean-HUNT marker was the same shape and still live when this was
+    written: 28 LOG lines contain `hunt -> clean @` and only 24 are the
+    canonical record. The other four are prose -- a note and two checkpoints
+    discussing it -- and each of them alone activated the converge prohibition
+    without a HUNT having run.
+
+    Three conditions, and dropping any one reopens the class:
+
+    * TAXONOMY -- authority belongs to the record type that carries it. A `RUN`
+      reporting an action is not a `DEC` deciding one, and prose about either
+      is neither.
+    * ANCHORING -- the marker must BEGIN the event text. A sentence containing
+      it is describing it. This is the same rule `_is_verify_boundary` already
+      applies to the VERIFY boundary, generalized rather than re-invented.
+    * BOUNDING -- `after_event` scopes the authority to events at or after a
+      named point, so an exception cannot cover work that had not happened when
+      it was granted. A suppressor whose scope is "the file" cannot expire.
+
+    Returns the event ids, so a caller can bound its own decision against them
+    rather than collapsing the answer to a boolean it cannot scope.
+    """
+    if not marker:
+        return []
+    allowed = tuple(taxonomies)
+    found: list[int] = []
+    for ev in events:
+        if ev.get("taxonomy") not in allowed:
+            continue
+        event_id = ev.get("event")
+        if not isinstance(event_id, int) or event_id < after_event:
+            continue
+        if (ev.get("text") or "").startswith(marker):
+            found.append(event_id)
+    return found
+
+
 def verification_evidence(ticket_id: str, events: list[dict]) -> tuple[bool, str]:
     """Classify verification evidence for a ticket (hostile-regression).
 

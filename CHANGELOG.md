@@ -1,6 +1,18 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.242.0 -- 2026-09-02 -- Narrative Authority Leakage (T-1268)
+
+- The class, named once so it stops being three separate incidents: free-form prose acquiring control authority because a validator searches text for a magic phrase. A line that merely DISCUSSES the phrase gains the power it carries -- and that line is usually written by whoever is diagnosing the defect.
+- Three instances, all found by accident. The timestamp-inversion amnesty was one boolean over the whole corpus, so three sealed DEC lines disarmed the check for five weeks (v7.239.1). Repairing it, the SCOUT checkpoint that quoted the marker disarmed the check again -- for the very event it was describing. And the clean-HUNT marker was the same shape and still live.
+- Found by looking for the SHAPE rather than the symptom: `validate.py:2608` read `any("hunt -> clean @" in ln)` across every line of every LOG segment. Measured on the live journal: **29 lines contain the phrase, 21 are the canonical record.** The other eight are a note and checkpoints discussing it, and each one alone activated the converge ADD prohibition without a HUNT ever having run clean. Inert only because the live intent is `goal`.
+- `saipen_engine.log.structural_marker_events` is now the single owner. Three conditions, and dropping any one reopens the class: **taxonomy** (a `RUN` reporting an action is not a `DEC` deciding one), **anchoring** (the marker must BEGIN the event text, generalizing the rule `_is_verify_boundary` already applied to the VERIFY boundary), and **bounding** (an `after_event` id, so an exception cannot cover work that had not happened when it was granted).
+- Both suppressors now share that owner, instead of one corrected and one not. The amnesty refactor was checked before it was made: anchored and substring forms both yield newest grant E-5265, at or after all 16 inversions, so no sealed warning is re-armed and no permanent warning is created.
+- It returns event ids, not a boolean. A boolean is precisely what could not be scoped.
+- New red control (229 of 229): demoting the compensating DEC from a record to a mention must lose the amnesty and let the 16 inversions report again. Without such a control, "no warning" and "the warning was silenced" are the same observation -- which is exactly how the check stayed dead for five weeks.
+- 14 tests, including one asserting that the test file's own docstring -- which spells every marker out while explaining the rule -- activates nothing.
+- The provenance-marker scan at `validate.py:3016` was deliberately left alone: it detects MISSING provenance rather than granting authority, so the leak direction is inverted and converting it would be machinery without a reproduced defect.
+
 ## 7.241.1 -- 2026-09-02 -- One Window, Two Instants (T-1265)
 
 - `saipen_metrics.py` windowed its two evidence sources differently and said nothing about it. The LOG side compares date strings, so `--since 2026-09-02` meant midnight. The git side handed the bare date to `git log --since`, where approxidate resolves a dateless day using the CURRENT time of day -- so the same argument meant "since 16:xx" and every commit made earlier that day vanished.

@@ -196,3 +196,34 @@ touched it. Third instance of this class after the CHANGELOG anchor (T-1245).
 **A duplicated anchor is a silently disarmed control.** When editing a document
 that `audit_checks.py` names in `CASES`, check whether the new text repeats an
 anchor phrase.
+
+## Narrative Authority Leakage
+
+Free-form prose acquiring control authority because a validator searches text
+for a magic phrase. A line that merely DISCUSSES the phrase gains the power the
+phrase carries, and the discussion is usually written by whoever is diagnosing
+the defect.
+
+Three instances, all expensive, all found by accident:
+
+- the timestamp-inversion amnesty was one boolean over the whole corpus, so
+  three sealed DEC lines disarmed the check for five weeks;
+- repairing it, the SCOUT checkpoint that quoted the marker disarmed the check
+  again, one level up, for the very event it was describing;
+- the clean-HUNT marker was the same shape and still live: 28 LOG lines
+  contained `hunt -> clean @` and only 24 were the canonical record.
+
+`saipen_engine.log.structural_marker_events` is the single owner of the rule.
+A marker is authority only when all three hold, and dropping any one reopens
+the class:
+
+- **taxonomy** -- a `RUN` reporting an action is not a `DEC` deciding one;
+- **anchoring** -- the marker must BEGIN the event text, never appear in it;
+- **bounding** -- an `after_event` id, so an exception cannot cover work that
+  had not happened when it was granted. A suppressor scoped to "the file"
+  cannot expire.
+
+When adding any check that reads free text for meaning, route it through that
+helper rather than writing a fourth substring test. And give every suppressor a
+red control that goes red once its authorization no longer applies: without
+one, "no warning" and "the warning was silenced" are the same observation.

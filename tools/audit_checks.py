@@ -2017,6 +2017,22 @@ CASES: list[tuple[str, str, object, str]] = [
         lambda s: force_converge(s, '"PHASE ADD"'),
         "converge clean-HUNT marker present but next_action names ADD",
     ),
+    # T-1268, Narrative Authority Leakage. A suppressor needs a control proving
+    # it can still go red once its authorization no longer applies -- otherwise
+    # "no warning" and "the warning was silenced" are the same observation, and
+    # that is how the inversion check stayed dead for five weeks. Demoting the
+    # compensating DEC from a record to a mention (the marker no longer BEGINS
+    # the event text) must lose the amnesty and let the 16 documented
+    # inversions report again. If this stops going red, the anchoring is gone.
+    (
+        "an amnesty demoted to prose stops suppressing",
+        LOG,
+        replace(
+            "DEC: observed historical timestamp inversions",
+            "DEC: a note about observed historical timestamp inversions",
+        ),
+        "timestamp moves backwards by",
+    ),
     # T-### valve-wording: ANY safety-valve pause's resume key is `cc`, never
     # `saipen goal` -- `saipen goal` is the create/pivot command, a
     # substitution. A pause naming `saipen goal` FAILs for both goal and

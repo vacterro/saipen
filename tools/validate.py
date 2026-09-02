@@ -2605,8 +2605,24 @@ if not active_log.is_file():
 # the failed routing this pins. The normal intent MAY reference ADD -- that is
 # the other half of the same rule and deliberately not checked here.
 if intent == "converge" and log_files and isinstance(next_action, str):
-    _clean_hunt_marker = any(
-        "hunt -> clean @" in ln for p in log_files for ln in read_doc(p).splitlines()
+    # Narrative Authority Leakage (T-1268). This read `any("hunt -> clean @"
+    # in ln)` across every line of every segment, so a line that merely
+    # DISCUSSED the marker carried its authority. Measured on the live
+    # journal at the time of the fix: 28 lines contain the phrase and only 24
+    # are the canonical record -- the other four are a note and two
+    # checkpoints, each of which alone activated this prohibition without a
+    # HUNT ever having run clean. `structural_marker_events` is the one owner
+    # of "a marker is authority only when it is the record, not a mention".
+    from saipen_engine.log import parse_log_line, structural_marker_events
+
+    _hunt_events = [
+        parsed
+        for p in log_files
+        for ln in read_doc(p).splitlines()
+        if (parsed := parse_log_line(ln)) is not None
+    ]
+    _clean_hunt_marker = bool(
+        structural_marker_events(_hunt_events, "hunt -> clean @", ("RUN",))
     )
     if _clean_hunt_marker:
         if re.search(r"\bADD\b", next_action):
@@ -3850,14 +3866,18 @@ if log_files:
     # that RUN line -- prose ABOUT the defect -- silenced the check for every
     # event before it, including the one it was describing. A record that
     # merely mentions an amnesty must not grant it; only a decision does.
-    documented_inversion_ids = [
-        int(match.group(1))
+    from saipen_engine.log import parse_log_line as _parse_log_line
+    from saipen_engine.log import structural_marker_events as _structural_marker_events
+
+    _amnesty_events = [
+        parsed
         for p in log_files
         for line in p.read_text(encoding="utf-8-sig", errors="replace").splitlines()
-        if "observed historical timestamp inversions" in line
-        and "] DEC: " in line
-        and (match := re.search(r"\[E-(\d+)\]", line))
+        if (parsed := _parse_log_line(line)) is not None
     ]
+    documented_inversion_ids = _structural_marker_events(
+        _amnesty_events, "observed historical timestamp inversions", ("DEC",)
+    )
     max_documented_inversion = max(documented_inversion_ids, default=0)
     # A zero harvest means both timestamp checks below iterate over nothing and
     # pass in silence -- the exact shape of the check that lay dead from
