@@ -26,7 +26,7 @@ l'installation est locale — aucun service cloud, aucun démon, aucune base de 
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.239.3** | [Spécifications](SPEC.md) | [Guide](GUIDE.md) | [Noyau](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [Interface utilisateur](saipen/UI.md) | [Conformité](saipen/CONFORMANCE.md) |MIT
+**v7.240.0** | [Spécifications](SPEC.md) | [Guide](GUIDE.md) | [Noyau](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [Interface utilisateur](saipen/UI.md) | [Conformité](saipen/CONFORMANCE.md) |MIT
 
 **Raccourcis clavier :** `cc` poursuit le contexte du projet jusqu'à la convergence (reprend un objectif actif s'il en existe un), `sss` signale l'état sans toucher au code et `ss` enregistre un point de contrôle puis s'arrête. [Voir la carte complète des 19 touches](saipen/RFC.md#110-command-surface). Les jumeaux cyrilliques fonctionnent aussi : `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 

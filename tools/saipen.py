@@ -250,21 +250,78 @@ def _ensure_handover(
     return None
 
 
-_TERMINAL_RESULT_RE = re.compile(r"->\s*(PASS|FAIL)\s*$")
+_TERMINAL_RESULT_RE = re.compile(r"->\s*(PASS|FAIL)\b")
 
 
 def _validator_terminal_result(txt: str) -> str:
     """The canonical terminal result of a validator RUN event, or UNKNOWN
     (second-wave P2).
 
-    Only an EXACT `-> PASS` / `-> FAIL` terminal token counts as a result.
-    Anything else -- `NOT PASS`, `BYPASS`, `PASSING`, mixed failure prose, or a
-    missing terminal token -- is UNKNOWN and is never promoted to a conformance
-    PASS."""
+    The result token is `-> PASS` / `-> FAIL`, and evidence MAY follow it --
+    `validate.py -> PASS conf: high -- 0 FAIL 21 WARN` is the shape agents
+    actually write. This used to anchor the token to end of line, which made
+    UNKNOWN the answer for every real record and left `saipen status` reporting
+    an unknown gate until somebody hand-wrote a bare line (T-1243).
+
+    The property the anchor was defending survives intact, in two parts that
+    each carry their own half:
+
+    - the token must sit IMMEDIATELY after the arrow, on a word boundary, so
+      `-> BYPASS`, `-> PASSING` and `-> NOT PASS` match nothing at all;
+    - a record that claims a PASS and also claims a failure is UNKNOWN, not
+      PASS. `_claims_failure` is the repository's existing hostile-tested
+      negative-evidence reader, reused rather than reimplemented: it reads
+      `PASS but the suite failed on linux` as a claim and `0 FAIL 21 WARN` as
+      a count, which is exactly the distinction this needs.
+
+    Nothing is ever promoted to a conformance PASS on a substring.
+    """
     m = _TERMINAL_RESULT_RE.search(txt)
     if not m:
         return "UNKNOWN"
-    return "PASS" if m.group(1) == "PASS" else "FAIL"
+    if m.group(1) == "FAIL":
+        return "FAIL"
+
+    from saipen_engine.log import _claims_failure
+
+    return "UNKNOWN" if _claims_failure(txt) else "PASS"
+
+
+def _project_conformance(history_events) -> str | None:
+    """The conformance gate `saipen status` reports, or None when unrecorded.
+
+    Two narrownesses, and dropping either one breaks the projection in a
+    different direction (T-1243).
+
+    The RESULT is read only from the canonical token, so nothing is promoted to
+    a PASS on a substring -- that half lives in `_validator_terminal_result`.
+
+    The SELECTOR is the half this function owns: naming the validator is not
+    running it. A checkpoint that discusses `validate.py:3871` is prose about
+    the file, and treating it as the newest validator record let it shadow the
+    last real run, which is how a green repository reported an unknown gate. So
+    the search takes the newest RUN that both names the validator and carries a
+    decidable result; a record with no result token contributes no gate
+    information and must not hide one that does. If nothing decidable exists at
+    all, the answer is UNKNOWN, dated by the newest naming record -- silence and
+    "not proven" stay distinguishable.
+    """
+    fallback: str | None = None
+    for ev in reversed(history_events):
+        txt = ev.get("text", "")
+        if ev.get("taxonomy") != "RUN":
+            continue
+        if not ("validate.py" in txt or "validate.sh" in txt or "validate.ps1" in txt):
+            continue
+        stamp = ev.get("date") or ""
+        result = _validator_terminal_result(txt)
+        rendered = f"{result} ({stamp})" if stamp else result
+        if result == "UNKNOWN":
+            if fallback is None:
+                fallback = rendered
+            continue
+        return rendered
+    return fallback
 
 
 def _protocol_version() -> str:
@@ -662,21 +719,22 @@ def _status(project_root: Path, as_json: bool) -> int:
         if not verdicts[dt["id"]][0]:
             claimed_but_unproven.append(dt["id"])
 
-    conformance: str | None = None
-    for ev in reversed(history_events):
-        txt = ev.get("text", "")
-        tax = ev.get("taxonomy", "")
-        if tax == "RUN" and ("validate.py" in txt or "validate.sh" in txt or "validate.ps1" in txt):
-            m_date = ev.get("date") or ""
-            # Second-wave P2: parse ONLY the canonical terminal result of the
-            # validator RUN (`-> PASS` / `-> FAIL` as an exact result token).
-            # A substring test would promote free event text like `NOT PASS`,
-            # `BYPASS`, `PASSING` or mixed failure prose to a conformance PASS
-            # although no exact successful result was recorded. Noncanonical
-            # text stays UNKNOWN/raw and is never promoted to PASS.
-            res = _validator_terminal_result(txt)
-            conformance = f"{res} ({m_date})" if m_date else res
-            break
+    # Second-wave P2: parse ONLY the canonical terminal result of the validator
+    # RUN (`-> PASS` / `-> FAIL` as an exact result token). A substring test
+    # would promote free event text like `NOT PASS`, `BYPASS`, `PASSING` or
+    # mixed failure prose to a conformance PASS although no exact successful
+    # result was recorded. Noncanonical text stays UNKNOWN and is never
+    # promoted to PASS.
+    #
+    # T-1243: the selector also has to be narrow. Naming the validator is not
+    # running it -- a checkpoint that discusses `validate.py:3871` is prose
+    # about the file, and treating it as the newest validator record let it
+    # shadow the last real run and report UNKNOWN. So the search takes the
+    # newest RUN that both names the validator AND carries a decidable result;
+    # a record with no result token contributes no gate information and must
+    # not hide one that does. When nothing decidable exists, the gate is
+    # UNKNOWN and says so, dated by the newest naming record.
+    conformance = _project_conformance(history_events)
 
     staleness: str | None = None
     updated_str = state.get("updated")

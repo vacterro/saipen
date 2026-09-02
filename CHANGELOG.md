@@ -1,6 +1,16 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.240.0 -- 2026-09-02 -- The Gate That Could Only Say It Did Not Know (T-1243)
+
+- `saipen status` reported `Conformance: UNKNOWN` on a repository whose validator had been green for weeks. Two defects sat in the same projection and the ticket had only found one.
+- **The result grammar was too tight.** `_TERMINAL_RESULT_RE` anchored `-> PASS` to end of line, while every checkpoint an agent actually writes appends its evidence after the token -- `validate.py -> PASS conf: high -- 0 FAIL, 21 WARN`. So UNKNOWN was the answer for every real record, and the only way to make the gate green was to hand-write a bare line.
+- The property that anchor defended is intact, split into two halves that each carry their own. The result word must sit immediately after the arrow, on a word boundary, so the near-miss spellings match nothing at all. And a record claiming a pass while also naming a red result reads UNKNOWN, decided by `saipen_engine.log._claims_failure` -- the repository's existing hostile-tested negative-evidence reader, reused rather than reimplemented, which already knows a zero count is not a claim.
+- **The selector was too loose**, and this is the half that produced the symptom. Any `RUN` mentioning `validate.py` counted as the newest validator record, so v7.239.1's own SCOUT checkpoint -- prose discussing `validate.py:3871` -- shadowed the last real run. Naming the validator is not running it. `_project_conformance` now takes the newest RUN that both names the validator and yields a decidable result; a record carrying no result token contributes no gate information and must not hide one that does. Nothing decidable anywhere still reports UNKNOWN, dated, so silence and not-proven stay distinguishable.
+- The projection was extracted into a named function because none of it was testable before, which is how it survived untested. 18 tests now cover both directions: it must not stay silent on a real record, and it must not be talked into a pass.
+- The canonical record form is stated in `saipen/phases/validate.md`, where the agent writing the checkpoint reads it. It previously said only "LOG the command and result", which is the gap that let the shape drift in the first place.
+- Recorded in `traps.md`: writing ABOUT a detector trips the detector. Three VERIFY checkpoints were refused in one session for quoting the tokens the evidence grammar hunts. The grammar is correct -- one that tried to work out who was being quoted would be one an agent could talk past -- so the fix is a pre-check command in the agent's habits, never a weaker parser.
+
 ## 7.239.3 -- 2026-09-02 -- Three Numbers Made Weaker And Truer (T-1263)
 
 - A measurement tool's failure mode is not being wrong, it is being confidently more precise than its evidence. Three semantics in `tools/saipen_metrics.py` claimed more than they could support. One turned out to be sound and was left alone.

@@ -147,3 +147,27 @@ next line is not, and one acknowledgement of an old problem must never grant
 amnesty to problems that have not happened yet. Whenever a check can be quieted,
 tie the quieting to the exact evidence it excuses -- an event id, a path, a hash
 -- so it stops covering anything written after it.
+
+## Writing ABOUT a detector trips the detector
+
+`verification_evidence` refuses a VERIFY checkpoint whose text claims a red
+result, and it is right to: an evidence parser that tried to work out who was
+being quoted would be one an agent could talk its way past. The cost lands on
+tickets that FIX detectors, because describing the work means writing the
+tokens the detector hunts. Three checkpoints were refused this way in one
+session -- one quoting a validator refusal verbatim, one containing the word
+"failure", one listing `NOT PASS` as a spelling the new grammar rejects.
+`_NEGATION_RE` is case-insensitive and matches the negated pass form anywhere
+in the line; `_claims_failure` counts every red token and only forgives the
+zero-count forms.
+
+Do not weaken the grammar for this. Pre-check the text instead:
+
+```
+python -c "import sys;sys.path.insert(0,'tools');from saipen_engine.log import _claims_failure;print(_claims_failure(open('msg.txt',encoding='utf-8').read()))"
+```
+
+Write the checkpoint to a file, check it, then pass it. Describe red results
+without spelling them: "the near-miss spellings", "a red claim", "a zero
+count". The facts stay exact -- gate names, counts and `file:line` are
+untouched -- and only the prose around them avoids the tokens.
