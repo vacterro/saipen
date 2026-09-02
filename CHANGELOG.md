@@ -1,6 +1,17 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.240.2 -- 2026-09-02 -- A Duplicated Anchor Disarms A Control (T-1264)
+
+- Three shipped protocol documents showed fresh timestamps mid-session, two of them matching HEAD byte for byte. It read as a phantom writer in a tree where `T-473`'s clobber class is a known open risk. It was neither a phantom nor a gate.
+- `ecd77546` at 15:09:59, author VAC34, committed `saipen/phases/hunt.md` and `saipen/MAINTENANCE.md` directly -- no `ship`/`closure` prefix, no ticket, past the board -- from a session working this repository in parallel. It is an ancestor of HEAD, so v7.240.1 built on top of it without noticing. `extensions/subs/PROTOCOL.md` is the same session's uncommitted work in progress. That is the `T-473` class live, except a commit landed rather than a clobber.
+- **The first hypothesis was wrong and was retracted before it shipped.** `audit_checks.py` was blamed and is innocent: it mutates a `pristine` copytree in a worker root, never the live tree. The `traps.md` entry asserting otherwise had already been written; it was rewritten once the worker root was read. A confidently wrong trap costs more than a missing one.
+- **The real damage.** That commit added a second `deletes, moves and renames nothing` to `hunt.md`. `replace()` is `t.replace(old, new, 1)` -- first occurrence only. So the control `hunt.md regains deletion authority` mutated one, the validator kept finding the other, and a red control stopped being evidence with nobody having touched the control. Third instance of this class after the CHANGELOG anchor (v7.235.x).
+- Surveyed rather than spot-fixed: all 106 `replace` anchors inspected through their closures against their target files. Exactly two are not unique. `hunt.md` moved to a new `replace_all`; `.saipen/BOARD.md`'s four `v8 Concurrent Mode` still produces its finding and is now visible rather than incidental.
+- A dead control now explains itself: `-- its anchor appears 2 times in the target, and \`replace\` mutates only the first; use \`replace_all\``. Previously it said only that the check no longer goes red, which names the symptom and not the cause.
+- The surviving `PROTOCOL.md` text was adjudicated on its merits and adopted with one correction. Its claim is true -- `LOG_RE` requires a `T-` prefix in the ticket slot, so `[WIKI-002]` and `[HUNT-003]` are not tickets to the parser -- but it overstated the parser as `T-<digits>`, when that narrower shape is a `validate.py` WARN one layer up. Corrected, and pinned by 7 tests so a rule about a parser is worth what the test that pins the parser is worth.
+- `ecd77546` was deliberately not reverted or re-attributed: it is committed, an ancestor, and its content is sound. Repairing the gate it broke is this ticket's business; adjudicating a foreign commit's authorship is not.
+
 ## 7.240.1 -- 2026-09-02 -- Stale, And Now It Says Of What (T-1242)
 
 - The ticket's headline was already closed. The installed router at the `.claude` home is 5063 bytes -- the post-W4 4972-byte file in CRLF -- not the 13 KB pre-W4 fork the ticket describes; v7.234.x and v7.235.x did that between them.

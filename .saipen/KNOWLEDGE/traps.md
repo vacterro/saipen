@@ -171,3 +171,28 @@ Write the checkpoint to a file, check it, then pass it. Describe red results
 without spelling them: "the near-miss spellings", "a red claim", "a zero
 count". The facts stay exact -- gate names, counts and `file:line` are
 untouched -- and only the prose around them avoids the tokens.
+
+## An mtime is not evidence, and a concurrent committer is real
+
+Three shipped protocol documents showed fresh timestamps mid-session, two of
+them matching HEAD byte for byte, and it read as a phantom writer in a tree
+where `T-473`'s clobber class is a known open risk. It was neither a phantom
+nor a gate: `ecd77546` at 15:09:59, authored by a session working this repo in
+parallel, committing `saipen/phases/hunt.md` and `saipen/MAINTENANCE.md`
+directly -- no `ship`/`closure` prefix, no ticket, straight past the board. The
+third file was the same session's uncommitted work in progress. The v7.240.1
+release built on top of it without noticing.
+
+Two lessons, and the second is the expensive one.
+
+`audit_checks.py` was suspected and is innocent: it mutates a `pristine`
+copytree in a worker root, never the live tree. Do not repeat that guess.
+
+The real cost: that commit added a second `deletes, moves and renames nothing`
+to `hunt.md`, and `replace()` mutates only the FIRST occurrence -- so the
+control `hunt.md regains deletion authority` mutated one, the validator still
+found the other, and a red control stopped being evidence with nobody having
+touched it. Third instance of this class after the CHANGELOG anchor (T-1245).
+**A duplicated anchor is a silently disarmed control.** When editing a document
+that `audit_checks.py` names in `CASES`, check whether the new text repeats an
+anchor phrase.

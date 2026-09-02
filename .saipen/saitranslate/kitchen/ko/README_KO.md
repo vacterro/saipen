@@ -26,7 +26,7 @@
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.240.1** | [사양](SPEC.md) | [가이드](GUIDE.md) | [코어](saipen/CORE.md) | [유지보수](saipen/MAINTENANCE.md) | [스타일](saipen/STYLE.md) | [UI](saipen/UI.md) | [일관성](saipen/CONFORMANCE.md) |MIT
+**v7.240.2** | [사양](SPEC.md) | [가이드](GUIDE.md) | [코어](saipen/CORE.md) | [유지보수](saipen/MAINTENANCE.md) | [스타일](saipen/STYLE.md) | [UI](saipen/UI.md) | [일관성](saipen/CONFORMANCE.md) |MIT
 
 **빠른 키:** `cc`는 프로젝트 컨텍스트를 수렴까지 계속합니다 (설정된 실행 중인 목표가 있으면 재개합니다), `sss`는 코드를 건드리지 않고 상태를 보여주며, `ss`는 체크포인트를 저장하고 멈춥니다. [전체 19 키 맵 보기](saipen/RFC.md#110-command-surface). 키릴 문자 쌍둥이도 작동합니다: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 

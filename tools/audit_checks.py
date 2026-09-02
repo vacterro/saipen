@@ -938,7 +938,45 @@ def force_converge(text: str, next_action: str = '"PHASE ADD"'):
 
 
 def replace(old: str, new: str):
-    return lambda t: t.replace(old, new, 1)
+    """Mutate the FIRST occurrence. Correct only while the anchor is unique.
+
+    A control that anchors on a phrase appearing twice mutates one and leaves
+    the other, so a "the document must still say X" check keeps passing and the
+    control silently stops being evidence -- nobody touched the control, and a
+    later edit to the document killed it. That happened to `hunt.md regains
+    deletion authority` when `ecd77546` added a second "deletes, moves and
+    renames nothing" to `saipen/phases/hunt.md`.
+
+    `anchor_occurrences` below is what turns that from a mystery into a
+    sentence, and `replace_all` is the fix for a phrase that is legitimately
+    repeated. This stays first-only because several controls need exactly one
+    edit to produce exactly one finding.
+    """
+    fn = lambda t: t.replace(old, new, 1)  # noqa: E731
+    fn.anchor = old
+    return fn
+
+
+def replace_all(old: str, new: str):
+    """Mutate EVERY occurrence, for an anchor the document repeats on purpose."""
+    fn = lambda t: t.replace(old, new)  # noqa: E731
+    fn.anchor = old
+    return fn
+
+
+def anchor_occurrences(mutation, path: Path) -> int | None:
+    """How many times a replace-style mutation's anchor appears in its target.
+
+    None when the mutation is not anchor-based (a callable, a DELETE, a raw
+    WRITE) or the file is unreadable -- those cannot fail this way.
+    """
+    anchor = getattr(mutation, "anchor", None)
+    if not isinstance(anchor, str) or not anchor:
+        return None
+    try:
+        return path.read_text(encoding="utf-8", errors="replace").count(anchor)
+    except OSError:
+        return None
 
 
 def bump_second_changelog_entry(text: str) -> str:
@@ -2251,7 +2289,11 @@ CASES: list[tuple[str, str, object, str]] = [
     (
         "hunt.md regains deletion authority",
         "saipen/phases/hunt.md",
-        replace("deletes, moves and renames nothing", "may delete obvious junk it finds"),
+        # replace_all, not replace: hunt.md states this twice on purpose (the
+        # rule, and the reminder beside the `hh` re-entry). Mutating one left
+        # the other standing, the validator kept finding the phrase, and the
+        # control stopped being evidence the moment ecd77546 added the second.
+        replace_all("deletes, moves and renames nothing", "may delete obvious junk it finds"),
         "hunt-no-mutation",
     ),
     (
@@ -3893,7 +3935,12 @@ def main() -> int:
                         local_skipped.append(label)
                         continue
                     if not matched(validator_output(worker_root, gate), expected, gate):
-                        local_dead.append((label, expected))
+                        # Carry WHY, not just THAT. A dead control is almost
+                        # always an anchor that stopped being unique, and the
+                        # count is the whole diagnosis (T-1264).
+                        local_dead.append(
+                            (label, expected, anchor_occurrences(mutation, worker_root / rel))
+                        )
                 finally:
                     restore_case_files(saved)
             if validator_output(worker_root) != control:
@@ -3945,10 +3992,20 @@ def main() -> int:
             f"missing, or its anchor text is (a LOG anchor sealed into "
             f".saipen/logs/ is the usual cause)"
         )
-    for label, expected in dead:
+    for entry in dead:
+        label, expected = entry[0], entry[1]
+        occurrences = entry[2] if len(entry) > 2 else None
+        why = ""
+        if occurrences == 0:
+            why = " -- its anchor is no longer in the file"
+        elif occurrences and occurrences > 1:
+            why = (
+                f" -- its anchor appears {occurrences} times in the target, and "
+                f"`replace` mutates only the first; use `replace_all`"
+            )
         print(
             f"FAIL: {label} -- the validator did not report {expected!r}. "
-            f"That check no longer goes red on its own condition"
+            f"That check no longer goes red on its own condition{why}"
         )
 
     live = len(CASES) - len(dead) - len(skipped) - len(always)
