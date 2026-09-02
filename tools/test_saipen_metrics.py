@@ -193,9 +193,9 @@ class TranscriptTests(unittest.TestCase):
             data = m.collect("2026-08-01", Path(tmp))
 
         cost = data["token_cost"]
-        self.assertIsNone(cost["window_cost_units_per_ticket_closed"])
+        self.assertIsNone(cost["window_units_per_ticket_closed"])
         self.assertIn("cannot be aligned", cost["window_ratio_withheld"])
-        self.assertEqual(cost["token_cost_units"], 1000)
+        self.assertEqual(cost["normalized_units"], 1000)
         # The renderer must survive the withheld case rather than concatenate None.
         self.assertIn("withheld", m.render(data))
 
@@ -210,7 +210,7 @@ class TranscriptTests(unittest.TestCase):
 
         cost = data["token_cost"]
         self.assertEqual(data["throughput"]["tickets_closed"], 0)
-        self.assertIsNone(cost["window_cost_units_per_ticket_closed"])
+        self.assertIsNone(cost["window_units_per_ticket_closed"])
         self.assertEqual(cost["window_ratio_withheld"], "no tickets closed in the report window")
         self.assertIn("no tickets closed in the report window", m.render(data))
 
@@ -227,6 +227,54 @@ class ReportTests(unittest.TestCase):
             data["not_measured"],
             ["outcome quality vs a plain agent", "human wall-clock saved"],
         )
+
+class EmptyWindowReportingTests(unittest.TestCase):
+    """A directory that was read and held nothing is not a directory nobody opened."""
+
+    def test_no_directory_reads_as_not_scanned(self):
+        data = m.collect("2026-08-01")
+        self.assertIn("not scanned", m.render(data))
+
+    def test_scanned_but_empty_window_says_so_and_keeps_the_file_count(self):
+        import tempfile
+
+        rows = [{"timestamp": "2020-01-01T00:00:00Z", "usage": {"input_tokens": 500}}]
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "session.jsonl"
+            with path.open("w", encoding="utf-8") as handle:
+                import json
+
+                handle.write(json.dumps(rows[0]) + "\n")
+            data = m.collect("2026-08-01", Path(tmp))
+
+        text = m.render(data)
+        self.assertNotIn("not scanned", text)
+        self.assertIn("scanned 1 transcript file(s)", text)
+        self.assertIn("1 before it", text)
+        self.assertEqual(data["token_cost"]["transcript_files"], 1)
+        self.assertEqual(data["token_cost"]["usage_records_in_window"], 0)
+
+
+class UnitHonestyTests(unittest.TestCase):
+    def test_unit_basis_denies_a_monetary_reading(self):
+        """Output is weighted 1.0 while real output pricing is several times input."""
+        self.assertEqual(m.USAGE_WEIGHTS["output_tokens"], 1.0)
+        self.assertIn("not money", m.UNIT_BASIS)
+        self.assertIn("face value", m.UNIT_BASIS)
+
+    def test_basis_is_printed_beside_the_number(self):
+        import tempfile
+
+        rows = {"timestamp": "2026-08-10T00:00:00Z", "usage": {"input_tokens": 10}}
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "s.jsonl"
+            with path.open("w", encoding="utf-8") as handle:
+                import json
+
+                handle.write(json.dumps(rows) + "\n")
+            text = m.render(m.collect("2026-08-01", Path(tmp)))
+        self.assertIn("normalized units in window", text)
+        self.assertIn("not money", text)
 
 
 if __name__ == "__main__":

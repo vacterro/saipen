@@ -21,17 +21,19 @@ what it measures is not evidence.
     python tools/saipen_metrics.py --json
     python tools/saipen_metrics.py --transcripts ~/.claude/projects/<project>
 
-Token cost is the one number the repository cannot hold, because it lives in
+Token traffic is the one number the repository cannot hold, because it lives in
 agent transcripts. `--transcripts DIR` scans JSONL session files for per-message
 `usage` objects, keeping only records whose own timestamp falls inside the
 report window, so the token sample and the ticket count describe the same days.
 The scan is deliberately vendor-shaped rather than vendor-specific: any harness
 that writes one JSON object per line with an `input_tokens`/`output_tokens`
-usage record is read the same way, and a directory that yields nothing is
-reported as nothing rather than as zero cost.
+usage record is read the same way. Three outcomes stay distinct: no directory
+given, a directory read that held nothing datable in the window, and records
+found. Collapsing the middle case into "not scanned" discards work that was
+actually done.
 
-The resulting ratio is WINDOW economics, deliberately named that way: cost units
-consumed in the window over tickets closed in the window. The numerator includes
+The resulting ratio is WINDOW economics, deliberately named that way: normalized
+units consumed in the window over tickets closed in the window. The numerator includes
 open tickets, abandoned attempts, audits and research, so it compares one period
 against another and never says what a single ticket cost. Attributing spend to a
 ticket would need attribution state this tool refuses to grow -- a precisely
@@ -45,10 +47,14 @@ result, not a gap to paper over. It is a LOWER BOUND even when reported: the
 store holds one harness's sessions, while a ticket may have been worked by
 several.
 
-Cache reads and writes are billed at different rates, so the totals are also
-reported as cost UNITS -- raw counts multiplied by published price ratios. The
-raw token counts stay printed beside them. Weighting changes what the work cost,
-never how many tokens were processed.
+Cache reads and writes carry different rates, so the totals are also reported
+as NORMALIZED UNITS: one unit is one fresh input token of traffic, with cache
+writes converted at 1.25x and cache reads at 0.1x. Those two are real published
+ratios. Output is counted at face value and not at its price, which is several
+times input, so the total is a usage proxy and never money -- enough to compare
+one period against another, which is the only question asked here. The raw token
+counts stay printed beside it. Weighting changes how traffic is compared, never
+how many tokens were processed.
 
 What it still CANNOT measure, and will not pretend to:
 
@@ -270,6 +276,23 @@ USAGE_WEIGHTS = {
     "cache_read_input_tokens": 0.1,
 }
 
+# What that total is, stated at its weakest truthful strength. Only the cache
+# ratios are real published multipliers against a fresh input token: a cache
+# write costs 1.25x and a cache read 0.1x. Output is counted at face value,
+# and real output pricing is several times input, so this total is NOT money
+# and no arithmetic on it produces money. It is a normalized usage proxy: one
+# unit is one fresh input token's worth of traffic, cache traffic converted at
+# its published ratio, output counted as usage rather than as price. That is
+# enough to compare one SAIPEN period against another, which is the only
+# question this report asks. Making it monetary would need a per-model pricing
+# basis and model attribution per record -- a subsystem, for an answer nobody
+# here needs.
+UNIT_BASIS = (
+    "normalized proxy: 1 unit = 1 fresh input token of traffic; cache write x1.25 "
+    "and cache read x0.1 are published ratios, output is counted at face value and "
+    "NOT at its price, so this is not money"
+)
+
 
 def record_date(record: dict) -> str:
     """YYYY-MM-DD from a transcript record's own ISO timestamp, or '' if absent."""
@@ -468,6 +491,17 @@ def collect(since: str, transcripts: Path | None = None) -> dict:
             "releases_per_day": round(len(releases) / days, 2),
             "tickets_per_day": round(len(ticket_hits) / days, 2),
         },
+        # `tickets_reopened_across_releases` counts a ticket named in more than
+        # one release-bearing subject. Checked against this repository rather
+        # than assumed, over 2026-08-01..248697fa: tickets named in BOTH a
+        # ship/release subject and a closure subject number 0, so the two
+        # conventions never double-count the same ticket -- the old `release:`
+        # subjects carried the id (17 of 113 releases), the current `ship v*`
+        # subjects do not and the id lives in the paired closure commit. Of 82
+        # tickets exactly 2 carry more than one hit, T-528 and T-534, and every
+        # one of their subjects says "second pass", "third pass" or "hotfix".
+        # Re-run that split before trusting this number on another repository:
+        # a convention that names the ticket in both halves would inflate it.
         "rework": {
             "tickets_reopened_across_releases": sum(1 for n in ticket_hits.values() if n > 1),
             "backward_transitions": signals["backward_transitions"],
@@ -504,15 +538,16 @@ def collect(since: str, transcripts: Path | None = None) -> dict:
             "sample_first": usage.get("first"),
             "sample_last": usage.get("last"),
             "raw_tokens": usage.get("raw_tokens", {}),
-            "token_cost_units": usage.get("cost_units"),
-            "cost_unit_ratios": USAGE_WEIGHTS,
-            "window_cost_units_per_ticket_closed": per_ticket,
+            "normalized_units": usage.get("cost_units"),
+            "unit_basis": UNIT_BASIS,
+            "unit_ratios": USAGE_WEIGHTS,
+            "window_units_per_ticket_closed": per_ticket,
             "window_ratio_withheld": per_ticket_withheld,
             "window_ratio_meaning": (
-                "cost units consumed in window / tickets closed in window -- period "
+                "normalized units consumed in window / tickets closed in window -- period "
                 "economics, not the cost of any one ticket"
             ),
-            "sample_scope": "one harness's session store; a lower bound on total cost",
+            "sample_scope": "one harness's session store; a lower bound on total traffic",
         },
         "not_measured": [
             "outcome quality vs a plain agent",
@@ -584,11 +619,26 @@ def render(data: dict) -> str:
 
 
 def render_token_cost(tc: dict) -> str:
+    # Three distinct outcomes, and collapsing any two of them throws away work
+    # that was actually done. No directory was given; a directory was read and
+    # held nothing datable inside the window; records were found. The middle
+    # case used to print "not scanned", which told a reader the opposite of
+    # what happened -- the files were inspected, and that is evidence.
+    if not tc.get("transcript_files"):
+        return "token traffic\n  not scanned -- pass --transcripts DIR of JSONL sessions"
     if not tc.get("usage_records_in_window"):
-        return "token cost\n  not scanned -- pass --transcripts DIR of JSONL sessions"
+        return (
+            "token traffic\n  scanned %d transcript file(s); no dated usage record "
+            "falls inside the report window (%d before it, %d undated)"
+            % (
+                tc["transcript_files"],
+                tc.get("usage_records_before_window", 0),
+                tc.get("usage_records_undated", 0),
+            )
+        )
     raw = tc["raw_tokens"]
     lines = [
-        "token cost -- %d session file(s), %d usage records in window (%s..%s)"
+        "token traffic -- %d session file(s), %d usage records in window (%s..%s)"
         % (
             tc["transcript_files"],
             tc["usage_records_in_window"],
@@ -601,18 +651,19 @@ def render_token_cost(tc: dict) -> str:
     for key in USAGE_WEIGHTS:
         lines.append("  %-32s %14d" % (key, raw.get(key, 0)))
     lines.append(
-        "  cost units = tokens priced at %s"
+        "  normalized at %s"
         % ", ".join("%s x%s" % (k.replace("_tokens", ""), v) for k, v in USAGE_WEIGHTS.items())
     )
-    lines.append("  %-32s %14d" % ("token cost units in window", tc["token_cost_units"]))
-    ratio = tc["window_cost_units_per_ticket_closed"]
+    lines.append("  %-32s %14d" % ("normalized units in window", tc["normalized_units"]))
+    lines.append("  " + tc["unit_basis"])
+    ratio = tc["window_units_per_ticket_closed"]
     if ratio is None:
         lines.append(
-            "  window cost units per ticket: withheld -- "
+            "  window units per ticket: withheld -- "
             + (tc["window_ratio_withheld"] or "reason not recorded")
         )
     else:
-        lines.append("  %-32s %14d" % ("window cost units per ticket", ratio))
+        lines.append("  %-32s %14d" % ("window units per ticket", ratio))
         lines.append("  " + tc["window_ratio_meaning"])
     return "\n".join(lines)
 
