@@ -20,7 +20,12 @@ heuristic is legal.
 If ephemeral read-only workers exist, dispatch the six categories as one
 bounded batch and merge results. They are **EPHEMERAL WORKERS, not SubSaipen instances**: one assigned investigation, one returned result, then disappear;
 never enter `MANIFEST.md`, never receive STATE/BOARD/LOG/kitchen or lifecycle state, and never mutate `.saipen/`. Otherwise run sequentially. Either route
-uses this order and a five-ticket cap:
+uses this order and a five-ticket cap. **The cap is a batch size, not a
+ceiling on completeness**: a pass that files the full five has not finished
+looking. An explicit `hh` re-enters HUNT after the filed batch is worked off,
+and keeps doing so until a pass files fewer than five, bounded by the goal caps
+in MAINTENANCE § 2.4 rather than by a private counter. `aa`/MARKHUNT keeps its
+own uncapped single-pass role; this is repetition, not the removal of a cap.
 
 1. failing tests;
 2. commits unverified in LOG;
@@ -31,9 +36,18 @@ uses this order and a five-ticket cap:
 6. dead code and orphan files, proven by references plus entry/config/docs.
 
 Before filing, search every BOARD section, including BLOCKED. An existing
-finding is not new. Classify new findings by priority and ticket them; ambiguous
-findings require user confirmation. Small obvious work may route to SCOUT,
-otherwise PLAN.
+finding is not new. Classify new findings by priority and ticket them.
+
+An ambiguous finding is never a reason to stop the sweep and never silently
+dropped. Ticket it at the lowest priority with `AMBIGUOUS:` naming the exact
+question. It stays workable when that question is answerable from evidence
+inside the project; one that genuinely needs the operator moves to `## BLOCKED`
+with the question as its blocker, which is where a run already parks work whose
+answer it must not invent. Nothing here becomes a mutation that was not one
+before: HUNT still deletes, moves and renames nothing, and CLEAN keeps every
+destructive path and its confirmation boundaries.
+
+Small obvious work may route to SCOUT, otherwise PLAN.
 
 **HUNT deletes, moves and renames nothing.** It detects, classifies, tickets,
 and reports. Its only mutations are canonical BOARD/LOG/STATE bookkeeping.

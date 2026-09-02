@@ -26,6 +26,16 @@ or adopted before maintenance begins.
   command. **The halt requirement governs the AUTONOMOUS transition only**;
   explicit `saipen hunt` uses CORE/COMMANDS from-any-phase routing, while
   FINISH priority and the canonical checkpoint still apply.
+- **An explicit `hh` that files at least one ticket does not stop at the
+  filing.** It sets `execution_intent: goal` with the sweep as the objective,
+  writes the `DEC: goal_waves 0->1` line § 2.4 requires, and enters `SCOUT` on
+  the top new ticket without pausing; § 2.4's caps and Exit conditions then
+  govern the run exactly as they do for `saipen goal <text>`. Filing and then
+  halting made the press mean "find it" when the operator meant "find it and
+  fix it", and left the findings to be re-picked by hand. This reuses the goal
+  valve rather than inventing a second autonomy path, so caps, counters and
+  exits stay in one place. A clean `hh` still routes by the rule above, and
+  `mode: read-only` still MUST NOT enter `ADD` or set goal intent.
 - Explicit CLEAN, MARKHUNT and TRANSLATE command routing belongs to
   CORE/COMMANDS; their local actions, isolation and exits live only in their
   phase documents.
