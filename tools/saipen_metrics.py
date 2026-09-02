@@ -147,9 +147,23 @@ def is_self_surface(path: str) -> bool:
     return path.startswith("README") and path.endswith(".md")
 
 
+def git_since(since: str) -> str:
+    """A date git reads as MIDNIGHT, not as this moment on that date.
+
+    `git log --since=2026-09-02` does not mean "from the start of 2026-09-02".
+    Approxidate resolves a dateless day using the CURRENT time of day, so on a
+    day carrying nine releases that argument returned zero commits while
+    `--since=2026-09-01` returned twenty-eight. The LOG side of this report
+    compares date strings and is midnight-anchored, so the two halves of one
+    window meant different instants and the report lost a day without saying
+    so. Spelling the time out is the whole fix.
+    """
+    return f"{since} 00:00:00"
+
+
 def rev_at(since: str) -> str:
     """The last commit strictly before the window, or the root commit."""
-    rev = git("rev-list", "-1", "--before=" + since, "HEAD").strip()
+    rev = git("rev-list", "-1", "--before=" + git_since(since), "HEAD").strip()
     if rev:
         return rev
     roots = git("rev-list", "--max-parents=0", "HEAD").strip().splitlines()
@@ -181,7 +195,7 @@ def machinery_lines(rev: str) -> int:
 
 
 def window_commits(since: str) -> list:
-    raw = git("log", "--since=" + since, "--pretty=%h\x1f%s", "HEAD")
+    raw = git("log", "--since=" + git_since(since), "--pretty=%h\x1f%s", "HEAD")
     out = []
     for line in raw.splitlines():
         if "\x1f" not in line:
@@ -412,7 +426,8 @@ def collect(since: str, transcripts: Path | None = None) -> dict:
     total_paths = set()
     lines_total = 0
     lines_external = 0
-    for raw in git("log", "--since=" + since, "--numstat", "--pretty=", "HEAD").splitlines():
+    numstat = git("log", "--since=" + git_since(since), "--numstat", "--pretty=", "HEAD")
+    for raw in numstat.splitlines():
         parts = raw.rstrip("\n").split("\t")
         if len(parts) != 3:
             continue

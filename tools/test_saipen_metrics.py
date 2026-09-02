@@ -228,6 +228,41 @@ class ReportTests(unittest.TestCase):
             ["outcome quality vs a plain agent", "human wall-clock saved"],
         )
 
+class WindowAnchorTests(unittest.TestCase):
+    """Both halves of one window must mean the same instant.
+
+    `git log --since=2026-09-02` does not mean midnight: approxidate resolves a
+    dateless day using the current time of day, so on a day carrying ten
+    releases that argument returned zero commits while the day before returned
+    twenty-eight. The LOG side compares date strings and was always
+    midnight-anchored, so the report silently lost a day.
+    """
+
+    def test_a_bare_date_is_spelled_out_to_midnight(self):
+        self.assertEqual(m.git_since("2026-09-02"), "2026-09-02 00:00:00")
+
+    def test_today_is_not_an_empty_window(self):
+        """The regression itself: a window naming today must see today."""
+        import datetime
+        import subprocess
+
+        today = datetime.date.today().isoformat()
+        anchored = subprocess.run(
+            ["git", "-C", str(m.REPO), "log", "--since=" + m.git_since(today), "--oneline"],
+            capture_output=True,
+            text=True,
+        ).stdout
+        bare = subprocess.run(
+            ["git", "-C", str(m.REPO), "log", "--since=" + today, "--oneline"],
+            capture_output=True,
+            text=True,
+        ).stdout
+        if not anchored.strip():
+            self.skipTest("no commits today in this clone")
+        self.assertGreaterEqual(len(anchored.splitlines()), len(bare.splitlines()))
+        self.assertEqual(m.window_commits(today) and True, True)
+
+
 class EmptyWindowReportingTests(unittest.TestCase):
     """A directory that was read and held nothing is not a directory nobody opened."""
 

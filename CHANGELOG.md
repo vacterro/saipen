@@ -1,6 +1,16 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.241.1 -- 2026-09-02 -- One Window, Two Instants (T-1265)
+
+- `saipen_metrics.py` windowed its two evidence sources differently and said nothing about it. The LOG side compares date strings, so `--since 2026-09-02` meant midnight. The git side handed the bare date to `git log --since`, where approxidate resolves a dateless day using the CURRENT time of day -- so the same argument meant "since 16:xx" and every commit made earlier that day vanished.
+- Measured on a day carrying ten releases: `git log --since=2026-09-02` returned **0** commits, `--since=2026-09-01` returned 28, and `--since='2026-09-02 00:00:00'` returns 22.
+- `git_since` spells the midnight out, and every date reaching git goes through it -- `window_commits`, the `--numstat` pass, and `rev_at`'s `--before` baseline, which drifted with the clock too. The third call site was missed by the first edit and caught by re-running the report rather than by reading the diff, which is why the proof recorded here is the end-to-end number.
+- Same `--since 2026-09-02` before and after: 0 commits / 0 releases / 0 tickets, then 22 commits / 10 releases / 10 tickets closed, with the per-ticket ratio no longer withheld.
+- The LOG side was deliberately left alone. It was already correct, and a fix that moved both halves to meet in the middle would have made the report agree with itself while agreeing with neither calendar.
+- Found by running the instrument on its own repository, which is the use it was built for. The default window sits five weeks back, which is exactly why the skew had never surfaced.
+- Two tests: the anchoring asserted directly, and the regression pinned by comparing the anchored and bare forms against the live clone, so the halves cannot drift apart again unnoticed.
+
 ## 7.241.0 -- 2026-09-02 -- Two Gates, One Condition, Opposite Answers (T-1181)
 
 - Caught in the act rather than reasoned about. During the v7.240.1 ship, `validate.py` reported `execution_intent: goal with goal_waves=0/goal_tickets=20 is the tripped safety valve (caps 3/20), but next_action='PHASE SHIP T-1242'`, while `saipen continue`'s reconciliation returned `code: CLEAN` on the same STATE in the same minute.
