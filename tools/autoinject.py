@@ -31,6 +31,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -316,6 +317,180 @@ def stamp_targets(digest: str, source_head: str | None = None) -> list[str]:
             # The agent home is what distinguishes them.
             done.append(next((p for p in t.parts if p.startswith(".")), str(t)))
     return done
+
+
+# ---------------------------------------------------------------------------
+# Distribution freshness projection (T-1271)
+# ---------------------------------------------------------------------------
+#
+# Every installed home already carries a stamp naming the source head it was
+# built from, and the scheduled runner already writes why a run published
+# nothing. Both were unreadable from the project: `saipen status` said nothing
+# about injection, so "does an installed agent home run current SAIPEN" could
+# only be answered by opening a log under LOCALAPPDATA. The guard that stalls
+# distribution on a dirty source is correct -- it refuses to publish unproven
+# bytes -- but one uncommitted edit stalls it indefinitely and only that log
+# said so.
+#
+# Everything below READS. It opens the stamps, a bounded tail of the runner's
+# log, and git; it creates nothing, stamps nothing, and never triggers a run.
+
+#: Bytes of the runner's log to read from the end. The log grows forever and
+#: only the newest run can explain today's staleness.
+LOG_TAIL_BYTES = 65536
+
+_RUN_START = "=== saipen scheduled inject run="
+_RUN_END = "=== end rc="
+#: The runner prefixes every line with `YYYY-MM-DD HH:MM:SS `. Splitting on
+#: the first space alone leaves the clock glued to the payload, which is how
+#: `SKIP: DIRTY_SOURCE` read as `09:46:00 SKIP: ...` and matched nothing.
+_LOG_STAMP = re.compile(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\s+")
+
+
+def scheduler_log() -> Path | None:
+    """The scheduled injector's log, or None where there is no scheduler.
+
+    The runner is Windows-only today (`bootstrap/schedule-run.ps1` writes to
+    `%LOCALAPPDATA%/saipen/inject.log`). Absence is a normal answer on every
+    other host and must never read as a failure.
+    """
+    base = os.environ.get("LOCALAPPDATA")
+    if not base:
+        return None
+    path = Path(base) / "saipen" / "inject.log"
+    return path if path.is_file() else None
+
+
+def last_inject_run(log: Path | None = None) -> dict | None:
+    """The newest complete-or-partial run block in the runner's log.
+
+    Returns None when there is no log at all. A run that is still in flight
+    has no `rc`, which is reported as unknown rather than as a success.
+    """
+    log = log if log is not None else scheduler_log()
+    if log is None or not log.is_file():
+        return None
+    try:
+        size = log.stat().st_size
+        with log.open("rb") as handle:
+            if size > LOG_TAIL_BYTES:
+                handle.seek(size - LOG_TAIL_BYTES)
+            raw = handle.read()
+    except OSError:
+        return None
+    lines = raw.decode("utf-8", errors="replace").splitlines()
+    start = None
+    for index in range(len(lines) - 1, -1, -1):
+        if _RUN_START in lines[index]:
+            start = index
+            break
+    if start is None:
+        return None
+    block = lines[start:]
+    run: dict = {"rc": None, "skip": None, "head": None, "dirty": [], "at": ""}
+    stamp, _, _ = block[0].partition(_RUN_START)
+    run["at"] = stamp.strip()
+    for line in block:
+        body = _LOG_STAMP.sub("", line.strip()).strip()
+        if body.startswith("SKIP:"):
+            run["skip"] = body[len("SKIP:") :].strip()
+        elif body.startswith("dirty:"):
+            detail = body[len("dirty:") :].strip()
+            if detail:
+                run["dirty"].append(detail)
+        elif "head=" in body:
+            run["head"] = body.split("head=", 1)[1].split()[0]
+        elif body.startswith(_RUN_END):
+            tail = body[len(_RUN_END) :].strip().rstrip("=").strip()
+            try:
+                run["rc"] = int(tail)
+            except ValueError:
+                run["rc"] = None
+    return run
+
+
+def distribution_report(source_head: str | None = None) -> dict:
+    """Read-only answer to: do the installed agent homes run current SAIPEN?
+
+    `installed` counts only homes that exist -- an agent this machine never set
+    up is not stale, it is absent. A home whose stamp predates the injector's
+    head-recording carries no `source_head`; that is reported as UNKNOWN, never
+    silently counted fresh, because a copy that cannot say what it is built
+    from is exactly the case the stamp exists to expose.
+    """
+    head = source_head or _source_head()
+    homes: list[dict] = []
+    for target in TARGETS:
+        if not target.is_dir():
+            continue
+        name = next((p for p in target.parts if p.startswith(".")), str(target))
+        record = read_stamp(target) or {}
+        carried = record.get("source_head")
+        homes.append(
+            {
+                "home": name,
+                "source_head": carried,
+                "installed_at": record.get("installed_at"),
+                "stale": bool(head) and carried != head,
+                "unknown": not carried,
+            }
+        )
+    heads = [h for h in (item["source_head"] for item in homes) if h]
+    newest = None
+    if homes:
+        dated = [item for item in homes if item["installed_at"] and item["source_head"]]
+        if dated:
+            newest = max(dated, key=lambda item: item["installed_at"])["source_head"]
+        elif heads:
+            newest = heads[0]
+    run = last_inject_run()
+    blocked = None
+    if run is not None and (run.get("skip") or (run.get("rc") not in (0, None))):
+        blocked = run.get("skip") or f"rc={run.get('rc')}"
+    stale = [item["home"] for item in homes if item["stale"]]
+    return {
+        "source_head": head,
+        "installed": len(homes),
+        "stale": len(stale),
+        "stale_homes": stale,
+        "unknown": len([item for item in homes if item["unknown"]]),
+        "newest_installed_head": newest,
+        "homes": homes,
+        "blocked": blocked,
+        "blocking_paths": (run or {}).get("dirty") or [],
+        "last_run_at": (run or {}).get("at") or None,
+        "scheduler_log": str(scheduler_log()) if scheduler_log() else None,
+        # AC-04: a fully current set is a POSITIVE answer, not an empty
+        # section. "Nothing printed" and "everything is current" have to be
+        # distinguishable or the report is only trustworthy when it complains.
+        "fresh": bool(homes) and not stale and not blocked,
+    }
+
+
+def distribution_line(report: dict) -> str:
+    """One operator sentence from `distribution_report`. Never a verdict."""
+    if not report["installed"]:
+        return "distribution: no installed agent home on this machine"
+    if report["fresh"]:
+        return (
+            f"distribution: {report['installed']} home(s) current at "
+            f"{str(report['source_head'] or '?')[:12]}"
+        )
+    parts = [
+        f"distribution: {report['stale']} of {report['installed']} home(s) stale",
+        f"newest installed head {str(report['newest_installed_head'] or 'unknown')[:12]}",
+        f"source head {str(report['source_head'] or 'unknown')[:12]}",
+    ]
+    if report["unknown"]:
+        parts.append(f"{report['unknown']} home(s) carry no head")
+    if report["blocked"]:
+        detail = f"injection blocked: {report['blocked']}"
+        if report["blocking_paths"]:
+            shown = ", ".join(report["blocking_paths"][:3])
+            more = len(report["blocking_paths"]) - 3
+            detail += f" ({shown}{f', +{more} more' if more > 0 else ''})"
+        parts.append(detail)
+    return " -- ".join(parts)
 
 
 def state_report() -> list[str]:

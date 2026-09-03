@@ -865,6 +865,34 @@ def _status(project_root: Path, as_json: bool) -> int:
         # reported as a condition, never allowed to hide behind a green status.
         payload["audit_inbox"] = {"error": f"{type(exc).__name__}: {exc}"}
 
+    # T-1271: whether an installed agent home runs current SAIPEN was
+    # answerable only by opening a log under LOCALAPPDATA. The stamps and the
+    # runner's log already held the answer; nothing surfaced it here. This
+    # reads both and writes nothing -- it never stamps, never injects and
+    # never triggers a run.
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from autoinject import distribution_line, distribution_report
+
+        _dist = distribution_report()
+        if _dist["installed"]:
+            payload["distribution"] = {
+                "installed": _dist["installed"],
+                "stale": _dist["stale"],
+                "unknown": _dist["unknown"],
+                "fresh": _dist["fresh"],
+                "source_head": _dist["source_head"],
+                "newest_installed_head": _dist["newest_installed_head"],
+                "blocked": _dist["blocked"],
+                "blocking_paths": _dist["blocking_paths"][:5],
+                "summary": distribution_line(_dist),
+            }
+    except Exception as exc:
+        # Distribution is an observation, not terminal truth: a projection
+        # failure is reported as a condition, never allowed to hide behind a
+        # green status.
+        payload["distribution"] = {"error": f"{type(exc).__name__}: {exc}"}
+
     parked = _parked_work(board["tickets"], state)
     if parked:
         payload["parked_work"] = parked

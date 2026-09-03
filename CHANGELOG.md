@@ -1,6 +1,17 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.248.0 -- 2026-09-03 -- Does The Installed Copy Run This? (T-1271)
+
+- `saipen status` carried zero mentions of injection, so "does an installed agent home run current SAIPEN" was unanswerable without opening `%LOCALAPPDATA%/saipen/inject.log`. **Measured when the ticket was written: all four homes held 7.241.1 while HEAD was two releases ahead, and every scheduled run since 18:31 had skipped with `SKIP DIRTY_SOURCE`.**
+- The guard is right and stays: the runner refuses to publish a dirty source, because publishing unproven bytes to four agent homes is worse than publishing nothing. The defect was that **one uncommitted edit stalls distribution indefinitely and only a log file knew.**
+- Both halves of the answer were already on disk. Every home carries `.saipen_injected` naming the `source_head` it was built from; every run block in the log carries its `SKIP:` reason and the `dirty:` paths that caused it. Nothing new is stored -- `saipen status` gains a `distribution` block that reads the stamps, a bounded 64 KB tail of the log, and `git rev-parse`. A byte-for-byte tree comparison around a full report proves it writes nothing, creates no absent home, and stamps no unstamped one.
+- It names both numbers the question needs: how many installed homes are stale, and **the newest head they actually carry** -- so an all-stale set still says how far behind it is rather than only that it is behind.
+- Distinctions that would otherwise hide the interesting case: an absent home is *not installed*, never stale; a home whose stamp carries no `source_head` is *unknown* and can never be counted current, because a copy that cannot say what it was built from is exactly what the stamp exists to expose; and a blocked run makes even a fully current set report **not fresh**, because the stall is about what happens next.
+- **A current set answers instead of going quiet.** "distribution: 4 home(s) current at 729a2d9daebb" -- an empty section and everything-is-fine have to be distinguishable, or the report is only trustworthy when it complains. A machine with no installed home says so too.
+- Fixed while writing the tests: the log parser split each line on its first space, leaving the clock glued to the payload, so `SKIP: DIRTY_SOURCE` read as `09:46:00 SKIP: ...` and matched nothing. It would have reported every blocked run as unblocked -- the precise failure the ticket exists to prevent, found because the test wrote a realistic log instead of a convenient one.
+- 19 new tests in `tools/test_distribution_report.py`; 945 in the suite.
+
 ## 7.247.0 -- 2026-09-03 -- A Faster Gate That Cannot Become The Gate (T-1273)
 
 - `audit_checks.py` is about 26 minutes of a ~45 minute gate batch, because it runs the whole validator once per control -- 229 times. A release earns that; it caught a disarmed control the day before. A two-file change does not, and a gate people wait 26 minutes for is a gate people start deleting.
