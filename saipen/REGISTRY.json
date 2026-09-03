@@ -12,6 +12,11 @@
       "tools/validate.py --gate core"
     ],
     "facts": {
+      "VERIFY-ORACLE-01": {
+        "owner": "saipen/phases/verify.md",
+        "test": "tools/test_verify_oracle.py",
+        "subject": "regression evidence binds to the verifier that produced it"
+      },
       "STATE-SHAPE-01": {
         "owner": "saipen/CORE.md",
         "test": "tools/test_protocol_registry.py",
@@ -105,6 +110,7 @@
     }
   },
   "rule_owners": {
+    "VERIFY-ORACLE-01": "saipen/phases/verify.md",
     "STATE-SHAPE-01": "saipen/CORE.md",
     "STATE-DFA-01": "saipen/CORE.md",
     "STATE-NEXT-01": "saipen/CORE.md",

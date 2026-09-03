@@ -14,6 +14,13 @@ LOG this run. Disagreement is a finding: the tree changed, the verifier is
 unstable, or the claim was false. Prove every suspicion with trace/repro and
 report `file:line + what breaks`.
 
+Agreement is not one either, on a bug fix. Re-running the same verifier
+reproduces a weakened one exactly as faithfully as a sound one, so ask what the
+diff did to the CHECK: did any test, fixture, oracle or verification command
+move; if so, on what independent grounds; does the pre-fix FAIL belong to the
+verifier now passing (`VERIFY-ORACLE-01`, phases/verify.md); and can this
+verifier still see the original bug. "All tests pass" answers none of those.
+
 Classify:
 
 - P0 correctness/data loss and P1 security: fix now, route to BUILD.

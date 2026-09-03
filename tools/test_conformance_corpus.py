@@ -18,7 +18,13 @@ class ConformanceCorpusTests(unittest.TestCase):
     def test_corpus_is_complete_and_generated_view_is_current(self):
         cases = load_cases(ROOT)
         self.assertEqual(validate_cases(cases), [])
-        self.assertEqual([case["id"] for case in cases], list(range(1, 257)))
+        # Independent of EXPECTED_IDS on purpose: this asserts the SHAPE the ids
+        # must have -- contiguous from 1, one per row, no gap and no duplicate --
+        # derived from the corpus itself. Restating the upper bound as a literal
+        # made this a second copy of the constant that had to be bumped by hand on
+        # every legitimate row, so it was rubber-stamped rather than consulted.
+        ids = [case["id"] for case in cases]
+        self.assertEqual(ids, list(range(1, len(cases) + 1)))
         self.assertEqual(check_generated(ROOT), [])
 
     def test_rule_ids_and_history_refs_are_separate(self):

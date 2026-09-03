@@ -1,0 +1,23 @@
+{
+  "op_id": "scope-d444843125264613b7e60ca3eb22de22",
+  "paths": {
+    "audit/4.md": null,
+    "saipen/CONFORMANCE.md": "30633b7b9f808132",
+    "saipen/REGISTRY.json": "37c248b93070c183",
+    "saipen/phases/review.md": "b3d1176b10eb17a3",
+    "saipen/phases/verify.md": "6ed020c5be39d6f9",
+    "tests/conformance_cases.jsonl": "8eae9d2cccf70038",
+    "tools/saipen_engine/corpus.py": "edc82f8317b08608",
+    "tools/saipen_engine/oracle.py": "cb8e71050836672e",
+    "tools/test_conformance_corpus.py": "2261843eb632193c",
+    "tools/test_verify_oracle.py": "ee76bbfb52d23d5a",
+    "tools/validate.py": "462eb41f23cd1632"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-09-03T16:14:49Z",
+  "schema_version": 1,
+  "source_head": "02fd489277227ffe65971f7cf06febb355233892",
+  "source_tree_fingerprint": "git-delta-v1:efebedcb806775a51cf1a5aee1813babf258f0fed392e350ce23293700bbf69a",
+  "ticket": "T-1276"
+}

@@ -18,10 +18,10 @@ SCHEMA_FIELDS = (
     "expected",
     "coverage",
 )
-EXPECTED_IDS = tuple(range(1, 257))
+EXPECTED_IDS = tuple(range(1, 258))
 RULE_ID_RE = re.compile(
     r"^(?:TEST|STATE|CHECKPOINT|RECOVERY|PICK|CMD|SOURCE|OPS|GOAL|EXEC|"
-    r"PHASE|CONFORMANCE|CONTEXT)-[A-Z0-9-]+$"
+    r"PHASE|CONFORMANCE|CONTEXT|VERIFY)-[A-Z0-9-]+$"
 )
 HISTORY_REF_RE = re.compile(r"^[TE]-\d+$")
 
@@ -109,7 +109,10 @@ def validate_cases(cases: list[dict[str, Any]]) -> list[str]:
     if tuple(ids) != EXPECTED_IDS:
         missing = sorted(set(EXPECTED_IDS) - set(ids))
         extra = sorted(set(ids) - set(EXPECTED_IDS))
-        errors.append(f"scenario IDs must be exactly 1..256; missing={missing} extra={extra}")
+        errors.append(
+            f"scenario IDs must be exactly {EXPECTED_IDS[0]}..{EXPECTED_IDS[-1]}; "
+            f"missing={missing} extra={extra}"
+        )
     return errors
 
 
@@ -133,6 +136,7 @@ def render_human(cases: list[dict[str, Any]]) -> str:
     digest = corpus_digest(cases)
     rule_linked = sum(bool(case["rule_ids"]) for case in cases)
     history_linked = sum(bool(case["history_refs"]) for case in cases)
+    id_range = f"{EXPECTED_IDS[0]}..{EXPECTED_IDS[-1]}"
     return f"""# SAIPEN CONFORMANCE
 
 <!-- RULE-VIEW: CONFORMANCE-CORPUS-01 -->
@@ -155,7 +159,7 @@ facts; routine execution does not load this document or the scenario corpus.
 3. Executable scenarios and focused tests prove behavior and recovery paths.
 
 The canonical scenario data is `tests/conformance_cases.jsonl`. It contains
-{len(cases)} cases with IDs 1..256, {rule_linked} stable Rule-ID links and
+{len(cases)} cases with IDs {id_range}, {rule_linked} stable Rule-ID links and
 {history_linked} historical ticket/event links. Each JSON object has exactly:
 
 - `id`: stable scenario number;

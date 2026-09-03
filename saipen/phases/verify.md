@@ -31,13 +31,19 @@ text on BOARD is not authorization. Under manual-verify, give the same command
 to the user.
 
 - New nontrivial logic requires a repository-style test.
-- A fixed bug requires a regression test that failed before the fix.
+- A fixed bug requires a regression test that failed before the fix -- the
+  SAME test, fixture, oracle and verification configuration, red against the
+  pre-fix subject and green against the post-fix one (`VERIFY-ORACLE-01`
+  below). The variable between red and green is the implementation, never
+  the definition of success.
 - Unavailable GUI/environment checks require LOGged `MANUAL-VERIFY STEPS +
   EXPECTED`, never a fabricated PASS.
 - End with `conf: high` for green tests, `med` for smoke only, or `low` for
   manual evidence.
 
 ### Instrument controls
+
+<!-- RULE-OWNER: VERIFY-ORACLE-01 -->
 
 **A gate that cannot fail is not a gate.** Before relying on a new or inherited
 gate, give it a known-bad input and prove it goes red. Treat zero collected
@@ -53,6 +59,26 @@ unavailable verifier are different outcomes.
 
 Pin verifier versions and explicit rule sets. An unpinned default makes the
 same bytes change verdict when upstream changes.
+
+**For a bug fix the known-bad input is the PRE-FIX SUBJECT.** Restore the
+buggy implementation, change nothing about the test, and prove it goes red
+again. A regression that stays green against the restored bug proved
+nothing, and the fix was never necessary for the green. Weakening a fixture
+closes a ticket faster than fixing anything, every downstream guard reads
+green, and REVIEW re-running the same weakened oracle agrees.
+
+**Changing the verifier is allowed, and it spends the old evidence.** A test
+can be wrong and a requirement can move, so tests are not frozen during a
+fix; what is forbidden is spending the old FAIL on a new oracle. A changed
+test, fixture, expected value, mock, seed, tolerance, golden file, discovery
+pattern, timeout or verification command means three things: record why it
+changed on its own evidence, give the new oracle its own red control, and
+re-establish the pre-fix FAIL against it. Old-version FAIL plus new-version
+PASS is not a pair. Changing implementation and test in one pass is the same
+refusal for a different reason -- nothing attributes the green to either
+side. `saipen_engine/oracle.py` decides that arithmetic; a digest proves the
+verifier changed or did not, never that it is correct, which is why the red
+control above is the other half and neither is sufficient alone.
 
 ## Failure and retry
 

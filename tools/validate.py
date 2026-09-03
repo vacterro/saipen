@@ -62,6 +62,7 @@ from saipen_engine.commands import (
 )
 from saipen_engine.registry import load_registry, require_mapping, require_string_list
 from saipen_engine.corpus import (
+    EXPECTED_IDS,
     check_generated as _check_conformance_generated,
     load_cases as _load_conformance_cases,
     validate_cases as _validate_conformance_cases,
@@ -4820,7 +4821,8 @@ if (
             if not _corpus_errors:
                 ok(
                     "conformance corpus schema + IDs valid "
-                    f"({len(_conformance_cases)} rows, exactly 1..256)"
+                    f"({len(_conformance_cases)} rows, exactly "
+                    f"{EXPECTED_IDS[0]}..{EXPECTED_IDS[-1]})"
                 )
                 _view_errors = _check_conformance_generated(Path("."))
                 for _view_error in _view_errors:

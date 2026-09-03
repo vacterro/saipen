@@ -1,7 +1,7 @@
 # SAIPEN CONFORMANCE
 
 <!-- RULE-VIEW: CONFORMANCE-CORPUS-01 -->
-<!-- GENERATED: tools/conformance_corpus.py; corpus-sha256: 657d222a61aaf5d69f998751ee959c7827be59172880bee4f223dda8b385e924 -->
+<!-- GENERATED: tools/conformance_corpus.py; corpus-sha256: d06afef2e713de1f8f617f320a55f9c3ee459ebce912d3fad72958462d4dfbbf -->
 
 Conformance means observable protocol behavior agrees across normative prose,
 machine registry, schemas, validator checks and executable fixtures. A green
@@ -20,8 +20,8 @@ facts; routine execution does not load this document or the scenario corpus.
 3. Executable scenarios and focused tests prove behavior and recovery paths.
 
 The canonical scenario data is `tests/conformance_cases.jsonl`. It contains
-256 cases with IDs 1..256, 6 stable Rule-ID links and
-64 historical ticket/event links. Each JSON object has exactly:
+257 cases with IDs 1..257, 7 stable Rule-ID links and
+65 historical ticket/event links. Each JSON object has exactly:
 
 - `id`: stable scenario number;
 - `rule_ids`: stable protocol Rule IDs only;
