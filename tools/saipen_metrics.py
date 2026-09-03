@@ -64,6 +64,13 @@ What it still CANNOT measure, and will not pretend to:
 Those two are the experiment SAIPEN still owes itself. RUNTIME.md already
 forbids claiming speed or token improvements without measurements; this tool is
 built to keep that rule honest rather than to route around it.
+
+The acceptance section reuses `saipen_engine.acceptance` rather than reparsing
+criteria here. The import is ONE-WAY and lazy: this tool reads the engine, the
+engine never reads this tool, so deleting this file still changes nothing. A
+second criterion parser would be worse than a dependency -- two parsers drift,
+and the number this section reports would slowly stop describing the projection
+`saipen acceptance` shows for the same ticket.
 """
 
 from __future__ import annotations
@@ -400,6 +407,157 @@ def scan_transcripts(directory: Path, since: str | None = None) -> dict:
     }
 
 
+# ESCAPED DEFECT: a defect found AFTER a criterion was recorded PASS. The
+# class names the reason the PASS was empty, never the defect's subject matter
+# -- "auth bug" tells you nothing reusable, "the proof restated the claim" tells
+# you what to change about how proofs are written. The set is CLOSED: an
+# unrecognized class is reported as unknown rather than counted, because a
+# vocabulary that silently accepts new members measures nothing over time.
+#
+# Every class below is grounded in this repository's own history rather than
+# invented, which is the only reason a closed set is defensible here.
+ESCAPED_CLASSES = (
+    # nothing claimed the behaviour at all -- the gap was outside the promise
+    "NOT_COVERED",
+    # a criterion claimed more than its evidence actually exercised
+    "SCOPE_NARROWER_THAN_CLAIM",
+    # the proof was a restatement of the claim, so no input could have failed it
+    "PROOF_RESTATES_CLAIM",
+    # the proof ran, and then the tree moved under it
+    "EVIDENCE_STALE",
+    # prose declared behaviour that nothing implements, so nothing could fail
+    "LAW_WITHOUT_MACHINERY",
+    # implemented and routed, but no control can observe a violation
+    "RULE_WITHOUT_DETECTOR",
+    # a detector existed and had quietly stopped being able to go red
+    "CONTROL_DISARMED",
+    # each side proven alone; the contract between them never exercised
+    "INTEGRATION_SEAM",
+)
+
+# Carried on the FOLLOW-UP ticket's own text. No new file, no new state, no new
+# subsystem: the ticket that fixes the escape is the record that it escaped.
+ESCAPED_RE = re.compile(r"\bescaped:\s*([A-Za-z_][A-Za-z0-9_]*)")
+
+# Evidence kinds a machine re-runs, as opposed to kinds a human asserted once.
+# The split is the whole point of the section: "6 of 9 criteria satisfied" reads
+# identically whether a test proves them or a sentence does.
+DETERMINISTIC_KINDS = ("static", "behavioral")
+
+
+def escaped_defect_signals(tickets: dict) -> dict:
+    """Escaped-defect classes declared across the board, by class.
+
+    Unknown classes are NAMED, not counted and not dropped. A typo that silently
+    vanishes from a report is worse than one that shows up as unknown.
+    """
+    counted = {name: 0 for name in ESCAPED_CLASSES}
+    unknown: list[str] = []
+    for ticket_id in sorted(tickets):
+        for raw_class in ESCAPED_RE.findall(tickets[ticket_id].get("raw", "") or ""):
+            name = raw_class.upper()
+            if name in counted:
+                counted[name] += 1
+            else:
+                unknown.append(f"{ticket_id}:{raw_class}")
+    return {
+        "vocabulary": list(ESCAPED_CLASSES),
+        "by_class": {name: n for name, n in counted.items() if n},
+        "declared_total": sum(counted.values()),
+        "unknown_class": unknown,
+    }
+
+
+def acceptance_signals(saipen_dir: Path) -> dict:
+    """Criterion counts over the whole board, from the ONE criterion parser.
+
+    Reports how many promises exist, how many have any evidence at all, and --
+    the number this section exists for -- how many are held up by something a
+    machine re-runs rather than by a sentence somebody wrote. Observational: it
+    opens BOARD and LOG, and there is no write path here or in what it calls.
+    """
+    try:
+        from saipen_engine.acceptance import (
+            CONTESTED,
+            FAILED,
+            SATISFIED,
+            UNVERIFIED,
+            reconcile,
+        )
+        from saipen_engine.board import parse_board
+        from saipen_engine.log import parse_log_line
+    except Exception as exc:
+        # A reporter degrades into a stated condition; it never raises.
+        return {"unavailable": f"{type(exc).__name__}: {exc}"}
+
+    board_path = saipen_dir / "BOARD.md"
+    if not board_path.is_file():
+        return {"unavailable": "BOARD.md missing"}
+    tickets = parse_board(board_path.read_text(encoding="utf-8-sig", errors="replace")).get(
+        "tickets", {}
+    )
+
+    # Sealed segments AND the live log: a criterion proven months ago is still
+    # proven, and reading only the live segment would report it unverified.
+    events = []
+    segments = sorted((saipen_dir / "logs").glob("LOG-*.md"))
+    for path in [*segments, saipen_dir / "LOG.md"]:
+        if not path.is_file():
+            continue
+        for line in path.read_text(encoding="utf-8-sig", errors="replace").splitlines():
+            parsed = parse_log_line(line)
+            if parsed is not None:
+                events.append(parsed)
+
+    states = Counter()
+    criteria_total = 0
+    tickets_with_criteria = 0
+    with_evidence = 0
+    deterministic = 0
+    manual_or_inspection_only = 0
+    undeclared = 0
+    for ticket_id in sorted(tickets):
+        verify = tickets[ticket_id].get("fields", {}).get("verify", "")
+        projection = reconcile(ticket_id, verify, events)
+        rows = projection["criteria"]
+        if not rows:
+            continue
+        tickets_with_criteria += 1
+        criteria_total += len(rows)
+        undeclared += len(projection["undeclared_evidence"])
+        for row in rows:
+            states[row["state"]] += 1
+            current = [r for r in row["evidence"] if not r["stale"]]
+            if not current:
+                continue
+            with_evidence += 1
+            if row["state"] != SATISFIED:
+                continue
+            kinds = {r["kind"] for r in current if r["result"] == "PASS"}
+            if kinds & set(DETERMINISTIC_KINDS):
+                deterministic += 1
+            else:
+                manual_or_inspection_only += 1
+
+    return {
+        "unavailable": None,
+        "tickets_with_criteria": tickets_with_criteria,
+        "criteria_total": criteria_total,
+        "criteria_with_current_evidence": with_evidence,
+        "satisfied": states[SATISFIED],
+        "deterministically_verified": deterministic,
+        "manual_or_inspection_only": manual_or_inspection_only,
+        "failed": states[FAILED],
+        "unverified": states[UNVERIFIED],
+        "contested": states[CONTESTED],
+        "undeclared_evidence_records": undeclared,
+        "escaped_defects": escaped_defect_signals(tickets),
+        "meaning": (
+            "counts of promises and what holds them up; observational, gates nothing"
+        ),
+    }
+
+
 def board_human_blocks(path: Path) -> int:
     if not path.exists():
         return 0
@@ -564,6 +722,7 @@ def collect(since: str, transcripts: Path | None = None) -> dict:
             ),
             "sample_scope": "one harness's session store; a lower bound on total traffic",
         },
+        "acceptance": acceptance_signals(REPO / ".saipen"),
         "not_measured": [
             "outcome quality vs a plain agent",
             "human wall-clock saved",
@@ -628,9 +787,42 @@ def render(data: dict) -> str:
             "",
             render_token_cost(data["token_cost"]),
             "",
+            render_acceptance(data["acceptance"]),
+            "",
             "not measured here: " + "; ".join(data["not_measured"]),
         ]
     )
+
+
+def render_acceptance(a: dict) -> str:
+    """Promises and what holds them up. Absence and proof must not look alike."""
+    if a.get("unavailable"):
+        return "acceptance -- unavailable: " + a["unavailable"]
+    lines = [
+        "acceptance -- what was promised, and what actually holds it up",
+        "  tickets declaring criteria           %8d" % a["tickets_with_criteria"],
+        "  criteria declared                    %8d" % a["criteria_total"],
+        "  criteria with current evidence       %8d" % a["criteria_with_current_evidence"],
+        "  satisfied                            %8d" % a["satisfied"],
+        "    of those, machine re-runnable      %8d" % a["deterministically_verified"],
+        "    of those, a human assertion only   %8d" % a["manual_or_inspection_only"],
+        "  failed                               %8d" % a["failed"],
+        "  unverified                           %8d" % a["unverified"],
+        "  contested                            %8d" % a["contested"],
+    ]
+    if a["undeclared_evidence_records"]:
+        lines.append(
+            "  evidence naming an undeclared AC     %8d" % a["undeclared_evidence_records"]
+        )
+    esc = a["escaped_defects"]
+    lines.append("  escaped defects declared             %8d" % esc["declared_total"])
+    for name, count in sorted(esc["by_class"].items(), key=lambda kv: (-kv[1], kv[0])):
+        lines.append("    %-34s %8d" % (name.lower().replace("_", " "), count))
+    if esc["unknown_class"]:
+        lines.append(
+            "    unknown class (not counted)        " + ", ".join(esc["unknown_class"])
+        )
+    return "\n".join(lines)
 
 
 def render_token_cost(tc: dict) -> str:

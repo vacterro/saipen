@@ -26,7 +26,7 @@ gỡ cài đặt đều là cục bộ — không có dịch vụ đám mây, kh
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.243.0** | [Thông số kỹ thuật](SPEC.md) | [Hướng dẫn](GUIDE.md) | [Lõi](saipen/CORE.md) | [Bảo trì](saipen/MAINTENANCE.md) | [Phong cách](saipen/STYLE.md) | [Giao diện người dùng](saipen/UI.md) | [Tuân thủ](saipen/CONFORMANCE.md) |MIT
+**v7.244.0** | [Thông số kỹ thuật](SPEC.md) | [Hướng dẫn](GUIDE.md) | [Lõi](saipen/CORE.md) | [Bảo trì](saipen/MAINTENANCE.md) | [Phong cách](saipen/STYLE.md) | [Giao diện người dùng](saipen/UI.md) | [Tuân thủ](saipen/CONFORMANCE.md) |MIT
 
 **Phím tắt:** `cc` tiếp tục bối cảnh dự án đến hội tụ (tiếp tục mục tiêu đang chạy nếu có), `sss` báo trạng thái mà không đụng vào mã và `ss` lưu điểm kiểm tra rồi dừng. [Xem bản đồ đầy đủ 19 phím](saipen/RFC.md#110-command-surface). Các cặp song sinh Cyrillic cũng hoạt động: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 

@@ -1,6 +1,19 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.244.0 -- 2026-09-03 -- Which Proofs A Machine Re-Runs (T-1269)
+
+- v7.243.0 made a criterion's evidence visible one ticket at a time. It could not answer the question one level up: across the whole board, how much of "satisfied" is a test that re-runs, and how much is a sentence somebody wrote once. Both render as SATISFIED, and that difference is the entire value of the record.
+- `saipen_metrics.py` grew an `acceptance` section: criteria declared, criteria with current evidence, and satisfied split into **machine re-runnable** (`static`/`behavioral`) and **a human assertion only** (`inspection`/`manual`), beside failed, unverified, contested, and evidence naming a criterion the ticket never declared. Measured on this repository the day it landed: **38 criteria across 8 tickets, 13 satisfied -- 11 machine re-runnable, 2 a human assertion only.**
+- It reuses `saipen_engine.acceptance` instead of reparsing criteria. The import is ONE-WAY and lazy: the reporter reads the engine, the engine never reads the reporter, so deleting the file still changes nothing. Two parsers drift, and a report that slowly stops matching `saipen acceptance` for the same ticket is worse than a dependency. A test asserts the direction.
+- Sealed LOG segments are read, not only the live one. A criterion proven months ago is still proven; reading the live segment alone would have reported it unverified.
+- **Escaped-defect taxonomy, eight classes, closed:** `NOT_COVERED`, `SCOPE_NARROWER_THAN_CLAIM`, `PROOF_RESTATES_CLAIM`, `EVIDENCE_STALE`, `LAW_WITHOUT_MACHINERY`, `RULE_WITHOUT_DETECTOR`, `CONTROL_DISARMED`, `INTEGRATION_SEAM`. Each names why a PASS was empty, never the defect's subject matter -- "auth bug" teaches nothing reusable, "the proof restated the claim" says what to change about how proofs get written. Every class is grounded in an instance this repository already produced rather than invented for symmetry.
+- No new subsystem, no new file, no new state: the marker `escaped: <CLASS>` rides on the follow-up ticket's own text, which is already the record that the escape was found.
+- The set is closed in the way that matters. An unrecognized class is **named** under `unknown_class` as `ticket:class`, is not counted, and does not suppress the known classes declared beside it. A vocabulary that silently absorbs new members measures nothing over time.
+- Observational, and proven so rather than promised: canonical `.saipen` bytes are byte-identical around a real CLI subprocess, the exit path carries no failure branch so no count can fail a build, and a missing BOARD or a raising engine degrade into a stated `unavailable` condition instead of an exception.
+- Two limits recorded at REVIEW rather than left for a later reader to discover: the taxonomy carries zero live declarations so far, and the section counts only tickets whose `verify:` uses `AC-NN`, which is 8 of the board's. Neither is hidden by a number -- an uncounted ticket never enters the denominator.
+- 26 focused tests.
+
 ## 7.243.0 -- 2026-09-02 -- What Was Promised, And What Proves It (T-1267)
 
 - A `verify:` clause was one prose blob, so completion evidence bound to a TICKET rather than to a CRITERION. A later reader could not tell which promise a green gate covered, and a producer sentence saying the work is done read the same as a test result.
