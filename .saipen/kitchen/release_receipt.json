@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
   "operation": "release_receipt",
-  "op_id": "release-cd35f781e58043c2ac2c6254eff1da4c",
-  "version": "7.243.0",
-  "tag": "v7.243.0",
-  "ticket_id": "T-1267",
-  "source_head": "c57f57899f8bd653a8cd8f2f9c1e80584b7110da",
-  "source_tree_fingerprint": "git-delta-v1:b6aa436f1cdee456943a7fa95c429992f30cb955ac5bb1d8ec0201ff600d7a2a",
+  "op_id": "release-5fb9d6477d5f410da01e59457069da66",
+  "version": "7.244.0",
+  "tag": "v7.244.0",
+  "ticket_id": "T-1269",
+  "source_head": "0c931d769e54080344fc05fece0044bd819afa44",
+  "source_tree_fingerprint": "git-delta-v1:6685e0089325be728826d76c60b0783e017a73e484cd7d39ee4b6e51df753f87",
   "mode": "full",
   "crew_epoch": "",
   "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
-  "recorded_at": "2026-09-02T17:01:47Z"
+  "recorded_at": "2026-09-03T07:36:40Z"
 }
