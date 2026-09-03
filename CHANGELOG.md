@@ -1,6 +1,16 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.246.0 -- 2026-09-03 -- A Remedy Nobody Could Type (T-1275)
+
+- `NOT_TOP_WORKABLE` refused an out-of-order claim by telling the operator to "use the explicit-claim flag to override with evidence". **No such flag existed.** `operations.claim` had carried `explicit` since it was written, and `CORE.md` `PICK-01` had always sanctioned the override -- *"Board order is priority; explicit override cannot bypass eligibility or authorization"* -- but the CLI rejected `--explicit` as a surplus argument. The law was complete, the engine was complete, and the only surface an operator can actually reach was not.
+- Textbook `LAW_WITHOUT_MACHINERY`, the class v7.244.0's taxonomy named the day before. The cost is not a missing convenience: with no legal path to claim a finished ticket that is not topmost, the remaining option is hand-editing `BOARD.md` -- exactly what `OPS.md` §4a calls FALLBACK ONLY and what the validator's `[saio]` check exists to catch. **A refusal that pushes the operator onto the forbidden path is worse than one that simply says no.**
+- `saipen claim <T-###> --explicit` now reaches `operations.claim`, and the refusal names that exact string, so the remedy is copyable rather than described.
+- **The override is recorded, never silent.** Its LOG event carries `EXPLICIT claim over PICK-01: topmost workable was <T-###>`, so stepping over the Pick Rule stays attributable in immutable history. A redundant `--explicit` on a ticket that WAS topmost writes no annotation at all -- a false "stepped over" claim in append-only history is worse than a missing one, and one test exists for each direction.
+- **It bypasses ordering and nothing else.** Every eligibility and authorization gate runs before the Pick Rule block the flag skips, so with the flag present a blocker, unmet `needs:`, an open attempt, a live DOING ticket and an unknown ticket all still refuse. `CORE.md` now names the flag where it states the rule, so the law and the surface cannot drift apart again.
+- Found the ordinary way: by trying to close a ticket whose work was already finished and whose number was not on top.
+- 14 new tests in `tools/test_explicit_claim.py`; 900 in the suite.
+
 ## 7.245.0 -- 2026-09-03 -- Settled Is Not The Same Claim As Clean (T-1274)
 
 - `SOURCE-AUDIT-INBOX-01` deleted every proven-closed layer and then reported the project idle. Consuming the last layer empties `audit/` of everything SAIPEN captured -- and anything ELSE in that folder is residue it never read and may never delete. Those two facts were reported as one verdict, so "nothing to do" and "the folder is full of files nobody reads" were indistinguishable from outside.

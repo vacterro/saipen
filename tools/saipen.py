@@ -4665,7 +4665,7 @@ def main(argv: list[str] | None = None) -> int:
     # Explicit `-h`/`--help` stays a usage/exit-2 path and does NOT resume.
     if args and args[0] in ("-h", "--help"):
         usage_msg = (
-            "usage: saipen (continue|status|next|runtime|recover|claim <T-###>|"
+            "usage: saipen (continue|status|next|runtime|recover|claim <T-###> [--explicit]|"
             "transition <PHASE> [T-###] [text]|checkpoint <TAXONOMY> "
             "[T-###] [text]|goal <text>|ticket add <PRIORITY> <text>|ticket "
             "done <T-###>|ticket block <T-###> <reason>|ticket "
@@ -4996,17 +4996,25 @@ def main(argv: list[str] | None = None) -> int:
     if command == "recover":
         return _recover(project_root, args[1:], as_json, dry_run)
     if command == "claim":
-        if len(args) < 2:
+        # `--explicit` is the operator-reachable form of the override CORE.md
+        # PICK-01 already sanctions. Before T-1275 the NOT_TOP_WORKABLE refusal
+        # named a flag no CLI surface set, so the only way to claim a finished
+        # ticket that was not topmost was to edit BOARD.md by hand -- the exact
+        # manual structural edit OPS.md 4a calls FALLBACK ONLY.
+        claim_rest = [a for a in args[1:] if a != "--explicit"]
+        claim_explicit = len(claim_rest) != len(args) - 1
+        if not claim_rest:
             _emit(
                 {"ok": False, "code": "VALIDATION_FAILED", "detail": "claim needs <T-###>"}, as_json
             )
             return 2
-        if len(args) > 2:
+        if len(claim_rest) > 1:
             _emit(
                 {
                     "ok": False,
                     "code": "VALIDATION_FAILED",
-                    "detail": f"claim takes <T-###>; surplus: {' '.join(args[2:])}",
+                    "detail": "claim takes <T-###> [--explicit]; surplus: "
+                    + " ".join(claim_rest[1:]),
                 },
                 as_json,
             )
@@ -5017,9 +5025,13 @@ def main(argv: list[str] | None = None) -> int:
         if _ho is not None:
             return _ho
         result = (
-            plan_claim(project_root, args[1], _agent_for(project_root))
+            plan_claim(
+                project_root, claim_rest[0], _agent_for(project_root), explicit=claim_explicit
+            )
             if dry_run
-            else apply_claim(project_root, args[1], _agent_for(project_root))
+            else apply_claim(
+                project_root, claim_rest[0], _agent_for(project_root), explicit=claim_explicit
+            )
         )
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1

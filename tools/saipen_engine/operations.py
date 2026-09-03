@@ -721,25 +721,39 @@ def _plan_claim(
     if doing:
         return _refuse("ALREADY_CLAIMED", f"DOING holds {doing[0]['id']}", ticket=ticket_id)
 
+    # The Pick Rule's own answer, computed whether or not it is being overridden:
+    # a refusal needs it to name the ticket that wins, and an override needs it
+    # to name the ticket it stepped over (T-1275). CORE.md PICK-01 already
+    # allows the override and bounds it -- "explicit override cannot bypass
+    # eligibility or authorization" -- which is why every gate above this point
+    # runs first and refuses with the flag present.
+    top_workable = None
+    for t in tickets.values():
+        if ticket_is_workable(t, tickets, agent=agent):
+            top_workable = t["id"]
+            break
     if not explicit:
-        top_workable = None
-        for t in tickets.values():
-            if ticket_is_workable(t, tickets, agent=agent):
-                top_workable = t["id"]
-                break
         if top_workable is None or top_workable != ticket_id:
             return _refuse(
                 "NOT_TOP_WORKABLE",
                 f"topmost workable ticket is {top_workable or 'none'}, "
-                f"requested {ticket_id}; use the explicit-claim "
-                "flag to override with evidence",
+                f"requested {ticket_id}; re-run with --explicit to override the "
+                "Pick Rule and record which ticket was stepped over",
                 ticket=ticket_id,
                 top_workable=top_workable,
             )
 
-    event, line = _event_line(
-        docs, log_tail, "DEC", ticket_id, agent, f"claimed via SAIOPS -- owner {agent}", now, op_id
-    )
+    # `--explicit` on a ticket that WAS topmost is a redundant flag, not an
+    # override: annotating it would put a false "stepped over" claim in
+    # immutable history.
+    stepped_over = top_workable if (explicit and top_workable != ticket_id) else None
+    detail = f"claimed via SAIOPS -- owner {agent}"
+    if stepped_over is not None:
+        detail += (
+            " -- EXPLICIT claim over PICK-01: topmost workable was "
+            f"{stepped_over}"
+        )
+    event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent, detail, now, op_id)
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     new_board = _claim_move(docs["board"].text_norm, ticket_id, agent, utc)
     owned = {

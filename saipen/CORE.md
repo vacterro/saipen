@@ -252,7 +252,11 @@ registry object.
   approved REVIEW.
 - Workable means TODO, every dependency DONE, no blocker, and no foreign live
   claim. `PICK-01`: choose the topmost workable line. Board order is priority;
-  explicit override cannot bypass eligibility or authorization.
+  explicit override cannot bypass eligibility or authorization. The override is
+  reachable as `saipen claim <T-###> --explicit` and records the ticket it
+  stepped over in its own LOG event, so ordering can be overridden but never
+  silently. A refusal that names a remedy no surface exposes drives the
+  operator to hand-edit BOARD.md, which is the one path OPS.md 4a forbids.
 - VERIFY runs real evidence. Failure loops through diagnosis/repair, not success
   relabeling. At its bounded dead-hypothesis/fix-cycle cap, block the Work and
   continue other workable tickets. Manual-verify waits for human confirmation.
