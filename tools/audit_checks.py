@@ -3721,8 +3721,153 @@ def case_parts(case):
     label, rel, mutation, expected = case[:4]
     return label, rel, mutation, expected, (case[4] if len(case) > 4 else None)
 
+# ---------------------------------------------------------------------------
+# Development-time scoping (T-1273)
+# ---------------------------------------------------------------------------
+#
+# The full sweep runs the validator once per control. That is 229 validator
+# runs and about 26 minutes, which a release earns and a two-file change does
+# not. Every CASE already declares the file it mutates, so a changed-path set
+# selects the controls that can possibly be affected.
+#
+# The whole risk is that the accelerator becomes the gate. Three things keep it
+# from doing so, and none of them is a convention someone has to remember:
+# the subset requires an explicit flag, so `python tools/audit_checks.py` with
+# no arguments -- which is exactly what CI runs -- is always the full sweep;
+# `saipen ship` never invokes this file at all; and a scoped run never prints
+# the "N of 229" sentence a checkpoint would quote, so its output cannot be
+# mistaken for the full sweep even when pasted.
+
+FULL_CASE_COUNT = len(CASES)
+
+#: Printed by every scoped run. Selection reads the DECLARED target, which is
+#: the only thing decidable without building a tree -- and is therefore blind
+#: to a control whose own target is untouched but whose validator check reads
+#: a changed file through a cross-reference. Naming that is the difference
+#: between a bounded accelerator and a silent false negative.
+SCOPED_LIMITATIONS = (
+    "selection reads each control's DECLARED target file only. A control whose "
+    "target is untouched but whose check reads a changed file indirectly -- a "
+    "cross-document rule, a manifest, a schema another file is validated "
+    "against -- is NOT selected and is NOT proven by this run",
+    "the always-on probes still run; only the per-control sweep is narrowed",
+)
+
+
+def _split_changed(raw: str) -> set[str]:
+    """Normalize one `--changed` value into comparable repo-relative paths."""
+    out: set[str] = set()
+    for part in raw.split(","):
+        text = part.strip().replace("\\", "/")
+        while text.startswith("./"):
+            text = text[2:]
+        if text:
+            out.add(text)
+    return out
+
+
+def scoped_paths(argv: list[str]) -> frozenset[str] | None:
+    """The changed-path set from `--changed`, or None meaning the full sweep.
+
+    None is returned for an absent flag AND for nothing else: an empty
+    `--changed` still means "scoped, and nothing matched", because silently
+    upgrading an empty selection to the full sweep would let a mistyped
+    invocation report a total the caller did not ask for.
+    """
+    paths: set[str] = set()
+    seen = False
+    index = 0
+    while index < len(argv):
+        arg = argv[index]
+        if arg == "--changed":
+            seen = True
+            index += 1
+            if index < len(argv):
+                paths.update(_split_changed(argv[index]))
+        elif arg.startswith("--changed="):
+            seen = True
+            paths.update(_split_changed(arg.split("=", 1)[1]))
+        index += 1
+    return frozenset(paths) if seen else None
+
+
+def case_declared_paths(rel: str, mutation) -> set[str]:
+    """Every path a case DECLARES it mutates, normalized to forward slashes.
+
+    A MULTI mutation names several files; every other mutation names exactly
+    `rel`. This reads the declaration and never the disk, so selection is
+    decidable before any tree exists.
+    """
+    if isinstance(mutation, tuple) and mutation and mutation[0] == "MULTI":
+        return {str(r).replace("\\", "/") for r, _ in mutation[1]}
+    return {str(rel).replace("\\", "/")}
+
+
+def scoped_banner(selected: int, changed: frozenset[str]) -> list[str]:
+    """The opening lines of a scoped run: what was narrowed, and what that hides.
+
+    Pure for the same reason as `sweep_report`. The limitations are the
+    honest half of the feature -- an accelerator that does not say what it
+    skipped is just a faster way to be wrong -- so they are proven by a test
+    rather than by someone remembering to read the banner.
+    """
+    lines = [
+        f"SCOPED: {selected} of {FULL_CASE_COUNT} control(s) selected by --changed "
+        f"({len(changed)} path(s)). This is NOT the full sweep."
+    ]
+    lines.extend(f"SCOPED: known limitation -- {text}" for text in SCOPED_LIMITATIONS)
+    return lines
+
+
+#: The one sentence a checkpoint quotes as proof the suite is intact. It
+#: belongs to the full sweep and to nothing else, which is why it is a
+#: constant a test can assert the absence of rather than a literal typed in
+#: two places that could drift into agreement.
+FULL_SWEEP_PHRASE = "validator check(s) still go red on their own condition"
+
+
+def sweep_report(changed, selected: int, live: int, skipped: int, broken: int) -> list[str]:
+    """The closing lines of one sweep, as text.
+
+    Pure on purpose. The promise this mode makes is that a scoped run never
+    emits the full-sweep sentence, and a promise provable only by running a
+    26-minute gate is a promise nobody re-checks.
+    """
+    if changed is None:
+        if broken:
+            return [f"\n{broken} of {selected} case(s) are not evidence any more."]
+        tail = f" ({skipped} skipped)" if skipped else ""
+        return [f"PASS: {live} of {selected} {FULL_SWEEP_PHRASE}{tail}"]
+    unrun = FULL_CASE_COUNT - selected
+    if broken:
+        return [
+            f"\nSCOPED: {broken} of the {selected} selected case(s) are not "
+            f"evidence any more. The other {unrun} control(s) were never run."
+        ]
+    return [
+        f"SCOPED: the {live} selected control(s) each went red on their own "
+        f"condition. This proves nothing about the {unrun} control(s) that were "
+        "not run, and is not audit_checks evidence for a checkpoint or a release."
+    ]
+
+
+def select_cases(cases, changed: frozenset[str]) -> list:
+    """The controls whose declared target appears in the changed-path set."""
+    chosen = []
+    for case in cases:
+        _, rel, mutation, _, _ = case_parts(case)
+        if case_declared_paths(rel, mutation) & changed:
+            chosen.append(case)
+    return chosen
+
 
 def main() -> int:
+    changed = scoped_paths(sys.argv[1:])
+    cases = select_cases(CASES, changed) if changed is not None else CASES
+    if changed is not None:
+        for line in scoped_banner(len(cases), changed):
+            print(line)
+
     tmp = Path(tempfile.mkdtemp(prefix="audit_checks_"))
     device_error = root_device_ignore_probe(tmp)
     if device_error:
@@ -3868,7 +4013,7 @@ def main() -> int:
     # invisible in the result: the count stays 218 either way.
     ungated = [
         parts[0]
-        for parts in map(case_parts, CASES)
+        for parts in map(case_parts, cases)
         if isinstance(parts[1], str) and parts[1].endswith("OUTBOX.md") and parts[4] is None
     ]
     if ungated:
@@ -3885,7 +4030,7 @@ def main() -> int:
 
     unavailable = [
         parts[0]
-        for parts in map(case_parts, CASES)
+        for parts in map(case_parts, cases)
         if not case_available(pristine, parts[1], parts[2])
     ]
     if unavailable:
@@ -3925,7 +4070,7 @@ def main() -> int:
 
     dead, skipped, always = [], [], []
     runnable = []
-    for label, rel, mutation, expected, gate in map(case_parts, CASES):
+    for label, rel, mutation, expected, gate in map(case_parts, cases):
         if matched(control_for(gate), expected, gate):
             always.append((label, expected))
             continue
@@ -4024,22 +4169,18 @@ def main() -> int:
             f"That check no longer goes red on its own condition{why}"
         )
 
-    live = len(CASES) - len(dead) - len(skipped) - len(always)
-    if dead or always or skipped:
-        print(
-            f"\n{len(dead) + len(always) + len(skipped)} of {len(CASES)} "
-            "case(s) are not "
-            f"evidence any more."
-        )
+    live = len(cases) - len(dead) - len(skipped) - len(always)
+    broken = len(dead) + len(always) + len(skipped)
+    if broken:
+        for line in sweep_report(changed, len(cases), live, len(skipped), broken):
+            print(line)
         return 1
     print(
         "PASS: release-ledger tag query is observed once; duplicate-query "
         "and invalid-validator controls both go red"
     )
-    print(
-        f"PASS: {live} of {len(CASES)} validator check(s) still go red on "
-        f"their own condition" + (f" ({len(skipped)} skipped)" if skipped else "")
-    )
+    for line in sweep_report(changed, len(cases), live, len(skipped), broken):
+        print(line)
     return 0
 
 

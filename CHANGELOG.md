@@ -1,6 +1,19 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.247.0 -- 2026-09-03 -- A Faster Gate That Cannot Become The Gate (T-1273)
+
+- `audit_checks.py` is about 26 minutes of a ~45 minute gate batch, because it runs the whole validator once per control -- 229 times. A release earns that; it caught a disarmed control the day before. A two-file change does not, and a gate people wait 26 minutes for is a gate people start deleting.
+- Every `CASE` already declares the file it mutates, so `python tools/audit_checks.py --changed <paths>` selects the controls that can possibly be affected. **Measured: `saipen/CORE.md` selects 3 of 229 and runs in 112 seconds.** The 112s floor is the always-on probes, which deliberately still run -- narrowing them would save nothing and lose the checks that catch a disarmed control.
+- **The feature was easy. Not letting it become the release gate was the job**, because that is precisely the class this repository keeps closing. Three independent things prevent it, none of them a convention anyone has to remember:
+  - the subset requires an explicit flag, so an argument-free run is always the full sweep -- and `.github/workflows/validate.yml` runs exactly `python tools/audit_checks.py`, with no arguments;
+  - `saipen ship` never invokes this harness at all: `release.py` contains neither `audit_checks` nor `--changed`;
+  - **a scoped run owns no sentence a checkpoint could quote.** It never prints `PASS: N of 229 validator check(s) still go red on their own condition`, never starts a line with `PASS:`, and never contains the substring `of 229` in any wording. Every line it emits begins with `SCOPED:`, and the closing line says outright that it is not `audit_checks` evidence for a checkpoint or a release.
+- `sweep_report` and `scoped_banner` are pure functions for exactly that reason: a promise provable only by running a 26-minute gate is a promise nobody re-checks. One test also asserts the full sweep still owns its sentence, so the absence assertions cannot quietly go vacuous if the wording moves.
+- **The blind spot is named, not trusted.** Selection reads each control's DECLARED target, which is the only thing decidable before a tree exists -- so a control whose own target is untouched but whose check reads a changed file indirectly (a cross-document rule, a manifest, a schema another file is validated against) is not selected. Every scoped run prints that as a known limitation before it starts.
+- Selection is proven in both directions: every selected case declares a changed path, **and no unselected case does**. A `MULTI` mutation is selected by any of the files it names, paths are additive, and `saipen\CORE.md`, `./saipen/CORE.md` and `--changed=` all resolve identically.
+- 26 new tests in `tools/test_audit_scope.py`; 926 in the suite.
+
 ## 7.246.1 -- 2026-09-03 -- The Carve-Out That Was Never Machinery (T-1272)
 
 - An unattributed working-tree edit had added a clause to `OPS.md` §4a permitting manual in-place repair of unparsable legacy LOG event lines by moving illegal bracket content into evidence text. Authored prose from a parallel session: not shipped, not adjudicated, riding in someone else's release scope. **Rejected.**

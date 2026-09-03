@@ -26,7 +26,7 @@ uninstall sono tutte locali — nessun servizio cloud, nessun demone, nessun dat
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.246.1** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) |MIT
+**v7.247.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) |MIT
 
 **Tasti rapidi:** `cc` prosegue il contesto del progetto fino alla convergenza (riprende un obiettivo attivo se ne è impostato uno), `sss` segnala lo stato senza toccare il codice e `ss` salva un checkpoint e si ferma. [Guarda la mappa completa degli 19 tasti](saipen/RFC.md#110-command-surface). Funzionano anche i gemelli cirillici: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
