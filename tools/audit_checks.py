@@ -1299,11 +1299,23 @@ def restore_case_files(saved: list[tuple[Path, bytes | None]]) -> None:
             path.write_bytes(data)
 
 
+def _member_creates(mutation) -> bool:
+    """Does this MULTI member bring its own file into existence?"""
+    return mutation == CREATE or (isinstance(mutation, tuple) and mutation[0] == "WRITE")
+
+
 def case_available(root: Path, rel: str, mutation) -> bool:
-    if mutation == CREATE or (isinstance(mutation, tuple) and mutation[0] == "WRITE"):
+    if _member_creates(mutation):
         return True
     if isinstance(mutation, tuple) and mutation and mutation[0] == "MULTI":
-        return all((root / r).is_file() for r, _ in mutation[1])
+        # T-1270: a red condition can need a file the pristine tree does not
+        # have -- an unconsumed `audit/1.md` is the whole point of the audit
+        # route control. A creating member supplies its own file, so
+        # requiring every member to pre-exist made that condition
+        # inexpressible rather than unsafe.
+        return all(
+            (root / r).is_file() or _member_creates(fn) for r, fn in mutation[1]
+        )
     target = case_target(root, rel, mutation)
     if not target.is_file():
         return False
@@ -3616,6 +3628,24 @@ _W4_RETIRED_PROSE_CONTROLS = frozenset(
 )
 CASES = [case for case in CASES if case[0] not in _W4_RETIRED_PROSE_CONTROLS]
 
+CASES.append(
+    (
+        # T-1270. The condition needs a file the pristine tree does not have,
+        # which is why MULTI learned to carry a creating member: an inbox with
+        # no layer routes nothing, so there is no route to ignore.
+        "audit route ignored while a workable layer waits",
+        STATE,
+        (
+            "MULTI",
+            [
+                ("audit/1.md", write_new("# audit\n\nfinding one\n")),
+                (STATE, sub_line("next_action", '"saipen improve"')),
+            ],
+        ),
+        "audit route not followed",
+    )
+)
+
 
 def apply_case(root: Path, rel: str, mutation) -> bool:
     """Returns False when the case cannot be set up (skip it loudly)."""
@@ -3666,6 +3696,12 @@ def apply_case(root: Path, rel: str, mutation) -> bool:
         changed = False
         for r, fn in mutation[1]:
             fp = root / r
+            if _member_creates(fn):
+                fp.parent.mkdir(parents=True, exist_ok=True)
+                body = "copied protocol\n" if fn == CREATE else fn[1]
+                fp.write_text(body, encoding="utf-8", newline="\n")
+                changed = True
+                continue
             if not fp.is_file():
                 continue
             text = fp.read_text(encoding="utf-8-sig")

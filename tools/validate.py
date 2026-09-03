@@ -2569,6 +2569,42 @@ for tid in doing:
             f"pair or non-UTC stamp) -- repair before validating"
         )
 
+# AUDIT ROUTE (T-1270). The route is deterministic in law and in code:
+# SOURCES.md gives ingest the lowest workable layer and ordinary BOARD
+# priority for the derived Work, and the router reaches that stage whenever no
+# live ticket owns continuation. So WHICH findings to fix was never a human
+# choice -- and nothing verified an agent had followed it. A rule with a route
+# and no detector is a preference.
+#
+# The DECISION lives in saipen_engine.audit_route so it is provable without
+# copying a tree and running this file; what stays here is reading the state
+# and reporting the finding.
+_audit_route_projection = None
+try:
+    from saipen_engine.audit_inbox import projection as _audit_inbox_projection
+    from saipen_engine.audit_route import route_violation as _audit_route_violation
+
+    _audit_route_projection = _audit_inbox_projection(PROJECT_ROOT)
+except Exception as _audit_route_exc:  # pragma: no cover - defensive
+    warn(
+        "audit-route-unreadable",
+        f"the audit inbox projection could not be read "
+        f"({type(_audit_route_exc).__name__}: {_audit_route_exc}), so the audit "
+        f"route could not be checked",
+    )
+
+if _audit_route_projection is not None:
+    _audit_route_why = _audit_route_violation(
+        _audit_route_projection,
+        state.get("next_action") if isinstance(state.get("next_action"), str) else "",
+        [tid for tid, t in tickets.items() if t["section"] == "## DOING"],
+        WAIT_CATEGORIES,
+    )
+    if _audit_route_why:
+        fail(f"STATE.md audit route not followed -- {_audit_route_why} (SOURCE-AUDIT-INBOX-01)")
+    elif _audit_route_projection.get("action"):
+        ok("the audit inbox's routed action owns continuation")
+
 # ----------------------------------------------------------------------- LOG
 
 # Segmented, append-only (RFC § 1.2): sealed older segments live in

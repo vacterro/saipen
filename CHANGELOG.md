@@ -1,6 +1,17 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.249.0 -- 2026-09-03 -- A Rule With A Route And No Detector (T-1270)
+
+- The audit route is deterministic in law and in code. `SOURCES.md` gives ingest the lowest workable layer and ordinary BOARD priority for the derived Work, and the router reaches that stage whenever no live ticket owns continuation. **So which findings to fix was never a human choice -- and nothing verified an agent had followed it.**
+- Witnessed on another project running this protocol: an agent found a 17-ticket audit campaign, then stopped and offered the human a three-option scope menu. `wait_categories` is a closed set of seven and scope selection is not among them, so that pause had no legal form. It also had no detector, and **a rule with a route and no detector is a preference.**
+- `validate.py` now goes red when a workable unconsumed layer is routed and `next_action` is neither that action nor a live-ticket continuation. The diagnostic **names the routed action, its layer and its path**, because a finding that says only "wrong" leaves the agent exactly as stuck as it was.
+- When the offending `next_action` is a `WAIT`, the diagnostic cites the reason rather than asserting it: WAIT is a closed set of 7 categories -- `manual-verify`, `destructive-op`, `first-publish`, `user brake`, `blocked`, `safety valve`, `init` -- and scope selection is not among them, so asking which findings to fix has **no legal form**. The test reads that set straight out of `REGISTRY.json`, so the citation cannot drift from the registry it quotes.
+- **The two quiet edges are the hard part, and both are tested from the negative side.** An `invalid_only` or `residue_only` inbox never trips the check, because a diagnostic must never outrank real Work -- with a positive control asserting a real layer *does* apply, so those absences cannot go vacuous by the check falling permanently silent. And a live phase-owned continuation keeps continuation, so a fresh file never preempts a running transaction -- but a DOING ticket **alone** does not buy silence: the continuation has to name the claimed ticket, because a `next_action` that wandered off its own ticket is precisely the drift being looked for.
+- The decision lives in `saipen_engine/audit_route.py` as a pure function. `validate.py` reads state and reports; it does not decide. Same reason as v7.247.0: a promise provable only by running the full gate is a promise nobody re-checks.
+- **Red control, suite 229 -> 230.** Its condition needs a file the pristine tree does not have -- an inbox with no layer routes nothing, so there is no route to ignore -- which exposed that `MULTI` required every member to pre-exist and therefore could not express it at all. A `MULTI` member may now bring its own file. Proven red the fast way, using v7.247.0's own accelerator: `--changed audit/1.md,.saipen/STATE.md` selected 41 controls and all 41 went red on their own condition.
+- 22 new tests in `tools/test_audit_route.py`; 967 in the suite.
+
 ## 7.248.0 -- 2026-09-03 -- Does The Installed Copy Run This? (T-1271)
 
 - `saipen status` carried zero mentions of injection, so "does an installed agent home run current SAIPEN" was unanswerable without opening `%LOCALAPPDATA%/saipen/inject.log`. **Measured when the ticket was written: all four homes held 7.241.1 while HEAD was two releases ahead, and every scheduled run since 18:31 had skipped with `SKIP DIRTY_SOURCE`.**
