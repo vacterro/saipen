@@ -1,6 +1,16 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.246.1 -- 2026-09-03 -- The Carve-Out That Was Never Machinery (T-1272)
+
+- An unattributed working-tree edit had added a clause to `OPS.md` §4a permitting manual in-place repair of unparsable legacy LOG event lines by moving illegal bracket content into evidence text. Authored prose from a parallel session: not shipped, not adjudicated, riding in someone else's release scope. **Rejected.**
+- **It contradicted the sentence two paragraphs above it.** `OPS.md` reads *"Pre-boundary history is exempt (append-only, cannot be rewritten)"* -- and legacy means pre-boundary, so the carve-out authorised rewriting exactly the class the same section declares un-rewritable.
+- **The identical defect already carried the opposite ratified disposition.** `validate.py` WARNs dateless sealed LOG lines and never repairs them, and `T-1119` is blocked `PERMANENT_WARNING_OWNER` precisely because 125 pre-date sealed entries are immutable and the warning therefore emits forever. This project had already chosen: tighten forward, never rewrite backward. A second, quieter answer to the same question is how a rule stops meaning one thing.
+- **Nothing implemented it and nothing depended on it.** No code, test or control for in-place LOG repair exists anywhere under `tools/`, and `.saipen/recovery/` holds no preserved original, because no repair was ever performed under it. It was permission without machinery -- the mirror image of v7.246.0's defect, and just as expensive.
+- What it actually cost was append-only, the invariant recovery is built on: a carve-out that costs nothing today and costs everything the first time a recovery has to trust the log.
+- Published here rather than left in `LOG.md` alone, so the next agent to have this idea meets the reasoning instead of re-deriving it. **A rejection is a decision, and decisions are what this file is for.**
+- Named because it mattered more than the clause: the injected surface stopped carrying unattributed prose and distribution resumed. All four agent homes had been stuck at 7.241.1 behind `SKIP: DIRTY_SOURCE`, and one uncommitted edit in the injected surface is all it takes to stall every consumer indefinitely.
+
 ## 7.246.0 -- 2026-09-03 -- A Remedy Nobody Could Type (T-1275)
 
 - `NOT_TOP_WORKABLE` refused an out-of-order claim by telling the operator to "use the explicit-claim flag to override with evidence". **No such flag existed.** `operations.claim` had carried `explicit` since it was written, and `CORE.md` `PICK-01` had always sanctioned the override -- *"Board order is priority; explicit override cannot bypass eligibility or authorization"* -- but the CLI rejected `--explicit` as a surplus argument. The law was complete, the engine was complete, and the only surface an operator can actually reach was not.

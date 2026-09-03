@@ -1,0 +1,14 @@
+{
+  "op_id": "scope-b69ea7c36d554a389259d839ae790cd0",
+  "paths": {
+    "CHANGELOG.md": "efb17b59191f3594",
+    "VERSION": "bd2955b624f5b43f"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-09-03T09:14:25Z",
+  "schema_version": 1,
+  "source_head": "81ed95e3e2f9c562a07398e217ca56885d1a73fa",
+  "source_tree_fingerprint": "git-delta-v1:1be3f1b48c65a261997da03f2a530a30530b85cb17602316b35f7028c9ae087b",
+  "ticket": "T-1272"
+}

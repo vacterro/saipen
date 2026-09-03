@@ -26,7 +26,7 @@ avinstallasjon er alle lokale — ingen skytjeneste, ingen daemon, ingen databas
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.246.0** | [Spesifikasjon](SPEC.md) | [Veiledning](GUIDE.md) | [Kjerne](saipen/CORE.md) | [Vedlikehold](saipen/MAINTENANCE.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Konformitet](saipen/CONFORMANCE.md) |MIT
+**v7.246.1** | [Spesifikasjon](SPEC.md) | [Veiledning](GUIDE.md) | [Kjerne](saipen/CORE.md) | [Vedlikehold](saipen/MAINTENANCE.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Konformitet](saipen/CONFORMANCE.md) |MIT
 
 **Hurtigtaster:** `cc` fortsetter prosjektets kontekst til konvergens (gjenopptar et aktivt mål hvis et er satt), `sss` viser status uten å røre koden, og `ss` lagrer et sjekkpunkt og stopper. [Se hele 19-tasters kartet](saipen/RFC.md#110-command-surface). Kyrilliske tvillinger fungerer også: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
