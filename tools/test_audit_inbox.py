@@ -105,6 +105,27 @@ class AuditInboxFixture(unittest.TestCase):
         if work:
             self.assertEqual(intake.status(self.root, receipt)["linked_work"], work)
 
+    def bind_closed(self, number: int, body: str) -> dict:
+        self.layer(number, body)
+        rel = f"audit/{number}.md"
+        captured = audit_inbox.capture_layer(self.root, rel)
+        self.close_source(captured["receipt"])
+        audit_inbox.bind_layer(
+            self.root,
+            rel,
+            layer=number,
+            generation=1,
+            file_sha256=captured["file_sha256"],
+            size_bytes=len(body.encode("utf-8")),
+            receipt_id=captured["receipt"],
+            receipt_sha256=captured["file_sha256"],
+            binding="exact",
+            linked_work=None,
+            state=audit_inbox.CLOSED_PENDING_DELETE,
+        )
+        return captured
+
+
 
 # ---------------------------------------------------------------------------
 # DISCOVERY
@@ -337,6 +358,41 @@ class RoutingTests(unittest.TestCase):
         )
         self.assertEqual(routed["reason"], "start")
 
+    def test_a_residue_only_inbox_is_surfaced_instead_of_idle(self) -> None:
+        routed = route_next(
+            _state(),
+            BOARD_EMPTY,
+            audit_inbox={
+                "action": "saipen audit status",
+                "residue_only": True,
+                "detail": "audit/ is settled but not clean: 1 non-layer entry",
+            },
+        )
+        self.assertEqual(routed["reason"], "audit-inbox-residue")
+        self.assertEqual(routed["executable_behavior"], "RESTATE_AND_STOP")
+        self.assertTrue(routed["ok"], "residue is a diagnostic, never a failure")
+
+    def test_a_residue_only_inbox_never_outranks_real_workable_board_work(self) -> None:
+        board = "# Board\n## DOING\n## TODO\n- [ ] T-500 [P1] backlog | verify: proof\n## DONE\n## BLOCKED\n"  # noqa: E501
+        routed = route_next(
+            _state(), board, audit_inbox={"action": "saipen audit status", "residue_only": True}
+        )
+        self.assertEqual(routed["reason"], "start")
+
+    def test_residue_never_preempts_a_live_ticket(self) -> None:
+        board = "# Board\n## DOING\n- [/] T-400 [P1] live | verify: proof\n## TODO\n## DONE\n## BLOCKED\n"  # noqa: E501
+        routed = route_next(
+            _state(
+                phase="BUILD",
+                task="T-400",
+                next_action="PHASE BUILD T-400",
+                transition_from="SCOUT",
+            ),
+            board,
+            audit_inbox={"action": "saipen audit status", "residue_only": True},
+        )
+        self.assertEqual(routed["reason"], "finish")
+
     def test_a_persisted_wait_still_outranks_the_audit_inbox(self) -> None:
         board = "# Board\n## DOING\n## TODO\n- [ ] T-500 [P1] backlog | verify: proof\n## DONE\n## BLOCKED\n"  # noqa: E501
         routed = route_next(
@@ -514,26 +570,6 @@ class MigrationEquivalenceTests(AuditInboxFixture):
 
 
 class SafeDeleteTests(AuditInboxFixture):
-    def bind_closed(self, number: int, body: str) -> dict:
-        self.layer(number, body)
-        rel = f"audit/{number}.md"
-        captured = audit_inbox.capture_layer(self.root, rel)
-        self.close_source(captured["receipt"])
-        audit_inbox.bind_layer(
-            self.root,
-            rel,
-            layer=number,
-            generation=1,
-            file_sha256=captured["file_sha256"],
-            size_bytes=len(body.encode("utf-8")),
-            receipt_id=captured["receipt"],
-            receipt_sha256=captured["file_sha256"],
-            binding="exact",
-            linked_work=None,
-            state=audit_inbox.CLOSED_PENDING_DELETE,
-        )
-        return captured
-
     def test_a_closed_unchanged_layer_is_deleted_and_nothing_else_is(self) -> None:
         self.bind_closed(2, "closed audit two\n")
         self.layer(1, "still open one\n")
@@ -698,6 +734,119 @@ class ReadOnlySurfaceTests(AuditInboxFixture):
 
 
 # ---------------------------------------------------------------------------
+# RESIDUE / CLEAN VERDICT
+# ---------------------------------------------------------------------------
+
+
+class ResidueTests(AuditInboxFixture):
+    """An inbox empty of everything SAIPEN captured is not yet a clean directory."""
+
+    def residue(self, name: str, body: str = "leftover\n") -> Path:
+        path = self.root / "audit" / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(body, encoding="utf-8")
+        return path
+
+    def test_an_absent_inbox_is_clean(self) -> None:
+        self.assertEqual(audit_inbox.scan_residue(self.root), [])
+        self.assertTrue(audit_inbox.status(self.root)["clean"])
+
+    def test_an_empty_inbox_is_clean(self) -> None:
+        (self.root / "audit").mkdir()
+        self.assertTrue(audit_inbox.status(self.root)["clean"])
+        self.assertIsNone(audit_inbox.projection(self.root))
+
+    def test_noncanonical_names_are_residue(self) -> None:
+        for name in ("notes.md", "01.md", "1.txt", "audit.md"):
+            self.residue(name)
+        (self.root / "audit" / "done").mkdir()
+        found = {item["name"]: item["kind"] for item in audit_inbox.scan_residue(self.root)}
+        self.assertEqual(sorted(found), ["01.md", "1.txt", "audit.md", "done", "notes.md"])
+        self.assertEqual(found["done"], "directory")
+
+    def test_a_canonical_layer_is_never_counted_as_residue(self) -> None:
+        self.layer(1)
+        self.assertEqual(audit_inbox.scan_residue(self.root), [])
+        self.assertFalse(audit_inbox.status(self.root)["clean"])
+
+    def test_an_invalid_layer_is_reported_once_as_a_layer_not_twice(self) -> None:
+        self.layer(1, b"\xff\xfe not utf-8")
+        self.assertEqual(audit_inbox.scan_residue(self.root), [])
+        status = audit_inbox.status(self.root)
+        self.assertEqual(len(status["invalid"]), 1)
+        self.assertEqual(status["residue_count"], 0)
+
+    def test_dot_prefixed_infrastructure_is_exempt(self) -> None:
+        self.residue(".gitkeep", "")
+        self.residue(".gitignore", "*\n")
+        self.assertEqual(audit_inbox.scan_residue(self.root), [])
+        self.assertTrue(audit_inbox.status(self.root)["clean"])
+        self.assertIsNone(audit_inbox.projection(self.root))
+
+    def test_the_nested_content_of_a_residue_directory_is_never_scanned(self) -> None:
+        nested = self.root / "audit" / "done"
+        nested.mkdir(parents=True)
+        for number in range(1, 6):
+            (nested / f"{number}.md").write_text("nested\n", encoding="utf-8")
+        self.assertEqual([item["name"] for item in audit_inbox.scan_residue(self.root)], ["done"])
+
+    def test_a_settled_inbox_with_residue_is_not_clean_and_not_idle(self) -> None:
+        self.bind_closed(2, "closed audit two\n")
+        keep = self.residue("notes.md")
+        self.assertTrue(audit_inbox.consume_layer(self.root, "audit/2.md", "probe")["ok"])
+        status = audit_inbox.status(self.root)
+        self.assertFalse(status["clean"])
+        self.assertEqual(status["residue_count"], 1)
+        routed = audit_inbox.projection(self.root)
+        self.assertTrue(routed["residue_only"])
+        self.assertIn("audit/notes.md", routed["detail"])
+        self.assertTrue(keep.is_file(), "residue is reported, never deleted")
+
+    def test_consuming_the_last_layer_of_a_clean_inbox_reports_clean(self) -> None:
+        self.bind_closed(2, "closed audit two\n")
+        self.assertTrue(audit_inbox.consume_layer(self.root, "audit/2.md", "probe")["ok"])
+        self.assertTrue(audit_inbox.status(self.root)["clean"])
+        self.assertIsNone(audit_inbox.projection(self.root))
+
+    def test_residue_never_starves_a_workable_layer(self) -> None:
+        self.residue("notes.md")
+        self.layer(1)
+        routed = audit_inbox.projection(self.root)
+        self.assertEqual(routed["action"], "saipen audit ingest")
+        self.assertNotIn("residue_only", routed)
+        self.assertEqual(routed["residue"], ["audit/notes.md"])
+
+    def test_an_invalid_layer_outranks_residue_in_the_verdict(self) -> None:
+        self.layer(1, b"")
+        self.residue("notes.md")
+        routed = audit_inbox.projection(self.root)
+        self.assertTrue(routed["invalid_only"])
+        self.assertNotIn("residue_only", routed)
+
+    def test_the_residue_report_is_capped(self) -> None:
+        for number in range(audit_inbox.RESIDUE_REPORT_CAP + 5):
+            self.residue(f"leftover-{number:03d}.txt")
+        routed = audit_inbox.projection(self.root)
+        self.assertEqual(len(routed["residue"]), audit_inbox.RESIDUE_REPORT_CAP)
+        self.assertEqual(routed["residue_count"], audit_inbox.RESIDUE_REPORT_CAP + 5)
+
+    def test_the_residue_projection_writes_nothing(self) -> None:
+        self.residue("notes.md")
+
+        def snap() -> dict:
+            return {
+                path: path.read_bytes()
+                for path in sorted((self.root / ".saipen").rglob("*"))
+                if path.is_file()
+            }
+
+        before = snap()
+        audit_inbox.projection(self.root)
+        audit_inbox.status(self.root)
+        self.assertEqual(before, snap())
+
+
+# ---------------------------------------------------------------------------
 # REGISTRY / OWNERSHIP
 # ---------------------------------------------------------------------------
 
@@ -718,6 +867,9 @@ class RegistryContractTests(unittest.TestCase):
         self.assertFalse(facts["recursive"])
         self.assertFalse(facts["renumber_after_delete"])
         self.assertEqual(facts["continue_position"], "AFTER_ACTIVE_BEFORE_BOARD_PICK")
+        self.assertEqual(facts["residue_policy"], "REPORT_NEVER_DELETE")
+        self.assertEqual(facts["residue_exempt_prefix"], audit_inbox.RESIDUE_EXEMPT_PREFIX)
+        self.assertEqual(facts["clean_verdict"], "NO_LAYER_AND_NO_RESIDUE")
 
     def test_the_rule_has_exactly_one_human_owner(self) -> None:
         self.assertEqual(

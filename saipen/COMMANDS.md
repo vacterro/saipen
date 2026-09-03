@@ -81,7 +81,14 @@ Cyrillic `сс` → Latin `cc` (continue), never `[ss]` (stop).
 fallback. The Audit Inbox stage checks the canonical `audit/` layers
 (`SOURCE-AUDIT-INBOX-01`, SOURCES.md): a workable unconsumed audit outranks
 SELECTION of unrelated queued TODO but never preempts active Work, and a
-project holding one is never idle.
+project holding one is never idle. Layer identity is the file digest, so a
+changed audit at a path already worked is a NEW generation and is read again.
+
+After the Pick Rule and before any idle verdict, two inbox diagnostics are
+restated rather than routed: `audit-inbox-invalid` (a layer that cannot be
+read) and `audit-inbox-residue` (every layer settled and deleted, but
+`audit/` still holds entries SAIPEN never captured). Neither outranks workable
+BOARD Work; neither is ever deleted automatically.
 
 `saipen continue` falls through to `saipen improve` ONCE after recovery,
 blocked, queued, audit-inbox and required-follow-up routing is exhausted. An

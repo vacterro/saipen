@@ -780,6 +780,9 @@
     "delete_gate": "SOURCE_CLOSED_AND_CURRENT_HASH_MATCHES",
     "delete_operation": "audit_inbox.consume",
     "renumber_after_delete": false,
+    "residue_policy": "REPORT_NEVER_DELETE",
+    "residue_exempt_prefix": ".",
+    "clean_verdict": "NO_LAYER_AND_NO_RESIDUE",
     "binding": ".saipen/intake/audit_inbox.json",
     "migration_binding": "legacy_transport_equivalent",
     "generation_states": [

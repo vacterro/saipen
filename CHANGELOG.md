@@ -1,6 +1,18 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.245.0 -- 2026-09-03 -- Settled Is Not The Same Claim As Clean (T-1274)
+
+- `SOURCE-AUDIT-INBOX-01` deleted every proven-closed layer and then reported the project idle. Consuming the last layer empties `audit/` of everything SAIPEN captured -- and anything ELSE in that folder is residue it never read and may never delete. Those two facts were reported as one verdict, so "nothing to do" and "the folder is full of files nobody reads" were indistinguishable from outside.
+- Measured the day it landed, across nine repositories fed by an external producer: **each held one canonical layer and five uncaptured files, and the inbox answered as if the folder were empty.**
+- `saipen audit status` now carries `clean`, `residue` and `residue_count`. Residue is the direct entries in `audit/` that are not `^[1-9][0-9]*\.md$`; the scan does not recurse, so a subdirectory is one entry whatever it contains.
+- `saipen continue` gained the verdict `audit-inbox-residue`, `RESTATE_AND_STOP`, emitted only when every layer is settled and the directory still holds entries SAIPEN never captured. It sits beside the existing invalid-layer diagnostic: **after** the Pick Rule and **before** any idle or Improve verdict, so it never outranks workable BOARD Work and never preempts a live ticket.
+- **The policy is REPORT_NEVER_DELETE, and that is the whole design.** Deleting bytes the transport never read is the one destructive act with no evidence behind it. The inbox names the entries and stops; the operator decides. Registered as a machine-readable fact -- `REGISTRY.json` gains `residue_policy`, `residue_exempt_prefix` and `clean_verdict` -- so the promise is checkable rather than prose.
+- Dot-prefixed names (`.gitkeep`, `.gitignore`) are directory infrastructure and exempt. Without that a repository tracking an empty inbox would report dirty on every `cc`, and a warning that is permanently on is a warning nobody reads.
+- Freshness was already correct and is now written down: identity is `relative path + SHA-256`, never mtime, so a changed audit at a path already worked is a NEW generation that never reuses the old receipt and re-enters routing exactly like a file never seen. `cc` cannot answer from a stale capture.
+- Verified across a tool boundary, not only in unit tests. An independent reader outside this repository was aligned against this contract over five project roots: residue counts equal on both sides, each layer's transport state mapping to the verdict it should, and the other tool's headline layer equal to this projection's routed layer. Two real disagreements were found that way and fixed there -- an `ACTIVE` record with no linked Work read as "somebody is working it", and a vanished transport outranking a fresh unread layer.
+- 16 new tests (73 in the suite, from 57).
+
 ## 7.244.0 -- 2026-09-03 -- Which Proofs A Machine Re-Runs (T-1269)
 
 - v7.243.0 made a criterion's evidence visible one ticket at a time. It could not answer the question one level up: across the whole board, how much of "satisfied" is a test that re-runs, and how much is a sentence somebody wrote once. Both render as SATISFIED, and that difference is the entire value of the record.

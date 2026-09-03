@@ -850,9 +850,15 @@ def _status(project_root: Path, as_json: bool) -> int:
             ),
             "closed_pending_delete": len(_inbox["closed_pending_delete"]),
             "invalid": len(_inbox["invalid"]),
+            "residue": _inbox.get("residue_count", 0),
+            "clean": _inbox.get("clean"),
             "last_allocated_id": _inbox.get("last_allocated_id"),
         }
-        if _summary["pending"] or _summary["last_allocated_id"] is not None:
+        if (
+            _summary["pending"]
+            or _summary["residue"]
+            or _summary["last_allocated_id"] is not None
+        ):
             payload["audit_inbox"] = _summary
     except Exception as exc:
         # The inbox is transport, not terminal truth: a projection failure is
@@ -2253,12 +2259,22 @@ def _audit(project_root: Path, args: list[str], as_json: bool, dry_run: bool) ->
 
     fresh = next((item for item in layers if item["state"] == audit_inbox.NEW), None)
     if fresh is None:
+        settled = audit_inbox.status(project_root)
         _emit(
             {
-                **audit_inbox.status(project_root),
+                **settled,
                 "code": "AUDIT_INBOX_STATUS",
                 "migrated": migrated or None,
-                "detail": "no unconsumed audit generation and nothing to settle",
+                "detail": (
+                    "no unconsumed audit generation and nothing to settle; "
+                    + (
+                        "audit/ is clean"
+                        if settled.get("clean")
+                        else f"audit/ still holds {settled.get('residue_count', 0)} "
+                        "entr(y/ies) SAIPEN never captured -- listed under residue, "
+                        "never deleted for you"
+                    )
+                ),
             },
             as_json,
         )

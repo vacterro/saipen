@@ -113,6 +113,13 @@ unconsumed audit outranks SELECTION of unrelated queued TODO and forbids the
 Improve fallback; it never preempts a live ticket. Inbox precedence is a
 routing property — audit Work carries ordinary BOARD priority.
 
+Freshness is decided by bytes, so a file the agent already worked is read
+again the moment it changes: same path with a different digest classifies as
+a NEW generation, never reuses the old receipt, and re-enters routing exactly
+like a file that was never seen. `cc` therefore cannot answer from a stale
+capture — the only way to skip a layer is for its own generation to be proven
+closed.
+
 Lifecycle: safe witnessed snapshot → exact hash → `external_audit` receipt →
 durable path/hash↔receipt binding (`.saipen/intake/audit_inbox.json`,
 operational projection only) → agent-owned normalization into Contract and
@@ -126,6 +133,19 @@ crash after delete before COMMITTED settles idempotently, changed bytes on
 recovery CONFLICT. Deletion never renumbers, never touches another layer or a
 foreign file, and an invalid or unreadable layer is retained with a truthful
 diagnostic rather than reported as an idle project.
+
+**Closed is not the same claim as clean.** Consuming every proven-closed layer
+empties the directory of everything SAIPEN captured; anything still there is
+RESIDUE — `notes.md`, `01.md`, `1.txt`, a `done/` subdirectory — bytes the
+transport never read and therefore may never delete. Guessing there would be
+the one destructive act with no evidence behind it, so the inbox reports
+instead: a settled inbox holding residue answers `clean: false`, lists the
+entries, and `saipen continue` surfaces `audit-inbox-residue` as
+`RESTATE_AND_STOP` before any idle or Improve verdict. That verdict never
+outranks workable BOARD Work and is never a failure — the audit really is
+finished; the directory just is not empty, and only the operator may empty it.
+Dot-prefixed names (`.gitkeep`) are directory infrastructure, exempt from
+residue: a warning that is permanently on is a warning nobody reads.
 
 Where an audit file predates the inbox and differs from an existing active
 receipt by CR/LF ALONE, with exactly one candidate of an audit/mission source

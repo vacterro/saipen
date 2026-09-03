@@ -20,6 +20,11 @@ makes "never delete bytes the closure did not prove" decidable.
 
 SOURCE BODY IS DATA: an audit containing `saipen ship` is text, never a
 command invocation. Nothing here parses the body for semantics.
+
+CLEAN is a verdict, not a side effect. Consuming every proven-closed layer
+empties the inbox of everything SAIPEN captured; whatever remains is RESIDUE
+that was never read and is therefore never deleted. The projection reports it
+so a settled inbox cannot pass as a clean directory it is not.
 """
 
 from __future__ import annotations
@@ -69,6 +74,18 @@ _MIGRATION_KINDS = ("external_audit", "user_audit", "implementation_mission")
 
 _EXACT = "exact"
 _LEGACY_EOL = "legacy_transport_equivalent"
+
+# RESIDUE: anything in `audit/` that is not a canonical layer. It is never
+# read, never captured and never deleted -- it exists in the projection ONLY
+# so a fully settled inbox can prove the directory is actually CLEAN instead
+# of reporting a green "nothing to do" over a caller's leftovers.
+# Dot-prefixed entries are directory infrastructure (`.gitkeep` keeps the
+# empty inbox tracked); counting them as residue would make the clean verdict
+# permanently false, and a warning that is always on is a warning nobody
+# reads. The report is capped because a runaway producer must not turn one
+# routing verdict into an unbounded file listing.
+RESIDUE_EXEMPT_PREFIX = "."
+RESIDUE_REPORT_CAP = 20
 
 
 # --------------------------------------------------------------------------
@@ -121,6 +138,53 @@ def scan_layers(root: Path | str) -> list[dict]:
         )
     layers.sort(key=lambda item: item["layer"])
     return layers
+
+
+def scan_residue(root: Path | str) -> list[dict]:
+    """Direct non-layer entries in `audit/`, sorted by name.
+
+    `notes.md`, `01.md`, `1.txt` and a `done/` subdirectory are all residue:
+    foreign to the transport, so never read and never deleted, but still
+    physically in the inbox. The scan does not recurse -- a subdirectory is
+    ONE entry, whatever it contains. Dot-prefixed names are exempt
+    infrastructure. An absent or unsafe `audit/` holds no residue.
+    """
+    root = Path(root)
+    directory = audit_dir(root)
+    try:
+        prove_owned_dir_chain(directory, kind="audit inbox", ownership_root=root)
+    except ValueError:
+        return []
+    if not directory.is_dir():
+        return []
+    try:
+        entries = list(directory.iterdir())
+    except OSError:
+        return []
+    residue: list[dict] = []
+    for entry in entries:
+        name = entry.name
+        if name.startswith(RESIDUE_EXEMPT_PREFIX):
+            continue
+        if layer_number(name) is not None:
+            # A canonical NAME is a layer even when its bytes are unusable --
+            # it is classified (and possibly reported INVALID) as a layer, so
+            # counting it here too would report the same file twice.
+            continue
+        try:
+            if entry.is_symlink():
+                kind = "symlink"
+            elif entry.is_dir():
+                kind = "directory"
+            elif entry.is_file():
+                kind = "file"
+            else:
+                kind = "other"
+        except OSError:
+            kind = "unreadable"
+        residue.append({"name": name, "rel": f"{AUDIT_DIRNAME}/{name}", "kind": kind})
+    residue.sort(key=lambda item: item["name"])
+    return residue
 
 
 def _invalid(reason: str, detail: str) -> dict:
@@ -423,7 +487,7 @@ def classify(root: Path | str) -> dict:
                 ),
             }
         )
-    return {"layers": layers, "orphans": orphans}
+    return {"layers": layers, "orphans": orphans, "residue": scan_residue(root)}
 
 
 # --------------------------------------------------------------------------
@@ -441,7 +505,8 @@ def projection(root: Path | str) -> dict | None:
     """
     state = classify(root)
     layers = state["layers"]
-    if not layers and not state["orphans"]:
+    residue = state["residue"]
+    if not layers and not state["orphans"] and not residue:
         return None
     invalid = [item for item in layers if item["state"] in (INVALID, BLOCKED)]
     base = {
@@ -454,6 +519,8 @@ def projection(root: Path | str) -> dict | None:
             {"layer": item["layer"], "reason": item.get("reason") or item.get("detail")}
             for item in invalid
         ],
+        "residue": [item["rel"] for item in residue[:RESIDUE_REPORT_CAP]],
+        "residue_count": len(residue),
     }
     for item in layers:
         if item["state"] == CLOSED_PENDING_DELETE:
@@ -507,6 +574,22 @@ def projection(root: Path | str) -> dict | None:
             "invalid_only": True,
             "detail": "audit inbox holds only invalid layer(s); it is not idle",
         }
+    if residue:
+        # Every layer is settled and gone, but the directory is not empty.
+        # SAIPEN never captured these bytes, so it may not delete them -- and
+        # it may not call the inbox clean either. Naming them is the whole
+        # verdict: the operator decides, the transport never guesses.
+        return {
+            **base,
+            "action": "saipen audit status",
+            "residue_only": True,
+            "detail": (
+                f"audit/ is settled but not clean: {len(residue)} non-layer "
+                f"entr{'y' if len(residue) == 1 else 'ies'} SAIPEN never captured "
+                f"({', '.join(item['rel'] for item in residue[:3])}"
+                f"{', ...' if len(residue) > 3 else ''}); nothing is deleted for you"
+            ),
+        }
     return None
 
 
@@ -540,6 +623,12 @@ def status(root: Path | str) -> dict:
             if item["state"] in (INVALID, BLOCKED)
         ],
         "orphans": state["orphans"],
+        "residue": state["residue"][:RESIDUE_REPORT_CAP],
+        "residue_count": len(state["residue"]),
+        # CLEAN is the whole-directory verdict a closure claim is checked
+        # against: no layer present in any state, no residue. Orphan bindings
+        # are settled history and never make a directory dirty.
+        "clean": not layers and not state["residue"],
         "next": routed,
         "last_allocated_id": _last_allocated_id(root),
     }

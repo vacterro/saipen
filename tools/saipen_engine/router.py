@@ -399,9 +399,10 @@ def route_next(
     # every active-continuation branch above has already returned, so a fresh
     # file can never steal ownership from a live BUILD/VERIFY/REVIEW
     # transaction; it only wins the START decision that has not been made yet.
-    # `invalid_only` is NOT routed here: an unreadable layer is a diagnostic
-    # that must not outrank real workable BOARD Work (it is surfaced below,
-    # before the project can call itself idle).
+    # `invalid_only` and `residue_only` are NOT routed here: an unreadable
+    # layer and an uncaptured leftover are diagnostics that must not outrank
+    # real workable BOARD Work (both are surfaced below, before the project
+    # can call itself idle).
     if not active and audit_inbox and audit_inbox.get("action"):
         # BOARD policy stays HERE, not in the inbox module: the inbox answers
         # structurally ("this layer's Work owns continuation"), and the router
@@ -417,7 +418,11 @@ def route_next(
                 board["tickets"].get(_audit_work, {}), board["tickets"], agent=session_agent
             )
         )
-        if not audit_inbox.get("invalid_only") and not _audit_blocked:
+        if (
+            not audit_inbox.get("invalid_only")
+            and not audit_inbox.get("residue_only")
+            and not _audit_blocked
+        ):
             routed_audit = {
                 "ok": True,
                 "action": audit_inbox["action"],
@@ -472,6 +477,21 @@ def route_next(
             "executable_behavior": "RESTATE_AND_STOP",
             "detail": audit_inbox.get(
                 "detail", "audit inbox holds only invalid layer(s); it is not idle"
+            ),
+        }
+
+    # Every layer settled, but `audit/` still holds bytes SAIPEN never
+    # captured. The work is genuinely finished, so this is not a failure and
+    # never a refusal -- it is the difference between "the audit is closed"
+    # and "the audit directory is clean", which are not the same claim.
+    if audit_inbox and audit_inbox.get("residue_only"):
+        return {
+            "ok": True,
+            "action": audit_inbox.get("action", "saipen audit status"),
+            "reason": "audit-inbox-residue",
+            "executable_behavior": "RESTATE_AND_STOP",
+            "detail": audit_inbox.get(
+                "detail", "audit inbox is settled but the directory is not clean"
             ),
         }
 
