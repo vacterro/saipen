@@ -734,6 +734,137 @@ class ReadOnlySurfaceTests(AuditInboxFixture):
 
 
 # ---------------------------------------------------------------------------
+# CORRUPT BINDING (SRC-019:R6)
+# ---------------------------------------------------------------------------
+
+
+class CorruptBindingTests(AuditInboxFixture):
+    """A binding that exists and cannot be decoded is not an empty inbox.
+
+    Every read mapped FileNotFoundError, an unreadable file, invalid UTF-8,
+    invalid JSON, a wrong root shape and a wrong record shape to the SAME
+    synthetic empty document, so the next write laundered corrupt authority
+    into a healthy-looking binding holding only the new record.
+    """
+
+    def binding(self) -> Path:
+        path = self.root / ".saipen" / "intake" / "audit_inbox.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        return path
+
+    def corrupt(self, raw: bytes = b"{broken") -> bytes:
+        path = self.binding()
+        path.write_bytes(raw)
+        return raw
+
+    def test_an_undecodable_binding_is_reported_not_read_as_empty(self) -> None:
+        self.layer(1, "# audit\n")
+        self.corrupt()
+        state = audit_inbox.classify(self.root)
+        self.assertFalse(state["ok"], state)
+        self.assertEqual(state["code"], "AUDIT_BINDING_CORRUPT")
+        self.assertEqual(state["binding_state"], audit_inbox.BINDING_CORRUPT)
+        self.assertEqual(state["layers"], [])
+
+    def test_an_absent_binding_is_still_an_empty_inbox(self) -> None:
+        self.binding().unlink(missing_ok=True)
+        doc, state, detail = audit_inbox.read_binding_state(self.root)
+        self.assertEqual(state, audit_inbox.BINDING_ABSENT)
+        self.assertEqual(detail, "")
+        self.assertEqual(doc["layers"], {})
+        self.assertTrue(audit_inbox.classify(self.root)["ok"])
+
+    def test_an_obstructed_binding_path_is_corrupt_not_absent(self) -> None:
+        with patch.object(
+            Path,
+            "read_bytes",
+            side_effect=NotADirectoryError("a path component is not a directory"),
+        ):
+            _doc, state, detail = audit_inbox.read_binding_state(self.root)
+        self.assertEqual(state, audit_inbox.BINDING_CORRUPT)
+        self.assertIn("cannot be read", detail)
+
+    def test_a_write_never_launders_corrupt_bytes(self) -> None:
+        raw = self.corrupt()
+        with self.assertRaises(audit_inbox.BindingCorrupt):
+            audit_inbox.bind_layer(
+                self.root,
+                "audit/2.md",
+                layer=2,
+                generation=1,
+                file_sha256="b" * 64,
+                size_bytes=1,
+                receipt_id="SRC-002",
+                receipt_sha256="b" * 64,
+                binding="exact",
+                linked_work=None,
+                state=audit_inbox.ACTIVE,
+            )
+        self.assertEqual(self.binding().read_bytes(), raw)
+
+    def test_status_and_routing_refuse_to_call_a_corrupt_inbox_idle(self) -> None:
+        self.corrupt()
+        out = audit_inbox.status(self.root)
+        self.assertFalse(out["ok"], out)
+        self.assertEqual(out["code"], "AUDIT_BINDING_CORRUPT")
+        self.assertFalse(out["clean"])
+        routed = audit_inbox.projection(self.root)
+        self.assertIsNotNone(routed)
+        self.assertTrue(routed["binding_corrupt"])
+        self.assertEqual(routed["action"], "saipen audit status")
+
+    def test_a_persisted_unreadable_generation_refuses_instead_of_crashing(self) -> None:
+        self.layer(1, "# audit\n")
+        self.binding().write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "layers": {
+                        "audit/1.md": {
+                            "layer": 1,
+                            "generation": "oops",
+                            "file_sha256": "c" * 64,
+                            "receipt_sha256": "c" * 64,
+                            "binding": "exact",
+                            "size_bytes": 1,
+                            "receipt_id": "SRC-001",
+                            "linked_work": None,
+                            "state": audit_inbox.ACTIVE,
+                        }
+                    },
+                }
+            ),
+            encoding="utf-8",
+        )
+        state = audit_inbox.classify(self.root)
+        self.assertFalse(state["ok"], state)
+        self.assertIn("generation", state["detail"])
+
+    def test_the_delete_gate_and_the_trace_refuse_on_a_corrupt_binding(self) -> None:
+        self.layer(1, "# audit\n")
+        self.corrupt()
+        gate = audit_inbox.delete_gate(self.root, "audit/1.md")
+        self.assertFalse(gate["ok"], gate)
+        self.assertEqual(gate["code"], "AUDIT_BINDING_CORRUPT")
+        consumed = audit_inbox.consume_layer(self.root, "audit/1.md", "probe")
+        self.assertFalse(consumed["ok"], consumed)
+        self.assertTrue((self.root / "audit" / "1.md").is_file())
+        trace = audit_inbox.provenance_trace(self.root)
+        self.assertFalse(trace["ok"], trace)
+        self.assertEqual(trace["rows"], [])
+
+    def test_the_producer_transport_fails_closed_on_a_corrupt_binding(self) -> None:
+        from saipen_engine import audit_enqueue
+
+        self.corrupt()
+        result = audit_enqueue.enqueue(
+            self.root, producer="audapack", body=b"# a finding\n", producer_operation_id="op-1"
+        )
+        self.assertFalse(result["ok"], result)
+        self.assertEqual(list((self.root / "audit").glob("*.md")), [])
+
+
+# ---------------------------------------------------------------------------
 # RESIDUE / CLEAN VERDICT
 # ---------------------------------------------------------------------------
 

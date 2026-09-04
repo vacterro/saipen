@@ -2275,11 +2275,30 @@ def _audit(project_root: Path, args: list[str], as_json: bool, dry_run: bool) ->
         return _capability_refusal(as_json)
 
     agent = _agent_for(project_root)
+    # SRC-019:R6 -- classify FIRST. A corrupt inbox binding is refused here,
+    # before `reconcile_bootstrap` reads it, because every mutation below
+    # (bootstrap binding, journaled cleanup, capture) would otherwise decide
+    # from authority nobody could read.
+    state = audit_inbox.classify(project_root)
+    if not state.get("ok", True):
+        _emit(
+            {
+                **state,
+                "action": "saipen audit status",
+                "detail": state.get("detail", "audit inbox binding is unreadable"),
+                "layers": None,
+                "orphans": None,
+                "residue": None,
+            },
+            as_json,
+        )
+        return 1
     # Bootstrap migration: layers that already own canonical Work are BOUND,
     # never recaptured. Without this the first activation would look at a
     # hand-converted audit and manufacture a duplicate receipt and ticket.
     migrated = audit_inbox.reconcile_bootstrap(project_root) if not dry_run else []
-    state = audit_inbox.classify(project_root)
+    if migrated:
+        state = audit_inbox.classify(project_root)
     layers = state["layers"]
 
     # CLEANUP FIRST: a completed audit must disappear on the next `cc` without

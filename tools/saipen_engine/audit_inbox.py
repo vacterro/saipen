@@ -249,24 +249,102 @@ def snapshot_layer(root: Path | str, rel: str) -> dict:
 # --------------------------------------------------------------------------
 
 
-def read_binding(root: Path | str) -> dict:
-    """The path+digest -> receipt binding. Rebuildable operational projection."""
+#: Binding read states. ABSENT and CORRUPT are DIFFERENT answers (SRC-019:R6).
+#: A binding nobody has written yet is an empty inbox; a binding that exists
+#: and cannot be decoded is authority nobody has read, and reading it as empty
+#: is how the next write LAUNDERS it into a healthy-looking document holding
+#: only the newest record.
+BINDING_ABSENT = "ABSENT"
+BINDING_OK = "OK"
+BINDING_CORRUPT = "CORRUPT"
+
+_SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+
+
+class BindingCorrupt(ValueError):
+    """The binding exists and cannot be trusted.
+
+    A ValueError so that every caller already guarding `(OSError, ValueError)`
+    fails closed rather than continuing on a synthetic empty document.
+    """
+
+
+def _binding_record_problem(rel: object, record: object) -> str | None:
+    """Why this binding entry cannot be read, or None when it decodes.
+
+    Strict on the fields the transport DECIDES with -- identity, digest,
+    generation and transport state -- because a record that cannot answer them
+    is not a weaker record, it is an unknown one. `classify` used to call
+    `int(record["generation"])` on whatever was persisted and crashed with
+    ValueError on `generation: "oops"`.
+    """
+    if not isinstance(rel, str) or not rel:
+        return f"layer key {rel!r} is not a path"
+    if not isinstance(record, dict):
+        return f"{rel} is not a record"
+    layer = record.get("layer")
+    if not isinstance(layer, int) or isinstance(layer, bool) or layer < 1:
+        return f"{rel} layer {record.get('layer')!r} is not a layer number"
+    generation = record.get("generation")
+    if not isinstance(generation, int) or isinstance(generation, bool) or generation < 1:
+        return f"{rel} generation {generation!r} is not a generation number"
+    digest = record.get("file_sha256")
+    if not isinstance(digest, str) or not _SHA256_RE.match(digest):
+        return f"{rel} file_sha256 {digest!r} is not a sha256"
+    state = record.get("state")
+    if state not in GENERATION_STATES:
+        return f"{rel} state {state!r} is not a transport state"
+    receipt_id = record.get("receipt_id")
+    if not isinstance(receipt_id, str) or not receipt_id:
+        return f"{rel} receipt_id {receipt_id!r} is not a receipt"
+    return None
+
+
+def read_binding_state(root: Path | str) -> tuple[dict, str, str]:
+    """`(document, state, detail)` for the binding. The only decoder.
+
+    SRC-019:R6 -- every read used to map FileNotFoundError, an unreadable file,
+    invalid UTF-8, invalid JSON, a wrong root shape and a wrong record shape to
+    the SAME synthetic empty binding, so a following `bind_layer` overwrote
+    corrupt bytes with a document holding only the new record and the rest of
+    the transport history was gone with no refusal anywhere.
+    """
     root = Path(root)
     path = root / Path(BINDING_REL)
     empty = {"schema_version": SCHEMA_VERSION, "layers": {}}
     try:
         raw = path.read_bytes()
-    except (FileNotFoundError, NotADirectoryError):
-        return empty
-    except OSError:
-        return empty
+    except FileNotFoundError:
+        return empty, BINDING_ABSENT, ""
+    except OSError as exc:
+        return empty, BINDING_CORRUPT, f"{BINDING_REL} cannot be read: {exc}"
     try:
         doc = json.loads(raw.decode("utf-8-sig"))
-    except (ValueError, UnicodeDecodeError):
-        return empty
-    if not isinstance(doc, dict) or not isinstance(doc.get("layers"), dict):
-        return empty
+    except (ValueError, UnicodeDecodeError) as exc:
+        return empty, BINDING_CORRUPT, f"{BINDING_REL} is not readable JSON: {exc}"
+    if not isinstance(doc, dict):
+        return empty, BINDING_CORRUPT, f"{BINDING_REL} root is not an object"
+    layers = doc.get("layers")
+    if not isinstance(layers, dict):
+        return empty, BINDING_CORRUPT, f"{BINDING_REL} carries no layers object"
+    for rel, record in layers.items():
+        problem = _binding_record_problem(rel, record)
+        if problem is not None:
+            return empty, BINDING_CORRUPT, f"{BINDING_REL} record is undecodable: {problem}"
     doc.setdefault("schema_version", SCHEMA_VERSION)
+    return doc, BINDING_OK, ""
+
+
+def read_binding(root: Path | str) -> dict:
+    """The path+digest -> receipt binding. Rebuildable operational projection.
+
+    Raises `BindingCorrupt` when the document exists and cannot be decoded, so
+    no caller can mistake unread authority for an empty inbox. Callers that
+    must REPORT rather than raise use `read_binding_state` directly.
+    """
+    doc, state, detail = read_binding_state(root)
+    if state == BINDING_CORRUPT:
+        raise BindingCorrupt(detail)
     return doc
 
 
@@ -388,9 +466,24 @@ def classify(root: Path | str) -> dict:
 
     Writes nothing and opens no source body: an ACTIVE/CLOSED verdict comes
     from the intake index + receipt metadata, never from re-reading receipts.
+
+    A CORRUPT binding is REPORTED, never rendered as an empty one: `status`,
+    `projection` and the ingest command all decide from this projection, and a
+    corrupt document read as "no bindings" makes every one of them describe an
+    idle inbox at the exact moment it is unsafe (SRC-019:R6).
     """
     root = Path(root)
-    binding = read_binding(root)
+    binding, binding_state, binding_detail = read_binding_state(root)
+    if binding_state == BINDING_CORRUPT:
+        return {
+            "ok": False,
+            "code": "AUDIT_BINDING_CORRUPT",
+            "detail": binding_detail,
+            "binding_state": binding_state,
+            "layers": [],
+            "orphans": [],
+            "residue": scan_residue(root),
+        }
     bound = binding.get("layers") or {}
     layers: list[dict] = []
     seen: set[str] = set()
@@ -487,7 +580,13 @@ def classify(root: Path | str) -> dict:
                 ),
             }
         )
-    return {"layers": layers, "orphans": orphans, "residue": scan_residue(root)}
+    return {
+        "ok": True,
+        "binding_state": binding_state,
+        "layers": layers,
+        "orphans": orphans,
+        "residue": scan_residue(root),
+    }
 
 
 # --------------------------------------------------------------------------
@@ -504,6 +603,22 @@ def projection(root: Path | str) -> dict | None:
     later workable one.
     """
     state = classify(root)
+    if not state.get("ok", True):
+        # A corrupt binding is not an idle inbox. Route it at the same stage a
+        # layer would be routed, so `cc` prescribes the repair instead of
+        # walking past unread transport authority (SRC-019:R6).
+        return {
+            "rule_id": RULE_ID,
+            "action": "saipen audit status",
+            "binding_corrupt": True,
+            "code": state.get("code"),
+            "detail": state.get("detail"),
+            "pending": [],
+            "closed_pending_delete": [],
+            "invalid": [],
+            "residue": [item["rel"] for item in state["residue"][:RESIDUE_REPORT_CAP]],
+            "residue_count": len(state["residue"]),
+        }
     layers = state["layers"]
     residue = state["residue"]
     if not layers and not state["orphans"] and not residue:
@@ -596,6 +711,17 @@ def projection(root: Path | str) -> dict | None:
 def status(root: Path | str) -> dict:
     """Compact operator projection. Never dumps audit body text."""
     state = classify(root)
+    if not state.get("ok", True):
+        return {
+            "ok": False,
+            "code": state.get("code"),
+            "detail": state.get("detail"),
+            "rule_id": RULE_ID,
+            "directory": AUDIT_DIRNAME,
+            "binding_state": state.get("binding_state"),
+            "clean": False,
+            "next": projection(root),
+        }
     routed = projection(root)
     layers = state["layers"]
     return {
@@ -655,9 +781,18 @@ def provenance_trace(root: Path | str, layer: int | None = None) -> dict:
     about the project beyond those links.
     """
     root = Path(root)
+    binding, binding_state, binding_detail = read_binding_state(root)
+    if binding_state == BINDING_CORRUPT:
+        return {
+            "ok": False,
+            "code": "AUDIT_BINDING_CORRUPT",
+            "detail": binding_detail,
+            "rule_id": RULE_ID,
+            "rows": [],
+        }
     index = _index(root)
     rows: list[dict] = []
-    for rel, record in sorted((read_binding(root).get("layers") or {}).items()):
+    for rel, record in sorted((binding.get("layers") or {}).items()):
         if not isinstance(record, dict):
             continue
         if layer is not None and record.get("layer") != layer:
@@ -724,6 +859,10 @@ def bind_layer(
     deleted, when the record's `state` becomes DELETED but its identity, digest,
     receipt, Work and producer claims stay readable. Deleting the bytes must
     not delete the answer to "who reported this and what came of it".
+
+    Raises `BindingCorrupt` before writing anything when the existing document
+    cannot be decoded (SRC-019:R6): the write would otherwise replace unread
+    authority with a document holding only this record.
     """
     root = Path(root)
     doc = read_binding(root)
@@ -872,7 +1011,11 @@ def delete_gate(root: Path | str, rel: str) -> dict:
     captured generation.
     """
     root = Path(root)
-    binding = read_binding(root)
+    binding, binding_state, binding_detail = read_binding_state(root)
+    if binding_state == BINDING_CORRUPT:
+        # A delete decided from an unreadable binding is the one failure this
+        # module can never take back (SRC-019:R6).
+        return {"ok": False, "code": "AUDIT_BINDING_CORRUPT", "detail": binding_detail}
     record = (binding.get("layers") or {}).get(rel)
     snap = snapshot_layer(root, rel)
     if not isinstance(record, dict):

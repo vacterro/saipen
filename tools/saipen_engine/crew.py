@@ -6,10 +6,10 @@ import json
 import os
 import re
 import stat
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
-from .applicability import ALWAYS, NOT_APPLICABLE
+from .applicability import ALWAYS, APPLICABLE, NOT_APPLICABLE
 from .board import blocker_class, convergence_closure_problems, parse_board, wait_role_target
 from .journal import (
     hash_file_dependency,
@@ -106,6 +106,14 @@ class ReleaseEvidence:
     created_at: str
     stages: tuple[str, ...]
     pre_ship_evidence: dict
+    source_tree_fingerprint: str = ""
+    # SRC-019:R1 -- the applicability manifest FROZEN at pre-ship capture:
+    # {role: {probe, verdict, reason, source_head, source_tree_fingerprint}}
+    # for every built-in role. Post-ship certification reads this record, so
+    # the certified role set cannot drift when the tree changes after the
+    # ship. Empty for pre-SRC-019 receipts, which fall back to the full
+    # roster (the set those receipts were actually captured against).
+    pre_ship_applicability: dict = field(default_factory=dict)
     verdict: str = "ok"
     verdict_reason: str = ""
 
@@ -153,6 +161,15 @@ class CrewSnapshot:
     # was not attempted, which `applicability.verdict` resolves to APPLICABLE --
     # a capability is never retired by a fact nobody looked for.
     project_facts: object | None = None
+    # SRC-019:R2: the applicability facts were read INSIDE the source
+    # observation that `source_id` names, and that observation revalidated
+    # identical afterwards. False means the source provably moved while the
+    # facts were being collected, so the facts may describe a different tree
+    # than the identity they are filed under and no NOT_APPLICABLE skip may be
+    # authorized from them. True when there was no source identity to bind
+    # against at all: that is already carried by `stable` and is not a
+    # witnessed mutation.
+    facts_source_bound: bool = True
 
 
 def _refuse(code: str, detail: str = "", **extra) -> Result:
@@ -607,6 +624,8 @@ def _release_evidence(
             ev["created_at"],
             tuple(ev["stages"]),
             ev.get("pre_ship_evidence") or {},
+            ev.get("source_tree_fingerprint", ""),
+            ev.get("pre_ship_applicability") or {},
         )
     return ReleaseEvidence(
         op_id="",
@@ -872,6 +891,13 @@ def crew_snapshot(
     receipt_hashes = {}
     for receipt_path in sorted(receipt_paths):
         receipt_hashes[receipt_path] = hash_file_dependency(root / receipt_path)
+    # SRC-019:R2 -- collected BEFORE the closing revalidation, so the tree read
+    # that decides applicability sits INSIDE the same observation window as
+    # every other crew input. It used to run after `stable` had already been
+    # computed, which let a snapshot advertise `stable=True` while its
+    # applicability facts came from a later tree state; a race in the negative
+    # direction could then skip a mandatory audit role.
+    project_facts = _project_facts(root)
     if source_id is None:
         source_stable = False
     else:
@@ -921,7 +947,8 @@ def crew_snapshot(
         semantic_snapshot,
         current_capability=current_capability,
         userperson=userperson,
-        project_facts=_project_facts(root),
+        project_facts=project_facts,
+        facts_source_bound=source_id is None or source_stable,
     )
 
 
@@ -932,10 +959,22 @@ def _role_applicability(snapshot: CrewSnapshot, role) -> tuple[str, str]:
     the collect set and the final fixed point -- asks the same question of the
     same facts. Two of them disagreeing is precisely how a role would end up
     skipped in one place and demanded in another.
+
+    A skip is also refused when the source moved while those facts were being
+    read (SRC-019:R2). Retiring a mandatory role is the one answer that must be
+    bound to a single observation; the opposite error only costs a pass.
     """
     from .applicability import verdict
 
-    return verdict(getattr(role, "applicability", ALWAYS), snapshot.project_facts)
+    state, reason = verdict(getattr(role, "applicability", ALWAYS), snapshot.project_facts)
+    if state == NOT_APPLICABLE and not snapshot.facts_source_bound:
+        return (
+            APPLICABLE,
+            "source changed while the applicability facts were collected, so "
+            f"{role.name} cannot be retired against this snapshot's source "
+            "identity; applicability fails closed to APPLICABLE",
+        )
+    return state, reason
 
 
 def applicable_roles(snapshot: CrewSnapshot, roles=None) -> tuple:
@@ -1162,6 +1201,89 @@ def _worktree_matches_head(root: Path, require_git: bool = False) -> bool:
     return not deltas
 
 
+def _pre_ship_applicability(snapshot: CrewSnapshot) -> dict:
+    """The applicability manifest to FREEZE into the release receipt (R1).
+
+    Every built-in role gets an entry -- including the retired ones, whose
+    reason is the whole point: a receipt that simply omits a role cannot be
+    told apart from a receipt written before the role existed. Each entry
+    carries the source identity the verdict was read against, so a verdict
+    copied from another source cannot pass as this release's own.
+    """
+    source = _source_dict(snapshot)
+    manifest = {}
+    for role in CREW_ROLES:
+        state, reason = _role_applicability(snapshot, role)
+        manifest[role.name] = {
+            "probe": getattr(role, "applicability", ALWAYS),
+            "verdict": state,
+            "reason": reason,
+            "source_head": source.get("source_head", ""),
+            "source_tree_fingerprint": source.get("source_tree_fingerprint", ""),
+        }
+    return manifest
+
+
+def _certified_role_names(release: ReleaseEvidence) -> tuple[tuple[str, ...], str]:
+    """`(role names the receipt must carry evidence for, problem)`.
+
+    Reads the FROZEN manifest, never the current tree: post-ship
+    certification of a shipped release must not change verdict because a UI
+    file was added or deleted after the ship. A malformed or unbound manifest
+    entry is a refusal, not a silent fallback to the full roster -- falling
+    back would let a broken manifest look like an old receipt.
+    """
+    manifest = release.pre_ship_applicability or {}
+    if not manifest:
+        return tuple(role.name for role in CREW_ROLES), ""
+    required = []
+    for role in CREW_ROLES:
+        record = manifest.get(role.name)
+        if not isinstance(record, dict):
+            return (), f"release applicability manifest has no entry for {role.name}"
+        state = record.get("verdict")
+        if state not in (APPLICABLE, NOT_APPLICABLE):
+            return (), (
+                f"release applicability manifest carries no usable verdict for {role.name}"
+            )
+        if not record.get("reason"):
+            return (), f"release applicability manifest states no reason for {role.name}"
+        if record.get("source_head") != release.source_head:
+            return (), (
+                f"release applicability verdict for {role.name} is bound to a "
+                "different source than the release it claims to certify"
+            )
+        if record.get("source_tree_fingerprint") != release.source_tree_fingerprint:
+            return (), (
+                f"release applicability verdict for {role.name} is bound to a "
+                "different source tree than the release it claims to certify"
+            )
+        if state == APPLICABLE:
+            required.append(role.name)
+    forged = [
+        name
+        for name in release.pre_ship_evidence
+        if isinstance(manifest.get(name), dict)
+        and manifest[name].get("verdict") == NOT_APPLICABLE
+    ]
+    if forged:
+        return (), (
+            "release carries pre-ship evidence for role(s) its own "
+            "applicability manifest retired: " + ", ".join(sorted(forged))
+        )
+    return tuple(required), ""
+
+
+def _missing_pre_ship_evidence(release: ReleaseEvidence) -> str:
+    required, problem = _certified_role_names(release)
+    if problem:
+        return problem
+    missing = [name for name in required if name not in release.pre_ship_evidence]
+    if missing:
+        return "release lacks pre-ship crew evidence: " + ", ".join(missing)
+    return ""
+
+
 def _release_current(
     snapshot: CrewSnapshot, current_capability: str | None = None
 ) -> tuple[bool, str]:
@@ -1194,9 +1316,9 @@ def _release_current(
             "none",
         ):
             return False, "no-publish closure requires Core DONE / task none"
-        missing = [role.name for role in CREW_ROLES if role.name not in release.pre_ship_evidence]
-        if missing:
-            return False, "release lacks pre-ship crew evidence: " + ", ".join(missing)
+        problem = _missing_pre_ship_evidence(release)
+        if problem:
+            return False, problem
         return True, ""
     if snapshot.source_id is None:
         return False, "source identity unavailable"
@@ -1209,10 +1331,24 @@ def _release_current(
             "equal the shipped commit exactly; a dirty tree (or an "
             "unprovable one) is not shipped HEAD",
         )
-    missing = [role.name for role in CREW_ROLES if role.name not in release.pre_ship_evidence]
-    if missing:
-        return False, "release lacks pre-ship crew evidence: " + ", ".join(missing)
+    problem = _missing_pre_ship_evidence(release)
+    if problem:
+        return False, problem
     return True, ""
+
+
+def _certified_roles(snapshot: CrewSnapshot) -> tuple:
+    """The roles post-ship certification must cover: the FROZEN set when the
+    receipt carries a manifest, today's live set only for pre-SRC-019 receipts.
+    """
+    release = snapshot.release
+    if release is None or not release.pre_ship_applicability:
+        return applicable_roles(snapshot)
+    required, problem = _certified_role_names(release)
+    if problem:
+        return applicable_roles(snapshot)
+    names = set(required)
+    return tuple(role for role in CREW_ROLES if role.name in names)
 
 
 def _current_packages_for(
@@ -1517,6 +1653,7 @@ def crew_release_context(project_root: Path | str) -> dict:
         "crew_epoch": snapshot.epoch.op_id,
         "crew_pre_ship_source": _source_dict(snapshot),
         "crew_pre_ship_evidence": evidence,
+        "crew_pre_ship_applicability": _pre_ship_applicability(snapshot),
         "crew_defer_scope": scope,
         "ticket_id": snapshot.epoch.ticket or "",
     }
@@ -1526,7 +1663,7 @@ def _post_ship(snapshot: CrewSnapshot) -> tuple[bool, str, CrewAction | None]:
     release_ok, reason = _release_current(snapshot)
     if not release_ok:
         return False, reason, None
-    for role in applicable_roles(snapshot):
+    for role in _certified_roles(snapshot):
         health = snapshot.roles[role.name]
         if role.role_class == "core-review":
             kind = health.get("health")

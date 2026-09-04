@@ -2405,6 +2405,7 @@ def _apply_no_publish_locked(root: Path, plan: ReleasePlan) -> dict:
             crew_epoch=crew_context["crew_epoch"],
             crew_pre_ship_source=crew_context["crew_pre_ship_source"],
             crew_pre_ship_evidence=crew_context["crew_pre_ship_evidence"],
+            crew_pre_ship_applicability=crew_context.get("crew_pre_ship_applicability") or {},
             crew_closure=True,
         )
     try:
@@ -2542,6 +2543,7 @@ def _apply_release_locked(root: Path, plan: ReleasePlan) -> dict:
                 crew_epoch=crew_context["crew_epoch"],
                 crew_pre_ship_source=crew_context["crew_pre_ship_source"],
                 crew_pre_ship_evidence=crew_context["crew_pre_ship_evidence"],
+                crew_pre_ship_applicability=crew_context.get("crew_pre_ship_applicability") or {},
             )
         elif plan.crew_epoch:
             _try_journal(
@@ -4356,10 +4358,12 @@ def _receipt_evidence(record: dict) -> dict:
         "tag": record.get("tag", ""),
         "version": record.get("version", ""),
         "source_head": record.get("source_head", ""),
+        "source_tree_fingerprint": record.get("source_tree_fingerprint", ""),
         "closure_commit": record.get("closure_commit", ""),
         "created_at": record.get("created_at", ""),
         "stages": tuple(record.get("stages") or ()),
         "pre_ship_evidence": dict(record.get("crew_pre_ship_evidence") or {}),
+        "pre_ship_applicability": dict(record.get("crew_pre_ship_applicability") or {}),
         "mode": record.get("mode") or "full",
     }
 

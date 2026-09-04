@@ -1,6 +1,19 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.253.0 -- 2026-09-05 -- Freeze The Decision, Preserve The Evidence (T-1288, SRC-019)
+
+**This release closes all nine actionable requirements from external audit SRC-019: six repairs are verified here, while three performance findings are explicitly deduplicated to T-1283 and T-1284.**
+
+- Release certification now freezes every built-in crew role's applicability verdict, reason, probe and source identity in the pre-ship receipt. Post-ship checks consume that immutable manifest instead of recomputing against a later tree; legacy receipts still require the full roster.
+- Applicability facts are captured inside the same source-stability window as the rest of the crew snapshot. A source movement can no longer turn an uncertain role into a trusted NOT_APPLICABLE decision.
+- Python UI detection now parses imports with the AST after a cheap toolkit-name prefilter. Multi-import statements and dotted imports are recognized, while unreadable, oversized or syntactically invalid candidates fail closed to APPLICABLE and name the uncertain path.
+- Audit enqueue recovery now reconstructs a lost allocator from surviving payload or inbox-binding evidence without allocating a duplicate layer. A COMMITTED operation whose bytes vanished is acknowledged only when the binding proves the exact digest was captured; otherwise it refuses with NEEDS_REPAIR.
+- Audit inbox binding has one strict decoder. Missing remains ABSENT; invalid UTF-8/JSON, malformed records, unreadable paths and obstructed filesystem nodes are CORRUPT. Classification and ingestion report that state without laundering the authority through a rewrite.
+- Two additional review controls close same-HEAD edge cases: an applicability manifest bound to another working tree cannot certify, and an obstructed binding path cannot be mistaken for absence.
+- Verification: 1,131 unit tests passed (2 skipped); validator, 230 hostile audit controls, scenarios, audit floor/parity/order/tags and Ruff all passed. Two exact pre-fix implementations were executed against the unchanged new tests and went red before the current implementations went green.
+- Source accounting: SRC-019 R1-R6 VERIFIED; R7-R8 DUPLICATE of T-1283; R9 DUPLICATE of T-1284. Context clauses add no independent obligation.
+
 ## 7.252.0 -- 2026-09-04 -- A Gap Is Not A Backwards Step (T-1281, T-1285)
 
 **Two defects in one file, published together because they are the same file and one of them was blocking the other's release.** T-1281 is the closure classifier reading ordinary English as a failure verdict. T-1285 is the ledger-gap check, restored with an escape. Both live in `tools/saipen_engine`, and T-1281 vetoed four green cycles in one session -- including the closure of the ticket that reported it.

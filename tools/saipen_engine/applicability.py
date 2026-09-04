@@ -30,10 +30,19 @@ Two rules carry the weight:
 * **A verdict always names the deciding fact.** `NOT_APPLICABLE` with no reason
   is indistinguishable from a stage nobody ran, which is the exact confusion
   this module exists to remove.
+* **"Not found" is not "proved absent" (SRC-019:R3).** The first version of the
+  Python probe was a line regex anchored to the first module token after
+  `import`, so `import os, tkinter as tk` -- valid Python naming a toolkit the
+  probe claims to recognize -- produced the same empty answer as a project with
+  no UI at all, and a file the probe could not open or finish reading produced
+  it too. A negative may only be reported when the whole candidate was
+  inspected and understood; anything else is `indeterminate_paths`, and that
+  resolves APPLICABLE under the first rule.
 """
 
 from __future__ import annotations
 
+import ast
 import re
 from dataclasses import dataclass, field
 
@@ -70,12 +79,32 @@ VISUAL_SUFFIXES = frozenset(
     }
 )
 
-#: A desktop-UI toolkit import. Extension alone misses a Tk or Qt application,
-#: which is a `.py` file like any other, so the probe reads imports too.
-GUI_IMPORT_RE = re.compile(
-    rb"^[ \t]*(?:from|import)[ \t]+(tkinter|PyQt[456]|PySide[26]|textual|wx|kivy|gi)\b",
-    re.MULTILINE,
+#: A desktop-UI toolkit, by import root. Extension alone misses a Tk or Qt
+#: application, which is a `.py` file like any other, so the probe reads imports
+#: too. Closed set on purpose: widening it is a product decision, not something
+#: a detector should guess at.
+GUI_TOOLKIT_ROOTS = frozenset(
+    {
+        "tkinter",
+        "PyQt4",
+        "PyQt5",
+        "PyQt6",
+        "PySide2",
+        "PySide6",
+        "textual",
+        "wx",
+        "kivy",
+        "gi",
+    }
 )
+
+#: The cheap first pass: a module that never mentions any toolkit root cannot
+#: import one, because `import tkinter` requires the literal name in the source.
+#: A file with no hint is therefore a PROVEN negative and is never parsed --
+#: which is what keeps a grammar-aware probe affordable on a large tree. Two
+#: roots are short enough to appear inside ordinary words (`gi` in `begin`, `wx`
+#: in an identifier), so those two are matched on word boundaries.
+_TOOLKIT_HINT_RE = re.compile(rb"tkinter|PyQt[456]|PySide[26]|textual|\bwx\b|\bkivy\b|\bgi\b")
 
 #: Files the import probe opens. Anything else is judged by extension only.
 _IMPORT_SUFFIXES = frozenset({".py", ".pyw"})
@@ -103,10 +132,17 @@ EXCLUDED_DIRS = frozenset(
     }
 )
 
-#: A single file is read no further than this when probing imports. An import
-#: line lives at the top; reading a 200 MB generated blob to find that out is a
-#: cost the answer does not justify.
-IMPORT_PROBE_BYTES = 64 * 1024
+#: A single candidate module is parsed no further than this. A grammar-aware
+#: answer needs the whole file -- an import may sit under a conditional halfway
+#: down -- so the old 64 KiB prefix is gone: it converted "I stopped reading" into
+#: "there is no UI here". Above this bound the file is INDETERMINATE, never a
+#: negative, so the cost ceiling can never buy a silent skip.
+PARSE_LIMIT_BYTES = 4 * 1024 * 1024
+
+#: `_probe_gui_imports` answers with exactly one of these.
+_GUI_IMPORT = "gui"
+_NO_GUI = "clean"
+_INDETERMINATE = "indeterminate"
 
 
 @dataclass(frozen=True)
@@ -131,6 +167,11 @@ class ProjectFacts:
     #: Files enumerated. Zero on a readable but genuinely empty tree, which is
     #: why it is carried separately from `readable`.
     scanned: int = 0
+    #: Candidate modules whose imports could NOT be determined -- unreadable,
+    #: unparseable, or larger than the parse window. Carried as a fact rather
+    #: than dropped because "I could not tell" is the one input that must not
+    #: look like "there is nothing here" (SRC-019:R3).
+    indeterminate_paths: tuple[str, ...] = ()
     _evidence: tuple[str, ...] = field(default=(), compare=False, repr=False)
 
     @property
@@ -146,6 +187,10 @@ class ProjectFacts:
         it is a denial of service on the reader.
         """
         return tuple((*self.visual_paths, *self.gui_module_paths))[:limit]
+
+    def indeterminate_evidence(self, limit: int = 3) -> tuple[str, ...]:
+        """A bounded sample of the candidates that could not be decided."""
+        return tuple(self.indeterminate_paths)[:limit]
 
 
 def verdict(probe: str, facts: ProjectFacts | None) -> tuple[str, str]:
@@ -166,6 +211,15 @@ def verdict(probe: str, facts: ProjectFacts | None) -> tuple[str, str]:
         if facts.visual_surface:
             sample = ", ".join(facts.visual_evidence())
             return APPLICABLE, f"visual surface present: {sample}"
+        if facts.indeterminate_paths:
+            sample = ", ".join(facts.indeterminate_evidence())
+            return (
+                APPLICABLE,
+                f"no visual implementation file found, but "
+                f"{len(facts.indeterminate_paths)} Python candidate(s) could not be "
+                f"proven free of a UI toolkit import ({sample}); "
+                "applicability fails closed to APPLICABLE",
+            )
         return (
             NOT_APPLICABLE,
             f"no visual implementation file in {facts.scanned} scanned project "
@@ -236,6 +290,7 @@ def collect_facts(project_root) -> ProjectFacts:
 
     visual: list[str] = []
     gui: list[str] = []
+    unknown: list[str] = []
     for rel in paths:
         parts = rel.split("/")
         if any(part in EXCLUDED_DIRS for part in parts[:-1]):
@@ -244,28 +299,63 @@ def collect_facts(project_root) -> ProjectFacts:
         if suffix in VISUAL_SUFFIXES:
             visual.append(rel)
             continue
-        if suffix in _IMPORT_SUFFIXES and _imports_gui_toolkit(root / rel):
-            gui.append(rel)
+        if suffix in _IMPORT_SUFFIXES:
+            state, detail = _probe_gui_imports(root / rel)
+            if state == _GUI_IMPORT:
+                gui.append(rel)
+            elif state == _INDETERMINATE:
+                unknown.append(f"{rel} ({detail})" if detail else rel)
 
     return ProjectFacts(
         visual_paths=tuple(visual),
         gui_module_paths=tuple(gui),
         readable=True,
         scanned=len(paths),
+        indeterminate_paths=tuple(unknown),
     )
 
 
-def _imports_gui_toolkit(path) -> bool:
-    """Does this module import a desktop UI toolkit?
+def _probe_gui_imports(path) -> tuple[str, str]:
+    """`(state, detail)` for one Python module: `gui`, `clean` or `indeterminate`.
 
-    An unreadable file answers False rather than raising: one file the probe
-    cannot open is not a reason to fail the whole enumeration, and the
-    surrounding contract already fails closed at the level that matters -- an
-    entire tree that cannot be listed reports `readable=False`.
+    `clean` is a CLAIM, so it is only made when the whole file was read and
+    either mentions no toolkit root anywhere -- which no real import of one can
+    avoid -- or parses cleanly and imports none of them. Everything else is
+    `indeterminate` and carries the reason: an unreadable file, a file above the
+    parse window, or source Python itself cannot parse. The old probe answered
+    False for all three, which is how an unopenable module became proof that a
+    project has no UI (SRC-019:R3).
+
+    The `ast` walk covers every statement, not the first line of the file, so a
+    comma-separated `import os, tkinter as tk`, an aliased submodule import and a
+    toolkit imported inside a function or a conditional are all found.
     """
     try:
-        with open(path, "rb") as handle:
-            head = handle.read(IMPORT_PROBE_BYTES)
-    except OSError:
-        return False
-    return GUI_IMPORT_RE.search(head) is not None
+        size = path.stat().st_size
+    except OSError as exc:
+        return _INDETERMINATE, f"unreadable: {exc.strerror or exc}"
+    if size > PARSE_LIMIT_BYTES:
+        return _INDETERMINATE, f"{size} bytes exceeds the {PARSE_LIMIT_BYTES}-byte parse window"
+    try:
+        raw = path.read_bytes()
+    except OSError as exc:
+        return _INDETERMINATE, f"unreadable: {exc.strerror or exc}"
+    if not _TOOLKIT_HINT_RE.search(raw):
+        return _NO_GUI, ""
+    try:
+        tree = ast.parse(raw)
+    except (SyntaxError, ValueError) as exc:
+        return _INDETERMINATE, f"unparseable: {type(exc).__name__}"
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if _import_root(alias.name) in GUI_TOOLKIT_ROOTS:
+                    return _GUI_IMPORT, alias.name
+        elif isinstance(node, ast.ImportFrom):
+            if not node.level and _import_root(node.module or "") in GUI_TOOLKIT_ROOTS:
+                return _GUI_IMPORT, node.module or ""
+    return _NO_GUI, ""
+
+
+def _import_root(dotted: str) -> str:
+    return dotted.split(".", 1)[0]

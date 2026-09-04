@@ -63,6 +63,25 @@ class EnqueueFixture(unittest.TestCase):
             (self.root / ".saipen" / "intake" / "audit_allocator.json").read_text("utf-8")
         )
 
+    def consume(self, rel: str, sha256: str, state: str | None = None) -> None:
+        """Record the downstream capture the journaled cleanup would leave, then
+        delete the bytes -- what a legitimately consumed layer looks like."""
+        layer = int(Path(rel).stem)
+        audit_inbox.bind_layer(
+            self.root,
+            rel,
+            layer=layer,
+            generation=1,
+            file_sha256=sha256,
+            size_bytes=len(BODY),
+            receipt_id=f"SRC-{layer:03d}",
+            receipt_sha256="a" * 64,
+            binding="exact",
+            linked_work=None,
+            state=state or audit_inbox.DELETED,
+        )
+        (self.root / rel).unlink(missing_ok=True)
+
 
 class Allocation(EnqueueFixture):
     def test_first_enqueue_is_layer_one_and_places_exact_bytes(self) -> None:
@@ -177,13 +196,37 @@ class Idempotency(EnqueueFixture):
         self.assertEqual(self.enqueue("op-1")["layer"], 2)
 
     def test_consumed_layer_does_not_get_re_placed_by_a_late_retry(self) -> None:
-        self.enqueue("op-1")
-        (self.root / "audit" / "1.md").unlink()
+        first = self.enqueue("op-1")
+        self.consume("audit/1.md", first["sha256"])
         again = self.enqueue("op-1")
         self.assertTrue(again["ok"], again)
         self.assertEqual(again["layer"], 1)
         self.assertFalse(again["present"])
+        self.assertEqual(again["binding_state"], audit_inbox.DELETED)
         self.assertFalse((self.root / "audit" / "1.md").exists())
+
+    def test_a_layer_that_vanished_before_any_capture_is_not_called_delivered(self) -> None:
+        """SRC-019:R5 -- absent bytes plus no binding is a LOSS, not a delivery.
+
+        The retry branch read COMMITTED plus an absent layer as "the journaled
+        cleanup took it" with nothing proving that, so a payload deleted before
+        any capture was acknowledged as delivered and the finding was gone.
+        """
+        self.enqueue("op-1")
+        (self.root / "audit" / "1.md").unlink()
+
+        again = self.enqueue("op-1")
+        self.assertFalse(again["ok"], again)
+        self.assertEqual(again["code"], "NEEDS_REPAIR")
+        self.assertIn("audit/1.md", again["detail"])
+        self.assertFalse((self.root / "audit" / "1.md").exists())
+
+    def test_a_binding_for_other_bytes_is_not_proof_of_this_delivery(self) -> None:
+        self.enqueue("op-1")
+        self.consume("audit/1.md", hashlib.sha256(b"# some other audit\n").hexdigest())
+        again = self.enqueue("op-1")
+        self.assertFalse(again["ok"], again)
+        self.assertEqual(again["code"], "NEEDS_REPAIR")
 
     def test_retry_with_different_bytes_is_refused_not_silently_reallocated(self) -> None:
         self.enqueue("op-1")
@@ -196,6 +239,66 @@ class Idempotency(EnqueueFixture):
         first = self.enqueue("run-7", producer="audapack")
         second = self.enqueue("run-7", producer="saipal")
         self.assertNotEqual(first["layer"], second["layer"])
+
+
+class AllocatorLoss(EnqueueFixture):
+    """SRC-019:R4 -- the allocator is the only home of `op -> layer`.
+
+    When it goes missing, `_reconcile` rebuilds the numeric floor and cannot
+    rebuild the operation map, so a retry used to look exactly like a first
+    attempt: a SECOND layer for the same audit, reported `idempotent: false`.
+    The bytes outlive the allocator, so they carry the answer.
+    """
+
+    def allocator_path(self) -> Path:
+        return self.root / ".saipen" / "intake" / "audit_allocator.json"
+
+    def test_retry_after_the_allocator_is_lost_does_not_duplicate_the_layer(self) -> None:
+        first = self.enqueue("op-1")
+        self.allocator_path().unlink()
+
+        again = self.enqueue("op-1")
+        self.assertTrue(again["ok"], again)
+        self.assertEqual(again["layer"], first["layer"])
+        self.assertTrue(again["idempotent"])
+        self.assertEqual(again["recovered_from"], "audit/1.md")
+        self.assertEqual(len(list((self.root / "audit").glob("*.md"))), 1)
+        self.assertEqual(self.allocator()["next_id"], 2)
+
+    def test_recovery_reads_the_binding_when_the_layer_is_already_consumed(self) -> None:
+        first = self.enqueue("op-1")
+        audit_inbox.bind_layer(
+            self.root,
+            "audit/1.md",
+            layer=1,
+            generation=1,
+            file_sha256=first["sha256"],
+            size_bytes=len(BODY),
+            receipt_id="SRC-001",
+            receipt_sha256="a" * 64,
+            binding="exact",
+            linked_work=None,
+            state=audit_inbox.DELETED,
+        )
+        (self.root / "audit" / "1.md").unlink()
+        self.allocator_path().unlink()
+
+        again = self.enqueue("op-1")
+        self.assertTrue(again["ok"], again)
+        self.assertEqual(again["layer"], 1)
+        self.assertTrue(again["idempotent"])
+        self.assertFalse(again["present"])
+        self.assertEqual(list((self.root / "audit").glob("*.md")), [])
+
+    def test_a_different_audit_still_gets_its_own_layer(self) -> None:
+        self.enqueue("op-1")
+        self.allocator_path().unlink()
+
+        other = self.enqueue("op-2", body=b"# a different finding\n")
+        self.assertTrue(other["ok"], other)
+        self.assertEqual(other["layer"], 2)
+        self.assertFalse(other["idempotent"])
+        self.assertNotIn("recovered_from", other)
 
 
 class Concurrency(EnqueueFixture):

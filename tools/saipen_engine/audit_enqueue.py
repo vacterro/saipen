@@ -455,6 +455,50 @@ def _placed_digest(root: Path, layer: int) -> str | None:
     return hashlib.sha256(raw).hexdigest()
 
 
+def _digest_match_layer(root: Path, digest: str) -> tuple[int | None, str]:
+    """The layer already carrying exactly these bytes, or `(None, "")`.
+
+    SRC-019:R4 uses this only while the allocator is ABSENT, where the
+    `producer + operation -> layer` map is gone and the bytes are the last
+    surviving evidence of what a retry already sent. Two durable sources,
+    answering different halves: a layer still on disk proves the delivery is
+    pending, and a binding record proves it was captured and spent even though
+    the file is long deleted.
+    """
+    for item in audit_inbox.scan_layers(root):
+        layer = item.get("layer")
+        if isinstance(layer, int) and _placed_digest(root, layer) == digest:
+            return layer, f"{audit_inbox.AUDIT_DIRNAME}/{layer}.md"
+    layers = audit_inbox.read_binding(root).get("layers")
+    if isinstance(layers, dict):
+        for rel, record in sorted(layers.items()):
+            if not isinstance(record, dict) or record.get("file_sha256") != digest:
+                continue
+            layer = record.get("layer")
+            if isinstance(layer, int) and not isinstance(layer, bool):
+                return layer, str(rel)
+    return None, ""
+
+
+def _bound_delivery_state(root: Path, layer: int, digest: str) -> str | None:
+    """The inbox binding state for exactly these bytes, or None when nothing
+    downstream ever bound them.
+
+    SRC-019:R5 -- an absent layer is a COMPLETED delivery only if something
+    took the bytes, and `audit_inbox.consume_layer` cannot delete a layer
+    without writing its binding record through the same journaled mutation.
+    So a binding record carrying this digest is the proof, and its absence
+    means the payload is gone with nobody having read it.
+    """
+    rel = f"{audit_inbox.AUDIT_DIRNAME}/{layer}.md"
+    layers = audit_inbox.read_binding(root).get("layers")
+    record = layers.get(rel) if isinstance(layers, dict) else None
+    if not isinstance(record, dict) or record.get("file_sha256") != digest:
+        return None
+    state = record.get("state")
+    return state if isinstance(state, str) and state else audit_inbox.NEW
+
+
 def enqueue(
     root: Path | str,
     *,
@@ -498,6 +542,38 @@ def enqueue(
                 )
             doc = _reconcile(root, doc)
             record = doc["operations"].get(key)
+
+            if not isinstance(record, dict) and allocator_state == ALLOCATOR_ABSENT:
+                # SRC-019:R4 -- the allocator is the ONLY home of
+                # `producer + operation -> layer`, so when it is missing a retry
+                # and a first attempt look identical: reproduced as the same
+                # operation with the same bytes allocated a SECOND layer and
+                # reported `idempotent: false`. `_reconcile` rebuilds the numeric
+                # floor, which hides the symptom (no id is reused) while the
+                # duplicate dispatch stays. The bytes themselves survived the
+                # allocator, so they are the evidence: a layer already carrying
+                # exactly this digest IS this operation's delivery, and the
+                # record is rebuilt onto it instead of a second layer being spent.
+                #
+                # Bound to the ABSENT state deliberately. With a readable
+                # allocator the operation map is authoritative and two distinct
+                # operations sending identical bytes stay two deliveries.
+                recovered, where = _digest_match_layer(root, digest)
+                if recovered is not None:
+                    record = {
+                        "layer": recovered,
+                        "producer": producer,
+                        "producer_operation_id": producer_operation_id,
+                        "producer_item_id": producer_item_id,
+                        "created_at": audit_inbox._utc(),
+                        "sha256": digest,
+                        "state": COMMITTED,
+                    }
+                    doc["operations"][key] = record
+                    write_allocator(root, doc)
+                    result = _result(root, record, idempotent=True)
+                    result["recovered_from"] = where
+                    return result
 
             if isinstance(record, dict) and isinstance(record.get("layer"), int):
                 # RETRY. The op already owns a number; finish that number or
@@ -549,10 +625,30 @@ def enqueue(
                             f"its reservation and cannot be safely removed: {exc}",
                         )
                 if record.get("state") == COMMITTED:
-                    # The layer was consumed by the journaled cleanup. That is
-                    # a completed enqueue, not a missing one: report the
-                    # original allocation and place nothing.
-                    return _result(root, record, idempotent=True)
+                    # SRC-019:R5 -- an absent layer used to be read as "consumed
+                    # by the journaled cleanup" with nothing proving it. So a
+                    # payload deleted before any capture was acknowledged
+                    # `ok: true, idempotent: true, present: false`, and the
+                    # producer was told its audit had been delivered when it
+                    # existed nowhere. `consume_layer` writes the binding record
+                    # in the same journaled mutation that deletes the bytes, so
+                    # the binding IS the delivery proof: report the original
+                    # allocation only when it names this digest.
+                    bound = _bound_delivery_state(root, record["layer"], digest)
+                    if bound is None:
+                        return _fail(
+                            "NEEDS_REPAIR",
+                            f"audit layer {record['layer']} is absent and the audit inbox "
+                            f"binding does not record digest {digest} at "
+                            f"{audit_inbox.AUDIT_DIRNAME}/{record['layer']}.md, so nothing "
+                            "downstream ever took these bytes and this retry cannot honestly "
+                            "be called delivered. Replay a pending audit_inbox.consume "
+                            "recovery if one is open, then retry; otherwise enqueue under a "
+                            "new producer_operation_id",
+                        )
+                    result = _result(root, record, idempotent=True)
+                    result["binding_state"] = bound
+                    return result
                 failure = _place(root, record["layer"], body)
                 if failure is not None:
                     return failure
