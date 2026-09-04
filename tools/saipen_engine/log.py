@@ -575,23 +575,76 @@ MANUAL_RESULT_PREFIX = "MANUAL-VERIFY RESULT: "
 _ZERO_FAIL_RE = re.compile(r"\b(?:0|no|zero)\s+FAIL(?:S|ED|URE|URES)?\b", re.IGNORECASE)
 _FAIL_TOKEN_RE = re.compile(r"\bFAIL(?:S|ED|URE|URES)?\b", re.IGNORECASE)
 
+#: The VERDICT SEGMENT: an event's text up to its first ` -- `. Everything
+#: after that separator is the detail an author writes for a human -- what ran,
+#: what it repaired, why a control moved -- and that is where ordinary English
+#: lives. The verdict itself is in front of it, which is exactly how every
+#: canonical line in this repository is already written:
+#:
+#:     PASS -- 1078 tests green; the pre-fix FAIL is re-established -- conf: high
+#:     ^^^^    ^ verdict                    ^ narrative
+_VERDICT_SEPARATOR = " -- "
+
+#: Unambiguous MACHINE shapes, honoured anywhere in the text because no prose
+#: produces them by accident: a nonzero count before the token (`2 FAIL`,
+#: `3 failures`) and a nonzero field (`failures=2`, the shape unittest prints).
+_FAIL_COUNTED_RE = re.compile(
+    r"\b(?!0+\b)\d+\s+FAIL(?:S|ED|URE|URES)?\b", re.IGNORECASE
+)
+_FAIL_FIELD_RE = re.compile(r"\bFAILURES?\s*=\s*(?!0+\b)\d+", re.IGNORECASE)
+#: Their zero twins, which exempt a token instead of claiming one.
+_ZERO_FIELD_RE = re.compile(r"\bFAILURES?\s*=\s*0+\b", re.IGNORECASE)
+
 
 def _claims_failure(text: str) -> bool:
-    """Does this event text CLAIM a failure? (T-1241)
+    """Does this event text CLAIM a failure? (T-1241, narrowed by T-1281)
 
-    Every `FAIL` token has to be accounted for. A text is failure-free only
-    when each occurrence is one of the zero-count forms; a single unexplained
-    token -- `1 FAIL`, `FAILED`, a bare `FAIL:` prefix -- is a failure claim.
-    An evidence grammar that must guess should guess toward failure, so the
-    comparison is a count, not a "contains a zero form somewhere" test: a line
-    reading `0 FAIL on core, 3 FAIL on ship` is a failure.
+    Guessing toward failure is deliberate and stays: a real failure can never
+    be talked past. What changed is SCOPE. The rule used to count every
+    `FAIL`-family token anywhere in the body and veto unless each one carried
+    an adjacent zero, so ordinary English vetoed a green cycle -- reproduced
+    four times in one session on this repository alone:
+
+        PASS -- the pre-fix FAIL is re-established
+        PASS -- a failed atomic write leaves no orphan
+        PASS -- zero anchored failures        (the zero is not adjacent)
+        PASS -- CORE-004 was a fail-open condition   (the hyphen is a boundary)
+
+    Same tree, same commit, same measurements; only prose moved. And the cost
+    was not merely a blocked close: the release path had already created and
+    PUSHED its closure commit before the refusal, so the veto published commits
+    whose subject says DONE over a board that says DOING (T-1278).
+
+    `structural_marker_events` in this module already names the class --
+    Narrative Authority Leakage, a validator searching free text for a magic
+    phrase -- and already prescribes the cure. This is that same defect at the
+    opposite polarity, and the same cure: authority belongs to a VERDICT SHAPE,
+    not to a word a sentence happens to contain.
+
+    T-1241's counting rule is kept EXACTLY -- every token accounted for, a
+    count rather than "contains a zero form somewhere", so `0 FAIL on core,
+    3 FAIL on ship` is still a failure. It is only SCOPED to the verdict
+    segment. And the two machine shapes that no prose produces by accident, a
+    nonzero count and a nonzero `failures=` field, still claim from anywhere,
+    so a narrative that names a real count cannot hide behind the separator.
+
+    What this gives up, deliberately: a bare lowercase `failed` in the detail
+    of a line whose verdict says PASS. That is the trade the four
+    reproductions above are worth, and a real failure still has three ways to
+    say so.
     """
     if _NEGATION_RE.search(text):
         return True
-    total = len(_FAIL_TOKEN_RE.findall(text))
+    body = text or ""
+    # Machine shapes: unambiguous wherever they appear.
+    if _FAIL_COUNTED_RE.search(body) or _FAIL_FIELD_RE.search(body):
+        return True
+    verdict = body.split(_VERDICT_SEPARATOR, 1)[0]
+    total = len(_FAIL_TOKEN_RE.findall(verdict))
     if not total:
         return False
-    return total > len(_ZERO_FAIL_RE.findall(text))
+    exempt = len(_ZERO_FAIL_RE.findall(verdict)) + len(_ZERO_FIELD_RE.findall(verdict))
+    return total > exempt
 
 
 # CORE-001: the regression channel is NOT the ordinary verification channel.

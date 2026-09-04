@@ -1,0 +1,16 @@
+{
+  "op_id": "scope-507529b41d0c4aca9c516bba319c9a81",
+  "paths": {
+    "tools/saipen_engine/fast_check.py": "5c45dd254ea2157e",
+    "tools/saipen_engine/log.py": "96148cbadba0619f",
+    "tools/test_ledger_gap.py": "37e3c4d4bb006c4f",
+    "tools/test_verification_grammar.py": "07469d8d04f7ec5e"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-09-04T10:54:50Z",
+  "schema_version": 1,
+  "source_head": "794085e9844235d6234283fe2da2b4ee02a28ddb",
+  "source_tree_fingerprint": "git-delta-v1:137372a6a35bcc39400e3ee4eb158d475644d49463a58e683ad003ec03d8fea5",
+  "ticket": "T-1285"
+}

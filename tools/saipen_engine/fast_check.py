@@ -45,10 +45,22 @@ def _analyze_log(log_text: str) -> "LogAnalysis":
 
     events: list[dict] = []
     errors: list[str] = []
+    amnestied: list[str] = []
     seen: set[int] = set()
     parents: set[int] = set()
     prev = None
     highest = None
+    # T-1285: a gap in the chain is a DEFECT by default and stays one. A
+    # project that carries a documented historical hole can exempt THAT hole,
+    # by name, with a recorded decision -- never by loosening the rule for
+    # everything, which was measured to accept a forged log line outright.
+    #
+    # Resolved LAZILY, on the first gap only. An amnesty can never precede the
+    # gap it covers (BOUNDING below), so it cannot be collected in this forward
+    # pass -- and PERF-007 exists because this module is on every mutation's
+    # write path. A project with no gap pays nothing; a gapped one pays one
+    # extra walk, once.
+    amnesties: dict[tuple[int, int], int] | None = None
     for lineno, line in enumerate(log_text.splitlines(), 1):
         if not line.strip():
             continue
@@ -64,7 +76,24 @@ def _analyze_log(log_text: str) -> "LogAnalysis":
             errors.append(f"LOG.md:{lineno} duplicate event E-{event}")
         seen.add(event)
         if prev is not None and event != prev + 1:
-            errors.append(f"LOG.md:{lineno} E-{event} breaks monotonicity after E-{prev}")
+            if amnesties is None:
+                amnesties = _ledger_gap_amnesties(log_text)
+            if (prev, event) in amnesties and amnesties[(prev, event)] >= event:
+                # Exempted, and not invisible: carried on the analysis beside
+                # the errors rather than instead of them, because a hole
+                # nobody can see is the state the loosened rule produced.
+                amnestied.append(
+                    f"LOG.md:{lineno} E-{event} follows E-{prev} through an "
+                    f"amnestied ledger gap"
+                )
+            else:
+                errors.append(
+                    f"LOG.md:{lineno} E-{event} is not consecutive after E-{prev}; "
+                    f"an unexplained gap means events were lost or removed from an "
+                    f"append-only ledger. A documented historical gap is exempted by "
+                    f"a DEC line at or after E-{event} whose text BEGINS "
+                    f"`{_GAP_AMNESTY_MARKER}E-{prev} -> E-{event}`"
+                )
         prev = event
         if parsed["parent"] is not None:
             parents.add(parsed["parent"])
@@ -74,16 +103,62 @@ def _analyze_log(log_text: str) -> "LogAnalysis":
                 )
         if highest is None or event > highest:
             highest = event
-    return LogAnalysis(tuple(events), errors, highest)
+    return LogAnalysis(tuple(events), errors, highest, tuple(amnestied))
+
+
+#: A ledger-gap amnesty (T-1285). Three conditions, the same three
+#: `structural_marker_events` requires and for the same reasons:
+#:
+#: * TAXONOMY -- a `DEC` decides; a `RUN` reporting one is not the decision.
+#: * ANCHORING -- the marker BEGINS the event text. A line that merely
+#:   discusses an amnesty is discussing it.
+#: * BOUNDING -- twice. It names the EXACT pair it exempts, and the deciding
+#:   event must itself sit at or after the gap, so an amnesty cannot cover a
+#:   hole that did not exist when it was granted. Both are the property the
+#:   loosened rule threw away: "gaps are fine" has no scope and no expiry.
+_GAP_AMNESTY_MARKER = "LEDGER-GAP AMNESTY "
+_GAP_AMNESTY_RE = re.compile(r"^LEDGER-GAP AMNESTY E-(\d+)\s*->\s*E-(\d+)\b")
+
+
+def _ledger_gap_amnesties(log_text: str) -> dict[tuple[int, int], int]:
+    """`(previous, next) -> newest deciding event id` for exempted gaps.
+
+    Read from the same append-only history the gap lives in, so an amnesty is
+    as durable and as auditable as the hole it covers, and cannot be supplied
+    out of band by whoever happens to be running the command. The deciding id
+    is returned rather than a boolean because a boolean cannot be bounded --
+    that is precisely how the timestamp-inversion amnesty stayed disarmed for
+    five weeks (`structural_marker_events`).
+    """
+    from .log import parse_log_line
+
+    out: dict[tuple[int, int], int] = {}
+    for line in log_text.splitlines():
+        parsed = parse_log_line(line)
+        if parsed is None or parsed.get("taxonomy") != "DEC":
+            continue
+        event = parsed.get("event")
+        if not isinstance(event, int):
+            continue
+        match = _GAP_AMNESTY_RE.match((parsed.get("text") or "").strip())
+        if match:
+            pair = (int(match.group(1)), int(match.group(2)))
+            out[pair] = max(out.get(pair, 0), event)
+    return out
 
 
 class LogAnalysis:
-    __slots__ = ("errors", "events", "tail")
+    #: `amnestied` carries the ledger gaps this history explicitly exempted
+    #: (T-1285). It is separate from `errors` on purpose: an exempted gap is
+    #: not a defect, and it is not invisible either. The loosened rule made
+    #: every gap invisible, which is how a forged line rode through.
+    __slots__ = ("amnestied", "errors", "events", "tail")
 
-    def __init__(self, events, errors, tail):
+    def __init__(self, events, errors, tail, amnestied=()):
         self.events = events
         self.errors = errors
         self.tail = tail
+        self.amnestied = tuple(amnestied)
 
 
 def block_parked_evidence_error(state: dict, board: dict, events) -> str | None:

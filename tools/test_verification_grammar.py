@@ -72,6 +72,61 @@ class FailureClaims(unittest.TestCase):
         self.assertTrue(_claims_failure("NOT PASS"))
         self.assertTrue(_claims_failure("NOT MANUAL-VERIFY"))
 
+    def test_narrative_after_the_verdict_is_not_a_claim(self) -> None:
+        """T-1281. Four reproductions, all from one session's real evidence.
+
+        The rule counted every FAIL-family token anywhere in the body, so
+        ordinary English vetoed a green cycle -- and because the release path
+        creates and PUSHES its closure commit before the finish gate runs, the
+        veto also published commits whose subject says DONE over a board that
+        says DOING (T-1278). Same tree, same measurements; only prose moved.
+        """
+        for text in (
+            "PASS -- the pre-fix FAIL is re-established -- conf: high",
+            "PASS -- a failed atomic write leaves no orphan; 780 passed -- conf: high",
+            "PASS -- zero anchored failures; 1229 PASS -- conf: high",
+            "PASS -- CORE-004 was a fail-open condition -- conf: high",
+        ):
+            self.assertFalse(_claims_failure(text), text)
+
+    def test_a_machine_count_claims_from_anywhere(self) -> None:
+        """The separator is not a hiding place for a real number."""
+        for text in (
+            "PASS conf: high -- but 2 FAIL remain",
+            "PASS conf: high -- unittest reported FAILED (failures=2, errors=1)",
+            "PASS -- validate.py: 8 failures",
+        ):
+            self.assertTrue(_claims_failure(text), text)
+
+    def test_the_zero_exemption_is_not_widened(self) -> None:
+        for text in (
+            "PASS conf: high -- 0 FAIL",
+            "the suite ended with failures=0",
+            "0 FAIL",
+        ):
+            self.assertFalse(_claims_failure(text), text)
+
+    def test_a_verdict_before_the_separator_still_claims(self) -> None:
+        """Narrowing the SCOPE must not narrow the verdict itself."""
+        for text in (
+            "FAIL -- the gate refused and nothing was written",
+            "FAILED (failures=1) -- see the transcript",
+            "the suite FAILED -- rerun after the fix",
+        ):
+            self.assertTrue(_claims_failure(text), text)
+
+    def test_no_constant_answer_satisfies_this_class(self) -> None:
+        """Red control: neither verdict can be hardcoded.
+
+        Without it, a classifier stuck on True would pass every claim test and
+        a classifier stuck on False would pass every exemption test.
+        """
+        claims = _claims_failure("core 0 FAIL, ship 3 FAIL")
+        exempt = _claims_failure("PASS -- a failed atomic write -- conf: high")
+        self.assertTrue(claims)
+        self.assertFalse(exempt)
+        self.assertNotEqual(claims, exempt)
+
     def test_text_without_the_token_is_not_a_claim(self) -> None:
         self.assertFalse(_claims_failure("PASS conf: high -- everything green"))
         self.assertFalse(_claims_failure(""))

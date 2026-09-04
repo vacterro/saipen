@@ -1,6 +1,30 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.252.0 -- 2026-09-04 -- A Gap Is Not A Backwards Step (T-1281, T-1285)
+
+**Two defects in one file, published together because they are the same file and one of them was blocking the other's release.** T-1281 is the closure classifier reading ordinary English as a failure verdict. T-1285 is the ledger-gap check, restored with an escape. Both live in `tools/saipen_engine`, and T-1281 vetoed four green cycles in one session -- including the closure of the ticket that reported it.
+
+### Prose was a failure verdict (T-1281)
+
+- `_claims_failure` counted every `FAIL`-family token anywhere in an event body and vetoed unless each one carried an adjacent zero. **So a PASS event that DESCRIBED what it repaired vetoed its own closure.** Four reproductions, same tree, same measurements, only prose moved: `the pre-fix FAIL is re-established`, `a failed atomic write leaves no orphan`, `zero anchored failures` (the zero is not adjacent), and `CORE-004 was a fail-open condition` (the hyphen is a word boundary).
+- **The cost was not merely a blocked close.** The release path creates and PUSHES its content commit before the closure gate runs, so the veto published commits whose subject says DONE over a board that says DOING -- `058ab732` for T-1276 and `794085e9` for T-1280. That compounding defect is T-1278 and stays open.
+- `log.py` already names the class one screen away: **Narrative Authority Leakage**, a validator searching free text for a magic phrase. This was the same defect at the opposite polarity, and the cure is the same -- authority belongs to a shape, not to a word a sentence happens to contain.
+- The verdict now lives in the **verdict segment**: the text up to the first ` -- `, which is how every canonical line in this repository is already written. T-1241's counting rule is kept exactly -- every token accounted for, a count rather than "contains a zero form somewhere", so `0 FAIL on core, 3 FAIL on ship` is still a failure -- and only SCOPED. Two machine shapes still claim from anywhere: a nonzero count (`2 FAIL`) and a nonzero field (`failures=2`, what unittest prints), because no prose produces them by accident.
+- What this deliberately gives up: a bare lowercase `failed` in the detail of a line whose verdict says PASS. Stated in the docstring rather than discovered later.
+- **The whole suite is green with zero existing tests changed**, and that is the load-bearing fact. The first attempt narrowed to leading-position and machine-count forms only; three existing contracts went red, and those three reds produced the verdict-segment design.
+
+### A gap is not a backwards step (T-1285)
+
+- The fast-path ledger check arrived in the working tree loosened from `event != prev + 1` to `event <= prev`, unattributed. That reports a BACKWARDS id and nothing else: **`E-001` followed by `E-005` returned no error at all**, and a forged line inserted into a gap rode straight through. A gap in an append-only ledger means events were lost or removed, which is exactly what the fast path exists to notice cheaply.
+- Restoring strictness alone is not the answer either, and this was measured, not theorised: the loosening was a deliberate change made in a SHARED install by a project carrying two documented T-222-era holes in its chain. **Reverting it WEDGED that project** -- SAIOPS refused every mutation there, and the agent resorted to hand-writing events without op ids. Both requirements are real and in direct conflict: a gap must be detectable, and a project with legitimate historical gaps must not be permanently blocked.
+- So a gap is a defect **by default**, and a NAMED gap is exempted by a recorded decision: a `DEC` whose text BEGINS `LEDGER-GAP AMNESTY E-<prev> -> E-<next>`. Same mechanism `structural_marker_events` already owns, same three conditions -- **taxonomy** (a `RUN` reporting one is not the decision), **anchoring** (a line discussing an amnesty is discussing it), and **bounding twice**: the exact pair, plus a deciding event at or after the gap, so no pre-dated grant becomes a standing licence to open holes for the rest of the project's life.
+- **An exempted gap is reported, not silenced.** It rides on `LogAnalysis.amnestied`, separate from `errors`, because a hole nobody can see is precisely the state the loosening produced. The diagnostic also stops claiming `monotonicity` when it means consecutiveness -- that weaker contract belongs to `validate.py`, and the mismatch is what made the loosening look defensible.
+- Amnesties resolve **lazily, on the first gap only**, so PERF-007's single pass is untouched for a clean ledger: verified against the live 709-line journal at 0 errors, 0 amnestied.
+- 14 tests in `tools/test_ledger_gap.py` with five red controls -- the loosening itself turns 8 cases red, and dropping the taxonomy, the anchor, the bound or the amnestied report each turns one red.
+- **Found while verifying and filed rather than fixed**: `audit_checks --changed` crashes with `ValueError: max_workers must be greater than 0` when the changed-path set selects zero controls, so v7.247.0's accelerator is unusable on an engine-module change. T-1287.
+- 1083 -> 1097 in the suite.
+
 ## 7.251.0 -- 2026-09-04 -- There Is Nothing To Scan, And Nothing Was Enforcing It (T-1279, T-1280)
 
 **This release carries two bodies of work in one scope, and says so rather than splitting a file that cannot be split.** T-1279 is the applicability model below. T-1280 is the external audit campaign captured as `SRC-018`, whose repairs touch the same `tools/run_scenarios.py` — one edit removed a scenario that ASSERTED a fail-open, another repaired a fixture that manufactured its own failure — so the two cannot be published independently without shipping a suite that does not pass.
