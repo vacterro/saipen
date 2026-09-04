@@ -224,23 +224,32 @@ class Concurrency(EnqueueFixture):
             self.assertEqual(hashlib.sha256(body).hexdigest(), outcome["sha256"])
 
     def test_a_scanner_never_observes_a_partially_written_layer(self) -> None:
-        """The bytes become a LAYER at the rename, never before it.
+        """The bytes become a LAYER at the install, never before it.
 
-        The temp file lives in `audit/` (same directory, so the replace cannot
-        cross a mount) but its name cannot match the canonical regex, which is
-        what makes a concurrent `scan_layers` safe without any reader lock.
+        The staging file lives in `audit/` (same directory, so the install
+        cannot cross a mount) but its name cannot match the canonical regex,
+        which is what makes a concurrent `scan_layers` safe without any reader
+        lock.
+
+        W2-001: the install call moved from `os.replace` to `os.link`, so the
+        spy moved with it. The PROPERTY under test is unchanged and is the
+        reason the change was safe to make -- link publishes the canonical name
+        in one step exactly as replace did, and additionally cannot clobber a
+        destination that appeared after the existence test. A spy left on
+        `os.replace` would have gone permanently, silently green here, which is
+        the disarmed control this repository keeps meeting.
         """
         observed: list[list[str]] = []
-        real_replace = os.replace
+        real_link = os.link
 
         def spy(src, dst):
-            # The allocator commit also replaces a file; only the layer
-            # placement is the moment under test.
+            # The allocator commit also writes through a temp file; only the
+            # layer placement is the moment under test.
             if str(dst).endswith(".md"):
                 observed.append([item["rel"] for item in audit_inbox.scan_layers(self.root)])
-            return real_replace(src, dst)
+            return real_link(src, dst)
 
-        with patch.object(audit_enqueue.os, "replace", spy):
+        with patch.object(audit_enqueue.os, "link", spy):
             self.enqueue("op-1")
         self.assertEqual(observed, [[]])
 

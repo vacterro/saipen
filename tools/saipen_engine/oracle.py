@@ -39,13 +39,24 @@ RULE_ID = "VERIFY-ORACLE-01"
 ADMISSIBLE = "ADMISSIBLE"
 ORACLE_CHANGED = "ORACLE_CHANGED"
 SUBJECT_UNCHANGED = "SUBJECT_UNCHANGED"
+SUBJECT_UNRECORDED = "SUBJECT_UNRECORDED"
 NOT_A_REGRESSION_PAIR = "NOT_A_REGRESSION_PAIR"
 
-#: `oracle:<hex>` / `subject:<hex>` inside an evidence line. Optional by
-#: design: a record without them is not rejected, it is simply unpairable, and
-#: silently upgrading "no identity recorded" to "identity matched" would
-#: manufacture exactly the confidence this exists to withhold.
-_TOKEN = re.compile(r"\b(oracle|subject):([0-9a-f]{8,64})\b")
+#: ONE record vocabulary (CORE-002). The comparison record has exactly two
+#: identity keys, `verifier` and `subject`, and the parser produces exactly
+#: that shape. It previously emitted `oracle`/`subject` while the verdict
+#: consumed `verifier`/`subject`, so the parser's output was not the verdict's
+#: declared record without an undocumented remapping -- an easy thing to get
+#: wrong at the moment this is finally wired into production.
+VERIFIER_KEY = "verifier"
+SUBJECT_KEY = "subject"
+
+#: `verifier:<hex>` / `subject:<hex>` inside an evidence line. `oracle:` is
+#: accepted as the same field under its human-facing spelling -- the norm and
+#: this module both say "oracle" in prose -- and both spellings land on the
+#: single `verifier` record key above.
+_TOKEN = re.compile(r"\b(verifier|oracle|subject):([0-9a-f]{8,64})\b")
+_TOKEN_KEY = {"verifier": VERIFIER_KEY, "oracle": VERIFIER_KEY, "subject": SUBJECT_KEY}
 
 _MISSING = "(none)"
 
@@ -90,11 +101,77 @@ def verifier_identity(command: str, oracle_paths=(), root: Path | str = ".") -> 
 
 
 def parse_identity(text: str) -> dict:
-    """The `oracle:` / `subject:` tokens carried by an evidence line, if any."""
-    found = {}
-    for key, value in _TOKEN.findall(text or ""):
-        found[key] = value
+    """The identity tokens carried by an evidence line, in RECORD shape.
+
+    The result is exactly what `regression_pair_verdict` consumes: keys
+    `verifier` and `subject`, never the wire spellings. A line carrying both
+    `verifier:` and `oracle:` keeps the first occurrence, so a second spelling
+    cannot quietly redefine the identity a reader already saw.
+    """
+    found: dict[str, str] = {}
+    for token, value in _TOKEN.findall(text or ""):
+        found.setdefault(_TOKEN_KEY[token], value)
     return found
+
+
+#: The anchored evidence record (CORE-001). Until this existed, the whole rule
+#: was documentation plus a helper nothing called: `operations.py` gated
+#: VERIFY -> REVIEW and finish through `log.verification_evidence` alone, which
+#: decides from free-form text carrying `PASS` and `conf: high` and never
+#: compared an oracle to a subject. A bug could stay untouched, its fixture be
+#: weakened, a normal green be logged, and both canonical gates accepted it.
+#:
+#: Anchored for the reason `structural_marker_events` gives: a line that merely
+#: CONTAINS a marker is discussing it. The record must BEGIN the event.
+_EVIDENCE_RE = re.compile(
+    r"^REGRESSION-EVIDENCE\s+(FAIL|PASS)\b(?P<rest>.*)$", re.DOTALL
+)
+EVIDENCE_PREFIX = "REGRESSION-EVIDENCE "
+
+#: Verdicts the gate can reach that are not about the pair itself.
+NO_EVIDENCE = "NO_REGRESSION_EVIDENCE"
+
+
+def parse_evidence(text: str) -> dict | None:
+    """One `REGRESSION-EVIDENCE <FAIL|PASS> verifier:… subject:…` record.
+
+    Returns the record `regression_pair_verdict` consumes, or None when the
+    line is not an anchored evidence record. Prose about regression evidence
+    is not evidence, which is the entire point of the anchor.
+    """
+    match = _EVIDENCE_RE.match((text or "").strip())
+    if match is None:
+        return None
+    record = parse_identity(match.group("rest"))
+    record["result"] = match.group(1)
+    return record
+
+
+def regression_evidence_verdict(records) -> dict:
+    """The verdict for a ticket's current-cycle evidence records.
+
+    Takes the LATEST FAIL and the LATEST PASS, because a cycle may legitimately
+    record several attempts and the pair that matters is the one that closed
+    it. Missing either half is `NO_REGRESSION_EVIDENCE` -- distinct from a pair
+    that exists and is inadmissible, so the diagnostic can say which of the two
+    an agent is actually looking at.
+    """
+    before = after = None
+    for record in records or ():
+        if record.get("result") == "FAIL":
+            before = record
+        elif record.get("result") == "PASS":
+            after = record
+    if before is None or after is None:
+        missing = "FAIL" if before is None else "PASS"
+        return _verdict(
+            NO_EVIDENCE,
+            f"no {missing} half of a regression pair was recorded in this VERIFY "
+            f"cycle. A ticket declaring `regression: required` owes both: the "
+            f"SAME verifier red against the pre-fix subject and green against "
+            f"the post-fix one",
+        )
+    return regression_pair_verdict(before, after)
 
 
 def regression_pair_verdict(before: dict, after: dict) -> dict:
@@ -153,6 +230,20 @@ def regression_pair_verdict(before: dict, after: dict) -> dict:
             "the same verifier reports FAIL then PASS against the same subject, "
             "which is an unstable verifier or an unrecorded change, never a proven "
             "fix",
+        )
+    if not before_s or not after_s:
+        # CORE-002: this used to fall through to ADMISSIBLE, so an ABSENT
+        # subject identity was treated as proof the subject had changed --
+        # fail-OPEN on the identity of the very thing whose change is supposed
+        # to have caused the green. Missing verifier already failed closed
+        # right above; the two sides are now symmetric, because the claim
+        # "the implementation is what changed" needs both endpoints named.
+        missing = "pre-fix" if not before_s else "post-fix"
+        return _verdict(
+            SUBJECT_UNRECORDED,
+            f"no subject identity was recorded for the {missing} side, so nothing "
+            "shows the implementation moved between the FAIL and the PASS. An "
+            "unrecorded identity is not a changed one",
         )
     return _verdict(
         ADMISSIBLE,

@@ -66,21 +66,42 @@
       "weak_model": {
         "type": "string",
         "description": "RFC 1.2 recognized optional ticket field (T-558): the WEAK-MODEL PRECEDENT answer -- could a weak but compliant model still choose wrong while honestly believing it followed SAIPEN? Required by the [sweep-ticket-link] check for a PROTOCOL_VIOLATION finding that produced a ticket."
+      },
+      "regression": {
+        "type": "string",
+        "description": "CORE-001: `required` declares that this ticket owes a regression PAIR -- a FAIL against the pre-fix subject and a PASS against the post-fix one under the SAME verifier -- and arms the extra gate in VERIFY -> REVIEW and finish. A machine-owned field, never inferred from prose."
       }
     },
     "allOf": [
       {
         "description": "blocker is active blocked-state data: present and non-empty exactly under BLOCKED (T-631)",
         "if": {
-          "properties": { "status": { "const": "BLOCKED" } },
-          "required": ["status"]
+          "properties": {
+            "status": {
+              "const": "BLOCKED"
+            }
+          },
+          "required": [
+            "status"
+          ]
         },
         "then": {
-          "required": ["blocker"],
-          "properties": { "blocker": { "minLength": 1, "pattern": "\\S" } }
+          "required": [
+            "blocker"
+          ],
+          "properties": {
+            "blocker": {
+              "minLength": 1,
+              "pattern": "\\S"
+            }
+          }
         },
         "else": {
-          "not": { "required": ["blocker"] }
+          "not": {
+            "required": [
+              "blocker"
+            ]
+          }
         }
       }
     ],

@@ -5792,8 +5792,25 @@ def neutralize_sandbox_work_surface(saipen_dir: Path) -> set[str]:
     the ORIGINAL board is untouched, still dangling, and still fails; that is
     the condition the check exists to catch.
 
+    T-1270 left a second surface behind the same reasoning. The Audit Inbox
+    became WORK when `SOURCE-AUDIT-INBOX-01` landed: a workable layer routes an
+    action, and a `next_action` that is neither that action nor a LIVE-TICKET
+    continuation is a violation. This function removes every live ticket, and
+    the probes that call it then force a neutral `next_action` -- so a copied
+    `audit/` layer becomes a violation THE PROBE MANUFACTURED and reported
+    against the live repository. Exactly the T-1240 shape one layer out, so the
+    delivery inbox is emptied with the board rather than left to disagree with
+    it. Fixtures that mean to exercise the inbox bring their own layer (see
+    audit_checks' MULTI control), so nothing that tests it loses coverage.
+
     Returns the ticket ids that were dropped.
     """
+    audit_dir = saipen_dir.parent / "audit"
+    if audit_dir.is_dir():
+        for entry in sorted(audit_dir.iterdir()):
+            if entry.is_file() and not entry.name.startswith("."):
+                entry.unlink()
+
     board_path = saipen_dir / "BOARD.md"
     board_out: list[str] = []
     dropped: set[str] = set()
@@ -17471,8 +17488,28 @@ def run_hostile_authority_probes() -> tuple[list[str], int]:
     expect(
         "capability negotiation reads the session, never STATE",
         negotiate_capability({}) == "full"
-        and negotiate_capability({"SAIPEN_CAPABILITY": "read-only"}) == "read-only"
-        and negotiate_capability({"SAIPEN_CAPABILITY": "nonsense"}) == "full",
+        and negotiate_capability({"SAIPEN_CAPABILITY": "read-only"}) == "read-only",
+    )
+    # CORE-004: this scenario used to assert that a nonsense declaration
+    # negotiates `full`, which LOCKED IN the fail-open. An absent declaration
+    # is still the default writable session; a PRESENT invalid one is now
+    # returned verbatim so every closed-set check downstream can fire on it.
+    from saipen_engine.capability import capability_error
+
+    expect(
+        "an invalid live capability declaration is never laundered into full",
+        all(
+            capability_error(negotiate_capability({"SAIPEN_CAPABILITY": bad})) is not None
+            and not may_mutate(negotiate_capability({"SAIPEN_CAPABILITY": bad}))
+            and not may_publish(negotiate_capability({"SAIPEN_CAPABILITY": bad}))
+            for bad in ("nonsense", "readonly", "read only", "no_publish", "full-access")
+        ),
+    )
+    expect(
+        "an absent or empty declaration keeps the documented default",
+        negotiate_capability({}) == "full"
+        and negotiate_capability({"SAIPEN_CAPABILITY": ""}) == "full"
+        and negotiate_capability({"SAIPEN_CAPABILITY": "   "}) == "full",
     )
     expect(
         "capability predicates are closed",

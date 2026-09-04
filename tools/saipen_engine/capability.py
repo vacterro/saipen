@@ -73,14 +73,34 @@ PRODUCER_FORBIDDEN_ACTIONS = frozenset(
 def negotiate_capability(env: dict | None = None) -> str:
     """The capability of the RUNNING session.
 
-    Honors `SAIPEN_CAPABILITY` (one of `CAPABILITIES`); an absent or
-    unrecognized declaration negotiates the default writable session. The
-    result is always a member of `CAPABILITIES`, so no caller has to defend
-    against a None/garbage capability leaking into an authorization decision.
+    Honors `SAIPEN_CAPABILITY` (one of `CAPABILITIES`). An ABSENT declaration
+    negotiates the default writable session, which is the documented
+    behaviour a host that never heard of this variable relies on.
+
+    A declaration that is PRESENT BUT INVALID is returned VERBATIM, so it fails
+    every downstream `capability_error` / `may_mutate` / `may_publish` check.
+    It used to be mapped to `full` alongside the absent case (CORE-004), which
+    meant a typo, a corrupted value, an unsupported spelling or a broken host
+    integration silently granted the STRONGEST capability -- and the closed-set
+    validation two functions below could never fire, because negotiation had
+    already laundered the input. The likely typos are the damning part:
+    `readonly`, `read only` and `no_publish` are all attempts to RESTRICT the
+    session, and every one of them used to publish.
+
+    So the result is a member of `CAPABILITIES` only when the host declared one
+    or declared nothing; callers must not assume it, which is exactly what
+    `capability_error` is for.
     """
     source = os.environ if env is None else env
-    declared = str(source.get(ENV_VAR, "") or "").strip().lower()
-    return declared if declared in CAPABILITIES else DEFAULT_CAPABILITY
+    raw = source.get(ENV_VAR)
+    if raw is None:
+        return DEFAULT_CAPABILITY
+    declared = str(raw or "").strip().lower()
+    if not declared:
+        # An empty or whitespace-only value is an absent declaration: a shell
+        # that exports the variable unset is not a host asking for anything.
+        return DEFAULT_CAPABILITY
+    return declared
 
 
 def capability_error(capability: object) -> str | None:

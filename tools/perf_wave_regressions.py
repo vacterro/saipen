@@ -947,9 +947,25 @@ def run_t1023(base: Path) -> None:
         ),
         encoding="utf-8",
     )
+    # PERF-002: this control used to count ONLY `_iter_receipts` and
+    # `_find_receipt_by_id`, both of which the direct locator legitimately
+    # avoids, and then print "constant-I/O (no full scan)". It never
+    # instrumented the work `latest_receipt` actually does: on a live project
+    # with 1,052 conformance receipts one call invoked
+    # `_receipt_content_token` 1,052 times -- it opened and SHA-256 hashed
+    # every receipt in the lifetime population -- while this control reported
+    # PASS. A gate that cannot fail is not a gate, and this one was asserting
+    # the exact property it was blind to.
+    #
+    # It now counts the real I/O. The claim is stated truthfully: the direct
+    # locator avoids the ITERATORS, and the content hashing is measured and
+    # BOUNDED so it cannot get worse, rather than described as absent. Making
+    # it genuinely constant needs the sealed-segment work PERF-002 describes;
+    # until that lands this control reports the cost instead of hiding it.
     real_iter = conformance._iter_receipts
     real_find = conformance._find_receipt_by_id
-    scans = {"iter": 0, "find": 0}
+    real_token = conformance._receipt_content_token
+    scans = {"iter": 0, "find": 0, "content_token": 0}
 
     def ci(r):
         scans["iter"] += 1
@@ -959,17 +975,35 @@ def run_t1023(base: Path) -> None:
         scans["find"] += 1
         return real_find(r, rid)
 
+    def ct(*args, **kwargs):
+        scans["content_token"] += 1
+        return real_token(*args, **kwargs)
+
     conformance._iter_receipts = ci
     conformance._find_receipt_by_id = cf
+    conformance._receipt_content_token = ct
     try:
         got = conformance.latest_receipt(root4, "core")
     finally:
         conformance._iter_receipts = real_iter
         conformance._find_receipt_by_id = real_find
+        conformance._receipt_content_token = real_token
+    receipt_dir = Path(root4) / ".saipen/recovery/conformance"
+    population = (
+        len([p for p in receipt_dir.iterdir() if p.suffix == ".json"])
+        if receipt_dir.is_dir()
+        else 0
+    )
     expect(
-        "PERF-004 index lookup is constant-I/O (no full scan)",
+        "PERF-004 index lookup avoids the receipt iterators",
         scans["iter"] == 0 and scans["find"] == 0,
         f"iter={scans['iter']} find={scans['find']}",
+    )
+    expect(
+        "PERF-004 index lookup hashes at most one token per receipt "
+        "(MEASURED, not constant -- see PERF-002)",
+        scans["content_token"] <= max(population, 1),
+        f"content_token={scans['content_token']} population={population}",
     )
     expect(
         "PERF-004 index lookup returns the latest receipt",

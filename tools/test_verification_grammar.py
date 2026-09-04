@@ -97,9 +97,45 @@ class SingleTicket(unittest.TestCase):
         self.assertFalse(ok)
         self.assertEqual(reason, "no current-cycle VERIFY boundary")
 
-    def test_manual_verify_still_counts(self) -> None:
+    def test_manual_verify_steps_are_not_a_human_verdict(self) -> None:
+        """CORE-003. This test previously asserted the opposite, and that is
+        why the defect survived: `MANUAL-VERIFY steps recorded; 0 FAIL` counted
+        as successful verification.
+
+        `phases/verify.md` REQUIRES an agent to record MANUAL-VERIFY STEPS +
+        EXPECTED precisely when a human has NOT verified anything yet, so the
+        instruction to wait for a person satisfied the gate that was waiting for
+        that person. Steps are a request; only a recorded RESULT is a verdict.
+        """
         ok, _ = verification_evidence(TICKET, events("MANUAL-VERIFY steps recorded; 0 FAIL"))
+        self.assertFalse(ok)
+
+    def test_prose_mentioning_the_token_is_not_a_human_verdict(self) -> None:
+        """Narrative Authority Leakage, the class this module already names."""
+        ok, _ = verification_evidence(
+            TICKET, events("some prose that merely mentions MANUAL-VERIFY in passing")
+        )
+        self.assertFalse(ok)
+
+    def test_a_recorded_human_pass_is_a_verdict(self) -> None:
+        ok, _ = verification_evidence(
+            TICKET, events("MANUAL-VERIFY RESULT: PASS -- operator confirmed the dialog")
+        )
         self.assertTrue(ok)
+
+    def test_a_recorded_human_fail_is_negative_evidence(self) -> None:
+        ok, _ = verification_evidence(
+            TICKET, events("MANUAL-VERIFY RESULT: FAIL -- operator reports a blank dialog")
+        )
+        self.assertFalse(ok)
+
+    def test_the_result_marker_must_begin_the_event(self) -> None:
+        """Anchoring is the whole property: a sentence CONTAINING it describes it."""
+        ok, _ = verification_evidence(
+            TICKET,
+            events("we will later record MANUAL-VERIFY RESULT: PASS once someone looks"),
+        )
+        self.assertFalse(ok)
 
 
 class ClassifierAgreement(unittest.TestCase):

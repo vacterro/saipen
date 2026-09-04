@@ -37,7 +37,14 @@ to the user.
   below). The variable between red and green is the implementation, never
   the definition of success.
 - Unavailable GUI/environment checks require LOGged `MANUAL-VERIFY STEPS +
-  EXPECTED`, never a fabricated PASS.
+  EXPECTED`, never a fabricated PASS. **Those steps are a REQUEST, not a
+  verdict, and they do not satisfy this phase.** The verdict is a separate
+  event that BEGINS with `MANUAL-VERIFY RESULT: PASS` or
+  `MANUAL-VERIFY RESULT: FAIL`, written only from what the human reported.
+  Anchoring is the point: a line that merely contains the words is describing
+  the check, and the steps record exists precisely when nobody has looked yet,
+  so treating it as success made the instruction to wait for a person satisfy
+  the gate that was waiting for that person.
 - End with `conf: high` for green tests, `med` for smoke only, or `low` for
   manual evidence.
 
@@ -66,6 +73,24 @@ again. A regression that stays green against the restored bug proved
 nothing, and the fix was never necessary for the green. Weakening a fixture
 closes a ticket faster than fixing anything, every downstream guard reads
 green, and REVIEW re-running the same weakened oracle agrees.
+
+**The rule is enforced, not merely written.** A ticket that owes this
+comparison declares `regression: required` on its BOARD line -- a machine-owned
+field, because a gate that decided "this is a bug fix" by reading a description
+would be the prose-authority failure the rule exists to stop. It then records
+the two halves as anchored events:
+
+```
+REGRESSION-EVIDENCE FAIL verifier:<hex> subject:<hex> -- <what ran>
+REGRESSION-EVIDENCE PASS verifier:<hex> subject:<hex> -- <what ran>
+```
+
+`VERIFY -> REVIEW` and the atomic finish both consume
+`saipen_engine.oracle.regression_pair_verdict` over those records and refuse
+anything but `ADMISSIBLE`. A green run is not enough, a weakened oracle is
+`ORACLE_CHANGED`, and a missing half is `NO_REGRESSION_EVIDENCE`. Anchoring
+matters as everywhere else: a line DESCRIBING an evidence record is not one.
+Tickets that do not declare the field are untouched.
 
 **Changing the verifier is allowed, and it spends the old evidence.** A test
 can be wrong and a requirement can move, so tests are not frozen during a

@@ -2687,10 +2687,17 @@ if converge_target == "ship" and log_files:
         )
     else:
         _ccc_start, _pre_ship_head = _ccc_markers[-1]
+        # The BINDING ship is the LAST one after the marker, not the first.
+        # A converge run at target `ship` legitimately publishes more than
+        # once: stage M (or a post-ship audit) returns to C, the new work
+        # runs E-I again, and SHIP repeats. J-M then bind to the LATEST
+        # shipped revision, so comparing the FIRST ship against current HEAD
+        # reported a stale mismatch on a correctly-converging project and
+        # could never be satisfied except by never shipping twice.
         _ship_result = next(
             (
                 (index, match.group(1))
-                for index in range(_ccc_start + 1, len(_ccc_lines))
+                for index in range(len(_ccc_lines) - 1, _ccc_start, -1)
                 if (match := re.search(rf"RUN: ship .* -> pushed ({OID_RE})\b", _ccc_lines[index]))
             ),
             None,

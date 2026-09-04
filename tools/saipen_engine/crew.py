@@ -9,6 +9,7 @@ import stat
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+from .applicability import ALWAYS, NOT_APPLICABLE
 from .board import blocker_class, convergence_closure_problems, parse_board, wait_role_target
 from .journal import (
     hash_file_dependency,
@@ -147,6 +148,11 @@ class CrewSnapshot:
     # internal call) and the persisted mode governs.
     current_capability: str | None = None
     userperson: dict | None = None
+    # T-1279: the deterministic project facts every applicability probe is
+    # judged against, enumerated ONCE per snapshot. None means the enumeration
+    # was not attempted, which `applicability.verdict` resolves to APPLICABLE --
+    # a capability is never retired by a fact nobody looked for.
+    project_facts: object | None = None
 
 
 def _refuse(code: str, detail: str = "", **extra) -> Result:
@@ -915,7 +921,57 @@ def crew_snapshot(
         semantic_snapshot,
         current_capability=current_capability,
         userperson=userperson,
+        project_facts=_project_facts(root),
     )
+
+
+def _role_applicability(snapshot: CrewSnapshot, role) -> tuple[str, str]:
+    """`(verdict, reason)` for one built-in role against this snapshot's facts.
+
+    One entry point so every consumer -- the roster stage, the sensor stages,
+    the collect set and the final fixed point -- asks the same question of the
+    same facts. Two of them disagreeing is precisely how a role would end up
+    skipped in one place and demanded in another.
+    """
+    from .applicability import verdict
+
+    return verdict(getattr(role, "applicability", ALWAYS), snapshot.project_facts)
+
+
+def applicable_roles(snapshot: CrewSnapshot, roles=None) -> tuple:
+    """The subset of `roles` that has something to apply to in this project."""
+    return tuple(
+        role
+        for role in (CREW_ROLES if roles is None else roles)
+        if _role_applicability(snapshot, role)[0] != NOT_APPLICABLE
+    )
+
+
+def _project_facts(root: Path):
+    """The applicability facts for this snapshot, or None if they cannot be had.
+
+    Not collected when no built-in declares a condition. `crew_snapshot` is on
+    the `cc`/`sc`/`status` hot path and the walk costs a Git subprocess plus a
+    bounded read of every module in the tree; spending that to answer a
+    question nobody asked is the kind of cost T-1019 counts. None resolves
+    APPLICABLE for every probe, which is exactly the answer an all-`always`
+    roster would have produced anyway -- the skip changes timing, never a
+    verdict.
+
+    Deliberately swallows every enumeration failure into None rather than
+    raising: applicability decides whether OPTIONAL work runs, and a crew
+    circuit must not be stopped by a probe. None resolves APPLICABLE in
+    `applicability.verdict`, so the failure direction is "run the capability
+    anyway", never "skip it quietly".
+    """
+    from .applicability import collect_facts
+
+    if all(getattr(role, "applicability", ALWAYS) == ALWAYS for role in CREW_ROLES):
+        return None
+    try:
+        return collect_facts(root)
+    except (OSError, ValueError):
+        return None
 
 
 def _source_dict(snapshot: CrewSnapshot) -> dict:
@@ -1444,7 +1500,7 @@ def crew_release_context(project_root: Path | str) -> dict:
     if scope_problem:
         return {"ok": False, "detail": scope_problem}
     evidence = {}
-    for role in CREW_ROLES:
+    for role in applicable_roles(snapshot):
         evidence[role.name] = (
             _current_packages(snapshot, role)
             if role.role_class == "core-review"
@@ -1470,7 +1526,7 @@ def _post_ship(snapshot: CrewSnapshot) -> tuple[bool, str, CrewAction | None]:
     release_ok, reason = _release_current(snapshot)
     if not release_ok:
         return False, reason, None
-    for role in CREW_ROLES:
+    for role in applicable_roles(snapshot):
         health = snapshot.roles[role.name]
         if role.role_class == "core-review":
             kind = health.get("health")
@@ -1900,6 +1956,11 @@ def _evaluate(
     for role in CREW_ROLES:
         if not role.ensure_instance:
             continue
+        if _role_applicability(snapshot, role)[0] == NOT_APPLICABLE:
+            # An instance is machinery for producing evidence. A role with
+            # nothing to produce evidence ABOUT does not need one spawned,
+            # kept in the manifest, or re-adopted on every charter revision.
+            continue
         health = snapshot.roles[role.name]
         state_path = snapshot.root / SUBS_REL / role.name / "STATE.md"
         if role.name not in manifest_names or not health.get("instance_present"):
@@ -1941,7 +2002,26 @@ def _evaluate(
         )
     )
 
+    # Stages whose verdict no predecessor can move (see `_reachable`).
+    unconditional_stages = set()
     for role in (item for item in CREW_ROLES if item.role_class == "core-review"):
+        applies, applies_reason = _role_applicability(snapshot, role)
+        if applies == NOT_APPLICABLE:
+            unconditional_stages.add(role.stage)
+            # The machine receipt (AC-02). The stage is SATISFIED and the
+            # reason NAMES the deciding fact, so a reader can tell this apart
+            # from a stage that ran and found nothing -- which is the entire
+            # point. No model run, no package, no review ticket.
+            evaluations.append(
+                (
+                    role.stage,
+                    role.name,
+                    SATISFIED,
+                    f"NOT_APPLICABLE -- {applies_reason}",
+                    None,
+                )
+            )
+            continue
         ok, reason = _sensor_executed(snapshot, role)
         action = (
             None
@@ -1964,13 +2044,13 @@ def _evaluate(
 
     ready = [
         role.name
-        for role in CREW_ROLES
+        for role in applicable_roles(snapshot)
         if role.role_class == "core-review"
         and snapshot.roles[role.name].get("health") == HEALTH_READY_FOR_REVIEW
     ]
     dispositions = [
         role.name
-        for role in CREW_ROLES
+        for role in applicable_roles(snapshot)
         if role.role_class == "core-review"
         and snapshot.roles[role.name].get("health") == HEALTH_REVIEW_PENDING
         and snapshot.roles[role.name].get("collect", {}).get("disposition_pending")
@@ -2106,7 +2186,7 @@ def _evaluate(
 
     sensors_current = all(
         snapshot.roles[role.name].get("health") == HEALTH_CURRENT
-        for role in CREW_ROLES
+        for role in applicable_roles(snapshot)
         if role.role_class == "core-review"
     )
     final_fixed = sensors_current and core_ok and not oscillation and not dispositions
@@ -2127,7 +2207,7 @@ def _evaluate(
         # Terminal ship authorization is computed against SC-0..SC-10 only
         # (no recursion: the reachability of the pre-ship circuit is derived
         # here, before SC-11/12/13 append their own evaluations).
-        pre_stages = _reachable(evaluations)
+        pre_stages = _reachable(evaluations, unconditional=frozenset(unconditional_stages))
         ship_ok, ship_reason = crew_ready_for_terminal_ship(snapshot, pre_stages)
         action = (
             None
@@ -2177,7 +2257,7 @@ def _evaluate(
             else None,
         )
     )
-    stages = _reachable(evaluations)
+    stages = _reachable(evaluations, unconditional=frozenset(unconditional_stages))
     return stages, _first_action(stages)
 
 
@@ -2224,11 +2304,27 @@ def _sc13_conformance_check(
     return True, ""
 
 
-def _reachable(evaluations, forced_action: CrewAction | None = None) -> list[dict]:
+def _reachable(
+    evaluations,
+    forced_action: CrewAction | None = None,
+    unconditional: frozenset = frozenset(),
+) -> list[dict]:
+    """Project the evaluations into the plan's stage listing.
+
+    A stage after the first unsatisfied one normally reports WAITING, because
+    its own verdict can still move once the blocker is worked -- running a
+    sensor mutates the tree, which is exactly what invalidates later evidence.
+
+    `unconditional` names the stages whose verdict does NOT depend on any
+    predecessor (T-1279: a role with no applicable surface has nothing for a
+    predecessor to change). Blanking those to "waiting on predecessor" would
+    hide the deciding fact in precisely the plan an operator reads to find out
+    why a stage is quiet, which is the confusion this whole change removes.
+    """
     blocked_by = None
     stages = []
     for stage, name, status, reason, action in evaluations:
-        if blocked_by is not None:
+        if blocked_by is not None and stage not in unconditional:
             stages.append(
                 {
                     "stage": stage,

@@ -32,6 +32,7 @@ from saipen_engine.oracle import (  # noqa: E402
     NOT_A_REGRESSION_PAIR,
     ORACLE_CHANGED,
     SUBJECT_UNCHANGED,
+    SUBJECT_UNRECORDED,
     oracle_digest,
     parse_identity,
     regression_pair_verdict,
@@ -219,14 +220,94 @@ class VerifierIdentityTests(OracleFixture):
         self.assertEqual(forward, reversed_sep)
 
     def test_identity_tokens_round_trip_through_an_evidence_line(self) -> None:
+        """CORE-002: the parser emits the RECORD shape the verdict consumes.
+
+        This test previously asserted the key `oracle`, which is the defect an
+        external audit named: the parser's output was not
+        `regression_pair_verdict`'s declared record without an undocumented
+        remapping, and nothing would have caught that at the moment this is
+        wired into production. Both wire spellings now land on `verifier`.
+        """
         line = (
             "AC-EVIDENCE AC-01 PASS behavioral -- "
             "oracle:abc123def456 subject:0011223344 -- test:x"
         )
         self.assertEqual(
-            parse_identity(line), {"oracle": "abc123def456", "subject": "0011223344"}
+            parse_identity(line), {"verifier": "abc123def456", "subject": "0011223344"}
+        )
+        self.assertEqual(
+            parse_identity("PASS -- verifier:abc123def456 subject:0011223344"),
+            {"verifier": "abc123def456", "subject": "0011223344"},
         )
         self.assertEqual(parse_identity("AC-EVIDENCE AC-01 PASS behavioral -- test:x"), {})
+
+    def test_a_parsed_line_feeds_the_verdict_with_no_remapping(self) -> None:
+        """The round trip the two halves have to agree on, end to end."""
+        before = parse_identity("FAIL -- oracle:1111aaaa subject:2222bbbb")
+        after = parse_identity("PASS -- oracle:1111aaaa subject:3333cccc")
+        before["result"], after["result"] = "FAIL", "PASS"
+        self.assertEqual(regression_pair_verdict(before, after)["code"], ADMISSIBLE)
+
+
+class SubjectIdentityTests(unittest.TestCase):
+    """CORE-002: an unrecorded subject is not a changed one.
+
+    A missing VERIFIER already failed closed. A missing SUBJECT fell through to
+    ADMISSIBLE -- fail-open on the identity of the very thing whose change is
+    supposed to have caused the green. The two sides are now symmetric.
+    """
+
+    def pair(self, before: dict, after: dict) -> str:
+        return regression_pair_verdict(
+            {"result": "FAIL", **before}, {"result": "PASS", **after}
+        )["code"]
+
+    def test_both_subjects_missing_is_inadmissible(self) -> None:
+        self.assertEqual(
+            self.pair({"verifier": "v1"}, {"verifier": "v1"}), SUBJECT_UNRECORDED
+        )
+
+    def test_a_missing_pre_fix_subject_is_inadmissible(self) -> None:
+        code = self.pair({"verifier": "v1"}, {"verifier": "v1", "subject": "s2"})
+        self.assertEqual(code, SUBJECT_UNRECORDED)
+
+    def test_a_missing_post_fix_subject_is_inadmissible(self) -> None:
+        code = self.pair({"verifier": "v1", "subject": "s1"}, {"verifier": "v1"})
+        self.assertEqual(code, SUBJECT_UNRECORDED)
+
+    def test_a_missing_verifier_on_either_side_is_inadmissible(self) -> None:
+        self.assertEqual(
+            self.pair({"subject": "s1"}, {"verifier": "v1", "subject": "s2"}),
+            ORACLE_CHANGED,
+        )
+        self.assertEqual(
+            self.pair({"verifier": "v1", "subject": "s1"}, {"subject": "s2"}),
+            ORACLE_CHANGED,
+        )
+
+    def test_the_honest_cases_are_preserved(self) -> None:
+        """The repair must not turn a real fix into a refusal."""
+        self.assertEqual(
+            self.pair({"verifier": "v1", "subject": "s1"}, {"verifier": "v1", "subject": "s2"}),
+            ADMISSIBLE,
+        )
+        self.assertEqual(
+            self.pair({"verifier": "v1", "subject": "s1"}, {"verifier": "v1", "subject": "s1"}),
+            SUBJECT_UNCHANGED,
+        )
+
+    def test_no_incomplete_identity_record_is_ever_admissible(self) -> None:
+        """Exhaustive over the four identity slots: only the full record passes."""
+        full = {"verifier": "v1", "subject": "s1"}, {"verifier": "v1", "subject": "s2"}
+        self.assertEqual(self.pair(*full), ADMISSIBLE)
+        for drop_side, drop_key in (
+            (0, "verifier"), (0, "subject"), (1, "verifier"), (1, "subject"),
+        ):
+            sides = [dict(full[0]), dict(full[1])]
+            sides[drop_side].pop(drop_key)
+            self.assertNotEqual(
+                self.pair(*sides), ADMISSIBLE, f"dropping {drop_key} from side {drop_side}"
+            )
 
 
 # ---------------------------------------------------------------------------

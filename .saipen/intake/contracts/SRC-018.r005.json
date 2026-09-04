@@ -1,0 +1,34 @@
+{
+  "clauses": {
+    "SRC-018:R1": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001 P1: VERIFY-ORACLE-01 is documentation plus a detached helper and test, not an authoritative lifecycle invariant. regression_pair_verdict, oracle_digest and oracle parse_identity have zero production callers; operations.py gates VERIFY to REVIEW and finish solely through log.py verification_evidence, which decides from free-form RUN text carrying PASS and conf high. A bug may remain untouched, its oracle weakened, a normal PASS logged, and both canonical gates still accept it. Wire the authoritative transition and finish gates to a machine-owned regression-evidence path"
+    },
+    "SRC-018:R2": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-002 P1: regression_pair_verdict is fail-open on subject identity. A missing verifier identity fails closed as ORACLE_CHANGED but a missing subject on either side falls through to ADMISSIBLE, so an absent subject is treated as proof the subject changed. Separately parse_identity returns keys oracle and subject while regression_pair_verdict consumes verifier and subject, so the parser output is not the verdict record shape without an undocumented remapping"
+    },
+    "SRC-018:R3": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-003 P1: verification_evidence plus the transition and checkpoint command surface plus phases/verify.md -- see the audit body for the exact defect and repair"
+    },
+    "SRC-018:R4": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-004 P1: capability.negotiate_capability and saipen._negotiate_capability -- see the audit body for the exact defect and repair"
+    },
+    "SRC-018:R5": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-005 P1: corpus.py plus tests/conformance_cases.jsonl row 257 plus the validator conformance gate -- see the audit body for the exact defect and repair"
+    }
+  },
+  "derived_at": "2026-09-03T20:05:33Z",
+  "derived_from": "SRC-018",
+  "interpretation_revision": 5,
+  "schema_version": 1,
+  "source_sha256": "2b22e539570b9c3aa9993d9dc215f9983b5dc5e8459e3ff234df8b3f99760cb7"
+}

@@ -543,7 +543,26 @@ _VERIFY_BOUNDARY_RE = re.compile(r"^transition to VERIFY(?: -- .*)?$")
 _VERIFY_BOUNDARY_PREFIX = "transition to VERIFY -- "
 _NEGATION_RE = re.compile(r"\bNOT\s+(?:PASS|MANUAL-VERIFY)\b", re.IGNORECASE)
 _PASS_TOKEN_RE = re.compile(r"\bPASS\b")
-_MANUAL_TOKEN_RE = re.compile(r"\bMANUAL-VERIFY\b")
+
+# CORE-003: a manual verification RESULT, not the appearance of the words.
+#
+# This used to be `\bMANUAL-VERIFY\b` searched anywhere in the body, so the
+# procedural instruction `phases/verify.md` REQUIRES an agent to record --
+# "MANUAL-VERIFY STEPS + EXPECTED", written precisely because a human has not
+# verified anything yet -- satisfied the gate. So did any sentence that merely
+# mentioned the token: `some prose that merely mentions MANUAL-VERIFY in
+# passing` classified as successful verification. Human confirmation had become
+# a magic substring.
+#
+# `structural_marker_events` in this same module already names that class --
+# Narrative Authority Leakage -- and already prescribes the cure: authority
+# belongs to a marker that BEGINS the event text, not one contained in it. The
+# rule existed; the verification grammar had simply never been held to it.
+#
+# So the marker is anchored and it carries an explicit verdict. Steps, requests
+# and prose are none of these and classify as nothing at all.
+_MANUAL_RESULT_RE = re.compile(r"^MANUAL-VERIFY RESULT:\s*(PASS|FAIL)\b")
+MANUAL_RESULT_PREFIX = "MANUAL-VERIFY RESULT: "
 
 # T-1241: a FAILURE CLAIM, not the mere appearance of the letters. The old
 # test was `"FAIL" in txt`, so the canonical zero-failure summary every gate in
@@ -575,6 +594,19 @@ def _claims_failure(text: str) -> bool:
     return total > len(_ZERO_FAIL_RE.findall(text))
 
 
+# CORE-001: the regression channel is NOT the ordinary verification channel.
+# A `REGRESSION-EVIDENCE FAIL ...` record is the REQUIRED red half of a pair --
+# an agent recording it is complying, not reporting that the cycle failed --
+# but `_claims_failure` sees the word and vetoes. The two classifiers answer
+# different questions over the same LOG, so the ordinary one steps over the
+# other one's records rather than guessing about them. `regression_evidence`
+# reads exactly these, and nothing else reads them at all.
+def _is_regression_evidence(text: str) -> bool:
+    from .oracle import parse_evidence
+
+    return parse_evidence(text) is not None
+
+
 def _is_verify_boundary(ev: dict) -> bool:
     """True iff `ev` is the EXACT machine-owned VERIFY entry marker.
 
@@ -586,6 +618,47 @@ def _is_verify_boundary(ev: dict) -> bool:
     """
     txt = ev.get("text", "")
     return txt == "transition to VERIFY" or txt.startswith(_VERIFY_BOUNDARY_PREFIX)
+
+
+def regression_evidence(ticket_id: str, events: list[dict]) -> tuple[bool, str]:
+    """`(admissible, reason)` for a ticket that owes a regression PAIR.
+
+    CORE-001. `verification_evidence` above answers "did something green happen
+    in this cycle" and cannot answer "did the IMPLEMENTATION cause it" -- it
+    reads free-form text and never compares an oracle to a subject. A ticket
+    declaring `regression: required` needs both answers, so this is the second
+    half, scoped exactly the same way: the current VERIFY cycle only, bounded
+    by the latest machine-owned boundary, taxonomy RUN, ticket-scoped.
+
+    Reuses `oracle.regression_pair_verdict` rather than re-deciding: one
+    arithmetic, one place, so the gate and the module cannot drift.
+    """
+    from .oracle import parse_evidence, regression_evidence_verdict
+
+    if not ticket_id:
+        return False, "no ticket id provided"
+    boundary = None
+    for i in range(len(events) - 1, -1, -1):
+        ev = events[i]
+        if (
+            ev.get("ticket") == ticket_id
+            and ev.get("taxonomy") == "RUN"
+            and _is_verify_boundary(ev)
+        ):
+            boundary = i
+            break
+    if boundary is None:
+        return False, "no current-cycle VERIFY boundary"
+
+    records = []
+    for ev in events[boundary:]:
+        if ev.get("ticket") != ticket_id or ev.get("taxonomy") != "RUN":
+            continue
+        record = parse_evidence(ev.get("text", ""))
+        if record is not None:
+            records.append(record)
+    verdict = regression_evidence_verdict(records)
+    return bool(verdict.get("admissible")), f"{verdict['code']}: {verdict['reason']}"
 
 
 def structural_marker_events(
@@ -683,10 +756,15 @@ def verification_evidence(ticket_id: str, events: list[dict]) -> tuple[bool, str
         if ev.get("ticket") != ticket_id or ev.get("taxonomy") != "RUN":
             continue
         txt = ev.get("text", "")
+        if _is_regression_evidence(txt):
+            continue
         if _claims_failure(txt):
             return False, txt
-        if _MANUAL_TOKEN_RE.search(txt):
-            return True, txt
+        manual = _MANUAL_RESULT_RE.match(txt.strip())
+        if manual is not None:
+            # An explicit human verdict, either way. A recorded FAIL is
+            # negative evidence, not "keep looking for something greener".
+            return manual.group(1) == "PASS", txt
         if _PASS_TOKEN_RE.search(txt):
             if "conf: low" in txt or "conf: med" in txt:
                 return False, txt
@@ -740,11 +818,13 @@ def bulk_verification_evidence(
         if tid in boundary_seen:
             continue  # older than the newest VERIFY boundary: out of cycle
         txt = ev.get("text", "")
+        if _is_regression_evidence(txt):
+            continue
         decisive = None
         if _claims_failure(txt):
             decisive = (False, txt)
-        elif _MANUAL_TOKEN_RE.search(txt):
-            decisive = (True, txt)
+        elif _MANUAL_RESULT_RE.match(txt.strip()):
+            decisive = (_MANUAL_RESULT_RE.match(txt.strip()).group(1) == "PASS", txt)
         elif _PASS_TOKEN_RE.search(txt):
             if "conf: low" in txt or "conf: med" in txt:
                 decisive = (False, txt)

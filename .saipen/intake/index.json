@@ -7,9 +7,13 @@
     "SRC-017": {
       "linked_work": null,
       "source_sha256": "504306b4cf43ed1622e96909fec7f233bee124a718c99b42c3a530a2039c4a13"
+    },
+    "SRC-018": {
+      "linked_work": "T-1280",
+      "source_sha256": "2b22e539570b9c3aa9993d9dc215f9983b5dc5e8459e3ff234df8b3f99760cb7"
     }
   },
-  "next_id": 18,
+  "next_id": 19,
   "schema_version": 1,
   "tombstones": {
     "SRC-001": {

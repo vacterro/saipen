@@ -452,6 +452,37 @@ def _negotiate_capability(project_root: Path) -> str:
     return negotiate_capability()
 
 
+def _invalid_capability_refusal() -> dict | None:
+    """The refusal payload for a present-but-invalid live capability, or None.
+
+    Read-only by construction: it inspects the declaration and returns a dict.
+    Nothing is journaled, no project root is resolved, no canonical byte is
+    touched, so an invalid declaration cannot reach a write path at all --
+    which is the property CORE-004's acceptance measures by hashing the tree
+    before and after a mutating command.
+    """
+    from saipen_engine.capability import (
+        CAPABILITIES,
+        ENV_VAR,
+        capability_error,
+        negotiate_capability,
+    )
+
+    declared = negotiate_capability()
+    problem = capability_error(declared)
+    if problem is None:
+        return None
+    return {
+        "ok": False,
+        "code": "CAPABILITY_DENIED",
+        "detail": (
+            f"{ENV_VAR}={declared!r} is not one of {'/'.join(CAPABILITIES)}; "
+            "an invalid live capability declaration is refused before any "
+            "command runs rather than treated as a writable session"
+        ),
+    }
+
+
 def _capability_refusal(as_json: bool) -> int:
     """Emit the read-only capability refusal and return exit 1 (CORE-002).
 
@@ -2287,6 +2318,24 @@ def _audit(project_root: Path, args: list[str], as_json: bool, dry_run: bool) ->
 
     fresh = next((item for item in layers if item["state"] == audit_inbox.NEW), None)
     if fresh is None:
+        # W2-004: RESUME. Ingestion commits BOARD Work, then the Source link,
+        # then the inbox binding, and a crash between them left a layer that is
+        # already ACTIVE -- so this selection, which only ever looked for NEW,
+        # returned status-only success. `projection()` meanwhile kept routing
+        # `saipen audit ingest`, so the router prescribed a command whose
+        # implementation refused to consume the state it prescribed it for: a
+        # permanent no-progress loop, and `SOURCE-AUDIT-INBOX-01` REQUIRES an
+        # agent to follow that route. Picking up the partial state here is what
+        # makes the action consume every state the projection emits.
+        fresh = next(
+            (
+                item
+                for item in layers
+                if item["state"] == audit_inbox.ACTIVE and not item.get("linked_work")
+            ),
+            None,
+        )
+    if fresh is None:
         settled = audit_inbox.status(project_root)
         _emit(
             {
@@ -2344,24 +2393,39 @@ def _audit(project_root: Path, args: list[str], as_json: bool, dry_run: bool) ->
     # P1, never P0 merely because the file came from `audit/` -- inbox
     # precedence is a ROUTING property and must not corrupt BOARD priority.
     if not work:
+        # W2-004: a retry after the ticket committed must ADOPT that ticket,
+        # never manufacture a second one. The link is a structured
+        # `source_receipt=<SRC-NNN>` token -- the same machine-owned key=value
+        # linkage the sub-collect tickets already use for package identity --
+        # so discovery is a field lookup, not a guess from title prose.
+        work = _work_for_source_receipt(project_root, receipt)
+    if not work:
         from saipen_engine.operations import ticket_add
 
         added = ticket_add(
             project_root,
             agent,
             "P1",
-            f"Execute external audit inbox layer {fresh['rel']} ({receipt})",
+            f"Execute external audit inbox layer {fresh['rel']} ({receipt}); "
+            f"source_receipt={receipt}",
             [],
             (
                 f"every actionable clause of {receipt} is terminal with evidence; "
                 f"linked Work DONE; source closure succeeds; {fresh['rel']} consumed "
-                "by the journaled audit inbox cleanup"
+                f"by the journaled audit inbox cleanup; source_receipt={receipt}"
             ),
         )
         if not added.ok:
             _emit(added.to_dict(), as_json)
             return 1
         work = added.data.get("ticket")
+
+    # W2-004: the Source link is written for a DISCOVERED ticket exactly as for
+    # a freshly created one. It used to live inside the creation branch, so a
+    # resumed ingest adopted the right ticket and then left the receipt
+    # unlinked -- the same wedge one step further along, and the projection
+    # would have kept routing here forever.
+    if work and not captured.get("linked_work"):
         linked = audit_inbox.capture_layer(project_root, fresh["rel"], work=work)
         if not linked.get("ok"):
             _emit(linked, as_json)
@@ -2402,6 +2466,63 @@ def _audit(project_root: Path, args: list[str], as_json: bool, dry_run: bool) ->
         as_json,
     )
     return 0
+
+
+def _work_for_source_receipt(project_root: Path, receipt: str) -> str | None:
+    """The BOARD ticket already created for this Source receipt, or None.
+
+    W2-004: ingestion is three durable writes -- BOARD Work, the Source link,
+    the inbox binding -- and a crash between the first two leaves real Work the
+    receipt cannot reach. The retry has to find that exact ticket, and it has to
+    find it by MACHINE identity: matching on the title text would adopt any
+    ticket whose prose happened to mention the receipt, which is the
+    narrative-authority failure this repository already has a name for.
+
+    TWO records of one fact, and both are needed because they become durable at
+    DIFFERENT points:
+
+    * `source_receipts:` is the canonical board field, and it is written by the
+      LINKAGE step -- the write that crashes. It cannot be the discovery key on
+      the very path this function exists for, but where it is present it is the
+      authority and is checked first.
+    * `source_receipt=<SRC-NNN>` rides inside the description, so it commits
+      ATOMICALLY with the ticket itself. It is the only marker that survives a
+      crash between ticket creation and linkage.
+
+    Both are structured `key=value`/field lookups, not title-text matching:
+    adopting a ticket because its prose happened to mention the receipt is the
+    narrative-authority failure this repository already has a name for.
+
+    A non-terminal ticket is preferred, but a terminal one still counts: the
+    receipt belongs to the Work created for it whatever state that Work
+    reached, and making a second ticket because the first was closed would be
+    the duplicate dispatch this exists to prevent.
+    """
+    from saipen_engine.board import parse_board
+
+    try:
+        board = parse_board((project_root / ".saipen" / "BOARD.md").read_text(encoding="utf-8-sig"))
+    except (OSError, ValueError):
+        return None
+
+    field_matches: list[dict] = []
+    token_matches: list[dict] = []
+    token = f"source_receipt={receipt}"
+    for ticket in (board.get("tickets") or {}).values():
+        fields = ticket.get("fields") or {}
+        declared = str(fields.get("source_receipts") or "")
+        if receipt in [part.strip() for part in declared.replace(",", " ").split()]:
+            field_matches.append(ticket)
+            continue
+        blob = f"{ticket.get('description') or ''} {fields.get('verify') or ''}"
+        if token in blob:
+            token_matches.append(ticket)
+
+    for candidates in (field_matches, token_matches):
+        if candidates:
+            candidates.sort(key=lambda t: (t.get("section") == "## DONE", t.get("id") or ""))
+            return candidates[0].get("id")
+    return None
 
 
 def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
@@ -4628,6 +4749,18 @@ def main(argv: list[str] | None = None) -> int:
         # while printing after all reasoning already succeeded.
         with suppress(OSError, ValueError):
             sys.stdout.reconfigure(encoding="utf-8")
+
+    # CORE-004: an invalid live capability declaration is refused HERE, before
+    # any command runs, so the refusal cannot depend on a particular command
+    # remembering to ask. An ABSENT declaration is still the documented default
+    # writable session; a PRESENT one outside the closed set is a broken host
+    # integration, and the typos that reach this branch -- `readonly`,
+    # `read only`, `no_publish` -- are all attempts to RESTRICT the session.
+    # Failing open on them granted publish authority no one asked for.
+    _capability_problem = _invalid_capability_refusal()
+    if _capability_problem is not None:
+        _emit(_capability_problem, as_json)
+        return 2
     dry_run = "--dry-run" in before_dashdash
     project_root_opt: str | None = None
     runtime_info_opt: str | None = None

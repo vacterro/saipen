@@ -345,6 +345,40 @@ def _event_line(
     )
 
 
+def _regression_gate(docs: dict, ticket_id: str) -> str | None:
+    """Why this ticket's regression pair is inadmissible, or None (CORE-001).
+
+    Returns None -- silently, for every ticket -- unless the BOARD declares
+    `regression: required`. That declaration is the machine-owned switch: the
+    gate never guesses from a description whether something is a bug fix,
+    because a gate that reads prose is the failure this rule exists to close.
+
+    When the switch is on, the pair is decided by the same
+    `oracle.regression_pair_verdict` arithmetic the module owns, over the
+    anchored `REGRESSION-EVIDENCE` records of the CURRENT VERIFY cycle. Before
+    this existed the rule was documentation plus a helper with no production
+    caller, so a weakened oracle passed both canonical gates.
+    """
+    from .board import parse_board, regression_required
+    from .log import regression_evidence
+
+    try:
+        tickets = parse_board(docs["board"].text_norm)["tickets"]
+    except (KeyError, AttributeError, ValueError):
+        return None
+    ticket = tickets.get(ticket_id)
+    if ticket is None or not regression_required(ticket):
+        return None
+    ok, reason = regression_evidence(ticket_id, docs["_history"].events)
+    if ok:
+        return None
+    return (
+        f"ticket {ticket_id} declares `regression: required`, so a green run is "
+        f"not enough -- the SAME verifier must be red against the pre-fix "
+        f"subject and green against the post-fix one ({reason})"
+    )
+
+
 def _refuse(code: str, detail: str = "", **extra) -> Result:
     return Result(ok=False, code=code, message=detail, data=extra)
 
@@ -1333,6 +1367,14 @@ def _plan_transition(
                 phase=destination,
                 ticket=subject,
             )
+        regression_problem = _regression_gate(docs, subject)
+        if regression_problem is not None:
+            return _refuse(
+                "INCOMPLETE_TICKET",
+                f"VERIFY -> REVIEW: {regression_problem}",
+                phase=destination,
+                ticket=subject,
+            )
 
     # Machine-owned marker (hostile-regression): the transition text is ALWAYS
     # `transition to {destination}` -- a caller-supplied reason is appended
@@ -2030,6 +2072,13 @@ def _plan_finish_ticket(
         return _refuse(
             "INCOMPLETE_TICKET",
             f"finish requires explicit verification evidence for ticket {ticket_id} (got: {reason})",  # noqa: E501
+            ticket=ticket_id,
+        )
+    regression_problem = _regression_gate(docs, ticket_id)
+    if regression_problem is not None:
+        return _refuse(
+            "INCOMPLETE_TICKET",
+            f"finish: {regression_problem}",
             ticket=ticket_id,
         )
 

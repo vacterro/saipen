@@ -56,6 +56,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from . import codec
+from .applicability import ALWAYS as APPLICABILITY_ALWAYS
+from .applicability import VISUAL_SURFACE as APPLICABILITY_VISUAL_SURFACE
 from .journal import empty_delete_tree_hash, hash_bytes, hash_delete_tree, hash_tree, run_mutation
 from .lock import project_writer_lock
 from .paths import project_identity
@@ -94,6 +96,11 @@ class CrewRole:
     stage: str
     evidence_kind: str
     outbox_path: str
+    #: Which deterministic project fact decides whether this role has anything
+    #: to apply to (T-1279). A name from `applicability.PROBES`; `always` means
+    #: the role declares no condition and is never skipped. An unknown name
+    #: resolves APPLICABLE, so a typo can never silently retire a capability.
+    applicability: str = APPLICABILITY_ALWAYS
 
 
 CREW_ROLES = (
@@ -140,6 +147,11 @@ CREW_ROLES = (
         "SC-5",
         "sensor",
         f"{SUBS_REL}/saiui/kitchen/OUTBOX.md",
+        # The only built-in with a condition today. Eleven consecutive empty
+        # packages against a tree with zero visual files is not a sensor
+        # finding nothing; it is a sensor with nothing to look at, and the
+        # difference is exactly what this probe makes reportable.
+        applicability=APPLICABILITY_VISUAL_SURFACE,
     ),
     CrewRole(
         "saitranslate",

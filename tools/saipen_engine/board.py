@@ -86,8 +86,27 @@ KNOWN_FIELDS = frozenset(
         "source_receipts",
         "recurrence",
         "weak_model",
+        # CORE-001: does this ticket owe a regression PAIR, not merely a green
+        # run? `regression: required` is the machine-owned declaration that the
+        # VERIFY -> REVIEW and finish gates must additionally consume
+        # `oracle.regression_pair_verdict`. It is a FIELD on purpose: inferring
+        # "this is a bug fix" from the description would make the gate depend
+        # on prose, which is the one thing this whole rule exists to stop.
+        "regression",
     }
 )
+
+#: The only value that turns the extra gate on. Anything else is a declaration
+#: the parser keeps and the gate ignores, so a typo cannot silently arm or
+#: disarm the strictest check in the phase chain -- `regression_required`
+#: reports what it saw.
+REGRESSION_REQUIRED = "required"
+
+
+def regression_required(ticket: dict) -> bool:
+    """True when this ticket declares that it owes a regression pair."""
+    value = str(((ticket or {}).get("fields") or {}).get("regression") or "").strip().lower()
+    return value == REGRESSION_REQUIRED
 
 
 def parse_board(text: str) -> dict:
