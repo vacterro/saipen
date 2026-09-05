@@ -55,7 +55,7 @@
     "audit/6.md": {
       "binding": "exact",
       "captured_at": "2026-09-04T11:41:38Z",
-      "closed_at": null,
+      "closed_at": "2026-09-04T23:25:09Z",
       "file_sha256": "8b6783f72c34f7254a81d398c1afcc308a77cd07f60e7626df5cc0281c9e15d8",
       "generation": 1,
       "layer": 6,
@@ -63,6 +63,19 @@
       "receipt_id": "SRC-019",
       "receipt_sha256": "8b6783f72c34f7254a81d398c1afcc308a77cd07f60e7626df5cc0281c9e15d8",
       "size_bytes": 64472,
+      "state": "DELETED"
+    },
+    "audit/7.md": {
+      "binding": "exact",
+      "captured_at": "2026-09-04T23:25:17Z",
+      "closed_at": null,
+      "file_sha256": "c2bcebc0f31642d20985021d7f6076dc46a31a110b61fff54f0632fed6a00121",
+      "generation": 1,
+      "layer": 7,
+      "linked_work": "T-1291",
+      "receipt_id": "SRC-020",
+      "receipt_sha256": "c2bcebc0f31642d20985021d7f6076dc46a31a110b61fff54f0632fed6a00121",
+      "size_bytes": 24376,
       "state": "ACTIVE"
     }
   },

@@ -127,6 +127,8 @@ def _agent_for(project_root: Path) -> str:
 #   explain-next ...................................... READ_ONLY
 #   source status|show ................................ READ_ONLY
 #   source capture|req|disp|close|archive|purge ....... MUTATING
+#   knowledge status|retrieve ......................... READ_ONLY
+#   knowledge index ................................... MUTATING (projection only)
 _MUTATING_TOPLEVEL = frozenset(
     {
         "claim",
@@ -180,6 +182,7 @@ _MUTATING_SUB = frozenset(
     {"sync", "spawn", "adopt", "pause", "resume", "clean", "collect", "dispose"}
 )
 _MUTATING_IMPROVE = frozenset({"submit", "complete", "sweep", "cycle-complete", "abort", "clean"})
+_MUTATING_KNOWLEDGE = frozenset({"index"})
 _READ_ONLY_RECOVER = frozenset({"inspect"})
 
 
@@ -232,6 +235,8 @@ def _command_mutates(command: str, rest: list[str]) -> bool:
             return True
         # verify/status/sweep-queue are read-only; the rest mutate.
         return sub in _MUTATING_IMPROVE
+    if command == "knowledge":
+        return sub in _MUTATING_KNOWLEDGE
     return False
 
 
@@ -3213,6 +3218,66 @@ def _context(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
     return 0
 
 
+def _knowledge(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
+    """Optional structured KNOWLEDGE cards and their deletable projection."""
+    from saipen_engine.knowledge import retrieve, validate_knowledge, write_index
+
+    if not args or args[0] not in ("status", "index", "retrieve"):
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "knowledge needs status | index | retrieve <objective>",
+            },
+            as_json,
+        )
+        return 2
+    action, rest = args[0], args[1:]
+    if action in ("status", "index") and rest:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"knowledge {action} accepts no arguments; surplus: {' '.join(rest)}",
+            },
+            as_json,
+        )
+        return 2
+    if action == "retrieve" and not " ".join(rest).strip():
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "knowledge retrieve needs an objective",
+            },
+            as_json,
+        )
+        return 2
+    if action == "status":
+        status = validate_knowledge(project_root)
+        payload = {"ok": not status["errors"], "code": "KNOWLEDGE_STATUS", **status}
+        _emit(payload, as_json)
+        return 0 if payload["ok"] else 1
+    if action == "retrieve":
+        result = retrieve(project_root, " ".join(rest))
+        payload = {
+            "ok": not result.get("error"),
+            "code": "VALIDATION_FAILED" if result.get("error") else "KNOWLEDGE_RETRIEVED",
+            "objective": " ".join(rest),
+            **result,
+        }
+        _emit(payload, as_json)
+        return 0 if payload["ok"] else 1
+    if not dry_run and _negotiate_capability(project_root) == "read-only":
+        return _capability_refusal(as_json)
+    _ho = _ensure_handover(project_root, as_json, dry_run)
+    if _ho is not None:
+        return _ho
+    payload = write_index(project_root, dry_run=dry_run)
+    _emit(payload, as_json)
+    return 0 if payload.get("ok") else 1
+
+
 def _attempt(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
     """saipen attempt open|close (T-1148, journaled Work/Attempt lifecycle)."""
     from saipen_engine.attempt import RESULTS, RESULT_STOP_MATRIX, STOP_REASONS
@@ -4861,7 +4926,8 @@ def main(argv: list[str] | None = None) -> int:
             "[--category NAME] [--project|--global]|userperson reset "
             "[--project|--global] --confirm|sub|rebind-home "
             "<candidate-home>|context|acceptance <T-###>|attempt open|attempt close <RESULT> "
-            "<STOP>|brief|focus [text]|build <directive>|cut <target>|"
+            "<STOP>|brief|focus [text]|build <directive>|knowledge "
+            "status|index|retrieve <objective>|cut <target>|"
             "cut confirm <CUT-ID>|undo|undo confirm <CP-ID> --reason <text>) "
             "[--dry-run] "
             "[--json] [--project-root PATH] [--agent ID] [--runtime-info JSON-FILE]"
@@ -5525,6 +5591,8 @@ def main(argv: list[str] | None = None) -> int:
         return _crew(project_root, args[1:], as_json, dry_run)
     if command == "context":
         return _context(project_root, args[1:], as_json, dry_run)
+    if command == "knowledge":
+        return _knowledge(project_root, args[1:], as_json, dry_run)
     if command == "attempt":
         return _attempt(project_root, args[1:], as_json, dry_run)
     if command == "audit":

@@ -1,6 +1,16 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.254.0 -- 2026-09-05 -- Retrieve Durable Project Lessons (T-1291, SRC-020)
+
+Optional KNOWLEDGE cards carry a reusable claim, its Why, evidence, and retrieval scope. Cold decision context receives only matching active cards; existing free-form knowledge remains valid.
+
+- Add a stdlib card parser, structural validation, explicit supersession, seven-criterion promotion gate, deterministic index projection, and knowledge status/index/retrieve commands.
+- Keep manually authored INDEX.md valid and refuse to overwrite it. Reject incoherent supersession during fallback retrieval and return CLI failures for invalid cards.
+- Preserve legacy documents; dogfood three existing lessons. The generated index is 4882 bytes. Same-checkpoint unrelated cold context remains 3809 bytes / 979 repository-counted tokens. Freshness still reads the tree internally; context selection is bounded.
+- Verify 1170 unit tests (one skip), 39 focused knowledge tests, four pre-fix red/post-fix green review regressions, and the canonical validator/audit/scenario/lint gates. T-1292 tracks the missing permanent audit_checks control for the new structured validator check.
+- SRC-020 has ten verified actionable clauses. Full implementation evidence and limitations: .saipen/kitchen/t1291-review.md.
+
 ## 7.253.0 -- 2026-09-05 -- Freeze The Decision, Preserve The Evidence (T-1288, SRC-019)
 
 **This release closes all nine actionable requirements from external audit SRC-019: six repairs are verified here, while three performance findings are explicitly deduplicated to T-1283 and T-1284.**

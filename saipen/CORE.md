@@ -144,6 +144,14 @@ LOG is append-only event authority. Each line is one bounded UTF-8 event:
 
 - `.saipen/KNOWLEDGE/` stores verified, reusable project facts. Do not copy
   tasks, logs, guesses, credentials, or protocol rules there.
+- Optional `KNOWLEDGE/cards/*.md` lessons are promoted only when verified,
+  reusable, decision-bearing, not cheaply derivable, non-duplicate,
+  non-transient, and safe. Any false condition means no card; ordinary Work
+  defaults to zero and normally promotes at most one independent lesson.
+- `KNOWLEDGE/INDEX.md` is a generated, deletable projection. Retrieval loads
+  only relevant active cards; superseded cards remain forensic evidence and
+  need one explicit active replacement link. Opening memory alone logs nothing;
+  a discretionary decision materially changed by it names the source in evidence.
 - `.saipen/kitchen/` stores transient plans, digests, generated packages, and
   rollback material. It is never canonical state and may use simpler writes.
 - `.saipen/intake/` obeys `SOURCE-AUTHORITY-01`; source bodies, contracts, and

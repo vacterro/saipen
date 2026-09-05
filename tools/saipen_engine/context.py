@@ -489,6 +489,16 @@ def context_cold(
     # STATE.phase -- action and instructions can never disagree.
     phase_doc = load_for_action(routed.get("action"))
 
+    # SRC-020: KNOWLEDGE is targeted decision context, never cold-start bulk.
+    # Exact source reads prove index freshness; only selected bodies reach
+    # model context. Missing/stale projections fall back read-only. A match adds
+    # card claim/Why/evidence to the protected decision surface.
+    from .knowledge import render_retrieval, retrieve
+
+    objective = _next_ticket_section(board, next_ticket)
+    knowledge_result = retrieve(root, objective)
+    knowledge_section = render_retrieval(knowledge_result)
+
     # MANDATORY prefix (never truncated): recovery/conflict, computed next
     # action, the exact full next ticket (needs + verify included), STATE
     # essentials, routed phase doc.
@@ -519,6 +529,8 @@ def context_cold(
     xpatch_section = _xpatch_section(inputs.get("xpatch") or {})
     if xpatch_section:
         mandatory.extend(["", xpatch_section])
+    if knowledge_section:
+        mandatory.extend(["", knowledge_section])
     mandatory.extend(["", "## ROUTING", f"phase_doc: {phase_doc}"])
     fixed = "\n".join(mandatory) + "\n"
 
@@ -558,6 +570,12 @@ def context_cold(
             "tokens": _tokens(body),
             "pre_bound_bytes": pre_bound,
             "truncation_bytes": max(0, pre_bound - emitted),
+            "knowledge": {
+                "index": knowledge_result.get("index"),
+                "retrieved": len(knowledge_result.get("retrieved") or []),
+                "loaded_paths": knowledge_result.get("loaded_paths") or [],
+                "metadata_scanned": knowledge_result.get("metadata_scanned", 0),
+            },
         },
     )
 

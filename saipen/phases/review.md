@@ -26,6 +26,12 @@ Classify:
 - P0 correctness/data loss and P1 security: fix now, route to BUILD.
 - P2 reliability and P3 maintainability/tests: create follow-up tickets.
 
+Run one bounded memory-promotion check after independent evidence exists:
+did this Work reveal a verified, reusable, decision-bearing, non-cheap,
+non-duplicate, non-transient, safe lesson? Usually NO. If YES, upsert normally
+one structured card or explicitly supersede the old card; never write a card
+merely because Work finished.
+
 Verdict is `DEC: SHIP`, `SHIP after FIXES`, or `NO -- BLOCKER`.
 
 ## Retry cap

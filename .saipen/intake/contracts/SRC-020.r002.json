@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-020:R1": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Preserve the existing project-local .saipen/KNOWLEDGE authority: optional cards only; no new phase, STATE field, LOG taxonomy, database, daemon, network dependency, second state store, or mandatory full-tree cold load."
+    },
+    "SRC-020:R2": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Define a compact promotion gate requiring verified, reusable, decision-bearing, not cheaply derivable, non-duplicate, non-transient, safe knowledge; ordinary tickets default to zero and normally at most one card."
+    }
+  },
+  "derived_at": "2026-09-04T23:26:51Z",
+  "derived_from": "SRC-020",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "c2bcebc0f31642d20985021d7f6076dc46a31a110b61fff54f0632fed6a00121"
+}

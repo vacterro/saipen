@@ -4708,6 +4708,8 @@ if saiui_mission.is_file():
 
 knowledge = Path(".saipen/KNOWLEDGE")
 if knowledge.is_dir():
+    from saipen_engine.knowledge import validate_knowledge
+
     leak_re = re.compile(r"^-\s+[0-9]{2,4}[-/.][0-9]{2}[-/.][0-9]{2}.*(RUN|DEC|H):")
     leaked = False
     for f in knowledge.rglob("*"):
@@ -4723,6 +4725,16 @@ if knowledge.is_dir():
                     leaked = True
     if not leaked:
         ok("KNOWLEDGE/ clean")
+    _knowledge_validation = validate_knowledge(Path("."))
+    for _knowledge_error in _knowledge_validation["errors"]:
+        fail(f"KNOWLEDGE/ structured card/index: {_knowledge_error}")
+    if not _knowledge_validation["errors"]:
+        ok(
+            "KNOWLEDGE/ structured surface valid "
+            f"({_knowledge_validation['cards']} card(s), "
+            f"{_knowledge_validation['active']} active, "
+            f"index {_knowledge_validation['index']})"
+        )
 
 # ------------------------------------------------- USERPERSON (T-574)
 

@@ -26,7 +26,7 @@ uninstall are all local — no cloud service, no daemon, no database.
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v7.253.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | MIT
+**v7.254.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | MIT
 
 **Shortcut keys.** A shortcut is the whole message, never a prefix: `cc` continues, `sss` reports status, `ss` stops; Cyrillic twins `сс`, `ссс`, `аа`, `ее`, `еее`, `рр` work too. [Full 19-key map](saipen/CORE.md#110-command-surface). `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
@@ -61,6 +61,11 @@ alone:
 | `LOG.md` | Why did the project reach this state? (append-only event graph) |
 | `KNOWLEDGE/` | What durable project facts must survive sessions? |
 | `next_action` (in `STATE.md`) | What exact action should the next agent execute? |
+
+`STATE` is now, `BOARD` is work, `LOG` is history, and `KNOWLEDGE` is reusable
+truth. A durable lesson is optional and promoted only when verified, reusable,
+and likely to change a future decision. Cold agents consult the compact generated
+`KNOWLEDGE/INDEX.md`, then load only relevant active cards instead of memory bulk.
 
 This is a checkpoint contract, not a design suggestion: `saipen stop` and every
 ticket transition write the files in a fixed order, and the result is checked by

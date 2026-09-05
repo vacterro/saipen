@@ -72,6 +72,9 @@ recoverable move can still break all consumers of the old path.
 5. **Freshness**
 
    Confirm paths and project dependencies are current, clean and aligned.
+   Regenerate a stale `KNOWLEDGE/INDEX.md` with `saipen knowledge index` and
+   report malformed cards or orphaned supersession links. Age never authorizes
+   deleting a card; only evidence-backed explicit supersession retires it.
 
 ## Exit
 

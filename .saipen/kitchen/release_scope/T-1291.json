@@ -1,0 +1,31 @@
+{
+  "op_id": "scope-751a90a37ec441dc83385568c01e9412",
+  "paths": {
+    ".saipen/KNOWLEDGE/INDEX.md": "7284c07ce80175b6",
+    ".saipen/KNOWLEDGE/cards/narrative-authority-leakage.md": "4265f483e045ffda",
+    ".saipen/KNOWLEDGE/cards/red-control-before-green.md": "a562b20ae16443f9",
+    ".saipen/KNOWLEDGE/cards/unattributed-tree-edit.md": "d396745a1bba8758",
+    ".saipen/kitchen/t1291-review.md": "415f929f68a1d914",
+    "GUIDE.md": "49936df12ef3eed7",
+    "README.md": "6d86e1e404f5ccf7",
+    "saipen/BOOT.md": "15d06f3f64ab5c84",
+    "saipen/COMMANDS.md": "49f96072bc741ca8",
+    "saipen/CORE.md": "72cde1abd18d4362",
+    "saipen/REGISTRY.json": "4b43b787c1ed2149",
+    "saipen/phases/clean.md": "75aacc58e4b68728",
+    "saipen/phases/review.md": "4303bd1a75080cf7",
+    "saipen/phases/scout.md": "d488c5cff4694194",
+    "tools/saipen.py": "9e25dc87374c228a",
+    "tools/saipen_engine/context.py": "f82cda9726714cb5",
+    "tools/saipen_engine/knowledge.py": "67b3362f306df4cf",
+    "tools/test_knowledge.py": "a448327b49a529b5",
+    "tools/validate.py": "df6c10d8f7990f17"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-09-05T10:22:52Z",
+  "schema_version": 1,
+  "source_head": "1ab925f060b25d2cfe8ae10b1b040bb0abddcff2",
+  "source_tree_fingerprint": "git-delta-v1:71a2fea19d7076b4ff9eccde31a7aac98f224718befcd8cada05d4cfd84d0e97",
+  "ticket": "T-1291"
+}

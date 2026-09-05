@@ -70,7 +70,11 @@ Agent creates `.saipen/`. Start planning.
 
 ## Memory, not just rules
 
-`.saipen/KNOWLEDGE/` holds durable truth: architecture decisions, conventions. Survives agent death. Two formats: running `decisions.md` or numbered `ADR-001.md`. Agent reads before planning.
+`.saipen/KNOWLEDGE/` holds reusable truth; STATE is now, BOARD is work, and LOG
+is history. Legacy decisions and ADRs stay valid. Optional structured cards are
+promoted only for verified, reusable lessons that can change a future decision.
+A cold agent uses the generated `KNOWLEDGE/INDEX.md` to load the smallest relevant
+active set; `saipen knowledge index` rebuilds that deletable projection.
 
 Kitchen (`.saipen/kitchen/`) = scratchpad. Half-finished files. Agent dies? Next one picks up from kitchen.
 

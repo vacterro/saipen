@@ -29,6 +29,9 @@ human ownership map lives in `INDEX.md`.
    - Skill injection present: load its SPEC and the smallest matching skill.
    - Active Work names a receipt: load the exact source, current Contract and
      coverage (`SOURCE-AUTHORITY-01`, `SOURCES.md`).
+   - Current objective matches project knowledge: use `.saipen/KNOWLEDGE/INDEX.md`
+     when fresh, then load only the smallest relevant active card/file set;
+     missing/stale INDEX falls back to targeted discovery and is never authority.
    - USERPERSON is advertised by the effective context: load that effective
      profile before discretionary choices; otherwise create and warn nothing.
    - Runtime identity/capabilities are needed: query the runtime projection and
