@@ -75,6 +75,7 @@ CORE = "saipen/CORE.md"
 IMPROVE = "saipen/IMPROVE.md"
 INDEX = "saipen/INDEX.md"
 CREW_BACKLOG = ".saipen/KNOWLEDGE/crew-v8-backlog.md"
+KNOWLEDGE_CARD = ".saipen/KNOWLEDGE/cards/red-control-before-green.md"
 STATE_SCHEMA = "extensions/schemas/state.schema.json"
 IMPROVE_REPORT = ".saipen/improve/imp-key-20260808/seat01/saipen_improve_PROJ.md"
 IMPROVE_MANIFEST = ".saipen/improve/imp-key-20260808/MANIFEST.md"
@@ -82,6 +83,26 @@ PHASE_IMPROVE = "saipen/phases/improve.md"
 TAG_QUERY = ("git", "tag", "-l", "v*")
 AUDIT_TAGS_GIT_SHIM = "SAIPEN_AUDIT_TAGS_GIT_SHIM"
 AUDIT_TAGS_MODE = "SAIPEN_AUDIT_TAGS_MODE"
+
+#: Fail sites `tools/validate.py` declares, recorded here so a NEW validator
+#: check cannot arrive uncovered in silence. `CASES` below is hand-maintained
+#: and nothing bound it to the validator: the KNOWLEDGE structured-surface
+#: check landed in v7.254.0 and the closing sweep line read the same total
+#: before and after, so the one number a checkpoint quotes as proof the control
+#: ledger is intact did not move when a check arrived with no control (T-1292).
+#: Raise this in the same change that adds the control, or that records why the
+#: new check has none.
+VALIDATOR_FAIL_SITES = 324
+
+#: The honest half. Counting fail sites binds VOLUME, not identity: it cannot
+#: say WHICH check is uncovered, and a change that adds one check while
+#: deleting another leaves the count intact and passes. It is a tripwire that
+#: forces a decision when the surface grows, not a coverage proof.
+CHECK_INVENTORY_LIMITATION = (
+    "the count binds how many fail sites tools/validate.py declares, never "
+    "which of them has a control -- a change that adds one check and removes "
+    "another keeps the total and is NOT detected here"
+)
 
 
 def freshen_synthetic_outboxes(tree: Path) -> None:
@@ -864,6 +885,74 @@ def duplicate_tag_query(path: Path) -> str | None:
     )
     lines.insert(index, duplicate)
     path.write_text("".join(lines), encoding="utf-8", newline="\n")
+    return None
+
+
+def count_fail_sites(source: str) -> int:
+    """How many `fail(...)` sites the canonical validator declares."""
+    return sum(
+        1
+        for node in ast.walk(ast.parse(source))
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "fail"
+    )
+
+
+def add_fail_site(source: str) -> str:
+    """Append one synthetic fail site, as the red control for the tripwire."""
+    if not source.endswith("\n"):
+        source += "\n"
+    return source + 'if False:\n    fail("synthetic red-control fail site")\n'
+
+
+def check_inventory_probe(root: Path, destination: Path) -> str | None:
+    """Detect a validator check arriving with no control in this file.
+
+    `CASES` is hand-maintained and nothing bound it to the validator, so the
+    KNOWLEDGE structured-surface check landed with the sweep total unchanged --
+    the closing line read 230 of 230 both before and after a check arrived
+    uncovered (T-1292). This is the tripwire: the validator's fail surface is
+    recorded, and growing it without a decision here is a failure rather than
+    a silent one.
+
+    Bounded on purpose, and the bound is stated in
+    `CHECK_INVENTORY_LIMITATION`: a count binds volume, never identity.
+    """
+    validator = root / "tools" / "validate.py"
+    try:
+        source = validator.read_text(encoding="utf-8-sig")
+    except OSError as exc:
+        return f"cannot read the canonical validator: {exc}"
+    try:
+        observed = count_fail_sites(source)
+    except SyntaxError as exc:
+        return f"canonical validator does not parse: {exc}"
+    if observed != VALIDATOR_FAIL_SITES:
+        direction = "grew to" if observed > VALIDATOR_FAIL_SITES else "shrank to"
+        return (
+            f"tools/validate.py {direction} {observed} fail site(s) against the "
+            f"recorded {VALIDATOR_FAIL_SITES}. A new check needs a CASE in this "
+            f"file, or a recorded reason it has none; a removed check needs its "
+            f"CASE removed. Update VALIDATOR_FAIL_SITES in the same change"
+        )
+
+    # The control. A counter that cannot notice a new fail site would report
+    # this baseline green forever, which is precisely the disarmed-control
+    # shape the tripwire exists to catch.
+    probe = destination / "check-inventory-probe"
+    probe.mkdir(parents=True, exist_ok=True)
+    mutated = probe / "validate.py"
+    mutated.write_text(add_fail_site(source), encoding="utf-8", newline="\n")
+    try:
+        red = count_fail_sites(mutated.read_text(encoding="utf-8"))
+    except SyntaxError as exc:
+        return f"red control did not parse: {exc}"
+    finally:
+        shutil.rmtree(probe, ignore_errors=True)
+    if red != observed + 1:
+        return (
+            f"an added fail site moved the count to {red}; expected "
+            f"{observed + 1}, so the tripwire cannot see a new check"
+        )
     return None
 
 
@@ -2995,6 +3084,29 @@ CASES: list[tuple[str, str, object, str]] = [
     ),
     ("sub transition_from dropped", SUB, drop_line("transition_from"), "ninth required field"),
     ("sub updated not UTC", SUB, sub_line("updated", "2026-07-30 10:00"), "must be ISO-8601 UTC"),
+    # --- KNOWLEDGE structured surface ------------------------------------
+    # T-1292. The check landed in v7.254.0 with a hand transcript and no
+    # permanent control, so the sweep total read the same before and after it
+    # arrived. Its two failure classes are independent: a card the parser
+    # refuses, and a projection that no longer matches the cards it claims to
+    # summarize. One control each, because a fix restoring only the parser
+    # would leave the staleness half unproven.
+    (
+        "a KNOWLEDGE card declares a kind outside the closed set",
+        KNOWLEDGE_CARD,
+        replace("kind: convention", "kind: notakind"),
+        "invalid kind",
+    ),
+    (
+        "a changed KNOWLEDGE card leaves the index projection stale",
+        KNOWLEDGE_CARD,
+        # Appended rather than anchored: the claim's wording is prose that will
+        # be edited, and an anchor inside it would turn this control into a
+        # silent no-op the day someone rewrites the card (T-532). Any content
+        # change stales the digest, which is the condition under test.
+        lambda t: t.rstrip("\n") + " Restated by the index-staleness control.\n",
+        "INDEX.md is stale",
+    ),
     # --- home-repo drift -------------------------------------------------
     (
         "README badge behind VERSION",
@@ -3941,6 +4053,17 @@ def main() -> int:
     print(
         "PASS: release-ledger clean/new-tag/new-changelog/stale-baseline controls behave distinctly"
     )
+
+    inventory_error = check_inventory_probe(pristine, tmp)
+    if inventory_error:
+        print(f"FAIL: validator check inventory -- {inventory_error}")
+        shutil.rmtree(tmp, ignore_errors=True)
+        return 1
+    print(
+        f"PASS: tools/validate.py declares the recorded {VALIDATOR_FAIL_SITES} "
+        f"fail site(s) and an added one is detected"
+    )
+    print(f"NOTE: known limitation -- {CHECK_INVENTORY_LIMITATION}")
 
     owner_error = warn_ownership_probe(pristine, tmp)
     if owner_error:

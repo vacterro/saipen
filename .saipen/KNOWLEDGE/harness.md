@@ -30,6 +30,29 @@ for a pass that never linted.
 `collect:<sub>`). `tests/validate.sh` / `tests/validate.ps1` are the portable
 floor — a deliberate SUBSET of `validate.py`, for hosts without Python.
 
+## What the red-control line does NOT prove (T-1292)
+
+`audit_checks.py` CASES is hand-maintained. Line 12's law — every validator
+check goes red on its own condition — is therefore only as complete as that
+list, and the list is not derived from the validator. A check landed in
+v7.254.0 with no control and the closing sweep line read the same total before
+and after it arrived, so the number a checkpoint quotes as proof the control
+ledger is intact did not move.
+
+The partial binding is `check_inventory_probe`: `VALIDATOR_FAIL_SITES` in
+`tools/audit_checks.py` records how many `fail(...)` sites `tools/validate.py`
+declares, and the sweep fails when that count moves. Growing the validator now
+forces a decision — add the CASE, or record why the new check has none — and
+raising the constant belongs in the same change.
+
+**Deliberate limitation, deliberately not closed here.** The count binds
+VOLUME, never IDENTITY: it cannot say which check has a control, and a change
+that adds one check while deleting another keeps the total and passes. Closing
+that needs stable per-check identity in the validator (named checks, not
+`fail(...)` call sites), which is separate Work. Until then, treat a green
+inventory line as "the surface did not silently grow", not as "every check is
+covered".
+
 ## Layout facts the gates depend on
 
 - `tools/` is a `copy_trees` entry in `saipen/MANIFEST.json` and the injectors

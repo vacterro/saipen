@@ -1,6 +1,15 @@
 {
-  "next_id": 5,
+  "next_id": 16,
   "operations": {
+    "audapack 4d363b58-69eb-5a09-9b1b-5c6facb80956": {
+      "created_at": "2026-09-05T11:23:05Z",
+      "layer": 15,
+      "producer": "audapack",
+      "producer_item_id": "4d363b58-69eb-5a09-9b1b-5c6facb80956",
+      "producer_operation_id": "4d363b58-69eb-5a09-9b1b-5c6facb80956",
+      "sha256": "d1baa4e874f811c055641f23b9894cea180fb8e9122a8c5e54c6a31c0ae330a3",
+      "state": "COMMITTED"
+    },
     "manual trajectory-delta-2026-08-31": {
       "created_at": "2026-08-31T12:32:09Z",
       "layer": 4,

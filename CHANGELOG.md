@@ -1,6 +1,16 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.255.0 -- 2026-09-05 -- A New Check Cannot Arrive Uncovered (T-1292)
+
+The validator check shipped in 7.254.0 was proven by a hand transcript that did not survive the session, and the red-control sweep read the same total before and after it landed. That total is what a checkpoint quotes as proof the control ledger is intact, so a check arriving with no control moved no number.
+
+- Add two permanent red controls for the KNOWLEDGE structured surface, one per independent failure class: a card whose `kind` is outside the closed set, and a changed card that leaves the index projection stale. The sweep total grows from 230 to 232.
+- Bind the sweep to the validator: `check_inventory_probe` records how many fail sites `tools/validate.py` declares and fails when that surface grows or shrinks, naming the remedy. The probe carries its own red control, so a counter that could not notice a new check cannot report green.
+- State the bound rather than implying coverage. The count binds volume, never identity: a change that adds one check while deleting another keeps the total and passes. The limitation prints as a NOTE on every run and is recorded in `KNOWLEDGE/harness.md` beside the red-control law.
+- Verification: 232 of 232 controls still go red on their own condition, 1,188 unit tests (one skip), 18 focused tests holding `validate_knowledge` fixed across each mutation's red and green halves, plus the canonical validator/scenario/floor/parity/order/tags/lint gates.
+- T-1293 tracks a defect found during review: the sanctioned safety-valve resume writes a `next_action` the audit-route check rejects while an audit layer is active.
+
 ## 7.254.0 -- 2026-09-05 -- Retrieve Durable Project Lessons (T-1291, SRC-020)
 
 Optional KNOWLEDGE cards carry a reusable claim, its Why, evidence, and retrieval scope. Cold decision context receives only matching active cards; existing free-form knowledge remains valid.

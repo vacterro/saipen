@@ -1,0 +1,15 @@
+{
+  "op_id": "scope-bdc718a80eb649b2b4abe2f1d8e8cb9d",
+  "paths": {
+    ".saipen/KNOWLEDGE/harness.md": "05e787d2b75a4ef3",
+    "tools/audit_checks.py": "0cb4fca578b38118",
+    "tools/test_check_inventory.py": "9ccd59fe09650945"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-09-05T18:40:22Z",
+  "schema_version": 1,
+  "source_head": "77c82c3948e0d73c6b8e94b5804ad4c522b04c4f",
+  "source_tree_fingerprint": "git-delta-v1:6ee46c4513736f216837d30c33f9fb935851291917294730667d0a2d8ccc4d5b",
+  "ticket": "T-1292"
+}
