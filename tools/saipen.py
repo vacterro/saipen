@@ -3925,6 +3925,15 @@ def _emit(payload: dict, as_json: bool) -> None:
         print(f"Conformance: {payload['conformance']}")
     if payload.get("staleness"):
         print(f"Staleness: {payload['staleness']}")
+    automation = payload.get("automation")
+    if isinstance(automation, dict) and automation.get("disposition") == "COMPLETE":
+        # SRC-023 (audit/10.md) §7: display-only human line. Machine truth
+        # lives in the JSON automation block; consumers must never parse
+        # this line -- it carries no disposition authority and prints only
+        # when the mechanical eight-condition gate already passed.
+        epoch = str(automation.get("audit_epoch") or "")
+        fingerprint = str(automation.get("source_fingerprint") or "")
+        print(f"SAIPEN_CLOSURE_COMPLETE audit={epoch[:24]} source={fingerprint[:24]}")
 
 
 def _canonical_proof_levels() -> list[str]:

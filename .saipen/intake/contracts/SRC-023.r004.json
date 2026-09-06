@@ -1,0 +1,29 @@
+{
+  "clauses": {
+    "SRC-023:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Extend saipen status --json with an authoritative read-only automation object: schema_version 1, closed dispositions (CONTINUE|COMPLETE|WAIT_USER|WAIT_EXTERNAL|BLOCKED|INVALID), next_command=cc only for CONTINUE and null otherwise, reason_code, reason, audit_quiescent, audit_epoch, convergence_current, closure_complete, source_fingerprint, completed_at; zero project bytes written; unknown/ambiguous state never becomes CONTINUE or COMPLETE --verification v7.256.0 shipped the block; live status --json verified; test_automation_block NextCommandLaw + ClosedVocabulary hold the law"
+    },
+    "SRC-023:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Canonical audit quiescence: no NEW/ACTIVE/CLOSED_PENDING_DELETE/invalid layer, no residue, no numbered transport file remaining, no uncaptured generation at a previously used path, no live audit-linked work; historical DELETED records allowed; derive a deterministic cheap audit_epoch that changes when a new generation arrives and is stable for the same canonical state --verification audit_quiescent + audit_epoch implemented in saipen_engine/automation.py over audit_inbox classify/status incl. MISSING_AFTER_CAPTURE orphans and residue; AuditEpoch test proves determinism and drift"
+    },
+    "SRC-023:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Post-empty convergence binding: COMPLETE only after the audit transport is canonically quiescent AND one fresh full convergence pass completed after that audit-empty boundary, bound to the current audit_epoch; a new audit generation during or after convergence invalidates the prior closure proof; reuse the existing convergence authority; no new persistent STATE flag --verification closure_gate C3-C6 implement the boundary chronology over the last AUDIT_INBOX_CLOSED event vs the newest convergence I receipt, fail-closed on same-minute ambiguity; race rule proven both directions in test_automation_block.ClosureGate"
+    },
+    "SRC-023:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Disposition derivation from existing canonical routing/ownership; COMPLETE only at the full closure bar; WAIT_USER for human authority (manual verification, destructive authorization, first publish, user brake); WAIT_EXTERNAL for non-user external dependency; BLOCKED for valid state with no safe autonomous progress; INVALID for corruption or unknown/unsafe machine evidence; not-complete is never mapped to CONTINUE blindly --verification _routing_disposition maps every routed verdict; WaitOwnership + ClosedVocabulary tests cover WAIT categories, foreign-live, read-only, refusals"
+    }
+  },
+  "derived_at": "2026-09-06T16:48:57Z",
+  "derived_from": "SRC-023",
+  "interpretation_revision": 4,
+  "schema_version": 1,
+  "source_sha256": "a9b3965ee0679f92d5eea164ee89a27ac3d46bdbef298d6ffcd38c2c07102a45"
+}

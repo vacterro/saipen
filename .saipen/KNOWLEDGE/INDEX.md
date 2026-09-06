@@ -1,12 +1,13 @@
 <!-- SAIPEN KNOWLEDGE INDEX v1; generated projection; not authority -->
-source-digest: sha256:5eb0a91f98addf454d50ce864f0c2314881046dd9e13a17161fdae109af4bc55
-cards: 3
+source-digest: sha256:8ef147691f257a61a756403a8443ea17d999559cdd96315e71e6bed960694652
+cards: 4
 legacy: 39
 
 # Knowledge index
 
 Active cards are retrieval candidates. Superseded cards remain forensic history.
 
+- cards/automation-block-is-the-only-machine-truth.md | convention | scope: saipen status --json, automation block, external drivers, Run to Closure | trigger: deciding whether an external driver may continue, stop, or trust a completion signal | active
 - cards/narrative-authority-leakage.md | trap | scope: validators, authority, free-form prose, structural markers | trigger: adding a validator or gate that derives authority from human prose | active
 - cards/red-control-before-green.md | convention | scope: tests, gates, red controls, regression oracle | trigger: adding a check or claiming a defect is fixed | active
 - cards/unattributed-tree-edit.md | trap | scope: working tree, shipped surface, release scope, attribution | trigger: finding a modified shipped file no active Work authorized | active

@@ -414,6 +414,269 @@ class ClosureGate(AutomationFixture):
         )
         self.assertEqual(block["disposition"], automation.COMPLETE)
 
+    def test_done_phase_and_empty_board_alone_are_insufficient(self) -> None:
+        # SRC-023 (audit/10.md) §9 #12/#13: neither DONE phase nor an empty
+        # board alone proves closure -- the convergence gate decides.
+        state, _ = _parsed(_state(phase="DONE"))
+        block = self.block(
+            routed=self._idle_route(),
+            state=state,
+            audit_status=self.audit(),
+            convergence=None,
+        )
+        self.assertEqual(block["disposition"], CONTINUE)
+        self.assertFalse(block["closure_complete"])
+        self.assertFalse(block["convergence_current"])
+
+    def test_empty_physical_folder_with_unsettled_intake_is_not_complete(self) -> None:
+        # SRC-023 (audit/10.md) §9 #5: a physically empty audit/ plus an
+        # unsettled canonical intake (a live ACTIVE source receipt whose
+        # transport file vanished) is exactly a MISSING_AFTER_CAPTURE
+        # orphan -- quiescence stays false although the folder looks empty.
+        block = self.block(
+            routed=self._idle_route(),
+            audit_status={
+                "ok": True,
+                "clean": True,
+                "pending": [],
+                "closed_pending_delete": [],
+                "invalid": [],
+                "orphans": [
+                    {
+                        "rel": "audit/3.md",
+                        "state": "MISSING_AFTER_CAPTURE",
+                        "sha256": "a" * 64,
+                    }
+                ],
+                "residue": [],
+            },
+        )
+        self.assertEqual(block["disposition"], CONTINUE)
+        self.assertFalse(block["audit_quiescent"])
+        self.assertFalse(block["closure_complete"])
+
+    def test_corrupted_route_evidence_is_invalid_fail_closed(self) -> None:
+        # SRC-023 (audit/10.md) §9 #16: structural corruption -> INVALID,
+        # hard stop, never CONTINUE/COMPLETE.
+        block = self.block(
+            routed={"ok": False, "action": "saipen status", "reason": "state-malformed"},
+        )
+        self.assertEqual(block["disposition"], automation.INVALID)
+        self.assertIsNone(block["next_command"])
+
+    def test_same_epoch_and_source_give_stable_machine_output(self) -> None:
+        # SRC-023 (audit/10.md) §9 #22: identical canonical state -> identical
+        # block bytes apart from nothing (epoch + fields all deterministic).
+        first = self.block(routed=self._idle_route(), audit_status=self.audit())
+        second = self.block(routed=self._idle_route(), audit_status=self.audit())
+        self.assertEqual(first, second)
+
+    def test_manual_semantics_unchanged_outside_rtc(self) -> None:
+        # SRC-023 (audit/10.md) §9 #17/#18: the block is additive. The
+        # router's own verdict for the same state is untouched, and the
+        # pre-authorized soft safety-valve WAIT still routes exactly as the
+        # router always routed it (CONTINUE carrier, valve reauthorization
+        # unchanged).
+        state, _ = _parsed(_state(phase="SHIP", next_action="WAIT: safety valve -- resume with cc"))
+        routed = route_next(
+            _state(phase="SHIP", next_action="WAIT: safety valve -- resume with cc"),
+            BOARD_EMPTY,
+            audit_inbox=None,
+        )
+        self.assertEqual(routed["reason"], "wait")
+        self.assertEqual(routed["action"], "WAIT: safety valve -- resume with cc")
+        block = self.block(
+            routed=routed,
+            state=state,
+            board=parse_board(BOARD_EMPTY),
+            audit_status=self.audit(),
+        )
+        self.assertEqual(block["disposition"], CONTINUE)
+        self.assertEqual(block["next_command"], "cc")
+
+    def test_status_json_writes_zero_project_bytes(self) -> None:
+        # SRC-023 (audit/10.md) §9 #20: `saipen status --json` mutates nothing.
+        import hashlib
+        import subprocess
+
+        def tree_digest() -> dict[str, str]:
+            out: dict[str, str] = {}
+            for path in sorted(self.root.rglob("*")):
+                if path.is_file() and ".git" not in path.parts:
+                    out[str(path)] = hashlib.sha256(path.read_bytes()).hexdigest()
+            return out
+
+        before = tree_digest()
+        subprocess.run(
+            [sys.executable, str(ROOT / "tools" / "saipen.py"), "status", "--json"],
+            cwd=self.root,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(tree_digest(), before)
+
+
+# ---------------------------------------------------------------------------
+# R8: acceptance fixture -- three-layer Run-to-Closure sequence
+# ---------------------------------------------------------------------------
+
+
+class AcceptanceFixture(AutomationFixture):
+    """The disposable three-layer project audit/10.md §10 demands.
+
+    Drive the REAL engine modules (audit_inbox transport state, the closure
+    gate, the router) through the full sequence: work -> first quiescence ->
+    post-boundary convergence -> COMPLETE -> a new generation invalidates ->
+    drains again -> COMPLETE returns.
+    """
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.audit_dir = self.root / "audit"
+        self.audit_dir.mkdir(exist_ok=True)
+        (self.audit_dir / ".gitkeep").write_text("", encoding="utf-8")
+
+    def _layer(self, number: int, body: str = "# external audit\n") -> None:
+        (self.audit_dir / f"{number}.md").write_text(body, encoding="utf-8")
+
+    def _consume_event(self, rel: str, minute: int) -> dict:
+        return {
+            "event": 40 + minute,
+            "date": f"06.09.26 {minute:02d}:00",
+            "taxonomy": "RUN",
+            "text": f"AUDIT_INBOX_CLOSED {rel} sha256=x SRC-900 T-900 coverage=1/1",
+        }
+
+    def _verdict_for(self, hour: int, minute: int = 0) -> dict:
+        import copy
+
+        verdict = copy.deepcopy(CONVERGENCE_OK)
+        for stage in verdict["stages"]:
+            if stage["stage"] == "I":
+                stage["created_at"] = f"2026-09-06T{hour:02d}:{minute:02d}:00Z"
+        return verdict
+
+    def close_source(self, receipt: str) -> None:
+        """Drive one receipt to a PROVEN closure through the real contract."""
+        from saipen_engine import intake
+
+        self.assertTrue(
+            intake.add_requirement(self.root, receipt, rid="R001", text="do the thing")["ok"]
+        )
+        self.assertTrue(
+            intake.set_disposition(
+                self.root,
+                receipt,
+                "R001",
+                "VERIFIED",
+                evidence="E-001",
+                verification="unittest:PASS",
+            )["ok"]
+        )
+        closed = intake.close_receipt(self.root, receipt)
+        self.assertTrue(closed["ok"], closed)
+
+    def _transport_rows(self, layers: list[tuple[int, str]], *, drained: bool = False) -> dict:
+        """Canonical transport rows as audit_inbox.status reports them.
+
+        With `drained=True` the layer has already been consumed: its binding
+        record sits at the CLOSED_PENDING_DELETE -> DELETED edge of the
+        transport's own lifecycle, so the folder is empty but the canonical
+        intake still names the path. The rows are built through the real
+        classify() over the real binding, never hand-typed.
+        """
+        from saipen_engine import audit_inbox
+
+        for number, body in layers:
+            self._layer(number, body)
+        if drained:
+            rel = f"audit/{layers[0][0]}.md"
+            captured = audit_inbox.capture_layer(self.root, rel)
+            self.assertTrue(captured["ok"], captured)
+            self.close_source(captured["receipt"])
+            consumed = audit_inbox.consume_layer(self.root, rel, agent="probe")
+            self.assertTrue(consumed["ok"], consumed)
+            self.audit_inbox_rel = rel
+        out = audit_inbox.status(self.root)
+        for number, _body in layers:
+            if not drained:
+                (self.audit_dir / f"{number}.md").unlink()
+        return out
+
+    def test_full_run_to_closure_sequence(self) -> None:
+        idle = route_next(_state(), BOARD_EMPTY, audit_inbox=None)
+        self.assertEqual(idle["reason"], "maintain")
+
+        # 1. While audit generations and their work remain -> CONTINUE.
+        work_rows = self._transport_rows([(1, "a\n"), (2, "b\n")])
+        block = self.block(
+            routed=idle, audit_status=work_rows, convergence=self._verdict_for(20)
+        )
+        self.assertEqual(block["disposition"], CONTINUE)
+        self.assertFalse(block["closure_complete"])
+
+        # 2. The transport first drains (the third layer consumed before the
+        #    convergence pass): quiescent, but the convergence ran BEFORE the
+        #    last boundary -> still not COMPLETE.
+        drained_rows = self._transport_rows([(3, "c\n")], drained=True)
+        early = self.block(
+            routed=idle,
+            audit_status=drained_rows,
+            history_events=[self._consume_event("audit/3.md", 10)],
+            convergence=self._verdict_for(9),
+        )
+        self.assertEqual(early["disposition"], CONTINUE)
+        self.assertFalse(early["closure_complete"])
+
+        # 3. A fresh convergence happens after that boundary -> COMPLETE.
+        closed = self.block(
+            routed=idle,
+            audit_status=drained_rows,
+            history_events=[self._consume_event("audit/3.md", 10)],
+            convergence=self._verdict_for(12),
+        )
+        self.assertEqual(closed["disposition"], automation.COMPLETE)
+        self.assertIsNone(closed["next_command"])
+        self.assertEqual(closed["completed_at"], "2026-09-06T12:00:00Z")
+        closure_epoch = closed["audit_epoch"]
+
+        # 4. Adding audit/4.md invalidates the prior closure.
+        self._layer(4, "d\n")
+        from saipen_engine.audit_inbox import status
+
+        raced = self.block(
+            routed=idle, audit_status=status(self.root), convergence=self._verdict_for(12)
+        )
+        self.assertEqual(raced["disposition"], CONTINUE)
+        self.assertFalse(raced["closure_complete"])
+        self.assertNotEqual(raced["audit_epoch"], closure_epoch)
+        (self.audit_dir / "4.md").unlink()
+
+        # 5. After audit/4.md drains (consumed before the fresh pass), the
+        #    old pass still predates the newer boundary -> CONTINUE, and
+        #    only a pass after the new boundary restores COMPLETE.
+        late_drained = self._transport_rows([(4, "d\n")], drained=True)
+        stale_events = [
+            self._consume_event("audit/3.md", 10),
+            self._consume_event("audit/4.md", 14),
+        ]
+        stale_pass = self.block(
+            routed=idle,
+            audit_status=late_drained,
+            history_events=stale_events,
+            convergence=self._verdict_for(12),
+        )
+        self.assertEqual(stale_pass["disposition"], CONTINUE)
+        self.assertFalse(stale_pass["closure_complete"])
+        fresh = self.block(
+            routed=idle,
+            audit_status=late_drained,
+            history_events=stale_events,
+            convergence=self._verdict_for(16),
+        )
+        self.assertEqual(fresh["disposition"], automation.COMPLETE)
+
 
 # ---------------------------------------------------------------------------
 # audit epoch determinism

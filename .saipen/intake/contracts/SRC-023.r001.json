@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-023:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Extend saipen status --json with an authoritative read-only automation object: schema_version 1, closed dispositions (CONTINUE|COMPLETE|WAIT_USER|WAIT_EXTERNAL|BLOCKED|INVALID), next_command=cc only for CONTINUE and null otherwise, reason_code, reason, audit_quiescent, audit_epoch, convergence_current, closure_complete, source_fingerprint, completed_at; zero project bytes written; unknown/ambiguous state never becomes CONTINUE or COMPLETE --verification v7.256.0 shipped the block; live status --json verified; test_automation_block NextCommandLaw + ClosedVocabulary hold the law"
+    }
+  },
+  "derived_at": "2026-09-06T16:48:45Z",
+  "derived_from": "SRC-023",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "a9b3965ee0679f92d5eea164ee89a27ac3d46bdbef298d6ffcd38c2c07102a45"
+}

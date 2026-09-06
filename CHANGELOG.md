@@ -1,6 +1,16 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.257.0 -- 2026-09-06 -- The Run-to-Closure Producer Wave Closes Itself (T-1296, SRC-023)
+
+The producer-side implementation order (audit/10.md) was largely satisfied by the v7.256.0 automation contract; this release adds what the audit explicitly demanded on top of it.
+
+- Render the display-only `SAIPEN_CLOSURE_COMPLETE` line (with compact `audit=`/`source=` evidence) only when the mechanical disposition is COMPLETE; the JSON automation block stays byte-clean and remains the only machine truth.
+- Add the missing deterministic test cases: an empty physical folder with an unsettled canonical intake (MISSING_AFTER_CAPTURE orphan) is not quiescent, DONE phase and empty board alone are insufficient, structural corruption is INVALID fail-closed, identical epoch + source yield byte-stable output, manual semantics outside Run to Closure are unchanged, and a real `saipen status --json` subprocess run writes zero project bytes.
+- Add the §10 acceptance fixture: a disposable three-layer project driven through the real audit transport proves work → CONTINUE, first quiescence with a pre-boundary pass → not COMPLETE, a post-boundary fresh pass → COMPLETE, a new `audit/4.md` invalidates the prior closure and drifts the epoch, and after it drains a stale pass stays CONTINUE until a fresh pass restores COMPLETE.
+- Document the contract in the smallest owners: the `automation.py` module docstring and one indexed KNOWLEDGE card naming that only the automation block is machine truth.
+- Verification: 1,217 unit tests (one skip), 29 automation tests, ruff clean on the tracked surface, validator 0 FAIL / 27 known warnings.
+
 ## 7.256.1 -- 2026-09-06 -- Cross-Repository Wave 1 Closed By Its Own Deliverable (T-1295, SRC-022)
 
 The external execution-order audit (audit/9.md) directed SAIPEN to implement the authoritative `saipen status --json` automation contract, prove audit quiescence and post-empty convergence, and ship tests. Wave 1 of that order is exactly the v7.256.0 deliverable: the contract shipped there with its 22 red controls, and the wave-2 consumer (SAITULS) is excluded from this repository's writable scope by the audit's own ordering.
