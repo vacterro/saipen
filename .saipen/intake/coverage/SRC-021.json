@@ -1,0 +1,77 @@
+{
+  "requirements": {
+    "SRC-021:R1": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-5798 build checkpoint",
+      "text": "Ownership stays split and unduplicated: SAIPEN owns semantic truth (whether useful autonomous work remains, whether the project is genuinely complete, whether continuation requires a human or external event, and whether current convergence is valid for the latest audit generation), while SAIPATCH owns only transport automation (observing the OpenCode completed/idle boundary, querying SAIPEN machine status, enqueueing at most one synthetic cc, stopping at completion or any unsafe boundary). Neither side reimplements the other's logic.",
+      "verification": "unittest tools.test_automation_block: R1 ownership invariant held structurally -- saipen_engine/automation.py only classifies evidence saipen status already reads (router verdict, audit_inbox status, convergence receipts, source identity); it enqueues nothing, writes nothing, and carries no transport logic (no OpenCode boundary watching, no cc enqueue, no send bookkeeping), so SAIPATCH owns transport and neither side duplicates the other",
+      "work": "T-1294"
+    },
+    "SRC-021:R2": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-5798 build checkpoint",
+      "text": "The only machine surface SAIPATCH consumes is read-only 'saipen status --json', which must expose an 'automation' block carrying schema_version, disposition (CONTINUE|COMPLETE|WAIT_USER|WAIT_EXTERNAL|BLOCKED|INVALID), next_command, reason_code, reason, audit_quiescent, audit_epoch, convergence_current, closure_complete, source_fingerprint and completed_at.",
+      "verification": "saipen status --json live-run renders the automation block with exactly the contracted fields: schema_version=1, disposition (closed set CONTINUE|COMPLETE|WAIT_USER|WAIT_EXTERNAL|BLOCKED|INVALID emitted, verified per-route in tools/test_automation_block.py), next_command, reason_code, reason, audit_quiescent, audit_epoch, convergence_current, closure_complete, source_fingerprint, completed_at; command is read-only (pure projection over parsed evidence, no journal write, no canonical byte touched)",
+      "work": "T-1294"
+    },
+    "SRC-021:R3": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-5798 build checkpoint",
+      "text": "next_command is 'cc' only for disposition CONTINUE and null for every other disposition; unknown schema version or unknown disposition fails closed; assistant prose is never machine authority; the human-readable SAIPEN_CLOSURE_COMPLETE marker may be printed but must never be parsed as truth.",
+      "verification": "test_automation_block.NextCommandLaw proves next_command==cc exactly for CONTINUE and None for every other disposition across the closed set; route refusals and projection failures yield INVALID with next_command null (fail-closed); the block is machine-derived from routed evidence -- assistant prose never enters it, and the human SAIPEN_CLOSURE_COMPLETE marker is not referenced or parsed anywhere in saipen_engine/automation.py",
+      "work": "T-1294"
+    },
+    "SRC-021:R4": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-5798 build checkpoint",
+      "text": "Terminal behaviour per disposition: CONTINUE enqueues exactly one synthetic cc; COMPLETE, WAIT_USER, WAIT_EXTERNAL and BLOCKED stop or pause and enqueue nothing; INVALID is a hard stop that enqueues nothing.",
+      "verification": "_routing_disposition in saipen_engine/automation.py maps every routed outcome to exactly one contract disposition; automation_block emits next_command cc only when disposition==CONTINUE and null otherwise, which is the terminal behaviour table SAIPATCH enqueues against (CONTINUE -> one synthetic cc; COMPLETE/WAIT_USER/WAIT_EXTERNAL/BLOCKED/INVALID -> stop, enqueue nothing); proven per-class in test_automation_block (WaitOwnership, ClosedVocabulary)",
+      "work": "T-1294"
+    },
+    "SRC-021:R5": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-5798 build checkpoint",
+      "text": "COMPLETE is valid only when all eight closure conditions are mechanically true: audit transport canonically quiescent; no actionable audit-linked work remaining; one full current convergence pass completed after the latest audit-empty boundary; that convergence bound to the current audit_epoch; no new audit generation arrived afterwards; no qualifying source mutation invalidated convergence; no workable TODO/DOING/follow-up remaining; no human, external or blocking boundary remaining. A physically empty audit/ directory is not sufficient.",
+      "verification": "closure_gate (saipen_engine/automation.py) computes all eight conditions mechanically: C1 audit quiescence via audit_inbox clean + no invalid layer + no closed_pending_delete + no MISSING_AFTER_CAPTURE orphan; C2 no actionable audit-linked work; C3 convergence pass strictly after the last AUDIT_INBOX_CLOSED boundary (minute-precision stamps compared conservatively); C4 bound to current audit_epoch (quiescence + post-boundary chronology); C5 no new audit generation after the pass; C6 no source mutation invalidated convergence (convergence_verdict identity-bound chain); C7 no workable TODO/DOING/follow-up (convergence_closure_problems); C8 no human/external/blocking boundary (no binding WAIT). COMPLETE only when all eight true; test_automation_block.ClosureGate proves residue, live layer, missing convergence, workable work and a binding WAIT each veto COMPLETE, and A physically empty audit/ is NOT sufficient (residue test)",
+      "work": "T-1294"
+    },
+    "SRC-021:R6": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-5798 build checkpoint",
+      "text": "Race rule: if a new audit generation arrives while post-empty convergence is running or after it completed, the old closure attempt is invalid, the new audit must be consumed, a new post-empty convergence is required, and COMPLETE may not refer to the older epoch.",
+      "verification": "race rule implemented as chronology over durable evidence in closure_gate: the last journaled AUDIT_INBOX_CLOSED event instant is the audit-empty boundary, the newest convergence I receipt created_at is the closure instant, and a consume event at/after the closure instant vetoes C3+C5 so COMPLETE cannot refer to the older epoch; same-minute stamp ambiguity fails closed. Red control: test_automation_block.ClosureGate.test_race_rule_consume_after_convergence_vetoes_closure (consume after I -> not COMPLETE, C3/C5 False) and test_race_rule_consume_before_convergence_allows_closure (boundary before pass -> COMPLETE)",
+      "work": "T-1294"
+    },
+    "SRC-021:R7": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-5798 build checkpoint",
+      "text": "Run to Closure may pre-authorize repeated ordinary cc continuation across soft SAIPEN safety-valve boundaries only. It never pre-authorizes first publish, destructive confirmation, manual verification, secrets or input owned by the user, or policy and product decisions owned by the user.",
+      "verification": "_routing_disposition maps WAIT categories: safety valve stays CONTINUE with next_command cc (the only soft boundary ordinary cc pre-authorizes, per its own uniform resume key), init stays mechanical CONTINUE; user brake, manual-verify, destructive-op and first-publish are WAIT_USER; the blocked category is BLOCKED. Proven in test_automation_block.WaitOwnership (user_brake, manual_verify, safety_valve, blocked_wait cases)",
+      "work": "T-1294"
+    },
+    "SRC-021:R8": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "E-5798 build checkpoint",
+      "text": "Transport rule: at most one RTC-generated cc may be queued or in flight per OpenCode session, and duplicate completion events must not duplicate sends.",
+      "verification": "transport rule is SAIPATCH-owned by R1's ownership split: at most one RTC cc queued/in-flight per session and duplicate completion events not duplicating sends are enqueue-side obligations, and SAIPEN emits no enqueue path at all (automation.py carries no send/queue bookkeeping; next_command is a stateless classification result). Nothing in this repository can violate or enforce it, so the clause is out of scope for SAIPEN-side work; the contract surface it consumes (disposition+next_command) is implemented and tested under R2-R4",
+      "work": "T-1294"
+    }
+  },
+  "schema_version": 1
+}

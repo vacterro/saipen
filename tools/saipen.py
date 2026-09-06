@@ -963,6 +963,51 @@ def _status(project_root: Path, as_json: bool) -> int:
         )
         return 1
 
+    # SRC-021 R2: the read-only Run-to-Closure automation block. Classified
+    # from the SAME evidence this projection already holds (parsed state and
+    # board, the route verdict, history events, the audit inbox status), so
+    # it can never contradict the fields beside it. R3: its next_command is
+    # machine authority, never the human-printed marker or any prose.
+    try:
+        from saipen_engine.automation import automation_block, failed_automation_block
+        from saipen_engine.audit_inbox import status as _audit_inbox_status
+
+        try:
+            _audit_status = _audit_inbox_status(project_root)
+        except Exception:
+            _audit_status = None
+        try:
+            from saipen_engine.convergence import convergence_verdict
+
+            _convergence = convergence_verdict(project_root).as_dict()
+        except Exception:
+            _convergence = None
+        _source_identity = None
+        try:
+            sys.path.insert(0, str(Path(__file__).resolve().parent))
+            from freshness import compute_source_identity as _csi_auto
+
+            _source_identity = _csi_auto(project_root)
+        except Exception:
+            _source_identity = None
+        payload["automation"] = automation_block(
+            project_root,
+            state=state,
+            board=board,
+            routed=routed,
+            history_events=history_events,
+            audit_status=_audit_status,
+            convergence=_convergence,
+            source_identity=_source_identity,
+            agent=resolved_agent,
+        )
+    except Exception as exc:
+        # R3 fail-closed: a projection that cannot be assembled is INVALID,
+        # never a healthy-looking block or a missing field.
+        payload["automation"] = failed_automation_block(
+            "automation-projection-failed", f"{type(exc).__name__}: {exc}"
+        )
+
     _emit(payload, as_json)
     return 0
 

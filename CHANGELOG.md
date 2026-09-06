@@ -1,6 +1,15 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.256.0 -- 2026-09-06 -- The Machine Surface Run-to-Closure Consumes (T-1294, SRC-021)
+
+External transport automation (SAIPATCH) had no machine answer to "should I continue or stop": the only signals were human prose and a router verdict inside `saipen next`, so an automation loop could only guess. The SAIPEN ↔ SAIPATCH Run to Closure contract makes SAIPEN own that semantic truth and publishes it as a read-only projection.
+
+- Add `saipen_engine/automation.py`: the `automation` block on `saipen status --json` carries the closed disposition vocabulary (CONTINUE | COMPLETE | WAIT_USER | WAIT_EXTERNAL | BLOCKED | INVALID) mapped from the same router verdict status already computes, `next_command` = `cc` exactly for CONTINUE and null otherwise, audit quiescence and a deterministic audit epoch from the transport's own classification, convergence currency from the canonical convergence verdict, and `completed_at` from the newest closure receipt when the gate passes.
+- Implement the eight-condition COMPLETE gate (R5) with the race rule (R6): a consume event at or after the closure instant vetoes COMPLETE, same-minute stamp ambiguity fails closed, and a physically empty `audit/` is not sufficient (residue and missing-after-capture orphans veto quiescence).
+- Enforce the pre-authorization limits (R7): a safety-valve WAIT keeps ordinary `cc` legal; user brake, manual-verify, destructive-op and first-publish are WAIT_USER; foreign-live progress is WAIT_EXTERNAL; read-only sessions and unreadable states are BLOCKED or INVALID with `next_command: null` — every projection failure fails closed, never into a healthy-looking block.
+- Verification: 1,210 unit tests (two skips, 22 new), ruff clean on the tracked surface, validator 0 FAIL / 29 known warnings, live `status --json` block verified CONTINUE+`cc` while the audit layer is still active.
+
 ## 7.255.0 -- 2026-09-05 -- A New Check Cannot Arrive Uncovered (T-1292)
 
 The validator check shipped in 7.254.0 was proven by a hand transcript that did not survive the session, and the red-control sweep read the same total before and after it landed. That total is what a checkpoint quotes as proof the control ledger is intact, so a check arriving with no control moved no number.
