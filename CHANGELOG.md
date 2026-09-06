@@ -1,6 +1,14 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 7.256.1 -- 2026-09-06 -- Cross-Repository Wave 1 Closed By Its Own Deliverable (T-1295, SRC-022)
+
+The external execution-order audit (audit/9.md) directed SAIPEN to implement the authoritative `saipen status --json` automation contract, prove audit quiescence and post-empty convergence, and ship tests. Wave 1 of that order is exactly the v7.256.0 deliverable: the contract shipped there with its 22 red controls, and the wave-2 consumer (SAITULS) is excluded from this repository's writable scope by the audit's own ordering.
+
+- Capture audit/9.md as SRC-022, normalize its Wave-1 clause, and disposition it VERIFIED against the shipped v7.256.0 evidence (SRC-021 R1-R8 lineage), with the live CLI surface re-verified.
+- No code change: the actionable content was already terminal; this release closes the audit layer's source receipt and consumes the transport file through the journaled inbox cleanup.
+- Verification: SRC-022 coverage 1/1 terminal, `test_automation_block` 22/22 re-executed, validator 0 FAIL / 27 known warnings.
+
 ## 7.256.0 -- 2026-09-06 -- The Machine Surface Run-to-Closure Consumes (T-1294, SRC-021)
 
 External transport automation (SAIPATCH) had no machine answer to "should I continue or stop": the only signals were human prose and a router verdict inside `saipen next`, so an automation loop could only guess. The SAIPEN ↔ SAIPATCH Run to Closure contract makes SAIPEN own that semantic truth and publishes it as a read-only projection.

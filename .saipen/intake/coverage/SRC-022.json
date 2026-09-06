@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-022:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "ship v7.256.0 RELEASED (content 8d488fe4, closure e52d0d1e, tag v7.256.0 pushed); T-1294 DONE; saipen status --json exposes the automation block live; SRC-021 R1-R8 all terminal with evidence; test_automation_block 22/22; validate 0 FAIL",
+      "text": "SAIPEN-side work: Wave 1 only -- the authoritative saipen status --json automation contract is implemented, tested and shipped (v7.256.0); audit quiescence and post-empty convergence are exposed mechanically; SAITULS is out of scope and must not be touched; Wave 2 belongs to SAITULS reading the already-updated SAIPEN repository --verification v7.256.0 shipped: automation.py + 22 red controls live, contract fields R2-R7 of SRC-021 terminal; the audit's Wave-1 goal is literally the completed T-1294 work",
+      "verification": "SRC-021 executed and shipped the exact Wave-1 deliverable this audit names (implement authoritative saipen status --json automation contract, prove audit quiescence + post-empty convergence machinery, ship tests and exact contract); live re-verification: status --json automation block present, audit_quiescent from audit_inbox clean+orphans, convergence_current from convergence_verdict, eight-condition closure gate mechanical; SAITULS untouched this session",
+      "work": "T-1295"
+    }
+  },
+  "schema_version": 1
+}
