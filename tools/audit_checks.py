@@ -2934,7 +2934,7 @@ CASES: list[tuple[str, str, object, str]] = [
     (
         "SKILL metadata drops a shortcut trigger",
         "saipen/SKILL.md",
-        replace("cc, ccc, ss, sss, dd", "cc, ccc, ss, dd"),
+        replace("cc, ccc, st, sss, dd", "cc, ccc, st, dd"),
         "metadata misses registry shortcut trigger",
     ),
     (

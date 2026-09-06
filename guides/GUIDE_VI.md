@@ -8,7 +8,7 @@ SAIPEN là sổ ghi nhớ trong thư mục .saipen/ cho các tác nhân AI.
 
 AI agents have one fatal flaw: they forget. Close the window and everything they learned about your project is gone — what you were building, what failed, which idea died on Tuesday. Every morning you brief a brilliant stranger from scratch. SAIPEN is the fix: a persistent notebook in the .saipen/ folder. The agent reads STATE and BOARD on startup, sees exactly where it left off, and gets back to work without a single repeated word.
 
-**Phím tắt:** `cc` tiếp tục bối cảnh dự án đến hội tụ (tiếp tục mục tiêu đang chạy nếu có), `sss` báo trạng thái mà không đụng vào mã và `ss` lưu điểm kiểm tra rồi dừng. [Xem bản đồ đầy đủ 19 phím](../saipen/RFC.md#110-command-surface). Các cặp song sinh Cyrillic cũng hoạt động: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
+**Phím tắt:** `cc` tiếp tục bối cảnh dự án đến hội tụ (tiếp tục mục tiêu đang chạy nếu có), `sss` báo trạng thái mà không đụng vào mã và `st` lưu điểm kiểm tra rồi dừng. [Xem bản đồ đầy đủ 19 phím](../saipen/RFC.md#110-command-surface). Các cặp song sinh Cyrillic cũng hoạt động: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
 ## Khởi đầu nhanh
 

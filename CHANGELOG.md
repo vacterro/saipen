@@ -1,6 +1,10 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 8.0.0 -- 2026-09-06 -- Distinct STOP Shortcut (T-1297, SRC-024)
+
+STOP shortcut changes from `ss` to `st` because repeated-letter `ss`/`sss` caused STOP/STATUS ambiguity for agents. `sss` remains STATUS; old `ss` is retired fail-closed and performs no action. Long-form commands are unchanged.
+
 ## 7.257.0 -- 2026-09-06 -- The Run-to-Closure Producer Wave Closes Itself (T-1296, SRC-023)
 
 The producer-side implementation order (audit/10.md) was largely satisfied by the v7.256.0 automation contract; this release adds what the audit explicitly demanded on top of it.

@@ -8,7 +8,7 @@ SAIPEN on muistilehtiö .saipen/-kansiossa tekoälyagenteille.
 
 AI agents have one fatal flaw: they forget. Close the window and everything they learned about your project is gone — what you were building, what failed, which idea died on Tuesday. Every morning you brief a brilliant stranger from scratch. SAIPEN is the fix: a persistent notebook in the .saipen/ folder. The agent reads STATE and BOARD on startup, sees exactly where it left off, and gets back to work without a single repeated word.
 
-**Pikanäppäimet:** `cc` jatkaa projektin kontekstia konvergenssiin (jatkaa käynnissä olevaa tavoitetta, jos sellainen on asetettu), `sss` näyttää tilan koskematta koodiin ja `ss` tallentaa tarkistuspisteen ja pysähtyy. [Katso täydellinen 19 näppäimen kartta](../saipen/RFC.md#110-command-surface). Kyrilliset kaksoset toimivat myös: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
+**Pikanäppäimet:** `cc` jatkaa projektin kontekstia konvergenssiin (jatkaa käynnissä olevaa tavoitetta, jos sellainen on asetettu), `sss` näyttää tilan koskematta koodiin ja `st` tallentaa tarkistuspisteen ja pysähtyy. [Katso täydellinen 19 näppäimen kartta](../saipen/RFC.md#110-command-surface). Kyrilliset kaksoset toimivat myös: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
 ## Pika-aloitus
 

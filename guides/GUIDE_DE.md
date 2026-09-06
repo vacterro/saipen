@@ -8,7 +8,7 @@ Hör zu, Neuling. Das Problem ist einfach: Deine AI-Agenten haben das Gedächtni
 
 **SAIPEN** ist einfach ein Notizbuch im Ordner `.saipen/` direkt in deinem Projekt.
 
-**Schnellzugriff:** `cc` führt den Projektkontext bis zur Konvergenz fort (setzt ein laufendes Ziel fort, falls eines gesetzt ist), `sss` meldet Status ohne Code anzufassen und `ss` speichert einen Checkpoint und stoppt. [Siehe die komplette 19-Tasten-Karte](../saipen/RFC.md#110-command-surface). Kyrillische Zwillinge funktionieren auch: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
+**Schnellzugriff:** `cc` führt den Projektkontext bis zur Konvergenz fort (setzt ein laufendes Ziel fort, falls eines gesetzt ist), `sss` meldet Status ohne Code anzufassen und `st` speichert einen Checkpoint und stoppt. [Siehe die komplette 19-Tasten-Karte](../saipen/RFC.md#110-command-surface). Kyrillische Zwillinge funktionieren auch: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
 ## Schnellstart
 

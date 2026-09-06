@@ -8,7 +8,7 @@ Dengar, pemula. Masalahnya sederhana: agen AI Anda memiliki ingatan ikan mas.
 
 **SAIPEN** adalah buku catatan di folder `.saipen/` di proyek Anda.
 
-**Tombol cepat:** `cc` melanjutkan konteks proyek hingga konvergensi (melanjutkan tujuan aktif jika ada yang ditetapkan), `sss` melaporkan status tanpa menyentuh kode, dan `ss` menyimpan titik periksa lalu berhenti. [Lihat peta 19 tombol lengkap](../saipen/RFC.md#110-command-surface). Kembar Sirilik juga berfungsi: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
+**Tombol cepat:** `cc` melanjutkan konteks proyek hingga konvergensi (melanjutkan tujuan aktif jika ada yang ditetapkan), `sss` melaporkan status tanpa menyentuh kode, dan `st` menyimpan titik periksa lalu berhenti. [Lihat peta 19 tombol lengkap](../saipen/RFC.md#110-command-surface). Kembar Sirilik juga berfungsi: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
 ## Mulai Cepat
 

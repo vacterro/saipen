@@ -73,7 +73,7 @@ DECLARED_CYRILLIC_TWINS = {
 EXPECTED_ROUTES = {
     "cc": "saipen continue",
     "ccc": "saipen continue",
-    "ss": "saipen stop",
+    "st": "saipen stop",
     "sss": "saipen status",
     "aa": "saipen markhunt",
     "ee": "saipen prepare saitranslate",
@@ -91,6 +91,11 @@ EXPECTED_ROUTES = {
     "vv": "saipen build",
     "zz": "saipen undo",
 }
+
+# `ss` is RETIRED (SRC-024 / audit/11.md). It is not an active row in the
+# canonical table: any token that still resolves to it must fail closed with
+# SHORTCUT_RETIRED, never reach the stop/status implementations.
+RETIRED_TOKENS = ("ss",)
 
 
 def table():
@@ -113,7 +118,10 @@ class CommandRoutingTests(unittest.TestCase):
         self.assertIn("qq", t)
         self.assertIn("gg", t)
         self.assertIn("hh", t)
-        self.assertIn("ss", t)
+        # `st` is the active STOP shortcut (SRC-024); `ss` is retired and
+        # therefore absent from the canonical table.
+        self.assertIn("st", t)
+        self.assertNotIn("ss", t)
         self.assertIn("sss", t)
         self.assertIn("dd", t)
         self.assertIn("aa", t)
@@ -489,7 +497,12 @@ class CliShortcutRoutingTests(unittest.TestCase):
         self.assertEqual(CM.normalize_shortcut_token("ссс"), "ccc")
         self.assertEqual(CM.resolve_shortcut("ссс", table=t), "ccc")
         self.assertEqual(t["sss"], "saipen status")
-        self.assertEqual(t["ss"], "saipen stop")
+        self.assertEqual(t["st"], "saipen stop")
+        # `ss` is retired: it MUST NOT be an active row.
+        self.assertNotIn("ss", t)
+        # The Cyrillic twin of `cc` never lands on `st` (no `s` fold target).
+        self.assertNotEqual(CM.resolve_shortcut("сс", table=t), "st")
+        self.assertNotEqual(CM.resolve_shortcut("сс", table=t), "ss")
 
     def test_undeclared_lookalikes_fail_closed_in_resolver(self):
         t = table()
@@ -546,15 +559,25 @@ class CliShortcutRoutingTests(unittest.TestCase):
         self.assertNotIn("CONVERGE_SET", str(stable_sss))
 
     def test_cli_ss_refuses_naming_stop_and_differs_from_cc(self):
-        # Wave1 closure: ss is now deterministic STOP, not NOT_EXECUTABLE.
-        rc_ss, stable_ss, _, _ = self._cli("ss")
+        # SRC-024 (audit/11.md): `ss` is RETIRED. The public boundary must
+        # refuse it as `SHORTCUT_RETIRED`, name the two live tokens, and
+        # leave both the stop and the status implementations untouched.
+        # `cc` still maps to the convergent continue path.
+        rc_ss, stable_ss, raw_ss, _ = self._cli("ss")
         rc_cc, stable_cc, _, _ = self._cli("cc")
-        self.assertEqual(stable_ss["code"], "STOP")
+        self.assertEqual(stable_ss["code"], "SHORTCUT_RETIRED")
+        self.assertIn('"route": "ss"', raw_ss)
+        self.assertIn("st", stable_ss.get("detail", ""))
+        self.assertIn("sss", stable_ss.get("detail", ""))
+        self.assertEqual(stable_ss.get("use_instead"), {"stop": "st", "status": "sss"})
         # The incident invariant at the boundary: сс (continue path) can
-        # never collapse into ss's STOP.
+        # never collapse into ss's STOP and the retired refusal must not
+        # share a code with the continue path either.
         self.assertNotEqual((rc_ss, stable_ss), (rc_cc, stable_cc))
         self.assertNotEqual(stable_ss.get("code"), stable_cc.get("code"))
         self.assertEqual(stable_cc.get("code"), "CONVERGE_SET")
+        # Process exit must signal a non-success refusal, not a healthy 0.
+        self.assertEqual(rc_ss, 1)
 
     def test_cli_sss_is_real_status_surface(self):
         rc_sss, stable_sss, _, err_sss = self._cli("sss")
@@ -564,11 +587,23 @@ class CliShortcutRoutingTests(unittest.TestCase):
         self.assertEqual(err_sss, err_status)
 
     def test_cli_declared_shortcut_never_answers_unknown_command(self):
-        tokens = list(EXPECTED_ROUTES) + list(DECLARED_CYRILLIC_TWINS)
+        tokens = list(EXPECTED_ROUTES) + list(DECLARED_CYRILLIC_TWINS) + list(RETIRED_TOKENS)
         for token in tokens:
             with self.subTest(token=token):
                 _rc, _stable, raw, _err = self._cli(token)
                 self.assertNotIn("unknown command", raw, token)
+
+    def test_cli_st_is_stop_and_matches_saipen_stop(self):
+        # SRC-024: `st` enters the EXACT same implementation path as the
+        # long-form `stop`; `ss` no longer reaches it. Pairwise route
+        # equality and a derived route-key assertion catch a drift where
+        # the dispatch tuple reads `stop, st` but only one branch mutates.
+        rc_st, stable_st, raw_st, _ = self._cli("st")
+        rc_stop, stable_stop, _raw_stop, _ = self._cli("stop")
+        self.assertEqual(stable_st.get("code"), stable_stop.get("code"))
+        self.assertEqual(rc_st, rc_stop)
+        self.assertIn("st", raw_st)
+        self.assertNotIn("SHORTCUT_RETIRED", raw_st)
 
     def test_cli_and_resolver_cannot_disagree(self):
         """Agreement property: whatever the resolver declares, the CLI routes
@@ -582,6 +617,13 @@ class CliShortcutRoutingTests(unittest.TestCase):
                 _rc, _stable, raw, _err = self._cli(token)
                 self.assertNotIn("unknown command", raw, token)
                 self.assertIn(route_key, raw, token)
+        # `ss` is retired: the resolver declines it AND the CLI names a
+        # specific retirement reason rather than "unknown command".
+        for token in RETIRED_TOKENS:
+            self.assertNotIn(token, t, token)
+            _rc, _stable, raw, _err = self._cli(token)
+            self.assertNotIn("unknown command", raw, token)
+            self.assertIn("SHORTCUT_RETIRED", raw, token)
         for token in ("нн", "пп"):
             self.assertIsNone(CM.resolve_shortcut(token, table=t), token)
             _rc, _stable, raw, _err = self._cli(token)
@@ -900,6 +942,296 @@ class CommandSemanticsTests(unittest.TestCase):
         self.assertNotEqual(payload_cc.get("code"), payload_sc.get("code"))
         self.assertNotIn("CREW_PLAN", str(payload_cc.get("code")))
         self.assertIn("CREW_PLAN", str(payload_sc.get("code")))
+
+
+class RetiredShortcutMigrationTests(unittest.TestCase):
+    """SRC-024 (audit/11.md): the ss -> st shortcut migration.
+
+    The audit's mandatory test matrix, in one place, against a REAL
+    throwaway project and the REAL public adapter:
+
+      A. st -> STOP (checkpoint semantics, correct route, success)
+      B. long stop unchanged
+      C. sss -> STATUS (read-only, no checkpoint, no mutation)
+      D. long status unchanged
+      E. ss -> non-success retired diagnostic, zero mutation, names st/sss
+      F. ss can never reach the stop implementation
+      G. ss can never reach the status implementation
+      H. st surplus args refused per the stop contract
+      I. sss surplus args retain refusal semantics
+      J. Cyrillic сс stays CONTINUE
+      K. registry contains st -> stop, sss -> status, no active ss
+      N. mutation difference: sss/ss leave bytes identical, st checkpoints
+      red control: reintroducing ss -> stop or sss -> stop fails a test
+    """
+
+    class _HandlerFired(Exception):
+        """Raised by the handler spies -- reaching an implementation is the red."""
+
+    def setUp(self):
+        _sandbox_user_config(self)
+
+    def _make(self, name):
+        td = tempfile.mkdtemp(prefix="saipen-retired-")
+        self.addCleanup(lambda: __import__("shutil").rmtree(td, ignore_errors=True))
+        proj = Path(td) / name
+        (proj / ".saipen").mkdir(parents=True)
+        import datetime
+
+        now = datetime.datetime.now(datetime.timezone.utc).strftime(
+            "%Y-%m-%dT%H:%M:%SZ"
+        )
+        (proj / ".saipen" / "STATE.md").write_text(
+            "---\n"
+            "phase: BUILD\n"
+            "task: T-010\n"
+            'next_action: "PHASE BUILD T-010"\n'
+            "blocker: none\n"
+            "transition_from: SCOUT\n"
+            "saipen_version: 7\n"
+            "agent: probe\n"
+            "mode: full\n"
+            f"updated: {now}\n"
+            "---\n",
+            encoding="utf-8",
+        )
+        (proj / ".saipen" / "BOARD.md").write_text(
+            "# Board\n"
+            "## DOING\n"
+            "- [/] T-010 feature | owner: probe | claim_time: 2020-01-01T00:00:00Z\n"
+            "## TODO\n## DONE\n## BLOCKED\n",
+            encoding="utf-8",
+        )
+        (proj / ".saipen" / "LOG.md").write_text(
+            "# Log\n\n- 01.01.20 00:00 [E-001] [T-010] [agent: probe] RUN: build\n",
+            encoding="utf-8",
+        )
+        return proj
+
+    def _cli(self, proj, token, dry_run=True):
+        tokens = token if isinstance(token, list) else [token]
+        proc = subprocess.run(
+            [
+                sys.executable,
+                str(SAIPEN_PY),
+                "--project-root",
+                str(proj),
+                "--json",
+                *(["--dry-run"] if dry_run else []),
+                *tokens,
+            ],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            env={**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"},
+            timeout=120,
+        )
+        try:
+            payload = json.loads(proc.stdout) if proc.stdout.strip() else {}
+        except ValueError:
+            payload = {"_unparseable_stdout": proc.stdout}
+        return proc.returncode, payload, proc.stdout, proc.stderr
+
+    def _tree_digest(self, proj):
+        import hashlib
+
+        out = {}
+        for path in sorted(Path(proj).rglob("*")):
+            if path.is_file():
+                out[str(path)] = hashlib.sha256(path.read_bytes()).hexdigest()
+        return out
+
+    # K. registry ---------------------------------------------------------
+    def test_registry_holds_st_not_ss(self):
+        t = table()
+        self.assertEqual(t["st"], "saipen stop")
+        self.assertEqual(t["sss"], "saipen status")
+        self.assertNotIn("ss", t)
+
+    # E/F/G. retired tombstone -------------------------------------------
+    def test_retired_ss_is_zero_mutation_refusal(self):
+        proj = self._make("retired")
+        before = self._tree_digest(proj)
+        rc, payload, raw, err = self._cli(proj, "ss", dry_run=False)
+        self.assertEqual(
+            self._cli(proj, "ss", dry_run=False), (rc, payload, raw, err)
+        )
+        after = self._tree_digest(proj)
+        self.assertEqual(before, after)
+        self.assertNotEqual(rc, 0)
+        self.assertEqual(payload["code"], "SHORTCUT_RETIRED")
+        self.assertIn("st", payload["detail"])
+        self.assertIn("sss", payload["detail"])
+        # F/G: neither the stop nor the status code path is reachable.
+        self.assertNotIn("STOP", str(payload.get("code")))
+        self.assertNotIn("AUDIT", str(payload))
+
+    def test_st_surplus_is_refused_like_stop_surplus(self):
+        proj = self._make("surplus")
+        rc_st, p_st, _, _ = self._cli(proj, ["st", "extra"])
+        rc_stop, p_stop, _, _ = self._cli(proj, ["stop", "extra"])
+        self.assertEqual(rc_st, rc_stop)
+        self.assertEqual(p_st["code"], "VALIDATION_FAILED")
+        self.assertIn("no arguments", p_st["detail"])
+        self.assertEqual(p_st["detail"], p_stop["detail"])
+
+    def test_sss_surplus_retains_refusal(self):
+        proj = self._make("sss-surplus")
+        rc, payload, _, _ = self._cli(proj, ["sss", "extra"])
+        self.assertEqual(rc, 2)
+        self.assertEqual(payload["code"], "VALIDATION_FAILED")
+
+    # N. mutation difference --------------------------------------------
+    def test_mutation_difference_sss_ss_zero_st_checkpoints(self):
+        proj = self._make("mutation")
+        base = self._tree_digest(proj)
+        _rc, _p, _raw, _err = self._cli(proj, "sss", dry_run=False)
+        self.assertEqual(self._tree_digest(proj), base)
+        _rc, _p, _raw, _err = self._cli(proj, "ss", dry_run=False)
+        self.assertEqual(self._tree_digest(proj), base)
+        # st in a writable session performs the real stop checkpoint.
+        rc, payload, _, _ = self._cli(proj, "st", dry_run=False)
+        self.assertEqual(payload.get("code"), "STOP")
+        self.assertNotEqual(rc, 2)
+        self.assertNotEqual(self._tree_digest(proj), base)
+
+    # J. Cyrillic safety --------------------------------------------------
+    def test_cyrillic_cc_stays_continue_never_stop_or_retired(self):
+        t = table()
+        self.assertEqual(CM.resolve_shortcut("сс", table=t), "cc")
+        self.assertNotEqual(CM.resolve_shortcut("сс", table=t), "st")
+        self.assertNotEqual(CM.resolve_shortcut("сс", table=t), "ss")
+
+    # red control ---------------------------------------------------------
+    def test_red_control_reintroduced_ss_or_sss_to_stop_fails(self):
+        # Mutate an exact copy of the real registry and keep the green
+        # contract check unchanged. Both unsafe contracts must fail it.
+        original = (PROTOCOL_DIR / "REGISTRY.json").read_text(encoding="utf-8")
+        with tempfile.TemporaryDirectory(prefix="saipen-hostile-registry-") as td:
+            protocol = Path(td)
+            for token in ("ss", "sss"):
+                with self.subTest(token=token):
+                    registry = json.loads(original)
+                    registry["shortcuts"][token] = "saipen stop"
+                    (protocol / "REGISTRY.json").write_text(
+                        json.dumps(registry), encoding="utf-8"
+                    )
+                    binding = mock.patch.dict(table.__globals__, PROTOCOL_DIR=protocol)
+                    with binding, self.assertRaises(AssertionError):
+                        self.test_registry_holds_st_not_ss()
+
+    # agent-confusion regression ------------------------------------------
+    def test_stop_and_status_shortcuts_are_not_repeated_letter_siblings(self):
+        # STOP and STATUS must not be distinguished only by repeated-letter
+        # count: one must not be a strict repetition of the other.
+        stop = table()["st"]
+        status = table()["sss"]
+        self.assertEqual(stop, "saipen stop")
+        self.assertEqual(status, "saipen status")
+        # structurally distinct tokens: neither is a prefix-repetition of
+        # the other (ss/ss/sss was; st/sss is not).
+        self.assertFalse("sss".startswith("st") or "st".startswith("sss"))
+
+    # F/G. instrumented handler reach -------------------------------------
+    def _cli_inprocess(self, argv):
+        """Run the REAL adapter's main() in-process so handler spies can
+        observe which implementation actually executes."""
+        import saipen as cli
+
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = cli.main(argv)
+        try:
+            payload = json.loads(buf.getvalue()) if buf.getvalue().strip() else {}
+        except ValueError:
+            payload = {"_unparseable_stdout": buf.getvalue()}
+        return rc, payload
+
+    def _handler_spies(self):
+        """Patch BOTH underlying implementations so a single invocation
+        through either one detonates. Used by the F/G instrument and its
+        red control: the patch makes the test fail if ss reaches the stop
+        or the status handler, independent of any output-string check."""
+        import saipen as cli
+        from saipen_engine import operations as ops
+
+        fired = []
+
+        def _spy(name):
+            def _detonate(*_a, **_k):
+                fired.append(name)
+                raise self._HandlerFired(name)
+
+            return _detonate
+
+        patches = [
+            mock.patch.object(
+                ops, "stop_checkpoint", side_effect=_spy("stop_checkpoint")
+            ),
+            mock.patch.object(cli, "_status", side_effect=_spy("_status")),
+        ]
+        return fired, patches
+
+    def test_instrumented_ss_reaches_neither_stop_nor_status_implementation(self):
+        # SRC-024 F/G, instrumented: the retired token must die at its
+        # tombstone. Patching the two underlying handlers makes this test
+        # fail loudly the moment either implementation is invoked, so a
+        # future `command in ("stop", "ss", "st")` dispatch tuple or a
+        # resolver row resurrecting ss is caught even if the tombstone
+        # output itself stays byte-identical.
+        proj = self._make("instrumented-ss")
+        fired, patches = self._handler_spies()
+        for p in patches:
+            p.start()
+        try:
+            rc, payload = self._cli_inprocess(
+                [
+                    "--project-root",
+                    str(proj),
+                    "--json",
+                    "ss",
+                ]
+            )
+        finally:
+            for p in patches:
+                p.stop()
+        self.assertEqual(fired, [], f"retired ss invoked: {fired}")
+        self.assertEqual(payload.get("code"), "SHORTCUT_RETIRED")
+        self.assertEqual(rc, 1)
+
+    def test_instrumented_red_control_ss_to_stop_fails_the_instrument(self):
+        # Red control for the F/G instrument itself: the runtime the dispatch
+        # tuple consumes is `resolve_shortcut(command, ...)` (tools/saipen.py:5059)
+        # -- the same registry/runtime seam an ss -> stop reintroduction
+        # attacks. A bounded mutation at that seam that maps ss onto the stop
+        # implementation MUST make the stop spy fire, proving the instrument
+        # can go red on exactly the regression the audit demands, rather than
+        # asserting against a locally constructed dictionary.
+        proj = self._make("instrumented-red")
+        fired, patches = self._handler_spies()
+        for p in patches:
+            p.start()
+        try:
+            import saipen as cli
+
+            mutation = mock.patch.object(cli, "resolve_shortcut", return_value="stop")
+            with mutation, self.assertRaises(self._HandlerFired) as ctx:
+                # The detonation IS the red: reaching the stop handler means
+                # the migration was reintroduced, and the instrument must fail
+                # on exactly that.
+                self._cli_inprocess(
+                    [
+                        "--project-root",
+                        str(proj),
+                        "--json",
+                        "ss",
+                    ]
+                )
+        finally:
+            for p in patches:
+                p.stop()
+        self.assertEqual(fired, ["stop_checkpoint"])
+        self.assertEqual(str(ctx.exception), "stop_checkpoint")
 
 
 if __name__ == "__main__":

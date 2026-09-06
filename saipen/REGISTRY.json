@@ -139,7 +139,7 @@
     "zz": "saipen undo",
     "cc": "saipen continue",
     "ccc": "saipen continue",
-    "ss": "saipen stop",
+    "st": "saipen stop",
     "sss": "saipen status",
     "dd": "saipen plan",
     "aa": "saipen markhunt",

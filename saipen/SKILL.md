@@ -2,7 +2,7 @@
 name: saipen
 description: >
   SAIPEN (v7). Trigger on "saipen set", "saipen",
-  subcommands, and shortcuts (gg, hh, ff, xx, vv, zz, cc, ccc, ss, sss, dd,
+  subcommands, and shortcuts (gg, hh, ff, xx, vv, zz, cc, ccc, st, sss, dd,
   aa, qq, qqq, ee, eee, pp, tt, sc; Cyrillic twins: сс, ссс, аа, ее, еее,
   рр, хх).
   cold-start kernel loads first; phases/ modules load

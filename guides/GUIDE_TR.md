@@ -8,7 +8,7 @@ Dinle, acemi. Sorun basit: yapay zeka ajanlarının hafızası bir japon balığ
 
 **SAIPEN** projenizdeki `.saipen/` klasöründe bulunan bir not defteridir.
 
-**Kısayol tuşları:** `cc` proje bağlamını yakınsamaya kadar sürdürür (ayarlanmışsa çalışan hedefi sürdürür), `sss` koda dokunmadan durumu bildirir ve `ss` kontrol noktası kaydedip durur. [19 tuşluk tam haritaya bakın](../saipen/RFC.md#110-command-surface). Kiril ikizleri de çalışır: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
+**Kısayol tuşları:** `cc` proje bağlamını yakınsamaya kadar sürdürür (ayarlanmışsa çalışan hedefi sürdürür), `sss` koda dokunmadan durumu bildirir ve `st` kontrol noktası kaydedip durur. [19 tuşluk tam haritaya bakın](../saipen/RFC.md#110-command-surface). Kiril ikizleri de çalışır: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
 ## Hızlı Başlangıç
 

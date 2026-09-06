@@ -18,7 +18,7 @@ global authority and deterministic priority rules.
 | `zz` | `saipen undo` | CMD-ROUTING-01 | Restore the last safe milestone |
 | `cc` | `saipen continue` | CMD-CONTINUE-01 | Resume the active intent through deterministic routing |
 | `ccc` | `saipen continue` | CMD-CONTINUE-01 | Converge target `ship`, then refresh stages J-M |
-| `ss` | `saipen stop` | CMD-ROUTING-01 | Checkpoint and return control |
+| `st` | `saipen stop` | CMD-ROUTING-01 | Checkpoint and return control; `ss` retired |
 | `sss` | `saipen status` | CMD-ROUTING-01 | Read-only status |
 | `dd` | `saipen plan` | CMD-ROUTING-01 | Plan; payload supplies user items |
 | `aa` | `saipen markhunt` | CMD-ROUTING-01 | Dry audit; records, never fixes |
@@ -70,8 +70,10 @@ global authority and deterministic priority rules.
 ## Unicode twin normalization
 
 Cyrillic shortcuts are the same as Latin. Codepoint substitution:
-`а→a е→e о→o р→p с→c у→y х→x`. Latin `ss`/`sss` have no Cyrillic twin.
-Cyrillic `сс` → Latin `cc` (continue), never `[ss]` (stop).
+`а→a е→e о→o р→p с→c у→y х→x`. Latin `st`/`sss` have no Cyrillic twin.
+Cyrillic `сс` → Latin `cc` (continue), never `st` (stop) or retired `ss`.
+Retired `ss` returns `SHORTCUT_RETIRED` with non-success and zero mutation;
+use `st` to checkpoint and stop, or `sss` for read-only status.
 
 ## Continue→improve fallthrough
 

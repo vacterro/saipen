@@ -8,7 +8,7 @@ Poslouchej, nováčku. Problém je jednoduchý: tvoji AI agenti mají paměť zl
 
 **SAIPEN** je zápisník ve složce `.saipen/` ve tvém projektu.
 
-**Rychlé klávesy:** `cc` pokračuje v konvergenci projektového kontextu (obnoví běžící cíl, pokud je nastaven), `sss` zobrazí stav bez dotyku kódu a `ss` uloží kontrolní bod a zastaví. [Podívej se na úplnou mapu 19 kláves](../saipen/RFC.md#110-command-surface). Fungují i cyrilské dvojníky: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
+**Rychlé klávesy:** `cc` pokračuje v konvergenci projektového kontextu (obnoví běžící cíl, pokud je nastaven), `sss` zobrazí stav bez dotyku kódu a `st` uloží kontrolní bod a zastaví. [Podívej se na úplnou mapu 19 kláves](../saipen/RFC.md#110-command-surface). Fungují i cyrilské dvojníky: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
 ## Rychlý start
 

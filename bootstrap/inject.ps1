@@ -117,7 +117,7 @@ $blockCore = @"
 <!-- SAIPEN:BEGIN -->
 ## saipen protocol (global)
 SHORTCUT ACTIVATION GATE: a whole-message token that is a declared SAIPEN
-shortcut (gg, hh, ff, xx, vv, zz, cc, ccc, ss, sss, dd, aa, qq, qqq, ee, eee, pp, tt, sc, or
+shortcut (gg, hh, ff, xx, vv, zz, cc, ccc, st, sss, dd, aa, qq, qqq, ee, eee, pp, tt, sc, or
 a Cyrillic twin) is a COMMAND, never a greeting and never a style token. It
 MUST activate SAIPEN and resolve through CORE.md 1.10's shortcut table BEFORE
 any conversational acknowledgement, style-mode interpretation, or remembered

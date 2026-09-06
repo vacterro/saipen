@@ -26,7 +26,7 @@
         "command": "saipen hunt"
       }
     ],
-    "ss": [
+    "st": [
       {
         "kind": "shortcut",
         "command": "saipen stop"

@@ -47,7 +47,7 @@ class StopAuditTests(ControlFixture):
             for name in ("STATE.md", "BOARD.md", "LOG.md")
         ]
         before = {path.name: path.read_bytes() for path in canonical}
-        rc, payload = self.cli(project, "ss")
+        rc, payload = self.cli(project, "st")
         self.assertEqual(rc, 1, payload)
         self.assertEqual(outside.read_text(encoding="utf-8"), "SENTINEL")
         self.assertEqual(before, {path.name: path.read_bytes() for path in canonical})
@@ -71,7 +71,7 @@ class StopAuditTests(ControlFixture):
             encoding="utf-8",
         )
         before["board"] = board_path.read_bytes()
-        rc, payload = self.cli(project, "ss")
+        rc, payload = self.cli(project, "st")
         self.assertEqual(rc, 0, payload)
         self.assertEqual(payload["code"], "STOP")
         self.assertEqual(payload["operation_code"], "STOPPED")
@@ -91,7 +91,7 @@ class StopAuditTests(ControlFixture):
         _replace_state(project / ".saipen" / "STATE.md", "mode", "read-only")
         before = _hashes(project)
         with mock.patch.dict(os.environ, {"SAIPEN_CAPABILITY": "read-only"}):
-            rc, payload = self.cli(project, "ss")
+            rc, payload = self.cli(project, "st")
         self.assertEqual(rc, 0, payload)
         self.assertEqual(payload["code"], "STOP")
         self.assertEqual(payload["mode"], "read-only")

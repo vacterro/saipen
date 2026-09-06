@@ -8,7 +8,7 @@ Slušaj, početniče. Problem je jednostavan: tvoji AI agenti imaju pamćenje zl
 
 **SAIPEN** je bilježnica u mapi `.saipen/` u vašem projektu.
 
-**Brzi prečaci:** `cc` nastavlja kontekst projekta do konvergencije (nastavlja aktivni cilj ako je postavljen), `sss` prikazuje status bez diranja koda, a `ss` sprema kontrolnu točku i zaustavlja se. [Pogledaj punu kartu od 19 tipki](../saipen/RFC.md#110-command-surface). Ćirilični blizanci također rade: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
+**Brzi prečaci:** `cc` nastavlja kontekst projekta do konvergencije (nastavlja aktivni cilj ako je postavljen), `sss` prikazuje status bez diranja koda, a `st` sprema kontrolnu točku i zaustavlja se. [Pogledaj punu kartu od 19 tipki](../saipen/RFC.md#110-command-surface). Ćirilični blizanci također rade: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
 ## Brzi početak
 

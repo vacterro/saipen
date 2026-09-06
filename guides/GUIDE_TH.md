@@ -8,7 +8,7 @@ SAIPEN คือสมุดบันทึกในโฟลเดอร์ .sa
 
 AI agents have one fatal flaw: they forget. Close the window and everything they learned about your project is gone — what you were building, what failed, which idea died on Tuesday. Every morning you brief a brilliant stranger from scratch. SAIPEN is the fix: a persistent notebook in the .saipen/ folder. The agent reads STATE and BOARD on startup, sees exactly where it left off, and gets back to work without a single repeated word.
 
-**คีย์ลัด:** `cc` ให้ดำเนินการต่อบริบทของโปรเจกต์จนถึงจุดบรรจบ (ดำเนินเป้าหมายที่กำลังทำงานต่อไปหากมีการตั้งไว้), `sss` แสดงสถานะโดยไม่แตะโค้ด และ `ss` บันทึกจุดตรวจสอบแล้วหยุด [ดูแผนที่ปุ่มลัดทั้ง 19 รายการ](../saipen/RFC.md#110-command-surface) ปุ่มอักษรซีริลลิกที่มีรูปเหมือนกันก็ใช้ได้: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр` `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
+**คีย์ลัด:** `cc` ให้ดำเนินการต่อบริบทของโปรเจกต์จนถึงจุดบรรจบ (ดำเนินเป้าหมายที่กำลังทำงานต่อไปหากมีการตั้งไว้), `sss` แสดงสถานะโดยไม่แตะโค้ด และ `st` บันทึกจุดตรวจสอบแล้วหยุด [ดูแผนที่ปุ่มลัดทั้ง 19 รายการ](../saipen/RFC.md#110-command-surface) ปุ่มอักษรซีริลลิกที่มีรูปเหมือนกันก็ใช้ได้: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр` `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
 ## เริ่มต้นอย่างรวดเร็ว
 

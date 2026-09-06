@@ -10,7 +10,7 @@ See on lahendus täpselt sellele ühele asjale.
 
 **SAIPEN** on lihtsalt üks kuradi märkmik kaustas `.saipen/`.
 
-**Kiirklahvid:** `cc` viib projekti konvergentsini (jätkab käimasolevat eesmärki, kui see on seatud), `sss` näitab olekut koodi puudutamata ja `ss` salvestab kontrollpunkti ning peatub. [Täielik 19 kiirklahvi kaart](../saipen/RFC.md#110-command-surface); toimivad ka kirillitsa vasted `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
+**Kiirklahvid:** `cc` viib projekti konvergentsini (jätkab käimasolevat eesmärki, kui see on seatud), `sss` näitab olekut koodi puudutamata ja `st` salvestab kontrollpunkti ning peatub. [Täielik 19 kiirklahvi kaart](../saipen/RFC.md#110-command-surface); toimivad ka kirillitsa vasted `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
 **Paketiklahvid:** `ee`/`qq` valmistavad täieliku tõlke- või vikipaketi ette ilma seda lõimimata; `eee`/`qqq` võtavad vastu ainult valmis paketi, seejärel lõimivad, kontrollivad, vaatavad üle ja lükkavad üles.
 

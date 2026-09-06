@@ -5696,7 +5696,7 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
     _shortcut_tokens = (
         "`cc`",
         "`sss`",
-        "`ss`",
+        "`st`",
         "`ff`",
         "`xx`",
         "`vv`",
@@ -5784,7 +5784,7 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
                 f"cross-doc drift [shortcut-callouts] -- {path} callout "
                 "does not carry each canonical key exactly once: " + ", ".join(_missing)
             )
-        if not _missing and not (_line.index("`cc`") < _line.index("`sss`") < _line.index("`ss`")):
+        if not _missing and not (_line.index("`cc`") < _line.index("`sss`") < _line.index("`st`")):
             fail(
                 f"cross-doc drift [shortcut-callouts] -- {path} no longer "
                 "orders continue, status, then stop like the canonical entry"
@@ -9550,13 +9550,13 @@ else:
                     if "typed in Cyrillic resolves to the same shortcut" in _case_177_text:
                         _check_twin_prose("conformance corpus row 177", _case_177_text)
                 # The load-bearing shape of the map: `s` must never become a
-                # fold target. If it ever does, Latin ss/sss suddenly gain
+                # fold target. If it ever does, Latin st/sss suddenly gain
                 # Cyrillic twins and every guarantee above inverts.
                 if "s" in CYRILLIC_CONFUSABLE_MAP.values():
                     _twin_failures.append(
                         "CYRILLIC_CONFUSABLE_MAP folds some character to "
                         "'s', which would declare Cyrillic twins for "
-                        "ss/sss (STOP/STATUS) -- forbidden by CORE § 1.10"
+                        "st/sss (STOP/STATUS) -- forbidden by CORE § 1.10"
                     )
                 if any(not ch.isascii() for key in _actual_routes for ch in key):
                     _twin_failures.append(

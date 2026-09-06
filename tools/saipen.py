@@ -138,8 +138,9 @@ _MUTATING_TOPLEVEL = frozenset(
         "goal",
         # CORE § 1.10 shortcut rows with mutating destinations: gg -> goal,
         # hh -> hunt, aa -> markhunt, pp -> sub spawn saipython. `sss` is
-        # read-only (status) and deliberately absent; ss/dd/tt/ccc have no
-        # deterministic CLI executor and refuse before any write.
+        # read-only (status) and deliberately absent; st routes through the
+        # mutating stop branch while retired ss/dd/tt/ccc refuse before any
+        # write.
         "gg",
         "hh",
         "aa",
@@ -5046,9 +5047,9 @@ def main(argv: list[str] | None = None) -> int:
     # any conversational interpretation. The raw token is normalized through
     # the ONE shared engine resolver: Unicode-CODEPOINT substitution, never
     # keyboard-position substitution. Cyrillic double-es normalizes to Latin
-    # "cc" (CONTINUE); it can never become Latin "ss" (STOP), because "s" is
+    # "cc" (CONTINUE); it can never become Latin "st" (STOP), because "s" is
     # not a fold target and no Cyrillic character maps to it, which is also
-    # why the ss/sss rows have no Cyrillic twins at all. Dispatch then
+    # why the st/sss rows have no Cyrillic twins at all. Dispatch then
     # proceeds exactly as if the Latin row had been typed, and this file
     # deliberately holds no Cyrillic literal, no confusable map and no twin
     # dictionary for the resolver to drift from. A resolver that cannot load
@@ -5952,9 +5953,32 @@ def main(argv: list[str] | None = None) -> int:
             dry_run,
             shortcut=command == "cc",
         )
-    if command in ("stop", "ss"):
-        # CORE § 1.10: `ss` routes to `saipen stop` -- checkpoint, digest, halt.
-        # Exact one nonterminal STOP carrier; read-only sessions emit chat lines.
+    if command == "ss":
+        # SRC-024 (audit/11.md): `ss` is RETIRED. It once routed to STOP and
+        # its visual/semantic overlap with `sss` (STATUS) made one accidental
+        # repeated letter flip control flow between observation and mutation.
+        # The tombstone is fail-closed: it reaches NEITHER the stop nor the
+        # status implementation, writes zero bytes, and names the two live
+        # tokens so a stale agent gets deterministic migration guidance
+        # instead of unpredictable model behavior.
+        _emit(
+            {
+                "ok": False,
+                "code": "SHORTCUT_RETIRED",
+                "route": "ss",
+                "detail": (
+                    "shortcut `ss` was retired: `st` is `saipen stop` "
+                    "(checkpoint and stop), `sss` is read-only `saipen status`"
+                ),
+                "use_instead": {"stop": "st", "status": "sss"},
+            },
+            as_json,
+        )
+        return 1
+    if command in ("stop", "st"):
+        # CORE § 1.10: `st` routes to `saipen stop` -- checkpoint, digest,
+        # halt. Exact one nonterminal STOP carrier; read-only sessions emit
+        # chat lines.
         if len(args) > 1:
             _emit(
                 {

@@ -8,7 +8,7 @@
 
 **SAIPEN** est un cahier résistant dans le dossier `.saipen/` de votre projet.
 
-**Raccourcis clavier :** `cc` poursuit le contexte du projet jusqu'à la convergence (reprend un objectif actif s'il en existe un), `sss` signale l'état sans toucher au code et `ss` enregistre un point de contrôle puis s'arrête. [Voir la carte complète des 19 touches](../saipen/RFC.md#110-command-surface). Les jumeaux cyrilliques fonctionnent aussi : `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
+**Raccourcis clavier :** `cc` poursuit le contexte du projet jusqu'à la convergence (reprend un objectif actif s'il en existe un), `sss` signale l'état sans toucher au code et `st` enregistre un point de contrôle puis s'arrête. [Voir la carte complète des 19 touches](../saipen/RFC.md#110-command-surface). Les jumeaux cyrilliques fonctionnent aussi : `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
 ## Démarrage Rapide
 

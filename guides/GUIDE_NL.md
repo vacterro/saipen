@@ -8,7 +8,7 @@ SAIPEN is een geheugennotitieblok in de map .saipen/ voor AI-agente.
 
 AI agents have one fatal flaw: they forget. Close the window and everything they learned about your project is gone — what you were building, what failed, which idea died on Tuesday. Every morning you brief a brilliant stranger from scratch. SAIPEN is the fix: a persistent notebook in the .saipen/ folder. The agent reads STATE and BOARD on startup, sees exactly where it left off, and gets back to work without a single repeated word.
 
-**Sneltoetsen:** `cc` zet de projectcontext voort tot convergentie (hervat een actief doel als er een is ingesteld), `sss` meldt status zonder code aan te raken en `ss` slaat een checkpoint op en stopt. [Bekijk de volledige 19-toetsenkaart](../saipen/RFC.md#110-command-surface). Cyrillische tweelingen werken ook: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
+**Sneltoetsen:** `cc` zet de projectcontext voort tot convergentie (hervat een actief doel als er een is ingesteld), `sss` meldt status zonder code aan te raken en `st` slaat een checkpoint op en stopt. [Bekijk de volledige 19-toetsenkaart](../saipen/RFC.md#110-command-surface). Cyrillische tweelingen werken ook: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
 ## Snelstart
 

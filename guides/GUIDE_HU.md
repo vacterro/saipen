@@ -8,7 +8,7 @@ Ide figyelj, újonc. A probléma egyszerű: az AI ügynökeidnek aranyhal memór
 
 A **SAIPEN** egy jegyzetfüzet a projekted `.saipen/` mappájában.
 
-**Gyorsbillentyűk:** a `cc` a projekt kontextusát konvergenciáig folytatja (folytat egy futó célt, ha be van állítva), az `sss` kód érintése nélkül jelzi az állapotot, az `ss` pedig menti az ellenőrzőpontot és megáll. [Lásd a teljes 19 billentyűs térképet](../saipen/RFC.md#110-command-surface). A cirill ikrek is működnek: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
+**Gyorsbillentyűk:** a `cc` a projekt kontextusát konvergenciáig folytatja (folytat egy futó célt, ha be van állítva), az `sss` kód érintése nélkül jelzi az állapotot, az `st` pedig menti az ellenőrzőpontot és megáll. [Lásd a teljes 19 billentyűs térképet](../saipen/RFC.md#110-command-surface). A cirill ikrek is működnek: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
 ## Gyors indulás
 
