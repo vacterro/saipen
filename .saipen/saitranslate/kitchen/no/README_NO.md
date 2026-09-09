@@ -26,7 +26,7 @@ avinstallasjon er alle lokale — ingen skytjeneste, ingen daemon, ingen databas
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v8.0.0** | [Spesifikasjon](SPEC.md) | [Veiledning](GUIDE.md) | [Kjerne](saipen/CORE.md) | [Vedlikehold](saipen/MAINTENANCE.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Konformitet](saipen/CONFORMANCE.md) |MIT
+**v8.0.1** | [Spesifikasjon](SPEC.md) | [Veiledning](GUIDE.md) | [Kjerne](saipen/CORE.md) | [Vedlikehold](saipen/MAINTENANCE.md) | [Stil](saipen/STYLE.md) | [UI](saipen/UI.md) | [Konformitet](saipen/CONFORMANCE.md) |MIT
 
 **Hurtigtaster:** `cc` fortsetter prosjektets kontekst til konvergens (gjenopptar et aktivt mål hvis et er satt), `sss` viser status uten å røre koden, og `st` lagrer et sjekkpunkt og stopper. [Se hele 19-tasters kartet](saipen/RFC.md#110-command-surface). Kyrilliske tvillinger fungerer også: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
@@ -181,7 +181,7 @@ verdi som ligner på hemmelighet blir slettet fra loggene(`sk-***`) (Kjerne § 1
 ## Vanlige kommandoer
 
 Daglige inngangspunkter; den komplette nåværende overflaten finnes i
-[Kjerne § 1.10](saipen/CORE.md#110-command-surface).
+[Kjerne § 1.10](saipen/RFC.md#110-command-surface).
 
 |Kommando|Gjør|
 |---|---|
@@ -317,4 +317,4 @@ OpenAI, osv.)? Per-platform notater finnes i`extensions/adapters/`.
 </p>
 
 <!-- translation-model: qwen3:14b contract:structured-markdown-v2 -->
-<!-- source-digest: README.md sha256:bb47f7158db4a7a4fd99298427c1e4bc6859433c36435640e129cc6dad2a63b7 -->
+<!-- source-digest: README.md sha256:877128c30331e9502a2b2cde921db503e98f9e63ee38fb9a9acee408eacdbd0b -->

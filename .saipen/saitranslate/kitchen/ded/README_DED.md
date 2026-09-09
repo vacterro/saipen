@@ -26,7 +26,7 @@
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v8.0.0** | [Спецификация](SPEC.md) | [Руководство](GUIDE.md) | [Ядро](saipen/CORE.md) | [Обслуживание](saipen/MAINTENANCE.md) | [Стиль](saipen/STYLE.md) | [Интерфейс](saipen/UI.md) | [Соответствие](saipen/CONFORMANCE.md) | MIT
+**v8.0.1** | [Спецификация](SPEC.md) | [Руководство](GUIDE.md) | [Ядро](saipen/CORE.md) | [Обслуживание](saipen/MAINTENANCE.md) | [Стиль](saipen/STYLE.md) | [Интерфейс](saipen/UI.md) | [Соответствие](saipen/CONFORMANCE.md) | MIT
 
 **Короткие кнопки, чтоб пальцы не отсохли:** `cc` ведёт проект к схождению (продолжает активную цель, если она задана), `sss` докладывает статус и код не лапает, `st` ставит чекпоинт и жмёт тормоз. [Вся карта из 19 шорткатов](saipen/RFC.md#110-command-surface); на русской раскладке работают `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
@@ -152,7 +152,7 @@ CORE            continuation / state / checkpoint / validation       required
 ## Общие команды
 
 Ежедневные точки входа; полная текущая поверхность находится в
-[Core § 1.10](saipen/CORE.md#110-command-surface).
+[Core § 1.10](saipen/RFC.md#110-command-surface).
 
 | Команда | Делает |
 |---|---|
@@ -280,4 +280,4 @@ OpenAI и т.д.)? Заметки по каждой платформе живу�
 </p>
 
 <!-- translation-model: qwen3:14b contract:structured-markdown-v2 -->
-<!-- source-digest: README.md sha256:bb47f7158db4a7a4fd99298427c1e4bc6859433c36435640e129cc6dad2a63b7 -->
+<!-- source-digest: README.md sha256:877128c30331e9502a2b2cde921db503e98f9e63ee38fb9a9acee408eacdbd0b -->

@@ -1,0 +1,59 @@
+{
+  "clauses": {
+    "SRC-025:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Release publication must bind every release-owned path to the exact reviewed blob content hash or reviewed deletion from an immutable plan manifest: after write-tree the owned tree entries must equal the frozen reviewed identity and any same-path restage after the ship gate must refuse before commit or publication."
+    },
+    "SRC-025:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Crew pre-ship certification must validate the frozen applicable role set semantically: declared probe against the role contract, ALWAYS role never NOT_APPLICABLE, source_head and source_tree_fingerprint both matching the release frozen source identity, and non-empty structurally valid evidence for every applicable role; malformed or mismatched authority refuses instead of certifying."
+    },
+    "SRC-025:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Applicability filesystem enumeration must surface every unreadable included subtree as explicit uncertainty so relevant negative verdicts fail closed to APPLICABLE; unreadable descendants must never silently count as proof of absence while excluded-directory errors stay outside the observation."
+    },
+    "SRC-025:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "GUI applicability probing must classify constant __import__(toolkit) and importlib.import_module(toolkit) forms including aliased imports as GUI evidence, and unclassifiable import-like toolkit expressions must yield INDETERMINATE, while comments, docstrings and plain strings stay non-evidence."
+    },
+    "SRC-025:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Audit enqueue idempotency must be bound to durable producer + producer_operation_id authority: equal body digest alone must never synthesize operation identity or adopt an existing layer; allocator loss with existing audit history must recover only from durable operation records or fail closed with a bounded recoverable refusal while genuine first-use allocation stays fresh and spent layer numbers are never reused."
+    },
+    "SRC-025:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A COMMITTED audit enqueue whose physical layer is missing succeeds idempotently only when exact same-layer same-digest downstream capture authority proves delivery: no binding requires restore or a recoverable refusal, same path with different digest is conflict, same digest on a different path proves nothing, corrupt binding fails closed."
+    },
+    "SRC-025:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The audit inbox binding must decode strictly with ABSENT/OK/CORRUPT fail-closed semantics and corrupt bytes never overwritten, and its read-modify-write must be concurrency-safe: concurrent writers either serialize to both persisted or one receives a structured busy/retry result; never two successes with one durable record and never raw ValueError leakage."
+    },
+    "SRC-025:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The allocator authority decoder must strictly validate schema version, canonical operation keys, producer and operation id tokens, positive non-bool integer layers, allowed states, canonical SHA-256 digests, duplicate layer ownership and coherent next_id; malformed records yield ALLOCATOR_CORRUPT and cannot authorize retry or placement, while _place independently rejects noncanonical layers before filename construction."
+    },
+    "SRC-025:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Audit directory scanning must distinguish ABSENT / OK / UNSAFE / UNREADABLE topology: absent or owned-empty stays clean, symlink or reparse escape and unreadable enumeration must report explicit non-clean diagnostics in classify, status and projection without following, reading or repairing the unsafe object, and routing must surface the transport problem instead of an idle verdict."
+    },
+    "SRC-025:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Settled journal operation-specific lookups and settlement appends must be bounded by operation or active segment rather than lifetime receipt volume, with a settlement that leaves a validating index; exact-byte deep audits remain reachable through the explicit validation path."
+    }
+  },
+  "derived_at": "2026-09-07T00:56:51Z",
+  "derived_from": "SRC-025",
+  "interpretation_revision": 10,
+  "schema_version": 1,
+  "source_sha256": "27efc70fdac11489d24b336758fe1adef00de6bb6144517276f127e17ced68ef"
+}

@@ -26,7 +26,7 @@ afinstallation er alle lokale — ingen skytjeneste, ingen daemon, ingen databas
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v8.0.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) |MIT
+**v8.0.1** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) |MIT
 
 **Hurtigtaster:** `cc` fortsætter projektets kontekst til konvergens (genoptager et aktivt mål, hvis et er sat), `sss` viser status uden at røre koden, og `st` gemmer et kontrolpunkt og stopper. [Se hele 19-tasters kortet](saipen/RFC.md#110-command-surface). Kyrilliske tvillinger virker også: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
@@ -181,7 +181,7 @@ hemmelighed-liknende værdier er censureret fra logfiler(`sk-***`) (KÆRNE § 1.
 ## Almindelige kommandoer
 
 Daglige indgangspunkter; den komplette nuværende overflade findes i
-[KÆRNE § 1.10](saipen/CORE.md#110-command-surface).
+[KÆRNE § 1.10](saipen/RFC.md#110-command-surface).
 
 |Kommando|Gør|
 |---|---|
@@ -317,4 +317,4 @@ OpenAI, osv.)? Per-platform noter findes i`extensions/adapters/`.
 </p>
 
 <!-- translation-model: qwen3:14b contract:structured-markdown-v2 -->
-<!-- source-digest: README.md sha256:bb47f7158db4a7a4fd99298427c1e4bc6859433c36435640e129cc6dad2a63b7 -->
+<!-- source-digest: README.md sha256:877128c30331e9502a2b2cde921db503e98f9e63ee38fb9a9acee408eacdbd0b -->

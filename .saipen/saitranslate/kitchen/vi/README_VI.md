@@ -26,7 +26,7 @@ gỡ cài đặt đều là cục bộ — không có dịch vụ đám mây, kh
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v8.0.0** | [Thông số kỹ thuật](SPEC.md) | [Hướng dẫn](GUIDE.md) | [Lõi](saipen/CORE.md) | [Bảo trì](saipen/MAINTENANCE.md) | [Phong cách](saipen/STYLE.md) | [Giao diện người dùng](saipen/UI.md) | [Tuân thủ](saipen/CONFORMANCE.md) |MIT
+**v8.0.1** | [Thông số kỹ thuật](SPEC.md) | [Hướng dẫn](GUIDE.md) | [Lõi](saipen/CORE.md) | [Bảo trì](saipen/MAINTENANCE.md) | [Phong cách](saipen/STYLE.md) | [Giao diện người dùng](saipen/UI.md) | [Tuân thủ](saipen/CONFORMANCE.md) |MIT
 
 **Phím tắt:** `cc` tiếp tục bối cảnh dự án đến hội tụ (tiếp tục mục tiêu đang chạy nếu có), `sss` báo trạng thái mà không đụng vào mã và `st` lưu điểm kiểm tra rồi dừng. [Xem bản đồ đầy đủ 19 phím](saipen/RFC.md#110-command-surface). Các cặp song sinh Cyrillic cũng hoạt động: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
@@ -181,7 +181,7 @@ các giá trị giống bí mật được xóa khỏi nhật ký(`sk-***`) (COR
 ## Các lệnh phổ biến
 
 Các điểm nhập thông thường; bề mặt hiện tại đầy đủ nằm trong
-[Core § 1.10](saipen/CORE.md#110-command-surface).
+[Core § 1.10](saipen/RFC.md#110-command-surface).
 
 |Lệnh|Làm|
 |---|---|
@@ -317,4 +317,4 @@ OpenAI, v.v.)? Ghi chú theo nền tảng sống trong`extensions/adapters/`.
 </p>
 
 <!-- translation-model: qwen3:14b contract:structured-markdown-v2 -->
-<!-- source-digest: README.md sha256:bb47f7158db4a7a4fd99298427c1e4bc6859433c36435640e129cc6dad2a63b7 -->
+<!-- source-digest: README.md sha256:877128c30331e9502a2b2cde921db503e98f9e63ee38fb9a9acee408eacdbd0b -->

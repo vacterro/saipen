@@ -26,7 +26,7 @@
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v8.0.0** | [仕様](SPEC.md) | [ガイド](GUIDE.md) | [コア](saipen/CORE.md) | [メンテナンス](saipen/MAINTENANCE.md) | [スタイル](saipen/STYLE.md) | [UI](saipen/UI.md) | [適合性](saipen/CONFORMANCE.md) |MIT
+**v8.0.1** | [仕様](SPEC.md) | [ガイド](GUIDE.md) | [コア](saipen/CORE.md) | [メンテナンス](saipen/MAINTENANCE.md) | [スタイル](saipen/STYLE.md) | [UI](saipen/UI.md) | [適合性](saipen/CONFORMANCE.md) |MIT
 
 **ショートカット:** `cc` はコンテキストを収束まで継続し（実行中の目標があればそれを再開）、`sss` はコードを変更せず状況を表示し、`st` はチェックポイントを保存して停止する。[全19キーの一覧](saipen/RFC.md#110-command-surface)。キリル文字の同形キーも使える: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`。 `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
@@ -181,7 +181,7 @@ CORE            continuation / state / checkpoint / validation       required
 ## 一般的なコマンド
 
 日常的なエントリポイント; 現在の完全な表面はここに存在する
-[Core § 1.10](saipen/CORE.md#110-command-surface).
+[Core § 1.10](saipen/RFC.md#110-command-surface).
 
 |コマンド|実行|
 |---|---|
@@ -317,4 +317,4 @@ OpenAIなど)? プラットフォームごとのノートは にライブで存�
 </p>
 
 <!-- translation-model: qwen3:14b contract:structured-markdown-v2 -->
-<!-- source-digest: README.md sha256:bb47f7158db4a7a4fd99298427c1e4bc6859433c36435640e129cc6dad2a63b7 -->
+<!-- source-digest: README.md sha256:877128c30331e9502a2b2cde921db503e98f9e63ee38fb9a9acee408eacdbd0b -->

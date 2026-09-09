@@ -130,6 +130,14 @@ from saipen_engine.subs import (
     validate_sub_lifecycle,
 )
 from saipen_engine.crew import crew_gate_problems as _crew_gate_problems
+from saipen_engine.producer_gate import (
+    CONVERGE_LABELS,
+    CONVERGE_REQUIRED_PRODUCERS as _CONVERGE_REQUIRED_PRODUCER_NAMES,
+    GateContext,
+    finding_class_for_slug as _finding_class_for_slug,
+    parse_gate_context as _parse_gate_context,
+    severity as _finding_severity,
+)
 from saipen_engine.manifest import copy_tree_members
 
 
@@ -369,20 +377,15 @@ def _parse_gate(raw):
     back to the default, because a typo'd `--gate collect:saiwki` that silently
     ran the SOFT gate would report green on exactly the package the caller
     asked to hard-check. Failing loudly on the spelling is the only reading
-    that cannot approve an uninspected package."""
-    if raw in ("ship", "converge", "core", "crew"):
-        return raw, None
-    if raw.startswith("collect:"):
-        producer = raw.split(":", 1)[1]
-        if re.fullmatch(r"[a-z][a-z0-9_-]*", producer or ""):
-            return "collect", producer
-        print(f"FAIL: --gate collect:<producer> needs a producer name, got {producer!r}")
+    that cannot approve an uninspected package. The closed-set grammar and the
+    refusal texts live in saipen_engine.producer_gate, the one policy both
+    this validator and the in-process test matrix consume."""
+    try:
+        context = _parse_gate_context(raw)
+    except ValueError as exc:
+        print(f"FAIL: {exc}")
         sys.exit(2)
-    print(
-        f"FAIL: unknown --gate {raw!r} -- one of: core (default), ship, "
-        f"collect:<producer>, converge, crew"
-    )
-    sys.exit(2)
+    return context.kind, context.producer
 
 
 def _parse_cli(argv):
@@ -443,6 +446,9 @@ def _git_from(cwd, *args):
 
 
 STRICT, _requested_root, GATE, GATE_PRODUCER, REQUIRE_RELEASE_INDEX = _parse_cli(sys.argv[1:])
+#: The one parsed gate context every producer severity decision reads. Built
+#: once; the policy function is pure, so nothing can drift around it.
+GATE_CONTEXT = GateContext(GATE, GATE_PRODUCER)
 PROJECT_ROOT, PROJECT_ROOT_SOURCE = resolve_project_root(Path.cwd().resolve(), _requested_root)
 if PROJECT_ROOT is None:
     print(f"FAIL: {PROJECT_ROOT_SOURCE}")
@@ -4089,8 +4095,12 @@ if _translate_outbox.is_file():
 #
 # EE and QQ, named rather than discovered: `--gate converge` must not depend on
 # which producer folders happen to exist in a given project, or a closure could
-# pass by deleting the producer instead of refreshing it.
-CONVERGE_REQUIRED_PRODUCERS = (("saitranslate", "EE"), ("saiwiki", "QQ"))
+# pass by deleting the producer instead of refreshing it. The severity policy
+# itself lives in saipen_engine.producer_gate (imported with the other engine
+# modules above); only the diagnostic labels are restated here.
+CONVERGE_REQUIRED_PRODUCERS = tuple(
+    (name, CONVERGE_LABELS[name]) for name in _CONVERGE_REQUIRED_PRODUCER_NAMES
+)
 
 
 def _producer_of(path):
@@ -4105,19 +4115,20 @@ def _producer_of(path):
 
 
 def producer_gate_is_hard(producer):
-    if GATE == "collect":
-        return producer == GATE_PRODUCER
-    if GATE == "converge":
-        return producer in {name for name, _ in CONVERGE_REQUIRED_PRODUCERS}
-    return False
+    return _finding_severity(GATE_CONTEXT, producer, "STALE") == "FAIL"
 
 
 _producers_failed_hard = set()
 
 
 def producer_problem(producer, slug, message):
-    """Report a producer-package defect at the severity the active gate owns."""
-    if producer_gate_is_hard(producer):
+    """Report a producer-package defect at the severity the active gate owns.
+
+    The severity decision is the shared closed policy in
+    saipen_engine.producer_gate; this wrapper only carries the validator's
+    reporting side effects (FAIL counter vs WARN slug).
+    """
+    if _finding_severity(GATE_CONTEXT, producer, _finding_class_for_slug(slug)) == "FAIL":
         _producers_failed_hard.add(producer)
         fail(message)
         return True

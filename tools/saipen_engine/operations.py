@@ -3635,6 +3635,21 @@ def stop_checkpoint(
 RELEASE_SCOPE_DIR = ".saipen/kitchen/release_scope"
 
 
+def release_scope_hash(raw: bytes) -> str:
+    """Full content identity for new reviewed scopes; journal tokens stay unchanged."""
+    import hashlib
+    return hashlib.sha256(raw).hexdigest()
+
+
+def release_scope_matches(raw: bytes, expected) -> bool:
+    """Read v2 exact identities and explicit historical v1 truncated tokens."""
+    if not isinstance(expected, str) or not re.fullmatch(
+        r"(?:[0-9a-f]{16}|[0-9a-f]{64})", expected
+    ):
+        return False
+    return release_scope_hash(raw)[:len(expected)] == expected
+
+
 def _plan_record_scope(
     root: Path, ticket_id: str, agent: str, paths: list[str], now: str, utc: str
 ) -> OperationPlan | Result:
@@ -3706,7 +3721,7 @@ def _plan_record_scope(
     for rel in clean:
         fp = root / rel
         if fp.is_file():
-            hashes[rel] = hash_bytes(fp.read_bytes())
+            hashes[rel] = release_scope_hash(fp.read_bytes())
         elif not fp.exists():
             # Deletion intent (T-994 / § 2): a reviewed removal is a scope
             # path too -- recorded as JSON null so APPLY stages `git add -u`
@@ -3735,7 +3750,7 @@ def _plan_record_scope(
     from .paths import project_lineage_identity
 
     record = {
-        "schema_version": 1,
+        "schema_version": 2,
         "ticket": ticket_id,
         "project_identity": _identity(root),
         "project_lineage": project_lineage_identity(root),
@@ -4227,7 +4242,7 @@ def _plan_defer_for_crew(
         scope_record = _json.loads(scope_doc.text_norm)
     except (OSError, _json.JSONDecodeError) as exc:
         return _refuse("RECOVERY_CONFLICT", f"release scope record {scope_path} is corrupt: {exc}")
-    if scope_record.get("schema_version") != 1 or scope_record.get("ticket") != ticket_id:
+    if scope_record.get("schema_version") not in (1, 2) or scope_record.get("ticket") != ticket_id:
         return _refuse(
             "RECOVERY_CONFLICT",
             f"release scope record {scope_path} does not bind ticket {ticket_id}",

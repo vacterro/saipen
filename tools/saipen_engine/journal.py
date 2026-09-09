@@ -4655,7 +4655,20 @@ def semantic_receipts_for_operation_safe(
     Useful for read-only projections that want to surface corrupción as data
     rather than exception. Mutation paths should use the raising variant and
     fail closed on corruption.
+
+    SRC-025:R010: the hot path consults the bounded settled-journal
+    projection first (locator + relevant segment(s) + active tail). An
+    ABSENT projection falls back to the canonical whole-history scan
+    below (read-only, never mutating); a present-but-UNTRUSTED projection
+    fails closed and never scans around corrupt authority.
     """
+    from .settled_projection import operation_receipts_bounded
+
+    records, errors, projection_used = operation_receipts_bounded(
+        Path(project_root), operation
+    )
+    if projection_used:
+        return records, errors
     snapshot = semantic_receipt_snapshot(project_root)
     if snapshot.errors:
         return [], snapshot.errors

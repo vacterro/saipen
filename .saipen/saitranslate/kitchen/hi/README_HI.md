@@ -26,7 +26,7 @@
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v8.0.0** | [विनिर्देश](SPEC.md) | [गाइड](GUIDE.md) | [कोर](saipen/CORE.md) | [रखरखाव](saipen/MAINTENANCE.md) | [शैली](saipen/STYLE.md) | [UI](saipen/UI.md) | [अनुरूपता](saipen/CONFORMANCE.md) |MIT
+**v8.0.1** | [विनिर्देश](SPEC.md) | [गाइड](GUIDE.md) | [कोर](saipen/CORE.md) | [रखरखाव](saipen/MAINTENANCE.md) | [शैली](saipen/STYLE.md) | [UI](saipen/UI.md) | [अनुरूपता](saipen/CONFORMANCE.md) |MIT
 
 **त्वरित कुंजियाँ:** `cc` परियोजना संदर्भ को अभिसरण तक जारी रखता है (यदि कोई लक्ष्य निर्धारित है तो उसे फिर से शुरू करता है), `sss` कोड छुए बिना स्थिति दिखाता है और `st` चेकपॉइंट सहेज कर रुक जाता है. [पूरा 19-कुंजी नक्शा देखें](saipen/RFC.md#110-command-surface). सिरिलिक जुड़वाँ भी काम करती हैं: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
@@ -181,7 +181,7 @@ CORE            continuation / state / checkpoint / validation       required
 ## सामान्य कमांड
 
 रोजमर्रा के प्रवेश बिंदु; पूर्ण वर्तमान सतह यहां रहती है
-[कोर § 1.10](saipen/CORE.md#110-command-surface).
+[कोर § 1.10](saipen/RFC.md#110-command-surface).
 
 |कमांड|करता है|
 |---|---|
@@ -317,4 +317,4 @@ SAIPEN का काम एक जारी रखने/अवस्था क�
 </p>
 
 <!-- translation-model: qwen3:14b contract:structured-markdown-v2 -->
-<!-- source-digest: README.md sha256:bb47f7158db4a7a4fd99298427c1e4bc6859433c36435640e129cc6dad2a63b7 -->
+<!-- source-digest: README.md sha256:877128c30331e9502a2b2cde921db503e98f9e63ee38fb9a9acee408eacdbd0b -->

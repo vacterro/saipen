@@ -1,0 +1,27 @@
+{
+  "op_id": "scope-ad1c4bad885e4a3b8ead75febcf56b30",
+  "paths": {
+    ".saipen/KNOWLEDGE/audit_2026-08-21.md": "2c25bb998fc7846150ecf13e168f4df399d5e4b5f4ff53bb3a00705eaba21c77",
+    "tools/saipen.py": "e2eaea46de91a89faf283cdda57f40bebe1d1ccbbe9a75aa13daf56a082006ac",
+    "tools/saipen_engine/conformance.py": "a3c496ea7f5f45a565e2f49072fcd8ded2fd468f1d3eb4c95ac09671d560f232",
+    "tools/saipen_engine/conformance_lineage.py": "52913545edb47d49f0ef81e0211c5184bf0267ef8713411c97eea2d764784816",
+    "tools/saipen_engine/controls.py": "49c0fdba407aed3d279477f77993a91d67a8d5c246599eccdf1dff0dbd3750ce",
+    "tools/saipen_engine/convergence.py": "a9e84f23c31f6074653477193ebe72821c46adcfc50a5504cd26a46be289eba1",
+    "tools/saipen_engine/journal.py": "6283ba98071ecb70c855418568a1e09f4ac5c7f8013d4eb7ae019176122deb5c",
+    "tools/saipen_engine/operations.py": "0ac1122925f53a91f38303fc15aa8a5d68d5166e5c17e9b170aacba45562b548",
+    "tools/saipen_engine/producer_gate.py": "7305ab0171ba5923db3bed75efff426ba50433ff7e7357d013af0f76caa58120",
+    "tools/saipen_engine/release.py": "84bb48cf2417ef5b44daa60d4fe8721d24f300712a66debe113cdbcf86115049",
+    "tools/saipen_engine/settled_projection.py": "a1590f5ca2df4dc755ffa3a3e651f73293efd2d1e04053c1b82de83538249837",
+    "tools/test_conformance_lineage.py": "de5ce7224d261a93ed8c71b16109e80cfc42d95c4dc24ecf159abb9634211821",
+    "tools/test_settled_projection.py": "deac15cdaa37716695c323b2bcd6e9669bcd7e53a1139824ae1e52d6b135a2f2",
+    "tools/test_source_receipts.py": "7c258a4be69e5aa2509b06969625fd66a6dd8647e2e6a233f6e3401030589156",
+    "tools/validate.py": "0e551c1f3c9ba18b80ac8694bebde71a186092815913bb742e39690b58f93629"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-09-09T00:36:00Z",
+  "schema_version": 2,
+  "source_head": "35ca656e7a9bcee92f3fed6ecde58fee1c9795de",
+  "source_tree_fingerprint": "git-delta-v1:ce472c724f85d32adc5be6b8778f39863b3d0faa53e38df7c480ae219a9b18ee",
+  "ticket": "T-1298"
+}

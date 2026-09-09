@@ -23,6 +23,18 @@ SCENARIO = ROOT / "tests" / "scenarios" / "stale-state-reconciliation" / ".saipe
 
 
 class SourceReceiptTests(unittest.TestCase):
+    def test_source_recovery_commands_refuse_structurally_when_unavailable(self) -> None:
+        for arguments in (("reconcile", "SRC-001"), ("normalize",)):
+            with self.subTest(arguments=arguments):
+                result = subprocess.run(
+                    [sys.executable, str(CLI), "source", *arguments,
+                     "--project-root", str(self.root), "--dry-run", "--json"],
+                    capture_output=True, text=True, timeout=60,
+                )
+                self.assertNotIn("Traceback", result.stderr)
+                payload = json.loads(result.stdout)
+                self.assertIsInstance(payload.get("ok"), bool)
+
     def setUp(self) -> None:
         self.tmp = tempfile.TemporaryDirectory(prefix="saipen-source-receipts-")
         self.root = Path(self.tmp.name) / "project"

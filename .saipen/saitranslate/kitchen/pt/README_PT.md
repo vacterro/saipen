@@ -26,7 +26,7 @@ desinstalar são todos locais — nenhum serviço em nuvem, nenhum daemon, nenhu
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v8.0.0** | [Especificações](SPEC.md) | [Guia](GUIDE.md) | [Núcleo](saipen/CORE.md) | [Manutenção](saipen/MAINTENANCE.md) | [Estilo](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformidade](saipen/CONFORMANCE.md) |MIT
+**v8.0.1** | [Especificações](SPEC.md) | [Guia](GUIDE.md) | [Núcleo](saipen/CORE.md) | [Manutenção](saipen/MAINTENANCE.md) | [Estilo](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformidade](saipen/CONFORMANCE.md) |MIT
 
 **Atalhos rápidos:** `cc` continua o contexto do projeto até a convergência (retoma um objetivo ativo, se houver um definido), `sss` informa o estado sem tocar no código e `st` salva um ponto de verificação e para. [Veja o mapa completo de 19 teclas](saipen/RFC.md#110-command-surface). Os gêmeos cirílicos também funcionam: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
@@ -181,7 +181,7 @@ valores semelhantes a segredos são omitidos dos logs(`sk-***`) (CORE § 1.2).
 ## Comandos comuns
 
 Pontos de entrada cotidianos; a superfície completa atual vive em
-[Core § 1.10](saipen/CORE.md#110-command-surface).
+[Core § 1.10](saipen/RFC.md#110-command-surface).
 
 |Comando|Faz|
 |---|---|
@@ -317,4 +317,4 @@ OpenAI, etc.)? Notas por plataforma vivas em`extensions/adapters/`.
 </p>
 
 <!-- translation-model: qwen3:14b contract:structured-markdown-v2 -->
-<!-- source-digest: README.md sha256:bb47f7158db4a7a4fd99298427c1e4bc6859433c36435640e129cc6dad2a63b7 -->
+<!-- source-digest: README.md sha256:877128c30331e9502a2b2cde921db503e98f9e63ee38fb9a9acee408eacdbd0b -->

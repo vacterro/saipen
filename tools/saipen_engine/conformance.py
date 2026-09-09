@@ -715,8 +715,34 @@ def _update_receipt_index(
     lookup into a constant-I/O direct read; lookup still validates the receipt
     and falls back to a full scan on a missing/corrupt/relocated index -- it
     never mutates state on a read-only upgrade.
+
+    SRC-025:R011: when a trustworthy pre-append directory token is supplied
+    (prior_receipt_dir_mtime_ns), delegate to the bounded conformance lineage
+    advance. On bounded success the v2 lineage head and per-gate locators are
+    written by the lineage module and this v1 index pass returns without
+    touching them. On refusal with a live v2 head the v1 index pass also
+    returns without touching anything: the lineage authority already exists,
+    the refusal means the head no longer represents the namespace the caller
+    saw (crash between receipt write and head publish, or an out-of-band
+    sibling), and the only honest recovery is the canonical deep rebuild --
+    this legacy writer must never clobber the v2 head/locator pair with a v1
+    bootstrap document (zero mutation on refusal).
     """
     root = Path(root)
+    if prior_receipt_dir_mtime_ns is not None:
+        from . import conformance_lineage as _cl
+
+        if _cl.advance_append(
+            root,
+            gate,
+            receipt_id,
+            timestamp,
+            receipt_path,
+            prior_receipt_dir_mtime_ns=prior_receipt_dir_mtime_ns,
+        ):
+            return
+        if _cl._read_head(root) is not None:
+            return
     appended = _receipt_matches_append(root, gate, receipt_id, timestamp, receipt_path)
     proof = _load_lineage_index(root)
     incremental = False
@@ -950,6 +976,15 @@ def latest_receipt(project_root: Path | str, gate: str | None = None) -> dict | 
     """
     root = Path(project_root)
     if gate is not None:
+        # SRC-025:R011: bounded authenticated lineage lookup first (head +
+        # locator + one generation + one receipt). handled=False means no v2
+        # lineage exists: the legacy path below runs unchanged. handled=True
+        # with record None degrades to the same legacy path.
+        from .conformance_lineage import latest_receipt_bounded
+
+        handled, record = latest_receipt_bounded(root, gate)
+        if handled and record is not None:
+            return record
         # PERF-003/04: index-first lookup. When the index carries a safe
         # relative receipt path, read that ONE file directly (constant I/O);
         # otherwise fall back to a full scan. Any failure (missing path,

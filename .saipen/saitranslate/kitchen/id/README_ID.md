@@ -26,7 +26,7 @@ uninstall are all local — no cloud service, no daemon, no database.
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v8.0.0** | [Spesifikasi](SPEC.md) | [Panduan](GUIDE.md) | [Inti](saipen/CORE.md) | [Pemeliharaan](saipen/MAINTENANCE.md) | [Gaya](saipen/STYLE.md) | [UI](saipen/UI.md) | [Kesesuaian](saipen/CONFORMANCE.md) |MIT
+**v8.0.1** | [Spesifikasi](SPEC.md) | [Panduan](GUIDE.md) | [Inti](saipen/CORE.md) | [Pemeliharaan](saipen/MAINTENANCE.md) | [Gaya](saipen/STYLE.md) | [UI](saipen/UI.md) | [Kesesuaian](saipen/CONFORMANCE.md) |MIT
 
 **Tombol cepat:** `cc` melanjutkan konteks proyek hingga konvergensi (melanjutkan tujuan aktif jika ada yang ditetapkan), `sss` melaporkan status tanpa menyentuh kode, dan `st` menyimpan titik periksa lalu berhenti. [Lihat peta 19 tombol lengkap](saipen/RFC.md#110-command-surface). Kembar Sirilik juga berfungsi: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
@@ -181,7 +181,7 @@ nilai-nilai seperti rahasia dihilangkan dari log(`sk-***`) (CORE § 1.2).
 ## Perintah umum
 
 Pintu masuk sehari-hari; permukaan saat ini lengkap berada di
-[Core § 1.10](saipen/CORE.md#110-command-surface).
+[Core § 1.10](saipen/RFC.md#110-command-surface).
 
 |Perintah|Melakukan|
 |---|---|
@@ -317,4 +317,4 @@ OpenAI, dll.)? Catatan per-platform berada di`extensions/adapters/`.
 </p>
 
 <!-- translation-model: qwen3:14b contract:structured-markdown-v2 -->
-<!-- source-digest: README.md sha256:bb47f7158db4a7a4fd99298427c1e4bc6859433c36435640e129cc6dad2a63b7 -->
+<!-- source-digest: README.md sha256:877128c30331e9502a2b2cde921db503e98f9e63ee38fb9a9acee408eacdbd0b -->

@@ -50,6 +50,7 @@ from .operations import (
     _target,
     _utc_iso,
     next_ticket_id,
+    release_scope_matches,
 )
 from .plan import OperationPlan, TargetPlan, apply_plan, build_plan, semantic_payload_hash
 from .paths import (
@@ -1370,10 +1371,10 @@ def _reviewed_dirty_ownership(
         return False, []
     tickets = board.get("tickets", {})
     live_lineage = project_lineage_identity(root)
-    live_tokens: dict[str, str | None] = {}
+    live_bytes: dict[str, bytes | None] = {}
     for rel in dirty:
         path = owned_target_path(root, rel, kind="undo ownership")
-        live_tokens[rel] = hash_bytes(path.read_bytes()) if path.is_file() else None
+        live_bytes[rel] = path.read_bytes() if path.is_file() else None
     proven: set[str] = set()
     evidence: set[str] = set()
     for scope_path in sorted(scope_dir.glob("T-*.json")):
@@ -1396,7 +1397,7 @@ def _reviewed_dirty_ownership(
             # lineage-bearing record fall back to that weaker rule.
             project_matches = record.get("project_identity") == canonical_identity(root)
         if (
-            record.get("schema_version") != 1
+            record.get("schema_version") not in (1, 2)
             or not project_matches
             or not isinstance(ticket, str)
             or ticket not in tickets
@@ -1404,7 +1405,13 @@ def _reviewed_dirty_ownership(
             or str(record.get("recorded_at", "")) < str(current.get("created_at", ""))
         ):
             continue
-        matched = {rel for rel in dirty if rel in paths and paths.get(rel) == live_tokens.get(rel)}
+        matched = {
+            rel
+            for rel in dirty
+            if rel in paths
+            and live_bytes.get(rel) is not None
+            and release_scope_matches(live_bytes[rel], paths.get(rel))
+        }
         if matched:
             proven.update(matched)
             evidence.add(ticket)

@@ -47,7 +47,7 @@ from . import codec
 from .board import strict_iso_utc, iso_utc_sort_key
 from .errors import CODES
 from .journal import _drop_settled_staged
-from .operations import RELEASE_SCOPE_DIR, _plan_finish_ticket
+from .operations import RELEASE_SCOPE_DIR, _plan_finish_ticket, release_scope_matches
 from .state import parse_state
 
 # ---------------------------------------------------------------------------
@@ -1678,7 +1678,7 @@ def _load_scope(
         data = json.loads(codec.read_doc(path))
     except (OSError, json.JSONDecodeError) as exc:
         raise ReleaseRefusal("RECOVERY_CONFLICT", f"release scope record {path} is corrupt: {exc}")
-    if data.get("schema_version") != 1:
+    if data.get("schema_version") not in (1, 2):
         raise ReleaseRefusal(
             "RECOVERY_CONFLICT",
             f"release scope record {path} has unknown schema_version "
@@ -1785,7 +1785,9 @@ def _load_scope(
                     "the deletion",
                 )
             continue
-        if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{16}", expected):
+        if not isinstance(expected, str) or not re.fullmatch(
+            r"(?:[0-9a-f]{16}|[0-9a-f]{64})", expected
+        ):
             raise ReleaseRefusal(
                 "RECOVERY_CONFLICT",
                 f"release scope path {rel!r} carries a malformed hash",
@@ -1794,8 +1796,9 @@ def _load_scope(
             raise ReleaseRefusal(
                 "SOURCE_SCOPE_MISSING", f"scope path {rel} is missing from the worktree"
             )
-        live = _quick_hash(fp.read_bytes())
-        if live != expected:
+        raw = fp.read_bytes()
+        if not release_scope_matches(raw, expected):
+            live = _quick_hash(raw)
             raise ReleaseRefusal(
                 "STALE_PLAN",
                 f"scope path {rel} changed since review (live {live!r}, "

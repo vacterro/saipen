@@ -26,7 +26,7 @@
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v8.0.0** | [Συμβολισμός](SPEC.md) | [Οδηγός](GUIDE.md) | [Πυρήνας](saipen/CORE.md) | [Συντήρηση](saipen/MAINTENANCE.md) | [Στυλ](saipen/STYLE.md) | [Διεπαφή Χρήστη](saipen/UI.md) | [Συμμόρφωση](saipen/CONFORMANCE.md) |MIT
+**v8.0.1** | [Συμβολισμός](SPEC.md) | [Οδηγός](GUIDE.md) | [Πυρήνας](saipen/CORE.md) | [Συντήρηση](saipen/MAINTENANCE.md) | [Στυλ](saipen/STYLE.md) | [Διεπαφή Χρήστη](saipen/UI.md) | [Συμμόρφωση](saipen/CONFORMANCE.md) |MIT
 
 **Συντομεύσεις:** το `cc` συνεχίζει το πλαίσιο του έργου μέχρι τη σύγκλιση (συνεχίζει έναν ενεργό στόχο, αν έχει οριστεί), το `sss` εμφανίζει την κατάσταση χωρίς να αγγίζει κώδικα και το `st` αποθηκεύει σημείο ελέγχου και σταματάει. [Δες τον πλήρη χάρτη 19 πλήκτρων](saipen/RFC.md#110-command-surface). Λειτουργούν και τα κυριλλικά δίδυμα: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
@@ -181,7 +181,7 @@ CORE            continuation / state / checkpoint / validation       required
 ## Συνηθισμένες εντολές
 
 Συνηθισμένες εισόδους; η πλήρης τρέχουσα επιφάνεια βρίσκεται στο
-[Πυρήνας § 1.10](saipen/CORE.md#110-command-surface).
+[Πυρήνας § 1.10](saipen/RFC.md#110-command-surface).
 
 |Εντολή|Κάνει|
 |---|---|
@@ -317,4 +317,4 @@ OpenAI, κλπ.)? Τα σημειώματα ανά πλατφόρμα εμφαν
 </p>
 
 <!-- translation-model: qwen3:14b contract:structured-markdown-v2 -->
-<!-- source-digest: README.md sha256:bb47f7158db4a7a4fd99298427c1e4bc6859433c36435640e129cc6dad2a63b7 -->
+<!-- source-digest: README.md sha256:877128c30331e9502a2b2cde921db503e98f9e63ee38fb9a9acee408eacdbd0b -->

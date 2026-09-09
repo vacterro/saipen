@@ -249,7 +249,9 @@ def _attribution_snapshot(
         if any(part in ("", ".", "..") for part in parts):
             return False
         if expected is not None:
-            if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{16}", expected):
+            if not isinstance(expected, str) or not re.fullmatch(
+                r"(?:[0-9a-f]{16}|[0-9a-f]{64})", expected
+            ):
                 return False
         try:
             (root / rel).resolve().relative_to(root_resolved)
@@ -311,7 +313,9 @@ def _attribution_snapshot(
             except (OSError, json.JSONDecodeError) as exc:
                 errors.append(f"release scope {scope.name} is corrupt: {exc}")
                 continue
-            if record.get("schema_version") != 1 or not isinstance(record.get("ticket"), str):
+            if record.get("schema_version") not in (1, 2) or not isinstance(
+                record.get("ticket"), str
+            ):
                 errors.append(f"release scope {scope.name} has malformed authority fields")
                 continue
             binding = _binding(record, f"release scope {scope.name}")
@@ -516,8 +520,9 @@ def attribution_problems(root: Path, receipt_snapshot=None) -> list[str]:
             if not fp.is_file():
                 problems.append(f"attributed path {rel} is missing -- reviewed scope stale, refuse")
                 continue
-            live = _quick_hash(fp.read_bytes())
-            if live != claim.expected_hash:
+            raw = fp.read_bytes()
+            if not _claim_matches(raw, claim.expected_hash):
+                live = _quick_hash(raw)
                 problems.append(
                     f"attributed path {rel} changed after its reviewed "
                     f"scope (expected {claim.expected_hash}, live {live}) -- stale, "
@@ -542,7 +547,7 @@ def attribution_problems(root: Path, receipt_snapshot=None) -> list[str]:
         if not fp.is_file():
             problems.append(f"attributed path {rel} is missing -- stale")
             continue
-        if _quick_hash(fp.read_bytes()) != claim.expected_hash:
+        if not _claim_matches(fp.read_bytes(), claim.expected_hash):
             problems.append(
                 f"attributed path {rel} changed after its reviewed scope -- stale, refuse"
             )
@@ -555,6 +560,15 @@ def _quick_hash(raw: bytes) -> str:
     import hashlib
 
     return hashlib.sha256(raw).hexdigest()[:16]
+
+
+def _claim_matches(raw: bytes, expected_hash: str) -> bool:
+    # v2 reviewed scopes carry the full SHA-256; v1 scopes, crew defers and
+    # xpatch receipts carry the 16-hex journal token. Compare through the one
+    # shared authority so both generations verify without duplicating the rule.
+    from .operations import release_scope_matches
+
+    return release_scope_matches(raw, expected_hash)
 
 
 def convergence_verdict(

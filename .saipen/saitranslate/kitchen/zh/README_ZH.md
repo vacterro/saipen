@@ -26,7 +26,7 @@
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v8.0.0** | [规范](SPEC.md) | [指南](GUIDE.md) | [核心](saipen/CORE.md) | [维护](saipen/MAINTENANCE.md) | [风格](saipen/STYLE.md) | [用户界面](saipen/UI.md) | [一致性](saipen/CONFORMANCE.md) |MIT
+**v8.0.1** | [规范](SPEC.md) | [指南](GUIDE.md) | [核心](saipen/CORE.md) | [维护](saipen/MAINTENANCE.md) | [风格](saipen/STYLE.md) | [用户界面](saipen/UI.md) | [一致性](saipen/CONFORMANCE.md) |MIT
 
 **快捷键:** `cc` 继续项目上下文直至收敛（如果设置了正在运行的目标，则恢复该目标），`sss` 在不触碰代码的情况下报告状态，`st` 保存检查点并停止。[查看完整的 19 键快捷键地图](saipen/RFC.md#110-command-surface)。西里尔字母的同型键也可用：`сс`、`ссс`、`аа`、`ее`、`еее`、`рр`。 `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
@@ -181,7 +181,7 @@ CORE            continuation / state / checkpoint / validation       required
 ## 常用命令
 
 日常入口点；完整的当前表面位于
-[核心 § 1.10](saipen/CORE.md#110-command-surface).
+[核心 § 1.10](saipen/RFC.md#110-command-surface).
 
 |命令|执行|
 |---|---|
@@ -317,4 +317,4 @@ OpenAI等)? 每个平台的注释位于`extensions/adapters/`.
 </p>
 
 <!-- translation-model: qwen3:14b contract:structured-markdown-v2 -->
-<!-- source-digest: README.md sha256:bb47f7158db4a7a4fd99298427c1e4bc6859433c36435640e129cc6dad2a63b7 -->
+<!-- source-digest: README.md sha256:877128c30331e9502a2b2cde921db503e98f9e63ee38fb9a9acee408eacdbd0b -->

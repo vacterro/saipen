@@ -875,26 +875,47 @@ def _status(project_root: Path, as_json: bool) -> int:
 
         _inbox = audit_inbox_status(project_root)
         _summary = {
-            "pending": len(_inbox["pending"]),
+            "pending": len(_inbox.get("pending") or []),
             "active_layer": next(
-                (item["layer"] for item in _inbox["pending"] if item["state"] == "ACTIVE"), None
+                (
+                    item["layer"]
+                    for item in _inbox.get("pending") or []
+                    if item["state"] == "ACTIVE"
+                ),
+                None,
             ),
             "bound_receipt": next(
-                (item["receipt"] for item in _inbox["pending"] if item["state"] == "ACTIVE"), None
+                (
+                    item["receipt"]
+                    for item in _inbox.get("pending") or []
+                    if item["state"] == "ACTIVE"
+                ),
+                None,
             ),
             "bound_work": next(
-                (item["work"] for item in _inbox["pending"] if item["state"] == "ACTIVE"), None
+                (
+                    item["work"]
+                    for item in _inbox.get("pending") or []
+                    if item["state"] == "ACTIVE"
+                ),
+                None,
             ),
-            "closed_pending_delete": len(_inbox["closed_pending_delete"]),
-            "invalid": len(_inbox["invalid"]),
+            "closed_pending_delete": len(_inbox.get("closed_pending_delete") or []),
+            "invalid": len(_inbox.get("invalid") or []),
             "residue": _inbox.get("residue_count", 0),
             "clean": _inbox.get("clean"),
             "last_allocated_id": _inbox.get("last_allocated_id"),
+            # SRC-025:R009: an UNSAFE/UNREADABLE inbox is a transport failure
+            # and must be visible even with zero discoverable layers, instead
+            # of the whole section disappearing and the inbox reading idle.
+            "inbox_state": _inbox.get("inbox_state"),
+            "error_state": None if _inbox.get("ok") else _inbox.get("code"),
         }
         if (
             _summary["pending"]
             or _summary["residue"]
             or _summary["last_allocated_id"] is not None
+            or _summary["error_state"]
         ):
             payload["audit_inbox"] = _summary
     except Exception as exc:
@@ -2214,10 +2235,39 @@ def _audit_enqueue(project_root: Path, rest: list[str], as_json: bool, dry_run: 
 
     if dry_run:
         # PLAN parity: validate exactly like the real call, name the layer the
-        # allocator would hand out, write nothing.
+        # allocator would hand out, write nothing. Identity comes from the
+        # same authorities the real path consults: the durable operation
+        # record first (SRC-025:R005), then the allocator projection. A plan
+        # that says "fresh layer N" where the real call would recover or
+        # refuse would be exactly the dry-run-certifies-invalid-input defect.
         doc = audit_enqueue._reconcile(project_root, audit_enqueue.read_allocator(project_root))
         existing = doc["operations"].get(audit_enqueue._op_key(producer, operation_id))
-        layer = existing["layer"] if isinstance(existing, dict) else doc["next_id"]
+        durable, durable_state = audit_enqueue.read_operation_record(
+            project_root, producer, operation_id
+        )
+        if durable_state == audit_enqueue.OPERATION_RECORD_CORRUPT:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "OPERATION_RECORD_CORRUPT",
+                    "operation": "audit_enqueue",
+                    "detail": (
+                        "the durable operation record for this operation exists "
+                        "but cannot be decoded; the real enqueue would refuse"
+                    ),
+                },
+                as_json,
+            )
+            return 1
+        if durable is not None and durable.get("state") != audit_enqueue.ABORTED:
+            layer = durable["layer"]
+            idempotent = True
+        elif isinstance(existing, dict):
+            layer = existing["layer"]
+            idempotent = True
+        else:
+            layer = doc["next_id"]
+            idempotent = False
         _emit(
             {
                 "ok": True,
@@ -2228,7 +2278,7 @@ def _audit_enqueue(project_root: Path, rest: list[str], as_json: bool, dry_run: 
                 "layer": layer,
                 "rel": f"audit/{layer}.md",
                 "sha256": audit_enqueue.layer_digest(body),
-                "idempotent": isinstance(existing, dict),
+                "idempotent": idempotent,
                 "writes": [],
             },
             as_json,
@@ -2347,7 +2397,14 @@ def _audit(project_root: Path, args: list[str], as_json: bool, dry_run: bool) ->
     # Bootstrap migration: layers that already own canonical Work are BOUND,
     # never recaptured. Without this the first activation would look at a
     # hand-converted audit and manufacture a duplicate receipt and ticket.
-    migrated = audit_inbox.reconcile_bootstrap(project_root) if not dry_run else []
+    try:
+        migrated = audit_inbox.reconcile_bootstrap(project_root) if not dry_run else []
+    except audit_inbox.BindingBusy as exc:
+        _emit(
+            {"ok": False, "code": "WRITER_BUSY", "detail": str(exc)},
+            as_json,
+        )
+        return 1
     if migrated:
         state = audit_inbox.classify(project_root)
     layers = state["layers"]
@@ -2501,20 +2558,27 @@ def _audit(project_root: Path, args: list[str], as_json: bool, dry_run: bool) ->
             _emit(linked, as_json)
             return 1
 
-    record = audit_inbox.bind_layer(
-        project_root,
-        fresh["rel"],
-        layer=fresh["layer"],
-        generation=fresh["generation"],
-        file_sha256=captured["file_sha256"],
-        size_bytes=fresh["size_bytes"],
-        receipt_id=receipt,
-        receipt_sha256=captured.get("source_sha256") or captured["file_sha256"],
-        binding=captured.get("binding", "exact"),
-        linked_work=work,
-        state=audit_inbox.ACTIVE,
-        provenance=captured.get("provenance"),
-    )
+    try:
+        record = audit_inbox.bind_layer(
+            project_root,
+            fresh["rel"],
+            layer=fresh["layer"],
+            generation=fresh["generation"],
+            file_sha256=captured["file_sha256"],
+            size_bytes=fresh["size_bytes"],
+            receipt_id=receipt,
+            receipt_sha256=captured.get("source_sha256") or captured["file_sha256"],
+            binding=captured.get("binding", "exact"),
+            linked_work=work,
+            state=audit_inbox.ACTIVE,
+            provenance=captured.get("provenance"),
+        )
+    except audit_inbox.BindingBusy as exc:
+        # SRC-025:R007: a contested binding writer is a structured busy
+        # result the producer can retry, never a raw race exception and
+        # never a success reported before the record is committed.
+        _emit({"ok": False, "code": "WRITER_BUSY", "detail": str(exc)}, as_json)
+        return 1
     _emit(
         {
             "ok": True,

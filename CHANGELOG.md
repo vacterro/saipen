@@ -1,6 +1,15 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 8.0.1 -- 2026-09-08 -- Audit release integrity and bounded receipt lookups (T-1298, SRC-025)
+
+- Preserve exact reviewed release identities, crew semantic applicability, and fail-closed audit transport authority.
+- Bound settled-operation and conformance-lineage hot lookups and appends while retaining explicit deep validation.
+- Centralize producer-gate severity policy and handle audit sweeps with zero runnable controls.
+- Restore complete structured validator findings for debt consumers; a classifier failure makes the export unavailable instead of publishing partial evidence.
+- Select the latest rebuilt conformance receipt by completion time and receipt identity, independently of filename order.
+- Remove residual CLI handlers for unavailable source-recovery functions; keep unfinished debt commands and orchestration work outside this publication.
+
 ## 8.0.0 -- 2026-09-06 -- Distinct STOP Shortcut (T-1297, SRC-024)
 
 STOP shortcut changes from `ss` to `st` because repeated-letter `ss`/`sss` caused STOP/STATUS ambiguity for agents. `sss` remains STATUS; old `ss` is retired fail-closed and performs no action. Long-form commands are unchanged.

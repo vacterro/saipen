@@ -26,7 +26,7 @@ Markdown داخل المشروع(`.saipen/`), لذا أي agent بارد متو�
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v8.0.0** | [المواصفات](SPEC.md) | [الدليل](GUIDE.md) | [النواة](saipen/CORE.md) | [الصيانة](saipen/MAINTENANCE.md) | [النمط](saipen/STYLE.md) | [واجهة المستخدم](saipen/UI.md) | [الامتثال](saipen/CONFORMANCE.md) |MIT
+**v8.0.1** | [المواصفات](SPEC.md) | [الدليل](GUIDE.md) | [النواة](saipen/CORE.md) | [الصيانة](saipen/MAINTENANCE.md) | [النمط](saipen/STYLE.md) | [واجهة المستخدم](saipen/UI.md) | [الامتثال](saipen/CONFORMANCE.md) |MIT
 
 **مفاتيح سريعة:** `cc` يواصل سياق المشروع إلى التقارب (يستأنف الهدف النشط إذا كان مضبوطًا)، `sss` يعرض الحالة دون لمس الكود، و`st` يحفظ نقطة تحقق ويتوقف. [انظر خريطة المفاتيح الكاملة 19](saipen/RFC.md#110-command-surface). التوائم السيريلية تعمل أيضًا: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
@@ -181,7 +181,7 @@ CORE            continuation / state / checkpoint / validation       required
 ## ال الأوامر الشائعة
 
 نقاط الدخول اليومية؛ يعيش السطح الحالي الكامل في
-[النواة § 1.10](saipen/CORE.md#110-command-surface).
+[النواة § 1.10](saipen/RFC.md#110-command-surface).
 
 |ال أمر|القيام|
 |---|---|
@@ -317,4 +317,4 @@ OpenAI، وغيرها)? ملاحظات منصة محددة توجد في`extensi
 </p>
 
 <!-- translation-model: qwen3:14b contract:structured-markdown-v2 -->
-<!-- source-digest: README.md sha256:bb47f7158db4a7a4fd99298427c1e4bc6859433c36435640e129cc6dad2a63b7 -->
+<!-- source-digest: README.md sha256:877128c30331e9502a2b2cde921db503e98f9e63ee38fb9a9acee408eacdbd0b -->

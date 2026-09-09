@@ -26,7 +26,7 @@ Markdown файл вътре в проекта(`.saipen/`), така че все
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v8.0.0** | [Спецификация](SPEC.md) | [Ръководство](GUIDE.md) | [Ядро](saipen/CORE.md) | [Поддръжка](saipen/MAINTENANCE.md) | [Стил](saipen/STYLE.md) | [Потребителски интерфейс](saipen/UI.md) | [Съответствие](saipen/CONFORMANCE.md) |MIT
+**v8.0.1** | [Спецификация](SPEC.md) | [Ръководство](GUIDE.md) | [Ядро](saipen/CORE.md) | [Поддръжка](saipen/MAINTENANCE.md) | [Стил](saipen/STYLE.md) | [Потребителски интерфейс](saipen/UI.md) | [Съответствие](saipen/CONFORMANCE.md) |MIT
 
 **Бързи клавиши:** `cc` продължава контекста на проекта до конвергенция (подновява текущата цел, ако е зададена), `sss` показва статус без допиране до кода, а `st` запазва контролна точка и спира. [Виж пълната карта с 19 клавиша](saipen/RFC.md#110-command-surface). Кирилските близнаци също работят: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
@@ -181,7 +181,7 @@ Core не зависи от Maintenance: с изключено автономн�
 ## Обичайни команди
 
 Обичайни точки за влизане; цялата текуща повърхност се намира в
-[Коре § 1.10](saipen/CORE.md#110-command-surface).
+[Коре § 1.10](saipen/RFC.md#110-command-surface).
 
 |Команда|Става|
 |---|---|
@@ -317,4 +317,4 @@ OpenAI и др.)? Забележки по платформи се намират
 </p>
 
 <!-- translation-model: qwen3:14b contract:structured-markdown-v2 -->
-<!-- source-digest: README.md sha256:bb47f7158db4a7a4fd99298427c1e4bc6859433c36435640e129cc6dad2a63b7 -->
+<!-- source-digest: README.md sha256:877128c30331e9502a2b2cde921db503e98f9e63ee38fb9a9acee408eacdbd0b -->

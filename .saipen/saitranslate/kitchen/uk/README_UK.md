@@ -26,7 +26,7 @@
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v8.0.0** | [Специфікація](SPEC.md) | [Гід](GUIDE.md) | [Ядро](saipen/CORE.md) | [Обслуговування](saipen/MAINTENANCE.md) | [Стиль](saipen/STYLE.md) | [Інтерфейс користувача](saipen/UI.md) | [Підтримка стандартів](saipen/CONFORMANCE.md) |MIT
+**v8.0.1** | [Специфікація](SPEC.md) | [Гід](GUIDE.md) | [Ядро](saipen/CORE.md) | [Обслуговування](saipen/MAINTENANCE.md) | [Стиль](saipen/STYLE.md) | [Інтерфейс користувача](saipen/UI.md) | [Підтримка стандартів](saipen/CONFORMANCE.md) |MIT
 
 **Швидкі клавіші:** `cc` продовжує контекст проєкту до конвергенції (відновлює активну ціль, якщо вона встановлена), `sss` показує статус без правок коду, а `st` зберігає контрольну точку і зупиняється. [Повна карта з 19 клавіш](saipen/RFC.md#110-command-surface). Кириличні двійники теж працюють: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 
@@ -181,7 +181,7 @@ CORE            continuation / state / checkpoint / validation       required
 ## Повседневні команди
 
 Повсякденні точки входу; повний поточний поверх розташований у
-[Ядро § 1.10](saipen/CORE.md#110-command-surface).
+[Ядро § 1.10](saipen/RFC.md#110-command-surface).
 
 |Команда|Виконує|
 |---|---|
@@ -317,4 +317,4 @@ OpenAI, тощо)? Примітки залежно від платформи з�
 </p>
 
 <!-- translation-model: qwen3:14b contract:structured-markdown-v2 -->
-<!-- source-digest: README.md sha256:bb47f7158db4a7a4fd99298427c1e4bc6859433c36435640e129cc6dad2a63b7 -->
+<!-- source-digest: README.md sha256:877128c30331e9502a2b2cde921db503e98f9e63ee38fb9a9acee408eacdbd0b -->
