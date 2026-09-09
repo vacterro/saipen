@@ -1,3 +1,3 @@
-done: ship v8.0.0 (content -> closure, tag v8.0.0)
-remaining: T-1293
+done: ship v8.0.1 (content -> closure, tag v8.0.1)
+remaining: T-1303
 awaiting: nothing
